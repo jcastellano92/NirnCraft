@@ -25,7 +25,7 @@ import java.util.Optional;
  *
  * <p>Data lives in {@code skycraft/tamriel/places/}: {@code index.json} lists the files (a JSON array of names),
  * and each file is a JSON array of places:
- * {@code {"id","name","type","culture","region","x","z","radius"}}. {@code name} is a lang key; a missing key falls
+ * {@code {"id","name","type","culture","region","x","z","radius","variant"}}. {@code name} is a lang key; a missing key falls
  * back to a literal built from the id. Later files may not reuse an earlier id.</p>
  */
 public final class Places {
@@ -115,7 +115,8 @@ public final class Places {
                 o.has("culture") ? o.get("culture").getAsString() : "nord",
                 o.has("region") ? o.get("region").getAsString() : "",
                 o.get("x").getAsInt(), o.get("z").getAsInt(),
-                o.has("radius") ? o.get("radius").getAsInt() : 32);
+                o.has("radius") ? o.get("radius").getAsInt() : 32,
+                o.has("variant") ? o.get("variant").getAsString() : "");
     }
 
     private static String prettify(String id) {
