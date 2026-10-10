@@ -5,9 +5,12 @@
   assets/skycraft/textures/environment/secunda_phases.png Secunda, 8 phases in a 4x2 grid (drawn by SkyRenderer)
   assets/skycraft/textures/environment/masser_halo.png    soft red glow drawn around Masser at night
   assets/skycraft/textures/environment/galaxy.png         horizontally tiling galaxy band
+  assets/skycraft/textures/particle/*.png + particles/*.json  atmospheric particle sprites (visual package):
+      snowflake, ash_flake, ember, sand_dust, falling_leaf, firefly, frost_breath, marsh_wisp, dust_mote
 
 Phase order follows vanilla: 0 full, 1-3 waning, 4 new, 5-7 waxing. Requires numpy and Pillow.
 """
+import json
 import pathlib
 
 import numpy as np
@@ -16,6 +19,8 @@ from PIL import Image
 ROOT = pathlib.Path(__file__).resolve().parents[2] / "mod/src/main/resources/assets"
 SKY = ROOT / "skycraft/textures/environment"
 VANILLA = ROOT / "minecraft/textures/environment"
+PARTICLE_TEX = ROOT / "skycraft/textures/particle"
+PARTICLE_DEF = ROOT / "skycraft/particles"
 
 
 def periodic_noise(h, w, rng, falloff=1.8, low=1.0):
@@ -85,7 +90,8 @@ def moon_phases(cell, radius, albedo, dark_side, rays=False):
 
 
 def masser(rng):
-    cell, radius = 64, 20.0
+    # Masser is huge in Skyrim's sky: the disc fills almost the whole vanilla moon quad
+    cell, radius = 64, 29.0
     alb = surface(256, rng, base=(222, 132, 98), dark=(140, 62, 48), bright=(255, 190, 150), craters=55, maria=0.65)
     return moon_phases(cell, radius, alb, dark_side=(16, 5, 4))
 
@@ -100,8 +106,8 @@ def halo():
     s = 128
     yy, xx = (np.mgrid[0:s, 0:s] + 0.5 - s / 2) / (s / 2)
     r = np.sqrt(xx ** 2 + yy ** 2)
-    inner = 0.35
-    g = np.exp(-np.clip(r - inner, 0, None) / 0.16) * smoothstep(inner - 0.03, inner + 0.03, r) * (1 - smoothstep(0.8, 1.0, r))
+    inner = 0.50  # Masser's rim: its disc fills ~90% of the vanilla moon quad (20 units), the halo quad is 36
+    g = np.exp(-np.clip(r - inner, 0, None) / 0.14) * smoothstep(inner - 0.03, inner + 0.03, r) * (1 - smoothstep(0.8, 1.0, r))
     img = np.zeros((s, s, 4))
     img[..., 0] = 255
     img[..., 1] = 120
@@ -141,7 +147,110 @@ def galaxy(rng):
     return np.clip(img, 0, 255).astype(np.uint8)
 
 
+# ---------------------------------------------------------------- particles
+# Sprites are drawn light grey/white: the game tints them per particle (ash grey, ember orange, leaf colour).
+
+def _grid(n):
+    yy, xx = (np.mgrid[0:n, 0:n] + 0.5 - n / 2) / (n / 2)
+    return xx, yy, np.sqrt(xx ** 2 + yy ** 2)
+
+
+def _rgba(alpha, rgb=(255, 255, 255)):
+    n = alpha.shape[0]
+    img = np.zeros((n, n, 4))
+    img[..., 0], img[..., 1], img[..., 2] = rgb
+    img[..., 3] = np.clip(alpha, 0, 1) * 255
+    img[..., :3] *= (img[..., 3:4] > 0)
+    return img.astype(np.uint8)
+
+
+def soft_dot(n, core=0.35, edge=1.0, rgb=(255, 255, 255), power=1.0):
+    _, _, r = _grid(n)
+    a = (1 - smoothstep(core, edge, r)) ** power
+    return _rgba(a, rgb)
+
+
+def snowflake(variant):
+    n = 8
+    xx, yy, r = _grid(n)
+    if variant == 3:
+        # a tiny six-armed crystal
+        ang = np.arctan2(yy, xx)
+        arms = np.abs(np.cos(3 * ang)) ** 6
+        a = np.clip((1 - r) * 1.6, 0, 1) * (0.35 + 0.65 * arms)
+        a[r < 0.3] = 1
+        return _rgba(a)
+    core = [0.15, 0.3, 0.45][variant]
+    return soft_dot(n, core, 0.95)
+
+
+def ash_flake(rng):
+    n = 8
+    xx, yy, r = _grid(n)
+    ang = np.arctan2(yy, xx)
+    wob = 0.65 + 0.25 * np.sin(ang * rng.integers(2, 5) + rng.uniform(0, 6))
+    a = (r < wob).astype(float) * (0.75 + 0.25 * rng.random((n, n)))
+    return _rgba(a, (235, 232, 228))
+
+
+def leaf(variant):
+    n = 16
+    xx, yy, _ = _grid(n)
+    t = variant * np.pi / 4
+    u = xx * np.cos(t) + yy * np.sin(t)
+    v = -xx * np.sin(t) + yy * np.cos(t)
+    shape = (u / 0.95) ** 2 + (v / 0.5) ** 2 < 1
+    vein = np.abs(v) < 0.09
+    a = shape.astype(float)
+    img = _rgba(a, (235, 235, 235))
+    img[vein & shape, :3] = (200, 200, 200)
+    return img
+
+
+def breath(rng, variant):
+    n = 32
+    xx, yy, r = _grid(n)
+    noise = periodic_noise(n, n, rng, 1.6)
+    a = (1 - smoothstep(0.2, 1.0, r * (0.85 + 0.3 * noise))) * (0.6 + 0.4 * noise)
+    return _rgba(a * 0.9)
+
+
+def wisp(rng, variant):
+    n = 32
+    xx, yy, _ = _grid(n)
+    r = np.sqrt((xx / 1.0) ** 2 + (yy / 0.55) ** 2)
+    noise = periodic_noise(n, n, rng, 1.5)
+    a = (1 - smoothstep(0.1, 1.0, r * (0.8 + 0.4 * noise))) * (0.5 + 0.5 * noise)
+    return _rgba(a * 0.8)
+
+
+def particles():
+    rng = np.random.default_rng(4242)
+    PARTICLE_TEX.mkdir(parents=True, exist_ok=True)
+    PARTICLE_DEF.mkdir(parents=True, exist_ok=True)
+    sprites = {
+        "snowflake": [snowflake(i) for i in range(4)],
+        "ash_flake": [ash_flake(rng) for _ in range(3)],
+        "ember": [soft_dot(8, 0.15, 0.9, (255, 255, 230), 1.5), soft_dot(8, 0.3, 1.0, (255, 250, 220), 1.2)],
+        "sand_dust": [soft_dot(4, 0.2, 1.0, (250, 245, 235)), soft_dot(8, 0.1, 0.9, (250, 245, 235), 2.0)],
+        "falling_leaf": [leaf(i) for i in range(4)],
+        "firefly": [soft_dot(8, 0.12, 1.0, (255, 255, 240), 2.2)],
+        "frost_breath": [breath(rng, i) for i in range(3)],
+        "marsh_wisp": [wisp(rng, i) for i in range(2)],
+        "dust_mote": [soft_dot(4, 0.25, 1.0, (255, 250, 235))],
+    }
+    for name, imgs in sprites.items():
+        names = []
+        for i, img in enumerate(imgs):
+            tex = f"{name}_{i}"
+            Image.fromarray(img, "RGBA").save(PARTICLE_TEX / f"{tex}.png")
+            names.append(f"skycraft:{tex}")
+        (PARTICLE_DEF / f"{name}.json").write_text(json.dumps({"textures": names}, indent=2) + "\n")
+    print("wrote", len(sprites), "particle sprite sets to", PARTICLE_TEX)
+
+
 def main():
+    particles()
     rng = np.random.default_rng(1771)
     SKY.mkdir(parents=True, exist_ok=True)
     VANILLA.mkdir(parents=True, exist_ok=True)

@@ -76,6 +76,8 @@ public class SkyrimInventoryScreen extends Screen {
     private float inspectRotX = 15f;
     private float inspectRotY = 0f;
     private float inspectZoom = 1.0f;
+    private long inspectLastFrame;
+    private long inspectLastDrag;
 
     // layout
     private int x0, contentW, catX, catW, listX, listW, detX, detW, top, bottom, listTop;
@@ -291,27 +293,33 @@ public class SkyrimInventoryScreen extends Screen {
 
     private void renderInspectOverlay(GuiGraphics g, int mx, int my) {
         g.fill(0, 0, width, height, 0xEE050505);
+        long now = Util.getMillis();
+        SkyUi.smoke(g, width, height, (now % 1_000_000L) / 1000f, 0.8f);
         int cx = width / 2;
-        int cy = height / 2;
+        int cy = height / 2 + 6;
 
-        g.pose().pushPose();
-        g.pose().translate(cx, cy, 300);
-        g.pose().mulPose(Axis.XP.rotationDegrees(inspectRotX));
-        g.pose().mulPose(Axis.YP.rotationDegrees(inspectRotY));
-        float scale = (Math.min(width, height) / 10.0f) * inspectZoom;
-        g.pose().scale(scale, scale, scale);
-        g.pose().translate(0, 0, -150);
-        g.renderItem(selectedEntry.stack, -8, -8);
-        g.pose().popPose();
+        // like Skyrim, the item keeps turning slowly until you take hold of it
+        float dt = Mth.clamp((now - inspectLastFrame) / 1000f, 0f, 0.1f);
+        inspectLastFrame = now;
+        if (now - inspectLastDrag > 1500) inspectRotY += dt * 20f;
 
-        String title = selectedEntry.name;
-        g.drawString(font, title, cx - font.width(title) / 2, 20, SkyUi.BRIGHT, false);
+        // the item-frame display draws an item one block wide: this fills ~55% of the shorter screen side
+        float scale = Math.min(width, height) * 0.55f * inspectZoom;
+        int poolY = cy + (int) (Math.min(width, height) * 0.32f);
+        for (int i = 5; i > 0; i--) {
+            int w = (int) (Math.min(width, height) * 0.05f * i);
+            g.fill(cx - w, poolY, cx + w, poolY + 2, 0x0CE8D8B0);
+        }
+        SkyUi.item3d(g, selectedEntry.stack, cx, cy, scale, inspectRotX, inspectRotY);
+
+        String title = SkyUi.caps(Component.literal(selectedEntry.name));
+        SkyUi.scaledCentered(g, font, title, cx, 16, 1.3f, SkyUi.BRIGHT, true);
         String kind = kindLine(selectedEntry).getString();
         g.drawString(font, kind, cx - font.width(kind) / 2, 32, SkyUi.DIM, false);
-        SkyUi.divider(g, cx, 46, Math.min(100, width / 4));
+        SkyUi.ornament(g, cx, 46, Math.min(100, width / 4), 0xC0C8BC9A);
 
         String hint = "[Drag] Rotate   [Scroll] Zoom   [X / Esc] Exit Inspect";
-        g.drawString(font, hint, cx - font.width(hint) / 2, height - 25, SkyUi.GOLD, false);
+        g.drawString(font, hint, cx - font.width(hint) / 2, height - 20, 0xB0A89F86, false);
     }
 
     private void drawCategories(GuiGraphics g, int mx, int my) {
@@ -746,14 +754,8 @@ public class SkyrimInventoryScreen extends Screen {
     private static void renderPreview(GuiGraphics g, ItemStack stack, int cx, int cy, float scale) {
         float t = (Util.getMillis() % 1_000_000L) / 1000f;
         float angle = (float) Math.sin(t * 0.8) * 30f;
-        g.pose().pushPose();
-        g.pose().translate(cx, cy, 200);
-        g.pose().mulPose(Axis.YP.rotationDegrees(angle));
-        g.pose().scale(scale, scale, scale);
-        // GuiGraphics#renderItem pushes the item 150 units forward; undo that so it turns around its own center
-        g.pose().translate(0, 0, -150);
-        g.renderItem(stack, -8, -8);
-        g.pose().popPose();
+        // a solid 3D model (the item-frame display is one block wide; ~0.9 of the old 16 px icon size)
+        SkyUi.item3d(g, stack, cx, cy, scale * 14f, 8f, angle);
     }
 
     // ------------------------------------------------------------------ item facts
@@ -1003,6 +1005,7 @@ public class SkyrimInventoryScreen extends Screen {
         if (inspectMode) {
             inspectRotY += (float) dragX * 1.5f;
             inspectRotX -= (float) dragY * 1.5f;
+            inspectLastDrag = Util.getMillis();
             return true;
         }
         return super.mouseDragged(mx, my, button, dragX, dragY);

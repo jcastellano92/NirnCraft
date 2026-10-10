@@ -1,36 +1,46 @@
 package com.skycraft.inventory.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.skycraft.Skycraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 import java.util.Locale;
 
-/** Skyrim menu drawing helpers shared by the inventory screens: dark translucent panels, thin gold lines. */
-final class SkyUi {
-    static final int TEXT = 0xFFE8E0C8;
-    static final int BRIGHT = 0xFFFFFFFF;
-    static final int DIM = 0xFF8A8478;
-    static final int HEADER = 0xFFA89F86;
-    static final int GOLD = 0xFFE8C060;
-    static final int LINE = 0xFFC8BC9A;
-    static final int TRIM = 0xFF8A7F66;
-    static final int STOLEN = 0xFFD06050;
-    static final int BAD = 0xFFE05050;
-    static final int LEFT_HAND = 0xFF9FC4E8;
+/**
+ * Skyrim menu drawing helpers shared by every Skycraft screen and HUD element: dark translucent panels, thin gold
+ * lines, ornaments, text buttons and ornate bars. Public so the HUD, title/pause/loading screens and other modules'
+ * menus look alike.
+ */
+public final class SkyUi {
+    public static final ResourceLocation ORNAMENT = new ResourceLocation(Skycraft.MODID, "textures/gui/hud/ornament.png");
+    public static final ResourceLocation BAR_CAPS = new ResourceLocation(Skycraft.MODID, "textures/gui/hud/bar_caps.png");
+    public static final ResourceLocation SMOKE = new ResourceLocation(Skycraft.MODID, "textures/gui/loading/smoke.png");
+    public static final int TEXT = 0xFFE8E0C8;
+    public static final int BRIGHT = 0xFFFFFFFF;
+    public static final int DIM = 0xFF8A8478;
+    public static final int HEADER = 0xFFA89F86;
+    public static final int GOLD = 0xFFE8C060;
+    public static final int LINE = 0xFFC8BC9A;
+    public static final int TRIM = 0xFF8A7F66;
+    public static final int STOLEN = 0xFFD06050;
+    public static final int BAD = 0xFFE05050;
+    public static final int LEFT_HAND = 0xFF9FC4E8;
 
     private SkyUi() {}
 
     /** A dark translucent panel with faint gold lines on top and bottom. */
-    static void panel(GuiGraphics g, int x1, int y1, int x2, int y2) {
+    public static void panel(GuiGraphics g, int x1, int y1, int x2, int y2) {
         g.fillGradient(x1, y1, x2, y2, 0x90000000, 0xA8000000);
         hline(g, x1, x2, y1, 0x70);
         hline(g, x1, x2, y2 - 1, 0x70);
     }
 
     /** A thin gold line that fades out at both ends. */
-    static void hline(GuiGraphics g, int x1, int x2, int y, int alpha) {
+    public static void hline(GuiGraphics g, int x1, int x2, int y, int alpha) {
         int w = x2 - x1;
         if (w <= 0) return;
         int fade = Math.min(24, w / 4);
@@ -44,12 +54,12 @@ final class SkyUi {
     }
 
     /** Divider with a small diamond in the middle (Skyrim menu ornament). */
-    static void divider(GuiGraphics g, int cx, int y, int half) {
+    public static void divider(GuiGraphics g, int cx, int y, int half) {
         hline(g, cx - half, cx + half, y, 0xB0);
         diamond(g, cx, y, 2, 0xFFC8BC9A);
     }
 
-    static void diamond(GuiGraphics g, int cx, int cy, int r, int color) {
+    public static void diamond(GuiGraphics g, int cx, int cy, int r, int color) {
         for (int i = -r; i <= r; i++) {
             int w = r - Math.abs(i);
             g.fill(cx - w, cy + i, cx + w + 1, cy + i + 1, color);
@@ -57,7 +67,7 @@ final class SkyUi {
     }
 
     /** Hollow diamond (left-hand marker). */
-    static void diamondOutline(GuiGraphics g, int cx, int cy, int r, int color) {
+    public static void diamondOutline(GuiGraphics g, int cx, int cy, int r, int color) {
         for (int i = -r; i <= r; i++) {
             int w = r - Math.abs(i);
             g.fill(cx - w, cy + i, cx - w + 1, cy + i + 1, color);
@@ -68,7 +78,7 @@ final class SkyUi {
     private static final String[] STAR = {"..#..", "#####", ".###.", ".#.#.", "#...#"};
 
     /** 5x5 pixel star (favorite marker). */
-    static void star(GuiGraphics g, int x, int y, int color) {
+    public static void star(GuiGraphics g, int x, int y, int color) {
         for (int r = 0; r < 5; r++) {
             for (int c = 0; c < 5; c++) {
                 if (STAR[r].charAt(c) == '#') g.fill(x + c, y + r, x + c + 1, y + r + 1, color);
@@ -77,7 +87,7 @@ final class SkyUi {
     }
 
     /** Small triangle pointing up or down (sort direction). */
-    static void triangle(GuiGraphics g, int cx, int y, boolean up, int color) {
+    public static void triangle(GuiGraphics g, int cx, int y, boolean up, int color) {
         for (int i = 0; i < 3; i++) {
             int row = up ? i : 2 - i;
             g.fill(cx - row, y + i, cx + row + 1, y + i + 1, color);
@@ -85,21 +95,21 @@ final class SkyUi {
     }
 
     /** Upper-case header text ("small caps" look). */
-    static String caps(Component c) {
+    public static String caps(Component c) {
         return c.getString().toUpperCase(Locale.ROOT);
     }
 
-    static void caps(GuiGraphics g, Font font, Component c, int x, int y, int color) {
+    public static void caps(GuiGraphics g, Font font, Component c, int x, int y, int color) {
         g.drawString(font, caps(c), x, y, color, false);
     }
 
-    static void capsCentered(GuiGraphics g, Font font, Component c, int cx, int y, int color) {
+    public static void capsCentered(GuiGraphics g, Font font, Component c, int cx, int y, int color) {
         String s = caps(c);
         g.drawString(font, s, cx - font.width(s) / 2, y, color, false);
     }
 
     /** Thin Skyrim vitals bar (fill shrinks toward the center). */
-    static void bar(GuiGraphics g, int x, int y, int w, float fill, int color) {
+    public static void bar(GuiGraphics g, int x, int y, int w, float fill, int color) {
         fill = Mth.clamp(fill, 0f, 1f);
         g.fill(x - 1, y - 1, x + w + 1, y + 4, 0xFF141414);
         g.fill(x, y, x + w, y + 3, 0xFF2A2A2A);
@@ -110,13 +120,132 @@ final class SkyUi {
         g.fill(x + w + 1, y, x + w + 3, y + 3, TRIM);
     }
 
-    static String ellipsize(Font font, String s, int width) {
+    // ------------------------------------------------------------------ shared Skyrim widgets
+
+    /** {@code argb} with its alpha multiplied by {@code alpha} (0..1). */
+    public static int fade(int argb, float alpha) {
+        int a = (int) (((argb >>> 24) & 0xFF) * Mth.clamp(alpha, 0f, 1f));
+        return a << 24 | (argb & 0xFFFFFF);
+    }
+
+    /**
+     * A Skyrim menu text button: upper-case label; when hovered or focused a dark band with fading gold lines above
+     * and below and a diamond on each side. Disabled buttons are dimmed.
+     */
+    public static void button(GuiGraphics g, Font font, Component label, int x, int y, int w, int h, boolean hovered, boolean active, float alpha) {
+        String text = caps(label);
+        int cx = x + w / 2;
+        int ty = y + (h - 8) / 2;
+        if (hovered && active) {
+            g.fillGradient(x, y, x + w, y + h, fade(0x70000000, alpha), fade(0x90000000, alpha));
+            hline(g, x, x + w, y, (int) (0xB0 * alpha));
+            hline(g, x, x + w, y + h - 1, (int) (0xB0 * alpha));
+            int tw = Math.min(w - 16, font.width(text));
+            diamond(g, cx - tw / 2 - 8, y + h / 2, 2, fade(GOLD, alpha));
+            diamond(g, cx + tw / 2 + 7, y + h / 2, 2, fade(GOLD, alpha));
+        }
+        int color = !active ? fade(0xFF5C574E, alpha) : hovered ? fade(BRIGHT, alpha) : fade(0xFFBDB5A0, alpha);
+        String shown = ellipsize(font, text, w - 20);
+        g.drawString(font, shown, cx - font.width(shown) / 2, ty, color, hovered && active);
+    }
+
+    /** The banner divider ornament (line with a central knot), centred, {@code half} wide each side. */
+    public static void ornament(GuiGraphics g, int cx, int y, int half, int argb) {
+        RenderSystem.enableBlend();
+        RenderSystem.setShaderColor(((argb >> 16) & 0xFF) / 255f, ((argb >> 8) & 0xFF) / 255f, (argb & 0xFF) / 255f, ((argb >>> 24) & 0xFF) / 255f);
+        g.blit(ORNAMENT, cx - half, y - 4, half * 2, 8, 0, 0, 128, 16, 128, 16);
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+    }
+
+    /**
+     * An ornate Skyrim bar: dark trough, fill shrinking toward the centre ({@code centered}) or from the right,
+     * a bright upper edge, and carved end caps ({@code boss} picks the winged pair).
+     */
+    public static void ornateBar(GuiGraphics g, int x, int y, int w, int h, float fill, int rgb, float alpha, boolean centered, boolean boss) {
+        if (alpha < 0.02f) return;
+        int a = (int) (alpha * 255) << 24;
+        fill = Mth.clamp(fill, 0f, 1f);
+        g.fill(x - 1, y - 1, x + w + 1, y + h + 1, a | 0x0C0B0A);
+        g.fill(x, y, x + w, y + h, (int) (alpha * 0xC0) << 24 | 0x1C1A18);
+        int filled = Math.round(w * fill);
+        int left = centered ? x + (w - filled) / 2 : x;
+        g.fill(left, y, left + filled, y + h, a | rgb);
+        g.fill(left, y, left + filled, y + 1, a | brighten(rgb, 70));
+        if (h > 3) g.fill(left, y + h - 1, left + filled, y + h, a | darken(rgb, 0.6f));
+        // carved end caps from the bar_caps sheet (each cap 24x8 on screen)
+        RenderSystem.enableBlend();
+        RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
+        int cy = y + h / 2 - 4;
+        int v = boss ? 16 : 0;
+        g.blit(BAR_CAPS, x - 25, cy, 24, 8, 0, v, 48, 16, 96, 32);
+        g.blit(BAR_CAPS, x + w + 1, cy, 24, 8, 48, v, 48, 16, 96, 32);
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+    }
+
+    public static int brighten(int rgb, int by) {
+        int r = Math.min(255, ((rgb >> 16) & 0xFF) + by);
+        int gr = Math.min(255, ((rgb >> 8) & 0xFF) + by);
+        int b = Math.min(255, (rgb & 0xFF) + by);
+        return r << 16 | gr << 8 | b;
+    }
+
+    public static int darken(int rgb, float f) {
+        int r = (int) (((rgb >> 16) & 0xFF) * f);
+        int gr = (int) (((rgb >> 8) & 0xFF) * f);
+        int b = (int) ((rgb & 0xFF) * f);
+        return r << 16 | gr << 8 | b;
+    }
+
+    /** Slowly drifting smoke over the whole area (menu and loading backgrounds); {@code time} in seconds. */
+    public static void smoke(GuiGraphics g, int w, int h, float time, float alpha) {
+        RenderSystem.enableBlend();
+        for (int layer = 0; layer < 2; layer++) {
+            float speed = layer == 0 ? 6f : -4f;
+            int u = (int) (time * speed) & 255;
+            int v = (int) (time * (layer == 0 ? 1.5f : 2.5f)) & 255;
+            RenderSystem.setShaderColor(0.55f, 0.53f, 0.5f, alpha * (layer == 0 ? 0.22f : 0.14f));
+            int scale = layer == 0 ? 2 : 3;
+            g.blit(SMOKE, 0, 0, w, h, u, v, w / scale, h / scale, 256, 256);
+        }
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+    }
+
+    /**
+     * Renders an item as a solid 3D model (the item-frame display: flat sprites get their thickness) centred at
+     * (cx, cy), {@code scale} GUI pixels per block, turned by the given angles. Lighting is restored afterwards.
+     */
+    public static void item3d(GuiGraphics g, net.minecraft.world.item.ItemStack stack, float cx, float cy, float scale, float rotX, float rotY) {
+        if (stack.isEmpty()) return;
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        g.pose().pushPose();
+        g.pose().translate(cx, cy, 150.0);
+        g.pose().scale(scale, -scale, scale);
+        g.pose().mulPose(com.mojang.math.Axis.XP.rotationDegrees(rotX));
+        g.pose().mulPose(com.mojang.math.Axis.YP.rotationDegrees(rotY));
+        com.mojang.blaze3d.platform.Lighting.setupFor3DItems();
+        mc.getItemRenderer().renderStatic(stack, net.minecraft.world.item.ItemDisplayContext.FIXED, 0xF000F0,
+                net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, g.pose(), g.bufferSource(), mc.level, 0);
+        g.flush();
+        com.mojang.blaze3d.platform.Lighting.setupForFlatItems();
+        g.pose().popPose();
+    }
+
+    /** Upper-case text scaled about its centre. */
+    public static void scaledCentered(GuiGraphics g, Font font, String text, float cx, float y, float scale, int argb, boolean shadow) {
+        g.pose().pushPose();
+        g.pose().translate(cx, y, 0);
+        g.pose().scale(scale, scale, 1f);
+        g.drawString(font, text, -font.width(text) / 2, 0, argb, shadow);
+        g.pose().popPose();
+    }
+
+    public static String ellipsize(Font font, String s, int width) {
         if (font.width(s) <= width) return s;
         if (width <= font.width("...")) return "";
         return font.plainSubstrByWidth(s, width - font.width("...")) + "...";
     }
 
-    static boolean inside(double mx, double my, int x1, int y1, int x2, int y2) {
+    public static boolean inside(double mx, double my, int x1, int y1, int x2, int y2) {
         return mx >= x1 && mx < x2 && my >= y1 && my < y2;
     }
 }

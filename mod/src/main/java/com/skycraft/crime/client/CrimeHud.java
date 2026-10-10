@@ -269,6 +269,8 @@ public final class CrimeHud {
 
     private static void renderSneakEye(GuiGraphics g, Font font, net.minecraft.world.entity.player.Player player, int width, int height) {
         SneakState state = getSneakState(player);
+        // The Skyrim eye itself is drawn at the crosshair by client.hud.SneakEye; this module supplies the state.
+        if (com.skycraft.client.hud.SneakEye.report(state.ordinal())) return;
         int cx = width / 2;
         int cy = height / 2 - 20;
 

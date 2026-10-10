@@ -87,31 +87,36 @@ public class SkyPauseScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        // Dark Nordic slate background
+        // Dark Nordic slate background with drifting smoke
         g.fillGradient(0, 0, width, height, 0xB0080808, 0xD0141210);
+        com.skycraft.inventory.client.SkyUi.smoke(g, width, height, (net.minecraft.Util.getMillis() % 1_000_000L) / 1000f, 0.6f);
         g.fillGradient(0, 0, Math.min(300, width / 2), height, 0x90000000, 0x20000000);
 
         int titleX = 50;
-        int titleY = Math.max(20, height / 6);
+        int titleY = titleY();
 
         // Header
-        g.drawString(font, "S Y S T E M", titleX, titleY, COLOR_GOLD, true);
+        g.pose().pushPose();
+        g.pose().translate(titleX, titleY - 4, 0);
+        g.pose().scale(1.6f, 1.6f, 1f);
+        g.drawString(font, "S Y S T E M", 0, 0, COLOR_GOLD, true);
+        g.pose().popPose();
         g.drawString(font, "SKYCRAFT", titleX, titleY + 12, 0xFF8A8272, false);
 
         // Divider
-        int divW = 180;
-        g.fill(titleX, titleY + 25, titleX + divW, titleY + 26, COLOR_GOLD);
-        g.fill(titleX + divW, titleY + 25, titleX + divW + 20, titleY + 26, 0x40E8C060);
+        int divW = Math.min(200, width / 2 - 40);
+        com.skycraft.inventory.client.SkyUi.hline(g, titleX - 6, titleX + divW, titleY + 25, 0xC0);
+        com.skycraft.inventory.client.SkyUi.diamond(g, titleX - 6, titleY + 25, 2, COLOR_GOLD);
 
         // Menu items
-        int menuStartY = titleY + 36;
-        int itemHeight = 20;
+        int menuStartY = menuStartY();
+        int itemHeight = itemHeight();
 
         for (int i = 0; i < menuItems.size(); i++) {
             MenuItem item = menuItems.get(i);
             int itemY = menuStartY + i * itemHeight;
 
-            boolean isHovered = mouseX >= titleX - 10 && mouseX <= titleX + 220 && mouseY >= itemY && mouseY < itemY + itemHeight;
+            boolean isHovered = mouseX >= titleX - 10 && mouseX <= titleX + 220 && mouseY >= itemY - 4 && mouseY < itemY - 4 + itemHeight;
             if (isHovered && selectedIndex != i) {
                 selectedIndex = i;
             }
@@ -120,8 +125,10 @@ public class SkyPauseScreen extends Screen {
             int textColor = isSelected ? COLOR_HOVER : COLOR_NORMAL;
 
             if (isSelected) {
-                g.drawString(font, "▶", titleX - 12, itemY + 2, COLOR_GOLD, false);
-                g.fill(titleX - 2, itemY + itemHeight - 3, titleX + 160, itemY + itemHeight - 2, 0x50E8C060);
+                g.fillGradient(titleX - 14, itemY - 2, titleX + 200, itemY + 10, 0x60000000, 0x80000000);
+                com.skycraft.inventory.client.SkyUi.hline(g, titleX - 14, titleX + 200, itemY - 2, 0x90);
+                com.skycraft.inventory.client.SkyUi.hline(g, titleX - 14, titleX + 200, itemY + 10, 0x90);
+                com.skycraft.inventory.client.SkyUi.diamond(g, titleX - 7, itemY + 4, 2, COLOR_GOLD);
             }
 
             g.drawString(font, item.getLabel().getString().toUpperCase(java.util.Locale.ROOT), titleX, itemY + 2, textColor, isSelected);
@@ -135,16 +142,30 @@ public class SkyPauseScreen extends Screen {
         super.render(g, mouseX, mouseY, partialTick);
     }
 
+    /** Layout that keeps every item on screen down to the Steam Deck's 427x267 scaled resolution. */
+    private int titleY() {
+        return net.minecraft.util.Mth.clamp(height / 6, 14, 70);
+    }
+
+    private int menuStartY() {
+        return titleY() + 38;
+    }
+
+    private int itemHeight() {
+        int n = Math.max(1, menuItems.size());
+        return net.minecraft.util.Mth.clamp((height - menuStartY() - 22) / n, 13, 20);
+    }
+
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
         if (button == 0) {
             int titleX = 50;
-            int menuStartY = Math.max(20, height / 6) + 36;
-            int itemHeight = 20;
+            int menuStartY = menuStartY();
+            int itemHeight = itemHeight();
 
             for (int i = 0; i < menuItems.size(); i++) {
                 int itemY = menuStartY + i * itemHeight;
-                if (mx >= titleX - 10 && mx <= titleX + 220 && my >= itemY && my < itemY + itemHeight) {
+                if (mx >= titleX - 10 && mx <= titleX + 220 && my >= itemY - 4 && my < itemY - 4 + itemHeight) {
                     selectedIndex = i;
                     activateItem(menuItems.get(i));
                     return true;

@@ -10,6 +10,8 @@ import net.minecraftforge.client.gui.overlay.ForgeGui;
 /** The Skyrim compass bar at the top of the screen with cardinal directions and markers. */
 public final class Compass {
     private static final String[] DIRS = {"S", "SW", "W", "NW", "N", "NE", "E", "SE"};
+    private static final net.minecraft.resources.ResourceLocation FRAME =
+            new net.minecraft.resources.ResourceLocation(com.skycraft.Skycraft.MODID, "textures/gui/hud/compass.png");
 
     private Compass() {}
 
@@ -22,22 +24,29 @@ public final class Compass {
         int y = 8;
         float yaw = Mth.wrapDegrees(mc.player.getViewYRot(partialTick));
 
-        // frame
-        g.fillGradient(cx - half, y, cx + half, y + 12, 0x90000000, 0x60000000);
-        g.fill(cx - half - 4, y + 5, cx - half, y + 7, 0xFF8A7F66);
-        g.fill(cx + half, y + 5, cx + half + 4, y + 7, 0xFF8A7F66);
-        g.fill(cx - half, y + 12, cx + half, y + 13, 0x808A7F66);
+        // frame: smoky band with fading gold edges and end ornaments (textures/gui/hud/compass.png)
+        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+        g.blit(FRAME, cx - half - 6, y - 1, (half + 6) * 2, 14, 0, 0, 440, 28, 440, 28);
 
-        // cardinal & intercardinal letters every 45 degrees
+        // cardinal letters every 90 degrees, smaller intercardinals between; letters fade toward the ends
         for (int i = 0; i < 8; i++) {
             float rel = Mth.wrapDegrees(i * 45f - yaw);
             if (Math.abs(rel) > 90) continue;
             int x = cx + (int) (rel / 90f * half);
-            float fade = 1f - Math.abs(rel) / 95f;
+            float fade = Mth.clamp(1.15f - Math.abs(rel) / 80f, 0f, 1f);
+            if (fade < 0.04f) continue;
             int a = (int) (fade * 255) << 24;
             boolean major = i % 2 == 0;
             int color = DIRS[i].equals("N") ? 0xE8C060 : major ? 0xF0EAD6 : 0xA8A090;
-            g.drawCenteredString(font, DIRS[i], x, y + 2, a | color);
+            if (major) {
+                g.drawString(font, DIRS[i], x - font.width(DIRS[i]) / 2, y + 2, a | color, true);
+            } else {
+                g.pose().pushPose();
+                g.pose().translate(x, y + 3.5f, 0);
+                g.pose().scale(0.7f, 0.7f, 1f);
+                g.drawString(font, DIRS[i], -font.width(DIRS[i]) / 2, 0, a | color, false);
+                g.pose().popPose();
+            }
         }
         // tick marks every 15 degrees
         for (int d = 0; d < 360; d += 15) {

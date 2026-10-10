@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -182,43 +183,37 @@ public class SkyTitleScreen extends Screen {
         // Nordic slate gradient behind left menu column for sharp text contrast
         g.fillGradient(0, 0, Math.min(340, width / 2 + 60), height, 0xD0080808, 0x15080808);
 
-        // Drifting ethereal fog layers across screen
-        float time = animTick * 0.4f;
-        for (int layer = 0; layer < 4; layer++) {
-            float speed = (layer + 1) * 0.4f;
-            float wave = (float) Math.sin((time * speed * 0.05f) + layer * 1.5f);
-            int baseMistY = height - 60 - layer * 18 + (int) (wave * 6);
-            int alpha = 10 + layer * 6;
-            int mistColor = (alpha << 24) | 0x1E1A16;
-            g.fillGradient(0, baseMistY, width, height, mistColor, 0x001E1A16);
-        }
+        // Drifting smoke across the scene
+        com.skycraft.inventory.client.SkyUi.smoke(g, width, height, (animTick + partialTick * 0.5f) / 10f, 0.8f);
+        g.fillGradient(0, height * 2 / 3, width, height, 0x00000000, 0x90000000);
 
-        // Title and Dragon Sigil styling
+        // Title: large spaced capitals over an ornament
         int titleX = 40;
-        int titleY = height / 5;
+        int titleY = titleY();
+        g.pose().pushPose();
+        g.pose().translate(titleX, titleY - 6, 0);
+        g.pose().scale(2.0f, 2.0f, 1f);
+        g.drawString(font, "S K Y C R A F T", 0, 0, COLOR_GOLD, true);
+        g.pose().popPose();
+        g.drawString(font, "THE ELDER SCROLLS IN MINECRAFT", titleX, titleY + 14, 0xFF8A8272, false);
 
-        // Skyrim Gold Title
-        g.drawString(font, "S K Y C R A F T", titleX, titleY, COLOR_GOLD, true);
-        g.drawString(font, "THE ELDER SCROLLS IN MINECRAFT", titleX, titleY + 12, 0xFF8A8272, false);
-
-        // Decorative horizontal divider
-        int divW = 160;
-        g.fill(titleX, titleY + 25, titleX + divW, titleY + 26, COLOR_GOLD);
-        g.fill(titleX + divW, titleY + 25, titleX + divW + 20, titleY + 26, 0x40E8C060);
+        // Decorative ornament divider
+        int divW = Math.min(180, width / 2 - 30);
+        com.skycraft.inventory.client.SkyUi.hline(g, titleX - 6, titleX + divW, titleY + 27, 0xC0);
+        com.skycraft.inventory.client.SkyUi.diamond(g, titleX - 6, titleY + 27, 2, COLOR_GOLD);
 
         // Menu items layout
-        int menuStartY = titleY + 42;
-        int itemHeight = 22;
-
+        int menuStartY = menuStartY();
         if (menuItems.isEmpty()) {
             rebuildMenuItems();
         }
+        int itemHeight = itemHeight();
 
         for (int i = 0; i < menuItems.size(); i++) {
             MenuItem item = menuItems.get(i);
             int itemY = menuStartY + i * itemHeight;
 
-            boolean isHovered = mouseX >= titleX - 10 && mouseX <= titleX + 180 && mouseY >= itemY && mouseY < itemY + itemHeight;
+            boolean isHovered = mouseX >= titleX - 10 && mouseX <= titleX + 180 && mouseY >= itemY - 4 && mouseY < itemY - 4 + itemHeight;
             if (isHovered && selectedIndex != i) {
                 selectedIndex = i;
                 playUiSound(com.skycraft.world.WorldSounds.UI_MENU_CLICK.get(), 1.0f);
@@ -228,11 +223,13 @@ public class SkyTitleScreen extends Screen {
             int textColor = isSelected ? COLOR_HOVER : COLOR_NORMAL;
 
             if (isSelected) {
-                // Skyrim diamond / pip selection indicator with pulsing glow
+                // Skyrim selection: a smoky band between fading gold lines, with a pulsing diamond
                 int pulseAlpha = (int) (200 + 55 * Math.sin(animTick * 0.2f));
                 int pulseColor = (pulseAlpha << 24) | (COLOR_GOLD & 0x00FFFFFF);
-                g.drawString(font, "▶", titleX - 12, itemY + 2, pulseColor, false);
-                g.fill(titleX - 2, itemY + itemHeight - 3, titleX + 130, itemY + itemHeight - 2, 0x50E8C060);
+                g.fillGradient(titleX - 14, itemY - 2, titleX + 170, itemY + 10, 0x60000000, 0x80000000);
+                com.skycraft.inventory.client.SkyUi.hline(g, titleX - 14, titleX + 170, itemY - 2, 0x90);
+                com.skycraft.inventory.client.SkyUi.hline(g, titleX - 14, titleX + 170, itemY + 10, 0x90);
+                com.skycraft.inventory.client.SkyUi.diamond(g, titleX - 7, itemY + 4, 2, pulseColor);
             }
 
             Component label = item.getLabel();
@@ -247,21 +244,36 @@ public class SkyTitleScreen extends Screen {
         }
 
         // Bottom version & lore footer
-        g.drawString(font, "Skycraft v0.1.0 • Skyrim Adventure System", width - 210, height - 16, COLOR_DIM, false);
+        String footer = "Skycraft v0.1.0 • Skyrim Adventure System";
+        g.drawString(font, footer, width - font.width(footer) - 8, height - 12, COLOR_DIM, false);
 
         super.render(g, mouseX, mouseY, partialTick);
+    }
+
+    /** Layout that fits the whole menu down to the Steam Deck's 427x267 scaled screen. */
+    private int titleY() {
+        return Mth.clamp(height / 5, 16, 80);
+    }
+
+    private int menuStartY() {
+        return titleY() + 40;
+    }
+
+    private int itemHeight() {
+        int n = Math.max(1, menuItems.size());
+        return Mth.clamp((height - menuStartY() - 16) / n, 13, 22);
     }
 
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
         if (button == 0) {
             int titleX = 40;
-            int menuStartY = height / 5 + 42;
-            int itemHeight = 22;
+            int menuStartY = menuStartY();
+            int itemHeight = itemHeight();
 
             for (int i = 0; i < menuItems.size(); i++) {
                 int itemY = menuStartY + i * itemHeight;
-                if (mx >= titleX - 10 && mx <= titleX + 180 && my >= itemY && my < itemY + itemHeight) {
+                if (mx >= titleX - 10 && mx <= titleX + 180 && my >= itemY - 4 && my < itemY - 4 + itemHeight) {
                     selectedIndex = i;
                     playUiSound(com.skycraft.world.WorldSounds.UI_MENU_OPEN.get(), 1.0f);
                     activateItem(menuItems.get(i));

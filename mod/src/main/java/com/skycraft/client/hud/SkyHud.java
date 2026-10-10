@@ -5,6 +5,7 @@ import com.skycraft.client.SkyKeys;
 import com.skycraft.core.PlayerData;
 import com.skycraft.core.SkyData;
 import com.skycraft.core.Skill;
+import com.skycraft.inventory.client.SkyUi;
 import com.skycraft.network.CorePackets;
 import com.skycraft.network.NotifyKind;
 import net.minecraft.Util;
@@ -116,24 +117,11 @@ public final class SkyHud {
 
     // ------------------------------------------------------------------ sneak eye
 
+    /** The Skyrim sneak eye replaces the crosshair while sneaking ({@link SneakEye}). */
     public static void renderSneakEye(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui || !mc.player.isCrouching()) return;
-        boolean detected = ClientState.has(CorePackets.SyncVitals.DETECTED);
-        int cx = width / 2;
-        int cy = 34;
-        int col = detected ? 0xFFE0E0E0 : 0xFF707070;
-        // eye outline
-        g.fill(cx - 12, cy, cx + 12, cy + 1, col);
-        g.fill(cx - 9, cy - 3, cx + 9, cy - 2, col);
-        g.fill(cx - 9, cy + 3, cx + 9, cy + 4, col);
-        g.fill(cx - 12, cy, cx - 9, cy - 2, col);
-        g.fill(cx + 9, cy, cx + 12, cy - 2, col);
-        g.fill(cx - 12, cy + 1, cx - 9, cy + 3, col);
-        g.fill(cx + 9, cy + 1, cx + 12, cy + 3, col);
-        if (detected) g.fill(cx - 2, cy - 2, cx + 3, cy + 3, 0xFFFFFFFF);
-        Component label = Component.translatable(detected ? "hud.skycraft.detected" : "hud.skycraft.hidden");
-        g.drawCenteredString(mc.font, label, cx, cy + 7, detected ? 0xFFFFFFFF : 0xFF909090);
+        if (mc.player == null || mc.options.hideGui || mc.screen != null) return;
+        SneakEye.render(g, width / 2, height / 2);
     }
 
     // ------------------------------------------------------------------ notifications
@@ -162,6 +150,10 @@ public final class SkyHud {
         if (alpha < 0.03f) return;
         int a = (int) (alpha * 255) << 24;
         CorePackets.Notify msg = banner.msg();
+        if (com.skycraft.visual.VisualConfig.STYLED_BANNERS.get()) {
+            renderBannerStyled(g, font, mc, msg, width, height, alpha, age);
+            return;
+        }
         switch (msg.kind()) {
             case SKILL_UP -> {
                 g.drawCenteredString(font, msg.title(), width / 2, 46, a | 0xF0EAD6);
@@ -202,6 +194,101 @@ public final class SkyHud {
                 drawDivider(g, width / 2, 95, 100, a);
             }
         }
+    }
+
+    /**
+     * Skyrim-style banners: each sits on a soft dark band that fades out at the sides, framed by ornaments.
+     * Skill increases show the skill's progress bar; level ups and big titles ("DRAGON SOUL ABSORBED") settle in from
+     * slightly larger with a faint glow.
+     */
+    private static void renderBannerStyled(GuiGraphics g, Font font, Minecraft mc, CorePackets.Notify msg, int width, int height,
+                                           float alpha, float age) {
+        int cx = width / 2;
+        float settle = 1f + 0.12f * (1f - Mth.clamp(age * 5f, 0f, 1f));
+        // stay clear of the boss and enemy bars under the compass
+        boolean boss = com.skycraft.client.SkyBossHud.isShowing(null);
+        boolean target = TargetHud.isVisible();
+        int off = msg.kind() == NotifyKind.BIG_TITLE ? 0 : (boss ? 28 : 0) + (target ? 24 : 0);
+        g.pose().pushPose();
+        g.pose().translate(0, off, 0);
+        renderBannerBody(g, font, mc, msg, width, height, alpha, cx, settle);
+        g.pose().popPose();
+    }
+
+    private static void renderBannerBody(GuiGraphics g, Font font, Minecraft mc, CorePackets.Notify msg, int width, int height,
+                                         float alpha, int cx, float settle) {
+        switch (msg.kind()) {
+            case SKILL_UP -> {
+                band(g, cx, 42, 68, 120, alpha * 0.55f);
+                String title = SkyUi.caps(msg.title());
+                SkyUi.scaledCentered(g, font, title, cx, 47, 0.9f, SkyUi.fade(0xFFF0EAD6, alpha), true);
+                Skill skill = msg.value() >= 0 && msg.value() < Skill.VALUES.length ? Skill.VALUES[msg.value()] : null;
+                float prog = skill == null ? msg.progress() : SkyData.get(mc.player).skillProgress(skill);
+                SkyUi.ornateBar(g, cx - 60, 59, 120, 3, prog, 0xD8D0B8, alpha, false, false);
+            }
+            case LEVEL_UP -> {
+                band(g, cx, 50, 100, 150, alpha * 0.6f);
+                SkyUi.ornament(g, cx, 56, 110, SkyUi.fade(0xFFC8BC9A, alpha));
+                glowTitle(g, font, SkyUi.caps(msg.title()), cx, 64, 2.0f * settle, alpha, 0xF5EBC8);
+                SkyUi.scaledCentered(g, font, msg.subtitle().getString(), cx, 84, 1f, SkyUi.fade(0xFFBDB59E, alpha), true);
+                SkyUi.ornament(g, cx, 96, 110, SkyUi.fade(0xFFC8BC9A, alpha));
+            }
+            case BIG_TITLE -> {
+                int y = height / 2 - 54;
+                band(g, cx, y - 8, y + 40, 170, alpha * 0.5f);
+                glowTitle(g, font, SkyUi.caps(msg.title()), cx, y, 2.2f * settle, alpha, 0xF5EBC8);
+                SkyUi.ornament(g, cx, y + 24, 100, SkyUi.fade(0xFFC8BC9A, alpha));
+                if (!msg.subtitle().getString().isEmpty()) {
+                    SkyUi.scaledCentered(g, font, msg.subtitle().getString(), cx, y + 30, 1f, SkyUi.fade(0xFFD0C8B0, alpha), true);
+                }
+            }
+            default -> {
+                // quests and locations: "QUEST STARTED" in small capitals over the name, between two ornaments
+                Component header = Component.translatable("notify.skycraft." + msg.kind().name().toLowerCase(java.util.Locale.ROOT));
+                boolean failed = msg.kind() == NotifyKind.QUEST_FAILED;
+                band(g, cx, 46, 98, 130, alpha * 0.55f);
+                SkyUi.ornament(g, cx, 50, 100, SkyUi.fade(0xFFC8BC9A, alpha));
+                SkyUi.scaledCentered(g, font, SkyUi.caps(header), cx, 56, 0.75f, SkyUi.fade(failed ? 0xFFD07060 : 0xFFA89F86, alpha), false);
+                SkyUi.scaledCentered(g, font, msg.title().getString(), cx, 66, 1.5f, SkyUi.fade(0xFFF5EBC8, alpha), true);
+                if (!msg.subtitle().getString().isEmpty()) {
+                    SkyUi.scaledCentered(g, font, msg.subtitle().getString(), cx, 81, 0.9f, SkyUi.fade(0xFFBDB59E, alpha), true);
+                }
+                SkyUi.ornament(g, cx, 94, 100, SkyUi.fade(0xFFC8BC9A, alpha));
+            }
+        }
+    }
+
+    /** A horizontal dark band from y1 to y2 that fades out over its last third on each side. */
+    private static void band(GuiGraphics g, int cx, int y1, int y2, int half, float alpha) {
+        int solid = half * 2 / 3;
+        int mid = (y1 + y2) / 2;
+        int steps = 12;
+        int fadeW = half - solid;
+        for (int i = -1; i < steps; i++) {
+            // i = -1 is the solid centre; then columns fading toward each side
+            float f = i < 0 ? 1f : 1f - (i + 1) / (float) (steps + 1);
+            int ca = (int) (alpha * 0x98 * f) << 24;
+            int x0 = i < 0 ? cx - solid : cx + solid + i * fadeW / steps;
+            int x1 = i < 0 ? cx + solid : cx + solid + (i + 1) * fadeW / steps;
+            // soft top and bottom edges: transparent -> dark -> transparent
+            g.fillGradient(x0, y1, x1, mid, 0, ca);
+            g.fillGradient(x0, mid, x1, y2, ca, 0);
+            if (i >= 0) {
+                g.fillGradient(2 * cx - x1, y1, 2 * cx - x0, mid, 0, ca);
+                g.fillGradient(2 * cx - x1, mid, 2 * cx - x0, y2, ca, 0);
+            }
+        }
+    }
+
+    /** Large title with a faint warm glow (offset copies) under it. */
+    private static void glowTitle(GuiGraphics g, Font font, String text, int cx, int y, float scale, float alpha, int rgb) {
+        int glow = SkyUi.fade(0x40E8C060, alpha);
+        for (int i = 0; i < 4; i++) {
+            float ox = (i & 1) == 0 ? -0.8f : 0.8f;
+            float oy = (i & 2) == 0 ? -0.8f : 0.8f;
+            SkyUi.scaledCentered(g, font, text, cx + ox, y + oy, scale, glow, false);
+        }
+        SkyUi.scaledCentered(g, font, text, cx, y, scale, SkyUi.fade(0xFF000000 | rgb, alpha), true);
     }
 
     private static void drawThinBar(GuiGraphics g, int x, int y, int w, float progress, int a) {

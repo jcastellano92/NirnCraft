@@ -10,7 +10,8 @@ import java.util.Random;
 
 /**
  * Static sky meshes, built once on the render thread and drawn every frame: two star layers (twinkling in
- * counter-phase), the galaxy band, and the aurora curtains (several keyframes per band, cross-faded at draw time
+ * counter-phase), the galaxy band, the thirteen birthsign constellations (the Serpent in its own buffer, because it
+ * wanders), the overcast veil dome, and the aurora curtains (several keyframes per band, cross-faded at draw time
  * so the folds drift without rebuilding geometry). Everything lies on a sphere of radius {@link #R} around the
  * camera, like the vanilla sky.
  */
@@ -26,6 +27,9 @@ final class SkyGeometry {
     static VertexBuffer starsA;
     static VertexBuffer starsB;
     static VertexBuffer galaxy;
+    static VertexBuffer constellations;
+    static VertexBuffer serpent;
+    static VertexBuffer veil;
     static final VertexBuffer[][] AURORA = new VertexBuffer[AURORA_BANDS][AURORA_KEYS];
     private static boolean built;
 
@@ -37,6 +41,9 @@ final class SkyGeometry {
         starsA = upload(buildStars(new Random(0x5EC0DAL), 1700));
         starsB = upload(buildStars(new Random(0x3A55E1L), 1700));
         galaxy = upload(buildGalaxy());
+        constellations = upload(buildConstellations(false));
+        serpent = upload(buildConstellations(true));
+        veil = upload(buildVeil());
         Random r = new Random(0xA0C0BAL);
         for (int b = 0; b < AURORA_BANDS; b++) {
             AuroraBand band = new AuroraBand(r, b);
@@ -101,6 +108,110 @@ final class SkyGeometry {
                             cz + (u[2] * c[0] + v[2] * c[1]) * size)
                     .color(r, g, b, a).endVertex();
         }
+    }
+
+    // ------------------------------------------------------------------ constellations
+
+    /**
+     * The thirteen birthsigns as original star figures. Each row: name (for reference), centre angle around the
+     * celestial equator (degrees), offset off the equator (-1..1, along the celestial pole axis), star points
+     * (x, y in units of {@link #SIGN_UNIT} degrees), then index pairs joined by faint lines.
+     */
+    private static final Object[][] SIGNS = {
+            {"warrior", 10f, 0.30f, new float[]{0, -3, 0, -1, 0, 1, 0, 3.5f, -1.5f, 1, 1.5f, 1, 0, 4.5f}, new int[]{0, 1, 1, 2, 2, 3, 4, 2, 2, 5, 3, 6}},
+            {"mage", 38f, -0.25f, new float[]{0, -3.5f, 0, -1, 0, 1.5f, -1, 2.5f, 0, 3.5f, 1, 2.5f}, new int[]{0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 2}},
+            {"thief", 66f, 0.40f, new float[]{-2.5f, -1, -1, 1, 0, -0.5f, 1, 1.5f, 2.5f, 0}, new int[]{0, 1, 1, 2, 2, 3, 3, 4}},
+            {"lady", 94f, -0.10f, new float[]{0, 3, -1, 1.5f, 1, 1.5f, -2, -2, 2, -2, 0, 0}, new int[]{0, 1, 0, 2, 1, 5, 2, 5, 5, 3, 5, 4, 3, 4}},
+            {"steed", 122f, 0.35f, new float[]{-3, -1, -1.5f, 0, 0, 0.5f, 1.5f, 2, 2.5f, 1, 1, -1, -1, -2}, new int[]{0, 1, 1, 2, 2, 3, 3, 4, 2, 5, 1, 6}},
+            {"lord", 150f, -0.35f, new float[]{-2, 0, -1, 1.5f, 0, 0.5f, 1, 1.5f, 2, 0, 0, -2}, new int[]{0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 0}},
+            {"apprentice", 178f, 0.15f, new float[]{0, 0, 0, 2, 1.5f, -1, -1.5f, -1, 0, -2.5f}, new int[]{0, 1, 0, 2, 0, 3, 0, 4}},
+            {"atronach", 206f, -0.30f, new float[]{0, 2, 1.4f, 1.4f, 2, 0, 1.4f, -1.4f, 0, -2, -1.4f, -1.4f, -2, 0, -1.4f, 1.4f}, new int[]{0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 0}},
+            {"ritual", 234f, 0.30f, new float[]{-2, 2, -2.5f, 0, -1.5f, -2, 0.5f, -2.5f, 2, -1.5f, 0, 0}, new int[]{0, 1, 1, 2, 2, 3, 3, 4, 2, 5}},
+            {"lover", 262f, -0.15f, new float[]{-2, 1, -1, 2, 0, 1, 1, 2, 2, 1, 0, -2}, new int[]{0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 0}},
+            {"shadow", 290f, 0.40f, new float[]{0, 2.5f, -2, -2, 2, -2, 0, -0.5f}, new int[]{0, 1, 1, 3, 3, 2, 2, 0}},
+            {"tower", 318f, -0.25f, new float[]{-1, -3, -1, 2, 1, 2, 1, -3, -1, 3, 0, 2.5f, 1, 3}, new int[]{0, 1, 1, 2, 2, 3, 1, 4, 4, 5, 5, 6, 6, 2}},
+            {"serpent", 0f, 0f, new float[]{-4, 0, -3, 1, -1.5f, 0.5f, 0, -0.5f, 1.5f, -0.5f, 3, 0.5f, 4, 1.5f}, new int[]{0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6}},
+    };
+    private static final float SIGN_UNIT = 1.9F;
+
+    /** All signs but the Serpent, or the Serpent alone (centred on the celestial equator at angle 0). */
+    private static BufferBuilder.RenderedBuffer buildConstellations(boolean serpentOnly) {
+        BufferBuilder bb = Tesselator.getInstance().getBuilder();
+        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        for (Object[] sign : SIGNS) {
+            boolean isSerpent = "serpent".equals(sign[0]);
+            if (isSerpent != serpentOnly) continue;
+            double ang = Math.toRadians((Float) sign[1]);
+            double off = (Float) sign[2];
+            // celestial frame: vanilla spins the sky about the local X axis, so the "equator" is the Y-Z circle
+            double[] c = normalize(off, Math.cos(ang), Math.sin(ang));
+            double[] u = cross(c, cross(new double[]{1, 0, 0}, c)); // the pole axis projected onto the tangent plane
+            double[] v = cross(c, u);
+            float[] pts = (float[]) sign[3];
+            int[] lines = (int[]) sign[4];
+            double unit = Math.toRadians(SIGN_UNIT);
+            double[][] dirs = new double[pts.length / 2][];
+            for (int i = 0; i < dirs.length; i++) {
+                double x = pts[i * 2] * unit, y = pts[i * 2 + 1] * unit;
+                dirs[i] = normalize(c[0] + u[0] * y + v[0] * x, c[1] + u[1] * y + v[1] * x, c[2] + u[2] * y + v[2] * x);
+            }
+            for (int i = 0; i < lines.length; i += 2) {
+                line(bb, dirs[lines[i]], dirs[lines[i + 1]], 0.07F, 0.62F, 0.72F, 0.95F, 0.16F);
+            }
+            for (double[] d : dirs) {
+                quad(bb, d, 0.34F, 0.85F, 0.90F, 1.0F, 1.0F);
+                quad(bb, d, 0.85F, 0.55F, 0.65F, 1.0F, 0.10F); // soft glow
+            }
+        }
+        return bb.end();
+    }
+
+    /** A thin quad along the sky sphere between two directions (trimmed so it doesn't run through the stars). */
+    private static void line(BufferBuilder bb, double[] a, double[] b, float width, float r, float g, float bl, float alpha) {
+        double[] mid = normalize(a[0] + b[0], a[1] + b[1], a[2] + b[2]);
+        double[] along = normalize(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
+        double[] side = cross(mid, along);
+        double[] p0 = lerp(a, b, 0.12), p1 = lerp(a, b, 0.88);
+        double w = width / R;
+        lineVertex(bb, p0, side, w, r, g, bl, alpha);
+        lineVertex(bb, p1, side, w, r, g, bl, alpha);
+        lineVertex(bb, p1, side, -w, r, g, bl, alpha);
+        lineVertex(bb, p0, side, -w, r, g, bl, alpha);
+    }
+
+    private static void lineVertex(BufferBuilder bb, double[] p, double[] side, double w, float r, float g, float b, float a) {
+        bb.vertex((p[0] + side[0] * w) * R, (p[1] + side[1] * w) * R, (p[2] + side[2] * w) * R).color(r, g, b, a).endVertex();
+    }
+
+    private static double[] lerp(double[] a, double[] b, double t) {
+        return normalize(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t);
+    }
+
+    // ------------------------------------------------------------------ overcast veil
+
+    /** A dome over the camera (down to 25 degrees below the horizon), white; tinted and faded at draw time. */
+    private static BufferBuilder.RenderedBuffer buildVeil() {
+        BufferBuilder bb = Tesselator.getInstance().getBuilder();
+        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        int seg = 32;
+        double[] elev = {-25, -5, 8, 25, 50, 90};
+        float[] alpha = {1.0F, 1.0F, 0.95F, 0.85F, 0.8F, 0.8F};
+        for (int i = 0; i < seg; i++) {
+            double a0 = Math.PI * 2 * i / seg, a1 = Math.PI * 2 * (i + 1) / seg;
+            for (int j = 0; j < elev.length - 1; j++) {
+                double e0 = Math.toRadians(elev[j]), e1 = Math.toRadians(elev[j + 1]);
+                veilVertex(bb, a0, e0, alpha[j]);
+                veilVertex(bb, a0, e1, alpha[j + 1]);
+                veilVertex(bb, a1, e1, alpha[j + 1]);
+                veilVertex(bb, a1, e0, alpha[j]);
+            }
+        }
+        return bb.end();
+    }
+
+    private static void veilVertex(BufferBuilder bb, double az, double el, float a) {
+        double r = R * 0.9;
+        bb.vertex(Math.sin(az) * Math.cos(el) * r, Math.sin(el) * r, Math.cos(az) * Math.cos(el) * r).color(1.0F, 1.0F, 1.0F, a).endVertex();
     }
 
     // ------------------------------------------------------------------ galaxy

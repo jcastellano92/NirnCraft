@@ -64,9 +64,17 @@ public class RaceScreen extends Screen {
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         // Dark vignette background
         g.fillGradient(0, 0, width, height, 0xF0050505, 0xF0181410);
+        com.skycraft.inventory.client.SkyUi.smoke(g, width, height, (net.minecraft.Util.getMillis() % 1_000_000L) / 1000f, 0.7f);
+        // a soft pool of light where the character stands
+        int glowCx = (12 + Math.min(95, width / 4) + width - 164) / 2;
+        for (int i = 6; i > 0; i--) {
+            int w = 12 * i;
+            g.fillGradient(glowCx - w, height / 3, glowCx + w, height - 30, 0, 0x08E8D8B0);
+        }
 
         // Header
-        g.drawCenteredString(font, Component.translatable("screen.skycraft.race_header"), width / 2, 8, GOLD_COLOR);
+        g.drawCenteredString(font, com.skycraft.inventory.client.SkyUi.caps(Component.translatable("screen.skycraft.race_header")), width / 2, 6, GOLD_COLOR);
+        com.skycraft.inventory.client.SkyUi.ornament(g, width / 2, 18, Math.min(90, width / 5), 0xB0C8BC9A);
 
         // Layout dimensions
         int listWidth = Math.min(95, width / 4);
@@ -82,8 +90,11 @@ public class RaceScreen extends Screen {
             boolean isHov = mouseX >= listX && mouseX <= listX + listWidth && mouseY >= itemY && mouseY < itemY + itemHeight;
 
             if (isSel) {
-                g.fill(listX - 2, itemY, listX + listWidth + 2, itemY + itemHeight - 2, 0x50E8C060);
-                g.fill(listX - 4, itemY + 2, listX - 2, itemY + itemHeight - 4, GOLD_COLOR);
+                // Skyrim selection: smoky band between fading gold lines, a diamond at the left
+                g.fillGradient(listX - 2, itemY, listX + listWidth + 2, itemY + itemHeight - 2, 0x60000000, 0x90000000);
+                com.skycraft.inventory.client.SkyUi.hline(g, listX - 2, listX + listWidth + 2, itemY, 0xA0);
+                com.skycraft.inventory.client.SkyUi.hline(g, listX - 2, listX + listWidth + 2, itemY + itemHeight - 3, 0xA0);
+                com.skycraft.inventory.client.SkyUi.diamond(g, listX - 4, itemY + itemHeight / 2 - 1, 2, GOLD_COLOR);
             } else if (isHov) {
                 g.fill(listX - 2, itemY, listX + listWidth + 2, itemY + itemHeight - 2, 0x30FFFFFF);
             }

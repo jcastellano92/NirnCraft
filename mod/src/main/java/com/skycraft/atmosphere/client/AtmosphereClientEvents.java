@@ -3,7 +3,10 @@ package com.skycraft.atmosphere.client;
 import com.skycraft.Skycraft;
 import com.skycraft.atmosphere.AtmosphereConfig;
 import com.skycraft.atmosphere.AtmosphereSounds;
+import com.skycraft.atmosphere.weather.WeatherProfile;
 import com.skycraft.core.SkyData;
+import com.skycraft.tamriel.Region;
+import com.skycraft.tamriel.Regions;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
@@ -42,11 +45,19 @@ public final class AtmosphereClientEvents {
         }
         if (mc.isPaused()) return;
 
-        // ---- aurora: is it cold here?
+        // ---- aurora: a northern sky (Skyrim, Atmora, cold climates), brightest over cold ground
         if (player.tickCount % 20 == 0 || trackedPlayer != player) {
             BlockPos pos = player.blockPosition();
             float temp = mc.level.getBiome(pos).value().getBaseTemperature();
-            coldTarget = temp <= AtmosphereConfig.AURORA_MAX_TEMPERATURE.get() ? 1.0F : 0.0F;
+            boolean cold = temp <= AtmosphereConfig.AURORA_MAX_TEMPERATURE.get();
+            if (AtmosphereConfig.AURORA_BY_REGION.get()) {
+                Region region = Regions.at(mc.level, pos);
+                boolean north = "skyrim".equals(region.province()) || "atmora".equals(region.province())
+                        || WeatherProfile.of(region).aurora;
+                coldTarget = north ? (cold ? 1.0F : 0.6F) : 0.0F;
+            } else {
+                coldTarget = cold ? 1.0F : 0.0F;
+            }
         }
         SkyRenderer.coldnessPrev = SkyRenderer.coldness;
         SkyRenderer.coldness += (coldTarget - SkyRenderer.coldness) * 0.02F;

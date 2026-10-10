@@ -32,8 +32,10 @@ import org.joml.Matrix4f;
 /**
  * The Skyrim night sky, drawn right after the vanilla sky ({@link RenderLevelStageEvent.Stage#AFTER_SKY}) in the
  * overworld: Secunda on its own tilted orbit, a glow around Masser (the retextured vanilla moon), a denser twinkling
- * star field, a faint galaxy band and, on clear nights in cold biomes, the aurora. Skipped while an Oculus/Iris
- * shader pack is active. All draws are additive, like vanilla's sun, moon and stars.
+ * star field, a faint galaxy band, the thirteen birthsign constellations (the Serpent wanders), occasional shooting
+ * stars and, on clear nights in the northern regions, the aurora. Under regional overcast a tinted veil dims the
+ * sky first ({@link ClientWeather}). Skipped while an Oculus/Iris shader pack is active. All draws except the veil
+ * are additive, like vanilla's sun, moon and stars; the render state is restored afterwards.
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class SkyRenderer {
@@ -44,9 +46,21 @@ public final class SkyRenderer {
     /** Secunda's orbit: inclined to Masser's and running a little ahead of it. */
     private static final float SECUNDA_TILT = 24.0F;
     private static final float SECUNDA_LEAD = 31.0F;
-    private static final float SECUNDA_SIZE = 6.0F;
+    private static final float SECUNDA_SIZE = 7.0F;
     private static final float HALO_SIZE = 36.0F;
     private static final double AURORA_KEY_SECONDS = 6.0;
+    /** The Serpent drifts once around the sky in this many days, out of step with the other stars. */
+    private static final double SERPENT_PERIOD_DAYS = 27.0;
+
+    // ---- the current shooting star (all primitives: nothing is allocated per frame)
+    private static final java.util.Random METEOR_RNG = new java.util.Random();
+    private static double nextMeteorAt = -1.0;
+    private static double meteorStart = -10.0;
+    private static double meteorDuration;
+    private static double meteorSpeed;      // radians per second
+    private static double meteorTail;       // radians
+    private static double mSx, mSy, mSz;     // start direction
+    private static double mTx, mTy, mTz;     // travel direction (tangent at the start)
 
     /** 0..1, how cold the player's surroundings are (smoothed by {@link AtmosphereClientEvents}). */
     static float coldness;
@@ -69,9 +83,9 @@ public final class SkyRenderer {
         if (mc.gui.getBossOverlay().shouldCreateWorldFog()) return;
 
         float pt = event.getPartialTick();
-        float clear = 1.0F - level.getRainLevel(pt);
+        float overcast = ClientWeather.active() && AtmosphereConfig.WEATHER_SKY.get() ? ClientWeather.clouds() : 0.0F;
+        float clear = (1.0F - level.getRainLevel(pt)) * (1.0F - overcast * 0.92F);
         float night = Mth.clamp(level.getStarBrightness(pt) * 2.0F, 0.0F, 1.0F);
-        if (clear <= 0.01F) return;
 
         SkyGeometry.ensureBuilt();
         PoseStack pose = event.getPoseStack();
@@ -79,11 +93,24 @@ public final class SkyRenderer {
         double seconds = (level.getGameTime() + pt) / 20.0;
 
         RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE,
-                GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         RenderSystem.depthMask(false);
         RenderSystem.disableCull();
         try {
+            // overcast veil: normal blending over vanilla's sun and moon, tinted like the fog
+            float veil = overcast * (1.0F - 0.5F * level.getRainLevel(pt));
+            if (veil > 0.01F) {
+                RenderSystem.defaultBlendFunc();
+                float day = Mth.clamp(Mth.cos(level.getTimeOfDay(pt) * Mth.TWO_PI) * 2.0F + 0.5F, 0.0F, 1.0F);
+                float lift = 0.85F + 0.15F * day;
+                RenderSystem.setShaderColor(ClientWeather.fogR * lift, ClientWeather.fogG * lift, ClientWeather.fogB * lift, Math.min(0.94F, veil));
+                SkyGeometry.veil.bind();
+                SkyGeometry.veil.drawWithShader(pose.last().pose(), proj, GameRenderer.getPositionColorShader());
+                VertexBuffer.unbind();
+            }
+            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE,
+                    GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            if (clear <= 0.01F) return;
+
             if (AtmosphereConfig.AURORA.get()) {
                 float cold = AtmosphereConfig.AURORA_EVERYWHERE.get() ? 1.0F : Mth.lerp(pt, coldnessPrev, coldness);
                 float alpha = night * night * clear * clear * cold * activity(level) * AtmosphereConfig.AURORA_BRIGHTNESS.get().floatValue();
@@ -98,9 +125,12 @@ public final class SkyRenderer {
             if (starAlpha > 0.003F) {
                 if (AtmosphereConfig.GALAXY.get()) drawGalaxy(pose, proj, starAlpha * 0.55F);
                 if (AtmosphereConfig.STARS.get()) drawStars(pose, proj, starAlpha, seconds);
+                if (AtmosphereConfig.CONSTELLATIONS.get()) drawConstellations(pose, proj, starAlpha, level.getDayTime() + pt);
             }
             if (AtmosphereConfig.MASSER_HALO.get() && starAlpha > 0.003F) drawHalo(pose.last().pose(), starAlpha * 0.5F);
             pose.popPose();
+
+            if (AtmosphereConfig.SHOOTING_STARS.get()) drawShootingStar(pose.last().pose(), starAlpha, seconds);
 
             if (AtmosphereConfig.SECUNDA.get()) {
                 pose.pushPose();
@@ -126,6 +156,80 @@ public final class SkyRenderer {
         float b = alpha * (0.82F + 0.18F * (float) Math.sin(seconds * 1.3 + 2.1));
         drawBuffer(SkyGeometry.starsA, pose.last().pose(), proj, GameRenderer.getPositionColorShader(), a);
         drawBuffer(SkyGeometry.starsB, pose.last().pose(), proj, GameRenderer.getPositionColorShader(), b);
+    }
+
+    private static void drawConstellations(PoseStack pose, Matrix4f proj, float alpha, double dayTime) {
+        drawBuffer(SkyGeometry.constellations, pose.last().pose(), proj, GameRenderer.getPositionColorShader(), alpha * 0.55F);
+        // the Serpent wanders against the fixed stars
+        double days = dayTime / 24000.0;
+        pose.pushPose();
+        pose.mulPose(Axis.XP.rotationDegrees((float) (days / SERPENT_PERIOD_DAYS * 360.0 % 360.0)));
+        pose.mulPose(Axis.ZP.rotationDegrees((float) Math.sin(days * 0.7) * 18.0F));
+        drawBuffer(SkyGeometry.serpent, pose.last().pose(), proj, GameRenderer.getPositionColorShader(), alpha * 0.6F);
+        pose.popPose();
+    }
+
+    /**
+     * A shooting star every 15-60 seconds of clear night: a short tapered streak sliding along a great circle in the
+     * camera's sky (not the celestial frame), fading in and out.
+     */
+    private static void drawShootingStar(Matrix4f m, float starAlpha, double seconds) {
+        if (starAlpha < 0.25F) {
+            nextMeteorAt = -1.0;
+            return;
+        }
+        if (nextMeteorAt < 0.0 || nextMeteorAt > seconds + 120.0) nextMeteorAt = seconds + 10.0 + METEOR_RNG.nextDouble() * 40.0;
+        if (seconds >= nextMeteorAt) {
+            nextMeteorAt = seconds + 15.0 + METEOR_RNG.nextDouble() * 45.0;
+            meteorStart = seconds;
+            meteorDuration = 0.45 + METEOR_RNG.nextDouble() * 0.6;
+            meteorSpeed = Math.toRadians(22.0 + METEOR_RNG.nextDouble() * 26.0);
+            meteorTail = Math.toRadians(6.0 + METEOR_RNG.nextDouble() * 8.0);
+            double az = METEOR_RNG.nextDouble() * Math.PI * 2.0;
+            double el = Math.toRadians(28.0 + METEOR_RNG.nextDouble() * 45.0);
+            mSx = Math.sin(az) * Math.cos(el);
+            mSy = Math.sin(el);
+            mSz = Math.cos(az) * Math.cos(el);
+            // a downward-slanting tangent: mostly sideways, a little toward the horizon
+            double side = METEOR_RNG.nextBoolean() ? 1.0 : -1.0;
+            double hx = Math.cos(az) * side, hz = -Math.sin(az) * side;            // horizontal tangent
+            double dx = -Math.sin(az) * Math.sin(el), dy = Math.cos(el), dz = -Math.cos(az) * Math.sin(el); // "up" tangent
+            double drop = 0.35 + METEOR_RNG.nextDouble() * 0.4;
+            mTx = hx - dx * drop;
+            mTy = -dy * drop;
+            mTz = hz - dz * drop;
+            double l = Math.sqrt(mTx * mTx + mTy * mTy + mTz * mTz);
+            mTx /= l;
+            mTy /= l;
+            mTz /= l;
+        }
+        double t = seconds - meteorStart;
+        if (t < 0.0 || t > meteorDuration) return;
+        float fade = (float) Math.sin(Math.PI * t / meteorDuration) * starAlpha;
+        double head = meteorSpeed * t;
+        double tail = Math.max(0.0, head - meteorTail * Math.min(1.0, t / (meteorDuration * 0.4)));
+        float r = SkyGeometry.R * 0.95F;
+        double hc = Math.cos(head), hs = Math.sin(head), tc = Math.cos(tail), ts = Math.sin(tail);
+        float hx = (float) ((mSx * hc + mTx * hs) * r), hy = (float) ((mSy * hc + mTy * hs) * r), hz = (float) ((mSz * hc + mTz * hs) * r);
+        float tx = (float) ((mSx * tc + mTx * ts) * r), ty = (float) ((mSy * tc + mTy * ts) * r), tz = (float) ((mSz * tc + mTz * ts) * r);
+        // width vector: perpendicular to both the streak and the view direction to the head
+        float ax = tx - hx, ay = ty - hy, az = tz - hz;
+        float wx = ay * hz - az * hy, wy = az * hx - ax * hz, wz = ax * hy - ay * hx;
+        float wl = Mth.sqrt(wx * wx + wy * wy + wz * wz);
+        if (wl < 1.0E-4F) return;
+        float w = 0.16F / wl;
+        wx *= w;
+        wy *= w;
+        wz *= w;
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        BufferBuilder bb = Tesselator.getInstance().getBuilder();
+        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        bb.vertex(m, hx + wx, hy + wy, hz + wz).color(1.0F, 0.97F, 0.88F, fade).endVertex();
+        bb.vertex(m, hx - wx, hy - wy, hz - wz).color(1.0F, 0.97F, 0.88F, fade).endVertex();
+        bb.vertex(m, tx, ty, tz).color(0.55F, 0.70F, 1.0F, 0.0F).endVertex();
+        bb.vertex(m, tx, ty, tz).color(0.55F, 0.70F, 1.0F, 0.0F).endVertex();
+        BufferUploader.drawWithShader(bb.end());
     }
 
     private static void drawGalaxy(PoseStack pose, Matrix4f proj, float alpha) {
