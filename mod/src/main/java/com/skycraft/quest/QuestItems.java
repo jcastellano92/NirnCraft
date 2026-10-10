@@ -31,6 +31,10 @@ public final class QuestItems {
             () -> new BlackHandLetter(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
     public static final RegistryObject<Item> COURIER_LETTER = ITEMS.register("courier_letter",
             () -> new QuestItem(new Item.Properties().stacksTo(16), "courier_letter"));
+    /** Story relics (the Dragonstone, the Horn of Jurgen Windcaller, an Elder Scroll...): NBT {@value #RELIC_TAG} names which. */
+    public static final RegistryObject<Item> QUEST_RELIC = ITEMS.register("quest_relic",
+            () -> new RelicItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));
+    public static final String RELIC_TAG = "relic";
 
     private QuestItems() {}
 
@@ -116,6 +120,41 @@ public final class QuestItems {
                 tooltip.add(Component.translatable("tooltip.skycraft.monster_trophy.value", stack.getTag().getInt("value"))
                         .withStyle(ChatFormatting.GOLD));
             }
+        }
+    }
+
+    /**
+     * A story relic. Name and tooltip come from the relic id ({@code item.skycraft.relic.<id>}); the model picks its
+     * look from {@code CustomModelData}. Relics are quest items: they can't be sold.
+     */
+    public static class RelicItem extends Item {
+        public RelicItem(Properties props) {
+            super(props);
+        }
+
+        private static String relic(ItemStack stack) {
+            return stack.getTag() == null ? "" : stack.getTag().getString(RELIC_TAG);
+        }
+
+        @Override
+        public Component getName(ItemStack stack) {
+            String id = relic(stack);
+            if (id.isEmpty()) return super.getName(stack);
+            return Component.translatable("item.skycraft.relic." + id);
+        }
+
+        @Override
+        public boolean isFoil(ItemStack stack) {
+            return true;
+        }
+
+        @Override
+        public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+            String id = relic(stack);
+            if (!id.isEmpty()) {
+                tooltip.add(Component.translatable("item.skycraft.relic." + id + ".desc").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+            }
+            tooltip.add(Component.translatable("tooltip.skycraft.quest_item").withStyle(ChatFormatting.DARK_AQUA));
         }
     }
 

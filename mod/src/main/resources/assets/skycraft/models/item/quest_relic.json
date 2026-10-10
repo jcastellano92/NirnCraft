@@ -1,0 +1,182 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "skycraft:item/ancient_tome"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 1
+      },
+      "model": "skycraft:item/relic/1"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 2
+      },
+      "model": "skycraft:item/relic/2"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 3
+      },
+      "model": "skycraft:item/relic/3"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 4
+      },
+      "model": "skycraft:item/relic/4"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 5
+      },
+      "model": "skycraft:item/relic/5"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 6
+      },
+      "model": "skycraft:item/relic/6"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 7
+      },
+      "model": "skycraft:item/relic/7"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 8
+      },
+      "model": "skycraft:item/relic/8"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 9
+      },
+      "model": "skycraft:item/relic/9"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 10
+      },
+      "model": "skycraft:item/relic/10"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 11
+      },
+      "model": "skycraft:item/relic/11"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 12
+      },
+      "model": "skycraft:item/relic/12"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 13
+      },
+      "model": "skycraft:item/relic/13"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 14
+      },
+      "model": "skycraft:item/relic/14"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 15
+      },
+      "model": "skycraft:item/relic/15"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 16
+      },
+      "model": "skycraft:item/relic/16"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 17
+      },
+      "model": "skycraft:item/relic/17"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 18
+      },
+      "model": "skycraft:item/relic/18"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 19
+      },
+      "model": "skycraft:item/relic/19"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 20
+      },
+      "model": "skycraft:item/relic/20"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 21
+      },
+      "model": "skycraft:item/relic/21"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 22
+      },
+      "model": "skycraft:item/relic/22"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 23
+      },
+      "model": "skycraft:item/relic/23"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 24
+      },
+      "model": "skycraft:item/relic/24"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 25
+      },
+      "model": "skycraft:item/relic/25"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 26
+      },
+      "model": "skycraft:item/relic/26"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 27
+      },
+      "model": "skycraft:item/relic/27"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 28
+      },
+      "model": "skycraft:item/relic/28"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 29
+      },
+      "model": "skycraft:item/relic/29"
+    }
+  ]
+}

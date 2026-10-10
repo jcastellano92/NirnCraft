@@ -124,6 +124,7 @@ public final class QuestCommands {
                                     int stage = IntegerArgumentType.getInteger(c, "stage");
                                     QuestStore.get(p.server).quests(Quests.personalKey(p.getUUID()))
                                             .removeIf(q -> q.isMain() && q.isActive());
+                                    Quests.changed(p.server, Quests.personalKey(p.getUUID()));
                                     MainQuest.startStage(p, stage);
                                     return 1;
                                 }))))
@@ -138,6 +139,7 @@ public final class QuestCommands {
                             c.getSource().sendSuccess(() -> Component.literal("Reset quests of " + p.getGameProfile().getName()), true);
                             return 1;
                         })))));
+        com.skycraft.quest.story.StoryCommands.register(d);
     }
 
     private static int fail(CommandContext<CommandSourceStack> c, String key) {

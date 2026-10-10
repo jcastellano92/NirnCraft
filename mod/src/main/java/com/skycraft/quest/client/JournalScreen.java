@@ -49,7 +49,7 @@ public class JournalScreen extends Screen {
     private int listScroll, detailScroll, listHeight, detailHeight;
     private boolean abandonArmed;
     private final List<Row> rows = new ArrayList<>();
-    private Button trackButton, shareButton, abandonButton, partyButton;
+    private Button trackButton, shareButton, abandonButton, partyButton, skipButton;
 
     private record Row(@Nullable Quest quest, int y) {
     }
@@ -80,7 +80,25 @@ public class JournalScreen extends Screen {
                 .bounds(x1 - 86, y1 - 22, 78, 16).build());
         partyButton = addRenderableWidget(Button.builder(Component.translatable("journal.skycraft.open_party"),
                 b -> minecraft.setScreen(new PartyScreen())).bounds((x0 + x1) / 2 - 60, y1 - 26, 120, 18).build());
+        skipButton = addRenderableWidget(Button.builder(Component.translatable("journal.skycraft.skip"), b -> skipStep())
+                .bounds(x1 - 180, y1 - 40, 172, 16).build());
+        skipButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("journal.skycraft.skip_hint")));
         tick();
+    }
+
+    /** The current step has been stuck for the configured number of days (the server checks it again). */
+    private boolean canSkip(@Nullable Quest q) {
+        if (q == null || !q.isActive() || minecraft == null || minecraft.level == null) return false;
+        Objective o = q.current();
+        if (o == null) return false;
+        long at = o.data.getLong("skip_at");
+        return at > 0 && minecraft.level.getGameTime() >= at;
+    }
+
+    private void skipStep() {
+        Quest q = selected();
+        if (!canSkip(q)) return;
+        SkyNetwork.sendToServer(new QuestPackets.QuestAction(QuestPackets.QuestAction.SKIP, q.id));
     }
 
     // ------------------------------------------------------------------ state
@@ -135,6 +153,7 @@ public class JournalScreen extends Screen {
             abandonButton.setMessage(Component.translatable(abandonArmed ? "journal.skycraft.abandon_confirm" : "journal.skycraft.abandon"));
         }
         partyButton.visible = tab == PARTY;
+        skipButton.visible = show && canSkip(q);
     }
 
     private void toggleTrack() {
@@ -321,7 +340,7 @@ public class JournalScreen extends Screen {
             detailHeight = 0;
             return;
         }
-        int dBottom = sel.isActive() ? bottom - 20 : bottom;
+        int dBottom = sel.isActive() ? bottom - (skipButton.visible ? 38 : 20) : bottom;
         g.enableScissor(listX1 + 6, top, x1 - 4, dBottom);
         detailHeight = renderQuestDetail(g, sel, listX1 + 12, top - detailScroll, x1 - listX1 - 24) - (top - detailScroll);
         g.disableScissor();
@@ -371,6 +390,16 @@ public class JournalScreen extends Screen {
         y += 6;
         y = drawWrapped(g, q.description, x, y, w, Parchment.INK);
         y += 8;
+        // story quests keep a journal: what happened at each step, oldest first (the first entry is the description)
+        var journal = q.extra.getList("journal", Tag.TAG_STRING);
+        if (journal.size() > 1) {
+            heading(g, Component.translatable("journal.skycraft.journal"), x, y);
+            y += 12;
+            for (int i = 1; i < journal.size(); i++) {
+                y = drawWrapped(g, Quest.readComponent(journal.getString(i)), x + 4, y, w - 4, Parchment.INK_LIGHT) + 4;
+            }
+            y += 4;
+        }
 
         heading(g, Component.translatable("journal.skycraft.objectives"), x, y);
         y += 12;

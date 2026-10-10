@@ -1,0 +1,178 @@
+{
+  "line": "college",
+  "category": "faction",
+  "faction": "college",
+  "region": "skyrim/winterhold",
+  "speakers": {"jyrik": "Jyrik Gauldurson", "morokei": "Morokei", "eye": "The Eye of Magnus", "the_caller": "The Caller"},
+  "npcs": [
+    {"id": "faralda", "name": "Faralda", "role": "mage", "place": "college_of_winterhold", "offset": [0, 40], "female": true, "greet": "The bridge is narrow and the drop is long. State your business with the College."},
+    {"id": "savos_aren", "name": "Savos Aren", "role": "mage", "place": "college_of_winterhold", "offset": [0, 0], "greet": "The College is a place of learning. I'd like it to remain one, whatever the Jarl and the townsfolk think of us."},
+    {"id": "mirabelle", "name": "Mirabelle Ervine", "role": "mage", "place": "college_of_winterhold", "offset": [3, 3], "female": true, "greet": "If you've lost your way, I can point you. If you've broken something, I'd rather know now."},
+    {"id": "tolfdir", "name": "Tolfdir", "role": "mage", "place": "college_of_winterhold", "offset": [-3, 3], "greet": "Ah, a student! Or are you a visitor? Either way, there is always time for a lesson on wards."},
+    {"id": "urag", "name": "Urag gro-Shub", "role": "mage", "place": "college_of_winterhold", "offset": [-6, -4], "greet": "This is the Arcanaeum. Touch the books with clean hands and don't eat near them."},
+    {"id": "ancano", "name": "Ancano", "role": "thalmor", "place": "college_of_winterhold", "offset": [5, -3], "greet": "The Thalmor take an interest in the College's work. Purely as advisors, of course."},
+    {"id": "quaranir", "name": "Quaranir", "role": "mage", "place": "college_of_winterhold", "offset": [8, 8], "greet": "You've noticed me. Good. The Psijic Order watches; it seldom speaks. Today it speaks to you."}
+  ],
+  "relics": [
+    {"id": "amulet_of_saarthal", "name": "Saarthal Amulet", "desc": "An old Nord amulet that hums whenever it's near powerful magic.", "icon": 4},
+    {"id": "fellglow_books", "name": "Stolen Arcanaeum Books", "desc": "Three volumes on the Eye of Magnus, taken from Urag's shelves by a former student.", "icon": 7},
+    {"id": "focusing_crystal", "name": "Oculory Focusing Crystal", "desc": "A lens of Dwemer glass that once focused starlight in Mzulft's Oculory.", "icon": 19},
+    {"id": "staff_relic_magnus", "name": "Staff of Magnus (dormant)", "desc": "Old Morokei's prize. It drinks magicka from whatever it is pointed at.", "icon": 6}
+  ],
+  "scenes": {
+    "saarthal_vision": [
+      ["narrator", "When you lift the amulet, the chamber goes silent and a robed figure stands where there was no one a moment ago."],
+      ["quaranir", "Listen well. What lies within Saarthal is dangerous beyond your understanding. The Psijic Order will be watching. Act wisely."],
+      ["narrator", "Then he is simply gone, and a sealed wall cracks open behind you."]
+    ],
+    "eye_found": [
+      ["tolfdir", "Look at it. A great orb of pure magic, sleeping under a Nord tomb. We must take it to the College, carefully. Very carefully."]
+    ],
+    "eye_anomaly": [
+      ["narrator", "A shock wave rolls out of the Hall of the Elements. The Eye of Magnus burns bright, and Ancano stands before it, laughing."],
+      ["ancano", "None of you understand what this is. I do. Stay back, or be unmade."],
+      ["narrator", "Wild magic spills into the courtyard and takes shape: anomalies, crackling and hungry."]
+    ],
+    "labyrinthian": [
+      ["morokei", "Sahrot qostiid! Who wakes Morokei in his own halls? Your magicka will feed my staff."]
+    ],
+    "eye_sealed": [
+      ["quaranir", "It is done. The Eye is too dangerous for this world, and the Order will keep it where no one can reach it. You have done well, Arch-Mage."],
+      ["tolfdir", "Arch-Mage! Ha! I always said you had a head for the Arcane."]
+    ]
+  },
+  "quests": [
+    {
+      "id": "col_first_lessons",
+      "title": "First Lessons",
+      "start": "npc:faralda",
+      "requires": ["!faction:college"],
+      "offer": "I want to join the College.",
+      "pitch": "Then show me you can do more than wave your hands. Cast any spell you know here, at the gate; the ward will tell me the rest. Then go inside and find Mirabelle.",
+      "desc": "Faralda let me across the bridge to the College of Winterhold. The Master Wizard, Mirabelle Ervine, will see me enrolled, and Tolfdir teaches the first lessons.",
+      "objectives": [
+        {"type": "go", "place": "college_of_winterhold", "text": "Cross the bridge into the College of Winterhold"},
+        {"type": "talk", "npc": "mirabelle", "text": "Speak with Mirabelle Ervine",
+         "topic": "Faralda sent me in.",
+         "reply": "Another apprentice. Welcome. Your quarters are in the Hall of Attainment. Lessons start in the Hall of the Elements; Tolfdir is waiting there now."},
+        {"type": "talk", "npc": "tolfdir", "text": "Attend Tolfdir's lesson on wards",
+         "topic": "I'm here for the lesson.",
+         "reply": "Excellent! Wards. Remember: a ward is not a wall. It's a door you're holding shut. Hold it shut with your whole will. Now, I need help with a small excavation at Saarthal. You'll come, won't you?"}
+      ],
+      "rewards": {"gold": 100, "join": true, "items": ["skycraft:spell_tome_lesser_ward"]}
+    },
+    {
+      "id": "col_under_saarthal",
+      "title": "Under Saarthal",
+      "start": "auto",
+      "requires": ["quest:col_first_lessons|faction:college"],
+      "desc": "Tolfdir is leading the College's excavation of Saarthal, the ancient Nord city near Winterhold. He asked me to help find anything of magical interest.",
+      "objectives": [
+        {"type": "go", "place": "saarthal", "text": "Meet Tolfdir at Saarthal", "actions": "summon:tolfdir"},
+        {"type": "clear", "place": "saarthal", "placement": "structure", "text": "Fight through the draugr of Saarthal",
+         "spawn": [{"type": "skycraft:draugr", "count": 4}]},
+        {"type": "retrieve", "place": "saarthal", "relic": "amulet_of_saarthal", "radius": 10, "text": "Search the ruins for magical artifacts", "actions": "scene:saarthal_vision"},
+        {"type": "kill", "place": "saarthal", "placement": "structure", "text": "Defeat Jyrik Gauldurson",
+         "spawn": [{"type": "skycraft:draugr_deathlord", "name": "Jyrik Gauldurson", "target": true, "boss": true, "hp": 2.0}],
+         "actions": "scene:eye_found",
+         "journal": "Beyond Jyrik Gauldurson's tomb we found an enormous orb of magic. Tolfdir thinks it may be the Eye of Magnus."},
+        {"type": "deliver", "npc": "savos_aren", "relic": "amulet_of_saarthal", "text": "Report to Savos Aren",
+         "topic": "We found something enormous under Saarthal.",
+         "reply": "And the Psijic Order appeared to you. They are not given to visits. Bring nothing more out of Saarthal without telling me, and say nothing to the Thalmor."}
+      ],
+      "rewards": {"gold": 400, "faction_points": 3, "items": ["skycraft:spell_tome_ironflesh"]}
+    },
+    {
+      "id": "col_hitting_the_books",
+      "title": "Hitting the Books",
+      "start": "npc:urag",
+      "requires": ["quest:col_under_saarthal"],
+      "offer": "I need books about the Eye of Magnus.",
+      "pitch": "The ones you want aren't here. Orthorn, a student, ran off to Fellglow Keep with three of my best volumes as a gift for some necromancers. Get them back. And don't get blood on them.",
+      "desc": "Urag gro-Shub says the books I need were stolen by a former student who fled to Fellglow Keep to join a circle of necromancers.",
+      "objectives": [
+        {"type": "go", "place": "fellglow_keep", "text": "Travel to Fellglow Keep"},
+        {"type": "clear", "place": "fellglow_keep", "placement": "structure", "text": "Fight through Fellglow Keep",
+         "spawn": [{"type": "skycraft:necromancer", "count": 2}, {"type": "skycraft:vampire", "count": 2}]},
+        {"type": "kill", "place": "fellglow_keep", "placement": "structure", "text": "Defeat the Caller",
+         "spawn": [{"type": "skycraft:necromancer", "name": "The Caller", "target": true, "boss": true, "hp": 2.2}]},
+        {"type": "retrieve", "place": "fellglow_keep", "relic": "fellglow_books", "radius": 10, "text": "Recover Urag's stolen books"},
+        {"type": "deliver", "npc": "urag", "relic": "fellglow_books", "text": "Return the books to Urag",
+         "topic": "Here are your books, without blood.",
+         "reply": "Mostly without blood. This one speaks of a staff, the Staff of Magnus. If anything could tame that Eye, it's that. Read it here; don't take it away."}
+      ],
+      "rewards": {"gold": 400, "faction_points": 3}
+    },
+    {
+      "id": "col_good_intentions",
+      "title": "Good Intentions",
+      "start": "npc:savos_aren",
+      "requires": ["quest:col_hitting_the_books"],
+      "offer": "The books speak of the Staff of Magnus.",
+      "pitch": "The Psijic monk visited you again, didn't he? Go to Mzulft, the Dwemer ruin in Eastmarch. Their Oculory focused light the way the Eye focuses magic. Bring back what it shows.",
+      "desc": "Savos Aren sent me to Mzulft to study the Dwemer Oculory, which might reveal where the Staff of Magnus lies.",
+      "objectives": [
+        {"type": "go", "place": "mzulft", "text": "Travel to Mzulft"},
+        {"type": "clear", "place": "mzulft", "placement": "structure", "text": "Fight the Falmer and the machines of Mzulft",
+         "spawn": [{"type": "skycraft:falmer", "count": 3}, {"type": "skycraft:dwarven_sphere", "count": 1, "name": "Dwarven Sphere"}]},
+        {"type": "retrieve", "place": "mzulft", "relic": "focusing_crystal", "radius": 10, "text": "Take the focusing crystal from the Oculory",
+         "journal": "Light through the Oculory's lenses drew a map on the walls. The Staff of Magnus lies in Labyrinthian, and the light showed something else: a Thalmor agent had been here before me."},
+        {"type": "deliver", "npc": "savos_aren", "relic": "focusing_crystal", "text": "Return to Savos Aren",
+         "topic": "The Oculory points to Labyrinthian.",
+         "reply": "Labyrinthian. Of course. I went there once, as a young man, with friends. I was the only one to come out. Go carefully, and tell no one, least of all Ancano."}
+      ],
+      "rewards": {"gold": 500, "faction_points": 3}
+    },
+    {
+      "id": "col_containment",
+      "title": "Containment",
+      "start": "auto",
+      "requires": ["quest:col_good_intentions"],
+      "desc": "Ancano has taken control of the Eye of Magnus. Wild magic is tearing through the College and the town of Winterhold.",
+      "objectives": [
+        {"type": "go", "place": "college_of_winterhold", "text": "Return to the College of Winterhold", "actions": "scene:eye_anomaly;retire:savos_aren"},
+        {"type": "clear", "place": "college_of_winterhold", "text": "Destroy the magical anomalies",
+         "spawn": [{"type": "skycraft:wispmother", "count": 2, "name": "Magical Anomaly"}, {"type": "minecraft:vex", "count": 3, "name": "Arcane Wisp"}]},
+        {"type": "talk", "npc": "mirabelle", "text": "Speak with Mirabelle",
+         "topic": "What happened to the Arch-Mage?",
+         "reply": "Savos... Savos is dead. Ancano did this. If you have found where the Staff of Magnus lies, go now. Nothing else can stop that Eye."}
+      ],
+      "rewards": {"gold": 400, "faction_points": 4}
+    },
+    {
+      "id": "col_staff_of_magnus",
+      "title": "The Staff of Magnus",
+      "start": "auto",
+      "requires": ["quest:col_containment"],
+      "desc": "The Staff of Magnus lies with the dragon priest Morokei in Labyrinthian, the ruined city where Savos Aren lost his friends long ago.",
+      "objectives": [
+        {"type": "go", "place": "labyrinthian", "text": "Travel to Labyrinthian"},
+        {"type": "clear", "place": "labyrinthian", "placement": "structure", "text": "Fight through the halls of Labyrinthian",
+         "spawn": [{"type": "skycraft:draugr", "count": 4}, {"type": "minecraft:skeleton", "count": 2, "name": "Restless Skeleton"}]},
+        {"type": "kill", "place": "labyrinthian", "placement": "structure", "text": "Defeat Morokei, the dragon priest",
+         "spawn": [{"type": "skycraft:dragon_priest", "name": "Morokei", "target": true, "boss": true, "hp": 2.5}],
+         "actions": "scene:labyrinthian"},
+        {"type": "retrieve", "place": "labyrinthian", "relic": "staff_relic_magnus", "radius": 10, "text": "Take the Staff of Magnus"}
+      ],
+      "rewards": {"gold": 500, "faction_points": 4}
+    },
+    {
+      "id": "col_eye_of_magnus",
+      "title": "The Eye of Magnus",
+      "start": "auto",
+      "requires": ["quest:col_staff_of_magnus"],
+      "desc": "With the Staff of Magnus I can drain the Eye's power and break Ancano's hold on it.",
+      "objectives": [
+        {"type": "go", "place": "college_of_winterhold", "text": "Return to the College"},
+        {"type": "kill", "place": "college_of_winterhold", "text": "Defeat Ancano",
+         "spawn": [{"type": "npc:thalmor", "name": "Ancano, Thalmor Advisor", "target": true, "boss": true, "hp": 3.0, "hostile": true}],
+         "actions": "take:staff_relic_magnus;retire:ancano"},
+        {"type": "talk", "npc": "quaranir", "text": "Speak with the Psijic Quaranir",
+         "topic": "Ancano is dead. What about the Eye?",
+         "reply": "The Order will take it, to a place where it will harm no one. Go and speak to Tolfdir. The College needs a new Arch-Mage, and I believe it has one.",
+         "actions": "scene:eye_sealed"}
+      ],
+      "rewards": {"gold": 1500, "faction_points": 20, "title": "archmage", "flags": ["archmage"], "items": ["skycraft:staff_of_magnus", "skycraft:spell_tome_fireball"]}
+    }
+  ]
+}

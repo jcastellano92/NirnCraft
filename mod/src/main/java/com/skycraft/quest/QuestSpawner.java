@@ -52,16 +52,42 @@ public final class QuestSpawner {
     public static final String BOSS_TAG = "skycraft_quest_boss";
 
     /** Vanilla stand-ins used when the creatures module's entity isn't registered. */
-    private static final Map<String, String> FALLBACKS = Map.of(
-            "skycraft:bandit", "minecraft:pillager",
-            "skycraft:bandit_chief", "minecraft:vindicator",
-            "skycraft:draugr", "minecraft:husk",
-            "skycraft:draugr_deathlord", "minecraft:wither_skeleton",
-            "skycraft:skeever", "minecraft:cave_spider",
-            "skycraft:troll", "minecraft:ravager",
-            "skycraft:giant", "minecraft:ravager",
-            "skycraft:dragon", "minecraft:ghast",
-            "skycraft:guard", "minecraft:iron_golem");
+    private static final Map<String, String> FALLBACKS = Map.ofEntries(
+            Map.entry("skycraft:bandit", "minecraft:pillager"),
+            Map.entry("skycraft:bandit_chief", "minecraft:vindicator"),
+            Map.entry("skycraft:draugr", "minecraft:husk"),
+            Map.entry("skycraft:draugr_deathlord", "minecraft:wither_skeleton"),
+            Map.entry("skycraft:skeever", "minecraft:cave_spider"),
+            Map.entry("skycraft:troll", "minecraft:ravager"),
+            Map.entry("skycraft:giant", "minecraft:ravager"),
+            Map.entry("skycraft:dragon", "minecraft:ghast"),
+            Map.entry("skycraft:guard", "minecraft:iron_golem"),
+            // named story creatures before the creatures module has them: the closest thing that exists
+            Map.entry("skycraft:alduin", "skycraft:dragon"),
+            Map.entry("skycraft:odahviing", "skycraft:dragon"),
+            Map.entry("skycraft:paarthurnax", "skycraft:dragon"),
+            Map.entry("skycraft:durnehviir", "skycraft:dragon"),
+            Map.entry("skycraft:dragon_priest", "skycraft:draugr_deathlord"),
+            Map.entry("skycraft:miraak", "skycraft:necromancer"),
+            Map.entry("skycraft:dremora", "minecraft:wither_skeleton"),
+            Map.entry("skycraft:werewolf", "minecraft:wolf"),
+            Map.entry("skycraft:vampire_lord", "skycraft:vampire"),
+            Map.entry("skycraft:seeker", "minecraft:vex"),
+            Map.entry("skycraft:lurker", "skycraft:troll"),
+            Map.entry("skycraft:ash_spawn", "minecraft:husk"),
+            Map.entry("skycraft:riekling", "minecraft:pillager"),
+            Map.entry("skycraft:falmer", "minecraft:zombie"),
+            Map.entry("skycraft:hagraven", "minecraft:witch"),
+            Map.entry("skycraft:spriggan", "minecraft:zombie"),
+            Map.entry("skycraft:vampire", "minecraft:zombie"),
+            Map.entry("skycraft:forsworn", "minecraft:vindicator"),
+            Map.entry("skycraft:necromancer", "minecraft:evoker"),
+            Map.entry("skycraft:frostbite_spider", "minecraft:spider"),
+            Map.entry("skycraft:ice_wraith", "minecraft:vex"),
+            Map.entry("skycraft:wispmother", "minecraft:vex"),
+            Map.entry("skycraft:dwarven_centurion", "minecraft:iron_golem"),
+            Map.entry("skycraft:dwarven_sphere", "minecraft:zombie"),
+            Map.entry("skycraft:dwarven_spider", "minecraft:cave_spider"));
 
     private QuestSpawner() {}
 
@@ -141,12 +167,25 @@ public final class QuestSpawner {
 
     public static Optional<EntityType<?>> resolveType(String id) {
         Optional<EntityType<?>> type = EntityType.byString(id);
-        if (type.isEmpty() && FALLBACKS.containsKey(id)) type = EntityType.byString(FALLBACKS.get(id));
+        // fallbacks may chain (alduin -> dragon -> ghast)
+        for (int i = 0; i < 3 && type.isEmpty() && FALLBACKS.containsKey(id); i++) {
+            id = FALLBACKS.get(id);
+            type = EntityType.byString(id);
+        }
         return type;
     }
 
+    /** {@code npc:<role>} spawns a society NPC with that role (soldiers, Thalmor, Forsworn...). */
     @Nullable
     public static Entity create(ServerLevel level, String typeId) {
+        if (typeId.startsWith("npc:")) {
+            com.skycraft.society.NpcRole role = com.skycraft.society.NpcRole.byId(typeId.substring(4));
+            if (role != null) {
+                Entity npc = com.skycraft.society.Npcs.create(level, BlockPos.ZERO, role);
+                if (npc != null) return npc;
+            }
+            typeId = "skycraft:bandit";
+        }
         Optional<EntityType<?>> type = resolveType(typeId);
         if (type.isEmpty()) type = EntityType.byString("minecraft:zombie");
         return type.map(t -> (Entity) t.create(level)).orElse(null);
@@ -164,12 +203,25 @@ public final class QuestSpawner {
         boolean targetSet = false;
         for (int i = 0; i < o.spawns.size(); i++) {
             CompoundTag spec = o.spawns.getCompound(i);
+            // story branches: "if": "flag:helgen_ralof" spawns only for the side the party took
+            if (!com.skycraft.quest.story.Story.spawnAllowed(level.getServer(), owner, spec)) continue;
             int count = Math.max(1, spec.getInt("count"));
             boolean target = spec.getBoolean("target");
+            boolean decor = spec.getBoolean("decor");
             for (int n = 0; n < count; n++) {
                 BlockPos p = target && n == 0 ? base : scatter(level, base, o.placement, r);
                 Entity e = spawnOne(level, owner, quest, spec, p, target && n == 0);
+                if (e != null && decor) {
+                    // scenery (a dragon circling overhead): not an enemy of the objective
+                    int[] c = spec.getIntArray("circle");
+                    if (c.length == 3) com.skycraft.quest.story.Scenes.circle(e, net.minecraft.world.phys.Vec3.atCenterOf(base), c[0], c[1], c[2]);
+                    continue;
+                }
                 if (e != null) {
+                    if (spec.getBoolean("hostile") && e instanceof com.skycraft.society.entity.NpcEntity npc) {
+                        ServerPlayer near = level.getNearestPlayer(e, 64) instanceof ServerPlayer sp ? sp : null;
+                        if (near != null) npc.setHuntTarget(near.getUUID());
+                    }
                     o.spawnedIds.add(e.getUUID());
                     if (target && n == 0) {
                         o.target = e.getUUID().toString();
@@ -183,6 +235,10 @@ public final class QuestSpawner {
             o.type = Objective.Type.CLEAR_AREA;
             o.required = Math.max(1, o.spawnedIds.size());
             o.radius = Math.max(o.radius, 32);
+        }
+        if (o.type == Objective.Type.CLEAR_AREA && !o.spawnedIds.isEmpty() && o.required > o.progress + o.spawnedIds.size()) {
+            // branch-conditional spawns ("if") left out part of the group: only what is there must die
+            o.required = o.progress + o.spawnedIds.size();
         }
         return !o.spawnedIds.isEmpty();
     }
@@ -216,7 +272,7 @@ public final class QuestSpawner {
             CompoundTag spec = o.spawns.getCompound(i);
             if (!spec.getBoolean("target")) continue;
             BlockPos p = surface(level, o.pos.getX(), o.pos.getZ());
-            if ("structure".equals(o.placement)) {
+            if ("structure".equals(o.placement) || level.dimensionType().hasCeiling()) {
                 BlockPos s = scanDown(level, o.pos.above(2), 8);
                 if (s != null) p = s;
             }
@@ -235,6 +291,7 @@ public final class QuestSpawner {
             e.setCustomNameVisible(isTarget || spec.getBoolean("boss"));
         }
         if (spec.getBoolean("glow")) e.setGlowingTag(true);
+        if (spec.getBoolean("invulnerable")) e.setInvulnerable(true);
         if (e instanceof LivingEntity le) {
             float hp = spec.contains("hp") ? spec.getFloat("hp") : 1f;
             float dmg = spec.contains("dmg") ? spec.getFloat("dmg") : 1f;
@@ -274,12 +331,19 @@ public final class QuestSpawner {
     // ------------------------------------------------------------------ placement
 
     private static BlockPos resolveBase(ServerLevel level, Objective o, RandomSource r) {
+        if (level.dimensionType().hasCeiling()) {
+            // Oblivion has a roof: the heightmap would put everything on top of it. Search down from the spot.
+            BlockPos s = scanDown(level, o.pos.above(3), 16);
+            return s != null ? s : o.pos;
+        }
         if ("structure".equals(o.placement)) {
             BlockPos s = structureSpot(level, o.pos, r);
             if (s != null) return s;
         }
-        if ("near".equals(o.placement)) return surface(level, o.pos.getX(), o.pos.getZ());
-        return landNear(level, o.pos, r);
+        BlockPos base = "near".equals(o.placement) ? surface(level, o.pos.getX(), o.pos.getZ()) : landNear(level, o.pos, r);
+        // over the void (the End's islands) there is no surface: keep the height the spot was given
+        if (base.getY() <= level.getMinBuildHeight() + 1 && o.yKnown) return o.pos;
+        return base;
     }
 
     public static BlockPos surface(ServerLevel level, int x, int z) {
@@ -342,7 +406,7 @@ public final class QuestSpawner {
     }
 
     private static BlockPos scatter(ServerLevel level, BlockPos base, String placement, RandomSource r) {
-        if ("structure".equals(placement)) {
+        if ("structure".equals(placement) || level.dimensionType().hasCeiling()) {
             for (int i = 0; i < 24; i++) {
                 BlockPos probe = base.offset(r.nextInt(13) - 6, r.nextInt(5) - 1, r.nextInt(13) - 6);
                 if (!level.isLoaded(probe)) continue;

@@ -69,7 +69,9 @@ public final class LoreEvents {
             Notifier.message(sp, Component.translatable("message.skycraft.lore.shelf_nothing"));
             return;
         }
-        LoreBooks.Book book = LoreBooks.random(level.random, b -> !b.category().isSheet());
+        // a shelf holds mostly the books of its own land
+        String province = com.skycraft.tamriel.Regions.at(level, pos).province();
+        LoreBooks.Book book = LoreBooks.randomFor(level.random, province, b -> !b.category().isSheet());
         if (book == null) return;
         ItemStack stack = LoreBookItem.create(book);
         Notifier.message(sp, Component.translatable("message.skycraft.lore.shelf_found", book.title()));

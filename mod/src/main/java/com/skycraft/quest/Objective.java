@@ -31,7 +31,11 @@ public class Objective {
         /** Talk to the NPC {@link #npc} (or any NPC matching {@link #npcFilter} near {@link #pos}) using topic {@link #topic}. */
         TALK_TO,
         /** A condition checked every second, e.g. {@code word} (learned a Word of Power) or {@code crime:items_stolen}. */
-        CONDITION
+        CONDITION,
+        /** Lead the quest NPC in {@code data.npcId} to {@link #pos} (within {@link #radius}). */
+        ESCORT,
+        /** Reach {@link #pos} once its guardians are dealt with, and take the relic {@code data.relic} (or item {@link #target}). */
+        RETRIEVE
     }
 
     public Type type = Type.GO_TO;

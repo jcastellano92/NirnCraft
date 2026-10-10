@@ -52,6 +52,8 @@ public final class LoreBooks {
     }
 
     private static final Map<String, Book> BOOKS = new LinkedHashMap<>();
+    /** Book id -> province whose shelves favor it. */
+    private static final Map<String, String> SHELF = new java.util.HashMap<>();
 
     static {
         // history
@@ -99,6 +101,86 @@ public final class LoreBooks {
         book("note_shopping_list", Category.NOTE, SHEET, 9, 5);
         book("journal_lost_explorer", Category.NOTE, SHEET, 7, 10);
         book("note_treasure_hint", Category.NOTE, SHEET, 6, 10);
+        // the Voice, the Blades and the factions of Skyrim (quest lore)
+        book("voice_and_the_throat", Category.DRAGONS, BLUE, 6, 30);
+        book("blades_in_the_dark_years", Category.HISTORY, RED, 5, 35);
+        book("rending_shout", Category.DRAGONS, GOLD, 3, 60);
+        book("hall_of_the_companions", Category.HISTORY, BROWN, 6, 20);
+        book("for_the_nords", Category.NOTE, SHEET, 8, 5);
+        book("empire_keeps_us_whole", Category.NOTE, SHEET, 8, 5);
+        book("of_silence_and_sanctuary", Category.DAEDRA, BLACK, 4, 40);
+        book("nightingale_shadow", Category.FICTION, BLACK, 5, 25);
+        book("winterhold_before_the_fall", Category.HISTORY, BLUE, 6, 20);
+        book("olafs_fire", Category.POEM, RED, 6, 15);
+        book("mist_of_sovngarde", Category.POEM, BLUE, 5, 15);
+        // Solstheim
+        book("allmakers_stones", Category.HISTORY, GREEN, 5, 25);
+        book("ash_over_raven_rock", Category.HISTORY, BROWN, 5, 20);
+        // the provinces of Tamriel
+        book("gates_at_kvatch", Category.HISTORY, RED, 5, 30);
+        book("starlight_in_glass", Category.GUIDE, BLUE, 5, 30);
+        book("three_who_were_gods", Category.HISTORY, GOLD, 5, 35);
+        book("house_by_house", Category.GUIDE, BROWN, 5, 25);
+        book("what_the_hist_remembers", Category.HISTORY, GREEN, 5, 30);
+        book("jone_and_jode", Category.HISTORY, GOLD, 5, 25);
+        book("covenant_of_root_and_bone", Category.HISTORY, GREEN, 5, 25);
+        book("the_island_that_isnt", Category.HISTORY, BLUE, 4, 40);
+        book("sword_is_a_prayer", Category.HISTORY, RED, 5, 30);
+        book("orsinium_again", Category.HISTORY, BROWN, 5, 25);
+        book("courts_and_covens", Category.HISTORY, BLACK, 5, 25);
+        // the lands beyond
+        book("beyond_the_edge_of_the_map", Category.GUIDE, BROWN, 5, 40);
+        book("what_the_tsaesci_left", Category.HISTORY, RED, 4, 45);
+        book("yokuda_beneath_the_waves", Category.HISTORY, GOLD, 4, 45);
+        book("the_cold_cradle", Category.HISTORY, BLUE, 4, 45);
+
+        // where the books are shelved: on a province's bookshelves its own books turn up four times as often
+        shelf("skyrim", "voice_and_the_throat", "blades_in_the_dark_years", "rending_shout", "hall_of_the_companions", "for_the_nords",
+                "empire_keeps_us_whole", "of_silence_and_sanctuary", "nightingale_shadow", "winterhold_before_the_fall", "olafs_fire",
+                "mist_of_sovngarde", "brief_history_nordic_empire", "nine_holds", "winter_without_end", "when_dragons_ruled",
+                "patience_of_the_voice", "walls_that_speak", "the_cold_cradle");
+        shelf("morrowind", "allmakers_stones", "ash_over_raven_rock", "three_who_were_gods", "house_by_house", "where_deep_folk_went");
+        shelf("cyrodiil", "gates_at_kvatch", "starlight_in_glass", "what_the_tsaesci_left");
+        shelf("black_marsh", "what_the_hist_remembers");
+        shelf("elsweyr", "jone_and_jode");
+        shelf("valenwood", "covenant_of_root_and_bone");
+        shelf("summerset", "the_island_that_isnt");
+        shelf("hammerfell", "sword_is_a_prayer", "yokuda_beneath_the_waves");
+        shelf("high_rock", "orsinium_again", "courts_and_covens");
+        shelf("realm", "beyond_the_edge_of_the_map");
+    }
+
+    private static void shelf(String province, String... ids) {
+        for (String id : ids) SHELF.put(id, province);
+    }
+
+    /** The province a book belongs to ({@code skyrim}, {@code morrowind}...), or empty for books found anywhere. */
+    public static String shelfOf(String id) {
+        return SHELF.getOrDefault(id, "");
+    }
+
+    /**
+     * Weighted random book among those matching {@code filter}, where books shelved in {@code province} count four
+     * times and books of other provinces half: a Morrowind bookshelf mostly holds Morrowind's books.
+     */
+    @Nullable
+    public static Book randomFor(RandomSource random, String province, Predicate<Book> filter) {
+        int total = 0;
+        for (Book b : BOOKS.values()) if (filter.test(b)) total += shelfWeight(b, province);
+        if (total <= 0) return null;
+        int roll = random.nextInt(total);
+        for (Book b : BOOKS.values()) {
+            if (!filter.test(b)) continue;
+            roll -= shelfWeight(b, province);
+            if (roll < 0) return b;
+        }
+        return null;
+    }
+
+    private static int shelfWeight(Book b, String province) {
+        String home = SHELF.getOrDefault(b.id(), "");
+        if (home.isEmpty()) return b.weight() * 2;
+        return home.equals(province) ? b.weight() * 8 : b.weight();
     }
 
     private LoreBooks() {}

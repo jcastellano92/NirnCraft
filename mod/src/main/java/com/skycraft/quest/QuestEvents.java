@@ -4,6 +4,9 @@ import com.skycraft.Skycraft;
 import com.skycraft.core.SkyData;
 import com.skycraft.dialogue.Dialogue;
 import com.skycraft.quest.party.Parties;
+import com.skycraft.quest.story.CivilWar;
+import com.skycraft.quest.story.QuestNpcs;
+import com.skycraft.quest.story.Story;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -191,6 +194,14 @@ public final class QuestEvents {
             }
             Objective o = q.current();
             if (o == null) continue;
+            if (!o.hasPos && o.data.getBoolean(Story.AT_PLAYER) && o.dim.equals(dim)) {
+                // "somewhere in Oblivion": the step happens where the party first stands in that realm
+                double angle = level.random.nextDouble() * Math.PI * 2;
+                int d = 14 + level.random.nextInt(8);
+                o.at(player.blockPosition().offset((int) (Math.cos(angle) * d), 0, (int) (Math.sin(angle) * d)), dim, Math.max(o.radius, 16));
+                o.placement("near");
+                Quests.changed(server, key);
+            }
             if (o.type == Objective.Type.GO_TO) {
                 if (reached(player, level, dim, o)) Quests.completeObjective(server, key, q, o, player);
                 continue;
@@ -201,20 +212,88 @@ public final class QuestEvents {
             }
             if (!o.spawns.isEmpty() && !o.spawned && o.hasPos && o.dim.equals(dim)
                     && Locate.horizontalDist(player.blockPosition(), o.pos) <= QuestConfig.SPAWN_DISTANCE.get()
-                    && level.isLoaded(o.pos)) {
-                QuestSpawner.spawnFor(level, key, q, o);
+                    && level.isLoaded(o.pos) && !Story.partnerSpawned(server, key, q, o)) {
+                boolean any = QuestSpawner.spawnFor(level, key, q, o);
                 Quests.changed(server, key);
+                if (!any && (o.type == Objective.Type.KILL_TARGET || o.type == Objective.Type.CLEAR_AREA)) {
+                    // nothing could be spawned (unknown entities, every branch excluded): nothing left to fight
+                    Quests.completeObjective(server, key, q, o, player);
+                }
                 continue;
             }
             if (o.type == Objective.Type.KILL_TARGET && o.spawned && o.dim.equals(dim)) trackTarget(server, level, player, key, q, o);
-            else if ((o.type == Objective.Type.CLEAR_AREA || o.type == Objective.Type.KILL_TYPE_COUNT) && o.spawned
-                    && o.dim.equals(dim)) trackGroup(server, level, player, key, q, o);
+            else if ((o.type == Objective.Type.CLEAR_AREA || o.type == Objective.Type.KILL_TYPE_COUNT
+                    || o.type == Objective.Type.RETRIEVE) && o.spawned && o.dim.equals(dim)) trackGroup(server, level, player, key, q, o);
+            if (o.type == Objective.Type.RETRIEVE) retrieve(server, level, player, dim, key, q, o);
+            if (o.type == Objective.Type.ESCORT) escort(server, level, player, dim, key, q, o);
             if ((o.type == Objective.Type.TALK_TO || o.type == Objective.Type.FETCH) && o.npc != null) followNpc(server, level, dim, key, q, o);
+            else if ((o.type == Objective.Type.TALK_TO || o.type == Objective.Type.FETCH) && o.data.contains(Story.NPC)) followStoryNpc(server, key, o);
         }
 
+        QuestNpcs.tickPlayer(player);
         if ((t / 20) % 5 == 0) {
             MainQuest.tick(player);
+            Story.tickPlayer(player);
             Factions.tickWhisper(player);
+            CivilWar.dressGuards(player);
+            com.skycraft.quest.story.ProvinceRadiant.tickPlayer(player);
+        }
+    }
+
+    /** RETRIEVE: once the guardians are dealt with, reaching the spot takes the relic. */
+    private static void retrieve(MinecraftServer server, ServerLevel level, ServerPlayer player, String dim, String key, Quest q, Objective o) {
+        if (!o.hasPos || !o.dim.equals(dim) || Locate.horizontalDist(player.blockPosition(), o.pos) > Math.max(4, o.radius)) return;
+        if (!o.spawns.isEmpty() && (!o.spawned || !o.spawnedIds.isEmpty())) return;
+        String relic = o.data.getString(Story.RELIC);
+        String give = !relic.isEmpty() ? "relic:" + relic : !o.target.isEmpty() ? "give:" + o.target : "";
+        if (!give.isEmpty()) Story.runActions(server, key, q, give, player);
+        Quests.completeObjective(server, key, q, o, player);
+    }
+
+    /**
+     * ESCORT: the NPC follows the nearest party member (teleporting along if it falls far behind) until it stands
+     * at the destination, which becomes its new home. A lost NPC is brought back next to the party after 30 s.
+     */
+    private static void escort(MinecraftServer server, ServerLevel level, ServerPlayer player, String dim, String key, Quest q, Objective o) {
+        String id = o.data.getString(Story.NPC);
+        if (id.isEmpty()) return;
+        Entity e = QuestNpcs.find(server, id);
+        if (e == null || e.level() != level) {
+            if (++o.missing >= 30) {
+                o.missing = 0;
+                QuestNpcs.summonNear(player, id);
+            }
+            return;
+        }
+        o.missing = 0;
+        if (e instanceof com.skycraft.society.entity.NpcEntity npc) {
+            if (npc.getLeader() == null || !npc.getLeader().equals(player.getUUID())) {
+                ServerPlayer leader = npc.getLeader() == null ? null : server.getPlayerList().getPlayer(npc.getLeader());
+                if (leader == null || leader.level() != level || leader.distanceToSqr(npc) > player.distanceToSqr(npc)) npc.setLeader(player.getUUID());
+            }
+            npc.clearRestriction();
+        }
+        if (e.distanceToSqr(player) > 40 * 40) {
+            net.minecraft.core.BlockPos s = QuestSpawner.surface(level, player.getBlockX() + 2, player.getBlockZ() + 2);
+            e.teleportTo(s.getX() + 0.5, s.getY(), s.getZ() + 0.5);
+        }
+        if (o.hasPos && o.dim.equals(dim) && Locate.horizontalDist(e.blockPosition(), o.pos) <= Math.max(6, o.radius)) {
+            if (e instanceof com.skycraft.society.entity.NpcEntity npc) npc.setLeader(null);
+            QuestNpcs.relocate(server, id, o.pos, dim);
+            Quests.completeObjective(server, key, q, o, player);
+        }
+    }
+
+    /** A story NPC wandered or was moved: the marker follows it. */
+    private static void followStoryNpc(MinecraftServer server, String key, Objective o) {
+        String first = o.data.getString(Story.NPC).split("\\|")[0];
+        Entity e = QuestNpcs.find(server, first);
+        if (e == null) return;
+        String edim = e.level().dimension().location().toString();
+        if (!o.dim.equals(edim) || !o.hasPos || e.blockPosition().distSqr(o.pos) > 256 || !o.yKnown) {
+            o.at(e.blockPosition(), edim, o.radius);
+            o.yKnown = true;
+            Quests.changed(server, key);
         }
     }
 
@@ -232,6 +311,27 @@ public final class QuestEvents {
 
     private static void checkCondition(MinecraftServer server, String key, Quest q, Objective o) {
         List<ServerPlayer> online = Quests.onlineMembers(server, key);
+        if (o.target.startsWith("shout:")) return; // completed by the shout hook (Story#onShout)
+        if (o.target.startsWith("story:")) {
+            String cond = o.target.substring("story:".length());
+            for (ServerPlayer m : online) {
+                if (Story.test(m, cond)) {
+                    Quests.completeObjective(server, key, q, o, m);
+                    return;
+                }
+            }
+            return;
+        }
+        if (o.target.startsWith("wait:")) {
+            long ticks;
+            try {
+                ticks = Long.parseLong(o.target.substring("wait:".length()));
+            } catch (NumberFormatException e) {
+                ticks = 1000;
+            }
+            if (server.overworld().getGameTime() - o.data.getLong(Story.BEGIN) >= ticks) Quests.completeObjective(server, key, q, o, null);
+            return;
+        }
         if ("word".equals(o.target)) {
             for (ServerPlayer m : online) {
                 CompoundTag words = SkyData.get(m).module("magic").getCompound("words");
@@ -286,6 +386,17 @@ public final class QuestEvents {
             return;
         }
         Entity e = level.getEntity(id);
+        if (e != null && e.isAlive() && o.data.contains(Story.FLEE) && e instanceof LivingEntity le
+                && le.getHealth() <= le.getMaxHealth() * o.data.getFloat(Story.FLEE)) {
+            // beaten, not killed: Alduin flees the Throat of the World, Odahviing is caught in the yoke
+            level.sendParticles(net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE, e.getX(), e.getY() + 1, e.getZ(), 60, 2, 2, 2, 0.05);
+            level.playSound(null, e.blockPosition(), net.minecraft.sounds.SoundEvents.ENDER_DRAGON_GROWL,
+                    net.minecraft.sounds.SoundSource.HOSTILE, 5f, 0.6f);
+            o.spawnedIds.remove(id);
+            if (!o.data.getBoolean("stay")) e.discard();
+            Quests.completeObjective(server, key, q, o, player);
+            return;
+        }
         if (e != null && e.isAlive()) {
             o.missing = 0;
             if (e.blockPosition().distSqr(o.pos) > 64) {
@@ -328,7 +439,8 @@ public final class QuestEvents {
         if (++o.missing < 30) return;
         o.missing = 0;
         o.spawnedIds.removeAll(gone);
-        Quests.addProgress(server, key, q, o, gone.size(), null);
+        if (o.type == Objective.Type.RETRIEVE) Quests.changed(server, key); // guardians gone: the relic is free
+        else Quests.addProgress(server, key, q, o, gone.size(), null);
     }
 
     /** Quest bosses get their boss bar back when they are (re)loaded. */

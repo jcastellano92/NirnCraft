@@ -115,6 +115,7 @@ public final class Shouting {
         level.playSound(null, p.getX(), p.getY(), p.getZ(), shoutSound, SoundSource.PLAYERS, 1.4f + 0.3f * words, 1.0f);
         p.swing(InteractionHand.MAIN_HAND, true);
         SkyData.get(p).addStat("shouts", 1);
+        com.skycraft.quest.story.StoryEvents.onShout(p, shout.id(), words); // "shout X at Y" quest steps
     }
 
     /**

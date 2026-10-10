@@ -165,7 +165,7 @@ public final class Quests {
         recordAcceptedBy(server, key, q);
         store.quests(key).add(q);
         Objective first = q.current();
-        if (first != null) begin(server, q, first);
+        if (first != null) begin(server, key, q, first);
         if (starter != null) {
             for (Tag t : q.extra.getList("give_on_start", Tag.TAG_COMPOUND)) give(starter, ItemStack.of((CompoundTag) t));
         }
@@ -183,12 +183,13 @@ public final class Quests {
         return id;
     }
 
-    /** Prepares an objective that just became current (condition baselines...). */
-    private static void begin(MinecraftServer server, Quest q, Objective o) {
+    /** Prepares an objective that just became current (condition baselines, start time, story NPC spot...). */
+    private static void begin(MinecraftServer server, String key, Quest q, Objective o) {
         if (o.type == Objective.Type.CONDITION && o.target.startsWith("crime:")) {
             // baselines are filled in lazily per member by checkCondition
             o.data.putBoolean("begun", true);
         }
+        com.skycraft.quest.story.Story.onBegin(server, key, q, o);
     }
 
     /** Adds kill/clear progress; completes the objective when the count is reached. */
@@ -208,52 +209,28 @@ public final class Quests {
         if (o.done || !q.isActive()) return;
         o.done = true;
         o.progress = o.required;
-        runOnComplete(server, key, o, actor);
+        runOnComplete(server, key, q, o, actor);
+        com.skycraft.quest.story.Story.onObjectiveCompleted(server, key, q, o, actor);
+        if (!q.isActive()) return; // an action ended the quest
         Objective next = q.current();
         if (next == null) {
             completeQuest(server, key, q);
             return;
         }
-        begin(server, q, next);
+        begin(server, key, q, next);
         for (ServerPlayer m : onlineMembers(server, key)) Notifier.send(m, NotifyKind.QUEST_UPDATED, q.title, next.text);
         changed(server, key);
     }
 
-    private static void runOnComplete(MinecraftServer server, String key, Objective o, @Nullable ServerPlayer actor) {
+    /**
+     * Runs the objective's completion actions ({@code give:skycraft:ancient_tome,...;scene:...}). The action language
+     * is shared with the story quests, see {@link com.skycraft.quest.story.Story#runActions}.
+     */
+    private static void runOnComplete(MinecraftServer server, String key, Quest q, Objective o, @Nullable ServerPlayer actor) {
         if (o.onComplete == null || o.onComplete.isEmpty()) return;
-        ServerPlayer receiver = actor;
-        if (receiver == null) {
-            List<ServerPlayer> online = onlineMembers(server, key);
-            if (!online.isEmpty()) receiver = online.get(0);
-        }
-        if (receiver == null) return;
-
-        for (String action : o.onComplete.split(";")) {
-            action = action.trim();
-            if (action.startsWith("give:")) {
-                String[] items = action.substring(5).split(",");
-                for (String part : items) {
-                    part = part.trim();
-                    if (part.isEmpty()) continue;
-                    int count = 1;
-                    if (part.contains("*")) {
-                        String[] cp = part.split("\\*");
-                        part = cp[0].trim();
-                        try {
-                            count = Integer.parseInt(cp[1].trim());
-                        } catch (Exception ignored) {
-                        }
-                    }
-                    ResourceLocation id = ResourceLocation.tryParse(part);
-                    Item item = id == null ? null : ForgeRegistries.ITEMS.getValue(id);
-                    if (item != null && item != Items.AIR) {
-                        ItemStack stack = new ItemStack(item, count);
-                        Notifier.message(receiver, Component.translatable("quest.skycraft.item_found", stack.getHoverName()));
-                        give(receiver, stack);
-                    }
-                }
-            }
-        }
+        // older saves wrote "give:a,give:b": every comma-separated part may repeat the "give:" prefix
+        String actions = o.onComplete.replace(",give:", ",");
+        com.skycraft.quest.story.Story.runActions(server, key, q, actions, actor);
     }
 
     public static void completeQuest(MinecraftServer server, String key, Quest q) {
@@ -283,7 +260,8 @@ public final class Quests {
         }
         store.trim(key);
         changed(server, key);
-        if (q.isMain()) MainQuest.onStageCompleted(server, key, q);
+        if (q.extra.contains(com.skycraft.quest.story.Story.DEF)) com.skycraft.quest.story.Story.onQuestCompleted(server, key, q);
+        else if (q.isMain()) MainQuest.onStageCompleted(server, key, q);
     }
 
     /** Remembers who was in the party when it took on (or was given) the quest. */
@@ -383,6 +361,7 @@ public final class Quests {
         Currency.give(player, gold);
         for (ItemStack s : q.rewardItems) give(player, s.copy());
         if (!q.faction.isEmpty()) Factions.onQuestReward(player, q);
+        com.skycraft.quest.story.Story.grantStoryRewards(player, q);
         if (q.kind.startsWith("college_")) {
             data.module("quest").putBoolean(q.kind + "_completed", true);
         }

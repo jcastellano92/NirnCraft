@@ -155,6 +155,8 @@ public final class QuestPackets {
         public static final int UNTRACK = 1;
         public static final int ABANDON = 2;
         public static final int SHARE = 3;
+        /** Skip the current step of a quest stuck for longer than the configured days (validated on the server). */
+        public static final int SKIP = 4;
 
         static void encode(QuestAction m, FriendlyByteBuf buf) {
             buf.writeVarInt(m.action);
@@ -182,6 +184,7 @@ public final class QuestPackets {
                     }
                     case ABANDON -> Quests.abandon(player, m.questId);
                     case SHARE -> Quests.shareWithParty(player, m.questId);
+                    case SKIP -> com.skycraft.quest.story.Story.skip(player, m.questId);
                     default -> {
                     }
                 }

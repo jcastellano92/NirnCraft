@@ -410,6 +410,314 @@
               "tag": "{book:\"note_treasure_hint\",skycraft_value:10}"
             }
           ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 6,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"voice_and_the_throat\",skycraft_value:30}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"blades_in_the_dark_years\",skycraft_value:35}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"rending_shout\",skycraft_value:60}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 6,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"hall_of_the_companions\",skycraft_value:20}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 8,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"for_the_nords\",skycraft_value:5}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 8,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"empire_keeps_us_whole\",skycraft_value:5}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"of_silence_and_sanctuary\",skycraft_value:40}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"nightingale_shadow\",skycraft_value:25}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 6,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"winterhold_before_the_fall\",skycraft_value:20}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 6,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"olafs_fire\",skycraft_value:15}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"mist_of_sovngarde\",skycraft_value:15}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"allmakers_stones\",skycraft_value:25}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"ash_over_raven_rock\",skycraft_value:20}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"gates_at_kvatch\",skycraft_value:30}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"starlight_in_glass\",skycraft_value:30}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"three_who_were_gods\",skycraft_value:35}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"house_by_house\",skycraft_value:25}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"what_the_hist_remembers\",skycraft_value:30}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"jone_and_jode\",skycraft_value:25}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"covenant_of_root_and_bone\",skycraft_value:25}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"the_island_that_isnt\",skycraft_value:40}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"sword_is_a_prayer\",skycraft_value:30}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"orsinium_again\",skycraft_value:25}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"courts_and_covens\",skycraft_value:25}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"beyond_the_edge_of_the_map\",skycraft_value:40}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"what_the_tsaesci_left\",skycraft_value:45}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"yokuda_beneath_the_waves\",skycraft_value:45}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"the_cold_cradle\",skycraft_value:45}"
+            }
+          ]
         }
       ]
     }

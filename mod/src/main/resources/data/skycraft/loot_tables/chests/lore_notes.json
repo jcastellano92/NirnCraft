@@ -69,6 +69,28 @@
               "tag": "{book:\"note_treasure_hint\",skycraft_value:10}"
             }
           ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 8,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"for_the_nords\",skycraft_value:5}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 8,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"empire_keeps_us_whole\",skycraft_value:5}"
+            }
+          ]
         }
       ]
     }

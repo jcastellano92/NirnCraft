@@ -96,6 +96,10 @@ public final class QuestDialogue {
 
     public static boolean matchesNpc(Objective o, LivingEntity npc) {
         if (o.npc != null) return o.npc.equals(npc.getUUID());
+        // a named story NPC ("hadvar|ralof"): whichever entity is that NPC right now
+        if (o.data.contains(com.skycraft.quest.story.Story.NPC)) {
+            return com.skycraft.quest.story.QuestNpcs.matches(npc, o.data.getString(com.skycraft.quest.story.Story.NPC));
+        }
         boolean typeOk = switch (o.npcFilter) {
             case "villager" -> isTownsperson(npc);
             case "guard" -> isGuard(npc);
@@ -122,7 +126,7 @@ public final class QuestDialogue {
             Quest q = ref.quest();
             Objective o = q.current();
             if (o == null || (o.type != Objective.Type.TALK_TO && o.type != Objective.Type.FETCH)) continue;
-            if (!matchesNpc(o, npc)) continue;
+            if (!matchesNpc(o, npc) || o.data.contains(com.skycraft.quest.story.Story.CHOICES)) continue; // choices: StoryDialogue
             String questId = q.id;
             out.add(new DialogueOption("quest.turnin." + questId, o.topic, 100, (pl, n) -> turnIn(pl, n, questId)));
         }
@@ -163,6 +167,13 @@ public final class QuestDialogue {
             darkBrotherhoodTopics(player, data, out);
         }
         SideQuests.addSideQuestTopics(player, npc, out);
+        com.skycraft.quest.story.StoryDialogue.addOptions(player, npc, out);
+        com.skycraft.quest.story.ProvinceRadiant.addOptions(player, npc, out, guard);
+    }
+
+    /** Offers a generated quest from another module (province radiants), with the usual accept/decline flow. */
+    public static void offer(ServerPlayer player, LivingEntity npc, String dailyKey, Supplier<RadiantQuests.Offer> generator) {
+        ask(player, npc, dailyKey, generator);
     }
 
     // ------------------------------------------------------------------ offers
@@ -237,7 +248,15 @@ public final class QuestDialogue {
         Quest q = ref.quest();
         Objective o = q.current();
         if (o == null || !matchesNpc(o, npc)) return;
-        if (o.type == Objective.Type.FETCH) {
+        String relic = o.data.getString(com.skycraft.quest.story.Story.RELIC);
+        if (o.type == Objective.Type.FETCH && !relic.isEmpty()) {
+            int have = com.skycraft.quest.story.Story.countRelic(player, relic);
+            if (have < o.required) {
+                Dialogue.open(player, npc, tr("quest.skycraft.reply.not_enough", have, o.required, Component.translatable("item.skycraft.relic." + relic)));
+                return;
+            }
+            com.skycraft.quest.story.Story.removeRelic(player, relic, o.required);
+        } else if (o.type == Objective.Type.FETCH) {
             ResourceLocation id = ResourceLocation.tryParse(o.target);
             Item item = id == null ? null : ForgeRegistries.ITEMS.getValue(id);
             if (item == null || item == Items.AIR) return;

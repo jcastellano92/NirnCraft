@@ -3,31 +3,28 @@ package com.skycraft.quest;
 import com.skycraft.core.Notifier;
 import com.skycraft.core.PlayerData;
 import com.skycraft.core.SkyData;
-import com.skycraft.quest.QuestSpawner.Spawn;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+import com.skycraft.quest.story.Story;
+import com.skycraft.quest.story.StoryData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.level.Level;
 
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * "The Dragonborn": the scripted main quest, started for every player once they chose a race.
- * <ol>
- *     <li>Unbound — reach the nearest village.</li>
- *     <li>Before the Storm — tell a guard you need to speak to the Jarl.</li>
- *     <li>Dragon Rising — slay the dragon attacking the watchtower.</li>
- *     <li>The Way of the Voice — learn a Word of Power.</li>
- *     <li>Alduin's Bane — enter Sovngarde (the End) and slay Alduin, World-Eater (the Ender Dragon).</li>
- * </ol>
- * The current stage is stored in {@code module("quest").main_stage} (0 = not started, 6 = finished).
+ * "The Dragonborn", Skyrim's main quest. The quests themselves are data ({@code skycraft/quests/main.json}, the
+ * {@code main} questline run by {@link Story}): Helgen, Riverwood, Whiterun's Jarl, Bleak Falls Barrow, the first
+ * dragon, the Greybeards, the Horn, the Blades, Sky Haven Temple, Paarthurnax, the Elder Scroll, Dragonrend,
+ * Odahviing, Skuldafn and Alduin in Sovngarde (the End).
+ *
+ * <p>This class keeps the coarse progress number other modules read ({@code module("quest").main_stage}: 0 = not
+ * started, 1 Helgen and Whiterun, 2 Bleak Falls Barrow, 3 the first dragon, 4 the Way of the Voice to the
+ * Fallen, 5 Skuldafn and Sovngarde, 6 = finished), migrates saves from the old five-stage main quest, and names
+ * the End's dragon Alduin.</p>
  */
 public final class MainQuest {
     public static final String STAGE = "main_stage";
@@ -39,158 +36,69 @@ public final class MainQuest {
         return data.module("quest").getInt(STAGE);
     }
 
-    private static void setStage(ServerPlayer player, int stage) {
-        PlayerData data = SkyData.get(player);
-        data.module("quest").putInt(STAGE, stage);
-        data.markDirty();
-    }
-
-    /** Called every few seconds per player: starts the main quest, renames Alduin. */
+    /** Called every few seconds per player: migrates old saves, renames Alduin. Story quests start in {@link Story#tickPlayer}. */
     public static void tick(ServerPlayer player) {
         if (!QuestConfig.MAIN_QUEST.get()) return;
         PlayerData data = SkyData.get(player);
         if (data.getRace() == null) return;
-        int stage = stage(data);
-        if (stage == 0) {
-            startStage(player, 1);
-            return;
-        }
-        if (stage >= 1 && stage <= FINAL_STAGE && !Quests.hasActiveKind(player.server, player.getUUID(), "main_" + stage)
-                && !completedStage(player, stage)) {
-            // the stage quest went missing (e.g. data reset): restart it
-            startStage(player, stage);
-        }
-        if (stage == FINAL_STAGE && player.level().dimension() == Level.END && player.level() instanceof ServerLevel end) {
+        migrateLegacy(player, data);
+        if (player.level().dimension() == Level.END && player.level() instanceof ServerLevel end) {
             for (EnderDragon dragon : end.getDragons()) {
                 if (!dragon.hasCustomName()) dragon.setCustomName(Component.translatable("entity.skycraft.alduin"));
             }
         }
     }
 
-    private static boolean completedStage(ServerPlayer player, int stage) {
-        for (Quest q : QuestStore.get(player.server).quests(Quests.personalKey(player.getUUID()))) {
-            if (q.kind.equals("main_" + stage) && q.status == Quest.Status.COMPLETED) return true;
+    /** Quests of the old five-stage main quest become progress in the story questline. */
+    private static void migrateLegacy(ServerPlayer player, PlayerData data) {
+        List<Quest> mine = QuestStore.get(player.server).quests(Quests.personalKey(player.getUUID()));
+        boolean legacy = false;
+        for (Quest q : mine) if (q.isMain() && q.kind.startsWith("main_") && !q.extra.contains(Story.DEF)) legacy = true;
+        if (!legacy) return;
+        int old = stage(data);
+        mine.removeIf(q -> q.isMain() && q.kind.startsWith("main_") && !q.extra.contains(Story.DEF));
+        Story.setFlag(data, "helgen_arrived", true); // an old character isn't carted off to Helgen
+        markBefore(player, old >= FINAL_STAGE + 1 ? Integer.MAX_VALUE : old);
+        Quests.changed(player.server, Quests.personalKey(player.getUUID()));
+    }
+
+    /** Marks every main story quest of a stage lower than {@code stage} as done (migration, admin jumps). */
+    private static void markBefore(ServerPlayer player, int stage) {
+        for (StoryData.QuestDef def : mainLine()) {
+            if (def.stage > 0 && def.stage < stage && !Story.completed(SkyData.get(player), def.id)) {
+                Quest q = Story.build(player, def);
+                if (q != null) Story.grantStoryRewardsSilently(player, q);
+            }
         }
-        return false;
     }
 
-    private static Quest quest(int stage) {
-        String kind = "main_" + stage;
-        Quest q = new Quest(kind, Quest.Category.MAIN, Component.translatable("quest.skycraft." + kind + ".title"),
-                Component.translatable("quest.skycraft." + kind + ".desc"));
-        q.giverName = Component.translatable("quest.skycraft.main.giver");
-        q.id = kind;
-        return q;
+    private static List<StoryData.QuestDef> mainLine() {
+        return new ArrayList<>(StoryData.line("main"));
     }
 
+    /** Admin: restarts the main quest at the first quest of a coarse stage (1..5). */
     public static void startStage(ServerPlayer player, int stage) {
-        ServerLevel level = (ServerLevel) player.level();
-        String dim = level.dimension().location().toString();
-        BlockPos at = player.blockPosition();
-        Quest q = quest(stage);
-        q.hold = com.skycraft.core.Holds.holdAt(level, at);
-        switch (stage) {
-            case 1 -> {
-                BlockPos village = level.dimension() == Level.OVERWORLD ? Locate.nearestVillage(level, at) : null;
-                BlockPos center = village != null ? village : at;
-                // Guided starter steps: basic gear through steps rather than a chest, all around the starting settlement
-                BlockPos p1 = center.offset(8, 0, 8);
-                Objective o1 = new Objective(Objective.Type.GO_TO, Component.translatable("quest.skycraft.obj.main_1a"))
-                        .at(p1, dim, 12).guessY().label("Camp Wreckage");
-                o1.onComplete = "give:minecraft:leather_chestplate,give:minecraft:leather_boots";
-
-                BlockPos p2 = center.offset(-12, 0, 8);
-                Objective o2 = new Objective(Objective.Type.GO_TO, Component.translatable("quest.skycraft.obj.main_1b"))
-                        .at(p2, dim, 14).guessY().label("Weapon Cache");
-                o2.onComplete = "give:minecraft:iron_sword";
-
-                BlockPos p3 = center.offset(8, 0, -14);
-                Objective o3 = new Objective(Objective.Type.GO_TO, Component.translatable("quest.skycraft.obj.main_1c"))
-                        .at(p3, dim, 16).guessY().label("Traveler Cache");
-                o3.onComplete = "give:minecraft:shield,give:skycraft:spell_tome_flames";
-
-                BlockPos p4 = center.offset(-10, 0, -12);
-                Objective o4 = new Objective(Objective.Type.GO_TO, Component.translatable("quest.skycraft.obj.main_1d"))
-                        .at(p4, dim, 18).guessY().label("Provisions");
-                o4.onComplete = "give:minecraft:bread*4,give:minecraft:cooked_beef*2";
-
-                Objective o5 = new Objective(Objective.Type.GO_TO, Component.translatable("quest.skycraft.obj.main_1e"));
-                if (village != null) {
-                    o5.at(village, "minecraft:overworld", 48).guessY().label("Village");
-                    q.extra.putLong("village", village.asLong());
-                } else {
-                    o5.target("near:villager");
-                }
-
-                q.add(o1).add(o2).add(o3).add(o4).add(o5).reward(100);
-            }
-            case 2 -> {
-                Objective o = new Objective(Objective.Type.TALK_TO, Component.translatable("quest.skycraft.obj.main_2"))
-                        .filter("guard").topic(Component.translatable("dialogue.skycraft.quest.jarl"),
-                                Component.translatable("quest.skycraft.reply.jarl"));
-                q.add(o).reward(150);
-            }
-            case 3 -> {
-                BlockPos spot = Locate.randomSpot(level, player.getRandom(), at, 180, 230);
-                String name = "Mirmulnir";
-                q.description = Component.translatable("quest.skycraft.main_3.desc", Names.direction(at, spot));
-                Objective o = new Objective(Objective.Type.KILL_TARGET, Component.translatable("quest.skycraft.obj.main_3"))
-                        .at(spot, dim, 0).guessY().placement("surface").label("Western Watchtower")
-                        .spawn(Spawn.of("skycraft:dragon", 1).name(Component.literal(name)).target().boss().build());
-                ItemStack axe = new ItemStack(Items.IRON_AXE);
-                axe.setHoverName(Component.translatable("item.skycraft.reward.axe_of_whiterun"));
-                axe.enchant(Enchantments.SHARPNESS, 2);
-                q.add(o).reward(600, axe);
-            }
-            case 4 -> {
-                q.add(new Objective(Objective.Type.CONDITION, Component.translatable("quest.skycraft.obj.main_4")).target("word"));
-                q.reward(300);
-            }
-            default -> {
-                q.add(new Objective(Objective.Type.GO_TO, Component.translatable("quest.skycraft.obj.main_5a")).target("dimension")
-                        .at(BlockPos.ZERO, "minecraft:the_end", 0));
-                q.objectives.get(0).hasPos = false;
-                q.add(new Objective(Objective.Type.KILL_TYPE_COUNT, Component.translatable("quest.skycraft.obj.main_5b"))
-                        .target("minecraft:ender_dragon").count(1).at(new BlockPos(0, 70, 0), "minecraft:the_end", 0).label("Alduin"));
-                ItemStack dragonbane = new ItemStack(Items.NETHERITE_SWORD);
-                dragonbane.setHoverName(Component.translatable("item.skycraft.reward.dragonbane"));
-                dragonbane.enchant(Enchantments.SHARPNESS, 5);
-                q.reward(5000, dragonbane, new ItemStack(Items.ELYTRA));
+        markBefore(player, stage);
+        for (StoryData.QuestDef def : mainLine()) {
+            if (def.stage == stage) {
+                Story.jumpTo(player, def.id, 0);
+                return;
             }
         }
-        // stage quests are unique per player: drop a stale copy with the same id
-        QuestStore.get(player.server).quests(Quests.personalKey(player.getUUID())).removeIf(old -> old.id.equals(q.id));
-        setStage(player, stage);
-        Quests.start(player, q);
     }
 
-    /** A stage was completed: start the next one, or celebrate. */
+    /** Old-style main quests (none are created any more) just advance the stage number. */
     public static void onStageCompleted(MinecraftServer server, String key, Quest q) {
-        int stage;
-        try {
-            stage = Integer.parseInt(q.kind.substring("main_".length()));
-        } catch (NumberFormatException e) {
-            return;
-        }
-        if (!key.startsWith("p:")) return;
-        ServerPlayer player;
-        try {
-            player = server.getPlayerList().getPlayer(UUID.fromString(key.substring(2)));
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        if (player == null) return;
-        if (stage >= FINAL_STAGE) {
-            setStage(player, FINAL_STAGE + 1);
-            PlayerData data = SkyData.get(player);
-            CompoundTag mod = data.module("quest");
-            mod.putString("title", "dragonborn");
-            data.markDirty();
-            Notifier.title(player, Component.translatable("quest.skycraft.main.victory_title"), Component.translatable("quest.skycraft.main.victory_sub"));
-            player.server.getPlayerList().broadcastSystemMessage(
-                    Component.translatable("quest.skycraft.main.victory_broadcast", player.getDisplayName()), false);
-            return;
-        }
-        startStage(player, stage + 1);
+    }
+
+    /** Alduin is dead: the title, the fanfare and word to the whole server. */
+    public static void victory(ServerPlayer player) {
+        PlayerData data = SkyData.get(player);
+        data.module("quest").putInt(STAGE, FINAL_STAGE + 1);
+        data.module("quest").putString("title", "dragonborn");
+        data.markDirty();
+        Notifier.title(player, Component.translatable("quest.skycraft.main.victory_title"), Component.translatable("quest.skycraft.main.victory_sub"));
+        player.server.getPlayerList().broadcastSystemMessage(
+                Component.translatable("quest.skycraft.main.victory_broadcast", player.getDisplayName()), false);
     }
 }
