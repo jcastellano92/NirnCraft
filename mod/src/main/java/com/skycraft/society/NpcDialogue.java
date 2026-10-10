@@ -38,8 +38,22 @@ import java.util.List;
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class NpcDialogue {
     public static final int DRINK_PRICE = 5;
+    /** Stack tag on the fugitive's "Stolen Nordic Blade" (the one the bounty hunter wants back). */
+    public static final String STOLEN_BLADE_TAG = "skycraft_fugitive_blade";
+    /** Persistent UUID on an NPC who accepted a duel with that player: killing them is not murder. */
+    public static final String DUEL_TAG = "skycraft_duel_with";
 
     private NpcDialogue() {}
+
+    /** Inventory slot of the fugitive's stolen blade, or -1. */
+    private static int stolenBladeSlot(Player player) {
+        var inv = player.getInventory();
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack s = inv.getItem(i);
+            if (!s.isEmpty() && s.getTag() != null && s.getTag().getBoolean(STOLEN_BLADE_TAG)) return i;
+        }
+        return -1;
+    }
 
     static void register() {
         Dialogue.registerProvider(NpcDialogue::addOptions);
@@ -132,8 +146,10 @@ public final class NpcDialogue {
         if (npc.getPersistentData().getBoolean("skycraft_old_orc")) {
             out.add(new DialogueOption("society.orc_duel", Component.literal("I will grant you a warrior's death."), 10, (p, n) -> {
                 if (n instanceof NpcEntity orc) {
+                    // an accepted duel: killing him is not murder (see crime.Crimes#onDeath)
+                    orc.getPersistentData().putUUID(DUEL_TAG, p.getUUID());
                     orc.setTarget(p);
-                    Barks.sayLineNow(orc, "combat");
+                    Barks.sayLineNow(orc, "attack.generic", p.getDisplayName());
                     Dialogue.open(p, n, Component.literal("Malacath guide our blades! To glory!"));
                 }
             }));
@@ -148,6 +164,8 @@ public final class NpcDialogue {
                 if (n instanceof NpcEntity fug) {
                     ItemStack gift = new ItemStack(Items.IRON_SWORD);
                     gift.setHoverName(Component.literal("Stolen Nordic Blade"));
+                    gift.getOrCreateTag().putBoolean(STOLEN_BLADE_TAG, true);
+                    com.skycraft.crime.Bounty.markStolen(gift);
                     if (!ActionHandler.addToBags(p, gift)) p.drop(gift, false);
                     fug.getPersistentData().remove("skycraft_fugitive");
                     Notifier.message(p, Component.literal("The fugitive shoved a Stolen Nordic Blade into your hands and bolted!"));
@@ -164,16 +182,33 @@ public final class NpcDialogue {
             out.add(new DialogueOption("society.hunter_lie", Component.literal("I haven't seen anyone pass by."), 20, (p, n) -> {
                 Dialogue.open(p, n, Component.literal("Hmm. If you're hiding him, you'll share his fate. Keep your eyes open."));
             }));
-            out.add(new DialogueOption("society.hunter_return", Component.literal("He gave me this stolen blade. Take it."), 30, (p, n) -> {
-                Currency.give(p, 40);
-                Notifier.message(p, Component.literal("Bounty Hunter handed you 40 Septims as a reward for returning stolen property."));
-                Dialogue.open(p, n, Component.literal("An honest citizen in Skyrim! Rare indeed. Take this reward for your trouble."));
-            }));
+            if (!npc.getPersistentData().getBoolean("skycraft_blade_returned") && stolenBladeSlot(player) >= 0) {
+                out.add(new DialogueOption("society.hunter_return", Component.literal("He gave me this stolen blade. Take it."), 30, (p, n) -> {
+                    // re-check on choose: the blade must still be in the bags, and each hunter pays only once
+                    int slot = stolenBladeSlot(p);
+                    if (slot < 0 || n.getPersistentData().getBoolean("skycraft_blade_returned")) return;
+                    p.getInventory().getItem(slot).shrink(1);
+                    n.getPersistentData().putBoolean("skycraft_blade_returned", true);
+                    Currency.give(p, 40);
+                    Notifier.message(p, Component.literal("Bounty Hunter handed you 40 Septims as a reward for returning stolen property."));
+                    Dialogue.open(p, n, Component.literal("An honest citizen in Skyrim! Rare indeed. Take this reward for your trouble."));
+                }));
+            }
             return;
         }
 
         if (npc.getPersistentData().getBoolean("skycraft_reveler")) {
             out.add(new DialogueOption("society.reveler_drink", Component.literal("I'll share a drink with you! (Toast)"), 10, (p, n) -> {
+                // one toast per reveler per player per in-game day
+                CompoundTag toasts = n.getPersistentData().getCompound("skycraft_toasts");
+                long day = p.level().getDayTime() / 24000L;
+                String key = p.getUUID().toString();
+                if (toasts.contains(key) && toasts.getLong(key) == day) {
+                    Dialogue.open(p, n, Component.literal("Ha! You've had your share today, friend. Come back tomorrow!"));
+                    return;
+                }
+                toasts.putLong(key, day);
+                n.getPersistentData().put("skycraft_toasts", toasts);
                 ItemStack mead = new ItemStack(Items.HONEY_BOTTLE);
                 mead.setHoverName(Component.literal("Honningbrew Mead"));
                 if (!ActionHandler.addToBags(p, mead)) p.drop(mead, false);

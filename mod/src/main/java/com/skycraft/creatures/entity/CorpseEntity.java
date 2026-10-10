@@ -30,25 +30,21 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * {@code skycraft:corpse}: the lootable body of a creature killed by a player.
  *
  * <ul>
- *     <li><b>Per-player loot</b> (like Lootr chests): the body keeps a base loot container; every player who opens it
- *     gets a private copy initialised from the base the first time. Copies are saved per UUID (capped).</li>
- *     <li><b>Despawn</b>: 60 s after every player who opened it has emptied their copy, otherwise after 15 minutes
- *     (both configurable). Never while someone is looking inside or dragging it.</li>
+ *     <li><b>Loot</b>: one body, one inventory shared by everybody (like Skyrim): exactly what the creature dropped
+ *     (its loot table and the equipment it was allowed to drop) plus the arrows stuck in it. Slots 0-5 hold the
+ *     dropped armor and held items; taking one off also takes it off the lying body.</li>
+ *     <li><b>Despawn</b>: 60 s after someone opened it and it is empty, otherwise after 15 minutes (both configurable).
+ *     Never while someone is looking inside or dragging it.</li>
  *     <li><b>Physics</b>: gravity, sliding with block friction, knocked around by hits and explosions (with a little
  *     tumble), falls off ledges and floats in water.</li>
  *     <li><b>Dragging</b>: sneak + right-click grabs the body; it follows in front of the player, costs stamina every
@@ -59,10 +55,10 @@ import java.util.UUID;
  */
 public class CorpseEntity extends Entity {
     public static final int SIZE = 27;
-    /** At most this many private loot copies are kept; older emptied copies are dropped first. */
-    public static final int MAX_COPIES = 24;
-    private static final int MAX_FINISHED = 128;
+    /** Loot slots 0-5: feet, legs, chest, head, main hand, off hand (what the body is shown wearing). */
+    public static final int WORN_SLOTS = 6;
     public static final int MAX_DRAG_TICKS = 600;
+    private static final String DRAGON_TYPE = "skycraft:dragon";
     private static final double MAX_DRAG_DISTANCE = 8.0;
 
     private static final EntityDataAccessor<String> BODY_TYPE = SynchedEntityData.defineId(CorpseEntity.class, EntityDataSerializers.STRING);
@@ -79,12 +75,12 @@ public class CorpseEntity extends Entity {
             "ForgeCaps", "ForgeData", "Motion", "FallDistance", "Fire", "Air", "PortalCooldown", "Tags", "Team", "Xp",
             "RecipeBook", "abilities", "EnderItems", "SelectedItem", "ChestedHorse", "Bees", "Trusted", "Owner", "AngryAt"};
 
-    /** The loot every new looter starts from. Never opened directly. */
-    private final SimpleContainer base = new SimpleContainer(SIZE);
-    /** Private copies by player, oldest first. */
-    private final Map<UUID, LootCopy> copies = new LinkedHashMap<>();
-    /** Players whose (emptied or evicted) copy is gone: they get an empty view if they come back. */
-    private final Set<UUID> finished = new LinkedHashSet<>();
+    /** The body's loot, shared by every looter. */
+    private final Loot loot = new Loot();
+    /** Bit i set: loot slot i (0-5) holds the item the body is shown wearing in that slot. */
+    private int wornMask;
+    /** Somebody has opened the body. */
+    private boolean looted;
     private int age;
     private int emptyTicks;
     private float bodyWidth = 0.6f;
@@ -102,7 +98,6 @@ public class CorpseEntity extends Entity {
 
     public CorpseEntity(EntityType<? extends CorpseEntity> type, Level level) {
         super(type, level);
-        this.noCulling = true; // the lying body is much bigger than the corpse's box
         this.setMaxUpStep(0.5f);
     }
 
@@ -119,7 +114,10 @@ public class CorpseEntity extends Entity {
 
     // ------------------------------------------------------------------ setup (server)
 
-    /** Remembers what the body looks like. Call before adding the corpse to the world. */
+    /**
+     * Remembers what the body looks like. Call after the loot was added (and before adding the corpse to the world):
+     * equipment the creature dropped into the body is shown worn again.
+     */
     public void setBody(LivingEntity dead) {
         String typeId = EntityType.getKey(dead.getType()).toString();
         CompoundTag body;
@@ -127,6 +125,7 @@ public class CorpseEntity extends Entity {
             body = dead.saveWithoutId(new CompoundTag());
             for (String key : STRIP) body.remove(key);
             body.putFloat("Health", 1.0f);
+            showWorn(body);
         } catch (Exception ignored) {
             body = new CompoundTag();
         }
@@ -142,31 +141,43 @@ public class CorpseEntity extends Entity {
         this.entityData.set(APPEAR_TICKS, ticks);
     }
 
-    /** Stores all equipped armor and weapons from the dead creature into the body's base loot container. */
-    public void populateEquipment(LivingEntity dead) {
-        net.minecraft.world.entity.EquipmentSlot[] armorSlots = {
-                net.minecraft.world.entity.EquipmentSlot.FEET,
-                net.minecraft.world.entity.EquipmentSlot.LEGS,
-                net.minecraft.world.entity.EquipmentSlot.CHEST,
-                net.minecraft.world.entity.EquipmentSlot.HEAD
-        };
-        for (int i = 0; i < 4; i++) {
-            ItemStack stack = dead.getItemBySlot(armorSlots[i]);
-            if (!stack.isEmpty()) {
-                base.setItem(i, stack.copy());
-            }
-        }
-        ItemStack main = dead.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND);
-        if (!main.isEmpty()) base.setItem(4, main.copy());
-        ItemStack off = dead.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.OFFHAND);
-        if (!off.isEmpty()) base.setItem(5, off.copy());
+    /**
+     * Puts an item the creature dropped from its equipment slot {@code slot} (0-5, see {@link #WORN_SLOTS}) into the
+     * body; the body is then shown wearing it until somebody takes it. Returns false if that slot is taken.
+     */
+    public boolean addWorn(int slot, ItemStack stack) {
+        if (slot < 0 || slot >= WORN_SLOTS || stack.isEmpty() || !loot.getItem(slot).isEmpty()) return false;
+        loot.setItemQuietly(slot, stack);
+        wornMask |= 1 << slot;
+        return true;
+    }
 
-        // Humanoid NPCs / villagers who died without explicit armor items generate wearable clothes
+    /**
+     * Townspeople and villagers wear plain clothes the game doesn't model as equipment: their body gets a set
+     * (only in the clothing slots the creature didn't drop anything into). Call only when mob loot is enabled.
+     */
+    public void addClothes(LivingEntity dead) {
         if (dead instanceof com.skycraft.society.entity.NpcEntity npc) {
             generateNpcClothes(npc);
         } else if (dead instanceof net.minecraft.world.entity.npc.AbstractVillager) {
             generateVillagerClothes();
         }
+    }
+
+    /** Writes the worn loot items into the body's equipment NBT (ArmorItems: feet..head, HandItems: main, off). */
+    private void showWorn(CompoundTag body) {
+        if (wornMask == 0) return;
+        ListTag armor = body.getList("ArmorItems", Tag.TAG_COMPOUND);
+        ListTag hands = body.getList("HandItems", Tag.TAG_COMPOUND);
+        if (armor.size() < 4 || hands.size() < 2) return; // not an equipment-wearing creature
+        for (int i = 0; i < WORN_SLOTS; i++) {
+            if ((wornMask & (1 << i)) == 0) continue;
+            CompoundTag item = loot.getItem(i).save(new CompoundTag());
+            if (i < 4) armor.set(i, item);
+            else hands.set(i - 4, item);
+        }
+        body.put("ArmorItems", armor);
+        body.put("HandItems", hands);
     }
 
     private void generateNpcClothes(com.skycraft.society.entity.NpcEntity npc) {
@@ -186,8 +197,8 @@ public class CorpseEntity extends Entity {
                 nameChest = "Mage Robes";
                 nameLegs = "Mage Breeches";
                 nameBoots = "Mage Boots";
-                if (base.getItem(3).isEmpty()) {
-                    base.setItem(3, createClothingPiece(net.minecraft.world.item.Items.LEATHER_HELMET, 0x283593, "Mage Hood"));
+                if (loot.getItem(3).isEmpty()) {
+                    loot.setItem(3, createClothingPiece(net.minecraft.world.item.Items.LEATHER_HELMET, 0x283593, "Mage Hood"));
                 }
             }
             case NECROMANCER -> {
@@ -197,8 +208,8 @@ public class CorpseEntity extends Entity {
                 nameChest = "Necromancer Robes";
                 nameLegs = "Dark Breeches";
                 nameBoots = "Dark Boots";
-                if (base.getItem(3).isEmpty()) {
-                    base.setItem(3, createClothingPiece(net.minecraft.world.item.Items.LEATHER_HELMET, 0x212121, "Necromancer Hood"));
+                if (loot.getItem(3).isEmpty()) {
+                    loot.setItem(3, createClothingPiece(net.minecraft.world.item.Items.LEATHER_HELMET, 0x212121, "Necromancer Hood"));
                 }
             }
             case MINER -> {
@@ -276,26 +287,26 @@ public class CorpseEntity extends Entity {
             default -> {}
         }
 
-        if (base.getItem(2).isEmpty()) {
-            base.setItem(2, createClothingPiece(net.minecraft.world.item.Items.LEATHER_CHESTPLATE, colorChest, nameChest));
+        if (loot.getItem(2).isEmpty()) {
+            loot.setItem(2, createClothingPiece(net.minecraft.world.item.Items.LEATHER_CHESTPLATE, colorChest, nameChest));
         }
-        if (base.getItem(1).isEmpty()) {
-            base.setItem(1, createClothingPiece(net.minecraft.world.item.Items.LEATHER_LEGGINGS, colorLegs, nameLegs));
+        if (loot.getItem(1).isEmpty()) {
+            loot.setItem(1, createClothingPiece(net.minecraft.world.item.Items.LEATHER_LEGGINGS, colorLegs, nameLegs));
         }
-        if (base.getItem(0).isEmpty()) {
-            base.setItem(0, createClothingPiece(net.minecraft.world.item.Items.LEATHER_BOOTS, colorBoots, nameBoots));
+        if (loot.getItem(0).isEmpty()) {
+            loot.setItem(0, createClothingPiece(net.minecraft.world.item.Items.LEATHER_BOOTS, colorBoots, nameBoots));
         }
     }
 
     private void generateVillagerClothes() {
-        if (base.getItem(2).isEmpty()) {
-            base.setItem(2, createClothingPiece(net.minecraft.world.item.Items.LEATHER_CHESTPLATE, 0x8D6E63, "Belted Tunic"));
+        if (loot.getItem(2).isEmpty()) {
+            loot.setItem(2, createClothingPiece(net.minecraft.world.item.Items.LEATHER_CHESTPLATE, 0x8D6E63, "Belted Tunic"));
         }
-        if (base.getItem(1).isEmpty()) {
-            base.setItem(1, createClothingPiece(net.minecraft.world.item.Items.LEATHER_LEGGINGS, 0x4E342E, "Farmer's Trousers"));
+        if (loot.getItem(1).isEmpty()) {
+            loot.setItem(1, createClothingPiece(net.minecraft.world.item.Items.LEATHER_LEGGINGS, 0x4E342E, "Farmer's Trousers"));
         }
-        if (base.getItem(0).isEmpty()) {
-            base.setItem(0, createClothingPiece(net.minecraft.world.item.Items.LEATHER_BOOTS, 0x2E1C0C, "Worn Boots"));
+        if (loot.getItem(0).isEmpty()) {
+            loot.setItem(0, createClothingPiece(net.minecraft.world.item.Items.LEATHER_BOOTS, 0x2E1C0C, "Worn Boots"));
         }
     }
 
@@ -308,13 +319,13 @@ public class CorpseEntity extends Entity {
         return stack;
     }
 
-    /** Adds base loot (what every looter finds); returns the part that didn't fit. */
+    /** Adds loot (in the slots after the worn ones); returns the part that didn't fit. */
     public ItemStack addLoot(ItemStack stack) {
         if (stack.isEmpty()) return ItemStack.EMPTY;
-        for (int i = 6; i < SIZE; i++) {
-            ItemStack existing = base.getItem(i);
+        for (int i = WORN_SLOTS; i < SIZE; i++) {
+            ItemStack existing = loot.getItem(i);
             if (existing.isEmpty()) {
-                base.setItem(i, stack);
+                loot.setItemQuietly(i, stack);
                 return ItemStack.EMPTY;
             } else if (ItemStack.isSameItemSameTags(existing, stack)) {
                 int space = existing.getMaxStackSize() - existing.getCount();
@@ -326,42 +337,31 @@ public class CorpseEntity extends Entity {
                 }
             }
         }
-        return base.addItem(stack);
+        return loot.addItem(stack);
     }
 
-    /** Updates the visual body model NBT when equipped gear is removed by a looter. */
-    public void syncEquipmentAppearance(Container container) {
-        if (this.level().isClientSide) return;
+    /**
+     * Takes worn items off the lying body once a looter took them (or swapped something else into their slot):
+     * only the slots that hold what the body is shown wearing are linked.
+     */
+    private void syncEquipmentAppearance() {
+        if (this.level().isClientSide || wornMask == 0) return;
         CompoundTag body = this.entityData.get(BODY).copy();
         if (body.isEmpty()) return;
-
         ListTag armor = body.getList("ArmorItems", Tag.TAG_COMPOUND);
         ListTag hands = body.getList("HandItems", Tag.TAG_COMPOUND);
-
         boolean changed = false;
-        // Armor: 0=feet, 1=legs, 2=chest, 3=head
-        for (int i = 0; i < 4; i++) {
-            if (i < armor.size()) {
-                ItemStack current = container.getItem(i);
-                CompoundTag slotTag = armor.getCompound(i);
-                if (current.isEmpty() && !slotTag.isEmpty()) {
-                    armor.set(i, new CompoundTag());
-                    changed = true;
-                }
-            }
+        for (int i = 0; i < WORN_SLOTS; i++) {
+            if ((wornMask & (1 << i)) == 0) continue;
+            ListTag list = i < 4 ? armor : hands;
+            int index = i < 4 ? i : i - 4;
+            if (index >= list.size()) continue;
+            ItemStack shown = ItemStack.of(list.getCompound(index));
+            if (ItemStack.isSameItem(loot.getItem(i), shown)) continue;
+            list.set(index, new CompoundTag());
+            wornMask &= ~(1 << i);
+            changed = true;
         }
-        // Hands: 0=mainhand (slot 4), 1=offhand (slot 5)
-        for (int i = 0; i < 2; i++) {
-            if (i < hands.size()) {
-                ItemStack current = container.getItem(4 + i);
-                CompoundTag slotTag = hands.getCompound(i);
-                if (current.isEmpty() && !slotTag.isEmpty()) {
-                    hands.set(i, new CompoundTag());
-                    changed = true;
-                }
-            }
-        }
-
         if (changed) {
             body.put("ArmorItems", armor);
             body.put("HandItems", hands);
@@ -369,9 +369,19 @@ public class CorpseEntity extends Entity {
         }
     }
 
-    /** True when the base loot is empty. */
+    /** True when the body holds no loot. */
     public boolean isEmptyOfLoot() {
-        return base.isEmpty();
+        return loot.isEmpty();
+    }
+
+    /** Ticks since the body appeared. */
+    public int age() {
+        return age;
+    }
+
+    /** Somebody is looking inside or dragging the body (it must not be removed now). */
+    public boolean inUse() {
+        return loot.openers > 0 || isDragged();
     }
 
     public float getBodyHeight() {
@@ -411,66 +421,6 @@ public class CorpseEntity extends Entity {
         return this.level().getEntity(id) instanceof Player p ? p : null;
     }
 
-    // ------------------------------------------------------------------ per-player loot
-
-    private LootCopy copyFor(Player player) {
-        UUID id = player.getUUID();
-        LootCopy copy = copies.get(id);
-        if (copy != null) return copy;
-        copy = new LootCopy(id);
-        if (!finished.contains(id)) {
-            for (int i = 0; i < base.getContainerSize(); i++) copy.setItem(i, base.getItem(i).copy());
-        }
-        if (copies.size() >= MAX_COPIES) evictCopy();
-        copies.put(id, copy);
-        finished.remove(id);
-        return copy;
-    }
-
-    /** Frees a slot: the oldest emptied copy goes first, then the oldest copy nobody is looking at. */
-    private void evictCopy() {
-        UUID victim = null;
-        for (Map.Entry<UUID, LootCopy> e : copies.entrySet()) {
-            if (e.getValue().openers == 0 && e.getValue().isEmpty()) {
-                victim = e.getKey();
-                break;
-            }
-        }
-        if (victim == null) {
-            for (Map.Entry<UUID, LootCopy> e : copies.entrySet()) {
-                if (e.getValue().openers == 0) {
-                    victim = e.getKey();
-                    break;
-                }
-            }
-        }
-        if (victim == null) return;
-        copies.remove(victim);
-        markFinished(victim);
-    }
-
-    private void markFinished(UUID id) {
-        finished.add(id);
-        if (finished.size() > MAX_FINISHED) {
-            Iterator<UUID> it = finished.iterator();
-            it.next();
-            it.remove();
-        }
-    }
-
-    private int openers() {
-        int n = 0;
-        for (LootCopy c : copies.values()) n += c.openers;
-        return n;
-    }
-
-    /** Someone has looted the body and every looter has emptied their copy. */
-    private boolean everyoneEmptied() {
-        if (copies.isEmpty()) return !finished.isEmpty();
-        for (LootCopy c : copies.values()) if (!c.isEmpty()) return false;
-        return true;
-    }
-
     // ------------------------------------------------------------------ ticking
 
     @Override
@@ -485,9 +435,9 @@ public class CorpseEntity extends Entity {
         if (!isDragged()) tickPhysics();
 
         age++;
-        if (everyoneEmptied()) emptyTicks++;
+        if (looted && loot.isEmpty()) emptyTicks++;
         else emptyTicks = 0;
-        if (openers() > 0 || isDragged()) return;
+        if (inUse()) return;
         if (emptyTicks > CreaturesConfig.EMPTY_CORPSE_DESPAWN_SECONDS.get() * 20
                 || age > CreaturesConfig.CORPSE_DESPAWN_SECONDS.get() * 20) {
             this.discard();
@@ -612,29 +562,35 @@ public class CorpseEntity extends Entity {
             return InteractionResult.sidedSuccess(this.level().isClientSide);
         }
         if (!this.level().isClientSide) {
-            LootCopy copy = copyFor(player);
-            player.openMenu(new SimpleMenuProvider((id, inventory, p) -> ChestMenu.threeRows(id, inventory, copy), this.getDisplayName()));
+            looted = true;
+            player.openMenu(new SimpleMenuProvider((id, inventory, p) -> ChestMenu.threeRows(id, inventory, loot), this.getDisplayName()));
             this.playSound(SoundEvents.ARMOR_EQUIP_LEATHER, 0.6f, 0.9f);
-            if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
-                com.skycraft.core.PlayerData data = com.skycraft.core.SkyData.get(sp);
-                if (data != null) {
-                    net.minecraft.nbt.ListTag list = com.skycraft.world.WorldData.discovered(data);
-                    boolean removed = false;
-                    for (int i = list.size() - 1; i >= 0; i--) {
-                        net.minecraft.nbt.CompoundTag loc = list.getCompound(i);
-                        if ("Your Corpse".equals(loc.getString("name")) || loc.getString("id").startsWith("corpse|")) {
-                            list.remove(i);
-                            removed = true;
-                        }
-                    }
-                    if (removed) {
-                        data.markDirty();
-                        com.skycraft.core.PlayerDataEvents.fullSync(sp);
-                    }
-                }
-            }
+            if (player instanceof ServerPlayer sp) clearOwnMarker(sp);
         }
         return InteractionResult.sidedSuccess(this.level().isClientSide);
+    }
+
+    /**
+     * Removes a map/compass marker pointing at this very body ({@code corpse|<this corpse's UUID>}), if any. Never
+     * touches other markers: the player's own death marker ("Your Corpse", {@code corpse|<player UUID>}) belongs to
+     * the combat module and stays until the player reaches their own grave.
+     */
+    private void clearOwnMarker(ServerPlayer sp) {
+        com.skycraft.core.PlayerData data = com.skycraft.core.SkyData.get(sp);
+        if (data == null) return;
+        String id = "corpse|" + this.getStringUUID();
+        ListTag list = com.skycraft.world.WorldData.discovered(data);
+        boolean removed = false;
+        for (int i = list.size() - 1; i >= 0; i--) {
+            if (id.equals(list.getCompound(i).getString("id"))) {
+                list.remove(i);
+                removed = true;
+            }
+        }
+        if (removed) {
+            data.markDirty();
+            com.skycraft.core.PlayerDataEvents.fullSync(sp);
+        }
     }
 
     @Override
@@ -736,15 +692,15 @@ public class CorpseEntity extends Entity {
         return renderDummy;
     }
 
-    private int renderFailures;
-
-    /** Called by the renderer when drawing the dummy threw: marks failed after repeated errors. */
-    public void markRenderFailed() {
-        renderFailures++;
-        if (renderFailures > 15) {
-            dummyFailed = true;
-            renderDummy = null;
-        }
+    /**
+     * The lying body is much bigger than the corpse's own box (it reaches about one body height away, and a dragon's
+     * wings and tail much further): cull with a box around all of it.
+     */
+    @Override
+    public AABB getBoundingBoxForCulling() {
+        double reach = Math.max(1.0, getBodyHeight());
+        if (DRAGON_TYPE.equals(this.entityData.get(BODY_TYPE))) return this.getBoundingBox().inflate(9.0, 4.0, 9.0);
+        return this.getBoundingBox().inflate(reach, Math.max(0.5, reach * 0.5), reach);
     }
 
     @Override
@@ -781,22 +737,9 @@ public class CorpseEntity extends Entity {
 
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
-        tag.put("Loot", saveItems(base));
-        ListTag copyList = new ListTag();
-        for (Map.Entry<UUID, LootCopy> e : copies.entrySet()) {
-            CompoundTag c = new CompoundTag();
-            c.putUUID("Id", e.getKey());
-            c.put("Items", saveItems(e.getValue()));
-            copyList.add(c);
-        }
-        tag.put("Copies", copyList);
-        ListTag done = new ListTag();
-        for (UUID id : finished) {
-            CompoundTag c = new CompoundTag();
-            c.putUUID("Id", id);
-            done.add(c);
-        }
-        tag.put("Finished", done);
+        tag.put("Loot", saveItems(loot));
+        tag.putByte("Worn", (byte) wornMask);
+        tag.putBoolean("Looted", looted);
         tag.putString("BodyType", this.entityData.get(BODY_TYPE));
         tag.put("Body", this.entityData.get(BODY));
         tag.putFloat("BodyHeight", getBodyHeight());
@@ -809,21 +752,12 @@ public class CorpseEntity extends Entity {
 
     @Override
     protected void readAdditionalSaveData(CompoundTag tag) {
-        loadItems(base, tag.getList("Loot", Tag.TAG_COMPOUND));
-        copies.clear();
-        ListTag copyList = tag.getList("Copies", Tag.TAG_COMPOUND);
-        for (int i = 0; i < copyList.size() && copies.size() < MAX_COPIES; i++) {
-            CompoundTag c = copyList.getCompound(i);
-            if (!c.hasUUID("Id")) continue;
-            LootCopy copy = new LootCopy(c.getUUID("Id"));
-            loadItems(copy, c.getList("Items", Tag.TAG_COMPOUND));
-            copies.put(copy.owner, copy);
-        }
-        finished.clear();
-        ListTag done = tag.getList("Finished", Tag.TAG_COMPOUND);
-        for (int i = 0; i < done.size(); i++) {
-            if (done.getCompound(i).hasUUID("Id")) markFinished(done.getCompound(i).getUUID("Id"));
-        }
+        // (Bodies saved by older versions also had per-player copies, "Copies"/"Finished": dropped, the base loot stays.)
+        loot.quiet = true;
+        loadItems(loot, tag.getList("Loot", Tag.TAG_COMPOUND));
+        loot.quiet = false;
+        wornMask = tag.getByte("Worn") & ((1 << WORN_SLOTS) - 1);
+        looted = tag.getBoolean("Looted") || tag.contains("Copies", Tag.TAG_LIST) && !tag.getList("Copies", Tag.TAG_COMPOUND).isEmpty();
         this.entityData.set(BODY_TYPE, tag.getString("BodyType"));
         this.entityData.set(BODY, tag.getCompound("Body"));
         if (tag.contains("BodyHeight")) this.entityData.set(BODY_HEIGHT, tag.getFloat("BodyHeight"));
@@ -839,46 +773,38 @@ public class CorpseEntity extends Entity {
         return new ClientboundAddEntityPacket(this);
     }
 
-    /** One player's private view of the loot; only valid for its owner, while the corpse exists and is close. */
-    private class LootCopy extends SimpleContainer {
-        final UUID owner;
+    /** The body's inventory, shared by all looters; valid while the corpse exists and the looter is close. */
+    private class Loot extends SimpleContainer {
         int openers;
+        /** Set while filling or loading: no appearance updates. */
+        boolean quiet;
 
-        LootCopy(UUID owner) {
+        Loot() {
             super(SIZE);
-            this.owner = owner;
-            this.addListener(container -> syncEquipmentAppearance(container));
+        }
+
+        void setItemQuietly(int slot, ItemStack stack) {
+            quiet = true;
+            setItem(slot, stack);
+            quiet = false;
         }
 
         @Override
         public void setChanged() {
             super.setChanged();
-            syncEquipmentAppearance(this);
-        }
-
-        @Override
-        public ItemStack removeItem(int slot, int amount) {
-            ItemStack stack = super.removeItem(slot, amount);
-            syncEquipmentAppearance(this);
-            return stack;
+            if (!quiet) syncEquipmentAppearance();
         }
 
         @Override
         public ItemStack removeItemNoUpdate(int slot) {
             ItemStack stack = super.removeItemNoUpdate(slot);
-            syncEquipmentAppearance(this);
+            if (!quiet) syncEquipmentAppearance();
             return stack;
         }
 
         @Override
-        public void setItem(int slot, ItemStack stack) {
-            super.setItem(slot, stack);
-            syncEquipmentAppearance(this);
-        }
-
-        @Override
         public boolean stillValid(Player player) {
-            return CorpseEntity.this.isAlive() && player.getUUID().equals(owner) && player.distanceToSqr(CorpseEntity.this) < 64.0;
+            return CorpseEntity.this.isAlive() && player.distanceToSqr(CorpseEntity.this) < 64.0;
         }
 
         @Override

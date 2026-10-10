@@ -126,7 +126,12 @@ public final class DiggingRules {
     @SubscribeEvent
     public static void onPlace(BlockEvent.EntityPlaceEvent event) {
         if (event.getEntity() instanceof Player player && !player.level().isClientSide) {
-            PlacedBlocks.mark(player.level(), event.getPos(), true);
+            if (event instanceof BlockEvent.EntityMultiPlaceEvent multi) {
+                // Beds, doors, tall plants: every part counts as placed.
+                for (var snapshot : multi.getReplacedBlockSnapshots()) PlacedBlocks.mark(player.level(), snapshot.getPos(), true);
+            } else {
+                PlacedBlocks.mark(player.level(), event.getPos(), true);
+            }
         }
     }
 

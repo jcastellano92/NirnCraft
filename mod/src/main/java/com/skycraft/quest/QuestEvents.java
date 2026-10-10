@@ -43,8 +43,10 @@ public final class QuestEvents {
 
     // ------------------------------------------------------------------ kills
 
-    @SubscribeEvent(priority = EventPriority.LOW)
+    /** LOWEST and skipping cancelled deaths: a totem/revive mod that cancels the death must not complete objectives. */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onDeath(LivingDeathEvent event) {
+        if (event.isCanceled()) return;
         LivingEntity victim = event.getEntity();
         if (!(victim.level() instanceof ServerLevel level)) return;
         MinecraftServer server = level.getServer();
@@ -108,35 +110,23 @@ public final class QuestEvents {
         }
         if (o == null) return;
         boolean isTarget = o.type == Objective.Type.KILL_TARGET && id.toString().equals(o.target);
-        boolean credited = (killer != null && Quests.isMember(server, key, killer)) || memberNear(server, key, victim, 128);
-        if (!credited) {
-            if (isTarget) {
-                // killed by someone else far from the party: the target "returns" later
-                o.spawned = false;
-                o.spawnedIds.clear();
-                o.target = "";
-                Quests.changed(server, key);
-            }
-            return;
-        }
+        // a quest enemy counts for its owner/party whoever (or whatever) killed it, so objectives can't soft-lock;
+        // only the per-kill rewards (killer argument) need a party member to land the blow
+        boolean memberKill = killer != null && Quests.isMember(server, key, killer);
+        ServerPlayer credit = memberKill ? killer : null;
+        o.spawnedIds.remove(id);
         switch (o.type) {
             case KILL_TARGET -> {
                 if (isTarget) {
-                    o.sneakKill = killer != null && killer.isCrouching() && Faction.DARK_BROTHERHOOD.id.equals(q.faction);
-                    Quests.completeObjective(server, key, q, o, killer);
+                    o.sneakKill = memberKill && killer.isCrouching() && Faction.DARK_BROTHERHOOD.id.equals(q.faction);
+                    Quests.completeObjective(server, key, q, o, credit);
+                } else {
+                    Quests.changed(server, key);
                 }
             }
-            case KILL_TYPE_COUNT, CLEAR_AREA -> Quests.addProgress(server, key, q, o, 1, killer);
-            default -> {
-            }
+            case KILL_TYPE_COUNT, CLEAR_AREA -> Quests.addProgress(server, key, q, o, 1, credit);
+            default -> Quests.changed(server, key);
         }
-    }
-
-    private static boolean memberNear(MinecraftServer server, String key, Entity e, double dist) {
-        for (ServerPlayer p : Quests.onlineMembers(server, key)) {
-            if (p.level() == e.level() && p.distanceToSqr(e) < dist * dist) return true;
-        }
-        return false;
     }
 
     /** Quests that still need their giver fail when the giver dies. */
@@ -216,7 +206,9 @@ public final class QuestEvents {
                 Quests.changed(server, key);
                 continue;
             }
-            if (o.type == Objective.Type.KILL_TARGET && o.spawned && o.dim.equals(dim)) trackTarget(server, level, player, key, o);
+            if (o.type == Objective.Type.KILL_TARGET && o.spawned && o.dim.equals(dim)) trackTarget(server, level, player, key, q, o);
+            else if ((o.type == Objective.Type.CLEAR_AREA || o.type == Objective.Type.KILL_TYPE_COUNT) && o.spawned
+                    && o.dim.equals(dim)) trackGroup(server, level, player, key, q, o);
             if ((o.type == Objective.Type.TALK_TO || o.type == Objective.Type.FETCH) && o.npc != null) followNpc(server, level, dim, key, q, o);
         }
 
@@ -280,7 +272,12 @@ public final class QuestEvents {
         }
     }
 
-    private static void trackTarget(MinecraftServer server, ServerLevel level, ServerPlayer player, String key, Objective o) {
+    /** Whether "not found" near {@code pos} means something: the chunk and its entities are loaded (they load later). */
+    private static boolean entitiesLoaded(ServerLevel level, net.minecraft.core.BlockPos pos) {
+        return level.isLoaded(pos) && level.areEntitiesLoaded(net.minecraft.world.level.ChunkPos.asLong(pos));
+    }
+
+    private static void trackTarget(MinecraftServer server, ServerLevel level, ServerPlayer player, String key, Quest q, Objective o) {
         UUID id;
         try {
             id = UUID.fromString(o.target);
@@ -295,15 +292,49 @@ public final class QuestEvents {
                 Quests.changed(server, key);
             }
             if (QuestSpawner.isBossObjective(o)) QuestSpawner.BossBars.track(e);
-        } else if (Locate.horizontalDist(player.blockPosition(), o.pos) < 24 && level.isLoaded(o.pos)) {
+        } else if (Locate.horizontalDist(player.blockPosition(), o.pos) < 24 && entitiesLoaded(level, o.pos)) {
             if (++o.missing >= 30) {
-                // the target vanished (despawned, removed...): it will be spawned again
-                o.spawned = false;
-                o.spawnedIds.clear();
-                o.target = "";
+                // the target vanished (despawned, removed...): only the target comes back, its group stays as it is
                 o.missing = 0;
-                Quests.changed(server, key);
+                o.spawnedIds.remove(id);
+                if (QuestSpawner.respawnTarget(level, key, q, o)) {
+                    Quests.changed(server, key);
+                } else {
+                    // can't recreate it: don't leave the quest stuck
+                    Quests.completeObjective(server, key, q, o, null);
+                }
             }
+        }
+    }
+
+    /**
+     * Spawned enemies of a CLEAR_AREA/KILL_TYPE_COUNT objective that vanished without dying (removed by another mod,
+     * despawned) are counted as dealt with after 30 s, so the objective can't soft-lock. Entities that are merely in
+     * unloaded chunks are waited for.
+     */
+    private static void trackGroup(MinecraftServer server, ServerLevel level, ServerPlayer player, String key, Quest q, Objective o) {
+        if (o.spawnedIds.isEmpty() || !o.hasPos || Locate.horizontalDist(player.blockPosition(), o.pos) >= 32
+                || !entitiesLoaded(level, o.pos)) return;
+        List<UUID> gone = new ArrayList<>();
+        for (UUID id : o.spawnedIds) {
+            Entity e = level.getEntity(id);
+            if (e == null || !e.isAlive()) gone.add(id);
+        }
+        if (gone.isEmpty()) {
+            o.missing = 0;
+            return;
+        }
+        if (++o.missing < 30) return;
+        o.missing = 0;
+        o.spawnedIds.removeAll(gone);
+        Quests.addProgress(server, key, q, o, gone.size(), null);
+    }
+
+    /** Quest bosses get their boss bar back when they are (re)loaded. */
+    @SubscribeEvent
+    public static void onEntityJoin(net.minecraftforge.event.entity.EntityJoinLevelEvent event) {
+        if (!event.getLevel().isClientSide && event.getEntity().getTags().contains(QuestSpawner.BOSS_TAG)) {
+            QuestSpawner.BossBars.track(event.getEntity());
         }
     }
 

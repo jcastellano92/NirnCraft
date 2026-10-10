@@ -3,6 +3,9 @@
   "values": [
     "skycraft:tanning_rack",
     "skycraft:grindstone_wheel",
-    "skycraft:armor_workbench"
+    "skycraft:armor_workbench",
+    "skycraft:alchemy_lab",
+    "skycraft:arcane_enchanter",
+    "skycraft:drafting_table"
   ]
 }

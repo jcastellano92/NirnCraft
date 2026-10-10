@@ -116,20 +116,26 @@ public class SkyTitleScreen extends Screen {
         LevelStorageSource source = mc.getLevelSource();
         try {
             LevelStorageSource.LevelCandidates candidates = source.findLevelCandidates();
+            // Summaries load on a worker thread; the menu is only ever changed on the render thread.
             source.loadLevelSummaries(candidates).thenAccept(summaries -> {
+                LevelSummary newest = null;
                 if (summaries != null && !summaries.isEmpty()) {
                     List<LevelSummary> sorted = new ArrayList<>(summaries);
                     sorted.sort((a, b) -> Long.compare(b.getLastPlayed(), a.getLastPlayed()));
-                    this.mostRecentSave = sorted.get(0);
-                } else {
-                    this.mostRecentSave = null;
+                    newest = sorted.get(0);
                 }
-                this.savesLoaded = true;
-                rebuildMenuItems();
+                LevelSummary found = newest;
+                mc.execute(() -> {
+                    this.mostRecentSave = found;
+                    this.savesLoaded = true;
+                    rebuildMenuItems();
+                });
             }).exceptionally(ex -> {
-                this.savesLoaded = true;
-                this.mostRecentSave = null;
-                rebuildMenuItems();
+                mc.execute(() -> {
+                    this.savesLoaded = true;
+                    this.mostRecentSave = null;
+                    rebuildMenuItems();
+                });
                 return null;
             });
         } catch (Exception e) {
@@ -139,6 +145,7 @@ public class SkyTitleScreen extends Screen {
         }
     }
 
+    /** Render thread only. */
     private void rebuildMenuItems() {
         menuItems.clear();
         if (mostRecentSave != null) {
@@ -154,7 +161,7 @@ public class SkyTitleScreen extends Screen {
         menuItems.add(MenuItem.MODS);
         menuItems.add(MenuItem.QUIT);
 
-        if (selectedIndex >= menuItems.size()) {
+        if (selectedIndex < 0 || selectedIndex >= menuItems.size()) {
             selectedIndex = 0;
         }
     }

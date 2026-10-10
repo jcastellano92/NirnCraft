@@ -1,12 +1,13 @@
 {
   "type": "forge:add_spawns",
-  "biomes": [
-    "minecraft:river",
-    "minecraft:beach",
-    "minecraft:swamp",
-    "minecraft:mangrove_swamp",
-    "minecraft:stony_shore"
-  ],
+  "biomes": {
+    "type": "forge:or",
+    "values": [
+      "#skycraft:spawns/river",
+      "#skycraft:spawns/coast",
+      "#skycraft:spawns/swamp"
+    ]
+  },
   "spawners": [
     {
       "type": "skycraft:mudcrab",

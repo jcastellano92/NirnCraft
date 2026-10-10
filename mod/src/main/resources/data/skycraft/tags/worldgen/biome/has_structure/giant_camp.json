@@ -1,14 +1,9 @@
 {
   "replace": false,
   "values": [
-    "minecraft:plains",
-    "minecraft:sunflower_plains",
-    "minecraft:meadow",
+    "#skycraft:spawns/plains",
     "minecraft:snowy_plains",
     "#minecraft:is_savanna",
-    {
-      "id": "#forge:is_plains",
-      "required": false
-    }
+    {"id": "#forge:is_plains", "required": false}
   ]
 }

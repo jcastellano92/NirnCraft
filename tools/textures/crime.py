@@ -4,6 +4,8 @@
 lockpick.png: a thin steel pick running from the bottom-left (cloth-wrapped grip) to the top-right, ending in a small
 hook, like Skyrim's lockpicks. The lockpicking minigame itself is drawn with GuiGraphics fills, so no GUI textures.
 
+jail_key.png: a large old iron key (ring bow at the top-left, shaft down to the bottom-right, two-tooth bit).
+
 Run from the repository root:  python3 tools/textures/crime.py
 """
 import os
@@ -74,10 +76,56 @@ def lockpick():
     return img
 
 
+IRON_HI = (0x9A, 0x96, 0x8E, 255)
+IRON = (0x6E, 0x6A, 0x64, 255)
+IRON_LO = (0x48, 0x44, 0x40, 255)
+
+
+def jail_key():
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    px = img.load()
+
+    def put(x, y, c):
+        if 0 <= x < 16 and 0 <= y < 16:
+            px[x, y] = c
+
+    # ring bow centred at (4.5, 4.5) with a clear 2x2+ hole
+    for y in range(10):
+        for x in range(10):
+            d = ((x - 4.5) ** 2 + (y - 4.5) ** 2) ** 0.5
+            if 1.9 <= d <= 3.7:
+                put(x, y, IRON_HI if x + y < 8 else IRON if x + y < 11 else IRON_LO)
+    # shaft: diagonal from the ring to the bottom-right, two pixels thick
+    for i in range(7):
+        x, y = 7 + i, 7 + i
+        put(x, y, IRON_HI)
+        put(x + 1, y, IRON)
+        put(x, y + 1, IRON_LO)
+    # bit: two square teeth sticking out to the upper-right near the shaft end
+    for (x, y) in [(12, 10), (13, 10), (13, 9), (14, 12), (15, 12), (15, 11)]:
+        put(x, y, IRON)
+    put(13, 11, IRON_LO)
+    put(15, 13, IRON_LO)
+    # outline everything
+    src = img.copy().load()
+    for y in range(16):
+        for x in range(16):
+            if src[x, y][3] != 0:
+                continue
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < 16 and 0 <= ny < 16 and src[nx, ny][3] > 0:
+                    put(x, y, OUTLINE)
+                    break
+    return img
+
+
 def main():
     os.makedirs(TEX, exist_ok=True)
     lockpick().save(os.path.join(TEX, "lockpick.png"))
     print("wrote", os.path.join(TEX, "lockpick.png"))
+    jail_key().save(os.path.join(TEX, "jail_key.png"))
+    print("wrote", os.path.join(TEX, "jail_key.png"))
 
 
 if __name__ == "__main__":

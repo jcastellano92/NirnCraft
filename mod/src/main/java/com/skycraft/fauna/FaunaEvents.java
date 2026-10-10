@@ -14,6 +14,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -38,6 +39,7 @@ import java.util.Deque;
 public final class FaunaEvents {
     /** Persistent-data flag on a giant once its herd has been placed. */
     public static final String HERD_FLAG = "skycraft_mammoth_herd";
+    private static final int MAX_MAMMOTHS = 6;
     private static final Deque<Entity> GIANTS = new ArrayDeque<>();
 
     private FaunaEvents() {}
@@ -63,11 +65,16 @@ public final class FaunaEvents {
         }
     }
 
+    /**
+     * A giant's herd: 2-3 mammoths nearby, tagged {@link MammothEntity#HERD_TAG} so they leave with the giant when no
+     * player is around. None if a herd already grazes close by, and never more than {@value #MAX_MAMMOTHS} in the area.
+     */
     private static void spawnHerd(ServerLevel level, Entity giant) {
         EntityType<MammothEntity> type = FaunaEntities.MAMMOTH.get();
         if (!level.getEntitiesOfClass(MammothEntity.class, giant.getBoundingBox().inflate(48)).isEmpty()) return;
+        int around = level.getEntitiesOfClass(MammothEntity.class, giant.getBoundingBox().inflate(128)).size();
         RandomSource random = level.random;
-        int count = 2 + random.nextInt(2);
+        int count = Math.min(2 + random.nextInt(2), MAX_MAMMOTHS - around);
         for (int i = 0, tries = 0; i < count && tries < 12; tries++) {
             double angle = random.nextDouble() * Math.PI * 2;
             double dist = 6 + random.nextDouble() * 10;
@@ -78,7 +85,15 @@ public final class FaunaEvents {
             BlockPos pos = new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);
             if (Math.abs(pos.getY() - giant.getY()) > 6 || !FaunaSpawns.wild(level, pos)) continue;
             if (!level.noCollision(type.getAABB(x + 0.5, pos.getY(), z + 0.5))) continue;
-            if (type.spawn(level, pos, MobSpawnType.EVENT) != null) i++;
+            MammothEntity mammoth = type.create(level);
+            if (mammoth == null) break;
+            mammoth.moveTo(x + 0.5, pos.getY(), z + 0.5, random.nextFloat() * 360f, 0f);
+            mammoth.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+            // a camp's giant stays, and so does its herd; a roaming giant's herd leaves when it does
+            if (giant instanceof Mob m && m.isPersistenceRequired()) mammoth.setPersistenceRequired();
+            else mammoth.addTag(MammothEntity.HERD_TAG);
+            level.addFreshEntity(mammoth);
+            i++;
         }
     }
 

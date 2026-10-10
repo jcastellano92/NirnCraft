@@ -98,6 +98,42 @@ public final class CreaturesModule {
                 Monster::checkMonsterSpawnRules, op);
         event.register(ModEntities.SKEEVER.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 Monster::checkMonsterSpawnRules, op);
+        event.register(ModEntities.DRAUGR_DEATHLORD.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                (type, level, reason, pos, random) -> Monster.checkMonsterSpawnRules(type, level, reason, pos, random)
+                        && fewNearby(type, level, pos, 64, 1), op);
+        // people of the wilds: Forsworn camps in the Reach, bandit chiefs, hagravens, spriggans guarding the forests
+        event.register(ModEntities.FORSWORN.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                (type, level, reason, pos, random) -> surfaceSpawn(type, level, reason, pos, random) && fewNearby(type, level, pos, 64, 4), op);
+        event.register(ModEntities.BANDIT_CHIEF.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                (type, level, reason, pos, random) -> surfaceSpawn(type, level, reason, pos, random) && fewNearby(type, level, pos, 96, 1), op);
+        event.register(ModEntities.HAGRAVEN.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                (type, level, reason, pos, random) -> surfaceSpawn(type, level, reason, pos, random) && fewNearby(type, level, pos, 96, 1), op);
+        event.register(ModEntities.SPRIGGAN.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                (type, level, reason, pos, random) -> surfaceSpawn(type, level, reason, pos, random) && fewNearby(type, level, pos, 64, 2), op);
+        // ice wraiths drift over snowfields at any hour; wispmothers walk the woods at night
+        event.register(ModEntities.ICE_WRAITH.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                (type, level, reason, pos, random) -> Monster.checkAnyLightMonsterSpawnRules(type, level, reason, pos, random)
+                        && (reason != MobSpawnType.NATURAL || level.getBiome(pos).value().coldEnoughToSnow(pos))
+                        && fewNearby(type, level, pos, 64, 2), op);
+        event.register(ModEntities.WISPMOTHER.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                (type, level, reason, pos, random) -> Monster.checkMonsterSpawnRules(type, level, reason, pos, random)
+                        && (reason != MobSpawnType.NATURAL || level.canSeeSky(pos)) && fewNearby(type, level, pos, 128, 1), op);
+        // creatures of the dark: caves, tombs, ruins and night
+        event.register(ModEntities.NECROMANCER.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                (type, level, reason, pos, random) -> Monster.checkMonsterSpawnRules(type, level, reason, pos, random)
+                        && fewNearby(type, level, pos, 64, 2), op);
+        event.register(ModEntities.VAMPIRE.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                (type, level, reason, pos, random) -> Monster.checkMonsterSpawnRules(type, level, reason, pos, random)
+                        && fewNearby(type, level, pos, 64, 2), op);
+        event.register(ModEntities.FALMER.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                (type, level, reason, pos, random) -> Monster.checkMonsterSpawnRules(type, level, reason, pos, random)
+                        && (reason != MobSpawnType.NATURAL || !level.canSeeSky(pos)) && fewNearby(type, level, pos, 48, 4), op);
+        event.register(ModEntities.FROSTBITE_SPIDER.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                (type, level, reason, pos, random) -> Monster.checkMonsterSpawnRules(type, level, reason, pos, random)
+                        && fewNearby(type, level, pos, 48, 3), op);
+        // dragons only come by attack events, quests and lairs, never by natural spawning
+        event.register(ModEntities.DRAGON.get(), SpawnPlacements.Type.NO_RESTRICTIONS, Heightmap.Types.MOTION_BLOCKING,
+                (type, level, reason, pos, random) -> reason != MobSpawnType.NATURAL && reason != MobSpawnType.CHUNK_GENERATION, op);
     }
 
     /**

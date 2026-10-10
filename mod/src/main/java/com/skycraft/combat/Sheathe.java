@@ -17,18 +17,16 @@ public final class Sheathe {
 
     public static boolean isSheathed(Player player) {
         if (player == null) return true;
-        PlayerData data = SkyData.get(player);
-        if (data == null) return false;
-        return data.module("combat").getBoolean("sheathed");
+        return SkyData.get(player).module("combat").getBoolean("sheathed");
     }
 
+    /** Changes the state; the server sends it to the owner and every tracking player (appearance sync). */
     public static void setSheathed(Player player, boolean sheathed) {
         if (player == null) return;
         PlayerData data = SkyData.get(player);
-        if (data != null) {
-            data.module("combat").putBoolean("sheathed", sheathed);
-            data.markDirty();
-        }
+        if (data.module("combat").getBoolean("sheathed") == sheathed) return;
+        data.module("combat").putBoolean("sheathed", sheathed);
+        data.markAppearanceDirty();
     }
 
     public static void toggle(Player player) {

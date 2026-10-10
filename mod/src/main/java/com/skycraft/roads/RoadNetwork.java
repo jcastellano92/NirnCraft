@@ -1,7 +1,9 @@
 package com.skycraft.roads;
 
 import com.skycraft.Skycraft;
+import com.skycraft.world.LocationTags;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -25,7 +27,6 @@ import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -43,8 +44,11 @@ import java.util.concurrent.Future;
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class RoadNetwork {
+    /** Legacy alias of {@code #skycraft:towns} (quests use it); see {@link LocationTags}. */
     public static final TagKey<Structure> SETTLEMENTS =
             TagKey.create(Registries.STRUCTURE, new ResourceLocation(Skycraft.MODID, "settlements"));
+    /** Non-town destinations get a single spur road to the nearest town within this fraction of maxDistance. */
+    private static final double SPUR_FACTOR = 0.5;
 
     private record FoundStart(Structure structure, long key, BoundingBox box) {
     }
@@ -91,6 +95,7 @@ public final class RoadNetwork {
         }
         RoadsData data = RoadsData.get(level);
         try {
+            if (!data.classified) reclassify(level, data);
             drainFound(level, data);
             drainLoaded(level, data);
             applyResults(level, data);
@@ -104,7 +109,10 @@ public final class RoadNetwork {
         }
     }
 
-    /** Clears snow settling on active road chunks near players so the road surface is always visible. */
+    /**
+     * Clears snow settling on active road chunks near players so the road surface is always visible. Snow layers are
+     * not motion blocking, so the top block comes from the WORLD_SURFACE heightmap.
+     */
     private static void clearRoadSnow(ServerLevel level, RoadsData data) {
         for (net.minecraft.server.level.ServerPlayer player : level.players()) {
             ChunkPos cp = player.chunkPosition();
@@ -118,7 +126,7 @@ public final class RoadNetwork {
                             for (int bz = 0; bz < 16; bz += 2) {
                                 int x = (cp.x + dx) * 16 + bx;
                                 int z = (cp.z + dz) * 16 + bz;
-                                int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
+                                int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
                                 net.minecraft.core.BlockPos above = new net.minecraft.core.BlockPos(x, y - 1, z);
                                 if (level.getBlockState(above).is(net.minecraft.world.level.block.Blocks.SNOW)) {
                                     net.minecraft.world.level.block.state.BlockState ground = level.getBlockState(above.below());
@@ -157,113 +165,120 @@ public final class RoadNetwork {
         FoundStart f;
         while ((f = FOUND.poll()) != null) {
             if (data.settlementByKey.containsKey(f.key())) continue;
-            Optional<ResourceKey<Structure>> key = registry.getResourceKey(f.structure());
-            if (key.isEmpty()) continue;
-            boolean settlement = registry.getHolder(key.get()).map(h -> h.is(SETTLEMENTS)).orElse(false);
-            if (!settlement) {
-                String path = key.get().location().getPath().toLowerCase();
-                String ns = key.get().location().getNamespace().toLowerCase();
-                if (path.contains("village") || path.contains("town") || path.contains("tavern") || path.contains("settlement")
-                        || path.contains("inn") || path.contains("hamlet") || path.contains("outpost")
-                        || ns.equals("ctov") || ns.equals("towns_and_towers") || ns.equals("dungeons_and_taverns")) {
-                    settlement = true;
-                }
-            }
-            if (!settlement) continue;
-            register(level, data, f, key.get().location());
+            Optional<Holder.Reference<Structure>> holder = registry.getResourceKey(f.structure()).flatMap(registry::getHolder);
+            if (holder.isEmpty()) continue;
+            // only explicit tags decide: towns get people, other destinations only a spur road
+            boolean town = holder.get().is(LocationTags.TOWNS);
+            if (!town && !holder.get().is(LocationTags.ROAD_DESTINATIONS)) continue;
+            register(level, data, f, holder.get(), town);
         }
     }
 
-    private static void register(ServerLevel level, RoadsData data, FoundStart f, ResourceLocation structure) {
+    /** Checks settlements loaded from an older save against the current tags (towns vs. other destinations). */
+    private static void reclassify(ServerLevel level, RoadsData data) {
+        data.classified = true;
+        for (Settlement s : new ArrayList<>(data.settlements)) {
+            ResourceLocation id = ResourceLocation.tryParse(s.structure);
+            if (id == null) continue;
+            // not in any tag any more (e.g. outposts registered by the old name heuristic): keep its roads, no people
+            data.setTown(s, LocationTags.is(level.registryAccess(), id, LocationTags.TOWNS));
+        }
+        data.rebuildLinks();
+    }
+
+    private static void register(ServerLevel level, RoadsData data, FoundStart f, Holder<Structure> holder, boolean town) {
+        ResourceLocation structure = holder.unwrapKey().map(ResourceKey::location).orElseThrow();
         BoundingBox box = f.box();
         ChunkPos startChunk = new ChunkPos(f.key());
         String locationId = SettlementNames.locationId(level.dimension(), structure, startChunk);
-        String name = SettlementNames.name(level.dimension(), structure, locationId);
+        String name = SettlementNames.name(level.dimension(), holder, structure, locationId);
         int cx = (box.minX() + box.maxX()) / 2;
         int cz = (box.minZ() + box.maxZ()) / 2;
         int cy = (box.minY() + box.maxY()) / 2;
         Settlement s = new Settlement(data.nextSettlementId++, f.key(), cx, cy, cz, box.minX(), box.minZ(), box.maxX(),
                 box.maxZ(), name, structure.toString(), locationId, false);
+        s.town = town;
         data.addSettlement(s);
         resolveY(level, s);
         Skycraft.LOGGER.debug("Skycraft roads: settlement {} ({}) at {}, {}", s.name, structure, s.x, s.z);
         planConnections(data, s);
     }
 
-    private static void resolveY(ServerLevel level, Settlement s) {
-        if (s.yResolved || level.getChunkSource().getChunkNow(s.x >> 4, s.z >> 4) == null) return;
+    /** Returns true if the height was resolved now. */
+    private static boolean resolveY(ServerLevel level, Settlement s) {
+        if (s.yResolved || level.getChunkSource().getChunkNow(s.x >> 4, s.z >> 4) == null) return false;
         s.y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, s.x, s.z);
         s.yResolved = true;
+        return true;
     }
 
-    /** Queues roads from {@code s} to its nearest settlements (or the nearest one at all if it would be isolated). */
+    /**
+     * Queues roads for a new destination. A town is linked to its nearest towns (or the nearest one at all if it
+     * would be isolated), its road group is bridged to the nearest other group, and dungeons near it that still lack
+     * a road get their spur. A dungeon gets one spur road to its nearest town. All lookups use the spatial grid and
+     * the incremental union-find, so the cost does not grow with the number of known settlements.
+     */
     static int planConnections(RoadsData data, Settlement s) {
         int maxDist = RoadsConfig.MAX_DISTANCE.get();
+        if (!s.town) return spur(data, s, maxDist) ? 1 : 0;
         int wanted = RoadsConfig.CONNECTIONS.get();
         int minDist = data.zoneRadius() * 2;
-        List<Settlement> others = new ArrayList<>(data.settlements);
-        others.remove(s);
-        if (others.isEmpty()) return 0;
-        others.sort(Comparator.comparingDouble(o -> s.distSq(o.x + 0.5, o.z + 0.5)));
+        List<Settlement> near = data.near(s.x, s.z, maxDist * 2.0, o -> o != s && o.town);
         int linked = 0, queued = 0;
-        for (Settlement o : others) {
+        for (Settlement o : near) {
             if (linked >= wanted) break;
             double d = Math.sqrt(s.distSq(o.x + 0.5, o.z + 0.5));
             if (d > maxDist) break;
+            if (data.failed.contains(RoadsData.pairKey(s.id, o.id))) continue; // unroutable: try the next one
             linked++;
             if (d < minDist) continue; // practically the same place
             if (queue(data, s, o)) queued++;
         }
         if (linked == 0) {
-            Settlement nearest = others.get(0);
-            if (Math.sqrt(s.distSq(nearest.x + 0.5, nearest.z + 0.5)) <= maxDist * 2.0 && queue(data, s, nearest)) queued++;
+            for (Settlement o : near) {
+                if (data.failed.contains(RoadsData.pairKey(s.id, o.id))) continue;
+                if (queue(data, s, o)) queued++;
+                break;
+            }
         }
-        queued += bridgeComponents(data, s, others, maxDist * 3.0);
+        queued += bridgeComponents(data, s, maxDist * 3.0);
+        // dungeons found before this town had nobody to connect to
+        for (Settlement o : data.near(s.x, s.z, maxDist * SPUR_FACTOR, o -> !o.town && !data.hasSpur(o.id))) {
+            if (spur(data, o, maxDist)) queued++;
+        }
         return queued;
     }
 
-    /**
-     * No orphan towns: if {@code s}'s connected group does not reach every known settlement, links the group to the
-     * nearest settlement of another group (within {@code limit} blocks).
-     */
-    private static int bridgeComponents(RoadsData data, Settlement s, List<Settlement> others, double limit) {
-        java.util.Map<Integer, Integer> parent = new java.util.HashMap<>();
-        for (Settlement o : data.settlements) parent.put(o.id, o.id);
-        for (long pair : data.pairs) {
-            int ra = find(parent, RoadsData.pairA(pair)), rb = find(parent, RoadsData.pairB(pair));
-            if (ra != rb) parent.put(ra, rb);
+    /** One road from a dungeon destination to its nearest town (if any is close enough). */
+    private static boolean spur(RoadsData data, Settlement s, int maxDist) {
+        if (data.hasSpur(s.id)) return false;
+        for (Settlement o : data.near(s.x, s.z, maxDist * SPUR_FACTOR, o -> o.town)) {
+            if (data.failed.contains(RoadsData.pairKey(s.id, o.id))) continue;
+            if (Math.sqrt(s.distSq(o.x + 0.5, o.z + 0.5)) < data.zoneRadius() * 2) return false; // part of the town
+            return queue(data, o, s);
         }
-        int mine = find(parent, s.id);
-        Settlement best = null;
-        Settlement from = null;
-        double bestD = Double.MAX_VALUE;
-        // nearest pair between s's group and any other group
-        for (Settlement a : data.settlements) {
-            if (find(parent, a.id) != mine) continue;
-            for (Settlement o : others) {
-                if (find(parent, o.id) == mine) continue;
-                double d = a.distSq(o.x + 0.5, o.z + 0.5);
-                if (d < bestD) {
-                    bestD = d;
-                    best = o;
-                    from = a;
-                }
-            }
-        }
-        if (best == null || Math.sqrt(bestD) > limit) return 0;
-        return queue(data, from, best) ? 1 : 0;
+        return false;
     }
 
-    private static int find(java.util.Map<Integer, Integer> parent, int x) {
-        int root = x;
-        while (parent.getOrDefault(root, root) != root) root = parent.get(root);
-        return root;
+    /**
+     * No orphan towns: if {@code s}'s connected group does not reach every known town, links {@code s} to the nearest
+     * town of another group (within {@code limit} blocks).
+     */
+    private static int bridgeComponents(RoadsData data, Settlement s, double limit) {
+        if (data.componentSize(s.id) >= data.townCount()) return 0;
+        int mine = data.find(s.id);
+        for (Settlement o : data.near(s.x, s.z, limit, o -> o.town && o != s)) {
+            if (data.find(o.id) == mine || data.failed.contains(RoadsData.pairKey(s.id, o.id))) continue;
+            return queue(data, s, o) ? 1 : 0;
+        }
+        return 0;
     }
 
     private static boolean queue(RoadsData data, Settlement a, Settlement b) {
         long key = RoadsData.pairKey(a.id, b.id);
-        if (!data.pairs.add(key)) return false;
+        if (data.failed.contains(key) || !data.pairs.add(key)) return false;
         data.pending.add(key);
+        data.link(a.id, b.id);
         data.setDirty();
         return true;
     }
@@ -278,10 +293,7 @@ public final class RoadNetwork {
             List<Settlement> centers = data.settlementByCenterChunk.get(chunk);
             if (centers != null) {
                 for (Settlement s : centers) {
-                    if (!s.yResolved) {
-                        resolveY(level, s);
-                        data.setDirty();
-                    }
+                    if (resolveY(level, s)) data.setDirty();
                 }
             }
         }
@@ -289,11 +301,12 @@ public final class RoadNetwork {
 
     /** Re-queues every loaded chunk that still needs paving (after roads changed). */
     static void queueLoaded(ServerLevel level, RoadsData data, LongOpenHashSet chunks) {
+        boolean changed = false;
         for (long c : chunks) {
-            data.paved.remove(c);
+            changed |= data.paved.remove(c);
             if (level.getChunkSource().getChunkNow(ChunkPos.getX(c), ChunkPos.getZ(c)) != null) Paver.enqueue(c);
         }
-        data.setDirty();
+        if (changed) data.setDirty();
     }
 
     // ------------------------------------------------------------------ planning
@@ -321,6 +334,7 @@ public final class RoadNetwork {
         Settlement b = data.settlement(RoadsData.pairB(pair));
         if (a == null || b == null) {
             data.pairs.remove(pair);
+            data.rebuildLinks();
             data.setDirty();
             return;
         }
@@ -349,15 +363,24 @@ public final class RoadNetwork {
             Settlement a = data.settlement(r.a()), b = data.settlement(r.b());
             if (a == null || b == null || r.xs().length < 2) {
                 data.pairs.remove(pair);
+                data.rebuildLinks();
                 data.setDirty();
+                if (a != null && b != null && !r.aborted()) {
+                    // no acceptable path (cliffs, open sea...): never retry this pair, link other neighbours instead
+                    data.failed.add(pair);
+                    Skycraft.LOGGER.debug("Skycraft roads: no path {} -> {} ({} expansions), trying other neighbours",
+                            a.name, b.name, r.expansions());
+                    planConnections(data, a);
+                    planConnections(data, b);
+                }
                 continue;
             }
             Road road = data.addRoad(r.a(), r.b(), r.xs(), r.zs(), r.flags());
             LongOpenHashSet touched = RoadLayout.layout(data, road); // before indexing: junctions see only other roads
             touched.addAll(data.indexRoad(road));
             queueLoaded(level, data, touched);
-            Skycraft.LOGGER.debug("Skycraft roads: road {} -> {} planned ({} points, {} m{}, {} expansions)", a.name, b.name,
-                    road.size(), Math.round(road.length()), r.fallback() ? ", straight fallback" : "", r.expansions());
+            Skycraft.LOGGER.debug("Skycraft roads: road {} -> {} planned ({} points, {} m, {} expansions)", a.name, b.name,
+                    road.size(), Math.round(road.length()), r.expansions());
         }
     }
 
@@ -369,7 +392,9 @@ public final class RoadNetwork {
         Paver.clear();
         data.clearRoads();
         int queued = 0;
-        for (Settlement s : data.settlements) queued += planConnections(data, s);
+        // towns first (the network), then the dungeons' spurs; each call is a local grid query, so this is O(n)
+        for (Settlement s : data.settlements) if (s.town) queued += planConnections(data, s);
+        for (Settlement s : data.settlements) if (!s.town) queued += planConnections(data, s);
         return queued;
     }
 

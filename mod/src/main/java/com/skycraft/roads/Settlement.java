@@ -3,8 +3,10 @@ package com.skycraft.roads;
 import net.minecraft.nbt.CompoundTag;
 
 /**
- * A town or village (a structure start in {@code #skycraft:settlements}). Positions are the structure's bounding box
- * center; the y coordinate is refined from the real heightmap once the center chunk is loaded.
+ * A road destination: a town, village or tavern ({@code #skycraft:towns}, {@link #town} true) or a dungeon the roads
+ * lead to ({@code #skycraft:road_destinations}). Only towns get people (settlers, innkeepers) and are returned by
+ * {@link RoadsData#settlements()}. Positions are the structure's bounding box center; the y coordinate is refined from
+ * the real heightmap once the center chunk is loaded.
  */
 public final class Settlement {
     /** Extra margin around the structure bounding box in which nothing is paved. */
@@ -25,6 +27,8 @@ public final class Settlement {
     public final String structure;
     /** The world module's location id ({@code dim|structure|cx,cz}) used to check discovery. */
     public final String locationId;
+    /** An inhabited town ({@code #skycraft:towns}); false for dungeons reached by a spur road. */
+    public boolean town = true;
 
     public Settlement(int id, long key, int x, int y, int z, int minX, int minZ, int maxX, int maxZ, String name,
                       String structure, String locationId, boolean yResolved) {
@@ -83,6 +87,7 @@ public final class Settlement {
         t.putString("structure", structure);
         t.putString("loc", locationId);
         t.putBoolean("yres", yResolved);
+        if (!town) t.putBoolean("dest", true);
         return t;
     }
 
@@ -90,7 +95,9 @@ public final class Settlement {
         int[] p = t.getIntArray("pos");
         int[] b = t.getIntArray("box");
         if (p.length < 3 || b.length < 4) return null;
-        return new Settlement(t.getInt("id"), t.getLong("key"), p[0], p[1], p[2], b[0], b[1], b[2], b[3],
+        Settlement s = new Settlement(t.getInt("id"), t.getLong("key"), p[0], p[1], p[2], b[0], b[1], b[2], b[3],
                 t.getString("name"), t.getString("structure"), t.getString("loc"), t.getBoolean("yres"));
+        s.town = !t.getBoolean("dest");
+        return s;
     }
 }

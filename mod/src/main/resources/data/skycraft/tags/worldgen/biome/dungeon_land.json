@@ -18,6 +18,10 @@
     {
       "id": "#forge:is_plains",
       "required": false
-    }
+    },
+    "#skycraft:spawns/plains",
+    "#skycraft:spawns/tundra",
+    "#skycraft:spawns/reach",
+    "#skycraft:spawns/swamp"
   ]
 }

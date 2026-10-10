@@ -22,6 +22,11 @@ public final class SpeechChecks {
     private SpeechChecks() {}
 
     public static boolean checkPersuade(ServerPlayer player, int difficulty) {
+        return checkPersuade(player, difficulty, true);
+    }
+
+    /** {@code awardXp} false: a repeat success on the same person teaches nothing new (no Speech XP farming). */
+    public static boolean checkPersuade(ServerPlayer player, int difficulty, boolean awardXp) {
         PlayerData data = SkyData.get(player);
         int baseSkill = data.getSkill(Skill.SPEECH);
         int bonus = 0;
@@ -31,7 +36,7 @@ public final class SpeechChecks {
 
         boolean success = effective >= difficulty || player.getRandom().nextFloat() < (float) effective / (difficulty * 1.35f);
         if (success) {
-            Progression.addSkillXp(player, Skill.SPEECH, difficulty * 2.5f);
+            if (awardXp) Progression.addSkillXp(player, Skill.SPEECH, difficulty * 2.5f);
             Notifier.message(player, Component.translatable("society.skycraft.speech.persuade_success"));
             player.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5f, 1.6f);
         } else {

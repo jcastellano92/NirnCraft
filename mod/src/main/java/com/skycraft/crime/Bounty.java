@@ -22,7 +22,7 @@ import java.util.Map;
  *     <li>{@code violent}: compound hold id -> 1 when the hold's bounty includes a murder</li>
  *     <li>{@code hostile_until}: game time until which guards attack on sight (resisting arrest / assault)</li>
  *     <li>{@code jail}: compound present while serving a sentence (see {@link Jail})</li>
- *     <li>{@code unlocked}: list of "dim|x|y|z" locks this player has picked (see {@link Locks})</li>
+ *     <li>{@code unlocked}: legacy list of picked locks, migrated into the world lock data on first use (see {@link Locks})</li>
  * </ul>
  */
 public final class Bounty {

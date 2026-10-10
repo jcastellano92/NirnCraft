@@ -1290,6 +1290,44 @@ def station_textures():
         px[x, 5] = hexc("5c3b22")
     out["armor_workbench_front"] = front
     out["armor_workbench_bottom"] = wood_planks(53, DARKWOOD)
+    # ---------------- homestead drafting table (blueprint pinned on a plank desk)
+    top = wood_planks(61, WOOD)
+    px = top.load()
+    paper, ink = hexc("d8ccae"), hexc("3c5a8a")
+    for y in range(2, 14):
+        for x in range(2, 14):
+            px[x, y] = paper if (x * 5 + y * 3) % 7 else hexc("cbbf9f")
+    for x in range(4, 12):  # floor plan: outer walls, an inner wall with a door gap
+        px[x, 4] = px[x, 11] = ink
+    for y in range(4, 12):
+        px[4, y] = px[11, y] = ink
+    for y in range(4, 12):
+        if y not in (7, 8):
+            px[8, y] = ink
+    for (x, y) in ((2, 2), (13, 2), (2, 13), (13, 13)):  # pins
+        px[x, y] = hexc("8a2a1e")
+    for i in range(5):  # quill lying on the corner
+        px[10 + i // 2, 13 - i] = hexc("f0ece0") if i else hexc("2a2a2a")
+    out["drafting_table_top"] = top
+    side = wood_planks(62, DARKWOOD)
+    px = side.load()
+    for x in range(16):
+        px[x, 0] = px[x, 1] = WOOD[2]
+        px[x, 2] = WOOD[0]
+    for y in range(3, 16):
+        for x in (1, 2, 13, 14):
+            px[x, y] = WOOD[1]
+    out["drafting_table_side"] = side
+    front = side.copy()
+    px = front.load()
+    for y in range(5, 10):  # rolled-up plans in a cubby
+        for x in range(4, 12):
+            px[x, y] = DARKWOOD[0]
+    for x in range(4, 12):
+        for y in (6, 7, 8):
+            px[x, y] = paper if (x + y) % 3 else hexc("bfb393")
+    out["drafting_table_front"] = front
+    out["drafting_table_bottom"] = wood_planks(63, DARKWOOD)
     return out
 
 

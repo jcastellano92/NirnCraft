@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:dark_forest",
+    {
+      "id": "terralith:moonlight_grove",
+      "required": false
+    },
+    {
+      "id": "terralith:moonlight_valley",
+      "required": false
+    }
+  ]
+}

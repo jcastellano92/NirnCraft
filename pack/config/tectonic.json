@@ -1,8 +1,0 @@
-{
-  "smoothTransitions": true,
-  "mountainScale": 1.4,
-  "valleyWidth": 1.3,
-  "increasedHeightLimit": false,
-  "undergroundRivers": true,
-  "enableDunes": true
-}

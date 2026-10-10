@@ -15,6 +15,7 @@ jobs:
   mod:
     name: Skycraft Core mod
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     defaults:
       run:
         working-directory: mod
@@ -44,6 +45,7 @@ jobs:
     name: Modpack (resolve, export, client & server packs)
     needs: mod
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -62,49 +64,64 @@ jobs:
         with:
           name: skycraft-core-jar
           path: mod-jar
-      - name: Resolve mods
+      - name: Locate Skycraft Core jar
         run: |
           JAR="$(ls mod-jar/*.jar | grep -v -- '-sources' | head -n1)"
-          tools/build-pack.sh "$JAR"
+          test -n "$JAR" && echo "CORE_JAR=$PWD/$JAR" >> "$GITHUB_ENV"
+      - name: Resolve mods
+        # Fails if any tools/modlist.txt entry can't be resolved. Skycraft Core is not part of the committed pack.
+        run: bash tools/build-pack.sh
       - name: Commit resolved pack
+        # Only pack metadata is committed (the core jar is git-ignored), and only when resolving changed something,
+        # i.e. tools/modlist.txt gained an entry or a .pw.toml was removed to update a mod.
         if: github.event_name == 'push'
         run: |
           git config user.name "skycraft-ci"
           git config user.email "skycraft-ci@users.noreply.github.com"
-          git add pack
-          if ! git diff --cached --quiet; then
+          git add -A pack
+          if git diff --cached --quiet; then
+            echo "Pack metadata unchanged; nothing to commit."
+          else
+            git diff --cached --stat
             git commit -m "[ci] Resolve modpack"
             if git pull --rebase origin "${GITHUB_REF_NAME}"; then
-              git push origin "HEAD:${GITHUB_REF_NAME}" || echo "Could not push resolved pack; next run will retry."
+              git push origin "HEAD:${GITHUB_REF_NAME}" || echo "::warning::Could not push resolved pack; next run will retry."
             else
               git rebase --abort || true
-              echo "Branch moved; resolved pack not pushed (next run will retry)."
+              echo "::warning::Branch moved; resolved pack not pushed (next run will retry)."
             fi
           fi
-      - name: Export Modrinth & CurseForge packs
-        working-directory: pack
-        run: |
-          mkdir -p ../dist
-          packwiz modrinth export -o ../dist/Skycraft.mrpack || true
-          packwiz curseforge export -o ../dist/Skycraft-curseforge.zip || true
       - name: Build client instance and server
-        run: tools/make-instances.sh
-      - name: Server smoke test (boot the full pack and generate the world)
-        run: tools/test-server.sh
-      - name: Client smoke test (headless autotest with software GL)
+        # Also creates dist/pack-build: the pack with Skycraft Core injected (tools/prepare-build-pack.sh).
+        run: bash tools/make-instances.sh "$CORE_JAR"
+      - name: Export Modrinth & CurseForge packs
+        working-directory: dist/pack-build
         run: |
-          sudo apt-get update && sudo apt-get install -y xvfb libgl1-mesa-dri libgl1-mesa-glx
-          tools/test-client.sh || true
+          packwiz modrinth export -o ../Skycraft.mrpack \
+            || echo "::warning::Modrinth export (Skycraft.mrpack) failed; see the log above."
+          packwiz curseforge export -o ../Skycraft-curseforge.zip \
+            || echo "::warning::CurseForge export failed (Modrinth-only mods can't be referenced); see the log above."
+      - name: Server smoke test (boot the full pack and generate the world)
+        timeout-minutes: 30
+        run: bash tools/test-server.sh
+      - name: Client smoke test (Skycraft dev client under Xvfb with software GL)
+        if: ${{ !cancelled() }}
+        timeout-minutes: 30
+        run: |
+          sudo apt-get update && sudo apt-get install -y xvfb libgl1 libgl1-mesa-dri
+          bash tools/test-client.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: server-test-logs
           path: dist/server-test
+          if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: client-test-logs
           path: dist/client-test
+          if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         with:
           name: Skycraft-client-instance
@@ -116,6 +133,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: Skycraft-exports
+          if-no-files-found: warn
           path: |
             dist/Skycraft.mrpack
             dist/Skycraft-curseforge.zip

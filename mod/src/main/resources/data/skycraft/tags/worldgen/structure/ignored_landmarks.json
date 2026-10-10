@@ -1,0 +1,463 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:buried_treasure",
+    "minecraft:nether_fossil",
+    {
+      "id": "mvs:acacia_log_pile",
+      "required": false
+    },
+    {
+      "id": "mvs:birch_log_pile",
+      "required": false
+    },
+    {
+      "id": "mvs:dark_oak_log_pile",
+      "required": false
+    },
+    {
+      "id": "mvs:jungle_log_pile",
+      "required": false
+    },
+    {
+      "id": "mvs:oak_log_pile",
+      "required": false
+    },
+    {
+      "id": "mvs:spruce_log_pile",
+      "required": false
+    },
+    {
+      "id": "mvs:acacia_tree",
+      "required": false
+    },
+    {
+      "id": "mvs:big_oak_tree",
+      "required": false
+    },
+    {
+      "id": "mvs:birch_tree",
+      "required": false
+    },
+    {
+      "id": "mvs:cherry_tree",
+      "required": false
+    },
+    {
+      "id": "mvs:dark_oak_tree",
+      "required": false
+    },
+    {
+      "id": "mvs:jungle_palm_tree",
+      "required": false
+    },
+    {
+      "id": "mvs:jungle_tree",
+      "required": false
+    },
+    {
+      "id": "mvs:oak_tree",
+      "required": false
+    },
+    {
+      "id": "mvs:spruce_tree",
+      "required": false
+    },
+    {
+      "id": "mvs:dead_tree_acacia",
+      "required": false
+    },
+    {
+      "id": "mvs:dead_tree_birch",
+      "required": false
+    },
+    {
+      "id": "mvs:dead_tree_cherry",
+      "required": false
+    },
+    {
+      "id": "mvs:dead_tree_dark_oak",
+      "required": false
+    },
+    {
+      "id": "mvs:dead_tree_jungle",
+      "required": false
+    },
+    {
+      "id": "mvs:dead_tree_mangrove",
+      "required": false
+    },
+    {
+      "id": "mvs:dead_tree_oak",
+      "required": false
+    },
+    {
+      "id": "mvs:dead_tree_spruce",
+      "required": false
+    },
+    {
+      "id": "mvs:tree_monument",
+      "required": false
+    },
+    {
+      "id": "mvs:bench",
+      "required": false
+    },
+    {
+      "id": "mvs:boulder",
+      "required": false
+    },
+    {
+      "id": "mvs:stone_rock",
+      "required": false
+    },
+    {
+      "id": "mvs:stone_pillars",
+      "required": false
+    },
+    {
+      "id": "mvs:pile",
+      "required": false
+    },
+    {
+      "id": "mvs:haystack",
+      "required": false
+    },
+    {
+      "id": "mvs:duck",
+      "required": false
+    },
+    {
+      "id": "mvs:mushroom_statue",
+      "required": false
+    },
+    {
+      "id": "mvs:villager_statue",
+      "required": false
+    },
+    {
+      "id": "mvs:stone_fountain",
+      "required": false
+    },
+    {
+      "id": "mvs:desert_pump",
+      "required": false
+    },
+    {
+      "id": "mvs:lamp_chest",
+      "required": false
+    },
+    {
+      "id": "mvs:cart",
+      "required": false
+    },
+    {
+      "id": "mvs:large_cart_1",
+      "required": false
+    },
+    {
+      "id": "mvs:large_cart_2",
+      "required": false
+    },
+    {
+      "id": "mvs:medium_bamboo_cart",
+      "required": false
+    },
+    {
+      "id": "mvs:red_stall",
+      "required": false
+    },
+    {
+      "id": "mvs:pink_stall",
+      "required": false
+    },
+    {
+      "id": "mvs:orange_stall",
+      "required": false
+    },
+    {
+      "id": "mvs:blue_stall",
+      "required": false
+    },
+    {
+      "id": "mvs:well",
+      "required": false
+    },
+    {
+      "id": "mvs:small_copper_well",
+      "required": false
+    },
+    {
+      "id": "mvs:small_well",
+      "required": false
+    },
+    {
+      "id": "mvs:acacia_well",
+      "required": false
+    },
+    {
+      "id": "mvs:birch_well",
+      "required": false
+    },
+    {
+      "id": "mvs:dark_oak_well",
+      "required": false
+    },
+    {
+      "id": "mvs:desert_well",
+      "required": false
+    },
+    {
+      "id": "mvs:jungle_well",
+      "required": false
+    },
+    {
+      "id": "mvs:oak_well",
+      "required": false
+    },
+    {
+      "id": "mvs:rocky_well",
+      "required": false
+    },
+    {
+      "id": "mvs:snowy_well",
+      "required": false
+    },
+    {
+      "id": "mvs:spruce_well",
+      "required": false
+    },
+    {
+      "id": "mvs:rare_well",
+      "required": false
+    },
+    {
+      "id": "mvs:mushroom_well",
+      "required": false
+    },
+    {
+      "id": "mvs:small_tower_well",
+      "required": false
+    },
+    {
+      "id": "mvs:nether_well",
+      "required": false
+    },
+    {
+      "id": "mvs:medium_oak_lantern",
+      "required": false
+    },
+    {
+      "id": "mvs:small_acacia_lantern",
+      "required": false
+    },
+    {
+      "id": "mvs:small_bamboo_lantern",
+      "required": false
+    },
+    {
+      "id": "mvs:small_birch_lantern",
+      "required": false
+    },
+    {
+      "id": "mvs:small_campfire_lantern",
+      "required": false
+    },
+    {
+      "id": "mvs:small_cherry_lantern",
+      "required": false
+    },
+    {
+      "id": "mvs:small_dark_oak_lantern",
+      "required": false
+    },
+    {
+      "id": "mvs:small_jungle_lantern",
+      "required": false
+    },
+    {
+      "id": "mvs:small_mangrove_lantern",
+      "required": false
+    },
+    {
+      "id": "mvs:small_oak_lantern",
+      "required": false
+    },
+    {
+      "id": "mvs:small_spruce_lantern",
+      "required": false
+    },
+    {
+      "id": "mvs:flower_hole",
+      "required": false
+    },
+    {
+      "id": "mvs:mushroom_pond",
+      "required": false
+    },
+    {
+      "id": "mvs:small_oak_pond",
+      "required": false
+    },
+    {
+      "id": "mvs:lecturn_garden",
+      "required": false
+    },
+    {
+      "id": "mvs:bee_dome",
+      "required": false
+    },
+    {
+      "id": "mvs:crystal",
+      "required": false
+    },
+    {
+      "id": "mvs:floating_islands",
+      "required": false
+    },
+    {
+      "id": "mvs:large_floating_island",
+      "required": false
+    },
+    {
+      "id": "mvs:large_mushroom",
+      "required": false
+    },
+    {
+      "id": "mvs:sunzi_gate",
+      "required": false
+    },
+    {
+      "id": "mvs:paths",
+      "required": false
+    },
+    {
+      "id": "mvs:railway",
+      "required": false
+    },
+    {
+      "id": "mvs:wheat_grain_bin",
+      "required": false
+    },
+    {
+      "id": "mvs:wooden_wheat_farm",
+      "required": false
+    },
+    {
+      "id": "mvs:horse_pen",
+      "required": false
+    },
+    {
+      "id": "mvs:out_house",
+      "required": false
+    },
+    {
+      "id": "mvs:fire_camp",
+      "required": false
+    },
+    {
+      "id": "mvs:snowy_fossil",
+      "required": false
+    },
+    {
+      "id": "mvs:crimson_enchanting_table",
+      "required": false
+    },
+    {
+      "id": "mvs:nether_devil",
+      "required": false
+    },
+    {
+      "id": "explorify:guide_post_cold",
+      "required": false
+    },
+    {
+      "id": "explorify:guide_post_warm",
+      "required": false
+    },
+    {
+      "id": "explorify:supply_cache/birch",
+      "required": false
+    },
+    {
+      "id": "explorify:supply_cache/dark",
+      "required": false
+    },
+    {
+      "id": "explorify:supply_cache/desert",
+      "required": false
+    },
+    {
+      "id": "explorify:supply_cache/forest",
+      "required": false
+    },
+    {
+      "id": "explorify:supply_cache/jungle",
+      "required": false
+    },
+    {
+      "id": "explorify:supply_cache/mangrove",
+      "required": false
+    },
+    {
+      "id": "explorify:supply_cache/taiga",
+      "required": false
+    },
+    {
+      "id": "nova_structures:well_spruce",
+      "required": false
+    },
+    {
+      "id": "nova_structures:well_birch",
+      "required": false
+    },
+    {
+      "id": "nova_structures:well_dark_oak",
+      "required": false
+    },
+    {
+      "id": "nova_structures:well_jungle",
+      "required": false
+    },
+    {
+      "id": "nova_structures:well_oak",
+      "required": false
+    },
+    {
+      "id": "nova_structures:well_savana",
+      "required": false
+    },
+    {
+      "id": "dungeons_arise:wishing_well",
+      "required": false
+    },
+    {
+      "id": "vampirism:hunter_camp",
+      "required": false
+    },
+    {
+      "id": "terralith:rubble_forest",
+      "required": false
+    },
+    {
+      "id": "terralith:rubble_taiga",
+      "required": false
+    },
+    {
+      "id": "terralith:rubble_jungle",
+      "required": false
+    },
+    {
+      "id": "terralith:rubble_mesa",
+      "required": false
+    },
+    {
+      "id": "terralith:rubble_mountain",
+      "required": false
+    },
+    {
+      "id": "terralith:rubble_desert",
+      "required": false
+    }
+  ]
+}

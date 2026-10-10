@@ -2,7 +2,6 @@ package com.skycraft.creatures.entity;
 
 import com.skycraft.core.Notifier;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -12,7 +11,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -37,9 +35,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.Heightmap;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -97,9 +93,9 @@ public class GiantEntity extends Monster {
                                         @Nullable SpawnGroupData data, @Nullable CompoundTag tag) {
         data = super.finalizeSpawn(level, difficulty, reason, data, tag);
         initialize();
-        if ((reason == MobSpawnType.NATURAL || reason == MobSpawnType.CHUNK_GENERATION) && level.getRandom().nextFloat() < 0.6f) {
-            placeCampfire(level, level.getRandom());
-        }
+        // Giants keep near where they appeared. Their camps (campfire and all) are the skycraft:giant_camp structure;
+        // a roaming giant never builds one.
+        setHome(this.blockPosition());
         return data;
     }
 
@@ -108,24 +104,6 @@ public class GiantEntity extends Monster {
         initialized = true;
         this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BONE));
         this.setDropChance(EquipmentSlot.MAINHAND, 0.0f);
-    }
-
-    /** Giants camp around a fire in the open. */
-    private void placeCampfire(ServerLevelAccessor level, RandomSource random) {
-        for (int attempt = 0; attempt < 8; attempt++) {
-            int x = this.getBlockX() + random.nextInt(9) - 4;
-            int z = this.getBlockZ() + random.nextInt(9) - 4;
-            int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-            BlockPos pos = new BlockPos(x, y, z);
-            BlockPos below = pos.below();
-            if (Math.abs(y - this.getBlockY()) > 3) continue;
-            if (!level.getBlockState(pos).isAir() || !level.getFluidState(below).isEmpty()) continue;
-            if (!level.getBlockState(below).isFaceSturdy(level, below, Direction.UP)) continue;
-            level.setBlock(pos, Blocks.CAMPFIRE.defaultBlockState(), 3);
-            setHome(pos);
-            return;
-        }
-        setHome(this.blockPosition());
     }
 
     public void setHome(BlockPos pos) {

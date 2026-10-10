@@ -48,6 +48,8 @@ import java.util.UUID;
 public final class QuestSpawner {
     public static final String TAG_OWNER = "skycraft_quest_owner";
     public static final String TAG_QUEST = "skycraft_quest_id";
+    /** Entity (scoreboard) tag on quest bosses: they get their boss bar back whenever they rejoin a level. */
+    public static final String BOSS_TAG = "skycraft_quest_boss";
 
     /** Vanilla stand-ins used when the creatures module's entity isn't registered. */
     private static final Map<String, String> FALLBACKS = Map.of(
@@ -166,22 +168,12 @@ public final class QuestSpawner {
             boolean target = spec.getBoolean("target");
             for (int n = 0; n < count; n++) {
                 BlockPos p = target && n == 0 ? base : scatter(level, base, o.placement, r);
-                Entity e = create(level, spec.getString("type"));
-                if (e == null) continue;
-                e.moveTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, r.nextFloat() * 360f, 0f);
-                if (e instanceof Mob mob) {
-                    ForgeEventFactory.onFinalizeSpawn(mob, level, level.getCurrentDifficultyAt(p), MobSpawnType.EVENT, null, null);
-                    mob.setPersistenceRequired();
-                }
-                decorate(e, spec, target && n == 0);
-                e.getPersistentData().putString(TAG_OWNER, owner);
-                e.getPersistentData().putString(TAG_QUEST, quest.id);
-                if (level.addFreshEntity(e)) {
+                Entity e = spawnOne(level, owner, quest, spec, p, target && n == 0);
+                if (e != null) {
                     o.spawnedIds.add(e.getUUID());
                     if (target && n == 0) {
                         o.target = e.getUUID().toString();
                         targetSet = true;
-                        if (spec.getBoolean("boss")) BossBars.track(e);
                     }
                 }
             }
@@ -193,6 +185,48 @@ public final class QuestSpawner {
             o.radius = Math.max(o.radius, 32);
         }
         return !o.spawnedIds.isEmpty();
+    }
+
+    /** Creates, decorates, tags and adds one quest entity; null if it couldn't be added. */
+    @Nullable
+    private static Entity spawnOne(ServerLevel level, String owner, Quest quest, CompoundTag spec, BlockPos p, boolean isTarget) {
+        Entity e = create(level, spec.getString("type"));
+        if (e == null) return null;
+        e.moveTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, level.random.nextFloat() * 360f, 0f);
+        if (e instanceof Mob mob) {
+            ForgeEventFactory.onFinalizeSpawn(mob, level, level.getCurrentDifficultyAt(p), MobSpawnType.EVENT, null, null);
+            mob.setPersistenceRequired();
+        }
+        decorate(e, spec, isTarget);
+        e.getPersistentData().putString(TAG_OWNER, owner);
+        e.getPersistentData().putString(TAG_QUEST, quest.id);
+        // the boss bar comes back whenever the boss is (re)loaded (see QuestEvents#onEntityJoin)
+        if (isTarget && spec.getBoolean("boss")) e.addTag(BOSS_TAG);
+        if (!level.addFreshEntity(e)) return null;
+        if (e.getTags().contains(BOSS_TAG)) BossBars.track(e);
+        return e;
+    }
+
+    /**
+     * The KILL_TARGET vanished (despawned or removed by something else, confirmed while its surroundings were
+     * loaded): spawns only the target again, where it was last seen. The rest of the group is left alone.
+     */
+    public static boolean respawnTarget(ServerLevel level, String owner, Quest quest, Objective o) {
+        for (int i = 0; i < o.spawns.size(); i++) {
+            CompoundTag spec = o.spawns.getCompound(i);
+            if (!spec.getBoolean("target")) continue;
+            BlockPos p = surface(level, o.pos.getX(), o.pos.getZ());
+            if ("structure".equals(o.placement)) {
+                BlockPos s = scanDown(level, o.pos.above(2), 8);
+                if (s != null) p = s;
+            }
+            Entity e = spawnOne(level, owner, quest, spec, p, true);
+            if (e == null) return false;
+            o.spawnedIds.add(e.getUUID());
+            o.target = e.getUUID().toString();
+            return true;
+        }
+        return false;
     }
 
     private static void decorate(Entity e, CompoundTag spec, boolean isTarget) {

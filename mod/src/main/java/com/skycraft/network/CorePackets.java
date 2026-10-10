@@ -1,15 +1,21 @@
 package com.skycraft.network;
 
+import com.skycraft.Skycraft;
 import com.skycraft.client.ClientPacketHandlers;
 import com.skycraft.core.PlayerData;
 import com.skycraft.core.Race;
 import com.skycraft.core.SkyData;
+import com.skycraft.dig.PlacedBlocks;
 import com.skycraft.perk.Perk;
 import com.skycraft.perk.Perks;
 import com.skycraft.skills.Progression;
 import com.skycraft.vitals.ActionHandler;
 import com.skycraft.vitals.Vitals;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,6 +24,10 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 /** Packets owned by the core (player data sync, notifications, level-up choices, perks, race, key actions). */
@@ -36,12 +46,53 @@ public final class CorePackets {
         SkyNetwork.register(HarvestBlock.class, NetworkDirection.PLAY_TO_SERVER, HarvestBlock::encode, HarvestBlock::decode, HarvestBlock::handle);
         SkyNetwork.register(ContainerTake.class, NetworkDirection.PLAY_TO_SERVER, ContainerTake::encode, ContainerTake::decode, ContainerTake::handle);
         SkyNetwork.register(ContainerStore.class, NetworkDirection.PLAY_TO_SERVER, ContainerStore::encode, ContainerStore::decode, ContainerStore::handle);
+        SkyNetwork.register(SyncProgress.class, NetworkDirection.PLAY_TO_CLIENT, SyncProgress::encode, SyncProgress::decode, SyncProgress::handle);
+        SkyNetwork.register(SyncAppearance.class, NetworkDirection.PLAY_TO_CLIENT, SyncAppearance::encode, SyncAppearance::decode, SyncAppearance::handle);
+        SkyNetwork.register(PlacedBlocksSync.class, NetworkDirection.PLAY_TO_CLIENT, PlacedBlocksSync::encode, PlacedBlocksSync::decode, PlacedBlocksSync::handle);
     }
 
     // ------------------------------------------------------------------ S2C
 
-    /** Full player data sync. */
+    /** Full player data sync (owner only). Built through {@link #of(PlayerData)} so it always fits in one packet. */
     public record SyncData(CompoundTag tag) {
+        /** Vanilla's client-bound custom payload limit is 1 MiB; stay well below it. */
+        private static final int MAX_BYTES = 900_000;
+
+        /**
+         * Serializes the player's data. If it would not fit in a packet, the largest module tags are left out (and
+         * listed in {@code "omitted"}, so the client keeps its previous copy) instead of disconnecting the player.
+         */
+        public static SyncData of(PlayerData data) {
+            CompoundTag tag = data.save();
+            int size = sizeOf(tag);
+            if (size <= MAX_BYTES) return new SyncData(tag);
+            CompoundTag modules = tag.getCompound("modules");
+            List<String> bySize = new ArrayList<>(modules.getAllKeys());
+            Map<String, Integer> sizes = new HashMap<>();
+            for (String k : bySize) sizes.put(k, sizeOf(modules.getCompound(k)));
+            bySize.sort((a, b) -> Integer.compare(sizes.get(b), sizes.get(a)));
+            ListTag omitted = new ListTag();
+            for (String k : bySize) {
+                if (size <= MAX_BYTES) break;
+                modules.remove(k);
+                omitted.add(StringTag.valueOf(k));
+                size -= sizes.get(k);
+                Skycraft.LOGGER.warn("Player data module '{}' is {} bytes; not syncing it to the client", k, sizes.get(k));
+            }
+            tag.put("omitted", omitted);
+            return new SyncData(tag);
+        }
+
+        private static int sizeOf(CompoundTag tag) {
+            ByteBuf raw = Unpooled.buffer();
+            try {
+                new FriendlyByteBuf(raw).writeNbt(tag);
+                return raw.readableBytes();
+            } finally {
+                raw.release();
+            }
+        }
+
         static void encode(SyncData m, FriendlyByteBuf buf) {
             buf.writeNbt(m.tag);
         }
@@ -52,6 +103,61 @@ public final class CorePackets {
 
         static void handle(SyncData m, Supplier<NetworkEvent.Context> ctx) {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientPacketHandlers.syncData(m.tag));
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
+    /** Small, throttled update of skills, level, attribute pools, perk points, gold and stats (owner only). */
+    public record SyncProgress(CompoundTag tag) {
+        static void encode(SyncProgress m, FriendlyByteBuf buf) {
+            buf.writeNbt(m.tag);
+        }
+
+        static SyncProgress decode(FriendlyByteBuf buf) {
+            return new SyncProgress(buf.readNbt());
+        }
+
+        static void handle(SyncProgress m, Supplier<NetworkEvent.Context> ctx) {
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientPacketHandlers.syncProgress(m.tag));
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
+    /** Race, sheathe state and apparel of a player, sent to everyone tracking them (see {@link PlayerData#appearance()}). */
+    public record SyncAppearance(int entityId, CompoundTag tag) {
+        static void encode(SyncAppearance m, FriendlyByteBuf buf) {
+            buf.writeVarInt(m.entityId);
+            buf.writeNbt(m.tag);
+        }
+
+        static SyncAppearance decode(FriendlyByteBuf buf) {
+            return new SyncAppearance(buf.readVarInt(), buf.readNbt());
+        }
+
+        static void handle(SyncAppearance m, Supplier<NetworkEvent.Context> ctx) {
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientPacketHandlers.syncAppearance(m.entityId, m.tag));
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
+    /**
+     * Player-placed block positions of one chunk ({@link PlacedBlocks}). {@code full} replaces the client's set for
+     * the chunk; otherwise {@code added}/{@code removed} are deltas.
+     */
+    public record PlacedBlocksSync(long chunk, boolean full, long[] added, long[] removed) {
+        static void encode(PlacedBlocksSync m, FriendlyByteBuf buf) {
+            buf.writeLong(m.chunk);
+            buf.writeBoolean(m.full);
+            buf.writeLongArray(m.added);
+            buf.writeLongArray(m.removed);
+        }
+
+        static PlacedBlocksSync decode(FriendlyByteBuf buf) {
+            return new PlacedBlocksSync(buf.readLong(), buf.readBoolean(), buf.readLongArray(), buf.readLongArray());
+        }
+
+        static void handle(PlacedBlocksSync m, Supplier<NetworkEvent.Context> ctx) {
+            PlacedBlocks.applyClientSync(m.chunk, m.full, m.added, m.removed);
             ctx.get().setPacketHandled(true);
         }
     }

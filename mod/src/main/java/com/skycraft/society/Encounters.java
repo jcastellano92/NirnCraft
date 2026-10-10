@@ -207,7 +207,10 @@ public final class Encounters {
             if (mob.isRemoved() || mob.level() != level) continue;
             CompoundTag t = tag(mob);
             if (t == null) continue;
-            if ((mob instanceof TamableAnimal ta && ta.isTame()) || mob.getLeashHolder() instanceof Player) {
+            // adopted: tamed, leashed, recruited as a follower, made persistent, or part of a quest
+            if ((mob instanceof TamableAnimal ta && ta.isTame()) || mob.getLeashHolder() instanceof Player
+                    || Followers.isFollower(mob) || mob.isPersistenceRequired()
+                    || mob.getPersistentData().contains(com.skycraft.quest.QuestSpawner.TAG_QUEST)) {
                 mob.getPersistentData().remove(TAG);
                 continue;
             }

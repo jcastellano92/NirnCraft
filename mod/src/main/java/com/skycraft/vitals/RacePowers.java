@@ -81,7 +81,7 @@ public final class RacePowers {
         if (!Buffs.active(player, "fire_cloak")) return;
         for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(3), m -> m instanceof Enemy)) {
             mob.setSecondsOnFire(2);
-            mob.hurt(player.damageSources().indirectMagic(player, player), 2f);
+            com.skycraft.combat.CombatHandler.secondaryHurt(mob, player.damageSources().indirectMagic(player, player), 2f);
         }
     }
 }

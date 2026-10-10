@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.phys.AABB;
+import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -59,13 +60,18 @@ public final class Theft {
         final BlockPos pos;
         final List<Entry> container;
         final List<Entry> inventory;
+        /** Wallet gold when the menu opened: coins taken may be deposited into the wallet before the menu closes. */
+        final long walletBefore;
+        /** Items taken out of the container and thrown out of the screen (already tagged stolen). */
+        final List<Entry> tossed = new ArrayList<>();
         boolean seen;
 
-        Session(int containerId, BlockPos pos, List<Entry> container, List<Entry> inventory) {
+        Session(int containerId, BlockPos pos, List<Entry> container, List<Entry> inventory, long walletBefore) {
             this.containerId = containerId;
             this.pos = pos;
             this.container = container;
             this.inventory = inventory;
+            this.walletBefore = walletBefore;
         }
     }
 
@@ -138,8 +144,31 @@ public final class Theft {
             if (!(be instanceof Container) || !isOwned(level, click.pos())) return;
         }
 
-        Session s = new Session(menu.containerId, click.pos(), countMenu(menu, player), countInventory(player));
+        Session s = new Session(menu.containerId, click.pos(), countMenu(menu, player), countInventory(player),
+                Currency.balance(player));
         SESSIONS.put(player.getUUID(), s);
+    }
+
+    /** Items thrown out of an owned container's screen are stolen too (they left the container without reaching the bags). */
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onToss(ItemTossEvent event) {
+        if (event.isCanceled() || !(event.getPlayer() instanceof ServerPlayer player)) return;
+        Session s = SESSIONS.get(player.getUUID());
+        if (s == null || player.containerMenu.containerId != s.containerId) return;
+        ItemStack stack = event.getEntity().getItem();
+        if (stack.isEmpty()) return;
+        // only as many as the container is now missing (and not already accounted for as thrown)
+        int missing = countOf(s.container, stack) - countOf(countMenu(player.containerMenu, player), stack) - countOf(s.tossed, stack);
+        int n = Math.min(missing, stack.getCount());
+        if (n <= 0) return;
+        ItemStack proto = stack.copy();
+        proto.setCount(1);
+        add(s.tossed, proto.copyWithCount(n));
+        if (!player.isCreative()) {
+            ItemStack tagged = stack.copy();
+            Bounty.markStolen(tagged);
+            event.getEntity().setItem(tagged);
+        }
     }
 
     /** Every second while an owned container is open: did someone see the player take something? */
@@ -171,15 +200,32 @@ public final class Theft {
         List<Entry> inventoryAfter = countInventory(player);
         int stolenCount = 0;
         long stolenValue = 0;
+        long coinsRemovedValue = 0;
+        int coinsRemoved = 0;
         for (Entry before : s.container) {
             int removed = before.count - countOf(containerAfter, before.proto);
             if (removed <= 0) continue;
+            if (Currency.valueOf(before.proto) > 0) {
+                // coins are paid into the wallet (now or on close), so they are counted by value below
+                coinsRemoved += removed;
+                coinsRemovedValue += unitValue(before.proto) * removed;
+                continue;
+            }
+            int tossed = Math.min(removed, countOf(s.tossed, before.proto));
             int gained = countOf(inventoryAfter, before.proto) - countOf(s.inventory, before.proto);
-            int stolen = Math.min(removed, gained);
-            if (stolen <= 0) continue;
-            int tagged = tagStolen(player, before.proto, stolen);
-            stolenCount += tagged;
-            stolenValue += unitValue(before.proto) * (long) tagged;
+            int stolen = Math.min(removed - tossed, gained);
+            int tagged = stolen > 0 ? tagStolen(player, before.proto, stolen) : 0;
+            stolenCount += tagged + tossed;
+            stolenValue += unitValue(before.proto) * (long) (tagged + tossed);
+        }
+        if (coinsRemovedValue > 0) {
+            long coinGain = Currency.balance(player) - s.walletBefore
+                    + coinValue(inventoryAfter) - coinValue(s.inventory) + coinValue(s.tossed);
+            long stolenGold = Math.min(coinsRemovedValue, Math.max(0, coinGain));
+            if (stolenGold > 0) {
+                stolenValue += stolenGold;
+                stolenCount += (int) Math.max(1, Math.round(coinsRemoved * (double) stolenGold / coinsRemovedValue));
+            }
         }
         if (stolenCount <= 0) return;
 
@@ -243,10 +289,8 @@ public final class Theft {
                 continue;
             }
 
-            // If timer expired, witness escaped and reported the crime to hold authorities
-            // If timer expired, witness only reports if they reached guards near a settlement
+            // If the timer expired, the witness only reports (once) if they reached guards near a settlement
             if (r.timer()[0] <= 0) {
-                Crimes.report(player, r.pos(), r.bounty(), true, null);
                 List<net.minecraft.world.entity.Mob> settlementGuards = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, witness.getBoundingBox().inflate(32), Crimes::isGuard);
                 if (!settlementGuards.isEmpty()) {
                     Crimes.report(player, r.pos(), r.bounty(), true, null);
@@ -395,6 +439,12 @@ public final class Theft {
         ItemStack proto = stack.copy();
         proto.setCount(1);
         list.add(new Entry(proto, stack.getCount()));
+    }
+
+    private static long coinValue(List<Entry> list) {
+        long sum = 0;
+        for (Entry e : list) sum += Currency.valueOf(e.proto) * e.count;
+        return sum;
     }
 
     private static int countOf(List<Entry> list, ItemStack proto) {

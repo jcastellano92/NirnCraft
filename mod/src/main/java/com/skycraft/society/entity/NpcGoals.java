@@ -25,6 +25,7 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BowItem;
+import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
@@ -178,7 +179,7 @@ final class NpcGoals {
                         cooldown = 25 + npc.getRandom().nextInt(15);
                     }
                 }
-            } else if (--cooldown <= 0 && seeTime >= -60 && npc.getMainHandItem().getItem() instanceof BowItem) {
+            } else if (--cooldown <= 0 && seeTime >= -60 && npc.getMainHandItem().getItem() instanceof net.minecraft.world.item.ProjectileWeaponItem) {
                 npc.startUsingItem(InteractionHand.MAIN_HAND);
             }
         }
@@ -584,7 +585,16 @@ final class NpcGoals {
 
     // ------------------------------------------------------------------ followers
 
-    /** Contract 11: A follower stays with their player, protects them in combat, or waits when told. */
+    /** Whether a follower has a live enemy close enough to fight (then the fighting goals take over). */
+    static boolean fighting(NpcEntity npc) {
+        LivingEntity t = npc.getTarget();
+        return t != null && t.isAlive() && npc.distanceToSqr(t) <= 24 * 24;
+    }
+
+    /**
+     * Contract 11: A follower stays with their player or waits when told. It yields to the melee/bow/caster goals
+     * while it has a live target nearby ({@link FollowerDefend} picks that target).
+     */
     static final class Follower extends Goal {
         private final NpcEntity npc;
         private int checkCooldown;
@@ -596,7 +606,12 @@ final class NpcGoals {
 
         @Override
         public boolean canUse() {
-            return com.skycraft.society.Followers.isFollower(npc);
+            return com.skycraft.society.Followers.isFollower(npc) && !fighting(npc);
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return canUse();
         }
 
         @Override
@@ -608,6 +623,12 @@ final class NpcGoals {
             if (ownerId == null) return;
             Player owner = level.getPlayerByUUID(ownerId);
             if (owner == null || !owner.isAlive()) return;
+            // one follower per player, even across restarts: a stale one lets go here
+            if (!com.skycraft.society.Followers.validate(npc, owner)) return;
+            // scale with the owner/region as they level up (no-op unless the level changed)
+            if (npc.tickCount % 200 < 20) com.skycraft.society.Followers.rescale(npc, owner, false);
+            // a far-away target isn't worth leaving the owner for
+            if (npc.getTarget() != null && !fighting(npc)) npc.setTarget(null);
 
             if (com.skycraft.society.Followers.isWaiting(npc)) {
                 npc.getNavigation().stop();
@@ -631,17 +652,44 @@ final class NpcGoals {
             } else if (distSq < 2.5 * 2.5) {
                 npc.getNavigation().stop();
             }
+        }
+    }
 
-            // Combat support: defend owner
-            LivingEntity ownerTarget = owner.getLastHurtMob();
-            if (ownerTarget != null && ownerTarget.isAlive() && !ownerTarget.isAlliedTo(npc) && ownerTarget != npc) {
-                npc.setTarget(ownerTarget);
-            } else {
-                LivingEntity attacker = owner.getLastHurtByMob();
-                if (attacker != null && attacker.isAlive() && !attacker.isAlliedTo(npc) && attacker != npc) {
-                    npc.setTarget(attacker);
-                }
-            }
+    /**
+     * Target goal: a following (not waiting) follower engages whoever hurt its owner, or whom the owner hit, in the
+     * last 10 s (see {@link com.skycraft.society.Followers#defendTarget}). Never players or allies.
+     */
+    static final class FollowerDefend extends Goal {
+        private final NpcEntity npc;
+        @Nullable
+        private LivingEntity pick;
+
+        FollowerDefend(NpcEntity npc) {
+            this.npc = npc;
+            this.setFlags(EnumSet.of(Flag.TARGET));
+        }
+
+        @Override
+        public boolean canUse() {
+            if ((npc.tickCount + npc.getId()) % 10 != 0) return false;
+            if (!com.skycraft.society.Followers.isFollower(npc) || com.skycraft.society.Followers.isWaiting(npc) || !npc.canFight()) return false;
+            if (fighting(npc)) return false;
+            UUID ownerId = com.skycraft.society.Followers.getOwnerId(npc);
+            Player owner = ownerId == null ? null : npc.level().getPlayerByUUID(ownerId);
+            if (owner == null || !owner.isAlive()) return false;
+            pick = com.skycraft.society.Followers.defendTarget(npc, owner);
+            return pick != null;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return false;
+        }
+
+        @Override
+        public void start() {
+            npc.setTarget(pick);
+            pick = null;
         }
     }
 
@@ -653,6 +701,9 @@ final class NpcGoals {
         private int cooldown;
         private int warnTimer = 0;
         private BlockPos bedPos = null;
+        private int nextBedSearch;
+        @Nullable
+        private UUID reported;
 
         NightRest(NpcEntity npc) {
             this.npc = npc;
@@ -698,7 +749,9 @@ final class NpcGoals {
                 npc.getLookControl().setLookAt(trespasser, 30f, 30f);
                 if (warnTimer == 40) {
                     Barks.say(npc, net.minecraft.network.chat.Component.literal("Leave now, or I'll call the guards!"));
-                } else if (warnTimer > 200) {
+                } else if (warnTimer > 200 && !trespasser.getUUID().equals(reported)) {
+                    // reported once per intrusion; leaving and coming back is a new one
+                    reported = trespasser.getUUID();
                     Barks.say(npc, net.minecraft.network.chat.Component.literal("Guards! Help! An intruder!"));
                     if (trespasser instanceof net.minecraft.server.level.ServerPlayer sp) {
                         com.skycraft.crime.Crimes.report(sp, npc.blockPosition(), 25, true, null);
@@ -706,11 +759,11 @@ final class NpcGoals {
                     if (npc.role().combatant) {
                         npc.setTarget(trespasser);
                     }
-                    warnTimer = 0;
                 }
                 return;
             } else {
                 warnTimer = 0;
+                reported = null;
             }
 
             if (npc.isSleeping()) return;
@@ -721,8 +774,12 @@ final class NpcGoals {
             BlockPos home = npc.getHome();
             if (home == null) home = npc.blockPosition();
 
-            if (bedPos == null || !level.getBlockState(bedPos).is(BlockTags.BEDS)) {
-                bedPos = findNearbyBed(level, home, 12);
+            // each NPC has its own bed claim (POI lookup, cached on the NPC); retry a failed search every ~30 s
+            if (bedPos == null || !bedPos.equals(npc.getBed())) {
+                if (npc.getBed() != null || npc.tickCount >= nextBedSearch) {
+                    bedPos = com.skycraft.society.Settlers.claimBed(npc, home);
+                    if (bedPos == null) nextBedSearch = npc.tickCount + 600;
+                }
             }
 
             if (bedPos != null) {
@@ -731,9 +788,15 @@ final class NpcGoals {
                     npc.getNavigation().moveTo(bedPos.getX() + 0.5, bedPos.getY(), bedPos.getZ() + 0.5, 0.65D);
                 } else {
                     npc.getNavigation().stop();
-                    try {
-                        npc.startSleeping(bedPos);
-                    } catch (Exception ignored) {}
+                    BlockState bed = level.getBlockState(bedPos);
+                    if (!bed.is(BlockTags.BEDS)) {
+                        com.skycraft.society.Settlers.releaseBed(npc);
+                        bedPos = null;
+                    } else if (!(bed.hasProperty(BedBlock.OCCUPIED) && bed.getValue(BedBlock.OCCUPIED))) {
+                        try {
+                            npc.startSleeping(bedPos);
+                        } catch (Exception ignored) {}
+                    }
                 }
             } else {
                 double distSq = npc.distanceToSqr(home.getX() + 0.5, home.getY(), home.getZ() + 0.5);
@@ -746,7 +809,7 @@ final class NpcGoals {
         }
 
         private Player findTrespasser() {
-            BlockPos home = npc.getHome();
+            BlockPos home = npc.getBed();
             if (home == null) return null;
             var level = npc.level();
             // Only indoor trespassing at night
@@ -760,21 +823,6 @@ final class NpcGoals {
                     if (p.distanceToSqr(home.getX() + 0.5, home.getY() + 0.5, home.getZ() + 0.5) > 16.0) continue;
                     if (com.skycraft.crime.Ownership.isOwnedByOther(p, level, p.blockPosition())) {
                         return p;
-                    }
-                }
-            }
-            return null;
-        }
-
-        private static BlockPos findNearbyBed(net.minecraft.world.level.Level level, BlockPos center, int radius) {
-            BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
-            for (int dx = -radius; dx <= radius; dx++) {
-                for (int dy = -2; dy <= 3; dy++) {
-                    for (int dz = -radius; dz <= radius; dz++) {
-                        m.set(center.getX() + dx, center.getY() + dy, center.getZ() + dz);
-                        if (level.getBlockState(m).is(BlockTags.BEDS)) {
-                            return m.immutable();
-                        }
                     }
                 }
             }

@@ -35,11 +35,25 @@ public final class InventoryEvents {
         }
     }
 
-    /** Convert any coin purse or septims sitting in player inventory directly into gold. */
+    /**
+     * Convert any coin purse or septims sitting in player inventory directly into gold (every 10 ticks). Not while a
+     * container is open: coins taken from a chest stay coins until the menu closes, so theft detection (crime module)
+     * sees them leave the container as items.
+     */
     @SubscribeEvent
     public static void onPlayerTick(net.minecraftforge.event.TickEvent.PlayerTickEvent event) {
         if (event.phase != net.minecraftforge.event.TickEvent.Phase.END || event.player.level().isClientSide) return;
-        var inv = event.player.getInventory();
+        if (event.player.tickCount % 10 != 0 || event.player.containerMenu != event.player.inventoryMenu) return;
+        convertCoins(event.player);
+    }
+
+    @SubscribeEvent
+    public static void onContainerClose(net.minecraftforge.event.entity.player.PlayerContainerEvent.Close event) {
+        if (!event.getEntity().level().isClientSide) convertCoins(event.getEntity());
+    }
+
+    private static void convertCoins(net.minecraft.world.entity.player.Player player) {
+        var inv = player.getInventory();
         long totalFound = 0;
         for (int i = 0; i < inv.getContainerSize(); i++) {
             net.minecraft.world.item.ItemStack stack = inv.getItem(i);
@@ -50,7 +64,7 @@ public final class InventoryEvents {
             }
         }
         if (totalFound > 0) {
-            com.skycraft.core.Currency.give(event.player, totalFound);
+            com.skycraft.core.Currency.give(player, totalFound);
         }
     }
 

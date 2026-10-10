@@ -55,6 +55,15 @@ public class MammothEntity extends FaunaAnimal {
                 .add(Attributes.FOLLOW_RANGE, 20.0);
     }
 
+    /** Entity tag of the mammoths spawned with a roaming giant: they despawn like it, when no player is near. */
+    public static final String HERD_TAG = "skycraft.giant_herd";
+
+    /** Animals never despawn; a roaming giant's herd does (unless someone leashed or named one). */
+    @Override
+    public boolean removeWhenFarAway(double distanceToClosestPlayer) {
+        return this.getTags().contains(HERD_TAG) && !this.isLeashed() && !this.hasCustomName();
+    }
+
     /** The creatures module's giant type, if registered. */
     @Nullable
     public static EntityType<?> giantType() {

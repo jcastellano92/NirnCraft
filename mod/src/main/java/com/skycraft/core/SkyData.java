@@ -18,14 +18,17 @@ public final class SkyData {
     public static final Capability<PlayerData> CAP = CapabilityManager.get(new CapabilityToken<>() {});
     public static final ResourceLocation KEY = new ResourceLocation(Skycraft.MODID, "player_data");
 
-    /** Fallback used if the capability is somehow missing (e.g. during early client init) so callers never NPE. */
-    private static final PlayerData FALLBACK = new PlayerData();
-
     private SkyData() {}
 
+    /**
+     * The player's data. If the capability is somehow missing (e.g. during early client init) a fresh, throwaway
+     * instance is returned so callers never NPE (never a shared object: writes to it must not leak across players
+     * or sides).
+     */
     public static PlayerData get(Player player) {
-        if (player == null) return FALLBACK;
-        return player.getCapability(CAP).orElse(FALLBACK);
+        if (player == null) return new PlayerData();
+        PlayerData data = player.getCapability(CAP).orElse(null);
+        return data != null ? data : new PlayerData();
     }
 
     public static boolean has(Player player) {

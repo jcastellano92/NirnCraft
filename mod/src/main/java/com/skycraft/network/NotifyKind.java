@@ -2,8 +2,6 @@ package com.skycraft.network;
 
 /** Kinds of HUD notifications, each with its own Skyrim-style presentation. */
 public enum NotifyKind {
-    /** Skill meter popup on XP gain (value = skill ordinal, progress = bar fill). */
-    SKILL_XP,
     /** "Mining increased to 23" (value = skill ordinal, progress = bar fill). */
     SKILL_UP,
     /** Big "LEVEL UP" banner. */

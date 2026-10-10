@@ -36,8 +36,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -49,8 +47,7 @@ import net.minecraftforge.fml.common.Mod;
 
 /**
  * Forge-bus rules of the arsenal: arrow bookkeeping (corpse arrows, contract 27), headshots, elemental arrows,
- * armor-piercing crossbows, leveled weapon drops from humanoid hostiles, kill-cam triggers and the lifetime of
- * staff effects (calm, fury, familiars, Wabbajack chickens).
+ * armor-piercing crossbows, leveled weapon drops from humanoid hostiles, kill-cam triggers and Wabbajack chickens.
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ArsenalEvents {
@@ -119,10 +116,6 @@ public final class ArsenalEvents {
         LivingEntity victim = event.getEntity();
         if (victim.level().isClientSide) return;
         DamageSource source = event.getSource();
-
-        // a calmed creature wakes up when hurt
-        victim.getPersistentData().remove(StaffEffects.CALM_UNTIL);
-
         if (!(source.getDirectEntity() instanceof AbstractArrow arrow)) return;
         float amount = event.getAmount();
 
@@ -213,8 +206,8 @@ public final class ArsenalEvents {
     public static void onDrops(LivingDropsEvent event) {
         LivingEntity victim = event.getEntity();
         CompoundTag pd = victim.getPersistentData();
-        if (pd.hasUUID(StaffEffects.SUMMON_OWNER) || pd.contains(StaffEffects.WABBAJACK_ORIGINAL)) {
-            event.setCanceled(true); // summons and Wabbajack chickens leave nothing behind
+        if (pd.contains(StaffEffects.WABBAJACK_ORIGINAL)) {
+            event.setCanceled(true); // Wabbajack chickens leave nothing behind (summons: see magic's Summons)
             return;
         }
         if (!(event.getSource().getEntity() instanceof ServerPlayer killer) || !(victim instanceof Mob) || !(victim instanceof Enemy)) return;
@@ -239,7 +232,7 @@ public final class ArsenalEvents {
     @SubscribeEvent
     public static void onXp(LivingExperienceDropEvent event) {
         CompoundTag pd = event.getEntity().getPersistentData();
-        if (pd.hasUUID(StaffEffects.SUMMON_OWNER) || pd.contains(StaffEffects.WABBAJACK_ORIGINAL)) event.setCanceled(true);
+        if (pd.contains(StaffEffects.WABBAJACK_ORIGINAL)) event.setCanceled(true);
     }
 
     // ------------------------------------------------------------------ kill cams
@@ -263,15 +256,18 @@ public final class ArsenalEvents {
         Vec3 dir = arrow ? direct.getDeltaMovement() : victim.position().subtract(killer.position());
         if (dir.lengthSqr() < 1.0E-4) dir = killer.getViewVector(1f);
         dir = dir.normalize();
+        // Sent on the killing blow, before the loot body replaces the victim: the packet carries where the victim was.
+        Vec3 mid = victim.position().add(0, victim.getBbHeight() * 0.55, 0);
         SkyNetwork.sendToPlayer(killer, new ArsenalPackets.KillCam(victim.getId(),
                 arrow ? ArsenalPackets.KillCam.ARROW : ArsenalPackets.KillCam.MELEE, arrow ? direct.getId() : -1,
-                (float) dir.x, (float) dir.y, (float) dir.z));
+                (float) dir.x, (float) dir.y, (float) dir.z, (float) mid.x, (float) mid.y, (float) mid.z));
         killer.playNotifySound(SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1f, 0.55f);
         killer.playNotifySound(SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.8f, 0.7f);
     }
 
     // ------------------------------------------------------------------ staff effect lifetimes
 
+    /** Wabbajack chickens turn back. (Summons, calm and fury are status effects / summons of the magic module.) */
     @SubscribeEvent
     public static void onLivingTick(LivingEvent.LivingTickEvent event) {
         LivingEntity e = event.getEntity();
@@ -279,43 +275,8 @@ public final class ArsenalEvents {
         CompoundTag pd = e.getPersistentData();
         if (pd.isEmpty()) return;
         long now = e.level().getGameTime();
-        if (pd.contains(StaffEffects.SUMMON_UNTIL) && now > pd.getLong(StaffEffects.SUMMON_UNTIL)) {
-            StaffEffects.unsummon(e);
-            return;
-        }
         if (pd.contains(StaffEffects.WABBAJACK_UNTIL) && now > pd.getLong(StaffEffects.WABBAJACK_UNTIL) && pd.contains(StaffEffects.WABBAJACK_ORIGINAL)) {
             StaffEffects.unchicken(e);
-            return;
-        }
-        if (pd.contains(StaffEffects.FURY_UNTIL)) {
-            if (now > pd.getLong(StaffEffects.FURY_UNTIL)) {
-                pd.remove(StaffEffects.FURY_UNTIL);
-            } else if (e instanceof Mob mob && (mob.getTarget() == null || mob.getTarget() instanceof Player || !mob.getTarget().isAlive())) {
-                StaffEffects.retargetFury(mob);
-            }
-        }
-        if (pd.contains(StaffEffects.CALM_UNTIL) && now > pd.getLong(StaffEffects.CALM_UNTIL)) pd.remove(StaffEffects.CALM_UNTIL);
-    }
-
-    @SubscribeEvent
-    public static void onChangeTarget(LivingChangeTargetEvent event) {
-        LivingEntity e = event.getEntity();
-        if (e.level().isClientSide || event.getNewTarget() == null) return;
-        CompoundTag pd = e.getPersistentData();
-        if (pd.contains(StaffEffects.CALM_UNTIL) && e.level().getGameTime() <= pd.getLong(StaffEffects.CALM_UNTIL)) {
-            event.setCanceled(true);
-        } else if (pd.contains(StaffEffects.FURY_UNTIL) && event.getNewTarget() instanceof Player
-                && e.level().getGameTime() <= pd.getLong(StaffEffects.FURY_UNTIL)) {
-            event.setCanceled(true);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onAttack(LivingAttackEvent event) {
-        if (!(event.getSource().getEntity() instanceof Mob attacker) || attacker.level().isClientSide) return;
-        CompoundTag pd = attacker.getPersistentData();
-        if (pd.contains(StaffEffects.CALM_UNTIL) && attacker.level().getGameTime() <= pd.getLong(StaffEffects.CALM_UNTIL)) {
-            event.setCanceled(true);
         }
     }
 }

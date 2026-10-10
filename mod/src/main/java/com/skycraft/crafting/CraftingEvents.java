@@ -24,6 +24,8 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.UUID;
@@ -88,7 +90,10 @@ public final class CraftingEvents {
                 new ItemStack(CraftingItems.HIDE.get())));
     }
 
-    /** The vanilla crafting stations open their Skyrim equivalents. */
+    /**
+     * The vanilla crafting stations open their Skyrim equivalents. Sneaking with an item places it as usual; sneaking
+     * empty-handed opens the vanilla crafting table / furnace / smoker / anvil / grindstone / smithing table.
+     */
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         var state = event.getLevel().getBlockState(event.getPos());
@@ -112,17 +117,32 @@ public final class CraftingEvents {
             }
         }
 
+        // Sneaking with something in hand places the held block / uses the item (vanilla), never a station menu.
+        Player user = event.getEntity();
+        boolean handsEmpty = user.getMainHandItem().isEmpty() && user.getOffhandItem().isEmpty();
+        boolean sneaking = user.isSecondaryUseActive();
+        if (sneaking && !handsEmpty) return;
+
         StationType stationType = null;
         boolean isCooking = false;
         boolean isEnchanter = false;
         boolean isAlchemy = false;
 
         if (b == Blocks.CARTOGRAPHY_TABLE) {
+            if (sneaking) return; // vanilla cartography table
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.SUCCESS);
             if (event.getLevel().isClientSide) {
-                net.minecraft.client.Minecraft.getInstance().setScreen(new com.skycraft.world.client.MapScreen());
+                DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.world.client.MapClient.openMap());
             }
+            return;
+        }
+
+        // Sneak + empty hand opens the vanilla block instead (3x3 crafting grid, furnace smelting, anvil, smoker,
+        // grindstone, smithing table): vanilla recipes and the shipped crafting/smelting JSONs stay usable.
+        if (sneaking && (b == Blocks.CRAFTING_TABLE || b == Blocks.SMITHING_TABLE || b == Blocks.FURNACE
+                || b == Blocks.BLAST_FURNACE || b == Blocks.SMOKER || b == Blocks.GRINDSTONE
+                || b instanceof net.minecraft.world.level.block.AnvilBlock)) {
             return;
         }
 
@@ -134,8 +154,11 @@ public final class CraftingEvents {
             stationType = StationType.FORGE;
         } else if (b == Blocks.GRINDSTONE) {
             stationType = StationType.GRINDSTONE;
-        } else if (b == Blocks.SMOKER || b == Blocks.CAMPFIRE || b == Blocks.SOUL_CAMPFIRE) {
+        } else if (b == Blocks.SMOKER) {
             isCooking = true;
+        } else if (b == Blocks.CAMPFIRE || b == Blocks.SOUL_CAMPFIRE) {
+            // Only an empty-handed use cooks Skyrim meals; flint and steel, shovels and raw food on the fire stay vanilla.
+            isCooking = user.getMainHandItem().isEmpty() && !sneaking;
         } else if (b == Blocks.ENCHANTING_TABLE) {
             isEnchanter = true;
         } else if (b == Blocks.BREWING_STAND) {

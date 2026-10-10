@@ -1,20 +1,30 @@
 # Skycraft mod list for Minecraft 1.20.1 / Forge 47.4.10
 # Format: <source>:<slug> [| <fallback source>:<slug>]   # comment
 # Sources: mr = Modrinth, cf = CurseForge. tools/build-pack.sh resolves each entry with packwiz
-# (dependencies are added automatically) and reports anything it cannot resolve.
+# (dependencies are added automatically) and fails if any entry can't be resolved.
+# An entry whose pack/<mods|shaderpacks|resourcepacks>/<slug>.pw.toml already exists keeps that pinned version;
+# to update a mod, edit or delete its .pw.toml.
+# Skycraft prefers its own implementations over third-party feature mods: trees, followers, NPC dialogue, the map
+# and physics are Skycraft Core's. Library and performance mods are fine.
 
 # --- Performance (runs efficiently, even with huge view distances) ---
-mr:embeddium                     # Sodium-based renderer for Forge
-mr:oculus                        # shader support (works with Distant Horizons)
+mr:embeddium                     # Sodium-based renderer for Forge (client)
+mr:oculus                        # shader support (works with Distant Horizons) (client)
 mr:distanthorizons               # Distant Horizons: LOD terrain to the horizon
 mr:modernfix                     # faster launch, lower memory
 mr:ferrite-core                  # memory usage
-mr:entityculling                 # skip rendering hidden entities
+mr:saturn                        # more memory savings (complements FerriteCore/ModernFix)
+mr:entityculling                 # skip rendering hidden entities (client)
+mr:immediatelyfast               # faster immediate-mode rendering: HUD, text, maps (client)
+mr:dynamic-fps                   # lower FPS when the window is in the background (client)
 mr:canary                        # Lithium port: server tick optimisations
+mr:krypton-fnp                   # Krypton (FNP/Reno): faster networking stack
+mr:clumps                        # merges XP orbs: fewer entities
+mr:structure-layout-optimizer    # faster jigsaw structure generation (towns, dungeons)
 mr:memoryleakfix
 mr:spark                         # profiler for diagnosing lag
 
-# --- Core RPG behaviour (Skycraft Core is added from mod/build/libs) ---
+# --- Core RPG behaviour (Skycraft Core is injected at build time from mod/build/libs; see docs/DEVELOPING.md) ---
 mr:lootr                         # per-player loot chests: every player gets their own dungeon loot
 mr:better-combat                 # directional combos and weapon swings
 mr:corpse                        # player corpses keep your gear when you die
@@ -24,11 +34,9 @@ mr:controllable | cf:controllable   # controller support (Steam Deck, gamepads)
 mr:default-options               # ships default keybinds for new players
 mr:essential                     # easy multiplayer hosting/invites with friends, skins & cosmetics
 mr:itemphysic-lite | cf:item-physic-lite   # dropped items lie in the world with physics (Skyrim clutter)
-mr:physicsmod                    # ragdoll bodies and physics effects (client)
 
-# --- NPCs, companions, factions ---
-cf:minecraft-comes-alive-reborn  # named villagers with dialogue, relationships, marriage
-mr:easy-npc                      # admins can place custom quest NPCs with dialogue
+# --- NPCs, factions (companions/followers are Skycraft's own) ---
+mr:minecraft-comes-alive-reborn | cf:minecraft-comes-alive-reborn   # MCA Reborn: named, human-looking villagers (pinned to a stable release)
 
 # --- Vampires, werewolves ---
 mr:vampirism                     # vampirism: become a vampire (or hunter)
@@ -57,7 +65,6 @@ mr:yungs-extras
 # --- Survival: fishing, cooking, gear, backpacks, sleeping ---
 cf:aquaculture | mr:aquaculture     # fishing overhaul (feeds the Fishing skill)
 mr:comforts                         # sleeping bags and hammocks for camping
-mr:treechop                         # falling tree physics: tree topples as one physical object and crumbles
 
 # --- Shaders (optional, client) ---
 mr:complementary-reimagined         # shader pack with Distant Horizons support

@@ -19,6 +19,9 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.DispenserMenu;
+import net.minecraft.world.inventory.HopperMenu;
+import net.minecraft.world.inventory.ShulkerBoxMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
@@ -32,6 +35,8 @@ import java.util.UUID;
 public final class ActionHandler {
     private static final Map<UUID, Long> POWER_ATTACK_ARMED = new HashMap<>();
     private static final Set<UUID> BLOCKING = new HashSet<>();
+    /** Last accepted CLIMB_TICK per player: {game time, y}. */
+    private static final Map<UUID, double[]> LAST_CLIMB = new HashMap<>();
 
     private ActionHandler() {}
 
@@ -71,7 +76,8 @@ public final class ActionHandler {
         for (net.minecraft.world.entity.LivingEntity target : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, box, e -> e != player && e.isAlive())) {
             if (player.distanceTo(target) < 3.0) {
                 float bashDmg = 4.0f + (com.skycraft.perk.Perks.has(player, "block.deadly_bash") ? 6.0f : 0f);
-                target.hurt(player.damageSources().playerAttack(player), bashDmg);
+                // A bash is not a weapon swing: no swing stamina, multipliers or weapon XP.
+                com.skycraft.combat.CombatHandler.secondaryHurt(target, player.damageSources().playerAttack(player), bashDmg);
                 target.knockback(0.6, -look.x, -look.z);
                 break;
             }
@@ -129,10 +135,18 @@ public final class ActionHandler {
      * Never equips into the player's active held hand slot unless completely full.
      */
     public static boolean addToBags(Player player, ItemStack stack) {
+        return addToBags(player, stack, true);
+    }
+
+    /**
+     * @param walletCoins false keeps coins as items (taken from a container: they become gold when the menu closes,
+     *                    see InventoryEvents, so theft detection sees them leave the container)
+     */
+    public static boolean addToBags(Player player, ItemStack stack, boolean walletCoins) {
         if (stack.isEmpty()) return true;
 
         // Auto-deposit currency directly into gold wallet
-        long coinVal = com.skycraft.core.Currency.valueOf(stack);
+        long coinVal = walletCoins ? com.skycraft.core.Currency.valueOf(stack) : 0;
         if (coinVal > 0) {
             com.skycraft.core.Currency.give(player, coinVal);
             stack.setCount(0);
@@ -210,24 +224,50 @@ public final class ActionHandler {
         }
     }
 
+    /**
+     * The client sends CLIMB_TICK every 5 ticks while clinging to a wall. The server rate-limits it, checks the
+     * player is really against a sturdy wall face, and only cancels fall damage for a continuing climb that isn't
+     * dropping fast (so spamming the packet while falling does nothing).
+     */
     private static void handleClimbTick(ServerPlayer player) {
-        BlockPos pos = player.blockPosition();
-        boolean nearWall = false;
+        if (player.isSpectator() || player.isPassenger() || player.isInWater()) return;
+        long now = player.level().getGameTime();
+        double[] last = LAST_CLIMB.get(player.getUUID());
+        if (last != null && now - (long) last[0] < 3) return; // rate limit
+        if (!againstWall(player)) {
+            LAST_CLIMB.remove(player.getUUID());
+            return;
+        }
+        LAST_CLIMB.put(player.getUUID(), new double[]{now, player.getY()});
+        boolean continuing = last != null && now - (long) last[0] <= 12 && player.getY() >= last[1] - 1.0;
+        float cost = Perks.has(player, "athletics.climber") ? 0.8f : 1.2f;
+        if (Vitals.consumeStamina(player, cost, false)) {
+            Progression.addSkillXp(player, Skill.ATHLETICS, 0.15f);
+            if (continuing) player.resetFallDistance();
+        } else {
+            Vitals.isExhausted(player);
+        }
+    }
+
+    /** True if a sturdy block face is right next to the player's body (feet or head level). */
+    private static boolean againstWall(ServerPlayer player) {
+        var level = player.level();
+        var box = player.getBoundingBox();
+        BlockPos feet = player.blockPosition();
         for (Direction dir : Direction.Plane.HORIZONTAL) {
-            if (player.level().getBlockState(pos.relative(dir)).isSolid()) {
-                nearWall = true;
-                break;
+            // distance from the body's side to the neighbouring block column on that side
+            double gap = switch (dir) {
+                case NORTH -> box.minZ - feet.getZ();
+                case SOUTH -> feet.getZ() + 1 - box.maxZ;
+                case WEST -> box.minX - feet.getX();
+                default -> feet.getX() + 1 - box.maxX;
+            };
+            if (gap > 0.45) continue;
+            for (BlockPos p : new BlockPos[]{feet.relative(dir), feet.above().relative(dir)}) {
+                if (level.getBlockState(p).isFaceSturdy(level, p, dir.getOpposite())) return true;
             }
         }
-        if (nearWall) {
-            float cost = Perks.has(player, "athletics.climber") ? 0.8f : 1.2f;
-            if (Vitals.consumeStamina(player, cost, false)) {
-                Progression.addSkillXp(player, Skill.ATHLETICS, 0.15f);
-                player.resetFallDistance();
-            } else {
-                Vitals.isExhausted(player);
-            }
-        }
+        return false;
     }
 
     private static void handleUnstuck(ServerPlayer player) {
@@ -261,53 +301,39 @@ public final class ActionHandler {
     public static void forget(UUID player) {
         POWER_ATTACK_ARMED.remove(player);
         BLOCKING.remove(player);
+        LAST_CLIMB.remove(player);
+    }
+
+    // ------------------------------------------------------------------ Skyrim container screen (take / store)
+
+    /**
+     * Number of container slots at the start of the menu if it is a plain storage container (chests, barrels,
+     * corpses and followers use ChestMenu; shulker boxes, hoppers, dispensers/droppers), else -1. Other menus
+     * (furnaces, crafting stations, modded machines) have slot rules this shortcut must not bypass.
+     */
+    private static int storageSlots(ServerPlayer player, int containerId) {
+        AbstractContainerMenu menu = player.containerMenu;
+        if (menu == null || menu == player.inventoryMenu || menu.containerId != containerId || !menu.stillValid(player)) return -1;
+        int count;
+        if (menu instanceof ChestMenu cm) count = cm.getRowCount() * 9;
+        else if (menu instanceof ShulkerBoxMenu || menu instanceof HopperMenu || menu instanceof DispenserMenu) count = menu.slots.size() - 36;
+        else return -1;
+        return count > 0 && count <= menu.slots.size() ? count : -1;
     }
 
     public static void handleContainerTake(ServerPlayer player, int containerId, int slotIndex, boolean all) {
-        if (player == null || !player.isAlive()) return;
-        AbstractContainerMenu menu = player.containerMenu;
-        if (menu == null || menu == player.inventoryMenu || menu.containerId != containerId) return;
-
-        int containerSlotCount = (menu instanceof ChestMenu cm)
-                ? cm.getRowCount() * 9
-                : Math.max(0, menu.slots.size() - 36);
+        if (player == null || !player.isAlive() || player.isSpectator()) return;
+        int containerSlotCount = storageSlots(player, containerId);
         if (containerSlotCount <= 0) return;
+        AbstractContainerMenu menu = player.containerMenu;
 
         boolean takenAny = false;
         if (all) {
             for (int i = 0; i < containerSlotCount; i++) {
-                Slot slot = menu.getSlot(i);
-                if (slot != null && slot.hasItem()) {
-                    ItemStack stack = slot.getItem();
-                    int countBefore = stack.getCount();
-                    addToBags(player, stack);
-                    if (stack.getCount() < countBefore) {
-                        takenAny = true;
-                        if (stack.isEmpty()) {
-                            slot.set(ItemStack.EMPTY);
-                        } else {
-                            slot.setChanged();
-                        }
-                    }
-                }
+                takenAny |= takeSlot(player, menu.getSlot(i));
             }
-        } else {
-            if (slotIndex >= 0 && slotIndex < containerSlotCount) {
-                Slot slot = menu.getSlot(slotIndex);
-                if (slot != null && slot.hasItem()) {
-                    ItemStack stack = slot.getItem();
-                    int countBefore = stack.getCount();
-                    addToBags(player, stack);
-                    if (stack.getCount() < countBefore) {
-                        takenAny = true;
-                        if (stack.isEmpty()) {
-                            slot.set(ItemStack.EMPTY);
-                        } else {
-                            slot.setChanged();
-                        }
-                    }
-                }
-            }
+        } else if (slotIndex >= 0 && slotIndex < containerSlotCount) {
+            takenAny = takeSlot(player, menu.getSlot(slotIndex));
         }
 
         if (takenAny) {
@@ -318,51 +344,37 @@ public final class ActionHandler {
         }
     }
 
-    public static void handleContainerStore(ServerPlayer player, int containerId, int slotIndex, boolean all) {
-        if (player == null || !player.isAlive()) return;
-        AbstractContainerMenu menu = player.containerMenu;
-        if (menu == null || menu == player.inventoryMenu || menu.containerId != containerId) return;
+    /** Takes a container slot into the bags through the slot's own rules (mayPickup / onTake); leftovers go back. */
+    private static boolean takeSlot(ServerPlayer player, Slot slot) {
+        if (slot == null || !slot.hasItem() || !slot.mayPickup(player)) return false;
+        ItemStack taken = slot.safeTake(slot.getItem().getCount(), Integer.MAX_VALUE, player);
+        if (taken.isEmpty()) return false;
+        int before = taken.getCount();
+        addToBags(player, taken, false);
+        boolean moved = taken.getCount() < before;
+        if (!taken.isEmpty()) {
+            ItemStack rest = slot.safeInsert(taken);
+            if (!rest.isEmpty()) player.getInventory().placeItemBackInInventory(rest);
+        }
+        return moved;
+    }
 
-        int containerSlotCount = (menu instanceof ChestMenu cm)
-                ? cm.getRowCount() * 9
-                : Math.max(0, menu.slots.size() - 36);
+    public static void handleContainerStore(ServerPlayer player, int containerId, int slotIndex, boolean all) {
+        if (player == null || !player.isAlive() || player.isSpectator()) return;
+        int containerSlotCount = storageSlots(player, containerId);
         if (containerSlotCount <= 0) return;
+        AbstractContainerMenu menu = player.containerMenu;
 
         boolean storedAny = false;
         if (all) {
             for (int i = containerSlotCount; i < menu.slots.size(); i++) {
                 Slot pSlot = menu.getSlot(i);
-                if (pSlot != null && pSlot.hasItem()) {
-                    ItemStack stack = pSlot.getItem();
-                    // Don't store actively held mainhand or offhand item when storing all
-                    if (stack == player.getMainHandItem() || stack == player.getOffhandItem()) {
-                        continue;
-                    }
-                    if (storeIntoContainerSlots(menu, containerSlotCount, stack)) {
-                        storedAny = true;
-                        if (stack.isEmpty()) {
-                            pSlot.set(ItemStack.EMPTY);
-                        } else {
-                            pSlot.setChanged();
-                        }
-                    }
-                }
+                // Don't store actively held mainhand or offhand item when storing all
+                if (pSlot.getItem() == player.getMainHandItem() || pSlot.getItem() == player.getOffhandItem()) continue;
+                storedAny |= storeSlot(player, menu, containerSlotCount, pSlot);
             }
-        } else {
-            if (slotIndex >= containerSlotCount && slotIndex < menu.slots.size()) {
-                Slot pSlot = menu.getSlot(slotIndex);
-                if (pSlot != null && pSlot.hasItem()) {
-                    ItemStack stack = pSlot.getItem();
-                    if (storeIntoContainerSlots(menu, containerSlotCount, stack)) {
-                        storedAny = true;
-                        if (stack.isEmpty()) {
-                            pSlot.set(ItemStack.EMPTY);
-                        } else {
-                            pSlot.setChanged();
-                        }
-                    }
-                }
-            }
+        } else if (slotIndex >= containerSlotCount && slotIndex < menu.slots.size()) {
+            storedAny = storeSlot(player, menu, containerSlotCount, menu.getSlot(slotIndex));
         }
 
         if (storedAny) {
@@ -373,38 +385,32 @@ public final class ActionHandler {
         }
     }
 
-    private static boolean storeIntoContainerSlots(AbstractContainerMenu menu, int containerSlotCount, ItemStack stack) {
-        if (stack.isEmpty()) return false;
-        int orig = stack.getCount();
+    /** Moves a player-inventory slot of the menu into the container slots; whatever doesn't fit stays put. */
+    private static boolean storeSlot(ServerPlayer player, AbstractContainerMenu menu, int containerSlotCount, Slot pSlot) {
+        if (pSlot == null || !pSlot.hasItem() || !pSlot.mayPickup(player)) return false;
+        ItemStack moving = pSlot.safeTake(pSlot.getItem().getCount(), Integer.MAX_VALUE, player);
+        if (moving.isEmpty()) return false;
+        int before = moving.getCount();
+        storeIntoContainerSlots(menu, containerSlotCount, moving);
+        boolean stored = moving.getCount() < before;
+        if (!moving.isEmpty()) {
+            ItemStack rest = pSlot.safeInsert(moving);
+            if (!rest.isEmpty()) player.getInventory().placeItemBackInInventory(rest);
+        }
+        return stored;
+    }
+
+    /** Inserts through each slot's own rules (mayPlace, max stack size), merging first. Shrinks {@code stack}. */
+    private static void storeIntoContainerSlots(AbstractContainerMenu menu, int containerSlotCount, ItemStack stack) {
         // 1. Merge into matching existing stacks in container
-        for (int i = 0; i < containerSlotCount; i++) {
+        for (int i = 0; i < containerSlotCount && !stack.isEmpty(); i++) {
             Slot s = menu.getSlot(i);
-            if (s != null && s.hasItem() && s.mayPlace(stack)) {
-                ItemStack inSlot = s.getItem();
-                if (ItemStack.isSameItemSameTags(inSlot, stack)) {
-                    int space = Math.min(s.getMaxStackSize(stack), inSlot.getMaxStackSize()) - inSlot.getCount();
-                    if (space > 0) {
-                        int move = Math.min(space, stack.getCount());
-                        inSlot.grow(move);
-                        stack.shrink(move);
-                        s.setChanged();
-                        if (stack.isEmpty()) return true;
-                    }
-                }
-            }
+            if (s.hasItem() && ItemStack.isSameItemSameTags(s.getItem(), stack)) s.safeInsert(stack);
         }
         // 2. Put into empty container slots
-        for (int i = 0; i < containerSlotCount; i++) {
+        for (int i = 0; i < containerSlotCount && !stack.isEmpty(); i++) {
             Slot s = menu.getSlot(i);
-            if (s != null && !s.hasItem() && s.mayPlace(stack)) {
-                int max = Math.min(s.getMaxStackSize(stack), stack.getMaxStackSize());
-                int move = Math.min(max, stack.getCount());
-                ItemStack placed = stack.split(move);
-                s.set(placed);
-                s.setChanged();
-                if (stack.isEmpty()) return true;
-            }
+            if (!s.hasItem()) s.safeInsert(stack);
         }
-        return stack.getCount() < orig;
     }
 }

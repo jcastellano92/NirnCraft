@@ -3,13 +3,17 @@ package com.skycraft.creatures;
 import com.skycraft.Skycraft;
 import com.skycraft.core.SkyData;
 import com.skycraft.creatures.entity.DragonEntity;
-import com.skycraft.creatures.entity.DraugrEntity;
-import com.skycraft.creatures.entity.FrostbiteSpiderEntity;
 import com.skycraft.creatures.entity.GuardEntity;
 import com.skycraft.creatures.entity.SkeeverEntity;
+import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -18,28 +22,42 @@ import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
+import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
- * Skyrim-like world population: draugr replace zombies in the cold north, phantoms are disabled, dragons attack
- * travelers, and every village keeps a few hold guards around its meeting point.
+ * Skyrim-like world population: draugr replace zombies in the cold north and frostbite spiders the spiders of caves,
+ * vanilla night monsters make way for skeevers and (a few, transient) wolves, phantoms are disabled, dragons attack
+ * travelers, and every village keeps a few hold guards (capped) instead of iron golems.
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class CreatureSpawns {
@@ -58,25 +76,72 @@ public final class CreatureSpawns {
 
     // ------------------------------------------------------------------ Skyrim-like spawning
 
-    public static boolean isSettlementOrHouse(ServerLevelAccessor level, BlockPos pos) {
-        ServerLevel serverLevel = level.getLevel();
-        // Check POIs: settlements have MEETING and HOME (beds)
-        Optional<BlockPos> meeting = serverLevel.getPoiManager().findClosest(
-                holder -> holder.is(PoiTypes.MEETING) || holder.is(PoiTypes.HOME),
-                pos, 48, PoiManager.Occupancy.ANY);
-        if (meeting.isPresent()) return true;
+    /** Wolves spawned instead of vanilla night monsters: capped per area, and they leave when no player is near. */
+    public static final String WILD_WOLF_TAG = "skycraft.wild_wolf";
+    private static final int MAX_WILD_WOLVES = 4;
+    private static final int MAX_TOWN_GUARDS = 6;
 
-        // Check if inside a roofed house / building
+    /** Settlement lookups by chunk section and dimension: {@code expiry << 4 | flags}, see {@link #poiFlags}. */
+    private static final Map<ResourceKey<Level>, Long2LongOpenHashMap> POI_CACHE = new HashMap<>();
+    private static final long POI_CACHE_TICKS = 600;
+    private static final int SETTLEMENT_KNOWN = 1;
+    private static final int SETTLEMENT = 2;
+    private static final int HOME_KNOWN = 4;
+    private static final int HOME = 8;
+
+    /**
+     * Inside a settlement (a meeting point or bed within 48 blocks) or under the roof of a house (a bed within 32).
+     * Main server thread only (POI lookups, cached per chunk section for 30 s); false during world generation.
+     */
+    public static boolean isSettlementOrHouse(ServerLevelAccessor level, BlockPos pos) {
+        if (!(level instanceof ServerLevel serverLevel) || !serverLevel.getServer().isSameThread()) return false;
+        if ((poiFlags(serverLevel, pos, false) & SETTLEMENT) != 0) return true;
+        // Inside a roofed house / building
         if (!level.canSeeSky(pos)) {
             int surfaceY = level.getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ());
-            if (pos.getY() < surfaceY - 1) {
-                Optional<BlockPos> housePoi = serverLevel.getPoiManager().findClosest(
-                        holder -> holder.is(PoiTypes.HOME),
-                        pos, 32, PoiManager.Occupancy.ANY);
-                if (housePoi.isPresent()) return true;
-            }
+            if (pos.getY() < surfaceY - 1) return (poiFlags(serverLevel, pos, true) & HOME) != 0;
         }
         return false;
+    }
+
+    private static int poiFlags(ServerLevel level, BlockPos pos, boolean needHome) {
+        Long2LongOpenHashMap cache = POI_CACHE.computeIfAbsent(level.dimension(), k -> new Long2LongOpenHashMap());
+        long key = SectionPos.asLong(pos);
+        long now = level.getGameTime();
+        long entry = cache.get(key);
+        long expiry = entry >>> 4;
+        int flags = (int) (entry & 15);
+        if (expiry < now) {
+            expiry = now + POI_CACHE_TICKS;
+            flags = 0;
+        }
+        int before = flags;
+        if ((flags & SETTLEMENT_KNOWN) == 0) {
+            flags |= SETTLEMENT_KNOWN;
+            if (level.getPoiManager().findClosest(holder -> holder.is(PoiTypes.MEETING) || holder.is(PoiTypes.HOME),
+                    pos, 48, PoiManager.Occupancy.ANY).isPresent()) flags |= SETTLEMENT;
+        }
+        if (needHome && (flags & HOME_KNOWN) == 0) {
+            flags |= HOME_KNOWN;
+            if (level.getPoiManager().findClosest(holder -> holder.is(PoiTypes.HOME), pos, 32, PoiManager.Occupancy.ANY).isPresent()) {
+                flags |= HOME;
+            }
+        }
+        if (flags != before || entry == 0) {
+            if (cache.size() > 16384) cache.clear();
+            cache.put(key, expiry << 4 | flags);
+        }
+        return flags;
+    }
+
+    /**
+     * Forge also fires this event while chunks generate (structure pieces, chunk-generation spawns) on worldgen threads,
+     * with a WorldGenRegion instead of the ServerLevel. True for those: no POI or entity lookups allowed.
+     */
+    private static boolean isWorldgen(MobSpawnEvent.FinalizeSpawn event) {
+        MobSpawnType type = event.getSpawnType();
+        if (type == MobSpawnType.STRUCTURE || type == MobSpawnType.CHUNK_GENERATION) return true;
+        return !(event.getLevel() instanceof ServerLevel level) || !level.getServer().isSameThread();
     }
 
     @SubscribeEvent
@@ -86,108 +151,184 @@ public final class CreatureSpawns {
         ServerLevelAccessor level = event.getLevel();
         BlockPos pos = BlockPos.containing(event.getX(), event.getY(), event.getZ());
         MobSpawnType type = event.getSpawnType();
-        // Remove and cancel monster spawners: Skyrim dungeons are clearable
-        if (type == MobSpawnType.SPAWNER) {
-            event.setSpawnCancelled(true);
-            BlockPos spawnPos = BlockPos.containing(event.getX(), event.getY(), event.getZ());
-            for (BlockPos p : BlockPos.betweenClosed(spawnPos.offset(-4, -4, -4), spawnPos.offset(4, 4, 4))) {
-                if (level.getBlockState(p).is(net.minecraft.world.level.block.Blocks.SPAWNER)) {
-                    level.setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
-                }
+        EntityType<?> entityType = mob.getType();
+
+        if (isWorldgen(event)) {
+            // Only cheap replacements that stay inside the region being generated.
+            if (entityType == EntityType.ZOMBIE && isNorth(level, pos) && level.getRandom().nextFloat() < CreaturesConfig.DRAUGR_REPLACES_ZOMBIES.get()) {
+                replace(event, ModEntities.DRAUGR.get().create(level.getLevel()));
+            } else if (entityType == EntityType.SPIDER || entityType == EntityType.CAVE_SPIDER) {
+                replace(event, ModEntities.FROSTBITE_SPIDER.get().create(level.getLevel()));
             }
             return;
         }
+        ServerLevel serverLevel = (ServerLevel) level;
 
-        // 1. Suppress all hostiles spawning inside settlements or houses (including wild trolls)
-        if (mob instanceof net.minecraft.world.entity.monster.Enemy && isSettlementOrHouse(level, pos)) {
+        if (type == MobSpawnType.SPAWNER) {
+            onSpawnerSpawn(event, serverLevel, pos, entityType);
+            return;
+        }
+
+        // 1. Suppress all hostiles spawning on their own inside settlements or houses (including wild trolls); spawn
+        // eggs, commands and scripted events still work there
+        boolean wild = type == MobSpawnType.NATURAL || type == MobSpawnType.PATROL || type == MobSpawnType.REINFORCEMENT;
+        if (wild && mob instanceof net.minecraft.world.entity.monster.Enemy && isSettlementOrHouse(serverLevel, pos)) {
             event.setSpawnCancelled(true);
             return;
         }
 
-        // Trolls belong in caves and snowy wilderness, never towns
-        if (mob.getType() == ModEntities.TROLL.get() && isSettlementOrHouse(level, pos)) {
+        // Replace Iron Golems in towns with proper Hold Guards, a few per village
+        if (entityType == EntityType.IRON_GOLEM && isSettlementOrHouse(serverLevel, pos)) {
             event.setSpawnCancelled(true);
-            return;
-        }
-
-        // Replace Iron Golems in towns with proper Hold Guards
-        if (mob.getType() == EntityType.IRON_GOLEM && isSettlementOrHouse(level, pos)) {
-            event.setSpawnCancelled(true);
-            GuardEntity guard = ModEntities.GUARD.get().create(level.getLevel());
+            if (!guardWanted(serverLevel, pos)) return; // villagers keep "summoning": the cap stops the flood
+            GuardEntity guard = ModEntities.GUARD.get().create(serverLevel);
             if (guard != null) {
                 guard.moveTo(event.getX(), event.getY(), event.getZ(), mob.getYRot(), 0);
-                guard.finalizeSpawn(level, event.getDifficulty(), MobSpawnType.CONVERSION, null, null);
-                level.addFreshEntity(guard);
+                guard.finalizeSpawn(serverLevel, event.getDifficulty(), MobSpawnType.CONVERSION, null, null);
+                guard.setPersistenceRequired();
+                serverLevel.addFreshEntity(guard);
             }
             return;
         }
 
-        // 2. Suppress vanilla natural night hostile spawns in the Overworld
-        if (level.getLevel().dimension() == Level.OVERWORLD && type == MobSpawnType.NATURAL) {
-            EntityType<?> entityType = mob.getType();
-            boolean isVanillaDarkHostile = entityType == EntityType.ZOMBIE
-                    || entityType == EntityType.SKELETON
-                    || entityType == EntityType.CREEPER
-                    || entityType == EntityType.SPIDER
-                    || entityType == EntityType.CAVE_SPIDER
-                    || entityType == EntityType.WITCH
-                    || entityType == EntityType.ENDERMAN
-                    || entityType == EntityType.ZOMBIE_VILLAGER
-                    || entityType == EntityType.SLIME;
-
-            if (isVanillaDarkHostile) {
-                event.setSpawnCancelled(true);
-
-                // Small chance to spawn Skyrim wild night hostiles (skeevers or wolves) out in the wild
-                if (level.getLevel().isNight() && !isSettlementOrHouse(level, pos)) {
-                    float roll = level.getRandom().nextFloat();
-                    if (roll < 0.12f) {
-                        SkeeverEntity skeever = ModEntities.SKEEVER.get().create(level.getLevel());
-                        if (skeever != null) {
-                            skeever.moveTo(event.getX(), event.getY(), event.getZ(), mob.getYRot(), 0);
-                            skeever.finalizeSpawn(level, event.getDifficulty(), MobSpawnType.NATURAL, null, null);
-                            level.addFreshEntity(skeever);
-                        }
-                    } else if (roll < 0.20f) {
-                        net.minecraft.world.entity.animal.Wolf wolf = EntityType.WOLF.create(level.getLevel());
-                        if (wolf != null) {
-                            wolf.moveTo(event.getX(), event.getY(), event.getZ(), mob.getYRot(), 0);
-                            wolf.finalizeSpawn(level, event.getDifficulty(), MobSpawnType.NATURAL, null, null);
-                            level.addFreshEntity(wolf);
-                        }
-                    }
-                }
+        // 2. Vanilla natural night hostiles in the Overworld make way for Skyrim's creatures
+        if (serverLevel.dimension() == Level.OVERWORLD && type == MobSpawnType.NATURAL && isVanillaDarkHostile(entityType)) {
+            RandomSource random = serverLevel.getRandom();
+            // draugr rise in the cold north, frostbite spiders lurk underground
+            if (entityType == EntityType.ZOMBIE && isNorth(serverLevel, pos) && random.nextFloat() < CreaturesConfig.DRAUGR_REPLACES_ZOMBIES.get()
+                    && fewNearby(serverLevel, ModEntities.DRAUGR.get(), pos, 48, 4)) {
+                replace(event, ModEntities.DRAUGR.get().create(serverLevel));
                 return;
             }
-        }
+            if ((entityType == EntityType.SPIDER || entityType == EntityType.CAVE_SPIDER) && !serverLevel.canSeeSky(pos)
+                    && random.nextFloat() < 0.35f && fewNearby(serverLevel, ModEntities.FROSTBITE_SPIDER.get(), pos, 32, 3)) {
+                replace(event, ModEntities.FROSTBITE_SPIDER.get().create(serverLevel));
+                return;
+            }
+            event.setSpawnCancelled(true);
 
-        // 3. Draugr replace zombies in snowy/mountain biomes
-        if (mob.getType() == EntityType.ZOMBIE && (type == MobSpawnType.CHUNK_GENERATION || type == MobSpawnType.SPAWNER)) {
-            Holder<Biome> biome = level.getBiome(pos);
-            boolean north = biome.is(BiomeTags.IS_TAIGA) || biome.is(BiomeTags.IS_MOUNTAIN) || biome.is(Tags.Biomes.IS_SNOWY)
-                    || biome.value().coldEnoughToSnow(pos);
-            if (north && level.getRandom().nextFloat() < CreaturesConfig.DRAUGR_REPLACES_ZOMBIES.get()) {
-                DraugrEntity draugr = ModEntities.DRAUGR.get().create(level.getLevel());
-                if (draugr != null) {
-                    draugr.moveTo(event.getX(), event.getY(), event.getZ(), mob.getYRot(), 0);
-                    draugr.finalizeSpawn(level, event.getDifficulty(), type, null, null);
-                    event.setSpawnCancelled(true);
-                    level.addFreshEntity(draugr);
+            // Small chance to spawn Skyrim wild night hostiles (skeevers or wolves) out in the wild
+            if (serverLevel.isNight() && !isSettlementOrHouse(serverLevel, pos)) {
+                float roll = random.nextFloat();
+                if (roll < 0.12f) {
+                    SkeeverEntity skeever = ModEntities.SKEEVER.get().create(serverLevel);
+                    if (skeever != null) {
+                        skeever.moveTo(event.getX(), event.getY(), event.getZ(), mob.getYRot(), 0);
+                        skeever.finalizeSpawn(serverLevel, event.getDifficulty(), MobSpawnType.NATURAL, null, null);
+                        serverLevel.addFreshEntity(skeever);
+                    }
+                } else if (roll < 0.20f && fewWildWolves(serverLevel, pos)) {
+                    Wolf wolf = EntityType.WOLF.create(serverLevel);
+                    if (wolf != null) {
+                        wolf.moveTo(event.getX(), event.getY(), event.getZ(), mob.getYRot(), 0);
+                        wolf.finalizeSpawn(serverLevel, event.getDifficulty(), MobSpawnType.NATURAL, null, null);
+                        wolf.addTag(WILD_WOLF_TAG);
+                        serverLevel.addFreshEntity(wolf);
+                    }
                 }
             }
         }
+    }
 
-        // 4. Frostbite spiders replace cave spiders and spiders in underground caves and mines
-        if ((mob.getType() == EntityType.SPIDER || mob.getType() == EntityType.CAVE_SPIDER)
-                && (type == MobSpawnType.CHUNK_GENERATION || type == MobSpawnType.SPAWNER || type == MobSpawnType.STRUCTURE)) {
-            FrostbiteSpiderEntity spider = ModEntities.FROSTBITE_SPIDER.get().create(level.getLevel());
-            if (spider != null) {
-                spider.moveTo(event.getX(), event.getY(), event.getZ(), mob.getYRot(), 0);
-                spider.finalizeSpawn(level, event.getDifficulty(), type, null, null);
-                event.setSpawnCancelled(true);
-                level.addFreshEntity(spider);
-            }
+    /**
+     * Spawners: vanilla spawner blocks inside Skycraft's own dungeons are removed (Skyrim dungeons are clearable). Any
+     * other spawner (vanilla dungeons, other mods' structures) keeps working; its zombies become draugr in the north and
+     * its spiders frostbite spiders.
+     */
+    private static void onSpawnerSpawn(MobSpawnEvent.FinalizeSpawn event, ServerLevel level, BlockPos pos, EntityType<?> entityType) {
+        BaseSpawner spawner = event.getSpawner();
+        BlockEntity block = spawner == null ? null : spawner.getSpawnerBlockEntity();
+        if (block instanceof SpawnerBlockEntity && block.getBlockState().is(Blocks.SPAWNER) && inSkycraftStructure(level, block.getBlockPos())) {
+            event.setSpawnCancelled(true);
+            level.removeBlock(block.getBlockPos(), false);
+            return;
         }
+        EntityType<? extends Mob> instead = null;
+        if (entityType == EntityType.ZOMBIE && isNorth(level, pos) && level.getRandom().nextFloat() < CreaturesConfig.DRAUGR_REPLACES_ZOMBIES.get()) {
+            instead = ModEntities.DRAUGR.get();
+        } else if ((entityType == EntityType.SPIDER || entityType == EntityType.CAVE_SPIDER) && !level.canSeeSky(pos)) {
+            instead = ModEntities.FROSTBITE_SPIDER.get();
+        }
+        if (instead == null) return;
+        // The spawner only counts its own type against its limit: count the replacements ourselves.
+        if (fewNearby(level, instead, pos, 9, 6)) replace(event, instead.create(level));
+        else event.setSpawnCancelled(true);
+    }
+
+    /** Inside (a piece of) a structure registered under the {@code skycraft} namespace. */
+    private static boolean inSkycraftStructure(ServerLevel level, BlockPos pos) {
+        Registry<Structure> registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
+        for (Structure structure : level.structureManager().getAllStructuresAt(pos).keySet()) {
+            ResourceLocation id = registry.getKey(structure);
+            if (id == null || !Skycraft.MODID.equals(id.getNamespace())) continue;
+            if (level.structureManager().getStructureWithPieceAt(pos, structure).isValid()) return true;
+        }
+        return false;
+    }
+
+    /** Cancels the event's spawn and puts {@code replacement} there instead (same spawn reason). */
+    private static void replace(MobSpawnEvent.FinalizeSpawn event, @Nullable Mob replacement) {
+        if (replacement == null) return;
+        Mob mob = event.getEntity();
+        ServerLevelAccessor level = event.getLevel();
+        replacement.moveTo(event.getX(), event.getY(), event.getZ(), mob.getYRot(), 0);
+        replacement.finalizeSpawn(level, event.getDifficulty(), event.getSpawnType(), null, null);
+        if (mob.isPersistenceRequired()) replacement.setPersistenceRequired();
+        event.setSpawnCancelled(true);
+        level.addFreshEntity(replacement);
+    }
+
+    private static boolean isVanillaDarkHostile(EntityType<?> entityType) {
+        return entityType == EntityType.ZOMBIE
+                || entityType == EntityType.SKELETON
+                || entityType == EntityType.CREEPER
+                || entityType == EntityType.SPIDER
+                || entityType == EntityType.CAVE_SPIDER
+                || entityType == EntityType.WITCH
+                || entityType == EntityType.ENDERMAN
+                || entityType == EntityType.ZOMBIE_VILLAGER
+                || entityType == EntityType.SLIME;
+    }
+
+    /** Cold, mountain and taiga biomes (draugr country). Region-safe: only reads the biome. */
+    private static boolean isNorth(ServerLevelAccessor level, BlockPos pos) {
+        Holder<Biome> biome = level.getBiome(pos);
+        return biome.is(BiomeTags.IS_TAIGA) || biome.is(BiomeTags.IS_MOUNTAIN) || biome.is(Tags.Biomes.IS_SNOWY)
+                || biome.value().coldEnoughToSnow(pos);
+    }
+
+    private static boolean fewNearby(ServerLevel level, EntityType<?> type, BlockPos pos, double radius, int max) {
+        return level.getEntities(type, new AABB(pos).inflate(radius), e -> true).size() < max;
+    }
+
+    /** Town guards: at most 2 + one per four villagers (at most {@value #MAX_TOWN_GUARDS}) within 64 blocks. */
+    private static boolean guardWanted(ServerLevel level, BlockPos pos) {
+        AABB area = new AABB(pos).inflate(64);
+        int guards = level.getEntitiesOfClass(GuardEntity.class, area).size();
+        int villagers = level.getEntitiesOfClass(LivingEntity.class, area,
+                e -> e instanceof AbstractVillager || e instanceof com.skycraft.society.entity.NpcEntity).size();
+        return guards < Math.min(MAX_TOWN_GUARDS, 2 + villagers / 4);
+    }
+
+    private static boolean fewWildWolves(ServerLevel level, BlockPos pos) {
+        return level.getEntitiesOfClass(Wolf.class, new AABB(pos).inflate(64), w -> w.getTags().contains(WILD_WOLF_TAG)).size() < MAX_WILD_WOLVES;
+    }
+
+    /** Wild night wolves leave when no player is within 96 blocks (unless someone tamed, leashed or named one). */
+    @SubscribeEvent
+    public static void onLivingTick(LivingEvent.LivingTickEvent event) {
+        if (!(event.getEntity() instanceof Wolf wolf) || wolf.tickCount % 100 != 0 || wolf.level().isClientSide
+                || !wolf.getTags().contains(WILD_WOLF_TAG)) return;
+        if (wolf.isTame() || wolf.isLeashed() || wolf.hasCustomName() || wolf.isPersistenceRequired()) {
+            wolf.removeTag(WILD_WOLF_TAG);
+            return;
+        }
+        if (wolf.level().getNearestPlayer(wolf, 96) == null) wolf.discard();
+    }
+
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event) {
+        POI_CACHE.clear();
     }
 
     // ------------------------------------------------------------------ per-player world events

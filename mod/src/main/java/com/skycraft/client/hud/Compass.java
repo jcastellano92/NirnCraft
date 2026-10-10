@@ -50,20 +50,7 @@ public final class Compass {
 
         // markers
         Vec3 eye = mc.player.position();
-        java.util.List<CompassMarkers.Marker> allMarkers = CompassMarkers.all();
-        java.util.List<CompassMarkers.Marker> deduplicated = new java.util.ArrayList<>();
-        for (CompassMarkers.Marker m : allMarkers) {
-            boolean exists = false;
-            for (CompassMarkers.Marker ex : deduplicated) {
-                if (ex.pos().distanceToSqr(m.pos()) < 16.0) {
-                    exists = true;
-                    break;
-                }
-            }
-            if (!exists) deduplicated.add(m);
-        }
-
-        for (CompassMarkers.Marker m : deduplicated) {
+        for (CompassMarkers.Marker m : CompassMarkers.deduplicated()) {
             double dx = m.pos().x - eye.x;
             double dz = m.pos().z - eye.z;
             double dist = Math.sqrt(dx * dx + dz * dz);

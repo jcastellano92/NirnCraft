@@ -4,11 +4,14 @@ import com.skycraft.Skycraft;
 import com.skycraft.core.Notifier;
 import com.skycraft.core.SkyData;
 import com.skycraft.core.Skill;
+import com.skycraft.crime.Ownership;
 import com.skycraft.dig.DiggingRules;
+import com.skycraft.dig.PlacedBlocks;
 import com.skycraft.perk.Perks;
 import com.skycraft.vitals.ActionHandler;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -18,22 +21,20 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.PolarBear;
-import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.server.TickTask;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraftforge.common.Tags;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.player.ItemFishedEvent;
@@ -46,6 +47,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -110,17 +112,21 @@ public final class LifeSkills {
         } else if (state.is(BlockTags.LOGS)) {
             Progression.addSkillXp(player, Skill.WOODCUTTING, 2.5f);
             SkyData.get(player).addStat("logs_chopped", 1);
-            if (level.getBlockState(pos.below()).is(BlockTags.DIRT)) {
-                Block sapling = saplingFor(state);
-                level.getServer().tell(new TickTask(level.getServer().getTickCount() + 1, () -> {
-                    if (level.getBlockState(pos).isAir() && level.getBlockState(pos.below()).is(BlockTags.DIRT)) {
-                        level.setBlock(pos, sapling.defaultBlockState(), 3);
-                    }
-                }));
-            }
-            // Entire tree crumbles and falls over in chop direction
-            if (!CHAIN_BREAKING.get()) {
-                fellTree(player, level, pos);
+            // Only natural trees fall (and get replanted): never log cabins, village houses or player builds.
+            FellingJob tree = CHAIN_BREAKING.get() ? null : scanNaturalTree(player, level, pos);
+            if (tree != null) {
+                if (level.getBlockState(pos.below()).is(BlockTags.DIRT)) {
+                    Block sapling = saplingFor(state);
+                    level.getServer().tell(new TickTask(level.getServer().getTickCount() + 1, () -> {
+                        if (level.getBlockState(pos).isAir() && level.getBlockState(pos.below()).is(BlockTags.DIRT)) {
+                            level.setBlock(pos, sapling.defaultBlockState(), 3);
+                        }
+                    }));
+                }
+                // Entire tree crumbles and falls over in chop direction, a few blocks per tick
+                FELLING.add(tree);
+                level.playSound(null, pos, net.minecraft.sounds.SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, net.minecraft.sounds.SoundSource.BLOCKS, 1.2f, 0.7f);
+                level.playSound(null, pos, net.minecraft.sounds.SoundEvents.CHEST_OPEN, net.minecraft.sounds.SoundSource.BLOCKS, 0.8f, 0.5f);
             }
         } else if (state.is(BlockTags.LEAVES) && Perks.has(player, "woodcutting.forager") && rnd.nextFloat() < 0.1f) {
             Block.popResource(level, pos, new ItemStack(rnd.nextBoolean() ? Items.APPLE : Items.STICK));
@@ -139,88 +145,175 @@ public final class LifeSkills {
         return Blocks.OAK_SAPLING;
     }
 
-    /**
-     * When any log in a tree trunk is cut, the tree completely crumbles and falls over in the direction
-     * the player is looking, turning the connected upper logs into falling blocks with momentum,
-     * crumbling the leaves into particles and drops, and planting a replanting sapling at the base dirt.
-     */
-    private static void fellTree(ServerPlayer player, ServerLevel level, BlockPos cutPos) {
-        CHAIN_BREAKING.set(true);
-        try {
-            Deque<BlockPos> queue = new ArrayDeque<>();
-            Set<BlockPos> logPositions = new HashSet<>();
-            Set<BlockPos> leafPositions = new HashSet<>();
-            Set<BlockPos> seen = new HashSet<>();
+    // ------------------------------------------------------------------ tree felling
 
-            queue.add(cutPos);
-            seen.add(cutPos);
+    /** A tree with more connected logs than this is not treated as a tree (log builds, giant structures). */
+    private static final int MAX_TREE_LOGS = 200;
+    /** Leaves crumbled with the tree (the rest decays naturally once the logs are gone). */
+    private static final int MAX_TREE_LEAVES = 160;
+    /** Natural leaves near the top of the trunk needed to call it a tree. */
+    private static final int MIN_CROWN_LEAVES = 4;
+    /** Logs turned into falling blocks, and leaves crumbled, per tick (per job). */
+    private static final int LOGS_PER_TICK = 12;
+    private static final int LEAVES_PER_TICK = 24;
 
-            // Breadth-first search for connected logs and adjacent leaves of the tree
-            int maxBlocks = 160;
-            while (!queue.isEmpty() && (logPositions.size() + leafPositions.size()) < maxBlocks) {
-                BlockPos cur = queue.poll();
-                for (BlockPos next : BlockPos.betweenClosed(cur.offset(-1, -1, -1), cur.offset(1, 1, 1))) {
-                    if (seen.contains(next)) continue;
-                    BlockState s = level.getBlockState(next);
-                    if (s.is(BlockTags.LOGS)) {
-                        BlockPos imm = next.immutable();
-                        seen.add(imm);
-                        logPositions.add(imm);
-                        queue.add(imm);
-                    } else if (s.is(BlockTags.LEAVES) && leafPositions.size() < 120) {
-                        BlockPos imm = next.immutable();
-                        seen.add(imm);
-                        leafPositions.add(imm);
-                        queue.add(imm);
-                    }
-                }
-            }
+    /** Trees currently falling, processed a few blocks per server tick. */
+    private static final List<FellingJob> FELLING = new ArrayList<>();
 
+    private static final class FellingJob {
+        final ServerLevel level;
+        final ServerPlayer player;
+        final BlockPos cutPos;
+        final Deque<BlockPos> logs;
+        final Deque<BlockPos> leaves;
+        final double fallX;
+        final double fallZ;
+
+        FellingJob(ServerLevel level, ServerPlayer player, BlockPos cutPos, List<BlockPos> logs, List<BlockPos> leaves) {
+            this.level = level;
+            this.player = player;
+            this.cutPos = cutPos;
+            this.logs = new ArrayDeque<>(logs);
+            this.leaves = new ArrayDeque<>(leaves);
             // Direction vector the tree falls towards (away from player)
             double lookX = player.getLookAngle().x;
             double lookZ = player.getLookAngle().z;
             double mag = Math.sqrt(lookX * lookX + lookZ * lookZ);
-            double fallX = mag > 0.01 ? (lookX / mag) * 0.28 : 0.2;
-            double fallZ = mag > 0.01 ? (lookZ / mag) * 0.28 : 0.0;
+            this.fallX = mag > 0.01 ? (lookX / mag) * 0.28 : 0.2;
+            this.fallZ = mag > 0.01 ? (lookZ / mag) * 0.28 : 0.0;
+        }
+    }
 
-            // Turn connected logs above or near the cut into falling block entities falling over
-            for (BlockPos logPos : logPositions) {
-                if (logPos.equals(cutPos)) continue;
-                BlockState s = level.getBlockState(logPos);
-                if (!s.is(BlockTags.LOGS)) continue;
+    /**
+     * Finds the natural tree the cut log belongs to, or null if it isn't one: every connected log must be natural
+     * (not player-placed), the cut log must not be owned or inside a generated structure (village houses, camps),
+     * and the top of the trunk must carry natural (non-persistent) leaves.
+     */
+    private static FellingJob scanNaturalTree(ServerPlayer player, ServerLevel level, BlockPos cutPos) {
+        if (PlacedBlocks.isPlayerPlaced(level, cutPos) || Ownership.isOwnedByOther(player, level, cutPos) || inStructure(level, cutPos)) {
+            return null;
+        }
+        Deque<BlockPos> queue = new ArrayDeque<>();
+        Set<BlockPos> seen = new HashSet<>();
+        List<BlockPos> logs = new ArrayList<>();
+        queue.add(cutPos);
+        seen.add(cutPos);
+        int topY = cutPos.getY();
+        // Breadth-first search through connected logs only (never through leaves into a neighbouring tree)
+        while (!queue.isEmpty()) {
+            BlockPos cur = queue.poll();
+            for (BlockPos next : BlockPos.betweenClosed(cur.offset(-1, -1, -1), cur.offset(1, 1, 1))) {
+                if (seen.contains(next) || next.getY() < cutPos.getY() - 1) continue;
+                BlockPos imm = next.immutable();
+                seen.add(imm);
+                if (!level.getBlockState(imm).is(BlockTags.LOGS)) continue;
+                if (PlacedBlocks.isPlayerPlaced(level, imm)) return null;
+                logs.add(imm);
+                if (logs.size() > MAX_TREE_LOGS) return null;
+                topY = Math.max(topY, imm.getY());
+                queue.add(imm);
+            }
+        }
 
-                // Replant if this log was touching ground dirt
-                if (level.getBlockState(logPos.below()).is(BlockTags.DIRT)) {
-                    Block sapling = saplingFor(s);
-                    level.setBlock(logPos, sapling.defaultBlockState(), 3);
-                } else {
-                    level.setBlock(logPos, Blocks.AIR.defaultBlockState(), 3);
-                }
-
-                // Spawn FallingBlockEntity with falling velocity
-                net.minecraft.world.entity.item.FallingBlockEntity falling =
-                        net.minecraft.world.entity.item.FallingBlockEntity.fall(level, logPos, s);
-                if (falling != null) {
-                    double heightBonus = Math.max(0, logPos.getY() - cutPos.getY()) * 0.04;
-                    falling.setDeltaMovement(fallX + (level.random.nextDouble() - 0.5) * 0.05, 0.12 + heightBonus, fallZ + (level.random.nextDouble() - 0.5) * 0.05);
-                    falling.dropItem = true;
+        // Natural leaves around the logs: the crown decides whether this is a tree; they crumble with it.
+        List<BlockPos> leaves = new ArrayList<>();
+        Set<BlockPos> leafSeen = new HashSet<>();
+        int crown = 0;
+        List<BlockPos> trunk = new ArrayList<>(logs);
+        trunk.add(cutPos);
+        for (BlockPos log : trunk) {
+            for (Direction d : Direction.values()) {
+                BlockPos p = log.relative(d);
+                if (!leafSeen.add(p)) continue;
+                BlockState s = level.getBlockState(p);
+                if (!s.is(BlockTags.LEAVES)) continue;
+                if (s.hasProperty(LeavesBlock.PERSISTENT) && s.getValue(LeavesBlock.PERSISTENT)) return null; // placed leaves: a build
+                if (p.getY() >= topY - 3) crown++;
+                if (leaves.size() < MAX_TREE_LEAVES) leaves.add(p);
+            }
+        }
+        if (crown < MIN_CROWN_LEAVES) return null;
+        // One more ring of leaves so the canopy visibly comes down; farther leaves decay on their own.
+        for (int i = 0, n = leaves.size(); i < n && leaves.size() < MAX_TREE_LEAVES; i++) {
+            for (Direction d : Direction.values()) {
+                BlockPos p = leaves.get(i).relative(d);
+                if (!leafSeen.add(p)) continue;
+                BlockState s = level.getBlockState(p);
+                if (s.is(BlockTags.LEAVES) && !(s.hasProperty(LeavesBlock.PERSISTENT) && s.getValue(LeavesBlock.PERSISTENT))) {
+                    leaves.add(p);
+                    if (leaves.size() >= MAX_TREE_LEAVES) break;
                 }
             }
+        }
+        logs.sort(java.util.Comparator.comparingInt(BlockPos::getY));
+        return new FellingJob(level, player, cutPos, logs, leaves);
+    }
 
-            // Crumble leaves: break them into leaf particles, sticks/sapling drops, and sounds
-            for (BlockPos leafPos : leafPositions) {
-                BlockState s = level.getBlockState(leafPos);
-                if (s.is(BlockTags.LEAVES)) {
-                    level.destroyBlock(leafPos, true, player);
-                }
+    private static boolean inStructure(ServerLevel level, BlockPos pos) {
+        var structures = level.structureManager();
+        for (var structure : structures.getAllStructuresAt(pos).keySet()) {
+            if (structures.getStructureWithPieceAt(pos, structure).isValid()) return true;
+        }
+        return false;
+    }
+
+    /** Topples falling trees a few blocks per tick so a big tree never stalls the server. */
+    @SubscribeEvent
+    public static void onServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || FELLING.isEmpty()) return;
+        CHAIN_BREAKING.set(true);
+        try {
+            for (Iterator<FellingJob> it = FELLING.iterator(); it.hasNext(); ) {
+                FellingJob job = it.next();
+                if (!tickFelling(job)) it.remove();
             }
-
-            // Play crumbling and tree-falling audio cues
-            level.playSound(null, cutPos, net.minecraft.sounds.SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, net.minecraft.sounds.SoundSource.BLOCKS, 1.2f, 0.7f);
-            level.playSound(null, cutPos, net.minecraft.sounds.SoundEvents.CHEST_OPEN, net.minecraft.sounds.SoundSource.BLOCKS, 0.8f, 0.5f);
         } finally {
             CHAIN_BREAKING.set(false);
         }
+    }
+
+    /** Processes a slice of the job; false when done. */
+    private static boolean tickFelling(FellingJob job) {
+        ServerLevel level = job.level;
+        // Turn connected logs above or near the cut into falling block entities falling over
+        for (int i = 0; i < LOGS_PER_TICK && !job.logs.isEmpty(); i++) {
+            BlockPos logPos = job.logs.poll();
+            if (!level.isLoaded(logPos)) continue;
+            BlockState s = level.getBlockState(logPos);
+            if (!s.is(BlockTags.LOGS) || PlacedBlocks.isPlayerPlaced(level, logPos)) continue;
+
+            // Replant if this log was touching ground dirt
+            if (level.getBlockState(logPos.below()).is(BlockTags.DIRT)) {
+                level.setBlock(logPos, saplingFor(s).defaultBlockState(), 3);
+            } else {
+                level.setBlock(logPos, Blocks.AIR.defaultBlockState(), 3);
+            }
+
+            // Spawn FallingBlockEntity with falling velocity
+            net.minecraft.world.entity.item.FallingBlockEntity falling =
+                    net.minecraft.world.entity.item.FallingBlockEntity.fall(level, logPos, s);
+            if (falling != null) {
+                double heightBonus = Math.max(0, logPos.getY() - job.cutPos.getY()) * 0.04;
+                falling.setDeltaMovement(job.fallX + (level.random.nextDouble() - 0.5) * 0.05, 0.12 + heightBonus, job.fallZ + (level.random.nextDouble() - 0.5) * 0.05);
+                falling.dropItem = true;
+            }
+        }
+        if (!job.logs.isEmpty()) return true;
+        // Crumble leaves: break them into leaf particles, sticks/sapling drops, and sounds
+        for (int i = 0; i < LEAVES_PER_TICK && !job.leaves.isEmpty(); i++) {
+            BlockPos leafPos = job.leaves.poll();
+            if (!level.isLoaded(leafPos)) continue;
+            BlockState s = level.getBlockState(leafPos);
+            if (s.is(BlockTags.LEAVES) && !(s.hasProperty(LeavesBlock.PERSISTENT) && s.getValue(LeavesBlock.PERSISTENT))) {
+                level.destroyBlock(leafPos, true, job.player.isRemoved() ? null : job.player);
+            }
+        }
+        return !job.leaves.isEmpty();
+    }
+
+    @SubscribeEvent
+    public static void onServerStopped(net.minecraftforge.event.server.ServerStoppedEvent event) {
+        FELLING.clear();
     }
 
     /** Breaks connected blocks (ore veins). */
@@ -328,13 +421,5 @@ public final class LifeSkills {
         event.getDrops().addAll(extra);
     }
 
-    /** Hunting "Beast Lore": wild predators leave you alone unless you attack them first. */
-    @SubscribeEvent
-    public static void onTarget(LivingChangeTargetEvent event) {
-        if (event.getNewTarget() instanceof Player player && Perks.has(player, "hunting.beast_lore")) {
-            LivingEntity mob = event.getEntity();
-            boolean beast = mob instanceof Animal || mob instanceof Wolf || mob instanceof PolarBear;
-            if (beast && mob.getLastHurtByMob() != player) event.setCanceled(true);
-        }
-    }
+    // Hunting "Beast Lore" (predators ignore you) lives with the other targeting rules in combat/Stealth.
 }

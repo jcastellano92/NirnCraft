@@ -1,0 +1,20 @@
+# Skycraft defaults for Distant Horizons 3.3.x. Distant Horizons fills in every other option on first launch.
+# _version must match the mod's config version (5 for 3.3.x), otherwise Distant Horizons deletes the file.
+_version = 5
+
+[client]
+	# Use about a quarter of the CPU threads for LOD building (Steam Deck friendly).
+	threadPresetSetting = "LOW_IMPACT"
+
+	[client.advanced.graphics.quality]
+		# LOD render distance in chunks (32-4096, default 256).
+		lodChunkRenderDistanceRadius = 128
+
+	[client.advanced.autoUpdater]
+		# The pack pins Distant Horizons; never download a different version at launch.
+		enableAutoUpdater = false
+		enableSilentUpdates = false
+
+[common.worldGenerator]
+	# Generate distant terrain with features (trees, plants) but without structures.
+	chunkGeneratorMode = "FEATURES"

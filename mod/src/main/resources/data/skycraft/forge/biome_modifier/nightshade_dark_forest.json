@@ -1,8 +1,6 @@
 {
   "type": "forge:add_features",
-  "biomes": [
-    "minecraft:dark_forest"
-  ],
+  "biomes": "#skycraft:spawns/dark_forest",
   "features": "skycraft:nightshade_patch",
   "step": "vegetal_decoration"
 }

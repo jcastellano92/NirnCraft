@@ -1,0 +1,12 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": "#skycraft:spawns/snowy_forest",
+  "spawners": [
+    {
+      "type": "skycraft:wispmother",
+      "weight": 1,
+      "minCount": 1,
+      "maxCount": 1
+    }
+  ]
+}

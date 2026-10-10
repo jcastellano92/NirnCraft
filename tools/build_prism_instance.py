@@ -1,15 +1,31 @@
-import os
-import sys
-import shutil
-import zipfile
-import urllib.request
-import tomllib
+"""Builds dist/Skycraft-client-instance.zip (Prism Launcher / MultiMC) locally, without packwiz.
+
+Usage: python3 tools/build_prism_instance.py [--core-jar PATH]
+
+* The instance is built from the committed pack state: every file listed in pack/index.toml (configs, defaultconfigs,
+  mod metadata). Each indexed file's hash is checked against the index first, so a stale index fails the build
+  (run tools/refresh_packwiz.py after editing pack/).
+* Mods and shader packs are downloaded from their .pw.toml metadata (Modrinth URL, or the CurseForge CDN for
+  CurseForge-only files) and their sha1/sha512 is verified every time, including when they come from dist/.cache.
+* Skycraft Core is not part of the committed pack. It comes from --core-jar, or else the newest jar in mod/build/libs
+  (run `./gradlew build` in mod/ first).
+"""
+import argparse
+import glob
 import hashlib
+import os
+import shutil
+import sys
+import tomllib
+import urllib.parse
+import urllib.request
+import zipfile
 from concurrent.futures import ThreadPoolExecutor
 
-ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 PACK_DIR = os.path.join(ROOT, "pack")
 DIST_DIR = os.path.join(ROOT, "dist")
+CACHE_DIR = os.path.join(DIST_DIR, ".cache")
 WORK_DIR = os.path.join(DIST_DIR, "tmp_prism_build")
 INST_DIR = os.path.join(WORK_DIR, "Skycraft")
 MC_DIR = os.path.join(INST_DIR, ".minecraft")
@@ -17,196 +33,179 @@ OUT_ZIP = os.path.join(DIST_DIR, "Skycraft-client-instance.zip")
 
 MC_VERSION = "1.20.1"
 FORGE_VERSION = "47.4.10"
+# Heap comes from Min/MaxMemAlloc (Prism adds -Xms/-Xmx itself). -Dessential.autoUpdate=false keeps the Essential
+# loader from replacing the pinned Essential version (read by Essential Loader stage2 as "<mod slug>.autoUpdate").
+JVM_ARGS = ("-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions "
+            "-XX:+DisableExplicitGC -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M "
+            "-Dessential.autoUpdate=false")
 
-HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+HEADERS = {"User-Agent": "skycraft-pack-tools/1.0 (+https://github.com/jcastellano92/Skycraft)"}
 
-CACHE_DIR = os.path.join(DIST_DIR, ".cache")
 
-def download_file(target_path, url, expected_hash=None, hash_format=None):
+def file_hash(path, fmt):
+    h = hashlib.new(fmt)
+    with open(path, "rb") as fp:
+        for chunk in iter(lambda: fp.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def curseforge_url(file_id, filename):
+    # CurseForge CDN layout: /files/<id // 1000>/<id % 1000>/<file name>, e.g. 5100034 -> /files/5100/34/.
+    fid = int(file_id)
+    return f"https://edge.forgecdn.net/files/{fid // 1000}/{fid % 1000}/{urllib.parse.quote(filename)}"
+
+
+def download(target_path, url, expected_hash, hash_format):
+    """Copies the file from dist/.cache (downloading it first if needed) and verifies its hash."""
     os.makedirs(CACHE_DIR, exist_ok=True)
     os.makedirs(os.path.dirname(target_path), exist_ok=True)
     cache_key = hashlib.sha256(url.encode()).hexdigest()[:16] + "_" + os.path.basename(target_path)
     cache_path = os.path.join(CACHE_DIR, cache_key)
-    
-    if os.path.exists(cache_path):
-        shutil.copyfile(cache_path, target_path)
-        return target_path, True
-
-    temp_path = cache_path + ".tmp"
-    req = urllib.request.Request(url, headers=HEADERS)
-    with urllib.request.urlopen(req) as resp, open(temp_path, "wb") as out:
-        shutil.copyfileobj(resp, out)
-    
-    if expected_hash and hash_format:
-        with open(temp_path, "rb") as fp:
-            data = fp.read()
-            if hash_format == "sha512":
-                calc = hashlib.sha512(data).hexdigest()
-            elif hash_format == "sha1":
-                calc = hashlib.sha1(data).hexdigest()
-            elif hash_format == "sha256":
-                calc = hashlib.sha256(data).hexdigest()
-            else:
-                calc = None
-            if calc and calc.lower() != expected_hash.lower():
-                os.remove(temp_path)
-                raise ValueError(f"Hash mismatch for {target_path}: expected {expected_hash}, got {calc}")
-                
-    os.replace(temp_path, cache_path)
+    cached = os.path.exists(cache_path)
+    if cached and file_hash(cache_path, hash_format) != expected_hash.lower():
+        print(f"  cached copy of {os.path.basename(target_path)} has the wrong hash; downloading again")
+        os.remove(cache_path)
+        cached = False
+    if not cached:
+        tmp = cache_path + ".tmp"
+        with urllib.request.urlopen(urllib.request.Request(url, headers=HEADERS)) as resp, open(tmp, "wb") as out:
+            shutil.copyfileobj(resp, out)
+        got = file_hash(tmp, hash_format)
+        if got != expected_hash.lower():
+            os.remove(tmp)
+            raise ValueError(f"hash mismatch for {url}: expected {expected_hash}, got {got}")
+        os.replace(tmp, cache_path)
     shutil.copyfile(cache_path, target_path)
-    return target_path, False
+    if file_hash(target_path, hash_format) != expected_hash.lower():
+        raise ValueError(f"hash mismatch after copying {target_path}")
+    return cached
 
-def build_prism_package():
-    print("=== Building Full Skycraft Modpack for Prism Launcher ===")
-    
-    # 1. Clean and prepare directories
+
+def find_core_jar(arg):
+    if arg:
+        if not os.path.isfile(arg):
+            sys.exit(f"--core-jar {arg} does not exist")
+        return arg
+    jars = [j for j in glob.glob(os.path.join(ROOT, "mod", "build", "libs", "*.jar"))
+            if not j.endswith(("-sources.jar", "-slim.jar"))]
+    if not jars:
+        sys.exit("No Skycraft Core jar: run `./gradlew build` in mod/ or pass --core-jar PATH")
+    return max(jars, key=os.path.getmtime)
+
+
+def read_index():
+    with open(os.path.join(PACK_DIR, "pack.toml"), "rb") as fp:
+        pack = tomllib.load(fp)
+    index_path = os.path.join(PACK_DIR, pack["index"]["file"])
+    if file_hash(index_path, pack["index"]["hash-format"]) != pack["index"]["hash"]:
+        sys.exit("pack/index.toml doesn't match the hash in pack/pack.toml: run tools/refresh_packwiz.py")
+    with open(index_path, "rb") as fp:
+        index = tomllib.load(fp)
+    fmt = index.get("hash-format", "sha256")
+    for entry in index.get("files", []):
+        path = os.path.join(PACK_DIR, entry["file"])
+        if not os.path.isfile(path):
+            sys.exit(f"pack/index.toml lists {entry['file']}, which doesn't exist")
+        if file_hash(path, entry.get("hash-format", fmt)) != entry["hash"]:
+            sys.exit(f"pack/{entry['file']} doesn't match pack/index.toml: run tools/refresh_packwiz.py")
+    return index["files"]
+
+
+def build_prism_package(core_jar_arg):
+    print("=== Building the Skycraft instance for Prism Launcher ===")
+    core_jar = find_core_jar(core_jar_arg)
+    entries = read_index()
+
     if os.path.exists(WORK_DIR):
         shutil.rmtree(WORK_DIR)
     os.makedirs(MC_DIR, exist_ok=True)
-    os.makedirs(DIST_DIR, exist_ok=True)
-    
-    # 2. Copy configs, shaderpacks, and local mods from pack/
-    print("\n[1/5] Copying local overrides (configs, options, scripts)...")
-    pack_config = os.path.join(PACK_DIR, "config")
-    if os.path.exists(pack_config):
-        shutil.copytree(pack_config, os.path.join(MC_DIR, "config"))
-    
-    # 3. Copy Skycraft Core mod
-    print("\n[2/5] Installing Skycraft Core...")
-    mc_mods_dir = os.path.join(MC_DIR, "mods")
-    os.makedirs(mc_mods_dir, exist_ok=True)
-    
-    skycraft_core_source = os.path.join(ROOT, "mod", "build", "libs", "skycraft-0.1.0.jar")
-    if not os.path.exists(skycraft_core_source):
-        skycraft_core_source = os.path.join(PACK_DIR, "mods", "skycraft-core.jar")
-    
-    dest_core = os.path.join(mc_mods_dir, "skycraft-core.jar")
-    shutil.copyfile(skycraft_core_source, dest_core)
-    print(f"  Installed {dest_core} ({os.path.getsize(dest_core)/(1024*1024):.1f} MB)")
-    
-    # 4. Parse all .pw.toml files
-    print("\n[3/5] Parsing pack metadata (.pw.toml)...")
-    download_tasks = []
-    
-    for root, dirs, files in os.walk(PACK_DIR):
-        for f in files:
-            if not f.endswith(".pw.toml"):
-                continue
-            pw_path = os.path.join(root, f)
-            rel_dir = os.path.relpath(root, PACK_DIR)  # e.g. "mods" or "shaderpacks"
-            
-            with open(pw_path, "rb") as fp:
-                d = tomllib.load(fp)
-            
-            side = d.get("side", "both")
-            if side == "server":
-                continue  # Skip server-only mods for client instance
-                
-            fn = d.get("filename")
-            download_info = d.get("download", {})
-            url = download_info.get("url")
-            h = download_info.get("hash")
-            h_format = download_info.get("hash-format")
-            
-            # If no direct download url, check CurseForge
-            if not url:
-                cf = d.get("update", {}).get("curseforge", {})
-                pid = cf.get("project-id")
-                fid = cf.get("file-id")
-                if pid and fid:
-                    fid_s = str(fid)
-                    url = f"https://edge.forgecdn.net/files/{fid_s[:4]}/{fid_s[4:]}/{fn}"
-                    
-            if not url:
-                print(f"WARNING: No download URL found for {f}")
-                continue
-                
-            target_path = os.path.join(MC_DIR, rel_dir, fn)
-            download_tasks.append((d.get("name", fn), target_path, url, h, h_format))
-            
-    print(f"  Found {len(download_tasks)} files to download.")
-    
-    # 5. Download mods and shaderpacks in parallel
-    print("\n[4/5] Downloading mods and assets...")
-    success = 0
-    failed = []
-    
+
+    print("\n[1/4] Copying indexed pack files (configs, defaults)...")
+    tasks = []
+    for entry in entries:
+        rel = entry["file"]
+        src = os.path.join(PACK_DIR, rel)
+        if not entry.get("metafile"):
+            dest = os.path.join(MC_DIR, rel)
+            os.makedirs(os.path.dirname(dest), exist_ok=True)
+            shutil.copyfile(src, dest)
+            continue
+        with open(src, "rb") as fp:
+            meta = tomllib.load(fp)
+        if meta.get("side", "both") == "server":
+            continue
+        dl = meta.get("download", {})
+        url = dl.get("url")
+        if not url:
+            cf = meta.get("update", {}).get("curseforge", {})
+            if not cf.get("file-id"):
+                sys.exit(f"{rel} has neither a download url nor a CurseForge file id")
+            url = curseforge_url(cf["file-id"], meta["filename"])
+        if not dl.get("hash") or not dl.get("hash-format"):
+            sys.exit(f"{rel} has no download hash")
+        target = os.path.join(MC_DIR, os.path.dirname(rel), meta["filename"])
+        tasks.append((meta.get("name", meta["filename"]), target, url, dl["hash"], dl["hash-format"]))
+
+    print(f"\n[2/4] Installing Skycraft Core from {core_jar}")
+    os.makedirs(os.path.join(MC_DIR, "mods"), exist_ok=True)
+    shutil.copyfile(core_jar, os.path.join(MC_DIR, "mods", "skycraft-core.jar"))
+
+    print(f"\n[3/4] Downloading {len(tasks)} mods and shader packs (hash-checked)...")
+
     def worker(task):
-        name, target_path, url, h, h_fmt = task
+        name, target, url, h, fmt = task
         try:
-            path, cached = download_file(target_path, url, h, h_fmt)
-            size = os.path.getsize(path) / (1024 * 1024)
-            print(f"  [OK] {name} ({size:.2f} MB)")
-            return True, name
+            cached = download(target, url, h, fmt)
+            print(f"  [OK] {name}{' (cache)' if cached else ''}")
+            return None
         except Exception as e:
             print(f"  [FAIL] {name}: {e}")
-            return False, f"{name}: {e}"
-            
-    with ThreadPoolExecutor(max_workers=8) as executor:
-        results = list(executor.map(worker, download_tasks))
-        
-    for ok, res in results:
-        if ok:
-            success += 1
-        else:
-            failed.append(res)
-            
+            return f"{name}: {e}"
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        failed = [r for r in pool.map(worker, tasks) if r]
     if failed:
-        print(f"\nDownload Errors ({len(failed)}):")
-        for err in failed:
-            print("  -", err)
-        raise RuntimeError("One or more files failed to download.")
-        
-    print(f"\nAll {success} dependencies successfully downloaded.")
-    
-    # 6. Generate Prism / MultiMC instance descriptors
-    print("\n[5/5] Generating Prism Launcher instance descriptor...")
-    instance_cfg = f"""InstanceType=OneSix
+        print(f"\n{len(failed)} downloads failed:")
+        for f in failed:
+            print("  -", f)
+        sys.exit(1)
+
+    print("\n[4/4] Writing the Prism instance...")
+    with open(os.path.join(INST_DIR, "instance.cfg"), "w", encoding="utf-8", newline="\n") as f:
+        f.write(f"""InstanceType=OneSix
 name=Skycraft
 iconKey=default
-notes=Skycraft: The Elder Scrolls V Skyrim Total Conversion for Minecraft 1.20.1 Forge 47.4.10
-JvmArgs=-Xms4G -Xmx8G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M
+notes=Skycraft: The Elder Scrolls V Skyrim total conversion for Minecraft {MC_VERSION} Forge {FORGE_VERSION}
+OverrideJavaArgs=true
+JvmArgs={JVM_ARGS}
 OverrideMemory=true
-MinMemAlloc=4096
-MaxMemAlloc=8192
-"""
-    with open(os.path.join(INST_DIR, "instance.cfg"), "w", encoding="utf-8") as f:
-        f.write(instance_cfg)
-
-    mmc_pack = f"""{{
+MinMemAlloc=2048
+MaxMemAlloc=6144
+""")
+    with open(os.path.join(INST_DIR, "mmc-pack.json"), "w", encoding="utf-8", newline="\n") as f:
+        f.write(f"""{{
   "components": [
     {{"uid": "net.minecraft", "version": "{MC_VERSION}", "important": true}},
     {{"uid": "net.minecraftforge", "version": "{FORGE_VERSION}"}}
   ],
   "formatVersion": 1
 }}
-"""
-    with open(os.path.join(INST_DIR, "mmc-pack.json"), "w", encoding="utf-8") as f:
-        f.write(mmc_pack)
+""")
 
-    # 7. Package instance zip
-    print(f"\nCreating Prism Launcher instance zip: {OUT_ZIP} ...")
     if os.path.exists(OUT_ZIP):
         os.remove(OUT_ZIP)
-        
     with zipfile.ZipFile(OUT_ZIP, "w", zipfile.ZIP_DEFLATED) as zf:
-        for root, dirs, files in os.walk(INST_DIR):
+        for root, _, files in os.walk(INST_DIR):
             for f in files:
-                full_p = os.path.join(root, f)
-                rel_p = os.path.relpath(full_p, WORK_DIR)
-                zf.write(full_p, rel_p)
-
-    final_size_mb = os.path.getsize(OUT_ZIP) / (1024 * 1024)
-    print(f"\n=======================================================")
-    print(f"SUCCESS! Modpack for Prism Launcher ready:")
-    print(f"File: {OUT_ZIP}")
-    print(f"Size: {final_size_mb:.2f} MB")
-    print(f"To play: In Prism Launcher, click 'Add Instance' -> 'Import' -> select this zip!")
-    print(f"=======================================================")
-    
-    # Cleanup work directory
+                full = os.path.join(root, f)
+                zf.write(full, os.path.relpath(full, WORK_DIR))
     shutil.rmtree(WORK_DIR, ignore_errors=True)
+    print(f"\nDone: {OUT_ZIP} ({os.path.getsize(OUT_ZIP) / (1024 * 1024):.1f} MB)")
+    print("In Prism Launcher: Add Instance -> Import -> choose this zip.")
+
 
 if __name__ == "__main__":
-    build_prism_package()
-
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--core-jar", help="Skycraft Core jar (default: newest jar in mod/build/libs)")
+    build_prism_package(ap.parse_args().core_jar)

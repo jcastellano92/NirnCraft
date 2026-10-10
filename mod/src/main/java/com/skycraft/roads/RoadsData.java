@@ -1,7 +1,9 @@
 package com.skycraft.roads;
 
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -11,6 +13,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.storage.DimensionDataStorage;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
@@ -20,7 +23,9 @@ import java.util.List;
 
 /**
  * Per-dimension road network (only the overworld is used): settlements, roads, roadside features and the set of
- * chunks that are already paved. Spatial indexes are transient and rebuilt on load.
+ * chunks that are already paved. Spatial indexes and the connectivity union-find are transient and rebuilt on load.
+ * Road polylines (the bulk of the data) are stored in per-region {@link RoadBucket} files, so adding a road rewrites
+ * only its region; this file holds the small, frequently changing state.
  */
 public final class RoadsData extends SavedData {
     public static final String NAME = "skycraft_roads";
@@ -29,7 +34,14 @@ public final class RoadsData extends SavedData {
     /** Size (log2 blocks) of the regions used to look up settlement zones. */
     private static final int ZONE_SHIFT = 8;
 
+    /** Size (log2 blocks) of the spatial grid used for nearest-settlement queries. */
+    private static final int GRID_SHIFT = 9;
+
+    /** Every road destination: towns and dungeons. */
     final List<Settlement> settlements = new ArrayList<>();
+    /** The towns among {@link #settlements} (what other modules see). */
+    private final List<Settlement> towns = new ArrayList<>();
+    private final Long2ObjectOpenHashMap<List<Settlement>> grid = new Long2ObjectOpenHashMap<>();
     final Int2ObjectOpenHashMap<Settlement> settlementById = new Int2ObjectOpenHashMap<>();
     final Long2ObjectOpenHashMap<Settlement> settlementByKey = new Long2ObjectOpenHashMap<>();
     final Long2ObjectOpenHashMap<List<Settlement>> settlementByCenterChunk = new Long2ObjectOpenHashMap<>();
@@ -48,15 +60,77 @@ public final class RoadsData extends SavedData {
     final LongOpenHashSet pairs = new LongOpenHashSet();
     /** Pairs waiting to be planned (FIFO). */
     final ArrayDeque<Long> pending = new ArrayDeque<>();
+    /** Pairs the planner found no acceptable path for: never queued again (until a replan). */
+    final LongOpenHashSet failed = new LongOpenHashSet();
     /** Pair currently being planned on the background thread (-1 = none); saved back into pending. */
     long inFlight = -1;
     int nextSettlementId = 1;
     int nextRoadId = 1;
     /** Bumped by replanning so results from older plans are discarded. Not saved. */
     int generation;
+    /** Settlements loaded from disk were checked against the current structure tags. Not saved. */
+    boolean classified;
+
+    /** Union-find over towns joined by a road or a queued pair (path compression + union by rank). Not saved. */
+    private final Int2IntOpenHashMap parent = new Int2IntOpenHashMap();
+    private final Int2IntOpenHashMap rank = new Int2IntOpenHashMap();
+    private final Int2IntOpenHashMap componentSize = new Int2IntOpenHashMap();
+    /** Non-town destinations that already have (or wait for) their spur road. Not saved. */
+    private final IntOpenHashSet spurred = new IntOpenHashSet();
+
+    /** Region files holding the road polylines; {@link #storage} is set once the buckets are attached. */
+    private final Long2ObjectOpenHashMap<RoadBucket> buckets = new Long2ObjectOpenHashMap<>();
+    private final LongOpenHashSet bucketKeys = new LongOpenHashSet();
+    @Nullable
+    private DimensionDataStorage storage;
+    /** Roads read from an old single-file save: moved into region buckets when attached. */
+    private boolean legacyRoads;
 
     public static RoadsData get(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(RoadsData::load, RoadsData::new, NAME);
+        RoadsData data = level.getDataStorage().computeIfAbsent(RoadsData::load, RoadsData::new, NAME);
+        if (data.storage == null) data.attach(level.getDataStorage());
+        return data;
+    }
+
+    /** Loads the road region files listed in the main file (and migrates roads from old saves into them). */
+    private void attach(DimensionDataStorage storage) {
+        this.storage = storage;
+        for (long key : bucketKeys.toLongArray()) {
+            RoadBucket b = storage.get(RoadBucket::load, RoadBucket.name(key));
+            if (b == null) {
+                bucketKeys.remove(key);
+                continue;
+            }
+            buckets.put(key, b);
+            for (Road road : b.roads.values()) {
+                if (roads.containsKey(road.id)) continue;
+                putRoad(road);
+            }
+        }
+        if (legacyRoads) {
+            for (Road road : roads.values()) bucket(RoadBucket.keyOf(road)).roads.put(road.id, road);
+            legacyRoads = false;
+            setDirty();
+        }
+        rebuildLinks();
+    }
+
+    private RoadBucket bucket(long key) {
+        RoadBucket b = buckets.get(key);
+        if (b == null) {
+            b = storage != null ? storage.computeIfAbsent(RoadBucket::load, RoadBucket::new, RoadBucket.name(key)) : new RoadBucket();
+            buckets.put(key, b);
+            if (bucketKeys.add(key)) setDirty();
+        }
+        b.setDirty();
+        return b;
+    }
+
+    private void putRoad(Road road) {
+        roads.put(road.id, road);
+        pairs.add(pairKey(road.a, road.b));
+        indexRoad(road);
+        nextRoadId = Math.max(nextRoadId, road.id + 1);
     }
 
     public RoadsData() {
@@ -98,12 +172,23 @@ public final class RoadsData extends SavedData {
 
     Settlement addSettlement(Settlement s) {
         settlements.add(s);
+        if (s.town) towns.add(s);
         settlementById.put(s.id, s);
         settlementByKey.put(s.key, s);
         settlementByCenterChunk.computeIfAbsent(ChunkPos.asLong(s.x >> 4, s.z >> 4), k -> new ArrayList<>()).add(s);
+        grid.computeIfAbsent(ChunkPos.asLong(s.x >> GRID_SHIFT, s.z >> GRID_SHIFT), k -> new ArrayList<>(2)).add(s);
         if (zoneIndexRadius >= 0) indexZone(s, zoneIndexRadius);
         setDirty();
         return s;
+    }
+
+    /** Changes whether a destination is a town (structure tags changed since it was saved). */
+    void setTown(Settlement s, boolean town) {
+        if (s.town == town) return;
+        s.town = town;
+        if (town) towns.add(s);
+        else towns.remove(s);
+        setDirty();
     }
 
     @Nullable
@@ -111,8 +196,93 @@ public final class RoadsData extends SavedData {
         return settlementById.get(id);
     }
 
+    /** The known towns ({@code #skycraft:towns}); dungeons the roads lead to are not included. */
     public List<Settlement> settlements() {
-        return Collections.unmodifiableList(settlements);
+        return Collections.unmodifiableList(towns);
+    }
+
+    int townCount() {
+        return towns.size();
+    }
+
+    /**
+     * Destinations within {@code radius} blocks of (x, z) matching {@code filter}, nearest first. Uses the spatial grid,
+     * so the cost depends on the radius, not on the number of settlements.
+     */
+    List<Settlement> near(int x, int z, double radius, java.util.function.Predicate<Settlement> filter) {
+        List<Settlement> out = new ArrayList<>();
+        double r2 = radius * radius;
+        int r = (int) Math.ceil(radius);
+        for (int gx = (x - r) >> GRID_SHIFT; gx <= (x + r) >> GRID_SHIFT; gx++) {
+            for (int gz = (z - r) >> GRID_SHIFT; gz <= (z + r) >> GRID_SHIFT; gz++) {
+                List<Settlement> list = grid.get(ChunkPos.asLong(gx, gz));
+                if (list == null) continue;
+                for (Settlement s : list) {
+                    if (s.distSq(x + 0.5, z + 0.5) <= r2 && filter.test(s)) out.add(s);
+                }
+            }
+        }
+        out.sort(java.util.Comparator.comparingDouble(s -> s.distSq(x + 0.5, z + 0.5)));
+        return out;
+    }
+
+    // ------------------------------------------------------------------ connectivity
+
+    /** Root of a town's road-connected group. */
+    int find(int id) {
+        int root = id;
+        while (true) {
+            int p = parent.getOrDefault(root, root);
+            if (p == root) break;
+            root = p;
+        }
+        // path compression
+        int cur = id;
+        while (cur != root) {
+            int next = parent.getOrDefault(cur, cur);
+            parent.put(cur, root);
+            cur = next;
+        }
+        return root;
+    }
+
+    int componentSize(int id) {
+        return componentSize.getOrDefault(find(id), 1);
+    }
+
+    /** Records that a road (built or queued) joins a and b. */
+    void link(int a, int b) {
+        Settlement sa = settlement(a), sb = settlement(b);
+        if (sa == null || sb == null) return;
+        if (!sa.town || !sb.town) {
+            spurred.add(sa.town ? b : a);
+            return;
+        }
+        int ra = find(a), rb = find(b);
+        if (ra == rb) return;
+        int rka = rank.getOrDefault(ra, 0), rkb = rank.getOrDefault(rb, 0);
+        if (rka < rkb) {
+            int t = ra;
+            ra = rb;
+            rb = t;
+        }
+        parent.put(rb, ra);
+        if (rka == rkb) rank.put(ra, rka + 1);
+        componentSize.put(ra, componentSize.getOrDefault(ra, 1) + componentSize.getOrDefault(rb, 1));
+        componentSize.remove(rb);
+    }
+
+    boolean hasSpur(int id) {
+        return spurred.contains(id);
+    }
+
+    /** Rebuilds the union-find from the known pairs (after load, or after a pair was dropped). */
+    void rebuildLinks() {
+        parent.clear();
+        rank.clear();
+        componentSize.clear();
+        spurred.clear();
+        for (long p : pairs) link(pairA(p), pairB(p));
     }
 
     private void indexZone(Settlement s, int radius) {
@@ -133,13 +303,24 @@ public final class RoadsData extends SavedData {
         for (Settlement s : settlements) indexZone(s, radius);
     }
 
-    /** The settlement whose zone (no-paving area) contains this column, if any. */
+    /** The town whose zone contains this column, if any (dungeon destinations are not towns). */
     @Nullable
     public Settlement zoneAt(int x, int z) {
+        return zoneAt(x, z, true);
+    }
+
+    /** The destination (town or dungeon) whose zone (no-paving area) contains this column, if any. */
+    @Nullable
+    Settlement anyZoneAt(int x, int z) {
+        return zoneAt(x, z, false);
+    }
+
+    @Nullable
+    private Settlement zoneAt(int x, int z, boolean townsOnly) {
         ensureZoneIndex();
         List<Settlement> list = zoneIndex.get(ChunkPos.asLong(x >> ZONE_SHIFT, z >> ZONE_SHIFT));
         if (list == null) return null;
-        for (Settlement s : list) if (s.inZone(x, z, zoneIndexRadius)) return s;
+        for (Settlement s : list) if ((s.town || !townsOnly) && s.inZone(x, z, zoneIndexRadius)) return s;
         return null;
     }
 
@@ -176,6 +357,8 @@ public final class RoadsData extends SavedData {
         Road road = new Road(nextRoadId++, a, b, xs, zs, flags);
         roads.put(road.id, road);
         pairs.add(pairKey(a, b));
+        link(a, b);
+        bucket(RoadBucket.keyOf(road)).roads.put(road.id, road);
         setDirty();
         return road;
     }
@@ -251,8 +434,15 @@ public final class RoadsData extends SavedData {
         paved.clear();
         pairs.clear();
         pending.clear();
+        failed.clear();
         inFlight = -1;
         generation++;
+        for (RoadBucket b : buckets.values()) {
+            if (b.roads.isEmpty()) continue;
+            b.roads.clear();
+            b.setDirty();
+        }
+        rebuildLinks();
         setDirty();
     }
 
@@ -263,9 +453,14 @@ public final class RoadsData extends SavedData {
         ListTag s = new ListTag();
         for (Settlement st : settlements) s.add(st.save());
         tag.put("settlements", s);
-        ListTag r = new ListTag();
-        for (Road road : roads.values()) r.add(road.save());
-        tag.put("roads", r);
+        if (storage == null) {
+            // never attached to its region files (should not happen): keep the polylines here rather than lose them
+            ListTag r = new ListTag();
+            for (Road road : roads.values()) r.add(road.save());
+            tag.put("roads", r);
+        }
+        tag.putLongArray("buckets", bucketKeys.toLongArray());
+        tag.putLongArray("failed", failed.toLongArray());
         ListTag f = new ListTag();
         for (RoadFeature feature : features) f.add(feature.save());
         tag.put("features", f);
@@ -290,15 +485,16 @@ public final class RoadsData extends SavedData {
             data.addSettlement(st);
             data.nextSettlementId = Math.max(data.nextSettlementId, st.id + 1);
         }
+        // roads live in region files (attached by get()); older saves kept them all here
         ListTag r = tag.getList("roads", Tag.TAG_COMPOUND);
         for (int i = 0; i < r.size(); i++) {
             Road road = Road.load(r.getCompound(i));
             if (road == null) continue;
-            data.roads.put(road.id, road);
-            data.pairs.add(pairKey(road.a, road.b));
-            data.indexRoad(road);
-            data.nextRoadId = Math.max(data.nextRoadId, road.id + 1);
+            data.putRoad(road);
+            data.legacyRoads = true;
         }
+        for (long k : tag.getLongArray("buckets")) data.bucketKeys.add(k);
+        for (long p : tag.getLongArray("failed")) data.failed.add(p);
         ListTag f = tag.getList("features", Tag.TAG_COMPOUND);
         for (int i = 0; i < f.size(); i++) data.addFeature(RoadFeature.load(f.getCompound(i)));
         for (long c : tag.getLongArray("paved")) data.paved.add(c);

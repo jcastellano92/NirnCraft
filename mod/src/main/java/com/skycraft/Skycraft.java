@@ -53,6 +53,7 @@ public class Skycraft {
         com.skycraft.society.SocietyModule.init(modBus);
         com.skycraft.arsenal.ArsenalModule.init(modBus);
         com.skycraft.atmosphere.AtmosphereModule.init(modBus);
+        com.skycraft.tamriel.TamrielModule.init(modBus);
 
         modBus.addListener(this::registerCapabilities);
         modBus.addListener(this::commonSetup);

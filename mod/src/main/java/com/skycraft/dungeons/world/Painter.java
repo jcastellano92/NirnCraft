@@ -270,7 +270,13 @@ public final class Painter {
             }
             mob.moveTo(x + 0.5, y, z + 0.5, yaw, 0.0f);
             mob.setYHeadRot(yaw);
-            mob.finalizeSpawn(level, level.getCurrentDifficultyAt(new BlockPos(x, y, z)), MobSpawnType.STRUCTURE, null, null);
+            // through Forge so MobSpawnEvent.FinalizeSpawn handlers (levelling, gear...) see dungeon mobs too
+            net.minecraftforge.event.ForgeEventFactory.onFinalizeSpawn(mob, level, level.getCurrentDifficultyAt(new BlockPos(x, y, z)),
+                    MobSpawnType.STRUCTURE, null, null);
+            if (mob.isSpawnCancelled()) {
+                mob.discard();
+                return null;
+            }
             mob.setPersistenceRequired();
             if (name != null) mob.setCustomName(Component.literal(name));
             CompoundTag data = mob.getPersistentData();

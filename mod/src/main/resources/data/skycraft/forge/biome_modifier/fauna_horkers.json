@@ -1,11 +1,6 @@
 {
   "type": "forge:add_spawns",
-  "biomes": [
-    "minecraft:snowy_beach",
-    "minecraft:stony_shore",
-    "minecraft:beach",
-    "minecraft:frozen_river"
-  ],
+  "biomes": "#skycraft:spawns/coast",
   "spawners": [
     {
       "type": "skycraft:horker",

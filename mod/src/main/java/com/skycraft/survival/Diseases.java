@@ -43,20 +43,17 @@ public final class Diseases {
             SurvivalEffects.ROCKJOINT, SurvivalEffects.WITBANE, SurvivalEffects.SWAMP_ROT, SurvivalEffects.COLLYWOBBLES,
             SurvivalEffects.GREENSPORE, SurvivalEffects.DROOPS);
 
-    /** Which diseases a creature can pass on, by entity type id (namespace-wide entries end with ":*"). */
+    /**
+     * Which diseases a creature can pass on, by entity type id (namespace-wide entries end with ":*"). Skyrim's wolves
+     * are vanilla wolves; cave/snow bears, snowy sabre cats and frost trolls are variants of one entity type each.
+     */
     private static final Map<String, List<RegistryObject<MobEffect>>> CARRIERS = Map.ofEntries(
             Map.entry("skycraft:skeever", List.of(SurvivalEffects.ATAXIA, SurvivalEffects.RATTLES, SurvivalEffects.WITBANE)),
             Map.entry("minecraft:wolf", List.of(SurvivalEffects.ROCKJOINT)),
-            Map.entry("skycraft:wolf", List.of(SurvivalEffects.ROCKJOINT)),
-            Map.entry("skycraft:ice_wolf", List.of(SurvivalEffects.ROCKJOINT)),
             Map.entry("skycraft:bear", List.of(SurvivalEffects.ROCKJOINT, SurvivalEffects.BONE_BREAK_FEVER)),
-            Map.entry("skycraft:cave_bear", List.of(SurvivalEffects.ROCKJOINT, SurvivalEffects.BONE_BREAK_FEVER)),
-            Map.entry("skycraft:snow_bear", List.of(SurvivalEffects.ROCKJOINT, SurvivalEffects.BONE_BREAK_FEVER)),
             Map.entry("minecraft:polar_bear", List.of(SurvivalEffects.ROCKJOINT, SurvivalEffects.BONE_BREAK_FEVER)),
             Map.entry("skycraft:sabre_cat", List.of(SurvivalEffects.BONE_BREAK_FEVER)),
-            Map.entry("skycraft:snowy_sabre_cat", List.of(SurvivalEffects.BONE_BREAK_FEVER)),
             Map.entry("skycraft:troll", List.of(SurvivalEffects.BONE_BREAK_FEVER, SurvivalEffects.GREENSPORE)),
-            Map.entry("skycraft:frost_troll", List.of(SurvivalEffects.BONE_BREAK_FEVER, SurvivalEffects.GREENSPORE)),
             Map.entry("skycraft:draugr", List.of(SurvivalEffects.BRAIN_ROT)),
             Map.entry("skycraft:draugr_deathlord", List.of(SurvivalEffects.BRAIN_ROT)),
             Map.entry("skycraft:mudcrab", List.of(SurvivalEffects.SWAMP_ROT)),

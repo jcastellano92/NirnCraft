@@ -21,3 +21,8 @@ Thumbs.db
 dist/
 *.args
 __pycache__/
+# Skycraft Core is a build output; CI and tools/prepare-build-pack.sh inject it into build copies of the pack
+pack/mods/skycraft-core.jar
+
+# Claude Code agent worktrees
+.claude/

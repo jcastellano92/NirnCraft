@@ -7,8 +7,9 @@ bounties, trade with merchants, get thrown in jail, and adventure with your frie
 
 * **Minecraft 1.20.1, Forge 47.4.10, Java 17**: the most complete RPG mod ecosystem.
 * **Skycraft Core** (`mod/`) is a custom mod that builds the Skyrim rules into Minecraft.
-* About 60 well-known mods (`tools/modlist.txt`) supply towns, dungeons, NPCs, companions, vampires, werewolves,
-  Distant Horizons, and performance.
+* About 60 well-known mods (`tools/modlist.txt`) supply towns, dungeons, villagers, vampires, werewolves,
+  Distant Horizons, and performance. Skycraft prefers its own systems over third-party feature mods: followers, NPC
+  dialogue, tree felling and the Skyrim map are all Skycraft Core.
 
 ## Install
 
@@ -24,34 +25,38 @@ Every CI run on GitHub Actions produces downloads (Actions → latest run → *A
 Full instructions, including hosting with friends through **Essential** and running a dedicated server, are in
 [docs/INSTALL.md](docs/INSTALL.md).
 
-You can also install with [packwiz-installer](https://packwiz.infra.link/tutorials/installing/packwiz-installer/)
-pointed at `pack/pack.toml`.
+The packwiz pack in `pack/` holds every third-party mod and config, but not Skycraft Core itself (that jar is a build
+output). Use the CI downloads above, or see [docs/DEVELOPING.md](docs/DEVELOPING.md) to build them yourself.
 
 ## Controls (rebind in Options → Controls → Key Binds → Skycraft)
 
-Skycraft moves any of its keys that clash with another mod's to a free key on first launch.
+These are the defaults for new players (shipped through Default Options). Skycraft moves any of its keys that clash
+with another mod's to a free key on first launch.
 
 | Key | Action |
 | --- | --- |
-| **E** | Skyrim inventory (C inside it opens the vanilla inventory for armor slots and crafting) |
+| **E** | Skyrim inventory |
+| **Tab** | Menu hub: Skills ↑, Items ←, Magic →, Map ↓, Journal |
 | **K** | Skills: look to the heavens, spend perk points, choose Health/Magicka/Stamina on level up |
-| **J** | Journal: quests, factions, stats, bounties |
-| **G** | Magic & shouts menu (left-click equips the right hand, right-click the left hand) |
-| **R** / right-click | Cast the right-hand / left-hand spell (hold for concentration spells) |
-| **Z** | Shout (hold longer for more Words of Power) |
-| **H** | Racial greater power |
-| **O** | Standing Stone power |
-| **X** | Favorites |
-| **Left Alt** (hold) | Power attack; sprinting attacks are also power attacks |
-| **V** (hold) | Block with your weapon (shields block with right-click as usual) |
+| **J** | Journal: quests, factions, party, reputation, stats, bounties |
+| **P** | Magic menu: equip spells, shouts and powers |
+| **M** | Skyrim map: fast travel to discovered locations and party members |
+| **Z** | Shout or use the equipped power (racial and Standing Stone powers too); hold longer for more Words of Power |
+| **Q** / mouse wheel | Favorites. **1–8** use your favorite hotkeys |
+| **Left mouse** | Attack or cast the right-hand spell. Hold to power attack |
+| **Right mouse** (hold) | Block with your weapon or shield, or cast the left-hand spell |
+| **F** | Interact: talk, loot, use |
+| **Left Alt** | Dodge roll (perk-unlocked) |
+| **H** | Call your horse |
 | **I** | Wait (beds also open the sleep menu, at any time of day) |
-| **N** | Skyrim map: fast travel to discovered locations and party members |
-| **M** | Xaero's terrain world map |
-| **U** | Party |
 | **Y** | Reputation and faction regalia |
+| **`** | Player list (vanilla Tab) |
 | Sneak + use on an NPC | Pickpocket |
 | Sneak + use on a corpse | Drag the body |
-| Use on an NPC | Talk: trade, train, work, factions, bounty |
+
+Unbound by default (set them in Controls if you want them): ready/sheathe weapon, the Standing Stone power key, vanilla
+drop, swap hands, advancements and hotbar slot 9, and Oculus's shader keys (shaders are in Video Settings →
+Shader Packs).
 
 ## How Skyrim maps onto Minecraft
 
@@ -60,3 +65,12 @@ See [docs/FEATURES.md](docs/FEATURES.md) for the full feature guide.
 ## Developing
 
 See [docs/DEVELOPING.md](docs/DEVELOPING.md). `cd mod && ./gradlew build` builds the mod; CI builds everything on push.
+
+## Recent mod list changes
+
+* **Removed:** Physics Mod (60 MB with its features switched off; Skycraft prefers its own physics), HT's TreeChop
+  (Skycraft fells trees itself), Easy NPC (unused; Skycraft has its own NPCs), and an invalid Tectonic config
+  (Tectonic itself stays, with its defaults).
+* **Added for performance:** ImmediatelyFast, Krypton, Clumps, Saturn, Dynamic FPS and Structure Layout Optimizer.
+  ModernFix and Entity Culling were updated.
+* **MCA Reborn** is pinned to its latest stable release (7.6.26) instead of a 7.7 beta.

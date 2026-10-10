@@ -79,7 +79,7 @@ public final class Discovery {
                     if (start == null || !start.isValid()) continue;
                     ResourceLocation key = registry.getKey(s);
                     if (key == null) continue;
-                    LocationKind kind = LocationKind.classify(key, level.dimension());
+                    LocationKind kind = LocationTags.classify(level, s);
                     if (kind == null) continue;
                     String id = level.dimension().location() + "|" + key + "|" + start.getChunkPos().x + "," + start.getChunkPos().z;
                     if (WorldData.find(data, id) != null) continue;
@@ -110,12 +110,10 @@ public final class Discovery {
             loc.putInt("y", nearestKind.underground() ? sCenter.getY() : sCenter.getY());
             loc.putInt("z", sCenter.getZ());
             loc.putString("dim", level.dimension().location().toString());
-            loc.putLong("t", level.getGameTime());
             loc.putInt("ax", sCenter.getX());
             loc.putInt("ay", sCenter.getY());
             loc.putInt("az", sCenter.getZ());
             loc.putIntArray("box", new int[]{box.minX(), box.minY(), box.minZ(), box.maxX(), box.maxY(), box.maxZ()});
-            loc.putString("structure", nearestKey.toString());
             loc.putBoolean("known", true);
 
             ListTag list = WorldData.discovered(data);
@@ -133,41 +131,45 @@ public final class Discovery {
         // spread the work of many players over different ticks
         if ((player.tickCount + (player.getId() & 31)) % CHECK_INTERVAL != 0) return;
         try {
-            if (WorldConfig.DISCOVERY.get()) checkStructures(player);
+            if (WorldConfig.DISCOVERY.get()) {
+                compactOnce(player);
+                checkStructures(player);
+            }
             checkHold(player);
-            checkCorpseProximity(player);
         } catch (RuntimeException e) {
             Skycraft.LOGGER.debug("Skycraft discovery check failed for {}", player.getName().getString(), e);
         }
     }
 
-    private static void checkCorpseProximity(ServerPlayer player) {
+    /**
+     * Once per player: drops discoveries of structures that are no longer locations ({@code #skycraft:ignored_landmarks}
+     * such as decorative trees and benches found before the tag existed) and fields nothing reads any more, so the
+     * synced list stays small.
+     */
+    private static void compactOnce(ServerPlayer player) {
         PlayerData data = SkyData.get(player);
-        if (data == null) return;
+        CompoundTag root = WorldData.root(data);
+        if (root.getInt("compacted") >= 1) return;
+        root.putInt("compacted", 1);
+        Registry<Structure> registry = player.serverLevel().registryAccess().registryOrThrow(Registries.STRUCTURE);
         ListTag list = WorldData.discovered(data);
-        String dim = player.level().dimension().location().toString();
-        boolean removed = false;
+        int removed = 0;
         for (int i = list.size() - 1; i >= 0; i--) {
             CompoundTag loc = list.getCompound(i);
-            String name = loc.getString("name");
-            String id = loc.getString("id");
-            if ("Your Corpse".equals(name) || id.startsWith("corpse|")) {
-                if (loc.getString("dim").equals(dim)) {
-                    int cx = loc.getInt("x");
-                    int cy = loc.getInt("y");
-                    int cz = loc.getInt("z");
-                    if (player.distanceToSqr(cx + 0.5, cy + 0.5, cz + 0.5) <= 64.0) {
-                        list.remove(i);
-                        removed = true;
-                    }
-                }
+            String structure = loc.getString("structure");
+            loc.remove("structure");
+            loc.remove("t");
+            ResourceLocation id = ResourceLocation.tryParse(structure);
+            if (id == null) continue;
+            boolean ignored = registry.getHolder(net.minecraft.resources.ResourceKey.create(Registries.STRUCTURE, id))
+                    .map(h -> h.is(LocationTags.IGNORED_LANDMARKS)).orElse(false);
+            if (ignored) {
+                list.remove(i);
+                removed++;
             }
         }
-        if (removed) {
-            data.markDirty();
-            com.skycraft.core.PlayerDataEvents.fullSync(player);
-            Notifier.send(player, NotifyKind.LOCATION_CLEARED, Component.literal("Your Corpse Recovered"), Component.literal("Corpse"));
-        }
+        data.markDirty();
+        if (removed > 0) com.skycraft.core.PlayerDataEvents.fullSync(player);
     }
 
     // ------------------------------------------------------------------ structures
@@ -184,7 +186,7 @@ public final class Discovery {
         for (Structure structure : refs.keySet()) {
             ResourceLocation key = registry.getKey(structure);
             if (key == null) continue;
-            LocationKind kind = LocationKind.classify(key, level.dimension());
+            LocationKind kind = LocationTags.classify(level, structure);
             if (kind == null) continue;
             StructureStart start = kind.insidePieces
                     ? structures.getStructureWithPieceAt(pos, structure)
@@ -203,7 +205,9 @@ public final class Discovery {
                 }
                 continue;
             }
-            if (WorldData.hasDiscoveredNear(data, level.dimension().location().toString(), pos.getX(), pos.getZ(), 64)) {
+            // the same place under another structure id (overlapping starts): only right on top of a discovered one
+            BlockPos center = start.getBoundingBox().getCenter();
+            if (WorldData.hasDiscoveredNear(data, level.dimension().location().toString(), center.getX(), center.getZ(), 16)) {
                 continue;
             }
             discover(player, data, id, kind, key, start.getBoundingBox());
@@ -221,12 +225,10 @@ public final class Discovery {
         loc.putInt("y", kind.underground() ? player.getBlockY() : center.getY());
         loc.putInt("z", center.getZ());
         loc.putString("dim", player.level().dimension().location().toString());
-        loc.putLong("t", player.level().getGameTime());
         loc.putInt("ax", player.getBlockX());
         loc.putInt("ay", player.getBlockY());
         loc.putInt("az", player.getBlockZ());
         loc.putIntArray("box", new int[]{box.minX(), box.minY(), box.minZ(), box.maxX(), box.maxY(), box.maxZ()});
-        loc.putString("structure", key.toString());
         ListTag list = WorldData.discovered(data);
         list.add(loc);
         data.addStat("locations_discovered", 1);

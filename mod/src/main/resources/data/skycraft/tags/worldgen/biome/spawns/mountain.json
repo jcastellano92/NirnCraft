@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:is_mountain",
+    "#minecraft:is_hill",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:stony_peaks",
+    {
+      "id": "#forge:is_peak",
+      "required": false
+    },
+    {
+      "id": "#forge:is_slope",
+      "required": false
+    },
+    {
+      "id": "#terralith:highlands",
+      "required": false
+    }
+  ]
+}

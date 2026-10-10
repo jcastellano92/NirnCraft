@@ -44,6 +44,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import com.skycraft.core.SkyData;
+import com.skycraft.magic.MagicDamage;
 
 /**
  * {@code skycraft:dragon}: flies, circles its prey high above, swoops in breathing fire (frost for Frost Dragons),
@@ -61,6 +62,11 @@ public class DragonEntity extends Monster {
     private static final float[] TIER_DAMAGE = {1.0f, 1.25f, 1.5f, 1.8f, 2.1f};
     public static final double BASE_HEALTH = 300.0;
     public static final double BASE_DAMAGE = 12.0;
+    /** Game ticks without a player within 256 blocks before a wild dragon leaves. */
+    private static final long ABSENCE_LIMIT = 1200;
+    /** Flying: keep at least this far above the terrain ahead. */
+    private static final double TERRAIN_MARGIN = 3.0;
+    private static final double[] LOOKAHEAD = {0.0, 3.0, 6.0, 10.0, 15.0};
 
     private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(DragonEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> FLYING = SynchedEntityData.defineId(DragonEntity.class, EntityDataSerializers.BOOLEAN);
@@ -87,7 +93,10 @@ public class DragonEntity extends Monster {
     private int biteCooldown;
     private int tailCooldown;
     private int groundBreathCooldown = 80;
-    private int noPlayerTicks;
+    /** Game time a player was last within 256 blocks (game time also passes while the dragon's chunk is unloaded). */
+    private long lastSeenTime = -1;
+    /** Just loaded from disk: check how long nobody was around before doing anything else. */
+    private boolean checkAbsence;
     private int stuckTicks;
     private Vec3 lastGroundPos = Vec3.ZERO;
     private boolean initialized;
@@ -98,12 +107,72 @@ public class DragonEntity extends Monster {
     /** Client-side only: this instance is a corpse dummy (wings folded, lying still). */
     private boolean corpsePose;
 
+    /** Hittable head, neck and wings (the body box is only the torso). */
+    private final DragonPart head;
+    private final DragonPart neck;
+    private final DragonPart leftWing;
+    private final DragonPart rightWing;
+    private final DragonPart[] parts;
+
     public DragonEntity(EntityType<? extends DragonEntity> type, Level level) {
         super(type, level);
         this.xpReward = 500;
         this.lookControl = new DragonLookControl(this);
         this.setMaxUpStep(1.5f);
         this.noCulling = true;
+        this.head = new DragonPart(this, "head", 2.0f, 2.0f, 1.25f);
+        this.neck = new DragonPart(this, "neck", 1.6f, 1.6f, 1.0f);
+        this.leftWing = new DragonPart(this, "left_wing", 3.5f, 1.0f, 0.6f);
+        this.rightWing = new DragonPart(this, "right_wing", 3.5f, 1.0f, 0.6f);
+        this.parts = new DragonPart[]{head, neck, leftWing, rightWing};
+        // parts take the ids right after the dragon's (like the ender dragon's), the same on server and client
+        this.setId(ENTITY_COUNTER.getAndAdd(parts.length + 1) + 1);
+    }
+
+    @Override
+    public void setId(int id) {
+        super.setId(id);
+        if (parts == null) return; // Entity's constructor sets the first id before the parts exist
+        for (int i = 0; i < parts.length; i++) parts[i].setId(id + i + 1);
+    }
+
+    @Override
+    public boolean isMultipartEntity() {
+        return true;
+    }
+
+    @Override
+    public net.minecraftforge.entity.PartEntity<?>[] getParts() {
+        return parts;
+    }
+
+    /** Damage taken by one of the parts (already scaled by where it hit). */
+    public boolean hurtFromPart(DragonPart part, DamageSource source, float amount) {
+        if (this.isRemoved() || this.isDeadOrDying()) return false;
+        return this.hurt(source, amount);
+    }
+
+    /** Places the parts around the body: head and neck ahead (higher when standing), wings spread while flying. */
+    private void updateParts() {
+        Vec3 fwd = Vec3.directionFromRotation(0, this.yBodyRot);
+        Vec3 right = new Vec3(-fwd.z, 0, fwd.x);
+        boolean flying = isFlying();
+        Vec3 base = this.position();
+        placePart(head, mouthPos().subtract(fwd.scale(0.8)));
+        placePart(neck, base.add(fwd.scale(3.2)).add(0, flying ? 1.3 : 2.4, 0));
+        double span = flying ? 4.6 : 2.2;
+        double wingY = flying ? 1.4 : 1.6;
+        placePart(leftWing, base.add(right.scale(-span)).add(0, wingY, 0));
+        placePart(rightWing, base.add(right.scale(span)).add(0, wingY, 0));
+    }
+
+    /** Moves a part so that its box is centered on {@code center}. */
+    private static void placePart(DragonPart part, Vec3 center) {
+        part.setOldPosAndRot();
+        part.xOld = part.getX();
+        part.yOld = part.getY();
+        part.zOld = part.getZ();
+        part.setPos(center.x, center.y - part.getBbHeight() / 2.0, center.z);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -130,9 +199,31 @@ public class DragonEntity extends Monster {
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, false, false, null));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, GuardEntity.class, 20, false, false, null));
-        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, 40, false, false, null));
+        this.targetSelector.addGoal(2, new DragonTargetGoal<>(this, Player.class, 10));
+        this.targetSelector.addGoal(3, new DragonTargetGoal<>(this, GuardEntity.class, 20));
+        this.targetSelector.addGoal(4, new DragonTargetGoal<>(this, AbstractVillager.class, 40));
+    }
+
+    /**
+     * The dragon circles 20-30 blocks above its prey: looks for targets in a tall box (64 blocks around, 48 up and
+     * down) instead of vanilla's flat one, and only ones it can see.
+     */
+    private static class DragonTargetGoal<T extends LivingEntity> extends NearestAttackableTargetGoal<T> {
+        DragonTargetGoal(DragonEntity dragon, Class<T> type, int interval) {
+            super(dragon, type, interval, true, false, null);
+        }
+
+        @Override
+        protected AABB getTargetSearchArea(double distance) {
+            return this.mob.getBoundingBox().inflate(64.0, 48.0, 64.0);
+        }
+
+        @Override
+        protected void findTarget() {
+            // vanilla checks players by distance only; use the box for them too
+            this.target = this.mob.level().getNearestEntity(this.mob.level().getEntitiesOfClass(this.targetType,
+                    this.getTargetSearchArea(0), e -> true), this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
+        }
     }
 
     // ------------------------------------------------------------------ state
@@ -156,7 +247,7 @@ public class DragonEntity extends Monster {
     public void setFlying(boolean flying) {
         this.entityData.set(FLYING, flying);
         this.setNoGravity(flying);
-        if (!flying) this.noPhysics = false;
+        if (!flying) enableCollision();
     }
 
     public boolean isBreathing() {
@@ -311,8 +402,52 @@ public class DragonEntity extends Monster {
         Vec3 desired = dist < 1.0E-4 ? Vec3.ZERO : to.scale(Math.min(speed, dist * 0.2) / dist);
         Vec3 vel = this.getDeltaMovement();
         vel = vel.add(desired.subtract(vel).scale(accel));
+        if (isFlying()) vel = avoidTerrain(vel);
         this.setDeltaMovement(vel);
         faceVelocity(vel);
+    }
+
+    /**
+     * Flight passes through blocks (no physics, for smooth turns), so it must not fly into hills: samples the terrain
+     * along the flight path and climbs (slowing down in front of a wall) to stay {@value #TERRAIN_MARGIN} blocks above it.
+     */
+    private Vec3 avoidTerrain(Vec3 vel) {
+        Vec3 flat = new Vec3(vel.x, 0, vel.z);
+        double h = flat.length();
+        Vec3 dir = h < 1.0E-3 ? Vec3.directionFromRotation(0, this.getYRot()) : flat.scale(1.0 / h);
+        double need = 0;
+        double nearNeed = 0;
+        for (double d : LOOKAHEAD) {
+            double ground = groundY(this.getX() + dir.x * d, this.getZ() + dir.z * d);
+            double climb = ground + TERRAIN_MARGIN - this.getY();
+            if (climb <= 0) continue;
+            need = Math.max(need, climb);
+            if (d <= 6.0) nearNeed = Math.max(nearNeed, climb);
+        }
+        if (need <= 0) return vel;
+        double vy = Math.max(vel.y, Math.min(0.9, 0.15 + need * 0.12));
+        double slow = nearNeed > 4.0 ? 0.6 : 1.0; // a cliff right ahead: slow down while climbing over it
+        return new Vec3(vel.x * slow, vy, vel.z * slow);
+    }
+
+    /** Flying with no physics when well above the ground, otherwise with collisions (once out of the terrain). */
+    private void flightPhysics(double clearance) {
+        if (this.getY() > groundY(this.getX(), this.getZ()) + clearance) this.noPhysics = true;
+        else enableCollision();
+    }
+
+    /**
+     * Turns collisions back on, but never while the body is inside blocks (it would be stuck there for good): until it
+     * is out, it keeps passing through and rises.
+     */
+    private void enableCollision() {
+        if (!this.noPhysics) return;
+        if (this.level().noCollision(this, this.getBoundingBox())) {
+            this.noPhysics = false;
+            return;
+        }
+        Vec3 v = this.getDeltaMovement();
+        this.setDeltaMovement(v.x * 0.5, Math.max(v.y, 0.4), v.z * 0.5);
     }
 
     private void faceVelocity(Vec3 vel) {
@@ -401,12 +536,29 @@ public class DragonEntity extends Monster {
         tickBreath(target);
     }
 
-    /** Wild dragons leave when nobody is around for a minute. */
+    /**
+     * Wild dragons (random attacks, spawn eggs: anything not made persistent by a quest, a lair or a name tag) leave
+     * when nobody has been within 256 blocks for a minute. Counted in game time, so a dragon that was outrun and sat in
+     * an unloaded chunk is gone as soon as it loads again.
+     */
     private boolean tickDespawn() {
+        long now = this.level().getGameTime();
+        if (this.isPersistenceRequired() || lastSeenTime < 0) {
+            lastSeenTime = now;
+            checkAbsence = false;
+            return false;
+        }
+        if (checkAbsence) {
+            checkAbsence = false;
+            if (now - lastSeenTime > ABSENCE_LIMIT) {
+                this.discard();
+                return true;
+            }
+        }
         if (this.tickCount % 20 != 0) return false;
-        boolean near = this.level().getNearestPlayer(this, 256) != null;
-        noPlayerTicks = near ? 0 : noPlayerTicks + 20;
-        if (noPlayerTicks > 1200 && !this.isPersistenceRequired()) {
+        if (this.level().getNearestPlayer(this, 256) != null) {
+            lastSeenTime = now;
+        } else if (now - lastSeenTime > ABSENCE_LIMIT) {
             this.discard();
             return true;
         }
@@ -422,7 +574,7 @@ public class DragonEntity extends Monster {
         double gz = center.z + Math.sin(circleAngle) * radius;
         double gy = Math.max(center.y + altitude, groundY(gx, gz) + 14.0);
         steerTowards(new Vec3(gx, gy, gz), 0.95, 0.06);
-        this.noPhysics = this.getY() > groundY(this.getX(), this.getZ()) + 5.0;
+        flightPhysics(5.0);
 
         if (target != null) {
             if (phaseTicks > 90 + this.getRandom().nextInt(80)) setPhase(swoops >= swoopsBeforeLanding ? Phase.LAND : Phase.SWOOP);
@@ -446,7 +598,7 @@ public class DragonEntity extends Monster {
         }
         aim = new Vec3(aim.x, Math.max(aim.y, groundY(aim.x, aim.z) + 5.0), aim.z);
         steerTowards(aim, 1.15, 0.08);
-        this.noPhysics = this.getY() > groundY(this.getX(), this.getZ()) + 4.0;
+        flightPhysics(4.0);
 
         double dist = this.distanceTo(target);
         Vec3 fwd = Vec3.directionFromRotation(0, this.getYRot());
@@ -485,12 +637,12 @@ public class DragonEntity extends Monster {
         if (hd > 4.0 && !(forced && phaseTicks > 20)) {
             double gy = Math.max(spot.y + 10.0, groundY(this.getX(), this.getZ()) + 6.0);
             steerTowards(new Vec3(spot.x, gy, spot.z), 0.85, 0.07);
-            this.noPhysics = this.getY() > groundY(this.getX(), this.getZ()) + 6.0;
+            flightPhysics(6.0);
         } else {
-            // descend
-            this.noPhysics = false;
+            // descend (once out of any terrain it flew through: until then enableCollision lifts it)
+            enableCollision();
             Vec3 vel = this.getDeltaMovement();
-            this.setDeltaMovement(vel.x * 0.85, forced ? -0.7 : -0.35, vel.z * 0.85);
+            if (!this.noPhysics) this.setDeltaMovement(vel.x * 0.85, forced ? -0.7 : -0.35, vel.z * 0.85);
             if (target != null) this.setYRot(Mth.approachDegrees(this.getYRot(), yawTo(target), 5.0f));
             this.setXRot(Mth.approach(this.getXRot(), 0, 3.0f));
             this.yBodyRot = this.getYRot();
@@ -527,7 +679,7 @@ public class DragonEntity extends Monster {
     }
 
     private void tickGround(@Nullable LivingEntity target, boolean rended) {
-        this.noPhysics = false;
+        enableCollision();
         if (this.isNoGravity()) this.setNoGravity(false);
         if (target == null) {
             if (phaseTicks % 120 == 0 && this.getRandom().nextBoolean()) {
@@ -676,13 +828,14 @@ public class DragonEntity extends Monster {
             if (along < 0 || along > range) continue;
             double perp = to.subtract(dir.scale(along)).length();
             if (perp > 1.2 + along * 0.28) continue;
+            // Breath is elemental, like a spell: fire/frost spell damage types (is_fire / is_freezing, ignore armor),
+            // so Fire Resistance, wards, magic resistance and Spellbreaker all work against it.
             if (isFrost()) {
-                e.hurt(this.damageSources().indirectMagic(this, this), damage);
+                e.hurt(MagicDamage.source(this.level(), MagicDamage.FROST, null, this), damage);
                 e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, 1), this);
                 if (e.canFreeze()) e.setTicksFrozen(Math.min(e.getTicksRequiredToFreeze() + 80, e.getTicksFrozen() + 25));
             } else {
-                e.hurt(this.damageSources().mobAttack(this), damage);
-                e.setSecondsOnFire(5);
+                if (e.hurt(MagicDamage.source(this.level(), MagicDamage.FIRE, null, this), damage)) e.setSecondsOnFire(5);
             }
         }
     }
@@ -692,6 +845,7 @@ public class DragonEntity extends Monster {
     @Override
     public void aiStep() {
         super.aiStep();
+        if (!corpsePose) updateParts();
         if (!this.level().isClientSide || corpsePose) return;
         if (isBreathing()) spawnBreathParticles();
         if (isFlying() && this.isAlive()) {
@@ -729,7 +883,7 @@ public class DragonEntity extends Monster {
     protected void tickDeath() {
         this.deathTime++;
         if (isFlying()) setFlying(false);
-        this.noPhysics = false;
+        if (!this.level().isClientSide) enableCollision();
         if (this.level().isClientSide) {
             RandomSource r = this.getRandom();
             for (int i = 0; i < 6; i++) {
@@ -788,6 +942,7 @@ public class DragonEntity extends Monster {
         tag.putInt("Variant", getVariant());
         tag.putBoolean("Flying", isFlying());
         tag.putBoolean("SkycraftInit", initialized);
+        if (lastSeenTime >= 0) tag.putLong("LastSeen", lastSeenTime);
         if (anchor != null) {
             tag.putDouble("AnchorX", anchor.x);
             tag.putDouble("AnchorY", anchor.y);
@@ -801,6 +956,10 @@ public class DragonEntity extends Monster {
         setVariant(tag.getInt("Variant"));
         setFlying(tag.getBoolean("Flying"));
         initialized = tag.getBoolean("SkycraftInit");
+        if (tag.contains("LastSeen")) {
+            lastSeenTime = tag.getLong("LastSeen");
+            checkAbsence = true;
+        }
         if (tag.contains("AnchorX")) anchor = new Vec3(tag.getDouble("AnchorX"), tag.getDouble("AnchorY"), tag.getDouble("AnchorZ"));
         this.bossEvent.setName(this.getDisplayName());
     }

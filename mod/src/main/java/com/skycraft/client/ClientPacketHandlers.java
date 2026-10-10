@@ -18,6 +18,20 @@ public final class ClientPacketHandlers {
         if (player != null && tag != null) SkyData.get(player).load(tag);
     }
 
+    public static void syncProgress(CompoundTag tag) {
+        var player = Minecraft.getInstance().player;
+        if (player != null && tag != null) SkyData.get(player).loadProgress(tag);
+    }
+
+    /** Race/sheathe/apparel of any player (others' copies of the data are otherwise empty on this client). */
+    public static void syncAppearance(int entityId, CompoundTag tag) {
+        var level = Minecraft.getInstance().level;
+        if (level == null || tag == null) return;
+        if (level.getEntity(entityId) instanceof net.minecraft.world.entity.player.Player p) {
+            SkyData.get(p).loadAppearance(tag);
+        }
+    }
+
     public static void syncVitals(float magicka, float stamina, byte flags) {
         var player = Minecraft.getInstance().player;
         if (player == null) return;

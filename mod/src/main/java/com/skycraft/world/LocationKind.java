@@ -1,9 +1,11 @@
 package com.skycraft.world;
 
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.structure.Structure;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -11,8 +13,9 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * What a discovered structure "is" in Skyrim terms. Derived from keywords in the structure's registry path, so
- * vanilla and modded structures both get a sensible kind.
+ * What a discovered structure "is" in Skyrim terms. Whether a structure is a location at all and whether it is a town
+ * comes from the structure tags in {@link LocationTags}; the finer kind is derived from keywords in the structure's
+ * registry path, so vanilla and modded structures both get a sensible kind.
  */
 public enum LocationKind {
     // icon index = position in textures/gui/map_icons.png (8 per row)
@@ -79,7 +82,30 @@ public enum LocationKind {
     }
 
     /**
-     * Classifies a structure registry key, or returns {@code null} if it should not be discovered at all.
+     * THE classifier (discovery, map, roads, signposts and loot all use it): {@code null} for structures that are not
+     * locations ({@code #skycraft:ignored_landmarks} or too small), {@link #TOWN}/{@link #INN} exactly for
+     * {@code #skycraft:towns}, otherwise a kind from the registry path that is never a town.
+     */
+    @org.jetbrains.annotations.Nullable
+    public static LocationKind classify(Holder<Structure> structure, ResourceKey<Level> dimension) {
+        if (structure.is(LocationTags.IGNORED_LANDMARKS)) return null;
+        ResourceLocation key = structure.unwrapKey().map(ResourceKey::location).orElse(null);
+        if (key == null) return null;
+        if (structure.is(LocationTags.TOWNS)) {
+            return key.getPath().toLowerCase(Locale.ROOT).contains("tavern") ? INN : TOWN;
+        }
+        LocationKind kind = classify(key, dimension);
+        if (kind == TOWN || kind == INN) {
+            // named like a town but not an inhabited one (bandit villages, ruined towns, roadside shacks...)
+            String path = key.getPath().toLowerCase(Locale.ROOT);
+            return path.contains("bandit") || path.contains("illager") ? BANDIT_CAMP : RUIN;
+        }
+        return kind;
+    }
+
+    /**
+     * Keyword-only classification of a structure registry key, or {@code null} if it should not be discovered at all.
+     * Prefer {@link #classify(Holder, ResourceKey)}, which also honours the structure tags.
      */
     public static LocationKind classify(ResourceLocation key, ResourceKey<Level> dimension) {
         String path = key.getPath().toLowerCase(Locale.ROOT);

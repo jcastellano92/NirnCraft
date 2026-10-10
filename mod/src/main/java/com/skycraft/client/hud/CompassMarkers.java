@@ -21,20 +21,44 @@ public final class CompassMarkers {
     }
 
     private static final Map<String, List<Marker>> SOURCES = new ConcurrentHashMap<>();
+    /** All markers with near-duplicates (within 4 blocks) removed; rebuilt only when a source changes. */
+    private static volatile List<Marker> deduplicated;
 
     private CompassMarkers() {}
 
     public static void set(String source, List<Marker> markers) {
-        SOURCES.put(source, List.copyOf(markers));
+        List<Marker> copy = List.copyOf(markers);
+        if (copy.equals(SOURCES.put(source, copy))) return;
+        deduplicated = null;
     }
 
     public static void clear(String source) {
-        SOURCES.remove(source);
+        if (SOURCES.remove(source) != null) deduplicated = null;
     }
 
     public static List<Marker> all() {
         List<Marker> out = new ArrayList<>();
         SOURCES.values().forEach(out::addAll);
         return out;
+    }
+
+    /** {@link #all()} without markers that sit within 4 blocks of an earlier one (cached). */
+    public static List<Marker> deduplicated() {
+        List<Marker> cached = deduplicated;
+        if (cached != null) return cached;
+        List<Marker> out = new ArrayList<>();
+        for (Marker m : all()) {
+            boolean exists = false;
+            for (Marker ex : out) {
+                if (ex.pos().distanceToSqr(m.pos()) < 16.0) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) out.add(m);
+        }
+        cached = List.copyOf(out);
+        deduplicated = cached;
+        return cached;
     }
 }

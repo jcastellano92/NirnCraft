@@ -72,14 +72,20 @@ public final class Enchanting {
         return out;
     }
 
+    /** The enchantment registry sorted by id, built once (the registry is frozen after loading; the screen asks every frame). */
     private static List<Map.Entry<ResourceLocation, Enchantment>> sortedEnchantments() {
+        List<Map.Entry<ResourceLocation, Enchantment>> cached = sortedEnchantments;
+        if (cached != null) return cached;
         List<Map.Entry<ResourceLocation, Enchantment>> list = new ArrayList<>();
         for (Map.Entry<ResourceKey<Enchantment>, Enchantment> e : ForgeRegistries.ENCHANTMENTS.getEntries()) {
             list.add(Map.entry(e.getKey().location(), e.getValue()));
         }
         list.sort((a, b) -> a.getKey().toString().compareTo(b.getKey().toString()));
-        return list;
+        sortedEnchantments = cached = List.copyOf(list);
+        return cached;
     }
+
+    private static volatile List<Map.Entry<ResourceLocation, Enchantment>> sortedEnchantments;
 
     private static void learn(ServerPlayer player, Enchantment ench) {
         String id = id(ench);

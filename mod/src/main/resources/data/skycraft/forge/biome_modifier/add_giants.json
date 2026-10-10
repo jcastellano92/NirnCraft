@@ -1,12 +1,6 @@
 {
   "type": "forge:add_spawns",
-  "biomes": [
-    "minecraft:plains",
-    "minecraft:sunflower_plains",
-    "minecraft:savanna",
-    "minecraft:savanna_plateau",
-    "minecraft:meadow"
-  ],
+  "biomes": "#skycraft:spawns/plains",
   "spawners": [
     {
       "type": "skycraft:giant",

@@ -24,26 +24,23 @@ public final class RespawnPoints {
     public static void set(ServerPlayer player, ResourceKey<Level> dim, BlockPos pos) {
         player.setRespawnPosition(dim, pos, player.getYRot(), true, false);
         PlayerData data = SkyData.get(player);
-        if (data != null) {
-            CompoundTag tag = data.module("respawn");
-            tag.putString("dim", dim.location().toString());
-            tag.putInt("x", pos.getX());
-            tag.putInt("y", pos.getY());
-            tag.putInt("z", pos.getZ());
-            data.markDirty();
-        }
+        CompoundTag tag = data.module("respawn");
+        tag.putString("dim", dim.location().toString());
+        tag.putInt("x", pos.getX());
+        tag.putInt("y", pos.getY());
+        tag.putInt("z", pos.getZ());
+        data.markDirty();
     }
 
     public static boolean teleportToRestPoint(ServerPlayer player) {
-        PlayerData data = SkyData.get(player);
-        CompoundTag tag = data != null ? data.module("respawn") : null;
+        CompoundTag tag = SkyData.get(player).module("respawn");
         MinecraftServer server = player.getServer();
         if (server == null) return false;
 
         ServerLevel targetLevel = null;
         BlockPos targetPos = null;
 
-        if (tag != null && tag.contains("dim") && tag.contains("x")) {
+        if (tag.contains("dim") && tag.contains("x")) {
             ResourceLocation dimId = new ResourceLocation(tag.getString("dim"));
             ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, dimId);
             targetLevel = server.getLevel(key);

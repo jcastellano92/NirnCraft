@@ -114,14 +114,17 @@ public final class MagicPackets {
                         }
                     }
                     case SELECT_POWER -> {
-                        MagicData.setSelectedVoice(player, m.id);
+                        if (MagicData.hasPower(player, m.id)) MagicData.setSelectedVoice(player, m.id);
                     }
                     case UNLOCK_WORD -> {
                         Shout shout = Shout.byId(m.id);
                         if (shout != null) Shouting.unlockWord(player, shout);
                     }
                     case TOGGLE_FAVORITE -> {
-                        MagicData.toggleFavorite(player, m.id);
+                        // Removing always works; adding only spells, shouts and powers the player actually has.
+                        if (MagicData.favorites(player).contains(m.id) || MagicData.canFavorite(player, m.id)) {
+                            MagicData.toggleFavorite(player, m.id);
+                        }
                     }
                     default -> {
                     }

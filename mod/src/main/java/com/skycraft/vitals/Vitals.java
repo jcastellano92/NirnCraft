@@ -12,11 +12,9 @@ import com.skycraft.network.CorePackets;
 import com.skycraft.network.SkyNetwork;
 import com.skycraft.perk.Perks;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.minecraftforge.event.TickEvent;
@@ -87,7 +85,7 @@ public final class Vitals {
                 if (player.getHealth() > player.getMaxHealth()) player.setHealth(player.getMaxHealth());
             }
         }
-        updateArmorWeight(player);
+        updateArmorWeight(player, data);
         data.setMagicka(Math.min(data.getMagicka(), data.maxMagicka()));
         data.setStamina(Math.min(data.getStamina(), data.maxStamina()));
         data.markDirty();
@@ -95,11 +93,11 @@ public final class Vitals {
     }
 
     /** Heavy armor slows you down (2.5% per piece) unless you have the Conditioning perk. */
-    private static void updateArmorWeight(ServerPlayer player) {
+    private static void updateArmorWeight(ServerPlayer player, PlayerData data) {
         AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speed == null) return;
         int heavy = ArmorClass.countHeavy(player);
-        double penalty = Perks.has(player, "heavy_armor.conditioning") ? 0 : -0.025 * heavy;
+        double penalty = Perks.has(data, "heavy_armor.conditioning") ? 0 : -0.025 * heavy;
         AttributeModifier existing = speed.getModifier(HEAVY_SPEED_MOD);
         if (existing != null && existing.getAmount() == penalty) return;
         if (existing != null) speed.removeModifier(HEAVY_SPEED_MOD);
@@ -115,14 +113,15 @@ public final class Vitals {
         long now = player.level().getGameTime();
         boolean combat = inCombat(player);
 
-        // Sprinting drains stamina.
+        // Sprinting drains stamina. Out of stamina (with hysteresis, see isExhausted) you can't run: this is the one
+        // server-side sprint block; the client mirrors it from the EXHAUSTED vitals flag (ClientEvents).
         if (player.isSprinting() && !player.isCreative() && !player.isSpectator()) {
             float drain = (float) (SkyConfig.SPRINT_STAMINA_PER_SECOND.get() / 20.0);
-            if (Perks.has(player, "light_armor.unhindered") && ArmorClass.countLight(player) >= 4) drain *= 0.85f;
-            if (Perks.has(player, "athletics.sprinter")) drain *= 0.8f;
+            if (Perks.has(data, "light_armor.unhindered") && ArmorClass.countLight(player) >= 4) drain *= 0.85f;
+            if (Perks.has(data, "athletics.sprinter")) drain *= 0.8f;
             data.setStamina(data.getStamina() - drain);
             data.setLastStaminaUseTick(now);
-            if (data.getStamina() <= 0) player.setSprinting(false);
+            if (isExhausted(player)) player.setSprinting(false);
             if (now % 20 == 0) Progression.addSkillXp(player, Skill.ATHLETICS, 0.4f);
         }
 
@@ -133,25 +132,26 @@ public final class Vitals {
 
         if (now % 5 == 0) {
             regen(player, data, combat, now);
-            updateArmorWeight(player);
+            updateArmorWeight(player, data);
         }
 
-        // Skyrim hunger: food never drains. While exhausted we hold food at 6 so the client cannot sprint.
+        // Skyrim hunger: food never drains (kept above vanilla's sprint threshold; sprinting is gated by stamina).
         if (SkyConfig.SKYRIM_HUNGER.get()) {
-            int target = data.getStamina() < 1f || isExhausted(player) ? 6 : 17;
-            if (player.getFoodData().getFoodLevel() != target) player.getFoodData().setFoodLevel(target);
+            if (player.getFoodData().getFoodLevel() != 17) player.getFoodData().setFoodLevel(17);
             player.getFoodData().setSaturation(0f);
             player.getFoodData().setExhaustion(0f);
         }
 
-        if (now % 20 == 0) {
-            data.module("vitals").putBoolean("detected", isDetected(player));
-        }
-
-        sync(player, data, now);
+        // The "detected" flag is computed by combat/Stealth's single per-player mob scan.
+        sync(player, data);
     }
 
     private static final java.util.Set<UUID> EXHAUSTED = new java.util.HashSet<>();
+
+    /** Drops per-player state on logout. */
+    public static void forget(UUID player) {
+        EXHAUSTED.remove(player);
+    }
 
     /** Hysteresis: once out of stamina, sprinting is blocked until 15 stamina has regenerated. */
     public static boolean isExhausted(Player player) {
@@ -165,7 +165,7 @@ public final class Vitals {
         float seconds = 0.25f;
         // Magicka
         float magPct = (float) (double) SkyConfig.MAGICKA_REGEN_PERCENT.get() / 100f;
-        magPct *= 1f + 0.25f * Perks.rank(player, "restoration.recovery");
+        magPct *= 1f + 0.25f * Perks.rank(data, "restoration.recovery");
         if (Buffs.active(player, "highborn")) magPct *= 25f;
         if (combat) magPct *= 0.33f;
         if (now - data.getLastMagickaUseTick() > 20) {
@@ -175,16 +175,16 @@ public final class Vitals {
         float stPct = (float) (double) SkyConfig.STAMINA_REGEN_PERCENT.get() / 100f;
         int ath = data.getSkill(Skill.ATHLETICS);
         stPct *= 1f + ath * 0.005f;
-        int runner = Perks.rank(player, "athletics.runner");
+        int runner = Perks.rank(data, "athletics.runner");
         if (runner > 0) stPct *= (1f + 0.1f * runner);
-        if (Perks.has(player, "athletics.wind_walker") && player.getDeltaMovement().lengthSqr() > 0.001) stPct *= 1.5f;
-        if (Perks.has(player, "light_armor.wind_walker") && ArmorClass.countLight(player) >= 4) stPct *= 1.5f;
+        if (Perks.has(data, "athletics.wind_walker") && player.getDeltaMovement().lengthSqr() > 0.001) stPct *= 1.5f;
+        if (Perks.has(data, "light_armor.wind_walker") && ArmorClass.countLight(player) >= 4) stPct *= 1.5f;
         if (Buffs.active(player, "adrenaline_rush")) stPct *= 10f;
         if (combat) stPct *= 0.5f;
 
         // Armor trade-offs
         int heavy = ArmorClass.countHeavy(player);
-        if (heavy > 0 && !Perks.has(player, "heavy_armor.conditioning")) {
+        if (heavy > 0 && !Perks.has(data, "heavy_armor.conditioning")) {
             stPct *= Math.max(0.2f, 1f - 0.05f * heavy);
         }
         int light = ArmorClass.countLight(player);
@@ -207,22 +207,40 @@ public final class Vitals {
         }
     }
 
-    /** A player is "detected" when a hostile mob nearby is targeting them (drives the sneak eye on the HUD). */
-    public static boolean isDetected(ServerPlayer player) {
-        for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(24),
-                m -> m instanceof Enemy && m.isAlive())) {
-            if (mob.getTarget() == player) return true;
-        }
-        return false;
-    }
+    /** Minimum ticks between two full player data syncs; further {@code markDirty()} calls are coalesced. */
+    private static final int FULL_SYNC_INTERVAL = 10;
+    /** Minimum ticks between two progress (skills/level/gold) packets. */
+    private static final int PROGRESS_SYNC_INTERVAL = 5;
 
-    private static void sync(ServerPlayer player, PlayerData data, long now) {
-        if (data.consumeDirty()) {
-            SkyNetwork.sendToPlayer(player, new CorePackets.SyncData(data.save()));
+    /**
+     * Sends whatever changed: the full data (structural changes, coalesced), the small progress packet (skill XP
+     * etc., throttled), the appearance to tracking players, and the vitals pools.
+     */
+    private static void sync(ServerPlayer player, PlayerData data) {
+        int tick = player.server.getTickCount();
+        boolean full = false;
+        if (data.isDirty() && tick - data.getLastFullSync() >= FULL_SYNC_INTERVAL) {
+            data.consumeDirty();
+            data.setLastFullSync(tick);
+            SkyNetwork.sendToPlayer(player, CorePackets.SyncData.of(data));
+            full = true;
+        } else if (tick % PROGRESS_SYNC_INTERVAL == 0 && data.consumeProgressDirty()) {
+            SkyNetwork.sendToPlayer(player, new CorePackets.SyncProgress(data.saveProgress()));
+        }
+        if (data.consumeAppearanceDirty()) syncAppearance(player, data);
+        if (full) {
             data.consumeVitalsDirty();
             sendVitals(player, data);
-        } else if (now % 2 == 0 && data.consumeVitalsDirty() || now % 20 == 0) {
+        } else if (tick % 2 == 0 && data.consumeVitalsDirty() || tick % 20 == 0) {
             sendVitals(player, data);
+        }
+    }
+
+    /** Sends race/sheathe/apparel to every player tracking this one (and to itself) if it changed since last time. */
+    public static void syncAppearance(ServerPlayer player, PlayerData data) {
+        net.minecraft.nbt.CompoundTag appearance = data.appearance();
+        if (data.appearanceChanged(appearance)) {
+            SkyNetwork.sendToTracking(player, new CorePackets.SyncAppearance(player.getId(), appearance));
         }
     }
 

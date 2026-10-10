@@ -1,17 +1,19 @@
 package com.skycraft.crafting.recipe;
 
+import com.skycraft.Skycraft;
 import com.skycraft.crafting.CraftingItems;
-import com.skycraft.crafting.CraftingValues;
 import com.skycraft.crafting.SkyArmorMaterial;
 import com.skycraft.crafting.SkyOre;
 import com.skycraft.crafting.SmithingTier;
 import com.skycraft.crafting.StationType;
 import com.skycraft.crafting.WeaponType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -31,7 +33,7 @@ public final class SmithingRecipes {
     public static final Map<StationType, List<String>> CATEGORIES = new EnumMap<>(StationType.class);
 
     static {
-        CATEGORIES.put(StationType.FORGE, List.of("iron", "steel", "elven", "dwarven", "orcish", "glass", "ebony", "daedric", "dragon", "leather", "jewelry"));
+        CATEGORIES.put(StationType.FORGE, List.of("iron", "steel", "elven", "dwarven", "orcish", "glass", "ebony", "daedric", "dragon", "leather", "jewelry", "arrows", "stations"));
         CATEGORIES.put(StationType.SMELTER, List.of("ingots", "alloys"));
         CATEGORIES.put(StationType.TANNING_RACK, List.of("tanning", "leather"));
         CATEGORIES.put(StationType.GRINDSTONE, List.of());
@@ -123,6 +125,10 @@ public final class SmithingRecipes {
         }
 
         // ---------------------------------------------------------------- forge: jewelry
+        // Plain rings and necklaces are just metal (Skyrim); circlets, amulets and pendants carry a gem, and the jade
+        // pieces (refined malachite) need Elven Smithing like other moonstone/malachite work.
+        String jadePerk = "smithing.elven_smithing";
+        Supplier<Item> copper = () -> Items.COPPER_INGOT;
         out.add(recipe("forge/silver_ring", StationType.FORGE, "jewelry", CraftingItems.SILVER_RING, 1, List.of(Cost.of(silver, 1)), null));
         out.add(recipe("forge/gold_ring", StationType.FORGE, "jewelry", CraftingItems.GOLD_RING, 1, List.of(Cost.of(gold, 1)), null));
         out.add(recipe("forge/silver_necklace", StationType.FORGE, "jewelry", CraftingItems.SILVER_NECKLACE, 1, List.of(Cost.of(silver, 2)), null));
@@ -134,26 +140,101 @@ public final class SmithingRecipes {
         out.add(recipe("forge/gold_diamond_ring", StationType.FORGE, "jewelry", CraftingItems.GOLD_DIAMOND_RING, 1,
                 List.of(Cost.of(gold, 1), Cost.of(CraftingItems.FLAWLESS_DIAMOND, 1)), null));
         out.add(recipe("forge/copper_circlet", StationType.FORGE, "jewelry", CraftingItems.COPPER_CIRCLET, 1,
-                List.of(Cost.of(() -> Items.COPPER_INGOT, 2)), null));
+                List.of(Cost.of(copper, 2), Cost.of(CraftingItems.GARNET, 1)), null));
         out.add(recipe("forge/silver_circlet", StationType.FORGE, "jewelry", CraftingItems.SILVER_CIRCLET, 1,
-                List.of(Cost.of(silver, 2)), null));
+                List.of(Cost.of(silver, 2), Cost.of(CraftingItems.GARNET, 1)), null));
         out.add(recipe("forge/gold_circlet", StationType.FORGE, "jewelry", CraftingItems.GOLD_CIRCLET, 1,
-                List.of(Cost.of(gold, 2)), null));
+                List.of(Cost.of(gold, 2), Cost.of(CraftingItems.RUBY, 1)), null));
         out.add(recipe("forge/jade_circlet", StationType.FORGE, "jewelry", CraftingItems.JADE_CIRCLET, 1,
-                List.of(Cost.of(gold, 2), Cost.of(malachite, 2)), null));
+                List.of(Cost.of(gold, 2), Cost.of(malachite, 2), Cost.of(CraftingItems.SAPPHIRE, 1)), jadePerk));
         out.add(recipe("forge/amulet_of_talos", StationType.FORGE, "jewelry", CraftingItems.AMULET_OF_TALOS, 1,
-                List.of(Cost.of(iron, 2), Cost.of(silver, 1)), null));
+                List.of(Cost.of(iron, 1), Cost.of(silver, 1), Cost.of(CraftingItems.GARNET, 1)), null));
         out.add(recipe("forge/amulet_of_mara", StationType.FORGE, "jewelry", CraftingItems.AMULET_OF_MARA, 1,
                 List.of(Cost.of(gold, 2), Cost.of(CraftingItems.GARNET, 1)), null));
         out.add(recipe("forge/jade_pendant", StationType.FORGE, "jewelry", CraftingItems.JADE_PENDANT, 1,
-                List.of(Cost.of(silver, 1), Cost.of(malachite, 1)), null));
+                List.of(Cost.of(silver, 1), Cost.of(malachite, 1), Cost.of(CraftingItems.GARNET, 1)), jadePerk));
         out.add(recipe("forge/sapphire_pendant", StationType.FORGE, "jewelry", CraftingItems.SAPPHIRE_PENDANT, 1,
                 List.of(Cost.of(silver, 1), Cost.of(CraftingItems.SAPPHIRE, 1)), null));
+        add(out, "forge/soul_gem_petty", StationType.FORGE, "jewelry", "soul_gem_petty", 1, null,
+                Cost.of(() -> Items.AMETHYST_SHARD, 4), Cost.of(() -> Items.GLASS, 1));
+
+        // ---------------------------------------------------------------- forge: arrows, bolts and crossbows
+        // (the arsenal module's items, same materials as its crafting JSONs, most of which need a 3x3 grid)
+        Supplier<Item> stick = () -> Items.STICK;
+        Supplier<Item> feather = () -> Items.FEATHER;
+        Supplier<Item> steel = CraftingItems.STEEL_INGOT;
+        Supplier<Item> dwarven = CraftingItems.DWARVEN_METAL_INGOT;
+        arrow(out, "iron_arrow", () -> Items.IRON_NUGGET, 6, SmithingTier.IRON);
+        arrow(out, "steel_arrow", steel, 12, SmithingTier.STEEL);
+        arrow(out, "orcish_arrow", () -> CraftingItems.ingot(SkyOre.ORICHALCUM), 12, SmithingTier.ORCISH);
+        arrow(out, "dwarven_arrow", dwarven, 12, SmithingTier.DWARVEN);
+        arrow(out, "elven_arrow", moonstone, 12, SmithingTier.ELVEN);
+        arrow(out, "glass_arrow", malachite, 12, SmithingTier.GLASS);
+        arrow(out, "ebony_arrow", () -> CraftingItems.ingot(SkyOre.EBONY), 12, SmithingTier.EBONY);
+        arrow(out, "dragonbone_arrow", CraftingItems.DRAGON_BONE, 12, SmithingTier.DRAGONBONE);
+        add(out, "forge/daedric_arrow", StationType.FORGE, "arrows", "daedric_arrow", 24, SmithingTier.DAEDRIC.perk,
+                Cost.of(() -> CraftingItems.ingot(SkyOre.EBONY), 1), Cost.of(CraftingItems.DAEDRA_HEART, 1), Cost.of(stick, 1), Cost.of(feather, 1));
+        add(out, "forge/fire_arrow", StationType.FORGE, "arrows", "fire_arrow", 4, null,
+                Cost.of(byId("steel_arrow"), 4), Cost.of(() -> Items.BLAZE_POWDER, 1));
+        add(out, "forge/frost_arrow", StationType.FORGE, "arrows", "frost_arrow", 4, null,
+                Cost.of(byId("steel_arrow"), 4), Cost.of(() -> Items.BLUE_ICE, 1));
+        add(out, "forge/shock_arrow", StationType.FORGE, "arrows", "shock_arrow", 4, null,
+                Cost.of(byId("steel_arrow"), 4), Cost.of(() -> Items.GLOWSTONE_DUST, 1));
+        add(out, "forge/steel_bolt", StationType.FORGE, "arrows", "steel_bolt", 10, SmithingTier.STEEL.perk,
+                Cost.of(steel, 1), Cost.of(stick, 1));
+        add(out, "forge/dwarven_bolt", StationType.FORGE, "arrows", "dwarven_bolt", 10, SmithingTier.DWARVEN.perk,
+                Cost.of(dwarven, 1), Cost.of(stick, 1));
+        add(out, "forge/explosive_bolt", StationType.FORGE, "arrows", "explosive_bolt", 4, null,
+                Cost.of(byId("steel_bolt"), 4), Cost.of(() -> Items.GUNPOWDER, 2));
+        Supplier<Item> string = () -> Items.STRING;
+        Supplier<Item> hook = () -> Items.TRIPWIRE_HOOK;
+        add(out, "forge/imperial_crossbow", StationType.FORGE, "arrows", "imperial_crossbow", 1, SmithingTier.STEEL.perk,
+                Cost.of(steel, 1), Cost.of(stick, 3), Cost.of(string, 2), Cost.of(hook, 1));
+        add(out, "forge/enhanced_crossbow", StationType.FORGE, "arrows", "enhanced_crossbow", 1, SmithingTier.STEEL.perk,
+                Cost.of(byId("imperial_crossbow"), 1), Cost.of(steel, 4));
+        add(out, "forge/dwarven_crossbow", StationType.FORGE, "arrows", "dwarven_crossbow", 1, SmithingTier.DWARVEN.perk,
+                Cost.of(dwarven, 4), Cost.of(string, 2), Cost.of(hook, 1));
+        add(out, "forge/enhanced_dwarven_crossbow", StationType.FORGE, "arrows", "enhanced_dwarven_crossbow", 1, SmithingTier.DWARVEN.perk,
+                Cost.of(byId("dwarven_crossbow"), 1), Cost.of(dwarven, 4));
+
+        // ---------------------------------------------------------------- forge: stations and shrines
+        // (their crafting JSONs need a 3x3 grid, and a vanilla crafting table opens the armor workbench unless sneaking)
+        Cost planks = Cost.tag(ItemTags.PLANKS, () -> Items.OAK_PLANKS, 5);
+        add(out, "forge/blacksmith_forge", StationType.FORGE, "stations", "blacksmith_forge", 1, null,
+                Cost.of(iron, 3), Cost.tag(ItemTags.STONE_CRAFTING_MATERIALS, () -> Items.COBBLESTONE, 5), Cost.of(() -> Items.FURNACE, 1));
+        add(out, "forge/smelter", StationType.FORGE, "stations", "smelter", 1, null,
+                Cost.of(iron, 1), Cost.tag(ItemTags.STONE_CRAFTING_MATERIALS, () -> Items.COBBLESTONE, 7), Cost.of(() -> Items.FURNACE, 1));
+        add(out, "forge/armor_workbench", StationType.FORGE, "stations", "armor_workbench", 1, null, Cost.of(iron, 3), planks);
+        add(out, "forge/tanning_rack", StationType.FORGE, "stations", "tanning_rack", 1, null,
+                Cost.of(stick, 6), Cost.of(() -> Items.LEATHER, 2));
+        add(out, "forge/cooking_pot", StationType.FORGE, "stations", "cooking_pot", 1, null, Cost.of(iron, 5), Cost.of(stick, 1));
+        add(out, "forge/alchemy_lab", StationType.FORGE, "stations", "alchemy_lab", 1, null,
+                Cost.of(() -> Items.BREWING_STAND, 1), Cost.of(() -> Items.CAULDRON, 1), Cost.of(() -> Items.GLASS_BOTTLE, 2), planks);
+        add(out, "forge/arcane_enchanter", StationType.FORGE, "stations", "arcane_enchanter", 1, null,
+                Cost.of(() -> Items.OBSIDIAN, 4), Cost.of(() -> Items.AMETHYST_SHARD, 2), Cost.of(gold, 2), Cost.of(() -> Items.BOOK, 1));
+        out.add(recipe("forge/enchanting_table", StationType.FORGE, "stations", () -> Items.ENCHANTING_TABLE, 1,
+                List.of(Cost.of(() -> Items.OBSIDIAN, 4), Cost.of(() -> Items.DIAMOND, 2), Cost.of(() -> Items.BOOK, 1)), null));
+        shrine(out, "akatosh", () -> Items.CLOCK);
+        shrine(out, "arkay", () -> Items.BONE);
+        shrine(out, "dibella", () -> Items.PINK_TULIP);
+        shrine(out, "julianos", () -> Items.BOOK);
+        shrine(out, "kynareth", () -> Items.FEATHER);
+        shrine(out, "mara", () -> Items.POPPY);
+        shrine(out, "stendarr", () -> Items.SHIELD);
+        shrine(out, "talos", () -> Items.IRON_SWORD);
+        shrine(out, "zenithar", () -> Items.GOLD_INGOT);
 
         // ---------------------------------------------------------------- smelter
         for (SkyOre ore : SkyOre.values()) {
             out.add(recipe("smelter/" + ore.ingotId, StationType.SMELTER, "ingots", CraftingItems.INGOTS.get(ore), 1,
                     List.of(Cost.of(CraftingItems.RAW.get(ore), 1)), null));
+        }
+        for (SkyOre ore : SkyOre.values()) {
+            // silk-touched vein blocks (the smelting/blasting JSONs only run in a vanilla furnace)
+            out.add(recipe("smelter/" + ore.ingotId + "_from_" + ore.oreId(), StationType.SMELTER, "ingots", CraftingItems.INGOTS.get(ore), 1,
+                    List.of(Cost.of(CraftingItems.BLOCK_ITEMS.get(ore.oreId()), 1)), null));
+            out.add(recipe("smelter/" + ore.ingotId + "_from_" + ore.deepslateOreId(), StationType.SMELTER, "ingots", CraftingItems.INGOTS.get(ore), 1,
+                    List.of(Cost.of(CraftingItems.BLOCK_ITEMS.get(ore.deepslateOreId()), 1)), null));
         }
         out.add(recipe("smelter/iron_ingot", StationType.SMELTER, "ingots", iron, 1, List.of(Cost.of(() -> Items.RAW_IRON, 1)), null));
         out.add(recipe("smelter/gold_ingot", StationType.SMELTER, "ingots", gold, 1, List.of(Cost.of(() -> Items.RAW_GOLD, 1)), null));
@@ -225,7 +306,33 @@ public final class SmithingRecipes {
 
     private static SmithingRecipe recipe(String id, StationType station, String category, Supplier<? extends ItemLike> result, int count,
                                          List<Cost> costs, @Nullable String perk) {
-        int value = CraftingValues.of(result.get().asItem()) * count;
-        return new SmithingRecipe(id, station, category, result, count, List.copyOf(costs), perk, value);
+        return new SmithingRecipe(id, station, category, result, count, List.copyOf(costs), perk);
+    }
+
+    /** A forge recipe for another module's {@code skycraft:<resultId>} item; skipped if that item isn't registered. */
+    private static void add(List<SmithingRecipe> out, String id, StationType station, String category, String resultId, int count,
+                            @Nullable String perk, Cost... costs) {
+        Supplier<Item> result = byId(resultId);
+        if (result.get() == Items.AIR) return;
+        out.add(recipe(id, station, category, result, count, List.of(costs), perk));
+    }
+
+    /** Tiered arrow: one head material, a stick and a feather; needs the tier's smithing perk like its weapons. */
+    private static void arrow(List<SmithingRecipe> out, String id, Supplier<? extends ItemLike> head, int count, SmithingTier tier) {
+        add(out, "forge/" + id, StationType.FORGE, "arrows", id, count, tier.perk,
+                Cost.of(head, 1), Cost.of(() -> Items.STICK, 1), Cost.of(() -> Items.FEATHER, 1));
+    }
+
+    private static void shrine(List<SmithingRecipe> out, String divine, Supplier<? extends ItemLike> offering) {
+        add(out, "forge/shrine_of_" + divine, StationType.FORGE, "stations", "shrine_of_" + divine, 1, null,
+                Cost.of(() -> Items.STONE_BRICKS, 5), Cost.of(() -> Items.CANDLE, 1), Cost.of(offering, 1));
+    }
+
+    private static Supplier<Item> byId(String path) {
+        ResourceLocation id = new ResourceLocation(Skycraft.MODID, path);
+        return () -> {
+            Item item = ForgeRegistries.ITEMS.getValue(id);
+            return item == null ? Items.AIR : item;
+        };
     }
 }

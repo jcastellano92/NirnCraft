@@ -16,8 +16,6 @@ public final class HudNotifications {
     static final Deque<Entry> BANNERS = new ArrayDeque<>();
     /** Top-left message log. */
     static final List<Entry> MESSAGES = new ArrayList<>();
-    /** The skill meter that pops up on XP gain. */
-    static Entry meter;
     static Entry currentBanner;
 
     private HudNotifications() {}
@@ -31,7 +29,6 @@ public final class HudNotifications {
     public static void add(CorePackets.Notify msg) {
         long now = Util.getMillis();
         switch (msg.kind()) {
-            case SKILL_XP -> meter = new Entry(msg, now, 2500);
             case CRIME -> {
                 MESSAGES.removeIf(e -> e.msg.kind() == NotifyKind.CRIME);
                 MESSAGES.add(new Entry(msg, now, 5000));
@@ -86,7 +83,6 @@ public final class HudNotifications {
             Entry e = it.next();
             if (now - e.start > e.duration) it.remove();
         }
-        if (meter != null && now - meter.start > meter.duration) meter = null;
     }
 }
 

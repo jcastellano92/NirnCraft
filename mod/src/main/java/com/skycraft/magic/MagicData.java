@@ -2,7 +2,11 @@ package com.skycraft.magic;
 
 import com.skycraft.core.PlayerData;
 import com.skycraft.core.SkyData;
+import com.skycraft.lore.StandingStone;
+import com.skycraft.lore.StandingStones;
 import com.skycraft.magic.shout.Shout;
+import com.skycraft.magic.spell.Spell;
+import com.skycraft.magic.spell.Spells;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -111,9 +115,34 @@ public final class MagicData {
                 removed = true;
             }
         }
-        if (!removed) list.add(StringTag.valueOf(id));
+        if (!removed) {
+            if (list.size() >= MAX_FAVORITES) return;
+            list.add(StringTag.valueOf(id));
+        }
         tag.put("favorites", list);
         dirty(player);
+    }
+
+    /** Favorites can hold every spell, shout and power, but no more than this. */
+    public static final int MAX_FAVORITES = 128;
+
+    /** Whether {@code id} names a spell the player knows, a shout it has learned or a power it has. */
+    public static boolean canFavorite(Player player, String id) {
+        Spell spell = Spells.byId(id);
+        if (spell != null) return knows(player, id) || player.isCreative();
+        Shout shout = Shout.byId(id);
+        if (shout != null) return wordsLearned(player, shout) > 0 || player.isCreative();
+        return hasPower(player, id);
+    }
+
+    /** Whether {@code voice} is a power the player has: "power:racial" or its current standing stone's power. */
+    public static boolean hasPower(Player player, String voice) {
+        if ("power:racial".equals(voice)) return SkyData.get(player).getRace() != null;
+        if (voice.startsWith("power:stone:")) {
+            StandingStone stone = StandingStones.current(player);
+            return stone != null && stone.hasPower && voice.equals("power:stone:" + stone.id());
+        }
+        return false;
     }
 
     // ------------------------------------------------------------------ shouts

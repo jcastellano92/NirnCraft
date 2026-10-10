@@ -49,7 +49,8 @@ public final class RoadsConfig {
         SETTLEMENT_RADIUS = b.comment("Roads are not paved within this radius of a settlement center (villages have their own paths).",
                         "The settlement's structure bounding box (+6) is always excluded too.")
                 .defineInRange("settlementRadius", 40, 8, 256);
-        MAX_EXPANSIONS = b.comment("A* node budget per road (coarse 8-block grid). Above it the road falls back to a straight line.")
+        MAX_EXPANSIONS = b.comment("A* node budget per planning stage (the coarse corridor of a long road, and each ~256-block stretch).",
+                        "If no path is found within it the link is skipped and the settlement is linked to another neighbour.")
                 .defineInRange("maxPathExpansions", 20000, 500, 200000);
         MAX_BRIDGE_LENGTH = b.comment("Water crossings longer than this (blocks) get no bridge; the road simply stops at the shore.")
                 .defineInRange("maxBridgeLength", 64, 0, 512);

@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "#skycraft:spawns/plains",
+    "#skycraft:spawns/forest",
+    "#skycraft:spawns/pine_forest",
+    "#skycraft:spawns/tundra",
+    "#skycraft:spawns/reach"
+  ]
+}

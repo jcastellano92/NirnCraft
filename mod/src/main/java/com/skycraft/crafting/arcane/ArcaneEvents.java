@@ -8,7 +8,6 @@ import com.skycraft.core.Skill;
 import com.skycraft.crafting.SoulGems;
 import com.skycraft.crafting.arcane.alchemy.Alchemy;
 import com.skycraft.crafting.arcane.alchemy.Ingredients;
-import com.skycraft.crafting.arcane.block.IngredientPlantBlock;
 import com.skycraft.crafting.arcane.effect.ArcaneEffects;
 import com.skycraft.perk.Perks;
 import net.minecraft.nbt.CompoundTag;
@@ -19,7 +18,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -36,23 +34,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CaveVines;
-import net.minecraft.world.level.block.FlowerBlock;
-import net.minecraft.world.level.block.MushroomBlock;
-import net.minecraft.world.level.block.SweetBerryBushBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -63,7 +52,7 @@ import java.util.Locale;
 import java.util.function.Supplier;
 
 /**
- * Forge-bus handlers of the arcane module: learning ingredient effects by eating, Green Thumb, Snakeblood and the
+ * Forge-bus handlers of the arcane module: learning ingredient effects by eating, Snakeblood and the
  * resist/weakness/fortify alchemy effects, weapon poisons, Soul Siphon and the creature drops of alchemy salts.
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
@@ -103,34 +92,7 @@ public final class ArcaneEvents {
         }
     }
 
-    // ------------------------------------------------------------------ Green Thumb
-
-    @SubscribeEvent
-    public static void onBreak(BlockEvent.BreakEvent event) {
-        if (!(event.getPlayer() instanceof ServerPlayer player) || player.isCreative()) return;
-        if (!(event.getLevel() instanceof Level level) || level.isClientSide) return;
-        if (!Perks.has(player, "alchemy.green_thumb")) return;
-        ItemStack bonus = harvestBonus(event.getState());
-        if (!bonus.isEmpty() && Ingredients.isIngredient(bonus)) Block.popResource(level, event.getPos(), bonus);
-    }
-
-    private static ItemStack harvestBonus(BlockState state) {
-        Block block = state.getBlock();
-        if (block instanceof SweetBerryBushBlock) {
-            return state.getValue(SweetBerryBushBlock.AGE) >= 2 ? new ItemStack(Items.SWEET_BERRIES) : ItemStack.EMPTY;
-        }
-        if (block == Blocks.CAVE_VINES || block == Blocks.CAVE_VINES_PLANT) {
-            return CaveVines.hasGlowBerries(state) ? new ItemStack(Items.GLOW_BERRIES) : ItemStack.EMPTY;
-        }
-        if (block == Blocks.KELP || block == Blocks.KELP_PLANT) return new ItemStack(Items.KELP);
-        if (block instanceof FlowerBlock || block instanceof MushroomBlock || block instanceof IngredientPlantBlock
-                || state.is(BlockTags.SMALL_FLOWERS) || block == Blocks.CRIMSON_FUNGUS || block == Blocks.WARPED_FUNGUS
-                || block == Blocks.SPORE_BLOSSOM || block == Blocks.SEA_PICKLE) {
-            Item item = block.asItem();
-            return item == Items.AIR ? ItemStack.EMPTY : new ItemStack(item);
-        }
-        return ItemStack.EMPTY;
-    }
+    // Green Thumb lives in exactly one place: com.skycraft.survival.Harvesting (harvests and left-click breaks).
 
     // ------------------------------------------------------------------ damage: resistances, weaknesses, fortify, poisons
 

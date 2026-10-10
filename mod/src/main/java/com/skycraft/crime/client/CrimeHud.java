@@ -1,5 +1,6 @@
 package com.skycraft.crime.client;
 
+import com.skycraft.client.ClientState;
 import com.skycraft.core.Holds;
 import com.skycraft.crime.Bounty;
 import com.skycraft.crime.CrimePackets;
@@ -7,6 +8,7 @@ import com.skycraft.crime.Crimes;
 import com.skycraft.crime.Jail;
 import com.skycraft.crime.Locks;
 import com.skycraft.crime.Ownership;
+import com.skycraft.network.CorePackets;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -24,6 +26,12 @@ import net.minecraftforge.client.gui.overlay.ForgeGui;
  */
 public final class CrimeHud {
     private static final int RED = 0xE04040;
+
+    private static long sneakAt = -100;
+    private static SneakState sneakCached = SneakState.HIDDEN;
+    private static net.minecraft.core.BlockPos estPos;
+    private static long estAt;
+    private static String estName;
 
     private CrimeHud() {}
 
@@ -207,7 +215,18 @@ public final class CrimeHud {
         HIDDEN, CAUTION, DETECTED
     }
 
+    /** The sneak eye: "detected" is the server's verdict (synced vitals flag); "caution" is a client estimate, cached. */
     private static SneakState getSneakState(net.minecraft.world.entity.player.Player player) {
+        if (ClientState.has(CorePackets.SyncVitals.DETECTED)) return SneakState.DETECTED;
+        long now = player.level().getGameTime();
+        if (now - sneakAt >= 5 || now < sneakAt) {
+            sneakAt = now;
+            sneakCached = estimateSneakState(player);
+        }
+        return sneakCached;
+    }
+
+    private static SneakState estimateSneakState(net.minecraft.world.entity.player.Player player) {
         var level = player.level();
         var box = player.getBoundingBox().inflate(24);
         var list = level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, box,
@@ -219,11 +238,9 @@ public final class CrimeHud {
         boolean dark = light < 7;
         boolean moving = player.getDeltaMovement().horizontalDistanceSqr() > 0.0004;
 
+        // never claims DETECTED on its own (mob targets aren't synced): close calls are CAUTION until the server says so
         boolean anyCaution = false;
         for (net.minecraft.world.entity.LivingEntity e : list) {
-            if (e instanceof net.minecraft.world.entity.Mob mob && mob.getTarget() == player) {
-                return SneakState.DETECTED;
-            }
             boolean civilian = Crimes.isCivilian(e);
             boolean hostile = e instanceof net.minecraft.world.entity.monster.Enemy;
             if (!civilian && !hostile) continue;
@@ -235,20 +252,11 @@ public final class CrimeHud {
             if (dark) vision *= 0.6;
             if (moving) vision *= 1.3;
 
+            if (dist >= vision * 1.4) continue; // too far to matter: skip the raycast
             if (e.hasLineOfSight(player)) {
                 boolean facing = Crimes.facing(e, player);
-                if (facing) {
-                    if (dist < vision) {
-                        return SneakState.DETECTED;
-                    } else if (dist < vision * 1.4) {
-                        anyCaution = true;
-                    }
-                } else {
-                    if (dist < Math.max(3.0, vision * 0.35)) {
-                        return SneakState.DETECTED;
-                    } else if (dist < vision * 0.7) {
-                        anyCaution = true;
-                    }
+                if (facing ? dist < vision * 1.4 : dist < Math.max(3.0, vision * 0.7)) {
+                    return SneakState.CAUTION;
                 }
             } else {
                 if (moving && dist < 6.0 && sneakSkill < 50) {
@@ -300,7 +308,18 @@ public final class CrimeHud {
         g.pose().popPose();
     }
 
+    /** Cached per looked-at block for 10 client ticks (two entity scans + a block scan are too much per frame). */
     private static String getEstablishmentName(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) {
+        long now = level.getGameTime();
+        if (!pos.equals(estPos) || now - estAt >= 10 || now < estAt) {
+            estPos = pos.immutable();
+            estAt = now;
+            estName = findEstablishmentName(level, pos);
+        }
+        return estName;
+    }
+
+    private static String findEstablishmentName(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) {
         for (com.skycraft.economy.Houses.HouseDef h : com.skycraft.economy.Houses.HOUSES) {
             if (pos.closerThan(h.approxPos(), h.radius())) {
                 return h.name();

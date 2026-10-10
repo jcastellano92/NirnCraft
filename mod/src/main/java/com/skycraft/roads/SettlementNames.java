@@ -4,10 +4,12 @@ import com.skycraft.core.PlayerData;
 import com.skycraft.world.LocationKind;
 import com.skycraft.world.LocationNames;
 import com.skycraft.world.WorldData;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.structure.Structure;
 
 /**
  * Settlement names and the link to the world module's location discovery. Names come from the world module's
@@ -27,9 +29,10 @@ final class SettlementNames {
         return dimension.location() + "|" + structure + "|" + start.x + "," + start.z;
     }
 
-    static String name(ResourceKey<Level> dimension, ResourceLocation structure, String locationId) {
+    /** The same name the world module gives this location (same classifier, same id). */
+    static String name(ResourceKey<Level> dimension, Holder<Structure> holder, ResourceLocation structure, String locationId) {
         try {
-            LocationKind kind = LocationKind.classify(structure, dimension);
+            LocationKind kind = LocationKind.classify(holder, dimension);
             String name = LocationNames.generate(locationId, kind == null ? LocationKind.TOWN : kind, structure.getPath());
             if (name != null && !name.isEmpty()) return name;
         } catch (RuntimeException ignored) {

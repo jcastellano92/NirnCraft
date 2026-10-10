@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "skycraft:block/drafting_table"
+    },
+    "facing=east": {
+      "model": "skycraft:block/drafting_table",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "skycraft:block/drafting_table",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "skycraft:block/drafting_table",
+      "y": 270
+    }
+  }
+}

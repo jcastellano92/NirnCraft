@@ -8,7 +8,7 @@ third-party mod that provides it.
 * **Race selection** [Core]: on first join, pick one of the ten races (Nord, Imperial, Breton, Redguard, High Elf,
   Wood Elf, Dark Elf, Orc, Khajiit, Argonian). Each comes with Skyrim's starting skill bonuses (+10 to one skill,
   +5 to five others), passives (frost, fire, poison or magic resistance, extra Magicka, claws, water breathing) and a
-  once-a-day greater power on **H**.
+  once-a-day greater power: equip it in the magic menu (**P**) and use it with **Z**.
 * **Digging is earned** [Core]: you can mine ore veins (pickaxe only) and chop trees (axe only), but terrain can't be
   dug until you unlock Mining perks:
   * **Excavator** (Mining 10): dirt, sand, gravel, clay and snow.
@@ -52,10 +52,10 @@ third-party mod that provides it.
   * axes cause bleeding
   * maces crush through armor
   * swords and greatswords score critical hits
-* **Power attacks.** Hold **Left Alt** while swinging, or attack while sprinting. They cost stamina, deal 1.5×
+* **Power attacks.** Hold the **left mouse button**, or attack while sprinting. They cost stamina, deal 1.5×
   damage (1.75× two-handed) and stagger.
 * **Blocking.**
-  * Hold **V** to block with a weapon (30–70% less damage, costs stamina).
+  * Hold the **right mouse button** to block with a weapon (30–70% less damage, costs stamina).
   * Shields block Skyrim-style: they reduce damage rather than nullify it, and Block perks add knockback, bash
     damage, arrow deflection and disarming.
 * **Sneak attacks** against unaware targets:
@@ -73,10 +73,11 @@ third-party mod that provides it.
   Read a tome to learn its spell for good.
 * **Schools and casting.** Destruction, Restoration, Alteration, Conjuration and Illusion, in Novice through Master
   tiers.
-  * Fire-and-forget spells: press **R** (or right-click with an empty hand).
-  * Concentration spells: hold **R**.
+  * Fire-and-forget spells: click the mouse button of the hand the spell is in (left mouse for the right hand, right
+    mouse for the left hand).
+  * Concentration spells: hold that button.
 * **Costs** follow Skyrim's formula, so higher skill and school perks make spells cheaper.
-* **Magic menu** on **G**: equip spells and shouts.
+* **Magic menu** on **P**: equip spells, shouts and powers.
 * **Soul Trap** fills soul gems for enchanting.
 
 ## Dragons and the Voice
@@ -117,14 +118,17 @@ third-party mod that provides it.
 
 ## People, dialogue, factions and quests
 
-* **Named villagers** with relationships, marriage and dialogue (MCA Reborn).
-* **Conversation menu** [Core]: talk to any villager to trade, train, ask for work, join factions or chat.
-* **Companions** who follow, travel and fight with you (Villager Recruits).
+* **Named villagers** (MCA Reborn): human-looking villagers with names and relationships. Its marriage, romance traits,
+  Grim Reaper, cultists and zombie infection are switched off in `config/mca.json`, and its guards attack Skycraft's
+  bandits, draugr, Forsworn and other hostiles.
+* **Conversation menu** [Core]: talk to any villager (**F**) to trade, train, ask for work, join factions or chat.
+* **Followers** [Core]: earn an NPC's trust (a favor, gold for hirelings, a Speech check or a quest) and they follow,
+  travel and fight with you. Tell them to wait, follow, trade items or leave.
 * **Quests** [Core]:
   * Radiant villager quests and Jarl's bounties (bandit leaders, giants, dragons, legendary monster hunts).
   * The main quest, "The Dragonborn".
   * Quests are shared by your **party**: everyone gets the reward.
-  * Press **J** for the journal and **U** for your party.
+  * Press **J** for the journal; your party is managed there too.
 * **Factions** [Core]: the Companions, the College of Winterhold, the Thieves Guild, the Dark Brotherhood, the
   Imperial Legion and the Stormcloaks, with ranks and contracts.
 
@@ -167,16 +171,25 @@ third-party mod that provides it.
 * **Oblivion.** The Nether is Oblivion: Deadlands, Daedra and Oblivion Gates.
 * **Sovngarde.** The End is Sovngarde, where Alduin awaits.
 * **Vampires and werewolves** (Vampirism, Werewolves: Become a Beast) let you transform, with their own skill
-  trees.
-* **Fast travel & Carriages.** The Skyrim map on **M** takes you to discovered locations and party members. Horse carriages outside hold capitals provide paid travel (20–50 Septims) across all 9 Skyrim holds with companion and horse teleportation.
+  trees. As in Skyrim, vampires keep to caves and lairs: Vampirism's vampire forest biome, hunter tent camps and
+  faction-controlled villages are switched off (`config/vampirism-common.toml`).
+* **Fast travel & Carriages.** The Skyrim map on **M** takes you to discovered locations and party members. Horse carriages outside hold capitals provide paid travel (20–50 Septims) across all 9 Skyrim holds with follower and horse teleportation.
 * **Terrain map.** The integrated Skyrim map on **M** replaces third-party maps, featuring explored terrain and fog of war.
-* **Woodcutting & Physics.** Whole trees topple and crumble dynamically with physics into harvestable logs, replanting saplings at the stump.
-* **Controllers & Steam Deck.** Full gamepad and Steam Deck support out-of-the-box via Controllable with virtual cursor and dedicated layouts.
+* **Woodcutting** [Core]: chop a trunk with an axe and the whole tree comes down into harvestable logs; a sapling is
+  replanted at the stump.
+* **Player corpses** (Corpse): when you die, your gear stays in your body where you fell. Bodies don't despawn while
+  they hold items, never fall into the void or burn in lava, and other players may loot them.
+* **Controllers & Steam Deck.** Full gamepad and Steam Deck support out-of-the-box via Controllable, preconfigured
+  with Steam button icons and the virtual cursor.
 
 ## Performance
 
-* **Distant Horizons** renders terrain to the horizon cheaply.
-* **Rendering and memory:** Embeddium, Oculus, ModernFix, FerriteCore, Entity Culling, Canary and Memory Leak Fix.
+* **Distant Horizons** renders terrain to the horizon cheaply. The pack starts it at 128 chunks with the Low Impact
+  CPU preset, and its auto-updater is off.
+* **Rendering and memory:** Embeddium, Oculus, ImmediatelyFast, Entity Culling, Dynamic FPS, ModernFix, FerriteCore,
+  Saturn and Memory Leak Fix.
+* **Server and world generation:** Canary (Lithium port), Krypton (networking), Clumps (merges XP orbs) and
+  Structure Layout Optimizer (faster town and dungeon generation).
 * **Distant terrain generation:** Distant Horizons builds far-off terrain in the background on its own worker threads,
   so no separate pre-generation mod is needed. (Chunky was dropped: it crashes new worlds alongside Distant Horizons 3.)
 * **Skycraft's own systems** stay cheap: road paving and NPC traffic run on a per-tick budget and never force chunks

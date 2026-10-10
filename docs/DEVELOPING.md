@@ -113,6 +113,49 @@ cd mod && ./gradlew build      # needs network access to Forge & Mojang maven
 ```
 The jar lands in `mod/build/libs/`.
 
+## The modpack (`pack/`, `tools/`)
+
+`pack/` is a [packwiz](https://packwiz.infra.link/) pack: `pack.toml`, `index.toml`, one `mods/*.pw.toml` per
+third-party mod, `config/` (client and common configs, copied into `.minecraft/config`) and `defaultconfigs/` (server
+configs that Forge copies into every new world's `serverconfig/`).
+
+* **Skycraft Core is not in the committed pack.** The jar is a build output: git ignores `pack/mods/skycraft-core.jar`
+  and `index.toml` never lists it. Every build injects it into a throwaway copy:
+  `tools/prepare-build-pack.sh <jar> [out]` copies `pack/` to `dist/pack-build`, adds `mods/skycraft-core.jar` and
+  re-hashes the copy's index.
+* **Adding a mod:** add a line to `tools/modlist.txt`. CI (`tools/build-pack.sh`, which needs packwiz) resolves new
+  entries into `.pw.toml` files and commits them. To skip the wait, write the `.pw.toml` yourself from the Modrinth API
+  (same format as the existing ones: `name`, `filename`, `side`, `[download]` url + `hash-format` + `hash`,
+  `[update.modrinth]` `mod-id` + `version`) and run `python3 tools/refresh_packwiz.py`.
+* **Updating or removing a mod:** edit or delete its `.pw.toml` (and its `modlist.txt` line), then run
+  `python3 tools/refresh_packwiz.py`. Entries whose `.pw.toml` exists are never re-resolved.
+* **`side`:** `client` for rendering/UI-only mods (Embeddium, Oculus, shaders, Controllable…), `server` for
+  server-only ones, `both` otherwise. The dedicated server zip skips client mods.
+* **After any change under `pack/`** run `python3 tools/refresh_packwiz.py` (works from any directory, hashes raw
+  bytes, indexes only `config/`, `defaultconfigs/`, `mods/`, `resourcepacks/`, `shaderpacks/`). `.gitattributes` marks
+  `pack/**` as `-text`, so git never rewrites line endings there; keep those files LF so the hashes are the same on
+  every OS.
+* **Configs:** only ship keys you verified against the mod's jar (javap its config class, or read the config file it
+  generates). A wrong key is silently ignored, which is worse than none.
+
+### Building downloads locally
+
+| Command | Result |
+| --- | --- |
+| `python3 tools/build_prism_instance.py [--core-jar PATH]` | `dist/Skycraft-client-instance.zip` without packwiz (Windows friendly). Uses `mod/build/libs`' newest jar unless `--core-jar` is given; checks every hash. |
+| `tools/make-instances.sh <core.jar>` | Client instance and dedicated server zips through a pinned packwiz-installer (Linux/macOS, needs Java and python3). |
+| `tools/test-server.sh` | Boots `dist/Skycraft-server.zip`, generates the spawn area, fails on crashes, client classes on the server or Skycraft stack traces. |
+| `tools/test-client.sh` | Boots the Skycraft dev client (`./gradlew runClient`, Forge + Skycraft only) under Xvfb, fails on crashes, Skycraft stack traces or missing Skycraft models/textures. It does not test the full pack's client. |
+
+### CI (`.github/workflows/build.yml`)
+
+1. Builds Skycraft Core.
+2. Resolves `tools/modlist.txt` (fails if any entry can't be resolved) and commits `pack/` only if that changed it.
+3. Builds the client instance and server from the build copy with the jar injected, then exports `Skycraft.mrpack`
+   and `Skycraft-curseforge.zip` from the same copy (export failures are warnings: some mods exist on one platform
+   only).
+4. Runs the server and client smoke tests; either failing fails the build.
+
 ## Second-wave contracts
 
 18. **Skill XP modifiers** (core): `Progression.registerXpModifier((player, skill) -> multiplier)` — Standing Stones,

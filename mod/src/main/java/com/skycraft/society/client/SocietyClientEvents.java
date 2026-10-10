@@ -43,41 +43,35 @@ public final class SocietyClientEvents {
         ClientSociety.clear();
     }
 
-    /** Overhead text must only appear above heads, not flooded into chat. */
+    /**
+     * Overhead text must only appear above heads, not flooded into chat. Barks arrive by their own packet; this only
+     * drops a <em>system</em> chat echo of a bark that is on screen right now: exactly its text, or exactly
+     * "Name: text" / "[Name] text" with the speaking NPC's name. Player chat is never touched.
+     */
     @SubscribeEvent
     public static void onClientChatReceived(net.minecraftforge.client.event.ClientChatReceivedEvent event) {
+        if (!event.isSystem() || ClientSociety.BARKS.isEmpty()) return;
+        if (event instanceof net.minecraftforge.client.event.ClientChatReceivedEvent.System sys && sys.isOverlay()) return;
         net.minecraft.network.chat.Component message = event.getMessage();
         if (message == null) return;
         String raw = message.getString().trim();
         if (raw.isEmpty()) return;
-
-        // 1. Any message matching an active overhead bark
-        if (!ClientSociety.BARKS.isEmpty()) {
-            for (ClientSociety.Bark bark : ClientSociety.BARKS.values()) {
-                String barkText = bark.text().getString().trim();
-                if (!barkText.isEmpty() && (raw.contains(barkText) || barkText.contains(raw))) {
-                    event.setCanceled(true);
-                    return;
-                }
+        Minecraft mc = Minecraft.getInstance();
+        for (var entry : ClientSociety.BARKS.entrySet()) {
+            String barkText = entry.getValue().text().getString().trim();
+            if (barkText.isEmpty() || !raw.endsWith(barkText)) continue;
+            if (raw.length() == barkText.length()) {
+                event.setCanceled(true);
+                return;
             }
-        }
-
-        // 2. Any NPC bark or chatter formatted as "Name: text" or "[Name]: text"
-        if (raw.matches("^(\\[[^\\]]+\\]|<[^>]+>|[A-Z][a-zA-Z0-9_ ]+):?\\s+.*$")) {
-            Minecraft mc = Minecraft.getInstance();
-            if (mc.level != null && mc.player != null) {
-                int colon = raw.indexOf(':');
-                if (colon > 0) {
-                    String speaker = raw.substring(0, colon).replaceAll("[\\[\\]<>]", "").trim();
-                    for (net.minecraft.world.entity.Entity e : mc.level.entitiesForRendering()) {
-                        if (e instanceof LivingEntity && !(e instanceof net.minecraft.world.entity.player.Player)) {
-                            if (e.getName().getString().equalsIgnoreCase(speaker) && e.distanceToSqr(mc.player) <= 32 * 32) {
-                                event.setCanceled(true);
-                                return;
-                            }
-                        }
-                    }
-                }
+            net.minecraft.world.entity.Entity speaker = mc.level == null ? null : mc.level.getEntity(entry.getKey());
+            if (speaker == null || speaker instanceof net.minecraft.world.entity.player.Player) continue;
+            String prefix = raw.substring(0, raw.length() - barkText.length()).trim();
+            String name = speaker.getName().getString();
+            if (prefix.equals(name + ":") || prefix.equals("[" + name + "]") || prefix.equals("[" + name + "]:")
+                    || prefix.equals("<" + name + ">")) {
+                event.setCanceled(true);
+                return;
             }
         }
     }

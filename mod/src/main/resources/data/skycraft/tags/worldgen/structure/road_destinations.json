@@ -1,0 +1,35 @@
+{
+  "replace": false,
+  "values": [
+    "#skycraft:towns",
+    "skycraft:nordic_barrow",
+    "skycraft:dwemer_ruin",
+    "skycraft:fort",
+    "skycraft:mine",
+    "skycraft:giant_camp",
+    {
+      "id": "dungeons_arise:keep_kayra",
+      "required": false
+    },
+    {
+      "id": "dungeons_arise:monastery",
+      "required": false
+    },
+    {
+      "id": "dungeons_arise:bandit_towers",
+      "required": false
+    },
+    {
+      "id": "dungeons_arise:thornborn_towers",
+      "required": false
+    },
+    {
+      "id": "nova_structures:stray_fort",
+      "required": false
+    },
+    {
+      "id": "nova_structures:ruin_town",
+      "required": false
+    }
+  ]
+}

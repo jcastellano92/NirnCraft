@@ -39,12 +39,18 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
- * Conjured creatures and temporary animal allies.
+ * Conjured creatures and temporary animal allies: the one summon/ally system, used by spells and staves alike.
  *
- * <p>A summon carries the entity tag {@link #TAG} and persistent data {@link #OWNER}/{@link #UNTIL}/{@link #KIND}.
- * It never targets its owner, the owner's other allies or other players (unless they attacked the owner or the
- * summon), fights what the owner fights and hostile mobs near the owner, follows the owner and vanishes when its
- * time is up or its owner leaves. Animal allies (Animal Allegiance) use {@link #ALLY_TAG} and keep living after.</p>
+ * <ul>
+ *     <li><b>Summoned</b> ({@link #TAG}): spawned by magic (Conjure spells, the Staff of Conjuring). Vanishes when its
+ *     time is up or its owner leaves, and leaves no drops or experience.</li>
+ *     <li><b>Allied</b> ({@link #ALLY_TAG}): an existing creature charmed by magic (Animal Allegiance). When its time is
+ *     up it just goes back to its own business: it is never removed and dies with its normal drops.</li>
+ * </ul>
+ *
+ * <p>Both carry persistent data {@link #OWNER}/{@link #UNTIL} (summons also {@link #KIND}). They never target their
+ * owner, the owner's other allies or other players (unless they attacked the owner or the summon), fight what the
+ * owner fights and hostile mobs near the owner.</p>
  */
 public final class Summons {
     public static final String TAG = "skycraft.summon";
@@ -63,6 +69,11 @@ public final class Summons {
 
     public static boolean isAlly(Entity e) {
         return e.getTags().contains(ALLY_TAG);
+    }
+
+    /** A summon or an ally: it fights for a player, so it isn't a wild creature (no leveling, no loot body). */
+    public static boolean isCompanion(Entity e) {
+        return isSummon(e) || isAlly(e);
     }
 
     /** Owner of a summon or ally, or null. Cheap for ordinary entities (scoreboard tag check first). */
@@ -142,17 +153,36 @@ public final class Summons {
     private static Spell.Result summon(ServerPlayer p, Spell spell, EntityType<? extends Mob> type, String kind,
                                        boolean atronach, boolean undead, Consumer<Mob> setup) {
         ServerLevel level = p.serverLevel();
-        Mob mob = type.create(level);
-        if (mob == null) return Spell.Result.FAILED;
         double range = 14 * (1 + 0.5 * Perks.rank(p, "conjuration.summoner"));
+        int duration = spell.duration;
+        if (atronach && Perks.has(p, "conjuration.atromancy")) duration *= 2;
+        if (undead && Perks.has(p, "conjuration.necromancy")) duration *= 2;
+        Mob mob = conjure(p, type, kind, range, duration, setup);
+        if (mob == null) return Spell.Result.FAILED;
+
+        Vec3 pos = mob.position();
+        Vec3 c = pos.add(0, mob.getBbHeight() / 2, 0);
+        MagicFx.sendNear(level, c, 64, MagicFx.SUMMON, spell.element, pos, pos, mob.getId(), Math.round(mob.getBbHeight() * 10));
+        level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 1f, 1f);
+        level.playSound(null, pos.x, pos.y, pos.z, undead ? SoundEvents.ZOMBIE_VILLAGER_CURE : SoundEvents.ILLUSIONER_MIRROR_MOVE,
+                SoundSource.PLAYERS, 0.7f, undead ? 1.5f : 0.8f);
+        return Spell.Result.EFFECT;
+    }
+
+    /**
+     * Spawns a summon of {@code p} where it is looking (up to {@code range} blocks) for {@code duration} ticks; used by
+     * Conjure spells and conjuring staves. The owner keeps one summon (two with Twin Souls): the oldest is dismissed.
+     * Returns the summon, or null if it couldn't be created.
+     */
+    @Nullable
+    public static Mob conjure(ServerPlayer p, EntityType<? extends Mob> type, String kind, double range, int duration, Consumer<Mob> setup) {
+        ServerLevel level = p.serverLevel();
+        Mob mob = type.create(level);
+        if (mob == null) return null;
         Vec3 pos = spawnPos(p, range, mob);
         mob.moveTo(pos.x, pos.y, pos.z, p.getYRot(), 0f);
         mob.setYHeadRot(p.getYRot());
         setup.accept(mob);
-
-        int duration = spell.duration;
-        if (atronach && Perks.has(p, "conjuration.atromancy")) duration *= 2;
-        if (undead && Perks.has(p, "conjuration.necromancy")) duration *= 2;
 
         // Limit: one summon (two with Twin Souls). The oldest is dismissed, like Skyrim.
         int max = Perks.has(p, "conjuration.twin_souls") ? 2 : 1;
@@ -168,13 +198,7 @@ public final class Summons {
         mob.setPersistenceRequired();
         mob.setCustomName(Component.translatable("entity.skycraft.summon." + kind));
         level.addFreshEntity(mob);
-
-        Vec3 c = pos.add(0, mob.getBbHeight() / 2, 0);
-        MagicFx.sendNear(level, c, 64, MagicFx.SUMMON, spell.element, pos, pos, mob.getId(), Math.round(mob.getBbHeight() * 10));
-        level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 1f, 1f);
-        level.playSound(null, pos.x, pos.y, pos.z, undead ? SoundEvents.ZOMBIE_VILLAGER_CURE : SoundEvents.ILLUSIONER_MIRROR_MOVE,
-                SoundSource.PLAYERS, 0.7f, undead ? 1.5f : 0.8f);
-        return Spell.Result.EFFECT;
+        return mob;
     }
 
     /** Where the player is looking (up to {@code range}), dropped to the ground; falls back to just in front. */
@@ -204,6 +228,18 @@ public final class Summons {
         level.sendParticles(ParticleTypes.LARGE_SMOKE, c.x, c.y, c.z, 10, mob.getBbWidth() / 2, mob.getBbHeight() / 3, mob.getBbWidth() / 2, 0.02);
         level.playSound(null, c.x, c.y, c.z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.NEUTRAL, 0.8f, 0.6f);
         mob.discard();
+    }
+
+    /**
+     * Older worlds: Staff of Conjuring familiars only carried {@link #OWNER}/{@link #UNTIL}. Turns them into proper
+     * summons so they still expire. Called when an entity joins the level.
+     */
+    public static void upgradeLegacy(Entity e) {
+        if (isCompanion(e)) return;
+        CompoundTag pd = e.getPersistentData();
+        if (!pd.hasUUID(OWNER) || !pd.contains(UNTIL)) return;
+        e.addTag(TAG);
+        if (!pd.contains(KIND)) pd.putString(KIND, "familiar");
     }
 
     /** Animal Allegiance: an animal fights for {@code owner} until {@code until}. */

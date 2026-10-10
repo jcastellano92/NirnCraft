@@ -193,10 +193,22 @@ public class BarterScreen extends Screen {
             int alpha = age < 4000 ? 0xFF : (int) (0xFF * (5000 - age) / 1000f);
             g.drawCenteredString(font, message, width / 2, height - 26, (Math.max(8, alpha) << 24) | 0xF0E6C8);
         }
-        g.drawString(font, Component.literal("Your Gold: " + com.skycraft.core.Currency.formatGold(state.playerGold())), 12, height - 14, GOLD, true);
+        Component pGold = Component.literal("Your Gold: " + com.skycraft.core.Currency.formatGold(state.playerGold()));
         Component mGold = Component.literal("Merchant Gold: " + com.skycraft.core.Currency.formatGold(state.merchantGold()));
-        g.drawString(font, mGold, width - font.width(mGold) - 12, height - 14, GOLD, true);
-        g.drawCenteredString(font, Component.translatable("barter.skycraft.hint"), width / 2, height - 12, 0xFF8A8478);
+        Component hint = Component.translatable("barter.skycraft.hint");
+        int hintW = font.width(hint);
+        // the corner readouts repeat the header: on narrow screens (427 px at GUI scale 3) they make room for the hint
+        int between = width - 24 - font.width(pGold) - font.width(mGold) - 16;
+        if (hintW <= between) {
+            g.drawString(font, pGold, 12, height - 14, GOLD, true);
+            g.drawString(font, mGold, width - font.width(mGold) - 12, height - 14, GOLD, true);
+        }
+        float hintScale = Math.min(1f, (width - 16) / (float) Math.max(1, hintW));
+        g.pose().pushPose();
+        g.pose().translate(width / 2f, height - 13, 0);
+        g.pose().scale(hintScale, hintScale, 1f);
+        g.drawCenteredString(font, hint, 0, 0, 0xFF8A8478);
+        g.pose().popPose();
 
         super.render(g, mouseX, mouseY, partialTick);
 

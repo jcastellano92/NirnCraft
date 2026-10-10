@@ -8,7 +8,8 @@ import net.minecraftforge.fml.config.ModConfig;
  * Road network between settlements, signposts, and travelers/caravans/patrols walking the roads.
  *
  * <ul>
- *     <li>{@link RoadNetwork}: settlement detection ({@code #skycraft:settlements} structure starts in loaded chunks),
+ *     <li>{@link RoadNetwork}: destination detection ({@code #skycraft:towns} and {@code #skycraft:road_destinations}
+ *     structure starts in loaded chunks),
  *     background road planning, feeding loaded road chunks to the {@link Paver}.</li>
  *     <li>{@link RoadPlanner}: A* on the generator's noise heights (never loads chunks).</li>
  *     <li>{@link Paver}: budgeted, idempotent paving, bridges, lantern posts and signposts.</li>

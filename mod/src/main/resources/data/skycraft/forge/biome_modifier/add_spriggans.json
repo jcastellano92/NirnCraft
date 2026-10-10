@@ -1,0 +1,12 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": "#skycraft:spawns/forest",
+  "spawners": [
+    {
+      "type": "skycraft:spriggan",
+      "weight": 2,
+      "minCount": 1,
+      "maxCount": 1
+    }
+  ]
+}

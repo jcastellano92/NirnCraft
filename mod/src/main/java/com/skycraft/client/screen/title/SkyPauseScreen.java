@@ -54,6 +54,8 @@ public class SkyPauseScreen extends Screen {
     private int selectedIndex = 0;
     private String statusMessage = null;
     private long statusMessageExpire = 0;
+    /** A quicksave is running on the integrated server. */
+    private static volatile boolean saving;
 
     public SkyPauseScreen() {
         super(Component.literal("System"));
@@ -68,7 +70,8 @@ public class SkyPauseScreen extends Screen {
     protected void init() {
         menuItems.clear();
         menuItems.add(MenuItem.RESUME);
-        menuItems.add(MenuItem.QUICKSAVE);
+        // Only the host can save; on a remote server the item is hidden.
+        if (Minecraft.getInstance().getSingleplayerServer() != null) menuItems.add(MenuItem.QUICKSAVE);
         menuItems.add(MenuItem.LOAD);
         menuItems.add(MenuItem.SETTINGS);
         menuItems.add(MenuItem.MODS);
@@ -179,13 +182,24 @@ public class SkyPauseScreen extends Screen {
         switch (item) {
             case RESUME -> onClose();
             case QUICKSAVE -> {
-                if (mc.hasSingleplayerServer() && mc.getSingleplayerServer() != null) {
-                    mc.getSingleplayerServer().saveAllChunks(false, true, false);
-                    statusMessage = "Game Saved";
+                var server = mc.getSingleplayerServer();
+                if (server == null) {
+                    // Remote server: saving is the host's business.
+                    statusMessage = "Saving is handled by the server host";
                     statusMessageExpire = System.currentTimeMillis() + 3000;
-                } else {
-                    statusMessage = "World saved";
-                    statusMessageExpire = System.currentTimeMillis() + 3000;
+                } else if (!saving) {
+                    // Save on the server thread (players, levels and chunks), never on the render thread.
+                    saving = true;
+                    statusMessage = "Saving...";
+                    statusMessageExpire = Long.MAX_VALUE;
+                    server.execute(() -> {
+                        boolean ok = server.saveEverything(false, true, false);
+                        mc.execute(() -> {
+                            saving = false;
+                            statusMessage = ok ? "Game saved" : "Save failed";
+                            statusMessageExpire = System.currentTimeMillis() + 3000;
+                        });
+                    });
                 }
             }
             case LOAD -> mc.setScreen(new SkyLoadWorldScreen(this));

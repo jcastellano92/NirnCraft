@@ -16,10 +16,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 /**
  * Skyrim leveling: using a skill grants skill XP; each skill increase grants character XP equal to the new
  * skill level; each character level grants a perk point and a +10 Health/Magicka/Stamina choice.
@@ -28,7 +24,6 @@ import java.util.UUID;
  * (e.g. damage dealt in Skyrim units, gold value of an item crafted, or a fixed amount per action).</p>
  */
 public final class Progression {
-    private static final Map<UUID, long[]> LAST_POPUP = new HashMap<>();
     private static final java.util.List<XpModifier> MODIFIERS = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     /** Multiplies skill XP gains, e.g. Standing Stones (+20% combat skills) or fortify effects. Return 1 for no change. */
@@ -159,9 +154,5 @@ public final class Progression {
         data.setLegendary(skill, data.getLegendary(skill) + 1);
         Vitals.refreshAttributes(player);
         Notifier.title(player, Component.translatable("notify.skycraft.legendary", skill.displayName()), Component.empty());
-    }
-
-    public static void forget(UUID player) {
-        LAST_POPUP.remove(player);
     }
 }

@@ -18,10 +18,19 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.Nullable;
 
+import com.skycraft.crime.Ownership;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.entity.ai.village.poi.PoiManager;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Gives each settlement detected by the roads module its people, once: a bard (playing for the inn the survival
@@ -95,11 +104,63 @@ public final class Settlers {
         return level.addFreshEntity(npc) ? npc : null;
     }
 
-    /** Which settlements got their people, and which holds have a Jarl. */
+    // ------------------------------------------------------------------ beds
+
+    /**
+     * The bed {@code npc} sleeps in: its existing claim if that is still a free bed, else the closest unclaimed bed
+     * near {@code home} from the POI manager (no block scanning). Beds a player placed or owns, beds a villager
+     * claimed, and beds another NPC claimed are never taken. Returns null if there is none.
+     */
+    @Nullable
+    public static BlockPos claimBed(NpcEntity npc, BlockPos home) {
+        if (!(npc.level() instanceof ServerLevel level)) return null;
+        Data data = Data.get(level);
+        BlockPos current = npc.getBed();
+        if (current != null) {
+            UUID who = data.beds.get(current.asLong());
+            boolean mine = who == null || who.equals(npc.getUUID());
+            if (mine && (!level.isLoaded(current) || level.getBlockState(current).is(BlockTags.BEDS))) {
+                if (who == null) {
+                    data.beds.put(current.asLong(), npc.getUUID());
+                    data.setDirty();
+                }
+                return current;
+            }
+            if (who != null && who.equals(npc.getUUID())) {
+                data.beds.remove(current.asLong());
+                data.setDirty();
+            }
+            npc.setBed(null);
+        }
+        Optional<BlockPos> found = level.getPoiManager().findClosest(h -> h.is(PoiTypes.HOME),
+                p -> !data.beds.containsKey(p.asLong()) && !Ownership.isPlayerOwned(level, p),
+                home, 32, PoiManager.Occupancy.HAS_SPACE);
+        if (found.isEmpty()) return null;
+        BlockPos bed = found.get().immutable();
+        data.beds.put(bed.asLong(), npc.getUUID());
+        data.setDirty();
+        npc.setBed(bed);
+        return bed;
+    }
+
+    /** Frees the NPC's bed claim (death or despawn). */
+    public static void releaseBed(NpcEntity npc) {
+        BlockPos bed = npc.getBed();
+        if (bed == null || !(npc.level() instanceof ServerLevel level)) return;
+        Data data = Data.get(level);
+        if (npc.getUUID().equals(data.beds.get(bed.asLong()))) {
+            data.beds.remove(bed.asLong());
+            data.setDirty();
+        }
+        npc.setBed(null);
+    }
+
+    /** Which settlements got their people, which holds have a Jarl, and which NPC sleeps in which bed. */
     static final class Data extends SavedData {
         static final String NAME = "skycraft_society";
         final LongOpenHashSet populated = new LongOpenHashSet();
         final Set<String> seats = new HashSet<>();
+        final Map<Long, UUID> beds = new HashMap<>();
 
         static Data get(ServerLevel level) {
             return level.getDataStorage().computeIfAbsent(Data::load, Data::new, NAME);
@@ -113,6 +174,11 @@ public final class Settlers {
             }
             ListTag seats = tag.getList("seats", Tag.TAG_STRING);
             for (int i = 0; i < seats.size(); i++) d.seats.add(seats.getString(i));
+            ListTag beds = tag.getList("beds", Tag.TAG_COMPOUND);
+            for (int i = 0; i < beds.size(); i++) {
+                CompoundTag b = beds.getCompound(i);
+                if (b.hasUUID("npc")) d.beds.put(b.getLong("pos"), b.getUUID("npc"));
+            }
             return d;
         }
 
@@ -124,6 +190,14 @@ public final class Settlers {
             ListTag seatList = new ListTag();
             for (String h : seats) seatList.add(StringTag.valueOf(h));
             tag.put("seats", seatList);
+            ListTag bedList = new ListTag();
+            beds.forEach((pos, npc) -> {
+                CompoundTag b = new CompoundTag();
+                b.putLong("pos", pos);
+                b.putUUID("npc", npc);
+                bedList.add(b);
+            });
+            tag.put("beds", bedList);
             return tag;
         }
     }

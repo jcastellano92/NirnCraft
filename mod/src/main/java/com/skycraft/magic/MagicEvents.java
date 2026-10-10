@@ -34,9 +34,12 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
@@ -47,13 +50,17 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /** Forge-bus server logic of the magic module: ticking, damage rules, summons, souls, bound weapons, cleanup. */
@@ -71,12 +78,50 @@ public final class MagicEvents {
         SpellCasting.tick(p);
         Shouting.tick(p);
         if (p.tickCount % 2 == 0) Candlelight.tick(p);
-        if (p.tickCount % 5 == 0 && p.containerMenu != p.inventoryMenu) {
-            // Bound weapons can't be stored in containers.
-            for (Slot slot : p.containerMenu.slots) {
-                if (!(slot.container instanceof Inventory) && BoundWeapons.isBound(slot.getItem())) slot.set(ItemStack.EMPTY);
+        // Bound weapons can't be stored in containers or bundles (the open container reports changes, see onOpen).
+        if (BOUND_IN_CONTAINER.remove(p.getUUID())) BoundWeapons.purge(p.containerMenu);
+        if (p.tickCount % 20 == 0) BoundWeapons.purgeInventoryBundles(p);
+    }
+
+    /** Players whose open container just received a bound weapon (or a bundle with one): purged at the end of their tick. */
+    private static final Set<UUID> BOUND_IN_CONTAINER = new HashSet<>();
+
+    @SubscribeEvent
+    public static void onOpen(PlayerContainerEvent.Open event) {
+        if (!(event.getEntity() instanceof ServerPlayer p)) return;
+        AbstractContainerMenu menu = event.getContainer();
+        UUID id = p.getUUID();
+        menu.addSlotListener(new ContainerListener() {
+            @Override
+            public void slotChanged(AbstractContainerMenu changed, int slot, ItemStack stack) {
+                if (stack.isEmpty() || !BoundWeapons.holdsBound(stack)) return;
+                if (BoundWeapons.isBound(stack) && slot >= 0 && slot < changed.slots.size()
+                        && changed.getSlot(slot).container instanceof Inventory) return; // still in the caster's own inventory
+                BOUND_IN_CONTAINER.add(id);
             }
-        }
+
+            @Override
+            public void dataChanged(AbstractContainerMenu changed, int index, int value) {
+            }
+        });
+    }
+
+    @SubscribeEvent
+    public static void onClose(PlayerContainerEvent.Close event) {
+        if (!(event.getEntity() instanceof ServerPlayer p)) return;
+        BOUND_IN_CONTAINER.remove(p.getUUID());
+        BoundWeapons.purge(event.getContainer());
+    }
+
+    /** Summons never grief: no fire from a Flame Atronach's fireballs, no doors broken by a reanimated zombie. */
+    @SubscribeEvent
+    public static void onMobGriefing(EntityMobGriefingEvent event) {
+        if (event.getEntity() != null && Summons.isSummon(event.getEntity())) event.setResult(Event.Result.DENY);
+    }
+
+    @SubscribeEvent
+    public static void onJoin(EntityJoinLevelEvent event) {
+        if (!event.getLevel().isClientSide() && event.loadedFromDisk()) Summons.upgradeLegacy(event.getEntity());
     }
 
     @SubscribeEvent
@@ -320,6 +365,7 @@ public final class MagicEvents {
         Candlelight.remove(p);
         SpellCasting.forget(p.getUUID());
         Shouting.forget(p.getUUID());
+        BOUND_IN_CONTAINER.remove(p.getUUID());
         Summons.summonsOf(p).forEach(Summons::dismiss);
     }
 
@@ -336,5 +382,6 @@ public final class MagicEvents {
         for (ServerPlayer p : event.getServer().getPlayerList().getPlayers()) Candlelight.remove(p);
         MagicScheduler.clear();
         SpellCasting.clear();
+        BOUND_IN_CONTAINER.clear();
     }
 }

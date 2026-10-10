@@ -11,13 +11,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.player.Input;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.MovementInputUpdateEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -28,7 +26,7 @@ import java.util.List;
 
 /**
  * Forge-bus client events of the inventory module: swapping the vanilla survival inventory for the Skyrim one, the
- * favorites key, keeping an over-encumbered player from running, and item weights in tooltips.
+ * favorites key and number keys, and item weights in tooltips (over-encumbered sprint blocking: core ClientEvents).
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class InventoryClientEvents {
@@ -143,29 +141,33 @@ public final class InventoryClientEvents {
         while (InventoryKeys.FAVORITES.consumeClick()) {
             if (mc.screen == null && !player.isSpectator()) mc.setScreen(new FavoritesScreen());
         }
+        // Over-encumbered: no running. The client-side sprint block lives in ClientEvents (with exhaustion).
+    }
 
-        // Favorites hotbar mapping: number keys 1-8 map to Favorites 1-8
-        if (mc.options != null && mc.options.keyHotbarSlots != null && !player.isCreative() && mc.screen == null) {
-            for (int i = 0; i < Math.min(8, mc.options.keyHotbarSlots.length); i++) {
-                if (mc.options.keyHotbarSlots[i].consumeClick()) {
-                    List<InvEntry> favs = getFavorites(player);
-                    if (i < favs.size()) {
-                        if (com.skycraft.combat.Sheathe.isSheathed(player)) {
-                            com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.SHEATHE_TOGGLE, 0));
-                        }
-                        ClientInventoryHandlers.primary(favs.get(i));
+    /**
+     * Favorites hotbar mapping: number keys 1-8 equip Favorites 1-8. Runs before vanilla handles the keys (tick START)
+     * and only takes a key press if that favorite exists; otherwise the number key selects the hotbar slot as usual.
+     * Key 9 is never touched.
+     */
+    @SubscribeEvent
+    public static void onClientTickStart(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.START) return;
+        Minecraft mc = Minecraft.getInstance();
+        LocalPlayer player = mc.player;
+        if (player == null || mc.screen != null || mc.options == null || player.isCreative() || player.isSpectator()) return;
+        List<InvEntry> favs = null;
+        for (int i = 0; i < Math.min(8, mc.options.keyHotbarSlots.length); i++) {
+            while (mc.options.keyHotbarSlots[i].consumeClick()) {
+                if (favs == null) favs = getFavorites(player);
+                if (i < favs.size()) {
+                    if (com.skycraft.combat.Sheathe.isSheathed(player)) {
+                        com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.SHEATHE_TOGGLE, 0));
                     }
+                    ClientInventoryHandlers.primary(favs.get(i));
+                } else {
+                    player.getInventory().selected = i; // what vanilla would have done with this press
                 }
             }
-            for (int i = 8; i < mc.options.keyHotbarSlots.length; i++) {
-                while (mc.options.keyHotbarSlots[i].consumeClick()) {}
-            }
-        }
-
-        // Over-encumbered: no running.
-        if (ClientInventoryHandlers.over && !player.isCreative() && !player.isSpectator()) {
-            if (player.isSprinting()) player.setSprinting(false);
-            mc.options.keySprint.setDown(false);
         }
     }
 
@@ -191,30 +193,11 @@ public final class InventoryClientEvents {
         if (player == null || mc.screen != null || player.isCreative() || player.isSpectator()) return;
         double delta = event.getScrollDelta();
         if (delta == 0) return;
-        event.setCanceled(true);
 
+        // Without favorites the wheel scrolls the hotbar as usual (and never toggles sheathing or sends packets).
         List<InvEntry> favs = getFavorites(player);
-        if (favs.isEmpty()) {
-            boolean wasSheathed = com.skycraft.combat.Sheathe.isSheathed(player);
-            if (!wasSheathed) {
-                if (!player.getMainHandItem().isEmpty()) lastDrawnMainSlot = player.getInventory().selected;
-                com.skycraft.combat.Sheathe.setSheathed(player, true);
-                com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.SHEATHE_TOGGLE, 0));
-                for (int i = 0; i < 9; i++) {
-                    if (player.getInventory().getItem(i).isEmpty()) {
-                        player.getInventory().selected = i;
-                        break;
-                    }
-                }
-                ClientPacketHandlers.notify(new CorePackets.Notify(NotifyKind.MESSAGE, Component.literal("Hands Sheathed"), Component.empty(), 0, 0f));
-            } else {
-                com.skycraft.combat.Sheathe.setSheathed(player, false);
-                com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.SHEATHE_TOGGLE, 0));
-                player.getInventory().selected = lastDrawnMainSlot;
-                ClientPacketHandlers.notify(new CorePackets.Notify(NotifyKind.MESSAGE, Component.literal("Hands Drawn"), Component.empty(), 0, 0f));
-            }
-            return;
-        }
+        if (favs.isEmpty()) return;
+        event.setCanceled(true);
 
         int total = favs.size() + 1;
         if (scrollFavIndex < 0) scrollFavIndex = 0;
@@ -243,14 +226,6 @@ public final class InventoryClientEvents {
             }
             ClientInventoryHandlers.primary(chosen);
         }
-    }
-
-    /** Keep the forward impulse under the sprint threshold so neither the sprint key nor double-tapping W can start a run. */
-    @SubscribeEvent
-    public static void onMovementInput(MovementInputUpdateEvent event) {
-        if (!ClientInventoryHandlers.over || event.getEntity().isCreative() || event.getEntity().isSpectator()) return;
-        Input input = event.getInput();
-        if (input.forwardImpulse > 0.79f) input.forwardImpulse = 0.79f;
     }
 
     // ------------------------------------------------------------------ misc

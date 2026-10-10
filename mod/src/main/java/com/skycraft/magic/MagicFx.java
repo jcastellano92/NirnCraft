@@ -28,6 +28,8 @@ public final class MagicFx {
     public static final int LIGHTNING = 9;
     public static final int TOTEM = 10;
     public static final int AURA = 11;
+    /** Staff and artifact visuals (arsenal): {@code extra} is one of {@code ArsenalPackets.Fx}'s kinds. */
+    public static final int STAFF = 12;
 
     private MagicFx() {}
 

@@ -134,6 +134,8 @@ public final class SettlementStations {
     }
 
     private static void placeStation(ServerLevel level, BlockPos pos, Block block, Settlement s, String role, String roleTitle) {
+        // never replace anything: only empty air that isn't a container or a villager's job site
+        if (!isFreeSpot(level, pos)) return;
         BlockState state = block.defaultBlockState();
         if (state.hasProperty(HorizontalDirectionalBlock.FACING)) {
             state = state.setValue(HorizontalDirectionalBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(level.random));
@@ -192,42 +194,49 @@ public final class SettlementStations {
     }
 
     private static BlockPos findIndoorCounter(ServerLevel level, BlockPos origin, int radius) {
-        return findIndoorCounter(level, origin, radius, Collections.emptySet());
+        return findIndoorCounter(level, origin, radius, Collections.emptySet(), false);
     }
 
-    private static BlockPos findIndoorCounter(ServerLevel level, BlockPos origin, int radius, Set<BlockPos> exclude) {
+    /**
+     * An empty indoor spot ON TOP of a counter (barrel, crafting table, smoker, bookshelf, slab, stair) near
+     * {@code origin}, i.e. the air block above it; the counter itself is never returned or replaced. Chests are
+     * skipped (something on top would stop them opening). Without a counter: an empty indoor floor spot, where
+     * {@code buildTable} first builds a small fence-and-plate table (for clutter) and returns the air above its top.
+     */
+    private static BlockPos findIndoorCounter(ServerLevel level, BlockPos origin, int radius, Set<BlockPos> exclude, boolean buildTable) {
         // 1. Look for existing tables, barrels, counters, slabs, and desks
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dz = -radius; dz <= radius; dz++) {
                 for (int dy = -2; dy <= 2; dy++) {
                     BlockPos p = origin.offset(dx, dy, dz);
-                    if (exclude.contains(p)) continue;
+                    BlockPos top = p.above();
+                    if (exclude.contains(top)) continue;
                     BlockState surface = level.getBlockState(p);
-                    BlockState above = level.getBlockState(p.above());
-                    if (above.isAir() && !level.canSeeSky(p)) {
+                    if (isFreeSpot(level, top) && !level.canSeeSky(top)) {
                         if (surface.is(Blocks.BARREL) || surface.is(Blocks.CRAFTING_TABLE)
                                 || surface.is(Blocks.SMOKER) || surface.is(Blocks.BOOKSHELF)
                                 || surface.getBlock() instanceof SlabBlock
-                                || surface.getBlock() instanceof StairBlock
-                                || surface.is(Blocks.CHEST)) {
-                            return p;
+                                || surface.getBlock() instanceof StairBlock) {
+                            return top;
                         }
                     }
                 }
             }
         }
-        // 2. Look for open floor space to build a rustic wooden table surface
+        // 2. Look for open floor space (optionally building a rustic fence-post table surface)
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dz = -radius; dz <= radius; dz++) {
                 for (int dy = -2; dy <= 2; dy++) {
                     BlockPos p = origin.offset(dx, dy, dz);
                     if (exclude.contains(p) || exclude.contains(p.above())) continue;
-                    if (level.getBlockState(p).isAir() && level.getBlockState(p.above()).isAir()) {
+                    if (isFreeSpot(level, p) && isFreeSpot(level, p.above())) {
                         BlockState floor = level.getBlockState(p.below());
                         if (floor.isSolidRender(level, p.below()) && !level.canSeeSky(p)) {
+                            if (!buildTable) return p;
+                            if (!isFreeSpot(level, p.above(2))) continue;
                             level.setBlock(p, Blocks.SPRUCE_FENCE.defaultBlockState(), 3);
                             level.setBlock(p.above(), Blocks.SPRUCE_PRESSURE_PLATE.defaultBlockState(), 3);
-                            return p.above();
+                            return p.above(2);
                         }
                     }
                 }
@@ -236,8 +245,14 @@ public final class SettlementStations {
         return null;
     }
 
+    /** Air that holds no block entity and is no villager job site / bed / bell (POI). */
+    private static boolean isFreeSpot(ServerLevel level, BlockPos pos) {
+        return level.getBlockState(pos).isAir() && level.getBlockEntity(pos) == null
+                && level.getPoiManager().getType(pos).isEmpty();
+    }
+
     private static BlockPos findShelteredOrOutdoorSpot(ServerLevel level, BlockPos origin, int radius) {
-        BlockPos indoor = findIndoorCounter(level, origin, radius, Collections.emptySet());
+        BlockPos indoor = findIndoorCounter(level, origin, radius, Collections.emptySet(), false);
         if (indoor != null) return indoor;
 
         for (int dx = -radius; dx <= radius; dx++) {
@@ -246,7 +261,7 @@ public final class SettlementStations {
                 int z = origin.getZ() + dz;
                 int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
                 BlockPos p = new BlockPos(x, y, z);
-                if (level.getBlockState(p).isAir() && level.getBlockState(p.below()).isSolidRender(level, p.below())) {
+                if (isFreeSpot(level, p) && level.getBlockState(p.below()).isSolidRender(level, p.below())) {
                     return p;
                 }
             }
@@ -280,6 +295,10 @@ public final class SettlementStations {
         return center;
     }
 
+    /** Persistent-data flag of placed clutter items (so a settlement never gets more than {@link #MAX_CLUTTER}). */
+    private static final String CLUTTER_TAG = "skycraft_clutter";
+    private static final int MAX_CLUTTER = 8;
+
     private static void placeIndoorClutter(ServerLevel level, Settlement s, BlockPos center, RandomSource r) {
         List<ItemStack> clutterPool = List.of(
                 new ItemStack(Items.BREAD),
@@ -289,44 +308,52 @@ public final class SettlementStations {
                 new ItemStack(CraftingItems.FIREWOOD.get())
         );
 
+        // clutter never despawns, so keep it bounded even if a settlement is ever populated again
+        int existing = level.getEntitiesOfClass(ItemEntity.class, new net.minecraft.world.phys.AABB(center).inflate(48),
+                e -> e.getPersistentData().getBoolean(CLUTTER_TAG)).size();
+        int budget = MAX_CLUTTER - existing;
+
         Set<BlockPos> usedSurfaces = new HashSet<>();
         for (ItemStack item : clutterPool) {
+            if (budget <= 0) return;
             BlockPos house = findIndoorHouse(level, center, 4, 32, r);
             if (house != null) {
-                BlockPos table = findIndoorCounter(level, house, 4, usedSurfaces);
+                BlockPos table = findIndoorCounter(level, house, 4, usedSurfaces, true);
                 if (table != null) {
                     usedSurfaces.add(table);
-                    double offX = 0.35 + (r.nextDouble() - 0.5) * 0.3;
-                    double offZ = 0.35 + (r.nextDouble() - 0.5) * 0.3;
-                    ItemEntity entity = new ItemEntity(level, table.getX() + offX, table.getY() + 0.15, table.getZ() + offZ, item.copy());
-                    entity.setDeltaMovement(0, 0, 0);
-                    entity.lifespan = Integer.MAX_VALUE;
-                    entity.setExtendedLifetime();
-                    entity.getPersistentData().putString(Ownership.ENTITY_OWNER_KEY, "settlement:" + s.id);
-                    level.addFreshEntity(entity);
+                    placeClutter(level, s, table, item.copy(), r);
+                    budget--;
                 }
             }
         }
 
         // Place readable lore books and notes on desks and tables
-        LoreBooks.Book randomBook = LoreBooks.random(r, b -> true);
+        LoreBooks.Book randomBook = budget > 0 ? LoreBooks.random(r, b -> true) : null;
         if (randomBook != null) {
             BlockPos house = findIndoorHouse(level, center, 4, 32, r);
             if (house != null) {
-                BlockPos table = findIndoorCounter(level, house, 4, usedSurfaces);
+                BlockPos table = findIndoorCounter(level, house, 4, usedSurfaces, true);
                 if (table != null) {
                     usedSurfaces.add(table);
-                    ItemStack bookStack = LoreBookItem.create(randomBook);
-                    double offX = 0.35 + (r.nextDouble() - 0.5) * 0.3;
-                    double offZ = 0.35 + (r.nextDouble() - 0.5) * 0.3;
-                    ItemEntity entity = new ItemEntity(level, table.getX() + offX, table.getY() + 0.15, table.getZ() + offZ, bookStack);
-                    entity.setDeltaMovement(0, 0, 0);
-                    entity.lifespan = Integer.MAX_VALUE;
-                    entity.setExtendedLifetime();
-                    entity.getPersistentData().putString(Ownership.ENTITY_OWNER_KEY, "settlement:" + s.id);
-                    level.addFreshEntity(entity);
+                    placeClutter(level, s, table, LoreBookItem.create(randomBook), r);
                 }
             }
         }
+    }
+
+    /**
+     * Lays an owned item on the surface below {@code spot} (an air block above a counter). It belongs to the
+     * settlement ({@link Ownership#ENTITY_OWNER_KEY}: taking it is theft) and stays until someone takes it.
+     */
+    private static void placeClutter(ServerLevel level, Settlement s, BlockPos spot, ItemStack stack, RandomSource r) {
+        double offX = 0.5 + (r.nextDouble() - 0.5) * 0.3;
+        double offZ = 0.5 + (r.nextDouble() - 0.5) * 0.3;
+        ItemEntity entity = new ItemEntity(level, spot.getX() + offX, spot.getY() + 0.05, spot.getZ() + offZ, stack);
+        entity.setDeltaMovement(0, 0, 0);
+        entity.lifespan = Integer.MAX_VALUE;
+        entity.setExtendedLifetime();
+        entity.getPersistentData().putString(Ownership.ENTITY_OWNER_KEY, "settlement:" + s.id);
+        entity.getPersistentData().putBoolean(CLUTTER_TAG, true);
+        level.addFreshEntity(entity);
     }
 }

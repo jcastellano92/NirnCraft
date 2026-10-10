@@ -1,19 +1,16 @@
 package com.skycraft.crafting.arcane.block;
 
-import com.skycraft.perk.Perks;
-import com.skycraft.vitals.ActionHandler;
+import com.skycraft.survival.Harvesting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -28,9 +25,9 @@ import net.minecraft.world.phys.BlockHitResult;
 /**
  * A wild alchemy plant (Nightshade, Deathbell, Nirnroot, Frost Mirriam). Grows on dirt, sand, moss and snow.
  *
- * <p>Right-click to harvest (fauna module): the player gets the ingredient (two with Green Thumb) and the plant is left
- * as bare stems ({@link #HARVESTED}), which regrow after about one in-game day of random ticks. Harvested stems drop
- * nothing when broken.</p>
+ * <p>Right-click (or [F]) to harvest through {@link Harvesting}: the player gets the ingredient (two with Green Thumb)
+ * and the plant is left as bare stems ({@link #HARVESTED}), which regrow after about one in-game day of random ticks.
+ * A plant the player placed is just picked back up. Harvested stems drop nothing when broken.</p>
  */
 public class IngredientPlantBlock extends FlowerBlock {
     public static final BooleanProperty HARVESTED = BooleanProperty.create("harvested");
@@ -61,11 +58,8 @@ public class IngredientPlantBlock extends FlowerBlock {
     @SuppressWarnings("deprecation")
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (state.getValue(HARVESTED)) return InteractionResult.PASS;
-        if (!level.isClientSide) {
-            ItemStack harvest = new ItemStack(this.asItem(), Perks.has(player, "alchemy.green_thumb") ? 2 : 1);
-            if (!ActionHandler.addToBags(player, harvest)) Block.popResource(level, pos, harvest);
-            level.setBlock(pos, state.setValue(HARVESTED, true), Block.UPDATE_CLIENTS);
-            level.playSound(null, pos, SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, SoundSource.BLOCKS, 1.0f, 0.8f + level.random.nextFloat() * 0.4f);
+        // The survival module's harvesting does the protection checks, Green Thumb and player-placed plants
+        if (player instanceof ServerPlayer sp && Harvesting.harvest(sp, pos)) {
             level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
         }
         return InteractionResult.sidedSuccess(level.isClientSide);

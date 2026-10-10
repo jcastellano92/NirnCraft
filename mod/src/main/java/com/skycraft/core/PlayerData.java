@@ -1,6 +1,7 @@
 package com.skycraft.core;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 
 import java.util.EnumMap;
@@ -13,6 +14,9 @@ import java.util.Map;
  *
  * <p>Feature modules that need their own persistent per-player state store it in a named sub-tag obtained
  * through {@link #module(String)} and call {@link #markDirty()} after changing it so it gets synced.</p>
+ *
+ * <p>Sync is split: {@link #markDirty()} (full, owner only, coalesced), {@link #markProgressDirty()} (small
+ * progress packet, throttled) and {@link #markAppearanceDirty()} (race/sheathe/apparel, sent to tracking players).</p>
  */
 public class PlayerData {
     public static final int BASE_HEALTH = 100;
@@ -46,7 +50,13 @@ public class PlayerData {
     private transient long lastStaminaUseTick = -1000;
     private transient long lastMagickaUseTick = -1000;
     private transient boolean dirty = true;
+    private transient boolean progressDirty = true;
+    private transient boolean appearanceDirty = true;
     private transient boolean vitalsDirty = true;
+    /** Server tick of the last full sync, used to coalesce bursts of {@link #markDirty()}. */
+    private transient int lastFullSync = Integer.MIN_VALUE / 2;
+    /** Hash of the last appearance sent to tracking players. */
+    private transient int lastAppearanceHash;
 
     public PlayerData() {
         for (Skill s : Skill.VALUES) {
@@ -64,48 +74,17 @@ public class PlayerData {
 
     public void setSkill(Skill skill, int level) {
         skillLevels.put(skill, Math.max(0, Math.min(Skill.MAX_LEVEL, level)));
-        markDirty();
+        markProgressDirty();
     }
 
     public float getSkillXp(Skill skill) {
         return skillXp.getOrDefault(skill, 0f);
     }
 
+    /** Raw setter. Award XP through {@code Progression.addSkillXp} so rates, perks and level-ups apply. */
     public void setSkillXp(Skill skill, float xp) {
         skillXp.put(skill, Math.max(0, xp));
-        markDirty();
-    }
-
-    public void addSkillXp(Skill skill, float xp) {
-        awardSkill(skill, xp);
-    }
-
-    public void awardSkill(Skill skill, float xp) {
-        int currentLvl = getSkill(skill);
-        if (currentLvl >= Skill.MAX_LEVEL) return;
-        float currentXp = getSkillXp(skill) + xp;
-        float needed = skill.xpToNext(currentLvl);
-        while (currentXp >= needed && currentLvl < Skill.MAX_LEVEL) {
-            currentXp -= needed;
-            currentLvl++;
-            setSkill(skill, currentLvl);
-            addLevelXp(currentLvl);
-            needed = skill.xpToNext(currentLvl);
-        }
-        setSkillXp(skill, currentXp);
-    }
-
-    public void addLevelXp(float xp) {
-        this.levelXp += xp;
-        float needed = levelXpToNext(this.level);
-        while (this.levelXp >= needed) {
-            this.levelXp -= needed;
-            this.level++;
-            this.perkPoints++;
-            this.pendingLevelUps++;
-            needed = levelXpToNext(this.level);
-        }
-        markDirty();
+        markProgressDirty();
     }
 
     /** Progress 0..1 towards the next skill level. */
@@ -121,7 +100,7 @@ public class PlayerData {
 
     public void setLegendary(Skill skill, int times) {
         legendary.put(skill, times);
-        markDirty();
+        markProgressDirty();
     }
 
     // ------------------------------------------------------------------ character level
@@ -132,7 +111,7 @@ public class PlayerData {
 
     public void setLevel(int level) {
         this.level = Math.max(1, level);
-        markDirty();
+        markProgressDirty();
     }
 
     public float getLevelXp() {
@@ -141,7 +120,7 @@ public class PlayerData {
 
     public void setLevelXp(float xp) {
         this.levelXp = Math.max(0, xp);
-        markDirty();
+        markProgressDirty();
     }
 
     /** Skyrim: XP to go from level L to L+1 is (L + 3) * 25. */
@@ -159,7 +138,7 @@ public class PlayerData {
 
     public void setPerkPoints(int points) {
         this.perkPoints = Math.max(0, points);
-        markDirty();
+        markProgressDirty();
     }
 
     public int getPendingLevelUps() {
@@ -168,7 +147,7 @@ public class PlayerData {
 
     public void setPendingLevelUps(int n) {
         this.pendingLevelUps = Math.max(0, n);
-        markDirty();
+        markProgressDirty();
     }
 
     public int getTrainingsThisLevel() {
@@ -177,7 +156,7 @@ public class PlayerData {
 
     public void setTrainingsThisLevel(int n) {
         this.trainingsThisLevel = n;
-        markDirty();
+        markProgressDirty();
     }
 
     // ------------------------------------------------------------------ perks
@@ -220,7 +199,7 @@ public class PlayerData {
             case 1 -> magickaPoints++;
             default -> staminaPoints++;
         }
-        markDirty();
+        markProgressDirty();
         markVitalsDirty();
     }
 
@@ -294,7 +273,7 @@ public class PlayerData {
 
     public void setGold(long gold) {
         this.gold = Math.max(0, gold);
-        markDirty();
+        markProgressDirty();
     }
 
     public Race getRace() {
@@ -305,6 +284,7 @@ public class PlayerData {
         this.race = race;
         markDirty();
         markVitalsDirty();
+        markAppearanceDirty();
     }
 
     public long getPowerReadyAt() {
@@ -313,7 +293,7 @@ public class PlayerData {
 
     public void setPowerReadyAt(long gameTime) {
         this.powerReadyAt = gameTime;
-        markDirty();
+        markProgressDirty();
     }
 
     // ------------------------------------------------------------------ stats
@@ -324,7 +304,7 @@ public class PlayerData {
 
     public void addStat(String key, int amount) {
         stats.merge(key, amount, Integer::sum);
-        markDirty();
+        markProgressDirty();
     }
 
     public Map<String, Integer> stats() {
@@ -340,14 +320,69 @@ public class PlayerData {
 
     // ------------------------------------------------------------------ dirty tracking
 
+    /**
+     * Structural change (perks, race, quests, module storage...): the whole player data is re-sent to the owner.
+     * Bursts are coalesced (at most a couple of full syncs per second). Skill/level/gold/stat setters only mark
+     * the small progress packet, see {@link #markProgressDirty()}.
+     */
     public void markDirty() {
         dirty = true;
+        appearanceDirty = true;
+    }
+
+    public boolean isDirty() {
+        return dirty;
     }
 
     public boolean consumeDirty() {
         boolean d = dirty;
         dirty = false;
+        if (d) progressDirty = false; // a full sync carries the progress too
         return d;
+    }
+
+    /** Skill/level/attribute/gold/stat change: only the small progress packet is sent (throttled). */
+    public void markProgressDirty() {
+        progressDirty = true;
+    }
+
+    public boolean consumeProgressDirty() {
+        boolean d = progressDirty;
+        progressDirty = false;
+        return d;
+    }
+
+    /** Race, sheathe state or worn apparel changed: tracking players are told (see {@link #appearance()}). */
+    public void markAppearanceDirty() {
+        appearanceDirty = true;
+    }
+
+    public boolean consumeAppearanceDirty() {
+        boolean d = appearanceDirty;
+        appearanceDirty = false;
+        return d;
+    }
+
+    public int getLastFullSync() {
+        return lastFullSync;
+    }
+
+    public void setLastFullSync(int serverTick) {
+        this.lastFullSync = serverTick;
+    }
+
+    /** Returns true (and remembers it) if this appearance differs from the last one sent. */
+    public boolean appearanceChanged(CompoundTag appearance) {
+        int hash = appearance.hashCode();
+        if (hash == lastAppearanceHash) return false;
+        lastAppearanceHash = hash;
+        return true;
+    }
+
+    /** Forces the next {@link #appearanceChanged} to report a change (e.g. after a respawn). */
+    public void resetAppearanceHash() {
+        lastAppearanceHash = 0;
+        appearanceDirty = true;
     }
 
     public void markVitalsDirty() {
@@ -361,6 +396,82 @@ public class PlayerData {
     }
 
     // ------------------------------------------------------------------ serialization
+
+    /** The small, frequently changing part: skills, level, attribute pools, perk points, gold and stats. */
+    public CompoundTag saveProgress() {
+        CompoundTag tag = new CompoundTag();
+        int n = Skill.VALUES.length;
+        int[] lvl = new int[n];
+        int[] leg = new int[n];
+        int[] xp = new int[n];
+        for (int i = 0; i < n; i++) {
+            Skill s = Skill.VALUES[i];
+            lvl[i] = getSkill(s);
+            leg[i] = getLegendary(s);
+            xp[i] = Float.floatToIntBits(getSkillXp(s));
+        }
+        tag.putIntArray("lvl", lvl);
+        tag.putIntArray("leg", leg);
+        tag.putIntArray("xp", xp);
+        tag.putInt("level", level);
+        tag.putFloat("levelXp", levelXp);
+        tag.putInt("perkPoints", perkPoints);
+        tag.putInt("pendingLevelUps", pendingLevelUps);
+        tag.putInt("hp", healthPoints);
+        tag.putInt("mp", magickaPoints);
+        tag.putInt("sp", staminaPoints);
+        tag.putLong("gold", gold);
+        tag.putLong("powerReadyAt", powerReadyAt);
+        tag.putInt("trainings", trainingsThisLevel);
+        CompoundTag statTag = new CompoundTag();
+        stats.forEach(statTag::putInt);
+        tag.put("stats", statTag);
+        return tag;
+    }
+
+    /** Client side: applies a {@link #saveProgress()} tag. */
+    public void loadProgress(CompoundTag tag) {
+        int[] lvl = tag.getIntArray("lvl");
+        int[] leg = tag.getIntArray("leg");
+        int[] xp = tag.getIntArray("xp");
+        for (int i = 0; i < Skill.VALUES.length; i++) {
+            Skill s = Skill.VALUES[i];
+            if (i < lvl.length) skillLevels.put(s, lvl[i]);
+            if (i < leg.length) legendary.put(s, leg[i]);
+            if (i < xp.length) skillXp.put(s, Float.intBitsToFloat(xp[i]));
+        }
+        level = Math.max(1, tag.getInt("level"));
+        levelXp = tag.getFloat("levelXp");
+        perkPoints = tag.getInt("perkPoints");
+        pendingLevelUps = tag.getInt("pendingLevelUps");
+        healthPoints = tag.getInt("hp");
+        magickaPoints = tag.getInt("mp");
+        staminaPoints = tag.getInt("sp");
+        gold = tag.getLong("gold");
+        powerReadyAt = tag.getLong("powerReadyAt");
+        trainingsThisLevel = tag.getInt("trainings");
+        stats.clear();
+        CompoundTag statTag = tag.getCompound("stats");
+        for (String k : statTag.getAllKeys()) stats.put(k, statTag.getInt(k));
+    }
+
+    /** What other players need to render this player: race, sheathe state and worn apparel. */
+    public CompoundTag appearance() {
+        CompoundTag tag = new CompoundTag();
+        if (race != null) tag.putString("race", race.id());
+        tag.putBoolean("sheathed", module("combat").getBoolean("sheathed"));
+        CompoundTag apparel = modules.get("apparel");
+        if (apparel != null && !apparel.isEmpty()) tag.put("apparel", apparel.copy());
+        return tag;
+    }
+
+    /** Client side: applies an {@link #appearance()} tag to another player's copy of the data. */
+    public void loadAppearance(CompoundTag tag) {
+        race = tag.contains("race") ? Race.byId(tag.getString("race")) : null;
+        module("combat").putBoolean("sheathed", tag.getBoolean("sheathed"));
+        if (tag.contains("apparel", Tag.TAG_COMPOUND)) modules.put("apparel", tag.getCompound("apparel").copy());
+        else modules.remove("apparel");
+    }
 
     public CompoundTag save() {
         CompoundTag tag = new CompoundTag();
@@ -415,7 +526,11 @@ public class PlayerData {
         stats.clear();
         CompoundTag statTag = tag.getCompound("stats");
         for (String k : statTag.getAllKeys()) stats.put(k, statTag.getInt(k));
-        modules.clear();
+        // A full sync that had to leave oversized modules out lists them in "omitted": keep the copy we have.
+        java.util.Set<String> omitted = new java.util.HashSet<>();
+        ListTag omittedTag = tag.getList("omitted", Tag.TAG_STRING);
+        for (int i = 0; i < omittedTag.size(); i++) omitted.add(omittedTag.getString(i));
+        modules.keySet().removeIf(k -> !omitted.contains(k));
         CompoundTag moduleTag = tag.getCompound("modules");
         for (String k : moduleTag.getAllKeys()) modules.put(k, moduleTag.getCompound(k).copy());
 
@@ -433,6 +548,7 @@ public class PlayerData {
         powerReadyAt = tag.getLong("powerReadyAt");
         trainingsThisLevel = tag.getInt("trainings");
         markDirty();
+        markProgressDirty();
         markVitalsDirty();
     }
 

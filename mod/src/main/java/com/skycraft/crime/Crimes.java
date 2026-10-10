@@ -38,7 +38,12 @@ public final class Crimes {
     /** Guards fight a player who just assaulted someone for this long before coming to arrest them. */
     private static final int ASSAULT_HOSTILE_TICKS = 600;
 
+    /** Killing someone who hurt the player within this many ticks (30 s) is self-defense. */
+    private static final long SELF_DEFENSE_TICKS = 600;
+
     private static final Map<String, Long> LAST_ASSAULT = new HashMap<>();
+    /** "aggressor uuid|player uuid" -> game time the aggressor last hurt the player. */
+    private static final Map<String, Long> AGGRESSORS = new HashMap<>();
 
     private Crimes() {}
 
@@ -118,11 +123,40 @@ public final class Crimes {
         return e instanceof ServerPlayer sp ? sp : null;
     }
 
+    /** Remembers a civilian (or any NPC) hurting a player, for self-defense. */
+    private static void noteAggression(LivingEntity aggressor, ServerPlayer player) {
+        long now = player.level().getGameTime();
+        if (AGGRESSORS.size() > 2048) AGGRESSORS.entrySet().removeIf(e -> now - e.getValue() > SELF_DEFENSE_TICKS);
+        AGGRESSORS.put(aggressor.getUUID() + "|" + player.getUUID(), now);
+    }
+
+    /**
+     * Whether killing/hurting {@code victim} is self-defense: it attacked the player recently, is fighting them right
+     * now, or accepted a duel with them. Guards are never fair game.
+     */
+    public static boolean selfDefense(LivingEntity victim, ServerPlayer player) {
+        if (isGuard(victim)) return false;
+        var data = victim.getPersistentData();
+        if (data.hasUUID(com.skycraft.society.NpcDialogue.DUEL_TAG) && player.getUUID().equals(data.getUUID(com.skycraft.society.NpcDialogue.DUEL_TAG))) return true;
+        // the player started it: fighting back doesn't make the victim fair game
+        Long assaulted = LAST_ASSAULT.get(victim.getUUID() + "|" + player.getUUID());
+        if (assaulted != null && player.level().getGameTime() - assaulted < 6000) return false;
+        if (victim instanceof Mob mob && mob.getTarget() == player) return true;
+        if (victim instanceof com.skycraft.society.entity.NpcEntity npc && npc.isHostileTo(player)) return true;
+        Long last = AGGRESSORS.get(victim.getUUID() + "|" + player.getUUID());
+        return last != null && player.level().getGameTime() - last <= SELF_DEFENSE_TICKS;
+    }
+
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onHurt(LivingHurtEvent event) {
         if (event.isCanceled() || event.getAmount() <= 0) return;
         LivingEntity victim = event.getEntity();
         if (victim.level().isClientSide) return;
+        if (victim instanceof ServerPlayer hurtPlayer && event.getSource().getEntity() instanceof LivingEntity aggressor
+                && !(aggressor instanceof net.minecraft.world.entity.player.Player)) {
+            noteAggression(aggressor, hurtPlayer);
+            return;
+        }
         ServerPlayer player = attacker(event.getSource());
         if (player == null || !canCommitCrime(player)) return;
 
@@ -134,21 +168,32 @@ public final class Crimes {
 
         if (!isCivilian(victim)) return;
 
-        // Attacking a guard
+        // Attacking a guard: assault and resisting arrest. The only leeway is one stray punch (weapon sheathed) per
+        // guard per minute, and never while already fighting the guards.
         if (isGuard(victim)) {
             if (victim instanceof Mob mob) {
-                if ((com.skycraft.combat.Sheathe.isSheathed(player) || event.getAmount() < 6.0f) && !Bounty.isHostile(player)) {
+                if (com.skycraft.combat.Sheathe.isSheathed(player) && !Bounty.isHostile(player)
+                        && !Guards.hitRecently(victim, player, 1200) && Guards.allowAccident(victim, player)) {
                     Guards.handleAccidentalHit(player, mob);
                     return;
                 }
                 mob.setTarget(player);
+            }
+            Guards.noteHit(victim, player);
+            long now = victim.level().getGameTime();
+            String key = victim.getUUID() + "|" + player.getUUID();
+            Long last = LAST_ASSAULT.get(key);
+            if (last == null || now - last >= ASSAULT_THROTTLE) {
+                LAST_ASSAULT.put(key, now);
+                Bounty.increment(player, "assaults", 1);
+                report(player, victim.blockPosition(), Bounty.ASSAULT, true, null);
             }
             Guards.resist(player);
             return;
         }
 
         // fighting back against someone who's already attacking you isn't a new crime
-        if (victim instanceof Mob mob && mob.getTarget() == player) return;
+        if (selfDefense(victim, player)) return;
 
         long now = victim.level().getGameTime();
         String key = victim.getUUID() + "|" + player.getUUID();
@@ -199,6 +244,8 @@ public final class Crimes {
         }
 
         if (!isCivilian(victim)) return;
+        // killing someone who attacked you (or who accepted your duel) isn't murder
+        if (selfDefense(victim, player)) return;
 
         // the Dark Brotherhood always knows
         Bounty.increment(player, "murders", 1);
@@ -213,5 +260,6 @@ public final class Crimes {
     static void forget(java.util.UUID player) {
         String suffix = "|" + player;
         LAST_ASSAULT.keySet().removeIf(k -> k.endsWith(suffix));
+        AGGRESSORS.keySet().removeIf(k -> k.endsWith(suffix));
     }
 }

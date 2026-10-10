@@ -12,6 +12,9 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -31,8 +34,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * {@code #skycraft:talkers} opens a dialogue menu. Feature modules contribute topics with
  * {@link #registerProvider(DialogueProvider)} (barter, training, work/quests, factions, bounty...).
  *
- * <p>The "Chat" topic hands the interaction back to the entity's own behaviour (vanilla trading UI, or MCA
- * Reborn's interaction menu when that mod is installed).</p>
+ * <p>"Goodbye" (always last) ends the conversation. Only the player an NPC is talking to can pick its lines; the
+ * conversation also ends when that player logs out or walks more than 8 blocks away, or the NPC dies/unloads.</p>
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Dialogue {
@@ -111,7 +114,9 @@ public final class Dialogue {
     }
 
     static void choose(ServerPlayer player, int entityId, String optionId) {
-        if (!(player.level().getEntity(entityId) instanceof LivingEntity npc) || player.distanceToSqr(npc) > 64) {
+        // only the player this NPC is actually talking to may pick a line
+        if (!player.getUUID().equals(TALKING.get(entityId))) return;
+        if (!(player.level().getEntity(entityId) instanceof LivingEntity npc) || !npc.isAlive() || player.distanceToSqr(npc) > 64) {
             endConversation(player, entityId);
             return;
         }
@@ -121,6 +126,39 @@ public final class Dialogue {
                 return;
             }
         }
+    }
+
+    // ------------------------------------------------------------------ cleanup
+
+    @SubscribeEvent
+    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        UUID id = event.getEntity().getUUID();
+        TALKING.entrySet().removeIf(e -> {
+            if (!e.getValue().equals(id)) return false;
+            if (event.getEntity().level().getEntity(e.getKey()) instanceof com.skycraft.society.entity.NpcEntity n) n.setConversationPartner(-1);
+            return true;
+        });
+    }
+
+    /** NPC died, unloaded or changed dimension: whoever talked to it is done. */
+    @SubscribeEvent
+    public static void onLeave(EntityLeaveLevelEvent event) {
+        if (!event.getLevel().isClientSide) TALKING.remove(event.getEntity().getId());
+    }
+
+    /** Once a second: conversations whose player walked away (> 8 blocks) or is gone end. */
+    @SubscribeEvent
+    public static void onServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || TALKING.isEmpty() || event.getServer().getTickCount() % 20 != 0) return;
+        var players = event.getServer().getPlayerList();
+        TALKING.entrySet().removeIf(e -> {
+            ServerPlayer p = players.getPlayer(e.getValue());
+            if (p == null) return true;
+            var entity = p.level().getEntity(e.getKey());
+            if (entity != null && entity.isAlive() && p.isAlive() && p.distanceToSqr(entity) <= 64) return false;
+            if (entity instanceof com.skycraft.society.entity.NpcEntity n && n.getConversationPartner() == p.getId()) n.setConversationPartner(-1);
+            return true;
+        });
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)

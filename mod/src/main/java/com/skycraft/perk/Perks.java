@@ -43,6 +43,16 @@ public final class Perks {
         return SkyData.get(player).hasPerk(id);
     }
 
+    /** Same as {@link #rank(Player, String)} for handlers that already resolved the player's data (avoids a capability lookup per call). */
+    public static int rank(PlayerData data, String id) {
+        return data.getPerkRank(id);
+    }
+
+    /** Same as {@link #has(Player, String)} for handlers that already resolved the player's data. */
+    public static boolean has(PlayerData data, String id) {
+        return data.hasPerk(id);
+    }
+
     /** Whether the player may buy the next rank of the perk right now (ignoring perk points). */
     public static boolean canUnlock(PlayerData data, Perk perk) {
         int current = data.getPerkRank(perk.id());

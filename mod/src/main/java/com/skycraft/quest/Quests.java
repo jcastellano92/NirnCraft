@@ -43,6 +43,11 @@ public final class Quests {
     /** Persistent-data keys under which summons/minions may record their owning player. */
     private static final String[] SUMMON_OWNER_KEYS = {"skycraft_owner", "skycraft_summoner", "skycraft_summon_owner"};
 
+    /** {@link Quest#extra} list of member UUIDs in the party when the quest was accepted (or shared with it). */
+    private static final String ACCEPTED_BY = "accepted_by";
+    /** {@link Quest#extra} flag: every eligible party member gets the full gold reward instead of a share. */
+    public static final String PER_PLAYER = "per_player";
+
     private static final Set<String> DIRTY_KEYS = new HashSet<>();
     private static final Set<UUID> DIRTY_PLAYERS = new HashSet<>();
 
@@ -157,6 +162,7 @@ public final class Quests {
         if (q.id.isEmpty()) q.id = newId(store, key);
         q.status = Quest.Status.ACTIVE;
         q.started = server.overworld().getGameTime();
+        recordAcceptedBy(server, key, q);
         store.quests(key).add(q);
         Objective first = q.current();
         if (first != null) begin(server, q, first);
@@ -256,15 +262,21 @@ public final class Quests {
         q.finished = server.overworld().getGameTime();
         for (Objective o : q.objectives) o.done = true;
         QuestStore store = QuestStore.get(server);
-        List<UUID> members = members(server, key);
+        List<UUID> members = eligible(server, key, q);
         boolean shared = isPartyKey(key) && members.size() > 1;
+        // gold is split between the eligible members (unless the quest pays each of them), items go to each
+        Quest paid = q;
+        if (shared && !q.extra.getBoolean(PER_PLAYER)) {
+            paid = Quest.load(q.save());
+            paid.rewardGold = Math.round(q.rewardGold / (double) members.size());
+        }
         for (UUID id : members) {
             ServerPlayer m = server.getPlayerList().getPlayer(id);
             if (m != null) {
-                grantRewards(m, q, shared);
+                grantRewards(m, paid, shared);
             } else {
                 CompoundTag pending = new CompoundTag();
-                pending.put("quest", q.save());
+                pending.put("quest", paid.save());
                 pending.putBoolean("shared", shared);
                 store.addPending(id, pending);
             }
@@ -272,6 +284,49 @@ public final class Quests {
         store.trim(key);
         changed(server, key);
         if (q.isMain()) MainQuest.onStageCompleted(server, key, q);
+    }
+
+    /** Remembers who was in the party when it took on (or was given) the quest. */
+    private static void recordAcceptedBy(MinecraftServer server, String key, Quest q) {
+        if (!isPartyKey(key)) return;
+        ListTag list = new ListTag();
+        for (UUID id : members(server, key)) list.add(net.minecraft.nbt.StringTag.valueOf(id.toString()));
+        q.extra.put(ACCEPTED_BY, list);
+    }
+
+    /**
+     * Who gets the rewards: party members who were in the party when the quest was accepted, plus later joiners who
+     * are online and within 64 blocks of one of them (or of the last objective) at completion. Quests without the
+     * record (older saves, solo keys) reward every member.
+     */
+    private static List<UUID> eligible(MinecraftServer server, String key, Quest q) {
+        List<UUID> members = members(server, key);
+        if (!isPartyKey(key) || !q.extra.contains(ACCEPTED_BY, Tag.TAG_LIST)) return members;
+        Set<String> accepted = new HashSet<>();
+        for (Tag t : q.extra.getList(ACCEPTED_BY, Tag.TAG_STRING)) accepted.add(t.getAsString());
+        List<ServerPlayer> anchors = new ArrayList<>();
+        for (UUID id : members) {
+            ServerPlayer p = server.getPlayerList().getPlayer(id);
+            if (p != null && accepted.contains(id.toString())) anchors.add(p);
+        }
+        Objective last = q.objectives.isEmpty() ? null : q.objectives.get(q.objectives.size() - 1);
+        List<UUID> out = new ArrayList<>();
+        for (UUID id : members) {
+            if (accepted.contains(id.toString())) {
+                out.add(id);
+                continue;
+            }
+            ServerPlayer p = server.getPlayerList().getPlayer(id);
+            if (p == null) continue;
+            boolean near = false;
+            for (ServerPlayer a : anchors) {
+                if (a.level() == p.level() && a.distanceToSqr(p) <= 64 * 64) near = true;
+            }
+            if (!near && last != null && last.hasPos && p.level().dimension().location().toString().equals(last.dim)
+                    && p.blockPosition().distSqr(last.pos) <= 64 * 64) near = true;
+            if (near) out.add(id);
+        }
+        return out.isEmpty() ? members : out;
     }
 
     public static void fail(MinecraftServer server, String key, Quest q, Component reason) {
@@ -307,6 +362,7 @@ public final class Quests {
         // Move from personal list to party list
         store.quests(pKey).remove(q);
         if (store.find(ptKey, q.id) != null) q.id = newId(store, ptKey);
+        recordAcceptedBy(player.server, ptKey, q);
         store.quests(ptKey).add(q);
         for (ServerPlayer m : onlineMembers(player.server, ptKey)) {
             Notifier.message(m, Component.translatable("quest.skycraft.shared_with_party", player.getDisplayName(), q.title));

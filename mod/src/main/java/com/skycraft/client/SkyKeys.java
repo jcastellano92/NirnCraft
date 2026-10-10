@@ -9,7 +9,7 @@ import org.lwjgl.glfw.GLFW;
  * Every Skycraft key binding. Modules read these in their own client tick handlers; each key is consumed by
  * exactly one module:
  * <ul>
- *     <li>core: SKILLS, POWER_ATTACK, BLOCK, RACIAL_POWER</li>
+ *     <li>core: HUB, SKILLS, SHEATHE, DODGE (power attacks: sprint-attack; blocking: right mouse)</li>
  *     <li>magic: MAGIC_MENU, CAST, SHOUT</li>
  *     <li>quest: JOURNAL, PARTY</li>
  *     <li>world: WAIT, MAP</li>
@@ -19,9 +19,10 @@ import org.lwjgl.glfw.GLFW;
 public final class SkyKeys {
     public static final String CATEGORY = "key.categories.skycraft";
 
+    // Documented defaults (keep in sync with defaultoptions/keybindings.txt). Favorites (Q) is in InventoryKeys.
     public static final KeyMapping SKILLS = key("skills", GLFW.GLFW_KEY_K);
     public static final KeyMapping HUB = key("hub", GLFW.GLFW_KEY_TAB);
-    public static final KeyMapping JOURNAL = key("journal", GLFW.GLFW_KEY_R);
+    public static final KeyMapping JOURNAL = key("journal", GLFW.GLFW_KEY_J);
     public static final KeyMapping MAGIC_MENU = key("magic_menu", GLFW.GLFW_KEY_P);
     public static final KeyMapping SHOUT = key("shout", GLFW.GLFW_KEY_Z);
     public static final KeyMapping WAIT = key("wait", GLFW.GLFW_KEY_I);
@@ -31,10 +32,11 @@ public final class SkyKeys {
     public static final KeyMapping CALL_HORSE = key("call_horse", GLFW.GLFW_KEY_H);
     public static final KeyMapping INTERACT = key("interact", GLFW.GLFW_KEY_F);
 
-    // Compatibility aliases for keys transitioning to mouse/hold/journal controls
+    /**
+     * Not registered (casting is on the mouse buttons), so it can never be pressed. Still read by the magic module;
+     * remove it together with those reads.
+     */
     public static final KeyMapping CAST = key("cast", InputConstants.UNKNOWN.getValue());
-    public static final KeyMapping POWER_ATTACK = key("power_attack", InputConstants.UNKNOWN.getValue());
-    public static final KeyMapping BLOCK = key("block", InputConstants.UNKNOWN.getValue());
     public static final KeyMapping RACIAL_POWER = SHOUT;
     public static final KeyMapping PARTY = JOURNAL;
 

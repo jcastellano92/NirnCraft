@@ -4,13 +4,22 @@ import com.skycraft.SkyConfig;
 import com.skycraft.Skycraft;
 import com.skycraft.network.CorePackets;
 import com.skycraft.network.SkyNetwork;
-import com.skycraft.skills.Progression;
 import com.skycraft.vitals.ActionHandler;
 import com.skycraft.vitals.Vitals;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
@@ -18,9 +27,25 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-/** Capability lifecycle (attach, death copy, sync on login/respawn/dimension change) and coin pickup. */
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+/** Capability lifecycle (attach, death copy, sync on login/respawn/dimension change), first spawn and race prompt. */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class PlayerDataEvents {
+    /** Real towns/villages/taverns (worldgen tag owned by the world module) where new characters start. */
+    private static final TagKey<Structure> TOWNS = TagKey.create(Registries.STRUCTURE, new ResourceLocation(Skycraft.MODID, "towns"));
+    /** Starting-town search radius. Structure-start lookups only, so it stays cheap. */
+    private static final int START_SEARCH_CHUNKS = 24;
+    /** How long a raceless player is protected while the race menu is pending (5 minutes). */
+    private static final int RACE_PROTECTION_TICKS = 20 * 60 * 5;
+    /** Persistent-data flag the Illusion invisibility spell sets (magic module); the only invisibility we ever clear. */
+    private static final String SPELL_INVISIBILITY = "skycraft_spell_invisibility";
+
+    /** Server tick at which each raceless player's race prompt (and protection) started this session. */
+    private static final Map<UUID, Integer> RACE_PROMPT_START = new ConcurrentHashMap<>();
+
     private PlayerDataEvents() {}
 
     @SubscribeEvent
@@ -51,52 +76,76 @@ public final class PlayerDataEvents {
     public static void login(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             player.setMaxUpStep(1.0625f);
-            player.setInvisible(false);
-            player.removeEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY);
+            // A Skycraft invisibility spell doesn't survive a relog; potions, Vampirism etc. are left alone.
+            if (player.getPersistentData().getBoolean(SPELL_INVISIBILITY)) {
+                player.getPersistentData().remove(SPELL_INVISIBILITY);
+                player.removeEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY);
+            }
             fullSync(player);
             PlayerData data = SkyData.get(player);
+            if (data.getRace() == null) RACE_PROMPT_START.put(player.getUUID(), player.server.getTickCount());
             if (!data.module("core").getBoolean("spawn_placed")) {
                 data.module("core").putBoolean("spawn_placed", true);
                 com.skycraft.combat.Sheathe.setSheathed(player, true);
                 data.markDirty();
-                net.minecraft.server.level.ServerLevel level = player.serverLevel();
-                if (level.dimension() == net.minecraft.world.level.Level.OVERWORLD) {
-                    net.minecraft.core.BlockPos village = com.skycraft.quest.Locate.nearestVillage(level, player.blockPosition());
-                    if (village != null && (level.getBiome(village).is(net.minecraft.tags.BiomeTags.IS_OCEAN) || level.getBiome(village).is(net.minecraft.tags.BiomeTags.IS_DEEP_OCEAN))) {
-                        village = null;
-                    }
-                    net.minecraft.core.BlockPos targetPos = village != null ? village : level.getSharedSpawnPos();
-                    level.getChunk(targetPos.getX() >> 4, targetPos.getZ() >> 4, net.minecraft.world.level.chunk.ChunkStatus.FULL, true);
+                placeAtStart(player);
+            }
+        }
+    }
 
-                    net.minecraft.core.BlockPos.MutableBlockPos safe = new net.minecraft.core.BlockPos.MutableBlockPos(targetPos.getX(), 64, targetPos.getZ());
-                    boolean foundSafe = false;
-                    for (int r = 0; r <= 8 && !foundSafe; r += 2) {
-                        for (int dx = -r; dx <= r && !foundSafe; dx += 2) {
-                            for (int dz = -r; dz <= r && !foundSafe; dz += 2) {
-                                int testX = targetPos.getX() + dx;
-                                int testZ = targetPos.getZ() + dz;
-                                int topY = Math.min(level.getMaxBuildHeight() - 3, level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, testX, testZ) + 2);
-                                for (int y = topY; y >= Math.max(level.getMinBuildHeight() + 2, 60); y--) {
-                                    safe.set(testX, y, testZ);
-                                    boolean groundSolid = level.getBlockState(safe.below()).isSolid() && level.getFluidState(safe.below()).isEmpty();
-                                    boolean feetAir = level.getBlockState(safe).getCollisionShape(level, safe).isEmpty() && level.getFluidState(safe).isEmpty();
-                                    boolean headAir = level.getBlockState(safe.above()).getCollisionShape(level, safe.above()).isEmpty() && level.getFluidState(safe.above()).isEmpty();
-                                    if (groundSolid && feetAir && headAir) {
-                                        foundSafe = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (foundSafe) {
-                        player.teleportTo(level, safe.getX() + 0.5, safe.getY() + 0.05, safe.getZ() + 0.5, player.getYRot(), player.getXRot());
-                        player.fallDistance = 0f;
-                        player.setDeltaMovement(0, 0, 0);
+    /**
+     * First login: start in the nearest real town (structure-start lookups within {@link #START_SEARCH_CHUNKS}),
+     * else at the world spawn. Only the destination chunk is loaded; the safe spot is searched inside it.
+     */
+    private static void placeAtStart(ServerPlayer player) {
+        ServerLevel level = player.serverLevel();
+        if (level.dimension() != Level.OVERWORLD) return;
+        BlockPos town = null;
+        try {
+            town = level.findNearestMapStructure(TOWNS, player.blockPosition(), START_SEARCH_CHUNKS, false);
+        } catch (Exception e) {
+            Skycraft.LOGGER.warn("Starting town search failed", e);
+        }
+        BlockPos target = town != null ? town : level.getSharedSpawnPos();
+        LevelChunk chunk = level.getChunk(target.getX() >> 4, target.getZ() >> 4);
+        if (town != null && (level.getBiome(town).is(BiomeTags.IS_OCEAN) || level.getBiome(town).is(BiomeTags.IS_DEEP_OCEAN))) {
+            target = level.getSharedSpawnPos();
+            chunk = level.getChunk(target.getX() >> 4, target.getZ() >> 4);
+        }
+
+        BlockPos safe = findSafeSpot(level, chunk, target);
+        if (safe != null) {
+            player.teleportTo(level, safe.getX() + 0.5, safe.getY() + 0.05, safe.getZ() + 0.5, player.getYRot(), player.getXRot());
+            player.fallDistance = 0f;
+            player.setDeltaMovement(0, 0, 0);
+        }
+    }
+
+    /** A standable spot near {@code target} without leaving its (already loaded) chunk, or null. */
+    private static BlockPos findSafeSpot(ServerLevel level, LevelChunk chunk, BlockPos target) {
+        int minX = chunk.getPos().getMinBlockX();
+        int minZ = chunk.getPos().getMinBlockZ();
+        BlockPos.MutableBlockPos safe = new BlockPos.MutableBlockPos();
+        for (int r = 0; r <= 8; r += 2) {
+            for (int dx = -r; dx <= r; dx += 2) {
+                for (int dz = -r; dz <= r; dz += 2) {
+                    int x = target.getX() + dx;
+                    int z = target.getZ() + dz;
+                    if (x < minX || x > minX + 15 || z < minZ || z > minZ + 15) continue;
+                    int topY = Math.min(level.getMaxBuildHeight() - 3, chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, x & 15, z & 15) + 2);
+                    for (int y = topY; y >= Math.max(level.getMinBuildHeight() + 2, 60); y--) {
+                        safe.set(x, y, z);
+                        BlockPos below = safe.below();
+                        boolean groundSolid = chunk.getBlockState(below).isFaceSturdy(level, below, net.minecraft.core.Direction.UP)
+                                && chunk.getFluidState(below).isEmpty();
+                        boolean feetAir = chunk.getBlockState(safe).getCollisionShape(level, safe).isEmpty() && chunk.getFluidState(safe).isEmpty();
+                        boolean headAir = chunk.getBlockState(safe.above()).getCollisionShape(level, safe.above()).isEmpty() && chunk.getFluidState(safe.above()).isEmpty();
+                        if (groundSolid && feetAir && headAir) return safe.immutable();
                     }
                 }
             }
         }
+        return null;
     }
 
     @SubscribeEvent
@@ -104,6 +153,8 @@ public final class PlayerDataEvents {
         if (event.getEntity() instanceof ServerPlayer player) {
             player.setMaxUpStep(1.0625f);
             fullSync(player);
+            // refreshAttributes only clamps down; a fresh body after death starts at full (Skyrim) health.
+            if (!event.isEndConquered()) player.setHealth(player.getMaxHealth());
         }
     }
 
@@ -112,42 +163,49 @@ public final class PlayerDataEvents {
         if (event.getEntity() instanceof ServerPlayer player) fullSync(player);
     }
 
+    /** Other players' race, sheathe state and apparel (only the owner gets the full data). */
     @SubscribeEvent
-    public static void logout(PlayerEvent.PlayerLoggedOutEvent event) {
-        ActionHandler.forget(event.getEntity().getUUID());
-        Progression.forget(event.getEntity().getUUID());
+    public static void startTracking(PlayerEvent.StartTracking event) {
+        if (event.getTarget() instanceof ServerPlayer target && event.getEntity() instanceof ServerPlayer viewer) {
+            SkyNetwork.sendToPlayer(viewer, new CorePackets.SyncAppearance(target.getId(), SkyData.get(target).appearance()));
+        }
     }
 
+    @SubscribeEvent
+    public static void logout(PlayerEvent.PlayerLoggedOutEvent event) {
+        UUID id = event.getEntity().getUUID();
+        ActionHandler.forget(id);
+        Vitals.forget(id);
+        com.skycraft.combat.CombatHandler.forget(id);
+        RACE_PROMPT_START.remove(id);
+    }
+
+    /** Sends the whole player data to its owner right now (login, respawn, dimension change, big changes). */
     public static void fullSync(ServerPlayer player) {
         PlayerData data = SkyData.get(player);
         Vitals.refreshAttributes(player);
-        SkyNetwork.sendToPlayer(player, new CorePackets.SyncData(data.save()));
+        data.consumeDirty();
+        data.setLastFullSync(player.server.getTickCount());
+        SkyNetwork.sendToPlayer(player, CorePackets.SyncData.of(data));
+    }
+
+    /**
+     * True while a raceless player is choosing their race: at most {@link #RACE_PROTECTION_TICKS} per session, and
+     * only while the race prompt is actually active (enabled, not jailed).
+     */
+    public static boolean isRacePending(Player player) {
+        if (!(player instanceof ServerPlayer sp) || SkyData.get(player).getRace() != null || !SkyConfig.PROMPT_RACE.get()) return false;
+        Integer start = RACE_PROMPT_START.get(player.getUUID());
+        if (start == null || sp.server.getTickCount() - start > RACE_PROTECTION_TICKS) return false;
+        return !com.skycraft.crime.Jail.isJailed(sp);
     }
 
     /** Until a race is chosen, periodically re-open the race menu (the first time shortly after joining). */
     @SubscribeEvent
     public static void tick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
-        if (player.isCrouching() && player.tickCount % 10 == 0) {
-            int sneakSkill = SkyData.get(player).getSkill(Skill.SNEAK);
-            int light = player.level().getMaxLocalRawBrightness(player.blockPosition());
-            for (net.minecraft.world.entity.Mob mob : player.level().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, player.getBoundingBox().inflate(24), m -> m.getTarget() == player)) {
-                boolean hasLos = mob.hasLineOfSight(player);
-                double dist = mob.distanceTo(player);
-                if (!hasLos && dist > 5.0) {
-                    mob.setTarget(null);
-                    mob.getNavigation().stop();
-                } else if (hasLos && light < 7 && dist > Math.max(4.0, 14.0 - sneakSkill * 0.1)) {
-                    mob.setTarget(null);
-                    mob.getNavigation().stop();
-                }
-            }
-        }
         // Auto-clear corpse marker on map and compass when player reaches within 6 blocks of their corpse
         if (player.tickCount % 20 == 0) {
-            if (!player.getPersistentData().getBoolean("skycraft_spell_invisibility")) {
-                if (player.isInvisible()) player.setInvisible(false);
-            }
             PlayerData data = SkyData.get(player);
             net.minecraft.nbt.ListTag discovered = com.skycraft.world.WorldData.discovered(data);
             boolean removedCorpse = false;
@@ -171,7 +229,6 @@ public final class PlayerDataEvents {
             }
             if (removedCorpse) {
                 data.markDirty();
-                fullSync(player);
                 Notifier.send(player, com.skycraft.network.NotifyKind.LOCATION_CLEARED,
                         net.minecraft.network.chat.Component.literal("Corpse Reached"),
                         net.minecraft.network.chat.Component.literal("Death marker cleared"));
@@ -179,45 +236,37 @@ public final class PlayerDataEvents {
         }
         if (!SkyConfig.PROMPT_RACE.get()) return;
         PlayerData data = SkyData.get(player);
-        if (data.getRace() == null && !com.skycraft.crime.Jail.isJailed(player) && player.tickCount % 600 == 60) {
+        if (data.getRace() != null) {
+            if (player.tickCount % 200 == 0) RACE_PROMPT_START.remove(player.getUUID());
+            return;
+        }
+        RACE_PROMPT_START.putIfAbsent(player.getUUID(), player.server.getTickCount());
+        if (!com.skycraft.crime.Jail.isJailed(player) && player.tickCount % 600 == 60) {
             SkyNetwork.sendToPlayer(player, new CorePackets.OpenScreen(CorePackets.OpenScreen.RACE));
         }
     }
 
-    /** Invulnerable while choosing race / character */
+    /** Invulnerable while the race menu is pending (never against /kill or the void). */
     @SubscribeEvent
     public static void onHurt(net.minecraftforge.event.entity.living.LivingHurtEvent event) {
-        if (event.getEntity() instanceof Player player) {
-            PlayerData data = SkyData.get(player);
-            if (data.getRace() == null) event.setCanceled(true);
+        if (event.getEntity() instanceof Player player && !event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)
+                && isRacePending(player)) {
+            event.setCanceled(true);
         }
     }
 
+    /** Mobs ignore a player whose race menu is pending. Stealth targeting rules live in combat/Stealth. */
     @SubscribeEvent
     public static void onTarget(net.minecraftforge.event.entity.living.LivingChangeTargetEvent event) {
-        if (event.getNewTarget() instanceof Player player) {
-            PlayerData data = SkyData.get(player);
-            if (data.getRace() == null) {
-                event.setCanceled(true);
-                return;
-            }
-            if (player.isCrouching() && event.getEntity() instanceof net.minecraft.world.entity.Mob mob) {
-                if (!mob.hasLineOfSight(player)) {
-                    event.setCanceled(true);
-                    return;
-                }
-                int sneakSkill = data.getSkill(Skill.SNEAK);
-                int light = player.level().getMaxLocalRawBrightness(player.blockPosition());
-                double dist = mob.distanceTo(player);
-                double detectDist = Math.max(3.0, 16.0 - (sneakSkill * 0.12) - (light < 8 ? 6.0 : 0.0));
-                if (dist > detectDist) {
-                    event.setCanceled(true);
-                }
-            }
+        if (event.getNewTarget() instanceof Player player && isRacePending(player)) {
+            event.setCanceled(true);
         }
     }
 
-    /** Walk-over auto-pickup is disabled so items require deliberate interaction ([E] / Take) like Skyrim. */
+    /**
+     * Walk-over auto-pickup is disabled so items require deliberate interaction ([E] / Take) like Skyrim.
+     * Note: this cancels every pickup, which makes crime/Theft.onPickup's own pickup cancelling redundant.
+     */
     @SubscribeEvent
     public static void pickup(EntityItemPickupEvent event) {
         event.setCanceled(true);

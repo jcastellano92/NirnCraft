@@ -84,6 +84,9 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     private BlockPos destination;
     @Nullable
     private BlockPos home;
+    /** The bed this NPC claimed (see Settlers#claimBed); each townsperson has their own. */
+    @Nullable
+    private BlockPos bed;
     private boolean initialized;
     private long nextCombatBark;
     private long lastProvokedBy;
@@ -166,9 +169,12 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this) {
             @Override
             public boolean canUse() {
+                // a follower doesn't turn on its owner over a stray blow
+                if (NpcEntity.this.getLastHurtByMob() instanceof Player p && com.skycraft.society.Followers.isFollowerOf(NpcEntity.this, p)) return false;
                 return NpcEntity.this.canFight() && super.canUse();
             }
         });
+        this.targetSelector.addGoal(1, new NpcGoals.FollowerDefend(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false, this::isHostileTo) {
             @Override
             public boolean canUse() {
@@ -306,6 +312,15 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         this.restrictTo(this.home, radius);
     }
 
+    @Nullable
+    public BlockPos getBed() {
+        return bed;
+    }
+
+    public void setBed(@Nullable BlockPos bed) {
+        this.bed = bed == null ? null : bed.immutable();
+    }
+
     public int getLetter() {
         return letter;
     }
@@ -343,7 +358,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
 
     public Style style() {
         if (!canFight() || isPrisoner()) return Style.NONE;
-        if (this.getMainHandItem().getItem() instanceof BowItem) return Style.BOW;
+        if (this.getMainHandItem().getItem() instanceof net.minecraft.world.item.ProjectileWeaponItem) return Style.BOW;
         if (role().caster && role() != NpcRole.THALMOR) return Style.CASTER;
         return Style.MELEE;
     }
@@ -407,7 +422,8 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         Entity attacker = source.getEntity();
         if (attacker instanceof NpcEntity o && this.isAlliedTo(o)) return false;
         boolean hurt = super.hurt(source, amount);
-        if (hurt && !this.level().isClientSide && attacker instanceof LivingEntity living && living != this) {
+        if (hurt && !this.level().isClientSide && attacker instanceof LivingEntity living && living != this
+                && !(living instanceof Player p && com.skycraft.society.Followers.isFollowerOf(this, p))) {
             provoker = living.getUUID();
             lastProvokedBy = this.level().getGameTime();
             Npcs.rallyAllies(this, living);
@@ -529,6 +545,16 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         if (target != null) {
             boolean provoked = provoker != null && provoker.equals(target.getUUID())
                     && this.level().getGameTime() - lastProvokedBy < 1200;
+            if (!provoked && com.skycraft.society.Followers.isFollower(this) && target instanceof Mob m && m.getTarget() != null) {
+                // a follower keeps fighting whatever is fighting it or its owner
+                UUID owner = com.skycraft.society.Followers.getOwnerId(this);
+                provoked = m.getTarget() == this || (owner != null && owner.equals(m.getTarget().getUUID()));
+            }
+            if (!provoked && com.skycraft.society.Followers.isFollower(this)) {
+                UUID owner = com.skycraft.society.Followers.getOwnerId(this);
+                Player p = owner == null ? null : this.level().getPlayerByUUID(owner);
+                provoked = p != null && com.skycraft.society.Followers.isDefendTarget(this, p, target);
+            }
             if (!target.isAlive() || !canFight() || (!provoked && !isHostileTo(target) && !(target instanceof Animal))) {
                 this.setTarget(null);
                 this.setAggressive(false);
@@ -541,7 +567,12 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
 
     @Override
     public boolean removeWhenFarAway(double distanceSqr) {
-        return isEncounter() && distanceSqr > 96 * 96;
+        return isEncounter() && !com.skycraft.society.Followers.isFollower(this) && distanceSqr > 96 * 96;
+    }
+
+    /** Whether the item in {@code slot} was given by the follower's player (it always drops; see Followers). */
+    public boolean isGivenGear(net.minecraft.world.entity.EquipmentSlot slot) {
+        return this.getEquipmentDropChance(slot) > 1.0f;
     }
 
     @Override
@@ -556,6 +587,13 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
             int gold = 3 + this.getRandom().nextInt(role().civilian ? 12 : 30);
             this.spawnAtLocation(Currency.coins(gold));
         }
+    }
+
+    /** Runs on every death, whatever doMobLoot says: a follower's bags (the player's items) always drop. */
+    @Override
+    protected void dropEquipment() {
+        super.dropEquipment();
+        com.skycraft.society.Followers.onDeath(this);
     }
 
     @Override
@@ -587,6 +625,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         }
         if (letter >= 0) tag.putInt("Letter", letter);
         if (fearedPlayerUuid != null) tag.putUUID("FearedPlayer", fearedPlayerUuid);
+        if (bed != null) tag.put("Bed", NbtUtils.writeBlockPos(bed));
     }
 
     @Override
@@ -604,5 +643,13 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         if (tag.contains("Home")) setHome(NbtUtils.readBlockPos(tag.getCompound("Home")), Math.max(8, tag.getInt("HomeRadius")));
         letter = tag.contains("Letter") ? tag.getInt("Letter") : -1;
         fearedPlayerUuid = tag.hasUUID("FearedPlayer") ? tag.getUUID("FearedPlayer") : null;
+        bed = tag.contains("Bed") ? NbtUtils.readBlockPos(tag.getCompound("Bed")) : null;
+    }
+
+    @Override
+    public void remove(RemovalReason reason) {
+        // killed or discarded for good (not just unloaded): free the bed for someone else
+        if (reason.shouldDestroy() && !this.level().isClientSide) com.skycraft.society.Settlers.releaseBed(this);
+        super.remove(reason);
     }
 }

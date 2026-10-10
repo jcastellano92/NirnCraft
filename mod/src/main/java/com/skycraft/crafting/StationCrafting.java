@@ -45,10 +45,18 @@ public final class StationCrafting {
         player.getInventory().setChanged();
         player.containerMenu.broadcastChanges();
         player.level().playSound(null, player.blockPosition(), sound(station), SoundSource.BLOCKS, 0.8f, 0.9f + player.getRandom().nextFloat() * 0.2f);
-        Progression.addSkillXp(player, Skill.SMITHING, recipe.value() * made);
+        Progression.addSkillXp(player, Skill.SMITHING, xpUse(recipe.value()) * made);
         SkyData.get(player).addStat("items_crafted", made);
         ItemStack shown = recipe.resultStack();
         Notifier.message(player, Component.translatable("message.skycraft.smithing.crafted", shown.getHoverName(), made * recipe.count()));
+    }
+
+    /**
+     * Smithing "use value" of one craft worth {@code value} gold: Skyrim's sublinear 25 + 3 * value^0.65, so cheap
+     * items still train a little and expensive ones don't level the skill in a few clicks.
+     */
+    public static float xpUse(int value) {
+        return value <= 0 ? 0f : 25f + 3f * (float) Math.pow(value, 0.65);
     }
 
     private static SoundEvent sound(StationType station) {

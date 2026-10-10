@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    "#skycraft:spawns/tundra",
+    "#skycraft:spawns/frozen_peaks",
+    "#skycraft:spawns/snowy_forest",
+    "minecraft:taiga",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:old_growth_spruce_taiga",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:windswept_forest",
+    "minecraft:frozen_river",
+    "minecraft:snowy_beach",
+    "minecraft:meadow",
+    {
+      "id": "#forge:is_snowy",
+      "required": false
+    },
+    {
+      "id": "#forge:is_cold/overworld",
+      "required": false
+    }
+  ]
+}

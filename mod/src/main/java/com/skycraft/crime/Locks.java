@@ -13,7 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -51,8 +51,10 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -61,7 +63,7 @@ import java.util.UUID;
  * <p>Any container that still has a loot table to generate (or any Lootr container) is a lock candidate the first
  * time someone interacts with it. Whether it's locked (~35%) and how hard (Novice..Master, harder deeper down and in
  * the Nether) is derived from the world seed and the position, and remembered in {@link LockData}. Every player picks
- * a lock once; afterwards it stays open for them ({@code crime.unlocked}).</p>
+ * a lock once; afterwards it stays open for them (per world, {@link LockData#unlocked}).</p>
  *
  * <p>The sweet spot and pick breaking live on the server: the client only reports the pick angle while turning, and
  * the server answers how far the lock turns, whether the pick broke and whether the lock opened.</p>
@@ -194,21 +196,34 @@ public final class Locks {
         return z ^ (z >>> 31);
     }
 
+    /** Server only: picked locks live per world in {@link LockData} (not in the synced player data). */
     public static boolean isUnlocked(Player player, Level level, BlockPos pos) {
-        ListTag list = Bounty.state(player).getList("unlocked", Tag.TAG_STRING);
-        String key = key(level, pos);
-        for (int i = 0; i < list.size(); i++) {
-            if (list.getString(i).equals(key)) return true;
-        }
-        return false;
+        if (level.getServer() == null) return false;
+        LockData data = LockData.get(level.getServer());
+        migrateUnlocked(player, data);
+        Set<UUID> who = data.unlocked.get(key(level, pos));
+        return who != null && who.contains(player.getUUID());
     }
 
     private static void markUnlocked(Player player, Level level, BlockPos pos) {
+        if (level.getServer() == null) return;
+        LockData data = LockData.get(level.getServer());
+        migrateUnlocked(player, data);
+        data.unlocked.computeIfAbsent(key(level, pos), k -> new HashSet<>()).add(player.getUUID());
+        data.setDirty();
+    }
+
+    /** Moves a legacy {@code crime.unlocked} list out of the player's synced data into the world's lock data. */
+    private static void migrateUnlocked(Player player, LockData data) {
         CompoundTag state = Bounty.state(player);
+        if (!state.contains("unlocked")) return;
         ListTag list = state.getList("unlocked", Tag.TAG_STRING);
-        list.add(StringTag.valueOf(key(level, pos)));
-        state.put("unlocked", list);
+        for (int i = 0; i < list.size(); i++) {
+            data.unlocked.computeIfAbsent(list.getString(i), k -> new HashSet<>()).add(player.getUUID());
+        }
+        state.remove("unlocked");
         SkyData.get(player).markDirty();
+        data.setDirty();
     }
 
     public static Component tierName(int tier) {
@@ -324,7 +339,10 @@ public final class Locks {
         if (event.isCanceled() || !(event.getLevel() instanceof ServerLevel level)) return;
         if (level.getBlockEntity(event.getPos()) == null) return;
         LockData data = LockData.get(level.getServer());
-        if (data.locks.remove(key(level, event.getPos())) != null) data.setDirty();
+        String key = key(level, normalizePos(level, event.getPos()));
+        boolean changed = data.locks.remove(key) != null;
+        changed |= data.unlocked.remove(key) != null;
+        if (changed) data.setDirty();
     }
 
     // ------------------------------------------------------------------ minigame
@@ -500,6 +518,8 @@ public final class Locks {
     public static class LockData extends SavedData {
         private static final String NAME = "skycraft_locks";
         final Map<String, Integer> locks = new HashMap<>();
+        /** Lock key -> players who have picked it (it stays open for them). */
+        final Map<String, Set<UUID>> unlocked = new HashMap<>();
 
         static LockData get(MinecraftServer server) {
             return server.overworld().getDataStorage().computeIfAbsent(LockData::load, LockData::new, NAME);
@@ -509,6 +529,18 @@ public final class Locks {
             LockData data = new LockData();
             CompoundTag locks = tag.getCompound("locks");
             for (String k : locks.getAllKeys()) data.locks.put(k, locks.getInt(k));
+            CompoundTag unlocked = tag.getCompound("unlocked");
+            for (String k : unlocked.getAllKeys()) {
+                Set<UUID> who = new HashSet<>();
+                for (Tag t : unlocked.getList(k, Tag.TAG_INT_ARRAY)) {
+                    try {
+                        who.add(NbtUtils.loadUUID(t));
+                    } catch (IllegalArgumentException ignored) {
+                        // corrupt entry
+                    }
+                }
+                if (!who.isEmpty()) data.unlocked.put(k, who);
+            }
             return data;
         }
 
@@ -517,6 +549,13 @@ public final class Locks {
             CompoundTag locks = new CompoundTag();
             this.locks.forEach(locks::putInt);
             tag.put("locks", locks);
+            CompoundTag unlocked = new CompoundTag();
+            this.unlocked.forEach((k, who) -> {
+                ListTag list = new ListTag();
+                for (UUID u : who) list.add(NbtUtils.createUUID(u));
+                if (!list.isEmpty()) unlocked.put(k, list);
+            });
+            tag.put("unlocked", unlocked);
             return tag;
         }
     }

@@ -177,6 +177,12 @@ public final class Pickpocket {
             SkyNetwork.sendToPlayer(player, new CrimePackets.ClosePickpocket());
             return;
         }
+        // a victim who just caught someone keeps a hand on their purse (the screen may still be open client-side)
+        if (npc.getPersistentData().getLong(WARY_UNTIL) > npc.level().getGameTime()) {
+            SkyNetwork.sendToPlayer(player, new CrimePackets.ClosePickpocket());
+            Notifier.message(player, Component.translatable("crime.skycraft.pickpocket.wary", npc.getDisplayName()));
+            return;
+        }
         List<ItemStack> items = pockets(player, npc);
         if (slot < 0 || slot >= items.size()) {
             send(player, npc);

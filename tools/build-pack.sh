@@ -1,20 +1,26 @@
 #!/usr/bin/env bash
-# Resolves tools/modlist.txt into the packwiz pack in pack/ (one .pw.toml per mod).
-# Usage: tools/build-pack.sh [path/to/skycraft-core.jar]
-# Requires packwiz on PATH and network access to Modrinth/CurseForge.
+# Resolves tools/modlist.txt into the packwiz pack in pack/ (one .pw.toml per mod), then re-hashes the index with
+# tools/refresh_packwiz.py. Exits non-zero if any entry can't be resolved.
+# Usage: tools/build-pack.sh
+# Requires packwiz on PATH, python3, and network access to Modrinth/CurseForge.
+# Skycraft Core is NOT added here: the committed pack never contains it. Builds inject it with
+# tools/prepare-build-pack.sh <jar>.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PACK="$ROOT/pack"
 LIST="$ROOT/tools/modlist.txt"
 REPORT="$ROOT/pack/RESOLVE_REPORT.md"
-JAR=""
-if [ $# -ge 1 ] && [ -f "$1" ]; then JAR="$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"; fi
+PY="$(command -v python3 || command -v python || { command -v py >/dev/null && echo "py -3"; })"
+command -v packwiz >/dev/null || { echo "packwiz is not on PATH" >&2; exit 2; }
 cd "$PACK"
+
+MARK="$(mktemp)"
+trap 'rm -f "$MARK"' EXIT
 
 echo "# Mod resolution report" > "$REPORT"
 echo "" >> "$REPORT"
 ok=0; failed=0
-while IFS= read -r raw; do
+while IFS= read -r raw || [ -n "$raw" ]; do
   line="${raw%%#*}"
   line="$(echo "$line" | xargs)"
   [ -z "$line" ] && continue
@@ -36,20 +42,17 @@ while IFS= read -r raw; do
     case "$src" in
       mr) cmd=(packwiz modrinth add "$slug" -y) ;;
       cf) cmd=(packwiz curseforge add "$slug" -y) ;;
-      *) echo "unknown source in: $opt"; continue ;;
+      *) echo "unknown source in: $opt" >&2; continue ;;
     esac
     echo ">>> ${cmd[*]}"
-    if out="$("${cmd[@]}" 2>&1)"; then
-      if echo "$out" | grep -qiE "no (projects|files|valid versions)|not found|failed|error"; then
-        echo "$out"
-        continue
-      fi
-      echo "$out"
+    touch "$MARK"
+    sleep 1   # make sure files written by packwiz are strictly newer than the marker
+    # Success = packwiz exits 0 AND it wrote a metadata file. Its messages are not parsed.
+    if "${cmd[@]}" && [ -n "$(find mods resourcepacks shaderpacks -name '*.pw.toml' -newer "$MARK" 2>/dev/null | head -n1)" ]; then
       resolved="$opt"
       break
-    else
-      echo "$out"
     fi
+    echo "!!! could not resolve $opt" >&2
   done
   if [ -n "$resolved" ]; then
     ok=$((ok+1)); echo "- [x] \`$resolved\`" >> "$REPORT"
@@ -58,13 +61,11 @@ while IFS= read -r raw; do
   fi
 done < "$LIST"
 
-if [ -n "$JAR" ]; then
-  mkdir -p "$PACK/mods"
-  cp "$JAR" "$PACK/mods/skycraft-core.jar"
-  echo "- [x] Skycraft Core (local jar)" >> "$REPORT"
-fi
-
-packwiz refresh
+$PY "$ROOT/tools/refresh_packwiz.py" --pack "$PACK"
 echo "" >> "$REPORT"
 echo "Resolved: $ok, unresolved: $failed" >> "$REPORT"
 cat "$REPORT"
+if [ "$failed" -gt 0 ]; then
+  echo "::error::$failed mod list entries could not be resolved (see pack/RESOLVE_REPORT.md)"
+  exit 1
+fi

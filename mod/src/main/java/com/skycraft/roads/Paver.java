@@ -2,7 +2,10 @@ package com.skycraft.roads;
 
 import com.skycraft.Skycraft;
 import com.skycraft.dig.PlacedBlocks;
+import com.skycraft.homestead.HomesteadClaim;
+import com.skycraft.homestead.HomesteadData;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.BlockPos;
@@ -22,16 +25,27 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Paves road chunks incrementally. A chunk is paved only while it and its 8 neighbours are loaded (so no block
  * update can ever reach into an unloaded chunk), never from inside the chunk load event, and with a per-tick block
  * and time budget. Every operation is idempotent, so partially paved chunks are simply paved again later.
+ * Roads are only laid on natural ground: never on logs, roofs or other mods' floors, never inside a structure piece
+ * or a homestead claim, never over player-placed blocks.
  */
 final class Paver {
     /** Blocks placed without neighbour shape updates (no cascades, no drops). */
@@ -90,14 +104,12 @@ final class Paver {
                 used = current.step(level, data);
             } catch (RuntimeException e) {
                 Skycraft.LOGGER.warn("Skycraft roads: paving chunk {} failed", new ChunkPos(current.chunk), e);
-                data.paved.add(current.chunk);
-                data.setDirty();
+                if (data.paved.add(current.chunk)) data.setDirty();
                 current = null;
                 continue;
             }
             if (used < 0) {
-                data.paved.add(current.chunk);
-                data.setDirty();
+                if (data.paved.add(current.chunk)) data.setDirty();
                 current = null;
                 continue;
             }
@@ -115,7 +127,7 @@ final class Paver {
                 WAITING.add(c);
                 continue;
             }
-            return Task.build(data, c);
+            return Task.build(level, data, c);
         }
         return null;
     }
@@ -138,10 +150,14 @@ final class Paver {
         final int[] colX, colZ, colRoad, colIdx;
         final boolean[] colEdge, colCenter;
         final List<RoadFeature> features;
+        /** Pieces of every structure reaching into this chunk (other mods' buildings, trees, ruins...). */
+        final List<BoundingBox> pieces;
+        /** Homestead claims overlapping this chunk. */
+        final List<HomesteadClaim> claims;
         int cursor;
         long tick = Long.MIN_VALUE;
 
-        private Task(long chunk, int n, List<RoadFeature> features) {
+        private Task(long chunk, int n, List<RoadFeature> features, List<BoundingBox> pieces, List<HomesteadClaim> claims) {
             this.chunk = chunk;
             this.cx = ChunkPos.getX(chunk);
             this.cz = ChunkPos.getZ(chunk);
@@ -152,9 +168,57 @@ final class Paver {
             colEdge = new boolean[n];
             colCenter = new boolean[n];
             this.features = features;
+            this.pieces = pieces;
+            this.claims = claims;
         }
 
-        static Task build(RoadsData data, long chunk) {
+        /** True if a structure piece covers (x, z) around ground level y (1 block margin), or a homestead claims it. */
+        boolean reserved(ServerLevel level, int x, int y, int z) {
+            for (BoundingBox b : pieces) {
+                if (x >= b.minX() - 1 && x <= b.maxX() + 1 && z >= b.minZ() - 1 && z <= b.maxZ() + 1
+                        && b.maxY() >= y - 1 && b.minY() <= y + 4) return true;
+            }
+            if (!claims.isEmpty()) {
+                BlockPos pos = new BlockPos(x, y, z);
+                for (HomesteadClaim c : claims) if (c.isHorizontallyInside(level, pos)) return true;
+            }
+            return false;
+        }
+
+        /** Structure pieces reaching into the chunk, from start chunks that are already in memory (never loads any). */
+        private static List<BoundingBox> pieces(ServerLevel level, int cx, int cz) {
+            LevelChunk lc = level.getChunkSource().getChunkNow(cx, cz);
+            if (lc == null || !lc.hasAnyStructureReferences()) return List.of();
+            int bx = cx << 4, bz = cz << 4;
+            List<BoundingBox> out = new ArrayList<>();
+            for (Map.Entry<Structure, LongSet> e : lc.getAllReferences().entrySet()) {
+                for (long startChunk : e.getValue()) {
+                    ChunkAccess sc = level.getChunkSource().getChunk(ChunkPos.getX(startChunk), ChunkPos.getZ(startChunk),
+                            ChunkStatus.STRUCTURE_STARTS, false);
+                    if (sc == null) continue;
+                    StructureStart start = sc.getStartForStructure(e.getKey());
+                    if (start == null || !start.isValid()) continue;
+                    for (StructurePiece piece : start.getPieces()) {
+                        BoundingBox b = piece.getBoundingBox();
+                        if (b.maxX() < bx - 1 || b.minX() > bx + 16 || b.maxZ() < bz - 1 || b.minZ() > bz + 16) continue;
+                        out.add(b);
+                    }
+                }
+            }
+            return out;
+        }
+
+        private static List<HomesteadClaim> claims(ServerLevel level, int cx, int cz) {
+            List<HomesteadClaim> out = new ArrayList<>(0);
+            int mx = (cx << 4) + 8, mz = (cz << 4) + 8;
+            for (HomesteadClaim c : HomesteadData.get(level.getServer()).allClaims()) {
+                int reach = c.getRadius() + 12;
+                if (Math.abs(c.getCenter().getX() - mx) <= reach && Math.abs(c.getCenter().getZ() - mz) <= reach) out.add(c);
+            }
+            return out;
+        }
+
+        static Task build(ServerLevel level, RoadsData data, long chunk) {
             int cx = ChunkPos.getX(chunk), cz = ChunkPos.getZ(chunk);
             int bx = cx << 4, bz = cz << 4;
             float[] best = new float[256];
@@ -200,7 +264,7 @@ final class Paver {
             int n = 0;
             for (float b : best) if (b <= RAIL_SQ) n++;
             List<RoadFeature> feats = data.featuresByChunk.get(chunk);
-            Task t = new Task(chunk, n, feats == null ? List.of() : new ArrayList<>(feats));
+            Task t = new Task(chunk, n, feats == null ? List.of() : new ArrayList<>(feats), pieces(level, cx, cz), claims(level, cx, cz));
             int j = 0;
             for (int li = 0; li < 256; li++) {
                 if (best[li] > RAIL_SQ) continue;
@@ -222,13 +286,13 @@ final class Paver {
                 int i = cursor++;
                 Road r = data.road(colRoad[i]);
                 if (r == null) return 0;
-                return paveColumn(level, r, colIdx[i], colX[i], colZ[i], colEdge[i], colCenter[i]);
+                return paveColumn(level, this, r, colIdx[i], colX[i], colZ[i], colEdge[i], colCenter[i]);
             }
             int f = cursor - columns;
             if (f < features.size()) {
                 cursor++;
                 RoadFeature feature = features.get(f);
-                return feature.type == RoadFeature.SIGNPOST ? placeSignpost(level, data, feature) : placeLantern(level, feature);
+                return feature.type == RoadFeature.SIGNPOST ? placeSignpost(level, this, data, feature) : placeLantern(level, this, feature);
             }
             return -1;
         }
@@ -236,20 +300,18 @@ final class Paver {
 
     // ------------------------------------------------------------------ road surface
 
-    private static int paveColumn(ServerLevel level, Road road, int idx, int x, int z, boolean edge, boolean center) {
-        int topY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
-        if (topY <= level.getMinBuildHeight()) return 0;
-        BlockPos top = new BlockPos(x, topY, z);
+    private static int paveColumn(ServerLevel level, Task task, Road road, int idx, int x, int z, boolean edge, boolean center) {
+        BlockPos top = naturalTop(level, x, z);
+        if (top == null) return 0;
         BlockState ts = level.getBlockState(top);
+        if (task.reserved(level, x, top.getY(), z)) return 0; // another mod's building, a tree structure, a homestead
         FluidState fluid = ts.getFluidState();
         if (!fluid.isEmpty()) {
             if (!fluid.is(FluidTags.WATER) || road.longWater(idx)) return 0;
             return bridge(level, top, ts, edge, center && idx % 4 == 0);
         }
-        if (ts.is(Blocks.SNOW)) { // thick snow layers block motion: pave the ground under them
-            top = top.below();
-            ts = level.getBlockState(top);
-        }
+        // only ever on natural ground (or our own road): never on roofs, logs or other mods' floors
+        if (!isNaturalGround(ts) && !isRoadMaterial(ts)) return 0;
         BlockPos above = top.above();
         BlockPos above2 = above.above();
         BlockPos above3 = above2.above();
@@ -339,6 +401,35 @@ final class Paver {
         return depth;
     }
 
+    /**
+     * The top solid block of a column after walking down through leaves, plants and snow layers, or null if that walk
+     * ends on a log (a tree trunk or branch: never paved over or cut) or goes on for too long. Water is returned as is.
+     */
+    @Nullable
+    private static BlockPos naturalTop(ServerLevel level, int x, int z) {
+        int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, y, z);
+        for (int guard = 0; guard < 24; guard++) {
+            if (p.getY() <= level.getMinBuildHeight()) return null;
+            BlockState s = level.getBlockState(p);
+            if (s.is(BlockTags.LOGS)) return null;
+            if (!s.getFluidState().isEmpty()) return p.immutable();
+            boolean passable = s.isAir() || s.is(Blocks.SNOW) || s.is(BlockTags.LEAVES) || s.getBlock() instanceof BushBlock
+                    || s.canBeReplaced();
+            if (!passable) return p.immutable();
+            p.move(Direction.DOWN);
+        }
+        return null;
+    }
+
+    /** Ground the world generator made: soil, sand, stone, gravel, snow, clay... */
+    static boolean isNaturalGround(BlockState s) {
+        return s.is(BlockTags.DIRT) || s.is(BlockTags.SAND) || s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.TERRACOTTA)
+                || s.is(Blocks.GRAVEL) || s.is(Blocks.SNOW_BLOCK) || s.is(Blocks.POWDER_SNOW) || s.is(Blocks.CALCITE)
+                || s.is(Blocks.CLAY) || s.is(Blocks.MUD) || s.is(Blocks.PACKED_ICE) || s.is(Blocks.SANDSTONE)
+                || s.is(Blocks.RED_SANDSTONE);
+    }
+
     static boolean isRoadMaterial(BlockState s) {
         return s.is(Blocks.DIRT_PATH) || s.is(Blocks.GRAVEL) || s.is(Blocks.COARSE_DIRT) || s.is(Blocks.COBBLESTONE)
                 || s.is(Blocks.MOSSY_COBBLESTONE) || s.is(Blocks.SMOOTH_SANDSTONE) || s.is(Blocks.SMOOTH_RED_SANDSTONE)
@@ -346,6 +437,7 @@ final class Paver {
     }
 
     /** The road block for a natural surface, or null to leave the column alone. Cobble & path mix. */
+    @Nullable
     private static BlockState surfaceFor(ServerLevel level, BlockPos pos, BlockState s, int x, int z) {
         int roll = roll(x, z);
         if (s.is(BlockTags.DIRT)) {
@@ -365,11 +457,17 @@ final class Paver {
             if (roll < 80) return Blocks.MOSSY_COBBLESTONE.defaultBlockState();
             return Blocks.STONE_BRICKS.defaultBlockState();
         }
-        return Blocks.COBBLESTONE.defaultBlockState();
+        if (isNaturalGround(s)) {
+            if (roll < 30 && supported(level, pos)) return Blocks.GRAVEL.defaultBlockState();
+            return roll < 70 ? Blocks.COBBLESTONE.defaultBlockState() : Blocks.MOSSY_COBBLESTONE.defaultBlockState();
+        }
+        return null; // not ours to pave
     }
 
-    /** Edge stones lining the border of the road. */
+    /** Edge stones lining the border of the road (natural ground only). */
+    @Nullable
     private static BlockState edgeFor(ServerLevel level, BlockPos pos, BlockState s, int x, int z) {
+        if (!isNaturalGround(s)) return null;
         int roll = roll(x, z);
         if (roll < 40) return Blocks.COBBLESTONE.defaultBlockState();
         if (roll < 65) return Blocks.MOSSY_COBBLESTONE.defaultBlockState();
@@ -382,13 +480,13 @@ final class Paver {
         return !FallingBlock.isFree(level.getBlockState(pos.below()));
     }
 
-    /** Plants, snow layers and other replaceable clutter that may be removed above a road. */
+    /** Plants, snow layers, leaves and other replaceable clutter that may be removed above a road (never logs). */
     static boolean clearable(BlockState s) {
         if (s.isAir()) return true;
         if (!s.getFluidState().isEmpty()) return false;
         if (s.is(Blocks.SNOW)) return true;
         if (s.getBlock() instanceof BushBlock) return true;
-        if (s.is(BlockTags.LEAVES) || s.is(BlockTags.LOGS) || s.is(BlockTags.FLOWERS)) return true;
+        if (s.is(BlockTags.LEAVES) || s.is(BlockTags.FLOWERS)) return true;
         return s.canBeReplaced();
     }
 
@@ -422,6 +520,7 @@ final class Paver {
         }
         if (!s.getFluidState().isEmpty() || !s.isFaceSturdy(level, p, Direction.UP) || s.is(BlockTags.LEAVES)
                 || s.is(BlockTags.LOGS)) return null;
+        if (!isNaturalGround(s) && !isRoadMaterial(s)) return null; // roofs, floors and walls of other builds
         return p.immutable();
     }
 
@@ -430,9 +529,9 @@ final class Paver {
         return (clearable(s) || isPostMaterial(s)) && !PlacedBlocks.isPlayerPlaced(level, pos);
     }
 
-    private static int placeLantern(ServerLevel level, RoadFeature f) {
+    private static int placeLantern(ServerLevel level, Task task, RoadFeature f) {
         BlockPos g = ground(level, f.x, f.z);
-        if (g == null || PlacedBlocks.isPlayerPlaced(level, g)) return 0;
+        if (g == null || PlacedBlocks.isPlayerPlaced(level, g) || task.reserved(level, f.x, g.getY(), f.z)) return 0;
         BlockState gs = level.getBlockState(g);
         if (gs.is(Blocks.DIRT_PATH)) return 0; // don't block another road
         BlockPos p1 = g.above(), p2 = p1.above(), p3 = p2.above();
@@ -449,10 +548,10 @@ final class Paver {
      * A signpost: a stripped spruce post with one level of wall signs per destination (both sides of the post, so it
      * can be read from either direction), capped with a fence. Rebuilding just rewrites the signs.
      */
-    private static int placeSignpost(ServerLevel level, RoadsData data, RoadFeature f) {
+    private static int placeSignpost(ServerLevel level, Task task, RoadsData data, RoadFeature f) {
         if (f.dests.isEmpty()) return 0;
         BlockPos g = ground(level, f.x, f.z);
-        if (g == null || PlacedBlocks.isPlayerPlaced(level, g)) return 0;
+        if (g == null || PlacedBlocks.isPlayerPlaced(level, g) || task.reserved(level, f.x, g.getY(), f.z)) return 0;
         int k = Math.min(f.dests.size(), RoadFeature.MAX_DESTINATIONS);
         BlockPos base = g.above();
         for (int i = 0; i <= k + 1; i++) {

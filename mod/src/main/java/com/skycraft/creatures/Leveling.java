@@ -4,6 +4,7 @@ import com.skycraft.Skycraft;
 import com.skycraft.combat.CombatHandler;
 import com.skycraft.core.SkyData;
 import com.skycraft.creatures.entity.Ranked;
+import com.skycraft.magic.spell.Summons;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
@@ -70,6 +71,8 @@ public final class Leveling {
         if (event.getLevel().isClientSide || !(event.getEntity() instanceof Mob mob) || !(mob instanceof Enemy)) return;
         CompoundTag data = mob.getPersistentData();
         if (data.contains(LEVEL_KEY)) return;
+        // Player summons (conjured zombies, atronachs, dremora) and charmed allies keep the stats their spell gave them.
+        if (Summons.isCompanion(mob)) return;
         if (mob.getType().is(CombatHandler.BOSSES) || mob instanceof EnderDragon || mob instanceof WitherBoss) return;
         if (!CreaturesConfig.LEVELED_ENEMIES.get()) return;
 

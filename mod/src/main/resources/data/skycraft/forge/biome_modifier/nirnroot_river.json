@@ -1,6 +1,6 @@
 {
   "type": "forge:add_features",
-  "biomes": "#minecraft:is_river",
+  "biomes": "#skycraft:spawns/river",
   "features": "skycraft:nirnroot_patch",
   "step": "vegetal_decoration"
 }

@@ -1,28 +1,24 @@
 hash-format = "sha256"
 
 [[files]]
-file = "config/controllable.json"
-hash = "55c6ba013b8727d970bc2b892084fe9348d9dd3fb7dd3f856ed1e36a671e78a6"
+file = "config/DistantHorizons.toml"
+hash = "c8d414500217851258db85d8fde305b8c62c0094cec1bdd3bc3d6737e6e6d72c"
 
 [[files]]
-file = "config/corpse-common.toml"
-hash = "12b40b93fb0ddea5787704a4200826ebe0f378d5b5b140a74e3e11353d792b1e"
+file = "config/controllable.client.toml"
+hash = "feb76445c99386ac92ab7142842e283a3f03fe8b32d578ddc4bb655d2b783ddd"
+
+[[files]]
+file = "config/defaultoptions/keybindings.txt"
+hash = "88b9955aaeaaeac47e7ff6df7ea73ea8e1b532c13a1451ca359c37e59347053e"
 
 [[files]]
 file = "config/defaultoptions/options.txt"
-hash = "f96fa1efa01b017acbe35f4f10b473307e1299d3413943d853cc5d59313476ab"
+hash = "de083bba509a8ad8d34fcc4e810d2d6070fe1e6df28e94b100101c5505edbf50"
 
 [[files]]
 file = "config/mca.json"
-hash = "cc1383c1b08ecd75102f0443047885280aac53259071535b724a31d15232a675"
-
-[[files]]
-file = "config/physicsmod/physics_client_config.json"
-hash = "eac1e64d645f66a447c2b02df97a8e05e3d453626f1bd68186068fb04449c0c5"
-
-[[files]]
-file = "config/tectonic.json"
-hash = "6511c3816a9bab400950d03b775587b0e33d6c4ec2d313c9740fbb75191a266c"
+hash = "8aefb114c3f58b310bd89ba2b577ac78db98507b9211b68237b15044364b0e66"
 
 [[files]]
 file = "config/towns_and_towers/structure_enable_or_disable_new.json5"
@@ -31,6 +27,14 @@ hash = "675fad2f8467b4de380c77d54c6353af88b6a237474dadfe7a7c7296c7ed6c6a"
 [[files]]
 file = "config/towns_and_towers/structure_rarity_new.json5"
 hash = "1f6cddbcb2d89fbcc774d7bdae9987ccb031ba8fe024307357076ca617b17eeb"
+
+[[files]]
+file = "config/vampirism-common.toml"
+hash = "70134a6c6a20e53eed88cdc0878f11aa5811b312da9486e9a3d1656b739c6dc7"
+
+[[files]]
+file = "defaultconfigs/corpse-server.toml"
+hash = "43d553add5137ca2d4e6ca40056e483d6c6dd62a4304f2c5bbfa7f7c01b1eaad"
 
 [[files]]
 file = "mods/aquaculture.pw.toml"
@@ -60,6 +64,11 @@ metafile = true
 [[files]]
 file = "mods/cloth-config.pw.toml"
 hash = "e3dd03e7fec88831974857e2cdded54dd5c5bdcaa3f6d6248c2800e82db4dd41"
+metafile = true
+
+[[files]]
+file = "mods/clumps.pw.toml"
+hash = "903352ffbd84d4b95fed905893f4715d9c3f88ec9fff6fb06f6e359e0b839dc3"
 metafile = true
 
 [[files]]
@@ -108,33 +117,23 @@ hash = "a6af059766ea70358690d048898d19e493108e2e06a97542fac696fd5e03589a"
 metafile = true
 
 [[files]]
+file = "mods/dynamic-fps.pw.toml"
+hash = "b67251b53eb4685d349bda68fde30b021e99900fe4d445e6c0f3e9fa0a908580"
+metafile = true
+
+[[files]]
 file = "mods/dynamiclights-reforged.pw.toml"
-hash = "8f2270a50a633db681826cbfb691e6efdb25e1e0c4702125c13d525b52fe229f"
-metafile = true
-
-[[files]]
-file = "mods/easy-npc-config-ui.pw.toml"
-hash = "0140b9f9ff0f1d305e2e516aa47c04147aa5c549886e6e6c3164ac6358bdf1f7"
-metafile = true
-
-[[files]]
-file = "mods/easy-npc-core.pw.toml"
-hash = "6a2617a473c24098ce57896e3da9e3a1da9f3a9eb70155f36fb7be856032c76e"
-metafile = true
-
-[[files]]
-file = "mods/easy-npc.pw.toml"
-hash = "a998aff74f668935b1b52b89d6466d058f29cbe4a8eb36373d41c7168862418d"
+hash = "00a06884a4f8854fad85f2456c1d6c53ee09cc5e545a35e41cad24e82907a1ab"
 metafile = true
 
 [[files]]
 file = "mods/embeddium.pw.toml"
-hash = "a1575677daaaf6ea6dac12e5a10073e34025e5ca2c35b6d36ad4a5a0edbc0e82"
+hash = "a74b2d65c286896335b454f61f18be630d0f13767626ebb118584907d1d37112"
 metafile = true
 
 [[files]]
 file = "mods/entityculling.pw.toml"
-hash = "03783bea6895d8acf198ac7d8bce4f91746659d0954f7367d0029b11963edee0"
+hash = "e5206ecaa7deacbdb38d292be484bd584bac736d1bed2fb20289020a65a7f132"
 metafile = true
 
 [[files]]
@@ -158,8 +157,18 @@ hash = "86621230dbc7c1b076d579f68e49eb454dededcb0f63f2305cf5d3ca55f9c46f"
 metafile = true
 
 [[files]]
+file = "mods/immediatelyfast.pw.toml"
+hash = "1a9564ded8e9cd1f843f9de7fc87ffbf73033aab51494205458b0e58cc0ab194"
+metafile = true
+
+[[files]]
 file = "mods/itemphysic-lite.pw.toml"
 hash = "cf31130ba0da56362298409418b9a6b6e5ab01822d9c04e0aee61c0682662b01"
+metafile = true
+
+[[files]]
+file = "mods/krypton-fnp.pw.toml"
+hash = "fda62419ea0d286061260ceb7dc1e27ea6ebdfc1ab6a01a588c5e9e2243a6200"
 metafile = true
 
 [[files]]
@@ -179,12 +188,12 @@ metafile = true
 
 [[files]]
 file = "mods/minecraft-comes-alive-reborn.pw.toml"
-hash = "1f1a21b26bd03e166d751e1471220f4ddbbf57cdd12e59b21952e1b0ccadf60f"
+hash = "2355739e29d6568e4eac040f178f450230f1d75efa23d25b431124415684ff3c"
 metafile = true
 
 [[files]]
 file = "mods/modernfix.pw.toml"
-hash = "054e65d7f7235e0d37aba40cd421fbfbb7f092dc1d797d0423b4b35f42a209d8"
+hash = "a9aeaaedd47d724add417a08520589504fc7d56a5c0580db41d7b448ac3623d5"
 metafile = true
 
 [[files]]
@@ -208,27 +217,33 @@ hash = "f83b253ca6a8e6f2f847952704da0e1fb00e65cbb10b7c9cb15d1a1780618da0"
 metafile = true
 
 [[files]]
-file = "mods/physicsmod.pw.toml"
-hash = "762ee3d2dee5355be633bc365829c546800163ec4757f052be665601afe90fba"
-metafile = true
-
-[[files]]
 file = "mods/playeranimator.pw.toml"
 hash = "765987a78e5d8c782d0da2de99998b43b5907d6c41347d3804045ad109e4a586"
 metafile = true
 
 [[files]]
-file = "mods/skycraft-core.jar"
-hash = "984f5d4ba8f6472cfa63243e867e78e7da6e196a341ff6a03e0175db28c0c00b"
+file = "mods/resourceful-config.pw.toml"
+hash = "b85e8417e797be3fdae046c487eeda8f54cdc88f3f20e462e0e229f8dd734214"
+metafile = true
+
+[[files]]
+file = "mods/saturn.pw.toml"
+hash = "3602f220a9d98e89d44168a6e84dc7bb169fb8b8209b4b966288d1fa1c3650bc"
+metafile = true
 
 [[files]]
 file = "mods/sodium-options-api.pw.toml"
-hash = "5240c62752415b5d66d4beffec4fe98c253eba8ebcbb2a5c1097fc3ad3de0b00"
+hash = "bec4fd7f9b90e9040786e31d14bf4af7fb42fce842b9f5acfdd0821c973ecb82"
 metafile = true
 
 [[files]]
 file = "mods/spark.pw.toml"
 hash = "0be4976227df8e261fd362889bf8e85b93e224d1b1c3cd2a11b73a9de3b64083"
+metafile = true
+
+[[files]]
+file = "mods/structure-layout-optimizer.pw.toml"
+hash = "a97af67d3179566144fe1863184d4015e559a52b3c8b9bdc1a3ccdd59d536bb4"
 metafile = true
 
 [[files]]
@@ -244,11 +259,6 @@ metafile = true
 [[files]]
 file = "mods/towns-and-towers.pw.toml"
 hash = "7b7108d879e1e1c141b24d0d8fa268a6bbcd5c227875d156fcc62c3beec55f63"
-metafile = true
-
-[[files]]
-file = "mods/treechop.pw.toml"
-hash = "7d676de4988d6d176fcc327a1a2f27b17091962565785cb0214af1ec6826dca0"
 metafile = true
 
 [[files]]
@@ -323,5 +333,5 @@ metafile = true
 
 [[files]]
 file = "shaderpacks/complementary-reimagined.pw.toml"
-hash = "507cb3963240110bc71ed7c75cac1682e66d3609536b0bc5ef90a01db3cce21f"
+hash = "75d1d2488a0c332a9a58af7e57f980a1b006c02b3a1c580fbd50443088e4eab0"
 metafile = true

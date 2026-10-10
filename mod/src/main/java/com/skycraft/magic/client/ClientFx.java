@@ -1,5 +1,6 @@
 package com.skycraft.magic.client;
 
+import com.skycraft.arsenal.ArsenalPackets;
 import com.skycraft.magic.MagicFx;
 import com.skycraft.magic.MagicPackets;
 import com.skycraft.magic.shout.Shout;
@@ -78,6 +79,7 @@ public final class ClientFx {
             case MagicFx.AURA -> {
                 if (entity != null) aura(level, el, entity, m.extra());
             }
+            case MagicFx.STAFF -> staff(level, m.extra(), m.a(), m.b());
             default -> {
             }
         }
@@ -514,6 +516,118 @@ public final class ClientFx {
             Vec3 dir = look.add(j(spread), j(spread), j(spread)).normalize();
             double speed = range * (0.05 + R.nextDouble() * 0.04);
             level.addParticle(particle, origin.x, origin.y, origin.z, dir.x * speed, dir.y * speed, dir.z * speed);
+        }
+    }
+
+    // ------------------------------------------------------------------ staves and artifacts (arsenal)
+
+    private static DustParticleOptions dust(float r, float g, float b, float s) {
+        return new DustParticleOptions(new Vector3f(r, g, b), s);
+    }
+
+    /** Staff/artifact visuals, {@code kind} from {@code ArsenalPackets.Fx}. */
+    private static void staff(ClientLevel level, int kind, Vec3 a, Vec3 b) {
+        RandomSource r = level.random;
+        switch (kind) {
+            case ArsenalPackets.Fx.FIRE_STREAM -> staffStream(level, r, a, b, ParticleTypes.FLAME, ParticleTypes.SMOKE);
+            case ArsenalPackets.Fx.FROST_STREAM -> staffStream(level, r, a, b, ParticleTypes.SNOWFLAKE, dust(0.75f, 0.9f, 1f, 1.2f));
+            case ArsenalPackets.Fx.SHOCK_STREAM -> {
+                staffStream(level, r, a, b, ParticleTypes.ELECTRIC_SPARK, dust(0.7f, 0.8f, 1f, 0.9f));
+                staffArc(level, r, a, b, dust(0.85f, 0.9f, 1f, 0.8f), 0.35);
+            }
+            case ArsenalPackets.Fx.HEAL_BEAM -> staffBeam(level, r, a, b, dust(1f, 0.92f, 0.55f, 1.1f), ParticleTypes.HAPPY_VILLAGER);
+            case ArsenalPackets.Fx.MAGNUS_BEAM -> staffBeam(level, r, a, b, dust(0.45f, 0.6f, 1f, 1.3f), ParticleTypes.ENCHANT);
+            case ArsenalPackets.Fx.LIGHTNING_ARC -> {
+                staffArc(level, r, a, b, dust(0.8f, 0.85f, 1f, 1.2f), 0.6);
+                staffArc(level, r, a, b, ParticleTypes.ELECTRIC_SPARK, 0.5);
+            }
+            case ArsenalPackets.Fx.FIRE_BURST -> staffBurst(level, r, a, ParticleTypes.FLAME, 60, 0.35);
+            case ArsenalPackets.Fx.SUN_BURST -> {
+                staffBurst(level, r, a, dust(1f, 0.95f, 0.6f, 1.6f), 50, 0.3);
+                staffBurst(level, r, a, ParticleTypes.END_ROD, 25, 0.2);
+                level.addParticle(ParticleTypes.FLASH, a.x, a.y, a.z, 0, 0, 0);
+            }
+            case ArsenalPackets.Fx.FROST_BURST -> staffBurst(level, r, a, ParticleTypes.SNOWFLAKE, 20, 0.15);
+            case ArsenalPackets.Fx.WARD -> staffWard(level, r, a, b);
+            case ArsenalPackets.Fx.SOUL_BURST -> staffBurst(level, r, a, ParticleTypes.SOUL, 20, 0.08);
+            default -> {
+            }
+        }
+    }
+
+    /** A cone of particles flying from a to b (flames, frostbite, sparks). */
+    private static void staffStream(ClientLevel level, RandomSource r, Vec3 a, Vec3 b, ParticleOptions main, ParticleOptions extra) {
+        Vec3 d = b.subtract(a);
+        double len = Math.max(0.5, d.length());
+        Vec3 dir = d.scale(1 / len);
+        for (int i = 0; i < 10; i++) {
+            double speed = 0.35 + r.nextDouble() * 0.35;
+            double spread = 0.08;
+            level.addParticle(main, a.x, a.y, a.z,
+                    (dir.x + (r.nextDouble() - 0.5) * spread * 2) * speed * len / 4,
+                    (dir.y + (r.nextDouble() - 0.5) * spread * 2) * speed * len / 4,
+                    (dir.z + (r.nextDouble() - 0.5) * spread * 2) * speed * len / 4);
+        }
+        for (int i = 0; i < 3; i++) {
+            double f = r.nextDouble();
+            level.addParticle(extra, a.x + d.x * f, a.y + d.y * f, a.z + d.z * f, 0, 0.01, 0);
+        }
+    }
+
+    /** A straight line with a sparkle at the end (healing, Magnus). */
+    private static void staffBeam(ClientLevel level, RandomSource r, Vec3 a, Vec3 b, ParticleOptions line, ParticleOptions end) {
+        Vec3 d = b.subtract(a);
+        int n = Math.max(2, (int) (d.length() * 4));
+        for (int i = 0; i <= n; i++) {
+            double f = i / (double) n;
+            level.addParticle(line, a.x + d.x * f + (r.nextDouble() - 0.5) * 0.05, a.y + d.y * f + (r.nextDouble() - 0.5) * 0.05,
+                    a.z + d.z * f + (r.nextDouble() - 0.5) * 0.05, 0, 0, 0);
+        }
+        for (int i = 0; i < 3; i++) level.addParticle(end, b.x + (r.nextDouble() - 0.5) * 0.4, b.y + (r.nextDouble() - 0.5) * 0.4,
+                b.z + (r.nextDouble() - 0.5) * 0.4, 0, 0, 0);
+    }
+
+    /** A jagged lightning line. */
+    private static void staffArc(ClientLevel level, RandomSource r, Vec3 a, Vec3 b, ParticleOptions p, double jag) {
+        Vec3 d = b.subtract(a);
+        int n = Math.max(3, (int) (d.length() * 3));
+        Vec3 prev = a;
+        for (int i = 1; i <= n; i++) {
+            double f = i / (double) n;
+            Vec3 next = i == n ? b : a.add(d.scale(f)).add((r.nextDouble() - 0.5) * jag, (r.nextDouble() - 0.5) * jag, (r.nextDouble() - 0.5) * jag);
+            for (int k = 0; k < 3; k++) {
+                double t = k / 3.0;
+                level.addParticle(p, prev.x + (next.x - prev.x) * t, prev.y + (next.y - prev.y) * t, prev.z + (next.z - prev.z) * t, 0, 0, 0);
+            }
+            prev = next;
+        }
+    }
+
+    private static void staffBurst(ClientLevel level, RandomSource r, Vec3 c, ParticleOptions p, int count, double speed) {
+        for (int i = 0; i < count; i++) {
+            double x = r.nextGaussian(), y = r.nextGaussian(), z = r.nextGaussian();
+            double l = Math.sqrt(x * x + y * y + z * z) + 1e-6;
+            double s = speed * (0.5 + r.nextDouble() * 0.5);
+            level.addParticle(p, c.x, c.y, c.z, x / l * s, y / l * s, z / l * s);
+        }
+    }
+
+    /** A disc of light in front of the blocker ({@code normal} = facing). */
+    private static void staffWard(ClientLevel level, RandomSource r, Vec3 c, Vec3 normal) {
+        Vec3 n = normal.lengthSqr() < 1e-6 ? new Vec3(0, 0, 1) : normal.normalize();
+        Vec3 u = n.cross(new Vec3(0, 1, 0));
+        if (u.lengthSqr() < 1e-6) u = new Vec3(1, 0, 0);
+        u = u.normalize();
+        Vec3 v = u.cross(n).normalize();
+        for (int i = 0; i < 40; i++) {
+            double ang = i / 40.0 * Math.PI * 2;
+            double rad = 0.9;
+            Vec3 p = c.add(u.scale(Math.cos(ang) * rad)).add(v.scale(Math.sin(ang) * rad));
+            level.addParticle(dust(0.6f, 0.75f, 1f, 1f), p.x, p.y, p.z, 0, 0, 0);
+        }
+        for (int i = 0; i < 12; i++) {
+            level.addParticle(ParticleTypes.ENCHANTED_HIT, c.x + (r.nextDouble() - 0.5), c.y + (r.nextDouble() - 0.5), c.z + (r.nextDouble() - 0.5),
+                    n.x * 0.2, n.y * 0.2, n.z * 0.2);
         }
     }
 }

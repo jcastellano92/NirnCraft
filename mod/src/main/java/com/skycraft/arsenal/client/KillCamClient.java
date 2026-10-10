@@ -64,15 +64,18 @@ public final class KillCamClient {
 
     // ------------------------------------------------------------------ start
 
-    public static void start(int victimId, byte camKind, int arrowId, Vec3 dir) {
+    /**
+     * Starts a kill cam. {@code victimMid} is the middle of the victim's body as the server saw it on the killing blow:
+     * the victim itself may already be gone here (its loot body replaces it right after death).
+     */
+    public static void start(int victimId, byte camKind, int arrowId, Vec3 dir, Vec3 victimMid) {
         try {
             if (!ArsenalConfig.CLIENT_KILL_CAMS.get()) return;
             Minecraft mc = Minecraft.getInstance();
             LocalPlayer player = mc.player;
             ClientLevel level = mc.level;
             if (active || player == null || level == null || mc.screen != null || !player.isAlive() || mc.getCameraEntity() != player) return;
-            Entity victim = level.getEntity(victimId);
-            if (victim == null) return;
+            if (victimMid.distanceToSqr(player.position()) > 96 * 96) return;
             if (!ArsenalConfig.KILL_CAM_NEAR_PLAYERS.get()) {
                 for (Player other : level.players()) {
                     if (other != player && other.distanceToSqr(player) < 32 * 32) return;
@@ -81,7 +84,8 @@ public final class KillCamClient {
 
             kind = camKind;
             tick = 0;
-            Vec3 victimMid = victim.position().add(0, victim.getBbHeight() * 0.55, 0);
+            Entity victim = level.getEntity(victimId);
+            if (victim != null && !victim.isRemoved()) victimMid = victim.position().add(0, victim.getBbHeight() * 0.55, 0);
             side = level.random.nextBoolean() ? 1f : -1f;
             if (kind == ArsenalPackets.KillCam.ARROW) {
                 Vec3 d = dir.lengthSqr() < 1e-6 ? victimMid.subtract(player.getEyePosition()) : dir;

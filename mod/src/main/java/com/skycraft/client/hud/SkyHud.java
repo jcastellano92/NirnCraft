@@ -1,11 +1,13 @@
 package com.skycraft.client.hud;
 
 import com.skycraft.client.ClientState;
+import com.skycraft.client.SkyKeys;
 import com.skycraft.core.PlayerData;
 import com.skycraft.core.SkyData;
 import com.skycraft.core.Skill;
 import com.skycraft.network.CorePackets;
 import com.skycraft.network.NotifyKind;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -19,6 +21,7 @@ import net.minecraftforge.client.gui.overlay.ForgeGui;
  */
 public final class SkyHud {
     private static float healthAlpha, magickaAlpha, staminaAlpha;
+    private static long lastFadeMs = Util.getMillis();
 
     private SkyHud() {}
 
@@ -34,9 +37,12 @@ public final class SkyHud {
         float magicka = data.getMagicka() / Math.max(1, data.maxMagicka());
         float stamina = data.getStamina() / Math.max(1, data.maxStamina());
 
-        healthAlpha = approach(healthAlpha, combat || health < 0.999f ? 1f : 0f);
-        magickaAlpha = approach(magickaAlpha, combat || magicka < 0.999f ? 1f : 0f);
-        staminaAlpha = approach(staminaAlpha, combat || stamina < 0.999f || mc.player.isSprinting() ? 1f : 0f);
+        long nowMs = Util.getMillis();
+        float step = fadeStep(nowMs - lastFadeMs);
+        lastFadeMs = nowMs;
+        healthAlpha = approach(healthAlpha, combat || health < 0.999f ? 1f : 0f, step);
+        magickaAlpha = approach(magickaAlpha, combat || magicka < 0.999f ? 1f : 0f, step);
+        staminaAlpha = approach(staminaAlpha, combat || stamina < 0.999f || mc.player.isSprinting() ? 1f : 0f, step);
 
         int barW = 110;
         int y = height - 14;
@@ -59,7 +65,7 @@ public final class SkyHud {
             String text;
             int col;
             if (diff <= 0) {
-                text = "[Z] " + race.powerName().getString();
+                text = "[" + SkyKeys.SHOUT.getTranslatedKeyMessage().getString() + "] " + race.powerName().getString();
                 col = 0xFFE0C060;
             } else {
                 long sec = diff / 20;
@@ -70,8 +76,14 @@ public final class SkyHud {
         }
     }
 
-    private static float approach(float current, float target) {
-        return current + (target - current) * 0.08f;
+    /** Fraction of the remaining distance to cover after {@code elapsedMs}: ~8% per frame at 60 fps, at any frame rate. */
+    private static float fadeStep(long elapsedMs) {
+        float seconds = Mth.clamp(elapsedMs, 0, 250) / 1000f;
+        return 1f - (float) Math.exp(-5.0 * seconds);
+    }
+
+    private static float approach(float current, float target, float step) {
+        return current + (target - current) * step;
     }
 
     /** A Skyrim bar: dark frame, fill shrinking toward the center for the health bar, colored fill. */
@@ -143,15 +155,7 @@ public final class SkyHud {
             my += 11;
         }
 
-        // Skill meter (popup on XP gain)
-        HudNotifications.Entry meter = HudNotifications.meter;
         HudNotifications.Entry banner = HudNotifications.banner();
-        if (meter != null && (banner == null || banner.msg().kind() != NotifyKind.SKILL_UP)) {
-            float age = meter.age();
-            float alpha = Mth.clamp(Math.min(age * 8, (1 - age) * 3), 0, 1);
-            if (alpha > 0.03f) drawSkillMeter(g, font, width, 52, meter.msg().title(), meter.msg().progress(), meter.msg().value(), alpha);
-        }
-
         if (banner == null) return;
         float age = banner.age();
         float alpha = Mth.clamp(Math.min(age * 6, (1 - age) * 4), 0, 1);
@@ -198,15 +202,6 @@ public final class SkyHud {
                 drawDivider(g, width / 2, 95, 100, a);
             }
         }
-    }
-
-    private static void drawSkillMeter(GuiGraphics g, Font font, int width, int y, Component name, float progress, int skillIndex, float alpha) {
-        int a = (int) (alpha * 255) << 24;
-        Minecraft mc = Minecraft.getInstance();
-        int level = skillIndex >= 0 && skillIndex < Skill.VALUES.length ? SkyData.get(mc.player).getSkill(Skill.VALUES[skillIndex]) : 0;
-        Component label = name.copy().append(" " + level);
-        g.drawCenteredString(font, label, width / 2, y - 12, a | 0xE8E2D0);
-        drawThinBar(g, width / 2 - 60, y, 120, progress, a);
     }
 
     private static void drawThinBar(GuiGraphics g, int x, int y, int w, float progress, int a) {

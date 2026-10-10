@@ -35,8 +35,15 @@ public final class SkyBossHud {
     private static float currentDisplayHealth = 1.0f;
     private static float currentAlpha = 0.0f;
     private static float targetAlpha = 0.0f;
+    private static final int SEARCH_INTERVAL = 10;
+    private static int searchCooldown = SEARCH_INTERVAL;
 
     private SkyBossHud() {}
+
+    /** True if the bar for this boss name is the one this HUD is drawing (its vanilla boss bar is then hidden). */
+    public static boolean isShowing(Component name) {
+        return activeBoss != null && currentAlpha > 0.01f && activeBoss.getDisplayName().getString().equals(name.getString());
+    }
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
@@ -48,8 +55,12 @@ public final class SkyBossHud {
             return;
         }
 
-        // Find closest boss entity within 50 blocks
-        if (activeBoss == null || !activeBoss.isAlive() || activeBoss.distanceTo(mc.player) > 52.0f) {
+        // Find closest boss entity within 50 blocks (the entity search runs at most every 10 ticks)
+        boolean lost = activeBoss == null || !activeBoss.isAlive() || activeBoss.isRemoved() || activeBoss.level() != mc.level
+                || activeBoss.distanceTo(mc.player) > 52.0f;
+        if (lost) activeBoss = null;
+        if (lost && ++searchCooldown >= SEARCH_INTERVAL) {
+            searchCooldown = 0;
             activeBoss = findNearestBoss(mc);
         }
 

@@ -167,6 +167,13 @@ public final class Ownership {
         return false;
     }
 
+    /** Server: whether a player placed or owns the block (e.g. a bed in their house); NPCs must leave it alone. */
+    public static boolean isPlayerOwned(ServerLevel level, BlockPos pos) {
+        if (PlacedBlocks.isPlayerPlaced(level, pos)) return true;
+        OwnerEntry entry = OwnershipData.get(level.getServer()).entries.get(key(level, pos));
+        return entry != null && entry.ownerId() != null && entry.ownerId().startsWith("player:");
+    }
+
     public static void setOwner(ServerLevel level, BlockPos pos, String ownerId, Component ownerName) {
         OwnershipData data = OwnershipData.get(level.getServer());
         data.entries.put(key(level, pos), new OwnerEntry(ownerId, ownerName));

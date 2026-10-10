@@ -88,18 +88,25 @@ public class SkyLoadWorldScreen extends Screen {
         LevelStorageSource source = mc.getLevelSource();
         try {
             LevelStorageSource.LevelCandidates candidates = source.findLevelCandidates();
+            // Summaries load on a worker thread; build the sorted list there and swap it in on the render thread.
             source.loadLevelSummaries(candidates).thenAccept(summaries -> {
-                saves.clear();
+                List<LevelSummary> sorted = new ArrayList<>();
                 if (summaries != null) {
-                    saves.addAll(summaries);
-                    saves.sort((a, b) -> Long.compare(b.getLastPlayed(), a.getLastPlayed()));
+                    sorted.addAll(summaries);
+                    sorted.sort((a, b) -> Long.compare(b.getLastPlayed(), a.getLastPlayed()));
                 }
-                loading = false;
-                if (selectedIndex >= saves.size()) selectedIndex = Math.max(0, saves.size() - 1);
-                updateButtonState();
+                mc.execute(() -> {
+                    saves.clear();
+                    saves.addAll(sorted);
+                    loading = false;
+                    if (selectedIndex >= saves.size()) selectedIndex = Math.max(0, saves.size() - 1);
+                    updateButtonState();
+                });
             }).exceptionally(ex -> {
-                loading = false;
-                updateButtonState();
+                mc.execute(() -> {
+                    loading = false;
+                    updateButtonState();
+                });
                 return null;
             });
         } catch (Exception e) {
@@ -128,8 +135,9 @@ public class SkyLoadWorldScreen extends Screen {
         mc.setScreen(new ConfirmScreen(
                 confirm -> {
                     if (confirm) {
-                        try {
-                            mc.getLevelSource().createAccess(summary.getLevelId()).deleteLevel();
+                        // Close the access afterwards so its session lock is released.
+                        try (var access = mc.getLevelSource().createAccess(summary.getLevelId())) {
+                            access.deleteLevel();
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

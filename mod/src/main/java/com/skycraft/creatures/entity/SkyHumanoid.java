@@ -161,7 +161,7 @@ public abstract class SkyHumanoid extends Monster implements RangedAttackMob {
                 } else {
                     this.searchTicks--;
                     if (this.searchTicks % 40 == 0 && player instanceof ServerPlayer sp) {
-                        SkyData.get(sp).awardSkill(Skill.SNEAK, 0.6f);
+                        com.skycraft.skills.Progression.addSkillXp(sp, Skill.SNEAK, 0.6f / Skill.SNEAK.useMult);
                     }
                     if (this.searchTicks <= 0) {
                         // Lost the player: give up and return to normal

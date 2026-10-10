@@ -1,23 +1,84 @@
 #!/usr/bin/env bash
-# CI client smoke test: boots the Skycraft client under Xvfb (software Mesa) with -Dskycraft.autotest=true,
-# visits all Skyrim UI screens, tests entity renderers, captures screenshots, and checks for model/texture errors.
+# CI client smoke test (Linux, needs xvfb-run and Mesa software OpenGL).
+#
+# What it tests: the Skycraft Core dev client (`./gradlew runClient`, Forge + Skycraft only, not the full pack) boots
+# under Xvfb, loads every Skycraft resource (models, blockstates, textures, sounds, lang) and reaches the main menu
+# without a crash. -Dskycraft.autotest=true is passed to the game JVM (through JAVA_TOOL_OPTIONS, because Gradle's own
+# -D flags never reach the forked game); if a world is loaded, ClientAutotest then walks through the Skyrim screens,
+# saves screenshots to mod/build/autotest-screenshots and closes the game.
+#
+# It fails on: a crash report, the game exiting with an error, never finishing resource loading within the time
+# limit, any exception stack trace through com.skycraft, a client class loaded on the wrong side, or a missing
+# skycraft model/texture/blockstate.
+# It does NOT test the full modpack's client (mod conflicts): the server smoke test covers the pack's common side.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$ROOT/dist/client-test"
+LOAD_LIMIT=900      # seconds until resources must have finished loading
+SETTLE=60           # seconds to keep the client running at the main menu afterwards
+rm -rf "$OUT"
 mkdir -p "$OUT"
-
+LOG="$OUT/client.log"
 cd "$ROOT/mod"
-echo "=== Running Skycraft Client Smoke Test with Mesa Software OpenGL ==="
+rm -rf run/crash-reports build/autotest-screenshots
 
-# Execute gradle runClient with autotest flag
-xvfb-run -s "-screen 0 1024x768x24" ./gradlew runClient --console=plain -Dskycraft.autotest=true 2>&1 | tee "$OUT/client.log"
+echo "=== Skycraft client smoke test (Xvfb + Mesa software OpenGL) ==="
+export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:-} -Dskycraft.autotest=true"
+export LIBGL_ALWAYS_SOFTWARE=1
+setsid xvfb-run -a -s "-screen 0 1280x800x24" ./gradlew runClient --no-daemon --console=plain > "$LOG" 2>&1 &
+GAME=$!
+stop_game() {
+  kill -TERM -- "-$GAME" 2>/dev/null || true
+  for _ in $(seq 1 20); do kill -0 "$GAME" 2>/dev/null || break; sleep 1; done
+  kill -KILL -- "-$GAME" 2>/dev/null || true
+}
+trap stop_game EXIT
+
+loaded=0; exited=0; elapsed=0
+while [ "$elapsed" -lt "$LOAD_LIMIT" ]; do
+  sleep 5; elapsed=$((elapsed+5))
+  if ! kill -0 "$GAME" 2>/dev/null; then exited=1; break; fi
+  # The last texture atlases are stitched at the end of the resource reload that precedes the main menu.
+  if grep -qE "Created: .*minecraft:textures/atlas/" "$LOG"; then loaded=1; break; fi
+done
+if [ "$loaded" = 1 ]; then
+  echo "Resources loaded after ~${elapsed}s; letting the client run for ${SETTLE}s"
+  for _ in $(seq 1 $((SETTLE / 5))); do
+    sleep 5
+    if ! kill -0 "$GAME" 2>/dev/null; then exited=1; break; fi
+  done
+fi
+status=0
+if [ "$exited" = 1 ]; then wait "$GAME"; status=$?; else stop_game; fi
+trap - EXIT
 
 cp -r build/autotest-screenshots "$OUT/" 2>/dev/null || true
+cp -r run/crash-reports "$OUT/" 2>/dev/null || true
+cp run/logs/latest.log "$OUT/latest.log" 2>/dev/null || true
+cp run/logs/debug.log "$OUT/debug.log" 2>/dev/null || true
 
-echo "=== Client Smoke Test Finished ==="
-if grep -iE "Fatal|Crash|Exception caught during firing event" "$OUT/client.log" | grep -v "skycraft.autotest" | head -40; then
-  echo "Client test encountered critical errors."
-  exit 1
+fail=0
+autotest_done=0
+grep -q "Skycraft Autotest: Completed successfully" "$LOG" && autotest_done=1
+if [ "$loaded" != 1 ] && [ "$autotest_done" != 1 ]; then
+  echo "::error::Client never finished loading resources"; tail -120 "$LOG"; fail=1
 fi
-echo "Client smoke test passed."
-
+if [ "$exited" = 1 ] && [ "$status" != 0 ] && [ "$autotest_done" != 1 ]; then
+  echo "::error::Client exited with status $status"; tail -80 "$LOG"; fail=1
+fi
+if ls "$OUT"/crash-reports/*.txt >/dev/null 2>&1 || grep -q -- "---- Minecraft Crash Report ----" "$LOG"; then
+  echo "::error::Crash report produced"; head -80 "$OUT"/crash-reports/*.txt 2>/dev/null; fail=1
+fi
+if grep -nE "Attempted to load class .* for invalid dist|NoClassDefFoundError" "$LOG" | head -20 | grep .; then
+  echo "::error::Class loading failure"; fail=1
+fi
+if grep -nE "^\s+at com\.skycraft\.|(Exception|Error)[^ ]*:.*com\.skycraft\." "$LOG" | head -40 | grep .; then
+  grep -n -B12 -m5 -E "^\s+at com\.skycraft\." "$LOG" | head -120
+  echo "::error::Exception stack trace from Skycraft code"; fail=1
+fi
+if grep -nE "(Missing textures in model|Unable to load model|Exception loading blockstate definition|Unable to resolve texture|Using missing texture).*skycraft:" "$LOG" | head -40 | grep .; then
+  echo "::error::Skycraft model/texture errors"; fail=1
+fi
+if [ "$fail" != 0 ]; then exit 1; fi
+if [ "$autotest_done" = 1 ]; then echo "Client smoke test passed (screen autotest completed)."
+else echo "Client smoke test passed (booted to the main menu; no world was loaded, so the screen autotest did not run)."; fi

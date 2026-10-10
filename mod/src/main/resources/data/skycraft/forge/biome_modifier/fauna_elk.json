@@ -1,16 +1,13 @@
 {
   "type": "forge:add_spawns",
-  "biomes": [
-    "minecraft:taiga",
-    "minecraft:old_growth_pine_taiga",
-    "minecraft:old_growth_spruce_taiga",
-    "minecraft:snowy_taiga",
-    "minecraft:meadow",
-    "minecraft:grove",
-    "minecraft:windswept_hills",
-    "minecraft:windswept_forest",
-    "minecraft:snowy_plains"
-  ],
+  "biomes": {
+    "type": "forge:or",
+    "values": [
+      "#skycraft:spawns/pine_forest",
+      "#skycraft:spawns/tundra",
+      "#skycraft:spawns/mountain"
+    ]
+  },
   "spawners": [
     {
       "type": "skycraft:elk",

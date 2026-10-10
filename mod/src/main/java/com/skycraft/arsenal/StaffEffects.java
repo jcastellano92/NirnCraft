@@ -9,6 +9,9 @@ import com.skycraft.core.Notifier;
 import com.skycraft.core.PlayerData;
 import com.skycraft.core.SkyData;
 import com.skycraft.core.Skill;
+import com.skycraft.magic.Targeting;
+import com.skycraft.magic.spell.Illusion;
+import com.skycraft.magic.spell.Summons;
 import com.skycraft.registry.ModEffects;
 import com.skycraft.skills.Progression;
 import net.minecraft.core.Holder;
@@ -35,19 +38,14 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.animal.Rabbit;
-import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,15 +54,12 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Everything staves do. Self-contained (no dependency on the magic module): streams are instantaneous ray hits
- * every half second, aimed staves fire {@link StaffBolt}s, and the visuals go to nearby clients as
- * {@link ArsenalPackets.Fx}. Damage scales a little with the staff's magic skill, and every use trains it.
+ * Everything staves do: streams are instantaneous ray hits every half second, aimed staves fire {@link StaffBolt}s,
+ * and the visuals go to nearby clients as {@link ArsenalPackets.Fx}. Damage scales a little with the staff's magic
+ * skill, and every use trains it. Aiming, friend-or-foe, summons and calm/fury states are the magic module's
+ * ({@link Targeting}, {@link Summons}, {@link Illusion}), so staves and spells behave the same.
  */
 public final class StaffEffects {
-    public static final String CALM_UNTIL = "skycraft_calm_until";
-    public static final String FURY_UNTIL = "skycraft_fury_until";
-    public static final String SUMMON_UNTIL = "skycraft_summon_until";
-    public static final String SUMMON_OWNER = "skycraft_summon_owner";
     public static final String WABBAJACK_ORIGINAL = "skycraft_wabbajack_original";
     public static final String WABBAJACK_UNTIL = "skycraft_wabbajack_until";
 
@@ -109,45 +104,15 @@ public final class StaffEffects {
         return source(level, SHOCK_SPELL, direct, cause);
     }
 
-    /** Creatures a staff should not hurt: the caster, its pets and its summons. */
-    public static boolean friendly(ServerPlayer caster, Entity e) {
-        if (e == caster) return true;
-        if (e instanceof TamableAnimal pet && pet.isOwnedBy(caster)) return true;
-        CompoundTag pd = e.getPersistentData();
-        return pd.hasUUID(SUMMON_OWNER) && caster.getUUID().equals(pd.getUUID(SUMMON_OWNER));
+    /** Creatures a staff should not hurt: the caster, its pets, summons, team and party (and their summons). */
+    private static boolean friendly(ServerPlayer caster, Entity e) {
+        return Targeting.isFriendly(caster, e);
     }
 
     private static Vec3 handPos(ServerPlayer player) {
         Vec3 look = player.getViewVector(1f);
         Vec3 right = new Vec3(-look.z, 0, look.x).normalize().scale(0.3);
         return player.getEyePosition().add(look.scale(0.6)).add(right).add(0, -0.25, 0);
-    }
-
-    /** The first living entity along the player's aim within {@code range} (blocks stop the ray), or null. */
-    @Nullable
-    public static LivingEntity aimed(ServerPlayer player, double range, Vec3[] endOut) {
-        Vec3 eye = player.getEyePosition();
-        Vec3 look = player.getViewVector(1f);
-        Vec3 end = eye.add(look.scale(range));
-        BlockHitResult block = player.level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
-        if (block.getType() != HitResult.Type.MISS) end = block.getLocation();
-        LivingEntity best = null;
-        double bestDist = Double.MAX_VALUE;
-        Vec3 bestHit = end;
-        AABB box = new AABB(eye, end).inflate(1.0);
-        for (LivingEntity e : player.level().getEntitiesOfClass(LivingEntity.class, box, e -> e != player && e.isAlive() && !e.isSpectator())) {
-            var hit = e.getBoundingBox().inflate(0.35).clip(eye, end);
-            if (hit.isPresent()) {
-                double d = hit.get().distanceToSqr(eye);
-                if (d < bestDist) {
-                    bestDist = d;
-                    best = e;
-                    bestHit = hit.get();
-                }
-            }
-        }
-        if (endOut != null && endOut.length > 0) endOut[0] = best != null ? bestHit : end;
-        return best;
     }
 
     private static void sound(ServerPlayer player, Vec3 pos, SoundEvent sound, float volume, float pitch) {
@@ -206,11 +171,11 @@ public final class StaffEffects {
 
     private static void chainLightning(ServerPlayer player, float power) {
         ServerLevel level = player.serverLevel();
-        Vec3[] end = new Vec3[1];
-        LivingEntity first = aimed(player, 32, end);
+        Targeting.Ray ray = Targeting.ray(player, 32, e -> true);
+        LivingEntity first = ray.entity();
         Vec3 from = handPos(player);
-        ArsenalPackets.Fx.send(level, ArsenalPackets.Fx.LIGHTNING_ARC, from, end[0]);
-        sound(player, end[0], SoundEvents.LIGHTNING_BOLT_THUNDER, 0.5f, 1.8f);
+        ArsenalPackets.Fx.send(level, ArsenalPackets.Fx.LIGHTNING_ARC, from, ray.end());
+        sound(player, ray.end(), SoundEvents.LIGHTNING_BOLT_THUNDER, 0.5f, 1.8f);
         if (first == null || friendly(player, first)) return;
         float damage = 8f * power;
         List<LivingEntity> hit = new ArrayList<>();
@@ -242,38 +207,16 @@ public final class StaffEffects {
         xp(player, Skill.DESTRUCTION, dealt * CombatHandler.SKYRIM_SCALE * 0.25f);
     }
 
+    /** A familiar for a minute, through the magic module's summon system (same limits and rules as the spell). */
     private static void conjureFamiliar(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
-        // one familiar at a time
-        for (Wolf old : level.getEntitiesOfClass(Wolf.class, player.getBoundingBox().inflate(64),
-                w -> w.getPersistentData().hasUUID(SUMMON_OWNER) && player.getUUID().equals(w.getPersistentData().getUUID(SUMMON_OWNER)))) {
-            unsummon(old);
-        }
-        Wolf wolf = EntityType.WOLF.create(level);
+        Mob wolf = Summons.conjure(player, EntityType.WOLF, "familiar", 6, 20 * 60,
+                mob -> mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 60, 0, false, false)));
         if (wolf == null) return;
-        Vec3[] end = new Vec3[1];
-        aimed(player, 6, end);
-        Vec3 pos = end[0].subtract(player.getViewVector(1f).scale(0.8));
-        wolf.moveTo(pos.x, Math.floor(player.getY()) + 0.05, pos.z, player.getYRot() + 180f, 0f);
-        wolf.tame(player);
-        wolf.setCustomName(Component.translatable("entity.skycraft.familiar"));
-        wolf.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 60, 0, false, false));
-        CompoundTag pd = wolf.getPersistentData();
-        pd.putUUID(SUMMON_OWNER, player.getUUID());
-        pd.putLong(SUMMON_UNTIL, level.getGameTime() + 20 * 60);
-        level.addFreshEntity(wolf);
+        Vec3 pos = wolf.position();
         level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.x, pos.y + 0.5, pos.z, 30, 0.4, 0.5, 0.4, 0.02);
         sound(player, pos, SoundEvents.EVOKER_CAST_SPELL, 1f, 0.8f);
         xp(player, Skill.CONJURATION, 6f);
-    }
-
-    /** Sends a summon back to Oblivion. */
-    public static void unsummon(Entity e) {
-        if (e.level() instanceof ServerLevel level) {
-            level.sendParticles(ParticleTypes.SOUL, e.getX(), e.getY() + 0.5, e.getZ(), 16, 0.3, 0.4, 0.3, 0.03);
-            level.playSound(null, e.blockPosition(), SoundEvents.SOUL_ESCAPE, SoundSource.NEUTRAL, 1f, 1f);
-        }
-        e.discard();
     }
 
     // ------------------------------------------------------------------ streams
@@ -283,8 +226,8 @@ public final class StaffEffects {
         ServerLevel level = player.serverLevel();
         boolean beam = kind == StaffKind.HEALING || kind == StaffKind.MAGNUS;
         double range = beam ? 14 : 8;
-        Vec3[] end = new Vec3[1];
-        LivingEntity target = aimed(player, range, end);
+        Targeting.Ray ray = Targeting.ray(player, range, e -> true);
+        LivingEntity target = ray.entity();
         if (used % 3 == 0) {
             byte fx = switch (kind) {
                 case FLAMES -> ArsenalPackets.Fx.FIRE_STREAM;
@@ -293,7 +236,7 @@ public final class StaffEffects {
                 case HEALING -> ArsenalPackets.Fx.HEAL_BEAM;
                 default -> ArsenalPackets.Fx.MAGNUS_BEAM;
             };
-            ArsenalPackets.Fx.send(level, fx, handPos(player), end[0]);
+            ArsenalPackets.Fx.send(level, fx, handPos(player), ray.end());
         }
         if (used % 20 == 0) {
             SoundEvent s = switch (kind) {
@@ -428,7 +371,7 @@ public final class StaffEffects {
                     Notifier.message(caster, Component.translatable("message.skycraft.arsenal.resisted", mob.getDisplayName()));
                     return;
                 }
-                calm(mob, 20 * 30);
+                Illusion.applyCalm(mob, 20 * 30);
                 level.sendParticles(ParticleTypes.HAPPY_VILLAGER, mob.getX(), mob.getY() + mob.getBbHeight(), mob.getZ(), 10, 0.4, 0.3, 0.4, 0);
                 xp(caster, Skill.ILLUSION, 4f);
             }
@@ -436,9 +379,7 @@ public final class StaffEffects {
                 int affected = 0;
                 for (Mob mob : level.getEntitiesOfClass(Mob.class, new AABB(pos, pos).inflate(4), m -> m.isAlive() && !friendly(caster, m))) {
                     if (resists(caster, mob, Skill.ILLUSION)) continue;
-                    mob.getPersistentData().putLong(FURY_UNTIL, level.getGameTime() + 20 * 20);
-                    mob.getPersistentData().remove(CALM_UNTIL);
-                    retargetFury(mob);
+                    Illusion.applyFrenzy(mob, 20 * 20);
                     level.sendParticles(ParticleTypes.ANGRY_VILLAGER, mob.getX(), mob.getY() + mob.getBbHeight(), mob.getZ(), 4, 0.3, 0.2, 0.3, 0);
                     affected++;
                 }
@@ -458,31 +399,6 @@ public final class StaffEffects {
             }
             case WABBAJACK -> wabbajack(caster, target, pos, power);
         }
-    }
-
-    /** Calms a creature: it forgets its target and won't pick a new one for {@code ticks}. */
-    public static void calm(Mob mob, int ticks) {
-        mob.getPersistentData().putLong(CALM_UNTIL, mob.level().getGameTime() + ticks);
-        mob.getPersistentData().remove(FURY_UNTIL);
-        mob.setTarget(null);
-        mob.setLastHurtByMob(null);
-        mob.getNavigation().stop();
-        if (mob instanceof NeutralMob neutral) neutral.stopBeingAngry();
-    }
-
-    /** A frenzied creature attacks the nearest other creature. */
-    public static void retargetFury(Mob mob) {
-        LivingEntity best = null;
-        double bestD = 144;
-        for (LivingEntity e : mob.level().getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(12),
-                e -> e != mob && e.isAlive() && !(e instanceof Player) && !(e instanceof net.minecraft.world.entity.decoration.ArmorStand))) {
-            double d = e.distanceToSqr(mob);
-            if (d < bestD) {
-                bestD = d;
-                best = e;
-            }
-        }
-        if (best != null) mob.setTarget(best);
     }
 
     // ------------------------------------------------------------------ Wabbajack
@@ -526,8 +442,7 @@ public final class StaffEffects {
             case 7 -> rabbits(level, target.position(), r);
             default -> {
                 if (target instanceof Mob mob && !mob.getType().is(CombatHandler.BOSSES)) {
-                    mob.getPersistentData().putLong(FURY_UNTIL, level.getGameTime() + 20 * 15);
-                    retargetFury(mob);
+                    Illusion.applyFrenzy(mob, 20 * 15);
                 } else {
                     target.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 200, 0));
                 }
@@ -594,7 +509,7 @@ public final class StaffEffects {
         bolt.setVisualOnly(true);
         level.addFreshEntity(bolt);
         if (hurt) {
-            for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(pos, pos).inflate(2.5), e -> e.isAlive() && e != caster)) {
+            for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(pos, pos).inflate(2.5), e -> e.isAlive() && !friendly(caster, e))) {
                 e.hurt(shock(level, null, caster), 6f);
                 e.setSecondsOnFire(3);
             }

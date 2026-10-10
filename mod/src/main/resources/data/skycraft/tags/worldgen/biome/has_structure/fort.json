@@ -1,12 +1,10 @@
 {
   "replace": false,
   "values": [
-    "minecraft:plains",
-    "minecraft:sunflower_plains",
-    "minecraft:meadow",
-    "minecraft:snowy_plains",
-    "minecraft:forest",
-    "minecraft:birch_forest",
+    "#skycraft:spawns/plains",
+    "#skycraft:spawns/forest",
+    "#skycraft:spawns/pine_forest",
+    "#skycraft:spawns/tundra",
     "#minecraft:is_taiga",
     "#minecraft:is_savanna",
     "#minecraft:is_hill"

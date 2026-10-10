@@ -26,8 +26,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -309,10 +311,11 @@ public class MapScreen extends Screen {
         g.blit(PARCHMENT, left, top, right - left, bottom - top, 0f, 0f, 256, 256, 256, 256);
 
         g.enableScissor(left, top, right, bottom);
-        drawLandscape(g, level, player);
+        // thousands of small fills: batch them into one draw instead of flushing after each
+        g.drawManaged(() -> drawLandscape(g, level, player));
         drawHolds(g, level);
         drawGrid(g);
-        drawFog(g, level, player);
+        g.drawManaged(() -> drawFog(g, level, player));
         drawLocations(g, level, player, mouseX, mouseY);
         drawQuestMarkers(g, level, mouseX, mouseY);
         drawCustomWaypoint(g, level, player, mouseX, mouseY);
@@ -336,6 +339,7 @@ public class MapScreen extends Screen {
 
         for (int sy = top; sy < bottom; sy += step) {
             double wz = worldZ(sy + step / 2.0);
+            int runStart = left, runColor = 0;
             for (int sx = left; sx < right; sx += step) {
                 double wx = worldX(sx + step / 2.0);
                 int bx = Mth.floor(wx);
@@ -367,8 +371,16 @@ public class MapScreen extends Screen {
                         color = 0x18485238; // forested valley
                     }
                 }
-                g.fill(sx, sy, Math.min(right, sx + step), Math.min(bottom, sy + step), color);
+                // one fill per horizontal run of equal colour
+                if (sx == left) {
+                    runColor = color;
+                } else if (color != runColor) {
+                    g.fill(runStart, sy, sx, Math.min(bottom, sy + step), runColor);
+                    runStart = sx;
+                    runColor = color;
+                }
             }
+            g.fill(runStart, sy, right, Math.min(bottom, sy + step), runColor);
         }
     }
 
@@ -544,37 +556,66 @@ public class MapScreen extends Screen {
         }
     }
 
+    /** Fog cells (world space) are this many blocks wide. */
+    private static final int FOG_CELL_SHIFT = 5;
+    private static final int FOG_REVEAL = 250;
+    /** World cells within {@link #FOG_REVEAL} of a discovered location; rebuilt only when the discoveries change. */
+    private static final LongOpenHashSet exploredCells = new LongOpenHashSet();
+    private static long exploredStamp = Long.MIN_VALUE;
+
+    private static void updateExplored(ListTag list, String dim) {
+        long stamp = list.size();
+        for (int i = 0; i < list.size(); i++) {
+            CompoundTag loc = list.getCompound(i);
+            stamp = stamp * 31 + loc.getInt("x") * 7919L + loc.getInt("z") + (loc.getBoolean("known") ? 1 : 0);
+        }
+        stamp = stamp * 31 + dim.hashCode();
+        if (stamp == exploredStamp) return;
+        exploredStamp = stamp;
+        exploredCells.clear();
+        int cell = 1 << FOG_CELL_SHIFT;
+        int r = FOG_REVEAL / cell + 1;
+        long reveal2 = (long) FOG_REVEAL * FOG_REVEAL;
+        for (int i = 0; i < list.size(); i++) {
+            CompoundTag loc = list.getCompound(i);
+            if (!loc.getString("dim").equals(dim) || loc.getBoolean("known")) continue;
+            int lx = loc.getInt("x"), lz = loc.getInt("z");
+            int cx = lx >> FOG_CELL_SHIFT, cz = lz >> FOG_CELL_SHIFT;
+            for (int dx = -r; dx <= r; dx++) {
+                for (int dz = -r; dz <= r; dz++) {
+                    long ox = ((long) (cx + dx) << FOG_CELL_SHIFT) + cell / 2 - lx;
+                    long oz = ((long) (cz + dz) << FOG_CELL_SHIFT) + cell / 2 - lz;
+                    if (ox * ox + oz * oz <= reveal2) exploredCells.add(ChunkPos.asLong(cx + dx, cz + dz));
+                }
+            }
+        }
+    }
+
     private void drawFog(GuiGraphics g, Level level, Player player) {
         if (level.dimension() != Level.OVERWORLD) return;
         ListTag list = SkyData.get(player).module(WorldData.MODULE).getList("discovered", Tag.TAG_COMPOUND);
-        String dim = level.dimension().location().toString();
+        updateExplored(list, level.dimension().location().toString());
         int step = 20;
         int fogColor = 0x70302214;
 
         for (int y = top; y < bottom; y += step) {
+            int runStart = -1;
             for (int x = left; x < right; x += step) {
                 double wx = worldX(x + step / 2.0);
                 double wz = worldZ(y + step / 2.0);
 
                 double pDx = wx - player.getX();
                 double pDz = wz - player.getZ();
-                if (pDx * pDx + pDz * pDz < 350.0 * 350.0) continue;
-
-                boolean explored = false;
-                for (int i = 0; i < list.size(); i++) {
-                    CompoundTag loc = list.getCompound(i);
-                    if (!loc.getString("dim").equals(dim) || loc.getBoolean("known")) continue;
-                    double lDx = wx - loc.getInt("x");
-                    double lDz = wz - loc.getInt("z");
-                    if (lDx * lDx + lDz * lDz < 250.0 * 250.0) {
-                        explored = true;
-                        break;
-                    }
-                }
-                if (!explored) {
-                    g.fill(x, y, Math.min(right, x + step), Math.min(bottom, y + step), fogColor);
+                boolean fogged = pDx * pDx + pDz * pDz >= 350.0 * 350.0
+                        && !exploredCells.contains(ChunkPos.asLong(Mth.floor(wx) >> FOG_CELL_SHIFT, Mth.floor(wz) >> FOG_CELL_SHIFT));
+                // one fill per horizontal run of fogged cells
+                if (fogged && runStart < 0) runStart = x;
+                if (!fogged && runStart >= 0) {
+                    g.fill(runStart, y, x, Math.min(bottom, y + step), fogColor);
+                    runStart = -1;
                 }
             }
+            if (runStart >= 0) g.fill(runStart, y, right, Math.min(bottom, y + step), fogColor);
         }
     }
 

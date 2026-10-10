@@ -1,0 +1,8 @@
+# packwiz hashes every file under pack/ (index.toml, pack.toml, configs, .pw.toml metadata). They must be
+# byte-identical on every OS, so git never converts their line endings. Keep them LF in the working tree.
+pack/** -text
+
+# Shell scripts run on Linux CI and the Steam Deck; Windows batch files need CRLF.
+*.sh text eol=lf
+gradlew text eol=lf
+*.bat text eol=crlf

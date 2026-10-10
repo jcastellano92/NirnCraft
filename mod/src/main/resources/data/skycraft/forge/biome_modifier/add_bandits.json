@@ -1,27 +1,6 @@
 {
   "type": "forge:add_spawns",
-  "biomes": [
-    "minecraft:plains",
-    "minecraft:sunflower_plains",
-    "minecraft:meadow",
-    "minecraft:forest",
-    "minecraft:birch_forest",
-    "minecraft:flower_forest",
-    "minecraft:dark_forest",
-    "minecraft:taiga",
-    "minecraft:old_growth_pine_taiga",
-    "minecraft:old_growth_spruce_taiga",
-    "minecraft:savanna",
-    "minecraft:savanna_plateau",
-    "minecraft:windswept_savanna",
-    "minecraft:badlands",
-    "minecraft:wooded_badlands",
-    "minecraft:eroded_badlands",
-    "minecraft:windswept_hills",
-    "minecraft:windswept_forest",
-    "minecraft:snowy_plains",
-    "minecraft:snowy_taiga"
-  ],
+  "biomes": "#skycraft:spawns/wilderness",
   "spawners": [
     {
       "type": "skycraft:bandit",

@@ -30,6 +30,9 @@ public class DungeonStructure extends Structure {
     ).apply(instance, DungeonStructure::new));
 
     private static final int WATER = Integer.MIN_VALUE;
+    /** No dungeon starts within this many chunks of a {@code #skycraft:towns} start. */
+    private static final int TOWN_RANGE_SURFACE = 6;
+    private static final int TOWN_RANGE_UNDERGROUND = 4;
 
     public final Theme theme;
 
@@ -46,6 +49,9 @@ public class DungeonStructure extends Structure {
     @Override
     public Optional<GenerationStub> findGenerationPoint(GenerationContext ctx) {
         ChunkPos cp = ctx.chunkPos();
+        // never in or right next to a town (surface sites keep a wider berth than buried ones)
+        boolean surfaceSite = !theme.underground() || theme == Theme.FORT;
+        if (TownExclusion.nearTown(ctx, surfaceSite ? TOWN_RANGE_SURFACE : TOWN_RANGE_UNDERGROUND)) return Optional.empty();
         int x = cp.getMiddleBlockX();
         int z = cp.getMiddleBlockZ();
         WorldgenRandom random = ctx.random();

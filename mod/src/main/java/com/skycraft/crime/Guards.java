@@ -34,9 +34,38 @@ public final class Guards {
     private static final long CONFRONT_COOLDOWN = 400;
     private static final int RUMORS = 8;
 
+    /** A guard hit by the player doesn't stand down (yield, paid bounty) for this many ticks (30 s). */
+    private static final long CALM_AFTER_HIT = 600;
+
     private static final Map<UUID, Long> NEXT_CONFRONT = new HashMap<>();
+    /** "guard uuid|player uuid" -> game time the player last hit that guard. */
+    private static final Map<String, Long> LAST_HIT = new HashMap<>();
+    private static final Map<String, Long> ACCIDENTS = new HashMap<>();
 
     private Guards() {}
+
+    static void noteHit(LivingEntity guard, ServerPlayer player) {
+        long now = guard.level().getGameTime();
+        if (LAST_HIT.size() > 1024) LAST_HIT.entrySet().removeIf(e -> now - e.getValue() > 1200);
+        LAST_HIT.put(guard.getUUID() + "|" + player.getUUID(), now);
+    }
+
+    /** One stray (sheathed) punch per guard per minute is forgiven; returns whether this one is. */
+    static boolean allowAccident(LivingEntity guard, ServerPlayer player) {
+        long now = guard.level().getGameTime();
+        String key = guard.getUUID() + "|" + player.getUUID();
+        Long last = ACCIDENTS.get(key);
+        if (last != null && now - last < 1200) return false;
+        if (ACCIDENTS.size() > 1024) ACCIDENTS.entrySet().removeIf(e -> now - e.getValue() > 1200);
+        ACCIDENTS.put(key, now);
+        return true;
+    }
+
+    /** Whether the player hit this guard within the last {@code ticks}. */
+    static boolean hitRecently(LivingEntity guard, ServerPlayer player, long ticks) {
+        Long last = LAST_HIT.get(guard.getUUID() + "|" + player.getUUID());
+        return last != null && guard.level().getGameTime() - last < ticks;
+    }
 
     // ------------------------------------------------------------------ behaviour (every second per player)
 
@@ -51,6 +80,12 @@ public final class Guards {
         List<Mob> guards = level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(AWARE_RANGE),
                 m -> m.isAlive() && Crimes.isGuard(m));
         for (Mob guard : guards) {
+            // a guard the player just hit keeps fighting, whatever the bounty says
+            boolean struck = hitRecently(guard, player, CALM_AFTER_HIT);
+            if (struck) {
+                if (guard.getTarget() != player) guard.setTarget(player);
+                continue;
+            }
             if (bounty <= 0) {
                 if (guard.getTarget() == player) calm(guard);
                 continue;
@@ -107,6 +142,9 @@ public final class Guards {
             calm(guard);
         }
         NEXT_CONFRONT.remove(player.getUUID());
+        // the debt is settled: guards struck earlier may stand down now
+        String suffix = "|" + player.getUUID();
+        LAST_HIT.keySet().removeIf(k -> k.endsWith(suffix));
     }
 
     private static void calm(Mob guard) {
@@ -138,6 +176,9 @@ public final class Guards {
 
     static void forget(UUID player) {
         NEXT_CONFRONT.remove(player);
+        String suffix = "|" + player;
+        LAST_HIT.keySet().removeIf(k -> k.endsWith(suffix));
+        ACCIDENTS.keySet().removeIf(k -> k.endsWith(suffix));
     }
 
     // ------------------------------------------------------------------ arrest dialogue

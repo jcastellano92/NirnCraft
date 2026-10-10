@@ -1,14 +1,15 @@
 {
   "type": "forge:add_spawns",
-  "biomes": [
-    "minecraft:swamp",
-    "minecraft:mangrove_swamp",
-    "minecraft:river",
-    "minecraft:dripstone_caves",
-    "minecraft:lush_caves",
-    "minecraft:plains",
-    "minecraft:forest"
-  ],
+  "biomes": {
+    "type": "forge:or",
+    "values": [
+      "#skycraft:spawns/swamp",
+      "#skycraft:spawns/river",
+      "#skycraft:spawns/plains",
+      "#skycraft:spawns/forest",
+      "#skycraft:spawns/caves"
+    ]
+  },
   "spawners": [
     {
       "type": "skycraft:skeever",

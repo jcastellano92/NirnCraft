@@ -367,7 +367,7 @@ public final class Travelers {
             int idx = RoadsData.entryIndex(e);
             if (road == null) continue;
             int x = road.xs[idx], z = road.zs[idx];
-            if (data.zoneAt(x, z) != null) continue;
+            if (data.anyZoneAt(x, z) != null) continue;
             BlockPos pos = groundAt(level, x, z);
             if (pos == null || !level.isPositionEntityTicking(pos)) continue;
             if (visible(level, player, pos)) continue;

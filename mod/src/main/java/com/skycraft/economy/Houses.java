@@ -144,8 +144,8 @@ public final class Houses {
             }
         }
 
-        // Set respawn point (Contract 9 RespawnPoints)
-        RespawnPoints.set(player, level.dimension(), center.above());
+        // Set respawn point (Contract 9 RespawnPoints): a real standing spot, never inside the walls or floor
+        RespawnPoints.set(player, level.dimension(), safeStandingSpot(level, center, r));
 
         // Update sign if provided
         if (signPos != null) {
@@ -155,6 +155,41 @@ public final class Houses {
         level.playSound(null, player.blockPosition(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0f, 1.0f);
         Notifier.message(player, Component.translatable("message.skycraft.economy.house.bought", house.name()));
         SkyData.get(player).addStat("houses_owned", 1);
+        return true;
+    }
+
+    /**
+     * The free spot (two passable, dry blocks over a sturdy floor) closest to {@code center} within the house radius,
+     * or the surface at the center when there is none. Stopgap until houses become region plots.
+     */
+    static BlockPos safeStandingSpot(ServerLevel level, BlockPos center, int radius) {
+        BlockPos best = null;
+        double bestDist = Double.MAX_VALUE;
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        int r = Math.max(2, Math.min(radius, 12));
+        for (int dx = -r; dx <= r; dx++) {
+            for (int dz = -r; dz <= r; dz++) {
+                if (!level.getChunkSource().hasChunk((center.getX() + dx) >> 4, (center.getZ() + dz) >> 4)) continue;
+                for (int dy = -4; dy <= 8; dy++) {
+                    p.set(center.getX() + dx, center.getY() + dy, center.getZ() + dz);
+                    double d = p.distSqr(center);
+                    if (d >= bestDist || !standable(level, p)) continue;
+                    best = p.immutable();
+                    bestDist = d;
+                }
+            }
+        }
+        if (best != null) return best;
+        int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, center.getX(), center.getZ());
+        return new BlockPos(center.getX(), y, center.getZ());
+    }
+
+    private static boolean standable(ServerLevel level, BlockPos feet) {
+        BlockPos below = feet.below();
+        if (!level.getBlockState(below).isFaceSturdy(level, below, net.minecraft.core.Direction.UP)) return false;
+        for (BlockPos q : new BlockPos[]{feet, feet.above()}) {
+            if (!level.getBlockState(q).getCollisionShape(level, q).isEmpty() || !level.getFluidState(q).isEmpty()) return false;
+        }
         return true;
     }
 

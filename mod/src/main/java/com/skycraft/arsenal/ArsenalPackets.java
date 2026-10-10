@@ -1,7 +1,8 @@
 package com.skycraft.arsenal;
 
-import com.skycraft.arsenal.client.ArsenalFxClient;
 import com.skycraft.arsenal.client.KillCamClient;
+import com.skycraft.magic.MagicFx;
+import com.skycraft.magic.spell.Element;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
@@ -11,27 +12,30 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.util.function.Supplier;
 
-/** Arsenal packets: kill cams and staff visuals (S2C), Bloodskal swings (C2S). Registered in a fixed order. */
+/**
+ * Arsenal packets: kill cams (S2C), Bloodskal swings (C2S). Registered in a fixed order. Staff visuals go through the
+ * magic module's effect packet ({@link Fx}).
+ */
 public final class ArsenalPackets {
     private ArsenalPackets() {}
 
     public static void register() {
         SkyNetwork.register(KillCam.class, NetworkDirection.PLAY_TO_CLIENT, KillCam::encode, KillCam::decode, KillCam::handle);
-        SkyNetwork.register(Fx.class, NetworkDirection.PLAY_TO_CLIENT, Fx::encode, Fx::decode, Fx::handle);
         SkyNetwork.register(BladeSwing.class, NetworkDirection.PLAY_TO_SERVER, BladeSwing::encode, BladeSwing::decode, BladeSwing::handle);
     }
 
     // ------------------------------------------------------------------ S2C
 
     /**
-     * Plays a kill cam on the killer's client. {@code kind} is {@link #MELEE} or {@link #ARROW}; for arrows
-     * {@code arrowId} is the arrow entity (may already be gone) and {@code dir} its flight direction.
+     * Plays a kill cam on the killer's client, sent on the killing blow. {@code kind} is {@link #MELEE} or
+     * {@link #ARROW}; for arrows {@code arrowId} is the arrow entity (may already be gone) and {@code dir} its flight
+     * direction. {@code (vx, vy, vz)} is the middle of the victim's body, so the cam works even when the victim is
+     * already gone on the client (its body replaced by a corpse).
      */
-    public record KillCam(int victimId, byte kind, int arrowId, float dx, float dy, float dz) {
+    public record KillCam(int victimId, byte kind, int arrowId, float dx, float dy, float dz, float vx, float vy, float vz) {
         public static final byte MELEE = 0;
         public static final byte ARROW = 1;
 
@@ -42,20 +46,28 @@ public final class ArsenalPackets {
             buf.writeFloat(m.dx);
             buf.writeFloat(m.dy);
             buf.writeFloat(m.dz);
+            buf.writeFloat(m.vx);
+            buf.writeFloat(m.vy);
+            buf.writeFloat(m.vz);
         }
 
         static KillCam decode(FriendlyByteBuf buf) {
-            return new KillCam(buf.readVarInt(), buf.readByte(), buf.readVarInt(), buf.readFloat(), buf.readFloat(), buf.readFloat());
+            return new KillCam(buf.readVarInt(), buf.readByte(), buf.readVarInt(), buf.readFloat(), buf.readFloat(), buf.readFloat(),
+                    buf.readFloat(), buf.readFloat(), buf.readFloat());
         }
 
         static void handle(KillCam m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> KillCamClient.start(m.victimId, m.kind, m.arrowId, new Vec3(m.dx, m.dy, m.dz)));
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> KillCamClient.start(m.victimId, m.kind, m.arrowId,
+                    new Vec3(m.dx, m.dy, m.dz), new Vec3(m.vx, m.vy, m.vz)));
             ctx.get().setPacketHandled(true);
         }
     }
 
-    /** A staff/artifact visual between two points (streams, beams, lightning arcs, bursts, wards). */
-    public record Fx(byte kind, float ax, float ay, float az, float bx, float by, float bz) {
+    /**
+     * Staff/artifact visuals between two points (streams, beams, lightning arcs, bursts, wards). Sent as the magic
+     * module's {@link com.skycraft.magic.MagicPackets.Fx} ({@link MagicFx#STAFF}, the visual kind in {@code extra}).
+     */
+    public static final class Fx {
         public static final byte FIRE_STREAM = 0;
         public static final byte FROST_STREAM = 1;
         public static final byte SHOCK_STREAM = 2;
@@ -68,34 +80,11 @@ public final class ArsenalPackets {
         public static final byte WARD = 9;
         public static final byte SOUL_BURST = 10;
 
-        public Fx(byte kind, Vec3 a, Vec3 b) {
-            this(kind, (float) a.x, (float) a.y, (float) a.z, (float) b.x, (float) b.y, (float) b.z);
-        }
-
-        static void encode(Fx m, FriendlyByteBuf buf) {
-            buf.writeByte(m.kind);
-            buf.writeFloat(m.ax);
-            buf.writeFloat(m.ay);
-            buf.writeFloat(m.az);
-            buf.writeFloat(m.bx);
-            buf.writeFloat(m.by);
-            buf.writeFloat(m.bz);
-        }
-
-        static Fx decode(FriendlyByteBuf buf) {
-            return new Fx(buf.readByte(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat());
-        }
-
-        static void handle(Fx m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ArsenalFxClient.play(m.kind,
-                    new Vec3(m.ax, m.ay, m.az), new Vec3(m.bx, m.by, m.bz)));
-            ctx.get().setPacketHandled(true);
-        }
+        private Fx() {}
 
         /** Sends the effect to every player within 64 blocks of {@code a}. */
         public static void send(ServerLevel level, byte kind, Vec3 a, Vec3 b) {
-            SkyNetwork.CHANNEL.send(PacketDistributor.NEAR.with(PacketDistributor.TargetPoint.p(a.x, a.y, a.z, 64, level.dimension())),
-                    new Fx(kind, a, b));
+            MagicFx.sendNear(level, a, 64, MagicFx.STAFF, Element.NONE, a, b, -1, kind);
         }
     }
 

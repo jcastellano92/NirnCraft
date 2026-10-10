@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PF",
+    "##"
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:paper"
+    },
+    "F": {
+      "item": "minecraft:feather"
+    },
+    "#": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "result": {
+    "item": "skycraft:drafting_table"
+  }
+}

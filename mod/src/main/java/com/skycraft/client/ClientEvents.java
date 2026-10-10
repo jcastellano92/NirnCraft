@@ -11,8 +11,8 @@ import com.skycraft.network.CorePackets;
 import com.skycraft.network.SkyNetwork;
 import com.skycraft.perk.Perks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.client.player.Input;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.BowItem;
@@ -20,6 +20,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ComputeFovModifierEvent;
+import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
+import net.minecraftforge.client.event.MovementInputUpdateEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
@@ -34,7 +36,6 @@ import net.minecraftforge.client.event.InputEvent;
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class ClientEvents {
     private static boolean wasBlocking;
-    private static int powerAttackResend;
     private static int climbResend;
     private static boolean isWallClinging;
     private static net.minecraft.core.Direction wallFacing;
@@ -87,11 +88,6 @@ public final class ClientEvents {
         // Smooth step assist over blocks without constant jumping
         if (mc.player.maxUpStep() < 1.0625f) {
             mc.player.setMaxUpStep(1.0625f);
-        }
-
-        // Prevent toggle crouch flipping state
-        if (mc.options.toggleCrouch().get()) {
-            mc.options.toggleCrouch().set(false);
         }
 
         // BotW / AC-style wall climbing & sticking:
@@ -211,18 +207,10 @@ public final class ClientEvents {
             climbResend = 0;
         }
 
-        // Power attack: while the key is held, the server treats swings as power attacks.
-        if (SkyKeys.POWER_ATTACK.isDown()) {
-            if (powerAttackResend-- <= 0) {
-                SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.POWER_ATTACK, 0));
-                powerAttackResend = 5;
-            }
-        } else {
-            powerAttackResend = 0;
-        }
+        // Power attacks are sprint-attacks (CombatHandler); there is no separate power-attack key.
 
         // Weapon & unarmed blocking: dual-wielding has no block.
-        // Can block with SkyKeys.BLOCK, or RMB (keyUse) when offhand has shield/weapon or when two-handed/unarmed.
+        // Block with RMB (keyUse) when offhand has shield/weapon or when two-handed/unarmed.
         ItemStack main = mc.player.getMainHandItem();
         ItemStack off = mc.player.getOffhandItem();
         boolean dual = !main.isEmpty() && !off.isEmpty()
@@ -231,7 +219,7 @@ public final class ClientEvents {
         boolean rmbBlock = mc.options.keyUse.isDown() && mc.screen == null && !dual
                 && (mc.hitResult == null || mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.MISS)
                 && (off.getItem() instanceof net.minecraft.world.item.ShieldItem || off.isEmpty() || WeaponClass.of(main).twoHanded());
-        boolean blocking = (SkyKeys.BLOCK.isDown() || rmbBlock) && mc.screen == null && !dual;
+        boolean blocking = rmbBlock;
         if (blocking != wasBlocking) {
             SkyNetwork.sendToServer(new CorePackets.Action(blocking ? CorePackets.Action.BLOCK_START : CorePackets.Action.BLOCK_STOP, 0));
             wasBlocking = blocking;
@@ -246,9 +234,9 @@ public final class ClientEvents {
             }
         }
 
-        // Out of stamina: no sprinting until it recovers.
-        if (ClientState.has(CorePackets.SyncVitals.EXHAUSTED) && !mc.player.isCreative()) {
-            mc.player.setSprinting(false);
+        // The one client-side sprint block, mirroring the server (Vitals: out of stamina; CarryWeight: over-encumbered).
+        if (cannotSprint(mc.player)) {
+            if (mc.player.isSprinting()) mc.player.setSprinting(false);
             mc.options.keySprint.setDown(false);
         }
 
@@ -259,12 +247,29 @@ public final class ClientEvents {
         }
     }
 
-    /** Alternating punches when unarmed and not sheathed */
+    /** Out of stamina (until it recovers) or carrying too much: no running. */
+    private static boolean cannotSprint(net.minecraft.client.player.LocalPlayer player) {
+        if (player.isCreative() || player.isSpectator()) return false;
+        return ClientState.has(CorePackets.SyncVitals.EXHAUSTED) || com.skycraft.inventory.client.ClientInventoryHandlers.over;
+    }
+
+    /** Keep the forward impulse under the sprint threshold so neither the sprint key nor double-tapping W can start a run. */
+    @SubscribeEvent
+    public static void onMovementInput(MovementInputUpdateEvent event) {
+        if (event.getEntity() instanceof net.minecraft.client.player.LocalPlayer player && cannotSprint(player)) {
+            Input input = event.getInput();
+            if (input.forwardImpulse > 0.79f) input.forwardImpulse = 0.79f;
+        }
+    }
+
+    /** Alternating punches when unarmed and not sheathed (discrete clicks only, never while mining a block). */
     @SubscribeEvent
     public static void onAttackInput(InputEvent.InteractionKeyMappingTriggered event) {
         if (!event.isAttack()) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.screen != null) return;
+        // Block breaking (including Forge's per-tick continueAttack trigger) is left entirely to vanilla.
+        if (mc.hitResult != null && mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) return;
         if (com.skycraft.combat.Sheathe.isSheathed(mc.player)) {
             // Unsheathe immediately without playing the punch animation
             event.setCanceled(true);
@@ -401,7 +406,23 @@ public final class ClientEvents {
         var id = event.getOverlay().id();
         if (id.equals(VanillaGuiOverlay.PLAYER_HEALTH.id()) || id.equals(VanillaGuiOverlay.FOOD_LEVEL.id())
                 || id.equals(VanillaGuiOverlay.ARMOR_LEVEL.id()) || id.equals(VanillaGuiOverlay.EXPERIENCE_BAR.id())
-                || id.equals(VanillaGuiOverlay.HOTBAR.id()) || id.equals(VanillaGuiOverlay.BOSS_EVENT_PROGRESS.id())) {
+                || id.equals(VanillaGuiOverlay.HOTBAR.id())) {
+            event.setCanceled(true);
+        }
+    }
+
+    /**
+     * Boss bars SkyBossHud draws itself (Skycraft bosses, the Ender Dragon, the Wither and whatever boss it is
+     * currently showing) are hidden; raid bars and other mods' bars render normally.
+     */
+    @SubscribeEvent
+    public static void hideReplacedBossBars(CustomizeGuiOverlayEvent.BossEventProgress event) {
+        Component name = event.getBossEvent().getName();
+        boolean replaced = name.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t
+                && (t.getKey().startsWith("entity.skycraft.") || t.getKey().equals("entity.minecraft.ender_dragon")
+                || t.getKey().equals("entity.minecraft.wither"));
+        if (replaced || SkyBossHud.isShowing(name)) {
+            event.setIncrement(0);
             event.setCanceled(true);
         }
     }
@@ -422,29 +443,6 @@ public final class ClientEvents {
         Minecraft mc = Minecraft.getInstance();
         if (mc.getToasts() != null) {
             mc.getToasts().clear();
-        }
-    }
-
-    /** Pause screen Unstuck button. */
-    @SubscribeEvent
-    public static void onScreenInit(ScreenEvent.Init.Post event) {
-        if (event.getScreen() instanceof PauseScreen pause) {
-            int w = 105;
-            int h = 20;
-            int x = pause.width - w - 8;
-            int y = 6;
-            event.addListener(Button.builder(
-                    Component.translatable("menu.skycraft.unstuck"),
-                    btn -> {
-                        if (ClientState.has(CorePackets.SyncVitals.IN_COMBAT)) {
-                            Minecraft.getInstance().gui.setOverlayMessage(
-                                    Component.translatable("message.skycraft.unstuck_combat"), false);
-                            return;
-                        }
-                        SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.UNSTUCK, 0));
-                        pause.onClose();
-                    }
-            ).bounds(x, y, w, h).build());
         }
     }
 
@@ -476,14 +474,6 @@ public final class ClientEvents {
 
         if (screen instanceof net.minecraft.client.gui.screens.worldselection.SelectWorldScreen && !(screen instanceof com.skycraft.client.screen.title.SkyLoadWorldScreen)) {
             event.setNewScreen(new com.skycraft.client.screen.title.SkyLoadWorldScreen(new com.skycraft.client.screen.title.SkyTitleScreen()));
-        }
-    }
-
-    @SubscribeEvent
-    public static void onKeyInput(InputEvent.Key event) {
-        if (event.getKey() == org.lwjgl.glfw.GLFW.GLFW_KEY_Z) {
-            Minecraft mc = Minecraft.getInstance();
-            KeyConflictResolver.enforceKeys(mc);
         }
     }
 }
