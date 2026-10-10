@@ -75,6 +75,9 @@ public final class Names {
 
     /** A stable ruin name for a location (the same dungeon always gets the same name). */
     public static String ruin(BlockPos pos) {
+        // a named barrow or ruin of Tamriel keeps its own name
+        var place = Locate.placeAt(pos);
+        if (place != null) return com.skycraft.world.PlaceText.plain(place);
         int h = Math.floorMod(pos.getX() / 16 * 31 + pos.getZ() / 16 * 17, RUINS.length);
         return RUINS[h];
     }

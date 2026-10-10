@@ -64,7 +64,7 @@ public enum HorseBreed {
 
     public static HorseBreed breedForHold(String hold) {
         if (hold == null) return WHITERUN_BAY;
-        return switch (hold) {
+        return switch (com.skycraft.core.Holds.base(hold)) {
             case "haafingar" -> SOLITUDE_GREY;
             case "eastmarch" -> WINDHELM_PINTO;
             case "the_rift" -> RIFTEN_CHESTNUT;

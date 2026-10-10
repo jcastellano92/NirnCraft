@@ -114,11 +114,8 @@ public class GuardEntity extends PathfinderMob {
     }
 
     public static int holdIndex(String holdId) {
-        String base = holdId;
-        int underscore = holdId.lastIndexOf('_');
-        if (underscore > 0 && holdId.substring(underscore + 1).chars().allMatch(Character::isDigit)) base = holdId.substring(0, underscore);
-        for (int i = 0; i < Holds.NAMES.length; i++) if (Holds.NAMES[i].equals(base)) return i;
-        return 0;
+        // guards outside Skyrim's holds wear Whiterun's colours until their province gets its own guards
+        return Math.max(0, Holds.index(holdId));
     }
 
     @Nullable

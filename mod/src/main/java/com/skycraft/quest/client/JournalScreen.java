@@ -601,8 +601,13 @@ public class JournalScreen extends Screen {
 
         heading(g, Component.translatable("journal.skycraft.reputation_holds"), lx, y);
         int ly = y + 14;
-        for (int i = 0; i < Holds.NAMES.length; i++) {
-            String hold = Holds.NAMES[i];
+        // Skyrim's nine holds always, then every other region where the player has a bounty
+        List<String> holds = new ArrayList<>(List.of(Holds.IDS));
+        for (String k : bountyTag.getAllKeys()) {
+            String id = Holds.migrate(k);
+            if (!holds.contains(id) && bountyTag.getInt(k) > 0) holds.add(id);
+        }
+        for (String hold : holds) {
             Component hName = Holds.displayName(hold);
             int bounty = bountyTag.getInt(hold);
             g.drawString(font, hName, lx + 4, ly, Parchment.INK, false);

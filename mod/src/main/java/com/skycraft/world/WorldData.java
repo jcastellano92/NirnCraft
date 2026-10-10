@@ -1,16 +1,22 @@
 package com.skycraft.world;
 
 import com.skycraft.core.PlayerData;
+import com.skycraft.tamriel.Place;
+import com.skycraft.tamriel.Places;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+
+import java.util.Optional;
 
 /**
  * Accessors for {@code data.module("world")}:
  * <ul>
- *     <li>{@code discovered}: list of {id, name, type, x, y, z, dim, t, ax, ay, az, box[6], cleared}</li>
- *     <li>{@code holds}: list of hold ids the player has entered</li>
+ *     <li>{@code discovered}: list of {id, name, type, x, y, z, dim, t, ax, ay, az, box[6], cleared, known, place};
+ *     named places of Tamriel have the id {@code place|<place id>} and {@code place} set</li>
+ *     <li>{@code holds}: list of region ids the player has entered ({@code skyrim/whiterun})</li>
  *     <li>{@code seen_nether}, {@code seen_end}: realm titles already shown</li>
  * </ul>
  * (x, y, z) is the centre of the location; (ax, ay, az) is where the player stood when discovering it (the
@@ -51,6 +57,35 @@ public final class WorldData {
         if (!m.contains("holds", Tag.TAG_LIST)) m.put("holds", new ListTag());
         m.getList("holds", Tag.TAG_STRING).add(StringTag.valueOf(hold));
         data.markDirty();
+    }
+
+    // ------------------------------------------------------------------ named places
+
+    public static final String PLACE_PREFIX = "place|";
+
+    /** Location id of a named place of Tamriel ({@code place|bleak_falls_barrow}). */
+    public static String placeLocId(String placeId) {
+        return PLACE_PREFIX + placeId;
+    }
+
+    /** The named place a location entry stands for, if it is one. */
+    public static Optional<Place> place(CompoundTag loc) {
+        String id = loc.getString("place");
+        return id.isEmpty() ? Optional.empty() : Places.byId(id);
+    }
+
+    /**
+     * The name to show for a location entry: a named place's (translated) name, otherwise the generated name stored
+     * when it was discovered.
+     */
+    public static Component displayName(CompoundTag loc) {
+        return place(loc).map(Place::name).orElseGet(() -> Component.literal(loc.getString("name")));
+    }
+
+    /** Whether the player has discovered (not merely heard of) the named place. */
+    public static boolean discoveredPlace(PlayerData data, String placeId) {
+        CompoundTag loc = find(data, placeLocId(placeId));
+        return loc != null && !loc.getBoolean("known");
     }
 
     /** True if (x, y, z) lies within the stored bounding box of a location, grown by {@code margin}. */

@@ -34,10 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /** Capability lifecycle (attach, death copy, sync on login/respawn/dimension change), first spawn and race prompt. */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class PlayerDataEvents {
-    /** Real towns/villages/taverns (worldgen tag owned by the world module) where new characters start. */
-    private static final TagKey<Structure> TOWNS = TagKey.create(Registries.STRUCTURE, new ResourceLocation(Skycraft.MODID, "towns"));
-    /** Starting-town search radius. Structure-start lookups only, so it stays cheap. */
-    private static final int START_SEARCH_CHUNKS = 24;
     /** How long a raceless player is protected while the race menu is pending (5 minutes). */
     private static final int RACE_PROTECTION_TICKS = 20 * 60 * 5;
     /** Persistent-data flag the Illusion invisibility spell sets (magic module); the only invisibility we ever clear. */
@@ -94,24 +90,14 @@ public final class PlayerDataEvents {
     }
 
     /**
-     * First login: start in the nearest real town (structure-start lookups within {@link #START_SEARCH_CHUNKS}),
-     * else at the world spawn. Only the destination chunk is loaded; the safe spot is searched inside it.
+     * First login: start at the world spawn, which the Tamriel map puts on the road outside Helgen
+     * (docs/TAMRIEL.md). Only the spawn chunk is loaded; the safe spot is searched inside it.
      */
     private static void placeAtStart(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
         if (level.dimension() != Level.OVERWORLD) return;
-        BlockPos town = null;
-        try {
-            town = level.findNearestMapStructure(TOWNS, player.blockPosition(), START_SEARCH_CHUNKS, false);
-        } catch (Exception e) {
-            Skycraft.LOGGER.warn("Starting town search failed", e);
-        }
-        BlockPos target = town != null ? town : level.getSharedSpawnPos();
+        BlockPos target = level.getSharedSpawnPos();
         LevelChunk chunk = level.getChunk(target.getX() >> 4, target.getZ() >> 4);
-        if (town != null && (level.getBiome(town).is(BiomeTags.IS_OCEAN) || level.getBiome(town).is(BiomeTags.IS_DEEP_OCEAN))) {
-            target = level.getSharedSpawnPos();
-            chunk = level.getChunk(target.getX() >> 4, target.getZ() >> 4);
-        }
 
         BlockPos safe = findSafeSpot(level, chunk, target);
         if (safe != null) {

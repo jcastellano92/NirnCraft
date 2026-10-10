@@ -16,8 +16,13 @@ public final class CompassMarkers {
 
     /**
      * @param range markers farther than this are hidden (0 = always shown, e.g. quest targets)
+     * @param icon  index into the map icon sheet ({@code textures/gui/map_icons.png}) drawn instead of the plain
+     *              shape, or -1
      */
-    public record Marker(Vec3 pos, Shape shape, int color, String label, double range) {
+    public record Marker(Vec3 pos, Shape shape, int color, String label, double range, int icon) {
+        public Marker(Vec3 pos, Shape shape, int color, String label, double range) {
+            this(pos, shape, color, label, range, -1);
+        }
     }
 
     private static final Map<String, List<Marker>> SOURCES = new ConcurrentHashMap<>();

@@ -21,7 +21,6 @@ public final class SkyConfig {
     public static final ForgeConfigSpec.DoubleValue STAMINA_REGEN_PERCENT;
     public static final ForgeConfigSpec.DoubleValue WEAPON_SKILL_DAMAGE_SCALE;
     public static final ForgeConfigSpec.BooleanValue SNEAK_ATTACKS;
-    public static final ForgeConfigSpec.IntValue HOLD_SIZE;
     public static final ForgeConfigSpec.BooleanValue PROMPT_RACE;
     public static final ForgeConfigSpec.IntValue MAX_TRAININGS_PER_LEVEL;
 
@@ -65,10 +64,6 @@ public final class SkyConfig {
         SNEAK_ATTACKS = b.define("sneakAttacks", true);
         b.pop();
 
-        b.push("world");
-        HOLD_SIZE = b.comment("Size in blocks of each hold (region with its own Jarl, guards and bounty).")
-                .defineInRange("holdSize", 2048, 256, 100000);
-        b.pop();
         SPEC = b.build();
     }
 

@@ -42,7 +42,40 @@ public final class Bounty {
     private Bounty() {}
 
     public static CompoundTag state(Player player) {
-        return SkyData.get(player).module(MODULE);
+        CompoundTag state = SkyData.get(player).module(MODULE);
+        if (state.getInt("hold_ids") < 2 && !player.level().isClientSide) migrateHoldIds(player, state);
+        return state;
+    }
+
+    /**
+     * Once per player: re-keys bounties saved under the pre-Tamriel hold ids ({@code "whiterun"}, {@code "whiterun_2"})
+     * to region ids ({@code "skyrim/whiterun"}). Bounties of the old repeated tiles add up into their hold.
+     */
+    private static void migrateHoldIds(Player player, CompoundTag state) {
+        state.putInt("hold_ids", 2);
+        for (String key : new String[]{"bounty", "violent"}) {
+            if (!state.contains(key, Tag.TAG_COMPOUND)) continue;
+            CompoundTag old = state.getCompound(key);
+            CompoundTag moved = new CompoundTag();
+            for (String hold : old.getAllKeys()) {
+                String id = Holds.migrate(hold);
+                if (key.equals("bounty")) moved.putInt(id, moved.getInt(id) + old.getInt(hold));
+                else moved.putBoolean(id, moved.getBoolean(id) || old.getBoolean(hold));
+            }
+            state.put(key, moved);
+        }
+        for (String k : new java.util.ArrayList<>(state.getAllKeys())) {
+            if (!k.startsWith("persuade_")) continue;
+            String id = Holds.migrate(k.substring("persuade_".length()));
+            int v = state.getInt(k);
+            state.remove(k);
+            state.putInt("persuade_" + id, v);
+        }
+        if (state.contains("jail", Tag.TAG_COMPOUND)) {
+            CompoundTag jail = state.getCompound("jail");
+            jail.putString("hold", Holds.migrate(jail.getString("hold")));
+        }
+        SkyData.get(player).markDirty();
     }
 
     private static CompoundTag bounties(Player player) {

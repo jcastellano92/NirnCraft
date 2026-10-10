@@ -85,7 +85,8 @@ public final class Houses {
     @Nullable
     public static HouseDef houseForHold(String hold) {
         for (HouseDef h : HOUSES) {
-            if (h.hold().equalsIgnoreCase(hold)) return h;
+            // region ids ("skyrim/whiterun") and the short hold names of the table both match
+            if (Holds.base(h.hold()).equalsIgnoreCase(Holds.base(hold))) return h;
         }
         return null;
     }

@@ -73,8 +73,27 @@ public final class Compass {
         }
     }
 
+    private static final net.minecraft.resources.ResourceLocation ICONS =
+            new net.minecraft.resources.ResourceLocation(com.skycraft.Skycraft.MODID, "textures/gui/map_icons.png");
+
     private static void drawMarker(GuiGraphics g, int x, int y, CompassMarkers.Marker m) {
         int c = 0xFF000000 | m.color();
+        if (m.icon() >= 0 && (m.shape() == CompassMarkers.Shape.DISCOVERED || m.shape() == CompassMarkers.Shape.LOCATION)) {
+            // Skyrim: discovered places in ink-white, undiscovered ones as dark silhouettes
+            float tone = m.shape() == CompassMarkers.Shape.DISCOVERED ? 1f : 0.35f;
+            com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+            g.pose().pushPose();
+            g.pose().translate(x - 5, y - 6, 0);
+            g.pose().scale(0.6875f, 0.6875f, 1f);
+            g.setColor(0f, 0f, 0f, 0.6f);
+            g.blit(ICONS, 1, 1, (float) ((m.icon() % 8) * 16), (float) ((m.icon() / 8) * 16), 16, 16, 128, 64);
+            g.setColor(tone * 1.25f, tone * 1.2f, tone * 1.1f, 1f);
+            g.blit(ICONS, 0, 0, (float) ((m.icon() % 8) * 16), (float) ((m.icon() / 8) * 16), 16, 16, 128, 64);
+            g.setColor(1f, 1f, 1f, 1f);
+            g.pose().popPose();
+            com.mojang.blaze3d.systems.RenderSystem.disableBlend();
+            return;
+        }
         switch (m.shape()) {
             case QUEST -> {
                 // downward arrow

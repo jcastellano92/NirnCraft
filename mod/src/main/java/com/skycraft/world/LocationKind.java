@@ -1,5 +1,6 @@
 package com.skycraft.world;
 
+import com.skycraft.tamriel.Place;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -41,10 +42,18 @@ public enum LocationKind {
     TOMB("tomb", 19, true, true, 0xE0C080),
     SANCTUM("sanctum", 20, true, true, 0xA8B0C0),
     BANDIT_CAMP("bandit_camp", 21, true, true, 0xD08060),
-    DAEDRIC_TOWER("daedric_tower", 22, true, true, 0xE05030);
+    DAEDRIC_TOWER("daedric_tower", 22, true, true, 0xE05030),
+    // named places of Tamriel (com.skycraft.tamriel.Places)
+    CAPITAL("capital", 25, false, false, 0xF0D890),
+    CITY("city", 26, false, false, 0xE8D8A8),
+    STANDING_STONE("standing_stone", 27, false, false, 0x90B8D8),
+    WORD_WALL("word_wall", 28, false, false, 0xD8C8A0),
+    DRAGON_MOUND("dragon_mound", 29, false, false, 0xC06040),
+    DAEDRIC_SHRINE("daedric_shrine", 30, false, false, 0xD05030);
 
     public static final int QUEST_ICON = 23;
     public static final int UNKNOWN_ICON = 24;
+    public static final int CUSTOM_ICON = 31;
 
     /** Structures too small or too common to be worth a discovery banner. */
     private static final Set<String> SKIP = new HashSet<>(Arrays.asList(
@@ -74,6 +83,33 @@ public enum LocationKind {
     /** Underground kinds put fast travellers at the surface above their entrance. */
     public boolean underground() {
         return insidePieces;
+    }
+
+    /** Whether this kind is a settlement (towns, cities and capitals): never "cleared", music of towns. */
+    public boolean settlement() {
+        return this == TOWN || this == CITY || this == CAPITAL || this == INN;
+    }
+
+    /** The kind of a named place: its type, or for named dungeons its variant/id keywords ("barrow", "dwemer"...). */
+    public static LocationKind forPlace(Place place) {
+        return switch (place.type()) {
+            case CAPITAL -> CAPITAL;
+            case CITY -> CITY;
+            case TOWN, VILLAGE -> TOWN;
+            case FARM -> HUT;
+            case FORT -> FORT;
+            case STANDING_STONE -> STANDING_STONE;
+            case WORD_WALL -> WORD_WALL;
+            case DRAGON_MOUND -> DRAGON_MOUND;
+            case DAEDRIC_SHRINE -> DAEDRIC_SHRINE;
+            case LANDMARK -> LANDMARK;
+            case DUNGEON_FIXED -> {
+                String hint = (place.variant() + "_" + place.id()).toLowerCase(Locale.ROOT);
+                if (hint.contains("ayleid") || hint.contains("velothi") || hint.contains("xanmeer")) yield RUIN;
+                LocationKind k = classify(new ResourceLocation("skycraft", hint.replaceAll("[^a-z0-9_]", "_")), Level.OVERWORLD);
+                yield k == null || k == LANDMARK || k == TOWN || k == INN || k == HUT || k == MANOR ? BARROW : k;
+            }
+        };
     }
 
     public static LocationKind byId(String id) {

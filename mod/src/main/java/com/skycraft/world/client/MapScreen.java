@@ -1,16 +1,23 @@
 package com.skycraft.world.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Axis;
-import com.skycraft.SkyConfig;
 import com.skycraft.Skycraft;
 import com.skycraft.client.SkyKeys;
-import com.skycraft.core.Holds;
 import com.skycraft.core.SkyData;
 import com.skycraft.network.SkyNetwork;
 import com.skycraft.quest.QuestPackets;
 import com.skycraft.quest.client.ClientQuestData;
+import com.skycraft.tamriel.Place;
+import com.skycraft.tamriel.PlaceType;
+import com.skycraft.tamriel.Places;
+import com.skycraft.tamriel.Region;
+import com.skycraft.tamriel.Regions;
+import com.skycraft.tamriel.TamrielMap;
 import com.skycraft.world.LocationKind;
+import com.skycraft.world.Provinces;
 import com.skycraft.world.SkyrimCalendar;
 import com.skycraft.world.WorldData;
 import com.skycraft.world.WorldPackets;
@@ -18,6 +25,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -26,32 +34,43 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 /**
- * The Skyrim world map on aged parchment: holds with their names, a coordinate grid, discovered locations (click to
- * fast travel), quest markers, you and the other players in this dimension. Drag to pan, scroll to zoom.
- * Terrain is intentionally not drawn (Xaero's World Map covers that).
+ * The world map of Nirn, Skyrim style: a painted parchment map (shaded relief, coasts, rivers, mountains, hold and
+ * province borders, see {@link MapTiles}) with province and region names, the named places of Tamriel and every
+ * location the player discovered (click to fast travel), quest markers, a custom marker, you, the other players
+ * and your party. Unexplored land lies under fog ({@link ExploredMap}); past the known world only explored land is
+ * drawn at all. Drag or WASD/arrows to pan, scroll or +/- to zoom, Space to find yourself, L for the legend.
+ *
+ * <p>Other realms (Oblivion, Sovngarde) show their discovered locations on blank parchment.</p>
  */
 public class MapScreen extends Screen {
     private static final ResourceLocation PARCHMENT = new ResourceLocation(Skycraft.MODID, "textures/gui/map_parchment.png");
     private static final ResourceLocation ICONS = new ResourceLocation(Skycraft.MODID, "textures/gui/map_icons.png");
-    private static final double MIN_SCALE = 1.0 / 64.0;
-    private static final double MAX_SCALE = 4.0;
-    private static final double DEFAULT_SCALE = 0.25;
+    private static final ResourceLocation FOG = new ResourceLocation(Skycraft.MODID, "map_fog");
+    /** GUI pixels per block. */
+    private static final double MIN_SCALE = 1.0 / 160.0;
+    private static final double MAX_SCALE = 2.0;
+    private static final double DEFAULT_SCALE = 1.0 / 6.0;
     private static final int INK = 0x3A2A18;
-    /** Subtle per-hold tints, indexed like {@link Holds#NAMES}. */
-    private static final int[] HOLD_TINTS = {0xC8A040, 0xC06020, 0x6080A0, 0x8090B0, 0xA0B8D0, 0x7A9060, 0x507060, 0xA05040, 0x408050};
+    private static final int FOG_RGB = 0xD6C6A0;
+    /** Foreign lands beyond Tamriel's seas count as charted (dim fog) within this many blocks of their centre. */
+    private static final int FOREIGN_RADIUS = 7000;
+    private static final String[] FOREIGN = {"atmora", "akavir", "yokuda", "pyandonea", "thras"};
 
     private static double savedScale = DEFAULT_SCALE;
     public static BlockPos customWaypoint = null;
+    private static boolean showLegend;
 
     private double centerX;
     private double centerZ;
@@ -60,7 +79,7 @@ public class MapScreen extends Screen {
     private int left, top, right, bottom;
     private boolean pressedOnMap;
     private double dragDistance;
-    private CompoundTag hoveredLocation;
+    private Pin hoveredPin;
     private CompoundTag pendingTravel;
     /** Party member under the cursor / chosen for fast travel (quest module's party sync). */
     private ClientQuestData.Member hoveredMember;
@@ -68,20 +87,27 @@ public class MapScreen extends Screen {
     private List<Component> tooltip;
     private Button yesButton, noButton;
 
+    /** A place or location drawn on the map. */
+    private record Pin(int x, int z, int icon, int priority, Component name, LocationKind kind, boolean known,
+                       boolean cleared, CompoundTag loc, Place place) {
+    }
+
     public MapScreen() {
         super(Component.translatable("screen.skycraft.map"));
     }
 
     public static void resetView() {
         savedScale = DEFAULT_SCALE;
+        customWaypoint = null;
+        Fog.release();
     }
 
     @Override
     protected void init() {
-        left = 14;
-        top = 30;
-        right = width - 14;
-        bottom = height - 26;
+        left = 10;
+        top = 28;
+        right = width - 10;
+        bottom = height - 16;
         if (!centered && minecraft != null && minecraft.player != null) {
             centerOnPlayer();
             centered = true;
@@ -113,6 +139,20 @@ public class MapScreen extends Screen {
     @Override
     public void tick() {
         updateButtons();
+        if (minecraft == null || pendingTravel != null || pendingMember != null) return;
+        // keyboard / controller (mapped to keys) panning
+        long window = minecraft.getWindow().getWindow();
+        double step = 10 / scale;
+        if (down(window, GLFW.GLFW_KEY_A) || down(window, GLFW.GLFW_KEY_LEFT)) centerX -= step;
+        if (down(window, GLFW.GLFW_KEY_D) || down(window, GLFW.GLFW_KEY_RIGHT)) centerX += step;
+        if (down(window, GLFW.GLFW_KEY_W) || down(window, GLFW.GLFW_KEY_UP)) centerZ -= step;
+        if (down(window, GLFW.GLFW_KEY_S) || down(window, GLFW.GLFW_KEY_DOWN)) centerZ += step;
+        if (down(window, GLFW.GLFW_KEY_Q) || down(window, GLFW.GLFW_KEY_PAGE_DOWN)) zoom(1 / 1.06, midX(), midY());
+        if (down(window, GLFW.GLFW_KEY_E) || down(window, GLFW.GLFW_KEY_PAGE_UP)) zoom(1.06, midX(), midY());
+    }
+
+    private static boolean down(long window, int key) {
+        return InputConstants.isKeyDown(window, key);
     }
 
     @Override
@@ -179,20 +219,17 @@ public class MapScreen extends Screen {
             cancelTravel();
             return true;
         }
-        if (button == 1 && onMap(mx, my)) {
-            // Right-click clears custom waypoint
-            if (customWaypoint != null) {
-                customWaypoint = null;
-                com.skycraft.client.hud.CompassMarkers.clear("custom_waypoint");
-                if (minecraft != null && minecraft.player != null) {
-                    minecraft.player.playSound(net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), 0.5f, 0.8f);
-                }
-                return true;
-            }
+        if (button == 1 && onMap(mx, my) && customWaypoint != null) {
+            clearWaypoint();
+            return true;
         }
         if (button == 0 && onMap(mx, my)) {
             pressedOnMap = true;
             dragDistance = 0;
+            return true;
+        }
+        if (button == 0 && my >= bottom + 2 && mx < left + 60) {
+            showLegend = !showLegend;
             return true;
         }
         return false;
@@ -213,37 +250,52 @@ public class MapScreen extends Screen {
     public boolean mouseReleased(double mx, double my, int button) {
         if (button == 0 && pressedOnMap) {
             pressedOnMap = false;
-            if (dragDistance < 4 && hoveredMember != null) {
+            if (dragDistance >= 4) return true;
+            if (hoveredMember != null) {
                 pendingMember = hoveredMember;
                 updateButtons();
-            } else if (dragDistance < 4 && hoveredLocation != null && !hoveredLocation.getBoolean("known")) {
-                pendingTravel = hoveredLocation;
+            } else if (hoveredPin != null && hoveredPin.loc() != null && !hoveredPin.known()) {
+                pendingTravel = hoveredPin.loc();
                 updateButtons();
-            } else if (dragDistance < 4 && onMap(mx, my) && hoveredLocation == null && hoveredMember == null) {
-                // If clicked close to existing custom waypoint, clear it
-                if (customWaypoint != null && Math.abs(screenX(customWaypoint.getX() + 0.5) - mx) <= 8 && Math.abs(screenY(customWaypoint.getZ() + 0.5) - my) <= 8) {
-                    customWaypoint = null;
-                    com.skycraft.client.hud.CompassMarkers.clear("custom_waypoint");
-                    if (minecraft != null && minecraft.player != null) {
-                        minecraft.player.playSound(net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), 0.5f, 0.8f);
-                    }
+            } else if (hoveredPin != null) {
+                // heard of but not discovered: mark it so the compass leads there
+                setWaypoint(new BlockPos(hoveredPin.x(), playerY(), hoveredPin.z()), hoveredPin.name().getString());
+            } else if (onMap(mx, my)) {
+                if (customWaypoint != null && Math.abs(screenX(customWaypoint.getX() + 0.5) - mx) <= 8
+                        && Math.abs(screenY(customWaypoint.getZ() + 0.5) - my) <= 8) {
+                    clearWaypoint();
                 } else {
-                    // Set custom waypoint at clicked location!
-                    int wx = (int) Math.round(worldX(mx));
-                    int wz = (int) Math.round(worldZ(my));
-                    int wy = minecraft != null && minecraft.player != null ? minecraft.player.getBlockY() : 64;
-                    customWaypoint = new BlockPos(wx, wy, wz);
-                    com.skycraft.client.hud.CompassMarkers.set("custom_waypoint", List.of(
-                            new com.skycraft.client.hud.CompassMarkers.Marker(Vec3.atBottomCenterOf(customWaypoint), com.skycraft.client.hud.CompassMarkers.Shape.QUEST, 0x38B0DE, "Custom Destination", 0)
-                    ));
-                    if (minecraft != null && minecraft.player != null) {
-                        minecraft.player.playSound(net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), 0.5f, 1.2f);
-                    }
+                    setWaypoint(new BlockPos((int) Math.round(worldX(mx)), playerY(), (int) Math.round(worldZ(my))), null);
                 }
             }
             return true;
         }
         return super.mouseReleased(mx, my, button);
+    }
+
+    private int playerY() {
+        return minecraft != null && minecraft.player != null ? minecraft.player.getBlockY() : 64;
+    }
+
+    private void setWaypoint(BlockPos pos, String label) {
+        customWaypoint = pos;
+        String text = label != null ? label : Component.translatable("world.skycraft.map.custom").getString();
+        com.skycraft.client.hud.CompassMarkers.set("custom_waypoint", List.of(
+                new com.skycraft.client.hud.CompassMarkers.Marker(Vec3.atBottomCenterOf(pos), com.skycraft.client.hud.CompassMarkers.Shape.QUEST,
+                        0x38B0DE, text, 0)));
+        click(1.2f);
+    }
+
+    private void clearWaypoint() {
+        customWaypoint = null;
+        com.skycraft.client.hud.CompassMarkers.clear("custom_waypoint");
+        click(0.8f);
+    }
+
+    private void click(float pitch) {
+        if (minecraft != null && minecraft.player != null) {
+            minecraft.player.playSound(net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), 0.5f, pitch);
+        }
     }
 
     @Override
@@ -281,12 +333,21 @@ public class MapScreen extends Screen {
             centerOnPlayer();
             return true;
         }
+        if (key == GLFW.GLFW_KEY_L) {
+            showLegend = !showLegend;
+            return true;
+        }
         if (key == GLFW.GLFW_KEY_EQUAL || key == GLFW.GLFW_KEY_KP_ADD) {
             zoom(1.5, midX(), midY());
             return true;
         }
         if (key == GLFW.GLFW_KEY_MINUS || key == GLFW.GLFW_KEY_KP_SUBTRACT) {
             zoom(1 / 1.5, midX(), midY());
+            return true;
+        }
+        if (key == GLFW.GLFW_KEY_F && customWaypoint != null) {
+            centerX = customWaypoint.getX();
+            centerZ = customWaypoint.getZ();
             return true;
         }
         return super.keyPressed(key, scan, mods);
@@ -301,8 +362,9 @@ public class MapScreen extends Screen {
         Level level = minecraft.level;
         Player player = minecraft.player;
         tooltip = null;
-        hoveredLocation = null;
+        hoveredPin = null;
         hoveredMember = null;
+        boolean overworld = level.dimension() == Level.OVERWORLD;
 
         // frame and paper
         g.fill(left - 5, top - 5, right + 5, bottom + 5, 0xFF1E140A);
@@ -311,168 +373,209 @@ public class MapScreen extends Screen {
         g.blit(PARCHMENT, left, top, right - left, bottom - top, 0f, 0f, 256, 256, 256, 256);
 
         g.enableScissor(left, top, right, bottom);
-        // thousands of small fills: batch them into one draw instead of flushing after each
-        g.drawManaged(() -> drawLandscape(g, level, player));
-        drawHolds(g, level);
-        drawGrid(g);
-        g.drawManaged(() -> drawFog(g, level, player));
-        drawLocations(g, level, player, mouseX, mouseY);
+        if (overworld) {
+            MapTiles.uploadFinished();
+            drawTiles(g);
+            drawPaperGrain(g);
+            drawFog(g);
+            drawProvinceAndRegionNames(g);
+        } else {
+            drawGrid(g);
+        }
+        drawPins(g, level, player, mouseX, mouseY);
         drawQuestMarkers(g, level, mouseX, mouseY);
-        drawCustomWaypoint(g, level, player, mouseX, mouseY);
+        drawCustomWaypoint(g, player, mouseX, mouseY);
         drawPlayers(g, level, player, partialTick, mouseX, mouseY);
         drawPartyMembers(g, level, player, mouseX, mouseY);
         g.disableScissor();
         drawVignette(g);
 
         drawHeader(g, level, player);
-        drawFooter(g, mouseX, mouseY);
+        drawFooter(g, level, mouseX, mouseY);
+        if (showLegend) drawLegend(g);
 
         if (pendingTravel != null || pendingMember != null) drawTravelDialog(g, player);
         super.render(g, mouseX, mouseY, partialTick);
         if (tooltip != null && pendingTravel == null && pendingMember == null) g.renderComponentTooltip(font, tooltip, mouseX, mouseY);
     }
 
-    private void drawLandscape(GuiGraphics g, Level level, Player player) {
-        if (level.dimension() != Level.OVERWORLD) return;
-        int step = (int) Math.max(6, Math.min(24, 16 * scale));
-        if (step <= 0) step = 12;
+    // ------------------------------------------------------------------ terrain tiles
 
-        for (int sy = top; sy < bottom; sy += step) {
-            double wz = worldZ(sy + step / 2.0);
-            int runStart = left, runColor = 0;
-            for (int sx = left; sx < right; sx += step) {
-                double wx = worldX(sx + step / 2.0);
-                int bx = Mth.floor(wx);
-                int bz = Mth.floor(wz);
+    /**
+     * Draws the painted map: every coarser level that is ready (so there is always something under a tile that is
+     * still being painted), then the level matching the zoom. Only the target level and the overview are requested.
+     */
+    private void drawTiles(GuiGraphics g) {
+        int target = MapTiles.lodFor(1 / scale);
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        for (int lod = 0; lod <= target; lod++) {
+            int tb = MapTiles.tileBlocks(lod);
+            int tx0 = Math.floorDiv(Mth.floor(worldX(left)), tb);
+            int tx1 = Math.floorDiv(Mth.floor(worldX(right)), tb);
+            int tz0 = Math.floorDiv(Mth.floor(worldZ(top)), tb);
+            int tz1 = Math.floorDiv(Mth.floor(worldZ(bottom)), tb);
+            if ((long) (tx1 - tx0 + 1) * (tz1 - tz0 + 1) > 400) continue;
+            boolean request = lod == target || lod == 0;
+            float size = (float) (tb * scale);
+            for (int tz = tz0; tz <= tz1; tz++) {
+                for (int tx = tx0; tx <= tx1; tx++) {
+                    ResourceLocation tex = request ? MapTiles.get(lod, tx, tz) : MapTiles.ready(lod, tx, tz) ? MapTiles.get(lod, tx, tz) : null;
+                    if (tex == null) continue;
+                    g.pose().pushPose();
+                    g.pose().translate((float) screenX((double) tx * tb), (float) screenY((double) tz * tb), 0);
+                    // a hair larger so neighbouring tiles never leave a seam
+                    float s = (size + 0.35f) / MapTiles.SIZE;
+                    g.pose().scale(s, s, 1f);
+                    g.blit(tex, 0, 0, 0f, 0f, MapTiles.SIZE, MapTiles.SIZE, MapTiles.SIZE, MapTiles.SIZE);
+                    g.pose().popPose();
+                }
+            }
+        }
+    }
 
-                int color;
-                if (level.hasChunk(bx >> 4, bz >> 4)) {
-                    int h = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, bx, bz);
-                    if (h <= 63) {
-                        color = 0x551E4870; // fjord / river water
-                    } else if (h > 120) {
-                        int alpha = Math.min(180, 80 + (h - 120) * 3);
-                        color = (alpha << 24) | 0xEDE8DC; // high mountain peak snow
-                    } else if (h > 88) {
-                        int alpha = Math.min(130, 40 + (h - 88) * 2);
-                        color = (alpha << 24) | 0x8A7E72; // mountain slopes & crags
-                    } else if (h > 72) {
-                        color = 0x303E4A28; // pine hills & tundra uplands
-                    } else {
-                        color = 0x24425232; // fertile plains & river valleys
-                    }
+    /** The parchment's fibres and stains over the painted map (multiplied, so the colours stay). */
+    private void drawPaperGrain(GuiGraphics g) {
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.DST_COLOR,
+                com.mojang.blaze3d.platform.GlStateManager.DestFactor.ZERO);
+        g.setColor(1.22f, 1.22f, 1.3f, 1f);
+        g.blit(PARCHMENT, left, top, right - left, bottom - top, 0f, 0f, right - left, bottom - top, 256, 256);
+        g.setColor(1f, 1f, 1f, 1f);
+        RenderSystem.defaultBlendFunc();
+    }
+
+    // ------------------------------------------------------------------ fog of war
+
+    /** The fog texture: one texel per explored-map cell over a margin around the view. */
+    private static final class Fog {
+        static DynamicTexture texture;
+        static int x0, z0, cell, w, h, level;
+        static long version = Long.MIN_VALUE;
+
+        static void release() {
+            if (texture != null) {
+                net.minecraft.client.Minecraft.getInstance().getTextureManager().release(FOG);
+                texture = null;
+            }
+            version = Long.MIN_VALUE;
+        }
+    }
+
+    private void drawFog(GuiGraphics g) {
+        double vx0 = worldX(left), vx1 = worldX(right), vz0 = worldZ(top), vz1 = worldZ(bottom);
+        double span = Math.max(vx1 - vx0, vz1 - vz0) * 1.6;
+        int level = 0;
+        while (level < ExploredMap.LEVELS - 1 && span / (1 << (ExploredMap.CELL_SHIFT + level)) > 320) level++;
+        int cell = 1 << (ExploredMap.CELL_SHIFT + level);
+        boolean inside = Fog.texture != null && Fog.level == level
+                && vx0 >= Fog.x0 && vz0 >= Fog.z0 && vx1 <= Fog.x0 + (long) Fog.w * Fog.cell && vz1 <= Fog.z0 + (long) Fog.h * Fog.cell;
+        if (!inside || Fog.version != ExploredMap.version()) rebuildFog(level, cell, (vx0 + vx1) / 2, (vz0 + vz1) / 2, span);
+        if (Fog.texture == null) return;
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        g.pose().pushPose();
+        g.pose().translate((float) screenX(Fog.x0), (float) screenY(Fog.z0), 0);
+        float s = (float) (Fog.cell * scale);
+        g.pose().scale(s, s, 1f);
+        g.blit(FOG, 0, 0, 0f, 0f, Fog.w, Fog.h, Fog.w, Fog.h);
+        g.pose().popPose();
+    }
+
+    private void rebuildFog(int level, int cell, double cx, double cz, double span) {
+        int n = Math.max(8, Math.min(512, (int) Math.ceil(span / cell)));
+        int x0 = Math.floorDiv((int) Math.floor(cx - n * cell / 2.0), cell) * cell;
+        int z0 = Math.floorDiv((int) Math.floor(cz - n * cell / 2.0), cell) * cell;
+        if (Fog.texture == null || Fog.w != n || Fog.h != n) {
+            Fog.release();
+            Fog.texture = new DynamicTexture(n, n, false);
+            Fog.texture.setFilter(true, false);
+            minecraft.getTextureManager().register(FOG, Fog.texture);
+        }
+        NativeImage img = Fog.texture.getPixels();
+        if (img == null) return;
+        int rgb = FOG_RGB;
+        int abgrRgb = (rgb & 0xFF) << 16 | (rgb & 0xFF00) | (rgb >> 16 & 0xFF);
+        for (int j = 0; j < n; j++) {
+            int wz = z0 + j * cell;
+            for (int i = 0; i < n; i++) {
+                int wx = x0 + i * cell;
+                int alpha;
+                if (ExploredMap.explored(level, (wx >> ExploredMap.CELL_SHIFT) >> level, (wz >> ExploredMap.CELL_SHIFT) >> level)) {
+                    alpha = 0;
                 } else {
-                    double n = Math.sin(wx * 0.003) * Math.cos(wz * 0.003) + 0.5 * Math.sin(wx * 0.007 + wz * 0.005);
-                    if (n > 0.5) {
-                        color = 0x3882786A; // distant mountain range
-                    } else if (n < -0.6) {
-                        color = 0x35203858; // water body
-                    } else {
-                        color = 0x18485238; // forested valley
-                    }
+                    alpha = charted(wx + cell / 2, wz + cell / 2) ? 150 : 255;
                 }
-                // one fill per horizontal run of equal colour
-                if (sx == left) {
-                    runColor = color;
-                } else if (color != runColor) {
-                    g.fill(runStart, sy, sx, Math.min(bottom, sy + step), runColor);
-                    runStart = sx;
-                    runColor = color;
-                }
-            }
-            g.fill(runStart, sy, right, Math.min(bottom, sy + step), runColor);
-        }
-    }
-
-    private void drawCustomWaypoint(GuiGraphics g, Level level, Player player, int mouseX, int mouseY) {
-        if (customWaypoint == null) return;
-        int sx = (int) Math.round(screenX(customWaypoint.getX() + 0.5));
-        int sy = (int) Math.round(screenY(customWaypoint.getZ() + 0.5));
-        if (sx < left - 10 || sx > right + 10 || sy < top - 10 || sy > bottom + 10) return;
-
-        // Glowing Azure Skyrim Waypoint marker
-        int color = 0xFF38B0DE;
-        diamond(g, sx, sy, 7, 0xFF101820);
-        diamond(g, sx, sy, 5, color);
-        diamond(g, sx, sy, 2, 0xFFFFFFFF);
-
-        // Downward pointer
-        g.fill(sx - 1, sy + 5, sx + 2, sy + 9, color);
-        g.fill(sx, sy + 9, sx + 1, sy + 11, color);
-
-        if (Math.abs(mouseX - sx) <= 8 && Math.abs(mouseY - sy) <= 8 && onMap(mouseX, mouseY)) {
-            double dx = customWaypoint.getX() - player.getX();
-            double dz = customWaypoint.getZ() - player.getZ();
-            int dist = (int) Math.sqrt(dx * dx + dz * dz);
-            List<Component> lines = new ArrayList<>();
-            lines.add(Component.literal("Custom Destination").withStyle(ChatFormatting.AQUA));
-            lines.add(Component.literal("X: " + customWaypoint.getX() + ", Z: " + customWaypoint.getZ()).withStyle(ChatFormatting.GRAY));
-            lines.add(Component.translatable("world.skycraft.map.distance", dist).withStyle(ChatFormatting.DARK_GRAY));
-            lines.add(Component.literal("[Click or R-Click to Remove]").withStyle(ChatFormatting.RED));
-            tooltip = lines;
-        }
-    }
-
-    private void drawHolds(GuiGraphics g, Level level) {
-        if (level.dimension() != Level.OVERWORLD) return;
-        int size = SkyConfig.HOLD_SIZE.get();
-        double px = size * scale;
-        if (px < 10) return;
-        int tx0 = Math.floorDiv(Mth.floor(worldX(left)), size);
-        int tx1 = Math.floorDiv(Mth.floor(worldX(right)), size);
-        int tz0 = Math.floorDiv(Mth.floor(worldZ(top)), size);
-        int tz1 = Math.floorDiv(Mth.floor(worldZ(bottom)), size);
-        if ((long) (tx1 - tx0 + 1) * (tz1 - tz0 + 1) > 600) return;
-        for (int tx = tx0; tx <= tx1; tx++) {
-            for (int tz = tz0; tz <= tz1; tz++) {
-                int x0 = Math.max(left, (int) Math.round(screenX((double) tx * size)));
-                int x1 = Math.min(right, (int) Math.round(screenX((double) (tx + 1) * size)));
-                int y0 = Math.max(top, (int) Math.round(screenY((double) tz * size)));
-                int y1 = Math.min(bottom, (int) Math.round(screenY((double) (tz + 1) * size)));
-                String hold = Holds.holdAt(level, new BlockPos(tx * size + size / 2, 64, tz * size + size / 2));
-                int tint = HOLD_TINTS[baseIndex(hold) % HOLD_TINTS.length];
-                if (x1 > x0 && y1 > y0) g.fill(x0, y0, x1, y1, 0x16000000 | tint);
+                img.setPixelRGBA(i, j, alpha << 24 | abgrRgb);
             }
         }
-        // dashed borders
-        int border = 0x907A2E1A;
-        for (int tx = tx0; tx <= tx1 + 1; tx++) {
-            int sx = (int) Math.round(screenX((double) tx * size));
-            if (sx < left || sx >= right) continue;
-            for (int y = top; y < bottom; y += 7) g.fill(sx, y, sx + 1, Math.min(bottom, y + 4), border);
+        Fog.texture.upload();
+        Fog.x0 = x0;
+        Fog.z0 = z0;
+        Fog.cell = cell;
+        Fog.w = n;
+        Fog.h = n;
+        Fog.level = level;
+        Fog.version = ExploredMap.version();
+    }
+
+    /** Tamriel and the foreign lands are on every map; the endless lands beyond are drawn only where explored. */
+    private static boolean charted(int x, int z) {
+        if (TamrielMap.inTamriel(x, z)) return true;
+        for (String f : FOREIGN) {
+            int[] a = Provinces.anchor(f);
+            if (a == null) continue;
+            long dx = x - a[0], dz = z - a[1];
+            if (dx * dx + dz * dz < (long) FOREIGN_RADIUS * FOREIGN_RADIUS) return true;
         }
-        for (int tz = tz0; tz <= tz1 + 1; tz++) {
-            int sy = (int) Math.round(screenY((double) tz * size));
-            if (sy < top || sy >= bottom) continue;
-            for (int x = left; x < right; x += 7) g.fill(x, sy, Math.min(right, x + 4), sy + 1, border);
+        return false;
+    }
+
+    // ------------------------------------------------------------------ names
+
+    private void drawProvinceAndRegionNames(GuiGraphics g) {
+        // province names: large spaced capitals when zoomed out
+        if (scale < 1 / 10.0) {
+            float a = (float) Mth.clamp((1 / 10.0 - scale) / (1 / 10.0 - 1 / 18.0), 0, 1);
+            float textScale = (float) Mth.clamp(0.9 + (1 / 40.0) / scale * 0.25, 1.1, 2.2);
+            for (MapLabels.Label l : MapLabels.provinces()) {
+                drawLabel(g, spaced(l.name().getString()), l.x(), l.z(), textScale, (int) (a * 0xB0) << 24 | 0x4A2A16);
+            }
         }
-        // names
-        if (px < 70) return;
-        float textScale = px > 400 ? 2f : px > 180 ? 1.5f : 1f;
-        for (int tx = tx0; tx <= tx1; tx++) {
-            for (int tz = tz0; tz <= tz1; tz++) {
-                String hold = Holds.holdAt(level, new BlockPos(tx * size + size / 2, 64, tz * size + size / 2));
-                Component name = Holds.displayName(hold);
-                // centre of the visible part of the hold, so its name stays readable while panning
-                double vx0 = Math.max(left, screenX((double) tx * size));
-                double vx1 = Math.min(right, screenX((double) (tx + 1) * size));
-                double vy0 = Math.max(top, screenY((double) tz * size));
-                double vy1 = Math.min(bottom, screenY((double) (tz + 1) * size));
-                if (vx1 - vx0 < font.width(name) * textScale * 0.8 || vy1 - vy0 < 16) continue;
-                float cx = (float) ((vx0 + vx1) / 2);
-                float cy = (float) ((vy0 + vy1) / 2);
-                g.pose().pushPose();
-                g.pose().translate(cx, cy, 0);
-                g.pose().scale(textScale, textScale, 1f);
-                g.drawString(font, name, -font.width(name) / 2, -4, 0x90000000 | INK, false);
-                g.pose().popPose();
+        // region (hold) names at middle zoom
+        if (scale > 1 / 60.0 && scale < 1 / 1.6) {
+            float a = (float) Math.min(Mth.clamp((scale - 1 / 60.0) / (1 / 30.0 - 1 / 60.0), 0, 1),
+                    Mth.clamp((1 / 1.6 - scale) / (1 / 1.6 - 1 / 2.5), 0, 1));
+            for (MapLabels.Label l : MapLabels.regions()) {
+                double px = Math.sqrt(l.area()) * scale;
+                if (px < 50) continue;
+                float textScale = (float) Mth.clamp(px / 220.0, 0.8, 1.4);
+                drawLabel(g, l.name().copy().withStyle(ChatFormatting.ITALIC), l.x(), l.z(), textScale, (int) (a * 0x98) << 24 | INK);
             }
         }
     }
 
-    private static int baseIndex(String holdId) {
-        for (int i = 0; i < Holds.NAMES.length; i++) if (holdId.startsWith(Holds.NAMES[i])) return i;
-        return 0;
+    private void drawLabel(GuiGraphics g, Component text, int wx, int wz, float textScale, int color) {
+        if ((color >>> 24) < 8) return;
+        double sx = screenX(wx);
+        double sy = screenY(wz);
+        int w = font.width(text);
+        if (sx + w * textScale < left || sx - w * textScale > right || sy < top - 20 || sy > bottom + 20) return;
+        g.pose().pushPose();
+        g.pose().translate((float) sx, (float) sy, 0);
+        g.pose().scale(textScale, textScale, 1f);
+        g.drawString(font, text, -w / 2, -4, color, false);
+        g.pose().popPose();
+    }
+
+    private static Component spaced(String s) {
+        StringBuilder sb = new StringBuilder();
+        String up = s.toUpperCase(Locale.ROOT);
+        for (int i = 0; i < up.length(); i++) {
+            if (i > 0) sb.append(' ');
+            sb.append(up.charAt(i));
+        }
+        return Component.literal(sb.toString());
     }
 
     private void drawGrid(GuiGraphics g) {
@@ -497,126 +600,156 @@ public class MapScreen extends Screen {
     }
 
     private void drawSmall(GuiGraphics g, String text, int x, int y, int color) {
+        drawScaled(g, Component.literal(text), x, y, 0.6f, color);
+    }
+
+    private void drawScaled(GuiGraphics g, Component text, float x, float y, float s, int color) {
         g.pose().pushPose();
         g.pose().translate(x, y, 0);
-        g.pose().scale(0.6f, 0.6f, 1f);
+        g.pose().scale(s, s, 1f);
         g.drawString(font, text, 0, 0, color, false);
         g.pose().popPose();
     }
 
-    private void drawIcon(GuiGraphics g, int index, int cx, int cy) {
+    // ------------------------------------------------------------------ places and locations
+
+    private void drawIcon(GuiGraphics g, int index, float cx, float cy, float size) {
         int u = (index % 8) * 16;
         int v = (index / 8) * 16;
-        g.blit(ICONS, cx - 8, cy - 8, (float) u, (float) v, 16, 16, 128, 64);
+        g.pose().pushPose();
+        g.pose().translate(cx - size / 2, cy - size / 2, 0);
+        g.pose().scale(size / 16f, size / 16f, 1f);
+        g.blit(ICONS, 0, 0, (float) u, (float) v, 16, 16, 128, 64);
+        g.pose().popPose();
     }
 
-    private void drawLocations(GuiGraphics g, Level level, Player player, int mouseX, int mouseY) {
+    /** Every pin to draw: discovered and rumored locations, plus the capitals and cities everyone knows. */
+    private List<Pin> pins(Level level, Player player) {
         ListTag list = SkyData.get(player).module(WorldData.MODULE).getList("discovered", Tag.TAG_COMPOUND);
         String dim = level.dimension().location().toString();
-        double best = 9 * 9;
-        CompoundTag hovered = null;
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
+        List<Pin> out = new ArrayList<>();
+        Set<String> listed = new HashSet<>();
         for (int i = 0; i < list.size(); i++) {
             CompoundTag loc = list.getCompound(i);
             if (!loc.getString("dim").equals(dim)) continue;
-            int sx = (int) Math.round(screenX(loc.getInt("x") + 0.5));
-            int sy = (int) Math.round(screenY(loc.getInt("z") + 0.5));
-            if (sx < left - 10 || sx > right + 10 || sy < top - 10 || sy > bottom + 10) continue;
             LocationKind kind = LocationKind.byId(loc.getString("type"));
-            boolean knownOnly = loc.getBoolean("known");
-            int iconIdx = knownOnly ? LocationKind.UNKNOWN_ICON : kind.icon;
-            drawIcon(g, iconIdx, sx, sy);
+            Place place = WorldData.place(loc).orElse(null);
+            if (place != null) listed.add(place.id());
+            out.add(new Pin(loc.getInt("x"), loc.getInt("z"), kind.icon, priority(place, kind), WorldData.displayName(loc), kind,
+                    loc.getBoolean("known"), loc.getBoolean("cleared"), loc, place));
+        }
+        if (level.dimension() == Level.OVERWORLD) {
+            for (Place p : Places.all()) {
+                if (listed.contains(p.id()) || (p.type() != PlaceType.CAPITAL && p.type() != PlaceType.CITY)) continue;
+                LocationKind kind = LocationKind.forPlace(p);
+                out.add(new Pin(p.x(), p.z(), kind.icon, priority(p, kind), p.name(), kind, true, false, null, p));
+            }
+        }
+        out.sort(Comparator.comparingInt(Pin::priority).reversed());
+        return out;
+    }
+
+    private static int priority(Place place, LocationKind kind) {
+        if (place == null) return 0;
+        return switch (place.type()) {
+            case CAPITAL -> 4;
+            case CITY -> 3;
+            case TOWN, STANDING_STONE, WORD_WALL, DRAGON_MOUND, DUNGEON_FIXED, DAEDRIC_SHRINE -> 2;
+            default -> 1;
+        };
+    }
+
+    /** The zoom (GUI pixels per block) from which pins of this priority are drawn. */
+    private static double minScale(int priority) {
+        return switch (priority) {
+            case 4 -> 0;
+            case 3 -> 1 / 48.0;
+            case 2 -> 1 / 18.0;
+            case 1 -> 1 / 12.0;
+            default -> 1 / 9.0;
+        };
+    }
+
+    private void drawPins(GuiGraphics g, Level level, Player player, int mouseX, int mouseY) {
+        List<Pin> pins = pins(level, player);
+        List<float[]> drawn = new ArrayList<>();
+        double best = 9 * 9;
+        Pin hovered = null;
+        float iconSize = scale < 1 / 30.0 ? 11f : scale < 1 / 8.0 ? 13f : 16f;
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        for (Pin pin : pins) {
+            if (scale < minScale(pin.priority())) continue;
+            float sx = (float) screenX(pin.x() + 0.5);
+            float sy = (float) screenY(pin.z() + 0.5);
+            if (sx < left - 10 || sx > right + 10 || sy < top - 10 || sy > bottom + 10) continue;
+            boolean crowded = false;
+            for (float[] d : drawn) {
+                if (Math.abs(d[0] - sx) < iconSize * 0.7f && Math.abs(d[1] - sy) < iconSize * 0.7f) {
+                    crowded = true;
+                    break;
+                }
+            }
+            if (crowded) continue;
+            drawn.add(new float[]{sx, sy});
+            if (pin.known()) {
+                g.setColor(0.42f, 0.36f, 0.3f, 0.9f); // heard of: a dark silhouette until discovered
+            }
+            drawIcon(g, pin.known() && pin.place() == null ? LocationKind.UNKNOWN_ICON : pin.icon(), sx, sy, iconSize);
+            g.setColor(1f, 1f, 1f, 1f);
+            if (showName(pin)) {
+                Component name = pin.name();
+                float ts = pin.priority() >= 4 ? 0.75f : 0.62f;
+                int w = (int) (font.width(name) * ts);
+                drawScaled(g, name, sx - w / 2f, sy + iconSize / 2f + 1, ts, (pin.known() ? 0xA0 : 0xE0) << 24 | INK);
+            }
             double d = (mouseX - sx) * (double) (mouseX - sx) + (mouseY - sy) * (double) (mouseY - sy);
             if (d < best && onMap(mouseX, mouseY)) {
                 best = d;
-                hovered = loc;
+                hovered = pin;
             }
         }
         RenderSystem.disableBlend();
         if (hovered != null) {
-            hoveredLocation = hovered;
-            int sx = (int) Math.round(screenX(hovered.getInt("x") + 0.5));
-            int sy = (int) Math.round(screenY(hovered.getInt("z") + 0.5));
-            outline(g, sx - 10, sy - 10, sx + 10, sy + 10, 0xC0000000 | INK);
-            LocationKind kind = LocationKind.byId(hovered.getString("type"));
-            List<Component> lines = new ArrayList<>();
-            lines.add(Component.literal(hovered.getString("name")).withStyle(ChatFormatting.GOLD));
-            lines.add(kind.displayName().copy().withStyle(ChatFormatting.GRAY));
-            if (hovered.getBoolean("cleared")) lines.add(Component.translatable("world.skycraft.map.cleared").withStyle(ChatFormatting.DARK_GREEN));
-            double dx = hovered.getInt("x") - player.getX();
-            double dz = hovered.getInt("z") - player.getZ();
-            lines.add(Component.translatable("world.skycraft.map.distance", (int) Math.sqrt(dx * dx + dz * dz)).withStyle(ChatFormatting.DARK_GRAY));
-            if (hovered.getBoolean("known")) {
-                lines.add(Component.translatable("world.skycraft.map.undiscovered").withStyle(ChatFormatting.DARK_GRAY));
-            } else {
-                lines.add(Component.translatable("world.skycraft.map.click_travel").withStyle(ChatFormatting.YELLOW));
-            }
-            tooltip = lines;
+            hoveredPin = hovered;
+            int sx = (int) Math.round(screenX(hovered.x() + 0.5));
+            int sy = (int) Math.round(screenY(hovered.z() + 0.5));
+            int r = (int) (iconSize / 2) + 2;
+            outline(g, sx - r, sy - r, sx + r, sy + r, 0xC0000000 | INK);
+            tooltip = pinTooltip(hovered, player);
         }
     }
 
-    /** Fog cells (world space) are this many blocks wide. */
-    private static final int FOG_CELL_SHIFT = 5;
-    private static final int FOG_REVEAL = 250;
-    /** World cells within {@link #FOG_REVEAL} of a discovered location; rebuilt only when the discoveries change. */
-    private static final LongOpenHashSet exploredCells = new LongOpenHashSet();
-    private static long exploredStamp = Long.MIN_VALUE;
-
-    private static void updateExplored(ListTag list, String dim) {
-        long stamp = list.size();
-        for (int i = 0; i < list.size(); i++) {
-            CompoundTag loc = list.getCompound(i);
-            stamp = stamp * 31 + loc.getInt("x") * 7919L + loc.getInt("z") + (loc.getBoolean("known") ? 1 : 0);
-        }
-        stamp = stamp * 31 + dim.hashCode();
-        if (stamp == exploredStamp) return;
-        exploredStamp = stamp;
-        exploredCells.clear();
-        int cell = 1 << FOG_CELL_SHIFT;
-        int r = FOG_REVEAL / cell + 1;
-        long reveal2 = (long) FOG_REVEAL * FOG_REVEAL;
-        for (int i = 0; i < list.size(); i++) {
-            CompoundTag loc = list.getCompound(i);
-            if (!loc.getString("dim").equals(dim) || loc.getBoolean("known")) continue;
-            int lx = loc.getInt("x"), lz = loc.getInt("z");
-            int cx = lx >> FOG_CELL_SHIFT, cz = lz >> FOG_CELL_SHIFT;
-            for (int dx = -r; dx <= r; dx++) {
-                for (int dz = -r; dz <= r; dz++) {
-                    long ox = ((long) (cx + dx) << FOG_CELL_SHIFT) + cell / 2 - lx;
-                    long oz = ((long) (cz + dz) << FOG_CELL_SHIFT) + cell / 2 - lz;
-                    if (ox * ox + oz * oz <= reveal2) exploredCells.add(ChunkPos.asLong(cx + dx, cz + dz));
-                }
-            }
-        }
+    private boolean showName(Pin pin) {
+        return switch (pin.priority()) {
+            case 4 -> scale >= 1 / 40.0;
+            case 3 -> scale >= 1 / 20.0;
+            case 2 -> scale >= 1 / 5.0;
+            default -> scale >= 1 / 2.5;
+        };
     }
 
-    private void drawFog(GuiGraphics g, Level level, Player player) {
-        if (level.dimension() != Level.OVERWORLD) return;
-        ListTag list = SkyData.get(player).module(WorldData.MODULE).getList("discovered", Tag.TAG_COMPOUND);
-        updateExplored(list, level.dimension().location().toString());
-        int step = 20;
-        int fogColor = 0x70302214;
-
-        for (int y = top; y < bottom; y += step) {
-            int runStart = -1;
-            for (int x = left; x < right; x += step) {
-                double wx = worldX(x + step / 2.0);
-                double wz = worldZ(y + step / 2.0);
-
-                double pDx = wx - player.getX();
-                double pDz = wz - player.getZ();
-                boolean fogged = pDx * pDx + pDz * pDz >= 350.0 * 350.0
-                        && !exploredCells.contains(ChunkPos.asLong(Mth.floor(wx) >> FOG_CELL_SHIFT, Mth.floor(wz) >> FOG_CELL_SHIFT));
-                // one fill per horizontal run of fogged cells
-                if (fogged && runStart < 0) runStart = x;
-                if (!fogged && runStart >= 0) {
-                    g.fill(runStart, y, x, Math.min(bottom, y + step), fogColor);
-                    runStart = -1;
-                }
-            }
-            if (runStart >= 0) g.fill(runStart, y, right, Math.min(bottom, y + step), fogColor);
+    private List<Component> pinTooltip(Pin pin, Player player) {
+        List<Component> lines = new ArrayList<>();
+        lines.add(pin.name().copy().withStyle(ChatFormatting.GOLD));
+        lines.add(pin.kind().displayName().copy().withStyle(ChatFormatting.GRAY));
+        Region region = pin.place() != null && !pin.place().regionId().isEmpty()
+                ? Regions.byId(pin.place().regionId()).orElse(null) : null;
+        if (region == null && minecraft.level.dimension() == Level.OVERWORLD) region = TamrielMap.region(pin.x(), pin.z());
+        if (region != null && !Provinces.isSea(region)) {
+            lines.add(region.name().copy().append(", ").append(Provinces.name(region.province())).withStyle(ChatFormatting.DARK_GRAY));
         }
+        if (pin.cleared()) lines.add(Component.translatable("world.skycraft.map.cleared").withStyle(ChatFormatting.DARK_GREEN));
+        double dx = pin.x() - player.getX();
+        double dz = pin.z() - player.getZ();
+        lines.add(Component.translatable("world.skycraft.map.distance", (int) Math.sqrt(dx * dx + dz * dz)).withStyle(ChatFormatting.DARK_GRAY));
+        if (pin.known() || pin.loc() == null) {
+            lines.add(Component.translatable("world.skycraft.map.undiscovered").withStyle(ChatFormatting.DARK_GRAY));
+            lines.add(Component.translatable("world.skycraft.map.click_mark").withStyle(ChatFormatting.AQUA));
+        } else {
+            lines.add(Component.translatable("world.skycraft.map.click_travel").withStyle(ChatFormatting.YELLOW));
+        }
+        return lines;
     }
 
     private void drawQuestMarkers(GuiGraphics g, Level level, int mouseX, int mouseY) {
@@ -633,16 +766,39 @@ public class MapScreen extends Screen {
             int sy = (int) Math.round(screenY(m.getDouble("z")));
             // pin markers that are off-map to the edge, like Skyrim does
             int cx = Mth.clamp(sx, left + 8, right - 8);
-            int cy = Mth.clamp(sy, top + 8, bottom - 8);
-            drawIcon(g, LocationKind.QUEST_ICON, cx, cy - 6);
-            if (tooltip == null && Math.abs(mouseX - cx) <= 7 && Math.abs(mouseY - (cy - 6)) <= 7) {
+            int cy = Mth.clamp(sy, top + 14, bottom - 8);
+            drawIcon(g, LocationKind.QUEST_ICON, cx, cy - 6, 16f);
+            if (Math.abs(mouseX - cx) <= 7 && Math.abs(mouseY - (cy - 6)) <= 7) {
                 List<Component> lines = new ArrayList<>();
                 lines.add(Component.literal(m.getString("label")).withStyle(ChatFormatting.YELLOW));
                 lines.add(Component.translatable("world.skycraft.map.quest").withStyle(ChatFormatting.GRAY));
                 tooltip = lines;
+                hoveredPin = null;
             }
         }
         RenderSystem.disableBlend();
+    }
+
+    private void drawCustomWaypoint(GuiGraphics g, Player player, int mouseX, int mouseY) {
+        if (customWaypoint == null) return;
+        int sx = (int) Math.round(screenX(customWaypoint.getX() + 0.5));
+        int sy = (int) Math.round(screenY(customWaypoint.getZ() + 0.5));
+        int cx = Mth.clamp(sx, left + 8, right - 8);
+        int cy = Mth.clamp(sy, top + 8, bottom - 8);
+        RenderSystem.enableBlend();
+        drawIcon(g, LocationKind.CUSTOM_ICON, cx, cy - 7, 14f);
+        RenderSystem.disableBlend();
+        if (Math.abs(mouseX - cx) <= 7 && Math.abs(mouseY - (cy - 7)) <= 7 && onMap(mouseX, mouseY)) {
+            double dx = customWaypoint.getX() - player.getX();
+            double dz = customWaypoint.getZ() - player.getZ();
+            List<Component> lines = new ArrayList<>();
+            lines.add(Component.translatable("world.skycraft.map.custom").withStyle(ChatFormatting.AQUA));
+            lines.add(Component.literal("X " + customWaypoint.getX() + "   Z " + customWaypoint.getZ()).withStyle(ChatFormatting.GRAY));
+            lines.add(Component.translatable("world.skycraft.map.distance", (int) Math.sqrt(dx * dx + dz * dz)).withStyle(ChatFormatting.DARK_GRAY));
+            lines.add(Component.translatable("world.skycraft.map.click_remove").withStyle(ChatFormatting.RED));
+            tooltip = lines;
+            hoveredPin = null;
+        }
     }
 
     private void drawPlayers(GuiGraphics g, Level level, Player self, float partialTick, int mouseX, int mouseY) {
@@ -653,8 +809,9 @@ public class MapScreen extends Screen {
             if (!onMap(sx, sy)) continue;
             g.fill(sx - 3, sy - 3, sx + 4, sy + 4, 0xFF1A1A2A);
             g.fill(sx - 2, sy - 2, sx + 3, sy + 3, 0xFF5A8AD8);
-            if (tooltip == null && Math.abs(mouseX - sx) <= 5 && Math.abs(mouseY - sy) <= 5) {
+            if (Math.abs(mouseX - sx) <= 5 && Math.abs(mouseY - sy) <= 5) {
                 tooltip = List.of(other.getDisplayName());
+                hoveredPin = null;
             }
         }
         // you: an arrow pointing where you look
@@ -702,7 +859,7 @@ public class MapScreen extends Screen {
             drawSmall(g, m.name(), cx - (int) (font.width(m.name()) * 0.3f), cy - 12, 0xFF000000 | INK);
             if (Math.abs(mouseX - cx) <= 6 && Math.abs(mouseY - cy) <= 6 && onMap(mouseX, mouseY)) {
                 hoveredMember = m;
-                hoveredLocation = null;
+                hoveredPin = null;
                 List<Component> lines = new ArrayList<>();
                 lines.add(Component.literal(m.name()).withStyle(ChatFormatting.GREEN));
                 lines.add(Component.translatable("party.skycraft.map.member").withStyle(ChatFormatting.GRAY));
@@ -754,10 +911,13 @@ public class MapScreen extends Screen {
         }
     }
 
+    // ------------------------------------------------------------------ header, footer, legend
+
     private void drawHeader(GuiGraphics g, Level level, Player player) {
         Component region;
         if (level.dimension() == Level.OVERWORLD) {
-            region = Holds.displayName(Holds.holdAt(level, player.blockPosition()));
+            Region r = Regions.at(level, player.blockPosition());
+            region = Provinces.isSea(r) ? r.name() : r.name().copy().append(" · ").append(Provinces.name(r.province()));
         } else if (level.dimension() == Level.NETHER) {
             region = Component.translatable("world.skycraft.realm.oblivion.name");
         } else if (level.dimension() == Level.END) {
@@ -765,24 +925,69 @@ public class MapScreen extends Screen {
         } else {
             region = Component.literal(level.dimension().location().getPath());
         }
+        float s = width < 520 ? 1.15f : 1.4f;
         g.pose().pushPose();
-        g.pose().translate(width / 2f, 8, 0);
-        g.pose().scale(1.5f, 1.5f, 1f);
+        g.pose().translate(width / 2f, 5, 0);
+        g.pose().scale(s, s, 1f);
         g.drawCenteredString(font, region, 0, 0, 0xFFF5EBC8);
         g.pose().popPose();
         long dayTime = level.getDayTime();
-        g.drawString(font, SkyrimCalendar.date(dayTime), left, 12, 0xFFBDB59E);
-        Component time = SkyrimCalendar.time(dayTime);
-        g.drawString(font, time, right - font.width(time), 12, 0xFFE8C060);
+        Component when = SkyrimCalendar.date(dayTime).copy().append("   ").append(SkyrimCalendar.time(dayTime));
+        float ws = 0.72f;
+        drawScaled(g, when, width / 2f - font.width(when) * ws / 2f, 5 + 9 * s + 2, ws, 0xFFBDB59E);
     }
 
-    private void drawFooter(GuiGraphics g, int mouseX, int mouseY) {
-        String help = "[L-Click] Travel / Waypoint   [R-Click] Clear   [Scroll] Zoom   [Space] Recenter";
-        g.drawString(font, help, left, bottom + 9, 0xFF8A7F66);
+    private void drawFooter(GuiGraphics g, Level level, int mouseX, int mouseY) {
+        float s = 0.7f;
+        Component help = Component.translatable("world.skycraft.map.help_short");
+        drawScaled(g, help, left, bottom + 5, s, 0xFF8A7F66);
         if (onMap(mouseX, mouseY)) {
-            String coords = "X " + Mth.floor(worldX(mouseX)) + "   Z " + Mth.floor(worldZ(mouseY));
-            g.drawString(font, coords, right - font.width(coords), bottom + 9, 0xFFBDB59E);
+            int wx = Mth.floor(worldX(mouseX));
+            int wz = Mth.floor(worldZ(mouseY));
+            Component where = Component.literal("X " + wx + "  Z " + wz);
+            if (level.dimension() == Level.OVERWORLD) {
+                Region r = TamrielMap.region(wx, wz);
+                where = r.name().copy().append("   ").append(where);
+            }
+            drawScaled(g, where, right - font.width(where) * s, bottom + 5, s, 0xFFBDB59E);
         }
+    }
+
+    private static final LocationKind[] LEGEND = {
+            LocationKind.CAPITAL, LocationKind.CITY, LocationKind.TOWN, LocationKind.FORT, LocationKind.BARROW,
+            LocationKind.CAVE, LocationKind.MINE, LocationKind.RUIN, LocationKind.DWEMER, LocationKind.STANDING_STONE,
+            LocationKind.WORD_WALL, LocationKind.DRAGON_MOUND, LocationKind.DAEDRIC_SHRINE, LocationKind.CAMP,
+            LocationKind.TOWER, LocationKind.LANDMARK};
+
+    private void drawLegend(GuiGraphics g) {
+        int rows = (LEGEND.length + 2 + 1) / 2;
+        int rowH = 11;
+        int colW = Math.min(110, (right - left - 16) / 2);
+        int w = colW * 2 + 10;
+        int h = rows * rowH + 18;
+        int x0 = left + 6;
+        int y0 = bottom - h - 6;
+        g.fill(x0, y0, x0 + w, y0 + h, 0xE0E8D8B4);
+        outline(g, x0, y0, x0 + w, y0 + h, 0xFF6B5030);
+        drawScaled(g, Component.translatable("world.skycraft.map.legend"), x0 + 5, y0 + 4, 0.8f, 0xFF000000 | INK);
+        RenderSystem.enableBlend();
+        int i = 0;
+        for (LocationKind k : LEGEND) {
+            int cx = x0 + 5 + (i % 2) * colW;
+            int cy = y0 + 15 + (i / 2) * rowH;
+            drawIcon(g, k.icon, cx + 5, cy + 4, 10f);
+            drawScaled(g, k.displayName(), cx + 13, cy + 1, 0.7f, 0xFF000000 | INK);
+            i++;
+        }
+        int[] extra = {LocationKind.QUEST_ICON, LocationKind.CUSTOM_ICON};
+        String[] keys = {"world.skycraft.map.quest", "world.skycraft.map.custom"};
+        for (int k = 0; k < extra.length; k++, i++) {
+            int cx = x0 + 5 + (i % 2) * colW;
+            int cy = y0 + 15 + (i / 2) * rowH;
+            drawIcon(g, extra[k], cx + 5, cy + 4, 10f);
+            drawScaled(g, Component.translatable(keys[k]), cx + 13, cy + 1, 0.7f, 0xFF000000 | INK);
+        }
+        RenderSystem.disableBlend();
     }
 
     private void drawTravelDialog(GuiGraphics g, Player player) {
@@ -790,15 +995,15 @@ public class MapScreen extends Screen {
         int cy = height / 2;
         g.fill(cx - 120, cy - 34, cx + 120, cy + 38, 0xE0100C08);
         outline(g, cx - 120, cy - 34, cx + 120, cy + 38, 0xFF8A7F66);
-        String name;
+        Component name;
         double dx, dz;
         if (pendingMember != null) {
-            name = pendingMember.name();
+            name = Component.literal(pendingMember.name());
             Vec3 pos = pendingMember.position();
             dx = pos.x - player.getX();
             dz = pos.z - player.getZ();
         } else {
-            name = pendingTravel.getString("name");
+            name = WorldData.displayName(pendingTravel);
             dx = pendingTravel.getInt("x") - player.getX();
             dz = pendingTravel.getInt("z") - player.getZ();
         }

@@ -51,9 +51,14 @@ public final class SideQuests {
         ServerLevel level = (ServerLevel) player.level();
         String dim = level.dimension().location().toString();
         BlockPos at = player.blockPosition();
-        BlockPos dungeon = Locate.mountainDungeon(level, at, player.getRandom());
+        // the real Bleak Falls Barrow when the world has it within reach, else a barrow up a mountain nearby
+        BlockPos dungeon = com.skycraft.tamriel.Places.byId("bleak_falls_barrow")
+                .filter(p -> level.dimension() == net.minecraft.world.level.Level.OVERWORLD && p.distSqr(at.getX(), at.getZ()) < 4000L * 4000L)
+                .map(p -> new BlockPos(p.x(), Locate.surfaceY(level, p.x(), p.z()), p.z())).orElse(null);
+        if (dungeon == null) dungeon = Locate.mountainDungeon(level, at, player.getRandom());
         if (dungeon == null) dungeon = Locate.dungeon(level, at, player.getRandom());
         if (dungeon == null) dungeon = Locate.randomSpot(level, player.getRandom(), at, 200, 450);
+        Locate.rumor(player, dungeon);
 
         Quest q = new Quest("side_golden_claw", Quest.Category.SIDE,
                 tr("quest.skycraft.side_golden_claw.title"), tr("quest.skycraft.side_golden_claw.desc"));
@@ -181,7 +186,7 @@ public final class SideQuests {
         q.giverName = giver.getDisplayName();
         q.giverPos = giver.blockPosition();
         q.giverDim = dim;
-        q.hold = "the_reach";
+        q.hold = "skyrim/the_reach";
 
         // Part 1: Investigate the Market Murder and read Margret's Note
         Objective o1 = new Objective(Objective.Type.TALK_TO, tr("quest.skycraft.obj.forsworn_1"))
@@ -276,7 +281,7 @@ public final class SideQuests {
 
         // The Forsworn Conspiracy Arc — offered in The Reach or by miners
         if (!hasSideQuest(player, "arc_forsworn_conspiracy") && data.getLevel() >= 6) {
-            boolean inReachOrMiner = "reach".equals(Holds.holdAt(player.serverLevel(), player.blockPosition()))
+            boolean inReachOrMiner = "the_reach".equals(Holds.base(Holds.holdAt(player.serverLevel(), player.blockPosition())))
                     || (npc instanceof com.skycraft.society.entity.NpcEntity ne && ne.role() == com.skycraft.society.NpcRole.MINER);
             if (inReachOrMiner) {
                 out.add(new DialogueOption("quest.arc.forsworn",

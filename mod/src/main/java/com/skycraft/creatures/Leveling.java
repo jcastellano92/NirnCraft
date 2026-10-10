@@ -20,6 +20,12 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import com.skycraft.tamriel.Place;
+import com.skycraft.tamriel.PlaceType;
+import com.skycraft.tamriel.Places;
+import com.skycraft.tamriel.Region;
+import com.skycraft.tamriel.Regions;
+import com.skycraft.tamriel.TamrielMap;
 import net.minecraft.tags.BiomeTags;
 import net.minecraftforge.common.Tags;
 
@@ -39,26 +45,61 @@ public final class Leveling {
 
     private Leveling() {}
 
+    /** Blocks from a region's capital at which its level band reaches its top. */
+    private static final double BAND_REACH = 1600.0;
+
     /**
-     * Contract 3 (docs/PLAYTEST-1.md): the difficulty level of a place, 1..60. Low near the world spawn and rising
-     * with distance and dangerous terrain.
+     * Contract 3 (docs/PLAYTEST-1.md): the difficulty level of a place, 1..60. The region's level band
+     * ({@link Region#minLevel()}..{@link Region#maxLevel()}, e.g. Whiterun 1-12, the Pale higher) is low near the
+     * region's capital and rises towards its wild edges; caves and deep places, high mountains and dungeons add a
+     * bonus on top.
      */
     public static int regionLevel(net.minecraft.server.level.ServerLevel level, net.minecraft.core.BlockPos pos) {
-        net.minecraft.core.BlockPos spawn = level.getSharedSpawnPos();
-        double dist = Math.sqrt(spawn.distSqr(new net.minecraft.core.BlockPos(pos.getX(), spawn.getY(), pos.getZ())));
-        int distLevel = 1 + (int) (dist / 120.0);
+        Region region = Regions.at(level, pos);
+        int min = Math.max(1, region.minLevel());
+        int max = Math.max(min, region.maxLevel());
+        double t;
+        if (level.dimension() != net.minecraft.world.level.Level.OVERWORLD) {
+            // realms: deeper in (farther from their entry point) is deadlier
+            net.minecraft.core.BlockPos spawn = level.getSharedSpawnPos();
+            double dx = pos.getX() - spawn.getX();
+            double dz = pos.getZ() - spawn.getZ();
+            t = Math.sqrt(dx * dx + dz * dz) / (BAND_REACH * 1.5);
+        } else {
+            t = wildness(region, pos.getX(), pos.getZ());
+        }
+        t = Math.max(0, Math.min(1, t));
+        int base = min + (int) Math.round((max - min) * t * t * (3 - 2 * t)); // smoothstep: safe around the capital
 
-        int terrainBonus = 0;
-        if (pos.getY() < 0) {
-            terrainBonus += Math.min(15, (-pos.getY()) / 6);
+        int bonus = 0;
+        if (pos.getY() < 40) bonus += Math.min(10, (40 - pos.getY()) / 8 + 1);
+        if (level.dimension() == net.minecraft.world.level.Level.OVERWORLD) {
+            float macro = TamrielMap.elevation(pos.getX(), pos.getZ());
+            if (macro > 150) bonus += Math.min(5, (int) ((macro - 150) / 40) + 1);
         }
         var biome = level.getBiome(pos);
         if (biome.is(BiomeTags.IS_MOUNTAIN)) {
-            terrainBonus += 8;
+            bonus += 2;
         } else if (biome.is(Tags.Biomes.IS_SNOWY)) {
-            terrainBonus += 4;
+            bonus += 1;
         }
-        return Math.max(1, Math.min(60, distLevel + terrainBonus));
+        // (no structure lookups here: this runs while chunks load their entities)
+        Place named = Places.nearest(PlaceType.DUNGEON_FIXED, pos.getX(), pos.getZ(), 160).orElse(null);
+        if (named != null && named.distSqr(pos.getX(), pos.getZ()) <= (long) named.radius() * named.radius()) bonus += 3;
+        return Math.max(1, Math.min(60, base + bonus));
+    }
+
+    /** 0 at the region's capital (or its nearest town), 1 at {@link #BAND_REACH} blocks and beyond. */
+    private static double wildness(Region region, int x, int z) {
+        Place capital = region.capital() == null ? null : Places.byId(region.capital()).orElse(null);
+        if (capital == null) {
+            capital = Places.nearest(PlaceType.CAPITAL, x, z, (int) BAND_REACH).orElse(null);
+            if (capital == null) capital = Places.nearest(PlaceType.CITY, x, z, (int) BAND_REACH).orElse(null);
+            if (capital == null) capital = Places.nearest(PlaceType.TOWN, x, z, (int) BAND_REACH).orElse(null);
+        }
+        if (capital == null) return 0.75;
+        double d = Math.sqrt(capital.distSqr(x, z)) - capital.radius();
+        return d / BAND_REACH;
     }
 
     /** The creature's level, or 0 if it isn't leveled. */

@@ -45,7 +45,7 @@ public final class FastTravelHandler {
             return;
         }
         CompoundTag loc = WorldData.find(SkyData.get(player), id);
-        if (loc == null) {
+        if (loc == null || loc.getBoolean("known")) {
             fail(player, "unknown");
             return;
         }
@@ -111,8 +111,8 @@ public final class FastTravelHandler {
         }
         SkyNetwork.sendToPlayer(player, new WorldPackets.RestFade(hours, WorldPackets.RestFade.TRAVEL));
         Notifier.message(player, hours > 0
-                ? Component.translatable("world.skycraft.travel.arrived_hours", loc.getString("name"), hours)
-                : Component.translatable("world.skycraft.travel.arrived", loc.getString("name")));
+                ? Component.translatable("world.skycraft.travel.arrived_hours", WorldData.displayName(loc), hours)
+                : Component.translatable("world.skycraft.travel.arrived", WorldData.displayName(loc)));
     }
 
     private static void fail(ServerPlayer player, String reason) {
@@ -152,7 +152,7 @@ public final class FastTravelHandler {
      * no fluids); underground places in the overworld put you on the surface above the entrance; in realms with a
      * ceiling (Oblivion) the search stays around the original height.
      */
-    static BlockPos findArrival(ServerLevel level, BlockPos anchor, LocationKind kind) {
+    public static BlockPos findArrival(ServerLevel level, BlockPos anchor, LocationKind kind) {
         boolean ceiling = level.dimensionType().hasCeiling();
         if (!kind.underground() || ceiling) {
             BlockPos p = searchVertical(level, anchor, 4);

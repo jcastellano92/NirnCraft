@@ -298,7 +298,12 @@ public final class RadiantQuests {
     }
 
     private static Offer bountyDragon(Ctx c) {
-        BlockPos spot = Locate.randomSpot(c.level, c.r, c.player.blockPosition(), 300, 600);
+        // dragons roost at the word walls and burial mounds of the hold, like Skyrim's dragon sightings
+        var roost = Locate.namedPlace(c.level, c.player.blockPosition(), c.r, 200, 1500,
+                java.util.EnumSet.of(com.skycraft.tamriel.PlaceType.DRAGON_MOUND, com.skycraft.tamriel.PlaceType.WORD_WALL));
+        BlockPos spot = roost != null
+                ? new BlockPos(roost.x(), Locate.surfaceY(c.level, roost.x(), roost.z()), roost.z())
+                : Locate.randomSpot(c.level, c.r, c.player.blockPosition(), 300, 600);
         String name = Names.dragon(c.r);
         Component dir = Names.direction(c.player.blockPosition(), spot);
         long gold = scale(1000, c.lvl, 600, 1500);

@@ -13,6 +13,7 @@ public final class WorldClientSetup {
 
     @SubscribeEvent
     public static void overlays(RegisterGuiOverlaysEvent event) {
+        event.registerAboveAll("region_banner", RegionBanner::render);
         event.registerAboveAll("world_fade", ScreenFade::render);
     }
 }

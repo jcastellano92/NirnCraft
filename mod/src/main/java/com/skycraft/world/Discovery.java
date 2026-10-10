@@ -7,12 +7,18 @@ import com.skycraft.core.PlayerData;
 import com.skycraft.core.SkyData;
 import com.skycraft.network.NotifyKind;
 import com.skycraft.network.SkyNetwork;
+import com.skycraft.tamriel.Place;
+import com.skycraft.tamriel.Places;
+import com.skycraft.tamriel.Region;
+import com.skycraft.tamriel.Regions;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -22,6 +28,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -33,13 +40,16 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 /**
- * Server side of exploration: structure discovery ("DISCOVERED: Bleakwind Barrow"), "CLEARED" when the last
- * hostile inside a discovered location dies, hold border crossings, and the first entry into Oblivion/Sovngarde.
- * Every player discovers individually (multiplayer-first).
+ * Server side of exploration: named places of Tamriel ("DISCOVERED: Bleak Falls Barrow" when you come within the
+ * place's radius), generic structures (named in their region's culture), "CLEARED" when the last hostile inside a
+ * discovered location dies, first entry into each region of Nirn, and the first entry into Oblivion/Sovngarde.
+ * The "Entering Whiterun Hold" / "CYRODIIL" banners at region and province borders are drawn by the client
+ * ({@code world.client.RegionBanner}). Every player discovers individually (multiplayer-first).
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Discovery {
@@ -50,14 +60,35 @@ public final class Discovery {
 
     /**
      * Contract 6 (docs/PLAYTEST-1.md): marks the nearest location this player hasn't discovered as known (shown
-     * with its name on the map and compass, but not discovered). Returns its name, or null if there is none.
-     *
-     * <p>STUB: workstream C replaces the body; the signature is fixed.
+     * with its name on the map and compass, but not discovered). Named places come first; otherwise the nearest
+     * generic structure in loaded chunks. Returns its name, or null if there is none.
      */
     @javax.annotation.Nullable
     public static Component revealNear(ServerPlayer player, BlockPos center, int radius) {
         ServerLevel level = player.serverLevel();
         PlayerData data = SkyData.get(player);
+
+        if (level.dimension() == Level.OVERWORLD) {
+            Place best = null;
+            long bestD = (long) radius * radius;
+            for (Place p : Places.overlapping(center.getX() - radius, center.getZ() - radius, center.getX() + radius, center.getZ() + radius)) {
+                if (p.type().isSettlement() && p.type() != com.skycraft.tamriel.PlaceType.FARM) continue; // rumors are of dungeons and wonders
+                if (WorldData.find(data, WorldData.placeLocId(p.id())) != null) continue;
+                long d = p.distSqr(center.getX(), center.getZ());
+                if (d <= bestD) {
+                    bestD = d;
+                    best = p;
+                }
+            }
+            if (best != null) {
+                CompoundTag loc = placeEntry(level, best, null);
+                loc.putBoolean("known", true);
+                WorldData.discovered(data).add(loc);
+                data.markDirty();
+                return best.name();
+            }
+        }
+
         Registry<Structure> registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
 
         int chunkRadius = Math.max(1, radius / 16);
@@ -79,6 +110,7 @@ public final class Discovery {
                     if (start == null || !start.isValid()) continue;
                     ResourceLocation key = registry.getKey(s);
                     if (key == null) continue;
+                    if (placeOf(level, key, start) != null) continue; // named places are revealed above
                     LocationKind kind = LocationTags.classify(level, s);
                     if (kind == null) continue;
                     String id = level.dimension().location() + "|" + key + "|" + start.getChunkPos().x + "," + start.getChunkPos().z;
@@ -107,7 +139,7 @@ public final class Discovery {
             loc.putString("name", name);
             loc.putString("type", nearestKind.id);
             loc.putInt("x", sCenter.getX());
-            loc.putInt("y", nearestKind.underground() ? sCenter.getY() : sCenter.getY());
+            loc.putInt("y", sCenter.getY());
             loc.putInt("z", sCenter.getZ());
             loc.putString("dim", level.dimension().location().toString());
             loc.putInt("ax", sCenter.getX());
@@ -124,6 +156,20 @@ public final class Discovery {
         return null;
     }
 
+    /**
+     * Marks a named place as known (rumored: on the map and compass, not yet discovered), e.g. when a quest points
+     * at it. Returns false if the player already knows or discovered it.
+     */
+    public static boolean revealPlace(ServerPlayer player, Place place) {
+        PlayerData data = SkyData.get(player);
+        if (WorldData.find(data, WorldData.placeLocId(place.id())) != null) return false;
+        CompoundTag loc = placeEntry(player.serverLevel(), place, null);
+        loc.putBoolean("known", true);
+        WorldData.discovered(data).add(loc);
+        data.markDirty();
+        return true;
+    }
+
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
@@ -131,11 +177,12 @@ public final class Discovery {
         // spread the work of many players over different ticks
         if ((player.tickCount + (player.getId() & 31)) % CHECK_INTERVAL != 0) return;
         try {
+            compactOnce(player);
             if (WorldConfig.DISCOVERY.get()) {
-                compactOnce(player);
+                checkPlaces(player);
                 checkStructures(player);
             }
-            checkHold(player);
+            checkRegion(player);
         } catch (RuntimeException e) {
             Skycraft.LOGGER.debug("Skycraft discovery check failed for {}", player.getName().getString(), e);
         }
@@ -144,32 +191,105 @@ public final class Discovery {
     /**
      * Once per player: drops discoveries of structures that are no longer locations ({@code #skycraft:ignored_landmarks}
      * such as decorative trees and benches found before the tag existed) and fields nothing reads any more, so the
-     * synced list stays small.
+     * synced list stays small (version 1); maps entered holds of the old 2048-block grid to region ids (version 2).
      */
     private static void compactOnce(ServerPlayer player) {
         PlayerData data = SkyData.get(player);
         CompoundTag root = WorldData.root(data);
-        if (root.getInt("compacted") >= 1) return;
-        root.putInt("compacted", 1);
-        Registry<Structure> registry = player.serverLevel().registryAccess().registryOrThrow(Registries.STRUCTURE);
-        ListTag list = WorldData.discovered(data);
-        int removed = 0;
-        for (int i = list.size() - 1; i >= 0; i--) {
-            CompoundTag loc = list.getCompound(i);
-            String structure = loc.getString("structure");
-            loc.remove("structure");
-            loc.remove("t");
-            ResourceLocation id = ResourceLocation.tryParse(structure);
-            if (id == null) continue;
-            boolean ignored = registry.getHolder(net.minecraft.resources.ResourceKey.create(Registries.STRUCTURE, id))
-                    .map(h -> h.is(LocationTags.IGNORED_LANDMARKS)).orElse(false);
-            if (ignored) {
-                list.remove(i);
-                removed++;
+        int version = root.getInt("compacted");
+        if (version >= 2) return;
+        root.putInt("compacted", 2);
+        if (version < 1 && WorldConfig.DISCOVERY.get()) {
+            Registry<Structure> registry = player.serverLevel().registryAccess().registryOrThrow(Registries.STRUCTURE);
+            ListTag list = WorldData.discovered(data);
+            for (int i = list.size() - 1; i >= 0; i--) {
+                CompoundTag loc = list.getCompound(i);
+                String structure = loc.getString("structure");
+                loc.remove("structure");
+                loc.remove("t");
+                ResourceLocation id = ResourceLocation.tryParse(structure);
+                if (id == null) continue;
+                boolean ignored = registry.getHolder(net.minecraft.resources.ResourceKey.create(Registries.STRUCTURE, id))
+                        .map(h -> h.is(LocationTags.IGNORED_LANDMARKS)).orElse(false);
+                if (ignored) list.remove(i);
             }
         }
+        ListTag holds = root.getList("holds", Tag.TAG_STRING);
+        ListTag migrated = new ListTag();
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        for (int i = 0; i < holds.size(); i++) {
+            String id = Holds.migrate(holds.getString(i));
+            if (seen.add(id)) migrated.add(StringTag.valueOf(id));
+        }
+        root.put("holds", migrated);
         data.markDirty();
-        if (removed > 0) com.skycraft.core.PlayerDataEvents.fullSync(player);
+        com.skycraft.core.PlayerDataEvents.fullSync(player);
+    }
+
+    // ------------------------------------------------------------------ named places
+
+    private static void checkPlaces(ServerPlayer player) {
+        ServerLevel level = player.serverLevel();
+        if (level.dimension() != Level.OVERWORLD) return;
+        int x = player.getBlockX();
+        int z = player.getBlockZ();
+        PlayerData data = SkyData.get(player);
+        for (Place p : Places.overlapping(x, z, x, z)) {
+            long r = p.radius();
+            if (p.distSqr(x, z) > r * r) continue;
+            CompoundTag existing = WorldData.find(data, WorldData.placeLocId(p.id()));
+            if (existing != null) {
+                if (!existing.getBoolean("known")) continue;
+                existing.remove("known");
+                existing.putInt("ax", player.getBlockX());
+                existing.putInt("ay", player.getBlockY());
+                existing.putInt("az", player.getBlockZ());
+                announce(player, data, p);
+                continue;
+            }
+            WorldData.discovered(data).add(placeEntry(level, p, player));
+            announce(player, data, p);
+        }
+    }
+
+    private static void announce(ServerPlayer player, PlayerData data, Place p) {
+        data.addStat("locations_discovered", 1);
+        data.markDirty();
+        Notifier.send(player, NotifyKind.LOCATION_DISCOVERED, p.name(), LocationKind.forPlace(p).displayName());
+        SkyNetwork.sendToPlayer(player, new WorldPackets.Cue(WorldPackets.Cue.DISCOVERY));
+    }
+
+    /**
+     * A discovered-list entry for a named place. The fast-travel arrival point is where the discoverer stood when
+     * they reached the place's edge (usually on the road in), or the anchor for places only heard of.
+     */
+    static CompoundTag placeEntry(ServerLevel level, Place p, @javax.annotation.Nullable ServerPlayer discoverer) {
+        LocationKind kind = LocationKind.forPlace(p);
+        int y = level.hasChunk(p.x() >> 4, p.z() >> 4)
+                ? level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p.x(), p.z())
+                : Math.max(level.getSeaLevel() + 1, (int) com.skycraft.tamriel.TamrielMap.elevation(p.x(), p.z()));
+        CompoundTag loc = new CompoundTag();
+        loc.putString("id", WorldData.placeLocId(p.id()));
+        loc.putString("place", p.id());
+        loc.putString("name", PlaceText.plain(p));
+        loc.putString("type", kind.id);
+        loc.putInt("x", p.x());
+        loc.putInt("y", y);
+        loc.putInt("z", p.z());
+        loc.putString("dim", level.dimension().location().toString());
+        BlockPos at = discoverer != null ? discoverer.blockPosition() : new BlockPos(p.x(), y, p.z());
+        loc.putInt("ax", at.getX());
+        loc.putInt("ay", at.getY());
+        loc.putInt("az", at.getZ());
+        return loc;
+    }
+
+    /** The named place a {@code skycraft:*} structure start builds (its start chunk holds the place's anchor), if any. */
+    @javax.annotation.Nullable
+    private static Place placeOf(ServerLevel level, ResourceLocation key, StructureStart start) {
+        if (level.dimension() != Level.OVERWORLD || !Skycraft.MODID.equals(key.getNamespace())) return null;
+        List<Place> places = Places.inChunk(start.getChunkPos());
+        return places.isEmpty() ? null : places.get(0);
     }
 
     // ------------------------------------------------------------------ structures
@@ -192,6 +312,26 @@ public final class Discovery {
                     ? structures.getStructureWithPieceAt(pos, structure)
                     : structures.getStructureAt(pos, structure);
             if (start == null || !start.isValid()) continue;
+            Place place = placeOf(level, key, start);
+            if (place != null) {
+                // a named place's own structure: the place entry gets the real bounds (for CLEARED)
+                CompoundTag loc = WorldData.find(data, WorldData.placeLocId(place.id()));
+                if (loc == null) {
+                    loc = placeEntry(level, place, player);
+                    WorldData.discovered(data).add(loc);
+                    announce(player, data, place);
+                } else if (loc.getBoolean("known")) {
+                    loc.remove("known");
+                    announce(player, data, place);
+                }
+                BoundingBox box = start.getBoundingBox();
+                int[] b = {box.minX(), box.minY(), box.minZ(), box.maxX(), box.maxY(), box.maxZ()};
+                if (!java.util.Arrays.equals(loc.getIntArray("box"), b)) {
+                    loc.putIntArray("box", b);
+                    data.markDirty();
+                }
+                continue;
+            }
             String id = level.dimension().location() + "|" + key + "|" + start.getChunkPos().x + "," + start.getChunkPos().z;
             CompoundTag existing = WorldData.find(data, id);
             if (existing != null) {
@@ -252,14 +392,14 @@ public final class Discovery {
             ListTag list = WorldData.discovered(data);
             for (int i = 0; i < list.size(); i++) {
                 CompoundTag loc = list.getCompound(i);
-                if (loc.getBoolean("cleared") || !loc.getString("dim").equals(dim)) continue;
+                if (loc.getBoolean("cleared") || loc.getBoolean("known") || !loc.getString("dim").equals(dim)) continue;
                 LocationKind kind = LocationKind.byId(loc.getString("type"));
                 if (!kind.clearable || !WorldData.inBox(loc, victim.getX(), victim.getY(), victim.getZ(), 6)) continue;
                 if (hostilesRemain(level, loc, victim)) continue;
                 loc.putBoolean("cleared", true);
                 data.addStat("locations_cleared", 1);
                 data.markDirty();
-                Notifier.send(player, NotifyKind.LOCATION_CLEARED, Component.literal(loc.getString("name")), kind.displayName());
+                Notifier.send(player, NotifyKind.LOCATION_CLEARED, WorldData.displayName(loc), kind.displayName());
             }
         }
     }
@@ -272,23 +412,27 @@ public final class Discovery {
         return !level.getEntitiesOfClass(Mob.class, search, m -> m != victim && m.isAlive() && m instanceof Enemy).isEmpty();
     }
 
-    // ------------------------------------------------------------------ holds
+    // ------------------------------------------------------------------ regions
 
-    private static void checkHold(ServerPlayer player) {
+    /**
+     * First entry into a region of Nirn ("DISCOVERED: The Rift / Skyrim"). Crossing into a known region shows the
+     * client's "Entering" banner instead. Seas and dimensions are not regions you discover.
+     */
+    private static void checkRegion(ServerPlayer player) {
         if (player.level().dimension() != Level.OVERWORLD) {
             LAST_HOLD.remove(player.getUUID());
             return;
         }
-        String hold = Holds.holdAt(player.level(), player.blockPosition());
+        Region region = Regions.at(player.level(), player.blockPosition());
+        String hold = region.id();
         String last = LAST_HOLD.put(player.getUUID(), hold);
         if (hold.equals(last)) return;
         PlayerData data = SkyData.get(player);
-        if (!WorldData.hasVisitedHold(data, hold)) {
-            WorldData.addVisitedHold(data, hold);
-            Notifier.send(player, NotifyKind.LOCATION_DISCOVERED, Holds.displayName(hold), Component.translatable("world.skycraft.hold"));
-        } else if (last != null) {
-            Notifier.message(player, Component.translatable("world.skycraft.hold.entering", Holds.displayName(hold)));
-        }
+        if (WorldData.hasVisitedHold(data, hold)) return;
+        WorldData.addVisitedHold(data, hold);
+        if ("sea".equals(region.kind()) || "sea".equals(region.province()) || "dimension".equals(region.kind())) return;
+        data.addStat("regions_discovered", 1);
+        Notifier.send(player, NotifyKind.LOCATION_DISCOVERED, region.name(), Provinces.name(region.province()));
     }
 
     // ------------------------------------------------------------------ realms

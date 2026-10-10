@@ -16,6 +16,7 @@ public final class WorldClient {
     public static void fade(int hours, int kind) {
         Component text;
         if (kind == WorldPackets.RestFade.TRAVEL) {
+            RegionBanner.reset(); // arriving by fast travel or carriage is not a border crossing
             text = hours > 0 ? Component.translatable("world.skycraft.fade.travel_hours", hours) : Component.empty();
         } else {
             text = Component.translatable(hours == 1 ? "world.skycraft.fade.hour" : "world.skycraft.fade.hours", hours);

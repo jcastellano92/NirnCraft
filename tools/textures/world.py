@@ -251,11 +251,64 @@ def unknown(d):
     d.ellipse([4, 4, 11, 11], fill=FILL, outline=INK)
 
 
+def capital(d):
+    # walled hold capital: keep with a banner behind a crenellated wall
+    d.rectangle([5, 3, 10, 9], fill=FILL, outline=INK)
+    d.line([(8, 3), (8, 0)], fill=INK)
+    d.polygon([(8, 0), (12, 1), (8, 2)], fill=RED_FILL)
+    d.rectangle([0, 9, 15, 14], fill=FILL, outline=INK)
+    for x in (0, 4, 8, 12):
+        d.rectangle([x, 7, x + 2, 9], fill=FILL, outline=INK)
+    d.rectangle([6, 11, 9, 14], fill=INK)
+    d.rectangle([0, 15, 15, 15], fill=INK_SOFT)
+
+
+def city(d):
+    d.rectangle([1, 7, 14, 14], fill=FILL, outline=INK)
+    for x in (1, 5, 9, 13):
+        d.rectangle([x, 5, x + 1, 7], fill=FILL, outline=INK)
+    d.polygon([(4, 7), (7, 2), (10, 7)], fill=INK_SOFT, outline=INK)
+    d.rectangle([6, 10, 9, 14], fill=INK)
+
+
+def standing_stone(d):
+    d.polygon([(5, 15), (4, 4), (8, 0), (12, 4), (11, 15)], fill=(150, 156, 160, 255), outline=INK)
+    d.ellipse([6, 4, 10, 8], outline=BLUE)
+    d.line([(8, 9), (8, 12)], fill=BLUE)
+    d.rectangle([1, 15, 15, 15], fill=INK_SOFT)
+
+
+def word_wall(d):
+    d.chord([0, 2, 15, 26], 180, 360, fill=(170, 160, 140, 255), outline=INK)
+    d.rectangle([0, 14, 15, 15], fill=INK)
+    for y in (6, 9, 12):
+        for x in range(3, 13, 3):
+            d.line([(x, y), (x + 1, y - 1)], fill=INK)
+
+
+def dragon_mound(d):
+    d.chord([0, 6, 15, 22], 180, 360, fill=INK_SOFT, outline=INK)
+    d.polygon([(4, 9), (8, 3), (12, 9)], fill=RED, outline=INK)
+    d.line([(6, 11), (10, 11)], fill=INK)
+    d.rectangle([0, 14, 15, 15], fill=INK)
+
+
+def daedric_shrine(d):
+    d.polygon([(7, 0), (9, 0), (12, 13), (4, 13)], fill=RED, outline=INK)
+    d.ellipse([6, 3, 10, 7], fill=(255, 190, 60, 255), outline=INK)
+    d.rectangle([2, 13, 14, 15], fill=INK)
+
+
+def custom(d):
+    d.polygon([(8, 15), (2, 6), (4, 2), (8, 1), (12, 2), (14, 6)], fill=(56, 176, 222, 255), outline=INK)
+    d.ellipse([6, 4, 10, 8], fill=(240, 250, 255, 255))
+
+
 # order must match LocationKind.icon
 ICONS = [town, ruin, cave, mine, fort, tower, camp, barrow,
          dwemer, shrine, wreck, oblivion_gate, citadel, hut, manor, temple,
          inn, landmark, hall_of_valor, tomb, sanctum, bandit_camp, daedric_tower, quest,
-         unknown]
+         unknown, capital, city, standing_stone, word_wall, dragon_mound, daedric_shrine, custom]
 
 
 def icon_sheet():

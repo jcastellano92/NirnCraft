@@ -1,7 +1,12 @@
 package com.skycraft.quest;
 
 import com.skycraft.Skycraft;
+import com.skycraft.core.Holds;
+import com.skycraft.tamriel.Place;
+import com.skycraft.tamriel.PlaceType;
+import com.skycraft.tamriel.Places;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -11,6 +16,11 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 
 /** Finding places for quests: villages, dungeons and random wilderness spots. Never loads chunks for spots. */
 public final class Locate {
@@ -59,12 +69,56 @@ public final class Locate {
         return null;
     }
 
+    /** Named places that quests send players into: the barrows, ruins and forts of {@link Places}. */
+    public static final Set<PlaceType> QUEST_DUNGEONS = EnumSet.of(PlaceType.DUNGEON_FIXED, PlaceType.FORT);
+
+    /**
+     * A random named place of {@code types} between {@code minDist} and {@code maxDist} blocks away, preferring the
+     * region (hold) the player is in; null if there is none (or outside the overworld).
+     */
+    @Nullable
+    public static Place namedPlace(ServerLevel level, BlockPos from, RandomSource r, int minDist, int maxDist, Set<PlaceType> types) {
+        if (level.dimension() != net.minecraft.world.level.Level.OVERWORLD) return null;
+        String region = Holds.holdAt(level, from);
+        List<Place> same = new ArrayList<>();
+        List<Place> other = new ArrayList<>();
+        long min2 = (long) minDist * minDist;
+        long max2 = (long) maxDist * maxDist;
+        for (Place p : Places.overlapping(from.getX() - maxDist, from.getZ() - maxDist, from.getX() + maxDist, from.getZ() + maxDist)) {
+            if (!types.contains(p.type())) continue;
+            long d = p.distSqr(from.getX(), from.getZ());
+            if (d < min2 || d > max2) continue;
+            (region.equals(p.regionId()) ? same : other).add(p);
+        }
+        List<Place> pool = !same.isEmpty() ? same : other;
+        return pool.isEmpty() ? null : pool.get(r.nextInt(pool.size()));
+    }
+
+    /** The named quest dungeon whose footprint contains {@code pos}, if any. */
+    @Nullable
+    public static Place placeAt(BlockPos pos) {
+        for (Place p : Places.overlapping(pos.getX(), pos.getZ(), pos.getX(), pos.getZ())) {
+            if (QUEST_DUNGEONS.contains(p.type()) && p.distSqr(pos.getX(), pos.getZ()) <= (long) p.radius() * p.radius()) return p;
+        }
+        return null;
+    }
+
+    /** If a quest target is a named place, the player hears of it: it appears on their map and compass. */
+    public static void rumor(ServerPlayer player, BlockPos target) {
+        Place p = placeAt(target);
+        if (p != null) com.skycraft.world.Discovery.revealPlace(player, p);
+    }
+
     @Nullable
     public static BlockPos dungeon(ServerLevel level, BlockPos from, RandomSource r) {
+        // named barrows and ruins of the region first (two times in three), then any generated dungeon
+        Place named = namedPlace(level, from, r, 100, 900, QUEST_DUNGEONS);
+        if (named != null && r.nextInt(3) > 0) return new BlockPos(named.x(), surfaceY(level, named.x(), named.z()), named.z());
         // look a little away from the player so the dungeon isn't always the one under their feet
         BlockPos probe = randomSpot(level, r, from, 100, 300);
         BlockPos d = structure(level, DUNGEONS, probe, 24);
         if (d == null) d = structure(level, DUNGEONS, from, MAX_SEARCH_CHUNKS);
+        if (d == null && named != null) d = new BlockPos(named.x(), surfaceY(level, named.x(), named.z()), named.z());
         return d;
     }
 
