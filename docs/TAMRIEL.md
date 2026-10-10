@@ -235,7 +235,105 @@ Existing callers keep compiling.
 * **Shared rules.** Every structure obeys the existing worldgen rules: only noise heights in
   `findGenerationPoint`, and painting clipped to the chunk.
 
-## 9. Order of work
+## 9. Authoritative region ids and city anchors
+
+### Region ids
+
+Region ids are `<province>/<region>`. Workstreams may add regions; none of the ids below may be renamed.
+
+| Province | Regions |
+| --- | --- |
+| skyrim | haafingar, hjaalmarch, the_pale, winterhold, the_reach, whiterun, eastmarch, falkreath, the_rift |
+| morrowind | solstheim, vvardenfell_ashlands, red_mountain, bitter_coast, west_gash, ascadian_isles, grazelands, molag_amur, azuras_coast, sheogorad, telvannis, deshaan, stonefalls |
+| cyrodiil | jerall_mountains, colovian_highlands, gold_coast, west_weald, heartlands, great_forest, nibenay_basin, nibenay_valley, blackwood |
+| high_rock | glenumbra, stormhaven, rivenspire, wrothgar, wayrest, bjoulsae |
+| hammerfell | alikr_desert, bangkorai, craglorn, stros_mkai, hews_bane, dragontail |
+| black_marsh | shadowfen, murkmire, gideon, stormhold, helstrom, lilmoth |
+| elsweyr | anequina, rimmen, torval, pellitine, senchal |
+| valenwood | grahtwood, greenshade, malabal_tor, reapers_march |
+| summerset | summerset_isle, auridon, artaeum |
+| atmora | ice_waste, frozen_forest |
+| akavir | tsaesci, kamal, tang_mo, ka_po_tun |
+| yokuda | yokudan_desert, sunken_isles |
+| pyandonea | maormer_isles |
+| thras | coral_kingdom |
+| sea | sea_of_ghosts, abecean_sea, iliac_bay, topal_bay, inner_sea, padomaic_ocean, eltheric_ocean |
+| realm | generated ids, `realm/x<cx>_z<cz>/<n>` |
+
+### Skyrim positions
+
+Skyrim positions come from the reference extraction: the map markers, scaled with Whiterun at (0, 0). Skyrim
+fills about x −3180..2830 and z −2480..1880. Solstheim's island centre is about (4600, −3200), with Raven Rock
+on its south-west bay.
+
+### Other provinces
+
+These anchors are binding. The terrain workstream must shape the map so each one sits on land in the named
+region, and the places file uses them as given.
+
+| Place | Type | Region | x, z |
+| --- | --- | --- | --- |
+| Imperial City | capital | cyrodiil/heartlands | 900, 5900 (an island in Lake Rumare) |
+| Bruma | city | cyrodiil/jerall_mountains | 1500, 3000 |
+| Chorrol | city | cyrodiil/colovian_highlands | −1300, 4400 |
+| Cheydinhal | city | cyrodiil/nibenay_basin | 3700, 5000 |
+| Skingrad | city | cyrodiil/west_weald | −1700, 6700 |
+| Kvatch | city | cyrodiil/gold_coast | −2700, 8000 |
+| Anvil | city | cyrodiil/gold_coast | −3900, 8700 (coast) |
+| Bravil | city | cyrodiil/nibenay_valley | 1800, 8700 |
+| Leyawiin | city | cyrodiil/blackwood | 3600, 9900 (Topal Bay coast) |
+| Mournhold | capital | morrowind/deshaan | 6300, 3300 |
+| Vivec | city | morrowind/ascadian_isles | 7400, 1300 (Inner Sea coast) |
+| Balmora | city | morrowind/west_gash | 6300, 500 |
+| Ald'ruhn | city | morrowind/vvardenfell_ashlands | 6100, −500 |
+| Sadrith Mora | city | morrowind/telvannis | 8900, 100 (coast) |
+| Ebonheart | city | morrowind/stonefalls | 4700, 2400 |
+| Necrom | city | morrowind/molag_amur | 8900, 3600 (coast) |
+| Red Mountain | landmark | morrowind/red_mountain | 7100, −400 |
+| Raven Rock | town | morrowind/solstheim | 4300, −2900 (coast) |
+| Wayrest | capital | high_rock/wayrest | −5300, 3300 (Iliac Bay coast) |
+| Daggerfall | city | high_rock/glenumbra | −9300, 2600 (coast) |
+| Camlorn | city | high_rock/glenumbra | −9000, −200 |
+| Shornhelm | city | high_rock/rivenspire | −7600, −1300 |
+| Evermor | city | high_rock/bjoulsae | −6600, 200 |
+| Orsinium | capital | high_rock/wrothgar | −4300, 300 |
+| Sentinel | capital | hammerfell/alikr_desert | −8200, 4900 (Iliac Bay coast) |
+| Elinhir | city | hammerfell/craglorn | −4200, 3700 |
+| Skaven | city | hammerfell/alikr_desert | −6400, 5700 |
+| Rihad | city | hammerfell/dragontail | −4800, 7200 |
+| Taneth | city | hammerfell/hews_bane | −6800, 8000 (coast) |
+| Stros M'Kai | town | hammerfell/stros_mkai | −10200, 7200 (island) |
+| Stormhold | city | black_marsh/stormhold | 6400, 6300 |
+| Gideon | city | black_marsh/gideon | 5800, 8300 |
+| Helstrom | city | black_marsh/helstrom | 8900, 6400 |
+| Lilmoth | capital | black_marsh/lilmoth | 7700, 10000 (coast) |
+| Murkmire | town | black_marsh/murkmire | 6800, 11000 |
+| Rimmen | city | elsweyr/rimmen | 1200, 10400 |
+| Riverhold | city | elsweyr/anequina | −600, 10800 |
+| Torval | capital | elsweyr/torval | 1200, 12600 |
+| Senchal | city | elsweyr/senchal | 2800, 13700 (Topal Bay coast) |
+| Elden Root | capital | valenwood/grahtwood | −4000, 11300 |
+| Falinesti | city | valenwood/malabal_tor | −5600, 10200 |
+| Woodhearth | city | valenwood/greenshade | −6700, 12600 (coast) |
+| Arenthia | town | valenwood/reapers_march | −2300, 10500 |
+| Alinor | capital | summerset/summerset_isle | −11200, 13000 (coast) |
+| Firsthold | town | summerset/auridon | −9300, 11000 (coast) |
+| Artaeum | landmark | summerset/artaeum | −11600, 11200 (island) |
+
+### Foreign lands
+
+These are rough centres, beyond Tamriel's seas:
+
+* Atmora: (0, −11000)
+* Akavir: (17000, 3000)
+* Yokuda: (−19000, 7000)
+* Pyandonea: (−17000, 19000)
+* Thras: (−15000, 16500)
+
+The raster bounds in `TamrielMap` may be widened so that all of Tamriel's anchors above, plus a sea margin,
+fit. `CELL` stays at 32.
+
+## 10. Order of work
 
 1. **Phase 2: Foundation.** The map tool and assets, the density functions and noise settings, the biome
    catalogue, palettes and biome source, the regions, places and Holds facade, and the map screen. Then

@@ -1,0 +1,462 @@
+[
+ {
+  "id": "imperial_city",
+  "name": "place.skycraft.imperial_city",
+  "type": "capital",
+  "culture": "imperial",
+  "region": "cyrodiil/heartlands",
+  "x": 900,
+  "z": 5900,
+  "radius": 200
+ },
+ {
+  "id": "bruma",
+  "name": "place.skycraft.bruma",
+  "type": "city",
+  "culture": "imperial",
+  "region": "cyrodiil/jerall_mountains",
+  "x": 1500,
+  "z": 3000,
+  "radius": 150
+ },
+ {
+  "id": "chorrol",
+  "name": "place.skycraft.chorrol",
+  "type": "city",
+  "culture": "imperial",
+  "region": "cyrodiil/colovian_highlands",
+  "x": -1300,
+  "z": 4400,
+  "radius": 150
+ },
+ {
+  "id": "cheydinhal",
+  "name": "place.skycraft.cheydinhal",
+  "type": "city",
+  "culture": "imperial",
+  "region": "cyrodiil/nibenay_basin",
+  "x": 3700,
+  "z": 5000,
+  "radius": 150
+ },
+ {
+  "id": "skingrad",
+  "name": "place.skycraft.skingrad",
+  "type": "city",
+  "culture": "imperial",
+  "region": "cyrodiil/west_weald",
+  "x": -1700,
+  "z": 6700,
+  "radius": 150
+ },
+ {
+  "id": "kvatch",
+  "name": "place.skycraft.kvatch",
+  "type": "city",
+  "culture": "imperial",
+  "region": "cyrodiil/gold_coast",
+  "x": -2700,
+  "z": 8000,
+  "radius": 150
+ },
+ {
+  "id": "anvil",
+  "name": "place.skycraft.anvil",
+  "type": "city",
+  "culture": "imperial",
+  "region": "cyrodiil/gold_coast",
+  "x": -3900,
+  "z": 8700,
+  "radius": 150
+ },
+ {
+  "id": "bravil",
+  "name": "place.skycraft.bravil",
+  "type": "city",
+  "culture": "imperial",
+  "region": "cyrodiil/nibenay_valley",
+  "x": 1800,
+  "z": 8700,
+  "radius": 150
+ },
+ {
+  "id": "leyawiin",
+  "name": "place.skycraft.leyawiin",
+  "type": "city",
+  "culture": "imperial",
+  "region": "cyrodiil/blackwood",
+  "x": 3600,
+  "z": 9900,
+  "radius": 150
+ },
+ {
+  "id": "mournhold",
+  "name": "place.skycraft.mournhold",
+  "type": "capital",
+  "culture": "dunmer",
+  "region": "morrowind/deshaan",
+  "x": 6300,
+  "z": 3300,
+  "radius": 200
+ },
+ {
+  "id": "vivec",
+  "name": "place.skycraft.vivec",
+  "type": "city",
+  "culture": "dunmer",
+  "region": "morrowind/ascadian_isles",
+  "x": 7400,
+  "z": 1300,
+  "radius": 150
+ },
+ {
+  "id": "balmora",
+  "name": "place.skycraft.balmora",
+  "type": "city",
+  "culture": "dunmer",
+  "region": "morrowind/west_gash",
+  "x": 6300,
+  "z": 500,
+  "radius": 150
+ },
+ {
+  "id": "aldruhn",
+  "name": "place.skycraft.aldruhn",
+  "type": "city",
+  "culture": "dunmer",
+  "region": "morrowind/vvardenfell_ashlands",
+  "x": 6100,
+  "z": -500,
+  "radius": 150
+ },
+ {
+  "id": "sadrith_mora",
+  "name": "place.skycraft.sadrith_mora",
+  "type": "city",
+  "culture": "dunmer",
+  "region": "morrowind/telvannis",
+  "x": 8900,
+  "z": 100,
+  "radius": 150
+ },
+ {
+  "id": "ebonheart",
+  "name": "place.skycraft.ebonheart",
+  "type": "city",
+  "culture": "dunmer",
+  "region": "morrowind/stonefalls",
+  "x": 4700,
+  "z": 2400,
+  "radius": 150
+ },
+ {
+  "id": "necrom",
+  "name": "place.skycraft.necrom",
+  "type": "city",
+  "culture": "dunmer",
+  "region": "morrowind/molag_amur",
+  "x": 8900,
+  "z": 3600,
+  "radius": 150
+ },
+ {
+  "id": "red_mountain",
+  "name": "place.skycraft.red_mountain",
+  "type": "landmark",
+  "culture": "dunmer",
+  "region": "morrowind/red_mountain",
+  "x": 7100,
+  "z": -400,
+  "radius": 64
+ },
+ {
+  "id": "raven_rock",
+  "name": "place.skycraft.raven_rock",
+  "type": "town",
+  "culture": "dunmer",
+  "region": "morrowind/solstheim",
+  "x": 4300,
+  "z": -2900,
+  "radius": 90
+ },
+ {
+  "id": "wayrest",
+  "name": "place.skycraft.wayrest",
+  "type": "capital",
+  "culture": "breton",
+  "region": "high_rock/wayrest",
+  "x": -5300,
+  "z": 3300,
+  "radius": 200
+ },
+ {
+  "id": "daggerfall",
+  "name": "place.skycraft.daggerfall",
+  "type": "city",
+  "culture": "breton",
+  "region": "high_rock/glenumbra",
+  "x": -9300,
+  "z": 2600,
+  "radius": 150
+ },
+ {
+  "id": "camlorn",
+  "name": "place.skycraft.camlorn",
+  "type": "city",
+  "culture": "breton",
+  "region": "high_rock/glenumbra",
+  "x": -9000,
+  "z": -200,
+  "radius": 150
+ },
+ {
+  "id": "shornhelm",
+  "name": "place.skycraft.shornhelm",
+  "type": "city",
+  "culture": "breton",
+  "region": "high_rock/rivenspire",
+  "x": -7600,
+  "z": -1300,
+  "radius": 150
+ },
+ {
+  "id": "evermor",
+  "name": "place.skycraft.evermor",
+  "type": "city",
+  "culture": "breton",
+  "region": "high_rock/bjoulsae",
+  "x": -6600,
+  "z": 200,
+  "radius": 150
+ },
+ {
+  "id": "orsinium",
+  "name": "place.skycraft.orsinium",
+  "type": "capital",
+  "culture": "orc",
+  "region": "high_rock/wrothgar",
+  "x": -4300,
+  "z": 300,
+  "radius": 200
+ },
+ {
+  "id": "sentinel",
+  "name": "place.skycraft.sentinel",
+  "type": "capital",
+  "culture": "redguard",
+  "region": "hammerfell/alikr_desert",
+  "x": -8200,
+  "z": 4900,
+  "radius": 200
+ },
+ {
+  "id": "elinhir",
+  "name": "place.skycraft.elinhir",
+  "type": "city",
+  "culture": "redguard",
+  "region": "hammerfell/craglorn",
+  "x": -4200,
+  "z": 3700,
+  "radius": 150
+ },
+ {
+  "id": "skaven",
+  "name": "place.skycraft.skaven",
+  "type": "city",
+  "culture": "redguard",
+  "region": "hammerfell/alikr_desert",
+  "x": -6400,
+  "z": 5700,
+  "radius": 150
+ },
+ {
+  "id": "rihad",
+  "name": "place.skycraft.rihad",
+  "type": "city",
+  "culture": "redguard",
+  "region": "hammerfell/dragontail",
+  "x": -4800,
+  "z": 7200,
+  "radius": 150
+ },
+ {
+  "id": "taneth",
+  "name": "place.skycraft.taneth",
+  "type": "city",
+  "culture": "redguard",
+  "region": "hammerfell/hews_bane",
+  "x": -6800,
+  "z": 8000,
+  "radius": 150
+ },
+ {
+  "id": "stros_mkai",
+  "name": "place.skycraft.stros_mkai",
+  "type": "town",
+  "culture": "redguard",
+  "region": "hammerfell/stros_mkai",
+  "x": -10200,
+  "z": 7200,
+  "radius": 90
+ },
+ {
+  "id": "stormhold",
+  "name": "place.skycraft.stormhold",
+  "type": "city",
+  "culture": "argonian",
+  "region": "black_marsh/stormhold",
+  "x": 6400,
+  "z": 6300,
+  "radius": 150
+ },
+ {
+  "id": "gideon",
+  "name": "place.skycraft.gideon",
+  "type": "city",
+  "culture": "argonian",
+  "region": "black_marsh/gideon",
+  "x": 5800,
+  "z": 8300,
+  "radius": 150
+ },
+ {
+  "id": "helstrom",
+  "name": "place.skycraft.helstrom",
+  "type": "city",
+  "culture": "argonian",
+  "region": "black_marsh/helstrom",
+  "x": 8900,
+  "z": 6400,
+  "radius": 150
+ },
+ {
+  "id": "lilmoth",
+  "name": "place.skycraft.lilmoth",
+  "type": "capital",
+  "culture": "argonian",
+  "region": "black_marsh/lilmoth",
+  "x": 7700,
+  "z": 10000,
+  "radius": 200
+ },
+ {
+  "id": "murkmire",
+  "name": "place.skycraft.murkmire",
+  "type": "town",
+  "culture": "argonian",
+  "region": "black_marsh/murkmire",
+  "x": 6800,
+  "z": 11000,
+  "radius": 90
+ },
+ {
+  "id": "rimmen",
+  "name": "place.skycraft.rimmen",
+  "type": "city",
+  "culture": "khajiit",
+  "region": "elsweyr/rimmen",
+  "x": 1200,
+  "z": 10400,
+  "radius": 150
+ },
+ {
+  "id": "riverhold",
+  "name": "place.skycraft.riverhold",
+  "type": "city",
+  "culture": "khajiit",
+  "region": "elsweyr/anequina",
+  "x": -600,
+  "z": 10800,
+  "radius": 150
+ },
+ {
+  "id": "torval",
+  "name": "place.skycraft.torval",
+  "type": "capital",
+  "culture": "khajiit",
+  "region": "elsweyr/torval",
+  "x": 1200,
+  "z": 12600,
+  "radius": 200
+ },
+ {
+  "id": "senchal",
+  "name": "place.skycraft.senchal",
+  "type": "city",
+  "culture": "khajiit",
+  "region": "elsweyr/senchal",
+  "x": 2800,
+  "z": 13700,
+  "radius": 150
+ },
+ {
+  "id": "elden_root",
+  "name": "place.skycraft.elden_root",
+  "type": "capital",
+  "culture": "bosmer",
+  "region": "valenwood/grahtwood",
+  "x": -4000,
+  "z": 11300,
+  "radius": 200
+ },
+ {
+  "id": "falinesti",
+  "name": "place.skycraft.falinesti",
+  "type": "city",
+  "culture": "bosmer",
+  "region": "valenwood/malabal_tor",
+  "x": -5600,
+  "z": 10200,
+  "radius": 150
+ },
+ {
+  "id": "woodhearth",
+  "name": "place.skycraft.woodhearth",
+  "type": "city",
+  "culture": "bosmer",
+  "region": "valenwood/greenshade",
+  "x": -6700,
+  "z": 12600,
+  "radius": 150
+ },
+ {
+  "id": "arenthia",
+  "name": "place.skycraft.arenthia",
+  "type": "town",
+  "culture": "bosmer",
+  "region": "valenwood/reapers_march",
+  "x": -2300,
+  "z": 10500,
+  "radius": 90
+ },
+ {
+  "id": "alinor",
+  "name": "place.skycraft.alinor",
+  "type": "capital",
+  "culture": "altmer",
+  "region": "summerset/summerset_isle",
+  "x": -11200,
+  "z": 13000,
+  "radius": 200
+ },
+ {
+  "id": "firsthold",
+  "name": "place.skycraft.firsthold",
+  "type": "town",
+  "culture": "altmer",
+  "region": "summerset/auridon",
+  "x": -9300,
+  "z": 11000,
+  "radius": 90
+ },
+ {
+  "id": "artaeum",
+  "name": "place.skycraft.artaeum",
+  "type": "landmark",
+  "culture": "altmer",
+  "region": "summerset/artaeum",
+  "x": -11600,
+  "z": 11200,
+  "radius": 64
+ }
+]
