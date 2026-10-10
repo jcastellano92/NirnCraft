@@ -112,6 +112,8 @@ public final class Crimes {
         String hold = Holds.holdAt(player.level(), where);
         Bounty.add(player, hold, bounty);
         Guards.alert(player);
+        // townsfolk who saw it think less of the player (society relationships)
+        com.skycraft.society.Relationships.onCrimeWitnessed(player, where, bounty);
         return true;
     }
 

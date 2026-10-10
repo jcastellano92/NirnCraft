@@ -37,8 +37,12 @@ import org.jetbrains.annotations.Nullable;
 public final class Npcs {
     private static final NpcRole[] RANDOM_CIVILIANS = {
             NpcRole.HUNTER, NpcRole.MINER, NpcRole.LUMBERJACK, NpcRole.BARD, NpcRole.PRIEST, NpcRole.BEGGAR, NpcRole.MAGE,
-            NpcRole.ADVENTURER, NpcRole.COURIER, NpcRole.INNKEEPER, NpcRole.HOUSECARL
+            NpcRole.ADVENTURER, NpcRole.COURIER, NpcRole.INNKEEPER, NpcRole.HOUSECARL, NpcRole.FARMER, NpcRole.FARMER,
+            NpcRole.BLACKSMITH, NpcRole.MERCHANT, NpcRole.APOTHECARY, NpcRole.FISHER, NpcRole.BUTCHER, NpcRole.SCHOLAR,
+            NpcRole.CITIZEN, NpcRole.CITIZEN, NpcRole.CITIZEN, NpcRole.CHILD
     };
+    /** Persistent-data key: the vanilla profession id a townsperson's trade corresponds to (economy, quests, trainers). */
+    public static final String PROFESSION_KEY = com.skycraft.economy.Merchants.PROFESSION_KEY;
     private static final NpcRole[] RANDOM_FIGHTERS = {
             NpcRole.THALMOR, NpcRole.IMPERIAL_SOLDIER, NpcRole.STORMCLOAK_SOLDIER, NpcRole.FORSWORN, NpcRole.VAMPIRE,
             NpcRole.NECROMANCER, NpcRole.ASSASSIN, NpcRole.THUG
@@ -82,16 +86,86 @@ public final class Npcs {
 
     // ------------------------------------------------------------------ outfit
 
-    /** Name, gear and stats for a freshly initialized NPC. */
+    /** Looks, name, trade, gear and stats for a freshly initialized NPC. */
     public static void outfit(NpcEntity npc) {
         RandomSource r = npc.getRandom();
         NpcRole role = npc.role();
-        if (!npc.hasCustomName()) npc.setCustomName(name(role, npc.isFemale(), r));
+        if (npc.getLook() < 0) chooseLook(npc, r);
+        if (!npc.hasCustomName()) npc.setCustomName(personalName(npc, role, r));
+        setupTrade(npc, role, r);
         equip(npc, role, r);
         stats(npc, role);
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             npc.setDropChance(slot, slot.getType() == EquipmentSlot.Type.HAND ? 0.06f : 0.0f);
         }
+    }
+
+    /** Picks race (from the region's people), sex, appearance and clothes. */
+    public static void chooseLook(NpcEntity npc, RandomSource r) {
+        NpcRole role = npc.role();
+        com.skycraft.tamriel.Region region = Cultures.regionAt(npc.level(), npc.blockPosition());
+        NpcNames.Race race = Cultures.raceFor(region, role, r);
+        boolean female = npc.isFemale();
+        Outfit outfit = Cultures.outfitFor(role, race, r);
+        npc.setLook(NpcLook.random(race, female, role == NpcRole.CHILD, outfit, r));
+    }
+
+    /** Older NPCs saved before looks existed get one now (their name stays). */
+    public static void ensureLook(NpcEntity npc) {
+        if (npc.getLook() >= 0 || !npc.hasRole()) return;
+        chooseLook(npc, npc.getRandom());
+    }
+
+    /**
+     * A personal name for the NPC in its race's style. Townsfolk go by their own (world-unique) name like in Skyrim;
+     * travelers keep a role title ("Ri'saad, Caravan Trader").
+     */
+    public static Component personalName(NpcEntity npc, NpcRole role, RandomSource r) {
+        if (!role.named()) return Component.translatable("society.skycraft.title." + role.id);
+        NpcRegistry registry = NpcRegistry.get(npc.level());
+        NpcNames.Race race = npc.race();
+        String name = registry != null ? registry.uniqueName(race, npc.isFemale(), r) : NpcNames.fullName(race, npc.isFemale(), r);
+        // the registry records them once they settle somewhere (NpcEntity#setHome); travelers come and go
+        npc.getPersistentData().putString(NpcRegistry.NAME_KEY, name);
+        if (role.townsfolk() && role != NpcRole.THIEF) return Component.literal(name);
+        return Component.translatable("society.skycraft.npc_name." + role.id, name);
+    }
+
+    /** Merchants among the townsfolk get a shop (economy contract: persistent {@code skycraft_shop.pools}). */
+    public static void setupTrade(NpcEntity npc, NpcRole role, RandomSource r) {
+        CompoundTag pd = npc.getPersistentData();
+        String profession = switch (role) {
+            case BLACKSMITH -> r.nextInt(3) == 0 ? "minecraft:armorer" : r.nextBoolean() ? "minecraft:weaponsmith" : "minecraft:toolsmith";
+            case APOTHECARY -> "minecraft:cleric";
+            case FISHER -> "minecraft:fisherman";
+            case BUTCHER -> "minecraft:butcher";
+            case FARMER -> "minecraft:farmer";
+            case SCHOLAR -> "minecraft:librarian";
+            case HUNTER -> "minecraft:leatherworker";
+            case MINER -> "minecraft:mason";
+            case MERCHANT -> r.nextInt(3) == 0 ? "minecraft:fletcher" : "minecraft:cartographer";
+            default -> null;
+        };
+        if (profession != null && !pd.contains(PROFESSION_KEY)) pd.putString(PROFESSION_KEY, profession);
+        String[] pools = switch (role) {
+            case BLACKSMITH -> new String[]{"blacksmith"};
+            case MERCHANT -> "minecraft:fletcher".equals(pd.getString(PROFESSION_KEY)) ? new String[]{"general", "fletcher"} : new String[]{"general"};
+            case APOTHECARY -> new String[]{"apothecary"};
+            case FISHER -> new String[]{"food", "fisher"};
+            case BUTCHER -> new String[]{"food", "hunter"};
+            case FARMER -> new String[]{"food"};
+            case SCHOLAR -> new String[]{"library", "arcane"};
+            case INNKEEPER -> new String[]{"food"};
+            case CARAVAN_TRADER -> new String[]{"general", "fence", "exotic"};
+            default -> null;
+        };
+        if (pools == null || pd.contains(com.skycraft.economy.Shop.KEY)) return;
+        CompoundTag shop = new CompoundTag();
+        net.minecraft.nbt.ListTag list = new net.minecraft.nbt.ListTag();
+        for (String p : pools) list.add(net.minecraft.nbt.StringTag.valueOf(p));
+        shop.put("pools", list);
+        shop.putInt("level", role == NpcRole.CARAVAN_TRADER ? 3 : 1 + r.nextInt(4));
+        pd.put(com.skycraft.economy.Shop.KEY, shop);
     }
 
     public static Component name(NpcRole role, boolean female, RandomSource r) {
@@ -151,6 +225,16 @@ public final class Npcs {
                 armor(npc, EquipmentSlot.CHEST, item("skycraft:steel_chestplate", Items.IRON_CHESTPLATE));
             }
             case JARL -> hand(npc, item("skycraft:steel_sword", Items.IRON_SWORD));
+            case FARMER -> {
+                if (r.nextBoolean()) hand(npc, new ItemStack(Items.IRON_HOE));
+            }
+            case BLACKSMITH -> hand(npc, item("skycraft:iron_mace", Items.IRON_AXE));
+            case FISHER -> hand(npc, new ItemStack(Items.FISHING_ROD));
+            case BUTCHER -> hand(npc, item("skycraft:iron_war_axe", Items.IRON_AXE));
+            case CARAVAN_TRADER -> hand(npc, item("skycraft:steel_sword", Items.IRON_SWORD));
+            case SCHOLAR -> {
+                if (r.nextBoolean()) hand(npc, new ItemStack(Items.BOOK));
+            }
             default -> {
             }
         }
@@ -176,6 +260,9 @@ public final class Npcs {
             case JARL -> { health = 30; damage = 4; armor = 2; }
             case HOUSECARL -> { health = 40; damage = 5; armor = 4; }
             case THIEF -> { health = 18; damage = 2; armor = 0; }
+            case CARAVAN_TRADER -> { health = 30; damage = 4; armor = 2; }
+            case BLACKSMITH -> { health = 26; damage = 3; armor = 0; }
+            case CHILD -> { health = 12; damage = 1; armor = 0; }
             default -> { health = 20; damage = 2; armor = 0; }
         }
         base(npc, Attributes.MAX_HEALTH, health);

@@ -59,7 +59,7 @@ public final class Barks {
 
     static {
         // guards
-        lines("guard.generic", 14);
+        lines("guard.generic", 30);
         lines("guard.night", 3);
         lines("guard.weapon", 3);
         lines("guard.sneak", 3);
@@ -110,6 +110,17 @@ public final class Barks {
         lines("role.jarl", 3);
         lines("role.housecarl", 3);
         lines("role.thief", 2);
+        lines("role.farmer", 3);
+        lines("role.blacksmith", 3);
+        lines("role.merchant", 3);
+        lines("role.apothecary", 3);
+        lines("role.fisher", 3);
+        lines("role.butcher", 3);
+        lines("role.scholar", 3);
+        lines("role.steward", 3);
+        lines("role.caravan_trader", 3);
+        lines("role.citizen", 4);
+        lines("role.child", 4);
         lines("prisoner", 3);
         // combat
         lines("attack.generic", 3);

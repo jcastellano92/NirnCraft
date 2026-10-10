@@ -82,9 +82,7 @@ implements or calls.
 * **Added:**
   * Controllable: controller support for the Steam Deck and gamepads.
 * **Unchanged:**
-  * MCA Reborn stays for its named, human-looking villagers.
-  * Its player editor, destiny screen and sexuality traits are switched off in config (workstream A).
-  * Its interaction menu is bypassed in favour of Skycraft dialogue (workstream F).
+  * (Phase 3: the third-party villager mod was later removed; Skycraft's society module provides the townsfolk.)
 
 ## Default key plan (authoritative; owned by workstream A, followed by everyone)
 
@@ -171,9 +169,7 @@ registration. A ships the vanilla defaults through Default Options and updates `
   * Race descriptions and bonuses sit in a scrolling panel; every list scrolls.
   * Racial traits must really work: verify every resistance, skill bonus and power in code, fix any that
     don't apply, and show the effects in the character page.
-* **MCA Reborn config** (`pack/config/...`; read MCA's source on raw.githubusercontent.com for the real keys):
-  switch off its player editor and destiny screen, and switch off sexuality and romance traits. Keep its
-  villagers.
+* **Villager mod config:** obsolete (Phase 3 removed the third-party villager mod).
 * **Respawn bug:** respawning must never reopen race selection or reset the character.
 * **Screens:**
   * A custom death screen (Skyrim style: "You died", with Load/Respawn wording).
@@ -329,8 +325,8 @@ registration. A ships the vanilla defaults through Default Options and updates `
   * The NPC stops, turns to face you and holds still while you talk.
   * The camera eases in toward the NPC's face, client side.
   * Other players see the NPC as "busy" and can't start a second conversation.
-* **One dialogue menu style for every NPC interaction:** trade, train, follow, rent a room, bounty. MCA's own
-  interaction menu must no longer appear; remove the "Chat" hand-back for MCA villagers.
+* **One dialogue menu style for every NPC interaction:** trade, train, follow, rent a room, bounty. No third-party
+  interaction menu may appear.
 * **Roles:** only the right NPCs trade, train, rent rooms or offer to follow. Each NPC has a role; topics
   check it.
 * **Followers** (contract 11; replaces Villager Recruits):

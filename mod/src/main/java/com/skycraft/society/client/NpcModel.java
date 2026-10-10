@@ -44,6 +44,10 @@ public class NpcModel extends PlayerModel<NpcEntity> {
     @Override
     public void setupAnim(NpcEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+        // children: a bigger head on the small body (the renderer scales the whole child down)
+        float headScale = entity.isChild() ? 1.22F : 1.0F;
+        this.head.xScale = this.head.yScale = this.head.zScale = headScale;
+        this.hat.xScale = this.hat.yScale = this.hat.zScale = headScale;
         boolean changed = true;
         if (entity.isPrisoner()) {
             // hands bound behind the back, head hung low

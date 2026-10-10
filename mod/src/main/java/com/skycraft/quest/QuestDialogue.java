@@ -85,15 +85,21 @@ public final class QuestDialogue {
     }
 
     private static boolean isProfession(LivingEntity e, VillagerProfession prof) {
-        return e instanceof Villager v && v.getVillagerData().getProfession() == prof;
+        return com.skycraft.economy.Merchants.profession(e) == prof;
+    }
+
+    /** Villagers and Skycraft's settled townsfolk (adults with a trade or a home in a settlement). */
+    public static boolean isTownsperson(LivingEntity e) {
+        if (e instanceof Villager v) return !v.isBaby();
+        return e instanceof com.skycraft.society.entity.NpcEntity n && n.isAlive() && n.role().townsfolk() && !n.isChild();
     }
 
     public static boolean matchesNpc(Objective o, LivingEntity npc) {
         if (o.npc != null) return o.npc.equals(npc.getUUID());
         boolean typeOk = switch (o.npcFilter) {
-            case "villager" -> npc instanceof Villager;
+            case "villager" -> isTownsperson(npc);
             case "guard" -> isGuard(npc);
-            case "trader" -> npc instanceof WanderingTrader;
+            case "trader" -> com.skycraft.economy.Merchants.isCaravan(npc);
             case "any" -> npc instanceof AbstractVillager || isGuard(npc) || Dialogue.canTalk(npc);
             default -> false;
         };
@@ -133,9 +139,9 @@ public final class QuestDialogue {
         // 3. topics by kind of NPC
         PlayerData data = SkyData.get(player);
         boolean guard = isGuard(npc);
-        if (npc instanceof Villager villager) {
+        if (isTownsperson(npc)) {
             out.add(opt("quest.help", "dialogue.skycraft.quest.help", 300,
-                    (pl, n) -> ask(pl, n, "help", () -> RadiantQuests.villager(pl, villager))));
+                    (pl, n) -> ask(pl, n, "help", () -> RadiantQuests.villager(pl, n))));
             if (isProfession(npc, VillagerProfession.WEAPONSMITH)) companionsTopics(player, data, out);
             if (isProfession(npc, VillagerProfession.LIBRARIAN)) {
                 collegeTopics(player, data, out);
@@ -152,7 +158,7 @@ public final class QuestDialogue {
             companionsTopics(player, data, out);
             civilWarTopics(player, data, out);
         }
-        if (npc instanceof WanderingTrader) {
+        if (com.skycraft.economy.Merchants.isCaravan(npc)) {
             thievesTopics(player, data, out);
             darkBrotherhoodTopics(player, data, out);
         }

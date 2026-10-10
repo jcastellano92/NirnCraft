@@ -248,7 +248,7 @@ public final class SideQuests {
 
         // In My Time of Need — offered by guards or wandering traders (Redguard search)
         if (!hasSideQuest(player, "side_time_of_need") && data.getLevel() >= 3) {
-            boolean isGuardOrTrader = npc instanceof net.minecraft.world.entity.npc.WanderingTrader
+            boolean isGuardOrTrader = com.skycraft.economy.Merchants.isCaravan(npc)
                     || (npc instanceof com.skycraft.society.entity.NpcEntity ne
                     && (ne.role() == com.skycraft.society.NpcRole.IMPERIAL_SOLDIER || ne.role() == com.skycraft.society.NpcRole.STORMCLOAK_SOLDIER));
             if (isGuardOrTrader) {

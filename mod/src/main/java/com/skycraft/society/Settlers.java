@@ -33,9 +33,15 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Gives each settlement detected by the roads module its people, once: a bard (playing for the inn the survival
- * module runs there), a priest, maybe a beggar, a worker (hunter, miner or lumberjack) and a mage or adventurer passing through. The first settlement found
- * in each hold becomes its seat: the Jarl and a housecarl live there.
+ * Gives each settlement detected by the roads module its people, once, the first time a player comes near: a roster
+ * sized by the settlement (a farm's family, a village's farmers and smith, a town's merchants, priest, bard and
+ * apothecary, a capital's Jarl, steward and housecarl), each of the region's races in realistic proportions (see
+ * {@link Cultures}), each with a home bed (POI claims), a workplace ({@link Workplaces}) and a daily routine
+ * ({@link Schedule}). The innkeeper comes from the survival module. The settlement on a capital {@code Place} (or,
+ * without places, the first settlement found in a hold) is the hold's seat.
+ *
+ * <p>Public API for settlement builders: {@link #populate(ServerLevel, Settlement)} and
+ * {@link #spawnResident(ServerLevel, BlockPos, NpcRole, BlockPos, int)}.</p>
  */
 public final class Settlers {
     private Settlers() {}
@@ -59,49 +65,166 @@ public final class Settlers {
         populate(level, s, data);
     }
 
+    /** Settlement sizes, smallest first. */
+    public enum Size { FARM, VILLAGE, TOWN, CITY }
+
+    /** Populates a settlement now (idempotent per settlement). For builders that place their towns themselves. */
+    public static void populate(ServerLevel level, Settlement s) {
+        Data data = Data.get(level);
+        if (!data.populated.contains(s.key)) populate(level, s, data);
+    }
+
     private static void populate(ServerLevel level, Settlement s, Data data) {
         data.populated.add(s.key);
         data.setDirty();
         RandomSource r = level.getRandom();
-        // the survival module gives every settlement its innkeeper
-        List<NpcRole> roles = new ArrayList<>(List.of(NpcRole.BARD, NpcRole.PRIEST));
-        if (r.nextBoolean()) roles.add(NpcRole.BEGGAR);
-        NpcRole[] workers = {NpcRole.HUNTER, NpcRole.MINER, NpcRole.LUMBERJACK};
-        roles.add(workers[r.nextInt(workers.length)]);
-        if (r.nextInt(3) == 0) roles.add(r.nextBoolean() ? NpcRole.MAGE : NpcRole.ADVENTURER);
-
         BlockPos center = Encounters.groundAt(level, s.x, s.z);
         if (center == null) center = new BlockPos(s.x, s.y, s.z);
-        for (NpcRole role : roles) spawn(level, s, center, role, r);
+        com.skycraft.tamriel.Place place = com.skycraft.tamriel.Places.nearest(null, s.x, s.z, 200)
+                .filter(p -> p.type().isSettlement()).orElse(null);
+        Size size = sizeOf(s, place);
+        String hold = Holds.holdAt(level, center);
+        boolean seat = !data.seats.contains(hold) && (place == null ? size.ordinal() >= Size.VILLAGE.ordinal()
+                : place.type() == com.skycraft.tamriel.PlaceType.CAPITAL);
+
+        List<NpcRole> roles = roster(size, seat, r);
+        int cap = SocietyConfig.MAX_RESIDENTS.get();
+        if (roles.size() > cap) roles = roles.subList(0, cap);
         com.skycraft.crafting.SettlementStations.populate(level, s, center, r);
 
-        String hold = Holds.holdAt(level, center);
-        if (!data.seats.contains(hold)) {
+        NpcEntity jarl = null;
+        Set<Long> taken = new HashSet<>();
+        for (NpcRole role : roles) {
+            NpcEntity npc = spawnResident(level, center, role, freeBed(level, center, taken, data), radiusFor(role));
+            if (npc != null && npc.getBed() != null) taken.add(npc.getBed().asLong());
+            if (role == NpcRole.JARL) jarl = npc;
+            if (role == NpcRole.HOUSECARL && npc != null && jarl != null) npc.setLeader(jarl.getUUID());
+        }
+        if (seat) {
             data.seats.add(hold);
-            NpcEntity jarl = spawn(level, s, center, NpcRole.JARL, r);
-            if (jarl != null) {
-                NpcEntity housecarl = spawn(level, s, jarl.blockPosition(), NpcRole.HOUSECARL, r);
-                if (housecarl != null) housecarl.setLeader(jarl.getUUID());
-            }
+            data.setDirty();
         }
     }
 
+    /** Spawns a roster of {@code size} around {@code center} (no settlement record; commands). Returns how many. */
+    public static int populateHere(ServerLevel level, BlockPos center, Size size) {
+        Data data = Data.get(level);
+        int count = 0;
+        Set<Long> taken = new HashSet<>();
+        List<NpcRole> roles = roster(size, false, level.getRandom());
+        int cap = SocietyConfig.MAX_RESIDENTS.get();
+        if (roles.size() > cap) roles = roles.subList(0, cap);
+        for (NpcRole role : roles) {
+            NpcEntity npc = spawnResident(level, center, role, freeBed(level, center, taken, data), radiusFor(role));
+            if (npc == null) continue;
+            count++;
+            if (npc.getBed() != null) taken.add(npc.getBed().asLong());
+        }
+        return count;
+    }
+
+    private static Size sizeOf(Settlement s, @Nullable com.skycraft.tamriel.Place place) {
+        if (place != null) {
+            return switch (place.type()) {
+                case CAPITAL, CITY -> Size.CITY;
+                case TOWN -> Size.TOWN;
+                case VILLAGE -> Size.VILLAGE;
+                default -> Size.FARM;
+            };
+        }
+        int half = Math.max(s.maxX - s.minX, s.maxZ - s.minZ) / 2;
+        if (half > 80) return Size.CITY;
+        if (half > 48) return Size.TOWN;
+        if (half > 20) return Size.VILLAGE;
+        return Size.FARM;
+    }
+
+    /** Who lives in a settlement of this size, most important first (the cap trims from the end). */
+    static List<NpcRole> roster(Size size, boolean seat, RandomSource r) {
+        List<NpcRole> roles = new ArrayList<>();
+        if (seat) {
+            roles.add(NpcRole.JARL);
+            roles.add(NpcRole.HOUSECARL);
+            roles.add(NpcRole.STEWARD);
+        }
+        NpcRole[] workers = {NpcRole.HUNTER, NpcRole.MINER, NpcRole.LUMBERJACK, NpcRole.FISHER};
+        switch (size) {
+            case FARM -> {
+                roles.add(NpcRole.FARMER);
+                roles.add(NpcRole.FARMER);
+                if (r.nextBoolean()) roles.add(NpcRole.CHILD);
+            }
+            case VILLAGE -> {
+                roles.addAll(List.of(NpcRole.FARMER, NpcRole.BLACKSMITH, NpcRole.MERCHANT, NpcRole.FARMER));
+                roles.add(workers[r.nextInt(workers.length)]);
+                if (r.nextBoolean()) roles.add(NpcRole.PRIEST);
+                if (r.nextBoolean()) roles.add(NpcRole.BARD);
+                roles.addAll(List.of(NpcRole.CITIZEN, NpcRole.CHILD, NpcRole.CITIZEN));
+                if (r.nextBoolean()) roles.add(NpcRole.CHILD);
+            }
+            case TOWN -> {
+                roles.addAll(List.of(NpcRole.BLACKSMITH, NpcRole.MERCHANT, NpcRole.PRIEST, NpcRole.BARD, NpcRole.APOTHECARY,
+                        NpcRole.FARMER, NpcRole.FARMER, NpcRole.BUTCHER));
+                roles.add(workers[r.nextInt(workers.length)]);
+                roles.add(workers[r.nextInt(workers.length)]);
+                if (r.nextBoolean()) roles.add(NpcRole.BEGGAR);
+                if (r.nextInt(3) == 0) roles.add(NpcRole.SCHOLAR);
+                roles.addAll(List.of(NpcRole.CITIZEN, NpcRole.CHILD, NpcRole.CITIZEN, NpcRole.CITIZEN, NpcRole.CHILD));
+            }
+            case CITY -> {
+                roles.addAll(List.of(NpcRole.BLACKSMITH, NpcRole.MERCHANT, NpcRole.PRIEST, NpcRole.BARD, NpcRole.APOTHECARY,
+                        NpcRole.SCHOLAR, NpcRole.MERCHANT, NpcRole.BUTCHER, NpcRole.FARMER, NpcRole.BLACKSMITH, NpcRole.BEGGAR,
+                        NpcRole.MAGE, NpcRole.FARMER));
+                roles.add(workers[r.nextInt(workers.length)]);
+                roles.addAll(List.of(NpcRole.CITIZEN, NpcRole.CHILD, NpcRole.CITIZEN, NpcRole.CITIZEN, NpcRole.CHILD, NpcRole.CITIZEN,
+                        NpcRole.PRIEST, NpcRole.CHILD, NpcRole.CITIZEN));
+            }
+        }
+        return roles;
+    }
+
+    private static int radiusFor(NpcRole role) {
+        return switch (role) {
+            case HUNTER, LUMBERJACK, MINER, FISHER, FARMER -> 48;
+            case CHILD -> 20;
+            default -> 28;
+        };
+    }
+
+    /** A free bed near the settlement center (POI lookup), or null. */
     @Nullable
-    private static NpcEntity spawn(ServerLevel level, Settlement s, BlockPos center, NpcRole role, RandomSource r) {
+    private static BlockPos freeBed(ServerLevel level, BlockPos center, Set<Long> taken, Data data) {
+        return level.getPoiManager().findClosest(h -> h.is(PoiTypes.HOME),
+                p -> !taken.contains(p.asLong()) && !data.beds.containsKey(p.asLong()) && !Ownership.isPlayerOwned(level, p),
+                center, 64, PoiManager.Occupancy.HAS_SPACE).map(BlockPos::immutable).orElse(null);
+    }
+
+    /**
+     * Spawns one settled townsperson: standing near {@code bed} (or the settlement center), living there, with that
+     * bed claimed. Returns the NPC or null. Public for settlement builders.
+     */
+    @Nullable
+    public static NpcEntity spawnResident(ServerLevel level, BlockPos center, NpcRole role, @Nullable BlockPos bed, int radius) {
+        RandomSource r = level.getRandom();
+        BlockPos anchor = bed != null ? bed : center;
         BlockPos pos = null;
         for (int i = 0; i < 12 && pos == null; i++) {
-            int x = center.getX() + r.nextInt(33) - 16;
-            int z = center.getZ() + r.nextInt(33) - 16;
-            BlockPos p = Encounters.groundAt(level, x, z);
-            if (p != null && Math.abs(p.getY() - center.getY()) <= 6 && level.getBlockState(p).isAir()
-                    && level.getBlockState(p.above()).isAir()) pos = p;
+            int spread = bed != null ? 3 : 16;
+            int x = anchor.getX() + r.nextInt(spread * 2 + 1) - spread;
+            int z = anchor.getZ() + r.nextInt(spread * 2 + 1) - spread;
+            BlockPos p = bed != null ? new BlockPos(x, bed.getY(), z) : Encounters.groundAt(level, x, z);
+            if (p != null && Math.abs(p.getY() - anchor.getY()) <= 6 && level.getBlockState(p).isAir()
+                    && level.getBlockState(p.above()).isAir() && level.getBlockState(p.below()).isSolid()) pos = p;
         }
-        if (pos == null) pos = center;
+        if (pos == null) pos = bed != null ? bed.above() : center;
         NpcEntity npc = Npcs.create(level, pos, role);
         if (npc == null) return null;
         npc.setPersistenceRequired();
-        npc.setHome(center, role == NpcRole.HUNTER || role == NpcRole.LUMBERJACK || role == NpcRole.MINER ? 48 : 28);
-        return level.addFreshEntity(npc) ? npc : null;
+        npc.setHome(anchor, radius);
+        if (bed != null) claimBed(npc, bed);
+        if (!level.addFreshEntity(npc)) return null;
+        NpcRegistry.get(level.getServer()).setHome(npc.getUUID(), anchor, level.dimension().location().toString());
+        return npc;
     }
 
     // ------------------------------------------------------------------ beds
@@ -132,9 +255,11 @@ public final class Settlers {
             }
             npc.setBed(null);
         }
+        // a spouse sleeps in the player's own beds at home
+        boolean spouse = Marriage.isSpouse(npc);
         Optional<BlockPos> found = level.getPoiManager().findClosest(h -> h.is(PoiTypes.HOME),
-                p -> !data.beds.containsKey(p.asLong()) && !Ownership.isPlayerOwned(level, p),
-                home, 32, PoiManager.Occupancy.HAS_SPACE);
+                p -> !data.beds.containsKey(p.asLong()) && (spouse || !Ownership.isPlayerOwned(level, p)),
+                home, spouse ? 20 : 32, PoiManager.Occupancy.HAS_SPACE);
         if (found.isEmpty()) return null;
         BlockPos bed = found.get().immutable();
         data.beds.put(bed.asLong(), npc.getUUID());

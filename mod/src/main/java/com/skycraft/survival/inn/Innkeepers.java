@@ -132,14 +132,13 @@ public final class Innkeepers {
         BlockPos anchor = bell.orElse(center);
         BlockPos spot = findSpot(level, anchor, level.getRandom());
         if (spot == null) return false;
-        Villager v = EntityType.VILLAGER.create(level);
+        // a Skycraft townsperson of the region's people (society module), who keeps the inn's hours
+        com.skycraft.society.entity.NpcEntity v = com.skycraft.society.Npcs.create(level, spot, com.skycraft.society.NpcRole.INNKEEPER);
         if (v == null) return false;
-        v.moveTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0f);
-        v.setVillagerData(v.getVillagerData().setType(VillagerType.byBiome(level.getBiome(spot)))
-                .setProfession(VillagerProfession.BUTCHER).setLevel(3));
-        v.setVillagerXp(100); // experienced villagers keep their profession without a job site
-        String name = NAMES[Math.floorMod(s.id * 7 + (int) (s.key ^ (s.key >>> 32)), NAMES.length)];
-        v.setCustomName(Component.translatable("entity.skycraft.innkeeper", name));
+        String name = v.hasCustomName() ? v.getCustomName().getString()
+                : NAMES[Math.floorMod(s.id * 7 + (int) (s.key ^ (s.key >>> 32)), NAMES.length)];
+        if (!v.hasCustomName()) v.setCustomName(Component.translatable("entity.skycraft.innkeeper", name));
+        v.setHome(anchor, 24);
         v.setPersistenceRequired();
         v.addTag(TAG);
         CompoundTag pd = v.getPersistentData();

@@ -101,6 +101,9 @@ public final class Theft {
 
     public static boolean inVillage(ServerLevel level, BlockPos pos) {
         if (!level.getEntitiesOfClass(Villager.class, new AABB(pos).inflate(32), Villager::isAlive).isEmpty()) return true;
+        // Skycraft townsfolk living here
+        if (!level.getEntitiesOfClass(com.skycraft.society.entity.NpcEntity.class, new AABB(pos).inflate(32),
+                n -> n.isAlive() && n.getHome() != null).isEmpty()) return true;
         return level.getPoiManager().findClosest((Holder<PoiType> h) -> h.is(PoiTypes.MEETING), pos, 48, PoiManager.Occupancy.ANY).isPresent();
     }
 
@@ -312,7 +315,7 @@ public final class Theft {
 
         // 1. Guard witness: immediate arrest confrontation
         if (Crimes.isGuard(witness)) {
-            com.skycraft.society.Barks.say(witness, net.minecraft.network.chat.Component.literal("Stop right there, criminal scum!"));
+            com.skycraft.society.Barks.say(witness, net.minecraft.network.chat.Component.literal("Halt, thief! In the name of the Jarl!"));
             Crimes.report(player, pos, bounty, true, null);
             return;
         }

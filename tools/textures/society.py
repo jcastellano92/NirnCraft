@@ -1,8 +1,9 @@
 """Generates the society module's textures (PIL).
 
 Writes PNGs into mod/src/main/resources/assets/skycraft/textures/entity/society/:
-  <role>_0.png, <role>_1.png         64x64 player-layout skins for every NPC role (0 = male, 1 = female)
+  <role>_0.png, <role>_1.png         64x64 player-layout skins for every NPC role (0 = male, 1 = female); fallback only
   cosmetic/<id>.png                  64x64 faction regalia (CosmeticLayer UVs: hood, torso, tabard panels, cloak, pelts)
+  npc/...                            the layers NpcSkins composites into race-correct townsfolk (see "NPC layers")
 
 Every model box is painted face by face from the same UV layout as the Java models. Run:
   python3 tools/textures/society.py
@@ -184,10 +185,10 @@ def stripes(p, a, b, period=4):
     return a if (p.y // 2 + p.x // 2) % period else b
 
 
-def humanoid(L, rnd):
-    """Paints a skin from a look dict (see LOOKS)."""
+def humanoid(L, rnd, clothes_only=False):
+    """Paints a skin from a look dict (see LOOKS). clothes_only leaves skin and face transparent (NPC outfit layers)."""
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    skin = L["skin"]
+    skin = L.get("skin", SKIN["nord"])
     tunic = L["tunic"]
     trim = L.get("trim", shade(tunic, 0.7))
     pants = L.get("pants", hexc("4a4038"))
@@ -199,16 +200,19 @@ def humanoid(L, rnd):
     gloves = L.get("gloves")
     bare = L.get("bare_chest", False)
 
+    def limb(p, skin):
+        return None if clothes_only else _limb(p, skin)
+
     def base(p):
         if p.kind == "head":
-            return face(p, L)
+            return None if clothes_only else face(p, L)
         if p.kind == "body":
             if not robe and 11.0 <= p.h <= 12.6:
                 return hexc("b89a50") if (p.face == "front" and p.x in (3, 4)) else belt
             if bare and p.h < 22:
                 if (p.face in ("front", "back")) and (p.x + p.y) % 8 in (0, 1):
                     return L.get("strap", hexc("6a5a46"))
-                return shade(skin, 0.97)
+                return None if clothes_only else shade(skin, 0.97)
             if cuirass is not None and p.h > 12.5:
                 c = cuirass
                 if p.face == "front" and p.y in (3, 7):
@@ -225,7 +229,7 @@ def humanoid(L, rnd):
                     return L["emblem"]
             if p.face == "front":
                 if p.y <= 1 and p.x in (3, 4) and not robe and not L.get("hood"):
-                    return shade(skin, 0.95)  # neckline
+                    return None if clothes_only else shade(skin, 0.95)  # neckline
                 if robe and p.x in (3, 4):
                     return trim  # robe opening
                 if p.x in (0, 7):
@@ -265,7 +269,7 @@ def humanoid(L, rnd):
             if L.get("leg_wraps") and p.y % 3 == 0:
                 return L["leg_wraps"]
             return pants if not (p.face == "front" and p.x == 0) else shade(pants, 0.82)
-        return skin
+        return None if clothes_only else skin
 
     def over(p):
         hood = L.get("hood")
@@ -332,7 +336,7 @@ def humanoid(L, rnd):
     return img
 
 
-def limb(p, skin):
+def _limb(p, skin):
     return shade(skin, 0.95 if p.side else 1.0)
 
 
@@ -650,6 +654,680 @@ COSMETICS = {
 }
 
 
+# ---------------------------------------------------------------------------------------------------- NPC layers
+#
+# Townsfolk are composited at runtime by society.client.NpcSkins from four layers (all 64x64, player layout):
+#   npc/body/<race>_<m|f>_<tone>.png      skin, face and race details (fur, scales, tusks), plain linen underclothes
+#   npc/hair/<style>.png                  greyscale, tinted with the NPC's hair colour (also carries the brows)
+#   npc/beard/<style>.png                 greyscale, tinted with the hair colour
+#   npc/outfit/<id>_<variant>_<m|f>.png   clothing (transparent where skin shows)
+#   npc/features.png                      greyscale texture of the extra race parts (RaceFeatureModel)
+# Index orders MUST match NpcLook / Outfit in Java (race, tone, hair, beard and outfit ordinals).
+
+NPC_RACES = ["nord", "imperial", "breton", "redguard", "altmer", "bosmer", "dunmer", "khajiit", "argonian", "orc"]
+# 4 tones per race; the same values are mirrored in NpcLook.TONES (feature layer tint)
+NPC_TONES = {
+    "nord": ["edd3c0", "e3bfa3", "d6ad8e", "c79c7e"],
+    "imperial": ["deb492", "cda07c", "bb8c66", "a87b58"],
+    "breton": ["f2d8c4", "e8c6ac", "dcb699", "cfa588"],
+    "redguard": ["a46e4a", "925e3c", "7e4e32", "6a4029"],
+    "altmer": ["ead489", "dcc47a", "cfb46a", "c2a55e"],
+    "bosmer": ["c8a070", "b88f60", "a68052", "937047"],
+    "dunmer": ["8e979c", "7d878e", "6c767d", "8f8582"],
+    "khajiit": ["c9a46c", "9e7044", "ddd0b4", "8c7d6e"],
+    "argonian": ["5f7f4c", "7c6d44", "4d6f7c", "8a5c3c"],
+    "orc": ["84a05e", "72904f", "8e9e66", "627e48"],
+}
+NPC_EYES = {
+    "nord": ["4a6e94", "6a8aa0", "5a7a5a", "6a6a7a"],
+    "imperial": ["5a3a24", "4a3220", "6a4a2a", "3a2a1c"],
+    "breton": ["4a7a9a", "5a8a5a", "6a4a2a", "7a8a9a"],
+    "redguard": ["3a2216", "2e1a10", "4a2a18", "3a2a1a"],
+    "altmer": ["d8a830", "c89a2a", "e0b848", "b88a20"],
+    "bosmer": ["2a1a10", "3a2a14", "1e140c", "4a3018"],
+    "dunmer": ["e03020", "d02818", "f04030", "c02010"],
+    "khajiit": ["a8c040", "d0a030", "60b050", "c08a28"],
+    "argonian": ["e0c030", "e08a20", "d0d040", "f0a030"],
+    "orc": ["c07020", "a05018", "d08a30", "8a4a1a"],
+}
+
+
+def npc_face(p, race, skin, eye, female, rnd):
+    """Head base pixel of an NPC (no hair: that is its own layer)."""
+    light = mix(skin, hexc("ffffff"), 0.25)
+    dark = shade(skin, 0.78)
+    if race == "khajiit":
+        cream = mix(skin, hexc("f4ead8"), 0.6)
+        stripe = shade(skin, 0.62)
+        if p.face == "top":
+            return stripe if p.x in (2, 5) and p.y < 6 else skin
+        if p.face == "bottom":
+            return cream
+        if p.face == "back":
+            return stripe if p.y % 3 == 0 and 1 <= p.x <= 6 else skin
+        if p.side:
+            if p.y in (2, 5) and 1 <= p.x <= 5:
+                return stripe
+            return cream if p.y >= 6 else skin
+        x, y = p.x, p.y
+        if y <= 1:
+            return stripe if x in (3, 4) else skin
+        if y == 2 and x in (2, 5):
+            return stripe
+        if y == 3:
+            return shade(skin, 0.85) if x in (1, 2, 5, 6) else skin
+        if y == 4:
+            if x in (1, 6):
+                return eye
+            if x in (2, 5):
+                return hexc("141010")  # slit pupils
+            return skin
+        if y == 5:
+            if x in (3, 4):
+                return hexc("8a4a4a")  # nose leather
+            return cream if 2 <= x <= 5 else skin
+        if y == 6:
+            if x in (1, 6):
+                return shade(skin, 0.55)  # whisker pads
+            if x in (3, 4):
+                return shade(cream, 0.6)
+            return cream if 2 <= x <= 5 else skin
+        return cream if 1 <= x <= 6 else skin
+    if race == "argonian":
+        belly = mix(skin, hexc("d8c890"), 0.55)
+        scale = shade(skin, 0.82)
+        ridge = shade(skin, 0.6)
+
+        def scaled(c):
+            return scale if (p.x + p.y * 2) % 4 == 0 else c
+        if p.face == "top":
+            return ridge if p.x in (3, 4) else scaled(skin)
+        if p.face == "bottom":
+            return belly
+        if p.face == "back":
+            return ridge if p.x in (3, 4) else scaled(skin)
+        if p.side:
+            if p.y >= 6:
+                return belly if (p.x >= 4 if p.face == "right" else p.x <= 3) else scaled(skin)
+            return scaled(skin)
+        x, y = p.x, p.y
+        if y == 2:
+            return ridge if x in (0, 1, 2, 5, 6, 7) else skin  # brow ridge
+        if y == 3:
+            if x in (1, 6):
+                return eye
+            if x in (2, 5):
+                return hexc("141410")
+            return scaled(skin)
+        if y == 5 and x in (2, 5):
+            return hexc("1a1a14")  # nostrils
+        if y == 6:
+            return shade(skin, 0.55) if 1 <= x <= 6 else skin  # long mouth line
+        if y == 7:
+            return belly
+        return scaled(skin)
+    # men and mer
+    if p.face == "top":
+        return skin
+    if p.face == "bottom":
+        return dark
+    if p.face == "back":
+        return shade(skin, 0.94)
+    if p.side:
+        if p.y in (4, 5) and p.x in (3, 4):
+            return shade(skin, 0.86)  # ear
+        return shade(skin, 0.96)
+    x, y = p.x, p.y
+    if y == 3:
+        if race == "orc":
+            return shade(skin, 0.7)  # heavy brow
+        return skin
+    if y == 4:
+        white = hexc("eeeeee")
+        if race == "dunmer":
+            white = shade(eye, 0.55)
+        elif race == "altmer":
+            white = hexc("f2e8c0")
+        elif race == "bosmer":
+            white = shade(eye, 1.6)
+        if x in (1, 6):
+            return white
+        if x in (2, 5):
+            return eye
+        return skin
+    if y == 5:
+        if x in (3, 4):
+            return shade(skin, 0.84)
+        if race == "orc" and x in (2, 5):
+            return shade(skin, 0.86)
+        if female and x in (1, 6):
+            return mix(skin, hexc("d88a80"), 0.18)  # a little colour in the cheeks
+        return skin
+    if y == 6:
+        if race == "orc" and x in (2, 5):
+            return hexc("e8e0c8")  # tusks
+        if x in (3, 4):
+            return mix(skin, hexc("a04a44"), 0.5) if female else shade(skin, 0.68)
+        if x in (2, 5):
+            return mix(skin, hexc("a04a44"), 0.2) if female else shade(skin, 0.85)
+        return skin
+    if y == 7:
+        return shade(skin, 0.93)
+    return skin
+
+
+def npc_body(race, female, tone, rnd):
+    skin = hexc(NPC_TONES[race][tone])
+    eye = hexc(NPC_EYES[race][tone])
+    linen = hexc("cdbf9f")
+    furry = race == "khajiit"
+    scaly = race == "argonian"
+
+    def detail(p, c):
+        if furry and p.face in ("back", "right", "left") and p.y % 4 == 1 and p.kind != "head":
+            return shade(c, 0.66)  # tabby stripes
+        if scaly and (p.x + p.y * 2) % 4 == 0:
+            return shade(c, 0.84)
+        return c
+
+    def base(p):
+        if p.kind == "head":
+            return npc_face(p, race, skin, eye, female, rnd)
+        if p.kind == "body":
+            if 10.5 <= p.h <= 12.6:
+                return linen
+            if female and 18 <= p.h <= 21 and p.face != "top":
+                return linen
+            c = skin
+            if (furry or scaly) and p.face == "front" and 2 <= p.x <= 5:
+                c = mix(skin, hexc("e8dcc0") if furry else hexc("d8c890"), 0.5)  # light belly
+            return detail(p, c)
+        if p.kind == "arm":
+            if (furry or scaly) and p.h < 1.5:
+                return shade(skin, 0.7)  # paws / claws
+            return detail(p, shade(skin, 0.95 if p.side else 1.0))
+        if p.kind == "leg":
+            if p.h > 10.5:
+                return linen
+            if (furry or scaly) and p.h < 1.5:
+                return shade(skin, 0.7)
+            return detail(p, shade(skin, 0.95 if p.side else 1.0))
+        return skin
+
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    paint_humanoid(img, base, lambda p: None, rnd, noise=5)
+    return img
+
+
+# hair styles: index -> painter(p, over) returning a grey level (0..1 brightness factor) or None
+GREY = (214, 214, 214)
+
+
+def g(f):
+    return shade(GREY, f)
+
+
+def brows(p):
+    if p.face == "front" and p.y == 3 and p.x in (1, 2, 5, 6):
+        return g(0.62)
+    return None
+
+
+def hair_short(p, over, long=False, back_rows=5):
+    if over:
+        return None
+    if p.face == "top":
+        return g(1.0)
+    if p.face == "front":
+        if p.y <= 1:
+            return g(0.95 if p.y == 0 else 0.86)
+        if p.y == 2 and p.x in (0, 7):
+            return g(0.8)
+        return brows(p)
+    if p.face == "back":
+        return g(0.9) if p.y <= back_rows else None
+    if p.side:
+        near_back = p.x <= 2 if p.face == "right" else p.x >= 5
+        if p.y <= 2 or (p.y <= 4 and near_back):
+            return g(0.88)
+        return None
+    return None
+
+
+def hair_long(p, over, braids=False):
+    if p.kind == "body":
+        if not over:
+            return None
+        if braids:
+            if p.face == "front" and p.x in (0, 7) and p.y <= 4:
+                return g(0.92 if p.y % 2 == 0 else 0.72)
+            return None
+        if p.face == "back" and p.y <= 6:
+            if p.y == 6 and p.x % 2 == 1:
+                return None
+            return g(0.86 - 0.02 * p.y)
+        return None
+    if p.kind != "head":
+        return None
+    if over:
+        if p.face == "back":
+            return g(0.82)
+        if p.side:
+            near_back = p.x <= 4 if p.face == "right" else p.x >= 3
+            if p.y >= 2 and near_back:
+                return g(0.8)
+            return None
+        return None
+    if p.face == "top":
+        return g(1.0)
+    if p.face == "front":
+        if p.y <= 1:
+            return g(0.95 if p.y == 0 else 0.86)
+        if p.x in (0, 7) and p.y <= 6:
+            return g(0.82)
+        return brows(p)
+    if p.face == "back":
+        return g(0.9)
+    if p.side:
+        if p.y <= 2:
+            return g(0.88)
+        near_back = p.x <= 3 if p.face == "right" else p.x >= 4
+        return g(0.84) if near_back else None
+    return None
+
+
+def hair_shoulder(p, over):
+    if p.kind != "head":
+        return None
+    if over:
+        if p.face == "back" and p.y >= 2:
+            return g(0.82) if not (p.y == 7 and p.x % 2) else None
+        return None
+    return hair_long(p, over)
+
+
+def hair_ponytail(p, over):
+    if p.kind == "body":
+        if over and p.face == "back" and p.x in (3, 4) and p.y <= 4:
+            return g(0.86)
+        return None
+    if p.kind != "head":
+        return None
+    if over:
+        if p.face == "back" and p.x in (3, 4) and p.y >= 1:
+            return g(0.92 if p.y % 3 else 0.6)
+        return None
+    return hair_short(p, over, back_rows=7)
+
+
+def hair_mohawk(p, over):
+    if p.kind != "head":
+        return None
+    if over:
+        if p.face == "top" and p.x in (3, 4):
+            return g(0.95)
+        if p.face == "back" and p.x in (3, 4) and p.y <= 5:
+            return g(0.86)
+        if p.face == "front" and p.x in (3, 4) and p.y == 0:
+            return g(0.9)
+        return None
+    if p.face == "top":
+        return g(0.95) if p.x in (2, 3, 4, 5) else g(0.55)  # shaved sides look darker
+    if p.face == "back" and p.y <= 2:
+        return g(0.55)
+    return brows(p)
+
+
+def hair_bun(p, over):
+    if p.kind != "head":
+        return None
+    if over:
+        if p.face == "back" and 2 <= p.x <= 5 and 1 <= p.y <= 4:
+            return g(0.9 if (p.x + p.y) % 3 else 0.7)
+        if p.face == "top" and 2 <= p.x <= 5 and p.y >= 5:
+            return g(0.9)
+        return None
+    return hair_short(p, over, back_rows=7)
+
+
+def hair_shaved(p, over):
+    if p.kind != "head" or over:
+        return None
+    if p.face == "top":
+        return g(1.0)
+    if p.face == "front":
+        if p.y == 0:
+            return g(0.92)
+        return brows(p)
+    if p.face == "back":
+        return g(0.86) if p.y <= 2 else (g(0.5) if p.y <= 4 else None)
+    if p.side:
+        return g(0.85) if p.y == 0 else (g(0.5) if p.y == 1 else None)
+    return None
+
+
+def hair_wild(p, over, rnd=random.Random(77)):
+    if p.kind != "head":
+        return None
+    if over:
+        if p.face == "top" and (p.x * 3 + p.y * 5) % 4 != 0:
+            return g(0.92)
+        if p.face in ("back", "right", "left") and p.y <= 4 and (p.x * 7 + p.y * 3) % 3 != 0:
+            return g(0.82)
+        if p.face == "front" and p.y == 0 and p.x % 2 == 0:
+            return g(0.9)
+        return None
+    return hair_long(p, over)
+
+
+def hair_bald(p, over):
+    if p.kind != "head" or over:
+        return None
+    return brows(p)
+
+
+def khajiit_mane(p, over):
+    if p.kind != "head" or not over:
+        return None
+    if p.side and p.y >= 3:
+        near_front = p.x >= 4 if p.face == "right" else p.x <= 3
+        return g(0.9 if (p.x + p.y) % 2 else 0.75) if near_front else None
+    if p.face == "back" and p.y >= 2 and (p.x + p.y) % 3 != 0:
+        return g(0.8)
+    if p.face == "top" and p.x in (3, 4) and p.y <= 3:
+        return g(0.9)
+    return None
+
+
+def khajiit_braids(p, over):
+    if p.kind == "body":
+        if over and p.face == "front" and p.x in (0, 7) and p.y <= 5:
+            return g(0.92 if p.y % 2 == 0 else 0.68)
+        return None
+    if p.kind != "head" or not over:
+        return None
+    if p.face == "back" and p.y >= 1:
+        return g(0.85) if p.x not in (0, 7) else None
+    if p.face == "top" and p.y >= 3:
+        return g(0.9)
+    return None
+
+
+def argonian_crest(p, over):
+    if p.kind != "head" or not over:
+        return None
+    if p.face == "top" and 2 <= p.x <= 5:
+        return g(1.0 if p.x in (3, 4) else 0.8)
+    if p.face == "back" and 1 <= p.x <= 6 and p.y <= 5:
+        return g(0.95 - 0.06 * p.y) if (p.x + p.y) % 2 == 0 or p.x in (3, 4) else None
+    if p.face == "front" and p.y == 0 and p.x in (3, 4):
+        return g(1.0)
+    return None
+
+
+def argonian_frills(p, over):
+    if p.kind != "head" or not over:
+        return None
+    if p.side:
+        near_back = p.x <= 3 if p.face == "right" else p.x >= 4
+        if near_back and 1 <= p.y <= 6:
+            return g(0.95 if (p.y % 2 == 0) else 0.7)
+        return None
+    if p.face == "back" and p.y <= 6 and p.x in (0, 1, 6, 7):
+        return g(0.85)
+    return None
+
+
+def argonian_spines(p, over):
+    if p.kind != "head" or not over:
+        return None
+    if p.face == "top" and p.x in (1, 3, 4, 6) and p.y >= 2:
+        return g(0.9)
+    if p.face == "back" and p.x in (1, 3, 4, 6) and p.y <= 3:
+        return g(0.8)
+    return None
+
+
+def nothing(p, over):
+    return None
+
+
+# order = NpcLook hair style index
+HAIR_STYLES = [
+    ("bald", hair_bald), ("short", lambda p, o: hair_short(p, o) if p.kind == "head" else None),
+    ("shoulder", hair_shoulder), ("long", hair_long), ("braids", lambda p, o: hair_long(p, o, braids=True)),
+    ("ponytail", hair_ponytail), ("mohawk", hair_mohawk), ("bun", hair_bun), ("shaved", hair_shaved),
+    ("wild", hair_wild), ("khajiit_mane", khajiit_mane), ("khajiit_braids", khajiit_braids),
+    ("argonian_crest", argonian_crest), ("argonian_frills", argonian_frills), ("argonian_spines", argonian_spines),
+    ("none", nothing),
+]
+
+
+def beard_painter(style):
+    def paint(p, over):
+        if style == 0:
+            return None
+        if p.kind == "body":
+            if style == 3 and over and p.face == "front" and 2 <= p.x <= 5 and p.y <= 3:
+                if p.y == 3 and p.x in (2, 5):
+                    return None
+                return g(0.86 if (p.x + p.y) % 2 else 0.7)
+            return None
+        if p.kind != "head":
+            return None
+        if over:
+            if style in (2, 3) and p.face == "front" and p.y == 7:
+                return g(0.84)
+            return None
+        if p.face == "bottom":
+            return g(0.8) if style in (2, 3, 6) else None
+        if p.face == "front":
+            x, y = p.x, p.y
+            if style == 1:  # stubble: sparse dark speckles
+                return (g(0.55) + (150,)) if y >= 5 and (x + y) % 2 == 0 and not (y == 5 and x in (3, 4)) else None
+            if style == 4:  # goatee
+                return g(0.8) if (y == 7 and 2 <= x <= 5) or (y == 6 and x in (2, 5)) else None
+            if style == 5:  # moustache
+                return g(0.84) if y == 5 and x in (1, 2, 5, 6) or (y == 6 and x in (1, 6)) else None
+            # full / braided / short full
+            if y == 5 and x in (1, 2, 5, 6):
+                return g(0.86)
+            if y == 6 and x not in (3, 4):
+                return g(0.84)
+            if y == 7:
+                return g(0.8)
+            return None
+        if p.side and style in (2, 3, 6):
+            near_front = p.x >= 4 if p.face == "right" else p.x <= 3
+            if near_front and p.y >= 5:
+                return g(0.82)
+            if near_front and p.y >= 3 and style == 2:
+                return g(0.78)  # sideburns
+        return None
+    return paint
+
+
+BEARD_STYLES = ["none", "stubble", "full", "braided", "goatee", "moustache", "short"]
+
+
+def grey_layer(fn, rnd):
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    paint_humanoid(img, lambda p: fn(p, False), lambda p: fn(p, True), rnd, noise=7)
+    return img
+
+
+def V(v, *opts):
+    return hexc(opts[v % len(opts)])
+
+
+def outfit_look(oid, v, female):
+    """Look dict (clothing only) for an outfit id, colour variant 0..2 and sex."""
+    F = female
+    if oid in ("miner", "hunter", "bard", "innkeeper", "courier", "lumberjack", "thalmor", "imperial_soldier",
+               "stormcloak_soldier", "forsworn", "vampire", "necromancer", "assassin", "thug", "thief", "adventurer",
+               "housecarl", "jarl", "priest", "mage", "beggar"):
+        L = looks(oid, F)
+        L.pop("beard", None)
+        if oid == "mage":
+            L.update(tunic=V(v, "2e4a8a", "5a2a6a", "2a5a4a"), hood=V(v, "28407a", "4a2260", "224a3c"))
+        elif oid == "priest":
+            L.update(tunic=V(v, "d8ccb0", "9a9a9e", "c8a8a0"), trim=V(v, "b89040", "d0c080", "8a3a4a"),
+                     emblem=V(v, "b89040", "e0d090", "8a3a4a"))
+        elif oid == "jarl":
+            L.update(tunic=V(v, "5a1e2a", "2a4a3a", "2a3460"))
+        elif oid == "innkeeper":
+            L.update(tunic=V(v, "7a5a3a", "6a7a4a", "5a4a6a"))
+        elif oid == "bard":
+            L.update(tunic=V(v, "6a3a7a", "8a3044", "2e5a6a"))
+        elif oid == "hunter":
+            L.update(tunic=V(v, "6b5236", "5a5a3a", "7a5a3e"))
+        return L
+    L = dict(female=F)
+    if oid == "farm":
+        if F:
+            L.update(tunic=V(v, "7a6a4a", "5a6a7a", "8a5a4a"), robe=True, apron=hexc("d8d0bc"), trim=V(v, "5a4a34", "3e4a5a", "6a3e30"),
+                     boots=hexc("4a3626"), sleeves="long")
+        else:
+            L.update(tunic=V(v, "8a7a5a", "6a7a4a", "7a5a44"), pants=V(v, "4e4436", "5a4a3a", "44403a"), sleeves="short",
+                     belt=hexc("4a3020"), boots=hexc("4a3626"))
+    elif oid == "fine":
+        trim = V(v, "c8a040", "b0b4b8", "c8a040")
+        if F:
+            L.update(tunic=V(v, "2e3e6a", "6a1e2a", "2a4a3a"), trim=trim, robe=True, emblem=trim, boots=hexc("2a2220"), sash=trim)
+        else:
+            L.update(tunic=V(v, "2e3e6a", "6a1e2a", "2a4a3a"), trim=trim, emblem=trim, pants=hexc("2e2a26"),
+                     boots=hexc("2a2220"), cloak=V(v, "1e2a4a", "4a1418", "1e3424"))
+    elif oid == "merchant":
+        L.update(tunic=V(v, "8a6a3a", "4a5a6a", "6a3a3a"), cuirass=V(v, "5a3a24", "3a2a1e", "2a2a2a"), pants=hexc("4a4036"),
+                 satchel=True, belt=hexc("3a2616"), cap=None if F else V(v, "5a3e2a", "3a3a4a", "4a2a2a"))
+        if F:
+            L.update(robe=True, trim=V(v, "5a3a24", "3a2a1e", "2a2a2a"))
+    elif oid == "blacksmith":
+        L.update(tunic=hexc("5a5450"), apron=V(v, "5a4632", "4a3a2a", "6a4a2a"), pants=hexc("3e3a36"),
+                 gloves=hexc("3a2c20"), sleeves="none" if not F else "short", boots=hexc("2e241a"))
+    elif oid == "steward":
+        L.update(tunic=V(v, "3a3446", "3a2a24", "2a3a3a"), trim=hexc("c8a040"), emblem=hexc("d8b850"), pants=hexc("2a2622"),
+                 boots=hexc("2a2220"), sash=V(v, "6a1e2a", "2a4a6a", "4a2a5a"))
+        if F:
+            L["robe"] = True
+    elif oid == "child":
+        if F:
+            L.update(tunic=V(v, "8a6a7a", "6a7a8a", "8a7a5a"), robe=True, trim=V(v, "6a4a5a", "4a5a6a", "6a5a3a"), boots=hexc("4a3626"),
+                     sleeves="short")
+        else:
+            L.update(tunic=V(v, "7a6a4a", "5a6a5a", "6a5a6a"), pants=V(v, "5a4a3a", "4a4a44", "5a4636"), sleeves="short",
+                     boots=hexc("4a3626"))
+    elif oid == "scholar":
+        L.update(tunic=V(v, "5a4a3a", "3a3a4a", "4a3a2a"), trim=V(v, "8a7a5a", "6a6a8a", "a08a5a"), robe=True, satchel=True,
+                 emblem=None, boots=hexc("2a2220"))
+    elif oid == "fisher":
+        L.update(tunic=V(v, "3a5a5a", "4a5a3a", "5a5a5a"), cuirass=V(v, "2a3a3a", "3a3a2a", "3a3a3a"), pants=hexc("3e4040"),
+                 boots=hexc("2a2622"), cap=V(v, "4a4a3a", "3a4a4a", "5a4a3a"), sleeves="long")
+    elif oid == "nord_fur":
+        L.update(tunic=V(v, "6a5a4a", "4a5a6a", "6a4a3a"), pants=hexc("4a4036"), fur=V(v, "a89a80", "8a7a62", "c8bca8"),
+                 fur_boots=V(v, "a89a80", "8a7a62", "c8bca8"), bracers=hexc("4a3626"), belt=hexc("3a2616"))
+        if F:
+            L.update(robe=True, trim=V(v, "4a3e30", "34404a", "4a3024"))
+    elif oid == "dunmer":
+        L.update(tunic=V(v, "8a6a4a", "6a5a6a", "7a4a3a"), trim=V(v, "3a2a1e", "2a2232", "2a1a14"), robe=True,
+                 sash=V(v, "a8803a", "8a3a2a", "5a7a6a"), fur=V(v, "5a4030", "3a3040", "4a2a20"), pauldrons=False,
+                 boots=hexc("2a2018"))
+    elif oid == "redguard":
+        L.update(tunic=V(v, "e0d0b0", "c8b088", "d8c8b8"), trim=V(v, "a83a2a", "2a5a8a", "8a6a2a"), sash=V(v, "a83a2a", "2a5a8a", "c08a2a"),
+                 pants=V(v, "c8b898", "b8a078", "c0b0a0"), sleeves="long", hood=V(v, "e0d0b0", "c8b088", "d8c8b8") if v != 1 else None,
+                 boots=hexc("6a4a2a"))
+    elif oid == "khajiit":
+        L.update(tunic=V(v, "6a3a7a", "c06a2a", "2a7a7a"), cuirass=V(v, "4a2a1a", "5a3a1a", "3a2a2a"), sleeves="none",
+                 sash=V(v, "d8a83a", "8a2a3a", "d8d0a0"), pants=V(v, "8a6a4a", "6a4a3a", "5a5a6a"), headband=V(v, "d8a83a", "8a2a3a", "d8d0a0"),
+                 barefoot=True, bracers=V(v, "d8a83a", "8a5a3a", "a0a0a0"))
+    elif oid == "caravan":
+        L.update(tunic=V(v, "8a5a2a", "6a2a3a", "3a4a6a"), trim=V(v, "d8a83a", "d8c890", "c8a040"), robe=True, sash=V(v, "c03a2a", "d8a83a", "2a7a6a"),
+                 hood=V(v, "a87a4a", "8a3a4a", "4a5a7a"), boots=hexc("4a3020"), satchel=True)
+    elif oid == "argonian":
+        L.update(tunic=V(v, "6a5a3a", "4a5a3a", "5a4a3a"), bare_chest=True, strap=V(v, "8a6a3a", "6a4a2a", "4a3a2a"),
+                 skirt=V(v, "6a5a3a", "4a5a3a", "5a4a3a"), leg_wraps=V(v, "a89a70", "8a7a5a", "9a8a6a"), barefoot=True, sleeves="none",
+                 bracers=V(v, "8a6a3a", "6a4a2a", "4a3a2a"), pants=V(v, "5a4a30", "3a4a2a", "4a3a2a"))
+    elif oid == "imperial":
+        L.update(tunic=V(v, "c8b890", "9a8a7a", "b8a080"), trim=V(v, "8a2420", "2a3a6a", "8a2420"), belt=hexc("6a4a2a"),
+                 skirt=V(v, "c8b890", "9a8a7a", "b8a080"), pants=hexc("6a5a46"), sleeves="short", boots=hexc("6a4a2a"))
+        if F:
+            L.update(robe=True)
+    elif oid == "altmer":
+        L.update(tunic=V(v, "e8e0c8", "6a8a5a", "2a6a6a"), trim=hexc("d8b040"), robe=True, emblem=hexc("d8b040"),
+                 sash=V(v, "c8a040", "e8e0c8", "e0c060"), boots=hexc("8a7a5a"))
+    elif oid == "bosmer":
+        L.update(tunic=V(v, "5a6a3a", "6a5a3a", "4a5a3a"), cuirass=V(v, "6a4a2a", "4a3a2a", "5a4a2a"), pants=V(v, "4a3e2a", "3e3a2a", "4a4030"),
+                 leg_wraps=hexc("8a7a5a"), bracers=hexc("4a3a20"), sleeves="short", boots=hexc("3a2a1a"))
+    elif oid == "breton":
+        L.update(tunic=V(v, "3a4a7a", "7a3a3a", "4a6a4a"), trim=V(v, "d0c090", "c8a040", "d8d0c0"), plaid=v == 2,
+                 pants=V(v, "6a2a2a", "2a2a4a", "4a3a2a"), cap=None if F else V(v, "2a2a3a", "3a1e1e", "2a3a2a"),
+                 feather=hexc("e8e0d0"), boots=hexc("2a2018"))
+        if F:
+            L.update(robe=True)
+    elif oid == "orc":
+        L.update(tunic=V(v, "4a3a2a", "3a3a3a", "5a4a3a"), cuirass=V(v, "5a5a5e", "4a4a3a", "6a5a4a"), fur=V(v, "6a5a46", "5a4a3a", "7a6a52"),
+                 bracers=hexc("5a5e64"), pants=hexc("3e3830"), sleeves="none" if not F else "short", gloves=hexc("3a2a1c"),
+                 boots=hexc("2e241a"))
+    else:
+        raise ValueError(oid)
+    if F and "skirt" not in L and L.get("robe") is not True and oid not in ("blacksmith", "khajiit", "argonian", "bosmer", "fisher", "orc"):
+        L["skirt"] = shade(L.get("tunic", hexc("6a5a4a")), 0.92)
+    return L
+
+
+# order = Java Outfit enum ordinals
+OUTFITS = ["farm", "fine", "merchant", "blacksmith", "priest", "mage", "beggar", "jarl", "steward", "child", "miner", "hunter",
+           "bard", "innkeeper", "courier", "lumberjack", "scholar", "fisher", "thalmor", "imperial_soldier",
+           "stormcloak_soldier", "forsworn", "vampire", "necromancer", "assassin", "thug", "thief", "adventurer",
+           "housecarl", "nord_fur", "dunmer", "redguard", "khajiit", "caravan", "argonian", "imperial", "altmer", "bosmer",
+           "breton", "orc"]
+
+
+def features_texture(rnd):
+    """Greyscale (tinted at runtime) texture of RaceFeatureModel's boxes; UVs must match that model."""
+    img = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
+    boxes = [
+        (0, 0, 1, 3, 2, "ear"), (6, 0, 1, 3, 2, "ear"),        # elf ears (left/right)
+        (12, 0, 2, 2, 1, "cat_ear"), (18, 0, 2, 2, 1, "cat_ear"),  # khajiit ears
+        (0, 6, 2, 2, 6, "tail"), (16, 6, 2, 2, 6, "tail_tip"),     # khajiit tail
+        (0, 16, 3, 3, 6, "scale_tail"), (18, 16, 2, 2, 6, "scale_tail"),  # argonian tail
+        (32, 0, 1, 1, 4, "horn"), (42, 0, 1, 1, 3, "horn"),         # argonian horns
+        (32, 8, 1, 1, 1, "tusk"),                                   # orc tusk
+    ]
+    for u, v, w, h, d, kind in boxes:
+        def fn(face, x, y, fw, fh, kind=kind):
+            if kind == "cat_ear" and face == "front":
+                return (232, 196, 196) if 0 < x < fw - 1 or y > 0 else (210, 210, 210)
+            if kind == "tail_tip":
+                return (150, 150, 150) if y > fh // 2 or face in ("front", "back") else (200, 200, 200)
+            if kind in ("tail", "scale_tail"):
+                return (215, 215, 215) if (x + y) % 3 else (180, 180, 180)
+            if kind == "horn":
+                return (230, 230, 230) if face != "back" else (200, 200, 200)
+            return (225, 225, 225)
+        paint_box(img, u, v, w, h, d, fn, rnd, noise=6, edges=True)
+    return img
+
+
+def npc_layers():
+    for ri, race in enumerate(NPC_RACES):
+        for female in (False, True):
+            for tone in range(4):
+                rnd = random.Random(9000 + ri * 31 + tone * 7 + (1 if female else 0))
+                save(npc_body(race, female, tone, rnd), "npc", "body", f"{race}_{'f' if female else 'm'}_{tone}.png")
+    for i, (name, fn) in enumerate(HAIR_STYLES):
+        save(grey_layer(fn, random.Random(9500 + i)), "npc", "hair", f"{i}.png")
+    for i in range(len(BEARD_STYLES)):
+        save(grey_layer(beard_painter(i), random.Random(9700 + i)), "npc", "beard", f"{i}.png")
+    for oi, oid in enumerate(OUTFITS):
+        for v in range(3):
+            for female in (False, True):
+                rnd = random.Random(10000 + oi * 13 + v * 3 + (1 if female else 0))
+                img = humanoid(outfit_look(oid, v, female), rnd, clothes_only=True)
+                save(img, "npc", "outfit", f"{oid}_{v}_{'f' if female else 'm'}.png")
+    save(features_texture(random.Random(9900)), "npc", "features.png")
+
+
 def main():
     for i, role in enumerate(ROLES):
         for variant in (0, 1):
@@ -658,6 +1336,7 @@ def main():
     for j, cid in enumerate(COSMETICS):
         rnd = random.Random(5000 + j)
         save(cosmetic(cid, rnd), "cosmetic", f"{cid}.png")
+    npc_layers()
 
 
 if __name__ == "__main__":

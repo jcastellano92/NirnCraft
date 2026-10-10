@@ -62,6 +62,8 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     private static final EntityDataAccessor<Integer> SKIN = SynchedEntityData.defineId(NpcEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Byte> FLAGS = SynchedEntityData.defineId(NpcEntity.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Integer> CONVERSATION_PARTNER = SynchedEntityData.defineId(NpcEntity.class, EntityDataSerializers.INT);
+    /** Packed appearance (see {@link com.skycraft.society.NpcLook}); -1 until chosen. */
+    private static final EntityDataAccessor<Integer> LOOK = SynchedEntityData.defineId(NpcEntity.class, EntityDataSerializers.INT);
     public static final int FLAG_PRISONER = 1;
     public static final int FLAG_CASTING = 2;
     public static final int FLAG_PLAYING = 4;
@@ -98,6 +100,16 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     private boolean raisedDead;
     /** Bard: a player asked for a song. */
     private boolean songRequested;
+    /** Where this townsperson works (forge, counter, field, temple...), found once and re-checked daily. */
+    @Nullable
+    private BlockPos workplace;
+    /** The inn (or meeting place) of this NPC's settlement: lunch and evenings. */
+    @Nullable
+    private BlockPos inn;
+    /** Relationships with players, favours and marriage (see Relationships / Marriage); saved as is. */
+    private CompoundTag social = new CompoundTag();
+    /** What the daily routine is doing right now (server only, not saved). */
+    public com.skycraft.society.Schedule.Activity activity = com.skycraft.society.Schedule.Activity.IDLE;
     /** Feared attacker: non-combatant civilians fear and flee this player until they leave. */
     @Nullable
     private UUID fearedPlayerUuid;
@@ -135,12 +147,16 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         this.entityData.define(SKIN, 0);
         this.entityData.define(FLAGS, (byte) 0);
         this.entityData.define(CONVERSATION_PARTNER, -1);
+        this.entityData.define(LOOK, -1);
     }
 
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
-        if (ROLE.equals(key)) roleCache = null;
+        if (ROLE.equals(key)) {
+            roleCache = null;
+            this.refreshDimensions();
+        }
     }
 
     @Override
@@ -154,8 +170,8 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         this.goalSelector.addGoal(3, new NpcGoals.Melee(this));
         this.goalSelector.addGoal(4, new NpcGoals.Travel(this));
         this.goalSelector.addGoal(5, new OpenDoorGoal(this, true));
-        this.goalSelector.addGoal(6, new NpcGoals.Work(this));
-        this.goalSelector.addGoal(6, new NpcGoals.NightRest(this));
+        this.goalSelector.addGoal(5, new NpcGoals.Work(this));
+        this.goalSelector.addGoal(6, new NpcGoals.Routine(this));
         this.goalSelector.addGoal(7, new MoveTowardsRestrictionGoal(this, 0.6D));
         this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 0.55D) {
             @Override
@@ -211,6 +227,31 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         roleCache = role;
         // soft contract read by other modules (e.g. survival's innkeeper/priest topics)
         this.getPersistentData().putString("skycraft_role", role.id);
+    }
+
+    public int getLook() {
+        return this.entityData.get(LOOK);
+    }
+
+    public void setLook(int look) {
+        this.entityData.set(LOOK, look);
+        if (look >= 0) setSkin(com.skycraft.society.NpcLook.female(look) ? 1 : 0);
+    }
+
+    /** The NPC's race (from its look; Nord until one is chosen). */
+    public com.skycraft.society.NpcNames.Race race() {
+        int look = getLook();
+        return look < 0 ? com.skycraft.society.NpcNames.Race.NORD : com.skycraft.society.NpcLook.race(look);
+    }
+
+    /** Children are small and can't be harmed. */
+    public boolean isChild() {
+        return role() == NpcRole.CHILD;
+    }
+
+    @Override
+    public float getScale() {
+        return isChild() ? 0.62F : 1.0F;
     }
 
     public int getSkin() {
@@ -310,6 +351,13 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     public void setHome(BlockPos pos, int radius) {
         this.home = pos.immutable();
         this.restrictTo(this.home, radius);
+        if (!this.level().isClientSide && this.isAddedToWorld()) com.skycraft.society.NpcRegistry.onSettled(this);
+    }
+
+    @Override
+    public void onAddedToWorld() {
+        super.onAddedToWorld();
+        if (!this.level().isClientSide && home != null) com.skycraft.society.NpcRegistry.onSettled(this);
     }
 
     @Nullable
@@ -319,6 +367,29 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
 
     public void setBed(@Nullable BlockPos bed) {
         this.bed = bed == null ? null : bed.immutable();
+    }
+
+    @Nullable
+    public BlockPos getWorkplace() {
+        return workplace;
+    }
+
+    public void setWorkplace(@Nullable BlockPos workplace) {
+        this.workplace = workplace == null ? null : workplace.immutable();
+    }
+
+    @Nullable
+    public BlockPos getInn() {
+        return inn;
+    }
+
+    public void setInn(@Nullable BlockPos inn) {
+        this.inn = inn == null ? null : inn.immutable();
+    }
+
+    /** Mutable relationship data (dispositions, favours, marriage); see com.skycraft.society.Relationships. */
+    public CompoundTag social() {
+        return social;
     }
 
     public int getLetter() {
@@ -419,6 +490,8 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
+        // like Skyrim's children: nothing but /kill and the void can hurt them
+        if (isChild() && !source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) return false;
         Entity attacker = source.getEntity();
         if (attacker instanceof NpcEntity o && this.isAlliedTo(o)) return false;
         boolean hurt = super.hurt(source, amount);
@@ -509,7 +582,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         if (initialized || this.level().isClientSide) return;
         initialized = true;
         if (!hasRole()) setRole(Npcs.randomRole(this.getRandom(), this.getType() == NpcEntities.NPC_FIGHTER.get()));
-        setSkin(this.getRandom().nextInt(NpcRole.SKINS));
+        if (getLook() < 0) setSkin(this.getRandom().nextInt(NpcRole.SKINS));
         Npcs.outfit(this);
     }
 
@@ -517,6 +590,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     public void tick() {
         super.tick();
         if (!this.level().isClientSide && !initialized) initialize();
+        if (!this.level().isClientSide && getLook() < 0 && this.tickCount % 20 == 1) Npcs.ensureLook(this); // older saves
         if (!this.level().isClientSide && isConversing()) {
             this.getNavigation().stop();
         }
@@ -626,6 +700,10 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         if (letter >= 0) tag.putInt("Letter", letter);
         if (fearedPlayerUuid != null) tag.putUUID("FearedPlayer", fearedPlayerUuid);
         if (bed != null) tag.put("Bed", NbtUtils.writeBlockPos(bed));
+        tag.putInt("Look", getLook());
+        if (workplace != null) tag.put("Workplace", NbtUtils.writeBlockPos(workplace));
+        if (inn != null) tag.put("Inn", NbtUtils.writeBlockPos(inn));
+        if (!social.isEmpty()) tag.put("Social", social);
     }
 
     @Override
@@ -644,12 +722,19 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         letter = tag.contains("Letter") ? tag.getInt("Letter") : -1;
         fearedPlayerUuid = tag.hasUUID("FearedPlayer") ? tag.getUUID("FearedPlayer") : null;
         bed = tag.contains("Bed") ? NbtUtils.readBlockPos(tag.getCompound("Bed")) : null;
+        if (tag.contains("Look")) setLook(tag.getInt("Look"));
+        workplace = tag.contains("Workplace") ? NbtUtils.readBlockPos(tag.getCompound("Workplace")) : null;
+        inn = tag.contains("Inn") ? NbtUtils.readBlockPos(tag.getCompound("Inn")) : null;
+        social = tag.getCompound("Social");
     }
 
     @Override
     public void remove(RemovalReason reason) {
         // killed or discarded for good (not just unloaded): free the bed for someone else
-        if (reason.shouldDestroy() && !this.level().isClientSide) com.skycraft.society.Settlers.releaseBed(this);
+        if (reason.shouldDestroy() && !this.level().isClientSide) {
+            com.skycraft.society.Settlers.releaseBed(this);
+            if (reason == RemovalReason.KILLED) com.skycraft.society.Relationships.onDeath(this);
+        }
         super.remove(reason);
     }
 }

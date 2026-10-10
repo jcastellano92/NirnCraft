@@ -80,6 +80,8 @@ public final class NpcDialogue {
                 event.setCanceled(true);
                 return;
             }
+            // townsfolk chatting among themselves break off for the player, like in Skyrim
+            if (npc.isConversing() && sp.serverLevel().getEntity(npc.getConversationPartner()) instanceof NpcEntity) Chatter.interrupt(npc);
             if (npc.isConversing() && npc.getConversationPartner() != sp.getId()) {
                 Entity current = sp.serverLevel().getEntity(npc.getConversationPartner());
                 if (current != null && current.isAlive() && npc.distanceToSqr(current) <= 64) {
@@ -112,10 +114,37 @@ public final class NpcDialogue {
         }
         NpcRole role = npc.role();
         if (npc.isPrisoner()) return line("prisoner");
+        if (Marriage.isSpouseOf(npc, player)) {
+            return Component.translatable("society.skycraft.greet.spouse." + npc.getRandom().nextInt(4), player.getName());
+        }
         int townsfolk = Reputation.get(player, Reputation.TOWNSFOLK);
-        if (role.civilian && townsfolk <= -40) return line("cold");
+        Relationships.Rank rank = role.civilian ? Relationships.rank(npc, player) : Relationships.Rank.STRANGER;
+        if (role.civilian && (townsfolk <= -40 || rank.ordinal() <= Relationships.Rank.DISLIKED.ordinal())) return line("cold");
         if (role == NpcRole.JARL && townsfolk >= 50) return line("jarl_honored");
         if (role == NpcRole.THALMOR) return line("thalmor");
+        if (npc.isChild()) return Component.translatable("society.skycraft.greet.child." + npc.getRandom().nextInt(4), player.getName());
+        if (role.civilian && rank.ordinal() >= Relationships.Rank.FRIEND.ordinal() && npc.getRandom().nextBoolean()) {
+            return Component.translatable("society.skycraft.greet.friend." + npc.getRandom().nextInt(4), player.getName());
+        }
+        // Khajiit speak of themselves in the third person; Argonians and Dunmer have their own way of greeting
+        if (role.civilian && npc.getRandom().nextInt(5) < 2) {
+            switch (npc.race()) {
+                case KHAJIIT -> {
+                    return Component.translatable("society.skycraft.greet.khajiit." + npc.getRandom().nextInt(4), player.getName());
+                }
+                case ARGONIAN -> {
+                    return Component.translatable("society.skycraft.greet.argonian." + npc.getRandom().nextInt(3), player.getName());
+                }
+                case DUNMER -> {
+                    return Component.translatable("society.skycraft.greet.dunmer." + npc.getRandom().nextInt(3), player.getName());
+                }
+                case ORC -> {
+                    return Component.translatable("society.skycraft.greet.orc." + npc.getRandom().nextInt(2), player.getName());
+                }
+                default -> {
+                }
+            }
+        }
         return Component.translatable("society.skycraft.greet." + role.id + "." + npc.getRandom().nextInt(2), player.getName());
     }
 
@@ -224,7 +253,15 @@ public final class NpcDialogue {
         }
 
         out.add(new DialogueOption("society.job", opt("job"), 600,
-                (p, n) -> Dialogue.open(p, n, say("job." + role.id))));
+                (p, n) -> Dialogue.open(p, n, jobLine(n, role))));
+        Relationships.addOptions(player, npc, out);
+        Marriage.addOptions(player, npc, out);
+        if (role.civilian && !npc.isChild()) {
+            out.add(new DialogueOption("society.region", opt("region"), 530, NpcDialogue::aboutRegion));
+            if (role != NpcRole.INNKEEPER && Relationships.rank(npc, player).ordinal() >= Relationships.Rank.STRANGER.ordinal()) {
+                out.add(new DialogueOption("society.news", opt("news"), 520, NpcDialogue::news));
+            }
+        }
 
         switch (role) {
             case BEGGAR -> out.add(new DialogueOption("society.coin", opt("coin"), 10, NpcDialogue::giveCoin));
@@ -232,8 +269,12 @@ public final class NpcDialogue {
                 boolean atInn = isNearInn(npc);
                 out.add(new DialogueOption("society.song", opt("song"), 10, (p, n) -> {
                     if (atInn) {
-                        if (n instanceof NpcEntity b) b.requestSong();
-                        Dialogue.open(p, n, say("song"));
+                        int song = p.getRandom().nextInt(Chatter.SONGS);
+                        if (n instanceof NpcEntity b) {
+                            b.requestSong();
+                            Chatter.sing(b, song);
+                        }
+                        Dialogue.open(p, n, Component.translatable("society.skycraft.say.song_named", Component.translatable("society.skycraft.song." + song + ".title")));
                     } else {
                         Dialogue.open(p, n, Component.literal("I only perform at taverns and inns, traveler. Look for me there."));
                     }
@@ -245,11 +286,82 @@ public final class NpcDialogue {
             case IMPERIAL_SOLDIER, STORMCLOAK_SOLDIER -> out.add(new DialogueOption("society.war", opt("war"), 10,
                     (p, n) -> Dialogue.open(p, n, say("war." + role.id + "." + p.getRandom().nextInt(2)))));
             case JARL -> out.add(new DialogueOption("society.standing", opt("standing"), 10, NpcDialogue::standing));
+            case STEWARD -> out.add(new DialogueOption("society.hold", opt("hold"), 10,
+                    (p, n) -> Dialogue.open(p, n, say("hold." + p.getRandom().nextInt(3)))));
+            case FARMER -> out.add(new DialogueOption("society.harvest", opt("harvest"), 10,
+                    (p, n) -> Dialogue.open(p, n, say("harvest." + p.getRandom().nextInt(3)))));
+            case BLACKSMITH -> out.add(new DialogueOption("society.smithing", opt("smithing"), 10,
+                    (p, n) -> Dialogue.open(p, n, say("smithing." + p.getRandom().nextInt(3)))));
+            case MERCHANT, APOTHECARY -> out.add(new DialogueOption("society.business", opt("business"), 10,
+                    (p, n) -> Dialogue.open(p, n, say("business." + p.getRandom().nextInt(3)))));
+            case CARAVAN_TRADER -> out.add(new DialogueOption("society.caravan", opt("caravan"), 10,
+                    (p, n) -> Dialogue.open(p, n, say("caravan." + p.getRandom().nextInt(3)))));
+            case FISHER -> out.add(new DialogueOption("society.fishing", opt("fishing"), 10,
+                    (p, n) -> Dialogue.open(p, n, say("fishing." + p.getRandom().nextInt(2)))));
+            case SCHOLAR -> out.add(new DialogueOption("society.studies", opt("studies"), 10,
+                    (p, n) -> Dialogue.open(p, n, say("studies." + p.getRandom().nextInt(3)))));
+            case CHILD -> out.add(new DialogueOption("society.play", opt("play"), 10,
+                    (p, n) -> Dialogue.open(p, n, say("play." + p.getRandom().nextInt(4)))));
             case HUNTER -> out.add(new DialogueOption("society.game", opt("game"), 10,
                     (p, n) -> Dialogue.open(p, n, say("game." + p.getRandom().nextInt(2)))));
             default -> {
             }
         }
+    }
+
+    /** "What do you do?": the role's answer, with a word about their family name or their homeland now and then. */
+    private static Component jobLine(LivingEntity n, NpcRole role) {
+        if (n instanceof NpcEntity npc && role.townsfolk() && npc.getRandom().nextInt(3) == 0) {
+            String race = npc.race().name().toLowerCase(java.util.Locale.ROOT);
+            return Component.translatable("society.skycraft.say.origin." + race);
+        }
+        return say("job." + role.id);
+    }
+
+    /** Regions and provinces with their own "Tell me about this place." lines in the language file. */
+    private static final java.util.Set<String> REGION_LORE = java.util.Set.of("haafingar", "hjaalmarch", "the_pale", "winterhold",
+            "the_reach", "whiterun", "eastmarch", "falkreath", "the_rift", "solstheim");
+    private static final java.util.Set<String> PROVINCE_LORE = java.util.Set.of("skyrim", "cyrodiil", "morrowind", "black_marsh",
+            "elsweyr", "valenwood", "summerset", "hammerfell", "high_rock", "atmora", "akavir", "yokuda");
+
+    /** "Tell me about this place.": hold lore, or the province's. */
+    private static void aboutRegion(ServerPlayer player, LivingEntity npc) {
+        com.skycraft.tamriel.Region region = Cultures.regionAt(player.level(), npc.blockPosition());
+        String key = REGION_LORE.contains(region.shortId()) ? "region." + region.shortId()
+                : PROVINCE_LORE.contains(region.province()) ? "province." + region.province() : "region.unknown";
+        Dialogue.open(player, npc, say(key));
+    }
+
+    /** "Any news?": a rumour about a nearby named place, which goes on the player's map. */
+    private static void news(ServerPlayer player, LivingEntity entity) {
+        if (!(entity instanceof NpcEntity npc)) return;
+        long day = player.level().getDayTime() / 24000L;
+        CompoundTag told = Npcs.sub(npc.social(), "news_day");
+        if (told.getLong(player.getStringUUID()) == day + 1) {
+            Dialogue.open(player, npc, say("news.none." + player.getRandom().nextInt(2)));
+            return;
+        }
+        told.putLong(player.getStringUUID(), day + 1);
+        com.skycraft.tamriel.Place place = Chatter.rumorPlace(npc.blockPosition(), player.getRandom());
+        if (place != null) {
+            Component revealed = com.skycraft.world.Discovery.revealNear(player, new net.minecraft.core.BlockPos(place.x(), npc.getBlockY(), place.z()),
+                    Math.max(64, place.radius() + 32));
+            Component name = revealed != null ? revealed : place.name();
+            String dir = direction(npc.getX(), npc.getZ(), place.x(), place.z());
+            Dialogue.open(player, npc, Component.translatable("society.skycraft.say.news.place." + player.getRandom().nextInt(4), name,
+                    Component.translatable("society.skycraft.dir." + dir)));
+            return;
+        }
+        Component loc = com.skycraft.world.Discovery.revealNear(player, player.blockPosition(), 1500);
+        if (loc != null) Dialogue.open(player, npc, Component.translatable("society.skycraft.rumor.revealed", loc));
+        else Dialogue.open(player, npc, say("news.none." + player.getRandom().nextInt(2)));
+    }
+
+    /** Compass direction from (x, z) to (tx, tz): north is -Z. */
+    static String direction(double x, double z, double tx, double tz) {
+        double angle = Math.toDegrees(Math.atan2(tx - x, -(tz - z)));
+        String[] dirs = {"north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"};
+        return dirs[Math.floorMod((int) Math.round(angle / 45.0), 8)];
     }
 
     private static void giveCoin(ServerPlayer player, LivingEntity npc) {

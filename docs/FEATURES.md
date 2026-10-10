@@ -188,9 +188,24 @@ Spell sounds all go through `SpellSounds` (slots the audio module can override),
 
 ## People, dialogue, factions and quests
 
-* **Named villagers** (MCA Reborn): human-looking villagers with names and relationships. Its marriage, romance traits,
-  Grim Reaper, cultists and zombie infection are switched off in `config/mca.json`, and its guards attack Skycraft's
-  bandits, draugr, Forsworn and other hostiles.
+* **The people of Nirn** [Core]: every town has its own townsfolk (no vanilla villagers; any that appear become
+  townsfolk, wandering traders become Khajiit caravan traders):
+  * Race and culture follow the region: mostly Nords in Skyrim, with Imperials, Bretons, Redguards, a Dunmer quarter in
+    Eastmarch, Reachfolk in the Reach and Argonians at the Rift's docks; each province has its own majority race.
+  * Original names per race (Nordic, Latin-like Imperial, Breton, Redguard, Altmer, Bosmer, Dunmer, Orc gro-/gra-,
+    Khajiit Ri'/J'/Dar names, Argonian deed and Jel names), with family names where the culture uses them. Names are
+    unique across the world.
+  * Procedural looks: skin tones, hair styles and colours, beards, Khajiit fur, ears and tails, Argonian scales,
+    crests, horns and tails, elf ears, Orc tusks, and 40 outfits (farm and fine clothes, smith aprons, priest and mage
+    robes, rags, Jarl regalia, children's clothes and each culture's dress).
+  * Trades: farmers, blacksmiths, merchants, apothecaries, fishers, butchers, scholars, stewards, priests, bards and
+    more. Merchants barter through the economy; children are small and can't be harmed.
+  * Daily routines: sleep in their own bed, breakfast at home, work at the forge, field, counter or temple during
+    shop hours, lunch and evenings at the inn while the bard sings, strolls, and chats with each other overhead.
+  * Relationships: gifts, favours and quests raise an NPC's opinion of you; crimes they witness lower it. Friends
+    share rumours that put nearby places on your map.
+  * Marriage: buy an Amulet of Mara from a priest, wear it, and propose to someone who likes you. The wedding is held
+    at the temple; your spouse moves into your house, shares the day's earnings and cooks you a meal.
 * **Conversation menu** [Core]: talk to any villager (**F**) to trade, train, ask for work, join factions or chat.
 * **Followers** [Core]: earn an NPC's trust (a favor, gold for hirelings, a Speech check or a quest) and they follow,
   travel and fight with you. Tell them to wait, follow, trade items or leave.

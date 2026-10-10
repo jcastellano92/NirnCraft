@@ -222,7 +222,8 @@ public final class QuestEvents {
         if (!o.dim.equals(dim)) return false;
         if (!o.hasPos) {
             if ("near:villager".equals(o.target)) {
-                return !level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(24)).isEmpty();
+                return !level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, player.getBoundingBox().inflate(24),
+                        QuestDialogue::isTownsperson).isEmpty();
             }
             return true;
         }

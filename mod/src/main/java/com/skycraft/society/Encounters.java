@@ -281,7 +281,8 @@ public final class Encounters {
         int surface = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.getBlockX(), player.getBlockZ());
         if (surface - player.getBlockY() > 8) return false; // underground
         if (inSettlement(level, player.getBlockX(), player.getBlockZ())) return false;
-        return level.getEntitiesOfClass(AbstractVillager.class, player.getBoundingBox().inflate(48, 24, 48), e -> true).isEmpty();
+        return level.getEntitiesOfClass(AbstractVillager.class, player.getBoundingBox().inflate(48, 24, 48), e -> true).isEmpty()
+                && level.getEntitiesOfClass(NpcEntity.class, player.getBoundingBox().inflate(48, 24, 48), e -> e.getHome() != null).isEmpty();
     }
 
     static boolean inSettlement(ServerLevel level, int x, int z) {
@@ -626,12 +627,12 @@ public final class Encounters {
                 return true;
             }
             case STRANDED_MERCHANT -> {
-                Mob trader = g.mob(EntityType.WANDERING_TRADER, g.center);
-                if (!(trader instanceof WanderingTrader wt)) return false;
-                wt.setDespawnDelay(0);
+                NpcEntity wt = g.npc(NpcRole.MERCHANT, g.center);
+                if (wt == null) return false;
                 wt.restrictTo(g.center, 5);
-                wt.setCustomName(Component.translatable("society.skycraft.title.stranded_merchant",
-                        NpcNames.generate(NpcNames.raceFor(NpcRole.INNKEEPER, g.random), g.random.nextBoolean(), g.random)));
+                String merchantName = wt.getCustomName() != null ? wt.getCustomName().getString()
+                        : NpcNames.generate(NpcNames.raceFor(NpcRole.INNKEEPER, g.random), g.random.nextBoolean(), g.random);
+                wt.setCustomName(Component.translatable("society.skycraft.title.stranded_merchant", merchantName));
                 CompoundTag shop = new CompoundTag();
                 ListTag pools = new ListTag();
                 pools.add(StringTag.valueOf("general"));

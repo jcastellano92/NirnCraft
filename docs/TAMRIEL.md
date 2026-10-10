@@ -341,7 +341,7 @@ fit. `CELL` stays at 32.
 2. **Phase 3: Skyrim content.**
    * Nord settlements and capitals, region-based houses and carriages, the standing stones, dragon mounds and
      word walls.
-   * Skycraft NPC villagers, which replace MCA.
+   * Skycraft NPC townsfolk, which replace the third-party villager mod (done: society module).
    * The ambient-sound engine and boss music, the creature roster, animations, UI and visuals.
    * Remove the remaining structure and village mods.
 3. **Phase 4: Tamriel and beyond.** Each province's culture kit, dungeons, creatures and NPC races; every race

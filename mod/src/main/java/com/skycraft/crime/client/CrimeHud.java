@@ -334,6 +334,10 @@ public final class CrimeHud {
                 return com.skycraft.survival.inn.Innkeepers.innName(npc).getString() + " (Inn)";
             }
             if (role == com.skycraft.society.NpcRole.PRIEST) return "Temple";
+            if (role == com.skycraft.society.NpcRole.BLACKSMITH) return "Blacksmith";
+            if (role == com.skycraft.society.NpcRole.APOTHECARY) return "Apothecary";
+            if (role == com.skycraft.society.NpcRole.MERCHANT || role == com.skycraft.society.NpcRole.BUTCHER
+                    || role == com.skycraft.society.NpcRole.SCHOLAR) return "Shop";
         }
         var villagers = level.getEntitiesOfClass(net.minecraft.world.entity.npc.Villager.class, new net.minecraft.world.phys.AABB(pos).inflate(14));
         for (var v : villagers) {

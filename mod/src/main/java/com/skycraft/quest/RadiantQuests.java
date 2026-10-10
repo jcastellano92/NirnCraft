@@ -152,9 +152,11 @@ public final class RadiantQuests {
 
     /** "Do you need help with anything?" — a profession-flavored favor, or null if the villager has nothing. */
     @Nullable
-    public static Offer villager(ServerPlayer player, Villager villager) {
+    public static Offer villager(ServerPlayer player, LivingEntity villager) {
         Ctx c = new Ctx(player, villager);
-        VillagerProfession prof = villager.getVillagerData().getProfession();
+        // villagers, and Skycraft townsfolk by the profession their trade matches
+        VillagerProfession prof = com.skycraft.economy.Merchants.profession(villager);
+        if (prof == null) prof = VillagerProfession.NONE;
         if (prof == VillagerProfession.FARMER && c.r.nextBoolean()) return skeevers(c);
         if (prof == VillagerProfession.LIBRARIAN && c.r.nextInt(3) > 0) {
             Offer o = tome(c, false);

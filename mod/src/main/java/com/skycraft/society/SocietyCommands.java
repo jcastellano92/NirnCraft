@@ -38,6 +38,10 @@ final class SocietyCommands {
                         .then(Commands.argument("role", StringArgumentType.word())
                                 .suggests((c, b) -> SharedSuggestionProvider.suggest(roles, b))
                                 .executes(SocietyCommands::npc)))
+                .then(Commands.literal("populate")
+                        .then(Commands.argument("size", StringArgumentType.word())
+                                .suggests((c, b) -> SharedSuggestionProvider.suggest(List.of("farm", "village", "town", "city"), b))
+                                .executes(SocietyCommands::populate)))
                 .then(Commands.literal("encounter")
                         .executes(c -> encounter(c, null))
                         .then(Commands.argument("kind", StringArgumentType.word())
@@ -58,15 +62,32 @@ final class SocietyCommands {
     }
 
     private static int npc(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
-        ServerPlayer player = c.getSource().getPlayerOrException();
         String role = StringArgumentType.getString(c, "role");
-        Mob mob = Npcs.spawn(player.serverLevel(), BlockPos.containing(c.getSource().getPosition()), role);
+        BlockPos pos = BlockPos.containing(c.getSource().getPosition());
+        Mob mob = Npcs.spawn(c.getSource().getLevel(), pos, role);
         if (mob == null) {
             c.getSource().sendFailure(Component.translatable("command.skycraft.society.unknown", role));
             return 0;
         }
+        // townsfolk spawned by command live where they were spawned (routines, bed claims)
+        if (mob instanceof com.skycraft.society.entity.NpcEntity n && n.role().townsfolk()) n.setHome(pos, 24);
         c.getSource().sendSuccess(() -> Component.translatable("command.skycraft.society.npc", mob.getDisplayName()), true);
         return 1;
+    }
+
+    /** Gives the spot a settlement's whole roster (testing, or towns built by hand). */
+    private static int populate(CommandContext<CommandSourceStack> c) {
+        String id = StringArgumentType.getString(c, "size");
+        Settlers.Size size;
+        try {
+            size = Settlers.Size.valueOf(id.toUpperCase(java.util.Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            c.getSource().sendFailure(Component.translatable("command.skycraft.society.unknown", id));
+            return 0;
+        }
+        int n = Settlers.populateHere(c.getSource().getLevel(), BlockPos.containing(c.getSource().getPosition()), size);
+        c.getSource().sendSuccess(() -> Component.translatable("command.skycraft.society.populated", n), true);
+        return n;
     }
 
     private static int encounter(CommandContext<CommandSourceStack> c, String kindId) throws CommandSyntaxException {

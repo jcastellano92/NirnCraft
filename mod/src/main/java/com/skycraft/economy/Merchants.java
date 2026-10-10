@@ -43,7 +43,18 @@ public final class Merchants {
             return p != VillagerProfession.NONE && p != VillagerProfession.NITWIT;
         }
         if (npc instanceof WanderingTrader) return true;
+        if (npc.isBaby()) return false;
+        // Skycraft townsfolk with a shop (society module: trades, caravan traders, innkeepers)
+        if (npc.getPersistentData().getCompound(Shop.KEY).contains("pools", Tag.TAG_LIST)) return true;
         return npc.getType().is(MERCHANTS);
+    }
+
+    /** Persistent-data key under which Skycraft townsfolk store the vanilla profession their trade matches. */
+    public static final String PROFESSION_KEY = "skycraft_profession";
+
+    /** Khajiit caravan traders (wandering traders and society's caravan traders). */
+    public static boolean isCaravan(LivingEntity npc) {
+        return npc instanceof WanderingTrader || "caravan_trader".equals(npc.getPersistentData().getString("skycraft_role"));
     }
 
     /** Merchant level 1..5 (villager level; wandering traders are journeymen). */
@@ -55,9 +66,13 @@ public final class Merchants {
         return lvl <= 0 ? 2 : Math.min(5, lvl);
     }
 
-    /** Profession of a villager, or null for anything else. */
+    /** Profession of a villager, the matching profession of a Skycraft townsperson's trade, or null. */
     public static VillagerProfession profession(LivingEntity npc) {
-        return npc instanceof Villager v ? v.getVillagerData().getProfession() : null;
+        if (npc instanceof Villager v) return v.getVillagerData().getProfession();
+        String id = npc.getPersistentData().getString(PROFESSION_KEY);
+        if (id.isEmpty()) return null;
+        net.minecraft.resources.ResourceLocation rl = net.minecraft.resources.ResourceLocation.tryParse(id);
+        return rl == null ? null : net.minecraftforge.registries.ForgeRegistries.VILLAGER_PROFESSIONS.getValue(rl);
     }
 
     /** The shop types (stock pools) of a merchant. Never empty for a merchant. */
@@ -72,7 +87,7 @@ public final class Merchants {
             }
             if (!out.isEmpty()) return out;
         }
-        if (npc instanceof WanderingTrader) {
+        if (isCaravan(npc)) {
             out.add(ShopType.GENERAL);
             out.add(ShopType.FENCE);
             out.add(ShopType.EXOTIC);
@@ -146,7 +161,7 @@ public final class Merchants {
         List<ShopType> pools = pools(npc);
         String kind;
         int variants;
-        if (npc instanceof WanderingTrader) {
+        if (isCaravan(npc)) {
             kind = "khajiit";
             variants = 3;
         } else {

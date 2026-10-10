@@ -4,6 +4,8 @@ import com.skycraft.society.Barks;
 import com.skycraft.society.NpcRole;
 import com.skycraft.society.Npcs;
 import com.skycraft.society.Reputation;
+import com.skycraft.society.Schedule;
+import com.skycraft.society.Workplaces;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -378,7 +380,11 @@ final class NpcGoals {
 
     // ------------------------------------------------------------------ work
 
-    /** Idle jobs: miners hack at rock, lumberjacks chop, bards play, priests heal. */
+    /**
+     * Jobs: miners hack at rock, lumberjacks chop, farmers tend crops, smiths hammer at the forge, fishers fish,
+     * shopkeepers mind the counter, bards play, priests heal. Settled townsfolk only work during their routine's
+     * working hours and at their workplace (the Routine goal walks them there).
+     */
     static final class Work extends Goal {
         private static final int[] SCALE = {0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24};
 
@@ -400,14 +406,27 @@ final class NpcGoals {
 
         @Override
         public boolean canUse() {
-            if (npc.getTarget() != null || npc.isBusy()) return false;
+            if (npc.getTarget() != null || npc.isBusy() || npc.isSleeping()) return false;
             if (npc.role() == NpcRole.BARD && npc.takeSongRequest()) return true;
             if (--cooldown > 0) return false;
             cooldown = 100 + npc.getRandom().nextInt(100);
             NpcRole role = npc.role();
+            boolean settled = npc.getHome() != null && com.skycraft.society.SocietyConfig.ROUTINES.get() && role.townsfolk();
+            BlockPos work = null;
+            if (settled) {
+                if (npc.activity != Schedule.Activity.WORK) return role == NpcRole.PRIEST && (patient = findPatient()) != null;
+                work = Workplaces.workplaceOf(npc);
+                if (work != null && Workplaces.kindFor(role) != null && npc.distanceToSqr(work.getX() + 0.5, npc.getY(), work.getZ() + 0.5) > 10 * 10) {
+                    return false;
+                }
+            }
             return switch (role) {
                 case MINER -> (spot = findBlock(true)) != null;
                 case LUMBERJACK -> (spot = findBlock(false)) != null;
+                case FARMER -> (spot = findCrop()) != null;
+                case BLACKSMITH, BUTCHER, INNKEEPER -> (spot = work != null ? work : npc.blockPosition()) != null;
+                case MERCHANT, APOTHECARY, SCHOLAR, STEWARD, JARL -> (spot = work != null ? work : npc.blockPosition()) != null;
+                case FISHER -> (spot = findWater()) != null;
                 case BARD -> audience() && npc.getRandom().nextInt(3) == 0;
                 case PRIEST -> (patient = findPatient()) != null;
                 default -> false;
@@ -427,11 +446,14 @@ final class NpcGoals {
         @Override
         public void start() {
             switch (npc.role()) {
-                case MINER, LUMBERJACK -> ticks = 120 + npc.getRandom().nextInt(80);
+                case MINER, LUMBERJACK, FARMER, BLACKSMITH, BUTCHER -> ticks = 120 + npc.getRandom().nextInt(80);
+                case MERCHANT, APOTHECARY, SCHOLAR, STEWARD, JARL, INNKEEPER -> ticks = 200 + npc.getRandom().nextInt(200);
+                case FISHER -> ticks = 300 + npc.getRandom().nextInt(200);
                 case BARD -> {
                     ticks = 200;
                     composeSong();
                     npc.setPlaying(true);
+                    if (npc.getRandom().nextBoolean()) com.skycraft.society.Chatter.sing(npc, npc.getRandom().nextInt(com.skycraft.society.Chatter.SONGS));
                     npc.getNavigation().stop();
                 }
                 case PRIEST -> ticks = 200;
@@ -453,7 +475,11 @@ final class NpcGoals {
             ticks--;
             if (!(npc.level() instanceof ServerLevel level)) return;
             switch (npc.role()) {
-                case MINER, LUMBERJACK -> labor(level);
+                case MINER, LUMBERJACK, FARMER -> labor(level);
+                case BLACKSMITH -> smith(level);
+                case BUTCHER, INNKEEPER -> chores(level);
+                case MERCHANT, APOTHECARY, SCHOLAR, STEWARD, JARL -> attend(level);
+                case FISHER -> fish(level);
                 case BARD -> play(level);
                 case PRIEST -> heal(level);
                 default -> ticks = 0;
@@ -506,6 +532,106 @@ final class NpcGoals {
             }
         }
 
+        // -------- farmers, smiths, shopkeepers, fishers
+
+        /** A crop or farmland near the NPC (small box scan, a few times a minute at most). */
+        @Nullable
+        private BlockPos findCrop() {
+            BlockPos base = npc.blockPosition();
+            List<BlockPos> found = new ArrayList<>();
+            for (BlockPos p : BlockPos.betweenClosed(base.offset(-6, -1, -6), base.offset(6, 1, 6))) {
+                BlockState s = npc.level().getBlockState(p);
+                if (s.is(BlockTags.CROPS) || s.getBlock() instanceof net.minecraft.world.level.block.FarmBlock) {
+                    found.add(p.immutable());
+                    if (found.size() >= 8) break;
+                }
+            }
+            return found.isEmpty() ? null : found.get(npc.getRandom().nextInt(found.size()));
+        }
+
+        @Nullable
+        private BlockPos findWater() {
+            BlockPos base = npc.blockPosition();
+            for (BlockPos p : BlockPos.betweenClosed(base.offset(-6, -2, -6), base.offset(6, 0, 6))) {
+                if (npc.level().getFluidState(p).is(net.minecraft.tags.FluidTags.WATER) && npc.level().isEmptyBlock(p.above())) {
+                    return p.immutable();
+                }
+            }
+            return null;
+        }
+
+        /** Hammering at the forge: ringing anvil, sparks. */
+        private void smith(ServerLevel level) {
+            if (spot == null) {
+                ticks = 0;
+                return;
+            }
+            if (!near(spot, 2.6)) return;
+            npc.getLookControl().setLookAt(spot.getX() + 0.5, spot.getY() + 0.8, spot.getZ() + 0.5);
+            if (ticks % 16 == 0) {
+                npc.swing(InteractionHand.MAIN_HAND);
+                level.playSound(null, spot, SoundEvents.ANVIL_USE, SoundSource.NEUTRAL, 0.35f, 0.9f + npc.getRandom().nextFloat() * 0.3f);
+                level.sendParticles(ParticleTypes.CRIT, spot.getX() + 0.5, spot.getY() + 1.0, spot.getZ() + 0.5, 6, 0.2, 0.1, 0.2, 0.15);
+                if (npc.getRandom().nextInt(3) == 0) {
+                    level.sendParticles(ParticleTypes.SMALL_FLAME, spot.getX() + 0.5, spot.getY() + 1.0, spot.getZ() + 0.5, 2, 0.15, 0.1, 0.15, 0.01);
+                }
+            }
+        }
+
+        /** Butchers chop, innkeepers wipe the counter and pour. */
+        private void chores(ServerLevel level) {
+            if (spot == null) {
+                ticks = 0;
+                return;
+            }
+            if (!near(spot, 3.5)) return;
+            Player p = level.getNearestPlayer(npc, 6);
+            if (p != null && npc.getRandom().nextInt(3) > 0) npc.getLookControl().setLookAt(p, 30f, 30f);
+            if (ticks % 40 == 0) {
+                npc.swing(InteractionHand.MAIN_HAND);
+                level.playSound(null, npc.blockPosition(), npc.role() == NpcRole.BUTCHER ? SoundEvents.AXE_STRIP : SoundEvents.BOTTLE_FILL,
+                        SoundSource.NEUTRAL, 0.4f, 1.0f);
+            }
+        }
+
+        /** Shopkeepers mind the counter and greet whoever comes in. */
+        private void attend(ServerLevel level) {
+            if (spot == null) {
+                ticks = 0;
+                return;
+            }
+            if (!near(spot, 3.0)) return;
+            Player p = level.getNearestPlayer(npc, 7);
+            if (p != null && !p.isSpectator()) npc.getLookControl().setLookAt(p, 30f, 30f);
+            else if (ticks % 60 == 0) npc.swing(InteractionHand.OFF_HAND);
+        }
+
+        /** Line in the water, the occasional splash. */
+        private void fish(ServerLevel level) {
+            if (spot == null) {
+                ticks = 0;
+                return;
+            }
+            if (!near(spot, 3.5)) return;
+            npc.getLookControl().setLookAt(spot.getX() + 0.5, spot.getY() + 0.5, spot.getZ() + 0.5);
+            if (ticks % 50 == 0) {
+                npc.swing(InteractionHand.MAIN_HAND);
+                level.sendParticles(ParticleTypes.FISHING, spot.getX() + 0.5, spot.getY() + 0.9, spot.getZ() + 0.5, 4, 0.2, 0, 0.2, 0.02);
+                if (npc.getRandom().nextInt(4) == 0) level.playSound(null, spot, SoundEvents.FISHING_BOBBER_SPLASH, SoundSource.NEUTRAL, 0.3f, 1.0f);
+            }
+        }
+
+        /** Walks up to {@code pos}; true once within {@code reach}. */
+        private boolean near(BlockPos pos, double reach) {
+            double d = npc.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+            if (d > reach * reach) {
+                if (npc.tickCount % 20 == 0) npc.getNavigation().moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 0.6D);
+                return false;
+            }
+            npc.getNavigation().stop();
+            return true;
+        }
+
         // -------- bards
 
         private boolean audience() {
@@ -514,7 +640,7 @@ final class NpcGoals {
 
         private void composeSong() {
             melody.clear();
-            int len = 24 + npc.getRandom().nextInt(16);
+            int len = 84 + npc.getRandom().nextInt(24);
             int idx = 3 + npc.getRandom().nextInt(4);
             for (int i = 0; i < len; i++) {
                 if (npc.getRandom().nextInt(6) == 0) {
@@ -695,85 +821,198 @@ final class NpcGoals {
 
     // ------------------------------------------------------------------ routines
 
-    /** At night, townsfolk return to their home and rest. */
-    static final class NightRest extends Goal {
+    /**
+     * The daily routine (Radiant AI-like, see {@link Schedule}): bed at night, breakfast and supper at home, the
+     * workplace during working hours, lunch and evenings at the inn, strolling and chatting in between. Thinks about
+     * once a second (offset per NPC so a town doesn't think on the same tick), only repaths when the destination
+     * changes or the path ran out, and never walks into unloaded chunks. NPCs without a home only rest at night.
+     */
+    static final class Routine extends Goal {
         private final NpcEntity npc;
-        private int cooldown;
+        private int think;
         private int warnTimer = 0;
         private BlockPos bedPos = null;
         private int nextBedSearch;
         @Nullable
         private UUID reported;
+        @Nullable
+        private BlockPos target;
+        private double speed = 0.6D;
+        private int strollTimer;
+        private int eatTimer;
 
-        NightRest(NpcEntity npc) {
+        Routine(NpcEntity npc) {
             this.npc = npc;
             this.setFlags(EnumSet.of(Flag.MOVE));
+        }
+
+        private boolean routines() {
+            return com.skycraft.society.SocietyConfig.ROUTINES.get() && (npc.role().townsfolk() || com.skycraft.society.Marriage.isSpouse(npc))
+                    && npc.getHome() != null;
         }
 
         @Override
         public boolean canUse() {
             if (npc.isBusy() || npc.getTarget() != null || !npc.role().civilian) return false;
+            if (npc.social().hasUUID("engaged")) return false; // waiting at the temple for the wedding
+            if (routines()) return true;
             return Npcs.isNight(npc.level());
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return canUse();
         }
 
         @Override
         public void start() {
             warnTimer = 0;
-            cooldown = 0;
+            think = 0;
+            target = null;
         }
 
         @Override
         public void stop() {
-            if (npc.isSleeping()) {
-                npc.stopSleeping();
-            }
+            if (npc.isSleeping()) npc.stopSleeping();
+            npc.activity = Schedule.Activity.IDLE;
+            target = null;
         }
 
         @Override
         public void tick() {
             var level = npc.level();
-            if (!Npcs.isNight(level)) {
-                if (npc.isSleeping()) npc.stopSleeping();
-                return;
+            Schedule.Activity activity = routines() ? Schedule.activity(npc) : Schedule.Activity.SLEEP;
+            if (activity != Schedule.Activity.SLEEP && npc.isSleeping()) npc.stopSleeping();
+            if (activity == Schedule.Activity.SLEEP || activity == Schedule.Activity.HOME) {
+                if (npc.tickCount % 10 == 0 && guardHome()) return;
             }
-
-            // Check for trespassers (players in the home who do not own it)
-            Player trespasser = findTrespasser();
-            if (trespasser != null) {
-                if (npc.isSleeping()) {
-                    npc.stopSleeping();
-                    npc.getLookControl().setLookAt(trespasser, 30f, 30f);
-                    Barks.say(npc, net.minecraft.network.chat.Component.literal("Who's there?! You're not supposed to be in here!"));
-                }
-                warnTimer++;
-                npc.getLookControl().setLookAt(trespasser, 30f, 30f);
-                if (warnTimer == 40) {
-                    Barks.say(npc, net.minecraft.network.chat.Component.literal("Leave now, or I'll call the guards!"));
-                } else if (warnTimer > 200 && !trespasser.getUUID().equals(reported)) {
-                    // reported once per intrusion; leaving and coming back is a new one
-                    reported = trespasser.getUUID();
-                    Barks.say(npc, net.minecraft.network.chat.Component.literal("Guards! Help! An intruder!"));
-                    if (trespasser instanceof net.minecraft.server.level.ServerPlayer sp) {
-                        com.skycraft.crime.Crimes.report(sp, npc.blockPosition(), 25, true, null);
-                    }
-                    if (npc.role().combatant) {
-                        npc.setTarget(trespasser);
-                    }
-                }
-                return;
-            } else {
-                warnTimer = 0;
-                reported = null;
-            }
-
             if (npc.isSleeping()) return;
+            if (--think > 0) {
+                follow();
+                return;
+            }
+            think = 18 + Math.floorMod(npc.getId(), 7);
+            if (activity != npc.activity) {
+                npc.activity = activity;
+                target = null;
+                strollTimer = 0;
+            }
+            BlockPos home = npc.getHome() != null ? npc.getHome() : npc.blockPosition();
+            switch (activity) {
+                case SLEEP -> sleep(home);
+                case EAT, HOME -> {
+                    BlockPos at = npc.getBed() != null ? npc.getBed() : home;
+                    go(at, 0.6D, 3);
+                    if (activity == Schedule.Activity.EAT && arrived(at, 4)) eat(level);
+                    else if (activity == Schedule.Activity.HOME && arrived(at, 6)) stroll(at, 4, 0.45D, 6);
+                }
+                case WORK -> {
+                    BlockPos work = Workplaces.workplaceOf(npc);
+                    if (work == null) {
+                        stroll(home, 10, 0.5D, 4);
+                    } else if (!arrived(work, 5)) {
+                        go(work, 0.65D, 3);
+                    } else {
+                        // the Work goal takes over at the workplace; hang around it until it does
+                        stroll(work, 3, 0.4D, 8);
+                        if (npc.role() == NpcRole.MERCHANT || npc.role() == NpcRole.APOTHECARY) lookAtCustomer();
+                    }
+                }
+                case LUNCH, INN -> {
+                    BlockPos inn = Workplaces.innFor(npc);
+                    if (inn == null) inn = home;
+                    if (!arrived(inn, 7)) go(inn, 0.65D, 4);
+                    else {
+                        stroll(inn, 5, 0.45D, 6);
+                        if (activity == Schedule.Activity.LUNCH && npc.getRandom().nextInt(4) == 0) eat(level);
+                        com.skycraft.society.Chatter.tryStart(npc);
+                    }
+                }
+                case WANDER -> {
+                    stroll(home, Math.max(8, (int) Math.min(24, npc.getRestrictRadius() * 0.7)), 0.5D, 3);
+                    com.skycraft.society.Chatter.tryStart(npc);
+                }
+                case PLAY -> {
+                    stroll(home, 14, 0.85D, 2);
+                    com.skycraft.society.Chatter.tryStart(npc);
+                }
+                default -> {
+                }
+            }
+            follow();
+        }
 
-            if (--cooldown > 0) return;
-            cooldown = 40;
+        // -------- movement
 
-            BlockPos home = npc.getHome();
-            if (home == null) home = npc.blockPosition();
+        private boolean arrived(BlockPos pos, double within) {
+            return npc.distanceToSqr(pos.getX() + 0.5, npc.getY(), pos.getZ() + 0.5) <= within * within
+                    && Math.abs(npc.getY() - pos.getY()) < 4;
+        }
 
+        /** Walks to {@code pos} unless already within {@code within} blocks. */
+        private void go(BlockPos pos, double speed, double within) {
+            if (arrived(pos, within)) {
+                target = null;
+                return;
+            }
+            if (!pos.equals(target) || npc.getNavigation().isDone()) {
+                if (!npc.level().isLoaded(pos)) {
+                    target = null; // never pull chunks in: wait for them to load
+                    return;
+                }
+                target = pos;
+                this.speed = speed;
+                npc.getNavigation().moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, speed);
+            }
+        }
+
+        private void follow() {
+            if (target != null && npc.getNavigation().isDone() && !arrived(target, 2.5)) {
+                npc.getNavigation().moveTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, speed);
+            }
+        }
+
+        /** Ambles to a random spot near {@code center} every few thinks. */
+        private void stroll(BlockPos center, int radius, double speed, int every) {
+            if (--strollTimer > 0) return;
+            strollTimer = every + npc.getRandom().nextInt(every + 1);
+            if (npc.isConversing()) return;
+            int x = center.getX() + npc.getRandom().nextInt(radius * 2 + 1) - radius;
+            int z = center.getZ() + npc.getRandom().nextInt(radius * 2 + 1) - radius;
+            BlockPos probe = new BlockPos(x, center.getY(), z);
+            if (!npc.level().isLoaded(probe)) return;
+            // stay on the floor the anchor is on (indoors) unless it's outside
+            int y = npc.level().canSeeSky(center) ? npc.level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) : center.getY();
+            target = new BlockPos(x, y, z);
+            this.speed = speed;
+            npc.getNavigation().moveTo(x + 0.5, y, z + 0.5, speed);
+        }
+
+        private void lookAtCustomer() {
+            Player p = npc.level().getNearestPlayer(npc, 6);
+            if (p != null && !p.isSpectator()) npc.getLookControl().setLookAt(p, 30f, 30f);
+        }
+
+        /** A bite of bread or a bowl of stew: particles and munching. */
+        private void eat(net.minecraft.world.level.Level level) {
+            if (--eatTimer > 0 || !(level instanceof ServerLevel sl)) return;
+            eatTimer = 2 + npc.getRandom().nextInt(3);
+            net.minecraft.world.item.ItemStack food = new net.minecraft.world.item.ItemStack(switch (npc.getRandom().nextInt(4)) {
+                case 0 -> net.minecraft.world.item.Items.BREAD;
+                case 1 -> net.minecraft.world.item.Items.COOKED_MUTTON;
+                case 2 -> net.minecraft.world.item.Items.APPLE;
+                default -> net.minecraft.world.item.Items.BAKED_POTATO;
+            });
+            Vec3 mouth = npc.getEyePosition().add(npc.getLookAngle().scale(0.35));
+            sl.sendParticles(new net.minecraft.core.particles.ItemParticleOption(ParticleTypes.ITEM, food), mouth.x, mouth.y - 0.15, mouth.z,
+                    5, 0.08, 0.05, 0.08, 0.03);
+            sl.playSound(null, npc.blockPosition(), SoundEvents.GENERIC_EAT, SoundSource.NEUTRAL, 0.5f, 0.9f + npc.getRandom().nextFloat() * 0.2f);
+        }
+
+        // -------- night
+
+        private void sleep(BlockPos home) {
+            var level = npc.level();
             // each NPC has its own bed claim (POI lookup, cached on the NPC); retry a failed search every ~30 s
             if (bedPos == null || !bedPos.equals(npc.getBed())) {
                 if (npc.getBed() != null || npc.tickCount >= nextBedSearch) {
@@ -781,13 +1020,13 @@ final class NpcGoals {
                     if (bedPos == null) nextBedSearch = npc.tickCount + 600;
                 }
             }
-
             if (bedPos != null) {
                 double distSq = npc.distanceToSqr(bedPos.getX() + 0.5, bedPos.getY(), bedPos.getZ() + 0.5);
                 if (distSq > 2.5 * 2.5) {
-                    npc.getNavigation().moveTo(bedPos.getX() + 0.5, bedPos.getY(), bedPos.getZ() + 0.5, 0.65D);
+                    go(bedPos, 0.65D, 1.5);
                 } else {
                     npc.getNavigation().stop();
+                    target = null;
                     BlockState bed = level.getBlockState(bedPos);
                     if (!bed.is(BlockTags.BEDS)) {
                         com.skycraft.society.Settlers.releaseBed(npc);
@@ -799,13 +1038,39 @@ final class NpcGoals {
                     }
                 }
             } else {
-                double distSq = npc.distanceToSqr(home.getX() + 0.5, home.getY(), home.getZ() + 0.5);
-                if (distSq > 4 * 4) {
-                    npc.getNavigation().moveTo(home.getX() + 0.5, home.getY(), home.getZ() + 0.5, 0.7D);
-                } else {
-                    npc.getNavigation().stop();
-                }
+                go(home, 0.7D, 4);
             }
+        }
+
+        /** Wakes up and shouts for the guards when a stranger stands in the home at night. Returns true while busy. */
+        private boolean guardHome() {
+            Player trespasser = findTrespasser();
+            if (trespasser != null) {
+                if (npc.isSleeping()) {
+                    npc.stopSleeping();
+                    npc.getLookControl().setLookAt(trespasser, 30f, 30f);
+                    Barks.say(npc, net.minecraft.network.chat.Component.translatable("society.skycraft.say.trespass.wake"));
+                }
+                warnTimer += 10;
+                npc.getLookControl().setLookAt(trespasser, 30f, 30f);
+                if (warnTimer == 40) {
+                    Barks.say(npc, net.minecraft.network.chat.Component.translatable("society.skycraft.say.trespass.warn"));
+                } else if (warnTimer > 200 && !trespasser.getUUID().equals(reported)) {
+                    // reported once per intrusion; leaving and coming back is a new one
+                    reported = trespasser.getUUID();
+                    Barks.say(npc, net.minecraft.network.chat.Component.translatable("society.skycraft.say.trespass.guards"));
+                    if (trespasser instanceof net.minecraft.server.level.ServerPlayer sp) {
+                        com.skycraft.crime.Crimes.report(sp, npc.blockPosition(), 25, true, null);
+                    }
+                    if (npc.role().combatant) {
+                        npc.setTarget(trespasser);
+                    }
+                }
+                return true;
+            }
+            warnTimer = 0;
+            reported = null;
+            return false;
         }
 
         private Player findTrespasser() {
@@ -821,6 +1086,8 @@ final class NpcGoals {
                     if (level.canSeeSky(p.blockPosition())) continue;
                     // Player must be within 4 blocks of the NPC's bed
                     if (p.distanceToSqr(home.getX() + 0.5, home.getY() + 0.5, home.getZ() + 0.5) > 16.0) continue;
+                    // the spouse's player lives here
+                    if (com.skycraft.society.Marriage.isSpouseOf(npc, p)) continue;
                     if (com.skycraft.crime.Ownership.isOwnedByOther(p, level, p.blockPosition())) {
                         return p;
                     }

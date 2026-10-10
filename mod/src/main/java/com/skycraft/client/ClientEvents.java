@@ -451,12 +451,6 @@ public final class ClientEvents {
     public static void onScreenOpen(ScreenEvent.Opening event) {
         net.minecraft.client.gui.screens.Screen screen = event.getNewScreen();
         if (screen == null) return;
-        String name = screen.getClass().getName().toLowerCase(java.util.Locale.ROOT);
-        if (name.contains("destiny") || name.contains("editor") && name.contains("mca")) {
-            event.setCanceled(true);
-            return;
-        }
-
         if (screen instanceof PauseScreen && !(screen instanceof com.skycraft.client.screen.title.SkyPauseScreen)) {
             event.setNewScreen(new com.skycraft.client.screen.title.SkyPauseScreen());
             return;

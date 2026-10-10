@@ -78,7 +78,7 @@ public final class EconomyDialogue {
             return false;
         }
         if (npc instanceof com.skycraft.society.entity.NpcEntity ne) {
-            return ne.role() == com.skycraft.society.NpcRole.JARL;
+            return ne.role() == com.skycraft.society.NpcRole.JARL || ne.role() == com.skycraft.society.NpcRole.STEWARD;
         }
         String name = npc.getName().getString().toLowerCase(java.util.Locale.ROOT);
         return name.contains("jarl") || name.contains("steward") || name.contains("proventius") || name.contains("elder");

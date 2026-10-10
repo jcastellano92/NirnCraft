@@ -13,6 +13,11 @@ import net.minecraftforge.fml.config.ModConfig;
  *     <li>{@link NpcEntities}: {@code skycraft:npc} (civilians, contract 22) and {@code skycraft:npc_fighter} (soldiers,
  *     villains) with {@link NpcRole roles}; {@link Npcs} is the public spawn API, {@link NpcDialogue} their topics,
  *     {@link Settlers} gives every settlement its townsfolk, Jarl and housecarl.</li>
+ *     <li>The people of Nirn (replacing third-party villager mods): {@link Cultures} (who lives where), {@link NpcNames}
+ *     (per-race names), {@link NpcLook} and {@link Outfit} (appearance, composited client-side by
+ *     {@code client.NpcSkins} with {@code client.RaceFeatureLayer}), {@link Schedule} and {@link Workplaces} (daily
+ *     routines), {@link Chatter} (NPC-to-NPC talk, bard songs), {@link Relationships} and {@link Marriage},
+ *     {@link NpcRegistry} (unique named NPCs), {@link VillagerConversion} (vanilla villagers become townsfolk).</li>
  *     <li>{@link Barks}: overhead speech (contract 22) and ambient lines from villagers, guards and NPCs.</li>
  *     <li>{@link Reputation} (contract 23) and {@link ReputationEvents}; {@link HitSquads} for hated players.</li>
  *     <li>{@link Encounters}: random wilderness encounters; {@link Letters} for couriers.</li>

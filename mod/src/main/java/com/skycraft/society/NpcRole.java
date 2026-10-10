@@ -33,7 +33,21 @@ public enum NpcRole {
     JARL(true, true, false, false, false, Reputation.GUARDS),
     HOUSECARL(true, true, false, true, false, Reputation.GUARDS),
     /** Not part of the contract: the pickpocket fleeing from guards in a random encounter. */
-    THIEF(false, false, false, false, false, Reputation.THIEVES_GUILD);
+    THIEF(false, false, false, false, false, Reputation.THIEVES_GUILD),
+    // townsfolk trades (they replace vanilla villagers; merchants among them barter through the economy module)
+    FARMER(true, false, false, false, false, Reputation.TOWNSFOLK),
+    BLACKSMITH(true, false, false, false, false, Reputation.TOWNSFOLK),
+    MERCHANT(true, false, false, false, false, Reputation.TOWNSFOLK),
+    APOTHECARY(true, false, false, false, false, Reputation.TOWNSFOLK),
+    FISHER(true, false, false, false, false, Reputation.TOWNSFOLK),
+    BUTCHER(true, false, false, false, false, Reputation.TOWNSFOLK),
+    SCHOLAR(true, false, false, false, false, Reputation.TOWNSFOLK),
+    STEWARD(true, false, false, false, false, Reputation.GUARDS),
+    /** Khajiit caravan traders (replace wandering traders). */
+    CARAVAN_TRADER(true, true, false, false, false, Reputation.TOWNSFOLK),
+    CITIZEN(true, false, false, false, false, Reputation.TOWNSFOLK),
+    /** Children: smaller, never harmed (like Skyrim's). */
+    CHILD(true, false, false, false, false, Reputation.TOWNSFOLK);
 
     public static final NpcRole[] VALUES = values();
     /** Skin variants per role: even = male, odd = female. */
@@ -78,6 +92,16 @@ public enum NpcRole {
     /** Roles with a personal name ("Lucan the Hunter"); the others are named by their role ("Thalmor Justiciar"). */
     public boolean named() {
         return civilian || this == THUG;
+    }
+
+    /** Settled working townsfolk (they keep a home, a bed, a workplace and a daily routine). */
+    public boolean townsfolk() {
+        return civilian && this != COURIER && this != ADVENTURER && this != CARAVAN_TRADER;
+    }
+
+    /** Whether people with this role may marry the player. */
+    public boolean marriageable() {
+        return civilian && this != CHILD && this != JARL && this != COURIER && this != PRIEST;
     }
 
     /** Whether two roles fight each other on sight (symmetric). */

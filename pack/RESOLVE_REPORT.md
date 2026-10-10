@@ -24,7 +24,6 @@
 - [x] `mr:default-options` (pinned)
 - [x] `mr:essential` (pinned)
 - [x] `mr:itemphysic-lite` (pinned)
-- [x] `cf:minecraft-comes-alive-reborn` (pinned)
 - [x] `mr:vampirism` (pinned)
 - [x] `mr:werewolves` (pinned)
 - [x] `mr:terralith` (pinned)
@@ -49,4 +48,4 @@
 - [x] `mr:comforts` (pinned)
 - [x] `mr:complementary-reimagined` (pinned)
 
-Resolved: 48, unresolved: 0
+Resolved: 47, unresolved: 0

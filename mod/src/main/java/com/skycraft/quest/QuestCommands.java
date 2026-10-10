@@ -238,7 +238,7 @@ public final class QuestCommands {
             case "stormcloaks" -> RadiantQuests.civilWarContract(p, giver, Faction.STORMCLOAKS);
             case "legion_trial" -> RadiantQuests.civilWarTrial(p, giver, Faction.IMPERIAL_LEGION);
             case "stormcloak_trial" -> RadiantQuests.civilWarTrial(p, giver, Faction.STORMCLOAKS);
-            case "villager" -> giver instanceof net.minecraft.world.entity.npc.Villager v ? RadiantQuests.villager(p, v) : null;
+            case "villager" -> QuestDialogue.isTownsperson(giver) ? RadiantQuests.villager(p, giver) : null;
             default -> null;
         };
         if (offer == null) return fail(c, "quest.skycraft.cmd.no_offer");

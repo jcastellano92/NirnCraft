@@ -31,9 +31,11 @@ public final class Trainers {
     public static Skill skillFor(LivingEntity npc) {
         if (npc == null || !npc.isAlive()) return null;
         if (com.skycraft.roads.Carriages.isCarriageDriver(npc)) return null;
-        if (npc instanceof WanderingTrader) return pick(npc, Skill.PICKPOCKET, Skill.LOCKPICKING, Skill.SPEECH);
-        if (!(npc instanceof Villager v) || v.isBaby()) return null;
-        VillagerProfession p = v.getVillagerData().getProfession();
+        if (npc instanceof WanderingTrader || Merchants.isCaravan(npc)) return pick(npc, Skill.PICKPOCKET, Skill.LOCKPICKING, Skill.SPEECH);
+        if (npc.isBaby()) return null;
+        // villagers and Skycraft townsfolk (whose trade maps to a profession, see Merchants#profession)
+        VillagerProfession p = Merchants.profession(npc);
+        if (p == null) return null;
         if (p == VillagerProfession.WEAPONSMITH) return pick(npc, Skill.ONE_HANDED, Skill.TWO_HANDED);
         if (p == VillagerProfession.ARMORER) return pick(npc, Skill.HEAVY_ARMOR, Skill.BLOCK);
         if (p == VillagerProfession.TOOLSMITH) return pick(npc, Skill.SMITHING, Skill.MINING);

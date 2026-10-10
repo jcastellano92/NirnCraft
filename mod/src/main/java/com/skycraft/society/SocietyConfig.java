@@ -8,6 +8,11 @@ public final class SocietyConfig {
 
     // ------------------------------------------------------------------ npcs
     public static final ForgeConfigSpec.BooleanValue POPULATE_SETTLEMENTS;
+    public static final ForgeConfigSpec.IntValue MAX_RESIDENTS;
+    public static final ForgeConfigSpec.BooleanValue CONVERT_VILLAGERS;
+    public static final ForgeConfigSpec.BooleanValue ROUTINES;
+    public static final ForgeConfigSpec.BooleanValue CHATTER;
+    public static final ForgeConfigSpec.IntValue SPOUSE_DAILY_GOLD;
 
     // ------------------------------------------------------------------ barks
     public static final ForgeConfigSpec.BooleanValue AMBIENT_BARKS;
@@ -43,6 +48,17 @@ public final class SocietyConfig {
         POPULATE_SETTLEMENTS = b.comment("Give every detected settlement (roads module) a few townsfolk: innkeeper, bard, priest, workers,",
                         "and the first settlement of each hold its Jarl and housecarl.")
                 .define("populateSettlements", true);
+        MAX_RESIDENTS = b.comment("Upper bound of townsfolk a settlement is given (a capital gets the most, a farm the fewest).")
+                .defineInRange("maxResidents", 22, 2, 64);
+        CONVERT_VILLAGERS = b.comment("Vanilla villagers and wandering traders that join the world (breeding, zombie curing, spawn eggs,",
+                        "commands, other mods, old saves) become Skycraft townsfolk / Khajiit caravan traders of the region's culture.")
+                .define("convertVillagers", true);
+        ROUTINES = b.comment("Townsfolk follow daily routines: sleep, breakfast, work, lunch, wandering, evenings at the inn.")
+                .define("routines", true);
+        CHATTER = b.comment("Townsfolk stop to chat with each other when a player is near enough to overhear.")
+                .define("chatter", true);
+        SPOUSE_DAILY_GOLD = b.comment("Gold a spouse's shop earns for the player each day (spouses without a trade earn half).")
+                .defineInRange("spouseDailyGold", 100, 0, 10000);
         b.pop();
 
         b.push("barks");

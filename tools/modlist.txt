@@ -4,7 +4,7 @@
 # (dependencies are added automatically) and fails if any entry can't be resolved.
 # An entry whose pack/<mods|shaderpacks|resourcepacks>/<slug>.pw.toml already exists keeps that pinned version;
 # to update a mod, edit or delete its .pw.toml.
-# Skycraft prefers its own implementations over third-party feature mods: trees, followers, NPC dialogue, the map
+# Skycraft prefers its own implementations over third-party feature mods: trees, townsfolk, followers, NPC dialogue, the map
 # and physics are Skycraft Core's. Library and performance mods are fine.
 
 # --- Performance (runs efficiently, even with huge view distances) ---
@@ -35,8 +35,7 @@ mr:default-options               # ships default keybinds for new players
 mr:essential                     # easy multiplayer hosting/invites with friends, skins & cosmetics
 mr:itemphysic-lite | cf:item-physic-lite   # dropped items lie in the world with physics (Skyrim clutter)
 
-# --- NPCs, factions (companions/followers are Skycraft's own) ---
-mr:minecraft-comes-alive-reborn | cf:minecraft-comes-alive-reborn   # MCA Reborn: named, human-looking villagers (pinned to a stable release)
+# --- NPCs, factions: townsfolk, companions, followers and marriage are Skycraft's own (society module) ---
 
 # --- Vampires, werewolves ---
 mr:vampirism                     # vampirism: become a vampire (or hunter)
