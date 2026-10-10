@@ -20,8 +20,12 @@ public final class SpellMath {
         float f = 1f - skill / 400f;
         float cost = spell.cost * f * f;
         if (Perks.has(player, spell.tier.perkFor(spell.school))) cost *= 0.5f;
+        if (ANCHORED.contains(spell.id) && Perks.has(player, "mysticism.anchor")) cost *= 0.5f;
         return Math.max(0f, cost);
     }
+
+    /** Teleport spells made cheaper by the Mysticism perk Anchor. */
+    private static final java.util.Set<String> ANCHORED = java.util.Set.of("mark", "recall", "divine_intervention", "almsivi_intervention");
 
     /** Damage multiplier of a destruction (or other offensive) spell against a target. */
     public static float damageMult(Player player, Spell spell, @Nullable LivingEntity target) {

@@ -31,6 +31,24 @@ public final class WordWalls {
         return Shout.UNRELENTING_FORCE;
     }
 
+    /**
+     * Placement API for structure/world code: makes the Word Wall at {@code pos} teach {@code shoutId} (a canonical id
+     * from docs/FEATURES.md). Returns false if there is no Word Wall there; unknown ids are kept and degrade gracefully.
+     */
+    public static boolean assign(net.minecraft.world.level.LevelAccessor level, BlockPos pos, String shoutId) {
+        if (!(level.getBlockEntity(pos) instanceof WordWallBlockEntity be)) return false;
+        if (!be.setShoutId(shoutId)) {
+            com.skycraft.Skycraft.LOGGER.warn("Word Wall at {} assigned unknown shout id '{}'; it will teach another shout", pos, shoutId);
+        }
+        return true;
+    }
+
+    /** A stable stand-in for an unknown shout id (same id, same shout). */
+    public static Shout fallbackFor(String unknownId) {
+        Shout[] all = Shout.VALUES;
+        return all[Math.floorMod(unknownId.hashCode(), all.length)];
+    }
+
     public static String wallKey(ServerLevel level, BlockPos pos) {
         return level.dimension().location() + "@" + pos.asLong();
     }

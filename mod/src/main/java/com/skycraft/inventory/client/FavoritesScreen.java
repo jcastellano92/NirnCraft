@@ -139,7 +139,7 @@ public class FavoritesScreen extends Screen {
                 if (id.isEmpty()) continue;
                 boolean shout = i == 2;
                 drawMagicLine(g, Component.translatable("inventory.skycraft.favorites." + MAGIC_LABELS[i]),
-                        Component.translatable((shout ? "shout.skycraft." : "spell.skycraft.") + id), shout ? 0xFFD8E4F0 : 0xFF7FB2FF, y);
+                        shout ? Component.translatable("shout.skycraft." + id) : spellName(id), shout ? 0xFFD8E4F0 : 0xFF7FB2FF, y);
                 y += 10;
             }
         }
@@ -189,6 +189,12 @@ public class FavoritesScreen extends Screen {
         String hint = SkyUi.ellipsize(font, Component.translatable("inventory.skycraft.favorites.hint").getString(), pw - 8);
         g.drawString(font, hint, cx - font.width(hint) / 2, py + ph - 12, 0xFF7A766C, false);
         super.render(g, mouseX, mouseY, partialTick);
+    }
+
+    /** A spell's name; spells made at a Spellmaking Altar carry their own name in their id. */
+    private static Component spellName(String id) {
+        com.skycraft.magic.spell.Spell spell = com.skycraft.magic.spell.Spells.byId(id);
+        return spell != null ? spell.displayName() : Component.translatable("spell.skycraft." + id);
     }
 
     private void drawMagicLine(GuiGraphics g, Component label, Component value, int color, int y) {

@@ -141,6 +141,33 @@ public final class MagicClientEvents {
         }
     }
 
+    /**
+     * Movement magic is applied where the player's movement is simulated (the client): Water Walking holds you on the
+     * water's surface (sneak to sink), and Levitate never lets you rise too far above the ground.
+     */
+    @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.START || !event.player.level().isClientSide || event.player != Minecraft.getInstance().player) return;
+        LocalPlayer player = (LocalPlayer) event.player;
+        if (player.hasEffect(com.skycraft.magic.MagicRegistry.WATER_WALKING.get()) && !player.isShiftKeyDown() && !player.isUnderWater()) {
+            net.minecraft.core.BlockPos below = net.minecraft.core.BlockPos.containing(player.getX(), player.getY() - 0.06, player.getZ());
+            boolean waterBelow = player.level().getFluidState(below).is(net.minecraft.tags.FluidTags.WATER);
+            Vec3 v = player.getDeltaMovement();
+            if (player.isInWater()) {
+                player.setDeltaMovement(v.x, Math.max(v.y, 0.14), v.z);
+            } else if (waterBelow && v.y <= 0) {
+                player.setDeltaMovement(v.x, 0, v.z);
+                player.setOnGround(true);
+                player.fallDistance = 0;
+            }
+        }
+        if (player.hasEffect(com.skycraft.magic.MagicRegistry.LEVITATE.get()) && player.getAbilities().flying
+                && com.skycraft.magic.spell.Mysticism.heightAboveGround(player) > com.skycraft.magic.spell.Mysticism.levitateCeiling(player)) {
+            Vec3 v = player.getDeltaMovement();
+            player.setDeltaMovement(v.x, Math.min(v.y, -0.08), v.z);
+        }
+    }
+
     /** The spell the local player has in a hand (left falls back to right, like the server). */
     public static Spell spellIn(LocalPlayer player, int hand) {
         String id = hand == SpellCasting.LEFT ? MagicData.leftSpell(player) : "";

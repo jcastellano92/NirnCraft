@@ -19,16 +19,25 @@ third-party mod that provides it.
 
 ## Skills, leveling and perks [Core]
 
-* **22 skills.** Skyrim's 18 (One-Handed, Two-Handed, Archery, Block, Heavy Armor, Smithing, Destruction,
+* **29 skills.** Skyrim's 18 (One-Handed, Two-Handed, Archery, Block, Heavy Armor, Smithing, Destruction,
   Restoration, Alteration, Conjuration, Illusion, Enchanting, Light Armor, Sneak, Lockpicking, Pickpocket, Speech,
-  Alchemy) plus four life skills: Mining, Woodcutting, Fishing and Hunting.
+  Alchemy), Unarmed, **Polearms**, the Elder Scrolls classics **Mysticism** and **Acrobatics**, and the life skills
+  Mining, Woodcutting, Fishing, Hunting, Athletics, **Riding** and **Cooking**.
+  * **Polearms:** spears, halberds and glaives in every smithing tier (forge them at the forge; Better Combat
+    movesets). Perks: Lancer, Long Reach, Impale, Set Against Charge, Sweeping Arc, Phalanx, Pinning Strike, Skewer.
+  * **Acrobatics:** trained by running jumps and surviving long falls. Higher jumps, softer landings, Double Jump,
+    Tumble (sneak as you land), Aerial Strike and Cat Fall.
+  * **Riding:** trained by real distance in the saddle and mounted combat. Faster horses, Stable Hand, Mounted Combat,
+    Horse Archer, Trample, Bond and Cavalry Charge.
+  * **Cooking:** every dish from a cooking pot trains it and carries its cook's skill: meals regenerate health, and
+    perks add healing, stamina, cures, Health Boost, extra portions and more.
 * **Skills improve by use.** Mining ore raises Mining; hitting with a sword raises One-Handed; blocking raises Block,
   and so on. A skill meter pops up as you gain XP, and "Mining increased to 23" shows when the skill levels up.
 * **Skyrim's formulas.** XP per skill level is `mult × level^1.95 + offset`. Each skill increase gives character XP
   equal to the new skill level. Going from level L to L+1 takes `(L + 3) × 25` character XP.
 * **Level up.** Each character level gives +10 Health, Magicka or Stamina (your choice) and one perk point.
-* **Look to the heavens.** Press **K** for a starfield of 22 constellations with 196 perks; scroll or use the arrow
-  keys to rotate between them.
+* **Look to the heavens.** Press **K** for a starfield of 29 constellations with 255 perks, each drawn over its
+  guardian sign; scroll, use the arrow keys, or click a dot in the strip along the bottom to jump to any skill.
 * **Legendary skills.** A skill at 100 can be reset to 15 to refund its perks.
 * **Training.** Pay trainers (villagers by profession) to raise a skill, up to 5 times per level.
 * **Skill books.** Reading one for the first time raises its skill by 1.
@@ -79,6 +88,21 @@ third-party mod that provides it.
 * **Costs** follow Skyrim's formula, so higher skill and school perks make spells cheaper.
 * **Magic menu** on **P**: equip spells, shouts and powers.
 * **Soul Trap** fills soul gems for enchanting.
+* **115 spells in six schools.** Every Skyrim spell with its level, base cost and behaviour, including runes,
+  cloaks, walls, the master storms (Lightning Storm is a charged beam), the three wards, the whole Turn/Repel Undead
+  line with Sun Fire, Stendarr's Aura and Vampire's Bane, Magelight, Equilibrium, Ash Shell, Dragonhide, Bound
+  Dagger, the necromancy line from Raise Zombie to Dead Thrall (aim at a body to raise that very creature), the
+  thralls, Flaming Familiar, Seeker, Banish and Command Daedra, Clairvoyance, Rout, Call to Arms and Hysteria.
+* **Mysticism**, the sixth school: Telekinesis, Detect Life, Soul Trap, Slowfall, Dispel, Water Walking, Absorb
+  Health/Stamina/Magicka, Mark and Recall, Divine Intervention (nearest temple of the Nine), Almsivi Intervention
+  (nearest Tribunal temple), Reflect Spell, Spell Absorption, Levitate, Telekinetic Hurl, Spell Turning, Mass Dispel.
+* **Skill only from real effects.** Spells train their school only when they do something: buffs only near enemies
+  and not when refreshed, lights only in the dark, wards by what they absorb, Clairvoyance once per 30 seconds.
+* **Spellmaking Altar** (forge it, or find one): combine up to four effects you know (from your spells) into your
+  own spell, with range, magnitude, duration and area. Oblivion's cost formula, a gold fee, and a school skill
+  requirement for powerful spells. Forget a made spell with **X** in the magic menu.
+* **Staff Enchanter** (Dragonborn): bind any spell you know into an Unenchanted Staff with a filled soul gem. The
+  staff casts it with no magicka; the soul's size sets its charges.
 
 ## Dragons and the Voice
 
@@ -86,8 +110,50 @@ third-party mod that provides it.
   level 3 or higher.
 * **Dragon souls.** Killing one lets everyone nearby absorb its soul.
 * **Word Walls.** Ancient Nordic shrines in the mountains teach Words of Power. Spend dragon souls to unlock words,
-  then shout with **Z**; hold longer for more words. Shouts include Unrelenting Force, Fire Breath, Frost Breath,
-  Whirlwind Sprint, Become Ethereal, Dragonrend, Slow Time and more.
+  then shout with **Z**; hold longer for more words. All 26 of Skyrim's shouts, each with its three words and
+  per-word recharge. Slow Time really slows time around you (creatures and projectiles run at 1/2, 1/3 or 1/5 speed),
+  Call Dragon brings a dragon to your side, Call of Valor a hero of Sovngarde, and Soul Tear raises its victim as
+  your thrall. The Blessing of Talos shortens every recharge by 20%; Dragon Aspect by a further quarter.
+
+### Canonical shout ids
+
+Word Walls, quests and commands name shouts by these ids (saved in player data and on walls, so they never change).
+`Shout.byId` also accepts the three dragon words (`fus_ro_dah`) or the first word (`fus`); unknown ids never crash:
+a wall with an unknown id keeps it and teaches a stand-in shout. Placement code assigns a wall with
+`WordWalls.assign(level, pos, id)`.
+
+| Id | Words | Recharge (s) |
+| --- | --- | --- |
+| `unrelenting_force` | FUS RO DAH | 20 / 25 / 45 |
+| `fire_breath` | YOL TOOR SHUL | 30 / 50 / 100 |
+| `frost_breath` | FO KRAH DIIN | 30 / 50 / 100 |
+| `whirlwind_sprint` | WULD NAH KEST | 20 / 25 / 35 |
+| `become_ethereal` | FEIM ZII GRON | 20 / 30 / 40 |
+| `clear_skies` | LOK VAH KOOR | 5 / 10 / 15 |
+| `aura_whisper` | LAAS YAH NIR | 30 / 40 / 50 |
+| `slow_time` | TIID KLO UL | 30 / 45 / 60 |
+| `marked_for_death` | KRII LUN AUS | 20 / 30 / 40 |
+| `disarm` | ZUN HAAL VIIK | 30 / 35 / 40 |
+| `elemental_fury` | SU GRAH DUN | 30 / 40 / 50 |
+| `kynes_peace` | KAAN DREM OV | 40 / 50 / 60 |
+| `animal_allegiance` | RAAN MIR TAH | 50 / 60 / 70 |
+| `storm_call` | STRUN BAH QO | 300 / 480 / 600 |
+| `dragonrend` | JOOR ZAH FRUL | 10 / 12 / 15 |
+| `ice_form` | IIZ SLEN NUS | 60 / 90 / 120 |
+| `throw_voice` | ZUL MEY GUT | 30 / 15 / 5 |
+| `dismay` | FAAS RU MAAR | 40 / 45 / 50 |
+| `call_dragon` | OD AH VIING | 5 / 5 / 300 |
+| `call_of_valor` | HUN KAAL ZOOR | 180 / 180 / 180 |
+| `cyclone` | VEN GAAR NOS | 30 / 45 / 60 |
+| `drain_vitality` | GAAN LAH HAAS | 30 / 60 / 90 |
+| `soul_tear` | RII VAAZ ZOL | 5 / 5 / 90 |
+| `bend_will` | GOL HAH DOV | 10 / 90 / 120 |
+| `dragon_aspect` | MUL QAH DIIV | 5 / 5 / 5 |
+| `battle_fury` | MID VUR SHAAN | 20 / 30 / 40 |
+
+Weather hooks: `ShoutHooks.onClearSkies` / `onStormCall` let the weather and visuals code react to those shouts.
+Spell sounds all go through `SpellSounds` (slots the audio module can override), and summoned creature types through
+`Summons.entityType` (e.g. a registered `skycraft:flame_atronach` replaces the blaze stand-in automatically).
 
 ## Enemies and spawning
 

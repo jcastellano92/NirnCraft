@@ -197,6 +197,21 @@ public final class SmithingRecipes {
         add(out, "forge/enhanced_dwarven_crossbow", StationType.FORGE, "arrows", "enhanced_dwarven_crossbow", 1, SmithingTier.DWARVEN.perk,
                 Cost.of(byId("dwarven_crossbow"), 1), Cost.of(dwarven, 4));
 
+        // ---------------------------------------------------------------- forge: polearms and magic stations (arsenal/magic items)
+        for (SmithingTier tier : SmithingTier.values()) {
+            for (com.skycraft.arsenal.item.PolearmKind kind : com.skycraft.arsenal.item.PolearmKind.VALUES) {
+                int main = tier == SmithingTier.DRAGONBONE ? Math.min(kind.materialCount, 3) : kind.materialCount;
+                add(out, "forge/" + kind.itemId(tier), StationType.FORGE, tier.category, kind.itemId(tier), 1, tier.perk,
+                        Cost.of(tier::material, main), Cost.of(() -> Items.STICK, 2), Cost.of(strips, kind.strips));
+            }
+        }
+        add(out, "forge/unenchanted_staff", StationType.FORGE, "stations", "unenchanted_staff", 1, null,
+                Cost.of(() -> Items.STICK, 3), Cost.of(iron, 1), Cost.of(() -> Items.AMETHYST_SHARD, 2));
+        add(out, "forge/spellmaking_altar", StationType.FORGE, "stations", "spellmaking_altar", 1, null,
+                Cost.of(() -> Items.STONE_BRICKS, 6), Cost.of(() -> Items.AMETHYST_SHARD, 6), Cost.of(gold, 2), Cost.of(() -> Items.BOOK, 1));
+        add(out, "forge/staff_enchanter", StationType.FORGE, "stations", "staff_enchanter", 1, null,
+                Cost.of(() -> Items.STONE_BRICKS, 4), Cost.of(dwarven, 2), Cost.of(() -> Items.AMETHYST_SHARD, 4));
+
         // ---------------------------------------------------------------- forge: stations and shrines
         // (their crafting JSONs need a 3x3 grid, and a vanilla crafting table opens the armor workbench unless sneaking)
         Cost planks = Cost.tag(ItemTags.PLANKS, () -> Items.OAK_PLANKS, 5);

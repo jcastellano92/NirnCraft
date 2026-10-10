@@ -80,9 +80,80 @@ public final class ClientFx {
                 if (entity != null) aura(level, el, entity, m.extra());
             }
             case MagicFx.STAFF -> staff(level, m.extra(), m.a(), m.b());
+            case MagicFx.RUNE -> rune(level, el, m.a(), Math.max(0.5f, m.extra() / 10f));
+            case MagicFx.PILLAR -> pillar(level, el, m.a(), Math.max(0.5f, m.extra() / 10f));
+            case MagicFx.PATH -> path(level, m.a(), m.b());
+            case MagicFx.TIME_FIELD -> timeField(level, m.a(), Math.max(1, m.extra()));
             default -> {
             }
         }
+    }
+
+    /** A rune: a slowly turning circle with a six-pointed glyph inside, drawn on the ground in the element's color. */
+    private static void rune(ClientLevel level, Element el, Vec3 c, float radius) {
+        int color = elementColor(el);
+        double spin = (System.currentTimeMillis() % 6000L) / 6000.0 * Math.PI * 2;
+        int n = (int) (radius * 22);
+        for (int i = 0; i < n; i++) {
+            double a = spin + i * Math.PI * 2 / n;
+            level.addParticle(dust(color, 0.7f), c.x + Math.cos(a) * radius, c.y + 0.05, c.z + Math.sin(a) * radius, 0, 0, 0);
+        }
+        // two interlaced triangles
+        for (int t = 0; t < 2; t++) {
+            for (int k = 0; k < 3; k++) {
+                double a0 = -spin + t * Math.PI / 3 + k * Math.PI * 2 / 3;
+                double a1 = a0 + Math.PI * 2 / 3;
+                Vec3 p0 = new Vec3(c.x + Math.cos(a0) * radius * 0.8, c.y + 0.05, c.z + Math.sin(a0) * radius * 0.8);
+                Vec3 p1 = new Vec3(c.x + Math.cos(a1) * radius * 0.8, c.y + 0.05, c.z + Math.sin(a1) * radius * 0.8);
+                for (int s = 0; s < 6; s++) {
+                    Vec3 p = lerp(p0, p1, s / 6.0);
+                    level.addParticle(dust(color, 0.5f), p.x, p.y, p.z, 0, 0, 0);
+                }
+            }
+        }
+        if (R.nextInt(2) == 0) level.addParticle(elementParticle(el), c.x + j(radius * 0.4), c.y + 0.1, c.z + j(radius * 0.4), 0, 0.03, 0);
+    }
+
+    /** A wall segment: a column of flame, frost or lightning. */
+    private static void pillar(ClientLevel level, Element el, Vec3 base, float height) {
+        for (int i = 0; i < 8; i++) {
+            double y = base.y + R.nextDouble() * height;
+            switch (el) {
+                case FIRE -> level.addParticle(ParticleTypes.FLAME, base.x + j(0.5), y, base.z + j(0.5), j(0.02), 0.06, j(0.02));
+                case FROST -> level.addParticle(ParticleTypes.SNOWFLAKE, base.x + j(0.5), y, base.z + j(0.5), j(0.03), 0.02, j(0.03));
+                case SHOCK -> level.addParticle(ParticleTypes.ELECTRIC_SPARK, base.x + j(0.5), y, base.z + j(0.5), j(0.2), j(0.2), j(0.2));
+                default -> level.addParticle(elementParticle(el), base.x + j(0.5), y, base.z + j(0.5), 0, 0.04, 0);
+            }
+        }
+        if (el == Element.SHOCK && R.nextInt(3) == 0) arc(level, base, base.add(j(0.3), height, j(0.3)), 1);
+        if (el == Element.FIRE && R.nextInt(3) == 0) level.addParticle(ParticleTypes.LARGE_SMOKE, base.x, base.y + height, base.z, 0, 0.03, 0);
+        if (el == Element.FROST) level.addParticle(dust(0xCFEFFF, 1.4f), base.x + j(0.4), base.y + R.nextDouble() * height, base.z + j(0.4), 0, 0, 0);
+    }
+
+    /** Clairvoyance: a trail of drifting motes along the ground towards the goal. */
+    private static void path(ClientLevel level, Vec3 a, Vec3 b) {
+        Vec3 d = b.subtract(a);
+        double len = d.length();
+        if (len < 0.5) return;
+        int n = (int) (len * 1.5);
+        for (int i = 0; i < n; i++) {
+            Vec3 p = a.add(d.scale(i / (double) n));
+            level.addParticle(dust(0xB89AFF, 0.9f), p.x + j(0.1), p.y + Math.sin(i * 0.6) * 0.15, p.z + j(0.1), 0, 0.005, 0);
+            if (i % 6 == 0) level.addParticle(ParticleTypes.END_ROD, p.x, p.y + 0.2, p.z, d.x / len * 0.03, 0.01, d.z / len * 0.03);
+        }
+    }
+
+    /** Slow Time: a shimmering dome. */
+    private static void timeField(ClientLevel level, Vec3 c, int radius) {
+        for (int i = 0; i < 40; i++) {
+            double theta = R.nextDouble() * Math.PI * 2;
+            double phi = R.nextDouble() * Math.PI * 0.5;
+            double x = c.x + Math.cos(theta) * Math.cos(phi) * radius;
+            double y = c.y + Math.sin(phi) * radius * 0.6;
+            double z = c.z + Math.sin(theta) * Math.cos(phi) * radius;
+            level.addParticle(dust(0xA8B8FF, 1.1f), x, y, z, 0, 0, 0);
+        }
+        for (int i = 0; i < 6; i++) level.addParticle(ParticleTypes.END_ROD, c.x + j(radius), c.y + R.nextDouble() * 3, c.z + j(radius), 0, 0.002, 0);
     }
 
     public static void handleShout(MagicPackets.ShoutFx m) {
@@ -503,6 +574,43 @@ public final class ClientFx {
                     Vec3 p = eye.add(look.scale(d));
                     level.addParticle(d % 2 < 0.4 ? ParticleTypes.SOUL_FIRE_FLAME : dust(0x8A40C0, 1.6f), p.x + j(0.2), p.y + j(0.2), p.z + j(0.2), 0, 0, 0);
                 }
+            }
+            case ICE_FORM -> {
+                cone(level, mouth, look, 12, 60 * words, ParticleTypes.SNOWFLAKE, 0.35);
+                cone(level, mouth, look, 10, 20 * words, dust(0xCFEFFF, 1.6f), 0.3);
+            }
+            case THROW_VOICE -> {
+                for (double d = 2; d <= 30; d += 3) {
+                    Vec3 p = eye.add(look.scale(d));
+                    level.addParticle(ParticleTypes.NOTE, p.x, p.y, p.z, R.nextDouble(), 0, 0);
+                }
+            }
+            case DISMAY -> cone(level, mouth, look, 14, 40 * words, ParticleTypes.SOUL, 0.5);
+            case CALL_DRAGON, CALL_OF_VALOR -> {
+                for (int i = 0; i < 40; i++) level.addParticle(ParticleTypes.END_ROD, e.getX() + j(0.4), e.getY() + 1.6, e.getZ() + j(0.4),
+                        j(0.05), 0.5 + R.nextDouble() * 0.5, j(0.05));
+                ring(level, Element.HOLY, e.position().add(0, 0.2, 0), 3f);
+            }
+            case CYCLONE -> cone(level, mouth, look, 10, 50 * words, ParticleTypes.CLOUD, 0.25);
+            case DRAIN_VITALITY -> {
+                cone(level, mouth, look, 12, 30 * words, dust(0x7A1030, 1.4f), 0.4);
+                if (words >= 2) cone(level, mouth, look, 12, 20, dust(0x3060D0, 1.2f), 0.4);
+                if (words >= 3) cone(level, mouth, look, 12, 20, dust(0x30A040, 1.2f), 0.4);
+            }
+            case SOUL_TEAR -> {
+                for (double d = 1; d <= 16; d += 0.5) {
+                    Vec3 p = eye.add(look.scale(d));
+                    level.addParticle(ParticleTypes.SOUL_FIRE_FLAME, p.x + j(0.25), p.y + j(0.25), p.z + j(0.25), 0, 0, 0);
+                }
+            }
+            case BEND_WILL -> cone(level, mouth, look, 16, 40 * words, ParticleTypes.WITCH, 0.4);
+            case DRAGON_ASPECT -> {
+                aura(level, Element.FIRE, e, 4);
+                for (int i = 0; i < 30; i++) level.addParticle(dust(0xD8A040, 1.5f), e.getX() + j(0.7), e.getY() + R.nextDouble() * 2, e.getZ() + j(0.7), 0, 0.02, 0);
+            }
+            case BATTLE_FURY -> {
+                ring(level, Element.FIRE, e.position().add(0, 0.2, 0), 5f);
+                for (int i = 0; i < 20; i++) level.addParticle(ParticleTypes.ANGRY_VILLAGER, e.getX() + j(4), e.getY() + 1 + R.nextDouble(), e.getZ() + j(4), 0, 0, 0);
             }
         }
         // The shout itself: a burst of air at the mouth.

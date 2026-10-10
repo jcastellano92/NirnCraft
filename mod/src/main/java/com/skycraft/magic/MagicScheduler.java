@@ -74,6 +74,20 @@ public final class MagicScheduler {
         return area;
     }
 
+    /** The owner's areas whose kind starts with {@code kindPrefix}, oldest first (runes). */
+    public static List<Area> areas(UUID owner, String kindPrefix) {
+        List<Area> out = new ArrayList<>();
+        for (Area a : AREAS) {
+            if (a.owner.equals(owner) && a.kind.startsWith(kindPrefix)) out.add(a);
+        }
+        return out;
+    }
+
+    /** Ends an area now. */
+    public static void remove(Area area) {
+        AREAS.remove(area);
+    }
+
     public static boolean hasArea(UUID owner, String kind) {
         for (Area a : AREAS) {
             if (a.owner.equals(owner) && a.kind.equals(kind)) return true;

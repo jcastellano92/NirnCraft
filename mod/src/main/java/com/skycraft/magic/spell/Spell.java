@@ -69,6 +69,11 @@ public final class Spell {
      * multiplied by {@link #DUAL_MAGNITUDE}. Illusion spells affect stronger targets and Impact staggers.
      */
     public final boolean dual;
+    /** Name and description of a spell made at a Spellmaking Altar (null for tome spells, which use lang keys). */
+    @Nullable
+    public final Component customName;
+    @Nullable
+    public final Component customDescription;
 
     /** Skyrim dual casting: 2.8x the magicka for 2.2x the effect with the Dual Casting perk. */
     public static final float DUAL_COST = 2.8f;
@@ -93,6 +98,8 @@ public final class Spell {
         this.hostile = b.hostile;
         this.dualCastable = b.dualCastable;
         this.dual = false;
+        this.customName = b.customName;
+        this.customDescription = b.customDescription;
     }
 
     private Spell(Spell base, boolean dual) {
@@ -114,6 +121,8 @@ public final class Spell {
         this.hostile = base.hostile;
         this.dualCastable = base.dualCastable;
         this.dual = dual;
+        this.customName = base.customName;
+        this.customDescription = base.customDescription;
     }
 
     /** The dual-cast variant of this spell (2.5x magnitude). */
@@ -126,11 +135,16 @@ public final class Spell {
     }
 
     public Component displayName() {
-        return Component.translatable("spell.skycraft." + id);
+        return customName != null ? customName : Component.translatable("spell.skycraft." + id);
     }
 
     public Component description() {
-        return Component.translatable("spell.skycraft." + id + ".desc");
+        return customDescription != null ? customDescription : Component.translatable("spell.skycraft." + id + ".desc");
+    }
+
+    /** A spell made at a Spellmaking Altar. */
+    public boolean isCustom() {
+        return customName != null;
     }
 
     public static Builder builder(String id, School school, Tier tier) {
@@ -155,6 +169,8 @@ public final class Spell {
         private boolean piercing;
         private boolean hostile;
         private boolean dualCastable = true;
+        private Component customName;
+        private Component customDescription;
 
         private Builder(String id, School school, Tier tier) {
             this.id = id;
@@ -232,6 +248,13 @@ public final class Spell {
 
         public Builder piercing() {
             this.piercing = true;
+            return this;
+        }
+
+        /** Literal name and description (spells made at a Spellmaking Altar). */
+        public Builder custom(Component name, Component description) {
+            this.customName = name;
+            this.customDescription = description;
             return this;
         }
 

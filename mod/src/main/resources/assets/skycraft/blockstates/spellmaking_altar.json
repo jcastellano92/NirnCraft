@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "skycraft:block/spellmaking_altar"
+    },
+    "facing=east": {
+      "model": "skycraft:block/spellmaking_altar",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "skycraft:block/spellmaking_altar",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "skycraft:block/spellmaking_altar",
+      "y": 270
+    }
+  }
+}

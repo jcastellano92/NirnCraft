@@ -1,6 +1,7 @@
 package com.skycraft.magic.spell;
 
 import com.skycraft.core.Notifier;
+import com.skycraft.magic.MagicDamage;
 import com.skycraft.magic.MagicFx;
 import com.skycraft.magic.Targeting;
 import com.skycraft.perk.Perks;
@@ -58,6 +59,8 @@ public final class Summons {
     public static final String OWNER = "skycraft_summon_owner";
     public static final String UNTIL = "skycraft_summon_until";
     public static final String KIND = "skycraft_summon_kind";
+    /** Shout allies that don't count against the summon limit. */
+    public static final String FREE = "skycraft_summon_free";
 
     private Summons() {}
 
@@ -90,53 +93,324 @@ public final class Summons {
                 m -> isSummon(m) && m.isAlive() && id.equals(ownerOf(m)));
     }
 
+    // ------------------------------------------------------------------ entity types
+
+    /**
+     * The one place summon entity types are chosen: summon kind -> entity ids in order of preference. The first id
+     * that is registered (and is a {@link Mob}) wins, so dedicated creatures (e.g. {@code skycraft:flame_atronach} from
+     * the creatures module) replace the vanilla stand-ins as soon as they exist. Unknown kinds fall back to a zombie.
+     */
+    private static final java.util.Map<String, List<String>> TYPES = new java.util.HashMap<>();
+
+    static {
+        types("familiar", "skycraft:familiar", "minecraft:wolf");
+        types("flaming_familiar", "skycraft:flaming_familiar", "skycraft:familiar", "minecraft:wolf");
+        types("zombie", "skycraft:zombie", "minecraft:zombie");
+        types("revenant", "skycraft:draugr", "minecraft:husk");
+        types("dread_zombie", "skycraft:draugr_deathlord", "minecraft:wither_skeleton");
+        types("dead_thrall", "skycraft:draugr_deathlord", "minecraft:wither_skeleton");
+        types("flame_atronach", "skycraft:flame_atronach", "minecraft:blaze");
+        types("frost_atronach", "skycraft:frost_atronach", "minecraft:iron_golem");
+        types("storm_atronach", "skycraft:storm_atronach", "minecraft:iron_golem");
+        types("flame_thrall", "skycraft:flame_atronach", "minecraft:blaze");
+        types("frost_thrall", "skycraft:frost_atronach", "minecraft:iron_golem");
+        types("storm_thrall", "skycraft:storm_atronach", "minecraft:iron_golem");
+        types("dremora_lord", "skycraft:dremora_lord", "skycraft:dremora", "minecraft:wither_skeleton");
+        types("seeker", "skycraft:seeker", "minecraft:vex");
+        types("sovngarde_hero", "skycraft:sovngarde_hero", "minecraft:vindicator");
+        types("odahviing", "skycraft:odahviing", "skycraft:dragon");
+    }
+
+    private static void types(String kind, String... ids) {
+        TYPES.put(kind, List.of(ids));
+    }
+
+    /** Entity type used for a summon kind (see {@link #TYPES}); never null. */
+    @SuppressWarnings("unchecked")
+    public static EntityType<? extends Mob> entityType(String kind) {
+        for (String id : TYPES.getOrDefault(kind, List.of())) {
+            net.minecraft.resources.ResourceLocation rl = net.minecraft.resources.ResourceLocation.tryParse(id);
+            if (rl == null || !net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.containsKey(rl)) continue;
+            EntityType<?> type = net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValue(rl);
+            if (type != null && isMobType(type)) return (EntityType<? extends Mob>) type;
+        }
+        return EntityType.ZOMBIE;
+    }
+
+    private static final java.util.Map<EntityType<?>, Boolean> MOB_TYPES = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** Whether an entity type makes {@link Mob}s (tested once by creating an instance on the server). */
+    private static boolean isMobType(EntityType<?> type) {
+        Boolean known = MOB_TYPES.get(type);
+        if (known != null) return known;
+        net.minecraft.server.MinecraftServer server = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
+        if (server == null) return false;
+        Entity e = type.create(server.overworld());
+        boolean mob = e instanceof Mob;
+        if (e != null) e.discard();
+        MOB_TYPES.put(type, mob);
+        return mob;
+    }
+
     // ------------------------------------------------------------------ spells
 
     public static Spell.Result familiar(ServerPlayer p, Spell spell, int tick) {
-        return summon(p, spell, EntityType.WOLF, "familiar", false, false, mob -> {
+        return summon(p, spell, entityType("familiar"), "familiar", false, false, mob -> {
             setHealth(mob, 24);
             setAttack(mob, 5);
         });
     }
 
-    public static Spell.Result zombie(ServerPlayer p, Spell spell, int tick) {
-        return summon(p, spell, EntityType.ZOMBIE, "zombie", false, true, mob -> {
-            setHealth(mob, Perks.has(p, "conjuration.dark_souls") ? 40 : 20);
-            mob.setCanPickUpLoot(false);
+    /** Flaming Familiar (Dragonborn): a burning wolf that sets what it bites on fire and explodes when its time is up. */
+    public static Spell.Result flamingFamiliar(ServerPlayer p, Spell spell, int tick) {
+        return summon(p, spell, entityType("flaming_familiar"), "flaming_familiar", false, false, mob -> {
+            setHealth(mob, 30);
+            setAttack(mob, 6);
             mob.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20 * 60 * 30, 0, false, false));
         });
     }
 
+    public static Spell.Result zombie(ServerPlayer p, Spell spell, int tick) {
+        return reanimate(p, spell, "zombie", 30f, Perks.has(p, "conjuration.dark_souls") ? 40 : 20, 3);
+    }
+
+    public static Spell.Result reanimateCorpse(ServerPlayer p, Spell spell, int tick) {
+        return reanimate(p, spell, "zombie", 60f, 40, 5);
+    }
+
+    public static Spell.Result revenant(ServerPlayer p, Spell spell, int tick) {
+        return reanimate(p, spell, "revenant", 100f, 60, 7);
+    }
+
+    public static Spell.Result dreadZombie(ServerPlayer p, Spell spell, int tick) {
+        return reanimate(p, spell, "dread_zombie", 180f, 90, 9);
+    }
+
+    /** Dead Thrall: a permanent undead servant from any corpse that isn't a dragon or a boss. */
+    public static Spell.Result deadThrall(ServerPlayer p, Spell spell, int tick) {
+        return reanimate(p, spell, "dead_thrall", 1000f, 120, 10);
+    }
+
     public static Spell.Result flameAtronach(ServerPlayer p, Spell spell, int tick) {
-        return summon(p, spell, EntityType.BLAZE, "flame_atronach", true, false, mob -> setHealth(mob, 30));
+        return summon(p, spell, entityType("flame_atronach"), "flame_atronach", true, false, Summons::setupFlameAtronach);
     }
 
     public static Spell.Result frostAtronach(ServerPlayer p, Spell spell, int tick) {
-        return summon(p, spell, EntityType.IRON_GOLEM, "frost_atronach", true, false, mob -> {
-            if (mob instanceof IronGolem golem) golem.setPlayerCreated(true);
-            setHealth(mob, 60);
-            setAttack(mob, 8);
-        });
+        return summon(p, spell, entityType("frost_atronach"), "frost_atronach", true, false, Summons::setupFrostAtronach);
     }
 
     public static Spell.Result stormAtronach(ServerPlayer p, Spell spell, int tick) {
-        return summon(p, spell, EntityType.IRON_GOLEM, "storm_atronach", true, false, mob -> {
-            if (mob instanceof IronGolem golem) golem.setPlayerCreated(true);
-            setHealth(mob, 80);
-            setAttack(mob, 12);
-            AttributeInstance speed = mob.getAttribute(Attributes.MOVEMENT_SPEED);
-            if (speed != null) speed.setBaseValue(0.32);
-        });
+        return summon(p, spell, entityType("storm_atronach"), "storm_atronach", true, false, Summons::setupStormAtronach);
+    }
+
+    /** Flame/Frost/Storm Thrall: a permanent atronach (it stays until killed or you leave). */
+    public static Spell.Result flameThrall(ServerPlayer p, Spell spell, int tick) {
+        return summon(p, spell, entityType("flame_thrall"), "flame_atronach", true, false, PERMANENT, Summons::setupFlameAtronach);
+    }
+
+    public static Spell.Result frostThrall(ServerPlayer p, Spell spell, int tick) {
+        return summon(p, spell, entityType("frost_thrall"), "frost_atronach", true, false, PERMANENT, Summons::setupFrostAtronach);
+    }
+
+    public static Spell.Result stormThrall(ServerPlayer p, Spell spell, int tick) {
+        return summon(p, spell, entityType("storm_thrall"), "storm_atronach", true, false, PERMANENT, Summons::setupStormAtronach);
+    }
+
+    private static void setupFlameAtronach(Mob mob) {
+        setHealth(mob, 30);
+        mob.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20 * 60 * 60, 0, false, false));
+    }
+
+    private static void setupFrostAtronach(Mob mob) {
+        if (mob instanceof IronGolem golem) golem.setPlayerCreated(true);
+        setHealth(mob, 60);
+        setAttack(mob, 8);
+    }
+
+    private static void setupStormAtronach(Mob mob) {
+        if (mob instanceof IronGolem golem) golem.setPlayerCreated(true);
+        setHealth(mob, 80);
+        setAttack(mob, 12);
+        AttributeInstance speed = mob.getAttribute(Attributes.MOVEMENT_SPEED);
+        if (speed != null) speed.setBaseValue(0.32);
     }
 
     public static Spell.Result dremoraLord(ServerPlayer p, Spell spell, int tick) {
-        return summon(p, spell, EntityType.WITHER_SKELETON, "dremora_lord", true, false, mob -> {
-            mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.NETHERITE_SWORD));
-            mob.setDropChance(EquipmentSlot.MAINHAND, 0f);
+        return summon(p, spell, entityType("dremora_lord"), "dremora_lord", true, false, mob -> {
+            if (mob.getMainHandItem().isEmpty() || mob.getType() == EntityType.WITHER_SKELETON) {
+                mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.NETHERITE_SWORD));
+                mob.setDropChance(EquipmentSlot.MAINHAND, 0f);
+            }
             setHealth(mob, 70);
             setAttack(mob, 6);
             mob.setCanPickUpLoot(false);
         });
+    }
+
+    /** Conjure Seeker (Dragonborn): a flying servant of Hermaeus Mora. */
+    public static Spell.Result seeker(ServerPlayer p, Spell spell, int tick) {
+        return summon(p, spell, entityType("seeker"), "seeker", false, false, mob -> {
+            setHealth(mob, 40);
+            setAttack(mob, 6);
+        });
+    }
+
+    /** Ticks a "permanent" summon (thralls) lasts: a full day of real time. */
+    public static final int PERMANENT = 20 * 60 * 60 * 24;
+
+    // ------------------------------------------------------------------ necromancy
+
+    /**
+     * Raise Zombie .. Dead Thrall. Aimed at a body ({@code skycraft:corpse}), it raises that very creature if it isn't
+     * too powerful for the spell ({@code maxBodyHealth}); its belongings spill onto the ground. With no body in sight
+     * it calls a generic undead of {@code fallbackKind} out of the earth instead.
+     */
+    private static Spell.Result reanimate(ServerPlayer p, Spell spell, String fallbackKind, float maxBodyHealth, double health, double attack) {
+        ServerLevel level = p.serverLevel();
+        boolean permanent = "dead_thrall".equals(fallbackKind);
+        double range = 14 * (1 + 0.5 * Perks.rank(p, "conjuration.summoner"));
+        com.skycraft.creatures.entity.CorpseEntity corpse = aimedCorpse(p, range);
+        double hp = Perks.has(p, "conjuration.dark_souls") ? health * 2 : health;
+        Consumer<Mob> undead = mob -> {
+            mob.setCanPickUpLoot(false);
+            mob.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20 * 60 * 60, 0, false, false));
+        };
+        if (corpse != null) {
+            CompoundTag saved = corpse.saveWithoutId(new CompoundTag());
+            EntityType<?> bodyType = EntityType.byString(saved.getString("BodyType")).orElse(null);
+            Entity probe = bodyType == null || bodyType == EntityType.PLAYER ? null : bodyType.create(level);
+            if (!(probe instanceof Mob bodyMob) || bodyType.is(com.skycraft.magic.MagicRegistry.DRAGONS) || bodyType.is(com.skycraft.combat.CombatHandler.BOSSES)) {
+                if (probe != null) probe.discard();
+                Notifier.message(p, Component.translatable("message.skycraft.corpse_cannot_rise"));
+                return Spell.Result.FAILED;
+            }
+            float bodyHealth = bodyMob.getMaxHealth();
+            bodyMob.discard();
+            if (bodyHealth > maxBodyHealth * (spell.dual ? 1.5f : 1f)) {
+                Notifier.message(p, Component.translatable("message.skycraft.corpse_too_powerful"));
+                return Spell.Result.FAILED;
+            }
+            // what the body carried falls to the ground
+            net.minecraft.nbt.ListTag loot = saved.getList("Loot", net.minecraft.nbt.Tag.TAG_COMPOUND);
+            for (int i = 0; i < loot.size(); i++) {
+                ItemStack stack = ItemStack.of(loot.getCompound(i));
+                if (!stack.isEmpty()) corpse.spawnAtLocation(stack, 0.3f);
+            }
+            Vec3 at = corpse.position();
+            corpse.discard();
+            @SuppressWarnings("unchecked")
+            EntityType<? extends Mob> mobType = (EntityType<? extends Mob>) bodyType;
+            int duration = permanent ? PERMANENT : Perks.has(p, "conjuration.necromancy") ? spell.duration * 2 : spell.duration;
+            Mob mob = conjureAt(p, mobType, "thrall", at, duration, m -> {
+                undead.accept(m);
+                if (m.getMaxHealth() < hp) setHealth(m, hp);
+            });
+            if (mob == null) return Spell.Result.FAILED;
+            mob.setCustomName(Component.translatable("entity.skycraft.summon.thrall", mob.getType().getDescription()));
+            raiseFx(level, mob, spell);
+            return Spell.Result.EFFECT;
+        }
+        int extra = permanent ? PERMANENT : -1;
+        return summon(p, spell, entityType(fallbackKind), fallbackKind, false, true, extra, mob -> {
+            undead.accept(mob);
+            setHealth(mob, hp);
+            setAttack(mob, attack);
+        });
+    }
+
+    private static void raiseFx(ServerLevel level, Mob mob, Spell spell) {
+        Vec3 pos = mob.position();
+        MagicFx.sendNear(level, pos, 64, MagicFx.SUMMON, Element.SOUL, pos, pos, mob.getId(), Math.round(mob.getBbHeight() * 10));
+        SpellSounds.world(level, pos, SpellSounds.Slot.SUMMON, 1f, 0.7f);
+        level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.7f, 1.5f);
+    }
+
+    /** The corpse the player is looking at, within {@code range}. */
+    @Nullable
+    private static com.skycraft.creatures.entity.CorpseEntity aimedCorpse(ServerPlayer p, double range) {
+        Vec3 eye = p.getEyePosition();
+        Vec3 end = eye.add(p.getViewVector(1f).scale(range));
+        BlockHitResult block = p.level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p));
+        Vec3 limit = block.getType() == HitResult.Type.MISS ? end : block.getLocation();
+        com.skycraft.creatures.entity.CorpseEntity best = null;
+        double bestDist = Double.MAX_VALUE;
+        for (com.skycraft.creatures.entity.CorpseEntity c : p.level().getEntitiesOfClass(com.skycraft.creatures.entity.CorpseEntity.class,
+                new net.minecraft.world.phys.AABB(eye, limit).inflate(1.5))) {
+            java.util.Optional<Vec3> hit = c.getBoundingBox().inflate(0.6).clip(eye, limit);
+            if (hit.isPresent()) {
+                double d = eye.distanceToSqr(hit.get());
+                if (d < bestDist) {
+                    bestDist = d;
+                    best = c;
+                }
+            }
+        }
+        return best;
+    }
+
+    // ------------------------------------------------------------------ banish & command
+
+    /** Summoned or daedric creatures: atronachs, dremora, seekers and familiars, or any creature tagged as daedra. */
+    public static boolean isDaedra(Entity e) {
+        if (isSummon(e)) {
+            String kind = e.getPersistentData().getString(KIND);
+            if (kind.contains("atronach") || kind.contains("dremora") || kind.contains("seeker") || kind.contains("familiar")) return true;
+        }
+        String id = String.valueOf(EntityType.getKey(e.getType()));
+        return id.contains("atronach") || id.contains("dremora") || id.contains("daedr") || id.contains("seeker");
+    }
+
+    /** Banish Daedra: summoned daedra (not your own) up to a high level are sent back to Oblivion. */
+    public static void banishHit(SpellProjectile proj, ServerPlayer caster, Spell spell, @Nullable LivingEntity target, Vec3 pos) {
+        ServerLevel level = (ServerLevel) proj.level();
+        MagicFx.burst(level, pos, Element.CONJURE, 1.2f);
+        SpellSounds.world(level, pos, SpellSounds.Slot.BANISH, 1f, 0.8f);
+        if (!(target instanceof Mob mob) || !isDaedra(mob) || caster.getUUID().equals(ownerOf(mob))) return;
+        if (target.getType().is(com.skycraft.combat.CombatHandler.BOSSES) || target.getMaxHealth() > 150f * (spell.dual ? 1.5f : 1f)) {
+            Notifier.message(caster, Component.translatable("message.skycraft.illusion_too_strong", target.getDisplayName()));
+            return;
+        }
+        if (isSummon(mob)) {
+            dismiss(mob);
+        } else {
+            Targeting.hurtNoKnockback(mob, MagicDamage.source(level, MagicDamage.SPELL, null, caster), mob.getHealth() + 20f);
+        }
+        Notifier.message(caster, Component.translatable("message.skycraft.banished"));
+        SpellEffects.xp(caster, spell);
+    }
+
+    /** Command Daedra: a summoned or wild daedra fights for you for 60 seconds. */
+    public static void commandHit(SpellProjectile proj, ServerPlayer caster, Spell spell, @Nullable LivingEntity target, Vec3 pos) {
+        ServerLevel level = (ServerLevel) proj.level();
+        MagicFx.burst(level, pos, Element.CONJURE, 1f);
+        if (!(target instanceof Mob mob) || !isDaedra(mob) || caster.getUUID().equals(ownerOf(mob))) return;
+        if (target.getType().is(com.skycraft.combat.CombatHandler.BOSSES)) return;
+        String kind = mob.getPersistentData().getString(KIND);
+        mob.addTag(TAG);
+        CompoundTag pd = mob.getPersistentData();
+        pd.putUUID(OWNER, caster.getUUID());
+        pd.putLong(UNTIL, level.getGameTime() + spell.duration);
+        pd.putString(KIND, kind.isEmpty() ? "commanded" : kind);
+        mob.setTarget(null);
+        mob.setPersistenceRequired();
+        MagicFx.send(mob, MagicFx.AURA, Element.CONJURE, mob.position(), mob.position(), mob.getId(), 3);
+        SpellSounds.world(level, pos, SpellSounds.Slot.SUMMON, 1f, 1.2f);
+        Notifier.message(caster, Component.translatable("message.skycraft.commanded", mob.getDisplayName()));
+        SpellEffects.xp(caster, spell);
+    }
+
+    /**
+     * Conjures a summon of {@code kind} (see {@link #entityType}) for a shout or power: Call of Valor, Call Dragon.
+     * Doesn't count against the conjuration summon limit only if {@code extraSlot} is set (shout allies).
+     */
+    @Nullable
+    public static Mob conjureAlly(ServerPlayer p, String kind, String nameKind, double range, int duration, Consumer<Mob> setup) {
+        Mob mob = conjureAt(p, entityType(kind), nameKind, null, range, duration, true, setup);
+        if (mob != null) {
+            Vec3 pos = mob.position();
+            MagicFx.sendNear(p.serverLevel(), pos, 96, MagicFx.SUMMON, Element.HOLY, pos, pos, mob.getId(), Math.round(mob.getBbHeight() * 10));
+        }
+        return mob;
     }
 
     private static void setHealth(Mob mob, double health) {
@@ -152,11 +426,18 @@ public final class Summons {
 
     private static Spell.Result summon(ServerPlayer p, Spell spell, EntityType<? extends Mob> type, String kind,
                                        boolean atronach, boolean undead, Consumer<Mob> setup) {
+        return summon(p, spell, type, kind, atronach, undead, -1, setup);
+    }
+
+    /** {@code fixedDuration} > 0 overrides the spell's duration and its perks (permanent thralls). */
+    private static Spell.Result summon(ServerPlayer p, Spell spell, EntityType<? extends Mob> type, String kind,
+                                       boolean atronach, boolean undead, int fixedDuration, Consumer<Mob> setup) {
         ServerLevel level = p.serverLevel();
         double range = 14 * (1 + 0.5 * Perks.rank(p, "conjuration.summoner"));
         int duration = spell.duration;
         if (atronach && Perks.has(p, "conjuration.atromancy")) duration *= 2;
         if (undead && Perks.has(p, "conjuration.necromancy")) duration *= 2;
+        if (fixedDuration > 0) duration = fixedDuration;
         Mob mob = conjure(p, type, kind, range, duration, setup);
         if (mob == null) return Spell.Result.FAILED;
 
@@ -176,25 +457,40 @@ public final class Summons {
      */
     @Nullable
     public static Mob conjure(ServerPlayer p, EntityType<? extends Mob> type, String kind, double range, int duration, Consumer<Mob> setup) {
+        return conjureAt(p, type, kind, null, range, duration, false, setup);
+    }
+
+    /** Like {@link #conjure} but at a fixed position (a raised corpse). */
+    @Nullable
+    public static Mob conjureAt(ServerPlayer p, EntityType<? extends Mob> type, String kind, Vec3 at, int duration, Consumer<Mob> setup) {
+        return conjureAt(p, type, kind, at, 0, duration, false, setup);
+    }
+
+    @Nullable
+    private static Mob conjureAt(ServerPlayer p, EntityType<? extends Mob> type, String kind, @Nullable Vec3 at, double range, int duration,
+                                 boolean free, Consumer<Mob> setup) {
         ServerLevel level = p.serverLevel();
         Mob mob = type.create(level);
         if (mob == null) return null;
-        Vec3 pos = spawnPos(p, range, mob);
+        Vec3 pos = at != null ? at : spawnPos(p, range, mob);
         mob.moveTo(pos.x, pos.y, pos.z, p.getYRot(), 0f);
         mob.setYHeadRot(p.getYRot());
         setup.accept(mob);
 
         // Limit: one summon (two with Twin Souls). The oldest is dismissed, like Skyrim.
+        // Shout allies (Call of Valor, Call Dragon) are "free": they neither count nor get dismissed.
         int max = Perks.has(p, "conjuration.twin_souls") ? 2 : 1;
         List<Mob> existing = summonsOf(p);
+        existing.removeIf(m -> m.getPersistentData().getBoolean(FREE));
         existing.sort(Comparator.comparingLong(m -> m.getPersistentData().getLong(UNTIL)));
-        while (existing.size() >= max) dismiss(existing.remove(0));
+        while (!free && existing.size() >= max) dismiss(existing.remove(0));
 
         mob.addTag(TAG);
         CompoundTag pd = mob.getPersistentData();
         pd.putUUID(OWNER, p.getUUID());
         pd.putLong(UNTIL, level.getGameTime() + duration);
         pd.putString(KIND, kind);
+        if (free) pd.putBoolean(FREE, true);
         mob.setPersistenceRequired();
         mob.setCustomName(Component.translatable("entity.skycraft.summon." + kind));
         level.addFreshEntity(mob);
@@ -288,6 +584,7 @@ public final class Summons {
         if (summon) {
             if (!ownerOk || now >= until) {
                 if (owner != null && now >= until) Notifier.message(owner, Component.translatable("message.skycraft.summon_expired", mob.getDisplayName()));
+                if (owner != null && now >= until && "flaming_familiar".equals(mob.getPersistentData().getString(KIND))) explode(level, mob, owner);
                 dismiss(mob);
                 return;
             }
@@ -338,13 +635,26 @@ public final class Summons {
         }
     }
 
+    /** A Flaming Familiar's last act: it bursts into flame, burning its owner's enemies nearby. */
+    private static void explode(ServerLevel level, Mob mob, ServerPlayer owner) {
+        Vec3 c = mob.position().add(0, mob.getBbHeight() / 2, 0);
+        MagicFx.burst(level, c, Element.FIRE, 3f);
+        level.playSound(null, c.x, c.y, c.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 1f, 1.3f);
+        for (LivingEntity e : Targeting.around(level, c, 3.5, e -> Targeting.canHarm(owner, e))) {
+            Targeting.hurtNoKnockback(e, MagicDamage.source(level, MagicDamage.FIRE, null, owner), 6f);
+            e.setSecondsOnFire(4);
+        }
+    }
+
     private static void ambient(ServerLevel level, Mob mob) {
         String kind = mob.getPersistentData().getString(KIND);
         ParticleOptions particle = switch (kind) {
-            case "flame_atronach" -> ParticleTypes.FLAME;
+            case "flame_atronach", "flaming_familiar" -> ParticleTypes.FLAME;
             case "frost_atronach" -> ParticleTypes.SNOWFLAKE;
             case "storm_atronach" -> ParticleTypes.ELECTRIC_SPARK;
             case "dremora_lord" -> ParticleTypes.SMALL_FLAME;
+            case "seeker" -> ParticleTypes.SQUID_INK;
+            case "sovngarde_hero", "felldir", "gormlaith", "hakon" -> ParticleTypes.END_ROD;
             default -> ParticleTypes.SOUL;
         };
         level.sendParticles(particle, mob.getX(), mob.getY() + mob.getBbHeight() * 0.6, mob.getZ(), 3,

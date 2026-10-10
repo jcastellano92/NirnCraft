@@ -1,0 +1,20 @@
+{
+  "item.skycraft.skill_book_acrobatics": "A Dance in Fire, v1",
+  "item.skycraft.skill_book_cooking": "Uncommon Taste",
+  "item.skycraft.skill_book_mysticism": "Withershins",
+  "item.skycraft.skill_book_polearm": "The Spear of Bitter Mercy",
+  "item.skycraft.skill_book_riding": "Hooves of the Reach",
+  "screen.skycraft.level_up_pending": "%s level-ups to choose",
+  "skill.skycraft.acrobatics": "Acrobatics",
+  "skill.skycraft.acrobatics.desc": "Jumping higher and farther, and landing from great heights without harm.",
+  "skill.skycraft.cooking": "Cooking",
+  "skill.skycraft.cooking.desc": "Cooking meals at a cooking pot that heal, refresh and fortify whoever eats them.",
+  "skill.skycraft.mysticism": "Mysticism",
+  "skill.skycraft.mysticism.desc": "The school of the unseen: telekinesis, dispelling, reflecting and absorbing magic, Mark and Recall, interventions and levitation.",
+  "skill.skycraft.polearm": "Polearms",
+  "skill.skycraft.polearm.desc": "Fighting with spears, halberds and glaives: long reach, sweeping blows and pinning thrusts.",
+  "skill.skycraft.riding": "Riding",
+  "skill.skycraft.riding.desc": "Riding horses faster and farther, and fighting from the saddle.",
+  "tooltip.skycraft.meal": "Cooked with Cooking %s: restores more when eaten",
+  "tooltip.skycraft.meal_perks": "A master cook's dish"
+}

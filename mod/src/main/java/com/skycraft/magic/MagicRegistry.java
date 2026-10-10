@@ -75,6 +75,19 @@ public final class MagicRegistry {
     public static final RegistryObject<Item> BOUND_SWORD = ITEMS.register("bound_sword", () -> new BoundSwordItem(new Item.Properties()));
     public static final RegistryObject<Item> BOUND_BATTLEAXE = ITEMS.register("bound_battleaxe", () -> new BoundBattleaxeItem(new Item.Properties()));
     public static final RegistryObject<Item> BOUND_BOW = ITEMS.register("bound_bow", () -> new BoundBowItem(new Item.Properties()));
+    public static final RegistryObject<Item> BOUND_DAGGER = ITEMS.register("bound_dagger", () -> new com.skycraft.magic.bound.BoundDaggerItem(new Item.Properties()));
+
+    /** Spellmaking Altar (Oblivion/Morrowind): combine known magic effects into new spells. */
+    public static final RegistryObject<Block> SPELLMAKING_ALTAR = BLOCKS.register("spellmaking_altar",
+            () -> new com.skycraft.magic.spell.spellmaking.SpellmakingAltarBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_PURPLE)
+                    .strength(3.5f, 9f)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> 7)
+                    .noOcclusion()
+                    .sound(SoundType.STONE)));
+    public static final RegistryObject<Item> SPELLMAKING_ALTAR_ITEM = ITEMS.register("spellmaking_altar",
+            () -> new BlockItem(SPELLMAKING_ALTAR.get(), new Item.Properties().rarity(Rarity.UNCOMMON)));
 
     // ------------------------------------------------------------------ blocks
 
@@ -127,6 +140,44 @@ public final class MagicRegistry {
     public static final RegistryObject<MobEffect> MARKED_FOR_DEATH = EFFECTS.register("marked_for_death",
             () -> new MagicEffect(MobEffectCategory.HARMFUL, 0x5A0A0A)
                     .addAttributeModifier(Attributes.ARMOR, "5a1c2e10-41b7-4d1f-8d0e-6c7b9a10f010", -2.0, AttributeModifier.Operation.ADDITION));
+
+    /** Dragonhide: 80% of physical damage is ignored. */
+    public static final RegistryObject<MobEffect> DRAGONHIDE = EFFECTS.register("dragonhide",
+            () -> new MagicEffect(MobEffectCategory.BENEFICIAL, 0x6A8A5A));
+    /** Reflect Spell: (amplifier + 1) * 5 percent chance to send a spell back at its caster. */
+    public static final RegistryObject<MobEffect> REFLECT_SPELL = EFFECTS.register("reflect_spell",
+            () -> new MagicEffect(MobEffectCategory.BENEFICIAL, 0xC8E8F0));
+    /** Spell Absorption: (amplifier + 1) * 5 percent chance to absorb a spell as magicka. */
+    public static final RegistryObject<MobEffect> SPELL_ABSORPTION = EFFECTS.register("spell_absorption",
+            () -> new MagicEffect(MobEffectCategory.BENEFICIAL, 0x4A7BD8));
+    /** Levitate: limited flight (Mysticism keeps the player's flying ability in sync with it). */
+    public static final RegistryObject<MobEffect> LEVITATE = EFFECTS.register("levitate",
+            () -> new MagicEffect(MobEffectCategory.BENEFICIAL, 0xE8F0FF));
+    /** Water Walking: water holds you up. */
+    public static final RegistryObject<MobEffect> WATER_WALKING = EFFECTS.register("water_walking",
+            () -> new MagicEffect(MobEffectCategory.BENEFICIAL, 0x5AA8E0));
+    public static final RegistryObject<MobEffect> FLAME_CLOAK = EFFECTS.register("flame_cloak",
+            () -> new com.skycraft.magic.spell.CloakEffect(0xFF7A2A, com.skycraft.magic.spell.Element.FIRE));
+    public static final RegistryObject<MobEffect> FROST_CLOAK = EFFECTS.register("frost_cloak",
+            () -> new com.skycraft.magic.spell.CloakEffect(0xA8E0FF, com.skycraft.magic.spell.Element.FROST));
+    public static final RegistryObject<MobEffect> LIGHTNING_CLOAK = EFFECTS.register("lightning_cloak",
+            () -> new com.skycraft.magic.spell.CloakEffect(0xC8C8FF, com.skycraft.magic.spell.Element.SHOCK));
+    public static final RegistryObject<MobEffect> STENDARRS_AURA = EFFECTS.register("stendarrs_aura",
+            () -> new com.skycraft.magic.spell.CloakEffect(0xFFE08A, com.skycraft.magic.spell.Element.HOLY));
+    /** Ash Shell: encased in ash, can't act and can't be harmed. */
+    public static final RegistryObject<MobEffect> ASH_SHELL = EFFECTS.register("ash_shell",
+            () -> new MagicEffect(MobEffectCategory.HARMFUL, 0x5A5550));
+    /** Slow Time: the creature lives at a fraction of normal speed (ticks are skipped). Amplifier = words - 1. */
+    public static final RegistryObject<MobEffect> TIME_SLOWED = EFFECTS.register("time_slowed",
+            () -> new MagicEffect(MobEffectCategory.HARMFUL, 0x8A9AD0));
+    /** Dragon Aspect: armor, stronger shouts, and damage resistance. */
+    public static final RegistryObject<MobEffect> DRAGON_ASPECT = EFFECTS.register("dragon_aspect",
+            () -> new MagicEffect(MobEffectCategory.BENEFICIAL, 0xD8A040)
+                    .addAttributeModifier(Attributes.ARMOR, "5a1c2e10-41b7-4d1f-8d0e-6c7b9a10f011", 3.0, AttributeModifier.Operation.ADDITION)
+                    .addAttributeModifier(Attributes.ATTACK_DAMAGE, "5a1c2e10-41b7-4d1f-8d0e-6c7b9a10f012", 1.0, AttributeModifier.Operation.ADDITION));
+    /** Ice Form: frozen solid. */
+    public static final RegistryObject<MobEffect> ICE_FORM = EFFECTS.register("ice_form",
+            () -> new MagicEffect(MobEffectCategory.HARMFUL, 0xB8E8FF));
 
     private static MobEffect armorEffect(int color, String uuid) {
         return new MagicEffect(MobEffectCategory.BENEFICIAL, color).addAttributeModifier(Attributes.ARMOR, uuid, 1.0, AttributeModifier.Operation.ADDITION);

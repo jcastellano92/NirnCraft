@@ -16,7 +16,11 @@ import net.minecraft.world.item.TridentItem;
 /** Skyrim weapon families, resolved from item tags with a vanilla-class fallback. */
 public enum WeaponClass {
     UNARMED(null), DAGGER(Skill.ONE_HANDED), SWORD(Skill.ONE_HANDED), WAR_AXE(Skill.ONE_HANDED), MACE(Skill.ONE_HANDED),
-    GREATSWORD(Skill.TWO_HANDED), BATTLEAXE(Skill.TWO_HANDED), WARHAMMER(Skill.TWO_HANDED), BOW(Skill.ARCHERY), OTHER(null);
+    GREATSWORD(Skill.TWO_HANDED), BATTLEAXE(Skill.TWO_HANDED), WARHAMMER(Skill.TWO_HANDED), BOW(Skill.ARCHERY), OTHER(null),
+    /** Spears, halberds and glaives (arsenal, tag {@code #skycraft:polearms}): the Polearms skill. */
+    POLEARM(Skill.POLEARM);
+
+    public static final TagKey<Item> POLEARMS = tag("polearms");
 
     public static final TagKey<Item> TWO_HANDED = tag("two_handed");
     public static final TagKey<Item> DAGGERS = tag("daggers");
@@ -42,6 +46,7 @@ public enum WeaponClass {
 
     public static WeaponClass of(ItemStack stack) {
         if (stack.isEmpty()) return UNARMED;
+        if (stack.is(POLEARMS)) return POLEARM;
         if (stack.is(GREATSWORDS)) return GREATSWORD;
         if (stack.is(BATTLEAXES)) return BATTLEAXE;
         if (stack.is(WARHAMMERS)) return WARHAMMER;

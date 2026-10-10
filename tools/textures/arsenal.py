@@ -369,6 +369,170 @@ def staff_texture(orb, claw, wood_key, style=None):
     return img
 
 
+# ============================================================================ polearms (Polearms skill)
+
+POLEARM_TIERS = ["iron", "steel", "orcish", "dwarven", "elven", "glass", "ebony", "daedric", "dragonbone"]
+POLEARM_TIER_NAMES = {"iron": "Iron", "steel": "Steel", "orcish": "Orcish", "dwarven": "Dwarven", "elven": "Elven", "glass": "Glass",
+                      "ebony": "Ebony", "daedric": "Daedric", "dragonbone": "Dragonbone"}
+SWORD_VALUE = {"iron": 25, "steel": 45, "orcish": 75, "dwarven": 135, "elven": 235, "glass": 410, "ebony": 720, "daedric": 1250,
+               "dragonbone": 1500}
+# kind: (name, value mult, base weight, Better Combat preset, tooltip)
+POLEARMS = {
+    "spear": ("Spear", 1.1, 9, "bettercombat:spear", "Quick thrusts at long reach. Light enough to carry a shield."),
+    "halberd": ("Halberd", 2.1, 18, "bettercombat:halberd", "An axe blade, a hook and a spike on a long haft. Slow, heavy, sweeping."),
+    "glaive": ("Glaive", 1.9, 16, "bettercombat:glaive", "A long curved blade on a staff, for wide sweeping cuts."),
+}
+
+
+def spear_head(st, t0, t1):
+    dark, mid, light, edge = st["blade"]
+    gd, gm, gl = st["guard"]
+
+    def f(t, c):
+        if t0 - 1 <= t < t0 and abs(c) <= 1:
+            return gm  # socket collar
+        if t0 <= t <= t1:
+            k = (t - t0) / max(1, (t1 - t0))
+            hw = 1.6 * math.sin(math.pi * min(1.0, k * 1.15)) if k < 0.85 else (1 - k) * 4
+            if "jagged" in st["style"] and t % 3 == 0:
+                hw -= 0.6
+            if abs(c) <= hw + 1e-6:
+                if "glow" in st["style"] and c == 0:
+                    return st["accent"][2]
+                return edge if c < 0 else (light if c == 0 else mid)
+        return None
+
+    return f
+
+
+def halberd_head(st):
+    axe = cr.axe_head(st, 21, 6.0, 1.2, 3.6, False)
+    tip = spear_head(st, 25, 30)
+    gd, gm, gl = st["guard"]
+
+    def f(t, c):
+        r = tip(t, c) if t >= 24 else None
+        if r is None:
+            r = axe(t, c)
+        if r is None and t == 21 and 1 <= c <= 3:
+            r = gl if c == 3 else gm  # the hook behind the blade
+        return r
+
+    return f
+
+
+def glaive_head(st):
+    dark, mid, light, edge = st["blade"]
+    gd, gm, gl = st["guard"]
+
+    def f(t, c):
+        if t == 18 and abs(c) <= 2:
+            return gl if c < 0 else gd  # small guard
+        if 19 <= t <= 30:
+            k = (t - 19) / 11.0
+            center = -1.6 * math.sin(k * math.pi * 0.9)
+            hw = 1.3 if k < 0.8 else max(0.0, (1 - k) * 6.5)
+            if abs(c - center) <= hw + 1e-6:
+                if "glow" in st["style"] and abs(c - center) < 0.5:
+                    return st["accent"][2]
+                return edge if c < center - 0.5 else (light if c < center + 0.5 else mid)
+        return None
+
+    return f
+
+
+def polearm_texture(tier, kind):
+    st = dict(cr.TIER_STYLE[tier])
+    st["name"] = tier
+    if kind == "spear":
+        cv = cr.draw_hafted(st, 25, 4, spear_head(st, 24, 30))
+    elif kind == "halberd":
+        cv = cr.draw_hafted(st, 26, 4, halberd_head(st))
+    else:
+        cv = cr.draw_hafted(st, 19, 4, glaive_head(st))
+    img = cv.img
+    outline(img, color_of=lambda n: with_alpha(shade(n, 0.3), 255))
+    return img
+
+
+# ============================================================================ staff enchanting (Dragonborn)
+
+def unenchanted_staff_texture():
+    return staff_texture(P("3a3a46", "6a6a7a", "9a9aaa", "c8c8d8"), P("4a4038", "7a6a58", "a8947a"), "wood")
+
+
+def enchanted_staff_texture():
+    return staff_texture(P("3a1a6a", "7a4ae0", "c8a8ff", "ffffff"), P("6e4416", "b07a32", "f2cf86"), "dark")
+
+
+def enchanter_texture(part):
+    """Staff Enchanter: a Dwemer bronze pedestal with a soul-lit socket."""
+    import random as _r
+    rnd = _r.Random("staff_enchanter_" + part)
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 255))
+    px = img.load()
+    bronze = hexc("8a5a22")
+    for y in range(16):
+        for x in range(16):
+            px[x, y] = shade(bronze, 0.75 + rnd.random() * 0.3)
+    if part == "top":
+        for y in range(16):
+            for x in range(16):
+                d = math.hypot(x - 7.5, y - 7.5)
+                if d < 3:
+                    px[x, y] = shade(hexc("60E0E8"), 0.8 + (3 - d) / 8)
+                elif d < 4:
+                    px[x, y] = hexc("3a2a10")
+                elif abs(d - 6) < 0.5:
+                    px[x, y] = shade(bronze, 1.3)
+    elif part == "side":
+        for x in range(16):
+            px[x, 0] = shade(bronze, 1.35)
+            px[x, 15] = shade(bronze, 0.55)
+        for y in range(3, 13, 3):
+            for x in range(2, 14):
+                px[x, y] = shade(bronze, 0.6)  # plate seams
+        for (x, y) in ((4, 6), (11, 6), (4, 9), (11, 9)):
+            px[x, y] = hexc("f2cf86")  # rivets
+    else:
+        for x in range(16):
+            px[x, 0] = shade(bronze, 1.25)
+        for y in range(16):
+            px[0, y] = shade(bronze, 0.6)
+            px[15, y] = shade(bronze, 0.6)
+    return img
+
+
+def enchanter_models():
+    tex = os.path.join(RES, "assets", "skycraft", "textures", "block")
+    os.makedirs(tex, exist_ok=True)
+    for part in ("top", "side", "base"):
+        enchanter_texture(part).save(os.path.join(tex, f"staff_enchanter_{part}.png"))
+    face = lambda t, uv=None: ({"texture": t, "uv": uv} if uv else {"texture": t})  # noqa: E731
+    model = {
+        "parent": "minecraft:block/block",
+        "textures": {"particle": "skycraft:block/staff_enchanter_side", "top": "skycraft:block/staff_enchanter_top",
+                     "side": "skycraft:block/staff_enchanter_side", "base": "skycraft:block/staff_enchanter_base"},
+        "elements": [
+            {"from": [2, 0, 2], "to": [14, 4, 14], "faces": {d: face("#base") for d in ("down", "up", "north", "south", "west", "east")}},
+            {"from": [5, 4, 5], "to": [11, 12, 11], "faces": {d: face("#side") for d in ("north", "south", "west", "east")}},
+            {"from": [3, 12, 3], "to": [13, 15, 13], "faces": {"down": face("#base"), "up": face("#top"),
+                                                                **{d: face("#side", [0, 0, 16, 3]) for d in ("north", "south", "west", "east")}}},
+        ],
+    }
+    blockmodels = os.path.join(RES, "assets", "skycraft", "models", "block")
+    write_json(os.path.join(blockmodels, "staff_enchanter.json"), model)
+    write_json(os.path.join(MODELS, "staff_enchanter.json"), {"parent": "skycraft:block/staff_enchanter"})
+    states = {"variants": {f"facing={f}": ({"model": "skycraft:block/staff_enchanter", "y": r} if r else {"model": "skycraft:block/staff_enchanter"})
+                           for f, r in (("north", 0), ("east", 90), ("south", 180), ("west", 270))}}
+    write_json(os.path.join(RES, "assets", "skycraft", "blockstates", "staff_enchanter.json"), states)
+    write_json(os.path.join(DATA, "loot_tables", "blocks", "staff_enchanter.json"), {
+        "type": "minecraft:block",
+        "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": "skycraft:staff_enchanter"}],
+                   "conditions": [{"condition": "minecraft:survives_explosion"}]}],
+    })
+
+
 def wabbajack_texture():
     """Sheogorath's staff: a twisted shaft crowned with three grinning faces (gold, purple, red)."""
     cv = Canvas()
@@ -799,11 +963,13 @@ def tags_and_values():
     artifacts = list(ARTIFACTS) + ["wabbajack", "staff_of_magnus"]
     sk = lambda ids: [f"skycraft:{i}" for i in ids]  # noqa: E731
     tag = lambda path, ids: write_json(os.path.join(DATA, "tags", "items", path + ".json"), {"replace": False, "values": ids})  # noqa: E731
-    tag("arsenal_goods", sk(arrows + bolts + crossbows + staves))
+    polearms = [f"{t}_{k}" for t in POLEARM_TIERS for k in POLEARMS]
+    tag("arsenal_goods", sk(arrows + bolts + crossbows + staves + polearms + ["unenchanted_staff"]))
+    tag("polearms", sk(polearms))
     tag("artifacts", sk(artifacts))
     tag("bolts", sk(bolts))
     tag("staves", sk(staves + ["wabbajack", "staff_of_magnus"]))
-    tag("arsenal/daggers", sk(["mehrunes_razor"]))
+    tag("arsenal/daggers", sk(["mehrunes_razor", "bound_dagger"]))
     tag("arsenal/maces", sk(["mace_of_molag_bal"]))
     tag("arsenal/greatswords", sk(["ebony_blade", "bloodskal_blade"]))
     tag("arsenal/battleaxes", sk(["wuuthrad"]))
@@ -829,6 +995,12 @@ def tags_and_values():
     for i, v in ARTIFACTS.items():
         values[f"skycraft:{i}"] = v[2]
         weights[f"skycraft:{i}"] = v[3]
+    for n, t in enumerate(POLEARM_TIERS):
+        for k, (_, vm, w, _, _) in POLEARMS.items():
+            values[f"skycraft:{t}_{k}"] = int(round(SWORD_VALUE[t] * vm))
+            weights[f"skycraft:{t}_{k}"] = int(round(w * (1 + 0.06 * n)))
+    values.update({"skycraft:unenchanted_staff": 100, "skycraft:enchanted_staff": 900, "skycraft:staff_enchanter": 300})
+    weights.update({"skycraft:unenchanted_staff": 8, "skycraft:enchanted_staff": 8, "skycraft:staff_enchanter": 30})
     write_json(os.path.join(DATA, "skycraft_values", "arsenal.json"), {"values": values})
     write_json(os.path.join(DATA, "skycraft_weights", "arsenal.json"), {"weights": weights})
 
@@ -891,6 +1063,34 @@ def lang():
         L[f"item.skycraft.{i}"] = v[0]
         L[f"tooltip.skycraft.artifact.{i}"] = v[5]
         L[f"lore.skycraft.artifact.{i}"] = v[6]
+    for t in POLEARM_TIERS:
+        for k, v in POLEARMS.items():
+            L[f"item.skycraft.{t}_{k}"] = f"{POLEARM_TIER_NAMES[t]} {v[0]}"
+    for k, v in POLEARMS.items():
+        L[f"tooltip.skycraft.polearm.{k}"] = v[4]
+    L.update({
+        "tooltip.skycraft.polearm.one_handed": "One-handed polearm (Polearms skill)",
+        "tooltip.skycraft.polearm.two_handed": "Two-handed polearm (Polearms skill)",
+        "item.skycraft.unenchanted_staff": "Unenchanted Staff",
+        "item.skycraft.enchanted_staff": "Enchanted Staff",
+        "item.skycraft.enchanted_staff.named": "Staff of %s",
+        "tooltip.skycraft.enchanted_staff.blank": "Bind a spell into it at a Staff Enchanter",
+        "item.skycraft.staff_enchanter": "Staff Enchanter",
+        "block.skycraft.staff_enchanter": "Staff Enchanter",
+        "screen.skycraft.staff_enchanter": "Staff Enchanter",
+        "staff_enchanter.skycraft.spells": "Spells",
+        "staff_enchanter.skycraft.no_spells": "You know no spells that can be bound into a staff.",
+        "staff_enchanter.skycraft.enchant": "Enchant",
+        "staff_enchanter.skycraft.need_staff": "Unenchanted Staff in your pack",
+        "staff_enchanter.skycraft.need_gem": "A filled soul gem in your pack",
+        "staff_enchanter.skycraft.charges": "The staff will hold %s charges",
+        "staff_enchanter.skycraft.hint": "Click a spell, then Enchant. The biggest soul you carry is used.",
+        "staff_enchanter.skycraft.made": "Staff enchanted",
+        "staff_enchanter.skycraft.problem.spell": "That spell can't be bound into a staff",
+        "staff_enchanter.skycraft.problem.unknown": "You don't know that spell",
+        "staff_enchanter.skycraft.problem.staff": "You need an Unenchanted Staff",
+        "staff_enchanter.skycraft.problem.gem": "You need a filled soul gem",
+    })
     L["lore.skycraft.artifact.wabbajack"] = "Sheogorath's staff. Even he isn't sure what it does."
     L["lore.skycraft.artifact.staff_of_magnus"] = "The staff of the god of magic, once kept at the College of Winterhold."
     L.update({
@@ -970,6 +1170,15 @@ def main():
         else:
             save(ARTIFACT_DRAW[i](), i)
             generated(i, "minecraft:item/handheld")
+    for t in POLEARM_TIERS:
+        for k in POLEARMS:
+            save(polearm_texture(t, k), f"{t}_{k}")
+            generated(f"{t}_{k}", "minecraft:item/handheld")
+    save(unenchanted_staff_texture(), "unenchanted_staff")
+    generated("unenchanted_staff", "minecraft:item/handheld")
+    save(enchanted_staff_texture(), "enchanted_staff")
+    generated("enchanted_staff", "minecraft:item/handheld")
+    enchanter_models()
     loot_tables()
     tags_and_values()
     recipes()

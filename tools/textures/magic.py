@@ -60,6 +60,7 @@ SCHOOLS = {
     "alteration": ("#24604A", "#9FE8C8", "#E8FFF4"),
     "conjuration": ("#4E2470", "#C890FF", "#F0D8FF"),
     "illusion": ("#22407E", "#FF9AD8", "#FFE0F4"),
+    "mysticism": ("#1E5A5A", "#7FF0E0", "#E8FFFC"),
 }
 
 EMBLEMS = {
@@ -69,6 +70,7 @@ EMBLEMS = {
     "alteration": ["..#..", ".#+#.", "#+.+#", ".#+#.", "..#.."],    # a crystal
     "conjuration": [".###.", "#...#", "#.+.#", "#...#", ".###."],   # a portal
     "illusion": [".....", ".###.", "#+#+#", ".###.", "....."],      # an eye
+    "mysticism": ["#...#", ".#+#.", "..#..", ".#+#.", "#...#"],     # crossed paths of the aether
 }
 
 
@@ -162,6 +164,68 @@ def bound_sword():
         px[x, y] = rgba("#3A1A60", 230)
     px[1, 15] = VIOLET_HI
     glow_outline(img)
+    return img
+
+
+def bound_dagger():
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    px = img.load()
+    # short blade: diagonal from (6,9) up to (12,3)
+    for i in range(7):
+        x, y = 6 + i, 9 - i
+        px[x, y] = VIOLET_HI if i % 3 == 0 else VIOLET
+        if y + 1 < 16 and i > 0:
+            px[x, y + 1] = VIOLET_DARK
+    px[13, 2] = VIOLET_HI
+    # small curved guard
+    for (x, y) in ((4, 9), (5, 10), (6, 11), (7, 11)):
+        px[x, y] = VIOLET_DARK
+    px[3, 8] = VIOLET
+    # grip and pommel
+    for (x, y) in ((5, 11), (4, 12), (3, 13)):
+        px[x, y] = rgba("#3A1A60", 230)
+    px[2, 14] = VIOLET_HI
+    glow_outline(img)
+    return img
+
+
+def altar_texture(part):
+    """Spellmaking Altar: dark stone with inlaid silver runes and a glowing amethyst top."""
+    rnd = random.Random("altar_" + part)
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 255))
+    px = img.load()
+    stone = rgba("#4A4458")
+    for y in range(16):
+        for x in range(16):
+            px[x, y] = shade(stone, 0.85 + rnd.random() * 0.25)
+    if part == "top":
+        glow = rgba("#C8A0FF")
+        hi = rgba("#F0E0FF")
+        for y in range(16):
+            for x in range(16):
+                d = abs(x - 7.5) + abs(y - 7.5)
+                if d < 5.5:
+                    px[x, y] = shade(glow, 0.7 + (5.5 - d) / 10)
+                elif abs(d - 6.5) < 0.6:
+                    px[x, y] = rgba("#D8D8E8")
+        px[7, 7] = hi
+        px[8, 8] = hi
+    elif part == "side":
+        rune = rgba("#C8C8E0")
+        for x in range(16):
+            px[x, 0] = shade(stone, 1.3)
+            px[x, 15] = shade(stone, 0.6)
+        for gx in (3, 7, 11):
+            for (dx, dy) in ((0, 0), (1, 1), (2, 0), (1, 2), (1, 3)):
+                px[gx + dx, 5 + dy] = rune
+        for x in range(2, 14):
+            px[x, 11] = shade(rgba("#9A7AE0"), 1.0 if x % 3 else 1.3)
+    else:  # base
+        for x in range(16):
+            px[x, 0] = shade(stone, 1.25)
+        for y in range(16):
+            px[0, y] = shade(stone, 0.7)
+            px[15, y] = shade(stone, 0.7)
     return img
 
 
@@ -328,6 +392,19 @@ ICONS = {
     "feared": ("#404060", "#A0A0D0", "skull"),
     "frenzied": ("#D02020", "#FF9A60", "burst"),
     "marked_for_death": ("#7A0A0A", "#FF5050", "skull"),
+    "dragonhide": ("#6A8A5A", "#D8E8B0", "scales"),
+    "reflect_spell": ("#9AB8C8", "#FFFFFF", "mirror"),
+    "spell_absorption": ("#3A6AC8", "#B8D8FF", "gem"),
+    "levitate": ("#D8E0F0", "#FFFFFF", "feather"),
+    "water_walking": ("#3A88C8", "#C8ECFF", "wave"),
+    "flame_cloak": ("#D85A1A", "#FFD070", "burst"),
+    "frost_cloak": ("#7AB8E0", "#FFFFFF", "burst"),
+    "lightning_cloak": ("#8A8AE0", "#F0F0FF", "burst"),
+    "stendarrs_aura": ("#D8B040", "#FFF4C0", "sun"),
+    "ash_shell": ("#5A5550", "#A8A090", "shield"),
+    "time_slowed": ("#6A7AC0", "#D8E0FF", "hourglass"),
+    "dragon_aspect": ("#C88A2A", "#FFE0A0", "scales"),
+    "ice_form": ("#A8D8F0", "#FFFFFF", "gem"),
 }
 
 SHAPES = {
@@ -408,6 +485,57 @@ SHAPES = {
         "....#+#++#+#....",
         ".....######.....",
     ],
+    "scales": [
+        "..##..##..##....",
+        ".#++##++##++#...",
+        "#+##+#+##+#+#...",
+        ".##..##..##.##..",
+        "..##..##..##..#.",
+        ".#++##++##++##..",
+        "#+##+#+##+#+##..",
+        ".##..##..##.....",
+        "..##..##..##....",
+        ".#++##++##++#...",
+        "..##..##..##....",
+    ],
+    "mirror": [
+        ".....######.....",
+        "....#++++++#....",
+        "...#+######+#...",
+        "...#+#++++#+#...",
+        "...#+#+..+#+#...",
+        "...#+#+..+#+#...",
+        "...#+#++++#+#...",
+        "...#+######+#...",
+        "....#++++++#....",
+        ".....######.....",
+        ".......##.......",
+        "......####......",
+    ],
+    "sun": [
+        ".......##.......",
+        "..#....##....#..",
+        "...#..####..#...",
+        "....##++++##....",
+        "...#++####++#...",
+        "####+######+####",
+        "...#++####++#...",
+        "....##++++##....",
+        "...#..####..#...",
+        "..#....##....#..",
+        ".......##.......",
+    ],
+    "hourglass": [
+        "...##########...",
+        "....#++++++#....",
+        ".....#++++#.....",
+        "......#++#......",
+        ".......##.......",
+        "......#..#......",
+        ".....#.++.#.....",
+        "....#.++++.#....",
+        "...##########...",
+    ],
     "burst": [
         ".......##.......",
         "...#...##...#...",
@@ -459,14 +587,44 @@ def effect_icon(name):
 
 TIER_WEIGHT = {"NOV": 20, "APP": 10, "ADE": 5, "EXP": 2, "MAS": 1}
 TIER_VALUE = {"NOV": 50, "APP": 150, "ADE": 350, "EXP": 750, "MAS": 1500}
-SCHOOL_CODE = {"D": "destruction", "R": "restoration", "A": "alteration", "C": "conjuration", "I": "illusion"}
+SCHOOL_CODE = {"D": "destruction", "R": "restoration", "A": "alteration", "C": "conjuration", "I": "illusion", "M": "mysticism"}
+
+
+def altar_models():
+    """Block model, blockstate, item model and loot table of the Spellmaking Altar (a pedestal with a slab top)."""
+    model = {
+        "parent": "minecraft:block/block",
+        "textures": {"particle": "skycraft:block/spellmaking_altar_side", "top": "skycraft:block/spellmaking_altar_top",
+                     "side": "skycraft:block/spellmaking_altar_side", "base": "skycraft:block/spellmaking_altar_base"},
+        "elements": [
+            {"from": [1, 0, 1], "to": [15, 3, 15], "faces": {
+                "down": {"texture": "#base"}, "up": {"texture": "#base"}, "north": {"texture": "#base"}, "south": {"texture": "#base"},
+                "west": {"texture": "#base"}, "east": {"texture": "#base"}}},
+            {"from": [4, 3, 4], "to": [12, 11, 12], "faces": {
+                "north": {"texture": "#side"}, "south": {"texture": "#side"}, "west": {"texture": "#side"}, "east": {"texture": "#side"}}},
+            {"from": [0, 11, 0], "to": [16, 14, 16], "faces": {
+                "down": {"texture": "#base"}, "up": {"texture": "#top"}, "north": {"texture": "#side", "uv": [0, 0, 16, 3]},
+                "south": {"texture": "#side", "uv": [0, 0, 16, 3]}, "west": {"texture": "#side", "uv": [0, 0, 16, 3]},
+                "east": {"texture": "#side", "uv": [0, 0, 16, 3]}}},
+        ],
+    }
+    write_json(os.path.join(MODELS, "block", "spellmaking_altar.json"), model)
+    write_json(os.path.join(MODELS, "item", "spellmaking_altar.json"), {"parent": "skycraft:block/spellmaking_altar"})
+    states = {"variants": {f"facing={f}": ({"model": "skycraft:block/spellmaking_altar", "y": r} if r else {"model": "skycraft:block/spellmaking_altar"})
+                           for f, r in (("north", 0), ("east", 90), ("south", 180), ("west", 270))}}
+    write_json(os.path.join(RES, "assets", "skycraft", "blockstates", "spellmaking_altar.json"), states)
+    write_json(os.path.join(DATA, "loot_tables", "blocks", "spellmaking_altar.json"), {
+        "type": "minecraft:block",
+        "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": "skycraft:spellmaking_altar"}],
+                   "conditions": [{"condition": "minecraft:survives_explosion"}]}],
+    })
 
 
 def read_spells():
     with open(SPELLS_JAVA, encoding="utf-8") as f:
         src = f.read()
     out = []
-    for m in re.finditer(r'add\(s\("([a-z_]+)",\s*([DRACI]),\s*(NOV|APP|ADE|EXP|MAS)\)', src):
+    for m in re.finditer(r'add\(s\("([a-z_]+)",\s*([DRACIM]),\s*(NOV|APP|ADE|EXP|MAS)\)', src):
         out.append((m.group(1), SCHOOL_CODE[m.group(2)], m.group(3)))
     return out
 
@@ -477,6 +635,12 @@ def main():
         written.append(save(spell_tome(school), "item", f"spell_tome_{school}.png"))
     written.append(save(bound_sword(), "item", "bound_sword.png"))
     written.append(save(bound_battleaxe(), "item", "bound_battleaxe.png"))
+    written.append(save(bound_dagger(), "item", "bound_dagger.png"))
+    write_json(os.path.join(MODELS, "item", "bound_dagger.json"),
+               {"parent": "minecraft:item/handheld", "textures": {"layer0": "skycraft:item/bound_dagger"}})
+    for part in ("top", "side", "base"):
+        written.append(save(altar_texture(part), "block", f"spellmaking_altar_{part}.png"))
+    altar_models()
     written.append(save(bound_bow(-1), "item", "bound_bow.png"))
     for stage in range(3):
         written.append(save(bound_bow(stage), "item", f"bound_bow_pulling_{stage}.png"))
@@ -500,7 +664,8 @@ def main():
         }],
     })
     values = {f"skycraft:spell_tome_{s}": TIER_VALUE[t] for s, _, t in spells}
-    values.update({"skycraft:bound_sword": 0, "skycraft:bound_battleaxe": 0, "skycraft:bound_bow": 0, "skycraft:word_wall": 0})
+    values.update({"skycraft:bound_sword": 0, "skycraft:bound_battleaxe": 0, "skycraft:bound_bow": 0, "skycraft:bound_dagger": 0,
+                   "skycraft:word_wall": 0, "skycraft:spellmaking_altar": 400})
     write_json(os.path.join(DATA, "skycraft_values", "magic.json"), {"values": values})
     print(f"wrote {len(written)} textures and assets for {len(spells)} spells")
 

@@ -1,5 +1,7 @@
 package com.skycraft.audio;
 
+import com.skycraft.magic.spell.SpellSounds;
+import com.skycraft.magic.spell.SpellSounds.Slot;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
@@ -17,5 +19,33 @@ public final class AudioModule {
     public static void init(IEventBus modBus) {
         AudioSounds.init(modBus);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, AudioConfig.CLIENT_SPEC, "skycraft-audio-client.toml");
+        overrideSpellSounds();
+    }
+
+    /** Points the magic module's spell sound slots at Skycraft's own spell sounds (suppliers resolve lazily). */
+    private static void overrideSpellSounds() {
+        spell(Slot.CAST_FIRE, "fire");
+        spell(Slot.CAST_FROST, "frost");
+        spell(Slot.CAST_SHOCK, "shock");
+        spell(Slot.CAST_HOLY, "heal");
+        spell(Slot.CAST_MIND, "illusion");
+        spell(Slot.CAST_SOUL, "conjure");
+        spell(Slot.CAST_CONJURE, "conjure");
+        spell(Slot.CAST_NATURE, "alteration");
+        spell(Slot.CAST_ARCANE, "alteration");
+        spell(Slot.LOOP_FIRE, "fire_stream");
+        spell(Slot.LOOP_FROST, "frost_stream");
+        spell(Slot.LOOP_SHOCK, "shock_stream");
+        spell(Slot.LOOP_HOLY, "heal");
+        spell(Slot.IMPACT_FIRE, "impact_fire");
+        spell(Slot.IMPACT_FROST, "impact_frost");
+        spell(Slot.IMPACT_SHOCK, "impact_shock");
+        spell(Slot.CHARGE, "charge");
+        spell(Slot.FIZZLE, "fizzle");
+        spell(Slot.SUMMON, "conjure");
+    }
+
+    private static void spell(Slot slot, String name) {
+        SpellSounds.override(slot, () -> AudioSounds.spell(name));
     }
 }

@@ -59,6 +59,8 @@ public final class SpellCasting {
         final Spell spell;
         final int hand;
         int ticks;
+        /** Charge ticks of a charged concentration spell. */
+        int charge;
         boolean held = true;
         boolean hadEffect;
 
@@ -156,7 +158,33 @@ public final class SpellCasting {
 
     private static void end(ServerPlayer p, Active[] hands, int hand) {
         hands[hand] = null;
-        if (!isCasting(p, "lesser_ward")) WARD.remove(p.getUUID());
+        if (!isCastingWard(p)) WARD.remove(p.getUUID());
+    }
+
+    /** The ward spells: held to absorb spell damage from the front. */
+    public static final java.util.Set<String> WARDS = java.util.Set.of("lesser_ward", "steadfast_ward", "greater_ward");
+
+    /** Whether the player is holding up any ward. */
+    public static boolean isCastingWard(ServerPlayer p) {
+        Active[] hands = ACTIVE.get(p.getUUID());
+        if (hands == null) return false;
+        for (Active a : hands) {
+            if (a != null && WARDS.contains(a.spell.id)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Runs a spell's effect without hands or magicka: staves (charges pay for it). {@code side}: 1 right hand,
+     * -1 left hand. Returns the result like a normal cast; the caller pays and grants XP.
+     */
+    public static Spell.Result castExternal(ServerPlayer p, Spell spell, int tick, int side) {
+        castingSide = side;
+        try {
+            return spell.action.cast(p, spell, tick);
+        } finally {
+            castingSide = 1;
+        }
     }
 
     /** Called every tick for every server player. */
@@ -201,6 +229,16 @@ public final class SpellCasting {
 
     private static void tickConcentration(ServerPlayer p, Active[] hands, Active a, boolean dual) {
         Spell spell = dual ? a.spell.dualCast() : a.spell;
+        // Master concentration spells (Lightning Storm) charge for two seconds first; charging costs nothing.
+        if (a.charge < spell.chargeTicks) {
+            a.charge++;
+            if (a.charge % 3 == 0) {
+                MagicFx.send(p, MagicFx.CHARGE, spell.element, p.position(), p.position(), p.getId(),
+                        Math.min(100, a.charge * 100 / Math.max(1, spell.chargeTicks)));
+            }
+            if (a.charge % 10 == 0) MagicFx.sound(p, SpellSounds.get(SpellSounds.Slot.CHARGE), 1f, 0.8f + a.charge / (float) spell.chargeTicks);
+            return;
+        }
         float perTick = SpellMath.cost(p, a.spell) * (dual ? Spell.DUAL_COST : 1f) / 20f;
         if (!Vitals.consumeMagicka(p, perTick)) {
             end(p, hands, a.hand);
@@ -288,7 +326,7 @@ public final class SpellCasting {
     /** Absorbs incoming spell damage with an active ward. Returns the damage that gets through. */
     public static float absorbWithWard(ServerPlayer p, DamageSource source, float amount) {
         Float pool = WARD.get(p.getUUID());
-        if (pool == null || !isCasting(p, "lesser_ward") || !MagicDamage.isWardable(source)) return amount;
+        if (pool == null || !isCastingWard(p) || !MagicDamage.isWardable(source)) return amount;
         Vec3 from = source.getSourcePosition();
         if (from != null) {
             Vec3 dir = from.subtract(p.getEyePosition()).normalize();
@@ -307,7 +345,7 @@ public final class SpellCasting {
             Active[] hands = ACTIVE.get(p.getUUID());
             if (hands != null) {
                 for (int h = 0; h < 2; h++) {
-                    if (hands[h] != null && hands[h].spell.id.equals("lesser_ward")) hands[h] = null;
+                    if (hands[h] != null && WARDS.contains(hands[h].spell.id)) hands[h] = null;
                 }
             }
             WARD.remove(p.getUUID());

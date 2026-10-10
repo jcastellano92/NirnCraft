@@ -5,7 +5,8 @@ import net.minecraft.network.chat.Component;
 import java.util.Locale;
 
 /**
- * The 18 skills of Skyrim plus four "life" skills (Mining, Woodcutting, Fishing, Hunting).
+ * The 18 skills of Skyrim, Unarmed and Polearms, the Elder Scrolls classics Mysticism and Acrobatics, and the
+ * "life" skills (Mining, Woodcutting, Fishing, Hunting, Athletics, Riding, Cooking).
  *
  * <p>{@code useMult} converts a "use value" (e.g. Skyrim-scale damage dealt, gold value of a crafted item)
  * into skill XP. {@code improveMult}/{@code improveOffset} define the XP needed per level:
@@ -20,12 +21,16 @@ public enum Skill {
     HEAVY_ARMOR(Group.WARRIOR, 3.8f, 1f, 0f, "The Lord"),
     SMITHING(Group.WARRIOR, 0.25f, 1f, 300f, "The Steed"),
     UNARMED(Group.WARRIOR, 5.5f, 1f, 0f, "The Warrior"),
+    /** Spears, halberds and glaives (arsenal). */
+    POLEARM(Group.WARRIOR, 5.95f, 1f, 0f, "The Warrior"),
     // Mage (blue constellation)
     DESTRUCTION(Group.MAGE, 1.35f, 1f, 0f, "The Mage"),
     RESTORATION(Group.MAGE, 2.0f, 1f, 0f, "The Mage"),
     ALTERATION(Group.MAGE, 3.0f, 1f, 0f, "The Apprentice"),
     CONJURATION(Group.MAGE, 2.1f, 1f, 0f, "The Atronach"),
     ILLUSION(Group.MAGE, 4.6f, 1f, 0f, "The Ritual"),
+    /** Oblivion/Morrowind's sixth school: telekinesis, dispel, reflect, absorb, Mark & Recall, levitation. */
+    MYSTICISM(Group.MAGE, 2.2f, 1f, 0f, "The Apprentice"),
     ENCHANTING(Group.MAGE, 900f, 1f, 170f, "The Apprentice"),
     // Thief (green constellation)
     LIGHT_ARMOR(Group.THIEF, 4.0f, 1f, 0f, "The Lover"),
@@ -34,12 +39,18 @@ public enum Skill {
     PICKPOCKET(Group.THIEF, 8.1f, 1f, 250f, "The Thief"),
     SPEECH(Group.THIEF, 0.36f, 1f, 0f, "The Lover"),
     ALCHEMY(Group.THIEF, 0.75f, 1f, 65f, "The Tower"),
+    /** Jumping and falling (Oblivion/Morrowind). */
+    ACROBATICS(Group.THIEF, 1.0f, 1f, 0f, "The Shadow"),
     // Life (gold constellation) - Skycraft additions
     MINING(Group.LIFE, 1.0f, 1f, 0f, "The Serpent"),
     WOODCUTTING(Group.LIFE, 1.0f, 1f, 0f, "The Tower"),
     FISHING(Group.LIFE, 1.0f, 1f, 0f, "The Ritual"),
     HUNTING(Group.LIFE, 1.0f, 1f, 0f, "The Steed"),
-    ATHLETICS(Group.LIFE, 3.5f, 1f, 0f, "The Steed");
+    ATHLETICS(Group.LIFE, 3.5f, 1f, 0f, "The Steed"),
+    /** Horseback riding and mounted combat. */
+    RIDING(Group.LIFE, 1.0f, 1f, 0f, "The Steed"),
+    /** Cooking at the cooking pot. */
+    COOKING(Group.LIFE, 1.0f, 1f, 20f, "The Lady");
 
     public enum Group {
         WARRIOR(0xC8463C), MAGE(0x4A7BD8), THIEF(0x4CB050), LIFE(0xD8B04A);

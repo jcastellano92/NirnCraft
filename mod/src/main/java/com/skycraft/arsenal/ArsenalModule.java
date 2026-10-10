@@ -33,6 +33,7 @@ public final class ArsenalModule {
     public static void init(IEventBus modBus) {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ArsenalConfig.COMMON_SPEC, "skycraft-arsenal-common.toml");
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ArsenalConfig.CLIENT_SPEC, "skycraft-arsenal-client.toml");
+        ArsenalBlocks.BLOCKS.register(modBus);
         ArsenalItems.ITEMS.register(modBus);
         ArsenalEntities.ENTITIES.register(modBus);
         LeveledGear.FUNCTIONS.register(modBus);

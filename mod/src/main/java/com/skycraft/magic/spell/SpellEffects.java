@@ -55,21 +55,24 @@ public final class SpellEffects {
         Progression.addSkillXp(player, spell.school.skill, spell.cost * (spell.dual ? Spell.DUAL_COST : 1f));
     }
 
-    /** The cast sound of a spell (respects Quiet Casting). */
+    /** The cast sound of a spell (respects Quiet Casting). See {@link SpellSounds}. */
     public static void castSound(ServerPlayer p, Spell spell) {
-        Vec3 pos = p.getEyePosition();
-        switch (spell.element) {
-            case FIRE -> MagicFx.sound(p, pos, com.skycraft.audio.AudioSounds.spell("fire"), 0.9f, 0.95f + p.getRandom().nextFloat() * 0.1f);
-            case FROST -> MagicFx.sound(p, pos, com.skycraft.audio.AudioSounds.spell("frost"), 1f, 0.95f + p.getRandom().nextFloat() * 0.1f);
-            case SHOCK -> MagicFx.sound(p, pos, com.skycraft.audio.AudioSounds.spell("shock"), 0.9f, 0.95f + p.getRandom().nextFloat() * 0.1f);
-            case HOLY -> MagicFx.sound(p, pos, com.skycraft.audio.AudioSounds.spell("heal"), 1f, 1.0f);
-            case MIND -> MagicFx.sound(p, pos, com.skycraft.audio.AudioSounds.spell("illusion"), 1f, 1.0f);
-            case SOUL, CONJURE -> MagicFx.sound(p, pos, com.skycraft.audio.AudioSounds.spell("conjure"), 1f, 1.0f);
-            case NATURE -> MagicFx.sound(p, pos, com.skycraft.audio.AudioSounds.spell("alteration"), 0.9f, 0.9f);
-            default -> MagicFx.sound(p, pos, spell.school == School.RESTORATION ? com.skycraft.audio.AudioSounds.spell("heal")
-                    : spell.school == School.ILLUSION ? com.skycraft.audio.AudioSounds.spell("illusion")
-                    : spell.school == School.CONJURATION ? com.skycraft.audio.AudioSounds.spell("conjure") : com.skycraft.audio.AudioSounds.spell("alteration"), 1f, 1.0f);
-        }
+        SpellSounds.cast(p, spell);
+    }
+
+    /**
+     * Whether hostile creatures are around (within {@code radius}) or the player is in combat: self-buffs only train
+     * their skill when they are useful, so casting armor or Muffle into an empty room grants nothing.
+     */
+    public static boolean hostilesNear(ServerPlayer p, double radius) {
+        if (Vitals.inCombat(p)) return true;
+        return !p.level().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, p.getBoundingBox().inflate(radius),
+                m -> m.isAlive() && (m instanceof Enemy || m.getTarget() == p) && !Summons.isCompanion(m)).isEmpty();
+    }
+
+    /** Result of a self-buff: trains the skill only when not just refreshing an active buff and enemies are about. */
+    public static Spell.Result buffResult(ServerPlayer p, boolean wasActive) {
+        return !wasActive && hostilesNear(p, 16) ? Spell.Result.EFFECT : Spell.Result.CAST;
     }
 
     public static DamageSource damage(ServerPlayer caster, Element element, @Nullable Entity direct) {
@@ -192,17 +195,7 @@ public final class SpellEffects {
     }
 
     private static void impactSound(ServerLevel level, Vec3 pos, Element element, float volume) {
-        SoundEvent sound = switch (element) {
-            case FIRE -> com.skycraft.audio.AudioSounds.spell("impact_fire");
-            case FROST -> com.skycraft.audio.AudioSounds.spell("impact_frost");
-            case SHOCK -> com.skycraft.audio.AudioSounds.spell("impact_shock");
-            case HOLY -> SoundEvents.AMETHYST_BLOCK_BREAK;
-            case SOUL -> SoundEvents.SOUL_ESCAPE;
-            case MIND -> SoundEvents.ILLUSIONER_MIRROR_MOVE;
-            default -> SoundEvents.AMETHYST_CLUSTER_BREAK;
-        };
-        float pitch = 0.92f + level.random.nextFloat() * 0.16f;
-        MagicFx.worldSound(level, pos, sound, SoundSource.PLAYERS, volume, pitch);
+        SpellSounds.impact(level, pos, element, volume);
     }
 
     /** Firebolt, Ice Spike, Lightning Bolt, Incinerate, Icy Spear, Thunderbolt. */
@@ -336,20 +329,6 @@ public final class SpellEffects {
         return Spell.Result.EFFECT;
     }
 
-    public static Spell.Result lightningStorm(ServerPlayer p, Spell spell, int tick) {
-        ServerLevel level = p.serverLevel();
-        Targeting.Ray ray = Targeting.ray(p, 48, e -> Targeting.canHarm(p, e));
-        Vec3 target = ray.end();
-        Vec3 hand = Targeting.handPos(p);
-        MagicFx.sendNear(level, hand, 96, MagicFx.ARC, Element.SHOCK, hand, target, -1, 1);
-        MagicFx.sendNear(level, target, 128, MagicFx.LIGHTNING, Element.SHOCK, target, target, -1, 0);
-        MagicFx.burst(level, target, Element.SHOCK, spell.radius);
-        MagicFx.worldSound(level, target, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 3f, 0.9f);
-        MagicFx.worldSound(level, target, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 2f, 0.8f);
-        Vitals.markInCombat(p);
-        return areaDamage(p, spell, target, spell.radius, spell.magnitude, null, 0.6) > 0 ? Spell.Result.EFFECT : Spell.Result.CAST;
-    }
-
     // ================================================================== restoration
 
     /** Heals and, with Respite, restores stamina. Returns the amount healed. */
@@ -435,12 +414,13 @@ public final class SpellEffects {
         return Spell.Result.EFFECT;
     }
 
-    /** Lesser Ward: holding it raises a barrier that absorbs spell damage from the front. */
+    /** Lesser, Steadfast and Greater Ward: holding one raises a barrier that absorbs spell damage from the front. */
     public static Spell.Result ward(ServerPlayer p, Spell spell, int tick) {
         if (tick == 0) {
             SpellCasting.raiseWard(p, spell.magnitude * (1 + 0.25f * Perks.rank(p, "restoration.ward_absorb")));
             MagicFx.sound(p, SoundEvents.BEACON_POWER_SELECT, 0.8f, 1.6f);
         }
+        // Wards train Restoration by what they absorb (SpellCasting#absorbWithWard), never by just being held.
         if (tick % 3 == 0) MagicFx.send(p, MagicFx.WARD, Element.HOLY, p.getEyePosition(), p.getViewVector(1f), p.getId(), 0);
         return Spell.Result.CAST;
     }
@@ -465,6 +445,8 @@ public final class SpellEffects {
 
     /** Oakflesh..Ebonyflesh: armor bonus; Mage Armor multiplies it when no armor is worn. */
     public static Spell.Result flesh(ServerPlayer p, Spell spell, int tick) {
+        MobEffectInstance current = p.getEffect(FLESH.get(spell.id).get());
+        boolean wasActive = current != null && current.getDuration() > spell.duration / 2;
         for (java.util.function.Supplier<MobEffect> e : FLESH.values()) p.removeEffect(e.get());
         float points = spell.magnitude;
         int rank = Perks.rank(p, "alteration.mage_armor");
@@ -480,7 +462,7 @@ public final class SpellEffects {
         };
         MagicFx.sound(p, sound, spell.id.equals("ironflesh") ? 0.3f : 1f, 0.8f);
         MagicFx.sound(p, SoundEvents.EVOKER_CAST_SPELL, 0.6f, 1.2f);
-        return Spell.Result.EFFECT;
+        return buffResult(p, wasActive);
     }
 
     public static Spell.Result detectLife(ServerPlayer p, Spell spell, int tick) {
@@ -498,10 +480,12 @@ public final class SpellEffects {
     }
 
     public static Spell.Result waterbreathing(ServerPlayer p, Spell spell, int tick) {
+        // trains the skill only when you actually need the air
+        boolean useful = p.isUnderWater() || p.isInWater();
         p.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, SpellMath.alterationDuration(p, spell), 0, false, true, true));
         MagicFx.send(p, MagicFx.AURA, Element.FROST, p.position(), p.position(), p.getId(), 1);
         MagicFx.sound(p, SoundEvents.BUBBLE_COLUMN_UPWARDS_INSIDE, 1f, 1.2f);
-        return Spell.Result.EFFECT;
+        return useful ? Spell.Result.EFFECT : Spell.Result.CAST;
     }
 
     /** Transmute: one piece of iron (ingot, raw iron or ore) becomes gold. */

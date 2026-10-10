@@ -40,6 +40,7 @@ public class MagicMenuScreen extends Screen {
         ALTERATION(School.ALTERATION, School.ALTERATION.color),
         CONJURATION(School.CONJURATION, School.CONJURATION.color),
         ILLUSION(School.ILLUSION, School.ILLUSION.color),
+        MYSTICISM(School.MYSTICISM, School.MYSTICISM.color),
         SHOUTS(null, 0xBFD8F0),
         POWERS(null, 0xD0A060);
 
@@ -77,6 +78,14 @@ public class MagicMenuScreen extends Screen {
         super(Component.translatable("screen.skycraft.magic"));
     }
 
+    /** Opens the next magic menu on a school's tab. */
+    public static void preselect(School school) {
+        for (Tab t : Tab.values()) {
+            if (t.school == school) tab = t;
+        }
+        opened = true;
+    }
+
     private LocalPlayer player() {
         return Minecraft.getInstance().player;
     }
@@ -93,7 +102,8 @@ public class MagicMenuScreen extends Screen {
         detailX = listX + listW + 14;
         detailW = Math.max(110, width - detailX - 14);
         top = 36;
-        bottom = height - 28;
+        // the key hint wraps to two lines on narrow screens
+        bottom = height - (font.width(Component.translatable("magic.skycraft.menu_hint")) > width - 16 ? 38 : 28);
         unlockButton = addRenderableWidget(Button.builder(Component.translatable("magic.skycraft.unlock_word"), b -> {
             Entry e = detailEntry();
             if (e != null && e.kind == Kind.SHOUT) SkyNetwork.sendToServer(new MagicPackets.MenuAction(MagicPackets.MenuAction.UNLOCK_WORD, e.id));
@@ -166,6 +176,12 @@ public class MagicMenuScreen extends Screen {
             default -> {
                 for (Spell s : Spells.of(tab.school)) {
                     if (known.contains(s.id) || p.isCreative()) entries.add(spellEntry(s));
+                }
+                // spells made at a Spellmaking Altar, under their school
+                for (String id : known) {
+                    if (!com.skycraft.magic.spell.spellmaking.CustomSpells.isCustom(id)) continue;
+                    Spell s = Spells.byId(id);
+                    if (s != null && s.school == tab.school) entries.add(spellEntry(s));
                 }
             }
         }
@@ -330,6 +346,13 @@ public class MagicMenuScreen extends Screen {
                 if (cursor >= 0 && cursor < entries.size()) favorite(entries.get(cursor));
                 return true;
             }
+            case GLFW.GLFW_KEY_X, GLFW.GLFW_KEY_DELETE -> {
+                // forget a spell you made (tome spells are never forgotten)
+                if (cursor >= 0 && cursor < entries.size() && com.skycraft.magic.spell.spellmaking.CustomSpells.isCustom(entries.get(cursor).id)) {
+                    SkyNetwork.sendToServer(new MagicPackets.MenuAction(MagicPackets.MenuAction.FORGET_CUSTOM, entries.get(cursor).id));
+                }
+                return true;
+            }
             default -> {
                 return super.keyPressed(key, scan, mods);
             }
@@ -400,7 +423,11 @@ public class MagicMenuScreen extends Screen {
             boolean equipped = isEquipped(e) && e.kind != Kind.POWER;
             if (equipped) g.fill(listX, y + 3, listX + 4, y + 7, 0xFF000000 | e.color);
             int nameColor = equipped ? 0xFFFFFFFF : 0xFFD8D2C0;
-            g.drawString(font, e.name, listX + 8, y + 2, nameColor, false);
+            // leave room for the cost / word markers on the right
+            int nameW = listW - 8 - (e.kind == Kind.SPELL ? 46 : e.kind == Kind.SHOUT ? 40 : 14);
+            String name = e.name.getString();
+            if (font.width(name) > nameW) name = font.plainSubstrByWidth(name, Math.max(0, nameW - font.width("..."))) + "...";
+            g.drawString(font, name, listX + 8, y + 2, nameColor, false);
             if (favorites.contains(e.id)) g.drawString(font, "★", listX + listW - 10, y + 2, 0xFFE8C860, false);
             if (e.kind == Kind.SPELL) {
                 Spell s = Spells.byId(e.id);
@@ -443,7 +470,11 @@ public class MagicMenuScreen extends Screen {
         }
 
         Component hint = Component.translatable("magic.skycraft.menu_hint");
-        g.drawCenteredString(font, hint, width / 2, height - 16, 0xFF807A6A);
+        List<FormattedCharSequence> hintLines = font.split(hint, width - 16);
+        int hy = height - 8 - 10 * Math.min(2, hintLines.size());
+        for (int i = 0; i < Math.min(2, hintLines.size()); i++) {
+            g.drawCenteredString(font, hintLines.get(i), width / 2, hy + i * 10, 0xFF807A6A);
+        }
         super.render(g, mouseX, mouseY, partialTick);
     }
 
@@ -480,20 +511,19 @@ public class MagicMenuScreen extends Screen {
         y += 12;
         Component cast = Component.translatable(s.isConcentration() ? "magic.skycraft.cast_concentration"
                 : s.chargeTicks > 0 ? "magic.skycraft.cast_charged" : "magic.skycraft.cast_fire_and_forget");
-        g.drawString(font, cast, detailX, y, 0xFFA09A8A, false);
-        y += 12;
+        // wrapped: these lines are wider than the detail panel on small (Steam Deck) screens
+        y = paragraph(g, font, cast, y, 0xFFA09A8A) + 2;
         boolean inLeft = s.id.equals(MagicData.leftSpell(p));
         boolean inRight = s.id.equals(MagicData.selectedSpell(p));
         Component hands = Component.translatable(inLeft && inRight ? "magic.skycraft.equipped_both" : inLeft ? "magic.skycraft.equipped_left"
                 : inRight ? "magic.skycraft.equipped_right" : "magic.skycraft.equip_hint");
-        g.drawString(font, hands, detailX, y, inLeft || inRight ? 0xFF90D090 : 0xFF807A6A, false);
-        y += 12;
+        y = paragraph(g, font, hands, y, inLeft || inRight ? 0xFF90D090 : 0xFF807A6A) + 2;
         if (s.dualCastable) {
-            g.drawString(font, Component.translatable("magic.skycraft.dual_hint", Math.round(SpellMath.cost(p, s) * Spell.DUAL_COST)), detailX, y, 0xFF8A9AAA, false);
-            y += 12;
+            y = paragraph(g, font, Component.translatable("magic.skycraft.dual_hint", Math.round(SpellMath.cost(p, s) * Spell.DUAL_COST)), y, 0xFF8A9AAA) + 2;
         }
         y += 4;
-        paragraph(g, font, s.description(), y, 0xFFD8D2C0);
+        y = paragraph(g, font, s.description(), y, 0xFFD8D2C0);
+        if (s.isCustom()) paragraph(g, font, Component.translatable("magic.skycraft.made_spell_hint"), y + 6, 0xFF807A6A);
     }
 
     private void shoutDetails(GuiGraphics g, Font font, LocalPlayer p, @Nullable Shout s) {

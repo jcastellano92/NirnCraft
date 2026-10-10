@@ -12,4 +12,9 @@ public final class MagicClient {
     public static void openMagicMenu() {
         Minecraft.getInstance().setScreen(new MagicMenuScreen());
     }
+
+    /** The Spellmaking Altar at {@code pos} was used. */
+    public static void openSpellmaking(net.minecraft.core.BlockPos pos) {
+        Minecraft.getInstance().setScreen(new SpellmakingScreen(pos));
+    }
 }

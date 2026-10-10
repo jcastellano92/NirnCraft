@@ -36,6 +36,21 @@
         },
         {
           "type": "minecraft:item",
+          "name": "skycraft:spell_tome_fire_rune",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_frost_rune",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_lightning_rune",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
           "name": "skycraft:spell_tome_fireball",
           "weight": 5
         },
@@ -51,6 +66,21 @@
         },
         {
           "type": "minecraft:item",
+          "name": "skycraft:spell_tome_flame_cloak",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_frost_cloak",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_lightning_cloak",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
           "name": "skycraft:spell_tome_incinerate",
           "weight": 2
         },
@@ -62,6 +92,21 @@
         {
           "type": "minecraft:item",
           "name": "skycraft:spell_tome_thunderbolt",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_wall_of_flames",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_wall_of_frost",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_wall_of_storms",
           "weight": 2
         },
         {
@@ -91,8 +136,8 @@
         },
         {
           "type": "minecraft:item",
-          "name": "skycraft:spell_tome_turn_lesser_undead",
-          "weight": 20
+          "name": "skycraft:spell_tome_healing_hands",
+          "weight": 10
         },
         {
           "type": "minecraft:item",
@@ -101,7 +146,17 @@
         },
         {
           "type": "minecraft:item",
-          "name": "skycraft:spell_tome_heal_other",
+          "name": "skycraft:spell_tome_steadfast_ward",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_turn_lesser_undead",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_sun_fire",
           "weight": 10
         },
         {
@@ -111,12 +166,62 @@
         },
         {
           "type": "minecraft:item",
+          "name": "skycraft:spell_tome_heal_other",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_greater_ward",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_repel_lesser_undead",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_turn_undead",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_stendarrs_aura",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
           "name": "skycraft:spell_tome_grand_healing",
           "weight": 2
         },
         {
           "type": "minecraft:item",
+          "name": "skycraft:spell_tome_circle_of_protection",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_repel_undead",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_turn_greater_undead",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
           "name": "skycraft:spell_tome_guardian_circle",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_bane_of_the_undead",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_vampires_bane",
           "weight": 1
         },
         {
@@ -128,6 +233,11 @@
           "type": "minecraft:item",
           "name": "skycraft:spell_tome_oakflesh",
           "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_magelight",
+          "weight": 10
         },
         {
           "type": "minecraft:item",
@@ -156,6 +266,21 @@
         },
         {
           "type": "minecraft:item",
+          "name": "skycraft:spell_tome_detect_dead",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_equilibrium",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_ash_shell",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
           "name": "skycraft:spell_tome_ebonyflesh",
           "weight": 2
         },
@@ -163,6 +288,11 @@
           "type": "minecraft:item",
           "name": "skycraft:spell_tome_paralyze",
           "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_dragonhide",
+          "weight": 1
         },
         {
           "type": "minecraft:item",
@@ -177,6 +307,11 @@
         {
           "type": "minecraft:item",
           "name": "skycraft:spell_tome_bound_sword",
+          "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_bound_dagger",
           "weight": 20
         },
         {
@@ -201,6 +336,11 @@
         },
         {
           "type": "minecraft:item",
+          "name": "skycraft:spell_tome_reanimate_corpse",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
           "name": "skycraft:spell_tome_conjure_frost_atronach",
           "weight": 5
         },
@@ -211,13 +351,68 @@
         },
         {
           "type": "minecraft:item",
+          "name": "skycraft:spell_tome_revenant",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_flaming_familiar",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
           "name": "skycraft:spell_tome_conjure_storm_atronach",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_dread_zombie",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_conjure_seeker",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_banish_daedra",
           "weight": 2
         },
         {
           "type": "minecraft:item",
           "name": "skycraft:spell_tome_conjure_dremora_lord",
           "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_dead_thrall",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_flame_thrall",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_frost_thrall",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_storm_thrall",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_command_daedra",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_clairvoyance",
+          "weight": 20
         },
         {
           "type": "minecraft:item",
@@ -261,8 +456,18 @@
         },
         {
           "type": "minecraft:item",
+          "name": "skycraft:spell_tome_rout",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
           "name": "skycraft:spell_tome_invisibility",
           "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_call_to_arms",
+          "weight": 1
         },
         {
           "type": "minecraft:item",
@@ -272,6 +477,106 @@
         {
           "type": "minecraft:item",
           "name": "skycraft:spell_tome_mayhem",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_hysteria",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_telekinesis",
+          "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_detect_life_mysticism",
+          "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_soul_trap_mysticism",
+          "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_slowfall",
+          "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_dispel",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_water_walking",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_absorb_health",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_absorb_stamina",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_absorb_magicka",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_mark",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_divine_intervention",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_almsivi_intervention",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_recall",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_reflect_spell",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_spell_absorption",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_levitate",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_telekinetic_hurl",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_spell_turning",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:spell_tome_mass_dispel",
           "weight": 1
         }
       ]

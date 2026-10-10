@@ -183,6 +183,9 @@ public final class CombatHandler {
             mult += (float) (data.getSkill(Skill.ONE_HANDED) * scale) + 0.2f * Perks.rank(data, "one_handed.armsman");
         } else if (wc.skill == Skill.TWO_HANDED) {
             mult += (float) (data.getSkill(Skill.TWO_HANDED) * scale) + 0.2f * Perks.rank(data, "two_handed.barbarian");
+        } else if (wc.skill == Skill.POLEARM) {
+            // Polearms skill (skills/Polearms has the other perks)
+            mult += (float) (data.getSkill(Skill.POLEARM) * scale) + 0.2f * Perks.rank(data, "polearm.lancer");
         } else if (wc == WeaponClass.UNARMED) {
             int unSkill = data.getSkill(Skill.UNARMED);
             amount += unSkill * 0.12f;

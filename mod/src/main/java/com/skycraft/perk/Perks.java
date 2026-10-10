@@ -351,6 +351,63 @@ public final class Perks {
         p(s, "wind_walker", 0f, 1f, lv(100), "dodge_roll", "climber");
     }
 
+    static {
+        // ---------------------------------------------------------------- Polearms (custom)
+        Skill s = Skill.POLEARM;
+        p(s, "lancer", 0f, 0f, FIVE);
+        p(s, "long_reach", -0.5f, 0.25f, lv(25), "lancer");
+        p(s, "impale", 0.5f, 0.3f, lv(30, 60, 90), "lancer");
+        p(s, "set_against_charge", -0.65f, 0.5f, lv(40), "long_reach");
+        p(s, "sweeping_arc", 0.05f, 0.5f, lv(50), "lancer");
+        p(s, "phalanx", -0.45f, 0.75f, lv(60), "set_against_charge");
+        p(s, "pinning_strike", 0.55f, 0.65f, lv(70), "impale");
+        p(s, "skewer", 0.1f, 1f, lv(100), "pinning_strike", "phalanx");
+
+        // ---------------------------------------------------------------- Mysticism (custom school)
+        s = Skill.MYSTICISM;
+        tiers(s, "mysticism");
+        p(s, "dual_casting", -0.3f, 0.2f, lv(20), "novice_mysticism");
+        p(s, "far_sight", -0.6f, 0.3f, lv(30), "novice_mysticism");
+        p(s, "thaumaturge", 0.5f, 0.25f, lv(30, 60), "novice_mysticism");
+        p(s, "anchor", -0.7f, 0.55f, lv(40), "far_sight");
+        p(s, "mirror_mage", 0.6f, 0.5f, lv(50), "thaumaturge");
+        p(s, "featherweight", -0.5f, 0.78f, lv(50), "anchor");
+        p(s, "dispeller", 0.35f, 0.7f, lv(60), "mirror_mage");
+        p(s, "spellbinder", 0.6f, 0.88f, lv(80), "dispeller");
+        p(s, "mystic_mastery", 0.25f, 1f, lv(100), "spellbinder", "featherweight");
+
+        // ---------------------------------------------------------------- Acrobatics (custom)
+        s = Skill.ACROBATICS;
+        p(s, "leaper", 0f, 0f, FIVE);
+        p(s, "featherfall", -0.5f, 0.3f, lv(30, 60), "leaper");
+        p(s, "nimble", 0.5f, 0.3f, lv(30), "leaper");
+        p(s, "double_jump", 0.55f, 0.6f, lv(50), "nimble");
+        p(s, "tumble", -0.55f, 0.62f, lv(50), "featherfall");
+        p(s, "aerial_strike", 0.3f, 0.82f, lv(70), "double_jump");
+        p(s, "cat_fall", -0.2f, 1f, lv(100), "tumble", "aerial_strike");
+
+        // ---------------------------------------------------------------- Riding (custom)
+        s = Skill.RIDING;
+        p(s, "horseman", 0f, 0f, FIVE);
+        p(s, "stable_hand", -0.5f, 0.25f, lv(20), "horseman");
+        p(s, "mounted_combat", 0.5f, 0.3f, lv(30), "horseman");
+        p(s, "endurance_rider", -0.6f, 0.52f, lv(40), "stable_hand");
+        p(s, "horse_archer", 0.65f, 0.55f, lv(50), "mounted_combat");
+        p(s, "trample", 0.2f, 0.6f, lv(60), "mounted_combat");
+        p(s, "bond", -0.45f, 0.8f, lv(70), "endurance_rider");
+        p(s, "cavalry_charge", 0.1f, 1f, lv(100), "trample", "bond");
+
+        // ---------------------------------------------------------------- Cooking (custom)
+        s = Skill.COOKING;
+        p(s, "cook", 0f, 0f, FIVE);
+        p(s, "hearty_meals", -0.5f, 0.3f, lv(20), "cook");
+        p(s, "seasoned", 0.5f, 0.3f, lv(30), "cook");
+        p(s, "camp_cook", -0.6f, 0.58f, lv(40), "hearty_meals");
+        p(s, "preserver", 0.55f, 0.6f, lv(50), "seasoned");
+        p(s, "master_chef", -0.2f, 0.8f, lv(70), "camp_cook");
+        p(s, "gourmet", 0.15f, 1f, lv(100), "master_chef", "preserver");
+    }
+
     /** Debug helper used by the /skycraft perks command. */
     public static String describe(Perk perk) {
         return perk.id() + " " + Arrays.toString(perk.requiredLevels()) + " <- " + perk.parents();

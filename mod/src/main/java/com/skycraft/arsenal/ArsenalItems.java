@@ -7,6 +7,9 @@ import com.skycraft.arsenal.item.ArtifactBowItem;
 import com.skycraft.arsenal.item.ArtifactItem;
 import com.skycraft.arsenal.item.ArtifactMeleeItem;
 import com.skycraft.arsenal.item.ArtifactStaffItem;
+import com.skycraft.arsenal.item.EnchantedStaffItem;
+import com.skycraft.arsenal.item.PolearmItem;
+import com.skycraft.arsenal.item.PolearmKind;
 import com.skycraft.arsenal.item.SkyArrowItem;
 import com.skycraft.arsenal.item.SkyCrossbowItem;
 import com.skycraft.arsenal.item.SpellbreakerItem;
@@ -90,6 +93,37 @@ public final class ArsenalItems {
             () -> new SpellbreakerItem(new Item.Properties().durability(ArtifactItem.DURABILITY).rarity(Rarity.EPIC)));
 
     public static final List<RegistryObject<Item>> ARTIFACT_BOWS = List.of(AURIELS_BOW, NIGHTINGALE_BOW, ZEPHYR, BOW_OF_SHADOWS);
+
+    // ------------------------------------------------------------------ staff enchanting (Dragonborn)
+    /** A plain staff: bind a spell into it at a Staff Enchanter. */
+    public static final RegistryObject<Item> UNENCHANTED_STAFF = ITEMS.register("unenchanted_staff",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    /** A staff casting the spell in its NBT (see {@link EnchantedStaffItem}). */
+    public static final RegistryObject<Item> ENCHANTED_STAFF = ITEMS.register("enchanted_staff",
+            () -> new EnchantedStaffItem(new Item.Properties().rarity(Rarity.UNCOMMON)));
+
+    // ------------------------------------------------------------------ polearms (Polearms skill)
+    /** tier -> kind -> spear/halberd/glaive. */
+    public static final Map<SmithingTier, Map<PolearmKind, RegistryObject<Item>>> POLEARMS = new EnumMap<>(SmithingTier.class);
+
+    static {
+        for (SmithingTier tier : SmithingTier.values()) {
+            Map<PolearmKind, RegistryObject<Item>> byKind = new EnumMap<>(PolearmKind.class);
+            for (PolearmKind kind : PolearmKind.VALUES) {
+                byKind.put(kind, ITEMS.register(kind.itemId(tier), () -> {
+                    Item.Properties props = new Item.Properties().rarity(tier.rarity)
+                            .durability(Math.max(1, Math.round(tier.getUses() * kind.durabilityMult)));
+                    if (tier.fireResistant) props.fireResistant();
+                    return new PolearmItem(tier, kind, props);
+                }));
+            }
+            POLEARMS.put(tier, byKind);
+        }
+    }
+
+    public static Item polearm(SmithingTier tier, PolearmKind kind) {
+        return POLEARMS.get(tier).get(kind).get();
+    }
 
     private ArsenalItems() {}
 

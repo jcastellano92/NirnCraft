@@ -30,6 +30,14 @@ public final class MagicFx {
     public static final int AURA = 11;
     /** Staff and artifact visuals (arsenal): {@code extra} is one of {@code ArsenalPackets.Fx}'s kinds. */
     public static final int STAFF = 12;
+    /** A glowing glyph on the ground (runes, Mark): {@code a} = center, {@code extra} = radius * 10. */
+    public static final int RUNE = 13;
+    /** A column of elemental energy (walls): {@code extra} = height * 10. */
+    public static final int PILLAR = 14;
+    /** A dotted trail of light from {@code a} to {@code b} (Clairvoyance). */
+    public static final int PATH = 15;
+    /** Slow Time: a shimmering field around {@code a}, {@code extra} = radius. */
+    public static final int TIME_FIELD = 16;
 
     private MagicFx() {}
 

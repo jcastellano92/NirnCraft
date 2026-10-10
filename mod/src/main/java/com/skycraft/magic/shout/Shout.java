@@ -8,7 +8,13 @@ import java.util.Locale;
 
 /**
  * Dragon Shouts (Thu'um): three Words of Power each, in dragon language with their translations, and the voice
- * cooldown (seconds) for shouting one, two or all three words. {@code wallWeight} is how often a Word Wall teaches it.
+ * cooldown (seconds) for shouting one, two or all three words. {@code wallWeight} is how often a Word Wall teaches it
+ * (0 = never from a random wall: quest/story shouts are only taught by walls that name them).
+ *
+ * <p><b>Canonical shout ids</b> ({@link #id()}, documented in docs/FEATURES.md) are the lower-case enum names, e.g.
+ * {@code unrelenting_force}. They are saved in player data and on Word Walls, so they never change. {@link #byId}
+ * also accepts the dragon words ({@code fus_ro_dah}, {@code fus}) and returns null for anything unknown, so callers
+ * (word walls, quests, commands) must treat unknown ids gracefully.</p>
  */
 public enum Shout {
     UNRELENTING_FORCE(new String[]{"FUS", "RO", "DAH"}, new int[]{20, 25, 45}, 30),
@@ -25,7 +31,18 @@ public enum Shout {
     KYNES_PEACE(new String[]{"KAAN", "DREM", "OV"}, new int[]{40, 50, 60}, 6),
     ANIMAL_ALLEGIANCE(new String[]{"RAAN", "MIR", "TAH"}, new int[]{50, 60, 70}, 6),
     STORM_CALL(new String[]{"STRUN", "BAH", "QO"}, new int[]{300, 480, 600}, 4),
-    DRAGONREND(new String[]{"JOOR", "ZAH", "FRUL"}, new int[]{10, 12, 15}, 3);
+    DRAGONREND(new String[]{"JOOR", "ZAH", "FRUL"}, new int[]{10, 12, 15}, 3),
+    ICE_FORM(new String[]{"IIZ", "SLEN", "NUS"}, new int[]{60, 90, 120}, 8),
+    THROW_VOICE(new String[]{"ZUL", "MEY", "GUT"}, new int[]{30, 15, 5}, 6),
+    DISMAY(new String[]{"FAAS", "RU", "MAAR"}, new int[]{40, 45, 50}, 8),
+    CALL_DRAGON(new String[]{"OD", "AH", "VIING"}, new int[]{5, 5, 300}, 2),
+    CALL_OF_VALOR(new String[]{"HUN", "KAAL", "ZOOR"}, new int[]{180, 180, 180}, 2),
+    CYCLONE(new String[]{"VEN", "GAAR", "NOS"}, new int[]{30, 45, 60}, 6),
+    DRAIN_VITALITY(new String[]{"GAAN", "LAH", "HAAS"}, new int[]{30, 60, 90}, 6),
+    SOUL_TEAR(new String[]{"RII", "VAAZ", "ZOL"}, new int[]{5, 5, 90}, 3),
+    BEND_WILL(new String[]{"GOL", "HAH", "DOV"}, new int[]{10, 90, 120}, 3),
+    DRAGON_ASPECT(new String[]{"MUL", "QAH", "DIIV"}, new int[]{5, 5, 5}, 3),
+    BATTLE_FURY(new String[]{"MID", "VUR", "SHAAN"}, new int[]{20, 30, 40}, 6);
 
     public static final Shout[] VALUES = values();
 
@@ -80,12 +97,31 @@ public enum Shout {
         return Component.translatable("shout.skycraft." + id() + ".desc");
     }
 
+    /**
+     * The shout with this canonical id. Also accepts, case-insensitively, the three words ({@code fus_ro_dah},
+     * {@code "FUS RO DAH"}) or the first word ({@code fus}). Null for null, blank or unknown ids.
+     */
     @Nullable
-    public static Shout byId(String id) {
+    public static Shout byId(@Nullable String id) {
+        if (id == null || id.isBlank()) return null;
         for (Shout s : VALUES) {
             if (s.id().equals(id)) return s;
         }
+        String norm = id.trim().toLowerCase(Locale.ROOT).replace(' ', '_').replace('-', '_');
+        if (norm.startsWith("skycraft:")) norm = norm.substring("skycraft:".length());
+        for (Shout s : VALUES) {
+            if (s.id().equals(norm)) return s;
+            String words = (s.words[0] + "_" + s.words[1] + "_" + s.words[2]).toLowerCase(Locale.ROOT);
+            if (words.equals(norm) || s.words[0].toLowerCase(Locale.ROOT).equals(norm)) return s;
+        }
         return null;
+    }
+
+    /** Every canonical shout id, in order. */
+    public static java.util.List<String> ids() {
+        java.util.List<String> out = new java.util.ArrayList<>();
+        for (Shout s : VALUES) out.add(s.id());
+        return out;
     }
 
     public static Shout byOrdinal(int i) {

@@ -20,11 +20,19 @@ public class WordWallBlockEntity extends BlockEntity {
         super(MagicRegistry.WORD_WALL_BE.get(), pos, state);
     }
 
+    /**
+     * The shout this wall teaches. A wall assigned an id this version doesn't know (a shout from a newer content
+     * list, a typo in a structure) keeps that id for later but teaches a random shout meanwhile.
+     */
     public Shout shout(RandomSource random) {
         Shout s = Shout.byId(shout);
         if (s == null) {
-            s = WordWalls.randomShout(random);
-            setShout(s);
+            if (shout.isEmpty()) {
+                s = WordWalls.randomShout(random);
+                setShout(s);
+            } else {
+                s = WordWalls.fallbackFor(shout);
+            }
         }
         return s;
     }
@@ -32,6 +40,22 @@ public class WordWallBlockEntity extends BlockEntity {
     public void setShout(Shout s) {
         this.shout = s.id();
         setChanged();
+    }
+
+    /**
+     * Assigns a shout by canonical id (see {@link Shout#byId}; dragon words like {@code fus_ro_dah} work too).
+     * Unknown ids are stored as given and handled gracefully. Returns true if the id is a known shout.
+     */
+    public boolean setShoutId(String id) {
+        Shout s = Shout.byId(id);
+        this.shout = s != null ? s.id() : id == null ? "" : id.trim();
+        setChanged();
+        return s != null;
+    }
+
+    /** The raw id stored on this wall ("" until first needed). */
+    public String shoutId() {
+        return shout;
     }
 
     @Override

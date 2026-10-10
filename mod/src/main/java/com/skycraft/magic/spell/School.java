@@ -5,13 +5,14 @@ import net.minecraft.network.chat.Component;
 
 import java.util.Locale;
 
-/** The five schools of magic. Each trains its own skill and has its own Novice..Master cost perks. */
+/** The six schools of magic (Skyrim's five plus Mysticism). Each trains its own skill and has its own Novice..Master cost perks. */
 public enum School {
     DESTRUCTION(Skill.DESTRUCTION, 0xE0603A),
     RESTORATION(Skill.RESTORATION, 0xE8C860),
     ALTERATION(Skill.ALTERATION, 0x58C08A),
     CONJURATION(Skill.CONJURATION, 0xA060E0),
-    ILLUSION(Skill.ILLUSION, 0x60A8F0);
+    ILLUSION(Skill.ILLUSION, 0x60A8F0),
+    MYSTICISM(Skill.MYSTICISM, 0x5CD6C8);
 
     public static final School[] VALUES = values();
 

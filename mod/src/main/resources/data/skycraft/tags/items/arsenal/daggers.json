@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "skycraft:mehrunes_razor"
+    "skycraft:mehrunes_razor",
+    "skycraft:bound_dagger"
   ]
 }

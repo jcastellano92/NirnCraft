@@ -67,6 +67,8 @@ import java.util.UUID;
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class MagicEvents {
     private static final int DAY = 24000;
+    /** Set while a reflected spell is being applied, so two reflectors can't bounce a spell forever. */
+    private static final ThreadLocal<Boolean> REFLECTING = ThreadLocal.withInitial(() -> false);
 
     private MagicEvents() {}
 
@@ -77,7 +79,9 @@ public final class MagicEvents {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
         SpellCasting.tick(p);
         Shouting.tick(p);
+        com.skycraft.magic.spell.Mysticism.tick(p);
         if (p.tickCount % 2 == 0) Candlelight.tick(p);
+        if (p.tickCount % 20 == 0) com.skycraft.magic.spell.AlterationSpells.tickMagelight(p);
         // Bound weapons can't be stored in containers or bundles (the open container reports changes, see onOpen).
         if (BOUND_IN_CONTAINER.remove(p.getUUID())) BoundWeapons.purge(p.containerMenu);
         if (p.tickCount % 20 == 0) BoundWeapons.purgeInventoryBundles(p);
@@ -128,13 +132,33 @@ public final class MagicEvents {
     public static void onServerTick(TickEvent.ServerTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-        if (server != null) MagicScheduler.tick(server);
+        if (server != null) {
+            MagicScheduler.tick(server);
+            com.skycraft.magic.shout.SlowTime.tick(server);
+            com.skycraft.magic.spell.Mysticism.serverTick(server);
+        }
     }
 
     @SubscribeEvent
     public static void onLivingTick(LivingEvent.LivingTickEvent event) {
         LivingEntity e = event.getEntity();
-        if (e.level().isClientSide || !(e instanceof Mob mob)) return;
+        if (e.level().isClientSide) return;
+        // Slow Time: creatures in the field skip most of their ticks.
+        if (com.skycraft.magic.shout.SlowTime.skipsTick(e)) {
+            event.setCanceled(true);
+            return;
+        }
+        if (e.tickCount % 10 == 0 && e.level() instanceof net.minecraft.server.level.ServerLevel sl) {
+            if (e.hasEffect(MagicRegistry.ASH_SHELL.get())) {
+                sl.sendParticles(net.minecraft.core.particles.ParticleTypes.ASH, e.getX(), e.getY() + e.getBbHeight() / 2, e.getZ(), 8,
+                        e.getBbWidth() / 2, e.getBbHeight() / 2, e.getBbWidth() / 2, 0.0);
+            } else if (e.hasEffect(MagicRegistry.ICE_FORM.get())) {
+                e.setTicksFrozen(Math.max(e.getTicksFrozen(), e.getTicksRequiredToFreeze() + 10));
+                sl.sendParticles(net.minecraft.core.particles.ParticleTypes.SNOWFLAKE, e.getX(), e.getY() + e.getBbHeight() / 2, e.getZ(), 4,
+                        e.getBbWidth() / 2, e.getBbHeight() / 2, e.getBbWidth() / 2, 0.0);
+            }
+        }
+        if (!(e instanceof Mob mob)) return;
         if (mob.tickCount % 10 == 0 && (Summons.isSummon(mob) || Summons.isAlly(mob))) {
             Summons.tick(mob);
             if (!mob.isAlive()) return;
@@ -176,6 +200,11 @@ public final class MagicEvents {
             event.setCanceled(true);
             return;
         }
+        // Ash Shell: encased in ash, nothing gets through.
+        if (victim.hasEffect(MagicRegistry.ASH_SHELL.get()) && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+            event.setCanceled(true);
+            return;
+        }
         if (attacker instanceof LivingEntity living && living != victim && living.hasEffect(MagicRegistry.ETHEREAL.get())) {
             event.setCanceled(true);
             return;
@@ -198,6 +227,46 @@ public final class MagicEvents {
         if (victim.level().isClientSide) return;
         DamageSource source = event.getSource();
         float amount = event.getAmount();
+
+        // Reflect Spell / Spell Absorption (Mysticism): a chance to send the spell back or drink it as magicka.
+        if (amount > 0 && !REFLECTING.get() && MagicDamage.isWardable(source)) {
+            MobEffectInstance reflect = victim.getEffect(MagicRegistry.REFLECT_SPELL.get());
+            Entity caster = source.getEntity();
+            if (reflect != null && caster instanceof LivingEntity back && back != victim && back.isAlive()
+                    && victim.getRandom().nextInt(100) < com.skycraft.magic.spell.Mysticism.chanceOf(reflect)) {
+                REFLECTING.set(true);
+                try {
+                    back.invulnerableTime = 0;
+                    back.hurt(MagicDamage.source(victim.level(), MagicDamage.SPELL, null, victim), amount);
+                } finally {
+                    REFLECTING.set(false);
+                }
+                MagicFx.send(victim, MagicFx.WARD, Element.ARCANE, victim.getEyePosition(), victim.getViewVector(1f), victim.getId(), 1);
+                com.skycraft.magic.spell.SpellSounds.world((net.minecraft.server.level.ServerLevel) victim.level(), victim.position(),
+                        com.skycraft.magic.spell.SpellSounds.Slot.REFLECT, 1f, 1.3f);
+                if (victim instanceof ServerPlayer rp) Notifier.message(rp, Component.translatable("message.skycraft.spell_reflected"));
+                event.setCanceled(true);
+                return;
+            }
+            MobEffectInstance absorb = victim.getEffect(MagicRegistry.SPELL_ABSORPTION.get());
+            if (absorb != null && victim instanceof ServerPlayer ap
+                    && (MagicDamage.isOurSpell(source) || source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC)
+                    || Perks.has(ap, "mysticism.spellbinder"))
+                    && ap.getRandom().nextInt(100) < com.skycraft.magic.spell.Mysticism.chanceOf(absorb)) {
+                PlayerData data = SkyData.get(ap);
+                data.setMagicka(Math.min(data.maxMagicka(), data.getMagicka() + amount * CombatHandler.SKYRIM_SCALE));
+                MagicFx.send(ap, MagicFx.AURA, Element.ARCANE, ap.position(), ap.position(), ap.getId(), 1);
+                com.skycraft.magic.spell.SpellSounds.play(ap, com.skycraft.magic.spell.SpellSounds.Slot.ABSORB, 1f, 1.5f);
+                event.setCanceled(true);
+                return;
+            }
+        }
+        // Dragonhide: 80% of physical damage is ignored. Dragon Aspect: a quarter of all damage.
+        if (amount > 0 && victim.hasEffect(MagicRegistry.DRAGONHIDE.get()) && !MagicDamage.isWardable(source)
+                && !source.is(DamageTypeTags.BYPASSES_ARMOR)) {
+            amount *= 0.2f;
+        }
+        if (amount > 0 && victim.hasEffect(MagicRegistry.DRAGON_ASPECT.get())) amount *= 0.75f;
 
         if (victim instanceof ServerPlayer p) {
             amount = SpellCasting.absorbWithWard(p, source, amount);
@@ -248,6 +317,7 @@ public final class MagicEvents {
         if (attacker instanceof Mob summon && Summons.isSummon(summon)) {
             String kind = summon.getPersistentData().getString(Summons.KIND);
             switch (kind) {
+                case "flaming_familiar" -> victim.setSecondsOnFire(4);
                 case "frost_atronach" -> {
                     victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1));
                     victim.setTicksFrozen(Math.min(victim.getTicksRequiredToFreeze() - 2, victim.getTicksFrozen() + 40));
@@ -305,7 +375,9 @@ public final class MagicEvents {
         LivingEntity dead = event.getEntity();
         if (dead.level().isClientSide) return;
 
-        if (dead.getType().is(MagicRegistry.DRAGONS)) DragonSouls.onDragonDeath(dead);
+        // A dragon you called (Call Dragon, Bend Will) gives no soul.
+        if (dead.getType().is(MagicRegistry.DRAGONS) && !Summons.isCompanion(dead)) DragonSouls.onDragonDeath(dead);
+        com.skycraft.magic.shout.ShoutEffects.onDeath(dead);
 
         if (dead.hasEffect(MagicRegistry.SOUL_TRAP.get()) && dead.getPersistentData().hasUUID(SpellEffects.SOUL_TRAPPER) && dead.getServer() != null) {
             ServerPlayer trapper = dead.getServer().getPlayerList().getPlayer(dead.getPersistentData().getUUID(SpellEffects.SOUL_TRAPPER));
@@ -324,6 +396,7 @@ public final class MagicEvents {
         if (dead instanceof ServerPlayer p) {
             Candlelight.end(p);
             SpellCasting.stop(p);
+            com.skycraft.magic.spell.Mysticism.forget(p);
             Summons.summonsOf(p).forEach(Summons::dismiss);
         }
     }
@@ -356,13 +429,21 @@ public final class MagicEvents {
 
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer p) Candlelight.remove(p);
+        if (event.getEntity() instanceof ServerPlayer p) {
+            Candlelight.remove(p);
+            com.skycraft.magic.spell.AlterationSpells.removeMagelight(p);
+            com.skycraft.magic.spell.Mysticism.onLogin(p);
+        }
     }
 
     @SubscribeEvent
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer p)) return;
         Candlelight.remove(p);
+        com.skycraft.magic.spell.AlterationSpells.removeMagelight(p);
+        com.skycraft.magic.spell.Mysticism.forget(p);
+        com.skycraft.magic.spell.DestructionSpells.forget(p.getUUID());
+        Illusion.forget(p.getUUID());
         SpellCasting.forget(p.getUUID());
         Shouting.forget(p.getUUID());
         BOUND_IN_CONTAINER.remove(p.getUUID());
@@ -379,7 +460,12 @@ public final class MagicEvents {
 
     @SubscribeEvent
     public static void onServerStopping(ServerStoppingEvent event) {
-        for (ServerPlayer p : event.getServer().getPlayerList().getPlayers()) Candlelight.remove(p);
+        for (ServerPlayer p : event.getServer().getPlayerList().getPlayers()) {
+            Candlelight.remove(p);
+            com.skycraft.magic.spell.AlterationSpells.removeMagelight(p);
+        }
+        com.skycraft.magic.spell.Mysticism.clear();
+        com.skycraft.magic.shout.SlowTime.clear();
         MagicScheduler.clear();
         SpellCasting.clear();
         BOUND_IN_CONTAINER.clear();

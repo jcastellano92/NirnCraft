@@ -26,6 +26,47 @@ public final class MagicPackets {
         SkyNetwork.register(MenuAction.class, NetworkDirection.PLAY_TO_SERVER, MenuAction::encode, MenuAction::decode, MenuAction::handle);
         SkyNetwork.register(Fx.class, NetworkDirection.PLAY_TO_CLIENT, Fx::encode, Fx::decode, Fx::handle);
         SkyNetwork.register(ShoutFx.class, NetworkDirection.PLAY_TO_CLIENT, ShoutFx::encode, ShoutFx::decode, ShoutFx::handle);
+        SkyNetwork.register(MakeSpell.class, NetworkDirection.PLAY_TO_SERVER, MakeSpell::encode, MakeSpell::decode, MakeSpell::handle);
+        SkyNetwork.register(StaffEnchant.class, NetworkDirection.PLAY_TO_SERVER, StaffEnchant::encode, StaffEnchant::decode, StaffEnchant::handle);
+        SkyNetwork.register(com.skycraft.skills.Acrobatics.DoubleJump.class, NetworkDirection.PLAY_TO_SERVER,
+                com.skycraft.skills.Acrobatics.DoubleJump::encode, com.skycraft.skills.Acrobatics.DoubleJump::decode,
+                com.skycraft.skills.Acrobatics.DoubleJump::handle);
+    }
+
+    /** Spellmaking Altar: make the spell encoded in {@code id} (see {@link com.skycraft.magic.spell.spellmaking.CustomSpells}). */
+    public record MakeSpell(net.minecraft.core.BlockPos pos, String id) {
+        static void encode(MakeSpell m, FriendlyByteBuf buf) {
+            buf.writeBlockPos(m.pos);
+            buf.writeUtf(m.id, 256);
+        }
+
+        static MakeSpell decode(FriendlyByteBuf buf) {
+            return new MakeSpell(buf.readBlockPos(), buf.readUtf(256));
+        }
+
+        static void handle(MakeSpell m, Supplier<NetworkEvent.Context> ctx) {
+            ServerPlayer player = ctx.get().getSender();
+            if (player != null) com.skycraft.magic.spell.spellmaking.SpellmakingAltarBlock.make(player, m.pos, m.id);
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
+    /** Staff Enchanter: bind a known spell into the unenchanted staff in the player's inventory. */
+    public record StaffEnchant(net.minecraft.core.BlockPos pos, String spellId) {
+        static void encode(StaffEnchant m, FriendlyByteBuf buf) {
+            buf.writeBlockPos(m.pos);
+            buf.writeUtf(m.spellId, 256);
+        }
+
+        static StaffEnchant decode(FriendlyByteBuf buf) {
+            return new StaffEnchant(buf.readBlockPos(), buf.readUtf(256));
+        }
+
+        static void handle(StaffEnchant m, Supplier<NetworkEvent.Context> ctx) {
+            ServerPlayer player = ctx.get().getSender();
+            if (player != null) com.skycraft.arsenal.StaffEnchanting.enchant(player, m.pos, m.spellId);
+            ctx.get().setPacketHandled(true);
+        }
     }
 
     // ------------------------------------------------------------------ C2S
@@ -81,14 +122,16 @@ public final class MagicPackets {
         public static final int SELECT_LEFT = 4;
         /** Equip a power to the Voice slot ({@link #SELECT_SHOUT} is for shouts). */
         public static final int SELECT_POWER = 5;
+        /** Forget a spell made at a Spellmaking Altar. */
+        public static final int FORGET_CUSTOM = 6;
 
         static void encode(MenuAction m, FriendlyByteBuf buf) {
             buf.writeVarInt(m.action);
-            buf.writeUtf(m.id, 64);
+            buf.writeUtf(m.id, 256);
         }
 
         static MenuAction decode(FriendlyByteBuf buf) {
-            return new MenuAction(buf.readVarInt(), buf.readUtf(64));
+            return new MenuAction(buf.readVarInt(), buf.readUtf(256));
         }
 
         static void handle(MenuAction m, Supplier<NetworkEvent.Context> ctx) {
@@ -116,6 +159,7 @@ public final class MagicPackets {
                     case SELECT_POWER -> {
                         if (MagicData.hasPower(player, m.id)) MagicData.setSelectedVoice(player, m.id);
                     }
+                    case FORGET_CUSTOM -> com.skycraft.magic.spell.spellmaking.SpellmakingAltarBlock.forget(player, m.id);
                     case UNLOCK_WORD -> {
                         Shout shout = Shout.byId(m.id);
                         if (shout != null) Shouting.unlockWord(player, shout);

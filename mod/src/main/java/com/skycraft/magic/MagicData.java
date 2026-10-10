@@ -73,6 +73,27 @@ public final class MagicData {
         return true;
     }
 
+    /** Removes a spell (made spells can be forgotten); it leaves the hands and favorites too. */
+    public static void forget(Player player, String spellId) {
+        CompoundTag tag = tag(player);
+        ListTag list = tag.getList("spells", Tag.TAG_STRING);
+        for (int i = list.size() - 1; i >= 0; i--) {
+            if (list.getString(i).equals(spellId)) list.remove(i);
+        }
+        tag.put("spells", list);
+        if (spellId.equals(tag.getString("right_spell")) || spellId.equals(tag.getString("selected_spell"))) {
+            tag.putString("right_spell", "");
+            tag.putString("selected_spell", "");
+        }
+        if (spellId.equals(tag.getString("left_spell"))) tag.putString("left_spell", "");
+        ListTag favs = tag.getList("favorites", Tag.TAG_STRING);
+        for (int i = favs.size() - 1; i >= 0; i--) {
+            if (favs.getString(i).equals(spellId)) favs.remove(i);
+        }
+        tag.put("favorites", favs);
+        dirty(player);
+    }
+
     /** The right-hand spell ({@code right_spell}; {@code selected_spell} is kept as an alias for older data). */
     public static String selectedSpell(Player player) {
         CompoundTag tag = tag(player);

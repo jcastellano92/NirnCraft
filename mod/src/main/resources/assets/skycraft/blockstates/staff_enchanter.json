@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "skycraft:block/staff_enchanter"
+    },
+    "facing=east": {
+      "model": "skycraft:block/staff_enchanter",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "skycraft:block/staff_enchanter",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "skycraft:block/staff_enchanter",
+      "y": 270
+    }
+  }
+}

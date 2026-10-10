@@ -11,7 +11,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 
-/** Server-side cooking. Like Skyrim, cooking trains no skill. */
+/** Server-side cooking. Dishes train the Cooking skill and carry the cook's quality ({@link com.skycraft.skills.Cookery}). */
 public final class Cooking {
     /** Most dishes made with one click (shift-click). */
     public static final int MAX_BATCH = 16;
@@ -33,8 +33,15 @@ public final class Cooking {
                     for (int i = 0; i < cost.count() && !rest.isEmpty(); i++) give(player, rest.copy());
                 }
             }
-            give(player, recipe.resultStack());
+            give(player, com.skycraft.skills.Cookery.season(player, recipe.resultStack()));
             made++;
+        }
+        // Cooking skill (skills module): XP per dish, and Seasoned's extra portions.
+        int ingredients = 0;
+        for (Cost cost : recipe.costs()) ingredients += cost.count();
+        com.skycraft.skills.Cookery.onCooked(player, ingredients, made);
+        for (int i = com.skycraft.skills.Cookery.bonusPortions(player, made); i > 0; i--) {
+            give(player, com.skycraft.skills.Cookery.season(player, recipe.resultStack()));
         }
         if (made == 0) {
             Notifier.message(player, Component.translatable("message.skycraft.survival.missing_ingredients"));

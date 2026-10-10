@@ -58,10 +58,46 @@ public final class ClientAutotest {
 
     private ClientAutotest() {}
 
+    /**
+     * Optional {@code -Dskycraft.autotest.world=<name>}: from the title screen, create that singleplayer world afresh
+     * (creative, cheats on; an old one of that name is deleted) so the screen walk-through runs without a person. CI
+     * leaves it unset and only checks resource loading.
+     */
+    private static final String AUTO_WORLD = System.getProperty("skycraft.autotest.world", "");
+    private static boolean autoWorldStarted;
+
+    private static void openAutoWorld(Minecraft mc) {
+        autoWorldStarted = true;
+        try {
+            // Always a fresh world: loading a modded world asks to confirm its experimental settings, which would wait
+            // for a person.
+            if (mc.getLevelSource().levelExists(AUTO_WORLD)) {
+                try (var access = mc.getLevelSource().createAccess(AUTO_WORLD)) {
+                    access.deleteLevel();
+                }
+            }
+            Skycraft.LOGGER.info("Autotest: creating creative world {}", AUTO_WORLD);
+            net.minecraft.world.level.LevelSettings settings = new net.minecraft.world.level.LevelSettings(AUTO_WORLD,
+                    net.minecraft.world.level.GameType.CREATIVE, false, net.minecraft.world.Difficulty.PEACEFUL, true,
+                    new net.minecraft.world.level.GameRules(), net.minecraft.world.level.WorldDataConfiguration.DEFAULT);
+            mc.createWorldOpenFlows().createFreshLevel(AUTO_WORLD, settings, new net.minecraft.world.level.levelgen.WorldOptions(1234L, true, false),
+                    access -> access.registryOrThrow(net.minecraft.core.registries.Registries.WORLD_PRESET)
+                            .getHolderOrThrow(net.minecraft.world.level.levelgen.presets.WorldPresets.NORMAL).value().createWorldDimensions());
+        } catch (Exception e) {
+            Skycraft.LOGGER.error("Autotest: could not open world {}", AUTO_WORLD, e);
+        }
+    }
+
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (!ENABLED || event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null && !AUTO_WORLD.isEmpty() && !autoWorldStarted
+                && (mc.screen instanceof net.minecraft.client.gui.screens.TitleScreen
+                || mc.screen instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
+            openAutoWorld(mc);
+            return;
+        }
         if (mc.level == null || mc.player == null) return;
 
         tick++;
@@ -151,7 +187,36 @@ public final class ClientAutotest {
             case 15 -> {
                 captureAndSave(mc, "08_wildlife_entities");
             }
+            // magic & skills workstream: the new constellations, the Mysticism tab, spellmaking and staff enchanting
             case 16 -> {
+                SkillsScreen.preselect(com.skycraft.core.Skill.MYSTICISM);
+                mc.setScreen(new SkillsScreen());
+            }
+            case 17 -> {
+                captureAndSave(mc, "09_skills_mysticism");
+                mc.setScreen(null);
+            }
+            case 18 -> mc.setScreen(new com.skycraft.magic.client.SpellmakingScreen(mc.player.blockPosition()).withEffects(
+                    com.skycraft.magic.spell.spellmaking.SpellEffectType.FIRE_DAMAGE, com.skycraft.magic.spell.spellmaking.SpellEffectType.SOUL_TRAP,
+                    com.skycraft.magic.spell.spellmaking.SpellEffectType.TURN_UNDEAD, com.skycraft.magic.spell.spellmaking.SpellEffectType.SHIELD));
+            case 19 -> {
+                captureAndSave(mc, "10_spellmaking_screen");
+                mc.setScreen(null);
+            }
+            case 20 -> mc.setScreen(new com.skycraft.arsenal.client.StaffEnchanterScreen(mc.player.blockPosition()));
+            case 21 -> {
+                captureAndSave(mc, "11_staff_enchanter_screen");
+                mc.setScreen(null);
+            }
+            case 22 -> {
+                com.skycraft.magic.client.MagicMenuScreen.preselect(com.skycraft.magic.spell.School.MYSTICISM);
+                mc.setScreen(new MagicMenuScreen());
+            }
+            case 23 -> {
+                captureAndSave(mc, "12_magic_mysticism");
+                mc.setScreen(null);
+            }
+            case 24 -> {
                 Skycraft.LOGGER.info("=== Skycraft Autotest: Completed successfully! Closing client. ===");
                 mc.stop();
             }

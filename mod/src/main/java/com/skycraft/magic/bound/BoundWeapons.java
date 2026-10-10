@@ -50,6 +50,11 @@ public final class BoundWeapons {
         return give(p, spell, MagicRegistry.BOUND_SWORD.get());
     }
 
+    /** Bound Dagger (Dragonborn). */
+    public static Spell.Result dagger(ServerPlayer p, Spell spell, int tick) {
+        return give(p, spell, MagicRegistry.BOUND_DAGGER.get());
+    }
+
     public static Spell.Result battleaxe(ServerPlayer p, Spell spell, int tick) {
         return give(p, spell, MagicRegistry.BOUND_BATTLEAXE.get());
     }

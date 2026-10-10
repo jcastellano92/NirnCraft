@@ -29,11 +29,23 @@ public final class Candlelight {
     private Candlelight() {}
 
     public static Spell.Result cast(ServerPlayer p, Spell spell, int tick) {
+        // Trains Alteration only when it lights up somewhere dark and isn't just a refresh (no free XP spam).
+        boolean wasActive = active(p);
+        boolean dark = p.serverLevel().getMaxLocalRawBrightness(BlockPos.containing(p.getEyePosition())) < 8;
         p.getPersistentData().putLong(UNTIL, p.level().getGameTime() + SpellMath.alterationDuration(p, spell));
         MagicFx.sound(p, SoundEvents.AMETHYST_BLOCK_CHIME, 1f, 1.8f);
         MagicFx.sound(p, SoundEvents.BEACON_POWER_SELECT, 0.3f, 2f);
         update(p);
-        return Spell.Result.EFFECT;
+        return dark && !wasActive ? Spell.Result.EFFECT : Spell.Result.CAST;
+    }
+
+    /** A light of {@code ticks} (made spells). Returns true if it lit somewhere dark that wasn't lit by one already. */
+    public static boolean light(ServerPlayer p, int ticks) {
+        boolean wasActive = active(p);
+        boolean dark = p.serverLevel().getMaxLocalRawBrightness(BlockPos.containing(p.getEyePosition())) < 8;
+        p.getPersistentData().putLong(UNTIL, p.level().getGameTime() + ticks);
+        update(p);
+        return dark && !wasActive;
     }
 
     public static boolean active(ServerPlayer p) {

@@ -106,7 +106,7 @@ public final class Shouting {
         }
         if (!perform(p, shout, words)) return;
 
-        long cooldown = shout.cooldownSeconds(words) * 20L;
+        long cooldown = Math.round(shout.cooldownSeconds(words) * 20L * cooldownMultiplier(p, shout));
         if (!p.isCreative()) MagicData.setShoutCooldown(p, now + cooldown, cooldown);
         SkyNetwork.sendToTracking(p, new MagicPackets.ShoutFx(p.getId(), shout.ordinal(), words));
         ServerLevel level = p.serverLevel();
@@ -115,6 +115,17 @@ public final class Shouting {
         level.playSound(null, p.getX(), p.getY(), p.getZ(), shoutSound, SoundSource.PLAYERS, 1.4f + 0.3f * words, 1.0f);
         p.swing(InteractionHand.MAIN_HAND, true);
         SkyData.get(p).addStat("shouts", 1);
+    }
+
+    /**
+     * Voice recharge multiplier: the Blessing of Talos (shrine, flag {@code blessing_talos}) shortens it by 20%, and
+     * Dragon Aspect makes every other shout recover a quarter faster.
+     */
+    public static float cooldownMultiplier(ServerPlayer p, Shout shout) {
+        float m = 1f;
+        if (com.skycraft.core.Buffs.active(p, "blessing_talos")) m *= 0.8f;
+        if (shout != Shout.DRAGON_ASPECT && p.hasEffect(MagicRegistry.DRAGON_ASPECT.get())) m *= 0.75f;
+        return m;
     }
 
     private static boolean perform(ServerPlayer p, Shout shout, int w) {
@@ -144,6 +155,7 @@ public final class Shouting {
                     return false;
                 }
                 level.setWeatherParameters(6000 + 6000 * w, 0, false, false);
+                ShoutHooks.clearSkies(level, p, w, 6000 + 6000 * w);
                 level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.WEATHER, 1f, 1.4f);
             }
             case AURA_WHISPER -> {
@@ -153,16 +165,41 @@ public final class Shouting {
                 }
             }
             case SLOW_TIME -> {
-                int duration = new int[]{8, 12, 16}[w - 1] * 20;
-                for (LivingEntity e : Targeting.around(p, p.position(), 24, e -> Targeting.canHarm(p, e))) {
-                    e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 1 + w));
-                    e.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, duration, w));
-                }
-                for (Projectile proj : level.getEntitiesOfClass(Projectile.class, p.getBoundingBox().inflate(24), pr -> pr.getOwner() != p)) {
-                    proj.setDeltaMovement(proj.getDeltaMovement().scale(0.2));
-                    proj.hurtMarked = true;
-                }
+                SlowTime.start(p, w);
                 level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.2f, 0.5f);
+            }
+            case ICE_FORM -> {
+                return ShoutEffects.iceForm(p, w);
+            }
+            case THROW_VOICE -> {
+                return ShoutEffects.throwVoice(p, w);
+            }
+            case DISMAY -> {
+                return ShoutEffects.dismay(p, w);
+            }
+            case CALL_DRAGON -> {
+                return ShoutEffects.callDragon(p, w);
+            }
+            case CALL_OF_VALOR -> {
+                return ShoutEffects.callOfValor(p, w);
+            }
+            case CYCLONE -> {
+                return ShoutEffects.cyclone(p, w);
+            }
+            case DRAIN_VITALITY -> {
+                return ShoutEffects.drainVitality(p, w);
+            }
+            case SOUL_TEAR -> {
+                return ShoutEffects.soulTear(p, w);
+            }
+            case BEND_WILL -> {
+                return ShoutEffects.bendWill(p, w);
+            }
+            case DRAGON_ASPECT -> {
+                return ShoutEffects.dragonAspect(p, w);
+            }
+            case BATTLE_FURY -> {
+                return ShoutEffects.battleFury(p, w);
             }
             case MARKED_FOR_DEATH -> {
                 for (LivingEntity e : Targeting.cone(p, 14, 0.8, e -> Targeting.canHarm(p, e))) {
@@ -197,6 +234,7 @@ public final class Shouting {
                 }
                 int duration = new int[]{30, 45, 60}[w - 1] * 20;
                 level.setWeatherParameters(0, duration + 1200, true, true);
+                ShoutHooks.stormCall(level, p, w, duration);
                 MagicScheduler.area(p, p.position(), true, 32, duration, 50, "storm_call", (lvl, owner, area) -> {
                     if (owner == null || area.age == 0) return;
                     List<LivingEntity> targets = new ArrayList<>(Targeting.around(lvl, area.center, area.radius,

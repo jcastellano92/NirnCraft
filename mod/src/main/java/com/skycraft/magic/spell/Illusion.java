@@ -257,12 +257,14 @@ public final class Illusion {
         SpellEffects.xp(caster, spell);
     }
 
-    /** Turn Lesser Undead: undead flee (no Master of the Mind needed, it's a Restoration spell). */
+    /**
+     * Turn Lesser Undead, Turn Undead, Turn Greater Undead: undead up to the spell's level flee (no Master of the Mind
+     * needed, it's a Restoration spell).
+     */
     public static void turnUndeadHit(SpellProjectile proj, ServerPlayer caster, Spell spell, @Nullable LivingEntity target, Vec3 pos) {
         MagicFx.burst((ServerLevel) proj.level(), pos, Element.HOLY, 0.8f);
         if (target == null || target.getMobType() != MobType.UNDEAD || target.getType().is(CombatHandler.BOSSES)) return;
-        float limit = BASE_THRESHOLD[spell.tier.ordinal()] * SpellMath.undeadMult(caster, target);
-        if (target.getMaxHealth() > limit) {
+        if (!RestorationSpells.turnable(caster, spell, target)) {
             Notifier.message(caster, Component.translatable("message.skycraft.illusion_too_strong", target.getDisplayName()));
             return;
         }
@@ -365,13 +367,17 @@ public final class Illusion {
     }
 
     public static Spell.Result muffle(ServerPlayer p, Spell spell, int tick) {
+        MobEffectInstance current = p.getEffect(MagicRegistry.MUFFLE.get());
+        boolean wasActive = current != null && current.getDuration() > spell.duration / 2;
         p.addEffect(new MobEffectInstance(MagicRegistry.MUFFLE.get(), spell.duration, 0, false, true, true));
         MagicFx.send(p, MagicFx.AURA, Element.MIND, p.position(), p.position(), p.getId(), 0);
         p.playNotifySound(SoundEvents.WOOL_PLACE, SoundSource.PLAYERS, 1f, 0.6f);
-        return Spell.Result.EFFECT;
+        return SpellEffects.buffResult(p, wasActive);
     }
 
     public static Spell.Result invisibility(ServerPlayer p, Spell spell, int tick) {
+        boolean wasActive = p.hasEffect(MobEffects.INVISIBILITY);
+        boolean useful = !wasActive && SpellEffects.hostilesNear(p, 24);
         p.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, spell.duration, 0, false, false, true));
         p.getPersistentData().putBoolean(INVIS_FLAG, true);
         MagicFx.send(p, MagicFx.AURA, Element.MIND, p.position(), p.position(), p.getId(), 3);
@@ -380,6 +386,111 @@ public final class Illusion {
         for (Mob mob : p.level().getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(32), m -> m.getTarget() == p)) {
             mob.setTarget(null);
         }
-        return Spell.Result.EFFECT;
+        return useful ? Spell.Result.EFFECT : Spell.Result.CAST;
+    }
+
+    // ------------------------------------------------------------------ added spells
+
+    /** Rout: creatures and people in the target area flee for 30 seconds. */
+    public static void routHit(SpellProjectile proj, ServerPlayer caster, Spell spell, @Nullable LivingEntity target, Vec3 pos) {
+        ServerLevel level = (ServerLevel) proj.level();
+        MagicFx.burst(level, pos, Element.MIND, spell.radius);
+        level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.EVOKER_PREPARE_ATTACK, SoundSource.PLAYERS, 1f, 0.7f);
+        if (area(caster, spell, pos, "fear") > 0) SpellEffects.xp(caster, spell);
+    }
+
+    /** Hysteria: everything around you flees in terror for 30 seconds. */
+    public static Spell.Result hysteria(ServerPlayer p, Spell spell, int tick) {
+        MagicFx.sendNear(p.serverLevel(), p.position(), 96, MagicFx.RING, Element.SOUL, p.position().add(0, 0.2, 0), p.position(), p.getId(),
+                Math.round(spell.radius * 10));
+        MagicFx.sound(p, SoundEvents.EVOKER_PREPARE_ATTACK, 1.5f, 0.5f);
+        MagicFx.sound(p, SoundEvents.WARDEN_ROAR, 0.4f, 1.5f);
+        return area(p, spell, p.position(), "fear") > 0 ? Spell.Result.EFFECT : Spell.Result.CAST;
+    }
+
+    /** Call to Arms: allies around you fight harder, take less damage and regain stamina for 60 seconds. */
+    public static Spell.Result callToArms(ServerPlayer p, Spell spell, int tick) {
+        int n = 0;
+        for (LivingEntity e : Targeting.around(p, p.position(), spell.radius, e -> e != p && (Targeting.isFriendly(p, e)
+                || !(e instanceof net.minecraft.world.entity.monster.Enemy) && Targeting.isHelpable(p, e) && !(e instanceof net.minecraft.world.entity.animal.Animal)))) {
+            embolden(e, spell.duration);
+            e.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, spell.duration, 0));
+            e.addEffect(new MobEffectInstance(MobEffects.HEALTH_BOOST, spell.duration, 1));
+            if (e instanceof ServerPlayer tp) {
+                com.skycraft.core.PlayerData data = com.skycraft.core.SkyData.get(tp);
+                data.setStamina(data.maxStamina());
+            }
+            n++;
+        }
+        MagicFx.sendNear(p.serverLevel(), p.position(), 96, MagicFx.RING, Element.HOLY, p.position().add(0, 0.2, 0), p.position(), p.getId(),
+                Math.round(spell.radius * 10));
+        MagicFx.sound(p, SoundEvents.RAID_HORN.value(), 0.6f, 1.4f);
+        return n > 0 ? Spell.Result.EFFECT : Spell.Result.CAST;
+    }
+
+    /** Last game time each player got Clairvoyance XP (it trains once per 30 s, not per second of staring). */
+    private static final java.util.Map<java.util.UUID, Long> CLAIRVOYANCE_XP = new java.util.HashMap<>();
+
+    /**
+     * Clairvoyance: while held, a trail of light shows the way to your nearest quest objective (or, with none, the
+     * nearest town).
+     */
+    public static Spell.Result clairvoyance(ServerPlayer p, Spell spell, int tick) {
+        Vec3 goal = clairvoyanceGoal(p);
+        if (goal == null) {
+            if (tick == 0) Notifier.message(p, Component.translatable("message.skycraft.clairvoyance_nothing"));
+            return tick == 0 ? Spell.Result.FAILED : Spell.Result.CAST;
+        }
+        if (tick % 10 == 0) {
+            Vec3 from = p.position().add(0, 0.3, 0);
+            Vec3 dir = goal.subtract(from);
+            double len = Math.min(spell.radius, dir.length());
+            Vec3 to = len < 1e-3 ? from : from.add(dir.normalize().scale(len));
+            // only the caster sees the path
+            com.skycraft.network.SkyNetwork.sendToPlayer(p, new com.skycraft.magic.MagicPackets.Fx(MagicFx.PATH, Element.MIND.ordinal(), from, to, p.getId(), 0));
+        }
+        if (tick % 20 == 0) MagicFx.sound(p, SoundEvents.AMETHYST_BLOCK_RESONATE, 0.4f, 1.6f);
+        long now = p.level().getGameTime();
+        Long last = CLAIRVOYANCE_XP.get(p.getUUID());
+        if (tick == 20 && (last == null || now - last > 600)) {
+            CLAIRVOYANCE_XP.put(p.getUUID(), now);
+            return Spell.Result.EFFECT;
+        }
+        return Spell.Result.CAST;
+    }
+
+    @Nullable
+    private static Vec3 clairvoyanceGoal(ServerPlayer p) {
+        net.minecraft.nbt.ListTag markers = com.skycraft.core.SkyData.get(p).module("quest").getList("markers", net.minecraft.nbt.Tag.TAG_COMPOUND);
+        String dim = p.level().dimension().location().toString();
+        Vec3 best = null;
+        double bestDist = Double.MAX_VALUE;
+        for (int i = 0; i < markers.size(); i++) {
+            CompoundTag m = markers.getCompound(i);
+            if (!m.getString("dim").isEmpty() && !m.getString("dim").equals(dim)) continue;
+            Vec3 v = new Vec3(m.getInt("x") + 0.5, m.getInt("y"), m.getInt("z") + 0.5);
+            double d = v.distanceToSqr(p.position());
+            if (d < bestDist) {
+                bestDist = d;
+                best = v;
+            }
+        }
+        if (best != null || p.level().dimension() != net.minecraft.world.level.Level.OVERWORLD) return best;
+        // no objective: the nearest settlement
+        com.skycraft.tamriel.Place town = null;
+        long bestSq = Long.MAX_VALUE;
+        for (com.skycraft.tamriel.Place pl : com.skycraft.tamriel.Places.all()) {
+            if (!pl.type().isSettlement()) continue;
+            long d = pl.distSqr(p.getBlockX(), p.getBlockZ());
+            if (d < bestSq && d > (long) pl.radius() * pl.radius()) {
+                bestSq = d;
+                town = pl;
+            }
+        }
+        return town == null ? null : new Vec3(town.x() + 0.5, p.getY(), town.z() + 0.5);
+    }
+
+    public static void forget(java.util.UUID id) {
+        CLAIRVOYANCE_XP.remove(id);
     }
 }
