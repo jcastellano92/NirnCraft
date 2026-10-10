@@ -48,19 +48,6 @@ mr:tectonic                      # dramatic terrain
 mr:ct-overhaul-village           # ChoiceTheorem's Overhauled Village: towns and cities
 mr:towns-and-towers              # more settlements, castles and towers
 mr:dungeons-and-taverns          # taverns (inns), dungeons
-mr:when-dungeons-arise           # huge dungeons and fortresses
-mr:moogs-voyager-structures      # lots of hidden structures
-mr:explorify                     # small hidden ruins and secrets
-mr:yungs-better-dungeons
-mr:yungs-better-mineshafts
-mr:yungs-better-strongholds
-mr:yungs-better-desert-temples
-mr:yungs-better-jungle-temples
-mr:yungs-better-ocean-monuments
-mr:yungs-better-witch-huts
-mr:yungs-better-nether-fortresses   # Oblivion citadels
-mr:yungs-bridges                    # bridges for the road network
-mr:yungs-extras
 
 # --- Survival: fishing, cooking, gear, backpacks, sleeping ---
 cf:aquaculture | mr:aquaculture     # fishing overhaul (feeds the Fishing skill)

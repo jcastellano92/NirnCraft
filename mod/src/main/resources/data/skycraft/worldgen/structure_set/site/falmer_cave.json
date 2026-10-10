@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/falmer_cave",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274007,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "falmer_cave"
+    ]
+  }
+}

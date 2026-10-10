@@ -1,7 +1,8 @@
 {
   "type": "skycraft:dungeon",
   "theme": "mine",
-  "biomes": "#skycraft:has_structure/mine",
+  "regional_kit": true,
+  "biomes": "#skycraft:dungeons/anywhere",
   "step": "underground_structures",
   "spawn_overrides": {},
   "terrain_adaptation": "none"

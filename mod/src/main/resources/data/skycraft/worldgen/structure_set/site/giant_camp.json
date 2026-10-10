@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/giant_camp",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274018,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "giant_camp"
+    ]
+  }
+}

@@ -40,6 +40,8 @@ public final class Painter {
     public final BoundingBox chunk;
     public final BoundingBox box;
     public final long seed;
+    /** The piece's culture kit: masonry palettes consult it ({@link BuiltBuilder#wall} and friends). */
+    public Kit kit = Kit.NONE;
     private final int x0, y0, z0, x1, y1, z1;
     private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
@@ -198,6 +200,27 @@ public final class Painter {
         return t * t * (3 - 2 * t);
     }
 
+    /**
+     * Height of the first free block above the terrain of column (x, z), from the chunk's worldgen heightmap. Only
+     * for columns of the chunk being generated (it never reads neighbours); {@link Integer#MIN_VALUE} otherwise.
+     */
+    public int surfaceAt(int x, int z) {
+        if (x < chunk.minX() || x > chunk.maxX() || z < chunk.minZ() || z > chunk.maxZ()) return Integer.MIN_VALUE;
+        return level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG, x, z);
+    }
+
+    /** True when (x, z) is a column of the chunk being generated. */
+    public boolean ownsColumn(int x, int z) {
+        return x >= chunk.minX() && x <= chunk.maxX() && z >= chunk.minZ() && z <= chunk.maxZ();
+    }
+
+    /** The block entity at a position this chunk owns, or null. */
+    @Nullable
+    public BlockEntity blockEntity(int x, int y, int z) {
+        if (!ok(x, y, z)) return null;
+        return level.getBlockEntity(pos.set(x, y, z));
+    }
+
     // ------------------------------------------------------------------ containers & entities
 
     /** A container (chest, barrel, trapped chest) holding the loot table. Lockpickable via the crime module. */
@@ -257,6 +280,22 @@ public final class Painter {
      */
     @Nullable
     public Mob spawn(@Nullable String id, int x, int y, int z, float yaw, @Nullable String name) {
+        return spawn(id, x, y, z, yaw, name, null);
+    }
+
+    /**
+     * A draugr (or any undead) lying dormant in its sarcophagus or alcove: no AI until a player comes close or hurts
+     * it ({@link DormantMobs}).
+     */
+    @Nullable
+    public Mob spawnDormant(@Nullable String id, int x, int y, int z, float yaw) {
+        return spawn(id, x, y, z, yaw, null, DormantMobs::makeDormant);
+    }
+
+    /** {@link #spawn} with a hook that runs before the mob is added (proto chunks serialize entities on add). */
+    @Nullable
+    public Mob spawn(@Nullable String id, int x, int y, int z, float yaw, @Nullable String name,
+                     @Nullable java.util.function.Consumer<Mob> setup) {
         if (id == null || !ok(x, y, z) || !chunk.isInside(new BlockPos(x, y, z))) return null;
         ResourceLocation rl = ResourceLocation.tryParse(id);
         if (rl == null || !ForgeRegistries.ENTITY_TYPES.containsKey(rl)) return null;
@@ -281,6 +320,7 @@ public final class Painter {
             if (name != null) mob.setCustomName(Component.literal(name));
             CompoundTag data = mob.getPersistentData();
             data.putBoolean("skycraft_dungeon", true);
+            if (setup != null) setup.accept(mob);
             level.addFreshEntityWithPassengers(mob);
             return mob;
         } catch (RuntimeException ex) {

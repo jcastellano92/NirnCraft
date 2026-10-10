@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/stormcloak_camp",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274025,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "stormcloak_camp"
+    ]
+  }
+}

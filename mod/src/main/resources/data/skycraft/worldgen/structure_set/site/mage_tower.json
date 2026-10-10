@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/mage_tower",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274033,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "mage_tower"
+    ]
+  }
+}

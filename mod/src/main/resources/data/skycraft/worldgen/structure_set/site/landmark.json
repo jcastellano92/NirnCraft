@@ -1,0 +1,32 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/landmark",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274041,
+    "types": [
+      "landmark"
+    ],
+    "variants": [
+      "monument",
+      "stones",
+      "ruin",
+      "peak",
+      "pass",
+      "clearing",
+      "dwemer",
+      "bridge",
+      "altar",
+      "rock",
+      "waterfall",
+      "eyrie",
+      "island",
+      "source",
+      "campsite"
+    ]
+  }
+}

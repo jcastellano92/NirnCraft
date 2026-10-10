@@ -1,0 +1,30 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "landmark",
+  "place": {
+    "types": [
+      "landmark"
+    ],
+    "variants": [
+      "monument",
+      "stones",
+      "ruin",
+      "peak",
+      "pass",
+      "clearing",
+      "dwemer",
+      "bridge",
+      "altar",
+      "rock",
+      "waterfall",
+      "eyrie",
+      "island",
+      "source",
+      "campsite"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

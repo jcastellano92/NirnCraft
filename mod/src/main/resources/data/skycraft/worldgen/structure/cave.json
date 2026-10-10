@@ -1,7 +1,8 @@
 {
   "type": "skycraft:dungeon",
   "theme": "cave",
-  "biomes": "#skycraft:has_structure/cave",
+  "regional_kit": true,
+  "biomes": "#skycraft:dungeons/anywhere",
   "step": "underground_structures",
   "spawn_overrides": {},
   "terrain_adaptation": "none"

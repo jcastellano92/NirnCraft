@@ -25,6 +25,10 @@ public final class NaturalBuilder {
     static BlockState floorBlock(Painter p, Theme t, int x, int y, int z) {
         int roll = p.roll(x, y, z, 90, 20);
         boolean deep = y < 0;
+        if (p.kit != Kit.NONE && p.kit != Kit.NORD && t == Theme.CAVE) {
+            Kit.Palette pal = p.kit.palette();
+            return roll < 9 ? pal.caveFloor : roll < 15 ? pal.rock : rock(y);
+        }
         return switch (t) {
             case MINE -> roll < 8 ? Blocks.COBBLESTONE.defaultBlockState() : roll < 12 ? Blocks.ANDESITE.defaultBlockState() : rock(y);
             case VAMPIRE_LAIR -> roll < 6 ? Blocks.BLACKSTONE.defaultBlockState() : roll < 8 ? Blocks.RED_TERRACOTTA.defaultBlockState() : rock(y);
@@ -41,6 +45,7 @@ public final class NaturalBuilder {
     public static void room(Painter p, Room room, RandomSource r) {
         Theme t = room.theme();
         boolean mine = t == Theme.MINE;
+        boolean lined = t == Theme.CAVE && p.kit != Kit.NONE && p.kit != Kit.NORD;
         double rx = room.halfX() - 0.5, rz = room.halfZ() - 0.5, ry = Math.max(3, room.height - 0.5);
         for (int x = p.minX(); x <= p.maxX(); x++) {
             for (int z = p.minZ(); z <= p.maxZ(); z++) {
@@ -53,6 +58,9 @@ public final class NaturalBuilder {
                         if (y == room.floor) carvedColumn = true;
                     } else if (mine && y >= room.floor - 1 && d < 1.3 && p.noise(x, y, z, 2.5, 81) > 0.42) {
                         if (p.get(x, y, z).is(BlockTags.BASE_STONE_OVERWORLD)) p.set(x, y, z, Deco.ore(p, x, y, z, y < 0));
+                    } else if (lined && y >= room.floor - 1 && d < 1.25 && p.get(x, y, z).is(BlockTags.BASE_STONE_OVERWORLD)) {
+                        // the cave's own rock: ice, coral, sandstone, ash...
+                        p.set(x, y, z, p.noise(x, y, z, 3.0, 86) > 0.2 ? p.kit.palette().rock : p.kit.palette().caveFloor);
                     }
                 }
                 if (carvedColumn && p.ok(x, room.floor - 1, z)) p.set(x, room.floor - 1, z, floorBlock(p, t, x, room.floor - 1, z));

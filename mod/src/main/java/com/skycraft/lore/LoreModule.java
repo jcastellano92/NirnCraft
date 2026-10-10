@@ -58,7 +58,28 @@ public final class LoreModule {
         }
     }
 
-    public static final RegistryObject<Item> BOOK = ITEMS.register("book", () -> new LoreBookItem(new Item.Properties().stacksTo(16)));
+    /** Solstheim's All-Maker stones ({@link AllMakerStones}). */
+    public static final Map<AllMakerStone, RegistryObject<Block>> ALL_MAKER_STONES = new EnumMap<>(AllMakerStone.class);
+
+    static {
+        for (AllMakerStone stone : AllMakerStone.VALUES) {
+            String id = "standing_stone_allmaker_" + stone.id();
+            RegistryObject<Block> block = BLOCKS.register(id, () -> new AllMakerStoneBlock(stone,
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.STONE)
+                            .strength(-1f, 3600000f)
+                            .noLootTable()
+                            .noOcclusion()
+                            .lightLevel(state -> 7)
+                            .sound(SoundType.STONE)
+                            .pushReaction(PushReaction.BLOCK)
+                            .isValidSpawn((state, level, pos, type) -> false)));
+            ALL_MAKER_STONES.put(stone, block);
+            ITEMS.register(id, () -> new BlockItem(block.get(), new Item.Properties().rarity(Rarity.EPIC)));
+        }
+    }
+
+    public static final RegistryObject<Item> BOOK =ITEMS.register("book", () -> new LoreBookItem(new Item.Properties().stacksTo(16)));
 
     public static final RegistryObject<Feature<NoneFeatureConfiguration>> STANDING_STONE_SHRINE = FEATURES.register("standing_stone_shrine",
             () -> new StandingStoneShrineFeature(NoneFeatureConfiguration.CODEC));

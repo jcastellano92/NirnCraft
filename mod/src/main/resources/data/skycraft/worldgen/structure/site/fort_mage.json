@@ -1,0 +1,17 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "fort",
+  "flavor": 3,
+  "place": {
+    "types": [
+      "fort"
+    ],
+    "variants": [
+      "fort_mage"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

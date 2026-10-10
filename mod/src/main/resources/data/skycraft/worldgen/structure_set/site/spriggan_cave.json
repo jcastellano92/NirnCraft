@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/spriggan_cave",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274009,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "spriggan_cave"
+    ]
+  }
+}

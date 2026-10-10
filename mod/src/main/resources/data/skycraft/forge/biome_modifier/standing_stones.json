@@ -1,6 +1,0 @@
-{
-  "type": "forge:add_features",
-  "biomes": "#minecraft:is_overworld",
-  "features": "skycraft:standing_stone_shrine",
-  "step": "surface_structures"
-}

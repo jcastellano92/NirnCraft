@@ -1,0 +1,17 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "prince_shrine",
+  "special": "azura",
+  "place": {
+    "types": [
+      "daedric_shrine"
+    ],
+    "variants": [
+      "azura_great"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

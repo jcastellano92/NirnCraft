@@ -1,0 +1,90 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:cave",
+      "weight": 7
+    },
+    {
+      "structure": "skycraft:mine",
+      "weight": 2
+    },
+    {
+      "structure": "skycraft:vampire_lair",
+      "weight": 1
+    },
+    {
+      "structure": "skycraft:necromancer_lair",
+      "weight": 2
+    },
+    {
+      "structure": "skycraft:hagraven_lair",
+      "weight": 1
+    },
+    {
+      "structure": "skycraft:dwemer_ruin",
+      "weight": 3
+    },
+    {
+      "structure": "skycraft:nordic_barrow",
+      "weight": 3
+    },
+    {
+      "structure": "skycraft:ruin/ayleid",
+      "weight": 5
+    },
+    {
+      "structure": "skycraft:ruin/velothi_tomb",
+      "weight": 5
+    },
+    {
+      "structure": "skycraft:ruin/daedric",
+      "weight": 3
+    },
+    {
+      "structure": "skycraft:ruin/xanmeer",
+      "weight": 6
+    },
+    {
+      "structure": "skycraft:ruin/moon_temple",
+      "weight": 6
+    },
+    {
+      "structure": "skycraft:ruin/tree_tomb",
+      "weight": 5
+    },
+    {
+      "structure": "skycraft:ruin/crystal_vault",
+      "weight": 5
+    },
+    {
+      "structure": "skycraft:ruin/yokudan_tomb",
+      "weight": 6
+    },
+    {
+      "structure": "skycraft:ruin/atmoran_tomb",
+      "weight": 6
+    },
+    {
+      "structure": "skycraft:ruin/sea_vault",
+      "weight": 5
+    },
+    {
+      "structure": "skycraft:ruin/coral_pit",
+      "weight": 6
+    },
+    {
+      "structure": "skycraft:ruin/akaviri",
+      "weight": 6
+    },
+    {
+      "structure": "skycraft:ice_cave",
+      "weight": 2
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 30,
+    "separation": 10,
+    "salt": 718273501
+  }
+}

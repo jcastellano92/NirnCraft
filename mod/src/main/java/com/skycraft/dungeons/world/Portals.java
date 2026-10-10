@@ -49,16 +49,285 @@ public final class Portals {
     public static void build(Painter p, DungeonPiece c, RandomSource r) {
         Frame f = new Frame(p, c);
         switch (c.theme) {
-            case BARROW -> barrow(f, c);
+            case BARROW -> {
+                if (c.kit == Kit.ATMORAN) icebound(f, c);
+                barrow(f, c);
+            }
             case DWEMER -> dwemer(f, c);
             case MINE -> {
                 outcrop(f, c);
                 mine(f, c);
             }
+            case RUIN -> ruin(f, c);
             default -> {
                 outcrop(f, c);
                 caveMouth(f, c);
             }
+        }
+    }
+
+    // ------------------------------------------------------------------ culture ruins
+
+    /** The face a culture ruin shows the world, over the top of its stairs. */
+    private static void ruin(Frame f, DungeonPiece c) {
+        Kit.Palette pal = (c.kit == Kit.NONE ? Kit.NORD : c.kit).palette();
+        switch (c.kit) {
+            case AYLEID -> ayleid(f, c, pal);
+            case VELOTHI -> tombHouse(f, c, pal, true);
+            case DAEDRIC -> daedricGate(f, c, pal);
+            case XANMEER -> pyramid(f, c, pal, 4);
+            case KHAJIIT -> moonTemple(f, c, pal);
+            case BOSMER -> hollowTree(f, c);
+            case ALTMER -> crystalSpire(f, c, pal);
+            case REDGUARD -> tombHouse(f, c, pal, false);
+            case ATMORAN -> {
+                icebound(f, c);
+                barrow(f, c);
+            }
+            case MAORMER, SLOAD -> coralMouth(f, c, pal);
+            case AKAVIRI -> akaviriGate(f, c, pal);
+            default -> barrow(f, c);
+        }
+    }
+
+    /** Paved forecourt and a 3x3 opening in a facade wall at t = T + 1. */
+    private static void facade(Frame f, DungeonPiece c, Kit.Palette pal, int halfWidth, int height) {
+        int T = c.tunnelLength(), y = c.aux;
+        Painter p = f.p();
+        for (int t = T + 1; t <= T + 6; t++) {
+            for (int lat = -halfWidth; lat <= halfWidth; lat++) {
+                f.clear(t, y, lat, y + height + 2);
+                f.set(t, y - 1, lat, pal.floor(p, f.x(t, lat), y - 1, f.z(t, lat)));
+                f.foundation(t, y - 2, lat, pal.wall(p, f.x(t, lat), y - 2, f.z(t, lat), 0));
+            }
+        }
+        int at = T + 1;
+        for (int lat = -halfWidth; lat <= halfWidth; lat++) {
+            for (int yy = y; yy <= y + height; yy++) {
+                if (Math.abs(lat) <= 1 && yy <= y + 2) {
+                    f.air(at, yy, lat);
+                    continue;
+                }
+                f.set(at, yy, lat, Math.abs(lat) == halfWidth || yy == y + height ? pal.trim : pal.wall(p, f.x(at, lat), yy, f.z(at, lat), yy - y));
+            }
+        }
+    }
+
+    private static void ayleid(Frame f, DungeonPiece c, Kit.Palette pal) {
+        int T = c.tunnelLength(), y = c.aux;
+        Painter p = f.p();
+        mound(f, c, true);
+        facade(f, c, pal, 3, 5);
+        // the welkynd arch: a pointed crown over the door with a glowing stone at its peak
+        int at = T + 1;
+        f.set(at, y + 6, 0, Blocks.SEA_LANTERN.defaultBlockState());
+        for (int s : new int[]{-1, 1}) f.set(at, y + 6, s, Deco.stair(pal.stairs, s < 0 ? c.right() : c.right().getOpposite(), false));
+        // a ring of broken columns around the forecourt
+        for (int i = 0; i < 8; i++) {
+            double a = Math.PI * (i / 7.0);
+            int t = T + 4 + (int) Math.round(Math.sin(a) * 4), lat = (int) Math.round(Math.cos(a) * 6);
+            int h = 2 + p.roll(f.x(t, lat), 0, f.z(t, lat), 330, 4);
+            for (int dy = 0; dy < h; dy++) f.set(t, y + dy, lat, pal.pillar(dy, h + 4));
+            if (h >= 4) f.set(t, y + h, lat, Blocks.SEA_LANTERN.defaultBlockState());
+        }
+    }
+
+    /** A small domed (Velothi) or flat-roofed sandstone (Yokudan) tomb house over the stairs. */
+    private static void tombHouse(Frame f, DungeonPiece c, Kit.Palette pal, boolean dome) {
+        int T = c.tunnelLength(), y = c.aux;
+        Painter p = f.p();
+        // walls around the last stretch of the stairs (t = T-3 .. T+1, lat -3..3)
+        for (int t = T - 3; t <= T + 1; t++) {
+            for (int lat = -3; lat <= 3; lat++) {
+                boolean wall = t == T - 3 || t == T + 1 || Math.abs(lat) == 3;
+                int ft = c.tunnelFloor(Math.min(t, T));
+                for (int yy = y - 1; yy <= y + 4; yy++) {
+                    boolean stairwell = Math.abs(lat) <= 1 && t <= T && yy >= ft - 1 && yy <= ft + 3;
+                    if (stairwell) continue;
+                    if (wall && !(t == T + 1 && Math.abs(lat) <= 1 && yy >= y && yy <= y + 2)) {
+                        f.set(t, yy, lat, yy == y + 4 ? pal.trim : pal.wall(p, f.x(t, lat), yy, f.z(t, lat), yy - y));
+                    } else if (yy >= y && !stairwell) {
+                        f.air(t, yy, lat);
+                    }
+                }
+                f.foundation(t, y - 2, lat, pal.wall(p, f.x(t, lat), y - 2, f.z(t, lat), 0));
+                // roof
+                int ct = t - (T - 1);
+                if (dome) {
+                    int d = Math.max(Math.abs(ct), Math.abs(lat));
+                    int h = d <= 1 ? 3 : d == 2 ? 2 : 1;
+                    for (int dy = 1; dy <= h; dy++) f.set(t, y + 4 + dy, lat, dy == h ? pal.trim : pal.wall(p, f.x(t, lat), y + 4 + dy, f.z(t, lat), 2));
+                } else {
+                    f.set(t, y + 5, lat, Deco.slab(pal.slab, false));
+                }
+            }
+        }
+        f.set(T + 2, y + 2, -2, pal.light);
+        f.set(T + 2, y + 2, 2, pal.light);
+        approach(f, c, 2, 5, pal.floor(p, f.x(T + 3, 0), y - 1, f.z(T + 3, 0)), true);
+    }
+
+    private static void daedricGate(Frame f, DungeonPiece c, Kit.Palette pal) {
+        int T = c.tunnelLength(), y = c.aux;
+        mound(f, c, true);
+        facade(f, c, pal, 3, 4);
+        int at = T + 1;
+        for (int s : new int[]{-4, 4}) {
+            for (int dy = 0; dy <= 9; dy++) {
+                BlockState st = dy == 9 ? Blocks.POINTED_DRIPSTONE.defaultBlockState()
+                        : dy % 3 == 2 ? Blocks.CRYING_OBSIDIAN.defaultBlockState() : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState();
+                f.set(at, y + dy, s, st);
+            }
+            f.set(at + 1, y, s, Blocks.MAGMA_BLOCK.defaultBlockState());
+            f.set(at + 1, y + 1, s, Deco.campfire(true, true));
+        }
+        for (int lat = -3; lat <= 3; lat++) f.set(at, y + 5 + (3 - Math.abs(lat)) / 2, lat, Blocks.GILDED_BLACKSTONE.defaultBlockState());
+    }
+
+    /** A stepped xanmeer: square tiers rising over the stairs, the door in the bottom tier's face. */
+    private static void pyramid(Frame f, DungeonPiece c, Kit.Palette pal, int tiers) {
+        int T = c.tunnelLength(), y = c.aux;
+        Painter p = f.p();
+        int ct = T - 4; // centre of the pyramid, behind the door
+        int r0 = 7;
+        for (int t = ct - r0; t <= ct + r0; t++) {
+            for (int lat = -r0; lat <= r0; lat++) {
+                int d = Math.max(Math.abs(t - ct), Math.abs(lat));
+                int top = y - 1 + (r0 - d) / 2 * 2 + 1;
+                int ft = c.tunnelFloor(Math.max(1, Math.min(t, T)));
+                for (int yy = y - 1; yy <= Math.min(top, y + tiers * 2); yy++) {
+                    boolean stairwell = Math.abs(lat) <= 1 && t <= T && yy >= ft - 1 && yy <= ft + 3;
+                    boolean doorway = Math.abs(lat) <= 1 && t > T && yy >= y && yy <= y + 2;
+                    if (stairwell || doorway) {
+                        if (yy >= y) f.air(t, yy, lat);
+                        continue;
+                    }
+                    f.set(t, yy, lat, yy == top && (r0 - d) % 2 == 1 ? Deco.slab(pal.slab, false) : pal.wall(p, f.x(t, lat), yy, f.z(t, lat), yy - y));
+                }
+                f.foundation(t, y - 2, lat, pal.wall(p, f.x(t, lat), y - 2, f.z(t, lat), 0));
+            }
+        }
+        // the shrine on top, and vines down the faces
+        int topY = y + tiers * 2;
+        f.set(ct, topY + 1, 0, pal.light);
+        for (int s : new int[]{-1, 1}) f.set(ct, topY + 1, s, pal.accent);
+        approach(f, c, 2, 4, pal.floor(p, f.x(T + 8, 0), y - 1, f.z(T + 8, 0)), true);
+    }
+
+    private static void moonTemple(Frame f, DungeonPiece c, Kit.Palette pal) {
+        int T = c.tunnelLength(), y = c.aux;
+        mound(f, c, true);
+        facade(f, c, pal, 4, 6);
+        int at = T + 1;
+        // four columns under a porch roof
+        for (int s : new int[]{-4, -2, 2, 4}) {
+            for (int dy = 0; dy <= 5; dy++) f.set(at + 4, y + dy, s, pal.pillar(dy, 5));
+        }
+        for (int t = at; t <= at + 4; t++) for (int lat = -5; lat <= 5; lat++) f.set(t, y + 6, lat, Deco.slab(pal.slab, false));
+        // the twin moons over the door: a gold crescent and a pale froglight
+        int[][] crescent = {{-2, 7}, {-1, 8}, {0, 8}, {1, 8}, {2, 7}, {-2, 6}, {2, 6}};
+        for (int[] cr : crescent) f.set(at, y + cr[1], cr[0], Blocks.GOLD_BLOCK.defaultBlockState());
+        f.set(at, y + 7, 0, Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState());
+    }
+
+    /** A dead Graht-oak, hollow, the stairs going down between its roots. */
+    private static void hollowTree(Frame f, DungeonPiece c) {
+        int T = c.tunnelLength(), y = c.aux;
+        Painter p = f.p();
+        int ct = T - 1;
+        for (int t = ct - 5; t <= ct + 5; t++) {
+            for (int lat = -5; lat <= 5; lat++) {
+                double d = Math.hypot(t - ct, lat);
+                int ft = c.tunnelFloor(Math.max(1, Math.min(t, T)));
+                for (int yy = y - 2; yy <= y + 16; yy++) {
+                    boolean stairwell = Math.abs(lat) <= 1 && t <= T && yy >= ft - 1 && yy <= ft + 3;
+                    boolean doorway = Math.abs(lat) <= 1 && t > ct && yy >= y && yy <= y + 2;
+                    if (stairwell) continue;
+                    double rr = yy < y + 2 ? 4.6 : 3.6;
+                    if (d <= rr && d >= rr - 1.2 && !doorway) f.set(t, yy, lat, Deco.pillar(Blocks.JUNGLE_LOG, Direction.Axis.Y));
+                    else if (d < rr - 1.2 && yy >= y) f.air(t, yy, lat);
+                }
+                // canopy
+                for (int yy = y + 14; yy <= y + 18; yy++) {
+                    double cd = Math.hypot(t - ct, lat) + Math.abs(yy - (y + 16)) * 1.2;
+                    if (cd < 5.5 + p.noise(f.x(t, lat), yy, f.z(t, lat), 2.0, 340) && !(d < 3.6 && yy <= y + 16)) {
+                        f.setIfOpen(t, yy, lat, Blocks.JUNGLE_LEAVES.defaultBlockState()
+                                .setValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT, true));
+                    }
+                }
+                // roots
+                if (d > 4.6 && d < 5.4 && p.chance(f.x(t, lat), 0, f.z(t, lat), 341, 2)) {
+                    f.setIfOpen(t, y, lat, Blocks.MANGROVE_ROOTS.defaultBlockState());
+                }
+            }
+        }
+        f.set(ct + 3, y + 2, 0, Blocks.SHROOMLIGHT.defaultBlockState());
+        approach(f, c, 1, 5, Blocks.ROOTED_DIRT.defaultBlockState(), false);
+    }
+
+    private static void crystalSpire(Frame f, DungeonPiece c, Kit.Palette pal) {
+        int T = c.tunnelLength(), y = c.aux;
+        mound(f, c, true);
+        facade(f, c, pal, 3, 5);
+        int at = T + 1;
+        for (int s : new int[]{-3, 3}) {
+            for (int dy = 0; dy <= 12; dy++) {
+                BlockState st = dy < 6 ? pal.trim : dy % 2 == 0 ? Blocks.AMETHYST_BLOCK.defaultBlockState() : Blocks.PURPLE_STAINED_GLASS.defaultBlockState();
+                f.set(at, y + dy, s, st);
+            }
+            f.set(at, y + 13, s, Blocks.END_ROD.defaultBlockState());
+        }
+        for (int lat = -2; lat <= 2; lat++) f.set(at, y + 6, lat, Blocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState());
+        f.set(at, y + 7, 0, Blocks.AMETHYST_CLUSTER.defaultBlockState());
+    }
+
+    /** Snow and ice drifted over a Nordic mound. */
+    private static void icebound(Frame f, DungeonPiece c) {
+        int T = c.tunnelLength(), y = c.aux;
+        Painter p = f.p();
+        for (int t = T - 4; t <= T + 1; t++) {
+            for (int lat = -6; lat <= 6; lat++) {
+                int top = y + 5 - Math.max(0, Math.abs(lat) - 2);
+                int ft = c.tunnelFloor(Math.max(1, Math.min(t, T)));
+                for (int yy = y; yy <= top; yy++) {
+                    if (Math.abs(lat) <= 2 && yy <= ft + 3) continue;
+                    f.setIfOpen(t, yy, lat, p.chance(f.x(t, lat), yy, f.z(t, lat), 350, 3) ? Blocks.PACKED_ICE.defaultBlockState() : Blocks.SNOW_BLOCK.defaultBlockState());
+                }
+            }
+        }
+    }
+
+    private static void coralMouth(Frame f, DungeonPiece c, Kit.Palette pal) {
+        int T = c.tunnelLength(), y = c.aux;
+        Painter p = f.p();
+        outcrop(f, c);
+        for (int t = T - 2; t <= T + 4; t++) {
+            for (int lat = -5; lat <= 5; lat++) {
+                double d = Math.hypot((t - T - 1) / 1.3, lat);
+                if (d < 4 || d > 5.5) continue;
+                int h = 1 + p.roll(f.x(t, lat), 0, f.z(t, lat), 360, 3);
+                for (int dy = 0; dy < h; dy++) f.set(t, y + dy, lat, pal.wall(p, f.x(t, lat), y + dy, f.z(t, lat), 1));
+                if (c.kit == Kit.SLOAD && p.chance(f.x(t, lat), 1, f.z(t, lat), 361, 4)) f.set(t, y + h, lat, Blocks.SLIME_BLOCK.defaultBlockState());
+                else f.set(t, y + h, lat, Blocks.DEAD_BRAIN_CORAL_FAN.defaultBlockState());
+            }
+        }
+        f.set(T + 1, y + 3, 0, pal.light);
+    }
+
+    /** An Akaviri gate: lacquered posts, a double crossbeam and a curved roof. */
+    private static void akaviriGate(Frame f, DungeonPiece c, Kit.Palette pal) {
+        int T = c.tunnelLength(), y = c.aux;
+        mound(f, c, true);
+        facade(f, c, pal, 3, 4);
+        int gt = T + 4;
+        for (int s : new int[]{-3, 3}) {
+            for (int dy = 0; dy <= 5; dy++) f.set(gt, y + dy, s, Deco.pillar(Blocks.STRIPPED_MANGROVE_LOG, Direction.Axis.Y));
+            f.set(gt + 1, y, s, Blocks.LANTERN.defaultBlockState());
+        }
+        for (int lat = -4; lat <= 4; lat++) {
+            f.set(gt, y + 4, lat, Blocks.RED_WOOL.defaultBlockState());
+            f.set(gt, y + 6, lat, Math.abs(lat) == 4 ? Deco.stair(Blocks.DEEPSLATE_TILE_STAIRS, lat < 0 ? c.right() : c.right().getOpposite(), false)
+                    : Blocks.DEEPSLATE_TILE_SLAB.defaultBlockState());
         }
     }
 
@@ -258,7 +527,25 @@ public final class Portals {
                 f.set(T + 3, y, 2, Blocks.MANGROVE_ROOTS.defaultBlockState());
             }
             default -> {
-                if (c.flavor % 2 == 0) {
+                int roster = CaveRoster.of(c.flavor);
+                if (roster == CaveRoster.FORSWORN) {
+                    // Forsworn totems: antlers and hide on poles
+                    for (int s : new int[]{-2, 2}) {
+                        f.set(T + 2, y, s, Blocks.SPRUCE_FENCE.defaultBlockState());
+                        f.set(T + 2, y + 1, s, Blocks.SPRUCE_FENCE.defaultBlockState());
+                        f.set(T + 2, y + 2, s, Deco.skull(Blocks.SKELETON_SKULL, Deco.skullRotation(c.facing())));
+                    }
+                    p.spawn(Mobs.forsworn(), f.x(T + 3, 0), y, f.z(T + 3, 0), Painter.yaw(c.facing()), null);
+                } else if (roster == CaveRoster.ICE) {
+                    for (int s : new int[]{-2, 2}) f.set(T + 1, y, s, Blocks.PACKED_ICE.defaultBlockState());
+                    f.set(T + 2, y, 0, Blocks.SNOW.defaultBlockState());
+                } else if (roster == CaveRoster.FALMER || roster == CaveRoster.SPIDER) {
+                    for (int s : new int[]{-1, 1}) f.setIfOpen(T, y + 2, s, Blocks.COBWEB.defaultBlockState());
+                    f.set(T + 2, y, 2, Deco.pillar(Blocks.BONE_BLOCK, Direction.Axis.X));
+                } else if (roster == CaveRoster.SPRIGGAN) {
+                    f.set(T + 2, y, -2, Blocks.AZALEA.defaultBlockState());
+                    f.set(T + 2, y, 2, Blocks.MOSS_BLOCK.defaultBlockState());
+                } else if (CaveRoster.inhabited(roster)) {
                     // bandit lookout: torches and a sentry
                     for (int s : new int[]{-2, 2}) {
                         f.set(T + 2, y, s, Blocks.SPRUCE_FENCE.defaultBlockState());

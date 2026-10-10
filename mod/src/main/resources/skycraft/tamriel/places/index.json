@@ -1,5 +1,6 @@
 [
- "provinces.json",
- "skyrim_settlements.json",
- "skyrim_landmarks.json"
+  "provinces.json",
+  "skyrim_settlements.json",
+  "skyrim_landmarks.json",
+  "tamriel_shrines.json"
 ]

@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:unique/labyrinthian",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274050,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "labyrinthian"
+    ]
+  }
+}

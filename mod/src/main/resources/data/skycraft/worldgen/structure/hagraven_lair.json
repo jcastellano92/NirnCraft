@@ -1,7 +1,11 @@
 {
   "type": "skycraft:dungeon",
   "theme": "hagraven_lair",
-  "biomes": "#skycraft:has_structure/hagraven_lair",
+  "where": [
+    "high_rock",
+    "realm"
+  ],
+  "biomes": "#skycraft:dungeons/anywhere",
   "step": "underground_structures",
   "spawn_overrides": {},
   "terrain_adaptation": "none"

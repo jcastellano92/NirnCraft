@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/dragon_lair",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274019,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "dragon_lair"
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/forsworn_tower",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274031,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "forsworn_tower"
+    ]
+  }
+}

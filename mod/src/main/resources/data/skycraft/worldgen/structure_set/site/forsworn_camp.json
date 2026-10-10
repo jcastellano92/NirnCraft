@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/forsworn_camp",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274023,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "forsworn_camp"
+    ]
+  }
+}

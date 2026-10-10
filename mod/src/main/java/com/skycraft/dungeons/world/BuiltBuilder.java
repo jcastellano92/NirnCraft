@@ -17,6 +17,7 @@ public final class BuiltBuilder {
     // ------------------------------------------------------------------ palettes
 
     public static BlockState wall(Painter p, Theme t, int x, int y, int z, int rel) {
+        if (p.kit != Kit.NONE) return p.kit.palette().wall(p, x, y, z, rel);
         int roll = p.roll(x, y, z, 1, 20);
         return switch (t) {
             case DWEMER -> {
@@ -48,6 +49,7 @@ public final class BuiltBuilder {
     }
 
     public static BlockState floor(Painter p, Theme t, int x, int y, int z) {
+        if (p.kit != Kit.NONE) return p.kit.palette().floor(p, x, y, z);
         int roll = p.roll(x, y, z, 2, 20);
         return switch (t) {
             case DWEMER -> {
@@ -63,6 +65,7 @@ public final class BuiltBuilder {
     }
 
     public static BlockState ceiling(Painter p, Theme t, int x, int y, int z) {
+        if (p.kit != Kit.NONE) return p.kit.palette().ceiling(p, x, y, z);
         int roll = p.roll(x, y, z, 3, 20);
         return switch (t) {
             case DWEMER -> Math.floorMod(x, 3) == 0 || Math.floorMod(z, 3) == 0 ? Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState()
@@ -72,6 +75,23 @@ public final class BuiltBuilder {
             default -> roll < 10 ? Blocks.STONE_BRICKS.defaultBlockState() : roll < 15 ? Blocks.MOSSY_STONE_BRICKS.defaultBlockState()
                     : Blocks.CRACKED_STONE_BRICKS.defaultBlockState();
         };
+    }
+
+    public static Block stairBlock(Painter p, Theme t) {
+        return p.kit != Kit.NONE ? p.kit.palette().stairs : stairBlock(t);
+    }
+
+    public static Block slabBlock(Painter p, Theme t) {
+        return p.kit != Kit.NONE ? p.kit.palette().slab : slabBlock(t);
+    }
+
+    public static BlockState pillar(Painter p, Theme t, int rel, int top) {
+        return p.kit != Kit.NONE ? p.kit.palette().pillar(rel, top) : pillar(t, rel, top);
+    }
+
+    /** The culture's light (hanging soul lantern in Nordic tombs). */
+    public static BlockState light(Painter p) {
+        return p.kit != Kit.NONE ? p.kit.palette().light : Deco.lantern(true, true);
     }
 
     public static Block stairBlock(Theme t) {
@@ -116,10 +136,20 @@ public final class BuiltBuilder {
         switch (t) {
             case DWEMER -> DwemerRooms.decorate(p, room, r);
             case FORT -> FortRooms.decorate(p, room, r);
+            case RUIN -> CultureRooms.decorate(p, room, r);
             default -> BarrowRooms.decorate(p, room, r);
         }
         Direction gate = room.gate();
-        if (gate != null) gate(p, room, gate);
+        if (gate != null) {
+            switch (Puzzles.kind(room.piece)) {
+                case CLAW -> Puzzles.clawDoor(p, room, gate);
+                case PILLARS -> {
+                    gate(p, room, gate);
+                    Puzzles.pillars(p, room, gate);
+                }
+                default -> gate(p, room, gate);
+            }
+        }
     }
 
     /** Four pillars set in from the corners, if the room is big enough. */
@@ -129,7 +159,7 @@ public final class BuiltBuilder {
         for (int sx : new int[]{room.minX + inset, room.maxX - inset}) {
             for (int sz : new int[]{room.minZ + inset, room.maxZ - inset}) {
                 if (room.nearDoor(sx, sz, 1) || room.onLane(sx, sz)) continue;
-                for (int rel = 0; rel <= top; rel++) p.set(sx, room.floor + rel, sz, pillar(room.theme(), rel, top));
+                for (int rel = 0; rel <= top; rel++) p.set(sx, room.floor + rel, sz, pillar(p, room.theme(), rel, top));
             }
         }
     }
@@ -161,7 +191,7 @@ public final class BuiltBuilder {
         for (int s : new int[]{1, -1}) {
             int px = wx + right.getStepX() * s + inward.getStepX() * 2;
             int pz = wz + right.getStepZ() * s + inward.getStepZ() * 2;
-            for (int rel = 0; rel <= top; rel++) p.set(px, room.floor + rel, pz, pillar(t, rel, top));
+            for (int rel = 0; rel <= top; rel++) p.set(px, room.floor + rel, pz, pillar(p, t, rel, top));
         }
         // the claw-door motif: carved pedestals with candles flanking the approach
         for (int s : new int[]{-3, 3}) {
@@ -185,7 +215,7 @@ public final class BuiltBuilder {
         int len = c.corridorLength();
         Direction plus = xAxis ? Direction.EAST : Direction.SOUTH;
         Direction latPlus = xAxis ? Direction.SOUTH : Direction.EAST;
-        Block stair = stairBlock(t);
+        Block stair = stairBlock(p, t);
         for (int x = p.minX(); x <= p.maxX(); x++) {
             for (int z = p.minZ(); z <= p.maxZ(); z++) {
                 int k = (xAxis ? x : z) - low;
@@ -252,7 +282,7 @@ public final class BuiltBuilder {
         Theme t = c.theme;
         Direction out = c.facing();
         Direction right = c.right();
-        Block stair = stairBlock(t);
+        Block stair = stairBlock(p, t);
         boolean openTop = c.has(DungeonPiece.FLAG_OPEN_TOP);
         int surfaceY = c.aux;
         for (int x = p.minX(); x <= p.maxX(); x++) {

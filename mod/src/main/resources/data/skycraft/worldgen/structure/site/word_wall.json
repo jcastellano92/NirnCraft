@@ -1,0 +1,14 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "word_wall",
+  "place": {
+    "types": [
+      "word_wall"
+    ],
+    "variants": []
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

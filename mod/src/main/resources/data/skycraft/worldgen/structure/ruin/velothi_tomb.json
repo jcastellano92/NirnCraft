@@ -1,0 +1,12 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "ruin",
+  "kit": "velothi",
+  "where": [
+    "morrowind"
+  ],
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

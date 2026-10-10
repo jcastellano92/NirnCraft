@@ -49,15 +49,31 @@ public class StandingStoneBlock extends Block {
     private static final VoxelShape UPPER_Z = Shapes.or(Block.box(5, 0, 2, 11, 10, 14), Block.box(5, 10, 3, 11, 13, 13), Block.box(5, 13, 5, 11, 15, 11));
 
     private final StandingStone sign;
+    private final int color;
 
     public StandingStoneBlock(StandingStone sign, Properties props) {
         super(props);
         this.sign = sign;
+        this.color = sign.color;
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(HALF, DoubleBlockHalf.LOWER));
     }
 
+    /** For other kinds of sacred stone (Solstheim's All-Maker stones): their own glow, their own blessing. */
+    protected StandingStoneBlock(int color, Properties props) {
+        super(props);
+        this.sign = null;
+        this.color = color;
+        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(HALF, DoubleBlockHalf.LOWER));
+    }
+
+    /** The birthsign, or null for a stone that isn't one of the thirteen. */
     public StandingStone sign() {
         return sign;
+    }
+
+    /** What touching the stone does (the base block at {@code base}). */
+    protected void activate(ServerPlayer player, BlockPos base) {
+        if (sign != null) StandingStones.activate(player, sign, base);
     }
 
     @Override
@@ -117,7 +133,7 @@ public class StandingStoneBlock extends Block {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
         if (!level.isClientSide && player instanceof ServerPlayer sp) {
             BlockPos base = state.getValue(HALF) == DoubleBlockHalf.UPPER ? pos.below() : pos;
-            StandingStones.activate(sp, sign, base);
+            activate(sp, base);
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
@@ -126,9 +142,9 @@ public class StandingStoneBlock extends Block {
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
         if (state.getValue(HALF) != DoubleBlockHalf.UPPER) return;
-        float r = (sign.color >> 16 & 255) / 255f;
-        float g = (sign.color >> 8 & 255) / 255f;
-        float b = (sign.color & 255) / 255f;
+        float r = (color >> 16 & 255) / 255f;
+        float g = (color >> 8 & 255) / 255f;
+        float b = (color & 255) / 255f;
         Direction facing = state.getValue(FACING);
         for (int i = 0; i < 2; i++) {
             if (random.nextInt(3) != 0) continue;

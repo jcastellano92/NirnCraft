@@ -1,0 +1,13 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:unique/blackreach",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:sites",
+    "salt": 718274058,
+    "sites": "blackreach"
+  }
+}

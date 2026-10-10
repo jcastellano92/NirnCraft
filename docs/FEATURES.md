@@ -107,8 +107,12 @@ third-party mod that provides it.
 ## Towns, cities, dungeons, roads and secrets
 
 * **Towns and cities:** ChoiceTheorem's Overhauled Village, Towns & Towers, Dungeons & Taverns (inns).
-* **Dungeons and ruins:** When Dungeons Arise, Moog's Voyager Structures, Explorify, the YUNG's suite, Terralith and
-  Tectonic mountains.
+* **Dungeons and landmarks** [Core]: every named site of Skyrim's map at its real place (about 370: barrows, caves,
+  Dwemer ruins, forts, camps, towers, shipwrecks, groves, the 13 Standing Stones, Word Walls and dragon mounds), with
+  High Hrothgar and the 7,000 Steps, Labyrinthian, Sky Haven Temple, Blackreach, Bleak Falls Barrow's claw door and
+  the shrines of all sixteen Daedric Princes in every province. Beyond Skyrim, culture ruins of each province (Ayleid
+  ruins, Velothi tombs, xanmeer, moon temples, tree tombs, crystal vaults, Yokudan tombs, Atmoran ice tombs...) and
+  the endless lands' caves, forts and camps.
 * **Roads** [Core] connect settlements, with signposts and lantern posts. Travelers, Khajiit caravans, guard patrols
   and the occasional bandit ambush walk them.
 * **Location discovery** [Core]: "DISCOVERED: Bleakwind Barrow" banners with Skyrim-style names, shown on the

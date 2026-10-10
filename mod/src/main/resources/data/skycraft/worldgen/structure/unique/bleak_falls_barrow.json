@@ -1,0 +1,17 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "barrow",
+  "special": "bleak_falls",
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "bleak_falls_barrow"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

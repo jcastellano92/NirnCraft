@@ -141,8 +141,19 @@ public final class Deco {
 
     /** A Word Wall (magic module) facing {@code facing}, or a chiseled tablet if magic isn't there. */
     public static void wordWall(Painter p, int x, int y, int z, Direction facing) {
+        wordWall(p, x, y, z, facing, 0);
+    }
+
+    /**
+     * A Word Wall that teaches a given shout: {@code shoutParam} is the shout's ordinal + 1 ({@link SiteParams#shout}),
+     * 0 lets the wall pick a weighted random shout the first time it is read.
+     */
+    public static void wordWall(Painter p, int x, int y, int z, Direction facing, int shoutParam) {
         BlockState wall = Painter.block("skycraft:word_wall", Blocks.CHISELED_STONE_BRICKS.defaultBlockState());
         p.set(x, y, z, Painter.facing(wall, facing));
+        if (shoutParam > 0 && p.blockEntity(x, y, z) instanceof com.skycraft.magic.wordwall.WordWallBlockEntity be) {
+            be.setShout(com.skycraft.magic.shout.Shout.byOrdinal(shoutParam - 1));
+        }
     }
 
     /** One of the Skyrim ores (crafting module) or a vanilla fallback. */

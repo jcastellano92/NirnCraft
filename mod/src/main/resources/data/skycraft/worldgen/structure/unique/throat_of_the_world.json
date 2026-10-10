@@ -1,0 +1,16 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "throat_summit",
+  "place": {
+    "types": [
+      "landmark"
+    ],
+    "variants": [
+      "throat_of_the_world"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

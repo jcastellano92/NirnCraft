@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:is_overworld",
+    {
+      "id": "#skycraft:dungeon_land",
+      "required": false
+    }
+  ]
+}

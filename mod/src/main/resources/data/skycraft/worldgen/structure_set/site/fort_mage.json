@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/fort_mage",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274037,
+    "types": [
+      "fort"
+    ],
+    "variants": [
+      "fort_mage"
+    ]
+  }
+}

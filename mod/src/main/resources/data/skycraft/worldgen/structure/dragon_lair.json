@@ -1,7 +1,12 @@
 {
   "type": "skycraft:dungeon",
   "theme": "dragon_lair",
-  "biomes": "#skycraft:has_structure/dragon_lair",
+  "where": [
+    "atmora",
+    "akavir",
+    "realm"
+  ],
+  "biomes": "#skycraft:dungeons/anywhere",
   "step": "surface_structures",
   "spawn_overrides": {},
   "terrain_adaptation": "none"

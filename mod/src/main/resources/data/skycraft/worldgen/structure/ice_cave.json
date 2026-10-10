@@ -1,0 +1,14 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "cave",
+  "kit": "ice",
+  "flavor": 7,
+  "where": [
+    "atmora",
+    "realm"
+  ],
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

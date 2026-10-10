@@ -17,7 +17,7 @@ public final class SurfaceBuilder {
     private SurfaceBuilder() {}
 
     /** Local frame: fwd towards the site's facing, lat to its right. */
-    private record Site(Painter p, DungeonPiece c, int cx, int cz, int base, Direction f, Direction r) {
+    private record Spot(Painter p, DungeonPiece c, int cx, int cz, int base, Direction f, Direction r) {
         int x(int fwd, int lat) {
             return cx + f.getStepX() * fwd + r.getStepX() * lat;
         }
@@ -46,7 +46,42 @@ public final class SurfaceBuilder {
     public static void build(Painter p, DungeonPiece c, RandomSource rnd) {
         BoundingBox b = c.getBoundingBox();
         Direction f = c.facing();
-        Site s = new Site(p, c, (b.minX() + b.maxX()) / 2, (b.minZ() + b.maxZ()) / 2, c.floor, f, f.getClockWise());
+        if (c.special != Special.NONE && c.theme.underground()) {
+            Exteriors.build(p, c);
+            return;
+        }
+        Frame frame = new Frame(p, (b.minX() + b.maxX()) / 2, (b.minZ() + b.maxZ()) / 2, c.floor, f);
+        switch (c.theme) {
+            case FORT, GIANT_CAMP, DRAGON_LAIR, DAEDRIC_SHRINE -> {
+            }
+            case WATCHTOWER, LIGHTHOUSE, MAGE_TOWER, GREAT_LIFT -> {
+                Towers.build(frame, c);
+                return;
+            }
+            case BANDIT_CAMP, FORSWORN_CAMP, MILITARY_CAMP, CABIN -> {
+                Camps.build(frame, c);
+                return;
+            }
+            case SHIPWRECK, GROVE, LANDMARK, NORDIC_RUIN -> {
+                Landmarks.build(frame, c);
+                return;
+            }
+            case STANDING_STONE, WORD_WALL, DRAGON_MOUND -> {
+                Sacred.build(frame, c);
+                return;
+            }
+            case PRINCE_SHRINE -> {
+                Statues.build(frame, c);
+                return;
+            }
+            case HIGH_HROTHGAR, THROAT_SUMMIT, SKY_HAVEN, LABYRINTHIAN -> {
+                Uniques.build(frame, c);
+                return;
+            }
+            default -> {
+            }
+        }
+        Spot s = new Spot(p, c, (b.minX() + b.maxX()) / 2, (b.minZ() + b.maxZ()) / 2, c.floor, f, f.getClockWise());
         switch (c.theme) {
             case FORT -> fort(s);
             case GIANT_CAMP -> giantCamp(s);
@@ -58,7 +93,7 @@ public final class SurfaceBuilder {
     // ------------------------------------------------------------------ ground
 
     /** Levels a column: ground block at base-1 on a foundation, air above up to {@code clearTo}. */
-    private static void level(Site s, int x, int z, BlockState ground, int clearTo) {
+    private static void level(Spot s, int x, int z, BlockState ground, int clearTo) {
         s.p().clear(x, s.base(), z, clearTo);
         s.p().set(x, s.base() - 1, z, ground);
         s.p().foundation(x, s.base() - 2, z, Blocks.DIRT.defaultBlockState(), 12);
@@ -66,7 +101,7 @@ public final class SurfaceBuilder {
 
     // ------------------------------------------------------------------ fort
 
-    private static void fort(Site s) {
+    private static void fort(Spot s) {
         Painter p = s.p();
         int base = s.base();
         int flavor = s.c().flavor;
@@ -123,7 +158,7 @@ public final class SurfaceBuilder {
         return BuiltBuilder.wall(p, Theme.FORT, x, y, z, 1);
     }
 
-    private static void fortWall(Site s, int x, int z, int fwd, int lat) {
+    private static void fortWall(Spot s, int x, int z, int fwd, int lat) {
         Painter p = s.p();
         int base = s.base();
         boolean front = fwd == 12;
@@ -140,7 +175,7 @@ public final class SurfaceBuilder {
         if (front && Math.abs(lat) == 2) p.set(x + s.f().getStepX(), base + 2, z + s.f().getStepZ(), Deco.wallTorch(false, s.f()));
     }
 
-    private static void fortTower(Site s, int x, int z, int ring, int af, int al) {
+    private static void fortTower(Spot s, int x, int z, int ring, int af, int al) {
         Painter p = s.p();
         int base = s.base();
         if (ring == 2) {
@@ -160,7 +195,7 @@ public final class SurfaceBuilder {
         }
     }
 
-    private static void fortKeep(Site s, int x, int z, int fwd, int lat, int cheb) {
+    private static void fortKeep(Spot s, int x, int z, int fwd, int lat, int cheb) {
         Painter p = s.p();
         int base = s.base();
         if (cheb == 4) {
@@ -195,7 +230,7 @@ public final class SurfaceBuilder {
     }
 
     /** An A-frame hide tent with a bedroll, along fwd, centred at (fwd, lat). */
-    private static void tent(Site s, int fwd0, int lat0) {
+    private static void tent(Spot s, int fwd0, int lat0) {
         int base = s.base();
         BlockState hide = lat0 < 0 ? Blocks.BROWN_WOOL.defaultBlockState() : Blocks.WHITE_WOOL.defaultBlockState();
         for (int fwd = fwd0 - 2; fwd <= fwd0 + 1; fwd++) {
@@ -210,7 +245,7 @@ public final class SurfaceBuilder {
 
     // ------------------------------------------------------------------ giant camp
 
-    private static void giantCamp(Site s) {
+    private static void giantCamp(Spot s) {
         Painter p = s.p();
         int base = s.base();
         for (int x = p.minX(); x <= p.maxX(); x++) {
@@ -280,7 +315,7 @@ public final class SurfaceBuilder {
 
     // ------------------------------------------------------------------ dragon lair
 
-    private static void dragonLair(Site s) {
+    private static void dragonLair(Spot s) {
         Painter p = s.p();
         int base = s.base();
         int plateau = base + 4;
@@ -321,7 +356,7 @@ public final class SurfaceBuilder {
                 s.set(w[0], plateau + dy, w[1], st);
             }
         }
-        Deco.wordWall(p, s.x(-4, 0), plateau + 2, s.z(-4, 0), s.f());
+        Deco.wordWall(p, s.x(-4, 0), plateau + 2, s.z(-4, 0), s.f(), s.c().param);
         // a fallen dragon's bones across the summit
         for (int lat = -4; lat <= 3; lat++) s.set(1, plateau + 1, lat, Deco.pillar(Blocks.BONE_BLOCK, s.r().getAxis()));
         for (int lat = -3; lat <= 2; lat += 2) {
@@ -339,7 +374,7 @@ public final class SurfaceBuilder {
 
     // ------------------------------------------------------------------ Daedric shrine
 
-    private static void shrine(Site s) {
+    private static void shrine(Spot s) {
         Painter p = s.p();
         int base = s.base();
         for (int x = p.minX(); x <= p.maxX(); x++) {

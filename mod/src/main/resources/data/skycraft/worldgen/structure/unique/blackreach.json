@@ -1,0 +1,9 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "blackreach",
+  "sites": "blackreach",
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

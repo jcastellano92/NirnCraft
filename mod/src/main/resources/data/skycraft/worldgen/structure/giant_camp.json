@@ -1,7 +1,11 @@
 {
   "type": "skycraft:dungeon",
   "theme": "giant_camp",
-  "biomes": "#skycraft:has_structure/giant_camp",
+  "where": [
+    "atmora",
+    "realm"
+  ],
+  "biomes": "#skycraft:dungeons/anywhere",
   "step": "surface_structures",
   "spawn_overrides": {},
   "terrain_adaptation": "none"

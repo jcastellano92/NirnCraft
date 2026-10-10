@@ -23,8 +23,16 @@ public class DungeonPiece extends StructurePiece {
 
     public static final int ROLE_START = 0, ROLE_NORMAL = 1, ROLE_BOSS = 2, ROLE_PUZZLE = 3;
     public static final int FLAG_TREASURE = 1, FLAG_DEAD_END = 2, FLAG_TRAP = 4, FLAG_OPEN_TOP = 8;
+    /** SURFACE: the structure levels the ground with terrain adaptation; the box starts at ground level. */
+    public static final int FLAG_PAD = 16;
 
     public final Theme theme;
+    /** Culture kit (palette and roster), {@link Kit#NONE} for the theme's own. */
+    public final Kit kit;
+    /** Named-site layout, {@link Special#NONE} for a procedural dungeon. */
+    public final Special special;
+    /** Site parameter: Word Wall shout, Standing Stone sign, Daedric Prince... (see {@link Site#param}). */
+    public final int param;
     public final Kind kind;
     public final long seed;
     /** ROOM: walking level. CORRIDOR: floor at the low-coordinate end. TUNNEL/PORTAL: walking level at the bottom. SURFACE: ground level. */
@@ -42,10 +50,14 @@ public class DungeonPiece extends StructurePiece {
     public final int flavor;
     public final int flags;
 
-    public DungeonPiece(Theme theme, Kind kind, BoundingBox box, long seed, int floor, int aux, int dir, int extra,
-                        int role, int doors, int variant, int flavor, int flags) {
+    public DungeonPiece(Site site, Kind kind, BoundingBox box, long seed, int floor, int aux, int dir, int extra,
+                        int role, int doors, int variant, int flags) {
         super(DungeonsRegistry.DUNGEON_PIECE.get(), 0, box);
-        this.theme = theme;
+        this.theme = site.theme();
+        this.kit = site.kit();
+        this.special = site.special();
+        this.param = site.param();
+        int flavor = site.flavor();
         this.kind = kind;
         this.seed = seed;
         this.floor = floor;
@@ -62,6 +74,9 @@ public class DungeonPiece extends StructurePiece {
     public DungeonPiece(StructurePieceSerializationContext context, CompoundTag tag) {
         super(DungeonsRegistry.DUNGEON_PIECE.get(), tag);
         this.theme = Theme.byOrdinal(tag.getInt("Theme"));
+        this.kit = Kit.byOrdinal(tag.getInt("Kit"));
+        this.special = Special.byOrdinal(tag.getInt("Special"));
+        this.param = tag.getInt("Param");
         Kind[] kinds = Kind.values();
         int k = tag.getInt("Kind");
         this.kind = k >= 0 && k < kinds.length ? kinds[k] : Kind.ROOM;
@@ -80,6 +95,9 @@ public class DungeonPiece extends StructurePiece {
     @Override
     protected void addAdditionalSaveData(StructurePieceSerializationContext context, CompoundTag tag) {
         tag.putInt("Theme", theme.ordinal());
+        tag.putInt("Kit", kit.ordinal());
+        tag.putInt("Special", special.ordinal());
+        tag.putInt("Param", param);
         tag.putInt("Kind", kind.ordinal());
         tag.putLong("Seed", seed);
         tag.putInt("Floor", floor);
@@ -91,6 +109,11 @@ public class DungeonPiece extends StructurePiece {
         tag.putInt("Variant", variant);
         tag.putInt("Flavor", flavor);
         tag.putInt("Flags", flags);
+    }
+
+    /** The site this piece belongs to (for builders that hand it on). */
+    public Site site() {
+        return new Site(theme, kit, special, flavor, param);
     }
 
     public boolean has(int flag) {
@@ -106,7 +129,16 @@ public class DungeonPiece extends StructurePiece {
                             BoundingBox chunkBox, ChunkPos chunkPos, BlockPos pivot) {
         Painter p = new Painter(level, chunkBox, this.boundingBox, seed);
         if (p.empty()) return;
+        p.kit = kit;
         RandomSource r = RandomSource.create(seed);
+        if (theme == Theme.BLACKREACH) {
+            Blackreach.build(p, this);
+            return;
+        }
+        if (theme == Theme.STEPS) {
+            Steps.build(p, this);
+            return;
+        }
         switch (kind) {
             case ROOM -> {
                 Room room = new Room(this);

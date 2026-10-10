@@ -1,0 +1,13 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:unique/throat_path",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:sites",
+    "salt": 718274057,
+    "sites": "throat_path"
+  }
+}

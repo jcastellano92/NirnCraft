@@ -1,0 +1,16 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "dragon_lair",
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "dragon_lair"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

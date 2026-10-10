@@ -1,0 +1,17 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "cave",
+  "flavor": 2,
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "spider_cave"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

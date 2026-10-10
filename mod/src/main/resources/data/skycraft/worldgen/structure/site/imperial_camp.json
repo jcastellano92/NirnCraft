@@ -1,0 +1,17 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "military_camp",
+  "flavor": 0,
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "imperial_camp"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

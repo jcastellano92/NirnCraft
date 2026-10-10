@@ -1,0 +1,18 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "fort",
+  "kit": "forsworn",
+  "flavor": 1,
+  "place": {
+    "types": [
+      "fort"
+    ],
+    "variants": [
+      "fort_forsworn"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

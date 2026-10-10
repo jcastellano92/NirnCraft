@@ -1,0 +1,9 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "steps",
+  "sites": "throat_path",
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

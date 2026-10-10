@@ -4,8 +4,24 @@ import com.skycraft.Skycraft;
 import com.skycraft.dungeons.entity.DwarvenCenturion;
 import com.skycraft.dungeons.entity.DwarvenSphere;
 import com.skycraft.dungeons.entity.DwarvenSpider;
+import com.skycraft.dungeons.puzzle.Claw;
+import com.skycraft.dungeons.puzzle.ClawKeyholeBlock;
+import com.skycraft.dungeons.puzzle.DragonClawItem;
+import com.skycraft.dungeons.puzzle.PuzzleLeverBlock;
+import com.skycraft.dungeons.puzzle.SymbolStoneBlock;
 import com.skycraft.dungeons.world.DungeonPiece;
 import com.skycraft.dungeons.world.DungeonStructure;
+import com.skycraft.dungeons.world.SitesPlacement;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
+
+import java.util.EnumMap;
+import java.util.Map;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -33,6 +49,11 @@ public final class DungeonsRegistry {
     public static final RegistryObject<StructurePieceType> DUNGEON_PIECE =
             PIECE_TYPES.register("dungeon_piece", () -> (StructurePieceType) DungeonPiece::new);
 
+    /** {@code skycraft:sites}: start chunks from a site list computed in Java (the 7,000 Steps, Blackreach tiles). */
+    public static final DeferredRegister<StructurePlacementType<?>> PLACEMENTS = DeferredRegister.create(Registries.STRUCTURE_PLACEMENT, Skycraft.MODID);
+    public static final RegistryObject<StructurePlacementType<SitesPlacement>> SITES_PLACEMENT =
+            PLACEMENTS.register("sites", () -> () -> SitesPlacement.CODEC);
+
     public static final RegistryObject<EntityType<DwarvenSpider>> DWARVEN_SPIDER = ENTITIES.register("dwarven_spider",
             () -> EntityType.Builder.<DwarvenSpider>of(DwarvenSpider::new, MobCategory.MONSTER)
                     .sized(0.9f, 0.65f).fireImmune().clientTrackingRange(8).build(id("dwarven_spider")));
@@ -50,12 +71,40 @@ public final class DungeonsRegistry {
     public static final RegistryObject<Item> DWARVEN_CENTURION_EGG = ITEMS.register("dwarven_centurion_spawn_egg",
             () -> new ForgeSpawnEggItem(DWARVEN_CENTURION, 0x8C5E2A, 0xFFB040, new Item.Properties()));
 
+    // ---- Nordic puzzles: glyph stones, claw doors and the dragon claws that open them
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Registries.BLOCK, Skycraft.MODID);
+
+    private static BlockBehaviour.Properties puzzleStone() {
+        return BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(-1f, 3600000f).noLootTable()
+                .sound(SoundType.STONE).pushReaction(PushReaction.BLOCK).isValidSpawn((s, l, p, t) -> false);
+    }
+
+    public static final RegistryObject<Block> SYMBOL_PILLAR = BLOCKS.register("symbol_pillar",
+            () -> new SymbolStoneBlock(true, puzzleStone()));
+    public static final RegistryObject<Block> SYMBOL_TABLET = BLOCKS.register("symbol_tablet",
+            () -> new SymbolStoneBlock(false, puzzleStone()));
+    public static final RegistryObject<Block> CLAW_KEYHOLE = BLOCKS.register("claw_keyhole",
+            () -> new ClawKeyholeBlock(puzzleStone()));
+    public static final RegistryObject<Block> PUZZLE_LEVER = BLOCKS.register("puzzle_lever",
+            () -> new PuzzleLeverBlock(BlockBehaviour.Properties.of().noCollission().strength(-1f, 3600000f).noLootTable()
+                    .sound(SoundType.STONE).pushReaction(PushReaction.DESTROY)));
+
+    public static final Map<Claw, RegistryObject<Item>> CLAWS = new EnumMap<>(Claw.class);
+
+    static {
+        for (Claw claw : Claw.VALUES) {
+            CLAWS.put(claw, ITEMS.register(claw.itemId(), () -> new DragonClawItem(claw, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON))));
+        }
+    }
+
     /** {@code #skycraft:automatons}: every Dwemer automaton (dungeons owns). */
     public static final TagKey<EntityType<?>> AUTOMATONS = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Skycraft.MODID, "automatons"));
     /** {@code #skycraft:dungeon_bosses}: boss creatures this module adds (the Centurion). */
     public static final TagKey<EntityType<?>> DUNGEON_BOSSES = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Skycraft.MODID, "dungeon_bosses"));
 
     static void init(IEventBus modBus) {
+        BLOCKS.register(modBus);
+        PLACEMENTS.register(modBus);
         STRUCTURE_TYPES.register(modBus);
         PIECE_TYPES.register(modBus);
         ENTITIES.register(modBus);

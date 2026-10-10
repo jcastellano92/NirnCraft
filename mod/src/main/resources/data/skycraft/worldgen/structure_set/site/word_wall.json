@@ -1,0 +1,16 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/word_wall",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274039,
+    "types": [
+      "word_wall"
+    ],
+    "variants": []
+  }
+}

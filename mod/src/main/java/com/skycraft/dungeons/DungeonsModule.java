@@ -11,9 +11,11 @@ import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 
 /**
- * Procedural Skyrim dungeons: Nordic barrows, caves, Dwemer ruins, vampire/necromancer/hagraven lairs, forts, mines,
- * giant camps, dragon lairs and Daedric shrines (one {@code skycraft:dungeon} structure type, themed per structure
- * JSON), plus the Dwemer automatons that guard the ruins.
+ * Procedural dungeons and landmarks of Nirn (one {@code skycraft:dungeon} structure type, themed per structure JSON):
+ * Skyrim's named sites at their places on the map ({@code skycraft:places}), the long ones in tiles
+ * ({@code skycraft:sites}: the 7,000 Steps, Blackreach), and the random dungeons of the other provinces and the endless
+ * lands, dressed in their region's culture ({@code world.Kit}). Also the Nordic puzzles (glyph pillars, claw doors and
+ * the dragon claws, {@code puzzle}), dormant draugr, and the Dwemer automatons that guard the ruins.
  *
  * <p>Everything syncs through vanilla structure data and {@code SynchedEntityData}; the module has no packets.</p>
  */

@@ -1,0 +1,13 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:unique/seven_thousand_steps",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:sites",
+    "salt": 718274056,
+    "sites": "seven_thousand_steps"
+  }
+}

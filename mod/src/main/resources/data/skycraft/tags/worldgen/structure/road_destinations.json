@@ -2,34 +2,30 @@
   "replace": false,
   "values": [
     "#skycraft:towns",
-    "skycraft:nordic_barrow",
     "skycraft:dwemer_ruin",
     "skycraft:fort",
-    "skycraft:mine",
     "skycraft:giant_camp",
-    {
-      "id": "dungeons_arise:keep_kayra",
-      "required": false
-    },
-    {
-      "id": "dungeons_arise:monastery",
-      "required": false
-    },
-    {
-      "id": "dungeons_arise:bandit_towers",
-      "required": false
-    },
-    {
-      "id": "dungeons_arise:thornborn_towers",
-      "required": false
-    },
-    {
-      "id": "nova_structures:stray_fort",
-      "required": false
-    },
-    {
-      "id": "nova_structures:ruin_town",
-      "required": false
-    }
+    "skycraft:mine",
+    "skycraft:nordic_barrow",
+    "skycraft:ruin/ayleid",
+    "skycraft:ruin/crystal_vault",
+    "skycraft:ruin/moon_temple",
+    "skycraft:ruin/tree_tomb",
+    "skycraft:ruin/velothi_tomb",
+    "skycraft:ruin/xanmeer",
+    "skycraft:ruin/yokudan_tomb",
+    "skycraft:site/barrow",
+    "skycraft:site/dwemer",
+    "skycraft:site/fort",
+    "skycraft:site/giant_camp",
+    "skycraft:site/mine",
+    "skycraft:unique/bleak_falls_barrow",
+    "skycraft:unique/forelhost",
+    "skycraft:unique/high_hrothgar",
+    "skycraft:unique/labyrinthian",
+    "skycraft:unique/labyrinthian_ruins",
+    "skycraft:unique/saarthal",
+    "skycraft:unique/sky_haven_temple",
+    "skycraft:unique/ustengrav"
   ]
 }

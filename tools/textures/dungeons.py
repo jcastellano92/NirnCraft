@@ -9,6 +9,7 @@ Every model box is painted face by face from the same UV layout as the Java mode
 seams, rivets along the edges, verdigris in the crevices and soul-blue / furnace-orange glows where the eyes and
 boilers are. Deterministic (fixed seeds). Run:  python3 tools/textures/dungeons.py
 """
+import json
 import os
 import random
 
@@ -193,12 +194,241 @@ def centurion():
     return img
 
 
+# --------------------------------------------------------------------------- Nordic puzzles
+
+ASSETS = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft")
+SYMBOLS = ["bear", "wolf", "hawk", "snake", "whale", "dragon"]
+# 10 x 10 glyph masks ('#' = carved)
+GLYPHS = {
+    "bear": [".#......#.", "###....###", "##########", "##.####.##", "##########",
+             "####..####", ".########.", "..######..", "...####...", "....##...."],
+    "wolf": [".......#..", "......##..", ".....###..", "....######", "...#######",
+             "..########", ".#######..", "#######...", ".####.....", "..##......"],
+    "hawk": ["....##....", "...####...", "#..####..#", "##.####.##", "##########",
+             ".########.", "...####...", "...#..#...", "..##..##..", ".........."],
+    "snake": ["...####...", "..##..##..", "..##......", "...###....", ".....###..",
+              ".......##.", "..##...##.", "...#####..", "..........", ".........."],
+    "whale": [".........#", "........##", "..#####.#.", ".########.", "##########",
+              "#.########", "##########", ".########.", "...####...", ".........."],
+    "dragon": ["#........#", "##..##..##", "###.##.###", "##########", ".########.",
+               "...####...", "...####...", "..##..##..", ".##....##.", "##......##"],
+}
+CLAWS = {"golden": (232, 184, 48), "ivory": (240, 232, 208), "coral": (240, 120, 96), "ruby": (208, 40, 56),
+         "sapphire": (48, 96, 224), "emerald": (48, 192, 96), "glass": (176, 240, 200), "iron": (140, 140, 144),
+         "ebony": (60, 50, 70), "diamond": (184, 240, 248)}
+GRANITE = (120, 116, 108)
+
+
+def granite(seed, w=16, h=16):
+    rnd = random.Random(seed)
+    img = Image.new("RGBA", (w, h))
+    px = img.load()
+    for y in range(h):
+        for x in range(w):
+            f = rnd.uniform(0.86, 1.08) * (0.92 if (x * 5 + y * 3) % 7 == 0 else 1.0)
+            px[x, y] = shade(GRANITE, f) + (255,)
+    for i in range(w):
+        px[i, 0] = shade(px[i, 0], 1.12) + (255,)
+        px[0, i] = shade(px[0, i], 1.08) + (255,)
+        px[i, h - 1] = shade(px[i, h - 1], 0.72) + (255,)
+        px[w - 1, i] = shade(px[w - 1, i], 0.78) + (255,)
+    return img, rnd
+
+
+def carve_glyph(img, glyph, ox=3, oy=3):
+    """Cuts a glyph: dark grooves with a lit lower lip."""
+    px = img.load()
+    rows = GLYPHS[glyph]
+    cut = set()
+    for gy, row in enumerate(rows):
+        for gx, ch in enumerate(row):
+            if ch == "#":
+                cut.add((ox + gx, oy + gy))
+    for (x, y) in cut:
+        px[x, y] = shade(px[x, y], 0.42) + (255,)
+    for (x, y) in cut:
+        if (x, y + 1) not in cut and y + 1 < 16:
+            px[x, y + 1] = shade(px[x, y + 1], 1.22) + (255,)
+
+
+def symbol_textures():
+    tex = os.path.join(ASSETS, "textures", "block")
+    os.makedirs(tex, exist_ok=True)
+    side, _ = granite("puzzle-side")
+    side.save(os.path.join(tex, "puzzle_stone_side.png"))
+    for s in SYMBOLS:
+        # the rotating ring: a carved disc border
+        img, rnd = granite("pillar-" + s)
+        px = img.load()
+        for y in range(16):
+            for x in range(16):
+                d = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+                if 6.6 < d < 7.6:
+                    px[x, y] = shade(px[x, y], 0.6) + (255,)
+                elif 5.8 < d <= 6.6:
+                    px[x, y] = shade(px[x, y], 1.15) + (255,)
+        carve_glyph(img, s)
+        img.save(os.path.join(tex, f"symbol_pillar_{s}.png"))
+        # the hint tablet: a square-framed slab
+        img, rnd = granite("tablet-" + s)
+        px = img.load()
+        for i in range(1, 15):
+            for (x, y) in ((i, 1), (i, 14), (1, i), (14, i)):
+                px[x, y] = shade(px[x, y], 0.66) + (255,)
+        carve_glyph(img, s)
+        img.save(os.path.join(tex, f"symbol_tablet_{s}.png"))
+    # the keyhole: a claw-shaped socket, three talon slots over a palm
+    img, rnd = granite("keyhole")
+    px = img.load()
+    hole = [(7, 3), (8, 3), (4, 4), (11, 4), (4, 5), (7, 5), (8, 5), (11, 5), (5, 6), (7, 6), (8, 6), (10, 6),
+            (5, 7), (6, 7), (7, 7), (8, 7), (9, 7), (10, 7)]
+    for y in range(8, 12):
+        for x in range(6, 10):
+            hole.append((x, y))
+    for (x, y) in hole:
+        px[x, y] = (34, 30, 28, 255)
+    for (x, y) in hole:
+        if (x, y + 1) not in hole:
+            px[x, y + 1] = shade(px[x, y + 1], 1.25) + (255,)
+    for i in range(2, 14):
+        px[i, 13] = (196, 160, 72, 255)
+    img.save(os.path.join(tex, "claw_keyhole.png"))
+
+
+def claw_icon(name, color):
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    px = img.load()
+    light = shade(color, 1.25)
+    dark = shade(color, 0.6)
+    # palm
+    for y in range(8, 14):
+        for x in range(5, 11):
+            if (x, y) in ((5, 13), (10, 13)):
+                continue
+            px[x, y] = color + (255,)
+    # three talons curling up and out
+    talons = [[(4, 7), (3, 6), (3, 5), (3, 4), (4, 3)], [(7, 7), (7, 6), (7, 5), (7, 4), (7, 3), (8, 2)],
+              [(10, 7), (11, 6), (12, 5), (12, 4), (11, 3)]]
+    for t in talons:
+        for i, (x, y) in enumerate(t):
+            px[x, y] = (light if i == len(t) - 1 else color) + (255,)
+            if x + 1 < 16 and px[x + 1, y][3] == 0:
+                px[x + 1, y] = dark + (255,)
+    for x in range(5, 11):
+        px[x, 14] = dark + (255,)
+    # the three glyph dots on the palm
+    for x in (6, 8):
+        px[x, 10] = dark + (255,)
+    px[7, 12] = dark + (255,)
+    for y in range(8, 14):
+        px[5, y] = light + (255,)
+    return img
+
+
+def write_json(path, obj):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(obj, f, indent=2)
+        f.write("\n")
+
+
+ROT = (("north", 0), ("east", 90), ("south", 180), ("west", 270))
+
+
+def puzzle_models():
+    bs = os.path.join(ASSETS, "blockstates")
+    models = os.path.join(ASSETS, "models")
+    for block in ("symbol_pillar", "symbol_tablet"):
+        variants = {}
+        for i, s in enumerate(SYMBOLS):
+            write_json(os.path.join(models, "block", f"{block}_{s}.json"), {
+                "parent": "minecraft:block/orientable",
+                "textures": {"front": f"skycraft:block/{block}_{s}", "side": "skycraft:block/puzzle_stone_side",
+                             "top": "skycraft:block/puzzle_stone_side"}})
+            for facing, rot in ROT:
+                v = {"model": f"skycraft:block/{block}_{s}"}
+                if rot:
+                    v["y"] = rot
+                variants[f"facing={facing},symbol={i}"] = v
+        write_json(os.path.join(bs, f"{block}.json"), {"variants": variants})
+    write_json(os.path.join(models, "block", "claw_keyhole.json"), {
+        "parent": "minecraft:block/orientable",
+        "textures": {"front": "skycraft:block/claw_keyhole", "side": "skycraft:block/puzzle_stone_side",
+                     "top": "skycraft:block/puzzle_stone_side"}})
+    variants = {}
+    for c in range(len(CLAWS)):
+        for facing, rot in ROT:
+            v = {"model": "skycraft:block/claw_keyhole"}
+            if rot:
+                v["y"] = rot
+            variants[f"claw={c},facing={facing}"] = v
+    write_json(os.path.join(bs, "claw_keyhole.json"), {"variants": variants})
+    # the puzzle lever looks like any lever (vanilla models, vanilla rotations)
+    variants = {}
+    face_rot = {"ceiling": (180, {"east": 270, "north": 180, "south": 0, "west": 90}),
+                "floor": (0, {"east": 90, "north": 0, "south": 180, "west": 270}),
+                "wall": (90, {"east": 90, "north": 0, "south": 180, "west": 270})}
+    for face, (x, ys) in face_rot.items():
+        for facing, y in ys.items():
+            for powered in ("false", "true"):
+                v = {"model": "minecraft:block/lever_on" if powered == "false" else "minecraft:block/lever"}
+                if x:
+                    v["x"] = x
+                if y:
+                    v["y"] = y
+                variants[f"face={face},facing={facing},powered={powered}"] = v
+    write_json(os.path.join(bs, "puzzle_lever.json"), {"variants": variants})
+    tex_item = os.path.join(ASSETS, "textures", "item")
+    os.makedirs(tex_item, exist_ok=True)
+    for name, color in CLAWS.items():
+        claw_icon(name, color).save(os.path.join(tex_item, f"{name}_claw.png"))
+        write_json(os.path.join(models, "item", f"{name}_claw.json"), {
+            "parent": "minecraft:item/generated", "textures": {"layer0": f"skycraft:item/{name}_claw"}})
+
+
+# --------------------------------------------------------------------------- Solstheim's All-Maker stones
+
+# Skaal runes on the standing-stone sigil grid (12 x 22): star points and the strokes joining them.
+RUNES = {
+    "beast": ([(3, 3), (6, 7), (9, 3), (6, 7), (6, 14), (3, 19), (9, 19)], [(0, 1), (2, 1), (1, 4), (4, 5), (4, 6)]),
+    "earth": ([(6, 3), (1, 18), (11, 18), (4, 12), (8, 12)], [(0, 1), (0, 2), (1, 2), (3, 4)]),
+    "sun": ([(6, 10), (6, 2), (6, 18), (1, 10), (11, 10), (2, 5), (10, 5), (2, 15), (10, 15)],
+            [(0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7), (0, 8)]),
+    "tree": ([(6, 20), (6, 4), (2, 8), (10, 8), (3, 13), (9, 13), (6, 1)], [(0, 1), (1, 2), (1, 3), (1, 6), (0, 4), (0, 5)]),
+    "water": ([(1, 6), (4, 4), (7, 6), (10, 4), (1, 13), (4, 11), (7, 13), (10, 11)], [(0, 1), (1, 2), (2, 3), (4, 5), (5, 6), (6, 7)]),
+    "wind": ([(2, 3), (10, 7), (2, 11), (10, 15), (2, 19)], [(0, 1), (1, 2), (2, 3), (3, 4)]),
+}
+ALLMAKER_COLORS = {"beast": "#C89058", "earth": "#8A7A5A", "sun": "#F8D050", "tree": "#58B048", "water": "#4890E0",
+                   "wind": "#D8E8F0"}
+
+
+def allmaker_stones():
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import lore
+    for name, (stars, lines) in RUNES.items():
+        sign = "allmaker_" + name
+        lore.SIGN_COLORS[sign] = ALLMAKER_COLORS[name]
+        st, ln = {sign: stars}, {sign: lines}
+        upper, lower = lore.split(lore.stone_face(sign, st, ln))
+        gu, gl = lore.split(lore.stone_glow(sign, st, ln))
+        lore.save(upper, "block", f"standing_stone_{sign}_upper.png")
+        lore.save(lower, "block", f"standing_stone_{sign}_lower.png")
+        lore.save(gu, "block", f"standing_stone_{sign}_upper_glow.png")
+        lore.save(gl, "block", f"standing_stone_{sign}_lower_glow.png")
+        lore.save(lore.stone_icon(sign, st, ln), "item", f"standing_stone_{sign}.png")
+        lore.stone_models(sign)
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     spider().save(os.path.join(OUT, "dwarven_spider.png"))
     sphere().save(os.path.join(OUT, "dwarven_sphere.png"))
     centurion().save(os.path.join(OUT, "dwarven_centurion.png"))
-    print("wrote", OUT)
+    symbol_textures()
+    puzzle_models()
+    allmaker_stones()
+    print("wrote", OUT, "and the puzzle, claw and All-Maker stone assets")
 
 
 if __name__ == "__main__":

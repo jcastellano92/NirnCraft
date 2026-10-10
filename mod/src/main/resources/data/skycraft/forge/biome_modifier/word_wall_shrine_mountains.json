@@ -1,9 +1,0 @@
-{
-  "type": "forge:add_features",
-  "biomes": {
-    "type": "forge:or",
-    "values": ["#minecraft:is_hill", "#minecraft:is_mountain"]
-  },
-  "features": "skycraft:word_wall_shrine_highlands",
-  "step": "surface_structures"
-}

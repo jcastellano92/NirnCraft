@@ -49,30 +49,118 @@ public final class Layout {
     }
 
     public static int surfaceRadius(Theme theme) {
-        return switch (theme) {
+        return surfaceRadius(Site.of(theme, 0));
+    }
+
+    /** Half-width of a surface site's footprint (its piece box reaches this far from the centre). */
+    public static int surfaceRadius(Site site) {
+        return switch (site.theme()) {
             case FORT -> 15;
             case GIANT_CAMP -> 13;
             case DRAGON_LAIR -> 12;
             case DAEDRIC_SHRINE -> 9;
+            case WATCHTOWER -> 9;
+            case SHIPWRECK -> 12;
+            case GROVE -> 14;
+            case BANDIT_CAMP, FORSWORN_CAMP -> 12;
+            case MILITARY_CAMP -> 16;
+            case CABIN -> 8;
+            case LIGHTHOUSE -> 8;
+            case LANDMARK -> 10;
+            case STANDING_STONE -> site.param() == SiteParams.GUARDIANS ? 10 : 7;
+            case WORD_WALL -> 8;
+            case DRAGON_MOUND -> 7;
+            case NORDIC_RUIN -> 10;
+            case GREAT_LIFT -> 7;
+            case PRINCE_SHRINE -> site.is(Special.AZURA) || site.is(Special.MERIDIA) ? 24 : 11;
+            case MAGE_TOWER -> 8;
+            case HIGH_HROTHGAR -> 38;
+            case THROAT_SUMMIT -> 14;
+            case SKY_HAVEN -> 26;
+            case LABYRINTHIAN -> 56;
             default -> 8;
+        };
+    }
+
+    /** Blocks the surface piece reaches above its ground level. */
+    private static int surfaceAbove(Site site) {
+        return switch (site.theme()) {
+            case FORT -> 24;
+            case DAEDRIC_SHRINE -> 20;
+            case DRAGON_LAIR -> 16;
+            case WATCHTOWER -> 26;
+            case LIGHTHOUSE -> 30;
+            case GREAT_LIFT -> 18;
+            case PRINCE_SHRINE -> site.is(Special.AZURA) || site.is(Special.MERIDIA) ? 56 : 24;
+            case MAGE_TOWER -> 32;
+            case HIGH_HROTHGAR -> 40;
+            case SKY_HAVEN -> 32;
+            case LABYRINTHIAN -> 30;
+            case THROAT_SUMMIT -> 20;
+            case NORDIC_RUIN, LANDMARK, GROVE -> 18;
+            default -> 14;
+        };
+    }
+
+    /** Blocks the surface piece reaches below its ground level (foundations, cellars, wells). */
+    private static int surfaceBelow(Site site) {
+        return switch (site.theme()) {
+            case FORT -> 14;
+            case GREAT_LIFT -> 96;
+            case SHIPWRECK -> 14;
+            case SKY_HAVEN, HIGH_HROTHGAR, PRINCE_SHRINE -> 24;
+            case LABYRINTHIAN -> 16;
+            default -> 12;
         };
     }
 
     // ------------------------------------------------------------------ surface sites
 
     public static void surface(StructurePiecesBuilder builder, Theme theme, int x, int y, int z, Direction facing, long seed, int flavor) {
-        int r = surfaceRadius(theme);
-        int below = theme == Theme.FORT ? 14 : 12;
-        int above = switch (theme) {
-            case FORT -> 24;
-            case DAEDRIC_SHRINE -> 20;
-            case DRAGON_LAIR -> 16;
-            default -> 14;
-        };
-        BoundingBox box = new BoundingBox(x - r, y - below, z - r, x + r, y + above, z + r);
-        builder.addPiece(new DungeonPiece(theme, DungeonPiece.Kind.SURFACE, box, seed, y, y, facing.get2DDataValue(), 0,
-                DungeonPiece.ROLE_NORMAL, 0, 0, flavor, 0));
+        surface(builder, Site.of(theme, flavor), x, y, z, facing, seed, false);
     }
+
+    /**
+     * One surface piece for the whole site.
+     *
+     * @param pad the structure uses terrain adaptation: the piece box starts at ground level so the beardifier levels
+     *            the ground to it (and foundations are left to the terrain)
+     */
+    public static void surface(StructurePiecesBuilder builder, Site site, int x, int y, int z, Direction facing, long seed, boolean pad) {
+        int r = surfaceRadius(site);
+        int below = pad ? 1 : surfaceBelow(site);
+        int above = surfaceAbove(site);
+        BoundingBox box = new BoundingBox(x - r, y - below, z - r, x + r, y + above, z + r);
+        builder.addPiece(new DungeonPiece(site, DungeonPiece.Kind.SURFACE, box, seed, y, y, facing.get2DDataValue(), 0,
+                DungeonPiece.ROLE_NORMAL, 0, 0, pad ? DungeonPiece.FLAG_PAD : 0));
+    }
+
+    /**
+     * A Great Lift: the Dwemer lift house on the surface and its shaft straight down into Blackreach. One piece
+     * from the cavern floor to the top of the lift house.
+     */
+    public static void greatLift(StructurePiecesBuilder builder, Site site, int x, int y, int z, Direction facing, long seed) {
+        int r = surfaceRadius(site);
+        int bottom = Math.min(y - 8, Blackreach.FLOOR_Y - 2);
+        BoundingBox box = new BoundingBox(x - r, bottom, z - r, x + r, y + surfaceAbove(site), z + r);
+        builder.addPiece(new DungeonPiece(site, DungeonPiece.Kind.SURFACE, box, seed, y, y, facing.get2DDataValue(), 0,
+                DungeonPiece.ROLE_NORMAL, 0, 0, 0));
+    }
+
+    /**
+     * The grounds of a named barrow or mine around its entrance (Bleak Falls' temple, Saarthal's dig, Forelhost's
+     * terraces...): one surface piece reaching out in front of the portal. {@link Exteriors} leaves the portal's own
+     * approach alone.
+     */
+    public static void exterior(StructurePiecesBuilder builder, Site site, int x, int y, int z, Direction out, long seed) {
+        int r = EXTERIOR_RADIUS;
+        int cx = x + out.getStepX() * (r - 6), cz = z + out.getStepZ() * (r - 6);
+        BoundingBox box = new BoundingBox(cx - r, y - 16, cz - r, cx + r, y + 30, cz + r);
+        builder.addPiece(new DungeonPiece(site, DungeonPiece.Kind.SURFACE, box, seed ^ 0x2545F491L, y, y, out.get2DDataValue(),
+                0, DungeonPiece.ROLE_NORMAL, x, z, 0));
+    }
+
+    public static final int EXTERIOR_RADIUS = 24;
 
     // ------------------------------------------------------------------ underground dungeons
 
@@ -85,6 +173,12 @@ public final class Layout {
      */
     public static void underground(StructurePiecesBuilder builder, Theme theme, int ex, int surfaceY, int ez, Direction out,
                                    int depth, long seed, int minFloor, int flavor, boolean openTop) {
+        underground(builder, Site.of(theme, flavor), ex, surfaceY, ez, out, depth, seed, minFloor, openTop);
+    }
+
+    public static void underground(StructurePiecesBuilder builder, Site site, int ex, int surfaceY, int ez, Direction out,
+                                   int depth, long seed, int minFloor, boolean openTop) {
+        Theme theme = site.theme();
         RandomSource r = RandomSource.create(seed);
         int floor0 = surfaceY - depth;
         int tunnelLen = depth + 4;
@@ -113,7 +207,7 @@ public final class Layout {
         List<Cell> cells = new ArrayList<>();
         cells.add(start);
 
-        int target = theme.minRooms + r.nextInt(theme.maxRooms - theme.minRooms + 1);
+        int target = theme.minRooms + r.nextInt(theme.maxRooms - theme.minRooms + 1) + (site.special() != Special.NONE ? 3 : 0);
         int maxFloor = floor0 + 2;
         for (int attempt = 0; attempt < 240 && cells.size() < target; attempt++) {
             Cell from = r.nextFloat() < 0.6f ? cells.get(cells.size() - 1 - r.nextInt(Math.min(2, cells.size()))) : cells.get(r.nextInt(cells.size()));
@@ -198,22 +292,25 @@ public final class Layout {
         {
             int a1 = wall + step, a2 = wall + step * tunnelLen;
             BoundingBox box = axisBox(axis, a1, a2, lateral - lat, lateral + lat, floor0 - 1, surfaceY + head);
-            builder.addPiece(new DungeonPiece(theme, DungeonPiece.Kind.TUNNEL, box, r.nextLong(), floor0, surfaceY,
-                    out.get2DDataValue(), depth, DungeonPiece.ROLE_NORMAL, lateral, wall, flavor, openTop ? DungeonPiece.FLAG_OPEN_TOP : 0));
+            builder.addPiece(new DungeonPiece(site, DungeonPiece.Kind.TUNNEL, box, r.nextLong(), floor0, surfaceY,
+                    out.get2DDataValue(), depth, DungeonPiece.ROLE_NORMAL, lateral, wall, openTop ? DungeonPiece.FLAG_OPEN_TOP : 0));
         }
         if (!openTop) {
-            int a1 = wall + step * (tunnelLen - 3), a2 = wall + step * (tunnelLen + 9);
-            BoundingBox box = axisBox(axis, a1, a2, lateral - 6, lateral + 6, surfaceY - 10, surfaceY + 10);
-            builder.addPiece(new DungeonPiece(theme, DungeonPiece.Kind.PORTAL, box, r.nextLong(), floor0, surfaceY,
-                    out.get2DDataValue(), depth, DungeonPiece.ROLE_NORMAL, lateral, wall, flavor, 0));
+            // culture ruins raise bigger facades (pyramids, hollow trees, spires) over the stairs
+            boolean big = theme == Theme.RUIN || site.kit() == Kit.ATMORAN;
+            int a1 = wall + step * (tunnelLen - (big ? 12 : 3)), a2 = wall + step * (tunnelLen + 9);
+            int w = big ? 8 : 6;
+            BoundingBox box = axisBox(axis, a1, a2, lateral - w, lateral + w, surfaceY - 10, surfaceY + (big ? 20 : 10));
+            builder.addPiece(new DungeonPiece(site, DungeonPiece.Kind.PORTAL, box, r.nextLong(), floor0, surfaceY,
+                    out.get2DDataValue(), depth, DungeonPiece.ROLE_NORMAL, lateral, wall, 0));
         }
 
         // rooms
         for (Cell c : cells) {
             int cx = ox + c.i * CELL, cz = oz + c.j * CELL;
             BoundingBox box = new BoundingBox(cx - c.hx, c.floor - 1, cz - c.hz, cx + c.hx, c.floor + c.height, cz + c.hz);
-            builder.addPiece(new DungeonPiece(theme, DungeonPiece.Kind.ROOM, box, r.nextLong(), c.floor, 0, c.entered, c.gate,
-                    c.role, c.doors, c.variant, flavor, c.flags));
+            builder.addPiece(new DungeonPiece(site, DungeonPiece.Kind.ROOM, box, r.nextLong(), c.floor, 0, c.entered, c.gate,
+                    c.role, c.doors, c.variant, c.flags));
         }
 
         // corridors (each link once: from the lower-coordinate cell)
@@ -239,8 +336,8 @@ public final class Layout {
                 boolean flat = a.floor == b.floor;
                 int len = axisId == 0 ? box.getXSpan() : box.getZSpan();
                 if (!natural && flat && len >= 3 && r.nextInt(10) < 3) flags |= DungeonPiece.FLAG_TRAP;
-                builder.addPiece(new DungeonPiece(theme, DungeonPiece.Kind.CORRIDOR, box, r.nextLong(), a.floor, b.floor, axisId, 0,
-                        DungeonPiece.ROLE_NORMAL, 0, r.nextInt(8), flavor, flags));
+                builder.addPiece(new DungeonPiece(site, DungeonPiece.Kind.CORRIDOR, box, r.nextLong(), a.floor, b.floor, axisId, 0,
+                        DungeonPiece.ROLE_NORMAL, 0, r.nextInt(8), flags));
             }
         }
     }

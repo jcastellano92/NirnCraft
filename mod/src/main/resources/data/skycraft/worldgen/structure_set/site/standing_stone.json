@@ -1,0 +1,16 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/standing_stone",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274038,
+    "types": [
+      "standing_stone"
+    ],
+    "variants": []
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "watchtower",
+  "flavor": 1,
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "nordic_tower"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

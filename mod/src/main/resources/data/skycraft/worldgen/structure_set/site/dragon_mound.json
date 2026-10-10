@@ -1,0 +1,16 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/dragon_mound",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274040,
+    "types": [
+      "dragon_mound"
+    ],
+    "variants": []
+  }
+}

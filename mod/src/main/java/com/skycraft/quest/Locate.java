@@ -34,12 +34,31 @@ public final class Locate {
 
     @Nullable
     public static BlockPos structure(ServerLevel level, TagKey<Structure> tag, BlockPos from, int radiusChunks) {
+        BlockPos found;
         try {
-            return level.findNearestMapStructure(tag, from, Math.min(radiusChunks, MAX_SEARCH_CHUNKS), false);
+            found = level.findNearestMapStructure(tag, from, Math.min(radiusChunks, MAX_SEARCH_CHUNKS), false);
         } catch (Exception e) {
             Skycraft.LOGGER.warn("Quest structure search failed for {}", tag.location(), e);
-            return null;
+            found = null;
         }
+        if (tag == DUNGEONS && level.dimension() == net.minecraft.world.level.Level.OVERWORLD) {
+            // Skyrim's dungeons are named places (their placement isn't searchable by structure): take the nearer
+            BlockPos named = namedDungeon(from, Math.min(radiusChunks, MAX_SEARCH_CHUNKS) * 16);
+            if (named != null && (found == null || horizontalDist(named, from) < horizontalDist(found, from))) found = named;
+        }
+        return found;
+    }
+
+    /** The nearest named dungeon or fort ({@link com.skycraft.tamriel.Places}) within {@code maxDist} blocks. */
+    @Nullable
+    private static BlockPos namedDungeon(BlockPos from, int maxDist) {
+        var dungeon = com.skycraft.tamriel.Places.nearest(com.skycraft.tamriel.PlaceType.DUNGEON_FIXED, from.getX(), from.getZ(), maxDist);
+        var fort = com.skycraft.tamriel.Places.nearest(com.skycraft.tamriel.PlaceType.FORT, from.getX(), from.getZ(), maxDist);
+        com.skycraft.tamriel.Place best = dungeon.orElse(null);
+        if (fort.isPresent() && (best == null || fort.get().distSqr(from.getX(), from.getZ()) < best.distSqr(from.getX(), from.getZ()))) {
+            best = fort.get();
+        }
+        return best == null ? null : new BlockPos(best.x(), 64, best.z());
     }
 
     @Nullable

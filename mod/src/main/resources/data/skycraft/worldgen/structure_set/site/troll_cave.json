@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/troll_cave",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274006,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "troll_cave"
+    ]
+  }
+}

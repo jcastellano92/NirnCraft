@@ -62,6 +62,48 @@ public final class Mobs {
         return orElse("skycraft:falmer", "minecraft:zombie");
     }
 
+    /** Reach natives: camps, redoubts and hagraven lairs. */
+    public static String forsworn() {
+        return orElse("skycraft:forsworn", "minecraft:vindicator");
+    }
+
+    /** Groves and forest dens. */
+    public static String spriggan() {
+        return orElse("skycraft:spriggan", "minecraft:vex");
+    }
+
+    /** Ice caves and snowbound ruins. */
+    public static String iceWraith() {
+        return orElse("skycraft:ice_wraith", "minecraft:stray");
+    }
+
+    /** Misty forest dens and grove hearts. */
+    public static String wispmother() {
+        return orElse("skycraft:wispmother", "minecraft:witch");
+    }
+
+    /** Military camps: the guard entity stands in for soldiers until NPC soldiers exist. */
+    public static String soldier() {
+        return orElse("skycraft:soldier", "skycraft:guard", "minecraft:villager");
+    }
+
+    public static String troll() {
+        return orElse(TROLL, "minecraft:ravager");
+    }
+
+    public static String sabreCat() {
+        return orElse("skycraft:sabre_cat", "skycraft:bear", "minecraft:wolf");
+    }
+
+    /** Shore wildlife; null (nothing spawns) without the fauna module. */
+    public static String horker() {
+        return Painter.firstExisting("skycraft:horker");
+    }
+
+    public static String mudcrab() {
+        return Painter.firstExisting("skycraft:mudcrab");
+    }
+
     /** Wildlife for animal dens: fauna's beasts if registered, frostbite spiders, wolves, and skeevers. */
     public static String denBeast(int roll) {
         return switch (Math.floorMod(roll, 4)) {

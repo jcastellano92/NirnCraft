@@ -1,7 +1,13 @@
 {
   "type": "skycraft:dungeon",
   "theme": "dwemer",
-  "biomes": "#skycraft:has_structure/dwemer_ruin",
+  "where": [
+    "morrowind",
+    "hammerfell",
+    "high_rock",
+    "realm"
+  ],
+  "biomes": "#skycraft:dungeons/anywhere",
   "step": "underground_structures",
   "spawn_overrides": {
     "monster": {

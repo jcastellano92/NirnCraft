@@ -1,8 +1,16 @@
 {
   "type": "skycraft:dungeon",
-  "theme": "daedric_shrine",
-  "biomes": "#skycraft:has_structure/daedric_shrine",
+  "theme": "prince_shrine",
+  "where": [
+    "realm",
+    "atmora",
+    "akavir",
+    "yokuda",
+    "pyandonea",
+    "thras"
+  ],
+  "biomes": "#skycraft:dungeons/anywhere",
   "step": "surface_structures",
   "spawn_overrides": {},
-  "terrain_adaptation": "none"
+  "terrain_adaptation": "beard_thin"
 }

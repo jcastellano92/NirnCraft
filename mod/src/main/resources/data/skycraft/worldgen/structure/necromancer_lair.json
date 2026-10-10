@@ -1,7 +1,7 @@
 {
   "type": "skycraft:dungeon",
   "theme": "necromancer_lair",
-  "biomes": "#skycraft:has_structure/necromancer_lair",
+  "biomes": "#skycraft:dungeons/anywhere",
   "step": "underground_structures",
   "spawn_overrides": {},
   "terrain_adaptation": "none"

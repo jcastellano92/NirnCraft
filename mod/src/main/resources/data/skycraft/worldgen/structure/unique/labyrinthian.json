@@ -1,0 +1,17 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "barrow",
+  "special": "labyrinthian",
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "labyrinthian"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

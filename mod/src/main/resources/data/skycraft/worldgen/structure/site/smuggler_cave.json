@@ -1,0 +1,17 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "cave",
+  "flavor": 9,
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "smuggler_cave"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

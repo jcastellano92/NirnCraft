@@ -1,0 +1,12 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "nordic_ruin",
+  "where": [
+    "atmora",
+    "realm"
+  ],
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

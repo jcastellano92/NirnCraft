@@ -1,0 +1,93 @@
+package com.skycraft.dungeons.puzzle;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.LeverBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+
+/**
+ * The lever of a Nordic pillar puzzle. Three rotating glyph stones sit in the wall above the sealed door; their
+ * answer is carved on three tablets over the doorway across the room (read left to right, as the pillars are when
+ * facing the door). Pulling the lever with the wrong glyphs showing fires poisoned darts from the walls; with the
+ * right ones it works like any lever and opens the door.
+ *
+ * <p>Geometry, from the lever: it hangs on the right jamb, facing into the room; the door's bottom-middle block is
+ * one block back towards the wall and one to the left, one block down.</p>
+ */
+public class PuzzleLeverBlock extends LeverBlock {
+    public static final int HINT_SEARCH = 16;
+
+    public PuzzleLeverBlock(Properties props) {
+        super(props);
+    }
+
+    /** Bottom-middle block of the door for a lever at {@code pos} facing {@code inward}. */
+    public static BlockPos doorBase(BlockPos pos, Direction inward) {
+        Direction right = inward.getOpposite().getClockWise();
+        return pos.relative(inward.getOpposite()).relative(right.getOpposite()).below();
+    }
+
+    @Override
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (level.isClientSide || state.getValue(POWERED)) return super.use(state, level, pos, player, hand, hit);
+        Direction inward = state.getValue(FACING);
+        if (solved(level, pos, inward)) return super.use(state, level, pos, player, hand, hit);
+        darts(level, pos, inward, player);
+        player.displayClientMessage(Component.translatable("message.skycraft.puzzle.wrong"), true);
+        return InteractionResult.CONSUME;
+    }
+
+    /** True if every pillar shows the glyph its tablet asks for (no tablets found counts as solved). */
+    public static boolean solved(Level level, BlockPos lever, Direction inward) {
+        BlockPos door = doorBase(lever, inward);
+        Direction right = inward.getOpposite().getClockWise();
+        BlockPos hintMid = null;
+        for (int k = 1; k <= HINT_SEARCH; k++) {
+            BlockPos p = door.relative(inward, k).above(3);
+            if (level.getBlockState(p).getBlock() instanceof SymbolStoneBlock b && !b.rotating()) {
+                hintMid = p;
+                break;
+            }
+        }
+        if (hintMid == null) return true;
+        for (int lat = -1; lat <= 1; lat++) {
+            Symbol want = SymbolStoneBlock.symbol(level.getBlockState(hintMid.relative(right, -lat)));
+            Symbol have = SymbolStoneBlock.symbol(level.getBlockState(door.relative(right, lat).above(3)));
+            if (want != null && want != have) return false;
+        }
+        return true;
+    }
+
+    private static void darts(Level level, BlockPos lever, Direction inward, Player player) {
+        BlockPos door = doorBase(lever, inward);
+        Direction right = inward.getOpposite().getClockWise();
+        Vec3 target = player.getEyePosition().subtract(0, 0.4, 0);
+        for (int s : new int[]{-2, 2}) {
+            BlockPos from = door.relative(right, s).relative(inward, 1).above(2);
+            Vec3 origin = Vec3.atCenterOf(from);
+            Vec3 d = target.subtract(origin);
+            Arrow arrow = new Arrow(level, origin.x, origin.y, origin.z);
+            arrow.setEffectsFromItem(PotionUtils.setPotion(new ItemStack(Items.TIPPED_ARROW), Potions.POISON));
+            arrow.pickup = AbstractArrow.Pickup.DISALLOWED;
+            arrow.shoot(d.x, d.y, d.z, 1.4f, 3.0f);
+            level.addFreshEntity(arrow);
+        }
+        level.playSound(null, lever, SoundEvents.DISPENSER_LAUNCH, SoundSource.BLOCKS, 1.0f, 1.3f);
+        level.playSound(null, lever, SoundEvents.STONE_BUTTON_CLICK_ON, SoundSource.BLOCKS, 1.0f, 0.5f);
+    }
+}

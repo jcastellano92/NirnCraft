@@ -98,7 +98,7 @@ public final class BarrowRooms {
                 boolean zr = z == room.minZ + 1 || z == room.maxZ - 1;
                 if (!xr && !zr) continue;
                 if (room.nearDoor(x, z, 1)) continue;
-                for (int y = room.floor; y <= ringTop; y++) p.set(x, y, z, BuiltBuilder.wall(p, Theme.BARROW, x, y, z, y - room.floor));
+                for (int y = room.floor; y <= ringTop; y++) p.set(x, y, z, BuiltBuilder.wall(p, room.theme(), x, y, z, y - room.floor));
                 p.set(x, ringTop + 1, z, Deco.slab(Blocks.STONE_BRICK_SLAB, false));
                 boolean corner = xr && zr;
                 int along = xr ? z : x;
@@ -114,7 +114,7 @@ public final class BarrowRooms {
                 else if (roll == 5) p.container(x, room.floor, z, Deco.barrel(inward), Deco.LOOT_MINOR);
                 else if (roll <= 7 && draugr < 3) {
                     draugr++;
-                    p.spawn(Mobs.draugr(), x, room.floor, z, Painter.yaw(inward), null);
+                    p.spawnDormant(Mobs.draugr(), x, room.floor, z, Painter.yaw(inward));
                 } else if (roll == 8) p.set(x, room.floor, z, Deco.candle(Blocks.CANDLE, 2 + roll % 2, true));
                 else if (roll == 9) p.set(x, room.floor, z, Blocks.BONE_BLOCK.defaultBlockState());
                 else p.set(x, room.floor + 1, z, Blocks.COBWEB.defaultBlockState());
@@ -143,7 +143,7 @@ public final class BarrowRooms {
                 int sx = fx + inward.getStepX(), sz = fz + inward.getStepZ();
                 if (draugr < 3 && !room.onLane(sx, sz) && p.chance(sx, room.floor, sz, 23, 2)) {
                     draugr++;
-                    p.spawn(Mobs.draugr(), sx, room.floor, sz, Painter.yaw(inward), null);
+                    p.spawnDormant(Mobs.draugr(), sx, room.floor, sz, Painter.yaw(inward));
                 }
             }
         }
@@ -243,6 +243,7 @@ public final class BarrowRooms {
         }
         urns(p, room, 1);
         common(p, room);
+        Puzzles.clawCache(p, room);
     }
 
     /**
@@ -277,7 +278,7 @@ public final class BarrowRooms {
                 p.set(x, room.floor + dy, z, st);
             }
         }
-        Deco.wordWall(p, wx, room.floor + 2, wz, back);
+        Deco.wordWall(p, wx, room.floor + 2, wz, back, room.piece.param);
         // braziers and the boss chest on the dais
         for (int s : new int[]{-(halfL - 1), halfL - 1}) {
             p.set(room.localX(f, halfF - 1, s), room.floor + 1, room.localZ(f, halfF - 1, s), Deco.campfire(false, true));
@@ -300,7 +301,7 @@ public final class BarrowRooms {
             for (int s : new int[]{-(halfL - 1), halfL - 1}) {
                 int x = room.localX(f, fwd, s), z = room.localZ(f, fwd, s);
                 if (room.nearDoor(x, z, 1)) continue;
-                for (int rel = 0; rel <= top; rel++) p.set(x, room.floor + rel, z, BuiltBuilder.pillar(Theme.BARROW, rel, top));
+                for (int rel = 0; rel <= top; rel++) p.set(x, room.floor + rel, z, BuiltBuilder.pillar(p, Theme.BARROW, rel, top));
             }
         }
         // guards
@@ -319,5 +320,6 @@ public final class BarrowRooms {
                 if (p.chance(x, room.maxY - 1, z, 51, 10)) p.setIfOpen(x, room.maxY - 1, z, Blocks.COBWEB.defaultBlockState());
             }
         }
+        if (room.piece.special != Special.NONE) Exteriors.bossRoom(p, room);
     }
 }

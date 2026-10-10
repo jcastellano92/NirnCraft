@@ -116,8 +116,17 @@ public final class NaturalRooms {
             case HAGRAVEN_LAIR -> hagraven(p, room);
             case MINE -> mine(p, room, flavor);
             default -> {
-                if (flavor % 2 == 0) bandits(p, room);
-                else den(p, room);
+                switch (CaveRoster.of(flavor)) {
+                    case CaveRoster.BANDIT, CaveRoster.SMUGGLER -> bandits(p, room);
+                    case CaveRoster.SPIDER -> CaveRooms.spiders(p, room);
+                    case CaveRoster.TROLL -> CaveRooms.troll(p, room);
+                    case CaveRoster.FALMER -> CaveRooms.falmer(p, room);
+                    case CaveRoster.FORSWORN -> CaveRooms.forsworn(p, room);
+                    case CaveRoster.SPRIGGAN -> CaveRooms.spriggans(p, room);
+                    case CaveRoster.ICE -> CaveRooms.ice(p, room);
+                    case CaveRoster.SKEEVER -> CaveRooms.skeevers(p, room);
+                    default -> den(p, room);
+                }
             }
         }
         if (room.piece.has(DungeonPiece.FLAG_TREASURE) && !room.boss()) loot(p, room, 99, Deco.chest(Direction.NORTH), Deco.LOOT_COMMON);
@@ -145,7 +154,9 @@ public final class NaturalRooms {
             case NECROMANCER_LAIR -> p.set(lx, f, lz, Blocks.SOUL_TORCH.defaultBlockState());
             case HAGRAVEN_LAIR -> p.set(lx, f, lz, Deco.candle(Blocks.BROWN_CANDLE, 1, true));
             case CAVE -> {
-                if (flavor % 2 == 0) p.set(lx, f, lz, Blocks.TORCH.defaultBlockState());
+                int roster = CaveRoster.of(flavor);
+                if (CaveRoster.inhabited(roster)) p.set(lx, f, lz, Blocks.TORCH.defaultBlockState());
+                else if (roster == CaveRoster.FALMER || roster == CaveRoster.SPRIGGAN) p.set(lx, f, lz, Blocks.SHROOMLIGHT.defaultBlockState());
             }
             default -> {
             }
@@ -304,14 +315,14 @@ public final class NaturalRooms {
             }
             loot(p, room, 96, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
             loot(p, room, 97, Deco.barrel(Direction.UP), Deco.LOOT_ALCHEMY);
-            mob(p, room, 98, "minecraft:evoker", "Master Necromancer");
+            mob(p, room, 98, Mobs.necromancer(), "Master Necromancer");
             mob(p, room, 110, "minecraft:skeleton", null);
             mob(p, room, 111, "minecraft:skeleton", null);
             mob(p, room, 112, "minecraft:zombie", "Thrall");
             return;
         }
         int roll = p.roll(room.cx, room.floor, room.cz, 113, 4);
-        if (roll == 0) mob(p, room, 114, "minecraft:evoker", "Necromancer");
+        if (roll == 0) mob(p, room, 114, Mobs.necromancer(), Painter.entityExists("skycraft:necromancer") ? null : "Necromancer");
         mob(p, room, 115, roll == 1 ? "minecraft:zombie" : "minecraft:skeleton", roll == 1 ? "Thrall" : null);
         if (room.piece.has(DungeonPiece.FLAG_DEAD_END)) loot(p, room, 116, Deco.barrel(Direction.UP), Deco.LOOT_ALCHEMY);
     }
@@ -342,14 +353,14 @@ public final class NaturalRooms {
         if (room.boss()) {
             loot(p, room, 127, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
             loot(p, room, 128, Deco.barrel(Direction.UP), Deco.LOOT_ALCHEMY);
-            mob(p, room, 129, "minecraft:witch", "Hagraven Matriarch");
-            mob(p, room, 130, "minecraft:vindicator", "Forsworn Briarheart");
-            mob(p, room, 131, "minecraft:pillager", "Forsworn");
+            mob(p, room, 129, Mobs.hagraven(), Painter.entityExists("skycraft:hagraven") ? null : "Hagraven Matriarch");
+            mob(p, room, 130, Mobs.forsworn(), "Forsworn Briarheart");
+            mob(p, room, 131, Mobs.forsworn(), Painter.entityExists("skycraft:forsworn") ? null : "Forsworn");
             return;
         }
         int roll = p.roll(room.cx, room.floor, room.cz, 132, 3);
-        if (roll == 0) mob(p, room, 133, "minecraft:witch", "Hagraven");
-        else mob(p, room, 134, roll == 1 ? "minecraft:vindicator" : "minecraft:pillager", "Forsworn");
+        if (roll == 0) mob(p, room, 133, Mobs.hagraven(), Painter.entityExists("skycraft:hagraven") ? null : "Hagraven");
+        else mob(p, room, 134, Mobs.forsworn(), Painter.entityExists("skycraft:forsworn") ? null : "Forsworn");
         if (room.piece.has(DungeonPiece.FLAG_DEAD_END)) loot(p, room, 135, Deco.barrel(Direction.UP), Deco.LOOT_ALCHEMY);
     }
 
@@ -391,6 +402,21 @@ public final class NaturalRooms {
             putEdge(p, room, 147, Blocks.GRINDSTONE.defaultBlockState());
         }
         boolean bandits = flavor % 2 == 1;
+        if (room.piece.special == Special.KOLSKEGGR) {
+            // the Forsworn hold Kolskeggr's gold
+            putEdge(p, room, 170, Blocks.RAW_GOLD_BLOCK.defaultBlockState());
+            putEdge(p, room, 171, Blocks.GOLD_ORE.defaultBlockState());
+            if (room.boss()) {
+                loot(p, room, 172, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
+                loot(p, room, 173, Deco.barrel(Direction.UP), Deco.LOOT_MINE);
+                mob(p, room, 174, Mobs.forsworn(), null);
+                mob(p, room, 175, Mobs.forsworn(), null);
+                mob(p, room, 176, Mobs.hagraven(), null);
+            } else {
+                mob(p, room, 177, Mobs.forsworn(), null);
+            }
+            return;
+        }
         if (room.boss()) {
             loot(p, room, 148, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
             loot(p, room, 149, Deco.barrel(Direction.UP), Deco.LOOT_MINE);

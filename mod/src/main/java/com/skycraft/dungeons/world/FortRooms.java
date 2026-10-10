@@ -13,14 +13,22 @@ import net.minecraft.world.level.block.state.BlockState;
 public final class FortRooms {
     private FortRooms() {}
 
-    /** Flavor 0 = bandits, 1 = Forsworn. */
+    /**
+     * Flavor 0 = bandits, 1 = Forsworn, 2 = vampires, 3 = mages and necromancers. Forts of other cultures (a culture
+     * kit other than Nord or Imperial) are held by that culture's roster instead.
+     */
     static void occupant(Painter p, int flavor, int x, int y, int z, float yaw, boolean chief) {
-        if (flavor % 2 == 0) {
-            p.spawn(chief ? Mobs.banditChief() : Mobs.bandit(), x, y, z, yaw, null);
-        } else {
-            boolean archer = !chief && p.chance(x, y, z, 70, 2);
-            p.spawn(archer ? "minecraft:pillager" : "minecraft:vindicator", x, y, z, yaw,
-                    chief ? "Forsworn Briarheart" : "Forsworn");
+        if (p.kit != Kit.NONE && p.kit != Kit.NORD && p.kit != Kit.IMPERIAL) {
+            Kit.Spawn s = chief ? p.kit.boss() : p.kit.minion(p.roll(x, y, z, 72, 6));
+            p.spawn(s.id(), x, y, z, yaw, s.label());
+            return;
+        }
+        switch (Math.floorMod(flavor, 4)) {
+            case 1 -> p.spawn(Mobs.forsworn(), x, y, z, yaw,
+                    chief ? "Forsworn Briarheart" : Painter.entityExists("skycraft:forsworn") ? null : "Forsworn");
+            case 2 -> p.spawn(chief ? Mobs.vampireMaster() : Mobs.vampire(), x, y, z, yaw, chief ? "Vampire Master" : null);
+            case 3 -> p.spawn(Mobs.necromancer(), x, y, z, yaw, chief ? "Master Wizard" : null);
+            default -> p.spawn(chief ? Mobs.banditChief() : Mobs.bandit(), x, y, z, yaw, null);
         }
     }
 

@@ -19,7 +19,34 @@ public enum Theme implements StringRepresentable {
     FORT("fort", Style.BUILT, 3, 5, 8, 11, 4, 5, false),
     GIANT_CAMP("giant_camp", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
     DRAGON_LAIR("dragon_lair", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
-    DAEDRIC_SHRINE("daedric_shrine", Style.SURFACE, 0, 0, 0, 0, 0, 0, false);
+    DAEDRIC_SHRINE("daedric_shrine", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    // ---- appended: saved by ordinal, never reorder
+    // surface sites of Skyrim's map (and the wilds beyond)
+    WATCHTOWER("watchtower", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    SHIPWRECK("shipwreck", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    GROVE("grove", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    BANDIT_CAMP("bandit_camp", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    MILITARY_CAMP("military_camp", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    CABIN("cabin", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    LIGHTHOUSE("lighthouse", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    LANDMARK("landmark", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    STANDING_STONE("standing_stone", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    WORD_WALL("word_wall", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    DRAGON_MOUND("dragon_mound", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    NORDIC_RUIN("nordic_ruin", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    FORSWORN_CAMP("forsworn_camp", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    GREAT_LIFT("great_lift", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    PRINCE_SHRINE("prince_shrine", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    MAGE_TOWER("mage_tower", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    // culture tombs and ruins: masonry like a barrow, dressed by the kit
+    RUIN("ruin", Style.BUILT, 6, 10, 14, 24, 5, 8, true),
+    // unique sites
+    HIGH_HROTHGAR("high_hrothgar", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    THROAT_SUMMIT("throat_summit", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    STEPS("steps", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    SKY_HAVEN("sky_haven", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    LABYRINTHIAN("labyrinthian", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    BLACKREACH("blackreach", Style.SURFACE, 0, 0, 0, 0, 0, 0, false);
 
     public static final Codec<Theme> CODEC = StringRepresentable.fromEnum(Theme::values);
 
@@ -60,6 +87,16 @@ public enum Theme implements StringRepresentable {
     /** Lairs share the cave carving with their own dressing. */
     public boolean lair() {
         return this == VAMPIRE_LAIR || this == NECROMANCER_LAIR || this == HAGRAVEN_LAIR;
+    }
+
+    /** Surface sites with a cellar or crypt below them (built as surface + underground pieces). */
+    public boolean hasUndercroft() {
+        return this == FORT;
+    }
+
+    /** Surface sites placed on open water or the shore rather than dry land. */
+    public boolean coastal() {
+        return this == SHIPWRECK || this == LIGHTHOUSE;
     }
 
     @Override

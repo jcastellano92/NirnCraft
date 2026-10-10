@@ -1,0 +1,8 @@
+{
+  "parent": "skycraft:block/standing_stone_upper",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "face": "skycraft:block/standing_stone_allmaker_sun_upper",
+    "glow": "skycraft:block/standing_stone_allmaker_sun_upper_glow"
+  }
+}

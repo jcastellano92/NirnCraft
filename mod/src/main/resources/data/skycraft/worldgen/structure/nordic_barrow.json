@@ -1,7 +1,12 @@
 {
   "type": "skycraft:dungeon",
   "theme": "barrow",
-  "biomes": "#skycraft:has_structure/nordic_barrow",
+  "kit": "nord",
+  "where": [
+    "atmora",
+    "realm"
+  ],
+  "biomes": "#skycraft:dungeons/anywhere",
   "step": "underground_structures",
   "spawn_overrides": {},
   "terrain_adaptation": "none"

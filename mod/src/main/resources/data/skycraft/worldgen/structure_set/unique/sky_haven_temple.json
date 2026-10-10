@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:unique/sky_haven_temple",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274055,
+    "types": [
+      "landmark"
+    ],
+    "variants": [
+      "sky_haven_temple"
+    ]
+  }
+}
