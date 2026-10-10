@@ -223,16 +223,6 @@ hash = "12b3bcbb19e76412d68c6978b4fb92c9aac0cb466e67e2ee4b18f5c33029aa4f"
 metafile = true
 
 [[files]]
-file = "mods/tectonic.pw.toml"
-hash = "e6d0da1f7ef491b71d6512418dd4b2e05ae84b9800d8236d366032a5b2ade778"
-metafile = true
-
-[[files]]
-file = "mods/terralith.pw.toml"
-hash = "c83f09563ed064b6c3729918ca3de823b4044681cf875481c53fd3495fb6221a"
-metafile = true
-
-[[files]]
 file = "mods/towns-and-towers.pw.toml"
 hash = "c137195ed17821b7735c01febd757bc345eb16f971931e71d5bf4d99f3a2dcaf"
 metafile = true

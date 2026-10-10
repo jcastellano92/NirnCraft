@@ -42,8 +42,6 @@ mr:vampirism                     # vampirism: become a vampire (or hunter)
 mr:werewolves | cf:werewolves-become-a-beast   # werewolf transformation
 
 # --- Towns, cities, dungeons, roads and secrets ---
-mr:terralith                     # Skyrim-like mountains and biomes
-mr:tectonic                      # dramatic terrain
 mr:ct-overhaul-village           # ChoiceTheorem's Overhauled Village: towns and cities
 mr:towns-and-towers              # more settlements, castles and towers
 mr:dungeons-and-taverns          # taverns (inns), dungeons

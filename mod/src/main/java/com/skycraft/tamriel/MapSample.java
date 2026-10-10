@@ -10,7 +10,7 @@ public final class MapSample {
     /** The second-nearest region at a border, and how much of it blends in (0 = none, 0.5 = on the border). */
     public int blendRegion;
     public float blendWeight;
-    /** Macro surface height in blocks (sea level is 63). */
+    /** Macro surface height in blocks (sea level is 63). Lakes report their bed. */
     public float elevation;
     /** 0..1 strengths. */
     public float ridge;
@@ -18,6 +18,24 @@ public final class MapSample {
     public float lake;
     /** Distance to the nearest coast in blocks, negative at sea. */
     public float coastDistance;
+
+    // ---- Detail used by the terrain density functions and the water feature (added in Phase 2) ----
+
+    /** Water surface of the nearest lake or river in blocks, or {@link Float#NaN} when there is none nearby. */
+    public float waterLevel;
+    /** Blocks to the nearest river centre line (large when none is near) and that river's half width. */
+    public float riverDistance;
+    public float riverHalfWidth;
+    /** Signed blocks to the nearest lake shore, positive inside the lake (very negative when none is near). */
+    public float lakeDistance;
+    /** Terrain character, 0..1: hill amplitude, cliffs/crags, dunes, wetland, and a road corridor. */
+    public float roughness;
+    public float crag;
+    public float dunes;
+    public float wetland;
+    public float road;
+    /** True inside the authored Tamriel raster, false in the foreign and generated lands. */
+    public boolean inTamriel;
 
     public void clear() {
         region = 0;
@@ -28,5 +46,21 @@ public final class MapSample {
         river = 0f;
         lake = 0f;
         coastDistance = 0f;
+        waterLevel = Float.NaN;
+        riverDistance = 10000f;
+        riverHalfWidth = 0f;
+        lakeDistance = -10000f;
+        roughness = 0f;
+        crag = 0f;
+        dunes = 0f;
+        wetland = 0f;
+        road = 0f;
+        inTamriel = false;
+    }
+
+    /** True when the column is inside a lake or a river channel (where the map places water). */
+    public boolean inWater() {
+        if (Float.isNaN(waterLevel)) return false;
+        return lakeDistance > 0 || riverDistance < riverHalfWidth;
     }
 }

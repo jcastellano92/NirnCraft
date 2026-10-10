@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:cache_2d",
+  "argument": {
+    "type": "skycraft:tamriel_height",
+    "hills": "skycraft:tamriel_hills",
+    "detail": "skycraft:tamriel_detail",
+    "ridges": "skycraft:tamriel_ridges",
+    "dunes": "skycraft:tamriel_dunes"
+  }
+}
