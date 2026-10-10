@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:deshaan_plains",
+    "skycraft:elsweyr_savanna",
+    "skycraft:grazelands",
+    "skycraft:ka_po_tun_steppe",
+    "skycraft:sugar_fields"
+  ]
+}

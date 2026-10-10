@@ -22,6 +22,7 @@
     "#skycraft:spawns/plains",
     "#skycraft:spawns/tundra",
     "#skycraft:spawns/reach",
-    "#skycraft:spawns/swamp"
+    "#skycraft:spawns/swamp",
+    "#skycraft:tamriel/land"
   ]
 }

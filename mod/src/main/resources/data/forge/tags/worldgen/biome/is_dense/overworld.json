@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:black_marsh_swamp",
+    "skycraft:falkreath_forest",
+    "skycraft:graht_oak_forest",
+    "skycraft:great_forest",
+    "skycraft:murkmire",
+    "skycraft:pellitine_jungle",
+    "skycraft:pyandonean_jungle_isles",
+    "skycraft:rivenspire",
+    "skycraft:tsaesci_jungle",
+    "skycraft:valenwood_rainforest"
+  ]
+}

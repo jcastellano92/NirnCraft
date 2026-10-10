@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:random_selector",
+  "config": {
+    "features": [
+      {
+        "feature": "skycraft:biome/juniper_checked",
+        "chance": 0.4
+      }
+    ],
+    "default": "skycraft:biome/huge_brown_mushroom_any"
+  }
+}

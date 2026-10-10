@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:random_selector",
+  "config": {
+    "features": [
+      {
+        "feature": "minecraft:cherry_checked",
+        "chance": 0.35
+      },
+      {
+        "feature": "minecraft:fancy_oak_checked",
+        "chance": 0.15
+      },
+      {
+        "feature": "minecraft:birch_checked",
+        "chance": 0.1
+      }
+    ],
+    "default": "skycraft:biome/summerset_gold_checked"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:alikr_desert",
+    "skycraft:alikr_dunes",
+    "skycraft:anequina_badlands",
+    "skycraft:craglorn",
+    "skycraft:elsweyr_canyons",
+    "skycraft:elsweyr_dunes",
+    "skycraft:yokudan_desert"
+  ]
+}

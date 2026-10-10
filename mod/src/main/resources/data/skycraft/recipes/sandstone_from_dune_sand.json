@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "key": {
+    "#": {
+      "item": "skycraft:dune_sand"
+    }
+  },
+  "result": {
+    "item": "minecraft:sandstone"
+  }
+}

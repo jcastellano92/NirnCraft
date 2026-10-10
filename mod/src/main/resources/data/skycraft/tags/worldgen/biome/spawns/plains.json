@@ -45,6 +45,9 @@
     {
       "id": "terralith:brushland",
       "required": false
-    }
+    },
+    "skycraft:eastmarch_volcanic_tundra",
+    "skycraft:whiterun_plains",
+    "skycraft:whiterun_tundra"
   ]
 }

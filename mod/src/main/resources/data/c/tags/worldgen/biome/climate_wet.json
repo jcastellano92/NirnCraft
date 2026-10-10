@@ -1,0 +1,31 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:bitter_coast_swamp",
+    "skycraft:black_marsh_swamp",
+    "skycraft:blackwood_swamp",
+    "skycraft:deep_mire",
+    "skycraft:eastmarch_hot_springs",
+    "skycraft:falkreath_forest",
+    "skycraft:glenumbra_moors",
+    "skycraft:graht_oak_forest",
+    "skycraft:great_forest",
+    "skycraft:hist_grove",
+    "skycraft:hjaalmarch_marsh",
+    "skycraft:mangrove_delta",
+    "skycraft:murkmire",
+    "skycraft:murky_river",
+    "skycraft:nibenay_valley",
+    "skycraft:pellitine_jungle",
+    "skycraft:pyandonean_jungle_isles",
+    "skycraft:rivenspire",
+    "skycraft:shadowfen",
+    "skycraft:stormhaven",
+    "skycraft:sunken_isles",
+    "skycraft:telvanni_mushroom_forest",
+    "skycraft:tropical_beach",
+    "skycraft:tsaesci_jungle",
+    "skycraft:valenwood_mangrove_coast",
+    "skycraft:valenwood_rainforest"
+  ]
+}

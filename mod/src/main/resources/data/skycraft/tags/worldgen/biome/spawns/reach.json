@@ -1,7 +1,9 @@
 {
   "replace": false,
   "values": [
-    "#minecraft:is_badlands",
+    "minecraft:badlands",
+    "minecraft:eroded_badlands",
+    "minecraft:wooded_badlands",
     "minecraft:windswept_hills",
     "minecraft:windswept_gravelly_hills",
     "minecraft:stony_peaks",
@@ -44,6 +46,8 @@
     {
       "id": "terralith:white_cliffs",
       "required": false
-    }
+    },
+    "skycraft:reach_crags",
+    "skycraft:reach_valley"
   ]
 }

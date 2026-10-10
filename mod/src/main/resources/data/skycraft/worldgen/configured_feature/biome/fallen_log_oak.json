@@ -1,0 +1,11 @@
+{
+  "type": "skycraft:fallen_log",
+  "config": {
+    "state": {
+      "Name": "minecraft:oak_log",
+      "Properties": {
+        "axis": "x"
+      }
+    }
+  }
+}

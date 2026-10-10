@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:random_selector",
+  "config": {
+    "features": [
+      {
+        "feature": "skycraft:biome/snowy_spruce_checked",
+        "chance": 0.5
+      },
+      {
+        "feature": "skycraft:biome/snowy_pine_checked",
+        "chance": 0.2
+      }
+    ],
+    "default": "skycraft:biome/giant_snowy_spruce_checked"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "type": "skycraft:boulder",
+  "config": {
+    "state": {
+      "type": "minecraft:weighted_state_provider",
+      "entries": [
+        {
+          "data": {
+            "Name": "skycraft:volcanic_rock"
+          },
+          "weight": 6
+        },
+        {
+          "data": {
+            "Name": "skycraft:cracked_volcanic_rock"
+          },
+          "weight": 2
+        },
+        {
+          "data": {
+            "Name": "minecraft:basalt"
+          },
+          "weight": 1
+        },
+        {
+          "data": {
+            "Name": "minecraft:blackstone"
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "radius": {
+      "type": "minecraft:uniform",
+      "value": {
+        "min_inclusive": 1,
+        "max_inclusive": 3
+      }
+    }
+  }
+}

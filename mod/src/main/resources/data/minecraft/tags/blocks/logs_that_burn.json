@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:graht_oak_log",
+    "skycraft:graht_oak_wood",
+    "skycraft:palm_log",
+    "skycraft:hist_log"
+  ]
+}

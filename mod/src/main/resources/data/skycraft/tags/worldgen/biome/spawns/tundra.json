@@ -34,6 +34,14 @@
     {
       "id": "terralith:snowy_badlands",
       "required": false
-    }
+    },
+    "skycraft:atmoran_ice_waste",
+    "skycraft:eastmarch_hot_springs",
+    "skycraft:eastmarch_volcanic_tundra",
+    "skycraft:kamal_snowfield",
+    "skycraft:pale_snowfield",
+    "skycraft:skyrim_highlands",
+    "skycraft:whiterun_tundra",
+    "skycraft:winterhold_glacier"
   ]
 }

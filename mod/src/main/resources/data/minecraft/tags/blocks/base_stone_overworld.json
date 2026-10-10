@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:volcanic_rock",
+    "skycraft:cracked_volcanic_rock",
+    "skycraft:coral_stone",
+    "skycraft:frosted_stone"
+  ]
+}

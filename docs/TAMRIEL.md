@@ -134,7 +134,15 @@ before datapacks load, and the client map screen needs it too.
   terrain context: coast/beach, river, lowland, hill, peak, and cave depth.
   * Every region's palette must cover ocean, beach and river, so coasts and rivers always get a sensible
     biome.
-  * Palettes live in `skycraft/tamriel/palettes.json`.
+  * Palettes live in `skycraft/tamriel/palettes.json`. Keys are region ids, `province/<province>`, `realm/<archetype>`
+    and `default`; a region finds its palette by id, then by its `palette` field (a key, or an archetype name such
+    as `frozen`), then by province. Missing contexts fall back along `fallback`. Contexts: `ocean`, `deep_ocean`,
+    `beach`, `river`, `lake`, `marsh`, `lowland`, `upland`, `peak`, `summit`, `cave`, `deep_cave`.
+  * The biome source reads the noise router like vanilla does: `depth` (about 0 at the surface, +1 per 128 blocks
+    down) for caves and the surface height, `continentalness` for sea (< −0.19), deep sea (< −0.455) and coast
+    (< −0.11), `erosion` for marshes and `ridges` for valley rivers at water level, plus `temperature` and
+    `vegetation` for variety inside a palette. From the map it uses `coastDistance`, `river`, `lake`, `ridge` and
+    `elevation`. `/skybiome [pos]` and `/skybiome census <radius> <palette>` show what it picks.
 * **Starter catalogue (about 90 biomes).** Workstreams may add more.
 
 | Province | Biomes |

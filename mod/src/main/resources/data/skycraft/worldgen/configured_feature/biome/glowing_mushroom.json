@@ -1,0 +1,22 @@
+{
+  "type": "skycraft:giant_mushroom",
+  "config": {
+    "stem": {
+      "Name": "skycraft:parasol_stem",
+      "Properties": {
+        "axis": "y"
+      }
+    },
+    "cap": {
+      "Name": "skycraft:glowing_mushroom_cap"
+    },
+    "style": "cave",
+    "height": {
+      "type": "minecraft:uniform",
+      "value": {
+        "min_inclusive": 5,
+        "max_inclusive": 16
+      }
+    }
+  }
+}

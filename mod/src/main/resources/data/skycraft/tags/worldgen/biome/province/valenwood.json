@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:graht_oak_forest",
+    "skycraft:jungle_river",
+    "skycraft:reapers_march",
+    "skycraft:valenwood_mangrove_coast",
+    "skycraft:valenwood_rainforest"
+  ]
+}

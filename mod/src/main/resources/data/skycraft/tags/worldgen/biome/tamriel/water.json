@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:bjoulsae_river",
+    "skycraft:cyrodiil_river",
+    "skycraft:frozen_river",
+    "skycraft:jungle_river",
+    "skycraft:lake_rumare_shore",
+    "skycraft:murky_river",
+    "skycraft:skyrim_lake",
+    "skycraft:skyrim_river",
+    "skycraft:warm_river"
+  ]
+}

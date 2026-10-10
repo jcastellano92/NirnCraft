@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:ascadian_isles",
+    "skycraft:ash_shore",
+    "skycraft:azuras_coast",
+    "skycraft:bitter_coast_swamp",
+    "skycraft:deshaan_plains",
+    "skycraft:grazelands",
+    "skycraft:inner_sea",
+    "skycraft:molag_amur",
+    "skycraft:red_mountain",
+    "skycraft:sheogorad",
+    "skycraft:solstheim_ashlands",
+    "skycraft:solstheim_pine_forest",
+    "skycraft:stonefalls",
+    "skycraft:telvanni_mushroom_forest",
+    "skycraft:vvardenfell_ashlands",
+    "skycraft:west_gash"
+  ]
+}

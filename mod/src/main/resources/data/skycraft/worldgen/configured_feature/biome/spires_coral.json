@@ -1,0 +1,79 @@
+{
+  "type": "skycraft:spire_cluster",
+  "config": {
+    "body": {
+      "type": "minecraft:weighted_state_provider",
+      "entries": [
+        {
+          "data": {
+            "Name": "skycraft:coral_stone"
+          },
+          "weight": 5
+        },
+        {
+          "data": {
+            "Name": "minecraft:dead_brain_coral_block"
+          },
+          "weight": 1
+        },
+        {
+          "data": {
+            "Name": "minecraft:dead_fire_coral_block"
+          },
+          "weight": 1
+        },
+        {
+          "data": {
+            "Name": "minecraft:dead_horn_coral_block"
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "tip": {
+      "type": "minecraft:weighted_state_provider",
+      "entries": [
+        {
+          "data": {
+            "Name": "minecraft:dead_brain_coral"
+          },
+          "weight": 1
+        },
+        {
+          "data": {
+            "Name": "minecraft:dead_fire_coral"
+          },
+          "weight": 1
+        },
+        {
+          "data": {
+            "Name": "minecraft:dead_tube_coral_fan"
+          },
+          "weight": 1
+        },
+        {
+          "data": {
+            "Name": "minecraft:dead_horn_coral"
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "count": {
+      "type": "minecraft:uniform",
+      "value": {
+        "min_inclusive": 2,
+        "max_inclusive": 6
+      }
+    },
+    "height": {
+      "type": "minecraft:uniform",
+      "value": {
+        "min_inclusive": 2,
+        "max_inclusive": 7
+      }
+    },
+    "spread": 5,
+    "lean": 0.2
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:random_selector",
+  "config": {
+    "features": [
+      {
+        "feature": "minecraft:cherry_checked",
+        "chance": 0.25
+      },
+      {
+        "feature": "minecraft:fancy_oak_checked",
+        "chance": 0.15
+      },
+      {
+        "feature": "skycraft:biome/orange_aspen_checked",
+        "chance": 0.1
+      }
+    ],
+    "default": "minecraft:oak_checked"
+  }
+}

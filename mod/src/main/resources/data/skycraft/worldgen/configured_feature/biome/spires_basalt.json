@@ -1,0 +1,44 @@
+{
+  "type": "skycraft:spire_cluster",
+  "config": {
+    "body": {
+      "type": "minecraft:weighted_state_provider",
+      "entries": [
+        {
+          "data": {
+            "Name": "minecraft:basalt"
+          },
+          "weight": 3
+        },
+        {
+          "data": {
+            "Name": "skycraft:volcanic_rock"
+          },
+          "weight": 2
+        }
+      ]
+    },
+    "tip": {
+      "type": "minecraft:simple_state_provider",
+      "state": {
+        "Name": "skycraft:magma_volcanic_rock"
+      }
+    },
+    "count": {
+      "type": "minecraft:uniform",
+      "value": {
+        "min_inclusive": 2,
+        "max_inclusive": 5
+      }
+    },
+    "height": {
+      "type": "minecraft:uniform",
+      "value": {
+        "min_inclusive": 3,
+        "max_inclusive": 9
+      }
+    },
+    "spread": 4,
+    "lean": 0.1
+  }
+}

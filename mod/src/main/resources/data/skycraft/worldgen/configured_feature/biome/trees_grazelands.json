@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:random_selector",
+  "config": {
+    "features": [
+      {
+        "feature": "skycraft:biome/crooked_oak_checked",
+        "chance": 0.2
+      }
+    ],
+    "default": "skycraft:biome/ash_scrub_checked"
+  }
+}

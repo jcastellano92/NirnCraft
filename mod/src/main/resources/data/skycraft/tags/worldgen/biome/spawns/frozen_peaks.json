@@ -24,6 +24,8 @@
     {
       "id": "terralith:alpine_grove",
       "required": false
-    }
+    },
+    "skycraft:snowy_slopes",
+    "skycraft:throat_of_the_world"
   ]
 }

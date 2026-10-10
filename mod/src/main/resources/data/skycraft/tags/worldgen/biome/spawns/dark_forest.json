@@ -9,6 +9,9 @@
     {
       "id": "terralith:moonlight_valley",
       "required": false
-    }
+    },
+    "skycraft:falkreath_forest",
+    "skycraft:great_forest",
+    "skycraft:rivenspire"
   ]
 }

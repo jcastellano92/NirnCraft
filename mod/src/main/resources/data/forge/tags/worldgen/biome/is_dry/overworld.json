@@ -1,0 +1,23 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:alikr_desert",
+    "skycraft:alikr_dunes",
+    "skycraft:anequina_badlands",
+    "skycraft:craglorn",
+    "skycraft:dragontail_mountains",
+    "skycraft:elsweyr_canyons",
+    "skycraft:elsweyr_dunes",
+    "skycraft:elsweyr_savanna",
+    "skycraft:grazelands",
+    "skycraft:ka_po_tun_steppe",
+    "skycraft:lava_caves",
+    "skycraft:molag_amur",
+    "skycraft:reach_crags",
+    "skycraft:red_mountain",
+    "skycraft:solstheim_ashlands",
+    "skycraft:stonefalls",
+    "skycraft:vvardenfell_ashlands",
+    "skycraft:yokudan_desert"
+  ]
+}

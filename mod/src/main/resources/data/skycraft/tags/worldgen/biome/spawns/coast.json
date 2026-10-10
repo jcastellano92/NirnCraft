@@ -4,6 +4,11 @@
     "minecraft:beach",
     "minecraft:snowy_beach",
     "minecraft:stony_shore",
-    "#minecraft:is_beach"
+    "skycraft:ash_shore",
+    "skycraft:azuras_coast",
+    "skycraft:frozen_shore",
+    "skycraft:rocky_shore",
+    "skycraft:sheogorad",
+    "skycraft:skyrim_coast"
   ]
 }

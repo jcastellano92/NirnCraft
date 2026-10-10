@@ -6,6 +6,16 @@
     "skycraft:armor_workbench",
     "skycraft:alchemy_lab",
     "skycraft:arcane_enchanter",
-    "skycraft:drafting_table"
+    "skycraft:drafting_table",
+    "skycraft:graht_oak_log",
+    "skycraft:graht_oak_wood",
+    "skycraft:palm_log",
+    "skycraft:hist_log",
+    "skycraft:graht_oak_planks",
+    "skycraft:palm_planks",
+    "skycraft:parasol_stem",
+    "skycraft:parasol_cap",
+    "skycraft:telvanni_cap",
+    "skycraft:glowing_mushroom_cap"
   ]
 }

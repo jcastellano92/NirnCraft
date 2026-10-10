@@ -170,6 +170,24 @@ Spell sounds all go through `SpellSounds` (slots the audio module can override),
   phantoms are gone.
 * **Loot bodies.** Slain creatures leave a body you open to loot.
 
+## Biomes of Nirn [Core]
+
+* **Over 110 biomes, one per corner of Tamriel.** Each region of the map has its own palette of biomes, picked by
+  terrain (coast, river, lowland, upland, peak, cave) and local climate, and region borders blend organically:
+  * Skyrim: Whiterun's golden tundra, tall pine forests, misty Falkreath, the Rift's autumn aspens, the Reach's red
+    crags, Hjaalmarch's marshes, Eastmarch's steaming hot springs, the Pale's snowfields, Winterhold's glacier, the
+    Throat of the World, the iceberg-strewn Sea of Ghosts, and Solstheim's ash.
+  * Morrowind: ash wastes with ash storms and lava vents, Red Mountain, the Bitter Coast, the Grazelands, the
+    Ascadian Isles and the Telvanni forests of giant mushrooms.
+  * Black Marsh's swamps and Hist groves, Elsweyr's badlands, dunes, savanna and moon-sugar fields, Valenwood's
+    walkable Graht-oaks, Summerset's crystal coasts, Hammerfell's Alik'r desert, High Rock's moors and mountains, and
+    the foreign lands beyond the seas (Atmora, Akavir, Yokuda, Pyandonea, Thras).
+  * Underground: Dwemer caverns with old pipework, Blackreach-like Falmer glow caves, ice caves, lava caves and
+    mushroom grottos, alongside vanilla's dripstone, lush and deep dark caves.
+* **New blocks:** ash and ash layers, volcanic rock, autumn aspen leaves, emperor parasol and Telvanni mushrooms,
+  Graht-oak, palm and Hist wood, Hist sap, crystal, coral stone, dune sand, swamp reeds, scathecraw and ash grass.
+* `/skybiome [pos]` (operators) shows the region, palette and terrain context behind the biome at a position.
+
 ## Towns, cities, dungeons, roads and secrets
 
 * **Towns and cities:** ChoiceTheorem's Overhauled Village, Towns & Towers, Dungeons & Taverns (inns).

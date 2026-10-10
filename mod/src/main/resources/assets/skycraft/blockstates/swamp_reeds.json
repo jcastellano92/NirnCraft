@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "half=lower": {
+      "model": "skycraft:block/swamp_reeds_bottom"
+    },
+    "half=upper": {
+      "model": "skycraft:block/swamp_reeds_top"
+    }
+  }
+}

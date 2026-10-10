@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:alikr_desert",
+    "skycraft:alikr_dunes",
+    "skycraft:anequina_badlands",
+    "skycraft:crystal_spires",
+    "skycraft:eastmarch_volcanic_tundra",
+    "skycraft:elsweyr_canyons",
+    "skycraft:elsweyr_dunes",
+    "skycraft:molag_amur",
+    "skycraft:stonefalls",
+    "skycraft:vvardenfell_ashlands",
+    "skycraft:whiterun_tundra",
+    "skycraft:yokudan_desert"
+  ]
+}

@@ -29,6 +29,13 @@
     "skycraft:shrine_of_mara",
     "skycraft:shrine_of_stendarr",
     "skycraft:shrine_of_talos",
-    "skycraft:shrine_of_zenithar"
+    "skycraft:shrine_of_zenithar",
+    "skycraft:volcanic_rock",
+    "skycraft:cracked_volcanic_rock",
+    "skycraft:magma_volcanic_rock",
+    "skycraft:coral_stone",
+    "skycraft:frosted_stone",
+    "skycraft:crystal_block",
+    "skycraft:crystal_cluster"
   ]
 }

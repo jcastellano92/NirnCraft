@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:golden_aspen_leaves",
+    "skycraft:orange_aspen_leaves",
+    "skycraft:snowy_spruce_leaves",
+    "skycraft:graht_oak_leaves",
+    "skycraft:palm_fronds",
+    "skycraft:hist_leaves",
+    "skycraft:hist_sap_block"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:dwemer_caverns",
+    "skycraft:falmer_glow_caves",
+    "skycraft:ice_caves",
+    "skycraft:lava_caves",
+    "skycraft:mushroom_grottos"
+  ]
+}

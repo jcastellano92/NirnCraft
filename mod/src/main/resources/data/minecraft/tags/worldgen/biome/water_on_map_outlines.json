@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:cold_ocean",
+    "skycraft:coral_sea",
+    "skycraft:deep_cold_ocean",
+    "skycraft:deep_sea_of_ghosts",
+    "skycraft:deep_temperate_ocean",
+    "skycraft:deep_warm_ocean",
+    "skycraft:inner_sea",
+    "skycraft:sea_of_ghosts",
+    "skycraft:temperate_ocean",
+    "skycraft:warm_ocean"
+  ]
+}

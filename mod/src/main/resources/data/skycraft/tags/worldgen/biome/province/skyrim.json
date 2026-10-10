@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:alpine_meadow",
+    "skycraft:deep_sea_of_ghosts",
+    "skycraft:eastmarch_hot_springs",
+    "skycraft:eastmarch_volcanic_tundra",
+    "skycraft:falkreath_forest",
+    "skycraft:frozen_river",
+    "skycraft:frozen_shore",
+    "skycraft:hjaalmarch_marsh",
+    "skycraft:pale_snowfield",
+    "skycraft:pine_forest",
+    "skycraft:reach_crags",
+    "skycraft:reach_valley",
+    "skycraft:rift_autumn_forest",
+    "skycraft:sea_of_ghosts",
+    "skycraft:skyrim_coast",
+    "skycraft:skyrim_highlands",
+    "skycraft:skyrim_lake",
+    "skycraft:skyrim_river",
+    "skycraft:snowy_pine_forest",
+    "skycraft:snowy_slopes",
+    "skycraft:throat_of_the_world",
+    "skycraft:whiterun_plains",
+    "skycraft:whiterun_tundra",
+    "skycraft:winterhold_glacier"
+  ]
+}

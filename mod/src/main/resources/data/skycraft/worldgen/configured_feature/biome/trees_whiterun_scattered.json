@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:random_selector",
+  "config": {
+    "features": [
+      {
+        "feature": "skycraft:biome/juniper_checked",
+        "chance": 0.4
+      },
+      {
+        "feature": "minecraft:oak_checked",
+        "chance": 0.1
+      }
+    ],
+    "default": "skycraft:biome/tall_spruce_checked"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:bjoulsae_river",
+    "skycraft:cold_ocean",
+    "skycraft:coral_sea",
+    "skycraft:cyrodiil_river",
+    "skycraft:deep_cold_ocean",
+    "skycraft:deep_sea_of_ghosts",
+    "skycraft:deep_temperate_ocean",
+    "skycraft:deep_warm_ocean",
+    "skycraft:frozen_river",
+    "skycraft:inner_sea",
+    "skycraft:jungle_river",
+    "skycraft:lake_rumare_shore",
+    "skycraft:sea_of_ghosts",
+    "skycraft:skyrim_lake",
+    "skycraft:skyrim_river",
+    "skycraft:temperate_ocean",
+    "skycraft:warm_ocean",
+    "skycraft:warm_river"
+  ]
+}

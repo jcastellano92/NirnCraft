@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:alpine_meadow",
+    "skycraft:dragontail_mountains",
+    "skycraft:jerall_foothills",
+    "skycraft:reach_crags",
+    "skycraft:red_mountain",
+    "skycraft:skyrim_highlands",
+    "skycraft:snowy_slopes",
+    "skycraft:throat_of_the_world",
+    "skycraft:wrothgarian_mountains"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:atmoran_frozen_forest",
+    "skycraft:atmoran_ice_waste",
+    "skycraft:deep_sea_of_ghosts",
+    "skycraft:frozen_river",
+    "skycraft:frozen_shore",
+    "skycraft:hjaalmarch_marsh",
+    "skycraft:ice_caves",
+    "skycraft:kamal_snowfield",
+    "skycraft:pale_snowfield",
+    "skycraft:sea_of_ghosts",
+    "skycraft:skyrim_coast",
+    "skycraft:snowy_pine_forest",
+    "skycraft:snowy_slopes",
+    "skycraft:solstheim_pine_forest",
+    "skycraft:throat_of_the_world",
+    "skycraft:winterhold_glacier",
+    "skycraft:wrothgarian_mountains"
+  ]
+}

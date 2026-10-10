@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "skycraft:block/parasol_stem_top",
+    "side": "skycraft:block/parasol_stem"
+  }
+}

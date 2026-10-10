@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:graht_oak_forest",
+    "skycraft:great_forest",
+    "skycraft:reapers_march",
+    "skycraft:rift_autumn_forest",
+    "skycraft:rivenspire",
+    "skycraft:stormhaven",
+    "skycraft:valenwood_rainforest"
+  ]
+}

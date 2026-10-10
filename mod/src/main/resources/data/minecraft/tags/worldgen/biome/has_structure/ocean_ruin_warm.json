@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:coral_sea",
+    "skycraft:deep_warm_ocean",
+    "skycraft:inner_sea",
+    "skycraft:warm_ocean"
+  ]
+}

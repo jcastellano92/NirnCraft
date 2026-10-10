@@ -1,0 +1,11 @@
+{
+  "type": "skycraft:dead_tree",
+  "config": {
+    "state": {
+      "Name": "minecraft:birch_log",
+      "Properties": {
+        "axis": "y"
+      }
+    }
+  }
+}
