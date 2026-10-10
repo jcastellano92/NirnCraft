@@ -78,5 +78,19 @@ public class WispmotherEntity extends SkyHumanoid {
         }
         return hit;
     }
-}
 
+    @Override
+    protected net.minecraft.sounds.SoundEvent getAmbientSound() {
+        return com.skycraft.audio.AudioSounds.creature("wisp", "ambient");
+    }
+
+    @Override
+    protected net.minecraft.sounds.SoundEvent getHurtSound(net.minecraft.world.damagesource.DamageSource source) {
+        return com.skycraft.audio.AudioSounds.creature("wisp", "ambient");
+    }
+
+    @Override
+    protected net.minecraft.sounds.SoundEvent getDeathSound() {
+        return com.skycraft.audio.AudioSounds.creature("wisp", "ambient");
+    }
+}

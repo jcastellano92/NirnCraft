@@ -76,5 +76,19 @@ public class SprigganEntity extends SkyHumanoid implements Ranked {
         String rank = level >= 28 ? "matron" : level >= 20 ? "earth_mother" : null;
         return rank == null ? null : Component.translatable("entity.skycraft.spriggan." + rank);
     }
-}
 
+    @Override
+    protected net.minecraft.sounds.SoundEvent getAmbientSound() {
+        return com.skycraft.audio.AudioSounds.creature("spriggan", "ambient");
+    }
+
+    @Override
+    protected net.minecraft.sounds.SoundEvent getHurtSound(net.minecraft.world.damagesource.DamageSource source) {
+        return com.skycraft.audio.AudioSounds.creature("spriggan", "hurt");
+    }
+
+    @Override
+    protected net.minecraft.sounds.SoundEvent getDeathSound() {
+        return com.skycraft.audio.AudioSounds.creature("spriggan", "death");
+    }
+}

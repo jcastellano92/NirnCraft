@@ -40,6 +40,12 @@ public final class SkyBossHud {
 
     private SkyBossHud() {}
 
+    /** The boss whose bar is shown (or fading), if any. Used by the soundtrack for boss music. */
+    @org.jetbrains.annotations.Nullable
+    public static LivingEntity currentBoss() {
+        return activeBoss;
+    }
+
     /** True if the bar for this boss name is the one this HUD is drawing (its vanilla boss bar is then hidden). */
     public static boolean isShowing(Component name) {
         return activeBoss != null && currentAlpha > 0.01f && activeBoss.getDisplayName().getString().equals(name.getString());

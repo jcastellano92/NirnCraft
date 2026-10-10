@@ -137,7 +137,7 @@ public class DwarvenCenturion extends Automaton {
                     at.y + (this.random.nextDouble() - 0.5) * spread, at.z + (this.random.nextDouble() - 0.5) * spread,
                     1, 0.0, 0.0, 0.0, 0.02);
         }
-        if (steamTicks % 10 == 0) this.playSound(SoundEvents.FIRE_EXTINGUISH, 1.2f, 0.6f);
+        if (steamTicks % 10 == 0) this.playSound(com.skycraft.audio.AudioSounds.creature("dwarven", "steam"), 1.2f, 0.8f);
         if (steamTicks % 5 != 0) return;
         for (LivingEntity e : server.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(STEAM_RANGE),
                 e -> e != this && e.isAlive() && !(e instanceof Automaton))) {

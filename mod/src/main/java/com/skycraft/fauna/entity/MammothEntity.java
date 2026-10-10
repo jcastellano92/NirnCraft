@@ -110,17 +110,17 @@ public class MammothEntity extends FaunaAnimal {
     @Override
     @Nullable
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.RAVAGER_AMBIENT;
+        return com.skycraft.audio.AudioSounds.creature("mammoth", "ambient");
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.RAVAGER_HURT;
+        return com.skycraft.audio.AudioSounds.creature("mammoth", "hurt");
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.RAVAGER_DEATH;
+        return com.skycraft.audio.AudioSounds.creature("mammoth", "death");
     }
 
     @Override

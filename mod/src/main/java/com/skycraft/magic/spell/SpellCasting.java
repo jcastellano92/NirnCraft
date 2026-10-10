@@ -83,7 +83,7 @@ public final class SpellCasting {
         if (last != null && now - last < 20) return;
         LAST_FAIL.put(p.getUUID(), now);
         Notifier.message(p, Component.translatable("message.skycraft.not_enough_magicka"));
-        p.playNotifySound(SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.4f, 1.8f);
+        p.playNotifySound(com.skycraft.audio.AudioSounds.spell("fizzle"), SoundSource.PLAYERS, 0.7f, 1.0f);
     }
 
     /** The spell equipped in a hand; an empty left hand falls back to the right hand's spell. */
@@ -130,7 +130,7 @@ public final class SpellCasting {
             return;
         }
         hands[hand] = new Active(spell, hand);
-        if (spell.chargeTicks > 0) MagicFx.sound(p, SoundEvents.BEACON_POWER_SELECT, 0.8f, 0.6f);
+        if (spell.chargeTicks > 0) MagicFx.sound(p, com.skycraft.audio.AudioSounds.spell("charge"), 0.8f, 1.0f);
     }
 
     /** A hand's cast key was released. */

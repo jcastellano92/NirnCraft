@@ -651,7 +651,7 @@ public class DragonEntity extends Monster {
                 setFlying(false);
                 this.setDeltaMovement(Vec3.ZERO);
                 anchor = this.position();
-                this.playSound(SoundEvents.GENERIC_EXPLODE, 1.0f, 0.5f);
+                this.playSound(com.skycraft.audio.AudioSounds.creature("dragon", "land"), 3.0f, 0.9f + this.getRandom().nextFloat() * 0.2f);
                 if (this.level() instanceof ServerLevel server) {
                     server.sendParticles(ParticleTypes.CLOUD, this.getX(), this.getY() + 0.2, this.getZ(), 40, 2.0, 0.2, 2.0, 0.05);
                 }
@@ -706,7 +706,7 @@ public class DragonEntity extends Monster {
                 biteCooldown = 25;
                 this.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
                 this.doHurtTarget(target);
-                this.playSound(SoundEvents.ENDER_DRAGON_HURT, 1.0f, 1.3f);
+                this.playSound(com.skycraft.audio.AudioSounds.creature("dragon", "growl"), 1.5f, 1.0f + this.getRandom().nextFloat() * 0.15f);
             }
         } else {
             this.getMoveControl().setWantedPosition(target.getX(), target.getY(), target.getZ(), 1.0);
@@ -768,8 +768,8 @@ public class DragonEntity extends Monster {
     }
 
     public void roar() {
-        this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 6.0f,
-                0.8f + this.getRandom().nextFloat() * 0.2f);
+        this.level().playSound(null, this.getX(), this.getY(), this.getZ(), com.skycraft.audio.AudioSounds.creature("dragon", "roar"), SoundSource.HOSTILE, 6.0f,
+                0.9f + this.getRandom().nextFloat() * 0.15f);
     }
 
     // ------------------------------------------------------------------ breath
@@ -777,7 +777,10 @@ public class DragonEntity extends Monster {
     private void startBreath(LivingEntity target, int ticks) {
         breathTicks = ticks;
         setBreathing(true, target.getId());
-        this.playSound(isFrost() ? SoundEvents.PLAYER_HURT_FREEZE : SoundEvents.ENDER_DRAGON_SHOOT, 3.0f, 0.7f);
+        this.playSound(isFrost() ? com.skycraft.audio.AudioSounds.creature("dragon", "breath_frost") : com.skycraft.audio.AudioSounds.creature("dragon", "breath_fire"), 3.0f, 1.0f);
+        // the dragon shouts its breath (Yol Toor Shul / Fo Krah Diin) in a deeper voice
+        this.playSound(com.skycraft.audio.AudioSounds.shout(isFrost() ? com.skycraft.magic.shout.Shout.FROST_BREATH : com.skycraft.magic.shout.Shout.FIRE_BREATH, 3),
+                4.0f, 0.78f);
     }
 
     /** Where fire comes out: the head sits ~5 blocks ahead, higher when standing. */
@@ -852,8 +855,8 @@ public class DragonEntity extends Monster {
             float cycle = Mth.cos(this.tickCount * 0.3f);
             float prev = Mth.cos((this.tickCount - 1) * 0.3f);
             if (cycle < -0.95f && prev >= -0.95f) {
-                this.level().playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.ENDER_DRAGON_FLAP, SoundSource.HOSTILE,
-                        2.5f, 0.7f + this.getRandom().nextFloat() * 0.2f, false);
+                this.level().playLocalSound(this.getX(), this.getY(), this.getZ(), com.skycraft.audio.AudioSounds.creature("dragon", "wings"), SoundSource.HOSTILE,
+                        2.5f, 0.9f + this.getRandom().nextFloat() * 0.2f, false);
             }
         }
     }
@@ -911,17 +914,17 @@ public class DragonEntity extends Monster {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.ENDER_DRAGON_AMBIENT;
+        return com.skycraft.audio.AudioSounds.creature("dragon", "growl");
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.ENDER_DRAGON_HURT;
+        return com.skycraft.audio.AudioSounds.creature("dragon", "hurt");
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.ENDER_DRAGON_DEATH;
+        return com.skycraft.audio.AudioSounds.creature("dragon", "death");
     }
 
     @Override

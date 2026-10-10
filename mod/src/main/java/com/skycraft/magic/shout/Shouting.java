@@ -110,12 +110,8 @@ public final class Shouting {
         if (!p.isCreative()) MagicData.setShoutCooldown(p, now + cooldown, cooldown);
         SkyNetwork.sendToTracking(p, new MagicPackets.ShoutFx(p.getId(), shout.ordinal(), words));
         ServerLevel level = p.serverLevel();
-        net.minecraft.sounds.SoundEvent shoutSound = switch (shout) {
-            case UNRELENTING_FORCE -> com.skycraft.world.WorldSounds.SHOUT_FUS_RO_DAH.get();
-            case WHIRLWIND_SPRINT -> com.skycraft.world.WorldSounds.SHOUT_WULD_NAH_KEST.get();
-            case FIRE_BREATH -> com.skycraft.world.WorldSounds.SHOUT_YOL_TOOR_SHUL.get();
-            default -> com.skycraft.world.WorldSounds.SHOUT_GENERIC.get();
-        };
+        // the Thu'um: the words actually shouted (one, two or all three)
+        net.minecraft.sounds.SoundEvent shoutSound = com.skycraft.audio.AudioSounds.shout(shout, words);
         level.playSound(null, p.getX(), p.getY(), p.getZ(), shoutSound, SoundSource.PLAYERS, 1.4f + 0.3f * words, 1.0f);
         p.swing(InteractionHand.MAIN_HAND, true);
         SkyData.get(p).addStat("shouts", 1);

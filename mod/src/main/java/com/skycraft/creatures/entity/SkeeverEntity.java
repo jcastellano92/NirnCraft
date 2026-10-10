@@ -78,17 +78,17 @@ public class SkeeverEntity extends Monster implements Ranked {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.SILVERFISH_AMBIENT;
+        return com.skycraft.audio.AudioSounds.creature("skeever", "ambient");
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.SILVERFISH_HURT;
+        return com.skycraft.audio.AudioSounds.creature("skeever", "hurt");
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.SILVERFISH_DEATH;
+        return com.skycraft.audio.AudioSounds.creature("skeever", "death");
     }
 
     @Override

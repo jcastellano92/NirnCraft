@@ -94,13 +94,36 @@ public final class WorldClientEvents {
         CompassMarkers.set("locations", markers);
     }
 
-    /** Vanilla background music is replaced by the Skycraft soundtrack while in a world. */
+    /**
+     * Vanilla background music is replaced by the Skycraft soundtrack while in a world. Also: the title screen's music
+     * becomes a fading instance (so it fades under the loading screen instead of cutting off), jukebox records and
+     * stings are reported to the {@link MusicController} so it can make way for them.
+     */
     @SubscribeEvent
     public static void onPlaySound(PlaySoundEvent event) {
         var sound = event.getSound();
-        if (sound == null || sound.getSource() != SoundSource.MUSIC || MusicController.isOurs(sound)) return;
+        if (sound == null || MusicController.isOurs(sound)) return;
+        if (sound.getSource() == SoundSource.RECORDS) {
+            MusicController.recordStarted(sound);
+            return;
+        }
+        String ns = sound.getLocation().getNamespace();
+        String path = sound.getLocation().getPath();
+        if (Skycraft.MODID.equals(ns) && (path.equals("music.discovery") || path.equals("music.level_up"))) {
+            MusicController.stingStarted(path.equals("music.discovery") ? 9 : 4); // stings play as UI sounds
+            return;
+        }
+        if (sound.getSource() != SoundSource.MUSIC) return;
+        if (Minecraft.getInstance().level == null) {
+            if (Skycraft.MODID.equals(ns) && path.startsWith("music.")) {
+                event.setSound(MusicController.titleMusic(sound));
+            } else if ("minecraft".equals(ns) && MusicController.titleMusicPlaying()) {
+                event.setSound(null); // vanilla menu music would play over the title theme
+            }
+            return;
+        }
         if (!MusicController.active()) return;
-        if (!"minecraft".equals(sound.getLocation().getNamespace())) return; // let other mods' music through
+        if (!"minecraft".equals(ns)) return; // let other mods' music through
         event.setSound(null);
     }
 

@@ -112,16 +112,16 @@ public class DraugrEntity extends SkyHumanoid implements Ranked {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.ZOMBIE_AMBIENT;
+        return com.skycraft.audio.AudioSounds.creature("draugr", "ambient");
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.SKELETON_HURT;
+        return com.skycraft.audio.AudioSounds.creature("draugr", "hurt");
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.ZOMBIE_DEATH;
+        return com.skycraft.audio.AudioSounds.creature("draugr", "death");
     }
 }

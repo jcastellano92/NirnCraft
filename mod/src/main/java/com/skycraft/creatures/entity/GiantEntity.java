@@ -141,8 +141,8 @@ public class GiantEntity extends Monster {
     /** The warning stomp: dust, a heavy thud and a clear message. */
     private void stomp(Player player) {
         this.getLookControl().setLookAt(player, 30f, 30f);
-        this.playSound(SoundEvents.RAVAGER_STEP, 2.5f, 0.5f);
-        this.playSound(SoundEvents.RAVAGER_ROAR, 1.2f, 0.6f);
+        this.playSound(com.skycraft.audio.AudioSounds.creature("giant", "stomp"), 2.5f, 1.0f);
+        this.playSound(com.skycraft.audio.AudioSounds.creature("giant", "ambient"), 1.5f, 0.9f);
         if (this.level() instanceof ServerLevel server) {
             BlockState ground = this.level().getBlockState(this.blockPosition().below());
             if (!ground.isAir()) {
@@ -187,22 +187,22 @@ public class GiantEntity extends Monster {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.RAVAGER_AMBIENT;
+        return com.skycraft.audio.AudioSounds.creature("giant", "ambient");
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.RAVAGER_HURT;
+        return com.skycraft.audio.AudioSounds.creature("giant", "hurt");
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.RAVAGER_DEATH;
+        return com.skycraft.audio.AudioSounds.creature("giant", "death");
     }
 
     @Override
     protected void playStepSound(BlockPos pos, BlockState state) {
-        this.playSound(SoundEvents.RAVAGER_STEP, 0.6f, 0.6f);
+        this.playSound(com.skycraft.audio.AudioSounds.creature("giant", "stomp"), 0.3f, 1.25f);
     }
 
     @Override

@@ -57,5 +57,19 @@ public class HagravenEntity extends SkyHumanoid {
             this.playSound(SoundEvents.BLAZE_SHOOT, 1.0f, 0.9f);
         }
     }
-}
 
+    @Override
+    protected net.minecraft.sounds.SoundEvent getAmbientSound() {
+        return com.skycraft.audio.AudioSounds.creature("hagraven", "ambient");
+    }
+
+    @Override
+    protected net.minecraft.sounds.SoundEvent getHurtSound(net.minecraft.world.damagesource.DamageSource source) {
+        return com.skycraft.audio.AudioSounds.creature("hagraven", "hurt");
+    }
+
+    @Override
+    protected net.minecraft.sounds.SoundEvent getDeathSound() {
+        return com.skycraft.audio.AudioSounds.creature("hagraven", "death");
+    }
+}

@@ -438,7 +438,7 @@ public final class CreatureSpawns {
             double rx = player.getX() + (x - player.getX()) * 0.3;
             double ry = player.getY() + 10;
             double rz = player.getZ() + (z - player.getZ()) * 0.3;
-            level.playSound(null, rx, ry, rz, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 8.0f, 0.75f);
+            level.playSound(null, rx, ry, rz, com.skycraft.audio.AudioSounds.creature("dragon", "roar"), SoundSource.HOSTILE, 8.0f, 0.95f);
             return dragon;
         }
         return null;

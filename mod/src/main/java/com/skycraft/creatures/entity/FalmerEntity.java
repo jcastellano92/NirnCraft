@@ -132,17 +132,17 @@ public class FalmerEntity extends SkyHumanoid implements Ranked {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.STRAY_AMBIENT;
+        return com.skycraft.audio.AudioSounds.creature("falmer", "ambient");
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.STRAY_HURT;
+        return com.skycraft.audio.AudioSounds.creature("falmer", "hurt");
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.STRAY_DEATH;
+        return com.skycraft.audio.AudioSounds.creature("falmer", "death");
     }
 
     @Override

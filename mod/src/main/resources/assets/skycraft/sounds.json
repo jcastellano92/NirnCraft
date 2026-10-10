@@ -1,154 +1,2038 @@
 {
   "music.explore": {
     "sounds": [
-      {"name": "skycraft:music/explore_day_1", "stream": true},
-      {"name": "skycraft:music/explore_day_2", "stream": true},
-      {"name": "skycraft:music/explore_day_3", "stream": true}
+      {
+        "name": "skycraft:music/explore_day_1",
+        "stream": true
+      },
+      {
+        "name": "skycraft:music/explore_day_2",
+        "stream": true
+      },
+      {
+        "name": "skycraft:music/explore_day_3",
+        "stream": true
+      }
     ]
   },
   "music.explore_night": {
     "sounds": [
-      {"name": "skycraft:music/explore_night_1", "stream": true},
-      {"name": "skycraft:music/explore_night_2", "stream": true}
+      {
+        "name": "skycraft:music/explore_night_1",
+        "stream": true
+      },
+      {
+        "name": "skycraft:music/explore_night_2",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore.cyrodiil": {
+    "sounds": [
+      {
+        "name": "skycraft:music/cyrodiil_day",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore_night.cyrodiil": {
+    "sounds": [
+      {
+        "name": "skycraft:music/cyrodiil_night",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore.morrowind": {
+    "sounds": [
+      {
+        "name": "skycraft:music/morrowind_day",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore_night.morrowind": {
+    "sounds": [
+      {
+        "name": "skycraft:music/morrowind_night",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore.black_marsh": {
+    "sounds": [
+      {
+        "name": "skycraft:music/black_marsh_day",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore_night.black_marsh": {
+    "sounds": [
+      {
+        "name": "skycraft:music/black_marsh_night",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore.elsweyr": {
+    "sounds": [
+      {
+        "name": "skycraft:music/elsweyr_day",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore_night.elsweyr": {
+    "sounds": [
+      {
+        "name": "skycraft:music/elsweyr_night",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore.valenwood": {
+    "sounds": [
+      {
+        "name": "skycraft:music/valenwood_day",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore_night.valenwood": {
+    "sounds": [
+      {
+        "name": "skycraft:music/valenwood_night",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore.summerset": {
+    "sounds": [
+      {
+        "name": "skycraft:music/summerset_day",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore_night.summerset": {
+    "sounds": [
+      {
+        "name": "skycraft:music/summerset_night",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore.hammerfell": {
+    "sounds": [
+      {
+        "name": "skycraft:music/hammerfell_day",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore_night.hammerfell": {
+    "sounds": [
+      {
+        "name": "skycraft:music/hammerfell_night",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore.high_rock": {
+    "sounds": [
+      {
+        "name": "skycraft:music/high_rock_day",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore_night.high_rock": {
+    "sounds": [
+      {
+        "name": "skycraft:music/high_rock_night",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore.atmora": {
+    "sounds": [
+      {
+        "name": "skycraft:music/atmora_day",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore_night.atmora": {
+    "sounds": [
+      {
+        "name": "skycraft:music/atmora_night",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore.akavir": {
+    "sounds": [
+      {
+        "name": "skycraft:music/akavir_day",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore_night.akavir": {
+    "sounds": [
+      {
+        "name": "skycraft:music/akavir_night",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore.sea": {
+    "sounds": [
+      {
+        "name": "skycraft:music/sea_day",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore_night.sea": {
+    "sounds": [
+      {
+        "name": "skycraft:music/sea_night",
+        "stream": true
+      }
     ]
   },
   "music.town": {
     "sounds": [
-      {"name": "skycraft:music/town_1", "stream": true},
-      {"name": "skycraft:music/town_2", "stream": true}
+      {
+        "name": "skycraft:music/town_1",
+        "stream": true
+      },
+      {
+        "name": "skycraft:music/town_2",
+        "stream": true
+      }
+    ]
+  },
+  "music.town.imperial": {
+    "sounds": [
+      {
+        "name": "skycraft:music/town_imperial",
+        "stream": true
+      }
+    ]
+  },
+  "music.town.dunmer": {
+    "sounds": [
+      {
+        "name": "skycraft:music/town_dunmer",
+        "stream": true
+      }
+    ]
+  },
+  "music.town.desert": {
+    "sounds": [
+      {
+        "name": "skycraft:music/town_desert",
+        "stream": true
+      }
+    ]
+  },
+  "music.town.elven": {
+    "sounds": [
+      {
+        "name": "skycraft:music/town_elven",
+        "stream": true
+      }
     ]
   },
   "music.dungeon": {
     "sounds": [
-      {"name": "skycraft:music/dungeon_1", "stream": true},
-      {"name": "skycraft:music/dungeon_2", "stream": true}
+      {
+        "name": "skycraft:music/dungeon_1",
+        "stream": true
+      },
+      {
+        "name": "skycraft:music/dungeon_2",
+        "stream": true
+      }
+    ]
+  },
+  "music.dungeon.dwemer": {
+    "sounds": [
+      {
+        "name": "skycraft:music/dungeon_dwemer",
+        "stream": true
+      }
+    ]
+  },
+  "music.dungeon.ayleid": {
+    "sounds": [
+      {
+        "name": "skycraft:music/dungeon_ayleid",
+        "stream": true
+      }
+    ]
+  },
+  "music.blackreach": {
+    "sounds": [
+      {
+        "name": "skycraft:music/blackreach",
+        "stream": true
+      }
     ]
   },
   "music.combat": {
     "sounds": [
-      {"name": "skycraft:music/combat_1", "stream": true, "weight": 2},
-      {"name": "skycraft:music/combat_2", "stream": true, "weight": 2},
-      {"name": "skycraft:music.boss", "type": "event"}
+      {
+        "name": "skycraft:music/combat_1",
+        "stream": true,
+        "weight": 2
+      },
+      {
+        "name": "skycraft:music/combat_2",
+        "stream": true,
+        "weight": 2
+      },
+      {
+        "name": "skycraft:music.boss",
+        "type": "event"
+      }
     ]
   },
   "music.boss": {
     "sounds": [
-      {"name": "skycraft:music/boss_dragon", "stream": true}
+      {
+        "name": "skycraft:music/boss_dragon",
+        "stream": true
+      }
+    ]
+  },
+  "music.boss.battle": {
+    "sounds": [
+      {
+        "name": "skycraft:music/boss_battle",
+        "stream": true
+      }
     ]
   },
   "music.oblivion": {
     "sounds": [
-      {"name": "skycraft:music/oblivion_1", "stream": true}
+      {
+        "name": "skycraft:music/oblivion_1",
+        "stream": true
+      }
     ]
   },
   "music.sovngarde": {
     "sounds": [
-      {"name": "skycraft:music/sovngarde_1", "stream": true}
+      {
+        "name": "skycraft:music/sovngarde_1",
+        "stream": true
+      }
     ]
   },
   "music.discovery": {
     "sounds": [
-      {"name": "skycraft:music/discovery", "stream": true}
+      {
+        "name": "skycraft:music/discovery",
+        "stream": true
+      }
     ]
   },
   "music.level_up": {
     "sounds": [
-      {"name": "skycraft:music/level_up", "stream": true}
+      {
+        "name": "skycraft:music/level_up",
+        "stream": true
+      }
     ]
+  },
+  "ambient.bed.wind_light": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/wind_light",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.wind_strong": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/wind_strong",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.blizzard": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/blizzard",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.forest_day": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/forest_day",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.forest_night": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/forest_night",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.plains_day": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/plains_day",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.plains_night": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/plains_night",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.marsh_day": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/marsh_day",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.marsh_night": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/marsh_night",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.jungle_day": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/jungle_day",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.jungle_night": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/jungle_night",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.desert_wind": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/desert_wind",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.ash_storm": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/ash_storm",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.coast_waves": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/coast_waves",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.open_ocean": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/open_ocean",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.river": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/river",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.cave": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/cave",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.cave_deep": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/cave_deep",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.glow_cave": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/glow_cave",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.oblivion": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/oblivion",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bed.sovngarde": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bed/sovngarde",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.bird_song": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/bird_song1",
+        "attenuation_distance": 48
+      },
+      {
+        "name": "skycraft:ambient/bird_song2",
+        "attenuation_distance": 48
+      },
+      {
+        "name": "skycraft:ambient/bird_song3",
+        "attenuation_distance": 48
+      },
+      {
+        "name": "skycraft:ambient/bird_song4",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.bird_song"
+  },
+  "ambient.crow": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/crow1",
+        "attenuation_distance": 64
+      },
+      {
+        "name": "skycraft:ambient/crow2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.crow"
+  },
+  "ambient.hawk": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/hawk1",
+        "attenuation_distance": 96
+      },
+      {
+        "name": "skycraft:ambient/hawk2",
+        "attenuation_distance": 96
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.hawk"
+  },
+  "ambient.gull": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/gull1",
+        "attenuation_distance": 64
+      },
+      {
+        "name": "skycraft:ambient/gull2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.gull"
+  },
+  "ambient.jungle_bird": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/jungle_bird1",
+        "attenuation_distance": 64
+      },
+      {
+        "name": "skycraft:ambient/jungle_bird2",
+        "attenuation_distance": 64
+      },
+      {
+        "name": "skycraft:ambient/jungle_bird3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.jungle_bird"
+  },
+  "ambient.owl": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/owl1",
+        "attenuation_distance": 48
+      },
+      {
+        "name": "skycraft:ambient/owl2",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.owl"
+  },
+  "ambient.loon": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/loon1",
+        "attenuation_distance": 96
+      },
+      {
+        "name": "skycraft:ambient/loon2",
+        "attenuation_distance": 96
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.loon"
+  },
+  "ambient.frog": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/frog1",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "skycraft:ambient/frog2",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "skycraft:ambient/frog3",
+        "attenuation_distance": 32
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.frog"
+  },
+  "ambient.cricket": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/cricket1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "skycraft:ambient/cricket2",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.cricket"
+  },
+  "ambient.insect": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/insect1",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "skycraft:ambient/insect2",
+        "attenuation_distance": 16
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.insect"
+  },
+  "ambient.cave_drip": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/cave_drip1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "skycraft:ambient/cave_drip2",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "skycraft:ambient/cave_drip3",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "skycraft:ambient/cave_drip4",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.cave_drip"
+  },
+  "ambient.cave_rumble": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/cave_rumble1",
+        "attenuation_distance": 48
+      },
+      {
+        "name": "skycraft:ambient/cave_rumble2",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.cave_rumble"
+  },
+  "ambient.rock_fall": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/rock_fall1",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "skycraft:ambient/rock_fall2",
+        "attenuation_distance": 32
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.rock_fall"
+  },
+  "ambient.wind_gust": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/wind_gust1",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "skycraft:ambient/wind_gust2",
+        "attenuation_distance": 32
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.wind_gust"
+  },
+  "ambient.tree_creak": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/tree_creak1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "skycraft:ambient/tree_creak2",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.tree_creak"
+  },
+  "ambient.volcano": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/volcano1",
+        "attenuation_distance": 160
+      },
+      {
+        "name": "skycraft:ambient/volcano2",
+        "attenuation_distance": 160
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.volcano"
+  },
+  "ambient.distant_dragon": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/distant_dragon1",
+        "attenuation_distance": 256
+      },
+      {
+        "name": "skycraft:ambient/distant_dragon2",
+        "attenuation_distance": 256
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.distant_dragon"
+  },
+  "ambient.wave_crash": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/wave_crash1",
+        "attenuation_distance": 48
+      },
+      {
+        "name": "skycraft:ambient/wave_crash2",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.wave_crash"
+  },
+  "ambient.whale": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/whale1",
+        "attenuation_distance": 160
+      },
+      {
+        "name": "skycraft:ambient/whale2",
+        "attenuation_distance": 160
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.whale"
+  },
+  "ambient.sand_hiss": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/sand_hiss1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "skycraft:ambient/sand_hiss2",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.sand_hiss"
+  },
+  "ambient.oblivion_wail": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/oblivion_wail1",
+        "attenuation_distance": 96
+      },
+      {
+        "name": "skycraft:ambient/oblivion_wail2",
+        "attenuation_distance": 96
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.oblivion_wail"
+  },
+  "ambient.sovngarde_horn": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/sovngarde_horn1",
+        "attenuation_distance": 192
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.sovngarde_horn"
+  },
+  "ambient.glow_chime": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/glow_chime1",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "skycraft:ambient/glow_chime2",
+        "attenuation_distance": 32
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.glow_chime"
+  },
+  "entity.dragon.roar": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/dragon/roar1",
+        "attenuation_distance": 192
+      },
+      {
+        "name": "skycraft:creature/dragon/roar2",
+        "attenuation_distance": 192
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.dragon.roar"
+  },
+  "entity.dragon.growl": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/dragon/growl1",
+        "attenuation_distance": 48
+      },
+      {
+        "name": "skycraft:creature/dragon/growl2",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.dragon.growl"
+  },
+  "entity.dragon.wings": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/dragon/wings1",
+        "attenuation_distance": 64
+      },
+      {
+        "name": "skycraft:creature/dragon/wings2",
+        "attenuation_distance": 64
+      },
+      {
+        "name": "skycraft:creature/dragon/wings3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.dragon.wings"
+  },
+  "entity.dragon.breath_fire": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/dragon/breath_fire1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.dragon.breath_fire"
+  },
+  "entity.dragon.breath_frost": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/dragon/breath_frost1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.dragon.breath_frost"
+  },
+  "entity.dragon.land": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/dragon/land1",
+        "attenuation_distance": 96
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.dragon.land"
+  },
+  "entity.dragon.hurt": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/dragon/hurt1",
+        "attenuation_distance": 48
+      },
+      {
+        "name": "skycraft:creature/dragon/hurt2",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.dragon.hurt"
+  },
+  "entity.dragon.death": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/dragon/death1",
+        "attenuation_distance": 192
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.dragon.death"
+  },
+  "entity.draugr.ambient": {
+    "sounds": [
+      "skycraft:creature/draugr/ambient1",
+      "skycraft:creature/draugr/ambient2",
+      "skycraft:creature/draugr/ambient3"
+    ],
+    "subtitle": "subtitles.skycraft.entity.draugr.ambient"
+  },
+  "entity.draugr.attack": {
+    "sounds": [
+      "skycraft:creature/draugr/attack1",
+      "skycraft:creature/draugr/attack2"
+    ],
+    "subtitle": "subtitles.skycraft.entity.draugr.attack"
+  },
+  "entity.draugr.hurt": {
+    "sounds": [
+      "skycraft:creature/draugr/hurt1",
+      "skycraft:creature/draugr/hurt2"
+    ],
+    "subtitle": "subtitles.skycraft.entity.draugr.hurt"
+  },
+  "entity.draugr.death": {
+    "sounds": [
+      "skycraft:creature/draugr/death1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.draugr.death"
+  },
+  "entity.skeever.ambient": {
+    "sounds": [
+      "skycraft:creature/skeever/ambient1",
+      "skycraft:creature/skeever/ambient2"
+    ],
+    "subtitle": "subtitles.skycraft.entity.skeever.ambient"
+  },
+  "entity.skeever.hurt": {
+    "sounds": [
+      "skycraft:creature/skeever/hurt1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.skeever.hurt"
+  },
+  "entity.skeever.death": {
+    "sounds": [
+      "skycraft:creature/skeever/death1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.skeever.death"
+  },
+  "entity.troll.ambient": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/troll/ambient1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "skycraft:creature/troll/ambient2",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.troll.ambient"
+  },
+  "entity.troll.roar": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/troll/roar1",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.troll.roar"
+  },
+  "entity.troll.hurt": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/troll/hurt1",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.troll.hurt"
+  },
+  "entity.troll.death": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/troll/death1",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.troll.death"
+  },
+  "entity.giant.ambient": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/giant/ambient1",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "skycraft:creature/giant/ambient2",
+        "attenuation_distance": 32
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.giant.ambient"
+  },
+  "entity.giant.stomp": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/giant/stomp1",
+        "attenuation_distance": 48
+      },
+      {
+        "name": "skycraft:creature/giant/stomp2",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.giant.stomp"
+  },
+  "entity.giant.hurt": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/giant/hurt1",
+        "attenuation_distance": 32
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.giant.hurt"
+  },
+  "entity.giant.death": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/giant/death1",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.giant.death"
+  },
+  "entity.mammoth.ambient": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/mammoth/ambient1",
+        "attenuation_distance": 64
+      },
+      {
+        "name": "skycraft:creature/mammoth/ambient2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.mammoth.ambient"
+  },
+  "entity.mammoth.hurt": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/mammoth/hurt1",
+        "attenuation_distance": 32
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.mammoth.hurt"
+  },
+  "entity.mammoth.death": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/mammoth/death1",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.mammoth.death"
+  },
+  "entity.frostbite_spider.ambient": {
+    "sounds": [
+      "skycraft:creature/frostbite_spider/ambient1",
+      "skycraft:creature/frostbite_spider/ambient2"
+    ],
+    "subtitle": "subtitles.skycraft.entity.frostbite_spider.ambient"
+  },
+  "entity.frostbite_spider.hurt": {
+    "sounds": [
+      "skycraft:creature/frostbite_spider/hurt1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.frostbite_spider.hurt"
+  },
+  "entity.frostbite_spider.death": {
+    "sounds": [
+      "skycraft:creature/frostbite_spider/death1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.frostbite_spider.death"
+  },
+  "entity.wolf.howl": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/wolf/howl1",
+        "attenuation_distance": 96
+      },
+      {
+        "name": "skycraft:creature/wolf/howl2",
+        "attenuation_distance": 96
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.wolf.howl"
+  },
+  "entity.wolf.growl": {
+    "sounds": [
+      "skycraft:creature/wolf/growl1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.wolf.growl"
+  },
+  "entity.bear.ambient": {
+    "sounds": [
+      "skycraft:creature/bear/ambient1",
+      "skycraft:creature/bear/ambient2"
+    ],
+    "subtitle": "subtitles.skycraft.entity.bear.ambient"
+  },
+  "entity.bear.roar": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/bear/roar1",
+        "attenuation_distance": 32
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.bear.roar"
+  },
+  "entity.bear.hurt": {
+    "sounds": [
+      "skycraft:creature/bear/hurt1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.bear.hurt"
+  },
+  "entity.bear.death": {
+    "sounds": [
+      "skycraft:creature/bear/death1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.bear.death"
+  },
+  "entity.sabre_cat.ambient": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/sabre_cat/ambient1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "skycraft:creature/sabre_cat/ambient2",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.sabre_cat.ambient"
+  },
+  "entity.sabre_cat.hurt": {
+    "sounds": [
+      "skycraft:creature/sabre_cat/hurt1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.sabre_cat.hurt"
+  },
+  "entity.sabre_cat.death": {
+    "sounds": [
+      "skycraft:creature/sabre_cat/death1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.sabre_cat.death"
+  },
+  "entity.falmer.ambient": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/falmer/ambient1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "skycraft:creature/falmer/ambient2",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.falmer.ambient"
+  },
+  "entity.falmer.hurt": {
+    "sounds": [
+      "skycraft:creature/falmer/hurt1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.falmer.hurt"
+  },
+  "entity.falmer.death": {
+    "sounds": [
+      "skycraft:creature/falmer/death1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.falmer.death"
+  },
+  "entity.dwarven.steam": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/dwarven/steam1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "skycraft:creature/dwarven/steam2",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.dwarven.steam"
+  },
+  "entity.dwarven.clank": {
+    "sounds": [
+      "skycraft:creature/dwarven/clank1",
+      "skycraft:creature/dwarven/clank2"
+    ],
+    "subtitle": "subtitles.skycraft.entity.dwarven.clank"
+  },
+  "entity.dwarven.hurt": {
+    "sounds": [
+      "skycraft:creature/dwarven/hurt1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.dwarven.hurt"
+  },
+  "entity.dwarven.death": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/dwarven/death1",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.dwarven.death"
+  },
+  "entity.wisp.ambient": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/wisp/ambient1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "skycraft:creature/wisp/ambient2",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.wisp.ambient"
+  },
+  "entity.spriggan.ambient": {
+    "sounds": [
+      "skycraft:creature/spriggan/ambient1",
+      "skycraft:creature/spriggan/ambient2"
+    ],
+    "subtitle": "subtitles.skycraft.entity.spriggan.ambient"
+  },
+  "entity.spriggan.hurt": {
+    "sounds": [
+      "skycraft:creature/spriggan/hurt1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.spriggan.hurt"
+  },
+  "entity.spriggan.death": {
+    "sounds": [
+      "skycraft:creature/spriggan/death1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.spriggan.death"
+  },
+  "entity.hagraven.ambient": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/hagraven/ambient1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "skycraft:creature/hagraven/ambient2",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.hagraven.ambient"
+  },
+  "entity.hagraven.hurt": {
+    "sounds": [
+      "skycraft:creature/hagraven/hurt1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.hagraven.hurt"
+  },
+  "entity.hagraven.death": {
+    "sounds": [
+      "skycraft:creature/hagraven/death1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.hagraven.death"
+  },
+  "entity.horker.ambient": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/horker/ambient1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "skycraft:creature/horker/ambient2",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.horker.ambient"
+  },
+  "entity.horker.hurt": {
+    "sounds": [
+      "skycraft:creature/horker/hurt1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.horker.hurt"
+  },
+  "entity.horker.death": {
+    "sounds": [
+      "skycraft:creature/horker/death1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.horker.death"
+  },
+  "entity.mudcrab.ambient": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/mudcrab/ambient1",
+        "attenuation_distance": 12
+      },
+      {
+        "name": "skycraft:creature/mudcrab/ambient2",
+        "attenuation_distance": 12
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.mudcrab.ambient"
+  },
+  "entity.mudcrab.hurt": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/mudcrab/hurt1",
+        "attenuation_distance": 12
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.mudcrab.hurt"
+  },
+  "entity.mudcrab.death": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/mudcrab/death1",
+        "attenuation_distance": 12
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.mudcrab.death"
+  },
+  "entity.ice_wraith.ambient": {
+    "sounds": [
+      {
+        "name": "skycraft:creature/ice_wraith/ambient1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "skycraft:creature/ice_wraith/ambient2",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.skycraft.entity.ice_wraith.ambient"
+  },
+  "entity.ice_wraith.hurt": {
+    "sounds": [
+      "skycraft:creature/ice_wraith/hurt1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.ice_wraith.hurt"
+  },
+  "entity.ice_wraith.death": {
+    "sounds": [
+      "skycraft:creature/ice_wraith/death1"
+    ],
+    "subtitle": "subtitles.skycraft.entity.ice_wraith.death"
+  },
+  "shout.unrelenting_force.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/unrelenting_force_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.unrelenting_force.1"
+  },
+  "shout.unrelenting_force.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/unrelenting_force_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.unrelenting_force.2"
+  },
+  "shout.unrelenting_force.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/unrelenting_force_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.unrelenting_force.3"
+  },
+  "shout.fire_breath.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/fire_breath_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.fire_breath.1"
+  },
+  "shout.fire_breath.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/fire_breath_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.fire_breath.2"
+  },
+  "shout.fire_breath.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/fire_breath_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.fire_breath.3"
+  },
+  "shout.frost_breath.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/frost_breath_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.frost_breath.1"
+  },
+  "shout.frost_breath.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/frost_breath_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.frost_breath.2"
+  },
+  "shout.frost_breath.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/frost_breath_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.frost_breath.3"
+  },
+  "shout.whirlwind_sprint.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/whirlwind_sprint_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.whirlwind_sprint.1"
+  },
+  "shout.whirlwind_sprint.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/whirlwind_sprint_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.whirlwind_sprint.2"
+  },
+  "shout.whirlwind_sprint.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/whirlwind_sprint_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.whirlwind_sprint.3"
+  },
+  "shout.become_ethereal.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/become_ethereal_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.become_ethereal.1"
+  },
+  "shout.become_ethereal.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/become_ethereal_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.become_ethereal.2"
+  },
+  "shout.become_ethereal.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/become_ethereal_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.become_ethereal.3"
+  },
+  "shout.clear_skies.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/clear_skies_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.clear_skies.1"
+  },
+  "shout.clear_skies.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/clear_skies_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.clear_skies.2"
+  },
+  "shout.clear_skies.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/clear_skies_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.clear_skies.3"
+  },
+  "shout.aura_whisper.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/aura_whisper_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.aura_whisper.1"
+  },
+  "shout.aura_whisper.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/aura_whisper_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.aura_whisper.2"
+  },
+  "shout.aura_whisper.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/aura_whisper_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.aura_whisper.3"
+  },
+  "shout.slow_time.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/slow_time_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.slow_time.1"
+  },
+  "shout.slow_time.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/slow_time_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.slow_time.2"
+  },
+  "shout.slow_time.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/slow_time_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.slow_time.3"
+  },
+  "shout.marked_for_death.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/marked_for_death_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.marked_for_death.1"
+  },
+  "shout.marked_for_death.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/marked_for_death_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.marked_for_death.2"
+  },
+  "shout.marked_for_death.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/marked_for_death_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.marked_for_death.3"
+  },
+  "shout.disarm.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/disarm_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.disarm.1"
+  },
+  "shout.disarm.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/disarm_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.disarm.2"
+  },
+  "shout.disarm.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/disarm_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.disarm.3"
+  },
+  "shout.elemental_fury.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/elemental_fury_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.elemental_fury.1"
+  },
+  "shout.elemental_fury.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/elemental_fury_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.elemental_fury.2"
+  },
+  "shout.elemental_fury.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/elemental_fury_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.elemental_fury.3"
+  },
+  "shout.kynes_peace.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/kynes_peace_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.kynes_peace.1"
+  },
+  "shout.kynes_peace.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/kynes_peace_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.kynes_peace.2"
+  },
+  "shout.kynes_peace.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/kynes_peace_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.kynes_peace.3"
+  },
+  "shout.animal_allegiance.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/animal_allegiance_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.animal_allegiance.1"
+  },
+  "shout.animal_allegiance.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/animal_allegiance_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.animal_allegiance.2"
+  },
+  "shout.animal_allegiance.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/animal_allegiance_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.animal_allegiance.3"
+  },
+  "shout.storm_call.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/storm_call_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.storm_call.1"
+  },
+  "shout.storm_call.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/storm_call_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.storm_call.2"
+  },
+  "shout.storm_call.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/storm_call_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.storm_call.3"
+  },
+  "shout.dragonrend.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/dragonrend_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.dragonrend.1"
+  },
+  "shout.dragonrend.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/dragonrend_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.dragonrend.2"
+  },
+  "shout.dragonrend.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/dragonrend_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.dragonrend.3"
+  },
+  "shout.fus_ro_dah": {
+    "sounds": [
+      {
+        "name": "skycraft:shout.unrelenting_force.3",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.fus_ro_dah"
+  },
+  "shout.wuld_nah_kest": {
+    "sounds": [
+      {
+        "name": "skycraft:shout.whirlwind_sprint.3",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.wuld_nah_kest"
+  },
+  "shout.yol_toor_shul": {
+    "sounds": [
+      {
+        "name": "skycraft:shout.fire_breath.3",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.yol_toor_shul"
+  },
+  "shout.generic": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/generic",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.generic"
+  },
+  "wordwall.chant": {
+    "sounds": [
+      {
+        "name": "skycraft:wordwall/chant",
+        "attenuation_distance": 32
+      }
+    ],
+    "subtitle": "subtitles.skycraft.wordwall.chant"
+  },
+  "wordwall.learn": {
+    "sounds": [
+      {
+        "name": "skycraft:wordwall/learn",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.skycraft.wordwall.learn"
+  },
+  "spell.fire": {
+    "sounds": [
+      "skycraft:magic/spell/fire"
+    ],
+    "subtitle": "subtitles.skycraft.spell.fire"
+  },
+  "spell.fire_stream": {
+    "sounds": [
+      "skycraft:magic/spell/fire_stream1",
+      "skycraft:magic/spell/fire_stream2"
+    ],
+    "subtitle": "subtitles.skycraft.spell.fire_stream"
+  },
+  "spell.frost": {
+    "sounds": [
+      "skycraft:magic/spell/frost"
+    ],
+    "subtitle": "subtitles.skycraft.spell.frost"
+  },
+  "spell.frost_stream": {
+    "sounds": [
+      "skycraft:magic/spell/frost_stream1",
+      "skycraft:magic/spell/frost_stream2"
+    ],
+    "subtitle": "subtitles.skycraft.spell.frost_stream"
+  },
+  "spell.shock": {
+    "sounds": [
+      "skycraft:magic/spell/shock"
+    ],
+    "subtitle": "subtitles.skycraft.spell.shock"
+  },
+  "spell.shock_stream": {
+    "sounds": [
+      "skycraft:magic/spell/shock_stream1",
+      "skycraft:magic/spell/shock_stream2"
+    ],
+    "subtitle": "subtitles.skycraft.spell.shock_stream"
+  },
+  "spell.heal": {
+    "sounds": [
+      "skycraft:magic/spell/heal"
+    ],
+    "subtitle": "subtitles.skycraft.spell.heal"
+  },
+  "spell.conjure": {
+    "sounds": [
+      "skycraft:magic/spell/conjure"
+    ],
+    "subtitle": "subtitles.skycraft.spell.conjure"
+  },
+  "spell.illusion": {
+    "sounds": [
+      "skycraft:magic/spell/illusion"
+    ],
+    "subtitle": "subtitles.skycraft.spell.illusion"
+  },
+  "spell.alteration": {
+    "sounds": [
+      "skycraft:magic/spell/alteration"
+    ],
+    "subtitle": "subtitles.skycraft.spell.alteration"
+  },
+  "spell.charge": {
+    "sounds": [
+      "skycraft:magic/spell/charge"
+    ],
+    "subtitle": "subtitles.skycraft.spell.charge"
+  },
+  "spell.fizzle": {
+    "sounds": [
+      "skycraft:magic/spell/fizzle"
+    ],
+    "subtitle": "subtitles.skycraft.spell.fizzle"
+  },
+  "spell.impact_fire": {
+    "sounds": [
+      "skycraft:magic/spell/impact_fire"
+    ],
+    "subtitle": "subtitles.skycraft.spell.impact_fire"
+  },
+  "spell.impact_frost": {
+    "sounds": [
+      "skycraft:magic/spell/impact_frost"
+    ],
+    "subtitle": "subtitles.skycraft.spell.impact_frost"
+  },
+  "spell.impact_shock": {
+    "sounds": [
+      "skycraft:magic/spell/impact_shock"
+    ],
+    "subtitle": "subtitles.skycraft.spell.impact_shock"
+  },
+  "magic.dragon_soul": {
+    "sounds": [
+      {
+        "name": "skycraft:magic/dragon_soul",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.skycraft.magic.dragon_soul"
+  },
+  "magic.shrine_pray": {
+    "sounds": [
+      "skycraft:magic/shrine_pray"
+    ],
+    "subtitle": "subtitles.skycraft.magic.shrine_pray"
+  },
+  "magic.standing_stone": {
+    "sounds": [
+      {
+        "name": "skycraft:magic/standing_stone",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.skycraft.magic.standing_stone"
+  },
+  "world.nirnroot_hum": {
+    "sounds": [
+      "skycraft:world/nirnroot_hum"
+    ],
+    "subtitle": "subtitles.skycraft.world.nirnroot_hum"
   },
   "ui.menu_open": {
     "sounds": [
-      {"name": "skycraft:ui/menu_open"}
+      "skycraft:ui/menu_open"
     ]
   },
   "ui.menu_close": {
     "sounds": [
-      {"name": "skycraft:ui/menu_close"}
+      "skycraft:ui/menu_close"
     ]
   },
   "ui.menu_click": {
     "sounds": [
-      {"name": "skycraft:ui/menu_click"}
+      "skycraft:ui/menu_click"
     ]
   },
-  "ui.skill_up": {
+  "ui.menu_back": {
     "sounds": [
-      {"name": "skycraft:ui/skill_up"}
+      "skycraft:ui/menu_back"
     ]
   },
   "ui.quest_update": {
     "sounds": [
-      {"name": "skycraft:ui/quest_update"}
-    ]
+      "skycraft:ui/quest_update"
+    ],
+    "subtitle": "subtitles.skycraft.ui.quest_update"
+  },
+  "ui.quest_complete": {
+    "sounds": [
+      "skycraft:ui/quest_complete"
+    ],
+    "subtitle": "subtitles.skycraft.ui.quest_complete"
+  },
+  "ui.skill_up": {
+    "sounds": [
+      "skycraft:ui/skill_up"
+    ],
+    "subtitle": "subtitles.skycraft.ui.skill_up"
+  },
+  "ui.level_up": {
+    "sounds": [
+      "skycraft:ui/level_up"
+    ],
+    "subtitle": "subtitles.skycraft.ui.level_up"
+  },
+  "ui.discover": {
+    "sounds": [
+      "skycraft:ui/discover"
+    ],
+    "subtitle": "subtitles.skycraft.ui.discover"
   },
   "ui.lockpick_turn": {
     "sounds": [
-      {"name": "skycraft:ui/lockpick_turn"}
-    ]
+      "skycraft:ui/lockpick_turn"
+    ],
+    "subtitle": "subtitles.skycraft.ui.lockpick_turn"
   },
   "ui.lockpick_strain": {
     "sounds": [
-      {"name": "skycraft:ui/lockpick_strain"}
-    ]
+      "skycraft:ui/lockpick_strain"
+    ],
+    "subtitle": "subtitles.skycraft.ui.lockpick_strain"
   },
   "ui.lockpick_break": {
     "sounds": [
-      {"name": "skycraft:ui/lockpick_break"}
-    ]
+      "skycraft:ui/lockpick_break"
+    ],
+    "subtitle": "subtitles.skycraft.ui.lockpick_break"
   },
   "ui.lockpick_unlock": {
     "sounds": [
-      {"name": "skycraft:ui/lockpick_unlock"}
-    ]
-  },
-  "shout.fus_ro_dah": {
-    "sounds": [
-      {"name": "skycraft:shout/fus_ro_dah"}
-    ]
-  },
-  "shout.wuld_nah_kest": {
-    "sounds": [
-      {"name": "skycraft:shout/wuld_nah_kest"}
-    ]
-  },
-  "shout.yol_toor_shul": {
-    "sounds": [
-      {"name": "skycraft:shout/yol_toor_shul"}
-    ]
-  },
-  "shout.generic": {
-    "sounds": [
-      {"name": "skycraft:shout/generic"}
-    ]
-  },
-  "wordwall.chant": {
-    "sounds": [
-      {"name": "skycraft:wordwall/chant"}
-    ]
-  },
-  "wordwall.learn": {
-    "sounds": [
-      {"name": "skycraft:wordwall/learn"}
-    ]
-  },
-  "magic.dragon_soul": {
-    "sounds": [
-      {"name": "skycraft:magic/dragon_soul"}
-    ]
-  },
-  "magic.shrine_pray": {
-    "sounds": [
-      {"name": "skycraft:magic/shrine_pray"}
-    ]
-  },
-  "magic.standing_stone": {
-    "sounds": [
-      {"name": "skycraft:magic/standing_stone"}
-    ]
-  },
-  "world.nirnroot_hum": {
-    "sounds": [
-      {"name": "skycraft:world/nirnroot_hum"}
-    ]
+      "skycraft:ui/lockpick_unlock"
+    ],
+    "subtitle": "subtitles.skycraft.ui.lockpick_unlock"
   }
 }

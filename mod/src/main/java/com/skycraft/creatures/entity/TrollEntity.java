@@ -162,17 +162,17 @@ public class TrollEntity extends Monster implements Ranked {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.POLAR_BEAR_AMBIENT;
+        return com.skycraft.audio.AudioSounds.creature("troll", "ambient");
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.POLAR_BEAR_HURT;
+        return com.skycraft.audio.AudioSounds.creature("troll", "hurt");
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.POLAR_BEAR_DEATH;
+        return com.skycraft.audio.AudioSounds.creature("troll", "death");
     }
 
     @Override
@@ -183,7 +183,7 @@ public class TrollEntity extends Monster implements Ranked {
     @Override
     public void setTarget(@Nullable LivingEntity target) {
         if (target != null && this.getTarget() == null && !this.level().isClientSide) {
-            this.playSound(SoundEvents.POLAR_BEAR_WARNING, 1.5f, 0.6f);
+            this.playSound(com.skycraft.audio.AudioSounds.creature("troll", "roar"), 1.5f, 1.0f);
         }
         super.setTarget(target);
     }

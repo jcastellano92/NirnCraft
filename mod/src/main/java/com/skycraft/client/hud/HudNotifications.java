@@ -49,13 +49,25 @@ public final class HudNotifications {
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         if (mc.player != null) {
             switch (msg.kind()) {
-                case LEVEL_UP -> mc.player.playSound(net.minecraft.sounds.SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
-                case SKILL_UP -> mc.player.playSound(net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP, 0.8f, 1.2f);
-                case QUEST_COMPLETED -> mc.player.playSound(net.minecraft.sounds.SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 0.9f, 1.1f);
-                case QUEST_UPDATED, QUEST_STARTED -> mc.player.playSound(net.minecraft.sounds.SoundEvents.EXPERIENCE_ORB_PICKUP, 0.8f, 1.0f);
+                // Skycraft UI sounds (audio module); skill-ups are heard from the server's ui.skill_up
+                case LEVEL_UP -> {
+                    // the music fanfare (atmosphere module) covers it when it plays
+                    if (!com.skycraft.atmosphere.AtmosphereConfig.LEVEL_UP_STING.get()
+                            || mc.options.getSoundSourceVolume(net.minecraft.sounds.SoundSource.MUSIC) <= 0f) {
+                        uiSound(com.skycraft.audio.AudioSounds.get("ui.level_up"));
+                    }
+                }
+                case QUEST_COMPLETED -> uiSound(com.skycraft.audio.AudioSounds.get("ui.quest_complete"));
+                case QUEST_UPDATED, QUEST_STARTED -> uiSound(com.skycraft.world.WorldSounds.UI_QUEST_UPDATE.get());
+                case LOCATION_DISCOVERED -> uiSound(com.skycraft.audio.AudioSounds.get("ui.discover"));
                 default -> {}
             }
         }
+    }
+
+    private static void uiSound(net.minecraft.sounds.SoundEvent sound) {
+        net.minecraft.client.Minecraft.getInstance().getSoundManager()
+                .play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(sound, 1.0f, 1.0f));
     }
 
     private static long durationOf(NotifyKind kind) {

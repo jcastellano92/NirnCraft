@@ -196,7 +196,7 @@ public class DraugrDeathlordEntity extends DraugrEntity {
         Vec3 look = facing();
         Vec3 eye = this.getEyePosition();
         announce("creatures.skycraft.shout.dah");
-        this.playSound(SoundEvents.WARDEN_SONIC_BOOM, 3.0f, 0.8f);
+        this.playSound(com.skycraft.audio.AudioSounds.shout(com.skycraft.magic.shout.Shout.UNRELENTING_FORCE, 3), 3.0f, 0.85f);
         if (this.level() instanceof ServerLevel server) {
             for (int i = 1; i <= 8; i++) {
                 Vec3 p = eye.add(look.scale(i));

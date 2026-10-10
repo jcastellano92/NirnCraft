@@ -77,7 +77,7 @@ public class BearEntity extends FaunaAnimal {
     @Override
     public void setTarget(@Nullable LivingEntity target) {
         if (target != null && getTarget() == null && !this.level().isClientSide) {
-            playSound(SoundEvents.POLAR_BEAR_WARNING, 1.2f, 0.75f); // the warning roar before the charge
+            playSound(com.skycraft.audio.AudioSounds.creature("bear", "roar"), 1.2f, 1.0f); // the warning roar before the charge
         }
         super.setTarget(target);
     }
@@ -90,17 +90,17 @@ public class BearEntity extends FaunaAnimal {
     @Override
     @Nullable
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.POLAR_BEAR_AMBIENT;
+        return com.skycraft.audio.AudioSounds.creature("bear", "ambient");
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.POLAR_BEAR_HURT;
+        return com.skycraft.audio.AudioSounds.creature("bear", "hurt");
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.POLAR_BEAR_DEATH;
+        return com.skycraft.audio.AudioSounds.creature("bear", "death");
     }
 
     @Override

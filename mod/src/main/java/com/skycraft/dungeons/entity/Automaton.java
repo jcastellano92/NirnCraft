@@ -40,17 +40,17 @@ public abstract class Automaton extends Monster {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.CHAIN_STEP;
+        return this.random.nextInt(3) == 0 ? com.skycraft.audio.AudioSounds.creature("dwarven", "steam") : com.skycraft.audio.AudioSounds.creature("dwarven", "clank");
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.IRON_GOLEM_HURT;
+        return com.skycraft.audio.AudioSounds.creature("dwarven", "hurt");
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.IRON_GOLEM_DEATH;
+        return com.skycraft.audio.AudioSounds.creature("dwarven", "death");
     }
 
     @Override

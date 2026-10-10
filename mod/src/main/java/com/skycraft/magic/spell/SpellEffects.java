@@ -59,18 +59,16 @@ public final class SpellEffects {
     public static void castSound(ServerPlayer p, Spell spell) {
         Vec3 pos = p.getEyePosition();
         switch (spell.element) {
-            case FIRE -> MagicFx.sound(p, pos, SoundEvents.BLAZE_SHOOT, 0.8f, 1.1f + p.getRandom().nextFloat() * 0.2f);
-            case FROST -> {
-                MagicFx.sound(p, pos, SoundEvents.POWDER_SNOW_BREAK, 1f, 0.7f);
-                MagicFx.sound(p, pos, SoundEvents.AMETHYST_BLOCK_CHIME, 1f, 1.6f);
-            }
-            case SHOCK -> MagicFx.sound(p, pos, SoundEvents.FIREWORK_ROCKET_TWINKLE, 0.8f, 1.6f);
-            case HOLY -> MagicFx.sound(p, pos, SoundEvents.AMETHYST_BLOCK_CHIME, 1f, 1.2f);
-            case MIND -> MagicFx.sound(p, pos, SoundEvents.ILLUSIONER_CAST_SPELL, 0.8f, 1.2f);
-            case SOUL -> MagicFx.sound(p, pos, SoundEvents.SOUL_ESCAPE, 1.2f, 0.8f);
-            case CONJURE -> MagicFx.sound(p, pos, SoundEvents.EVOKER_PREPARE_SUMMON, 0.7f, 1.3f);
-            case NATURE -> MagicFx.sound(p, pos, SoundEvents.EVOKER_CAST_SPELL, 0.7f, 0.9f);
-            default -> MagicFx.sound(p, pos, SoundEvents.ENCHANTMENT_TABLE_USE, 1f, 1.2f);
+            case FIRE -> MagicFx.sound(p, pos, com.skycraft.audio.AudioSounds.spell("fire"), 0.9f, 0.95f + p.getRandom().nextFloat() * 0.1f);
+            case FROST -> MagicFx.sound(p, pos, com.skycraft.audio.AudioSounds.spell("frost"), 1f, 0.95f + p.getRandom().nextFloat() * 0.1f);
+            case SHOCK -> MagicFx.sound(p, pos, com.skycraft.audio.AudioSounds.spell("shock"), 0.9f, 0.95f + p.getRandom().nextFloat() * 0.1f);
+            case HOLY -> MagicFx.sound(p, pos, com.skycraft.audio.AudioSounds.spell("heal"), 1f, 1.0f);
+            case MIND -> MagicFx.sound(p, pos, com.skycraft.audio.AudioSounds.spell("illusion"), 1f, 1.0f);
+            case SOUL, CONJURE -> MagicFx.sound(p, pos, com.skycraft.audio.AudioSounds.spell("conjure"), 1f, 1.0f);
+            case NATURE -> MagicFx.sound(p, pos, com.skycraft.audio.AudioSounds.spell("alteration"), 0.9f, 0.9f);
+            default -> MagicFx.sound(p, pos, spell.school == School.RESTORATION ? com.skycraft.audio.AudioSounds.spell("heal")
+                    : spell.school == School.ILLUSION ? com.skycraft.audio.AudioSounds.spell("illusion")
+                    : spell.school == School.CONJURATION ? com.skycraft.audio.AudioSounds.spell("conjure") : com.skycraft.audio.AudioSounds.spell("alteration"), 1f, 1.0f);
         }
     }
 
@@ -195,16 +193,16 @@ public final class SpellEffects {
 
     private static void impactSound(ServerLevel level, Vec3 pos, Element element, float volume) {
         SoundEvent sound = switch (element) {
-            case FIRE -> SoundEvents.FIRECHARGE_USE;
-            case FROST -> SoundEvents.GLASS_BREAK;
-            case SHOCK -> SoundEvents.LIGHTNING_BOLT_IMPACT;
+            case FIRE -> com.skycraft.audio.AudioSounds.spell("impact_fire");
+            case FROST -> com.skycraft.audio.AudioSounds.spell("impact_frost");
+            case SHOCK -> com.skycraft.audio.AudioSounds.spell("impact_shock");
             case HOLY -> SoundEvents.AMETHYST_BLOCK_BREAK;
             case SOUL -> SoundEvents.SOUL_ESCAPE;
             case MIND -> SoundEvents.ILLUSIONER_MIRROR_MOVE;
             default -> SoundEvents.AMETHYST_CLUSTER_BREAK;
         };
-        float pitch = element == Element.SHOCK ? 1.7f : 1.0f + level.random.nextFloat() * 0.2f;
-        MagicFx.worldSound(level, pos, sound, SoundSource.PLAYERS, element == Element.SHOCK ? volume * 0.5f : volume, pitch);
+        float pitch = 0.92f + level.random.nextFloat() * 0.16f;
+        MagicFx.worldSound(level, pos, sound, SoundSource.PLAYERS, volume, pitch);
     }
 
     /** Firebolt, Ice Spike, Lightning Bolt, Incinerate, Icy Spear, Thunderbolt. */
@@ -289,9 +287,9 @@ public final class SpellEffects {
         if (tick % 2 == 0) MagicFx.send(p, MagicFx.BEAM, spell.element, hand, ray.end(), p.getId(), ray.entity() != null || ray.hitBlock() ? 1 : 0);
         if (tick % 8 == 0) {
             switch (spell.element) {
-                case FIRE -> MagicFx.sound(p, hand, tick == 0 ? SoundEvents.BLAZE_SHOOT : SoundEvents.FIRE_AMBIENT, 0.9f, 1.0f + p.getRandom().nextFloat() * 0.3f);
-                case FROST -> MagicFx.sound(p, hand, SoundEvents.POWDER_SNOW_STEP, 1f, 0.5f + p.getRandom().nextFloat() * 0.2f);
-                case SHOCK -> MagicFx.sound(p, hand, SoundEvents.FIREWORK_ROCKET_TWINKLE_FAR, 0.6f, 1.8f + p.getRandom().nextFloat() * 0.2f);
+                case FIRE -> MagicFx.sound(p, hand, tick == 0 ? com.skycraft.audio.AudioSounds.spell("fire") : com.skycraft.audio.AudioSounds.spell("fire_stream"), 0.9f, 0.95f + p.getRandom().nextFloat() * 0.1f);
+                case FROST -> MagicFx.sound(p, hand, com.skycraft.audio.AudioSounds.spell("frost_stream"), 0.9f, 0.95f + p.getRandom().nextFloat() * 0.1f);
+                case SHOCK -> MagicFx.sound(p, hand, com.skycraft.audio.AudioSounds.spell("shock_stream"), 0.8f, 0.95f + p.getRandom().nextFloat() * 0.1f);
                 default -> {
                 }
             }

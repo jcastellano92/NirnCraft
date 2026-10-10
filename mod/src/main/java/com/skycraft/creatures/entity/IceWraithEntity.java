@@ -73,17 +73,17 @@ public class IceWraithEntity extends Monster {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.STRAY_AMBIENT;
+        return com.skycraft.audio.AudioSounds.creature("ice_wraith", "ambient");
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.GLASS_BREAK;
+        return com.skycraft.audio.AudioSounds.creature("ice_wraith", "hurt");
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.GLASS_BREAK;
+        return com.skycraft.audio.AudioSounds.creature("ice_wraith", "death");
     }
 }
 

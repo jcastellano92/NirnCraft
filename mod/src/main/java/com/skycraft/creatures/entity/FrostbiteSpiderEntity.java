@@ -39,5 +39,19 @@ public class FrostbiteSpiderEntity extends Spider {
         }
         return hit;
     }
-}
 
+    @Override
+    protected net.minecraft.sounds.SoundEvent getAmbientSound() {
+        return com.skycraft.audio.AudioSounds.creature("frostbite_spider", "ambient");
+    }
+
+    @Override
+    protected net.minecraft.sounds.SoundEvent getHurtSound(net.minecraft.world.damagesource.DamageSource source) {
+        return com.skycraft.audio.AudioSounds.creature("frostbite_spider", "hurt");
+    }
+
+    @Override
+    protected net.minecraft.sounds.SoundEvent getDeathSound() {
+        return com.skycraft.audio.AudioSounds.creature("frostbite_spider", "death");
+    }
+}

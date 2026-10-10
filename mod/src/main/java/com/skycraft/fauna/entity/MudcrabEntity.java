@@ -52,13 +52,18 @@ public class MudcrabEntity extends FaunaAnimal {
     }
 
     @Override
+    protected SoundEvent getAmbientSound() {
+        return com.skycraft.audio.AudioSounds.creature("mudcrab", "ambient");
+    }
+
+    @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.TURTLE_HURT;
+        return com.skycraft.audio.AudioSounds.creature("mudcrab", "hurt");
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.TURTLE_DEATH;
+        return com.skycraft.audio.AudioSounds.creature("mudcrab", "death");
     }
 
     @Override

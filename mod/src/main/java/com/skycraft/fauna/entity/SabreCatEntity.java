@@ -110,17 +110,17 @@ public class SabreCatEntity extends FaunaAnimal {
     @Override
     @Nullable
     protected SoundEvent getAmbientSound() {
-        return getTarget() != null ? SoundEvents.CAT_HISS : (this.random.nextInt(4) == 0 ? SoundEvents.OCELOT_AMBIENT : null);
+        return getTarget() != null || this.random.nextInt(4) == 0 ? com.skycraft.audio.AudioSounds.creature("sabre_cat", "ambient") : null;
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.CAT_HURT;
+        return com.skycraft.audio.AudioSounds.creature("sabre_cat", "hurt");
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.CAT_DEATH;
+        return com.skycraft.audio.AudioSounds.creature("sabre_cat", "death");
     }
 
     /** Leaps at a target 3-7 blocks away; landing on it deals heavy damage and staggers. */
@@ -153,7 +153,7 @@ public class SabreCatEntity extends FaunaAnimal {
             setDeltaMovement(h.x, 0.48, h.z);
             pouncing = true;
             pounceCooldown = 60 + getRandom().nextInt(50);
-            playSound(SoundEvents.CAT_HISS, 1.0f, 0.5f);
+            playSound(com.skycraft.audio.AudioSounds.creature("sabre_cat", "ambient"), 1.2f, 0.9f);
         }
 
         @Override

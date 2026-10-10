@@ -54,6 +54,7 @@ public class Skycraft {
         com.skycraft.arsenal.ArsenalModule.init(modBus);
         com.skycraft.atmosphere.AtmosphereModule.init(modBus);
         com.skycraft.tamriel.TamrielModule.init(modBus);
+        com.skycraft.audio.AudioModule.init(modBus);
 
         modBus.addListener(this::registerCapabilities);
         modBus.addListener(this::commonSetup);

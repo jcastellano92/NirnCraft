@@ -1,19 +1,22 @@
 #!/usr/bin/env python3
 """
-Build a personal resource pack that plays YOUR OWN copy of the Skyrim soundtrack in Skycraft.
+Build a personal resource pack that plays YOUR OWN copy of the Skyrim soundtrack in Skycraft, from a folder of music
+files you already exported from your installation.
 
-Skycraft ships its own original score. If you own The Elder Scrolls V: Skyrim you may prefer the real thing: export
-the music files from your own installation (see docs/MUSIC.md), point this script at that folder, and it converts
-them to Ogg Vorbis with ffmpeg and writes a resource pack ("Skycraft - Personal Skyrim OST") whose
-assets/skycraft/sounds.json maps them onto Skycraft's situational music events with "replace": true.
+This is the music-only front end of tools/music/import_skyrim_audio.py, kept for people who already have the
+soundtrack as loose files. If Skyrim is installed, import_skyrim_audio.py can read the game archives directly and also
+imports creature, magic, UI, ambience and shout sounds.
 
-  * It never downloads anything and never touches files outside the input folder and the output zip.
+  * It never downloads anything and only reads the input folder; the zip is written outside the Skycraft repository
+    (an output path inside the repository is refused).
   * The resulting pack contains copyrighted music: it is for your personal use only. Do not share or upload it.
 
 Skyrim names its music like mus_explore_day_01, mus_explore_night_02, mus_town_day_01, mus_dungeon_01, mus_combat_03,
-mus_combat_boss, mus_discover_dungeon_01, mus_levelup_01, mus_sovngarde_01 ... (.xwm, or .wav/.mp3/.flac/.ogg after
-conversion). Files are matched by name (first matching rule wins); use --map 'regex=music.event' to add your own rules
-and --dry-run to see the mapping without converting anything.
+mus_combat_boss, mus_discover_dungeon_01, mus_levelup_01, mus_sovngarde_chant_lp, mus_explore_dlc2solstheim_01 ...
+(.xwm, or .wav/.mp3/.flac/.ogg after conversion). Files are matched by name (first matching rule wins): the game's own
+names map precisely (e.g. Solstheim -> music.explore.morrowind, Apocrypha/Soul Cairn -> music.oblivion), other names
+by keyword (town, tavern, night, dungeon, combat, boss ...). Use --map 'regex=music.event' to add your own rules
+(tried first, matched against the file name) and --dry-run to see the mapping without converting anything.
 
 Usage:
     python3 tools/music/import_skyrim_ost.py ~/SkyrimMusic
@@ -23,66 +26,42 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import json
 import pathlib
-import re
-import shutil
-import subprocess
 import sys
-import tempfile
-import zipfile
+
+HERE = pathlib.Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import import_skyrim_audio  # noqa: E402
+import sound_catalog  # noqa: E402
 
 PACK_NAME = "Skycraft – Personal Skyrim OST"
-PACK_FORMAT = 15  # Minecraft 1.20.1
-EXTENSIONS = {".xwm", ".wav", ".mp3", ".flac", ".ogg", ".wma", ".m4a", ".opus"}
+ZIP_NAME = "skycraft_personal_skyrim_ost.zip"
 
-# Skycraft music events (registered by the world and atmosphere modules).
-EVENTS = ["music.explore", "music.explore_night", "music.town", "music.dungeon", "music.combat", "music.boss",
-          "music.oblivion", "music.sovngarde", "music.discovery", "music.level_up"]
-
-# (regex on the lower-case file stem, event); the first match wins.
-RULES = [
-    (r"level_?up", "music.level_up"),
-    (r"discover", "music.discovery"),
-    (r"combat.*boss|boss|dragon|alduin", "music.boss"),
-    (r"combat", "music.combat"),
-    (r"sovngarde", "music.sovngarde"),
-    (r"oblivion|apocrypha|soul_?cairn|daedric", "music.oblivion"),
-    (r"town|tavern|\binn\b|city", "music.town"),
-    (r"dungeon|dread|cave|ruin|dwemer|dwarven|crypt|barrow", "music.dungeon"),
-    (r"explore.*night|night", "music.explore_night"),
-    (r"explore|dawn|dusk|day|wilderness|travel", "music.explore"),
-]
-
-def classify(stem: str, rules) -> str | None:
-    s = stem.lower()
-    for pattern, event in rules:
-        if re.search(pattern, s):
-            return event
-    return None
+# Skycraft music events (see tools/music/sound_catalog.py).
+EVENTS = [e.name for e in sound_catalog.EVENTS if e.category == "music"]
 
 
-def safe_name(stem: str, used: set) -> str:
-    base = re.sub(r"[^a-z0-9_]+", "_", stem.lower()).strip("_") or "track"
-    name, i = base, 2
-    while name in used:
-        name = f"{base}_{i}"
-        i += 1
-    used.add(name)
-    return name
+def default_out() -> pathlib.Path:
+    rp = import_skyrim_audio.default_resourcepacks()
+    return (rp or pathlib.Path.home()) / ZIP_NAME
 
 
-def convert(ffmpeg: str, src: pathlib.Path, dst: pathlib.Path, quality: float) -> None:
-    cmd = [ffmpeg, "-y", "-hide_banner", "-loglevel", "error", "-i", str(src), "-vn", "-map_metadata", "-1",
-           "-ac", "2", "-ar", "44100", "-c:a", "libvorbis", "-q:a", str(quality), str(dst)]
-    subprocess.run(cmd, check=True)
+def stem_rule(pattern: str) -> str:
+    """Old-style --map patterns were matched against the file stem; turn one into a rule on 'extra/<path>'."""
+    p = pattern.lower()
+    head = r"(?:^|/)" if p.startswith("^") else ""
+    if p.startswith("^"):
+        p = p[1:]
+    if p.endswith("$") and not p.endswith(r"\$"):
+        p = p[:-1] + r"\.[a-z0-9]+$"
+    return head + "(?:" + p + ")"
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("folder", type=pathlib.Path, help="folder with music files exported from YOUR copy of Skyrim")
-    ap.add_argument("-o", "--out", type=pathlib.Path, default=pathlib.Path("skycraft_personal_skyrim_ost.zip"),
-                    help="output resource pack zip (default: ./skycraft_personal_skyrim_ost.zip)")
+    ap.add_argument("-o", "--out", type=pathlib.Path, default=None,
+                    help=f"output resource pack zip (default: <.minecraft>/resourcepacks/{ZIP_NAME}, else ~/{ZIP_NAME})")
     ap.add_argument("--map", action="append", default=[], metavar="REGEX=EVENT",
                     help="extra rule tried before the built-in ones, e.g. 'mus_special_.*=music.sovngarde'")
     ap.add_argument("--quality", type=float, default=5.0, help="Vorbis quality for conversion (default 5)")
@@ -92,7 +71,7 @@ def main() -> int:
     if not args.folder.is_dir():
         print(f"error: {args.folder} is not a folder", file=sys.stderr)
         return 2
-    rules = []
+    maps = []
     for m in args.map:
         if "=" not in m:
             print(f"error: --map needs REGEX=EVENT, got {m!r}", file=sys.stderr)
@@ -101,91 +80,17 @@ def main() -> int:
         if event not in EVENTS:
             print(f"error: unknown event {event!r}; choose from {', '.join(EVENTS)}", file=sys.stderr)
             return 2
-        rules.append((pattern.lower(), event))
-    rules += RULES
+        maps += ["--map", f"{stem_rule(pattern)}={event}"]
 
-    files = sorted(p for p in args.folder.rglob("*") if p.is_file() and p.suffix.lower() in EXTENSIONS)
-    if not files:
-        print(f"error: no music files ({', '.join(sorted(EXTENSIONS))}) found under {args.folder}", file=sys.stderr)
-        return 1
-
-    plan: dict[str, list[pathlib.Path]] = {e: [] for e in EVENTS}
-    skipped = []
-    for f in files:
-        event = classify(f.stem, rules)
-        if event:
-            plan[event].append(f)
-        else:
-            skipped.append(f)
-
-    for event in EVENTS:
-        if plan[event]:
-            print(f"{event}:")
-            for f in plan[event]:
-                print(f"    {f.relative_to(args.folder)}")
-    for event in EVENTS:
-        if not plan[event]:
-            print(f"{event}: (none found - Skycraft's original track stays)")
-    if skipped:
-        print("not mapped (use --map to assign):")
-        for f in skipped:
-            print(f"    {f.relative_to(args.folder)}")
+    out = args.out if args.out is not None else default_out()
+    if out.suffix.lower() != ".zip":
+        out = out / ZIP_NAME
+    argv = ["--no-skyrim", "--extra", str(args.folder), "--extra-is-music", "--only", "music",
+            "--quality", str(args.quality), "--out", str(out)] + maps
     if args.dry_run:
-        return 0
-    if not any(plan.values()):
-        print("error: nothing to put in the pack", file=sys.stderr)
-        return 1
-
-    ffmpeg = shutil.which("ffmpeg")
-    if not ffmpeg:
-        print("error: ffmpeg was not found on PATH. Install it (https://ffmpeg.org, or your package manager) - it is\n"
-              "needed to decode .xwm and to encode Ogg Vorbis, the only format Minecraft plays.", file=sys.stderr)
-        return 1
-
-    sounds = {}
-    used: set = set()
-    with tempfile.TemporaryDirectory() as tmp:
-        tmpdir = pathlib.Path(tmp)
-        converted: list[tuple[str, pathlib.Path]] = []
-        for event in EVENTS:
-            entries = []
-            for f in plan[event]:
-                name = safe_name(f.stem, used)
-                dst = tmpdir / f"{name}.ogg"
-                print(f"converting {f.name} -> personal/{name}.ogg")
-                try:
-                    convert(ffmpeg, f, dst, args.quality)
-                except subprocess.CalledProcessError:
-                    print(f"  warning: ffmpeg could not convert {f}; skipped", file=sys.stderr)
-                    continue
-                converted.append((name, dst))
-                entries.append({"name": f"skycraft:music/personal/{name}", "stream": True})
-            if entries:
-                sounds[event] = {"replace": True, "sounds": entries}
-
-        if not sounds:
-            print("error: no file could be converted", file=sys.stderr)
-            return 1
-        if "music.combat" in sounds and "music.boss" in sounds:
-            # Skycraft's situational player only asks for music.combat: keep boss pieces in that rotation
-            sounds["music.combat"]["sounds"].append({"name": "skycraft:music.boss", "type": "event"})
-        mcmeta = {"pack": {"pack_format": PACK_FORMAT,
-                           "description": f"{PACK_NAME}\n§7Personal use only - do not redistribute"}}
-        args.out.parent.mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(args.out, "w", compression=zipfile.ZIP_DEFLATED) as z:
-            z.writestr("pack.mcmeta", json.dumps(mcmeta, indent=2, ensure_ascii=False))
-            z.writestr("assets/skycraft/sounds.json", json.dumps(sounds, indent=2))
-            z.writestr("README.txt",
-                       f"{PACK_NAME}\n\nBuilt by Skycraft's tools/music/import_skyrim_ost.py from music files the pack's owner\n"
-                       "exported from their own copy of The Elder Scrolls V: Skyrim. The music is (c) Bethesda Softworks /\n"
-                       "its composer. This pack is for the owner's personal use only. Do not share or upload it.\n")
-            for name, path in converted:
-                z.write(path, f"assets/skycraft/sounds/music/personal/{name}.ogg", compress_type=zipfile.ZIP_STORED)
-
-    print(f"\nwrote {args.out}  ({args.out.stat().st_size / 1e6:.1f} MB)")
-    print("Copy it into .minecraft/resourcepacks/ and enable it above the Skycraft resources in Options > Resource Packs.")
-    print("Reminder: this pack contains your personal copy of copyrighted music - keep it to yourself.")
-    return 0
+        argv.append("--dry-run")
+    print(f"{PACK_NAME}: converting the music in {args.folder}")
+    return import_skyrim_audio.main(argv)
 
 
 if __name__ == "__main__":

@@ -62,16 +62,16 @@ public class HorkerEntity extends FaunaAnimal {
     @Override
     @Nullable
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.HOGLIN_AMBIENT;
+        return com.skycraft.audio.AudioSounds.creature("horker", "ambient");
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.HOGLIN_HURT;
+        return com.skycraft.audio.AudioSounds.creature("horker", "hurt");
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.HOGLIN_DEATH;
+        return com.skycraft.audio.AudioSounds.creature("horker", "death");
     }
 }
