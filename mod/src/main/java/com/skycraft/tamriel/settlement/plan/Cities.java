@@ -169,6 +169,33 @@ public final class Cities {
         };
     }
 
+    /**
+     * Local road ends (gates, bridge and ramp feet) of the unique layouts, main gate first; null for places the zoning
+     * planner lays out.
+     */
+    public static List<int[]> gatesLocal(Place p) {
+        int R = layoutRadius(p);
+        return switch (key(p)) {
+            case "whiterun" -> List.of(new int[]{0, 128});
+            case "solitude" -> List.of(new int[]{0, 180});
+            case "windhelm" -> List.of(new int[]{0, 172});
+            case "riften" -> List.of(new int[]{0, 80});
+            case "markarth" -> List.of(new int[]{0, 88});
+            case "winterhold" -> List.of(new int[]{0, 66});
+            case "falkreath" -> List.of(new int[]{0, 82});
+            case "morthal" -> List.of(new int[]{0, 72});
+            case "dawnstar" -> List.of(new int[]{0, 78});
+            case "college_of_winterhold" -> List.of(new int[]{-53, 92});
+            case "helgen" -> List.of(new int[]{0, 56}, new int[]{0, -56});
+            case "imperial_city" -> List.of(new int[]{0, 220});
+            case "vivec" -> List.of(new int[]{0, 140});
+            case "mournhold", "alinor", "sentinel", "torval", "wayrest", "orsinium" ->
+                    List.of(new int[]{0, R - 5}, new int[]{R - 5, 0}, new int[]{-(R - 5), 0});
+            case "elden_root", "lilmoth" -> List.of(new int[]{0, R - 8});
+            default -> null;
+        };
+    }
+
     // ------------------------------------------------------------------ dispatch
 
     /** Builds the unique layout of the place, if it has one. */
@@ -186,7 +213,7 @@ public final class Cities {
             case "college_of_winterhold" -> college(plan);
             case "helgen" -> helgen(plan);
             case "dragon_bridge" -> {
-                Layouts.generic(plan, Layouts.Size.TOWN, "", names(p));
+                com.skycraft.tamriel.settlement.grammar.Zoning.generic(plan, Layouts.Size.TOWN, "", names(p));
                 Spec b = plan.line(Archetype.BRIDGE, -plan.radius - 30, 0, -plan.radius + 4, 0, 7);
                 b.variant = 1;
                 plan.put(b);
@@ -745,7 +772,7 @@ public final class Cities {
     // ------------------------------------------------------------------ Morrowind
 
     static void ravenRock(Plan plan, Place p) {
-        Layouts.generic(plan, Layouts.Size.TOWN, "", names(p));
+        com.skycraft.tamriel.settlement.grammar.Zoning.generic(plan, Layouts.Size.TOWN, "", names(p));
         // the Bulwark: a stone wall round the landward side
         int from = plan.specs.size();
         plan.wallRing(Math.min(plan.radius - 4, 70), 12, 9, new double[]{0, Math.PI}, Spec.MAJOR, true);

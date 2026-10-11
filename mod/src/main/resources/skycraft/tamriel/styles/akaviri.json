@@ -1,0 +1,37 @@
+{
+  "_doc": "Akaviri style sheet: tiered pagodas with curved eaves on stone platforms, planned courts.",
+  "windows": "fence",
+  "hearth": false,
+  "faith": ["akatosh", "julianos", "stendarr"],
+  "crops": ["saltrice", "carrots", "orchard"],
+  "animals": ["chicken", "pig", "horse"],
+  "colors": ["red", "black", "white", "yellow"],
+  "forms": {"grid": 3, "cluster": 2, "harbour": 1},
+  "bodies": {"poor": {"rect": 2, "pagoda": 1}, "common": {"pagoda": 2, "rect": 1}, "wealthy": {"pagoda": 1}, "noble": {"pagoda": 1}},
+  "hallBody": "pagoda",
+  "roofs": {"poor": {"gable": 1}, "common": {"hip": 2, "gable": 1}, "wealthy": {"hip": 1}, "noble": {"hip": 1}},
+  "storeys": {"poor": [1, 1], "common": [1, 2], "wealthy": [2, 2], "noble": [2, 3]},
+  "rules": {"timber": 0.9, "porch": 0.4, "shutters": 0.3, "flowerBoxes": 0.1, "chimney": 0.0, "annex": 0.2, "banners": 0.7, "lanterns": 0.8, "awning": 0.2},
+  "tiers": {
+    "poor": [
+      {"wall": "birch_planks", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "bamboo", "accent": "red"},
+      {"wall": "bamboo_planks", "low": "cobblestone", "roof": "bamboo_mosaic", "wood": "bamboo", "accent": "white"},
+      {"wall": "white_terracotta", "low": "stone_bricks", "roof": "spruce", "wood": "mangrove", "accent": "black"}
+    ],
+    "common": [
+      {"wall": "birch_planks", "wall2": "white_terracotta", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "mangrove", "accent": "red"},
+      {"wall": "white_terracotta", "low": "polished_andesite", "roof": "blackstone", "wood": "dark_oak", "accent": "yellow"},
+      {"wall": "bamboo_mosaic", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "cherry", "accent": "black"}
+    ],
+    "wealthy": [
+      {"wall": "white_terracotta", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "mangrove", "post": "crimson_stem", "accent": "red"},
+      {"wall": "birch_planks", "low": "polished_andesite", "roof": "polished_blackstone_brick", "wood": "cherry", "accent": "white"},
+      {"wall": "calcite", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "dark_oak", "post": "mangrove_log", "accent": "yellow"}
+    ],
+    "noble": [
+      {"wall": "white_terracotta", "low": "chiseled_stone_bricks", "roof": "deepslate_tile", "wood": "crimson", "accent": "red"},
+      {"wall": "calcite", "low": "polished_andesite", "roof": "polished_blackstone_brick", "roofFull": "gold_block", "wood": "mangrove", "accent": "yellow"},
+      {"wall": "birch_planks", "low": "stone_bricks", "roof": "blackstone", "wood": "cherry", "accent": "black"}
+    ]
+  }
+}

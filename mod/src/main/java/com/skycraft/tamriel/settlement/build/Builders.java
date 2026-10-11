@@ -31,7 +31,25 @@ public final class Builders {
         }
         Culture culture = Culture.byOrdinal(s.culture);
         Palette p = Kits.palette(culture, s.style);
+        if (s.kind == Archetype.RESERVED) {
+            com.skycraft.tamriel.settlement.SettlementPlan.Painter painter = com.skycraft.tamriel.settlement.SettlementPlan.painterOf(s.name);
+            if (painter != null) {
+                painter.paint(c, s);
+                return;
+            }
+        }
+        if (s.grammar() && !s.has(Spec.RUINED)) {
+            com.skycraft.tamriel.settlement.grammar.Grammar.build(c, s);
+            return;
+        }
         switch (s.kind) {
+            case YARD -> com.skycraft.tamriel.settlement.grammar.Outdoors.yard(c, p, s,
+                    com.skycraft.tamriel.settlement.grammar.Styles.of(culture, s.style));
+            case PEN -> com.skycraft.tamriel.settlement.grammar.Outdoors.pen(c, p, s,
+                    com.skycraft.tamriel.settlement.grammar.Styles.of(culture, s.style));
+            case CAMP -> com.skycraft.tamriel.settlement.grammar.Outdoors.camp(c, p, s,
+                    com.skycraft.tamriel.settlement.grammar.Styles.of(culture, s.style));
+            case QUARRY -> com.skycraft.tamriel.settlement.grammar.Outdoors.quarry(c, p, s);
             case STREET -> Works.street(c, p, s);
             case WALL -> Works.wall(c, p, s);
             case BRIDGE -> Works.bridge(c, p, s);
@@ -89,6 +107,7 @@ public final class Builders {
 
     /** Height a building needs above its floor: storeys, the steepest roof over its span, chimney and finials. */
     public static int height(Spec s) {
+        if (s.grammar() && !s.has(Spec.RUINED)) return com.skycraft.tamriel.settlement.grammar.Blueprint.of(s).height();
         if (!s.kind.building) return s.h;
         int storeys = s.kind == Archetype.TOWER ? Math.max(2, (s.h - 4) / 5) : s.has(Spec.UPPER) ? 2 : 1;
         int walls = s.kind == Archetype.TOWER ? storeys * 5 : storeys * (wallHeight(s.kind) + 1);

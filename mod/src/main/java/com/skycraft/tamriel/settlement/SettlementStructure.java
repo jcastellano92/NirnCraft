@@ -82,6 +82,7 @@ public class SettlementStructure extends Structure {
             return switch (source) {
                 case "district" -> district(ctx);
                 case "generic" -> generic(ctx);
+                case "site" -> site(ctx);
                 default -> named(ctx);
             };
         } catch (RuntimeException e) {
@@ -102,6 +103,7 @@ public class SettlementStructure extends Structure {
             case INN -> (p.type() == PlaceType.VILLAGE || p.type() == PlaceType.TOWN) && v.equals("inn");
             case FARM -> p.type() == PlaceType.FARM && !v.equals("homestead");
             case HOMESTEAD -> p.type() == PlaceType.FARM && v.equals("homestead");
+            case SITE -> false;
         };
     }
 
@@ -169,18 +171,9 @@ public class SettlementStructure extends Structure {
         int style = Cities.style(p, c);
         Plan plan = new Plan(p.id(), p.x(), p.z(), Cities.layoutRadius(p), c, style, Cities.seed(p),
                 new Terrain(ctx, Cities.layoutRadius(p) > 60 ? 16 : 8), Cities.back(p));
-        if (!Cities.build(plan, p)) {
-            Layouts.Size sz = switch (p.type()) {
-                case CAPITAL, CITY -> Layouts.Size.CITY;
-                case TOWN -> Layouts.Size.TOWN;
-                case FARM -> Layouts.Size.FARM;
-                default -> plan.radius < 30 ? Layouts.Size.HAMLET : Layouts.Size.VILLAGE;
-            };
-            Layouts.generic(plan, sz, p.variant(), Cities.names(p));
-        }
-        // the hold's jail and the faction halls of the lore (appended: earlier pieces keep their indices)
-        com.skycraft.tamriel.settlement.plan.Halls.addTo(plan, p);
-        com.skycraft.tamriel.settlement.plan.HousePlots.reserve(plan, p);
+        // the zoning planner also gives the hold's jail, the faction halls (plan/Halls) and the provincial player-home
+        // plots (plan/HousePlots) their lots, before it packs the streets with houses
+        com.skycraft.tamriel.settlement.grammar.Zoning.place(plan, p);
         plan.resolve();
         com.skycraft.tamriel.settlement.plan.Halls.report(plan, p);
         List<Spec> specs = List.copyOf(plan.specs);
@@ -205,7 +198,7 @@ public class SettlementStructure extends Structure {
         Terrain t = new Terrain(ctx);
         int h = t.land(x, z);
         if (h <= t.sea || t.wet(x, z)) return Optional.empty();
-        int half = Math.max(8, R / 2);
+        int half = Math.max(8, com.skycraft.tamriel.settlement.grammar.Zoning.builtRadius(size, R) / 2);
         if (t.anyWet(x, z, half, half) && size != Layouts.Size.FARM) return Optional.empty();
         if (t.spread(x, z, half, half) > (size == Layouts.Size.CITY ? 18 : 12)) return Optional.empty();
         Culture c = Culture.of(culture.equals("auto") ? region.culture() : culture);
@@ -216,7 +209,29 @@ public class SettlementStructure extends Structure {
         Direction back = Direction.from2DDataValue((int) Math.floorMod(seed >>> 7, 4));
         return Optional.of(new GenerationStub(new BlockPos(x, h, z), builder -> {
             Plan plan = new Plan(key, x, z, R, c, style, seed, t, back);
-            Layouts.generic(plan, size, "", Layouts.Names.NONE);
+            com.skycraft.tamriel.settlement.grammar.Zoning.generic(plan, size, "", Layouts.Names.NONE);
+            plan.resolve();
+            for (int i = 0; i < plan.specs.size(); i++) {
+                builder.addPiece(new SettlementPiece(plan.specs.get(i), seed ^ (i * 0x9E3779B97F4A7C15L), key, i));
+            }
+        }));
+    }
+
+    // ------------------------------------------------------------------ outlying working sites
+
+    /** A working site near a settlement or on a road (logging camp, mine, farmstead, vineyard, waystation...). */
+    private Optional<GenerationStub> site(GenerationContext ctx) {
+        ChunkPos cp = ctx.chunkPos();
+        int x = cp.getMiddleBlockX(), z = cp.getMiddleBlockZ();
+        Terrain t = new Terrain(ctx);
+        long seed = ctx.seed() ^ cp.toLong() * 0x2545F4914F6CDD1DL ^ 0x517EL;
+        com.skycraft.tamriel.settlement.grammar.Sites.Choice choice = com.skycraft.tamriel.settlement.grammar.Sites.choose(seed, x, z, t);
+        if (choice == null) return Optional.empty();
+        int h = t.land(x, z);
+        String key = "site:" + cp.x + "," + cp.z;
+        return Optional.of(new GenerationStub(new BlockPos(x, h, z), builder -> {
+            Plan plan = new Plan(key, x, z, Layouts.Size.SITE.radius(), choice.culture(), choice.style(), seed, t, choice.back());
+            com.skycraft.tamriel.settlement.grammar.Sites.layout(plan, choice.kind());
             plan.resolve();
             for (int i = 0; i < plan.specs.size(); i++) {
                 builder.addPiece(new SettlementPiece(plan.specs.get(i), seed ^ (i * 0x9E3779B97F4A7C15L), key, i));

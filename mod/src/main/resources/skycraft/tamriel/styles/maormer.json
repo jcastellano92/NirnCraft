@@ -1,0 +1,38 @@
+{
+  "_doc": "Maormer style sheet: sea-shell hulls and prismarine halls with domes, harbour towns.",
+  "windows": "pane",
+  "hearth": false,
+  "faith": ["akatosh", "kynareth", "mara"],
+  "crops": ["carrots", "beetroots"],
+  "animals": ["turtle", "chicken"],
+  "colors": ["cyan", "light_blue", "blue"],
+  "forms": {"harbour": 4, "cluster": 2, "ring": 1},
+  "bodies": {"poor": {"chitin": 2, "rect": 1}, "common": {"chitin": 2, "rect": 1}, "wealthy": {"rect": 2, "chitin": 1}, "noble": {"rect": 1}},
+  "roofs": {"poor": {"flat": 1}, "common": {"dome": 1, "flat": 1}, "wealthy": {"dome": 2, "spire": 1}, "noble": {"dome": 2, "spire": 1}},
+  "halls": {"dome": 1},
+  "footprints": {"poor": {"rect": 1}, "common": {"rect": 1}, "wealthy": {"rect": 1, "l": 1}, "noble": {"t": 1, "u": 1}},
+  "storeys": {"poor": [1, 1], "common": [1, 1], "wealthy": [1, 2], "noble": [2, 2]},
+  "rules": {"timber": 0.0, "porch": 0.1, "balcony": 0.3, "shutters": 0.0, "chimney": 0.0, "annex": 0.2, "banners": 0.5, "lanterns": 0.8, "awning": 0.3, "tower": 0.5},
+  "tiers": {
+    "poor": [
+      {"wall": "prismarine", "low": "dark_prismarine", "roof": "prismarine", "wood": "warped", "accent": "cyan"},
+      {"wall": "prismarine_bricks", "low": "dark_prismarine", "roof": "dark_prismarine", "wood": "warped", "accent": "light_blue"},
+      {"wall": "warped_planks", "low": "dark_prismarine", "roof": "prismarine_brick", "wood": "warped", "accent": "blue"}
+    ],
+    "common": [
+      {"wall": "prismarine_bricks", "wall2": "prismarine", "low": "dark_prismarine", "roof": "prismarine_brick", "wood": "warped", "accent": "cyan"},
+      {"wall": "calcite", "low": "dark_prismarine", "roof": "prismarine_brick", "wood": "warped", "accent": "light_blue"},
+      {"wall": "warped_planks", "low": "prismarine_bricks", "roof": "dark_prismarine", "wood": "warped", "accent": "blue"}
+    ],
+    "wealthy": [
+      {"wall": "prismarine_bricks", "low": "dark_prismarine", "roof": "prismarine_brick", "roofFull": "sea_lantern", "wood": "warped", "accent": "cyan"},
+      {"wall": "calcite", "low": "prismarine_bricks", "roof": "dark_prismarine", "wood": "warped", "accent": "light_blue"},
+      {"wall": "dark_prismarine", "low": "prismarine_bricks", "roof": "prismarine_brick", "wood": "warped", "accent": "blue"}
+    ],
+    "noble": [
+      {"wall": "prismarine_bricks", "low": "dark_prismarine", "roof": "dark_prismarine", "roofFull": "prismarine_bricks", "wood": "warped", "column": "warped_stem", "accent": "cyan"},
+      {"wall": "smooth_quartz", "low": "dark_prismarine", "roof": "prismarine_brick", "wood": "warped", "accent": "light_blue"},
+      {"wall": "dark_prismarine", "low": "prismarine_bricks", "roof": "prismarine_brick", "roofFull": "sea_lantern", "wood": "warped", "accent": "blue"}
+    ]
+  }
+}

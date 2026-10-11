@@ -59,6 +59,15 @@ public final class Spec {
     public String name = "";
     /** Extra blocks around the footprint the piece may paint (eaves, porches, yards). */
     public int margin = 1;
+    /**
+     * Building grammar ({@link com.skycraft.tamriel.settlement.grammar}): the building's function
+     * ({@link com.skycraft.tamriel.settlement.grammar.Use} ordinal, -1 for the legacy archetype builders), its wealth
+     * tier, the seed its blueprint is derived from, and the terrain spread under it at planning time.
+     */
+    public int use = -1;
+    public int wealth = 1;
+    public int gseed;
+    public int slope;
 
     public Spec(Archetype kind) {
         this.kind = kind;
@@ -117,6 +126,17 @@ public final class Spec {
     public Spec variant(int v) {
         this.variant = v;
         return this;
+    }
+
+    /** Builds this spec with the building grammar as {@code use} at wealth tier {@code wealth}. */
+    public Spec use(com.skycraft.tamriel.settlement.grammar.Use use, com.skycraft.tamriel.settlement.grammar.Wealth wealth) {
+        this.use = use.ordinal();
+        this.wealth = wealth.ordinal();
+        return this;
+    }
+
+    public boolean grammar() {
+        return use >= 0;
     }
 
     public Spec style(int culture, int style) {

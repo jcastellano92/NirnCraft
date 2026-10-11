@@ -201,7 +201,7 @@ public final class Canvas {
     /** Topmost solid ground at (x, z): skips leaves, logs, plants, snow and fluids. Clamped to the chunk's column. */
     public int wground(int x, int z) {
         if (level == null || x < x0 || x > x1 || z < z0 || z > z1) return oy;
-        int y = level.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z) - 1;
+        int y = level.getHeight(worldgen() ? Heightmap.Types.OCEAN_FLOOR_WG : Heightmap.Types.OCEAN_FLOOR, x, z) - 1;
         int min = level.getMinBuildHeight();
         while (y > min) {
             BlockState s = level.getBlockState(m.set(x, y, z));
@@ -215,10 +215,15 @@ public final class Canvas {
         return y;
     }
 
+    /** Painting during world generation (worldgen heightmaps), rather than into a live level (dev previews). */
+    private boolean worldgen() {
+        return !(level instanceof net.minecraft.server.level.ServerLevel);
+    }
+
     /** Water surface at (x, z) if the column is covered by water, else {@link Integer#MIN_VALUE}. */
     public int wwater(int x, int z) {
         if (level == null || x < x0 || x > x1 || z < z0 || z > z1) return Integer.MIN_VALUE;
-        int top = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z) - 1;
+        int top = level.getHeight(worldgen() ? Heightmap.Types.WORLD_SURFACE_WG : Heightmap.Types.WORLD_SURFACE, x, z) - 1;
         return level.getBlockState(m.set(x, top, z)).getFluidState().isEmpty() ? Integer.MIN_VALUE : top;
     }
 

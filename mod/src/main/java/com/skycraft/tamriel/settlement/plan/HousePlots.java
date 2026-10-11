@@ -153,7 +153,7 @@ public final class HousePlots {
     static boolean removable(Spec o) {
         if (o.has(Spec.FOR_SALE) || o.has(Spec.SEAT) || o.has(Spec.SIGN)) return false;
         return switch (o.kind) {
-            case HOUSE, FARMHOUSE, MANOR, GARDEN, STALL, LAMP, FIELD, LUMBER, WELL, TENT -> true;
+            case HOUSE, FARMHOUSE, MANOR, GARDEN, STALL, LAMP, FIELD, LUMBER, WELL, TENT, YARD, PEN -> true;
             default -> false;
         };
     }

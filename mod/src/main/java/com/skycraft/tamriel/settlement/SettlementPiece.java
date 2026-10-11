@@ -64,6 +64,13 @@ public class SettlementPiece extends StructurePiece {
         }
         s.facing = Direction.from2DDataValue(tag.getInt("F"));
         s.name = tag.getString("N");
+        int[] gx = tag.getIntArray("Gx");
+        if (gx.length >= 4) {
+            s.use = gx[0];
+            s.wealth = gx[1];
+            s.gseed = gx[2];
+            s.slope = gx[3];
+        }
         this.spec = s;
         this.seed = tag.getLong("Seed");
         this.settlement = tag.getString("S");
@@ -79,6 +86,7 @@ public class SettlementPiece extends StructurePiece {
         tag.putIntArray("G", new int[]{s.x, s.z, s.x2, s.z2, s.w, s.d, s.h, s.floor, s.floor2, s.flags, s.variant, s.margin});
         tag.putInt("F", s.facing.get2DDataValue());
         tag.putString("N", s.name);
+        if (s.use >= 0) tag.putIntArray("Gx", new int[]{s.use, s.wealth, s.gseed, s.slope});
         tag.putLong("Seed", seed);
         tag.putString("S", settlement);
         tag.putInt("I", index);
@@ -136,7 +144,9 @@ public class SettlementPiece extends StructurePiece {
 
     /** Owner label of this piece (anchors and container ownership). */
     public String owner() {
-        String base = spec.name.isEmpty() ? spec.kind.name().toLowerCase(java.util.Locale.ROOT) : spec.name;
+        String kind = spec.use >= 0 ? com.skycraft.tamriel.settlement.grammar.Use.byOrdinal(spec.use).id()
+                : spec.kind.name().toLowerCase(java.util.Locale.ROOT);
+        String base = spec.name.isEmpty() ? kind : spec.name;
         return spec.has(Spec.FOR_SALE) ? base : base + "#" + index;
     }
 

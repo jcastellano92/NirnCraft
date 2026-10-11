@@ -46,7 +46,20 @@ public enum Archetype {
     /** A faction's guild hall ({@link Spec#name} = faction id), see {@link Halls}. */
     GUILD_HALL(true, 13, 17, 14),
     /** A hold's jail: guard room, evidence chests and cells ({@link Spec#variant} 1 = Cidhna Mine), see {@link Halls}. */
-    JAIL(true, 15, 21, 12);
+    JAIL(true, 15, 21, 12),
+    // ---- building grammar (appended: ordinals are saved)
+    /** Any grammar building ({@link Spec#use} says which). */
+    BUILDING(true, 9, 11, 12),
+    /** Street furniture and yard clutter: carts, woodpiles, benches, notice boards, statues, fountains... */
+    YARD(false, 5, 5, 5),
+    /** A fenced animal pen with its animals. */
+    PEN(false, 9, 9, 3),
+    /** A building slot reserved by another module ({@link com.skycraft.tamriel.settlement.SettlementPlan}). */
+    RESERVED(true, 9, 11, 12),
+    /** A stepped open-cast quarry. */
+    QUARRY(false, 17, 17, 10),
+    /** The work ground of an outlying site: felled forest, drying racks, hives, vine rows, paddies... */
+    CAMP(false, 13, 13, 6);
 
     public static final Archetype[] VALUES = values();
 

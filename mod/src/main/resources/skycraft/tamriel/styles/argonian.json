@@ -1,0 +1,40 @@
+{
+  "_doc": "Argonian style sheet: thatched cone huts and long stilt houses over the mire, boardwalk towns round canals and rings.",
+  "stilts": true,
+  "hearth": false,
+  "windows": "fence",
+  "faith": ["kynareth", "arkay", "mara"],
+  "crops": ["saltrice", "carrots", "beetroots"],
+  "animals": ["frog", "chicken", "turtle"],
+  "colors": ["green", "lime", "cyan", "brown"],
+  "forms": {"canal": 3, "ring": 3, "riverside": 3, "cluster": 1},
+  "bodies": {"poor": {"round": 1}, "common": {"round": 3, "rect": 1}, "wealthy": {"rect": 2, "round": 1}, "noble": {"rect": 1}},
+  "hallBody": "rect",
+  "roofs": {"poor": {"thatch": 1}, "common": {"thatch": 3, "steep": 1}, "wealthy": {"thatch": 2, "steep": 1}, "noble": {"steep": 2, "thatch": 1}},
+  "halls": {"thatch": 2, "steep": 1},
+  "footprints": {"poor": {"rect": 1}, "common": {"rect": 1}, "wealthy": {"rect": 2, "l": 1}, "noble": {"l": 1, "t": 1}},
+  "storeys": {"poor": [1, 1], "common": [1, 1], "wealthy": [1, 2], "noble": [2, 2]},
+  "rules": {"timber": 0.7, "porch": 0.5, "balcony": 0.1, "shutters": 0.0, "flowerBoxes": 0.0, "chimney": 0.0, "annex": 0.4, "banners": 0.3, "lanterns": 0.5, "awning": 0.2},
+  "tiers": {
+    "poor": [
+      {"wall": "bamboo_planks", "low": "mangrove_planks", "roofFull": "hay_block", "wood": "mangrove", "timber": false, "accent": "green"},
+      {"wall": "bamboo_mosaic", "low": "mangrove_planks", "roofFull": "hay_block", "wood": "bamboo", "timber": false, "accent": "brown"},
+      {"wall": "mangrove_roots", "low": "mud_bricks", "roofFull": "moss_block", "wood": "mangrove", "timber": false, "accent": "lime"}
+    ],
+    "common": [
+      {"wall": "bamboo_planks", "wall2": "bamboo_mosaic", "low": "mangrove_planks", "roofFull": "hay_block", "wood": "mangrove", "accent": "green"},
+      {"wall": "mangrove_planks", "low": "mud_bricks", "roofFull": "hay_block", "wood": "mangrove", "accent": "cyan"},
+      {"wall": "stripped_mangrove_wood", "low": "mangrove_planks", "roofFull": "moss_block", "wood": "bamboo", "timber": false, "accent": "lime"}
+    ],
+    "wealthy": [
+      {"wall": "mangrove_planks", "wall2": "bamboo_planks", "low": "mossy_stone_bricks", "roof": "bamboo_mosaic", "wood": "mangrove", "accent": "green"},
+      {"wall": "mud_bricks", "low": "mossy_stone_bricks", "roof": "mangrove", "wood": "mangrove", "accent": "cyan"},
+      {"wall": "bamboo_mosaic", "low": "mossy_cobblestone", "roof": "bamboo_mosaic", "wood": "bamboo", "accent": "lime"}
+    ],
+    "noble": [
+      {"wall": "mossy_stone_bricks", "wall2": "cracked_stone_bricks", "low": "mossy_cobblestone", "roof": "mangrove", "wood": "mangrove", "accent": "green", "timber": false},
+      {"wall": "mangrove_planks", "low": "mossy_stone_bricks", "roof": "mossy_stone_brick", "wood": "mangrove", "accent": "cyan"},
+      {"wall": "mud_bricks", "wall2": "packed_mud", "low": "mossy_stone_bricks", "roof": "bamboo_mosaic", "wood": "bamboo", "accent": "lime"}
+    ]
+  }
+}

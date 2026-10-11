@@ -1,0 +1,37 @@
+{
+  "_doc": "Breton style sheet: whitewashed half-timber under steep slate roofs with dormers, hill towns round a castle.",
+  "windows": "pane",
+  "pitch": 2,
+  "faith": ["stendarr", "julianos", "mara", "dibella", "akatosh", "zenithar"],
+  "crops": ["wheat", "carrots", "cabbage", "vines", "potatoes", "orchard"],
+  "animals": ["cow", "sheep", "chicken", "pig", "dog", "cat"],
+  "colors": ["blue", "red", "yellow", "white"],
+  "forms": {"hilltop": 3, "crossroads": 3, "linear": 2, "grid": 1},
+  "roofs": {"poor": {"thatch": 2, "steep": 2}, "common": {"slate": 3, "steep": 2}, "wealthy": {"slate": 3, "hip": 1}, "noble": {"slate": 2, "hip": 2}},
+  "halls": {"slate": 2, "steep": 1},
+  "footprints": {"poor": {"rect": 1}, "common": {"rect": 3, "l": 2}, "wealthy": {"l": 2, "t": 1, "rect": 1}, "noble": {"u": 1, "t": 1, "l": 1}},
+  "storeys": {"poor": [1, 1], "common": [1, 2], "wealthy": [2, 3], "noble": [2, 3]},
+  "rules": {"timber": 0.9, "porch": 0.2, "balcony": 0.3, "outsideStairs": 0.05, "shutters": 0.6, "flowerBoxes": 0.6, "chimney": 0.9, "annex": 0.35, "banners": 0.5, "lanterns": 0.6, "awning": 0.3, "dormers": 0.4, "tower": 0.6},
+  "tiers": {
+    "poor": [
+      {"wall": "mushroom_stem", "low": "cobblestone", "roof": "spruce", "wood": "dark_oak", "accent": "brown"},
+      {"wall": "cobblestone", "wall2": "mossy_cobblestone", "low": "cobblestone", "roof": "dark_oak", "wood": "spruce", "timber": false},
+      {"wall": "packed_mud", "low": "cobblestone", "roof": "spruce", "wood": "oak", "accent": "yellow"}
+    ],
+    "common": [
+      {"wall": "mushroom_stem", "low": "cobblestone", "roof": "deepslate_tile", "wood": "dark_oak", "accent": "blue"},
+      {"wall": "white_terracotta", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "spruce", "accent": "red"},
+      {"wall": "calcite", "low": "cobblestone", "roof": "blackstone", "wood": "dark_oak", "accent": "yellow"}
+    ],
+    "wealthy": [
+      {"wall": "calcite", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "dark_oak", "window": "glass_pane", "accent": "blue"},
+      {"wall": "mushroom_stem", "low": "polished_andesite", "roof": "polished_blackstone_brick", "wood": "dark_oak", "accent": "red"},
+      {"wall": "stone_bricks", "wall2": "mossy_stone_bricks", "low": "cobblestone", "roof": "deepslate_tile", "wood": "spruce", "timber": false, "accent": "white"}
+    ],
+    "noble": [
+      {"wall": "polished_diorite", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "dark_oak", "window": "glass_pane", "column": "stone_bricks", "timber": false, "accent": "blue"},
+      {"wall": "calcite", "low": "chiseled_stone_bricks", "roof": "polished_blackstone_brick", "wood": "dark_oak", "window": "glass_pane", "accent": "red"},
+      {"wall": "stone_bricks", "wall2": "chiseled_stone_bricks", "low": "polished_andesite", "roof": "deepslate_tile", "wood": "spruce", "timber": false, "accent": "yellow"}
+    ]
+  }
+}

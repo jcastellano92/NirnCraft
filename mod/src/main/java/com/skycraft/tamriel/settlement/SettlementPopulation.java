@@ -85,6 +85,8 @@ public final class SettlementPopulation {
                 case GUILD_TRAINER -> 24;
                 case GUILD_BED -> 96;
                 case JAIL_PRISONER -> 4;
+                case JEWELER, BOOKSELLER, TAILOR, BUTCHER, FLETCHER, FISHER, HUNTER, WORKER -> 3;
+                case FENCE -> 1;
                 default -> 0;
             };
             if (cap == 0) continue;
@@ -120,6 +122,15 @@ public final class SettlementPopulation {
                     case FARMER -> merchant(level, at, VillagerProfession.FARMER, "food", "entity.skycraft.farmer") != null;
                     case MILLER, LUMBERJACK -> npc(level, at, NpcRole.LUMBERJACK, null, 24) != null;
                     case MINER -> npc(level, at, NpcRole.MINER, null, 24) != null;
+                    case JEWELER -> merchant(level, at, VillagerProfession.TOOLSMITH, "jeweler", "entity.skycraft.jeweller") != null;
+                    case BOOKSELLER -> merchant(level, at, VillagerProfession.LIBRARIAN, "library", "entity.skycraft.bookseller") != null;
+                    case TAILOR -> merchant(level, at, VillagerProfession.SHEPHERD, "general", "entity.skycraft.tailor") != null;
+                    case BUTCHER -> merchant(level, at, VillagerProfession.BUTCHER, "food", "entity.skycraft.butcher", "hunter") != null;
+                    case FLETCHER -> merchant(level, at, VillagerProfession.FLETCHER, "fletcher", "entity.skycraft.fletcher") != null;
+                    case FENCE -> merchant(level, at, VillagerProfession.CARTOGRAPHER, "fence", "entity.skycraft.fence") != null;
+                    case FISHER -> merchant(level, at, VillagerProfession.FISHERMAN, "fisher", "entity.skycraft.fishmonger", "food") != null;
+                    case HUNTER -> merchant(level, at, VillagerProfession.LEATHERWORKER, "hunter", "entity.skycraft.hunter") != null;
+                    case WORKER -> npc(level, at, level.getRandom().nextBoolean() ? NpcRole.LUMBERJACK : NpcRole.MINER, null, 24) != null;
                     case GUARD -> guard(level, at);
                     case GUILD_LEADER, GUILD_TRAINER, GUILD_VENDOR, GUILD_BED ->
                             com.skycraft.quest.faction.FactionStaff.populate(level, a, at, e.key);
@@ -188,7 +199,7 @@ public final class SettlementPopulation {
     }
 
     /** A villager merchant with a Skycraft shop of the given pool. */
-    static Villager merchant(ServerLevel level, BlockPos at, VillagerProfession prof, String pool, String nameKey) {
+    static Villager merchant(ServerLevel level, BlockPos at, VillagerProfession prof, String pool, String nameKey, String... morePools) {
         Villager v = EntityType.VILLAGER.create(level);
         if (v == null) return null;
         v.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0f);
@@ -199,6 +210,7 @@ public final class SettlementPopulation {
         CompoundTag shop = new CompoundTag();
         ListTag pools = new ListTag();
         pools.add(StringTag.valueOf(pool));
+        for (String extra : morePools) pools.add(StringTag.valueOf(extra));
         shop.put("pools", pools);
         shop.putInt("level", 3);
         v.getPersistentData().put(Shop.KEY, shop);

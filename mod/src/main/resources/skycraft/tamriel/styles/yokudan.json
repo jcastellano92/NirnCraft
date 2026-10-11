@@ -1,0 +1,37 @@
+{
+  "_doc": "Yokudan style sheet: red sandstone courts with domes and flat roofs, outside stairs, desert clusters.",
+  "windows": "fence",
+  "hearth": false,
+  "faith": ["arkay", "akatosh", "zenithar"],
+  "crops": ["wheat", "orchard"],
+  "animals": ["camel", "goat", "chicken"],
+  "colors": ["yellow", "orange", "red"],
+  "forms": {"cluster": 4, "crossroads": 1, "harbour": 1},
+  "roofs": {"poor": {"flat": 1}, "common": {"flat": 3, "dome": 1}, "wealthy": {"dome": 2, "flat": 1}, "noble": {"dome": 2, "crenel": 1}},
+  "halls": {"dome": 1},
+  "footprints": {"poor": {"rect": 1}, "common": {"rect": 2, "l": 1}, "wealthy": {"l": 1, "u": 1}, "noble": {"u": 1, "t": 1}},
+  "storeys": {"poor": [1, 1], "common": [1, 2], "wealthy": [2, 2], "noble": [2, 3]},
+  "rules": {"timber": 0.0, "porch": 0.1, "balcony": 0.3, "outsideStairs": 0.6, "shutters": 0.0, "chimney": 0.0, "annex": 0.3, "banners": 0.7, "lanterns": 0.6, "awning": 0.8, "tower": 0.4},
+  "tiers": {
+    "poor": [
+      {"wall": "red_sandstone", "low": "red_sandstone", "roof": "red_sandstone", "wood": "acacia", "accent": "orange"},
+      {"wall": "smooth_red_sandstone", "low": "red_sandstone", "roof": "smooth_red_sandstone", "wood": "acacia", "accent": "yellow"},
+      {"wall": "packed_mud", "low": "red_sandstone", "roof": "mud_brick", "wood": "acacia", "accent": "red"}
+    ],
+    "common": [
+      {"wall": "smooth_red_sandstone", "low": "cut_red_sandstone", "roof": "smooth_red_sandstone", "roofFull": "orange_terracotta", "wood": "acacia", "accent": "yellow"},
+      {"wall": "red_sandstone", "wall2": "cut_red_sandstone", "low": "smooth_red_sandstone", "roof": "red_sandstone", "wood": "jungle", "accent": "orange"},
+      {"wall": "terracotta", "low": "red_sandstone", "roof": "smooth_red_sandstone", "wood": "acacia", "accent": "red"}
+    ],
+    "wealthy": [
+      {"wall": "cut_red_sandstone", "wall2": "chiseled_red_sandstone", "low": "smooth_red_sandstone", "roof": "smooth_red_sandstone", "roofFull": "orange_terracotta", "wood": "acacia", "accent": "yellow"},
+      {"wall": "smooth_red_sandstone", "low": "chiseled_red_sandstone", "roof": "smooth_red_sandstone", "roofFull": "yellow_terracotta", "wood": "dark_oak", "accent": "orange"},
+      {"wall": "smooth_sandstone", "low": "cut_red_sandstone", "roof": "smooth_sandstone", "roofFull": "orange_terracotta", "wood": "acacia", "accent": "red"}
+    ],
+    "noble": [
+      {"wall": "chiseled_red_sandstone", "wall2": "cut_red_sandstone", "low": "smooth_red_sandstone", "roof": "smooth_red_sandstone", "roofFull": "gold_block", "wood": "acacia", "accent": "yellow"},
+      {"wall": "smooth_red_sandstone", "low": "chiseled_red_sandstone", "roof": "smooth_red_sandstone", "roofFull": "orange_terracotta", "wood": "dark_oak", "accent": "red"},
+      {"wall": "cut_red_sandstone", "low": "smooth_sandstone", "roof": "smooth_sandstone", "roofFull": "yellow_terracotta", "wood": "acacia", "accent": "orange"}
+    ]
+  }
+}

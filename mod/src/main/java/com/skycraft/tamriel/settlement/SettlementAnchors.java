@@ -167,6 +167,42 @@ public final class SettlementAnchors extends SavedData {
         return a == null ? Optional.empty() : Optional.of(a.pos());
     }
 
+    /**
+     * Where outer roads join a named settlement, predicted from the map and the place alone (no world, no terrain):
+     * world {x, z} of each road end (gatehouse, road-end signpost, bridge or ramp foot), main gate first. Internal
+     * streets end exactly there. Stable for a place across worlds and seeds.
+     */
+    public static List<int[]> gates(Place p) {
+        List<int[]> out = new ArrayList<>();
+        List<int[]> local = com.skycraft.tamriel.settlement.plan.Cities.gatesLocal(p);
+        if (local == null && com.skycraft.tamriel.settlement.grammar.Zoning.special(p.variant())) {
+            // special small layouts (inns, mills, stables, estates...): their lane leaves to local south
+            local = List.of(new int[]{0, com.skycraft.tamriel.settlement.plan.Cities.layoutRadius(p)});
+        }
+        if (local != null) {
+            for (int[] g : local) out.add(com.skycraft.tamriel.settlement.plan.Cities.world(p, g[0], g[1]));
+            return out;
+        }
+        Culture c = Culture.of(p.culture());
+        int radius = com.skycraft.tamriel.settlement.plan.Cities.layoutRadius(p);
+        com.skycraft.tamriel.settlement.plan.Layouts.Size size = com.skycraft.tamriel.settlement.grammar.Zoning.sizeOf(p, radius);
+        if (size == com.skycraft.tamriel.settlement.plan.Layouts.Size.FARM) {
+            out.add(com.skycraft.tamriel.settlement.plan.Cities.world(p, 0, radius));
+            return out;
+        }
+        return com.skycraft.tamriel.settlement.grammar.Zoning.gates(com.skycraft.tamriel.settlement.plan.Cities.seed(p), c,
+                com.skycraft.tamriel.settlement.plan.Cities.style(p, c), size, p.x(), p.z(),
+                com.skycraft.tamriel.settlement.plan.Cities.back(p), radius);
+    }
+
+    /** The gates recorded for a generated settlement (any kind, generic ones too), main gate first. */
+    public static List<BlockPos> recordedGates(ServerLevel level, String key) {
+        List<BlockPos> out = new ArrayList<>();
+        Entry e = get(level).entries.get(key);
+        if (e != null) for (Anchor a : e.anchors) if (a.type() == AnchorType.GATE) out.add(a.pos());
+        return out;
+    }
+
     /** A house for sale as built: its bounds, front door and the owner's bed. */
     public record HouseSite(String houseId, String settlement, BlockPos min, BlockPos max, @Nullable BlockPos door, @Nullable BlockPos bed) {
         public boolean contains(BlockPos p) {

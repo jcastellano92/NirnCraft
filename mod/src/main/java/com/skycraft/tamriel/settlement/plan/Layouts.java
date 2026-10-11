@@ -21,7 +21,9 @@ public final class Layouts {
 
     /** Settlement sizes (structure JSON {@code size}). */
     public enum Size {
-        CITY, TOWN, VILLAGE, HAMLET, FARM, INN, HOMESTEAD;
+        CITY, TOWN, VILLAGE, HAMLET, FARM, INN, HOMESTEAD,
+        /** An outlying working site ({@link com.skycraft.tamriel.settlement.grammar.Sites}). */
+        SITE;
 
         public static Size of(String s) {
             try {
@@ -33,13 +35,15 @@ public final class Layouts {
 
         public int radius() {
             return switch (this) {
-                case CITY -> 100;
-                case TOWN -> 55;
-                case VILLAGE -> 40;
-                case HAMLET -> 26;
-                case FARM -> 24;
+                // the reach of the plan: a compact built-up core (Zoning.builtRadius) plus its farms and works
+                case CITY -> 112;
+                case TOWN -> 80;
+                case VILLAGE -> 60;
+                case HAMLET -> 40;
+                case FARM -> 30;
                 case INN -> 18;
                 case HOMESTEAD -> 16;
+                case SITE -> 36;
             };
         }
     }

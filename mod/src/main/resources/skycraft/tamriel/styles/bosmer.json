@@ -1,0 +1,37 @@
+{
+  "_doc": "Bosmer style sheet: homes grown into living trees, hide-and-bone huts, rings round a sacred green. The Green Pact: no fields.",
+  "hearth": false,
+  "windows": "fence",
+  "faith": ["kynareth", "arkay", "mara", "zenithar"],
+  "crops": ["honey"],
+  "animals": ["chicken", "rabbit", "dog"],
+  "colors": ["green", "brown", "lime"],
+  "forms": {"ring": 4, "cluster": 2},
+  "bodies": {"poor": {"round": 2, "tree": 1}, "common": {"tree": 3, "round": 1}, "wealthy": {"tree": 1}, "noble": {"tree": 1}},
+  "hallBody": "tree",
+  "roofs": {"poor": {"thatch": 1}, "common": {"gable": 1}, "wealthy": {"gable": 1}, "noble": {"gable": 1}},
+  "storeys": {"poor": [1, 1], "common": [1, 1], "wealthy": [1, 2], "noble": [2, 2]},
+  "rules": {"timber": 0.8, "porch": 0.3, "chimney": 0.0, "annex": 0.2, "banners": 0.3, "lanterns": 0.4, "awning": 0.1},
+  "tiers": {
+    "poor": [
+      {"wall": "brown_wool", "wall2": "brown_terracotta", "low": "brown_terracotta", "post": "bone_block", "wood": "jungle", "accent": "brown"},
+      {"wall": "light_gray_wool", "low": "brown_terracotta", "post": "bone_block", "wood": "jungle", "accent": "green"},
+      {"wall": "brown_terracotta", "low": "mossy_cobblestone", "post": "jungle_log", "wood": "jungle", "accent": "lime"}
+    ],
+    "common": [
+      {"wall": "brown_wool", "low": "brown_terracotta", "post": "bone_block", "wood": "jungle", "accent": "green"},
+      {"wall": "white_wool", "low": "brown_terracotta", "post": "bone_block", "wood": "jungle", "accent": "brown"},
+      {"wall": "skycraft:graht_oak_planks", "low": "jungle_planks", "post": "skycraft:graht_oak_log", "wood": "jungle", "accent": "lime"}
+    ],
+    "wealthy": [
+      {"wall": "skycraft:graht_oak_planks", "low": "mossy_cobblestone", "post": "skycraft:graht_oak_log", "wood": "jungle", "accent": "green"},
+      {"wall": "jungle_planks", "low": "brown_terracotta", "post": "bone_block", "wood": "jungle", "accent": "lime"},
+      {"wall": "green_wool", "low": "brown_terracotta", "post": "skycraft:graht_oak_log", "wood": "jungle", "accent": "brown"}
+    ],
+    "noble": [
+      {"wall": "skycraft:graht_oak_planks", "low": "moss_block", "post": "skycraft:graht_oak_log", "wood": "jungle", "accent": "green"},
+      {"wall": "stripped_jungle_wood", "low": "mossy_stone_bricks", "post": "bone_block", "wood": "jungle", "accent": "lime"},
+      {"wall": "jungle_planks", "low": "moss_block", "post": "skycraft:graht_oak_log", "wood": "mangrove", "accent": "brown"}
+    ]
+  }
+}

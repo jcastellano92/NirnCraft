@@ -31,6 +31,12 @@ public final class Plan {
     public final List<Spec> specs = new ArrayList<>();
     /** Ignore slopes when placing (a second pass, so named places never end up empty on rough ground). */
     public boolean relaxed;
+    /** The zoning planner has run (or adopted this plan): don't zone it twice. */
+    public boolean zoned;
+    /** The named place being planned (null for generic settlements and sites). */
+    public com.skycraft.tamriel.Place place;
+    /** Jail, guild halls and player-home plots have been placed (plan/Halls, plan/HousePlots). */
+    public boolean civicDone;
 
     public Plan(String key, int cx, int cz, int radius, Culture culture, int style, long seed, Terrain terrain, Direction back) {
         this.key = key;

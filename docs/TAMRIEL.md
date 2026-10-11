@@ -254,6 +254,22 @@ Existing callers keep compiling.
   * Xanmeer: Black Marsh.
 * **Shared rules.** Every structure obeys the existing worldgen rules: only noise heights in
   `findGenerationPoint`, and painting clipped to the chunk.
+* **Building grammar and zoning** (`tamriel/settlement/grammar`). Ordinary buildings are derived, not drawn by hand:
+  a `Blueprint` (footprint rect/L/T/U, storeys, roof, foundation, porch, annex, balcony, outside stairs, materials)
+  comes from the culture style sheet `skycraft/tamriel/styles/<culture>.json`, the building's `Use` and its
+  `Wealth`, deterministically from its spec. `Zoning` lays out every generic settlement (and fills round the unique
+  capitals): a seeded form per culture and site, tensor-field lanes, quarters, compact street frontage, squares,
+  street furniture, organic or partial walls only where warranted, farms and works outside. Contracts for other
+  workstreams:
+  * `SettlementAnchors.gates(Place)`: world `{x, z}` road ends of a named settlement (main gate first), predicted
+    from the map alone; internal streets end there. `SettlementAnchors.recordedGates(level, key)` gives the built
+    ones (`AnchorType.GATE`), generic settlements included.
+  * `SettlementPlan.reserve(role, size[, quarter, where])`: a lot in every matching settlement, built as a hall in
+    the local style unless a `SettlementPlan.painter`/`furnisher` is registered for the role.
+  * Jails and guild halls (`plan/Halls`) and player-home plots (`plan/HousePlots`) get their lots before the
+    houses are packed in.
+  * `/skysettle` (operators): galleries, plan/top/isometric images and density/variety metrics in
+    `skycraft-previews/`.
 
 ## 9. Authoritative region ids and city anchors
 

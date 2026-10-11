@@ -109,10 +109,36 @@ public final class SettlementEvents {
             if (isHouseForSale(a.owner())) continue;
             Ownership.setOwner(level, a.pos(), "settlement:" + key + ":" + a.owner(), ownerName(settlementName, a.owner()));
         }
+        // workplaces for the society module's townsfolk (forge, counters, fields, docks, temple, palace...)
+        for (Anchor a : found) {
+            com.skycraft.society.Workplaces.Kind kind = workplace(a.type());
+            if (kind != null) com.skycraft.society.Workplaces.register(level, a.pos(), kind);
+        }
         java.util.Set<String> houses = new java.util.HashSet<>();
         for (Anchor a : found) if (a.type() == AnchorType.HOUSE_MIN) houses.add(a.owner());
         for (String h : houses) com.skycraft.economy.Houses.onSiteBuilt(level, h);
         Skycraft.LOGGER.debug("Recorded {} anchors of settlement {} (start {})", found.size(), key, ChunkPos.getX(startKey) + "," + ChunkPos.getZ(startKey));
+    }
+
+    /** The society workplace kind an anchor stands for, or null. */
+    static com.skycraft.society.Workplaces.Kind workplace(AnchorType t) {
+        return switch (t) {
+            case SMITH -> com.skycraft.society.Workplaces.Kind.FORGE;
+            case MERCHANT, JEWELER, TAILOR, FLETCHER, FENCE, STABLES -> com.skycraft.society.Workplaces.Kind.COUNTER;
+            case ALCHEMIST -> com.skycraft.society.Workplaces.Kind.ALCHEMY;
+            case BOOKSELLER, WIZARD -> com.skycraft.society.Workplaces.Kind.LIBRARY;
+            case BUTCHER -> com.skycraft.society.Workplaces.Kind.BUTCHER;
+            case HUNTER -> com.skycraft.society.Workplaces.Kind.TANNERY;
+            case FISHER -> com.skycraft.society.Workplaces.Kind.DOCK;
+            case FARMER -> com.skycraft.society.Workplaces.Kind.FIELD;
+            case MINER -> com.skycraft.society.Workplaces.Kind.MINE;
+            case LUMBERJACK, MILLER, WORKER -> com.skycraft.society.Workplaces.Kind.LUMBER;
+            case INN, BARD -> com.skycraft.society.Workplaces.Kind.INN;
+            case PRIEST -> com.skycraft.society.Workplaces.Kind.TEMPLE;
+            case JARL, STEWARD -> com.skycraft.society.Workplaces.Kind.PALACE;
+            case MEETING -> com.skycraft.society.Workplaces.Kind.MARKET;
+            default -> null;
+        };
     }
 
     static boolean isHouseForSale(String owner) {
@@ -133,7 +159,7 @@ public final class SettlementEvents {
         for (com.skycraft.tamriel.settlement.plan.Archetype a : com.skycraft.tamriel.settlement.plan.Archetype.VALUES) {
             if (a.name().toLowerCase(Locale.ROOT).equals(base)) return true;
         }
-        return false;
+        return com.skycraft.tamriel.settlement.grammar.Use.byId(base) != null;
     }
 
     /** Anchor positions of a kind near a block (for other modules: beds and posts around a point). */

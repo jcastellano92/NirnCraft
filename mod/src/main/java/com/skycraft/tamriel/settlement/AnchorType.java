@@ -75,7 +75,31 @@ public enum AnchorType {
     JAIL_MIN,
     JAIL_MAX,
     /** A cell kept by an NPC prisoner. */
-    JAIL_PRISONER;
+    JAIL_PRISONER,
+    // ---- building grammar trades (appended: ordinals are saved)
+    /** Behind a jeweller's counter. */
+    JEWELER,
+    /** Behind a bookseller's or scribe's desk. */
+    BOOKSELLER,
+    /** A tailor / clothier at the loom. */
+    TAILOR,
+    /** At the butcher's block. */
+    BUTCHER,
+    /** A fletcher / bowyer at the fletching table. */
+    FLETCHER,
+    /** The fence, hidden in a cellar. */
+    FENCE,
+    /** At the fishery, the docks or a fishing camp. */
+    FISHER,
+    /** A hunter at the tanning rack of a hunting camp or tannery. */
+    HUNTER,
+    /** A labourer at a sawmill, smelter, quarry, warehouse or plantation. */
+    WORKER,
+    /**
+     * A settlement gate: where internal streets end and outer roads join (main gate first). Recorded per gate opening,
+     * on the ground in the middle of the passage.
+     */
+    GATE;
 
     public static final AnchorType[] VALUES = values();
 

@@ -1,0 +1,37 @@
+{
+  "_doc": "Altmer style sheet: white stone and glass under steep hipped roofs, spires and domes, gardens and planned avenues.",
+  "windows": "pane",
+  "pitch": 2,
+  "faith": ["akatosh", "julianos", "arkay", "mara", "stendarr"],
+  "crops": ["vines", "orchard", "wheat", "honey"],
+  "animals": ["horse", "sheep", "chicken", "cat"],
+  "colors": ["yellow", "light_blue", "white", "lime"],
+  "forms": {"grid": 3, "cluster": 2, "harbour": 2, "ring": 1},
+  "roofs": {"poor": {"hip": 2, "gable": 1}, "common": {"hip": 3, "spire": 1}, "wealthy": {"hip": 2, "dome": 1, "spire": 1}, "noble": {"dome": 2, "spire": 1, "hip": 1}},
+  "halls": {"dome": 2, "hip": 1},
+  "footprints": {"poor": {"rect": 1}, "common": {"rect": 2, "l": 1}, "wealthy": {"l": 2, "t": 1}, "noble": {"u": 2, "t": 1}},
+  "storeys": {"poor": [1, 1], "common": [1, 2], "wealthy": [2, 2], "noble": [2, 3]},
+  "rules": {"timber": 0.0, "porch": 0.25, "balcony": 0.4, "outsideStairs": 0.1, "shutters": 0.0, "flowerBoxes": 0.6, "chimney": 0.2, "annex": 0.25, "banners": 0.6, "lanterns": 0.8, "awning": 0.3, "tower": 0.6},
+  "tiers": {
+    "poor": [
+      {"wall": "calcite", "low": "quartz_bricks", "roof": "smooth_quartz", "roofFull": "honeycomb_block", "wood": "birch", "accent": "yellow"},
+      {"wall": "diorite", "low": "calcite", "roof": "birch", "wood": "birch", "accent": "white"},
+      {"wall": "smooth_stone", "low": "quartz_bricks", "roof": "smooth_quartz", "wood": "birch", "accent": "lime"}
+    ],
+    "common": [
+      {"wall": "smooth_quartz", "wall2": "calcite", "low": "quartz_bricks", "roof": "smooth_quartz", "roofFull": "honeycomb_block", "wood": "birch", "accent": "yellow"},
+      {"wall": "calcite", "low": "polished_diorite", "roof": "prismarine_brick", "wood": "birch", "accent": "light_blue"},
+      {"wall": "polished_diorite", "low": "quartz_bricks", "roof": "smooth_quartz", "roofFull": "yellow_terracotta", "wood": "birch", "accent": "white"}
+    ],
+    "wealthy": [
+      {"wall": "smooth_quartz", "low": "chiseled_quartz_block", "roof": "smooth_quartz", "roofFull": "gold_block", "wood": "birch", "window": "light_blue_stained_glass_pane", "accent": "yellow"},
+      {"wall": "quartz_bricks", "low": "smooth_quartz", "roof": "prismarine_brick", "wood": "birch", "window": "light_blue_stained_glass_pane", "accent": "light_blue"},
+      {"wall": "calcite", "wall2": "smooth_quartz", "low": "quartz_bricks", "roof": "smooth_quartz", "roofFull": "honeycomb_block", "wood": "cherry", "accent": "white"}
+    ],
+    "noble": [
+      {"wall": "smooth_quartz", "low": "quartz_bricks", "roof": "smooth_quartz", "roofFull": "gold_block", "wood": "birch", "window": "yellow_stained_glass_pane", "column": "quartz_pillar", "accent": "yellow"},
+      {"wall": "quartz_bricks", "wall2": "chiseled_quartz_block", "low": "smooth_quartz", "roof": "prismarine_brick", "wood": "birch", "window": "light_blue_stained_glass_pane", "column": "quartz_pillar", "accent": "light_blue"},
+      {"wall": "calcite", "low": "chiseled_quartz_block", "roof": "smooth_quartz", "roofFull": "amethyst_block", "wood": "cherry", "window": "magenta_stained_glass_pane", "column": "quartz_pillar", "accent": "white"}
+    ]
+  }
+}

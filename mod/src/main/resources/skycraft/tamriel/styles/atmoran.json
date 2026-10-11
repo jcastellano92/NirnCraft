@@ -1,0 +1,37 @@
+{
+  "_doc": "Atmoran (and Skaal) style sheet: low stone longhouses under turf and moss, rings round a fire.",
+  "windows": "fence",
+  "horns": true,
+  "faith": ["kynareth", "talos", "arkay"],
+  "crops": ["potatoes", "cabbage"],
+  "animals": ["goat", "sheep", "dog"],
+  "colors": ["light_gray", "white", "blue"],
+  "forms": {"ring": 3, "linear": 2, "cluster": 1},
+  "roofs": {"poor": {"gable": 2, "thatch": 1}, "common": {"steep": 2, "gable": 2}, "wealthy": {"steep": 2}, "noble": {"steep": 1}},
+  "halls": {"steep": 1},
+  "footprints": {"poor": {"rect": 1}, "common": {"rect": 1}, "wealthy": {"rect": 1, "l": 1}, "noble": {"l": 1}},
+  "storeys": {"poor": [1, 1], "common": [1, 1], "wealthy": [1, 1], "noble": [1, 2]},
+  "rules": {"timber": 0.3, "porch": 0.1, "shutters": 0.0, "flowerBoxes": 0.0, "chimney": 0.8, "annex": 0.5, "banners": 0.3, "lanterns": 0.4},
+  "tiers": {
+    "poor": [
+      {"wall": "cobblestone", "wall2": "mossy_cobblestone", "low": "mossy_cobblestone", "roof": "mossy_stone_brick", "roofFull": "moss_block", "wood": "spruce", "timber": false},
+      {"wall": "stone", "low": "cobblestone", "roof": "spruce", "roofFull": "moss_block", "wood": "spruce", "timber": false},
+      {"wall": "spruce_log", "low": "cobblestone", "roof": "mossy_cobblestone", "roofFull": "moss_block", "wood": "spruce", "timber": false}
+    ],
+    "common": [
+      {"wall": "cobblestone", "low": "mossy_cobblestone", "roof": "mossy_stone_brick", "roofFull": "moss_block", "wood": "spruce", "post": "stripped_spruce_log", "timber": false},
+      {"wall": "stone_bricks", "wall2": "mossy_stone_bricks", "low": "cobblestone", "roof": "spruce", "wood": "spruce", "timber": false},
+      {"wall": "stripped_spruce_wood", "low": "cobblestone", "roof": "mossy_cobblestone", "roofFull": "moss_block", "wood": "spruce", "post": "bone_block"}
+    ],
+    "wealthy": [
+      {"wall": "stone_bricks", "low": "mossy_stone_bricks", "roof": "mossy_stone_brick", "wood": "spruce", "post": "bone_block", "timber": false},
+      {"wall": "polished_andesite", "low": "cobblestone", "roof": "spruce", "roofFull": "moss_block", "wood": "dark_oak", "timber": false},
+      {"wall": "spruce_log", "low": "stone_bricks", "roof": "dark_oak", "wood": "spruce", "timber": false}
+    ],
+    "noble": [
+      {"wall": "stone_bricks", "low": "chiseled_stone_bricks", "roof": "mossy_stone_brick", "wood": "dark_oak", "post": "bone_block", "timber": false},
+      {"wall": "mossy_stone_bricks", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "spruce", "timber": false},
+      {"wall": "stripped_spruce_wood", "low": "stone_bricks", "roof": "mossy_stone_brick", "roofFull": "moss_block", "wood": "dark_oak", "post": "bone_block"}
+    ]
+  }
+}

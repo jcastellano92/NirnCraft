@@ -57,6 +57,8 @@ public final class Works {
     public static void street(Canvas c, Palette p, Spec s) {
         double half = s.w / 2.0;
         boolean major = s.has(Spec.MAJOR);
+        int ddx = s.x2 - s.x, ddz = s.z2 - s.z;
+        int sx = Math.abs(ddx) >= Math.abs(ddz) ? Integer.signum(ddx) : 0, sz = Math.abs(ddx) >= Math.abs(ddz) ? 0 : Integer.signum(ddz);
         line(c, s, half, (x, z, t, side) -> {
             int g = c.wground(x, z);
             if (c.wwater(x, z) > g) {
@@ -74,6 +76,26 @@ public final class Works {
             for (int y = g + 1; y <= g + 3; y++) {
                 BlockState s2 = c.wget(x, y, z);
                 if (!s2.isAir() && Canvas.open(s2)) c.wset(x, y, z, Blocks.AIR.defaultBlockState());
+            }
+            // no tree trunks or crowns over a street
+            for (int y = g + 1; y <= g + 14; y++) {
+                BlockState s2 = c.wget(x, y, z);
+                if (s2.is(net.minecraft.tags.BlockTags.LEAVES) && !s2.getOptionalValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT).orElse(false)
+                        || s2.is(net.minecraft.tags.BlockTags.LOGS) && !net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(s2.getBlock()).getPath().startsWith("stripped")
+                        && y > g + 3 && c.wget(x, y - 1, z).isAir()) {
+                    c.wset(x, y, z, Blocks.AIR.defaultBlockState());
+                }
+            }
+            // steps on slopes: a stair up to a neighbour one block higher along the street (same chunk only)
+            if (s.w > 1) {
+                for (int k = -1; k <= 1; k += 2) {
+                    int nx = x + sx * k, nz = z + sz * k;
+                    if (nx < c.clipMinX() || nx > c.clipMaxX() || nz < c.clipMinZ() || nz > c.clipMaxZ()) continue;
+                    if (c.wground(nx, nz) != g + 1) continue;
+                    Direction up = Direction.getNearest(sx * k, 0, sz * k);
+                    if (c.wget(x, g + 1, z).isAir()) c.wset(x, g + 1, z, B.stair(major ? p.trim : p.stairs, up, false));
+                    break;
+                }
             }
         });
     }
@@ -383,6 +405,7 @@ public final class Works {
         c.anchor(AnchorType.GUARD, ox0 - 1, 1, -2);
         c.anchor(AnchorType.GUARD, ox1 + 1, 1, -2);
         c.anchor(AnchorType.GUARD, (ox0 + ox1) / 2, h + 1, d / 2);
+        c.anchor(AnchorType.GATE, (ox0 + ox1) / 2, 1, d / 2);
     }
 
     // ------------------------------------------------------------------ water and earthworks

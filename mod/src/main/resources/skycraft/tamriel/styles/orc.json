@@ -1,0 +1,37 @@
+{
+  "_doc": "Orc (Orsimer) style sheet: log longhouses under hide roofs, stone footings, forges everywhere.",
+  "windows": "fence",
+  "horns": true,
+  "faith": ["stendarr", "arkay", "talos"],
+  "crops": ["potatoes", "beetroots"],
+  "animals": ["goat", "pig", "chicken", "dog"],
+  "colors": ["red", "black", "brown"],
+  "forms": {"ring": 3, "cluster": 2, "linear": 1},
+  "roofs": {"poor": {"gable": 2, "shed": 1}, "common": {"gable": 3, "steep": 1}, "wealthy": {"steep": 2, "gable": 1}, "noble": {"steep": 1}},
+  "halls": {"steep": 1},
+  "footprints": {"poor": {"rect": 1}, "common": {"rect": 1}, "wealthy": {"rect": 2, "l": 1}, "noble": {"l": 1, "t": 1}},
+  "storeys": {"poor": [1, 1], "common": [1, 1], "wealthy": [1, 2], "noble": [2, 2]},
+  "rules": {"timber": 0.2, "porch": 0.2, "balcony": 0.0, "shutters": 0.0, "flowerBoxes": 0.0, "chimney": 0.9, "annex": 0.5, "banners": 0.6, "lanterns": 0.3, "awning": 0.1},
+  "tiers": {
+    "poor": [
+      {"wall": "spruce_log", "low": "cobbled_deepslate", "roof": "spruce", "roofFull": "brown_wool", "wood": "spruce", "timber": false},
+      {"wall": "dark_oak_log", "low": "cobblestone", "roof": "dark_oak", "roofFull": "brown_wool", "wood": "dark_oak", "timber": false},
+      {"wall": "cobbled_deepslate", "low": "cobbled_deepslate", "roof": "spruce", "roofFull": "gray_wool", "wood": "spruce", "timber": false}
+    ],
+    "common": [
+      {"wall": "spruce_log", "low": "cobbled_deepslate", "roof": "spruce", "wood": "spruce", "timber": false, "accent": "red"},
+      {"wall": "stripped_dark_oak_log", "low": "cobbled_deepslate", "roof": "dark_oak", "wood": "dark_oak", "timber": false, "accent": "black"},
+      {"wall": "dark_oak_planks", "low": "cobblestone", "roof": "spruce", "roofFull": "brown_wool", "wood": "dark_oak", "accent": "brown"}
+    ],
+    "wealthy": [
+      {"wall": "dark_oak_log", "low": "deepslate_bricks", "roof": "deepslate_tile", "wood": "dark_oak", "timber": false, "accent": "red"},
+      {"wall": "cobbled_deepslate", "wall2": "deepslate_bricks", "low": "cobbled_deepslate", "roof": "spruce", "wood": "spruce", "timber": false, "accent": "black"},
+      {"wall": "spruce_log", "low": "polished_blackstone", "roof": "dark_oak", "wood": "spruce", "timber": false, "accent": "brown"}
+    ],
+    "noble": [
+      {"wall": "deepslate_bricks", "low": "polished_blackstone", "roof": "deepslate_tile", "wood": "dark_oak", "timber": false, "accent": "red"},
+      {"wall": "dark_oak_log", "low": "polished_blackstone_bricks", "roof": "blackstone", "wood": "dark_oak", "timber": false, "accent": "black"},
+      {"wall": "stripped_spruce_log", "low": "deepslate_bricks", "roof": "deepslate_tile", "wood": "spruce", "timber": false, "accent": "red"}
+    ]
+  }
+}
