@@ -167,7 +167,7 @@ DUNGEON-QA's blueprint format), hand-planned districts for the capitals (require
 plan format), more side quests.
 
 **T9. Final release pass:** refresh README/FEATURES/INSTALL counts (they still list curses/sailing as "coming");
-`tools/build_prism_instance.py`; one full Prism run of the real pack (the `Skycraft-QA` instance flow in
+`tools/build_prism_instance.py`; (OWNER RUNS the visual test themselves; do NOT launch the client, hand over a checklist instead) was: one full Prism run of the real pack (the `Skycraft-QA` instance flow in
 `docs/PLAYTEST-FULLPACK.md`: DH + Oculus/Complementary) with a short tour and one contact sheet; fix blockers; tag a
 release commit.
 
