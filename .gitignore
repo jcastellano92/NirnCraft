@@ -33,3 +33,6 @@ pack/mods/skycraft-core.jar
 
 # generated previews (large; regenerate with the tools)
 tools/worldgen/preview_places*.png
+
+# private reference data extracted from the owner's own game installs (facts only; never commit)
+.reference/
