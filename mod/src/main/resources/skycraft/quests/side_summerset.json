@@ -1,0 +1,609 @@
+{
+  "line": "side_summerset",
+  "category": "side",
+  "region": "summerset/summerset_isle",
+  "speakers": {
+    "side_sum_grey_voice": "A Voice in a Grey Hood",
+    "side_sum_reflection_voice": "Your Reflection",
+    "side_sum_kynval_voice": "Kynval the Steward",
+    "side_sum_tirnaril_voice": "Tirnaril Venwe",
+    "side_sum_calanwe_voice": "Lady Calanwe",
+    "side_sum_orvandil_voice": "Keeper Orvandil",
+    "side_sum_ysla_voice": "Captain Ysla Brine-Veil"
+  },
+  "npcs": [
+    {"id": "side_sum_seyvel", "name": "Seyvel of the Grey Hood", "role": "mage", "place": "artaeum", "offset": [8, -6],
+     "greet": "You're early. Or I'm late. On Artaeum it's considered rude to ask which."},
+    {"id": "side_sum_ansarwe", "name": "Master Ansarwe", "role": "priest", "place": "artaeum", "offset": [-10, 8], "female": true,
+     "greet": "The novice who brought you here thinks he is very clever. He is half right, which is the dangerous half."},
+    {"id": "side_sum_faelwe", "name": "Faelwe the Groundskeeper", "role": "farmer", "place": "artaeum", "offset": [-14, -12],
+     "greet": "Mind the moss. It's older than the Order, and the Order never lets it forget."},
+    {"id": "side_sum_aranon", "name": "Aranon Gullwhistle", "role": "fisher", "place": "side_sum_saltreach", "offset": [3, 2],
+     "greet": "Fish don't care who your grandmother was. It's why I like them better than people."},
+    {"id": "side_sum_nyssa", "name": "Nyssa Gullwhistle", "role": "citizen", "place": "side_sum_saltreach", "offset": [-4, 3], "female": true,
+     "greet": "Mending nets is a good trade. Your hands are busy, and nobody expects you to talk."},
+    {"id": "side_sum_irilwe", "name": "Irilwe Lanthenor", "role": "scholar", "place": "alinor", "offset": [14, 10], "female": true,
+     "greet": "If you are here to ask about the Crystal Tower, the answer is yes, it is very tall, and no, you may not go in."},
+    {"id": "side_sum_calwen", "name": "Calwen", "role": "scholar", "place": "side_sum_scriveners_grotto", "offset": [2, 2], "female": true,
+     "greet": "Please don't shout. The grotto echoes, and I'm trying very hard not to be found."},
+    {"id": "side_sum_haliwen", "name": "Lady Haliwen Valtaryon", "role": "steward", "place": "alinor", "offset": [-16, 12], "female": true,
+     "greet": "House Valtaryon has been fortunate for nine centuries. I have recently begun to find that suspicious."},
+    {"id": "side_sum_halcarion", "name": "Sapiarch Halcarion", "role": "scholar", "place": "alinor", "offset": [-8, -14],
+     "greet": "I am composing a treatise on the drift of the Mundus stones. Do not stand in my light; it is research."},
+    {"id": "side_sum_ilyrae", "name": "Ilyrae", "role": "mage", "place": "side_sum_starwell", "offset": [3, -2], "female": true,
+     "greet": "The stars move a hair's breadth every century. I have recorded eleven hairs. Don't touch the charts."},
+    {"id": "side_sum_quarendil", "name": "Master Quarendil Venwe", "role": "scholar", "place": "alinor", "offset": [18, -8],
+     "greet": "Thirty-one generations. Thirty-one! I can recite them. Would you like me to? Most people say no, but they're wrong."},
+    {"id": "side_sum_thaurwen", "name": "Envoy Thaurwen Copperleaf", "role": "courier", "place": "firsthold", "offset": [10, 8], "female": true,
+     "greet": "A Bosmer envoy in an Altmer city learns to smile with her teeth closed. Can I help you?"},
+    {"id": "side_sum_oriel", "name": "Oriel Featherwright", "role": "hunter", "place": "firsthold", "offset": [-12, -10], "female": true,
+     "greet": "This scar? Gryphon. That one? Also gryphon. They're affectionate, in their way."},
+    {"id": "side_sum_eldaran", "name": "Shipwright Eldaran Halvenor", "role": "merchant", "place": "firsthold", "offset": [6, -14],
+     "greet": "A good hull will forgive a bad captain. It won't forgive rocks."},
+    {"id": "side_sum_merewen", "name": "Old Merewen", "role": "fisher", "place": "firsthold", "offset": [-14, 12], "female": true,
+     "greet": "Forty years diving for pearls. You learn which waters sing back."},
+    {"id": "side_sum_neliril", "name": "Neliril Sunhallow", "role": "thief", "place": "side_sum_thornpetal_cottage", "offset": [2, -2], "female": true,
+     "greet": "You didn't see me. I'm very much deceased. Ask anyone. Well, ask my headstone."}
+  ],
+  "relics": [
+    {"id": "side_sum_grey_feather", "name": "Grey Feather", "desc": "A feather that was a loaf of bread two hours ago. It points, gently but insistently, toward the west.", "icon": 22},
+    {"id": "side_sum_tide_conch", "name": "Pyandonean Tide-Conch", "desc": "A blue-spiralled conch carved with Maormer tide-notes. Blown at night, it sings in a voice that is not quite yours.", "icon": 25},
+    {"id": "side_sum_ward_notes", "name": "Irilwe's Ward-Notes", "desc": "Eleven years of tight Aldmeris script on how the Crystal Tower's wards breathe in and out. Read carefully, it is a burglar's manual.", "icon": 23},
+    {"id": "side_sum_valtaryon_ledger", "name": "Valtaryon Vault Ledger", "desc": "Nine centuries of entries, each ending in a payment marked only 'to the Patron'. The final entry, unpaid, reads: the Crystal Tower's wards.", "icon": 23},
+    {"id": "side_sum_heron_brush", "name": "Lime-Crusted Brush", "desc": "A fine sable brush caked with white lime paint, stamped on the handle with the seal of the Firsthold Watch quartermaster.", "icon": 26},
+    {"id": "side_sum_circle_minutes", "name": "Minute-Book of the Unbroken Circle", "desc": "Minutes of a radical society, mostly complaints about the Dominion, and one furious argument about who keeps painting herons on corpses.", "icon": 23},
+    {"id": "side_sum_choir_bell", "name": "Silver Choir-Bell", "desc": "A small silver bell crusted with coral. It has no clapper, and it rings anyway when the tide turns.", "icon": 25},
+    {"id": "side_sum_gryphon_egg", "name": "Warm Gryphon Egg", "desc": "A speckled egg the size of a helm, warm as a hearthstone. Something inside it taps back when you tap.", "icon": 21},
+    {"id": "side_sum_sea_letter", "name": "Tirnaril's Unsent Letter", "desc": "A letter in Aldmeris, addressed to 'my wife in the southern isles'. The salutation is written in Pyandonean.", "icon": 23},
+    {"id": "side_sum_debt_ledger", "name": "Debt-Wardens' Ledger", "desc": "A record of every coin collected from Neliril Sunhallow. Someone has added it up. Nobody has stopped collecting.", "icon": 23},
+    {"id": "side_sum_coral_lens", "name": "Shard of Living Coral Lens", "desc": "A curved shard of coral grown, not cut, into a lens. It pulses faintly, like something breathing underwater.", "icon": 21},
+    {"id": "side_sum_grey_berries", "name": "Ash-Grey Berries", "desc": "Berries the colour of old ash, with a faint taste of brimstone. Someone grafted the bush they grew on.", "icon": 26}
+  ],
+  "places": {
+    "side_sum_still_table": {"x": -12848, "z": 12176, "r": 30, "name": "The Still Table"},
+    "side_sum_glass_tarn": {"x": -13424, "z": 12368, "r": 40, "name": "The Glass Tarn"},
+    "side_sum_threefold_arch": {"x": -12656, "z": 12944, "r": 30, "name": "The Threefold Arch"},
+    "side_sum_mistward_ledge": {"x": -11888, "z": 11024, "r": 30, "name": "The Mistward Ledge"},
+    "side_sum_greyfeather_grove": {"x": -11888, "z": 11216, "r": 30, "name": "Greyfeather Grove"},
+    "side_sum_sealed_undercroft": {"x": -11696, "z": 11024, "r": 30, "name": "The Sealed Undercroft"},
+    "side_sum_saltreach": {"x": -12080, "z": 14864, "r": 30, "name": "Saltreach"},
+    "side_sum_blackfin_landing": {"x": -13424, "z": 14672, "r": 40, "name": "Blackfin Landing"},
+    "side_sum_coilwater_cove": {"x": -13232, "z": 15248, "r": 40, "name": "Coilwater Cove"},
+    "side_sum_scriveners_grotto": {"x": -11888, "z": 12368, "r": 30, "name": "Scrivener's Grotto"},
+    "side_sum_gullrock_steps": {"x": -11504, "z": 13712, "r": 30, "name": "Gullrock Steps"},
+    "side_sum_valtaryon_terraces": {"x": -11888, "z": 13520, "r": 40, "name": "Valtaryon Terraces"},
+    "side_sum_starwell": {"x": -13040, "z": 11792, "r": 40, "name": "Starwell of Tirnalor"},
+    "side_sum_venwe_ossuary": {"x": -12464, "z": 13328, "r": 40, "name": "Venwe Ancestral Ossuary"},
+    "side_sum_wreckers_strand": {"x": -13424, "z": 13136, "r": 40, "name": "Wrecker's Strand"},
+    "side_sum_coral_lantern": {"x": -14000, "z": 13328, "r": 40, "name": "The Coral Lantern"},
+    "side_sum_heron_cloister": {"x": -9968, "z": 10640, "r": 40, "name": "Heron Cloister"},
+    "side_sum_lanthir_orchard": {"x": -9584, "z": 11408, "r": 40, "name": "Lanthir Orchard"},
+    "side_sum_watchpost": {"x": -9776, "z": 11792, "r": 30, "name": "South Road Watchpost"},
+    "side_sum_hawkspire_aerie": {"x": -9584, "z": 12368, "r": 40, "name": "Hawkspire Aerie"},
+    "side_sum_gull_hollow": {"x": -9776, "z": 13136, "r": 30, "name": "Gull Hollow"},
+    "side_sum_thornpetal_cottage": {"x": -10160, "z": 11408, "r": 30, "name": "Thornpetal Cottage"},
+    "side_sum_debt_camp": {"x": -9968, "z": 11984, "r": 30, "name": "Debt-Wardens' Camp"},
+    "side_sum_tidewater_spire": {"x": -9968, "z": 12752, "r": 48, "name": "The Tidewater Spire"},
+    "side_sum_exiles_cairn": {"x": -10160, "z": 12176, "r": 30, "name": "The Exile's Cairn"}
+  },
+  "bosses": {
+    "side_sum_mirrored_petitioner": {"name": "The Mirrored Petitioner", "type": "minecraft:vindicator", "hp": 4.5, "dmg": 1.7, "level": 32,
+      "weapon": "skycraft:glass_sword", "gear": {"head": "skycraft:glass_helmet", "chest": "skycraft:glass_chestplate"},
+      "drop": "loot:major", "glow": true},
+    "side_sum_ysla": {"name": "Captain Ysla Brine-Veil", "type": "skycraft:bandit_chief", "hp": 3.5, "dmg": 1.5, "level": 25,
+      "weapon": "skycraft:maormer_sword", "gear": {"head": "skycraft:maormer_helmet", "chest": "skycraft:maormer_chestplate"},
+      "drop": "loot:standard", "glow": false},
+    "side_sum_old_coil": {"name": "Old Coil", "type": "skycraft:sea_serpent", "hp": 6.0, "dmg": 1.8, "level": 30,
+      "drop": "loot:major", "glow": false},
+    "side_sum_vaenor": {"name": "Vaenor Glasshand", "type": "skycraft:bandit_chief", "hp": 3.0, "dmg": 1.4, "level": 23,
+      "weapon": "skycraft:glass_dagger", "gear": {"chest": "skycraft:elven_chestplate", "legs": "skycraft:elven_leggings"},
+      "drop": "loot:standard", "glow": false},
+    "side_sum_kynval": {"name": "Kynval the Steward", "type": "skycraft:dremora", "hp": 4.5, "dmg": 1.7, "level": 28,
+      "weapon": "skycraft:daedric_sword", "drop": "loot:major", "glow": true},
+    "side_sum_talonmir": {"name": "Watch-Captain Talonmir Avenaire", "type": "skycraft:bandit_chief", "hp": 3.5, "dmg": 1.5, "level": 24,
+      "weapon": "skycraft:elven_sword", "gear": {"head": "skycraft:elven_helmet", "chest": "skycraft:elven_chestplate"},
+      "drop": "loot:standard", "glow": false},
+    "side_sum_starwell_sentinel": {"name": "The Sentinel of Tirnalor", "type": "skycraft:gargoyle", "hp": 5.0, "dmg": 1.7, "level": 32,
+      "drop": "loot:major", "glow": true},
+    "side_sum_calanwe": {"name": "Lady Calanwe of the Drowned Choir", "type": "minecraft:drowned", "hp": 5.0, "dmg": 1.7, "level": 36,
+      "weapon": "skycraft:elven_war_axe", "gear": {"head": "skycraft:elven_gilded_helmet"},
+      "drop": "loot:major", "glow": true},
+    "side_sum_merric": {"name": "Merric Ashbourne", "type": "skycraft:bandit_chief", "hp": 4.0, "dmg": 1.6, "level": 35,
+      "weapon": "skycraft:breton_sword", "gear": {"head": "skycraft:breton_helmet", "chest": "skycraft:breton_chestplate"},
+      "drop": "loot:major", "glow": false},
+    "side_sum_shriekwing": {"name": "Shriekwing, Nest-Robber", "type": "skycraft:harpy", "hp": 4.0, "dmg": 1.5, "level": 34,
+      "drop": "loot:standard", "glow": false},
+    "side_sum_tirnaril": {"name": "Tirnaril the Unwritten", "type": "minecraft:wither_skeleton", "hp": 4.0, "dmg": 1.6, "level": 28,
+      "weapon": "skycraft:elven_sword", "gear": {"head": "skycraft:elven_gilded_helmet"},
+      "drop": "loot:standard", "glow": true},
+    "side_sum_aicantar": {"name": "Marshal Aicantar of the Debt-Wardens", "type": "skycraft:bandit_chief", "hp": 3.5, "dmg": 1.5, "level": 26,
+      "weapon": "skycraft:steel_mace", "gear": {"head": "skycraft:steel_helmet", "chest": "skycraft:steel_plate_chestplate"},
+      "drop": "loot:standard", "glow": false},
+    "side_sum_orvandil": {"name": "Keeper Orvandil Saltglass", "type": "skycraft:necromancer", "hp": 6.0, "dmg": 1.9, "level": 44,
+      "weapon": "skycraft:staff_of_frostbite", "gear": {"chest": "skycraft:maormer_chestplate"},
+      "drop": "loot:legendary", "glow": true},
+    "side_sum_cinderhoof": {"name": "Cinderhoof, the Grafted Indrik", "type": "skycraft:indrik", "hp": 5.0, "dmg": 1.8, "level": 38,
+      "drop": "loot:major", "glow": true}
+  },
+  "scenes": {
+    "side_sum_table_set": [
+      ["narrator", "A small table stands in the grass, laid for two: a white cloth, a warm loaf, two cups of tea still steaming. There is no one for a mile in any direction."],
+      ["side_sum_grey_voice", "Sit. The first question is whether you will eat the bread. Take as long as you like. I have, as they say here, all the time."]
+    ],
+    "side_sum_tarn_reflection": [
+      ["narrator", "The tarn is perfectly still. Your reflection in it is a heartbeat slow, and then a heartbeat fast, and then it is climbing out."],
+      ["side_sum_reflection_voice", "I know every trick you like. I know which foot you favour. I know what you would never do. Let's see if you do."]
+    ],
+    "side_sum_arch_mist": [
+      ["narrator", "Three doorways stand in a row on the hilltop, framing nothing but sky. Mist pours through all three at once, though the night is clear."],
+      ["side_sum_grey_voice", "Most choose a door. A few choose to wait. Hardly anyone notices that the mist parts for those who stand still."]
+    ],
+    "side_sum_seyvel_revealed": [
+      ["narrator", "On the ledge, a hooded Altmer is pacing. He stops when he sees you and throws back his hood. He is very young."],
+      ["side_sum_seyvel", "You passed. You passed all three. Do you know how long I've been looking for someone who would sit at that table without eating?"],
+      ["side_sum_ansarwe", "About as long as you've been avoiding sitting at it yourself, Seyvel."]
+    ],
+    "side_sum_ysla_hails": [
+      ["narrator", "Blue-sailed boats are drawn up on the shingle, their hulls painted with coiled serpents. A tall sea-elf in a veil of netting stands at the waterline."],
+      ["side_sum_ysla_voice", "Tell my betrothed she can come to me, or I can come to her village. I have been patient for twenty years. Old Coil has not."]
+    ],
+    "side_sum_coil_rises": [
+      ["narrator", "The conch's note runs out across the water and does not come back. Then the sea in the cove rises in a long, slow hump, and keeps rising."]
+    ],
+    "side_sum_vault_patron": [
+      ["narrator", "The shrine is heaped with fresh flowers in Valtaryon blue. A tall figure in steward's grey is arranging them with great care."],
+      ["side_sum_kynval_voice", "You've read the ledger. Nine centuries of good fortune, and not one Valtaryon ever asked who was paying for it. Every bargain needs a steward. I have been theirs."],
+      ["side_sum_kynval_voice", "The last payment is due. I will collect it from you instead, if you insist."]
+    ],
+    "side_sum_starwell_wakes": [
+      ["narrator", "The Starwell is a stone bowl cut into the cliff, open to the sky, ringed with brass instruments green with age. Several of them have been moved very recently."],
+      ["narrator", "At the rim, a stone watcher turns its head with a sound like a millstone. Its ward-runes have been chiselled away, neatly, by someone who knew which ones mattered."]
+    ],
+    "side_sum_choir": [
+      ["narrator", "The spire's upper rooms are dry, held in a bubble of still air. From below, through the stone, many voices are singing the same four notes over and over."],
+      ["side_sum_calanwe_voice", "Hush. Listen. My choir has sung the tide in and out for four thousand years. They are happy. They would tell you so themselves, if they could stop."]
+    ],
+    "side_sum_aerie": [
+      ["narrator", "The aerie is a crown of sticks and bones on the highest crag of Hawkspire. One speckled egg sits in it, alone. Harpies are circling, and they have seen you."]
+    ],
+    "side_sum_matriarch_returns": [
+      ["narrator", "A shadow crosses the sun. The gryphon matriarch lands on the rim of the nest with a sound like a sail filling, and looks at you for a long, long time."],
+      ["narrator", "Then she lowers her head over the two eggs and stops looking at you at all. Beneath the nest, the old sticks have fallen away from a stone cairn, and a sword-hilt glitters in it."]
+    ],
+    "side_sum_tirnaril_lies": [
+      ["narrator", "A pale figure in Sapiarch's robes drifts between the niches, straightening urns that do not need straightening."],
+      ["side_sum_tirnaril_voice", "A visitor from the family? Tell my descendant I went to sea for the glory of the Tower, and came home, and fathered a son as pure as Alinor glass. Now go. There is nothing else in here."]
+    ],
+    "side_sum_strand": [
+      ["narrator", "Ribs of wrecked hulls stick out of the sand like a beached whale's. Every wreck faces the same way: toward the light on the headland."]
+    ],
+    "side_sum_keeper_speaks": [
+      ["narrator", "The lighthouse lamp is not glass. It is a great lens of pink coral, pulsing slowly, and the light it throws smells of the deep sea."],
+      ["side_sum_orvandil_voice", "A Sload of Thras grew it for me. It shines twice as far as any glass. The crews it brings in... they are not dead, exactly. They row now, under the sea, for a fleet that will come back for Summerset one day. A fair price for such a light."]
+    ],
+    "side_sum_grey_grove": [
+      ["narrator", "Among the indrik-berry bushes on the cliff, a few have been cut and bound with fresh grafts. Their berries are grey, and the grass around them is scorched."]
+    ]
+  },
+  "quests": [
+    {
+      "id": "side_sum_the_unasked_question",
+      "title": "The Unasked Question",
+      "region": "summerset/summerset_isle",
+      "start": "find",
+      "find": {"place": "side_sum_still_table", "offset": [-80, -76], "clue": "lectern",
+               "text": "A lectern of pale wood stands alone in the grass, where nobody would put a lectern. On it, one page in fine Aldmeris: If you are reading this, you noticed something most people walk past. Come to the table. Sit. Do not eat the bread."},
+      "requires": ["level:30"],
+      "desc": "I found a lectern standing alone on Summerset's western hills, with a note inviting me to a table and warning me not to eat the bread. Someone is testing me, and they are not being subtle about being subtle.",
+      "objectives": [
+        {"type": "go", "place": "side_sum_still_table", "text": "Find the table the note spoke of", "actions": "scene:side_sum_table_set"},
+        {"type": "wait", "place": "side_sum_still_table", "hours": 2, "text": "Sit at the table and touch nothing", "actions": "relic:side_sum_grey_feather",
+         "journal": "The bread smelled wonderful for two hours. Then it turned to sand, and a grey feather lay where it had been."},
+        {"type": "go", "place": "side_sum_glass_tarn", "text": "Follow the grey feather to the Glass Tarn", "actions": "scene:side_sum_tarn_reflection"},
+        {"type": "kill", "place": "side_sum_glass_tarn", "placement": "near", "text": "Defeat the reflection that climbs out of the tarn",
+         "spawn": [{"boss_id": "side_sum_mirrored_petitioner"}],
+         "journal": "It fought with all my habits. Every feint I like, it liked first. I won by doing something I would never do."},
+        {"type": "cond", "cond": "night", "place": "side_sum_threefold_arch", "text": "Stand beneath the Threefold Arch at night", "actions": "scene:side_sum_arch_mist",
+         "journal": "Three doorways, and mist pouring through all of them. I walked through none. The mist parted anyway, and beyond it, across the water, was Artaeum."},
+        {"type": "go", "place": "side_sum_mistward_ledge", "text": "Cross to Artaeum and find the Mistward Ledge", "actions": "take:side_sum_grey_feather;scene:side_sum_seyvel_revealed"},
+        {"type": "talk", "npc": "side_sum_ansarwe", "text": "Speak with Master Ansarwe",
+         "topic": "Seyvel says I passed his test.",
+         "reply": "You passed his. He failed his own. His trial was to sit at that table himself; instead he spent a season finding a stranger who would do it for him. A novice who can find the right stranger is worth something, I suppose. So is the stranger.",
+         "choices": [
+           {"label": "Give Seyvel another chance. He chose well.", "reply": "Kindness. We'll call it a fourth trial and see whether he survives it.", "actions": "flag:side_sum_seyvel_forgiven"},
+           {"label": "He cheated. Let him own it.", "reply": "Honesty. He will resent you for a decade and thank you for a century. That's a good trade, on Artaeum.", "actions": "flag:side_sum_seyvel_humbled"}
+         ]}
+      ],
+      "outro": "A Psijic novice named Seyvel tested me with bread, a reflection and a doorway, because he was afraid to face his own trial. Master Ansarwe let me keep what I earned anyway.",
+      "rewards": {"gold": 1000, "loot": "major", "unique": "psijic_longbow", "perks": 1}
+    },
+    {
+      "id": "side_sum_salt_in_the_nets",
+      "title": "Salt in the Nets",
+      "region": "summerset/summerset_isle",
+      "start": "npc:side_sum_aranon",
+      "requires": ["level:24"],
+      "offer": "Trouble with the catch?",
+      "pitch": "Blue-sailed ships off the point three nights running. Maormer. They haven't touched a single boat, only watched. Then last night someone left a comb on my doorstep, carved from fishbone with a serpent on it. My wife went white as a gull's belly and won't say why.",
+      "desc": "Aranon Gullwhistle, a fisher of Saltreach on Summerset's south coast, has seen Maormer ships watching his village. A serpent-carved comb on his doorstep has frightened his wife Nyssa into silence.",
+      "objectives": [
+        {"type": "talk", "npc": "side_sum_nyssa", "text": "Speak with Nyssa",
+         "topic": "Aranon says the comb frightened you.",
+         "reply": "It's a betrothal comb. Pyandonean. Twenty years ago I ran from a captain who carved one for me, and I married a fisher who has never once asked about my accent. Ysla Brine-Veil does not forget a promise, even one I never made.",
+         "journal": "Nyssa is Maormer. Aranon, I realised, had always known and never cared."},
+        {"type": "go", "place": "side_sum_blackfin_landing", "text": "Scout the Maormer camp at Blackfin Landing", "actions": "scene:side_sum_ysla_hails"},
+        {"type": "clear", "place": "side_sum_blackfin_landing", "placement": "near", "text": "Fight off Ysla's raiders",
+         "spawn": [{"type": "npc:assassin", "count": 3, "name": "Maormer Raider", "hostile": true, "weapon": "skycraft:maormer_sword"},
+                   {"type": "npc:mage", "count": 1, "name": "Maormer Tide-Singer", "hostile": true}]},
+        {"type": "kill", "place": "side_sum_blackfin_landing", "placement": "near", "text": "Defeat Captain Ysla Brine-Veil",
+         "spawn": [{"boss_id": "side_sum_ysla"}],
+         "journal": "Ysla said she hadn't come for Saltreach. She had come to bring a runaway home. With her last breath she said Old Coil would come for Nyssa either way."},
+        {"type": "talk", "npc": "side_sum_nyssa", "text": "Tell Nyssa that Ysla is dead",
+         "topic": "Ysla is dead. She said something called Old Coil would come anyway.",
+         "reply": "Old Coil was hers, bound to her by a tide-song. With Ysla gone the song is broken, and the serpent is loose and hungry. And it knows the way to Saltreach, because it followed her here."}
+      ],
+      "outro": "Captain Ysla Brine-Veil came to Summerset to drag Nyssa Gullwhistle back to Pyandonea. She is dead now, but her sea serpent is not.",
+      "rewards": {"gold": 550, "loot": "standard",
+                  "items": [{"item": "skycraft:maormer_sword", "name": "Brine-Veil's Cutlass", "enchant": {"sharpness": 2, "knockback": 1}}]}
+    },
+    {
+      "id": "side_sum_old_coil",
+      "title": "Old Coil",
+      "region": "summerset/summerset_isle",
+      "start": "auto",
+      "requires": ["quest:side_sum_salt_in_the_nets", "level:28"],
+      "desc": "With Captain Ysla dead, the sea serpent she kept on a tide-song leash is loose off Saltreach. Nyssa still remembers the song that can call it to shore.",
+      "objectives": [
+        {"type": "talk", "npc": "side_sum_nyssa", "text": "Learn the tide-song from Nyssa",
+         "topic": "How do we draw the serpent out?",
+         "reply": "I sang to the serpents in the Pyandonean pens when I was a girl. Take this conch. Blow it at Coilwater Cove after dark and Old Coil will come to it. Don't miss when it does. It won't.",
+         "actions": "relic:side_sum_tide_conch"},
+        {"type": "go", "place": "side_sum_coilwater_cove", "text": "Go to Coilwater Cove"},
+        {"type": "cond", "cond": "night", "place": "side_sum_coilwater_cove", "text": "Sound the tide-conch at night", "actions": "take:side_sum_tide_conch;scene:side_sum_coil_rises"},
+        {"type": "kill", "place": "side_sum_coilwater_cove", "placement": "near", "text": "Kill Old Coil",
+         "spawn": [{"boss_id": "side_sum_old_coil"}, {"type": "minecraft:drowned", "count": 3, "name": "Drowned Fisher"}],
+         "journal": "Old Coil came up out of the cove like a tower falling sideways. The drowned fishers it had taken came up with it."},
+        {"type": "talk", "npc": "side_sum_aranon", "text": "Return to Aranon in Saltreach",
+         "topic": "Old Coil is dead. Nyssa called it in for me.",
+         "reply": "She sang it to shore? My Nyssa? The village will want to know how a net-mender knows Maormer serpent-songs.",
+         "choices": [
+           {"label": "Tell them. She saved Saltreach.", "reply": "Then I'll tell them at the market, loudly. Anyone who has a problem with it can buy their fish in Alinor.", "actions": "flag:side_sum_nyssa_known"},
+           {"label": "Some things can stay between a husband and wife.", "reply": "Twenty years we've kept it. We'll keep it twenty more.", "actions": "flag:side_sum_nyssa_secret"}
+         ]}
+      ],
+      "outro": "With Nyssa's tide-song I drew Old Coil into Coilwater Cove and killed it. Saltreach can fish again, and Nyssa no longer flinches at blue sails.",
+      "rewards": {"gold": 800, "loot": "major",
+                  "items": [{"item": "skycraft:maormer_bow", "name": "Coilsong Bow", "enchant": {"power": 3, "punch": 1}}]}
+    },
+    {
+      "id": "side_sum_marginalia",
+      "title": "Marginalia",
+      "region": "summerset/summerset_isle",
+      "start": "npc:side_sum_irilwe",
+      "requires": ["level:22"],
+      "offer": "You look like someone who lost an argument with a library.",
+      "pitch": "I lost a library. Eleven years of notes on how the Crystal Tower's wards breathe, gone from my study in one night, and only my apprentice Calwen had the key. The proctors want me to call the Justiciars. I would rather you found her first. She is shy, and very bad at running away.",
+      "desc": "Irilwe Lanthenor, a scholar of the Crystal Tower, told me her research on the Tower's wards was stolen and her apprentice Calwen has vanished. She wants Calwen found before the Justiciars are called.",
+      "objectives": [
+        {"type": "go", "place": "side_sum_scriveners_grotto", "text": "Search the sea-grotto where Calwen copied manuscripts"},
+        {"type": "talk", "npc": "side_sum_calwen", "text": "Speak with Calwen",
+         "topic": "Irilwe wants her notes back.",
+         "reply": "I didn't take them to sell. I took them because she was going to. A courier from House Valtaryon offered her a fortune, and she was thinking about it. Those notes show how to open the Tower like a coin purse. I hid them at Gullrock Steps, and now the courier's men are camped right on top of them.",
+         "journal": "Calwen stole the notes to keep her own teacher from selling them. Irilwe had left that part out."},
+        {"type": "go", "place": "side_sum_gullrock_steps", "text": "Go to Gullrock Steps"},
+        {"type": "clear", "place": "side_sum_gullrock_steps", "placement": "near", "text": "Drive off the courier's retainers",
+         "spawn": [{"type": "npc:assassin", "count": 3, "name": "Valtaryon Retainer", "hostile": true, "weapon": "skycraft:elven_dagger"}]},
+        {"type": "kill", "place": "side_sum_gullrock_steps", "placement": "near", "text": "Stop Vaenor Glasshand",
+         "spawn": [{"boss_id": "side_sum_vaenor"}],
+         "journal": "Vaenor carried the seal of House Valtaryon, and a letter that was not addressed to Irilwe at all, but to someone he called the Patron."},
+        {"type": "retrieve", "place": "side_sum_gullrock_steps", "offset": [5, -3], "relic": "side_sum_ward_notes", "radius": 8,
+         "text": "Recover Irilwe's ward-notes from Calwen's hiding place"},
+        {"type": "talk", "npc": "side_sum_irilwe", "text": "Return to Irilwe in Alinor",
+         "topic": "Here are your notes. Calwen took them so you couldn't sell them.",
+         "reply": "She thought I would sell? ... I might have. The offer was obscene. What do you intend to do with them?",
+         "choices": [
+           {"label": "Lodge them with the Sapiarchs, where neither of you can be tempted.", "reply": "Sensible, and humiliating. Very well. Tell Calwen she may come home. I'll be insufferable about it for a year.", "actions": "take:side_sum_ward_notes;flag:side_sum_notes_lodged"},
+           {"label": "I burned them. Calwen was right.", "reply": "Eleven years, in a fire. Calwen always did take my side against me. Get out, before I thank you.", "actions": "take:side_sum_ward_notes;flag:side_sum_notes_burned"}
+         ]}
+      ],
+      "outro": "Irilwe's ward-notes are out of reach of House Valtaryon. The courier's letter was addressed to a 'Patron', and Lady Haliwen Valtaryon of Alinor will want to hear about it.",
+      "rewards": {"gold": 450, "loot": "standard",
+                  "items": [{"item": "skycraft:elven_dagger", "name": "Calwen's Penknife", "enchant": {"sharpness": 2, "looting": 2}}]}
+    },
+    {
+      "id": "side_sum_the_patron_of_valtaryon",
+      "title": "The Patron of House Valtaryon",
+      "region": "summerset/summerset_isle",
+      "start": "npc:side_sum_haliwen",
+      "requires": ["quest:side_sum_marginalia", "level:26"],
+      "offer": "Your house's courier tried to buy the Crystal Tower's secrets. He carried your seal.",
+      "pitch": "Then someone in my house used it without me. House Valtaryon has had nine centuries of good harvests, good marriages and good luck, and I never once asked why. Perhaps I should. My steward Kynval keeps the oldest ledgers in the vault under the terraces and will not let me read them. Read them for me.",
+      "desc": "Lady Haliwen Valtaryon of Alinor swore she never sent the courier who tried to buy the Crystal Tower's secrets. She asked me to read her house's oldest ledgers, which her steward Kynval guards jealously.",
+      "objectives": [
+        {"type": "go", "place": "side_sum_valtaryon_terraces", "text": "Go to the Valtaryon Terraces outside Alinor"},
+        {"type": "clear", "place": "side_sum_valtaryon_terraces", "placement": "structure", "text": "Get past the vault's keepers",
+         "spawn": [{"type": "skycraft:scamp", "count": 3, "name": "Liveried Scamp"}],
+         "journal": "There should not be scamps in a noble's wine cellar. There should certainly not be scamps wearing the house livery."},
+        {"type": "retrieve", "place": "side_sum_valtaryon_terraces", "placement": "structure", "relic": "side_sum_valtaryon_ledger", "text": "Find the oldest ledger in the vault"},
+        {"type": "go", "place": "shrine_clavicus_vile_summerset", "text": "Follow the ledger's last entry to the Shrine of Clavicus Vile", "actions": "scene:side_sum_vault_patron"},
+        {"type": "kill", "place": "shrine_clavicus_vile_summerset", "placement": "near", "text": "Defeat Kynval the Steward",
+         "spawn": [{"boss_id": "side_sum_kynval"}, {"type": "skycraft:scamp", "count": 2}],
+         "journal": "Kynval shed his Altmer face like a coat. Beneath it was a dremora with nine centuries of patience and none left."},
+        {"type": "talk", "npc": "side_sum_haliwen", "text": "Tell Lady Haliwen who her steward was",
+         "topic": "Your steward was a dremora. Your family's luck was rented from Clavicus Vile.",
+         "reply": "Nine hundred years. Every vintage, every marriage, every lucky wind. Rented. And the rent was to be the Crystal Tower.",
+         "choices": [
+           {"label": "Pay nothing more. Let the luck run out.", "reply": "Then House Valtaryon will learn to be ordinary. I suspect we'll be dreadful at it.", "actions": "take:side_sum_valtaryon_ledger;flag:side_sum_valtaryon_freed"},
+           {"label": "Burn the ledger, and never sign anything you didn't write yourself.", "reply": "A Valtaryon reading her own contracts. My ancestors would faint. Good.", "actions": "take:side_sum_valtaryon_ledger;flag:side_sum_valtaryon_warned"}
+         ]}
+      ],
+      "outro": "House Valtaryon's nine centuries of luck were bought from Clavicus Vile through a dremora steward, and the final payment was to be the Crystal Tower's wards. The debt is unpaid, and the steward is gone.",
+      "rewards": {"gold": 800, "loot": "major", "unique": "alinor_dawnblade"}
+    },
+    {
+      "id": "side_sum_the_white_heron",
+      "title": "The White Heron",
+      "region": "summerset/auridon",
+      "start": "npc:side_sum_thaurwen",
+      "requires": ["level:22"],
+      "offer": "You look like you're counting exits.",
+      "pitch": "Two Bosmer and a Khajiit dead in the orchards outside Firsthold this month, each with a white heron painted on the chest. The heron is the sign of the Unbroken Circle, Altmer who think the Dominion is a dilution of their blood. The Watch-Captain says he is looking into it. I'd like someone to look faster.",
+      "desc": "Envoy Thaurwen Copperleaf, a Bosmer diplomat in Firsthold, asked me to investigate three murders marked with the white heron of the Unbroken Circle, Altmer radicals who despise the Dominion's alliance with Bosmer and Khajiit.",
+      "objectives": [
+        {"type": "go", "place": "side_sum_lanthir_orchard", "text": "Examine the orchard where the last body was found"},
+        {"type": "retrieve", "place": "side_sum_lanthir_orchard", "offset": [4, 6], "relic": "side_sum_heron_brush", "radius": 8,
+         "text": "Search the orchard for anything the killer dropped",
+         "journal": "The brush came from the Watch's own stores. Either the Circle had a friend in the Watch, or someone wanted it to look that way."},
+        {"type": "go", "place": "side_sum_heron_cloister", "text": "Find the Unbroken Circle's meeting place at Heron Cloister"},
+        {"type": "clear", "place": "side_sum_heron_cloister", "placement": "structure", "text": "Break up the Unbroken Circle's meeting",
+         "spawn": [{"type": "npc:assassin", "count": 3, "name": "Unbroken Circle Zealot", "hostile": true, "weapon": "skycraft:elven_sword"},
+                   {"type": "npc:mage", "count": 1, "name": "Circle Lector", "hostile": true}]},
+        {"type": "retrieve", "place": "side_sum_heron_cloister", "placement": "structure", "relic": "side_sum_circle_minutes", "text": "Take the Circle's minute-book",
+         "journal": "The Circle had argued for three meetings about who kept painting herons on corpses, and whether they ought to be grateful. One member had seen the painter: an Altmer in a Watch cloak, at the south road post."},
+        {"type": "kill", "place": "side_sum_watchpost", "placement": "near", "text": "Confront the Watch-Captain at the south road watchpost",
+         "spawn": [{"boss_id": "side_sum_talonmir"}, {"type": "npc:thalmor", "count": 2, "name": "Watch Loyalist", "hostile": true}],
+         "journal": "Talonmir said Firsthold needed a reason to close its gates to beastfolk, and the Circle needed a crime worthy of them. He only gave each what it wanted."},
+        {"type": "talk", "npc": "side_sum_thaurwen", "text": "Report to Envoy Thaurwen in Firsthold",
+         "topic": "The Watch-Captain painted the herons. The Circle is guilty of a great deal, but not these murders.",
+         "reply": "Then Firsthold owes the Circle an apology, and I would sooner eat a candle. What do you advise?",
+         "choices": [
+           {"label": "Tell the city the whole truth.", "reply": "Truth is a diplomat's only real currency. I'll spend it, even on them.", "actions": "flag:side_sum_heron_truth"},
+           {"label": "Let the Circle carry the blame. They'd have done it eventually.", "reply": "Convenient. Probably even true. I'll sleep badly, but I'll sleep.", "actions": "flag:side_sum_heron_blamed"}
+         ]}
+      ],
+      "outro": "The heron murders outside Firsthold were the Watch-Captain's work, dressed in the Unbroken Circle's colours to frighten the city into closing its gates. Envoy Thaurwen now decides what Firsthold hears.",
+      "rewards": {"gold": 500, "loot": "standard",
+                  "items": [{"item": "skycraft:elven_bow", "name": "Heronfeather Bow", "enchant": {"power": 2, "infinity": 1}}]}
+    },
+    {
+      "id": "side_sum_the_sapiarchs_pupil",
+      "title": "The Sapiarch's Pupil",
+      "region": "summerset/summerset_isle",
+      "start": "npc:side_sum_halcarion",
+      "requires": ["level:30"],
+      "offer": "Sapiarch, you seem distracted.",
+      "pitch": "My pupil Ilyrae went to the old Starwell of Tirnalor on the western cliffs to chart the drift of the stars. She was to send her figures every week. It has been five weeks. The Starwell has guardians older than the College. If she has woken one, I would like her back before it finishes waking.",
+      "desc": "Sapiarch Halcarion of Alinor asked me to find his pupil Ilyrae, who went to chart the stars at the ancient Starwell of Tirnalor on Summerset's western cliffs and has not written in five weeks.",
+      "objectives": [
+        {"type": "go", "place": "side_sum_starwell", "text": "Go to the Starwell of Tirnalor", "actions": "scene:side_sum_starwell_wakes"},
+        {"type": "clear", "place": "side_sum_starwell", "placement": "near", "text": "Get past the Starwell's watchers",
+         "spawn": [{"type": "skycraft:gargoyle", "count": 2, "name": "Starwell Watcher"}]},
+        {"type": "kill", "place": "side_sum_starwell", "placement": "near", "text": "Destroy the Sentinel of Tirnalor",
+         "spawn": [{"boss_id": "side_sum_starwell_sentinel"}],
+         "journal": "The Sentinel had not woken by accident. Someone had taken its ward-runes off with a chisel, very neatly."},
+        {"type": "talk", "npc": "side_sum_ilyrae", "text": "Speak with Ilyrae",
+         "topic": "Your Sapiarch is worried about you.",
+         "reply": "He's worried about his treatise. Every figure I sent him, he published under his own name. I woke the Sentinel to keep his couriers out. I didn't plan for someone competent.",
+         "choices": [
+           {"label": "Come back and accuse him before the College.", "reply": "With what proof? ... With you as a witness, and my original charts. Very well. I'll pack the brass.", "actions": "flag:side_sum_ilyrae_returns;relocate:side_sum_ilyrae:alinor:-4:-18"},
+           {"label": "Stay lost. I'll tell him the Starwell was empty.", "reply": "Thank you. Tell him the stars are still drifting, and so am I.", "actions": "flag:side_sum_ilyrae_hidden"}
+         ]},
+        {"type": "talk", "npc": "side_sum_halcarion", "text": "Return to Sapiarch Halcarion in Alinor",
+         "topic": "About Ilyrae.",
+         "reply": "Well? Is she alive? Did she finish the figures for the autumn quarter?",
+         "choices": [
+           {"label": "She's alive, and she knows whose name is on her work.", "reply": "Ah. Well. Scholarship is a collaborative enterprise. I'm sure the College will... see it that way. Excuse me. I must re-read some things.", "actions": "flag:side_sum_halcarion_exposed"},
+           {"label": "The Starwell was empty. She's gone.", "reply": "Gone. A pity. A great pity. She had such a gift for figures. Mine, now, I suppose, for the last time.", "actions": "flag:side_sum_halcarion_fooled"}
+         ]}
+      ],
+      "outro": "Ilyrae was not lost at the Starwell of Tirnalor. She was hiding there from the Sapiarch who had been publishing her work under his own name, and I decided what he would learn.",
+      "rewards": {"gold": 750, "loot": "major",
+                  "items": [{"item": "skycraft:staff_of_sparks", "name": "Ilyrae's Star-Rod"}, "minecraft:spyglass"]}
+    },
+    {
+      "id": "side_sum_the_tidewater_spire",
+      "title": "The Tidewater Spire",
+      "region": "summerset/auridon",
+      "start": "find",
+      "find": {"place": "side_sum_tidewater_spire", "offset": [110, 60], "clue": "urn",
+               "text": "A sealed Aldmeri urn has washed up among the rocks, green with weed. Its stopper is stamped with a spire rising out of waves. Inside, perfectly dry, is a funeral wreath of flowers that are still alive."},
+      "requires": ["level:34"],
+      "desc": "On Auridon's southern shore I found a sealed urn stamped with a spire rising from the waves, holding a wreath of living flowers. Someone in Firsthold must know where it came from.",
+      "objectives": [
+        {"type": "talk", "npc": "side_sum_merewen", "text": "Ask in Firsthold about the spire on the urn's seal",
+         "topic": "Have you seen a seal like this? A spire rising out of waves.",
+         "reply": "The Tidewater Spire. Sank in the First Era with its whole choir still inside, singing. On calm nights you can hear them off the southern rocks. Pearl-divers don't go there. The pearls sing too."},
+        {"type": "go", "place": "side_sum_tidewater_spire", "text": "Find the Tidewater Spire on Auridon's southern shore", "actions": "scene:side_sum_choir"},
+        {"type": "clear", "place": "side_sum_tidewater_spire", "placement": "structure", "text": "Fight through the drowned choristers",
+         "spawn": [{"type": "minecraft:drowned", "count": 4, "name": "Drowned Chorister"}]},
+        {"type": "retrieve", "place": "side_sum_tidewater_spire", "placement": "structure", "relic": "side_sum_choir_bell", "text": "Take the silver choir-bell from the spire's altar"},
+        {"type": "kill", "place": "side_sum_tidewater_spire", "placement": "structure", "text": "Silence Lady Calanwe",
+         "spawn": [{"boss_id": "side_sum_calanwe"}, {"type": "minecraft:drowned", "count": 2, "name": "Drowned Chorister"}],
+         "journal": "Calanwe had kept her choir singing for four thousand years so the sea would never notice the spire had sunk. When she fell, the singing stopped, and the choristers lay down as if they had been waiting for permission."},
+        {"type": "talk", "npc": "side_sum_merewen", "text": "Bring the choir-bell to Old Merewen",
+         "topic": "The choir is quiet now. This was their bell.",
+         "reply": "My grandmother swore that choir sang the tide in and out. We'll find out if the sea remembers how on its own. What will you do with the bell?",
+         "choices": [
+           {"label": "Ring it once over the water, so they know they can rest.", "reply": "Hear that? Nothing sang back. Good. That's good.", "actions": "take:side_sum_choir_bell;flag:side_sum_choir_rested"},
+           {"label": "You keep it. Your family listened to them longest.", "reply": "I'll hang it over the door. If it ever rings by itself, I'm moving inland.", "actions": "take:side_sum_choir_bell;flag:side_sum_bell_with_merewen"}
+         ]}
+      ],
+      "outro": "Lady Calanwe kept the drowned choir of the Tidewater Spire singing for four thousand years. The choir is silent now, and the tide off Auridon comes in on its own.",
+      "rewards": {"gold": 950, "loot": "major",
+                  "items": [{"item": "skycraft:elven_gilded_boots", "name": "Tidewalker's Boots", "enchant": {"depth_strider": 3, "feather_falling": 2}}]}
+    },
+    {
+      "id": "side_sum_the_hawkspire_egg",
+      "title": "The Hawkspire Egg",
+      "region": "summerset/auridon",
+      "start": "npc:side_sum_oriel",
+      "requires": ["level:34"],
+      "offer": "Is that a gryphon feather in your hat?",
+      "pitch": "Hawkspire's matriarch laid two eggs this spring. Now she has one and a temper, and she's taking sheep from Firsthold's pastures to make the point. Smugglers took the other egg; menageries in Alinor pay a fortune for gryphon chicks. Get it back before she decides sheep aren't enough.",
+      "desc": "Oriel Featherwright, a gryphon-keeper of Firsthold, told me smugglers stole an egg from the Hawkspire aerie, and the furious matriarch is raiding the pastures. She asked me to bring the egg home.",
+      "objectives": [
+        {"type": "go", "place": "side_sum_gull_hollow", "text": "Find the smugglers' cove at Gull Hollow"},
+        {"type": "clear", "place": "side_sum_gull_hollow", "placement": "structure", "text": "Deal with the egg-smugglers",
+         "spawn": [{"type": "npc:thug", "count": 3, "name": "Egg-Smuggler", "hostile": true, "weapon": "skycraft:steel_sword"}]},
+        {"type": "kill", "place": "side_sum_gull_hollow", "placement": "structure", "text": "Defeat Merric Ashbourne",
+         "spawn": [{"boss_id": "side_sum_merric"}],
+         "journal": "Merric said the egg was already paid for, by a menagerie-keeper in Alinor whose family name I had heard very recently: Featherwright."},
+        {"type": "retrieve", "place": "side_sum_gull_hollow", "placement": "structure", "relic": "side_sum_gryphon_egg", "text": "Take the egg from its heated crate"},
+        {"type": "go", "place": "side_sum_hawkspire_aerie", "text": "Climb to the Hawkspire Aerie with the egg", "actions": "scene:side_sum_aerie"},
+        {"type": "kill", "place": "side_sum_hawkspire_aerie", "placement": "near", "text": "Drive the harpies off the nest",
+         "spawn": [{"boss_id": "side_sum_shriekwing"}, {"type": "skycraft:harpy", "count": 3, "name": "Nest-Robbing Harpy"}],
+         "journal": "With the matriarch away hunting sheep, the harpies had been working up the courage to rob the second egg."},
+        {"type": "wait", "place": "side_sum_hawkspire_aerie", "hours": 1, "text": "Keep the egg warm in the nest until the matriarch returns",
+         "actions": "take:side_sum_gryphon_egg;scene:side_sum_matriarch_returns"},
+        {"type": "talk", "npc": "side_sum_oriel", "text": "Return to Oriel Featherwright in Firsthold",
+         "topic": "The egg's back in the nest. Merric's buyer was a Featherwright, in Alinor.",
+         "reply": "My brother. He kept asking which nest was best, and I told him just to make him stop asking. I'll be on the next boat to Alinor, and he'll be seeing the matriarch in his dreams for a year. Take the sword from the cairn. She showed it to you; that means she wants you to have it."}
+      ],
+      "outro": "I returned the stolen egg to the Hawkspire aerie and drove off the harpies circling it. The matriarch showed me an old gryphon-knight's cairn under her nest, and Oriel's brother has some explaining to do.",
+      "rewards": {"gold": 1000, "loot": "major", "unique": "sunbird_greatsword", "perks": 1}
+    },
+    {
+      "id": "side_sum_the_last_branch",
+      "title": "The Last Branch",
+      "region": "summerset/summerset_isle",
+      "start": "npc:side_sum_quarendil",
+      "requires": ["level:26"],
+      "offer": "Is that a family tree? It's taller than you are.",
+      "pitch": "Thirty-one generations, unbroken, back to the masons who laid the Crystal Tower's first course. Thirty-one, minus one. In the Second Era my ancestor Tirnaril is recorded only as 'gone to sea'. His bones are in our ossuary west of the city, and his ghost, I'm told, still talks. Ask him where he went. I need that branch closed.",
+      "desc": "Quarendil Venwe, a genealogist of Alinor obsessed with proving his unbroken descent from the Crystal Tower's founders, sent me to question his ancestor Tirnaril's ghost in the family ossuary.",
+      "objectives": [
+        {"type": "go", "place": "side_sum_venwe_ossuary", "text": "Go to the Venwe Ancestral Ossuary", "actions": "scene:side_sum_tirnaril_lies"},
+        {"type": "clear", "place": "side_sum_venwe_ossuary", "placement": "structure", "text": "Get past the ossuary's guardians",
+         "spawn": [{"type": "minecraft:skeleton", "count": 3, "name": "Venwe Ossuary-Guard"}]},
+        {"type": "retrieve", "place": "side_sum_venwe_ossuary", "placement": "structure", "relic": "side_sum_sea_letter", "text": "Search Tirnaril's niche",
+         "journal": "Tirnaril hadn't simply gone to sea. He had gone to a Maormer wife, and the son who came back to Alinor was hers. The letter asked that he be buried beside her on Auridon, at a cairn facing south."},
+        {"type": "go", "place": "side_sum_exiles_cairn", "text": "Find the exile's cairn on Auridon"},
+        {"type": "kill", "place": "side_sum_exiles_cairn", "placement": "near", "text": "Face Tirnaril's ghost at the cairn",
+         "spawn": [{"boss_id": "side_sum_tirnaril"}],
+         "journal": "Tirnaril's ghost had followed his secret across the strait, and he fought me to keep it. Beside his cairn was a second, smaller one with a serpent carved on it."},
+        {"type": "talk", "npc": "side_sum_quarendil", "text": "Bring Quarendil the answer in Alinor",
+         "topic": "Tirnaril married a Maormer. Your line runs through her.",
+         "reply": "Sea elves. In the Venwe line. Do you know what the College would... no. Is it true? It's true, isn't it.",
+         "choices": [
+           {"label": "It's true. The branch is closed. It just doesn't go where you wanted.", "reply": "Then I'll draw her in. In blue ink. Thirty-one generations, and the one that matters is the one I nearly let go.", "actions": "take:side_sum_sea_letter;flag:side_sum_branch_drawn"},
+           {"label": "Tirnaril drowned at sea. That's all.", "reply": "Drowned! Splendid. That is to say, how sad. Thank you. The branch is closed.", "actions": "take:side_sum_sea_letter;flag:side_sum_branch_forged"}
+         ]}
+      ],
+      "outro": "Quarendil Venwe's missing ancestor had married a Maormer woman and been buried in exile beside her on Auridon. Quarendil's family tree now ends one way or the other, because of what I told him.",
+      "rewards": {"gold": 650, "loot": "standard",
+                  "items": [{"item": "skycraft:maormer_dagger", "name": "Tirnaril's Sea-Knife", "enchant": {"sharpness": 3, "knockback": 1}}]}
+    },
+    {
+      "id": "side_sum_the_grave_with_no_body",
+      "title": "The Grave With No Body",
+      "region": "summerset/auridon",
+      "start": "find",
+      "find": {"place": "firsthold", "offset": [-110, -90], "clue": "grave",
+               "text": "A new headstone in a field where nobody is buried. Neliril Sunhallow, beloved daughter, taken by the sea. The date carved beneath it is next month. Fresh cart-tracks lead away inland."},
+      "requires": ["level:24"],
+      "desc": "Outside Firsthold I found a headstone for one Neliril Sunhallow, dated next month, with no grave dug beneath it.",
+      "objectives": [
+        {"type": "go", "place": "side_sum_thornpetal_cottage", "text": "Follow the cart-tracks to a shuttered cottage"},
+        {"type": "talk", "npc": "side_sum_neliril", "text": "Speak with the cottage's occupant",
+         "topic": "There's a headstone with your name on it, dated next month.",
+         "reply": "Then the mason's early. I owe the Debt-Wardens of Firsthold eight hundred gold, and they don't take no. A dead woman can't be collected from. Unless someone nosy leads them straight to her door. Which, I note, you may have just done."},
+        {"type": "clear", "place": "side_sum_thornpetal_cottage", "placement": "near", "text": "Fight off the Debt-Wardens who followed you",
+         "spawn": [{"type": "npc:thug", "count": 3, "name": "Debt-Warden", "hostile": true, "weapon": "skycraft:iron_mace"}]},
+        {"type": "kill", "place": "side_sum_debt_camp", "placement": "near", "text": "Confront the Debt-Wardens' marshal at their camp",
+         "spawn": [{"boss_id": "side_sum_aicantar"}, {"type": "npc:thug", "count": 1, "name": "Debt-Warden", "hostile": true}],
+         "journal": "Marshal Aicantar told me debts are sacred. His own ledger disagreed."},
+        {"type": "retrieve", "place": "side_sum_debt_camp", "offset": [3, -3], "relic": "side_sum_debt_ledger", "radius": 8, "text": "Take the Debt-Wardens' ledger",
+         "journal": "Neliril's debt had been paid twice over. The Debt-Wardens simply never stopped collecting."},
+        {"type": "talk", "npc": "side_sum_neliril", "text": "Bring the ledger to Neliril",
+         "topic": "Your debt was paid twice. Here's the proof.",
+         "reply": "Twice? I sold my mother's loom for the second payment. ... So I can stop being dead? I'd grown rather attached to my headstone.",
+         "choices": [
+           {"label": "Take back your name. Take the ledger to the magistrate.", "reply": "Neliril Sunhallow, alive and owed. I'll have the mason carve that instead.", "actions": "take:side_sum_debt_ledger;flag:side_sum_neliril_alive"},
+           {"label": "Stay dead if you like. The ledger can burn.", "reply": "Dead and debt-free. The best of both. Thank you, stranger. Forget my face.", "actions": "take:side_sum_debt_ledger;flag:side_sum_neliril_dead"}
+         ]}
+      ],
+      "outro": "Neliril Sunhallow had a headstone carved for herself to escape the Debt-Wardens of Firsthold, who had been collecting a debt she had already paid twice over. The marshal is dead, and Neliril chose which name to keep.",
+      "rewards": {"gold": 600, "loot": "standard",
+                  "items": [{"item": "skycraft:glass_dagger", "name": "Neliril's Last Favor", "enchant": {"sharpness": 3, "looting": 2}}]}
+    },
+    {
+      "id": "side_sum_the_coral_lantern",
+      "title": "The Coral Lantern",
+      "region": "summerset/summerset_isle",
+      "start": "npc:side_sum_eldaran",
+      "requires": ["level:42"],
+      "offer": "You build ships? Where do they go?",
+      "pitch": "Down, lately. Four of my hulls wrecked on Summerset's western strand this year, every one of them steering by the Coral Lantern. That light has guided ships for six hundred years, and now it guides them onto the rocks. The keeper won't answer letters, and the Admiralty says it is a matter for the Admiralty. It isn't, apparently, a matter for anyone.",
+      "desc": "Shipwright Eldaran Halvenor of Firsthold told me four of his ships have wrecked on Summerset's western strand while steering by the Coral Lantern, and its keeper has gone silent.",
+      "objectives": [
+        {"type": "go", "place": "side_sum_wreckers_strand", "text": "Walk the Wrecker's Strand below the lighthouse", "actions": "scene:side_sum_strand"},
+        {"type": "clear", "place": "side_sum_wreckers_strand", "placement": "near", "text": "Fight off what's picking over the wrecks",
+         "spawn": [{"type": "minecraft:drowned", "count": 4, "name": "Drowned Sailor"}, {"type": "skycraft:land_dreugh", "count": 2, "name": "Wreck-Picking Dreugh"}]},
+        {"type": "retrieve", "place": "side_sum_wreckers_strand", "offset": [-5, 4], "relic": "side_sum_coral_lens", "radius": 8, "text": "Search the newest wreck",
+         "journal": "A shard of the lighthouse's lens had come down with the last wreck. It pulsed in my hand. Coral doesn't do that, and neither do Altmer lighthouses."},
+        {"type": "go", "place": "side_sum_coral_lantern", "text": "Climb to the Coral Lantern", "actions": "scene:side_sum_keeper_speaks"},
+        {"type": "clear", "place": "side_sum_coral_lantern", "placement": "structure", "text": "Fight through the keeper's thralls",
+         "spawn": [{"type": "minecraft:drowned", "count": 3, "name": "Coral-Bound Thrall"}, {"type": "minecraft:skeleton", "count": 2, "name": "Salt-Bleached Sailor"}]},
+        {"type": "kill", "place": "side_sum_coral_lantern", "placement": "structure", "text": "Destroy Keeper Orvandil Saltglass",
+         "spawn": [{"boss_id": "side_sum_orvandil"}],
+         "journal": "Orvandil was proud of the arithmetic: so many crews, so many oars, so many years until the fleet under the sea was ready. He had never once looked at the faces."},
+        {"type": "talk", "npc": "side_sum_eldaran", "text": "Report to Shipwright Eldaran in Firsthold",
+         "topic": "A Sload grew a coral lens for the keeper. It drowned your crews on purpose.",
+         "reply": "A Sload. On Summerset. Every captain I ever trained trusted that light. What do we do with this shard?",
+         "choices": [
+           {"label": "Smash it, and every piece of that lens.", "reply": "I'll send my strongest apprentices with hammers, and a new glass lens behind them.", "actions": "take:side_sum_coral_lens;flag:side_sum_lens_smashed"},
+           {"label": "Send it to the Sapiarchs. Someone should learn what the Sload are planning.", "reply": "Then let the scholars lose sleep over it. I've lost enough.", "actions": "take:side_sum_coral_lens;flag:side_sum_lens_studied"}
+         ]}
+      ],
+      "outro": "The Coral Lantern was luring ships onto the rocks with a Sload-grown lens, and its keeper Orvandil was gathering drowned crews for a fleet under the sea. The light on the western headland is dark for now.",
+      "rewards": {"gold": 1400, "loot": "legendary", "perks": 1,
+                  "items": [{"item": "skycraft:glass_greatsword", "name": "Lantern-Breaker", "enchant": {"smite": 4, "sharpness": 2}}]}
+    },
+    {
+      "id": "side_sum_the_grey_indrik",
+      "title": "The Grey Indrik",
+      "region": "summerset/artaeum",
+      "start": "npc:side_sum_faelwe",
+      "requires": ["level:36"],
+      "offer": "That indrik looks like it's been rained on for a century.",
+      "pitch": "That's Dusk. He's two hundred years old, and he's never looked like that. His feathers are coming out grey. Indriks wear their health on their backs. Something on the cliffs is feeding him wrong, and I'm a groundskeeper, not a hero. Bring me what he's been eating.",
+      "desc": "Faelwe, a groundskeeper on Artaeum, asked me to find out why the old indrik Dusk is losing his feathers, and what he has been eating on the cliffs.",
+      "objectives": [
+        {"type": "go", "place": "side_sum_greyfeather_grove", "text": "Search the cliff grove where Dusk grazes", "actions": "scene:side_sum_grey_grove"},
+        {"type": "retrieve", "place": "side_sum_greyfeather_grove", "offset": [3, 4], "relic": "side_sum_grey_berries", "radius": 8,
+         "text": "Pick the grey berries from the grafted bushes",
+         "spawn": [{"type": "skycraft:will_o_wisp", "count": 3, "name": "Pale Wisp"}]},
+        {"type": "deliver", "npc": "side_sum_faelwe", "relic": "side_sum_grey_berries", "text": "Bring the berries to Faelwe",
+         "topic": "Someone grafted these bushes. They taste of brimstone.",
+         "reply": "Grafted. On Artaeum. The Order keeps a bound dremora in the sealed undercroft for 'study'. Last month he asked for books on gardening. Nobody thought anything of it, because nobody ever thinks anything of gardening."},
+        {"type": "go", "place": "side_sum_sealed_undercroft", "text": "Go to the Sealed Undercroft on the Mistward cliffs"},
+        {"type": "clear", "place": "side_sum_sealed_undercroft", "placement": "structure", "text": "Deal with the undercroft's escaped prisoner and his scamps",
+         "spawn": [{"type": "skycraft:dremora", "count": 1, "name": "Vashkyn the Gardener"}, {"type": "skycraft:scamp", "count": 3, "name": "Potting Scamp"}],
+         "journal": "Vashkyn wanted a mount worthy of a Daedra, so he set about growing one on Artaeum's own berries, one graft at a time."},
+        {"type": "kill", "place": "side_sum_sealed_undercroft", "placement": "structure", "text": "Put down Cinderhoof, the Grafted Indrik",
+         "spawn": [{"boss_id": "side_sum_cinderhoof"}],
+         "journal": "Cinderhoof had been one of Dusk's herd. Its feathers had burned down to embers, and it did not know me from its gardener."},
+        {"type": "talk", "npc": "side_sum_faelwe", "text": "Tell Faelwe the undercroft is quiet",
+         "topic": "Vashkyn is gone, and so is what he grew. What about the grafted bushes?",
+         "reply": "Dusk ate a plain berry this morning and kept it down. A few blue feathers already. What should I do with the grafts?",
+         "choices": [
+           {"label": "Burn them, root and graft.", "reply": "I'll burn them myself and salt the ash. The Order can study the smell.", "actions": "flag:side_sum_grafts_burned"},
+           {"label": "Keep one, under lock, so the Order learns what he did.", "reply": "One bush, in a cage, with a sign. I'll make the sign very large.", "actions": "flag:side_sum_graft_kept"}
+         ]}
+      ],
+      "outro": "A bound dremora in Artaeum's undercroft had been grafting brimstone into the indriks' berries to grow himself a burning mount. Dusk is going blue again, slowly.",
+      "rewards": {"gold": 1100, "loot": "major",
+                  "items": [{"item": "skycraft:elven_gilded_helmet", "name": "Indrik-Feather Crown", "enchant": {"protection": 3, "respiration": 2}}]}
+    }
+  ]
+}

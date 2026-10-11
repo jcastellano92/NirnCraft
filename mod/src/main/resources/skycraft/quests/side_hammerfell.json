@@ -1,0 +1,607 @@
+{
+  "line": "side_hammerfell",
+  "category": "side",
+  "region": "hammerfell/alikr_desert",
+  "speakers": {
+    "side_hf_sahrazad_voice": "Shade of Sahrazad",
+    "side_hf_khalid_voice": "Khalid of the Nine Cuts",
+    "side_hf_bahzir_voice": "Bahzir the Gravewright",
+    "side_hf_ushara_voice": "Ushara the Tide-Pale",
+    "side_hf_devilrock_voice": "A Witch of Devilrock",
+    "side_hf_rasheen_voice": "Captain Rasheen",
+    "side_hf_shard_voice": "A Voice in the Shard"
+  },
+  "npcs": [
+    {"id": "side_hf_jazira", "name": "Jazira at-Kherun", "role": "citizen", "place": "sentinel", "offset": [14, -10], "female": true,
+     "greet": "The at-Kherun had a ship once, and a hall, and a sword-singer at every wedding. Now we have a name and a roof that leaks."},
+    {"id": "side_hf_turaz", "name": "Ansei Turaz al-Hadi", "role": "adventurer", "place": "sentinel", "offset": [-16, 8],
+     "greet": "My hands shake when I lift a cup. They never shake when I lift a sword. Forty years of practice buys you that much."},
+    {"id": "side_hf_nahrin", "name": "Lady Nahrin at-Selem", "role": "steward", "place": "sentinel", "offset": [6, 18], "female": true,
+     "greet": "Forgive me if I seem distracted. A mother counts the hours her son is away, and lately there are a great many."},
+    {"id": "side_hf_fahim", "name": "Fahim at-Selem", "role": "citizen", "place": "sentinel", "offset": [10, 22],
+     "greet": "The sun is too loud today. Do you ever feel that? As if it were shouting at you."},
+    {"id": "side_hf_qadira", "name": "Qadira, Keeper of the Last Rites", "role": "priest", "place": "skaven", "offset": [8, -6], "female": true,
+     "greet": "Tu'whacca guides the dead to the Far Shores. My work is only to make sure they are buried facing the right way."},
+    {"id": "side_hf_bashir", "name": "Bashir the Long-Eyed", "role": "hunter", "place": "skaven", "offset": [-12, 10],
+     "greet": "I can see a scorpion's tail over a dune at half a league. Close up I need spectacles, but don't tell anyone."},
+    {"id": "side_hf_maradh", "name": "Maradh at-Senna", "role": "citizen", "place": "rihad", "offset": [-8, 6], "female": true,
+     "greet": "The at-Senna kept the old songs when the Bel-Tavir were still learning to count Imperial coin. Remember that, whatever they tell you."},
+    {"id": "side_hf_imran", "name": "Imran Bel-Tavir", "role": "merchant", "place": "rihad", "offset": [10, -4],
+     "greet": "Dates, figs, and a grudge older than either. Only the first two are for sale."},
+    {"id": "side_hf_nisha", "name": "Grandmother Nisha", "role": "apothecary", "place": "rihad", "offset": [-14, -10], "female": true,
+     "greet": "Salves for burns, teas for the cough, and something for whatever else ails you. Ask nicely about the something."},
+    {"id": "side_hf_ghesh", "name": "Mother Ghesh", "role": "apothecary", "place": "side_hf_mother_stone", "offset": [3, 2], "female": true,
+     "greet": "Few climb this high without a reason or a knife. Let me guess which one you brought."},
+    {"id": "side_hf_neyra", "name": "Neyra Sail-Mender", "role": "fisher", "place": "stros_mkai", "offset": [-6, 8], "female": true,
+     "greet": "Mind the nets. And if you're headed out past the point, mind the boats with no colours on them."},
+    {"id": "side_hf_hamid", "name": "Harbourmaster Hamid Seaward", "role": "steward", "place": "stros_mkai", "offset": [6, 4],
+     "greet": "Every hull that enters this harbour passes through my ledger. Every hull. I am very proud of my ledger."},
+    {"id": "side_hf_jafar", "name": "Jafar Netmaker", "role": "fisher", "place": "side_hf_gullwhistle_cove", "offset": [4, -3],
+     "greet": "You're not one of them. Gods, you're not one of them. Is Neyra all right?"},
+    {"id": "side_hf_ilvane", "name": "Ilvane Courtic", "role": "scholar", "place": "elinhir", "offset": [8, -6], "female": true,
+     "greet": "Dwemer tonal architecture, if you must know. No, it doesn't sing. Not unless you ask it in exactly the right key."},
+    {"id": "side_hf_eriq", "name": "Eriq Dannel", "role": "scholar", "place": "side_hf_mzindhal", "offset": [5, 4],
+     "greet": "Water. Then light. Then you can tell me how long I've been in here."},
+    {"id": "side_hf_bahrun", "name": "Bahrun the Star-Reader", "role": "hunter", "place": "elinhir", "offset": [-10, 12],
+     "greet": "My grandmother's grandmother read the sky over Craglorn before Elinhir had walls. Lately the sky has been writing back."},
+    {"id": "side_hf_veshra", "name": "Commander Veshra at-Hadan", "role": "housecarl", "place": "elinhir", "offset": [16, 10], "female": true,
+     "greet": "The Bangkorai passes are my charge. If you've come about a post, I need sentries who can stay awake."},
+    {"id": "side_hf_huzayra", "name": "Huzayra Quickpurse", "role": "thief", "place": "taneth", "offset": [10, 6], "female": true,
+     "greet": "Lovely boots. Very quiet. I always notice boots."},
+    {"id": "side_hf_salima", "name": "Salima of the Nets", "role": "fisher", "place": "taneth", "offset": [-12, 8], "female": true,
+     "greet": "Have you seen a boy, nine years old, missing a front tooth? No. No, of course you haven't."},
+    {"id": "side_hf_tariq", "name": "Tariq", "role": "child", "place": "side_hf_brine_hollow", "offset": [3, 3],
+     "greet": "I didn't cry. The little ones cried. I told them stories so they'd stop."}
+  ],
+  "relics": [
+    {"id": "side_hf_wager_slip", "name": "Khalid's Folded Wager-Slip", "desc": "A Sentinel bookmaker's receipt forty years old, naming a duel and the man paid to lose it.", "icon": 11},
+    {"id": "side_hf_ledger_of_names", "name": "Bahzir's Ledger of Names", "desc": "Page after page of names in a careful hand, each one dragged out of a dead mouth.", "icon": 7},
+    {"id": "side_hf_venom_sac", "name": "Saltback's Venom Sac", "desc": "Heavy, warm, and faintly sloshing. Bashir says not to squeeze it.", "icon": 15},
+    {"id": "side_hf_feed_tag", "name": "Brass Feed-Tag", "desc": "A tag from a crate of goat meat, stamped with the sign of a Skaven apothecary.", "icon": 23},
+    {"id": "side_hf_double_purse", "name": "Dabir's Double Purse", "desc": "Two purses knotted together. One is stitched with the at-Senna crescent, the other with the Bel-Tavir scales.", "icon": 23},
+    {"id": "side_hf_thorn_knife", "name": "Devilrock Thorn-Knife", "desc": "A black thorn as long as a hand, bound in red thread. It is warm in a way wood should not be.", "icon": 12},
+    {"id": "side_hf_tide_ledger", "name": "Ishraq's Tide-Ledger", "desc": "Sailing dates of merchant ships, copied from a harbour register in a neat clerk's hand.", "icon": 7},
+    {"id": "side_hf_tonal_cylinder", "name": "Tonal Key-Cylinder", "desc": "A brass cylinder ringed with grooves. It hums a low note when held near Dwemer metal.", "icon": 17},
+    {"id": "side_hf_gilt_forgery", "name": "Gilt Scimitar (Forgery)", "desc": "A fine copy of an old Hew's Bane scimitar. Fine enough to fool anyone who has never held the real one.", "icon": 21},
+    {"id": "side_hf_thornwatch_dispatch", "name": "Sealed Dispatch of Thornwatch", "desc": "A request for relief, sealed in wax that never cracked. The ink has faded to the colour of rust.", "icon": 11},
+    {"id": "side_hf_star_shard", "name": "Shard of the Fallen Star", "desc": "A splinter of black glass flecked with points of light that do not match any sky you know.", "icon": 19}
+  ],
+  "places": {
+    "side_hf_tomb_of_sahrazad": {"x": -9008, "z": 6032, "r": 36, "name": "Tomb of Sahrazad"},
+    "side_hf_salt_terrace": {"x": -7856, "z": 4880, "r": 30, "name": "The Salt Terrace"},
+    "side_hf_caravan_graves": {"x": -6704, "z": 5840, "r": 30, "name": "Caravan Graves of Skaven"},
+    "side_hf_faugtas_guard": {"x": -7088, "z": 6032, "r": 36, "name": "Faugta's Guard"},
+    "side_hf_singing_dunes": {"x": -6896, "z": 4688, "r": 40, "name": "The Singing Dunes"},
+    "side_hf_web_of_anker": {"x": -6128, "z": 5072, "r": 36, "name": "The Web of Anker"},
+    "side_hf_well_of_two_names": {"x": -5168, "z": 6992, "r": 30, "name": "Well of Two Names"},
+    "side_hf_drowned_court": {"x": -9392, "z": 5456, "r": 36, "name": "The Drowned Court"},
+    "side_hf_devilrock": {"x": -4976, "z": 6800, "r": 36, "name": "Devilrock"},
+    "side_hf_mother_stone": {"x": -4400, "z": 5840, "r": 30, "name": "The Mother-Stone"},
+    "side_hf_gullwhistle_cove": {"x": -10544, "z": 6992, "r": 30, "name": "Gullwhistle Cove"},
+    "side_hf_mzindhal": {"x": -4016, "z": 2576, "r": 40, "name": "Mzindhal"},
+    "side_hf_starfall_hollow": {"x": -4016, "z": 4496, "r": 36, "name": "Starfall Hollow"},
+    "side_hf_bangkorai_waystone": {"x": -5168, "z": 3920, "r": 20, "name": "Bangkorai Waystone"},
+    "side_hf_thornwatch": {"x": -5552, "z": 4496, "r": 36, "name": "Thornwatch Garrison"},
+    "side_hf_lantern_cistern": {"x": -7472, "z": 7376, "r": 30, "name": "The Lantern Cistern"},
+    "side_hf_drowned_slipway": {"x": -6128, "z": 7568, "r": 24, "name": "The Drowned Slipway"},
+    "side_hf_brine_hollow": {"x": -5552, "z": 8336, "r": 34, "name": "Brine Hollow"}
+  },
+  "bosses": {
+    "side_hf_shade_of_sahrazad": {"name": "Sahrazad, Who Came Ashore", "type": "minecraft:husk", "hp": 3.5, "dmg": 1.4, "level": 20,
+      "weapon": "skycraft:yokudan_sword",
+      "gear": {"head": "skycraft:ra_gada_helmet", "chest": "skycraft:ra_gada_chestplate", "legs": "skycraft:ra_gada_leggings", "feet": "skycraft:ra_gada_boots"},
+      "drop": "loot:major", "glow": true},
+    "side_hf_khalid": {"name": "Khalid of the Nine Cuts", "type": "npc:adventurer", "hostile": true, "hp": 4.5, "dmg": 1.7, "level": 36,
+      "weapon": "skycraft:yokudan_sword",
+      "gear": {"head": "skycraft:ra_gada_helmet", "chest": "skycraft:ra_gada_chestplate", "feet": "skycraft:ra_gada_boots"},
+      "drop": "loot:major", "glow": false},
+    "side_hf_bahzir": {"name": "Bahzir the Gravewright", "type": "skycraft:necromancer", "hp": 4.0, "dmg": 1.5, "level": 30,
+      "weapon": "skycraft:redguard_dagger",
+      "drop": "loot:major,skycraft:staff_of_frostbite", "glow": false},
+    "side_hf_anker": {"name": "Anker, Mother of Stings", "type": "skycraft:giant_scorpion", "hp": 4.5, "dmg": 1.5, "level": 22,
+      "drop": "loot:standard", "glow": false},
+    "side_hf_dabir": {"name": "Dabir Cinderhand", "type": "skycraft:bandit_chief", "hp": 3.5, "dmg": 1.5, "level": 26,
+      "weapon": "skycraft:redguard_war_axe",
+      "gear": {"head": "skycraft:studded_helmet", "chest": "skycraft:studded_chestplate"},
+      "drop": "loot:standard", "glow": false},
+    "side_hf_ushara": {"name": "Ushara the Tide-Pale", "type": "skycraft:vampire_lord", "hp": 5.0, "dmg": 1.7, "level": 34,
+      "drop": "loot:major", "glow": true},
+    "side_hf_kharza": {"name": "Kharza the Stone-Wife", "type": "skycraft:hagraven", "hp": 5.0, "dmg": 1.6, "level": 36,
+      "drop": "loot:major", "glow": false},
+    "side_hf_ylsa": {"name": "Ylsa Thornmouth", "type": "skycraft:hagraven", "hp": 5.0, "dmg": 1.6, "level": 36,
+      "drop": "loot:major", "glow": false},
+    "side_hf_ishraq": {"name": "Captain Ishraq Two-Flags", "type": "skycraft:bandit_chief", "hp": 4.0, "dmg": 1.6, "level": 30,
+      "weapon": "skycraft:redguard_sword",
+      "gear": {"head": "skycraft:leather_helmet", "chest": "skycraft:studded_chestplate"},
+      "drop": "loot:major", "glow": false},
+    "side_hf_warden_mzindhal": {"name": "The Warden of Mzindhal", "type": "skycraft:dwarven_centurion", "hp": 5.5, "dmg": 1.8, "level": 42,
+      "drop": "loot:legendary", "glow": false},
+    "side_hf_sarrah": {"name": "Sarrah Two-Knives", "type": "npc:assassin", "hostile": true, "hp": 3.5, "dmg": 1.6, "level": 28,
+      "weapon": "skycraft:redguard_dagger",
+      "drop": "loot:standard", "glow": false},
+    "side_hf_rasheen": {"name": "Captain Rasheen the Unrelieved", "type": "minecraft:wither_skeleton", "hp": 3.5, "dmg": 1.4, "level": 24,
+      "weapon": "skycraft:redguard_sword",
+      "gear": {"head": "skycraft:ra_gada_helmet"},
+      "drop": "loot:standard", "glow": true},
+    "side_hf_sabir": {"name": "Sabir the Ferryman", "type": "skycraft:bandit_chief", "hp": 3.5, "dmg": 1.5, "level": 26,
+      "weapon": "skycraft:redguard_mace",
+      "drop": "loot:standard", "glow": false},
+    "side_hf_vharzul": {"name": "Vharzul, the Fallen Light", "type": "skycraft:storm_atronach", "hp": 6.0, "dmg": 1.9, "level": 45,
+      "drop": "loot:legendary", "glow": true}
+  },
+  "scenes": {
+    "side_hf_sahrazad_wakes": [
+      ["narrator", "The lamps in the burial hall have been cold for four hundred years. One of them lights itself."],
+      ["side_hf_sahrazad_voice", "A living hand, reaching for a dead woman's sword. My blood sends a stranger to do what it lacks the spine for."],
+      ["side_hf_sahrazad_voice", "Very well. In Yokuda the blade chose its bearer. Show me your hands are worth the choosing."]
+    ],
+    "side_hf_sahrazad_judges": [
+      ["narrator", "The shade lowers her blade. Sand trickles from the joints of her armour like an hourglass running out."],
+      ["side_hf_sahrazad_voice", "You fight like someone who has buried friends. Good. My granddaughter's granddaughter sold my funeral gold to a Forebear dealer and sent you for the rest."],
+      ["side_hf_sahrazad_voice", "The sword goes with you, not with her. What you tell her is your own affair. Walk well."]
+    ],
+    "side_hf_salt_terrace_duel": [
+      ["narrator", "Twelve old blades are driven into the salt crust in a ring. A man in faded Ra Gada leathers waits inside it, eyes closed."],
+      ["side_hf_khalid_voice", "Turaz sends a champion. Of course he does. Draw, stranger, and let us see whether his school still teaches anything."]
+    ],
+    "side_hf_khalid_confesses": [
+      ["side_hf_khalid_voice", "Enough. I yield. Forty years I waited for this and I find I'm too tired to die properly."],
+      ["side_hf_khalid_voice", "Ask Turaz why he lost to me the first time. A bookmaker paid him to. I won a duel I never fought, and I have carried the shame of it since."],
+      ["narrator", "He presses a folded slip of paper into your hand. The ink is old, but the name on it is clear."]
+    ],
+    "side_hf_faugta_sermon": [
+      ["narrator", "Bodies in caravan shrouds stand in rows like an audience. At the far end a gaunt man reads to them from a ledger."],
+      ["side_hf_bahzir_voice", "Tell me who held the knife. Tell me, and I'll let you lie down again. That's all I ever ask of them."]
+    ],
+    "side_hf_bahzir_falls": [
+      ["side_hf_bahzir_voice", "My father was in the ninth wagon. Nobody hanged for it. Nobody even asked. So I asked him myself."],
+      ["narrator", "The risen dead fold to the ground as one, like puppets with the strings cut."]
+    ],
+    "side_hf_drowned_court": [
+      ["narrator", "Steps lead down into a palace the sea took long ago. Lamps of whale oil burn on the flooded stair, and dancers move in the half-dark."],
+      ["side_hf_ushara_voice", "A guest who was not invited. The Selenu have held court beneath Sentinel since before its walls. We do not care for intrusions."],
+      ["side_hf_ushara_voice", "The boy came to us willingly, as his mother did once. Ask her about the price she never finished paying."]
+    ],
+    "side_hf_devilrock_coven": [
+      ["narrator", "Red thread is knotted to every thorn bush on the rock. Three women in grey sit around a spring that smells of rot."],
+      ["side_hf_devilrock_voice", "The Mountain Witches set their Mother-Stone above our spring and turned it sour. Cut the stone with this thorn, and Devilrock will remember you kindly."]
+    ],
+    "side_hf_mother_stone": [
+      ["narrator", "A standing stone wrapped in goat-hair rope leans over a dry gully. An old woman sits at its foot, carding wool."],
+      ["narrator", "Below her, in the gully, the Devilrock spring has cut a new channel straight through the Mountain Witches' graves."]
+    ],
+    "side_hf_gullwhistle_cove": [
+      ["narrator", "Two longboats are drawn up on the shingle. The flag on the nearer one is a Forebear trading house's. The flag on the other is a Crown lord's. Neither is honest."]
+    ],
+    "side_hf_mzindhal_core": [
+      ["narrator", "Behind the Warden's chamber a cage of brass rods hums in a single, unbroken note. A man is curled up inside it, very thin and very much alive."]
+    ],
+    "side_hf_cistern_find": [
+      ["narrator", "The display case holds a gilded scimitar. Behind it, wrapped in oilcloth in a hollow of the wall, lies a second, plainer blade that rings like a bell when you touch it."],
+      ["narrator", "Tucked into the oilcloth is a note in Huzayra's hand: 'Leave the gilt one in the case. The fool will take it and the watch will take the fool.'"]
+    ],
+    "side_hf_thornwatch_dusk": [
+      ["narrator", "As the sun goes down, the empty walls of Thornwatch fill with figures in rusted half-helms. They take their posts without a word."],
+      ["side_hf_rasheen_voice", "Relief? Is that relief? No. Another one come to tell us the passes are quiet. Get off my wall."]
+    ],
+    "side_hf_brine_hollow": [
+      ["narrator", "Rope pens stand under a fold of the cliff. Small faces look up from inside them. One of them is missing a front tooth."]
+    ],
+    "side_hf_starfall": [
+      ["narrator", "The hollow is glassed over, black and smooth, as if a giant had poured out a cauldron of night. At its centre something glitters."],
+      ["side_hf_shard_voice", "Little warm thing. Carry me somewhere high and I will show you how the sky is made."]
+    ]
+  },
+  "quests": [
+    {
+      "id": "side_hf_the_ancestors_judgement",
+      "title": "The Judgement of Sahrazad",
+      "region": "hammerfell/alikr_desert",
+      "start": "npc:side_hf_jazira",
+      "requires": ["level:18"],
+      "offer": "You said your family had a sword-singer at every wedding. What happened?",
+      "pitch": "We ran out of weddings and money in that order. Out in the Alik'r lies the tomb of Sahrazad, our foremother, who came ashore with the Ra Gada. Her sword was buried with her. Bring it to me and the at-Kherun will have something to show the Crowns besides debts.",
+      "desc": "Jazira at-Kherun of Sentinel asked me to bring her the sword of her ancestor Sahrazad, a Ra Gada warrior buried in a tomb in the Alik'r Desert.",
+      "objectives": [
+        {"type": "go", "place": "side_hf_tomb_of_sahrazad", "text": "Find the Tomb of Sahrazad in the desert south-west of Sentinel"},
+        {"type": "clear", "place": "side_hf_tomb_of_sahrazad", "placement": "structure", "text": "Put down the oathbound guardians of the tomb",
+         "spawn": [{"type": "minecraft:husk", "count": 4, "name": "Oathbound of Sahrazad"}],
+         "journal": "Someone had been here before me. The burial niches were pried open and the gold was gone, but the guardians were still keeping their oath."},
+        {"type": "cond", "cond": "night", "place": "side_hf_tomb_of_sahrazad", "text": "Wait in the burial hall until nightfall",
+         "actions": "scene:side_hf_sahrazad_wakes"},
+        {"type": "kill", "place": "side_hf_tomb_of_sahrazad", "placement": "structure", "text": "Prove yourself against the shade of Sahrazad",
+         "spawn": [{"boss_id": "side_hf_shade_of_sahrazad"}],
+         "actions": "scene:side_hf_sahrazad_judges",
+         "journal": "The shade of Sahrazad judged me with her sword and then with her tongue. She said Jazira had already sold the tomb's gold, and that the blade was mine, not hers."},
+        {"type": "talk", "npc": "side_hf_jazira", "text": "Return to Jazira in Sentinel",
+         "topic": "I've been to Sahrazad's tomb.",
+         "reply": "And? You're holding something under that cloak. Is it her sword? Let me see it.",
+         "choices": [
+           {"label": "Sahrazad spoke to me. She knows you sold her funeral gold, and she gave the sword to me.", "reply": "She... spoke? No. No, that's a story. Fine. Keep the cursed thing. I'll explain to the Crowns that my ancestor prefers strangers.", "actions": "flag:side_hf_told_jazira"},
+           {"label": "The tomb was robbed. The sword's gone with the gold.", "reply": "Robbed. Of course it was. Well, I suppose the robbers did me the courtesy of not bringing it to my door. Here, for your trouble.", "actions": "flag:side_hf_lied_jazira;give:minecraft:emerald*3"}
+         ]}
+      ],
+      "outro": "Sahrazad of the Ra Gada weighed me in her tomb and found me worth her sword. Whatever Jazira believes, the blade that came ashore with the first ships hangs at my side now.",
+      "rewards": {"gold": 500, "loot": "standard", "unique": "sword_of_the_ansei"}
+    },
+    {
+      "id": "side_hf_the_salt_terrace",
+      "title": "A Duel on the Salt Terrace",
+      "region": "hammerfell/alikr_desert",
+      "start": "npc:side_hf_turaz",
+      "requires": ["level:34"],
+      "offer": "Forty years of practice. Do you still teach?",
+      "pitch": "I teach. I do not duel, not any more. Khalid of the Nine Cuts beat me forty years ago and took my student's sword as forfeit, and now he has challenged my school again because he knows my hands shake. The old law lets me name a champion. Stand for me on the Salt Terrace.",
+      "desc": "Ansei Turaz al-Hadi, an old sword-singer of Sentinel, asked me to be his champion in a duel of honour against Khalid of the Nine Cuts on the Salt Terrace east of the city.",
+      "objectives": [
+        {"type": "cond", "cond": "day", "place": "side_hf_salt_terrace", "text": "Go to the Salt Terrace by daylight, as the duel law demands",
+         "actions": "scene:side_hf_salt_terrace_duel"},
+        {"type": "kill", "place": "side_hf_salt_terrace", "placement": "near", "text": "Defeat Khalid of the Nine Cuts in the ring of blades",
+         "spawn": [{"boss_id": "side_hf_khalid"}],
+         "actions": "scene:side_hf_khalid_confesses;relic:side_hf_wager_slip",
+         "journal": "Khalid yielded with my blade at his throat. Then he told me Turaz had been paid to lose their first duel, and gave me a bookmaker's slip to prove it."},
+        {"type": "talk", "npc": "side_hf_turaz", "text": "Confront Ansei Turaz with the wager-slip",
+         "topic": "Khalid yielded. He also gave me this. It has your name on it.",
+         "reply": "Ah. I wondered if he had kept it. I was young, my mother was sick, and a fat man in the market offered more than a year's teaching for one bad afternoon. I have been paying it back in shame ever since.",
+         "choices": [
+           {"label": "Then pay the rest. Go to Khalid and tell him yourself.", "reply": "Yes. Forty years late, but yes. Take the blade of my school. I am not fit to keep it until I've done this.", "actions": "flag:side_hf_turaz_atoned;take:side_hf_wager_slip"},
+           {"label": "This stays between us. Burn the slip.", "reply": "You are kinder than I deserve. Kinder than Khalid would like, too. Take the blade of my school, and do not let it learn my habits.", "actions": "flag:side_hf_turaz_secret;take:side_hf_wager_slip"}
+         ]}
+      ],
+      "outro": "I won Turaz's duel and learned why he lost his own. The school's old shehai blade is mine now, given by a man who finally knows what it cost him.",
+      "rewards": {"gold": 1000, "loot": "major", "unique": "shehai_blade", "perks": 1}
+    },
+    {
+      "id": "side_hf_sand_in_the_shroud",
+      "title": "Sand in the Shroud",
+      "region": "hammerfell/alikr_desert",
+      "start": "find",
+      "find": {"place": "side_hf_caravan_graves", "offset": [12, -8], "clue": "grave",
+               "text": "The grave has been opened, but not by a robber: the dirt was thrown outwards, from below. The shroud lies empty beside it, still tied at the feet."},
+      "requires": ["level:28"],
+      "desc": "I found an opened grave among the caravan burials outside Skaven. Whatever left it walked out on its own.",
+      "objectives": [
+        {"type": "talk", "npc": "side_hf_qadira", "text": "Tell Qadira, the keeper of the last rites in Skaven",
+         "topic": "One of the caravan graves outside town is empty. It was opened from the inside.",
+         "reply": "Then someone is doing the vilest thing a Redguard can do to another. Tu'whacca forgive them, because I will not. Shepherds saw lamps at Faugta's Guard, the old shrine to the south-west. Go."},
+        {"type": "go", "place": "side_hf_faugtas_guard", "text": "Go to Faugta's Guard", "actions": "scene:side_hf_faugta_sermon"},
+        {"type": "clear", "place": "side_hf_faugtas_guard", "placement": "structure", "text": "Lay the risen caravaneers back down",
+         "spawn": [{"type": "minecraft:husk", "count": 5, "name": "Risen Caravaneer"}, {"type": "minecraft:skeleton", "count": 2, "name": "Shrouded Bones"}]},
+        {"type": "kill", "place": "side_hf_faugtas_guard", "placement": "structure", "text": "Kill Bahzir the Gravewright",
+         "spawn": [{"boss_id": "side_hf_bahzir"}],
+         "actions": "scene:side_hf_bahzir_falls",
+         "journal": "Bahzir had been raising the dead of the Ninth Caravan massacre one by one, trying to make them name their killers. His own father was among them."},
+        {"type": "retrieve", "place": "side_hf_faugtas_guard", "placement": "structure", "relic": "side_hf_ledger_of_names", "radius": 10,
+         "text": "Take Bahzir's ledger"},
+        {"type": "talk", "npc": "side_hf_qadira", "text": "Bring word to Qadira in Skaven",
+         "topic": "Bahzir is dead. He kept a ledger of what the dead told him.",
+         "reply": "Names wrung out of the dead. And some of them, I'd wager, belong to men still drinking in this town. What do you want done with it?",
+         "choices": [
+           {"label": "Burn it. Nothing good comes of words like these.", "reply": "Then the dead keep their secrets, as they should. I'll say the rites over the ashes.", "actions": "flag:side_hf_ledger_burned;take:side_hf_ledger_of_names"},
+           {"label": "Give it to the town watch. The killers should hang.", "reply": "Justice bought with necromancy. I don't like it, but I like murderers walking free even less. The watch will have it by nightfall.", "actions": "flag:side_hf_ledger_given;take:side_hf_ledger_of_names;loot:standard"}
+         ]}
+      ],
+      "outro": "Bahzir the Gravewright is dead and the caravan's dead lie still again. His ledger answered the question nobody in Skaven wanted to ask.",
+      "rewards": {"gold": 800, "loot": "major",
+                  "items": [{"item": "skycraft:silver_mace", "name": "Tu'whacca's Rest", "enchant": {"smite": 3, "unbreaking": 2}}]}
+    },
+    {
+      "id": "side_hf_the_web_of_anker",
+      "title": "The Web of Anker",
+      "region": "hammerfell/alikr_desert",
+      "start": "npc:side_hf_bashir",
+      "requires": ["level:20"],
+      "offer": "Seen anything worth hunting out there?",
+      "pitch": "Worth hunting? Two things. A sand serpent the drovers call Old Saltback has been swallowing goats whole in the Singing Dunes north of here. And scorpions as long as a cart have nested in the Web of Anker to the north-east. They're breeding faster than anything should. Help me with both and I'll split the bounty.",
+      "desc": "Bashir the Long-Eyed, a hunter of Skaven, wants help killing a sand serpent in the Singing Dunes and clearing a nest of giant scorpions at the Web of Anker.",
+      "objectives": [
+        {"type": "go", "place": "side_hf_singing_dunes", "text": "Track Old Saltback into the Singing Dunes"},
+        {"type": "kill", "place": "side_hf_singing_dunes", "placement": "near", "text": "Kill the sand serpent Old Saltback",
+         "spawn": [{"type": "skycraft:sand_serpent", "name": "Old Saltback", "target": true, "hp": 2.5, "dmg": 1.3}],
+         "actions": "relic:side_hf_venom_sac",
+         "journal": "Old Saltback came up out of the sand right under my feet. I cut the venom sac out of it, as Bashir asked."},
+        {"type": "go", "place": "side_hf_web_of_anker", "text": "Go to the scorpion nest at the Web of Anker"},
+        {"type": "clear", "place": "side_hf_web_of_anker", "placement": "structure", "text": "Clear the young scorpions from the nest",
+         "spawn": [{"type": "skycraft:giant_scorpion", "count": 4, "name": "Anker Brood"}]},
+        {"type": "kill", "place": "side_hf_web_of_anker", "placement": "structure", "text": "Kill the brood-mother, Anker",
+         "spawn": [{"boss_id": "side_hf_anker"}],
+         "actions": "relic:side_hf_feed_tag",
+         "journal": "Around the brood-mother's den lay crates of goat meat, nailed shut and stamped with an apothecary's brass tag. Someone had been feeding the nest."},
+        {"type": "talk", "npc": "side_hf_bashir", "text": "Bring the venom sac and the feed-tag to Bashir",
+         "topic": "Saltback and Anker are both dead. And somebody's been feeding that nest. Here's the tag off their crates.",
+         "reply": "That's Hadir's mark. The apothecary. He buys scorpion venom by the jar and sells it to the Imperials as medicine. He must have decided wild scorpions were too slow.",
+         "choices": [
+           {"label": "Take it to the town watch. People could have died.", "reply": "People did, last spring, two drovers. I'll walk it over myself. Here's your half of the bounty, and a bow I've no more use for.", "actions": "take:side_hf_feed_tag;take:side_hf_venom_sac;flag:side_hf_hadir_exposed"},
+           {"label": "Sell Hadir the venom sac and let him know we know.", "reply": "Hah. You've a merchant's heart. He'll pay double to keep this quiet, and he'll never feed another nest. I'll take my cut.", "actions": "take:side_hf_feed_tag;take:side_hf_venom_sac;flag:side_hf_hadir_squeezed;give:minecraft:emerald*4"}
+         ]}
+      ],
+      "outro": "Old Saltback and the brood-mother Anker are dead, and the apothecary who fed the nest has been found out, one way or another.",
+      "rewards": {"gold": 450, "loot": "standard",
+                  "items": [{"item": "skycraft:redguard_bow", "name": "Stingbreaker", "enchant": {"power": 2, "punch": 1}}]}
+    },
+    {
+      "id": "side_hf_two_names_one_well",
+      "title": "Two Names, One Well",
+      "region": "hammerfell/dragontail",
+      "start": "npc:side_hf_imran",
+      "requires": ["level:24"],
+      "offer": "A grudge older than your figs?",
+      "pitch": "Older than my grandfather. The at-Senna are Crown, we are Forebear, and we have shared the Well of Two Names since before Rihad had a wall. Last week someone burned my date grove beside it. Old Maradh at-Senna will deny it to your face. Go and look at that well, and tell me who did it.",
+      "desc": "Imran Bel-Tavir, a Forebear merchant in Rihad, believes the Crown family at-Senna burned his date grove at the Well of Two Names. He wants proof.",
+      "objectives": [
+        {"type": "talk", "npc": "side_hf_maradh", "text": "Hear Maradh at-Senna's side",
+         "topic": "Imran Bel-Tavir says your family burned his date grove.",
+         "reply": "Burned? Three nights ago Bel-Tavir men beat my nephew Yusuf half to death on that same road. If we wanted war we would not start it with dates. Go and look, if you must."},
+        {"type": "go", "place": "side_hf_well_of_two_names", "text": "Go to the Well of Two Names west of Rihad"},
+        {"type": "clear", "place": "side_hf_well_of_two_names", "placement": "near", "text": "Drive off the men camped among the burnt palms",
+         "spawn": [{"type": "npc:thug", "count": 3, "name": "Hired Torch", "hostile": true, "armor": "#5a4632"}]},
+        {"type": "kill", "place": "side_hf_well_of_two_names", "placement": "near", "text": "Kill their leader, Dabir Cinderhand",
+         "spawn": [{"boss_id": "side_hf_dabir"}],
+         "actions": "relic:side_hf_double_purse",
+         "journal": "Dabir carried two purses knotted together, one stitched with the at-Senna crescent and one with the Bel-Tavir scales. Both families' hotheaded sons had hired him, each to ruin the other."},
+        {"type": "talk", "npc": "side_hf_imran", "text": "Return to Imran Bel-Tavir in Rihad",
+         "topic": "Your son paid to have the at-Senna's nephew beaten. Their nephew paid to have your grove burned. Same man did both jobs.",
+         "reply": "My Karim? That... I would like to call you a liar. I find I can't. What happens now is a question for old men and old women.",
+         "choices": [
+           {"label": "Bring Maradh here. You two should hear this together.", "reply": "Together. In the square, where everyone can see. Gods, my father will spin in his tomb. Very well.", "actions": "flag:side_hf_feud_mended;take:side_hf_double_purse"},
+           {"label": "Keep the purses. They're a good lever if the at-Senna move again.", "reply": "A Forebear answer. I'm almost proud of you. Almost.", "actions": "flag:side_hf_feud_lever;take:side_hf_double_purse;give:minecraft:emerald*5"}
+         ]}
+      ],
+      "outro": "The burning of the Bel-Tavir grove was paid for by both families at once. What Rihad does with that truth is up to its elders now.",
+      "rewards": {"gold": 700, "loot": "standard",
+                  "items": [{"item": "skycraft:redguard_sword", "name": "Well-Warden's Scimitar", "enchant": {"sharpness": 2, "looting": 1}}]}
+    },
+    {
+      "id": "side_hf_the_pale_court",
+      "title": "The Pale Court",
+      "region": "hammerfell/alikr_desert",
+      "start": "npc:side_hf_nahrin",
+      "requires": ["level:32"],
+      "offer": "Your son keeps late hours?",
+      "pitch": "Fahim leaves at dusk and comes home at dawn, with sea-salt on his boots and no colour in his face. He says the sun shouts at him. I know what that means. Every family in Sentinel knows. Follow him tonight and bring him home.",
+      "desc": "Lady Nahrin at-Selem of Sentinel fears her son Fahim has fallen in with the Selenu, the old vampire bloodline of the Sentinel coast. She asked me to follow him by night and bring him home.",
+      "on_start": "relocate:side_hf_fahim:side_hf_drowned_court:3:2",
+      "objectives": [
+        {"type": "cond", "cond": "night", "place": "sentinel", "offset": [10, 22], "text": "Wait for nightfall outside the at-Selem house in Sentinel",
+         "journal": "Fahim was already gone when I arrived. A beggar on the steps said he walked west along the shore, toward the old drowned palace."},
+        {"type": "go", "place": "side_hf_drowned_court", "text": "Follow Fahim to the Drowned Court on the western shore", "actions": "scene:side_hf_drowned_court"},
+        {"type": "clear", "place": "side_hf_drowned_court", "placement": "structure", "text": "Cut through the Selenu courtiers",
+         "spawn": [{"type": "npc:vampire", "count": 3, "name": "Selenu Courtier", "hostile": true}, {"type": "skycraft:vampire", "count": 2, "name": "Selenu Thrall"}]},
+        {"type": "kill", "place": "side_hf_drowned_court", "placement": "structure", "text": "Destroy Ushara the Tide-Pale, matriarch of the Selenu",
+         "spawn": [{"boss_id": "side_hf_ushara"}],
+         "journal": "Ushara fell into the black water of her own stair. Fahim was alive in the inner hall, pale and confused, but not yet turned."},
+        {"type": "escort", "npc": "side_hf_fahim", "place": "sentinel", "text": "Bring Fahim home to Sentinel",
+         "actions": "relocate:side_hf_fahim:sentinel:10:22"},
+        {"type": "talk", "npc": "side_hf_nahrin", "text": "Speak with Lady Nahrin",
+         "topic": "Fahim is home. The matriarch said you made a bargain with the Selenu once.",
+         "reply": "When I was younger than he is now. I was dying of the wasting cough and they offered me years. They wanted my first child in return. I thought, if I never told anyone, it would never come due.",
+         "choices": [
+           {"label": "Fahim deserves to know why they came for him.", "reply": "Yes. He does. It will be the worst conversation of my life, and I have had some bad ones. Thank you for bringing him back to have it.", "actions": "flag:side_hf_fahim_told"},
+           {"label": "The debt died with Ushara. Let it stay buried.", "reply": "Then I will carry it alone, as I always have. Take this. My husband's, from the Order of the Candle. It was always meant for someone braver than him.", "actions": "flag:side_hf_fahim_spared;loot:standard"}
+         ]}
+      ],
+      "outro": "Ushara the Tide-Pale is ash in her drowned palace, and Fahim at-Selem sleeps at night again. The debt his mother made with the Selenu is settled, if not forgotten.",
+      "rewards": {"gold": 1000, "loot": "major",
+                  "items": [{"item": "skycraft:silver_sword", "name": "Candlewake", "enchant": {"smite": 4, "fire_aspect": 1}}]}
+    },
+    {
+      "id": "side_hf_witches_of_devilrock",
+      "title": "Thorn and Stone",
+      "region": "hammerfell/dragontail",
+      "start": "npc:side_hf_nisha",
+      "requires": ["level:34"],
+      "offer": "What's the something you mentioned?",
+      "pitch": "The something is my sisters' gratitude, and it's worth more than gold in these mountains. We are the Witches of Devilrock. The Mountain Witches have set their Mother-Stone above our spring and turned the water foul. Climb to Devilrock, take what my sisters give you, and cut that stone.",
+      "desc": "Grandmother Nisha, an apothecary of Rihad, is one of the Witches of Devilrock. She wants me to break the Mother-Stone of the rival Mountain Witches, which she says has poisoned Devilrock's spring.",
+      "objectives": [
+        {"type": "go", "place": "side_hf_devilrock", "text": "Climb to Devilrock in the Dragontail Mountains",
+         "actions": "scene:side_hf_devilrock_coven;relic:side_hf_thorn_knife"},
+        {"type": "go", "place": "side_hf_mother_stone", "text": "Find the Mother-Stone of the Mountain Witches", "actions": "scene:side_hf_mother_stone"},
+        {"type": "talk", "npc": "side_hf_ghesh", "text": "Speak with the old woman at the Mother-Stone",
+         "topic": "Devilrock says your stone poisoned their spring.",
+         "reply": "Their spring poisoned itself, child, when they cut it a new channel through our dead. The stone keeps our dead from walking. Cut it, and you will see what Devilrock really wanted.",
+         "choices": [
+           {"npc": "side_hf_ghesh", "label": "I made a promise. The stone comes down.", "reply": "Then my stone-wife will have something to say about that.", "actions": "flag:side_hf_cut_stone;take:side_hf_thorn_knife"},
+           {"npc": "side_hf_ghesh", "label": "Devilrock lied to me. Your stone stays.", "reply": "Then Devilrock will send someone to finish the job. They always do. Stand with me.", "actions": "flag:side_hf_spared_stone;take:side_hf_thorn_knife"}
+         ]},
+        {"type": "kill", "place": "side_hf_mother_stone", "placement": "near", "text": "Face the witch who comes for you",
+         "spawn": [{"boss_id": "side_hf_kharza", "if": "flag:side_hf_cut_stone"}, {"boss_id": "side_hf_ylsa", "if": "flag:side_hf_spared_stone"}],
+         "journal": "Whichever coven I crossed, it sent its champion at me before the dust had settled. The Dragontail witches do not leave a debt unpaid for long."},
+        {"type": "talk", "npc": "side_hf_nisha|side_hf_ghesh", "text": "Return to the witch whose side you took",
+         "topic": "It's done.",
+         "reply": "So it is. The mountain heard, and the mountain will remember. Here. A witch's thanks is a small thing, but it keeps."}
+      ],
+      "outro": "I chose a side in the old quarrel between the Witches of Devilrock and the Mountain Witches. The Dragontail will be talking about it for a generation.",
+      "rewards": {"gold": 900, "loot": "major",
+                  "items": [{"item": "skycraft:redguard_dagger", "name": "Hagthorn", "enchant": {"sharpness": 3, "fire_aspect": 2}}]}
+    },
+    {
+      "id": "side_hf_two_flags",
+      "title": "Two Flags over Gullwhistle",
+      "region": "hammerfell/stros_mkai",
+      "start": "npc:side_hf_neyra",
+      "requires": ["level:28"],
+      "offer": "Boats with no colours?",
+      "pitch": "Pirates. They took my Jafar off his boat a month ago to row for them, and the harbourmaster says there is nothing to be done. Fishermen saw longboats at Gullwhistle Cove on the far side of the island. Bring him home and I'll mend every sail you ever own.",
+      "desc": "Neyra Sail-Mender of Stros M'Kai says pirates pressed her husband Jafar into service. She thinks they shelter at Gullwhistle Cove.",
+      "objectives": [
+        {"type": "talk", "npc": "side_hf_hamid", "text": "Ask Harbourmaster Hamid about the pirates",
+         "topic": "Neyra says pirates took her husband. What do you know about Gullwhistle Cove?",
+         "reply": "Gullwhistle? Nothing there but gulls. These raiders come from the open sea, and they fly honest flags to get close. I keep my ledger, I warn the captains. What more can one man do?"},
+        {"type": "go", "place": "side_hf_gullwhistle_cove", "text": "Search Gullwhistle Cove anyway", "actions": "scene:side_hf_gullwhistle_cove"},
+        {"type": "clear", "place": "side_hf_gullwhistle_cove", "placement": "near", "text": "Fight off the pirate crew",
+         "spawn": [{"type": "skycraft:bandit", "count": 4, "name": "Gullwhistle Pirate"}, {"type": "skycraft:bandit", "count": 1, "name": "Pirate Bosun", "hp": 1.6}]},
+        {"type": "kill", "place": "side_hf_gullwhistle_cove", "placement": "near", "text": "Kill Captain Ishraq Two-Flags",
+         "spawn": [{"boss_id": "side_hf_ishraq"}],
+         "actions": "relic:side_hf_tide_ledger",
+         "journal": "Ishraq's tide-ledger listed every merchant sailing for a month ahead, copied from the harbour register in Hamid's own neat hand."},
+        {"type": "escort", "npc": "side_hf_jafar", "place": "stros_mkai", "text": "Bring Jafar back to Stros M'Kai",
+         "actions": "relocate:side_hf_jafar:stros_mkai:-9:11"},
+        {"type": "talk", "npc": "side_hf_neyra", "text": "Tell Neyra what you found",
+         "topic": "Jafar's home. And the pirates' sailing dates were copied from the harbourmaster's ledger.",
+         "reply": "Hamid? Hamid who ate at our table every feast day? Gods, he sold us all. What do we do with him?",
+         "choices": [
+           {"label": "Take the ledger to the town's elders. Let them deal with him.", "reply": "They'll put him in the stocks and then on a boat, and good riddance. Thank you. Thank you for Jafar.", "actions": "flag:side_hf_hamid_exposed;take:side_hf_tide_ledger"},
+           {"label": "Let me have a quiet word with Hamid. He'll pay you back every coin.", "reply": "Quiet words. Well, the coin would feed us through the winter. Just make sure he knows that we know.", "actions": "flag:side_hf_hamid_squeezed;take:side_hf_tide_ledger;give:minecraft:emerald*6"}
+         ]}
+      ],
+      "outro": "Captain Ishraq is dead, Jafar Netmaker is home, and the harbourmaster's neat ledger turned out to be the pirates' best map.",
+      "rewards": {"gold": 800, "loot": "major",
+                  "items": [{"item": "skycraft:ra_gada_shield", "name": "Gullwhistle Buckler", "enchant": {"projectile_protection": 3, "unbreaking": 2}}]}
+    },
+    {
+      "id": "side_hf_the_tonal_lock",
+      "title": "The Tonal Lock of Mzindhal",
+      "region": "hammerfell/craglorn",
+      "start": "npc:side_hf_ilvane",
+      "requires": ["level:40"],
+      "offer": "A Dwemer ruin that sings in the right key?",
+      "pitch": "Mzindhal, in the hills north of Elinhir. My partner Eriq and I opened its outer doors last season. Then the guardians woke, and Eriq didn't come out. I need the tonal key-cylinder from its inner hall, and I need someone who can deal with whatever is guarding it.",
+      "desc": "Ilvane Courtic, a Breton scholar in Elinhir, asked me to retrieve a tonal key-cylinder from the Dwemer ruin of Mzindhal. Her partner Eriq was lost there last season.",
+      "objectives": [
+        {"type": "go", "place": "side_hf_mzindhal", "text": "Go to the Dwemer ruin of Mzindhal in the Craglorn hills"},
+        {"type": "clear", "place": "side_hf_mzindhal", "placement": "structure", "text": "Destroy the ruin's waking automatons",
+         "spawn": [{"type": "skycraft:dwarven_spider", "count": 4, "name": "Mzindhal Spider"}, {"type": "skycraft:dwarven_sphere", "count": 2, "name": "Mzindhal Sphere"}]},
+        {"type": "retrieve", "place": "side_hf_mzindhal", "placement": "structure", "relic": "side_hf_tonal_cylinder", "radius": 10,
+         "text": "Take the tonal key-cylinder from the inner hall",
+         "spawn": [{"type": "skycraft:dwarven_ballista", "count": 1, "name": "Hall Ballista"}]},
+        {"type": "kill", "place": "side_hf_mzindhal", "placement": "structure", "text": "Destroy the Warden of Mzindhal",
+         "spawn": [{"boss_id": "side_hf_warden_mzindhal"}],
+         "actions": "scene:side_hf_mzindhal_core",
+         "journal": "Behind the Warden I found Eriq Dannel in a humming brass cage. He said Ilvane had shut it on him herself, so she could publish the discovery alone."},
+        {"type": "escort", "npc": "side_hf_eriq", "place": "elinhir", "text": "Get Eriq safely back to Elinhir",
+         "actions": "relocate:side_hf_eriq:elinhir:12:-2"},
+        {"type": "talk", "npc": "side_hf_ilvane", "text": "Confront Ilvane Courtic",
+         "topic": "I have your key-cylinder. I also have Eriq, alive. He says you locked him in.",
+         "reply": "He... it was the cage or both of us, the Warden was coming, I... No. That's not true and you'd know it. I wanted my name on that door. Just mine.",
+         "choices": [
+           {"label": "The key goes to Eriq. The discovery is his as much as yours.", "reply": "Of course it does. Take what I promised you and go. I'd rather not have a witness here when he comes in.", "actions": "flag:side_hf_key_to_eriq;take:side_hf_tonal_cylinder"},
+           {"label": "Pay me double and I'll forget what Eriq said.", "reply": "You're no better than I am. That's oddly comforting. Double it is.", "actions": "flag:side_hf_key_to_ilvane;take:side_hf_tonal_cylinder;give:minecraft:emerald*8"}
+         ]}
+      ],
+      "outro": "The Warden of Mzindhal is scrap and Eriq Dannel walked out of the ruin he was left to die in. The tonal key unlocked more than a Dwemer door.",
+      "rewards": {"gold": 1300, "loot": "legendary",
+                  "items": [{"item": "skycraft:dwarven_warhammer", "name": "Resonant Maul", "enchant": {"sharpness": 4, "knockback": 2, "unbreaking": 3}}]}
+    },
+    {
+      "id": "side_hf_the_lantern_cistern",
+      "title": "The Lantern Cistern",
+      "region": "hammerfell/hews_bane",
+      "start": "npc:side_hf_huzayra",
+      "requires": ["level:26"],
+      "offer": "You notice boots. What else do you notice?",
+      "pitch": "I notice that Ozan bel-Rihm, the richest fat man in Taneth, keeps an old Hew's Bane scimitar in a cistern vault north-west of the city, and that his watchmen drink. I need quiet boots to walk in at night and walk out with it. Half the fence price is yours.",
+      "desc": "Huzayra Quickpurse, a thief of Taneth, hired me to steal an old Hew's Bane scimitar from the merchant Ozan bel-Rihm's cistern vault north-west of the city.",
+      "objectives": [
+        {"type": "go", "place": "side_hf_lantern_cistern", "text": "Find the Lantern Cistern north-west of Taneth"},
+        {"type": "cond", "cond": "night", "place": "side_hf_lantern_cistern", "text": "Wait until the watch changes after dark"},
+        {"type": "clear", "place": "side_hf_lantern_cistern", "placement": "structure", "text": "Deal with Ozan's watchmen",
+         "spawn": [{"type": "npc:thug", "count": 4, "name": "Cistern Watchman", "hostile": true, "armor": "#2f4a5c"}]},
+        {"type": "retrieve", "place": "side_hf_lantern_cistern", "placement": "structure", "relic": "side_hf_gilt_forgery", "radius": 10,
+         "text": "Open the display case in the vault",
+         "actions": "scene:side_hf_cistern_find",
+         "journal": "The scimitar in the case was a gilt forgery. The real blade was hidden behind it, with a note from Huzayra: I was meant to take the fake and be caught with it."},
+        {"type": "kill", "at_player": true, "text": "Survive the ambush on the way out",
+         "spawn": [{"boss_id": "side_hf_sarrah"}, {"type": "npc:thug", "count": 2, "name": "Huzayra's Lookout", "hostile": true}],
+         "journal": "Huzayra's partner Sarrah was waiting at the cistern mouth to make sure I was caught red-handed, or not caught at all."},
+        {"type": "deliver", "npc": "side_hf_huzayra", "relic": "side_hf_gilt_forgery", "text": "Give Huzayra the scimitar she expects",
+         "topic": "Here's your scimitar. Sarrah sends her regards. From the bottom of the cistern.",
+         "reply": "Sarrah? I... well. Clever boots. Very clever boots. I suppose we'll call this square, and I suppose you'll tell me which blade you're really carrying some other day."}
+      ],
+      "outro": "Huzayra planned to sell me to the watch along with a forgery. She got the forgery. I kept the real Hew's Bane scimitar.",
+      "rewards": {"gold": 700, "loot": "standard", "unique": "hews_bane_scimitar"}
+    },
+    {
+      "id": "side_hf_the_last_dispatch",
+      "title": "The Last Dispatch of Thornwatch",
+      "region": "hammerfell/bangkorai",
+      "start": "find",
+      "find": {"place": "side_hf_bangkorai_waystone", "offset": [6, -4], "clue": "stone",
+               "text": "Cut deep under the moss: THORNWATCH HOLDS. SEND RELIEF. Beneath it, in fresher, shallower letters, someone has added: They never did."},
+      "requires": ["level:22"],
+      "desc": "A waystone in Bangkorai bears a garrison's old plea for relief, and a bitter answer scratched under it. Thornwatch Garrison lies somewhere to the south-west.",
+      "objectives": [
+        {"type": "go", "place": "side_hf_thornwatch", "text": "Find Thornwatch Garrison"},
+        {"type": "cond", "cond": "night", "place": "side_hf_thornwatch", "text": "Stay until dark, when the garrison wakes", "actions": "scene:side_hf_thornwatch_dusk"},
+        {"type": "clear", "place": "side_hf_thornwatch", "placement": "structure", "text": "Fight past the unrelieved sentries",
+         "spawn": [{"type": "minecraft:skeleton", "count": 4, "name": "Unrelieved Sentry"}, {"type": "minecraft:stray", "count": 2, "name": "Frozen Picket"}]},
+        {"type": "kill", "place": "side_hf_thornwatch", "placement": "structure", "text": "Lay Captain Rasheen to rest",
+         "spawn": [{"boss_id": "side_hf_rasheen"}],
+         "actions": "relic:side_hf_thornwatch_dispatch",
+         "journal": "When Rasheen fell, a sealed dispatch dropped from his belt. It was the request for relief he had sent with a courier. It had never left the garrison."},
+        {"type": "deliver", "npc": "side_hf_veshra", "relic": "side_hf_thornwatch_dispatch", "text": "Carry the dispatch to Commander Veshra in Elinhir",
+         "topic": "This is from Thornwatch Garrison. It's very late.",
+         "reply": "Thornwatch. My great-grandfather was its courier. The family story says he rode through the snow and the relief came too late. This seal was never broken. He never rode at all, did he?"},
+        {"type": "talk", "npc": "side_hf_veshra", "text": "Decide with Veshra what to do with the dispatch",
+         "topic": "What will you do with it?",
+         "reply": "Either way I can't give them back their lives. But I can give them something.",
+         "choices": [
+           {"label": "Enter it in the garrison rolls. Let the truth stand, even about your family.", "reply": "Then it goes in the rolls tonight, under my own name. Rasheen's men held their post. The record will say so.", "actions": "flag:side_hf_thornwatch_honoured"},
+           {"label": "Read their names at the waystone and let the dispatch burn with them.", "reply": "An old soldier's funeral. I'd like that. I'll ride out with you at dawn.", "actions": "flag:side_hf_thornwatch_burned;loot:standard"}
+         ]}
+      ],
+      "outro": "Captain Rasheen and his men waited a century for relief that was never asked for. Their last dispatch has finally been delivered.",
+      "rewards": {"gold": 600, "loot": "standard",
+                  "items": [{"item": "skycraft:ra_gada_helmet", "name": "Thornwatch Half-Helm", "enchant": {"protection": 3, "unbreaking": 2}}]}
+    },
+    {
+      "id": "side_hf_small_footprints",
+      "title": "Small Footprints at the Slipway",
+      "region": "hammerfell/hews_bane",
+      "start": "find",
+      "find": {"place": "side_hf_drowned_slipway", "offset": [8, 6], "clue": "urn",
+               "text": "A child's sandal is tied to the urn with fishing twine, very neatly, as if left on purpose. Scratched in the clay beneath: TARIQ WAS HERE. THE FERRY."},
+      "requires": ["level:24"],
+      "desc": "At a drowned slipway east of Taneth, a child left a sandal and a scratched message: Tariq was here, and something about a ferry.",
+      "objectives": [
+        {"type": "talk", "npc": "side_hf_salima", "text": "Find Tariq's family in Taneth",
+         "topic": "Is your boy called Tariq? I found his sandal at the old slipway east of town.",
+         "reply": "That's his! I tied that knot myself. He went to the school-ferry eight days ago with the other net-children and never came back. Sabir the ferryman said he ran off. Sabir has rowed our children for twenty years."},
+        {"type": "go", "place": "side_hf_brine_hollow", "text": "Follow the ferry route south to Brine Hollow", "actions": "scene:side_hf_brine_hollow"},
+        {"type": "clear", "place": "side_hf_brine_hollow", "placement": "near", "text": "Kill the slavers guarding the pens",
+         "spawn": [{"type": "skycraft:bandit", "count": 4, "name": "Brine Hollow Slaver"}]},
+        {"type": "kill", "place": "side_hf_brine_hollow", "placement": "near", "text": "Kill the man who sold the children",
+         "spawn": [{"boss_id": "side_hf_sabir"}],
+         "journal": "The slavers' master was Sabir the ferryman, the man Taneth trusted with its children. He had been selling them a few at a time to galleys out of the southern sea."},
+        {"type": "escort", "npc": "side_hf_tariq", "place": "taneth", "text": "Take Tariq home to Taneth",
+         "actions": "relocate:side_hf_tariq:taneth:-14:10"},
+        {"type": "talk", "npc": "side_hf_salima", "text": "Return Tariq to his mother",
+         "topic": "Here's Tariq. The other children are on their way back with the fishing boats.",
+         "reply": "Oh, my boy, my clever boy. He left you a trail, didn't he? Of course he did. Take this, it was his father's. He'd want it carried by the one who brought our son home."}
+      ],
+      "outro": "Sabir the ferryman is dead and the net-children of Taneth are home. Tariq's sandal did more than any watchman.",
+      "rewards": {"gold": 650, "loot": "standard",
+                  "items": [{"item": "skycraft:redguard_war_axe", "name": "Netmaker's Hatchet", "enchant": {"sharpness": 3, "looting": 2}}]}
+    },
+    {
+      "id": "side_hf_where_the_star_fell",
+      "title": "Where the Star Fell",
+      "region": "hammerfell/craglorn",
+      "start": "npc:side_hf_bahrun",
+      "requires": ["level:44", "quest:side_hf_the_tonal_lock|quest:side_hf_the_last_dispatch"],
+      "offer": "The sky is writing back?",
+      "pitch": "Nine nights ago a star fell into the hollow south-east of Elinhir. The shepherds who went to see it came back speaking a language nobody taught them. Storms walk there now on legs. My family has read the sky for a hundred generations, and we have a word for this. The word is 'no'.",
+      "desc": "Bahrun the Star-Reader of Elinhir says a fallen star in Starfall Hollow is maddening shepherds and drawing living storms. He wants it dealt with before the Elinhir mages get to it.",
+      "objectives": [
+        {"type": "go", "place": "side_hf_starfall_hollow", "text": "Go to Starfall Hollow", "actions": "scene:side_hf_starfall"},
+        {"type": "clear", "place": "side_hf_starfall_hollow", "placement": "near", "text": "Disperse the storm-things circling the hollow",
+         "spawn": [{"type": "skycraft:storm_atronach", "count": 2, "name": "Walking Storm"}, {"type": "skycraft:wisp", "count": 3, "name": "Star-Mote"}]},
+        {"type": "kill", "place": "side_hf_starfall_hollow", "placement": "near", "text": "Destroy Vharzul, the Fallen Light",
+         "spawn": [{"boss_id": "side_hf_vharzul"}],
+         "actions": "thunder",
+         "journal": "The thing that came out of the glass called itself Vharzul. When it broke apart, the whole hollow rang like a struck bell."},
+        {"type": "retrieve", "place": "side_hf_starfall_hollow", "relic": "side_hf_star_shard", "radius": 8, "text": "Take the shard from the heart of the hollow"},
+        {"type": "talk", "npc": "side_hf_bahrun", "text": "Bring the shard back to Bahrun in Elinhir",
+         "topic": "The storm-thing is dead. The shard still whispers.",
+         "reply": "Of course it does. It is a splinter of something the stars locked away, and it wants out. The Elinhir mages would pay a fortune for it. My grandmother's grandmother would have dropped it down the deepest well in Craglorn.",
+         "choices": [
+           {"label": "Drop it down the well. Some doors stay shut.", "reply": "Good. Come, we'll do it at dawn, when the stars can see us do it. They'll remember you kindly.", "actions": "flag:side_hf_shard_drowned;take:side_hf_star_shard"},
+           {"label": "Sell it to the mages. Let scholars worry about it.", "reply": "Scholars. Yes. Scholars always worry about the right things. Go on, then. Don't come to me when it starts talking to them.", "actions": "flag:side_hf_shard_sold;take:side_hf_star_shard;give:minecraft:emerald*10"}
+         ]}
+      ],
+      "outro": "Vharzul, the Fallen Light, is gone, and the shard of the fallen star has gone where I chose to send it. Craglorn's sky is quiet again, for now.",
+      "rewards": {"gold": 1500, "loot": "legendary", "perks": 1,
+                  "items": [{"item": "skycraft:yokudan_greatsword", "name": "Starsplitter", "enchant": {"sharpness": 4, "smite": 3, "unbreaking": 3}}]}
+    }
+  ]
+}

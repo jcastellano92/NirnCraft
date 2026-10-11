@@ -1,0 +1,663 @@
+{
+  "line": "side_morrowind",
+  "category": "side",
+  "region": "morrowind/vvardenfell_ashlands",
+  "speakers": {
+    "side_mw_jdarr": "J'darr the Runner",
+    "side_mw_dravil": "Shade of Dravil Sandas",
+    "side_mw_ulvon": "Shade of Ulvon Sandas",
+    "side_mw_hjorvald_voice": "A Voice Under the Cairn",
+    "side_mw_kynval_voice": "Kynval the Razor-Tongued",
+    "side_mw_coffin_man": "A Man in a Coffin",
+    "side_mw_quiet_cup_voice": "Vireth the Quiet Cup",
+    "side_mw_thelvas_voice": "Dagoth Thelvas",
+    "side_mw_bloom_voice": "The Bloom",
+    "side_mw_bolvyn_voice": "Bolvyn Gray-Lantern"
+  },
+  "npcs": [
+    {"id": "side_mw_brucius", "name": "Brucius Allene", "role": "miner", "place": "balmora", "offset": [14, -8],
+     "greet": "Salvage is honest work. The Dwemer aren't using any of it, are they?"},
+    {"id": "side_mw_cassia", "name": "Cassia Ventrilla", "role": "imperial_soldier", "place": "balmora", "offset": [-12, 10], "female": true,
+     "greet": "Excise office. If you're carrying sugar, declare it now and save us both the paperwork."},
+    {"id": "side_mw_aldam", "name": "Aldam Rothri", "role": "apothecary", "place": "balmora", "offset": [6, 16],
+     "greet": "Trama root for the cough, hackle-lo for the nerves. I have nothing for bad dreams, I'm afraid. I've looked."},
+    {"id": "side_mw_meralyn", "name": "Meralyn Hlervu", "role": "caravan_trader", "place": "aldruhn", "offset": [10, 6], "female": true,
+     "greet": "Three striders I own, sera. Two came home. You see why I'm not smiling."},
+    {"id": "side_mw_galos", "name": "Galos Ulven", "role": "caravan_trader", "place": "aldruhn", "offset": [-14, 4],
+     "greet": "A caller's work is half singing and half listening. The strider does the rest."},
+    {"id": "side_mw_sedrane", "name": "Sedrane Llothri", "role": "citizen", "place": "aldruhn", "offset": [4, -12], "female": true,
+     "greet": "Have you seen a boy, about so high, with ash in his hair? No. Of course you haven't."},
+    {"id": "side_mw_nilvyn", "name": "Nilvyn Llothri", "role": "child", "place": "side_mw_milk", "offset": [3, 2],
+     "greet": "Shh. Scuttle's sleeping. He's hurt his foot."},
+    {"id": "side_mw_ervyn", "name": "Ervyn Sandas", "role": "citizen", "place": "vivec", "offset": [12, -10],
+     "greet": "Forgive me. I haven't slept properly in a month. My grandsire keeps visiting."},
+    {"id": "side_mw_ungrid", "name": "Ungrid Ash-Born", "role": "scholar", "place": "ebonheart", "offset": [8, 8], "female": true,
+     "greet": "Nord father, Dunmer mother. I study the Pact because I'm made of it."},
+    {"id": "side_mw_drulvos", "name": "Drulvos Hleth", "role": "farmer", "place": "side_mw_hleth_pasture", "offset": [4, 4],
+     "greet": "Mind the bull. And mind the Mavrins, if you're headed their way. Both bite."},
+    {"id": "side_mw_orvesa", "name": "Orvesa Mavrin", "role": "farmer", "place": "side_mw_mavrin_pasture", "offset": [-4, 3], "female": true,
+     "greet": "If Drulvos Hleth sent you, you can float back to him on a netch."},
+    {"id": "side_mw_bralsa", "name": "Bralsa Teleri", "role": "merchant", "place": "sadrith_mora", "offset": [12, 8], "female": true,
+     "greet": "Dreugh wax, finest on the coast. Or it was, when I still had harvesters."},
+    {"id": "side_mw_faldrys", "name": "Faldrys Uvel", "role": "steward", "place": "sadrith_mora", "offset": [-10, -12],
+     "greet": "I keep my master's books, his floors and his secrets, in roughly that order of difficulty."},
+    {"id": "side_mw_saryne", "name": "Saryne Dalvilu", "role": "scholar", "place": "mournhold", "offset": [14, 6], "female": true,
+     "greet": "A palace scribe hears everything and is asked about nothing. It is restful, most days."},
+    {"id": "side_mw_dethan", "name": "Dethan Raloth", "role": "steward", "place": "mournhold", "offset": [-8, 14],
+     "greet": "The palace thanks you for your interest and asks that you take it elsewhere."},
+    {"id": "side_mw_hlavora", "name": "Hlavora Selvani", "role": "priest", "place": "necrom", "offset": [10, -6], "female": true,
+     "greet": "Speak softly. Necrom has more residents below the street than above it, and they are light sleepers."},
+    {"id": "side_mw_tarvyn", "name": "Tarvyn Faleran", "role": "adventurer", "place": "necrom", "offset": [-12, 8],
+     "greet": "I hunt Daedra for coin and their trinkets for fun. The trinkets usually hunt back."},
+    {"id": "side_mw_hjolfrid", "name": "Hjolfrid Salt-Eye", "role": "fisher", "place": "side_mw_dagon_fel", "offset": [5, -3], "female": true,
+     "greet": "Twenty years I've watched that water. It gives back boats, sometimes. Never brothers."}
+  ],
+  "relics": [
+    {"id": "side_mw_tally_plate", "name": "Brass Tally-Plate", "desc": "A Dwemer inventory plate; every entry is struck through but one, a regulator coil.", "icon": 19},
+    {"id": "side_mw_sugar_ledger", "name": "Llaro's Sugar Ledger", "desc": "Payments by the moon, and one name repeated each month: C. Ventrilla.", "icon": 11},
+    {"id": "side_mw_strongbox", "name": "Hlervu Caravan Strongbox", "desc": "Dented, ash-caked and still locked, which says something for Hlervu locksmiths.", "icon": 19},
+    {"id": "side_mw_widow_letter", "name": "Widow Sandas's Letter", "desc": "Sealed in Ulvon's urn: a widow's account of who poured the poison, and for whom.", "icon": 11},
+    {"id": "side_mw_oath_ring", "name": "Hjorvald's Oath-Ring", "desc": "A Nord arm-ring stamped with the three-headed Pact seal and a Dunmer captain's mark.", "icon": 19},
+    {"id": "side_mw_gall_sack", "name": "Sack of Gall-Root", "desc": "Bitter, sticky, and stamped with the Setus mine's tally mark.", "icon": 19},
+    {"id": "side_mw_egg_crate", "name": "Crate of Dreugh Eggs", "desc": "Six leathery eggs packed in kelp, still warm, still moving.", "icon": 19},
+    {"id": "side_mw_cipher_order", "name": "Ciphered Order", "desc": "A poisoner's instructions in a palace cipher, in a palace hand.", "icon": 11},
+    {"id": "side_mw_razor_shard", "name": "Razor-Shard of Ald Kharvenu", "desc": "A sliver of black Daedric steel that is always slightly wet.", "icon": 19},
+    {"id": "side_mw_varyn_seal", "name": "Embalmer's Seal", "desc": "A brass coffin-seal of the Necrom embalmers, its wax still soft.", "icon": 19},
+    {"id": "side_mw_wreck_ledger", "name": "Ledger of Wrecks", "desc": "Twenty years of ship names, cargoes and dates, in a neat fisherman's hand.", "icon": 11},
+    {"id": "side_mw_dream_journal", "name": "Fenas Rothri's Dream-Journal", "desc": "The handwriting starts small and careful. By the last page it fills the margins.", "icon": 11},
+    {"id": "side_mw_day_book", "name": "Apprentice's Day-Book", "desc": "Velsa Taren's notes: doses, dates, and 'the itching is better today'.", "icon": 11},
+    {"id": "side_mw_heartseed", "name": "Velsa's Heartseed", "desc": "A pale fungal seed the size of a fist. It is warm, like a held hand.", "icon": 19}
+  ],
+  "places": {
+    "side_mw_arkngthand": {"x": 6759, "z": 560, "r": 30, "name": "Arkngthand"},
+    "side_mw_shal": {"x": 5704, "z": 526, "r": 24, "name": "Shal"},
+    "side_mw_yasamsi": {"x": 6036, "z": 835, "r": 24, "name": "Yasamsi"},
+    "side_mw_ash_track": {"x": 5776, "z": -1072, "r": 30, "name": "The Falasmaryon Strider Track"},
+    "side_mw_mausur": {"x": 6440, "z": -674, "r": 28, "name": "Mausur Caverns"},
+    "side_mw_milk": {"x": 5545, "z": -674, "r": 24, "name": "Milk"},
+    "side_mw_sandas_tomb": {"x": 7384, "z": 785, "r": 24, "name": "Sandas Ancestral Tomb"},
+    "side_mw_othrelas_tomb": {"x": 7141, "z": 1112, "r": 24, "name": "Othrelas Ancestral Tomb"},
+    "side_mw_pact_cairn": {"x": 4240, "z": 2576, "r": 24, "name": "The Pact Cairn"},
+    "side_mw_hjorvald_barrow": {"x": 4048, "z": 1616, "r": 28, "name": "Hjorvald's Barrow"},
+    "side_mw_hleth_pasture": {"x": 7696, "z": -1072, "r": 30, "name": "Hleth Netch Pasture"},
+    "side_mw_mavrin_pasture": {"x": 7312, "z": -1264, "r": 30, "name": "Mavrin Netch Pasture"},
+    "side_mw_gall_spring": {"x": 7696, "z": -1456, "r": 24, "name": "The Shared Spring"},
+    "side_mw_setus": {"x": 7788, "z": -1238, "r": 24, "name": "Setus Egg Mine"},
+    "side_mw_dagon_fel": {"x": 7342, "z": -1581, "r": 40, "name": "Dagon Fel"},
+    "side_mw_nallit": {"x": 8418, "z": -127, "r": 24, "name": "Nallit"},
+    "side_mw_deshaan_cellars": {"x": 6928, "z": 3152, "r": 24, "name": "The Old Deshaan Wine Cellars"},
+    "side_mw_dralor_villa": {"x": 5968, "z": 2960, "r": 28, "name": "Villa Dralor"},
+    "side_mw_ald_kharvenu": {"x": 9232, "z": 2576, "r": 30, "name": "Ald Kharvenu"},
+    "side_mw_mourners_landing": {"x": 8080, "z": 3536, "r": 24, "name": "Mourners' Landing"},
+    "side_mw_necrom_ossuary": {"x": 8656, "z": 3728, "r": 28, "name": "The Lower Ossuaries of Necrom"},
+    "side_mw_gray_lantern": {"x": 6928, "z": -2224, "r": 24, "name": "The Gray Lantern"},
+    "side_mw_bone_reef": {"x": 6736, "z": -2032, "r": 24, "name": "Bone Reef"},
+    "side_mw_sharapli": {"x": 7043, "z": -67, "r": 24, "name": "Sharapli"},
+    "side_mw_maran_adon": {"x": 7466, "z": -637, "r": 28, "name": "Maran-Adon"},
+    "side_mw_tel_ravani": {"x": 10384, "z": 656, "r": 30, "name": "Tel Ravani"},
+    "side_mw_spore_grove": {"x": 10000, "z": 272, "r": 30, "name": "The Spore-Grove"}
+  },
+  "bosses": {
+    "side_mw_steam_warden": {"name": "The Steam-Warden of Arkngthand", "type": "skycraft:dwarven_centurion", "hp": 4.5, "dmg": 1.6,
+      "level": 22, "drop": "loot:major,skycraft:dwarven_metal_ingot", "glow": false},
+    "side_mw_fendryn_llaro": {"name": "Fendryn Llaro, the Sugar-Factor", "type": "skycraft:bandit_chief", "hp": 3.5, "dmg": 1.4,
+      "level": 22, "weapon": "skycraft:chitin_sword",
+      "gear": {"head": "skycraft:netch_helmet", "chest": "skycraft:netch_chestplate"}, "drop": "loot:major", "glow": false},
+    "side_mw_dravasa": {"name": "Dravasa Ash-Hand", "type": "skycraft:bandit_chief", "hp": 3.5, "dmg": 1.5,
+      "level": 24, "weapon": "skycraft:chitin_war_axe",
+      "gear": {"head": "skycraft:chitin_helmet", "chest": "skycraft:chitin_chestplate", "legs": "skycraft:chitin_leggings"}, "drop": "loot:major", "glow": false},
+    "side_mw_shade_dravil": {"name": "Shade of Dravil Sandas", "type": "skycraft:wispmother", "hp": 3.5, "dmg": 1.5,
+      "level": 24, "drop": "loot:major", "glow": true},
+    "side_mw_tusk_mother": {"name": "Tusk-Mother", "type": "skycraft:kagouti", "hp": 3.0, "dmg": 1.3,
+      "level": 18, "drop": "loot:standard,skycraft:kagouti_hide", "glow": false},
+    "side_mw_hjorvald": {"name": "Hjorvald Oath-Ash", "type": "skycraft:draugr_deathlord", "hp": 3.5, "dmg": 1.5,
+      "level": 22, "weapon": "skycraft:nordic_battleaxe",
+      "gear": {"head": "skycraft:nordic_helmet", "chest": "skycraft:nordic_chestplate"}, "drop": "loot:major", "glow": false},
+    "side_mw_thundergut": {"name": "Old Thundergut", "type": "skycraft:netch", "hp": 5.0, "dmg": 1.5,
+      "level": 26, "drop": "loot:major,skycraft:netch_leather", "glow": false},
+    "side_mw_shell_mother": {"name": "Shell-Mother Kharr", "type": "skycraft:land_dreugh", "hp": 5.0, "dmg": 1.6,
+      "level": 28, "drop": "loot:major", "glow": false},
+    "side_mw_quiet_cup": {"name": "Vireth the Quiet Cup", "type": "skycraft:bandit_chief", "hp": 4.0, "dmg": 1.7,
+      "level": 30, "weapon": "skycraft:glass_dagger",
+      "gear": {"head": "skycraft:netch_helmet", "chest": "skycraft:netch_chestplate", "feet": "skycraft:netch_boots"}, "drop": "loot:major", "glow": false},
+    "side_mw_kynval": {"name": "Kynval the Razor-Tongued", "type": "skycraft:dremora", "hp": 5.0, "dmg": 1.8,
+      "level": 34, "weapon": "skycraft:daedric_sword",
+      "gear": {"head": "skycraft:daedric_helmet", "chest": "skycraft:daedric_chestplate"}, "drop": "loot:major", "glow": true},
+    "side_mw_aldos_varyn": {"name": "Aldos Varyn, Master Embalmer", "type": "skycraft:necromancer", "hp": 4.5, "dmg": 1.7,
+      "level": 34, "weapon": "skycraft:staff_of_frostbite", "drop": "loot:major", "glow": false},
+    "side_mw_bolvyn": {"name": "Bolvyn Gray-Lantern", "type": "skycraft:bandit_chief", "hp": 5.0, "dmg": 1.8,
+      "level": 40, "weapon": "skycraft:ebony_war_axe",
+      "gear": {"head": "skycraft:bonemold_helmet", "chest": "skycraft:bonemold_chestplate", "legs": "skycraft:bonemold_leggings"}, "drop": "loot:legendary", "glow": false},
+    "side_mw_dagoth_thelvas": {"name": "Dagoth Thelvas, the Ash-Kin", "type": "skycraft:vampire_lord", "hp": 6.0, "dmg": 2.0,
+      "level": 45, "drop": "loot:legendary", "glow": true},
+    "side_mw_velsas_bloom": {"name": "Velsa's Bloom", "type": "skycraft:spriggan", "hp": 5.5, "dmg": 1.9,
+      "level": 44, "drop": "loot:legendary", "glow": true}
+  },
+  "scenes": {
+    "side_mw_brass_tracks": [
+      ["narrator", "Deep drag-marks run from the road into Arkngthand. Crates with Brucius Allene's salvage stamp lie at the door, empty, as if something carried their contents back inside."],
+      ["narrator", "Somewhere below, a valve sighs, and a heavy foot comes down in perfect time."]
+    ],
+    "side_mw_warden_falls": [
+      ["narrator", "The Steam-Warden kneels, and its chest-plate swings open on an empty socket shaped for a single coil. Everything else it carried home is laid out in neat rows behind it."]
+    ],
+    "side_mw_runner_found": [
+      ["side_mw_jdarr", "Do not draw, walker. J'darr is not a smuggler. J'darr is a debt with legs. Llaro owns the debt, and the legs."],
+      ["side_mw_jdarr", "The Imperial lady sent you? Then she sent you to close a mouth. Here, read who she drinks with. J'darr would rather be poor than quiet and dead."]
+    ],
+    "side_mw_storm_find": [
+      ["narrator", "Ash comes sideways, thick as felt. Through it looms the strider, folded on its long legs like a tent with the poles kicked out. It moans softly. A man answers it in the same note."]
+    ],
+    "side_mw_dravil_speaks": [
+      ["side_mw_dravil", "A living foot in my house, at last. Listen. My brother Ulvon poured poison in my cup and smiled while I drank it."],
+      ["side_mw_dravil", "His bones rest in Othrelas, among the family he married into. Carry them out and scatter them in the ash. Then I will sleep, and so will my grandson."]
+    ],
+    "side_mw_ulvon_speaks": [
+      ["side_mw_ulvon", "He sent you for my bones. Of course he did. While I lie whole, the Sandas door stays shut on him."],
+      ["side_mw_ulvon", "Dravil poisoned my wife for her dowry. I struck him down for it, and our mother hid the truth to save the family name. Her letter is in my urn. Read it, then decide which of us is lying."]
+    ],
+    "side_mw_cairn_opened": [
+      ["narrator", "The Pact Cairn has been opened from the inside. The stones lie outward, and frost-rimed bootprints lead west across the Stonefalls scrub."],
+      ["side_mw_hjorvald_voice", "Three peoples swore. Three names were cut. Two remain. Bring me the one who took mine."]
+    ],
+    "side_mw_spring_sour": [
+      ["narrator", "The shared spring smells of bile. Pale shreds of gall-root float on the surface, and the netch drifting over it twitch and drop, then rise again too fast."]
+    ],
+    "side_mw_cove_wreck": [
+      ["narrator", "The harvesters' camp is flattened. Among the wreckage stands a crate packed in wet kelp, and from inside it comes a soft clicking, like many small claws on wood."]
+    ],
+    "side_mw_quiet_cup_last": [
+      ["side_mw_quiet_cup_voice", "You were sent to find me, not to ask me questions. Pity. Ask the scribe who writes my orders in such a lovely hand."]
+    ],
+    "side_mw_razor_wakes": [
+      ["narrator", "The stone underfoot is warm. Rust-red veins in the walls pulse slowly, and the old altar is slick though no one has bled on it for an age."],
+      ["side_mw_kynval_voice", "Mortal. The Razor's shard waits on my altar. Take it, and carry Ald Kharvenu with you wherever you go. Or try to take it from me, and carry nothing ever again."]
+    ],
+    "side_mw_coffin_knock": [
+      ["narrator", "One of the coffins stacked on the landing is knocking. Inside, under a crust of embalming salts, a man blinks up at you."],
+      ["side_mw_coffin_man", "I came to bury my aunt. The embalmer gave me tea. Is this... is this Necrom? Why is it so dark?"]
+    ],
+    "side_mw_lantern_lit": [
+      ["narrator", "The old Velothi tower has been fitted with a lantern of gray glass. Its light falls not on the true channel but on the reef beside it, where hulls lie stacked like firewood."]
+    ],
+    "side_mw_bolvyn_falls": [
+      ["side_mw_bolvyn_voice", "Tell Hjolfrid... no. Tell her I drowned. She's had twenty years to like that version."]
+    ],
+    "side_mw_sleepers": [
+      ["narrator", "In the dark of Sharapli the sleepers sit in rows, rocking. They hum one long note through ash-grey lips, and none of them stops to breathe."]
+    ],
+    "side_mw_thelvas_speaks": [
+      ["side_mw_thelvas_voice", "The Mountain's heart is gone, and still it dreams. It dreamed me. You knew me, once, under another name. Do you remember it? I am beginning not to."]
+    ],
+    "side_mw_thelvas_falls": [
+      ["narrator", "The ash-mask cracks and falls away. Beneath it is a tired Dunmer face, and the mouth shapes a single word before it goes still: Aldam."]
+    ],
+    "side_mw_ravani_empty": [
+      ["narrator", "Tel Ravani's growth-vats stand cracked and dry. One was powered by a Dwemer regulator coil, wired in with a Telvanni's contempt for neatness. A trail of pale spores leads out of the tower and down to the shore."]
+    ],
+    "side_mw_bloom_pleads": [
+      ["side_mw_bloom_voice", "I did not escape. He carried me out in a sack and left me for the crabs. He was too proud to burn a failure."],
+      ["side_mw_bloom_voice", "I can feel the grove thinking. It is slow and kind. Please. Tell the steward I died."]
+    ],
+    "side_mw_bloom_turns": [
+      ["narrator", "A binding-rune flares on the Bloom's bark-skin, carved there long before it walked out of the tower. The voice in the grove stops being Velsa's."]
+    ]
+  },
+  "quests": [
+    {
+      "id": "side_mw_the_brass_tithe",
+      "title": "The Brass Tithe",
+      "region": "morrowind/west_gash",
+      "start": "npc:side_mw_brucius",
+      "requires": ["level:16"],
+      "offer": "Your crew looks like it's been chased by something.",
+      "pitch": "Chased is the word. Something big and brass walked out of Arkngthand, flattened my wagons and carried my salvage back in. The Dwemer are gone, so it's a machine with no master, and machines can be broken. Break it, and I'll pay what the scrap's worth.",
+      "desc": "Brucius Allene, a salvager in Balmora, says a Dwemer machine from Arkngthand is carrying his salvage back into the ruin. He wants it broken.",
+      "objectives": [
+        {"type": "go", "place": "side_mw_arkngthand", "text": "Follow the drag-marks to Arkngthand", "actions": "scene:side_mw_brass_tracks"},
+        {"type": "clear", "place": "side_mw_arkngthand", "placement": "structure", "text": "Clear the ruin's waking sentries",
+         "spawn": [{"type": "skycraft:dwarven_spider", "count": 3, "name": "Arkngthand Spider"}, {"type": "skycraft:dwarven_sphere", "count": 1, "name": "Arkngthand Sentry"}]},
+        {"type": "retrieve", "place": "side_mw_arkngthand", "placement": "structure", "relic": "side_mw_tally_plate",
+         "text": "Take the brass tally-plate from the sorting hall",
+         "journal": "The tally-plate lists everything Brucius's crew took. The machine has struck each item off as it brought it home. Only one remains: a regulator coil."},
+        {"type": "kill", "place": "side_mw_arkngthand", "placement": "structure", "text": "Bring down the Steam-Warden",
+         "spawn": [{"boss_id": "side_mw_steam_warden"}, {"type": "skycraft:dwarven_spider", "count": 2}],
+         "actions": "scene:side_mw_warden_falls",
+         "journal": "The Steam-Warden was not raiding anyone. It was taking back what was stolen, and it died one coil short."},
+        {"type": "deliver", "npc": "side_mw_brucius", "relic": "side_mw_tally_plate", "text": "Confront Brucius with the tally-plate",
+         "topic": "Your 'abandoned scrap' was a working warden's inventory. Where's the coil?",
+         "reply": "Sold, last month, to a Telvanni buyer who didn't haggle. Don't look at me like that. It was a machine guarding an empty house.",
+         "choices": [
+           {"label": "Then you'll seal what's left of the ruin and leave it be.", "reply": "Fine. Fine! There are other ruins. Probably with fewer opinions.", "actions": "flag:side_mw_arkngthand_sealed"},
+           {"label": "Your business. Pay me and we're done.", "reply": "A practical sort. I like you. Here, the best of the haul.", "actions": "flag:side_mw_coil_sold;loot:standard"}
+         ]}
+      ],
+      "outro": "Somewhere in Telvanni country a stolen Dwemer coil is humming in someone else's machine. I suspect I'll hear of it again.",
+      "rewards": {"gold": 500, "loot": "standard",
+                  "items": [{"item": "skycraft:dwarven_war_axe", "name": "The Warden's Due", "enchant": {"sharpness": 2, "unbreaking": 2}}]}
+    },
+    {
+      "id": "side_mw_sugar_and_salt",
+      "title": "Sugar and Salt",
+      "region": "morrowind/bitter_coast",
+      "start": "npc:side_mw_cassia",
+      "requires": ["level:18"],
+      "offer": "Any work for someone who doesn't mind mud?",
+      "pitch": "A Khajiit runner named J'darr carries moon-sugar up from the Bitter Coast. He makes his drop at a cave called Shal. Catch him there and see he doesn't run again, if you take my meaning. The Empire pays for results, not for prisoners.",
+      "desc": "Cassia Ventrilla of the Balmora excise office wants a Khajiit sugar-runner named J'darr stopped at the Bitter Coast cave of Shal, and she does not want him brought back alive.",
+      "objectives": [
+        {"type": "go", "place": "side_mw_shal", "text": "Find J'darr at the cave of Shal", "actions": "scene:side_mw_runner_found;relic:side_mw_sugar_ledger",
+         "journal": "J'darr is a bondsman of the sugar-factor Fendryn Llaro, and he gave me Llaro's ledger. Cassia Ventrilla's name is in it every month."},
+        {"type": "clear", "place": "side_mw_shal", "placement": "near", "text": "Drive off the guards sent to silence the runner",
+         "spawn": [{"type": "npc:thug", "count": 3, "name": "Sugar-Guard", "hostile": true}]},
+        {"type": "go", "place": "side_mw_yasamsi", "text": "Track Llaro to his cookhouse in Yasamsi"},
+        {"type": "clear", "place": "side_mw_yasamsi", "placement": "structure", "text": "Put out the skooma fires",
+         "spawn": [{"type": "skycraft:bandit", "count": 2, "name": "Skooma Cook"}, {"type": "npc:thug", "count": 2, "name": "Sugar-Guard", "hostile": true}]},
+        {"type": "kill", "place": "side_mw_yasamsi", "placement": "structure", "text": "Deal with Fendryn Llaro",
+         "spawn": [{"boss_id": "side_mw_fendryn_llaro"}, {"type": "skycraft:bandit", "count": 1}],
+         "journal": "Fendryn Llaro is dead among his own pots. J'darr's debt died with him."},
+        {"type": "talk", "npc": "side_mw_cassia", "text": "Settle things with Cassia Ventrilla",
+         "topic": "I found J'darr. I also found Llaro's ledger, with your name in it.",
+         "reply": "Ah. Well. A soldier's pay doesn't stretch far in Balmora. What will it take to make that book disappear?",
+         "choices": [
+           {"label": "It goes to the Legion at Ebonheart.", "reply": "Then I hope they pay you as well as Llaro paid me.", "actions": "take:side_mw_sugar_ledger;flag:side_mw_cassia_exposed;relocate:side_mw_cassia:ebonheart:-10:12"},
+           {"label": "Your purse is a good start.", "reply": "Here. Burn it where I can watch.", "actions": "take:side_mw_sugar_ledger;flag:side_mw_cassia_bought;loot:major"}
+         ]}
+      ],
+      "outro": "J'darr sent word from Hla Oad that he has bought a fishing boat. He named it after me, which is either a kindness or a warning.",
+      "rewards": {"gold": 600, "loot": "standard",
+                  "items": [{"item": "skycraft:khajiit_dagger", "name": "J'darr's Thanks", "enchant": {"sharpness": 2, "looting": 1}}]}
+    },
+    {
+      "id": "side_mw_ash_on_the_wind",
+      "title": "Ash on the Wind",
+      "region": "morrowind/vvardenfell_ashlands",
+      "start": "npc:side_mw_meralyn",
+      "requires": ["level:20"],
+      "on_start": "relocate:side_mw_galos:side_mw_ash_track:4:3",
+      "offer": "Which strider didn't come home?",
+      "pitch": "The one with my caller Galos on it, and my strongbox, and eight passengers. An ash storm caught them on the Falasmaryon track three days ago. Striders don't get lost, sera. Somebody steered it wrong.",
+      "desc": "Meralyn Hlervu of Ald'ruhn lost a silt strider, its caller and her strongbox to an ash storm on the Falasmaryon track. She thinks the strider was steered wrong on purpose.",
+      "objectives": [
+        {"type": "go", "place": "side_mw_ash_track", "text": "Find the stranded strider on the Falasmaryon track", "actions": "effect:blindness:5;scene:side_mw_storm_find"},
+        {"type": "clear", "place": "side_mw_ash_track", "placement": "near", "text": "Drive off the beasts circling the strider",
+         "spawn": [{"type": "skycraft:kagouti", "count": 2}, {"type": "skycraft:cliff_racer", "count": 3}]},
+        {"type": "talk", "npc": "side_mw_galos", "text": "Speak with Galos the caller",
+         "topic": "Galos? Meralyn sent me. What happened out here?",
+         "reply": "Our guide, a woman with a burned hand, made me leave the track when the storm came. Shelter, she said. Then she cut loose the pack-guar with the strongbox and walked into the ash. Raiders came at dusk. They went east, toward Mausur."},
+        {"type": "go", "place": "side_mw_mausur", "text": "Follow the raiders to Mausur Caverns"},
+        {"type": "clear", "place": "side_mw_mausur", "placement": "structure", "text": "Fight through the raiders",
+         "spawn": [{"type": "skycraft:bandit", "count": 3, "name": "Ash-Hand Raider"}]},
+        {"type": "kill", "place": "side_mw_mausur", "placement": "structure", "text": "Defeat the raider chief",
+         "spawn": [{"boss_id": "side_mw_dravasa"}, {"type": "skycraft:bandit", "count": 1, "name": "Ash-Hand Raider"}],
+         "journal": "The raider chief's right hand was burned to the wrist. Meralyn's guide and the Ash-Hand were the same woman."},
+        {"type": "retrieve", "place": "side_mw_mausur", "placement": "structure", "relic": "side_mw_strongbox", "text": "Recover Meralyn's strongbox"},
+        {"type": "deliver", "npc": "side_mw_meralyn", "relic": "side_mw_strongbox", "text": "Return the strongbox to Meralyn in Ald'ruhn",
+         "topic": "Your strongbox. And your guide won't be hiring on again.",
+         "reply": "Still locked. Good Hlervu work. Galos sent word the strider is walking again, slowly. I'll be hiring my own guides from now on, from people I've known since they were eggs."}
+      ],
+      "on_complete": "relocate:side_mw_galos:aldruhn:-14:4",
+      "outro": "Galos brought the strider home on foot, singing to it the whole way. Meralyn says it now refuses to leave the track for anyone.",
+      "rewards": {"gold": 650, "loot": "standard",
+                  "items": [{"item": "skycraft:netch_chestplate", "name": "Caller's Ash-Coat", "enchant": {"protection": 2, "projectile_protection": 2}}]}
+    },
+    {
+      "id": "side_mw_what_the_dead_say",
+      "title": "What the Dead Say",
+      "region": "morrowind/ascadian_isles",
+      "start": "npc:side_mw_ervyn",
+      "requires": ["level:20"],
+      "offer": "Your grandsire visits? Isn't he dead?",
+      "pitch": "Very. Dravil Sandas, dead these sixty years. He comes in my sleep and tells me he was murdered, and that I must set it right before he can rest. I am a clerk, sera, not a hero. Would you go to our tomb and hear him out?",
+      "desc": "Ervyn Sandas of Vivec is haunted in his dreams by his grandsire Dravil, who claims he was murdered. Ervyn asked me to visit the Sandas Ancestral Tomb.",
+      "objectives": [
+        {"type": "go", "place": "side_mw_sandas_tomb", "text": "Enter the Sandas Ancestral Tomb", "actions": "scene:side_mw_dravil_speaks",
+         "journal": "Dravil's shade says his brother Ulvon poisoned him. He wants Ulvon's bones taken from the Othrelas tomb and scattered in the ash."},
+        {"type": "clear", "place": "side_mw_sandas_tomb", "placement": "structure", "text": "Calm the restless Sandas guardians",
+         "spawn": [{"type": "minecraft:skeleton", "count": 3, "name": "Sandas Bonewalker"}]},
+        {"type": "go", "place": "side_mw_othrelas_tomb", "text": "Go to the Othrelas Ancestral Tomb", "actions": "scene:side_mw_ulvon_speaks"},
+        {"type": "retrieve", "place": "side_mw_othrelas_tomb", "placement": "structure", "relic": "side_mw_widow_letter", "text": "Open Ulvon's urn",
+         "spawn": [{"type": "minecraft:skeleton", "count": 2, "name": "Othrelas Guardian"}],
+         "journal": "The widow's letter tells it plainly. Dravil poisoned his brother's wife for her dowry, and Ulvon killed him for it. Dravil wants Ulvon's bones gone because they are what keeps him shut in."},
+        {"type": "cond", "cond": "night", "place": "side_mw_sandas_tomb", "text": "Return to the Sandas tomb after dark"},
+        {"type": "kill", "place": "side_mw_sandas_tomb", "placement": "structure", "text": "Put Dravil's shade down for good",
+         "spawn": [{"boss_id": "side_mw_shade_dravil"}, {"type": "minecraft:skeleton", "count": 2, "name": "Sandas Bonewalker"}],
+         "journal": "Dravil came at me with every lie he had left. When he broke, the tomb went quiet in a way it had not been for sixty years."},
+        {"type": "talk", "npc": "side_mw_ervyn", "text": "Tell Ervyn what his grandsire was",
+         "topic": "Your grandsire won't visit again. But you should know what he wanted.",
+         "reply": "Tell me. I have been afraid of him for a month. I would rather know why.",
+         "choices": [
+           {"label": "Read him the widow's letter.", "reply": "So the murderer was the one asking for justice. Ulvon gets a lamp at our shrine from now on, and Dravil gets none.", "actions": "take:side_mw_widow_letter;flag:side_mw_sandas_truth"},
+           {"label": "Tell him Dravil found peace, and burn the letter.", "reply": "Peace. Good. Then I can mourn him properly. Thank you, sera.", "actions": "take:side_mw_widow_letter;flag:side_mw_sandas_lie;loot:standard"}
+         ]}
+      ],
+      "outro": "Two brothers, one tomb's worth of grudges. The Sandas house sleeps now, and Ervyn with it.",
+      "rewards": {"gold": 700, "loot": "standard", "unique": "hopesfire"}
+    },
+    {
+      "id": "side_mw_the_boy_and_the_guar",
+      "title": "The Boy Who Followed the Guar",
+      "region": "morrowind/vvardenfell_ashlands",
+      "start": "find",
+      "find": {"place": "aldruhn", "offset": [-70, -55], "clue": "stone",
+               "text": "Chalked on a flat stone in a child's careful letters: 'Gone to bring Scuttle home. Back by supper. Don't tell Mama. N.' Small footprints and a guar's three-toed tracks lead off toward the west."},
+      "requires": ["level:15"],
+      "desc": "Near Ald'ruhn I found a child's note: a boy named N. had gone after a guar called Scuttle. The tracks lead west into the Ashlands.",
+      "objectives": [
+        {"type": "go", "place": "side_mw_milk", "text": "Follow the tracks to the cave called Milk",
+         "journal": "Inside the cave I heard a guar bleating and a boy shushing it. I also heard something much larger breathing."},
+        {"type": "clear", "place": "side_mw_milk", "placement": "structure", "text": "Kill the young kagouti in the outer cave",
+         "spawn": [{"type": "skycraft:kagouti", "count": 2, "name": "Young Kagouti"}]},
+        {"type": "kill", "place": "side_mw_milk", "placement": "structure", "text": "Kill the Tusk-Mother before she finds the boy",
+         "spawn": [{"boss_id": "side_mw_tusk_mother"}]},
+        {"type": "talk", "npc": "side_mw_nilvyn", "text": "Talk to the boy",
+         "topic": "You must be N. Your mother's looking for you.",
+         "reply": "I'm Nilvyn. Scuttle was my papa's guar. Papa's gone, and Scuttle ran off, and Mama said we'd have to sell him anyway. I wasn't going to let a kagouti eat him first."},
+        {"type": "escort", "npc": "side_mw_nilvyn", "place": "aldruhn", "text": "Bring Nilvyn and Scuttle home to Ald'ruhn"},
+        {"type": "talk", "npc": "side_mw_sedrane", "text": "Return Nilvyn to his mother",
+         "topic": "Nilvyn's home. So is the guar, limping a bit.",
+         "reply": "Nilvyn! You foolish, wonderful... I'll not sell Scuttle. His father would haunt me. Take this, sera. It was my husband's, and he would want it used."}
+      ],
+      "on_complete": "relocate:side_mw_nilvyn:aldruhn:6:-10",
+      "outro": "Nilvyn now walks Scuttle around Ald'ruhn on a rope twice as long as it needs to be.",
+      "rewards": {"gold": 350, "loot": "minor",
+                  "items": [{"item": "skycraft:chitin_bow", "name": "Llothri Herding Bow", "enchant": {"power": 2, "punch": 1}}]}
+    },
+    {
+      "id": "side_mw_the_oath_under_ash",
+      "title": "The Oath Under Ash",
+      "region": "morrowind/stonefalls",
+      "start": "find",
+      "find": {"place": "ebonheart", "offset": [-95, 70], "clue": "stone",
+               "text": "A weathered memorial stone with the three-headed seal of the old Ebonheart Pact. Three columns of names were carved here. One Nord name has been chiseled out so hard the stone is cracked. Fresh frost rimes the gap, though the day is warm."},
+      "requires": ["level:18"],
+      "desc": "Outside Ebonheart I found a Pact memorial with one Nord name gouged out. Frost clings to the gap. Something about it pointed me west, to the old Pact Cairn.",
+      "objectives": [
+        {"type": "go", "place": "side_mw_pact_cairn", "text": "Visit the Pact Cairn in the Stonefalls", "actions": "scene:side_mw_cairn_opened"},
+        {"type": "go", "place": "side_mw_hjorvald_barrow", "text": "Follow the frozen bootprints to the old barrow"},
+        {"type": "clear", "place": "side_mw_hjorvald_barrow", "placement": "structure", "text": "Fight through the barrow's oath-sworn dead",
+         "spawn": [{"type": "skycraft:draugr", "count": 4, "name": "Oath-Sworn Draugr"}]},
+        {"type": "kill", "place": "side_mw_hjorvald_barrow", "placement": "structure", "text": "Lay Hjorvald Oath-Ash to rest",
+         "spawn": [{"boss_id": "side_mw_hjorvald"}, {"type": "skycraft:draugr", "count": 2}]},
+        {"type": "retrieve", "place": "side_mw_hjorvald_barrow", "placement": "structure", "relic": "side_mw_oath_ring", "text": "Take Hjorvald's oath-ring",
+         "journal": "The ring bears a Dunmer captain's mark as well as Hjorvald's. Someone of the Pact took his oath, then took his name."},
+        {"type": "deliver", "npc": "side_mw_ungrid", "relic": "side_mw_oath_ring", "text": "Bring the oath-ring to Ungrid Ash-Born in Ebonheart",
+         "topic": "This belonged to a Nord whose name was cut off the Pact stone. I think he was wronged.",
+         "reply": "That captain's mark... he was the hero of the Stonefalls muster, by the histories. The histories may need correcting.",
+         "choices": [
+           {"label": "Carve Hjorvald's name back into the stone.", "reply": "I'll do it myself, and put the captain's beside it with the truth. History should be uncomfortable.", "actions": "flag:side_mw_hjorvald_restored"},
+           {"label": "Leave the stone as it is. The dead are quiet now.", "reply": "Quiet isn't the same as right. But I'll keep the ring, and the story.", "actions": "flag:side_mw_hjorvald_forgotten;loot:standard"}
+         ]}
+      ],
+      "outro": "A Nord who kept his word was cut from the stone by a Dunmer who didn't. Three peoples swore that oath; it took a stranger to finish it.",
+      "rewards": {"gold": 550, "loot": "standard",
+                  "items": [{"item": "skycraft:nordic_battleaxe", "name": "Hjorvald's Answer", "enchant": {"sharpness": 2, "smite": 2}}]}
+    },
+    {
+      "id": "side_mw_two_herds",
+      "title": "Two Herds, One Spring",
+      "region": "morrowind/grazelands",
+      "start": "npc:side_mw_drulvos",
+      "requires": ["level:24"],
+      "offer": "Trouble with the neighbours?",
+      "pitch": "Trouble with Mavrins, which is worse. Since spring their bull netch have gone mad and wrecked my fences, and Orvesa Mavrin swears my family did it. My grandfather and hers shared the spring between us for forty years. Go and talk sense to her. She won't hear it from a Hleth.",
+      "desc": "Drulvos Hleth, a netch herder in the Grazelands, is feuding with the Mavrin family over a shared spring. Each blames the other for netch going mad.",
+      "objectives": [
+        {"type": "talk", "npc": "side_mw_orvesa", "text": "Hear Orvesa Mavrin's side",
+         "topic": "Drulvos Hleth says he didn't touch your herd.",
+         "reply": "Then why does my bull come back from the spring frothing? Why did Old Thundergut stave in my barn? The Hleths want the whole spring. Go and look at it yourself."},
+        {"type": "go", "place": "side_mw_gall_spring", "text": "Inspect the shared spring", "actions": "scene:side_mw_spring_sour",
+         "journal": "Someone has been tipping gall-root into the spring. It drives netch mad. Neither family would poison its own water."},
+        {"type": "clear", "place": "side_mw_gall_spring", "placement": "near", "text": "Put down the maddened netch",
+         "spawn": [{"type": "skycraft:netch", "count": 3, "name": "Maddened Netch"}]},
+        {"type": "kill", "place": "side_mw_gall_spring", "placement": "near", "text": "Bring down Old Thundergut",
+         "spawn": [{"boss_id": "side_mw_thundergut"}]},
+        {"type": "retrieve", "place": "side_mw_setus", "placement": "structure", "relic": "side_mw_gall_sack", "text": "Search the Setus Egg Mine for the poisoner's supplies",
+         "spawn": [{"type": "npc:thug", "count": 3, "name": "Mine Bruiser", "hostile": true}],
+         "journal": "The gall-root came from the Setus mine. Its overseer wants the spring for a new kwama shaft, and two feuding families make for easy buyers of a cheap pasture."},
+        {"type": "talk", "npc": "side_mw_drulvos", "text": "Tell Drulvos Hleth who poisoned the spring",
+         "topic": "It wasn't the Mavrins. The Setus mine poisoned the spring to drive you both off.",
+         "reply": "The mine. Forty years of shouting at the wrong family. Well, someone has to have the spring now. Who?",
+         "choices": [
+           {"label": "Share it, like your grandfathers did.", "reply": "Orvesa will hate that. So will I. We'll manage.", "actions": "flag:side_mw_spring_shared"},
+           {"label": "The Hleths. You asked for help first.", "reply": "Ha! I'll send her a fair price. Probably.", "actions": "flag:side_mw_spring_hleth;loot:standard"},
+           {"label": "The Mavrins. They lost a barn.", "reply": "You're a hard judge. She did lose a barn. Fine.", "actions": "flag:side_mw_spring_mavrin"}
+         ]}
+      ],
+      "outro": "Two netch-herding families, one spring and a kwama mine that thought they'd be easy. They weren't, in the end.",
+      "rewards": {"gold": 700, "loot": "standard",
+                  "items": [{"item": "skycraft:chitin_mace", "name": "Herder's Goad", "enchant": {"knockback": 2, "sharpness": 2}}]}
+    },
+    {
+      "id": "side_mw_wax_and_shell",
+      "title": "Wax and Shell",
+      "region": "morrowind/azuras_coast",
+      "start": "npc:side_mw_bralsa",
+      "requires": ["level:26"],
+      "offer": "What happened to your harvesters?",
+      "pitch": "Six of them went down to the cove at Nallit on Azura's Coast to scrape dreugh wax. None came back. Dreugh are nasty but they are stupid, and my people know their work. Find out what went wrong, and bring back whatever wax you can.",
+      "desc": "Bralsa Teleri, a wax merchant in Sadrith Mora, lost six harvesters at the dreugh cove of Nallit on Azura's Coast.",
+      "objectives": [
+        {"type": "go", "place": "side_mw_nallit", "text": "Go to the cove at Nallit", "actions": "scene:side_mw_cove_wreck"},
+        {"type": "clear", "place": "side_mw_nallit", "placement": "near", "text": "Fight off the dreugh warriors",
+         "spawn": [{"type": "skycraft:land_dreugh", "count": 3, "name": "Dreugh Warrior"}]},
+        {"type": "retrieve", "place": "side_mw_nallit", "placement": "near", "offset": [6, 4], "relic": "side_mw_egg_crate", "text": "Open the clicking crate",
+         "journal": "Dreugh eggs, six of them, packed for market. The harvesters weren't scraping wax. They were robbing a nest, and the mother followed."},
+        {"type": "kill", "place": "side_mw_nallit", "placement": "structure", "text": "Face the Shell-Mother in her cave",
+         "spawn": [{"boss_id": "side_mw_shell_mother"}, {"type": "skycraft:land_dreugh", "count": 1}],
+         "journal": "Shell-Mother Kharr is dead. The cave held what was left of the harvesters, and nothing else."},
+        {"type": "deliver", "npc": "side_mw_bralsa", "relic": "side_mw_egg_crate", "text": "Bring the crate of eggs to Bralsa",
+         "topic": "Your harvesters died robbing a dreugh nest. Did you know?",
+         "reply": "Dreugh eggs fetch ten times what wax does at a Telvanni table. Of course I knew. What do I do with them now?",
+         "choices": [
+           {"label": "Sell them, and pay your harvesters' families out of it.", "reply": "That is... fair. Expensive, but fair.", "actions": "flag:side_mw_eggs_sold;loot:standard"},
+           {"label": "Nothing. I'm taking them back to the sea.", "reply": "Then I've lost six harvesters and a fortune. Go on, then. The sea's welcome to them.", "actions": "flag:side_mw_eggs_returned"}
+         ]}
+      ],
+      "outro": "Bralsa still sells dreugh wax. She has stopped asking her harvesters where it comes from, and they have stopped telling her.",
+      "rewards": {"gold": 750, "loot": "major",
+                  "items": [{"item": "skycraft:bonemold_shield", "name": "Shell-Mother's Ward", "enchant": {"protection": 3, "thorns": 1}}]}
+    },
+    {
+      "id": "side_mw_the_quiet_cup",
+      "title": "The Quiet Cup",
+      "region": "morrowind/deshaan",
+      "start": "npc:side_mw_saryne",
+      "requires": ["level:28"],
+      "offer": "You look like someone with a secret.",
+      "pitch": "Everyone in the palace has one. Mine is that a food-taster died last week, and the steward has ruled it a weak heart. It wasn't. The wine came from the old Deshaan cellars. I can't be seen asking. You can.",
+      "desc": "Saryne Dalvilu, a palace scribe in Mournhold, believes a royal food-taster was poisoned through wine from the old Deshaan cellars, and that the steward is covering it up.",
+      "objectives": [
+        {"type": "talk", "npc": "side_mw_dethan", "text": "Question the palace steward, Dethan Raloth",
+         "topic": "About the taster who died last week.",
+         "reply": "A weak heart. It happens. The palace does not need strangers stirring up talk of poison. Good day."},
+        {"type": "go", "place": "side_mw_deshaan_cellars", "text": "Search the old Deshaan wine cellars"},
+        {"type": "clear", "place": "side_mw_deshaan_cellars", "placement": "structure", "text": "Deal with the cellar's new tenants",
+         "spawn": [{"type": "npc:thug", "count": 3, "name": "Cellar Thug", "hostile": true}, {"type": "npc:assassin", "count": 1, "name": "Cellar Watcher", "hostile": true}]},
+        {"type": "retrieve", "place": "side_mw_deshaan_cellars", "placement": "structure", "relic": "side_mw_cipher_order", "text": "Find the poisoner's orders",
+         "journal": "The orders are written in a palace cipher, in a fine scribe's hand. They name a safehouse: Villa Dralor."},
+        {"type": "kill", "place": "side_mw_dralor_villa", "placement": "structure", "text": "Find the poisoner at Villa Dralor",
+         "spawn": [{"boss_id": "side_mw_quiet_cup"}, {"type": "npc:assassin", "count": 2, "hostile": true}],
+         "actions": "scene:side_mw_quiet_cup_last",
+         "journal": "Vireth the Quiet Cup is dead. With her last breath she told me to ask the scribe who writes her orders. Saryne sent me to tidy up her own loose end."},
+        {"type": "talk", "npc": "side_mw_saryne", "text": "Confront Saryne Dalvilu",
+         "topic": "Your cipher. Your hand. Your poisoner. Why send me?",
+         "reply": "Because Vireth was getting greedy, and you were available. The taster was a mistake; the cup was meant for someone who deserves it. So. What now?",
+         "choices": [
+           {"label": "Now the steward reads your orders.", "reply": "Raloth will bury it to save face. But you're welcome to try.", "actions": "take:side_mw_cipher_order;flag:side_mw_saryne_exposed;relocate:side_mw_saryne:mournhold:-20:20"},
+           {"label": "Now you pay me twice what you paid her.", "reply": "Done. I do admire practical people.", "actions": "take:side_mw_cipher_order;flag:side_mw_saryne_bought;loot:major"}
+         ]}
+      ],
+      "outro": "In Mournhold, the scribes write the history and occasionally the obituaries. I know which one I nearly ended up in.",
+      "rewards": {"gold": 800, "loot": "major",
+                  "items": [{"item": "skycraft:glass_dagger", "name": "Taster's Mercy", "enchant": {"sharpness": 3, "looting": 1}}]}
+    },
+    {
+      "id": "side_mw_the_razor_that_remembers",
+      "title": "The Razor That Remembers",
+      "region": "morrowind/molag_amur",
+      "start": "find",
+      "find": {"place": "side_mw_ald_kharvenu", "offset": [85, -60], "clue": "altar",
+               "text": "A black altar set alone in the scrub, its candles burning without wax. A thin groove runs across the stone, the exact shape of a razor's edge, and it is wet. Beyond it, the ruin of Ald Kharvenu seems to lean toward you."},
+      "requires": ["level:30"],
+      "desc": "I found a Daedric altar near the ruin of Ald Kharvenu in Molag Amur, still wet with something. The ruin belongs to Mehrunes Dagon, and it was waiting for me.",
+      "objectives": [
+        {"type": "go", "place": "side_mw_ald_kharvenu", "text": "Enter Ald Kharvenu", "actions": "scene:side_mw_razor_wakes"},
+        {"type": "clear", "place": "side_mw_ald_kharvenu", "placement": "structure", "text": "Destroy the ruin's daedric servants",
+         "spawn": [{"type": "skycraft:scamp", "count": 3}, {"type": "skycraft:dremora", "count": 2, "name": "Kharvenu Dremora"}]},
+        {"type": "cond", "cond": "night", "place": "side_mw_ald_kharvenu", "text": "Return at night, when the ruin wakes"},
+        {"type": "kill", "place": "side_mw_ald_kharvenu", "placement": "structure", "text": "Banish Kynval the Razor-Tongued",
+         "spawn": [{"boss_id": "side_mw_kynval"}, {"type": "skycraft:scamp", "count": 2}]},
+        {"type": "retrieve", "place": "side_mw_ald_kharvenu", "placement": "structure", "relic": "side_mw_razor_shard", "text": "Take the razor-shard from the altar",
+         "actions": "effect:wither:6;effect:slowness:30",
+         "journal": "The shard cut me through the cloth of my pack. The cut won't close. The Daedra-hunters of Necrom will know what to do with it."},
+        {"type": "deliver", "npc": "side_mw_tarvyn", "relic": "side_mw_razor_shard", "text": "Take the shard to Tarvyn Faleran in Necrom",
+         "topic": "This came from Ald Kharvenu. It's cursed, and it's cutting me.",
+         "reply": "A piece of Dagon's Razor, or something that badly wants to be. I can break it on a Temple anvil, or I can sell it to a Telvanni who wants to bleed slowly. Your shard. Your choice.",
+         "choices": [
+           {"label": "Break it.", "reply": "Hold still. This will ring.", "actions": "flag:side_mw_razor_broken"},
+           {"label": "Sell it.", "reply": "Brave, or foolish. Here's your share. Don't come crying when the Telvanni buyer turns up headless.", "actions": "flag:side_mw_razor_sold;loot:major"}
+         ]}
+      ],
+      "outro": "Ald Kharvenu is quiet now. In Necrom, Tarvyn swears the anvil he broke the shard on still bleeds on Sundas mornings.",
+      "rewards": {"gold": 900, "loot": "major", "unique": "trueflame"}
+    },
+    {
+      "id": "side_mw_the_unquiet_ferry",
+      "title": "The Unquiet Ferry",
+      "region": "morrowind/molag_amur",
+      "start": "npc:side_mw_hlavora",
+      "requires": ["level:32"],
+      "offer": "What troubles the City of the Dead?",
+      "pitch": "The dead have begun walking out of the lower ossuaries at night, and none of my rites will keep them in. They come up the steps blinking, sera, as if confused. The coffins all pass through Mourners' Landing first. Start there.",
+      "desc": "Hlavora Selvani, a priest of Necrom's dead, says corpses are walking out of the lower ossuaries. All the coffins come through Mourners' Landing.",
+      "objectives": [
+        {"type": "go", "place": "side_mw_mourners_landing", "text": "Inspect the coffins at Mourners' Landing", "actions": "scene:side_mw_coffin_knock;relic:side_mw_varyn_seal",
+         "journal": "The 'dead' are not dead. A man woke in his coffin, drugged with embalming tea. The seal on his coffin belongs to the Necrom embalmers."},
+        {"type": "clear", "place": "side_mw_mourners_landing", "placement": "near", "text": "Fight off the ferry's wardens",
+         "spawn": [{"type": "npc:necromancer", "count": 1, "name": "Ferry Warden", "hostile": true}, {"type": "minecraft:skeleton", "count": 2}]},
+        {"type": "deliver", "npc": "side_mw_hlavora", "relic": "side_mw_varyn_seal", "text": "Show Hlavora the embalmer's seal",
+         "topic": "Your walking dead are living pilgrims, drugged and coffined. This seal was on the lid.",
+         "reply": "Master Varyn's seal. He embalms half of Necrom. If he is sealing the living into the ossuaries, he is doing it for someone who wants them pliant. Go below, and be careful of what you find awake."},
+        {"type": "go", "place": "side_mw_necrom_ossuary", "text": "Descend into the lower ossuaries"},
+        {"type": "clear", "place": "side_mw_necrom_ossuary", "placement": "structure", "text": "Get past the hollow mourners",
+         "spawn": [{"type": "minecraft:zombie", "count": 4, "name": "Hollow Mourner"}]},
+        {"type": "kill", "place": "side_mw_necrom_ossuary", "placement": "structure", "text": "Stop Master Embalmer Aldos Varyn",
+         "spawn": [{"boss_id": "side_mw_aldos_varyn"}, {"type": "minecraft:skeleton", "count": 2}],
+         "journal": "Varyn was making thralls of the pilgrims he coffined. The ones who woke early were the ones whose tea he'd watered down to save coin."},
+        {"type": "talk", "npc": "side_mw_hlavora", "text": "Tell Hlavora what Varyn was doing",
+         "topic": "Varyn is dead. The ossuaries are full of half-made thralls.",
+         "reply": "Then we wake the ones we can and bury the rest honestly. How shall Necrom remember him?",
+         "choices": [
+           {"label": "As what he was. Put his name on the gate.", "reply": "Every embalmer in Necrom will read it on the way to work. Good.", "actions": "flag:side_mw_varyn_named"},
+           {"label": "Quietly. The city needs to trust its dead.", "reply": "A kind lie. Necrom is full of them already. Take this, for your silence.", "actions": "flag:side_mw_varyn_hidden;loot:standard"}
+         ]}
+      ],
+      "outro": "In the City of the Dead, it turned out the danger was a man who couldn't wait for people to die.",
+      "rewards": {"gold": 900, "loot": "major",
+                  "items": [{"item": "skycraft:silver_dagger", "name": "Embalmer's Hook", "enchant": {"smite": 3, "sharpness": 2}}]}
+    },
+    {
+      "id": "side_mw_the_gray_lantern",
+      "title": "The Gray Lantern",
+      "region": "morrowind/sheogorad",
+      "start": "find",
+      "find": {"place": "side_mw_bone_reef", "offset": [18, 12], "clue": "skeleton",
+               "text": "A sailor's bones on the rocks, still clutching a broken spyglass. Scratched on the brass: 'Followed the light. The light was wrong.' Out to the north, an old tower burns with a gray flame."},
+      "requires": ["level:38"],
+      "desc": "On a reef in Sheogorad I found a drowned sailor who wrote that the light he followed was wrong. A gray lantern burns in an old tower to the north.",
+      "objectives": [
+        {"type": "go", "place": "side_mw_gray_lantern", "text": "Reach the tower of the Gray Lantern", "actions": "scene:side_mw_lantern_lit"},
+        {"type": "clear", "place": "side_mw_gray_lantern", "placement": "near", "text": "Fight off the cliff racers nesting on the tower",
+         "spawn": [{"type": "skycraft:cliff_racer", "count": 4}]},
+        {"type": "clear", "place": "side_mw_gray_lantern", "placement": "structure", "text": "Clear out the wreckers",
+         "spawn": [{"type": "skycraft:bandit", "count": 3, "name": "Lantern-Wrecker"}, {"type": "npc:thug", "count": 1, "name": "Salvage Boss", "hostile": true}]},
+        {"type": "kill", "place": "side_mw_gray_lantern", "placement": "structure", "text": "Defeat the lantern-keeper",
+         "spawn": [{"boss_id": "side_mw_bolvyn"}, {"type": "skycraft:bandit", "count": 2, "name": "Lantern-Wrecker"}],
+         "actions": "scene:side_mw_bolvyn_falls"},
+        {"type": "retrieve", "place": "side_mw_gray_lantern", "placement": "structure", "relic": "side_mw_wreck_ledger", "text": "Take the keeper's ledger",
+         "journal": "Twenty years of wrecks, kept in a fisherman's tidy hand. The first page is signed: Bolvyn, son of Hjal, of Dagon Fel."},
+        {"type": "deliver", "npc": "side_mw_hjolfrid", "relic": "side_mw_wreck_ledger", "text": "Bring the ledger to Hjolfrid Salt-Eye in Dagon Fel",
+         "topic": "Did you have a brother named Bolvyn?",
+         "reply": "Had. He drowned twenty years back, the night the north boats went down. Why have you got his writing?",
+         "choices": [
+           {"label": "Tell her the truth.", "reply": "So I've been mourning the man who drowned the others. Give me the book. Every family in Dagon Fel deserves to read their page.", "actions": "flag:side_mw_bolvyn_truth"},
+           {"label": "Tell her he died a keeper, trying to save ships.", "reply": "A keeper. That's like him. Thank you, outlander. Here, it isn't much.", "actions": "flag:side_mw_bolvyn_lie;loot:major"}
+         ]}
+      ],
+      "outro": "The Gray Lantern is dark now. Ships out of Dagon Fel are steering by the stars again, which is how it should have been all along.",
+      "rewards": {"gold": 1100, "loot": "major",
+                  "items": [{"item": "skycraft:ebony_bow", "name": "Wrecker's Reckoning", "enchant": {"power": 3, "punch": 1, "flame": 1}}]}
+    },
+    {
+      "id": "side_mw_the_last_sleeper",
+      "title": "The Last Sleeper",
+      "region": "morrowind/red_mountain",
+      "start": "find",
+      "find": {"place": "side_mw_sharapli", "offset": [-75, 60], "clue": "altar",
+               "text": "A small ash-statue with a face pressed into it, set on a stone and ringed with burnt-out candles. Tucked beneath it is a letter: 'Aldam, the dreams have stopped being dreams. Don't look for me. F.' The ash-statue's eyes are wet."},
+      "requires": ["level:40"],
+      "desc": "Near Sharapli under Red Mountain I found an ash-statue offering and a letter from someone named F. to an Aldam. The Sixth House is gone, but somebody is still dreaming its dreams.",
+      "objectives": [
+        {"type": "go", "place": "side_mw_sharapli", "text": "Enter Sharapli", "actions": "scene:side_mw_sleepers"},
+        {"type": "clear", "place": "side_mw_sharapli", "placement": "structure", "text": "Break the sleepers' circle",
+         "spawn": [{"type": "skycraft:ash_spawn", "count": 4, "name": "Ash Ghoul"}, {"type": "npc:necromancer", "count": 1, "name": "Dreaming Sleeper", "hostile": true}]},
+        {"type": "retrieve", "place": "side_mw_sharapli", "placement": "structure", "relic": "side_mw_dream_journal", "text": "Take the journal from the sleepers' shrine",
+         "journal": "The journal belongs to Fenas Rothri, brother of the Balmora apothecary Aldam Rothri. He came to Red Mountain to cure his dreams and found a cult willing to finish them."},
+        {"type": "deliver", "npc": "side_mw_aldam", "relic": "side_mw_dream_journal", "text": "Bring Fenas's journal to Aldam Rothri in Balmora",
+         "topic": "Your brother Fenas. He's with what's left of the Sixth House.",
+         "reply": "I sold him draughts for the dreams for a year. I thought they were working. Maran-Adon, the last pages say. Bring him home. Whatever's left of him, bring it home."},
+        {"type": "go", "place": "side_mw_maran_adon", "text": "Go to Maran-Adon on the slopes of Red Mountain", "actions": "scene:side_mw_thelvas_speaks"},
+        {"type": "clear", "place": "side_mw_maran_adon", "placement": "structure", "text": "Cut through the Ash-Kin's guard",
+         "spawn": [{"type": "skycraft:ash_spawn", "count": 4, "name": "Ash Ghoul"}, {"type": "skycraft:ash_spawn", "count": 1, "name": "Ash Slave", "hp": 2.0}]},
+        {"type": "kill", "place": "side_mw_maran_adon", "placement": "structure", "text": "Destroy Dagoth Thelvas",
+         "spawn": [{"boss_id": "side_mw_dagoth_thelvas"}, {"type": "skycraft:ash_spawn", "count": 2}],
+         "actions": "scene:side_mw_thelvas_falls;effect:nausea:6",
+         "journal": "Dagoth Thelvas was Fenas Rothri. The cult did not take a captive. It made a new kinsman out of a man who couldn't sleep."},
+        {"type": "talk", "npc": "side_mw_aldam", "text": "Tell Aldam how his brother ended",
+         "topic": "I found Fenas. I'm sorry. There wasn't enough of him left to bring home.",
+         "reply": "He said my name? Then some of him was still there. Some of him was still mine.",
+         "choices": [
+           {"label": "He said your name at the very end.", "reply": "Then I'll stop selling dream-draughts. They never worked anyway. Take this. He'd want it used against them.", "actions": "flag:side_mw_fenas_mourned"},
+           {"label": "The cult is broken. Others may still be dreaming.", "reply": "Then I'll watch my customers' eyes. Take this, and go armed.", "actions": "flag:side_mw_sleepers_watched;loot:major"}
+         ]}
+      ],
+      "outro": "The Mountain's heart is long gone, but its dreams outlived it. One of them had my friend's brother's face.",
+      "rewards": {"gold": 1400, "loot": "legendary", "unique": "keening", "perks": 1}
+    },
+    {
+      "id": "side_mw_the_bloom_of_tel_ravani",
+      "title": "The Bloom of Tel Ravani",
+      "region": "morrowind/telvannis",
+      "start": "npc:side_mw_faldrys",
+      "requires": ["level:40"],
+      "offer": "Your master must keep you busy.",
+      "pitch": "Master Uvren Falavel keeps me busy, and today he keeps me worried. While he sits at council, something has broken out of his growing-vats at Tel Ravani. He says a 'specimen'. He says it quietly. Find it, destroy it, and nobody in Sadrith Mora need ever ask what it was.",
+      "desc": "Faldrys Uvel, steward to the Telvanni wizard Uvren Falavel, says an experiment escaped the growth-vats at Tel Ravani. He wants it found and quietly destroyed.",
+      "objectives": [
+        {"type": "go", "place": "side_mw_tel_ravani", "text": "Search Uvren Falavel's tower, Tel Ravani", "actions": "scene:side_mw_ravani_empty"},
+        {"type": "retrieve", "place": "side_mw_tel_ravani", "placement": "structure", "relic": "side_mw_day_book", "text": "Search the vat-room for notes",
+         "spawn": [{"type": "skycraft:flame_atronach", "count": 2, "name": "Vat-Room Warden"}],
+         "journal": "The day-book belonged to Velsa Taren, Falavel's apprentice. She volunteered for 'a small graft'. The entries grow shorter, then stop."},
+        {"type": "go", "place": "side_mw_spore_grove", "text": "Follow the spore-trail to the grove", "actions": "scene:side_mw_bloom_pleads",
+         "journal": "The specimen is Velsa. She did not escape; Falavel threw her out. She begged me to report her dead."},
+        {"type": "clear", "place": "side_mw_spore_grove", "placement": "near", "text": "Fight off the hunters Falavel sent after her",
+         "spawn": [{"type": "skycraft:storm_atronach", "count": 1, "name": "Falavel's Leash"}, {"type": "skycraft:flame_atronach", "count": 2, "name": "Falavel's Leash"}],
+         "actions": "scene:side_mw_bloom_turns"},
+        {"type": "kill", "place": "side_mw_spore_grove", "placement": "near", "text": "Free Velsa from the binding",
+         "spawn": [{"boss_id": "side_mw_velsas_bloom"}, {"type": "skycraft:spriggan", "count": 2, "name": "Grove Sprout"}],
+         "journal": "The hunters were only a signal. The binding-rune Falavel carved into her finished the job they started. There was nothing left of Velsa to save but a seed."},
+        {"type": "retrieve", "place": "side_mw_spore_grove", "placement": "near", "offset": [3, -2], "relic": "side_mw_heartseed", "text": "Take Velsa's heartseed"},
+        {"type": "deliver", "npc": "side_mw_faldrys", "relic": "side_mw_heartseed", "text": "Report to Faldrys Uvel in Sadrith Mora",
+         "topic": "Your master's specimen was his own apprentice. He threw her out and then sent atronachs to finish her.",
+         "reply": "Velsa. I sent her her post every week. He told me she'd gone home to Tear. Give me the seed. What do I do with it?",
+         "choices": [
+           {"label": "Plant it in the grove where she wanted to stay.", "reply": "I'll do it myself. And I'll keep my master's books more carefully, for anyone who asks. Take this from his vault. He won't miss it; he never understood it.", "actions": "flag:side_mw_velsa_planted"},
+           {"label": "Put it on Falavel's desk with her day-book.", "reply": "He'll have me flayed. Good. I'd like to see his face first. Here, from his vault, before he locks it.", "actions": "flag:side_mw_falavel_shamed;loot:major"}
+         ]}
+      ],
+      "outro": "A Telvanni master tried to grow something new and made a victim instead. Tel Ravani's vats are dry now, and the grove by the sea is quietly, slowly thinking.",
+      "rewards": {"gold": 1400, "loot": "legendary", "unique": "sunder", "perks": 1}
+    }
+  ]
+}

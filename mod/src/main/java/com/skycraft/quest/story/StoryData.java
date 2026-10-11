@@ -36,13 +36,17 @@ import java.util.Map;
  *   "npcs":   [{"id","name","role","place","offset":[dx,dz],"female","essential","greet"}],
  *   "relics": [{"id","name","desc","icon"}],
  *   "scenes": {"id": [["speaker", "text"], ...]},
- *   "quests": [{"id" (required),"title","desc","giver","start":"auto|npc:&lt;id&gt;|manual","offer","pitch",
+ *   "bosses": {"id": {"name","type","hp","dmg","level","weapon","armor","gear":{"head","chest","legs","feet","offhand"},
+ *                     "drop":"unique:&lt;id&gt;|loot:&lt;tier&gt;|ns:item","glow"}},
+ *   "quests": [{"id" (required),"title","desc","giver","start":"auto|npc:&lt;id&gt;|manual|find","offer","pitch",
+ *               "find":{"place","offset","radius","clue":"skeleton|stone|lever|altar|grave|lectern|urn|totem","text"},
  *               "requires":["quest:x","flag:y","!flag:z","level:5","faction:college:1"],"stage":3,
  *               "on_start":"actions","on_complete":"actions","outro":"journal text",
- *               "rewards":{"gold","items":[],"perks","words":[],"house","flags":[],"title","faction_points","join"},
+ *               "rewards":{"gold","items":[],"perks","words":[],"house","flags":[],"title","faction_points","join",
+ *                          "loot":"minor|standard|major|legendary","unique":"&lt;legendary unique id&gt;"},
  *               "objectives":[{"type" (required),"text","place","offset","radius","npc","topic","reply","journal",
  *                              "item","count","entity","shout","flag","cond","hours","dim","relic","flee_at",
- *                              "spawn":[{spawn spec}],"placement","at_player","label","actions",
+ *                              "spawn":[{spawn spec} or {"boss_id": "&lt;boss&gt;"}],"placement","at_player","label","actions",
  *                              "choices":[{"npc","label","reply","actions"}]}]}] }
  * </pre>
  */
@@ -99,6 +103,23 @@ public final class StoryData {
         public int factionPoints;
         public boolean join;
         public int souls;
+        /** A loot-module reward tier rolled per rewarded player ({@code minor}, {@code standard}, {@code major}, {@code legendary}). */
+        public String loot = "";
+        /** A legendary unique ({@code loot/LegendaryUniques}) handed to every rewarded player. */
+        public String unique = "";
+    }
+
+    /**
+     * How a hidden quest begins ({@code "start": "find"}): a clue left in the world at a place (a skeleton, a carved
+     * stone, a lever...) that starts the quest when a player touches it or stands on it. See {@link Discoveries}.
+     */
+    public static final class FindDef {
+        public String place = "";
+        public int dx, dz;
+        /** Trigger distance around the clue, in blocks. */
+        public int radius = 3;
+        public String clue = "stone";
+        public Txt text;
     }
 
     public static final class QuestDef {
@@ -121,6 +142,9 @@ public final class StoryData {
         public boolean repeatable;
         /** Values resolved when the quest starts, referenced as {@code @name} in places and actions. */
         public final Map<String, String> vars = new LinkedHashMap<>();
+        /** The clue that starts a hidden quest ({@code start: "find"}), or null. */
+        @Nullable
+        public FindDef find;
 
         public boolean isMain() {
             return category == Quest.Category.MAIN;
@@ -153,12 +177,21 @@ public final class StoryData {
     public record SceneLine(String speaker, Txt text) {
     }
 
+    /**
+     * A unique named foe ({@code bosses} block of a quest file): an existing creature with a name, level, health and
+     * damage multipliers, gear and a drop. A spawn spec {@code {"boss_id": "<id>"}} becomes this boss as the
+     * objective's target; the action {@code boss:<id>} raises it next to the party.
+     */
+    public record BossDef(String id, Txt name, JsonObject spec) {
+    }
+
     private static final Map<String, QuestDef> QUESTS = new LinkedHashMap<>();
     private static final Map<String, NpcDef> NPCS = new LinkedHashMap<>();
     private static final Map<String, RelicDef> RELICS = new LinkedHashMap<>();
     private static final Map<String, List<SceneLine>> SCENES = new LinkedHashMap<>();
     private static final Map<String, Txt> SPEAKERS = new LinkedHashMap<>();
     private static final Map<String, List<QuestDef>> BY_LINE = new LinkedHashMap<>();
+    private static final Map<String, BossDef> BOSSES = new LinkedHashMap<>();
     private static boolean loaded;
 
     private StoryData() {}
@@ -219,6 +252,17 @@ public final class StoryData {
         return SCENES.getOrDefault(id, List.of());
     }
 
+    @Nullable
+    public static BossDef boss(String id) {
+        ensureLoaded();
+        return BOSSES.get(id);
+    }
+
+    public static Collection<BossDef> bosses() {
+        ensureLoaded();
+        return Collections.unmodifiableCollection(BOSSES.values());
+    }
+
     /** Display name of a scene speaker: a quest NPC, a declared speaker or the id itself. */
     public static Component speaker(String id) {
         NpcDef npc = npc(id);
@@ -249,9 +293,41 @@ public final class StoryData {
                 Skycraft.LOGGER.error("Bad story quest file {}", file, e);
             }
         }
+        expandBosses();
         validate();
-        Skycraft.LOGGER.info("Loaded {} story quests in {} questlines, {} quest NPCs, {} relics, {} scenes",
-                QUESTS.size(), BY_LINE.size(), NPCS.size(), RELICS.size(), SCENES.size());
+        Skycraft.LOGGER.info("Loaded {} story quests in {} questlines, {} quest NPCs, {} relics, {} scenes, {} unique bosses",
+                QUESTS.size(), BY_LINE.size(), NPCS.size(), RELICS.size(), SCENES.size(), BOSSES.size());
+    }
+
+    /**
+     * Turns every {@code {"boss_id": "<id>"}} spawn into the boss's full spec (its own fields win over the boss's,
+     * so a quest may still say {@code "count"} or {@code "if"}). Bosses may live in any file, hence after loading.
+     */
+    private static void expandBosses() {
+        for (QuestDef q : QUESTS.values()) {
+            for (ObjDef o : q.objectives) {
+                for (JsonObject s : o.spawns) {
+                    if (!s.has("boss_id")) continue;
+                    BossDef b = BOSSES.get(str(s, "boss_id", ""));
+                    if (b == null) {
+                        Skycraft.LOGGER.warn("Story quest {} names unknown boss {}", q.id, str(s, "boss_id", ""));
+                        continue;
+                    }
+                    bossSpec(b, s);
+                }
+            }
+        }
+    }
+
+    /** Writes a boss's spec into {@code into} (fields already there are kept). */
+    static void bossSpec(BossDef b, JsonObject into) {
+        for (Map.Entry<String, JsonElement> e : b.spec().entrySet()) {
+            if (!into.has(e.getKey())) into.add(e.getKey(), e.getValue().deepCopy());
+        }
+        if (!into.has("target")) into.addProperty("target", true);
+        into.addProperty("boss", true);
+        into.addProperty("name", b.name().text());
+        into.addProperty("name_key", b.name().key());
     }
 
     private static void loadFile(JsonObject root) {
@@ -309,6 +385,14 @@ public final class StoryData {
                 SCENES.put(e.getKey(), lines);
             }
         }
+        if (root.has("bosses")) {
+            for (Map.Entry<String, JsonElement> e : root.getAsJsonObject("bosses").entrySet()) {
+                JsonObject o = e.getValue().getAsJsonObject().deepCopy();
+                Txt name = new Txt("story.skycraft.boss." + e.getKey(), str(o, "name", e.getKey()));
+                o.remove("name");
+                if (BOSSES.putIfAbsent(e.getKey(), new BossDef(e.getKey(), name, o)) != null) Skycraft.LOGGER.warn("Duplicate story boss {}", e.getKey());
+            }
+        }
         int order = 0;
         for (JsonElement e : arr(root, "quests")) {
             QuestDef q = quest(e.getAsJsonObject(), line, category, faction, region);
@@ -359,6 +443,20 @@ public final class StoryData {
             w.factionPoints = r.has("faction_points") ? r.get("faction_points").getAsInt() : 0;
             w.join = r.has("join") && r.get("join").getAsBoolean();
             w.souls = r.has("souls") ? r.get("souls").getAsInt() : 0;
+            w.loot = str(r, "loot", "");
+            w.unique = str(r, "unique", "");
+        }
+        if (o.has("find")) {
+            JsonObject f = o.getAsJsonObject("find");
+            FindDef d = new FindDef();
+            d.place = str(f, "place", "");
+            int[] off = offset(f);
+            d.dx = off[0];
+            d.dz = off[1];
+            d.radius = f.has("radius") ? f.get("radius").getAsInt() : 3;
+            d.clue = str(f, "clue", "stone");
+            d.text = new Txt(k + ".find", str(f, "text", ""));
+            q.find = d;
         }
         return q;
     }

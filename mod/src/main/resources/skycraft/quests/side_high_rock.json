@@ -1,0 +1,611 @@
+{
+  "line": "side_high_rock",
+  "category": "side",
+  "region": "high_rock/wayrest",
+  "speakers": {
+    "side_hr_glenmoril_voice": "A Glenmoril Witch",
+    "side_hr_vile_voice": "Clavicus Vile",
+    "side_hr_marrowgate_voice": "Hollis Marrowgate",
+    "side_hr_aubert_voice": "Aubert Morvayne",
+    "side_hr_ysmay_voice": "Lady Ysmay Lorne",
+    "side_hr_saerendil_voice": "Saerendil Direnni",
+    "side_hr_ilsabet_voice": "Countess Ilsabet",
+    "side_hr_malcor_voice": "Sir Malcor Vane",
+    "side_hr_odo_voice": "Odo the Bell-Ringer"
+  },
+  "npcs": [
+    {"id": "side_hr_wenna", "name": "Goodwife Wenna Thrale", "role": "apothecary", "place": "daggerfall", "offset": [12, -8], "female": true,
+     "greet": "Feverfew, comfrey, a little willow bark. Nothing a Kynareth priestess would frown at, I promise you."},
+    {"id": "side_hr_brannagh", "name": "Mother Brannagh", "role": "apothecary", "place": "side_hr_glenmoril_grove", "offset": [2, 3], "female": true,
+     "greet": "Mind the mushrooms, dear. Some of them are listening and all of them are mine."},
+    {"id": "side_hr_isolde", "name": "Isolde Thrale", "role": "citizen", "place": "side_hr_hunters_blind", "offset": [4, 2], "female": true,
+     "greet": "If you've come to light the pyre, at least have the courtesy to do it quickly."},
+    {"id": "side_hr_gerrold", "name": "Gerrold Hawke", "role": "fisher", "place": "side_hr_hawkston_tower", "offset": [3, -2],
+     "greet": "Still breathing. The webs are warm, you know. That's the worst of it. They're warm."},
+    {"id": "side_hr_tobias", "name": "Brother Tobias Wyck", "role": "priest", "place": "camlorn", "offset": [10, 6],
+     "greet": "Stendarr's mercy on you, traveller. And on Camlorn, which could use more of it than it gets."},
+    {"id": "side_hr_celestine", "name": "Lady Celestine Morvayne", "role": "citizen", "place": "side_hr_dunmoor_hall", "offset": [4, 4], "female": true,
+     "greet": "Please lower your voice. Mother and Father are sleeping. They sleep all day now."},
+    {"id": "side_hr_bertrand", "name": "Bertrand Lorne", "role": "citizen", "place": "shornhelm", "offset": [8, -10],
+     "greet": "I've inherited a manor, a title and a ghost. I'd happily give away any of the three, in any order."},
+    {"id": "side_hr_corwen", "name": "Magister Corwen Fayle", "role": "scholar", "place": "shornhelm", "offset": [-12, 6],
+     "greet": "Direnni script, Ayleid inscriptions, the odd Nedic rune. Bring me something old and I'll tell you what it wants."},
+    {"id": "side_hr_davette", "name": "Warden Lucan Davette", "role": "steward", "place": "evermor", "offset": [10, 4],
+     "greet": "River tolls, river law, river nonsense. Evermor's prosperity floats down the Bjoulsae, and half of it forgets to stop and pay."},
+    {"id": "side_hr_odile", "name": "Mother Odile", "role": "thief", "place": "side_hr_ferrygate_cellars", "offset": [3, 3], "female": true,
+     "greet": "Sit, if you're going to stay. Stand, if you're going to arrest me. Either way, wipe your feet."},
+    {"id": "side_hr_allard", "name": "Magister Prosper Allard", "role": "mage", "place": "evermor", "offset": [-10, -8],
+     "greet": "Yes, I'm the one whose apprentice set a farm on fire. No, I don't wish to discuss it at length."},
+    {"id": "side_hr_linnet", "name": "Linnet Gage", "role": "mage", "place": "side_hr_brindlecombe", "offset": [5, -4], "female": true,
+     "greet": "It isn't supposed to be this big. It was supposed to burn some paper and go home."},
+    {"id": "side_hr_tobin", "name": "Master Tobin Vauclair", "role": "merchant", "place": "wayrest", "offset": [12, -6],
+     "greet": "Vauclair wool, Vauclair dyes, Vauclair everything. Forgive me, I'm not myself. Do you have children?"},
+    {"id": "side_hr_remy", "name": "Remy Vauclair", "role": "citizen", "place": "side_hr_hawkford_hovel", "offset": [3, 2],
+     "greet": "You're not Jessamy's. Thank the Eight. Is my father very angry?"},
+    {"id": "side_hr_orlaith", "name": "Dame Orlaith Vane", "role": "adventurer", "place": "wayrest", "offset": [-14, 10], "female": true,
+     "greet": "I am the last Knight-Warden of the Order of the Heron. It is a lonely title, and the armour no longer fits."},
+    {"id": "side_hr_gashna", "name": "Stonewright Gashna gra-Ulfim", "role": "miner", "place": "orsinium", "offset": [10, 8], "female": true,
+     "greet": "Every stone in that wall has a name and a weight. I know them all. Ask me about the wall and lose an afternoon."},
+    {"id": "side_hr_morwen", "name": "Sister Morwen", "role": "apothecary", "place": "side_hr_daughters_hearth", "offset": [2, 3], "female": true,
+     "greet": "The Daughters of Wroth do not get many visitors. Most of the ones we get are lost, and most of those stay lost."},
+    {"id": "side_hr_odo", "name": "Odo the Bell-Ringer", "role": "beggar", "place": "daggerfall", "offset": [-14, 10],
+     "greet": "Fire on Tanners' Row, three nights hence. I don't want it to be true. It's always true."},
+    {"id": "side_hr_aline", "name": "Priestess Aline Dunstan", "role": "priest", "place": "daggerfall", "offset": [6, 16], "female": true,
+     "greet": "Kynareth's breath on you. Mind the crowd by the well, they're waiting for the Bell-Ringer again."}
+  ],
+  "relics": [
+    {"id": "side_hr_hunters_writ", "name": "Ser Aldous's Writ of Burning", "desc": "A list of names with a line through most of them. The newest is Isolde Thrale.", "icon": 11},
+    {"id": "side_hr_vile_token", "name": "Marrowgate's Contract", "desc": "A wish written in a tidy hand and countersigned in something that is not ink: Never to die.", "icon": 11},
+    {"id": "side_hr_lighthouse_key", "name": "Hawkston Lighthouse Key", "desc": "An iron key on a ring of tarred rope, still wrapped in a dead man's fingers when you found it.", "icon": 19},
+    {"id": "side_hr_morvayne_signet", "name": "Morvayne Signet", "desc": "A heavy silver ring with the Morvayne owl. It is cold to the touch and stays cold.", "icon": 4},
+    {"id": "side_hr_ysmay_ring", "name": "Ysmay's Wedding Ring", "desc": "A thin gold band, worn smooth on the inside. It was still on the ghost's finger when she gave it to you.", "icon": 4},
+    {"id": "side_hr_saerendil_journal", "name": "Journal of Saerendil Direnni", "desc": "Elven script in violet ink, the last pages written in a shaking, bony hand.", "icon": 7},
+    {"id": "side_hr_river_manifest", "name": "Smugglers' River Manifest", "desc": "Not crates. Names. Families, mostly, with a price beside each.", "icon": 7},
+    {"id": "side_hr_ransom_note", "name": "Ransom Note for Remy Vauclair", "desc": "Five thousand drakes, the north road, at moonrise. The handwriting is very good for a kidnapper.", "icon": 11},
+    {"id": "side_hr_heron_seal", "name": "Seal of the Heron", "desc": "The silver seal of the Order of the Heron's grandmasters, tarnished black.", "icon": 26},
+    {"id": "side_hr_pact_stone", "name": "Thunder-Heel Pact-Stone", "desc": "A flat stone carved with an orc's hand and a giant's foot, pressed side by side.", "icon": 1},
+    {"id": "side_hr_ilsabet_bell", "name": "Ilsabet's Coven Bell", "desc": "A small iron bell wound in red wool, the sign of the Daughters of Wroth. Its clapper is missing.", "icon": 20},
+    {"id": "side_hr_debt_ledger", "name": "Scorched Debt Ledger", "desc": "Half-burnt pages of loans and foreclosures. The surviving names are all Stormhaven farmers.", "icon": 7}
+  ],
+  "places": {
+    "side_hr_glenmoril_grove": {"x": -9392, "z": 1616, "r": 34, "name": "Glenmoril Grove"},
+    "side_hr_hunters_blind": {"x": -8816, "z": 1424, "r": 30, "name": "Ser Aldous's Camp"},
+    "side_hr_gallowmoor": {"x": -9200, "z": -880, "r": 30, "name": "Gallowmoor Crossroads"},
+    "side_hr_wreckers_strand": {"x": -10928, "z": 2192, "r": 24, "name": "Wreckers' Strand"},
+    "side_hr_hawkston_tower": {"x": -10544, "z": 1232, "r": 36, "name": "Hawkston Tower"},
+    "side_hr_dunmoor_hall": {"x": -9776, "z": 80, "r": 36, "name": "Dunmoor Hall"},
+    "side_hr_morvayne_crypt": {"x": -10736, "z": -304, "r": 30, "name": "Morvayne Family Crypt"},
+    "side_hr_lornhallow": {"x": -7664, "z": -1648, "r": 36, "name": "Lornhallow Manor"},
+    "side_hr_cairn_of_winters": {"x": -7280, "z": -2416, "r": 20, "name": "Cairn of Ten Winters"},
+    "side_hr_ennhalwe_spire": {"x": -8048, "z": -2416, "r": 40, "name": "Ennhalwe Spire"},
+    "side_hr_reedwater_landing": {"x": -6320, "z": -304, "r": 30, "name": "Reedwater Landing"},
+    "side_hr_ferrygate_cellars": {"x": -6320, "z": 1232, "r": 30, "name": "Ferrygate Cellars"},
+    "side_hr_brindlecombe": {"x": -7088, "z": 1232, "r": 34, "name": "Brindlecombe Farm"},
+    "side_hr_hawkford_hovel": {"x": -4976, "z": 2384, "r": 30, "name": "Ruins of the Old Hawkford Hovel"},
+    "side_hr_heronmere": {"x": -7472, "z": 1424, "r": 34, "name": "Heronmere Chapterhouse"},
+    "side_hr_castle_copperston": {"x": -6896, "z": 2576, "r": 36, "name": "Castle Copperston"},
+    "side_hr_thunderheel_cairn": {"x": -4592, "z": 1424, "r": 36, "name": "Cairn of Thunder-Heel"},
+    "side_hr_wroth_totem": {"x": -4400, "z": -496, "r": 20, "name": "Red Wool Totem"},
+    "side_hr_daughters_hearth": {"x": -6128, "z": -1648, "r": 30, "name": "Hearth of the Daughters"},
+    "side_hr_castle_mastercroft": {"x": -5360, "z": -1264, "r": 40, "name": "Castle Mastercroft"},
+    "side_hr_gaersmith_orchard": {"x": -8432, "z": 2768, "r": 34, "name": "Ruins of Gaersmith Orchard"}
+  },
+  "bosses": {
+    "side_hr_aldous_mire": {"name": "Ser Aldous Mire, Witchfinder", "type": "npc:adventurer", "hostile": true, "hp": 3.0, "dmg": 1.4, "level": 22,
+      "weapon": "skycraft:breton_mace",
+      "gear": {"head": "skycraft:breton_helmet", "chest": "skycraft:breton_chestplate", "offhand": "skycraft:breton_shield"},
+      "drop": "loot:standard", "glow": false},
+    "side_hr_marrowgate": {"name": "Hollis Marrowgate, the Unending", "type": "minecraft:zombie", "hp": 4.0, "dmg": 1.5, "level": 30,
+      "weapon": "skycraft:breton_dagger",
+      "gear": {"chest": "skycraft:breton_chestplate"},
+      "drop": "loot:major", "glow": true},
+    "side_hr_weaver": {"name": "The Weaver of Hawkston", "type": "skycraft:frostbite_spider", "hp": 4.0, "dmg": 1.4, "level": 18,
+      "drop": "loot:standard", "glow": false},
+    "side_hr_aubert": {"name": "Aubert Morvayne, Eldest of the Vraseth", "type": "skycraft:vampire_lord", "hp": 5.0, "dmg": 1.7, "level": 32,
+      "drop": "loot:major", "glow": true},
+    "side_hr_garamond": {"name": "Lord Garamond Lorne", "type": "minecraft:stray", "hp": 3.0, "dmg": 1.3, "level": 16,
+      "weapon": "skycraft:breton_sword",
+      "gear": {"head": "skycraft:breton_helmet", "chest": "skycraft:breton_chestplate"},
+      "drop": "loot:standard", "glow": true},
+    "side_hr_saerendil": {"name": "Saerendil Direnni, Warden of the Spire", "type": "skycraft:dragon_priest", "hp": 4.5, "dmg": 1.6, "level": 28,
+      "drop": "loot:major", "glow": true},
+    "side_hr_kynval": {"name": "Kynval Ashmaw", "type": "skycraft:dremora", "hp": 4.0, "dmg": 1.7, "level": 28,
+      "weapon": "skycraft:daedric_war_axe",
+      "drop": "loot:major", "glow": false},
+    "side_hr_hargrave": {"name": "Hargrave the Eel", "type": "skycraft:bandit_chief", "hp": 3.5, "dmg": 1.5, "level": 22,
+      "weapon": "skycraft:breton_sword",
+      "gear": {"chest": "skycraft:studded_chestplate"},
+      "drop": "loot:standard", "glow": false},
+    "side_hr_jessamy": {"name": "Cutwater Jessamy", "type": "npc:thug", "hostile": true, "hp": 3.5, "dmg": 1.5, "level": 24,
+      "weapon": "skycraft:steel_dagger",
+      "drop": "loot:standard", "glow": false},
+    "side_hr_malcor": {"name": "Sir Malcor Vane, the Oathbound", "type": "skycraft:draugr_deathlord", "hp": 5.5, "dmg": 1.8, "level": 40,
+      "weapon": "skycraft:breton_greatsword",
+      "gear": {"head": "skycraft:steel_plate_helmet", "chest": "skycraft:steel_plate_chestplate", "legs": "skycraft:steel_plate_leggings", "feet": "skycraft:steel_plate_boots"},
+      "drop": "loot:legendary", "glow": true},
+    "side_hr_cinderwick": {"name": "Cinderwick", "type": "skycraft:flame_atronach", "hp": 3.0, "dmg": 1.3, "level": 18,
+      "drop": "loot:standard", "glow": false},
+    "side_hr_thunderheel": {"name": "Grommoth Thunder-Heel", "type": "skycraft:giant", "hp": 4.0, "dmg": 1.6, "level": 26,
+      "drop": "loot:major", "glow": false},
+    "side_hr_ilsabet": {"name": "Countess Ilsabet of the Lyrezi", "type": "skycraft:vampire_lord", "hp": 5.5, "dmg": 1.8, "level": 36,
+      "drop": "loot:major", "glow": true},
+    "side_hr_mabry": {"name": "Mabry Crowe", "type": "skycraft:bandit_chief", "hp": 3.0, "dmg": 1.4, "level": 20,
+      "weapon": "skycraft:breton_dagger",
+      "drop": "loot:standard", "glow": false}
+  },
+  "scenes": {
+    "side_hr_glenmoril_grove": [
+      ["narrator", "Rings of pale mushrooms circle a hollow oak. Three women sit in its roots, sorting bones by size."],
+      ["side_hr_glenmoril_voice", "Wenna's errand-runner. She told us you'd come. The witchfinder Aldous Mire has one of ours staked out in his camp east of here, waiting on a dry day for the burning."],
+      ["side_hr_glenmoril_voice", "Bring her back to us, and the coven will owe you. On the day of a certain Prince, we can call him for you. That is a debt worth holding."]
+    ],
+    "side_hr_vile_summoned": [
+      ["narrator", "Mother Brannagh pours wine, salt and a hair from your head into the bowl at the shrine's foot. The air goes thick and sweet, like an overripe pear."],
+      ["side_hr_vile_voice", "My day, my shrine, and a mortal with a coven's favour to spend. How delightful. Here is my price: a man named Marrowgate cheated me. Not of anything important. But I keep my accounts."],
+      ["side_hr_vile_voice", "He is at the Gallowmoor crossroads, north of Camlorn. He wished never to die. Show him how generous I was."]
+    ],
+    "side_hr_marrowgate_pleads": [
+      ["narrator", "Something that was a man sits under the gallows, flesh hanging off it like wet linen. It looks up at you with relief."],
+      ["side_hr_marrowgate_voice", "Did he send you? Oh, thank the Eight. Never to die, I said. He never said anything about not rotting. Please. Be quick, and don't make any wishes."]
+    ],
+    "side_hr_vile_payment": [
+      ["side_hr_vile_voice", "Paid in full. You see, I always keep my word. It's the listening that trips mortals up."],
+      ["side_hr_vile_voice", "Your reward is in your pack already. Be careful what you wish for with it. Or don't. I do so enjoy my repeat customers."]
+    ],
+    "side_hr_hawkston_webs": [
+      ["narrator", "The old tower is sheathed in web from the foot to the lamp-room. The lamp is dark. Something heavy shifts at the top of the stairs."]
+    ],
+    "side_hr_dunmoor_night": [
+      ["narrator", "Every curtain in Dunmoor Hall is drawn, and every candle is lit. In the dining hall the table is set for six. The food has been there for days."],
+      ["narrator", "From below, through the floor, comes the slow sound of someone very old climbing stairs."]
+    ],
+    "side_hr_aubert_crypt": [
+      ["side_hr_aubert_voice", "Sixty years in a box, and my granddaughter was the only one who missed me. She opened the door. Did she tell you that?"],
+      ["side_hr_aubert_voice", "The Vraseth do not die, child. We simply wait for someone who loves us to forget what we are."]
+    ],
+    "side_hr_lornhallow_ghost": [
+      ["narrator", "At midnight the dust on the stairs lifts and settles into the shape of a woman in grey. She stands at the cellar door with her arms spread."],
+      ["side_hr_ysmay_voice", "Not up. Not ever up. He stays below with what he did. Help me keep him there, or help me end him. I'm so tired of standing here."]
+    ],
+    "side_hr_ysmay_rests": [
+      ["side_hr_ysmay_voice", "There. It's quiet. Give my ring to whoever owns this house now, and tell them to open the windows."],
+      ["narrator", "The grey shape drifts apart like breath on a cold morning. The ring stays in your palm."]
+    ],
+    "side_hr_saerendil_wakes": [
+      ["narrator", "At the top of the spire a figure in rotten violet robes stands over a sealed floor-stone, both hands pressed flat to it."],
+      ["side_hr_saerendil_voice", "Breton. Of course a Breton. Your grandfathers' grandfathers broke my house, and now you come to finish the job. Go home. I am holding something shut."]
+    ],
+    "side_hr_saerendil_falls": [
+      ["side_hr_saerendil_voice", "Fool. Fool. Three thousand years I held it."],
+      ["narrator", "The floor-stone cracks from end to end. Heat pours up through the crack, and a horned shape climbs out after it."]
+    ],
+    "side_hr_cellars": [
+      ["narrator", "The cellars under the old ferry house are full of people: Orc families, a Reachman grandmother, two Khajiit children asleep on sacks. Nobody here looks like a smuggler."]
+    ],
+    "side_hr_hargrave_turns": [
+      ["narrator", "Boots on the stairs. A big man in an oilskin coat comes down with a crossbow levelled at Mother Odile."],
+      ["narrator", "\"Warden pays better than you, Odile,\" he says. \"And the slavers in Daggerfall pay better than the Warden.\""]
+    ],
+    "side_hr_heron_vigil": [
+      ["narrator", "The chapterhouse roof has fallen in, but the stone heron above the altar still stands, one leg raised, waiting for something."],
+      ["side_hr_malcor_voice", "Who keeps vigil in my hall? Go to Copperston, if you would know where the Heron's honour went. I will be waiting."]
+    ],
+    "side_hr_malcor_confession": [
+      ["side_hr_malcor_voice", "They meant to sell her. Chrysamere. To pay the order's debts to a Wayrest banker. So I took her and I lay down here and I swore no one would."],
+      ["side_hr_malcor_voice", "You fight like a Heron. Take her. Better a stranger with honour than an order without it."]
+    ],
+    "side_hr_thunderheel_cairn": [
+      ["narrator", "Half the cairn is gone, carted off in neat orcish blocks. What remains is a ring of standing stones taller than a house, and a giant sitting among them, rocking, with a stone in its lap."]
+    ],
+    "side_hr_mastercroft_hall": [
+      ["narrator", "Castle Mastercroft's hall is hung with red wool, the colours of the Daughters of Wroth, but stained dark. A woman in a white gown sits on the high seat."],
+      ["side_hr_ilsabet_voice", "Morwen sent you. My little sister never could do her own work. I left the Daughters because they would grow old and die on that mountain. I chose not to."],
+      ["side_hr_ilsabet_voice", "There is room in the Lyrezi for one more. Or there is room in the crypt. Choose quickly, I'm hungry."]
+    ],
+    "side_hr_odo_vision": [
+      ["side_hr_odo_voice", "I saw the orchard. I saw a woman with my mother's eyes and a tinderbox. I didn't want to see it. I never want to see any of it."]
+    ],
+    "side_hr_gaersmith": [
+      ["narrator", "Among the dead apple trees stands a cart loaded with lamp-oil and bundled straw, and a stack of painted fire-wards: 'Blessed by the Bell-Ringer, two drakes'."]
+    ]
+  },
+  "quests": [
+    {
+      "id": "side_hr_a_favour_for_glenmoril",
+      "title": "A Favour for Glenmoril",
+      "region": "high_rock/glenumbra",
+      "start": "npc:side_hr_wenna",
+      "requires": ["level:20"],
+      "offer": "Nothing a priestess would frown at. And something she would?",
+      "pitch": "You've a sharp ear. There's a grove north of the city where some old women live who know more than herbs. The Glenmoril Witches. They have a favour to ask, and I can't do it myself. Go to them, do what they ask, and I'll owe you more than coin.",
+      "desc": "Goodwife Wenna Thrale, an herbalist of Daggerfall, sent me to the Glenmoril Witches in their grove north of the city. They have a favour to ask.",
+      "objectives": [
+        {"type": "go", "place": "side_hr_glenmoril_grove", "text": "Find Glenmoril Grove north of Daggerfall", "actions": "scene:side_hr_glenmoril_grove"},
+        {"type": "go", "place": "side_hr_hunters_blind", "text": "Find the witchfinder's camp east of the grove"},
+        {"type": "clear", "place": "side_hr_hunters_blind", "placement": "near", "text": "Fight off the witchfinder's men",
+         "spawn": [{"type": "npc:adventurer", "count": 3, "name": "Witchfinder's Torchman", "hostile": true, "armor": "#6b6b6b"}]},
+        {"type": "kill", "place": "side_hr_hunters_blind", "placement": "near", "text": "Kill Ser Aldous Mire",
+         "spawn": [{"boss_id": "side_hr_aldous_mire"}],
+         "actions": "relic:side_hr_hunters_writ",
+         "journal": "Ser Aldous carried a writ with a list of women he had burned. The last name on it was Isolde Thrale. Thrale, like Wenna."},
+        {"type": "escort", "npc": "side_hr_isolde", "place": "side_hr_glenmoril_grove", "text": "Bring the captive witch back to Glenmoril Grove",
+         "actions": "relocate:side_hr_isolde:side_hr_glenmoril_grove:5:1"},
+        {"type": "talk", "npc": "side_hr_wenna", "text": "Tell Wenna in Daggerfall the favour is done",
+         "topic": "The witch the coven wanted saved was called Isolde Thrale.",
+         "reply": "My daughter. She ran to the grove at fifteen and I told everyone she'd drowned. I couldn't walk into that camp, not with half of Daggerfall watching me. Thank you. The coven keeps its bargains. So do I.",
+         "choices": [
+           {"label": "Go and see her. She's alive, and she's family.", "reply": "Yes. Yes, I think I will. Even if the priestess frowns.", "actions": "flag:side_hr_thrales_reunited;take:side_hr_hunters_writ"},
+           {"label": "Your secret is safe with me.", "reply": "I hope so. Daggerfall is a small city with a long memory.", "actions": "flag:side_hr_thrale_secret;take:side_hr_hunters_writ"}
+         ]}
+      ],
+      "outro": "I saved Isolde Thrale from the witchfinder's pyre and returned her to the Glenmoril Witches. The coven owes me a summoning, and her mother owes me the truth she finally told.",
+      "rewards": {"gold": 600, "loot": "standard",
+                  "items": [{"item": "skycraft:breton_bow", "name": "Glenmoril Yew", "enchant": {"power": 3, "flame": 1}}]}
+    },
+    {
+      "id": "side_hr_on_viles_day",
+      "title": "On Vile's Day",
+      "region": "high_rock/glenumbra",
+      "start": "auto",
+      "requires": ["quest:side_hr_a_favour_for_glenmoril", "level:26"],
+      "desc": "The Glenmoril Witches are paying their debt. Mother Brannagh will summon the Daedric Prince Clavicus Vile for me on his summoning day, at his shrine east of Camlorn.",
+      "on_start": "relocate:side_hr_brannagh:shrine_clavicus_vile_high_rock:3:2",
+      "objectives": [
+        {"type": "go", "place": "shrine_clavicus_vile_high_rock", "text": "Meet Mother Brannagh at the shrine of Clavicus Vile east of Camlorn"},
+        {"type": "cond", "cond": "night", "place": "shrine_clavicus_vile_high_rock", "text": "Wait for the summoning hour at nightfall",
+         "actions": "scene:side_hr_vile_summoned",
+         "journal": "Clavicus Vile came to the coven's call, as cheerful as a moneylender. His price: the death of a man named Marrowgate, who had made a wish of him and somehow cheated him."},
+        {"type": "go", "place": "side_hr_gallowmoor", "text": "Find Marrowgate at the Gallowmoor crossroads north of Camlorn", "actions": "scene:side_hr_marrowgate_pleads"},
+        {"type": "kill", "place": "side_hr_gallowmoor", "placement": "near", "text": "Give Hollis Marrowgate the death he wished away",
+         "spawn": [{"boss_id": "side_hr_marrowgate"}, {"type": "minecraft:zombie", "count": 3, "name": "Gallows Leftover"}],
+         "actions": "relic:side_hr_vile_token",
+         "journal": "Marrowgate had wished never to die. Vile granted it and let him rot instead. He thanked me when it was over."},
+        {"type": "go", "place": "shrine_clavicus_vile_high_rock", "text": "Return to the shrine with Marrowgate's contract",
+         "actions": "scene:side_hr_vile_payment;take:side_hr_vile_token"},
+        {"type": "talk", "npc": "side_hr_brannagh", "text": "Speak with Mother Brannagh",
+         "topic": "Vile says my reward is already in my pack.",
+         "reply": "Then it is, dear, and it's yours. The coven's debt is paid. Now, a word from an old woman: whatever he gave you, don't ever ask it for anything.",
+         "actions": "relocate:side_hr_brannagh:side_hr_glenmoril_grove:2:3",
+         "choices": [
+           {"label": "I'll keep it. A gift is a gift.", "reply": "So said Marrowgate. Mind how you go.", "actions": "flag:side_hr_vile_gift_kept"},
+           {"label": "Give it to the coven. I don't want his favour.", "reply": "Wise. We'll bury it under the oak where he can't hear it. Here, take this instead, from us.", "actions": "flag:side_hr_vile_gift_refused;loot:major"}
+         ]}
+      ],
+      "outro": "Clavicus Vile got his account settled and I got a Daedric Prince's gift. Mother Brannagh says the trick with Vile is not in the asking. It's in never asking twice.",
+      "rewards": {"gold": 900, "loot": "major",
+                  "items": [{"item": "skycraft:daedric_dagger", "name": "Vile's Small Print", "enchant": {"sharpness": 3, "looting": 3}}]}
+    },
+    {
+      "id": "side_hr_the_dark_lamp",
+      "title": "The Dark Lamp of Hawkston",
+      "region": "high_rock/glenumbra",
+      "start": "find",
+      "find": {"place": "side_hr_wreckers_strand", "offset": [10, -6], "clue": "skeleton",
+               "text": "A skeleton in a fisherman's smock lies above the tide line, one hand still closed around an iron key on a loop of tarred rope. The rope is stamped HAWKSTON."},
+      "requires": ["level:16"],
+      "desc": "On the strand west of Daggerfall I found a dead man holding the key to Hawkston Tower, the old lighthouse to the north. The light has been dark for months.",
+      "objectives": [
+        {"type": "go", "place": "side_hr_hawkston_tower", "text": "Climb to Hawkston Tower", "actions": "relic:side_hr_lighthouse_key;scene:side_hr_hawkston_webs"},
+        {"type": "clear", "place": "side_hr_hawkston_tower", "placement": "structure", "text": "Burn out the spiders nesting in the tower",
+         "spawn": [{"type": "skycraft:frostbite_spider", "count": 4, "name": "Hawkston Spider"}, {"type": "minecraft:cave_spider", "count": 3, "name": "Spiderling"}]},
+        {"type": "kill", "place": "side_hr_hawkston_tower", "placement": "structure", "text": "Kill the Weaver of Hawkston in the lamp-room",
+         "spawn": [{"boss_id": "side_hr_weaver"}],
+         "journal": "In the Weaver's web hung the lighthouse keeper, Gerrold Hawke, wrapped tight but alive."},
+        {"type": "talk", "npc": "side_hr_gerrold", "text": "Cut the lighthouse keeper free",
+         "topic": "You're the keeper? Hold still. I'll cut you down.",
+         "reply": "Gerrold Hawke. I'd thank you, but you'll find out soon enough and then you'll wish you hadn't bothered. The spiders didn't put the lamp out. I did. Every dark night for two years, for the wreckers on the strand. Their man came to pay me and the spiders got him on the way back.",
+         "choices": [
+           {"label": "You'll answer to the magistrate in Daggerfall.", "reply": "Aye. I suppose I've been waiting for someone to say it. Give me the key. I'll light the lamp one more time before I go.", "actions": "flag:side_hr_gerrold_judged;take:side_hr_lighthouse_key"},
+           {"label": "Keep the light burning every night from now on, and I'll forget I heard this.", "reply": "Every night. I swear it on every drowned sailor I owe. You won't find this tower dark again.", "actions": "flag:side_hr_gerrold_spared;take:side_hr_lighthouse_key"}
+         ]}
+      ],
+      "outro": "The Weaver of Hawkston is dead and the lighthouse burns again. Its keeper had been dousing it for wreckers, and now I am the only one besides him who knows.",
+      "rewards": {"gold": 450, "loot": "standard",
+                  "items": [{"item": "skycraft:breton_sword", "name": "Lamplighter", "enchant": {"bane_of_arthropods": 3, "fire_aspect": 1}}]}
+    },
+    {
+      "id": "side_hr_the_vraseth_supper",
+      "title": "Supper at Dunmoor Hall",
+      "region": "high_rock/glenumbra",
+      "start": "npc:side_hr_tobias",
+      "requires": ["level:30"],
+      "offer": "Camlorn could use more mercy?",
+      "pitch": "Dunmoor Hall, west of the city. The Morvaynes were faithful to Stendarr for three generations. This year they stopped coming. Their cook left without her wages. Their stable-boy didn't leave at all; we found him in a ditch with no blood in him. I fear the Vraseth, and I am too old to go and look.",
+      "desc": "Brother Tobias of Camlorn fears that the noble Morvayne family of Dunmoor Hall have been taken by the Vraseth, the vampire bloodline of Glenumbra.",
+      "objectives": [
+        {"type": "go", "place": "side_hr_dunmoor_hall", "text": "Go to Dunmoor Hall west of Camlorn"},
+        {"type": "cond", "cond": "night", "place": "side_hr_dunmoor_hall", "text": "Wait for the household to wake at nightfall", "actions": "scene:side_hr_dunmoor_night"},
+        {"type": "talk", "npc": "side_hr_celestine", "text": "Speak with the young Lady Morvayne",
+         "topic": "Your parents aren't sleeping, are they? Who's coming up the stairs?",
+         "reply": "Grandfather. He died before I was born. I found his letters in the crypt and they were so kind, and the door wasn't even locked. He said he only wanted to see the family again. Now Mother and Father don't eat, and he sends me to bed early.",
+         "actions": "relic:side_hr_morvayne_signet"},
+        {"type": "clear", "place": "side_hr_dunmoor_hall", "placement": "structure", "text": "Fight past the turned household",
+         "spawn": [{"type": "npc:vampire", "count": 2, "name": "Lord and Lady Morvayne", "hostile": true}, {"type": "skycraft:vampire", "count": 3, "name": "Vraseth Servant"}]},
+        {"type": "go", "place": "side_hr_morvayne_crypt", "text": "Follow Aubert Morvayne to the family crypt", "actions": "scene:side_hr_aubert_crypt"},
+        {"type": "kill", "place": "side_hr_morvayne_crypt", "placement": "structure", "text": "Destroy Aubert Morvayne, eldest of the Vraseth",
+         "spawn": [{"boss_id": "side_hr_aubert"}, {"type": "skycraft:vampire", "count": 2, "name": "Crypt Thrall"}],
+         "journal": "Aubert Morvayne is ash. His granddaughter let him in out of loneliness, and the rest of the family paid for it."},
+        {"type": "deliver", "npc": "side_hr_tobias", "relic": "side_hr_morvayne_signet", "text": "Bring the Morvayne signet to Brother Tobias in Camlorn",
+         "topic": "The Morvaynes are gone, all but the youngest. Their grandfather came back from the crypt. She let him in.",
+         "reply": "A child who missed a grandfather she never met. Stendarr have mercy, it's always love that opens the door. I'll go to her myself and see what can be saved. Take this for your trouble. It was blessed for a better day than this."}
+      ],
+      "outro": "Aubert Morvayne of the Vraseth is destroyed and Dunmoor Hall stands empty. Celestine Morvayne will grow up knowing what her loneliness cost.",
+      "rewards": {"gold": 1000, "loot": "major",
+                  "items": [{"item": "skycraft:silver_greatsword", "name": "Stendarr's Late Mercy", "enchant": {"smite": 4, "unbreaking": 2}}]}
+    },
+    {
+      "id": "side_hr_the_lady_on_the_stair",
+      "title": "The Lady on the Stair",
+      "region": "high_rock/rivenspire",
+      "start": "npc:side_hr_bertrand",
+      "requires": ["level:15"],
+      "offer": "A ghost? What sort of ghost?",
+      "pitch": "My great-aunt Ysmay. Murdered by persons unknown, the family history says, sixty years ago. She stands on the stair of Lornhallow Manor, north of Shornhelm, every night at midnight, and no buyer will come within a mile. Make her go away and the family sword is yours. I'm no swordsman anyway.",
+      "desc": "Bertrand Lorne of Shornhelm has inherited Lornhallow Manor and the ghost of his great-aunt Ysmay. He wants the house cleared so he can sell it.",
+      "objectives": [
+        {"type": "go", "place": "side_hr_lornhallow", "text": "Go to Lornhallow Manor north of Shornhelm"},
+        {"type": "cond", "cond": "night", "place": "side_hr_lornhallow", "text": "Wait on the stair until midnight", "actions": "scene:side_hr_lornhallow_ghost",
+         "journal": "Ysmay was not haunting the stair. She was guarding the cellar door, against whatever her husband left down there."},
+        {"type": "clear", "place": "side_hr_lornhallow", "placement": "structure", "text": "Go down into the cellar and put down the restless servants",
+         "spawn": [{"type": "minecraft:skeleton", "count": 4, "name": "Lornhallow Servant"}]},
+        {"type": "kill", "place": "side_hr_lornhallow", "placement": "structure", "text": "Destroy the ghost of Lord Garamond Lorne",
+         "spawn": [{"boss_id": "side_hr_garamond"}],
+         "actions": "scene:side_hr_ysmay_rests;relic:side_hr_ysmay_ring",
+         "journal": "Lord Garamond murdered his wife and walled the servants who knew into the cellar. Ysmay held the stair against him for sixty years."},
+        {"type": "deliver", "npc": "side_hr_bertrand", "relic": "side_hr_ysmay_ring", "text": "Bring Ysmay's ring to Bertrand in Shornhelm",
+         "topic": "Your great-aunt is at rest. Her husband killed her. She was keeping him in the cellar.",
+         "reply": "Gods. And the family has toasted Great-Uncle Garamond every Saturalia for sixty years. Well, no more. The sword is yours. It was his, and I'd rather it went to someone who's done something decent with a blade."}
+      ],
+      "outro": "Lady Ysmay Lorne has left the stair at Lornhallow, and her murderer has left the cellar. The Lorne family sword has finally gone to someone the family can be proud of.",
+      "rewards": {"gold": 350, "loot": "standard", "unique": "shornhelm_blade"}
+    },
+    {
+      "id": "side_hr_the_held_door",
+      "title": "The Held Door",
+      "region": "high_rock/rivenspire",
+      "start": "find",
+      "find": {"place": "side_hr_cairn_of_winters", "offset": [-8, 6], "clue": "stone",
+               "text": "Elven letters, still sharp after three thousand years, run around the stone in a spiral. Someone has scratched a Breton gloss beneath in charcoal: 'Ennhalwe, west. The Direnni sorcerer keeps it. Do not wake him.'"},
+      "requires": ["level:26"],
+      "desc": "A Direnni carving on a cairn in northern Rivenspire points west to Ennhalwe Spire, where an elven sorcerer is said to keep something.",
+      "objectives": [
+        {"type": "go", "place": "side_hr_ennhalwe_spire", "text": "Find Ennhalwe Spire to the west"},
+        {"type": "clear", "place": "side_hr_ennhalwe_spire", "placement": "structure", "text": "Destroy the spire's bound guardians",
+         "spawn": [{"type": "minecraft:skeleton", "count": 4, "name": "Direnni Bondsman"}, {"type": "skycraft:wisp", "count": 2, "name": "Violet Wisp"}]},
+        {"type": "go", "place": "side_hr_ennhalwe_spire", "offset": [4, 4], "text": "Climb to the top of the spire", "actions": "scene:side_hr_saerendil_wakes"},
+        {"type": "kill", "place": "side_hr_ennhalwe_spire", "placement": "structure", "text": "Destroy the lich Saerendil Direnni",
+         "spawn": [{"boss_id": "side_hr_saerendil"}],
+         "actions": "scene:side_hr_saerendil_falls;relic:side_hr_saerendil_journal;boss:side_hr_kynval",
+         "journal": "Saerendil Direnni was not hoarding treasure. He had made himself a lich to hold a door shut, and I had just killed him."},
+        {"type": "kill", "at_player": true, "text": "Kill the dremora that climbed out of the floor",
+         "spawn": [{"boss_id": "side_hr_kynval"}],
+         "journal": "Kynval Ashmaw had waited three thousand years for Saerendil to let go. He had a few minutes of freedom. I made sure of that."},
+        {"type": "deliver", "npc": "side_hr_corwen", "relic": "side_hr_saerendil_journal", "text": "Take Saerendil's journal to Magister Corwen in Shornhelm",
+         "topic": "I found this at Ennhalwe Spire. The Direnni there was holding a gate shut. He isn't any more.",
+         "reply": "Let me see. Violet ink, very old Direnni hand. 'I will hold, though my house falls and the Bretons forget us.' He held it for three thousand years, alone. And you killed the dremora that came through? Then perhaps it ends well. Here, this was in the spire's inventory, according to his own list. It's yours by right."}
+      ],
+      "outro": "Saerendil Direnni held a Daedric door shut for three thousand years. I ended him, then ended what came through. His warhammer is mine now, and his journal is in Magister Corwen's keeping.",
+      "rewards": {"gold": 900, "loot": "major", "unique": "direnni_warhammer"}
+    },
+    {
+      "id": "side_hr_the_ferrygate_ring",
+      "title": "The Ferrygate Ring",
+      "region": "high_rock/bjoulsae",
+      "start": "npc:side_hr_davette",
+      "requires": ["level:21"],
+      "offer": "What's floating past without paying?",
+      "pitch": "Boats, at night, without lamps. Somebody's running cargo down the Bjoulsae past Evermor and paying nobody. My men found a landing upriver where they put in. Find out who's behind it and break it up, and the Crown's reward is yours.",
+      "desc": "Warden Lucan Davette of Evermor wants a smuggling ring on the Bjoulsae broken. His men found their landing upriver.",
+      "objectives": [
+        {"type": "go", "place": "side_hr_reedwater_landing", "text": "Go to Reedwater Landing upriver from Evermor"},
+        {"type": "clear", "place": "side_hr_reedwater_landing", "placement": "near", "text": "Drive off the river toughs at the landing",
+         "spawn": [{"type": "skycraft:bandit", "count": 4, "name": "River Tough"}]},
+        {"type": "retrieve", "place": "side_hr_reedwater_landing", "relic": "side_hr_river_manifest", "radius": 10, "offset": [4, 3],
+         "text": "Search the landing for the smugglers' manifest",
+         "journal": "The manifest listed no crates at all. It listed families: Orc refugees from the Wrothgar clan wars, Reachfolk, others. And it pointed downriver to Ferrygate Cellars."},
+        {"type": "go", "place": "side_hr_ferrygate_cellars", "text": "Follow the river south to Ferrygate Cellars", "actions": "scene:side_hr_cellars"},
+        {"type": "talk", "npc": "side_hr_odile", "text": "Speak with Mother Odile",
+         "topic": "These people are your cargo?",
+         "reply": "They're nobody's cargo. They're families that the Warden's toll would turn back at the border. I take a little coin to feed them and move them on to Wayrest. Hargrave runs the boats for me. Now, what will you do?",
+         "actions": "scene:side_hr_hargrave_turns"},
+        {"type": "kill", "place": "side_hr_ferrygate_cellars", "placement": "near", "text": "Stop Hargrave the Eel",
+         "spawn": [{"boss_id": "side_hr_hargrave"}, {"type": "skycraft:bandit", "count": 2, "name": "Hargrave's Oarsman"}],
+         "journal": "Hargrave had been selling Odile's ring to the Warden and Odile's passengers to slavers in Daggerfall, and taking money from both."},
+        {"type": "talk", "npc": "side_hr_davette", "text": "Report to Warden Davette in Evermor",
+         "topic": "The ring's broken. Their boatman was a slaver. The rest of them are refugees and an old woman feeding them.",
+         "reply": "Refugees. And my own informant was the slaver. That's a fine thing to put in a report to the King. What do you want me to do with the old woman?",
+         "choices": [
+           {"label": "Let her keep her boats. Better she moves them than the slavers do.", "reply": "I never heard you say that and I never saw any boats. Here is the Crown's reward, for the slaver.", "actions": "flag:side_hr_odile_spared;take:side_hr_river_manifest"},
+           {"label": "The law's the law. Arrest her, and see the families settled properly.", "reply": "Properly. That'll take a clerk and a year. But it'll be done. You have my word, and the Crown's reward.", "actions": "flag:side_hr_odile_arrested;take:side_hr_river_manifest;loot:standard"}
+         ]}
+      ],
+      "outro": "The Ferrygate ring turned out to be a refugee road, and its boatman a slaver. Hargrave the Eel is dead, and the Bjoulsae is a little cleaner.",
+      "rewards": {"gold": 700, "loot": "standard",
+                  "items": [{"item": "skycraft:breton_dagger", "name": "Ferrywoman's Knife", "enchant": {"sharpness": 3, "unbreaking": 2}}]}
+    },
+    {
+      "id": "side_hr_very_good_handwriting",
+      "title": "Very Good Handwriting",
+      "region": "high_rock/wayrest",
+      "start": "npc:side_hr_tobin",
+      "requires": ["level:22"],
+      "offer": "Do I have children? Is something wrong?",
+      "pitch": "My son Remy. Taken from the street outside our warehouse four nights ago. The note wants five thousand drakes. I'll pay it, gods help me, but I don't trust them to give him back. The watch says the gang uses the old Hawkford ruins north of the city. Bring my boy home.",
+      "desc": "Master Tobin Vauclair, a wool merchant of Wayrest, says his son Remy was kidnapped for ransom. He thinks the gang hides in the old Hawkford ruins north of the city.",
+      "on_start": "relic:side_hr_ransom_note",
+      "objectives": [
+        {"type": "go", "place": "side_hr_hawkford_hovel", "text": "Go to the Ruins of the Old Hawkford Hovel north of Wayrest"},
+        {"type": "clear", "place": "side_hr_hawkford_hovel", "placement": "structure", "text": "Deal with the kidnappers",
+         "spawn": [{"type": "npc:thug", "count": 4, "name": "Cutwater Gang", "hostile": true, "armor": "#3c3c5a"}]},
+        {"type": "kill", "place": "side_hr_hawkford_hovel", "placement": "structure", "text": "Kill Cutwater Jessamy, the gang's leader",
+         "spawn": [{"boss_id": "side_hr_jessamy"}]},
+        {"type": "talk", "npc": "side_hr_remy", "text": "Find Remy Vauclair",
+         "topic": "Your father sent me. Are you hurt?",
+         "reply": "No. Embarrassed. I wrote the ransom note. I needed the money to marry Aveline, and Father would never allow it. I hired Jessamy to play the kidnapper. Then she decided she liked the idea of the money and of keeping me.",
+         "journal": "The kidnapping was Remy's own plan, written in his own good hand. His hired kidnapper had simply decided to make it real."},
+        {"type": "escort", "npc": "side_hr_remy", "place": "wayrest", "text": "Bring Remy home to Wayrest",
+         "actions": "relocate:side_hr_remy:wayrest:14:-4"},
+        {"type": "deliver", "npc": "side_hr_tobin", "relic": "side_hr_ransom_note", "text": "Return Remy and the ransom note to his father",
+         "topic": "Here's your son. And here's the note. Look closely at the handwriting.",
+         "reply": "That's... that's Remy's hand. The little fool. He could have asked me. No. No, he couldn't, could he. I'd have said no. Well. I suppose I had better meet this Aveline."}
+      ],
+      "outro": "Remy Vauclair's kidnapping was his own idea until his hired kidnapper improved on it. He is home, and his father has agreed to meet the girl he nearly died for.",
+      "rewards": {"gold": 800, "loot": "standard",
+                  "items": [{"item": "skycraft:breton_shield", "name": "Vauclair Heater", "enchant": {"protection": 3, "unbreaking": 2}}]}
+    },
+    {
+      "id": "side_hr_the_heron_and_the_blade",
+      "title": "The Heron and the Blade",
+      "region": "high_rock/stormhaven",
+      "start": "npc:side_hr_orlaith",
+      "requires": ["level:38", "quest:side_hr_very_good_handwriting|quest:side_hr_the_vraseth_supper"],
+      "offer": "The Order of the Heron? I've never heard of it.",
+      "pitch": "Few have, now. We were a small order, like the Owls of Glenpoint or the Ravens of Dwynnen. Our grandmaster carried Chrysamere, the Paladin's Blade, until my grandfather Sir Malcor vanished with it and the order died of shame. I'm too old to find it. Keep vigil at our chapterhouse in Stormhaven, and see if the Heron still answers.",
+      "desc": "Dame Orlaith Vane, last Knight-Warden of the Order of the Heron, asked me to keep vigil at the order's ruined chapterhouse in Stormhaven and find Chrysamere, the blade her grandfather stole.",
+      "objectives": [
+        {"type": "go", "place": "side_hr_heronmere", "text": "Go to the ruined Heronmere Chapterhouse in Stormhaven"},
+        {"type": "wait", "hours": 3, "place": "side_hr_heronmere", "text": "Keep vigil before the stone heron",
+         "actions": "scene:side_hr_heron_vigil",
+         "journal": "At the end of my vigil a voice spoke from the empty altar. It named itself Sir Malcor Vane and told me to seek him at Castle Copperston."},
+        {"type": "clear", "place": "side_hr_heronmere", "placement": "near", "text": "Drive off the relic-hunters drawn by the voice",
+         "spawn": [{"type": "minecraft:vindicator", "count": 3, "name": "Relic-Hunter"}, {"type": "minecraft:pillager", "count": 2, "name": "Relic-Hunter Archer"}]},
+        {"type": "go", "place": "side_hr_castle_copperston", "text": "Go to the crypts of Castle Copperston to the south-east"},
+        {"type": "clear", "place": "side_hr_castle_copperston", "placement": "structure", "text": "Put down the knights who followed Malcor into the dark",
+         "spawn": [{"type": "skycraft:draugr", "count": 4, "name": "Oathbound Heron"}]},
+        {"type": "kill", "place": "side_hr_castle_copperston", "placement": "structure", "text": "Face Sir Malcor Vane",
+         "spawn": [{"boss_id": "side_hr_malcor"}],
+         "actions": "scene:side_hr_malcor_confession;relic:side_hr_heron_seal",
+         "journal": "Sir Malcor took Chrysamere because the order meant to sell it to pay its debts. He died guarding it and was still guarding it when I came."},
+        {"type": "talk", "npc": "side_hr_orlaith", "text": "Return to Dame Orlaith in Wayrest",
+         "topic": "Your grandfather didn't steal Chrysamere for himself. He took it to stop the order selling it.",
+         "reply": "So the shame was ours, not his. All these years. He gave you the blade, you say? Then the Heron has chosen. Kneel, if you would. It's the last thing I can give.",
+         "choices": [
+           {"label": "I'll kneel. Let the Heron fly again.", "reply": "Rise, Knight of the Heron. You are the whole order now. Try to do better than the last lot.", "actions": "flag:side_hr_heron_knighted;take:side_hr_heron_seal"},
+           {"label": "Let the order rest. Malcor earned that much.", "reply": "Perhaps you're right. Then carry the blade as he would have: for no one's coin. Keep the seal. Someone should.", "actions": "flag:side_hr_heron_rests"}
+         ]}
+      ],
+      "outro": "Chrysamere, the Paladin's Blade, has come out of Castle Copperston in my hands. Sir Malcor Vane's name is clear, and the Order of the Heron has had its last word.",
+      "rewards": {"gold": 1500, "loot": "legendary", "unique": "chrysamere", "perks": 1}
+    },
+    {
+      "id": "side_hr_cinderwick",
+      "title": "The Apprentice's Fire",
+      "region": "high_rock/stormhaven",
+      "start": "npc:side_hr_allard",
+      "requires": ["level:17"],
+      "offer": "Your apprentice set a farm on fire?",
+      "pitch": "Not personally. She summoned a flame atronach in my workroom, lost hold of it, and it walked out of the door and down the road to Brindlecombe Farm, south-west of here. It's still there, burning. Linnet ran after it. Please bring her back, and preferably not the atronach.",
+      "desc": "Magister Prosper Allard of Evermor says his apprentice Linnet lost control of a flame atronach, which is now burning Brindlecombe Farm in Stormhaven.",
+      "objectives": [
+        {"type": "go", "place": "side_hr_brindlecombe", "text": "Go to Brindlecombe Farm south-west of Evermor"},
+        {"type": "clear", "place": "side_hr_brindlecombe", "placement": "near", "text": "Put out the lesser fires that have taken shape",
+         "spawn": [{"type": "minecraft:magma_cube", "count": 3, "name": "Living Ember"}, {"type": "minecraft:blaze", "count": 1, "name": "Barn Fire"}]},
+        {"type": "kill", "place": "side_hr_brindlecombe", "placement": "near", "text": "Banish the flame atronach Cinderwick",
+         "spawn": [{"boss_id": "side_hr_cinderwick"}]},
+        {"type": "talk", "npc": "side_hr_linnet", "text": "Find Linnet among the ashes",
+         "topic": "Cinderwick's gone. You can come out.",
+         "reply": "I didn't lose hold of it. I sent it here. This farm belongs to the Magister's brother. He lends to farmers and takes their land when the harvest fails. He took ours. I wanted his ledgers to burn. The barn just... came with them.",
+         "actions": "relic:side_hr_debt_ledger",
+         "journal": "Linnet sent the atronach on purpose, to burn the debt ledgers of Allard's own brother, a moneylender who ruined her family."},
+        {"type": "deliver", "npc": "side_hr_allard", "relic": "side_hr_debt_ledger", "text": "Bring what's left of the ledger to Magister Allard",
+         "topic": "Linnet's safe. She sent the atronach after your brother's debt ledgers. This is what survived.",
+         "reply": "Edric's ledgers. Of course. Half these farmers came to me begging, and I sent them away because family is family. Linnet will be punished for the barn. Edric will be punished for the rest, if I have anything to say about it."}
+      ],
+      "outro": "Cinderwick is banished and Brindlecombe's barn is ash. So are most of the debts that ruined half of Stormhaven's farms, and Magister Allard has decided he can live with that.",
+      "rewards": {"gold": 400, "loot": "standard",
+                  "items": [{"item": "skycraft:staff_of_flames", "name": "Linnet's Ill-Advised Staff"}]}
+    },
+    {
+      "id": "side_hr_thunderheels_grudge",
+      "title": "Thunder-Heel's Grudge",
+      "region": "high_rock/wrothgar",
+      "start": "npc:side_hr_gashna",
+      "requires": ["level:24"],
+      "offer": "Tell me about the wall.",
+      "pitch": "The wall needs stone. South of the city there is an old giants' cairn, beautiful dressed stone, nobody using it. So we used it. Now a giant called Thunder-Heel smashes our carts and has killed two haulers. The King wants him dead. I want to know why a giant cares about a pile of rocks.",
+      "desc": "Stonewright Gashna gra-Ulfim of Orsinium says a giant called Thunder-Heel is attacking the haulers who take stone from an old cairn south of the city for Orsinium's walls.",
+      "objectives": [
+        {"type": "go", "place": "side_hr_thunderheel_cairn", "text": "Go to the Cairn of Thunder-Heel south of Orsinium", "actions": "scene:side_hr_thunderheel_cairn"},
+        {"type": "kill", "place": "side_hr_thunderheel_cairn", "placement": "near", "text": "Stop Grommoth Thunder-Heel",
+         "spawn": [{"boss_id": "side_hr_thunderheel"}],
+         "journal": "Thunder-Heel would not be calmed. When he fell, the stone he had been cradling rolled out of his lap. It was carved with an orc's hand beside a giant's foot."},
+        {"type": "retrieve", "place": "side_hr_thunderheel_cairn", "relic": "side_hr_pact_stone", "radius": 8, "text": "Take the carved stone from the cairn",
+         "spawn": [{"type": "skycraft:riekling", "count": 3, "name": "Cairn Scavenger"}]},
+        {"type": "go", "place": "old_orsinium", "text": "Search the ruins of Old Orsinium for a record of the pact",
+         "journal": "In the old orc records carved over the gate of Old Orsinium I found it: King Gortwog paid the giants of the cairn for passage through their valley, and swore that no orc would move a stone of their dead."},
+        {"type": "deliver", "npc": "side_hr_gashna", "relic": "side_hr_pact_stone", "text": "Bring the pact-stone to Gashna in Orsinium",
+         "topic": "That cairn was a giants' grave. Gortwog swore the orcs would never touch it. This stone was his oath.",
+         "reply": "An oath of Gortwog's, broken by my own crews. Malacath's teeth. Thunder-Heel was guarding his dead, and we called him a beast for it. The stones go back, every one, if I have to carry them myself. And this, which the King kept in the vault with Gortwog's pact-papers, you've earned more than any of us."}
+      ],
+      "outro": "Grommoth Thunder-Heel died guarding his people's graves against a broken orcish oath. Gashna is taking the stones back, and King Gortwog's hammer has come out of the vault to me.",
+      "rewards": {"gold": 700, "loot": "major", "unique": "gortwogs_hammer"}
+    },
+    {
+      "id": "side_hr_the_red_wool_bell",
+      "title": "The Red Wool Bell",
+      "region": "high_rock/wrothgar",
+      "start": "find",
+      "find": {"place": "side_hr_wroth_totem", "offset": [6, 4], "clue": "totem",
+               "text": "A skull wound in red wool hangs from the totem with a clapperless bell. A strip of bark is tied beneath it: 'The Lyrezi have Mastercroft. Whoever reads this, come to the Hearth. West, then north. - M.'"},
+      "requires": ["level:34"],
+      "desc": "A totem in the Wrothgarian Mountains bears the red wool of the Daughters of Wroth and a plea: the Lyrezi vampires have taken Castle Mastercroft.",
+      "objectives": [
+        {"type": "go", "place": "side_hr_daughters_hearth", "text": "Find the Hearth of the Daughters in the north-west of Wrothgar"},
+        {"type": "talk", "npc": "side_hr_morwen", "text": "Speak with Sister Morwen of the Daughters of Wroth",
+         "topic": "I found your totem. The Lyrezi took Mastercroft?",
+         "reply": "Mastercroft was ours for two hundred years, until an elder of the Lyrezi walked in one winter and made it a feasting hall. Turn her out of it, and the Daughters will brew you something kings would kill for. That is a coven's bargain. It is a good one."},
+        {"type": "go", "place": "side_hr_castle_mastercroft", "text": "Go to Castle Mastercroft"},
+        {"type": "clear", "place": "side_hr_castle_mastercroft", "placement": "structure", "text": "Cut through the Lyrezi feast-guests",
+         "spawn": [{"type": "npc:vampire", "count": 3, "name": "Lyrezi Guest", "hostile": true}, {"type": "skycraft:death_hound", "count": 2, "name": "Lyrezi Hound"}],
+         "actions": "scene:side_hr_mastercroft_hall"},
+        {"type": "kill", "place": "side_hr_castle_mastercroft", "placement": "structure", "text": "Destroy Countess Ilsabet of the Lyrezi",
+         "spawn": [{"boss_id": "side_hr_ilsabet"}],
+         "actions": "relic:side_hr_ilsabet_bell",
+         "journal": "Countess Ilsabet was once a Daughter of Wroth, Morwen's own elder sister. She still wore the coven bell around her wrist, with the clapper torn out."},
+        {"type": "talk", "npc": "side_hr_morwen", "text": "Return to Sister Morwen",
+         "topic": "Ilsabet is dead. She said you were her sister.",
+         "reply": "She was. She left to live forever and came back to eat the women who raised her. I sent a stranger because I couldn't lift a hand to her myself. Give me her bell, or keep it. I find I don't know which I'd rather.",
+         "choices": [
+           {"label": "Take the bell. Hang it at the Hearth where she started.", "reply": "Then she comes home, after a fashion. Here is the Daughters' brew, as promised. Drink it in a dire hour and not before.", "actions": "flag:side_hr_bell_home;take:side_hr_ilsabet_bell;give:minecraft:golden_apple"},
+           {"label": "I'll bury it at Mastercroft, where she chose to be.", "reply": "Where she chose. Yes. That's fair, and it's cruel, and it's right. The Daughters' brew is yours.", "actions": "flag:side_hr_bell_buried;take:side_hr_ilsabet_bell;give:minecraft:golden_apple"}
+         ]}
+      ],
+      "outro": "Countess Ilsabet of the Lyrezi is destroyed and Castle Mastercroft belongs to the Daughters of Wroth again. Two sisters' quarrel ended with a stranger's blade.",
+      "rewards": {"gold": 1100, "loot": "major",
+                  "items": [{"item": "skycraft:silver_warhammer", "name": "Mastercroft Bell-Breaker", "enchant": {"smite": 4, "knockback": 1, "unbreaking": 3}}]}
+    },
+    {
+      "id": "side_hr_the_bell_ringers_fires",
+      "title": "The Bell-Ringer's Fires",
+      "region": "high_rock/glenumbra",
+      "start": "npc:side_hr_aline",
+      "requires": ["level:18"],
+      "offer": "Who is the Bell-Ringer?",
+      "pitch": "Odo. He rang the bells at Kynareth's temple until his dreams started. Now he stands at the well and names the next house to burn, and it burns. Half the city thinks he's a prophet and buys his painted fire-wards. Weigh him for me. Is he touched by the gods, or by something else?",
+      "desc": "Priestess Aline of Daggerfall asked me to find out whether Odo the Bell-Ringer, whose prophecies of fire keep coming true, is a true prophet or a fraud.",
+      "objectives": [
+        {"type": "talk", "npc": "side_hr_odo", "text": "Speak with Odo the Bell-Ringer",
+         "topic": "The priestess says your fires always come true.",
+         "reply": "They do. I dream them. I don't want to. Last night I dreamed something new.",
+         "actions": "scene:side_hr_odo_vision",
+         "journal": "Odo swears he only dreams the fires. His latest dream was of an orchard, and a woman with his mother's eyes holding a tinderbox."},
+        {"type": "go", "place": "side_hr_gaersmith_orchard", "text": "Search the ruins of Gaersmith Orchard east of the city", "actions": "scene:side_hr_gaersmith"},
+        {"type": "clear", "place": "side_hr_gaersmith_orchard", "placement": "near", "text": "Deal with the fire-setters",
+         "spawn": [{"type": "npc:thug", "count": 3, "name": "Fire-Ward Peddler", "hostile": true, "armor": "#7a3b1e"}]},
+        {"type": "kill", "place": "side_hr_gaersmith_orchard", "placement": "near", "text": "Stop Mabry Crowe",
+         "spawn": [{"boss_id": "side_hr_mabry"}],
+         "journal": "Mabry Crowe was Odo's sister. She set the fires and sold the wards. But she swore with her last breath that she only ever burned the houses Odo had already dreamed."},
+        {"type": "talk", "npc": "side_hr_aline", "text": "Tell Priestess Aline what you found",
+         "topic": "Odo's sister set the fires and sold the wards. But she said she only burned what he dreamed first.",
+         "reply": "Then he's both. A fraud's pawn and a true dreamer. Gods, what a burden. What do we do with a man like that?",
+         "choices": [
+           {"label": "Take him into the temple. Let someone help him with his dreams.", "reply": "Kynareth's house has room for a man who hears too much. I'll see to it.", "actions": "flag:side_hr_odo_temple"},
+           {"label": "Let him keep warning people. Without Mabry, his warnings might save a house or two.", "reply": "A prophet with no one to make his prophecies come true. That may be the best kind. Very well.", "actions": "flag:side_hr_odo_free"}
+         ]}
+      ],
+      "outro": "Odo the Bell-Ringer dreamed of fires, and his sister made sure they came true. Mabry Crowe is dead, and Daggerfall has one less arsonist and one sadder prophet.",
+      "rewards": {"gold": 500, "loot": "standard",
+                  "items": [{"item": "skycraft:breton_mace", "name": "Ash-Warden", "enchant": {"fire_protection": 1, "smite": 2, "knockback": 1}}]}
+    }
+  ]
+}

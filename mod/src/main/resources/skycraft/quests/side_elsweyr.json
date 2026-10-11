@@ -1,0 +1,521 @@
+{
+  "line": "side_elsweyr",
+  "category": "side",
+  "region": "elsweyr/anequina",
+  "speakers": {
+    "side_els_pazhi": "Pazhi the Alfiq",
+    "side_els_nahrisha_ghost": "Nahrisha the Sand-Wrapped",
+    "side_els_zahjarr_voice": "High Whisker Zahjarr",
+    "side_els_dragon_voice": "Morvunrah",
+    "side_els_dark_voice": "Mother Nhirra",
+    "side_els_collector_voice": "Kyrzh the Collector",
+    "side_els_bride_voice": "Lady Shazira",
+    "side_els_drowned_voice": "Captain Velethis"
+  },
+  "npcs": [
+    {"id": "side_els_ri_zhassa", "name": "Ri'zhassa the Cane-Grower", "role": "farmer", "place": "torval", "offset": [10, -8], "female": true,
+     "greet": "Ri'zhassa grows the sweetest cane in Pellitine. Grew. This season she is not sure what she grows."},
+    {"id": "side_els_ahnissi", "name": "Ahnissi, Wharf-Warden of Senchal", "role": "steward", "place": "senchal", "offset": [12, 9], "female": true,
+     "greet": "Every ship that ties up in Senchal smells of sugar. Ahnissi's job is to learn which kind."},
+    {"id": "side_els_jo_zhirr", "name": "Jo'zhirr the Old Claw", "role": "adventurer", "place": "riverhold", "offset": [-9, 7],
+     "greet": "Jo'zhirr has fought Thalmor, bandits and one very angry mother senche. He has scars from all of them. The senche left the best ones."},
+    {"id": "side_els_ma_dara", "name": "Ma'dara the Song-Keeper", "role": "bard", "place": "riverhold", "offset": [6, 12], "female": true,
+     "greet": "Sit, sit. Ma'dara knows three hundred songs of Anequina, and every one of them is mostly true."},
+    {"id": "side_els_hanzira", "name": "Hanzira Spear-Mother", "role": "hunter", "place": "riverhold", "offset": [14, -10], "female": true,
+     "greet": "Hanzira hunts what the Mane's riders will not. Usually this means things with very large teeth."},
+    {"id": "side_els_zaba_jo", "name": "Zaba-jo the Lamplighter", "role": "citizen", "place": "torval", "offset": [-12, 10],
+     "greet": "Zaba-jo lights the lamps of the low streets every dusk. Lately, every dusk, he lights them twice."},
+    {"id": "side_els_inzirr", "name": "Grave-Tender Inzirr", "role": "priest", "place": "torval", "offset": [-6, -14],
+     "greet": "Inzirr keeps the sand-graves of Torval tidy. The dead do not complain, which is restful."},
+    {"id": "side_els_ja_neema", "name": "Ja'neema", "role": "merchant", "place": "torval", "offset": [16, 12], "female": true,
+     "greet": "Ja'neema sells her father's luck-charms. She would sell his luck too, if she could find where he put it."},
+    {"id": "side_els_ahzir", "name": "Lord Ahzir of Rimmen", "role": "merchant", "place": "rimmen", "offset": [10, -10],
+     "greet": "Lord Ahzir does not usually speak to people with road dust on them. Today he will make an exception. Briefly."},
+    {"id": "side_els_shavi_ra", "name": "Magistrate Shavi-ra", "role": "steward", "place": "rimmen", "offset": [-8, 12], "female": true,
+     "greet": "Shavi-ra judges disputes over sugar, land and sometimes cats. The cats are the most honest of the three."},
+    {"id": "side_els_khali", "name": "Khali the Tally-Keeper", "role": "caravan_trader", "place": "rimmen", "offset": [14, 6], "female": true,
+     "greet": "Khali counts what leaves Rimmen and what arrives elsewhere. The numbers should match. Khali is paid to worry when they do not."},
+    {"id": "side_els_azirr", "name": "Azirr the Star-Counter", "role": "mage", "place": "rimmen", "offset": [-14, -6],
+     "greet": "Azirr counts stars, moons and the steps between them. Tonight the count is wrong, and Azirr does not like wrong."},
+    {"id": "side_els_shirra", "name": "Shirra the Lamp-Keeper", "role": "citizen", "place": "senchal", "offset": [-10, -12], "female": true,
+     "greet": "Shirra's father kept the old light on the south rocks. He stopped writing in his log one night. Shirra has not stopped waiting."}
+  ],
+  "relics": [
+    {"id": "side_els_grey_powder", "name": "Tin of Grey Powder", "desc": "Fine grey dust that smells of iron and lamp-black. One pinch in an irrigation ditch could sour a field of moon sugar.", "icon": 15},
+    {"id": "side_els_mortgage_bundle", "name": "Bundle of Sugar-Field Mortgages", "desc": "Loans on every cane-field in western Pellitine, all held by one Senchal lender who signs with a sugar-tooth.", "icon": 11},
+    {"id": "side_els_sweet_ledger", "name": "Sweet-Tooth's Debt Ledger", "desc": "A ship's ledger listing farmers, their debts and the cargo they now owe in moon sugar and skooma.", "icon": 11},
+    {"id": "side_els_ancient_song", "name": "Funeral-Song Tablet", "desc": "A clay tablet with the true burial song of the First Claw, scratched quickly by someone who knew it would be hidden.", "icon": 21},
+    {"id": "side_els_dragon_bone_shard", "name": "Shard of Morvunrah", "desc": "A splinter of dragon bone, still hot to the touch. The cult believed it was a bone of Alkosh. It was not.", "icon": 19},
+    {"id": "side_els_ahzir_signet", "name": "Signet of House Ahzir", "desc": "A gold ring with a lion's head, worn smooth at the edges from sealing a great many documents it should not have.", "icon": 26},
+    {"id": "side_els_empty_manifest", "name": "Empty Manifest", "desc": "A caravan manifest listing forty crates of silk and spice. The crates were full of sand.", "icon": 11},
+    {"id": "side_els_lattice_lens", "name": "Moonglass Lens", "desc": "A lens ground from moonstone, designed to gather the light of Jone and Jode and bend it where it was never meant to go.", "icon": 20},
+    {"id": "side_els_pelt_of_scar_mother", "name": "Pelt of Old Scar-Mother", "desc": "A senche-tiger pelt as wide as a tent, striped with old scars. Three skooma-darts are still lodged in the shoulder.", "icon": 7},
+    {"id": "side_els_dark_lamp", "name": "Lamp of the Great Dark", "desc": "A lamp of black glass that does not shine but swallows. Candles placed near it go out.", "icon": 17},
+    {"id": "side_els_luck_contract", "name": "Ma'jhad's Luck Contract", "desc": "A contract in red ink: twenty years of luck for the merchant Ma'jhad, payable in full at the end. The end is marked as last month.", "icon": 11},
+    {"id": "side_els_bride_locket", "name": "Weeping Palms Locket", "desc": "A silver locket holding two portraits. One face has been scratched out, carefully, with a claw.", "icon": 26},
+    {"id": "side_els_keeper_log", "name": "Lighthouse Keeper's Log", "desc": "The last entry is in a shaking hand: 'A ship with serpent sails, lights burning green, and she asked for me by name.'", "icon": 11}
+  ],
+  "places": {
+    "side_els_ja_rassa_fields": {"x": -752, "z": 12304, "r": 40, "name": "Ja'rassa Cane-Fields"},
+    "side_els_wet_root_still": {"x": -368, "z": 12688, "r": 30, "name": "Wet-Root Distillery"},
+    "side_els_sugar_smoke_cove": {"x": 2128, "z": 14032, "r": 36, "name": "Sugar-Smoke Cove"},
+    "side_els_sweet_tooth_hold": {"x": 1744, "z": 13840, "r": 30, "name": "Sweet-Tooth's Hold"},
+    "side_els_bone_choir_camp": {"x": -176, "z": 9616, "r": 34, "name": "Bone-Choir Camp"},
+    "side_els_ash_whisker_aerie": {"x": -752, "z": 9232, "r": 44, "name": "Ash-Whisker Aerie"},
+    "side_els_first_claw_tomb": {"x": -1328, "z": 9808, "r": 40, "name": "Tomb of the First Claw"},
+    "side_els_tall_grass_gully": {"x": -1328, "z": 10576, "r": 32, "name": "Tall-Grass Gully"},
+    "side_els_scar_mother_den": {"x": -1520, "z": 11152, "r": 32, "name": "Old Scar-Mother's Den"},
+    "side_els_broken_wheel_pass": {"x": 208, "z": 10384, "r": 34, "name": "Broken-Wheel Pass"},
+    "side_els_dry_wells_waystation": {"x": 784, "z": 10000, "r": 30, "name": "Dry Wells Waystation"},
+    "side_els_old_granary": {"x": 1360, "z": 9808, "r": 30, "name": "Old Rimmen Granary"},
+    "side_els_ahzir_villa": {"x": 1936, "z": 10192, "r": 32, "name": "Ahzir's Summer Villa"},
+    "side_els_jodes_teeth": {"x": 2128, "z": 9808, "r": 36, "name": "Ring of Jode's Teeth"},
+    "side_els_glass_tower": {"x": 2512, "z": 10384, "r": 32, "name": "Caerwen's Glass Tower"},
+    "side_els_lightless_cistern": {"x": 976, "z": 12880, "r": 32, "name": "The Lightless Cistern"},
+    "side_els_majhads_folly": {"x": 1552, "z": 11920, "r": 32, "name": "Ma'jhad's Folly"},
+    "side_els_weeping_palms": {"x": -944, "z": 12880, "r": 38, "name": "Weeping Palms Estate"},
+    "side_els_south_rocks_light": {"x": 2704, "z": 13264, "r": 28, "name": "South Rocks Lighthouse"},
+    "side_els_wreck_of_the_hunger": {"x": 3088, "z": 12688, "r": 34, "name": "Wreck of the Hunger"}
+  },
+  "bosses": {
+    "side_els_vashir": {"name": "Vashir Pale-Paw", "type": "skycraft:bandit_chief", "hp": 2.6, "dmg": 1.3, "level": 24,
+      "weapon": "skycraft:khajiit_dagger", "gear": {"chest": "skycraft:khajiit_chestplate"},
+      "drop": "loot:standard", "glow": false},
+    "side_els_sweet_tooth": {"name": "Captain Dro'sakhar Sweet-Tooth", "type": "skycraft:bandit_chief", "hp": 4.0, "dmg": 1.7, "level": 38,
+      "weapon": "skycraft:khajiit_sword", "gear": {"head": "skycraft:khajiit_helmet", "chest": "skycraft:khajiit_chestplate", "legs": "skycraft:khajiit_leggings"},
+      "drop": "loot:major", "glow": false},
+    "side_els_zahjarr": {"name": "High Whisker Zahjarr", "type": "skycraft:dragon_priest", "hp": 4.0, "dmg": 1.7, "level": 40,
+      "weapon": "skycraft:khajiit_greatsword", "gear": {"chest": "skycraft:dragonscale_chestplate"},
+      "drop": "loot:major", "glow": true},
+    "side_els_morvunrah": {"name": "Morvunrah the Ash-Wing", "type": "skycraft:dragon", "hp": 6.0, "dmg": 2.0, "level": 45,
+      "drop": "loot:legendary", "glow": false},
+    "side_els_nahrisha": {"name": "Nahrisha the Sand-Wrapped", "type": "skycraft:draugr_deathlord", "hp": 3.0, "dmg": 1.4, "level": 22,
+      "weapon": "skycraft:khajiit_war_axe", "gear": {"head": "skycraft:khajiit_helmet", "offhand": "skycraft:khajiit_shield"},
+      "drop": "loot:standard", "glow": true},
+    "side_els_mother_nhirra": {"name": "Mother Nhirra, Voice of the Great Dark", "type": "skycraft:vampire", "hp": 3.4, "dmg": 1.5, "level": 30,
+      "weapon": "skycraft:khajiit_dagger", "gear": {"chest": "skycraft:vampire_chestplate"},
+      "drop": "loot:major", "glow": true},
+    "side_els_shazrah": {"name": "Shazrah the Velvet Knife", "type": "skycraft:bandit_chief", "hp": 3.2, "dmg": 1.6, "level": 32,
+      "weapon": "skycraft:khajiit_dagger", "gear": {"head": "skycraft:leather_helmet", "chest": "skycraft:studded_chestplate"},
+      "drop": "loot:major", "glow": false},
+    "side_els_dro_zel": {"name": "Dro'zel Two-Ledgers", "type": "skycraft:bandit_chief", "hp": 2.5, "dmg": 1.3, "level": 20,
+      "weapon": "skycraft:khajiit_sword", "gear": {"chest": "skycraft:khajiit_chestplate"},
+      "drop": "loot:standard", "glow": false},
+    "side_els_caerwen": {"name": "Magister Caerwen Ilyndil", "type": "skycraft:necromancer", "hp": 3.4, "dmg": 1.6, "level": 30,
+      "weapon": "skycraft:staff_of_sparks", "gear": {"head": "skycraft:elven_gilded_helmet", "chest": "skycraft:elven_gilded_chestplate"},
+      "drop": "loot:major", "glow": true},
+    "side_els_grell": {"name": "Grell Hookhand, Poacher", "type": "skycraft:bandit_chief", "hp": 2.8, "dmg": 1.4, "level": 26,
+      "weapon": "skycraft:steel_war_axe", "gear": {"head": "skycraft:fur_helmet", "chest": "skycraft:fur_chestplate"},
+      "drop": "loot:standard", "glow": false},
+    "side_els_scar_mother": {"name": "Old Scar-Mother", "type": "skycraft:senche_tiger", "hp": 4.0, "dmg": 1.7, "level": 30,
+      "drop": "loot:major", "glow": false},
+    "side_els_kyrzh": {"name": "Kyrzh the Collector", "type": "skycraft:dremora", "hp": 4.0, "dmg": 1.7, "level": 36,
+      "weapon": "skycraft:daedric_war_axe", "gear": {"head": "skycraft:daedric_helmet"},
+      "drop": "loot:major", "glow": true},
+    "side_els_lady_shazira": {"name": "Lady Shazira of Weeping Palms", "type": "skycraft:vampire_lord", "hp": 4.6, "dmg": 1.8, "level": 38,
+      "drop": "loot:major", "glow": true},
+    "side_els_velethis": {"name": "Captain Velethis of the Hunger", "type": "skycraft:draugr_deathlord", "hp": 4.6, "dmg": 1.8, "level": 42,
+      "weapon": "skycraft:maormer_sword", "gear": {"head": "skycraft:maormer_helmet", "chest": "skycraft:maormer_chestplate"},
+      "drop": "loot:major", "glow": true}
+  },
+  "scenes": {
+    "side_els_fields_grey": [
+      ["narrator", "The cane stands tall and grey as ash. Where a stalk has split, the sugar inside is the colour of wet slate."],
+      ["side_els_ri_zhassa", "Ri'zhassa's grandmother planted this row. It glittered like the moons once. Now look at it."]
+    ],
+    "side_els_cove_night": [
+      ["narrator", "Lanterns bob on the black water. The smoke over the cove is sweet enough to taste, and the crews singing on the beach do not sound happy."],
+      ["narrator", "Some of them wear farmer's sashes under their pirate coats."]
+    ],
+    "side_els_choir_sings": [
+      ["narrator", "Khajiit in scaled mantles kneel around a ribcage half buried in the sand, chanting one word over and over. The bones are smoking."],
+      ["side_els_zahjarr_voice", "Alkosh sleeps in these bones! Sing, brothers, sisters! Sing until the Dragon-Cat remembers he has wings!"]
+    ],
+    "side_els_dragon_wakes": [
+      ["narrator", "The ribcage cracks. Flesh crawls up the bones like fire up a curtain."],
+      ["side_els_dragon_voice", "ALKOSH? You sang a stranger's name to me for a hundred years, little cats. I am Morvunrah, and I am hungry."]
+    ],
+    "side_els_tomb_opens": [
+      ["narrator", "The tomb's door is carved with a lion-headed warrior holding a pass alone against a host. Sand pours from the cracks like water."],
+      ["side_els_nahrisha_ghost", "No one passes. No one reads. The First Claw sleeps with his glory. That is the bargain, and I keep it."]
+    ],
+    "side_els_tomb_truth": [
+      ["side_els_nahrisha_ghost", "It was Nahrisha who held the pass. Ja'khizzar ran. They needed a hero with a good name, and his was better than mine."],
+      ["side_els_nahrisha_ghost", "Nahrisha agreed to guard his lie forever, so the clans would not lose heart. A thousand years is long enough. Tell them, if you like. Or do not."]
+    ],
+    "side_els_pazhi_granary": [
+      ["side_els_pazhi", "Oh, the big one is slow. Pazhi was nearly bored. Here is a riddle: why would a lord care so much for a little ring?"],
+      ["narrator", "The Alfiq flicks its tail and is gone between two sacks of grain. On the floor it has left a tithe-receipt, sealed with a lion's head."]
+    ],
+    "side_els_pazhi_villa": [
+      ["side_els_pazhi", "Here is where the ring does its work. Tithe papers, sugar papers, papers that make farmers owe what they never borrowed. Pazhi only took the stamp. Pazhi is a very honest thief."],
+      ["side_els_pazhi", "The lord's knife is coming. Pazhi is small, and leaves now. You are big. Good luck."]
+    ],
+    "side_els_lattice_tilted": [
+      ["narrator", "Nine standing stones ring the hill, each one carved with a phase of the moons. Three have been turned to face the wrong sky."],
+      ["side_els_azirr", "You see? A cub born under this hill tonight would be born under the wrong moons. Azirr cannot say what furstock it would be. No one could."]
+    ],
+    "side_els_dark_rises": [
+      ["narrator", "One by one, every lamp in the cistern gutters out. The dark that fills it is not empty. It breathes."],
+      ["side_els_dark_voice", "Light is a lie the moons tell. Namiira tells the truth: before everything, there was nothing, and it was hungry. Come and be honest with us."]
+    ],
+    "side_els_collector_arrives": [
+      ["narrator", "The air in the ruined counting-house smells of hot coins. A shadow stands up from behind the desk that has no one to cast it."],
+      ["side_els_collector_voice", "Twenty years of luck, paid. The debt is due. The merchant died owing; the debt passes to his blood. Unless you would like to pay it."]
+    ],
+    "side_els_palms_bride": [
+      ["narrator", "The estate's great hall is laid for a wedding feast that rotted long ago. A bride in grey silk sits alone at the head of the table."],
+      ["side_els_bride_voice", "He promised forever, and then he aged. So inconsiderate. I kept him in the cellar as long as I could. Will you stay for the feast?"]
+    ],
+    "side_els_hunger_hails": [
+      ["narrator", "Green lamps burn along the rail of a ship that has been on the rocks for twenty years. Somewhere in the hold, someone is calling a name."],
+      ["side_els_drowned_voice", "Keeper! Keeper, you put out your light and let us strike. Twenty years I have asked for you. Who are you, to come in his place?"]
+    ]
+  },
+  "quests": [
+    {
+      "id": "side_els_grey_sugar",
+      "title": "Grey Sugar",
+      "region": "elsweyr/pellitine",
+      "start": "npc:side_els_ri_zhassa",
+      "requires": ["level:22"],
+      "offer": "Why does a cane-grower look so worried?",
+      "pitch": "Because her cane has gone grey, walker. Grey sugar, and the ones who eat it see things and bite their friends. Every small field in western Pellitine is sick. The big fields are fine. Ri'zhassa does not believe in a sickness that knows which farmer is rich.",
+      "desc": "Ri'zhassa, a cane-grower of Torval, says the moon sugar in the small fields of western Pellitine has turned grey and maddening, while the large estates are untouched.",
+      "objectives": [
+        {"type": "go", "place": "side_els_ja_rassa_fields", "text": "Visit the Ja'rassa Cane-Fields in Pellitine", "actions": "scene:side_els_fields_grey"},
+        {"type": "clear", "place": "side_els_ja_rassa_fields", "text": "Subdue the sugar-maddened field hands",
+         "spawn": [{"type": "npc:farmer", "count": 3, "name": "Sugar-Mad Field Hand", "hostile": true}, {"type": "skycraft:alfiq", "count": 1, "name": "Feral Barn-Cat"}]},
+        {"type": "go", "place": "side_els_wet_root_still", "text": "Follow the irrigation ditch upstream to the old distillery"},
+        {"type": "clear", "place": "side_els_wet_root_still", "placement": "structure", "text": "Kill the distillery's guards",
+         "spawn": [{"type": "skycraft:bandit", "count": 4, "name": "Still-Guard"}]},
+        {"type": "kill", "place": "side_els_wet_root_still", "placement": "structure", "text": "Kill Vashir Pale-Paw, the poisoner",
+         "spawn": [{"boss_id": "side_els_vashir"}], "actions": "relic:side_els_grey_powder;relic:side_els_mortgage_bundle",
+         "journal": "Vashir was tipping grey powder into the ditches that fed only the small fields. His satchel held mortgages on every one of them, all owned by a Senchal lender who signs with a drawing of a sweet-tooth."},
+        {"type": "talk", "npc": "side_els_ri_zhassa", "text": "Tell Ri'zhassa who soured the cane",
+         "topic": "The sickness was a poisoner, paid by whoever holds your mortgages.",
+         "reply": "Ri'zhassa signed one of those papers, in a bad year. Sweet-Tooth. Everyone in Pellitine knows the name and no one says it. He wanted the fields to fail, so he could take them for his cooks.",
+         "choices": [
+           {"label": "Burn the mortgages. Let him try to collect on ash.", "reply": "Ha! Ri'zhassa will light the fire herself. And when he comes, she will offer him a cup of grey sugar.", "actions": "flag:side_els_mortgages_burned;take:side_els_mortgage_bundle"},
+           {"label": "Keep them. They are proof against him.", "reply": "Proof. Yes. Clever walker. Take them to Senchal. The wharf-warden there hates him almost as much as Ri'zhassa does.", "actions": "flag:side_els_mortgages_kept"}
+         ]},
+        {"type": "deliver", "npc": "side_els_ri_zhassa", "relic": "side_els_grey_powder", "text": "Give Ri'zhassa the tin of grey powder",
+         "topic": "Here is what poisoned your cane.",
+         "reply": "Ri'zhassa will bury it under the fattest stalk, so the moons can see what was done. Next season, the cane will be sweet again. This one promises you the first cut."}
+      ],
+      "outro": "The grey sugar of western Pellitine was poison tipped into the ditches by a hired alchemist. The lender behind him is a Senchal skooma lord called Sweet-Tooth.",
+      "rewards": {"gold": 600, "loot": "standard", "items": [{"item": "skycraft:khajiit_dagger", "name": "Cane-Cutter's Kiss", "enchant": {"sharpness": 2, "looting": 1}}]}
+    },
+    {
+      "id": "side_els_the_sweet_tide",
+      "title": "The Sweet Tide",
+      "region": "elsweyr/senchal",
+      "start": "auto",
+      "requires": ["quest:side_els_grey_sugar", "level:36"],
+      "desc": "The man behind the grey sugar is Dro'sakhar Sweet-Tooth, a skooma lord who runs a pirate fleet out of Senchal. The wharf-warden of Senchal may know where to find him.",
+      "objectives": [
+        {"type": "talk", "npc": "side_els_ahnissi", "text": "Speak with Ahnissi, the Wharf-Warden of Senchal",
+         "topic": "Where does Sweet-Tooth anchor?",
+         "reply": "In Sugar-Smoke Cove, south along the shore, where the cliffs hide the lanterns. His crews are not sailors, walker. They are farmers who owe him. He takes the field, then he takes the farmer. Remember that when you draw steel."},
+        {"type": "go", "place": "side_els_sugar_smoke_cove", "text": "Find Sugar-Smoke Cove after dark", "actions": "scene:side_els_cove_night"},
+        {"type": "cond", "cond": "night", "place": "side_els_sugar_smoke_cove", "text": "Wait for the skooma barges to come in at night"},
+        {"type": "clear", "place": "side_els_sugar_smoke_cove", "text": "Fight off Sweet-Tooth's enforcers on the beach",
+         "spawn": [{"type": "skycraft:bandit", "count": 4, "name": "Sweet-Tooth Enforcer"}, {"type": "npc:thug", "count": 2, "name": "Debt-Sworn Deckhand", "hostile": true}],
+         "journal": "Ahnissi was right. The enforcers fought; the deckhands mostly dropped their clubs and ran into the dark. Sweet-Tooth keeps his skooma in a sea-cave further west."},
+        {"type": "go", "place": "side_els_sweet_tooth_hold", "text": "Enter Sweet-Tooth's hold in the sea-cliffs"},
+        {"type": "kill", "place": "side_els_sweet_tooth_hold", "placement": "structure", "text": "Kill Captain Dro'sakhar Sweet-Tooth",
+         "spawn": [{"boss_id": "side_els_sweet_tooth"}, {"type": "skycraft:bandit", "count": 2, "name": "Sugar-Mate"}], "actions": "relic:side_els_sweet_ledger"},
+        {"type": "deliver", "npc": "side_els_ahnissi", "relic": "side_els_sweet_ledger", "text": "Bring Sweet-Tooth's ledger to Ahnissi",
+         "topic": "Sweet-Tooth is dead. This ledger lists everyone who owed him.",
+         "reply": "Ahnissi could hang every name in this book on a hook for smuggling. Or she could lose it in the harbor, and Pellitine would have a great many farmers again by spring.",
+         "choices": [
+           {"label": "Lose it in the harbor. They were his prisoners, not his crew.", "reply": "Then the tide takes it. Ahnissi will tell the magistrate the book was very wet. Go well, walker. Senchal is sweeter for you.", "actions": "flag:side_els_debts_drowned"},
+           {"label": "Keep it. The worst of them deserve a magistrate.", "reply": "The worst of them, yes. Ahnissi will read carefully and be fair. That is harder than hanging, but she is paid for hard.", "actions": "flag:side_els_debts_judged;loot:standard"}
+         ]}
+      ],
+      "outro": "Dro'sakhar Sweet-Tooth is dead in his sea-cave, and the ledger that bound half of Pellitine's farmers to his skooma barges is in Ahnissi's hands, or in the harbor.",
+      "rewards": {"gold": 1300, "loot": "major", "items": [{"item": "skycraft:khajiit_sword", "name": "Sweet-Tooth's Hook", "enchant": {"sharpness": 4, "fire_aspect": 1}}]}
+    },
+    {
+      "id": "side_els_the_scaled_mane",
+      "title": "The Scaled Mane",
+      "region": "elsweyr/anequina",
+      "start": "npc:side_els_jo_zhirr",
+      "requires": ["level:42"],
+      "offer": "What is the Scaled Mane?",
+      "pitch": "A cult, walker. Old, stupid, stubborn. They wear dragon scales and say Alkosh was a dragon who learned to be a cat. Fine, says Jo'zhirr, believe what you like. But now they dig in the northern dunes, and the herders say the sand there is warm at night, and smoking.",
+      "desc": "Jo'zhirr the Old Claw of Riverhold warned me about the Scaled Mane, a dragon-cult remnant digging in the northern dunes of Anequina, where the sand smokes at night.",
+      "objectives": [
+        {"type": "go", "place": "side_els_bone_choir_camp", "text": "Find the cult's camp in the northern dunes"},
+        {"type": "clear", "place": "side_els_bone_choir_camp", "text": "Scatter the Bone-Choir cultists",
+         "spawn": [{"type": "npc:necromancer", "count": 3, "name": "Scaled Mane Chanter", "hostile": true}, {"type": "skycraft:giant_scorpion", "count": 2, "name": "Cult-Kept Scorpion"}],
+         "journal": "The chanters at the camp were only the outer circle. Their maps all pointed north, to a ridge they called the Aerie, where their High Whisker sings over a buried dragon."},
+        {"type": "go", "place": "side_els_ash_whisker_aerie", "text": "Climb to the Ash-Whisker Aerie", "actions": "scene:side_els_choir_sings"},
+        {"type": "kill", "place": "side_els_ash_whisker_aerie", "placement": "near", "text": "Kill High Whisker Zahjarr before the song ends",
+         "spawn": [{"boss_id": "side_els_zahjarr"}, {"type": "npc:necromancer", "count": 2, "name": "Scaled Mane Chanter", "hostile": true}],
+         "actions": "scene:side_els_dragon_wakes;thunder"},
+        {"type": "kill", "place": "side_els_ash_whisker_aerie", "placement": "near", "text": "Slay Morvunrah the Ash-Wing",
+         "spawn": [{"boss_id": "side_els_morvunrah"}], "actions": "relic:side_els_dragon_bone_shard",
+         "journal": "Zahjarr died with the last verse in his mouth, and it was enough. The bones he had been singing to for a lifetime were not Alkosh's. They belonged to a dragon who woke up hungry and very annoyed."},
+        {"type": "deliver", "npc": "side_els_jo_zhirr", "relic": "side_els_dragon_bone_shard", "text": "Bring the bone shard to Jo'zhirr in Riverhold",
+         "topic": "The cult woke something. It was not Alkosh.",
+         "reply": "A real dragon. Jo'zhirr said stupid; he did not say dangerous. He should have. Old Claw is too old. Here: take this from his hoard, and tell no one that Jo'zhirr was wrong. Ha. Tell everyone. It is a good story."}
+      ],
+      "outro": "The Scaled Mane sang a dragon awake in the northern dunes of Anequina, believing it was Alkosh. Morvunrah the Ash-Wing is dead again, and the cult's song is over.",
+      "rewards": {"gold": 1500, "loot": "legendary", "perks": 1, "items": [{"item": "skycraft:dragonbone_war_axe", "name": "Ash-Wing's Rib", "enchant": {"sharpness": 4, "fire_aspect": 2}}]}
+    },
+    {
+      "id": "side_els_the_first_claw",
+      "title": "The First Claw",
+      "region": "elsweyr/anequina",
+      "start": "npc:side_els_ma_dara",
+      "requires": ["level:20"],
+      "offer": "Which of your songs is mostly untrue?",
+      "pitch": "Clever. The song of Ja'khizzar, the First Claw, who held the dune pass alone against a thousand. Ma'dara learned it from her mother. But the tomb-scribes left a second song, a funeral-song, and no one has heard it for a thousand years. It is sealed in his tomb, in the north. Ma'dara is too old to rob tombs. You are not.",
+      "desc": "Ma'dara the Song-Keeper of Riverhold wants the lost funeral-song of Ja'khizzar, the First Claw, recovered from his tomb in the northern sands of Anequina.",
+      "objectives": [
+        {"type": "go", "place": "side_els_first_claw_tomb", "text": "Find the Tomb of the First Claw", "actions": "scene:side_els_tomb_opens"},
+        {"type": "clear", "place": "side_els_first_claw_tomb", "placement": "structure", "text": "Destroy the tomb's sand-wrapped sentries",
+         "spawn": [{"type": "minecraft:husk", "count": 4, "name": "Sand-Wrapped Sentry"}, {"type": "skycraft:sand_serpent", "count": 1, "name": "Tomb Serpent"}]},
+        {"type": "kill", "place": "side_els_first_claw_tomb", "placement": "structure", "text": "Defeat the tomb's guardian",
+         "spawn": [{"boss_id": "side_els_nahrisha"}], "actions": "scene:side_els_tomb_truth"},
+        {"type": "retrieve", "place": "side_els_first_claw_tomb", "placement": "structure", "relic": "side_els_ancient_song", "text": "Take the funeral-song tablet from the sarcophagus",
+         "journal": "The guardian was Nahrisha, who truly held the pass while Ja'khizzar ran. The funeral-song on the tablet tells it plainly. Someone carved it, then buried it with the lie."},
+        {"type": "deliver", "npc": "side_els_ma_dara", "relic": "side_els_ancient_song", "text": "Bring the tablet to Ma'dara",
+         "topic": "The First Claw ran. It was Nahrisha who held the pass.",
+         "reply": "Ma'dara has sung his name at every wedding in Riverhold for forty years. ...Ah. And yet. A song is a thing you choose, walker. You chose to carry this out of the sand. What would you have her sing?",
+         "choices": [
+           {"label": "Sing the true song. Nahrisha has waited long enough.", "reply": "Then tonight Riverhold hears a new old song, and every child learns a new name. Some will be angry. Good. Angry children remember.", "actions": "flag:side_els_nahrisha_sung"},
+           {"label": "Keep the old song. The clans need their hero.", "reply": "That is what Nahrisha chose too. Ma'dara will keep the tablet in her chest, and sing the old song a little more quietly.", "actions": "flag:side_els_old_song_kept"}
+         ]}
+      ],
+      "outro": "Ja'khizzar the First Claw was a coward, and the hero who held the dune pass was the guardian buried at his door. Ma'dara the Song-Keeper now knows both songs.",
+      "rewards": {"gold": 500, "loot": "standard", "unique": "claw_of_alkosh"}
+    },
+    {
+      "id": "side_els_the_hungry_dark",
+      "title": "The Hungry Dark",
+      "region": "elsweyr/torval",
+      "start": "npc:side_els_zaba_jo",
+      "requires": ["level:28"],
+      "offer": "Why light the lamps twice?",
+      "pitch": "Because they go out, walker. Not blown out. Out, as if something drank the flame. Three street-cats are gone from the low quarter, and two beggars, and Zaba-jo's sister has not come home in a month. People whisper Namiira. Zaba-jo would rather whisper nothing at all.",
+      "desc": "Zaba-jo, Torval's lamplighter, says the lamps in the low streets are going dark on their own and people are vanishing, among them his own sister.",
+      "objectives": [
+        {"type": "cond", "cond": "night", "place": "torval", "offset": [-20, 18], "text": "Walk the low streets of Torval after dusk"},
+        {"type": "clear", "place": "torval", "offset": [-24, 22], "radius": 24, "placement": "near", "text": "Fight off the shadows snuffing out the lamps",
+         "spawn": [{"type": "minecraft:vex", "count": 3, "name": "Lamp-Eater"}],
+         "journal": "Something small and black was eating the lamp-flames. When I killed them they fled as smoke, south, toward the old cistern outside the city."},
+        {"type": "go", "place": "side_els_lightless_cistern", "text": "Descend into the Lightless Cistern", "actions": "scene:side_els_dark_rises;effect:darkness:6"},
+        {"type": "clear", "place": "side_els_lightless_cistern", "placement": "structure", "text": "Kill the Namiira cultists",
+         "spawn": [{"type": "npc:vampire", "count": 3, "name": "Child of the Great Dark", "hostile": true}, {"type": "minecraft:spider", "count": 2, "name": "Cistern Spider"}]},
+        {"type": "kill", "place": "side_els_lightless_cistern", "placement": "structure", "text": "Kill Mother Nhirra",
+         "spawn": [{"boss_id": "side_els_mother_nhirra"}], "actions": "relic:side_els_dark_lamp",
+         "journal": "Mother Nhirra wore a lamplighter's ring on a cord around her neck. Zaba-jo's sister did not run away. She went looking for the dark, and found it, and became it."},
+        {"type": "talk", "npc": "side_els_zaba_jo", "text": "Return to Zaba-jo",
+         "topic": "I found the cult in the cistern. I found your sister.",
+         "reply": "Zaba-jo can see it on your face. Tell him. Tell him how she died.",
+         "choices": [
+           {"label": "She led the cult. She called herself Mother Nhirra.", "reply": "Nhirra. Their mother's name. So she took it into the dark with her. ...Thank you for the truth. It is heavy, but it is shaped like something, at least.", "actions": "flag:side_els_zaba_knows"},
+           {"label": "She was a prisoner there. She died fighting them.", "reply": "Fighting. Yes, she always fought. Zaba-jo will light a lamp for her on every street. Every one.", "actions": "flag:side_els_zaba_spared"}
+         ]},
+        {"type": "deliver", "npc": "side_els_zaba_jo", "relic": "side_els_dark_lamp", "text": "Give Zaba-jo the black lamp to be smashed",
+         "topic": "This is what drank your lamps.",
+         "reply": "It is very heavy for something so empty. Zaba-jo will break it on the temple steps at dawn, where the moons can watch it break."}
+      ],
+      "outro": "A cult of Namiira in Torval's old cistern was swallowing the city's lamps and its lost people. Its Mother was the lamplighter's own sister.",
+      "rewards": {"gold": 900, "loot": "major", "items": [{"item": "skycraft:khajiit_helmet", "name": "Lamplighter's Hood", "enchant": {"protection": 3, "projectile_protection": 2}}]}
+    },
+    {
+      "id": "side_els_the_honest_thief",
+      "title": "The Honest Thief",
+      "region": "elsweyr/rimmen",
+      "start": "npc:side_els_ahzir",
+      "requires": ["level:30"],
+      "offer": "You seem short one ring, my lord.",
+      "pitch": "Lord Ahzir's signet was stolen from his own hand. By an Alfiq. A cat, walker, the size of a cat, who sat on his desk and smiled. It is humiliating. Find the beast, bring back the ring, and do not ask what the ring is for. Lord Ahzir pays well for people who do not ask.",
+      "desc": "Lord Ahzir of Rimmen hired me to recover his signet ring, stolen by an Alfiq trickster. He was very clear that I should not ask what the ring seals.",
+      "objectives": [
+        {"type": "go", "place": "side_els_old_granary", "text": "Follow the Alfiq's trail to the old granary north of Rimmen", "actions": "scene:side_els_pazhi_granary"},
+        {"type": "clear", "place": "side_els_old_granary", "placement": "structure", "text": "Clear the skeevers out of the granary",
+         "spawn": [{"type": "skycraft:skeever", "count": 5, "name": "Granary Skeever"}],
+         "journal": "Pazhi the Alfiq was waiting for me, not running. It left a tithe receipt sealed with Ahzir's lion, for a debt the farmer swears he never owed."},
+        {"type": "go", "place": "side_els_ahzir_villa", "text": "Follow the Alfiq to Lord Ahzir's summer villa", "actions": "scene:side_els_pazhi_villa"},
+        {"type": "kill", "place": "side_els_ahzir_villa", "placement": "near", "text": "Survive Shazrah the Velvet Knife",
+         "spawn": [{"boss_id": "side_els_shazrah"}, {"type": "npc:assassin", "count": 2, "name": "Velvet Knife", "hostile": true}]},
+        {"type": "retrieve", "place": "side_els_ahzir_villa", "offset": [4, -6], "relic": "side_els_ahzir_signet", "text": "Take the signet the Alfiq left on the forger's desk",
+         "journal": "The villa was a forger's workshop. Ahzir's signet made false sugar-tithes against half the farms around Rimmen. The Alfiq stole the stamp, and Ahzir sent a knife after whoever followed it."},
+        {"type": "talk", "npc": "side_els_ahzir", "text": "Confront Lord Ahzir in Rimmen",
+         "topic": "Your knife missed. Your villa is a forger's workshop.",
+         "reply": "Lord Ahzir does not know what you mean, and would pay a great deal to keep not knowing. Name a number. No? Then get out, and remember that Rimmen's magistrates dine at Lord Ahzir's table.",
+         "choices": [
+           {"label": "Keep your gold. The magistrate will have the ring.", "reply": "Then you are a fool with a ring. Go. Lord Ahzir has better lawyers than you have friends.", "actions": "flag:side_els_ahzir_refused"},
+           {"label": "Say nothing. Let him sweat.", "reply": "Silence. Lord Ahzir hates silence. ...Go away, walker.", "actions": "flag:side_els_ahzir_sweats"}
+         ]},
+        {"type": "deliver", "npc": "side_els_shavi_ra", "relic": "side_els_ahzir_signet", "text": "Give the signet to Magistrate Shavi-ra",
+         "topic": "This is Lord Ahzir's signet. It sealed forged sugar-tithes. An Alfiq named Pazhi stole it.",
+         "reply": "Pazhi. Ha! That one has brought Shavi-ra evidence for years, through the window, at night, never once through the door. Lord Ahzir dines with magistrates, yes. Not with this one. Pazhi left something for you on Shavi-ra's desk. There is a paw-print on the wrapping."}
+      ],
+      "outro": "An Alfiq called Pazhi stole Lord Ahzir's signet to expose the forged sugar-tithes it sealed. The magistrate of Rimmen has its evidence, and I have the thief's thanks.",
+      "rewards": {"gold": 1000, "loot": "major", "unique": "rajhins_shadow"}
+    },
+    {
+      "id": "side_els_sand_in_the_crates",
+      "title": "Sand in the Crates",
+      "region": "elsweyr/rimmen",
+      "start": "npc:side_els_khali",
+      "requires": ["level:18"],
+      "offer": "Do you need a caravan guard?",
+      "pitch": "Khali always needs a caravan guard. Dro'zel's caravan to Riverhold has been robbed three times this year at Broken-Wheel Pass, and three times the trade-guild has paid him for the loss. Khali would like it not to be robbed a fourth time. Meet the caravan at the Dry Wells Waystation.",
+      "desc": "Khali the Tally-Keeper of Rimmen hired me to guard Dro'zel's caravan to Riverhold. It has been robbed three times at Broken-Wheel Pass, and the trade-guild has paid each time.",
+      "objectives": [
+        {"type": "go", "place": "side_els_dry_wells_waystation", "text": "Meet Dro'zel's caravan at the Dry Wells Waystation"},
+        {"type": "wait", "place": "side_els_dry_wells_waystation", "hours": 2, "text": "Wait while the caravan loads up"},
+        {"type": "go", "place": "side_els_broken_wheel_pass", "text": "Ride ahead to Broken-Wheel Pass"},
+        {"type": "clear", "place": "side_els_broken_wheel_pass", "text": "Fight off the raiders at the pass",
+         "spawn": [{"type": "skycraft:bandit", "count": 4, "name": "Pass Raider"}],
+         "journal": "The raiders fought badly and died easily. One of them, dying, laughed: 'He said the guard would be a fool.' The crates they were meant to steal were full of sand."},
+        {"type": "kill", "place": "side_els_broken_wheel_pass", "placement": "near", "text": "Kill Dro'zel Two-Ledgers",
+         "spawn": [{"boss_id": "side_els_dro_zel"}, {"type": "skycraft:bandit", "count": 2, "name": "Dro'zel's Cousin"}], "actions": "relic:side_els_empty_manifest",
+         "journal": "Dro'zel hired the raiders himself, sold the guild empty crates, and planned to leave a dead guard behind as proof of the robbery. I declined."},
+        {"type": "deliver", "npc": "side_els_khali", "relic": "side_els_empty_manifest", "text": "Bring the manifest back to Khali in Rimmen",
+         "topic": "The caravan was robbing itself.",
+         "reply": "Forty crates of sand. Three times paid. Khali knew the numbers were wrong; she did not know they were wrong in such a tidy way. The guild will be very grateful. Khali will make sure of it."}
+      ],
+      "outro": "Dro'zel Two-Ledgers staged his own caravan robberies to cheat the Rimmen trade-guild, and meant to leave me dead as his alibi. The guild has its ledger straight again.",
+      "rewards": {"gold": 400, "loot": "standard", "items": [{"item": "skycraft:khajiit_bow", "name": "Caravan-Watch Bow", "enchant": {"power": 2, "infinity": 1}}]}
+    },
+    {
+      "id": "side_els_the_crooked_lattice",
+      "title": "The Crooked Lattice",
+      "region": "elsweyr/rimmen",
+      "start": "npc:side_els_azirr",
+      "requires": ["level:28"],
+      "offer": "What is wrong with the count, star-counter?",
+      "pitch": "The moons are where they should be. The light is not. Three cubs were born in Rimmen this month, and the midwives cannot agree on what furstock any of them will grow into. That does not happen. Something is bending the Lattice near the Ring of Jode's Teeth. Come with Azirr's map and see.",
+      "desc": "Azirr the Star-Counter of Rimmen believes the Lunar Lattice is being bent near an old stone ring east of the city, confusing the furstock of newborn cubs.",
+      "objectives": [
+        {"type": "go", "place": "side_els_jodes_teeth", "text": "Visit the Ring of Jode's Teeth", "actions": "scene:side_els_lattice_tilted"},
+        {"type": "clear", "place": "side_els_jodes_teeth", "placement": "near", "text": "Destroy the atronachs set to guard the turned stones",
+         "spawn": [{"type": "skycraft:storm_atronach", "count": 2, "name": "Lattice-Bound Atronach"}]},
+        {"type": "cond", "cond": "night", "place": "side_els_jodes_teeth", "text": "Watch which way the bent moonlight runs after dark",
+         "journal": "At moonrise the light ran off the turned stones in a thin silver thread, south-east across the plain, to a tower of glass."},
+        {"type": "go", "place": "side_els_glass_tower", "text": "Follow the stolen moonlight to the glass tower"},
+        {"type": "clear", "place": "side_els_glass_tower", "placement": "structure", "text": "Get past the tower's wards",
+         "spawn": [{"type": "skycraft:storm_atronach", "count": 1, "name": "Tower Warden"}, {"type": "npc:mage", "count": 2, "name": "Hired Apprentice", "hostile": true}]},
+        {"type": "kill", "place": "side_els_glass_tower", "placement": "structure", "text": "Kill Magister Caerwen Ilyndil",
+         "spawn": [{"boss_id": "side_els_caerwen"}], "actions": "relic:side_els_lattice_lens",
+         "journal": "The Altmer magister was paid by a noble house to choose the furstock of their unborn heirs. She called it husbandry. The lens she built drank moonlight, and every cub nearby paid for it."},
+        {"type": "deliver", "npc": "side_els_azirr", "relic": "side_els_lattice_lens", "text": "Bring the moonglass lens to Azirr",
+         "topic": "An Altmer was bending the moonlight through this lens.",
+         "reply": "To choose a cub's shape before it is born. To choose. The moons never ask permission, and they never play favourites. That is the whole point of them. Azirr will grind this to dust and scatter it on the Ring. And this, from the old stores, is yours."}
+      ],
+      "outro": "An Altmer magister was bending the Lunar Lattice through a moonglass lens to choose the furstock of a noble house's heirs. The stones of Jode's Teeth face the right sky again.",
+      "rewards": {"gold": 900, "loot": "major", "unique": "moonblade_of_the_mane"}
+    },
+    {
+      "id": "side_els_old_scar_mother",
+      "title": "Old Scar-Mother",
+      "region": "elsweyr/anequina",
+      "start": "npc:side_els_hanzira",
+      "requires": ["level:26"],
+      "offer": "What has teeth this week, Spear-Mother?",
+      "pitch": "A senche-tiger. Old Scar-Mother, the herders call her. She has hunted the plains west of Riverhold for twenty years and never touched a Khajiit. This month she has killed four. Something has changed her. Hanzira wants to know what, before she puts a spear in her.",
+      "desc": "Hanzira Spear-Mother of Riverhold asked me to help hunt Old Scar-Mother, a senche-tiger that suddenly turned man-eater after twenty peaceful years.",
+      "objectives": [
+        {"type": "go", "place": "side_els_tall_grass_gully", "text": "Search the Tall-Grass Gully for Scar-Mother's tracks"},
+        {"type": "clear", "place": "side_els_tall_grass_gully", "offset": [5, 5], "placement": "near", "text": "Drive the wolves away from the baited pit in the gully",
+         "spawn": [{"type": "skycraft:wolf", "count": 3, "name": "Bait-Drunk Wolf"}],
+         "journal": "Someone had baited a pit with meat soaked in skooma. Poachers drug a big cat, then sell its pelt whole. Old Scar-Mother had eaten the bait and not died. She had only gone mad."},
+        {"type": "kill", "place": "side_els_tall_grass_gully", "placement": "near", "text": "Kill Grell Hookhand and his poachers",
+         "spawn": [{"boss_id": "side_els_grell"}, {"type": "skycraft:bandit", "count": 2, "name": "Poacher"}]},
+        {"type": "go", "place": "side_els_scar_mother_den", "text": "Track Old Scar-Mother to her den"},
+        {"type": "kill", "place": "side_els_scar_mother_den", "placement": "near", "text": "End Old Scar-Mother's pain",
+         "spawn": [{"boss_id": "side_els_scar_mother"}], "actions": "relic:side_els_pelt_of_scar_mother"},
+        {"type": "deliver", "npc": "side_els_hanzira", "relic": "side_els_pelt_of_scar_mother", "text": "Bring the pelt to Hanzira",
+         "topic": "Poachers fed her skooma-bait. She was mad, not wicked.",
+         "reply": "Skooma in the meat. Hanzira should have guessed; the darts were in her shoulder all along. She will not sell this pelt. She will hang it over the Riverhold gate, with the darts still in it, so every poacher on the road can see what it cost."}
+      ],
+      "outro": "Old Scar-Mother turned man-eater because poachers baited her with skooma-soaked meat. The poachers are dead, and so, mercifully, is she.",
+      "rewards": {"gold": 700, "loot": "standard", "items": [{"item": "skycraft:khajiit_war_axe", "name": "Scar-Mother's Claw", "enchant": {"sharpness": 3, "knockback": 1}}]}
+    },
+    {
+      "id": "side_els_luck_comes_due",
+      "title": "Luck Comes Due",
+      "region": "elsweyr/torval",
+      "start": "find",
+      "find": {"place": "shrine_clavicus_vile_elsweyr", "offset": [80, -70], "clue": "urn",
+               "text": "A burial urn left in the grass, its lid sealed with red wax. Painted on the side: 'Ma'jhad, merchant of Torval. Lucky for twenty years. Not for twenty-one.' Something rattles inside that is not ash."},
+      "requires": ["level:32"],
+      "desc": "Near Clavicus Vile's shrine I found the urn of Ma'jhad, a Torval merchant whose luck ran out after twenty years. A key in the ashes points to his ruined counting-house.",
+      "objectives": [
+        {"type": "go", "place": "side_els_majhads_folly", "text": "Find Ma'jhad's ruined counting-house", "actions": "scene:side_els_collector_arrives"},
+        {"type": "clear", "place": "side_els_majhads_folly", "placement": "structure", "text": "Banish the Collector's scamps",
+         "spawn": [{"type": "skycraft:scamp", "count": 4, "name": "Debt-Scamp"}]},
+        {"type": "retrieve", "place": "side_els_majhads_folly", "placement": "structure", "relic": "side_els_luck_contract", "text": "Take Ma'jhad's luck contract from the strongbox",
+         "journal": "Ma'jhad bought twenty years of luck from Clavicus Vile and signed for 'his blood' as surety. His daughter Ja'neema sells charms in Torval. She does not know she is the payment."},
+        {"type": "kill", "place": "side_els_majhads_folly", "placement": "structure", "text": "Destroy Kyrzh the Collector",
+         "spawn": [{"boss_id": "side_els_kyrzh"}, {"type": "skycraft:scamp", "count": 2, "name": "Debt-Scamp"}]},
+        {"type": "talk", "npc": "side_els_ja_neema", "text": "Find Ma'jhad's daughter in Torval",
+         "topic": "Your father signed you away for his luck. I have the contract.",
+         "reply": "Ja'neema always thought her father was simply clever. ...Clever and lucky, and a coward at the end. What do we do with it, walker? Ja'neema is afraid to touch it.",
+         "choices": [
+           {"label": "Burn it. The Collector is gone; let the debt go with him.", "reply": "Fire, yes. Ja'neema will feel lighter when it is ash. She hopes the Prince is not watching. She suspects he always is.", "actions": "flag:side_els_contract_burned;take:side_els_luck_contract"},
+           {"label": "Keep it. A Daedric contract is a weapon if you know how to read it.", "reply": "You are braver than Ja'neema, or more foolish. Take it far away from her, then. And take this, from her father's stock. It never worked for him.", "actions": "flag:side_els_contract_kept;loot:standard"}
+         ]}
+      ],
+      "outro": "Ma'jhad of Torval bought twenty years of luck from Clavicus Vile and pledged his daughter as payment. The Collector who came for her is banished.",
+      "rewards": {"gold": 1000, "loot": "major", "items": [{"item": "skycraft:daedric_dagger", "name": "Collector's Quill", "enchant": {"sharpness": 3, "looting": 2}}]}
+    },
+    {
+      "id": "side_els_the_bride_of_weeping_palms",
+      "title": "The Bride of Weeping Palms",
+      "region": "elsweyr/pellitine",
+      "start": "find",
+      "find": {"place": "side_els_ja_rassa_fields", "offset": [-90, 80], "clue": "grave",
+               "text": "A small headstone at the edge of the cane, half swallowed by jungle: 'Ri'darhan, groom of Weeping Palms. Kept too long. Let him go.' The grave is empty, and fresh."},
+      "requires": ["level:34"],
+      "desc": "At the edge of the Pellitine cane-fields I found an empty grave for the groom of Weeping Palms, an estate deep in the jungle.",
+      "objectives": [
+        {"type": "go", "place": "side_els_weeping_palms", "text": "Find the Weeping Palms Estate in the jungle", "actions": "scene:side_els_palms_bride"},
+        {"type": "clear", "place": "side_els_weeping_palms", "placement": "structure", "text": "Kill the estate's thralls",
+         "spawn": [{"type": "skycraft:vampire", "count": 3, "name": "Wedding-Guest Thrall"}, {"type": "minecraft:zombie", "count": 2, "name": "Bloodless Servant"}]},
+        {"type": "kill", "place": "side_els_weeping_palms", "placement": "structure", "text": "Destroy Lady Shazira of Weeping Palms",
+         "spawn": [{"boss_id": "side_els_lady_shazira"}], "actions": "relic:side_els_bride_locket",
+         "journal": "The bride was the vampire, not the victim. She fed on her groom for sixty years in the cellar and buried him only when he finally stopped being useful. The locket shows them both, young."},
+        {"type": "talk", "npc": "side_els_inzirr", "text": "Bring word to Grave-Tender Inzirr in Torval",
+         "topic": "The groom of Weeping Palms needs a proper grave.",
+         "reply": "Ri'darhan. Inzirr's grandfather told stories of the wedding that never ended. They were not stories. Inzirr will find him a sand-grave in Torval, under the open moons, far from any cellar."},
+        {"type": "deliver", "npc": "side_els_inzirr", "relic": "side_els_bride_locket", "text": "Give the locket to Inzirr to bury with the groom",
+         "topic": "Bury this with him. Her face is scratched out.",
+         "reply": "Good. He scratched it himself, Inzirr thinks, near the end. Let him keep the one face he still wanted to remember: his own, when he was young."}
+      ],
+      "outro": "The bride of Weeping Palms was a vampire who kept her groom alive to feed on for sixty years. She is destroyed, and the groom has a grave in Torval under the open moons.",
+      "rewards": {"gold": 1100, "loot": "major", "items": [{"item": "skycraft:silver_sword", "name": "Widower's Edge", "enchant": {"smite": 4, "unbreaking": 2}}]}
+    },
+    {
+      "id": "side_els_the_keepers_light",
+      "title": "The Keeper's Light",
+      "region": "elsweyr/senchal",
+      "start": "find",
+      "find": {"place": "side_els_south_rocks_light", "offset": [5, 4], "clue": "lectern",
+               "text": "A rain-swollen logbook on a lectern in the dead lighthouse. The last entry is twenty years old: 'Serpent sails, green lamps. She asked for me by name. I put out the light. Forgive me, Shirra.'"},
+      "requires": ["level:38"],
+      "desc": "In the dead lighthouse on Senchal's south rocks I found the keeper's last log. Twenty years ago he put out the light for a ship with serpent sails.",
+      "objectives": [
+        {"type": "go", "place": "side_els_wreck_of_the_hunger", "text": "Find the wreck the keeper wrote about", "actions": "relic:side_els_keeper_log;scene:side_els_hunger_hails"},
+        {"type": "cond", "cond": "night", "place": "side_els_wreck_of_the_hunger", "text": "Wait until the green lamps are lit"},
+        {"type": "clear", "place": "side_els_wreck_of_the_hunger", "placement": "near", "text": "Put down the drowned Maormer crew",
+         "spawn": [{"type": "minecraft:drowned", "count": 5, "name": "Drowned Sea-Elf"}, {"type": "skycraft:slaughterfish", "count": 2}]},
+        {"type": "kill", "place": "side_els_wreck_of_the_hunger", "placement": "near", "text": "Destroy Captain Velethis",
+         "spawn": [{"boss_id": "side_els_velethis"}],
+         "journal": "Velethis was a Maormer raider who paid the keeper to douse his light so her ship could slip into Senchal unseen. The keeper doused it, then fled before she could pay him in blades instead. The rocks took her ship either way."},
+        {"type": "deliver", "npc": "side_els_shirra", "relic": "side_els_keeper_log", "text": "Bring the log to Shirra in Senchal",
+         "topic": "Your father put out his light for a Maormer raider. Then he ran.",
+         "reply": "He ran. Shirra waited twenty years for a father who was afraid to come home. ...But he wrote her name in the last line. Shirra will light the south rocks again herself. Someone in this family should keep the light."}
+      ],
+      "outro": "The keeper of the South Rocks Lighthouse doused his lamp for a Maormer raider and fled. Captain Velethis and her drowned crew are at rest, and Shirra will keep the light herself.",
+      "rewards": {"gold": 1200, "loot": "major", "items": [{"item": "skycraft:maormer_bow", "name": "Green-Lamp Longbow", "enchant": {"power": 4, "flame": 1}}]}
+    }
+  ]
+}

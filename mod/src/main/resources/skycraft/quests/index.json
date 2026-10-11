@@ -54,5 +54,17 @@
  "place_skyrim_north.json",
  "place_solstheim.json",
  "place_tamriel_east.json",
- "place_tamriel_west.json"
+ "place_tamriel_west.json",
+ "side_radiant.json",
+ "side_cyrodiil.json",
+ "side_morrowind.json",
+ "side_solstheim.json",
+ "side_black_marsh.json",
+ "side_elsweyr.json",
+ "side_valenwood.json",
+ "side_summerset.json",
+ "side_hammerfell.json",
+ "side_high_rock.json",
+ "side_skyrim.json",
+ "side_foreign.json"
 ]

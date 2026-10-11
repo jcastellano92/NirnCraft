@@ -1,0 +1,15 @@
+{
+  "line": "side_radiant",
+  "category": "misc",
+  "relics": [
+    {"id": "side_rad_heirloom", "name": "Stolen Heirloom", "desc": "A family's keepsake, scratched where the thief pried out a stone and thought better of it.", "icon": 20},
+    {"id": "side_rad_relic", "name": "Rumored Relic", "desc": "Old, heavy and humming faintly. Whoever wanted it wanted it badly.", "icon": 17},
+    {"id": "side_rad_herbs", "name": "Rare Reagents", "desc": "A bundle of roots, caps and petals, wrapped in damp cloth so they keep.", "icon": 15},
+    {"id": "side_rad_heart", "name": "Daedra Heart", "desc": "Still warm. Still, faintly, beating. It will not keep forever.", "icon": 10},
+    {"id": "side_rad_salvage", "name": "Salvaged Strongbox", "desc": "A lockbox from a wreck, swollen with water and sealed with somebody's crest.", "icon": 11},
+    {"id": "side_rad_ledger", "name": "Smuggler's Ledger", "desc": "Names, dates and debts in a cramped hand. Several of the names are important.", "icon": 7},
+    {"id": "side_rad_tome", "name": "Forbidden Tome", "desc": "Its clasp is shaped like a closed eye. The pages are warmer than they should be.", "icon": 7},
+    {"id": "side_rad_token", "name": "Captive's Token", "desc": "Something the captive pressed into your hand so their family would know you.", "icon": 20}
+  ],
+  "quests": []
+}

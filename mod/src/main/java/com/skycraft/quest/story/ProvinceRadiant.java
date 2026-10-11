@@ -131,6 +131,11 @@ public final class ProvinceRadiant {
             case "imperial", "dunmer", "argonian", "khajiit", "bosmer", "altmer", "redguard", "breton", "orc" -> region.culture();
             default -> "foreign";
         };
+        // two times in five: a culture-flavored archetype from the radiant templates (Daggerfall-style work)
+        if (r.nextInt(5) < 2) {
+            RadiantQuests.Offer t = RadiantTemplates.offer(p, npc, region, culture, r);
+            if (t != null) return t;
+        }
         int roll = r.nextInt(3);
         if (roll == 2) {
             RadiantQuests.Offer o = delivery(p, npc, region, culture, r);

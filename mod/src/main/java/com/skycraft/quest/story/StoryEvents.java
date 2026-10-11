@@ -12,6 +12,9 @@ import net.minecraft.world.entity.Mob;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -40,6 +43,37 @@ public final class StoryEvents {
     @SubscribeEvent
     public static void onStopped(ServerStoppedEvent event) {
         Scenes.reset();
+        Discoveries.reset();
+    }
+
+    /** Hidden quests: clues near the player are built, hinted at and found (once a second). */
+    @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p) || p.tickCount % 20 != 7) return;
+        try {
+            Discoveries.tick(p);
+        } catch (RuntimeException e) {
+            Skycraft.LOGGER.error("Story discoveries tick failed", e);
+        }
+    }
+
+    /** Using a hidden quest's clue (the lever, the carved stone, the skull...) starts it. */
+    @SubscribeEvent
+    public static void onUseBlock(PlayerInteractEvent.RightClickBlock event) {
+        if (event.getEntity() instanceof ServerPlayer p && event.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND) {
+            Discoveries.onUse(p, event.getPos());
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        Discoveries.forget(event.getEntity().getUUID());
+    }
+
+    /** A named side-quest boss leaves its own drop. */
+    @SubscribeEvent
+    public static void onDrops(LivingDropsEvent event) {
+        if (!event.getEntity().level().isClientSide) Bosses.onDrops(event);
     }
 
     /** Essential quest NPCs survive anything: they drop to a quarter of their health and stagger away. */

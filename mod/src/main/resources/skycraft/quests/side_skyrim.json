@@ -1,0 +1,702 @@
+{
+  "line": "side_skyrim",
+  "category": "side",
+  "region": "skyrim/whiterun",
+  "speakers": {
+    "side_sky_aslief_v": "Brother Aslief",
+    "side_sky_eirik_v": "Eirik",
+    "side_sky_gunnolf_v": "Ghost of Gunnolf Fen-Walker",
+    "side_sky_hrafna_v": "The Mire-Bride",
+    "side_sky_torvar_v": "Torvar Kolfinn",
+    "side_sky_crowsong_v": "Mother Crowsong",
+    "side_sky_custodian_v": "The Custodian",
+    "side_sky_dren_v": "Captain Dren's Ghost",
+    "side_sky_gautr_v": "The Ransom-Warden",
+    "side_sky_hafgrim_v": "Commander Hafgrim",
+    "side_sky_coldvein_v": "Lady Coldvein",
+    "side_sky_hakon_v": "Hakon"
+  },
+  "npcs": [
+    {"id": "side_sky_hrodulf", "name": "Hrodulf", "role": "farmer", "place": "chillfurrow_farm", "offset": [5, 3],
+     "greet": "Mind the turnips. What's left of them."},
+    {"id": "side_sky_svana", "name": "Svana Ironmere", "role": "farmer", "place": "rorikstead", "offset": [10, -6], "female": true,
+     "greet": "Have you seen a girl, seven winters, red cap? No. Nobody has."},
+    {"id": "side_sky_rishadi", "name": "Ri'shadi", "role": "caravan_trader", "place": "rorikstead", "offset": [28, -16],
+     "greet": "Ri'shadi sells spice and rope. Not children. Whatever the farmers whisper."},
+    {"id": "side_sky_hroa", "name": "Hroa", "role": "child", "place": "serpents_bluff_redoubt", "offset": [3, 2], "female": true,
+     "greet": "Is it morning? Brother Aslief said we could go home in the morning."},
+    {"id": "side_sky_ulfgar", "name": "Ulfgar Lean-Bow", "role": "hunter", "place": "falkreath", "offset": [-14, 9],
+     "greet": "Keep your voice down. Things in these woods listen."},
+    {"id": "side_sky_jorunn", "name": "Jorunn Mire-Daughter", "role": "citizen", "place": "morthal", "offset": [8, 12], "female": true,
+     "greet": "You're tracking marsh mud onto my floor. Stay by the door."},
+    {"id": "side_sky_ingrith", "name": "Ingrith Arnleif", "role": "lumberjack", "place": "dragon_bridge", "offset": [-12, 6], "female": true,
+     "greet": "Two cords of seasoned pine, burned to cinders. You want to know who did it? So do I."},
+    {"id": "side_sky_kolfinn", "name": "Old Kolfinn", "role": "fisher", "place": "dragon_bridge", "offset": [14, -8],
+     "greet": "River's high this year. It always gives something back in spring. Never what you want."},
+    {"id": "side_sky_bjarni", "name": "Bjarni Stonefist", "role": "miner", "place": "karthwasten", "offset": [9, 7],
+     "greet": "You're not from the Silver-Bloods. Good. Then you might actually help me."},
+    {"id": "side_sky_gerda", "name": "Gerda", "role": "citizen", "place": "sundered_towers", "offset": [4, -3], "female": true,
+     "greet": "If he sent you, you can tell him the road runs one way."},
+    {"id": "side_sky_hela", "name": "Hela Corundum-Hand", "role": "miner", "place": "darkwater_crossing", "offset": [-10, 8], "female": true,
+     "greet": "If you're here for work, the new shaft is closed. If you're here to kill things, it's open."},
+    {"id": "side_sky_corvin", "name": "Corvin Vale", "role": "scholar", "place": "nightgate_inn", "offset": [6, 4],
+     "greet": "Ah! A capable-looking person. Wonderful. Do you know anything about very large brass men?"},
+    {"id": "side_sky_ilvesi", "name": "Ilvesi Dravyne", "role": "citizen", "place": "winterhold", "offset": [-8, 10], "female": true,
+     "greet": "Serjo. Winterhold has little to offer a traveler, but it offers it honestly."},
+    {"id": "side_sky_vigge", "name": "Watch-Sergeant Vigge", "role": "housecarl", "place": "riften", "offset": [-16, 12],
+     "greet": "Keep your hands where I can see them. In Riften that's not personal."},
+    {"id": "side_sky_brodd", "name": "Brodd Half-Mitten", "role": "beggar", "place": "riften", "offset": [12, 18],
+     "greet": "Spare a septim? Or a sweet-cake? A sweet-cake would be better."},
+    {"id": "side_sky_holgeir", "name": "Brother Holgeir", "role": "priest", "place": "ivarstead", "offset": [7, -9],
+     "greet": "The pilgrims climb for the Greybeards. I stay down here for everyone they leave behind."},
+    {"id": "side_sky_sigrun", "name": "Sigrun Asgeirsdottir", "role": "citizen", "place": "winterhold", "offset": [12, -6], "female": true,
+     "greet": "Don't go near Fellhammer after dark. That's the only advice I've got."},
+    {"id": "side_sky_nerasa", "name": "Nerasa Velothi", "role": "apothecary", "place": "windhelm", "offset": [10, 14], "female": true,
+     "greet": "Salves, poultices, and a warm word. The Grey Quarter can afford two of the three."},
+    {"id": "side_sky_olfrid", "name": "Olfrid Lampwarden", "role": "fisher", "place": "solitude", "offset": [18, -20],
+     "greet": "I keep the lighthouse oil. My boy Hakon keeps the night watch. Between us, nobody drowns."}
+  ],
+  "relics": [
+    {"id": "side_sky_bleakwind_tusk", "name": "Hacked Mammoth Tusk", "desc": "Cut at the root with a woodsman's saw, still smelling of the giant's fire.", "icon": 4},
+    {"id": "side_sky_orvald_tally", "name": "Orvald's Tally Stick", "desc": "A notched stick with a buyer's name burned beside every notch.", "icon": 11},
+    {"id": "side_sky_wooden_horse", "name": "Grey-Threaded Wooden Horse", "desc": "A child's toy horse, its tail tied with the grey thread of a priest's prayer cord.", "icon": 7},
+    {"id": "side_sky_mire_torc", "name": "The Mire Torc", "desc": "A twisted band of black bronze, always cold, always faintly damp.", "icon": 15},
+    {"id": "side_sky_gerda_letter", "name": "Gerda's Letter", "desc": "Folded small and pinned under a crow's skull, addressed to Bjarni.", "icon": 2},
+    {"id": "side_sky_resonance_rod", "name": "Dwemer Resonance Rod", "desc": "A brass rod that hums when tapped, and keeps humming far longer than it should.", "icon": 19},
+    {"id": "side_sky_custodial_key", "name": "Custodial Key", "desc": "A small brass key stamped with a Dwemer glyph for 'return'.", "icon": 20},
+    {"id": "side_sky_dravyne_urn", "name": "Urn of Ilmeni Dravyne", "desc": "A Dunmer ash-urn sealed with wax, salt-crusted but unbroken.", "icon": 9},
+    {"id": "side_sky_promise_log", "name": "Log of the Velothi Promise", "desc": "A ship's log, swollen with seawater; the last pages are written in a hurried hand.", "icon": 2},
+    {"id": "side_sky_sugar_ledger", "name": "Dar'Vasha's Ledger", "desc": "Sums paid and received, in a neat Khajiiti hand, with one buyer marked only 'the widow'.", "icon": 2},
+    {"id": "side_sky_ransom_tablet", "name": "Ransom-Tablet of Stuhn", "desc": "A slate tablet listing warriors whose ransom was promised and never paid.", "icon": 18},
+    {"id": "side_sky_fellhammer_roll", "name": "Fellhammer Garrison Roll", "desc": "A Legion roll book, every name ticked present, night after night, in fresh ink.", "icon": 2},
+    {"id": "side_sky_coldvein_ledger", "name": "Coldvein's Book of Guests", "desc": "A guest book in a fine hand. Beside each name: a date, and the word 'rested'.", "icon": 2},
+    {"id": "side_sky_false_lantern", "name": "Wrecker's Lantern", "desc": "A ship's lantern with a shutter, the initial H scratched into the brass.", "icon": 13}
+  ],
+  "places": {
+    "side_sky_veinhollow": {"x": 1360, "z": 464, "r": 30, "name": "Veinhollow Shaft"},
+    "side_sky_stuhnhallr": {"x": 1168, "z": 656, "r": 34, "name": "Stuhnhallr"},
+    "side_sky_hulvard_barrow": {"x": -368, "z": -688, "r": 30, "name": "Hulvard's Sinking Barrow"}
+  },
+  "bosses": {
+    "side_sky_orvald": {"name": "Orvald Tusk-Taker", "type": "skycraft:bandit_chief", "hp": 2.5, "dmg": 1.2, "level": 4,
+      "weapon": "skycraft:iron_battleaxe", "gear": {"head": "skycraft:fur_helmet", "chest": "skycraft:fur_chestplate"},
+      "drop": "loot:standard", "glow": false},
+    "side_sky_aslief": {"name": "Aslief the Lantern Shepherd", "type": "skycraft:necromancer", "hp": 2.5, "dmg": 1.3, "level": 8,
+      "weapon": "skycraft:staff_of_frostbite", "drop": "loot:standard", "glow": false},
+    "side_sky_runa": {"name": "Runa Greymantle", "type": "skycraft:werewolf", "hp": 3.5, "dmg": 1.5, "level": 12,
+      "drop": "loot:major", "glow": false},
+    "side_sky_hrafna": {"name": "Hrafna the Mire-Bride", "type": "skycraft:draugr_deathlord", "hp": 3.5, "dmg": 1.5, "level": 14,
+      "weapon": "skycraft:ancient_nord_greatsword", "gear": {"head": "skycraft:ancient_nord_helmet"},
+      "drop": "loot:major", "glow": false},
+    "side_sky_saltcutter": {"name": "Eldra Saltcutter", "type": "skycraft:bandit_chief", "hp": 3.0, "dmg": 1.4, "level": 12,
+      "weapon": "skycraft:steel_sword", "gear": {"head": "skycraft:studded_helmet", "chest": "skycraft:studded_chestplate"},
+      "drop": "loot:standard", "glow": false},
+    "side_sky_ashfeather": {"name": "Sister Ashfeather", "type": "skycraft:hagraven", "hp": 3.0, "dmg": 1.4, "level": 18,
+      "drop": "loot:standard", "glow": false},
+    "side_sky_crowsong": {"name": "Mother Crowsong", "type": "skycraft:hagraven", "hp": 4.5, "dmg": 1.7, "level": 22,
+      "weapon": "skycraft:staff_of_flames", "drop": "loot:major", "glow": false},
+    "side_sky_gloomseer": {"name": "The Gloomseer of Veinhollow", "type": "skycraft:falmer", "hp": 4.0, "dmg": 1.6, "level": 18,
+      "weapon": "skycraft:falmer_war_axe", "gear": {"head": "skycraft:falmer_helmet", "chest": "skycraft:falmer_chestplate"},
+      "drop": "loot:major", "glow": false},
+    "side_sky_custodian": {"name": "The Custodian of Raldbthar", "type": "skycraft:dwarven_centurion", "hp": 4.5, "dmg": 1.6, "level": 20,
+      "drop": "loot:major,skycraft:dwarven_metal_ingot", "glow": false},
+    "side_sky_dren": {"name": "Captain Ulvis Dren", "type": "minecraft:drowned", "hp": 4.0, "dmg": 1.6, "level": 20,
+      "weapon": "skycraft:steel_sword", "gear": {"chest": "skycraft:chitin_chestplate"},
+      "drop": "loot:major", "glow": true},
+    "side_sky_darvasha": {"name": "Dar'Vasha Sugar-Tooth", "type": "skycraft:bandit_chief", "hp": 3.0, "dmg": 1.4, "level": 15,
+      "weapon": "skycraft:khajiit_sword", "gear": {"head": "skycraft:khajiit_helmet", "chest": "skycraft:khajiit_chestplate"},
+      "drop": "loot:standard", "glow": false},
+    "side_sky_asta": {"name": "Widow Asta Sweetmilk", "type": "minecraft:witch", "hp": 3.0, "dmg": 1.3, "level": 16,
+      "drop": "loot:major", "glow": false},
+    "side_sky_gautr": {"name": "Gautr the Ransom-Warden", "type": "skycraft:draugr_deathlord", "hp": 5.0, "dmg": 1.8, "level": 24,
+      "weapon": "skycraft:ancient_nord_warhammer", "gear": {"head": "skycraft:ancient_nord_helmet", "chest": "skycraft:ancient_nord_chestplate"},
+      "drop": "loot:major", "glow": false},
+    "side_sky_hafgrim": {"name": "Commander Hafgrim's Shade", "type": "minecraft:stray", "hp": 4.5, "dmg": 1.7, "level": 24,
+      "weapon": "skycraft:imperial_sword", "gear": {"head": "skycraft:imperial_helmet", "chest": "skycraft:imperial_chestplate"},
+      "drop": "loot:major", "glow": true},
+    "side_sky_coldvein": {"name": "Lady Vigdis Coldvein", "type": "skycraft:vampire_lord", "hp": 5.0, "dmg": 1.8, "level": 26,
+      "drop": "loot:legendary", "glow": false},
+    "side_sky_gunnhild": {"name": "Gunnhild Falsebeacon", "type": "skycraft:bandit_chief", "hp": 3.0, "dmg": 1.4, "level": 14,
+      "weapon": "skycraft:steel_war_axe", "gear": {"head": "skycraft:hide_helmet", "chest": "skycraft:hide_chestplate"},
+      "drop": "loot:standard", "glow": false}
+  },
+  "scenes": {
+    "side_sky_tusk_basin": [
+      ["narrator", "The camp is quiet. A giant sits beside the carcass of a mammoth whose tusks have been sawn off at the root."],
+      ["narrator", "It does not rise when you approach. Around the carcass, the snow is trampled by boots, and a sledge track runs east."]
+    ],
+    "side_sky_tusk_returned": [
+      ["narrator", "The giant watches you lay the tusk in the snow. It keeps its club across its knees."],
+      ["narrator", "After a long while it lifts the mammoth's great head and settles it on the tusk, the way you would set a pillow under a sleeping friend."]
+    ],
+    "side_sky_aslief_counsel": [
+      ["side_sky_aslief_v", "Kynareth keep the little ones, wherever they've wandered."],
+      ["side_sky_aslief_v", "If you mean to help, friend, start with the caravan by the road. Search the cats' wagons. I'd wager you'll find small shoes."]
+    ],
+    "side_sky_moldering_toy": [
+      ["narrator", "In the lee of the broken wall, someone has swept the snow into a neat circle and set five candle stubs around it."],
+      ["narrator", "A child's wooden horse lies in the middle. Its tail is tied with grey thread, the kind priests of Arkay braid into their prayer cords."]
+    ],
+    "side_sky_aslief_reveal": [
+      ["side_sky_aslief_v", "You shouldn't have come. They're only sleeping. I'd never hurt them."],
+      ["side_sky_aslief_v", "Arkay closed his door on my Ingrid. But children breathe so easily. A little of their breath each night, and she opens her eyes. Just for a moment."],
+      ["narrator", "On a bier behind him lies a girl ten years dead, her cheeks painted pink, her hair freshly braided."]
+    ],
+    "side_sky_maw_tracks": [
+      ["narrator", "The prints by the woodpile belong to a wolf, but each is as long as your forearm."],
+      ["narrator", "Walking in the same line, step for step, are the prints of a man's bare feet."]
+    ],
+    "side_sky_maw_eirik": [
+      ["narrator", "A naked man kneels before the Lady Stone, shivering, dried blood in his beard. He sees you and does not run."],
+      ["side_sky_eirik_v", "Tell Ulfgar I didn't kill those woodcutters. I can't stop what I turn into, but I don't hunt men."],
+      ["side_sky_eirik_v", "Runa does. She keeps the graveyard. She gathers us in Moss Mother Cavern and feeds us from the graves so we'll learn the taste."]
+    ],
+    "side_sky_torc_ghost": [
+      ["narrator", "A pale shape rises from the broken stones: a broad man with an axe through his belt and marsh-weed in his beard."],
+      ["side_sky_gunnolf_v", "That torc was a gift. The Mire-Bride gave it to me with her own hands, for my courage."],
+      ["side_sky_gunnolf_v", "Don't carry it back to her barrow. She'll drown you as she drowned my blood. Smash it here, on my stones, and be done."]
+    ],
+    "side_sky_torc_barrow": [
+      ["narrator", "The barrow's walls are carved with a story. A woman sleeps on a bier, the torc at her throat."],
+      ["narrator", "A man pries it loose while she sleeps. He has Gunnolf's broad shoulders, and Gunnolf's axe through his belt."],
+      ["side_sky_hrafna_v", "Thief's blood. I smell it on the bronze. Bring it here."]
+    ],
+    "side_sky_feud_pitch": [
+      ["narrator", "The tracks from the burned woodpile smell of pitch. They run along the riverbank, away from both houses, toward the cave in the hills."]
+    ],
+    "side_sky_torvar_surrenders": [
+      ["narrator", "A grey-bearded smuggler throws down his sword and raises both hands."],
+      ["side_sky_torvar_v", "Don't. I'm Torvar Kolfinn. Yes, that Torvar. I swam out of the river that night and kept swimming, and Eldra's boat picked me up."],
+      ["side_sky_torvar_v", "Every year the feud ran hot, nobody on that bridge watched the water at night. Burning the logs was my job. I'm sorry for it. Mostly."]
+    ],
+    "side_sky_coven_lookout": [
+      ["narrator", "A woman's shawl hangs from the antlers of a Forsworn totem, neatly folded, as if left for someone to find."],
+      ["narrator", "Crow feathers are bound into the antlers with red wool. A folded letter is pinned beneath a crow's skull."]
+    ],
+    "side_sky_crowsong_speaks": [
+      ["side_sky_crowsong_v", "She came to us with a split lip and a finger set crooked. We offered her a beak and talons, so no man would ever lay a hand on her again."],
+      ["side_sky_crowsong_v", "The change wants a heart, little sword. Hers was too soft. So we'll take his. She was going to fetch it for us tonight."]
+    ],
+    "side_sky_veinhollow_mouth": [
+      ["narrator", "Picks and lamps lie where they were dropped. Falmer arrows stand in the timber props like quills."],
+      ["narrator", "At the bottom gallery a new tunnel climbs out of the floor. It was dug upward, from below."]
+    ],
+    "side_sky_custodian_tracks": [
+      ["narrator", "Fences lie flattened in a straight line, as if something walked through them without noticing they were there."],
+      ["narrator", "The tracks don't lead to the farmhouse. They bend away north-east, toward Nightgate Inn, where Corvin Vale is waiting."]
+    ],
+    "side_sky_custodian_wakes": [
+      ["side_sky_custodian_v", "RETURN. RETURN. RETURN."],
+      ["narrator", "The great brass head turns toward the key in your pack, and the furnace in its chest roars."]
+    ],
+    "side_sky_dren_hail": [
+      ["side_sky_dren_v", "Ahoy, the shore! I'm Ulvis Dren, master of the Velothi Promise. I stayed at her wheel until the ice took her. Every soul aboard, I tried."],
+      ["side_sky_dren_v", "Tell them that, when you go back. Tell them Dren stayed."]
+    ],
+    "side_sky_dren_log": [
+      ["narrator", "The last entry is barely legible: 'Hold locked to keep the panic down. Taking the boat for help. Will return.'"],
+      ["narrator", "The boat lies upturned twenty paces from the wreck, its hull stove in. The hold door is still barred from the outside."]
+    ],
+    "side_sky_bakehouse": [
+      ["narrator", "The old bakehouse smells of honey and something sharper. Crates marked FLOUR are packed with grey-white moon sugar."],
+      ["narrator", "A note on the oven, in a woman's round hand: 'Dar'Vasha. Twice the sugar next week. The children like them sweeter.'"]
+    ],
+    "side_sky_stuhn_hall": [
+      ["narrator", "Rows of stone cells line the hall. Every door stands open, yet in each a draugr sits chained to the wall, as if it chose to stay."],
+      ["side_sky_gautr_v", "Stranger. In the old days Stuhn's priests bought back warriors taken in war, and kept the ransom here. Then the Dragon Priests came wanting our captives for their armies."],
+      ["side_sky_gautr_v", "We would not sell. So they made us keep them forever. Pay the price of your passage, or become my newest prisoner."]
+    ],
+    "side_sky_stuhn_freed": [
+      ["narrator", "As you read the last name aloud, the chains in every cell go slack, one after another, like a held breath let go."],
+      ["side_sky_gautr_v", "Ransom paid. Doors opened. Stuhn keeps his word, even late."]
+    ],
+    "side_sky_roll_call": [
+      ["side_sky_hafgrim_v", "Garrison! Roll call! Bjornolf. Present. Sild. Present. Hrolf the Younger. Present."],
+      ["side_sky_hafgrim_v", "Asgeir Sigrunsson."],
+      ["narrator", "Silence. The wind moves over the broken wall."],
+      ["side_sky_hafgrim_v", "Absent. Again. Mark him."]
+    ],
+    "side_sky_coldvein_rest": [
+      ["narrator", "Clean beds, warm blankets, candles in every niche. Someone has made the old cells comfortable."],
+      ["side_sky_coldvein_v", "I take only the ones Windhelm has already thrown away. A warm bed, a full belly, and a quiet last night."],
+      ["side_sky_coldvein_v", "Tell me which of your Jarl's guards has done as much for them."]
+    ],
+    "side_sky_beacon_night": [
+      ["narrator", "On the headland above the grotto a lantern swings slowly, side to side, the way a harbor light does."],
+      ["side_sky_hakon_v", "Steady, steady. Another hour and she'll come right onto the rocks."]
+    ]
+  },
+  "quests": [
+    {
+      "id": "side_sky_the_tusk_debt",
+      "title": "The Tusk Debt",
+      "region": "skyrim/whiterun",
+      "start": "npc:side_sky_hrodulf",
+      "requires": ["level:3"],
+      "offer": "Something flattened your fields.",
+      "pitch": "Third time this month a giant's come down off the hill and stamped my rows flat. Killed my best ox last night. The Jarl's guards say giants aren't their concern unless they climb the walls. Go up to Bleakwind Basin and put it down, and I'll pay you what I'd have paid for a new ox, and then some.",
+      "desc": "Hrodulf of Chillfurrow Farm says a giant keeps raiding his fields. He wants it dead and promised good coin for it.",
+      "objectives": [
+        {"type": "go", "place": "bleakwind_basin", "text": "Climb to the giant camp at Bleakwind Basin", "actions": "scene:side_sky_tusk_basin",
+         "journal": "The giant at Bleakwind Basin was sitting beside a mammoth whose tusks had been sawn off. Sledge tracks ran east."},
+        {"type": "go", "place": "halted_stream_camp", "text": "Follow the sledge tracks to Halted Stream Camp"},
+        {"type": "clear", "place": "halted_stream_camp", "placement": "structure", "text": "Drive out the poachers at Halted Stream",
+         "spawn": [{"type": "skycraft:bandit", "count": 4, "name": "Tusk Poacher"}]},
+        {"type": "kill", "place": "halted_stream_camp", "placement": "structure", "text": "Kill Orvald Tusk-Taker",
+         "spawn": [{"boss_id": "side_sky_orvald"}], "actions": "relic:side_sky_orvald_tally",
+         "journal": "Orvald carried a tally stick of buyers. The first name burned into it was Hrodulf of Chillfurrow."},
+        {"type": "retrieve", "place": "halted_stream_camp", "offset": [4, 3], "relic": "side_sky_bleakwind_tusk",
+         "text": "Take back the mammoth's tusk from the poachers' sledge"},
+        {"type": "go", "place": "bleakwind_basin", "offset": [3, 2], "text": "Lay the tusk beside the dead mammoth",
+         "actions": "take:side_sky_bleakwind_tusk;scene:side_sky_tusk_returned"},
+        {"type": "talk", "npc": "side_sky_hrodulf", "text": "Confront Hrodulf about the tally",
+         "topic": "Your name was on Orvald's tally, Hrodulf.",
+         "reply": "...So it was. Orvald said the beast was old and wouldn't be missed, and ivory fetches more than turnips. I didn't think the big one would know whose fields to walk through.",
+         "choices": [
+           {"label": "Leave a sack of grain at the basin every month, and it will leave you be.", "reply": "Feed a giant? ...Fine. Cheaper than another ox, I suppose.", "actions": "take:side_sky_orvald_tally;flag:side_sky_giant_fed"},
+           {"label": "The Jarl's steward will see this tally.", "reply": "Do what you like. But the Jarl's men won't plow my rows while I'm in the dungeon.", "actions": "take:side_sky_orvald_tally;flag:side_sky_hrodulf_reported;loot:minor"}
+         ]}
+      ],
+      "outro": "The giant stopped coming down from Bleakwind Basin. Hrodulf still grumbles about the price of an ox.",
+      "rewards": {"gold": 300, "loot": "standard",
+                  "items": [{"item": "skycraft:iron_war_axe", "name": "Tuskbreaker", "enchant": {"sharpness": 2, "knockback": 1}}],
+                  "flags": ["side_sky_tusk_debt_done"]}
+    },
+    {
+      "id": "side_sky_the_lantern_shepherd",
+      "title": "The Lantern Shepherd",
+      "region": "skyrim/whiterun",
+      "start": "npc:side_sky_svana",
+      "requires": ["level:6"],
+      "offer": "Who are you looking for?",
+      "pitch": "My Hroa's been gone three nights, and the Bjornsson twins before her. Folk say it's the Khajiit camped past the fields, that cats steal children to sell south. Brother Aslief prays with us every night. I don't want prayers. I want my daughter.",
+      "desc": "Three children have vanished from Rorikstead, the last of them Svana's daughter Hroa. The village blames the Khajiit caravan camped by the road.",
+      "on_start": "scene:side_sky_aslief_counsel",
+      "objectives": [
+        {"type": "talk", "npc": "side_sky_rishadi", "text": "Question the Khajiit trader Ri'shadi",
+         "topic": "Rorikstead says your caravan took their children.",
+         "reply": "Ri'shadi has heard what Rorikstead says. Rorikstead does not say that Ri'shadi saw a lantern of bone cross the fields at midnight, three nights running, going west. Small feet followed it. Ri'shadi did not follow. Ri'shadi is not brave."},
+        {"type": "go", "place": "moldering_ruins", "text": "Follow the lantern's path west to the Moldering Ruins", "actions": "scene:side_sky_moldering_toy"},
+        {"type": "retrieve", "place": "moldering_ruins", "offset": [5, -3], "relic": "side_sky_wooden_horse", "text": "Pick up the wooden horse in the candle circle",
+         "spawn": [{"type": "skycraft:skeever", "count": 3}],
+         "journal": "The toy's tail was tied with grey prayer thread. Only one man in Rorikstead braids Arkay's cord, and he had been very keen I search the Khajiit."},
+        {"type": "go", "place": "serpents_bluff_redoubt", "text": "Follow the trail of candle stubs to Serpent's Bluff", "actions": "scene:side_sky_aslief_reveal"},
+        {"type": "clear", "place": "serpents_bluff_redoubt", "placement": "structure", "text": "Destroy the thralls guarding the sleeping children",
+         "spawn": [{"type": "minecraft:skeleton", "count": 4, "name": "Lantern Thrall"}]},
+        {"type": "kill", "place": "serpents_bluff_redoubt", "placement": "structure", "text": "Stop Aslief the Lantern Shepherd",
+         "spawn": [{"boss_id": "side_sky_aslief"}],
+         "journal": "Aslief died asking me to tell Ingrid he was sorry. The twins woke first, then Hroa."},
+        {"type": "escort", "npc": "side_sky_hroa", "place": "rorikstead", "text": "Bring Hroa home to Rorikstead",
+         "actions": "relocate:side_sky_hroa:rorikstead:12:-4"},
+        {"type": "deliver", "npc": "side_sky_svana", "relic": "side_sky_wooden_horse", "text": "Give Svana the wooden horse",
+         "topic": "Hroa's home. And this is hers.",
+         "reply": "Her horse. She calls it Mead. I... Aslief? Aslief, who sat at our table? Gods. And we nearly drove the Khajiit out with pitchforks."}
+      ],
+      "outro": "The children of Rorikstead came home. Svana took a basket of bread to Ri'shadi's caravan the next morning.",
+      "rewards": {"gold": 450, "loot": "standard",
+                  "items": [{"item": "skycraft:steel_dagger", "name": "Shepherd's Mercy", "enchant": {"smite": 3, "sharpness": 1}}]}
+    },
+    {
+      "id": "side_sky_the_grey_maw",
+      "title": "The Grey Maw",
+      "region": "skyrim/falkreath",
+      "start": "npc:side_sky_ulfgar",
+      "requires": ["level:10"],
+      "offer": "What are you hunting?",
+      "pitch": "Two woodcutters dead by Half-Moon Mill this month, and the graveyard dug up besides. Jarl says sabre cat. No cat I ever tracked opens a coffin. Come hunt with me, and bring something silver if you've got it.",
+      "desc": "Ulfgar Lean-Bow, a Falkreath hunter, thinks a werewolf is killing woodcutters and robbing the town's graves. He asked me to help him hunt it.",
+      "objectives": [
+        {"type": "go", "place": "half_moon_mill", "text": "Search for tracks around Half-Moon Mill", "actions": "scene:side_sky_maw_tracks"},
+        {"type": "cond", "cond": "night", "place": "the_lady_stone", "text": "Follow the footprints to the Lady Stone after nightfall",
+         "actions": "scene:side_sky_maw_eirik",
+         "journal": "At the Lady Stone I found Ulfgar's brother Eirik, a werewolf by his own admission. He swore another wolf, Runa the gravekeeper, was the killer."},
+        {"type": "talk", "npc": "side_sky_ulfgar", "text": "Tell Ulfgar what you saw at the Lady Stone",
+         "topic": "Your brother Eirik is one of them.",
+         "reply": "...I knew. I think I knew when he stopped coming to supper. If he's still himself, even a little, I won't put silver in him. Find the one who made him."},
+        {"type": "go", "place": "moss_mother_cavern", "text": "Find the pack's den at Moss Mother Cavern"},
+        {"type": "clear", "place": "moss_mother_cavern", "placement": "structure", "text": "Kill the wolves of Runa's pack",
+         "spawn": [{"type": "skycraft:wolf", "count": 4, "name": "Greymantle Wolf"}]},
+        {"type": "kill", "place": "moss_mother_cavern", "placement": "structure", "text": "Kill Runa Greymantle",
+         "spawn": [{"boss_id": "side_sky_runa"}],
+         "journal": "Runa Greymantle had kept Falkreath's graveyard for twenty years, and fed her pack from it for the last one."},
+        {"type": "talk", "npc": "side_sky_ulfgar", "text": "Tell Ulfgar that Runa is dead",
+         "topic": "Runa is dead. What about Eirik?",
+         "reply": "He's waiting at the stone. He said whatever I decide, he'll accept. That's worse, somehow.",
+         "choices": [
+           {"label": "Send him north, into the empty country, far from anyone he could hurt.", "reply": "North. Aye. He always liked the snow better than I did.", "actions": "flag:side_sky_eirik_exiled"},
+           {"label": "That's your choice to make, not mine.", "reply": "Then I'll make it at the stone, where he can see the lake. Thank you for leaving it to me.", "actions": "flag:side_sky_eirik_mercy"}
+         ]}
+      ],
+      "outro": "The graves of Falkreath lie quiet again. Ulfgar doesn't talk about his brother, and I don't ask.",
+      "rewards": {"gold": 650, "loot": "major",
+                  "items": [{"item": "skycraft:silver_sword", "name": "Greymantle's Bane", "enchant": {"sharpness": 3, "looting": 1}}]}
+    },
+    {
+      "id": "side_sky_the_mire_torc",
+      "title": "The Mire Torc",
+      "region": "skyrim/hjaalmarch",
+      "start": "find",
+      "find": {"place": "morthal", "offset": [70, -55], "clue": "grave",
+               "text": "A headstone has sunk to its shoulders in the marsh. Three women's names are cut into it, one below the other, and beneath each the same words: 'Taken by the water, wearing her mother's torc.' The newest name is barely weathered."},
+      "requires": ["level:12"],
+      "desc": "A grave outside Morthal named three women of one family, each drowned wearing the same torc. The last of that line still lives in Morthal.",
+      "objectives": [
+        {"type": "talk", "npc": "side_sky_jorunn", "text": "Find the last woman of the family in Morthal",
+         "topic": "I found your family's grave in the marsh.",
+         "reply": "Then you know. Grandmother, mother, sister. The torc went to each in turn, and the marsh took each in turn. It's mine now. I keep it in a box and never go near the water, and still I dream of it. Take it. Find out what it wants.",
+         "actions": "relic:side_sky_mire_torc"},
+        {"type": "cond", "cond": "night", "place": "kjenstag_ruins", "text": "Go to the Kjenstag Ruins by night, where Jorunn's ancestor is buried",
+         "actions": "scene:side_sky_torc_ghost"},
+        {"type": "go", "place": "side_sky_hulvard_barrow", "text": "Find the Mire-Bride's barrow anyway", "actions": "scene:side_sky_torc_barrow",
+         "journal": "The carvings in Hulvard's barrow told the truth: Gunnolf Fen-Walker stole the torc from a sleeping woman. His ghost lied to me."},
+        {"type": "clear", "place": "side_sky_hulvard_barrow", "placement": "structure", "text": "Cut through the Mire-Bride's fen-draugr",
+         "spawn": [{"type": "skycraft:draugr", "count": 4, "name": "Fen-Draugr"}]},
+        {"type": "kill", "place": "side_sky_hulvard_barrow", "placement": "structure", "text": "Face Hrafna the Mire-Bride",
+         "spawn": [{"boss_id": "side_sky_hrafna"}], "actions": "take:side_sky_mire_torc",
+         "journal": "When Hrafna fell, I closed the torc around her throat. The barrow sighed like a drained pool and went still."},
+        {"type": "talk", "npc": "side_sky_jorunn", "text": "Return to Jorunn in Morthal",
+         "topic": "The torc is back where it belongs.",
+         "reply": "I slept last night. All night. No water in my dreams at all. What did you find out there?",
+         "choices": [
+           {"label": "Your ancestor stole it. The curse was the Mire-Bride's due.", "reply": "So the hero of every story my grandmother told was a grave-robber. Good. I'm glad I know.", "actions": "flag:side_sky_torc_truth"},
+           {"label": "Gunnolf fought bravely. It's over now.", "reply": "That's what Grandmother always said. Thank you for ending it.", "actions": "flag:side_sky_torc_kind_lie"}
+         ]}
+      ],
+      "outro": "The Mire Torc lies on Hrafna's throat in her sinking barrow, and the women of Jorunn's line can walk by the water again.",
+      "rewards": {"gold": 500, "loot": "major",
+                  "items": [{"item": "skycraft:ancient_nord_boots", "name": "Mirewalker Boots", "enchant": {"depth_strider": 3, "protection": 2}}]}
+    },
+    {
+      "id": "side_sky_salt_between_houses",
+      "title": "Salt Between Houses",
+      "region": "skyrim/haafingar",
+      "start": "npc:side_sky_ingrith",
+      "requires": ["level:10"],
+      "offer": "What happened to your woodpile?",
+      "pitch": "Somebody burned our seasoned timber, a whole winter's work. Everybody on this bridge knows it was the Kolfinns. Twenty years they've hated us. Find me proof, and the Jarl's reeve can deal with them.",
+      "desc": "Ingrith Arnleif of Dragon Bridge says the Kolfinn family burned her timber, the latest blow in a twenty-year feud. She wants proof.",
+      "objectives": [
+        {"type": "talk", "npc": "side_sky_kolfinn", "text": "Ask Old Kolfinn about the fire",
+         "topic": "Did your family burn the Arnleif timber?",
+         "reply": "We didn't. But I'll not weep for it. Twenty winters ago their boys threw my Torvar off this bridge, and the river never gave him back. Ask them about that."},
+        {"type": "go", "place": "dragon_bridge", "offset": [45, 30], "text": "Search the riverbank below the burned woodpile", "actions": "scene:side_sky_feud_pitch"},
+        {"type": "go", "place": "pinemoon_cave", "text": "Follow the pitch-stained tracks to Pinemoon Cave"},
+        {"type": "clear", "place": "pinemoon_cave", "placement": "structure", "text": "Fight off the smugglers in Pinemoon Cave",
+         "spawn": [{"type": "skycraft:bandit", "count": 4, "name": "Saltcutter Smuggler"}]},
+        {"type": "kill", "place": "pinemoon_cave", "placement": "structure", "text": "Kill Eldra Saltcutter",
+         "spawn": [{"boss_id": "side_sky_saltcutter"}], "actions": "scene:side_sky_torvar_surrenders",
+         "journal": "With Eldra dead, her lieutenant surrendered. He was Torvar Kolfinn, the boy who drowned twenty years ago. He burned the timber to keep the feud alive."},
+        {"type": "talk", "npc": "side_sky_kolfinn", "text": "Tell Old Kolfinn his son is alive",
+         "topic": "Torvar is alive. He's been running smugglers past this bridge for twenty years.",
+         "reply": "Alive. And he let me spit at the Arnleifs every day for twenty years, so nobody would look at the water. My boy.",
+         "choices": [
+           {"label": "Both families should hear it. Today.", "reply": "Aye. Let them all hear it. Maybe we can stop being fools together.", "actions": "flag:side_sky_feud_ended;loot:minor"},
+           {"label": "It's your family. You decide who hears it.", "reply": "Then I'll go up to that cave myself. After that, we'll see.", "actions": "flag:side_sky_feud_secret"}
+         ]},
+        {"type": "talk", "npc": "side_sky_ingrith", "text": "Report to Ingrith Arnleif",
+         "topic": "The Kolfinns didn't burn your timber.",
+         "reply": "Then who... No. Torvar? I was twelve. I cried for him. Gods, I cried for that boy."}
+      ],
+      "outro": "Dragon Bridge has gone quiet, the way a house does after a long shouting match. The smugglers' boats no longer pass at night.",
+      "rewards": {"gold": 500, "loot": "standard",
+                  "items": [{"item": "skycraft:steel_war_axe", "name": "Feudbreaker", "enchant": {"sharpness": 3}}]}
+    },
+    {
+      "id": "side_sky_the_splintered_moon",
+      "title": "The Splintered Moon",
+      "region": "skyrim/the_reach",
+      "start": "npc:side_sky_bjarni",
+      "requires": ["level:18"],
+      "offer": "You look like a man who lost something.",
+      "pitch": "My wife Gerda walked out of Karthwasten nine days ago with a bundle and her good shawl. Shepherds saw her on the road toward Four Skull Lookout, with an old woman in feathers. She went to the hagravens. I want her back before they make her one.",
+      "desc": "Bjarni Stonefist of Karthwasten says his wife Gerda went to a hagraven coven in the hills. He wants her brought home before she is changed.",
+      "objectives": [
+        {"type": "go", "place": "four_skull_lookout", "text": "Climb to Four Skull Lookout", "actions": "scene:side_sky_coven_lookout"},
+        {"type": "clear", "place": "four_skull_lookout", "placement": "structure", "text": "Defeat the coven's briar-guards",
+         "spawn": [{"type": "skycraft:forsworn", "count": 4, "name": "Coven Briar-Guard"}]},
+        {"type": "retrieve", "place": "four_skull_lookout", "offset": [3, -4], "relic": "side_sky_gerda_letter", "text": "Take the letter pinned under the crow's skull",
+         "journal": "Gerda's letter was for Bjarni: 'Don't follow. You know why I went. Every bruise you gave me, I'm giving back to the stone.'"},
+        {"type": "go", "place": "bleakwind_bluff", "text": "Follow the red wool markers to Bleakwind Bluff"},
+        {"type": "kill", "place": "bleakwind_bluff", "placement": "structure", "text": "Kill Sister Ashfeather",
+         "spawn": [{"boss_id": "side_sky_ashfeather"}, {"type": "skycraft:forsworn", "count": 2}]},
+        {"type": "talk", "npc": "side_sky_gerda", "text": "Find Gerda at the Sundered Towers",
+         "topic": "I read your letter, Gerda.",
+         "reply": "Then you know I'm not going back. The Mother says the change costs a heart. I thought she meant mine. Tonight she told me she means his, and I'm to fetch it. I don't want him dead. I just want to be gone.",
+         "actions": "scene:side_sky_crowsong_speaks"},
+        {"type": "kill", "place": "sundered_towers", "placement": "structure", "text": "Kill Mother Crowsong",
+         "spawn": [{"boss_id": "side_sky_crowsong"}, {"type": "skycraft:hagraven", "count": 1}],
+         "journal": "Mother Crowsong died cursing me in a language older than Markarth. Gerda watched from the tower door and didn't look away."},
+        {"type": "talk", "npc": "side_sky_gerda", "text": "Decide with Gerda where she goes",
+         "topic": "The coven's finished. Where will you go?",
+         "reply": "Somewhere he isn't. That's all I ask of the world.",
+         "choices": [
+           {"label": "Go to Markarth. A city is a good place to start over.", "reply": "Markarth. Stone walls, and nobody knows my face. Yes.", "actions": "relocate:side_sky_gerda:markarth:10:6;flag:side_sky_gerda_markarth"},
+           {"label": "Old Hroldan's inn always needs hands.", "reply": "An inn. Warm, and full of strangers. That sounds like heaven.", "actions": "relocate:side_sky_gerda:old_hroldan:5:3;flag:side_sky_gerda_hroldan"}
+         ]},
+        {"type": "deliver", "npc": "side_sky_bjarni", "relic": "side_sky_gerda_letter", "text": "Give Bjarni his wife's letter",
+         "topic": "She's alive. She left you this.",
+         "reply": "She... Fine. Fine. Let her go, then. I paid you to bring her back, not to read me letters. Take your coin and get out."}
+      ],
+      "outro": "Gerda never became a hagraven. She never went back to Karthwasten either, and I think that's how it should be.",
+      "rewards": {"gold": 800, "loot": "major",
+                  "items": [{"item": "skycraft:forsworn_sword", "name": "Talon of the Splintered Moon", "enchant": {"sharpness": 3, "fire_aspect": 1}}]}
+    },
+    {
+      "id": "side_sky_the_knock_below",
+      "title": "The Knock Below",
+      "region": "skyrim/eastmarch",
+      "start": "npc:side_sky_hela",
+      "requires": ["level:15"],
+      "offer": "Why is the new shaft closed?",
+      "pitch": "We opened a new seam north of the crossing. Good corundum. Then the knocking started, from under the deepest gallery, steady as a heartbeat. Two nights ago it stopped, and the night shift didn't come up. Something else did.",
+      "desc": "Hela Corundum-Hand of Darkwater Crossing says her night shift vanished in the new Veinhollow shaft after weeks of knocking from below.",
+      "objectives": [
+        {"type": "go", "place": "side_sky_veinhollow", "text": "Go down the Veinhollow shaft", "actions": "scene:side_sky_veinhollow_mouth"},
+        {"type": "clear", "place": "side_sky_veinhollow", "placement": "structure", "text": "Kill the Falmer in the galleries",
+         "spawn": [{"type": "skycraft:falmer", "count": 4, "name": "Falmer Skulker"}, {"type": "skycraft:chaurus", "count": 2}]},
+        {"type": "retrieve", "place": "side_sky_veinhollow", "offset": [5, -4], "relic": "side_sky_resonance_rod", "text": "Pull the humming brass rod out of the gallery floor",
+         "journal": "Someone had hammered a Dwemer resonance rod into the deepest gallery. The 'knocking' was the rod, ringing down into the dark. It called them up."},
+        {"type": "talk", "npc": "side_sky_hela", "text": "Show Hela the rod",
+         "topic": "Someone drove this into your floor. It's been ringing like a dinner bell.",
+         "reply": "That's the foreman's sounding rod. Bought it off a Markarth trader to find ore veins. He's been down there every night 'listening.' He went down with the night shift. Gods help him."},
+        {"type": "go", "place": "kagrenzel", "text": "Follow the Falmer tunnel to where it opens at Kagrenzel"},
+        {"type": "kill", "place": "kagrenzel", "placement": "structure", "text": "Kill the Gloomseer who leads the raiders",
+         "spawn": [{"boss_id": "side_sky_gloomseer"}, {"type": "skycraft:falmer", "count": 2}, {"type": "skycraft:chaurus_hunter", "count": 1}],
+         "journal": "The Gloomseer had been answering the rod's call for weeks, each night a little closer to the miners. Two of the night shift were alive in its larder."},
+        {"type": "talk", "npc": "side_sky_hela", "text": "Report to Hela at Darkwater Crossing",
+         "topic": "Two of your miners are coming home. The rest aren't.",
+         "reply": "Two is more than I hoped. What do we do with that cursed rod?",
+         "choices": [
+           {"label": "Break it, and fill in the bottom gallery.", "reply": "Rock and mortar, as deep as we can pour it. No more listening.", "actions": "take:side_sky_resonance_rod;flag:side_sky_rod_broken"},
+           {"label": "Keep it. If you hear it ring on its own, run.", "reply": "Hmph. An alarm bell that answers back. I'll hang it over the shaft.", "actions": "take:side_sky_resonance_rod;flag:side_sky_rod_kept;loot:minor"}
+         ]}
+      ],
+      "outro": "The Veinhollow shaft is quiet now. Hela says the miners sing while they work, loudly, to drown out anything they might hear below.",
+      "rewards": {"gold": 700, "loot": "major",
+                  "items": [{"item": "skycraft:dwarven_war_axe", "name": "Seam-Splitter", "enchant": {"sharpness": 3, "unbreaking": 2}}]}
+    },
+    {
+      "id": "side_sky_the_custodians_errand",
+      "title": "The Custodian's Errand",
+      "region": "skyrim/the_pale",
+      "start": "npc:side_sky_corvin",
+      "requires": ["level:16"],
+      "offer": "Brass men?",
+      "pitch": "I woke a Dwemer centurion in Raldbthar. Only for a moment! It was meant to recite its maintenance logs. Instead it walked out of the ruin, and now it is walking, very slowly, toward Loreius Farm, flattening whatever is in its path. I would very much like it to stop.",
+      "desc": "Corvin Vale, a Breton tinkerer at Nightgate Inn, woke a Dwemer centurion in Raldbthar. It walked out of the ruin and is crossing the Pale.",
+      "objectives": [
+        {"type": "go", "place": "loreius_farm", "text": "Find the centurion's trail near Loreius Farm", "actions": "scene:side_sky_custodian_tracks"},
+        {"type": "clear", "place": "loreius_farm", "offset": [30, -20], "placement": "near", "text": "Destroy the machines trailing behind it",
+         "spawn": [{"type": "skycraft:dwarven_spider", "count": 3, "name": "Custodial Escort"}, {"type": "skycraft:dwarven_sphere", "count": 1}]},
+        {"type": "talk", "npc": "side_sky_corvin", "text": "Ask Corvin why the machine is walking toward him",
+         "topic": "It isn't going to the farm, Corvin. It's coming for you.",
+         "reply": "Ah. Well. There was a small brass key in a niche by its pedestal. I took it as a keepsake. You don't think it wants...? Oh. Oh dear. Please take it. Take it far away from me.",
+         "actions": "relic:side_sky_custodial_key"},
+        {"type": "go", "place": "raldbthar", "text": "Carry the key back to Raldbthar", "actions": "scene:side_sky_custodian_wakes"},
+        {"type": "kill", "place": "raldbthar", "placement": "structure", "text": "Survive the Custodian of Raldbthar",
+         "spawn": [{"boss_id": "side_sky_custodian"}],
+         "journal": "The Custodian didn't want its key back. It wanted the thief, and to its mind anyone carrying the key was the thief."},
+        {"type": "go", "place": "raldbthar", "offset": [6, 4], "text": "Return the key to its niche beside the empty pedestal",
+         "actions": "take:side_sky_custodial_key"},
+        {"type": "talk", "npc": "side_sky_corvin", "text": "Tell Corvin it's over",
+         "topic": "Your keepsake nearly flattened a farm. The key's back where it belongs.",
+         "reply": "I will never touch a Dwemer niche again. Probably. Here, take this. I made it from a centurion's spare knuckle. It seemed appropriate."}
+      ],
+      "outro": "The Custodian of Raldbthar lies in pieces at its post. Corvin swears he has given up Dwemer ruins for the study of moss.",
+      "rewards": {"gold": 700, "loot": "major",
+                  "items": [{"item": "skycraft:dwarven_mace", "name": "Corvin's Apology", "enchant": {"sharpness": 3, "knockback": 2}}]}
+    },
+    {
+      "id": "side_sky_ashes_on_the_ice",
+      "title": "Ashes on the Ice",
+      "region": "skyrim/winterhold",
+      "start": "npc:side_sky_ilvesi",
+      "requires": ["level:18"],
+      "offer": "You seem troubled, serjo.",
+      "pitch": "Forty years ago the Velothi Promise ran aground in the trench below the ice, full of refugees from Morrowind. My grandmother's ashes were aboard, in the hold with the living. The ice shifted this winter, and the wreck shows again. I would have her back, and in a proper shrine.",
+      "desc": "Ilvesi Dravyne of Winterhold asked me to recover her grandmother's ash-urn from the wreck of the Velothi Promise in Pilgrim's Trench.",
+      "objectives": [
+        {"type": "go", "place": "pilgrims_trench", "text": "Go to the wreck in Pilgrim's Trench", "actions": "scene:side_sky_dren_hail"},
+        {"type": "clear", "place": "pilgrims_trench", "placement": "structure", "text": "Lay the drowned passengers to rest",
+         "spawn": [{"type": "minecraft:drowned", "count": 4, "name": "Drowned Pilgrim"}, {"type": "skycraft:slaughterfish", "count": 2}]},
+        {"type": "retrieve", "place": "pilgrims_trench", "offset": [6, 5], "relic": "side_sky_dravyne_urn", "text": "Find the Dravyne urn in the hold"},
+        {"type": "retrieve", "place": "pilgrims_trench", "offset": [-8, 4], "relic": "side_sky_promise_log", "text": "Take the ship's log from the captain's cabin",
+         "actions": "scene:side_sky_dren_log",
+         "journal": "Captain Dren barred the hold from outside and took the only boat. The ice took him a few strokes from the wreck. He didn't stay at the wheel; he left everyone to die."},
+        {"type": "kill", "place": "pilgrims_trench", "placement": "structure", "text": "Silence Captain Dren's ghost",
+         "spawn": [{"boss_id": "side_sky_dren"}]},
+        {"type": "deliver", "npc": "side_sky_ilvesi", "relic": "side_sky_dravyne_urn", "text": "Bring the urn to Ilvesi Dravyne",
+         "topic": "Your grandmother, Ilvesi.",
+         "reply": "Ancestors be thanked. I will make her a shrine by the hearth. Did you learn how the ship was lost? The survivors never spoke of it."},
+        {"type": "talk", "npc": "side_sky_ilvesi", "text": "Tell Ilvesi what the log says",
+         "topic": "The captain's log tells the story.",
+         "reply": "Tell me plainly.",
+         "choices": [
+           {"label": "He locked the hold and fled in the only boat.", "reply": "Then the families of Winterhold will hear it, and his name will be cursed at every ash-shrine in Skyrim. That is justice of a kind.", "actions": "take:side_sky_promise_log;flag:side_sky_dren_shamed"},
+           {"label": "The ice took them all. No one could have saved them.", "reply": "Then it was the will of the sea. I can live with that. Perhaps it is better.", "actions": "take:side_sky_promise_log;flag:side_sky_dren_hidden"}
+         ]}
+      ],
+      "outro": "Ilmeni Dravyne's urn sits by her granddaughter's hearth in Winterhold. The Velothi Promise is sinking back under the ice.",
+      "rewards": {"gold": 800, "loot": "major",
+                  "items": [{"item": "skycraft:elven_bow", "name": "Ashen Wake", "enchant": {"power": 3, "flame": 1}}]}
+    },
+    {
+      "id": "side_sky_the_sweet_tithe",
+      "title": "The Sweet Tithe",
+      "region": "skyrim/the_rift",
+      "start": "npc:side_sky_vigge",
+      "requires": ["level:14"],
+      "offer": "You look like you haven't slept.",
+      "pitch": "Skooma's come back to Riften, and it's coming through the beggars. Half the poor in this city have the shakes. They won't talk to a man in a guard's helmet. You don't wear one. Find where it's coming from.",
+      "desc": "Watch-Sergeant Vigge asked me to find the source of the skooma spreading through Riften's beggars.",
+      "objectives": [
+        {"type": "talk", "npc": "side_sky_brodd", "text": "Ask Brodd Half-Mitten where the beggars get skooma",
+         "topic": "Where do the poor folk get their sugar, Brodd?",
+         "reply": "Sugar? Nobody's got coin for skooma. But the widow Asta gives out sweet-cakes at the well every morning. Best thing in Riften. After a week you'd kill for one. That's not the same thing, is it?"},
+        {"type": "go", "place": "merryfair_farm", "offset": [20, 12], "text": "Search the widow's bakehouse near Merryfair Farm", "actions": "scene:side_sky_bakehouse",
+         "journal": "The widow Asta's sweet-cakes were baked with moon sugar, and her supplier is a Khajiit named Dar'Vasha."},
+        {"type": "go", "place": "lost_prospect_mine", "text": "Find Dar'Vasha's smugglers at Lost Prospect Mine"},
+        {"type": "clear", "place": "lost_prospect_mine", "placement": "structure", "text": "Clear out the sugar smugglers",
+         "spawn": [{"type": "skycraft:bandit", "count": 4, "name": "Sugar Runner"}]},
+        {"type": "kill", "place": "lost_prospect_mine", "placement": "structure", "text": "Kill Dar'Vasha Sugar-Tooth",
+         "spawn": [{"boss_id": "side_sky_darvasha"}], "actions": "relic:side_sky_sugar_ledger",
+         "journal": "Dar'Vasha's ledger listed a monthly payment to 'the sergeant with the red beard' for keeping the watch away from the well. Vigge has a red beard."},
+        {"type": "cond", "cond": "night", "place": "merryfair_farm", "offset": [20, 12], "text": "Return to the bakehouse at night, when the widow bakes"},
+        {"type": "kill", "place": "merryfair_farm", "offset": [20, 12], "placement": "near", "text": "Stop Widow Asta Sweetmilk",
+         "spawn": [{"boss_id": "side_sky_asta"}, {"type": "skycraft:bandit", "count": 2, "name": "Bakehouse Lookout"}]},
+        {"type": "talk", "npc": "side_sky_vigge", "text": "Confront Watch-Sergeant Vigge with the ledger",
+         "topic": "Dar'Vasha paid a red-bearded sergeant to keep the watch away from the well.",
+         "reply": "...Aye. I took her coin for a year. Then she started handing cakes to children, and I couldn't stomach it. I couldn't arrest her without her talking about me, so I sent you. Now you know.",
+         "choices": [
+           {"label": "The Jarl's steward gets this ledger. You'll answer for it.", "reply": "Fair. I'll walk up to Mistveil Keep myself. Don't need an escort for that.", "actions": "take:side_sky_sugar_ledger;flag:side_sky_vigge_reported"},
+           {"label": "Keep the badge. Spend the rest of it cleaning up what you allowed.", "reply": "Every shaking beggar in this city is mine to feed now. I'll do it. Thank you.", "actions": "take:side_sky_sugar_ledger;flag:side_sky_vigge_penance;loot:minor"}
+         ]}
+      ],
+      "outro": "The sweet-cakes stopped. It took Riften's beggars a hard month to stop shaking, but most of them did.",
+      "rewards": {"gold": 800, "loot": "major",
+                  "items": [{"item": "skycraft:glass_dagger", "name": "Sugar-Cutter", "enchant": {"sharpness": 3, "looting": 2}}]}
+    },
+    {
+      "id": "side_sky_the_ransomers_hall",
+      "title": "The Ransomer's Hall",
+      "region": "skyrim/the_rift",
+      "start": "find",
+      "find": {"place": "nilheim", "offset": [-70, -80], "clue": "stone",
+               "text": "A standing stone half buried in the slope, carved with a pair of open shackles above a hand full of coins. Below, in old runes worn nearly smooth: 'Stuhn takes the ransom. Stuhn opens the door.' A line of the same shackle-marks leads west into the hills."},
+      "requires": ["level:20"],
+      "desc": "A stone near Nilheim bore the marks of Stuhn the Ransomer, one of the old Nordic gods, and pointed to a forgotten hall in the hills.",
+      "objectives": [
+        {"type": "go", "place": "side_sky_stuhnhallr", "text": "Follow the shackle-marks to the hall in the hills", "actions": "scene:side_sky_stuhn_hall"},
+        {"type": "clear", "place": "side_sky_stuhnhallr", "placement": "structure", "text": "Fight past the ransom-bound draugr",
+         "spawn": [{"type": "skycraft:draugr", "count": 5, "name": "Ransom-Bound Draugr"}]},
+        {"type": "kill", "place": "side_sky_stuhnhallr", "placement": "structure", "text": "Pay your passage by defeating Gautr the Ransom-Warden",
+         "spawn": [{"boss_id": "side_sky_gautr"}]},
+        {"type": "retrieve", "place": "side_sky_stuhnhallr", "offset": [5, 6], "relic": "side_sky_ransom_tablet", "text": "Take the slate tablet from the ransom-altar",
+         "journal": "The tablet listed every warrior whose ransom Stuhn's priests promised and never paid. Gautr's own name was last."},
+        {"type": "talk", "npc": "side_sky_holgeir", "text": "Ask Brother Holgeir of Ivarstead about the tablet",
+         "topic": "This tablet came from a hall of Stuhn, in the hills.",
+         "reply": "Stuhn. My grandmother still swore by him. Shor's brother, the god who paid for prisoners. If those names were promised a ransom, they've been waiting a long time. Read them aloud at the altar, every one. In the old days that was the payment."},
+        {"type": "wait", "hours": 1, "place": "side_sky_stuhnhallr", "offset": [5, 6], "text": "Read every name on the tablet aloud at the ransom-altar",
+         "actions": "take:side_sky_ransom_tablet;scene:side_sky_stuhn_freed"}
+      ],
+      "outro": "The cells of Stuhnhallr stand empty now. I left the tablet on the altar with every name read, and a coin on top for Stuhn.",
+      "rewards": {"gold": 900, "loot": "major", "perks": 1,
+                  "items": [{"item": "skycraft:nordic_shield", "name": "Ransom-Warden's Ward", "enchant": {"protection": 3, "unbreaking": 2}}]}
+    },
+    {
+      "id": "side_sky_the_fellhammer_roll",
+      "title": "The Fellhammer Roll",
+      "region": "skyrim/winterhold",
+      "start": "npc:side_sky_sigrun",
+      "requires": ["level:20"],
+      "offer": "Why avoid Fellhammer?",
+      "pitch": "Every night the dead garrison of Fort Fellhammer answers roll call. Shepherds hear it on the wind. My father Asgeir served there before the mine fell in, and every night they call his name and he doesn't answer. I want to know why he can't rest when the others can't stop.",
+      "desc": "Sigrun of Winterhold says the dead garrison of Fort Fellhammer answers a roll call every night, and her father Asgeir's name is always called and never answered.",
+      "objectives": [
+        {"type": "cond", "cond": "night", "place": "fort_fellhammer", "text": "Be at Fort Fellhammer when night falls", "actions": "scene:side_sky_roll_call"},
+        {"type": "clear", "place": "fort_fellhammer", "placement": "structure", "text": "Put down the revenants of the garrison",
+         "spawn": [{"type": "minecraft:stray", "count": 5, "name": "Fellhammer Revenant"}]},
+        {"type": "retrieve", "place": "fort_fellhammer", "offset": [4, -5], "relic": "side_sky_fellhammer_roll", "text": "Take the garrison roll book from the commander's table",
+         "journal": "The last real entry in the roll, in Hafgrim's hand: 'Six deserters sealed in the lower mine. Charges set. Let the mountain judge them.' Asgeir was the first name."},
+        {"type": "go", "place": "fort_fellhammer", "offset": [45, -25], "text": "Search the collapsed mine behind the fort",
+         "journal": "Behind the rubble I found six skeletons huddled together, and a Legion badge with Asgeir's name. They hadn't deserted. Their letters home were tucked in their boots, asking for leave that never came."},
+        {"type": "kill", "place": "fort_fellhammer", "placement": "structure", "text": "Destroy Commander Hafgrim's shade",
+         "spawn": [{"boss_id": "side_sky_hafgrim"}, {"type": "minecraft:stray", "count": 2}]},
+        {"type": "deliver", "npc": "side_sky_sigrun", "relic": "side_sky_fellhammer_roll", "text": "Bring Sigrun the garrison roll",
+         "topic": "Your father didn't answer because he wasn't on duty. He was in the mine.",
+         "reply": "Sealed in. By his own commander. And for twenty years Hafgrim's ghost kept calling him absent, as if that made it his fault.",
+         "choices": [
+           {"label": "Strike his name from the roll. He's off duty now.", "reply": "Struck. Let him rest. Let all six of them rest.", "actions": "flag:side_sky_asgeir_struck"},
+           {"label": "Write 'present' beside his name.", "reply": "Present. He was always where he said he'd be. Thank you.", "actions": "flag:side_sky_asgeir_present"}
+         ]}
+      ],
+      "outro": "Nobody answers roll call at Fort Fellhammer any longer. The shepherds say the wind there sounds like ordinary wind now.",
+      "rewards": {"gold": 900, "loot": "major",
+                  "items": [{"item": "skycraft:imperial_sword", "name": "Roll-Caller", "enchant": {"smite": 4, "sharpness": 1}}]}
+    },
+    {
+      "id": "side_sky_coldveins_mercy",
+      "title": "Coldvein's Mercy",
+      "region": "skyrim/eastmarch",
+      "start": "find",
+      "find": {"place": "windhelm", "offset": [-80, -100], "clue": "skeleton",
+               "text": "A man lies frozen under a thin drift, wrapped in a Grey Quarter blanket. Two small wounds on his throat have been neatly cleaned and bandaged. Whoever fed on him tended him afterward, and folded his hands."},
+      "requires": ["level:22"],
+      "desc": "In the snow outside Windhelm I found a frozen beggar, bled by a vampire and then carefully tended. The blanket came from the Grey Quarter's healer.",
+      "objectives": [
+        {"type": "talk", "npc": "side_sky_nerasa", "text": "Ask the Grey Quarter healer about the blanket",
+         "topic": "This blanket is yours. The man wrapped in it was drained by a vampire.",
+         "reply": "He was dying already. Lung-rot. The Lady gave him a warm bed and a gentle end, which is more than this city ever gave him. You would rather he coughed his last in an alley? Go and see her, then. The old prison in the marshes south-west of here, past Mixwater Mill."},
+        {"type": "go", "place": "abandoned_prison", "text": "Find the Lady's rest at the abandoned prison", "actions": "scene:side_sky_coldvein_rest"},
+        {"type": "retrieve", "place": "abandoned_prison", "offset": [5, 3], "relic": "side_sky_coldvein_ledger", "text": "Read the guest book by the door",
+         "spawn": [{"type": "skycraft:vampire", "count": 3, "name": "Coldvein Thrall"}],
+         "journal": "Beside each name in Coldvein's book, the healer had written a diagnosis. Half of them were dockworkers, hale and strong. Nerasa had been sending her the healthy ones too."},
+        {"type": "kill", "place": "abandoned_prison", "placement": "structure", "text": "Kill Lady Vigdis Coldvein",
+         "spawn": [{"boss_id": "side_sky_coldvein"}, {"type": "skycraft:vampire", "count": 2}]},
+        {"type": "talk", "npc": "side_sky_nerasa", "text": "Confront Nerasa with the guest book",
+         "topic": "You sent her healthy men. It's in her book, in your hand.",
+         "reply": "She said the strong ones lasted longer. That she could make them comfortable for weeks instead of days. She promised me... it doesn't matter what she promised. What will you do with me?",
+         "choices": [
+           {"label": "The Grey Quarter will judge you. I'll give them the book.", "reply": "Then I'll stand there and let them. It's fair.", "actions": "take:side_sky_coldvein_ledger;flag:side_sky_nerasa_judged"},
+           {"label": "Burn the book. Spend the rest of your life healing for free.", "reply": "Every day. Every patient. I swear it on my mother's ashes.", "actions": "take:side_sky_coldvein_ledger;flag:side_sky_nerasa_spared;loot:minor"}
+         ]}
+      ],
+      "outro": "The old prison is cold and empty again. In the Grey Quarter, nobody speaks of the Lady's rest.",
+      "rewards": {"gold": 1000, "loot": "legendary",
+                  "items": [{"item": "skycraft:ebony_dagger", "name": "Coldvein's Last Kiss", "enchant": {"sharpness": 4, "smite": 2}}]}
+    },
+    {
+      "id": "side_sky_the_false_beacon",
+      "title": "The False Beacon",
+      "region": "skyrim/haafingar",
+      "start": "find",
+      "find": {"place": "solitude_lighthouse", "offset": [-68, 7], "clue": "lectern",
+               "text": "A lighthouse watch-log lies open on a rock, its pages flapping. The last three entries read the same: 'Lantern seen burning on the Broken Oar headland. No light should burn there. Reported to O.' The ink smells fresh."},
+      "requires": ["level:12"],
+      "desc": "A watch-log near the Solitude lighthouse recorded a lantern burning where no lantern should be, on the headland above Broken Oar Grotto.",
+      "objectives": [
+        {"type": "talk", "npc": "side_sky_olfrid", "text": "Ask the lighthouse keeper about the log",
+         "topic": "Someone's been logging a false light on the Broken Oar headland.",
+         "reply": "That's my log! My boy Hakon keeps the night watch. Lights on Broken Oar, three nights? He never said a word to me. Two ships have gone on those rocks this season. Gods. Go and look, will you? I can't leave the oil."},
+        {"type": "cond", "cond": "night", "place": "broken_oar_grotto", "text": "Watch the Broken Oar headland after dark", "actions": "scene:side_sky_beacon_night",
+         "journal": "Above Broken Oar Grotto a wrecker's lantern swung like a harbor light. The man holding it called himself Hakon."},
+        {"type": "clear", "place": "broken_oar_grotto", "placement": "structure", "text": "Fight the wreckers in Broken Oar Grotto",
+         "spawn": [{"type": "skycraft:bandit", "count": 5, "name": "Wrecker"}]},
+        {"type": "kill", "place": "broken_oar_grotto", "placement": "structure", "text": "Kill Gunnhild Falsebeacon",
+         "spawn": [{"boss_id": "side_sky_gunnhild"}],
+         "journal": "Gunnhild's crew lured ships onto the rocks and sold the salvage to the smugglers of Haafingar. Hakon ran when she fell."},
+        {"type": "retrieve", "place": "broken_oar_grotto", "offset": [4, -3], "relic": "side_sky_false_lantern", "text": "Take the wrecker's lantern"},
+        {"type": "deliver", "npc": "side_sky_olfrid", "relic": "side_sky_false_lantern", "text": "Show Olfrid the lantern",
+         "topic": "This is the false beacon. There's an H scratched in the brass.",
+         "reply": "Hakon's mark. I taught him to scratch it on his tools. He kept my lamp burning with one hand and that one with the other. Where is he?",
+         "choices": [
+           {"label": "He ran. If he comes back, it's for you to judge him.", "reply": "Then I'll leave the door unbarred. And the lighthouse lit. He'll know which light is mine.", "actions": "flag:side_sky_hakon_fled"},
+           {"label": "The Solitude guard should know his face.", "reply": "...Aye. Two ships. Men drowned. I'll tell them myself.", "actions": "flag:side_sky_hakon_named;loot:minor"}
+         ]}
+      ],
+      "outro": "Only one light burns on the Haafingar coast at night now, and it is Olfrid's.",
+      "rewards": {"gold": 550, "loot": "standard",
+                  "items": [{"item": "skycraft:steel_bow", "name": "Lampwarden's Bow", "enchant": {"power": 2, "flame": 1}}]}
+    }
+  ]
+}

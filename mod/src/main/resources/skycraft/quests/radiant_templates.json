@@ -1,0 +1,390 @@
+{
+  "_doc": "Radiant quest archetypes (Daggerfall-style), drawn by com.skycraft.quest.story.RadiantTemplates for townsfolk outside Skyrim. Args: %1$s direction, %2$s site, %3$s gold, %4$s named target, %5$s region, %6$s destination town. Texts are exported to lang by tools/quest_lang.js.",
+  "templates": [
+    {
+      "id": "infested_storehouse", "cultures": ["*"], "category": "bounty", "weight": 3, "gold": 160,
+      "title": "Vermin at %2$s",
+      "desc": "Something has moved into the storehouses at %2$s, %1$s of here, and the owner would pay %3$s gold to have it moved out again.",
+      "pitch": "Our stores at %2$s, %1$s of here. Something's nesting in them, and the last man I sent came back without his boots. %3$s gold if you clear them out.",
+      "steps": [
+        {"do": "clear", "at": "wild", "count": [4, 6], "text": "Clear the vermin out of %2$s",
+         "foe": {"argonian": ["skycraft:mudcrab", "Bloated Mudcrab"], "khajiit": ["skycraft:giant_scorpion", "Granary Scorpion"],
+                 "dunmer": ["skycraft:kagouti", "Hungry Kagouti"], "redguard": ["skycraft:giant_scorpion", "Sand Scorpion"],
+                 "bosmer": ["minecraft:spider", "Canopy Spider"], "default": ["skycraft:skeever", "Plague Skeever"]}},
+        {"do": "return", "text": "Tell the owner the stores are clear"}
+      ]
+    },
+    {
+      "id": "named_beast", "cultures": ["*"], "category": "bounty", "weight": 3, "gold": 300, "min_level": 8,
+      "title": "The Beast Called %4$s",
+      "desc": "A beast the locals call %4$s has made its lair at %2$s, %1$s of here. Its head is worth %3$s gold.",
+      "pitch": "They call it %4$s. It lairs at %2$s, %1$s of here, and it has taken two hunters and a mule this month. Bring it down and the reward is %3$s gold.",
+      "names": ["Old Notch-Ear", "the Widowmaker", "Graymaw", "the Bone Collector", "Sixtoes", "the Pale Hunger", "Rotfang", "the Quiet One"],
+      "steps": [
+        {"do": "kill", "at": "dungeon", "hp": 3.0, "text": "Hunt down %4$s at %2$s",
+         "foe": {"argonian": ["skycraft:wamasu"], "khajiit": ["skycraft:senche_tiger"], "bosmer": ["skycraft:spriggan"],
+                 "dunmer": ["skycraft:kagouti"], "altmer": ["skycraft:harpy"], "redguard": ["skycraft:giant_scorpion"],
+                 "breton": ["skycraft:troll"], "orc": ["skycraft:ogre"], "imperial": ["skycraft:minotaur"], "default": ["skycraft:troll"]}},
+        {"do": "return", "text": "Collect the bounty"}
+      ]
+    },
+    {
+      "id": "livestock_raider", "cultures": ["imperial", "breton", "redguard", "khajiit", "orc", "foreign"], "category": "bounty", "weight": 2, "gold": 200,
+      "title": "Something Takes the Herd",
+      "desc": "A beast has been raiding the herds %1$s of here, near %2$s. The herders will pay %3$s gold to see it dead.",
+      "pitch": "Every third night another animal is gone and the fence is just... open. Tracks lead %1$s, towards %2$s. %3$s gold, from all of us.",
+      "names": ["the Night Thief", "Gutripper", "Ol' Grizzle"],
+      "steps": [
+        {"do": "go", "at": "wild", "text": "Follow the tracks to %2$s"},
+        {"do": "kill", "at": "wild", "hp": 2.5, "text": "Kill %4$s",
+         "foe": {"redguard": ["skycraft:giant_scorpion"], "khajiit": ["skycraft:senche_tiger"], "orc": ["skycraft:troll"], "default": ["skycraft:bear"]}},
+        {"do": "return", "text": "Tell the herders their animals are safe"}
+      ]
+    },
+    {
+      "id": "undead_master", "cultures": ["*"], "category": "bounty", "weight": 2, "gold": 450, "min_level": 15,
+      "title": "The Master of %2$s",
+      "desc": "The dead are walking out of %2$s, %1$s of here. Somebody inside is calling them up, and they call themselves %4$s.",
+      "pitch": "Graves dug up from below. Corpses on the road at dawn, all walking the same way: %1$s, to %2$s. The one who calls them signs their letters %4$s. %3$s gold to end it.",
+      "names": ["the Ashen Abbot", "Mother Grieve", "Velk of the Long Night", "the Gravewright", "Sister Hollow"],
+      "steps": [
+        {"do": "clear", "at": "dungeon", "count": [3, 5], "text": "Cut through the risen dead of %2$s",
+         "foe": {"dunmer": ["skycraft:ash_spawn", "Ash Ghoul"], "redguard": ["minecraft:husk", "Desert Revenant"], "argonian": ["minecraft:drowned", "Bog Corpse"], "default": ["minecraft:skeleton", "Risen Dead"]}},
+        {"do": "kill", "at": "dungeon", "hp": 3.5, "text": "Destroy %4$s", "foe": ["skycraft:necromancer"], "escort": ["minecraft:skeleton"], "count": [1, 2]},
+        {"do": "return", "text": "Report that %2$s is quiet"}
+      ]
+    },
+    {
+      "id": "haunted_home", "cultures": ["imperial", "breton", "redguard", "altmer", "dunmer", "foreign"], "category": "misc", "weight": 2, "gold": 260,
+      "title": "The House That Weeps",
+      "desc": "An old homestead at %2$s, %1$s of here, has a tenant who died years ago. The family wants to move back in. They will pay %3$s gold.",
+      "pitch": "My grandmother's house at %2$s, %1$s of here. Nobody's lived there since the fever. At night the doors bang and someone sings in the cellar. Sit with it a while, and then... make it stop. %3$s gold.",
+      "steps": [
+        {"do": "go", "at": "wild", "text": "Go to the old house at %2$s"},
+        {"do": "wait", "hours": 3, "text": "Keep a vigil at %2$s"},
+        {"do": "clear", "at": "wild", "count": [2, 3], "text": "Lay the restless spirits to rest",
+         "foe": {"dunmer": ["skycraft:ash_spawn", "Restless Ancestor"], "default": ["skycraft:wisp", "Weeping Shade"]}},
+        {"do": "return", "text": "Tell the family the house is quiet"}
+      ]
+    },
+    {
+      "id": "family_curse", "cultures": ["imperial", "breton", "redguard", "altmer"], "category": "misc", "weight": 1, "gold": 520, "min_level": 18,
+      "title": "The Ancestor in the Crypt",
+      "desc": "A noble family fears their ancestor %4$s has risen in the family crypt at %2$s, %1$s of here. They want it done quietly, for %3$s gold.",
+      "pitch": "This is delicate. My house's founder, %4$s, was buried at %2$s with honours. Now the crypt door stands open at dawn and the dogs won't go near it. End this. Quietly. %3$s gold.",
+      "names": ["Lord Aldric Vaunt", "Lady Emmeline Corve", "Count Silvain Draux", "Dame Yolande Thrice"],
+      "steps": [
+        {"do": "go", "at": "dungeon", "text": "Open the family crypt at %2$s"},
+        {"do": "kill", "at": "dungeon", "hp": 4.0, "text": "Put %4$s back in the ground", "foe": ["skycraft:vampire"], "escort": ["minecraft:skeleton"], "count": [2, 3]},
+        {"do": "return", "text": "Tell the family it is done, and nothing more"}
+      ]
+    },
+    {
+      "id": "planar_breach", "cultures": ["*"], "category": "bounty", "weight": 1, "gold": 600, "min_level": 20,
+      "title": "A Tear Near %2$s",
+      "desc": "Something has torn open near %2$s, %1$s of here, and daedra are walking out of it. %3$s gold to close it.",
+      "pitch": "The air near %2$s, %1$s of here, smells of brimstone and burnt hair. People have seen horned things in the fields. If you can send them back, %3$s gold, and my eternal gratitude, which is worth less.",
+      "names": ["Kynmarcher Vhaz", "Gatewarden Ruhl", "the Ember Knight"],
+      "steps": [
+        {"do": "clear", "at": "wild", "count": [3, 4], "text": "Fight the daedra at the breach",
+         "foe": ["skycraft:scamp", "Breach Scamp"]},
+        {"do": "kill", "at": "wild", "hp": 3.0, "text": "Slay %4$s, who holds the breach open", "foe": ["skycraft:dremora"], "escort": ["skycraft:flame_atronach"], "count": [1, 1]},
+        {"do": "return", "text": "Report that the breach has closed"}
+      ]
+    },
+    {
+      "id": "artifact_rumour", "cultures": ["*"], "category": "misc", "weight": 2, "gold": 380, "min_level": 10,
+      "title": "The Thing at %2$s",
+      "desc": "A collector heard that something old and valuable lies in %2$s, %1$s of here. They will pay %3$s gold for it.",
+      "pitch": "I collect. Rumor says something rather special lies in %2$s, %1$s of here, and that nobody who went for it came back to argue about the price. %3$s gold if you bring it to me.",
+      "steps": [
+        {"do": "retrieve", "at": "dungeon", "relic": "side_rad_relic", "count": [2, 4], "text": "Find the relic in %2$s",
+         "foe": {"dunmer": ["skycraft:dwarven_spider", "Dwemer Sentry"], "imperial": ["minecraft:skeleton", "Ayleid Warden"], "argonian": ["skycraft:spriggan", "Root-Guardian"], "default": ["skycraft:draugr", "Tomb Guardian"]}},
+        {"do": "bring", "relic": "side_rad_relic", "text": "Bring the relic to the collector"}
+      ]
+    },
+    {
+      "id": "missing_person", "cultures": ["*"], "category": "misc", "weight": 2, "gold": 300,
+      "title": "Gone Missing",
+      "desc": "%4$s went out %1$s of here, towards %2$s, and never came back. Their family will pay %3$s gold to know what happened.",
+      "pitch": "%4$s went out %1$s, towards %2$s, three days ago. Said it was just for the afternoon. Please. Find them. %3$s gold is all we have.",
+      "names": ["young Pell", "Old Marisse", "my brother Tavin", "the scholar Ondre", "my sister Kaila", "the miller's boy"],
+      "steps": [
+        {"do": "go", "at": "dungeon", "text": "Search for %4$s near %2$s"},
+        {"do": "clear", "at": "dungeon", "count": [3, 4], "text": "Deal with whoever took %4$s",
+         "foe": {"khajiit": ["skycraft:bandit", "Sand Raider"], "argonian": ["skycraft:bandit", "Slaver"], "altmer": ["skycraft:bandit", "Maormer Raider"], "default": ["skycraft:bandit", "Kidnapper"]}},
+        {"do": "retrieve", "at": "dungeon", "relic": "side_rad_token", "text": "Find %4$s"},
+        {"do": "bring", "relic": "side_rad_token", "text": "Bring word of %4$s home"}
+      ]
+    },
+    {
+      "id": "timed_courier", "cultures": ["*"], "category": "misc", "weight": 3, "gold": 180,
+      "title": "Sealed for %6$s",
+      "desc": "A sealed letter must reach %6$s, and the sender is paying %3$s gold for speed and discretion.",
+      "pitch": "This letter goes to %6$s, and it goes today. Don't open it. Don't lose it. Don't let anyone see you hand it over. %3$s gold, paid there.",
+      "steps": [
+        {"do": "courier", "text": "Carry the sealed letter to %6$s"}
+      ]
+    },
+    {
+      "id": "relic_under_siege", "cultures": ["*"], "category": "misc", "weight": 1, "gold": 420, "min_level": 12,
+      "title": "The Relic Must Move",
+      "desc": "The temple's relic must be moved to %6$s before raiders take it. They will try anyway. %3$s gold for the escort.",
+      "pitch": "Raiders have hit our shrine twice for the relic we keep. It must go to %6$s, where the walls are thicker. They'll be waiting on the road. %3$s gold.",
+      "steps": [
+        {"do": "clear", "at": "wild", "count": [3, 4], "text": "Break the ambush on the road",
+         "foe": {"orc": ["skycraft:bandit", "Orc Raider"], "breton": ["skycraft:bandit", "Orc Raider"], "default": ["skycraft:bandit", "Relic Raider"]}},
+        {"do": "courier", "text": "Bring the relic to the temple in %6$s"}
+      ]
+    },
+    {
+      "id": "gather_reagents", "cultures": ["*"], "category": "misc", "weight": 2, "gold": 220,
+      "title": "Roots and Caps",
+      "desc": "An apothecary needs rare reagents that only grow near %2$s, %1$s of here. %3$s gold.",
+      "pitch": "The rarest things grow where the worst things nest. %2$s, %1$s of here. Bring me a full bundle and I'll pay %3$s gold. Wear gloves.",
+      "steps": [
+        {"do": "retrieve", "at": "wild", "relic": "side_rad_herbs", "count": [2, 3], "text": "Gather the reagents at %2$s",
+         "foe": {"argonian": ["skycraft:wamasu", "Marsh Wamasu"], "bosmer": ["skycraft:spriggan", "Thorn Spriggan"], "dunmer": ["skycraft:netch", "Bull Netch"], "khajiit": ["skycraft:giant_scorpion", "Dune Scorpion"], "default": ["minecraft:spider", "Giant Spider"]}},
+        {"do": "bring", "relic": "side_rad_herbs", "text": "Bring the reagents to the apothecary"}
+      ]
+    },
+    {
+      "id": "purge_shrine", "cultures": ["*"], "category": "bounty", "weight": 2, "gold": 480, "min_level": 14,
+      "title": "The Profane Shrine",
+      "desc": "A cult has made a shrine of %2$s, %1$s of here. Their leader, %4$s, must fall. %3$s gold.",
+      "pitch": "There are candles in %2$s again, %1$s of here, and chanting at night. The cult's leader calls himself %4$s. The temple wants it ended and will pay %3$s gold.",
+      "names": ["the Hollow Prophet", "Brother Varn", "the Red Mother", "Ysolde of the Seventh Door", "the Unwed Bride"],
+      "steps": [
+        {"do": "clear", "at": "dungeon", "count": [3, 4], "text": "Break the cult at %2$s", "foe": ["skycraft:necromancer", "Cultist"]},
+        {"do": "kill", "at": "dungeon", "hp": 3.0, "text": "Kill %4$s", "foe": ["skycraft:necromancer"], "escort": ["skycraft:scamp"], "count": [1, 2]},
+        {"do": "return", "text": "Tell the temple the shrine is purged"}
+      ]
+    },
+    {
+      "id": "stolen_heirloom", "cultures": ["*"], "category": "misc", "weight": 3, "gold": 240,
+      "title": "Taken in the Night",
+      "desc": "Thieves took a family heirloom and fled %1$s, towards %2$s. Its owner will pay %3$s gold for its return.",
+      "pitch": "They came through the window and took the one thing that mattered. My mother's. They're holed up at %2$s, %1$s of here; everyone knows it and nobody does anything. %3$s gold if you do.",
+      "steps": [
+        {"do": "retrieve", "at": "dungeon", "relic": "side_rad_heirloom", "count": [3, 4], "text": "Take the heirloom back from the thieves at %2$s",
+         "foe": ["skycraft:bandit", "Housebreaker"]},
+        {"do": "bring", "relic": "side_rad_heirloom", "text": "Return the heirloom"}
+      ]
+    },
+    {
+      "id": "kidnapping", "cultures": ["*"], "category": "bounty", "weight": 2, "gold": 450, "min_level": 10,
+      "title": "Ransom",
+      "desc": "A gang led by %4$s took someone and holds them at %2$s, %1$s of here, for ransom. The family would rather pay me %3$s gold.",
+      "pitch": "A note under the door. They want everything we have, and they'll still do what they want. The gang's at %2$s, %1$s of here; their leader is %4$s. %3$s gold to bring our child home instead.",
+      "names": ["Crooked Haldo", "Marrow-Jin", "the Widow Sable", "Two-Coin Rennick"],
+      "steps": [
+        {"do": "clear", "at": "dungeon", "count": [3, 4], "text": "Fight through the gang at %2$s", "foe": ["skycraft:bandit", "Kidnapper"]},
+        {"do": "kill", "at": "dungeon", "hp": 2.5, "text": "Kill %4$s", "foe": ["skycraft:bandit_chief"]},
+        {"do": "retrieve", "at": "dungeon", "relic": "side_rad_token", "text": "Free the captive"},
+        {"do": "bring", "relic": "side_rad_token", "text": "Tell the family their child is coming home"}
+      ]
+    },
+    {
+      "id": "turncoat", "cultures": ["*"], "category": "bounty", "weight": 2, "gold": 380, "min_level": 10,
+      "title": "The Turncoat",
+      "desc": "%4$s sold out their own and fled %1$s of here, to %2$s. Someone wants that debt settled, for %3$s gold.",
+      "pitch": "%4$s rode with us for six years and sold us for a purse. They're hiding at %2$s, %1$s of here. I don't want them back. I want them done. %3$s gold.",
+      "names": ["Ferro the Smiling", "Ysmay Coldhand", "Benoit Larque", "Hesk the Quick"],
+      "steps": [
+        {"do": "kill", "at": "wild", "hp": 2.0, "text": "Find %4$s at %2$s and settle the debt", "foe": ["npc:assassin"], "escort": ["npc:thug"], "count": [2, 2]},
+        {"do": "return", "text": "Tell your client it is done"}
+      ]
+    },
+    {
+      "id": "night_watch", "cultures": ["*"], "category": "misc", "weight": 2, "gold": 280,
+      "title": "The Long Watch",
+      "desc": "Someone needs a guard at %2$s, %1$s of here, through a dangerous night. %3$s gold.",
+      "pitch": "I need someone at %2$s, %1$s of here, until the work is done, and I need them awake. There will be visitors. You'll know them because they'll be trying to kill you. %3$s gold.",
+      "steps": [
+        {"do": "go", "at": "wild", "text": "Take up the watch at %2$s"},
+        {"do": "wait", "hours": 3, "text": "Keep watch at %2$s"},
+        {"do": "clear", "at": "wild", "count": [3, 4], "text": "Fight off the night's visitors",
+         "foe": {"dunmer": ["npc:assassin", "Hired Blade"], "khajiit": ["skycraft:bandit", "Dune Cutthroat"], "default": ["skycraft:bandit", "Hired Blade"]}},
+        {"do": "return", "text": "Collect your pay"}
+      ]
+    },
+    {
+      "id": "escaped_experiment", "cultures": ["altmer", "breton", "dunmer", "imperial"], "category": "bounty", "weight": 1, "gold": 420, "min_level": 14,
+      "title": "It Got Out",
+      "desc": "A mage's experiment, %4$s, broke its bindings and fled %1$s, towards %2$s. Quietly destroy it for %3$s gold.",
+      "pitch": "A small matter of containment. My... project, %4$s, slipped its circle and went %1$s, to %2$s. Destroy it before the guard hears about this. %3$s gold, and you never met me.",
+      "names": ["Specimen Nine", "the Bright Thing", "Assistant", "Ember-Who-Was-Promised"],
+      "steps": [
+        {"do": "kill", "at": "wild", "hp": 3.0, "text": "Destroy %4$s",
+         "foe": {"dunmer": ["skycraft:storm_atronach"], "altmer": ["skycraft:frost_atronach"], "default": ["skycraft:flame_atronach"]}},
+        {"do": "return", "text": "Tell the mage it's done"}
+      ]
+    },
+    {
+      "id": "field_survey", "cultures": ["altmer", "breton", "imperial", "dunmer", "foreign"], "category": "misc", "weight": 2, "gold": 230,
+      "title": "A Reading at %2$s",
+      "desc": "A scholar needs an observation taken at %2$s, %1$s of here, over a few hours. %3$s gold.",
+      "pitch": "The ley-lines bend at %2$s, %1$s of here, and I need a reading taken there over a few hours. I would go myself, but I have a strong preference for not being eaten. %3$s gold.",
+      "steps": [
+        {"do": "go", "at": "wild", "text": "Travel to %2$s"},
+        {"do": "wait", "hours": 2, "text": "Take the reading at %2$s"},
+        {"do": "return", "text": "Bring the reading back"}
+      ]
+    },
+    {
+      "id": "rogue_archmage", "cultures": ["altmer", "breton", "imperial", "dunmer"], "category": "bounty", "weight": 1, "gold": 700, "min_level": 22,
+      "title": "The Wizard of %2$s",
+      "desc": "%4$s, a mage gone rogue, has holed up in %2$s, %1$s of here, and defies the crown. %3$s gold for their end.",
+      "pitch": "%4$s was brilliant once. Now they've taken %2$s, %1$s of here, and the crown's letters come back burned. The guild washes its hands. We don't. %3$s gold.",
+      "names": ["Magister Orvayne", "Theodric the Unseen", "Sorceress Ilaine", "the Glass Hermit"],
+      "steps": [
+        {"do": "clear", "at": "dungeon", "count": [2, 3], "text": "Get past the wizard's servants", "foe": ["skycraft:flame_atronach", "Bound Servant"]},
+        {"do": "kill", "at": "dungeon", "hp": 4.0, "text": "Defeat %4$s", "foe": ["skycraft:necromancer"], "escort": ["skycraft:storm_atronach"], "count": [1, 1]},
+        {"do": "return", "text": "Report the wizard's end"}
+      ]
+    },
+    {
+      "id": "salvage_job", "cultures": ["altmer", "argonian", "redguard", "imperial", "khajiit", "foreign"], "category": "misc", "weight": 2, "gold": 320,
+      "title": "What the Sea Gave Back",
+      "desc": "A merchant's strongbox lies with a wreck near %2$s, %1$s of here, and scavengers have got there first. %3$s gold for the box.",
+      "pitch": "My ship went down off %2$s, %1$s of here. The crew's gone; the strongbox isn't, and the scavengers know it. %3$s gold for the box, unopened.",
+      "steps": [
+        {"do": "retrieve", "at": "wild", "relic": "side_rad_salvage", "count": [3, 4], "text": "Recover the strongbox at %2$s",
+         "foe": {"argonian": ["skycraft:land_dreugh", "Dreugh"], "altmer": ["skycraft:bandit", "Maormer Scavenger"], "default": ["skycraft:bandit", "Wrecker"]}},
+        {"do": "bring", "relic": "side_rad_salvage", "text": "Deliver the strongbox"}
+      ]
+    },
+    {
+      "id": "daedra_heart", "cultures": ["*"], "category": "misc", "weight": 1, "gold": 520, "min_level": 18,
+      "title": "A Fresh Heart",
+      "desc": "Someone needs the heart of a daedra, fresh. One walks near %2$s, %1$s of here. %3$s gold.",
+      "pitch": "Don't ask what it's for. A daedra has been seen at %2$s, %1$s of here. Its heart, still warm, is worth %3$s gold to me. Cold, it's worth nothing.",
+      "steps": [
+        {"do": "retrieve", "at": "wild", "relic": "side_rad_heart", "count": [1, 2], "text": "Take a daedra's heart at %2$s", "foe": ["skycraft:dremora", "Dremora Churl"]},
+        {"do": "bring", "relic": "side_rad_heart", "text": "Bring the heart while it's warm"}
+      ]
+    },
+    {
+      "id": "coven_favour", "cultures": ["breton", "redguard", "foreign"], "category": "misc", "weight": 2, "gold": 360, "min_level": 12,
+      "title": "A Favour for the Sisters",
+      "desc": "A coven of witches asked a favour: witch-hunters are camped at %2$s, %1$s of here. In return, %3$s gold and the sisters' goodwill.",
+      "pitch": "The sisters remember who helps them. Witch-hunters have made camp at %2$s, %1$s of here, with nets and fire. Send them home, or wherever. %3$s gold, and a door that will open for you later.",
+      "steps": [
+        {"do": "clear", "at": "wild", "count": [3, 4], "text": "Drive off the witch-hunters at %2$s", "foe": ["npc:thug", "Witch-Hunter"]},
+        {"do": "return", "text": "Tell the coven's messenger"}
+      ]
+    },
+    {
+      "id": "elder_vampire", "cultures": ["breton", "redguard", "imperial", "dunmer"], "category": "bounty", "weight": 1, "gold": 750, "min_level": 24,
+      "title": "The Elder of %2$s",
+      "desc": "An ancient vampire, %4$s, has taken %2$s, %1$s of here, as a court. %3$s gold to destroy it.",
+      "pitch": "Families vanish around %2$s, %1$s of here, and come back pale and polite. The thing at the heart of it is %4$s, older than the road you came on. %3$s gold. Bring garlic. Bring more than garlic.",
+      "names": ["Lady Vraseth-Orne", "the Pale Margrave", "Sanguis Lhaur", "Old Montalion"],
+      "steps": [
+        {"do": "clear", "at": "dungeon", "count": [3, 4], "text": "Cut through the thralls of %2$s", "foe": ["skycraft:vampire", "Thrall"]},
+        {"do": "kill", "at": "dungeon", "hp": 4.5, "text": "Destroy %4$s", "foe": ["skycraft:vampire_lord"], "glow": true},
+        {"do": "return", "text": "Report the elder's end"}
+      ]
+    },
+    {
+      "id": "orc_warband", "cultures": ["breton", "redguard", "orc", "imperial"], "category": "bounty", "weight": 2, "gold": 420, "min_level": 12,
+      "title": "The Warband of %4$s",
+      "desc": "An orc warband under %4$s camps at %2$s, %1$s of here, and has been taking tolls in blood. %3$s gold.",
+      "pitch": "Mercenaries, they say. Mercenaries who stopped waiting for contracts. %4$s leads them from %2$s, %1$s of here. %3$s gold, and the road open again.",
+      "names": ["Gash gro-Durz", "Ulbazag the Red", "Mogrul Ironjaw", "Shagra Twice-Exiled"],
+      "steps": [
+        {"do": "clear", "at": "wild", "count": [3, 5], "text": "Break the warband at %2$s", "foe": ["skycraft:bandit", "Orc Mercenary"]},
+        {"do": "kill", "at": "wild", "hp": 3.0, "text": "Kill %4$s", "foe": ["skycraft:bandit_chief"]},
+        {"do": "return", "text": "Report the road is open"}
+      ]
+    },
+    {
+      "id": "hatchling_slavers", "cultures": ["argonian"], "category": "bounty", "weight": 2, "gold": 420, "min_level": 12,
+      "title": "Chains in the Reeds",
+      "desc": "Slavers led by %4$s took hatchlings from a village and camp at %2$s, %1$s of here. %3$s gold, and the village's thanks.",
+      "pitch": "The warm-skins came in boats with nets. They have little ones from our village at %2$s, %1$s of here. Their leader is %4$s. This one cannot pay much, only %3$s gold. And the Hist's memory.",
+      "names": ["Varo Dulnas", "Captain Severin Allane", "Nilene Sadri", "the Netmaster"],
+      "steps": [
+        {"do": "clear", "at": "wild", "count": [3, 4], "text": "Break the slavers' camp at %2$s", "foe": ["npc:thug", "Slaver"]},
+        {"do": "kill", "at": "wild", "hp": 2.5, "text": "Kill %4$s", "foe": ["skycraft:bandit_chief"]},
+        {"do": "return", "text": "Tell the village the little ones are free"}
+      ]
+    },
+    {
+      "id": "skooma_den", "cultures": ["khajiit", "argonian", "dunmer", "imperial"], "category": "bounty", "weight": 2, "gold": 380, "min_level": 10,
+      "title": "Sugar and Smoke",
+      "desc": "A skooma den at %2$s, %1$s of here, is cooking the moon-sugar wrong and selling it cheap. Its master is %4$s. %3$s gold.",
+      "pitch": "Moon-sugar is sacred. What %4$s cooks at %2$s, %1$s of here, is not. Young ones go in and come out empty. %3$s gold to end the den, and this one will not ask how.",
+      "names": ["Rajhad the Sweet", "Ma'jirr Two-Pipes", "Dravas Velothi", "the Candy Man of the Dunes"],
+      "steps": [
+        {"do": "clear", "at": "dungeon", "count": [3, 4], "text": "Clear the den at %2$s", "foe": ["skycraft:bandit", "Skooma Cook"]},
+        {"do": "kill", "at": "dungeon", "hp": 2.5, "text": "Deal with %4$s", "foe": ["skycraft:bandit_chief"]},
+        {"do": "return", "text": "Tell the giver the den is gone"}
+      ]
+    },
+    {
+      "id": "pact_breakers", "cultures": ["bosmer"], "category": "bounty", "weight": 2, "gold": 360, "min_level": 10,
+      "title": "Axes in the Green",
+      "desc": "Someone is cutting living wood at %2$s, %1$s of here. The Green Pact demands an answer. %3$s gold.",
+      "pitch": "Fresh sap on the ground at %2$s, %1$s of here. Living wood, cut by iron. Whoever did it is still there, and the Green remembers. %3$s gold, and the forest's favour.",
+      "steps": [
+        {"do": "go", "at": "wild", "text": "Find the cutting at %2$s"},
+        {"do": "clear", "at": "wild", "count": [3, 4], "text": "Stop the pact-breakers", "foe": ["npc:lumberjack", "Pact-Breaker"]},
+        {"do": "return", "text": "Tell the giver the cutting has stopped"}
+      ]
+    },
+    {
+      "id": "maormer_landing", "cultures": ["altmer", "bosmer"], "category": "bounty", "weight": 2, "gold": 480, "min_level": 18,
+      "title": "Sails from the South",
+      "desc": "Maormer raiders under %4$s landed at %2$s, %1$s of here. %3$s gold to throw them back into the sea.",
+      "pitch": "Serpent-prowed boats on the beach at %2$s, %1$s of here. Sea elves, and a captain they call %4$s. The garrison is days away. You are not. %3$s gold.",
+      "names": ["Captain Nehvoril", "Sea-Witch Ulthrae", "Tide-Lord Vanyon"],
+      "steps": [
+        {"do": "clear", "at": "wild", "count": [3, 5], "text": "Fight the raiders on the beach at %2$s", "foe": ["skycraft:bandit", "Maormer Raider"]},
+        {"do": "kill", "at": "wild", "hp": 3.0, "text": "Kill %4$s", "foe": ["skycraft:bandit_chief"], "escort": ["skycraft:sea_serpent"], "count": [1, 1]},
+        {"do": "return", "text": "Report the landing broken"}
+      ]
+    },
+    {
+      "id": "tomb_robbers", "cultures": ["dunmer"], "category": "misc", "weight": 2, "gold": 340, "min_level": 12,
+      "title": "Grave Goods",
+      "desc": "Robbers broke into the family tomb at %2$s, %1$s of here, and took the ancestors' urn. %3$s gold, and the family's honour restored.",
+      "pitch": "Outlanders. In our tomb at %2$s, %1$s of here. They took an urn. Do you understand? They took a grandmother. Bring her back and %3$s gold is yours, with the ancestors' blessing.",
+      "steps": [
+        {"do": "retrieve", "at": "dungeon", "relic": "radiant_dunmer", "count": [3, 4], "text": "Take back the urn at %2$s", "foe": ["skycraft:bandit", "Tomb Robber"]},
+        {"do": "bring", "relic": "radiant_dunmer", "text": "Return the ancestor to her family"}
+      ]
+    },
+    {
+      "id": "smugglers_ledger", "cultures": ["imperial", "breton", "redguard", "khajiit", "altmer", "foreign"], "category": "misc", "weight": 2, "gold": 400, "min_level": 10,
+      "title": "The Ledger",
+      "desc": "A smuggling ring keeps its books at %2$s, %1$s of here. Someone wants the ledger, and will pay %3$s gold for it.",
+      "pitch": "Every smuggler on this coast pays someone, and someone writes it down. That book is at %2$s, %1$s of here. Bring it to me before anyone burns it. %3$s gold.",
+      "steps": [
+        {"do": "retrieve", "at": "dungeon", "relic": "side_rad_ledger", "count": [3, 4], "text": "Steal the ledger from %2$s", "foe": ["skycraft:bandit", "Smuggler"]},
+        {"do": "bring", "relic": "side_rad_ledger", "text": "Deliver the ledger"}
+      ]
+    },
+    {
+      "id": "forbidden_tome", "cultures": ["*"], "category": "misc", "weight": 1, "gold": 460, "min_level": 16,
+      "title": "The Closed Eye",
+      "desc": "A forbidden book is kept at %2$s, %1$s of here, by people who read it too often. Someone wants it out of their hands. %3$s gold.",
+      "pitch": "There is a book at %2$s, %1$s of here, with a clasp like a closed eye. The people guarding it have started to look like it. Take it from them. Do not read it. %3$s gold.",
+      "steps": [
+        {"do": "retrieve", "at": "dungeon", "relic": "side_rad_tome", "count": [2, 3], "text": "Take the tome from %2$s", "foe": ["skycraft:necromancer", "Hollow Reader"]},
+        {"do": "bring", "relic": "side_rad_tome", "text": "Hand over the tome, unread"}
+      ]
+    },
+    {
+      "id": "stronghold_trial", "cultures": ["orc"], "category": "misc", "weight": 2, "gold": 380, "min_level": 14,
+      "title": "Blood for the Chief",
+      "desc": "The stronghold will hear me out once I bring down %4$s, who hunts near %2$s, %1$s of here. %3$s gold besides.",
+      "pitch": "You want the chief's ear? Earn it. %4$s hunts near %2$s, %1$s of here. Bring it down with your own hands and the chief will drink with you. %3$s gold from the forge-wife, too.",
+      "names": ["the Grey Echatere", "Wroth-Belly", "Stonehide"],
+      "steps": [
+        {"do": "kill", "at": "wild", "hp": 3.0, "text": "Kill %4$s", "foe": ["skycraft:echatere"]},
+        {"do": "return", "text": "Tell the stronghold of your kill"}
+      ]
+    }
+  ]
+}

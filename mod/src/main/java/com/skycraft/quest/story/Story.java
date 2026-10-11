@@ -355,6 +355,8 @@ public final class Story {
         for (String fl : r.flags) flags.add(StringTag.valueOf(fl));
         if (!flags.isEmpty()) sr.put("flags", flags);
         if (def.stage > 0) sr.putInt("stage", def.stage);
+        if (!r.loot.isEmpty()) sr.putString("loot", r.loot);
+        if (!r.unique.isEmpty()) sr.putString("unique", r.unique);
         q.extra.put(REWARDS, sr);
         if (!def.desc.isEmpty()) addJournal(q, def.desc.c());
         return q;
@@ -364,6 +366,7 @@ public final class Story {
     private static String resolveVar(MinecraftServer server, String expr, CompoundTag vars, RandomSource r) {
         if (expr.startsWith("enemy_fort:")) return CivilWar.enemyFort(server, expr.substring(11), r);
         if (expr.startsWith("fort_region:")) return CivilWar.fortRegion(sub(vars, expr.substring(12)));
+        if (expr.startsWith("land:")) return Discoveries.landSite(expr.substring(5));
         if (expr.startsWith("pick:")) {
             String[] opts = expr.substring(5).split(",");
             return opts[r.nextInt(opts.length)].trim();
@@ -552,10 +555,15 @@ public final class Story {
         for (int j = 0; j < od.spawns.size(); j++) {
             JsonObject s = od.spawns.get(j);
             if (s.has("target") && s.get("target").getAsBoolean() && s.has("name")) {
-                return Component.translatableWithFallback("story.skycraft.q." + def.id + ".o" + idx + ".s" + j, s.get("name").getAsString());
+                return Component.translatableWithFallback(spawnNameKey(def, idx, j, s), s.get("name").getAsString());
             }
         }
         return Component.translatable("story.skycraft.default.foe");
+    }
+
+    /** A named boss ({@code bosses} block) keeps its own name key; other spawns are keyed by where they sit. */
+    private static String spawnNameKey(StoryData.QuestDef def, int idx, int j, JsonObject s) {
+        return s.has("name_key") ? s.get("name_key").getAsString() : "story.skycraft.q." + def.id + ".o" + idx + ".s" + j;
     }
 
     private static CompoundTag spawnSpec(StoryData.QuestDef def, int idx, int j, JsonObject s) {
@@ -563,9 +571,9 @@ public final class Story {
         t.putString("type", StoryData.str(s, "type", "skycraft:bandit"));
         t.putInt("count", s.has("count") ? s.get("count").getAsInt() : 1);
         if (s.has("name")) {
-            t.putString("name", Quest.writeComponent(Component.translatableWithFallback(
-                    "story.skycraft.q." + def.id + ".o" + idx + ".s" + j, s.get("name").getAsString())));
+            t.putString("name", Quest.writeComponent(Component.translatableWithFallback(spawnNameKey(def, idx, j, s), s.get("name").getAsString())));
         }
+        Bosses.extraSpec(s, t);
         for (String b : new String[]{"target", "boss", "glow", "decor", "hostile", "invulnerable"}) {
             if (s.has(b) && s.get(b).getAsBoolean()) t.putBoolean(b, true);
         }
@@ -797,6 +805,9 @@ public final class Story {
             Notifier.message(p, Component.translatable("story.skycraft.reward.souls", r.getInt("souls")).withStyle(ChatFormatting.GOLD));
         }
         for (Tag t : r.getList("words", Tag.TAG_STRING)) teachWords(p, t.getAsString());
+        // loot tiers roll for each rewarded player at their own loot level; a unique is everyone's own copy
+        if (!r.getString("loot").isEmpty()) Bosses.giveLoot(p, r.getString("loot"));
+        if (!r.getString("unique").isEmpty()) Bosses.giveUnique(p, r.getString("unique"));
         if (!r.getString("house").isEmpty()) grantHouse(p, r.getString("house"));
         if (!r.getString("title").isEmpty()) {
             d.module("quest").putString("title", r.getString("title"));
@@ -863,7 +874,8 @@ public final class Story {
      * {@code scene:<id>}, {@code flag:<f>}, {@code unflag:<f>}, {@code start:<quest>}, {@code word:<spec>},
      * {@code souls:<n>}, {@code teleport_dim:<dim>}, {@code flight:<place>}, {@code effect:<id>:<sec>[:<amp>]},
      * {@code control:<region>:<side>}, {@code relocate:<npc>:<place>[:dx:dz]}, {@code summon:<npc>},
-     * {@code flyover:<entity>:<name>}, {@code helgen}, {@code thunder}.
+     * {@code flyover:<entity>:<name>}, {@code helgen}, {@code thunder}, {@code loot:<tier>}, {@code unique:<id>},
+     * {@code boss:<id>}.
      */
     public static void runActions(MinecraftServer server, String key, Quest q, String actions, @Nullable ServerPlayer actor) {
         if (actions == null || actions.isEmpty()) return;
@@ -1023,6 +1035,17 @@ public final class Story {
             }
             case "imprison" -> {
                 if (receiver != null) com.skycraft.crime.Jail.imprison(receiver, arg);
+            }
+            // side quests: loot:<tier> rolls a loot-module reward, unique:<id> hands over a legendary unique,
+            // boss:<id> raises a named boss of a bosses block next to the party (an ambush)
+            case "loot" -> {
+                for (ServerPlayer m : audience(online, receiver)) Bosses.giveLoot(m, arg);
+            }
+            case "unique" -> {
+                if (receiver != null) Bosses.giveUnique(receiver, arg);
+            }
+            case "boss" -> {
+                if (receiver != null) Bosses.ambush(receiver, key, q, arg);
             }
             case "thunder" -> {
                 for (ServerPlayer m : audience(online, receiver)) {

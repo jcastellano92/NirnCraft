@@ -254,6 +254,8 @@ public final class QuestSpawner {
             mob.setPersistenceRequired();
         }
         decorate(e, spec, isTarget);
+        // named side-quest bosses: level, gear and their own drop
+        com.skycraft.quest.story.Bosses.apply(e, spec);
         e.getPersistentData().putString(TAG_OWNER, owner);
         e.getPersistentData().putString(TAG_QUEST, quest.id);
         // the boss bar comes back whenever the boss is (re)loaded (see QuestEvents#onEntityJoin)
@@ -261,6 +263,12 @@ public final class QuestSpawner {
         if (!level.addFreshEntity(e)) return null;
         if (e.getTags().contains(BOSS_TAG)) BossBars.track(e);
         return e;
+    }
+
+    /** One quest entity from a spec outside any objective (a story ambush): decorated, tagged, boss bar if a boss. */
+    @Nullable
+    public static Entity spawnLoose(ServerLevel level, String owner, Quest quest, CompoundTag spec, BlockPos p) {
+        return spawnOne(level, owner, quest, spec, p, spec.getBoolean("boss"));
     }
 
     /**

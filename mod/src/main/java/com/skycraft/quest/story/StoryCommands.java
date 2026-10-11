@@ -162,7 +162,7 @@ public final class StoryCommands {
     private static final java.util.Set<String> ACTIONS = java.util.Set.of("give", "relic", "take", "scene", "flag", "unflag", "start",
             "word", "souls", "teleport_dim", "flight", "effect", "control", "relocate", "summon", "flyover", "helgen", "thunder",
             "absorb_soul", "beast_blood", "cure_beast_blood", "vampire_lord", "cure", "retire", "victory",
-            "join", "points", "expel", "imprison");
+            "join", "points", "expel", "imprison", "loot", "unique", "boss");
 
     /**
      * Builds every story quest for a stand-in player and checks what a playthrough would hit: places, NPCs, relics,
@@ -215,6 +215,28 @@ public final class StoryCommands {
                     if (!ACTIONS.contains(kind)) problems.add(def.id + ": unknown action " + t);
                     if (kind.equals("scene") && StoryData.scene(t.substring(6)).isEmpty()) problems.add(def.id + ": unknown scene " + t);
                     if (kind.equals("relic") && StoryData.relic(t.substring(6)) == null) problems.add(def.id + ": unknown relic " + t);
+                    if (kind.equals("boss") && StoryData.boss(t.substring(5)) == null) problems.add(def.id + ": unknown boss " + t);
+                    if (kind.equals("unique") && com.skycraft.loot.LegendaryUniques.get(t.substring(7)) == null) problems.add(def.id + ": unknown unique " + t);
+                    if (kind.equals("loot") && !Bosses.TIERS.contains(t.substring(5))) problems.add(def.id + ": unknown loot tier " + t);
+                }
+            }
+            if (!def.rewards.loot.isEmpty() && !Bosses.TIERS.contains(def.rewards.loot)) problems.add(def.id + ": unknown loot tier " + def.rewards.loot);
+            if (!def.rewards.unique.isEmpty() && com.skycraft.loot.LegendaryUniques.create(def.rewards.unique).isEmpty()) {
+                problems.add(def.id + ": unknown unique " + def.rewards.unique);
+            }
+            if (def.find != null && Discoveries.spot(def) == null) problems.add(def.id + ": hidden clue at unknown place " + def.find.place);
+            if ("find".equals(def.start) && def.find == null) problems.add(def.id + ": start find without a find block");
+        }
+        for (StoryData.BossDef b : StoryData.bosses()) {
+            String type = StoryData.str(b.spec(), "type", "");
+            if (type.startsWith("npc:") ? com.skycraft.society.NpcRole.byId(type.substring(4)) == null
+                    : com.skycraft.quest.QuestSpawner.resolveType(type).isEmpty()) problems.add("boss " + b.id() + ": unknown entity " + type);
+            String drop = StoryData.str(b.spec(), "drop", "");
+            if (!drop.isEmpty() && !Bosses.validDrop(drop)) problems.add("boss " + b.id() + ": drop " + drop + " doesn't exist");
+            if (b.spec().has("weapon") && Story.item(b.spec().get("weapon").getAsString()) == null) problems.add("boss " + b.id() + ": unknown weapon");
+            if (b.spec().has("gear")) {
+                for (var e : b.spec().getAsJsonObject("gear").entrySet()) {
+                    if (Story.item(e.getValue().getAsString()) == null) problems.add("boss " + b.id() + ": unknown gear " + e.getValue().getAsString());
                 }
             }
         }
@@ -222,6 +244,7 @@ public final class StoryCommands {
             if (QuestNpcs.anchor(server, n.id) == null) problems.add("npc " + n.id + ": no home (place " + n.place + ")");
             if (com.skycraft.society.NpcRole.byId(n.role) == null) problems.add("npc " + n.id + ": unknown role " + n.role);
         }
+        for (String t : RadiantTemplates.selftest(fake, fake)) problems.add("radiant template " + t + ": didn't build");
         int b = built, o = objectives, s = spawns, f = fallbackSpawns;
         c.getSource().sendSuccess(() -> Component.literal("Story selftest: built " + b + "/" + StoryData.quests().size() + " quests, " + o
                 + " objectives, " + s + " spawn specs (" + f + " use a stand-in entity until their creature exists), "

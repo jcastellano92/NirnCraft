@@ -64,7 +64,7 @@ public final class QuestPlaces {
         }
         ensureLoaded();
         Fallback f = FALLBACK.get(id);
-        if (f == null) return Optional.empty();
+        if (f == null) return landSpot(id);
         Component name = Component.translatableWithFallback("place.skycraft." + id, f.name());
         if ("minecraft:overworld".equals(f.dim())) {
             // a real place built at (or very near) the reference position under another id: anchor to it
@@ -76,6 +76,19 @@ public final class QuestPlaces {
             }
         }
         return Optional.of(new Spot(id, f.x(), f.z(), f.radius(), f.dim(), name, null));
+    }
+
+    /** {@code land_<x>_<z>}: a spot of a foreign shore found by a {@code land:} quest variable, named after its region. */
+    private static Optional<Spot> landSpot(String id) {
+        if (!id.startsWith("land_")) return Optional.empty();
+        String[] p = id.substring(5).split("_");
+        if (p.length != 2) return Optional.empty();
+        try {
+            int x = Integer.parseInt(p[0]), z = Integer.parseInt(p[1]);
+            return Optional.of(new Spot(id, x, z, 48, "minecraft:overworld", com.skycraft.tamriel.TamrielMap.region(x, z).name(), null));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
     }
 
     /** The display name of a place id (the id itself if unknown). */

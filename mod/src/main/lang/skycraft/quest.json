@@ -616,6 +616,7 @@
   "story.skycraft.reward.title": "You are now known as: %s",
   "story.skycraft.reward.word": "WORD OF POWER LEARNED",
   "story.skycraft.reward.house_gold": "%s already has an owner, so you were paid its worth instead: %s gold.",
+  "story.skycraft.reward.unique": "A legendary weapon is yours: %s",
   "story.skycraft.title.dragonborn": "Dragonborn",
   "story.skycraft.title.harbinger": "Harbinger of the Companions",
   "story.skycraft.title.archmage": "Arch-Mage of Winterhold",
