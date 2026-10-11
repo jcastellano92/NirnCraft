@@ -1006,6 +1006,17 @@ T_RIVENSPIRE = T("rivenspire", [("dark_oak", 4), ("skyrim_spruce", 3), ("dead_oa
                  F_FOREST_DENSE, floor=0.08)
 T_WROTHGAR = T("wrothgar", [("snowy_spruce", 3), ("skyrim_spruce", 3), ("skyrim_pine", 2), ("dead_pine", 1)], 6, 0.65,
                F_FOREST, floor=0.04)
+# ecotone layers (see tools/worldgen/ecotones.py): the grades between a region's land and its neighbour's
+T_WARM_STEPPE = T("warm_steppe", [("juniper", 3), ("acacia", 2), ("desert_shrub", 3), ("oak", 1), ("olive", 1)], 12,
+                  0.4, F_SCATTER, floor=0.04)
+T_FEN_EDGE = T("fen_edge", [("willow", 3), ("bald_cypress", 2), ("swamp_oak", 2), ("oak", 1), ("marsh_snag", 1)], 8,
+               0.55, F_WOODLAND, floor=0.05)
+T_REEDLANDS = T("reedlands", [("marsh_snag", 2), ("bald_cypress", 1), ("swamp_hist", 1)], 15, 0.3, F_SCATTER,
+                floor=0.03)
+T_ASH_HEATH = T("ash_heath", [("juniper", 3), ("tundra_shrub", 3), ("graze_tree", 2), ("charred_tree", 1)], 11, 0.45,
+                F_SCATTER, floor=0.03)
+T_PALE_HEATH = T("pale_heath", [("tundra_shrub", 4), ("juniper", 3), ("snowy_spruce", 2), ("frozen_pine", 1)], 10,
+                 0.45, F_SCATTER, floor=0.03)
 T_WAYREST = T("wayrest", [("oak", 3), ("fruit_tree", 3), ("elm", 1)], 11, 0.45, F_SCATTER, floor=0.03)
 # foreign lands
 T_ATMORA = T("atmora", [("frozen_pine", 4), ("snowy_giant_pine", 2), ("snowy_spruce", 2)], 6, 0.7, F_FOREST, floor=0.05)
@@ -1207,6 +1218,13 @@ FLORA.update({
     "dragontail_mountains": [R_RED, T_DRAGONTAIL, C_DESERT_SCRUB],
     "craglorn": [R_RED, R_SAND, T_CRAGLORN, C_DRY_GRASS],
     "bangkorai": [R_GREY, T_BANGKORAI, C_PLAINS_GRASS, FL_HIGH_ROCK],
+    # ecotones
+    "warm_steppe": [R_GREY, T_WARM_STEPPE, C_SAVANNA_GRASS, C_DRY_GRASS, FL_STEPPE],
+    "fen_edge": [R_MOSSY, T_FEN_EDGE, T_MARSH_DEAD, C_REEDS_FEW, C_SWAMP_GRASS, FL_SWAMP, C_MUSHROOMS, C_LILIES,
+                 "minecraft:seagrass_swamp"],
+    "reedlands": [T_REEDLANDS, C_REEDS, C_SWAMP_GRASS, C_LILIES, FL_SWAMP, "minecraft:seagrass_swamp"],
+    "ash_heath": [R_VOLCANIC, T_ASH_HEATH, C_TUNDRA_GRASS, C_ASH_SPARSE, FL_TUNDRA, "ash_drifts_sparse"],
+    "pale_heath": [R_TUNDRA, T_PALE_HEATH, C_SNOW_GRASS, C_SNOWBERRIES, FL_COLD],
     "stros_mkai_coast": [T_STROS, FL_JUNGLE, C_SAVANNA_GRASS, "minecraft:patch_sugar_cane"],
     # High Rock
     "glenumbra_moors": [R_MOOR, T_MOORS, C_SNOWBERRIES_FEW, FL_MOOR, C_PLAINS_GRASS],
@@ -2257,6 +2275,34 @@ biome("bangkorai", "Bangkorai", temp=0.6, downfall=0.5, sky="#84A8E8", fog="#C8D
       extra=OUTLAWS,
       features=["boulders_grey_4", "trees_bangkorai", "flowers_high_rock", "grass_plains", "tall_grass_sparse"],
       tags=["hill"])
+# Ecotone biomes: gentle grades between very different neighbours (placed by apply_ecotones / ecotones.json)
+biome("warm_steppe", "Warm Steppe", temp=1.15, downfall=0.3, precip=False, sky="#78AEF4", fog="#DCD8C0",
+      water="#42A8E8", grass="#B0AC5C", foliage="#98A048", surface=S_SAVANNA, province="hammerfell",
+      creature=C_STEPPE, extra=OUTLAWS,
+      features=["boulders_red_4", "trees_savanna", "flowers_savanna", "grass_savanna", "tall_grass_dense"],
+      tags=["savanna", "dry", "plains"])
+biome("fen_edge", "Fen Edge", temp=0.9, downfall=0.75, sky="#80A088", fog="#98B096", water="#3E5E44",
+      water_fog="#0C1C10", grass="#6A8A3A", foliage="#587A30", surface=S_SWAMP, province="black_marsh",
+      creature=C_SWAMP, monster=monsters("swamp"), water_ambient=WA_SWAMP,
+      features=["trees_bitter_coast", "reeds_dense", "flowers_swamp", "grass_swamp", "lily_pads",
+                "minecraft:seagrass_swamp"],
+      tags=["swamp", "wet"])
+biome("reedlands", "Reedlands", temp=0.95, downfall=0.9, sky="#7A9878", fog="#8AA088", water="#3E5A3A",
+      water_fog="#0A1A0A", grass="#5E7E34", foliage="#4E6E2A", surface=S_SWAMP, province="black_marsh",
+      creature=C_SWAMP, monster=monsters("swamp"), water_ambient=WA_SWAMP,
+      features=["trees_black_marsh", "reeds_dense", "flowers_swamp", "grass_swamp", "lily_pads_dense",
+                "minecraft:seagrass_swamp"],
+      tags=["swamp", "wet", "hot"])
+biome("ash_heath", "Ash Heath", temp=0.6, downfall=0.3, sky="#92A8D8", fog="#C4C0B4", water="#4A6A78",
+      grass="#8E9A58", foliage="#7C8A48", surface=S_STONEFALLS, province="morrowind", creature=C_SKYRIM_PLAINS,
+      particle=particle("ash", 0.004),
+      features=["boulders_volcanic_3", "trees_grazelands", "flowers_tundra", "grass_tundra", "ash_drifts_sparse"],
+      tags=["dry", "plains", "sparse"])
+biome("pale_heath", "Pale Heath", temp=-0.1, downfall=0.45, sky="#9CB2D8", fog="#D0DAE8", water="#3938C9",
+      grass="#8CA68A", foliage="#789A78", surface=S_SNOW_FOREST, province="skyrim", creature=C_SKYRIM_SNOW,
+      particle=particle("white_ash", 0.002),
+      features=["boulders_tundra_9", "trees_skyrim_snowy_sparse", "snowberries_rare", "flowers_cold", "grass_snow"],
+      tags=["tundra", "snowy", "cold"])
 biome("stros_mkai_coast", "Stros M'Kai Coast", temp=1.4, downfall=0.5, sky="#6EB0FF", fog="#D8ECFF", water="#44C4E8",
       water_fog="#062E40", grass="#8EC050", foliage="#70B030", surface=S_STROS, province="hammerfell", kind="beach",
       creature=C_COAST_WARM + [sp("parrot", 10, 1, 2)],
@@ -2973,6 +3019,51 @@ def check_tags(tags):
     assert not both, "biomes in both #is_river and #spawns/swamp get skycraft:nirnroot_patch twice: %s" % both
 
 
+def apply_ecotones():
+    """tools/worldgen/ecotones.json (from ecotones.py): extra surface biomes for region palettes, with a geographic
+    bias so they grow towards the neighbour they soften. Each extra takes `share` of the lowland/upland mix at its
+    strongest; entries go last (later entries lie towards the bias direction)."""
+    path = os.path.join(ROOT, "tools", "worldgen", "ecotones.json")
+    if not os.path.exists(path):
+        return
+    rows = json.load(open(path, encoding="utf-8"))
+
+    def resolved(key, ctx):
+        k = key
+        while k and ctx not in PALETTES[k]["contexts"]:
+            k = PALETTES[k].get("fallback")
+        return [dict(c) for c in PALETTES[k]["contexts"][ctx]]
+
+    for key, row in rows.items():
+        assert key in PALETTES, "ecotone for unknown palette " + key
+        total_rel = sum(w for _, w in row["add"])
+        share = row["share"]
+        for ctx in ("lowland", "upland", "peak"):
+            adds = row["add"] if ctx != "peak" else row.get("peak_add")
+            if not adds:
+                continue
+            base = resolved(key, ctx)
+            names = {c["biome"] for c in base}
+            tot = sum(c["weight"] for c in base) or 1
+            extra = tot * share / (1 - share)
+            total_rel = sum(w for _, w in adds)
+            # the extra the row weights most goes last: it lies furthest towards the border, so it is the grade
+            # that actually meets the neighbour (v is clamped, so the last entry takes the whole saturated end)
+            for b, rel in sorted(adds, key=lambda a: a[1]):
+                bid = SK + ":" + b
+                assert b in BIOMES, "ecotone biome " + b
+                if bid in names:
+                    continue
+                base.append({"biome": bid, "weight": max(1, round(extra * rel / total_rel))})
+            PALETTES[key]["contexts"][ctx] = base
+        bias = row.get("bias")
+        if bias:
+            have = PALETTES[key].setdefault("bias", {})
+            for kind, val in bias.items():
+                if kind not in have:
+                    have[kind] = val
+
+
 def check_palettes():
     known = {SK + ":" + b for b in BIOMES} | VANILLA_CAVES
     for key, p in PALETTES.items():
@@ -3098,6 +3189,7 @@ def main():
     check_tags(tags)
     write_tags(tags)
 
+    apply_ecotones()
     check_palettes()
     catalogue = sorted(SK + ":" + b for b in BIOMES) + sorted(VANILLA_CAVES)
     dump(os.path.join(RES, SK, "tamriel", "palettes.json"), {

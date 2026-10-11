@@ -1524,7 +1524,8 @@
                 "if_true": {
                   "type": "minecraft:biome",
                   "biome_is": [
-                    "skycraft:snowy_pine_forest"
+                    "skycraft:snowy_pine_forest",
+                    "skycraft:pale_heath"
                   ]
                 },
                 "then_run": {
@@ -8417,7 +8418,9 @@
                   "biome_is": [
                     "skycraft:blackwood_swamp",
                     "skycraft:black_marsh_swamp",
-                    "skycraft:shadowfen"
+                    "skycraft:shadowfen",
+                    "skycraft:fen_edge",
+                    "skycraft:reedlands"
                   ]
                 },
                 "then_run": {
@@ -11334,7 +11337,8 @@
                 "if_true": {
                   "type": "minecraft:biome",
                   "biome_is": [
-                    "skycraft:stonefalls"
+                    "skycraft:stonefalls",
+                    "skycraft:ash_heath"
                   ]
                 },
                 "then_run": {
@@ -13024,7 +13028,8 @@
                 "if_true": {
                   "type": "minecraft:biome",
                   "biome_is": [
-                    "skycraft:elsweyr_savanna"
+                    "skycraft:elsweyr_savanna",
+                    "skycraft:warm_steppe"
                   ]
                 },
                 "then_run": {

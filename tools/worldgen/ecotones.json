@@ -1,0 +1,729 @@
+{
+ "hammerfell/alikr_desert": {
+  "share": 0.35,
+  "add": [
+   [
+    "warm_steppe",
+    3
+   ],
+   [
+    "anequina_badlands",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    -6920,
+    5046,
+    0.836,
+    -0.549,
+    888,
+    0.5
+   ]
+  }
+ },
+ "hammerfell/bangkorai": {
+  "share": 0.3,
+  "add": [
+   [
+    "warm_steppe",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    -5334,
+    4524,
+    0.364,
+    0.931,
+    250,
+    0.5
+   ]
+  }
+ },
+ "hammerfell/dragontail": {
+  "share": 0.35,
+  "add": [
+   [
+    "warm_steppe",
+    2
+   ],
+   [
+    "bangkorai",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    -4461,
+    5710,
+    0.423,
+    -0.906,
+    452,
+    0.5
+   ]
+  }
+ },
+ "hammerfell/craglorn": {
+  "share": 0.4,
+  "add": [
+   [
+    "warm_steppe",
+    3
+   ],
+   [
+    "bangkorai",
+    1
+   ],
+   [
+    "anequina_badlands",
+    1
+   ]
+  ],
+  "bias": {
+   "radial": [
+    -4069,
+    3496,
+    389,
+    821,
+    0.5
+   ]
+  }
+ },
+ "hammerfell/stros_mkai": {
+  "share": 0.3,
+  "add": [
+   [
+    "pellitine_jungle",
+    1
+   ],
+   [
+    "elsweyr_savanna",
+    1
+   ]
+  ]
+ },
+ "high_rock/wrothgar": {
+  "share": 0.3,
+  "add": [
+   [
+    "bangkorai",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    -4385,
+    1274,
+    0.229,
+    0.973,
+    1019,
+    0.5
+   ]
+  }
+ },
+ "high_rock/wayrest": {
+  "share": 0.25,
+  "add": [
+   [
+    "warm_steppe",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    -4846,
+    2828,
+    0.928,
+    -0.371,
+    275,
+    0.5
+   ]
+  }
+ },
+ "cyrodiil/colovian_highlands": {
+  "share": 0.3,
+  "add": [
+   [
+    "warm_steppe",
+    1
+   ],
+   [
+    "bangkorai",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    -2939,
+    4440,
+    -0.998,
+    -0.06,
+    706,
+    0.5
+   ]
+  }
+ },
+ "cyrodiil/west_weald": {
+  "share": 0.25,
+  "add": [
+   [
+    "warm_steppe",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    -3135,
+    6615,
+    -0.996,
+    -0.085,
+    530,
+    0.5
+   ]
+  }
+ },
+ "morrowind/molag_amur": {
+  "share": 0.4,
+  "add": [
+   [
+    "grazelands",
+    1
+   ],
+   [
+    "ash_heath",
+    1
+   ]
+  ],
+  "bias": {
+   "radial": [
+    9126,
+    2988,
+    557,
+    1177,
+    0.5
+   ]
+  }
+ },
+ "morrowind/telvannis": {
+  "share": 0.3,
+  "add": [
+   [
+    "grazelands",
+    1
+   ],
+   [
+    "ash_heath",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    10019,
+    1058,
+    -0.53,
+    0.848,
+    705,
+    0.5
+   ]
+  }
+ },
+ "morrowind/sheogorad": {
+  "share": 0.3,
+  "add": [
+   [
+    "ash_heath",
+    1
+   ],
+   [
+    "solstheim_ashlands",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    6828,
+    -2161,
+    0.0,
+    1.0,
+    250,
+    0.5
+   ]
+  }
+ },
+ "morrowind/vvardenfell_ashlands": {
+  "share": 0.3,
+  "add": [
+   [
+    "ash_heath",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    5990,
+    -1679,
+    0.0,
+    -1.0,
+    376,
+    0.5
+   ]
+  }
+ },
+ "morrowind/deshaan": {
+  "share": 0.35,
+  "add": [
+   [
+    "fen_edge",
+    1
+   ],
+   [
+    "grazelands",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    6302,
+    3717,
+    -0.198,
+    0.98,
+    395,
+    0.5
+   ]
+  }
+ },
+ "black_marsh/shadowfen": {
+  "share": 0.4,
+  "add": [
+   [
+    "fen_edge",
+    3
+   ],
+   [
+    "reedlands",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    7061,
+    4445,
+    0.14,
+    -0.99,
+    277,
+    0.5
+   ]
+  }
+ },
+ "black_marsh/stormhold": {
+  "share": 0.35,
+  "add": [
+   [
+    "fen_edge",
+    2
+   ],
+   [
+    "reedlands",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    5241,
+    6283,
+    -0.991,
+    -0.135,
+    628,
+    0.5
+   ]
+  }
+ },
+ "cyrodiil/nibenay_basin": {
+  "share": 0.3,
+  "add": [
+   [
+    "fen_edge",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    4285,
+    5150,
+    0.991,
+    0.135,
+    472,
+    0.5
+   ]
+  }
+ },
+ "black_marsh/lilmoth": {
+  "share": 0.3,
+  "add": [
+   [
+    "reedlands",
+    1
+   ],
+   [
+    "fen_edge",
+    1
+   ]
+  ]
+ },
+ "black_marsh/gideon": {
+  "share": 0.3,
+  "add": [
+   [
+    "reedlands",
+    1
+   ],
+   [
+    "fen_edge",
+    1
+   ]
+  ]
+ },
+ "black_marsh/murkmire": {
+  "share": 0.25,
+  "add": [
+   [
+    "reedlands",
+    1
+   ]
+  ]
+ },
+ "skyrim/eastmarch": {
+  "share": 0.4,
+  "add": [
+   [
+    "ash_heath",
+    3
+   ],
+   [
+    "solstheim_ashlands",
+    1
+   ]
+  ],
+  "peak_add": [
+   [
+    "red_mountain",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    2693,
+    -181,
+    0.999,
+    -0.043,
+    383,
+    0.5
+   ]
+  }
+ },
+ "skyrim/the_rift": {
+  "share": 0.3,
+  "add": [
+   [
+    "ash_heath",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    2593,
+    1364,
+    0.996,
+    -0.087,
+    494,
+    0.5
+   ]
+  }
+ },
+ "morrowind/stonefalls": {
+  "share": 0.4,
+  "add": [
+   [
+    "ash_heath",
+    3
+   ],
+   [
+    "grazelands",
+    1
+   ]
+  ],
+  "peak_add": [
+   [
+    "snowy_slopes",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    3658,
+    1289,
+    -0.941,
+    0.338,
+    250,
+    0.5
+   ]
+  }
+ },
+ "cyrodiil/nibenay_valley": {
+  "share": 0.35,
+  "add": [
+   [
+    "warm_steppe",
+    2
+   ]
+  ],
+  "bias": {
+   "linear": [
+    1171,
+    8970,
+    -0.234,
+    0.972,
+    460,
+    0.5
+   ]
+  }
+ },
+ "cyrodiil/blackwood": {
+  "share": 0.3,
+  "add": [
+   [
+    "warm_steppe",
+    1
+   ],
+   [
+    "fen_edge",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    3125,
+    9301,
+    -0.707,
+    0.707,
+    581,
+    0.5
+   ]
+  }
+ },
+ "cyrodiil/gold_coast": {
+  "share": 0.3,
+  "add": [
+   [
+    "warm_steppe",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    -2703,
+    8868,
+    0.287,
+    0.958,
+    418,
+    0.5
+   ]
+  }
+ },
+ "elsweyr/rimmen": {
+  "share": 0.35,
+  "add": [
+   [
+    "warm_steppe",
+    2
+   ],
+   [
+    "grazelands",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    2133,
+    9986,
+    0.297,
+    -0.955,
+    282,
+    0.5
+   ]
+  }
+ },
+ "elsweyr/anequina": {
+  "share": 0.35,
+  "add": [
+   [
+    "elsweyr_savanna",
+    2
+   ],
+   [
+    "warm_steppe",
+    1
+   ]
+  ],
+  "bias": {
+   "radial": [
+    -669,
+    10305,
+    600,
+    1266,
+    0.5
+   ]
+  }
+ },
+ "elsweyr/pellitine": {
+  "share": 0.3,
+  "add": [
+   [
+    "elsweyr_savanna",
+    2
+   ]
+  ],
+  "bias": {
+   "linear": [
+    -485,
+    12289,
+    -0.124,
+    -0.992,
+    690,
+    0.5
+   ]
+  }
+ },
+ "elsweyr/senchal": {
+  "share": 0.25,
+  "add": [
+   [
+    "elsweyr_savanna",
+    1
+   ]
+  ]
+ },
+ "valenwood/reapers_march": {
+  "share": 0.35,
+  "add": [
+   [
+    "warm_steppe",
+    1
+   ],
+   [
+    "elsweyr_savanna",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    -2093,
+    10489,
+    0.999,
+    -0.047,
+    400,
+    0.5
+   ]
+  }
+ },
+ "valenwood/greenshade": {
+  "share": 0.25,
+  "add": [
+   [
+    "pellitine_jungle",
+    1
+   ]
+  ]
+ },
+ "skyrim/the_pale": {
+  "share": 0.4,
+  "add": [
+   [
+    "pale_heath",
+    2
+   ],
+   [
+    "whiterun_tundra",
+    1
+   ],
+   [
+    "alpine_meadow",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    254,
+    -710,
+    -0.294,
+    0.956,
+    264,
+    0.5
+   ]
+  }
+ },
+ "skyrim/whiterun": {
+  "share": 0.25,
+  "add": [
+   [
+    "pale_heath",
+    1
+   ]
+  ],
+  "bias": {
+   "linear": [
+    -387,
+    -413,
+    0.294,
+    -0.956,
+    250,
+    0.5
+   ]
+  }
+ },
+ "skyrim/winterhold": {
+  "share": 0.3,
+  "add": [
+   [
+    "pale_heath",
+    2
+   ],
+   [
+    "snowy_pine_forest",
+    1
+   ]
+  ],
+  "bias": {
+   "radial": [
+    1354,
+    -1632,
+    388,
+    819,
+    0.5
+   ]
+  }
+ },
+ "summerset/artaeum": {
+  "share": 0.3,
+  "add": [
+   [
+    "summerset_meadow",
+    1
+   ],
+   [
+    "auridon_vineyards",
+    1
+   ]
+  ]
+ },
+ "summerset/auridon": {
+  "share": 0.25,
+  "add": [
+   [
+    "crystal_coast",
+    1
+   ]
+  ]
+ }
+}

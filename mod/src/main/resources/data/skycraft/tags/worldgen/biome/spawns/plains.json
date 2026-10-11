@@ -46,7 +46,9 @@
       "id": "terralith:brushland",
       "required": false
     },
+    "skycraft:ash_heath",
     "skycraft:eastmarch_volcanic_tundra",
+    "skycraft:warm_steppe",
     "skycraft:whiterun_plains",
     "skycraft:whiterun_tundra"
   ]

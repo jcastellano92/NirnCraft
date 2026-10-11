@@ -21,6 +21,7 @@
     "skycraft:anequina_badlands",
     "skycraft:artaeum",
     "skycraft:ascadian_isles",
+    "skycraft:ash_heath",
     "skycraft:ash_shore",
     "skycraft:atmoran_frozen_forest",
     "skycraft:atmoran_ice_waste",
@@ -53,6 +54,7 @@
     "skycraft:elsweyr_savanna",
     "skycraft:falkreath_forest",
     "skycraft:falmer_glow_caves",
+    "skycraft:fen_edge",
     "skycraft:frozen_river",
     "skycraft:frozen_shore",
     "skycraft:glenumbra_moors",
@@ -77,6 +79,7 @@
     "skycraft:murky_river",
     "skycraft:mushroom_grottos",
     "skycraft:nibenay_valley",
+    "skycraft:pale_heath",
     "skycraft:pale_snowfield",
     "skycraft:pellitine_jungle",
     "skycraft:pine_forest",
@@ -85,6 +88,7 @@
     "skycraft:reach_valley",
     "skycraft:reapers_march",
     "skycraft:red_mountain",
+    "skycraft:reedlands",
     "skycraft:rift_autumn_forest",
     "skycraft:rivenspire",
     "skycraft:rocky_shore",
@@ -120,6 +124,7 @@
     "skycraft:warm_beach",
     "skycraft:warm_ocean",
     "skycraft:warm_river",
+    "skycraft:warm_steppe",
     "skycraft:wayrest_farmland",
     "skycraft:west_gash",
     "skycraft:west_weald_vineyards",
@@ -1697,6 +1702,14 @@
           450,
           1400,
           0.55
+        ],
+        "linear": [
+          -387,
+          -413,
+          0.294,
+          -0.956,
+          250,
+          0.5
         ]
       },
       "contexts": {
@@ -1708,6 +1721,10 @@
           {
             "biome": "skycraft:whiterun_plains",
             "weight": 3
+          },
+          {
+            "biome": "skycraft:pale_heath",
+            "weight": 2
           }
         ],
         "upland": [
@@ -1726,6 +1743,10 @@
           {
             "biome": "skycraft:alpine_meadow",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:pale_heath",
+            "weight": 2
           }
         ],
         "marsh": [
@@ -1784,6 +1805,14 @@
           450,
           1300,
           0.8
+        ],
+        "linear": [
+          2593,
+          1364,
+          0.996,
+          -0.087,
+          494,
+          0.5
         ]
       },
       "contexts": {
@@ -1795,6 +1824,10 @@
           {
             "biome": "skycraft:alpine_meadow",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:ash_heath",
+            "weight": 3
           }
         ],
         "upland": [
@@ -1809,6 +1842,10 @@
           {
             "biome": "skycraft:alpine_meadow",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:ash_heath",
+            "weight": 3
           }
         ],
         "marsh": [
@@ -1961,6 +1998,18 @@
           {
             "biome": "skycraft:snowy_pine_forest",
             "weight": 2
+          },
+          {
+            "biome": "skycraft:whiterun_tundra",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:alpine_meadow",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:pale_heath",
+            "weight": 2
           }
         ],
         "upland": [
@@ -1970,6 +2019,18 @@
           },
           {
             "biome": "skycraft:snowy_slopes",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:whiterun_tundra",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:alpine_meadow",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:pale_heath",
             "weight": 1
           }
         ],
@@ -1997,6 +2058,16 @@
             "weight": 1
           }
         ]
+      },
+      "bias": {
+        "linear": [
+          254,
+          -710,
+          -0.294,
+          0.956,
+          264,
+          0.5
+        ]
       }
     },
     "skyrim/winterhold": {
@@ -2012,6 +2083,14 @@
           {
             "biome": "skycraft:pale_snowfield",
             "weight": 2
+          },
+          {
+            "biome": "skycraft:snowy_pine_forest",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:pale_heath",
+            "weight": 1
           }
         ],
         "upland": [
@@ -2021,6 +2100,14 @@
           },
           {
             "biome": "skycraft:snowy_slopes",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:snowy_pine_forest",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:pale_heath",
             "weight": 1
           }
         ],
@@ -2058,6 +2145,15 @@
             "weight": 3
           }
         ]
+      },
+      "bias": {
+        "radial": [
+          1354,
+          -1632,
+          388,
+          819,
+          0.5
+        ]
       }
     },
     "skyrim/eastmarch": {
@@ -2075,6 +2171,14 @@
           {
             "biome": "skycraft:snowy_pine_forest",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:solstheim_ashlands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:ash_heath",
+            "weight": 3
           }
         ],
         "upland": [
@@ -2089,6 +2193,14 @@
           {
             "biome": "skycraft:snowy_pine_forest",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:solstheim_ashlands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:ash_heath",
+            "weight": 2
           }
         ],
         "marsh": [
@@ -2108,6 +2220,26 @@
             "biome": "skycraft:frozen_shore",
             "weight": 1
           }
+        ],
+        "peak": [
+          {
+            "biome": "skycraft:snowy_slopes",
+            "weight": 3
+          },
+          {
+            "biome": "skycraft:red_mountain",
+            "weight": 2
+          }
+        ]
+      },
+      "bias": {
+        "linear": [
+          2693,
+          -181,
+          0.999,
+          -0.043,
+          383,
+          0.5
         ]
       }
     },
@@ -2255,13 +2387,31 @@
           {
             "biome": "skycraft:stonefalls",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:ash_heath",
+            "weight": 2
           }
         ],
         "upland": [
           {
             "biome": "skycraft:vvardenfell_ashlands",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:ash_heath",
+            "weight": 1
           }
+        ]
+      },
+      "bias": {
+        "linear": [
+          5990,
+          -1679,
+          0.0,
+          -1.0,
+          376,
+          0.5
         ]
       }
     },
@@ -2473,11 +2623,27 @@
           {
             "biome": "skycraft:vvardenfell_ashlands",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:grazelands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:ash_heath",
+            "weight": 1
           }
         ],
         "upland": [
           {
             "biome": "skycraft:molag_amur",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:grazelands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:ash_heath",
             "weight": 1
           }
         ],
@@ -2496,6 +2662,15 @@
             "biome": "@surface",
             "weight": 3
           }
+        ]
+      },
+      "bias": {
+        "radial": [
+          9126,
+          2988,
+          557,
+          1177,
+          0.5
         ]
       }
     },
@@ -2547,11 +2722,27 @@
           {
             "biome": "skycraft:azuras_coast",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:ash_heath",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:solstheim_ashlands",
+            "weight": 1
           }
         ],
         "upland": [
           {
             "biome": "skycraft:sheogorad",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:ash_heath",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:solstheim_ashlands",
             "weight": 1
           }
         ],
@@ -2573,6 +2764,16 @@
             "weight": 1
           }
         ]
+      },
+      "bias": {
+        "linear": [
+          6828,
+          -2161,
+          0.0,
+          1.0,
+          250,
+          0.5
+        ]
       }
     },
     "morrowind/telvannis": {
@@ -2586,11 +2787,27 @@
           {
             "biome": "skycraft:azuras_coast",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:grazelands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:ash_heath",
+            "weight": 1
           }
         ],
         "upland": [
           {
             "biome": "skycraft:telvanni_mushroom_forest",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:grazelands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:ash_heath",
             "weight": 1
           }
         ],
@@ -2616,6 +2833,16 @@
             "weight": 3
           }
         ]
+      },
+      "bias": {
+        "linear": [
+          10019,
+          1058,
+          -0.53,
+          0.848,
+          705,
+          0.5
+        ]
       }
     },
     "morrowind/deshaan": {
@@ -2629,6 +2856,14 @@
           {
             "biome": "skycraft:stonefalls",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:fen_edge",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:grazelands",
+            "weight": 1
           }
         ],
         "upland": [
@@ -2638,6 +2873,14 @@
           },
           {
             "biome": "skycraft:west_gash",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:fen_edge",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:grazelands",
             "weight": 1
           }
         ],
@@ -2665,6 +2908,16 @@
             "weight": 1
           }
         ]
+      },
+      "bias": {
+        "linear": [
+          6302,
+          3717,
+          -0.198,
+          0.98,
+          395,
+          0.5
+        ]
       }
     },
     "morrowind/stonefalls": {
@@ -2678,6 +2931,14 @@
           {
             "biome": "skycraft:deshaan_plains",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:grazelands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:ash_heath",
+            "weight": 2
           }
         ],
         "upland": [
@@ -2688,13 +2949,35 @@
           {
             "biome": "skycraft:vvardenfell_ashlands",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:grazelands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:ash_heath",
+            "weight": 1
           }
         ],
         "peak": [
           {
             "biome": "skycraft:red_mountain",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:snowy_slopes",
+            "weight": 1
           }
+        ]
+      },
+      "bias": {
+        "linear": [
+          3658,
+          1289,
+          -0.941,
+          0.338,
+          250,
+          0.5
         ]
       }
     },
@@ -2768,6 +3051,14 @@
           {
             "biome": "skycraft:heartlands",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:bangkorai",
+            "weight": 1
           }
         ],
         "upland": [
@@ -2778,7 +3069,25 @@
           {
             "biome": "skycraft:jerall_foothills",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:bangkorai",
+            "weight": 1
           }
+        ]
+      },
+      "bias": {
+        "linear": [
+          -2939,
+          4440,
+          -0.998,
+          -0.06,
+          706,
+          0.5
         ]
       }
     },
@@ -2793,11 +3102,19 @@
           {
             "biome": "skycraft:west_weald_vineyards",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 2
           }
         ],
         "upland": [
           {
             "biome": "skycraft:colovian_highlands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
             "weight": 1
           }
         ],
@@ -2817,6 +3134,16 @@
             "weight": 1
           }
         ]
+      },
+      "bias": {
+        "linear": [
+          -2703,
+          8868,
+          0.287,
+          0.958,
+          418,
+          0.5
+        ]
       }
     },
     "cyrodiil/west_weald": {
@@ -2830,13 +3157,31 @@
           {
             "biome": "skycraft:heartlands",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 2
           }
         ],
         "upland": [
           {
             "biome": "skycraft:colovian_highlands",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 1
           }
+        ]
+      },
+      "bias": {
+        "linear": [
+          -3135,
+          6615,
+          -0.996,
+          -0.085,
+          530,
+          0.5
         ]
       }
     },
@@ -2913,13 +3258,31 @@
           {
             "biome": "skycraft:great_forest",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:fen_edge",
+            "weight": 3
           }
         ],
         "upland": [
           {
             "biome": "skycraft:colovian_highlands",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:fen_edge",
+            "weight": 1
           }
+        ]
+      },
+      "bias": {
+        "linear": [
+          4285,
+          5150,
+          0.991,
+          0.135,
+          472,
+          0.5
         ]
       }
     },
@@ -2934,6 +3297,10 @@
           {
             "biome": "skycraft:blackwood_swamp",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 3
           }
         ],
         "marsh": [
@@ -2941,6 +3308,30 @@
             "biome": "skycraft:blackwood_swamp",
             "weight": 1
           }
+        ],
+        "upland": [
+          {
+            "biome": "skycraft:colovian_highlands",
+            "weight": 2
+          },
+          {
+            "biome": "skycraft:jerall_foothills",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 2
+          }
+        ]
+      },
+      "bias": {
+        "linear": [
+          1171,
+          8970,
+          -0.234,
+          0.972,
+          460,
+          0.5
         ]
       }
     },
@@ -2955,11 +3346,27 @@
           {
             "biome": "skycraft:blackwood_swamp",
             "weight": 4
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:fen_edge",
+            "weight": 1
           }
         ],
         "upland": [
           {
             "biome": "skycraft:great_forest",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:fen_edge",
             "weight": 1
           }
         ],
@@ -3024,6 +3431,16 @@
             "biome": "minecraft:deep_dark",
             "weight": 1
           }
+        ]
+      },
+      "bias": {
+        "linear": [
+          3125,
+          9301,
+          -0.707,
+          0.707,
+          581,
+          0.5
         ]
       }
     },
@@ -3130,6 +3547,10 @@
           {
             "biome": "skycraft:wrothgarian_mountains",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:bangkorai",
+            "weight": 1
           }
         ],
         "peak": [
@@ -3178,6 +3599,16 @@
             "weight": 1
           }
         ]
+      },
+      "bias": {
+        "linear": [
+          -4385,
+          1274,
+          0.229,
+          0.973,
+          1019,
+          0.5
+        ]
       }
     },
     "high_rock/wayrest": {
@@ -3191,6 +3622,10 @@
           {
             "biome": "skycraft:stormhaven",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 2
           }
         ],
         "beach": [
@@ -3204,6 +3639,26 @@
             "biome": "skycraft:temperate_ocean",
             "weight": 1
           }
+        ],
+        "upland": [
+          {
+            "biome": "skycraft:bangkorai",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 1
+          }
+        ]
+      },
+      "bias": {
+        "linear": [
+          -4846,
+          2828,
+          0.928,
+          -0.371,
+          275,
+          0.5
         ]
       }
     },
@@ -3239,6 +3694,14 @@
           {
             "biome": "skycraft:alikr_desert",
             "weight": 4
+          },
+          {
+            "biome": "skycraft:anequina_badlands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 2
           }
         ],
         "upland": [
@@ -3249,7 +3712,25 @@
           {
             "biome": "skycraft:dragontail_mountains",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:anequina_badlands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 1
           }
+        ]
+      },
+      "bias": {
+        "linear": [
+          -6920,
+          5046,
+          0.836,
+          -0.549,
+          888,
+          0.5
         ]
       }
     },
@@ -3260,11 +3741,19 @@
           {
             "biome": "skycraft:bangkorai",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 1
           }
         ],
         "upland": [
           {
             "biome": "skycraft:bangkorai",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
             "weight": 1
           }
         ],
@@ -3334,6 +3823,16 @@
             "weight": 1
           }
         ]
+      },
+      "bias": {
+        "linear": [
+          -5334,
+          4524,
+          0.364,
+          0.931,
+          250,
+          0.5
+        ]
       }
     },
     "hammerfell/craglorn": {
@@ -3347,11 +3846,35 @@
           {
             "biome": "skycraft:alikr_desert",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:bangkorai",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:anequina_badlands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 2
           }
         ],
         "upland": [
           {
             "biome": "skycraft:craglorn",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:bangkorai",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:anequina_badlands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
             "weight": 1
           }
         ],
@@ -3360,6 +3883,15 @@
             "biome": "skycraft:dragontail_mountains",
             "weight": 1
           }
+        ]
+      },
+      "bias": {
+        "radial": [
+          -4069,
+          3496,
+          389,
+          821,
+          0.5
         ]
       }
     },
@@ -3374,11 +3906,27 @@
           {
             "biome": "skycraft:sunken_isles",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:pellitine_jungle",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:elsweyr_savanna",
+            "weight": 1
           }
         ],
         "upland": [
           {
             "biome": "skycraft:dragontail_mountains",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:pellitine_jungle",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:elsweyr_savanna",
             "weight": 1
           }
         ],
@@ -3433,13 +3981,39 @@
           {
             "biome": "skycraft:dragontail_mountains",
             "weight": 3
+          },
+          {
+            "biome": "skycraft:bangkorai",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 1
           }
         ],
         "upland": [
           {
             "biome": "skycraft:dragontail_mountains",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:bangkorai",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 1
           }
+        ]
+      },
+      "bias": {
+        "linear": [
+          -4461,
+          5710,
+          0.423,
+          -0.906,
+          452,
+          0.5
         ]
       }
     },
@@ -3454,11 +4028,27 @@
           {
             "biome": "skycraft:deep_mire",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:reedlands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:fen_edge",
+            "weight": 2
           }
         ],
         "upland": [
           {
             "biome": "skycraft:shadowfen",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:reedlands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:fen_edge",
             "weight": 1
           }
         ],
@@ -3467,6 +4057,16 @@
             "biome": "skycraft:deep_mire",
             "weight": 1
           }
+        ]
+      },
+      "bias": {
+        "linear": [
+          7061,
+          4445,
+          0.14,
+          -0.99,
+          277,
+          0.5
         ]
       }
     },
@@ -3481,11 +4081,19 @@
           {
             "biome": "skycraft:hist_grove",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:reedlands",
+            "weight": 2
           }
         ],
         "upland": [
           {
             "biome": "skycraft:murkmire",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:reedlands",
             "weight": 1
           }
         ],
@@ -3508,11 +4116,33 @@
           {
             "biome": "skycraft:deep_mire",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:reedlands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:fen_edge",
+            "weight": 1
           }
         ],
         "marsh": [
           {
             "biome": "skycraft:deep_mire",
+            "weight": 1
+          }
+        ],
+        "upland": [
+          {
+            "biome": "skycraft:black_marsh_swamp",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:reedlands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:fen_edge",
             "weight": 1
           }
         ]
@@ -3529,13 +4159,39 @@
           {
             "biome": "skycraft:hist_grove",
             "weight": 2
+          },
+          {
+            "biome": "skycraft:reedlands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:fen_edge",
+            "weight": 2
           }
         ],
         "upland": [
           {
             "biome": "skycraft:black_marsh_swamp",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:reedlands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:fen_edge",
+            "weight": 1
           }
+        ]
+      },
+      "bias": {
+        "linear": [
+          5241,
+          6283,
+          -0.991,
+          -0.135,
+          628,
+          0.5
         ]
       }
     },
@@ -3569,6 +4225,14 @@
           {
             "biome": "skycraft:black_marsh_swamp",
             "weight": 2
+          },
+          {
+            "biome": "skycraft:reedlands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:fen_edge",
+            "weight": 1
           }
         ],
         "beach": [
@@ -3580,6 +4244,20 @@
         "ocean": [
           {
             "biome": "skycraft:coral_sea",
+            "weight": 1
+          }
+        ],
+        "upland": [
+          {
+            "biome": "skycraft:black_marsh_swamp",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:reedlands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:fen_edge",
             "weight": 1
           }
         ]
@@ -3600,6 +4278,10 @@
           {
             "biome": "skycraft:elsweyr_savanna",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 1
           }
         ],
         "upland": [
@@ -3610,7 +4292,24 @@
           {
             "biome": "skycraft:elsweyr_canyons",
             "weight": 2
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:elsweyr_savanna",
+            "weight": 1
           }
+        ]
+      },
+      "bias": {
+        "radial": [
+          -669,
+          10305,
+          600,
+          1266,
+          0.5
         ]
       }
     },
@@ -3629,13 +4328,39 @@
           {
             "biome": "skycraft:sugar_fields",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:grazelands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 2
           }
         ],
         "upland": [
           {
             "biome": "skycraft:elsweyr_canyons",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:grazelands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 1
           }
+        ]
+      },
+      "bias": {
+        "linear": [
+          2133,
+          9986,
+          0.297,
+          -0.955,
+          282,
+          0.5
         ]
       }
     },
@@ -3675,11 +4400,19 @@
           {
             "biome": "skycraft:pellitine_jungle",
             "weight": 4
+          },
+          {
+            "biome": "skycraft:elsweyr_savanna",
+            "weight": 2
           }
         ],
         "upland": [
           {
             "biome": "skycraft:pellitine_jungle",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:elsweyr_savanna",
             "weight": 1
           }
         ],
@@ -3733,6 +4466,16 @@
             "weight": 1
           }
         ]
+      },
+      "bias": {
+        "linear": [
+          -485,
+          12289,
+          -0.124,
+          -0.992,
+          690,
+          0.5
+        ]
       }
     },
     "elsweyr/senchal": {
@@ -3746,6 +4489,10 @@
           {
             "biome": "skycraft:pellitine_jungle",
             "weight": 2
+          },
+          {
+            "biome": "skycraft:elsweyr_savanna",
+            "weight": 1
           }
         ],
         "beach": [
@@ -3757,6 +4504,20 @@
         "ocean": [
           {
             "biome": "skycraft:coral_sea",
+            "weight": 1
+          }
+        ],
+        "upland": [
+          {
+            "biome": "skycraft:elsweyr_canyons",
+            "weight": 2
+          },
+          {
+            "biome": "skycraft:anequina_badlands",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:elsweyr_savanna",
             "weight": 1
           }
         ]
@@ -3794,11 +4555,25 @@
           {
             "biome": "skycraft:valenwood_rainforest",
             "weight": 3
+          },
+          {
+            "biome": "skycraft:pellitine_jungle",
+            "weight": 2
           }
         ],
         "beach": [
           {
             "biome": "skycraft:valenwood_mangrove_coast",
+            "weight": 1
+          }
+        ],
+        "upland": [
+          {
+            "biome": "skycraft:valenwood_rainforest",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:pellitine_jungle",
             "weight": 1
           }
         ]
@@ -3830,11 +4605,27 @@
           {
             "biome": "skycraft:graht_oak_forest",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:elsweyr_savanna",
+            "weight": 1
           }
         ],
         "upland": [
           {
             "biome": "skycraft:reapers_march",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:warm_steppe",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:elsweyr_savanna",
             "weight": 1
           }
         ],
@@ -3843,6 +4634,16 @@
             "biome": "skycraft:warm_river",
             "weight": 1
           }
+        ]
+      },
+      "bias": {
+        "linear": [
+          -2093,
+          10489,
+          0.999,
+          -0.047,
+          400,
+          0.5
         ]
       }
     },
@@ -3876,11 +4677,19 @@
           {
             "biome": "skycraft:summerset_meadow",
             "weight": 2
+          },
+          {
+            "biome": "skycraft:crystal_coast",
+            "weight": 2
           }
         ],
         "upland": [
           {
             "biome": "skycraft:summerset_meadow",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:crystal_coast",
             "weight": 1
           }
         ]
@@ -3897,11 +4706,27 @@
           {
             "biome": "skycraft:crystal_coast",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:summerset_meadow",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:auridon_vineyards",
+            "weight": 1
           }
         ],
         "upland": [
           {
             "biome": "skycraft:artaeum",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:summerset_meadow",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:auridon_vineyards",
             "weight": 1
           }
         ],

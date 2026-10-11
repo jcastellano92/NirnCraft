@@ -115,8 +115,12 @@ public class TamrielBiomeSource extends BiomeSource {
         TamrielMap.sample(x, z, col.sample);
         // domain-warp the region lookup so borders are organic, not the map's cell grid
         int h = BiomeNoise.hash(qx, qz, 7);
-        int wx = (int) Math.round(BiomeNoise.fbm2(x / 160.0, z / 160.0, 101) * 36 + ((h & 15) - 7.5));
-        int wz = (int) Math.round(BiomeNoise.fbm2(x / 160.0, z / 160.0, 202) * 36 + (((h >> 4) & 15) - 7.5));
+        // (a mid-frequency octave and a wider per-cell jitter feather the edge over ~50 blocks, so palettes grade into
+        // each other instead of meeting on a clean line; see docs/REGION-AUDIT.md)
+        int wx = (int) Math.round(BiomeNoise.fbm2(x / 160.0, z / 160.0, 101) * 36
+                + BiomeNoise.value2(x / 40.0, z / 40.0, 111) * 24 + ((h & 31) - 15.5) * 1.4);
+        int wz = (int) Math.round(BiomeNoise.fbm2(x / 160.0, z / 160.0, 202) * 36
+                + BiomeNoise.value2(x / 40.0, z / 40.0, 222) * 24 + (((h >> 5) & 31) - 15.5) * 1.4);
         if (forced != null) {
             col.palette = forced;
             col.regionId = forced.key;
