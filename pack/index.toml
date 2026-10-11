@@ -17,14 +17,6 @@ file = "config/defaultoptions/options.txt"
 hash = "809ac132f886b5fe357d15f09e86c736e0ae8b9cb070b75affb7c812ce1fd3af"
 
 [[files]]
-file = "config/towns_and_towers/structure_enable_or_disable_new.json5"
-hash = "1409b7ddb8b83692bc7afef430a365116195f43b03eba90d4e618bc3d554c83b"
-
-[[files]]
-file = "config/towns_and_towers/structure_rarity_new.json5"
-hash = "a0965fc9211eee61896671763086133dba1e760bbe6849f84772bf575c7d8ae3"
-
-[[files]]
 file = "config/vampirism-common.toml"
 hash = "958d8a95f1fd3b4aba540136b6cbef8d1c4cea0efb54ece20b75895d537bfe37"
 
@@ -88,16 +80,6 @@ hash = "3c4b544a9f63603562d2e0a8f62099edcbfb84bd5b9627a257599125ab1b6c0f"
 metafile = true
 
 [[files]]
-file = "mods/cristel-lib.pw.toml"
-hash = "2fc2619ba5a0d13db31fc5a8a819627008ce8dda38be395c623424195c5f579e"
-metafile = true
-
-[[files]]
-file = "mods/ct-overhaul-village.pw.toml"
-hash = "10b8b85e2dda059cf6a12b509ec633bbd2839d708eb5ec04b2da6b4436d70394"
-metafile = true
-
-[[files]]
 file = "mods/default-options.pw.toml"
 hash = "e3f4f3cfdf82a3867d1096651c46138a94bfc118efb60016a31d9411f7747b51"
 metafile = true
@@ -105,11 +87,6 @@ metafile = true
 [[files]]
 file = "mods/distanthorizons.pw.toml"
 hash = "86f762a8b1f828586dbb598de0ef2d9f319c2891575609054da5ba4adbc3a158"
-metafile = true
-
-[[files]]
-file = "mods/dungeons-and-taverns.pw.toml"
-hash = "ba4a9b2d7a69e66e37338d3518ae5a37587e5c253b6cc5a47a692b2513048c30"
 metafile = true
 
 [[files]]
@@ -220,11 +197,6 @@ metafile = true
 [[files]]
 file = "mods/structure-layout-optimizer.pw.toml"
 hash = "12b3bcbb19e76412d68c6978b4fb92c9aac0cb466e67e2ee4b18f5c33029aa4f"
-metafile = true
-
-[[files]]
-file = "mods/towns-and-towers.pw.toml"
-hash = "c137195ed17821b7735c01febd757bc345eb16f971931e71d5bf4d99f3a2dcaf"
 metafile = true
 
 [[files]]

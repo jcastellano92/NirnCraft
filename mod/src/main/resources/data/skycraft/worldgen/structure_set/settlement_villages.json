@@ -1,0 +1,15 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:settlement_village",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 520102,
+    "types": [
+      "village"
+    ]
+  }
+}

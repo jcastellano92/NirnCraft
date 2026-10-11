@@ -1,0 +1,72 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#minecraft:is_overworld",
+      "required": false
+    },
+    {
+      "id": "#skycraft:spawns/caves",
+      "required": false
+    },
+    {
+      "id": "#skycraft:spawns/coast",
+      "required": false
+    },
+    {
+      "id": "#skycraft:spawns/cold",
+      "required": false
+    },
+    {
+      "id": "#skycraft:spawns/dark_forest",
+      "required": false
+    },
+    {
+      "id": "#skycraft:spawns/forest",
+      "required": false
+    },
+    {
+      "id": "#skycraft:spawns/frozen_peaks",
+      "required": false
+    },
+    {
+      "id": "#skycraft:spawns/mountain",
+      "required": false
+    },
+    {
+      "id": "#skycraft:spawns/pine_forest",
+      "required": false
+    },
+    {
+      "id": "#skycraft:spawns/plains",
+      "required": false
+    },
+    {
+      "id": "#skycraft:spawns/reach",
+      "required": false
+    },
+    {
+      "id": "#skycraft:spawns/river",
+      "required": false
+    },
+    {
+      "id": "#skycraft:spawns/snowy_forest",
+      "required": false
+    },
+    {
+      "id": "#skycraft:spawns/swamp",
+      "required": false
+    },
+    {
+      "id": "#skycraft:spawns/tundra",
+      "required": false
+    },
+    {
+      "id": "#skycraft:spawns/wilderness",
+      "required": false
+    },
+    "minecraft:plains",
+    "minecraft:snowy_slopes",
+    "minecraft:ocean"
+  ]
+}

@@ -287,6 +287,9 @@ public final class LocationNames {
      * @param path structure registry path, used for flavour (crypt vs barrow)
      */
     public static String generate(String id, LocationKind kind, String path) {
+        // named Skycraft settlements (Whiterun, Riverwood...) keep their real names
+        String named = com.skycraft.tamriel.settlement.SettlementNaming.forLocation(id);
+        if (named != null) return named;
         return generate(id, kind, path, cultureOf(id));
     }
 

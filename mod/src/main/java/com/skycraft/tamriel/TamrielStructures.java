@@ -19,5 +19,6 @@ public final class TamrielStructures {
 
     public static void init(IEventBus modBus) {
         PLACEMENTS.register(modBus);
+        com.skycraft.tamriel.settlement.SettlementStructures.init(modBus);
     }
 }

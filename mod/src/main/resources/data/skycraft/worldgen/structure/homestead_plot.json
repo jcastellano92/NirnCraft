@@ -1,0 +1,10 @@
+{
+  "type": "skycraft:settlement",
+  "size": "homestead",
+  "source": "place",
+  "culture": "auto",
+  "biomes": "#skycraft:settlement_biomes",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_box"
+}

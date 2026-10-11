@@ -323,8 +323,8 @@ public final class CrimeHud {
 
     private static String findEstablishmentName(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) {
         for (com.skycraft.economy.Houses.HouseDef h : com.skycraft.economy.Houses.HOUSES) {
-            if (pos.closerThan(h.approxPos(), h.radius())) {
-                return h.name();
+            if (!h.homestead() && h.contains(pos)) {
+                return h.displayName().getString();
             }
         }
         var npcs = level.getEntitiesOfClass(com.skycraft.society.entity.NpcEntity.class, new net.minecraft.world.phys.AABB(pos).inflate(14));

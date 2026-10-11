@@ -17,6 +17,9 @@ public final class EconomyItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Skycraft.MODID);
 
     public static final Map<Skill, RegistryObject<Item>> SKILL_BOOKS = new EnumMap<>(Skill.class);
+    /** The key of a bought house ({@link HouseKeyItem}). */
+    public static final RegistryObject<Item> HOUSE_KEY = ITEMS.register("house_key",
+            () -> new HouseKeyItem(new Item.Properties().stacksTo(1)));
 
     static {
         for (Skill skill : Skill.VALUES) {

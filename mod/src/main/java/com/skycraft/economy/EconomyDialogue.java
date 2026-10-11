@@ -54,16 +54,15 @@ public final class EconomyDialogue {
         }
 
         // Town steward / Jarl house options - guards and regular soldiers never sell houses
-        String hold = com.skycraft.core.Holds.holdAt(player.level(), npc.blockPosition());
-        Houses.HouseDef house = Houses.houseForHold(hold);
-        if (house != null && isStewardOrJarl(npc)) {
+        Houses.HouseDef house = isStewardOrJarl(npc) ? Houses.houseFor(player.level(), npc.blockPosition()) : null;
+        if (house != null) {
             if (!Houses.isHouseOwner(player, house)) {
                 out.add(new DialogueOption("economy.buy_house", Component.translatable("dialogue.skycraft.economy.house.buy", Currency.formatCompact(house.cost())), 250,
                         (p, n) -> Houses.purchaseHouse(p, p.serverLevel(), house, null)));
             } else {
                 Houses.HousesData data = Houses.HousesData.get(player.server.overworld().getServer());
                 for (Houses.Furnishing furn : Houses.UPGRADES) {
-                    if (!data.hasFurnishing(house.id(), furn.id())) {
+                    if (!house.homestead() && !data.hasFurnishing(house.id(), furn.id())) {
                         out.add(new DialogueOption("economy.furnish." + furn.id(),
                                 Component.translatable("dialogue.skycraft.economy.house.furnish_option", furn.name(), Currency.formatCompact(furn.cost())), 260,
                                 (p, n) -> Houses.purchaseFurnishing(p, p.serverLevel(), house, furn)));
@@ -74,6 +73,7 @@ public final class EconomyDialogue {
     }
 
     public static boolean isStewardOrJarl(LivingEntity npc) {
+        if (npc.getPersistentData().getBoolean("skycraft_steward")) return true;
         if (com.skycraft.crime.Crimes.isGuard(npc) || npc.getType().getDescriptionId().contains("guard")) {
             return false;
         }

@@ -28,9 +28,6 @@
 - [x] `mr:werewolves` (pinned)
 - [x] `mr:terralith` (pinned)
 - [x] `mr:tectonic` (pinned)
-- [x] `mr:ct-overhaul-village` (pinned)
-- [x] `mr:towns-and-towers` (pinned)
-- [x] `mr:dungeons-and-taverns` (pinned)
 - [x] `mr:when-dungeons-arise` (pinned)
 - [x] `mr:moogs-voyager-structures` (pinned)
 - [x] `mr:explorify` (pinned)
@@ -48,4 +45,3 @@
 - [x] `mr:comforts` (pinned)
 - [x] `mr:complementary-reimagined` (pinned)
 
-Resolved: 47, unresolved: 0

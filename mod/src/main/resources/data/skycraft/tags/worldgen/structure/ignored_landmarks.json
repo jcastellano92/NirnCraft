@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "minecraft:buried_treasure",
+    "skycraft:settlement_district",
     "minecraft:nether_fossil",
     {
       "id": "mvs:acacia_log_pile",

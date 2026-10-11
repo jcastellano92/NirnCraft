@@ -100,6 +100,7 @@ public final class Theft {
     }
 
     public static boolean inVillage(ServerLevel level, BlockPos pos) {
+        if (com.skycraft.tamriel.settlement.SettlementAnchors.inSettlement(level, pos)) return true;
         if (!level.getEntitiesOfClass(Villager.class, new AABB(pos).inflate(32), Villager::isAlive).isEmpty()) return true;
         // Skycraft townsfolk living here
         if (!level.getEntitiesOfClass(com.skycraft.society.entity.NpcEntity.class, new AABB(pos).inflate(32),

@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:settlement_tavern",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 520103,
+    "types": [
+      "village",
+      "town"
+    ],
+    "variants": [
+      "inn"
+    ]
+  }
+}

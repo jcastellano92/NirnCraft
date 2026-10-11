@@ -1,6 +1,10 @@
 # Gradle / IDE
 .gradle/
 build/
+# ...but never Java packages or assets that happen to be named build/out/bin
+!mod/src/**/build/
+!mod/src/**/out/
+!mod/src/**/bin/
 out/
 run/
 run-data/

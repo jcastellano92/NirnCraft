@@ -1,0 +1,16 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:settlement_city",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 520100,
+    "types": [
+      "capital",
+      "city"
+    ]
+  }
+}
