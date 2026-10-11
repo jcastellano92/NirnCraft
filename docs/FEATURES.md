@@ -201,6 +201,14 @@ Spell sounds all go through `SpellSounds` (slots the audio module can override),
   and the occasional bandit ambush walk them.
 * **Location discovery** [Core]: "DISCOVERED: Bleakwind Barrow" banners with Skyrim-style names, shown on the
   compass and on the Skyrim map.
+* **Ships and the sea** [Core]: sail your own rowboat, Nord longship (oars, square sail, crew of eight and a horse)
+  or Imperial cog (castles, big sail, 54-slot hold). Built at the Shipwright's Bench or bought from harbormasters.
+  Movement keys row and steer, R/V set and take in sail; the sail draws from the region's wind (point of sail on the
+  HUD), hulls run aground, take damage in storms far from shore, sink, and are repaired with planks. Every coastal
+  city has a harbour with a pier and a harbormaster who sells passage (the Northern Maiden between Windhelm and
+  Raven Rock, the Iliac Bay, Topal Bay, Summerset and Morrowind runs) and expeditions to Atmora, Akavir, Yokuda,
+  Pyandonea and Thras, where a landing camp waits. Ports and known sea routes are on the map; wrecks and floating
+  flotsam with loot lie in the open sea.
 * **Per-player loot chests** (Lootr): every player gets their own loot from each dungeon chest.
 * **Locked chests** [Core]: Novice to Master locks, opened with the lockpicking minigame.
 

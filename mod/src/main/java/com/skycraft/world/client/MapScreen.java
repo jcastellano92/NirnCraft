@@ -182,6 +182,36 @@ public class MapScreen extends Screen {
 
     // ------------------------------------------------------------------ coordinates
 
+    /**
+     * An extra layer another module draws on the overworld map, above the terrain and below the pins (e.g. the sailing
+     * module's ports and sea routes). Register once on the client in {@link #LAYERS}.
+     */
+    public interface Layer {
+        /** Draws the layer; returns tooltip lines for what is under the mouse, or null. */
+        List<Component> draw(GuiGraphics g, MapScreen map, int mouseX, int mouseY);
+    }
+
+    public static final List<Layer> LAYERS = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    /** Screen X of a world X (for {@link Layer}s). */
+    public double toScreenX(double wx) {
+        return screenX(wx);
+    }
+
+    /** Screen Y of a world Z (for {@link Layer}s). */
+    public double toScreenY(double wz) {
+        return screenY(wz);
+    }
+
+    /** Current zoom in GUI pixels per block (for {@link Layer}s). */
+    public double mapScale() {
+        return scale;
+    }
+
+    public net.minecraft.client.gui.Font mapFont() {
+        return font;
+    }
+
     private double midX() {
         return (left + right) / 2.0;
     }
@@ -379,6 +409,10 @@ public class MapScreen extends Screen {
             drawPaperGrain(g);
             drawFog(g);
             drawProvinceAndRegionNames(g);
+            for (Layer layer : LAYERS) {
+                List<Component> tip = layer.draw(g, this, mouseX, mouseY);
+                if (tip != null && onMap(mouseX, mouseY)) tooltip = tip;
+            }
         } else {
             drawGrid(g);
         }

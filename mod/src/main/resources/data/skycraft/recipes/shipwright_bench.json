@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "LAL",
+    "L L"
+  ],
+  "key": {
+    "P": {
+      "tag": "minecraft:planks"
+    },
+    "L": {
+      "tag": "minecraft:logs"
+    },
+    "A": {
+      "item": "minecraft:iron_axe"
+    }
+  },
+  "result": {
+    "item": "skycraft:shipwright_bench"
+  }
+}

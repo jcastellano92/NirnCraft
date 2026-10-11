@@ -76,6 +76,16 @@ public final class RegionalWeather {
         return kindOf(level.getServer(), Regions.at(level, pos).id());
     }
 
+    /**
+     * The wind of the region at {@code pos}: the direction it blows towards in degrees (yaw convention, as the client
+     * draws it), or -1 if the region has no weather yet. Used by sailing.
+     */
+    public static int windAt(ServerLevel level, BlockPos pos) {
+        if (level.dimension() != net.minecraft.world.level.Level.OVERWORLD) return -1;
+        Spell s = Data.get(level.getServer()).spells.get(Regions.at(level, pos).id());
+        return s == null ? -1 : s.wind;
+    }
+
     /** Remaining ticks of the region's current spell (0 if none). */
     public static long remaining(MinecraftServer server, String region) {
         Spell s = Data.get(server).spells.get(region);
