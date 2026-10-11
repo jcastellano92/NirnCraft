@@ -1,0 +1,18 @@
+{
+  "id": "imperial_waterfront",
+  "tint": {
+    "wall": "minecraft:stone_bricks",
+    "wall2": "minecraft:mossy_stone_bricks",
+    "low": "minecraft:cobblestone",
+    "wood": "dark_oak",
+    "roof": "prismarine_brick",
+    "accent": "blue"
+  },
+  "palette": {
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:mossy_stone_bricks",
+    "plaza": "minecraft:stone_bricks",
+    "plaza2": "minecraft:prismarine_bricks",
+    "path": "minecraft:gravel"
+  }
+}

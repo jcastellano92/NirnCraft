@@ -1,0 +1,18 @@
+{
+  "id": "aldruhn",
+  "tint": {
+    "wall": "minecraft:calcite",
+    "wall2": "minecraft:bone_block",
+    "low": "minecraft:polished_andesite",
+    "wood": "dark_oak",
+    "roof": "dark_oak",
+    "accent": "red"
+  },
+  "palette": {
+    "cityWall": "calcite",
+    "cityWall2": "minecraft:bone_block",
+    "plaza": "minecraft:polished_andesite",
+    "plaza2": "minecraft:andesite",
+    "path": "minecraft:coarse_dirt"
+  }
+}

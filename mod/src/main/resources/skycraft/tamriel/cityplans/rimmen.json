@@ -1,0 +1,53 @@
+{
+  "id": "rimmen",
+  "base": "none",
+  "sil": "cliff-palace-over-necropolis",
+  "reach": 120,
+  "radius": 120,
+  "overlay": "rimmen",
+  "names": {"inn": "rimmen_moonlit_court_inn", "store": "rimmen_artisan_masterworks", "smithy": "rimmen_sandforge"},
+  "innKey": "rimmen_moonlit_court_inn",
+  "gates": [[0, 112]],
+  "terraces": [
+    {"rect": [-80, -78, 80, -40], "level": 8, "parapet": 1},
+    {"rect": [-80, -40, 80, -8], "level": 4, "parapet": 1}
+  ],
+  "walls": [{"r": 106, "sides": 16, "h": 9, "gates": [0], "flags": ["major"]}],
+  "landmarks": [
+    {"id": "cliff", "at": [-55, -92], "size": [55, 25], "h": 46, "margin": 5},
+    {"id": "cliff", "at": [0, -92], "size": [55, 25], "h": 46, "margin": 5, "name": "keep"},
+    {"id": "cliff", "at": [55, -92], "size": [55, 25], "h": 46, "margin": 5}
+  ],
+  "buildings": [
+    {"kind": "palace", "at": [0, -58], "size": [21, 29], "face": "S", "flags": ["upper", "rich", "seat"], "name": "rimmen_palace", "raise": 8},
+    {"kind": "hall_of_dead", "at": [-70, -22], "size": [9, 11], "face": "E", "name": "rimmen_necropolis_gate", "raise": 4},
+    {"kind": "mine", "at": [68, -66], "size": [7, 14], "face": "S", "variant": 2, "flags": ["no_beard"], "name": "rimmen_necropolis_stair", "raise": 8},
+    {"kind": "longhouse", "at": [-40, -24], "size": [13, 25], "face": "S", "flags": ["upper"], "name": "rimmen_artisan_masterworks", "raise": 4}
+  ],
+  "streets": [
+    {"from": [0, 110], "to": [0, -10], "width": 5, "major": true, "tag": "low"},
+    {"from": [-90, 48], "to": [90, 48], "width": 3, "tag": "low"},
+    {"from": [-66, 84], "to": [66, 84], "width": 3, "tag": "low"},
+    {"from": [-64, -26], "to": [64, -26], "width": 3, "tag": "mid", "raise": 4}
+  ],
+  "plazas": [
+    {"at": [0, 22], "size": 17, "variant": 1, "stalls": 5, "name": "rimmen_sun_square"}
+  ],
+  "queue": [
+    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "rimmen_moonlit_court_inn", "on": "low"},
+    {"kind": "smithy", "size": [11, 9], "name": "rimmen_sandforge", "on": "low"},
+    {"kind": "store", "count": 3, "on": "low"},
+    {"kind": "alchemist", "on": "low"},
+    {"kind": "house", "count": 22, "flags": ["upper"], "plain_every": 3, "small_every": 4, "on": "low"},
+    {"kind": "house", "count": 6, "raise": 4, "flags": ["upper"], "on": "mid"}
+  ],
+  "titles": {
+    "rimmen_moonlit_court_inn": "The Moonlit Court Inn",
+    "rimmen_artisan_masterworks": "Artisan Masterworks",
+    "rimmen_sandforge": "The Sandforge",
+    "rimmen_palace": "Rimmen Palace",
+    "rimmen_necropolis_gate": "Necropolis Gate Shrine",
+    "rimmen_necropolis_stair": "Necropolis Stair",
+    "rimmen_sun_square": "Sun Square"
+  }
+}

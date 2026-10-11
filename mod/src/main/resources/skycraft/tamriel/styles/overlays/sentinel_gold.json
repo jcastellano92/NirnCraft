@@ -1,0 +1,17 @@
+{
+  "id": "sentinel_gold",
+  "tint": {
+    "wall": "minecraft:smooth_sandstone",
+    "wall2": "minecraft:cut_sandstone",
+    "low": "minecraft:sandstone",
+    "roof": "waxed_cut_copper",
+    "accent": "yellow"
+  },
+  "palette": {
+    "cityWall": "cut_sandstone",
+    "cityWall2": "minecraft:sandstone",
+    "plaza": "minecraft:cut_sandstone",
+    "plaza2": "minecraft:yellow_terracotta",
+    "path": "minecraft:sandstone"
+  }
+}

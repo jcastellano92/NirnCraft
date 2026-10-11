@@ -1,0 +1,18 @@
+{
+  "id": "imperial_palace",
+  "tint": {
+    "wall": "minecraft:smooth_quartz",
+    "wall2": "minecraft:quartz_block",
+    "low": "minecraft:quartz_bricks",
+    "roof": "quartz",
+    "trim": "waxed_cut_copper",
+    "accent": "yellow"
+  },
+  "palette": {
+    "cityWall": "quartz",
+    "cityWall2": "minecraft:smooth_quartz",
+    "plaza": "minecraft:smooth_quartz",
+    "plaza2": "minecraft:yellow_terracotta",
+    "path": "minecraft:smooth_quartz"
+  }
+}

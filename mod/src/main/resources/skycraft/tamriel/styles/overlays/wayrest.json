@@ -1,0 +1,17 @@
+{
+  "id": "wayrest",
+  "tint": {
+    "wall": "minecraft:polished_andesite",
+    "wall2": "minecraft:andesite",
+    "low": "minecraft:cobblestone",
+    "roof": "deepslate_tile",
+    "accent": "blue"
+  },
+  "palette": {
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:mossy_stone_bricks",
+    "plaza": "minecraft:stone_bricks",
+    "plaza2": "minecraft:andesite",
+    "path": "minecraft:gravel"
+  }
+}

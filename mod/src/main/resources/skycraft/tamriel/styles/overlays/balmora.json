@@ -1,0 +1,25 @@
+{
+  "id": "balmora",
+  "tint": {
+    "wall": "minecraft:smooth_sandstone",
+    "wall2": "minecraft:sandstone",
+    "low": "minecraft:terracotta",
+    "wood": "dark_oak",
+    "roof": "dark_oak",
+    "accent": "yellow"
+  },
+  "palette": {
+    "cityWall": "cut_sandstone",
+    "cityWall2": "minecraft:sandstone",
+    "plaza": "minecraft:smooth_sandstone",
+    "plaza2": "minecraft:terracotta",
+    "path": "minecraft:sandstone"
+  },
+  "style": {
+    "forms": {
+      "riverside": 12,
+      "crossroads": 1,
+      "linear": 1
+    }
+  }
+}

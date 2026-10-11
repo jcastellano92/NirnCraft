@@ -1,0 +1,18 @@
+{
+  "id": "lillandril",
+  "tint": {
+    "wall": "minecraft:calcite",
+    "wall2": "minecraft:polished_diorite",
+    "low": "minecraft:quartz_bricks",
+    "roof": "cut_copper",
+    "column": "minecraft:quartz_pillar",
+    "accent": "brown"
+  },
+  "palette": {
+    "cityWall": "polished_diorite",
+    "cityWall2": "minecraft:calcite",
+    "plaza": "minecraft:polished_diorite",
+    "plaza2": "minecraft:calcite",
+    "path": "minecraft:smooth_quartz"
+  }
+}

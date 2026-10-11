@@ -1,0 +1,17 @@
+{
+  "id": "orsinium",
+  "tint": {
+    "wall": "minecraft:polished_blackstone_bricks",
+    "wall2": "minecraft:cracked_polished_blackstone_bricks",
+    "low": "minecraft:blackstone",
+    "roof": "deepslate_tile",
+    "accent": "red"
+  },
+  "palette": {
+    "cityWall": "polished_blackstone_bricks",
+    "cityWall2": "minecraft:cracked_polished_blackstone_bricks",
+    "plaza": "minecraft:blackstone",
+    "plaza2": "minecraft:polished_blackstone",
+    "path": "minecraft:coarse_dirt"
+  }
+}

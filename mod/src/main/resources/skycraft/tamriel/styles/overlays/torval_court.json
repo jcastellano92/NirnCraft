@@ -1,0 +1,16 @@
+{
+  "id": "torval_court",
+  "tint": {
+    "wall": "minecraft:quartz_block",
+    "wall2": "minecraft:smooth_quartz",
+    "roof": "quartz",
+    "accent": "blue"
+  },
+  "palette": {
+    "cityWall": "quartz",
+    "cityWall2": "minecraft:calcite",
+    "plaza": "minecraft:quartz_bricks",
+    "plaza2": "minecraft:blue_terracotta",
+    "path": "minecraft:smooth_quartz"
+  }
+}

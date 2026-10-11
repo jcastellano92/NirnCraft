@@ -1,0 +1,17 @@
+{
+  "id": "imperial_market",
+  "tint": {
+    "wall": "minecraft:calcite",
+    "wall2": "minecraft:diorite",
+    "low": "minecraft:stone_bricks",
+    "roof": "brick",
+    "accent": "red"
+  },
+  "palette": {
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:mossy_stone_bricks",
+    "plaza": "minecraft:stone_bricks",
+    "plaza2": "minecraft:bricks",
+    "path": "minecraft:gravel"
+  }
+}

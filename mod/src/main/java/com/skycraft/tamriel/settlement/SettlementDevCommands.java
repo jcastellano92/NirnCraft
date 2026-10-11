@@ -92,8 +92,11 @@ public final class SettlementDevCommands {
                         .then(Commands.argument("culture", StringArgumentType.word())
                                 .then(Commands.argument("x", IntegerArgumentType.integer()).then(Commands.argument("z", IntegerArgumentType.integer())
                                         .executes(SettlementDevCommands::site))))))
+                .then(Commands.literal("plan").then(Commands.argument("id", StringArgumentType.word()).executes(SettlementDevCommands::planOne)))
+                .then(Commands.literal("plans").executes(SettlementDevCommands::planAll))
                 .then(Commands.literal("reload").executes(c -> {
                     Styles.reload();
+                    com.skycraft.tamriel.settlement.plan.CityPlans.reload();
                     c.getSource().sendSuccess(() -> Component.literal("Style sheets reloaded"), false);
                     return 1;
                 }))
@@ -393,6 +396,60 @@ public final class SettlementDevCommands {
         }
         say(c, "Rendered " + id + " (" + p.x() + ", " + p.z() + ", r " + r + ")");
         return 1;
+    }
+
+    /**
+     * {@code /skysettle plan <id>}: plans a named place exactly as world generation does (city plan, zoning, quarters),
+     * without building it, and writes {@code plan_<id>.png} (a plan diagram) and {@code plan_<id>.json} (every spec in
+     * local coordinates) to the preview folder.
+     */
+    static int planOne(CommandContext<CommandSourceStack> c) {
+        String id = StringArgumentType.getString(c, "id");
+        return exportPlan(c.getSource().getLevel(), id, msg -> say(c, msg)) ? 1 : 0;
+    }
+
+    /** {@code /skysettle plans}: {@link #planOne} for every place that has a city plan file. */
+    static int planAll(CommandContext<CommandSourceStack> c) {
+        int n = 0;
+        for (var cp : com.skycraft.tamriel.settlement.plan.CityPlans.all()) {
+            if (exportPlan(c.getSource().getLevel(), cp.id, msg -> say(c, msg))) n++;
+        }
+        say(c, "Exported " + n + " city plans");
+        return n;
+    }
+
+    static boolean exportPlan(ServerLevel level, String id, java.util.function.Consumer<String> say) {
+        Place p = Places.byId(id).orElse(null);
+        if (p == null) {
+            say.accept("No place " + id);
+            return false;
+        }
+        long t0 = System.nanoTime();
+        Plan plan = SettlementStructure.planPlace(context(level, p.x(), p.z()), p, "auto");
+        long ms = (System.nanoTime() - t0) / 1_000_000;
+        try {
+            SettlementPreview.plan(plan, 0, 3, new File(DIR, "plan_" + id + ".png"));
+            com.google.gson.JsonObject o = new com.google.gson.JsonObject();
+            o.addProperty("id", id);
+            o.addProperty("x", p.x());
+            o.addProperty("z", p.z());
+            o.addProperty("radius", plan.radius);
+            o.addProperty("reach", Cities.reach(p));
+            o.addProperty("back", plan.back.getName());
+            o.addProperty("culture", plan.culture.id());
+            o.addProperty("style", plan.style);
+            o.addProperty("base", plan.base);
+            o.add("specs", com.skycraft.tamriel.settlement.plan.CityPlans.describe(plan));
+            DIR.mkdirs();
+            try (FileWriter fw = new FileWriter(new File(DIR, "plan_" + id + ".json"))) {
+                fw.write(o.toString());
+            }
+        } catch (IOException e) {
+            Skycraft.LOGGER.error("Plan export failed", e);
+            return false;
+        }
+        say.accept("Plan " + id + ": " + plan.specs.size() + " specs in " + ms + " ms");
+        return true;
     }
 
     static int compare(CommandContext<CommandSourceStack> c) {

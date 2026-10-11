@@ -1,0 +1,26 @@
+{
+  "id": "bruma",
+  "base": "zoning",
+  "sil": "switchback-alpine",
+  "reach": 115,
+  "radius": 115,
+  "overlay": "bruma",
+  "names": {"inn": "bruma_jerall_view_inn", "store": "bruma_candle_and_wick", "smithy": "bruma_mountain_smithy"},
+  "innKey": "bruma_jerall_view_inn",
+  "terraces": [
+    {"rect": [-40, -78, 40, -34], "level": 6, "parapet": 1}
+  ],
+  "walls": [{"r": 100, "sides": 12, "h": 10, "gates": [0], "flags": ["major"]}],
+  "landmarks": [
+    {"id": "chapel_spire", "at": [0, -56], "size": [17, 25], "h": 50, "margin": 3, "raise": 6, "face": "S"}
+  ],
+  "plazas": [
+    {"at": [0, 4], "size": 13, "variant": 3, "name": "bruma_chapel_steps"}
+  ],
+  "titles": {
+    "bruma_jerall_view_inn": "The Jerall View Inn",
+    "bruma_candle_and_wick": "Candle and Wick",
+    "bruma_mountain_smithy": "Mountain Smithy",
+    "bruma_chapel_steps": "Chapel Steps"
+  }
+}

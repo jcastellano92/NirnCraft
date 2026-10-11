@@ -1,0 +1,50 @@
+{
+  "id": "aldruhn",
+  "base": "none",
+  "sil": "shell-spine-fort",
+  "reach": 125,
+  "radius": 125,
+  "kit": "redoran",
+  "overlay": "aldruhn",
+  "names": {"inn": "aldruhn_rat_walk_inn", "store": "aldruhn_ashlander_goods", "smithy": "aldruhn_chitin_forge"},
+  "innKey": "aldruhn_rat_walk_inn",
+  "gates": [[0, 118]],
+  "walls": [{"r": 112, "sides": 12, "h": 10, "gates": [0], "flags": ["major"]}],
+  "landmarks": [
+    {"id": "shell", "at": [0, -26], "size": [41, 17], "h": 28, "margin": 2, "face": "E", "flags": ["no_beard"]}
+  ],
+  "buildings": [
+    {"kind": "tower", "at": [-60, -70], "size": [7, 7], "h": 26, "margin": 1},
+    {"kind": "tower", "at": [60, -70], "size": [7, 7], "h": 26, "margin": 1},
+    {"kind": "barracks", "at": [-52, 30], "size": [9, 15], "face": "E", "name": "aldruhn_redoran_barracks"},
+    {"kind": "inn", "at": [38, 8], "size": [13, 17], "face": "W", "flags": ["upper"], "name": "aldruhn_rat_walk_inn"},
+    {"kind": "manor", "at": [0, -78], "size": [15, 17], "face": "S", "flags": ["upper", "rich", "seat"], "name": "aldruhn_council_manor"}
+  ],
+  "streets": [
+    {"from": [0, 118], "to": [0, 56], "width": 5, "major": true},
+    {"from": [-20, 56], "to": [-20, -50], "width": 4, "major": true, "tag": "spine"},
+    {"from": [20, 56], "to": [20, -50], "width": 4, "major": true, "tag": "spine"},
+    {"from": [-80, 56], "to": [80, 56], "width": 3, "tag": "market"},
+    {"from": [-70, -56], "to": [70, -56], "width": 3, "tag": "back"}
+  ],
+  "plazas": [
+    {"at": [0, 18], "size": 15, "variant": 3, "name": "aldruhn_skar_plaza"},
+    {"at": [0, 82], "size": 13, "stalls": 5}
+  ],
+  "queue": [
+    {"kind": "store", "count": 2, "name": "aldruhn_ashlander_goods", "on": "market"},
+    {"kind": "smithy", "size": [11, 9], "name": "aldruhn_chitin_forge", "on": "market"},
+    {"kind": "alchemist", "on": "market"},
+    {"kind": "house", "count": 14, "flags": ["upper"], "plain_every": 3, "small_every": 4, "on": "spine"},
+    {"kind": "house", "count": 10, "on": "back", "small_every": 4},
+    {"kind": "manor", "count": 2, "flags": ["upper", "rich"], "on": "back"}
+  ],
+  "titles": {
+    "aldruhn_rat_walk_inn": "The Rat-Walk Inn",
+    "aldruhn_ashlander_goods": "Ashlander Goods",
+    "aldruhn_chitin_forge": "The Chitin Forge",
+    "aldruhn_redoran_barracks": "Redoran Barracks",
+    "aldruhn_council_manor": "Redoran Council Manor",
+    "aldruhn_skar_plaza": "Skar Plaza"
+  }
+}

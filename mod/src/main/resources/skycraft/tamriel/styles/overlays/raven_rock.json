@@ -1,0 +1,16 @@
+{
+  "id": "raven_rock",
+  "tint": {
+    "wall": "minecraft:cobbled_deepslate",
+    "wall2": "minecraft:deepslate_bricks",
+    "wood": "dark_oak",
+    "accent": "green"
+  },
+  "palette": {
+    "cityWall": "deepslate_bricks",
+    "cityWall2": "minecraft:cracked_deepslate_bricks",
+    "plaza": "minecraft:polished_deepslate",
+    "plaza2": "minecraft:deepslate_tiles",
+    "path": "minecraft:gravel"
+  }
+}

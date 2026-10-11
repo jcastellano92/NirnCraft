@@ -1,0 +1,54 @@
+{
+  "id": "alinor",
+  "base": "none",
+  "sil": "crystal-spire-radial-garden",
+  "reach": 110,
+  "radius": 110,
+  "overlay": "alinor",
+  "names": {"inn": "alinor_prism_court_inn", "store": "alinor_gilded_stalls", "smithy": "alinor_starsteel_forge"},
+  "innKey": "alinor_prism_court_inn",
+  "gates": [[0, 105], [105, 0], [-105, 0]],
+  "walls": [{"r": 105, "sides": 16, "h": 10, "gates": [0, 1.5708, -1.5708], "flags": ["major"]}],
+  "landmarks": [
+    {"id": "crystal_tower", "at": [0, 0], "size": [19, 19], "h": 110, "margin": 2},
+    {"id": "dome_palace", "at": [0, -74], "size": [29, 29], "h": 34, "margin": 2},
+    {"id": "orrery", "at": [-62, 40], "size": [19, 19], "h": 22},
+    {"id": "glass_dome", "at": [62, -36], "size": [25, 25], "h": 20}
+  ],
+  "buildings": [
+    {"kind": "temple", "at": [60, 40], "size": [13, 19], "face": "W", "name": "alinor_hall_of_aldmeri_law", "variant": 0}
+  ],
+  "streets": [
+    {"from": [0, 104], "to": [0, 24], "width": 5, "major": true},
+    {"from": [0, -24], "to": [0, -58], "width": 5, "major": true},
+    {"from": [-104, 0], "to": [-24, 0], "width": 5, "major": true},
+    {"from": [104, 0], "to": [24, 0], "width": 5, "major": true},
+    {"from": [18, 18], "to": [72, 72], "width": 3, "fill": false},
+    {"from": [-18, 18], "to": [-72, 72], "width": 3, "fill": false},
+    {"from": [18, -18], "to": [72, -72], "width": 3, "fill": false},
+    {"from": [-18, -18], "to": [-72, -72], "width": 3, "fill": false}
+  ],
+  "rings": [
+    {"r": 30, "sides": 16, "width": 4, "major": true},
+    {"r": 66, "sides": 8, "width": 3, "offset": 0.3927, "fill": true},
+    {"r": 92, "sides": 8, "width": 3, "offset": 0.3927, "fill": true}
+  ],
+  "plazas": [
+    {"at": [0, 52], "size": 17, "variant": 2, "stalls": 6, "name": "alinor_royal_garden"}
+  ],
+  "queue": [
+    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "alinor_prism_court_inn"},
+    {"kind": "smithy", "size": [11, 9], "name": "alinor_starsteel_forge"},
+    {"kind": "store", "count": 3, "name": "alinor_gilded_stalls"},
+    {"kind": "alchemist", "count": 2},
+    {"kind": "manor", "count": 6, "flags": ["upper", "rich"]},
+    {"kind": "house", "count": 24, "flags": ["upper"], "plain_every": 3, "small_every": 4}
+  ],
+  "titles": {
+    "alinor_prism_court_inn": "The Prism Court Inn",
+    "alinor_gilded_stalls": "Gilded Stalls",
+    "alinor_starsteel_forge": "The Starsteel Forge",
+    "alinor_hall_of_aldmeri_law": "Hall of Aldmeri Law",
+    "alinor_royal_garden": "Royal Garden"
+  }
+}

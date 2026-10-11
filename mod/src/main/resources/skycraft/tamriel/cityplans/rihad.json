@@ -1,0 +1,22 @@
+{
+  "id": "rihad",
+  "base": "zoning",
+  "sil": "walled-bazaar-maze",
+  "reach": 120,
+  "radius": 120,
+  "overlay": "rihad",
+  "names": {"inn": "rihad_caravanserai", "store": "rihad_spice_gate_stalls", "smithy": "rihad_brass_and_steel"},
+  "innKey": "rihad_caravanserai",
+  "walls": [{"r": 108, "sides": 16, "h": 10, "gates": [0, 1.5708, -1.5708], "flags": ["major"]}],
+  "landmarks": [
+    {"id": "minaret", "at": [-34, -46], "size": [11, 11], "h": 46},
+    {"id": "minaret", "at": [38, -40], "size": [11, 11], "h": 38},
+    {"id": "awning_row", "at": [-18, 24], "size": [7, 41], "h": 7, "name": "red", "face": "S"},
+    {"id": "awning_row", "at": [18, 24], "size": [7, 41], "h": 7, "name": "yellow", "face": "S"}
+  ],
+  "titles": {
+    "rihad_caravanserai": "The Courtyard Caravanserai",
+    "rihad_spice_gate_stalls": "Spice Gate Stalls",
+    "rihad_brass_and_steel": "Brass and Steel"
+  }
+}

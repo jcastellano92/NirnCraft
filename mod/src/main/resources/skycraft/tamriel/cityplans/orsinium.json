@@ -1,0 +1,57 @@
+{
+  "id": "orsinium",
+  "base": "none",
+  "sil": "stepped-orc-bastions",
+  "reach": 125,
+  "radius": 125,
+  "overlay": "orsinium",
+  "names": {"inn": "orsinium_bone_and_ember", "store": "orsinium_tradestone", "smithy": "orsinium_great_forge"},
+  "innKey": "orsinium_bone_and_ember",
+  "gates": [[0, 120]],
+  "terraces": [
+    {"rect": [-62, -62, 62, 62], "level": 4, "parapet": 1},
+    {"rect": [-38, -38, 38, 38], "level": 8, "parapet": 1}
+  ],
+  "walls": [
+    {"r": 108, "sides": 12, "h": 9, "gates": [0], "flags": ["palisade", "major"]},
+    {"r": 76, "sides": 12, "h": 9, "gates": [0], "flags": ["major"], "raise": 4},
+    {"r": 46, "sides": 10, "h": 9, "gates": [0], "flags": ["major"], "raise": 8}
+  ],
+  "landmarks": [
+    {"id": "gate_hammer", "at": [0, 119], "size": [23, 11], "h": 32, "face": "S"},
+    {"id": "castle", "at": [0, -18], "size": [29, 25], "h": 30, "margin": 4, "raise": 8}
+  ],
+  "buildings": [
+    {"kind": "longhouse", "at": [-26, 24], "size": [13, 25], "face": "E", "name": "orsinium_trophy_hall", "flags": ["seat", "upper"], "raise": 8},
+    {"kind": "smithy", "at": [26, 24], "size": [13, 11], "face": "W", "name": "orsinium_great_forge", "raise": 8},
+    {"kind": "temple", "at": [-42, 54], "size": [11, 15], "face": "E", "name": "orsinium_shrine_of_malacath", "raise": 4},
+    {"kind": "barracks", "at": [42, 54], "size": [9, 15], "face": "W", "raise": 4}
+  ],
+  "streets": [
+    {"from": [0, 118], "to": [0, 78], "width": 5, "major": true, "tag": "outer"},
+    {"from": [-62, 90], "to": [62, 90], "width": 3, "tag": "outer"},
+    {"from": [0, 78], "to": [0, 50], "width": 5, "major": true, "tag": "mid", "raise": 4},
+    {"from": [-52, 60], "to": [52, 60], "width": 3, "tag": "mid", "raise": 4},
+    {"from": [0, 50], "to": [0, 6], "width": 5, "major": true, "tag": "inner", "raise": 8},
+    {"from": [-34, 6], "to": [34, 6], "width": 3, "tag": "inner", "raise": 8}
+  ],
+  "plazas": [
+    {"at": [0, 26], "size": 15, "variant": 3, "raise": 8, "name": "orsinium_forge_pit"},
+    {"at": [34, 100], "size": 11, "stalls": 3}
+  ],
+  "queue": [
+    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "orsinium_bone_and_ember", "on": "outer"},
+    {"kind": "store", "count": 2, "name": "orsinium_tradestone", "on": "outer"},
+    {"kind": "house", "count": 9, "on": "outer", "small_every": 4},
+    {"kind": "house", "count": 9, "on": "mid", "raise": 4, "small_every": 4},
+    {"kind": "house", "count": 5, "flags": ["upper"], "on": "inner", "raise": 8}
+  ],
+  "titles": {
+    "orsinium_bone_and_ember": "The Bone and Ember",
+    "orsinium_tradestone": "Tradestone Goods",
+    "orsinium_great_forge": "The Great Forge",
+    "orsinium_trophy_hall": "Trophy Hall",
+    "orsinium_shrine_of_malacath": "Shrine of Malacath",
+    "orsinium_forge_pit": "The Forge Pit"
+  }
+}

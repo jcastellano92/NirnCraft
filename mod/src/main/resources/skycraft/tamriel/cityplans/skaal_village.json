@@ -1,0 +1,33 @@
+{
+  "id": "skaal_village",
+  "base": "none",
+  "sil": "yurt-ring-totem",
+  "reach": 45,
+  "radius": 45,
+  "overlay": "skaal",
+  "gates": [[0, 42]],
+  "landmarks": [
+    {"id": "stone_circle", "at": [0, 0], "size": [27, 27], "h": 10}
+  ],
+  "buildings": [
+    {"kind": "tent", "at": [0, -25], "face": "S", "size": [5, 7]},
+    {"kind": "tent", "at": [18, -18], "face": "W", "size": [5, 7]},
+    {"kind": "tent", "at": [25, 0], "face": "W", "size": [5, 7]},
+    {"kind": "tent", "at": [18, 18], "face": "W", "size": [5, 7]},
+    {"kind": "tent", "at": [0, 25], "face": "N", "size": [5, 7]},
+    {"kind": "tent", "at": [-18, 18], "face": "E", "size": [5, 7]},
+    {"kind": "tent", "at": [-25, 0], "face": "E", "size": [5, 7]},
+    {"kind": "tent", "at": [-18, -18], "face": "E", "size": [5, 7]},
+    {"kind": "longhouse", "at": [0, -38], "size": [13, 11], "face": "S", "flags": ["seat"], "name": "skaal_elders_firehouse"},
+    {"kind": "temple", "at": [-37, -20], "size": [9, 13], "face": "E", "name": "skaal_totem_hall"},
+    {"kind": "lumber", "at": [37, -24], "size": [7, 5], "face": "W", "name": "skaal_skinning_racks"}
+  ],
+  "streets": [
+    {"from": [0, 44], "to": [0, 16], "width": 3, "major": true}
+  ],
+  "titles": {
+    "skaal_elders_firehouse": "The Elder's Firehouse",
+    "skaal_totem_hall": "Totem Hall",
+    "skaal_skinning_racks": "Skinning Racks"
+  }
+}

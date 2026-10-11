@@ -1,0 +1,16 @@
+{
+  "id": "elden_root",
+  "tint": {
+    "wall": "minecraft:birch_planks",
+    "wall2": "minecraft:stripped_jungle_log",
+    "wood": "jungle",
+    "roof": "jungle",
+    "light": "minecraft:lantern",
+    "accent": "lime"
+  },
+  "palette": {
+    "plaza": "minecraft:mossy_cobblestone",
+    "plaza2": "minecraft:moss_block",
+    "path": "minecraft:podzol"
+  }
+}

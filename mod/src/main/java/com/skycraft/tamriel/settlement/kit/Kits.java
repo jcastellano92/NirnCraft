@@ -21,14 +21,40 @@ public final class Kits {
             WINTERHOLD = 6, MARSH = 7, FOREST = 8, STONE = 9;
     public static final int HLAALU = 0, REDORAN = 1, TELVANNI = 2, VELOTHI = 3;
     public static final int IMPERIAL_CITY = 1;
+    public static final int KIT_MASK = 0xFF, OVERLAY_SHIFT = 8;
 
     private static final Map<Culture, Palette[]> CACHE = new EnumMap<>(Culture.class);
 
     private Kits() {}
 
-    public static synchronized Palette palette(Culture c, int style) {
+    /**
+     * The palette of a culture and style. {@code style} packs the kit style (low 8 bits) and, above them, an optional
+     * per-place overlay ({@link com.skycraft.tamriel.settlement.grammar.Overlays}) that re-tints the kit.
+     */
+    public static Palette palette(Culture c, int style) {
+        Palette base = kit(c, style < 0 ? style : style & KIT_MASK);
+        int overlay = style < 0 ? 0 : style >>> OVERLAY_SHIFT;
+        return overlay == 0 ? base : com.skycraft.tamriel.settlement.grammar.Overlays.palette(base, c, overlay);
+    }
+
+    private static synchronized Palette kit(Culture c, int style) {
         Palette[] styles = CACHE.computeIfAbsent(c, Kits::build);
         return styles[Math.floorMod(style, styles.length)];
+    }
+
+    /** The kit style index of the palette called {@code name} for a culture, or {@code fallback}. */
+    public static int styleOf(Culture c, String name, int fallback) {
+        for (int i = 0; i < 16; i++) {
+            Palette p = kit(c, i);
+            if (p.name.equals(name)) return i;
+            if (i > 0 && p == kit(c, 0)) break;
+        }
+        return fallback;
+    }
+
+    /** A packed style: kit style plus overlay index. */
+    public static int pack(int kit, int overlay) {
+        return (kit & KIT_MASK) | (overlay << OVERLAY_SHIFT);
     }
 
     private static Palette[] build(Culture c) {

@@ -1,0 +1,25 @@
+{
+  "id": "bravil",
+  "tint": {
+    "wall": "minecraft:spruce_planks",
+    "wall2": "minecraft:mossy_cobblestone",
+    "low": "minecraft:mossy_cobblestone",
+    "wood": "spruce",
+    "roof": "spruce",
+    "thatch": "true",
+    "accent": "green"
+  },
+  "palette": {
+    "cityWall": "mossy_stone_bricks",
+    "cityWall2": "minecraft:cobblestone",
+    "plaza": "minecraft:mossy_cobblestone",
+    "plaza2": "minecraft:cobblestone",
+    "path": "minecraft:coarse_dirt"
+  },
+  "style": {
+    "forms": {
+      "hilltop": 12,
+      "linear": 1
+    }
+  }
+}

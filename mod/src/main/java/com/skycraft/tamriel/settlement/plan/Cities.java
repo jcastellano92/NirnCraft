@@ -77,6 +77,8 @@ public final class Cities {
 
     /** How far the layout reaches from the place anchor (bridges, arches and outworks included). */
     public static int reach(Place p) {
+        CityPlan cp = CityPlans.of(p);
+        if (cp != null && cp.reach > 0) return cp.reach;
         return switch (key(p)) {
             case "solitude" -> 215;
             case "windhelm" -> 175;
@@ -90,6 +92,8 @@ public final class Cities {
 
     /** Radius used for building placement. */
     public static int layoutRadius(Place p) {
+        CityPlan cp = CityPlans.of(p);
+        if (cp != null && cp.radius > 0) return cp.radius;
         return switch (key(p)) {
             case "imperial_city" -> 160;
             case "solitude" -> 135;
@@ -105,6 +109,8 @@ public final class Cities {
 
     /** World direction of the palace side (local north). */
     public static Direction back(Place p) {
+        CityPlan cp = CityPlans.of(p);
+        if (cp != null && cp.back != null) return cp.back;
         return switch (key(p)) {
             case "solitude" -> E;
             case "riften" -> S;
@@ -113,7 +119,14 @@ public final class Cities {
         };
     }
 
+    /** The packed style (kit style plus overlay) of a place: its plan's kit and overlay over the culture default. */
     public static int style(Place p, Culture c) {
+        int base = kitStyle(p, c);
+        CityPlan cp = CityPlans.of(p);
+        return cp == null ? base : cp.style(c, base);
+    }
+
+    private static int kitStyle(Place p, Culture c) {
         String k = key(p);
         return switch (k) {
             case "whiterun" -> Kits.WHITERUN;
@@ -133,6 +146,8 @@ public final class Cities {
 
     /** Names of the key shops of named towns (signs and inn names). */
     public static Layouts.Names names(Place p) {
+        CityPlan cp = CityPlans.of(p);
+        if (cp != null && cp.names != Layouts.Names.NONE) return cp.names;
         return switch (p.id()) {
             case "riverwood" -> new Layouts.Names("sleeping_giant_inn", "riverwood_trader", "alvors_smithy");
             case "rorikstead" -> new Layouts.Names("frostfruit_inn", "", "");
@@ -174,6 +189,8 @@ public final class Cities {
      * planner lays out.
      */
     public static List<int[]> gatesLocal(Place p) {
+        CityPlan cp = CityPlans.of(p);
+        if (cp != null && cp.gates != null) return List.of(cp.gates);
         int R = layoutRadius(p);
         return switch (key(p)) {
             case "whiterun" -> List.of(new int[]{0, 128});
@@ -200,6 +217,13 @@ public final class Cities {
 
     /** Builds the unique layout of the place, if it has one. */
     public static boolean build(Plan plan, Place p) {
+        CityPlan cp = CityPlans.of(p);
+        if (cp != null) return CityPlans.build(plan, p, cp);
+        return buildJava(plan, p);
+    }
+
+    /** The hand-written layouts (Skyrim's cities and the provincial capitals that have no plan file). */
+    static boolean buildJava(Plan plan, Place p) {
         switch (key(p)) {
             case "whiterun" -> whiterun(plan);
             case "solitude" -> solitude(plan);

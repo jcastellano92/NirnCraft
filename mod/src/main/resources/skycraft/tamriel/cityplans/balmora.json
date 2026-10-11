@@ -1,0 +1,29 @@
+{
+  "id": "balmora",
+  "base": "zoning",
+  "sil": "twin-bank-river-terrace",
+  "reach": 120,
+  "radius": 120,
+  "kit": "hlaalu",
+  "overlay": "balmora",
+  "names": {"inn": "balmora_council_club", "store": "balmora_saltrice_exchange", "smithy": "balmora_river_forge"},
+  "innKey": "balmora_council_club",
+  "terraces": [
+    {"rect": [-30, -78, 30, -42], "level": 3, "parapet": 1}
+  ],
+  "plazas": [
+    {"at": [0, 34], "size": 15, "variant": 1, "stalls": 6, "name": "balmora_guild_row"}
+  ],
+  "buildings": [
+    {"kind": "manor", "at": [0, -60], "size": [17, 19], "face": "S", "flags": ["upper", "rich", "seat"], "name": "balmora_council_manor", "raise": 3},
+    {"kind": "tower", "at": [78, 56], "size": [7, 7], "h": 30, "margin": 1, "name": "balmora_silt_strider_port"}
+  ],
+  "titles": {
+    "balmora_council_club": "The Council Club",
+    "balmora_saltrice_exchange": "Saltrice Exchange",
+    "balmora_river_forge": "River Forge",
+    "balmora_council_manor": "Hlaalu Council Manor",
+    "balmora_silt_strider_port": "Silt Strider Port",
+    "balmora_guild_row": "Guild Row"
+  }
+}

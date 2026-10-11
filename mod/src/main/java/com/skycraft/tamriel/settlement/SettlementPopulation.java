@@ -243,6 +243,9 @@ public final class SettlementPopulation {
         pd.putInt(Innkeepers.SETTLEMENT_KEY, s.id);
         int inn = Cities.innIndex(e.key);
         pd.putInt(Innkeepers.INN_KEY, inn >= 0 ? inn : Math.floorMod(e.key.hashCode(), Innkeepers.INN_NAMES));
+        // a city plan names its own inn (lang settlement.skycraft.name.<key>), no index into the survival list needed
+        String planned = com.skycraft.tamriel.settlement.plan.CityPlans.innKey(e.key);
+        if (planned != null && inn < 0) pd.putString(Innkeepers.INN_NAME_KEY, planned);
         CompoundTag shop = new CompoundTag();
         ListTag pools = new ListTag();
         pools.add(StringTag.valueOf("food"));

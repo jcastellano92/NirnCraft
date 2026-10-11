@@ -4,6 +4,7 @@ import com.skycraft.tamriel.settlement.AnchorType;
 import com.skycraft.tamriel.settlement.kit.Palette;
 import com.skycraft.tamriel.settlement.plan.Spec;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.BellBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -141,6 +142,13 @@ public final class Works {
             lamp(c, p, w - 1, 0, 0);
             lamp(c, p, w - 1, 0, d - 1);
             lamp(c, p, 0, 0, d - 1);
+        }
+        // a named ward or square (city plans): a signpost at the front corner
+        if (!s.name.isEmpty() && w >= 7 && !c.recording()) {
+            int px = w - 2;
+            for (int y = 1; y <= 3; y++) c.set(px, y, 2, p.foundation);
+            c.sign(px, 2, 1, p.sign, Direction.NORTH, Component.empty(),
+                    Component.translatable("settlement.skycraft.name." + s.name));
         }
     }
 

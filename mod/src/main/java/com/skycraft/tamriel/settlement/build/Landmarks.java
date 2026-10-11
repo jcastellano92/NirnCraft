@@ -43,23 +43,22 @@ public final class Landmarks {
             case RATWAY -> ratway(c, p, s);
             case BLUE_PALACE -> bluePalace(c, p, s);
             case ARENA -> arena(c, p, s);
-            default -> {
-            }
+            default -> LandmarkRegistry.build(c, p, s);
         }
     }
 
-    static BlockState leaves(BlockState s) {
+    public static BlockState leaves(BlockState s) {
         return s.hasProperty(LeavesBlock.PERSISTENT) ? s.setValue(LeavesBlock.PERSISTENT, true) : s;
     }
 
-    static void disc(Canvas c, int cx, int y, int cz, double r, BlockState s) {
+    public static void disc(Canvas c, int cx, int y, int cz, double r, BlockState s) {
         int ri = (int) Math.ceil(r);
         for (int dx = -ri; dx <= ri; dx++) for (int dz = -ri; dz <= ri; dz++) {
             if (dx * dx + dz * dz <= r * r) c.set(cx + dx, y, cz + dz, s);
         }
     }
 
-    static void ring(Canvas c, int cx, int y, int cz, double r, double thick, BlockState s) {
+    public static void ring(Canvas c, int cx, int y, int cz, double r, double thick, BlockState s) {
         int ri = (int) Math.ceil(r);
         for (int dx = -ri; dx <= ri; dx++) for (int dz = -ri; dz <= ri; dz++) {
             double dist = Math.sqrt(dx * dx + dz * dz);
@@ -67,7 +66,7 @@ public final class Landmarks {
         }
     }
 
-    static void hollowCylinder(Canvas c, int cx, int y0, int y1, int cz, double r, BlockState wall, BlockState floor) {
+    public static void hollowCylinder(Canvas c, int cx, int y0, int y1, int cz, double r, BlockState wall, BlockState floor) {
         int ri = (int) Math.ceil(r);
         for (int dx = -ri; dx <= ri; dx++) for (int dz = -ri; dz <= ri; dz++) {
             double dist = Math.sqrt(dx * dx + dz * dz);
@@ -80,7 +79,7 @@ public final class Landmarks {
         }
     }
 
-    static void cone(Canvas c, int cx, int y, int cz, double r, int height, BlockState s) {
+    public static void cone(Canvas c, int cx, int y, int cz, double r, int height, BlockState s) {
         for (int k = 0; k <= height; k++) {
             double rr = r * (1 - k / (double) (height + 1));
             ring(c, cx, y + k, cz, rr, 1.2, s);

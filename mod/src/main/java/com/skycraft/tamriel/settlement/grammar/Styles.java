@@ -28,8 +28,24 @@ public final class Styles {
 
     /** The style sheet of a culture and kit style. Never null (an empty sheet when the file is missing). */
     public static Style of(Culture c, int style) {
-        Palette kit = Kits.palette(c, style);
-        return CACHE.computeIfAbsent(c.id() + "/" + kit.name, k -> load(c, kit.name));
+        Palette kit = Kits.palette(c, style < 0 ? style : style & Kits.KIT_MASK);
+        int overlay = style < 0 ? 0 : style >>> Kits.OVERLAY_SHIFT;
+        String key = overlay == 0 ? c.id() + "/" + kit.name : c.id() + "/" + kit.name + "#" + overlay;
+        return CACHE.computeIfAbsent(key, k -> {
+            Style s = load(c, kit.name);
+            JsonObject sheet = overlay == 0 ? null : Overlays.sheet(overlay);
+            if (sheet != null && (sheet.has("style") || sheet.has("tint"))) {
+                try {
+                    Style o = s.derive(s.name);
+                    if (sheet.has("style")) o.read(sheet.getAsJsonObject("style"));
+                    if (sheet.has("tint")) o.tint(sheet.getAsJsonObject("tint"));
+                    return o;
+                } catch (RuntimeException e) {
+                    Skycraft.LOGGER.error("Bad style overlay {} for {}", overlay, c.id(), e);
+                }
+            }
+            return s;
+        });
     }
 
     private static Style load(Culture c, String kitName) {
@@ -70,5 +86,6 @@ public final class Styles {
     public static void reload() {
         CACHE.clear();
         SHEETS.clear();
+        Overlays.reload();
     }
 }

@@ -167,7 +167,18 @@ public class SettlementStructure extends Structure {
         List<Spec> cached = PLANS.get(key);
         if (cached != null) return cached;
         long t0 = System.nanoTime();
-        Culture c = Culture.of(culture.equals("auto") ? p.culture() : culture);
+        Plan plan = planPlace(ctx, p, culture);
+        List<Spec> specs = List.copyOf(plan.specs);
+        if (PLANS.size() > 64) PLANS.clear();
+        PLANS.put(key, specs);
+        Skycraft.LOGGER.info("Planned settlement {} ({} pieces, culture {}, {} ms)", p.id(), specs.size(), plan.culture.id(),
+                (System.nanoTime() - t0) / 1_000_000);
+        return specs;
+    }
+
+    /** Plans a named place on the terrain of a generation context (the structure path and the dev tools share it). */
+    public static Plan planPlace(GenerationContext ctx, Place p, String cultureOverride) {
+        Culture c = Culture.of(cultureOverride.equals("auto") ? p.culture() : cultureOverride);
         int style = Cities.style(p, c);
         Plan plan = new Plan(p.id(), p.x(), p.z(), Cities.layoutRadius(p), c, style, Cities.seed(p),
                 new Terrain(ctx, Cities.layoutRadius(p) > 60 ? 16 : 8), Cities.back(p));
@@ -176,12 +187,7 @@ public class SettlementStructure extends Structure {
         com.skycraft.tamriel.settlement.grammar.Zoning.place(plan, p);
         plan.resolve();
         com.skycraft.tamriel.settlement.plan.Halls.report(plan, p);
-        List<Spec> specs = List.copyOf(plan.specs);
-        if (PLANS.size() > 64) PLANS.clear();
-        PLANS.put(key, specs);
-        Skycraft.LOGGER.info("Planned settlement {} ({} pieces, culture {}, {} ms)", p.id(), specs.size(), c.id(),
-                (System.nanoTime() - t0) / 1_000_000);
-        return specs;
+        return plan;
     }
 
     // ------------------------------------------------------------------ generic settlements

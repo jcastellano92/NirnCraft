@@ -65,6 +65,8 @@ public final class Innkeepers {
     public static final String SETTLEMENT_KEY = "skycraft_inn_settlement";
     public static final String INN_KEY = "skycraft_inn";
     public static final TagKey<Item> INN_GOODS = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "inn_goods"));
+    /** Optional: a lang key suffix ({@code settlement.skycraft.name.<key>}) naming the inn, set by city plans. */
+    public static final String INN_NAME_KEY = "skycraft_inn_name";
     public static final int INN_NAMES = 16;
     public static final int RUMORS = 14;
     /** Rented rooms count anywhere within this distance of the innkeeper when no settlement is known. */
@@ -82,6 +84,7 @@ public final class Innkeepers {
     /** The translated name of the inn an innkeeper runs. */
     public static Component innName(LivingEntity npc) {
         CompoundTag pd = npc.getPersistentData();
+        if (pd.contains(INN_NAME_KEY)) return Component.translatable("settlement.skycraft.name." + pd.getString(INN_NAME_KEY));
         int idx = pd.contains(INN_KEY) ? pd.getInt(INN_KEY) : Math.floorMod(npc.getUUID().hashCode(), INN_NAMES);
         return Component.translatable("survival.skycraft.inn." + Math.floorMod(idx, INN_NAMES));
     }

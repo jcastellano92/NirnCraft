@@ -1,0 +1,16 @@
+{
+  "id": "imperial_arena",
+  "tint": {
+    "wall": "minecraft:smooth_red_sandstone",
+    "wall2": "minecraft:cut_red_sandstone",
+    "low": "minecraft:red_nether_bricks",
+    "roof": "nether_brick",
+    "accent": "red"
+  },
+  "palette": {
+    "cityWall": "red_sandstone",
+    "cityWall2": "minecraft:cut_red_sandstone",
+    "plaza": "minecraft:smooth_red_sandstone",
+    "plaza2": "minecraft:cut_red_sandstone"
+  }
+}

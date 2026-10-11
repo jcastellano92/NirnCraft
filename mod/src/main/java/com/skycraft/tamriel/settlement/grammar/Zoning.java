@@ -358,6 +358,8 @@ public final class Zoning {
             generic(plan, sz, p.variant(), com.skycraft.tamriel.settlement.plan.Cities.names(p));
             if (!plan.civicDone) civic(plan);
         }
+        // a city plan's quarters (districts of another kit, culture or colour) recolour what the layout produced
+        com.skycraft.tamriel.settlement.plan.CityPlans.finish(plan, p);
     }
 
     /** The jail, the faction halls and the player-home plots of a named place (once per planning attempt). */

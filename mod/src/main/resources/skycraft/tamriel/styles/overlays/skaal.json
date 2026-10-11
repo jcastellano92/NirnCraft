@@ -1,0 +1,15 @@
+{
+  "id": "skaal",
+  "tint": {
+    "wall": "minecraft:bone_block",
+    "wall2": "minecraft:calcite",
+    "wood": "spruce",
+    "roof": "spruce",
+    "accent": "light_blue"
+  },
+  "palette": {
+    "plaza": "minecraft:snow_block",
+    "plaza2": "minecraft:packed_ice",
+    "path": "minecraft:snow_block"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "id": "sentinel",
+  "base": "none",
+  "sil": "domed-oasis-harbour",
+  "reach": 110,
+  "radius": 110,
+  "overlay": "sentinel",
+  "names": {"inn": "sentinel_oasis_rest", "store": "sentinel_spice_and_silk", "smithy": "sentinel_scimitar_works"},
+  "innKey": "sentinel_oasis_rest",
+  "gates": [[0, 105], [105, 0], [-105, 0]],
+  "walls": [{"r": 105, "sides": 16, "h": 10, "gates": [0, 1.5708, -1.5708], "flags": ["major"]}],
+  "landmarks": [
+    {"id": "dome_palace", "at": [0, -74], "size": [31, 31], "h": 36, "margin": 2, "overlay": "sentinel_gold"},
+    {"id": "dome_temple", "at": [50, -14], "size": [23, 23], "h": 30, "margin": 2, "name": "stendarr", "overlay": "sentinel"},
+    {"id": "awning_row", "at": [-40, 38], "size": [7, 45], "h": 7, "name": "blue", "face": "S"},
+    {"id": "awning_row", "at": [-24, 38], "size": [7, 45], "h": 7, "name": "yellow", "face": "S"}
+  ],
+  "buildings": [
+    {"kind": "tower", "at": [-62, -36], "size": [7, 7], "h": 30, "margin": 1},
+    {"kind": "barracks", "at": [-44, -40], "size": [9, 15], "face": "E"}
+  ],
+  "streets": [
+    {"from": [0, 104], "to": [0, -44], "width": 5, "major": true},
+    {"from": [-104, 12], "to": [104, 12], "width": 5, "major": true},
+    {"from": [-92, 88], "to": [92, 88], "width": 3}
+  ],
+  "rings": [{"r": 62, "sides": 8, "width": 3, "offset": 0.3927, "fill": true}],
+  "plazas": [
+    {"at": [0, 40], "size": 17, "variant": 2, "stalls": 6},
+    {"at": [66, 56], "size": 11, "name": "sentinel_ward_bazaar_of_winds"}
+  ],
+  "quarters": [
+    {"rect": [-110, -110, 110, -30], "overlay": "sentinel_gold"}
+  ],
+  "queue": [
+    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "sentinel_oasis_rest"},
+    {"kind": "smithy", "size": [11, 9], "name": "sentinel_scimitar_works"},
+    {"kind": "store", "count": 3, "name": "sentinel_spice_and_silk"},
+    {"kind": "alchemist"},
+    {"kind": "temple", "size": [11, 17]},
+    {"kind": "manor", "count": 4, "flags": ["upper", "rich"]},
+    {"kind": "house", "count": 30, "flags": ["upper"], "plain_every": 3, "small_every": 4}
+  ],
+  "titles": {
+    "sentinel_oasis_rest": "The Oasis Rest",
+    "sentinel_spice_and_silk": "Spice and Silk",
+    "sentinel_scimitar_works": "Scimitar Works",
+    "sentinel_ward_bazaar_of_winds": "Bazaar of Winds"
+  }
+}

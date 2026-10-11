@@ -1,0 +1,16 @@
+{
+  "id": "imperial_garden",
+  "tint": {
+    "wall": "minecraft:calcite",
+    "wall2": "minecraft:polished_diorite",
+    "wood": "birch",
+    "roof": "oxidized_cut_copper",
+    "accent": "green"
+  },
+  "palette": {
+    "cityWall": "polished_diorite",
+    "cityWall2": "minecraft:calcite",
+    "plaza": "minecraft:polished_diorite",
+    "plaza2": "minecraft:moss_block"
+  }
+}

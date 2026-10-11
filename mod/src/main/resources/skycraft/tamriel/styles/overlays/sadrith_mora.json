@@ -1,0 +1,23 @@
+{
+  "id": "sadrith_mora",
+  "tint": {
+    "wall": "minecraft:mushroom_stem",
+    "wall2": "minecraft:bone_block",
+    "roof": "purpur",
+    "light": "minecraft:soul_lantern",
+    "accent": "purple"
+  },
+  "palette": {
+    "cityWall": "polished_deepslate",
+    "cityWall2": "minecraft:deepslate_bricks",
+    "plaza": "minecraft:polished_deepslate",
+    "plaza2": "minecraft:amethyst_block",
+    "path": "minecraft:coarse_dirt"
+  },
+  "style": {
+    "forms": {
+      "cluster": 8,
+      "crossroads": 1
+    }
+  }
+}

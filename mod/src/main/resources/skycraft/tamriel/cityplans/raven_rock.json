@@ -1,0 +1,17 @@
+{
+  "id": "raven_rock",
+  "base": "zoning",
+  "sil": "bulwark-mining-colony",
+  "overlay": "raven_rock",
+  "names": {"inn": "the_retching_netch", "store": "milores_ingredients", "smithy": "glover_mallorys_smithy"},
+  "walls": [{"r": 70, "sides": 12, "h": 9, "gates": [0, 3.1416], "flags": ["major"]}],
+  "landmarks": [
+    {"id": "headframe", "at": [-46, -44], "size": [15, 15], "h": 26}
+  ],
+  "buildings": [
+    {"kind": "shrine", "at": [38, -22], "size": [5, 5], "face": "S", "name": "raven_rock_tribunal_chapel", "variant": 1}
+  ],
+  "titles": {
+    "raven_rock_tribunal_chapel": "Chapel of the Tribunal"
+  }
+}

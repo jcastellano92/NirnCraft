@@ -1,0 +1,54 @@
+{
+  "id": "lilmoth",
+  "base": "none",
+  "sil": "stilt-delta-canal",
+  "reach": 110,
+  "radius": 110,
+  "overlay": "lilmoth",
+  "names": {"inn": "lilmoth_hist_pool_inn", "store": "lilmoth_canal_stalls", "smithy": "lilmoth_bone_forge"},
+  "innKey": "lilmoth_hist_pool_inn",
+  "gates": [[0, 102]],
+  "landmarks": [
+    {"id": "xanmeer", "at": [0, -72], "size": [33, 33], "h": 26}
+  ],
+  "lines": [
+    {"kind": "canal", "from": [-96, 22], "to": [96, 22], "width": 9},
+    {"kind": "canal", "from": [-46, -34], "to": [-46, 100], "width": 7},
+    {"kind": "canal", "from": [46, -34], "to": [46, 100], "width": 7},
+    {"kind": "bridge", "from": [0, 14], "to": [0, 30], "width": 5, "lift": 1},
+    {"kind": "bridge", "from": [-62, 14], "to": [-62, 30], "width": 3, "lift": 1},
+    {"kind": "bridge", "from": [62, 14], "to": [62, 30], "width": 3, "lift": 1},
+    {"kind": "bridge", "from": [-54, 70], "to": [-38, 70], "width": 3, "lift": 1},
+    {"kind": "bridge", "from": [38, 70], "to": [54, 70], "width": 3, "lift": 1}
+  ],
+  "buildings": [
+    {"kind": "dock", "at": [-30, 108], "size": [5, 15], "face": "S", "flags": ["no_beard"], "count": 4, "step": [20, 0]}
+  ],
+  "streets": [
+    {"from": [0, 102], "to": [0, -30], "width": 5, "major": true},
+    {"from": [-90, 70], "to": [-54, 70], "width": 3, "tag": "w"},
+    {"from": [-38, 70], "to": [38, 70], "width": 3, "tag": "c"},
+    {"from": [54, 70], "to": [90, 70], "width": 3, "tag": "e"},
+    {"from": [-90, -6], "to": [-54, -6], "width": 3, "tag": "w"},
+    {"from": [54, -6], "to": [90, -6], "width": 3, "tag": "e"}
+  ],
+  "plazas": [
+    {"at": [-22, 44], "size": 13, "stalls": 5, "name": "lilmoth_canal_market"},
+    {"at": [28, -30], "size": 13, "variant": 2, "name": "lilmoth_hist_tenders_pool"}
+  ],
+  "queue": [
+    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "lilmoth_hist_pool_inn", "on": "c"},
+    {"kind": "smithy", "size": [11, 9], "name": "lilmoth_bone_forge", "on": "c"},
+    {"kind": "store", "count": 3, "name": "lilmoth_canal_stalls", "on": "c"},
+    {"kind": "house", "count": 8, "on": "w", "small_every": 3},
+    {"kind": "house", "count": 8, "on": "e", "small_every": 3},
+    {"kind": "alchemist", "on": "c"}
+  ],
+  "titles": {
+    "lilmoth_hist_pool_inn": "The Hist Pool Inn",
+    "lilmoth_canal_stalls": "Canal Stalls",
+    "lilmoth_bone_forge": "The Bone Forge",
+    "lilmoth_canal_market": "Canal Market",
+    "lilmoth_hist_tenders_pool": "Hist Tender's Pool"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "sentinel",
+  "tint": {
+    "wall": "minecraft:smooth_sandstone",
+    "wall2": "minecraft:cut_sandstone",
+    "low": "minecraft:sandstone",
+    "roof": "prismarine_brick",
+    "accent": "blue"
+  },
+  "palette": {
+    "cityWall": "cut_sandstone",
+    "cityWall2": "minecraft:sandstone",
+    "plaza": "minecraft:smooth_sandstone",
+    "plaza2": "minecraft:cut_sandstone",
+    "path": "minecraft:sandstone"
+  }
+}

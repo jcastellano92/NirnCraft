@@ -1,0 +1,24 @@
+{
+  "id": "bruma",
+  "tint": {
+    "wall": "minecraft:calcite",
+    "wall2": "minecraft:white_terracotta",
+    "low": "minecraft:stone_bricks",
+    "wood": "spruce",
+    "roof": "deepslate_tile",
+    "accent": "white"
+  },
+  "palette": {
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:mossy_stone_bricks",
+    "plaza": "minecraft:stone_bricks",
+    "plaza2": "minecraft:andesite",
+    "path": "minecraft:gravel"
+  },
+  "style": {
+    "forms": {
+      "hilltop": 10,
+      "linear": 2
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "rihad",
+  "tint": {
+    "wall": "minecraft:pink_terracotta",
+    "wall2": "minecraft:white_terracotta",
+    "low": "minecraft:smooth_red_sandstone",
+    "roof": "red_sandstone",
+    "accent": "orange"
+  },
+  "palette": {
+    "cityWall": "cut_red_sandstone",
+    "cityWall2": "minecraft:red_sandstone",
+    "plaza": "minecraft:smooth_red_sandstone",
+    "plaza2": "minecraft:cut_red_sandstone",
+    "path": "minecraft:terracotta"
+  },
+  "style": {
+    "forms": {
+      "cluster": 10,
+      "crossroads": 2
+    }
+  }
+}

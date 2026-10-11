@@ -1,0 +1,51 @@
+{
+  "id": "sadrith_mora",
+  "base": "none",
+  "sil": "mushroom-spore-cluster",
+  "reach": 120,
+  "radius": 120,
+  "kit": "telvanni",
+  "overlay": "sadrith_mora",
+  "names": {"inn": "sadrith_mora_gateway_inn", "store": "sadrith_mora_spore_traders", "smithy": ""},
+  "innKey": "sadrith_mora_gateway_inn",
+  "gates": [[0, 112]],
+  "landmarks": [
+    {"id": "mushroom_spire", "at": [0, -8], "size": [17, 17], "h": 56, "name": "purple"},
+    {"id": "mushroom_spire", "at": [-50, -40], "size": [15, 15], "h": 42, "name": "cyan"},
+    {"id": "mushroom_spire", "at": [52, -34], "size": [15, 15], "h": 38, "name": "magenta"},
+    {"id": "mushroom_spire", "at": [58, 34], "size": [15, 15], "h": 36, "name": "blue"},
+    {"id": "mushroom_spire", "at": [-56, 30], "size": [15, 15], "h": 40, "name": "pink"},
+    {"id": "mushroom_spire", "at": [0, -70], "size": [15, 15], "h": 46, "name": "lime"}
+  ],
+  "lines": [
+    {"kind": "bridge", "from": [-13, -20], "to": [-43, -33], "width": 3, "lift": 21},
+    {"kind": "bridge", "from": [13, -20], "to": [45, -29], "width": 3, "lift": 21},
+    {"kind": "bridge", "from": [10, 2], "to": [52, 30], "width": 3, "lift": 21},
+    {"kind": "bridge", "from": [-10, 4], "to": [-49, 27], "width": 3, "lift": 21},
+    {"kind": "bridge", "from": [0, -17], "to": [0, -63], "width": 3, "lift": 21}
+  ],
+  "buildings": [
+    {"kind": "inn", "at": [26, 62], "size": [13, 17], "face": "W", "flags": ["upper"], "name": "sadrith_mora_gateway_inn"},
+    {"kind": "garden", "at": [-34, 66], "size": [19, 15], "face": "S"},
+    {"kind": "tower", "at": [-26, 90], "size": [7, 7], "h": 22, "margin": 1},
+    {"kind": "tower", "at": [26, 94], "size": [7, 7], "h": 22, "margin": 1}
+  ],
+  "streets": [
+    {"from": [0, 112], "to": [0, 20], "width": 4, "major": true},
+    {"from": [-72, 48], "to": [72, 48], "width": 3},
+    {"from": [-70, 78], "to": [70, 78], "width": 3}
+  ],
+  "plazas": [
+    {"at": [0, 36], "size": 15, "variant": 2, "name": "sadrith_mora_council_court"}
+  ],
+  "queue": [
+    {"kind": "store", "count": 2, "name": "sadrith_mora_spore_traders"},
+    {"kind": "alchemist", "count": 2},
+    {"kind": "house", "count": 16, "flags": ["upper"], "plain_every": 2, "small_every": 3}
+  ],
+  "titles": {
+    "sadrith_mora_gateway_inn": "The Rope-Bridge Tavern",
+    "sadrith_mora_spore_traders": "Spore Traders",
+    "sadrith_mora_council_court": "Council Court"
+  }
+}

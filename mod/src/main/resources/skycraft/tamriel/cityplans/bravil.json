@@ -1,0 +1,29 @@
+{
+  "id": "bravil",
+  "base": "zoning",
+  "sil": "stacked-shanty-hill",
+  "reach": 115,
+  "radius": 115,
+  "overlay": "bravil",
+  "names": {"inn": "bravil_lonely_suitor_lodge", "store": "bravil_fishmarket_stalls", "smithy": "bravil_riverside_smithy"},
+  "innKey": "bravil_lonely_suitor_lodge",
+  "terraces": [
+    {"rect": [-30, -86, 30, -46], "level": 8, "parapet": 1}
+  ],
+  "landmarks": [
+    {"id": "lucky_lady", "at": [0, -64], "size": [15, 15], "h": 36, "raise": 8}
+  ],
+  "lines": [
+    {"kind": "bridge", "from": [-40, 4], "to": [40, 4], "width": 3, "lift": 5},
+    {"kind": "bridge", "from": [-34, -22], "to": [34, -22], "width": 3, "lift": 8}
+  ],
+  "buildings": [
+    {"kind": "shrine", "at": [-46, -40], "size": [5, 5], "face": "S", "name": "bravil_ratcatchers_shrine", "raise": 6}
+  ],
+  "titles": {
+    "bravil_lonely_suitor_lodge": "The Lonely Suitor Lodge",
+    "bravil_fishmarket_stalls": "Bridgeside Fishmarket",
+    "bravil_riverside_smithy": "Riverside Smithy",
+    "bravil_ratcatchers_shrine": "Ratcatcher's Shrine"
+  }
+}

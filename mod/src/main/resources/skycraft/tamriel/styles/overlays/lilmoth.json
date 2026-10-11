@@ -1,0 +1,18 @@
+{
+  "id": "lilmoth",
+  "tint": {
+    "wood": "mangrove",
+    "wall": "minecraft:mangrove_planks",
+    "wall2": "minecraft:stripped_mangrove_log",
+    "roof": "mangrove",
+    "light": "minecraft:lantern",
+    "accent": "red"
+  },
+  "palette": {
+    "cityWall": "mud_bricks",
+    "cityWall2": "minecraft:packed_mud",
+    "plaza": "minecraft:mud_bricks",
+    "plaza2": "minecraft:packed_mud",
+    "path": "minecraft:coarse_dirt"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "id": "alinor",
+  "tint": {
+    "wall": "minecraft:smooth_quartz",
+    "wall2": "minecraft:quartz_bricks",
+    "low": "minecraft:calcite",
+    "roof": "prismarine_brick",
+    "trim": "waxed_cut_copper",
+    "accent": "pink"
+  },
+  "palette": {
+    "cityWall": "smooth_quartz",
+    "cityWall2": "minecraft:quartz_bricks",
+    "plaza": "minecraft:smooth_quartz",
+    "plaza2": "minecraft:prismarine_bricks",
+    "glass": "minecraft:pink_stained_glass",
+    "path": "minecraft:smooth_quartz"
+  }
+}

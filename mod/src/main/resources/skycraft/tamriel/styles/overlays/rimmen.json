@@ -1,0 +1,17 @@
+{
+  "id": "rimmen",
+  "tint": {
+    "wall": "minecraft:smooth_sandstone",
+    "wall2": "minecraft:cut_sandstone",
+    "low": "minecraft:polished_granite",
+    "roof": "polished_granite",
+    "accent": "pink"
+  },
+  "palette": {
+    "cityWall": "cut_sandstone",
+    "cityWall2": "minecraft:sandstone",
+    "plaza": "minecraft:smooth_sandstone",
+    "plaza2": "minecraft:polished_granite",
+    "path": "minecraft:sandstone"
+  }
+}

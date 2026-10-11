@@ -1,0 +1,49 @@
+{
+  "id": "wayrest",
+  "base": "none",
+  "sil": "bay-castle-wheel",
+  "reach": 110,
+  "radius": 110,
+  "overlay": "wayrest",
+  "names": {"inn": "wayrest_silver_lantern", "store": "wayrest_quay_provisions", "smithy": "wayrest_anchor_and_hammer"},
+  "innKey": "wayrest_silver_lantern",
+  "gates": [[0, 105], [105, 0], [-105, 0]],
+  "walls": [{"r": 105, "sides": 16, "h": 11, "gates": [0, 1.5708, -1.5708], "flags": ["major"]}],
+  "landmarks": [
+    {"id": "castle", "at": [0, -64], "size": [37, 29], "h": 34, "margin": 5},
+    {"id": "chain_tower", "at": [-66, 72], "size": [31, 11], "h": 28, "face": "S"}
+  ],
+  "buildings": [
+    {"kind": "tower", "at": [-28, -36], "size": [7, 7], "h": 26, "margin": 1},
+    {"kind": "tower", "at": [28, -36], "size": [7, 7], "h": 26, "margin": 1},
+    {"kind": "longhouse", "at": [-32, 62], "size": [13, 25], "face": "E", "name": "wayrest_merchant_guildhall", "flags": ["upper", "rich"]},
+    {"kind": "temple", "at": [42, -14], "size": [13, 19], "face": "W", "name": "wayrest_chapel_of_the_divines"},
+    {"kind": "barracks", "at": [-44, -22], "size": [9, 15], "face": "E"}
+  ],
+  "streets": [
+    {"from": [0, 104], "to": [0, -42], "width": 5, "major": true},
+    {"from": [-104, 0], "to": [104, 0], "width": 5, "major": true},
+    {"from": [-92, 50], "to": [92, 50], "width": 3}
+  ],
+  "rings": [{"r": 58, "sides": 8, "width": 3, "offset": 0.3927, "fill": true}],
+  "plazas": [
+    {"at": [0, 26], "size": 17, "variant": 1, "stalls": 6},
+    {"at": [60, 74], "size": 11, "variant": 3, "name": "wayrest_ward_quay"}
+  ],
+  "queue": [
+    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "wayrest_silver_lantern"},
+    {"kind": "smithy", "size": [11, 9], "name": "wayrest_anchor_and_hammer"},
+    {"kind": "store", "count": 3, "name": "wayrest_quay_provisions"},
+    {"kind": "alchemist"},
+    {"kind": "manor", "count": 4, "flags": ["upper", "rich"]},
+    {"kind": "house", "count": 32, "flags": ["upper"], "plain_every": 3, "small_every": 4}
+  ],
+  "titles": {
+    "wayrest_silver_lantern": "The Silver Lantern",
+    "wayrest_quay_provisions": "Quay Provisions",
+    "wayrest_anchor_and_hammer": "Anchor and Hammer",
+    "wayrest_merchant_guildhall": "Merchants' Guildhall",
+    "wayrest_chapel_of_the_divines": "Chapel of the Divines",
+    "wayrest_ward_quay": "Chain Quay"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "id": "lillandril",
+  "base": "none",
+  "sil": "terraced-library-isle",
+  "reach": 110,
+  "radius": 110,
+  "overlay": "lillandril",
+  "names": {"inn": "lillandril_scholars_hostel", "store": "lillandril_inkwell_and_vellum", "smithy": ""},
+  "innKey": "lillandril_scholars_hostel",
+  "gates": [[0, 100]],
+  "terraces": [
+    {"rect": [-76, -70, 76, -16], "level": 3, "parapet": 1}
+  ],
+  "landmarks": [
+    {"id": "library_terrace", "at": [0, -50], "size": [35, 27], "h": 18, "raise": 3},
+    {"id": "orrery", "at": [0, 12], "size": [19, 19], "h": 24}
+  ],
+  "buildings": [
+    {"kind": "tower", "at": [-58, -40], "size": [7, 7], "h": 30, "margin": 1, "raise": 3, "name": "lillandril_astronomers_tower"},
+    {"kind": "dock", "at": [-20, 108], "size": [5, 15], "face": "S", "flags": ["no_beard"], "count": 3, "step": [20, 0]}
+  ],
+  "streets": [
+    {"from": [0, 100], "to": [0, 24], "width": 5, "major": true},
+    {"from": [-90, 50], "to": [90, 50], "width": 3},
+    {"from": [-70, 4], "to": [-26, 4], "width": 3},
+    {"from": [26, 4], "to": [70, 4], "width": 3}
+  ],
+  "plazas": [
+    {"at": [0, 76], "size": 15, "variant": 1, "stalls": 4, "name": "lillandril_scholars_square"}
+  ],
+  "queue": [
+    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "lillandril_scholars_hostel"},
+    {"kind": "store", "count": 3, "name": "lillandril_inkwell_and_vellum"},
+    {"kind": "alchemist"},
+    {"kind": "temple", "size": [11, 17]},
+    {"kind": "manor", "count": 3, "flags": ["upper", "rich"]},
+    {"kind": "house", "count": 22, "flags": ["upper"], "plain_every": 3, "small_every": 4}
+  ],
+  "titles": {
+    "lillandril_scholars_hostel": "Scholars' Hostel",
+    "lillandril_inkwell_and_vellum": "Inkwell and Vellum",
+    "lillandril_astronomers_tower": "Astronomers' Tower",
+    "lillandril_scholars_square": "Scholars' Square"
+  }
+}

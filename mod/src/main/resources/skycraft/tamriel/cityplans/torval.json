@@ -1,0 +1,52 @@
+{
+  "id": "torval",
+  "base": "none",
+  "sil": "twin-moon-concentric",
+  "reach": 110,
+  "radius": 110,
+  "overlay": "torval",
+  "names": {"inn": "torval_two_moons_rest", "store": "torval_sugar_exchange_stalls", "smithy": "torval_clawsmith"},
+  "innKey": "torval_two_moons_rest",
+  "gates": [[0, 105], [105, 0], [-105, 0]],
+  "walls": [{"r": 105, "sides": 16, "h": 10, "gates": [0, 1.5708, -1.5708], "flags": ["major"]}],
+  "landmarks": [
+    {"id": "twin_domes", "at": [0, -4], "size": [39, 21], "h": 34, "margin": 2, "overlay": "torval_court"},
+    {"id": "orrery", "at": [0, -70], "size": [19, 19], "h": 24, "overlay": "torval_court"}
+  ],
+  "buildings": [
+    {"kind": "tower", "at": [-70, -50], "size": [7, 7], "h": 28, "margin": 1},
+    {"kind": "tower", "at": [70, -50], "size": [7, 7], "h": 28, "margin": 1}
+  ],
+  "streets": [
+    {"from": [0, 104], "to": [0, 22], "width": 5, "major": true},
+    {"from": [-104, 0], "to": [-24, 0], "width": 5, "major": true},
+    {"from": [104, 0], "to": [24, 0], "width": 5, "major": true},
+    {"from": [0, -24], "to": [0, -60], "width": 5, "major": true}
+  ],
+  "rings": [
+    {"r": 34, "sides": 16, "width": 5, "major": true},
+    {"r": 66, "sides": 8, "width": 3, "offset": 0.3927, "fill": true},
+    {"r": 94, "sides": 8, "width": 3, "offset": 0.3927, "fill": true}
+  ],
+  "plazas": [
+    {"at": [0, 54], "size": 19, "variant": 3, "stalls": 6, "name": "torval_moon_sugar_exchange"}
+  ],
+  "quarters": [
+    {"ring": [0, 44], "overlay": "torval_court"}
+  ],
+  "queue": [
+    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "torval_two_moons_rest"},
+    {"kind": "smithy", "size": [11, 9], "name": "torval_clawsmith"},
+    {"kind": "store", "count": 3, "name": "torval_sugar_exchange_stalls"},
+    {"kind": "alchemist", "count": 2},
+    {"kind": "temple", "size": [11, 17]},
+    {"kind": "manor", "count": 4, "flags": ["upper", "rich"]},
+    {"kind": "house", "count": 30, "flags": ["upper"], "plain_every": 3, "small_every": 4}
+  ],
+  "titles": {
+    "torval_two_moons_rest": "The Two Moons' Rest",
+    "torval_sugar_exchange_stalls": "Exchange Stalls",
+    "torval_clawsmith": "The Clawsmith",
+    "torval_moon_sugar_exchange": "Moon-Sugar Exchange"
+  }
+}

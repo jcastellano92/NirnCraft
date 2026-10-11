@@ -240,7 +240,7 @@ public final class Style {
         return m;
     }
 
-    private static Variant variant(JsonObject o) {
+    static Variant variant(JsonObject o) {
         Variant v = new Variant();
         for (Map.Entry<String, JsonElement> e : o.entrySet()) {
             switch (e.getKey()) {
@@ -251,6 +251,41 @@ public final class Style {
                 default -> v.set.put(e.getKey(), e.getValue().getAsString());
             }
         }
+        return v;
+    }
+
+    /**
+     * Layers a style overlay's {@code tint} over every material variant of every tier: keys of {@code tint} are palette
+     * overrides ({@code wall}, {@code roof}, {@code wood}...); an object keyed by wealth ids ({@code poor}, {@code common},
+     * {@code wealthy}, {@code noble}) tints only those tiers, and {@code all} (or loose keys) tints every tier.
+     */
+    void tint(JsonObject t) {
+        JsonObject loose = new JsonObject();
+        for (Map.Entry<String, JsonElement> e : t.entrySet()) {
+            boolean tierKey = e.getValue().isJsonObject();
+            if (!tierKey) loose.add(e.getKey(), e.getValue());
+        }
+        for (Wealth w : Wealth.VALUES) {
+            Variant add = variant(loose);
+            if (t.has("all") && t.get("all").isJsonObject()) add = merge(add, variant(t.getAsJsonObject("all")));
+            if (t.has(w.id()) && t.get(w.id()).isJsonObject()) add = merge(add, variant(t.getAsJsonObject(w.id())));
+            List<Variant> base = tiers.get(w);
+            List<Variant> out = new ArrayList<>();
+            if (base == null || base.isEmpty()) {
+                out.add(merge(new Variant(), add));
+            } else {
+                for (Variant v : base) out.add(merge(v, add));
+            }
+            tiers.put(w, out);
+        }
+    }
+
+    private static Variant merge(Variant a, Variant b) {
+        Variant v = new Variant();
+        v.set.putAll(a.set);
+        v.set.putAll(b.set);
+        v.timber = b.timber != null ? b.timber : a.timber;
+        v.pitch = b.pitch > 0 ? b.pitch : a.pitch;
         return v;
     }
 

@@ -1,0 +1,32 @@
+{
+  "id": "imperial_city",
+  "base": "java",
+  "sil": "ring-island",
+  "landmarks": [
+    {"id": "glass_dome", "at": [84, -84], "size": [25, 25], "h": 20, "margin": 2, "overlay": "imperial_garden"}
+  ],
+  "plazas": [
+    {"at": [26, -74], "size": 11, "variant": 3, "name": "imperial_ward_temple"},
+    {"at": [44, 82], "size": 11, "variant": 1, "name": "imperial_ward_talos_plaza"},
+    {"at": [-84, -84], "size": 13, "variant": 2, "name": "imperial_ward_elven_gardens"},
+    {"at": [-80, 46], "size": 11, "variant": 3, "name": "imperial_ward_arena"},
+    {"at": [40, 126], "size": 11, "name": "imperial_ward_waterfront"},
+    {"at": [84, -44], "size": 11, "variant": 2, "name": "imperial_ward_arboretum"}
+  ],
+  "quarters": [
+    {"rect": [-122, -34, -56, 34], "overlay": "imperial_arena"},
+    {"rect": [-30, -132, 30, -70], "overlay": "imperial_palace"},
+    {"ring": [0, 46], "overlay": "imperial_palace"},
+    {"ring": [46, 92], "overlay": "imperial_market"},
+    {"ring": [92, 136], "overlay": "imperial_garden"},
+    {"ring": [136, 260], "overlay": "imperial_waterfront"}
+  ],
+  "titles": {
+    "imperial_ward_temple": "Temple District",
+    "imperial_ward_talos_plaza": "Talos Plaza District",
+    "imperial_ward_elven_gardens": "Elven Gardens District",
+    "imperial_ward_arena": "Arena District",
+    "imperial_ward_waterfront": "Waterfront District",
+    "imperial_ward_arboretum": "Arboretum District"
+  }
+}

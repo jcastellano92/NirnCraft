@@ -1,0 +1,17 @@
+{
+  "id": "torval",
+  "tint": {
+    "wall": "minecraft:smooth_quartz",
+    "wall2": "minecraft:calcite",
+    "low": "minecraft:calcite",
+    "roof": "quartz",
+    "accent": "light_blue"
+  },
+  "palette": {
+    "cityWall": "smooth_quartz",
+    "cityWall2": "minecraft:calcite",
+    "plaza": "minecraft:smooth_quartz",
+    "plaza2": "minecraft:calcite",
+    "path": "minecraft:sandstone"
+  }
+}

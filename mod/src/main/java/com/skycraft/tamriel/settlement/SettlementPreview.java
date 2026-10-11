@@ -177,6 +177,25 @@ public final class SettlementPreview {
                 }
             }
         }
+        // labels: landmarks by registry id, named buildings by name
+        g.setFont(new java.awt.Font(java.awt.Font.SANS_SERIF, java.awt.Font.BOLD, 11));
+        for (int i = from; i < plan.specs.size(); i++) {
+            Spec s = plan.specs.get(i);
+            if (s.isLine()) continue;
+            String label = null;
+            if (s.kind == Archetype.LANDMARK) {
+                var def = com.skycraft.tamriel.settlement.build.LandmarkRegistry.ofVariant(s.variant);
+                label = def != null ? def.id() : "lm" + s.variant;
+            } else if (!s.name.isEmpty() && s.kind.building) {
+                label = s.name;
+            }
+            if (label == null) continue;
+            int lx = (s.x - minX) * k, lz = (s.z - minZ) * k;
+            g.setColor(new Color(0, 0, 0, 170));
+            g.drawString(label, lx - label.length() * 3 + 1, lz + 1);
+            g.setColor(s.kind == Archetype.LANDMARK ? new Color(0xFFF3A0) : Color.WHITE);
+            g.drawString(label, lx - label.length() * 3, lz);
+        }
         g.dispose();
         out.getParentFile().mkdirs();
         ImageIO.write(img, "png", out);
@@ -212,7 +231,8 @@ public final class SettlementPreview {
             case STALL -> new Color(0xE0C030);
             case GATE, TOWER -> new Color(0x404040);
             case DOCK -> new Color(0x8B6B3E);
-            case LANDMARK, PALACE -> new Color(0xFFFFFF);
+            case LANDMARK -> new Color(0x4F9FB0);
+            case PALACE -> new Color(0xFFFFFF);
             default -> s.kind.building ? new Color(0xA08060) : new Color(0x909090);
         };
     }
