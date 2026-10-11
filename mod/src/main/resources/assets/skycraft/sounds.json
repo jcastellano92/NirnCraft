@@ -1784,6 +1784,303 @@
     ],
     "subtitle": "subtitles.skycraft.shout.dragonrend.3"
   },
+  "shout.ice_form.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/ice_form_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.ice_form.1"
+  },
+  "shout.ice_form.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/ice_form_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.ice_form.2"
+  },
+  "shout.ice_form.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/ice_form_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.ice_form.3"
+  },
+  "shout.throw_voice.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/throw_voice_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.throw_voice.1"
+  },
+  "shout.throw_voice.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/throw_voice_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.throw_voice.2"
+  },
+  "shout.throw_voice.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/throw_voice_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.throw_voice.3"
+  },
+  "shout.dismay.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/dismay_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.dismay.1"
+  },
+  "shout.dismay.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/dismay_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.dismay.2"
+  },
+  "shout.dismay.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/dismay_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.dismay.3"
+  },
+  "shout.call_dragon.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/call_dragon_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.call_dragon.1"
+  },
+  "shout.call_dragon.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/call_dragon_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.call_dragon.2"
+  },
+  "shout.call_dragon.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/call_dragon_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.call_dragon.3"
+  },
+  "shout.call_of_valor.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/call_of_valor_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.call_of_valor.1"
+  },
+  "shout.call_of_valor.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/call_of_valor_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.call_of_valor.2"
+  },
+  "shout.call_of_valor.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/call_of_valor_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.call_of_valor.3"
+  },
+  "shout.cyclone.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/cyclone_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.cyclone.1"
+  },
+  "shout.cyclone.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/cyclone_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.cyclone.2"
+  },
+  "shout.cyclone.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/cyclone_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.cyclone.3"
+  },
+  "shout.drain_vitality.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/drain_vitality_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.drain_vitality.1"
+  },
+  "shout.drain_vitality.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/drain_vitality_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.drain_vitality.2"
+  },
+  "shout.drain_vitality.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/drain_vitality_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.drain_vitality.3"
+  },
+  "shout.soul_tear.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/soul_tear_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.soul_tear.1"
+  },
+  "shout.soul_tear.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/soul_tear_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.soul_tear.2"
+  },
+  "shout.soul_tear.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/soul_tear_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.soul_tear.3"
+  },
+  "shout.bend_will.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/bend_will_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.bend_will.1"
+  },
+  "shout.bend_will.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/bend_will_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.bend_will.2"
+  },
+  "shout.bend_will.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/bend_will_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.bend_will.3"
+  },
+  "shout.dragon_aspect.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/dragon_aspect_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.dragon_aspect.1"
+  },
+  "shout.dragon_aspect.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/dragon_aspect_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.dragon_aspect.2"
+  },
+  "shout.dragon_aspect.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/dragon_aspect_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.dragon_aspect.3"
+  },
+  "shout.battle_fury.1": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/battle_fury_1",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.battle_fury.1"
+  },
+  "shout.battle_fury.2": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/battle_fury_2",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.battle_fury.2"
+  },
+  "shout.battle_fury.3": {
+    "sounds": [
+      {
+        "name": "skycraft:shout/battle_fury_3",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.skycraft.shout.battle_fury.3"
+  },
   "shout.fus_ro_dah": {
     "sounds": [
       {

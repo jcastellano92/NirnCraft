@@ -57,10 +57,21 @@ public final class TamrielSpawn {
                 TamrielMap.sample(x, z, s);
                 if (s.coastDistance < 16 || s.river > 0.2f || s.lake > 0.2f) continue;
                 int y = gen.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, level, level.getChunkSource().randomState());
-                if (y > TamrielMap.SEA_LEVEL + 1) return new BlockPos(x, y, z);
+                // open ground, not the floor of a cave mouth or ravine: near the map's surface and level around
+                if (y > TamrielMap.SEA_LEVEL + 1 && Math.abs(y - s.elevation) < 12 && level(gen, level, x, z, y)) return new BlockPos(x, y, z);
             }
         }
         int y = gen.getBaseHeight(x0, z0, Heightmap.Types.WORLD_SURFACE_WG, level, level.getChunkSource().randomState());
         return new BlockPos(x0, Math.max(y, TamrielMap.SEA_LEVEL + 1), z0);
+    }
+
+    /** True when the ground 6 blocks around (x, z) is within 3 blocks of y. */
+    private static boolean level(ChunkGenerator gen, ServerLevel level, int x, int z, int y) {
+        int[][] around = {{6, 0}, {-6, 0}, {0, 6}, {0, -6}};
+        for (int[] d : around) {
+            int h = gen.getBaseHeight(x + d[0], z + d[1], Heightmap.Types.WORLD_SURFACE_WG, level, level.getChunkSource().randomState());
+            if (Math.abs(h - y) > 3) return false;
+        }
+        return true;
     }
 }

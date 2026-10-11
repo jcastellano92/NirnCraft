@@ -684,6 +684,9 @@ SHOUT_FLAVOUR = {
     "become_ethereal": "shimmer", "clear_skies": "wind", "aura_whisper": "shimmer", "slow_time": "time",
     "marked_for_death": "dark", "disarm": "metal", "elemental_fury": "wind", "kynes_peace": "shimmer",
     "animal_allegiance": "wind", "storm_call": "storm", "dragonrend": "dark",
+    "ice_form": "frost", "throw_voice": "shimmer", "dismay": "dark", "call_dragon": "storm", "call_of_valor": "shimmer",
+    "cyclone": "wind", "drain_vitality": "dark", "soul_tear": "dark", "bend_will": "force", "dragon_aspect": "force",
+    "battle_fury": "force",
 }
 
 

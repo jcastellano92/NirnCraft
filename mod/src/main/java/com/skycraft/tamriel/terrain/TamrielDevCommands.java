@@ -71,12 +71,13 @@ public final class TamrielDevCommands {
         ServerLevel level = src.getLevel();
         ChunkGenerator gen = level.getChunkSource().getGenerator();
         int surface = gen.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, level, level.getChunkSource().randomState());
+        int floor = gen.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, level, level.getChunkSource().randomState());
         src.sendSuccess(() -> Component.literal(String.format(Locale.ROOT, "(%d, %d) ", x, z)).append(r.name())
                 .append(String.format(Locale.ROOT, " [%s, %s, %s, levels %d-%d, idx %d]", r.id(), r.kind(), r.culture(),
                         r.minLevel(), r.maxLevel(), s.region)), false);
         src.sendSuccess(() -> Component.literal(String.format(Locale.ROOT,
-                "map y %.1f, surface y %d, coast %.0f, ridge %.2f, rough %.2f, crag %.2f, dunes %.2f, wet %.2f, road %.2f",
-                s.elevation, surface, s.coastDistance, s.ridge, s.roughness, s.crag, s.dunes, s.wetland, s.road)), false);
+                "map y %.1f, surface y %d, floor y %d, coast %.0f, ridge %.2f, rough %.2f, crag %.2f, dunes %.2f, wet %.2f, road %.2f",
+                s.elevation, surface, floor, s.coastDistance, s.ridge, s.roughness, s.crag, s.dunes, s.wetland, s.road)), false);
         src.sendSuccess(() -> Component.literal(String.format(Locale.ROOT,
                 "water %s, river %.2f (%.0f blocks, half width %.0f), lake %.2f (%.0f), blend %s %.2f, tamriel %s",
                 Float.isNaN(s.waterLevel) ? "none" : String.format(Locale.ROOT, "%.1f", s.waterLevel), s.river,

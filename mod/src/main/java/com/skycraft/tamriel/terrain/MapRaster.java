@@ -186,7 +186,7 @@ public final class MapRaster {
         out.inTamriel = true;
         out.elevation = lerp(d, ELEV, o00, o10, o01, o11, w00, w10, w01, w11);
         out.coastDistance = lerp(d, COAST, o00, o10, o01, o11, w00, w10, w01, w11);
-        out.riverDistance = lerp(d, RIV_D, o00, o10, o01, o11, w00, w10, w01, w11);
+        out.riverDistance = riverDistance(d, o00, o10, o01, o11, tx, tz, lerp(d, RIV_D, o00, o10, o01, o11, w00, w10, w01, w11));
         out.lakeDistance = lerp(d, LAKE_SD, o00, o10, o01, o11, w00, w10, w01, w11);
         out.ridge = lerp(d, RIDGE, o00, o10, o01, o11, w00, w10, w01, w11);
         out.roughness = lerp(d, ROUGH, o00, o10, o01, o11, w00, w10, w01, w11);
@@ -223,6 +223,32 @@ public final class MapRaster {
             out.blendWeight = 0f;
         }
         TamrielMap.deriveStrengths(out);
+    }
+
+    /**
+     * Distance to the nearest river centre line. The raster holds exact distances at the cell centres, but a bilinear
+     * blend of an unsigned distance can't reach zero between them (it bottoms out up to half a cell off a line that
+     * runs between two centres), which broke rivers narrower than a cell into a chain of puddles. Near a river, fit a
+     * planar signed distance through the four corners instead (trying each sign pattern: the line passes between the
+     * corners of opposite sign) and use it when it explains them well, i.e. a straight stretch of one river.
+     */
+    private static float riverDistance(float[] d, int o00, int o10, int o01, int o11, float tx, float tz, float bilinear) {
+        float d00 = d[o00 + RIV_D], d10 = d[o10 + RIV_D], d01 = d[o01 + RIV_D], d11 = d[o11 + RIV_D];
+        if (Math.min(Math.min(d00, d10), Math.min(d01, d11)) > CELL * 1.5f
+                || Math.max(Math.max(d00, d10), Math.max(d01, d11)) >= 127f) return bilinear;
+        float best = Float.MAX_VALUE, value = bilinear;
+        for (int m = 0; m < 8; m++) {
+            float v00 = d00, v10 = (m & 1) != 0 ? -d10 : d10, v01 = (m & 2) != 0 ? -d01 : d01, v11 = (m & 4) != 0 ? -d11 : d11;
+            float b = ((v10 - v00) + (v11 - v01)) * 0.5f, c = ((v01 - v00) + (v11 - v10)) * 0.5f;
+            float twist = v00 - v10 - v01 + v11;
+            float score = Math.abs(twist) / CELL + Math.abs((float) Math.sqrt(b * b + c * c) / CELL - 1f);
+            if (score < best) {
+                best = score;
+                float a = (v00 + v10 + v01 + v11) * 0.25f - (b + c) * 0.5f;
+                value = Math.abs(a + b * tx + c * tz);
+            }
+        }
+        return best < 0.25f ? Math.min(bilinear, value) : bilinear;
     }
 
     private static float lerp(float[] d, int ch, int o00, int o10, int o01, int o11,

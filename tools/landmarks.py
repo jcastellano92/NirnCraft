@@ -418,9 +418,49 @@ CULTURE = {"cyrodiil": "imperial", "morrowind": "dunmer", "high_rock": "breton",
            "black_marsh": "argonian", "elsweyr": "khajiit", "valenwood": "bosmer", "summerset": "altmer"}
 
 
+class MapCells:
+    """The Tamriel map rasters (mod resources, see TamrielMap/MapRaster): lets the shrines avoid the sea, lakes and
+    rivers and take their region from the map. Missing rasters (or no PIL) disable the check."""
+    CELL, MIN_X, MIN_Z = 32, -15360, -5120
+
+    def __init__(self):
+        self.ok = False
+        try:
+            from PIL import Image
+            d = os.path.join(RES, "skycraft", "tamriel")
+            self.reg = Image.open(os.path.join(d, "regions.png")).load()
+            self.elev = Image.open(os.path.join(d, "elevation.png")).load()
+            self.coast = Image.open(os.path.join(d, "coast.png")).load()
+            self.feat = Image.open(os.path.join(d, "features.png")).convert("RGBA").load()
+            self.size = Image.open(os.path.join(d, "regions.png")).size
+            regions = json.load(open(os.path.join(d, "regions.json"), encoding="utf-8"))
+            self.regions = {r["index"]: r for r in regions}
+            self.ok = True
+        except Exception as e:  # noqa: BLE001 - optional check
+            print("map rasters unavailable, shrines are not checked against the terrain:", e)
+
+    def region(self, x, z):
+        """The land region (dict) at (x, z) if it is dry, inland land well away from water, else None."""
+        cx, cz = (x - self.MIN_X) // self.CELL, (z - self.MIN_Z) // self.CELL
+        if not (2 <= cx < self.size[0] - 2 and 2 <= cz < self.size[1] - 2):
+            return None
+        best = None
+        for dx in (-1, 0, 1):
+            for dz in (-1, 0, 1):
+                px = (cx + dx, cz + dz)
+                r, _, b, _ = self.feat[px]
+                if self.coast[px] - 32768 < 64 or self.elev[px] / 32 - 64 < 68 or (b - 128) * 0.5 > -24 or (255 - r) * 0.5 < 24:
+                    return None
+                if dx == 0 and dz == 0:
+                    best = self.regions.get(self.reg[px])
+        return best
+
+
 def province_shrines(lang):
-    """Sixteen shrines per province, spread inland from the province's anchors (towards its middle), well apart."""
+    """Sixteen shrines per province, spread inland from the province's anchors (towards its middle), well apart, on
+    dry land of the province (checked against the map rasters when they are available)."""
     out = []
+    cells = MapCells()
     for prov, anchors in PROVINCE_ANCHORS.items():
         cx = sum(a[1] for a in anchors) / len(anchors)
         cz = sum(a[2] for a in anchors) / len(anchors)
@@ -430,20 +470,50 @@ def province_shrines(lang):
             # head inland: towards the province's centre, swung by the Prince
             base_ang = math.atan2(cz - az, cx - ax) if (cx, cz) != (ax, az) else 0.0
             h = (hash_str(prov + prince) % 1000) / 1000.0
-            for attempt in range(24):
+            land = None
+            for attempt in range(96):
                 ang = base_ang + (h - 0.5) * 2.2 + attempt * 0.9
                 dist = 420 + ((hash_str(prince + prov + str(attempt)) % 1000) / 1000.0) * 520
                 if len(anchors) <= 2:
                     dist *= 0.8
+                if attempt >= 24:
+                    # still at sea or in a lake: try closer to the anchor, then further out
+                    dist *= (0.35, 0.6, 1.3)[attempt % 3]
                 x = round(ax + math.cos(ang) * dist)
                 z = round(az + math.sin(ang) * dist)
-                if all(math.hypot(x - a[1], z - a[2]) > 300 for a in anchors) and all(math.hypot(x - s[0], z - s[1]) > 380 for s in spots):
+                if not all(math.hypot(x - a[1], z - a[2]) > 300 for a in anchors) or not all(math.hypot(x - s[0], z - s[1]) > 380 for s in spots):
+                    continue
+                land = cells.region(x, z) if cells.ok else None
+                if not cells.ok or (land is not None and land["province"] == prov):
                     break
+            else:
+                if cells.ok:
+                    # small islands (Summerset, Auridon): the nearest free dry land of the province around any anchor
+                    found = None
+                    for rad in range(128, 2400, 64):
+                        for a in anchors:
+                            for k in range(max(8, rad // 48)):
+                                ang = k * 2 * math.pi / max(8, rad // 48) + h
+                                tx, tz = round(a[1] + math.cos(ang) * rad), round(a[2] + math.sin(ang) * rad)
+                                tl = cells.region(tx, tz)
+                                if tl is not None and tl["province"] == prov and all(math.hypot(tx - b[1], tz - b[2]) > 200 for b in anchors) \
+                                        and all(math.hypot(tx - s[0], tz - s[1]) > 250 for s in spots):
+                                    found = (tx, tz, tl)
+                                    break
+                            if found:
+                                break
+                        if found:
+                            break
+                    if found:
+                        x, z, land = found
             spots.append((x, z))
             pid = "shrine_" + prince + "_" + prov
             near = min(anchors, key=lambda a: math.hypot(a[1] - x, a[2] - z))
+            region = land["id"] if land is not None and land["province"] == prov else near[0]
+            if cells.ok and region == near[0] and land is None:
+                print("shrine still off land:", pid, x, z)
             out.append({"id": pid, "name": "place.skycraft." + pid, "type": "daedric_shrine", "culture": CULTURE[prov],
-                        "region": near[0], "x": x, "z": z, "radius": 12, "variant": prince})
+                        "region": region, "x": x, "z": z, "radius": 12, "variant": prince})
             lang["place.skycraft." + pid] = PRINCE_NAMES[prince]
     return out
 

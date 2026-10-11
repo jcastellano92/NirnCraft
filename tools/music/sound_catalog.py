@@ -193,6 +193,10 @@ SHOUTS = {
     "aura_whisper": ["LAAS", "YAH", "NIR"], "slow_time": ["TIID", "KLO", "UL"], "marked_for_death": ["KRII", "LUN", "AUS"],
     "disarm": ["ZUN", "HAAL", "VIIK"], "elemental_fury": ["SU", "GRAH", "DUN"], "kynes_peace": ["KAAN", "DREM", "OV"],
     "animal_allegiance": ["RAAN", "MIR", "TAH"], "storm_call": ["STRUN", "BAH", "QO"], "dragonrend": ["JOOR", "ZAH", "FRUL"],
+    "ice_form": ["IIZ", "SLEN", "NUS"], "throw_voice": ["ZUL", "MEY", "GUT"], "dismay": ["FAAS", "RU", "MAAR"],
+    "call_dragon": ["OD", "AH", "VIING"], "call_of_valor": ["HUN", "KAAL", "ZOOR"], "cyclone": ["VEN", "GAAR", "NOS"],
+    "drain_vitality": ["GAAN", "LAH", "HAAS"], "soul_tear": ["RII", "VAAZ", "ZOL"], "bend_will": ["GOL", "HAH", "DOV"],
+    "dragon_aspect": ["MUL", "QAH", "DIIV"], "battle_fury": ["MID", "VUR", "SHAAN"],
 }
 for shout, words in SHOUTS.items():
     for k in (1, 2, 3):

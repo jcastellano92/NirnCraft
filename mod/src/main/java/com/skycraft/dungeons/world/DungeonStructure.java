@@ -334,7 +334,17 @@ public class DungeonStructure extends Structure {
         ChunkGenerator gen = ctx.chunkGenerator();
         int land = gen.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, ctx.heightAccessor(), ctx.randomState());
         int top = gen.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, ctx.heightAccessor(), ctx.randomState());
-        return top > land ? WATER : land;
+        if (top > land) return WATER;
+        // the map's lakes and rivers above sea level are filled by a feature later, so the noise heights don't see them
+        if (gen instanceof net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator ng
+                && ng.generatorSettings().is(com.skycraft.tamriel.terrain.TamrielSpawn.TAMRIEL_SETTINGS)) {
+            com.skycraft.tamriel.MapSample s = new com.skycraft.tamriel.MapSample();
+            TamrielMap.sample(x, z, s);
+            if (s.inWater() && land < s.waterLevel) return WATER;
+            // nor is the floor of a cave mouth far below the surrounding ground a building spot (treated like water)
+            if (s.coastDistance > 32 && land < s.elevation - 24) return WATER;
+        }
+        return land;
     }
 
     /** Solid ground level at (x, z), even under water. */

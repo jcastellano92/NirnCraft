@@ -88,10 +88,164 @@ public final class ClientAutotest {
         }
     }
 
+    /**
+     * Optional {@code -Dskycraft.autotest.createflow=true}: create the world the way a player does, through the title
+     * screen's New Game and {@link com.skycraft.client.screen.title.SkyCreateWorldScreen}, and screenshot any prompt
+     * that shows up on the way (a prompt here would block a real player).
+     */
+    private static final boolean CREATE_FLOW = Boolean.getBoolean("skycraft.autotest.createflow");
+    /** With {@link #CREATE_FLOW}: {@code -Dskycraft.autotest.load=<save folder>} loads that save instead of creating one. */
+    private static final String LOAD_WORLD = System.getProperty("skycraft.autotest.load", "");
+    private static int createTicks;
+    private static int createStage;
+    private static final java.util.Set<String> SEEN_PROMPTS = new java.util.HashSet<>();
+
+    private static void createFlowTick(Minecraft mc) {
+        createTicks++;
+        net.minecraft.client.gui.screens.Screen s = mc.screen;
+        if (s instanceof net.minecraft.client.gui.screens.AccessibilityOnboardingScreen) {
+            mc.setScreen(new net.minecraft.client.gui.screens.TitleScreen());
+            return;
+        }
+        if (createStage == 0 && (s instanceof net.minecraft.client.gui.screens.TitleScreen
+                || s instanceof com.skycraft.client.screen.title.SkyTitleScreen) && createTicks > 40) {
+            createStage = 1;
+            createTicks = 0;
+            try {
+                Files.createDirectories(SCREENSHOT_DIR);
+            } catch (Exception ignored) {}
+            if (!LOAD_WORLD.isEmpty()) {
+                // Continue an existing save, as the title screen's Continue does
+                Skycraft.LOGGER.info("Autotest: loading saved world {}", LOAD_WORLD);
+                createStage = 2;
+                mc.createWorldOpenFlows().loadLevel(s, LOAD_WORLD);
+                return;
+            }
+            Skycraft.LOGGER.info("Autotest: New Game from the title screen ({})", s.getClass().getSimpleName());
+            net.minecraft.client.gui.screens.worldselection.CreateWorldScreen.openFresh(mc, s);
+        } else if (createStage == 1 && s instanceof com.skycraft.client.screen.title.SkyCreateWorldScreen && createTicks > 40) {
+            createStage = 2;
+            createTicks = 0;
+            captureAndSave(mc, "00_create_world_screen");
+            s.keyPressed(org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER, 0, 0);
+        } else if (createStage >= 2) {
+            String name = s == null ? "none" : s.getClass().getName();
+            if (!name.equals(lastScreen)) {
+                lastScreen = name;
+                createTicks = 0;
+                Skycraft.LOGGER.info("Autotest: world creation shows {} \"{}\"", name, s == null ? "" : s.getTitle().getString());
+            } else if (createTicks == 60 && s != null && SEEN_PROMPTS.add(name)) {
+                // a screen that stays up for 3 s during creation is a prompt or a hang a player would see
+                Skycraft.LOGGER.warn("Autotest: world creation waits at {} \"{}\"", name, s.getTitle().getString());
+                captureAndSave(mc, "00_create_world_wait_" + SEEN_PROMPTS.size());
+            }
+        }
+    }
+
+    private static String lastScreen = "";
+
+    /**
+     * Optional {@code -Dskycraft.autotest.tour=Name:x:z,Name:x:z,...}: instead of the screen walk-through, fly to each
+     * spot (spectator, through the integrated server, so cheats needn't be on) and screenshot it from the ground and
+     * from the air. The map screen and the HUD are captured at the start.
+     */
+    private static final String TOUR = System.getProperty("skycraft.autotest.tour", "");
+    private static final int TOUR_WAIT = Integer.getInteger("skycraft.autotest.tourWait", 400);
+    private static int tourStep;
+    private static int tourWait;
+
+    private static void serverCommand(Minecraft mc, String command) {
+        var server = mc.getSingleplayerServer();
+        if (server == null || mc.player == null) return;
+        String name = mc.player.getGameProfile().getName();
+        server.execute(() -> server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
+                command.replace("@p", name)));
+    }
+
+    /**
+     * Teleports the player to (x, surface + up, z) on the server thread: the generator's estimate before the chunk
+     * exists, the real height (above trees) once it is loaded. Then clears the regional weather there.
+     */
+    private static void tourTeleport(Minecraft mc, int x, int z, int up, float yaw, float pitch) {
+        var server = mc.getSingleplayerServer();
+        if (server == null || mc.player == null) return;
+        String name = mc.player.getGameProfile().getName();
+        server.execute(() -> {
+            var level = server.overworld();
+            boolean loaded = level.getChunkSource().hasChunk(x >> 4, z >> 4);
+            int h = loaded ? level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, x, z)
+                    : level.getChunkSource().getGenerator().getBaseHeight(x, z,
+                    net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE_WG, level, level.getChunkSource().randomState());
+            server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
+                    String.format(java.util.Locale.ROOT, "tp %s %d %d %d %.0f %.0f", name, x, h + up, z, yaw, pitch));
+            server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(),
+                    "execute as " + name + " at " + name + " run skycraft-weather set clear 30");
+            Skycraft.LOGGER.info("Autotest tour: {} at {} {} {} (surface {}, {})", name, x, h + up, z, h, loaded ? "loaded" : "estimate");
+        });
+    }
+
+    private static void tourTick(Minecraft mc) {
+        if (tourWait-- > 0) return;
+        String[] spots = TOUR.split(",");
+        int s = tourStep++;
+        tourWait = 40;
+        switch (s) {
+            case 0 -> {
+                com.skycraft.network.SkyNetwork.sendToServer(new com.skycraft.network.CorePackets.ChooseRace(com.skycraft.core.Race.NORD.id()));
+                mc.setScreen(null);
+                serverCommand(mc, "gamerule doDaylightCycle false");
+                serverCommand(mc, "gamerule doMobSpawning false");
+                serverCommand(mc, "time set 5000");
+                serverCommand(mc, "weather clear 1000000");
+                serverCommand(mc, "execute as @p at @p run skycraft-weather set clear 600");
+                tourWait = 100;
+            }
+            case 1 -> captureAndSave(mc, "t00_spawn_hud");
+            case 2 -> mc.setScreen(new MapScreen());
+            case 3 -> {
+                captureAndSave(mc, "t01_map_screen");
+                mc.setScreen(null);
+                serverCommand(mc, "gamemode spectator @p");
+            }
+            default -> {
+                int i = (s - 4) / 4;
+                if (i >= spots.length) {
+                    Skycraft.LOGGER.info("=== Skycraft Autotest: tour finished. Closing client. ===");
+                    mc.stop();
+                    return;
+                }
+                String[] p = spots[i].split(":");
+                int x = Integer.parseInt(p[1].trim()), z = Integer.parseInt(p[2].trim());
+                float yaw = p.length > 3 ? Float.parseFloat(p[3]) : 0f;
+                String tag = String.format(java.util.Locale.ROOT, "t%02d_%s", i + 2, p[0].trim());
+                switch ((s - 4) % 4) {
+                    case 0 -> {
+                        tourTeleport(mc, x, z, 3, yaw, 8f);
+                        tourWait = TOUR_WAIT;
+                    }
+                    case 1 -> {
+                        tourTeleport(mc, x, z, 2, yaw, 8f);
+                        tourWait = 60;
+                    }
+                    case 2 -> {
+                        captureAndSave(mc, tag + "_ground");
+                        tourTeleport(mc, x, z, 70, yaw, 28f);
+                        tourWait = TOUR_WAIT * 3 / 4;
+                    }
+                    default -> captureAndSave(mc, tag + "_air");
+                }
+            }
+        }
+    }
+
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (!ENABLED || event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null && CREATE_FLOW) {
+            createFlowTick(mc);
+            return;
+        }
         if (mc.level == null && !AUTO_WORLD.isEmpty() && !autoWorldStarted
                 && (mc.screen instanceof net.minecraft.client.gui.screens.TitleScreen
                 || mc.screen instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
@@ -111,6 +265,10 @@ public final class ClientAutotest {
                 } catch (Exception ignored) {}
                 Skycraft.LOGGER.info("=== Skycraft Autotest: World loaded, beginning test suite ===");
             }
+            return;
+        }
+        if (!TOUR.isEmpty()) {
+            tourTick(mc);
             return;
         }
 

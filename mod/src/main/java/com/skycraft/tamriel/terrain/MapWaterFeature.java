@@ -37,7 +37,12 @@ public class MapWaterFeature extends Feature<NoneFeatureConfiguration> {
             for (int dx = 0; dx < 16; dx++) {
                 int x = x0 + dx, z = z0 + dz;
                 TamrielMap.sample(x, z, s);
-                if (!s.inWater()) continue;
+                if (!s.inWater()) {
+                    // marshes (Hjaalmarch, Black Marsh...) sit at sea level: their shallow dips below it are pools,
+                    // not dry pits (inland, the aquifers leave them empty)
+                    if (s.wetland >= 0.5f) placed |= fillMarshPool(level, pos, x, z);
+                    continue;
+                }
                 int top = (int) Math.ceil(s.waterLevel) - 1;
                 if (top < TamrielMap.SEA_LEVEL) continue;  // the sea and aquifers handle water below sea level
                 int floor = level.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z);
@@ -53,4 +58,24 @@ public class MapWaterFeature extends Feature<NoneFeatureConfiguration> {
         }
         return placed;
     }
+
+    /** Fills an open-sky dip of at most {@link #MARSH_POOL_DEPTH} blocks below sea level with water up to sea level. */
+    private static boolean fillMarshPool(WorldGenLevel level, BlockPos.MutableBlockPos pos, int x, int z) {
+        int top = TamrielMap.SEA_LEVEL - 1;
+        int floor = level.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z);
+        // deeper holes are cave mouths: leave them dry so the water doesn't pour into the caves
+        if (floor > top || floor < TamrielMap.SEA_LEVEL - MARSH_POOL_DEPTH) return false;
+        if (level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z) != floor) return false;
+        boolean placed = false;
+        for (int y = floor; y <= top; y++) {
+            pos.set(x, y, z);
+            if (level.getBlockState(pos).isAir()) {
+                level.setBlock(pos, WATER, 2);
+                placed = true;
+            }
+        }
+        return placed;
+    }
+
+    private static final int MARSH_POOL_DEPTH = 8;
 }

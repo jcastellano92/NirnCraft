@@ -468,7 +468,47 @@ public final class ClientEvents {
 
         if (screen instanceof net.minecraft.client.gui.screens.worldselection.SelectWorldScreen && !(screen instanceof com.skycraft.client.screen.title.SkyLoadWorldScreen)) {
             event.setNewScreen(new com.skycraft.client.screen.title.SkyLoadWorldScreen(new com.skycraft.client.screen.title.SkyTitleScreen()));
+            return;
         }
+
+        // Skycraft's world (the Tamriel preset, biomes and structures) comes from the mod's data pack, which vanilla
+        // flags as "experimental settings". Answer that warning for the player, on create and on load.
+        if ((screen instanceof net.minecraft.client.gui.screens.ConfirmScreen || screen instanceof net.minecraft.client.gui.screens.BackupConfirmScreen)
+                && isExperimentalWarning(screen.getTitle()) && skipExperimentalWarning(screen)) {
+            com.skycraft.Skycraft.LOGGER.info("Answered the experimental settings warning ({}) for the player", screen.getClass().getSimpleName());
+            event.setCanceled(true);
+        }
+    }
+
+    private static boolean isExperimentalWarning(net.minecraft.network.chat.Component title) {
+        return title.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t
+                && (t.getKey().equals("selectWorld.warning.experimental.title") || t.getKey().equals("selectWorld.backupQuestion.experimental"));
+    }
+
+    /** Runs the warning's "proceed" answer on the next tick (instead of showing it); false if that isn't possible. */
+    private static boolean skipExperimentalWarning(net.minecraft.client.gui.screens.Screen screen) {
+        for (Class<?> c = screen.getClass(); c != null && c != Object.class; c = c.getSuperclass()) {
+            for (java.lang.reflect.Field f : c.getDeclaredFields()) {
+                try {
+                    if (f.getType() == it.unimi.dsi.fastutil.booleans.BooleanConsumer.class) {
+                        f.setAccessible(true);
+                        it.unimi.dsi.fastutil.booleans.BooleanConsumer callback = (it.unimi.dsi.fastutil.booleans.BooleanConsumer) f.get(screen);
+                        Minecraft.getInstance().tell(() -> callback.accept(true));
+                        return true;
+                    }
+                    if (f.getType() == net.minecraft.client.gui.screens.BackupConfirmScreen.Listener.class) {
+                        f.setAccessible(true);
+                        net.minecraft.client.gui.screens.BackupConfirmScreen.Listener listener = (net.minecraft.client.gui.screens.BackupConfirmScreen.Listener) f.get(screen);
+                        Minecraft.getInstance().tell(() -> listener.proceed(false, false));
+                        return true;
+                    }
+                } catch (ReflectiveOperationException | RuntimeException e) {
+                    com.skycraft.Skycraft.LOGGER.warn("Could not answer the experimental settings warning", e);
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 }
 
