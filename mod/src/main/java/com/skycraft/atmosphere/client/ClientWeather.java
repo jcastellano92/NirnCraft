@@ -105,6 +105,22 @@ public final class ClientWeather {
     public static WeatherKind kind() { return centerKind; }
     /** The region the player stands in (null before the first update). */
     public static Region region() { return region; }
+    /** The synced weather of any region (the server covers every region out to about 1.6 km), or null if unknown. */
+    public static WeatherKind kindOf(String regionId) {
+        Spell s = TABLE.get(regionId);
+        return s == null ? null : s.kind;
+    }
+    /** Ids of the regions the server has sent weather for. */
+    static java.util.Set<String> regionIds() { return TABLE.keySet(); }
+    /** Wind direction (where it blows towards, degrees) as eased on the client. */
+    public static float windDegrees() { return windDeg; }
+
+    /** Test hook (visual autotest): jump the eased weather and the cloud climate to the synced table right away. */
+    public static void snapForTest() {
+        snap = true;
+        CloudClimate.snapAll();
+        CloudRenderer.invalidate();
+    }
 
     // ------------------------------------------------------------------ sync
 
@@ -243,6 +259,12 @@ public final class ClientWeather {
             target[P.TINT_R] = cur[P.TINT_R];
             target[P.TINT_G] = cur[P.TINT_G];
             target[P.TINT_B] = cur[P.TINT_B];
+        }
+        // Morning mist (and a little at night) where the climate breeds it, thickest down by the water.
+        float mist = profile.dawnMist * WeatherProfile.mistHour(level.getDayTime());
+        if (mist > 0.01f) {
+            float low = Mth.clamp(1f - Math.max(0, here.getY() - 100) / 120f, 0.25f, 1f);
+            target[P.FOG] = Math.max(target[P.FOG], target[P.FOG] + mist * 0.45f * low * (1f - target[P.FOG]));
         }
         // Under a roof or deep underground the storm is outside: precipitation stays, but no fog indoors.
         if (!level.canSeeSky(here.above()) && level.getBrightness(net.minecraft.world.level.LightLayer.SKY, here) < 6) {

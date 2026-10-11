@@ -22,6 +22,12 @@
   "skycraft.configuration.regionalWeather": "Regional Weather Simulation",
   "skycraft.configuration.driveVanillaWeather": "Vanilla Weather Follows Players",
   "skycraft.configuration.durationScale": "Weather Duration Multiplier",
+  "skycraft.configuration.clouds": "Clouds",
+  "skycraft.configuration.skycraftClouds": "Skycraft Clouds",
+  "skycraft.configuration.cloudHeight": "Cloud Height",
+  "skycraft.configuration.cloudDistance": "Cloud Distance",
+  "skycraft.configuration.distantWeather": "Distant Weather",
+  "skycraft.configuration.distantThunder": "Distant Thunder",
   "skycraft.configuration.music": "Soundtrack",
   "skycraft.configuration.levelUpSting": "Level-Up Fanfare",
 

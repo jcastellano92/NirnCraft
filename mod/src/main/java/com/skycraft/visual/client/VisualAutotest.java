@@ -45,8 +45,11 @@ import java.util.function.Consumer;
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class VisualAutotest {
-    private static final boolean ENABLED = Files.exists(Paths.get("skycraft-visualtest.txt")) || "1".equals(System.getenv("SKYCRAFT_VISUALTEST"));
-    private static final Path OUT = Paths.get("build", "visualtest-screenshots");
+    /** {@code -Dskycraft.visualtest=clouds} (e.g. through JAVA_TOOL_OPTIONS) runs the cloud and distant-weather tour instead. */
+    private static final String MODE = System.getProperty("skycraft.visualtest", "");
+    private static final boolean ENABLED = Files.exists(Paths.get("skycraft-visualtest.txt")) || "1".equals(System.getenv("SKYCRAFT_VISUALTEST"))
+            || !MODE.isEmpty();
+    static final Path OUT = Paths.get("build", "visualtest-screenshots");
 
     private record Step(int delay, Consumer<Minecraft> action) {}
 
@@ -59,6 +62,11 @@ public final class VisualAutotest {
     private static int waitLeft;
 
     static {
+        if ("clouds".equals(MODE)) CloudTour.steps();
+        else defaultSteps();
+    }
+
+    private static void defaultSteps() {
         step(100, mc -> {
             com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.ChooseRace(com.skycraft.core.Race.NORD.id()));
             mc.setScreen(null);
@@ -127,11 +135,11 @@ public final class VisualAutotest {
 
     private VisualAutotest() {}
 
-    private static void step(int wait, Consumer<Minecraft> action) {
+    static void step(int wait, Consumer<Minecraft> action) {
         STEPS.add(new Step(wait, action));
     }
 
-    private static void cmd(int wait, String command) {
+    static void cmd(int wait, String command) {
         step(wait, mc -> {
             if (mc.player != null) mc.player.connection.sendCommand(command);
         });
@@ -143,7 +151,7 @@ public final class VisualAutotest {
         step(320, mc -> shot(mc, "10_weather_" + kind));
     }
 
-    private static void look(Minecraft mc, float yaw, float pitch) {
+    static void look(Minecraft mc, float yaw, float pitch) {
         if (mc.player == null) return;
         mc.setScreen(null);
         mc.player.setYRot(yaw);
@@ -178,7 +186,7 @@ public final class VisualAutotest {
         }
     }
 
-    private static void shot(Minecraft mc, String name) {
+    static void shot(Minecraft mc, String name) {
         try {
             Files.createDirectories(OUT);
             NativeImage img = Screenshot.takeScreenshot(mc.getMainRenderTarget());

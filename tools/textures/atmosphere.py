@@ -5,6 +5,8 @@
   assets/skycraft/textures/environment/secunda_phases.png Secunda, 8 phases in a 4x2 grid (drawn by SkyRenderer)
   assets/skycraft/textures/environment/masser_halo.png    soft red glow drawn around Masser at night
   assets/skycraft/textures/environment/galaxy.png         horizontally tiling galaxy band
+  assets/skycraft/textures/environment/clouds.png         cloud sprite atlas (4x4) for atmosphere.client.CloudRenderer
+                                                          (`atmosphere.py clouds` rewrites only this one)
   assets/skycraft/textures/particle/*.png + particles/*.json  atmospheric particle sprites (visual package):
       snowflake, ash_flake, ember, sand_dust, falling_leaf, firefly, frost_breath, marsh_wisp, dust_mote
 
@@ -249,7 +251,183 @@ def particles():
     print("wrote", len(sprites), "particle sprite sets to", PARTICLE_TEX)
 
 
+# ---------------------------------------------------------------- clouds
+# One 1024x1024 atlas of 4x4 cells (256 px), drawn by atmosphere.client.CloudRenderer as billboards and sheets.
+# Sprites are near-white with soft alpha and a little baked top light; the renderer colours them per vertex
+# (sun, shadowed bases, dawn tint, haze). RGB is filled everywhere so filtering and mipmaps never fringe dark.
+# Cells: 0-3 cumulus puffs, 4-5 stratus sheets, 6-7 cirrus, 8 fog bank, 9 rain curtain, 10 snow squall,
+# 11 dust/ash billow, 12 lenticular cap, 13 glow, 14 storm wall, 15 flat-based puff.
+
+CLOUD_CELL = 256
+
+
+def _cgrid(n=CLOUD_CELL):
+    yy, xx = (np.mgrid[0:n, 0:n] + 0.5 - n / 2) / (n / 2)
+    return xx, yy
+
+
+def _lobes(rng, n_lobes, spread, rmin, rmax, flat_bottom=None, n=CLOUD_CELL):
+    """A cauliflower puff: soft round lobes, each lit on its own upper side.
+
+    Returns (density about 0..1.5, brightness 0..1)."""
+    xx, yy = _cgrid(n)
+    d = np.zeros((n, n))
+    wsum = np.full((n, n), 1e-6)
+    bsum = np.zeros((n, n))
+    lobes = []
+    for i in range(n_lobes):
+        ang = rng.uniform(0, np.pi * 2)
+        rad = spread * np.sqrt(rng.uniform(0, 1))
+        cx = np.cos(ang) * rad
+        cy = np.sin(ang) * rad * 0.6 + 0.05
+        r = rng.uniform(rmin, rmax) * (1.15 - 0.4 * (rad / spread))
+        lobes.append((cx, cy, r))
+    # small lobes along the upper rim make the cauliflower edge
+    for i in range(n_lobes):
+        ang = rng.uniform(np.pi * 1.05, np.pi * 1.95)
+        lobes.append((np.cos(ang) * spread * 1.05, np.sin(ang) * spread * 0.75, rng.uniform(rmin * 0.55, rmin * 0.9)))
+    for cx, cy, r in lobes:
+        q = ((xx - cx) ** 2 + (yy - cy) ** 2) / (r * r)
+        g = np.exp(-q * 1.6)
+        d += g
+        w = g ** 4
+        lit = np.clip(0.55 - (yy - cy) / r * 0.55 - (xx - cx) / r * 0.15, 0, 1)
+        bsum += w * lit
+        wsum += w
+    shade = bsum / wsum
+    if flat_bottom is not None:
+        cut = 1 - smoothstep(flat_bottom - 0.14, flat_bottom + 0.02, yy)
+        d *= cut
+    return d, shade
+
+
+def _puff(rng, flat=False, billow=False):
+    n = CLOUD_CELL
+    d, lit = _lobes(rng, 9 if not billow else 13, 0.42, 0.2, 0.32, flat_bottom=0.45 if flat else None)
+    edge = periodic_noise(n, n, rng, 2.1)
+    fine = periodic_noise(n, n, rng, 1.7)
+    a = smoothstep(0.1, 0.85, d * (0.75 + 0.5 * edge)) * (0.88 + 0.12 * fine)
+    xx, yy = _cgrid(n)
+    a *= 1 - smoothstep(0.84, 0.97, np.maximum(np.abs(xx), np.abs(yy)))  # keep clear of the cell border
+    vert = 1 - (yy + 1) / 2
+    bottom = 0.86 if billow else 0.76
+    b = bottom + (1 - bottom) * np.clip(0.35 * vert + 0.65 * lit, 0, 1)
+    b *= 0.96 + 0.06 * fine
+    return np.clip(b, 0, 1), a * (0.85 if billow else 1.0)
+
+
+def _sheet(rng):
+    n = CLOUD_CELL
+    xx, yy = _cgrid(n)
+    r = np.sqrt(xx ** 2 + yy ** 2)
+    n1 = periodic_noise(n, n, rng, 2.4)
+    n2 = periodic_noise(n, n, rng, 2.0)
+    a = (1 - smoothstep(0.1, 0.95, r * (0.85 + 0.3 * n1))) ** 1.3 * (0.6 + 0.4 * smoothstep(0.2, 0.8, n2))
+    b = 0.88 + 0.12 * n2
+    return b, a
+
+
+def _streaks(rng, n, stretch):
+    """Noise stretched along x (bicubic upscale of a squashed field)."""
+    small = periodic_noise(max(4, n // stretch), n, rng, 1.6, low=2.0)
+    img = Image.fromarray((small * 255).astype(np.uint8), "L").resize((n, n), Image.BICUBIC)
+    return np.asarray(img, dtype=float) / 255
+
+
+def _cirrus(rng):
+    n = CLOUD_CELL
+    xx, yy = _cgrid(n)
+    fib = _streaks(rng, n, 24)
+    # bend the fibres: shift rows by a smooth curve so the streaks hook like mares' tails
+    curve = (np.sin(np.linspace(0, np.pi * rng.uniform(1.0, 2.0), n)) * rng.uniform(10, 30)).astype(int)
+    fib = np.stack([np.roll(fib[:, i], curve[i]) for i in range(n)], axis=1)
+    clump = periodic_noise(n, n, rng, 2.2)
+    env = (1 - smoothstep(0.5, 0.98, np.abs(xx))) * (1 - smoothstep(0.2, 0.85, np.abs(yy)))
+    a = smoothstep(0.42, 0.8, fib) * env * (0.45 + 0.55 * smoothstep(0.3, 0.7, clump))
+    return np.full((n, n), 1.0), np.clip(a * 1.15, 0, 1)
+
+
+def _fog(rng):
+    n = CLOUD_CELL
+    xx, yy = _cgrid(n)
+    n1 = periodic_noise(n, n, rng, 1.6)
+    r = np.sqrt((xx / 0.98) ** 2 + (yy / 0.45) ** 2)
+    a = (1 - smoothstep(0.2, 1.0, r * (0.8 + 0.4 * n1))) * (0.7 + 0.3 * n1)
+    return np.full((n, n), 0.97), a * 0.9
+
+
+def _curtain(rng, snow=False):
+    n = CLOUD_CELL
+    xx, yy = _cgrid(n)
+    v = (yy + 1) / 2                                   # 0 top (cloud base) .. 1 ground
+    if snow:
+        streak = periodic_noise(n, n, rng, 1.5)
+        dens = 0.55 + 0.45 * streak
+    else:
+        cols = periodic_noise(1, n, rng, 0.9, low=6.0)[0]
+        streak = np.repeat(cols[None, :], n, axis=0)
+        drift = periodic_noise(n, n, rng, 1.8)
+        dens = 0.45 + 0.55 * smoothstep(0.3, 0.8, np.roll(streak, 0, axis=1) * (0.7 + 0.6 * drift))
+    shafts = periodic_noise(1, n, rng, 2.2)[0][None, :]
+    side = 1 - smoothstep(0.55, 0.98, np.abs(xx))
+    fall = smoothstep(0.0, 0.08, v) * (1 - smoothstep(0.55, 1.0, v) * 0.85)
+    a = dens * side * fall * (0.55 + 0.45 * shafts)
+    return np.full((n, n), 0.95 if snow else 0.9), np.clip(a, 0, 1)
+
+
+def _lens(rng):
+    n = CLOUD_CELL
+    xx, yy = _cgrid(n)
+    r = np.sqrt((xx / 0.95) ** 2 + (yy / 0.32) ** 2)
+    bands = 0.8 + 0.2 * np.sin(yy * 30 + periodic_noise(n, n, rng, 2.0) * 3)
+    a = (1 - smoothstep(0.55, 1.0, r)) * bands
+    b = 0.8 + 0.2 * smoothstep(0.3, -0.3, yy)
+    return b, a
+
+
+def _glow():
+    xx, yy = _cgrid()
+    r = np.sqrt(xx ** 2 + yy ** 2)
+    a = np.exp(-(r / 0.38) ** 2) * (1 - smoothstep(0.8, 0.98, r))
+    return np.full(r.shape, 1.0), a
+
+
+def _wall(rng):
+    n = CLOUD_CELL
+    xx, yy = _cgrid(n)
+    v = (yy + 1) / 2
+    top = 0.25 + 0.25 * periodic_noise(1, n, rng, 1.6)[0][None, :]
+    billows = periodic_noise(n, n, rng, 1.7)
+    a = smoothstep(top - 0.12, top + 0.2, v + 0.1 * billows) * (0.75 + 0.25 * billows)
+    a *= 1 - smoothstep(0.6, 0.98, np.abs(xx))
+    a *= 1 - smoothstep(0.92, 1.0, v)
+    b = 0.8 + 0.2 * (1 - v)
+    return b, a
+
+
+def clouds():
+    rng = np.random.default_rng(3303)
+    n = CLOUD_CELL
+    cells = [_puff(rng) for _ in range(4)]
+    cells += [_sheet(rng) for _ in range(2)]
+    cells += [_cirrus(rng) for _ in range(2)]
+    cells += [_fog(rng), _curtain(rng), _curtain(rng, snow=True), _puff(rng, billow=True), _lens(rng), _glow(), _wall(rng)]
+    cells.append(_puff(rng, flat=True))
+    img = np.zeros((n * 4, n * 4, 4))
+    for i, (b, a) in enumerate(cells):
+        r, c = divmod(i, 4)
+        img[r * n:(r + 1) * n, c * n:(c + 1) * n, :3] = (b * 255)[..., None]
+        img[r * n:(r + 1) * n, c * n:(c + 1) * n, 3] = np.clip(a, 0, 1) * 255
+    Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGBA").save(SKY / "clouds.png")
+    print("wrote", SKY / "clouds.png")
+
+
 def main():
+    import sys
+    if "clouds" in sys.argv[1:]:
+        SKY.mkdir(parents=True, exist_ok=True)
+        clouds()
+        return
     particles()
     rng = np.random.default_rng(1771)
     SKY.mkdir(parents=True, exist_ok=True)
@@ -258,6 +436,7 @@ def main():
     Image.fromarray(secunda(rng), "RGBA").save(SKY / "secunda_phases.png")
     Image.fromarray(halo(), "RGBA").save(SKY / "masser_halo.png")
     Image.fromarray(galaxy(rng), "RGBA").save(SKY / "galaxy.png")
+    clouds()
     print("wrote", VANILLA / "moon_phases.png", "and", SKY)
 
 

@@ -36,6 +36,12 @@ import java.util.Map;
 public final class RegionalWeather {
     /** Sample offsets around each player, so the client can blend weather across a nearby border. */
     private static final int[][] SAMPLES = {{0, 0}, {96, 0}, {-96, 0}, {0, 96}, {0, -96}};
+    /**
+     * Rings of samples out to the horizon (checked every five seconds), so the regions a player can see get weather
+     * too and clients can draw distant storms, squalls and sandstorms over them.
+     */
+    private static final int[] FAR_RINGS = {450, 1000, 1600};
+    private static final int FAR_DIRECTIONS = 8;
     /** Drop a region's spell this long after the last player left it. */
     private static final long FORGET_TICKS = 6000;
     private static final long VANILLA_REFRESH_TICKS = 6000;
@@ -98,7 +104,7 @@ public final class RegionalWeather {
         Data data = Data.get(server);
         long now = ow.getGameTime();
         WeatherProfile profile = WeatherProfile.of(region);
-        int len = ticks > 0 ? ticks : profile.duration(ow.random);
+        int len = ticks > 0 ? ticks : profile.duration(ow.random, kind);
         Spell s = data.spells.get(region.id());
         if (s == null) {
             s = new Spell(kind, now + len, ow.random.nextInt(360), now);
@@ -126,22 +132,22 @@ public final class RegionalWeather {
         boolean cycle = ow.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE);
         List<WeatherPackets.Entry> changed = new ArrayList<>();
 
-        // make sure every region around a player has weather
+        // make sure every region around a player (and, every five seconds, out to the horizon) has weather
         BlockPos.MutableBlockPos probe = new BlockPos.MutableBlockPos();
+        boolean far = ticks % 100 == 0;
+        float mist = WeatherProfile.mistHour(ow.getDayTime());
         for (ServerPlayer p : ow.players()) {
             for (int[] off : SAMPLES) {
                 probe.set(p.getBlockX() + off[0], p.getBlockY(), p.getBlockZ() + off[1]);
-                Region region = Regions.at(ow, probe);
-                WeatherProfile profile = WeatherProfile.of(region);
-                if (profile == WeatherProfile.NONE) continue;
-                Spell s = data.spells.get(region.id());
-                if (s == null) {
-                    s = new Spell(profile.roll(ow.random, null), now + profile.duration(ow.random), ow.random.nextInt(360), now);
-                    data.spells.put(region.id(), s);
-                    changed.add(entry(region.id(), s));
-                    data.setDirty();
+                touch(ow, data, probe, now, mist, changed);
+            }
+            if (!far) continue;
+            for (int ring : FAR_RINGS) {
+                for (int d = 0; d < FAR_DIRECTIONS; d++) {
+                    double a = Math.PI * 2 * (d + (ring / 450 % 2) * 0.5) / FAR_DIRECTIONS;
+                    probe.set(p.getBlockX() + (int) (Math.cos(a) * ring), p.getBlockY(), p.getBlockZ() + (int) (Math.sin(a) * ring));
+                    touch(ow, data, probe, now, mist, changed);
                 }
-                s.lastSeen = now;
             }
         }
 
@@ -158,8 +164,8 @@ public final class RegionalWeather {
                 } else {
                     WeatherProfile profile = Regions.byId(e.getKey()).map(WeatherProfile::of)
                             .orElseGet(() -> profileFor(ow, e.getKey()));
-                    s.kind = profile.roll(ow.random, s.kind);
-                    s.until = now + Math.max(600, (long) (profile.duration(ow.random) * scale));
+                    s.kind = profile.roll(ow.random, s.kind, mist);
+                    s.until = now + Math.max(600, (long) (profile.duration(ow.random, s.kind) * scale));
                     // wind veers a little between spells
                     s.wind = Math.floorMod(s.wind + ow.random.nextInt(91) - 45, 360);
                     changed.add(entry(e.getKey(), s));
@@ -170,6 +176,22 @@ public final class RegionalWeather {
         if (!changed.isEmpty()) SkyNetwork.sendToAll(new WeatherPackets.Sync(false, changed));
 
         if (ticks % 100 == 0 && cycle && AtmosphereConfig.DRIVE_VANILLA_WEATHER.get()) driveVanilla(ow, data, now);
+    }
+
+    /** Gives the region at {@code pos} a spell if it has none, and marks it as seen. */
+    private static void touch(ServerLevel ow, Data data, BlockPos pos, long now, float mist, List<WeatherPackets.Entry> changed) {
+        Region region = Regions.at(ow, pos);
+        WeatherProfile profile = WeatherProfile.of(region);
+        if (profile == WeatherProfile.NONE) return;
+        Spell s = data.spells.get(region.id());
+        if (s == null) {
+            WeatherKind kind = profile.roll(ow.random, null, mist);
+            s = new Spell(kind, now + profile.duration(ow.random, kind), ow.random.nextInt(360), now);
+            data.spells.put(region.id(), s);
+            changed.add(entry(region.id(), s));
+            data.setDirty();
+        }
+        s.lastSeen = now;
     }
 
     /** Generated regions aren't in {@link Regions#byId}: find the profile from a player standing in it. */
@@ -202,7 +224,7 @@ public final class RegionalWeather {
                     data.spells.put(region.id(), s);
                 }
                 s.kind = kind;
-                s.until = now + profile.duration(ow.random);
+                s.until = now + profile.duration(ow.random, kind);
                 changed.add(entry(region.id(), s));
             }
             data.setDirty();

@@ -30,6 +30,10 @@ public final class AtmosphereConfig {
     public static final ForgeConfigSpec.BooleanValue WEATHER_SKY;
     public static final ForgeConfigSpec.BooleanValue WEATHER_PARTICLES;
     public static final ForgeConfigSpec.DoubleValue WEATHER_FOG_STRENGTH;
+    public static final ForgeConfigSpec.BooleanValue CLOUDS;
+    public static final ForgeConfigSpec.IntValue CLOUD_DISTANCE;
+    public static final ForgeConfigSpec.BooleanValue DISTANT_WEATHER;
+    public static final ForgeConfigSpec.BooleanValue DISTANT_THUNDER;
 
     public static final ForgeConfigSpec.BooleanValue REGIONAL_WEATHER;
     public static final ForgeConfigSpec.BooleanValue DRIVE_VANILLA_WEATHER;
@@ -65,6 +69,15 @@ public final class AtmosphereConfig {
         WEATHER_FOG_STRENGTH = b.comment("Multiplier for regional fog density.").defineInRange("fogStrength", 1.0, 0.0, 2.0);
         WEATHER_SKY = b.comment("Overcast skies darken and tint with the regional weather.").define("overcastSky", true);
         WEATHER_PARTICLES = b.comment("Snow, ash and sand precipitation particles for regional weather vanilla can't draw.").define("precipitationParticles", true);
+        b.pop();
+        b.push("clouds");
+        CLOUDS = b.comment("Skycraft's own clouds replace vanilla's in the overworld (not while an Oculus/Iris shader pack is active):",
+                "cumulus, cirrus, overcast decks, storm towers, fog banks, peak caps, ash and sand, chosen by each region's",
+                "weather and climate. They follow Video Settings > Clouds (Fast = fewer puffs, Off = none).").define("skycraftClouds", true);
+        CLOUD_DISTANCE = b.comment("How far out clouds and distant weather are drawn, in blocks.").defineInRange("cloudDistance", 1800, 400, 3200);
+        DISTANT_WEATHER = b.comment("Weather you can see in other regions: rain curtains under storms, snow squalls over mountains,",
+                "lightning, ash plumes and sandstorm walls on the horizon.").define("distantWeather", true);
+        DISTANT_THUNDER = b.comment("Distant lightning is followed by thunder, delayed and softened by its distance.").define("distantThunder", true);
         b.pop();
         b.push("music");
         LEVEL_UP_STING = b.comment("Play the short level-up fanfare (skycraft:music.level_up) when your character levels up.")
