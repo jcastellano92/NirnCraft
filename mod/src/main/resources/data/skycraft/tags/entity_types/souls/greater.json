@@ -48,6 +48,10 @@
     {
       "id": "skycraft:tsaesci",
       "required": false
+    },
+    {
+      "id": "skycraft:whale",
+      "required": false
     }
   ]
 }

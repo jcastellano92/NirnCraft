@@ -24,7 +24,7 @@ public enum ShipType {
                     new Vec3(0, 0.62, 4.7)},
             new Vec3[]{new Vec3(0, 0.55, 1.9)},
             new float[]{-4.6f, -1.6f, 1.6f, 4.6f}),
-    COG(12.0f, 3.4f, 0.90f, 90f, 0.08f, 0.56f, 140f, 0.34f, 0.025f, 0.58f, 54, 1, 2.0f,
+    COG(12.0f, 3.4f, 0.90f, 90f, 0.08f, 0.56f, 140f, 0.34f, 0.025f, 0.58f, 54, 1, 1.5f,
             new Vec3[]{
                     new Vec3(-0.5, 3.05, -4.7),
                     new Vec3(1.25, 1.55, -2.4), new Vec3(-1.25, 1.55, -2.4),
@@ -55,7 +55,7 @@ public enum ShipType {
     public final float maxSpeed;
     public final int cargoSlots;
     public final int horseSeats;
-    /** Height of the main hit box. */
+    /** Height of the main hit box (kept at about the deck, so people walking the deck can be aimed at over it). */
     public final float height;
     /** Seats for people (index 0 is the helm) and for horses. */
     public final Vec3[] seats;

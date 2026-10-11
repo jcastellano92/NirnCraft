@@ -1,0 +1,24 @@
+{
+  "name": "school_fish",
+  "width": 32,
+  "height": 32,
+  "bones": [
+    {"name": "root", "parent": "", "x": 0.000, "y": 24.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "head", "parent": "root", "x": 0.000, "y": -2.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "jaw", "parent": "head", "x": 0.000, "y": 0.500, "z": -1.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "seg1", "parent": "head", "x": 0.000, "y": 0.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "seg2", "parent": "seg1", "x": 0.000, "y": 0.000, "z": 2.500, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "fin_right", "parent": "seg1", "x": -1.000, "y": 0.750, "z": 1.000, "rx": 0.000, "ry": -30.000, "rz": 20.000},
+    {"name": "fin_left", "parent": "seg1", "x": 1.000, "y": 0.750, "z": 1.000, "rx": 0.000, "ry": 30.000, "rz": -20.000},
+    {"name": "tail_fin", "parent": "seg2", "x": 0.000, "y": 0.000, "z": 2.500, "rx": 0.000, "ry": 0.000, "rz": 0.000}
+  ],
+  "boxes": [
+    {"id": "head#0", "bone": "head", "mat": "head", "tag": "head", "u": 6, "v": 0, "w": 2, "h": 3, "d": 3, "mirror": false, "shared": false, "x": -1.000, "y": -1.500, "z": -3.000, "inflate": 0.000},
+    {"id": "jaw#0", "bone": "jaw", "mat": "head", "tag": "jaw", "u": 8, "v": 13, "w": 1, "h": 1, "d": 2, "mirror": false, "shared": false, "x": -0.500, "y": 0.000, "z": -1.500, "inflate": 0.000},
+    {"id": "seg1#0", "bone": "seg1", "mat": "scales", "tag": "segment", "u": 16, "v": 0, "w": 2, "h": 3, "d": 3, "mirror": false, "shared": false, "x": -1.000, "y": -1.500, "z": 0.000, "inflate": 0.000},
+    {"id": "seg2#0", "bone": "seg2", "mat": "scales", "tag": "segment", "u": 0, "v": 13, "w": 1, "h": 2, "d": 3, "mirror": false, "shared": false, "x": -0.500, "y": -1.000, "z": 0.000, "inflate": 0.000},
+    {"id": "fin_right#0", "bone": "fin_right", "mat": "fin", "tag": "fin", "u": 14, "v": 13, "w": 2, "h": 0, "d": 1, "mirror": false, "shared": false, "x": -2.000, "y": 0.000, "z": 0.000, "inflate": 0.000},
+    {"id": "fin_left#0", "bone": "fin_left", "mat": "fin", "tag": "fin", "u": 14, "v": 13, "w": 2, "h": 0, "d": 1, "mirror": true, "shared": true, "x": -0.000, "y": 0.000, "z": 0.000, "inflate": 0.000},
+    {"id": "tail_fin#0", "bone": "tail_fin", "mat": "fin", "tag": "tail_fin", "u": 0, "v": 0, "w": 0, "h": 10, "d": 3, "mirror": false, "shared": false, "x": 0.000, "y": -5.000, "z": 0.000, "inflate": 0.000}
+  ]
+}

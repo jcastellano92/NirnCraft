@@ -1,0 +1,37 @@
+{
+  "name": "whale",
+  "width": 256,
+  "height": 128,
+  "bones": [
+    {"name": "root", "parent": "", "x": 0.000, "y": 24.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "head", "parent": "root", "x": 0.000, "y": -10.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "jaw", "parent": "head", "x": 0.000, "y": 2.000, "z": -1.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "seg1", "parent": "head", "x": 0.000, "y": 0.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "seg2", "parent": "seg1", "x": 0.000, "y": 0.000, "z": 12.500, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "seg3", "parent": "seg2", "x": 0.000, "y": 0.000, "z": 12.500, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "seg4", "parent": "seg3", "x": 0.000, "y": 0.000, "z": 12.500, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "seg5", "parent": "seg4", "x": 0.000, "y": 0.000, "z": 12.500, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "fin_right", "parent": "seg1", "x": -8.000, "y": 3.000, "z": 1.000, "rx": 0.000, "ry": -30.000, "rz": 20.000},
+    {"name": "fin_left", "parent": "seg1", "x": 8.000, "y": 3.000, "z": 1.000, "rx": 0.000, "ry": 30.000, "rz": -20.000},
+    {"name": "tail_fin", "parent": "seg5", "x": 0.000, "y": 0.000, "z": 12.500, "rx": 0.000, "ry": 0.000, "rz": 0.000}
+  ],
+  "boxes": [
+    {"id": "head#0", "bone": "head", "mat": "hide", "tag": "head", "u": 0, "v": 0, "w": 14, "h": 9, "d": 18, "mirror": false, "shared": false, "x": -7.000, "y": -6.000, "z": -18.000, "inflate": 0.000},
+    {"id": "head#1", "bone": "head", "mat": "belly", "tag": "throat", "u": 124, "v": 27, "w": 12, "h": 1, "d": 15, "mirror": false, "shared": false, "x": -6.000, "y": 4.000, "z": -17.000, "inflate": 0.000},
+    {"id": "head#2", "bone": "head", "mat": "hide", "tag": "blowhole", "u": 112, "v": 61, "w": 2, "h": 1, "d": 2, "mirror": false, "shared": false, "x": -1.000, "y": -7.000, "z": -6.000, "inflate": 0.000},
+    {"id": "jaw#0", "bone": "jaw", "mat": "hide", "tag": "jaw", "u": 174, "v": 0, "w": 13, "h": 4, "d": 17, "mirror": false, "shared": false, "x": -6.500, "y": 0.000, "z": -16.500, "inflate": 0.000},
+    {"id": "seg1#0", "bone": "seg1", "mat": "hide", "tag": "segment", "u": 64, "v": 0, "w": 16, "h": 12, "d": 13, "mirror": false, "shared": false, "x": -8.000, "y": -6.000, "z": 0.000, "inflate": 0.000},
+    {"id": "seg1#1", "bone": "seg1", "mat": "belly", "tag": "belly", "u": 82, "v": 48, "w": 15, "h": 1, "d": 12, "mirror": false, "shared": false, "x": -7.500, "y": 5.000, "z": 0.500, "inflate": 0.050},
+    {"id": "seg2#0", "bone": "seg2", "mat": "hide", "tag": "segment", "u": 122, "v": 0, "w": 13, "h": 10, "d": 13, "mirror": false, "shared": false, "x": -6.500, "y": -5.000, "z": 0.000, "inflate": 0.000},
+    {"id": "seg2#1", "bone": "seg2", "mat": "belly", "tag": "belly", "u": 190, "v": 48, "w": 12, "h": 1, "d": 12, "mirror": false, "shared": false, "x": -6.000, "y": 4.000, "z": 0.500, "inflate": 0.050},
+    {"id": "seg3#0", "bone": "seg3", "mat": "hide", "tag": "segment", "u": 0, "v": 27, "w": 10, "h": 8, "d": 13, "mirror": false, "shared": false, "x": -5.000, "y": -4.000, "z": 0.000, "inflate": 0.000},
+    {"id": "seg3#1", "bone": "seg3", "mat": "belly", "tag": "belly", "u": 0, "v": 61, "w": 9, "h": 1, "d": 12, "mirror": false, "shared": false, "x": -4.500, "y": 3.000, "z": 0.500, "inflate": 0.050},
+    {"id": "seg4#0", "bone": "seg4", "mat": "hide", "tag": "segment", "u": 46, "v": 27, "w": 8, "h": 6, "d": 13, "mirror": false, "shared": false, "x": -4.000, "y": -3.000, "z": 0.000, "inflate": 0.000},
+    {"id": "seg4#1", "bone": "seg4", "mat": "belly", "tag": "belly", "u": 42, "v": 61, "w": 7, "h": 1, "d": 12, "mirror": false, "shared": false, "x": -3.500, "y": 2.000, "z": 0.500, "inflate": 0.050},
+    {"id": "seg5#0", "bone": "seg5", "mat": "hide", "tag": "segment", "u": 88, "v": 27, "w": 5, "h": 4, "d": 13, "mirror": false, "shared": false, "x": -2.500, "y": -2.000, "z": 0.000, "inflate": 0.000},
+    {"id": "seg5#1", "bone": "seg5", "mat": "belly", "tag": "belly", "u": 80, "v": 61, "w": 4, "h": 1, "d": 12, "mirror": false, "shared": false, "x": -2.000, "y": 1.000, "z": 0.500, "inflate": 0.050},
+    {"id": "fin_right#0", "bone": "fin_right", "mat": "fin", "tag": "fin", "u": 136, "v": 48, "w": 14, "h": 0, "d": 13, "mirror": false, "shared": false, "x": -14.000, "y": 0.000, "z": 0.000, "inflate": 0.000},
+    {"id": "fin_left#0", "bone": "fin_left", "mat": "fin", "tag": "fin", "u": 136, "v": 48, "w": 14, "h": 0, "d": 13, "mirror": true, "shared": true, "x": -0.000, "y": 0.000, "z": 0.000, "inflate": 0.000},
+    {"id": "tail_fin#0", "bone": "tail_fin", "mat": "fin", "tag": "tail_fin", "u": 0, "v": 48, "w": 28, "h": 0, "d": 13, "mirror": false, "shared": false, "x": -14.000, "y": 0.000, "z": 0.000, "inflate": 0.000}
+  ]
+}

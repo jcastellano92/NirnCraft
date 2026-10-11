@@ -8,6 +8,10 @@
       "required": false
     },
     "skycraft:dragon_priest",
-    "skycraft:miraak"
+    "skycraft:miraak",
+    {
+      "id": "#skycraft:sea_bosses",
+      "required": false
+    }
   ]
 }

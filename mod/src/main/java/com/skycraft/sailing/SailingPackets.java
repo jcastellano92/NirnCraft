@@ -28,6 +28,8 @@ public final class SailingPackets {
         SkyNetwork.register(OpenShipwright.class, NetworkDirection.PLAY_TO_CLIENT, OpenShipwright::encode, OpenShipwright::decode, OpenShipwright::handle);
         SkyNetwork.register(BuildShip.class, NetworkDirection.PLAY_TO_SERVER, BuildShip::encode, BuildShip::decode, BuildShip::handle);
         SkyNetwork.register(VoyageStart.class, NetworkDirection.PLAY_TO_CLIENT, VoyageStart::encode, VoyageStart::decode, VoyageStart::handle);
+        SkyNetwork.register(DeckReport.class, NetworkDirection.PLAY_TO_SERVER, DeckReport::encode, DeckReport::decode, DeckReport::handle);
+        SkyNetwork.register(DeckSync.class, NetworkDirection.PLAY_TO_CLIENT, DeckSync::encode, DeckSync::decode, DeckSync::handle);
     }
 
     /** The ship the sender is aboard, if it is {@code id}. */
@@ -160,6 +162,69 @@ public final class SailingPackets {
 
         static void handle(VoyageStart m, Supplier<NetworkEvent.Context> ctx) {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> VoyageOverlay.start(m.from, m.to, m.ship, m.hours, m.expedition));
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
+    /** The sender's own position on a ship's deck (ship-local), or {@code ship = -1} when it left the deck. */
+    public record DeckReport(int ship, float lx, float ly, float lz, float yaw, float headYaw) {
+        static void encode(DeckReport m, FriendlyByteBuf buf) {
+            buf.writeVarInt(m.ship + 1);
+            if (m.ship < 0) return;
+            buf.writeFloat(m.lx);
+            buf.writeFloat(m.ly);
+            buf.writeFloat(m.lz);
+            buf.writeFloat(m.yaw);
+            buf.writeFloat(m.headYaw);
+        }
+
+        static DeckReport decode(FriendlyByteBuf buf) {
+            int ship = buf.readVarInt() - 1;
+            if (ship < 0) return new DeckReport(-1, 0, 0, 0, 0, 0);
+            return new DeckReport(ship, buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat());
+        }
+
+        static void handle(DeckReport m, Supplier<NetworkEvent.Context> ctx) {
+            ServerPlayer player = ctx.get().getSender();
+            if (player != null && Float.isFinite(m.yaw) && Float.isFinite(m.headYaw)) {
+                DeckPhysics.report(player, m.ship, m.lx, m.ly, m.lz, m.yaw, m.headYaw);
+            }
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
+    /**
+     * Where everyone aboard a ship stands, in ship-local coordinates (yaws relative to the ship's heading): clients
+     * place them against their own view of the ship so nobody drifts off the deck it walks on.
+     */
+    public record DeckSync(int ship, java.util.List<Entry> entries) {
+        public record Entry(int entity, float lx, float ly, float lz, float yaw, float headYaw) {}
+
+        static void encode(DeckSync m, FriendlyByteBuf buf) {
+            buf.writeVarInt(m.ship);
+            buf.writeVarInt(m.entries.size());
+            for (Entry e : m.entries) {
+                buf.writeVarInt(e.entity);
+                buf.writeFloat(e.lx);
+                buf.writeFloat(e.ly);
+                buf.writeFloat(e.lz);
+                buf.writeFloat(e.yaw);
+                buf.writeFloat(e.headYaw);
+            }
+        }
+
+        static DeckSync decode(FriendlyByteBuf buf) {
+            int ship = buf.readVarInt();
+            int n = Math.min(buf.readVarInt(), 256);
+            java.util.List<Entry> list = new java.util.ArrayList<>(n);
+            for (int i = 0; i < n; i++) {
+                list.add(new Entry(buf.readVarInt(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat()));
+            }
+            return new DeckSync(ship, list);
+        }
+
+        static void handle(DeckSync m, Supplier<NetworkEvent.Context> ctx) {
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.sailing.client.DeckClient.onSync(m));
             ctx.get().setPacketHandled(true);
         }
     }

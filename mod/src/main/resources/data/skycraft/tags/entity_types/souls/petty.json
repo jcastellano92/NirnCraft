@@ -77,6 +77,18 @@
     "minecraft:rabbit",
     "minecraft:fox",
     "minecraft:cod",
-    "minecraft:salmon"
+    "minecraft:salmon",
+    {
+      "id": "skycraft:sea_netch",
+      "required": false
+    },
+    {
+      "id": "skycraft:seal",
+      "required": false
+    },
+    {
+      "id": "skycraft:hawk",
+      "required": false
+    }
   ]
 }

@@ -73,6 +73,7 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
     private static final EntityDataAccessor<Integer> DATA_HURT = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_SINKING = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> DATA_MOORED = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> DATA_LIVERY = SynchedEntityData.defineId(ShipEntity.class, EntityDataSerializers.INT);
 
     public static final int IN_FORWARD = 1, IN_BACK = 2, IN_LEFT = 4, IN_RIGHT = 8;
     public static final int SAIL_FURLED = 0, SAIL_HALF = 1, SAIL_FULL = 2;
@@ -102,6 +103,28 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
     private String port = "";
     private boolean stormWarned;
 
+    /**
+     * The ship's pose at the start of the tick on this side: the frame {@link DeckPhysics} collides deck riders in
+     * before carrying them along with the ship's motion since.
+     */
+    public double carryX, carryY, carryZ;
+    public float carryYaw;
+    public boolean carryReady;
+
+    /** Who steers when no player holds the helm (NPC ships of {@code com.skycraft.seas}); server side, never saved. */
+    public interface Autopilot {
+        /** Helm bits ({@link #IN_FORWARD}...) for this tick. */
+        int helm(ShipEntity ship);
+
+        /** Every server tick, before the ship sails (sail trim, crew, despawning). */
+        default void tick(ShipEntity ship) {}
+    }
+
+    @Nullable
+    private Autopilot autopilot;
+    /** A ship of the sea traffic: crewed by NPCs, never saved with the chunk (it is gone when nobody is near). */
+    private boolean transientShip;
+
     public ShipEntity(EntityType<? extends ShipEntity> type, Level level, ShipType shipType) {
         super(type, level);
         this.shipType = shipType;
@@ -124,6 +147,7 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
         entityData.define(DATA_HURT, 0);
         entityData.define(DATA_SINKING, 0);
         entityData.define(DATA_MOORED, false);
+        entityData.define(DATA_LIVERY, 0);
     }
 
     /** Freshly built ships start with a sound hull. */
@@ -184,6 +208,62 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
         return port;
     }
 
+    /** Colours and sail ({@link ShipLivery}): pirates, the Imperial navy, Maormer, Sload, ghost ships... */
+    public ShipLivery getLivery() {
+        return ShipLivery.byId(entityData.get(DATA_LIVERY));
+    }
+
+    public void setLivery(ShipLivery livery) {
+        entityData.set(DATA_LIVERY, livery.ordinal());
+    }
+
+    @Nullable
+    public Autopilot autopilot() {
+        return autopilot;
+    }
+
+    /** Hands the helm to an NPC captain (null: nobody steers). */
+    public void setAutopilot(@Nullable Autopilot autopilot) {
+        this.autopilot = autopilot;
+        if (autopilot == null && !level().isClientSide) setSyncedInput(0);
+    }
+
+    public boolean isTransient() {
+        return transientShip;
+    }
+
+    /** Sea traffic: not saved with the chunk. A captured ship is made permanent again with {@code false}. */
+    public void setTransient(boolean value) {
+        this.transientShip = value;
+    }
+
+    @Override
+    public boolean shouldBeSaved() {
+        return !transientShip && super.shouldBeSaved();
+    }
+
+    /** The carry frame catches up with the ship's pose (end of a tick, see {@link DeckPhysics}). */
+    public void syncCarryPose() {
+        carryX = getX();
+        carryY = getY();
+        carryZ = getZ();
+        carryYaw = getYRot();
+        carryReady = true;
+    }
+
+    @Override
+    public void onAddedToWorld() {
+        super.onAddedToWorld();
+        syncCarryPose();
+        DeckPhysics.track(this);
+    }
+
+    @Override
+    public void onRemovedFromWorld() {
+        super.onRemovedFromWorld();
+        DeckPhysics.untrack(this);
+    }
+
     public int getHurtTime() {
         return entityData.get(DATA_HURT);
     }
@@ -231,12 +311,20 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
     /** Ship-local (x = port, y = up, z = bow) to world, at the given position and yaw. */
     public Vec3 toWorld(double lx, double ly, double lz, double px, double py, double pz, float yaw) {
         float r = yaw * Mth.DEG_TO_RAD;
-        double s = Mth.sin(r), c = Mth.cos(r);
+        double s = Math.sin(r), c = Math.cos(r); // exact: deck riders are carried through these every tick
         return new Vec3(px + lx * c - lz * s, py + ly, pz + lx * s + lz * c);
     }
 
     public Vec3 toWorld(double lx, double ly, double lz) {
         return toWorld(lx, ly, lz, getX(), getY(), getZ(), getYRot());
+    }
+
+    /** World to ship-local at the current pose (the inverse of {@link #toWorld(double, double, double)}). */
+    public Vec3 toLocal(double x, double y, double z) {
+        float r = getYRot() * Mth.DEG_TO_RAD;
+        double s = Math.sin(r), c = Math.cos(r); // exact: deck riders are carried through these every tick
+        double dx = x - getX(), dz = z - getZ();
+        return new Vec3(dx * c + dz * s, y - getY(), -dx * s + dz * c);
     }
 
     private void updateParts() {
@@ -297,6 +385,8 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
             updateParts();
             return;
         }
+        if (!level().isClientSide && autopilot != null && getSinking() == 0) autopilot.tick(this);
+        if (isRemoved()) return;
         boolean broke = !isMoored() && breakIce();
         if (isMoored()) {
             setDeltaMovement(Vec3.ZERO);
@@ -324,7 +414,8 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
         double vs = v.x * side.x + v.z * side.z;
         double vy;
         double surface = waterSurface();
-        int bits = level().isClientSide ? input : 0;
+        int bits = level().isClientSide ? input : autopilot != null && getControllingPassenger() == null ? autopilot.helm(this) & 15 : 0;
+        if (!level().isClientSide && autopilot != null && entityData.get(DATA_INPUT) != (byte) bits) setSyncedInput(bits);
         boolean afloat = !Double.isNaN(surface) && surface > getY() + shipType.draft * 0.35;
         if (afloat) {
             double thrust = 0;
@@ -459,6 +550,13 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
 
     private void serverTick() {
         ServerLevel level = (ServerLevel) level();
+        if ((tickCount & 1) == 0) {
+            var entries = DeckPhysics.deckEntries(level, this);
+            if (!entries.isEmpty()) {
+                SkyNetwork.CHANNEL.send(net.minecraftforge.network.PacketDistributor.TRACKING_ENTITY.with(() -> this),
+                        new SailingPackets.DeckSync(getId(), entries));
+            }
+        }
         if ((tickCount + getId()) % 20 == 0) {
             float[] wind = SeaWind.at(level, getX(), getZ());
             entityData.set(DATA_WIND_DIR, wind[0]);
@@ -487,6 +585,12 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
     }
 
     private void clientEffects() {
+        if (getLivery() == ShipLivery.GHOST && random.nextInt(3) == 0) {
+            // a ghost ship trails cold mist and drifting soul-lights
+            Vec3 p = toWorld((random.nextFloat() - 0.5) * shipType.beam * 1.2, shipType.draft + random.nextFloat() * 3,
+                    (random.nextFloat() - 0.5) * shipType.length);
+            level().addParticle(random.nextInt(4) == 0 ? ParticleTypes.SOUL : ParticleTypes.WHITE_ASH, p.x, p.y, p.z, 0, 0.02, 0);
+        }
         double speed = Math.hypot(getX() - xo, getZ() - zo);
         Vec3 f = forward();
         if (speed > 0.12 && isInWater() && random.nextFloat() < speed * 2.5) {
@@ -532,7 +636,8 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
         lerpY = y;
         lerpZ = z;
         lerpYRot = yRot;
-        lerpSteps = 10;
+        // short interpolation: people on deck are placed against this pose, so it must not trail the server far
+        lerpSteps = 4;
     }
 
     // ------------------------------------------------------------------ damage, sinking
@@ -551,6 +656,8 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
         if (isMoored() || getSinking() > 0) return false;
         Entity attacker = source.getEntity();
         if (attacker != null && hasPassenger(attacker) && !(attacker instanceof Player p && p.isShiftKeyDown())) return false;
+        // a swing at someone on deck that catches the hull underfoot: deckhands don't hack at their own ship
+        if (attacker instanceof Player p && !p.isShiftKeyDown() && DeckPhysics.deckShip(p) == this && source.getDirectEntity() == p) return false;
         if (attacker instanceof Player p && p.isShiftKeyDown() && getPassengers().isEmpty()
                 && (p.getAbilities().instabuild || owner == null || owner.equals(p.getUUID()))) {
             dismantle(p);
@@ -698,6 +805,7 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
     @Override
     protected boolean canAddPassenger(Entity passenger) {
         if (isMoored() || getSinking() > 0) return false;
+        if (autopilot != null && passenger instanceof Player) return false;
         if (isLarge(passenger)) return countHorses() < shipType.horseSeats;
         return getPassengers().size() - countHorses() < shipType.seats.length;
     }
@@ -761,6 +869,20 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
     @Override
     public Vec3 getDismountLocationForPassenger(LivingEntity passenger) {
         Vec3 seat = seatOf(passenger);
+        // stand up on the deck beside the seat (the decks are walkable, see DeckPhysics)
+        if (getSinking() == 0 && !isLarge(passenger)) {
+            ShipDeck.Deck deck = ShipDeck.of(shipType);
+            for (double[] off : new double[][]{{0, 0}, {0, -0.7}, {0, 0.7}, {-0.6, 0}, {0.6, 0}}) {
+                double lx = seat.x * 0.6 + off[0], lz = seat.z + off[1];
+                float floor = deck.floorAt(lx, lz, seat.y + 0.6);
+                if (Float.isNaN(floor)) continue;
+                Vec3 at = toWorld(lx, floor + 0.01, lz);
+                if (level().noCollision(passenger, passenger.getDimensions(Pose.STANDING).makeBoundingBox(at))) {
+                    passenger.setPose(Pose.STANDING);
+                    return at;
+                }
+            }
+        }
         float half = shipType.beam / 2f + 1.2f;
         double[][] spots = {{half, seat.z}, {-half, seat.z}, {half, 0}, {-half, 0},
                 {0, shipType.length / 2f + 1.2}, {0, -shipType.length / 2f - 1.2},

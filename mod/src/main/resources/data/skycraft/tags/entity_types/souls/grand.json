@@ -31,6 +31,14 @@
     },
     "minecraft:ender_dragon",
     "minecraft:wither",
-    "minecraft:warden"
+    "minecraft:warden",
+    {
+      "id": "skycraft:dreugh_queen",
+      "required": false
+    },
+    {
+      "id": "skycraft:sea_leviathan",
+      "required": false
+    }
   ]
 }

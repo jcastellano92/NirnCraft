@@ -1,5 +1,6 @@
 package com.skycraft.sailing.client;
 
+import com.skycraft.sailing.ShipDeck;
 import com.skycraft.sailing.ShipType;
 import com.skycraft.sailing.client.ShipMesh.Mat;
 
@@ -166,12 +167,12 @@ public final class ShipModels {
         for (float z = -5.5f; z < 5.5f; z += 0.5f) {
             float zc = z + 0.25f;
             float w = widthAt(beam.f(zc), floor.f(zc), top.f(zc), 0.45f, 4) - 0.1f;
-            if (w > 0.1f) m.box(-w, 0.38f, z, w, 0.46f, z + 0.5f, DECK);
+            if (w > 0.1f) m.box(-w, 0.48f, z, w, 0.56f, z + 0.5f, DECK); // the walkable floor (ShipDeck)
         }
         // sea chests the rowers sit on
         for (float zc : new float[]{-3.4f, -2.0f, 3.5f, -0.6f}) {
             for (float x : new float[]{0.75f, -0.75f}) {
-                m.box(x - 0.28f, 0.46f, zc - 0.22f, x + 0.28f, 0.82f, zc + 0.22f, CRATE);
+                m.box(x - 0.28f, 0.56f, zc - 0.22f, x + 0.28f, 0.82f, zc + 0.22f, CRATE);
             }
         }
         // shields along both sides
@@ -217,7 +218,7 @@ public final class ShipModels {
         md.sailBottom = 3.0f;
         md.sailTex = SAIL_NORD;
         m.box(-0.16f, md.mastBase, md.mastZ - 0.16f, 0.16f, md.mastTop, md.mastZ + 0.16f, MAST);
-        m.box(-0.3f, 0.46f, md.mastZ - 0.9f, 0.3f, 0.7f, md.mastZ + 0.9f, PLANK_DARK);
+        m.box(-0.3f, 0.56f, md.mastZ - 0.9f, 0.3f, 0.7f, md.mastZ + 0.9f, PLANK_DARK);
         m.line(0, md.mastTop - 0.2f, md.mastZ, 0, 3.0f, 6.9f, 0.05f, ROPE);
         m.line(0, md.mastTop - 0.2f, md.mastZ, 0, 2.7f, -6.8f, 0.05f, ROPE);
         for (float s : new float[]{1, -1}) {
@@ -272,8 +273,11 @@ public final class ShipModels {
             if (w > 0.1f) m.box(-w, 1.36f, z, w, 1.46f, z + 0.5f, DECK);
         }
         // castles: raised decks with crenellated bulwarks
-        castle(m, beam, top, -6.0f, -3.4f, true);
-        castle(m, beam, top, 3.6f, 6.0f, false);
+        castle(m, beam, top, -6.0f, -3.4f, true, ShipDeck.STAIR_X0, ShipDeck.STAIR_X1);
+        castle(m, beam, top, 3.6f, 6.0f, false, -ShipDeck.STAIR_X1, -ShipDeck.STAIR_X0);
+        // stairs up to the castles: the aftcastle's on the port side, the forecastle's to starboard
+        stairs(m, ShipDeck.STAIR_X0, ShipDeck.STAIR_X1, -2.4f, -1);
+        stairs(m, -ShipDeck.STAIR_X1, -ShipDeck.STAIR_X0, 2.6f, 1);
         // cabin door under the aftcastle and a stern lantern
         m.box(-0.35f, 1.46f, -3.34f, 0.35f, 2.75f, -3.29f, PLANK_DARK);
         m.box(0.2f, 2.0f, -3.29f, 0.28f, 2.08f, -3.25f, GOLD);
@@ -294,12 +298,17 @@ public final class ShipModels {
         md.sailBottom = 3.7f;
         md.sailTex = SAIL_IMPERIAL;
         m.box(-0.19f, md.mastBase, md.mastZ - 0.19f, 0.19f, md.mastTop, md.mastZ + 0.19f, MAST);
-        float nest = 10.25f;
-        m.box(-0.55f, nest - 0.1f, md.mastZ - 0.55f, 0.55f, nest, md.mastZ + 0.55f, DECK);
-        m.box(-0.55f, nest, md.mastZ - 0.55f, 0.55f, nest + 0.45f, md.mastZ - 0.45f, PLANK_RED);
-        m.box(-0.55f, nest, md.mastZ + 0.45f, 0.55f, nest + 0.45f, md.mastZ + 0.55f, PLANK_RED);
-        m.box(-0.55f, nest, md.mastZ - 0.45f, -0.45f, nest + 0.45f, md.mastZ + 0.45f, PLANK_RED);
-        m.box(0.45f, nest, md.mastZ - 0.45f, 0.55f, nest + 0.45f, md.mastZ + 0.45f, PLANK_RED);
+        // the crow's nest, big enough to stand in (ShipDeck), and the rungs up the mast to it
+        float nest = ShipDeck.COG_NEST, nh = ShipDeck.COG_NEST_HALF, ni = nh - 0.1f;
+        m.box(-nh, nest - 0.1f, md.mastZ - nh, nh, nest, md.mastZ + nh, DECK);
+        m.box(-nh, nest, md.mastZ - nh, nh, nest + 0.5f, md.mastZ - ni, PLANK_RED);
+        m.box(-nh, nest, md.mastZ + ni, nh, nest + 0.5f, md.mastZ + nh, PLANK_RED);
+        m.box(-nh, nest, md.mastZ - ni, -ni, nest + 0.5f, md.mastZ + ni, PLANK_RED);
+        m.box(ni, nest, md.mastZ - ni, nh, nest + 0.5f, md.mastZ + ni, PLANK_RED);
+        m.box(-nh - 0.02f, nest + 0.42f, md.mastZ - nh - 0.02f, nh + 0.02f, nest + 0.5f, md.mastZ - ni, GOLD);
+        for (float y = md.mastBase + 0.45f; y < nest - 0.2f; y += 0.42f) {
+            m.box(-0.16f, y, md.mastZ - 0.27f, 0.16f, y + 0.06f, md.mastZ - 0.19f, PLANK_DARK);
+        }
         m.line(0, 3.1f, 5.4f, 0, 4.2f, 8.1f, 0.24f, MAST);
         m.line(0, md.mastTop - 0.3f, md.mastZ, 0, 4.15f, 8.0f, 0.05f, ROPE);
         m.line(0, md.mastTop - 0.3f, md.mastZ, 0, 3.8f, -5.8f, 0.05f, ROPE);
@@ -331,7 +340,18 @@ public final class ShipModels {
     }
 
     /** A castle deck between z0 and z1 with bulwarks and crenels; {@code aft} gets a front wall with a rail. */
-    private static void castle(ShipMesh m, Profile beam, Profile top, float z0, float z1, boolean aft) {
+    /** A flight of two steps from the main deck up to a castle; {@code dir} -1 climbs aft, +1 forward. */
+    private static void stairs(ShipMesh m, float x0, float x1, float zStart, int dir) {
+        float[][] steps = {{1.96f}, {2.46f}};
+        for (int i = 0; i < steps.length; i++) {
+            float za = zStart + dir * 0.5f * i, zb = za + dir * 0.5f;
+            float lo = Math.min(za, zb), hi = Math.max(za, zb);
+            m.box(x0, ShipDeck.COG_DECK, lo, x1, steps[i][0] - 0.08f, hi, PLANK_DARK);
+            m.box(x0, steps[i][0] - 0.08f, lo, x1, steps[i][0], hi, DECK);
+        }
+    }
+
+    private static void castle(ShipMesh m, Profile beam, Profile top, float z0, float z1, boolean aft, float gap0, float gap1) {
         float deck = 2.95f;
         for (float z = z0; z < z1 - 1e-3f; z += 0.5f) {
             float zc = z + 0.25f;
@@ -353,9 +373,13 @@ public final class ShipModels {
         // the castle's inner wall (down to the main deck) and its rail
         m.box(-w + 0.12f, 1.46f, edge - 0.06f, w - 0.12f, deck, edge + 0.06f, PLANK_WHITE);
         for (float x = -w + 0.3f; x < w - 0.2f; x += 0.45f) {
+            if (x + 0.08f > gap0 && x < gap1) continue; // the head of the stair
             m.box(x, deck, edge - 0.04f, x + 0.08f, deck + 0.6f, edge + 0.04f, MAST);
         }
-        m.box(-w + 0.12f, deck + 0.6f, edge - 0.06f, w - 0.12f, deck + 0.7f, edge + 0.06f, GOLD);
+        m.box(-w + 0.12f, deck + 0.6f, edge - 0.06f, gap0, deck + 0.7f, edge + 0.06f, GOLD);
+        m.box(gap1, deck + 0.6f, edge - 0.06f, w - 0.12f, deck + 0.7f, edge + 0.06f, GOLD);
+        m.box(gap0 - 0.08f, deck, edge - 0.06f, gap0, deck + 0.7f, edge + 0.06f, MAST);
+        m.box(gap1, deck, edge - 0.06f, gap1 + 0.08f, deck + 0.7f, edge + 0.06f, MAST);
         // the far end closes the castle (transom or bow bulkhead)
         float far = aft ? z0 : z1;
         float fw = beam.f(far + (aft ? 0.25f : -0.25f)) * flare(6, 6);

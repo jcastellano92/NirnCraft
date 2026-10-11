@@ -197,6 +197,16 @@ public final class LoreBooks {
         if (!BOOKS.containsKey(id)) book(id, category, cover, weight, value);
     }
 
+    /**
+     * Adds a book or note from another module (title {@code book.skycraft.<id>}, text
+     * {@code assets/skycraft/lore/books/<id>.json}). Weight 0 keeps it out of the random shelves: it is then only found
+     * where its module places it. Call during mod construction.
+     */
+    public static void register(String id, Category category, int cover, int weight, int value, String shelf) {
+        book(id, category, cover, weight, value);
+        if (!shelf.isEmpty()) shelf(shelf, id);
+    }
+
     @Nullable
     public static Book get(String id) {
         return id == null ? null : BOOKS.get(id);

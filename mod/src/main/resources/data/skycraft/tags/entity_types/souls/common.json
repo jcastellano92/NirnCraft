@@ -64,6 +64,10 @@
     {
       "id": "skycraft:hagraven",
       "required": false
+    },
+    {
+      "id": "skycraft:dreugh",
+      "required": false
     }
   ]
 }

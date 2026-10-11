@@ -1,0 +1,6 @@
+{
+  "type": "forge:add_features",
+  "biomes": "#skycraft:tamriel/sea",
+  "features": "skycraft:sea_garden",
+  "step": "vegetal_decoration"
+}

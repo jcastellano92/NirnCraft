@@ -33,6 +33,7 @@ public final class SailingModule {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SailingConfig.SPEC, "skycraft-sailing.toml");
         SailingRegistry.init(modBus);
         Ferries.register();
+        com.skycraft.seas.SeasModule.init(modBus);
     }
 
     /** Registers this module's packets via {@link com.skycraft.network.SkyNetwork#register}. Called once at startup. */

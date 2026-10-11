@@ -69,6 +69,26 @@
     "skycraft:boneman",
     "skycraft:mistman",
     "skycraft:wrathman",
-    "skycraft:harvester"
+    "skycraft:harvester",
+    {
+      "id": "skycraft:dreugh",
+      "required": false
+    },
+    {
+      "id": "skycraft:dreugh_queen",
+      "required": false
+    },
+    {
+      "id": "skycraft:sea_leviathan",
+      "required": false
+    },
+    {
+      "id": "skycraft:giant_slaughterfish",
+      "required": false
+    },
+    {
+      "id": "skycraft:sea_crab",
+      "required": false
+    }
   ]
 }

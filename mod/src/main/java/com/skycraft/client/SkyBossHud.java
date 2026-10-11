@@ -118,8 +118,8 @@ public final class SkyBossHud {
         if (e.getMaxHealth() < 80.0f) return false;
         String name = e.getType().getDescriptionId().toLowerCase(java.util.Locale.ROOT);
         if (name.contains("dragonfly") || name.contains("dartwing") || name.contains("butterfly") || name.contains("insect")) return false;
-        return name.contains("dragon") || name.contains("giant") || name.contains("troll")
-                || name.contains("deathlord") || name.contains("priest") || name.contains("chief") || name.contains("centurion");
+        // giants, trolls and "giant" beasts are ordinary foes in Skyrim; real bosses carry the #forge:bosses tag
+        return name.contains("dragon") || name.contains("deathlord") || name.contains("chief") || name.contains("centurion");
     }
 
     /** HUD overlay "sky_boss_bar" (registered by {@code visual.client.VisualClientSetup}). */

@@ -77,6 +77,14 @@
     "minecraft:polar_bear",
     "minecraft:spider",
     "minecraft:zombie",
-    "minecraft:skeleton"
+    "minecraft:skeleton",
+    {
+      "id": "skycraft:giant_slaughterfish",
+      "required": false
+    },
+    {
+      "id": "skycraft:sea_crab",
+      "required": false
+    }
   ]
 }

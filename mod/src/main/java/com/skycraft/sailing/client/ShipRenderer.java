@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.skycraft.Skycraft;
 import com.skycraft.sailing.ShipEntity;
+import com.skycraft.sailing.ShipLivery;
 import com.skycraft.sailing.ShipType;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -23,7 +24,10 @@ import net.minecraft.util.Mth;
  */
 public class ShipRenderer extends EntityRenderer<ShipEntity> {
     public static final ResourceLocation ATLAS = new ResourceLocation(Skycraft.MODID, "textures/entity/sailing/ship_atlas.png");
+    /** The liveries' sails (pirate, navy, Maormer, Sload, ghost, merchant): 64 px pictures in a 4 x 4 grid. */
+    public static final ResourceLocation LIVERY_SAILS = new ResourceLocation(Skycraft.MODID, "textures/entity/sailing/livery_sails.png");
     private final ShipMesh dynamic = new ShipMesh();
+    private final ShipMesh cloth = new ShipMesh();
 
     public ShipRenderer(EntityRendererProvider.Context ctx) {
         super(ctx);
@@ -66,9 +70,17 @@ public class ShipRenderer extends EntityRenderer<ShipEntity> {
         pose.mulPose(Axis.XP.rotationDegrees(pitch));
         pose.mulPose(Axis.ZP.rotationDegrees(roll));
 
-        VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(ATLAS));
+        ShipLivery livery = ship.getLivery();
+        boolean ghost = livery.a < 1f;
+        float lr = livery.r, lg = livery.g, lb = livery.b, la = livery.a;
+        if (ghost) {
+            // a ghost ship: pale and see-through, glowing faintly, its outline wavering
+            light = LightTexture.pack(12, 12);
+            la *= 0.85f + 0.15f * Mth.sin(t * 0.07f);
+        }
+        VertexConsumer vc = buffers.getBuffer(ghost ? RenderType.entityTranslucent(ATLAS) : RenderType.entityCutoutNoCull(ATLAS));
         int overlay = OverlayTexture.NO_OVERLAY;
-        model.hull.render(pose.last(), vc, light, overlay, 1f, 1f, 1f, 1f);
+        model.hull.render(pose.last(), vc, light, overlay, lr, lg, lb, la);
 
         // oars
         float phase = Mth.lerp(partial, ship.rowPhaseO, ship.rowPhase);
@@ -81,7 +93,7 @@ public class ShipRenderer extends EntityRenderer<ShipEntity> {
             pose.translate(o[0], o[1], o[2]);
             pose.mulPose(Axis.YP.rotationDegrees(side > 0 ? 90f + sweep : -90f - sweep));
             pose.mulPose(Axis.XP.rotationDegrees(dip));
-            model.oar.render(pose.last(), vc, light, overlay, 1f, 1f, 1f, 1f);
+            model.oar.render(pose.last(), vc, light, overlay, lr, lg, lb, la);
             pose.popPose();
         }
 
@@ -91,19 +103,28 @@ public class ShipRenderer extends EntityRenderer<ShipEntity> {
             pose.pushPose();
             pose.translate(model.rudderPivot[0], model.rudderPivot[1], model.rudderPivot[2]);
             pose.mulPose(Axis.YP.rotationDegrees(rudder * 28f));
-            model.rudder.render(pose.last(), vc, light, overlay, 1f, 1f, 1f, 1f);
+            model.rudder.render(pose.last(), vc, light, overlay, lr, lg, lb, la);
             pose.popPose();
         }
 
         // yard, sail and pennant
         if (type.hasSail()) {
             dynamic.clear();
+            cloth.clear();
             float brace = Mth.clamp(rel * 0.35f, -35f, 35f);
+            boolean own = livery.sail < 0;
+            int[] tex = own ? model.sailTex : new int[]{(livery.sail % 4) * 64, (livery.sail / 4) * 64, 64, 64};
             dynamic.push().translate(0, 0, model.mastZ).rotate(0, brace, 0);
-            buildSail(dynamic, model, deploy, wind, eff, t);
+            cloth.push().translate(0, 0, model.mastZ).rotate(0, brace, 0);
+            buildSail(dynamic, own ? dynamic : cloth, model, tex, deploy, wind, eff, t);
             dynamic.pop();
+            cloth.pop();
             buildPennant(dynamic, model, rel, wind, t);
-            dynamic.render(pose.last(), vc, light, overlay, 1f, 1f, 1f, 1f);
+            dynamic.render(pose.last(), vc, light, overlay, lr, lg, lb, la);
+            if (cloth.quadCount() > 0) {
+                VertexConsumer sv = buffers.getBuffer(ghost ? RenderType.entityTranslucent(LIVERY_SAILS) : RenderType.entityCutoutNoCull(LIVERY_SAILS));
+                cloth.render(pose.last(), sv, light, overlay, ghost ? 0.9f : 1f, ghost ? 1f : 1f, 1f, ghost ? la : 1f);
+            }
         }
 
         // stern lantern glows at night
@@ -118,7 +139,7 @@ public class ShipRenderer extends EntityRenderer<ShipEntity> {
     }
 
     /** Yard plus the sail: furled under the yard, or set as a billowing cloth grid to the deployed depth. */
-    private static void buildSail(ShipMesh m, ShipModels.Model md, float deploy, float wind, float eff, float t) {
+    private static void buildSail(ShipMesh m, ShipMesh cloth, ShipModels.Model md, int[] tex, float deploy, float wind, float eff, float t) {
         float half = md.yardHalf;
         float yt = md.yardY;
         m.box(-half, yt - 0.1f, 0.14f, half, yt + 0.12f, 0.36f, ShipModels.YARD);
@@ -133,7 +154,6 @@ public class ShipRenderer extends EntityRenderer<ShipEntity> {
         if (deploy < 0.04f) return;
         float top = yt - 0.12f;
         float bottom = top - (top - md.sailBottom) * deploy;
-        int[] tex = md.sailTex;
         int cols = 8, rows = 6;
         float fill = Mth.clamp(wind * (0.25f + eff), 0.08f, 1.1f);
         float flog = (1f - Math.min(1f, eff * 1.4f)) * Math.min(1f, wind + 0.2f);
@@ -153,7 +173,7 @@ public class ShipRenderer extends EntityRenderer<ShipEntity> {
             for (int j = 0; j < rows; j++) {
                 float u0 = tex[0] + tex[2] * (1f - i / (float) cols), u1 = tex[0] + tex[2] * (1f - (i + 1) / (float) cols);
                 float v0 = tex[1] + tex[3] * deploy * (j / (float) rows), v1 = tex[1] + tex[3] * deploy * ((j + 1) / (float) rows);
-                m.rawQuad(new float[][]{p[i][j + 1], p[i + 1][j + 1], p[i + 1][j], p[i][j]},
+                cloth.rawQuad(new float[][]{p[i][j + 1], p[i + 1][j + 1], p[i + 1][j], p[i][j]},
                         new float[][]{{u0, v1}, {u1, v1}, {u1, v0}, {u0, v0}});
             }
         }

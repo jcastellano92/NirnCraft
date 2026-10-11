@@ -1,0 +1,6 @@
+{
+  "type": "forge:add_features",
+  "biomes": "#skycraft:tamriel/coast",
+  "features": "skycraft:coast_site",
+  "step": "surface_structures"
+}
