@@ -520,6 +520,14 @@ public class JournalScreen extends Screen {
             y = drawWrapped(g, f.howToJoin(), x, y, w, Parchment.INK_LIGHT);
         }
         y += 6;
+        heading(g, Component.translatable("journal.skycraft.benefits"), x, y);
+        y += 12;
+        y = drawWrapped(g, f.benefits(), x, y, w, Parchment.INK_LIGHT);
+        y += 6;
+        heading(g, Component.translatable("journal.skycraft.halls"), x, y);
+        y += 12;
+        y = drawWrapped(g, f.halls(), x, y, w, Parchment.INK_LIGHT);
+        y += 6;
         heading(g, Component.translatable("journal.skycraft.ranks"), x, y);
         y += 12;
         for (int r = 0; r < f.ranks; r++) {

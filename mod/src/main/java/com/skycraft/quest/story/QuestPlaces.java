@@ -7,9 +7,9 @@ import com.skycraft.tamriel.Places;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Where story quests send players. A quest names a place by id: the real {@link Places} entry when the world has
@@ -25,12 +25,18 @@ public final class QuestPlaces {
     private record Fallback(int x, int z, int radius, String name, String dim) {
     }
 
-    private static final Map<String, Fallback> FALLBACK = new HashMap<>();
-    private static boolean loaded;
+    private static final Map<String, Fallback> FALLBACK = new ConcurrentHashMap<>();
+    private static volatile boolean loaded;
 
     private QuestPlaces() {}
 
-    private static synchronized void ensureLoaded() {
+    private static void ensureLoaded() {
+        if (!loaded) loadTable();
+        // questline files declare their own lore sites (StoryData registers them while loading)
+        StoryData.ensureLoaded();
+    }
+
+    private static synchronized void loadTable() {
         if (loaded) return;
         loaded = true;
         JsonElement root = StoryData.read("/skycraft/quests/places.json");
@@ -41,6 +47,11 @@ public final class QuestPlaces {
                     o.has("r") ? o.get("r").getAsInt() : 48, StoryData.str(o, "name", e.getKey()),
                     StoryData.str(o, "dim", "minecraft:overworld")));
         }
+    }
+
+    /** A questline's own fallback anchor (its {@code places} block); the shared table wins on a clash. */
+    static void declare(String id, int x, int z, int radius, String name, String dim) {
+        FALLBACK.putIfAbsent(id, new Fallback(x, z, radius, name, dim));
     }
 
     /** Resolves a place id; empty if neither the world nor the fallback table knows it. */

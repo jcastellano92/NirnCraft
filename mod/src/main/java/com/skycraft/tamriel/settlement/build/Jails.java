@@ -1,0 +1,224 @@
+package com.skycraft.tamriel.settlement.build;
+
+import com.skycraft.tamriel.Places;
+import com.skycraft.tamriel.settlement.AnchorType;
+import com.skycraft.tamriel.settlement.Culture;
+import com.skycraft.tamriel.settlement.kit.Palette;
+import com.skycraft.tamriel.settlement.plan.Spec;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.IronBarsBlock;
+import net.minecraft.world.level.block.LadderBlock;
+import net.minecraft.world.level.block.TrapDoorBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.level.block.state.properties.Half;
+
+/**
+ * A hold's jail (Castle Dour's dungeon, the Dragonsreach dungeon, Mistveil Keep's jail...) as a stone gaol beside
+ * the keep. Front: the guard room with the guards' tables and one evidence chest per cell. Through a locked iron
+ * gate: the cell block, a corridor between two rows of three barred cells with iron doors, beds and buckets; the two
+ * back cells hold NPC prisoners. At the corridor's end a rusted drain grate drops into an old culvert that comes out
+ * behind the jail - the way out for those who would rather not serve their time (the other is picking the cell door
+ * and the gate). Variant 1 is Cidhna Mine: rough-hewn rock with silver veins in the cell walls for the prisoners'
+ * labour. Footprint 15 x 21; anchors in cell order (see {@link AnchorType#JAIL_CELL}).
+ */
+public final class Jails {
+    private Jails() {}
+
+    public static final int W = 15, D = 21;
+    /** Cell rows: first and last z of each cell (left cells x 1..4, right cells x 10..13). */
+    static final int[][] ROWS = {{8, 10}, {12, 14}, {16, 19}};
+    static final int GATE_Z = 7, CORRIDOR_X = 7, ROOF = 6;
+
+    public static void build(Canvas c, Palette p, Spec s, Culture culture, String settlement) {
+        boolean mine = s.variant == 1;
+        int w = W, d = D;
+        BlockState wall = mine ? B.s(Blocks.STONE) : p.cityWall;
+        BlockState wall2 = mine ? B.s(Blocks.ANDESITE) : p.cityWall2;
+        BlockState floor = mine ? B.s(Blocks.COBBLESTONE) : B.s(Blocks.STONE_BRICKS);
+        BlockState ore = Props.ore("skycraft:silver_ore", Blocks.IRON_ORE);
+
+        if (!c.recording()) {
+            c.clear(1, 1, 1, w - 2, ROOF - 1, d - 2);
+            c.clearPlants(-2, 1, -2, w + 1, ROOF + 3, d + 1);
+        }
+        // floor, foundation, walls and a flat crenellated roof
+        for (int x = 0; x < w; x++) {
+            for (int z = 0; z < d; z++) {
+                boolean edge = x == 0 || z == 0 || x == w - 1 || z == d - 1;
+                c.set(x, 0, z, edge ? wall : (c.chance(x, 0, z, 41, 6) ? B.s(Blocks.CRACKED_STONE_BRICKS) : floor));
+                c.foundation(x, -1, z, p.foundation, Shells.SettlementPieceDepth.DEPTH);
+                if (edge) {
+                    for (int y = 1; y < ROOF; y++) c.set(x, y, z, c.chance(x, y, z, 43, 5) ? wall2 : wall);
+                }
+                c.set(x, ROOF, z, wall);
+                if (edge && (x + z) % 2 == 0) c.set(x, ROOF + 1, z, p.cityWallWall);
+            }
+        }
+        // arrow slits with bars on the long walls
+        for (int z = 3; z < d - 2; z += 4) {
+            c.set(0, 3, z, bars(Direction.NORTH, Direction.SOUTH));
+            c.set(w - 1, 3, z, bars(Direction.NORTH, Direction.SOUTH));
+        }
+        // the front door, the jail's name and a lamp either side
+        int doorX = (w - 1) / 2;
+        c.door(doorX, 1, 0, mine ? B.s(Blocks.IRON_DOOR) : p.door, Direction.SOUTH);
+        c.set(doorX - 1, 3, -1, p.light);
+        c.set(doorX + 1, 3, -1, p.light);
+        if (!c.recording()) {
+            Component name = jailTitle(s.name, settlement);
+            c.sign(doorX, 4, -1, p.sign, Direction.NORTH, Component.empty(), name);
+        }
+        c.anchor(AnchorType.JAIL_EXIT, doorX, 1, -2);
+        c.anchor(AnchorType.JAIL_MIN, 0, -4, 0);
+        c.anchor(AnchorType.JAIL_MAX, w - 1, ROOF + 1, d - 1);
+
+        guardRoom(c, p, w, mine);
+        cellBlock(c, p, w, d, mine, wall, ore);
+        culvert(c, p, d, wall);
+    }
+
+    static Component jailTitle(String name, String settlement) {
+        if (!"jail".equals(name)) return Component.translatableWithFallback("settlement.skycraft.name." + name, "Jail");
+        Component place = Places.byId(settlement).map(pl -> pl.name()).orElse(Component.literal(settlement));
+        return Component.translatableWithFallback("settlement.skycraft.jail_of", "%s Jail", place);
+    }
+
+    static BlockState bars(Direction a, Direction b) {
+        BlockState s = B.s(Blocks.IRON_BARS);
+        for (Direction dir : new Direction[]{a, b}) {
+            s = s.setValue(switch (dir) {
+                case NORTH -> IronBarsBlock.NORTH;
+                case SOUTH -> IronBarsBlock.SOUTH;
+                case EAST -> IronBarsBlock.EAST;
+                default -> IronBarsBlock.WEST;
+            }, true);
+        }
+        return s;
+    }
+
+    /** Guard room (z 1..6): tables, the guards' posts and the evidence chests along both side walls. */
+    static void guardRoom(Canvas c, Palette p, int w, boolean mine) {
+        int y = 1;
+        // evidence chests: three double chests on each side wall, in cell order (left, right, left, right...)
+        for (int k = 0; k < 6; k++) {
+            boolean left = k % 2 == 0;
+            int x = left ? 1 : w - 2;
+            int z = 1 + (k / 2) * 2;
+            Direction face = left ? Direction.EAST : Direction.WEST;
+            // a double chest: LEFT half connects clockwise of its facing
+            BlockState base = B.face(B.s(Blocks.CHEST), face);
+            int lz = left ? z : z + 1, rz = left ? z + 1 : z;
+            c.set(x, y, rz, base.setValue(ChestBlock.TYPE, ChestType.RIGHT));
+            c.set(x, y, lz, base.setValue(ChestBlock.TYPE, ChestType.LEFT));
+            c.anchor(AnchorType.JAIL_EVIDENCE, x, y, rz);
+            c.anchor(AnchorType.JAIL_EVIDENCE, x, y, lz);
+        }
+        // the guards' tables, a weapon rack and lamps
+        Props.table(c, p, 3, y, 5);
+        Props.table(c, p, 4, y, 5);
+        Props.candles(c, 3, y + 1, 5, 2);
+        Props.chair(c, p, 4, y, 4, Direction.SOUTH);
+        Props.table(c, p, w - 4, y, 5);
+        c.set(w - 5, y, 5, B.s(Blocks.SMITHING_TABLE));
+        c.set(w - 4, y + 1, 5, B.s(Blocks.LANTERN));
+        c.anchor(AnchorType.GUARD, 4, y, 3);
+        c.anchor(AnchorType.GUARD, w - 5, y, 3);
+        Props.lantern(c, p, 5, ROOF - 1, 3, true);
+        Props.lantern(c, p, w - 6, ROOF - 1, 3, true);
+        // the wall to the cell block with its locked iron gate and barred peep holes
+        for (int x = 1; x < w - 1; x++) {
+            for (int yy = 1; yy < ROOF; yy++) c.set(x, yy, GATE_Z, p.cityWall);
+        }
+        c.door(CORRIDOR_X, 1, GATE_Z, B.s(Blocks.IRON_DOOR), Direction.SOUTH);
+        c.set(CORRIDOR_X - 1, 2, GATE_Z, bars(Direction.EAST, Direction.WEST));
+        c.set(CORRIDOR_X + 1, 2, GATE_Z, bars(Direction.EAST, Direction.WEST));
+        c.anchor(AnchorType.JAIL_GATE, CORRIDOR_X, 1, GATE_Z);
+        if (mine) {
+            // Cidhna's mouth: rubble and a cart of ore by the gate
+            c.set(2, y, 6, B.s(Blocks.COBBLESTONE));
+            Props.barrel(c, w - 4, y, 6, null);
+        }
+    }
+
+    /** The cell block (z 8..19): corridor x 6..8, barred walls at x 5 and 9, three cells either side. */
+    static void cellBlock(Canvas c, Palette p, int w, int d, boolean mine, BlockState wall, BlockState ore) {
+        int y = 1;
+        int lastZ = d - 2;
+        // barred walls along the corridor
+        for (int z = GATE_Z + 1; z <= lastZ; z++) {
+            for (int yy = 1; yy <= 3; yy++) {
+                c.set(5, yy, z, bars(Direction.NORTH, Direction.SOUTH));
+                c.set(9, yy, z, bars(Direction.NORTH, Direction.SOUTH));
+            }
+            c.set(5, 4, z, wall);
+            c.set(9, 4, z, wall);
+        }
+        // dividers between the cells
+        for (int[] row : new int[][]{{11}, {15}}) {
+            for (int yy = 1; yy < ROOF; yy++) {
+                for (int x = 1; x <= 4; x++) c.set(x, yy, row[0], wall);
+                for (int x = 10; x <= 13; x++) c.set(x, yy, row[0], wall);
+            }
+        }
+        int cell = 0;
+        for (int[] row : ROWS) {
+            int za = row[0], zb = row[1], zc = (za + zb) / 2;
+            for (int side = 0; side < 2; side++, cell++) {
+                boolean left = side == 0;
+                int bars = left ? 5 : 9;
+                Direction out = left ? Direction.EAST : Direction.WEST;
+                c.door(bars, 1, zc, B.s(Blocks.IRON_DOOR), out);
+                c.anchor(AnchorType.JAIL_DOOR, bars, 1, zc);
+                int stand = left ? 3 : 11;
+                c.anchor(AnchorType.JAIL_CELL, stand, y, zc);
+                // a straw bed in the back corner and a slop bucket
+                int bx = left ? 2 : 12;
+                c.bed(bx, y, za, B.s(Blocks.BROWN_BED), left ? Direction.WEST : Direction.EAST);
+                c.set(left ? 1 : 13, y, zb, B.s(Blocks.CAULDRON));
+                if (cell % 2 == 0) c.setIfOpen(left ? 2 : 12, y, zb, B.slab(B.s(Blocks.SPRUCE_SLAB), false));
+                if (cell >= 4) c.anchor(AnchorType.JAIL_PRISONER, stand, y, zc);
+                if (mine) {
+                    // silver veins in the cell's rock for the prisoners' labour
+                    int wx = left ? 0 : w - 1;
+                    c.set(wx, 1, za, ore);
+                    c.set(wx, 2, zc, ore);
+                    c.set(wx, 1, zb, ore);
+                }
+            }
+        }
+        // the corridor: a dim lamp, and the drain grate at its end
+        Props.lantern(c, p, CORRIDOR_X, ROOF - 1, 11, true);
+        Props.lantern(c, p, CORRIDOR_X, ROOF - 1, 17, true);
+        c.set(CORRIDOR_X, 0, lastZ, B.s(Blocks.IRON_TRAPDOOR).setValue(TrapDoorBlock.HALF, Half.TOP));
+    }
+
+    /** The old culvert under the back wall: drops from the grate, runs out and climbs to a hatch behind the jail. */
+    static void culvert(Canvas c, Palette p, int d, BlockState wall) {
+        int x = CORRIDOR_X;
+        int z0 = d - 2, z1 = d + 1;
+        for (int z = z0; z <= z1; z++) {
+            for (int yy = -4; yy <= 0; yy++) {
+                for (int dx = -1; dx <= 1; dx++) {
+                    boolean inside = dx == 0 && yy >= -3 && yy <= -2;
+                    boolean shaft = dx == 0 && (z == z0 || z == z1) && yy >= -3;
+                    if (inside || shaft) {
+                        if (!(z == z0 && yy == 0) && !(z == z1 && yy == 0)) c.set(x + dx, yy, z, B.s(Blocks.AIR));
+                    } else if (yy < 0 || z > d - 1) {
+                        if (!(z == z1 && yy == 0 && dx == 0)) c.set(x + dx, yy, z, yy == -4 ? B.s(Blocks.MOSSY_COBBLESTONE) : wall);
+                    }
+                }
+            }
+        }
+        // a ladder up the far shaft against its back wall, under a wooden hatch in the ground
+        for (int yy = -3; yy <= -1; yy++) {
+            c.set(x, yy, z1 + 1, wall);
+            c.set(x, yy, z1, B.face(B.s(Blocks.LADDER), Direction.NORTH).setValue(LadderBlock.FACING, Direction.NORTH));
+        }
+        c.set(x, 0, z1 + 1, wall);
+        c.set(x, 0, z1, B.s(Blocks.SPRUCE_TRAPDOOR).setValue(TrapDoorBlock.HALF, Half.TOP));
+    }
+}

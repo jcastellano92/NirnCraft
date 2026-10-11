@@ -143,6 +143,8 @@ public final class StoryData {
         public String dim = "minecraft:overworld";
         /** Optional entity type id to use instead of a society NPC (e.g. a talking dragon from the creatures module). */
         public String entity = "";
+        /** Faction id whose guild hall in {@link #place} is this NPC's home (they stand at the hall's head desk). */
+        public String hall = "";
     }
 
     public record RelicDef(String id, Txt name, Txt desc, int icon) {
@@ -278,7 +280,16 @@ public final class StoryData {
             n.essential = !o.has("essential") || o.get("essential").getAsBoolean();
             n.dim = str(o, "dim", "minecraft:overworld");
             n.entity = str(o, "entity", "");
+            n.hall = str(o, "hall", "");
             if (NPCS.putIfAbsent(n.id, n) != null) Skycraft.LOGGER.warn("Duplicate quest NPC {}", n.id);
+        }
+        // fallback anchors for the lore sites this questline visits (same format as places.json)
+        if (root.has("places")) {
+            for (Map.Entry<String, JsonElement> e : root.getAsJsonObject("places").entrySet()) {
+                JsonObject o = e.getValue().getAsJsonObject();
+                QuestPlaces.declare(e.getKey(), o.get("x").getAsInt(), o.get("z").getAsInt(), o.has("r") ? o.get("r").getAsInt() : 48,
+                        str(o, "name", e.getKey()), str(o, "dim", "minecraft:overworld"));
+            }
         }
         for (JsonElement e : arr(root, "relics")) {
             JsonObject o = e.getAsJsonObject();

@@ -169,6 +169,23 @@ public final class Story {
                 Shout s = Shout.byId(arg);
                 return s != null && MagicData.wordsLearned(p, s) > 0;
             }
+            case "race": {
+                // race:dunmer or race:altmer,bosmer,khajiit
+                com.skycraft.core.Race race = d.getRace();
+                if (race == null) return false;
+                for (String r : arg.split(",")) if (race.id().equals(r.trim())) return true;
+                return false;
+            }
+            case "skill": {
+                // skill:mysticism:25
+                String[] parts = arg.split(":");
+                for (com.skycraft.core.Skill s : com.skycraft.core.Skill.VALUES) {
+                    if (s.id().equals(parts[0])) return d.getSkill(s) >= (parts.length > 1 ? parseInt(parts[1], 1) : 1);
+                }
+                return false;
+            }
+            case "false":
+                return false;
             case "dragonborn":
                 return MagicData.tag(p).getBoolean("dragonborn");
             case "souls":
@@ -986,6 +1003,23 @@ public final class Story {
             }
             case "victory" -> {
                 for (ServerPlayer m : online) MainQuest.victory(m);
+            }
+            // factions: join:<id>, points:<id>:<n>, expel:<id>; imprison:<place> sends the player to that city's jail
+            case "join" -> {
+                Faction f = Faction.byId(arg);
+                if (f != null) for (ServerPlayer m : audience(online, receiver)) Factions.join(m, f);
+            }
+            case "points" -> {
+                int c = arg.lastIndexOf(':');
+                Faction f = c > 0 ? Faction.byId(arg.substring(0, c)) : null;
+                if (f != null) for (ServerPlayer m : audience(online, receiver)) Factions.addPoints(m, f, parseInt(arg.substring(c + 1), 1));
+            }
+            case "expel" -> {
+                Faction f = Faction.byId(arg);
+                if (f != null) for (ServerPlayer m : audience(online, receiver)) Factions.expel(m, f, "faction.skycraft.reason.betrayal");
+            }
+            case "imprison" -> {
+                if (receiver != null) com.skycraft.crime.Jail.imprison(receiver, arg);
             }
             case "thunder" -> {
                 for (ServerPlayer m : audience(online, receiver)) {

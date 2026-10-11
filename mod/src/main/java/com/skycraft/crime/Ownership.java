@@ -48,6 +48,12 @@ public final class Ownership {
 
     private Ownership() {}
 
+    /** Faction property ({@code faction:<id>}: guild hall beds and chests) is free to the faction's members. */
+    private static boolean memberOf(Player player, String ownerId) {
+        return ownerId.startsWith("faction:")
+                && com.skycraft.core.SkyData.get(player).module("quest").getCompound("factions").contains(ownerId.substring(8));
+    }
+
     private static String key(Level level, BlockPos pos) {
         return level.dimension().location() + "|" + pos.getX() + "|" + pos.getY() + "|" + pos.getZ();
     }
@@ -70,6 +76,7 @@ public final class Ownership {
             if (entry != null) {
                 if ("public".equals(entry.ownerId)) return false;
                 if (("player:" + player.getStringUUID()).equals(entry.ownerId)) return false;
+                if (memberOf(player, entry.ownerId)) return false;
                 return true;
             }
             // Client heuristics for responsive crosshair
@@ -102,6 +109,7 @@ public final class Ownership {
             if (entry != null) {
                 if ("public".equals(entry.ownerId)) return false;
                 if (("player:" + player.getStringUUID()).equals(entry.ownerId)) return false;
+                if (memberOf(player, entry.ownerId)) return false;
                 return true;
             }
 
@@ -109,7 +117,7 @@ public final class Ownership {
             if (PlacedBlocks.isPlayerPlaced(level, pos)) return false;
 
             // Camps and dungeons are NEVER owned: looting them is not a crime
-            if (Jail.isJailDimension(level)) return false;
+            if (Jail.isJailDimension(level) || Jail.isJailArea(level, pos)) return false;
             BlockEntity be = level.getBlockEntity(pos);
             String loot = Theft.lootTable(be);
             if (loot != null && !loot.contains("village")) {

@@ -20,7 +20,7 @@ function put(key, text) {
 }
 
 const files = JSON.parse(fs.readFileSync(path.join(dir, 'index.json'), 'utf8'));
-const quests = {}, npcs = {}, relics = {}, scenes = {};
+const quests = {}, npcs = {}, relics = {}, scenes = {}, filePlaces = {};
 const data = [];
 for (const f of files) {
   let j;
@@ -32,6 +32,12 @@ for (const f of files) {
     continue;
   }
   data.push([f, j]);
+  // fallback anchors a questline brings along for lore sites the world doesn't list (same format as places.json)
+  for (const [id, p] of Object.entries(j.places || {})) {
+    if (typeof p.x !== 'number' || typeof p.z !== 'number') problems.push(`${f}: place ${id} needs numeric x and z`);
+    if (filePlaces[id]) problems.push(`${f}: place ${id} is also declared in ${filePlaces[id]}`);
+    filePlaces[id] = f;
+  }
   for (const [id, name] of Object.entries(j.speakers || {})) put(`story.skycraft.speaker.${id}`, name);
   for (const n of j.npcs || []) {
     if (npcs[n.id]) problems.push(`${f}: duplicate npc ${n.id}`);
@@ -76,7 +82,33 @@ for (const f of JSON.parse(fs.readFileSync(path.join(pdir, 'index.json'), 'utf8'
     for (const p of JSON.parse(fs.readFileSync(path.join(pdir, f), 'utf8'))) worldPlaces.add(p.id);
   } catch (e) { /* not ours */ }
 }
-const known = id => !id || id.startsWith('@') || places[id] || worldPlaces.has(id);
+const known = id => !id || id.startsWith('@') || places[id] || worldPlaces.has(id) || filePlaces[id];
+// faction ids (enum com.skycraft.quest.Faction): file/quest factions, NPC halls and faction actions must name one
+const factionSrc = fs.readFileSync(path.join(root, 'java', 'com', 'skycraft', 'quest', 'Faction.java'), 'utf8');
+const factions = new Set([...factionSrc.matchAll(/^\s+[A-Z_]+\("([a-z_]+)", \d+/gm)].map(m => m[1]));
+for (const [f, j] of data) {
+  if (j.faction && !factions.has(j.faction)) problems.push(`${f}: unknown faction ${j.faction}`);
+  for (const n of j.npcs || []) if (n.hall && !factions.has(n.hall)) problems.push(`${f}: npc ${n.id} lives in the hall of unknown faction ${n.hall}`);
+  for (const q of j.quests || []) {
+    if (q.faction && !factions.has(q.faction)) problems.push(`${f}: ${q.id} unknown faction ${q.faction}`);
+    const acts = [q.on_start || '', q.on_complete || '', ...(q.objectives || []).flatMap(o => [o.actions || '', ...(o.choices || []).map(c => c.actions || '')])];
+    for (const a of acts.join(';').split(';').map(s => s.trim()).filter(Boolean)) {
+      const m = a.match(/^(join|expel|points):([a-z_]+)/);
+      if (m && !factions.has(m[2])) problems.push(`${f}: ${q.id} action ${a} names an unknown faction`);
+    }
+    for (const r of q.requires || []) {
+      for (const part of r.split('|')) {
+        const m = part.replace(/^!/, '').match(/^faction:([a-z_]+)/);
+        if (m && !factions.has(m[1])) problems.push(`${f}: ${q.id} requires unknown faction ${m[1]}`);
+      }
+    }
+  }
+}
+
+// a questline's own anchor for a site the world now lists is harmless (the world's place wins), just noted
+for (const id of Object.keys(filePlaces)) {
+  if (places[id] || worldPlaces.has(id)) console.log(`note: ${filePlaces[id]} declares place ${id}, which the world already lists`);
+}
 for (const [f, j] of data) {
   for (const n of j.npcs || []) if (!known(n.place)) problems.push(`${f}: npc ${n.id} lives at unknown place ${n.place}`);
   for (const q of j.quests || []) {

@@ -92,7 +92,7 @@ public final class Theft {
 
     /** Whether the container at {@code pos} belongs to someone (stealing from it is a crime). */
     public static boolean isOwned(ServerLevel level, BlockPos pos) {
-        if (Jail.isJailDimension(level) || PlacedBlocks.isPlayerPlaced(level, pos)) return false;
+        if (Jail.isJailDimension(level) || Jail.isJailArea(level, pos) || PlacedBlocks.isPlayerPlaced(level, pos)) return false;
         BlockEntity be = level.getBlockEntity(pos);
         String loot = lootTable(be);
         if (loot != null && !loot.contains(VILLAGE_LOOT)) return false; // dungeon/structure loot: finders keepers

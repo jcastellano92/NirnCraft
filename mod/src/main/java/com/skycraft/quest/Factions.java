@@ -67,10 +67,15 @@ public final class Factions {
     /** Joins a faction. Fails (with a message) if already a member or enemy of it. */
     public static boolean join(ServerPlayer player, Faction f) {
         PlayerData data = SkyData.get(player);
-        if (isMember(data, f)) return false;
-        Faction rival = f.rival();
-        if (rival != null && isMember(data, rival)) {
-            Notifier.message(player, Component.translatable("faction.skycraft.rival_member", rival.displayName()));
+        if (isMember(data, f) || !f.joinable) return false;
+        for (Faction rival : f.exclusive()) {
+            if (isMember(data, rival)) {
+                Notifier.message(player, Component.translatable("faction.skycraft.rival_member", rival.displayName()));
+                return false;
+            }
+        }
+        if (com.skycraft.quest.faction.FactionEffects.expelled(data, f)) {
+            Notifier.message(player, Component.translatable("faction.skycraft.expelled_no", f.displayName()));
             return false;
         }
         factionsTag(data).putInt(f.id, 0);
@@ -79,7 +84,20 @@ public final class Factions {
         Notifier.title(player, Component.translatable("faction.skycraft.joined", f.displayName()), f.rankName(0));
         player.level().playSound(null, player.blockPosition(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.6f, 1.0f);
         rankReward(player, f, 0);
+        com.skycraft.quest.faction.FactionEffects.onJoined(player, f);
         return true;
+    }
+
+    /** Throws the player out (killing a brother, heresy...). They may be taken back after making amends. */
+    public static void expel(ServerPlayer player, Faction f, String reasonKey) {
+        PlayerData data = SkyData.get(player);
+        if (!isMember(data, f)) return;
+        factionsTag(data).remove(f.id);
+        pointsTag(data).remove(f.id);
+        com.skycraft.quest.faction.FactionEffects.markExpelled(data, f);
+        data.markDirty();
+        Notifier.title(player, Component.translatable("faction.skycraft.expelled", f.displayName()), Component.translatable(reasonKey));
+        player.level().playSound(null, player.blockPosition(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.8f, 0.6f);
     }
 
     /** Adds reputation; promotes through every rank reached. */
@@ -235,6 +253,8 @@ public final class Factions {
                     Currency.give(p, 800);
                 }
             }
+            // the factions of Tamriel's halls: faction gear per rank (quest.faction.FactionData)
+            default -> com.skycraft.quest.faction.FactionData.rankReward(p, f, rank);
         }
     }
 

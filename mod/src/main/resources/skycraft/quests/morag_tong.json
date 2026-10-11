@@ -1,0 +1,187 @@
+{
+  "line": "morag_tong",
+  "category": "faction",
+  "faction": "morag_tong",
+  "region": "morrowind/ascadian_isles",
+  "speakers": {"narrator": "Narrator", "mephala": "Mephala"},
+  "places": {
+    "yansirramus": {"x": 7300, "z": -40, "r": 30, "name": "Yansirramus"},
+    "dark_brotherhood_cell_vivec": {"x": 7120, "z": 1520, "r": 28, "name": "Abandoned Velothi Tomb"}
+  },
+  "npcs": [
+    {"id": "eno_hlaalu", "name": "Grandmaster Eno Hlaalu", "role": "assassin", "place": "vivec", "offset": [-6, -10],
+     "greet": "The Morag Tong is the oldest guild in Morrowind, and the only one the law permits to kill. We do it by writ, in daylight, and we sign our work."},
+    {"id": "ethasi_rilvayn", "name": "Ethasi Rilvayn", "role": "assassin", "place": "balmora", "offset": [6, 10], "female": true, "hall": "morag_tong",
+     "greet": "This hall keeps the writs for the West Gash. If you're here to hire us, state the name. If you're here to join, state your reasons."}
+  ],
+  "relics": [
+    {"id": "first_writ", "name": "Sanctioned Writ", "desc": "A writ of honorable execution, sealed by the Morag Tong and recognised by the Grand Council. It names one person.", "icon": 11},
+    {"id": "brotherhood_letter", "name": "Coded Brotherhood Letter", "desc": "Orders in a Cyrodiilic cipher, sent to a Dark Brotherhood agent in Vvardenfell. The last line gives a place.", "icon": 11},
+    {"id": "thread_shrine", "name": "Thread of the Webspinner (Shrine)", "desc": "A black thread that never tangles, taken from Mephala's shrine.", "icon": 15},
+    {"id": "thread_ruin", "name": "Thread of the Webspinner (Ruin)", "desc": "A black thread from the Daedric ruin of Yansirramus, warm as skin.", "icon": 15},
+    {"id": "thread_renegade", "name": "Thread of the Webspinner (Renegade)", "desc": "A black thread carried by a renegade who thought it would protect him. It did not.", "icon": 15}
+  ],
+  "scenes": {
+    "mt_code": [
+      ["ethasi_rilvayn", "Hear the code. We kill only by writ. We kill only the one named. We leave our writ on the body, so all know it was lawful."],
+      ["ethasi_rilvayn", "Kill without a writ, and you are a murderer like any other, and the Tong will issue a writ for you. Do you understand?"]
+    ],
+    "mt_webspinner": [
+      ["narrator", "Eno Hlaalu lays the three threads on the floor of his chamber. They move, slowly, weaving themselves into a pattern no hand made."],
+      ["mephala", "My children keep their law, and my threads come home. Good. The Night Mother's brood is nesting in my house. Cut them out."]
+    ],
+    "mt_exalted": [
+      ["eno_hlaalu", "The Brotherhood's cell in Vvardenfell is gone. Their killers broke our law and mocked our goddess, and you answered both."],
+      ["eno_hlaalu", "The Tong has few Exalted Masters. You are one now. Wear the title as you wear the writ: openly, and without apology."]
+    ]
+  },
+  "quests": [
+    {
+      "id": "mt_sanctioned_writ",
+      "title": "The Sanctioned Writ",
+      "start": "npc:ethasi_rilvayn",
+      "requires": ["!faction:morag_tong", "!faction:dark_brotherhood"],
+      "offer": "I want to join the Morag Tong.",
+      "pitch": "Then you will learn the code, and then you will carry a writ. Ovys Hlerano, an extortionist who burned a family's farm when they refused to pay him, has been sentenced. He drinks at a shack on the road south of town. Leave this writ on his body.",
+      "desc": "Ethasi Rilvayn of the Morag Tong hall in Balmora will accept me if I learn the code and execute a sanctioned writ against Ovys Hlerano, an extortionist.",
+      "on_start": "relic:first_writ",
+      "objectives": [
+        {"type": "talk", "npc": "ethasi_rilvayn", "text": "Hear the code of the Morag Tong",
+         "topic": "Tell me the code.",
+         "reply": "Listen closely. I will not say it twice.",
+         "actions": "scene:mt_code"},
+        {"type": "kill", "place": "balmora", "offset": [80, 260], "placement": "near", "text": "Execute the writ on Ovys Hlerano",
+         "spawn": [{"type": "npc:thug", "name": "Ovys Hlerano", "target": true, "hp": 1.5, "hostile": true}],
+         "actions": "take:first_writ",
+         "journal": "I left the writ folded on Hlerano's chest, as the code requires. The farmers he burned out will know who answered them, and that it was lawful."},
+        {"type": "talk", "npc": "ethasi_rilvayn", "text": "Report to Ethasi Rilvayn",
+         "topic": "The writ is served. Hlerano is dead.",
+         "reply": "And you left the writ. Good. You are an Associate of the Morag Tong. Mephala watches us all. Try to make her proud."}
+      ],
+      "outro": "I executed a sanctioned writ against Ovys Hlerano and joined the Morag Tong.",
+      "rewards": {"gold": 200, "join": true, "items": ["skycraft:chitin_dagger", "skycraft:chitin_chestplate"]}
+    },
+    {
+      "id": "mt_writ_captain_mavus",
+      "title": "Writ for Captain Mavus",
+      "start": "npc:ethasi_rilvayn",
+      "requires": ["quest:mt_sanctioned_writ|faction:morag_tong"],
+      "offer": "Do you have another writ for me?",
+      "pitch": "Captain Seleth Mavus runs skooma through Ebonheart on a hull full of slaves. The Council sealed the writ yesterday. His crew will fight; the writ names only him, but the code permits you to defend yourself.",
+      "desc": "Ethasi Rilvayn gave me a writ for Captain Seleth Mavus, a smuggler running skooma and slaves through the docks of Ebonheart.",
+      "objectives": [
+        {"type": "go", "place": "ebonheart", "text": "Travel to Ebonheart"},
+        {"type": "clear", "place": "ebonheart", "offset": [60, 40], "text": "Fight through Mavus's crew on the docks",
+         "spawn": [{"type": "npc:thug", "count": 3, "name": "Mavus's Crewman", "hostile": true}]},
+        {"type": "kill", "place": "ebonheart", "offset": [60, 40], "text": "Execute the writ on Captain Seleth Mavus",
+         "spawn": [{"type": "npc:thug", "name": "Captain Seleth Mavus", "target": true, "boss": true, "hp": 2.5, "dmg": 1.3, "hostile": true, "weapon": "skycraft:steel_sword"}],
+         "journal": "When Mavus fell, the hold was opened. The captives inside walked out into the sun and did not look back."},
+        {"type": "talk", "npc": "ethasi_rilvayn", "text": "Report to Ethasi Rilvayn",
+         "topic": "Mavus is dead, and his cargo set free.",
+         "reply": "The writ said nothing about the cargo. The code says nothing against kindness, either. Well done."}
+      ],
+      "outro": "I served the writ on Captain Seleth Mavus at Ebonheart, and his captives walked free.",
+      "rewards": {"gold": 400, "faction_points": 3}
+    },
+    {
+      "id": "mt_writ_ser_andalas",
+      "title": "Writ for a Dishonoured Noble",
+      "start": "npc:ethasi_rilvayn",
+      "requires": ["quest:mt_writ_captain_mavus"],
+      "offer": "What is the next writ?",
+      "pitch": "A delicate one. Ser Varo Andalas, a minor noble of Vivec, poisoned his own cousin for an inheritance and bribed the magistrates to look away. His cousin's widow came to us. The Council agreed. He keeps guards, and he keeps them close.",
+      "desc": "A writ has been sealed against Ser Varo Andalas, a Vivec noble who poisoned his cousin and bought the magistrates' silence.",
+      "objectives": [
+        {"type": "go", "place": "vivec", "text": "Travel to Vivec"},
+        {"type": "clear", "place": "vivec", "offset": [-40, -60], "text": "Get past Andalas's household guards",
+         "spawn": [{"type": "npc:adventurer", "count": 2, "name": "Andalas House Guard", "hostile": true}]},
+        {"type": "kill", "place": "vivec", "offset": [-40, -60], "placement": "near", "text": "Execute the writ on Ser Varo Andalas",
+         "spawn": [{"type": "npc:citizen", "name": "Ser Varo Andalas", "target": true, "hostile": true, "hp": 1.5}],
+         "journal": "Andalas offered me his cousin's inheritance to walk away. I left the writ on his desk instead, beside the bribes he had been counting."},
+        {"type": "talk", "npc": "ethasi_rilvayn", "text": "Report to Ethasi Rilvayn",
+         "topic": "Andalas offered me gold to leave. I didn't take it.",
+         "reply": "Of course he did, and of course you didn't. That is the whole difference between us and the hired knives. Grandmaster Hlaalu has heard your name."}
+      ],
+      "outro": "I served the writ on Ser Varo Andalas in Vivec and refused his bribe.",
+      "rewards": {"gold": 500, "faction_points": 4}
+    },
+    {
+      "id": "mt_writ_the_infiltrator",
+      "title": "The Infiltrator",
+      "start": "npc:eno_hlaalu",
+      "requires": ["quest:mt_writ_ser_andalas"],
+      "offer": "You asked for me, Grandmaster?",
+      "pitch": "Two of our members have been murdered in their beds, without writs. That is not our way, and it is not the way of anyone in Morrowind. The Dark Brotherhood has come to Vvardenfell. One of them hides in Balmora as a moneylender's clerk, Fevila Sarano. Here is the writ.",
+      "desc": "Grandmaster Eno Hlaalu has issued a writ against Fevila Sarano, a Dark Brotherhood assassin hiding in Balmora who murdered members of the Morag Tong.",
+      "objectives": [
+        {"type": "talk", "npc": "hlaalu_factor", "text": "Ask Nevos the factor about the clerk Fevila Sarano",
+         "topic": "There's a clerk named Fevila Sarano. Where can I find her?",
+         "reply": "The quiet one who never takes coin from anyone? Odd for a clerk. She keeps a room above the old warehouse on the east bank."},
+        {"type": "kill", "place": "balmora", "offset": [90, -30], "placement": "near", "text": "Execute the writ on Fevila Sarano",
+         "spawn": [{"type": "npc:assassin", "name": "Fevila Sarano", "target": true, "boss": true, "hp": 2.5, "dmg": 1.5, "hostile": true, "armor": "#1a1a1a", "weapon": "skycraft:ebony_dagger"}],
+         "actions": "relic:brotherhood_letter"},
+        {"type": "deliver", "npc": "eno_hlaalu", "relic": "brotherhood_letter", "text": "Bring the coded letter to Eno Hlaalu",
+         "topic": "Sarano is dead. She carried this.",
+         "reply": "A Brotherhood cipher. I can read it, given time. Meanwhile, there is a matter of faith to attend to. Mephala's threads have gone astray, and we will need her favour for what comes next."}
+      ],
+      "outro": "I executed the Dark Brotherhood infiltrator Fevila Sarano in Balmora. Her coded letter will lead us to the Brotherhood's cell in Vvardenfell.",
+      "rewards": {"gold": 600, "faction_points": 5}
+    },
+    {
+      "id": "mt_threads_of_the_webspinner",
+      "title": "Threads of the Webspinner",
+      "start": "auto",
+      "requires": ["quest:mt_writ_the_infiltrator"],
+      "desc": "Mephala, the Webspinner, blessed the Morag Tong with sacred threads. Three have been lost: one at her shrine, one in the ruin of Yansirramus, and one in the hands of a renegade in Vivec. Eno Hlaalu wants them home.",
+      "objectives": [
+        {"type": "go", "place": "shrine_mephala_morrowind", "text": "Travel to the shrine of Mephala"},
+        {"type": "clear", "place": "shrine_mephala_morrowind", "text": "Kill the spiders nesting in the shrine",
+         "spawn": [{"type": "skycraft:frostbite_spider", "count": 3, "name": "Webspinner's Brood"}]},
+        {"type": "retrieve", "place": "shrine_mephala_morrowind", "relic": "thread_shrine", "radius": 10, "text": "Take the thread from the shrine"},
+        {"type": "go", "place": "yansirramus", "text": "Travel to the ruin of Yansirramus"},
+        {"type": "clear", "place": "yansirramus", "placement": "structure", "text": "Banish the daedra guarding the ruin",
+         "spawn": [{"type": "skycraft:dremora", "count": 2}, {"type": "skycraft:scamp", "count": 2}]},
+        {"type": "retrieve", "place": "yansirramus", "relic": "thread_ruin", "radius": 10, "text": "Take the thread from Yansirramus"},
+        {"type": "kill", "place": "vivec", "offset": [50, 70], "text": "Find the renegade Ralvas Indrano in Vivec and take back his thread",
+         "spawn": [{"type": "npc:assassin", "name": "Ralvas Indrano, Renegade", "target": true, "boss": true, "hp": 2.0, "hostile": true}],
+         "actions": "relic:thread_renegade"},
+        {"type": "deliver", "npc": "eno_hlaalu", "relic": "thread_shrine", "text": "Return the first thread to Eno Hlaalu",
+         "topic": "The thread from Mephala's shrine.", "reply": "One. Set it here."},
+        {"type": "deliver", "npc": "eno_hlaalu", "relic": "thread_ruin", "text": "Return the second thread",
+         "topic": "The thread from Yansirramus.", "reply": "Two. And the last?"},
+        {"type": "deliver", "npc": "eno_hlaalu", "relic": "thread_renegade", "text": "Return the third thread",
+         "topic": "Indrano's thread. He won't need it now.",
+         "reply": "Three. Now watch.",
+         "actions": "scene:mt_webspinner"}
+      ],
+      "outro": "I returned the three Threads of the Webspinner to Eno Hlaalu. Mephala herself has bid the Tong cut the Dark Brotherhood out of Morrowind.",
+      "rewards": {"gold": 800, "faction_points": 7, "items": [{"item": "skycraft:shrouded_boots", "name": "Webspinner's Step", "enchant": {"feather_falling": 3}}]}
+    },
+    {
+      "id": "mt_grandmasters_writ",
+      "title": "The Grandmaster's Writ",
+      "start": "auto",
+      "requires": ["quest:mt_threads_of_the_webspinner"],
+      "desc": "Eno Hlaalu has deciphered the Brotherhood letter. Their cell hides in an abandoned Velothi tomb west of Vivec. He has signed a writ for every one of them.",
+      "objectives": [
+        {"type": "talk", "npc": "eno_hlaalu", "text": "Receive the Grandmaster's writ",
+         "topic": "You've read the letter?",
+         "reply": "An abandoned tomb west of Vivec. Here is the writ. It names the whole cell, and it is the first of its kind in a hundred years. Go."},
+        {"type": "go", "place": "dark_brotherhood_cell_vivec", "text": "Find the Velothi tomb"},
+        {"type": "clear", "place": "dark_brotherhood_cell_vivec", "placement": "structure", "text": "Execute the writ on the Brotherhood assassins",
+         "spawn": [{"type": "npc:assassin", "count": 4, "name": "Dark Brotherhood Assassin", "hostile": true, "armor": "#1a1a1a"}]},
+        {"type": "kill", "place": "dark_brotherhood_cell_vivec", "placement": "structure", "text": "Kill the cell's leader, the Speaker Darvame Hleran",
+         "spawn": [{"type": "npc:assassin", "name": "Speaker Darvame Hleran", "target": true, "boss": true, "hp": 3.5, "dmg": 1.7, "hostile": true, "armor": "#1a1a1a", "weapon": "skycraft:ebony_dagger"}],
+         "journal": "I left the Grandmaster's writ on the altar of their tomb. When the Brotherhood comes looking, they will know it was lawful, and who signed it."},
+        {"type": "talk", "npc": "eno_hlaalu", "text": "Report to Eno Hlaalu",
+         "topic": "The writ is served. The cell is gone.",
+         "reply": "Then stand there and hear me.",
+         "actions": "scene:mt_exalted"}
+      ],
+      "outro": "I served the Grandmaster's writ on the Dark Brotherhood's cell in Vvardenfell. Eno Hlaalu named me an Exalted Master of the Morag Tong.",
+      "rewards": {"gold": 1800, "faction_points": 11, "flags": ["mt_exalted_master"], "perks": 1,
+                  "items": [{"item": "skycraft:ebony_dagger", "name": "Mephala's Writ", "enchant": {"sharpness": 4, "looting": 2}},
+                            {"item": "skycraft:chitin_helmet", "name": "Exalted Master's Helm", "enchant": {"protection": 3}}]}
+    }
+  ]
+}

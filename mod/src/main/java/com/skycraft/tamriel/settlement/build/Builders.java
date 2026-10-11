@@ -48,6 +48,8 @@ public final class Builders {
             case HOMESTEAD_PLOT -> Works.homesteadPlot(c, p, s);
             case LANDMARK -> Landmarks.build(c, p, s, piece.settlement);
             case SHRINE -> shrine(c, p, s);
+            case GUILD_HALL -> GuildHalls.build(c, p, s, culture);
+            case JAIL -> Jails.build(c, p, s, culture, piece.settlement);
             default -> building(c, p, s, culture);
         }
     }

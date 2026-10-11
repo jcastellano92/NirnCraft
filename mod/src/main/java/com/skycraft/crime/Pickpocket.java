@@ -114,7 +114,7 @@ public final class Pickpocket {
                 .create(LootContextParamSets.GIFT);
         ObjectArrayList<ItemStack> items = table.getRandomItems(params);
         List<ItemStack> result = new ArrayList<>(items);
-        if (level.dimension() == Jail.JAIL && Crimes.isGuard(npc)) {
+        if ((level.dimension() == Jail.JAIL || Jail.isJailArea(level, npc.blockPosition())) && Crimes.isGuard(npc)) {
             result.add(0, new ItemStack(CrimeItems.JAIL_KEY.get()));
         }
         return result;

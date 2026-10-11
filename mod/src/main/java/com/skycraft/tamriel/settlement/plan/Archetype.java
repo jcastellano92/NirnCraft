@@ -41,7 +41,12 @@ public enum Archetype {
     CANAL(false, 7, 1, 6),
     LUMBER(false, 7, 5, 4),
     HOMESTEAD_PLOT(false, 23, 23, 4),
-    LANDMARK(false, 9, 9, 20);
+    LANDMARK(false, 9, 9, 20),
+    // ---- appended (ordinals are saved in structure pieces)
+    /** A faction's guild hall ({@link Spec#name} = faction id), see {@link Halls}. */
+    GUILD_HALL(true, 13, 17, 14),
+    /** A hold's jail: guard room, evidence chests and cells ({@link Spec#variant} 1 = Cidhna Mine), see {@link Halls}. */
+    JAIL(true, 15, 21, 12);
 
     public static final Archetype[] VALUES = values();
 

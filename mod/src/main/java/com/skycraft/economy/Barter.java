@@ -76,7 +76,7 @@ public final class Barter {
         ItemStack stack = stock.get(index);
         if (!matches(stack, itemId)) return Component.empty();
         Component name = stack.getHoverName();
-        int unit = Pricing.buyPrice(player, stack);
+        int unit = Pricing.buyPrice(player, stack, shop.npc());
         int want = all ? stack.getCount() : 1;
         int affordable = (int) Math.min(want, Currency.balance(player) / unit);
         if (affordable <= 0) return Component.translatable("message.skycraft.not_enough_gold");
@@ -108,7 +108,7 @@ public final class Barter {
         ItemStack stack = inv.getItem(slot);
         if (!matches(stack, itemId)) return Component.empty();
         LivingEntity npc = shop.npc();
-        if (!sellable(stack) || Pricing.sellPrice(player, stack) <= 0) return Component.translatable("message.skycraft.economy.cant_sell");
+        if (!sellable(stack) || Pricing.sellPrice(player, stack, npc) <= 0) return Component.translatable("message.skycraft.economy.cant_sell");
         if (!Merchants.buysFrom(player, npc, stack)) return Component.translatable("message.skycraft.economy.not_dealt");
         boolean stolen = Merchants.isStolen(stack);
         if (stolen && !Merchants.isFence(player, npc, shop)) return Component.translatable("message.skycraft.economy.stolen");
@@ -116,7 +116,7 @@ public final class Barter {
             return Component.translatable("message.skycraft.economy.contraband");
         }
 
-        int unit = Pricing.sellPrice(player, stack);
+        int unit = Pricing.sellPrice(player, stack, npc);
         int want = all ? stack.getCount() : 1;
         int n = Math.min(want, shop.available(player) / unit);
         if (n <= 0) return Component.translatable("message.skycraft.economy.no_merchant_gold");
@@ -155,7 +155,7 @@ public final class Barter {
         for (int i = 0; i < stock.size(); i++) {
             ItemStack s = stock.get(i);
             if (s.isEmpty()) continue;
-            merchant.add(new EconomyPackets.Entry(i, s.copy(), Pricing.buyPrice(player, s), (byte) ItemCategory.of(s).ordinal(), STATUS_OK));
+            merchant.add(new EconomyPackets.Entry(i, s.copy(), Pricing.buyPrice(player, s, npc), (byte) ItemCategory.of(s).ordinal(), STATUS_OK));
         }
         List<EconomyPackets.Entry> mine = new ArrayList<>();
         boolean fence = Merchants.isFence(player, npc, shop);
@@ -164,7 +164,7 @@ public final class Barter {
         for (int slot = 0; slot < inv.getContainerSize(); slot++) {
             ItemStack s = inv.getItem(slot);
             if (!sellable(s)) continue;
-            int price = Pricing.sellPrice(player, s);
+            int price = Pricing.sellPrice(player, s, npc);
             if (price <= 0) continue;
             byte status = STATUS_OK;
             if (!Merchants.buysFrom(player, npc, s)) {
@@ -200,7 +200,7 @@ public final class Barter {
         for (int slot = 0; slot < MAIN_INVENTORY; slot++) {
             ItemStack s = inv.getItem(slot);
             if (s.isEmpty() || !s.is(filter) || !sellable(s) || Merchants.isStolen(s)) continue;
-            int unit = Pricing.sellPrice(player, s);
+            int unit = Pricing.sellPrice(player, s, npc);
             if (unit <= 0) continue;
             int n = Math.min(s.getCount(), shop.available(player) / unit);
             if (n < s.getCount()) ranOut = true;

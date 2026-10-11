@@ -42,4 +42,19 @@ public final class Pricing {
         if (value <= 0) return 0;
         return (int) Math.max(1, Math.floor(value * sellMult(player)));
     }
+
+    /** Price of ONE item bought from {@code npc}: a faction's quartermaster gives its members a discount. */
+    public static int buyPrice(Player player, ItemStack stack, net.minecraft.world.entity.LivingEntity npc) {
+        int price = buyPrice(player, stack);
+        int off = com.skycraft.quest.faction.FactionStaff.discountFor(player, npc);
+        if (off <= 0) return price;
+        // never below what any merchant pays for it, so the discount can't be traded for gold
+        int floor = (int) Math.ceil(sellPrice(player, stack) * 1.1) + 1;
+        return Math.max(Math.min(price, floor), (int) Math.ceil(price * (100 - off) / 100.0));
+    }
+
+    /** Gold paid by {@code npc} for ONE item (a faction's quartermaster pays the usual price). */
+    public static int sellPrice(Player player, ItemStack stack, net.minecraft.world.entity.LivingEntity npc) {
+        return sellPrice(player, stack);
+    }
 }

@@ -1,0 +1,193 @@
+{
+  "line": "aldmeri_dominion",
+  "category": "faction",
+  "faction": "aldmeri_dominion",
+  "region": "summerset/auridon",
+  "speakers": {"narrator": "Narrator", "ayrenn": "Queen Ayrenn"},
+  "places": {
+    "veiled_heritance_hideout": {"x": -9800, "z": 10700, "r": 30, "name": "Veiled Heritance Hideout"},
+    "vulkhel_guard": {"x": -10150, "z": 11700, "r": 50, "name": "Vulkhel Guard"}
+  },
+  "npcs": [
+    {"id": "razum_dar", "name": "Razum-dar", "role": "adventurer", "place": "firsthold", "offset": [5, -3], "hall": "aldmeri_dominion",
+     "greet": "Raz is only a humble envoy of the Queen. Humble, handsome, and listening to everything you say. Sit, sit."},
+    {"id": "ilmaril_senwe", "name": "Sapiarch Ilmaril Senwe", "role": "scholar", "place": "alinor", "offset": [-8, 6], "female": true,
+     "greet": "The Crystal Tower has kept the memory of the Aldmer since before the first Bosmer sang the first tree into shape. Do not touch the shelves."}
+  ],
+  "relics": [
+    {"id": "ad_veil_cipher", "name": "Veiled Heritance Cipher", "desc": "A wax tablet of names and dates, written in a code that confuses Bosmer and Khajiit with livestock.", "icon": 11},
+    {"id": "ad_viper_banner", "name": "Sea Viper War-Banner", "desc": "Blue-green silk worked with a coiled serpent. The Maormer fly it when they mean to burn a town.", "icon": 26},
+    {"id": "ad_green_treaty", "name": "Treaty of the Green", "desc": "A pledge between Summerset and Valenwood, written on cured hide because no Bosmer will sign on paper.", "icon": 11},
+    {"id": "ad_queens_gift", "name": "Queen Ayrenn's Gift", "desc": "A carved box of Summerset glass holding a silver moon-sugar spoon. A gift for the Mane, and a promise.", "icon": 26}
+  ],
+  "scenes": {
+    "ad_veil_lifted": [
+      ["razum_dar", "Lord Varandil. Raz has eaten at his table. He has excellent wine and very ugly opinions about cats."],
+      ["razum_dar", "The Veiled Heritance thinks the Queen shames Summerset by shaking hands with Bosmer and Khajiit. They would rather the Dominion die pure than live together."],
+      ["razum_dar", "They are wrong, and now they are also short one lord. Good work, friend."]
+    ],
+    "ad_crystal_tower": [
+      ["narrator", "Light pours down through the Crystal Tower, splitting into colours on the floor. Altmer, Bosmer and Khajiit stand side by side beneath it, and not all of them look comfortable."],
+      ["ayrenn", "My mother's court said this alliance could not last a season. It has lasted because people like this one carried it across Tamriel on foot."],
+      ["ayrenn", "Kneel, and rise as my Hand. When I cannot be there, you will be."],
+      ["razum_dar", "Raz will be weeping now, in a very dignified way. Do not look."]
+    ]
+  },
+  "quests": [
+    {
+      "id": "ad_the_queens_eyes",
+      "title": "The Queen's Eyes",
+      "start": "npc:razum_dar",
+      "requires": ["!faction:aldmeri_dominion", "race:altmer,bosmer,khajiit,ohmes_raht", "!faction:blades", "!faction:stormcloaks"],
+      "offer": "I want to serve the Dominion.",
+      "pitch": "Good, good. Raz has a small problem with large teeth. Someone on the Firsthold docks is passing messages to people who hate the Queen. Raz cannot be seen watching the docks; everyone knows Raz. You, nobody knows. Yet.",
+      "desc": "Razum-dar, a Khajiit who calls himself Queen Ayrenn's humble envoy, asked me to watch the Firsthold docks for a conspirator passing messages against the Queen.",
+      "objectives": [
+        {"type": "go", "place": "firsthold", "offset": [-50, 50], "text": "Watch the Firsthold docks"},
+        {"type": "kill", "place": "firsthold", "offset": [-50, 50], "text": "Stop the messenger before he slips away",
+         "spawn": [{"type": "npc:thug", "name": "Hooded Messenger", "target": true, "hp": 1.8, "hostile": true, "armor": "#d8d0b0"}],
+         "journal": "The messenger tried to throw his tablet into the harbor. He threw it poorly."},
+        {"type": "retrieve", "place": "firsthold", "offset": [-50, 50], "relic": "ad_veil_cipher", "radius": 8, "text": "Take the messenger's tablet"},
+        {"type": "deliver", "npc": "razum_dar", "relic": "ad_veil_cipher", "text": "Bring the tablet to Razum-dar",
+         "topic": "Your messenger carried this.",
+         "reply": "Ah. The Veiled Heritance. Raz hoped it was only smugglers. Smugglers you can bargain with. Welcome to the Queen's service, friend. Raz will try not to get you killed."}
+      ],
+      "outro": "I caught a Veiled Heritance messenger on the Firsthold docks and gave his cipher to Razum-dar, who welcomed me into Queen Ayrenn's service.",
+      "rewards": {"gold": 200, "join": true, "items": ["skycraft:elven_sword", "skycraft:elven_chestplate"]}
+    },
+    {
+      "id": "ad_beneath_the_veil",
+      "title": "Beneath the Veil",
+      "start": "npc:razum_dar",
+      "requires": ["quest:ad_the_queens_eyes|faction:aldmeri_dominion"],
+      "offer": "Did you break the cipher?",
+      "pitch": "Raz broke it over breakfast. The Veiled Heritance meets in an old cellar in the hills west of here, and the man who leads them wears a silk mask and a very expensive ring. Go in. Bring Raz the ring, with or without the finger.",
+      "desc": "The cipher led Razum-dar to a Veiled Heritance meeting place in the hills west of Firsthold. He wants their masked leader stopped.",
+      "objectives": [
+        {"type": "go", "place": "veiled_heritance_hideout", "text": "Find the Veiled Heritance hideout"},
+        {"type": "clear", "place": "veiled_heritance_hideout", "placement": "structure", "text": "Break up the conspirators' meeting",
+         "spawn": [{"type": "npc:thug", "count": 3, "name": "Veiled Zealot", "hostile": true, "armor": "#d8d0b0"},
+                   {"type": "npc:mage", "name": "Veiled Spellsword", "hostile": true, "armor": "#d8d0b0"}]},
+        {"type": "kill", "place": "veiled_heritance_hideout", "placement": "structure", "text": "Unmask the leader of the cell",
+         "spawn": [{"type": "npc:mage", "name": "The Silk Mask", "target": true, "boss": true, "hp": 3.0, "dmg": 1.5, "hostile": true, "armor": "#f0e8c8", "weapon": "skycraft:elven_dagger"}],
+         "journal": "Under the silk mask was Lord Varandil, a councillor of Firsthold. He spat that the Queen had sold her birthright to beasts. Then he stopped saying anything."},
+        {"type": "talk", "npc": "razum_dar", "text": "Report to Razum-dar",
+         "topic": "The Silk Mask was Lord Varandil.",
+         "reply": "Raz suspected. Raz hoped to be wrong.",
+         "actions": "scene:ad_veil_lifted"},
+        {"type": "talk", "npc": "razum_dar", "text": "Answer Razum-dar's question",
+         "choices": [
+           {"label": "Some of his followers surrendered. They deserve a trial.", "reply": "A trial. Yes, the Queen would like that. Raz will see they get one, and Raz will see it is public. Let Auridon hear what they believed.", "actions": "flag:ad_veil_trial"},
+           {"label": "Hang the rest quietly. Fear will finish the job.", "reply": "Hm. Effective. Also exactly what the Veiled Heritance would do. Raz will think about it. Raz will think very hard.", "actions": "flag:ad_veil_hanged"}
+         ]}
+      ],
+      "outro": "I unmasked the leader of a Veiled Heritance cell: Lord Varandil of Firsthold. The conspiracy is wounded, though Razum-dar doubts it is dead.",
+      "rewards": {"gold": 350, "faction_points": 3}
+    },
+    {
+      "id": "ad_sea_vipers",
+      "title": "Sails off Vulkhel Guard",
+      "start": "auto",
+      "requires": ["quest:ad_beneath_the_veil"],
+      "desc": "Maormer raiders from Pyandonea have landed on the Auridon shore near Vulkhel Guard. Razum-dar thinks the Veiled Heritance told them where the patrols would not be.",
+      "objectives": [
+        {"type": "talk", "npc": "razum_dar", "text": "Speak with Razum-dar",
+         "topic": "You look worried. That's new.",
+         "reply": "Sea Vipers on the west shore, burning boats at Vulkhel Guard. Somebody told them the patrol was moved. Raz would like to know who, but first Raz would like the Maormer dead."},
+        {"type": "go", "place": "vulkhel_guard", "text": "Ride to Vulkhel Guard"},
+        {"type": "clear", "place": "vulkhel_guard", "text": "Drive the Maormer raiders back into the sea",
+         "spawn": [{"type": "npc:thug", "count": 4, "name": "Maormer Raider", "hostile": true, "armor": "#2f6f7f", "weapon": "skycraft:elven_sword"},
+                   {"type": "skycraft:slaughterfish", "count": 2, "name": "Viper-Bred Slaughterfish"}]},
+        {"type": "kill", "place": "vulkhel_guard", "text": "Kill the raid's captain",
+         "spawn": [{"type": "npc:mage", "name": "Captain Orilith Tidesworn", "target": true, "boss": true, "hp": 3.0, "dmg": 1.6, "hostile": true, "armor": "#2f6f7f"}],
+         "journal": "Captain Orilith called a wave onto the beach that took two of the town's boats with it. The third wave she called never came."},
+        {"type": "retrieve", "place": "vulkhel_guard", "relic": "ad_viper_banner", "radius": 12, "text": "Take the raiders' war-banner"},
+        {"type": "deliver", "npc": "razum_dar", "relic": "ad_viper_banner", "text": "Bring the banner to Razum-dar in Firsthold",
+         "topic": "The raid is broken. Here's their flag.",
+         "reply": "Raz will hang it in the hall, upside down. The Maormer find that very rude. Now, you are going on a long trip. Raz hopes you like trees."}
+      ],
+      "outro": "I broke a Maormer raid on Vulkhel Guard and took the Sea Vipers' war-banner. Razum-dar says my next task lies far from Summerset.",
+      "rewards": {"gold": 400, "faction_points": 3, "items": ["skycraft:elven_bow", "minecraft:arrow*32"]}
+    },
+    {
+      "id": "ad_treaty_of_the_green",
+      "title": "Treaty of the Green",
+      "start": "auto",
+      "requires": ["quest:ad_sea_vipers"],
+      "desc": "Razum-dar has given me a treaty to carry to Elden Root in Valenwood. The Green Pact must agree to it, and spies of the Daggerfall Covenant would very much prefer that it never arrive.",
+      "on_start": "relic:ad_green_treaty",
+      "objectives": [
+        {"type": "go", "place": "elden_root", "text": "Carry the treaty to Elden Root"},
+        {"type": "talk", "npc": "spinner", "text": "Present yourself to Spinner Aerfin",
+         "topic": "I bring a treaty from Queen Ayrenn.",
+         "reply": "On hide, not paper. Someone in Summerset was listening, for once. But the Green does not sign for the Queen. It signs for the one who carries the treaty. Tell me why you carry it."},
+        {"type": "talk", "npc": "spinner", "text": "Give the Spinner your reason",
+         "choices": [
+           {"label": "Because Summerset needs the forest more than the forest needs Summerset.", "reply": "True, and rarely said aloud by an outsider. The Green will remember that you said it.", "actions": "flag:ad_humble_envoy"},
+           {"label": "Because divided, all of us fall to the Covenant and the Pact.", "reply": "A soldier's reason. Not wrong. The Green has buried a great many soldiers and kept their songs.", "actions": "flag:ad_soldier_envoy"}
+         ]},
+        {"type": "deliver", "npc": "spinner", "relic": "ad_green_treaty", "text": "Hand the treaty to the Spinner",
+         "topic": "Then let it be signed.",
+         "reply": "It is sung, which is better. Go carefully. There are Bretons in the trees who were very interested in this treaty."},
+        {"type": "clear", "place": "elden_root", "offset": [150, 150], "text": "Ambush the Covenant spies on the road",
+         "spawn": [{"type": "npc:thug", "count": 3, "name": "Covenant Saboteur", "hostile": true, "armor": "#3a4a8a"},
+                   {"type": "npc:mage", "name": "Covenant Spymaster", "hostile": true, "boss": true, "hp": 2.0, "armor": "#3a4a8a"}],
+         "journal": "The Covenant spies carried a copy of my route, written in a Firsthold hand. Somebody in the Queen's own city is still talking."}
+      ],
+      "outro": "Spinner Aerfin sang Valenwood's assent to Queen Ayrenn's treaty, and I killed the Covenant spies who had been waiting to stop it.",
+      "rewards": {"gold": 400, "faction_points": 3, "items": ["skycraft:bosmer_chestplate"]}
+    },
+    {
+      "id": "ad_the_manes_blessing",
+      "title": "The Mane's Blessing",
+      "start": "auto",
+      "requires": ["quest:ad_treaty_of_the_green"],
+      "desc": "With Valenwood bound to the Dominion, Queen Ayrenn wants Elsweyr's blessing as well. I am to carry her gift to the Mane in Riverhold.",
+      "on_start": "relic:ad_queens_gift",
+      "objectives": [
+        {"type": "go", "place": "riverhold", "text": "Travel to Riverhold in Elsweyr"},
+        {"type": "deliver", "npc": "mane", "relic": "ad_queens_gift", "text": "Present the Queen's gift to the Mane",
+         "topic": "Queen Ayrenn sends this, with her respect.",
+         "reply": "A spoon for moon sugar, made by people who do not eat it. The Mane understands the meaning. But gifts are words. The Mane would see a deed."},
+        {"type": "talk", "npc": "mane", "text": "Ask what deed the Mane requires",
+         "topic": "Name it.",
+         "reply": "Raiders from the Ebonheart Pact are burning sugar caravans on the road west of the city. Nords and Dunmer, far from home and very hungry. Make them less hungry, forever."},
+        {"type": "clear", "place": "riverhold", "offset": [200, -200], "text": "Destroy the Pact raiders on the caravan road",
+         "spawn": [{"type": "npc:stormcloak_soldier", "count": 2, "name": "Pact Axeman", "hostile": true},
+                   {"type": "npc:thug", "count": 2, "name": "Pact Skirmisher", "hostile": true, "armor": "#5a3a2a"},
+                   {"type": "skycraft:guar", "name": "Pact Pack-Guar"}]},
+        {"type": "talk", "npc": "mane", "text": "Return to the Mane",
+         "topic": "The road is safe again.",
+         "reply": "Then the caravans will sing your name in their own way, which is mostly about the price of sugar. Tell your Queen: Elsweyr stands with the Dominion. The Mane will come to the Crystal Tower."}
+      ],
+      "outro": "I carried Queen Ayrenn's gift to the Mane and cleared Pact raiders from the caravan road. Elsweyr has pledged to the Dominion, and the Mane will attend the ceremony at the Crystal Tower.",
+      "rewards": {"gold": 450, "faction_points": 3, "items": ["skycraft:khajiit_helmet"]}
+    },
+    {
+      "id": "ad_the_crystal_tower",
+      "title": "The Crystal Tower",
+      "start": "auto",
+      "requires": ["quest:ad_the_manes_blessing"],
+      "desc": "Altmer, Bosmer and Khajiit will gather at the Crystal Tower to seal the Aldmeri Dominion before Queen Ayrenn. Sapiarch Ilmaril Senwe will keep the rite, and Razum-dar is certain the Veiled Heritance will not let the day pass quietly.",
+      "objectives": [
+        {"type": "talk", "npc": "ilmaril_senwe", "text": "Speak with Sapiarch Ilmaril Senwe in Alinor",
+         "topic": "I'm here for the ceremony.",
+         "reply": "You are here to stand in the right place and say nothing until spoken to. The rite is old and the Sapiarchs are older. Go to the Tower and wait by the eastern stair."},
+        {"type": "go", "place": "crystal_tower", "offset": [-250, 0], "text": "Go to the Crystal Tower"},
+        {"type": "clear", "place": "crystal_tower", "offset": [-250, 0], "text": "Stop the Veiled Heritance assassins at the stair",
+         "spawn": [{"type": "npc:assassin", "count": 4, "name": "Veiled Knife", "hostile": true, "armor": "#f0e8c8"}]},
+        {"type": "kill", "place": "crystal_tower", "offset": [-250, 0], "text": "Kill the Veiled Heritance's last master",
+         "spawn": [{"type": "npc:assassin", "name": "The Veiled Hand", "target": true, "boss": true, "hp": 4.0, "dmg": 1.8, "hostile": true, "armor": "#f0e8c8", "weapon": "skycraft:glass_dagger"}],
+         "journal": "The Veiled Hand had been a Sapiarch's acolyte. He had studied the Tower's stairs for years. He never thought someone might wait on them."},
+        {"type": "talk", "npc": "ilmaril_senwe", "text": "Return to the Sapiarch for the ceremony",
+         "topic": "The stair is clear. The ceremony can begin.",
+         "reply": "Then stand where I told you, and this time, kneel when the Queen looks at you.",
+         "actions": "scene:ad_crystal_tower"}
+      ],
+      "outro": "I stopped the Veiled Heritance's last strike at the Crystal Tower. Before the gathered peoples of the Dominion, Queen Ayrenn named me her Hand.",
+      "rewards": {"gold": 1400, "faction_points": 5, "perks": 1, "flags": ["ad_hand_of_the_queen"],
+                  "items": [{"item": "skycraft:glass_sword", "name": "Ayrenn's Promise", "enchant": {"sharpness": 4, "fire_aspect": 1, "unbreaking": 3}},
+                            {"item": "skycraft:elven_gilded_chestplate", "name": "Cuirass of the Queen's Hand", "enchant": {"protection": 4}}]}
+    }
+  ]
+}

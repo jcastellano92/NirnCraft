@@ -257,7 +257,7 @@ public final class Locks {
                 }
             }
         }
-        if (Jail.isJailDimension(level) && hasJailKey(player)) return false;
+        if ((Jail.isJailDimension(level) || Jail.isJailArea(level, pos)) && hasJailKey(player)) return false;
         int tier = lockLevel(level, pos);
         return tier != NOT_LOCKED && !isUnlocked(player, level, pos);
     }

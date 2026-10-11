@@ -130,6 +130,11 @@ public final class QuestNpcs {
         if (r != null && r.home != null) return r.home;
         StoryData.NpcDef def = StoryData.npc(id);
         if (def == null) return null;
+        // the head of a guild hall stands at the hall's desk once the hall exists
+        if (!def.hall.isEmpty()) {
+            BlockPos hall = com.skycraft.quest.faction.FactionStaff.hallSpot(server, def.hall, def.place);
+            if (hall != null) return hall;
+        }
         Optional<QuestPlaces.Spot> spot = QuestPlaces.find(def.place);
         if (spot.isEmpty()) return null;
         int x = spot.get().x() + def.dx;
@@ -212,9 +217,16 @@ public final class QuestNpcs {
             // cheap x/z test first: the full anchor needs a surface height
             Rec r = store.recs.get(def.id);
             int ax, az;
+            BlockPos hall = r != null && r.home != null || def.hall.isEmpty() ? null
+                    : com.skycraft.quest.faction.FactionStaff.hallSpot(server, def.hall, def.place);
             if (r != null && r.home != null) {
                 ax = r.home.getX();
                 az = r.home.getZ();
+            } else if (hall != null) {
+                // the hall now exists: the NPC moves in for good (spawned earlier at the town anchor? fetched over)
+                relocate(server, def.id, hall, "minecraft:overworld");
+                ax = hall.getX();
+                az = hall.getZ();
             } else {
                 Optional<QuestPlaces.Spot> spot = QuestPlaces.find(def.place);
                 if (spot.isEmpty()) continue;
@@ -309,7 +321,8 @@ public final class QuestNpcs {
     /** Creates (but doesn't add) the NPC entity at the surface of {@code at}. */
     @Nullable
     private static LivingEntity create(ServerLevel level, StoryData.NpcDef def, BlockPos at) {
-        BlockPos pos = QuestSpawner.surface(level, at.getX(), at.getZ());
+        // an indoor spot with room to stand (a cell, a hall's desk) is used as is; outdoors, the ground under it
+        BlockPos pos = !level.canSeeSky(at) && standable(level, at) ? at : QuestSpawner.surface(level, at.getX(), at.getZ());
         LivingEntity entity = null;
         if (!def.entity.isEmpty()) {
             Optional<EntityType<?>> type = EntityType.byString(def.entity);
@@ -335,6 +348,11 @@ public final class QuestNpcs {
 
     private static void mark(LivingEntity e, StoryData.NpcDef def) {
         e.getPersistentData().putString(TAG, def.id);
+        if (!def.hall.isEmpty()) {
+            // a guild hall's head: the faction's services (joining, work, penance) are theirs to give
+            e.getPersistentData().putString(com.skycraft.quest.faction.FactionStaff.TAG, def.hall);
+            e.getPersistentData().putString(com.skycraft.quest.faction.FactionStaff.JOB, "leader");
+        }
         e.setCustomName(def.name.c());
         e.setCustomNameVisible(false);
         if (e instanceof Mob mob) mob.setPersistenceRequired();
@@ -346,9 +364,12 @@ public final class QuestNpcs {
         Entity e = find(player.server, id);
         ServerLevel level = player.serverLevel();
         BlockPos near = player.blockPosition().offset(level.random.nextInt(5) - 2, 0, level.random.nextInt(5) - 2);
+        // indoors (a jail cell, a hall): beside the player on their own floor rather than up on the roof
+        boolean indoors = !level.canSeeSky(player.blockPosition());
+        if (indoors) near = freeBeside(level, player.blockPosition());
         if (e != null) {
             if (e.level() == level) {
-                BlockPos s = QuestSpawner.surface(level, near.getX(), near.getZ());
+                BlockPos s = indoors ? near : QuestSpawner.surface(level, near.getX(), near.getZ());
                 e.teleportTo(s.getX() + 0.5, s.getY(), s.getZ() + 0.5);
                 return e;
             }
@@ -357,6 +378,21 @@ public final class QuestNpcs {
         Store store = Store.get(player.server);
         store.rec(id).uuid = null;
         return ensure(level, id, near, true);
+    }
+
+    private static boolean standable(ServerLevel level, BlockPos p) {
+        return level.getBlockState(p).getCollisionShape(level, p).isEmpty()
+                && level.getBlockState(p.above()).getCollisionShape(level, p.above()).isEmpty()
+                && !level.getBlockState(p.below()).getCollisionShape(level, p.below()).isEmpty();
+    }
+
+    /** A free spot next to {@code p} on the same floor (or {@code p} itself). */
+    private static BlockPos freeBeside(ServerLevel level, BlockPos p) {
+        for (int[] d : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}}) {
+            BlockPos q = p.offset(d[0], 0, d[1]);
+            if (standable(level, q)) return q;
+        }
+        return p;
     }
 
     /** The NPC leaves the story for good (killed in a quest, exiled): removed and never respawned. */

@@ -1,0 +1,169 @@
+{
+  "line": "legion_cyrodiil",
+  "category": "faction",
+  "faction": "imperial_legion",
+  "region": "cyrodiil/heartlands",
+  "speakers": {"narrator": "Narrator"},
+  "places": {
+    "fort_urasek": {"x": -1280, "z": 6460, "r": 36, "name": "Fort Urasek"},
+    "rumare_smuggler_cove": {"x": 880, "z": 5480, "r": 30, "name": "Smugglers' Cove on Lake Rumare"},
+    "fort_sutch": {"x": -3420, "z": 8280, "r": 36, "name": "Fort Sutch"}
+  },
+  "npcs": [
+    {"id": "adamus_phillida", "name": "Adamus Phillida", "role": "imperial_soldier", "place": "imperial_city", "offset": [12, 4], "hall": "imperial_legion",
+     "greet": "Commander of the Legion in the Heartland, and I have more roads than soldiers. If you can hold a sword and follow an order, we can talk."},
+    {"id": "hieronymus_lex", "name": "Hieronymus Lex", "role": "imperial_soldier", "place": "imperial_city", "offset": [14, 7], "hall": "imperial_legion",
+     "greet": "Captain Lex, Imperial Watch. Every theft in this city is a crime against the Emperor, and every unsolved one is a crime against me."},
+    {"id": "marcella_tullus", "name": "Marcella Tullus", "role": "blacksmith", "place": "imperial_city", "offset": [-14, 16], "female": true,
+     "greet": "I build walls. Good ones. The trouble is that people keep wanting to knock them down."}
+  ],
+  "relics": [
+    {"id": "smuggler_manifest", "name": "Smuggler's Manifest", "desc": "Cargoes ferried across Lake Rumare by night, and the Waterfront warehouse each was bound for.", "icon": 11},
+    {"id": "dremora_sigil", "name": "Dremora War-Sigil", "desc": "A blackened iron token from the Daedra at Fort Sutch. It is warm and does not cool.", "icon": 26}
+  ],
+  "scenes": {
+    "lgc_kvatch_walls": [
+      ["savlian", "Stone, mortar, and a mason who knows what she's doing. Kvatch hasn't seen a convoy that reached it whole in a long time."],
+      ["marcella_tullus", "Give me a season and your walls will stand when the hills burn again. Which, from the look of them, they might."],
+      ["narrator", "Behind the ruined chapel, the first new stones are set while the soldiers watch the ridge."]
+    ],
+    "lgc_fort_sutch": [
+      ["narrator", "Fort Sutch smells of ash and hot iron. Where a gate to Oblivion once burned, a scar of red rock still pulses in the ground, and the Daedra have come back to it."],
+      ["adamus_phillida", "Hold the walls. Whatever comes out of that scar, it doesn't reach the Gold Coast road."]
+    ]
+  },
+  "quests": [
+    {
+      "id": "lgc_sworn_to_the_watch",
+      "title": "Sworn to the Watch",
+      "start": "npc:adamus_phillida",
+      "requires": ["!faction:imperial_legion", "!faction:stormcloaks"],
+      "offer": "I want to serve the Legion.",
+      "pitch": "Good. The Watch is short of hands, so you'll start there. Thugs have been robbing travellers on the Red Ring Road in sight of the city walls. Clear them off and report to Captain Lex. If you're still standing, you'll take the oath.",
+      "desc": "Commander Adamus Phillida will take me into the Imperial Legion if I serve a first duty with the Imperial Watch: clearing the thugs who rob travellers on the Red Ring Road.",
+      "objectives": [
+        {"type": "talk", "npc": "hieronymus_lex", "text": "Report to Captain Hieronymus Lex",
+         "topic": "Commander Phillida sent me to you.",
+         "reply": "A recruit. Wonderful. The Red Ring Road, south shore. Four of them, maybe five, and they're bold because nobody stops them. Stop them."},
+        {"type": "clear", "place": "red_ring_road", "text": "Clear the thugs off the Red Ring Road",
+         "spawn": [{"type": "npc:thug", "count": 4, "name": "Road Thug", "hostile": true}]},
+        {"type": "talk", "npc": "adamus_phillida", "text": "Return to Adamus Phillida and take the oath",
+         "topic": "The Red Ring Road is clear.",
+         "reply": "Captain Lex says you did it cleanly. Raise your right hand. You serve the Empire, its laws and its people, for as long as it needs you. Welcome to the Legion, Auxiliary."}
+      ],
+      "outro": "I cleared the Red Ring Road and swore the oath of the Imperial Legion before Commander Adamus Phillida.",
+      "rewards": {"gold": 150, "join": true, "items": ["skycraft:imperial_sword", "skycraft:imperial_light_chestplate"]}
+    },
+    {
+      "id": "lgc_blood_on_the_gold_road",
+      "title": "Blood on the Gold Road",
+      "start": "npc:adamus_phillida",
+      "requires": ["quest:lgc_sworn_to_the_watch|faction:imperial_legion"],
+      "offer": "Any orders, Commander?",
+      "pitch": "A warlord calling himself Varn Ironjaw has taken Fort Urasek on the Gold Road and is taxing every caravan between here and Skingrad. Take the fort back. Bring me his head, or at least his surrender.",
+      "desc": "A bandit warlord named Varn Ironjaw holds Fort Urasek on the Gold Road and has been robbing every caravan bound for Skingrad. Commander Phillida ordered me to retake the fort.",
+      "objectives": [
+        {"type": "go", "place": "fort_urasek", "text": "Travel to Fort Urasek on the Gold Road"},
+        {"type": "clear", "place": "fort_urasek", "placement": "structure", "text": "Retake Fort Urasek from the bandits",
+         "spawn": [{"type": "skycraft:bandit", "count": 5, "name": "Ironjaw Raider"}]},
+        {"type": "kill", "place": "fort_urasek", "placement": "structure", "text": "Defeat the warlord Varn Ironjaw",
+         "spawn": [{"type": "skycraft:bandit_chief", "name": "Varn Ironjaw", "target": true, "boss": true, "hp": 3.0, "dmg": 1.4}],
+         "journal": "Varn Ironjaw had a strongbox full of caravan seals and a Legion helmet he'd taken off a dead patrol. He fought like a man who thought nobody would ever come for him."},
+        {"type": "talk", "npc": "adamus_phillida", "text": "Report to Adamus Phillida",
+         "topic": "Fort Urasek is ours again. Ironjaw is dead.",
+         "reply": "Then the Gold Road is open. Skingrad's merchants will remember the Legion kindly, for a month or two. Well done, soldier."}
+      ],
+      "outro": "I retook Fort Urasek and killed the warlord Varn Ironjaw. The caravans run again between the Imperial City and Skingrad.",
+      "rewards": {"gold": 400, "faction_points": 2}
+    },
+    {
+      "id": "lgc_mist_on_rumare",
+      "title": "Mist on Rumare",
+      "start": "npc:hieronymus_lex",
+      "requires": ["quest:lgc_blood_on_the_gold_road"],
+      "offer": "Captain, you look like a man with a grudge.",
+      "pitch": "Smugglers are running boats across Lake Rumare at night, straight into the Waterfront. I want to know what they're carrying and who they're carrying it for. There's a cove on the north shore. Go after dark.",
+      "desc": "Captain Lex believes smugglers cross Lake Rumare by night to supply the Waterfront. He sent me to their cove on the north shore to find out who they work for.",
+      "objectives": [
+        {"type": "go", "place": "rumare_smuggler_cove", "text": "Find the smugglers' cove on Lake Rumare"},
+        {"type": "cond", "cond": "night", "text": "Wait for the smugglers' boats after dark"},
+        {"type": "clear", "place": "rumare_smuggler_cove", "text": "Take the smugglers",
+         "spawn": [{"type": "npc:thug", "count": 3, "name": "Rumare Smuggler", "hostile": true}, {"type": "skycraft:slaughterfish", "count": 2}]},
+        {"type": "retrieve", "place": "rumare_smuggler_cove", "relic": "smuggler_manifest", "radius": 10, "text": "Search the smugglers' boat for papers"},
+        {"type": "deliver", "npc": "hieronymus_lex", "relic": "smuggler_manifest", "text": "Bring the manifest to Captain Lex",
+         "topic": "The smugglers kept a manifest. Every cargo goes to a Waterfront warehouse.",
+         "reply": "Of course it does. The Waterfront means one thing to me: the Gray Fox. This is the closest I've been in years."}
+      ],
+      "outro": "The smugglers on Lake Rumare were supplying the Waterfront. Captain Lex is convinced the trail leads to the Gray Fox himself.",
+      "rewards": {"gold": 400, "faction_points": 2}
+    },
+    {
+      "id": "lgc_hunting_the_fox",
+      "title": "Hunting the Gray Fox",
+      "start": "auto",
+      "requires": ["quest:lgc_mist_on_rumare"],
+      "desc": "Captain Lex wants the Gray Fox, master of the Thieves Guild, in a cell. He has sent me into the Waterfront to find where the smugglers' cargo ends up. Anyone in the Guild will see this as a betrayal.",
+      "objectives": [
+        {"type": "go", "place": "imperial_city", "offset": [-8, 10], "radius": 8, "text": "Search the Waterfront warehouses",
+         "journal": "Behind a false wall in a Waterfront warehouse I found a grey hood hung on a peg, a lamp still warm, and a man whose face I could not keep in my mind. He did not run. He asked me what I was going to tell Lex."},
+        {"type": "talk", "npc": "hieronymus_lex", "text": "Report to Captain Lex",
+         "topic": "I found the Gray Fox's hideout.",
+         "reply": "Then tell me where, soldier. Tell me exactly where."},
+        {"type": "talk", "npc": "hieronymus_lex", "text": "Decide whether to give the Gray Fox up to Captain Lex",
+         "choices": [
+           {"label": "It was empty. He was gone before I got there.", "reply": "Gone. Always gone. Very well. I'll get him another day, and you'll be there when I do.", "actions": "flag:lgc_spared_fox"},
+           {"label": "The Waterfront, behind the warehouse wall. I'll take you there.", "reply": "At last. We'll raid it tonight. If he slips the cells again, it won't be for lack of trying on your part.", "actions": "flag:lgc_turned_in_fox;expel:thieves_guild"}
+         ]}
+      ],
+      "outro": "I tracked the Gray Fox to the Waterfront and made my choice about what Captain Lex would hear.",
+      "rewards": {"gold": 500, "faction_points": 3}
+    },
+    {
+      "id": "lgc_stones_for_kvatch",
+      "title": "Stones for Kvatch",
+      "start": "npc:adamus_phillida",
+      "requires": ["quest:lgc_hunting_the_fox"],
+      "offer": "What's the next posting, Commander?",
+      "pitch": "Kvatch is still rebuilding, and every mason we send gets robbed on the road. Marcella Tullus is the best builder in the Heartland. Take her to Savlian Matius in Kvatch, alive and with her tools, and see the first walls go up.",
+      "desc": "Commander Phillida assigned me to escort the master mason Marcella Tullus to Kvatch, where Savlian Matius is rebuilding the city's walls.",
+      "objectives": [
+        {"type": "talk", "npc": "marcella_tullus", "text": "Meet Marcella Tullus in the Imperial City",
+         "topic": "I'm your escort to Kvatch.",
+         "reply": "Just you? Well, I've seen the Legion send fewer. My tools are on the cart. Try to keep the bandits off them; they're worth more than I am."},
+        {"type": "escort", "npc": "marcella_tullus", "place": "kvatch", "text": "Escort Marcella Tullus to Kvatch"},
+        {"type": "clear", "place": "kvatch", "offset": [-120, 60], "text": "Drive off the scavengers picking over the convoy road",
+         "spawn": [{"type": "skycraft:bandit", "count": 3, "name": "Kvatch Scavenger"}]},
+        {"type": "talk", "npc": "savlian", "text": "Report to Savlian Matius",
+         "topic": "Your mason, Captain. Delivered whole.",
+         "reply": "Whole! I'd nearly forgotten that was possible. Stay a moment. I want you to see this.",
+         "actions": "scene:lgc_kvatch_walls;relocate:marcella_tullus:kvatch:6:24"}
+      ],
+      "outro": "I brought Marcella Tullus safely to Kvatch. The first stones of the new walls went up while I watched.",
+      "rewards": {"gold": 500, "faction_points": 3}
+    },
+    {
+      "id": "lgc_ashes_of_fort_sutch",
+      "title": "The Ashes of Fort Sutch",
+      "start": "auto",
+      "requires": ["quest:lgc_stones_for_kvatch"],
+      "desc": "Daedra have been seen around Fort Sutch, where an Oblivion gate once burned near Anvil. Commander Phillida has called up the Legion to hold the fort, and I am to lead the defence.",
+      "objectives": [
+        {"type": "go", "place": "fort_sutch", "text": "Reach Fort Sutch", "actions": "scene:lgc_fort_sutch"},
+        {"type": "clear", "place": "fort_sutch", "text": "Hold the walls against the first wave of Daedra",
+         "spawn": [{"type": "skycraft:scamp", "count": 3}, {"type": "skycraft:flame_atronach", "count": 1}]},
+        {"type": "kill", "place": "fort_sutch", "text": "Kill the dremora warlord Valkynaz Ruuth",
+         "spawn": [{"type": "skycraft:dremora", "name": "Valkynaz Ruuth", "target": true, "boss": true, "hp": 3.5, "dmg": 1.6},
+                   {"type": "skycraft:dremora", "count": 2, "name": "Dremora Kynval"}],
+         "actions": "relic:dremora_sigil",
+         "journal": "Valkynaz Ruuth laughed when he fell, and promised to come back. Perhaps he will. The fort is still ours."},
+        {"type": "deliver", "npc": "adamus_phillida", "relic": "dremora_sigil", "text": "Report to Adamus Phillida in the Imperial City",
+         "topic": "Fort Sutch held. Their warlord carried this.",
+         "reply": "Then the Gold Coast sleeps tonight because of you. The Legion needs officers who stand when the sky turns red. Consider yourself promoted."}
+      ],
+      "outro": "I held Fort Sutch against the Daedra and killed their warlord. Commander Phillida raised me to Tribune.",
+      "rewards": {"gold": 1200, "faction_points": 4, "flags": ["lgc_fort_sutch_held"], "perks": 1,
+                  "items": [{"item": "skycraft:imperial_chestplate", "name": "Cuirass of the Red Watch", "enchant": {"protection": 4, "fire_protection": 3}},
+                            {"item": "skycraft:imperial_sword", "name": "Phillida's Gladius", "enchant": {"sharpness": 4, "smite": 2}}]}
+    }
+  ]
+}

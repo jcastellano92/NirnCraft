@@ -19,6 +19,7 @@ public final class QuestModule {
         QuestItems.init(modBus);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, QuestConfig.SPEC, "skycraft-quest.toml");
         QuestDialogue.register();
+        com.skycraft.quest.faction.FactionDialogue.register();
     }
 
     /** Registers this module's packets via {@link com.skycraft.network.SkyNetwork#register}. Called once at startup. */

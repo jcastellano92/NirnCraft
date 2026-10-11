@@ -80,6 +80,11 @@ public final class SettlementPopulation {
                 case MERCHANT -> MERCHANTS[tier];
                 case BED -> CITIZENS[tier];
                 case INN, BARD, SMITH, ALCHEMIST, PRIEST, FARMER, MILLER, MINER, LUMBERJACK -> 3;
+                // faction halls (a city may keep several) and the jail's other inmates
+                case GUILD_LEADER, GUILD_VENDOR -> 12;
+                case GUILD_TRAINER -> 24;
+                case GUILD_BED -> 96;
+                case JAIL_PRISONER -> 4;
                 default -> 0;
             };
             if (cap == 0) continue;
@@ -116,6 +121,9 @@ public final class SettlementPopulation {
                     case MILLER, LUMBERJACK -> npc(level, at, NpcRole.LUMBERJACK, null, 24) != null;
                     case MINER -> npc(level, at, NpcRole.MINER, null, 24) != null;
                     case GUARD -> guard(level, at);
+                    case GUILD_LEADER, GUILD_TRAINER, GUILD_VENDOR, GUILD_BED ->
+                            com.skycraft.quest.faction.FactionStaff.populate(level, a, at, e.key);
+                    case JAIL_PRISONER -> npc(level, at, NpcRole.BEGGAR, Component.translatable("entity.skycraft.prisoner"), 2) != null;
                     case BED -> {
                         // about one townsperson for every two beds
                         if (r.nextBoolean()) yield true;

@@ -50,7 +50,32 @@ public enum AnchorType {
     HOUSE_MIN,
     HOUSE_MAX,
     /** A homestead plot's building site (drafting table spot). */
-    HOMESTEAD;
+    HOMESTEAD,
+    // ---- guild halls (the owner label is "<faction id>#<piece>", see plan/Halls)
+    /** Where the hall's head stands (desk / dais). */
+    GUILD_LEADER,
+    /** A trainer's spot by the practice area or the study. */
+    GUILD_TRAINER,
+    /** Behind the hall's counter (guild vendor). */
+    GUILD_VENDOR,
+    /** A members' bed (free for members, trespass for others). */
+    GUILD_BED,
+    // ---- jails (crime.Jail reads these; a jail's anchors are recorded in cell order)
+    /** Where a prisoner stands in a cell (one per cell). */
+    JAIL_CELL,
+    /** Lower half of a cell's door (one per cell). */
+    JAIL_DOOR,
+    /** The two halves of a cell's evidence chest (two per cell, right then left). */
+    JAIL_EVIDENCE,
+    /** The locked door between the cell block and the guard room. */
+    JAIL_GATE,
+    /** Where released prisoners walk out (in front of the jail door). */
+    JAIL_EXIT,
+    /** Jail bounds (inclusive corners): leaving them is an escape. */
+    JAIL_MIN,
+    JAIL_MAX,
+    /** A cell kept by an NPC prisoner. */
+    JAIL_PRISONER;
 
     public static final AnchorType[] VALUES = values();
 
