@@ -21,11 +21,6 @@ file = "config/vampirism-common.toml"
 hash = "958d8a95f1fd3b4aba540136b6cbef8d1c4cea0efb54ece20b75895d537bfe37"
 
 [[files]]
-file = "mods/architectury-api.pw.toml"
-hash = "3011e54cc0370c6eccab1b78e6520266015f8de4a1fd762fd7df2a6c62e1b0e0"
-metafile = true
-
-[[files]]
 file = "mods/balm.pw.toml"
 hash = "68ee64e8e6c5874b10bfb02ec70cb20113de4b96a3f574c64c5707836d4b4cc6"
 metafile = true
@@ -128,11 +123,6 @@ metafile = true
 [[files]]
 file = "mods/memoryleakfix.pw.toml"
 hash = "77fa53a8466d39da52d38565818ead2df35fdc358a2af8d83e041b7863d87deb"
-metafile = true
-
-[[files]]
-file = "mods/mezzconfig.pw.toml"
-hash = "314186f3ac85ec0d2ccb7be16f5fbf010b8673bd04a9aa3b69ed9bedaa421bb6"
 metafile = true
 
 [[files]]
