@@ -1,0 +1,184 @@
+[
+ {
+  "id": "talos_bridge",
+  "class": "highway",
+  "route": [
+   "imperial_city",
+   "imperial_bridge_inn"
+  ],
+  "bridge": 720
+ },
+ {
+  "id": "red_ring_road",
+  "class": "highway",
+  "route": [
+   "imperial_bridge_inn",
+   "weye",
+   "aleswell",
+   "pells_gate",
+   "roxey_inn",
+   "imperial_bridge_inn"
+  ]
+ },
+ {
+  "id": "gold_road",
+  "class": "highway",
+  "route": [
+   "weye",
+   "inn_of_ill_omen",
+   "skingrad",
+   "brina_cross_inn",
+   "kvatch",
+   "gottshaw_inn",
+   "anvil"
+  ]
+ },
+ {
+  "id": "black_road",
+  "class": "highway",
+  "route": [
+   "weye",
+   "chorrol"
+  ]
+ },
+ {
+  "id": "silver_road",
+  "class": "highway",
+  "route": [
+   "aleswell",
+   "bleakers_way"
+  ]
+ },
+ {
+  "id": "orange_road",
+  "class": "highway",
+  "route": [
+   "bleakers_way",
+   "bruma"
+  ]
+ },
+ {
+  "id": "blue_road",
+  "class": "highway",
+  "route": [
+   "pells_gate",
+   "cheydinhal"
+  ]
+ },
+ {
+  "id": "green_road",
+  "class": "highway",
+  "route": [
+   "roxey_inn",
+   "faregyl_inn",
+   "bravil"
+  ]
+ },
+ {
+  "id": "yellow_road",
+  "class": "highway",
+  "route": [
+   "bravil",
+   "drunken_dragon_inn",
+   "leyawiin"
+  ]
+ },
+ {
+  "id": "white_river_road",
+  "class": "highway",
+  "route": [
+   "whiterun",
+   "riverwood",
+   "helgen"
+  ]
+ },
+ {
+  "id": "pale_pass_road",
+  "class": "highway",
+  "route": [
+   "helgen",
+   "bruma"
+  ]
+ },
+ {
+  "id": "falkreath_road",
+  "class": "highway",
+  "route": [
+   "helgen",
+   "falkreath"
+  ]
+ },
+ {
+  "id": "treva_road",
+  "class": "highway",
+  "route": [
+   "riverwood",
+   "ivarstead",
+   "riften"
+  ]
+ },
+ {
+  "id": "reach_road",
+  "class": "highway",
+  "route": [
+   "whiterun",
+   "rorikstead",
+   "old_hroldan",
+   "markarth"
+  ]
+ },
+ {
+  "id": "karth_road",
+  "class": "highway",
+  "route": [
+   "markarth",
+   "karthwasten",
+   "dragon_bridge",
+   "solitude"
+  ]
+ },
+ {
+  "id": "hjaal_road",
+  "class": "highway",
+  "route": [
+   "dragon_bridge",
+   "morthal",
+   "whiterun"
+  ]
+ },
+ {
+  "id": "eastmarch_road",
+  "class": "highway",
+  "route": [
+   "whiterun",
+   "kynesgrove",
+   "windhelm"
+  ]
+ },
+ {
+  "id": "rift_road",
+  "class": "highway",
+  "route": [
+   "windhelm",
+   "darkwater_crossing",
+   "shors_stone",
+   "riften"
+  ]
+ },
+ {
+  "id": "pale_road",
+  "class": "highway",
+  "route": [
+   "whiterun",
+   "dawnstar"
+  ]
+ },
+ {
+  "id": "winterhold_road",
+  "class": "highway",
+  "route": [
+   "windhelm",
+   "winterhold"
+  ]
+ }
+]

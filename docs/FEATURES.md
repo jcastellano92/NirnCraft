@@ -605,6 +605,30 @@ Spell sounds all go through `SpellSounds` (slots the audio module can override),
   appear on the map only. The Oblivion gate pins are recorded for the realms workstream, which builds the gates.
 * **Roads** [Core] connect settlements, with signposts and lantern posts. Travelers, Khajiit caravans, guard patrols
   and the occasional bandit ambush walk them.
+* **Roads** [Core]: one pre-planned network across Tamriel, so you can walk from any town to any other.
+  * Planned when a world starts (and on the first load of an older save), on background threads from the world's
+    noise heights, without loading chunks. Every named settlement of every province is linked (named roads, then a
+    spanner over each landmass, farms as leaves), preferring the map's old road corridors, valleys and passes. Roads
+    go round walled cities to their main gate, bridge rivers and narrow straits (up to 48 blocks) and never cross open
+    sea: islands (Solstheim, Vvardenfell, Summerset, Stros M'Kai) keep their own networks.
+  * Historic roads by name, on the signposts and the map: the Red Ring Road round Lake Rumare and the Talos Bridge to
+    the Imperial City, the Gold, Black, Silver, Orange, Blue, Green and Yellow Roads of Cyrodiil (with Weye, Aleswell,
+    Pell's Gate, Bleaker's Way and the roadside inns of Oblivion's map), and Skyrim's roads between the holds (the
+    White River Road, Pale Pass Road, Reach Road, Karth Road, Rift Road and more).
+  * Highways between capitals and cities, lesser roads to towns and villages, lanes to farms, and signposted trails to
+    named dungeons, forts, standing stones and shrines within 300 blocks of a road. Generic towns, villages, farmsteads
+    and inns are predicted from the world seed as players approach (within 3,000 blocks) and joined to the network;
+    generic dungeons near a road get trails too.
+  * Paved as their chunks generate or load (natural ground only, nothing built over), in each culture's style: Nord
+    cobble, gravel and dirt paths, Imperial stone-brick highways, Dunmer ash paths and dark stone, Argonian mud tracks
+    and mangrove boardwalks, Khajiit and Redguard sandstone, Bosmer earth, Altmer white stone, Breton cobble.
+    Bridges stand a block above the water with slab ramps, piers and lanterns: stone with parapets for the
+    stone-building cultures, planks with rails for the rest.
+  * Signposts at town exits and junctions with distances, milestones every 640 blocks, wayside shrines of the Divines
+    on the highways, lantern posts. The map screen draws the whole planned network and the historic roads' names.
+  * Travelers, Khajiit caravans, guard patrols and the occasional bandit ambush walk the roads, going on from town to
+    town along the network. Carriages reach every capital the roads reach.
+  * `/skycraft-roads stats | render | inspect | export-inns` (operators) report and picture the network.
 * **Location discovery** [Core]: "DISCOVERED: Bleakwind Barrow" banners with Skyrim-style names, shown on the
   compass and on the Skyrim map.
 * **Per-player loot chests** (Lootr): every player gets their own loot from each dungeon chest.

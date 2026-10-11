@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -62,8 +63,20 @@ public final class RoadsData extends SavedData {
     final ArrayDeque<Long> pending = new ArrayDeque<>();
     /** Pairs the planner found no acceptable path for: never queued again (until a replan). */
     final LongOpenHashSet failed = new LongOpenHashSet();
-    /** Pair currently being planned on the background thread (-1 = none); saved back into pending. */
-    long inFlight = -1;
+    /** Pairs currently being planned on the background threads; saved back into pending. */
+    final LongOpenHashSet inFlight = new LongOpenHashSet();
+    /** How the planned (pending or built) link of a pair is to be built; pairs without one are ordinary roads. */
+    final Long2ObjectOpenHashMap<Link> links = new Long2ObjectOpenHashMap<>();
+    /** Named places registered as destinations, by place id. Not saved (rebuilt from the settlements). */
+    final java.util.Map<String, Settlement> byPlace = new java.util.HashMap<>();
+    /** Roads ending at each destination. Not saved. */
+    final Int2ObjectOpenHashMap<it.unimi.dsi.fastutil.ints.IntArrayList> roadsAt = new Int2ObjectOpenHashMap<>();
+    /** Version of the world plan applied to this save (0 = roads only from explored settlements). */
+    int planVersion;
+    /** Regions ({@link WorldPlan#SCAN_SHIFT}) whose generic settlements and dungeons were predicted and registered. */
+    final LongOpenHashSet scanned = new LongOpenHashSet();
+    /** Trail destinations already checked for a nearby road (whether or not they got a trail). */
+    final IntOpenHashSet trailChecked = new IntOpenHashSet();
     int nextSettlementId = 1;
     int nextRoadId = 1;
     /** Bumped by replanning so results from older plans are discarded. Not saved. */
@@ -128,12 +141,65 @@ public final class RoadsData extends SavedData {
 
     private void putRoad(Road road) {
         roads.put(road.id, road);
+        indexEnds(road);
         pairs.add(pairKey(road.a, road.b));
         indexRoad(road);
         nextRoadId = Math.max(nextRoadId, road.id + 1);
     }
 
     public RoadsData() {
+    }
+
+    /**
+     * How a planned link is built: road class, historic name, longest bridge, and for trails the road point it joins
+     * ({@code tx}, {@code tz}; {@link Integer#MIN_VALUE} when the link runs between the two destinations' ends) and the
+     * destination it starts from ({@code from}; 0 for ordinary links).
+     */
+    record Link(byte kind, String name, int maxBridge, int tx, int tz, int from) {
+        static final Link DEFAULT = new Link(Road.ROAD, "", RoadGraph.DEFAULT_BRIDGE, Integer.MIN_VALUE, Integer.MIN_VALUE, 0);
+
+        boolean trail() {
+            return tx != Integer.MIN_VALUE;
+        }
+
+        CompoundTag save(long pair) {
+            CompoundTag t = new CompoundTag();
+            t.putLong("p", pair);
+            t.putByte("k", kind);
+            if (!name.isEmpty()) t.putString("n", name);
+            t.putInt("b", maxBridge);
+            if (trail()) t.putIntArray("t", new int[]{tx, tz});
+            if (from != 0) t.putInt("fr", from);
+            return t;
+        }
+
+        static Link load(CompoundTag t) {
+            int[] target = t.getIntArray("t");
+            return new Link(t.getByte("k"), t.getString("n"), t.contains("b") ? t.getInt("b") : RoadGraph.DEFAULT_BRIDGE,
+                    target.length == 2 ? target[0] : Integer.MIN_VALUE, target.length == 2 ? target[1] : Integer.MIN_VALUE,
+                    t.getInt("fr"));
+        }
+    }
+
+    Link link(long pair) {
+        Link l = links.get(pair);
+        return l != null ? l : Link.DEFAULT;
+    }
+
+    @Nullable
+    Settlement byPlace(String placeId) {
+        return byPlace.get(placeId);
+    }
+
+    /** Ids of the roads ending at a destination. */
+    it.unimi.dsi.fastutil.ints.IntArrayList roadsAt(int settlement) {
+        it.unimi.dsi.fastutil.ints.IntArrayList l = roadsAt.get(settlement);
+        return l != null ? l : new it.unimi.dsi.fastutil.ints.IntArrayList(0);
+    }
+
+    private void indexEnds(Road road) {
+        roadsAt.computeIfAbsent(road.a, k -> new it.unimi.dsi.fastutil.ints.IntArrayList(2)).add(road.id);
+        roadsAt.computeIfAbsent(road.b, k -> new it.unimi.dsi.fastutil.ints.IntArrayList(2)).add(road.id);
     }
 
     // ------------------------------------------------------------------ keys
@@ -175,6 +241,7 @@ public final class RoadsData extends SavedData {
         if (s.town) towns.add(s);
         settlementById.put(s.id, s);
         settlementByKey.put(s.key, s);
+        if (!s.placeId.isEmpty()) byPlace.put(s.placeId, s);
         settlementByCenterChunk.computeIfAbsent(ChunkPos.asLong(s.x >> 4, s.z >> 4), k -> new ArrayList<>()).add(s);
         grid.computeIfAbsent(ChunkPos.asLong(s.x >> GRID_SHIFT, s.z >> GRID_SHIFT), k -> new ArrayList<>(2)).add(s);
         if (zoneIndexRadius >= 0) indexZone(s, zoneIndexRadius);
@@ -353,9 +420,10 @@ public final class RoadsData extends SavedData {
 
     // ------------------------------------------------------------------ roads
 
-    Road addRoad(int a, int b, int[] xs, int[] zs, byte[] flags) {
-        Road road = new Road(nextRoadId++, a, b, xs, zs, flags);
+    Road addRoad(int a, int b, int[] xs, int[] zs, byte[] flags, byte kind, String name) {
+        Road road = new Road(nextRoadId++, a, b, xs, zs, flags, kind, name);
         roads.put(road.id, road);
+        indexEnds(road);
         pairs.add(pairKey(a, b));
         link(a, b);
         bucket(RoadBucket.keyOf(road)).roads.put(road.id, road);
@@ -435,7 +503,11 @@ public final class RoadsData extends SavedData {
         pairs.clear();
         pending.clear();
         failed.clear();
-        inFlight = -1;
+        inFlight.clear();
+        links.clear();
+        roadsAt.clear();
+        trailChecked.clear();
+        planVersion = 0;
         generation++;
         for (RoadBucket b : buckets.values()) {
             if (b.roads.isEmpty()) continue;
@@ -466,9 +538,15 @@ public final class RoadsData extends SavedData {
         tag.put("features", f);
         tag.putLongArray("paved", paved.toLongArray());
         LongArrayList pend = new LongArrayList();
-        if (inFlight != -1) pend.add(inFlight);
+        for (long p : inFlight) pend.add(p);
         for (Long p : pending) pend.add(p.longValue());
         tag.putLongArray("pending", pend.toLongArray());
+        ListTag l = new ListTag();
+        for (Long2ObjectMap.Entry<Link> e : links.long2ObjectEntrySet()) l.add(e.getValue().save(e.getLongKey()));
+        tag.put("links", l);
+        tag.putInt("planVersion", planVersion);
+        tag.putLongArray("scanned", scanned.toLongArray());
+        tag.putIntArray("trailChecked", trailChecked.toIntArray());
         tag.putInt("nextSettlement", nextSettlementId);
         tag.putInt("nextRoad", nextRoadId);
         return tag;
@@ -501,6 +579,11 @@ public final class RoadsData extends SavedData {
         for (long p : tag.getLongArray("pending")) {
             if (data.pairs.add(p)) data.pending.add(p);
         }
+        ListTag l = tag.getList("links", Tag.TAG_COMPOUND);
+        for (int i = 0; i < l.size(); i++) data.links.put(l.getCompound(i).getLong("p"), Link.load(l.getCompound(i)));
+        data.planVersion = tag.getInt("planVersion");
+        for (long k : tag.getLongArray("scanned")) data.scanned.add(k);
+        for (int k : tag.getIntArray("trailChecked")) data.trailChecked.add(k);
         data.setDirty(false);
         return data;
     }

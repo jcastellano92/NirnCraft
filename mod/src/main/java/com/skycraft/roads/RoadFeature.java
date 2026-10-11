@@ -7,17 +7,24 @@ import net.minecraft.nbt.Tag;
 import java.util.ArrayList;
 import java.util.List;
 
-/** A roadside object placed when its chunk is paved: a lantern post or a signpost. */
+/** A roadside object placed when its chunk is paved: a lantern post, a signpost, a milestone or a wayside shrine. */
 public final class RoadFeature {
     public static final int LANTERN = 0;
     public static final int SIGNPOST = 1;
+    /** A stone post with the distances to both ends of the road. */
+    public static final int MILESTONE = 2;
+    /** A small shrine of one of the Divines beside a highway ({@link #dests} empty; {@link #variant} = which). */
+    public static final int SHRINE = 3;
     /** A signpost carries at most this many destination signs. */
     public static final int MAX_DESTINATIONS = 3;
 
     /**
      * One sign: destination settlement, distance in blocks, and the direction (unit vector) the road leaves toward it.
      */
-    public record Dest(int settlement, int distance, float dirX, float dirZ) {
+    public record Dest(int settlement, int distance, float dirX, float dirZ, String roadName) {
+        public Dest(int settlement, int distance, float dirX, float dirZ) {
+            this(settlement, distance, dirX, dirZ, "");
+        }
     }
 
     public final int type;
@@ -26,6 +33,8 @@ public final class RoadFeature {
     /** Road that created this feature. */
     public final int road;
     public final List<Dest> dests = new ArrayList<>();
+    /** Type-specific choice (the Divine of a shrine). */
+    public int variant;
 
     public RoadFeature(int type, int x, int z, int road) {
         this.type = type;
@@ -45,6 +54,7 @@ public final class RoadFeature {
         t.putInt("x", x);
         t.putInt("z", z);
         t.putInt("road", road);
+        if (variant != 0) t.putInt("v", variant);
         if (!dests.isEmpty()) {
             ListTag list = new ListTag();
             for (Dest d : dests) {
@@ -53,6 +63,7 @@ public final class RoadFeature {
                 dt.putInt("d", d.distance());
                 dt.putFloat("dx", d.dirX());
                 dt.putFloat("dz", d.dirZ());
+                if (!d.roadName().isEmpty()) dt.putString("n", d.roadName());
                 list.add(dt);
             }
             t.put("dests", list);
@@ -62,10 +73,11 @@ public final class RoadFeature {
 
     static RoadFeature load(CompoundTag t) {
         RoadFeature f = new RoadFeature(t.getInt("type"), t.getInt("x"), t.getInt("z"), t.getInt("road"));
+        f.variant = t.getInt("v");
         ListTag list = t.getList("dests", Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             CompoundTag dt = list.getCompound(i);
-            f.dests.add(new Dest(dt.getInt("s"), dt.getInt("d"), dt.getFloat("dx"), dt.getFloat("dz")));
+            f.dests.add(new Dest(dt.getInt("s"), dt.getInt("d"), dt.getFloat("dx"), dt.getFloat("dz"), dt.getString("n")));
         }
         return f;
     }

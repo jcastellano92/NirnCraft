@@ -1,6 +1,9 @@
 package com.skycraft.roads;
 
+import com.skycraft.tamriel.Place;
+import com.skycraft.tamriel.Places;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 
 /**
  * A road destination: a town, village or tavern ({@code #skycraft:towns}, {@link #town} true) or a dungeon the roads
@@ -12,7 +15,7 @@ public final class Settlement {
     /** Extra margin around the structure bounding box in which nothing is paved. */
     public static final int BOX_MARGIN = 6;
     /** Bounding boxes larger than this (per side from the center) are clamped, so huge modded towns stay sane. */
-    private static final int MAX_HALF_EXTENT = 112;
+    private static final int MAX_HALF_EXTENT = 240;
 
     public final int id;
     /** Start chunk ({@code ChunkPos.toLong()}): unique per structure start. */
@@ -29,6 +32,8 @@ public final class Settlement {
     public final String locationId;
     /** An inhabited town ({@code #skycraft:towns}); false for dungeons reached by a spur road. */
     public boolean town = true;
+    /** The named {@link Place} this destination is (planned at world start), or empty for one found in the world. */
+    public String placeId = "";
 
     public Settlement(int id, long key, int x, int y, int z, int minX, int minZ, int maxX, int maxZ, String name,
                       String structure, String locationId, boolean yResolved) {
@@ -53,6 +58,16 @@ public final class Settlement {
         long dz = pz - z;
         if (dx * dx + dz * dz <= (long) radius * radius) return true;
         return px >= minX - BOX_MARGIN && px <= maxX + BOX_MARGIN && pz >= minZ - BOX_MARGIN && pz <= maxZ + BOX_MARGIN;
+    }
+
+    /** The named place, if this destination is one. */
+    public java.util.Optional<Place> place() {
+        return placeId.isEmpty() ? java.util.Optional.empty() : Places.byId(placeId);
+    }
+
+    /** The name for signs and maps: the place's translatable name (shown in each reader's language), else the literal. */
+    public Component displayName() {
+        return place().map(Place::name).orElseGet(() -> Component.literal(name));
     }
 
     public double distSq(double px, double pz) {
@@ -88,6 +103,7 @@ public final class Settlement {
         t.putString("loc", locationId);
         t.putBoolean("yres", yResolved);
         if (!town) t.putBoolean("dest", true);
+        if (!placeId.isEmpty()) t.putString("place", placeId);
         return t;
     }
 
@@ -98,6 +114,7 @@ public final class Settlement {
         Settlement s = new Settlement(t.getInt("id"), t.getLong("key"), p[0], p[1], p[2], b[0], b[1], b[2], b[3],
                 t.getString("name"), t.getString("structure"), t.getString("loc"), t.getBoolean("yres"));
         s.town = !t.getBoolean("dest");
+        s.placeId = t.getString("place");
         return s;
     }
 }

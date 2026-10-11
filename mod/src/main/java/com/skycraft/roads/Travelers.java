@@ -276,7 +276,7 @@ public final class Travelers {
         int end = dir > 0 ? road.size() - 1 : 0;
         if (Math.abs(end - idx) <= 3) {
             t.putInt("idx", idx);
-            t.putBoolean("arrived", true);
+            if (!continueJourney(level, mob, t, road, dir > 0 ? road.b : road.a)) t.putBoolean("arrived", true);
             return;
         }
         double mx = mob.getX() - t.getDouble("lx"), mz = mob.getZ() - t.getDouble("lz");
@@ -292,6 +292,33 @@ public final class Travelers {
         if (!level.isLoaded(new BlockPos(x, mob.getBlockY(), z))) return;
         int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
         moveTo(mob, x + 0.5, y, z + 0.5, speed(mob));
+    }
+
+    /**
+     * At the end of a road, travelers often go on along another road from that settlement (caravans and couriers
+     * crossing the province, patrols walking their beat), up to a few legs; group members follow their leader.
+     */
+    private static boolean continueJourney(ServerLevel level, Mob mob, CompoundTag t, Road road, int at) {
+        int legs = t.getInt("legs");
+        if (legs >= 4 || level.getRandom().nextInt(100) >= 65) return false;
+        RoadsData data = RoadsData.get(level);
+        it.unimi.dsi.fastutil.ints.IntArrayList options = new it.unimi.dsi.fastutil.ints.IntArrayList();
+        for (int id : data.roadsAt(at)) {
+            Road r = data.road(id);
+            if (r == null || r.id == road.id || r.kind == Road.TRAIL || r.size() < 40) continue;
+            options.add(id);
+        }
+        if (options.isEmpty()) return false;
+        Road next = data.road(options.getInt(level.getRandom().nextInt(options.size())));
+        if (next == null) return false;
+        int dir = next.a == at ? 1 : -1;
+        t.putInt("road", next.id);
+        t.putInt("idx", next.endAt(at));
+        t.putInt("dir", dir);
+        t.putInt("dest", next.other(at));
+        t.putInt("legs", legs + 1);
+        t.putInt("stuck", 0);
+        return true;
     }
 
     // ------------------------------------------------------------------ spawning
@@ -349,7 +376,7 @@ public final class Travelers {
                     long e = entries.getLong(k);
                     Road road = data.road(RoadsData.entryRoad(e));
                     int i = RoadsData.entryIndex(e);
-                    if (road == null || i < 0 || i >= road.size()) continue;
+                    if (road == null || i < 0 || i >= road.size() || road.kind == Road.TRAIL) continue; // traffic keeps to the roads
                     int x = road.xs[i], z = road.zs[i];
                     if ((x >> 4) != cx || (z >> 4) != cz) continue; // each point once
                     double dx = x + 0.5 - player.getX(), dz = z + 0.5 - player.getZ();

@@ -23,6 +23,11 @@ final class RoadLayout {
     private static final int MAX_JUNCTIONS = 3;
     /** Another road counts as "met" within this distance. */
     private static final int MEET_DIST = 3;
+    private static final int MILESTONE_SPACING = 640;
+    /** Lantern posts stand within this distance (along the road) of its ends. */
+    private static final int LANTERN_REACH = 280;
+    private static final int SHRINE_SPACING = 1800;
+    private static final int SHRINE_OFFSET = 7;
 
     private RoadLayout() {}
 
@@ -46,6 +51,11 @@ final class RoadLayout {
         if (first < 0) return touched; // the whole road lies inside settlements
 
         List<RoadFeature> created = new ArrayList<>();
+        if (road.kind == Road.TRAIL) {
+            if (RoadsConfig.SIGNPOSTS.get()) trailSign(data, road, inZone, created, touched);
+            return touched;
+        }
+        if (road.kind <= Road.ROAD) milestonesAndShrines(data, road, inZone, created, touched);
         if (RoadsConfig.SIGNPOSTS.get()) {
             junctions(data, road, inZone, first, last, created, touched);
             int ia = Math.min(first + 2, n - 1);
@@ -56,12 +66,15 @@ final class RoadLayout {
             }
         }
         int spacing = RoadsConfig.LANTERN_SPACING.get();
-        if (RoadsConfig.LANTERNS.get() && spacing > 0) {
+        // lanterns light highways and roads; lanes to farms stay dark
+        if (RoadsConfig.LANTERNS.get() && spacing > 0 && road.kind <= Road.ROAD) {
             int step = Math.max(4, (int) Math.round(spacing / RoadPlanner.SPACING));
             int side = 1;
             for (int i = 2; i < n - 2; i += step) {
                 // none inside towns or dungeon sites: the road is not paved there and the place has its own lights
                 if (inZone[i] || road.flags[i] != 0) continue;
+                // lit only on the approaches to towns, like the lamp posts outside Skyrim's cities
+                if (road.cum[i] > LANTERN_REACH && road.length() - road.cum[i] > LANTERN_REACH) continue;
                 double[] r = right(road, i);
                 int x = (int) Math.round(road.xs[i] + r[0] * LANTERN_OFFSET * side);
                 int z = (int) Math.round(road.zs[i] + r[1] * LANTERN_OFFSET * side);
@@ -108,7 +121,83 @@ final class RoadLayout {
             dz = 0;
             len = 1;
         }
-        return new RoadFeature.Dest(settlement, Math.round(road.distanceTo(i, settlement)), dx / len, dz / len);
+        return new RoadFeature.Dest(settlement, Math.round(road.distanceTo(i, settlement)), dx / len, dz / len, road.name);
+    }
+
+    /** A milestone every {@link #MILESTONE_SPACING} blocks, and on highways a wayside shrine every {@link #SHRINE_SPACING}. */
+    private static void milestonesAndShrines(RoadsData data, Road road, boolean[] inZone, List<RoadFeature> created,
+                                             LongOpenHashSet touched) {
+        float len = road.length();
+        if (len < MILESTONE_SPACING) return;
+        int nextMile = MILESTONE_SPACING, nextShrine = SHRINE_SPACING / 2;
+        int side = 1;
+        for (int i = 4; i < road.size() - 4; i++) {
+            if (inZone[i] || road.flags[i] != 0) continue;
+            float at = road.cum[i];
+            if (at >= nextMile && len - at > MILESTONE_SPACING / 3f) {
+                nextMile += MILESTONE_SPACING;
+                double[] r = right(road, i);
+                int x = (int) Math.round(road.xs[i] + r[0] * SIGN_OFFSET * side);
+                int z = (int) Math.round(road.zs[i] + r[1] * SIGN_OFFSET * side);
+                side = -side;
+                if (data.anyZoneAt(x, z) != null || data.signpostNear(x, z, 24) != null || near(created, x, z, 24)) continue;
+                RoadFeature f = new RoadFeature(RoadFeature.MILESTONE, x, z, road.id);
+                f.dests.add(dest(road, i, -1, road.a));
+                f.dests.add(dest(road, i, +1, road.b));
+                created.add(f);
+                touched.add(data.addFeature(f));
+            }
+            if (road.kind == Road.HIGHWAY && at >= nextShrine && len - at > 200) {
+                nextShrine += SHRINE_SPACING;
+                int divine = Wayshrines.divineFor(road.xs[i], road.zs[i]);
+                if (divine < 0) continue;
+                double[] r = right(road, i);
+                int s = (i & 1) == 0 ? 1 : -1;
+                int x = (int) Math.round(road.xs[i] + r[0] * SHRINE_OFFSET * s);
+                int z = (int) Math.round(road.zs[i] + r[1] * SHRINE_OFFSET * s);
+                if (data.anyZoneAt(x, z) != null || near(created, x, z, 16)) continue;
+                RoadFeature f = new RoadFeature(RoadFeature.SHRINE, x, z, road.id);
+                f.variant = divine;
+                // the shrine faces the road
+                f.dests.add(new RoadFeature.Dest(road.a, 0, (float) -r[0] * s, (float) -r[1] * s));
+                created.add(f);
+                touched.add(data.addFeature(f));
+            }
+        }
+    }
+
+    /** The signpost where a trail leaves its road: to the trail's destination, and both ways along the road. */
+    private static void trailSign(RoadsData data, Road road, boolean[] inZone, List<RoadFeature> created, LongOpenHashSet touched) {
+        int n = road.size();
+        int at = Math.max(0, n - 5); // a few blocks up the trail from the road it joins
+        if (inZone[at]) return;
+        double[] r = right(road, at);
+        int x = (int) Math.round(road.xs[at] + r[0] * 2);
+        int z = (int) Math.round(road.zs[at] + r[1] * 2);
+        if (data.anyZoneAt(x, z) != null) return;
+        RoadFeature existing = data.signpostNear(x, z, 10);
+        RoadFeature.Dest toSite = dest(road, at, -1, road.a);
+        if (existing != null) {
+            if (!existing.hasDest(road.a) && existing.dests.size() < RoadFeature.MAX_DESTINATIONS) {
+                existing.dests.add(toSite);
+                touched.add(ChunkPos.asLong(existing.x >> 4, existing.z >> 4));
+                data.setDirty();
+            }
+            return;
+        }
+        RoadFeature f = new RoadFeature(RoadFeature.SIGNPOST, x, z, road.id);
+        f.dests.add(toSite);
+        long meet = nearestOther(data, road.xs[n - 1], road.zs[n - 1]);
+        if (meet != -1) {
+            Road other = data.road(RoadsData.entryRoad(meet));
+            if (other != null) {
+                int oi = other.clamp(RoadsData.entryIndex(meet));
+                addDest(f, dest(other, oi, -1, other.a));
+                addDest(f, dest(other, oi, +1, other.b));
+            }
+        }
+        created.add(f);
+        touched.add(data.addFeature(f));
     }
 
     /** Signposts where the new road joins or leaves an existing road outside settlements. */

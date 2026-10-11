@@ -153,6 +153,7 @@ public final class ClientAutotest {
     private static final int TOUR_WAIT = Integer.getInteger("skycraft.autotest.tourWait", 400);
     private static int tourStep;
     private static int tourWait;
+    private static boolean tourMapAtEnd;
 
     private static void serverCommand(Minecraft mc, String command) {
         var server = mc.getSingleplayerServer();

@@ -36,6 +36,170 @@ public final class RoadsPackets {
     static void register() {
         SkyNetwork.register(SettlementMarkers.class, NetworkDirection.PLAY_TO_CLIENT, SettlementMarkers::encode,
                 SettlementMarkers::decode, SettlementMarkers::handle);
+        SkyNetwork.register(NetworkLines.class, NetworkDirection.PLAY_TO_CLIENT, NetworkLines::encode,
+                NetworkLines::decode, NetworkLines::handle);
+    }
+
+    // ------------------------------------------------------------------ the planned network for the map
+
+    /** Roads per packet (each a simplified polyline of a few dozen points). */
+    private static final int LINES_PER_PACKET = 160;
+    /** Polylines are simplified to within this many blocks of the planned road for the map. */
+    private static final double SIMPLIFY = 6.0;
+    private static final Map<Integer, Line> SIMPLE = new HashMap<>();
+    /** The whole network must be re-sent (it was re-planned). */
+    private static boolean networkDirty;
+    /** Roads planned since the last broadcast, sent as an addition to what clients have. */
+    private static final List<Integer> FRESH = new ArrayList<>();
+
+    /** One road on the map: class, historic name id (or empty) and a simplified polyline (x, z pairs). */
+    public record Line(byte kind, String name, int[] xz) {
+    }
+
+    /**
+     * A part of the planned road network for the map screen. Part 0 replaces whatever the client had, later parts
+     * (and the roads planned since) are added to it.
+     */
+    public record NetworkLines(int part, List<Line> lines) {
+        static void encode(NetworkLines m, FriendlyByteBuf buf) {
+            buf.writeVarInt(m.part);
+            buf.writeVarInt(m.lines.size());
+            for (Line l : m.lines) {
+                buf.writeByte(l.kind());
+                buf.writeUtf(l.name(), 48);
+                int n = l.xz().length / 2;
+                buf.writeVarInt(n);
+                int px = 0, pz = 0;
+                for (int i = 0; i < n; i++) {
+                    int x = l.xz()[i * 2], z = l.xz()[i * 2 + 1];
+                    buf.writeVarInt(zigzag(x - px));
+                    buf.writeVarInt(zigzag(z - pz));
+                    px = x;
+                    pz = z;
+                }
+            }
+        }
+
+        static NetworkLines decode(FriendlyByteBuf buf) {
+            int part = buf.readVarInt();
+            int count = Math.min(buf.readVarInt(), LINES_PER_PACKET * 2);
+            List<Line> lines = new ArrayList<>(count);
+            for (int k = 0; k < count; k++) {
+                byte kind = buf.readByte();
+                String name = buf.readUtf(48);
+                int n = Math.min(buf.readVarInt(), 4096);
+                int[] xz = new int[n * 2];
+                int px = 0, pz = 0;
+                for (int i = 0; i < n; i++) {
+                    px += unzigzag(buf.readVarInt());
+                    pz += unzigzag(buf.readVarInt());
+                    xz[i * 2] = px;
+                    xz[i * 2 + 1] = pz;
+                }
+                lines.add(new Line(kind, name, xz));
+            }
+            return new NetworkLines(part, lines);
+        }
+
+        static void handle(NetworkLines m, Supplier<NetworkEvent.Context> ctx) {
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> RoadsClient.setNetwork(m.part, m.lines));
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
+    private static int zigzag(int v) {
+        return (v << 1) ^ (v >> 31);
+    }
+
+    private static int unzigzag(int v) {
+        return (v >>> 1) ^ -(v & 1);
+    }
+
+    /** The network was forgotten and is planned again: everyone gets it afresh at the next opportunity. */
+    static void networkReset() {
+        networkDirty = true;
+        FRESH.clear();
+        SIMPLE.clear();
+    }
+
+    /** A road was planned: it is added to everyone's map at the next opportunity. */
+    static void roadAdded(Road road) {
+        FRESH.add(road.id);
+    }
+
+    /** Sends the roads planned since the last call (or everything after a re-plan); called every few seconds. */
+    static void sendNetworkIfChanged(ServerLevel level, RoadsData data) {
+        if (networkDirty) {
+            networkDirty = false;
+            FRESH.clear();
+            for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) sendNetwork(player, data);
+            return;
+        }
+        if (FRESH.isEmpty()) return;
+        List<Line> lines = new ArrayList<>(FRESH.size());
+        for (int id : FRESH) {
+            Road road = data.road(id);
+            if (road != null) lines.add(SIMPLE.computeIfAbsent(id, k -> simplify(road)));
+        }
+        FRESH.clear();
+        for (int i = 0; i < lines.size(); i += LINES_PER_PACKET) {
+            NetworkLines msg = new NetworkLines(1, lines.subList(i, Math.min(lines.size(), i + LINES_PER_PACKET)));
+            for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) SkyNetwork.sendToPlayer(player, msg);
+        }
+    }
+
+    static void sendNetwork(ServerPlayer player, RoadsData data) {
+        List<Line> all = new ArrayList<>(data.roads.size());
+        for (Road road : data.roads.values()) all.add(SIMPLE.computeIfAbsent(road.id, k -> simplify(road)));
+        int part = 0;
+        for (int i = 0; i < all.size() || part == 0; i += LINES_PER_PACKET) {
+            SkyNetwork.sendToPlayer(player, new NetworkLines(part++, all.subList(Math.min(i, all.size()),
+                    Math.min(all.size(), i + LINES_PER_PACKET))));
+        }
+    }
+
+    /** Douglas-Peucker simplification of a road to {@link #SIMPLIFY} blocks. */
+    static Line simplify(Road road) {
+        int n = road.size();
+        boolean[] keep = new boolean[n];
+        keep[0] = keep[n - 1] = true;
+        java.util.ArrayDeque<int[]> stack = new java.util.ArrayDeque<>();
+        stack.push(new int[]{0, n - 1});
+        while (!stack.isEmpty()) {
+            int[] seg = stack.pop();
+            int a = seg[0], b = seg[1];
+            if (b - a < 2) continue;
+            double ax = road.xs[a], az = road.zs[a], dx = road.xs[b] - ax, dz = road.zs[b] - az;
+            double len = Math.sqrt(dx * dx + dz * dz);
+            int far = -1;
+            double farD = SIMPLIFY;
+            for (int i = a + 1; i < b; i++) {
+                double d = len < 1e-6 ? Math.hypot(road.xs[i] - ax, road.zs[i] - az)
+                        : Math.abs((road.xs[i] - ax) * dz - (road.zs[i] - az) * dx) / len;
+                if (d > farD) {
+                    farD = d;
+                    far = i;
+                }
+            }
+            if (far < 0) continue;
+            keep[far] = true;
+            stack.push(new int[]{a, far});
+            stack.push(new int[]{far, b});
+        }
+        it.unimi.dsi.fastutil.ints.IntArrayList xz = new it.unimi.dsi.fastutil.ints.IntArrayList();
+        for (int i = 0; i < n; i++) {
+            if (!keep[i]) continue;
+            xz.add(road.xs[i]);
+            xz.add(road.zs[i]);
+        }
+        return new Line(road.kind, road.name, xz.toIntArray());
+    }
+
+    @SubscribeEvent
+    public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        ServerLevel overworld = player.server.overworld();
+        sendNetwork(player, RoadsData.get(overworld));
     }
 
     public record Entry(int x, int y, int z, String name) {
@@ -101,6 +265,9 @@ public final class RoadsPackets {
 
     static void clear() {
         LAST.clear();
+        SIMPLE.clear();
+        FRESH.clear();
+        networkDirty = false;
     }
 
     @SubscribeEvent

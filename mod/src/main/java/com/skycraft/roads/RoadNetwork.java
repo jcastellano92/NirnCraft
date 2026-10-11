@@ -47,8 +47,6 @@ public final class RoadNetwork {
     /** Legacy alias of {@code #skycraft:towns} (quests use it); see {@link LocationTags}. */
     public static final TagKey<Structure> SETTLEMENTS =
             TagKey.create(Registries.STRUCTURE, new ResourceLocation(Skycraft.MODID, "settlements"));
-    /** Non-town destinations get a single spur road to the nearest town within this fraction of maxDistance. */
-    private static final double SPUR_FACTOR = 0.5;
 
     private record FoundStart(Structure structure, long key, BoundingBox box) {
     }
@@ -57,8 +55,17 @@ public final class RoadNetwork {
     private static final ConcurrentLinkedQueue<Long> LOADED = new ConcurrentLinkedQueue<>();
     private static final ConcurrentLinkedQueue<RoadPlanner.Result> RESULTS = new ConcurrentLinkedQueue<>();
     private static ExecutorService planner;
-    private static Future<?> running;
+    private static final List<Future<?>> RUNNING = new ArrayList<>();
+    /** Areas of the links being planned now (pair -> minX, minZ, maxX, maxZ). */
+    private static final it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap<int[]> IN_FLIGHT_BOXES = new it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap<>();
     private static long tick;
+    /** Copy of the road cells handed to plan jobs; rebuilt only after roads were added. */
+    @org.jetbrains.annotations.Nullable
+    private static LongOpenHashSet cellsSnapshot;
+    /** Planner statistics since the server started (for /skycraft-roads stats and the log). */
+    static long plannedRoads, plannedNanos, plannedSamples, failedPlans, applyNanosMax;
+    /** Server-thread cost of the roads tick (paving, results, traffic) since the server started. */
+    static long tickNanosMax, tickNanosTotal, ticks;
 
     private RoadNetwork() {}
 
@@ -94,19 +101,28 @@ public final class RoadNetwork {
             return;
         }
         RoadsData data = RoadsData.get(level);
+        long tickStart = System.nanoTime();
         try {
             if (!data.classified) reclassify(level, data);
+            WorldPlan.tick(level, data, tick);
             drainFound(level, data);
             drainLoaded(level, data);
+            long t0 = System.nanoTime();
             applyResults(level, data);
+            applyNanosMax = Math.max(applyNanosMax, System.nanoTime() - t0);
             if (tick % RoadsConfig.PLAN_INTERVAL_TICKS.get() == 0) startPlanning(level, data);
             Paver.tick(level, data, tick);
             Travelers.tick(level, data, tick);
             if (tick % 100 == 13) clearRoadSnow(level, data);
             if (tick % 200 == 17) RoadsPackets.sendMarkers(level, data);
+            if (tick % 100 == 29) RoadsPackets.sendNetworkIfChanged(level, data);
         } catch (RuntimeException e) {
             Skycraft.LOGGER.error("Skycraft roads tick failed", e);
         }
+        long spent = System.nanoTime() - tickStart;
+        tickNanosMax = Math.max(tickNanosMax, spent);
+        tickNanosTotal += spent;
+        ticks++;
     }
 
     /**
@@ -148,7 +164,10 @@ public final class RoadNetwork {
             planner.shutdownNow();
             planner = null;
         }
-        running = null;
+        RUNNING.clear();
+        IN_FLIGHT_BOXES.clear();
+        cellsSnapshot = null;
+        WorldPlan.clear();
         FOUND.clear();
         LOADED.clear();
         RESULTS.clear();
@@ -160,11 +179,14 @@ public final class RoadNetwork {
     // ------------------------------------------------------------------ settlements
 
     private static void drainFound(ServerLevel level, RoadsData data) {
-        if (FOUND.isEmpty()) return;
+        // wait for the world plan, so the named places' own starts are recognised as the planned destinations
+        if (FOUND.isEmpty() || data.planVersion < WorldPlan.VERSION) return;
         Registry<Structure> registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
         FoundStart f;
         while ((f = FOUND.poll()) != null) {
             if (data.settlementByKey.containsKey(f.key())) continue;
+            BoundingBox box = f.box();
+            if (WorldPlan.plannedAt(data, (box.minX() + box.maxX()) / 2, (box.minZ() + box.maxZ()) / 2) != null) continue;
             Optional<Holder.Reference<Structure>> holder = registry.getResourceKey(f.structure()).flatMap(registry::getHolder);
             if (holder.isEmpty()) continue;
             // only explicit tags decide: towns get people, other destinations only a spur road
@@ -220,10 +242,12 @@ public final class RoadNetwork {
      */
     static int planConnections(RoadsData data, Settlement s) {
         int maxDist = RoadsConfig.MAX_DISTANCE.get();
-        if (!s.town) return spur(data, s, maxDist) ? 1 : 0;
-        int wanted = RoadsConfig.CONNECTIONS.get();
+        if (!s.town) return 0; // dungeons get a trail from the nearest road (WorldPlan)
+        // farmsteads and roadside inns hang off the network with one road; villages and towns get the configured count
+        int wanted = s.structure.contains("farmstead") ? 1 : RoadsConfig.CONNECTIONS.get();
         int minDist = data.zoneRadius() * 2;
-        List<Settlement> near = data.near(s.x, s.z, maxDist * 2.0, o -> o != s && o.town);
+        List<Settlement> near = data.near(s.x, s.z, maxDist * 2.0, o -> o != s && o.town
+                && Landmass.connected(s.x, s.z, o.x, o.z));
         int linked = 0, queued = 0;
         for (Settlement o : near) {
             if (linked >= wanted) break;
@@ -242,22 +266,7 @@ public final class RoadNetwork {
             }
         }
         queued += bridgeComponents(data, s, maxDist * 3.0);
-        // dungeons found before this town had nobody to connect to
-        for (Settlement o : data.near(s.x, s.z, maxDist * SPUR_FACTOR, o -> !o.town && !data.hasSpur(o.id))) {
-            if (spur(data, o, maxDist)) queued++;
-        }
         return queued;
-    }
-
-    /** One road from a dungeon destination to its nearest town (if any is close enough). */
-    private static boolean spur(RoadsData data, Settlement s, int maxDist) {
-        if (data.hasSpur(s.id)) return false;
-        for (Settlement o : data.near(s.x, s.z, maxDist * SPUR_FACTOR, o -> o.town)) {
-            if (data.failed.contains(RoadsData.pairKey(s.id, o.id))) continue;
-            if (Math.sqrt(s.distSq(o.x + 0.5, o.z + 0.5)) < data.zoneRadius() * 2) return false; // part of the town
-            return queue(data, o, s);
-        }
-        return false;
     }
 
     /**
@@ -267,7 +276,7 @@ public final class RoadNetwork {
     private static int bridgeComponents(RoadsData data, Settlement s, double limit) {
         if (data.componentSize(s.id) >= data.townCount()) return 0;
         int mine = data.find(s.id);
-        for (Settlement o : data.near(s.x, s.z, limit, o -> o.town && o != s)) {
+        for (Settlement o : data.near(s.x, s.z, limit, o -> o.town && o != s && Landmass.connected(s.x, s.z, o.x, o.z))) {
             if (data.find(o.id) == mine || data.failed.contains(RoadsData.pairKey(s.id, o.id))) continue;
             return queue(data, s, o) ? 1 : 0;
         }
@@ -277,6 +286,12 @@ public final class RoadNetwork {
     private static boolean queue(RoadsData data, Settlement a, Settlement b) {
         long key = RoadsData.pairKey(a.id, b.id);
         if (data.failed.contains(key) || !data.pairs.add(key)) return false;
+        // generic settlements hang off the network with lesser roads: lanes to farmsteads, roads to the rest
+        if (!data.links.containsKey(key)) {
+            boolean farm = a.structure.contains("farmstead") || b.structure.contains("farmstead");
+            data.links.put(key, new RoadsData.Link(farm ? Road.LANE : Road.ROAD, "", RoadGraph.DEFAULT_BRIDGE,
+                    Integer.MIN_VALUE, Integer.MIN_VALUE, 0));
+        }
         data.pending.add(key);
         data.link(a.id, b.id);
         data.setDirty();
@@ -309,11 +324,13 @@ public final class RoadNetwork {
         if (changed) data.setDirty();
     }
 
+
     // ------------------------------------------------------------------ planning
 
     private static ExecutorService planner() {
         if (planner == null) {
-            planner = Executors.newSingleThreadExecutor(r -> {
+            int threads = RoadsConfig.PLANNER_THREADS.get();
+            planner = Executors.newFixedThreadPool(threads, r -> {
                 Thread t = new Thread(r, "Skycraft Road Planner");
                 t.setDaemon(true);
                 t.setPriority(Thread.MIN_PRIORITY);
@@ -323,35 +340,137 @@ public final class RoadNetwork {
         return planner;
     }
 
+    /** Runs background work (graph building, site prediction) on the planner threads. */
+    static void submit(Runnable task) {
+        RUNNING.add(planner().submit(task));
+    }
+
     static boolean planning() {
-        return running != null && !running.isDone();
+        RUNNING.removeIf(Future::isDone);
+        return !RUNNING.isEmpty();
+    }
+
+    /**
+     * The waiting pair to plan next: the one whose midpoint is nearest to a player (or to the world spawn), so the
+     * roads around the players are ready first.
+     */
+    private static long nextPair(ServerLevel level, RoadsData data) {
+        List<double[]> anchors = new ArrayList<>();
+        for (net.minecraft.server.level.ServerPlayer p : level.players()) anchors.add(new double[]{p.getX(), p.getZ()});
+        if (anchors.isEmpty()) anchors.add(new double[]{level.getSharedSpawnPos().getX(), level.getSharedSpawnPos().getZ()});
+        long best = -1;
+        double bestD = Double.MAX_VALUE;
+        for (long pair : data.pending) {
+            Settlement a = data.settlement(RoadsData.pairA(pair)), b = data.settlement(RoadsData.pairB(pair));
+            if (a == null || b == null) return pair; // dropped by the caller
+            // never two neighbouring roads at once: the second must see the first to share its way
+            if (overlapsInFlight(box(data, pair, a, b))) continue;
+            double mx = (a.x + b.x) * 0.5, mz = (a.z + b.z) * 0.5;
+            for (double[] p : anchors) {
+                double d = (mx - p[0]) * (mx - p[0]) + (mz - p[1]) * (mz - p[1]);
+                if (d < bestD) {
+                    bestD = d;
+                    best = pair;
+                }
+            }
+        }
+        return best;
+    }
+
+    /** Area a link's planning may touch (endpoints plus a margin). */
+    private static int[] box(RoadsData data, long pair, Settlement a, Settlement b) {
+        int m = 160;
+        RoadsData.Link link = data.link(pair);
+        int ax = a.x, az = a.z, bx = b.x, bz = b.z;
+        if (link.trail()) { // from the destination to the road point it joins
+            Settlement from = link.from() == b.id ? b : a;
+            ax = from.x;
+            az = from.z;
+            bx = link.tx();
+            bz = link.tz();
+            m = 48;
+        }
+        return new int[]{Math.min(ax, bx) - m, Math.min(az, bz) - m, Math.max(ax, bx) + m, Math.max(az, bz) + m};
+    }
+
+    private static boolean overlapsInFlight(int[] box) {
+        for (int[] o : IN_FLIGHT_BOXES.values()) {
+            if (box[0] <= o[2] && box[2] >= o[0] && box[1] <= o[3] && box[3] >= o[1]) return true;
+        }
+        return false;
     }
 
     private static void startPlanning(ServerLevel level, RoadsData data) {
-        if (planning() || data.pending.isEmpty()) return;
-        long pair = data.pending.poll();
-        Settlement a = data.settlement(RoadsData.pairA(pair));
-        Settlement b = data.settlement(RoadsData.pairB(pair));
-        if (a == null || b == null) {
-            data.pairs.remove(pair);
-            data.rebuildLinks();
-            data.setDirty();
-            return;
-        }
-        data.inFlight = pair;
-        ChunkGenerator generator = level.getChunkSource().getGenerator();
-        RandomState random = level.getChunkSource().randomState();
-        int longWater = Math.max(1, (int) Math.round(RoadsConfig.MAX_BRIDGE_LENGTH.get() / RoadPlanner.SPACING));
-        RoadPlanner.Job job = new RoadPlanner.Job(data.generation, a.id, b.id, a.x, a.z, b.x, b.z, level.getSeaLevel(),
-                RoadsConfig.MAX_EXPANSIONS.get(), longWater, new LongOpenHashSet(data.roadCells));
-        running = planner().submit(() -> {
-            try {
-                RESULTS.add(RoadPlanner.plan(job, generator, random, level));
-            } catch (Throwable t) {
-                Skycraft.LOGGER.warn("Skycraft roads: planning {} -> {} failed", a.name, b.name, t);
-                RESULTS.add(new RoadPlanner.Result(job.generation(), a.id, b.id, new int[0], new int[0], new byte[0], true, 0));
+        RUNNING.removeIf(Future::isDone);
+        int threads = RoadsConfig.PLANNER_THREADS.get();
+        while (RUNNING.size() < threads && !data.pending.isEmpty()) {
+            long pair = nextPair(level, data);
+            if (pair == -1) break; // everything waiting overlaps a road being planned
+            data.pending.remove(pair);
+            Settlement a = data.settlement(RoadsData.pairA(pair));
+            Settlement b = data.settlement(RoadsData.pairB(pair));
+            if (a == null || b == null) {
+                data.pairs.remove(pair);
+                data.rebuildLinks();
+                data.setDirty();
+                continue;
             }
-        });
+            RoadsData.Link link = data.link(pair);
+            // a trail runs from its destination (the non-town end) to the road point it joins
+            if (link.trail() && link.from() == b.id) {
+                Settlement t = a;
+                a = b;
+                b = t;
+            }
+            int[] ea = end(a), eb = link.trail() ? new int[]{link.tx(), link.tz()} : end(b);
+            data.inFlight.add(pair);
+            IN_FLIGHT_BOXES.put(pair, box(data, pair, a, b));
+            ChunkGenerator generator = level.getChunkSource().getGenerator();
+            RandomState random = level.getChunkSource().randomState();
+            int bridge = link.maxBridge() > RoadGraph.DEFAULT_BRIDGE ? link.maxBridge()
+                    : Math.min(link.maxBridge(), RoadsConfig.MAX_BRIDGE_LENGTH.get());
+            int longWater = Math.max(1, (int) Math.round(bridge / RoadPlanner.SPACING));
+            if (cellsSnapshot == null) cellsSnapshot = new LongOpenHashSet(data.roadCells);
+            RoadPlanner.Job job = new RoadPlanner.Job(data.generation, a.id, b.id, ea[0], ea[1], eb[0], eb[1], level.getSeaLevel(),
+                    RoadsConfig.MAX_EXPANSIONS.get(), longWater, cellsSnapshot, bridge, avoid(data, ea, eb));
+            Settlement fa = a, fb = b;
+            RUNNING.add(planner().submit(() -> {
+                long t0 = System.nanoTime();
+                RoadPlanner.Result r;
+                try {
+                    r = RoadPlanner.plan(job, generator, random, level);
+                } catch (Throwable t) {
+                    Skycraft.LOGGER.warn("Skycraft roads: planning {} -> {} failed", fa.name, fb.name, t);
+                    r = new RoadPlanner.Result(job.generation(), fa.id, fb.id, new int[0], new int[0], new byte[0], true, 0, 0);
+                }
+                synchronized (RoadNetwork.class) {
+                    plannedNanos += System.nanoTime() - t0;
+                    plannedSamples += r.samples();
+                }
+                RESULTS.add(r);
+            }));
+        }
+    }
+
+    /** Where roads meet a destination: a city's main gate, otherwise its centre. */
+    static int[] end(Settlement s) {
+        return s.place().map(RoadGraph::endpoint).orElseGet(() -> new int[]{s.x, s.z});
+    }
+
+    /** Walled cities near the link (centre and radius triples): the road goes round them to the gate. */
+    private static int[] avoid(RoadsData data, int[] a, int[] b) {
+        int x = (a[0] + b[0]) / 2, z = (a[1] + b[1]) / 2;
+        double reach = Math.sqrt((double) (a[0] - b[0]) * (a[0] - b[0]) + (double) (a[1] - b[1]) * (a[1] - b[1])) / 2 + 400;
+        it.unimi.dsi.fastutil.ints.IntArrayList out = new it.unimi.dsi.fastutil.ints.IntArrayList();
+        for (Settlement s : data.near(x, z, reach, s -> s.town && !s.placeId.isEmpty())) {
+            s.place().ifPresent(p -> {
+                if (p.type() != com.skycraft.tamriel.PlaceType.CAPITAL && p.type() != com.skycraft.tamriel.PlaceType.CITY) return;
+                out.add(p.x());
+                out.add(p.z());
+                out.add(p.radius());
+            });
+        }
+        return out.toIntArray();
     }
 
     private static void applyResults(ServerLevel level, RoadsData data) {
@@ -359,42 +478,112 @@ public final class RoadNetwork {
         while ((r = RESULTS.poll()) != null) {
             if (r.generation() != data.generation) continue;
             long pair = RoadsData.pairKey(r.a(), r.b());
-            if (data.inFlight == pair) data.inFlight = -1;
+            data.inFlight.remove(pair);
+            IN_FLIGHT_BOXES.remove(pair);
             Settlement a = data.settlement(r.a()), b = data.settlement(r.b());
             if (a == null || b == null || r.xs().length < 2) {
                 data.pairs.remove(pair);
                 data.rebuildLinks();
                 data.setDirty();
-                if (a != null && b != null && !r.aborted()) {
-                    // no acceptable path (cliffs, open sea...): never retry this pair, link other neighbours instead
+                if (r.aborted() && a != null && b != null) {
+                    // interrupted or crashed: plan it again later
+                    data.pairs.add(pair);
+                    data.pending.add(pair);
+                    data.link(a.id, b.id);
+                } else if (a != null && b != null) {
+                    RoadsData.Link link = data.link(pair);
+                    if (!link.trail() && link.maxBridge() < RETRY_BRIDGE) {
+                        // a lake island (Goldenglow Estate) or a broad river: try once more with a longer bridge
+                        data.links.put(pair, new RoadsData.Link(link.kind(), link.name(), RETRY_BRIDGE, link.tx(), link.tz(), link.from()));
+                        data.pairs.add(pair);
+                        data.pending.add(pair);
+                        data.link(a.id, b.id);
+                        continue;
+                    }
+                    // no acceptable path (cliffs, open sea...): never retry this pair
                     data.failed.add(pair);
-                    Skycraft.LOGGER.debug("Skycraft roads: no path {} -> {} ({} expansions), trying other neighbours",
-                            a.name, b.name, r.expansions());
-                    planConnections(data, a);
-                    planConnections(data, b);
+                    failedPlans++;
+                    Skycraft.LOGGER.info("Skycraft roads: no path {} -> {} ({} expansions)", a.name, b.name, r.expansions());
+                    // link other neighbours instead, but only for a destination left without any road (no cascades)
+                    if (!link.trail()) {
+                        if (isolated(data, a)) planConnections(data, a);
+                        if (isolated(data, b)) planConnections(data, b);
+                    }
                 }
                 continue;
             }
-            Road road = data.addRoad(r.a(), r.b(), r.xs(), r.zs(), r.flags());
+            RoadsData.Link link = data.link(pair);
+            Road road = data.addRoad(r.a(), r.b(), r.xs(), r.zs(), r.flags(), link.kind(), link.name());
             LongOpenHashSet touched = RoadLayout.layout(data, road); // before indexing: junctions see only other roads
             touched.addAll(data.indexRoad(road));
+            cellsSnapshot = null;
+            plannedRoads++;
             queueLoaded(level, data, touched);
+            RoadsPackets.roadAdded(road);
             Skycraft.LOGGER.debug("Skycraft roads: road {} -> {} planned ({} points, {} m, {} expansions)", a.name, b.name,
                     road.size(), Math.round(road.length()), r.expansions());
+            if (data.pending.isEmpty() && data.inFlight.isEmpty()) logStats(data);
         }
     }
 
-    /** Forgets every road and plans the network again from the known settlements. */
+    /** Longest bridge of a link's second attempt. */
+    private static final int RETRY_BRIDGE = 160;
+    /** A destination stops asking for replacement links after this many failed ones. */
+    private static final int MAX_FAILURES = 3;
+
+    /** True if a town has no road and nothing queued, and has not failed too often to be worth another try. */
+    private static boolean isolated(RoadsData data, Settlement s) {
+        if (!s.town || !data.roadsAt(s.id).isEmpty()) return false;
+        int failures = 0;
+        for (long p : data.failed) if (RoadsData.pairA(p) == s.id || RoadsData.pairB(p) == s.id) failures++;
+        if (failures >= MAX_FAILURES) return false;
+        for (long p : data.pending) if (RoadsData.pairA(p) == s.id || RoadsData.pairB(p) == s.id) return false;
+        for (long p : data.inFlight) if (RoadsData.pairA(p) == s.id || RoadsData.pairB(p) == s.id) return false;
+        return true;
+    }
+
+    /** Logs the network size and the planner's cost so far. */
+    static void logStats(RoadsData data) {
+        Skycraft.LOGGER.info("Skycraft roads: {}", stats(data));
+    }
+
+    static String stats(RoadsData data) {
+        double[] km = new double[4];
+        int[] count = new int[4];
+        for (Road road : data.roads.values()) {
+            int k = Math.max(0, Math.min(3, road.kind));
+            km[k] += road.length() / 1000.0;
+            count[k]++;
+        }
+        int towns = 0, dests = 0;
+        for (Settlement s : data.settlements) {
+            if (s.town) towns++;
+            else dests++;
+        }
+        return String.format(java.util.Locale.ROOT,
+                "network: %d towns, %d other destinations, %d roads (%.1f km): %d highways %.1f km, %d roads %.1f km, %d lanes %.1f km, "
+                        + "%d trails %.1f km; %d pending, %d failed; planner %.1f s over %d plans (%d height samples), "
+                        + "slowest result apply %.2f ms; roads tick avg %.3f ms, max %.2f ms; generic sites predicted in %d regions: "
+                        + "%d towns, %d dungeons",
+                towns, dests, data.roads.size(), km[0] + km[1] + km[2] + km[3], count[0], km[0], count[1], km[1], count[2], km[2],
+                count[3], km[3], pendingPlans(data), data.failed.size(), plannedNanos / 1e9, plannedRoads, plannedSamples,
+                applyNanosMax / 1e6, ticks == 0 ? 0.0 : tickNanosTotal / 1e6 / ticks, tickNanosMax / 1e6,
+                WorldPlan.scannedRegions, WorldPlan.predictedTowns, WorldPlan.predictedDungeons);
+    }
+
+    /** Forgets every road and plans the network again: the named network (WorldPlan), then the known generic towns. */
     static int replan(ServerLevel level, RoadsData data) {
-        if (running != null) running.cancel(true);
-        running = null;
+        for (Future<?> f : RUNNING) f.cancel(true);
+        RUNNING.clear();
+        IN_FLIGHT_BOXES.clear();
         RESULTS.clear();
         Paver.clear();
+        WorldPlan.clear();
+        cellsSnapshot = null;
         data.clearRoads();
         int queued = 0;
-        // towns first (the network), then the dungeons' spurs; each call is a local grid query, so this is O(n)
-        for (Settlement s : data.settlements) if (s.town) queued += planConnections(data, s);
-        for (Settlement s : data.settlements) if (!s.town) queued += planConnections(data, s);
+        for (Settlement s : data.settlements) if (s.town && s.placeId.isEmpty()) queued += planConnections(data, s);
+        RoadsPackets.networkReset();
         return queued;
     }
 
@@ -415,6 +604,6 @@ public final class RoadNetwork {
     }
 
     static int pendingPlans(RoadsData data) {
-        return data.pending.size() + (data.inFlight != -1 ? 1 : 0);
+        return data.pending.size() + data.inFlight.size();
     }
 }

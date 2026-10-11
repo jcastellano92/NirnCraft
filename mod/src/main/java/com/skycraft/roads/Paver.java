@@ -52,9 +52,12 @@ final class Paver {
     private static final int QUIET = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS;
     /** Fences must update their neighbours so rails connect. */
     private static final int CONNECT = Block.UPDATE_CLIENTS;
-    private static final float ROAD_HALF_WIDTH_SQ = 4.0f;  // 2.0^2: wider 4-5 block road band
-    private static final float RAIL_SQ = 6.25f;            // 2.5^2: edge stones and bridge rails
-    private static final int MAX_PILLAR = 16;
+    /** Squared half widths of the paved band per road class (highway, road, lane, trail), and of bridge decks. */
+    private static final float[] HALF_SQ = {4.0f, 2.5f, 1.3f, 0.6f};
+    /** Squared outer half widths: highways get edge stones out to here, bridges their rails. */
+    private static final float[] RAIL_SQ = {6.25f, 2.5f, 1.3f, 0.6f};
+    private static final float BRIDGE_HALF_SQ = 2.25f, BRIDGE_RAIL_SQ = 4.0f;
+    private static final int MAX_PILLAR = 24;
 
     private static final LongLinkedOpenHashSet QUEUE = new LongLinkedOpenHashSet();
     private static final LongOpenHashSet WAITING = new LongOpenHashSet();
@@ -149,6 +152,8 @@ final class Paver {
         final int cx, cz;
         final int[] colX, colZ, colRoad, colIdx;
         final boolean[] colEdge, colCenter;
+        /** The building culture of the chunk's land (road style and bridge kind). */
+        final com.skycraft.tamriel.settlement.Culture culture;
         final List<RoadFeature> features;
         /** Pieces of every structure reaching into this chunk (other mods' buildings, trees, ruins...). */
         final List<BoundingBox> pieces;
@@ -167,6 +172,7 @@ final class Paver {
             colIdx = new int[n];
             colEdge = new boolean[n];
             colCenter = new boolean[n];
+            culture = RoadStyle.cultureAt((cx << 4) + 8, (cz << 4) + 8);
             this.features = features;
             this.pieces = pieces;
             this.claims = claims;
@@ -221,7 +227,10 @@ final class Paver {
         static Task build(ServerLevel level, RoadsData data, long chunk) {
             int cx = ChunkPos.getX(chunk), cz = ChunkPos.getZ(chunk);
             int bx = cx << 4, bz = cz << 4;
+            // per column: the road whose band covers it most centrally (distance relative to that road's half width)
             float[] best = new float[256];
+            boolean[] edgeOf = new boolean[256];
+            float[] d2Of = new float[256];
             int[] road = new int[256];
             int[] idx = new int[256];
             java.util.Arrays.fill(best, Float.MAX_VALUE);
@@ -243,6 +252,10 @@ final class Paver {
                         }
                     }
                     if (skip) continue;
+                    int kind = Math.max(0, Math.min(3, r.kind));
+                    boolean water = r.water(i) || (i > 0 && r.water(i - 1)) || (i + 1 < r.size() && r.water(i + 1));
+                    float half = water ? Math.max(HALF_SQ[kind], BRIDGE_HALF_SQ) : HALF_SQ[kind];
+                    float rail = water ? Math.max(RAIL_SQ[kind], BRIDGE_RAIL_SQ) : RAIL_SQ[kind];
                     for (int dx = -RoadsData.FOOTPRINT; dx <= RoadsData.FOOTPRINT; dx++) {
                         int x = px + dx;
                         if ((x >> 4) != cx) continue;
@@ -250,10 +263,13 @@ final class Paver {
                             int z = pz + dz;
                             if ((z >> 4) != cz) continue;
                             float d2 = dx * dx + dz * dz;
-                            if (d2 > RAIL_SQ) continue;
+                            if (d2 > rail) continue;
+                            float q = d2 / half;
                             int li = ((z - bz) << 4) | (x - bx);
-                            if (d2 < best[li]) {
-                                best[li] = d2;
+                            if (q < best[li]) {
+                                best[li] = q;
+                                d2Of[li] = d2;
+                                edgeOf[li] = d2 > half;
                                 road[li] = r.id;
                                 idx[li] = i;
                             }
@@ -262,18 +278,18 @@ final class Paver {
                 }
             }
             int n = 0;
-            for (float b : best) if (b <= RAIL_SQ) n++;
+            for (float b : best) if (b != Float.MAX_VALUE) n++;
             List<RoadFeature> feats = data.featuresByChunk.get(chunk);
             Task t = new Task(chunk, n, feats == null ? List.of() : new ArrayList<>(feats), pieces(level, cx, cz), claims(level, cx, cz));
             int j = 0;
             for (int li = 0; li < 256; li++) {
-                if (best[li] > RAIL_SQ) continue;
+                if (best[li] == Float.MAX_VALUE) continue;
                 t.colX[j] = bx + (li & 15);
                 t.colZ[j] = bz + (li >> 4);
                 t.colRoad[j] = road[li];
                 t.colIdx[j] = idx[li];
-                t.colEdge[j] = best[li] > ROAD_HALF_WIDTH_SQ;
-                t.colCenter[j] = best[li] < 0.5f;
+                t.colEdge[j] = edgeOf[li];
+                t.colCenter[j] = d2Of[li] < 0.5f;
                 j++;
             }
             return t;
@@ -292,7 +308,12 @@ final class Paver {
             if (f < features.size()) {
                 cursor++;
                 RoadFeature feature = features.get(f);
-                return feature.type == RoadFeature.SIGNPOST ? placeSignpost(level, this, data, feature) : placeLantern(level, this, feature);
+                return switch (feature.type) {
+                    case RoadFeature.SIGNPOST -> placeSignpost(level, this, data, feature, false);
+                    case RoadFeature.MILESTONE -> placeSignpost(level, this, data, feature, true);
+                    case RoadFeature.SHRINE -> placeShrine(level, this, feature);
+                    default -> placeLantern(level, this, feature);
+                };
             }
             return -1;
         }
@@ -308,8 +329,10 @@ final class Paver {
         FluidState fluid = ts.getFluidState();
         if (!fluid.isEmpty()) {
             if (!fluid.is(FluidTags.WATER) || road.longWater(idx)) return 0;
-            return bridge(level, top, ts, edge, center && idx % 4 == 0);
+            return bridge(level, task, road, idx, top, ts, edge, center);
         }
+        // a bridge deck we built (one above the water surface): leave it be
+        if (isBridgeDeck(level, task, top, ts)) return 0;
         // only ever on natural ground (or our own road): never on roofs, logs or other mods' floors
         if (!isNaturalGround(ts) && !isRoadMaterial(ts)) return 0;
         BlockPos above = top.above();
@@ -321,28 +344,9 @@ final class Paver {
         if (!clearable(a1)) return 0;
         if (PlacedBlocks.isPlayerPlaced(level, top) || (!a1.isAir() && PlacedBlocks.isPlayerPlaced(level, above))) return 0;
 
-        if (edge) {
-            if (isRoadMaterial(ts)) return 0;
-            BlockState edgeBlock = edgeFor(level, top, ts, x, z);
-            if (edgeBlock == null) return 0;
-            if (!a1.isAir() && clearable(a1) && !PlacedBlocks.isPlayerPlaced(level, above)) level.setBlock(above, Blocks.AIR.defaultBlockState(), QUIET);
-            if (!a2.isAir() && clearable(a2) && !PlacedBlocks.isPlayerPlaced(level, above2)) level.setBlock(above2, Blocks.AIR.defaultBlockState(), QUIET);
-            if (!a3.isAir() && clearable(a3) && !PlacedBlocks.isPlayerPlaced(level, above3)) level.setBlock(above3, Blocks.AIR.defaultBlockState(), QUIET);
-            level.setBlock(top, edgeBlock, QUIET);
-            return 2;
-        }
-
-        if (isRoadMaterial(ts)) {
-            if (a1.is(Blocks.SNOW) || (clearable(a1) && !PlacedBlocks.isPlayerPlaced(level, above))) {
-                level.setBlock(above, Blocks.AIR.defaultBlockState(), QUIET);
-                if (!a2.isAir() && clearable(a2) && !PlacedBlocks.isPlayerPlaced(level, above2)) level.setBlock(above2, Blocks.AIR.defaultBlockState(), QUIET);
-                if (!a3.isAir() && clearable(a3) && !PlacedBlocks.isPlayerPlaced(level, above3)) level.setBlock(above3, Blocks.AIR.defaultBlockState(), QUIET);
-                return 1;
-            }
-            return 0;
-        }
-        BlockState surface = surfaceFor(level, top, ts, x, z);
-        if (surface == null) return 0;
+        int roll = roll(x, z);
+        BlockState want = edge ? RoadStyle.edge(task.culture, roll) : RoadStyle.surface(task.culture, road.kind, roll);
+        if (want.getBlock() instanceof FallingBlock && !supported(level, top)) want = Blocks.COARSE_DIRT.defaultBlockState();
         int changes = 0;
         if (!a3.isAir() && clearable(a3) && !PlacedBlocks.isPlayerPlaced(level, above3)) {
             level.setBlock(above3, Blocks.AIR.defaultBlockState(), QUIET);
@@ -356,48 +360,91 @@ final class Paver {
             level.setBlock(above, Blocks.AIR.defaultBlockState(), QUIET);
             changes++;
         }
-        level.setBlock(top, surface, QUIET);
-        return changes + 1;
+        if (ts.getBlock() != want.getBlock()) {
+            level.setBlock(top, want, QUIET);
+            changes++;
+        }
+        return changes;
     }
 
-    private static int bridge(ServerLevel level, BlockPos waterTop, BlockState waterState, boolean edge, boolean pillar) {
-        // the deck replaces the water surface, so it is flush with the banks
+    /** True if this column's top is one of our raised bridge decks (deck material over water). */
+    private static boolean isBridgeDeck(ServerLevel level, Task task, BlockPos top, BlockState ts) {
+        if (!ts.is(RoadStyle.deck(task.culture).getBlock()) && !ts.is(RoadStyle.deckSlab(task.culture).getBlock())) return false;
+        return !level.getBlockState(top.below()).getFluidState().isEmpty();
+    }
+
+    /**
+     * One column of a bridge. The deck stands one block above the water surface, so boats and swimmers pass under it,
+     * and its first and last columns are slabs: half steps up from the banks, walkable without jumping. Stone cultures
+     * build stone decks with wall parapets and masonry piers; the others plank decks with fence rails and log piles.
+     * Piers stand every 8 blocks down to the river bed; lanterns light every second pier.
+     */
+    private static int bridge(ServerLevel level, Task task, Road road, int idx, BlockPos waterTop, BlockState waterState,
+                              boolean edge, boolean center) {
         if (!waterState.is(Blocks.WATER) && !(waterState.getBlock() instanceof BushBlock) && !waterState.canBeReplaced()) {
             return 0; // waterlogged stairs, kelp-covered player builds...
         }
         if (PlacedBlocks.isPlayerPlaced(level, waterTop)) return 0;
-        BlockPos above = waterTop.above();
-        BlockState a1 = level.getBlockState(above);
-        if (!clearable(a1)) return 0;
+        BlockPos deckPos = waterTop.above();
+        BlockState d0 = level.getBlockState(deckPos);
+        if (!clearable(d0) && !d0.is(RoadStyle.deck(task.culture).getBlock()) && !d0.is(RoadStyle.deckSlab(task.culture).getBlock())) {
+            return 0;
+        }
+        com.skycraft.tamriel.settlement.Culture c = task.culture;
+        boolean stone = RoadStyle.stoneBridge(c);
+        // a slab where the road reaches the shore within one point, so the step up from the bank is a half block
+        boolean end = !waterAt(level, road, idx - 1) || !waterAt(level, road, idx + 1);
+        BlockState deck = end ? RoadStyle.deckSlab(c) : RoadStyle.deck(c);
         int changes = 0;
-        level.setBlock(waterTop, Blocks.SPRUCE_PLANKS.defaultBlockState(), QUIET);
-        changes++;
-        if (edge) {
-            BlockState fence = Block.updateFromNeighbourShapes(Blocks.SPRUCE_FENCE.defaultBlockState(), level, above);
-            level.setBlock(above, fence, CONNECT);
-            changes++;
-        } else if (!a1.isAir()) {
+        if (level.setBlock(deckPos, deck, QUIET)) changes++;
+        BlockPos above = deckPos.above();
+        BlockState a1 = level.getBlockState(above);
+        if (edge && !end) {
+            BlockState rail = Block.updateFromNeighbourShapes(RoadStyle.rail(c), level, above);
+            if (level.setBlock(above, rail, CONNECT)) changes++;
+            if (idx % 8 == 0 && level.getBlockState(above.above()).isAir()) {
+                level.setBlock(above.above(), Blocks.LANTERN.defaultBlockState(), QUIET);
+                changes++;
+            }
+        } else if (!a1.isAir() && clearable(a1)) {
             level.setBlock(above, Blocks.AIR.defaultBlockState(), QUIET);
             changes++;
         }
-        if (pillar) changes += pillar(level, waterTop.below());
+        if (idx % 4 == 0 && (center || (stone && edge))) changes += pillar(level, waterTop, stone ? RoadStyle.pillar(c) : log(c));
         return changes;
     }
 
-    /** A log pillar from below the deck down to the river bed, if the bed is close enough. */
-    private static int pillar(ServerLevel level, BlockPos from) {
-        BlockPos.MutableBlockPos p = from.mutable();
+    private static BlockState log(com.skycraft.tamriel.settlement.Culture c) {
+        return RoadStyle.pillar(c).is(BlockTags.LOGS) ? RoadStyle.pillar(c) : Blocks.SPRUCE_LOG.defaultBlockState();
+    }
+
+    /** True if the road point is over water in the world (outside the loaded area counts as water: no slab). */
+    private static boolean waterAt(ServerLevel level, Road road, int i) {
+        if (i < 0 || i >= road.size()) return false;
+        int x = road.xs[i], z = road.zs[i];
+        if (level.getChunkSource().getChunkNow(x >> 4, z >> 4) == null) return true;
+        int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
+        BlockState s = level.getBlockState(new BlockPos(x, y, z));
+        if (!s.getFluidState().isEmpty()) return true;
+        // our own deck: the water is one below
+        return !level.getBlockState(new BlockPos(x, y - 1, z)).getFluidState().isEmpty();
+    }
+
+    /** A pier from the water surface down to the river bed, if the bed is close enough. */
+    private static int pillar(ServerLevel level, BlockPos waterTop, BlockState material) {
+        BlockPos.MutableBlockPos p = waterTop.mutable();
         int depth = 0;
         while (depth < MAX_PILLAR && p.getY() > level.getMinBuildHeight()) {
             BlockState s = level.getBlockState(p);
-            if (!s.is(Blocks.WATER) && !(s.getBlock() instanceof BushBlock && !s.getFluidState().isEmpty())) break;
+            if (!s.is(Blocks.WATER) && !(s.getBlock() instanceof BushBlock && !s.getFluidState().isEmpty())
+                    && !s.is(Blocks.KELP) && !s.is(Blocks.KELP_PLANT) && !s.is(Blocks.SEAGRASS) && !s.is(Blocks.TALL_SEAGRASS)) break;
             p.move(Direction.DOWN);
             depth++;
         }
         if (depth == 0 || depth >= MAX_PILLAR) return 0;
         if (!level.getBlockState(p).isFaceSturdy(level, p, Direction.UP)) return 0;
-        BlockState log = Blocks.SPRUCE_LOG.defaultBlockState();
-        for (int i = 0; i < depth; i++) level.setBlock(from.below(i), log, QUIET);
+        BlockState pier = material.hasProperty(RotatedPillarBlock.AXIS) ? material.setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y) : material;
+        for (int i = 0; i < depth; i++) level.setBlock(waterTop.below(i), pier, QUIET);
         return depth;
     }
 
@@ -422,57 +469,26 @@ final class Paver {
         return null;
     }
 
-    /** Ground the world generator made: soil, sand, stone, gravel, snow, clay... */
+    /** Ground the world generator made: soil, sand, stone, gravel, snow, clay, ash, volcanic rock... */
     static boolean isNaturalGround(BlockState s) {
         return s.is(BlockTags.DIRT) || s.is(BlockTags.SAND) || s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.TERRACOTTA)
                 || s.is(Blocks.GRAVEL) || s.is(Blocks.SNOW_BLOCK) || s.is(Blocks.POWDER_SNOW) || s.is(Blocks.CALCITE)
                 || s.is(Blocks.CLAY) || s.is(Blocks.MUD) || s.is(Blocks.PACKED_ICE) || s.is(Blocks.SANDSTONE)
-                || s.is(Blocks.RED_SANDSTONE);
+                || s.is(Blocks.RED_SANDSTONE) || s.is(Blocks.SMOOTH_BASALT) || s.is(Blocks.BASALT)
+                || isTamrielGround(s);
+    }
+
+    private static boolean isTamrielGround(BlockState s) {
+        var id = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(s.getBlock());
+        if (id == null || !com.skycraft.Skycraft.MODID.equals(id.getNamespace())) return false;
+        return switch (id.getPath()) {
+            case "ash_block", "volcanic_rock", "cracked_volcanic_rock", "dune_sand", "coral_stone", "frosted_stone" -> true;
+            default -> false;
+        };
     }
 
     static boolean isRoadMaterial(BlockState s) {
-        return s.is(Blocks.DIRT_PATH) || s.is(Blocks.GRAVEL) || s.is(Blocks.COARSE_DIRT) || s.is(Blocks.COBBLESTONE)
-                || s.is(Blocks.MOSSY_COBBLESTONE) || s.is(Blocks.SMOOTH_SANDSTONE) || s.is(Blocks.SMOOTH_RED_SANDSTONE)
-                || s.is(Blocks.PACKED_MUD) || s.is(Blocks.SPRUCE_PLANKS) || s.is(Blocks.ANDESITE) || s.is(Blocks.STONE_BRICKS);
-    }
-
-    /** The road block for a natural surface, or null to leave the column alone. Cobble & path mix. */
-    @Nullable
-    private static BlockState surfaceFor(ServerLevel level, BlockPos pos, BlockState s, int x, int z) {
-        int roll = roll(x, z);
-        if (s.is(BlockTags.DIRT)) {
-            if (roll < 20) return Blocks.COBBLESTONE.defaultBlockState();
-            if (roll < 35) return Blocks.MOSSY_COBBLESTONE.defaultBlockState();
-            if (roll < 45 && supported(level, pos)) return Blocks.GRAVEL.defaultBlockState();
-            return Blocks.DIRT_PATH.defaultBlockState();
-        }
-        if (s.is(BlockTags.SAND)) {
-            if (s.is(Blocks.RED_SAND)) return Blocks.SMOOTH_RED_SANDSTONE.defaultBlockState();
-            return roll < 20 ? Blocks.COBBLESTONE.defaultBlockState() : (roll < 35 ? Blocks.PACKED_MUD.defaultBlockState() : Blocks.SMOOTH_SANDSTONE.defaultBlockState());
-        }
-        if (s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.TERRACOTTA) || s.is(Blocks.SNOW_BLOCK)
-                || s.is(Blocks.POWDER_SNOW) || s.is(Blocks.CALCITE) || s.is(Blocks.CLAY)) {
-            if (roll < 25 && supported(level, pos)) return Blocks.GRAVEL.defaultBlockState();
-            if (roll < 60) return Blocks.COBBLESTONE.defaultBlockState();
-            if (roll < 80) return Blocks.MOSSY_COBBLESTONE.defaultBlockState();
-            return Blocks.STONE_BRICKS.defaultBlockState();
-        }
-        if (isNaturalGround(s)) {
-            if (roll < 30 && supported(level, pos)) return Blocks.GRAVEL.defaultBlockState();
-            return roll < 70 ? Blocks.COBBLESTONE.defaultBlockState() : Blocks.MOSSY_COBBLESTONE.defaultBlockState();
-        }
-        return null; // not ours to pave
-    }
-
-    /** Edge stones lining the border of the road (natural ground only). */
-    @Nullable
-    private static BlockState edgeFor(ServerLevel level, BlockPos pos, BlockState s, int x, int z) {
-        if (!isNaturalGround(s)) return null;
-        int roll = roll(x, z);
-        if (roll < 40) return Blocks.COBBLESTONE.defaultBlockState();
-        if (roll < 65) return Blocks.MOSSY_COBBLESTONE.defaultBlockState();
-        if (roll < 85) return Blocks.ANDESITE.defaultBlockState();
-        return Blocks.STONE_BRICKS.defaultBlockState();
+        return s.is(Blocks.DIRT_PATH) || s.is(Blocks.SPRUCE_PLANKS) || RoadStyle.isMaterial(s);
     }
 
     /** Gravel would fall into air/fluid below. */
@@ -490,7 +506,7 @@ final class Paver {
         return s.canBeReplaced();
     }
 
-    private static int roll(int x, int z) {
+    static int roll(int x, int z) {
         int h = x * 73428767 ^ z * 912931;
         h ^= h >>> 13;
         h *= 0x5bd1e995;
@@ -502,7 +518,7 @@ final class Paver {
 
     private static boolean isPostMaterial(BlockState s) {
         return s.is(Blocks.SPRUCE_FENCE) || s.is(Blocks.STRIPPED_SPRUCE_LOG) || s.is(Blocks.LANTERN)
-                || s.getBlock() instanceof WallSignBlock;
+                || s.is(Blocks.MOSSY_STONE_BRICKS) || s.is(Blocks.CHISELED_STONE_BRICKS) || s.getBlock() instanceof WallSignBlock;
     }
 
     /** The natural ground block under a (possibly already built) post, or null if unsuitable. */
@@ -544,11 +560,13 @@ final class Paver {
         return 3;
     }
 
+
     /**
      * A signpost: a stripped spruce post with one level of wall signs per destination (both sides of the post, so it
-     * can be read from either direction), capped with a fence. Rebuilding just rewrites the signs.
+     * can be read from either direction), capped with a fence. A milestone is the same in stone: a mossy stone-brick
+     * post with a wall cap. Rebuilding just rewrites the signs.
      */
-    private static int placeSignpost(ServerLevel level, Task task, RoadsData data, RoadFeature f) {
+    private static int placeSignpost(ServerLevel level, Task task, RoadsData data, RoadFeature f, boolean milestone) {
         if (f.dests.isEmpty()) return 0;
         BlockPos g = ground(level, f.x, f.z);
         if (g == null || PlacedBlocks.isPlayerPlaced(level, g) || task.reserved(level, f.x, g.getY(), f.z)) return 0;
@@ -558,11 +576,13 @@ final class Paver {
             if (!freeFor(level, base.above(i))) return 0;
         }
         int changes = 0;
-        BlockState post = Blocks.STRIPPED_SPRUCE_LOG.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y);
+        BlockState post = milestone ? Blocks.MOSSY_STONE_BRICKS.defaultBlockState()
+                : Blocks.STRIPPED_SPRUCE_LOG.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y);
+        BlockState cap = milestone ? Blocks.CHISELED_STONE_BRICKS.defaultBlockState() : Blocks.SPRUCE_FENCE.defaultBlockState();
         for (int i = 0; i <= k; i++) {
             if (level.setBlock(base.above(i), post, QUIET)) changes++;
         }
-        if (level.setBlock(base.above(k + 1), Blocks.SPRUCE_FENCE.defaultBlockState(), QUIET)) changes++;
+        if (level.setBlock(base.above(k + 1), cap, QUIET)) changes++;
         for (int i = 0; i < k; i++) {
             RoadFeature.Dest d = f.dests.get(i);
             Settlement s = data.settlement(d.settlement());
@@ -572,17 +592,18 @@ final class Paver {
             boolean eastWest = Math.abs(d.dirX()) >= Math.abs(d.dirZ());
             Direction[] faces = eastWest ? new Direction[]{Direction.NORTH, Direction.SOUTH}
                     : new Direction[]{Direction.EAST, Direction.WEST};
-            for (Direction face : faces) changes += placeSign(level, level0.relative(face), face, s.name, d);
+            for (Direction face : faces) changes += placeSign(level, level0.relative(face), face, s.displayName(), d, milestone);
         }
         return changes;
     }
 
-    private static int placeSign(ServerLevel level, BlockPos pos, Direction face, String name, RoadFeature.Dest d) {
+    private static int placeSign(ServerLevel level, BlockPos pos, Direction face, Component name, RoadFeature.Dest d,
+                                 boolean stone) {
         BlockState existing = level.getBlockState(pos);
         if (!(existing.getBlock() instanceof WallSignBlock) && !clearable(existing)) return 0;
         if (PlacedBlocks.isPlayerPlaced(level, pos)) return 0;
         int changes = 0;
-        BlockState sign = Blocks.SPRUCE_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, face);
+        BlockState sign = (stone ? Blocks.DARK_OAK_WALL_SIGN : Blocks.SPRUCE_WALL_SIGN).defaultBlockState().setValue(WallSignBlock.FACING, face);
         if (level.setBlock(pos, sign, QUIET)) changes++;
         BlockEntity be = level.getBlockEntity(pos);
         if (!(be instanceof SignBlockEntity sbe)) return changes;
@@ -590,16 +611,63 @@ final class Paver {
         Direction readerRight = face.getOpposite().getClockWise();
         boolean right = d.dirX() * readerRight.getStepX() + d.dirZ() * readerRight.getStepZ() >= 0;
         String distance = formatDistance(d.distance());
+        // the historic road's name (the Gold Road...) heads the sign, in each reader's language
+        Component road = d.roadName().isEmpty() ? Component.empty()
+                : Component.translatable("road.skycraft." + d.roadName()).withStyle(net.minecraft.ChatFormatting.ITALIC);
         SignText text = new SignText()
-                .setMessage(0, Component.empty())
-                .setMessage(1, Component.literal(name))
+                .setMessage(0, road)
+                .setMessage(1, name)
                 .setMessage(2, Component.literal(right ? distance + " →" : "← " + distance))
                 .setMessage(3, Component.empty());
+        if (stone) text = text.setColor(net.minecraft.world.item.DyeColor.WHITE);
         sbe.setText(text, true);
+        sbe.setText(text, false);
         sbe.setWaxed(true);
         sbe.setChanged();
         level.sendBlockUpdated(pos, sign, sign, Block.UPDATE_CLIENTS);
         return changes + 1;
+    }
+
+    /**
+     * A wayside shrine: the Divine's shrine on a dressed-stone plinth facing the road, between two lantern posts.
+     */
+    private static int placeShrine(ServerLevel level, Task task, RoadFeature f) {
+        BlockPos g = ground(level, f.x, f.z);
+        if (g == null || PlacedBlocks.isPlayerPlaced(level, g) || task.reserved(level, f.x, g.getY(), f.z)) return 0;
+        Block shrine = Wayshrines.block(f.variant);
+        BlockPos at = g.above();
+        if (level.getBlockState(at).is(shrine)) return 0; // already built
+        RoadFeature.Dest d = f.dests.isEmpty() ? null : f.dests.get(0);
+        Direction facing = d == null ? Direction.SOUTH : Direction.getNearest(d.dirX(), 0, d.dirZ());
+        Direction side = facing.getClockWise();
+        BlockPos[] spots = {at, at.relative(side, 2), at.relative(side, -2)};
+        for (BlockPos p : spots) {
+            if (!freeFor(level, p) || !freeFor(level, p.above()) || !freeFor(level, p.above(2))) return 0;
+            BlockState below = level.getBlockState(p.below());
+            if (!isNaturalGround(below) && !isRoadMaterial(below)) return 0;
+        }
+        int changes = 0;
+        for (int s = -2; s <= 2; s++) {
+            BlockPos p = g.relative(side, s);
+            BlockState below = level.getBlockState(p);
+            if ((isNaturalGround(below) || isRoadMaterial(below)) && !PlacedBlocks.isPlayerPlaced(level, p)
+                    && level.getBlockState(p.above()).canBeReplaced()) {
+                level.setBlock(p, (s == 0 ? Blocks.CHISELED_STONE_BRICKS : Blocks.STONE_BRICKS).defaultBlockState(), QUIET);
+                changes++;
+            }
+        }
+        BlockState state = shrine.defaultBlockState();
+        if (state.hasProperty(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING)) {
+            state = state.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, facing);
+        }
+        if (level.setBlock(at, state, Block.UPDATE_CLIENTS)) changes++;
+        for (int s : new int[]{2, -2}) {
+            BlockPos p = at.relative(side, s);
+            level.setBlock(p, Blocks.STONE_BRICK_WALL.defaultBlockState(), QUIET);
+            level.setBlock(p.above(), Blocks.LANTERN.defaultBlockState(), QUIET);
+            changes += 2;
+        }
+        return changes;
     }
 
     static String formatDistance(int blocks) {

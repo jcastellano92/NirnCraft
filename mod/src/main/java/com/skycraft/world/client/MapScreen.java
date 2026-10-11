@@ -408,6 +408,8 @@ public class MapScreen extends Screen {
             drawTiles(g);
             drawPaperGrain(g);
             drawFog(g);
+            // the planned road network (roads module), drawn over the fog like Skyrim's map shows every road
+            com.skycraft.roads.client.RoadMapLayer.draw(g, font, this::screenX, this::screenY, scale, left, top, right, bottom);
             drawProvinceAndRegionNames(g);
             for (Layer layer : LAYERS) {
                 List<Component> tip = layer.draw(g, this, mouseX, mouseY);

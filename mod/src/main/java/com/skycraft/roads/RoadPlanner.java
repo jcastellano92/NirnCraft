@@ -1,7 +1,8 @@
 package com.skycraft.roads;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import com.skycraft.tamriel.MapSample;
+import com.skycraft.tamriel.TamrielMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.world.level.ChunkPos;
@@ -22,6 +23,10 @@ import java.util.PriorityQueue;
  * generator's noise ({@link ChunkGenerator#getBaseHeight}), then Chaikin smoothing and densification to one point
  * every 2 blocks. If no acceptable path exists the link is dropped, never replaced by a straight line. Runs on the background planner thread; everything it reads is either
  * immutable or thread-safe world generation state.
+ *
+ * <p>The cost also reads the Tamriel map: its road corridors (the valleys and passes the old roads take) are cheaper,
+ * elevated lakes and rivers count as water at their real surface, water wider than the link's longest allowed bridge
+ * and open sea are impassable, and walled cities near the route are expensive to cross (roads go round to the gate).</p>
  */
 final class RoadPlanner {
     static final int CELL = 8;
@@ -35,7 +40,7 @@ final class RoadPlanner {
     private static final double CLIFF_COST = 400.0;
     private static final double SHALLOW_WATER = 6.0;
     private static final double DEEP_WATER = 30.0;
-    private static final double ROAD_DISCOUNT = 0.55;
+    private static final double ROAD_DISCOUNT = 0.35;
     private static final double TURN_COST = 3.0;
     private static final double HEURISTIC_WEIGHT = 1.15;
     /** Links up to this long (blocks) are planned directly on the fine grid. */
@@ -45,59 +50,100 @@ final class RoadPlanner {
     /** Long links are refined between corridor waypoints this many coarse cells apart (~256 blocks). */
     private static final int WAYPOINT_STEP = 8;
 
+    /**
+     * @param maxBridge longest water crossing (blocks) the road may bridge
+     * @param avoid     circles (x, z, radius triples) the road should go round: walled cities
+     */
     record Job(int generation, int a, int b, int ax, int az, int bx, int bz, int seaLevel, int maxExpansions,
-               int longWaterPoints, LongOpenHashSet roadCells) {
+               int longWaterPoints, LongOpenHashSet roadCells, int maxBridge, int[] avoid) {
     }
 
     /**
      * A planned road, or no points at all if no acceptable path exists ({@code aborted} = the plan was interrupted or
      * crashed rather than proven impossible, so the pair may be tried again later).
      */
-    record Result(int generation, int a, int b, int[] xs, int[] zs, byte[] flags, boolean aborted, int expansions) {
+    record Result(int generation, int a, int b, int[] xs, int[] zs, byte[] flags, boolean aborted, int expansions, int samples) {
     }
 
     private RoadPlanner() {}
 
-    /** Noise-based terrain heights per grid cell ({@code cell} blocks), cached. */
+    /** What the planner knows of one grid cell: noise ground height, water surface, map hints. */
+    private static final class Cell {
+        /** First free y above the solid terrain (water does not count as solid). */
+        int raw;
+        /** Water surface over this cell (sea level, or an elevated lake's or river's level), or MIN_VALUE if dry. */
+        int water = Integer.MIN_VALUE;
+        /** 0..1 road corridor strength from the map. */
+        float road;
+        /** Open sea, or water wider than the longest allowed bridge. */
+        boolean blocked;
+        /** Extra cost per block (inside a walled city). */
+        float penalty;
+    }
+
+    /** Terrain per grid cell ({@code cell} blocks), cached: noise heights plus the Tamriel map's water and hints. */
     private static final class Heights {
         private final ChunkGenerator generator;
         private final RandomState random;
         private final LevelHeightAccessor heightAccessor;
         private final int sea;
         private final int cell;
-        private final Long2IntOpenHashMap cache = new Long2IntOpenHashMap();
+        private final int maxBridge;
+        private final int[] avoid;
+        private final MapSample sample = new MapSample();
+        private final Long2ObjectOpenHashMap<Cell> cache = new Long2ObjectOpenHashMap<>();
+        int samples;
 
-        Heights(ChunkGenerator generator, RandomState random, LevelHeightAccessor heightAccessor, int sea, int cell) {
+        Heights(ChunkGenerator generator, RandomState random, LevelHeightAccessor heightAccessor, int sea, int cell,
+                int maxBridge, int[] avoid) {
             this.generator = generator;
             this.random = random;
             this.heightAccessor = heightAccessor;
             this.sea = sea;
             this.cell = cell;
-            cache.defaultReturnValue(Integer.MIN_VALUE);
+            this.maxBridge = maxBridge;
+            this.avoid = avoid;
         }
 
-        /** First free y above the solid terrain (water does not count as solid). */
-        int raw(int cx, int cz) {
+        Cell cell(int cx, int cz) {
             long k = ChunkPos.asLong(cx, cz);
-            int h = cache.get(k);
-            if (h != Integer.MIN_VALUE) return h;
+            Cell c = cache.get(k);
+            if (c != null) return c;
+            c = new Cell();
+            samples++;
+            int x = cx * cell + cell / 2, z = cz * cell + cell / 2;
             try {
-                h = generator.getBaseHeight(cx * cell + cell / 2, cz * cell + cell / 2, Heightmap.Types.OCEAN_FLOOR_WG,
-                        heightAccessor, random);
+                c.raw = generator.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, heightAccessor, random);
             } catch (RuntimeException e) {
-                h = sea;
+                c.raw = sea;
             }
-            cache.put(k, h);
-            return h;
+            if (c.raw < sea) c.water = sea;
+            TamrielMap.sample(x, z, sample);
+            c.road = sample.road;
+            if (Corridors.on(x, z)) c.road = 1.6f; // a traced historic route: strongly preferred
+            if (sample.inWater() && sample.waterLevel > c.raw) c.water = Math.max(c.water, Math.round(sample.waterLevel));
+            float half = maxBridge / 2f + 8f;
+            if (sample.coastDistance < -half && (sample.inTamriel || sample.region == 0)) c.blocked = true;
+            if (c.water != Integer.MIN_VALUE) {
+                if (sample.lakeDistance > half) c.blocked = true;
+                if (sample.riverHalfWidth > half && sample.riverDistance < sample.riverHalfWidth - half) c.blocked = true;
+            }
+            for (int i = 0; i + 2 < avoid.length; i += 3) {
+                long dx = x - avoid[i], dz = z - avoid[i + 1];
+                if (dx * dx + dz * dz < (long) avoid[i + 2] * avoid[i + 2]) c.penalty = 40f;
+            }
+            cache.put(k, c);
+            return c;
         }
 
         boolean water(int cx, int cz) {
-            return raw(cx, cz) < sea;
+            return cell(cx, cz).water != Integer.MIN_VALUE;
         }
 
         /** Walking height: the water surface counts as the deck of a bridge. */
         int effective(int cx, int cz) {
-            return Math.max(raw(cx, cz), sea);
+            Cell c = cell(cx, cz);
+            return Math.max(c.raw, c.water);
         }
     }
 
@@ -125,24 +171,24 @@ final class RoadPlanner {
     }
 
     static Result plan(Job job, ChunkGenerator generator, RandomState random, LevelHeightAccessor heightAccessor) {
-        Heights fine = new Heights(generator, random, heightAccessor, job.seaLevel(), CELL);
-        int[] expansions = new int[1];
+        Heights fine = new Heights(generator, random, heightAccessor, job.seaLevel(), CELL, job.maxBridge(), job.avoid());
+        int[] expansions = new int[2];
         List<double[]> poly;
         try {
             poly = route(job, fine, generator, random, heightAccessor, expansions);
         } catch (Aborted e) {
-            return new Result(job.generation(), job.a(), job.b(), new int[0], new int[0], new byte[0], true, expansions[0]);
+            return new Result(job.generation(), job.a(), job.b(), new int[0], new int[0], new byte[0], true, expansions[0], expansions[1] + fine.samples);
         }
         if (poly == null) {
             // never a straight line over cliffs or sea: the caller links another neighbour instead
-            return new Result(job.generation(), job.a(), job.b(), new int[0], new int[0], new byte[0], false, expansions[0]);
+            return new Result(job.generation(), job.a(), job.b(), new int[0], new int[0], new byte[0], false, expansions[0], expansions[1] + fine.samples);
         }
         poly = chaikin(chaikin(poly));
         IntArrayList xs = new IntArrayList();
         IntArrayList zs = new IntArrayList();
         densify(poly, xs, zs);
         byte[] flags = waterFlags(xs, zs, fine, job.longWaterPoints());
-        return new Result(job.generation(), job.a(), job.b(), xs.toIntArray(), zs.toIntArray(), flags, false, expansions[0]);
+        return new Result(job.generation(), job.a(), job.b(), xs.toIntArray(), zs.toIntArray(), flags, false, expansions[0], expansions[1] + fine.samples);
     }
 
     // ------------------------------------------------------------------ hierarchical routing
@@ -159,9 +205,10 @@ final class RoadPlanner {
         if (Math.sqrt(dx * dx + dz * dz) <= DIRECT_LIMIT) {
             return segment(job, fine, job.ax(), job.az(), job.bx(), job.bz(), expansions);
         }
-        Heights coarse = new Heights(generator, random, heightAccessor, job.seaLevel(), COARSE_CELL);
+        Heights coarse = new Heights(generator, random, heightAccessor, job.seaLevel(), COARSE_CELL, job.maxBridge(), job.avoid());
         List<double[]> corridor = astar(job, coarse, COARSE_CELL, job.ax(), job.az(), job.bx(), job.bz(), 8,
                 job.maxExpansions(), expansions);
+        expansions[1] += coarse.samples;
         if (corridor == null) return null;
         // waypoints along the corridor, every WAYPOINT_STEP coarse cells (always ending at the goal)
         List<int[]> waypoints = new ArrayList<>();
@@ -223,7 +270,10 @@ final class RoadPlanner {
                 Node cur = entry.node();
                 if (cur.closed || entry.g() > cur.g + 1e-6) continue;
                 cur.closed = true;
-                if (cur.x == gx && cur.z == gz) return reconstruct(cur, cell, ax, az, bx, bz);
+                if (cur.x == gx && cur.z == gz) {
+                    List<double[]> path = reconstruct(cur, cell, ax, az, bx, bz);
+                    return fineGrid ? straighten(path, heights, cell, job.roadCells()) : path;
+                }
                 if (++expansions > budget) break;
                 if ((expansions & 1023) == 0 && Thread.currentThread().isInterrupted()) throw new Aborted();
 
@@ -236,17 +286,23 @@ final class RoadPlanner {
                     if (nb != null && nb.closed) continue;
 
                     double len = ((d & 1) == 0 ? 1.0 : SQRT2) * cell;
-                    int raw = heights.raw(nx, nz);
-                    int hn = Math.max(raw, sea);
+                    Cell c = heights.cell(nx, nz);
+                    if (c.blocked && !(nx == gx && nz == gz)) continue;
+                    int raw = c.raw;
+                    int hn = Math.max(raw, c.water);
                     int rise = Math.abs(hn - hc);
                     double grade = rise / len;
                     double cost = len * (1.0 + SLOPE_K * grade * grade);
                     if (rise > cliff) cost += cliffCost;
-                    if (raw < sea) {
-                        cost += len * (sea - raw > 6 ? DEEP_WATER : SHALLOW_WATER);
-                    } else if (fineGrid && job.roadCells().contains(key)) {
-                        cost *= ROAD_DISCOUNT;
+                    if (c.water != Integer.MIN_VALUE) {
+                        // a long bridge (the Talos Bridge) runs straight across; ordinary ones take the narrowest spot
+                        double w = job.maxBridge() > RoadGraph.DEFAULT_BRIDGE ? 3.0 : c.water - raw > 6 ? DEEP_WATER : SHALLOW_WATER;
+                        cost += len * w;
+                    } else {
+                        cost *= 1.0 - 0.4 * c.road;
+                        if (fineGrid && job.roadCells().contains(key)) cost *= ROAD_DISCOUNT;
                     }
+                    cost += len * c.penalty;
                     if (cur.dir >= 0 && cur.dir != d) {
                         int turn = Math.abs(cur.dir - d);
                         cost += TURN_COST * Math.min(turn, 8 - turn);
@@ -275,6 +331,58 @@ final class RoadPlanner {
         int dx = Math.abs(gx - x), dz = Math.abs(gz - z);
         double octile = Math.max(dx, dz) + (SQRT2 - 1.0) * Math.min(dx, dz);
         return octile * cell * HEURISTIC_WEIGHT;
+    }
+
+    /** Look-ahead (in path points) when straightening. */
+    private static final int STRAIGHTEN_LOOK = 28;
+    /** Steepest rise (blocks) between neighbouring samples on a straightened stretch. */
+    private static final int STRAIGHT_RISE = 2;
+
+    /**
+     * Any-angle smoothing of a grid path: each point is joined straight to the farthest later point the road can reach
+     * in a line over gentle, dry, already-sampled ground (no new height samples). The octilinear zigzag of the grid
+     * becomes the long straight runs and gentle bends of a real road, while the A* still decides where it goes.
+     */
+    private static List<double[]> straighten(List<double[]> path, Heights heights, int cell, LongOpenHashSet roadCells) {
+        int n = path.size();
+        if (n < 3) return path;
+        List<double[]> out = new ArrayList<>();
+        out.add(path.get(0));
+        int i = 0;
+        while (i < n - 1) {
+            int next = i + 1;
+            // where the path follows an existing road it keeps to it exactly (the roads merge into one)
+            boolean onRoad = roadCells.contains(cellOf(path.get(i), cell)) || roadCells.contains(cellOf(path.get(next), cell));
+            for (int j = Math.min(n - 1, i + STRAIGHTEN_LOOK); j > i + 1 && !onRoad; j--) {
+                if (clearLine(path.get(i), path.get(j), heights, cell)) {
+                    next = j;
+                    break;
+                }
+            }
+            out.add(path.get(next));
+            i = next;
+        }
+        return out;
+    }
+
+    private static long cellOf(double[] p, int cell) {
+        return ChunkPos.asLong(Math.floorDiv((int) Math.floor(p[0]), cell), Math.floorDiv((int) Math.floor(p[1]), cell));
+    }
+
+    private static boolean clearLine(double[] a, double[] b, Heights heights, int cell) {
+        double dx = b[0] - a[0], dz = b[1] - a[1];
+        double len = Math.sqrt(dx * dx + dz * dz);
+        int steps = Math.max(1, (int) Math.ceil(len / (cell * 0.5)));
+        int last = Integer.MIN_VALUE;
+        for (int s = 0; s <= steps; s++) {
+            double t = s / (double) steps;
+            int cx = Math.floorDiv((int) Math.floor(a[0] + dx * t), cell), cz = Math.floorDiv((int) Math.floor(a[1] + dz * t), cell);
+            Cell c = heights.cache.get(ChunkPos.asLong(cx, cz));
+            if (c == null || c.blocked || c.penalty > 0 || c.water != Integer.MIN_VALUE) return false;
+            if (last != Integer.MIN_VALUE && Math.abs(c.raw - last) > STRAIGHT_RISE) return false;
+            last = c.raw;
+        }
+        return true;
     }
 
     private static List<double[]> reconstruct(Node goal, int cell, int ax, int az, int bx, int bz) {

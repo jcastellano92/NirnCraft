@@ -43,10 +43,8 @@ import java.util.List;
  * Travel moves the player, their horse and followers, advances time, and plays the travel fade.
  */
 public final class Carriages {
-    /** At most this many destinations in the dialogue (nearest first). */
-    private static final int MAX_DESTINATIONS = 14;
-    /** A destination farther than this over open water needs a ship. */
-    private static final int MAX_WATER_RUN = 384;
+    /** At most this many destinations in the dialogue besides the capitals (nearest first). */
+    private static final int MAX_DESTINATIONS = 18;
 
     private Carriages() {}
 
@@ -78,18 +76,27 @@ public final class Carriages {
         String province = Holds.province(Holds.holdAt(player.level(), from));
         int baseFare = RoadsConfig.CARRIAGE_COST.get();
         var data = SkyData.get(player);
+        List<Destination> cities = new ArrayList<>();
         for (Place p : Places.all()) {
             if (p.type() != PlaceType.CAPITAL && p.type() != PlaceType.CITY) continue;
             double dist = Math.sqrt(p.distSqr(from.getX(), from.getZ()));
             if (dist < p.radius() + 200) continue; // the town you are at
+            // the road network reaches every place on this landmass; islands need a ship
+            if (!Landmass.connected(from.getX(), from.getZ(), p.x(), p.z())) continue;
             String destProvince = provinceOf(p);
             boolean sameProvince = destProvince.equals(province);
-            if (!sameProvince && !WorldData.discoveredPlace(data, p.id())) continue;
-            if (crossesSea(from.getX(), from.getZ(), p.x(), p.z())) continue;
-            out.add(new Destination(p, fare(baseFare, dist, sameProvince && "skyrim".equals(province)), dist));
+            Destination d = new Destination(p, fare(baseFare, dist, sameProvince && "skyrim".equals(province)), dist);
+            // every capital the roads reach is offered; other provinces' cities once you have been there
+            if (p.type() == PlaceType.CAPITAL) out.add(d);
+            else if (sameProvince || WorldData.discoveredPlace(data, p.id())) cities.add(d);
+        }
+        cities.sort(Comparator.comparingDouble(Destination::distance));
+        for (Destination d : cities) {
+            if (out.size() >= MAX_DESTINATIONS) break;
+            out.add(d);
         }
         out.sort(Comparator.comparingDouble(Destination::distance));
-        return out.size() > MAX_DESTINATIONS ? out.subList(0, MAX_DESTINATIONS) : out;
+        return out;
     }
 
     /** Skyrim: 20 Septims for a neighbouring hold up to 50 across the province; elsewhere it grows with the road. */
@@ -104,25 +111,6 @@ public final class Carriages {
                     .orElse(p.regionId().contains("/") ? p.regionId().substring(0, p.regionId().indexOf('/')) : p.regionId());
         }
         return TamrielMap.region(p.x(), p.z()).province();
-    }
-
-    /** True if the straight road between two points runs over more than {@link #MAX_WATER_RUN} blocks of sea. */
-    static boolean crossesSea(int x0, int z0, int x1, int z1) {
-        double len = Math.sqrt((double) (x1 - x0) * (x1 - x0) + (double) (z1 - z0) * (z1 - z0));
-        int steps = Math.max(1, (int) (len / 48));
-        int run = 0;
-        for (int i = 0; i <= steps; i++) {
-            double t = i / (double) steps;
-            int x = (int) Math.round(x0 + (x1 - x0) * t);
-            int z = (int) Math.round(z0 + (z1 - z0) * t);
-            if (TamrielMap.elevation(x, z) < TamrielMap.SEA_LEVEL) {
-                run += 48;
-                if (run > MAX_WATER_RUN) return true;
-            } else {
-                run = 0;
-            }
-        }
-        return false;
     }
 
     private static void addOptions(ServerPlayer player, LivingEntity npc, List<DialogueOption> out) {
@@ -205,8 +193,12 @@ public final class Carriages {
      * when the road network has one, otherwise on the side facing the nearest other settlement.
      */
     public static BlockPos stopFor(ServerLevel level, Place place) {
-        // TODO(S1): settlements build stables and a carriage stop beside capitals and cities; once their anchors are
-        // published (e.g. a "stables" anchor per place), return that anchor's safe spot here first.
+        // the settlement's own carriage stop or stables, once they have been generated
+        java.util.Optional<BlockPos> stop = com.skycraft.tamriel.settlement.SettlementAnchors.stables(level, place.id());
+        if (stop.isPresent()) {
+            BlockPos safe = FastTravelHandler.findArrival(level, stop.get(), LocationKind.TOWN);
+            return safe != null ? safe : stop.get();
+        }
         BlockPos target = roadPointOutside(level, place);
         if (target == null) target = sideTowardsNeighbour(place);
         int y = level.getChunk(target.getX() >> 4, target.getZ() >> 4)

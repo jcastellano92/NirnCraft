@@ -21,6 +21,7 @@ public final class RoadsConfig {
     public static final ForgeConfigSpec.IntValue PAVE_BLOCKS_PER_TICK;
     public static final ForgeConfigSpec.DoubleValue PAVE_MILLIS_PER_TICK;
     public static final ForgeConfigSpec.IntValue PLAN_INTERVAL_TICKS;
+    public static final ForgeConfigSpec.IntValue PLANNER_THREADS;
 
     // ------------------------------------------------------------------ travelers
     public static final ForgeConfigSpec.BooleanValue TRAVELERS;
@@ -52,8 +53,8 @@ public final class RoadsConfig {
         MAX_EXPANSIONS = b.comment("A* node budget per planning stage (the coarse corridor of a long road, and each ~256-block stretch).",
                         "If no path is found within it the link is skipped and the settlement is linked to another neighbour.")
                 .defineInRange("maxPathExpansions", 20000, 500, 200000);
-        MAX_BRIDGE_LENGTH = b.comment("Water crossings longer than this (blocks) get no bridge; the road simply stops at the shore.")
-                .defineInRange("maxBridgeLength", 64, 0, 512);
+        MAX_BRIDGE_LENGTH = b.comment("Water crossings longer than this (blocks) get no bridge: the planner routes round them (the Talos Bridge to the Imperial City is the one longer bridge).")
+                .defineInRange("maxBridgeLength", 48, 0, 512);
         LANTERN_SPACING = b.comment("Distance in blocks between lantern posts along a road (0 = none).")
                 .defineInRange("lanternSpacing", 40, 0, 4096);
         SIGNPOSTS = b.comment("Place signposts at settlement exits and road junctions.").define("signposts", true);
@@ -67,6 +68,9 @@ public final class RoadsConfig {
                 .defineInRange("paveMillisPerTick", 3.0, 0.1, 50.0);
         PLAN_INTERVAL_TICKS = b.comment("Ticks between starting two road plans (planning runs on a low-priority background thread).")
                 .defineInRange("planIntervalTicks", 10, 1, 1200);
+        PLANNER_THREADS = b.comment("Background threads planning roads (low priority; the whole of Tamriel takes a few minutes with 2).",
+                        "Read when the server starts.")
+                .defineInRange("plannerThreads", 2, 1, 8);
         b.pop();
 
         b.push("travelers");

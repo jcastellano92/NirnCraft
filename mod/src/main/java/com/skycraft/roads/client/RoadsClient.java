@@ -33,8 +33,26 @@ public final class RoadsClient {
         CompassMarkers.set(SOURCE, markers);
     }
 
+    /** The planned road network (for the map), replaced when part 0 of a new transfer arrives. */
+    private static List<RoadsPackets.Line> network = List.of();
+    private static List<RoadsPackets.Line> incoming = new ArrayList<>();
+
+    public static void setNetwork(int part, List<RoadsPackets.Line> lines) {
+        if (part == 0) incoming = new ArrayList<>();
+        incoming.addAll(lines);
+        network = List.copyOf(incoming);
+        RoadMapLayer.invalidate();
+    }
+
+    public static List<RoadsPackets.Line> network() {
+        return network;
+    }
+
     @SubscribeEvent
     public static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         CompassMarkers.clear(SOURCE);
+        network = List.of();
+        incoming = new ArrayList<>();
+        RoadMapLayer.invalidate();
     }
 }

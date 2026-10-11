@@ -12,17 +12,34 @@ public final class Road {
     /** Part of a water crossing longer than the maximum bridge length: nothing is built here. */
     public static final byte LONG_WATER = 2;
 
+    /** Road classes, widest first: highways between capitals and cities, roads to towns and villages, lanes to farms,
+     *  and trails to dungeons and landmarks. */
+    public static final byte HIGHWAY = 0;
+    public static final byte ROAD = 1;
+    public static final byte LANE = 2;
+    public static final byte TRAIL = 3;
+
     public final int id;
     public final int a;
     public final int b;
     public final int[] xs;
     public final int[] zs;
     public final byte[] flags;
+    /** {@link #HIGHWAY}, {@link #ROAD}, {@link #LANE} or {@link #TRAIL}. */
+    public final byte kind;
+    /** Named historic road id ({@code gold_road}; lang key {@code road.skycraft.<id>}), or empty. */
+    public final String name;
     /** Cumulative arc length (blocks) from point 0, computed on load. */
     final float[] cum;
 
     public Road(int id, int a, int b, int[] xs, int[] zs, byte[] flags) {
+        this(id, a, b, xs, zs, flags, ROAD, "");
+    }
+
+    public Road(int id, int a, int b, int[] xs, int[] zs, byte[] flags, byte kind, String name) {
         this.id = id;
+        this.kind = kind;
+        this.name = name == null ? "" : name;
         this.a = a;
         this.b = b;
         this.xs = xs;
@@ -57,6 +74,20 @@ public final class Road {
         return (flags[i] & LONG_WATER) != 0;
     }
 
+    public boolean water(int i) {
+        return (flags[i] & WATER) != 0;
+    }
+
+    /** The settlement at the other end. */
+    public int other(int settlement) {
+        return settlement == a ? b : a;
+    }
+
+    /** Point index at settlement {@code s}'s end. */
+    public int endAt(int s) {
+        return s == a ? 0 : xs.length - 1;
+    }
+
     CompoundTag save() {
         CompoundTag t = new CompoundTag();
         t.putInt("id", id);
@@ -65,6 +96,8 @@ public final class Road {
         t.putIntArray("x", xs);
         t.putIntArray("z", zs);
         t.putByteArray("f", flags);
+        t.putByte("k", kind);
+        if (!name.isEmpty()) t.putString("n", name);
         return t;
     }
 
@@ -72,6 +105,7 @@ public final class Road {
         int[] xs = t.getIntArray("x");
         int[] zs = t.getIntArray("z");
         if (xs.length < 2 || xs.length != zs.length) return null;
-        return new Road(t.getInt("id"), t.getInt("a"), t.getInt("b"), xs, zs, t.getByteArray("f"));
+        byte kind = t.contains("k") ? t.getByte("k") : ROAD;
+        return new Road(t.getInt("id"), t.getInt("a"), t.getInt("b"), xs, zs, t.getByteArray("f"), kind, t.getString("n"));
     }
 }
