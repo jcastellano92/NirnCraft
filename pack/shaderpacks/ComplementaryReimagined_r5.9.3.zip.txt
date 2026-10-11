@@ -1,0 +1,17 @@
+#Skycraft preset for Complementary Shaders - Reimagined r5.9.3 (Oculus shader options file).
+#Base profile: HIGH. Option names and allowed values come from the pack's shaders/lib/common.glsl.
+#Clouds: CLOUD_ALT1 stays at its default (192) on purpose. Complementary adds the world's cloud height offset
+#(vanilla 192 -> Skycraft's overworld clouds at y 330) to it, so the shader clouds sit exactly where Skycraft's are.
+CLOUD_STYLE_DEFINE=3
+CLOUD_UNBOUND_AMOUNT=1.10
+CLOUD_SHADOWS=true
+ATM_FOG_DISTANCE=200
+ATM_FOG_MULT=0.80
+ATM_FOG_ALTITUDE=100
+WATER_STYLE_DEFINE=3
+AURORA_STYLE_DEFINE=2
+AURORA_CONDITION=2
+NIGHT_NEBULAE=1
+WAVING_FOLIAGE=true
+WAVING_LEAVES=true
+WAVING_WATER_VERTEX=true

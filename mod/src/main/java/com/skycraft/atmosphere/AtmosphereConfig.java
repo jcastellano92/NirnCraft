@@ -20,6 +20,7 @@ public final class AtmosphereConfig {
     public static final ForgeConfigSpec.BooleanValue STARS;
     public static final ForgeConfigSpec.BooleanValue GALAXY;
     public static final ForgeConfigSpec.BooleanValue SKIP_WITH_SHADERS;
+    public static final ForgeConfigSpec.IntValue CLOUD_HEIGHT;
     public static final ForgeConfigSpec.BooleanValue LEVEL_UP_STING;
     public static final ForgeConfigSpec.BooleanValue AURORA_BY_REGION;
     public static final ForgeConfigSpec.BooleanValue CONSTELLATIONS;
@@ -54,6 +55,8 @@ public final class AtmosphereConfig {
         SHOOTING_STARS = b.comment("Occasional shooting stars on clear nights.").define("shootingStars", true);
         SKIP_WITH_SHADERS = b.comment("Don't draw the extra sky while an Oculus/Iris shader pack is active (shader packs draw their own sky).")
                 .define("skipWithShaders", true);
+        CLOUD_HEIGHT = b.comment("Overworld cloud layer altitude (vanilla 192). Tamriel's mountains reach far above y 192, so the clouds sit",
+                "higher; shader packs that follow the cloud height (Complementary) move with it.").defineInRange("cloudHeight", 330, 64, 2048);
         b.pop();
         b.push("weather");
         LOCAL_WEATHER = b.comment("Render the server's regional weather where you stand (local rain, snow, ash and sand storms,",

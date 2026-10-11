@@ -207,33 +207,153 @@ public final class ClientAutotest {
                 mc.setScreen(null);
                 serverCommand(mc, "gamemode spectator @p");
             }
+            default -> tourSpotTick(mc, spots);
+        }
+    }
+
+    /**
+     * Optional {@code -Dskycraft.autotest.tourFar=<blocks>}: at each tour spot also take a "far" shot from that height
+     * above the ground, looking at the horizon (Distant Horizons LODs, clouds, fog). 0 (default) = no far shot.
+     */
+    private static final int TOUR_FAR = Integer.getInteger("skycraft.autotest.tourFar", 0);
+    /**
+     * Optional {@code -Dskycraft.autotest.shaderToggle=true}: while an Oculus shader pack is active, repeat the last
+     * shot of each spot with shaders off (through the Iris API), then turn them back on.
+     */
+    private static final boolean SHADER_TOGGLE = Boolean.getBoolean("skycraft.autotest.shaderToggle");
+    private static int spotIndex;
+    private static int spotPhase;
+    private static boolean spotShadersToggled;
+    // frame-rate samples since the last teleport (one per second)
+    private static int fpsSum, fpsCount, fpsMin = Integer.MAX_VALUE;
+
+    private static void resetFps() {
+        fpsSum = 0;
+        fpsCount = 0;
+        fpsMin = Integer.MAX_VALUE;
+    }
+
+    private static void sampleFps(Minecraft mc) {
+        if (tick % 20 != 0) return;
+        int fps = mc.getFps();
+        fpsSum += fps;
+        fpsCount++;
+        fpsMin = Math.min(fpsMin, fps);
+    }
+
+    private static void logPerf(Minecraft mc, String shot) {
+        Runtime rt = Runtime.getRuntime();
+        long used = (rt.totalMemory() - rt.freeMemory()) >> 20;
+        Skycraft.LOGGER.info("Autotest perf: {} shaders={} skySeesShaders={} fps_now={} fps_avg={} fps_min={} samples={} heap={}MB/{}MB | {}",
+                shot, irisShaders(), skySeesShaders(), mc.getFps(), fpsCount == 0 ? 0 : fpsSum / fpsCount, fpsCount == 0 ? 0 : fpsMin, fpsCount,
+                used, rt.maxMemory() >> 20, mc.fpsString);
+    }
+
+    /** What the Skycraft sky renderer believes (it skips its extra sky while a shader pack is active). */
+    private static String skySeesShaders() {
+        try {
+            var m = Class.forName("com.skycraft.atmosphere.client.ShaderCompat").getDeclaredMethod("shadersActive");
+            m.setAccessible(true);
+            return String.valueOf(m.invoke(null));
+        } catch (Throwable t) {
+            return "n/a";
+        }
+    }
+
+    /** Iris API config by reflection (no dependency): null when Oculus isn't installed. */
+    private static Object irisConfig() {
+        try {
+            Class<?> c = Class.forName("net.irisshaders.iris.api.v0.IrisApi");
+            Object api = c.getMethod("getInstance").invoke(null);
+            return c.getMethod("getConfig").invoke(api);
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    private static boolean irisShaders() {
+        try {
+            Class<?> c = Class.forName("net.irisshaders.iris.api.v0.IrisApi");
+            Object api = c.getMethod("getInstance").invoke(null);
+            return Boolean.TRUE.equals(c.getMethod("isShaderPackInUse").invoke(api));
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
+    private static void setIrisShaders(boolean on) {
+        Object cfg = irisConfig();
+        if (cfg == null) return;
+        try {
+            Class.forName("net.irisshaders.iris.api.v0.IrisApiConfig").getMethod("setShadersEnabledAndApply", boolean.class).invoke(cfg, on);
+            Skycraft.LOGGER.info("Autotest: shaders {}", on ? "on" : "off");
+        } catch (Throwable t) {
+            Skycraft.LOGGER.warn("Autotest: could not switch shaders {}", on ? "on" : "off", t);
+        }
+    }
+
+    private static void tourSpotTick(Minecraft mc, String[] spots) {
+        int i = spotIndex;
+        if (i >= spots.length) {
+            Skycraft.LOGGER.info("=== Skycraft Autotest: tour finished. Closing client. ===");
+            mc.stop();
+            return;
+        }
+        String[] p = spots[i].split(":");
+        int x = Integer.parseInt(p[1].trim()), z = Integer.parseInt(p[2].trim());
+        float yaw = p.length > 3 ? Float.parseFloat(p[3]) : 0f;
+        String tag = String.format(java.util.Locale.ROOT, "t%02d_%s", i + 2, p[0].trim());
+        String last = TOUR_FAR > 0 ? "_far" : "_air";
+        switch (spotPhase++) {
+            case 0 -> {
+                tourTeleport(mc, x, z, 3, yaw, 8f);
+                tourWait = TOUR_WAIT;
+            }
+            case 1 -> {
+                tourTeleport(mc, x, z, 2, yaw, 8f);
+                resetFps();
+                tourWait = 60;
+            }
+            case 2 -> {
+                captureAndSave(mc, tag + "_ground");
+                logPerf(mc, tag + "_ground");
+                tourTeleport(mc, x, z, 70, yaw, 28f);
+                tourWait = TOUR_WAIT * 3 / 4;
+                resetFps();
+            }
+            case 3 -> {
+                captureAndSave(mc, tag + "_air");
+                logPerf(mc, tag + "_air");
+                if (TOUR_FAR > 0) {
+                    tourTeleport(mc, x, z, TOUR_FAR, yaw, 6f);
+                    tourWait = TOUR_WAIT / 2;
+                    resetFps();
+                }
+            }
+            case 4 -> {
+                if (TOUR_FAR > 0) {
+                    captureAndSave(mc, tag + "_far");
+                    logPerf(mc, tag + "_far");
+                }
+                spotShadersToggled = SHADER_TOGGLE && irisShaders();
+                if (spotShadersToggled) {
+                    setIrisShaders(false);
+                    tourWait = 160;
+                    resetFps();
+                }
+            }
+            case 5 -> {
+                if (spotShadersToggled) {
+                    captureAndSave(mc, tag + last + "_noshaders");
+                    logPerf(mc, tag + last + "_noshaders");
+                    setIrisShaders(true);
+                    tourWait = 200;
+                }
+            }
             default -> {
-                int i = (s - 4) / 4;
-                if (i >= spots.length) {
-                    Skycraft.LOGGER.info("=== Skycraft Autotest: tour finished. Closing client. ===");
-                    mc.stop();
-                    return;
-                }
-                String[] p = spots[i].split(":");
-                int x = Integer.parseInt(p[1].trim()), z = Integer.parseInt(p[2].trim());
-                float yaw = p.length > 3 ? Float.parseFloat(p[3]) : 0f;
-                String tag = String.format(java.util.Locale.ROOT, "t%02d_%s", i + 2, p[0].trim());
-                switch ((s - 4) % 4) {
-                    case 0 -> {
-                        tourTeleport(mc, x, z, 3, yaw, 8f);
-                        tourWait = TOUR_WAIT;
-                    }
-                    case 1 -> {
-                        tourTeleport(mc, x, z, 2, yaw, 8f);
-                        tourWait = 60;
-                    }
-                    case 2 -> {
-                        captureAndSave(mc, tag + "_ground");
-                        tourTeleport(mc, x, z, 70, yaw, 28f);
-                        tourWait = TOUR_WAIT * 3 / 4;
-                    }
-                    default -> captureAndSave(mc, tag + "_air");
-                }
+                spotIndex++;
+                spotPhase = 0;
+                tourWait = 0;
             }
         }
     }
@@ -268,6 +388,7 @@ public final class ClientAutotest {
             return;
         }
         if (!TOUR.isEmpty()) {
+            sampleFps(mc);
             tourTick(mc);
             return;
         }

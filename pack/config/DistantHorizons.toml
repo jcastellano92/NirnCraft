@@ -1,5 +1,7 @@
 # Skycraft defaults for Distant Horizons 3.3.x. Distant Horizons fills in every other option on first launch.
 # _version must match the mod's config version (5 for 3.3.x), otherwise Distant Horizons deletes the file.
+# Full-pack QA (docs/PLAYTEST-FULLPACK.md): DH's world-gen threads sat idle ~89% of the time at LOW_IMPACT, so a
+# heavier thread preset would not build LODs faster; it would only take CPU from the game.
 _version = 5
 
 [client]
@@ -7,7 +9,8 @@ _version = 5
 	threadPresetSetting = "LOW_IMPACT"
 
 	[client.advanced.graphics.quality]
-		# LOD render distance in chunks (32-4096, default 256).
+		# LOD render distance in chunks (32-4096, default 256). 128 chunks = 2 km of Tamriel; desktops with a fast
+		# GPU and 8 GB+ of heap can raise it to 256.
 		lodChunkRenderDistanceRadius = 128
 
 	[client.advanced.autoUpdater]
@@ -18,3 +21,11 @@ _version = 5
 [common.worldGenerator]
 	# Generate distant terrain with features (trees, plants) but without structures.
 	chunkGeneratorMode = "FEATURES"
+	# Rough surface first (a quick horizon), then real chunks fill in trees and correct heights. The rough pass can
+	# sit a few blocks off Skycraft's real terrain for the first minute in a new area; the chunk pass replaces it.
+	generatorPlan = "SURFACE_THEN_CHUNKS"
+
+	[common.logging.warning]
+		# The pack ships G1 with tuned flags (a concurrent collector isn't available in every Java 17 build), so the
+		# chat warning about it is noise the player can't act on.
+		showGarbageCollectorWarning = false

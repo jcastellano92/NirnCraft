@@ -4,7 +4,8 @@ Usage: python3 tools/refresh_packwiz.py [--pack DIR] [--with-core]
 
 * Paths resolve relative to this script, so it works from any working directory.
 * Only pack content is indexed: config/**, defaultconfigs/**, mods/*.pw.toml, resourcepacks/*.pw.toml,
-  shaderpacks/*.pw.toml and mods/*.jar. Everything else in the folder (RESOLVE_REPORT.md, README, editor files) is
+  shaderpacks/*.pw.toml, shaderpacks/*.zip.txt (a shader pack's option preset, read by Oculus from
+  shaderpacks/<pack file name>.txt) and mods/*.jar. Everything else in the folder (RESOLVE_REPORT.md, README, editor files) is
   ignored.
 * mods/skycraft-core.jar is a build output that is never committed. It is only indexed with --with-core, which the
   build (tools/prepare-build-pack.sh) uses on its throwaway copy of the pack.
@@ -25,7 +26,8 @@ def wanted(rel):
     if top in ("config", "defaultconfigs"):
         return bool(rest)
     if top in ("mods", "resourcepacks", "shaderpacks") and "/" not in rest:
-        return rest.endswith(".pw.toml") or (top == "mods" and rest.endswith(".jar"))
+        return (rest.endswith(".pw.toml") or (top == "mods" and rest.endswith(".jar"))
+                or (top == "shaderpacks" and rest.endswith(".zip.txt")))
     return False
 
 

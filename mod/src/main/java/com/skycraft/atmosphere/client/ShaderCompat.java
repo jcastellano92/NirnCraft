@@ -13,7 +13,10 @@ final class ShaderCompat {
     private static boolean unavailable;
     private static Object api;
     private static Method inUse;
-    private static long lastCheck = Long.MIN_VALUE;
+    private static long lastCheck;
+    /** Whether {@link #lastCheck} holds a real time. (It used to start at Long.MIN_VALUE, and now - MIN_VALUE overflows
+     * to a negative number, so the "checked less than a second ago" test always passed and shaders were never seen.) */
+    private static boolean checked;
     private static boolean cached;
 
     private ShaderCompat() {}
@@ -21,7 +24,8 @@ final class ShaderCompat {
     static boolean shadersActive() {
         if (unavailable) return false;
         long now = Util.getMillis();
-        if (now - lastCheck < 1000L) return cached;
+        if (checked && now - lastCheck < 1000L) return cached;
+        checked = true;
         lastCheck = now;
         cached = query();
         return cached;
