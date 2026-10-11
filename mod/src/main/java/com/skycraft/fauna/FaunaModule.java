@@ -38,11 +38,13 @@ public final class FaunaModule {
         modBus.addListener(FaunaModule::onAttributes);
         modBus.addListener(FaunaSpawns::register);
         Stables.register();
+        com.skycraft.mounts.MountsModule.init(modBus);
     }
 
     /** Registers this module's packets via {@link com.skycraft.network.SkyNetwork#register}. Called once at startup. */
     public static void registerPackets() {
         FaunaPackets.register();
+        com.skycraft.mounts.MountsModule.registerPackets();
     }
 
     private static void onAttributes(EntityAttributeCreationEvent event) {

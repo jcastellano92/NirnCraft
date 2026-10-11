@@ -22,6 +22,13 @@ public final class Builders {
 
     public static void build(Canvas c, SettlementPiece piece) {
         Spec s = piece.spec;
+        if (s.has(Spec.RESERVED)) {
+            // a player home plot (HousePlots): only its bounds and front door, the economy module builds the home
+            c.anchor(AnchorType.HOUSE_MIN, -1, 0, -1);
+            c.anchor(AnchorType.HOUSE_MAX, s.w, Math.max(s.h, height(s)), s.d);
+            c.anchor(AnchorType.HOUSE_DOOR, (s.w - 1) / 2, 1, 0);
+            return;
+        }
         Culture culture = Culture.byOrdinal(s.culture);
         Palette p = Kits.palette(culture, s.style);
         switch (s.kind) {

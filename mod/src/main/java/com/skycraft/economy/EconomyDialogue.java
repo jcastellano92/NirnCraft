@@ -54,16 +54,20 @@ public final class EconomyDialogue {
         }
 
         // Town steward / Jarl house options - guards and regular soldiers never sell houses
-        Houses.HouseDef house = isStewardOrJarl(npc) ? Houses.houseFor(player.level(), npc.blockPosition()) : null;
-        if (house != null) {
+        List<Houses.HouseDef> houses = isStewardOrJarl(npc) ? Houses.housesFor(player.level(), npc.blockPosition()) : List.of();
+        for (Houses.HouseDef house : houses) {
             if (!Houses.isHouseOwner(player, house)) {
-                out.add(new DialogueOption("economy.buy_house", Component.translatable("dialogue.skycraft.economy.house.buy", Currency.formatCompact(house.cost())), 250,
+                // one home: the old line; several (the Imperial City's shack and Talos Plaza house): each by name
+                Component label = houses.size() == 1
+                        ? Component.translatable("dialogue.skycraft.economy.house.buy", Currency.formatCompact(house.cost()))
+                        : Component.translatable("dialogue.skycraft.economy.house.buy_named", house.displayName(), Currency.formatCompact(house.cost()));
+                out.add(new DialogueOption("economy.buy_house." + house.id(), label, 250,
                         (p, n) -> Houses.purchaseHouse(p, p.serverLevel(), house, null)));
             } else {
                 Houses.HousesData data = Houses.HousesData.get(player.server.overworld().getServer());
                 for (Houses.Furnishing furn : Houses.UPGRADES) {
                     if (!house.homestead() && !data.hasFurnishing(house.id(), furn.id())) {
-                        out.add(new DialogueOption("economy.furnish." + furn.id(),
+                        out.add(new DialogueOption("economy.furnish." + house.id() + "." + furn.id(),
                                 Component.translatable("dialogue.skycraft.economy.house.furnish_option", furn.name(), Currency.formatCompact(furn.cost())), 260,
                                 (p, n) -> Houses.purchaseFurnishing(p, p.serverLevel(), house, furn)));
                     }

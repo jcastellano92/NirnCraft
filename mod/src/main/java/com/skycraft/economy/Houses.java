@@ -13,6 +13,8 @@ import com.skycraft.tamriel.Places;
 import com.skycraft.tamriel.settlement.SettlementAnchors;
 import com.skycraft.tamriel.settlement.SettlementAnchors.HouseSite;
 import com.skycraft.tamriel.settlement.plan.Cities;
+import com.skycraft.tamriel.settlement.plan.HousePlots;
+import com.skycraft.economy.homes.ProvincialHomes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -114,7 +116,78 @@ public final class Houses {
             Places.byId(id).ifPresent(p -> out.add(new HouseDef(id, pretty(id), p.regionId(), 5000, id,
                     new BlockPos(p.x(), 64, p.z()), 12, true)));
         }
+        // the other provinces' homes: plots reserved in their cities, built by economy.homes (approxPos is the
+        // preferred spot; the plot may have moved a little, so lookups go through the recorded site)
+        for (HousePlots.Plot h : HousePlots.PLOTS) {
+            Optional<Place> p = Places.byId(h.place());
+            if (p.isEmpty()) continue;
+            int[] w = Cities.world(p.get(), h.lx(), h.lz());
+            out.add(new HouseDef(h.id(), pretty(h.id()), p.get().regionId(), h.cost(), h.place(), new BlockPos(w[0], 64, w[1]),
+                    Math.max(h.w(), h.d()) / 2 + 1, false));
+        }
         return List.copyOf(out);
+    }
+
+    /**
+     * Where a house stands as built: the settlement's recorded bounds and door, with the owner's bed (for the
+     * provinces' homes, those of {@link ProvincialHomes}). Empty until its city has been generated.
+     */
+    public static Optional<HouseSite> site(ServerLevel level, String houseId) {
+        Optional<HouseSite> s = SettlementAnchors.houseSite(level, houseId);
+        if (s.isEmpty() || !ProvincialHomes.isProvincial(houseId)) return s;
+        BlockPos bed = ProvincialHomes.bed(level, houseId);
+        BlockPos door = ProvincialHomes.door(level, houseId);
+        HouseSite h = s.get();
+        BlockPos max = h.max();
+        if (bed != null && bed.getY() + 6 > max.getY()) max = new BlockPos(max.getX(), bed.getY() + 6, max.getZ());
+        return Optional.of(new HouseSite(h.houseId(), h.settlement(), h.min(), max, door != null ? door : h.door(), bed));
+    }
+
+    /** The house whose built bounds hold {@code pos} (server side; homes in the provinces may stand off their plan). */
+    @Nullable
+    public static HouseDef houseAt(ServerLevel level, BlockPos pos) {
+        for (HouseDef h : HOUSES) {
+            if (h.homestead()) continue;
+            if (Math.abs(pos.getX() - h.approxPos().getX()) > 140 || Math.abs(pos.getZ() - h.approxPos().getZ()) > 140) continue;
+            if (!ProvincialHomes.isProvincial(h.id())) {
+                if (h.contains(pos)) return h;
+                continue;
+            }
+            Optional<HouseSite> s = SettlementAnchors.houseSite(level, h.id());
+            if (s.isPresent() && s.get().contains(pos)) return h;
+        }
+        return null;
+    }
+
+    /** The homes sold in the settlement at {@code pos} (cities with two, like the Imperial City, list both). */
+    public static List<HouseDef> housesFor(Level level, BlockPos pos) {
+        List<HouseDef> out = new ArrayList<>();
+        Optional<Place> here = Places.nearest(null, pos.getX(), pos.getZ(), 260);
+        if (here.isPresent() && here.get().type().isSettlement()) {
+            for (HouseDef d : HOUSES) if (!d.homestead() && d.placeId().equals(here.get().id())) out.add(d);
+        }
+        if (out.isEmpty()) {
+            HouseDef d = houseFor(level, pos);
+            if (d != null) out.add(d);
+        }
+        return out;
+    }
+
+    /** Where a married player's spouse should live: inside the home the player owns nearest to them (or null). */
+    @Nullable
+    public static BlockPos homeOf(ServerPlayer player) {
+        BlockPos best = null;
+        double bestD = Double.MAX_VALUE;
+        for (HouseDef h : HOUSES) {
+            if (h.homestead() || !isHouseOwner(player, h)) continue;
+            BlockPos at = site(player.serverLevel(), h.id()).map(s -> s.bed() != null ? s.bed() : s.center()).orElse(h.approxPos());
+            double d = at.distSqr(player.blockPosition());
+            if (d < bestD) {
+                bestD = d;
+                best = at;
+            }
+        }
+        return best;
     }
 
     private static String pretty(String id) {
@@ -187,11 +260,17 @@ public final class Houses {
             }
             return false;
         }
+        Component refusal = ProvincialHomes.refusal(player, house.id());
+        if (refusal != null) {
+            Notifier.message(player, refusal);
+            return false;
+        }
         if (!Currency.take(player, house.cost())) {
             Notifier.message(player, Component.translatable("message.skycraft.economy.house.not_enough_gold", house.cost(), house.displayName()));
             return false;
         }
         data.setOwner(house.id(), player.getUUID(), player.getScoreboardName());
+        ProvincialHomes.onBought(player, house.id());
         data.setDirty();
 
         if (house.homestead()) {
@@ -201,10 +280,11 @@ public final class Houses {
             Notifier.message(player, Component.translatable("settlement.skycraft.house.homestead_bought", house.displayName()));
         } else {
             give(player, HouseKeyItem.forHouse(house.id()));
-            Optional<HouseSite> site = SettlementAnchors.houseSite(level, house.id());
+            Optional<HouseSite> site = site(level, house.id());
             if (site.isPresent()) {
                 claim(level, site.get(), player.getUUID());
                 if (site.get().bed() != null) RespawnPoints.set(player, Level.OVERWORLD, site.get().bed());
+                else data.pendingRespawn.add(player.getUUID());
             } else {
                 // not generated yet: the claim is applied when the house is built (see onSiteBuilt)
                 data.pendingRespawn.add(player.getUUID());
@@ -240,7 +320,7 @@ public final class Houses {
         HousesData data = HousesData.get(level.getServer());
         UUID owner = data.getOwner(houseId);
         if (owner == null) return;
-        SettlementAnchors.houseSite(level, houseId).ifPresent(site -> {
+        site(level, houseId).ifPresent(site -> {
             claim(level, site, owner);
             ServerPlayer player = level.getServer().getPlayerList().getPlayer(owner);
             if (player != null && site.bed() != null && data.pendingRespawn.remove(owner)) {
@@ -262,7 +342,7 @@ public final class Houses {
             Notifier.message(player, Component.translatable("settlement.skycraft.house.has_furnishing", house.displayName(), furn.name()));
             return false;
         }
-        Optional<HouseSite> site = SettlementAnchors.houseSite(level, house.id());
+        Optional<HouseSite> site = site(level, house.id());
         if (house.homestead() || site.isEmpty()) {
             Notifier.message(player, Component.translatable("settlement.skycraft.house.cannot_furnish", house.displayName()));
             return false;
@@ -351,9 +431,9 @@ public final class Houses {
         if (level.dimension() != Level.OVERWORLD || player.isCreative() || player.isSpectator()) return;
         BlockState state = level.getBlockState(event.getPos());
         if (!(state.getBlock() instanceof DoorBlock) && !(state.getBlock() instanceof TrapDoorBlock)) return;
-        HouseDef house = houseNear(event.getPos());
+        HouseDef house = houseAt(level, event.getPos());
         if (house == null) return;
-        Optional<HouseSite> site = SettlementAnchors.houseSite(level, house.id());
+        Optional<HouseSite> site = site(level, house.id());
         if (site.isEmpty() || !site.get().contains(event.getPos())) return;
         HousesData data = HousesData.get(level.getServer());
         UUID owner = data.getOwner(house.id());
@@ -361,10 +441,26 @@ public final class Houses {
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.FAIL);
         if (event.getHand() != InteractionHand.MAIN_HAND) return;
+        if (owner == null && player.isSecondaryUseActive()) {
+            // the deed can be bought at the door too (sneak-use twice): a city without a steward still sells its home
+            long now = level.getGameTime();
+            String[] pending = DOOR_OFFERS.get(player.getUUID());
+            if (pending != null && pending[0].equals(house.id()) && now - Long.parseLong(pending[1]) < 200) {
+                DOOR_OFFERS.remove(player.getUUID());
+                purchaseHouse(player, level, house, null);
+            } else {
+                DOOR_OFFERS.put(player.getUUID(), new String[]{house.id(), Long.toString(now)});
+                Notifier.message(player, Component.translatable("economy.skycraft.home.door_offer", house.displayName(), Currency.formatCompact(house.cost())));
+            }
+            return;
+        }
         Notifier.message(player, owner == null
                 ? Component.translatable("settlement.skycraft.house.for_sale", house.displayName())
                 : Component.translatable("settlement.skycraft.house.locked", house.displayName()));
     }
+
+    /** Door purchase offers awaiting the second sneak-use: player -> {house id, game time}. */
+    private static final Map<UUID, String[]> DOOR_OFFERS = new java.util.concurrent.ConcurrentHashMap<>();
 
     public static boolean hasKey(Player player, String houseId) {
         for (ItemStack s : player.getInventory().items) {

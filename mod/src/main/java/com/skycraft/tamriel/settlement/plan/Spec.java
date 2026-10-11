@@ -35,6 +35,8 @@ public final class Spec {
     public static final int SEAT = 1024;
     /** Ground works (terraces, rock plateaus): other pieces may stand on them. */
     public static final int GROUND = 2048;
+    /** A plot kept clear and level for a building another module puts up (player homes, {@link HousePlots}). */
+    public static final int RESERVED = 4096;
 
     public Archetype kind;
     /** Culture ordinal, or -1 for the plan's culture. */

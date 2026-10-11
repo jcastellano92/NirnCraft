@@ -340,9 +340,9 @@ public final class Marriage {
     @Nullable
     public static BlockPos ownedHouse(ServerPlayer player) {
         try {
-            for (Houses.HouseDef h : Houses.HOUSES) {
-                if (Houses.isHouseOwner(player, h)) return h.approxPos();
-            }
+            // the owned home nearest the player, at its bed as built (not the planned spot, which has no floor height)
+            BlockPos home = Houses.homeOf(player);
+            if (home != null) return home;
         } catch (RuntimeException e) {
             Skycraft.LOGGER.debug("Skycraft society: house lookup failed", e);
         }

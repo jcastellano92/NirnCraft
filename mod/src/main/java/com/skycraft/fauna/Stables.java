@@ -1,30 +1,39 @@
 package com.skycraft.fauna;
 
 import com.skycraft.core.Currency;
-import com.skycraft.core.Holds;
 import com.skycraft.core.Notifier;
-import com.skycraft.core.SkyData;
 import com.skycraft.dialogue.Dialogue;
 import com.skycraft.dialogue.DialogueOption;
+import com.skycraft.mounts.MountEntities;
+import com.skycraft.mounts.MountItems;
+import com.skycraft.mounts.MountKind;
+import com.skycraft.mounts.Mounts;
+import com.skycraft.mounts.Saddlebags;
+import com.skycraft.tamriel.Region;
+import com.skycraft.tamriel.Regions;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.horse.Horse;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.util.List;
 
 /**
- * Skyrim stables: stable masters in holds and settlements sell horses of different breeds and stats.
+ * Stables: stablemasters sell their province's mounts ({@link MountKind#forSale}: hold breeds in Skyrim, Imperial
+ * horses in Cyrodiil, guar in Morrowind, senche-tigers in Elsweyr, camels in Hammerfell...), bring out any mount you
+ * already own, and sell saddles, the local barding and, in Black Marsh where no beast will carry you, marsh-shoes.
  */
 public final class Stables {
+    static final int SADDLE_COST = 60;
+    static final int HORSE_BARDING_COST = 650;
+    static final int BEAST_BARDING_COST = 900;
+    static final int MARSH_SHOES_COST = 250;
+
     private Stables() {}
 
     public static void register() {
@@ -47,47 +56,81 @@ public final class Stables {
     private static void addOptions(ServerPlayer player, LivingEntity npc, List<DialogueOption> out) {
         if (!isStableMaster(npc)) return;
 
-        String hold = Holds.holdAt(player.level(), npc.blockPosition());
-        HorseBreed breed = HorseBreed.breedForHold(hold);
-
-        out.add(new DialogueOption(
-                "fauna.buy_horse",
-                Component.translatable("dialogue.skycraft.stables.buy_horse", breed.displayName(), breed.cost),
-                180,
-                (pl, n) -> buyHorse(pl, n, breed)
-        ));
+        Region region = Regions.at(player.level(), npc.blockPosition());
+        List<MountKind> sale = MountKind.forSale(region.id(), region.province());
+        List<MountKind> owned = Mounts.stable(player);
+        MountKind active = Mounts.active(player);
+        int order = 180;
+        for (MountKind kind : sale) {
+            if (owned.contains(kind)) continue;
+            out.add(new DialogueOption("fauna.buy_mount." + kind.id,
+                    Component.translatable("dialogue.skycraft.stables.buy_mount", kind.displayName(), Currency.formatCompact(kind.cost),
+                            speed(kind), kind.stamina, kind.bagSlots()),
+                    order++, (pl, n) -> buyMount(pl, n, kind)));
+        }
+        // any mount you own can be brought out here
+        int shown = 0;
+        for (MountKind kind : owned) {
+            if (kind == active || shown >= 4) continue;
+            shown++;
+            out.add(new DialogueOption("fauna.take_out." + kind.id, Component.translatable("dialogue.skycraft.stables.take_out", kind.displayName()),
+                    order++, (pl, n) -> takeOut(pl, n, kind)));
+        }
+        out.add(new DialogueOption("fauna.buy_saddle", Component.translatable("dialogue.skycraft.stables.buy_saddle", SADDLE_COST), order++,
+                (pl, n) -> sell(pl, n, new ItemStack(Items.SADDLE), SADDLE_COST)));
+        if (active != null && active.bardable()) {
+            boolean beast = active.backing == MountKind.Backing.BEAST;
+            Item barding = beast ? MountItems.BEAST_BARDING.get() : MountItems.bardingFor(region.province());
+            int cost = beast ? BEAST_BARDING_COST : HORSE_BARDING_COST;
+            out.add(new DialogueOption("fauna.buy_barding", Component.translatable("dialogue.skycraft.stables.buy_barding",
+                    new ItemStack(barding).getHoverName(), cost), order++, (pl, n) -> sell(pl, n, new ItemStack(barding), cost)));
+        }
+        if (sale.isEmpty() && "black_marsh".equals(region.province())) {
+            out.add(new DialogueOption("fauna.buy_marsh_shoes", Component.translatable("dialogue.skycraft.stables.buy_marsh_shoes", MARSH_SHOES_COST),
+                    order, (pl, n) -> sell(pl, n, new ItemStack(MountItems.MARSH_SHOES.get()), MARSH_SHOES_COST)));
+        }
     }
 
-    private static void buyHorse(ServerPlayer player, LivingEntity npc, HorseBreed breed) {
-        if (!Currency.take(player, breed.cost)) {
-            Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.stables.no_gold", breed.cost));
+    /** Riding speed in blocks a second (roughly), for the price list. */
+    static int speed(MountKind kind) {
+        double attr = switch (kind.backing) {
+            case HORSE, SKELETON -> kind.breed.movementSpeed;
+            case CAMEL -> 0.26;
+            case GUAR -> 0.23;
+            case BEAST -> {
+                var t = MountEntities.type(kind);
+                yield t == null ? 0.3 : MountEntities.spec(t).speed;
+            }
+        };
+        return (int) Math.round(attr * 43.0);
+    }
+
+    private static void buyMount(ServerPlayer player, LivingEntity npc, MountKind kind) {
+        if (!Currency.take(player, kind.cost)) {
+            Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.stables.no_gold", kind.cost));
             return;
         }
-
-        ServerLevel level = player.serverLevel();
         BlockPos spawnPos = npc.blockPosition().relative(npc.getDirection(), 2);
-        if (!level.getBlockState(spawnPos).isAir()) spawnPos = player.blockPosition();
+        Mounts.grant(player, kind, spawnPos);
+        Saddlebags.fit(player, kind.bagSlots());
+        player.level().playSound(null, spawnPos, SoundEvents.HORSE_SADDLE, SoundSource.NEUTRAL, 1.0f, 1.0f);
+        Notifier.message(player, Component.translatable("fauna.skycraft.horse.bought", kind.displayName()));
+        Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.stables.bought", kind.displayName()));
+    }
 
-        Horse horse = EntityType.HORSE.create(level);
-        if (horse != null) {
-            horse.moveTo(spawnPos.getX() + 0.5, spawnPos.getY(), spawnPos.getZ() + 0.5, player.getYRot(), 0.0f);
-            breed.apply(horse);
-            horse.tameWithName(player);
-            horse.equipSaddle(SoundSource.NEUTRAL);
+    private static void takeOut(ServerPlayer player, LivingEntity npc, MountKind kind) {
+        Mounts.switchTo(player, kind, npc.blockPosition().relative(npc.getDirection(), 2));
+        Saddlebags.fit(player, kind.bagSlots());
+        Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.stables.brought", kind.displayName()));
+    }
 
-            // Mark player ownership & skycraft owner
-            horse.getPersistentData().putString("skycraft_owner", "player:" + player.getStringUUID());
-            horse.getPersistentData().putBoolean(Livestock.PLAYER_OWNED, true);
-
-            level.addFreshEntity(horse);
-
-            // Register as player's active horse
-            HorseManager.setPlayerHorse(player, horse, breed);
-
-            level.playSound(null, spawnPos, SoundEvents.HORSE_SADDLE, SoundSource.NEUTRAL, 1.0f, 1.0f);
-            Notifier.message(player, Component.translatable("fauna.skycraft.horse.bought", breed.displayName()));
-            Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.stables.bought", breed.displayName()));
+    private static void sell(ServerPlayer player, LivingEntity npc, ItemStack stack, int cost) {
+        if (!Currency.take(player, cost)) {
+            Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.stables.no_gold", cost));
+            return;
         }
+        Component name = stack.getHoverName();
+        if (!player.getInventory().add(stack)) player.drop(stack, false);
+        Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.stables.sold", name));
     }
 }
-

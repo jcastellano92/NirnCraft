@@ -396,6 +396,10 @@ public final class ClientAutotest {
             com.skycraft.guide.client.GuideAutotest.tick(mc);
             return;
         }
+        if (MountsAutotest.ENABLED) {
+            MountsAutotest.tick(mc);
+            return;
+        }
 
         // Run steps with pauses between to let renderers stabilize and draw
         if (tick % 40 == 0) {

@@ -101,8 +101,8 @@ public final class FaunaEvents {
 
     @SubscribeEvent
     public static void onKill(LivingDeathEvent event) {
-        if (event.getEntity() instanceof net.minecraft.world.entity.animal.horse.AbstractHorse horse) {
-            HorseManager.onHorseDeath(horse);
+        if (!event.getEntity().level().isClientSide && com.skycraft.mounts.Mounts.ownerOf(event.getEntity()) != null) {
+            com.skycraft.mounts.Mounts.onDeath(event.getEntity());
         }
 
         if (!(event.getSource().getEntity() instanceof ServerPlayer player)) return;
@@ -112,28 +112,25 @@ public final class FaunaEvents {
         }
     }
 
-    // ------------------------------------------------------------------ horse mounting and taming
+    // ------------------------------------------------------------------ mounting and taming (horses, camels, guar, wild beasts)
 
     @SubscribeEvent
     public static void onInteract(net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract event) {
-        if (event.getTarget() instanceof net.minecraft.world.entity.animal.horse.AbstractHorse horse) {
-            if (event.getEntity() instanceof ServerPlayer player) {
-                // Check if wild horse taming with saddle
-                ItemStack stack = event.getItemStack();
-                if (!horse.isTamed() && stack.is(net.minecraft.world.item.Items.SADDLE)) {
-                    if (WildHorseTaming.tryStartTaming(player, horse, stack)) {
-                        event.setCanceled(true);
-                        return;
-                    }
-                }
-
-                // Check mount ownership permission
-                if (!HorseManager.canMount(player, horse)) {
-                    com.skycraft.core.Notifier.message(player, net.minecraft.network.chat.Component.translatable("fauna.skycraft.horse.locked"));
-                    event.setCanceled(true);
-                    return;
-                }
+        if (event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND) return;
+        if (!(event.getTarget() instanceof net.minecraft.world.entity.Mob mob) || mob instanceof com.skycraft.mounts.MountBeast) return;
+        if (!(mob instanceof net.minecraft.world.entity.animal.horse.AbstractHorse) && !(mob instanceof com.skycraft.creatures.entity.GuarEntity)
+                && com.skycraft.mounts.MountTaming.wildKind(mob) == null) return;
+        if (event.getEntity() instanceof ServerPlayer player) {
+            // taming with a saddle, saddlebags, who may ride (the mount system decides; vanilla riding otherwise)
+            if (com.skycraft.mounts.Mounts.interact(player, mob, event.getItemStack())) {
+                event.setCanceled(true);
+                event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
             }
+        } else if (event.getItemStack().is(net.minecraft.world.item.Items.SADDLE) && com.skycraft.mounts.MountTaming.wildKind(mob) != null
+                && !(mob instanceof net.minecraft.world.entity.animal.horse.AbstractHorse)) {
+            // client: don't run the beast's own saddle handling
+            event.setCanceled(true);
+            event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
         }
     }
 

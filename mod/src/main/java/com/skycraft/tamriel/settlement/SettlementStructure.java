@@ -180,6 +180,7 @@ public class SettlementStructure extends Structure {
         }
         // the hold's jail and the faction halls of the lore (appended: earlier pieces keep their indices)
         com.skycraft.tamriel.settlement.plan.Halls.addTo(plan, p);
+        com.skycraft.tamriel.settlement.plan.HousePlots.reserve(plan, p);
         plan.resolve();
         com.skycraft.tamriel.settlement.plan.Halls.report(plan, p);
         List<Spec> specs = List.copyOf(plan.specs);
