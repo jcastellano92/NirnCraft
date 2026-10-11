@@ -80,6 +80,8 @@ public final class Settlers {
         RandomSource r = level.getRandom();
         BlockPos center = Encounters.groundAt(level, s.x, s.z);
         if (center == null) center = new BlockPos(s.x, s.y, s.z);
+        // Skycraft-built settlements populate their own buildings from SettlementAnchors (Jarl, smith, inn...)
+        if (com.skycraft.tamriel.settlement.SettlementAnchors.near(level, center, 48).isPresent()) return;
         com.skycraft.tamriel.Place place = com.skycraft.tamriel.Places.nearest(null, s.x, s.z, 200)
                 .filter(p -> p.type().isSettlement()).orElse(null);
         Size size = sizeOf(s, place);
