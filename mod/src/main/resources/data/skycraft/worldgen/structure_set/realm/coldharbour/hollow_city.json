@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:realm/coldharbour/hollow_city",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:realm_grid",
+    "salt": 62,
+    "spacing": 0,
+    "fixed": [
+      [
+        0,
+        -13
+      ]
+    ]
+  }
+}

@@ -121,15 +121,15 @@ public final class Bestiary {
 
     // ---------------------------------------------------------------- registration helpers
 
-    static RegistryObject<EntityType<SkyBeast>> beast(CreatureSpec spec) {
+    public static RegistryObject<EntityType<SkyBeast>> beast(CreatureSpec spec) {
         return register(spec, SkyBeast::new);
     }
 
-    static RegistryObject<EntityType<SkyMonster>> monster(CreatureSpec spec) {
+    public static RegistryObject<EntityType<SkyMonster>> monster(CreatureSpec spec) {
         return register(spec, SkyMonster::new);
     }
 
-    static <T extends Mob> RegistryObject<EntityType<T>> register(CreatureSpec spec, EntityType.EntityFactory<T> factory) {
+    public static <T extends Mob> RegistryObject<EntityType<T>> register(CreatureSpec spec, EntityType.EntityFactory<T> factory) {
         if (BY_ID.put(spec.id, spec) != null) throw new IllegalStateException("Duplicate bestiary id " + spec.id);
         RegistryObject<EntityType<T>> type = ENTITIES.register(spec.id, () -> {
             EntityType.Builder<T> b = EntityType.Builder.of(factory, spec.category).sized(spec.width, spec.height)

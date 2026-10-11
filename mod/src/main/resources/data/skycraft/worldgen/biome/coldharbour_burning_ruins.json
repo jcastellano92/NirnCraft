@@ -1,0 +1,50 @@
+{
+  "has_precipitation": false,
+  "temperature": 1.2,
+  "downfall": 0.0,
+  "effects": {
+    "sky_color": 2759198,
+    "fog_color": 3678758,
+    "water_color": 2765904,
+    "water_fog_color": 1053726,
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "grass_color": 5914688,
+    "foliage_color": 4862000,
+    "particle": {
+      "options": {
+        "type": "minecraft:smoke"
+      },
+      "probability": 0.01
+    }
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [
+      "skycraft:realm/ch_chain_pylon",
+      "skycraft:realm/ch_broken_pillar",
+      "skycraft:realm/ch_soul_fire_pit"
+    ],
+    [],
+    [],
+    [],
+    [
+      "skycraft:realm/ch_lavafall"
+    ],
+    [
+      "skycraft:realm/ch_fire",
+      "skycraft:realm/ch_soul_fire"
+    ],
+    []
+  ]
+}

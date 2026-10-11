@@ -926,7 +926,8 @@ public final class Story {
             case "teleport_dim" -> {
                 ServerLevel dest = QuestNpcs.level(server, arg);
                 if (dest == null) return;
-                for (ServerPlayer m : audience(online, receiver)) if (m.level() != dest) m.changeDimension(dest);
+                // realms get their landings (the Deadlands through the nearest gate); elsewhere the vanilla way
+                for (ServerPlayer m : audience(online, receiver)) if (m.level() != dest) com.skycraft.realms.RealmTravel.travel(m, dest);
             }
             case "flight" -> {
                 Optional<QuestPlaces.Spot> spot = QuestPlaces.find(arg);

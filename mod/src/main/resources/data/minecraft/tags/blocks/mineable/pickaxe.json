@@ -36,6 +36,19 @@
     "skycraft:coral_stone",
     "skycraft:frosted_stone",
     "skycraft:crystal_block",
-    "skycraft:crystal_cluster"
+    "skycraft:crystal_cluster",
+    "skycraft:deadlands_rock",
+    "skycraft:deadlands_magma_rock",
+    "skycraft:daedric_bricks",
+    "skycraft:daedric_glyph_bricks",
+    "skycraft:daedric_pillar",
+    "skycraft:daedric_spike",
+    "skycraft:apocrypha_stone",
+    "skycraft:apocrypha_glyph_stone",
+    "skycraft:soul_stone",
+    "skycraft:soul_gem_block",
+    "skycraft:soul_gem_cluster",
+    "skycraft:coldharbour_stone",
+    "skycraft:coldharbour_bricks"
   ]
 }

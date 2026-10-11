@@ -1,0 +1,44 @@
+{
+  "has_precipitation": false,
+  "temperature": 0.5,
+  "downfall": 0.0,
+  "effects": {
+    "sky_color": 793104,
+    "fog_color": 662034,
+    "water_color": 659980,
+    "water_fog_color": 264198,
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "particle": {
+      "options": {
+        "type": "minecraft:enchant"
+      },
+      "probability": 0.004
+    }
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [
+      "skycraft:realm/ap_book_stack_sparse",
+      "skycraft:realm/ap_ink_tentacle_sparse"
+    ],
+    [],
+    [
+      "skycraft:realm/ap_glyph_vein"
+    ],
+    [],
+    [],
+    [],
+    []
+  ]
+}

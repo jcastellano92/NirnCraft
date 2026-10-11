@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:realm/soul_cairn/boneyard",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:realm_grid",
+    "salt": 53,
+    "spacing": 0,
+    "fixed": [
+      [
+        30,
+        -4
+      ]
+    ]
+  }
+}

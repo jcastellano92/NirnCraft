@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:shivering_isles_mania_fields",
+    "skycraft:shivering_isles_mania_mushroom_forest",
+    "skycraft:shivering_isles_mania_crystal_grove",
+    "skycraft:shivering_isles_dementia_swamp",
+    "skycraft:shivering_isles_dementia_forest",
+    "skycraft:shivering_isles_fringe",
+    "skycraft:shivering_isles_sea"
+  ]
+}

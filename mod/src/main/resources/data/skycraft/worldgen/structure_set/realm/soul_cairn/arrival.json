@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:realm/soul_cairn/arrival",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:realm_grid",
+    "salt": 51,
+    "spacing": 0,
+    "fixed": [
+      [
+        0,
+        13
+      ]
+    ]
+  }
+}

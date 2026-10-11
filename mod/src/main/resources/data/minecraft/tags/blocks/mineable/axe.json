@@ -16,6 +16,12 @@
     "skycraft:parasol_stem",
     "skycraft:parasol_cap",
     "skycraft:telvanni_cap",
-    "skycraft:glowing_mushroom_cap"
+    "skycraft:glowing_mushroom_cap",
+    "skycraft:mania_stem",
+    "skycraft:mania_cap_violet",
+    "skycraft:mania_cap_teal",
+    "skycraft:mania_cap_amber",
+    "skycraft:page_block",
+    "skycraft:black_page_block"
   ]
 }

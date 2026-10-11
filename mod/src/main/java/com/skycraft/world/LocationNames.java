@@ -290,6 +290,9 @@ public final class LocationNames {
         // named Skycraft settlements (Whiterun, Riverwood...) keep their real names
         String named = com.skycraft.tamriel.settlement.SettlementNaming.forLocation(id);
         if (named != null) return named;
+        // the realms' landmarks keep their names (the Hall of Valor, New Sheoth...)
+        String realm = com.skycraft.realms.RealmLore.name(id, path);
+        if (realm != null) return realm;
         return generate(id, kind, path, cultureOf(id));
     }
 

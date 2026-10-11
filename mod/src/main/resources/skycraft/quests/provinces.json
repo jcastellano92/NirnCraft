@@ -42,7 +42,7 @@
       ["dremora", "Mortal! The Prince's gate opens again. Step through, and burn with the rest."]
     ],
     "oblivion_return": [
-      ["narrator", "You tear the Sigil Stone from its socket. The tower screams, the sky of Oblivion folds in on itself, and you fall back into Cyrodiil's clean air."]
+      ["narrator", "You tear the Sigil Stone from its flame. The tower screams, the red sky folds in on itself, and the Deadlands spit you back into Cyrodiil's clean air. Behind you the gate's fire gutters out."]
     ],
     "red_mountain": [
       ["sleeper", "The heart beats still, outlander. The Tribunal is gone; the House of Troubles stirs. Sleep, and wake as one of us."],
@@ -84,9 +84,10 @@
         {"type": "clear", "place": "kvatch_gate", "radius": 32, "text": "Kill the dremora guarding the gate",
          "spawn": [{"type": "skycraft:dremora", "count": 3, "name": "Dremora Guard"}]},
         {"type": "go", "place": "kvatch_gate", "radius": 8, "text": "Step through the Oblivion gate", "actions": "teleport_dim:minecraft:the_nether"},
-        {"type": "kill", "dim": "minecraft:the_nether", "at_player": true, "text": "Defeat the Sigil Keeper atop the gate's tower",
-         "spawn": [{"type": "skycraft:dremora", "name": "Dremora Sigil Keeper", "target": true, "boss": true, "hp": 2.5}, {"type": "minecraft:blaze", "count": 2}],
-         "actions": "relic:sigil_stone;scene:oblivion_return;flight:kvatch_gate"},
+        {"type": "flag", "flag": "sigil_keeper_slain", "place": "kvatch_sigil_tower", "radius": 24,
+         "text": "Climb the Great Sigil Tower and defeat the Sigil Keeper", "actions": "relic:sigil_stone"},
+        {"type": "flag", "flag": "kvatch_gate_closed", "place": "kvatch_sigil_tower", "radius": 24,
+         "text": "Take the Sigil Stone from its flame to close the gate", "actions": "scene:oblivion_return"},
         {"type": "deliver", "npc": "savlian", "relic": "sigil_stone", "text": "Bring the Sigil Stone to Savlian Matius", "topic": "The gate is closed. Here's what held it open.",
          "reply": "Closed. Just like the Hero of Kvatch did it, two hundred years ago. Kvatch owes you, and Kvatch pays its debts."}
       ],

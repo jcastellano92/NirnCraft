@@ -1,0 +1,13 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:realm/apocrypha/chapter",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:realm_grid",
+    "salt": 41,
+    "spacing": 32
+  }
+}

@@ -66,6 +66,17 @@
       ["sheogorath", "Ah, a visitor! In the mind of Pelagius, of all places. He was so very interesting, before the strangling. Fix his little troubles and I'll go home. And you'll get a present!"],
       ["pelagius", "Leave me alone! Not you too! The Night Terrors, the Confidence, the Anger! They're all in here with me!"]
     ],
+    "sheogorath_isles": [
+      ["sheogorath", "Splendid! You've earned a holiday. Come along, come along, mind the door. It bites. Only on Tuesdays."],
+      ["narrator", "A door that was not there a moment ago swings open on a sky of impossible colours."]
+    ],
+    "sheogorath_palace": [
+      ["sheogorath", "My Isles! My city! My cheese! Take the staff, little mortal, and spread a little madness. Now off you pop, I have a lunch to forget."]
+    ],
+    "molag_coldharbour": [
+      ["molag", "You did well. Now see what you serve. Walk my city, and remember it when you sleep."],
+      ["narrator", "Chains lash out of the floor. The house folds away, and a black sky opens over burning ruins."]
+    ],
     "vaermina": [["vaermina", "You walk in my dream, little thing. Erandur betrayed me once. Will you betray him, and take my Skull?"]]
   },
   "quests": [
@@ -209,7 +220,11 @@
       "objectives": [
         {"type": "go", "place": "abandoned_house", "radius": 8, "text": "Enter the Abandoned House with the Vigilant", "actions": "scene:molag;retire:tyranus"},
         {"type": "kill", "place": "abandoned_house", "text": "Bring Molag Bal's judgment to Logrolf the Willful",
-         "spawn": [{"type": "npc:forsworn", "name": "Logrolf the Willful", "target": true, "hostile": true, "hp": 1.6}]}
+         "spawn": [{"type": "npc:forsworn", "name": "Logrolf the Willful", "target": true, "hostile": true, "hp": 1.6}]},
+        {"type": "go", "place": "abandoned_house", "radius": 8, "text": "Answer the Prince of Domination's summons", "actions": "scene:molag_coldharbour;teleport_dim:skycraft:coldharbour"},
+        {"type": "go", "place": "coldharbour_hollow_city", "radius": 40, "text": "Walk the burning streets of the Hollow City",
+         "spawn": [{"type": "skycraft:dremora", "count": 2}, {"type": "skycraft:harvester", "count": 1}]},
+        {"type": "cond", "cond": "dim:minecraft:overworld", "place": "coldharbour_anchor", "radius": 10, "text": "Escape Coldharbour through the Dark Anchor"}
       ],
       "rewards": {"gold": 300, "flags": ["daedra_molag"], "items": ["skycraft:mace_of_molag_bal"]}
     },
@@ -269,7 +284,10 @@
       "objectives": [
         {"type": "go", "place": "pelagius_wing", "radius": 8, "text": "Enter the Pelagius Wing", "actions": "scene:sheogorath;effect:nausea:8:0"},
         {"type": "clear", "place": "pelagius_wing", "text": "Calm Pelagius's troubled mind",
-         "spawn": [{"type": "minecraft:vex", "count": 3, "name": "Night Terror"}, {"type": "skycraft:bandit", "count": 2, "name": "Pelagius's Anger"}, {"type": "minecraft:skeleton", "count": 1, "name": "Pelagius's Paranoia"}]}
+         "spawn": [{"type": "minecraft:vex", "count": 3, "name": "Night Terror"}, {"type": "skycraft:bandit", "count": 2, "name": "Pelagius's Anger"}, {"type": "minecraft:skeleton", "count": 1, "name": "Pelagius's Paranoia"}]},
+        {"type": "go", "place": "pelagius_wing", "radius": 10, "text": "Take Sheogorath's hand", "actions": "scene:sheogorath_isles;teleport_dim:skycraft:shivering_isles"},
+        {"type": "go", "place": "new_sheoth_palace", "radius": 40, "text": "Walk through the Gates of Madness to New Sheoth and the Mad God's palace",
+         "actions": "scene:sheogorath_palace;teleport_dim:minecraft:overworld"}
       ],
       "rewards": {"gold": 300, "flags": ["daedra_sheogorath"], "items": ["skycraft:wabbajack"]}
     },

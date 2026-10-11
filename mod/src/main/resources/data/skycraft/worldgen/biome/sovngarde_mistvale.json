@@ -1,0 +1,49 @@
+{
+  "has_precipitation": true,
+  "temperature": 0.6,
+  "downfall": 0.6,
+  "effects": {
+    "sky_color": 10136260,
+    "fog_color": 11845842,
+    "water_color": 5935296,
+    "water_fog_color": 2771578,
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "grass_color": 12103792,
+    "foliage_color": 13150288,
+    "particle": {
+      "options": {
+        "type": "minecraft:white_ash"
+      },
+      "probability": 0.008
+    }
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [
+    [],
+    [],
+    [
+      "skycraft:realm/sg_boulder"
+    ],
+    [],
+    [
+      "skycraft:realm/sg_runestone"
+    ],
+    [],
+    [],
+    [],
+    [],
+    [
+      "skycraft:realm/sg_golden_tree",
+      "skycraft:realm/sg_flowers_dense",
+      "skycraft:realm/sg_grass"
+    ],
+    []
+  ]
+}

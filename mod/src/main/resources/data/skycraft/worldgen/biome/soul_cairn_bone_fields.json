@@ -1,0 +1,47 @@
+{
+  "has_precipitation": false,
+  "temperature": 0.4,
+  "downfall": 0.0,
+  "effects": {
+    "sky_color": 4074064,
+    "fog_color": 5259366,
+    "water_color": 5917312,
+    "water_fog_color": 2759232,
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "grass_color": 6969984,
+    "foliage_color": 5917296,
+    "particle": {
+      "options": {
+        "type": "minecraft:white_ash"
+      },
+      "probability": 0.012
+    }
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [
+      "skycraft:realm/sc_bone_pillar_dense",
+      "skycraft:realm/sc_dead_tree",
+      "skycraft:realm/sc_bone_ribs"
+    ],
+    [],
+    [],
+    [],
+    [],
+    [
+      "skycraft:realm/sc_soul_fire"
+    ],
+    []
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:realm/nirn/black_book_altar",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 2041511,
+    "types": [
+      "landmark"
+    ],
+    "variants": [
+      "black_book_altar"
+    ]
+  }
+}

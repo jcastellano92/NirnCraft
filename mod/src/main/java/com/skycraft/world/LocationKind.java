@@ -151,6 +151,11 @@ public enum LocationKind {
                 || path.contains("desert_well")) {
             return null;
         }
+        // the realms' sites (Sigil Towers, the Hall of Valor, Oblivion gates...) know what they are
+        if (key.getNamespace().equals("skycraft")) {
+            LocationKind realm = com.skycraft.realms.RealmLore.kind(path);
+            if (realm != null) return realm;
+        }
         // vanilla structures first (exact keywords)
         if (path.contains("village")) return TOWN;
         if (path.contains("ancient_city")) return DWEMER;

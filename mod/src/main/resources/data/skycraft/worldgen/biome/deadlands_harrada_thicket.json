@@ -1,0 +1,52 @@
+{
+  "has_precipitation": false,
+  "temperature": 2.0,
+  "downfall": 0.0,
+  "effects": {
+    "sky_color": 11020820,
+    "fog_color": 5641740,
+    "water_color": 7023130,
+    "water_fog_color": 3344901,
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "grass_color": 8003608,
+    "foliage_color": 6953490,
+    "particle": {
+      "options": {
+        "type": "minecraft:crimson_spore"
+      },
+      "probability": 0.01
+    }
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [
+      "skycraft:realm/dl_spike"
+    ],
+    [],
+    [
+      "skycraft:realm/dl_magma_vein",
+      "skycraft:realm/dl_blackstone_blob"
+    ],
+    [],
+    [
+      "skycraft:realm/dl_lavafall"
+    ],
+    [
+      "skycraft:realm/dl_hanging_vines",
+      "skycraft:realm/dl_bloodgrass_sparse",
+      "skycraft:realm/dl_harrada_dense"
+    ],
+    []
+  ]
+}

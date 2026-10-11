@@ -116,10 +116,12 @@
         {"type": "clear", "place": "nchardak", "placement": "structure", "text": "Fight past Nchardak's guardians",
          "spawn": [{"type": "skycraft:dwarven_spider", "count": 2}, {"type": "skycraft:dwarven_centurion", "count": 1}]},
         {"type": "retrieve", "place": "nchardak", "relic": "black_book_epistolary", "radius": 12, "text": "Take the Black Book from Nchardak"},
-        {"type": "go", "place": "nchardak", "radius": 16, "text": "Read the Black Book", "actions": "scene:apocrypha;effect:nausea:10:0;effect:darkness:10:0"},
-        {"type": "clear", "place": "nchardak", "radius": 32, "text": "Survive Apocrypha's Seekers",
+        {"type": "go", "place": "nchardak", "radius": 16, "text": "Read the Black Book", "actions": "scene:apocrypha;teleport_dim:skycraft:apocrypha"},
+        {"type": "clear", "place": "apocrypha_chapter_one", "radius": 40, "text": "Survive Apocrypha's Seekers",
          "spawn": [{"type": "skycraft:seeker", "count": 3, "name": "Seeker"}, {"type": "skycraft:lurker", "count": 1, "name": "Lurker"}],
-         "journal": "Inside the Black Book, Hermaeus Mora granted me a word of a Shout that bends the will of others. Miraak learned it here, long ago."}
+         "journal": "Inside the Black Book, Hermaeus Mora granted me a word of a Shout that bends the will of others. Miraak learned it here, long ago."},
+        {"type": "cond", "cond": "dim:minecraft:overworld", "place": "apocrypha_chapter_one", "radius": 40,
+         "text": "Find the Black Book that closes the chapter and read your way out"}
       ],
       "rewards": {"gold": 400, "words": ["bend_will:2:2"]}
     },
@@ -132,12 +134,14 @@
       "desc": "Storn read the Black Book Waking Dreams, and gave his life to show me the way to Miraak. It is time to face the first Dragonborn.",
       "objectives": [
         {"type": "go", "place": "temple_of_miraak", "text": "Read Waking Dreams at the Temple of Miraak",
-         "actions": "take:black_book_waking;scene:summit;effect:darkness:6:0;retire:storn"},
-        {"type": "clear", "place": "temple_of_miraak", "radius": 40, "text": "Fight Miraak's dragon",
+         "actions": "take:black_book_waking;scene:summit;retire:storn;teleport_dim:skycraft:apocrypha"},
+        {"type": "clear", "place": "summit_of_apocrypha", "radius": 40, "text": "Fight Miraak's dragon on the Summit of Apocrypha",
          "spawn": [{"type": "skycraft:dragon", "count": 1, "name": "Sahrotaar"}]},
-        {"type": "kill", "place": "temple_of_miraak", "text": "Defeat Miraak",
+        {"type": "kill", "place": "summit_of_apocrypha", "text": "Defeat Miraak",
          "spawn": [{"type": "skycraft:miraak", "name": "Miraak, the First Dragonborn", "target": true, "boss": true, "hp": 4.0, "dmg": 1.4}],
-         "actions": "scene:miraak_falls"}
+         "actions": "scene:miraak_falls"},
+        {"type": "cond", "cond": "dim:minecraft:overworld", "place": "summit_of_apocrypha", "radius": 40,
+         "text": "Read the Black Book on the Summit to return to Solstheim"}
       ],
       "rewards": {"gold": 2000, "souls": 3, "title": "first_and_last", "flags": ["miraak_slain"],
                   "items": [{"item": "minecraft:netherite_helmet", "name": "Miraak's Mask", "enchant": {"protection": 4}}]}

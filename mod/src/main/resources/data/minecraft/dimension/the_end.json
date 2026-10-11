@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:the_end",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "skycraft:realm/sovngarde",
+    "biome_source": {
+      "type": "skycraft:realm",
+      "realm": "sovngarde",
+      "biomes": {
+        "fields": "skycraft:sovngarde_fields",
+        "mistvale": "skycraft:sovngarde_mistvale",
+        "chasm": "skycraft:sovngarde_chasm",
+        "hall_heights": "skycraft:sovngarde_hall_heights",
+        "golden_grove": "skycraft:sovngarde_golden_grove",
+        "mountains": "skycraft:sovngarde_mountains"
+      }
+    }
+  }
+}

@@ -1,0 +1,608 @@
+[
+  {
+    "regions": [
+      "minecraft:the_nether"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:scamp",
+        "count": [
+          1,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 8,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:clannfear",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 7,
+        "levels": [
+          10,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:dremora",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:flame_atronach",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          15,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:daedroth",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          18,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:spider_daedra",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          20,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "members": [
+          {
+            "entity": "skycraft:dremora",
+            "count": [
+              2,
+              3
+            ]
+          },
+          {
+            "entity": "skycraft:scamp",
+            "count": [
+              1,
+              2
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "regions": [
+      "minecraft:the_nether"
+    ],
+    "biomes": [
+      "skycraft:deadlands_harrada_thicket",
+      "skycraft:deadlands_blood_fields"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:spider_daedra",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:clannfear",
+        "count": [
+          2,
+          3
+        ]
+      }
+    ]
+  },
+  {
+    "regions": [
+      "minecraft:the_end"
+    ],
+    "groups": [
+      {
+        "kind": "wildlife",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:sovngarde_hero",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:wandering_soul",
+        "count": [
+          1,
+          3
+        ]
+      }
+    ]
+  },
+  {
+    "regions": [
+      "skycraft:shivering_isles"
+    ],
+    "biomes": [
+      "skycraft:shivering_isles_dementia_swamp",
+      "skycraft:shivering_isles_dementia_forest"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:grummite",
+        "count": [
+          2,
+          4
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:baliwog",
+        "count": [
+          1,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:gnarl",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:elytra",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          15,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:flesh_atronach",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "water",
+        "entity": "skycraft:baliwog",
+        "count": [
+          2,
+          3
+        ]
+      }
+    ]
+  },
+  {
+    "regions": [
+      "skycraft:shivering_isles"
+    ],
+    "biomes": [
+      "skycraft:shivering_isles_mania_fields",
+      "skycraft:shivering_isles_mania_mushroom_forest",
+      "skycraft:shivering_isles_mania_crystal_grove",
+      "skycraft:shivering_isles_fringe"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 8,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:elytra",
+        "count": [
+          1,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:gnarl",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:grummite",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          15,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:flesh_atronach",
+        "count": [
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  {
+    "regions": [
+      "skycraft:apocrypha"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:seeker",
+        "count": [
+          1,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          15,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:lurker",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "water",
+        "entity": "skycraft:lurker",
+        "count": [
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  {
+    "regions": [
+      "skycraft:soul_cairn"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 9,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:boneman",
+        "count": [
+          1,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 7,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:mistman",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          18,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:wrathman",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          25,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:keeper",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:wandering_soul",
+        "count": [
+          2,
+          4
+        ]
+      }
+    ]
+  },
+  {
+    "regions": [
+      "skycraft:coldharbour"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 9,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:dremora",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:harvester",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:flame_atronach",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:scamp",
+        "count": [
+          2,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:daedroth",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:wandering_soul",
+        "count": [
+          1,
+          3
+        ]
+      }
+    ]
+  }
+]

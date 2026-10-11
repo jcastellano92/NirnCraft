@@ -982,7 +982,8 @@ public class MapScreen extends Screen {
         } else if (level.dimension() == Level.END) {
             region = Component.translatable("world.skycraft.realm.sovngarde.name");
         } else {
-            region = Component.literal(level.dimension().location().getPath());
+            String dim = level.dimension().location().getPath();
+            region = Component.translatableWithFallback("region.skycraft.dimension." + dim, dim);
         }
         float s = width < 520 ? 1.15f : 1.4f;
         g.pose().pushPose();

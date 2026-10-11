@@ -115,8 +115,11 @@ public final class Regions {
         String path = dim.substring(dim.indexOf(':') + 1);
         String key = "region.skycraft.dimension." + path;
         String fallback = Character.toUpperCase(path.charAt(0)) + path.substring(1).replace('_', ' ');
+        // the realms of Oblivion and the afterlife have their own level bands (com.skycraft.realms.Realm)
+        com.skycraft.realms.Realm realm = com.skycraft.realms.Realm.byId(dim);
+        int lo = realm != null ? realm.minLevel : 30, hi = realm != null ? realm.maxLevel : 60;
         return new Region(dim, path, "dimension", "none", Component.translatableWithFallback(key, fallback),
-                30, 60, path, path, path, null);
+                lo, hi, path, path, path, null);
     }
 
     public static Optional<Region> byId(String id) {

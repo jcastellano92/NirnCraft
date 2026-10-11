@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:cache_2d",
+  "argument": {
+    "type": "skycraft:realm_terrain",
+    "realm": "soul_cairn",
+    "channel": "height",
+    "large": "skycraft:realm/large",
+    "mid": "skycraft:realm/mid",
+    "detail": "skycraft:realm/detail"
+  }
+}

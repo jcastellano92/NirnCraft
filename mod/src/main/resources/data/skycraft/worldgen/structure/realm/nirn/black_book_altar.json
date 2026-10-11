@@ -1,0 +1,8 @@
+{
+  "type": "skycraft:realm_site",
+  "site": "nirn/black_book_altar",
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

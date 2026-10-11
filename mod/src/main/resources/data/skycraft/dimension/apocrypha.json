@@ -1,0 +1,17 @@
+{
+  "type": "skycraft:apocrypha",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "skycraft:realm/apocrypha",
+    "biome_source": {
+      "type": "skycraft:realm",
+      "realm": "apocrypha",
+      "biomes": {
+        "ink_sea": "skycraft:apocrypha_ink_sea",
+        "stacks": "skycraft:apocrypha_stacks",
+        "tentacle_depths": "skycraft:apocrypha_tentacle_depths",
+        "floating_library": "skycraft:apocrypha_floating_library"
+      }
+    }
+  }
+}

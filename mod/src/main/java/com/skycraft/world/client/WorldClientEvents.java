@@ -132,6 +132,8 @@ public final class WorldClientEvents {
     public static void onFogColor(ViewportEvent.ComputeFogColor event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || !WorldConfig.REALM_FOG.get()) return;
+        // the Deadlands and Sovngarde are full realms now: their sky and fog come from the realms module
+        if (com.skycraft.realms.Realm.of(mc.level) != null) return;
         if (mc.level.dimension() == Level.NETHER) {
             event.setRed(lerp(event.getRed(), 0.55f, 0.6f));
             event.setGreen(lerp(event.getGreen(), 0.12f, 0.6f));

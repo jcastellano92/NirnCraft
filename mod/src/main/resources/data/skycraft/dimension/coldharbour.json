@@ -1,0 +1,18 @@
+{
+  "type": "skycraft:coldharbour",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "skycraft:realm/coldharbour",
+    "biome_source": {
+      "type": "skycraft:realm",
+      "realm": "coldharbour",
+      "biomes": {
+        "chained_wastes": "skycraft:coldharbour_chained_wastes",
+        "burning_ruins": "skycraft:coldharbour_burning_ruins",
+        "hollow_city": "skycraft:coldharbour_hollow_city",
+        "lava_rift": "skycraft:coldharbour_lava_rift",
+        "black_crags": "skycraft:coldharbour_black_crags"
+      }
+    }
+  }
+}

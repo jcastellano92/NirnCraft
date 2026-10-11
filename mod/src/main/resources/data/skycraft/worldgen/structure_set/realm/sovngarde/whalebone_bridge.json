@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:realm/sovngarde/whalebone_bridge",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:realm_grid",
+    "salt": 23,
+    "spacing": 0,
+    "fixed": [
+      [
+        0,
+        -8
+      ]
+    ]
+  }
+}

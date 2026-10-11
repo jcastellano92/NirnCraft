@@ -1,0 +1,41 @@
+{
+  "has_precipitation": false,
+  "temperature": 0.5,
+  "downfall": 0.0,
+  "effects": {
+    "sky_color": 1057816,
+    "fog_color": 926230,
+    "water_color": 659980,
+    "water_fog_color": 264198,
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "particle": {
+      "options": {
+        "type": "minecraft:enchant"
+      },
+      "probability": 0.012
+    }
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [
+      "skycraft:realm/ap_book_stack"
+    ],
+    [],
+    [],
+    [],
+    [],
+    [],
+    []
+  ]
+}

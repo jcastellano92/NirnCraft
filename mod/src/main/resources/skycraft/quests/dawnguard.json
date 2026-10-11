@@ -115,11 +115,12 @@
       "desc": "Serana's mother, Valerica, fled into the Soul Cairn with the second Elder Scroll. The portal is in the courtyard of Castle Volkihar.",
       "objectives": [
         {"type": "go", "place": "castle_volkihar", "radius": 20, "text": "Open the portal in Castle Volkihar's courtyard",
-         "actions": "scene:soul_cairn;teleport_dim:minecraft:the_nether"},
-        {"type": "dimension", "dim": "minecraft:the_nether", "text": "Enter the Soul Cairn"},
-        {"type": "kill", "dim": "minecraft:the_nether", "at_player": true, "text": "Defeat the Keeper guarding Valerica",
-         "spawn": [{"type": "skycraft:dremora", "name": "Keeper of the Soul Cairn", "target": true, "boss": true, "hp": 2.0},
-                   {"type": "minecraft:wither_skeleton", "count": 2, "name": "Boneman"}],
+         "actions": "scene:soul_cairn;teleport_dim:skycraft:soul_cairn"},
+        {"type": "dimension", "dim": "skycraft:soul_cairn", "text": "Enter the Soul Cairn"},
+        {"type": "go", "place": "valerica_refuge", "radius": 40, "text": "Cross the Soul Cairn to Valerica's refuge"},
+        {"type": "kill", "place": "valerica_refuge", "text": "Defeat the Keeper guarding Valerica",
+         "spawn": [{"type": "skycraft:keeper", "name": "Keeper of the Soul Cairn", "target": true, "boss": true, "hp": 2.0},
+                   {"type": "skycraft:boneman", "count": 2}],
          "actions": "relic:elder_scroll_sun;flight:castle_volkihar",
          "journal": "With the Keeper destroyed, Valerica gave up the second Elder Scroll, and I left the Soul Cairn before it could keep me."}
       ],

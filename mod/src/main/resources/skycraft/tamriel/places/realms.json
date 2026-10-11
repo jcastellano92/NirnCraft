@@ -1,0 +1,79 @@
+[
+  {
+    "id": "kvatch_gate",
+    "name": "place.skycraft.kvatch_gate",
+    "type": "landmark",
+    "culture": "imperial",
+    "region": "cyrodiil/gold_coast",
+    "x": -2480,
+    "z": 8190,
+    "radius": 18,
+    "variant": "oblivion_gate"
+  },
+  {
+    "id": "shivering_isles_door",
+    "name": "place.skycraft.shivering_isles_door",
+    "type": "landmark",
+    "culture": "imperial",
+    "region": "sea/topal_bay",
+    "x": 3600,
+    "z": 10330,
+    "radius": 12,
+    "variant": "madness_door"
+  },
+  {
+    "id": "black_book_epistolary",
+    "name": "place.skycraft.black_book_epistolary",
+    "type": "landmark",
+    "culture": "dunmer",
+    "region": "morrowind/solstheim",
+    "x": 4990,
+    "z": -3000,
+    "radius": 8,
+    "variant": "black_book_altar"
+  },
+  {
+    "id": "black_book_sallow_regent",
+    "name": "place.skycraft.black_book_sallow_regent",
+    "type": "landmark",
+    "culture": "nord",
+    "region": "morrowind/solstheim",
+    "x": 4290,
+    "z": -3600,
+    "radius": 8,
+    "variant": "black_book_altar"
+  },
+  {
+    "id": "black_book_filament",
+    "name": "place.skycraft.black_book_filament",
+    "type": "landmark",
+    "culture": "nord",
+    "region": "morrowind/solstheim",
+    "x": 4230,
+    "z": -3150,
+    "radius": 8,
+    "variant": "black_book_altar"
+  },
+  {
+    "id": "soul_cairn_portal",
+    "name": "place.skycraft.soul_cairn_portal",
+    "type": "landmark",
+    "culture": "imperial",
+    "region": "skyrim/haafingar",
+    "x": -3148,
+    "z": -2402,
+    "radius": 10,
+    "variant": "soul_cairn_portal"
+  },
+  {
+    "id": "dark_anchor",
+    "name": "place.skycraft.dark_anchor",
+    "type": "landmark",
+    "culture": "imperial",
+    "region": "cyrodiil/jerall_mountains",
+    "x": 1010,
+    "z": 2530,
+    "radius": 12,
+    "variant": "dark_anchor"
+  }
+]

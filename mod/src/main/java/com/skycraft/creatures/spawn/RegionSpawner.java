@@ -75,7 +75,8 @@ public final class RegionSpawner {
         ServerLevel level = player.serverLevel();
         if ((level.getGameTime() + player.getId() * 7L) % INTERVAL != 0) return;
         if (!CreaturesConfig.REGION_SPAWNING.get() || player.isSpectator() || !player.isAlive()) return;
-        if (level.dimension() != Level.OVERWORLD || SpawnTables.rules().isEmpty()) return;
+        // Nirn and the realms (the realms' tables match their dimension region, e.g. "minecraft:the_nether")
+        if (level.dimension() != Level.OVERWORLD && com.skycraft.realms.Realm.of(level) == null || SpawnTables.rules().isEmpty()) return;
         if (!level.getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING)) return;
 
         List<Mob> mine = level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(BUDGET_RADIUS),

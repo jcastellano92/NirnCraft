@@ -1,0 +1,46 @@
+{
+  "has_precipitation": true,
+  "temperature": 0.8,
+  "downfall": 0.6,
+  "effects": {
+    "sky_color": 11056328,
+    "fog_color": 13159124,
+    "water_color": 6985928,
+    "water_fog_color": 2771578,
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "grass_color": 9085072,
+    "foliage_color": 8034440,
+    "particle": {
+      "options": {
+        "type": "minecraft:white_ash"
+      },
+      "probability": 0.004
+    }
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [
+      "skycraft:realm/si_crystal_tree_sparse"
+    ],
+    [],
+    [],
+    [],
+    [],
+    [
+      "skycraft:realm/si_blooms",
+      "skycraft:realm/si_mania_grass"
+    ],
+    []
+  ]
+}

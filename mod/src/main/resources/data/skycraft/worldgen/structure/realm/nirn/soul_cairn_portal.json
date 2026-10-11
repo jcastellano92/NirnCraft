@@ -1,0 +1,8 @@
+{
+  "type": "skycraft:realm_site",
+  "site": "nirn/soul_cairn_portal",
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

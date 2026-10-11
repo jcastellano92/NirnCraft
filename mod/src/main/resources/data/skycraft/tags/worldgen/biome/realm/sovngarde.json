@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:sovngarde_fields",
+    "skycraft:sovngarde_mistvale",
+    "skycraft:sovngarde_chasm",
+    "skycraft:sovngarde_hall_heights",
+    "skycraft:sovngarde_golden_grove",
+    "skycraft:sovngarde_mountains"
+  ]
+}

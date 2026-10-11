@@ -185,8 +185,9 @@ public final class Locks {
                 break;
             }
         }
-        if (level.dimension() == Level.NETHER) tier += 1;
-        else if (level.dimension() == Level.END) tier += 2;
+        // the realms' strongholds lock harder (the Deadlands +1 ... Coldharbour +3)
+        com.skycraft.realms.Realm realm = com.skycraft.realms.Realm.of(level);
+        if (realm != null) tier += realm.lockBonus;
         return Math.min(MASTER, tier);
     }
 

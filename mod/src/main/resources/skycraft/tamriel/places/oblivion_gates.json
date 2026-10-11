@@ -220,17 +220,6 @@
   "variant": "oblivion_gate"
  },
  {
-  "id": "oblivion_gate_21",
-  "name": "place.skycraft.oblivion_gate",
-  "type": "landmark",
-  "culture": "daedric",
-  "region": "cyrodiil/gold_coast",
-  "x": -2561,
-  "z": 8252,
-  "radius": 16,
-  "variant": "oblivion_gate"
- },
- {
   "id": "oblivion_gate_22",
   "name": "place.skycraft.oblivion_gate",
   "type": "landmark",

@@ -1,0 +1,47 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:translucent",
+  "textures": {
+    "particle": "skycraft:block/coldharbour_portal",
+    "p": "skycraft:block/coldharbour_portal"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        6
+      ],
+      "to": [
+        16,
+        16,
+        10
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#p"
+        },
+        "south": {
+          "texture": "#p"
+        },
+        "east": {
+          "texture": "#p",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#p",
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#p",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#p",
+          "cullface": "down"
+        }
+      }
+    }
+  ]
+}

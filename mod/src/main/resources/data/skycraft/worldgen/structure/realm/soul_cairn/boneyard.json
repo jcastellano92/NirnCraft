@@ -1,0 +1,8 @@
+{
+  "type": "skycraft:realm_site",
+  "site": "soul_cairn/boneyard",
+  "biomes": "#skycraft:realm/soul_cairn",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

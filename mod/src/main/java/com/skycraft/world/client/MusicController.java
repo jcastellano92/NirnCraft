@@ -284,12 +284,15 @@ public final class MusicController {
         var player = mc.player;
         boolean fight = inCombat(mc);
         String dim = level.dimension().location().getPath();
-        if (level.dimension() == Level.NETHER || dim.contains("oblivion")) {
+        if (level.dimension() == Level.NETHER || dim.contains("oblivion") || dim.contains("coldharbour") || dim.contains("soul_cairn")) {
             return fight ? new Mood(Kind.COMBAT, "music.combat") : new Mood(Kind.OBLIVION, "music.oblivion");
         }
         if (level.dimension() == Level.END || dim.contains("sovngarde")) {
             return fight ? new Mood(Kind.COMBAT, "music.combat") : new Mood(Kind.SOVNGARDE, "music.sovngarde");
         }
+        // Apocrypha's endless library and the Shivering Isles: the deep, strange music of Blackreach and the dungeons
+        if (dim.contains("apocrypha")) return fight ? new Mood(Kind.COMBAT, "music.combat") : new Mood(Kind.BLACKREACH, "music.blackreach");
+        if (dim.contains("shivering_isles")) return fight ? new Mood(Kind.COMBAT, "music.combat") : new Mood(Kind.DUNGEON, "music.dungeon");
         if (AudioConfig.BOSS_MUSIC.get()) {
             Mood boss = boss(mc, fight);
             if (boss != null) return boss;

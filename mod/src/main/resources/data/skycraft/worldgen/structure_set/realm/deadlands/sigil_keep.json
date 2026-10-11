@@ -1,0 +1,13 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:realm/deadlands/sigil_keep",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:realm_grid",
+    "salt": 11,
+    "spacing": 40
+  }
+}

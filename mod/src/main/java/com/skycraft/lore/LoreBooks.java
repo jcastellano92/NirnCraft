@@ -189,6 +189,14 @@ public final class LoreBooks {
         BOOKS.put(id, new Book(id, category, cover, weight, value));
     }
 
+    /**
+     * A book of another module (the realms' lore), registered during mod construction. Its title and text follow the
+     * same conventions; the lore loot table doesn't list it (the module's own loot tables do).
+     */
+    public static void register(String id, Category category, int cover, int weight, int value) {
+        if (!BOOKS.containsKey(id)) book(id, category, cover, weight, value);
+    }
+
     @Nullable
     public static Book get(String id) {
         return id == null ? null : BOOKS.get(id);

@@ -1,0 +1,47 @@
+{
+  "has_precipitation": true,
+  "temperature": 0.7,
+  "downfall": 0.9,
+  "effects": {
+    "sky_color": 4740694,
+    "fog_color": 3029554,
+    "water_color": 3033652,
+    "water_fog_color": 924176,
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "grass_color": 3625006,
+    "foliage_color": 2769958,
+    "particle": {
+      "options": {
+        "type": "minecraft:mycelium"
+      },
+      "probability": 0.012
+    }
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [
+      "skycraft:realm/si_gnarled_tree"
+    ],
+    [],
+    [],
+    [],
+    [],
+    [
+      "skycraft:realm/si_dementia_bulbs",
+      "skycraft:realm/si_dementia_grass",
+      "skycraft:realm/si_vines"
+    ],
+    []
+  ]
+}

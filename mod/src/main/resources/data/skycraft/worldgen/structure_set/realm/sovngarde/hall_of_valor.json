@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:realm/sovngarde/hall_of_valor",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:realm_grid",
+    "salt": 24,
+    "spacing": 0,
+    "fixed": [
+      [
+        0,
+        -18
+      ]
+    ]
+  }
+}

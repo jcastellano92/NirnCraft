@@ -1,0 +1,37 @@
+{
+  "has_precipitation": false,
+  "temperature": 1.4,
+  "downfall": 0.0,
+  "effects": {
+    "sky_color": 3806738,
+    "fog_color": 4856338,
+    "water_color": 2765904,
+    "water_fog_color": 1053726,
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    }
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [
+      "skycraft:realm/ch_iron_spikes"
+    ],
+    [],
+    [],
+    [],
+    [
+      "skycraft:realm/ch_lavafall"
+    ],
+    [],
+    []
+  ]
+}

@@ -74,7 +74,13 @@ public class BlackBookItem extends BookItem {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         Collectibles.Entry e = CollectibleItem.entry(stack);
-        if (e == null) return InteractionResultHolder.pass(stack);
+        if (e == null) {
+            // a realm-placed Black Book with only a chapter: it just opens the way into Apocrypha
+            if (!level.isClientSide && player instanceof ServerPlayer sp) {
+                com.skycraft.realms.RealmTravel.readBlackBookItem(sp, com.skycraft.realms.item.BlackBookItem.chapter(stack));
+            }
+            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        }
         if (!level.isClientSide && player instanceof ServerPlayer sp) {
             PlayerData data = SkyData.get(sp);
             CompoundTag read = data.module(Collectibles.MODULE).getCompound("black_books_read");
@@ -93,6 +99,11 @@ public class BlackBookItem extends BookItem {
                         Component.translatable("message.skycraft.loot.black_book_secret", skill.displayName()));
                 level.playSound(null, player.blockPosition(), SoundEvents.ENDER_EYE_DEATH, SoundSource.PLAYERS, 1f, 0.5f);
             }
+            // every Black Book is also a door: reading it pulls the reader into Apocrypha (chapter from the book, else by title)
+            int chapter = stack.hasTag() && stack.getTag().contains("chapter")
+                    ? com.skycraft.realms.item.BlackBookItem.chapter(stack)
+                    : 1 + Math.floorMod(e.id().hashCode(), com.skycraft.realms.RealmLayout.APOCRYPHA_CHAPTERS);
+            com.skycraft.realms.RealmTravel.readBlackBookItem(sp, chapter);
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
     }

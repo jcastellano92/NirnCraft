@@ -512,11 +512,14 @@
       "desc": "Sovngarde. The mist here is Alduin's: he hunts the souls of the dead as they arrive. The heroes who first cast him out wait in the Hall of Valor.",
       "objectives": [
         {"type": "dimension", "dim": "minecraft:the_end", "text": "Enter Sovngarde"},
-        {"type": "cond", "cond": "dim:minecraft:the_end", "text": "Find the heroes of old", "actions": "scene:sovngarde_heroes"},
+        {"type": "go", "place": "sovngarde_arena", "radius": 24, "text": "Follow the old road through the mist and find the heroes of old",
+         "actions": "scene:sovngarde_heroes"},
         {"type": "kill_type", "entity": "minecraft:ender_dragon,skycraft:alduin", "count": 1, "dim": "minecraft:the_end", "at_player": true, "text": "Defeat Alduin, World-Eater",
-         "spawn": [{"type": "skycraft:alduin", "name": "Alduin", "boss": true, "hp": 4.0, "if": "end_dragon_slain"}],
+         "spawn": [{"type": "minecraft:ender_dragon", "name": "Alduin", "boss": true, "hp": 4.0, "if": "end_dragon_slain"}],
          "actions": "scene:alduin_dies",
-         "journal": "Alduin is gone. His soul broke apart over Sovngarde like sparks on the wind."}
+         "journal": "Alduin is gone. His soul broke apart over Sovngarde like sparks on the wind."},
+        {"type": "cond", "cond": "!dim:minecraft:the_end", "place": "sovngarde_bridge", "radius": 12,
+         "text": "Ask Tsun at the Whalebone Bridge to send you home (or take the golden way at the misty vale)"}
       ],
       "rewards": {"gold": 5000, "title": "dragonborn", "items": ["minecraft:elytra"]},
       "on_complete": "victory"

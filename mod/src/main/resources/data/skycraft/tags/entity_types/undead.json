@@ -21,6 +21,10 @@
     "skycraft:death_hound",
     "skycraft:gargoyle",
     "skycraft:ash_spawn",
-    "skycraft:dragon_priest"
+    "skycraft:dragon_priest",
+    "skycraft:keeper",
+    "skycraft:boneman",
+    "skycraft:mistman",
+    "skycraft:wrathman"
   ]
 }

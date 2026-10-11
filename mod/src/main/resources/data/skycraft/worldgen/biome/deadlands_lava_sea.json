@@ -1,0 +1,48 @@
+{
+  "has_precipitation": false,
+  "temperature": 2.0,
+  "downfall": 0.0,
+  "effects": {
+    "sky_color": 11544602,
+    "fog_color": 5902856,
+    "water_color": 7023130,
+    "water_fog_color": 3344901,
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "particle": {
+      "options": {
+        "type": "minecraft:ash"
+      },
+      "probability": 0.006
+    }
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [
+      "skycraft:realm/dl_spike"
+    ],
+    [],
+    [
+      "skycraft:realm/dl_magma_vein",
+      "skycraft:realm/dl_blackstone_blob"
+    ],
+    [],
+    [
+      "skycraft:realm/dl_lavafall"
+    ],
+    [
+      "skycraft:realm/dl_flames"
+    ],
+    []
+  ]
+}

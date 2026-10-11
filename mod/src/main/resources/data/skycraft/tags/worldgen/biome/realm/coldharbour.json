@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:coldharbour_chained_wastes",
+    "skycraft:coldharbour_burning_ruins",
+    "skycraft:coldharbour_hollow_city",
+    "skycraft:coldharbour_lava_rift",
+    "skycraft:coldharbour_black_crags"
+  ]
+}

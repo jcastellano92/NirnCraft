@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:sigil_stone",
+    "skycraft:oblivion_portal",
+    "skycraft:black_book",
+    "skycraft:madness_door"
+  ]
+}

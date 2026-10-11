@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "particle": "skycraft:block/madness_door_lower",
+    "d": "skycraft:block/madness_door_lower",
+    "e": "skycraft:block/madness_door_edge"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        5
+      ],
+      "to": [
+        16,
+        16,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#d"
+        },
+        "south": {
+          "texture": "#d"
+        },
+        "east": {
+          "texture": "#e"
+        },
+        "west": {
+          "texture": "#e"
+        },
+        "up": {
+          "texture": "#e"
+        },
+        "down": {
+          "texture": "#e"
+        }
+      }
+    }
+  ]
+}

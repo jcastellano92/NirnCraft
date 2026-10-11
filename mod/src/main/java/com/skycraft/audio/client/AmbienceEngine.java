@@ -66,7 +66,8 @@ public final class AmbienceEngine {
         Holder<Biome> here = level.getBiome(at);
         String id = Soundscapes.id(here);
         String dim = level.dimension().location().getPath();
-        h.nether = level.dimension() == Level.NETHER || dim.contains("oblivion");
+        // the realms: fire and wails in the Deadlands, Coldharbour and the Soul Cairn; Sovngarde's horns
+        h.nether = level.dimension() == Level.NETHER || dim.contains("oblivion") || dim.contains("coldharbour") || dim.contains("soul_cairn");
         h.end = level.dimension() == Level.END || dim.contains("sovngarde");
 
         // the biome here (weight 3) and a ring of eight samples 24 blocks out: shores, rivers and forest edges fade in

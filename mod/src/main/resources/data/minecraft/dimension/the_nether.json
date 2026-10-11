@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:the_nether",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "skycraft:realm/deadlands",
+    "biome_source": {
+      "type": "skycraft:realm",
+      "realm": "deadlands",
+      "biomes": {
+        "lava_sea": "skycraft:deadlands_lava_sea",
+        "ashen_wastes": "skycraft:deadlands_ashen_wastes",
+        "blood_fields": "skycraft:deadlands_blood_fields",
+        "spires": "skycraft:deadlands_spires",
+        "harrada_thicket": "skycraft:deadlands_harrada_thicket"
+      }
+    }
+  }
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "on_the_deadlands",
+    "category": "DAEDRA",
+    "cover": "RED",
+    "weight": 2,
+    "value": 60
+  },
+  {
+    "id": "binding_a_sigil_stone",
+    "category": "GUIDE",
+    "cover": "BLACK",
+    "weight": 2,
+    "value": 45
+  },
+  {
+    "id": "the_whalebone_bridge",
+    "category": "POEM",
+    "cover": "BLUE",
+    "weight": 2,
+    "value": 30
+  },
+  {
+    "id": "letter_from_new_sheoth",
+    "category": "LETTER",
+    "cover": "SHEET",
+    "weight": 2,
+    "value": 15
+  },
+  {
+    "id": "mania_and_dementia",
+    "category": "DAEDRA",
+    "cover": "GREEN",
+    "weight": 2,
+    "value": 50
+  },
+  {
+    "id": "apocrypha_marginalia",
+    "category": "NOTE",
+    "cover": "SHEET",
+    "weight": 1,
+    "value": 20
+  },
+  {
+    "id": "the_ideal_masters",
+    "category": "DAEDRA",
+    "cover": "BLACK",
+    "weight": 1,
+    "value": 55
+  },
+  {
+    "id": "chains_of_coldharbour",
+    "category": "DAEDRA",
+    "cover": "BLACK",
+    "weight": 1,
+    "value": 55
+  }
+]

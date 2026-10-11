@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "skycraft:block/mania_cap_teal"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:realm/deadlands/citadel",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 24,
+    "separation": 9,
+    "salt": 2041501
+  }
+}

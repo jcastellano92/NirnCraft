@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:sigil_stone",
+    "skycraft:oblivion_portal",
+    "skycraft:valor_portal",
+    "skycraft:madness_door",
+    "skycraft:black_book",
+    "skycraft:soul_portal",
+    "skycraft:coldharbour_portal",
+    "skycraft:sigil_flame"
+  ]
+}

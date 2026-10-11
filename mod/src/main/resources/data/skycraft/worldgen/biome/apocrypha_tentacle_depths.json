@@ -1,0 +1,43 @@
+{
+  "has_precipitation": false,
+  "temperature": 0.5,
+  "downfall": 0.0,
+  "effects": {
+    "sky_color": 661004,
+    "fog_color": 529420,
+    "water_color": 528392,
+    "water_fog_color": 198148,
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "particle": {
+      "options": {
+        "type": "minecraft:squid_ink"
+      },
+      "probability": 0.004
+    }
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [
+      "skycraft:realm/ap_ink_tentacle"
+    ],
+    [],
+    [
+      "skycraft:realm/ap_glyph_vein"
+    ],
+    [],
+    [],
+    [],
+    []
+  ]
+}

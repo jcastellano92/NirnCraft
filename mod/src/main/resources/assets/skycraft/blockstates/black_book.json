@@ -1,0 +1,49 @@
+{
+  "variants": {
+    "facing=north,mode=enter": {
+      "model": "skycraft:block/black_book"
+    },
+    "facing=north,mode=next": {
+      "model": "skycraft:block/black_book"
+    },
+    "facing=north,mode=exit": {
+      "model": "skycraft:block/black_book"
+    },
+    "facing=east,mode=enter": {
+      "model": "skycraft:block/black_book",
+      "y": 90
+    },
+    "facing=east,mode=next": {
+      "model": "skycraft:block/black_book",
+      "y": 90
+    },
+    "facing=east,mode=exit": {
+      "model": "skycraft:block/black_book",
+      "y": 90
+    },
+    "facing=south,mode=enter": {
+      "model": "skycraft:block/black_book",
+      "y": 180
+    },
+    "facing=south,mode=next": {
+      "model": "skycraft:block/black_book",
+      "y": 180
+    },
+    "facing=south,mode=exit": {
+      "model": "skycraft:block/black_book",
+      "y": 180
+    },
+    "facing=west,mode=enter": {
+      "model": "skycraft:block/black_book",
+      "y": 270
+    },
+    "facing=west,mode=next": {
+      "model": "skycraft:block/black_book",
+      "y": 270
+    },
+    "facing=west,mode=exit": {
+      "model": "skycraft:block/black_book",
+      "y": 270
+    }
+  }
+}

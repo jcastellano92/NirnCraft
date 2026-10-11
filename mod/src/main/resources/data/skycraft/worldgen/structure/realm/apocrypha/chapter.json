@@ -1,0 +1,8 @@
+{
+  "type": "skycraft:realm_site",
+  "site": "apocrypha/chapter",
+  "biomes": "#skycraft:realm/apocrypha",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

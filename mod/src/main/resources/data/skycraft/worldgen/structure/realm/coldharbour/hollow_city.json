@@ -1,0 +1,8 @@
+{
+  "type": "skycraft:realm_site",
+  "site": "coldharbour/hollow_city",
+  "biomes": "#skycraft:realm/coldharbour",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}
