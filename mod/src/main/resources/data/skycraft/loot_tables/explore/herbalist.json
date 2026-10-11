@@ -1,0 +1,110 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 3,
+        "max": 6
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:sugar",
+          "weight": 16,
+          "functions": [
+            {
+              "function": "skycraft:regional_tag",
+              "tag": "skycraft:loot/ingredients"
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 4
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:chests/alchemy_ingredients",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "weight": 8,
+          "functions": [
+            {
+              "function": "skycraft:skyrim_potion",
+              "poison": false
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "skycraft:skyrim_potion",
+              "poison": true
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:glass_bottle",
+          "weight": 6,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 4
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 35,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"explore_note_herb_notes\",skycraft_value:2}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 65
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:skill_book_alchemy",
+          "weight": 6
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 94
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:explore/herbalist"
+}

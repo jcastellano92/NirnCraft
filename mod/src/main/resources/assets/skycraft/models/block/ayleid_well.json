@@ -1,0 +1,140 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "minecraft:block/quartz_pillar",
+    "pillar": "minecraft:block/quartz_pillar",
+    "top": "minecraft:block/quartz_pillar_top",
+    "stone": "minecraft:block/sea_lantern"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        2,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#pillar"
+        },
+        "south": {
+          "texture": "#pillar"
+        },
+        "east": {
+          "texture": "#pillar"
+        },
+        "west": {
+          "texture": "#pillar"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "down": {
+          "texture": "#top"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        2,
+        5
+      ],
+      "to": [
+        11,
+        8,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#pillar"
+        },
+        "south": {
+          "texture": "#pillar"
+        },
+        "east": {
+          "texture": "#pillar"
+        },
+        "west": {
+          "texture": "#pillar"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "down": {
+          "texture": "#top"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        8,
+        4
+      ],
+      "to": [
+        12,
+        9,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#top"
+        },
+        "south": {
+          "texture": "#top"
+        },
+        "east": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#top"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "down": {
+          "texture": "#top"
+        }
+      }
+    },
+    {
+      "from": [
+        5.5,
+        9,
+        5.5
+      ],
+      "to": [
+        10.5,
+        14,
+        10.5
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#stone"
+        },
+        "south": {
+          "texture": "#stone"
+        },
+        "east": {
+          "texture": "#stone"
+        },
+        "west": {
+          "texture": "#stone"
+        },
+        "up": {
+          "texture": "#stone"
+        },
+        "down": {
+          "texture": "#stone"
+        }
+      }
+    }
+  ]
+}

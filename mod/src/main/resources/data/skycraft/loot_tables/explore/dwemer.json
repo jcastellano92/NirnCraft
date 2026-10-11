@@ -1,0 +1,102 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 4
+      },
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:chests/dwemer_scrap",
+          "weight": 30
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:dwemer_gear",
+          "weight": 6,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:dwarven_oil",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:dwarven_metal_ingot",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_sword",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "skycraft:regional_gear",
+              "kind": "weapon",
+              "enchant_chance": 0.2,
+              "quality_chance": 0.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 35,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"explore_note_dwemer_survey\",skycraft_value:2}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 65
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:chests/skill_books",
+          "weight": 6
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 94
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:explore/dwemer"
+}

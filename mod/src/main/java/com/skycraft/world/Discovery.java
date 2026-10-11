@@ -259,6 +259,7 @@ public final class Discovery {
         SkyNetwork.sendToPlayer(player, new WorldPackets.Cue(WorldPackets.Cue.DISCOVERY));
         // the place's story in a line under the banner (and its lore lectern, the first time anyone comes)
         com.skycraft.lore.place.PlaceLoreEvents.onDiscovered(player, p);
+        com.skycraft.explore.ExploreEvents.onDiscovered(player);
     }
 
     /**
@@ -344,6 +345,7 @@ public final class Discovery {
                     String name = existing.getString("name");
                     Notifier.send(player, NotifyKind.LOCATION_DISCOVERED, Component.literal(name), kind.displayName());
                     SkyNetwork.sendToPlayer(player, new WorldPackets.Cue(WorldPackets.Cue.DISCOVERY));
+                    com.skycraft.explore.ExploreEvents.onDiscovered(player);
                 }
                 continue;
             }
@@ -377,6 +379,7 @@ public final class Discovery {
         data.markDirty();
         Notifier.send(player, NotifyKind.LOCATION_DISCOVERED, Component.literal(name), kind.displayName());
         SkyNetwork.sendToPlayer(player, new WorldPackets.Cue(WorldPackets.Cue.DISCOVERY));
+        com.skycraft.explore.ExploreEvents.onDiscovered(player);
     }
 
     // ------------------------------------------------------------------ cleared

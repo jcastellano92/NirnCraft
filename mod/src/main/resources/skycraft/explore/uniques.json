@@ -1,0 +1,360 @@
+[
+  {
+    "id": "frostfang",
+    "kind": "dead_adventurer",
+    "x": 144,
+    "z": -2448,
+    "item": "skycraft:nordic_war_axe",
+    "enchant": {
+      "minecraft:sharpness": 2,
+      "minecraft:unbreaking": 2
+    },
+    "note": "explore_unique_frostfang"
+  },
+  {
+    "id": "hearthwarden",
+    "kind": "hermit_hut",
+    "x": 816,
+    "z": 496,
+    "item": "skycraft:banded_iron_shield",
+    "enchant": {
+      "minecraft:protection": 3
+    }
+  },
+  {
+    "id": "wanderers_circlet",
+    "kind": "overlook",
+    "x": 1584,
+    "z": 2224,
+    "item": "skycraft:silver_circlet",
+    "enchant": {
+      "minecraft:protection": 2,
+      "minecraft:feather_falling": 2
+    },
+    "note": "explore_unique_wanderers_circlet"
+  },
+  {
+    "id": "stormcrow",
+    "kind": "nordic_cairn",
+    "x": -2896,
+    "z": -1808,
+    "item": "skycraft:ancient_nord_bow",
+    "enchant": {
+      "minecraft:power": 3,
+      "minecraft:punch": 1
+    }
+  },
+  {
+    "id": "riverwyrm_fang",
+    "kind": "dead_adventurer",
+    "x": -400,
+    "z": -592,
+    "item": "skycraft:elven_dagger",
+    "enchant": {
+      "minecraft:sharpness": 3
+    }
+  },
+  {
+    "id": "ashfall",
+    "kind": "ancient_battlefield",
+    "x": 2992,
+    "z": -624,
+    "item": "skycraft:steel_greatsword",
+    "enchant": {
+      "minecraft:fire_aspect": 1,
+      "minecraft:sharpness": 1
+    },
+    "note": "explore_unique_ashfall"
+  },
+  {
+    "id": "last_watch_helm",
+    "kind": "bandit_lookout",
+    "x": -2768,
+    "z": 1328,
+    "item": "skycraft:iron_helmet",
+    "enchant": {
+      "minecraft:protection": 2,
+      "minecraft:respiration": 1
+    }
+  },
+  {
+    "id": "kynes_feather",
+    "kind": "wayshrine",
+    "x": -1968,
+    "z": 1808,
+    "item": "skycraft:silver_necklace",
+    "enchant": {
+      "minecraft:feather_falling": 3
+    }
+  },
+  {
+    "id": "scribes_mittens",
+    "kind": "mage_ruin",
+    "x": 1968,
+    "z": -2672,
+    "item": "skycraft:fur_leggings",
+    "enchant": {
+      "minecraft:protection": 2,
+      "minecraft:unbreaking": 2
+    },
+    "note": "explore_unique_scribes_mittens"
+  },
+  {
+    "id": "ashguard_cuirass",
+    "kind": "velothi_shrine",
+    "x": 4784,
+    "z": -2864,
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "minecraft:fire_protection": 4
+    }
+  },
+  {
+    "id": "lindai_gleam",
+    "kind": "ayleid_well",
+    "x": 2544,
+    "z": 6704,
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "minecraft:smite": 3,
+      "minecraft:sharpness": 1
+    },
+    "note": "explore_unique_lindai_gleam"
+  },
+  {
+    "id": "colovian_greaves",
+    "kind": "hunters_camp",
+    "x": -2288,
+    "z": 3600,
+    "item": "skycraft:imperial_light_boots",
+    "enchant": {
+      "minecraft:feather_falling": 2,
+      "minecraft:protection": 1
+    }
+  },
+  {
+    "id": "vintners_signet",
+    "kind": "hermit_hut",
+    "x": -3312,
+    "z": 6000,
+    "item": "skycraft:gold_ring",
+    "enchant": {
+      "minecraft:protection": 2
+    }
+  },
+  {
+    "id": "blackwood_cleaver",
+    "kind": "dead_adventurer",
+    "x": 3568,
+    "z": 8528,
+    "item": "skycraft:imperial_war_axe",
+    "enchant": {
+      "minecraft:bane_of_arthropods": 4
+    }
+  },
+  {
+    "id": "ashland_stinger",
+    "kind": "velothi_shrine",
+    "x": 6480,
+    "z": -1840,
+    "item": "skycraft:chitin_dagger",
+    "enchant": {
+      "minecraft:sharpness": 2,
+      "minecraft:fire_aspect": 1
+    }
+  },
+  {
+    "id": "spore_warden_helm",
+    "kind": "rare_reagent",
+    "x": 10320,
+    "z": 48,
+    "item": "skycraft:chitin_helmet",
+    "enchant": {
+      "minecraft:respiration": 3,
+      "minecraft:protection": 1
+    }
+  },
+  {
+    "id": "redoran_watch_shield",
+    "kind": "ancient_battlefield",
+    "x": 5968,
+    "z": 48,
+    "item": "skycraft:bonemold_shield",
+    "enchant": {
+      "minecraft:protection": 3
+    }
+  },
+  {
+    "id": "thorn_of_glenumbra",
+    "kind": "breton_menhir",
+    "x": -9872,
+    "z": 880,
+    "item": "skycraft:breton_sword",
+    "enchant": {
+      "minecraft:sharpness": 2,
+      "minecraft:knockback": 1
+    },
+    "note": "explore_unique_thorn_of_glenumbra"
+  },
+  {
+    "id": "wrothgar_icebreaker",
+    "kind": "mineral_vein",
+    "x": -5200,
+    "z": -1200,
+    "item": "skycraft:orcish_warhammer",
+    "enchant": {
+      "minecraft:sharpness": 2,
+      "minecraft:knockback": 2
+    }
+  },
+  {
+    "id": "rivenspire_mourning_ring",
+    "kind": "dead_adventurer",
+    "x": -8464,
+    "z": -2256,
+    "item": "skycraft:silver_garnet_ring",
+    "enchant": {
+      "minecraft:protection": 2
+    }
+  },
+  {
+    "id": "sun_sworn_blade",
+    "kind": "yokudan_obelisk",
+    "x": -8272,
+    "z": 7120,
+    "item": "skycraft:redguard_sword",
+    "enchant": {
+      "minecraft:sharpness": 3,
+      "minecraft:fire_aspect": 1
+    }
+  },
+  {
+    "id": "dune_strider_boots",
+    "kind": "abandoned_camp",
+    "x": -6064,
+    "z": 4176,
+    "item": "skycraft:hide_boots",
+    "enchant": {
+      "minecraft:feather_falling": 2,
+      "minecraft:protection": 2
+    }
+  },
+  {
+    "id": "starstone_amulet",
+    "kind": "yokudan_obelisk",
+    "x": -3632,
+    "z": 2704,
+    "item": "skycraft:gold_ruby_necklace",
+    "enchant": {
+      "minecraft:fire_protection": 3
+    }
+  },
+  {
+    "id": "hist_bark_cuirass",
+    "kind": "hist_sapling",
+    "x": 8880,
+    "z": 5200,
+    "item": "skycraft:argonian_chestplate",
+    "enchant": {
+      "minecraft:protection": 3,
+      "minecraft:thorns": 1
+    }
+  },
+  {
+    "id": "swampfang_mace",
+    "kind": "dead_adventurer",
+    "x": 6064,
+    "z": 10832,
+    "item": "skycraft:argonian_mace",
+    "enchant": {
+      "minecraft:bane_of_arthropods": 3,
+      "minecraft:sharpness": 1
+    }
+  },
+  {
+    "id": "twin_moons_claw",
+    "kind": "moon_sugar_field",
+    "x": -1520,
+    "z": 9456,
+    "item": "skycraft:khajiit_dagger",
+    "enchant": {
+      "minecraft:sharpness": 3,
+      "minecraft:looting": 2
+    },
+    "note": "explore_unique_twin_moons_claw"
+  },
+  {
+    "id": "sand_dancer_boots",
+    "kind": "overlook",
+    "x": 1552,
+    "z": 14096,
+    "item": "skycraft:khajiit_boots",
+    "enchant": {
+      "minecraft:feather_falling": 4
+    }
+  },
+  {
+    "id": "green_pact_bow",
+    "kind": "giant_beehive",
+    "x": -2224,
+    "z": 13936,
+    "item": "skycraft:bosmer_bow",
+    "enchant": {
+      "minecraft:power": 4
+    }
+  },
+  {
+    "id": "thornheart_cuirass",
+    "kind": "hermit_hut",
+    "x": -2704,
+    "z": 11792,
+    "item": "skycraft:bosmer_chestplate",
+    "enchant": {
+      "minecraft:thorns": 3,
+      "minecraft:protection": 1
+    }
+  },
+  {
+    "id": "crystal_singers_circlet",
+    "kind": "crystal_outcrop",
+    "x": -9968,
+    "z": 12464,
+    "item": "skycraft:gold_circlet",
+    "enchant": {
+      "minecraft:protection": 3,
+      "minecraft:respiration": 1
+    }
+  },
+  {
+    "id": "atmoran_rime_axe",
+    "kind": "nordic_cairn",
+    "x": -400,
+    "z": -11200,
+    "item": "skycraft:atmoran_war_axe",
+    "enchant": {
+      "minecraft:sharpness": 3,
+      "minecraft:unbreaking": 3
+    }
+  },
+  {
+    "id": "tsaesci_fang",
+    "kind": "akaviri_shrine",
+    "x": 17400,
+    "z": 2600,
+    "item": "skycraft:akaviri_sword",
+    "enchant": {
+      "minecraft:sharpness": 4
+    }
+  },
+  {
+    "id": "tide_ring",
+    "kind": "sea_shrine",
+    "x": -19300,
+    "z": 20600,
+    "item": "skycraft:silver_ring",
+    "enchant": {
+      "minecraft:respiration": 3,
+      "minecraft:depth_strider": 3
+    }
+  }
+]

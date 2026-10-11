@@ -1,0 +1,119 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 4
+      },
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:chests/sea_wreck",
+          "weight": 30
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 10,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 10,
+                "max": 50
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:alto_wine",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:lead",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:paper",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 4
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 35,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"explore_note_ships_log\",skycraft_value:2}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 65
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:treasure_map",
+          "weight": 15,
+          "functions": [
+            {
+              "function": "skycraft:explore_treasure_map"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 15,
+          "functions": [
+            {
+              "function": "skycraft:explore_lead"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 70
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:explore/shipwreck"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "skycraft:explore_skill_books",
+  "conditions": [],
+  "tables": [
+    "skycraft:chests/dungeon_common",
+    "skycraft:chests/dungeon_minor",
+    "skycraft:chests/dwemer_scrap",
+    "skycraft:chests/giant_camp",
+    "skycraft:chests/dragon_lair",
+    "skycraft:chests/bandit_camp",
+    "skycraft:chests/mine_ore"
+  ],
+  "table": "skycraft:chests/skill_books",
+  "chance": 0.06
+}

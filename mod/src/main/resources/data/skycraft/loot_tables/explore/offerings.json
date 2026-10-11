@@ -1,0 +1,152 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 3
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 20,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 3,
+                "max": 30
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:candle",
+          "weight": 8,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:garnet",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:ruby",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:amulet_of_mara",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:amulet_of_talos",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:silver_ring",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "skycraft:skyrim_potion",
+              "poison": false
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:poppy",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 20,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"explore_note_wayshrine_prayer\",skycraft_value:2}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 10,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"explore_note_menhir_verse\",skycraft_value:2}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"explore_note_sea_hymn\",skycraft_value:2}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 65
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:chests/skill_books",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 97
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:explore/offerings"
+}

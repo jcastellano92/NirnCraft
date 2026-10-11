@@ -19,6 +19,8 @@
     "skycraft:forage_moss",
     "skycraft:forage_moon_sugar",
     "skycraft:forage_trama_root",
-    "skycraft:forage_saltrice"
+    "skycraft:forage_saltrice",
+    "skycraft:explore_skill_books",
+    "skycraft:explore_skill_books_boss"
   ]
 }

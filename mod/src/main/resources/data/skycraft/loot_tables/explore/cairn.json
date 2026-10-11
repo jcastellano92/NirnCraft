@@ -1,0 +1,109 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 3
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 14,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 8,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:ancient_nord_war_axe",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:ancient_nord_sword",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:ancient_nord_helmet",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:chests/soul_gems",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:garnet",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:bone_meal_draugr",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:silver_necklace",
+          "weight": 2
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 25,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"explore_note_cairn_epitaph\",skycraft_value:2}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 75
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:chests/skill_books",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 96
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:explore/cairn"
+}

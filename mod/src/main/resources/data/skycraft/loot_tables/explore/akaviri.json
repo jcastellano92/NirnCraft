@@ -1,0 +1,109 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 3
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 12,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 10,
+                "max": 50
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:akaviri_dagger",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:sapphire",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:lantern",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "skycraft:skyrim_potion",
+              "poison": false
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:sugar",
+          "weight": 6,
+          "functions": [
+            {
+              "function": "skycraft:regional_tag",
+              "tag": "skycraft:loot/ingredients"
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 45,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"explore_note_akaviri_scroll\",skycraft_value:2}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 55
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:chests/skill_books",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 95
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:explore/akaviri"
+}

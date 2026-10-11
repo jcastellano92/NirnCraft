@@ -1,0 +1,200 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:coin_purse",
+          "weight": 20,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{gold:150L}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:coin_purse",
+          "weight": 10,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{gold:300L}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 10,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 25,
+                "max": 64
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 4
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_sword",
+          "weight": 10,
+          "functions": [
+            {
+              "function": "skycraft:regional_gear",
+              "kind": "weapon",
+              "enchant_chance": 0.5,
+              "quality_chance": 0.5
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_chestplate",
+          "weight": 10,
+          "functions": [
+            {
+              "function": "skycraft:regional_gear",
+              "kind": "armor",
+              "enchant_chance": 0.5,
+              "quality_chance": 0.5
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bow",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "skycraft:leveled_gear",
+              "kind": "bow",
+              "enchant_chance": 0.5,
+              "quality_chance": 0.5
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:flawless_ruby",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:flawless_sapphire",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:flawless_diamond",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:gold_diamond_ring",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:gold_ruby_necklace",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:chests/soul_gems",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "weight": 6,
+          "functions": [
+            {
+              "function": "skycraft:skyrim_potion",
+              "poison": false
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "skycraft:leveled_tome"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 30,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"explore_note_cache_ledger\",skycraft_value:2}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 70
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:chests/skill_books",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 88
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:arsenal/staves",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:legendary",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 97
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:explore/cache"
+}

@@ -1,0 +1,209 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 4
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 10,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 15
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:chests/skyrim_food",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:torch",
+          "weight": 6,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:leather",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:lockpick",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "skycraft:skyrim_potion",
+              "poison": false
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 6
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"explore_journal_snowbound\",skycraft_value:2}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"explore_journal_deserter\",skycraft_value:2}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"explore_journal_pilgrim\",skycraft_value:2}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"explore_journal_cartographer\",skycraft_value:2}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"explore_journal_prospector\",skycraft_value:2}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{book:\"explore_journal_runaways\",skycraft_value:2}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:treasure_map",
+          "weight": 18,
+          "functions": [
+            {
+              "function": "skycraft:explore_treasure_map"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 30,
+          "functions": [
+            {
+              "function": "skycraft:explore_lead"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 52
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:chests/skill_books",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 97
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:explore/camp"
+}
