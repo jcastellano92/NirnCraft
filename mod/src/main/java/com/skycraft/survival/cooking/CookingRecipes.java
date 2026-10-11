@@ -3,6 +3,8 @@ package com.skycraft.survival.cooking;
 import com.skycraft.crafting.arcane.ArcaneRegistry;
 import com.skycraft.crafting.recipe.Cost;
 import com.skycraft.survival.SurvivalRegistry;
+import com.skycraft.survival.fishing.FishingRegistry;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 
@@ -58,7 +60,16 @@ public final class CookingRecipes {
         b.add("meat", "leg_of_goat_roast", SurvivalRegistry.LEG_OF_GOAT_ROAST::get, 1, Cost.of(SurvivalRegistry.RAW_GOAT_MEAT, 1), Cost.of(salt, 1));
         b.add("meat", "grilled_chicken_breast", () -> Items.COOKED_CHICKEN, 1, Cost.of(() -> Items.CHICKEN, 1), Cost.of(salt, 1));
         b.add("meat", "cooked_rabbit", () -> Items.COOKED_RABBIT, 1, Cost.of(() -> Items.RABBIT, 1), Cost.of(salt, 1));
-        b.add("meat", "salmon_steak", SurvivalRegistry.SALMON_STEAK::get, 1, Cost.of(() -> Items.SALMON, 1), Cost.of(salt, 1));
+        b.add("meat", "salmon_steak", SurvivalRegistry.SALMON_STEAK::get, 1, salmonid(), Cost.of(salt, 1));
+        // fish from Skycraft rods (any species; survival/fishing)
+        b.add("meat", "grilled_fish", FishingRegistry.GRILLED_FISH::get, 1, fish(1), Cost.of(salt, 1));
+        b.add("meat", "smoked_fish", FishingRegistry.SMOKED_FISH::get, 2, fish(2), Cost.of(salt, 1), Cost.of(() -> Items.CHARCOAL, 1));
+        b.add("meat", "steamed_mudcrab_legs", FishingRegistry.STEAMED_MUDCRAB_LEGS::get, 1,
+                Cost.of(() -> FishingRegistry.FISH_ITEMS.get("juvenile_mudcrab").get(), 2), Cost.of(SurvivalRegistry.GARLIC, 1));
+        b.add("stews", "fish_stew", FishingRegistry.FISH_STEW::get, 1,
+                fish(2), Cost.of(() -> Items.POTATO, 1), Cost.of(SurvivalRegistry.LEEK, 1), Cost.of(salt, 1));
+        b.add("stews", "fish_chowder", FishingRegistry.FISH_CHOWDER::get, 1,
+                fish(1), Cost.of(() -> Items.MILK_BUCKET, 1), Cost.of(() -> Items.POTATO, 1), Cost.of(salt, 1));
         b.add("meat", "grilled_leeks", SurvivalRegistry.GRILLED_LEEKS::get, 1, Cost.of(SurvivalRegistry.LEEK, 1), Cost.of(salt, 1));
         b.add("meat", "baked_potatoes", () -> Items.BAKED_POTATO, 1, Cost.of(() -> Items.POTATO, 1));
 
@@ -92,6 +103,18 @@ public final class CookingRecipes {
         cats.replaceAll((k, v) -> Collections.unmodifiableList(v));
         byCategory = Collections.unmodifiableMap(cats);
         byId = Collections.unmodifiableMap(ids);
+    }
+
+    /** Any caught fish ({@code #skycraft:fish}, vanilla cod and salmon too). */
+    private static Cost fish(int count) {
+        return new Cost(stack -> stack.is(FishingRegistry.FISH) || stack.is(Items.COD) || stack.is(Items.SALMON),
+                () -> new ItemStack(FishingRegistry.FISH_ITEMS.get("carp").get()), count);
+    }
+
+    /** Salmon, char, trout or grayling (and vanilla salmon). */
+    private static Cost salmonid() {
+        return new Cost(stack -> stack.is(FishingRegistry.SALMONID) || stack.is(Items.SALMON),
+                () -> new ItemStack(FishingRegistry.FISH_ITEMS.get("salmon").get()), 1);
     }
 
     public static Map<String, List<CookingRecipe>> byCategory() {

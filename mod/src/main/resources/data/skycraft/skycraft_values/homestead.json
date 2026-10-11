@@ -1,0 +1,10 @@
+{
+  "values": {
+    "skycraft:sawn_log": 15,
+    "skycraft:quarried_stone": 10,
+    "skycraft:nails": 1,
+    "skycraft:hinge": 5,
+    "skycraft:lock": 10,
+    "skycraft:iron_fittings": 8
+  }
+}

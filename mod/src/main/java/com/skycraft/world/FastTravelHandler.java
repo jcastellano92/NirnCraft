@@ -40,6 +40,10 @@ public final class FastTravelHandler {
             fail(player, "disabled");
             return;
         }
+        if (com.skycraft.survival.mode.SurvivalMode.blocksFastTravel(player)) {
+            fail(player, "survival");
+            return;
+        }
         if (com.skycraft.inventory.CarryWeight.isOverencumbered(player)) {
             fail(player, "encumbered");
             return;

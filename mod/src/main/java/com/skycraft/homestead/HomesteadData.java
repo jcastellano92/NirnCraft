@@ -74,6 +74,15 @@ public class HomesteadData extends SavedData {
 
         ServerLevel level = player.serverLevel();
 
+        // Hearthfire plots (Lakeview, Windstad, Heljarchen) lie by farms and roads: only one owner each
+        Homesteads.Plot plot = Homesteads.plotAt(pos);
+        if (plot != null) {
+            for (HomesteadClaim claim : claimsByOwner.values()) {
+                if (plot.id().equals(claim.getPlot())) return "message.skycraft.homestead.plot_taken";
+            }
+            return null;
+        }
+
         // 2. Check settlements and villages
         if (Theft.inVillage(level, pos)) {
             return "message.skycraft.homestead.near_settlement";
@@ -126,6 +135,12 @@ public class HomesteadData extends SavedData {
                 pos,
                 player.level().dimension().location().toString()
         );
+        // the house grows away from the drafting table's front (where whoever placed it stood)
+        net.minecraft.world.level.block.state.BlockState table = player.level().getBlockState(pos);
+        if (table.hasProperty(DraftingTableBlock.FACING)) claim.setFacing(table.getValue(DraftingTableBlock.FACING).getOpposite());
+        else claim.setFacing(player.getDirection());
+        Homesteads.Plot plot = Homesteads.plotAt(pos);
+        if (plot != null) claim.setPlot(plot.id());
         claimsByOwner.put(player.getUUID(), claim);
         setDirty();
         return claim;

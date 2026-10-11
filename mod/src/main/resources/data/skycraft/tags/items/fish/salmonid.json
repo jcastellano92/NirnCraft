@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:salmon",
+    "skycraft:arctic_char",
+    "skycraft:arctic_grayling",
+    "skycraft:brook_trout",
+    "skycraft:colovian_trout",
+    "skycraft:redfin_trout",
+    "skycraft:bjoulsae_trout",
+    "skycraft:wrothgar_char"
+  ]
+}

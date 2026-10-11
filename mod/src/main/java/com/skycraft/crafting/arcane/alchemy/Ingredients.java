@@ -136,6 +136,11 @@ public final class Ingredients {
         BY_ID.put(id, new Ingredient(id, new AlchemyEffect[]{a, b, c, d}));
     }
 
+    /** Adds an ingredient owned by another module (e.g. the survival module's fish). Call during mod construction. */
+    public static synchronized void register(String id, AlchemyEffect a, AlchemyEffect b, AlchemyEffect c, AlchemyEffect d) {
+        if (!BY_ID.containsKey(id)) add(id, a, b, c, d);
+    }
+
     public static Collection<Ingredient> all() {
         return Collections.unmodifiableCollection(BY_ID.values());
     }

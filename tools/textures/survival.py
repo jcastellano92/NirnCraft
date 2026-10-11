@@ -989,8 +989,788 @@ def blocks():
     depleted_ore_textures()
 
 
+# ============================================================================ Phase 2: fishing, camping, homesteads, HUD
+
+import json
+
+ASSETS = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft")
+
+
+def write_json(rel, data):
+    p = os.path.join(ASSETS, rel)
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    with open(p, "w", encoding="utf-8", newline="\n") as fp:
+        json.dump(data, fp, indent=2)
+        fp.write("\n")
+
+
+def item_model(name, tex=None, parent="minecraft:item/generated", overrides=None):
+    m = {"parent": parent, "textures": {"layer0": "skycraft:item/" + (tex or name)}}
+    if overrides:
+        m["overrides"] = overrides
+    write_json(f"models/item/{name}.json", m)
+
+
+# ---------------------------------------------------------------------------- fish
+
+# id: (body, belly, fin, accent, shape, pattern)
+FISH = {
+    "salmon": ("8a9aa8", "f0c8b8", "6a7078", "e07868", "fish", "stripe"),
+    "arctic_char": ("4a5a48", "e86a3a", "e05a30", "f0e0c0", "fish", "spots"),
+    "arctic_grayling": ("6a7a88", "c8c8d0", "8a4a8a", "3a3a48", "sail", "spots"),
+    "brook_trout": ("4a6a3a", "e8a060", "d86030", "f0d060", "fish", "spots"),
+    "carp": ("a88a3a", "e8d090", "8a6a2a", "7a5a20", "deep", "scales"),
+    "catfish": ("5a5048", "c8c0b0", "4a4038", "2a2420", "cat", None),
+    "goldfish": ("f0901a", "f8c060", "f8a830", "ffd890", "small", None),
+    "pike": ("5a7a3a", "e0e0c0", "7a6a2a", "d8e0a0", "long", "spots"),
+    "pogfish": ("8a8070", "d8d0c0", "6a6050", "5a5040", "deep", "warts"),
+    "vampire_fish": ("3a2a3a", "8a5a6a", "8a1a2a", "e03040", "fangs", None),
+    "silverside_perch": ("a8b0b8", "e8f0f0", "c86040", "6a7a88", "fish", "bars"),
+    "river_betty": ("8a9a5a", "d8e0b0", "6a7a3a", "4a5a2a", "slender", "stripe"),
+    "abecean_longfin": ("4a6aa8", "c8d8f0", "3a5a98", "8ab0e8", "longfin", None),
+    "cyrodilic_spadetail": ("8a6a5a", "d8c0a8", "c84a2a", "5a3a2a", "spade", "spots"),
+    "histcarp": ("5a7a6a", "c8d8a8", "6a8a4a", "a8c860", "deep", "spots"),
+    "glassfish": ("b8e0ec", "e8f8fc", "98d0e0", "ffffff", "glass", "glow"),
+    "juvenile_mudcrab": ("8a7a5a", "b8a880", "5a4a30", "2a2010", "crab", None),
+    "slaughterfish_egg": ("e8a040", "f8d080", "a86020", "3a2010", "eggs", None),
+    "niben_eel": ("4a4a3a", "a8a080", "3a3a2a", "6a6a4a", "eel", None),
+    "rumare_bass": ("4a6a4a", "d8d8b0", "3a5a3a", "2a3a2a", "fish", "bars"),
+    "colovian_trout": ("7a8a9a", "f0e0d0", "c88a6a", "4a4a6a", "fish", "spots"),
+    "gold_coast_snapper": ("d84a3a", "f0b0a0", "c83a2a", "f8d0c0", "deep", "stripe"),
+    "ash_perch": ("5a5050", "a89890", "c86a3a", "2a2020", "fish", "bars"),
+    "kollop": ("c8b098", "e8d8c8", "8a7058", "f8f0f0", "shell", None),
+    "bittergreen_eel": ("4a6a3a", "c8d890", "3a5a2a", "8aa858", "eel", None),
+    "dreugh_crab": ("6a5a7a", "a898b8", "4a3a5a", "2a2030", "crab", None),
+    "telvanni_glowfish": ("3a5a7a", "7a9ab8", "2a4a6a", "9af0e0", "fish", "glow"),
+    "marsh_gar": ("6a6a3a", "c8c090", "5a5a2a", "3a3a1a", "gar", "spots"),
+    "murkmire_mudskipper": ("6a5a3a", "b8a878", "5a4a2a", "e8e0c0", "skipper", "spots"),
+    "bloodfin": ("6a2a2a", "c86060", "d81a1a", "2a0a0a", "fish", None),
+    "riverhold_catfish": ("8a7a5a", "d8c8a0", "6a5a3a", "3a3020", "cat", None),
+    "sugar_koi": ("f8f0e0", "fff8f0", "f8e0c0", "e85a2a", "deep", "patches"),
+    "senchal_snapper": ("c86a4a", "f0c0a0", "b85a3a", "f8e0d0", "deep", None),
+    "dune_minnow": ("d8c090", "f0e8c8", "b8a070", "8a7040", "small", "stripe"),
+    "valenwood_tigerfish": ("c8a040", "f0e0a0", "c83a2a", "2a2a1a", "fish", "bars"),
+    "greenshade_glimmerfish": ("3a7a5a", "8ac8a0", "2a6a4a", "c0ffa0", "small", "glow"),
+    "woodhearth_mackerel": ("3a6a8a", "e0e8f0", "2a5a7a", "1a3a4a", "fish", "waves"),
+    "alinor_sunfish": ("e8c040", "f8e8a0", "e09020", "f07030", "deep", "spots"),
+    "auridon_silverfin": ("c0c8d8", "f0f4f8", "e8e8f8", "8a98b0", "longfin", "stripe"),
+    "artaeum_moonfish": ("b8b8e8", "e8e8ff", "9898d8", "f0f0ff", "deep", "glow"),
+    "iliac_tuna": ("2a3a5a", "c8d0d8", "e8c040", "4a5a7a", "big", None),
+    "redfin_trout": ("8a8a7a", "e8e0d0", "d83a2a", "4a4a3a", "fish", "spots"),
+    "stros_mkai_marlin": ("2a4a8a", "d8e0e8", "3a5a9a", "6a8ad8", "marlin", "bars"),
+    "glenumbra_herring": ("6a8aa8", "e8f0f8", "5a7a98", "a8c0d8", "slender", None),
+    "bjoulsae_trout": ("6a7a5a", "e8d8b0", "8a6a4a", "2a2a2a", "fish", "spots"),
+    "wrothgar_char": ("3a4a5a", "e88a5a", "d86a3a", "d8e0e8", "fish", "spots"),
+    "atmoran_icefish": ("c8e8f4", "f0fafe", "a8d8e8", "ffffff", "glass", None),
+    "akaviri_koi": ("f0f0f0", "ffffff", "f0e0e0", "d02020", "deep", "patches"),
+    "tsaesci_eel": ("6a8a2a", "c8d870", "5a7a1a", "e8d040", "eel", "bars"),
+    "yokudan_sailfin": ("3a5a7a", "d8e0e8", "4a8ad8", "8ab8f0", "sail", None),
+    "maormer_serpentfish": ("2a6a7a", "6ab0b8", "1a5a6a", "80f0f0", "eel", "glow"),
+    "thras_coralfish": ("e86a8a", "f8b0c0", "f8a040", "f8d040", "deep", "bars"),
+}
+
+
+def fish_sprite(name, body, belly, fin, accent, shape, pattern):
+    body, belly, fin, accent = hexc(body), hexc(belly), hexc(fin), hexc(accent)
+    rnd = random.Random(seed_of(name))
+    img = new()
+    if shape == "crab":
+        crab_sprite(img, body, belly, fin, accent)
+    elif shape == "eggs":
+        egg_sprite(img, body, belly, accent, rnd)
+    elif shape == "shell":
+        shell_sprite(img, body, belly, fin, accent)
+    elif shape == "eel":
+        eel_sprite(img, body, belly, fin, accent, pattern, rnd)
+    else:
+        body_sprite(img, body, belly, fin, accent, shape, pattern, rnd)
+    outline(img, shade(body, 0.32), diagonal=False)
+    out("item", name, img)
+    item_model(name)
+
+
+def body_sprite(img, body, belly, fin, accent, shape, pattern, rnd):
+    # head to the right, slightly tilted up like a fish held by the tail
+    dims = {"fish": (5.4, 2.8), "deep": (4.8, 3.8), "small": (3.8, 2.4), "long": (6.4, 2.2), "slender": (6.0, 1.9),
+            "cat": (6.0, 2.6), "fangs": (5.2, 2.8), "longfin": (5.2, 2.7), "spade": (5.2, 2.6), "glass": (5.0, 2.6),
+            "gar": (6.4, 1.8), "skipper": (5.0, 2.2), "big": (6.2, 3.4), "marlin": (5.6, 3.0), "sail": (5.4, 2.6)}
+    rx, ry = dims.get(shape, (5.4, 2.8))
+    cx, cy = 8.6 if shape != "big" else 8.8, 8.4
+    tail_x = cx - rx
+    alpha = 190 if shape == "glass" else 255
+    # tail fin
+    spread = 3.2 if shape not in ("spade",) else 4.2
+    for y in range(16):
+        for x in range(16):
+            dx = tail_x + 0.6 - (x + 0.5)
+            if 0 <= dx <= 3.6 and abs(y + 0.5 - cy) <= 0.8 + dx * (spread / 3.6):
+                notch = shape not in ("spade", "cat") and dx > 2.4 and abs(y + 0.5 - cy) < (dx - 2.4) * 1.1
+                if not notch:
+                    img.putpixel((x, y), shade(fin, 0.9 + 0.1 * (y % 2))[:3] + (alpha,))
+    # body
+    for y in range(16):
+        for x in range(16):
+            if in_ellipse(x, y, cx, cy, rx, ry):
+                t = (y + 0.5 - (cy - ry)) / (2 * ry)
+                c = mix(body, belly, max(0.0, (t - 0.35) * 1.8))
+                c = lit(c, x, y, cx, cy, max(rx, ry), 0.22)
+                img.putpixel((x, y), c[:3] + (alpha,))
+    # fins: dorsal, (big) sail, pectoral
+    top = int(cy - ry)
+    if shape in ("sail",):
+        for x in range(int(cx - 3), int(cx + 2)):
+            for y in range(max(0, top - 4), top + 1):
+                if y >= top - 4 + abs(x - (cx - 1)) * 0.6:
+                    put(img, x, y, fin)
+    else:
+        for i, x in enumerate(range(int(cx - 2), int(cx + 1))):
+            put(img, x, top - (1 if i < 2 else 0), fin)
+            put(img, x, top, shade(fin, 0.9))
+    if shape == "longfin":
+        for i in range(4):
+            put(img, int(cx) - i, int(cy + 1) + i // 2, shade(fin, 1.1))
+    else:
+        put(img, int(cx), int(cy + 1), shade(fin, 1.1))
+        put(img, int(cx) - 1, int(cy + 2), shade(fin, 1.0))
+    # pattern
+    if pattern == "spots":
+        for _ in range(7):
+            x = int(cx - rx + 1 + rnd.random() * (2 * rx - 3))
+            y = int(cy - ry + 1 + rnd.random() * ry)
+            if get(img, x, y)[3]:
+                put(img, x, y, accent)
+    elif pattern == "stripe":
+        for x in range(int(cx - rx + 1), int(cx + rx - 1)):
+            if get(img, x, int(cy))[3]:
+                put(img, x, int(cy), accent)
+    elif pattern == "bars":
+        for x in range(int(cx - rx + 2), int(cx + rx - 2), 2):
+            for y in range(int(cy - ry), int(cy + 1)):
+                if get(img, x, y)[3]:
+                    put(img, x, y, mix(get(img, x, y), accent, 0.7))
+    elif pattern == "waves":
+        for x in range(int(cx - rx + 1), int(cx + rx - 1)):
+            y = int(cy - ry + 1 + (1 if (x // 2) % 2 else 0))
+            if get(img, x, y)[3]:
+                put(img, x, y, accent)
+    elif pattern == "patches":
+        for (px, py) in [(cx - 2, cy - 1), (cx + 1, cy - 2), (cx - 3, cy + 1), (cx + 2, cy)]:
+            for dx in range(2):
+                for dy in range(2):
+                    if rnd.random() < 0.8 and get(img, int(px) + dx, int(py) + dy)[3]:
+                        put(img, int(px) + dx, int(py) + dy, accent)
+    elif pattern == "scales":
+        for y in range(int(cy - ry) + 1, int(cy + ry)):
+            for x in range(int(cx - rx) + 1, int(cx + rx) - 1):
+                if (x + y) % 3 == 0 and get(img, x, y)[3]:
+                    put(img, x, y, shade(get(img, x, y), 0.85))
+    elif pattern == "warts":
+        for _ in range(6):
+            x = int(cx - rx + 1 + rnd.random() * (2 * rx - 2))
+            y = int(cy - ry + 1 + rnd.random() * (2 * ry - 2))
+            if get(img, x, y)[3]:
+                put(img, x, y, accent)
+    elif pattern == "glow":
+        for _ in range(5):
+            x = int(cx - rx + 1 + rnd.random() * (2 * rx - 3))
+            y = int(cy - ry + 1 + rnd.random() * (2 * ry - 2))
+            if get(img, x, y)[3]:
+                put(img, x, y, accent)
+    # head: gill line, eye, mouth; extras by shape
+    hx = int(cx + rx - 2)
+    for y in range(int(cy - ry + 1), int(cy + ry)):
+        if get(img, hx - 1, y)[3]:
+            put(img, hx - 1, y, shade(get(img, hx - 1, y), 0.8))
+    eye_y = int(cy - 1)
+    eye = (16, 12, 10, 255)
+    if shape == "fangs":
+        eye = accent
+    if shape == "skipper":
+        put(img, hx, eye_y - 2, (240, 236, 220, 255))
+        put(img, hx, eye_y - 1, (16, 12, 10, 255))
+    else:
+        put(img, hx, eye_y, eye)
+    mouth = int(cx + rx)
+    put(img, mouth - 1, int(cy + 0.5), shade(body, 0.5))
+    if shape in ("cat",):
+        for i in range(3):
+            put(img, mouth + i // 2, int(cy + 1) + i, shade(body, 0.6))
+    if shape == "fangs":
+        put(img, mouth - 1, int(cy + 1), (240, 240, 230, 255))
+        put(img, mouth - 2, int(cy + 1), (240, 240, 230, 255))
+    if shape in ("gar", "marlin"):
+        for i in range(1, 5 if shape == "gar" else 6):
+            put(img, min(15, mouth - 1 + i), int(cy) - (i // 3 if shape == "marlin" else 0), shade(body, 0.8))
+
+
+def eel_sprite(img, body, belly, fin, accent, pattern, rnd):
+    for x in range(1, 15):
+        yc = 8 + 2.2 * math.sin(x / 2.4)
+        thick = 1.6 if x < 12 else 1.9
+        for y in range(16):
+            d = y + 0.5 - yc
+            if abs(d) <= thick:
+                c = mix(body, belly, max(0.0, d / thick))
+                if pattern == "bars" and x % 3 == 0:
+                    c = mix(c, accent, 0.6)
+                if pattern == "glow" and rnd.random() < 0.08:
+                    c = accent
+                img.putpixel((x, y), c)
+        if x % 2 == 0:
+            put(img, x, int(yc - thick - 0.5), fin)
+    put(img, 13, int(8 + 2.2 * math.sin(13 / 2.4)) - 1, (16, 12, 10, 255))
+
+
+def crab_sprite(img, body, belly, fin, accent):
+    for y in range(16):
+        for x in range(16):
+            if in_ellipse(x, y, 8, 8.5, 4.6, 3.4):
+                img.putpixel((x, y), lit(mix(body, belly, (y - 5) / 7.0), x, y, 8, 8.5, 5, 0.3))
+    for i, (x0, y0) in enumerate([(3, 10), (2, 12), (13, 10), (14, 12)]):
+        put(img, x0, y0, fin)
+        put(img, x0 + (-1 if x0 < 8 else 1), y0 + 1, fin)
+    # claws
+    for (x, y) in [(3, 6), (2, 5), (3, 5), (12, 6), (13, 5), (12, 5)]:
+        put(img, x, y, shade(body, 1.1))
+    put(img, 2, 4, fin)
+    put(img, 13, 4, fin)
+    put(img, 7, 6, accent)
+    put(img, 9, 6, accent)
+
+
+def egg_sprite(img, body, belly, accent, rnd):
+    eggs = [(6, 6), (10, 6), (5, 10), (8.5, 9), (11.5, 10.5), (7.5, 12.5), (10, 13)]
+    for (ex, ey) in eggs:
+        for y in range(16):
+            for x in range(16):
+                if in_ellipse(x, y, ex, ey, 2.0, 2.0):
+                    c = lit(body, x, y, ex, ey, 2, 0.35)
+                    img.putpixel((x, y), c[:3] + (230,))
+        put(img, int(ex), int(ey), accent)
+        put(img, int(ex) - 1, int(ey) - 1, belly)
+
+
+def shell_sprite(img, body, belly, fin, accent):
+    for y in range(16):
+        for x in range(16):
+            dx, dy = x + 0.5 - 8, y + 0.5 - 12
+            r = math.hypot(dx, dy)
+            ang = math.atan2(-dy, dx)
+            if r <= 8.5 and 0.15 <= ang <= math.pi - 0.15:
+                ridge = int(ang * 7 / math.pi) % 2 == 0
+                c = mix(belly, body, r / 8.5)
+                if ridge:
+                    c = shade(c, 0.88)
+                img.putpixel((x, y), c)
+    for x in range(6, 11):
+        put(img, x, 12, fin)
+        put(img, x, 13, fin)
+    put(img, 8, 6, accent)
+
+
+def fish_items():
+    for name, spec in FISH.items():
+        fish_sprite(name, *spec)
+
+
+def cooked_fish_items():
+    # grilled fish: a whole fish, browned, with grill marks
+    img = new()
+    rnd = random.Random(31)
+    body_sprite(img, hexc("a0602a"), hexc("d8a060"), hexc("7a4a20"), hexc("5a3010"), "fish", None, rnd)
+    for x in range(5, 12, 2):
+        for y in range(6, 11):
+            if get(img, x, y)[3] and (x + y) % 2 == 0:
+                put(img, x, y, hexc("4a2810"))
+    outline(img, hexc("3a2010"))
+    out("item", "grilled_fish", img)
+    item_model("grilled_fish")
+    # smoked fish: dark split fillets on a string
+    img = new()
+    for y in range(3, 15):
+        for x in range(4, 12):
+            if in_ellipse(x, y, 8, 9, 3.6, 5.5):
+                c = lit(hexc("8a4a20"), x, y, 8, 9, 5, 0.3)
+                if x == 8:
+                    c = hexc("c88a50")
+                img.putpixel((x, y), c)
+    line(img, 8, 0, 8, 3, hexc("d8c8a0"))
+    outline(img, hexc("2a1408"))
+    out("item", "smoked_fish", img)
+    item_model("smoked_fish")
+    bowl_dish("fish_stew", hexc("c88a50"), [hexc("f0e0c8"), hexc("5a8a30"), hexc("e08a40")], 41)
+    item_model("fish_stew")
+    bowl_dish("fish_chowder", hexc("ece0c0"), [hexc("f8f0e0"), hexc("c8a060"), hexc("5a8a30")], 42)
+    item_model("fish_chowder")
+    # steamed mudcrab legs: red jointed legs
+    img = new()
+    for i, (x0, y0) in enumerate([(3, 4), (5, 3), (7, 3)]):
+        for k in range(9):
+            x = x0 + k // 2 + i
+            y = y0 + k
+            put(img, x, y, hexc("d04a2a") if k % 3 else hexc("f0a080"))
+            put(img, x + 1, y, hexc("a83a20"))
+    outline(img, hexc("4a1a0a"))
+    out("item", "steamed_mudcrab_legs", img)
+    item_model("steamed_mudcrab_legs")
+
+
+# ---------------------------------------------------------------------------- rods & bait
+
+def rod_sprite(name, wood, wood_d, fitting, cast):
+    img = new()
+    # the pole: bottom-left handle to top-right tip
+    for i in range(14):
+        x, y = 1 + i, 14 - i
+        put(img, x, y, wood if i % 4 else wood_d)
+        if i < 4:
+            put(img, x + 1, y, wood_d)  # thicker grip
+    # reel and guides
+    put(img, 4, 10, fitting)
+    put(img, 5, 10, fitting)
+    put(img, 4, 11, shade(fitting, 0.7))
+    put(img, 8, 6, fitting)
+    put(img, 11, 3, fitting)
+    if not cast:
+        line(img, 14, 1, 14, 9, (230, 230, 230, 255))
+        put(img, 14, 10, hexc("c83a2a"))
+        put(img, 14, 11, (240, 240, 240, 255))
+    out("item", name + ("_cast" if cast else ""), img)
+
+
+def rods():
+    specs = {"fishing_rod": (hexc("8a5a2a"), hexc("5a3a18"), hexc("6a6a70")),
+             "fine_fishing_rod": (hexc("5a3a2a"), hexc("3a2418"), hexc("c0c0c8")),
+             "dwarven_fishing_rod": (hexc("b8862a"), hexc("7a5418"), hexc("e8c060"))}
+    for name, (w, wd, fit) in specs.items():
+        rod_sprite(name, w, wd, fit, False)
+        rod_sprite(name, w, wd, fit, True)
+        item_model(name + "_cast", parent="minecraft:item/handheld_rod")
+        item_model(name, parent="minecraft:item/handheld_rod",
+                   overrides=[{"predicate": {"cast": 1}, "model": f"skycraft:item/{name}_cast"}])
+    # bait: a twist of worms in a scrap of cloth; glow bait: glowing grubs
+    for name, worm, glow in (("fishing_bait", hexc("c86a6a"), False), ("glow_bait", hexc("b8f060"), True)):
+        img = new()
+        for y in range(9, 15):
+            for x in range(3, 13):
+                if in_ellipse(x, y, 8, 12, 5, 2.8):
+                    img.putpixel((x, y), lit(hexc("8a6a4a"), x, y, 8, 12, 5, 0.3))
+        rnd = random.Random(seed_of(name))
+        for k in range(4):
+            x0 = 4 + k * 2
+            for t in range(6):
+                x = x0 + int(1.5 * math.sin(t + k))
+                y = 4 + t + (k % 2)
+                put(img, x, y, shade(worm, 1.0 + 0.1 * (t % 2)))
+        if glow:
+            for (x, y) in [(5, 3), (10, 4), (7, 2)]:
+                put(img, x, y, (240, 255, 200, 200))
+        outline(img, hexc("2a1a10"))
+        out("item", name, img)
+        item_model(name)
+
+
+# ---------------------------------------------------------------------------- camping
+
+def fur(seed, base, light, dark):
+    rnd = random.Random(seed)
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            n = rnd.random()
+            c = base if n < 0.6 else light if n < 0.8 else dark
+            if (x + y * 3 + seed) % 7 == 0:
+                c = shade(c, 0.85)
+            img.putpixel((x, y), c)
+    # combed fur strands
+    for _ in range(18):
+        x, y = rnd.randrange(16), rnd.randrange(16)
+        for k in range(3):
+            put(img, (x + k) % 16, (y + k // 2) % 16, light)
+    return img
+
+
+def leather(seed, base):
+    rnd = random.Random(seed)
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            c = shade(base, 0.9 + rnd.random() * 0.15)
+            img.putpixel((x, y), c)
+    return img
+
+
+def camping():
+    fur_base, fur_l, fur_d = hexc("7a5a3a"), hexc("a8845a"), hexc("4a3420")
+    out("block", "bedroll_fur", fur(71, fur_base, fur_l, fur_d))
+    hide = leather(72, hexc("8a6a48"))
+    for x in range(16):
+        put(hide, x, 0, hexc("5a4028"))
+        put(hide, x, 15, hexc("5a4028"))
+    out("block", "bedroll_hide", hide)
+    pillow = leather(73, hexc("c8b088"))
+    for x in range(0, 16, 3):
+        put(pillow, x, 7, hexc("8a7050"))
+    out("block", "bedroll_pillow", pillow)
+    # item: a rolled bedroll with two straps
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            # a diagonal cylinder
+            d = abs((x - y) / math.sqrt(2))
+            along = (x + y) / 2.0
+            if d <= 3.4 and 2.5 <= along <= 13.5:
+                c = lit(fur_base if d > 1.2 else fur_l, x, y, 8, 8, 6, 0.25)
+                if abs(along - 5.5) < 0.6 or abs(along - 10.5) < 0.6:
+                    c = hexc("3a2614")
+                img.putpixel((x, y), c)
+    # rolled end spiral
+    for (x, y) in [(3, 3), (4, 3), (3, 4), (4, 4)]:
+        put(img, x, y, hexc("c8a070"))
+    outline(img, hexc("2a1a0c"))
+    out("item", "bedroll", img)
+    item_model("bedroll")
+
+    # tent canvas: stitched hide patches; the pole
+    canvas = leather(81, hexc("a8875e"))
+    for y in range(16):
+        for x in range(16):
+            if (y in (5, 11) and x % 2 == 0) or (x in (7,) and y % 2 == 1):
+                put(canvas, x, y, hexc("6a5034"))
+    for (x, y) in [(2, 2), (12, 8), (4, 13)]:
+        put(canvas, x, y, hexc("8a6a48"))
+    out("block", "tent_canvas", canvas)
+    pole = leather(82, hexc("6a4a28"))
+    for y in range(16):
+        put(pole, 0, y, hexc("4a3018"))
+        put(pole, 15, y, hexc("4a3018"))
+    out("block", "tent_pole", pole)
+    pack = leather(83, hexc("7a5a38"))
+    for x in range(16):
+        put(pack, x, 6, hexc("3a2814"))
+    out("block", "tent_pack", pack)
+
+    # tent kit: rolled canvas tied to poles
+    img = new()
+    for y in range(5, 13):
+        for x in range(2, 14):
+            if in_ellipse(x, y, 8, 9, 6, 3.5):
+                img.putpixel((x, y), lit(hexc("a8875e"), x, y, 8, 9, 6, 0.3))
+    for x in range(1, 15):
+        put(img, x, 4, hexc("6a4a28"))
+        put(img, x, 13, hexc("6a4a28"))
+    for y in range(5, 13):
+        put(img, 5, y, hexc("3a2614"))
+        put(img, 11, y, hexc("3a2614"))
+    outline(img, hexc("2a1a0c"))
+    out("item", "tent_kit", img)
+    item_model("tent_kit")
+
+    # campfire kit: a bundle of split logs with a flint
+    img = new()
+    for k, y0 in enumerate((6, 9, 12)):
+        for x in range(2, 14):
+            put(img, x, y0, hexc("7a5230") if (x + k) % 5 else hexc("5a3a1c"))
+            put(img, x, y0 + 1, hexc("5a3a1c"))
+        put(img, 1, y0, hexc("c8a070"))
+        put(img, 1, y0 + 1, hexc("a88050"))
+    for y in range(5, 15):
+        put(img, 7, y, hexc("2a1a0c"))
+    for (x, y) in [(10, 3), (11, 3), (10, 4), (11, 4), (12, 4)]:
+        put(img, x, y, hexc("4a4a50"))
+    outline(img, hexc("1e140a"))
+    out("item", "campfire_kit", img)
+    item_model("campfire_kit")
+
+    # models: bedroll head (pillow) and foot (rolled-up end); tent sides, back and pack
+    blanket = {"from": [1, 0, 0], "to": [15, 2, 16],
+               "faces": {d: {"texture": "#fur" if d == "up" else "#hide", "uv": [1, 0, 15, 16] if d in ("up", "down") else [0, 13, 16, 15]}
+                         for d in ("up", "down", "north", "south", "east", "west")}}
+    write_json("models/block/bedroll_head.json", {
+        "parent": "minecraft:block/block", "textures": {"particle": "skycraft:block/bedroll_fur", "fur": "skycraft:block/bedroll_fur",
+                                                        "hide": "skycraft:block/bedroll_hide", "pillow": "skycraft:block/bedroll_pillow"},
+        "elements": [blanket, {"from": [2, 2, 1], "to": [14, 4.5, 6],
+                               "faces": {d: {"texture": "#pillow"} for d in ("up", "down", "north", "south", "east", "west")}}]})
+    write_json("models/block/bedroll_foot.json", {
+        "parent": "minecraft:block/block", "textures": {"particle": "skycraft:block/bedroll_fur", "fur": "skycraft:block/bedroll_fur",
+                                                        "hide": "skycraft:block/bedroll_hide"},
+        "elements": [blanket, {"from": [1, 2, 11], "to": [15, 5, 15],
+                               "faces": {d: {"texture": "#hide"} for d in ("up", "down", "north", "south", "east", "west")}}]})
+    variants = {}
+    rot = {"north": 0, "east": 90, "south": 180, "west": 270}
+    for facing, y in rot.items():
+        for part in ("head", "foot"):
+            v = {"model": f"skycraft:block/bedroll_{part}"}
+            if y:
+                v["y"] = y
+            variants[f"facing={facing},part={part}"] = v
+    write_json("blockstates/bedroll.json", {"variants": variants})
+
+    def plane(x0, x1, origin_x, angle):
+        faces = {d: {"texture": "#canvas", "uv": [0, 0, 16, 16]} for d in ("up", "down")}
+        for d in ("north", "south", "east", "west"):
+            faces[d] = {"texture": "#canvas", "uv": [0, 0, 16, 1]}
+        return {"from": [x0, 0, 0], "to": [x1, 0.8, 16],
+                "rotation": {"origin": [origin_x, 0, 8], "axis": "z", "angle": angle, "rescale": True}, "faces": faces}
+
+    def back_steps(rising_right):
+        els = []
+        for i in range(6):
+            if rising_right:
+                x0, x1 = 4 * i, 4 * i + 4
+            else:
+                x0, x1 = 16 - 4 * (i + 1), 16 - 4 * i
+            els.append({"from": [x0, 0, 15.2], "to": [x1, 4 * i + 4, 16],
+                        "faces": {d: {"texture": "#canvas"} for d in ("north", "south", "east", "west", "up")}})
+        return els
+
+    ridge = {"from": [22.5, 22.5, 0], "to": [25.5, 25.5, 16],
+             "faces": {d: {"texture": "#pole"} for d in ("up", "down", "north", "south", "east", "west")}}
+    tex = {"particle": "skycraft:block/tent_canvas", "canvas": "skycraft:block/tent_canvas", "pole": "skycraft:block/tent_pole",
+           "pack": "skycraft:block/tent_pack"}
+    side_a = [plane(0, 24, 0, 45), ridge]
+    side_b = [plane(-8, 16, 16, -45)]
+    write_json("models/block/tent_side_a.json", {"textures": tex, "elements": side_a})
+    write_json("models/block/tent_side_a_back.json", {"textures": tex, "elements": side_a + back_steps(True)})
+    write_json("models/block/tent_side_b.json", {"textures": tex, "elements": side_b})
+    write_json("models/block/tent_side_b_back.json", {"textures": tex, "elements": side_b + back_steps(False)})
+    write_json("models/block/tent_back.json", {"textures": tex, "elements": [
+        {"from": [4, 0, 9], "to": [12, 5, 15], "faces": {d: {"texture": "#pack"} for d in ("up", "down", "north", "south", "east", "west")}},
+        {"from": [5, 5, 10], "to": [11, 6, 14], "faces": {d: {"texture": "#canvas"} for d in ("up", "north", "south", "east", "west")}}]})
+    variants = {}
+    models = {"a_front": "tent_side_a", "a_mid": "tent_side_a", "a_back": "tent_side_a_back",
+              "b_front": "tent_side_b", "b_mid": "tent_side_b", "b_back": "tent_side_b_back", "back": "tent_back"}
+    for facing, y in rot.items():
+        for part, model in models.items():
+            v = {"model": "skycraft:block/" + model}
+            if y:
+                v["y"] = y
+            variants[f"facing={facing},part={part}"] = v
+    write_json("blockstates/tent.json", {"variants": variants})
+
+
+# ---------------------------------------------------------------------------- homestead
+
+def homestead():
+    # sawn log: a squared beam, saw-cut end
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            d = abs((x - y) / math.sqrt(2))
+            along = (x + y) / 2.0
+            if d <= 2.6 and 2 <= along <= 14:
+                c = hexc("b08050") if d < 1.8 else hexc("8a5a30")
+                if int(along * 2) % 7 == 0:
+                    c = shade(c, 0.85)
+                img.putpixel((x, y), c)
+    for (x, y) in [(2, 2), (3, 2), (2, 3), (3, 3), (4, 3), (3, 4)]:
+        put(img, x, y, hexc("e0c090"))
+    outline(img, hexc("3a2410"))
+    out("item", "sawn_log", img)
+    # quarried stone: a rough-cut block
+    img = new()
+    rnd = random.Random(91)
+    for y in range(4, 14):
+        for x in range(2, 14):
+            c = shade(hexc("8a8a86"), 0.85 + rnd.random() * 0.25)
+            if y == 4 or x == 2:
+                c = shade(c, 1.2)
+            if y == 13 or x == 13:
+                c = shade(c, 0.7)
+            img.putpixel((x, y), c)
+    for (x, y) in [(5, 7), (6, 7), (9, 10), (10, 10), (11, 6)]:
+        put(img, x, y, hexc("5a5a58"))
+    outline(img, hexc("2a2a28"))
+    out("item", "quarried_stone", img)
+    # nails: a small pile
+    img = new()
+    for k, (x0, y0) in enumerate([(3, 8), (6, 6), (9, 9), (5, 11), (10, 5), (8, 12)]):
+        for i in range(5):
+            put(img, x0 + i // 2, y0 + i - (k % 2), hexc("a8a8b0") if i else hexc("d8d8e0"))
+        put(img, x0 - 1, y0 - (k % 2), hexc("8a8a90"))
+    outline(img, hexc("2a2a30"))
+    out("item", "nails", img)
+    # hinge: two leaves and a pin
+    img = new()
+    for y in range(3, 13):
+        for x in range(3, 13):
+            if x == 8:
+                c = hexc("c8c8d0")
+            elif (x < 8 and y < 11) or (x > 8 and y > 4):
+                c = hexc("7a7a82")
+            else:
+                continue
+            img.putpixel((x, y), c)
+    for (x, y) in [(5, 5), (5, 9), (11, 7), (11, 11)]:
+        put(img, x, y, hexc("3a3a40"))
+    outline(img, hexc("1a1a20"))
+    out("item", "hinge", img)
+    # lock: a padlock
+    img = new()
+    for y in range(2, 8):
+        for x in range(5, 11):
+            if (x in (5, 10)) or (y == 2 and 6 <= x <= 9):
+                img.putpixel((x, y), hexc("a8a8b0"))
+    for y in range(7, 14):
+        for x in range(3, 13):
+            img.putpixel((x, y), lit(hexc("6a6a72"), x, y, 8, 10, 5, 0.3))
+    put(img, 8, 10, hexc("1a1a20"))
+    put(img, 8, 11, hexc("1a1a20"))
+    outline(img, hexc("1a1a20"))
+    out("item", "lock", img)
+    # iron fittings: an angle bracket with rivets
+    img = new()
+    for y in range(2, 14):
+        for x in range(3, 7):
+            img.putpixel((x, y), hexc("6a6a72"))
+    for y in range(10, 14):
+        for x in range(3, 13):
+            img.putpixel((x, y), hexc("7a7a82"))
+    for (x, y) in [(4, 4), (4, 8), (8, 11), (11, 11)]:
+        put(img, x, y, hexc("c8c8d0"))
+    outline(img, hexc("1a1a20"))
+    out("item", "iron_fittings", img)
+    for name in ("sawn_log", "quarried_stone", "nails", "hinge", "lock", "iron_fittings"):
+        item_model(name)
+
+    # deposits
+    rnd = random.Random(95)
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            c = shade(hexc("8e8c86"), 0.8 + rnd.random() * 0.3)
+            if (y % 5 == 0) or ((x + (y // 5) * 3) % 7 == 0 and y % 5 != 0):
+                c = shade(c, 0.6)  # quarry cuts
+            img.putpixel((x, y), c)
+    for (x, y) in [(3, 2), (11, 7), (6, 12)]:
+        put(img, x, y, hexc("d8d8d0"))
+    out("block", "stone_deposit", img)
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            c = shade(hexc("a86a4a"), 0.85 + rnd.random() * 0.25)
+            if rnd.random() < 0.06:
+                c = hexc("d89878")
+            img.putpixel((x, y), c)
+    for x in range(16):
+        put(img, x, 3 + int(1.5 * math.sin(x / 2.0)), hexc("8a4a30"))
+    out("block", "clay_deposit", img)
+    for name in ("stone_deposit", "clay_deposit"):
+        write_json(f"models/block/{name}.json", {"parent": "minecraft:block/cube_all", "textures": {"all": f"skycraft:block/{name}"}})
+        write_json(f"blockstates/{name}.json", {"variants": {"": {"model": f"skycraft:block/{name}"}}})
+        write_json(f"models/item/{name}.json", {"parent": f"skycraft:block/{name}"})
+
+
+# ---------------------------------------------------------------------------- HUD icons & effects
+
+SNOWFLAKE = ["....#....",
+             ".#..#..#.",
+             "..#.#.#..",
+             "...###...",
+             "#########",
+             "...###...",
+             "..#.#.#..",
+             ".#..#..#.",
+             "....#...."]
+MOON = ["...####..",
+        "..##.....",
+        ".##......",
+        ".##......",
+        ".##......",
+        ".##......",
+        "..##.....",
+        "...####..",
+        "........."]
+MEAL = [".........",
+        "..#..#...",
+        "...#..#..",
+        ".........",
+        "#########",
+        "#########",
+        ".#######.",
+        "..#####..",
+        "........."]
+FLAME = ["....#....",
+         "...##....",
+         "...###...",
+         "..####.#.",
+         "..######.",
+         ".#######.",
+         ".##.####.",
+         "..#..##..",
+         "...###..."]
+DROPLET = ["....#....",
+           "...###...",
+           "...###...",
+           "..#####..",
+           "..#####..",
+           ".#######.",
+           ".#######.",
+           "..#####..",
+           "...###..."]
+HEART = ["........",
+         ".##..##.",
+         "########",
+         "########",
+         ".######.",
+         "..####..",
+         "...##...",
+         "........"]
+MOON8 = ["..####..",
+         ".##.....",
+         "##......",
+         "##......",
+         "##......",
+         ".##.....",
+         "..####..",
+         "........"]
+
+
+def hud_icons():
+    sheet = Image.new("RGBA", (64, 16), (0, 0, 0, 0))
+    icons = [(MEAL, hexc("e0a050"), hexc("6a3a10")), (MOON, hexc("b8a8f0"), hexc("3a2a6a")),
+             (SNOWFLAKE, hexc("c8ecff"), hexc("2a4a6a")), (FLAME, hexc("ffb040"), hexc("7a2a08")),
+             (DROPLET, hexc("8ac8ff"), hexc("1a3a6a"))]
+    for i, (rows, col, edge) in enumerate(icons):
+        x0 = i * 10
+        for j, row in enumerate(rows):
+            for k, ch in enumerate(row):
+                if ch == "#":
+                    sheet.putpixel((x0 + k, j), mix(col, (255, 255, 255, 255), 0.25 if j < 3 else 0.0))
+        # dark rim for legibility on bright snow
+        rim = sheet.copy()
+        for y in range(10):
+            for x in range(x0, x0 + 10):
+                if rim.getpixel((x, y))[3]:
+                    continue
+                for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    nx, ny = x + dx, y + dy
+                    if x0 <= nx < x0 + 10 and 0 <= ny < 10 and rim.getpixel((nx, ny))[3] > 40:
+                        sheet.putpixel((x, y), edge[:3] + (200,))
+                        break
+    d = os.path.join(TEX, "gui", "survival")
+    os.makedirs(d, exist_ok=True)
+    sheet.save(os.path.join(d, "icons.png"))
+
+    for name, col, rows in (("warming_meal", "e08a40", BOWL), ("rested", "9ab0d8", MOON8), ("lovers_comfort", "e07a9a", HEART)):
+        img = icon_base(col)
+        draw_rows(img, rows, ink_for(col))
+        out("mob_effect", name, img)
+
+
+def phase2():
+    fish_items()
+    cooked_fish_items()
+    rods()
+    camping()
+    homestead()
+    hud_icons()
+
+
+
 if __name__ == "__main__":
     items()
     blocks()
     effect_icons()
+    phase2()
     print("survival textures written to", TEX)

@@ -212,6 +212,7 @@ public final class RestManager {
             Request r = done.get(p.getUUID());
             if (r != null) {
                 applyRest(p, hours, r.sleep, r.bed);
+                com.skycraft.survival.mode.SurvivalMode.onRest(p, hours, r.sleep, r.bed); // survival meters, Rested, Lover's Comfort
                 SkyNetwork.sendToPlayer(p, new WorldPackets.RestFade(hours, r.sleep ? WorldPackets.RestFade.SLEEP : WorldPackets.RestFade.WAIT));
             } else {
                 Notifier.message(p, Component.translatable("world.skycraft.vote.passed", hours));

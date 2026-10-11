@@ -21,15 +21,6 @@ file = "config/vampirism-common.toml"
 hash = "958d8a95f1fd3b4aba540136b6cbef8d1c4cea0efb54ece20b75895d537bfe37"
 
 [[files]]
-file = "defaultconfigs/corpse-server.toml"
-hash = "567ba98daa63857c41f87bf35c2a222bf0f951408dca98b461766881527a26bc"
-
-[[files]]
-file = "mods/aquaculture.pw.toml"
-hash = "9979ffe64490c1f95518f5cf2bebff291b14f8affa2fc7039d53e51f4b7868b6"
-metafile = true
-
-[[files]]
 file = "mods/architectury-api.pw.toml"
 hash = "3011e54cc0370c6eccab1b78e6520266015f8de4a1fd762fd7df2a6c62e1b0e0"
 metafile = true
@@ -60,18 +51,8 @@ hash = "1339de8f4cab5df9d953ce0bc0bc07b5a35e7aba65fb92191539b98eb40fbf8e"
 metafile = true
 
 [[files]]
-file = "mods/comforts.pw.toml"
-hash = "e0c90098adfccae9f58ff1c4f51366536f701deb93ce87208c3caab559ff51d0"
-metafile = true
-
-[[files]]
 file = "mods/controllable.pw.toml"
 hash = "425bd3423fdb6214eca387e027c79101197f8c3c4f5075022d46f60fbdeb8c18"
-metafile = true
-
-[[files]]
-file = "mods/corpse.pw.toml"
-hash = "e4312318fca7bb2adc422776b4e56ba37e9f160dc1f5b73a046358a7c5fa8cd8"
 metafile = true
 
 [[files]]

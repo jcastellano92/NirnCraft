@@ -2,26 +2,44 @@ package com.skycraft.homestead;
 
 import com.skycraft.core.Notifier;
 import com.skycraft.network.SkyNetwork;
-import com.skycraft.vitals.ActionHandler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
+/**
+ * Drafting table packets. Every client request is accepted only while the player has the table's menu open and in
+ * reach, for the claim of that very table, and (except reading) only from its owner.
+ */
 public final class HomesteadPackets {
     private HomesteadPackets() {}
 
     public static void register() {
         SkyNetwork.register(UpdatePerms.class, NetworkDirection.PLAY_TO_SERVER, UpdatePerms::encode, UpdatePerms::decode, UpdatePerms::handle);
         SkyNetwork.register(CraftBlueprint.class, NetworkDirection.PLAY_TO_SERVER, CraftBlueprint::encode, CraftBlueprint::decode, CraftBlueprint::handle);
+        SkyNetwork.register(Action.class, NetworkDirection.PLAY_TO_SERVER, Action::encode, Action::decode, Action::handle);
+        SkyNetwork.register(State.class, NetworkDirection.PLAY_TO_CLIENT, State::encode, State::decode, State::handle);
+    }
+
+    /** The claim of the open drafting table if {@code player} owns it, else null. */
+    @Nullable
+    private static HomesteadClaim ownedClaim(ServerPlayer player) {
+        if (player == null || !(player.containerMenu instanceof HomesteadMenu menu) || !menu.stillValid(player)) return null;
+        HomesteadClaim claim = HomesteadData.get(player.server).getClaimAt(player.level(), menu.pos);
+        if (claim == null || !claim.getCenter().equals(menu.pos)) return null;
+        if (!claim.isOwner(player)) {
+            Notifier.message(player, Component.translatable("message.skycraft.homestead.owned_by", claim.getOwnerName()));
+            return null;
+        }
+        return claim;
     }
 
     public record UpdatePerms(BlockPos pos, int doorPerm, int containerPerm, int buildPerm) {
@@ -38,127 +56,88 @@ public final class HomesteadPackets {
 
         static void handle(UpdatePerms m, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayer player = ctx.get().getSender();
-            if (player != null && player.containerMenu instanceof HomesteadMenu menu && menu.stillValid(player)) {
-                HomesteadData data = HomesteadData.get(player.server);
-                HomesteadClaim claim = data.getClaim(player.getUUID());
-                if (claim != null && claim.getCenter().equals(m.pos)) {
-                    claim.setDoorPerm(m.doorPerm);
-                    claim.setContainerPerm(m.containerPerm);
-                    claim.setBuildPerm(m.buildPerm);
-                    data.setDirty();
-                    menu.doorPerm = m.doorPerm;
-                    menu.containerPerm = m.containerPerm;
-                    menu.buildPerm = m.buildPerm;
-                    Notifier.message(player, Component.translatable("message.skycraft.homestead.perms_updated"));
-                }
+            HomesteadClaim claim = ownedClaim(player);
+            if (claim != null && claim.getCenter().equals(m.pos)) {
+                claim.setDoorPerm(Math.floorMod(m.doorPerm, 3));
+                claim.setContainerPerm(Math.floorMod(m.containerPerm, 2));
+                claim.setBuildPerm(Math.floorMod(m.buildPerm, 2));
+                HomesteadData.get(player.server).setDirty();
+                Notifier.message(player, Component.translatable("message.skycraft.homestead.perms_updated"));
+                Hearthfire.sync(player, claim);
             }
             ctx.get().setPacketHandled(true);
         }
     }
 
-    public record CraftBlueprint(int index) {
+    /** C2S: make building material {@code index} of {@link Hearthfire#MATERIALS}, {@code times} times. */
+    public record CraftBlueprint(int index, int times) {
         static void encode(CraftBlueprint m, FriendlyByteBuf buf) {
             buf.writeVarInt(m.index);
+            buf.writeVarInt(m.times);
         }
 
         static CraftBlueprint decode(FriendlyByteBuf buf) {
-            return new CraftBlueprint(buf.readVarInt());
+            return new CraftBlueprint(buf.readVarInt(), buf.readVarInt());
         }
 
         static void handle(CraftBlueprint m, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayer player = ctx.get().getSender();
-            if (player != null && player.containerMenu instanceof HomesteadMenu menu && menu.stillValid(player)) {
-                executeCraft(player, m.index);
+            HomesteadClaim claim = ownedClaim(player);
+            if (claim != null) Hearthfire.craft(player, claim, m.index, m.times);
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
+    /**
+     * C2S: a drafting table action: {@code build} (arg: plan id), {@code buy_plot}, {@code hire_steward},
+     * {@code steward_buy} (arg: offer index).
+     */
+    public record Action(String action, String arg) {
+        static void encode(Action m, FriendlyByteBuf buf) {
+            buf.writeUtf(m.action, 32);
+            buf.writeUtf(m.arg, 64);
+        }
+
+        static Action decode(FriendlyByteBuf buf) {
+            return new Action(buf.readUtf(32), buf.readUtf(64));
+        }
+
+        static void handle(Action m, Supplier<NetworkEvent.Context> ctx) {
+            ServerPlayer player = ctx.get().getSender();
+            HomesteadClaim claim = ownedClaim(player);
+            if (claim != null) {
+                switch (m.action) {
+                    case "build" -> Hearthfire.build(player, claim, m.arg);
+                    case "buy_plot" -> Hearthfire.buyPlot(player, claim);
+                    case "hire_steward" -> Hearthfire.hireSteward(player, claim);
+                    case "steward_buy" -> {
+                        try {
+                            Hearthfire.stewardBuy(player, claim, Integer.parseInt(m.arg));
+                        } catch (NumberFormatException ignored) {
+                            // malformed request
+                        }
+                    }
+                    default -> { }
+                }
             }
             ctx.get().setPacketHandled(true);
         }
     }
 
-    private static void executeCraft(ServerPlayer player, int index) {
-        // Blueprint index:
-        // 0: Nails & Fittings (1 Iron Ingot -> 10 Iron Nuggets)
-        // 1: Sawn Timber (1 Oak Log -> 4 Oak Planks)
-        // 2: Hewn Stone (4 Cobblestone -> 4 Stone Bricks)
-        // 3: Wood Door (6 Planks -> 1 Wooden Door)
-        // 4: Nordic Chest (8 Planks -> 1 Chest)
-        // 5: Hearth Fireplace (6 Cobblestone + 1 Coal -> 1 Campfire)
-        // 6: Glass Panes (4 Glass -> 16 Glass Panes)
-
-        ItemStack required;
-        ItemStack output;
-        int reqCount;
-
-        switch (index) {
-            case 0 -> {
-                required = new ItemStack(Items.IRON_INGOT);
-                reqCount = 1;
-                output = new ItemStack(Items.IRON_NUGGET, 10);
-            }
-            case 1 -> {
-                required = new ItemStack(Items.OAK_LOG);
-                reqCount = 1;
-                output = new ItemStack(Items.OAK_PLANKS, 4);
-            }
-            case 2 -> {
-                required = new ItemStack(Items.COBBLESTONE);
-                reqCount = 4;
-                output = new ItemStack(Items.STONE_BRICKS, 4);
-            }
-            case 3 -> {
-                required = new ItemStack(Items.OAK_PLANKS);
-                reqCount = 6;
-                output = new ItemStack(Items.OAK_DOOR, 1);
-            }
-            case 4 -> {
-                required = new ItemStack(Items.OAK_PLANKS);
-                reqCount = 8;
-                output = new ItemStack(Items.CHEST, 1);
-            }
-            case 5 -> {
-                required = new ItemStack(Items.COBBLESTONE);
-                reqCount = 6;
-                output = new ItemStack(Items.CAMPFIRE, 1);
-            }
-            case 6 -> {
-                required = new ItemStack(Items.GLASS);
-                reqCount = 4;
-                output = new ItemStack(Items.GLASS_PANE, 16);
-            }
-            default -> {
-                return;
-            }
+    /** S2C: the open drafting table's state changed. */
+    public record State(CompoundTag state) {
+        static void encode(State m, FriendlyByteBuf buf) {
+            buf.writeNbt(m.state);
         }
 
-        // Check if player has required items
-        int count = 0;
-        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-            ItemStack stack = player.getInventory().getItem(i);
-            if (!stack.isEmpty() && stack.is(required.getItem())) {
-                count += stack.getCount();
-            }
+        static State decode(FriendlyByteBuf buf) {
+            CompoundTag t = buf.readNbt();
+            return new State(t == null ? new CompoundTag() : t);
         }
 
-        if (count >= reqCount) {
-            // Deduct
-            int toRemove = reqCount;
-            for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-                ItemStack stack = player.getInventory().getItem(i);
-                if (!stack.isEmpty() && stack.is(required.getItem())) {
-                    int rem = Math.min(stack.getCount(), toRemove);
-                    stack.shrink(rem);
-                    toRemove -= rem;
-                    if (toRemove <= 0) break;
-                }
-            }
-            // Give
-            if (!ActionHandler.addToBags(player, output)) {
-                player.drop(output, false);
-            }
-            player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.WOOD_PLACE, SoundSource.PLAYERS, 0.8f, 1.2f);
-            Notifier.message(player, Component.translatable("message.skycraft.homestead.crafted", output.getHoverName()));
-        } else {
-            Notifier.message(player, Component.translatable("message.skycraft.homestead.missing_mats", required.getHoverName()));
+        static void handle(State m, Supplier<NetworkEvent.Context> ctx) {
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.homestead.client.HomesteadScreen.receive(m.state));
+            ctx.get().setPacketHandled(true);
         }
     }
 }

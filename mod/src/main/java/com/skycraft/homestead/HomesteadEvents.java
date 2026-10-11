@@ -96,6 +96,12 @@ public final class HomesteadEvents {
                 Notifier.message(sp, Component.translatable("message.skycraft.homestead.cannot_destroy", claim.getOwnerName()));
                 return;
             }
+            // a house stands on these plans: the table stays (sneak to give up the homestead anyway)
+            if (claim != null && !claim.getBuilt().isEmpty() && !sp.isShiftKeyDown()) {
+                event.setCanceled(true);
+                Notifier.message(sp, Component.translatable("message.skycraft.homestead.table_in_use"));
+                return;
+            }
             if (claim != null) {
                 data.removeClaimAt(level, pos);
                 Notifier.message(sp, Component.translatable("message.skycraft.homestead.dismantled"));

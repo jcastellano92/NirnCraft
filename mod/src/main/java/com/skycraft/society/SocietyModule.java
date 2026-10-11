@@ -31,6 +31,13 @@ public final class SocietyModule {
 
     /** Registers this module's DeferredRegisters and mod-bus listeners. Called from the mod constructor. */
     public static void init(IEventBus modBus) {
+        // Hearthfire homes find the player's spouse for Lover's Comfort and family life
+        com.skycraft.homestead.Homesteads.setSpouseLocator((player, bed, radius) -> {
+            java.util.UUID spouse = Marriage.spouseOf(player);
+            if (spouse == null) return null;
+            net.minecraft.world.entity.Entity e = player.serverLevel().getEntity(spouse);
+            return e != null && e.distanceToSqr(bed.getX() + 0.5, bed.getY(), bed.getZ() + 0.5) <= radius * radius ? e : null;
+        });
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SocietyConfig.SPEC, "skycraft-society.toml");
         NpcEntities.init(modBus);
         modBus.addListener(SocietyModule::onAttributes);

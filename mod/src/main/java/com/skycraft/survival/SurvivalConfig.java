@@ -19,6 +19,26 @@ public final class SurvivalConfig {
     public static final ForgeConfigSpec.IntValue ROOM_PRICE;
     public static final ForgeConfigSpec.IntValue INNKEEPER_RESPAWN_TICKS;
 
+    public static final ForgeConfigSpec.BooleanValue SURVIVAL_MODE;
+    public static final ForgeConfigSpec.DoubleValue HUNGER_PER_HOUR;
+    public static final ForgeConfigSpec.DoubleValue FATIGUE_PER_HOUR;
+    public static final ForgeConfigSpec.DoubleValue COLD_RATE;
+    public static final ForgeConfigSpec.DoubleValue CARRY_PENALTY;
+    public static final ForgeConfigSpec.BooleanValue FREEZING_DAMAGE;
+    public static final ForgeConfigSpec.BooleanValue BLOCK_FAST_TRAVEL;
+    public static final ForgeConfigSpec.BooleanValue STAGE_MESSAGES;
+
+    public static final ForgeConfigSpec.BooleanValue FISHING_MINIGAME;
+    public static final ForgeConfigSpec.DoubleValue FISHING_BITE_SPEED;
+    public static final ForgeConfigSpec.IntValue FISH_STOCK_REGEN_TICKS;
+
+    public static final ForgeConfigSpec.BooleanValue PLAYER_CORPSES;
+    public static final ForgeConfigSpec.ConfigValue<String> CORPSE_LOOT_ACCESS;
+    public static final ForgeConfigSpec.IntValue EMPTY_CORPSE_SECONDS;
+
+    public static final ForgeConfigSpec.IntValue PLOT_PRICE;
+    public static final ForgeConfigSpec.IntValue STEWARD_PRICE;
+
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
         b.push("ore_veins");
@@ -46,6 +66,49 @@ public final class SurvivalConfig {
         ROOM_PRICE = b.comment("Gold for renting a room for one day.").defineInRange("roomPrice", 10, 0, 100000);
         INNKEEPER_RESPAWN_TICKS = b.comment("A settlement whose innkeeper has not been seen for this long gets a new one.")
                 .defineInRange("innkeeperRespawnTicks", 72000, 1200, 100_000_000);
+        b.pop();
+
+        b.push("survival_mode");
+        SURVIVAL_MODE = b.comment("Skyrim's Survival Mode: hunger, fatigue and cold meters with their penalties, warmth from clothing,",
+                        "and a lower carry weight. Each world can still switch it off with the game rule skycraftSurvivalMode.")
+                .define("enabled", true);
+        HUNGER_PER_HOUR = b.comment("Hunger gained per in-game hour (0-240 scale: Peckish at 40, Hungry 80, Famished 120, Starving 180).")
+                .defineInRange("hungerPerHour", 4.0, 0.0, 240.0);
+        FATIGUE_PER_HOUR = b.comment("Fatigue gained per in-game hour awake (0-240 scale: Tired at 80, Weary 120, Debilitated 180).")
+                .defineInRange("fatiguePerHour", 3.0, 0.0, 240.0);
+        COLD_RATE = b.comment("Multiplier for how fast you get cold (and warm up again).")
+                .defineInRange("coldRate", 1.0, 0.0, 20.0);
+        CARRY_PENALTY = b.comment("Carry weight taken away while Survival Mode is on (Skyrim: you can carry less).")
+                .defineInRange("carryPenalty", 100.0, 0.0, 10000.0);
+        FREEZING_DAMAGE = b.comment("Numbing cold water hurts: swimming in freezing water can kill you.")
+                .define("freezingDamage", true);
+        BLOCK_FAST_TRAVEL = b.comment("Disable map fast travel while Survival Mode is on (Skyrim's Survival Mode does; carriages still work).")
+                .define("blockFastTravel", false);
+        STAGE_MESSAGES = b.comment("Show \"You are hungry\"-style messages when a meter reaches a new stage.")
+                .define("stageMessages", true);
+        b.pop();
+
+        b.push("fishing");
+        FISHING_MINIGAME = b.comment("Reel in at the right moment (Skyrim's fishing). Off: a bite is caught automatically.")
+                .define("minigame", true);
+        FISHING_BITE_SPEED = b.comment("Multiplier for how quickly fish bite.").defineInRange("biteSpeed", 1.0, 0.1, 10.0);
+        FISH_STOCK_REGEN_TICKS = b.comment("Ticks for a fished-out spot to regain one fish (water keeps up to 10 per 16x16 area).")
+                .defineInRange("stockRegenTicks", 1500, 20, 1_000_000);
+        b.pop();
+
+        b.push("player_corpses");
+        PLAYER_CORPSES = b.comment("When you die, what you drop stays in your body where you fell (never despawns while it holds items).")
+                .define("enabled", true);
+        CORPSE_LOOT_ACCESS = b.comment("Who can take items from a player's body: owner, party (owner and their party) or anyone.")
+                .define("lootAccess", "party");
+        EMPTY_CORPSE_SECONDS = b.comment("Seconds an emptied player body stays before it fades away.")
+                .defineInRange("emptyDespawnSeconds", 60, 1, 100000);
+        b.pop();
+
+        b.push("homesteads");
+        PLOT_PRICE = b.comment("Gold for the deed to a Hearthfire plot (Lakeview Manor, Windstad Manor, Heljarchen Hall).")
+                .defineInRange("plotPrice", 5000, 0, 1_000_000);
+        STEWARD_PRICE = b.comment("Gold to hire a steward for your homestead.").defineInRange("stewardPrice", 1000, 0, 1_000_000);
         b.pop();
         SPEC = b.build();
     }

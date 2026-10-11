@@ -265,7 +265,14 @@ Spell sounds all go through `SpellSounds` (slots the audio module can override),
 
 ## Survival and the world
 
-* **Fishing** feeds the Fishing skill and its perks; Aquaculture 2 adds fish and gear.
+* **Survival Mode** [Core]: Skyrim's hunger (Peckish to Starving), fatigue (Tired to Debilitated) and cold (Chilly to
+  Numb), with stat penalties and a lower carry weight. Warmth from fur, hide and Nordic gear, hoods and cloaks; fires,
+  forges and hot stews warm you; cold water is deadly; Nords feel the cold less. Small meters sit above the health
+  bar. Switch it off in `config/skycraft-survival.toml` or per world with `/gamerule skycraftSurvivalMode false`.
+* **Fishing** [Core]: Skycraft rods, more than fifty fish of Skyrim and every province (salmon, char, pike, histcarp,
+  glassfish, Abecean longfin, Niben eel, sugar koi...) by water, region, time, weather and depth; fishing spots with
+  jumping fish; Skyrim's reel-in timing bar. Fish are cooking and alchemy ingredients and feed the Fishing skill.
+* **Camping** [Core]: bedrolls (sleep anywhere, never a respawn point), hide tents and campfire kits.
 * **Hunting:** pelts, meat and monster hunting.
 * **Wait and sleep.** Pick how many hours to wait or sleep (beds work any time). In multiplayer, everyone votes.
   Sleeping grants Well Rested.
@@ -280,8 +287,12 @@ Spell sounds all go through `SpellSounds` (slots the audio module can override),
 * **Terrain map.** The integrated Skyrim map on **M** replaces third-party maps, featuring explored terrain and fog of war.
 * **Woodcutting** [Core]: chop a trunk with an axe and the whole tree comes down into harvestable logs; a sapling is
   replanted at the stump.
-* **Player corpses** (Corpse): when you die, your gear stays in your body where you fell. Bodies don't despawn while
-  they hold items, never fall into the void or burn in lava, and other players may loot them.
+* **Player corpses** [Core]: when you die, what you drop stays in your body where you fell, marked "Your Corpse" on
+  the map and compass. Bodies don't despawn while they hold items and are moved out of lava and the void; you and
+  your party may loot them (configurable).
+* **Hearthfire homesteads** [Core]: buy Lakeview Manor, Windstad Manor or Heljarchen Hall (or claim your own land)
+  with a drafting table, then build a small house, a main hall, three wings, a cellar, a garden, an animal pen and a
+  workshop from sawn logs, quarried stone, clay, nails, hinges, locks and iron fittings. Hire a steward.
 * **Controllers & Steam Deck.** Full gamepad and Steam Deck support out-of-the-box via Controllable, preconfigured
   with Steam button icons and the virtual cursor.
 

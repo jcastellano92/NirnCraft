@@ -359,7 +359,10 @@ public final class LifeSkills {
 
         List<ItemStack> extra = new ArrayList<>();
         int angler = Perks.rank(player, "fishing.angler");
-        if (angler > 0 && rnd.nextFloat() < 0.1f * angler) extra.add(new ItemStack(rnd.nextBoolean() ? Items.COD : Items.SALMON));
+        if (angler > 0 && rnd.nextFloat() < 0.1f * angler) {
+            // another fish of the same kind (Skycraft rods catch the local species)
+            extra.add(event.getDrops().isEmpty() ? new ItemStack(rnd.nextBoolean() ? Items.COD : Items.SALMON) : event.getDrops().get(0).copy());
+        }
         if (Perks.has(player, "fishing.double_catch") && rnd.nextFloat() < 0.25f) {
             for (ItemStack s : event.getDrops()) extra.add(s.copy());
         }
@@ -373,8 +376,11 @@ public final class LifeSkills {
             extra.addAll(level.getServer().getLootData().getLootTable(BuiltInLootTables.FISHING_TREASURE).getRandomItems(params));
         }
         if (Perks.has(player, "fishing.legendary_angler") && rnd.nextFloat() < 0.02f) {
-            ItemStack legendary = new ItemStack(Items.TROPICAL_FISH);
-            legendary.setHoverName(Component.translatable("item.skycraft.legendary_fish").withStyle(ChatFormatting.GOLD));
+            ItemStack legendary = com.skycraft.survival.fishing.Fishing.trophyOf(event.getDrops().isEmpty() ? ItemStack.EMPTY : event.getDrops().get(0), rnd);
+            if (legendary.isEmpty()) {
+                legendary = new ItemStack(Items.TROPICAL_FISH);
+                legendary.setHoverName(Component.translatable("item.skycraft.legendary_fish").withStyle(ChatFormatting.GOLD));
+            }
             extra.add(legendary);
             Notifier.message(player, Component.translatable("message.skycraft.legendary_fish"));
             Progression.addSkillXp(player, Skill.FISHING, 100f);

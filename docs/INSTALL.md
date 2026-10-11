@@ -50,8 +50,7 @@ The host's PC runs the server, so give the host 8 GB of RAM in Prism. Guests can
 
 1. Unzip `Skycraft-server.zip` onto the server machine. It contains Forge, all server-side mods, a tuned
    `server.properties` (flight allowed, because giants launch players into the air; a 2-minute watchdog for heavy
-   world generation) and JVM flags in `user_jvm_args.txt`. New worlds get Skycraft's server configs from
-   `defaultconfigs/` (for example, corpses never despawn while they still hold items, and other players may loot them).
+   world generation) and JVM flags in `user_jvm_args.txt`.
 2. Read the [Minecraft EULA](https://aka.ms/MinecraftEULA) and set `eula=true` in `eula.txt`.
 3. Start it with `./run.sh` (Linux/macOS) or `run.bat` (Windows). Give it 6–10 GB of RAM in `user_jvm_args.txt`.
 4. Players join with the client instance from step 2. Essential isn't needed for a dedicated server, but is harmless.

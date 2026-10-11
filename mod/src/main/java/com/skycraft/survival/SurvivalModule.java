@@ -14,6 +14,11 @@ import net.minecraftforge.fml.config.ModConfig;
  *     {@link SurvivalDialogue}.</li>
  *     <li>Diseases (contract 24): {@link Diseases}; cures by {@code skycraft:cure_disease}, {@link Shrines} and priests.</li>
  *     <li>Ore veins: {@link OreVeins} and {@code skycraft:depleted_ore}.</li>
+ *     <li>Survival Mode ({@link com.skycraft.survival.mode.SurvivalMode}): hunger, fatigue and cold, with warmth from
+ *     clothing.</li>
+ *     <li>Camping ({@code camping}: bedrolls, tents, campfire kits), fishing ({@code fishing}: rods, the regional fish
+ *     of Nirn, the reel-in minigame) and player bodies ({@code corpse}).</li>
+ *     <li>Hearthfire homesteads have their own package ({@link com.skycraft.homestead.Homesteads}).</li>
  * </ul>
  */
 public final class SurvivalModule {
@@ -23,6 +28,9 @@ public final class SurvivalModule {
     public static void init(IEventBus modBus) {
         SurvivalEffects.init(modBus);
         SurvivalRegistry.init(modBus);
+        com.skycraft.survival.fishing.FishingRegistry.init(modBus);
+        com.skycraft.homestead.HomesteadRegistry.init(modBus);
+        com.skycraft.survival.mode.SurvivalMode.init();
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SurvivalConfig.SPEC, "skycraft-survival.toml");
         SurvivalDialogue.register();
         SurvivalEvents.register();

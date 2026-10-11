@@ -1,0 +1,10 @@
+{
+  "weights": {
+    "skycraft:sawn_log": 5.0,
+    "skycraft:quarried_stone": 5.0,
+    "skycraft:nails": 0.0,
+    "skycraft:hinge": 0.5,
+    "skycraft:lock": 0.5,
+    "skycraft:iron_fittings": 1.0
+  }
+}

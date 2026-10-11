@@ -35,6 +35,17 @@ public final class SurvivalEffects {
     public static final RegistryObject<MobEffect> FORTIFY_STAMINA_REGEN = EFFECTS.register("fortify_stamina_regen",
             () -> new SurvivalEffect(MobEffectCategory.BENEFICIAL, 0xC8A050, true));
 
+    // ---------------------------------------------------------------- survival mode (survival/mode)
+    /** A hot stew or soup: the cold can't reach you as easily (and you warmed up when you ate it). */
+    public static final RegistryObject<MobEffect> WARMING_MEAL = EFFECTS.register("warming_meal",
+            () -> new SurvivalEffect(MobEffectCategory.BENEFICIAL, 0xE08A40, false));
+    /**
+     * Slept in a bedroll or tent: skills improve 5% faster (a proper bed gives the core's Well Rested instead, and
+     * sleeping near your spouse its Lover's Comfort).
+     */
+    public static final RegistryObject<MobEffect> RESTED = EFFECTS.register("rested",
+            () -> new SurvivalEffect(MobEffectCategory.BENEFICIAL, 0x9AB0D8, true));
+
     // ---------------------------------------------------------------- diseases (Diseases lists them)
     public static final RegistryObject<MobEffect> ATAXIA = disease("ataxia", 0x7A8A5A);
     public static final RegistryObject<MobEffect> BONE_BREAK_FEVER = disease("bone_break_fever", 0xB8A890);

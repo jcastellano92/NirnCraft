@@ -1,0 +1,110 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "skycraft:block/bedroll_fur",
+    "fur": "skycraft:block/bedroll_fur",
+    "hide": "skycraft:block/bedroll_hide"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        0,
+        0
+      ],
+      "to": [
+        15,
+        2,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#fur",
+          "uv": [
+            1,
+            0,
+            15,
+            16
+          ]
+        },
+        "down": {
+          "texture": "#hide",
+          "uv": [
+            1,
+            0,
+            15,
+            16
+          ]
+        },
+        "north": {
+          "texture": "#hide",
+          "uv": [
+            0,
+            13,
+            16,
+            15
+          ]
+        },
+        "south": {
+          "texture": "#hide",
+          "uv": [
+            0,
+            13,
+            16,
+            15
+          ]
+        },
+        "east": {
+          "texture": "#hide",
+          "uv": [
+            0,
+            13,
+            16,
+            15
+          ]
+        },
+        "west": {
+          "texture": "#hide",
+          "uv": [
+            0,
+            13,
+            16,
+            15
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        2,
+        11
+      ],
+      "to": [
+        15,
+        5,
+        15
+      ],
+      "faces": {
+        "up": {
+          "texture": "#hide"
+        },
+        "down": {
+          "texture": "#hide"
+        },
+        "north": {
+          "texture": "#hide"
+        },
+        "south": {
+          "texture": "#hide"
+        },
+        "east": {
+          "texture": "#hide"
+        },
+        "west": {
+          "texture": "#hide"
+        }
+      }
+    }
+  ]
+}

@@ -7,11 +7,17 @@ import com.skycraft.survival.block.DepletedOreBlock;
 import com.skycraft.survival.block.DepletedOreBlockEntity;
 import com.skycraft.survival.block.ShrineBlock;
 import com.skycraft.survival.block.SkyCropBlock;
+import com.skycraft.survival.camping.BedrollBlock;
+import com.skycraft.survival.camping.CampfireKitItem;
+import com.skycraft.survival.camping.TentBlock;
+import com.skycraft.survival.camping.TentKitItem;
+import com.skycraft.survival.corpse.PlayerCorpseEntity;
 import com.skycraft.survival.cooking.CookingMenu;
 import com.skycraft.survival.item.FoodSpec;
 import com.skycraft.survival.item.SkyFoodItem;
 import com.skycraft.survival.world.WaysideShrineFeature;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.BedItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemNameBlockItem;
@@ -41,6 +47,8 @@ public final class SurvivalRegistry {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, Skycraft.MODID);
     public static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.MENU_TYPES, Skycraft.MODID);
     public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, Skycraft.MODID);
+    public static final DeferredRegister<net.minecraft.world.entity.EntityType<?>> ENTITIES =
+            DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, Skycraft.MODID);
 
     // ================================================================ blocks
     public static final RegistryObject<Block> COOKING_POT = BLOCKS.register("cooking_pot",
@@ -53,6 +61,14 @@ public final class SurvivalRegistry {
             () -> new DepletedOreBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(-1.0f, 3600000.0f)
                     .noLootTable().randomTicks().sound(SoundType.STONE).pushReaction(PushReaction.BLOCK)));
     public static final Map<Divine, RegistryObject<Block>> SHRINES = new EnumMap<>(Divine.class);
+
+    // camping (replaces the Comforts mod): bedroll, tent, campfire kit
+    public static final RegistryObject<Block> BEDROLL = BLOCKS.register("bedroll",
+            () -> new BedrollBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).strength(0.2f)
+                    .sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.DESTROY)));
+    public static final RegistryObject<Block> TENT = BLOCKS.register("tent",
+            () -> new TentBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).strength(0.6f)
+                    .sound(SoundType.WOOL).noOcclusion().noLootTable().pushReaction(PushReaction.BLOCK)));
 
     // crops (the produce/seed items are below; suppliers resolve lazily)
     public static final RegistryObject<Block> CABBAGE_CROP = crop("cabbage_crop", "cabbage_seeds");
@@ -89,6 +105,19 @@ public final class SurvivalRegistry {
             ITEMS.register(d.shrineId(), () -> new BlockItem(SHRINES.get(d).get(), new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
         }
     }
+
+    public static final RegistryObject<Item> BEDROLL_ITEM = ITEMS.register("bedroll",
+            () -> new BedItem(BEDROLL.get(), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> TENT_KIT = ITEMS.register("tent_kit",
+            () -> new TentKitItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> CAMPFIRE_KIT = ITEMS.register("campfire_kit",
+            () -> new CampfireKitItem(new Item.Properties().stacksTo(16)));
+
+    // ================================================================ entities
+    /** A dead player's body (replaces the Corpse mod). */
+    public static final RegistryObject<net.minecraft.world.entity.EntityType<PlayerCorpseEntity>> PLAYER_CORPSE = ENTITIES.register("player_corpse",
+            () -> net.minecraft.world.entity.EntityType.Builder.<PlayerCorpseEntity>of(PlayerCorpseEntity::new, net.minecraft.world.entity.MobCategory.MISC)
+                    .sized(1.0f, 0.5f).fireImmune().clientTrackingRange(10).updateInterval(2).build(Skycraft.MODID + ":player_corpse"));
 
     // ================================================================ items: produce & seeds
     public static final RegistryObject<Item> CABBAGE = food("cabbage", FoodSpec.snack(2, 0.2f), false, 64);
@@ -162,5 +191,6 @@ public final class SurvivalRegistry {
         BLOCK_ENTITIES.register(modBus);
         MENUS.register(modBus);
         FEATURES.register(modBus);
+        ENTITIES.register(modBus);
     }
 }

@@ -27,7 +27,6 @@ mr:spark                         # profiler for diagnosing lag
 # --- Core RPG behaviour (Skycraft Core is injected at build time from mod/build/libs; see docs/DEVELOPING.md) ---
 mr:lootr                         # per-player loot chests: every player gets their own dungeon loot
 mr:better-combat                 # directional combos and weapon swings
-mr:corpse                        # player corpses keep your gear when you die
 cf:dynamiclights-reforged | mr:dynamic-lights-reforged   # torches light up the world in your hand
 mr:mouse-tweaks
 mr:controllable | cf:controllable   # controller support (Steam Deck, gamepads)
@@ -43,9 +42,7 @@ mr:werewolves | cf:werewolves-become-a-beast   # werewolf transformation
 
 # --- Towns, cities, dungeons, roads and secrets ---
 
-# --- Survival: fishing, cooking, gear, backpacks, sleeping ---
-cf:aquaculture | mr:aquaculture     # fishing overhaul (feeds the Fishing skill)
-mr:comforts                         # sleeping bags and hammocks for camping
+# --- Survival: fishing, camping (bedrolls, tents) and player corpses are Skycraft's own (survival module) ---
 
 # --- Shaders (optional, client) ---
 mr:complementary-reimagined         # shader pack with Distant Horizons support

@@ -123,6 +123,25 @@ public final class DeathHandler {
         data.markDirty();
     }
 
+    /** Moves the "Your Corpse" marker to where the body really lies (survival/corpse puts it on safe ground). */
+    public static void moveCorpseMarker(ServerPlayer player, BlockPos pos) {
+        PlayerData data = SkyData.get(player);
+        String corpseId = "corpse|" + player.getStringUUID();
+        ListTag discovered = com.skycraft.world.WorldData.discovered(data);
+        for (int i = 0; i < discovered.size(); i++) {
+            CompoundTag loc = discovered.getCompound(i);
+            if (!corpseId.equals(loc.getString("id"))) continue;
+            loc.putInt("x", pos.getX());
+            loc.putInt("y", pos.getY());
+            loc.putInt("z", pos.getZ());
+            loc.putInt("ax", pos.getX());
+            loc.putInt("ay", pos.getY());
+            loc.putInt("az", pos.getZ());
+            loc.putIntArray("box", new int[]{pos.getX() - 2, pos.getY() - 2, pos.getZ() - 2, pos.getX() + 2, pos.getY() + 2, pos.getZ() + 2});
+            data.markDirty();
+        }
+    }
+
     /**
      * Removes exactly the kept stacks from the death drops: whole identical stacks first, then the remaining
      * counts from stacks of the same item and tags (never a different stack that merely shares the item type).
@@ -236,6 +255,8 @@ public final class DeathHandler {
     public static void onWakeUp(PlayerWakeUpEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             BlockPos bed = player.getSleepingPos().orElse(player.blockPosition());
+            // bedrolls and tents are for one night: they never become a respawn point
+            if (com.skycraft.survival.camping.CampingEvents.isCampBed(player.level(), bed)) return;
             RespawnPoints.set(player, player.level().dimension(), bed);
         }
     }

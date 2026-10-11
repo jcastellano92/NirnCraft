@@ -2,11 +2,21 @@ package com.skycraft.homestead;
 
 import com.skycraft.quest.party.Parties;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -39,6 +49,20 @@ public class HomesteadClaim {
     private int doorPerm;
     private int containerPerm;
     private int buildPerm;
+
+    // Hearthfire: which plot (if any), what was built, the steward, the beds of the house
+    @Nullable
+    private String plot;
+    private boolean purchased;
+    /** The way the house grows from the drafting table (the side away from whoever placed it). */
+    private Direction facing = Direction.NORTH;
+    private final Set<String> built = new LinkedHashSet<>();
+    @Nullable
+    private UUID steward;
+    private String stewardName = "";
+    /** Beds the builder made: adults' first, then children's (see {@link #childBeds}). */
+    private final List<BlockPos> beds = new ArrayList<>();
+    private int childBeds;
 
     public HomesteadClaim(UUID ownerId, String ownerName, BlockPos center, String dimension) {
         this(ownerId, ownerName, center, dimension, DEFAULT_RADIUS, DEFAULT_MIN_DEPTH, DEFAULT_MAX_HEIGHT,
@@ -160,6 +184,77 @@ public class HomesteadClaim {
         return false;
     }
 
+    // ------------------------------------------------------------------ Hearthfire
+
+    /** The Hearthfire plot's place id ({@code lakeview_manor}, ...) or null for a homestead anywhere else. */
+    @Nullable
+    public String getPlot() {
+        return plot;
+    }
+
+    public void setPlot(@Nullable String plot) {
+        this.plot = plot;
+    }
+
+    /** A Hearthfire plot must be bought before building; other claims never need to be. */
+    public boolean isPurchased() {
+        return plot == null || purchased;
+    }
+
+    public void setPurchased(boolean purchased) {
+        this.purchased = purchased;
+    }
+
+    public Direction getFacing() {
+        return facing;
+    }
+
+    public void setFacing(Direction facing) {
+        if (facing.getAxis().isHorizontal()) this.facing = facing;
+    }
+
+    public Set<String> getBuilt() {
+        return built;
+    }
+
+    @Nullable
+    public UUID getSteward() {
+        return steward;
+    }
+
+    public String getStewardName() {
+        return stewardName;
+    }
+
+    public void setSteward(@Nullable UUID steward, String name) {
+        this.steward = steward;
+        this.stewardName = name == null ? "" : name;
+    }
+
+    public List<BlockPos> getBeds() {
+        return beds;
+    }
+
+    public int getChildBeds() {
+        return childBeds;
+    }
+
+    public void addBed(BlockPos head, boolean child) {
+        if (beds.contains(head)) return;
+        if (child) {
+            beds.add(head);
+            childBeds++;
+        } else {
+            beds.add(beds.size() - childBeds, head);
+        }
+    }
+
+    /** The homestead's display name: the plot's name, or "<owner>'s Homestead". */
+    public Component displayName() {
+        if (plot != null) return Component.translatable("place.skycraft." + plot);
+        return Component.translatable("homestead.skycraft.name", ownerName);
+    }
+
     public CompoundTag save() {
         CompoundTag tag = new CompoundTag();
         tag.putUUID("owner", ownerId);
@@ -172,6 +267,18 @@ public class HomesteadClaim {
         tag.putInt("doorPerm", doorPerm);
         tag.putInt("contPerm", containerPerm);
         tag.putInt("buildPerm", buildPerm);
+        if (plot != null) tag.putString("plot", plot);
+        tag.putBoolean("purchased", purchased);
+        tag.putInt("facing", facing.get2DDataValue());
+        ListTag builtList = new ListTag();
+        for (String b : built) builtList.add(StringTag.valueOf(b));
+        tag.put("built", builtList);
+        if (steward != null) tag.putUUID("steward", steward);
+        tag.putString("stewardName", stewardName);
+        ListTag bedList = new ListTag();
+        for (BlockPos b : beds) bedList.add(NbtUtils.writeBlockPos(b));
+        tag.put("beds", bedList);
+        tag.putInt("childBeds", childBeds);
         return tag;
     }
 
@@ -186,6 +293,17 @@ public class HomesteadClaim {
         int door = tag.getInt("doorPerm");
         int cont = tag.getInt("contPerm");
         int build = tag.getInt("buildPerm");
-        return new HomesteadClaim(owner, name, center, dim, rad, depth, height, door, cont, build);
+        HomesteadClaim claim = new HomesteadClaim(owner, name, center, dim, rad, depth, height, door, cont, build);
+        if (tag.contains("plot")) claim.plot = tag.getString("plot");
+        claim.purchased = tag.getBoolean("purchased");
+        if (tag.contains("facing")) claim.setFacing(Direction.from2DDataValue(tag.getInt("facing")));
+        ListTag builtList = tag.getList("built", Tag.TAG_STRING);
+        for (int i = 0; i < builtList.size(); i++) claim.built.add(builtList.getString(i));
+        if (tag.hasUUID("steward")) claim.steward = tag.getUUID("steward");
+        claim.stewardName = tag.getString("stewardName");
+        ListTag bedList = tag.getList("beds", Tag.TAG_COMPOUND);
+        for (int i = 0; i < bedList.size(); i++) claim.beds.add(NbtUtils.readBlockPos(bedList.getCompound(i)));
+        claim.childBeds = Math.min(claim.beds.size(), tag.getInt("childBeds"));
+        return claim;
     }
 }
