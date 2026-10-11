@@ -15,43 +15,67 @@ import java.util.Map;
  * Redguards in the cities, a Dunmer quarter in Eastmarch, Reachfolk Bretons in the Reach, Argonians at the Rift's
  * docks and Thalmor Altmer at the embassy; the other provinces have their own majority race. Roles override the mix
  * where lore demands it (Thalmor are Altmer, caravan traders Khajiit, Forsworn Reachmen).
+ *
+ * <p>The other folk live where the lore puts them: Reachmen in the Reach, Ohmes-raht in Elsweyr's south, Imga in
+ * Valenwood, a few Lilmothiit and Kothringi in Black Marsh, Sea Elves only in Pyandonea, Atmorans in Atmora and the
+ * Tsaesci, Ka Po' Tun and Tang Mo in Akavir. Snow Elves are never part of a mix: one is met only rarely, near the
+ * deep places where their people went below (Blackreach's great lifts, Darkfall). The Dwemer and Ayleids are gone.</p>
  */
 public final class Cultures {
     private Cultures() {}
 
-    /** Weights per race, in {@link Race} order. */
+    /** Weights per race, in {@link Race} order (the races after the first ten weigh 0 unless {@link #and} adds them). */
     private static int[] w(int nord, int imperial, int breton, int redguard, int altmer, int bosmer, int dunmer, int khajiit,
                            int argonian, int orc) {
-        return new int[]{nord, imperial, breton, redguard, altmer, bosmer, dunmer, khajiit, argonian, orc};
+        int[] w = new int[Race.VALUES.length];
+        int[] first = {nord, imperial, breton, redguard, altmer, bosmer, dunmer, khajiit, argonian, orc};
+        System.arraycopy(first, 0, w, 0, first.length);
+        return w;
+    }
+
+    /** Adds weights for the other folk: {@code and(w(...), Race.REACHMAN, 20, Race.ORC, 5)}. */
+    private static int[] and(int[] w, Object... raceWeights) {
+        for (int i = 0; i < raceWeights.length; i += 2) w[((Race) raceWeights[i]).ordinal()] = (Integer) raceWeights[i + 1];
+        return w;
     }
 
     private static final int[] SKYRIM = w(62, 9, 7, 5, 2, 3, 6, 2, 2, 2);
     private static final Map<String, int[]> REGION = Map.ofEntries(
             Map.entry("skyrim/eastmarch", w(56, 6, 4, 3, 1, 2, 20, 1, 6, 1)),
-            Map.entry("skyrim/the_reach", w(44, 7, 24, 4, 2, 3, 4, 2, 2, 8)),
+            Map.entry("skyrim/the_reach", and(w(44, 7, 8, 4, 2, 3, 4, 2, 2, 8), Race.REACHMAN, 18)),
             Map.entry("skyrim/haafingar", w(52, 20, 8, 6, 4, 3, 4, 1, 1, 1)),
             Map.entry("skyrim/the_rift", w(56, 8, 5, 4, 2, 7, 6, 2, 8, 2)),
             Map.entry("skyrim/winterhold", w(60, 6, 8, 3, 6, 2, 12, 1, 1, 1)),
             Map.entry("skyrim/the_pale", w(72, 8, 5, 4, 1, 3, 4, 1, 1, 1)),
             Map.entry("skyrim/falkreath", w(66, 10, 6, 5, 1, 6, 3, 1, 1, 1)),
             Map.entry("skyrim/hjaalmarch", w(70, 8, 6, 3, 1, 3, 5, 1, 2, 1)),
-            Map.entry("morrowind/solstheim", w(26, 3, 1, 1, 1, 1, 65, 1, 1, 0)));
+            Map.entry("morrowind/solstheim", w(26, 3, 1, 1, 1, 1, 65, 1, 1, 0)),
+            Map.entry("black_marsh/lilmoth", and(w(0, 4, 0, 1, 0, 0, 3, 3, 80, 0), Race.LILMOTHIIT, 7, Race.KOTHRINGI, 2)),
+            Map.entry("black_marsh/murkmire", and(w(0, 2, 0, 0, 0, 0, 2, 2, 90, 0), Race.LILMOTHIIT, 3, Race.KOTHRINGI, 1)),
+            Map.entry("elsweyr/pellitine", and(w(0, 4, 1, 1, 1, 3, 0, 72, 1, 0), Race.OHMES_RAHT, 17)),
+            Map.entry("elsweyr/senchal", and(w(0, 6, 1, 2, 1, 3, 1, 66, 2, 0), Race.OHMES_RAHT, 18)),
+            Map.entry("valenwood/malabal_tor", and(w(0, 2, 0, 1, 4, 82, 0, 3, 1, 0), Race.IMGA, 7)),
+            Map.entry("akavir/tsaesci", and(w(0, 3, 0, 0, 0, 0, 0, 0, 0, 0), Race.TSAESCI, 85, Race.KA_PO_TUN, 5, Race.TANG_MO, 7)),
+            Map.entry("akavir/ka_po_tun", and(w(0, 0, 0, 0, 0, 0, 0, 0, 0, 0), Race.KA_PO_TUN, 85, Race.TSAESCI, 5, Race.TANG_MO, 10)),
+            Map.entry("akavir/tang_mo", and(w(0, 0, 0, 0, 0, 0, 0, 0, 0, 0), Race.TANG_MO, 90, Race.KA_PO_TUN, 10)),
+            Map.entry("akavir/kamal", and(w(0, 0, 0, 0, 0, 0, 0, 0, 0, 0), Race.KA_PO_TUN, 50, Race.TSAESCI, 30, Race.TANG_MO, 20)));
     private static final Map<String, int[]> PROVINCE = Map.ofEntries(
             Map.entry("skyrim", SKYRIM),
             Map.entry("cyrodiil", w(5, 70, 6, 6, 1, 4, 2, 3, 3, 0)),
             Map.entry("morrowind", w(4, 6, 1, 1, 1, 1, 78, 2, 5, 1)),
-            Map.entry("black_marsh", w(0, 4, 0, 1, 0, 0, 4, 3, 88, 0)),
-            Map.entry("elsweyr", w(0, 4, 1, 1, 1, 4, 0, 88, 1, 0)),
-            Map.entry("valenwood", w(0, 3, 0, 1, 6, 85, 0, 4, 1, 0)),
+            Map.entry("black_marsh", and(w(0, 4, 0, 1, 0, 0, 4, 3, 86, 0), Race.LILMOTHIIT, 2, Race.KOTHRINGI, 1)),
+            Map.entry("elsweyr", and(w(0, 4, 1, 1, 1, 4, 0, 82, 1, 0), Race.OHMES_RAHT, 6)),
+            Map.entry("valenwood", and(w(0, 3, 0, 1, 6, 83, 0, 4, 1, 0), Race.IMGA, 3)),
             Map.entry("summerset", w(0, 3, 0, 0, 90, 5, 1, 1, 0, 0)),
             Map.entry("hammerfell", w(2, 5, 5, 84, 1, 1, 0, 1, 0, 1)),
             Map.entry("high_rock", w(5, 5, 80, 5, 1, 1, 1, 0, 0, 2)),
-            Map.entry("atmora", w(100, 0, 0, 0, 0, 0, 0, 0, 0, 0)),
+            Map.entry("atmora", and(w(10, 0, 0, 0, 0, 0, 0, 0, 0, 0), Race.ATMORAN, 90)),
             Map.entry("yokuda", w(0, 0, 0, 100, 0, 0, 0, 0, 0, 0)),
-            Map.entry("pyandonea", w(0, 0, 0, 0, 90, 10, 0, 0, 0, 0)),
+            Map.entry("pyandonea", and(w(0, 0, 0, 0, 0, 0, 0, 0, 0, 0), Race.MAORMER, 100)),
             Map.entry("thras", w(0, 0, 0, 0, 0, 0, 0, 0, 100, 0)),
-            Map.entry("akavir", w(10, 40, 0, 40, 0, 0, 0, 10, 0, 0)),
-            Map.entry("realm", w(15, 15, 10, 10, 10, 10, 10, 8, 7, 5)));
+            Map.entry("akavir", and(w(0, 2, 0, 0, 0, 0, 0, 0, 0, 0), Race.TSAESCI, 40, Race.KA_PO_TUN, 33, Race.TANG_MO, 25)),
+            Map.entry("realm", and(w(15, 15, 10, 10, 10, 10, 10, 8, 7, 5), Race.REACHMAN, 2, Race.OHMES_RAHT, 2, Race.IMGA, 1,
+                    Race.LILMOTHIIT, 1, Race.TSAESCI, 2, Race.KA_PO_TUN, 2, Race.TANG_MO, 2, Race.MAORMER, 1)));
     /** The region at a position (overworld map; other dimensions get a neutral region). */
     public static Region regionAt(Level level, BlockPos pos) {
         try {
@@ -76,7 +100,24 @@ public final class Cultures {
         int[] w = weights(region);
         int best = 0;
         for (int i = 1; i < w.length; i++) if (w[i] > w[best]) best = i;
-        return Race.values()[best];
+        return Race.VALUES[best];
+    }
+
+    /**
+     * A race for someone with {@code role} living at {@code pos}: {@link #raceFor(Region, NpcRole, RandomSource)}, except
+     * that near the old ways down into Blackreach a stranger may be one of the last Snow Elves.
+     */
+    public static Race raceFor(Level level, BlockPos pos, @Nullable Region region, @Nullable NpcRole role, RandomSource r) {
+        if (region != null && "skyrim".equals(region.province()) && (role == null || !role.townsfolk() || role == NpcRole.PRIEST)
+                && r.nextInt(4) == 0) {
+            for (com.skycraft.tamriel.Place p : com.skycraft.tamriel.Places.overlapping(pos.getX() - 300, pos.getZ() - 300,
+                    pos.getX() + 300, pos.getZ() + 300)) {
+                if (p.id().startsWith("great_lift") || p.id().equals("darkfall_cave") || p.id().startsWith("blackreach")) {
+                    if (p.distSqr(pos.getX(), pos.getZ()) < 300L * 300L) return Race.FALMER;
+                }
+            }
+        }
+        return raceFor(region, role, r);
     }
 
     /** A race for someone with {@code role} living in {@code region}. */
@@ -88,7 +129,7 @@ public final class Cultures {
                 case CARAVAN_TRADER:
                     return Race.KHAJIIT;
                 case FORSWORN:
-                    return Race.BRETON;
+                    return r.nextInt(3) == 0 ? Race.BRETON : Race.REACHMAN;
                 case JARL, STEWARD, HOUSECARL:
                     // rulers come from the land's own people
                     return r.nextInt(6) == 0 ? NpcNames.raceFor(role, r) : majority(region);
@@ -110,7 +151,7 @@ public final class Cultures {
         int n = r.nextInt(total);
         for (int i = 0; i < w.length; i++) {
             n -= w[i];
-            if (n < 0) return Race.values()[i];
+            if (n < 0) return Race.VALUES[i];
         }
         return Race.NORD;
     }

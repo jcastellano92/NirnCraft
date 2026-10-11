@@ -205,7 +205,7 @@ public class PlayerData {
 
     /** Skyrim-scale max health (100 base). One Minecraft half-heart is 5 Skyrim health. */
     public int maxHealth() {
-        return BASE_HEALTH + healthPoints * ATTRIBUTE_STEP + (int) module("bonus").getFloat("health");
+        return BASE_HEALTH + healthPoints * ATTRIBUTE_STEP + (race == null ? 0 : race.bonusHealth) + (int) module("bonus").getFloat("health");
     }
 
     public float maxMagicka() {
@@ -214,7 +214,7 @@ public class PlayerData {
     }
 
     public float maxStamina() {
-        return BASE_STAMINA + staminaPoints * ATTRIBUTE_STEP + module("bonus").getFloat("stamina");
+        return BASE_STAMINA + staminaPoints * ATTRIBUTE_STEP + (race == null ? 0 : race.bonusStamina) + module("bonus").getFloat("stamina");
     }
 
     public float getMagicka() {
@@ -459,6 +459,9 @@ public class PlayerData {
     public CompoundTag appearance() {
         CompoundTag tag = new CompoundTag();
         if (race != null) tag.putString("race", race.id());
+        // the chosen face, hair and body (society.NpcLook packing; see client.RaceSkins)
+        CompoundTag look = modules.get("race");
+        if (look != null && look.contains("look")) tag.putInt("look", look.getInt("look"));
         tag.putBoolean("sheathed", module("combat").getBoolean("sheathed"));
         CompoundTag apparel = modules.get("apparel");
         if (apparel != null && !apparel.isEmpty()) tag.put("apparel", apparel.copy());
@@ -468,6 +471,8 @@ public class PlayerData {
     /** Client side: applies an {@link #appearance()} tag to another player's copy of the data. */
     public void loadAppearance(CompoundTag tag) {
         race = tag.contains("race") ? Race.byId(tag.getString("race")) : null;
+        if (tag.contains("look")) module("race").putInt("look", tag.getInt("look"));
+        else module("race").remove("look");
         module("combat").putBoolean("sheathed", tag.getBoolean("sheathed"));
         if (tag.contains("apparel", Tag.TAG_COMPOUND)) modules.put("apparel", tag.getCompound("apparel").copy());
         else modules.remove("apparel");

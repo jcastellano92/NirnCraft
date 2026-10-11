@@ -271,19 +271,26 @@ public final class CorePackets {
         }
     }
 
-    public record ChooseRace(String raceId) {
+    /** The character creator's choice: race and look ({@code society.NpcLook} packing, -1 = the race's default). */
+    public record ChooseRace(String raceId, int look) {
+        public ChooseRace(String raceId) {
+            this(raceId, -1);
+        }
+
         static void encode(ChooseRace m, FriendlyByteBuf buf) {
             buf.writeUtf(m.raceId, 64);
+            buf.writeInt(m.look);
         }
 
         static ChooseRace decode(FriendlyByteBuf buf) {
-            return new ChooseRace(buf.readUtf(64));
+            return new ChooseRace(buf.readUtf(64), buf.readInt());
         }
 
         static void handle(ChooseRace m, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayer player = ctx.get().getSender();
             Race race = Race.byId(m.raceId);
-            if (player != null && race != null) Progression.chooseRace(player, race);
+            // the look is validated (forced to the race, every field clamped) in Progression.chooseRace
+            if (player != null && race != null) Progression.chooseRace(player, race, m.look);
             ctx.get().setPacketHandled(true);
         }
     }

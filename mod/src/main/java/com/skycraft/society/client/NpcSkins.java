@@ -64,7 +64,9 @@ public final class NpcSkins {
     private static NativeImage compose(int look) {
         String race = NpcLook.race(look).name().toLowerCase(Locale.ROOT);
         String sex = NpcLook.female(look) ? "f" : "m";
-        NativeImage body = source(ROOT + "body/" + race + "_" + sex + "_" + NpcLook.tone(look) + ".png");
+        // the sub-people's own body (Nibenese, Cathay-raht...), else the race's
+        NativeImage body = source(ROOT + "body/" + NpcLook.bodyKey(look) + ".png");
+        if (body == null) body = source(ROOT + "body/" + race + "_" + sex + "_" + NpcLook.tone(look) + ".png");
         if (body == null) return null;
         NativeImage out = new NativeImage(64, 64, true);
         out.copyFrom(body);

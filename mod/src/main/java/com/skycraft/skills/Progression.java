@@ -126,10 +126,18 @@ public final class Progression {
         }
     }
 
-    /** Sets the player's race. Only allowed once, unless reset by an operator. */
+    /** Sets the player's race (in the race's default look). Only allowed once, unless reset by an operator. */
     public static void chooseRace(ServerPlayer player, Race race) {
+        chooseRace(player, race, -1);
+    }
+
+    /** Sets the player's race and look (-1: the race's default look). Only allowed once, unless reset by an operator. */
+    public static void chooseRace(ServerPlayer player, Race race, int look) {
         PlayerData data = SkyData.get(player);
         if (data.getRace() != null) return;
+        look = look < 0 ? com.skycraft.society.NpcLook.defaultFor(race, player.getUUID().getLeastSignificantBits())
+                : com.skycraft.society.NpcLook.sanitizePlayer(look, race);
+        data.module("race").putInt("look", look);
         data.setRace(race);
         race.startingSkills().forEach((skill, lvl) -> {
             if (data.getSkill(skill) <= Skill.BASE_LEVEL) data.setSkill(skill, lvl);

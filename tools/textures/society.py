@@ -1283,32 +1283,6 @@ OUTFITS = ["farm", "fine", "merchant", "blacksmith", "priest", "mage", "beggar",
            "breton", "orc"]
 
 
-def features_texture(rnd):
-    """Greyscale (tinted at runtime) texture of RaceFeatureModel's boxes; UVs must match that model."""
-    img = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
-    boxes = [
-        (0, 0, 1, 3, 2, "ear"), (6, 0, 1, 3, 2, "ear"),        # elf ears (left/right)
-        (12, 0, 2, 2, 1, "cat_ear"), (18, 0, 2, 2, 1, "cat_ear"),  # khajiit ears
-        (0, 6, 2, 2, 6, "tail"), (16, 6, 2, 2, 6, "tail_tip"),     # khajiit tail
-        (0, 16, 3, 3, 6, "scale_tail"), (18, 16, 2, 2, 6, "scale_tail"),  # argonian tail
-        (32, 0, 1, 1, 4, "horn"), (42, 0, 1, 1, 3, "horn"),         # argonian horns
-        (32, 8, 1, 1, 1, "tusk"),                                   # orc tusk
-    ]
-    for u, v, w, h, d, kind in boxes:
-        def fn(face, x, y, fw, fh, kind=kind):
-            if kind == "cat_ear" and face == "front":
-                return (232, 196, 196) if 0 < x < fw - 1 or y > 0 else (210, 210, 210)
-            if kind == "tail_tip":
-                return (150, 150, 150) if y > fh // 2 or face in ("front", "back") else (200, 200, 200)
-            if kind in ("tail", "scale_tail"):
-                return (215, 215, 215) if (x + y) % 3 else (180, 180, 180)
-            if kind == "horn":
-                return (230, 230, 230) if face != "back" else (200, 200, 200)
-            return (225, 225, 225)
-        paint_box(img, u, v, w, h, d, fn, rnd, noise=6, edges=True)
-    return img
-
-
 def npc_layers():
     for ri, race in enumerate(NPC_RACES):
         for female in (False, True):
@@ -1325,7 +1299,9 @@ def npc_layers():
                 rnd = random.Random(10000 + oi * 13 + v * 3 + (1 if female else 0))
                 img = humanoid(outfit_look(oid, v, female), rnd, clothes_only=True)
                 save(img, "npc", "outfit", f"{oid}_{v}_{'f' if female else 'm'}.png")
-    save(features_texture(random.Random(9900)), "npc", "features.png")
+    # the races added after Skyrim's ten, the sub-peoples and the feature texture (RaceFeatureLayer)
+    import races
+    races.main_layers()
 
 
 def main():

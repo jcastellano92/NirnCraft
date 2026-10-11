@@ -64,6 +64,9 @@ public final class InventoryEvents {
             }
         }
         if (totalFound > 0) {
+            // Imperial luck: Imperials find more gold
+            com.skycraft.core.Race race = com.skycraft.core.SkyData.get(player).getRace();
+            if (race != null && race.goldFind() > 1f) totalFound = Math.round(totalFound * (double) race.goldFind());
             com.skycraft.core.Currency.give(player, totalFound);
         }
     }

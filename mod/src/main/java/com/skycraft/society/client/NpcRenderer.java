@@ -3,7 +3,6 @@ package com.skycraft.society.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.skycraft.Skycraft;
 import com.skycraft.society.NpcLook;
-import com.skycraft.society.NpcNames;
 import com.skycraft.society.NpcRole;
 import com.skycraft.society.entity.NpcEntity;
 import net.minecraft.client.model.HumanoidModel;
@@ -49,7 +48,7 @@ public class NpcRenderer extends HumanoidMobRenderer<NpcEntity, NpcModel> {
 
     private static RaceFeatureLayer.Features features(NpcEntity npc) {
         int look = npc.getLook();
-        return look < 0 ? null : new RaceFeatureLayer.Features(NpcLook.race(look), NpcLook.toneColor(look));
+        return look < 0 ? null : RaceFeatureLayer.Features.of(look);
     }
 
     @Override
@@ -63,13 +62,8 @@ public class NpcRenderer extends HumanoidMobRenderer<NpcEntity, NpcModel> {
     protected void scale(NpcEntity entity, PoseStack poseStack, float partialTick) {
         float s = entity.getScale();
         int look = entity.getLook();
-        if (look >= 0 && !entity.isChild()) {
-            NpcNames.Race race = NpcLook.race(look);
-            if (race == NpcNames.Race.ALTMER) s *= 1.05f;
-            else if (race == NpcNames.Race.BOSMER) s *= 0.94f;
-            else if (race == NpcNames.Race.ORC || race == NpcNames.Race.NORD && !NpcLook.female(look)) s *= 1.02f;
-            if (NpcLook.female(look)) s *= 0.97f;
-        }
+        // race height (core.Race.scale), sub-people and sex
+        if (look >= 0 && !entity.isChild()) s *= NpcLook.bodyScale(look);
         if (s != 1.0f) poseStack.scale(s, s, s);
         this.shadowRadius = 0.5f * entity.getScale();
     }

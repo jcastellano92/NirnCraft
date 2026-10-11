@@ -56,7 +56,7 @@ public final class MagicHud {
                 com.skycraft.core.Race race = data.getRace();
                 powerName = race != null ? race.powerName() : Component.literal("Power");
                 ready = data.getPowerReadyAt();
-                if (race == com.skycraft.core.Race.KHAJIIT) total = 200;
+                if (race != null) total = race.powerCooldown();
             } else {
                 String stoneId = voice.substring("power:stone:".length());
                 com.skycraft.lore.StandingStone stone = com.skycraft.lore.StandingStone.byId(stoneId);

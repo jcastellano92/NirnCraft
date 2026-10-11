@@ -104,7 +104,7 @@ public final class Npcs {
     public static void chooseLook(NpcEntity npc, RandomSource r) {
         NpcRole role = npc.role();
         com.skycraft.tamriel.Region region = Cultures.regionAt(npc.level(), npc.blockPosition());
-        NpcNames.Race race = Cultures.raceFor(region, role, r);
+        NpcNames.Race race = Cultures.raceFor(npc.level(), npc.blockPosition(), region, role, r);
         boolean female = npc.isFemale();
         Outfit outfit = Cultures.outfitFor(role, race, r);
         npc.setLook(NpcLook.random(race, female, role == NpcRole.CHILD, outfit, r));

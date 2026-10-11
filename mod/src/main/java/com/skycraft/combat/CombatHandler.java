@@ -192,7 +192,7 @@ public final class CombatHandler {
             int pugilist = Perks.rank(data, "unarmed.pugilist");
             if (pugilist > 0) amount *= (1f + 0.2f * pugilist);
             if (Perks.has(data, "unarmed.iron_fist")) amount += 3f;
-            if (data.getRace() == Race.KHAJIIT) amount += 4f;
+            if (data.getRace() != null) amount += data.getRace().clawDamage(); // Khajiit, Ka Po' Tun, Imga, Tsaesci
             if (Perks.has(data, "heavy_armor.fists_of_steel")) {
                 ItemStack chest = player.getItemBySlot(EquipmentSlot.CHEST);
                 if (chest.getItem() instanceof ArmorItem a && ArmorClass.isHeavy(chest)) amount += a.getDefense() * 0.5f;
@@ -366,13 +366,7 @@ public final class CombatHandler {
 
         // Racial and magical resistances
         Race race = data.getRace();
-        if (race != null) {
-            if (source.is(DamageTypeTags.IS_FIRE)) amount *= 1f - race.resistance("fire");
-            if (source.is(DamageTypeTags.IS_FREEZING)) amount *= 1f - race.resistance("frost");
-            if (source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC)) {
-                amount *= 1f - race.resistance("magic") - race.resistance("poison") * 0.5f;
-            }
-        }
+        if (race != null) amount *= race.damageTaken(source, player);
         if (source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC)) {
             amount *= 1f - 0.1f * Perks.rank(data, "alteration.magic_resistance");
         }

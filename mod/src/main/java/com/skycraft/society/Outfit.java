@@ -36,6 +36,18 @@ public enum Outfit {
             case KHAJIIT -> KHAJIIT;
             case ARGONIAN -> ARGONIAN;
             case ORC -> ORC;
+            // the other folk wear the nearest cut: Sea Elf and Snow Elf finery, Reach furs and bones...
+            case MAORMER, FALMER -> ALTMER;
+            case REACHMAN -> FORSWORN;
+            case OHMES_RAHT -> KHAJIIT;
+            case LILMOTHIIT, KOTHRINGI -> ARGONIAN;
+            case IMGA -> FINE; // the Imga ape the manners and dress of Summerset's nobles
+            case TSAESCI -> IMPERIAL;
+            case KA_PO_TUN -> ORC; // steppe warriors in fur and leather
+            case TANG_MO -> FARM;
+            case ATMORAN -> NORD_FUR;
+            case DWEMER -> SCHOLAR;
+            case AYLEID -> ALTMER;
         };
     }
 }

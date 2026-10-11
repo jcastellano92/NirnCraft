@@ -112,7 +112,9 @@ public final class Shouting {
         ServerLevel level = p.serverLevel();
         // the Thu'um: the words actually shouted (one, two or all three)
         net.minecraft.sounds.SoundEvent shoutSound = com.skycraft.audio.AudioSounds.shout(shout, words);
-        level.playSound(null, p.getX(), p.getY(), p.getZ(), shoutSound, SoundSource.PLAYERS, 1.4f + 0.3f * words, 1.0f);
+        com.skycraft.core.Race voiceRace = SkyData.get(p).getRace();
+        level.playSound(null, p.getX(), p.getY(), p.getZ(), shoutSound, SoundSource.PLAYERS, 1.4f + 0.3f * words,
+                voiceRace == null ? 1.0f : voiceRace.voicePitch);
         p.swing(InteractionHand.MAIN_HAND, true);
         SkyData.get(p).addStat("shouts", 1);
         com.skycraft.quest.story.StoryEvents.onShout(p, shout.id(), words); // "shout X at Y" quest steps
@@ -126,6 +128,8 @@ public final class Shouting {
         float m = 1f;
         if (com.skycraft.core.Buffs.active(p, "blessing_talos")) m *= 0.8f;
         if (shout != Shout.DRAGON_ASPECT && p.hasEffect(MagicRegistry.DRAGON_ASPECT.get())) m *= 0.75f;
+        com.skycraft.core.Race race = com.skycraft.core.SkyData.get(p).getRace();
+        if (race != null) m *= race.shoutCooldown(); // Atmorans: the Thu'um comes easier
         return m;
     }
 

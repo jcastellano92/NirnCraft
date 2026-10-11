@@ -134,6 +134,6 @@ public final class Diseases {
     /** Fraction of disease chance a race resists (Argonians and Bosmer: 50%, like Skyrim). */
     public static float resistance(Player player) {
         Race race = SkyData.get(player).getRace();
-        return race == Race.ARGONIAN || race == Race.BOSMER ? 0.5f : 0f;
+        return race == null ? 0f : race.diseaseResistance();
     }
 }

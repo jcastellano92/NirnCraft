@@ -1,40 +1,90 @@
 package com.skycraft.client.screen;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.skycraft.client.RaceSkins;
 import com.skycraft.core.Race;
 import com.skycraft.core.Skill;
+import com.skycraft.inventory.client.SkyUi;
 import com.skycraft.network.CorePackets;
 import com.skycraft.network.SkyNetwork;
-import net.minecraft.client.gui.Font;
+import com.skycraft.society.NpcLook;
+import com.skycraft.society.NpcNames;
+import com.skycraft.society.Outfit;
+import com.skycraft.tamriel.TamrielMap;
+import com.skycraft.world.client.MapTiles;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.LivingEntity;
+import org.joml.Quaternionf;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
- * Skyrim-styled Character Creator:
- * Choose race with live 3D preview model, scrolling descriptions/bonuses, no "Decide later",
- * and fully responsive at 427x267 (Steam Deck) scaled resolution.
+ * Skyrim-styled character creator: every playable race, grouped as the peoples of Tamriel, of Akavir and the lost
+ * races, in a scrolling list; a live preview of the player that can be turned all the way round; a Lore tab (homeland
+ * on a little map of Nirn, the race's story, skill bonuses, passive abilities, greater power) and an Appearance tab
+ * (sub-people, sex, skin, hair, beard, clothes). Fits 427x267 (Steam Deck at GUI scale 3) and larger.
  */
 public class RaceScreen extends Screen {
     private static final int TEXT_COLOR = 0xFFE8E0C8;
     private static final int BRIGHT_COLOR = 0xFFFFFFFF;
     private static final int GOLD_COLOR = 0xFFE8C060;
     private static final int DIM_COLOR = 0xFF8A8478;
+    private static final int ROW = 12;
+    /** Where the player wakes (Helgen), shown on the homeland map. */
+    private static final int START_X = -24, START_Z = 1143;
+    /** The homeland map: whole width of the known world, {@link #MAP_BPP} blocks per pixel. */
+    private static final int MAP_MIN_X = -22000, MAP_MAX_X = 25000, MAP_MIN_Z = -14000, MAP_MAX_Z = 23000;
 
+    private static Race preselected;
+    private static boolean preselectLook;
+
+    /** List rows: a group header (race null) or a race. */
+    private record Row(Race.Group group, Race race) {}
+
+    private final List<Row> rows = new ArrayList<>();
     private Race selected = Race.NORD;
-    private float descScroll = 0f;
-    private int maxDescScroll = 0;
-    private float modelYawOffset = 0f;
-    private boolean isDraggingModel = false;
-    private double lastDragX = 0;
+    private boolean lookTab;
+    private float listScroll, infoScroll;
+    private int maxListScroll, maxInfoScroll;
+    private float modelYaw = -25f;
+    private boolean isDraggingModel;
+    private double lastDragX;
+
+    // appearance
+    private int raceVariant, tone, hairIdx, colorIdx, beard, outfitIdx;
+    private boolean female;
+
+    // layout (computed in init)
+    private int listX, listY, listW, listH, infoX, infoY, infoW, infoH, modelX, modelY, modelScale;
+    private int btnX, btnY, btnW, btnH;
 
     public RaceScreen() {
         super(Component.translatable("screen.skycraft.race"));
+        for (Race.Group group : Race.Group.values()) {
+            rows.add(new Row(group, null));
+            for (Race r : Race.VALUES) if (r.group == group) rows.add(new Row(group, r));
+        }
+        if (preselected != null) selected = preselected;
+        lookTab = preselectLook;
+        preselected = null;
+        preselectLook = false;
+        resetLook();
+    }
+
+    /** The race the next character creator opens on (dev screenshots), optionally on the Appearance tab. */
+    public static void preselect(Race race, boolean appearance) {
+        preselected = race;
+        preselectLook = appearance;
     }
 
     @Override
@@ -50,203 +100,433 @@ public class RaceScreen extends Screen {
 
     @Override
     protected void init() {
-        descScroll = 0f;
-        com.skycraft.client.RaceSkins.setPreviewRace(selected);
+        listX = 8;
+        listY = 26;
+        listW = Mth.clamp(width / 4, 96, 130);
+        listH = height - listY - 8;
+        infoW = Mth.clamp((int) (width * 0.36f), 150, 230);
+        infoX = width - infoW - 10;
+        infoY = 26;
+        btnW = Math.min(120, infoW);
+        btnH = 18;
+        btnX = infoX + (infoW - btnW) / 2;
+        btnY = height - btnH - 6;
+        infoH = btnY - 6 - infoY;
+        modelX = (listX + listW + infoX) / 2;
+        modelY = height - 34;
+        modelScale = Math.min(100, (int) ((height - 80) / 2.5f));
+        updatePreview();
+        scrollListTo(selected);
     }
 
     @Override
     public void removed() {
         super.removed();
-        com.skycraft.client.RaceSkins.setPreviewRace(null);
+        RaceSkins.setPreviewLook(NpcLook.UNSET);
     }
+
+    // ------------------------------------------------------------------ look
+
+    private NpcNames.Race npcRace() {
+        return NpcNames.Race.of(selected);
+    }
+
+    private int[] hairOptions() {
+        return NpcLook.hairStyles(npcRace(), female);
+    }
+
+    private int[] colorOptions() {
+        return NpcLook.hairColors(npcRace());
+    }
+
+    private boolean hasBeard() {
+        return !female && NpcLook.bearded(npcRace());
+    }
+
+    private int look() {
+        int[] hairs = hairOptions();
+        int[] colors = colorOptions();
+        Outfit outfit = NpcLook.playerOutfits(npcRace())[outfitIdx];
+        return NpcLook.pack(npcRace(), raceVariant, female, tone, hairs[Math.floorMod(hairIdx, hairs.length)],
+                colors[Math.floorMod(colorIdx, colors.length)], hasBeard() ? beard : 0, outfit, 0, false);
+    }
+
+    /** The race's default look for this player (as the server would give it). */
+    private void resetLook() {
+        long seed = minecraft != null && minecraft.player != null ? minecraft.player.getUUID().getLeastSignificantBits()
+                : net.minecraft.client.Minecraft.getInstance().player != null
+                ? net.minecraft.client.Minecraft.getInstance().player.getUUID().getLeastSignificantBits() : 0L;
+        adopt(NpcLook.defaultFor(selected, seed), false);
+    }
+
+    /** Takes a look's fields as the current choices. */
+    private void adopt(int look, boolean keepSex) {
+        if (!keepSex) female = NpcLook.female(look);
+        raceVariant = NpcLook.raceVariant(look);
+        tone = NpcLook.tone(look);
+        hairIdx = Math.max(0, indexOf(hairOptions(), NpcLook.hair(look)));
+        colorIdx = Math.max(0, indexOf(colorOptions(), NpcLook.hairColor(look)));
+        beard = NpcLook.beard(look);
+        outfitIdx = 0;
+    }
+
+    private void randomize() {
+        RandomSource r = RandomSource.create();
+        NpcNames.Race race = npcRace();
+        female = r.nextBoolean();
+        int look = NpcLook.random(race, female, false, Outfit.cultural(race), r);
+        adopt(look, true);
+        outfitIdx = r.nextInt(NpcLook.playerOutfits(race).length);
+        updatePreview();
+    }
+
+    private static int indexOf(int[] options, int value) {
+        for (int i = 0; i < options.length; i++) if (options[i] == value) return i;
+        return -1;
+    }
+
+    private void updatePreview() {
+        RaceSkins.setPreviewLook(look());
+    }
+
+    private void select(Race race) {
+        if (race == null || race == selected) return;
+        selected = race;
+        infoScroll = 0f;
+        resetLook();
+        updatePreview();
+        scrollListTo(race);
+    }
+
+    private void scrollListTo(Race race) {
+        for (int i = 0; i < rows.size(); i++) {
+            if (rows.get(i).race() == race) {
+                int top = i * ROW;
+                if (top < listScroll) listScroll = top;
+                if (top + ROW > listScroll + listH - 4) listScroll = top + ROW - listH + 4;
+                listScroll = Mth.clamp(listScroll, 0, Math.max(0, rows.size() * ROW - listH + 4));
+                return;
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------ render
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         // Dark vignette background
         g.fillGradient(0, 0, width, height, 0xF0050505, 0xF0181410);
-        com.skycraft.inventory.client.SkyUi.smoke(g, width, height, (net.minecraft.Util.getMillis() % 1_000_000L) / 1000f, 0.7f);
+        SkyUi.smoke(g, width, height, (net.minecraft.Util.getMillis() % 1_000_000L) / 1000f, 0.7f);
         // a soft pool of light where the character stands
-        int glowCx = (12 + Math.min(95, width / 4) + width - 164) / 2;
         for (int i = 6; i > 0; i--) {
             int w = 12 * i;
-            g.fillGradient(glowCx - w, height / 3, glowCx + w, height - 30, 0, 0x08E8D8B0);
+            g.fillGradient(modelX - w, height / 3, modelX + w, height - 30, 0, 0x08E8D8B0);
         }
 
         // Header
-        g.drawCenteredString(font, com.skycraft.inventory.client.SkyUi.caps(Component.translatable("screen.skycraft.race_header")), width / 2, 6, GOLD_COLOR);
-        com.skycraft.inventory.client.SkyUi.ornament(g, width / 2, 18, Math.min(90, width / 5), 0xB0C8BC9A);
+        g.drawCenteredString(font, SkyUi.caps(Component.translatable("screen.skycraft.race_header")), width / 2, 6, GOLD_COLOR);
+        SkyUi.ornament(g, width / 2, 18, Math.min(90, width / 5), 0xB0C8BC9A);
 
-        // Layout dimensions
-        int listWidth = Math.min(95, width / 4);
-        int listX = 12;
-        int listStartY = 24;
-        int itemHeight = 18;
+        renderList(g, mouseX, mouseY);
+        renderModel(g);
+        renderInfo(g, mouseX, mouseY);
 
-        // Render Race List on the Left
-        for (int i = 0; i < Race.VALUES.length; i++) {
-            Race r = Race.VALUES[i];
-            int itemY = listStartY + i * itemHeight;
-            boolean isSel = (r == selected);
-            boolean isHov = mouseX >= listX && mouseX <= listX + listWidth && mouseY >= itemY && mouseY < itemY + itemHeight;
-
-            if (isSel) {
-                // Skyrim selection: smoky band between fading gold lines, a diamond at the left
-                g.fillGradient(listX - 2, itemY, listX + listWidth + 2, itemY + itemHeight - 2, 0x60000000, 0x90000000);
-                com.skycraft.inventory.client.SkyUi.hline(g, listX - 2, listX + listWidth + 2, itemY, 0xA0);
-                com.skycraft.inventory.client.SkyUi.hline(g, listX - 2, listX + listWidth + 2, itemY + itemHeight - 3, 0xA0);
-                com.skycraft.inventory.client.SkyUi.diamond(g, listX - 4, itemY + itemHeight / 2 - 1, 2, GOLD_COLOR);
-            } else if (isHov) {
-                g.fill(listX - 2, itemY, listX + listWidth + 2, itemY + itemHeight - 2, 0x30FFFFFF);
-            }
-
-            int color = isSel ? BRIGHT_COLOR : (isHov ? TEXT_COLOR : DIM_COLOR);
-            g.drawString(font, r.displayName(), listX + 4, itemY + 4, color, isSel);
-        }
-
-        // Right Panel: Race Info & Attributes (Scrollable)
-        int infoWidth = 150;
-        int infoX = width - infoWidth - 14;
-        int infoY = 24;
-        int infoHeight = height - 60;
-
-        // Center: Live 3D Character Preview Model
-        int modelCenterX = (listX + listWidth + infoX) / 2;
-        int modelScale = Math.min(65, (int) (height * 0.32f));
-        int modelCenterY = height - 38;
-
-        if (minecraft.player != null) {
-            minecraft.player.setInvisible(false);
-            minecraft.player.removeEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY);
-            com.skycraft.client.RaceSkins.setPreviewRace(selected);
-            // Skyrim circular stone dais under feet
-            int daisRadius = (int) (modelScale * 0.55f);
-            g.fill(modelCenterX - daisRadius, modelCenterY - 3, modelCenterX + daisRadius, modelCenterY + 2, 0x50000000);
-            g.fill(modelCenterX - daisRadius + 4, modelCenterY - 2, modelCenterX + daisRadius - 4, modelCenterY + 1, 0x80353028);
-            drawHLine(g, modelCenterX - daisRadius + 2, modelCenterX + daisRadius - 2, modelCenterY - 1, 0x60E8C060);
-
-            // Compute head eye position and mouse pitch/yaw angles
-            int headY = modelCenterY - (int) (1.55f * modelScale);
-            float yawLook = (float) (modelCenterX - mouseX) + modelYawOffset;
-            float pitchLook = (float) (headY - mouseY);
-
-            InventoryScreen.renderEntityInInventoryFollowsMouse(g, modelCenterX, modelCenterY, modelScale, yawLook, pitchLook, minecraft.player);
-
-            // Subtle rotation helper hint
-            g.drawCenteredString(font, Component.literal("⟳ Drag to Rotate"), modelCenterX, height - 16, 0x809E9689);
-        }
-
-        // Info Background Panel
-        g.fill(infoX - 4, infoY - 4, infoX + infoWidth + 4, infoY + infoHeight + 4, 0x85000000);
-        drawHLine(g, infoX - 4, infoX + infoWidth + 4, infoY - 4, 0x70C8BC9A);
-        drawHLine(g, infoX - 4, infoX + infoWidth + 4, infoY + infoHeight + 4, 0x70C8BC9A);
-
-        // Scissor or clip drawing for scroll area
-        g.enableScissor(infoX - 4, infoY, infoX + infoWidth + 4, infoY + infoHeight);
-
-        int currentY = infoY + 2 - (int) descScroll;
-
-        // Race Name
-        g.drawString(font, selected.displayName().getString().toUpperCase(java.util.Locale.ROOT), infoX, currentY, GOLD_COLOR, true);
-        currentY += 14;
-
-        // Description text
-        List<FormattedCharSequence> descLines = font.split(selected.description(), infoWidth);
-        for (FormattedCharSequence line : descLines) {
-            g.drawString(font, line, infoX, currentY, TEXT_COLOR, false);
-            currentY += 10;
-        }
-        currentY += 8;
-
-        // Skills Header & List
-        g.drawString(font, Component.translatable("screen.skycraft.race_skills"), infoX, currentY, GOLD_COLOR, false);
-        currentY += 12;
-        g.drawString(font, selected.major.displayName().copy().append(" +10"), infoX + 6, currentY, BRIGHT_COLOR, false);
-        currentY += 10;
-        for (Skill s : selected.minors) {
-            g.drawString(font, s.displayName().copy().append(" +5"), infoX + 6, currentY, TEXT_COLOR, false);
-            currentY += 10;
-        }
-        currentY += 8;
-
-        // Greater Power
-        g.drawString(font, Component.translatable("screen.skycraft.race_power"), infoX, currentY, GOLD_COLOR, false);
-        currentY += 12;
-        g.drawString(font, selected.powerName(), infoX + 6, currentY, BRIGHT_COLOR, false);
-        currentY += 10;
-        List<FormattedCharSequence> powerLines = font.split(Component.translatable("power.skycraft." + selected.power + ".desc"), infoWidth - 6);
-        for (FormattedCharSequence line : powerLines) {
-            g.drawString(font, line, infoX + 6, currentY, DIM_COLOR, false);
-            currentY += 10;
-        }
-
-        // Calculate max scroll
-        int contentHeight = currentY + (int) descScroll - infoY;
-        maxDescScroll = Math.max(0, contentHeight - infoHeight);
-
-        g.disableScissor();
-
-        // Scrollbar indicator if needed
-        if (maxDescScroll > 0) {
-            int scrollbarH = Math.max(12, infoHeight * infoHeight / contentHeight);
-            int scrollbarY = infoY + (int) ((infoHeight - scrollbarH) * (descScroll / maxDescScroll));
-            g.fill(infoX + infoWidth + 2, scrollbarY, infoX + infoWidth + 4, scrollbarY + scrollbarH, GOLD_COLOR);
-        }
-
-        // Bottom Confirm Button
-        int btnW = 120;
-        int btnH = 20;
-        int btnX = width - btnW - 14;
-        int btnY = height - 26;
-        boolean btnHov = mouseX >= btnX && mouseX <= btnX + btnW && mouseY >= btnY && mouseY <= btnY + btnH;
-
-        g.fill(btnX, btnY, btnX + btnW, btnY + btnH, btnHov ? 0xFF2A261E : 0xFF181512);
-        drawHLine(g, btnX, btnX + btnW, btnY, btnHov ? GOLD_COLOR : 0xFF8A7F66);
-        drawHLine(g, btnX, btnX + btnW, btnY + btnH - 1, btnHov ? GOLD_COLOR : 0xFF8A7F66);
-        g.drawCenteredString(font, Component.translatable("screen.skycraft.race_confirm"), btnX + btnW / 2, btnY + 6, btnHov ? BRIGHT_COLOR : TEXT_COLOR);
+        boolean btnHov = in(mouseX, mouseY, btnX, btnY, btnW, btnH);
+        SkyUi.panel(g, btnX, btnY, btnX + btnW, btnY + btnH);
+        SkyUi.button(g, font, Component.translatable("screen.skycraft.race_confirm"), btnX, btnY, btnW, btnH, btnHov, true, 1f);
 
         super.render(g, mouseX, mouseY, partialTick);
     }
 
-    private void drawHLine(GuiGraphics g, int x1, int x2, int y, int color) {
-        g.fill(x1, y, x2, y + 1, color);
+    private void renderList(GuiGraphics g, int mouseX, int mouseY) {
+        SkyUi.panel(g, listX - 4, listY - 4, listX + listW + 4, listY + listH);
+        g.enableScissor(listX - 4, listY - 2, listX + listW + 4, listY + listH - 2);
+        int y = listY - (int) listScroll;
+        for (Row row : rows) {
+            if (y + ROW >= listY - 2 && y < listY + listH) {
+                if (row.race() == null) {
+                    SkyUi.caps(g, font, row.group().displayName(), listX, y + 3, 0xFFA89F86);
+                    SkyUi.hline(g, listX, listX + listW, y + ROW - 1, 0x50);
+                } else {
+                    Race r = row.race();
+                    boolean sel = r == selected;
+                    boolean hov = in(mouseX, mouseY, listX, y, listW, ROW) && mouseY >= listY && mouseY < listY + listH;
+                    if (sel) {
+                        g.fillGradient(listX - 2, y, listX + listW + 2, y + ROW, 0x60000000, 0x90000000);
+                        SkyUi.hline(g, listX - 2, listX + listW + 2, y, 0xA0);
+                        SkyUi.hline(g, listX - 2, listX + listW + 2, y + ROW - 1, 0xA0);
+                        SkyUi.diamond(g, listX + 1, y + ROW / 2, 2, GOLD_COLOR);
+                    } else if (hov) {
+                        g.fill(listX - 2, y, listX + listW + 2, y + ROW, 0x30FFFFFF);
+                    }
+                    int color = sel ? BRIGHT_COLOR : hov ? TEXT_COLOR : DIM_COLOR;
+                    String name = SkyUi.ellipsize(font, r.displayName().getString(), listW - 10);
+                    g.drawString(font, name, listX + 7, y + 2, color, sel);
+                }
+            }
+            y += ROW;
+        }
+        g.disableScissor();
+        maxListScroll = Math.max(0, rows.size() * ROW - listH + 4);
+        if (maxListScroll > 0) {
+            int barH = Math.max(12, listH * listH / (rows.size() * ROW));
+            int barY = listY + (int) ((listH - barH - 4) * (listScroll / maxListScroll));
+            g.fill(listX + listW + 2, barY, listX + listW + 4, barY + barH, 0xA0E8C060);
+        }
+    }
+
+    private void renderModel(GuiGraphics g) {
+        LivingEntity player = minecraft.player;
+        if (player == null) return;
+        player.setInvisible(false);
+        player.removeEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY);
+        // Skyrim circular stone dais under feet
+        int daisRadius = (int) (modelScale * 0.55f);
+        g.fill(modelX - daisRadius, modelY - 3, modelX + daisRadius, modelY + 2, 0x50000000);
+        g.fill(modelX - daisRadius + 4, modelY - 2, modelX + daisRadius - 4, modelY + 1, 0x80353028);
+        g.fill(modelX - daisRadius + 2, modelY - 1, modelX + daisRadius - 2, modelY, 0x60E8C060);
+        drawEntity(g, modelX, modelY, modelScale, modelYaw, player);
+
+        // race (and sub-people) under the dais
+        Component name = selected.variantCount() > 1 && raceVariant > 0
+                ? Component.translatable("screen.skycraft.race_variant_of", selected.displayName(), selected.variantName(raceVariant))
+                : selected.displayName();
+        g.drawCenteredString(font, name, modelX, height - 28, GOLD_COLOR);
+        g.drawCenteredString(font, Component.translatable("screen.skycraft.race_rotate"), modelX, height - 16, 0x809E9689);
+    }
+
+    /** The entity turned to {@code yaw} degrees (any angle), looking slightly down at it. */
+    private static void drawEntity(GuiGraphics g, int x, int y, int scale, float yaw, LivingEntity e) {
+        Quaternionf pose = new Quaternionf().rotateZ((float) Math.PI);
+        Quaternionf camera = new Quaternionf().rotateX(8f * Mth.DEG_TO_RAD);
+        pose.mul(camera);
+        float bodyRot = e.yBodyRot, bodyRotO = e.yBodyRotO, yRot = e.getYRot(), xRot = e.getXRot(), headO = e.yHeadRotO, head = e.yHeadRot;
+        float face = 180f + yaw;
+        e.yBodyRot = face;
+        e.yBodyRotO = face;
+        e.setYRot(face);
+        e.setXRot(0f);
+        e.yHeadRot = face;
+        e.yHeadRotO = face;
+        InventoryScreen.renderEntityInInventory(g, x, y, scale, pose, camera, e);
+        e.yBodyRot = bodyRot;
+        e.yBodyRotO = bodyRotO;
+        e.setYRot(yRot);
+        e.setXRot(xRot);
+        e.yHeadRotO = headO;
+        e.yHeadRot = head;
+    }
+
+    private void renderInfo(GuiGraphics g, int mouseX, int mouseY) {
+        SkyUi.panel(g, infoX - 4, infoY - 4, infoX + infoW + 4, infoY + infoH + 4);
+        // tabs
+        int tabW = infoW / 2;
+        for (int i = 0; i < 2; i++) {
+            boolean active = (i == 1) == lookTab;
+            int tx = infoX + i * tabW;
+            boolean hov = in(mouseX, mouseY, tx, infoY, tabW, ROW);
+            if (active) g.fillGradient(tx, infoY, tx + tabW, infoY + ROW, 0x50E8C060, 0x10E8C060);
+            Component label = Component.translatable(i == 0 ? "screen.skycraft.race_tab_lore" : "screen.skycraft.race_tab_look");
+            SkyUi.capsCentered(g, font, label, tx + tabW / 2, infoY + 2, active ? GOLD_COLOR : hov ? TEXT_COLOR : DIM_COLOR);
+        }
+        SkyUi.hline(g, infoX - 4, infoX + infoW + 4, infoY + ROW, 0x90);
+
+        int top = infoY + ROW + 4;
+        int bottom = infoY + infoH;
+        g.enableScissor(infoX - 4, top, infoX + infoW + 4, bottom);
+        int y = top - (int) infoScroll;
+        y = lookTab ? renderLook(g, mouseX, mouseY, y, top, bottom) : renderLore(g, y);
+        g.disableScissor();
+        int content = y + (int) infoScroll - top;
+        maxInfoScroll = Math.max(0, content - (bottom - top));
+        infoScroll = Mth.clamp(infoScroll, 0, maxInfoScroll);
+        if (maxInfoScroll > 0) {
+            int h = bottom - top;
+            int barH = Math.max(12, h * h / content);
+            int barY = top + (int) ((h - barH) * (infoScroll / maxInfoScroll));
+            g.fill(infoX + infoW + 2, barY, infoX + infoW + 4, barY + barH, 0xA0E8C060);
+        }
+    }
+
+    private int renderLore(GuiGraphics g, int y) {
+        // homeland on the map of Nirn
+        int mapH = Mth.clamp(infoW / 2, 60, 90);
+        renderMap(g, infoX, y, infoW, mapH);
+        y += mapH + 3;
+        Component home = TamrielMap.loaded() ? TamrielMap.region(selected.homeX, selected.homeZ).name() : Component.literal("?");
+        g.drawString(font, Component.translatable("screen.skycraft.race_homeland", home), infoX, y, TEXT_COLOR, false);
+        y += 10;
+        for (FormattedCharSequence line : font.split(Component.translatable("screen.skycraft.race_start"), infoW)) {
+            g.drawString(font, line, infoX, y, DIM_COLOR, false);
+            y += 9;
+        }
+        y += 6;
+
+        g.drawString(font, selected.displayName().getString().toUpperCase(Locale.ROOT), infoX, y, GOLD_COLOR, true);
+        y += 12;
+        for (FormattedCharSequence line : font.split(selected.description(), infoW)) {
+            g.drawString(font, line, infoX, y, TEXT_COLOR, false);
+            y += 10;
+        }
+        y += 6;
+
+        g.drawString(font, Component.translatable("screen.skycraft.race_skills"), infoX, y, GOLD_COLOR, false);
+        y += 11;
+        g.drawString(font, selected.major.displayName().copy().append(" +10"), infoX + 6, y, BRIGHT_COLOR, false);
+        y += 10;
+        for (Skill s : selected.minors) {
+            g.drawString(font, s.displayName().copy().append(" +5"), infoX + 6, y, TEXT_COLOR, false);
+            y += 10;
+        }
+        for (Skill s : selected.extras) {
+            g.drawString(font, s.displayName().copy().append(" +5"), infoX + 6, y, TEXT_COLOR, false);
+            y += 10;
+        }
+        y += 6;
+
+        List<String> passives = selected.passives();
+        if (!passives.isEmpty()) {
+            g.drawString(font, Component.translatable("screen.skycraft.race_passives"), infoX, y, GOLD_COLOR, false);
+            y += 11;
+            for (String p : passives) {
+                int colon = p.indexOf(':');
+                Component c = colon < 0 ? Component.translatable("race.skycraft.passive." + p)
+                        : Component.translatable("race.skycraft.passive." + p.substring(0, colon), p.substring(colon + 1));
+                List<FormattedCharSequence> lines = font.split(c, infoW - 10);
+                for (int i = 0; i < lines.size(); i++) {
+                    if (i == 0) SkyUi.diamond(g, infoX + 3, y + 3, 1, 0xFFC8BC9A);
+                    g.drawString(font, lines.get(i), infoX + 8, y, TEXT_COLOR, false);
+                    y += 10;
+                }
+            }
+            y += 6;
+        }
+
+        g.drawString(font, Component.translatable("screen.skycraft.race_power"), infoX, y, GOLD_COLOR, false);
+        y += 11;
+        g.drawString(font, selected.powerName(), infoX + 6, y, BRIGHT_COLOR, false);
+        y += 10;
+        for (FormattedCharSequence line : font.split(selected.powerDescription(), infoW - 6)) {
+            g.drawString(font, line, infoX + 6, y, DIM_COLOR, false);
+            y += 10;
+        }
+        return y + 4;
+    }
+
+    /** A painted map of Nirn (the world map's tiles) with the homeland and Helgen marked. */
+    private void renderMap(GuiGraphics g, int x, int y, int w, int h) {
+        g.fill(x - 1, y - 1, x + w + 1, y + h + 1, 0xFF3A2E20);
+        g.fill(x, y, x + w, y + h, 0xFF22303A);
+        if (!TamrielMap.loaded()) return;
+        MapTiles.uploadFinished();
+        double bpp = (double) (MAP_MAX_X - MAP_MIN_X) / w;
+        double spanZ = h * bpp;
+        double z0 = Mth.clamp(selected.homeZ - spanZ / 2, MAP_MIN_Z, MAP_MAX_Z - spanZ);
+        double x0 = MAP_MIN_X;
+        int tb = MapTiles.tileBlocks(0);
+        // clip to the map frame (scissors nest: this intersects the info panel's)
+        g.enableScissor(x, y, x + w, y + h);
+        RenderSystem.enableBlend();
+        for (int tz = Math.floorDiv((int) z0, tb); tz <= Math.floorDiv((int) (z0 + spanZ), tb); tz++) {
+            for (int tx = Math.floorDiv(MAP_MIN_X, tb); tx <= Math.floorDiv(MAP_MAX_X, tb); tx++) {
+                ResourceLocation tex = MapTiles.get(0, tx, tz);
+                if (tex == null) continue;
+                g.pose().pushPose();
+                g.pose().translate((float) (x + (tx * (double) tb - x0) / bpp), (float) (y + (tz * (double) tb - z0) / bpp), 0);
+                float s = (float) ((tb / bpp + 0.35) / MapTiles.SIZE);
+                g.pose().scale(s, s, 1f);
+                g.blit(tex, 0, 0, 0f, 0f, MapTiles.SIZE, MapTiles.SIZE, MapTiles.SIZE, MapTiles.SIZE);
+                g.pose().popPose();
+            }
+        }
+        // the start (Helgen) and the homeland
+        int sx = x + (int) ((START_X - x0) / bpp), sz = y + (int) ((START_Z - z0) / bpp);
+        g.fill(sx - 1, sz - 1, sx + 2, sz + 2, 0xFFB03020);
+        int hx = x + (int) ((selected.homeX - x0) / bpp), hz = y + (int) ((selected.homeZ - z0) / bpp);
+        float pulse = 0.6f + 0.4f * Mth.sin(net.minecraft.Util.getMillis() / 250f);
+        SkyUi.diamond(g, hx, hz, 4, 0xFF000000);
+        SkyUi.diamond(g, hx, hz, 3, SkyUi.fade(GOLD_COLOR, pulse));
+        g.disableScissor();
+    }
+
+    private int renderLook(GuiGraphics g, int mouseX, int mouseY, int y, int top, int bottom) {
+        NpcNames.Race race = npcRace();
+        if (selected.variantCount() > 1) {
+            y = selector(g, mouseX, mouseY, y, "variant", selected.variantName(raceVariant), -1, top, bottom);
+        }
+        y = selector(g, mouseX, mouseY, y, "sex", Component.translatable(female ? "screen.skycraft.race_female" : "screen.skycraft.race_male"), -1, top, bottom);
+        int toneRgb = NpcLook.toneColor(look());
+        y = selector(g, mouseX, mouseY, y, "skin", Component.literal((tone + 1) + " / " + NpcLook.TONES_PER_RACE), toneRgb, top, bottom);
+        int[] hairs = hairOptions();
+        y = selector(g, mouseX, mouseY, y, "hair", Component.translatable("race_look.skycraft.hair." + hairs[Math.floorMod(hairIdx, hairs.length)]), -1, top, bottom);
+        int[] colors = colorOptions();
+        int hairRgb = NpcLook.HAIR_COLORS[colors[Math.floorMod(colorIdx, colors.length)]];
+        y = selector(g, mouseX, mouseY, y, "color", Component.literal((Math.floorMod(colorIdx, colors.length) + 1) + " / " + colors.length), hairRgb, top, bottom);
+        if (hasBeard()) {
+            y = selector(g, mouseX, mouseY, y, "beard", Component.translatable("race_look.skycraft.beard." + beard), -1, top, bottom);
+        }
+        y = selector(g, mouseX, mouseY, y, "outfit", Component.translatable("race_look.skycraft.outfit." + outfitIdx), -1, top, bottom);
+        y += 4;
+        boolean hov = in(mouseX, mouseY, infoX + 10, y, infoW - 20, 14) && mouseY >= top && mouseY < bottom;
+        SkyUi.button(g, font, Component.translatable("screen.skycraft.race_randomize"), infoX + 10, y, infoW - 20, 14, hov, true, 1f);
+        return y + 18;
+    }
+
+    /** One "label   < value >" row; {@code swatch} >= 0 draws a colour chip. */
+    private int selector(GuiGraphics g, int mouseX, int mouseY, int y, String key, Component value, int swatch, int top, int bottom) {
+        g.drawString(font, Component.translatable("screen.skycraft.race_look_" + key), infoX, y + 3, DIM_COLOR, false);
+        int vx = infoX + infoW / 2 - 6;
+        int vw = infoW - (vx - infoX);
+        boolean inside = mouseY >= top && mouseY < bottom;
+        boolean hl = in(mouseX, mouseY, vx, y, 10, 13) && inside;
+        boolean hr = in(mouseX, mouseY, vx + vw - 10, y, 10, 13) && inside;
+        g.drawString(font, "<", vx + 2, y + 3, hl ? BRIGHT_COLOR : GOLD_COLOR, false);
+        g.drawString(font, ">", vx + vw - 7, y + 3, hr ? BRIGHT_COLOR : GOLD_COLOR, false);
+        int cx = vx + vw / 2;
+        String text = SkyUi.ellipsize(font, value.getString(), vw - 24 - (swatch >= 0 ? 10 : 0));
+        int tw = font.width(text) + (swatch >= 0 ? 10 : 0);
+        int tx = cx - tw / 2;
+        if (swatch >= 0) {
+            g.fill(tx, y + 2, tx + 8, y + 10, 0xFF000000);
+            g.fill(tx + 1, y + 3, tx + 7, y + 9, 0xFF000000 | swatch);
+            tx += 10;
+        }
+        g.drawString(font, text, tx, y + 3, TEXT_COLOR, false);
+        SkyUi.hline(g, infoX, infoX + infoW, y + 13, 0x30);
+        return y + 15;
+    }
+
+    // ------------------------------------------------------------------ input
+
+    private static boolean in(double mx, double my, int x, int y, int w, int h) {
+        return mx >= x && mx < x + w && my >= y && my < y + h;
     }
 
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
         if (button == 0) {
-            // Check race list items
-            int listWidth = Math.min(95, width / 4);
-            int listX = 12;
-            int listStartY = 24;
-            int itemHeight = 18;
-
-            for (int i = 0; i < Race.VALUES.length; i++) {
-                int itemY = listStartY + i * itemHeight;
-                if (mx >= listX && mx <= listX + listWidth && my >= itemY && my < itemY + itemHeight) {
-                    selected = Race.VALUES[i];
-                    descScroll = 0f;
-                    com.skycraft.client.RaceSkins.setPreviewRace(selected);
-                    return true;
-                }
+            // race list
+            if (in(mx, my, listX - 2, listY, listW + 4, listH)) {
+                int i = (int) ((my - listY + listScroll) / ROW);
+                if (i >= 0 && i < rows.size() && rows.get(i).race() != null) select(rows.get(i).race());
+                return true;
             }
-
-            // Check Confirm Button
-            int btnW = 120;
-            int btnH = 20;
-            int btnX = width - btnW - 14;
-            int btnY = height - 26;
-            if (mx >= btnX && mx <= btnX + btnW && my >= btnY && my <= btnY + btnH) {
+            // tabs
+            if (in(mx, my, infoX, infoY, infoW, ROW)) {
+                boolean look = mx >= infoX + infoW / 2;
+                if (look != lookTab) {
+                    lookTab = look;
+                    infoScroll = 0f;
+                }
+                return true;
+            }
+            if (lookTab && clickLook(mx, my)) return true;
+            if (in(mx, my, btnX, btnY, btnW, btnH)) {
                 confirmSelection();
                 return true;
             }
-
-            // Check Character Model Click to start drag rotation
-            int infoWidth = 150;
-            int infoX = width - infoWidth - 14;
-            int modelCenterX = (listX + listWidth + infoX) / 2;
-            int modelScale = Math.min(65, (int) (height * 0.32f));
-            int modelCenterY = height - 38;
-            if (mx >= modelCenterX - 55 && mx <= modelCenterX + 55 && my >= modelCenterY - (int) (1.8f * modelScale) && my <= modelCenterY + 10) {
+            // drag the model round
+            if (in(mx, my, modelX - 60, modelY - (int) (2.2f * modelScale), 120, (int) (2.2f * modelScale) + 10)) {
                 isDraggingModel = true;
                 lastDragX = mx;
                 return true;
@@ -255,10 +535,59 @@ public class RaceScreen extends Screen {
         return super.mouseClicked(mx, my, button);
     }
 
+    /** Clicks on the Appearance tab's arrows and the randomize button (same layout as {@link #renderLook}). */
+    private boolean clickLook(double mx, double my) {
+        int top = infoY + ROW + 4;
+        if (my < top || my >= infoY + infoH) return false;
+        int y = top - (int) infoScroll;
+        int vx = infoX + infoW / 2 - 6;
+        int vw = infoW - (vx - infoX);
+        List<String> keys = new ArrayList<>();
+        if (selected.variantCount() > 1) keys.add("variant");
+        keys.add("sex");
+        keys.add("skin");
+        keys.add("hair");
+        keys.add("color");
+        if (hasBeard()) keys.add("beard");
+        keys.add("outfit");
+        for (String key : keys) {
+            int dir = in(mx, my, vx - 2, y, 14, 13) ? -1 : in(mx, my, vx + vw - 12, y, 14, 13) ? 1 : 0;
+            if (dir != 0) {
+                step(key, dir);
+                return true;
+            }
+            y += 15;
+        }
+        y += 4;
+        if (in(mx, my, infoX + 10, y, infoW - 20, 14)) {
+            randomize();
+            return true;
+        }
+        return false;
+    }
+
+    private void step(String key, int dir) {
+        switch (key) {
+            case "variant" -> raceVariant = Math.floorMod(raceVariant + dir, selected.variantCount());
+            case "sex" -> {
+                female = !female;
+                hairIdx = Math.floorMod(hairIdx, hairOptions().length);
+            }
+            case "skin" -> tone = Math.floorMod(tone + dir, NpcLook.TONES_PER_RACE);
+            case "hair" -> hairIdx = Math.floorMod(hairIdx + dir, hairOptions().length);
+            case "color" -> colorIdx = Math.floorMod(colorIdx + dir, colorOptions().length);
+            case "beard" -> beard = Math.floorMod(beard + dir, NpcLook.BEARDS);
+            case "outfit" -> outfitIdx = Math.floorMod(outfitIdx + dir, NpcLook.playerOutfits(npcRace()).length);
+            default -> {
+            }
+        }
+        updatePreview();
+    }
+
     @Override
     public boolean mouseDragged(double mx, double my, int button, double dragX, double dragY) {
         if (isDraggingModel && button == 0) {
-            modelYawOffset += (float) (mx - lastDragX) * 1.8f;
+            modelYaw -= (float) (mx - lastDragX) * 2.2f;
             lastDragX = mx;
             return true;
         }
@@ -267,16 +596,22 @@ public class RaceScreen extends Screen {
 
     @Override
     public boolean mouseReleased(double mx, double my, int button) {
-        if (button == 0) {
-            isDraggingModel = false;
-        }
+        if (button == 0) isDraggingModel = false;
         return super.mouseReleased(mx, my, button);
     }
 
     @Override
     public boolean mouseScrolled(double mx, double my, double delta) {
-        if (maxDescScroll > 0) {
-            descScroll = Mth.clamp(descScroll - (float) delta * 14f, 0, maxDescScroll);
+        if (mx < listX + listW + 6) {
+            listScroll = Mth.clamp(listScroll - (float) delta * 18f, 0, maxListScroll);
+            return true;
+        }
+        if (mx >= infoX - 4 && maxInfoScroll > 0) {
+            infoScroll = Mth.clamp(infoScroll - (float) delta * 14f, 0, maxInfoScroll);
+            return true;
+        }
+        if (mx > listX + listW && mx < infoX) {
+            modelYaw += (float) delta * 15f;
             return true;
         }
         return super.mouseScrolled(mx, my, delta);
@@ -284,29 +619,40 @@ public class RaceScreen extends Screen {
 
     @Override
     public boolean keyPressed(int key, int scan, int mods) {
-        if (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_SPACE) {
+        if (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_KP_ENTER) {
             confirmSelection();
             return true;
         }
-        if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_W) {
-            int prev = Math.floorMod(selected.ordinal() - 1, Race.VALUES.length);
-            selected = Race.VALUES[prev];
-            descScroll = 0f;
-            com.skycraft.client.RaceSkins.setPreviewRace(selected);
+        if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_W || key == GLFW.GLFW_KEY_DOWN || key == GLFW.GLFW_KEY_S) {
+            int dir = key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_W ? -1 : 1;
+            int n = Race.VALUES.length;
+            List<Race> order = new ArrayList<>();
+            for (Row row : rows) if (row.race() != null) order.add(row.race());
+            select(order.get(Math.floorMod(order.indexOf(selected) + dir, n)));
             return true;
         }
-        if (key == GLFW.GLFW_KEY_DOWN || key == GLFW.GLFW_KEY_S) {
-            int next = Math.floorMod(selected.ordinal() + 1, Race.VALUES.length);
-            selected = Race.VALUES[next];
-            descScroll = 0f;
-            com.skycraft.client.RaceSkins.setPreviewRace(selected);
+        if (key == GLFW.GLFW_KEY_LEFT || key == GLFW.GLFW_KEY_A) {
+            modelYaw += 20f;
+            return true;
+        }
+        if (key == GLFW.GLFW_KEY_RIGHT || key == GLFW.GLFW_KEY_D) {
+            modelYaw -= 20f;
+            return true;
+        }
+        if (key == GLFW.GLFW_KEY_TAB) {
+            lookTab = !lookTab;
+            infoScroll = 0f;
+            return true;
+        }
+        if (key == GLFW.GLFW_KEY_R) {
+            randomize();
             return true;
         }
         return super.keyPressed(key, scan, mods);
     }
 
     private void confirmSelection() {
-        SkyNetwork.sendToServer(new CorePackets.ChooseRace(selected.id()));
+        SkyNetwork.sendToServer(new CorePackets.ChooseRace(selected.id(), look()));
         onClose();
     }
 }
