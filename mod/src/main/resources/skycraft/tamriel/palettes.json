@@ -135,8 +135,8 @@
   "palettes": {
     "default": {
       "upland_y": 115,
-      "peak_y": 175,
-      "summit_y": 270,
+      "peak_y": 240,
+      "summit_y": 420,
       "contexts": {
         "ocean": [
           {
@@ -238,7 +238,8 @@
     },
     "province/skyrim": {
       "fallback": "default",
-      "peak_y": 185,
+      "peak_y": 255,
+      "summit_y": 470,
       "contexts": {
         "ocean": [
           {
@@ -1688,19 +1689,25 @@
     },
     "skyrim/whiterun": {
       "fallback": "province/skyrim",
+      "upland_y": 130,
+      "bias": {
+        "radial": [
+          62,
+          -68,
+          450,
+          1400,
+          0.55
+        ]
+      },
       "contexts": {
         "lowland": [
           {
             "biome": "skycraft:whiterun_tundra",
-            "weight": 3
+            "weight": 4
           },
           {
             "biome": "skycraft:whiterun_plains",
             "weight": 3
-          },
-          {
-            "biome": "skycraft:pine_forest",
-            "weight": 1
           }
         ],
         "upland": [
@@ -1710,14 +1717,14 @@
           },
           {
             "biome": "skycraft:skyrim_highlands",
-            "weight": 3
-          },
-          {
-            "biome": "skycraft:alpine_meadow",
-            "weight": 1
+            "weight": 2
           },
           {
             "biome": "skycraft:pine_forest",
+            "weight": 2
+          },
+          {
+            "biome": "skycraft:alpine_meadow",
             "weight": 1
           }
         ],
@@ -1731,6 +1738,8 @@
     },
     "skyrim/falkreath": {
       "fallback": "province/skyrim",
+      "upland_y": 200,
+      "peak_y": 280,
       "contexts": {
         "lowland": [
           {
@@ -1766,11 +1775,22 @@
     },
     "skyrim/the_rift": {
       "fallback": "province/skyrim",
+      "upland_y": 212,
+      "peak_y": 290,
+      "bias": {
+        "radial": [
+          2250,
+          1420,
+          450,
+          1300,
+          0.8
+        ]
+      },
       "contexts": {
         "lowland": [
           {
             "biome": "skycraft:rift_autumn_forest",
-            "weight": 5
+            "weight": 7
           },
           {
             "biome": "skycraft:alpine_meadow",
@@ -1780,7 +1800,7 @@
         "upland": [
           {
             "biome": "skycraft:rift_autumn_forest",
-            "weight": 2
+            "weight": 3
           },
           {
             "biome": "skycraft:pine_forest",
@@ -1801,7 +1821,8 @@
     },
     "skyrim/the_reach": {
       "fallback": "province/skyrim",
-      "upland_y": 100,
+      "upland_y": 150,
+      "peak_y": 270,
       "contexts": {
         "lowland": [
           {
@@ -1843,6 +1864,7 @@
     },
     "skyrim/hjaalmarch": {
       "fallback": "province/skyrim",
+      "upland_y": 112,
       "contexts": {
         "lowland": [
           {
@@ -1888,6 +1910,7 @@
     },
     "skyrim/haafingar": {
       "fallback": "province/skyrim",
+      "upland_y": 145,
       "contexts": {
         "lowland": [
           {
@@ -1927,7 +1950,8 @@
     },
     "skyrim/the_pale": {
       "fallback": "province/skyrim",
-      "peak_y": 160,
+      "upland_y": 145,
+      "peak_y": 205,
       "contexts": {
         "lowland": [
           {
@@ -1977,7 +2001,8 @@
     },
     "skyrim/winterhold": {
       "fallback": "province/skyrim",
-      "peak_y": 150,
+      "upland_y": 145,
+      "peak_y": 200,
       "contexts": {
         "lowland": [
           {
@@ -2088,34 +2113,45 @@
     },
     "morrowind/solstheim": {
       "fallback": "province/morrowind",
-      "peak_y": 160,
+      "upland_y": 128,
+      "peak_y": 205,
+      "bias": {
+        "linear": [
+          4600,
+          -3250,
+          0,
+          1,
+          330,
+          0.65
+        ]
+      },
       "contexts": {
         "lowland": [
           {
-            "biome": "skycraft:solstheim_ashlands",
-            "weight": 2
-          },
-          {
             "biome": "skycraft:solstheim_pine_forest",
-            "weight": 2
+            "weight": 3
           },
           {
             "biome": "skycraft:pale_snowfield",
             "weight": 1
+          },
+          {
+            "biome": "skycraft:solstheim_ashlands",
+            "weight": 3
           }
         ],
         "upland": [
           {
-            "biome": "skycraft:solstheim_ashlands",
-            "weight": 2
+            "biome": "skycraft:snowy_slopes",
+            "weight": 1
           },
           {
             "biome": "skycraft:solstheim_pine_forest",
-            "weight": 1
+            "weight": 2
           },
           {
-            "biome": "skycraft:snowy_slopes",
-            "weight": 1
+            "biome": "skycraft:solstheim_ashlands",
+            "weight": 2
           }
         ],
         "peak": [
@@ -2232,7 +2268,7 @@
     "morrowind/red_mountain": {
       "fallback": "province/morrowind",
       "upland_y": 95,
-      "peak_y": 150,
+      "peak_y": 190,
       "contexts": {
         "lowland": [
           {
@@ -2664,8 +2700,8 @@
     },
     "cyrodiil/jerall_mountains": {
       "fallback": "province/cyrodiil",
-      "upland_y": 100,
-      "peak_y": 165,
+      "upland_y": 120,
+      "peak_y": 250,
       "contexts": {
         "lowland": [
           {
@@ -3035,7 +3071,7 @@
     },
     "high_rock/rivenspire": {
       "fallback": "province/high_rock",
-      "peak_y": 160,
+      "peak_y": 200,
       "contexts": {
         "lowland": [
           {
@@ -3077,8 +3113,8 @@
     },
     "high_rock/wrothgar": {
       "fallback": "province/high_rock",
-      "upland_y": 95,
-      "peak_y": 160,
+      "upland_y": 110,
+      "peak_y": 250,
       "contexts": {
         "lowland": [
           {
@@ -4694,7 +4730,7 @@
     "realm/alpine": {
       "fallback": "province/skyrim",
       "upland_y": 100,
-      "peak_y": 165,
+      "peak_y": 200,
       "contexts": {
         "lowland": [
           {

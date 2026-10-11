@@ -21,8 +21,8 @@ import java.util.Locale;
  */
 public record TamrielChannel(Channel channel) implements DensityFunction.SimpleFunction {
     public enum Channel implements StringRepresentable {
-        ELEVATION(-64, 400), CONTINENTALNESS(-1.2, 1), EROSION(-1, 1), RIDGES(0, 1), RIVER(0, 1), LAKE(0, 1),
-        ROUGHNESS(0, 1), CRAG(0, 1), DUNES(0, 1), WETLAND(0, 1), WATER_LEVEL(-64, 400), COAST(-100000, 100000),
+        ELEVATION(-64, 640), CONTINENTALNESS(-1.2, 1), EROSION(-1, 1), RIDGES(0, 1), RIVER(0, 1), LAKE(0, 1),
+        ROUGHNESS(0, 1), CRAG(0, 1), DUNES(0, 1), WETLAND(0, 1), WATER_LEVEL(-64, 640), COAST(-100000, 100000),
         ROAD(0, 1), OVERHANG(0, 1);
 
         public static final StringRepresentable.EnumCodec<Channel> CODEC = StringRepresentable.fromEnum(Channel::values);
@@ -62,9 +62,9 @@ public record TamrielChannel(Channel channel) implements DensityFunction.SimpleF
             case WETLAND -> s.wetland;
             case WATER_LEVEL -> Float.isNaN(s.waterLevel) ? -64 : s.waterLevel;
             case COAST -> s.coastDistance;
-            case ROAD -> s.road;
+            case ROAD -> Math.max(s.road, s.calm);  // road corridors, settlement pads, ledges and climbing paths
             case OVERHANG -> MapNoise.smoothstep(0.3, 0.8, s.ridge) * (0.35 + 0.65 * s.crag)
-                    * MapNoise.smoothstep(30, 120, s.coastDistance);
+                    * MapNoise.smoothstep(30, 120, s.coastDistance) * (1 - s.calm) * (1 - 0.8 * s.road);
         };
     }
 

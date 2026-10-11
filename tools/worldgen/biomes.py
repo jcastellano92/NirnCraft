@@ -332,6 +332,7 @@ ROCK_ICE = weighted(("packed_ice", 5), ("blue_ice", 1), ("snow_block", 2), (st(S
 ROCK_CORAL = weighted((st(SK + ":coral_stone"), 6), ("dead_brain_coral_block", 1), ("dead_tube_coral_block", 1))
 ROCK_CALCITE = weighted(("calcite", 5), ("diorite", 2), ("smooth_basalt", 1))
 ROCK_DARK = weighted(("deepslate", 3), ("cobbled_deepslate", 2), ("mossy_cobblestone", 3), ("tuff", 2))
+ROCK_FROST = weighted(("stone", 4), (st(SK + ":frosted_stone"), 4), ("snow_block", 2), ("andesite", 1))
 boulder("mossy", ROCK_MOSSY, uniform(1, 2), chance=3)
 boulder("mossy", ROCK_MOSSY, uniform(1, 2), chance=8)
 boulder("grey", ROCK_GREY, uniform(1, 3), chance=4)
@@ -345,6 +346,7 @@ boulder("ice", ROCK_ICE, uniform(1, 3), chance=4)
 boulder("coral", ROCK_CORAL, uniform(1, 2), chance=4)
 boulder("calcite", ROCK_CALCITE, uniform(1, 2), chance=3)
 boulder("dark", ROCK_DARK, uniform(1, 2), chance=4)
+boulder("frost", ROCK_FROST, uniform(1, 3), chance=4)
 
 
 def spires(name, body, tip, n, height, spread, lean, chance):
@@ -918,8 +920,34 @@ def tweak(preset, **kw):
     return p
 
 
+def natural(lo, hi):
+    """Turns a noise band into a one-sided threshold. A band between two thresholds follows the noise's contour lines,
+    so it draws thin rings and worm-like stripes repeated across the land; one-sided thresholds give blobs and drifts.
+    Wide bands round zero (organic mazes of mud and moss) stay as they are."""
+    if hi >= MAX or lo <= -MAX or (lo < 0 < hi and hi - lo >= 0.3):
+        return lo, hi
+    if hi - lo <= 0.15 and lo <= 0.0 <= hi:      # a hairline round zero: a few scattered blobs instead
+        return 0.62, MAX
+    if lo >= 0:
+        return lo + 0.6 * (hi - lo), MAX
+    return -MAX, hi - 0.6 * (hi - lo)
+
+
 def patch_rules(patches):
-    return [cond(noise(n, lo, hi), block_of(b)) for n, lo, hi, b in patches]
+    return [cond(noise(n, *natural(lo, hi)), block_of(b)) for n, lo, hi, b in patches]
+
+
+def steep_rule(blk):
+    """Cliffs and steep slopes of rock: bare rock with scree and darker bands, not one flat colour. "snowy_stone" (the
+    high peaks) is the same rock with snow clinging to about half of it."""
+    if blk == "snowy_stone":
+        return seq(cond(noise("surface", -0.05, MAX), SB("snow_block")), steep_rule("stone"))
+    if blk not in ("stone", "mossy_cobblestone"):
+        return block_of(blk)
+    return seq(cond(noise("gravel", 0.52, MAX), SB("gravel")),
+               cond(noise("surface", -MAX, -0.55), SB("andesite")),
+               cond(noise("calcite", 0.6, MAX), SB("tuff")),
+               block_of(blk))
 
 
 def build_surface(p):
@@ -935,15 +963,15 @@ def build_surface(p):
     if p["snow"]:
         y, mul = p["snow"]
         dry.append(cond(y_above(y, mul), seq(
-            cond(STEEP, SB("stone")),
-            cond(noise("powder_snow", 0.45, 0.58), SB("powder_snow")),
-            cond(noise("packed_ice", 0.0, 0.08), SB("packed_ice")),
+            cond(STEEP, steep_rule("stone")),
+            cond(noise("powder_snow", *natural(0.45, 0.58)), SB("powder_snow")),
+            cond(noise("packed_ice", 0.72, MAX), SB("packed_ice")),
             SB("snow_block"))))
     if p["rock"]:
         y, blk, rp = p["rock"]
         dry.append(cond(y_above(y, 2), seq(*patch_rules(rp), block_of(blk))))
     if p["steep"]:
-        dry.append(cond(STEEP, block_of(p["steep"])))
+        dry.append(cond(STEEP, steep_rule(p["steep"])))
     dry += patch_rules(p["patches"])
     dry.append(block_of(p["top"]))
     out.append(cond(ON_FLOOR, cond(water_c(-1), seq(*dry))))
@@ -1019,32 +1047,32 @@ MYCELIUM = st("mycelium", snowy=False)
 
 # Surface presets by terrain family
 S_TUNDRA = surface(GRASS, patches=[("surface", 0.55, MAX, "coarse_dirt"), ("gravel", 0.6, MAX, "gravel"),
-                                   ("calcite", -0.02, 0.02, "stone")], steep="stone", snow=(250, 4),
-                   rock=(205, "stone", [("gravel", 0.3, MAX, "gravel"), ("surface", -0.3, 0.1, "andesite")]))
-S_PLAINS_SKYRIM = surface(GRASS, patches=[("surface", 0.75, MAX, "coarse_dirt")], steep="stone", snow=(250, 4))
+                                   ("calcite", -0.02, 0.02, "stone")], steep="stone", snow=(310, 4),
+                   rock=(238, "stone", [("gravel", 0.3, MAX, "gravel"), ("surface", -0.3, 0.1, "andesite")]))
+S_PLAINS_SKYRIM = surface(GRASS, patches=[("surface", 0.75, MAX, "coarse_dirt")], steep="stone", snow=(310, 4))
 S_PINE = surface(GRASS, patches=[("surface", 0.35, 0.7, PODZOL), ("surface", 0.85, MAX, "coarse_dirt"),
-                                 ("patch", 0.6, MAX, "mossy_cobblestone")], steep="stone", snow=(220, 4),
-                 rock=(200, "stone", [("gravel", 0.4, MAX, "gravel")]))
-S_SNOW_FOREST = surface(GRASS, patches=[("surface", 0.4, MAX, PODZOL)], steep="stone", snow=(170, 4))
+                                 ("patch", 0.6, MAX, "mossy_cobblestone")], steep="stone", snow=(262, 4),
+                 rock=(230, "stone", [("gravel", 0.4, MAX, "gravel")]))
+S_SNOW_FOREST = surface(GRASS, patches=[("surface", 0.4, MAX, PODZOL)], steep="stone", snow=(182, 4))
 S_FALKREATH = surface(GRASS, patches=[("surface", 0.2, 0.6, PODZOL), ("surface", -0.8, -0.45, "moss_block"),
                                       ("surface", 0.85, MAX, "coarse_dirt")], steep="mossy_cobblestone",
-                      steep_under="stone", snow=(240, 4))
+                      steep_under="stone", snow=(294, 4))
 S_RIFT = surface(GRASS, patches=[("surface", 0.6, MAX, PODZOL), ("patch", 0.7, MAX, "coarse_dirt")], steep="stone",
-                 snow=(235, 4))
+                 snow=(286, 4))
 S_REACH = surface(GRASS, patches=[("surface", 0.3, 0.6, "coarse_dirt"), ("gravel", 0.45, MAX, "gravel"),
                                   ("surface", -0.55, -0.3, "granite")], steep="stone",
-                  rock=(150, "stone", [("surface", 0.2, MAX, "granite"), ("gravel", 0.3, MAX, "gravel")]),
-                  snow=(250, 4))
+                  rock=(235, "stone", [("surface", 0.2, MAX, "granite"), ("gravel", 0.3, MAX, "gravel")]),
+                  snow=(310, 4))
 S_REACH_VALLEY = surface(GRASS, patches=[("surface", 0.6, MAX, "coarse_dirt"), ("surface", -0.7, -0.5, "granite")],
                          steep="stone", uw="gravel", uw_patches=[("surface", 0.2, MAX, "sand")])
 S_MARSH = surface(GRASS, patches=[("surface", -0.3, 0.1, "mud"), ("surface", 0.6, MAX, "coarse_dirt")],
                   uw="mud", uw_patches=[("surface", 0.2, MAX, "clay")], swamp=62)
 S_VOLCANIC_TUNDRA = surface(GRASS, patches=[("surface", 0.45, MAX, "coarse_dirt"), ("gravel", 0.35, MAX, "gravel"),
                                             ("calcite", -0.03, 0.03, "calcite"), ("patch", 0.65, MAX, "tuff")],
-                            steep="stone", snow=(230, 4))
+                            steep="stone", snow=(278, 4))
 S_HOT_SPRINGS = surface(GRASS, patches=[("calcite", -0.05, 0.05, "calcite"), ("gravel", 0.3, MAX, "gravel"),
                                         ("surface", 0.5, MAX, "coarse_dirt"), ("patch", 0.6, MAX, "diorite")],
-                        steep="stone", uw="calcite", snow=(230, 4))
+                        steep="stone", uw="calcite", snow=(278, 4))
 S_SNOWFIELD = surface("snow_block", "snow_block", patches=[("powder_snow", 0.45, 0.55, "powder_snow"),
                                                           ("packed_ice", 0.0, 0.1, "packed_ice"),
                                                           ("surface", 0.7, MAX, GRASS)], steep="stone",
@@ -1053,18 +1081,22 @@ S_GLACIER = surface("snow_block", "packed_ice", patches=[("packed_ice", -0.25, 0
                                                          ("ice", 0.4, MAX, "blue_ice"),
                                                          ("powder_snow", 0.45, 0.6, "powder_snow")],
                     steep="packed_ice", steep_under="packed_ice", uw="gravel", uw_under="packed_ice")
+# The Throat's summit and the high slopes share one look (the biome border between them runs along 4-block cells, so
+# any difference shows as rectangles): wind-packed snow and powder drifts and bare rock on the crags and ribs
+# (no ice: the old packed-ice patches showed as blue rectangles).
 S_PEAK = surface("snow_block", "snow_block", patches=[("powder_snow", 0.35, 0.6, "powder_snow"),
-                                                     ("packed_ice", -0.5, 0.2, "packed_ice"),
-                                                     ("ice", -0.0625, 0.025, "ice")], steep="stone",
+                                                     ("surface", 0.55, MAX, "stone"),
+                                                     ("surface", -0.7, -0.55, FROSTED)], steep="snowy_stone",
                  steep_under="stone", uw="stone")
 S_SLOPES = surface("snow_block", "snow_block", patches=[("powder_snow", 0.45, 0.58, "powder_snow"),
+                                                       ("surface", 0.6, MAX, "stone"),
                                                        ("calcite", -0.0125, 0.0125, "stone")],
-                   steep="stone", steep_under="stone", uw="stone")
+                   steep="snowy_stone", steep_under="stone", uw="stone")
 S_ALPINE = surface(GRASS, patches=[("surface", 0.7, MAX, "coarse_dirt"), ("calcite", -0.0125, 0.0125, "stone")],
-                   steep="stone", snow=(240, 3))
+                   steep="stone", snow=(294, 3))
 S_HIGHLANDS = surface(GRASS, patches=[("surface", 0.35, MAX, "coarse_dirt"), ("gravel", 0.25, MAX, "gravel"),
-                                      ("surface", -0.6, -0.35, "stone")], steep="stone", snow=(215, 4),
-                      rock=(180, "stone", [("gravel", 0.2, MAX, "gravel"), ("surface", 0.5, MAX, "andesite")]))
+                                      ("surface", -0.6, -0.35, "stone")], steep="stone", snow=(254, 4),
+                      rock=(198, "stone", [("gravel", 0.2, MAX, "gravel"), ("surface", 0.5, MAX, "andesite")]))
 S_GRAVEL_COAST = surface("gravel", "gravel", patches=[("surface", 0.3, MAX, "stone"),
                                                      ("patch", 0.65, MAX, "cobblestone")], uw="gravel", steep="stone")
 S_FROZEN_SHORE = surface("snow_block", "gravel", patches=[("surface", 0.2, MAX, "gravel"),
@@ -1077,7 +1109,7 @@ S_ASH = surface(ASH, ASH, patches=[("surface", 0.5, MAX, VOLCANIC), ("gravel", 0
                 ceiling=VOLCANIC)
 S_SOLSTHEIM_ASH = surface(ASH, ASH, patches=[("surface", 0.55, MAX, VOLCANIC), ("surface", -0.75, -0.45, "snow_block"),
                                               ("gravel", 0.6, MAX, "gravel")], steep=VOLCANIC, uw="gravel",
-                          deep=(5, VOLCANIC), snow=(200, 3), ceiling=VOLCANIC)
+                          deep=(5, VOLCANIC), snow=(230, 3), ceiling=VOLCANIC)
 S_RED_MOUNTAIN = surface(VOLCANIC, VOLCANIC, patches=[("netherrack", 0.55, MAX, MAGMA_ROCK),
                                                       ("surface", 0.4, MAX, CRACKED),
                                                       ("surface", -0.7, -0.3, ASH), ("patch", 0.7, MAX, "blackstone")],
@@ -1095,7 +1127,7 @@ S_BITTER = surface(GRASS, patches=[("surface", -0.2, 0.25, "mud"), ("surface", 0
 S_GRAZE = surface(GRASS, patches=[("surface", 0.6, MAX, "coarse_dirt"), ("surface", -0.8, -0.55, ASH)], steep=VOLCANIC)
 S_WEST_GASH = surface(GRASS, patches=[("surface", 0.3, MAX, "coarse_dirt"), ("gravel", 0.4, MAX, "gravel"),
                                       ("surface", -0.6, -0.3, VOLCANIC)], steep="stone",
-                      rock=(150, "stone", [("surface", 0.3, MAX, VOLCANIC)]))
+                      rock=(205, "stone", [("surface", 0.3, MAX, VOLCANIC)]))
 S_ASCADIAN = surface(GRASS, patches=[("surface", 0.8, MAX, "coarse_dirt")], uw="sand",
                      uw_patches=[("surface", 0.3, MAX, "clay")])
 S_AZURA = surface(GRASS, patches=[("surface", 0.0, MAX, "stone"), ("gravel", 0.4, MAX, "gravel"),
@@ -1138,8 +1170,8 @@ S_DARK_FOREST = surface(GRASS, patches=[("surface", 0.3, 0.7, PODZOL), ("surface
                                         ("surface", 0.85, MAX, "coarse_dirt")], steep="mossy_cobblestone",
                         steep_under="stone")
 S_HIGHLANDS_TEMPERATE = surface(GRASS, patches=[("surface", 0.45, MAX, "coarse_dirt"), ("gravel", 0.4, MAX, "gravel")],
-                                steep="stone", snow=(230, 4),
-                                rock=(190, "stone", [("gravel", 0.3, MAX, "gravel"), ("surface", 0.5, MAX, "andesite")]))
+                                steep="stone", snow=(278, 4),
+                                rock=(214, "stone", [("gravel", 0.3, MAX, "gravel"), ("surface", 0.5, MAX, "andesite")]))
 S_WEALD = surface(GRASS, patches=[("surface", 0.65, MAX, "coarse_dirt"), ("patch", 0.7, MAX, "rooted_dirt")],
                   steep="stone")
 S_GOLD_COAST = surface(GRASS, patches=[("surface", 0.55, MAX, "coarse_dirt"), ("surface", -0.8, -0.5, "sand")],
@@ -1164,15 +1196,15 @@ S_DRAGONTAIL = surface("red_sand", "red_sand", patches=[("surface", 0.2, MAX, "t
                        steep="terracotta", steep_under="terracotta", ceiling="red_sandstone", deep=(10, "red_sandstone"))
 S_BANGKORAI = surface(GRASS, patches=[("surface", 0.3, MAX, "coarse_dirt"), ("gravel", 0.5, MAX, "gravel"),
                                       ("surface", -0.6, -0.35, "granite")], steep="stone",
-                      rock=(170, "stone", [("surface", 0.3, MAX, "granite")]), snow=(240, 4))
+                      rock=(182, "stone", [("surface", 0.3, MAX, "granite")]), snow=(294, 4))
 S_STROS = surface("sand", "sand", patches=[("surface", 0.5, MAX, GRASS), ("patch", 0.65, MAX, "sandstone")],
                   ceiling="sandstone", uw="sand", deep=(6, "sandstone"))
 S_MOOR = surface(GRASS, patches=[("surface", 0.4, MAX, "coarse_dirt"), ("surface", -0.6, -0.3, PODZOL),
                                  ("gravel", 0.6, MAX, "mossy_cobblestone")], steep="stone")
 S_RIVENSPIRE = surface(GRASS, patches=[("surface", 0.3, MAX, PODZOL), ("surface", -0.6, -0.3, "coarse_dirt"),
-                                       ("gravel", 0.55, MAX, "gravel")], steep="stone", snow=(220, 4))
+                                       ("gravel", 0.55, MAX, "gravel")], steep="stone", snow=(262, 4))
 S_WROTHGAR = surface(GRASS, patches=[("surface", 0.3, MAX, "gravel"), ("surface", -0.5, -0.25, "coarse_dirt")],
-                     steep="stone", snow=(170, 4), rock=(150, "stone", [("gravel", 0.2, MAX, "gravel")]))
+                     steep="stone", snow=(265, 4), rock=(235, "stone", [("gravel", 0.2, MAX, "gravel")]))
 S_FARMLAND = surface(GRASS, patches=[("surface", 0.8, MAX, "coarse_dirt")], steep="stone", uw="gravel",
                      uw_patches=[("surface", 0.0, MAX, "sand"), ("surface", -0.6, -0.3, "clay")])
 S_ICE_WASTE = surface("snow_block", "packed_ice", patches=[("packed_ice", -0.3, 0.3, "packed_ice"),
@@ -1390,10 +1422,10 @@ biome("winterhold_glacier", "Winterhold Glacier", temp=-0.8, downfall=0.5, sky="
       tags=["tundra", "snowy", "cold", "wasteland"])
 biome("throat_of_the_world", "Throat of the World", temp=-0.9, downfall=0.6, sky="#B2C6F0", fog="#E8EEF8",
       water="#3938C9", surface=S_PEAK, province="skyrim", creature=C_PEAK, particle=particle("white_ash", 0.01),
-      features=["boulders_ice_4"], tags=["peak", "mountain", "snowy", "cold"])
+      features=["boulders_frost_4"], tags=["peak", "mountain", "snowy", "cold"])
 biome("snowy_slopes", "Snowy Slopes", temp=-0.4, downfall=0.6, sky="#A0B8E0", fog="#DCE6F2", water="#3938C9",
       grass="#80A090", foliage="#6C8C80", surface=S_SLOPES, province="skyrim", creature=C_PEAK,
-      particle=particle("white_ash", 0.003), features=["boulders_ice_4", "trees_skyrim_snowy_sparse"],
+      particle=particle("white_ash", 0.003), features=["boulders_frost_4", "trees_skyrim_snowy_sparse"],
       tags=["peak", "slope", "mountain", "snowy", "cold"])
 biome("alpine_meadow", "Alpine Meadow", temp=0.25, downfall=0.6, sky="#8CB0EC", fog="#CCDCF0", water="#3D57D6",
       grass="#7DB060", foliage="#64904C", surface=S_ALPINE, province="skyrim", creature=C_PEAK + C_SKYRIM_PLAINS,
@@ -1923,12 +1955,16 @@ SURFACE = "@surface"
 VANILLA_CAVES = {"minecraft:dripstone_caves", "minecraft:lush_caves", "minecraft:deep_dark"}
 
 
-def pal(key, fallback=None, upland_y=None, peak_y=None, summit_y=None, **contexts):
+def pal(key, fallback=None, upland_y=None, peak_y=None, summit_y=None, bias=None, **contexts):
+    """bias shifts the climate value by position, so a palette's choices follow the land's geography:
+    {"linear": [x, z, dx, dz, span, shift]} adds shift * clamp(((x, z) - centre) . (dx, dz) / span, -1, 1) (later
+    entries towards (dx, dz)); {"radial": [x, z, inner, outer, scale]} scales the value by `scale` inside `inner`,
+    rising to 1 at `outer` (only the first entries near the centre)."""
     assert key not in PALETTES, key
     entry = {}
     if fallback:
         entry["fallback"] = fallback
-    for k, v in (("upland_y", upland_y), ("peak_y", peak_y), ("summit_y", summit_y)):
+    for k, v in (("upland_y", upland_y), ("peak_y", peak_y), ("summit_y", summit_y), ("bias", bias)):
         if v is not None:
             entry[k] = v
     ctx = {}
@@ -1966,11 +2002,11 @@ CAVE_MAGIC = [("falmer_glow_caves", 1), (SURFACE, 4), ("mushroom_grottos", 1)]
 DEEP_MAGIC = [("falmer_glow_caves", 2), (SURFACE, 2), (LC, 1)]
 
 # --- the default and the province fallbacks
-pal("default", upland_y=115, peak_y=175, summit_y=270,
+pal("default", upland_y=115, peak_y=240, summit_y=420,
     ocean="temperate_ocean", deep_ocean="deep_temperate_ocean", beach="temperate_beach", river="cyrodiil_river",
     lake="cyrodiil_river", marsh="nibenay_valley", lowland="heartlands", upland="colovian_highlands",
     peak="snowy_slopes", summit="throat_of_the_world", cave=CAVE_TEMPERATE, deep_cave=DEEP_TEMPERATE)
-pal("province/skyrim", fallback="default", peak_y=185,
+pal("province/skyrim", fallback="default", peak_y=255, summit_y=470,
     ocean="sea_of_ghosts", deep_ocean="deep_sea_of_ghosts", beach=[("frozen_shore", 1), ("skyrim_coast", 2)],
     river="skyrim_river", lake="skyrim_lake", marsh="hjaalmarch_marsh",
     lowland=[("whiterun_tundra", 2), ("pine_forest", 2)], upland=[("skyrim_highlands", 2), ("pine_forest", 1)],
@@ -2038,31 +2074,36 @@ pal("province/sea", fallback="default", ocean="temperate_ocean", deep_ocean="dee
 pal("province/realm", fallback="default")
 
 # --- Skyrim's holds
-pal("skyrim/whiterun", fallback="province/skyrim",
-    lowland=[("whiterun_tundra", 3), ("whiterun_plains", 3), ("pine_forest", 1)],
-    upland=[("whiterun_tundra", 1), ("skyrim_highlands", 3), ("alpine_meadow", 1), ("pine_forest", 1)],
+# The upland/peak heights follow each hold's ground (TERRAIN2 raised the south: the Rift and Falkreath are highlands
+# at y 150-190 whose lowland is their forest, not the province's upland mix).
+pal("skyrim/whiterun", fallback="province/skyrim", upland_y=130, bias={"radial": [62, -68, 450, 1400, 0.55]},
+    # the golden tundra plain right up to the city walls; pines only on the foothills round its edge (upland)
+    lowland=[("whiterun_tundra", 4), ("whiterun_plains", 3)],
+    upland=[("whiterun_tundra", 1), ("skyrim_highlands", 2), ("pine_forest", 2), ("alpine_meadow", 1)],
     marsh="whiterun_plains")
-pal("skyrim/falkreath", fallback="province/skyrim",
+pal("skyrim/falkreath", fallback="province/skyrim", upland_y=200, peak_y=280,
     lowland=[("pine_forest", 2), ("falkreath_forest", 4)], upland=[("falkreath_forest", 1), ("pine_forest", 2),
                                                                      ("skyrim_highlands", 1)],
     marsh="falkreath_forest")
-pal("skyrim/the_rift", fallback="province/skyrim",
-    lowland=[("rift_autumn_forest", 5), ("alpine_meadow", 1)],
-    upland=[("rift_autumn_forest", 2), ("pine_forest", 2), ("alpine_meadow", 1)], marsh="rift_autumn_forest")
-pal("skyrim/the_reach", fallback="province/skyrim", upland_y=100,
+pal("skyrim/the_rift", fallback="province/skyrim", upland_y=212, peak_y=290,
+    bias={"radial": [2250, 1420, 450, 1300, 0.8]},
+    # golden and orange aspens round Riften and Lake Honrich; pines climb the valley sides
+    lowland=[("rift_autumn_forest", 7), ("alpine_meadow", 1)],
+    upland=[("rift_autumn_forest", 3), ("pine_forest", 2), ("alpine_meadow", 1)], marsh="rift_autumn_forest")
+pal("skyrim/the_reach", fallback="province/skyrim", upland_y=150, peak_y=270,
     lowland=[("reach_crags", 2), ("reach_valley", 3)], upland=[("reach_crags", 4), ("skyrim_highlands", 1)],
     peak=[("reach_crags", 1), ("snowy_slopes", 2)], marsh="reach_valley")
-pal("skyrim/hjaalmarch", fallback="province/skyrim",
+pal("skyrim/hjaalmarch", fallback="province/skyrim", upland_y=112,
     lowland=[("hjaalmarch_marsh", 3), ("whiterun_tundra", 1), ("snowy_pine_forest", 1)],
     upland=[("skyrim_highlands", 1), ("snowy_pine_forest", 2)], marsh="hjaalmarch_marsh",
     beach=[("skyrim_coast", 2), ("frozen_shore", 1)])
-pal("skyrim/haafingar", fallback="province/skyrim",
+pal("skyrim/haafingar", fallback="province/skyrim", upland_y=145,
     lowland=[("skyrim_highlands", 1), ("pine_forest", 2), ("snowy_pine_forest", 1)],
     upland=[("skyrim_highlands", 2), ("snowy_pine_forest", 2)], beach=[("rocky_shore", 1), ("skyrim_coast", 2)])
-pal("skyrim/the_pale", fallback="province/skyrim", peak_y=160,
+pal("skyrim/the_pale", fallback="province/skyrim", upland_y=145, peak_y=205,
     lowland=[("pale_snowfield", 3), ("snowy_pine_forest", 2)], upland=[("pale_snowfield", 2), ("snowy_slopes", 1)],
     marsh="pale_snowfield", river="frozen_river", lake="frozen_river", beach="frozen_shore")
-pal("skyrim/winterhold", fallback="province/skyrim", peak_y=150,
+pal("skyrim/winterhold", fallback="province/skyrim", upland_y=145, peak_y=200,
     lowland=[("winterhold_glacier", 2), ("pale_snowfield", 2)], upland=[("winterhold_glacier", 2), ("snowy_slopes", 1)],
     marsh="winterhold_glacier", river="frozen_river", lake="frozen_river", beach="frozen_shore",
     cave=[("ice_caves", 3), (SURFACE, 3)])
@@ -2072,15 +2113,17 @@ pal("skyrim/eastmarch", fallback="province/skyrim",
     marsh="eastmarch_hot_springs", lake="eastmarch_hot_springs", beach="frozen_shore")
 
 # --- Morrowind
-pal("morrowind/solstheim", fallback="province/morrowind", peak_y=160,
-    lowland=[("solstheim_ashlands", 2), ("solstheim_pine_forest", 2), ("pale_snowfield", 1)],
-    upland=[("solstheim_ashlands", 2), ("solstheim_pine_forest", 1), ("snowy_slopes", 1)], peak="snowy_slopes",
+# Solstheim: Skaal pine forests and snow in the north, the ash wastes of Red Mountain's fall-out in the south
+pal("morrowind/solstheim", fallback="province/morrowind", upland_y=128, peak_y=205,
+    bias={"linear": [4600, -3250, 0, 1, 330, 0.65]},
+    lowland=[("solstheim_pine_forest", 3), ("pale_snowfield", 1), ("solstheim_ashlands", 3)],
+    upland=[("snowy_slopes", 1), ("solstheim_pine_forest", 2), ("solstheim_ashlands", 2)], peak="snowy_slopes",
     summit="snowy_slopes", ocean="sea_of_ghosts", deep_ocean="deep_sea_of_ghosts",
     beach=[("ash_shore", 1), ("frozen_shore", 1)], river="skyrim_river", lake="skyrim_lake",
     marsh="solstheim_ashlands", cave=CAVE_SKYRIM, deep_cave=DEEP_SKYRIM)
 pal("morrowind/vvardenfell_ashlands", fallback="province/morrowind",
     lowland=[("vvardenfell_ashlands", 4), ("stonefalls", 1)], upland="vvardenfell_ashlands")
-pal("morrowind/red_mountain", fallback="province/morrowind", upland_y=95, peak_y=150,
+pal("morrowind/red_mountain", fallback="province/morrowind", upland_y=95, peak_y=190,
     lowland=[("vvardenfell_ashlands", 1), ("red_mountain", 2)], upland="red_mountain", peak="red_mountain",
     cave=[("lava_caves", 4), (SURFACE, 2)], deep_cave=[("lava_caves", 3), ("dwemer_caverns", 2)])
 pal("morrowind/bitter_coast", fallback="province/morrowind",
@@ -2113,7 +2156,7 @@ pal("morrowind/stonefalls", fallback="province/morrowind",
     peak="red_mountain")
 
 # --- Cyrodiil
-pal("cyrodiil/jerall_mountains", fallback="province/cyrodiil", upland_y=100, peak_y=165,
+pal("cyrodiil/jerall_mountains", fallback="province/cyrodiil", upland_y=120, peak_y=250,
     lowland=[("jerall_foothills", 3), ("great_forest", 1)], upland="jerall_foothills", peak="snowy_slopes",
     river="skyrim_river", lake="skyrim_lake", cave=CAVE_SKYRIM)
 pal("cyrodiil/colovian_highlands", fallback="province/cyrodiil",
@@ -2143,10 +2186,10 @@ pal("high_rock/glenumbra", fallback="province/high_rock",
     lowland=[("glenumbra_moors", 4), ("stormhaven", 1)], upland="glenumbra_moors")
 pal("high_rock/stormhaven", fallback="province/high_rock",
     lowland=[("wayrest_farmland", 1), ("stormhaven", 4)], upland="bangkorai")
-pal("high_rock/rivenspire", fallback="province/high_rock", peak_y=160,
+pal("high_rock/rivenspire", fallback="province/high_rock", peak_y=200,
     lowland=[("rivenspire", 4), ("glenumbra_moors", 1)], upland="rivenspire", peak="wrothgarian_mountains",
     cave=CAVE_MAGIC)
-pal("high_rock/wrothgar", fallback="province/high_rock", upland_y=95, peak_y=160,
+pal("high_rock/wrothgar", fallback="province/high_rock", upland_y=110, peak_y=250,
     lowland=[("wrothgarian_mountains", 2), ("bangkorai", 1)], upland="wrothgarian_mountains",
     peak=[("wrothgarian_mountains", 1), ("snowy_slopes", 2)], cave=CAVE_SKYRIM, deep_cave=DEEP_SKYRIM)
 pal("high_rock/wayrest", fallback="province/high_rock",
@@ -2280,7 +2323,7 @@ pal("realm/mushroom", fallback="province/morrowind",
     lowland=[("sheogorad", 1), ("telvanni_mushroom_forest", 4)], upland="telvanni_mushroom_forest",
     beach="rocky_shore", ocean="temperate_ocean", cave=[("mushroom_grottos", 3), (SURFACE, 3)],
     deep_cave=[("falmer_glow_caves", 2), (SURFACE, 2)])
-pal("realm/alpine", fallback="province/skyrim", upland_y=100, peak_y=165,
+pal("realm/alpine", fallback="province/skyrim", upland_y=100, peak_y=200,
     lowland=[("alpine_meadow", 2), ("pine_forest", 2), ("rift_autumn_forest", 1)],
     upland=[("alpine_meadow", 1), ("skyrim_highlands", 2), ("wrothgarian_mountains", 1)],
     peak="snowy_slopes", summit="throat_of_the_world")

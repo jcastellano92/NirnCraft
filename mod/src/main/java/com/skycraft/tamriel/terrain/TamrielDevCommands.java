@@ -2,17 +2,24 @@ package com.skycraft.tamriel.terrain;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.skycraft.Skycraft;
 import com.skycraft.tamriel.MapSample;
+import com.skycraft.tamriel.Place;
+import com.skycraft.tamriel.Places;
 import com.skycraft.tamriel.Region;
 import com.skycraft.tamriel.Regions;
 import com.skycraft.tamriel.TamrielMap;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
@@ -22,6 +29,9 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
@@ -34,6 +44,9 @@ import java.util.stream.IntStream;
  *       surface heights (the noise generator's base height, no chunks are loaded) to
  *       {@code skycraft-heightmaps/} in the server folder, off the server thread.</li>
  *   <li>{@code /skycraft-tamriel bench}: times {@link TamrielMap#sample} and the generator's column heights.</li>
+ *   <li>{@code /skycraft-tamriel chunkbench <x> <z> <n>}: times full generation of fresh chunks.</li>
+ *   <li>{@code /skycraft-locate <place id or name> [tp]}: where a named place is (vanilla /locate can't find the
+ *       place-placed structures), and optionally a teleport there.</li>
  * </ul>
  */
 public final class TamrielDevCommands {
@@ -60,7 +73,76 @@ public final class TamrielDevCommands {
                                                 .executes(c -> heightmap(c, 0))
                                                 .then(Commands.argument("step", IntegerArgumentType.integer(1, 256))
                                                         .executes(c -> heightmap(c, IntegerArgumentType.getInteger(c, "step"))))))))
-                .then(Commands.literal("bench").executes(TamrielDevCommands::bench)));
+                .then(Commands.literal("bench").executes(TamrielDevCommands::bench))
+                .then(Commands.literal("chunkbench")
+                        .then(Commands.argument("x", IntegerArgumentType.integer())
+                                .then(Commands.argument("z", IntegerArgumentType.integer())
+                                        .then(Commands.argument("chunks", IntegerArgumentType.integer(1, 16))
+                                                .executes(TamrielDevCommands::chunkBench))))));
+        d.register(Commands.literal("skycraft-locate").requires(s -> s.hasPermission(2))
+                .then(Commands.argument("place", StringArgumentType.greedyString())
+                        .suggests((c, b) -> SharedSuggestionProvider.suggest(
+                                Places.all().stream().map(Place::id), b))
+                        .executes(c -> locate(c.getSource(), StringArgumentType.getString(c, "place")))));
+    }
+
+    /**
+     * {@code /skycraft-locate <place id or name> [tp]}: where a named place is (vanilla /locate only searches its
+     * random-spread structures), its distance from the caller, and with {@code tp} a teleport to the ground there.
+     */
+    private static int locate(CommandSourceStack src, String query) {
+        String q = query.trim();
+        boolean tp = false;
+        if (q.toLowerCase(Locale.ROOT).endsWith(" tp")) {
+            tp = true;
+            q = q.substring(0, q.length() - 3).trim();
+        }
+        String key = q.toLowerCase(Locale.ROOT);
+        Language lang = Language.getInstance();
+        List<Place> hits = new ArrayList<>();
+        Place exact = Places.byId(key).orElse(null);
+        if (exact == null) {
+            for (Place p : Places.all()) {
+                String name = p.name().getContents() instanceof TranslatableContents t
+                        ? lang.getOrDefault(t.getKey()) : p.name().getString();
+                String n = name.toLowerCase(Locale.ROOT);
+                if (n.equals(key) || p.id().replace('_', ' ').equals(key)) {
+                    exact = p;
+                    break;
+                }
+                if (n.contains(key) || p.id().contains(key.replace(' ', '_'))) hits.add(p);
+            }
+        }
+        Vec3 at = src.getPosition();
+        if (exact == null && hits.size() == 1) exact = hits.get(0);
+        if (exact == null) {
+            if (hits.isEmpty()) {
+                src.sendFailure(Component.literal("No place matches \"" + q + "\""));
+                return 0;
+            }
+            hits.sort(Comparator.comparingLong(p -> p.distSqr((int) at.x, (int) at.z)));
+            StringBuilder sb = new StringBuilder(hits.size() + " places match \"" + q + "\":");
+            for (int i = 0; i < Math.min(10, hits.size()); i++) sb.append(' ').append(hits.get(i).id());
+            if (hits.size() > 10) sb.append(" ...");
+            src.sendSuccess(() -> Component.literal(sb.toString()), false);
+            return hits.size();
+        }
+        Place p = exact;
+        int dist = (int) Math.round(Math.sqrt(p.distSqr((int) Math.floor(at.x), (int) Math.floor(at.z))));
+        src.sendSuccess(() -> Component.empty().append(p.name()).append(String.format(Locale.ROOT,
+                " [%s, %s, %s] at (%d, %d), %d blocks away", p.id(), p.type().name().toLowerCase(Locale.ROOT),
+                p.regionId(), p.x(), p.z(), dist)), false);
+        if (tp) {
+            if (!(src.getEntity() instanceof ServerPlayer player)) {
+                src.sendFailure(Component.literal("Only a player can be teleported"));
+                return 0;
+            }
+            ServerLevel level = src.getServer().overworld();
+            level.getChunk(p.x() >> 4, p.z() >> 4);  // generate it, so the ground height is real
+            int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p.x(), p.z());
+            player.teleportTo(level, p.x() + 0.5, y + 0.1, p.z() + 0.5, player.getYRot(), player.getXRot());
+        }
+        return 1;
     }
 
     private static int describe(CommandSourceStack src, int x, int z) {
@@ -79,9 +161,10 @@ public final class TamrielDevCommands {
                 "map y %.1f, surface y %d, floor y %d, coast %.0f, ridge %.2f, rough %.2f, crag %.2f, dunes %.2f, wet %.2f, road %.2f",
                 s.elevation, surface, floor, s.coastDistance, s.ridge, s.roughness, s.crag, s.dunes, s.wetland, s.road)), false);
         src.sendSuccess(() -> Component.literal(String.format(Locale.ROOT,
-                "water %s, river %.2f (%.0f blocks, half width %.0f), lake %.2f (%.0f), blend %s %.2f, tamriel %s",
+                "water %s, river %.2f (%.0f blocks, half width %.0f), lake %.2f (%.0f), blend %s %.2f, tamriel %s, peak %.1f, calm %.2f",
                 Float.isNaN(s.waterLevel) ? "none" : String.format(Locale.ROOT, "%.1f", s.waterLevel), s.river,
-                s.riverDistance, s.riverHalfWidth, s.lake, s.lakeDistance, b.id(), s.blendWeight, s.inTamriel)), false);
+                s.riverDistance, s.riverHalfWidth, s.lake, s.lakeDistance, b.id(), s.blendWeight, s.inTamriel, s.peak,
+                s.calm)), false);
         return 1;
     }
 
@@ -167,7 +250,7 @@ public final class TamrielDevCommands {
 
     private static int landColor(int y) {
         double[][] stops = {{63, 200, 190, 140}, {66, 150, 175, 95}, {90, 95, 145, 70}, {130, 70, 115, 55},
-                {170, 125, 115, 75}, {220, 140, 130, 115}, {270, 185, 185, 185}, {330, 245, 245, 250}, {400, 255, 255, 255}};
+                {170, 125, 115, 75}, {240, 140, 130, 115}, {320, 175, 172, 168}, {420, 225, 225, 230}, {520, 255, 255, 255}};
         for (int k = 0; k < stops.length - 1; k++) {
             if (y < stops[k + 1][0]) {
                 double t = MapNoise.clamp((y - stops[k][0]) / (stops[k + 1][0] - stops[k][0]), 0, 1);
@@ -184,6 +267,35 @@ public final class TamrielDevCommands {
 
     private static int rgb(double r, double g, double b) {
         return ((int) MapNoise.clamp(r, 0, 255) << 16) | ((int) MapNoise.clamp(g, 0, 255) << 8) | (int) MapNoise.clamp(b, 0, 255);
+    }
+
+    /**
+     * {@code /skycraft-tamriel chunkbench <x> <z> <n>}: generates the (2n+1)^2 chunks around block (x, z) to full status
+     * one by one on the server thread (they should be fresh) and reports the wall time per chunk.
+     */
+    private static int chunkBench(CommandContext<CommandSourceStack> c) {
+        CommandSourceStack src = c.getSource();
+        int cx = IntegerArgumentType.getInteger(c, "x") >> 4, cz = IntegerArgumentType.getInteger(c, "z") >> 4;
+        int n = IntegerArgumentType.getInteger(c, "chunks");
+        ServerLevel level = src.getLevel();
+        // process CPU time as well as wall time: on a shared machine the CPU time is the steadier measure
+        java.lang.management.OperatingSystemMXBean os = java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+        long cpu0 = os instanceof com.sun.management.OperatingSystemMXBean sun ? sun.getProcessCpuTime() : 0;
+        long t0 = System.nanoTime();
+        int count = 0;
+        for (int dz = -n; dz <= n; dz++) {
+            for (int dx = -n; dx <= n; dx++) {
+                level.getChunk(cx + dx, cz + dz);
+                count++;
+            }
+        }
+        double ms = (System.nanoTime() - t0) / 1e6 / count;
+        double cpu = os instanceof com.sun.management.OperatingSystemMXBean sun ? (sun.getProcessCpuTime() - cpu0) / 1e6 / count : 0;
+        String msg = String.format(Locale.ROOT, "chunkbench (%d, %d): %d chunks, %.1f ms/chunk wall, %.1f ms/chunk CPU",
+                cx << 4, cz << 4, count, ms, cpu);
+        Skycraft.LOGGER.info(msg);
+        src.sendSuccess(() -> Component.literal(msg), false);
+        return count;
     }
 
     private static int bench(CommandContext<CommandSourceStack> c) {

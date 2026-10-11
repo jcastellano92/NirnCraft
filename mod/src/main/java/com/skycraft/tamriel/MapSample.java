@@ -36,6 +36,12 @@ public final class MapSample {
     public float road;
     /** True inside the authored Tamriel raster, false in the foreign and generated lands. */
     public boolean inTamriel;
+    /** On a sharp peak ({@code MapPeaks}): the amplitude of its crag detail in blocks (0 elsewhere). */
+    public float peak;
+    /** 0..1: how much of the seeded terrain detail is suppressed (a peak's ledges and climbing paths). */
+    public float calm;
+    /** Steepness of the macro elevation, blocks per block (0 where unknown, e.g. beyond Tamriel). */
+    public float slope;
 
     public void clear() {
         region = 0;
@@ -56,6 +62,9 @@ public final class MapSample {
         wetland = 0f;
         road = 0f;
         inTamriel = false;
+        peak = 0f;
+        calm = 0f;
+        slope = 0f;
     }
 
     /** True when the column is inside a lake or a river channel (where the map places water). */

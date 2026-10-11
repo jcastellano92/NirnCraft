@@ -30,7 +30,8 @@ before datapacks load, and the client map screen needs it too.
 | --- | --- |
 | `regions.png` | 640×560, 8-bit indexed. Each pixel is a region index into `regions.json` (0 = open sea). |
 | `elevation.png` | 640×560, 16-bit grey. Macro surface elevation in blocks, offset by +64, so 64 = sea level y 63. |
-| `features.png` | 640×560 RGBA bit flags: R = river strength, G = mountain ridge strength, B = lake, A = road corridor hint. |
+| `features.png` | 640×560 RGBA bit flags: R = river strength, G = mountain ridge strength, B = lake, A = road corridor and settlement pad (calms the terrain detail and keeps cave mouths shut). |
+| `peaks.json` | The sharp peaks (the Throat of the World, Mount Anthor) that `terrain/MapPeaks` draws at full resolution on top of the raster: profile, aretes, High Hrothgar's ledge, and the graded 7,000 Steps. |
 | `regions.json` | Region definitions (section 5). |
 | `places.json` | Named places with block coordinates (section 6). |
 
@@ -46,7 +47,7 @@ before datapacks load, and the client map screen needs it too.
   The vectors use block coordinates, so the script just rasterises them. **Re-run the script after editing the
   vectors**, and commit both the vectors and the PNGs.
 * **Geography to get right.** The vectors must trace the real lore map:
-  * Skyrim: the Throat of the World (the highest peak, y ≈ 380, east of Whiterun), the Velothi Mountains on
+  * Skyrim: the Throat of the World (the highest peak, y ≈ 560, east of Whiterun), the Velothi Mountains on
     the Morrowind border, the Jerall Mountains on the Cyrodiil border, the Druadach Mountains in the Reach,
     the White River, the Karth, Lake Ilinalta, Lake Honrich, the Sea of Ghosts coast and Solstheim.
   * Cyrodiil: Lake Rumare and the Imperial City island, the Niben, the Gold Coast and Topal Bay.
@@ -81,8 +82,13 @@ before datapacks load, and the client map screen needs it too.
 * **Overrides.**
   * `data/minecraft/worldgen/world_preset/normal.json` (and `large_biomes`) points the overworld at
     `skycraft:tamriel` noise settings and the `skycraft:tamriel` biome source. Amplified stays vanilla.
-  * `data/minecraft/dimension_type/overworld.json` raises the world top: `min_y` −64, `height` 448 (top at
-    y 383).
+  * `data/minecraft/dimension_type/overworld.json` raises the world top: `min_y` −64, `height` 704 (top at
+    y 639). The terrain noise fills up to y 575 (`noise.height` 640); above that is open sky.
+* **Heights.** Sea level is y 63. Ordinary hills are y 90–180; the Rift and Falkreath are highlands at y 150–190;
+  the great ranges (Jerall, Velothi, Druadach, Wrothgarian, Dragontail) reach y 300–480 with passes at y 180–250
+  where the map's roads cross them; Red Mountain stands at about y 480 round its caldera; the Throat of the World
+  peaks near y 560 with High Hrothgar on a ledge at about y 434. The client draws the overworld's clouds at y 330
+  (`terrain/client/TamrielSkyEffects`), so the big peaks rise through them.
 * **Custom density function types.** These are registered in `Registries.DENSITY_FUNCTION_TYPE`.
   * `skycraft:tamriel_channel` has a `channel` field: `continentalness`, `erosion`, `ridges`, `elevation`,
     `river` or `lake`. It samples the map with bilinear interpolation plus a small seeded domain warp, so
@@ -95,6 +101,9 @@ before datapacks load, and the client map screen needs it too.
   * Vanilla-style noises supply the local detail.
   * Map continentalness and erosion feed vanilla's terrain splines, so slopes, cliffs and peaks look natural.
   * Mountain-ridge strength raises jaggedness, and the river and lake channels carve.
+  * Road corridors and settlement pads (the A channel of `features.png`) calm the detail, keep cave mouths shut
+    and turn mountain ranges into passes; settlements stand on ground levelled to its local mean.
+  * Marshes (wetland) hover round sea level with a maze of channels that the `map_water` feature fills.
 * **Surface rules** come from the biome catalogue (section 5). Each biome has a surface preset: grass, snow,
   ash, sand, red sand, mud, moss, podzol, gravel, stone, crystal or coral.
 * **Caves.** Vanilla noise caves stay. Aquifers and ore veins stay on, using Skycraft ores.
@@ -138,6 +147,9 @@ before datapacks load, and the client map screen needs it too.
     and `default`; a region finds its palette by id, then by its `palette` field (a key, or an archetype name such
     as `frozen`), then by province. Missing contexts fall back along `fallback`. Contexts: `ocean`, `deep_ocean`,
     `beach`, `river`, `lake`, `marsh`, `lowland`, `upland`, `peak`, `summit`, `cave`, `deep_cave`.
+  * `upland_y`, `peak_y` and `summit_y` follow each region's ground. An optional `bias` shifts the climate value by
+    position so the choices follow geography: `linear` (e.g. Solstheim's pine north and ash south) or `radial`
+    (only the first entries near a centre, e.g. tundra round Whiterun, aspens round Riften).
   * The biome source reads the noise router like vanilla does: `depth` (about 0 at the surface, +1 per 128 blocks
     down) for caves and the surface height, `continentalness` for sea (< −0.19), deep sea (< −0.455) and coast
     (< −0.11), `erosion` for marshes and `ridges` for valley rivers at water level, plus `temperature` and

@@ -35,6 +35,9 @@ public final class TamrielMap {
 
     /** Fills {@code out} for block column (x, z). */
     public static void sample(int x, int z, MapSample out) {
+        out.peak = 0f;
+        out.calm = 0f;
+        out.slope = 0f;
         if (MapRaster.covers(x, z)) {
             MapRaster.get().sample(x, z, out);
             if (Beyond.nearForeign(x, z)) Beyond.mergeForeign(x, z, out);

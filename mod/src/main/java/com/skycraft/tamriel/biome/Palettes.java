@@ -104,17 +104,42 @@ public final class Palettes {
         public final String key;
         public final int uplandY, peakY, summitY;
         private final Choices[] contexts;
+        /** Optional geographic bias of the climate value (see {@link #bias}); null for none. */
+        @Nullable
+        private final double[] linear, radial;
 
-        Palette(String key, int uplandY, int peakY, int summitY, Choices[] contexts) {
+        Palette(String key, int uplandY, int peakY, int summitY, Choices[] contexts, @Nullable double[] linear,
+                @Nullable double[] radial) {
             this.key = key;
             this.uplandY = uplandY;
             this.peakY = peakY;
             this.summitY = summitY;
             this.contexts = contexts;
+            this.linear = linear;
+            this.radial = radial;
         }
 
         public Choices get(Context context) {
             return contexts[context.ordinal()];
+        }
+
+        /**
+         * The climate value v in [0, 1) shifted by position, so the choices follow the land's geography ("bias" in
+         * palettes.json): linear {@code [x, z, dx, dz, span, shift]} adds shift * clamp(offset . (dx, dz) / span),
+         * later entries lying towards (dx, dz); radial {@code [x, z, inner, outer, scale]} scales v down near a
+         * centre, so only the first entries grow there.
+         */
+        public double bias(double v, int x, int z) {
+            if (linear != null) {
+                double t = ((x - linear[0]) * linear[2] + (z - linear[1]) * linear[3]) / linear[4];
+                v += linear[5] * Math.max(-1, Math.min(1, t));
+            }
+            if (radial != null) {
+                double d = Math.hypot(x - radial[0], z - radial[1]);
+                double t = Math.max(0, Math.min(1, (d - radial[2]) / (radial[3] - radial[2])));
+                v *= radial[4] + (1 - radial[4]) * t * t * (3 - 2 * t);
+            }
+            return Math.max(0, Math.min(0.99999, v));
         }
     }
 
@@ -216,10 +241,12 @@ public final class Palettes {
         for (Context c : Context.values()) {
             if (choices[c.ordinal()] == null) throw new IllegalStateException("palette " + key + " has no " + c.key);
         }
+        JsonObject bias = p.has("bias") ? p.getAsJsonObject("bias") : null;
         Palette out = new Palette(key,
                 intOr(p, "upland_y", parent != null ? parent.uplandY : 115),
                 intOr(p, "peak_y", parent != null ? parent.peakY : 175),
-                intOr(p, "summit_y", parent != null ? parent.summitY : 270), choices);
+                intOr(p, "summit_y", parent != null ? parent.summitY : 270), choices,
+                numbers(bias, "linear", 6), numbers(bias, "radial", 5));
         done.put(key, out);
         visiting.remove(key);
         return out;
@@ -227,6 +254,16 @@ public final class Palettes {
 
     private static int intOr(JsonObject o, String key, int def) {
         return o.has(key) ? o.get(key).getAsInt() : def;
+    }
+
+    @Nullable
+    private static double[] numbers(@Nullable JsonObject o, String key, int n) {
+        if (o == null || !o.has(key)) return null;
+        com.google.gson.JsonArray a = o.getAsJsonArray(key);
+        if (a.size() != n) throw new IllegalStateException("palette bias " + key + " needs " + n + " numbers");
+        double[] out = new double[n];
+        for (int i = 0; i < n; i++) out[i] = a.get(i).getAsDouble();
+        return out;
     }
 
     @Nullable

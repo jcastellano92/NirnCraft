@@ -184,7 +184,7 @@ public final class MapRaster {
         float[] d = data;
 
         out.inTamriel = true;
-        out.elevation = lerp(d, ELEV, o00, o10, o01, o11, w00, w10, w01, w11);
+        elevation(x, z, out);
         out.coastDistance = lerp(d, COAST, o00, o10, o01, o11, w00, w10, w01, w11);
         out.riverDistance = riverDistance(d, o00, o10, o01, o11, tx, tz, lerp(d, RIV_D, o00, o10, o01, o11, w00, w10, w01, w11));
         out.lakeDistance = lerp(d, LAKE_SD, o00, o10, o01, o11, w00, w10, w01, w11);
@@ -223,6 +223,7 @@ public final class MapRaster {
             out.blendWeight = 0f;
         }
         TamrielMap.deriveStrengths(out);
+        MapPeaks.apply(x, z, out);
     }
 
     /**
@@ -249,6 +250,41 @@ public final class MapRaster {
             }
         }
         return best < 0.25f ? Math.min(bilinear, value) : bilinear;
+    }
+
+    /**
+     * Macro elevation and its slope (blocks per block) at the unwarped column: Catmull-Rom over 4x4 cells. A bilinear
+     * blend creased every slope along the 32-block cell grid, and the borders' domain warp rippled steep slopes in a
+     * regular lattice; the cubic is smooth, passes through the cell values and gives the slope for free.
+     */
+    private void elevation(int x, int z, MapSample out) {
+        double fx = (x - TamrielMap.MIN_X) / (double) CELL - 0.5, fz = (z - TamrielMap.MIN_Z) / (double) CELL - 0.5;
+        int ix = (int) Math.floor(fx), iz = (int) Math.floor(fz);
+        double tx = fx - ix, tz = fz - iz;
+        double tx2 = tx * tx, tx3 = tx2 * tx, tz2 = tz * tz, tz3 = tz2 * tz;
+        double ax0 = -0.5 * tx3 + tx2 - 0.5 * tx, ax1 = 1.5 * tx3 - 2.5 * tx2 + 1, ax2 = -1.5 * tx3 + 2 * tx2 + 0.5 * tx,
+                ax3 = 0.5 * tx3 - 0.5 * tx2;
+        double bx0 = -1.5 * tx2 + 2 * tx - 0.5, bx1 = 4.5 * tx2 - 5 * tx, bx2 = -4.5 * tx2 + 4 * tx + 0.5, bx3 = 1.5 * tx2 - tx;
+        double az0 = -0.5 * tz3 + tz2 - 0.5 * tz, az1 = 1.5 * tz3 - 2.5 * tz2 + 1, az2 = -1.5 * tz3 + 2 * tz2 + 0.5 * tz,
+                az3 = 0.5 * tz3 - 0.5 * tz2;
+        double bz0 = -1.5 * tz2 + 2 * tz - 0.5, bz1 = 4.5 * tz2 - 5 * tz, bz2 = -4.5 * tz2 + 4 * tz + 0.5, bz3 = 1.5 * tz2 - tz;
+        int c0 = clampI(ix - 1, W - 1), c1 = clampI(ix, W - 1), c2 = clampI(ix + 1, W - 1), c3 = clampI(ix + 2, W - 1);
+        double e = 0, ex = 0, ez = 0;
+        float[] d = data;
+        for (int j = 0; j < 4; j++) {
+            int row = clampI(iz - 1 + j, H - 1) * W;
+            double v0 = d[(row + c0) * CH + ELEV], v1 = d[(row + c1) * CH + ELEV], v2 = d[(row + c2) * CH + ELEV],
+                    v3 = d[(row + c3) * CH + ELEV];
+            double r = ax0 * v0 + ax1 * v1 + ax2 * v2 + ax3 * v3;
+            double rx = bx0 * v0 + bx1 * v1 + bx2 * v2 + bx3 * v3;
+            double wz = j == 0 ? az0 : j == 1 ? az1 : j == 2 ? az2 : az3;
+            double dz = j == 0 ? bz0 : j == 1 ? bz1 : j == 2 ? bz2 : bz3;
+            e += wz * r;
+            ex += wz * rx;
+            ez += dz * r;
+        }
+        out.elevation = (float) e;
+        out.slope = (float) (Math.sqrt(ex * ex + ez * ez) / CELL);
     }
 
     private static float lerp(float[] d, int ch, int o00, int o10, int o01, int o11,

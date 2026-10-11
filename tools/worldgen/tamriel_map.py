@@ -39,6 +39,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 RES_DIR = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft", "tamriel")
 PLACES = os.path.join(RES_DIR, "places", "provinces.json")
+SKYRIM_SETTLEMENTS = os.path.join(RES_DIR, "places", "skyrim_settlements.json")
 
 V = json.load(open(os.path.join(HERE, "tamriel_vectors.json"), encoding="utf-8"))
 M = V["meta"]
@@ -96,6 +97,65 @@ def ridged(x, z, scale, octaves, seed):
     for o in range(octaves):
         n = 1.0 - np.abs(vnoise(x, z, scale / (2 ** o), seed + o * 17))
         tot = tot + n * n * amp
+        norm += amp
+        amp *= 0.5
+    return tot / norm
+
+
+def _grad(ix, iz, seed):
+    h = (ix.astype(np.int64) * 374761393 + iz.astype(np.int64) * 668265263 + seed * 1442695041) & 0xFFFFFFFF
+    h = ((h ^ (h >> 13)) * 1274126177) & 0xFFFFFFFF
+    a = ((h ^ (h >> 16)) & 0xFFFF) / 65536.0 * 2 * math.pi
+    return np.cos(a), np.sin(a)
+
+
+GN_SCALE = 2.1  # brings gradient noise to about the spread of vnoise, so the authored amplitudes keep their meaning
+
+
+def gnoise(x, z, scale, seed):
+    """Gradient (Perlin-style) noise in about [-1, 1] with quintic fades: no value-noise lattice blobs."""
+    fx, fz = x / scale, z / scale
+    ix, iz = np.floor(fx), np.floor(fz)
+    tx, tz = fx - ix, fz - iz
+    ix, iz = ix.astype(np.int64), iz.astype(np.int64)
+
+    def corner(dx, dz):
+        gx, gz = _grad(ix + dx, iz + dz, seed)
+        return gx * (tx - dx) + gz * (tz - dz)
+
+    ux = tx * tx * tx * (tx * (tx * 6 - 15) + 10)
+    uz = tz * tz * tz * (tz * (tz * 6 - 15) + 10)
+    a, b, c, d = corner(0, 0), corner(1, 0), corner(0, 1), corner(1, 1)
+    return np.clip(((a + (b - a) * ux) + ((c + (d - c) * ux) - (a + (b - a) * ux)) * uz) * GN_SCALE, -1, 1)
+
+
+def _octave(x, z, o, seed):
+    """Each octave rotated and shifted, so octaves never line up into a grid."""
+    ang = 0.61 + o * 1.17 + seed * 0.37
+    ca, sa = math.cos(ang), math.sin(ang)
+    return x * ca - z * sa + o * 1371.3 + seed * 17.7, x * sa + z * ca - o * 713.9 - seed * 31.1
+
+
+def gfbm(x, z, scale, octaves, seed, gain=0.5, lac=2.03):
+    tot, amp, norm = 0.0, 1.0, 0.0
+    for o in range(octaves):
+        ox, oz = _octave(x, z, o, seed)
+        tot = tot + gnoise(ox, oz, scale / lac ** o, seed + o * 31) * amp
+        norm += amp
+        amp *= gain
+    return tot / norm
+
+
+def gridged(x, z, scale, octaves, seed, lac=2.03):
+    """Ridged multifractal in [0, 1]: sharp crests, each finer octave weighted by the crest signal of the coarser
+    ones, so detail gathers on the ridges and the valleys between stay smooth (as erosion leaves them)."""
+    tot, norm, weight, amp = 0.0, 0.0, 1.0, 1.0
+    for o in range(octaves):
+        ox, oz = _octave(x, z, o, seed)
+        s = (1.0 - np.abs(gnoise(ox, oz, scale / lac ** o, seed + o * 17))) ** 2
+        s = s * weight
+        weight = np.clip(s * 1.6, 0, 1)
+        tot = tot + s * amp
         norm += amp
         amp *= 0.5
     return tot / norm
@@ -246,6 +306,22 @@ def anchor_list():
     return out
 
 
+# How flat the ground under each kind of settlement is made (1 = the macro surface is levelled to the local mean
+# inside the settlement's radius); the hill/crag detail fades by the same weight.
+PAD_STRENGTH = {"capital": 1.0, "city": 1.0, "town": 0.9, "village": 0.7, "farm": 0.55}
+
+
+def settlement_pads():
+    """(id, x, z, radius, strength) of every settlement in the places files (Skyrim's at their real positions)."""
+    out = {}
+    for f in (PLACES, SKYRIM_SETTLEMENTS):
+        for p in json.load(open(f, encoding="utf-8")):
+            s = PAD_STRENGTH.get(p["type"])
+            if s:
+                out[p["id"]] = (p["id"], p["x"], p["z"], p.get("radius", 120), s)
+    return list(out.values())
+
+
 def warp_fields(gx, gz, scale, amp, seed):
     return (gx + fbm(gx, gz, scale, 3, seed) * amp, gz + fbm(gx, gz, scale, 3, seed + 500) * amp)
 
@@ -327,11 +403,18 @@ def build():
 
     # --- region terrain properties -----------------------------------------------------------------------------------
     print("terrain properties")
-    props = np.zeros((7, H, W))
+    # base, relief, rough, crag, dunes, wet, coast ramp, plus the optional hills (amplitude of the rolling hill field in
+    # blocks; default 24 x rough) and cliff (0..1: steep coasts with a narrow beach)
+    area_keys = ["base", "relief", "rough", "crag", "dunes", "wet", "coast", "hills", "cliff"]
+    props = np.zeros((len(area_keys), H, W))
     default = [90, 10, 0.35, 0.1, 0, 0, 200]
-    table = np.array([r.get("terrain", default) for r in regions], float)
+
+    def full(t):
+        t = list(t)
+        return t + [24.0 * t[2], 0.0][len(t) - 7:]
+
+    table = np.array([full(r.get("terrain", default)) for r in regions], float)
     props[:] = table[reg].transpose(2, 0, 1)
-    area_keys = ["base", "relief", "rough", "crag", "dunes", "wet", "coast"]
     for a in V["areas"]:
         m = raster_polys([a["poly"]], CELL, W, H)[rj, ri]
         for k, v in a.items():
@@ -339,31 +422,46 @@ def build():
                 props[area_keys.index(k)][m] = v
     landf = land.astype(float)
     wsum = blur(landf, 6) + 1e-6
-    for k in range(7):
+    for k in range(len(area_keys)):
         props[k] = blur(props[k] * landf, 6) / wsum
-    base, relief, rough, crag, dunes, wet, ramp = props
+    base, relief, rough, crag, dunes, wet, ramp, hamp, cliff = props
 
     # --- elevation ---------------------------------------------------------------------------------------------------
     print("elevation")
-    big = fbm(GX, GZ, 2600, 3, 11)
-    mid = fbm(GX, GZ, 900, 3, 23)
-    hills = ridged(GX, GZ, 1500, 3, 29) - 0.42
-    B = base + relief * (0.55 * big + 0.45 * mid) + rough * (26 * hills + 8 * fbm(GX, GZ, 380, 2, 31))
+    # (gradient noise with rotated octaves throughout: value noise and aligned octaves left lattice patterns)
+    big = gfbm(GX, GZ, 2600, 4, 11)
+    mid = gfbm(GX, GZ, 900, 4, 23)
+    hills = gridged(GX, GZ, 1500, 4, 29) - 0.35
+    B = base + relief * (0.55 * big + 0.45 * mid) + rough * (26 * hills + 8 * gfbm(GX, GZ, 380, 3, 31))
+    # rolling hills and dales a few hundred blocks across: ridged crests (spurs and knolls) over a smooth swell
+    dales = 0.6 * (gridged(GX, GZ, 640, 4, 61) - 0.38) * 2.6 + 0.4 * gfbm(GX, GZ, 280, 3, 62) * 1.8
+    B = B + hamp * dales
     # continuous across the coast: land rises from sea level, the sea floor falls from it
-    # (linear in D within 64 blocks of the coast, so interpolating the 32-block raster gives a smooth shoreline)
-    t = smoothstep(48, 48 + np.maximum(ramp * 1.8, 60), D)
+    # (linear in D within 64 blocks of the coast, so interpolating the 32-block raster gives a smooth shoreline);
+    # cliff coasts have a narrow strand and rise fast
+    bw = 48 - 36 * cliff
+    t = smoothstep(bw, bw + np.maximum(ramp * 1.8, 60) * (1 - 0.7 * cliff), D)
     beach = SEA + 0.05 * np.minimum(D, 64)
     hland = beach + (np.maximum(B, beach) - beach) * t
-    hsea = SEA - sea_depth(np.maximum(-D, 0)) + 5 * fbm(GX, GZ, 700, 2, 5) * smoothstep(64, 400, -D)
+    hsea = SEA - sea_depth(np.maximum(-D, 0)) + 5 * gfbm(GX, GZ, 700, 3, 5) * smoothstep(64, 400, -D)
     h = np.where(D > 0, hland, hsea)
+
+    # roads first: where a road crosses a range the range dips into a pass
+    road_d = np.full((H, W), 1e5)
+    for rd in V["roads"]:
+        d, _, _ = polyline_field(rd["line"], 600)
+        road_d = np.minimum(road_d, np.where(np.isfinite(d), d, 1e5))
+    passes = 1 - 0.65 * (1 - smoothstep(80, 560, road_d))
+    for ps in V.get("passes", []):
+        passes = np.minimum(passes, 1 - ps.get("depth", 0.5) * (1 - smoothstep(ps["radius"] * 0.3, ps["radius"],
+                                                                                 np.hypot(GX - ps["x"], GZ - ps["z"]))))
 
     ridge = np.zeros((H, W))
     rwx, rwz = warp_fields(GX, GZ, 1100, 320, 202)
-    rn1 = ridged(GX, GZ, 650, 3, 77)
-    rn2 = ridged(GX, GZ, 260, 2, 78)
-    rn = 0.65 * rn1 + 0.35 * rn2
-    wmod = 0.75 + 0.5 * (fbm(GX, GZ, 1800, 2, 79) * 0.5 + 0.5)
-    hvar = fbm(GX, GZ, 800, 2, 80)
+    # ridged multifractal crests: spurs branching off the main ridgelines, smooth valleys between
+    rn = np.clip(1.2 * (0.65 * gridged(GX, GZ, 650, 4, 77) + 0.35 * gridged(GX, GZ, 260, 3, 78)), 0, 1)
+    wmod = 0.75 + 0.5 * (gfbm(GX, GZ, 1800, 3, 79) * 0.5 + 0.5)
+    hvar = gfbm(GX, GZ, 800, 3, 80)
     for rg in V["ranges"]:
         half = rg["width"] / 2.0
         d, _, _ = polyline_field(rg["line"], half * 1.3 + 350, gx=rwx, gz=rwz)
@@ -371,11 +469,16 @@ def build():
         if not p.any():
             continue
         hl = rg["height"] * (0.88 + 0.12 * hvar)
-        shape = p ** 1.25 * (0.38 + 0.62 * rn)
-        lift = np.maximum(hl - h, 0) * shape
+        # jagged ranges: sharper crests (rn squared) and individual summits standing above the crest line
+        shape = p ** 1.25 * (0.3 + 0.7 * rn ** rg.get("jag", 1.0))
+        lift = np.maximum(hl - h, 0) * shape * (passes if rg.get("passes", True) else 1)
         h = h + lift * smoothstep(0, 150, D)
         ridge = np.maximum(ridge, p * (0.5 + 0.5 * rn))
     for pk in V["peaks"]:
+        if pk.get("sharp"):
+            # a horn peak is not in the raster: Java's MapPeaks adds it at full resolution (see sharp_lift)
+            ridge = np.maximum(ridge, 0.9 * (1 - smoothstep(0, pk["radius"], np.hypot(GX - pk["x"], GZ - pk["z"]))))
+            continue
         r = np.hypot(GX - pk["x"], GZ - pk["z"])
         # a caldera volcano keeps its full height out to the crater rim
         p = 1 - smoothstep(0, pk["radius"], np.maximum(r - pk.get("caldera", 0), 0))
@@ -387,8 +490,14 @@ def build():
         if pk.get("caldera"):
             h = h - pk["caldera_depth"] * np.clip(1 - (r / pk["caldera"]) ** 2, 0, 1) ** 0.5
 
+    # --- erosion: drainage valleys and gullies cut by the run-off, talus slopes below the crags ------------------------
+    print("erosion")
+    lake_near = dist_to(raster_polys([lk["poly"] for lk in V["lakes"]], CELL, W, H)) * CELL < 220
+    keep = (smoothstep(60, 220, D) * (1 - smoothstep(0.2, 0.5, wet)) * ~lake_near).astype(float)
+    h = erode(h, keep)
+
     # wetlands sit just around sea level so low spots become pools
-    wl = SEA + 0.7 + 1.7 * fbm(GX, GZ, 160, 2, 41)
+    wl = SEA + 0.7 + 1.7 * gfbm(GX, GZ, 160, 3, 41)
     wv = smoothstep(0.2, 0.6, wet) * land
     # settlements get dry, level ground
     pad = np.zeros((H, W))
@@ -397,6 +506,18 @@ def build():
     wv = wv * (1 - pad)
     h = h + (wl - h) * wv * smoothstep(SEA + 45, SEA + 20, h)
     h = np.where((D > 64) & (pad > 0), np.maximum(h, SEA + 1 + 2.5 * pad), h)
+    # ... and towns stand on buildable ground: level the macro surface to its local mean, fading out past the walls
+    flat = np.zeros((H, W))
+    h0 = h.copy()
+    for pid, x, z, rad, s in settlement_pads():
+        dd = np.hypot(GX - x, GZ - z)
+        disc = (dd < rad * 1.2 + 16) & land
+        if not disc.any():
+            continue
+        target = max(float(h0[disc].mean()), SEA + 2.0)
+        w = s * (1 - smoothstep(rad * 0.9, rad * 1.9 + 32, dd))
+        h = h + (target - h) * w * land
+        flat = np.maximum(flat, w)
 
     # --- lakes -----------------------------------------------------------------------------------------------------
     print("lakes")
@@ -453,17 +574,37 @@ def build():
         riv_level[m] = lev[m]
         riv_hw[m] = hw[m]
 
-    h = np.clip(h, -40, 376)
+    h = np.clip(h, -40, 568)
 
-    # --- roads -------------------------------------------------------------------------------------------------------
-    road_d = np.full((H, W), 1e5)
-    for rd in V["roads"]:
-        d, _, _ = polyline_field(rd["line"], 80)
-        road_d = np.minimum(road_d, np.where(np.isfinite(d), d, 1e5))
+    # --- sharp peaks (drawn by Java on top of the raster; previews and checks use h_view) --------------------------
+    # the road channel as Java sees it: road corridors and settlement pads
+    roadw = np.clip(np.maximum(1 - road_d / 63.75, flat), 0, 1)
+    sharp = []
+    h_view = h.copy()
+    for pk in V["peaks"]:
+        if not pk.get("sharp"):
+            continue
+        pk = dict(pk)
+        shelves = []
+        for sx, sz, sr in pk["sharp"].get("shelves", []):
+            b = float(bil(h, sx, sz))
+            shelves.append([sx, sz, sr, round(float(sharp_core(sx, sz, pk, b, bil(roadw, sx, sz))), 1)])
+        pk["_shelves"] = shelves
+
+        def surface(x, z, pk=pk):
+            b = float(bil(h, x, z))
+            return b + float(sharp_lift(x, z, pk, b, bil(roadw, x, z)))
+
+        # paths climb evenly from their foot to their end (a shelf, or the summit)
+        pk["_paths"] = [graded_path(p, surface, surface(*p[0]), surface(*p[-1])) for p in pk["sharp"].get("paths", [])]
+        h_view = h_view + sharp_lift(GX, GZ, pk, h, roadw)
+        sharp.append(pk)
 
     # --- terrain character -----------------------------------------------------------------------------------------
-    rough_t = np.clip(rough + ridge * 0.45, 0, 1)
-    crag_t = np.clip(crag + ridge * 0.6 * smoothstep(110, 200, h), 0, 1)
+    # (settlement pads keep a little of the seeded detail; the settlement builders level the rest)
+    ridge = ridge * (1 - 0.8 * flat)
+    rough_t = np.clip(rough + ridge * 0.45, 0, 1) * (1 - 0.6 * flat)
+    crag_t = np.clip(crag + ridge * 0.6 * smoothstep(110, 200, h), 0, 1) * (1 - 0.85 * flat)
     dunes_t = np.clip(dunes, 0, 1) * land
     wet_t = wv
 
@@ -477,7 +618,114 @@ def build():
 
     return dict(regions=regions, reg=reg, h=h, D=D, land=land, ridge=ridge, rough=rough_t, crag=crag_t,
                 dunes=dunes_t, wet=wet_t, lake_sd=lake_sd, riv_d=riv_d, riv_hw=riv_hw, road_d=road_d,
-                wl_code=wl_code, wflags=wflags, wlevel=wlevel)
+                wl_code=wl_code, wflags=wflags, wlevel=wlevel, h_view=h_view, sharp=sharp, flat=flat, roadw=roadw)
+
+
+D8 = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+
+
+def erode(h, weight, iters=6, k=0.55, cap=9.0, talus=0.95):
+    """A macro hydraulic + thermal erosion pass at raster resolution (32-block cells). Each round routes the run-off
+    downhill (D8), cuts every cell by stream power (k * sqrt(upstream area) * slope, at most `cap` blocks) and lets
+    slopes steeper than `talus` (blocks per block) slump. Big catchments cut dendritic valleys that feed the rivers,
+    small ones leave gullies down the mountain flanks, and the plains (no slope) barely change. `weight` (0..1) keeps
+    the coasts, lakes and marshes as authored."""
+    hh, ww = h.shape
+    rows, cols = np.indices(h.shape)
+    flat_idx = rows * ww + cols
+    h = h.copy()
+    h0 = h.copy()
+    for _ in range(iters):
+        p = np.pad(h, 1, mode="edge")
+        best = np.zeros_like(h)
+        rec = flat_idx.copy()
+        drop_max = np.zeros_like(h)
+        for dz, dx in D8:
+            nb = p[1 + dz:1 + dz + hh, 1 + dx:1 + dx + ww]
+            dd = CELL * (math.sqrt(2) if dz and dx else 1.0)
+            s = (h - nb) / dd
+            m = s > best
+            best = np.where(m, s, best)
+            rr = np.clip(rows + dz, 0, hh - 1)
+            cc = np.clip(cols + dx, 0, ww - 1)
+            rec = np.where(m, rr * ww + cc, rec)
+            drop_max = np.maximum(drop_max, (h - nb) - talus * dd)
+        # upstream area, highest cells first
+        area = np.ones(hh * ww)
+        recf = rec.ravel()
+        for i in np.argsort(-h.ravel(), kind="stable"):
+            r = recf[i]
+            if r != i:
+                area[r] += area[i]
+        cut = np.minimum(cap, k * np.sqrt(area.reshape(h.shape)) * best)
+        slump = np.maximum(drop_max, 0) * 0.3
+        h = h - (cut + slump) * weight
+    # widen the cuts a little: valleys, not slots
+    eroded = h0 - h
+    return h0 - (0.6 * eroded + 0.4 * box_blur(eroded, 1))
+
+
+def peak_profile(x, z, pk):
+    """0..1 shape of a sharp (horn) peak: 1 at the summit, 0 past its foot. Its reach varies with the bearing, longest
+    along the authored spurs (aretes), so the contours bulge out into ridges. MapPeaks.java computes the same."""
+    s = pk["sharp"]
+    dx, dz = np.asarray(x, float) - pk["x"], np.asarray(z, float) - pk["z"]
+    r = np.hypot(dx, dz)
+    th = np.arctan2(dz, dx)
+    reach = s["reach"] * (1 + 0.06 * (0.5 * np.sin(3 * th + 1.3) + 0.3 * np.sin(7 * th + 0.4) + 0.2 * np.sin(11 * th + 2.1)))
+    for ang, width, gain in s["spurs"]:
+        da = np.degrees(np.angle(np.exp(1j * (th - np.radians(ang)))))
+        reach = reach * (1 + gain * np.exp(-(da / width) ** 2))
+    # (1 - u^shape)^power: shape 1 is a horn with concave flanks, larger shapes a massif with steep lower walls
+    u = np.clip(r / reach, 0, 1)
+    return (1 - u ** s.get("shape", 1.0)) ** s["power"]
+
+
+def sharp_core(x, z, pk, base, road=0.0):
+    """A sharp peak's surface over terrain of height `base` before its shelves and paths: the massif (damped in road
+    corridors and settlement pads, which stay passes and level ground), clear zones, and the summit horn."""
+    s = pk["sharp"]
+    x, z = np.asarray(x, float), np.asarray(z, float)
+    prof = peak_profile(x, z, pk) * (1 - 0.85 * np.asarray(road, float))
+    # settlements at the foot keep their own ground
+    for cx, cz, cr in s.get("clear", []):
+        prof = prof * smoothstep(cr * 0.8, cr + 60, np.hypot(x - cx, z - cz))
+    hh, hr = s.get("horn", [0, 1])
+    y = base + np.maximum(pk["height"] - hh - base, 0) * prof
+    return y + hh * np.clip(1 - np.hypot(x - pk["x"], z - pk["z"]) / hr, 0, 1) ** 1.5
+
+
+def sharp_lift(x, z, pk, base, road=0.0):
+    """How far a sharp peak raises terrain of height `base` at (x, z), shelves included (MapPeaks.java; the graded
+    paths are only a few blocks wide and only drawn there)."""
+    y = sharp_core(x, z, pk, base, road)
+    for sx, sz, sr, sy in pk.get("_shelves", []):
+        w = 1 - smoothstep(sr, sr + 40, np.hypot(np.asarray(x, float) - sx, np.asarray(z, float) - sz))
+        y = y + (sy - y) * w
+    return y - base
+
+
+def graded_path(path, surface, ystart, yend, step=8.0, grade=0.6):
+    """A climbing path resampled every `step` blocks with its levels: as close to the ground as possible while never
+    descending and never climbing more than `grade` blocks per block, from ystart to yend. Java levels a ledge along
+    it (cut into the slope or built out from it, with talus banks), so the climb stays walkable."""
+    pts = np.array(path, float)
+    out = [pts[0]]
+    for a, b in zip(pts[:-1], pts[1:]):
+        n = max(1, int(math.ceil(np.hypot(*(b - a)) / step)))
+        out += [a + (b - a) * (k / n) for k in range(1, n + 1)]
+    out = np.array(out)
+    ds = np.concatenate([[0], np.hypot(*(out[1:] - out[:-1]).T)])
+    ground = np.array([surface(x, z) for x, z in out])
+    y = ground.copy()
+    y[0], y[-1] = ystart, yend
+    for i in range(1, len(y)):  # never down, at most `grade` up
+        y[i] = min(max(y[i], y[i - 1]), y[i - 1] + grade * ds[i])
+    y[-1] = yend
+    for i in range(len(y) - 2, -1, -1):  # and still arrive: pull the climb forward where the end needs it
+        y[i] = max(min(y[i], y[i + 1]), y[i + 1] - grade * ds[i + 1])
+    y[0] = ystart
+    return [[round(float(x), 1), round(float(z), 1), round(float(v), 1)] for (x, z), v in zip(out, y)]
 
 
 def sea_depth(d):
@@ -548,7 +796,8 @@ def write_assets(o):
     feat[..., 0] = np.clip(255 - 2 * o["riv_d"], 0, 255)
     feat[..., 1] = np.clip(o["ridge"] * 255, 0, 255)
     feat[..., 2] = np.clip(128 + 2 * o["lake_sd"], 0, 255)
-    feat[..., 3] = np.clip(255 - 4 * o["road_d"], 0, 255)
+    # the road corridor channel also covers settlement pads: both calm the seeded detail and keep cave mouths shut
+    feat[..., 3] = np.clip(np.maximum(255 - 4 * o["road_d"], o["flat"] * 255), 0, 255)
     Image.fromarray(feat, "RGBA").save(os.path.join(RES_DIR, "features.png"))
 
     ter = np.zeros((H, W, 4), np.uint8)
@@ -565,6 +814,19 @@ def write_assets(o):
 
     coast = np.clip(np.round(o["D"]) + 32768, 0, 65535).astype(np.uint16)
     Image.fromarray(coast).save(os.path.join(RES_DIR, "coast.png"))
+
+    # sharp peaks for MapPeaks.java: the profile parameters, shelves with their levelled height, calm path corridors
+    peaks = []
+    for pk in o["sharp"]:
+        s = pk["sharp"]
+        peaks.append({"name": pk["name"], "x": pk["x"], "z": pk["z"], "height": pk["height"], "reach": s["reach"],
+                      "shape": s.get("shape", 1.0), "power": s["power"], "horn": s.get("horn", [0, 1]),
+                      "spurs": s["spurs"], "shelves": pk["_shelves"], "clear": s.get("clear", []),
+                      "paths": pk["_paths"], "jag": s.get("jag", 20)})
+    with open(os.path.join(RES_DIR, "peaks.json"), "w", encoding="utf-8", newline="\n") as f:
+        json.dump({"_comment": "Written by tools/worldgen/tamriel_map.py from the sharp peaks in tamriel_vectors.json",
+                   "peaks": peaks}, f, indent=1)
+        f.write("\n")
 
     table = []
     for i, r in enumerate(regions):
@@ -673,7 +935,7 @@ def validate(o):
     for pid, (rid, x, z) in sorted(anchors().items()):
         ix, iz = int((x - MIN_X) / CELL), int((z - MIN_Z) / CELL)
         got = regions[o["reg"][iz, ix]]["id"]
-        h = float(bil(o["h"], x, z))
+        h = float(bil(o["h_view"], x, z))
         d = float(bil(o["D"], x, z))
         lk = float(bil(o["lake_sd"], x, z))
         rv = float(bil(o["riv_d"], x, z))
@@ -703,7 +965,7 @@ def validate(o):
 def hypso(h, water):
     stops = [(-40, (10, 30, 70)), (40, (25, 70, 130)), (62.9, (70, 130, 180)), (63, (200, 190, 140)),
              (66, (150, 175, 95)), (90, (95, 145, 70)), (130, (70, 115, 55)), (170, (125, 115, 75)),
-             (220, (140, 130, 115)), (270, (185, 185, 185)), (330, (245, 245, 250)), (400, (255, 255, 255))]
+             (240, (140, 130, 115)), (320, (175, 172, 168)), (420, (225, 225, 230)), (520, (255, 255, 255))]
     out = np.zeros(h.shape + (3,))
     for (h0, c0), (h1, c1) in zip(stops[:-1], stops[1:]):
         m = (h >= h0) & (h < h1)
@@ -734,6 +996,8 @@ def preview(o, name, x0, z0, x1, z1, bpp, labels=True, borders=True):
     zs = np.arange(z0, z1, bpp) + bpp / 2
     gx, gz = np.meshgrid(xs, zs)
     h = bil(o["h"], gx, gz)
+    for pk in o["sharp"]:
+        h = h + sharp_lift(gx, gz, pk, h, bil(o["roadw"], gx, gz))
     D = bil(o["D"], gx, gz)
     lsd = bil(o["lake_sd"], gx, gz)
     rd = bil(o["riv_d"], gx, gz)

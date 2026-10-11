@@ -18,8 +18,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 DATA = os.path.join(ROOT, "mod", "src", "main", "resources", "data")
 
-MIN_Y, HEIGHT, SEA = -64, 448, 63
-TOP = MIN_Y + HEIGHT - 1  # 383
+MIN_Y, HEIGHT, SEA = -64, 704, 63
+TOP = MIN_Y + HEIGHT - 1  # 639: room for Skyrim-scale mountains (the Throat of the World peaks near y 560)
+# The noise (terrain) only fills up to y 575: nothing stands higher, and every block of the column the generator fills
+# costs a density interpolation and an aquifer lookup even as air. Above it the world is plain air up to the top.
+NOISE_HEIGHT = 640
+NOISE_TOP = MIN_Y + NOISE_HEIGHT - 1  # 575
 SLOPE = 1.0 / 28.0  # density per block below the surface
 
 
@@ -54,14 +58,14 @@ def noise(name, xz=1.0, y=0.0):
 def fades(inner):
     """Vanilla's bottom/top fades around a terrain density (solid at the floor, air at the ceiling)."""
     return add(0.1171875, mul(ygrad(MIN_Y, MIN_Y + 24, 0.0, 1.0),
-               add(-0.1171875, add(-0.078125, mul(ygrad(TOP - 11, TOP, 1.0, 0.0), add(0.078125, inner))))))
+               add(-0.1171875, add(-0.078125, mul(ygrad(NOISE_TOP - 11, NOISE_TOP, 1.0, 0.0), add(0.078125, inner))))))
 
 
 # --- noise parameters ---------------------------------------------------------------------------------------------
 NOISES = {
-    "tamriel_hills": {"firstOctave": -8, "amplitudes": [1.0, 0.6, 0.3]},
-    "tamriel_detail": {"firstOctave": -6, "amplitudes": [1.0, 0.5]},
-    "tamriel_ridges": {"firstOctave": -7, "amplitudes": [1.0, 0.45, 0.2]},
+    "tamriel_hills": {"firstOctave": -8, "amplitudes": [1.0, 0.6, 0.35, 0.18]},
+    "tamriel_detail": {"firstOctave": -6, "amplitudes": [1.0, 0.5, 0.25]},
+    "tamriel_ridges": {"firstOctave": -7, "amplitudes": [1.0, 0.45, 0.22, 0.1]},
     "tamriel_dunes": {"firstOctave": -5, "amplitudes": [1.0, 0.3]},
     "tamriel_overhang": {"firstOctave": -5, "amplitudes": [1.0, 0.5, 0.25]},
 }
@@ -75,6 +79,8 @@ DF = {
     "tamriel/continents": {"type": "minecraft:flat_cache", "argument": {"type": "minecraft:cache_2d", "argument": channel("continentalness")}},
     "tamriel/erosion": {"type": "minecraft:flat_cache", "argument": {"type": "minecraft:cache_2d", "argument": channel("erosion")}},
     "tamriel/ridges": {"type": "minecraft:flat_cache", "argument": {"type": "minecraft:cache_2d", "argument": channel("ridges")}},
+    # road corridors and settlement pads (keeps cave mouths from opening under them)
+    "tamriel/road": {"type": "minecraft:cache_2d", "argument": channel("road")},
     # blocks below the surface, as density
     "tamriel/below_surface": mul(SLOPE, add("skycraft:tamriel/height", mul(-1.0, "minecraft:y"))),
     # the terrain without caves: the height field plus crags/overhangs on mountain ridges
@@ -87,7 +93,8 @@ SLOPED = "skycraft:tamriel/sloped"
 CAVES = {
     "type": "minecraft:range_choice", "input": SLOPED, "min_inclusive": -1000000.0, "max_exclusive": 1.5625,
     "when_in_range": {"type": "minecraft:min", "argument1": SLOPED,
-                      "argument2": mul(5.0, "minecraft:overworld/caves/entrances")},
+                      "argument2": mul(5.0, add("minecraft:overworld/caves/entrances",
+                                                mul(0.6, "skycraft:tamriel/road")))},
     "when_out_of_range": {"type": "minecraft:max",
         "argument1": {"type": "minecraft:min",
             "argument1": {"type": "minecraft:min",
@@ -102,7 +109,7 @@ CAVES = {
 }
 
 # Well above the surface (more than ~17 blocks, past any overhang) skip the cave noises entirely: that is most of a
-# 448-high column, and it is what getBaseHeight / Distant Horizons scan first.
+# 704-high column, and it is what getBaseHeight / Distant Horizons scan first.
 TERRAIN = {"type": "minecraft:range_choice", "input": "skycraft:tamriel/below_surface",
            "min_inclusive": -1000000.0, "max_exclusive": -0.6, "when_in_range": SLOPED, "when_out_of_range": CAVES}
 
@@ -221,7 +228,7 @@ def main():
         "legacy_random_source": False,
         "default_block": {"Name": "minecraft:stone"},
         "default_fluid": {"Name": "minecraft:water", "Properties": {"level": "0"}},
-        "noise": {"min_y": MIN_Y, "height": HEIGHT, "size_horizontal": 1, "size_vertical": 2},
+        "noise": {"min_y": MIN_Y, "height": NOISE_HEIGHT, "size_horizontal": 1, "size_vertical": 2},
         "noise_router": ROUTER,
         "spawn_target": [{"temperature": [-1.0, 1.0], "humidity": [-1.0, 1.0], "continentalness": [-0.11, 1.0],
                           "erosion": [-1.0, 1.0], "weirdness": [-1.0, 1.0], "depth": 0.0, "offset": 0.0}],

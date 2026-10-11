@@ -31,8 +31,8 @@ public record TamrielHeight(DensityFunction.NoiseHolder hills, DensityFunction.N
     ).apply(i, TamrielHeight::new));
     public static final KeyDispatchDataCodec<TamrielHeight> CODEC = KeyDispatchDataCodec.of(DATA_CODEC);
 
-    /** Highest surface the terrain may reach (world top is y 383). */
-    public static final double MAX_SURFACE = 378;
+    /** Highest surface the terrain may reach (the noise fills up to y 575; the world top is y 639). */
+    public static final double MAX_SURFACE = 568;
 
     @Override
     public double compute(FunctionContext ctx) {
@@ -51,31 +51,51 @@ public record TamrielHeight(DensityFunction.NoiseHolder hills, DensityFunction.N
             return Math.min(h + (hillsN * 5 + detailN * 1.5) * (0.4 + 0.6 * MapNoise.smoothstep(-600, 0, cd)), TamrielMap.SEA_LEVEL - 1);
         }
 
-        // detail amplitude: calm at the shoreline, along roads and next to water
-        double amp = MapNoise.smoothstep(0, 56, cd) * (1 - 0.75 * s.road);
+        // detail amplitude: calm at the shoreline, along roads and in towns, next to water, on ledges and paths
+        double amp = MapNoise.smoothstep(0, 56, cd) * (1 - 0.75 * s.road) * (1 - s.calm);
         boolean water = !Float.isNaN(s.waterLevel);
         if (water) {
             amp *= Math.min(MapNoise.smoothstep(s.riverHalfWidth + 4, s.riverHalfWidth + 70, s.riverDistance),
                     MapNoise.smoothstep(0, 70, -s.lakeDistance));
         }
 
-        // rolling hills
-        h += amp * s.roughness * (hillsN * 14 + detailN * 4.5);
+        // Erosion-like damping: the fine detail fades on steep macro slopes (run-off smooths the flanks into gullies
+        // and talus) and stays on crests, flats and valley floors, like derivative-damped ("eroded") fBm.
+        double smooth = 1 / (1 + 6 * s.slope * s.slope);
 
-        // jagged peaks along ridges
-        if (s.ridge > 0.02f) {
+        // rolling hills
+        h += amp * s.roughness * (hillsN * 22 + detailN * 6.5 * smooth);
+
+        // jagged peaks along ridges, more so high up (a sharp peak brings its own crags instead); a ridged
+        // multifractal: the fine octave rides on the crests of the coarse one, so the valleys between stay smooth
+        double own = Math.min(1.0, s.peak / 8.0);
+        if (s.ridge > 0.02f && own < 1) {
             double r1 = 1 - Math.abs(ridges.getValue(x, 0, z));
             double r2 = 1 - Math.abs(detail.getValue(x * 2.1, 37, z * 2.1));
-            h += amp * Math.pow(s.ridge, 1.3) * (r1 * r1 * 36 + r2 * r2 * 9 - 13);
+            double high = 1 + 0.6 * MapNoise.smoothstep(150, 300, h);
+            h += amp * (1 - own) * Math.pow(s.ridge, 1.3) * high
+                    * (r1 * r1 * 36 + r1 * r2 * r2 * 12 * (0.4 + 0.6 * smooth) - 15);
+        }
+        if (s.peak > 0) {
+            // aretes, buttresses and gullies down a horn peak's flanks
+            double r1 = 1 - Math.abs(ridges.getValue(x * 1.7, 113, z * 1.7));
+            double r2 = 1 - Math.abs(detail.getValue(x * 3.3, 131, z * 3.3));
+            h += amp * s.peak * ((r1 * r1 - 0.45) + 0.4 * r1 * (r2 * r2 - 0.45) * (0.4 + 0.6 * smooth));
         }
 
-        // cliff terraces
+        // cliff bands: only where the rock is steep (the macro slope), with uneven step heights and the bands broken
+        // and offset along their length, not contour lines repeated over every hillside
         if (s.crag > 0.05f) {
-            double step = 7 + 3 * hillsN;
-            double t = h / step;
-            double fl = Math.floor(t);
-            double terraced = (fl + MapNoise.smoothstep(0.55, 0.9, t - fl)) * step;
-            h += (terraced - h) * s.crag * 0.85 * amp;
+            double steep = MapNoise.smoothstep(0.25, 0.85, s.slope);
+            double w = s.crag * 0.85 * amp * (0.15 + 0.85 * steep);
+            if (w > 0.01) {
+                double step = 8 + 4 * hillsN;
+                double off = dunes.getValue(x * 0.22, 61, z * 0.22) * 9;
+                double t = (h + off) / step;
+                double fl = Math.floor(t);
+                double terraced = (fl + MapNoise.smoothstep(0.5, 0.9, t - fl)) * step - off;
+                h += (terraced - h) * w;
+            }
         }
 
         // dunes: long crests across the prevailing wind
@@ -87,8 +107,20 @@ public record TamrielHeight(DensityFunction.NoiseHolder hills, DensityFunction.N
 
         // wetlands: keep the ground hovering around the water table so hollows hold pools
         if (s.wetland > 0.05f && h < TamrielMap.SEA_LEVEL + 10) {
-            double wl = TamrielMap.SEA_LEVEL + 0.4 + detailN * 1.8 + hillsN * 0.8;
+            double wl = TamrielMap.SEA_LEVEL + 0.4 + detailN * 1.8 + hillsN * 0.8 + Math.max(0, hillsN) * 2.5;
             h += (wl - h) * s.wetland * 0.6;
+            if (s.wetland > 0.3f) {
+                // a maze of meandering channels a few blocks wide between the hummocks (the water feature fills
+                // them up to sea level)
+                double c1 = Math.abs(ridges.getValue(x * 1.9, 57, z * 1.9));
+                double c2 = Math.abs(hills.getValue(x * 3.6 + 400, 23, z * 3.6)) * 1.4;
+                double k = 1 - Math.min(c1, c2) / 0.11;
+                if (k > 0) {
+                    double bed = TamrielMap.SEA_LEVEL - 1.2 - 2.4 * k;
+                    double w = MapNoise.smoothstep(0.3, 0.8, s.wetland) * Math.min(1, k * 3) * (1 - 0.8 * s.road);
+                    h += (Math.min(bed, h) - h) * w;
+                }
+            }
         }
 
         // lakes and rivers above sea level: basins below the water, banks above it

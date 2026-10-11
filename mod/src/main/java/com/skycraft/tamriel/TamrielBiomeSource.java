@@ -65,6 +65,14 @@ public class TamrielBiomeSource extends BiomeSource {
         String regionId;
         double noise;
         int jitter;
+        /**
+         * The router's climate at this column, sampled once per sampler: temperature, humidity, continentalness,
+         * erosion and weirdness don't vary with y here, and depth is linear in y ((surface - y) / 128), so a column of
+         * up to 176 quarts needs one sample instead of one per quart (the world is 704 blocks tall).
+         */
+        Climate.Sampler climateFor;
+        Climate.TargetPoint climate;
+        float surface;
     }
 
     public TamrielBiomeSource(HolderGetter<Biome> biomes) {
@@ -88,9 +96,15 @@ public class TamrielBiomeSource extends BiomeSource {
     public Holder<Biome> getNoiseBiome(int qx, int qy, int qz, Climate.Sampler sampler) {
         if (grid) return gridBiome(qx, qz);
         Column col = column(qx, qz);
-        Climate.TargetPoint tp = sampler.sample(qx, qy, qz);
-        Context ctx = context(col, col.palette, qy << 2, tp);
-        return pick(col, col.palette, ctx, qx, qy, qz, tp);
+        if (col.climateFor != sampler) {
+            Climate.TargetPoint tp = sampler.sample(qx, qy, qz);
+            col.climate = tp;
+            col.surface = (qy << 2) + Climate.unquantizeCoord(tp.depth()) * 128f;
+            col.climateFor = sampler;
+        }
+        int y = qy << 2;
+        Context ctx = context(col, col.palette, y, (col.surface - y) / 128f, col.climate);
+        return pick(col, col.palette, ctx, qx, qy, qz, col.climate);
     }
 
     // ------------------------------------------------------------------------------------------- internals
@@ -116,12 +130,16 @@ public class TamrielBiomeSource extends BiomeSource {
         col.jitter = (int) Math.round(BiomeNoise.value2(x / 48.0, z / 48.0, 404) * 10 + ((h >> 8) & 7) - 3.5);
         col.qx = qx;
         col.qz = qz;
+        col.climateFor = null;
         return col;
     }
 
     private Context context(Column col, Palette p, int y, Climate.TargetPoint tp) {
+        return context(col, p, y, Climate.unquantizeCoord(tp.depth()), tp);
+    }
+
+    private Context context(Column col, Palette p, int y, float depth, Climate.TargetPoint tp) {
         MapSample s = col.sample;
-        float depth = Climate.unquantizeCoord(tp.depth());
         float c = Climate.unquantizeCoord(tp.continentalness());
         float erosion = Climate.unquantizeCoord(tp.erosion());
         float weird = Climate.unquantizeCoord(tp.weirdness());
@@ -150,7 +168,7 @@ public class TamrielBiomeSource extends BiomeSource {
         if (ctx == Context.CAVE || ctx == Context.DEEP_CAVE) {
             v = BiomeNoise.cdf(BiomeNoise.value3(qx / 24.0, qy / 12.0, qz / 24.0, 505) / 0.33);
         } else {
-            v = climate(col, tp);
+            v = palette.bias(climate(col, tp), qx << 2, qz << 2);
         }
         Holder<Biome> b = palette.get(ctx).pick(v);
         if (b != null) return b;
@@ -169,7 +187,7 @@ public class TamrielBiomeSource extends BiomeSource {
     private Holder<Biome> surfaceBiome(Column col, Palette p, Climate.TargetPoint tp) {
         float e = col.sample.elevation;
         Context ctx = e >= p.peakY ? Context.PEAK : e >= p.uplandY ? Context.UPLAND : Context.LOWLAND;
-        Holder<Biome> b = p.get(ctx).pick(climate(col, tp));
+        Holder<Biome> b = p.get(ctx).pick(p.bias(climate(col, tp), col.qx << 2, col.qz << 2));
         return b != null ? b : p.get(Context.LOWLAND).pick(0.5);
     }
 
@@ -218,7 +236,7 @@ public class TamrielBiomeSource extends BiomeSource {
             for (int z = cz - radius; z <= cz + radius; z += step) {
                 int qx = x >> 2, qz = z >> 2;
                 Column col = column(qx, qz);
-                int qy = 320 >> 2;
+                int qy = 632 >> 2;
                 Climate.TargetPoint tp = sampler.sample(qx, qy, qz);
                 // walk down to the surface (depth crosses zero)
                 while (qy > -16 && Climate.unquantizeCoord(tp.depth()) < 0f) {
