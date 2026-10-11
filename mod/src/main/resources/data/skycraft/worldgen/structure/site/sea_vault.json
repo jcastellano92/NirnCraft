@@ -1,0 +1,17 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "ruin",
+  "kit": "maormer",
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "sea_vault"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

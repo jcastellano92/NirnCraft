@@ -2,5 +2,15 @@
   "provinces.json",
   "skyrim_settlements.json",
   "skyrim_landmarks.json",
-  "tamriel_shrines.json"
+  "tamriel_shrines.json",
+  "cyrodiil.json",
+  "morrowind.json",
+  "black_marsh.json",
+  "elsweyr.json",
+  "valenwood.json",
+  "summerset.json",
+  "hammerfell.json",
+  "high_rock.json",
+  "foreign.json",
+  "oblivion_gates.json"
 ]

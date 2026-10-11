@@ -534,6 +534,31 @@ DWEMER_SPAWNS = {"monster": {"bounding_box": "piece", "spawns": [
 
 UNDERGROUND = {"barrow", "cave", "dwemer", "mine", "vampire_lair", "necromancer_lair", "hagraven_lair", "ruin"}
 
+# Named sites of the provinces beyond Skyrim (places from tools/provinces.py): sid, place types, variants, structure.
+# The variant names a kind of site; culture ruins wear their culture's kit, keeps and towers the region's own.
+PROVINCE_SITES = [
+    ("site/ayleid_ruin", ["dungeon_fixed"], ["ayleid_ruin"], dict(theme="ruin", kit="ayleid")),
+    ("site/velothi_tomb", ["dungeon_fixed"], ["velothi_tomb"], dict(theme="ruin", kit="velothi")),
+    ("site/daedric_ruin", ["dungeon_fixed"], ["daedric_ruin"], dict(theme="ruin", kit="daedric")),
+    ("site/xanmeer", ["dungeon_fixed"], ["xanmeer"], dict(theme="ruin", kit="xanmeer")),
+    ("site/moon_temple", ["dungeon_fixed"], ["moon_temple"], dict(theme="ruin", kit="khajiit")),
+    ("site/tree_tomb", ["dungeon_fixed"], ["tree_tomb"], dict(theme="ruin", kit="bosmer")),
+    ("site/crystal_vault", ["dungeon_fixed"], ["crystal_vault"], dict(theme="ruin", kit="altmer")),
+    ("site/yokudan_tomb", ["dungeon_fixed"], ["yokudan_tomb"], dict(theme="ruin", kit="redguard")),
+    ("site/akaviri_ruin", ["dungeon_fixed"], ["akaviri_ruin"], dict(theme="ruin", kit="akaviri")),
+    ("site/atmoran_tomb", ["dungeon_fixed"], ["atmoran_tomb"], dict(theme="ruin", kit="atmoran")),
+    ("site/sea_vault", ["dungeon_fixed"], ["sea_vault"], dict(theme="ruin", kit="maormer")),
+    ("site/coral_pit", ["dungeon_fixed"], ["coral_pit"], dict(theme="ruin", kit="sload")),
+    ("site/breton_crypt", ["dungeon_fixed"], ["breton_crypt"], dict(theme="ruin", kit="breton")),
+    ("site/orc_ruin", ["dungeon_fixed"], ["orc_ruin"], dict(theme="ruin", kit="orc")),
+    ("site/imperial_crypt", ["dungeon_fixed"], ["imperial_crypt"], dict(theme="ruin", kit="imperial")),
+    ("site/tower", ["dungeon_fixed"], ["tower"], dict(theme="watchtower", flavor=0, regional=True)),
+    ("site/fort_keep", ["fort"], ["keep"], dict(theme="fort", regional=True)),
+    ("site/fort_akaviri", ["fort"], ["akaviri_fort"], dict(theme="fort", flavor=0, kit="akaviri")),
+    ("site/egg_mine", ["dungeon_fixed"], ["egg_mine"], dict(theme="mine", regional=True)),
+    ("site/sixth_house_base", ["dungeon_fixed"], ["sixth_house_base"], dict(theme="cave", kit="daedric")),
+]
+
 
 def structure(theme, kit=None, flavor=None, special=None, place=None, where=None, regional=False, sites=None,
               pad=False, spawns=None):
@@ -659,6 +684,15 @@ def structures():
         if theme == "blackreach":
             dungeon_ids.append("skycraft:" + sid)
 
+    # ---- the named sites of the other provinces (tools/provinces.py): culture ruins, regional keeps and towers
+    salt[0] = 718274500
+    for sid, types, variants, kw in PROVINCE_SITES:
+        kw = dict(kw)
+        theme = kw.pop("theme")
+        place_set(sid, types, variants, structure(theme, place=pf(types, variants), **kw))
+        if theme in ("ruin", "fort"):
+            road_ids.append("skycraft:" + sid)
+
     # ---- the wilds beyond Skyrim: random sites by culture (old ids kept for the Skyrim-era dungeon types)
     everywhere_but_skyrim = []
     underground = [
@@ -729,4 +763,7 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print(__doc__)
         sys.exit(1)
-    main(sys.argv[1])
+    if sys.argv[1] == "--structures":
+        structures()  # only the structure / structure set JSON (no reference file needed)
+    else:
+        main(sys.argv[1])

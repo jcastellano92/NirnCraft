@@ -1,0 +1,17 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "fort",
+  "regional_kit": true,
+  "place": {
+    "types": [
+      "fort"
+    ],
+    "variants": [
+      "keep"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

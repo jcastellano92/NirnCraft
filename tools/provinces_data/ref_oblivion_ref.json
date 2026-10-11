@@ -1,0 +1,3974 @@
+[
+{
+"name": "Anga",
+"type": "ayleid_ruin",
+"x": 1851,
+"z": 4005,
+"prov": "cyrodiil"
+},
+{
+"name": "Anutwyll",
+"type": "ayleid_ruin",
+"x": 1524,
+"z": 8528,
+"prov": "cyrodiil"
+},
+{
+"name": "Arpenia",
+"type": "ayleid_ruin",
+"x": 3703,
+"z": 9350,
+"prov": "cyrodiil"
+},
+{
+"name": "Atatar",
+"type": "ayleid_ruin",
+"x": 3999,
+"z": 9183,
+"prov": "cyrodiil"
+},
+{
+"name": "Bawn",
+"type": "ayleid_ruin",
+"x": 2442,
+"z": 8977,
+"prov": "cyrodiil"
+},
+{
+"name": "Belda",
+"type": "ayleid_ruin",
+"x": 2621,
+"z": 5017,
+"prov": "cyrodiil"
+},
+{
+"name": "Beldaburo",
+"type": "ayleid_ruin",
+"x": -4568,
+"z": 7989,
+"prov": "cyrodiil"
+},
+{
+"name": "Ceyatatar",
+"type": "ayleid_ruin",
+"x": -730,
+"z": 6338,
+"prov": "cyrodiil"
+},
+{
+"name": "Culotte",
+"type": "ayleid_ruin",
+"x": 2042,
+"z": 7497,
+"prov": "cyrodiil"
+},
+{
+"name": "Elenglynn",
+"type": "ayleid_ruin",
+"x": -1647,
+"z": 5694,
+"prov": "cyrodiil"
+},
+{
+"name": "Fanacas",
+"type": "ayleid_ruin",
+"x": 4119,
+"z": 4217,
+"prov": "cyrodiil"
+},
+{
+"name": "Fanacasecul",
+"type": "ayleid_ruin",
+"x": -166,
+"z": 6029,
+"prov": "cyrodiil"
+},
+{
+"name": "Garlas Agea",
+"type": "ayleid_ruin",
+"x": -3436,
+"z": 8132,
+"prov": "cyrodiil"
+},
+{
+"name": "Garlas Malatar",
+"type": "ayleid_ruin",
+"x": -4718,
+"z": 8471,
+"prov": "sea"
+},
+{
+"name": "Hame",
+"type": "ayleid_ruin",
+"x": 4906,
+"z": 6610,
+"prov": "cyrodiil"
+},
+{
+"name": "Hrotanda Vale",
+"type": "ayleid_ruin",
+"x": -1082,
+"z": 3954,
+"prov": "cyrodiil"
+},
+{
+"name": "Kemen",
+"type": "ayleid_ruin",
+"x": 4339,
+"z": 4950,
+"prov": "cyrodiil"
+},
+{
+"name": "Lindai",
+"type": "ayleid_ruin",
+"x": -475,
+"z": 4460,
+"prov": "cyrodiil"
+},
+{
+"name": "Lipsand Tarn",
+"type": "ayleid_ruin",
+"x": -1250,
+"z": 3276,
+"prov": "cyrodiil"
+},
+{
+"name": "Mackamentain",
+"type": "ayleid_ruin",
+"x": 3819,
+"z": 7550,
+"prov": "cyrodiil"
+},
+{
+"name": "Malada",
+"type": "ayleid_ruin",
+"x": 5659,
+"z": 7349,
+"prov": "cyrodiil"
+},
+{
+"name": "Miscarcand",
+"type": "ayleid_ruin",
+"x": -2325,
+"z": 6930,
+"prov": "cyrodiil"
+},
+{
+"name": "Morahame",
+"type": "ayleid_ruin",
+"x": 3641,
+"z": 8604,
+"prov": "cyrodiil"
+},
+{
+"name": "Moranda",
+"type": "ayleid_ruin",
+"x": -20,
+"z": 3685,
+"prov": "cyrodiil"
+},
+{
+"name": "Nagastani",
+"type": "ayleid_ruin",
+"x": 2455,
+"z": 5950,
+"prov": "cyrodiil"
+},
+{
+"name": "Narfinsel",
+"type": "ayleid_ruin",
+"x": -1102,
+"z": 5340,
+"prov": "cyrodiil"
+},
+{
+"name": "Nenalata",
+"type": "ayleid_ruin",
+"x": 3226,
+"z": 8317,
+"prov": "cyrodiil"
+},
+{
+"name": "Nenyond Twyll",
+"type": "ayleid_ruin",
+"x": 119,
+"z": 7450,
+"prov": "cyrodiil"
+},
+{
+"name": "Ninendava",
+"type": "ayleid_ruin",
+"x": -314,
+"z": 3141,
+"prov": "cyrodiil"
+},
+{
+"name": "Niryastare",
+"type": "ayleid_ruin",
+"x": -3774,
+"z": 6791,
+"prov": "cyrodiil"
+},
+{
+"name": "Nonungalo",
+"type": "ayleid_ruin",
+"x": -2312,
+"z": 5575,
+"prov": "cyrodiil"
+},
+{
+"name": "Nornal",
+"type": "ayleid_ruin",
+"x": 2836,
+"z": 6705,
+"prov": "cyrodiil"
+},
+{
+"name": "Nornalhorst",
+"type": "ayleid_ruin",
+"x": -675,
+"z": 7252,
+"prov": "cyrodiil"
+},
+{
+"name": "Ondo",
+"type": "ayleid_ruin",
+"x": 4756,
+"z": 7611,
+"prov": "cyrodiil"
+},
+{
+"name": "Piukanda",
+"type": "ayleid_ruin",
+"x": 476,
+"z": 4254,
+"prov": "cyrodiil"
+},
+{
+"name": "Rielle",
+"type": "ayleid_ruin",
+"x": 1045,
+"z": 2706,
+"prov": "cyrodiil"
+},
+{
+"name": "Sardavar Leed",
+"type": "ayleid_ruin",
+"x": 944,
+"z": 7235,
+"prov": "cyrodiil"
+},
+{
+"name": "Sedor",
+"type": "ayleid_ruin",
+"x": 3109,
+"z": 3672,
+"prov": "cyrodiil"
+},
+{
+"name": "Sercen",
+"type": "ayleid_ruin",
+"x": 1431,
+"z": 4585,
+"prov": "cyrodiil"
+},
+{
+"name": "Silorn",
+"type": "ayleid_ruin",
+"x": -1112,
+"z": 7367,
+"prov": "cyrodiil"
+},
+{
+"name": "Talwinque",
+"type": "ayleid_ruin",
+"x": -2406,
+"z": 6326,
+"prov": "cyrodiil"
+},
+{
+"name": "Telepe",
+"type": "ayleid_ruin",
+"x": 3059,
+"z": 9833,
+"prov": "cyrodiil"
+},
+{
+"name": "Trumbe",
+"type": "ayleid_ruin",
+"x": -3288,
+"z": 7167,
+"prov": "cyrodiil"
+},
+{
+"name": "Varondo",
+"type": "ayleid_ruin",
+"x": -2861,
+"z": 6120,
+"prov": "cyrodiil"
+},
+{
+"name": "Veyond",
+"type": "ayleid_ruin",
+"x": 3999,
+"z": 9675,
+"prov": "cyrodiil"
+},
+{
+"name": "Vilverin",
+"type": "ayleid_ruin",
+"x": 1698,
+"z": 5192,
+"prov": "cyrodiil"
+},
+{
+"name": "Vindasel",
+"type": "ayleid_ruin",
+"x": -36,
+"z": 6625,
+"prov": "cyrodiil"
+},
+{
+"name": "Welke",
+"type": "ayleid_ruin",
+"x": 4526,
+"z": 8897,
+"prov": "cyrodiil"
+},
+{
+"name": "Wendelbek",
+"type": "ayleid_ruin",
+"x": 4945,
+"z": 8480,
+"prov": "cyrodiil"
+},
+{
+"name": "Wendir",
+"type": "ayleid_ruin",
+"x": -1706,
+"z": 5094,
+"prov": "cyrodiil"
+},
+{
+"name": "Wenyandawik",
+"type": "ayleid_ruin",
+"x": 833,
+"z": 8172,
+"prov": "cyrodiil"
+},
+{
+"name": "Aerin's Camp",
+"type": "camp",
+"x": 4314,
+"z": 3666,
+"prov": "cyrodiil"
+},
+{
+"name": "Atrene Camp",
+"type": "camp",
+"x": -4189,
+"z": 8068,
+"prov": "cyrodiil"
+},
+{
+"name": "Bawnwatch Camp",
+"type": "camp",
+"x": 2381,
+"z": 8881,
+"prov": "cyrodiil"
+},
+{
+"name": "Black Dog Camp",
+"type": "camp",
+"x": 4266,
+"z": 8701,
+"prov": "cyrodiil"
+},
+{
+"name": "Bodean Camp",
+"type": "camp",
+"x": -3572,
+"z": 7421,
+"prov": "cyrodiil"
+},
+{
+"name": "Bogwater",
+"type": "camp",
+"x": 4725,
+"z": 10293,
+"prov": "cyrodiil"
+},
+{
+"name": "Brotch Camp",
+"type": "camp",
+"x": -2475,
+"z": 5820,
+"prov": "cyrodiil"
+},
+{
+"name": "Camp Ales",
+"type": "camp",
+"x": -3073,
+"z": 6468,
+"prov": "cyrodiil"
+},
+{
+"name": "Carbo's Camp",
+"type": "camp",
+"x": 3990,
+"z": 5923,
+"prov": "cyrodiil"
+},
+{
+"name": "Collarbone Camp",
+"type": "camp",
+"x": -845,
+"z": 7229,
+"prov": "cyrodiil"
+},
+{
+"name": "Crestbridge Camp",
+"type": "camp",
+"x": 3013,
+"z": 7500,
+"prov": "cyrodiil"
+},
+{
+"name": "Dagny's Camp",
+"type": "camp",
+"x": -2470,
+"z": 6506,
+"prov": "cyrodiil"
+},
+{
+"name": "Fat Ramp Camp",
+"type": "camp",
+"x": -1918,
+"z": 6903,
+"prov": "cyrodiil"
+},
+{
+"name": "Fisherman's Rock",
+"type": "camp",
+"x": 3347,
+"z": 9525,
+"prov": "sea"
+},
+{
+"name": "Garnet Camp",
+"type": "camp",
+"x": 5546,
+"z": 8367,
+"prov": "cyrodiil"
+},
+{
+"name": "Gnoll's Meeting Camp",
+"type": "camp",
+"x": -2288,
+"z": 7417,
+"prov": "cyrodiil"
+},
+{
+"name": "Hidden Camp",
+"type": "camp",
+"x": 3197,
+"z": 3705,
+"prov": "cyrodiil"
+},
+{
+"name": "Last Chance Camp",
+"type": "camp",
+"x": -3623,
+"z": 6535,
+"prov": "cyrodiil"
+},
+{
+"name": "Marsh-Punk Camp",
+"type": "camp",
+"x": 4892,
+"z": 8817,
+"prov": "cyrodiil"
+},
+{
+"name": "Mortal Camp",
+"type": "camp",
+"x": -2408,
+"z": 7680,
+"prov": "cyrodiil"
+},
+{
+"name": "Nayon Camp",
+"type": "camp",
+"x": 5165,
+"z": 7807,
+"prov": "cyrodiil"
+},
+{
+"name": "Ra'sava Camp",
+"type": "camp",
+"x": -2275,
+"z": 7129,
+"prov": "cyrodiil"
+},
+{
+"name": "Seran Camp",
+"type": "camp",
+"x": 5248,
+"z": 8750,
+"prov": "cyrodiil"
+},
+{
+"name": "Sercen Camp",
+"type": "camp",
+"x": 4152,
+"z": 6523,
+"prov": "cyrodiil"
+},
+{
+"name": "Sweetwater Camp",
+"type": "camp",
+"x": 1082,
+"z": 7311,
+"prov": "cyrodiil"
+},
+{
+"name": "Troll Candle Camp",
+"type": "camp",
+"x": -2955,
+"z": 8469,
+"prov": "cyrodiil"
+},
+{
+"name": "Trossan Camp",
+"type": "camp",
+"x": 3821,
+"z": 7431,
+"prov": "cyrodiil"
+},
+{
+"name": "Valley View Camp",
+"type": "camp",
+"x": -2256,
+"z": 5886,
+"prov": "cyrodiil"
+},
+{
+"name": "Varus Camp",
+"type": "camp",
+"x": -3859,
+"z": 6928,
+"prov": "cyrodiil"
+},
+{
+"name": "Walker Camp",
+"type": "camp",
+"x": 4193,
+"z": 4008,
+"prov": "cyrodiil"
+},
+{
+"name": "Wind Range Camp",
+"type": "camp",
+"x": 3616,
+"z": 4566,
+"prov": "cyrodiil"
+},
+{
+"name": "gro-Bak Camp",
+"type": "camp",
+"x": -1135,
+"z": 7069,
+"prov": "cyrodiil"
+},
+{
+"name": "Amelion Tomb",
+"type": "cave",
+"x": 3651,
+"z": 9730,
+"prov": "cyrodiil"
+},
+{
+"name": "Arrowshaft Cavern",
+"type": "cave",
+"x": 5176,
+"z": 7304,
+"prov": "cyrodiil"
+},
+{
+"name": "Barren Cave",
+"type": "cave",
+"x": 2967,
+"z": 5232,
+"prov": "cyrodiil"
+},
+{
+"name": "Bedrock Break",
+"type": "cave",
+"x": 4538,
+"z": 8195,
+"prov": "cyrodiil"
+},
+{
+"name": "Black Rock Caverns",
+"type": "cave",
+"x": -1489,
+"z": 4028,
+"prov": "cyrodiil"
+},
+{
+"name": "Bleak Flats Cave",
+"type": "cave",
+"x": -1876,
+"z": 6248,
+"prov": "cyrodiil"
+},
+{
+"name": "Bloodcrust Cavern",
+"type": "cave",
+"x": -1449,
+"z": 6944,
+"prov": "cyrodiil"
+},
+{
+"name": "Bloodmayne Cave",
+"type": "cave",
+"x": 1154,
+"z": 8569,
+"prov": "cyrodiil"
+},
+{
+"name": "Bloodrun Cave",
+"type": "cave",
+"x": 5097,
+"z": 8740,
+"prov": "cyrodiil"
+},
+{
+"name": "Boreal Stone Cave",
+"type": "cave",
+"x": 782,
+"z": 2825,
+"prov": "cyrodiil"
+},
+{
+"name": "Bramblepoint Cave",
+"type": "cave",
+"x": 3266,
+"z": 8119,
+"prov": "cyrodiil"
+},
+{
+"name": "Breakneck Cave",
+"type": "cave",
+"x": -718,
+"z": 5447,
+"prov": "cyrodiil"
+},
+{
+"name": "Brittlerock Cave",
+"type": "cave",
+"x": -3477,
+"z": 7173,
+"prov": "cyrodiil"
+},
+{
+"name": "Broken Promises Cave",
+"type": "cave",
+"x": -2101,
+"z": 4987,
+"prov": "cyrodiil"
+},
+{
+"name": "Bruma Caverns",
+"type": "cave",
+"x": 1263,
+"z": 3166,
+"prov": "cyrodiil"
+},
+{
+"name": "Capstone Cave",
+"type": "cave",
+"x": 1108,
+"z": 2859,
+"prov": "cyrodiil"
+},
+{
+"name": "Charcoal Cave",
+"type": "cave",
+"x": 807,
+"z": 7395,
+"prov": "cyrodiil"
+},
+{
+"name": "Cracked Wood Cave",
+"type": "cave",
+"x": 2418,
+"z": 7098,
+"prov": "cyrodiil"
+},
+{
+"name": "Crayfish Cave",
+"type": "cave",
+"x": 3732,
+"z": 6953,
+"prov": "cyrodiil"
+},
+{
+"name": "Dark Fissure",
+"type": "cave",
+"x": 4220,
+"z": 5805,
+"prov": "cyrodiil"
+},
+{
+"name": "Darkfathom Cave",
+"type": "cave",
+"x": 4064,
+"z": 9978,
+"prov": "cyrodiil"
+},
+{
+"name": "Dunbarrow Cove",
+"type": "cave",
+"x": -3686,
+"z": 9028,
+"prov": "cyrodiil"
+},
+{
+"name": "Dzonot Cave",
+"type": "cave",
+"x": 343,
+"z": 5954,
+"prov": "cyrodiil"
+},
+{
+"name": "Echo Cave",
+"type": "cave",
+"x": 504,
+"z": 2710,
+"prov": "cyrodiil"
+},
+{
+"name": "Fallen Rock Cave",
+"type": "cave",
+"x": -2104,
+"z": 6279,
+"prov": "cyrodiil"
+},
+{
+"name": "Fatback Cave",
+"type": "cave",
+"x": 1001,
+"z": 6907,
+"prov": "cyrodiil"
+},
+{
+"name": "Felgageldt Cave",
+"type": "cave",
+"x": -409,
+"z": 6581,
+"prov": "cyrodiil"
+},
+{
+"name": "Fieldhouse Cave",
+"type": "cave",
+"x": 4272,
+"z": 9377,
+"prov": "cyrodiil"
+},
+{
+"name": "Fingerbowl Cave",
+"type": "cave",
+"x": 870,
+"z": 4379,
+"prov": "cyrodiil"
+},
+{
+"name": "Frostfire Glade",
+"type": "cave",
+"x": 2299,
+"z": 3968,
+"prov": "cyrodiil"
+},
+{
+"name": "Fyrelight Cave",
+"type": "cave",
+"x": -2074,
+"z": 7013,
+"prov": "cyrodiil"
+},
+{
+"name": "Glademist Cave",
+"type": "cave",
+"x": 61,
+"z": 4179,
+"prov": "cyrodiil"
+},
+{
+"name": "Goblin Jim's Cave",
+"type": "cave",
+"x": -1698,
+"z": 6105,
+"prov": "cyrodiil"
+},
+{
+"name": "Grayrock Cave",
+"type": "cave",
+"x": -1119,
+"z": 6549,
+"prov": "cyrodiil"
+},
+{
+"name": "Greenmead Cave",
+"type": "cave",
+"x": -818,
+"z": 6635,
+"prov": "cyrodiil"
+},
+{
+"name": "Haynote Cave",
+"type": "cave",
+"x": -643,
+"z": 6058,
+"prov": "cyrodiil"
+},
+{
+"name": "Horn Cave",
+"type": "cave",
+"x": 587,
+"z": 7153,
+"prov": "cyrodiil"
+},
+{
+"name": "Howling Cave",
+"type": "cave",
+"x": -954,
+"z": 7131,
+"prov": "cyrodiil"
+},
+{
+"name": "Hrota Cave",
+"type": "cave",
+"x": -4063,
+"z": 8372,
+"prov": "cyrodiil"
+},
+{
+"name": "Imperial City Sewers - North Exit",
+"type": "cave",
+"x": 1032,
+"z": 5294,
+"prov": "cyrodiil"
+},
+{
+"name": "Imperial Prison Sewer",
+"type": "cave",
+"x": 1556,
+"z": 5330,
+"prov": "cyrodiil"
+},
+{
+"name": "Imperial Sewer - South East Exit",
+"type": "cave",
+"x": 1253,
+"z": 6313,
+"prov": "cyrodiil"
+},
+{
+"name": "Kindred Cave",
+"type": "cave",
+"x": 5140,
+"z": 8669,
+"prov": "cyrodiil"
+},
+{
+"name": "Kingscrest Cavern",
+"type": "cave",
+"x": 4217,
+"z": 3735,
+"prov": "cyrodiil"
+},
+{
+"name": "Lake Arrius Caverns",
+"type": "cave",
+"x": 3543,
+"z": 4272,
+"prov": "cyrodiil"
+},
+{
+"name": "Leafrot Cave",
+"type": "cave",
+"x": 5434,
+"z": 8294,
+"prov": "cyrodiil"
+},
+{
+"name": "Lost Boy Cavern",
+"type": "cave",
+"x": 5132,
+"z": 7700,
+"prov": "cyrodiil"
+},
+{
+"name": "Memorial Cave",
+"type": "cave",
+"x": 1659,
+"z": 6503,
+"prov": "cyrodiil"
+},
+{
+"name": "Mingo Cave",
+"type": "cave",
+"x": 916,
+"z": 7742,
+"prov": "cyrodiil"
+},
+{
+"name": "Mongrel's Tooth Cave",
+"type": "cave",
+"x": -2825,
+"z": 6420,
+"prov": "cyrodiil"
+},
+{
+"name": "Moss Rock Cavern",
+"type": "cave",
+"x": 1775,
+"z": 4497,
+"prov": "cyrodiil"
+},
+{
+"name": "Muck Valley Cavern",
+"type": "cave",
+"x": 2863,
+"z": 6044,
+"prov": "cyrodiil"
+},
+{
+"name": "Newt Cave",
+"type": "cave",
+"x": 2765,
+"z": 7757,
+"prov": "cyrodiil"
+},
+{
+"name": "Nisin Cave",
+"type": "cave",
+"x": -373,
+"z": 7245,
+"prov": "cyrodiil"
+},
+{
+"name": "Nonwyll Cavern",
+"type": "cave",
+"x": -1297,
+"z": 3801,
+"prov": "cyrodiil"
+},
+{
+"name": "Onyx Caverns",
+"type": "cave",
+"x": 4654,
+"z": 9705,
+"prov": "cyrodiil"
+},
+{
+"name": "Outlaw Endre's Cave",
+"type": "cave",
+"x": 637,
+"z": 3918,
+"prov": "cyrodiil"
+},
+{
+"name": "Pothole Caverns",
+"type": "cave",
+"x": 448,
+"z": 7776,
+"prov": "cyrodiil"
+},
+{
+"name": "Quickwater Cave",
+"type": "cave",
+"x": 3590,
+"z": 4685,
+"prov": "cyrodiil"
+},
+{
+"name": "Red Ruby Cave",
+"type": "cave",
+"x": 2182,
+"z": 3622,
+"prov": "cyrodiil"
+},
+{
+"name": "Redguard Valley Cave",
+"type": "cave",
+"x": -1483,
+"z": 5606,
+"prov": "cyrodiil"
+},
+{
+"name": "Redwater Slough",
+"type": "cave",
+"x": 5242,
+"z": 8535,
+"prov": "cyrodiil"
+},
+{
+"name": "Reedstand Cave",
+"type": "cave",
+"x": 2874,
+"z": 9257,
+"prov": "cyrodiil"
+},
+{
+"name": "Robber's Glen Cave",
+"type": "cave",
+"x": 1275,
+"z": 8107,
+"prov": "cyrodiil"
+},
+{
+"name": "Rock Bottom Caverns",
+"type": "cave",
+"x": -1953,
+"z": 5451,
+"prov": "cyrodiil"
+},
+{
+"name": "Rockmilk Cave",
+"type": "cave",
+"x": 2846,
+"z": 9572,
+"prov": "cyrodiil"
+},
+{
+"name": "Sage Glen Hollow",
+"type": "cave",
+"x": 3829,
+"z": 7807,
+"prov": "cyrodiil"
+},
+{
+"name": "Sandstone Cavern",
+"type": "cave",
+"x": -2551,
+"z": 7095,
+"prov": "cyrodiil"
+},
+{
+"name": "Serpent Hollow Cave",
+"type": "cave",
+"x": -1366,
+"z": 5477,
+"prov": "cyrodiil"
+},
+{
+"name": "Serpent's Trail",
+"type": "cave",
+"x": 2032,
+"z": 2329,
+"prov": "cyrodiil"
+},
+{
+"name": "Shadow's Rest Cavern",
+"type": "cave",
+"x": -624,
+"z": 3741,
+"prov": "cyrodiil"
+},
+{
+"name": "Shattered Scales Cave",
+"type": "cave",
+"x": 4819,
+"z": 8976,
+"prov": "cyrodiil"
+},
+{
+"name": "Shinbone Cave",
+"type": "cave",
+"x": 1734,
+"z": 7235,
+"prov": "cyrodiil"
+},
+{
+"name": "Sideways Cave",
+"type": "cave",
+"x": 1630,
+"z": 5500,
+"prov": "cyrodiil"
+},
+{
+"name": "Silver Tooth Cave",
+"type": "cave",
+"x": 2913,
+"z": 3818,
+"prov": "cyrodiil"
+},
+{
+"name": "Sinkhole Cave",
+"type": "cave",
+"x": 703,
+"z": 5256,
+"prov": "cyrodiil"
+},
+{
+"name": "Smoke Hole Cave",
+"type": "cave",
+"x": -3171,
+"z": 8493,
+"prov": "cyrodiil"
+},
+{
+"name": "Swampy Cave",
+"type": "cave",
+"x": 3998,
+"z": 5682,
+"prov": "cyrodiil"
+},
+{
+"name": "The Beast's Maw",
+"type": "cave",
+"x": 2554,
+"z": 4098,
+"prov": "cyrodiil"
+},
+{
+"name": "Tidewater Cave",
+"type": "cave",
+"x": 4161,
+"z": 10327,
+"prov": "sea"
+},
+{
+"name": "Timberscar Hollow",
+"type": "cave",
+"x": 2622,
+"z": 7541,
+"prov": "cyrodiil"
+},
+{
+"name": "Toadstool Hollow",
+"type": "cave",
+"x": 1649,
+"z": 3549,
+"prov": "cyrodiil"
+},
+{
+"name": "Underpall Cave",
+"type": "cave",
+"x": 398,
+"z": 3480,
+"prov": "cyrodiil"
+},
+{
+"name": "Undertow Cavern",
+"type": "cave",
+"x": 3315,
+"z": 9828,
+"prov": "cyrodiil"
+},
+{
+"name": "Unmarked Cave",
+"type": "cave",
+"x": 1054,
+"z": 4063,
+"prov": "cyrodiil"
+},
+{
+"name": "Vahtacen",
+"type": "cave",
+"x": 3830,
+"z": 5706,
+"prov": "cyrodiil"
+},
+{
+"name": "Veyond Cave",
+"type": "cave",
+"x": 1840,
+"z": 8175,
+"prov": "cyrodiil"
+},
+{
+"name": "Wellspring Cave",
+"type": "cave",
+"x": 1902,
+"z": 6107,
+"prov": "cyrodiil"
+},
+{
+"name": "Wenderbek Cave",
+"type": "cave",
+"x": 3167,
+"z": 6838,
+"prov": "cyrodiil"
+},
+{
+"name": "Wind Cave",
+"type": "cave",
+"x": -2045,
+"z": 5343,
+"prov": "cyrodiil"
+},
+{
+"name": "Yellow Tick Cave",
+"type": "cave",
+"x": -373,
+"z": 4886,
+"prov": "cyrodiil"
+},
+{
+"name": "Anvil Lighthouse",
+"type": "city",
+"x": -4059,
+"z": 8929,
+"prov": "cyrodiil"
+},
+{
+"name": "Castle Skingrad",
+"type": "city",
+"x": -1579,
+"z": 6896,
+"prov": "cyrodiil"
+},
+{
+"name": "Imperial City Waterfront",
+"type": "city",
+"x": 454,
+"z": 6375,
+"prov": "cyrodiil"
+},
+{
+"name": "Kvatch",
+"type": "city",
+"x": -2700,
+"z": 8000,
+"prov": "cyrodiil"
+},
+{
+"name": "Azura's Shrine",
+"type": "daedric_shrine",
+"x": 3785,
+"z": 3579,
+"prov": "cyrodiil"
+},
+{
+"name": "Boethia's Shrine",
+"type": "daedric_shrine",
+"x": 4539,
+"z": 6331,
+"prov": "cyrodiil"
+},
+{
+"name": "Clavicus Vile's Shrine",
+"type": "daedric_shrine",
+"x": -425,
+"z": 6355,
+"prov": "cyrodiil"
+},
+{
+"name": "Hermaeus Mora's Shrine",
+"type": "daedric_shrine",
+"x": -455,
+"z": 2632,
+"prov": "cyrodiil"
+},
+{
+"name": "Hircine's Shrine",
+"type": "daedric_shrine",
+"x": 1041,
+"z": 7504,
+"prov": "cyrodiil"
+},
+{
+"name": "Malacath's Shrine",
+"type": "daedric_shrine",
+"x": -4323,
+"z": 7608,
+"prov": "cyrodiil"
+},
+{
+"name": "Mephala's Shrine",
+"type": "daedric_shrine",
+"x": 2037,
+"z": 4350,
+"prov": "cyrodiil"
+},
+{
+"name": "Meridia's Shrine",
+"type": "daedric_shrine",
+"x": -2154,
+"z": 6671,
+"prov": "cyrodiil"
+},
+{
+"name": "Molag Bal's Shrine",
+"type": "daedric_shrine",
+"x": -1167,
+"z": 5584,
+"prov": "cyrodiil"
+},
+{
+"name": "Namira's Shrine",
+"type": "daedric_shrine",
+"x": 2073,
+"z": 3351,
+"prov": "cyrodiil"
+},
+{
+"name": "Nocturnal Shrine",
+"type": "daedric_shrine",
+"x": 3693,
+"z": 9461,
+"prov": "cyrodiil"
+},
+{
+"name": "Peryite's Shrine",
+"type": "daedric_shrine",
+"x": 4649,
+"z": 7943,
+"prov": "cyrodiil"
+},
+{
+"name": "Sheogorath's Shrine",
+"type": "daedric_shrine",
+"x": 2546,
+"z": 9377,
+"prov": "cyrodiil"
+},
+{
+"name": "Shrine of Sanguine",
+"type": "daedric_shrine",
+"x": -2010,
+"z": 5894,
+"prov": "cyrodiil"
+},
+{
+"name": "Vaermina's Shrine",
+"type": "daedric_shrine",
+"x": 3126,
+"z": 5955,
+"prov": "cyrodiil"
+},
+{
+"name": "Arkved's Tower",
+"type": "fort_ruin",
+"x": 2862,
+"z": 6478,
+"prov": "cyrodiil"
+},
+{
+"name": "Battlehorn Castle",
+"type": "fort_ruin",
+"x": -1873,
+"z": 4310,
+"prov": "cyrodiil"
+},
+{
+"name": "Crowhaven",
+"type": "fort_ruin",
+"x": -4456,
+"z": 8283,
+"prov": "cyrodiil"
+},
+{
+"name": "Fathis Aren's Tower",
+"type": "fort_ruin",
+"x": 2002,
+"z": 9028,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Alessia",
+"type": "fort_ruin",
+"x": 1307,
+"z": 7330,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Ash",
+"type": "fort_ruin",
+"x": -722,
+"z": 4963,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Aurus",
+"type": "fort_ruin",
+"x": 2706,
+"z": 8123,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Black Boot",
+"type": "fort_ruin",
+"x": 193,
+"z": 8032,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Blueblood",
+"type": "fort_ruin",
+"x": 4563,
+"z": 10064,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Bulwark",
+"type": "fort_ruin",
+"x": 4726,
+"z": 9477,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Caractacus",
+"type": "fort_ruin",
+"x": 822,
+"z": 4769,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Carmala",
+"type": "fort_ruin",
+"x": -1461,
+"z": 5103,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Cedrian",
+"type": "fort_ruin",
+"x": 3171,
+"z": 7423,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Chalman",
+"type": "fort_ruin",
+"x": 2109,
+"z": 4781,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Coldcorn",
+"type": "fort_ruin",
+"x": -214,
+"z": 4517,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Cuptor",
+"type": "fort_ruin",
+"x": 5424,
+"z": 7926,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Dirich",
+"type": "fort_ruin",
+"x": -2071,
+"z": 5761,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Doublecross",
+"type": "fort_ruin",
+"x": 4081,
+"z": 9570,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Empire",
+"type": "fort_ruin",
+"x": 105,
+"z": 4787,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Entius",
+"type": "fort_ruin",
+"x": 4624,
+"z": 7365,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Facian",
+"type": "fort_ruin",
+"x": 4235,
+"z": 6709,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Farragut",
+"type": "fort_ruin",
+"x": 4102,
+"z": 4855,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Flecia",
+"type": "fort_ruin",
+"x": 4012,
+"z": 8031,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Gold-Throat",
+"type": "fort_ruin",
+"x": 4582,
+"z": 8407,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Grief",
+"type": "fort_ruin",
+"x": 2763,
+"z": 8390,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Hastrel",
+"type": "fort_ruin",
+"x": -3274,
+"z": 6571,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Homestead",
+"type": "fort_ruin",
+"x": 529,
+"z": 6832,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Horunn",
+"type": "fort_ruin",
+"x": 2632,
+"z": 3837,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Irony",
+"type": "fort_ruin",
+"x": 2967,
+"z": 8996,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Istirus",
+"type": "fort_ruin",
+"x": -2137,
+"z": 7276,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Linchal",
+"type": "fort_ruin",
+"x": -2670,
+"z": 6685,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Magia",
+"type": "fort_ruin",
+"x": 1879,
+"z": 6245,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Naso",
+"type": "fort_ruin",
+"x": 4133,
+"z": 6184,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Nikel",
+"type": "fort_ruin",
+"x": -270,
+"z": 5420,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Nomore",
+"type": "fort_ruin",
+"x": 2637,
+"z": 9278,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Ontus",
+"type": "fort_ruin",
+"x": -2565,
+"z": 5494,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Rayles",
+"type": "fort_ruin",
+"x": -1782,
+"z": 3876,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Redman",
+"type": "fort_ruin",
+"x": 3173,
+"z": 9479,
+"prov": "sea"
+},
+{
+"name": "Fort Redwater",
+"type": "fort_ruin",
+"x": 5447,
+"z": 8549,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Roebeck",
+"type": "fort_ruin",
+"x": 6,
+"z": 7171,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Scinia",
+"type": "fort_ruin",
+"x": 4516,
+"z": 5260,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Sejanus",
+"type": "fort_ruin",
+"x": 2357,
+"z": 6783,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Strand",
+"type": "fort_ruin",
+"x": -3540,
+"z": 8574,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Sutch",
+"type": "fort_ruin",
+"x": -4107,
+"z": 7449,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Teleman",
+"type": "fort_ruin",
+"x": 4787,
+"z": 9221,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Urasek",
+"type": "fort_ruin",
+"x": 1891,
+"z": 5617,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Variela",
+"type": "fort_ruin",
+"x": 1538,
+"z": 7791,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Virtue",
+"type": "fort_ruin",
+"x": -203,
+"z": 6235,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Vlastarus",
+"type": "fort_ruin",
+"x": -987,
+"z": 6867,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Wariel",
+"type": "fort_ruin",
+"x": -3367,
+"z": 7424,
+"prov": "cyrodiil"
+},
+{
+"name": "Fort Wooden Hand",
+"type": "fort_ruin",
+"x": -1003,
+"z": 5755,
+"prov": "cyrodiil"
+},
+{
+"name": "Sancre Tor",
+"type": "fort_ruin",
+"x": -652,
+"z": 3283,
+"prov": "cyrodiil"
+},
+{
+"name": "Sundercliff Watch",
+"type": "fort_ruin",
+"x": 5987,
+"z": 7680,
+"prov": "cyrodiil"
+},
+{
+"name": "A Strange Door",
+"type": "landmark",
+"x": 2474,
+"z": 8648,
+"prov": "cyrodiil"
+},
+{
+"name": "Cloud Top",
+"type": "landmark",
+"x": -1578,
+"z": 3539,
+"prov": "cyrodiil"
+},
+{
+"name": "Dive Rock",
+"type": "landmark",
+"x": 4537,
+"z": 3437,
+"prov": "cyrodiil"
+},
+{
+"name": "Dragonclaw Rock",
+"type": "landmark",
+"x": 2188,
+"z": 2531,
+"prov": "cyrodiil"
+},
+{
+"name": "Gnoll Mountain",
+"type": "landmark",
+"x": 2314,
+"z": 2978,
+"prov": "cyrodiil"
+},
+{
+"name": "Harcane Grove",
+"type": "landmark",
+"x": 1142,
+"z": 7847,
+"prov": "cyrodiil"
+},
+{
+"name": "Hero Hill",
+"type": "landmark",
+"x": 4264,
+"z": 5424,
+"prov": "cyrodiil"
+},
+{
+"name": "Mouth of the Panther",
+"type": "landmark",
+"x": 3523,
+"z": 8942,
+"prov": "cyrodiil"
+},
+{
+"name": "Old Bridge",
+"type": "landmark",
+"x": 364,
+"z": 6854,
+"prov": "cyrodiil"
+},
+{
+"name": "Shadeleaf Copse",
+"type": "landmark",
+"x": -1386,
+"z": 6271,
+"prov": "cyrodiil"
+},
+{
+"name": "Abandoned Mine",
+"type": "mine",
+"x": 5893,
+"z": 7567,
+"prov": "cyrodiil"
+},
+{
+"name": "Barren Mine",
+"type": "mine",
+"x": 3779,
+"z": 9199,
+"prov": "cyrodiil"
+},
+{
+"name": "Belletor's Folly",
+"type": "mine",
+"x": -2815,
+"z": 8059,
+"prov": "cyrodiil"
+},
+{
+"name": "Bleak Mine",
+"type": "mine",
+"x": -3955,
+"z": 7711,
+"prov": "cyrodiil"
+},
+{
+"name": "Collapsed Mine",
+"type": "mine",
+"x": 5232,
+"z": 7192,
+"prov": "cyrodiil"
+},
+{
+"name": "Crumbling Mine",
+"type": "mine",
+"x": -1254,
+"z": 4550,
+"prov": "cyrodiil"
+},
+{
+"name": "Cursed Mine",
+"type": "mine",
+"x": -1959,
+"z": 6672,
+"prov": "cyrodiil"
+},
+{
+"name": "Dasek Moor",
+"type": "mine",
+"x": -2661,
+"z": 8137,
+"prov": "cyrodiil"
+},
+{
+"name": "Derelict Mine",
+"type": "mine",
+"x": -1395,
+"z": 6652,
+"prov": "cyrodiil"
+},
+{
+"name": "Deserted Mine",
+"type": "mine",
+"x": 4347,
+"z": 7265,
+"prov": "cyrodiil"
+},
+{
+"name": "Desolate Mine",
+"type": "mine",
+"x": 3246,
+"z": 4662,
+"prov": "cyrodiil"
+},
+{
+"name": "Doomed Mine",
+"type": "mine",
+"x": 4325,
+"z": 5872,
+"prov": "cyrodiil"
+},
+{
+"name": "Echo Mine",
+"type": "mine",
+"x": -2393,
+"z": 5932,
+"prov": "cyrodiil"
+},
+{
+"name": "Empty Mine",
+"type": "mine",
+"x": 2197,
+"z": 6310,
+"prov": "cyrodiil"
+},
+{
+"name": "Exhausted Mine",
+"type": "mine",
+"x": 2411,
+"z": 4736,
+"prov": "cyrodiil"
+},
+{
+"name": "Flooded Mine",
+"type": "mine",
+"x": 1747,
+"z": 8417,
+"prov": "cyrodiil"
+},
+{
+"name": "Forsaken Mine",
+"type": "mine",
+"x": 3613,
+"z": 10103,
+"prov": "cyrodiil"
+},
+{
+"name": "Gutted Mine",
+"type": "mine",
+"x": 3400,
+"z": 3831,
+"prov": "cyrodiil"
+},
+{
+"name": "Haunted Mine",
+"type": "mine",
+"x": 4308,
+"z": 9124,
+"prov": "cyrodiil"
+},
+{
+"name": "Infested Mine",
+"type": "mine",
+"x": -2958,
+"z": 5877,
+"prov": "cyrodiil"
+},
+{
+"name": "Pillaged Mine",
+"type": "mine",
+"x": -1688,
+"z": 4595,
+"prov": "cyrodiil"
+},
+{
+"name": "Plundered Mine",
+"type": "mine",
+"x": 2019,
+"z": 3036,
+"prov": "cyrodiil"
+},
+{
+"name": "Rickety Mine",
+"type": "mine",
+"x": 4251,
+"z": 5049,
+"prov": "cyrodiil"
+},
+{
+"name": "Shattered Mine",
+"type": "mine",
+"x": -3063,
+"z": 6783,
+"prov": "cyrodiil"
+},
+{
+"name": "Squandered Mine",
+"type": "mine",
+"x": 3789,
+"z": 6460,
+"prov": "cyrodiil"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -1381,
+"z": 6855,
+"prov": "cyrodiil",
+"id": "oblivion_gate_1"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 3893,
+"z": 9843,
+"prov": "cyrodiil",
+"id": "oblivion_gate_2"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -1361,
+"z": 4698,
+"prov": "cyrodiil",
+"id": "oblivion_gate_3"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 1609,
+"z": 3196,
+"prov": "cyrodiil",
+"id": "oblivion_gate_4"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 1892,
+"z": 8559,
+"prov": "cyrodiil",
+"id": "oblivion_gate_5"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 3445,
+"z": 4950,
+"prov": "cyrodiil",
+"id": "oblivion_gate_6"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -2710,
+"z": 7726,
+"prov": "cyrodiil",
+"id": "oblivion_gate_7"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -3939,
+"z": 7343,
+"prov": "cyrodiil",
+"id": "oblivion_gate_8"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -3457,
+"z": 8905,
+"prov": "cyrodiil",
+"id": "oblivion_gate_9"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -2937,
+"z": 8774,
+"prov": "sea",
+"id": "oblivion_gate_10"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -3209,
+"z": 8161,
+"prov": "cyrodiil",
+"id": "oblivion_gate_11"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -3029,
+"z": 7307,
+"prov": "cyrodiil",
+"id": "oblivion_gate_12"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -3225,
+"z": 6882,
+"prov": "cyrodiil",
+"id": "oblivion_gate_13"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -4188,
+"z": 7109,
+"prov": "cyrodiil",
+"id": "oblivion_gate_14"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -4316,
+"z": 7845,
+"prov": "cyrodiil",
+"id": "oblivion_gate_15"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -4246,
+"z": 8589,
+"prov": "cyrodiil",
+"id": "oblivion_gate_16"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -3585,
+"z": 8137,
+"prov": "cyrodiil",
+"id": "oblivion_gate_17"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 3841,
+"z": 5572,
+"prov": "cyrodiil",
+"id": "oblivion_gate_18"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 3573,
+"z": 6108,
+"prov": "cyrodiil",
+"id": "oblivion_gate_19"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 3386,
+"z": 5757,
+"prov": "cyrodiil",
+"id": "oblivion_gate_20"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -2561,
+"z": 8252,
+"prov": "cyrodiil",
+"id": "oblivion_gate_21"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -1962,
+"z": 6979,
+"prov": "cyrodiil",
+"id": "oblivion_gate_22"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -2044,
+"z": 6758,
+"prov": "cyrodiil",
+"id": "oblivion_gate_23"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -1963,
+"z": 6395,
+"prov": "cyrodiil",
+"id": "oblivion_gate_24"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -1767,
+"z": 6107,
+"prov": "cyrodiil",
+"id": "oblivion_gate_25"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -477,
+"z": 7376,
+"prov": "cyrodiil",
+"id": "oblivion_gate_26"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -1,
+"z": 7612,
+"prov": "cyrodiil",
+"id": "oblivion_gate_27"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -2196,
+"z": 6496,
+"prov": "cyrodiil",
+"id": "oblivion_gate_28"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 4704,
+"z": 6751,
+"prov": "cyrodiil",
+"id": "oblivion_gate_29"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 4382,
+"z": 4700,
+"id": "oblivion_gate_30",
+"prov": "cyrodiil"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 3851,
+"z": 3279,
+"prov": "cyrodiil",
+"id": "oblivion_gate_31"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -848,
+"z": 2786,
+"prov": "cyrodiil",
+"id": "oblivion_gate_32"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 982,
+"z": 3055,
+"prov": "cyrodiil",
+"id": "oblivion_gate_33"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 3284,
+"z": 3816,
+"prov": "cyrodiil",
+"id": "oblivion_gate_34"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -90,
+"z": 2978,
+"prov": "cyrodiil",
+"id": "oblivion_gate_35"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -294,
+"z": 6907,
+"prov": "cyrodiil",
+"id": "oblivion_gate_36"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 395,
+"z": 7192,
+"prov": "cyrodiil",
+"id": "oblivion_gate_37"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 1025,
+"z": 8261,
+"prov": "cyrodiil",
+"id": "oblivion_gate_38"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -1335,
+"z": 5277,
+"prov": "cyrodiil",
+"id": "oblivion_gate_39"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -759,
+"z": 4741,
+"prov": "cyrodiil",
+"id": "oblivion_gate_40"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -2205,
+"z": 5970,
+"prov": "cyrodiil",
+"id": "oblivion_gate_41"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -2201,
+"z": 5679,
+"prov": "cyrodiil",
+"id": "oblivion_gate_42"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -1979,
+"z": 4985,
+"prov": "cyrodiil",
+"id": "oblivion_gate_43"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -1094,
+"z": 3418,
+"prov": "cyrodiil",
+"id": "oblivion_gate_44"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 4743,
+"z": 9087,
+"prov": "cyrodiil",
+"id": "oblivion_gate_45"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 3398,
+"z": 9140,
+"prov": "cyrodiil",
+"id": "oblivion_gate_46"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 4583,
+"z": 9303,
+"prov": "cyrodiil",
+"id": "oblivion_gate_47"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 3901,
+"z": 9377,
+"prov": "cyrodiil",
+"id": "oblivion_gate_48"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 3625,
+"z": 9548,
+"prov": "cyrodiil",
+"id": "oblivion_gate_49"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 4796,
+"z": 9698,
+"prov": "cyrodiil",
+"id": "oblivion_gate_50"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 4913,
+"z": 10233,
+"prov": "cyrodiil",
+"id": "oblivion_gate_51"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 4724,
+"z": 10393,
+"prov": "cyrodiil",
+"id": "oblivion_gate_52"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 4242,
+"z": 10230,
+"prov": "cyrodiil",
+"id": "oblivion_gate_53"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 4296,
+"z": 10017,
+"prov": "cyrodiil",
+"id": "oblivion_gate_54"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 3643,
+"z": 9770,
+"prov": "cyrodiil",
+"id": "oblivion_gate_55"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 2786,
+"z": 9501,
+"prov": "cyrodiil",
+"id": "oblivion_gate_56"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 4525,
+"z": 9923,
+"prov": "cyrodiil",
+"id": "oblivion_gate_57"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -2749,
+"z": 7084,
+"prov": "cyrodiil",
+"id": "oblivion_gate_58"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -2590,
+"z": 6355,
+"prov": "cyrodiil",
+"id": "oblivion_gate_59"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -3041,
+"z": 6299,
+"prov": "cyrodiil",
+"id": "oblivion_gate_60"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -2700,
+"z": 5720,
+"prov": "cyrodiil",
+"id": "oblivion_gate_61"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -2489,
+"z": 5223,
+"prov": "cyrodiil",
+"id": "oblivion_gate_62"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -2024,
+"z": 4199,
+"prov": "cyrodiil",
+"id": "oblivion_gate_63"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -1616,
+"z": 3881,
+"prov": "cyrodiil",
+"id": "oblivion_gate_64"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -1670,
+"z": 4267,
+"prov": "cyrodiil",
+"id": "oblivion_gate_65"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -951,
+"z": 6068,
+"prov": "cyrodiil",
+"id": "oblivion_gate_66"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -489,
+"z": 5229,
+"prov": "cyrodiil",
+"id": "oblivion_gate_67"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 292,
+"z": 4444,
+"prov": "cyrodiil",
+"id": "oblivion_gate_68"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 2923,
+"z": 4713,
+"prov": "cyrodiil",
+"id": "oblivion_gate_69"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 1136,
+"z": 4416,
+"prov": "cyrodiil",
+"id": "oblivion_gate_70"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 1691,
+"z": 3695,
+"prov": "cyrodiil",
+"id": "oblivion_gate_71"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 2541,
+"z": 4394,
+"prov": "cyrodiil",
+"id": "oblivion_gate_72"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 1678,
+"z": 8054,
+"prov": "cyrodiil",
+"id": "oblivion_gate_73"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 1546,
+"z": 7591,
+"prov": "cyrodiil",
+"id": "oblivion_gate_74"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 1280,
+"z": 6703,
+"prov": "cyrodiil",
+"id": "oblivion_gate_75"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 1919,
+"z": 4976,
+"prov": "cyrodiil",
+"id": "oblivion_gate_76"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 2245,
+"z": 5267,
+"prov": "cyrodiil",
+"id": "oblivion_gate_77"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 2323,
+"z": 6034,
+"prov": "cyrodiil",
+"id": "oblivion_gate_78"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 2277,
+"z": 7827,
+"prov": "cyrodiil",
+"id": "oblivion_gate_79"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 641,
+"z": 7663,
+"prov": "cyrodiil",
+"id": "oblivion_gate_80"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 2955,
+"z": 3214,
+"prov": "cyrodiil",
+"id": "oblivion_gate_81"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -483,
+"z": 7765,
+"prov": "cyrodiil",
+"id": "oblivion_gate_82"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 518,
+"z": 7966,
+"prov": "cyrodiil",
+"id": "oblivion_gate_83"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -988,
+"z": 7325,
+"prov": "cyrodiil",
+"id": "oblivion_gate_84"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -187,
+"z": 7731,
+"prov": "cyrodiil",
+"id": "oblivion_gate_85"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -1109,
+"z": 6997,
+"prov": "cyrodiil",
+"id": "oblivion_gate_86"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": -1450,
+"z": 6553,
+"prov": "cyrodiil",
+"id": "oblivion_gate_87"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 3846,
+"z": 4530,
+"prov": "cyrodiil",
+"id": "oblivion_gate_88"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 2475,
+"z": 6542,
+"prov": "cyrodiil",
+"id": "oblivion_gate_89"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 2164,
+"z": 7178,
+"prov": "cyrodiil",
+"id": "oblivion_gate_90"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 2966,
+"z": 7105,
+"prov": "cyrodiil",
+"id": "oblivion_gate_91"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 3534,
+"z": 7376,
+"prov": "cyrodiil",
+"id": "oblivion_gate_92"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 3576,
+"z": 7903,
+"prov": "cyrodiil",
+"id": "oblivion_gate_93"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 3660,
+"z": 8848,
+"id": "oblivion_gate_94",
+"prov": "cyrodiil"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 4066,
+"z": 8490,
+"prov": "cyrodiil",
+"id": "oblivion_gate_95"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 5113,
+"z": 7611,
+"prov": "cyrodiil",
+"id": "oblivion_gate_96"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 4236,
+"z": 7037,
+"prov": "cyrodiil",
+"id": "oblivion_gate_97"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 5443,
+"z": 8154,
+"prov": "cyrodiil",
+"id": "oblivion_gate_98"
+},
+{
+"name": "A Gate to Oblivion",
+"type": "oblivion_gate",
+"x": 6061,
+"z": 7393,
+"prov": "cyrodiil",
+"id": "oblivion_gate_99"
+},
+{
+"name": "Aleswell",
+"type": "settlement",
+"x": 776,
+"z": 4489,
+"prov": "cyrodiil"
+},
+{
+"name": "Applewatch",
+"type": "settlement",
+"x": 988,
+"z": 2921,
+"prov": "cyrodiil"
+},
+{
+"name": "Blankenmarch",
+"type": "settlement",
+"x": 3867,
+"z": 9622,
+"prov": "cyrodiil"
+},
+{
+"name": "Bleaker's Way",
+"type": "settlement",
+"x": 1357,
+"z": 4008,
+"prov": "cyrodiil"
+},
+{
+"name": "Border Watch",
+"type": "settlement",
+"x": 2693,
+"z": 9644,
+"prov": "cyrodiil"
+},
+{
+"name": "Brindle Home",
+"type": "settlement",
+"x": -1397,
+"z": 5811,
+"prov": "cyrodiil"
+},
+{
+"name": "Cadlew Chapel",
+"type": "settlement",
+"x": 3184,
+"z": 8240,
+"prov": "cyrodiil"
+},
+{
+"name": "Cloud Ruler Temple",
+"type": "settlement",
+"x": 1261,
+"z": 2628,
+"prov": "cyrodiil"
+},
+{
+"name": "Cropsford",
+"type": "settlement",
+"x": 2434,
+"z": 7325,
+"prov": "cyrodiil"
+},
+{
+"name": "Deepscorn Hollow",
+"type": "settlement",
+"x": 4714,
+"z": 10502,
+"prov": "sea"
+},
+{
+"name": "Drakelowe",
+"type": "settlement",
+"x": 3685,
+"z": 6550,
+"prov": "cyrodiil"
+},
+{
+"name": "Frostcrag Spire",
+"type": "settlement",
+"x": 2483,
+"z": 3136,
+"prov": "cyrodiil"
+},
+{
+"name": "Gottlesfont Priory",
+"type": "settlement",
+"x": -1124,
+"z": 5851,
+"prov": "cyrodiil"
+},
+{
+"name": "Greyland",
+"type": "settlement",
+"x": 3259,
+"z": 10004,
+"prov": "cyrodiil"
+},
+{
+"name": "Gweden Farm",
+"type": "settlement",
+"x": -3263,
+"z": 8731,
+"prov": "cyrodiil"
+},
+{
+"name": "Hackdirt",
+"type": "settlement",
+"x": -1558,
+"z": 5236,
+"prov": "cyrodiil"
+},
+{
+"name": "Harlun's Watch",
+"type": "settlement",
+"x": 3664,
+"z": 5463,
+"prov": "cyrodiil"
+},
+{
+"name": "Harm's Folly",
+"type": "settlement",
+"x": 2640,
+"z": 4599,
+"prov": "cyrodiil"
+},
+{
+"name": "Knights of the Thorn Lodge",
+"type": "settlement",
+"x": 3492,
+"z": 4969,
+"prov": "cyrodiil"
+},
+{
+"name": "Lord Drad's Estate",
+"type": "settlement",
+"x": -4110,
+"z": 7750,
+"prov": "cyrodiil"
+},
+{
+"name": "Lord Rugdumph's Estate",
+"type": "settlement",
+"x": 3996,
+"z": 3924,
+"prov": "cyrodiil"
+},
+{
+"name": "Odiil Farm",
+"type": "settlement",
+"x": -1060,
+"z": 4800,
+"prov": "cyrodiil"
+},
+{
+"name": "Pell's Gate",
+"type": "settlement",
+"x": 467,
+"z": 6968,
+"prov": "cyrodiil"
+},
+{
+"name": "Priory of the Nine",
+"type": "settlement",
+"x": -456,
+"z": 7677,
+"prov": "cyrodiil"
+},
+{
+"name": "Roland Jenseric's Cabin",
+"type": "settlement",
+"x": 2382,
+"z": 5390,
+"prov": "cyrodiil"
+},
+{
+"name": "Shardrock",
+"type": "settlement",
+"x": -2302,
+"z": 6686,
+"prov": "cyrodiil"
+},
+{
+"name": "Shetcombe Farm",
+"type": "settlement",
+"x": -2550,
+"z": 7215,
+"prov": "cyrodiil"
+},
+{
+"name": "Temple of the Ancestor Moths",
+"type": "settlement",
+"x": 4026,
+"z": 3307,
+"prov": "cyrodiil"
+},
+{
+"name": "Water's Edge",
+"type": "settlement",
+"x": 2980,
+"z": 9614,
+"prov": "cyrodiil"
+},
+{
+"name": "Weatherleah",
+"type": "settlement",
+"x": -1783,
+"z": 5490,
+"prov": "cyrodiil"
+},
+{
+"name": "Weye",
+"type": "settlement",
+"x": 118,
+"z": 5675,
+"prov": "cyrodiil"
+},
+{
+"name": "Weynon Priory",
+"type": "settlement",
+"x": -1203,
+"z": 4684,
+"prov": "cyrodiil"
+},
+{
+"name": "White Stallion Lodge",
+"type": "settlement",
+"x": 3152,
+"z": 9759,
+"prov": "cyrodiil"
+},
+{
+"name": "Whitmond Farm",
+"type": "settlement",
+"x": -3941,
+"z": 8473,
+"prov": "cyrodiil"
+},
+{
+"name": "Bay Roan Stables",
+"type": "tavern",
+"x": 1732,
+"z": 8574,
+"prov": "cyrodiil"
+},
+{
+"name": "Black Waterside Stables",
+"type": "tavern",
+"x": 3513,
+"z": 5095,
+"prov": "cyrodiil"
+},
+{
+"name": "Brina Cross Inn",
+"type": "tavern",
+"x": -3833,
+"z": 8044,
+"prov": "cyrodiil"
+},
+{
+"name": "Chestnut Handy Stables",
+"type": "tavern",
+"x": 555,
+"z": 5808,
+"prov": "cyrodiil"
+},
+{
+"name": "Faregyl Inn",
+"type": "tavern",
+"x": 453,
+"z": 7585,
+"prov": "cyrodiil"
+},
+{
+"name": "Five Riders Stables",
+"type": "tavern",
+"x": 3287,
+"z": 9898,
+"prov": "cyrodiil"
+},
+{
+"name": "Gottshaw Inn",
+"type": "tavern",
+"x": -3149,
+"z": 7895,
+"prov": "cyrodiil"
+},
+{
+"name": "Grateful Pass Stables",
+"type": "tavern",
+"x": -1801,
+"z": 6720,
+"prov": "cyrodiil"
+},
+{
+"name": "Horse Whisperer Stables",
+"type": "tavern",
+"x": -3941,
+"z": 8551,
+"prov": "cyrodiil"
+},
+{
+"name": "Imperial Bridge Inn",
+"type": "tavern",
+"x": 3921,
+"z": 8149,
+"prov": "cyrodiil"
+},
+{
+"name": "Inn of Ill Omen",
+"type": "tavern",
+"x": 681,
+"z": 7760,
+"prov": "cyrodiil"
+},
+{
+"name": "North Country Stables",
+"type": "tavern",
+"x": -1357,
+"z": 4599,
+"prov": "cyrodiil"
+},
+{
+"name": "Roxey Inn",
+"type": "tavern",
+"x": 1764,
+"z": 4653,
+"prov": "cyrodiil"
+},
+{
+"name": "The Drunken Dragon Inn",
+"type": "tavern",
+"x": 4120,
+"z": 9216,
+"prov": "cyrodiil"
+},
+{
+"name": "Wawnet Inn",
+"type": "tavern",
+"x": 28,
+"z": 5662,
+"prov": "cyrodiil"
+},
+{
+"name": "Wildeye Stables",
+"type": "tavern",
+"x": 1664,
+"z": 3024,
+"prov": "cyrodiil"
+},
+{
+"name": "Castle Anvil",
+"type": "city",
+"x": -3773,
+"z": 8848,
+"prov": "cyrodiil"
+},
+{
+"name": "Anvil Castle Gate",
+"type": "city",
+"x": -3769,
+"z": 8733,
+"prov": "cyrodiil"
+},
+{
+"name": "Anvil Dock Gate",
+"type": "city",
+"x": -4028,
+"z": 8760,
+"prov": "cyrodiil"
+},
+{
+"name": "Anvil Main Gate",
+"type": "city",
+"x": -3896,
+"z": 8599,
+"prov": "cyrodiil"
+},
+{
+"name": "Bravil",
+"type": "city",
+"x": 1757,
+"z": 8650,
+"prov": "cyrodiil"
+},
+{
+"name": "Castle Bravil",
+"type": "city",
+"x": 1846,
+"z": 8746,
+"prov": "cyrodiil"
+},
+{
+"name": "Bruma East Gate",
+"type": "city",
+"x": 1571,
+"z": 3080,
+"prov": "cyrodiil"
+},
+{
+"name": "Bruma North Gate",
+"type": "city",
+"x": 1493,
+"z": 2929,
+"prov": "cyrodiil"
+},
+{
+"name": "Castle Bruma",
+"type": "city",
+"x": 1434,
+"z": 2993,
+"prov": "cyrodiil"
+},
+{
+"name": "Castle Cheydinhal",
+"type": "city",
+"x": 3656,
+"z": 4932,
+"prov": "cyrodiil"
+},
+{
+"name": "Cheydinhal - East Gate",
+"type": "city",
+"x": 3861,
+"z": 4972,
+"prov": "cyrodiil"
+},
+{
+"name": "Cheydinhal - West Gate",
+"type": "city",
+"x": 3583,
+"z": 5095,
+"prov": "cyrodiil"
+},
+{
+"name": "Castle Chorrol",
+"type": "city",
+"x": -1223,
+"z": 4413,
+"prov": "cyrodiil"
+},
+{
+"name": "Chorrol North Gate",
+"type": "city",
+"x": -1331,
+"z": 4283,
+"prov": "cyrodiil"
+},
+{
+"name": "Chorrol South Gate",
+"type": "city",
+"x": -1345,
+"z": 4505,
+"prov": "cyrodiil"
+},
+{
+"name": "Imperial City Arboretum",
+"type": "city",
+"x": 958,
+"z": 6190,
+"prov": "cyrodiil"
+},
+{
+"name": "Imperial City Arena",
+"type": "city",
+"x": 1038,
+"z": 5925,
+"prov": "cyrodiil"
+},
+{
+"name": "Imperial City Elven Gardens District",
+"type": "city",
+"x": 806,
+"z": 5598,
+"prov": "cyrodiil"
+},
+{
+"name": "Imperial City Palace",
+"type": "city",
+"x": 765,
+"z": 5866,
+"prov": "cyrodiil"
+},
+{
+"name": "Imperial City Prison",
+"type": "city",
+"x": 1204,
+"z": 5491,
+"prov": "cyrodiil"
+},
+{
+"name": "Imperial City Market District",
+"type": "city",
+"x": 1081,
+"z": 5642,
+"prov": "cyrodiil"
+},
+{
+"name": "Imperial City Talos Plaza District",
+"type": "city",
+"x": 598,
+"z": 5821,
+"prov": "cyrodiil"
+},
+{
+"name": "Imperial City Temple District",
+"type": "city",
+"x": 678,
+"z": 6124,
+"prov": "cyrodiil"
+},
+{
+"name": "Imperial City, The Arcane University",
+"type": "city",
+"x": 1008,
+"z": 6353,
+"prov": "cyrodiil"
+},
+{
+"name": "Leyawiin - Castle",
+"type": "city",
+"x": 3735,
+"z": 9937,
+"prov": "cyrodiil"
+},
+{
+"name": "Leyawiin - North East Gate",
+"type": "city",
+"x": 3696,
+"z": 9868,
+"prov": "cyrodiil"
+},
+{
+"name": "Leyawiin - West Gate",
+"type": "city",
+"x": 3364,
+"z": 9904,
+"prov": "cyrodiil"
+},
+{
+"name": "Skingrad - East Gate",
+"type": "city",
+"x": -1626,
+"z": 6661,
+"prov": "cyrodiil"
+},
+{
+"name": "Skingrad - West Gate",
+"type": "city",
+"x": -1764,
+"z": 6748,
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": -119,
+"z": 4965,
+"id": "ayleid_well_1",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": -112,
+"z": 7327,
+"id": "ayleid_well_2",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 945,
+"z": 3578,
+"id": "ayleid_well_3",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 906,
+"z": 7247,
+"id": "ayleid_well_4",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 1751,
+"z": 5197,
+"id": "ayleid_well_5",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 1566,
+"z": 4673,
+"id": "ayleid_well_6",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 2058,
+"z": 7508,
+"id": "ayleid_well_7",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 2018,
+"z": 6030,
+"id": "ayleid_well_8",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 1887,
+"z": 6774,
+"id": "ayleid_well_9",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 2744,
+"z": 6930,
+"id": "ayleid_well_10",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 2437,
+"z": 5039,
+"id": "ayleid_well_11",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 3656,
+"z": 3847,
+"id": "ayleid_well_12",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 4330,
+"z": 10166,
+"id": "ayleid_well_13",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 4443,
+"z": 9735,
+"id": "ayleid_well_14",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 473,
+"z": 8059,
+"id": "ayleid_well_15",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 833,
+"z": 8184,
+"id": "ayleid_well_16",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 1538,
+"z": 8524,
+"id": "ayleid_well_17",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 4092,
+"z": 9057,
+"id": "ayleid_well_18",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 3194,
+"z": 7883,
+"id": "ayleid_well_19",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 3804,
+"z": 7563,
+"id": "ayleid_well_20",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 4203,
+"z": 6426,
+"id": "ayleid_well_21",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 4187,
+"z": 5250,
+"id": "ayleid_well_22",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 4199,
+"z": 4306,
+"id": "ayleid_well_23",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 4276,
+"z": 8328,
+"id": "ayleid_well_24",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": 4724,
+"z": 7617,
+"id": "ayleid_well_25",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": -3583,
+"z": 6752,
+"id": "ayleid_well_26",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": -2873,
+"z": 6834,
+"id": "ayleid_well_27",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": -3364,
+"z": 7707,
+"id": "ayleid_well_28",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": -2590,
+"z": 6919,
+"id": "ayleid_well_29",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": -2190,
+"z": 6153,
+"id": "ayleid_well_30",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": -1967,
+"z": 6821,
+"id": "ayleid_well_31",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": -1180,
+"z": 6702,
+"id": "ayleid_well_32",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": -1509,
+"z": 6025,
+"id": "ayleid_well_33",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": -259,
+"z": 6426,
+"id": "ayleid_well_34",
+"prov": "cyrodiil"
+},
+{
+"name": "Ayleid Well",
+"type": "poi:ayleid_well",
+"x": -399,
+"z": 7509,
+"id": "ayleid_well_35",
+"prov": "cyrodiil"
+},
+{
+"name": "Apprentice Stone",
+"type": "poi:doomstone",
+"x": -1748,
+"z": 6963,
+"prov": "cyrodiil"
+},
+{
+"name": "Atronach Stone",
+"type": "poi:doomstone",
+"x": -2355,
+"z": 6472,
+"prov": "cyrodiil"
+},
+{
+"name": "Lady Stone",
+"type": "poi:doomstone",
+"x": -4254,
+"z": 8881,
+"prov": "cyrodiil"
+},
+{
+"name": "Lord Stone",
+"type": "poi:doomstone",
+"x": -3814,
+"z": 6543,
+"prov": "cyrodiil"
+},
+{
+"name": "Lover Stone",
+"type": "poi:doomstone",
+"x": 4318,
+"z": 8129,
+"prov": "cyrodiil"
+},
+{
+"name": "Mage Stone",
+"type": "poi:doomstone",
+"x": 4743,
+"z": 6876,
+"prov": "cyrodiil"
+},
+{
+"name": "Ritual Stone",
+"type": "poi:doomstone",
+"x": 3390,
+"z": 9435,
+"prov": "cyrodiil"
+},
+{
+"name": "Serpent Stone",
+"type": "poi:doomstone",
+"x": 4452,
+"z": 10269,
+"prov": "cyrodiil"
+},
+{
+"name": "Shadow Stone",
+"type": "poi:doomstone",
+"x": 3441,
+"z": 7477,
+"prov": "cyrodiil"
+},
+{
+"name": "Steed Stone",
+"type": "poi:doomstone",
+"x": 2572,
+"z": 5628,
+"prov": "cyrodiil"
+},
+{
+"name": "Thief Stone",
+"type": "poi:doomstone",
+"x": 1544,
+"z": 4311,
+"prov": "cyrodiil"
+},
+{
+"name": "Tower Stone",
+"type": "poi:doomstone",
+"x": 196,
+"z": 6656,
+"prov": "cyrodiil"
+},
+{
+"name": "Warrior Stone",
+"type": "poi:doomstone",
+"x": -1146,
+"z": 7261,
+"prov": "cyrodiil"
+},
+{
+"name": "Jone Stone",
+"type": "poi:doomstone",
+"x": -1807,
+"z": 5864,
+"prov": "cyrodiil"
+},
+{
+"name": "Aetherius Stone",
+"type": "poi:doomstone",
+"x": -1877,
+"z": 6313,
+"prov": "cyrodiil"
+},
+{
+"name": "Jode Stone",
+"type": "poi:doomstone",
+"x": -2823,
+"z": 8485,
+"prov": "cyrodiil"
+},
+{
+"name": "Sithian Stone",
+"type": "poi:doomstone",
+"x": -2830,
+"z": 6591,
+"prov": "cyrodiil"
+},
+{
+"name": "Magnus Stone",
+"type": "poi:doomstone",
+"x": 4470,
+"z": 9101,
+"prov": "cyrodiil"
+},
+{
+"name": "Shezarr Stone",
+"type": "poi:doomstone",
+"x": 3039,
+"z": 9794,
+"prov": "cyrodiil"
+},
+{
+"name": "Dragon Stone",
+"type": "poi:doomstone",
+"x": 3733,
+"z": 4193,
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Akatosh",
+"type": "poi:wayshrine",
+"x": -830,
+"z": 7456,
+"id": "wayshrine_of_akatosh_1",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Akatosh",
+"type": "poi:wayshrine",
+"x": -3382,
+"z": 8402,
+"id": "wayshrine_of_akatosh_2",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Akatosh",
+"type": "poi:wayshrine",
+"x": 1328,
+"z": 3464,
+"id": "wayshrine_of_akatosh_3",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Akatosh",
+"type": "poi:wayshrine",
+"x": 3767,
+"z": 5307,
+"id": "wayshrine_of_akatosh_4",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Arkay",
+"type": "poi:wayshrine",
+"x": -1035,
+"z": 7662,
+"id": "wayshrine_of_arkay_1",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Arkay",
+"type": "poi:wayshrine",
+"x": -3793,
+"z": 7692,
+"id": "wayshrine_of_arkay_2",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Arkay",
+"type": "poi:wayshrine",
+"x": -1816,
+"z": 6986,
+"id": "wayshrine_of_arkay_3",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Dibella",
+"type": "poi:wayshrine",
+"x": -99,
+"z": 6329,
+"id": "wayshrine_of_dibella_1",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Dibella",
+"type": "poi:wayshrine",
+"x": 4308,
+"z": 9263,
+"id": "wayshrine_of_dibella_2",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Dibella",
+"type": "poi:wayshrine",
+"x": -1332,
+"z": 4993,
+"id": "wayshrine_of_dibella_3",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Julianos",
+"type": "poi:wayshrine",
+"x": -1867,
+"z": 5546,
+"id": "wayshrine_of_julianos_1",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Julianos",
+"type": "poi:wayshrine",
+"x": 4195,
+"z": 4486,
+"id": "wayshrine_of_julianos_2",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Julianos",
+"type": "poi:wayshrine",
+"x": 2211,
+"z": 6949,
+"id": "wayshrine_of_julianos_3",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Julianos",
+"type": "poi:wayshrine",
+"x": 506,
+"z": 5549,
+"id": "wayshrine_of_julianos_4",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Kynareth",
+"type": "poi:wayshrine",
+"x": -2099,
+"z": 5591,
+"id": "wayshrine_of_kynareth_1",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Kynareth",
+"type": "poi:wayshrine",
+"x": 4261,
+"z": 7569,
+"id": "wayshrine_of_kynareth_2",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Kynareth",
+"type": "poi:wayshrine",
+"x": -1357,
+"z": 6861,
+"id": "wayshrine_of_kynareth_3",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Kynareth",
+"type": "poi:wayshrine",
+"x": -1353,
+"z": 6862,
+"id": "wayshrine_of_kynareth_4",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Mara",
+"type": "poi:wayshrine",
+"x": -2036,
+"z": 6571,
+"id": "wayshrine_of_mara_1",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Mara",
+"type": "poi:wayshrine",
+"x": 4118,
+"z": 9453,
+"id": "wayshrine_of_mara_2",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Mara",
+"type": "poi:wayshrine",
+"x": -4262,
+"z": 8581,
+"id": "wayshrine_of_mara_3",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Stendarr",
+"type": "poi:wayshrine",
+"x": -2792,
+"z": 5505,
+"id": "wayshrine_of_stendarr_1",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Stendarr",
+"type": "poi:wayshrine",
+"x": 2822,
+"z": 9397,
+"id": "wayshrine_of_stendarr_2",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Stendarr",
+"type": "poi:wayshrine",
+"x": 1594,
+"z": 5871,
+"id": "wayshrine_of_stendarr_3",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Talos",
+"type": "poi:wayshrine",
+"x": -2192,
+"z": 6847,
+"id": "wayshrine_of_talos_1",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Talos",
+"type": "poi:wayshrine",
+"x": 952,
+"z": 7898,
+"id": "wayshrine_of_talos_2",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Talos",
+"type": "poi:wayshrine",
+"x": 1272,
+"z": 7637,
+"id": "wayshrine_of_talos_3",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Zenithar",
+"type": "poi:wayshrine",
+"x": -2985,
+"z": 7845,
+"id": "wayshrine_of_zenithar_1",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Zenithar",
+"type": "poi:wayshrine",
+"x": 474,
+"z": 7678,
+"id": "wayshrine_of_zenithar_2",
+"prov": "cyrodiil"
+},
+{
+"name": "Wayshrine of Zenithar",
+"type": "poi:wayshrine",
+"x": 1716,
+"z": 8330,
+"id": "wayshrine_of_zenithar_3",
+"prov": "cyrodiil"
+}
+]

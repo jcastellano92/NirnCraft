@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/xanmeer",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274504,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "xanmeer"
+    ]
+  }
+}

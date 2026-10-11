@@ -773,6 +773,13 @@ public class MapScreen extends Screen {
         if (region != null && !Provinces.isSea(region)) {
             lines.add(region.name().copy().append(", ").append(Provinces.name(region.province())).withStyle(ChatFormatting.DARK_GRAY));
         }
+        // the place's one-line lore description (places of the provinces, lang key place.skycraft.<id>.desc)
+        String descKey = pin.place() != null ? "place.skycraft." + pin.place().id() + ".desc" : null;
+        if (descKey != null && net.minecraft.client.resources.language.I18n.exists(descKey)) {
+            for (String line : wrapWords(net.minecraft.client.resources.language.I18n.get(descKey), 46)) {
+                lines.add(Component.literal(line).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+            }
+        }
         if (pin.cleared()) lines.add(Component.translatable("world.skycraft.map.cleared").withStyle(ChatFormatting.DARK_GREEN));
         double dx = pin.x() - player.getX();
         double dz = pin.z() - player.getZ();
@@ -784,6 +791,22 @@ public class MapScreen extends Screen {
             lines.add(Component.translatable("world.skycraft.map.click_travel").withStyle(ChatFormatting.YELLOW));
         }
         return lines;
+    }
+
+    /** Splits text into lines of at most {@code width} characters at spaces. */
+    private static List<String> wrapWords(String text, int width) {
+        List<String> out = new ArrayList<>();
+        StringBuilder line = new StringBuilder();
+        for (String word : text.split(" ")) {
+            if (line.length() > 0 && line.length() + 1 + word.length() > width) {
+                out.add(line.toString());
+                line.setLength(0);
+            }
+            if (line.length() > 0) line.append(' ');
+            line.append(word);
+        }
+        if (line.length() > 0) out.add(line.toString());
+        return out;
     }
 
     private void drawQuestMarkers(GuiGraphics g, Level level, int mouseX, int mouseY) {

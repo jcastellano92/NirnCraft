@@ -30,3 +30,6 @@ pack/mods/skycraft-core.jar
 
 # Claude Code agent worktrees
 .claude/
+
+# generated previews (large; regenerate with the tools)
+tools/worldgen/preview_places*.png

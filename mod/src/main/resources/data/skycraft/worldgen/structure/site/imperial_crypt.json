@@ -1,0 +1,17 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "ruin",
+  "kit": "imperial",
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "imperial_crypt"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/velothi_tomb",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274502,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "velothi_tomb"
+    ]
+  }
+}

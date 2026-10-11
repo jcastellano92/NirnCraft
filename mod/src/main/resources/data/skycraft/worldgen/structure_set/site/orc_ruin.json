@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/orc_ruin",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274514,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "orc_ruin"
+    ]
+  }
+}

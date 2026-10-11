@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/imperial_crypt",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274515,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "imperial_crypt"
+    ]
+  }
+}

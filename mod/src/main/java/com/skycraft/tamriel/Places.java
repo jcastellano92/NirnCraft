@@ -34,6 +34,13 @@ public final class Places {
     private static final Map<String, Place> BY_ID;
     private static final List<Place> ALL;
     private static final Map<Long, List<Place>> BY_CHUNK;
+    /** Spatial index: places by the {@value #BUCKET_SHIFT}-bit bucket of their anchor (thousands of places, many queries). */
+    private static final int BUCKET_SHIFT = 9;
+    private static final Map<Long, List<Place>> BY_BUCKET;
+    /** The largest radius of any place: how far beyond a query box a bucket's anchors may still overlap it. */
+    private static final int MAX_RADIUS;
+    /** Queries spanning more buckets than this scan the whole list instead. */
+    private static final int MAX_BUCKET_SCAN = 256;
 
     static {
         Map<String, Place> byId = new LinkedHashMap<>();
@@ -59,9 +66,18 @@ public final class Places {
             byChunk.computeIfAbsent(ChunkPos.asLong(p.x() >> 4, p.z() >> 4), k -> new ArrayList<>(1)).add(p);
         }
         byChunk.replaceAll((k, v) -> List.copyOf(v));
+        Map<Long, List<Place>> byBucket = new HashMap<>();
+        int maxRadius = 0;
+        for (Place p : byId.values()) {
+            byBucket.computeIfAbsent(bucket(p.x() >> BUCKET_SHIFT, p.z() >> BUCKET_SHIFT), k -> new ArrayList<>(4)).add(p);
+            maxRadius = Math.max(maxRadius, p.radius());
+        }
+        byBucket.replaceAll((k, v) -> List.copyOf(v));
         BY_ID = Collections.unmodifiableMap(byId);
         ALL = List.copyOf(byId.values());
         BY_CHUNK = byChunk;
+        BY_BUCKET = byBucket;
+        MAX_RADIUS = maxRadius;
         Skycraft.LOGGER.info("Loaded {} places of Tamriel", ALL.size());
     }
 
@@ -79,7 +95,7 @@ public final class Places {
     public static Optional<Place> nearest(PlaceType type, int x, int z, int maxDist) {
         long best = (long) maxDist * maxDist;
         Place found = null;
-        for (Place p : ALL) {
+        for (Place p : candidates(x - maxDist, z - maxDist, x + maxDist, z + maxDist, 0)) {
             if (type != null && p.type() != type) continue;
             long d = p.distSqr(x, z);
             if (d <= best) {
@@ -98,13 +114,35 @@ public final class Places {
     /** Places whose footprint (anchor ± radius) overlaps the given block rectangle. */
     public static List<Place> overlapping(int minX, int minZ, int maxX, int maxZ) {
         List<Place> out = new ArrayList<>();
-        for (Place p : ALL) {
+        for (Place p : candidates(minX, minZ, maxX, maxZ, MAX_RADIUS)) {
             if (p.x() + p.radius() >= minX && p.x() - p.radius() <= maxX
                     && p.z() + p.radius() >= minZ && p.z() - p.radius() <= maxZ) {
                 out.add(p);
             }
         }
         return out;
+    }
+
+    /**
+     * Every place whose anchor may lie within {@code margin} blocks of the box: the index buckets it covers, or the
+     * whole list for a very large box. A superset; callers test each place themselves.
+     */
+    private static Iterable<Place> candidates(int minX, int minZ, int maxX, int maxZ, int margin) {
+        long bx0 = ((long) minX - margin) >> BUCKET_SHIFT, bz0 = ((long) minZ - margin) >> BUCKET_SHIFT;
+        long bx1 = ((long) maxX + margin) >> BUCKET_SHIFT, bz1 = ((long) maxZ + margin) >> BUCKET_SHIFT;
+        if ((bx1 - bx0 + 1) * (bz1 - bz0 + 1) > MAX_BUCKET_SCAN) return ALL;
+        List<Place> out = new ArrayList<>();
+        for (long bx = bx0; bx <= bx1; bx++) {
+            for (long bz = bz0; bz <= bz1; bz++) {
+                List<Place> b = BY_BUCKET.get(bucket((int) bx, (int) bz));
+                if (b != null) out.addAll(b);
+            }
+        }
+        return out;
+    }
+
+    private static long bucket(int bx, int bz) {
+        return ((long) bx << 32) ^ (bz & 0xFFFFFFFFL);
     }
 
     private static Place parse(JsonObject o) {

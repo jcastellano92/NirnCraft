@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/egg_mine",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274519,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "egg_mine"
+    ]
+  }
+}

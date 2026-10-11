@@ -1,0 +1,2846 @@
+[
+{
+"name": "Alas Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8443,
+"z": 694
+},
+{
+"name": "Alen Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 5242,
+"z": -1394
+},
+{
+"name": "Andalen Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8752,
+"z": 564
+},
+{
+"name": "Andalor Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8257,
+"z": -327
+},
+{
+"name": "Andas Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8373,
+"z": 334
+},
+{
+"name": "Andavel Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 5951,
+"z": -1754
+},
+{
+"name": "Andrano Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 6818,
+"z": 1076
+},
+{
+"name": "Andrethi Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 6008,
+"z": 428
+},
+{
+"name": "Andules Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8019,
+"z": 88
+},
+{
+"name": "Aralen Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7955,
+"z": -246
+},
+{
+"name": "Aran Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7750,
+"z": 521
+},
+{
+"name": "Arano Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8839,
+"z": 1578
+},
+{
+"name": "Arenim Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 9013,
+"z": 577
+},
+{
+"name": "Arethan Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8268,
+"z": 636
+},
+{
+"name": "Aryon Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7091,
+"z": 147
+},
+{
+"name": "Arys Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8583,
+"z": 1432
+},
+{
+"name": "Baram Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8661,
+"z": -158
+},
+{
+"name": "Beran Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8930,
+"z": 1554
+},
+{
+"name": "Dareleth Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7554,
+"z": -823
+},
+{
+"name": "Dralas Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7166,
+"z": -1369
+},
+{
+"name": "Drath Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 5590,
+"z": -1501
+},
+{
+"name": "Dreloth Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8776,
+"z": 407
+},
+{
+"name": "Drethan Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7546,
+"z": -1229
+},
+{
+"name": "Drinith Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 6744,
+"z": -1074
+},
+{
+"name": "Dulo Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7715,
+"z": 370
+},
+{
+"name": "Fadathram Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 6571,
+"z": -342
+},
+{
+"name": "Falas Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 4849,
+"z": -1020
+},
+{
+"name": "Favel Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7619,
+"z": -970
+},
+{
+"name": "Gimothran Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7924,
+"z": 135
+},
+{
+"name": "Ginith Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 4409,
+"z": -1350
+},
+{
+"name": "Helan Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8606,
+"z": 958
+},
+{
+"name": "Helas Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7374,
+"z": -52
+},
+{
+"name": "Heran Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 5896,
+"z": 804
+},
+{
+"name": "Hlaalu Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8632,
+"z": 1181
+},
+{
+"name": "Hleran Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 5714,
+"z": -514
+},
+{
+"name": "Hlervi Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 9062,
+"z": -166
+},
+{
+"name": "Hlervu Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 9187,
+"z": 894
+},
+{
+"name": "Ienith Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8078,
+"z": -132
+},
+{
+"name": "Indalen Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 6349,
+"z": -72
+},
+{
+"name": "Indaren Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7075,
+"z": -1091
+},
+{
+"name": "Llando Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 6040,
+"z": -1403
+},
+{
+"name": "Lleran Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 6458,
+"z": 911
+},
+{
+"name": "Llervu Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 4640,
+"z": -1346
+},
+{
+"name": "Maren Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8312,
+"z": 505
+},
+{
+"name": "Marvani Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8459,
+"z": 1355
+},
+{
+"name": "Nelas Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 6276,
+"z": -1964
+},
+{
+"name": "Nerano Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7745,
+"z": -780
+},
+{
+"name": "Norvayn Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 5910,
+"z": 233
+},
+{
+"name": "Omalen Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 6455,
+"z": -1253
+},
+{
+"name": "Omaren Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 9154,
+"z": 65
+},
+{
+"name": "Orethi Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 6687,
+"z": -1540
+},
+{
+"name": "Othrelas Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7141,
+"z": 1112
+},
+{
+"name": "Randas Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 5403,
+"z": -767
+},
+{
+"name": "Ravel Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 9060,
+"z": 832
+},
+{
+"name": "Raviro Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8329,
+"z": 1023
+},
+{
+"name": "Redas Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8571,
+"z": 1143
+},
+{
+"name": "Releth Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8091,
+"z": 1137
+},
+{
+"name": "Reloth Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 5266,
+"z": -1171
+},
+{
+"name": "Rethandus Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 4957,
+"z": -1252
+},
+{
+"name": "Rothan Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 5599,
+"z": -1092
+},
+{
+"name": "Sadryon Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8828,
+"z": -74
+},
+{
+"name": "Salothan Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 5178,
+"z": -1012
+},
+{
+"name": "Salothran Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 5326,
+"z": -732
+},
+{
+"name": "Salvel Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7308,
+"z": -576
+},
+{
+"name": "Samarys Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 6378,
+"z": 1003
+},
+{
+"name": "Sandas Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7385,
+"z": 786
+},
+{
+"name": "Sandus Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7658,
+"z": -204
+},
+{
+"name": "Sarano Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 6990,
+"z": 708
+},
+{
+"name": "Saren Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 6932,
+"z": 440
+},
+{
+"name": "Sarethi Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7030,
+"z": -1742
+},
+{
+"name": "Sarys Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 6190,
+"z": 1075
+},
+{
+"name": "Savel Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8872,
+"z": 1062
+},
+{
+"name": "Senim Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7477,
+"z": -1476
+},
+{
+"name": "Seran Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 4923,
+"z": -1515
+},
+{
+"name": "Serano Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7815,
+"z": 311
+},
+{
+"name": "Sethan Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7911,
+"z": -353
+},
+{
+"name": "Telvayn Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 5415,
+"z": -423
+},
+{
+"name": "Thalas Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 6783,
+"z": 304
+},
+{
+"name": "Tharys Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 6224,
+"z": 568
+},
+{
+"name": "Thelas Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 6400,
+"z": 1111
+},
+{
+"name": "Thiralas Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 8290,
+"z": -180
+},
+{
+"name": "Uveran Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 6092,
+"z": 182
+},
+{
+"name": "Vandus Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7556,
+"z": 652
+},
+{
+"name": "Velas Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7978,
+"z": 1018
+},
+{
+"name": "Veloth Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 4988,
+"z": -804
+},
+{
+"name": "Venim Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 7869,
+"z": -517
+},
+{
+"name": "Verelnim Ancestral Tomb",
+"type": "ancestral_tomb",
+"x": 9075,
+"z": 430
+},
+{
+"name": "Bloodskal Barrow",
+"type": "barrow",
+"x": 4430,
+"z": -3073
+},
+{
+"name": "Connorflenge Barrow",
+"type": "barrow",
+"x": 5099,
+"z": -3168
+},
+{
+"name": "Eddard Barrow",
+"type": "barrow",
+"x": 4648,
+"z": -3151
+},
+{
+"name": "Frosselmane Barrow",
+"type": "barrow",
+"x": 4887,
+"z": -2832
+},
+{
+"name": "Glenschul's Tomb",
+"type": "barrow",
+"x": 5024,
+"z": -3235
+},
+{
+"name": "Gyldenhul Barrow",
+"type": "barrow",
+"x": 5165,
+"z": -3439
+},
+{
+"name": "Himmelhost Barrow",
+"type": "barrow",
+"x": 4993,
+"z": -2816
+},
+{
+"name": "Hrothmund's Barrow",
+"type": "barrow",
+"x": 4549,
+"z": -3500
+},
+{
+"name": "Jolgeirr Barrow",
+"type": "barrow",
+"x": 4564,
+"z": -3234
+},
+{
+"name": "Kelsedolk Barrow",
+"type": "barrow",
+"x": 4452,
+"z": -2893
+},
+{
+"name": "Kolbjorn Barrow",
+"type": "barrow",
+"x": 4601,
+"z": -2818
+},
+{
+"name": "Lukesturm Barrow",
+"type": "barrow",
+"x": 4976,
+"z": -3140
+},
+{
+"name": "Skogsdrake Barrow",
+"type": "barrow",
+"x": 4893,
+"z": -2995
+},
+{
+"name": "Stormpfund Barrow",
+"type": "barrow",
+"x": 4663,
+"z": -2842
+},
+{
+"name": "Tombs of Skaalara",
+"type": "barrow",
+"x": 5072,
+"z": -3407
+},
+{
+"name": "Valbrandr Barrow",
+"type": "barrow",
+"x": 4918,
+"z": -3064
+},
+{
+"name": "Aharasaplit Camp",
+"type": "camp",
+"x": 6945,
+"z": -1408
+},
+{
+"name": "Ahemmusa Camp",
+"type": "camp",
+"x": 8039,
+"z": -957
+},
+{
+"name": "Aidanat Camp",
+"type": "camp",
+"x": 4604,
+"z": -1416
+},
+{
+"name": "Ashamanu Camp",
+"type": "camp",
+"x": 8396,
+"z": -15
+},
+{
+"name": "Bensiberib Camp",
+"type": "camp",
+"x": 8368,
+"z": 199
+},
+{
+"name": "Elanius Camp",
+"type": "camp",
+"x": 8046,
+"z": -175
+},
+{
+"name": "Erabenimsun Camp",
+"type": "camp",
+"x": 8420,
+"z": 477
+},
+{
+"name": "Kaushtababi Camp",
+"type": "camp",
+"x": 8560,
+"z": 1156
+},
+{
+"name": "Mamshar-Disamus Camp",
+"type": "camp",
+"x": 6650,
+"z": -1027
+},
+{
+"name": "Massahanud Camp",
+"type": "camp",
+"x": 8351,
+"z": -243
+},
+{
+"name": "Mila-Nipal",
+"type": "camp",
+"x": 5458,
+"z": -971
+},
+{
+"name": "Salit Camp",
+"type": "camp",
+"x": 8265,
+"z": -474
+},
+{
+"name": "Shashmanu Camp",
+"type": "camp",
+"x": 4941,
+"z": -1437
+},
+{
+"name": "Shashurari Camp",
+"type": "camp",
+"x": 8065,
+"z": 487
+},
+{
+"name": "Sobitbael Camp",
+"type": "camp",
+"x": 8482,
+"z": 351
+},
+{
+"name": "Urshilaku Camp",
+"type": "camp",
+"x": 5744,
+"z": -1542
+},
+{
+"name": "Yakaridan Camp",
+"type": "camp",
+"x": 8000,
+"z": -576
+},
+{
+"name": "Zainab Camp",
+"type": "camp",
+"x": 7884,
+"z": -398
+},
+{
+"name": "Abanabi",
+"type": "cave",
+"x": 8753,
+"z": 229
+},
+{
+"name": "Abernanit",
+"type": "cave",
+"x": 5501,
+"z": -146
+},
+{
+"name": "Adanumuran",
+"type": "cave",
+"x": 6556,
+"z": 774
+},
+{
+"name": "Addamasartus",
+"type": "cave",
+"x": 6722,
+"z": 1079
+},
+{
+"name": "Aharnabi",
+"type": "cave",
+"x": 9273,
+"z": 1099
+},
+{
+"name": "Aharunartus",
+"type": "cave",
+"x": 6198,
+"z": 1066
+},
+{
+"name": "Ahinipalit",
+"type": "cave",
+"x": 8307,
+"z": 240
+},
+{
+"name": "Ainat",
+"type": "cave",
+"x": 8937,
+"z": 755
+},
+{
+"name": "Akimaes Grotto",
+"type": "cave",
+"x": 6801,
+"z": 1228
+},
+{
+"name": "Ansi",
+"type": "cave",
+"x": 7771,
+"z": 1459
+},
+{
+"name": "Ashanammu",
+"type": "cave",
+"x": 6084,
+"z": 22
+},
+{
+"name": "Ashinabi",
+"type": "cave",
+"x": 4368,
+"z": -1169
+},
+{
+"name": "Ashir-Dan",
+"type": "cave",
+"x": 5066,
+"z": -1596
+},
+{
+"name": "Ashirbadon",
+"type": "cave",
+"x": 8233,
+"z": 1362
+},
+{
+"name": "Assarnud",
+"type": "cave",
+"x": 4934,
+"z": -1126
+},
+{
+"name": "Assu",
+"type": "cave",
+"x": 8272,
+"z": 800
+},
+{
+"name": "Assumanu",
+"type": "cave",
+"x": 5879,
+"z": -1708
+},
+{
+"name": "Benkongerike",
+"type": "cave",
+"x": 4604,
+"z": -3632
+},
+{
+"name": "Beshara",
+"type": "cave",
+"x": 7727,
+"z": 1210
+},
+{
+"name": "Bjorn",
+"type": "cave",
+"x": 4689,
+"z": -3373
+},
+{
+"name": "Cave of Hidden Music",
+"type": "cave",
+"x": 4518,
+"z": -3209
+},
+{
+"name": "Caves of Fjalding",
+"type": "cave",
+"x": 4879,
+"z": -3327
+},
+{
+"name": "Domme",
+"type": "cave",
+"x": 4449,
+"z": -3442
+},
+{
+"name": "Dun-Ahhe",
+"type": "cave",
+"x": 7469,
+"z": -796
+},
+{
+"name": "Eluba-Addon Grotto",
+"type": "cave",
+"x": 8104,
+"z": -998
+},
+{
+"name": "Fjell",
+"type": "cave",
+"x": 4705,
+"z": -3139
+},
+{
+"name": "Frossel",
+"type": "cave",
+"x": 5058,
+"z": -3477
+},
+{
+"name": "Frykte",
+"type": "cave",
+"x": 4644,
+"z": -3555
+},
+{
+"name": "Gandrung Caverns",
+"type": "cave",
+"x": 4816,
+"z": -2864
+},
+{
+"name": "Geilir the Mumbling's Dwelling",
+"type": "cave",
+"x": 4373,
+"z": -3141
+},
+{
+"name": "Gloomy Cave",
+"type": "cave",
+"x": 4720,
+"z": -3229
+},
+{
+"name": "Gronn",
+"type": "cave",
+"x": 4772,
+"z": -3265
+},
+{
+"name": "Habinbaes",
+"type": "cave",
+"x": 6916,
+"z": -1729
+},
+{
+"name": "Halls of Penumbra",
+"type": "cave",
+"x": 4728,
+"z": -2972
+},
+{
+"name": "Hinnabi",
+"type": "cave",
+"x": 7920,
+"z": 1244
+},
+{
+"name": "Ilanipu Grotto",
+"type": "cave",
+"x": 7342,
+"z": -1104
+},
+{
+"name": "Kjolver's Dwelling",
+"type": "cave",
+"x": 4563,
+"z": -3165
+},
+{
+"name": "Koal Cave",
+"type": "cave",
+"x": 4669,
+"z": -973
+},
+{
+"name": "Kolfinna's Dwelling",
+"type": "cave",
+"x": 4826,
+"z": -3002
+},
+{
+"name": "Kudanat",
+"type": "cave",
+"x": 5974,
+"z": -25
+},
+{
+"name": "Kumarahaz",
+"type": "cave",
+"x": 8865,
+"z": 1322
+},
+{
+"name": "Kunirai",
+"type": "cave",
+"x": 7956,
+"z": 904
+},
+{
+"name": "Lair of the Udyrfrykte",
+"type": "cave",
+"x": 4925,
+"z": -3287
+},
+{
+"name": "Legge",
+"type": "cave",
+"x": 4770,
+"z": -3460
+},
+{
+"name": "Maba-Ilu",
+"type": "cave",
+"x": 8853,
+"z": 1212
+},
+{
+"name": "Madas Grotto",
+"type": "cave",
+"x": 5792,
+"z": -1590
+},
+{
+"name": "Mallapi",
+"type": "cave",
+"x": 5464,
+"z": -346
+},
+{
+"name": "Malmus Grotto",
+"type": "cave",
+"x": 7143,
+"z": -1819
+},
+{
+"name": "Mannammu",
+"type": "cave",
+"x": 6943,
+"z": 1059
+},
+{
+"name": "Massama Cave",
+"type": "cave",
+"x": 7802,
+"z": -20
+},
+{
+"name": "Masseranit",
+"type": "cave",
+"x": 8318,
+"z": 1169
+},
+{
+"name": "Mat",
+"type": "cave",
+"x": 4763,
+"z": -1186
+},
+{
+"name": "Mausur Caverns",
+"type": "cave",
+"x": 6440,
+"z": -675
+},
+{
+"name": "Milk",
+"type": "cave",
+"x": 5545,
+"z": -674
+},
+{
+"name": "Minabi",
+"type": "cave",
+"x": 7994,
+"z": 1088
+},
+{
+"name": "Mudan Grotto",
+"type": "cave",
+"x": 7033,
+"z": 1554
+},
+{
+"name": "Mul Grotto",
+"type": "cave",
+"x": 8167,
+"z": 1196
+},
+{
+"name": "Nallit",
+"type": "cave",
+"x": 8418,
+"z": -128
+},
+{
+"name": "Nammu",
+"type": "cave",
+"x": 8130,
+"z": -13
+},
+{
+"name": "Nimawia Grotto",
+"type": "cave",
+"x": 6446,
+"z": 1066
+},
+{
+"name": "Nissintu",
+"type": "cave",
+"x": 6955,
+"z": 584
+},
+{
+"name": "Nund",
+"type": "cave",
+"x": 7582,
+"z": 1345
+},
+{
+"name": "Odaishah",
+"type": "cave",
+"x": 6918,
+"z": 206
+},
+{
+"name": "Odibaal",
+"type": "cave",
+"x": 5532,
+"z": -749
+},
+{
+"name": "Odirnamat",
+"type": "cave",
+"x": 7501,
+"z": -1350
+},
+{
+"name": "Palansour",
+"type": "cave",
+"x": 4795,
+"z": -1311
+},
+{
+"name": "Panat",
+"type": "cave",
+"x": 6892,
+"z": 898
+},
+{
+"name": "Pinsun",
+"type": "cave",
+"x": 8345,
+"z": -453
+},
+{
+"name": "Pulk",
+"type": "cave",
+"x": 8044,
+"z": -247
+},
+{
+"name": "Punabi",
+"type": "cave",
+"x": 7294,
+"z": 506
+},
+{
+"name": "Punammu",
+"type": "cave",
+"x": 7018,
+"z": 961
+},
+{
+"name": "Punsabanit",
+"type": "cave",
+"x": 7368,
+"z": -1349
+},
+{
+"name": "Rimhull",
+"type": "cave",
+"x": 4850,
+"z": -3517
+},
+{
+"name": "Sanabi",
+"type": "cave",
+"x": 7405,
+"z": 306
+},
+{
+"name": "Sargon",
+"type": "cave",
+"x": 6098,
+"z": -1686
+},
+{
+"name": "Saturan",
+"type": "cave",
+"x": 7807,
+"z": 890
+},
+{
+"name": "Sha-Adnius",
+"type": "cave",
+"x": 5416,
+"z": -1450
+},
+{
+"name": "Shal",
+"type": "cave",
+"x": 5705,
+"z": 526
+},
+{
+"name": "Shallit",
+"type": "cave",
+"x": 7539,
+"z": -1267
+},
+{
+"name": "Shurinbaal",
+"type": "cave",
+"x": 5263,
+"z": -166
+},
+{
+"name": "Shushan",
+"type": "cave",
+"x": 8033,
+"z": 386
+},
+{
+"name": "Shushishi",
+"type": "cave",
+"x": 6502,
+"z": 11
+},
+{
+"name": "Sinsibadon",
+"type": "cave",
+"x": 7871,
+"z": 1141
+},
+{
+"name": "Sjobal",
+"type": "cave",
+"x": 5024,
+"z": -3408
+},
+{
+"name": "Skygge",
+"type": "cave",
+"x": 4846,
+"z": -3608
+},
+{
+"name": "Solvjord",
+"type": "cave",
+"x": 4722,
+"z": -3046
+},
+{
+"name": "Stahlman's Gorge",
+"type": "cave",
+"x": 4284,
+"z": -3582
+},
+{
+"name": "Sud",
+"type": "cave",
+"x": 6633,
+"z": -1699
+},
+{
+"name": "Surirulk",
+"type": "cave",
+"x": 7309,
+"z": -1317
+},
+{
+"name": "Tin-Ahhe",
+"type": "cave",
+"x": 7355,
+"z": -676
+},
+{
+"name": "Ulfgar the Unending's Dwelling",
+"type": "cave",
+"x": 4639,
+"z": -3085
+},
+{
+"name": "Ulummusa",
+"type": "cave",
+"x": 6602,
+"z": 902
+},
+{
+"name": "Urshilaku",
+"type": "cave",
+"x": 5873,
+"z": -1374
+},
+{
+"name": "Varstaad Caves",
+"type": "cave",
+"x": 4406,
+"z": -3393
+},
+{
+"name": "Vassamsi Grotto",
+"type": "cave",
+"x": 8575,
+"z": -214
+},
+{
+"name": "Yakanalit",
+"type": "cave",
+"x": 8224,
+"z": 1287
+},
+{
+"name": "Yasamsi",
+"type": "cave",
+"x": 6037,
+"z": 835
+},
+{
+"name": "Yesamsi",
+"type": "cave",
+"x": 5443,
+"z": -1368
+},
+{
+"name": "Zainsipilu",
+"type": "cave",
+"x": 6304,
+"z": 908
+},
+{
+"name": "Zaintirari",
+"type": "cave",
+"x": 8310,
+"z": 368
+},
+{
+"name": "Zalkin Grotto",
+"type": "cave",
+"x": 9075,
+"z": 721
+},
+{
+"name": "Zanabi",
+"type": "cave",
+"x": 5871,
+"z": 431
+},
+{
+"name": "Zebabi",
+"type": "cave",
+"x": 8661,
+"z": 490
+},
+{
+"name": "Zenarbael",
+"type": "cave",
+"x": 8202,
+"z": 338
+},
+{
+"name": "Addadshashanammu",
+"type": "daedric_shrine",
+"x": 5371,
+"z": 70
+},
+{
+"name": "Ald Daedroth",
+"type": "daedric_shrine",
+"x": 7942,
+"z": -1332
+},
+{
+"name": "Ald Sotha",
+"type": "daedric_shrine",
+"x": 7732,
+"z": 1138
+},
+{
+"name": "Almurbalarammi",
+"type": "daedric_shrine",
+"x": 8881,
+"z": 1126
+},
+{
+"name": "Ashalmawia",
+"type": "daedric_shrine",
+"x": 4808,
+"z": -1452
+},
+{
+"name": "Ashalmimilkala",
+"type": "daedric_shrine",
+"x": 5481,
+"z": 302
+},
+{
+"name": "Ashunartes",
+"type": "daedric_shrine",
+"x": 7183,
+"z": 620
+},
+{
+"name": "Ashurnibibi",
+"type": "daedric_shrine",
+"x": 5720,
+"z": 596
+},
+{
+"name": "Assalkushalit",
+"type": "daedric_shrine",
+"x": 6860,
+"z": -674
+},
+{
+"name": "Assarnatamat",
+"type": "daedric_shrine",
+"x": 6688,
+"z": 281
+},
+{
+"name": "Assurdirapal",
+"type": "daedric_shrine",
+"x": 6246,
+"z": -1684
+},
+{
+"name": "Assurnabitashpi",
+"type": "daedric_shrine",
+"x": 5582,
+"z": -1576
+},
+{
+"name": "Bal Fell",
+"type": "daedric_shrine",
+"x": 8047,
+"z": 1370
+},
+{
+"name": "Bal Ur",
+"type": "daedric_shrine",
+"x": 7676,
+"z": 812
+},
+{
+"name": "Dubdilla",
+"type": "daedric_shrine",
+"x": 8116,
+"z": -529
+},
+{
+"name": "Dushariran",
+"type": "daedric_shrine",
+"x": 5345,
+"z": -914
+},
+{
+"name": "Ebernanit",
+"type": "daedric_shrine",
+"x": 6391,
+"z": -1329
+},
+{
+"name": "Esutanamus",
+"type": "daedric_shrine",
+"x": 8454,
+"z": -482
+},
+{
+"name": "Ibar-Dad",
+"type": "daedric_shrine",
+"x": 5436,
+"z": -1585
+},
+{
+"name": "Kaushtarari",
+"type": "daedric_shrine",
+"x": 8960,
+"z": 373
+},
+{
+"name": "Kora-Dur",
+"type": "daedric_shrine",
+"x": 6803,
+"z": -960
+},
+{
+"name": "Kushtashpi",
+"type": "daedric_shrine",
+"x": 7787,
+"z": -978
+},
+{
+"name": "Maelkashishi",
+"type": "daedric_shrine",
+"x": 5458,
+"z": -1185
+},
+{
+"name": "Onnissiralis",
+"type": "daedric_shrine",
+"x": 6169,
+"z": -1799
+},
+{
+"name": "Ramimilk",
+"type": "daedric_shrine",
+"x": 6364,
+"z": -219
+},
+{
+"name": "Shashpilamat",
+"type": "daedric_shrine",
+"x": 8942,
+"z": 789
+},
+{
+"name": "Shrine of Azura",
+"type": "daedric_shrine",
+"x": 9281,
+"z": 1068
+},
+{
+"name": "Tusenend",
+"type": "daedric_shrine",
+"x": 8539,
+"z": 539
+},
+{
+"name": "Ularradallaku",
+"type": "daedric_shrine",
+"x": 6678,
+"z": -481
+},
+{
+"name": "Yansirramus",
+"type": "daedric_shrine",
+"x": 8298,
+"z": 78
+},
+{
+"name": "Yasammidan",
+"type": "daedric_shrine",
+"x": 4061,
+"z": -1448
+},
+{
+"name": "Zaintiraris",
+"type": "daedric_shrine",
+"x": 8490,
+"z": 1181
+},
+{
+"name": "Zergonipal",
+"type": "daedric_shrine",
+"x": 7242,
+"z": -966
+},
+{
+"name": "Vivec, Arena",
+"type": "district",
+"x": 7464,
+"z": 1254
+},
+{
+"name": "Vivec, Foreign Quarter",
+"type": "district",
+"x": 7386,
+"z": 1180
+},
+{
+"name": "Vivec, Hlaalu",
+"type": "district",
+"x": 7204,
+"z": 1255
+},
+{
+"name": "Vivec, Redoran",
+"type": "district",
+"x": 7334,
+"z": 1254
+},
+{
+"name": "Vivec, St. Delyn",
+"type": "district",
+"x": 7348,
+"z": 1330
+},
+{
+"name": "Vivec, St. Olms",
+"type": "district",
+"x": 7478,
+"z": 1331
+},
+{
+"name": "Vivec, Telvanni",
+"type": "district",
+"x": 7593,
+"z": 1257
+},
+{
+"name": "Vivec, Temple",
+"type": "district",
+"x": 7435,
+"z": 1448
+},
+{
+"name": "Aleft",
+"type": "dwemer_ruin",
+"x": 5492,
+"z": -10
+},
+{
+"name": "Arkngthand",
+"type": "dwemer_ruin",
+"x": 6759,
+"z": 560
+},
+{
+"name": "Arkngthunch-Sturdumz",
+"type": "dwemer_ruin",
+"x": 4314,
+"z": -1432
+},
+{
+"name": "Bthanchend",
+"type": "dwemer_ruin",
+"x": 6114,
+"z": -842
+},
+{
+"name": "Bthuand",
+"type": "dwemer_ruin",
+"x": 7067,
+"z": -1022
+},
+{
+"name": "Bthungthumz",
+"type": "dwemer_ruin",
+"x": 5580,
+"z": -1413
+},
+{
+"name": "Druscashti",
+"type": "dwemer_ruin",
+"x": 5383,
+"z": -1519
+},
+{
+"name": "Endusal",
+"type": "dwemer_ruin",
+"x": 6747,
+"z": -382
+},
+{
+"name": "Galom Daeus",
+"type": "dwemer_ruin",
+"x": 7807,
+"z": 382
+},
+{
+"name": "Mzahnch",
+"type": "dwemer_ruin",
+"x": 7975,
+"z": 1159
+},
+{
+"name": "Mzanchend",
+"type": "dwemer_ruin",
+"x": 7940,
+"z": 250
+},
+{
+"name": "Mzuleft",
+"type": "dwemer_ruin",
+"x": 7240,
+"z": -1518
+},
+{
+"name": "Nchardahrk",
+"type": "dwemer_ruin",
+"x": 7465,
+"z": -1370
+},
+{
+"name": "Nchardumz",
+"type": "dwemer_ruin",
+"x": 8726,
+"z": 822
+},
+{
+"name": "Nchuleft",
+"type": "dwemer_ruin",
+"x": 7676,
+"z": -636
+},
+{
+"name": "Nchuleftingth",
+"type": "dwemer_ruin",
+"x": 8109,
+"z": 625
+},
+{
+"name": "Nchurdamz",
+"type": "dwemer_ruin",
+"x": 8967,
+"z": 898
+},
+{
+"name": "Odrosal",
+"type": "dwemer_ruin",
+"x": 7025,
+"z": -294
+},
+{
+"name": "Tureynulal",
+"type": "dwemer_ruin",
+"x": 7175,
+"z": -393
+},
+{
+"name": "Vemynal",
+"type": "dwemer_ruin",
+"x": 6472,
+"z": -734
+},
+{
+"name": "Abaesen-Pulu Egg Mine",
+"type": "egg_mine",
+"x": 6909,
+"z": 1154
+},
+{
+"name": "Abebaal Egg Mine",
+"type": "egg_mine",
+"x": 8706,
+"z": 1321
+},
+{
+"name": "Ahallaraddon Egg Mine",
+"type": "egg_mine",
+"x": 9234,
+"z": 990
+},
+{
+"name": "Ahanibi-Malmus Egg Mine",
+"type": "egg_mine",
+"x": 6828,
+"z": -840
+},
+{
+"name": "Akimaes-Ilanipu Egg Mine",
+"type": "egg_mine",
+"x": 6068,
+"z": -1320
+},
+{
+"name": "Asha-Ahhe Egg Mine",
+"type": "egg_mine",
+"x": 4971,
+"z": -1466
+},
+{
+"name": "Ashimanu Egg Mine",
+"type": "egg_mine",
+"x": 5173,
+"z": -846
+},
+{
+"name": "Band Egg Mine",
+"type": "egg_mine",
+"x": 5818,
+"z": -77
+},
+{
+"name": "Eluba-Addon Egg Mine",
+"type": "egg_mine",
+"x": 4203,
+"z": -1340
+},
+{
+"name": "Eretammus-Sennammu Egg Mine",
+"type": "egg_mine",
+"x": 8592,
+"z": 1279
+},
+{
+"name": "Hairat-Vassamsi Egg Mine",
+"type": "egg_mine",
+"x": 5565,
+"z": -1181
+},
+{
+"name": "Hawia Egg Mine",
+"type": "egg_mine",
+"x": 7312,
+"z": 1106
+},
+{
+"name": "Inanius Egg Mine",
+"type": "egg_mine",
+"x": 7830,
+"z": 995
+},
+{
+"name": "Madas-Zebba Egg Mine",
+"type": "egg_mine",
+"x": 6893,
+"z": -1678
+},
+{
+"name": "Maelu Egg Mine",
+"type": "egg_mine",
+"x": 7660,
+"z": -88
+},
+{
+"name": "Maesa-Shammus Egg Mine",
+"type": "egg_mine",
+"x": 8662,
+"z": 715
+},
+{
+"name": "Matus-Akin Egg Mine",
+"type": "egg_mine",
+"x": 8789,
+"z": 730
+},
+{
+"name": "Missir-Dadalit Egg Mine",
+"type": "egg_mine",
+"x": 8305,
+"z": 332
+},
+{
+"name": "Mudan-Mul Egg Mine",
+"type": "egg_mine",
+"x": 7824,
+"z": -785
+},
+{
+"name": "Panabanit-Nimawia Egg Mine",
+"type": "egg_mine",
+"x": 6595,
+"z": -254
+},
+{
+"name": "Panud Egg Mine",
+"type": "egg_mine",
+"x": 5047,
+"z": -1529
+},
+{
+"name": "Pudai Egg Mine",
+"type": "egg_mine",
+"x": 6756,
+"z": -1618
+},
+{
+"name": "Sarimisun-Assa Egg Mine",
+"type": "egg_mine",
+"x": 5080,
+"z": -680
+},
+{
+"name": "Setus Egg Mine",
+"type": "egg_mine",
+"x": 7788,
+"z": -1239
+},
+{
+"name": "Shulk Egg Mine",
+"type": "egg_mine",
+"x": 6172,
+"z": 649
+},
+{
+"name": "Shurdan-Raplay Egg Mine",
+"type": "egg_mine",
+"x": 6253,
+"z": 791
+},
+{
+"name": "Sinamusa Egg Mine",
+"type": "egg_mine",
+"x": 7919,
+"z": -949
+},
+{
+"name": "Sinarralit Egg Mine",
+"type": "egg_mine",
+"x": 8088,
+"z": -673
+},
+{
+"name": "Sur Egg Mine",
+"type": "egg_mine",
+"x": 7668,
+"z": -240
+},
+{
+"name": "Vansunalit Egg Mine",
+"type": "egg_mine",
+"x": 7918,
+"z": 963
+},
+{
+"name": "Zalkin-Sul Egg Mine",
+"type": "egg_mine",
+"x": 7801,
+"z": 248
+},
+{
+"name": "Alof's Farmhouse",
+"type": "house",
+"x": 7046,
+"z": 771
+},
+{
+"name": "An Abandoned Shack",
+"type": "house",
+"x": 5220,
+"z": -128
+},
+{
+"name": "Balur's Farmhouse",
+"type": "house",
+"x": 6993,
+"z": 1068
+},
+{
+"name": "Big Head's Shack",
+"type": "house",
+"x": 5898,
+"z": -2051
+},
+{
+"name": "Dirara's Farmhouse",
+"type": "house",
+"x": 7603,
+"z": 1015
+},
+{
+"name": "Drulene Falen's Hut",
+"type": "house",
+"x": 5360,
+"z": -552
+},
+{
+"name": "Graring's House",
+"type": "house",
+"x": 4788,
+"z": -3420
+},
+{
+"name": "Llirala's Shack",
+"type": "house",
+"x": 6462,
+"z": -1637
+},
+{
+"name": "Llovyn's Farmhouse",
+"type": "house",
+"x": 7064,
+"z": 1000
+},
+{
+"name": "Manat's Farmhouse",
+"type": "house",
+"x": 7276,
+"z": 883
+},
+{
+"name": "Nilera's Farmhouse",
+"type": "house",
+"x": 7417,
+"z": 1059
+},
+{
+"name": "Piernette's Farmhouse",
+"type": "house",
+"x": 7426,
+"z": 1022
+},
+{
+"name": "Rayna Drolan's Shack",
+"type": "house",
+"x": 6738,
+"z": -1841
+},
+{
+"name": "Sjorvar Horse-Mouth's House",
+"type": "house",
+"x": 5649,
+"z": -305
+},
+{
+"name": "Small Farmhouse",
+"type": "house",
+"x": 7511,
+"z": 1055
+},
+{
+"name": "Sterdecan's Farmhouse",
+"type": "house",
+"x": 7345,
+"z": 808
+},
+{
+"name": "Uncle Sweetshare's Workshop",
+"type": "house",
+"x": 4926,
+"z": -3127
+},
+{
+"name": "Buckmoth Legion Fort",
+"type": "imperial_fort",
+"x": 6124,
+"z": -352
+},
+{
+"name": "Fort Darius",
+"type": "imperial_fort",
+"x": 4780,
+"z": -1090
+},
+{
+"name": "Fort Frostmoth",
+"type": "imperial_fort",
+"x": 4759,
+"z": -2807
+},
+{
+"name": "Fort Pelagiad",
+"type": "imperial_fort",
+"x": 6916,
+"z": 983
+},
+{
+"name": "Hawkmoth Legion Garrison",
+"type": "imperial_fort",
+"x": 7126,
+"z": 1393
+},
+{
+"name": "Moonmoth Legion Fort",
+"type": "imperial_fort",
+"x": 6621,
+"z": 573
+},
+{
+"name": "Wolverine Hall",
+"type": "imperial_fort",
+"x": 8943,
+"z": 153
+},
+{
+"name": "Altar of Thrond",
+"type": "landmark",
+"x": 4656,
+"z": -3319
+},
+{
+"name": "Bal Isra",
+"type": "landmark",
+"x": 5592,
+"z": -850
+},
+{
+"name": "Brodir Grove",
+"type": "landmark",
+"x": 4656,
+"z": -3060
+},
+{
+"name": "Castle Karstaag",
+"type": "landmark",
+"x": 4550,
+"z": -3603
+},
+{
+"name": "Cavern of the Incarnate",
+"type": "landmark",
+"x": 7428,
+"z": -732
+},
+{
+"name": "Dagoth Ur",
+"type": "landmark",
+"x": 6859,
+"z": -438
+},
+{
+"name": "Fields of Kummu",
+"type": "landmark",
+"x": 6973,
+"z": 797
+},
+{
+"name": "Ghostgate",
+"type": "landmark",
+"x": 6883,
+"z": -102
+},
+{
+"name": "Holamayan Monastery",
+"type": "landmark",
+"x": 9172,
+"z": 750
+},
+{
+"name": "Hrothmund's Bane",
+"type": "landmark",
+"x": 4570,
+"z": -3492
+},
+{
+"name": "Hvitkald Peak",
+"type": "landmark",
+"x": 4483,
+"z": -3319
+},
+{
+"name": "Imperial Prison Ship",
+"type": "landmark",
+"x": 6703,
+"z": 1141
+},
+{
+"name": "Khartag Point",
+"type": "landmark",
+"x": 5122,
+"z": -390
+},
+{
+"name": "Lake Fjalding",
+"type": "landmark",
+"x": 4873,
+"z": -3319
+},
+{
+"name": "Ministry of Truth",
+"type": "landmark",
+"x": 7399,
+"z": 1387
+},
+{
+"name": "Mortrag Glacier",
+"type": "landmark",
+"x": 4440,
+"z": -3622
+},
+{
+"name": "Mount Assarnibibi",
+"type": "landmark",
+"x": 8590,
+"z": 729
+},
+{
+"name": "Mount Kand",
+"type": "landmark",
+"x": 8247,
+"z": 832
+},
+{
+"name": "Odai Plateau",
+"type": "landmark",
+"x": 6109,
+"z": 738
+},
+{
+"name": "Red Mountain",
+"type": "landmark",
+"x": 7100,
+"z": -400
+},
+{
+"name": "Sanctus Shrine",
+"type": "landmark",
+"x": 6467,
+"z": -1665
+},
+{
+"name": "Thormoor's Watch",
+"type": "landmark",
+"x": 4310,
+"z": -3233
+},
+{
+"name": "Indarys Manor",
+"type": "manor",
+"x": 5617,
+"z": -853
+},
+{
+"name": "Morvayn Manor",
+"type": "manor",
+"x": 6186,
+"z": -529
+},
+{
+"name": "Omani Manor",
+"type": "manor",
+"x": 7821,
+"z": 1332
+},
+{
+"name": "Rethan Manor",
+"type": "manor",
+"x": 6124,
+"z": 742
+},
+{
+"name": "Ules Manor",
+"type": "manor",
+"x": 7480,
+"z": 906
+},
+{
+"name": "Abaelun Mine",
+"type": "mine",
+"x": 6466,
+"z": -79
+},
+{
+"name": "Caldera Mine",
+"type": "mine",
+"x": 6179,
+"z": 120
+},
+{
+"name": "Dissapla Mine",
+"type": "mine",
+"x": 7958,
+"z": -131
+},
+{
+"name": "Dunirai Caverns",
+"type": "mine",
+"x": 7221,
+"z": 94
+},
+{
+"name": "Elith-Pal Mine",
+"type": "mine",
+"x": 7600,
+"z": -426
+},
+{
+"name": "Halit Mine",
+"type": "mine",
+"x": 7307,
+"z": -78
+},
+{
+"name": "Sudanit Mine",
+"type": "mine",
+"x": 6483,
+"z": -201
+},
+{
+"name": "Vassir-Didanat Cave",
+"type": "mine",
+"x": 6385,
+"z": 741
+},
+{
+"name": "Yanemus Mine",
+"type": "mine",
+"x": 7200,
+"z": -262
+},
+{
+"name": "Yassu Mine",
+"type": "mine",
+"x": 6914,
+"z": -230
+},
+{
+"name": "Arano Plantation",
+"type": "plantation",
+"x": 7406,
+"z": 926
+},
+{
+"name": "Arvel Plantation",
+"type": "plantation",
+"x": 7140,
+"z": 881
+},
+{
+"name": "Dren Plantation",
+"type": "plantation",
+"x": 7150,
+"z": 971
+},
+{
+"name": "Gro-Bagrat Plantation",
+"type": "plantation",
+"x": 7287,
+"z": 1064
+},
+{
+"name": "Arrow",
+"type": "ship",
+"x": 7351,
+"z": -1609
+},
+{
+"name": "Chun-Ook",
+"type": "ship",
+"x": 7227,
+"z": 1416
+},
+{
+"name": "Elf-Skerring",
+"type": "ship",
+"x": 8786,
+"z": 45
+},
+{
+"name": "Fair Helas",
+"type": "ship",
+"x": 4561,
+"z": -1530
+},
+{
+"name": "Falvillo's Endeavor",
+"type": "ship",
+"x": 8182,
+"z": -720
+},
+{
+"name": "Grytewake",
+"type": "ship",
+"x": 5805,
+"z": 776
+},
+{
+"name": "Abandoned Shipwreck",
+"type": "shipwreck",
+"x": 6367,
+"z": -1821
+},
+{
+"name": "Ancient Shipwreck",
+"type": "shipwreck",
+"x": 7595,
+"z": -1407
+},
+{
+"name": "Derelict Shipwreck",
+"type": "shipwreck",
+"x": 5256,
+"z": -1649
+},
+{
+"name": "Deserted Shipwreck",
+"type": "shipwreck",
+"x": 8049,
+"z": 1281
+},
+{
+"name": "Desolate Shipwreck",
+"type": "shipwreck",
+"x": 6991,
+"z": 887
+},
+{
+"name": "Forgotten Shipwreck",
+"type": "shipwreck",
+"x": 4374,
+"z": -1506
+},
+{
+"name": "Lonely Shipwreck",
+"type": "shipwreck",
+"x": 9069,
+"z": 518
+},
+{
+"name": "Lonesome Shipwreck",
+"type": "shipwreck",
+"x": 8300,
+"z": -857
+},
+{
+"name": "Lost Shipwreck",
+"type": "shipwreck",
+"x": 8585,
+"z": -487
+},
+{
+"name": "Neglected Shipwreck",
+"type": "shipwreck",
+"x": 5040,
+"z": -437
+},
+{
+"name": "Obscure Shipwreck",
+"type": "shipwreck",
+"x": 6073,
+"z": -1907
+},
+{
+"name": "Prelude Shipwreck",
+"type": "shipwreck",
+"x": 8368,
+"z": 1375
+},
+{
+"name": "Remote Shipwreck",
+"type": "shipwreck",
+"x": 6734,
+"z": 1242
+},
+{
+"name": "Shunned Shipwreck",
+"type": "shipwreck",
+"x": 5130,
+"z": -79
+},
+{
+"name": "Strange Shipwreck",
+"type": "shipwreck",
+"x": 9008,
+"z": -66
+},
+{
+"name": "Unchartered Shipwreck",
+"type": "shipwreck",
+"x": 7495,
+"z": 1579
+},
+{
+"name": "Unexplored Shipwreck",
+"type": "shipwreck",
+"x": 6099,
+"z": 920
+},
+{
+"name": "Unknown Shipwreck",
+"type": "shipwreck",
+"x": 8678,
+"z": 73
+},
+{
+"name": "Unmarked Shipwreck",
+"type": "shipwreck",
+"x": 4033,
+"z": -1499
+},
+{
+"name": "Abinabi",
+"type": "sixth_house_base",
+"x": 5733,
+"z": -1391
+},
+{
+"name": "Ainab",
+"type": "sixth_house_base",
+"x": 7229,
+"z": -1071
+},
+{
+"name": "Assemanu",
+"type": "sixth_house_base",
+"x": 6893,
+"z": 1261
+},
+{
+"name": "Bensamsi",
+"type": "sixth_house_base",
+"x": 6864,
+"z": -1062
+},
+{
+"name": "Hassour",
+"type": "sixth_house_base",
+"x": 6433,
+"z": 789
+},
+{
+"name": "Ilunibi",
+"type": "sixth_house_base",
+"x": 5155,
+"z": -357
+},
+{
+"name": "Mamaea",
+"type": "sixth_house_base",
+"x": 5191,
+"z": -926
+},
+{
+"name": "Maran-Adon",
+"type": "sixth_house_base",
+"x": 7467,
+"z": -637
+},
+{
+"name": "Missamsi",
+"type": "sixth_house_base",
+"x": 6773,
+"z": 443
+},
+{
+"name": "Piran",
+"type": "sixth_house_base",
+"x": 7827,
+"z": 647
+},
+{
+"name": "Rissun",
+"type": "sixth_house_base",
+"x": 8307,
+"z": 1345
+},
+{
+"name": "Salmantu",
+"type": "sixth_house_base",
+"x": 9117,
+"z": 649
+},
+{
+"name": "Sanit",
+"type": "sixth_house_base",
+"x": 7624,
+"z": -920
+},
+{
+"name": "Sennananit",
+"type": "sixth_house_base",
+"x": 5699,
+"z": 160
+},
+{
+"name": "Sharapli",
+"type": "sixth_house_base",
+"x": 7044,
+"z": -67
+},
+{
+"name": "Subdun",
+"type": "sixth_house_base",
+"x": 4700,
+"z": -852
+},
+{
+"name": "Yakin",
+"type": "sixth_house_base",
+"x": 8331,
+"z": -166
+},
+{
+"name": "Andasreth",
+"type": "stronghold",
+"x": 5112,
+"z": -535
+},
+{
+"name": "Berandas",
+"type": "stronghold",
+"x": 4837,
+"z": -922
+},
+{
+"name": "Falasmaryon",
+"type": "stronghold",
+"x": 6084,
+"z": -1215
+},
+{
+"name": "Falensarano",
+"type": "stronghold",
+"x": 7916,
+"z": -77
+},
+{
+"name": "Hlormaren",
+"type": "stronghold",
+"x": 5790,
+"z": 271
+},
+{
+"name": "Indoranyon",
+"type": "stronghold",
+"x": 8473,
+"z": -314
+},
+{
+"name": "Kogoruhn",
+"type": "stronghold",
+"x": 6486,
+"z": -1060
+},
+{
+"name": "Marandus",
+"type": "stronghold",
+"x": 7323,
+"z": 637
+},
+{
+"name": "Rotheran",
+"type": "stronghold",
+"x": 7325,
+"z": -1246
+},
+{
+"name": "Telasero",
+"type": "stronghold",
+"x": 8011,
+"z": 959
+},
+{
+"name": "Valenvaryon",
+"type": "stronghold",
+"x": 6194,
+"z": -1468
+},
+{
+"name": "Tel Uvirith",
+"type": "telvanni_tower",
+"x": 8113,
+"z": 361
+},
+{
+"name": "Tel Vos",
+"type": "telvanni_tower",
+"x": 7951,
+"z": -775
+},
+{
+"name": "Tower of Tel Fyr",
+"type": "telvanni_tower",
+"x": 8592,
+"z": 290
+},
+{
+"name": "Ald Velothi",
+"type": "town",
+"x": 4630,
+"z": -1497
+},
+{
+"name": "Ald-ruhn",
+"type": "town",
+"x": 6100,
+"z": -500
+},
+{
+"name": "Balmora",
+"type": "town",
+"x": 6300,
+"z": 500
+},
+{
+"name": "Caldera",
+"type": "town",
+"x": 6296,
+"z": 29
+},
+{
+"name": "Dagon Fel",
+"type": "town",
+"x": 7342,
+"z": -1581
+},
+{
+"name": "Ebonheart",
+"type": "town",
+"x": 7129,
+"z": 1397
+},
+{
+"name": "Gnaar Mok",
+"type": "town",
+"x": 5329,
+"z": -231
+},
+{
+"name": "Gnisis",
+"type": "town",
+"x": 4676,
+"z": -1130
+},
+{
+"name": "Hla Oad",
+"type": "town",
+"x": 5933,
+"z": 729
+},
+{
+"name": "Khuul",
+"type": "town",
+"x": 4941,
+"z": -1596
+},
+{
+"name": "Maar Gan",
+"type": "town",
+"x": 5930,
+"z": -1029
+},
+{
+"name": "Molag Mar",
+"type": "town",
+"x": 8539,
+"z": 1056
+},
+{
+"name": "Pelagiad",
+"type": "town",
+"x": 6888,
+"z": 982
+},
+{
+"name": "Raven Rock",
+"type": "town",
+"x": 4519,
+"z": -2974
+},
+{
+"name": "Sadrith Mora",
+"type": "town",
+"x": 8900,
+"z": 100
+},
+{
+"name": "Seyda Neen",
+"type": "town",
+"x": 6652,
+"z": 1119
+},
+{
+"name": "Skaal Village",
+"type": "town",
+"x": 4927,
+"z": -3526
+},
+{
+"name": "Suran",
+"type": "town",
+"x": 7688,
+"z": 959
+},
+{
+"name": "Tel Aruhn",
+"type": "town",
+"x": 8587,
+"z": -15
+},
+{
+"name": "Tel Branora",
+"type": "town",
+"x": 8863,
+"z": 1461
+},
+{
+"name": "Tel Mora",
+"type": "town",
+"x": 8288,
+"z": -754
+},
+{
+"name": "Thirsk",
+"type": "town",
+"x": 4966,
+"z": -3294
+},
+{
+"name": "Vivec",
+"type": "town",
+"x": 7400,
+"z": 1300
+},
+{
+"name": "Vos",
+"type": "town",
+"x": 8092,
+"z": -730
+},
+{
+"name": "Ald Redaynia",
+"type": "velothi_tower",
+"x": 5623,
+"z": -1866
+},
+{
+"name": "Ashmelech",
+"type": "velothi_tower",
+"x": 6636,
+"z": -1435
+},
+{
+"name": "Hanud",
+"type": "velothi_tower",
+"x": 8392,
+"z": -327
+},
+{
+"name": "Mababi",
+"type": "velothi_tower",
+"x": 7972,
+"z": 644
+},
+{
+"name": "Mawia",
+"type": "velothi_tower",
+"x": 8826,
+"z": 1247
+},
+{
+"name": "Odirniran",
+"type": "velothi_tower",
+"x": 9034,
+"z": 1030
+},
+{
+"name": "Sanni",
+"type": "velothi_tower",
+"x": 7713,
+"z": -1286
+},
+{
+"name": "Shara",
+"type": "velothi_tower",
+"x": 6729,
+"z": -1544
+},
+{
+"name": "Shishara",
+"type": "velothi_tower",
+"x": 7096,
+"z": 254
+},
+{
+"name": "Shishi",
+"type": "velothi_tower",
+"x": 5747,
+"z": -1278
+},
+{
+"name": "Sulipund",
+"type": "velothi_tower",
+"x": 7345,
+"z": 455
+},
+{
+"name": "Vas",
+"type": "velothi_tower",
+"x": 6353,
+"z": -1801
+}
+]

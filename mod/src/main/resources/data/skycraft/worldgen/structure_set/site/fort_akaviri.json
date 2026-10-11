@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/fort_akaviri",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274518,
+    "types": [
+      "fort"
+    ],
+    "variants": [
+      "akaviri_fort"
+    ]
+  }
+}

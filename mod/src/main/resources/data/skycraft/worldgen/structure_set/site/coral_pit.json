@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/coral_pit",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274512,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "coral_pit"
+    ]
+  }
+}
