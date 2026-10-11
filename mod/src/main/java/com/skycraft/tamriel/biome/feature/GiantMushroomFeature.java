@@ -56,6 +56,7 @@ public class GiantMushroomFeature extends Feature<GiantMushroomFeature.Config> {
         double lean = 0.08 + random.nextDouble() * 0.12;
         double sx = x, sz = z;
         boolean thick = height > 14;
+        double bendFreq = 0.1 + random.nextDouble() * 0.25, bendAmp = random.nextDouble() * 1.2;
         for (int dy = 0; dy < height; dy++) {
             int bx = Mth.floor(sx), bz = Mth.floor(sz);
             box.set(bx, y + dy, bz, cfg.stem());
@@ -64,23 +65,40 @@ public class GiantMushroomFeature extends Feature<GiantMushroomFeature.Config> {
                 box.set(bx, y + dy, bz + 1, cfg.stem());
                 box.set(bx + 1, y + dy, bz + 1, cfg.stem());
             }
-            sx += Math.cos(a) * lean * dy / height * 2;
-            sz += Math.sin(a) * lean * dy / height * 2;
+            double bendA = a + Math.sin(dy * bendFreq) * bendAmp;
+            sx += Math.cos(bendA) * lean * dy / height * 2;
+            sz += Math.sin(bendA) * lean * dy / height * 2;
         }
         int top = y + height;
         int cx = Mth.floor(sx), cz = Mth.floor(sz);
-        // flat cap: full disc on top, rim one lower, a few hanging gills
+        // every parasol's cap differs: flat with a drooping rim, a low dome, a shallow funnel, or flat with a second,
+        // smaller cap lower on the stem
+        int style = random.nextInt(4);
+        cap(box, cfg, cx, top, cz, capR, style == 1 ? 1 : style == 2 ? -1 : 0);
+        if (style == 3 && height > 9) {
+            int lowR = Math.max(2, capR / 2 + random.nextInt(2));
+            int ly = y + height / 2 + random.nextInt(3);
+            double t = (ly - y) / (double) height;
+            int lx = Mth.floor(x + (sx - x) * t * t), lz = Mth.floor(z + (sz - z) * t * t);
+            cap(box, cfg, lx, ly, lz, lowR, 0);
+        }
+        box.set(cx, top - 1, cz, cfg.stem());
+        return true;
+    }
+
+    /** A parasol cap: a disc with a rim one lower and a raised middle; {@code bulge} 1 domes it, -1 dishes it. */
+    private static void cap(GenBox box, Config cfg, int cx, int top, int cz, int capR, int bulge) {
         for (int dx = -capR; dx <= capR; dx++) {
             for (int dz = -capR; dz <= capR; dz++) {
                 int d2 = dx * dx + dz * dz;
                 if (d2 > capR * capR) continue;
-                if (d2 <= (capR - 1) * (capR - 1)) box.setSoft(cx + dx, top, cz + dz, cfg.cap());
-                if (d2 <= (capR - 3) * (capR - 3)) box.setSoft(cx + dx, top + 1, cz + dz, cfg.cap());
-                if (d2 > (capR - 2) * (capR - 2)) box.setSoft(cx + dx, top - 1, cz + dz, cfg.cap());
+                int lift = bulge > 0 && d2 <= (capR - 2) * (capR - 2) ? 1 : bulge < 0 && d2 > (capR - 2) * (capR - 2) ? 1 : 0;
+                if (d2 <= (capR - 1) * (capR - 1)) box.setSoft(cx + dx, top + lift, cz + dz, cfg.cap());
+                if (d2 <= (capR - 3) * (capR - 3)) box.setSoft(cx + dx, top + 1 + lift, cz + dz, cfg.cap());
+                if (bulge > 0 && d2 <= (capR - 4) * (capR - 4)) box.setSoft(cx + dx, top + 2 + lift, cz + dz, cfg.cap());
+                if (d2 > (capR - 2) * (capR - 2)) box.setSoft(cx + dx, top - 1 + lift, cz + dz, cfg.cap());
             }
         }
-        box.set(cx, top - 1, cz, cfg.stem());
-        return true;
     }
 
     private boolean tower(GenBox box, Config cfg, RandomSource random, int x, int y, int z, int height) {

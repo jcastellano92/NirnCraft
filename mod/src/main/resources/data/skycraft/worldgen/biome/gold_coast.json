@@ -166,11 +166,10 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/palms_rare",
-      "skycraft:biome/trees_gold_coast",
-      "skycraft:biome/grape_vines",
-      "skycraft:biome/flowers_gold_coast",
-      "skycraft:biome/grass_plains"
+      "skycraft:biome/flora/trees_gold_coast",
+      "skycraft:biome/flora/cover_plains_grass",
+      "skycraft:biome/flora/cover_grapes",
+      "skycraft:biome/flora/cover_flowers_gold_coast"
     ],
     [
       "minecraft:freeze_top_layer"

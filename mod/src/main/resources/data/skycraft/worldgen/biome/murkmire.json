@@ -158,11 +158,11 @@
       "minecraft:vines",
       "minecraft:seagrass_swamp",
       "skycraft:biome/hist_trees_sparse",
-      "skycraft:biome/trees_black_marsh",
-      "skycraft:biome/reeds_dense",
-      "skycraft:biome/flowers_jungle",
-      "skycraft:biome/grass_jungle",
-      "skycraft:biome/lily_pads_dense"
+      "skycraft:biome/flora/trees_murkmire",
+      "skycraft:biome/flora/cover_jungle_floor",
+      "skycraft:biome/flora/cover_reeds",
+      "skycraft:biome/flora/cover_lilies_dense",
+      "skycraft:biome/flora/cover_flowers_jungle"
     ],
     [
       "minecraft:freeze_top_layer"

@@ -1,0 +1,21 @@
+{
+  "type": "skycraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "bald_cypress",
+        "weight": 4
+      },
+      {
+        "species": "mangrove",
+        "weight": 3
+      },
+      {
+        "species": "marsh_snag",
+        "weight": 2
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "feature": "skycraft:biome/flora/trees_solstheim_pine",
+  "placement": [
+    {
+      "type": "skycraft:flora_scatter",
+      "spacing": 5,
+      "min_distance": 0.8,
+      "density": 0.8,
+      "floor": 0.05,
+      "field": {
+        "salt": 102,
+        "scale": 60,
+        "coverage": 0.62,
+        "softness": 0.15,
+        "kind": "fbm",
+        "mode": "inside"
+      }
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "OCEAN_FLOOR"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

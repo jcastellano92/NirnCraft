@@ -107,8 +107,8 @@
     [
       "minecraft:amethyst_geode",
       "skycraft:biome/lava_vents_sparse",
-      "skycraft:biome/boulders_volcanic_3",
-      "skycraft:biome/spires_basalt"
+      "skycraft:biome/spires_basalt",
+      "skycraft:biome/flora/rocks_volcanic"
     ],
     [
       "minecraft:monster_room",
@@ -146,10 +146,10 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/dead_trees_charred_4",
-      "skycraft:biome/flowers_ash",
-      "skycraft:biome/grass_ash",
-      "skycraft:biome/ash_drifts"
+      "skycraft:biome/ash_drifts",
+      "skycraft:biome/flora/trees_ashlands",
+      "skycraft:biome/flora/cover_ash_grass",
+      "skycraft:biome/flora/cover_flowers_ash"
     ],
     [
       "minecraft:freeze_top_layer"

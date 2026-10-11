@@ -1,0 +1,27 @@
+{
+  "feature": "skycraft:biome/flora/trees_rainforest",
+  "placement": [
+    {
+      "type": "skycraft:flora_scatter",
+      "spacing": 5,
+      "min_distance": 0.8,
+      "density": 0.9,
+      "floor": 0.15,
+      "field": {
+        "salt": 101,
+        "scale": 72,
+        "coverage": 0.82,
+        "softness": 0.16,
+        "kind": "fbm",
+        "mode": "inside"
+      }
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "OCEAN_FLOOR"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

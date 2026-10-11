@@ -149,7 +149,7 @@
       "minecraft:glow_lichen",
       "minecraft:patch_sugar_cane",
       "minecraft:seagrass_river",
-      "skycraft:biome/reeds_sparse"
+      "skycraft:biome/flora/cover_reeds_few"
     ],
     [
       "minecraft:freeze_top_layer"

@@ -151,6 +151,9 @@ public final class ClientAutotest {
      */
     private static final String TOUR = System.getProperty("skycraft.autotest.tour", "");
     private static final int TOUR_WAIT = Integer.getInteger("skycraft.autotest.tourWait", 400);
+    /** Height above the ground and pitch of the second ("air") shot: e.g. 14 and 12 for a view over the treetops. */
+    private static final int TOUR_UP = Integer.getInteger("skycraft.autotest.tourUp", 70);
+    private static final float TOUR_PITCH = Float.parseFloat(System.getProperty("skycraft.autotest.tourPitch", "28"));
     private static int tourStep;
     private static int tourWait;
     private static boolean tourMapAtEnd;

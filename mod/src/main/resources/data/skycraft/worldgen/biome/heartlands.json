@@ -167,11 +167,10 @@
     [
       "minecraft:glow_lichen",
       "minecraft:patch_sugar_cane",
-      "skycraft:biome/trees_heartlands",
-      "skycraft:biome/tall_grass_dense",
-      "skycraft:biome/pumpkins_rare",
-      "skycraft:biome/flowers_heartlands",
-      "skycraft:biome/grass_plains"
+      "skycraft:biome/flora/trees_heartlands",
+      "skycraft:biome/flora/cover_lush_grass",
+      "skycraft:biome/flora/cover_pumpkins",
+      "skycraft:biome/flora/cover_flowers_heartlands"
     ],
     [
       "minecraft:freeze_top_layer"

@@ -1,0 +1,37 @@
+{
+  "type": "skycraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": {
+          "Name": "skycraft:ash_grass"
+        },
+        "weight": 4
+      },
+      {
+        "state": {
+          "Name": "skycraft:scathecraw"
+        },
+        "weight": 1
+      },
+      {
+        "state": {
+          "Name": "minecraft:dead_bush"
+        },
+        "weight": 2
+      }
+    ],
+    "scale": 24,
+    "patchiness": 0.6,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "value": {
+        "min_inclusive": 1,
+        "max_inclusive": 3
+      }
+    },
+    "spread": 2,
+    "salt": 9198,
+    "near_water": false
+  }
+}

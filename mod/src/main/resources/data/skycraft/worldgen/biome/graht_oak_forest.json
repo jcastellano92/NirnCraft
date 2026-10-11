@@ -168,13 +168,13 @@
       "minecraft:glow_lichen",
       "minecraft:vines",
       "skycraft:biome/graht_oaks_dense",
-      "skycraft:biome/trees_valenwood",
-      "skycraft:biome/fallen_logs_graht_oak_3",
-      "skycraft:biome/tall_ferns",
-      "skycraft:biome/flowers_jungle",
-      "skycraft:biome/grass_jungle",
-      "skycraft:biome/moss_carpets",
-      "skycraft:biome/forest_mushrooms"
+      "skycraft:biome/flora/trees_jungle_under",
+      "skycraft:biome/flora/trees_valenwood",
+      "skycraft:biome/flora/trees_valenwood_dead",
+      "skycraft:biome/flora/cover_jungle_floor",
+      "skycraft:biome/flora/cover_moss",
+      "skycraft:biome/flora/cover_mushrooms",
+      "skycraft:biome/flora/cover_flowers_jungle"
     ],
     [
       "minecraft:freeze_top_layer"

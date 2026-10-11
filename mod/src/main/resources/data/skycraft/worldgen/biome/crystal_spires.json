@@ -104,9 +104,9 @@
     ],
     [
       "minecraft:amethyst_geode",
-      "skycraft:biome/boulders_calcite_3",
       "skycraft:biome/spires_crystal_small",
-      "skycraft:biome/spires_crystal_large"
+      "skycraft:biome/spires_crystal_large",
+      "skycraft:biome/flora/rocks_calcite"
     ],
     [
       "minecraft:monster_room",
@@ -143,8 +143,9 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/crystal_clusters",
-      "skycraft:biome/grass_tundra_sparse"
+      "skycraft:biome/flora/trees_crystal_spires",
+      "skycraft:biome/flora/cover_dry_grass",
+      "skycraft:biome/flora/cover_crystals"
     ],
     [
       "minecraft:freeze_top_layer"

@@ -18,6 +18,7 @@ Run from anywhere:  python3 tools/worldgen/biomes.py
 import json
 import os
 import shutil
+import zlib
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
@@ -757,6 +758,491 @@ patch("cave_moss", weighted(("moss_carpet", 4), ("brown_mushroom", 1)), tries=32
 cave_floor_placed("cave_moss_patches", "cave_moss", 16)
 patch("cave_crystals", simple(SK + ":crystal_cluster", facing="up", waterlogged=False), tries=12, xz=4, y=2)
 cave_floor_placed("cave_crystals", "cave_crystals", 10)
+
+# ===================================================================================================== flora
+# Nirn's vegetation, region by region (owned by the flora workstream; see docs/FLORA.md). The Java side is
+# com.skycraft.tamriel.biome.flora: skycraft:flora_tree grows procedural trees of a named species, spaced by
+# skycraft:flora_scatter (blue-noise points thinned by a density field: groves, clearings, forest edges);
+# skycraft:ground_cover places tufts whose kind follows slow per-plant noise (drifts), thinned by skycraft:flora_density;
+# skycraft:flora_rock makes rocks of varied shapes with moss and lichen.
+#
+# FLORA[biome] lists each land biome's vegetation. apply_flora() swaps it in for the biome's older vegetation
+# entries (everything this file defines in vegetal_decoration, except cave flora, plus the old boulders), so the
+# catalogue below keeps its terrain features and the flora table owns the plants. Old vegetation features stay
+# defined for anything else that names them.
+OLD_VEG = set(MINE[V]) - {ref(n) for n in ("glowing_mushrooms", "grotto_mushrooms", "cave_mushroom_patches",
+                                             "cave_moss_patches", "cave_crystals")}
+OLD_VEG |= {f for f in MINE["local_modifications"] if f.startswith(SK + ":biome/boulders_")}
+# vanilla vegetation the flora table manages too (it re-lists what it keeps)
+OLD_VEG |= {"minecraft:vines", "minecraft:patch_melon", "minecraft:bamboo_vegetation", "minecraft:patch_sugar_cane",
+            "minecraft:brown_mushroom_swamp", "minecraft:red_mushroom_swamp", "minecraft:patch_dead_bush_2",
+            "minecraft:patch_dead_bush_badlands"}
+FLORA = {}
+
+
+def field(salt, scale, coverage=0.5, softness=0.12, kind="fbm", mode="inside"):
+    return {"salt": salt, "scale": scale, "coverage": coverage, "softness": softness, "kind": kind, "mode": mode}
+
+
+def mode(f, m):
+    g = dict(f)
+    g["mode"] = m
+    return g
+
+
+def forest(name, species, spacing, density, fld, floor=0.0, stands=0.6, stand_scale=48, min_distance=0.8):
+    """A layer of trees: species [(name, weight)], one per blue-noise point `spacing` apart where the field lets it."""
+    assert all(isinstance(w, int) for _, w in species), name
+    cf = configured("flora/trees_" + name, SK + ":flora_tree", {
+        "species": [{"species": s, "weight": w} for s, w in species], "stands": stands, "stand_scale": stand_scale})
+    return placed("flora/trees_" + name, cf, [
+        {"type": SK + ":flora_scatter", "spacing": spacing, "min_distance": min_distance, "density": density,
+         "floor": floor, "field": fld}, hm("OCEAN_FLOOR"), BIOME], V)
+
+
+def plant(name, **props):
+    s = st(name, **props)
+    if s["Name"] in DOUBLE:
+        s.setdefault("Properties", {})["half"] = "lower"
+    return s
+
+
+DOUBLE = {"minecraft:tall_grass", "minecraft:large_fern", "minecraft:lilac", "minecraft:rose_bush", "minecraft:peony",
+          "minecraft:sunflower", SK + ":swamp_reeds"}
+
+
+def cover(name, entries, n, fld, density=1.0, floor=0.0, scale=24, patchiness=0.6, cluster=(1, 3), spread=2,
+          near_water=False, salt=None):
+    """A layer of ground cover: n tries per chunk, kept where the field allows, each a tuft of `cluster` plants."""
+    cfg = {"entries": [{"state": plant(e) if isinstance(e, str) else e, "weight": w} for e, w in entries],
+           "scale": scale, "patchiness": patchiness, "cluster": uniform(*cluster), "spread": spread,
+           "salt": salt if salt is not None else zlib.crc32(name.encode()) % 9973, "near_water": near_water}
+    cf = configured("flora/cover_" + name, SK + ":ground_cover", cfg)
+    return placed("flora/cover_" + name, cf, [count(n), SQUARE,
+                                               {"type": SK + ":flora_density", "density": density, "floor": floor,
+                                                "field": fld}, hm("MOTION_BLOCKING_NO_LEAVES"), BIOME], V)
+
+
+def rocks(name, stone, size, n=1, moss=None, moss_chance=0.0, style="mixed", fld=None, floor=0.15, chance=None):
+    cfg = {"stone": stone, "moss_chance": moss_chance, "size": size if isinstance(size, dict) else uniform(*size),
+           "style": style}
+    if moss:
+        cfg["moss"] = moss
+    cf = configured("flora/rock_" + name, SK + ":flora_rock", cfg)
+    mods = [count(n)] if chance is None else [rarity(chance)]
+    mods.append(SQUARE)
+    if fld:
+        mods.append({"type": SK + ":flora_density", "density": 1.0, "floor": floor, "field": fld})
+    return placed("flora/rocks_" + name, cf, mods + [hm("MOTION_BLOCKING"), BIOME], "local_modifications")
+
+
+# --- fields: the same salt and shape is the same forest for trees, edge shrubs and clearing flowers
+F_FOREST_DENSE = field(101, 72, 0.82, 0.16)       # closed forest, a few glades
+F_FOREST = field(102, 60, 0.62, 0.15)             # forest with clearings
+F_WOODLAND = field(103, 52, 0.42, 0.16)           # groves in open country
+F_SCATTER = field(104, 90, 0.22, 0.2)             # lone trees and copses
+F_MARSH = field(105, 40, 0.5, 0.18)
+F_OASIS = field(106, 140, 0.12, 0.08, "worley")   # palm oases in the desert
+F_TUFT = field(110, 11, 0.55, 0.2, "worley")      # grass tufts and bare ground
+F_MEADOW = field(111, 30, 0.45, 0.2)              # flower meadows
+F_DRIFT = field(112, 16, 0.4, 0.2)                # small drifts (moss, ferns)
+F_RING = field(113, 13, 0.18, 0.08, "worley")     # mushroom rings, berry clumps
+F_ROCKS = field(114, 44, 0.22, 0.15, "worley")    # rock fields
+F_EVERY = field(115, 64, 0.5, 0.1, mode="any")
+
+# --- rocks (local_modifications: before any plant)
+MOSS = weighted(("moss_block", 3), ("mossy_cobblestone", 3))
+LICHEN = weighted(("mossy_cobblestone", 4), ("moss_block", 1), ("tuff", 1))
+R_TUNDRA = rocks("tundra", ROCK_TUNDRA, (1, 3), 2, LICHEN, 0.25, fld=F_ROCKS)
+R_TUNDRA_FEW = rocks("tundra_few", ROCK_TUNDRA, (1, 2), 1, LICHEN, 0.2, fld=F_ROCKS, floor=0.05)
+R_MOSSY = rocks("mossy", weighted(("stone", 4), ("cobblestone", 2), ("andesite", 2), ("mossy_cobblestone", 2)), (1, 3), 2,
+                MOSS, 0.6, fld=F_ROCKS)
+R_GREY = rocks("grey", ROCK_GREY, (1, 3), 1, LICHEN, 0.15, fld=F_ROCKS)
+R_REACH = rocks("reach", ROCK_REACH, (2, 4), 2, LICHEN, 0.2, fld=F_ROCKS, floor=0.3)
+R_REACH_STANDING = rocks("reach_standing", ROCK_REACH, (2, 4), style="standing", chance=9)
+R_VOLCANIC = rocks("volcanic", ROCK_VOLCANIC, (1, 3), 2, fld=F_ROCKS, floor=0.2)
+R_SAND = rocks("sand", ROCK_SAND, (1, 3), 1, fld=F_ROCKS, floor=0.05)
+R_RED = rocks("red", ROCK_RED, (1, 4), 1, fld=F_ROCKS, floor=0.2)
+R_ICE = rocks("ice", ROCK_ICE, (1, 3), 1, fld=F_ROCKS, floor=0.2)
+R_CORAL = rocks("coral", ROCK_CORAL, (1, 2), 1, fld=F_ROCKS, floor=0.2)
+R_CALCITE = rocks("calcite", ROCK_CALCITE, (1, 3), 1, fld=F_ROCKS, floor=0.2)
+R_DARK = rocks("dark", ROCK_DARK, (1, 3), 1, MOSS, 0.4, fld=F_ROCKS, floor=0.2)
+R_MOOR = rocks("moor", ROCK_GREY, (1, 3), 2, MOSS, 0.5, style="mixed", fld=F_ROCKS, floor=0.25)
+R_RUBBLE = rocks("rubble", ROCK_GREY, (1, 2), 1, style="rubble", chance=3)
+
+# --- tree layers. Spacing is the blue-noise distance in blocks; density the chance a point grows inside the field.
+T = forest
+SKYRIM_PINES = [("skyrim_pine", 6), ("skyrim_spruce", 3), ("giant_pine", 1)]
+T_PINE = T("skyrim_pine", SKYRIM_PINES, 5, 0.85, F_FOREST, floor=0.05)
+T_PINE_UNDER = T("skyrim_pine_under", [("pine_sapling", 4), ("conifer_bush", 2), ("berry_bush", 1)], 4, 0.5,
+                 mode(F_FOREST, "edge"), floor=0.03)
+T_PINE_DEAD = T("skyrim_pine_dead", [("fallen_spruce", 4), ("stump_spruce", 2), ("dead_pine", 2)], 12, 0.45, F_FOREST)
+T_SNOWY = T("snowy_pine", [("snowy_pine", 6), ("snowy_spruce", 4), ("snowy_giant_pine", 1)], 5, 0.8, F_FOREST, floor=0.05)
+T_SNOWY_UNDER = T("snowy_under", [("snowy_sapling", 3), ("conifer_bush", 1)], 5, 0.4, mode(F_FOREST, "edge"))
+T_SNOWY_DEAD = T("snowy_dead", [("dead_pine", 2), ("fallen_spruce", 3), ("frozen_pine", 1)], 13, 0.4, F_FOREST)
+T_SNOWY_SPARSE = T("snowy_sparse", [("snowy_pine", 3), ("snowy_spruce", 4), ("snowy_sapling", 2), ("frozen_pine", 1)],
+                   9, 0.6, F_SCATTER, floor=0.03)
+T_FALKREATH = T("falkreath", [("skyrim_pine", 10), ("giant_pine", 4), ("skyrim_spruce", 6), ("dark_oak", 2), ("birch", 1)],
+                5, 0.85, F_FOREST_DENSE, floor=0.1, min_distance=0.85)
+T_FALKREATH_UNDER = T("falkreath_under", [("pine_sapling", 3), ("forest_bush", 2), ("conifer_bush", 2), ("sapling_oak", 1)],
+                      4, 0.55, mode(F_FOREST_DENSE, "edge"), floor=0.12)
+T_FALKREATH_DEAD = T("falkreath_dead", [("fallen_spruce", 5), ("stump_spruce", 3), ("dead_pine", 2), ("fallen_dark_oak", 1)],
+                     9, 0.55, F_FOREST_DENSE)
+T_RIFT = T("rift", [("aspen_gold", 8), ("aspen_orange", 6), ("skyrim_pine", 3), ("maple", 2), ("aspen_young_gold", 2),
+                    ("aspen_young_orange", 2)], 5, 0.85, F_FOREST, floor=0.05, stands=0.8)
+T_RIFT_UNDER = T("rift_under", [("autumn_bush", 3), ("berry_bush", 1), ("pine_sapling", 1)], 5, 0.5,
+                 mode(F_FOREST, "edge"), floor=0.03)
+T_RIFT_DEAD = T("rift_dead", [("fallen_birch", 4), ("stump_birch", 2), ("dead_birch", 1)], 13, 0.4, F_FOREST)
+T_TUNDRA = T("tundra", [("tundra_shrub", 6), ("juniper", 4), ("tundra_tree", 3), ("skyrim_pine", 1)], 8, 0.55,
+             F_SCATTER, floor=0.04, stands=0.5)
+T_WHITERUN = T("whiterun", [("tundra_shrub", 4), ("juniper", 3), ("tundra_tree", 2), ("oak", 1), ("skyrim_pine", 1)],
+               10, 0.5, F_SCATTER, floor=0.02)
+T_REACH = T("reach", [("crag_tree", 5), ("juniper", 3), ("highland_pine", 1), ("tundra_shrub", 2)], 7, 0.6,
+            F_WOODLAND, floor=0.08)
+T_REACH_VALLEY = T("reach_valley", [("crag_tree", 3), ("oak", 2), ("birch", 2), ("skyrim_pine", 2), ("juniper", 1),
+                                    ("forest_bush", 2)], 6, 0.65, F_WOODLAND, floor=0.05)
+T_HJAAL = T("hjaalmarch", [("swamp_pine", 7), ("marsh_snag", 2), ("dead_oak", 1), ("conifer_bush", 2)], 7, 0.55,
+            F_MARSH, floor=0.06)
+T_HJAAL_DEAD = T("hjaalmarch_dead", [("fallen_spruce", 2), ("stump_spruce", 1)], 16, 0.4, F_MARSH)
+T_VOLC_TUNDRA = T("volcanic_tundra", [("tundra_shrub", 4), ("juniper", 3), ("tundra_tree", 2), ("dead_pine", 1)], 9, 0.5,
+                  F_SCATTER, floor=0.03)
+T_HOT_SPRINGS = T("hot_springs", [("juniper", 3), ("tundra_shrub", 3), ("dead_pine", 1)], 11, 0.4, F_SCATTER, floor=0.03)
+T_SLOPES = T("slopes", [("snowy_spruce", 3), ("frozen_pine", 2), ("snowy_sapling", 2)], 11, 0.35, F_SCATTER)
+T_ALPINE = T("alpine", [("highland_pine", 3), ("juniper", 3), ("snowy_spruce", 1), ("tundra_shrub", 2)], 9, 0.45,
+             F_SCATTER, floor=0.03)
+T_HIGHLAND = T("highland", [("highland_pine", 4), ("juniper", 3), ("tundra_tree", 2), ("dead_pine", 1)], 8, 0.5,
+               F_WOODLAND, floor=0.03)
+T_SOLS_ASH = T("solstheim_ash", [("charred_tree", 3), ("fallen_charred", 2)], 12, 0.4, F_SCATTER, floor=0.05)
+T_SOLS_PINE = T("solstheim_pine", [("solstheim_pine", 5), ("snowy_spruce", 2), ("snowy_pine", 2)], 5, 0.8, F_FOREST,
+                floor=0.05)
+# Cyrodiil
+T_HEARTLANDS = T("heartlands", [("oak", 4), ("elm", 3), ("fruit_tree", 1), ("birch", 1), ("cypress", 1)], 8, 0.6,
+                 F_WOODLAND, floor=0.02)
+T_GREAT_FOREST = T("great_forest", [("great_oak", 3), ("oak", 4), ("dark_oak", 4), ("beech", 3), ("elm", 2)], 7, 0.75,
+                   F_FOREST, floor=0.08, min_distance=0.9)
+T_GREAT_UNDER = T("great_forest_under", [("sapling_oak", 3), ("forest_bush", 4), ("berry_bush", 1)], 4, 0.6,
+                  mode(F_FOREST, "edge"), floor=0.15)
+T_GREAT_DEAD = T("great_forest_dead", [("fallen_oak", 3), ("fallen_dark_oak", 3), ("stump_oak", 2), ("dead_oak", 1)],
+                 10, 0.5, F_FOREST)
+T_COLOVIAN = T("colovian", [("skyrim_pine", 3), ("oak", 3), ("cypress", 2), ("juniper", 2), ("highland_pine", 1)], 8,
+               0.55, F_WOODLAND, floor=0.03)
+T_GOLD_COAST = T("gold_coast", [("olive", 4), ("cypress", 4), ("fruit_tree", 1), ("palm", 1)], 8, 0.55, F_WOODLAND,
+                 floor=0.03, stands=0.8)
+T_WEALD = T("west_weald", [("fruit_tree", 5), ("cypress", 3), ("olive", 2)], 7, 0.5, field(120, 40, 0.4, 0.1),
+            floor=0.02, stands=0.9)
+T_NIBENAY = T("nibenay", [("oak", 3), ("willow", 2), ("elm", 2), ("birch", 1), ("swamp_oak", 1)], 7, 0.65, F_WOODLAND,
+              floor=0.03)
+T_BLACKWOOD = T("blackwood", [("swamp_oak", 4), ("bald_cypress", 3), ("mangrove", 2), ("swamp_hist", 1)], 6, 0.75,
+                F_MARSH, floor=0.1)
+T_JERALL = T("jerall", [("skyrim_pine", 12), ("skyrim_spruce", 12), ("snowy_spruce", 3), ("oak", 1)], 5, 0.75,
+             F_FOREST, floor=0.05)
+T_RUMARE = T("rumare", [("willow", 4), ("oak", 1), ("birch", 1)], 9, 0.45, F_WOODLAND, floor=0.03)
+# Morrowind
+T_ASHLANDS = T("ashlands", [("charred_tree", 3), ("ash_tree", 2), ("fallen_charred", 1)], 12, 0.35, F_SCATTER, floor=0.04)
+T_BITTER = T("bitter_coast", [("bitter_coast_tree", 6), ("marsh_snag", 1), ("swamp_hist", 1)], 6, 0.7, F_MARSH,
+             floor=0.08)
+T_GRAZE = T("grazelands", [("graze_tree", 3), ("tundra_shrub", 2), ("ash_tree", 1)], 13, 0.35, F_SCATTER, floor=0.03)
+T_GASH = T("west_gash", [("west_gash_pine", 5), ("juniper", 2), ("crag_tree", 1)], 7, 0.6, F_WOODLAND, floor=0.04)
+T_ASCADIAN = T("ascadian", [("ascadian_bloom", 3), ("ascadian_oak", 3), ("oak", 1), ("fruit_tree", 1)], 7, 0.6,
+               F_WOODLAND, floor=0.04, stands=0.7)
+T_AZURA = T("azura", [("juniper", 2), ("ascadian_bloom", 1), ("crag_tree", 1)], 12, 0.4, F_SCATTER)
+T_SHEOGORAD = T("sheogorad", [("juniper", 3), ("dead_birch", 1), ("tundra_shrub", 2)], 11, 0.4, F_SCATTER)
+T_MOLAG = T("molag_amur", [("charred_tree", 1)], 16, 0.3, F_SCATTER)
+T_DESHAAN = T("deshaan", [("ash_tree", 2), ("graze_tree", 2), ("maple", 1)], 11, 0.45, F_SCATTER, floor=0.03)
+T_STONEFALLS = T("stonefalls", [("charred_tree", 2), ("graze_tree", 1), ("ash_tree", 1)], 12, 0.35, F_SCATTER)
+# Black Marsh
+T_BLACK_MARSH = T("black_marsh", [("bald_cypress", 4), ("mangrove", 3), ("swamp_hist", 2), ("swamp_oak", 1),
+                                  ("jungle_tree", 1)], 6, 0.8, F_MARSH, floor=0.12)
+T_MARSH_DEAD = T("marsh_dead", [("marsh_snag", 2), ("fallen_mangrove", 2), ("fallen_oak", 1)], 12, 0.45, F_MARSH)
+T_DEEP_MIRE = T("deep_mire", [("bald_cypress", 4), ("mangrove", 3), ("marsh_snag", 2)], 5, 0.75, F_MARSH, floor=0.15)
+T_HIST_GROVE = T("hist_grove", [("swamp_hist", 4), ("bald_cypress", 1), ("jungle_bush", 1)], 7, 0.6, F_MARSH, floor=0.1)
+T_MANGROVE = T("mangrove", [("mangrove", 6), ("bald_cypress", 1)], 5, 0.8, F_MARSH, floor=0.2)
+T_SHADOWFEN = T("shadowfen", [("bald_cypress", 3), ("dark_oak", 2), ("marsh_snag", 3), ("swamp_hist", 1)], 6, 0.7,
+                F_MARSH, floor=0.1)
+T_MURKMIRE = T("murkmire", [("jungle_tree", 3), ("bald_cypress", 2), ("mangrove", 2), ("swamp_hist", 1),
+                            ("jungle_bush", 2)], 5, 0.8, F_MARSH, floor=0.15)
+# Elsweyr and Hammerfell
+T_SAVANNA = T("savanna", [("acacia", 5), ("baobab", 1), ("desert_shrub", 3)], 14, 0.4, F_SCATTER, floor=0.08,
+              min_distance=1.0)
+T_BADLANDS = T("badlands", [("bleached_tree", 2), ("desert_shrub", 3)], 14, 0.3, F_SCATTER, floor=0.05)
+T_PELLITINE = T("pellitine", [("jungle_tree", 5), ("jungle_giant", 2), ("palm", 1)], 5, 0.85, F_FOREST_DENSE, floor=0.1)
+T_JUNGLE_UNDER = T("jungle_under", [("jungle_bush", 5), ("bamboo", 1)], 4, 0.55, F_DRIFT, floor=0.15)
+T_SUGAR = T("sugar_fields", [("palm", 2), ("acacia", 1), ("desert_shrub", 1)], 14, 0.35, F_SCATTER, floor=0.04)
+T_CANYONS = T("canyons", [("bleached_tree", 2), ("desert_shrub", 3), ("acacia", 1)], 14, 0.3, F_SCATTER, floor=0.04)
+T_DESERT = T("desert", [("date_palm", 4), ("palm", 1), ("desert_shrub", 2)], 6, 0.75, F_OASIS)
+T_DESERT_SCRUB = T("desert_scrub", [("desert_shrub", 3), ("bleached_tree", 1)], 16, 0.25, F_SCATTER, floor=0.03)
+T_DRAGONTAIL = T("dragontail", [("juniper", 3), ("bleached_tree", 1), ("desert_shrub", 3)], 12, 0.35, F_SCATTER, floor=0.03)
+T_CRAGLORN = T("craglorn", [("juniper", 3), ("baobab", 1), ("desert_shrub", 3), ("acacia", 1)], 12, 0.35, F_SCATTER,
+               floor=0.03)
+T_BANGKORAI = T("bangkorai", [("oak", 3), ("skyrim_pine", 3), ("dark_oak", 1), ("juniper", 1)], 7, 0.6, F_WOODLAND,
+                floor=0.04)
+T_STROS = T("stros_mkai", [("palm", 4), ("date_palm", 1)], 6, 0.6, F_WOODLAND, floor=0.15)
+# Valenwood
+T_VALENWOOD = T("valenwood", [("young_graht_oak", 3), ("jungle_tree", 3), ("jungle_giant", 1)], 6, 0.85,
+                F_FOREST_DENSE, floor=0.1)
+T_VALEN_DEAD = T("valenwood_dead", [("fallen_graht_oak", 2), ("fallen_jungle", 2), ("stump_jungle", 1)], 12, 0.45,
+                 F_FOREST_DENSE)
+T_RAINFOREST = T("rainforest", [("jungle_giant", 3), ("jungle_tree", 5), ("young_graht_oak", 1)], 5, 0.9,
+                 F_FOREST_DENSE, floor=0.15)
+T_VALEN_MANGROVE = T("valenwood_mangrove", [("mangrove", 5), ("palm", 1)], 5, 0.75, F_MARSH, floor=0.15)
+T_REAPERS = T("reapers_march", [("oak", 3), ("maple", 2), ("jungle_tree", 1), ("young_graht_oak", 1), ("acacia", 1)],
+              7, 0.6, F_WOODLAND, floor=0.03)
+# Summerset
+T_CRYSTAL = T("crystal_coast", [("crystal_tree", 2), ("summerset_gold", 2), ("palm", 1)], 13, 0.4, F_SCATTER, floor=0.03)
+T_SUMMERSET = T("summerset", [("summerset_bloom", 4), ("summerset_gold", 4), ("cherry", 1)], 8, 0.6, F_WOODLAND,
+                floor=0.03, stands=0.8)
+T_AURIDON = T("auridon", [("olive", 2), ("fruit_tree", 3), ("cypress", 2), ("palm", 1)], 8, 0.5, F_WOODLAND, floor=0.03)
+T_ARTAEUM = T("artaeum", [("summerset_bloom", 2), ("cherry", 3), ("crystal_tree", 1)], 7, 0.65, F_WOODLAND, floor=0.05)
+T_SHORE_PALMS = T("shore_palms", [("palm", 3), ("date_palm", 1)], 10, 0.4, F_SCATTER, floor=0.06)
+T_TROPICAL = T("tropical_palms", [("palm", 4), ("date_palm", 1)], 6, 0.6, F_WOODLAND, floor=0.2)
+# High Rock
+T_MOORS = T("glenumbra", [("hawthorn", 6), ("oak", 1), ("birch", 1)], 10, 0.45, F_SCATTER, floor=0.05)
+T_STORMHAVEN = T("stormhaven", [("oak", 4), ("beech", 3), ("birch", 1), ("elm", 2), ("dark_oak", 1)], 6, 0.8, F_FOREST,
+                 floor=0.05)
+T_TEMPERATE_UNDER = T("temperate_under", [("sapling_oak", 2), ("forest_bush", 3), ("berry_bush", 1)], 5, 0.45,
+                      mode(F_FOREST, "edge"), floor=0.03)
+T_TEMPERATE_DEAD = T("temperate_dead", [("fallen_oak", 3), ("stump_oak", 2), ("dead_oak", 1)], 13, 0.4, F_FOREST)
+T_RIVENSPIRE = T("rivenspire", [("dark_oak", 4), ("skyrim_spruce", 3), ("dead_oak", 2), ("marsh_snag", 1)], 5, 0.8,
+                 F_FOREST_DENSE, floor=0.08)
+T_WROTHGAR = T("wrothgar", [("snowy_spruce", 3), ("skyrim_spruce", 3), ("skyrim_pine", 2), ("dead_pine", 1)], 6, 0.65,
+               F_FOREST, floor=0.04)
+T_WAYREST = T("wayrest", [("oak", 3), ("fruit_tree", 3), ("elm", 1)], 11, 0.45, F_SCATTER, floor=0.03)
+# foreign lands
+T_ATMORA = T("atmora", [("frozen_pine", 4), ("snowy_giant_pine", 2), ("snowy_spruce", 2)], 6, 0.7, F_FOREST, floor=0.05)
+T_ATMORA_WASTE = T("atmora_waste", [("frozen_pine", 1)], 20, 0.2, F_SCATTER)
+T_TSAESCI = T("tsaesci", [("jungle_tree", 4), ("jungle_giant", 1), ("bamboo", 3)], 5, 0.85, F_FOREST_DENSE, floor=0.1,
+              stands=0.8)
+T_KAMAL = T("kamal", [("snowy_spruce", 3), ("frozen_pine", 2)], 12, 0.35, F_SCATTER)
+T_TANG_MO = T("tang_mo", [("cherry", 3), ("plum", 2), ("akaviri_pine", 3), ("bamboo", 2), ("palm", 1)], 7, 0.6,
+              F_WOODLAND, floor=0.04, stands=0.8)
+T_KA_PO_TUN = T("ka_po_tun", [("akaviri_pine", 3), ("acacia", 1), ("tundra_shrub", 2)], 15, 0.35, F_SCATTER, floor=0.03)
+T_SUNKEN = T("sunken_isles", [("palm", 3), ("mangrove", 1)], 8, 0.5, F_WOODLAND, floor=0.05)
+T_PYANDONEA = T("pyandonea", [("jungle_tree", 4), ("jungle_giant", 1), ("palm", 2)], 5, 0.8, F_FOREST_DENSE, floor=0.1)
+T_THRAS = T("thras", [("palm", 2), ("date_palm", 1)], 12, 0.35, F_SCATTER, floor=0.04)
+T_CRYSTAL_SPIRES = T("crystal_spires", [("crystal_tree", 1)], 16, 0.3, F_SCATTER, floor=0.05)
+
+# --- ground cover
+G = "grass"
+TALL = "tall_grass"
+C_TUNDRA_GRASS = cover("tundra_grass", [(G, 9), ("fern", 1), ("dead_bush", 1), (TALL, 2)], 30, F_TUFT, floor=0.2,
+                       cluster=(2, 5), patchiness=0.3)
+C_PLAINS_GRASS = cover("plains_grass", [(G, 10), (TALL, 3), ("fern", 1)], 40, F_TUFT, floor=0.45, cluster=(2, 6),
+                       patchiness=0.4)
+C_LUSH_GRASS = cover("lush_grass", [(G, 8), (TALL, 4), ("fern", 2)], 48, F_TUFT, floor=0.55, cluster=(3, 6))
+C_FOREST_FLOOR = cover("forest_floor", [(G, 3), ("fern", 4), ("large_fern", 2)], 30, mode(F_FOREST, "inside"),
+                       floor=0.35, cluster=(2, 5), patchiness=0.7, scale=18)
+C_TAIGA_FLOOR = cover("taiga_floor", [("fern", 5), (G, 2), ("large_fern", 2)], 26, F_DRIFT, floor=0.3, cluster=(2, 5),
+                      patchiness=0.7, scale=16)
+C_DRY_GRASS = cover("dry_grass", [(G, 4), ("dead_bush", 1), (TALL, 1)], 20, F_TUFT, floor=0.1, cluster=(1, 4))
+C_SAVANNA_GRASS = cover("savanna_grass", [(G, 6), (TALL, 5)], 46, field(116, 26, 0.6, 0.2), floor=0.25, cluster=(3, 7),
+                        patchiness=0.5)
+C_GRAZE_GRASS = cover("graze_grass", [(G, 5), (st(SK + ":ash_grass"), 2), (TALL, 4)], 46, field(116, 26, 0.6, 0.2),
+                      floor=0.3, cluster=(3, 7))
+C_ASH_GRASS = cover("ash_grass", [(st(SK + ":ash_grass"), 6), (st(SK + ":scathecraw"), 2), ("dead_bush", 1)], 20,
+                    F_TUFT, floor=0.1, cluster=(1, 4), patchiness=0.6)
+C_ASH_SPARSE = cover("ash_sparse", [(st(SK + ":ash_grass"), 4), (st(SK + ":scathecraw"), 1), ("dead_bush", 2)], 7,
+                     F_TUFT, cluster=(1, 3))
+C_SWAMP_GRASS = cover("swamp_grass", [(G, 5), ("fern", 2), (TALL, 3), ("large_fern", 1)], 42, F_DRIFT, floor=0.5,
+                      cluster=(2, 5))
+C_JUNGLE_FLOOR = cover("jungle_floor", [(G, 3), ("fern", 3), ("large_fern", 3), (TALL, 1)], 46, F_DRIFT, floor=0.5,
+                       cluster=(3, 6), patchiness=0.6)
+C_SNOW_GRASS = cover("snow_grass", [(G, 2), ("fern", 1)], 7, F_TUFT, cluster=(1, 3))
+C_DESERT_SCRUB = cover("desert_scrub", [("dead_bush", 4), (G, 1)], 5, F_TUFT, floor=0.2, cluster=(1, 2))
+C_MOSS = cover("moss", [("moss_carpet", 1)], 10, F_DRIFT, cluster=(3, 8), spread=3)
+C_MOSS_DENSE = cover("moss_dense", [("moss_carpet", 1)], 18, F_DRIFT, floor=0.1, cluster=(4, 9), spread=3)
+C_MUSHROOMS = cover("mushrooms", [("brown_mushroom", 2), ("red_mushroom", 1)], 4, F_RING, floor=0.02, cluster=(2, 6),
+                    spread=2, patchiness=0.8)
+C_NIGHTSHADE = cover("nightshade", [(st(SK + ":nightshade", harvested=False), 1)], 2, F_RING, cluster=(1, 3))
+C_SNOWBERRIES = cover("snowberries", [(st("sweet_berry_bush", age=3), 1)], 3, F_RING, floor=0.02, cluster=(2, 5))
+C_SNOWBERRIES_FEW = cover("snowberries_few", [(st("sweet_berry_bush", age=3), 1)], 1, F_RING, cluster=(1, 4))
+C_GRAPES = cover("grapes", [(st("sweet_berry_bush", age=3), 1)], 8, field(117, 18, 0.35, 0.1), cluster=(3, 6), spread=3)
+C_PUMPKINS = cover("pumpkins", [("pumpkin", 1)], 1, F_RING, density=0.1, cluster=(1, 3))
+C_REEDS = cover("reeds", [(SK + ":swamp_reeds", 1)], 24, F_EVERY, cluster=(3, 7), spread=3, near_water=True)
+C_REEDS_FEW = cover("reeds_few", [(SK + ":swamp_reeds", 1)], 8, F_EVERY, cluster=(2, 5), spread=2, near_water=True)
+C_LILIES = cover("lilies", [("lily_pad", 1)], 8, F_DRIFT, floor=0.15, cluster=(2, 6), spread=3)
+C_LILIES_DENSE = cover("lilies_dense", [("lily_pad", 1)], 18, F_DRIFT, floor=0.25, cluster=(3, 8), spread=3)
+C_CRYSTALS = cover("crystals", [(st(SK + ":crystal_cluster", facing="up", waterlogged=False), 1)], 3, F_RING,
+                   floor=0.05, cluster=(1, 4))
+C_CACTI = cover("cacti", [("cactus", 1)], 1, F_RING, density=0.3, cluster=(1, 2))
+
+
+def flowers(name, entries, n=10, fld=None, floor=0.04, cluster=(3, 8), spread=3, salt=None):
+    return cover("flowers_" + name, entries, n, fld or F_MEADOW, floor=floor, cluster=cluster, spread=spread,
+                 patchiness=0.85, scale=28, salt=salt)
+
+
+FL_TUNDRA = flowers("tundra", [("azure_bluet", 3), ("oxeye_daisy", 2), ("cornflower", 2), ("dandelion", 1)], 8)
+FL_MOUNTAIN = flowers("mountain", [("poppy", 3), ("cornflower", 3), ("allium", 2), ("azure_bluet", 1)], 8)
+FL_MOUNTAIN_FEW = flowers("mountain_few", [("poppy", 3), ("cornflower", 3), ("allium", 2)], 3)
+FL_RIFT = flowers("rift", [("poppy", 2), ("cornflower", 2), ("orange_tulip", 3), ("dandelion", 1), ("lilac", 1)], 9,
+                  mode(F_FOREST, "outside"))
+FL_MEADOW = flowers("meadow", [("cornflower", 3), ("allium", 2), ("azure_bluet", 2), ("oxeye_daisy", 2), ("poppy", 2),
+                               ("lilac", 1)], 16)
+FL_FOREST = flowers("forest", [("lily_of_the_valley", 3), ("poppy", 1), ("cornflower", 1)], 5, mode(F_FOREST, "outside"))
+FL_SWAMP = flowers("swamp", [("blue_orchid", 4), ("lily_of_the_valley", 1)], 8, F_DRIFT)
+FL_COLD_MARSH = flowers("cold_marsh", [("azure_bluet", 2), ("lily_of_the_valley", 2), ("blue_orchid", 1)], 5, F_DRIFT)
+FL_HEARTLANDS = flowers("heartlands", [("poppy", 2), ("dandelion", 2), ("oxeye_daisy", 2), ("red_tulip", 1),
+                                       ("white_tulip", 1), ("sunflower", 1)], 12)
+FL_WEALD = flowers("weald", [("allium", 3), ("pink_tulip", 2), ("lilac", 2), ("dandelion", 1)], 12)
+FL_LAVENDER = flowers("lavender", [("lilac", 2), ("allium", 5)], 10, field(118, 22, 0.3, 0.1), floor=0.0,
+                      cluster=(5, 10), spread=4)
+FL_GOLD_COAST = flowers("gold_coast", [("dandelion", 3), ("orange_tulip", 2), ("oxeye_daisy", 2), ("sunflower", 1)], 9)
+FL_ASCADIAN = flowers("ascadian", [("pink_tulip", 3), ("allium", 3), ("dandelion", 2), ("azure_bluet", 1),
+                                   ("peony", 1)], 14)
+FL_ASH = flowers("ash", [("dead_bush", 3), ("wither_rose", 1)], 2, F_RING)
+FL_SAVANNA = flowers("savanna", [("orange_tulip", 2), ("dandelion", 3), ("red_tulip", 1)], 5)
+FL_JUNGLE = flowers("jungle", [("blue_orchid", 2), ("allium", 1), ("red_tulip", 1), ("peony", 1)], 7)
+FL_SUMMERSET = flowers("summerset", [("lily_of_the_valley", 3), ("white_tulip", 2), ("azure_bluet", 2), ("allium", 1),
+                                     ("peony", 1)], 16)
+FL_ROSES = flowers("roses", [("rose_bush", 2), ("peony", 2), ("poppy", 3)], 4, F_RING, cluster=(2, 6))
+FL_ARTAEUM = flowers("artaeum", [("lily_of_the_valley", 3), ("allium", 2), ("pink_tulip", 2), ("torchflower", 1)], 14)
+FL_HIGH_ROCK = flowers("high_rock", [("poppy", 3), ("cornflower", 2), ("oxeye_daisy", 2), ("red_tulip", 1)], 9)
+FL_MOOR = flowers("moor", [("allium", 4), ("azure_bluet", 2), ("lilac", 1)], 14, field(119, 34, 0.5, 0.25),
+                  cluster=(4, 9))      # heather
+FL_AKAVIR = flowers("akavir", [("pink_tulip", 3), ("white_tulip", 2), ("lily_of_the_valley", 2)], 10)
+FL_STEPPE = flowers("steppe", [("dandelion", 3), ("cornflower", 2), ("poppy", 1)], 6)
+FL_COLD = flowers("cold", [("azure_bluet", 2), ("lily_of_the_valley", 1)], 3)
+
+# --- the table. Giants (Graht-oaks, Hist, Telvanni and emperor parasol mushrooms) keep their Java features.
+FOREST_FLOOR = [C_FOREST_FLOOR, C_MOSS, C_MUSHROOMS]
+FLORA.update({
+    # Skyrim
+    "whiterun_tundra": [R_TUNDRA, T_WHITERUN, C_TUNDRA_GRASS, FL_TUNDRA, C_SNOWBERRIES_FEW],
+    "whiterun_plains": [R_TUNDRA_FEW, T_WHITERUN, C_PLAINS_GRASS, FL_TUNDRA, FL_MOUNTAIN_FEW, C_PUMPKINS],
+    "pine_forest": [R_MOSSY, T_PINE, T_PINE_UNDER, T_PINE_DEAD, C_TAIGA_FLOOR, FL_MOUNTAIN_FEW, C_MOSS, C_MUSHROOMS,
+                    C_SNOWBERRIES_FEW],
+    "snowy_pine_forest": [R_TUNDRA_FEW, T_SNOWY, T_SNOWY_UNDER, T_SNOWY_DEAD, C_SNOW_GRASS, C_SNOWBERRIES, FL_COLD],
+    "falkreath_forest": [R_MOSSY, T_FALKREATH, T_FALKREATH_UNDER, T_FALKREATH_DEAD, C_TAIGA_FLOOR, C_MOSS_DENSE,
+                         C_MUSHROOMS, C_NIGHTSHADE, FL_FOREST],
+    "rift_autumn_forest": [R_TUNDRA_FEW, T_RIFT, T_RIFT_UNDER, T_RIFT_DEAD, C_FOREST_FLOOR, FL_RIFT, FL_LAVENDER,
+                           C_MUSHROOMS],
+    "reach_crags": [R_REACH, R_REACH_STANDING, T_REACH, C_DRY_GRASS, FL_MOUNTAIN_FEW],
+    "reach_valley": [R_MOSSY, T_REACH_VALLEY, C_PLAINS_GRASS, FL_MOUNTAIN, C_REEDS_FEW],
+    "hjaalmarch_marsh": [T_HJAAL, T_HJAAL_DEAD, C_REEDS, C_SWAMP_GRASS, FL_COLD_MARSH, C_LILIES,
+                         "minecraft:seagrass_swamp"],
+    "eastmarch_volcanic_tundra": [R_TUNDRA, T_VOLC_TUNDRA, C_TUNDRA_GRASS, FL_TUNDRA, C_SNOWBERRIES_FEW],
+    "eastmarch_hot_springs": [R_CALCITE, T_HOT_SPRINGS, C_REEDS_FEW, C_DRY_GRASS, FL_TUNDRA],
+    "pale_snowfield": [R_ICE, T_SNOWY_SPARSE, C_SNOW_GRASS, C_SNOWBERRIES_FEW, FL_COLD],
+    "winterhold_glacier": [R_ICE],
+    "throat_of_the_world": [R_ICE],
+    "snowy_slopes": [R_ICE, T_SLOPES],
+    "alpine_meadow": [R_TUNDRA_FEW, T_ALPINE, C_PLAINS_GRASS, FL_MEADOW],
+    "skyrim_highlands": [R_TUNDRA, T_HIGHLAND, C_TUNDRA_GRASS, FL_MOUNTAIN_FEW, C_SNOWBERRIES_FEW],
+    "skyrim_coast": [R_GREY, C_DRY_GRASS],
+    "frozen_shore": [R_ICE],
+    "skyrim_river": [C_REEDS_FEW, "minecraft:seagrass_river"],
+    "skyrim_lake": [C_REEDS_FEW, C_LILIES, "minecraft:seagrass_river"],
+    "solstheim_ashlands": [R_VOLCANIC, T_SOLS_ASH, FL_ASH, C_ASH_SPARSE, "ash_drifts"],
+    "solstheim_pine_forest": [R_TUNDRA_FEW, T_SOLS_PINE, T_SNOWY_DEAD, C_TAIGA_FLOOR, C_SNOWBERRIES, FL_COLD,
+                              "ash_drifts_sparse"],
+    # Cyrodiil
+    "heartlands": [T_HEARTLANDS, C_LUSH_GRASS, FL_HEARTLANDS, C_PUMPKINS, "minecraft:patch_sugar_cane"],
+    "great_forest": [R_MOSSY, T_GREAT_FOREST, T_GREAT_UNDER, T_GREAT_DEAD, C_NIGHTSHADE, FL_FOREST] + FOREST_FLOOR,
+    "colovian_highlands": [R_GREY, T_COLOVIAN, C_TUNDRA_GRASS, FL_MOUNTAIN_FEW],
+    "gold_coast": [T_GOLD_COAST, C_GRAPES, C_PLAINS_GRASS, FL_GOLD_COAST],
+    "west_weald_vineyards": [T_WEALD, C_GRAPES, FL_LAVENDER, FL_WEALD, C_PLAINS_GRASS],
+    "nibenay_valley": [T_NIBENAY, C_LUSH_GRASS, FL_HEARTLANDS, C_REEDS_FEW, C_LILIES, "minecraft:patch_sugar_cane"],
+    "blackwood_swamp": ["hist_trees_sparse", T_BLACKWOOD, T_MARSH_DEAD, C_REEDS, C_SWAMP_GRASS, FL_SWAMP,
+                        C_LILIES_DENSE, "minecraft:seagrass_swamp"],
+    "jerall_foothills": [R_TUNDRA_FEW, T_JERALL, T_PINE_UNDER, T_PINE_DEAD, C_TAIGA_FLOOR, C_SNOWBERRIES_FEW,
+                         FL_MOUNTAIN_FEW],
+    "lake_rumare_shore": [T_RUMARE, C_REEDS, C_LUSH_GRASS, FL_HEARTLANDS, C_LILIES, "minecraft:patch_sugar_cane",
+                          "minecraft:seagrass_river"],
+    "cyrodiil_river": [C_REEDS_FEW, "minecraft:seagrass_river"],
+    # Morrowind
+    "vvardenfell_ashlands": [R_VOLCANIC, T_ASHLANDS, FL_ASH, C_ASH_GRASS, "ash_drifts"],
+    "red_mountain": [R_VOLCANIC, C_ASH_SPARSE, "ash_drifts_sparse"],
+    "bitter_coast_swamp": ["emperor_parasols_rare", T_BITTER, T_MARSH_DEAD, C_REEDS, C_SWAMP_GRASS, FL_SWAMP,
+                           C_MUSHROOMS, C_LILIES, "minecraft:seagrass_swamp"],
+    "grazelands": [R_TUNDRA_FEW, T_GRAZE, C_GRAZE_GRASS, FL_SAVANNA],
+    "west_gash": [R_GREY, T_GASH, C_DRY_GRASS, FL_MOUNTAIN_FEW],
+    "ascadian_isles": [T_ASCADIAN, C_LUSH_GRASS, FL_ASCADIAN, FL_LAVENDER, C_REEDS_FEW, C_LILIES,
+                       "minecraft:patch_sugar_cane"],
+    "azuras_coast": [R_GREY, "emperor_parasols_rare", T_AZURA, C_FOREST_FLOOR, FL_ASCADIAN],
+    "sheogorad": [R_GREY, "emperor_parasols_sparse", T_SHEOGORAD, C_FOREST_FLOOR, C_MUSHROOMS, FL_MOUNTAIN_FEW],
+    "molag_amur": [R_VOLCANIC, T_MOLAG, C_ASH_SPARSE, "ash_drifts"],
+    "telvanni_mushroom_forest": ["telvanni_towers", "emperor_parasols_dense", "trees_mushroom_grove", C_FOREST_FLOOR,
+                                 C_MOSS, C_MUSHROOMS, FL_ASCADIAN],
+    "deshaan_plains": [T_DESHAAN, C_GRAZE_GRASS, FL_ASCADIAN, "ash_drifts_sparse"],
+    "stonefalls": [R_VOLCANIC, T_STONEFALLS, C_ASH_GRASS, C_DRY_GRASS, "ash_drifts_sparse"],
+    "ash_shore": [R_VOLCANIC],
+    # Black Marsh
+    "black_marsh_swamp": ["hist_trees_sparse", T_BLACK_MARSH, T_MARSH_DEAD, C_REEDS, FL_SWAMP, C_SWAMP_GRASS,
+                          C_LILIES_DENSE, C_MUSHROOMS, "minecraft:vines", "minecraft:seagrass_swamp"],
+    "deep_mire": ["hist_trees_sparse", T_DEEP_MIRE, T_MARSH_DEAD, C_REEDS, C_SWAMP_GRASS, C_LILIES_DENSE,
+                  "minecraft:vines", "minecraft:seagrass_swamp"],
+    "hist_grove": ["hist_trees_dense", T_HIST_GROVE, C_REEDS_FEW, FL_SWAMP, C_JUNGLE_FLOOR, C_MOSS, C_LILIES,
+                   "minecraft:seagrass_swamp"],
+    "mangrove_delta": [T_MANGROVE, C_REEDS, C_SWAMP_GRASS, C_LILIES, "minecraft:seagrass_swamp"],
+    "shadowfen": [T_SHADOWFEN, T_MARSH_DEAD, C_REEDS, C_SWAMP_GRASS, C_MUSHROOMS, C_NIGHTSHADE, C_LILIES,
+                  "minecraft:seagrass_swamp"],
+    "murkmire": ["hist_trees_sparse", T_MURKMIRE, C_REEDS, FL_JUNGLE, C_JUNGLE_FLOOR, C_LILIES_DENSE, "minecraft:vines",
+                 "minecraft:seagrass_swamp"],
+    "murky_river": [C_REEDS_FEW, C_LILIES, "minecraft:seagrass_swamp"],
+    # Elsweyr
+    "anequina_badlands": [R_RED, T_BADLANDS, C_DESERT_SCRUB],
+    "elsweyr_dunes": [C_DESERT_SCRUB],
+    "elsweyr_savanna": [R_RED, T_SAVANNA, C_SAVANNA_GRASS, FL_SAVANNA],
+    "pellitine_jungle": [T_PELLITINE, T_JUNGLE_UNDER, C_JUNGLE_FLOOR, FL_JUNGLE, "minecraft:vines",
+                         "minecraft:patch_melon"],
+    "sugar_fields": [T_SUGAR, "moon_sugar", C_SAVANNA_GRASS, FL_SAVANNA, "minecraft:patch_sugar_cane"],
+    "elsweyr_canyons": [R_RED, T_CANYONS, C_DESERT_SCRUB],
+    # Valenwood
+    "graht_oak_forest": ["graht_oaks_dense", T_VALENWOOD, T_JUNGLE_UNDER, T_VALEN_DEAD, C_JUNGLE_FLOOR, FL_JUNGLE, C_MOSS,
+                         C_MUSHROOMS, "minecraft:vines"],
+    "valenwood_rainforest": ["graht_oaks_sparse", T_RAINFOREST, T_JUNGLE_UNDER, T_VALEN_DEAD, C_JUNGLE_FLOOR, FL_JUNGLE,
+                             "minecraft:vines", "minecraft:patch_melon"],
+    "valenwood_mangrove_coast": [T_VALEN_MANGROVE, C_REEDS, C_SWAMP_GRASS, C_LILIES, "minecraft:seagrass_swamp"],
+    "reapers_march": ["graht_oaks_sparse", T_REAPERS, T_TEMPERATE_DEAD, C_SAVANNA_GRASS, FL_SAVANNA],
+    "jungle_river": [C_REEDS_FEW, C_LILIES, "minecraft:seagrass_river"],
+    # Summerset
+    "crystal_coast": [R_CALCITE, T_CRYSTAL, C_CRYSTALS, FL_SUMMERSET, C_PLAINS_GRASS],
+    "summerset_meadow": [T_SUMMERSET, FL_ROSES, FL_LAVENDER, FL_SUMMERSET, C_CRYSTALS, C_PLAINS_GRASS],
+    "auridon_vineyards": [T_AURIDON, C_GRAPES, FL_LAVENDER, FL_WEALD, C_PLAINS_GRASS],
+    "artaeum": [R_CALCITE, T_ARTAEUM, C_CRYSTALS, FL_ARTAEUM, C_LUSH_GRASS, C_MOSS],
+    "summerset_shore": [T_SHORE_PALMS, C_CRYSTALS],
+    # Hammerfell
+    "alikr_desert": [R_SAND, T_DESERT, T_DESERT_SCRUB, C_DESERT_SCRUB],
+    "alikr_dunes": [C_DESERT_SCRUB],
+    "dragontail_mountains": [R_RED, T_DRAGONTAIL, C_DESERT_SCRUB],
+    "craglorn": [R_RED, R_SAND, T_CRAGLORN, C_DRY_GRASS],
+    "bangkorai": [R_GREY, T_BANGKORAI, C_PLAINS_GRASS, FL_HIGH_ROCK],
+    "stros_mkai_coast": [T_STROS, FL_JUNGLE, C_SAVANNA_GRASS, "minecraft:patch_sugar_cane"],
+    # High Rock
+    "glenumbra_moors": [R_MOOR, T_MOORS, C_SNOWBERRIES_FEW, FL_MOOR, C_PLAINS_GRASS],
+    "stormhaven": [R_MOSSY, T_STORMHAVEN, T_TEMPERATE_UNDER, T_TEMPERATE_DEAD, C_PUMPKINS, FL_HIGH_ROCK, C_FOREST_FLOOR],
+    "rivenspire": [R_DARK, T_RIVENSPIRE, T_TEMPERATE_DEAD, C_TAIGA_FLOOR, C_MUSHROOMS, C_NIGHTSHADE, C_MOSS],
+    "wrothgarian_mountains": [R_TUNDRA, T_WROTHGAR, T_SNOWY_DEAD, C_SNOWBERRIES, FL_COLD, C_TAIGA_FLOOR],
+    "wayrest_farmland": [T_WAYREST, C_PUMPKINS, FL_HIGH_ROCK, C_LUSH_GRASS, "minecraft:patch_sugar_cane"],
+    "bjoulsae_river": [C_REEDS_FEW, "minecraft:seagrass_river"],
+    # foreign lands
+    "atmoran_ice_waste": [R_ICE, T_ATMORA_WASTE],
+    "atmoran_frozen_forest": [R_ICE, T_ATMORA, T_SNOWY_DEAD, C_SNOWBERRIES, C_SNOW_GRASS],
+    "tsaesci_jungle": [T_TSAESCI, T_JUNGLE_UNDER, FL_JUNGLE, C_JUNGLE_FLOOR, "minecraft:vines", "minecraft:patch_melon"],
+    "kamal_snowfield": [R_ICE, T_KAMAL, C_SNOW_GRASS],
+    "tang_mo_islands": [T_TANG_MO, FL_AKAVIR, C_LUSH_GRASS],
+    "ka_po_tun_steppe": [R_GREY, T_KA_PO_TUN, FL_STEPPE, C_SAVANNA_GRASS],
+    "yokudan_desert": [R_SAND, T_DESERT, T_DESERT_SCRUB, C_CACTI, C_DESERT_SCRUB],
+    "sunken_isles": [R_GREY, T_SUNKEN, C_REEDS_FEW, FL_JUNGLE, C_SAVANNA_GRASS],
+    "pyandonean_jungle_isles": [T_PYANDONEA, T_JUNGLE_UNDER, FL_JUNGLE, C_JUNGLE_FLOOR, "minecraft:vines"],
+    "thras_coral": [R_CORAL, T_THRAS, "dead_corals", C_SAVANNA_GRASS],
+    "crystal_spires": [R_CALCITE, T_CRYSTAL_SPIRES, C_CRYSTALS, C_DRY_GRASS],
+    # generic coasts and rivers
+    "warm_beach": [T_SHORE_PALMS],
+    "tropical_beach": [T_TROPICAL, "minecraft:patch_sugar_cane"],
+    "rocky_shore": [R_GREY, R_RUBBLE],
+    "warm_river": [C_REEDS_FEW, "minecraft:patch_sugar_cane", "minecraft:seagrass_river"],
+})
+
+
+def apply_flora():
+    """Gives every biome in FLORA its flora: the old vegetation entries out, the table's in (in canonical order)."""
+    for bid, plants in FLORA.items():
+        assert bid in BIOMES, "flora for unknown biome " + bid
+        b = BIOMES[bid]
+        keep = [f for f in b["features"] if resolve_feature(f) not in OLD_VEG]
+        b["features"] = keep + [f for f in plants if f not in keep]
+
 
 # map_water placeholder ordering: lakes = [map_water, hot springs] then vanilla lava lakes (see canonical()).
 
@@ -2463,8 +2949,8 @@ def write_tags(tags):
             with open(path, encoding="utf-8") as f:
                 old = json.load(f).get("values", [])
             for v in old:
-                if isinstance(v, str) and v.startswith(SK + ":"):
-                    continue   # generated biome entries
+                if isinstance(v, str) and v.startswith(SK + ":") and v.split(":", 1)[1] in BIOMES:
+                    continue   # generated biome entries (other modules' biomes, e.g. the realms, are kept)
                 if (v if isinstance(v, str) else v.get("id")) in values:
                     continue
                 keep.append(v)
@@ -2566,6 +3052,7 @@ BLOCK_NAMES = {
 
 
 def main():
+    apply_flora()
     where = step_of_all()
     order = {s: {f: i for i, f in enumerate(canonical(s))} for s in STEPS}
     # placed features referenced by placed features must exist
@@ -2578,8 +3065,13 @@ def main():
                 assert f.startswith("minecraft:") or f in [ref(n) for n in PF], (name, f)
 
     # clean what this script generates
-    for d in (os.path.join(DATA, SK, "worldgen", "biome"),
-              os.path.join(DATA, SK, "worldgen", "configured_feature", "biome"),
+    # only this catalogue's own biomes: other modules (the realms) keep their biome files in the same folder
+    bdir = os.path.join(DATA, SK, "worldgen", "biome")
+    if os.path.isdir(bdir):
+        for fn in os.listdir(bdir):
+            if fn.endswith(".json") and fn[:-5] in BIOMES:
+                os.remove(os.path.join(bdir, fn))
+    for d in (os.path.join(DATA, SK, "worldgen", "configured_feature", "biome"),
               os.path.join(DATA, SK, "worldgen", "placed_feature", "biome")):
         if os.path.isdir(d):
             shutil.rmtree(d)

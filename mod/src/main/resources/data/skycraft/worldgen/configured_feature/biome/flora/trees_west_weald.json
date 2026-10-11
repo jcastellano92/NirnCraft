@@ -1,0 +1,21 @@
+{
+  "type": "skycraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "fruit_tree",
+        "weight": 5
+      },
+      {
+        "species": "cypress",
+        "weight": 3
+      },
+      {
+        "species": "olive",
+        "weight": 2
+      }
+    ],
+    "stands": 0.9,
+    "stand_scale": 48
+  }
+}

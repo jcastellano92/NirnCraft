@@ -112,7 +112,7 @@
     ],
     [
       "minecraft:amethyst_geode",
-      "skycraft:biome/boulders_mossy_3"
+      "skycraft:biome/flora/rocks_mossy"
     ],
     [
       "minecraft:monster_room",
@@ -149,14 +149,14 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/trees_falkreath",
-      "skycraft:biome/fallen_logs_spruce_3",
-      "skycraft:biome/tall_ferns",
-      "skycraft:biome/flowers_forest",
-      "skycraft:biome/grass_forest",
-      "skycraft:biome/moss_carpets",
-      "skycraft:biome/forest_mushrooms",
-      "skycraft:biome/nightshade_shade"
+      "skycraft:biome/flora/trees_falkreath",
+      "skycraft:biome/flora/trees_falkreath_under",
+      "skycraft:biome/flora/trees_falkreath_dead",
+      "skycraft:biome/flora/cover_taiga_floor",
+      "skycraft:biome/flora/cover_moss_dense",
+      "skycraft:biome/flora/cover_mushrooms",
+      "skycraft:biome/flora/cover_nightshade",
+      "skycraft:biome/flora/cover_flowers_forest"
     ],
     [
       "minecraft:freeze_top_layer"

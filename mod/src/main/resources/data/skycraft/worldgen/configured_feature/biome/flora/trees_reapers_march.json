@@ -1,0 +1,29 @@
+{
+  "type": "skycraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "oak",
+        "weight": 3
+      },
+      {
+        "species": "maple",
+        "weight": 2
+      },
+      {
+        "species": "jungle_tree",
+        "weight": 1
+      },
+      {
+        "species": "young_graht_oak",
+        "weight": 1
+      },
+      {
+        "species": "acacia",
+        "weight": 1
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

@@ -161,11 +161,10 @@
     [
       "minecraft:glow_lichen",
       "skycraft:biome/graht_oaks_sparse",
-      "skycraft:biome/trees_reapers_march",
-      "skycraft:biome/fallen_logs_oak_5",
-      "skycraft:biome/tall_grass_dense",
-      "skycraft:biome/flowers_savanna",
-      "skycraft:biome/grass_plains"
+      "skycraft:biome/flora/trees_reapers_march",
+      "skycraft:biome/flora/trees_temperate_dead",
+      "skycraft:biome/flora/cover_savanna_grass",
+      "skycraft:biome/flora/cover_flowers_savanna"
     ],
     [
       "minecraft:freeze_top_layer"

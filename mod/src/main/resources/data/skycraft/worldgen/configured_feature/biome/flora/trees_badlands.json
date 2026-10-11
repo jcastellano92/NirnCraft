@@ -1,0 +1,17 @@
+{
+  "type": "skycraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "bleached_tree",
+        "weight": 2
+      },
+      {
+        "species": "desert_shrub",
+        "weight": 3
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

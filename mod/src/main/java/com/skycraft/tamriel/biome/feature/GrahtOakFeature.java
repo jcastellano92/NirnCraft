@@ -46,12 +46,16 @@ public class GrahtOakFeature extends Feature<NoneFeatureConfiguration> {
         // the trunk: a column that leans gently, wider at the foot
         double tx = cx, tz = cz;
         double driftX = (random.nextDouble() - 0.5) * 0.08, driftZ = (random.nextDouble() - 0.5) * 0.08;
+        // every Graht-oak twists and rises its own way: a slow spiral of the trunk, branch pitch, crown size
+        double twist = random.nextDouble() * 0.9, twistPhase = random.nextDouble() * Math.PI * 2;
+        double rise = 0.15 + random.nextDouble() * 0.25;
+        int crownBase = 3 + random.nextInt(3);
         double[] centerX = new double[height + 1];
         double[] centerZ = new double[height + 1];
         for (int dy = -3; dy <= height; dy++) {
             if (dy >= 0) {
-                tx += driftX;
-                tz += driftZ;
+                tx += driftX + Math.cos(twistPhase + dy * 0.09) * twist * 0.06;
+                tz += driftZ + Math.sin(twistPhase + dy * 0.09) * twist * 0.06;
                 centerX[dy] = tx;
                 centerZ[dy] = tz;
             }
@@ -86,7 +90,7 @@ public class GrahtOakFeature extends Feature<NoneFeatureConfiguration> {
             for (int s = 0; s <= len; s++) {
                 ex = bx + Math.cos(a) * (radius + s);
                 ez = bz + Math.sin(a) * (radius + s);
-                ey += s < 3 ? 0.5 : 0.25;
+                ey += s < 3 ? 0.5 : rise;
                 int x = Mth.floor(ex), y = Mth.floor(ey), z = Mth.floor(ez);
                 // a 3-wide deck with a flat top: walkable
                 for (int ox = -1; ox <= 1; ox++) {
@@ -97,10 +101,10 @@ public class GrahtOakFeature extends Feature<NoneFeatureConfiguration> {
                 }
                 box.set(x, y - 1, z, log);
             }
-            crown(box, ex, ey + 2, ez, 4 + random.nextInt(2), 3, leaves, random);
+            crown(box, ex, ey + 2, ez, crownBase + random.nextInt(3), 2 + random.nextInt(2), leaves, random);
         }
         // the top crown
-        crown(box, centerX[height], y0 + height + 1, centerZ[height], 6 + random.nextInt(2), 4, leaves, random);
+        crown(box, centerX[height], y0 + height + 1, centerZ[height], 5 + random.nextInt(4), 3 + random.nextInt(2), leaves, random);
         return true;
     }
 

@@ -154,13 +154,12 @@
     ],
     [
       "minecraft:glow_lichen",
-      "minecraft:bamboo_vegetation",
       "minecraft:vines",
       "minecraft:patch_melon",
-      "skycraft:biome/trees_tsaesci",
-      "skycraft:biome/bamboo_groves",
-      "skycraft:biome/flowers_jungle",
-      "skycraft:biome/grass_jungle"
+      "skycraft:biome/flora/trees_jungle_under",
+      "skycraft:biome/flora/trees_tsaesci",
+      "skycraft:biome/flora/cover_jungle_floor",
+      "skycraft:biome/flora/cover_flowers_jungle"
     ],
     [
       "minecraft:freeze_top_layer"

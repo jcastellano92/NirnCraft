@@ -112,7 +112,7 @@
     ],
     [
       "minecraft:amethyst_geode",
-      "skycraft:biome/boulders_mossy_3"
+      "skycraft:biome/flora/rocks_mossy"
     ],
     [
       "minecraft:monster_room",
@@ -149,13 +149,14 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/trees_skyrim_pine",
-      "skycraft:biome/fallen_logs_spruce_3",
-      "skycraft:biome/snowberries_rare",
-      "skycraft:biome/tall_ferns",
-      "skycraft:biome/flowers_mountain_rare",
-      "skycraft:biome/grass_taiga",
-      "skycraft:biome/forest_mushrooms"
+      "skycraft:biome/flora/trees_skyrim_pine",
+      "skycraft:biome/flora/trees_skyrim_pine_under",
+      "skycraft:biome/flora/trees_skyrim_pine_dead",
+      "skycraft:biome/flora/cover_taiga_floor",
+      "skycraft:biome/flora/cover_moss",
+      "skycraft:biome/flora/cover_mushrooms",
+      "skycraft:biome/flora/cover_snowberries_few",
+      "skycraft:biome/flora/cover_flowers_mountain_few"
     ],
     [
       "minecraft:freeze_top_layer"

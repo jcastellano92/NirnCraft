@@ -144,8 +144,8 @@
     [
       "minecraft:glow_lichen",
       "minecraft:seagrass_river",
-      "skycraft:biome/reeds_sparse",
-      "skycraft:biome/lily_pads"
+      "skycraft:biome/flora/cover_reeds_few",
+      "skycraft:biome/flora/cover_lilies"
     ],
     [
       "minecraft:freeze_top_layer"

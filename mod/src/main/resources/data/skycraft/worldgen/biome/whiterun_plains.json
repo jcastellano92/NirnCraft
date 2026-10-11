@@ -118,7 +118,7 @@
     ],
     [
       "minecraft:amethyst_geode",
-      "skycraft:biome/boulders_tundra_9"
+      "skycraft:biome/flora/rocks_tundra_few"
     ],
     [
       "minecraft:monster_room",
@@ -155,12 +155,11 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/trees_whiterun_scattered",
-      "skycraft:biome/tall_grass_dense",
-      "skycraft:biome/pumpkins_rare",
-      "skycraft:biome/flowers_tundra",
-      "skycraft:biome/flowers_mountain_rare",
-      "skycraft:biome/grass_plains"
+      "skycraft:biome/flora/trees_whiterun",
+      "skycraft:biome/flora/cover_plains_grass",
+      "skycraft:biome/flora/cover_pumpkins",
+      "skycraft:biome/flora/cover_flowers_tundra",
+      "skycraft:biome/flora/cover_flowers_mountain_few"
     ],
     [
       "minecraft:freeze_top_layer"

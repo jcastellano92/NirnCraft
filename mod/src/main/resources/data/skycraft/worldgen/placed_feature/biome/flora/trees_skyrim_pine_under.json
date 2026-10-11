@@ -1,0 +1,27 @@
+{
+  "feature": "skycraft:biome/flora/trees_skyrim_pine_under",
+  "placement": [
+    {
+      "type": "skycraft:flora_scatter",
+      "spacing": 4,
+      "min_distance": 0.8,
+      "density": 0.5,
+      "floor": 0.03,
+      "field": {
+        "salt": 102,
+        "scale": 60,
+        "coverage": 0.62,
+        "softness": 0.15,
+        "kind": "fbm",
+        "mode": "edge"
+      }
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "OCEAN_FLOOR"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

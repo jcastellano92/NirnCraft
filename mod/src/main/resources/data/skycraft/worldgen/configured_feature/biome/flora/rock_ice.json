@@ -1,0 +1,43 @@
+{
+  "type": "skycraft:flora_rock",
+  "config": {
+    "stone": {
+      "type": "minecraft:weighted_state_provider",
+      "entries": [
+        {
+          "data": {
+            "Name": "minecraft:packed_ice"
+          },
+          "weight": 5
+        },
+        {
+          "data": {
+            "Name": "minecraft:blue_ice"
+          },
+          "weight": 1
+        },
+        {
+          "data": {
+            "Name": "minecraft:snow_block"
+          },
+          "weight": 2
+        },
+        {
+          "data": {
+            "Name": "skycraft:frosted_stone"
+          },
+          "weight": 3
+        }
+      ]
+    },
+    "moss_chance": 0.0,
+    "size": {
+      "type": "minecraft:uniform",
+      "value": {
+        "min_inclusive": 1,
+        "max_inclusive": 3
+      }
+    },
+    "style": "mixed"
+  }
+}

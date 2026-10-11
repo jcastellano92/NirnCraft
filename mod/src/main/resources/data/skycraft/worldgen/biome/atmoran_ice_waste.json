@@ -116,8 +116,8 @@
     ],
     [
       "minecraft:amethyst_geode",
-      "skycraft:biome/boulders_ice_4",
-      "skycraft:biome/spires_ice"
+      "skycraft:biome/spires_ice",
+      "skycraft:biome/flora/rocks_ice"
     ],
     [
       "minecraft:monster_room",
@@ -157,7 +157,8 @@
       "minecraft:spring_lava"
     ],
     [
-      "minecraft:glow_lichen"
+      "minecraft:glow_lichen",
+      "skycraft:biome/flora/trees_atmora_waste"
     ],
     [
       "minecraft:freeze_top_layer"

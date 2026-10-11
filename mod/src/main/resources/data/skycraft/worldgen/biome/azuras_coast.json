@@ -100,7 +100,7 @@
     ],
     [
       "minecraft:amethyst_geode",
-      "skycraft:biome/boulders_grey_4"
+      "skycraft:biome/flora/rocks_grey"
     ],
     [
       "minecraft:monster_room",
@@ -138,9 +138,9 @@
     [
       "minecraft:glow_lichen",
       "skycraft:biome/emperor_parasols_rare",
-      "skycraft:biome/trees_sheogorad",
-      "skycraft:biome/flowers_ascadian",
-      "skycraft:biome/grass_forest"
+      "skycraft:biome/flora/trees_azura",
+      "skycraft:biome/flora/cover_forest_floor",
+      "skycraft:biome/flora/cover_flowers_ascadian"
     ],
     [
       "minecraft:freeze_top_layer"

@@ -138,7 +138,7 @@
     ],
     [
       "minecraft:glow_lichen",
-      "minecraft:patch_dead_bush_2"
+      "skycraft:biome/flora/cover_desert_scrub"
     ],
     [
       "minecraft:freeze_top_layer"

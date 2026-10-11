@@ -161,11 +161,10 @@
     [
       "minecraft:glow_lichen",
       "minecraft:vines",
-      "skycraft:biome/palms_sparse",
-      "skycraft:biome/trees_pyandonea",
-      "skycraft:biome/bamboo_groves",
-      "skycraft:biome/flowers_jungle",
-      "skycraft:biome/grass_jungle"
+      "skycraft:biome/flora/trees_jungle_under",
+      "skycraft:biome/flora/trees_pyandonea",
+      "skycraft:biome/flora/cover_jungle_floor",
+      "skycraft:biome/flora/cover_flowers_jungle"
     ],
     [
       "minecraft:freeze_top_layer"

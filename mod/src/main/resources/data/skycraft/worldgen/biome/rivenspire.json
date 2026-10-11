@@ -124,7 +124,7 @@
     ],
     [
       "minecraft:amethyst_geode",
-      "skycraft:biome/boulders_dark_4"
+      "skycraft:biome/flora/rocks_dark"
     ],
     [
       "minecraft:monster_room",
@@ -161,12 +161,12 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/trees_rivenspire",
-      "skycraft:biome/dead_trees_oak_6",
-      "skycraft:biome/fallen_logs_dark_oak_4",
-      "skycraft:biome/grass_taiga",
-      "skycraft:biome/forest_mushrooms",
-      "skycraft:biome/nightshade_shade"
+      "skycraft:biome/flora/trees_temperate_dead",
+      "skycraft:biome/flora/trees_rivenspire",
+      "skycraft:biome/flora/cover_taiga_floor",
+      "skycraft:biome/flora/cover_moss",
+      "skycraft:biome/flora/cover_mushrooms",
+      "skycraft:biome/flora/cover_nightshade"
     ],
     [
       "minecraft:freeze_top_layer"

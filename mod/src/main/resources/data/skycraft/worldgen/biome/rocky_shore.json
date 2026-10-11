@@ -91,7 +91,8 @@
     ],
     [
       "minecraft:amethyst_geode",
-      "skycraft:biome/boulders_grey_4"
+      "skycraft:biome/flora/rocks_grey",
+      "skycraft:biome/flora/rocks_rubble"
     ],
     [
       "minecraft:monster_room",

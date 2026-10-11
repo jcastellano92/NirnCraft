@@ -141,7 +141,7 @@
     [
       "minecraft:glow_lichen",
       "minecraft:patch_sugar_cane",
-      "skycraft:biome/palms_dense"
+      "skycraft:biome/flora/trees_tropical_palms"
     ],
     [
       "minecraft:freeze_top_layer"

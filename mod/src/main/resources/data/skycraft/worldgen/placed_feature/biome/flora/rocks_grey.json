@@ -1,0 +1,32 @@
+{
+  "feature": "skycraft:biome/flora/rock_grey",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 1
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "skycraft:flora_density",
+      "density": 1.0,
+      "floor": 0.15,
+      "field": {
+        "salt": 114,
+        "scale": 44,
+        "coverage": 0.22,
+        "softness": 0.15,
+        "kind": "worley",
+        "mode": "inside"
+      }
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "MOTION_BLOCKING"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

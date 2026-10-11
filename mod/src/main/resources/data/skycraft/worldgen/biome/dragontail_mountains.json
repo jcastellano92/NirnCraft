@@ -118,7 +118,7 @@
     ],
     [
       "minecraft:amethyst_geode",
-      "skycraft:biome/boulders_red_4"
+      "skycraft:biome/flora/rocks_red"
     ],
     [
       "minecraft:monster_room",
@@ -155,9 +155,8 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/trees_dragontail",
-      "skycraft:biome/dead_trees_acacia_8",
-      "skycraft:biome/grass_desert"
+      "skycraft:biome/flora/trees_dragontail",
+      "skycraft:biome/flora/cover_desert_scrub"
     ],
     [
       "minecraft:freeze_top_layer"

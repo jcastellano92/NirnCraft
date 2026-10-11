@@ -1,0 +1,27 @@
+{
+  "feature": "skycraft:biome/flora/trees_snowy_under",
+  "placement": [
+    {
+      "type": "skycraft:flora_scatter",
+      "spacing": 5,
+      "min_distance": 0.8,
+      "density": 0.4,
+      "floor": 0.0,
+      "field": {
+        "salt": 102,
+        "scale": 60,
+        "coverage": 0.62,
+        "softness": 0.15,
+        "kind": "fbm",
+        "mode": "edge"
+      }
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "OCEAN_FLOOR"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

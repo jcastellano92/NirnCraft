@@ -1,0 +1,40 @@
+{
+  "type": "skycraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": {
+          "Name": "minecraft:grass"
+        },
+        "weight": 4
+      },
+      {
+        "state": {
+          "Name": "minecraft:dead_bush"
+        },
+        "weight": 1
+      },
+      {
+        "state": {
+          "Name": "minecraft:tall_grass",
+          "Properties": {
+            "half": "lower"
+          }
+        },
+        "weight": 1
+      }
+    ],
+    "scale": 24,
+    "patchiness": 0.6,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "value": {
+        "min_inclusive": 1,
+        "max_inclusive": 4
+      }
+    },
+    "spread": 2,
+    "salt": 8294,
+    "near_water": false
+  }
+}

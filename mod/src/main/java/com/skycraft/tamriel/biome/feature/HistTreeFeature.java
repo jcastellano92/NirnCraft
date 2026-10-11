@@ -64,10 +64,13 @@ public class HistTreeFeature extends Feature<NoneFeatureConfiguration> {
         // the twisting trunk
         double tx = cx + 0.5, tz = cz + 0.5;
         double phase = random.nextDouble() * Math.PI * 2;
+        // each Hist coils its own way: how wide and how tight the trunk spirals, how broad the canopy is
+        double coil = 0.5 + random.nextDouble() * 1.4, pitch = 0.1 + random.nextDouble() * 0.16;
+        int canopyR = 5 + random.nextInt(3);
         double topX = tx, topZ = tz;
         for (int dy = -2; dy < height; dy++) {
             double r = radius + (dy < 5 ? (5 - Math.max(dy, 0)) * 0.3 : 0);
-            double ox = Math.cos(phase + dy * 0.18) * 1.2, oz = Math.sin(phase + dy * 0.18) * 1.2;
+            double ox = Math.cos(phase + dy * pitch) * coil, oz = Math.sin(phase + dy * pitch) * coil;
             topX = tx + ox;
             topZ = tz + oz;
             GrahtOakFeature.disc(box, topX, floor + 3 + dy, topZ, r, logY);
@@ -79,7 +82,7 @@ public class HistTreeFeature extends Feature<NoneFeatureConfiguration> {
         }
         int top = floor + 3 + height;
         // a few heavy boughs and the drooping canopy
-        int boughs = 4 + random.nextInt(3);
+        int boughs = 3 + random.nextInt(4);
         for (int i = 0; i < boughs; i++) {
             double a = phase + i * Math.PI * 2 / boughs + random.nextDouble() * 0.5;
             int len = Math.min(reach - 8, 5 + random.nextInt(4));
@@ -94,7 +97,7 @@ public class HistTreeFeature extends Feature<NoneFeatureConfiguration> {
             }
             canopy(box, ex, by + len / 3 + 1, ez, 5 + random.nextInt(2), leaves, random);
         }
-        canopy(box, topX, top + 1, topZ, 6, leaves, random);
+        canopy(box, topX, top + 1, topZ, canopyR, leaves, random);
         return true;
     }
 

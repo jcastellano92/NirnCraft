@@ -1,0 +1,21 @@
+{
+  "type": "skycraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "snowy_spruce",
+        "weight": 3
+      },
+      {
+        "species": "frozen_pine",
+        "weight": 2
+      },
+      {
+        "species": "snowy_sapling",
+        "weight": 2
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

@@ -157,12 +157,12 @@
       "minecraft:glow_lichen",
       "minecraft:seagrass_swamp",
       "skycraft:biome/hist_trees_dense",
-      "skycraft:biome/trees_black_marsh",
-      "skycraft:biome/reeds_sparse",
-      "skycraft:biome/flowers_swamp_dense",
-      "skycraft:biome/grass_lush",
-      "skycraft:biome/moss_carpets",
-      "skycraft:biome/lily_pads"
+      "skycraft:biome/flora/trees_hist_grove",
+      "skycraft:biome/flora/cover_jungle_floor",
+      "skycraft:biome/flora/cover_moss",
+      "skycraft:biome/flora/cover_reeds_few",
+      "skycraft:biome/flora/cover_lilies",
+      "skycraft:biome/flora/cover_flowers_swamp"
     ],
     [
       "minecraft:freeze_top_layer"

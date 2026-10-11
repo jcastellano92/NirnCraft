@@ -154,11 +154,9 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/palms_sparse",
-      "skycraft:biome/trees_tang_mo",
-      "skycraft:biome/bamboo_groves",
-      "skycraft:biome/flowers_akavir",
-      "skycraft:biome/grass_lush"
+      "skycraft:biome/flora/trees_tang_mo",
+      "skycraft:biome/flora/cover_lush_grass",
+      "skycraft:biome/flora/cover_flowers_akavir"
     ],
     [
       "minecraft:freeze_top_layer"

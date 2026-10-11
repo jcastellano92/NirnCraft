@@ -1,0 +1,25 @@
+{
+  "type": "skycraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "juniper",
+        "weight": 3
+      },
+      {
+        "species": "baobab",
+        "weight": 1
+      },
+      {
+        "species": "desert_shrub",
+        "weight": 3
+      },
+      {
+        "species": "acacia",
+        "weight": 1
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

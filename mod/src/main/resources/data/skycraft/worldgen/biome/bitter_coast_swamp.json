@@ -150,12 +150,13 @@
       "minecraft:glow_lichen",
       "minecraft:seagrass_swamp",
       "skycraft:biome/emperor_parasols_rare",
-      "skycraft:biome/trees_bitter_coast",
-      "skycraft:biome/reeds_dense",
-      "skycraft:biome/flowers_swamp",
-      "skycraft:biome/grass_swamp",
-      "skycraft:biome/forest_mushrooms",
-      "skycraft:biome/lily_pads"
+      "skycraft:biome/flora/trees_bitter_coast",
+      "skycraft:biome/flora/trees_marsh_dead",
+      "skycraft:biome/flora/cover_swamp_grass",
+      "skycraft:biome/flora/cover_mushrooms",
+      "skycraft:biome/flora/cover_reeds",
+      "skycraft:biome/flora/cover_lilies",
+      "skycraft:biome/flora/cover_flowers_swamp"
     ],
     [
       "minecraft:freeze_top_layer"

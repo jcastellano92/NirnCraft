@@ -106,7 +106,7 @@
     ],
     [
       "minecraft:amethyst_geode",
-      "skycraft:biome/boulders_tundra_9"
+      "skycraft:biome/flora/rocks_tundra_few"
     ],
     [
       "minecraft:monster_room",
@@ -143,10 +143,9 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/trees_grazelands",
-      "skycraft:biome/tall_grass_dense",
-      "skycraft:biome/flowers_savanna",
-      "skycraft:biome/grass_grazelands"
+      "skycraft:biome/flora/trees_grazelands",
+      "skycraft:biome/flora/cover_graze_grass",
+      "skycraft:biome/flora/cover_flowers_savanna"
     ],
     [
       "minecraft:freeze_top_layer"

@@ -167,12 +167,11 @@
     [
       "minecraft:glow_lichen",
       "minecraft:patch_sugar_cane",
-      "skycraft:biome/trees_nibenay",
-      "skycraft:biome/reeds_sparse",
-      "skycraft:biome/tall_grass_sparse",
-      "skycraft:biome/flowers_heartlands",
-      "skycraft:biome/grass_plains",
-      "skycraft:biome/lily_pads"
+      "skycraft:biome/flora/trees_nibenay",
+      "skycraft:biome/flora/cover_lush_grass",
+      "skycraft:biome/flora/cover_reeds_few",
+      "skycraft:biome/flora/cover_lilies",
+      "skycraft:biome/flora/cover_flowers_heartlands"
     ],
     [
       "minecraft:freeze_top_layer"

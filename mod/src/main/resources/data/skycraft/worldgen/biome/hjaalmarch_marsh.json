@@ -143,12 +143,12 @@
     [
       "minecraft:glow_lichen",
       "minecraft:seagrass_swamp",
-      "skycraft:biome/trees_skyrim_pine_sparse",
-      "skycraft:biome/dead_trees_oak_2",
-      "skycraft:biome/reeds_dense",
-      "skycraft:biome/flowers_cold",
-      "skycraft:biome/grass_swamp",
-      "skycraft:biome/lily_pads"
+      "skycraft:biome/flora/trees_hjaalmarch",
+      "skycraft:biome/flora/trees_hjaalmarch_dead",
+      "skycraft:biome/flora/cover_swamp_grass",
+      "skycraft:biome/flora/cover_reeds",
+      "skycraft:biome/flora/cover_lilies",
+      "skycraft:biome/flora/cover_flowers_cold_marsh"
     ],
     [
       "minecraft:freeze_top_layer"

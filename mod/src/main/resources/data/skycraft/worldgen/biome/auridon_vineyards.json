@@ -154,12 +154,11 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/palms_rare",
-      "skycraft:biome/trees_auridon",
-      "skycraft:biome/lavender_fields",
-      "skycraft:biome/grape_vines",
-      "skycraft:biome/flowers_weald",
-      "skycraft:biome/grass_plains"
+      "skycraft:biome/flora/trees_auridon",
+      "skycraft:biome/flora/cover_plains_grass",
+      "skycraft:biome/flora/cover_grapes",
+      "skycraft:biome/flora/cover_flowers_weald",
+      "skycraft:biome/flora/cover_flowers_lavender"
     ],
     [
       "minecraft:freeze_top_layer"

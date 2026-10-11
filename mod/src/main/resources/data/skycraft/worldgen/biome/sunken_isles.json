@@ -100,7 +100,7 @@
     ],
     [
       "minecraft:amethyst_geode",
-      "skycraft:biome/boulders_grey_4"
+      "skycraft:biome/flora/rocks_grey"
     ],
     [
       "minecraft:monster_room",
@@ -137,10 +137,10 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/palms_sparse",
-      "skycraft:biome/reeds_sparse",
-      "skycraft:biome/flowers_jungle",
-      "skycraft:biome/grass_savanna"
+      "skycraft:biome/flora/trees_sunken_isles",
+      "skycraft:biome/flora/cover_savanna_grass",
+      "skycraft:biome/flora/cover_reeds_few",
+      "skycraft:biome/flora/cover_flowers_jungle"
     ],
     [
       "minecraft:freeze_top_layer"

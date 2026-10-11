@@ -136,7 +136,7 @@
     ],
     [
       "minecraft:amethyst_geode",
-      "skycraft:biome/boulders_ice_4"
+      "skycraft:biome/flora/rocks_ice"
     ],
     [
       "minecraft:monster_room",
@@ -174,8 +174,8 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/trees_skyrim_snowy_sparse",
-      "skycraft:biome/grass_snow"
+      "skycraft:biome/flora/trees_kamal",
+      "skycraft:biome/flora/cover_snow_grass"
     ],
     [
       "minecraft:freeze_top_layer"

@@ -143,9 +143,9 @@
     [
       "minecraft:glow_lichen",
       "minecraft:patch_sugar_cane",
-      "skycraft:biome/palms_dense",
-      "skycraft:biome/flowers_jungle",
-      "skycraft:biome/grass_savanna"
+      "skycraft:biome/flora/trees_stros_mkai",
+      "skycraft:biome/flora/cover_savanna_grass",
+      "skycraft:biome/flora/cover_flowers_jungle"
     ],
     [
       "minecraft:freeze_top_layer"

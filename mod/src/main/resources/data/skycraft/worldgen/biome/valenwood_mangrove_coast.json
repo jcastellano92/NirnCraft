@@ -162,11 +162,10 @@
     [
       "minecraft:glow_lichen",
       "minecraft:seagrass_swamp",
-      "skycraft:biome/palms_sparse",
-      "skycraft:biome/trees_mangrove",
-      "skycraft:biome/reeds_dense",
-      "skycraft:biome/grass_swamp",
-      "skycraft:biome/lily_pads"
+      "skycraft:biome/flora/trees_valenwood_mangrove",
+      "skycraft:biome/flora/cover_swamp_grass",
+      "skycraft:biome/flora/cover_reeds",
+      "skycraft:biome/flora/cover_lilies"
     ],
     [
       "minecraft:freeze_top_layer"

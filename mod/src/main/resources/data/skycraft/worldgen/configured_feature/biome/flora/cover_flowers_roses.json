@@ -1,0 +1,43 @@
+{
+  "type": "skycraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": {
+          "Name": "minecraft:rose_bush",
+          "Properties": {
+            "half": "lower"
+          }
+        },
+        "weight": 2
+      },
+      {
+        "state": {
+          "Name": "minecraft:peony",
+          "Properties": {
+            "half": "lower"
+          }
+        },
+        "weight": 2
+      },
+      {
+        "state": {
+          "Name": "minecraft:poppy"
+        },
+        "weight": 3
+      }
+    ],
+    "scale": 28,
+    "patchiness": 0.85,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "value": {
+        "min_inclusive": 2,
+        "max_inclusive": 6
+      }
+    },
+    "spread": 3,
+    "salt": 7309,
+    "near_water": false
+  }
+}

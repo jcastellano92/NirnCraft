@@ -182,11 +182,11 @@
       "minecraft:glow_lichen",
       "minecraft:patch_sugar_cane",
       "minecraft:seagrass_river",
-      "skycraft:biome/trees_lake_shore",
-      "skycraft:biome/reeds_dense",
-      "skycraft:biome/flowers_heartlands",
-      "skycraft:biome/grass_plains",
-      "skycraft:biome/lily_pads"
+      "skycraft:biome/flora/trees_rumare",
+      "skycraft:biome/flora/cover_lush_grass",
+      "skycraft:biome/flora/cover_reeds",
+      "skycraft:biome/flora/cover_lilies",
+      "skycraft:biome/flora/cover_flowers_heartlands"
     ],
     [
       "minecraft:freeze_top_layer"

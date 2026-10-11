@@ -149,13 +149,12 @@
     [
       "minecraft:glow_lichen",
       "minecraft:patch_sugar_cane",
-      "skycraft:biome/trees_ascadian",
-      "skycraft:biome/lavender_rare",
-      "skycraft:biome/reeds_sparse",
-      "skycraft:biome/tall_grass_dense",
-      "skycraft:biome/flowers_ascadian",
-      "skycraft:biome/grass_plains",
-      "skycraft:biome/lily_pads"
+      "skycraft:biome/flora/trees_ascadian",
+      "skycraft:biome/flora/cover_lush_grass",
+      "skycraft:biome/flora/cover_reeds_few",
+      "skycraft:biome/flora/cover_lilies",
+      "skycraft:biome/flora/cover_flowers_lavender",
+      "skycraft:biome/flora/cover_flowers_ascadian"
     ],
     [
       "minecraft:freeze_top_layer"

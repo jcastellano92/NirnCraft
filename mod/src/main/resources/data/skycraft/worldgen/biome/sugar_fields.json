@@ -161,11 +161,10 @@
     [
       "minecraft:glow_lichen",
       "minecraft:patch_sugar_cane",
-      "skycraft:biome/palms_rare",
-      "skycraft:biome/trees_savanna",
       "skycraft:biome/moon_sugar",
-      "skycraft:biome/flowers_savanna",
-      "skycraft:biome/grass_savanna"
+      "skycraft:biome/flora/trees_sugar_fields",
+      "skycraft:biome/flora/cover_savanna_grass",
+      "skycraft:biome/flora/cover_flowers_savanna"
     ],
     [
       "minecraft:freeze_top_layer"

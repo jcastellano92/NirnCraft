@@ -28,5 +28,6 @@ public final class TamrielBiomes {
         BIOME_SOURCES.register(modBus);
         BiomeBlocks.init(modBus);
         BiomeFeatures.init(modBus);
+        com.skycraft.tamriel.biome.flora.Flora.init(modBus);
     }
 }

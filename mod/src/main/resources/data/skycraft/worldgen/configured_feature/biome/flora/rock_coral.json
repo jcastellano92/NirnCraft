@@ -1,0 +1,37 @@
+{
+  "type": "skycraft:flora_rock",
+  "config": {
+    "stone": {
+      "type": "minecraft:weighted_state_provider",
+      "entries": [
+        {
+          "data": {
+            "Name": "skycraft:coral_stone"
+          },
+          "weight": 6
+        },
+        {
+          "data": {
+            "Name": "minecraft:dead_brain_coral_block"
+          },
+          "weight": 1
+        },
+        {
+          "data": {
+            "Name": "minecraft:dead_tube_coral_block"
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "moss_chance": 0.0,
+    "size": {
+      "type": "minecraft:uniform",
+      "value": {
+        "min_inclusive": 1,
+        "max_inclusive": 2
+      }
+    },
+    "style": "mixed"
+  }
+}

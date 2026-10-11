@@ -163,11 +163,11 @@
       "minecraft:vines",
       "minecraft:patch_melon",
       "skycraft:biome/graht_oaks_sparse",
-      "skycraft:biome/trees_rainforest",
-      "skycraft:biome/fallen_logs_jungle_4",
-      "skycraft:biome/tall_ferns",
-      "skycraft:biome/flowers_jungle",
-      "skycraft:biome/grass_jungle"
+      "skycraft:biome/flora/trees_jungle_under",
+      "skycraft:biome/flora/trees_valenwood_dead",
+      "skycraft:biome/flora/trees_rainforest",
+      "skycraft:biome/flora/cover_jungle_floor",
+      "skycraft:biome/flora/cover_flowers_jungle"
     ],
     [
       "minecraft:freeze_top_layer"

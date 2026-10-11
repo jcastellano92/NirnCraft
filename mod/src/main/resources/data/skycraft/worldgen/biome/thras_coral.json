@@ -100,8 +100,8 @@
     ],
     [
       "minecraft:amethyst_geode",
-      "skycraft:biome/boulders_coral_4",
-      "skycraft:biome/spires_coral"
+      "skycraft:biome/spires_coral",
+      "skycraft:biome/flora/rocks_coral"
     ],
     [
       "minecraft:monster_room",
@@ -139,9 +139,9 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/palms_sparse",
       "skycraft:biome/dead_corals",
-      "skycraft:biome/grass_savanna"
+      "skycraft:biome/flora/trees_thras",
+      "skycraft:biome/flora/cover_savanna_grass"
     ],
     [
       "minecraft:freeze_top_layer"

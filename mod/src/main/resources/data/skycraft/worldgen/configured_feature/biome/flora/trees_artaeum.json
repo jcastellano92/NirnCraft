@@ -1,0 +1,21 @@
+{
+  "type": "skycraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "summerset_bloom",
+        "weight": 2
+      },
+      {
+        "species": "cherry",
+        "weight": 3
+      },
+      {
+        "species": "crystal_tree",
+        "weight": 1
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

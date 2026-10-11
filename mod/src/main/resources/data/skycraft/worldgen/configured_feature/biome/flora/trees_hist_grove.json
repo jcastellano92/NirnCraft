@@ -1,0 +1,21 @@
+{
+  "type": "skycraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "swamp_hist",
+        "weight": 4
+      },
+      {
+        "species": "bald_cypress",
+        "weight": 1
+      },
+      {
+        "species": "jungle_bush",
+        "weight": 1
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

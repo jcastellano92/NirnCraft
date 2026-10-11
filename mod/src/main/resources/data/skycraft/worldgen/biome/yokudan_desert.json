@@ -100,7 +100,7 @@
     ],
     [
       "minecraft:amethyst_geode",
-      "skycraft:biome/boulders_sand_8"
+      "skycraft:biome/flora/rocks_sand"
     ],
     [
       "minecraft:fossil_upper",
@@ -141,9 +141,10 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/dead_trees_acacia_8",
-      "skycraft:biome/cacti_rare",
-      "skycraft:biome/grass_desert"
+      "skycraft:biome/flora/trees_desert",
+      "skycraft:biome/flora/trees_desert_scrub",
+      "skycraft:biome/flora/cover_desert_scrub",
+      "skycraft:biome/flora/cover_cacti"
     ],
     [
       "minecraft:freeze_top_layer"

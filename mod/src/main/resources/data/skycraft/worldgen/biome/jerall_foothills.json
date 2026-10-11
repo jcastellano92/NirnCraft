@@ -124,7 +124,7 @@
     ],
     [
       "minecraft:amethyst_geode",
-      "skycraft:biome/boulders_tundra_9"
+      "skycraft:biome/flora/rocks_tundra_few"
     ],
     [
       "minecraft:monster_room",
@@ -161,10 +161,12 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/trees_jerall",
-      "skycraft:biome/snowberries_rare",
-      "skycraft:biome/flowers_mountain_rare",
-      "skycraft:biome/grass_taiga"
+      "skycraft:biome/flora/trees_skyrim_pine_under",
+      "skycraft:biome/flora/trees_skyrim_pine_dead",
+      "skycraft:biome/flora/trees_jerall",
+      "skycraft:biome/flora/cover_taiga_floor",
+      "skycraft:biome/flora/cover_snowberries_few",
+      "skycraft:biome/flora/cover_flowers_mountain_few"
     ],
     [
       "minecraft:freeze_top_layer"

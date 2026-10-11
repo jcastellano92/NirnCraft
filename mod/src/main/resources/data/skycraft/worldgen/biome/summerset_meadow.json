@@ -160,13 +160,12 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/trees_summerset",
-      "skycraft:biome/lavender_rare",
-      "skycraft:biome/roses",
-      "skycraft:biome/tall_grass_sparse",
-      "skycraft:biome/crystal_clusters_rare",
-      "skycraft:biome/flowers_summerset",
-      "skycraft:biome/grass_plains"
+      "skycraft:biome/flora/trees_summerset",
+      "skycraft:biome/flora/cover_plains_grass",
+      "skycraft:biome/flora/cover_crystals",
+      "skycraft:biome/flora/cover_flowers_lavender",
+      "skycraft:biome/flora/cover_flowers_summerset",
+      "skycraft:biome/flora/cover_flowers_roses"
     ],
     [
       "minecraft:freeze_top_layer"

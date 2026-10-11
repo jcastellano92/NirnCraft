@@ -145,10 +145,10 @@
       "skycraft:biome/telvanni_towers",
       "skycraft:biome/emperor_parasols_dense",
       "skycraft:biome/trees_mushroom_grove",
-      "skycraft:biome/flowers_ascadian",
-      "skycraft:biome/grass_forest",
-      "skycraft:biome/moss_carpets",
-      "skycraft:biome/forest_mushrooms"
+      "skycraft:biome/flora/cover_forest_floor",
+      "skycraft:biome/flora/cover_moss",
+      "skycraft:biome/flora/cover_mushrooms",
+      "skycraft:biome/flora/cover_flowers_ascadian"
     ],
     [
       "minecraft:freeze_top_layer"

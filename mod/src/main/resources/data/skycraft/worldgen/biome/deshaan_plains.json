@@ -148,11 +148,10 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/trees_deshaan",
-      "skycraft:biome/tall_grass_sparse",
-      "skycraft:biome/flowers_ascadian",
-      "skycraft:biome/grass_grazelands",
-      "skycraft:biome/ash_drifts_sparse"
+      "skycraft:biome/ash_drifts_sparse",
+      "skycraft:biome/flora/trees_deshaan",
+      "skycraft:biome/flora/cover_graze_grass",
+      "skycraft:biome/flora/cover_flowers_ascadian"
     ],
     [
       "minecraft:freeze_top_layer"

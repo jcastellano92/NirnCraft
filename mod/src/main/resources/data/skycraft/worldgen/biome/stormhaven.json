@@ -130,7 +130,7 @@
     ],
     [
       "minecraft:amethyst_geode",
-      "skycraft:biome/boulders_mossy_8"
+      "skycraft:biome/flora/rocks_mossy"
     ],
     [
       "minecraft:monster_room",
@@ -167,11 +167,12 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/trees_stormhaven",
-      "skycraft:biome/fallen_logs_oak_5",
-      "skycraft:biome/pumpkins_rare",
-      "skycraft:biome/flowers_high_rock",
-      "skycraft:biome/grass_forest"
+      "skycraft:biome/flora/trees_stormhaven",
+      "skycraft:biome/flora/trees_temperate_under",
+      "skycraft:biome/flora/trees_temperate_dead",
+      "skycraft:biome/flora/cover_forest_floor",
+      "skycraft:biome/flora/cover_pumpkins",
+      "skycraft:biome/flora/cover_flowers_high_rock"
     ],
     [
       "minecraft:freeze_top_layer"

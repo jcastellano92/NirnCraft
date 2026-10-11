@@ -134,8 +134,8 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/palms_rare",
-      "skycraft:biome/crystal_clusters_rare"
+      "skycraft:biome/flora/trees_shore_palms",
+      "skycraft:biome/flora/cover_crystals"
     ],
     [
       "minecraft:freeze_top_layer"

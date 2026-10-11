@@ -149,14 +149,13 @@
     [
       "minecraft:glow_lichen",
       "minecraft:seagrass_swamp",
-      "skycraft:biome/trees_shadowfen",
-      "skycraft:biome/dead_trees_oak_2",
-      "skycraft:biome/fallen_logs_dark_oak_4",
-      "skycraft:biome/reeds_dense",
-      "skycraft:biome/grass_swamp",
-      "skycraft:biome/forest_mushrooms",
-      "skycraft:biome/nightshade_shade",
-      "skycraft:biome/lily_pads"
+      "skycraft:biome/flora/trees_marsh_dead",
+      "skycraft:biome/flora/trees_shadowfen",
+      "skycraft:biome/flora/cover_swamp_grass",
+      "skycraft:biome/flora/cover_mushrooms",
+      "skycraft:biome/flora/cover_nightshade",
+      "skycraft:biome/flora/cover_reeds",
+      "skycraft:biome/flora/cover_lilies"
     ],
     [
       "minecraft:freeze_top_layer"

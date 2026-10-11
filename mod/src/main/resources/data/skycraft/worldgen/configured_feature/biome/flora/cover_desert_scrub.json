@@ -1,0 +1,31 @@
+{
+  "type": "skycraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": {
+          "Name": "minecraft:dead_bush"
+        },
+        "weight": 4
+      },
+      {
+        "state": {
+          "Name": "minecraft:grass"
+        },
+        "weight": 1
+      }
+    ],
+    "scale": 24,
+    "patchiness": 0.6,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "value": {
+        "min_inclusive": 1,
+        "max_inclusive": 2
+      }
+    },
+    "spread": 2,
+    "salt": 246,
+    "near_water": false
+  }
+}

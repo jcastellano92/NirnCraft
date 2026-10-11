@@ -1,0 +1,32 @@
+{
+  "feature": "skycraft:biome/flora/cover_flowers_lavender",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 10
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "skycraft:flora_density",
+      "density": 1.0,
+      "floor": 0.0,
+      "field": {
+        "salt": 118,
+        "scale": 22,
+        "coverage": 0.3,
+        "softness": 0.1,
+        "kind": "fbm",
+        "mode": "inside"
+      }
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "MOTION_BLOCKING_NO_LEAVES"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

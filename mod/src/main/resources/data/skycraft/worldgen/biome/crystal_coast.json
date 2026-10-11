@@ -124,8 +124,8 @@
     ],
     [
       "minecraft:amethyst_geode",
-      "skycraft:biome/boulders_calcite_3",
-      "skycraft:biome/spires_crystal_small"
+      "skycraft:biome/spires_crystal_small",
+      "skycraft:biome/flora/rocks_calcite"
     ],
     [
       "minecraft:monster_room",
@@ -162,10 +162,10 @@
     ],
     [
       "minecraft:glow_lichen",
-      "skycraft:biome/palms_rare",
-      "skycraft:biome/crystal_clusters",
-      "skycraft:biome/flowers_summerset",
-      "skycraft:biome/grass_plains"
+      "skycraft:biome/flora/trees_crystal_coast",
+      "skycraft:biome/flora/cover_plains_grass",
+      "skycraft:biome/flora/cover_crystals",
+      "skycraft:biome/flora/cover_flowers_summerset"
     ],
     [
       "minecraft:freeze_top_layer"

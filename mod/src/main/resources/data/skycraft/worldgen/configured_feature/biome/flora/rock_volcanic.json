@@ -1,0 +1,43 @@
+{
+  "type": "skycraft:flora_rock",
+  "config": {
+    "stone": {
+      "type": "minecraft:weighted_state_provider",
+      "entries": [
+        {
+          "data": {
+            "Name": "skycraft:volcanic_rock"
+          },
+          "weight": 6
+        },
+        {
+          "data": {
+            "Name": "skycraft:cracked_volcanic_rock"
+          },
+          "weight": 2
+        },
+        {
+          "data": {
+            "Name": "minecraft:basalt"
+          },
+          "weight": 1
+        },
+        {
+          "data": {
+            "Name": "minecraft:blackstone"
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "moss_chance": 0.0,
+    "size": {
+      "type": "minecraft:uniform",
+      "value": {
+        "min_inclusive": 1,
+        "max_inclusive": 3
+      }
+    },
+    "style": "mixed"
+  }
+}

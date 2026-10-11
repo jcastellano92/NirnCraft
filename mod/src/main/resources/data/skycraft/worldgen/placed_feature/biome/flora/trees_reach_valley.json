@@ -1,0 +1,27 @@
+{
+  "feature": "skycraft:biome/flora/trees_reach_valley",
+  "placement": [
+    {
+      "type": "skycraft:flora_scatter",
+      "spacing": 6,
+      "min_distance": 0.8,
+      "density": 0.65,
+      "floor": 0.05,
+      "field": {
+        "salt": 103,
+        "scale": 52,
+        "coverage": 0.42,
+        "softness": 0.16,
+        "kind": "fbm",
+        "mode": "inside"
+      }
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "OCEAN_FLOOR"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

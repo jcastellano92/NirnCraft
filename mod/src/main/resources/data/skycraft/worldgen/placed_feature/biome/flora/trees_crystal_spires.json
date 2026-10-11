@@ -1,0 +1,27 @@
+{
+  "feature": "skycraft:biome/flora/trees_crystal_spires",
+  "placement": [
+    {
+      "type": "skycraft:flora_scatter",
+      "spacing": 16,
+      "min_distance": 0.8,
+      "density": 0.3,
+      "floor": 0.05,
+      "field": {
+        "salt": 104,
+        "scale": 90,
+        "coverage": 0.22,
+        "softness": 0.2,
+        "kind": "fbm",
+        "mode": "inside"
+      }
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "OCEAN_FLOOR"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}
