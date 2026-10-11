@@ -1,0 +1,527 @@
+{
+  "line": "place_skyrim_the_rift",
+  "category": "side",
+  "npcs": [
+    {"id": "pln_skyrim_the_rift_ingrith", "name": "Ingrith Quill-Hand", "role": "steward", "place": "riften", "offset": [6, -4],
+     "female": true, "greet": "Clerk to the Jarl's steward. Which means I count what the Black-Briars let me count."},
+    {"id": "pln_skyrim_the_rift_hjalla", "name": "Hjalla Grey-Shawl", "role": "citizen", "place": "riften", "offset": [-5, 6],
+     "female": true, "greet": "Have you been up north of the lake? Have you seen a tall lad with a copper bracelet?"},
+    {"id": "pln_skyrim_the_rift_hrelga", "name": "Hrelga Dawnmoor", "role": "priest", "place": "riften", "offset": [3, 7],
+     "female": true, "greet": "Mara's peace on you. Mind the candles, they're all I've got to keep the dark off."},
+    {"id": "pln_skyrim_the_rift_oddvar", "name": "Oddvar the Pilgrim", "role": "priest", "place": "ivarstead", "offset": [4, 3],
+     "female": false, "greet": "Eighty-one years and seven thousand steps still to climb. And no bell to ring at the top."},
+    {"id": "pln_skyrim_the_rift_eydis", "name": "Eydis Long-Net", "role": "fisher", "place": "ivarstead", "offset": [-6, -2],
+     "female": true, "greet": "The lake's quiet today. It's always quiet after it takes something."},
+    {"id": "pln_skyrim_the_rift_thrud", "name": "Thrud Ore-Wife", "role": "miner", "place": "shors_stone", "offset": [3, -5],
+     "female": true, "greet": "If you're from Ruunvald, keep walking. If you're going there, stop and listen."},
+    {"id": "pln_skyrim_the_rift_brandulf", "name": "Brandulf the Younger", "role": "miner", "place": "shors_stone", "offset": [-4, 4],
+     "female": false, "greet": "Grandfather's asking about his pick again. Every night, the same question."},
+    {"id": "pln_skyrim_the_rift_gula", "name": "Gula gro-Ushnar", "role": "hunter", "place": "largashbur", "offset": [5, 2],
+     "female": true, "greet": "Stranger. You have the look of someone who walks into barrows. Good. Sit."}
+  ],
+  "relics": [
+    {"id": "plr_fort_greenwall_toll_book", "name": "Brannoc's Toll Book", "desc": "A fat ledger bound in oiled hide. Every coin the Greenwall toll took, and every coin it paid out, is written in a careful hand. Some of the names would hang half of Riften."},
+    {"id": "plr_faldars_tooth_bone_knife", "name": "Ottar's Bone-Handled Knife", "desc": "A heavy skinning knife with a handle of yellowed bone, carved with birch leaves. The badge of the Ashwood Knives' chief."},
+    {"id": "plr_last_vigil_reserve_cask", "name": "Black-Briar 'Reserve' Cask", "desc": "A small cask sealed with the black thorn. Under a false bottom, bottles of something red and sweet-smelling clink together."},
+    {"id": "plr_broken_helm_hollow_dented_helm", "name": "Dented Riften Guard Helm", "desc": "A purple-plumed guard's helm with a deep dent over the left eye. A name is scratched inside the brow: ARNBJORN."},
+    {"id": "plr_redwater_den_copper_bracelet", "name": "Hjalmar's Copper Bracelet", "desc": "A plain copper bracelet, green at the clasp, stamped with a small hearth sign."},
+    {"id": "plr_ruunvald_excavation_iron_token", "name": "Kolbjorn's Iron Token", "desc": "A worn iron disc on a cord, stamped with the mark of the Shor's Stone miners and a K scratched by a child's hand."},
+    {"id": "plr_boulderfall_cave_ledger", "name": "Ledger of Acquisitions", "desc": "Magister Venn's ledger of bodies bought and sold, naming a junior attendant at the Riften Hall of the Dead."},
+    {"id": "plr_northwind_mine_pick", "name": "Northwind Heirloom Pick", "desc": "An old miner's pick with silver bands round the haft and three runes cut into it: hearth, ore, home."},
+    {"id": "plr_darkwater_pass_lodestone", "name": "Surveyor's Lodestone", "desc": "A black lodestone in a brass cage that always turns its blunt end north. Chitin scratches mar the brass."},
+    {"id": "plr_tolvalds_cave_lantern", "name": "Tolvald's Brass Lantern", "desc": "A soldier's brass lantern from the Great War, dented and soot-black. A Falmer charm of bone has been tied to its handle."},
+    {"id": "plr_avanchnzel_resonance_key", "name": "Resonance Key", "desc": "A small bronze Dwemer key that hums at a single steady note when held near old machinery."},
+    {"id": "plr_angarvunde_tusk_charm", "name": "Gula's Tusk-Charm", "desc": "A charm carved from an Orc's tusk, worn smooth by a thumb, its cord snapped."},
+    {"id": "plr_forelhost_signet", "name": "High Priest's Door-Signet", "desc": "A bronze ring set with a dragon's head, cold to the touch. Beside the place it lay, eleven Nord names were cut into the stone."},
+    {"id": "plr_shroud_hearth_barrow_urn", "name": "Silver-Banded Burial Urn", "desc": "A clay urn bound in tarnished silver at the neck. The ash inside is still faintly warm."},
+    {"id": "plr_geirmunds_hall_net_weight", "name": "Soapstone Net-Weight", "desc": "A small fish carved from soapstone, with a hole for an eye, strung on a cord. Lake weed still clings to it."},
+    {"id": "plr_nilheim_votive_bell", "name": "Pilgrim's Votive Bell", "desc": "A small brass bell, very old, that rings with a sweet and lingering note. Prayers are scratched around the rim."},
+    {"id": "plr_stendarrs_beacon_log", "name": "The Beacon Log", "desc": "The Vigilants' log of Stendarr's Beacon, its last entry naming 'the Redwater man'."},
+    {"id": "plr_darklight_tower_bottle", "name": "Bottle of a Child's Song", "desc": "A stoppered bottle that hums faintly with a little girl's voice. The Gnarlmother's price, never paid in full."}
+  ],
+  "quests": [
+    {
+      "id": "pl_fort_greenwall",
+      "title": "The Toll Book",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "desc": "The bandits at Fort Greenwall charge every cart a toll except the Black-Briars'. Their chief, Brannoc Tollhand, keeps a book of every coin. Somebody in Riften would very much like it to burn.",
+      "pitch": "You want to know who really runs the Riften road? Brannoc Tollhand at Fort Greenwall keeps a book. Get the book and you'll know. Then you'll wish you didn't.",
+      "objectives": [
+        {"type": "kill", "place": "fort_greenwall", "text": "Break the Greenwall toll gang and its chief",
+         "spawn": [{"type": "skycraft:bandit", "count": 4},
+                   {"type": "skycraft:bandit_chief", "name": "Brannoc Tollhand", "target": true, "boss": true, "hp": 1.6}],
+         "journal": "Brannoc Tollhand died with his strongbox key around his neck."},
+        {"type": "retrieve", "place": "fort_greenwall", "relic": "plr_fort_greenwall_toll_book", "text": "Take the toll book from Brannoc's strongbox"},
+        {"type": "talk", "npc": "pln_skyrim_the_rift_ingrith", "text": "Decide what becomes of the toll book",
+         "topic": "I have Brannoc's toll book.",
+         "reply": "Shor's bones. Every Briar wagon, every bribe, every guard who looked away. What do you want done with it?",
+         "choices": [
+           {"label": "Put it before the Jarl. Let Riften see who it pays.", "reply": "Then I'll read it aloud in court myself, and see who goes pale. Maven will know it was us. Watch your back on the canal.", "actions": "take:plr_fort_greenwall_toll_book;flag:rift_toll_book_court"},
+           {"label": "Burn it. Nobody in this hold will act on it anyway.", "reply": "Wise, maybe. Cowardly, maybe. Both, probably. I'll fetch a candle. And I'll remember that the road is quieter now, at least.", "actions": "take:plr_fort_greenwall_toll_book;flag:rift_toll_book_burned"}
+         ]}
+      ],
+      "rewards": {"gold": 240, "items": ["skycraft:lockpick*5"]},
+      "outro": "Brannoc Tollhand will charge no more tolls on the Riften road. What became of his book is between me, a clerk named Ingrith and, sooner or later, Maven Black-Briar."
+    },
+    {
+      "id": "pl_faldars_tooth",
+      "title": "Knives in the Birches",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "desc": "The Ashwood Knives have robbed the western road from their den at Faldar's Tooth. The Riften guard has posted a bounty on their chief, Ottar Ashwood, and declined to collect it themselves.",
+      "pitch": "The guard's offering two hundred for Ottar Ashwood. They won't go up to Faldar's Tooth themselves, mind. Busy, they say. Busy counting Briar coin.",
+      "objectives": [
+        {"type": "go", "place": "faldars_tooth", "text": "Find the Ashwood Knives at Faldar's Tooth"},
+        {"type": "kill", "place": "faldars_tooth", "text": "Kill Ottar Ashwood",
+         "spawn": [{"type": "skycraft:bandit", "count": 4, "name": "Ashwood Knife"},
+                   {"type": "skycraft:wolf", "count": 2},
+                   {"type": "skycraft:bandit_chief", "name": "Ottar Ashwood", "target": true, "boss": true, "hp": 1.8, "dmg": 1.2}],
+         "journal": "Ottar Ashwood laughed right up to the end. It was not a long laugh."},
+        {"type": "retrieve", "place": "faldars_tooth", "relic": "plr_faldars_tooth_bone_knife", "text": "Take Ottar's bone-handled knife as proof",
+         "journal": "In the chief's chest, beside the knife, was a small pair of boots. A mill boy's, by the size."}
+      ],
+      "rewards": {"gold": 200, "items": ["skycraft:steel_dagger"]},
+      "outro": "The Ashwood Knives are broken and the western road is open. The boy at Heartwood Mill will get his boots back."
+    },
+    {
+      "id": "pl_last_vigil",
+      "title": "The Reserve Cask",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "desc": "The bandits at Last Vigil robbed a Black-Briar mead wagon and found something under the cask's false bottom that was never meant to be mead.",
+      "pitch": "Last Vigil hit a Black-Briar wagon, the mad fools. They say the cask they took isn't mead at all. Somebody ought to get it before Maven's men do.",
+      "objectives": [
+        {"type": "retrieve", "place": "last_vigil", "relic": "plr_last_vigil_reserve_cask", "text": "Take the 'reserve' cask from Last Vigil",
+         "spawn": [{"type": "skycraft:bandit", "count": 3},
+                   {"type": "skycraft:bandit_chief", "name": "Rorik Unbowed", "boss": true, "hp": 1.5}],
+         "journal": "The cask is heavy and it clinks. Under the false bottom: bottles of Redwater skooma."},
+        {"type": "deliver", "npc": "pln_skyrim_the_rift_ingrith", "relic": "plr_last_vigil_reserve_cask", "text": "Bring the cask to Ingrith in Riften",
+         "topic": "This came off a Black-Briar wagon. Look under the bottom.",
+         "reply": "Red skooma. In a Briar cask. Mara's mercy. Maven will say it was planted, and half the court will believe her because she pays them to. But I'll write it down. Somebody has to start writing it down."}
+      ],
+      "rewards": {"gold": 180},
+      "outro": "Ingrith has the cask and a page in her own ledger that starts with Redwater and ends with a black thorn."
+    },
+    {
+      "id": "pl_broken_helm_hollow",
+      "title": "A Nail for a Brother",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "desc": "The bandits of Broken Helm Hollow nail the helmets of their victims to the wall. One belonged to Arnbjorn of the Riften guard, who went there alone on his day off.",
+      "pitch": "Arnbjorn of the guard went to Broken Helm Hollow by himself. His helm's on their wall now. His brother Torbjorn won't stop staring south.",
+      "objectives": [
+        {"type": "clear", "place": "broken_helm_hollow", "placement": "structure", "text": "Clear the bandits out of Broken Helm Hollow",
+         "spawn": [{"type": "skycraft:bandit", "count": 4},
+                   {"type": "skycraft:bandit_chief", "name": "Ingvild the Breaker", "boss": true, "hp": 1.7}]},
+        {"type": "retrieve", "place": "broken_helm_hollow", "placement": "structure", "relic": "plr_broken_helm_hollow_dented_helm", "text": "Take Arnbjorn's helm down from the trophy wall",
+         "journal": "There was an empty nail next to it, freshly hammered. Ingvild had been expecting another guest."}
+      ],
+      "rewards": {"gold": 170, "items": ["skycraft:studded_helmet"]},
+      "outro": "Arnbjorn's helm will go home to his family in Riften. The empty nail in Broken Helm Hollow will stay empty."
+    },
+    {
+      "id": "pl_redwater_den",
+      "title": "Red Water, Grey Shawl",
+      "region": "skyrim/the_rift",
+      "start": "npc:pln_skyrim_the_rift_hjalla",
+      "requires": ["level:12"],
+      "offer": "Who are you looking for?",
+      "pitch": "My boy Hjalmar. He went up to Redwater after Edda, my friend, the skooma took her. He said he'd bring her home. That was a month ago. I've no gold left. I have this shawl and a prayer. Please.",
+      "desc": "Hjalla Grey-Shawl's son Hjalmar went to Redwater Den, the skooma den north-west of the lake, to bring back a friend. Neither has come home.",
+      "objectives": [
+        {"type": "go", "place": "redwater_den", "text": "Go to Redwater Den"},
+        {"type": "kill", "place": "redwater_den", "placement": "structure", "text": "Find out who runs the lower den",
+         "spawn": [{"type": "npc:vampire", "count": 2, "name": "Den Keeper", "hostile": true},
+                   {"type": "npc:vampire", "name": "Vanthel the Pourer", "target": true, "boss": true, "hp": 2.0, "dmg": 1.3, "hostile": true}],
+         "journal": "The den's keepers were vampires, feeding on the skooma-drunk. Hjalmar was alive in the cells, thin and shaking, but he had stopped drinking the red. He is walking home."},
+        {"type": "retrieve", "place": "redwater_den", "placement": "structure", "relic": "plr_redwater_den_copper_bracelet", "text": "Find Hjalmar's copper bracelet in the box by the stairs"},
+        {"type": "deliver", "npc": "pln_skyrim_the_rift_hjalla", "relic": "plr_redwater_den_copper_bracelet", "text": "Bring the bracelet to Hjalla in Riften",
+         "topic": "Hjalmar's alive. He's on the road behind me.",
+         "reply": "Alive? Alive. Oh, Mara. Oh, my lad. Give it here, I'll put it back on his wrist myself. And Edda? ...No. I knew. I knew. Thank you for bringing me one of them."}
+      ],
+      "rewards": {"gold": 120, "items": ["skycraft:amulet_of_mara"]},
+      "outro": "Hjalmar came home to Riften on his own two feet. Edda did not. Hjalla has given me what she had, which was more than she could afford."
+    },
+    {
+      "id": "pl_ruunvald_excavation",
+      "title": "Triple Wages",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "desc": "Miners from Shor's Stone went to work at the Ruunvald Excavation for triple wages and never came home. Thrud Ore-Wife wants her husband Kolbjorn's iron token back, if nothing else.",
+      "pitch": "Ruunvald paid triple wages. Thrud's husband went. They're not digging for ore up there, whatever they say. Bring her something back. She's asking for so little.",
+      "objectives": [
+        {"type": "kill", "place": "ruunvald_excavation", "placement": "structure", "text": "Stop the necromancers of Ruunvald",
+         "spawn": [{"type": "skycraft:necromancer", "count": 2},
+                   {"type": "minecraft:skeleton", "count": 3, "name": "Bound Miner"},
+                   {"type": "skycraft:necromancer", "name": "Sister Hrolfa", "target": true, "boss": true, "hp": 1.8, "dmg": 1.2}],
+         "journal": "Some of the skeletons wore miners' boots. I didn't look closer than that."},
+        {"type": "retrieve", "place": "ruunvald_excavation", "placement": "structure", "relic": "plr_ruunvald_excavation_iron_token", "text": "Find Kolbjorn's iron token under the third cart in the cut"},
+        {"type": "deliver", "npc": "pln_skyrim_the_rift_thrud", "relic": "plr_ruunvald_excavation_iron_token", "text": "Bring the token to Thrud at Shor's Stone",
+         "topic": "Kolbjorn hid this so they couldn't use it to bind him. He fought them to the end.",
+         "reply": "He hid it. Stubborn fool. Stubborn, wonderful fool. Then he's his own man still, wherever he's gone. I'll hang it over the door so the whole village knows."}
+      ],
+      "rewards": {"gold": 240, "items": ["skycraft:soul_gem_lesser"]},
+      "outro": "The Ruunvald dig is silent. Thrud has her husband's token, and Shor's Stone has its dead back, in a way."
+    },
+    {
+      "id": "pl_boulderfall_cave",
+      "title": "The Corpse Buyer",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "desc": "A necromancer at Boulderfall Cave has been buying bodies from someone at Riften's Hall of the Dead. Her ledger would name the seller.",
+      "pitch": "Bodies are going missing from the Hall of the Dead. Somebody's carting them up to Boulderfall Cave. Ask me, the priests know more than they're saying.",
+      "objectives": [
+        {"type": "kill", "place": "boulderfall_cave", "placement": "structure", "text": "Kill Magister Aurelia Venn",
+         "spawn": [{"type": "minecraft:zombie", "count": 3, "name": "Drowned Thrall"},
+                   {"type": "skycraft:necromancer", "name": "Magister Aurelia Venn", "target": true, "boss": true, "hp": 2.0, "dmg": 1.3}]},
+        {"type": "retrieve", "place": "boulderfall_cave", "placement": "structure", "relic": "plr_boulderfall_cave_ledger", "text": "Take her ledger of acquisitions",
+         "journal": "The ledger names the seller: a junior attendant at the Riften Hall of the Dead. It also names Sister Hrolfa, at Ruunvald, as a buyer."}
+      ],
+      "rewards": {"gold": 210, "items": ["skycraft:soul_gem_common"]},
+      "outro": "Magister Venn's workshop is closed for good. Her apprentice Teodor, if he lives, is free of her box of hair. The Hall of the Dead in Riften will be getting a visit."
+    },
+    {
+      "id": "pl_northwind_mine",
+      "title": "Hearth, Ore, Home",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "desc": "Old Brandulf, once foreman of Northwind Mine, is dying, and asks every night for his father's silver-banded pick. He left it in the third gallery when the chaurus came.",
+      "pitch": "Old Brandulf at Shor's Stone wants his father's pick from Northwind Mine before he dies. Chaurus in there, mind. His grandson tried. His grandson came back fast.",
+      "objectives": [
+        {"type": "retrieve", "place": "northwind_mine", "placement": "structure", "relic": "plr_northwind_mine_pick", "text": "Find the heirloom pick in the third gallery",
+         "spawn": [{"type": "skycraft:chaurus", "count": 3}]},
+        {"type": "deliver", "npc": "pln_skyrim_the_rift_brandulf", "relic": "plr_northwind_mine_pick", "text": "Bring the pick to Brandulf the Younger at Shor's Stone",
+         "topic": "Your great-grandfather's pick. Hearth, ore, home.",
+         "reply": "That's it. That's the one. He'll weep, and then he'll shout at me for not fetching it myself. Thank you. He can go to Sovngarde with it now, like he wanted."}
+      ],
+      "rewards": {"gold": 150, "items": ["skycraft:steel_war_axe"]},
+      "outro": "Old Brandulf has his father's pick across his knees. He says he'll be buried with it, and that I'm welcome at the funeral."
+    },
+    {
+      "id": "pl_darkwater_pass",
+      "title": "The Lost Lodestone",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "desc": "A surveyor charting Darkwater Pass for a cart road lost his lodestone to the Falmer, and went back into the dark for it.",
+      "pitch": "A surveyor from Darkwater Crossing went into the pass with a fancy lodestone and came out without it. Then went back in. He's not come out a second time.",
+      "objectives": [
+        {"type": "go", "place": "darkwater_pass", "text": "Search Darkwater Pass for the surveyor"},
+        {"type": "retrieve", "place": "darkwater_pass", "placement": "structure", "relic": "plr_darkwater_pass_lodestone", "text": "Take back the surveyor's lodestone",
+         "spawn": [{"type": "skycraft:falmer", "count": 3},
+                   {"type": "skycraft:chaurus", "count": 1}],
+         "journal": "Hadvar Iron-Line lay near the Falmer camp with his chain still wound round his arm. The lodestone was on a little shrine of bone."}
+      ],
+      "rewards": {"gold": 180, "items": ["skycraft:chitin_dagger"]},
+      "outro": "The lodestone points north again. Someone at Darkwater Crossing will be glad of it, and sorrier about the man who carried it."
+    },
+    {
+      "id": "pl_tolvalds_cave",
+      "title": "A Light for Tolvald",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "requires": ["level:14"],
+      "desc": "Tolvald went into the cave that now bears his name with his father's brass lantern. His mother in Riften still lights a lamp in her window every night. The Falmer have made his lantern into a god.",
+      "pitch": "Tolvald's mother still lights a lamp for him every night. If anyone could bring back something of his, even just that old lantern... it might let her blow the lamp out.",
+      "objectives": [
+        {"type": "go", "place": "tolvalds_cave", "text": "Descend into Tolvald's Cave"},
+        {"type": "kill", "place": "tolvalds_cave", "placement": "structure", "text": "Defeat the Falmer who keep the lantern shrine",
+         "spawn": [{"type": "skycraft:falmer", "count": 3},
+                   {"type": "skycraft:chaurus_hunter", "count": 1},
+                   {"type": "skycraft:falmer", "name": "Lantern-Keeper", "target": true, "boss": true, "hp": 2.0, "dmg": 1.3}]},
+        {"type": "retrieve", "place": "tolvalds_cave", "placement": "structure", "relic": "plr_tolvalds_cave_lantern", "text": "Take Tolvald's lantern from the shrine",
+         "journal": "Tolvald's bones lay in a side passage by a pool of glowing mushrooms, facing the way he came in."}
+      ],
+      "rewards": {"gold": 230, "items": ["skycraft:silver_ring"]},
+      "outro": "Tolvald's lantern is coming home to Riften. His mother can let her lamp go out at last."
+    },
+    {
+      "id": "pl_avanchnzel",
+      "title": "The Resonance Key",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "requires": ["level:16"],
+      "desc": "An Imperial expedition to Avanchnzel found a Dwemer key that quiets the machines, and woke the one guardian it does not. Lucan Varro's last wish was that the key never return to his Society.",
+      "pitch": "Those Imperial scholars that went into Avanchnzel? The Orcs at Largashbur found one of their journals by the gate. Something in there is still guarding something.",
+      "objectives": [
+        {"type": "go", "place": "avanchnzel", "text": "Enter Avanchnzel"},
+        {"type": "retrieve", "place": "avanchnzel", "placement": "structure", "relic": "plr_avanchnzel_resonance_key", "text": "Find Lucan Varro and the resonance key",
+         "spawn": [{"type": "skycraft:dwarven_spider", "count": 3},
+                   {"type": "skycraft:dwarven_sphere", "count": 1}],
+         "journal": "Lucan Varro died in a maintenance crawlway with the key clutched to his chest. It hummed when I touched it."},
+        {"type": "kill", "place": "avanchnzel", "placement": "structure", "text": "Destroy the guardian of the lower hall",
+         "spawn": [{"type": "skycraft:dwarven_centurion", "name": "The Key-Warden", "target": true, "boss": true, "hp": 1.6}],
+         "journal": "The Key-Warden fell, and every machine in Avanchnzel went quiet for a long moment, as if listening."}
+      ],
+      "rewards": {"gold": 320, "items": ["skycraft:dwarven_helmet"]},
+      "outro": "I have the resonance key, and Lucan Varro's wish that it go into Lake Honrich. Whether it does is up to me."
+    },
+    {
+      "id": "pl_angarvunde",
+      "title": "The Brave Fool",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "desc": "Durz gro-Ushnar of Largashbur went into Angarvunde for a Nord dead-king's blade, hoping it would lift his stronghold's curse. His sister Gula wants him found.",
+      "pitch": "An Orc lad from Largashbur walked into Angarvunde after a Nord blade. His sister Gula sits by the road every night. Speak to her, if you're the barrow-diving sort.",
+      "objectives": [
+        {"type": "go", "place": "angarvunde", "text": "Search Angarvunde for Durz"},
+        {"type": "kill", "place": "angarvunde", "placement": "structure", "text": "Lay the Warden of Angarvunde to rest",
+         "spawn": [{"type": "skycraft:draugr", "count": 3},
+                   {"type": "skycraft:draugr_deathlord", "name": "Warden of Angarvunde", "target": true, "boss": true, "hp": 1.6}],
+         "journal": "Durz lay under the fallen wall in the deep hall. He had broken more draugr than I'd have believed of one Orc."},
+        {"type": "retrieve", "place": "angarvunde", "placement": "structure", "relic": "plr_angarvunde_tusk_charm", "text": "Find Durz's tusk-charm in the dark"},
+        {"type": "deliver", "npc": "pln_skyrim_the_rift_gula", "relic": "plr_angarvunde_tusk_charm", "text": "Bring the charm to Gula at Largashbur",
+         "topic": "Durz died in the deep hall. He fought to the end. He wanted the chief told he was brave.",
+         "reply": "...He was brave. He was a fool. Both go to Malacath's halls. I will tell the chief he was brave. I will not tell the chief he was a fool. That one is mine to keep."}
+      ],
+      "rewards": {"gold": 220, "items": ["skycraft:orcish_war_axe"]},
+      "outro": "Gula has her father's tusk back, and her brother's story to tell. Largashbur's curse is unbroken, but one Orc there is no longer waiting by the road."
+    },
+    {
+      "id": "pl_forelhost",
+      "title": "The Siege Captain's Signet",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "requires": ["level:16"],
+      "desc": "A First Era siege captain left the High Priest's door-signet in the lower halls of Forelhost, with his men's names cut beside it. Hrelga Dawnmoor of the Temple of Mara wants it, so their names can be read at the vigil.",
+      "pitch": "The keeper at the Temple of Mara wants something brought back from Forelhost, an old captain's ring. Forelhost, mind. The Cult's old fortress. Bring a big sword and a bigger heart.",
+      "objectives": [
+        {"type": "go", "place": "forelhost", "text": "Enter Forelhost"},
+        {"type": "retrieve", "place": "forelhost", "placement": "structure", "relic": "plr_forelhost_signet", "text": "Find the door-signet in the lower hall",
+         "spawn": [{"type": "skycraft:draugr", "count": 4},
+                   {"type": "skycraft:draugr_deathlord", "name": "Smiling Monk", "boss": true, "hp": 1.5}],
+         "journal": "The signet lay on a ledge in the lower hall. Eleven names were cut beside it, and a twelfth, half-finished."},
+        {"type": "deliver", "npc": "pln_skyrim_the_rift_hrelga", "relic": "plr_forelhost_signet", "text": "Bring the signet to Hrelga Dawnmoor in Riften",
+         "topic": "Captain Hroald's signet. His men's names were beside it. Eleven, and one unfinished.",
+         "reply": "Unfinished? Then he cut his own last, and never got to the end of it. We'll read twelve names at the vigil. I'll cut his for him on the temple wall."}
+      ],
+      "rewards": {"gold": 300, "items": ["skycraft:amulet_of_mara"]},
+      "outro": "Twelve names will be read at the Hearthfire vigil in Riften. The last of them, Hroald, was a captain who did not run."
+    },
+    {
+      "id": "pl_shroud_hearth_barrow",
+      "title": "The Hearth Gone Out",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "desc": "Asvar, a stonemason's son of Ivarstead, took a burial urn from Shroud Hearth Barrow and woke its Hearthkeeper. The knocking in the barrow has not stopped since.",
+      "pitch": "Hjorvald's boy went into Shroud Hearth for a Ratway fence and an urn of silver. There's been knocking from the hill every night since. Put it right, if anything can.",
+      "objectives": [
+        {"type": "retrieve", "place": "shroud_hearth_barrow", "placement": "structure", "relic": "plr_shroud_hearth_barrow_urn", "text": "Find the urn Asvar disturbed",
+         "spawn": [{"type": "skycraft:draugr", "count": 3}],
+         "journal": "Asvar was dead by the hearth door, the urn still in his arms. He had tried to put it back."},
+        {"type": "kill", "place": "shroud_hearth_barrow", "placement": "structure", "text": "Lay the Hearthkeeper to rest",
+         "spawn": [{"type": "skycraft:draugr_deathlord", "name": "The Hearthkeeper", "target": true, "boss": true, "hp": 1.5}],
+         "journal": "When the Hearthkeeper fell, I set the urn back in its alcove. The knocking stopped. The ash in the hearth-bowl was warm."}
+      ],
+      "rewards": {"gold": 160, "items": ["skycraft:fur_boots"]},
+      "outro": "The knocking under Ivarstead has stopped. Hjorvald will bring his son home and bury him close to the hearth he was trying to mend."
+    },
+    {
+      "id": "pl_geirmunds_hall",
+      "title": "What the Lake Kept",
+      "region": "skyrim/the_rift",
+      "start": "npc:pln_skyrim_the_rift_eydis",
+      "offer": "Are you waiting for someone?",
+      "pitch": "My husband Arne. He rowed a College woman out to the island in Lake Geir and the lake gave back the boat, not him. He wore a soapstone fish I carved. If you're going out there, bring it home to me.",
+      "desc": "Eydis Long-Net's husband Arne rowed a scholar to Geirmund's Hall and never came back. She asks for the soapstone net-weight he wore.",
+      "objectives": [
+        {"type": "go", "place": "geirmunds_hall", "text": "Cross Lake Geir to Geirmund's Hall"},
+        {"type": "retrieve", "place": "geirmunds_hall", "placement": "structure", "relic": "plr_geirmunds_hall_net_weight", "text": "Find Arne's soapstone net-weight",
+         "spawn": [{"type": "skycraft:draugr", "count": 3},
+                   {"type": "skycraft:slaughterfish", "count": 2}],
+         "journal": "Arne and the College scholar lay together near the flooded stair. She had finished her chapter. He had his hand on her shoulder."},
+        {"type": "deliver", "npc": "pln_skyrim_the_rift_eydis", "relic": "plr_geirmunds_hall_net_weight", "text": "Bring the net-weight to Eydis in Ivarstead",
+         "topic": "Arne didn't leave her alone in there. He stayed with the scholar to the end.",
+         "reply": "That's him. That's exactly him. He never could leave anyone in the dark. Thank you. I can stop standing on the dock now."}
+      ],
+      "rewards": {"gold": 170, "items": ["skycraft:iron_dagger"]},
+      "outro": "Eydis has stopped waiting on the dock. She wears the soapstone fish around her own neck now."
+    },
+    {
+      "id": "pl_nilheim",
+      "title": "The Votive Bell",
+      "region": "skyrim/the_rift",
+      "start": "npc:pln_skyrim_the_rift_oddvar",
+      "offer": "You look troubled, grandfather.",
+      "pitch": "Bandits at Nilheim took my father's bell. I meant to ring it at the top of the Steps, for his soul. I'm too old to fight, and too stubborn to go home without it.",
+      "desc": "The bandits of Nilheim robbed Oddvar the Pilgrim of a brass votive bell he meant to ring at High Hrothgar.",
+      "objectives": [
+        {"type": "kill", "place": "nilheim", "text": "Deal with Svidi Half-Hand at Nilheim",
+         "spawn": [{"type": "skycraft:bandit", "count": 3},
+                   {"type": "skycraft:bandit_chief", "name": "Svidi Half-Hand", "target": true, "boss": true, "hp": 1.4}]},
+        {"type": "retrieve", "place": "nilheim", "relic": "plr_nilheim_votive_bell", "text": "Recover Oddvar's bell"},
+        {"type": "deliver", "npc": "pln_skyrim_the_rift_oddvar", "relic": "plr_nilheim_votive_bell", "text": "Return the bell to Oddvar in Ivarstead",
+         "topic": "Your bell. Svidi won't be robbing pilgrims again.",
+         "reply": "Ha! Listen to it. Just the same as when I was a boy. I'll ring it at the top for Father, and once more for you. The Greybeards will grumble. Let them."}
+      ],
+      "rewards": {"gold": 130, "items": ["skycraft:silver_ring"]},
+      "outro": "Oddvar has set off up the Seven Thousand Steps with his bell. If the wind is right, Ivarstead may hear it."
+    },
+    {
+      "id": "pl_pinepeak_cavern",
+      "title": "Old Scarback",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "desc": "Bjarn the Tracker went into Pinepeak Cavern after the man-killing bear called Old Scarback. His journal ends in her den.",
+      "pitch": "Old Scarback's killed two men and a horse. Bjarn went after her and didn't come back either. She's half blind on her scarred side, if that helps.",
+      "objectives": [
+        {"type": "kill", "place": "pinepeak_cavern", "placement": "structure", "text": "Kill Old Scarback",
+         "spawn": [{"type": "skycraft:bear", "name": "Old Scarback", "target": true, "boss": true, "hp": 2.0, "dmg": 1.3}],
+         "journal": "Old Scarback is dead. Bjarn's bow lay by the cave wall, still strung."}
+      ],
+      "rewards": {"gold": 110, "items": ["skycraft:fur_chestplate"]},
+      "outro": "Ivarstead's goats are safe, and Hakon and Bjarn are avenged."
+    },
+    {
+      "id": "pl_honeystrand_cave",
+      "title": "Thirty Paces East",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "desc": "A forgetful beekeeper hid his wax money near Honeystrand Cave, thirty paces east under a flat stone, where the bears are less likely to dig.",
+      "pitch": "Rolf the beekeeper buried his coin by Honeystrand Cave and forgot where. He's been digging up half the hillside. Bears watch him do it.",
+      "objectives": [
+        {"type": "retrieve", "place": "honeystrand_cave", "offset": [30, 0], "item": "skycraft:gold_ring", "text": "Dig under the flat stone thirty paces east of Honeystrand Cave",
+         "spawn": [{"type": "skycraft:bear", "count": 1}],
+         "journal": "Under the flat stone: a pouch of wax money and a gold ring. A bear watched me dig, just as the note promised."}
+      ],
+      "rewards": {"gold": 70},
+      "outro": "Rolf's stash is found. He'll be digging in the wrong place for a while yet."
+    },
+    {
+      "id": "pl_ruins_of_bthalft",
+      "title": "The Burning Door",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "desc": "A cultist calling himself Velyn Ashwhisper has been making offerings to Mehrunes Dagon at the Dwemer ruin of Bthalft. His next offering is meant to be a living Legion deserter.",
+      "pitch": "Red light at the Dwemer stones by night, and a stink of brimstone. One of the Legion lads from the camp went missing. Someone should look before there's another.",
+      "objectives": [
+        {"type": "go", "place": "ruins_of_bthalft", "text": "Go to the Ruins of Bthalft at night"},
+        {"type": "kill", "place": "ruins_of_bthalft", "text": "Stop Velyn Ashwhisper's rite",
+         "spawn": [{"type": "skycraft:scamp", "count": 2},
+                   {"type": "npc:mage", "name": "Velyn Ashwhisper", "target": true, "boss": true, "hp": 1.8, "dmg": 1.3, "hostile": true}],
+         "journal": "The deserter was bound on the steps, alive. I cut him loose and he ran south, toward the Legion camp and a flogging he'd chosen over the alternative."}
+      ],
+      "rewards": {"gold": 200, "items": ["skycraft:spell_tome_lesser_ward"]},
+      "outro": "The offerings at Bthalft have stopped. The Dwemer plate warns not to open the door. Nobody will now."
+    },
+    {
+      "id": "pl_arcwind_point",
+      "title": "Wings over Arcwind",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "requires": ["level:18"],
+      "desc": "A green-scaled dragon has nested on the old shrine at Arcwind Point and hunts the herds south of Autumnwatch Tower. The Legion scout who watched it recommends that someone else kill it.",
+      "pitch": "The dragon on Arcwind Point took a Legion scout last week. It hunts every third day and comes home at dusk. If you're the sort who fights dragons, now's your chance.",
+      "objectives": [
+        {"type": "go", "place": "arcwind_point", "text": "Climb to Arcwind Point"},
+        {"type": "kill", "place": "arcwind_point", "text": "Slay the dragon of Arcwind Point",
+         "spawn": [{"type": "skycraft:dragon", "name": "Moss-Scaled Dragon", "target": true, "boss": true}],
+         "journal": "The dragon fell across the old shrine stair. Its scales, close up, were the colour of birch moss after rain."}
+      ],
+      "rewards": {"gold": 400, "items": ["skycraft:soul_gem_greater"]},
+      "outro": "Arcwind Point is empty again. Scout Valens can have her transfer, or keep her post, with one dragon fewer to observe."
+    },
+    {
+      "id": "pl_dragon_mound_frokis_shack",
+      "title": "The Mound Keeper's Count",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "desc": "Hrelga Dawnmoor, a keeper of the Temple of Mara, is counting the dragon mounds of the Rift. One near Froki's Shack is open. She wants to know about the other two.",
+      "pitch": "The candle-keeper at the Temple of Mara is counting dragon mounds, of all things. She's paying anyone brave enough to go and look at them.",
+      "objectives": [
+        {"type": "go", "place": "dragon_mound_autumnshade_clearing", "text": "Look at the dragon mound by Autumnshade Clearing",
+         "journal": "The cap-stone at Autumnshade is split. The ground hums."},
+        {"type": "go", "place": "dragon_mound_lost_tongue_overlook", "text": "Look at the dragon mound below Lost Tongue Overlook",
+         "spawn": [{"type": "skycraft:draugr", "count": 2, "name": "Mound Watcher"}],
+         "journal": "Below Lost Tongue the ground is burned in a ring and the mound smokes without fire. Two draugr were standing guard on it, facing outward."},
+        {"type": "talk", "npc": "pln_skyrim_the_rift_hrelga", "text": "Tell Hrelga Dawnmoor what you saw",
+         "topic": "One cracked and humming, one burnt and smoking, and draugr standing guard.",
+         "reply": "Guards. On a grave. Waiting for someone to come home. ...Thank you. I'll write to the Jarl, and to Whiterun, and I'll light every candle we have. It isn't much. It's what I've got."}
+      ],
+      "rewards": {"gold": 150, "items": ["skycraft:amulet_of_mara"]},
+      "outro": "Three dragon mounds in the Rift: one open, one cracked, one smoking. Hrelga is writing letters, and lighting candles."
+    },
+    {
+      "id": "pl_darklight_tower",
+      "title": "The Gnarlmother's Price",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "requires": ["level:14"],
+      "desc": "A hagraven called the Gnarlmother promised a Snow-Shod child to make the Black-Briar debt collectors go away, for a price paid in hair, teeth and song. Her crows have been watching the farm.",
+      "pitch": "The Snow-Shod girl's been sleepwalking toward Darklight Tower. Her father's sleeping in the barn with an axe. Somebody ought to visit that tower before she gets there.",
+      "objectives": [
+        {"type": "go", "place": "darklight_tower", "text": "Go to Darklight Tower"},
+        {"type": "kill", "place": "darklight_tower", "text": "Kill the Gnarlmother",
+         "spawn": [{"type": "skycraft:forsworn", "count": 2},
+                   {"type": "skycraft:hagraven", "name": "The Gnarlmother", "target": true, "boss": true, "hp": 1.8, "dmg": 1.2}]},
+        {"type": "retrieve", "place": "darklight_tower", "relic": "plr_darklight_tower_bottle", "text": "Take the bottle with the child's song",
+         "journal": "I smashed the bottle on the tower stair. The song flew out of it, just for a moment, like a bird. Somewhere south of Riften, a girl will sleep through the night."}
+      ],
+      "rewards": {"gold": 250, "items": ["skycraft:forsworn_helmet"]},
+      "outro": "The Gnarlmother is dead and her crows have scattered. The Snow-Shods still owe the Black-Briars forty septims, but a hagraven isn't the one collecting."
+    },
+    {
+      "id": "pl_stendarrs_beacon",
+      "title": "Relight the Beacon",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "desc": "The Vigilants of Stendarr's Beacon were slaughtered by skeletons and a pale man from Redwater. The last of them asked that the fire be relit.",
+      "pitch": "The Vigilants' beacon's gone dark for the first time in my life. Something came up the hill. The fire needs relighting, and whatever put it out needs putting out.",
+      "objectives": [
+        {"type": "clear", "place": "stendarrs_beacon", "text": "Drive the dead out of Stendarr's Beacon",
+         "spawn": [{"type": "minecraft:skeleton", "count": 4},
+                   {"type": "npc:vampire", "name": "Redwater Thrall-Master", "boss": true, "hp": 1.5, "hostile": true}]},
+        {"type": "retrieve", "place": "stendarrs_beacon", "relic": "plr_stendarrs_beacon_log", "text": "Find the Beacon Log in the lower chest",
+         "journal": "I relit the beacon with the Vigilants' own flint. It burns again, and it can be seen from Riften."}
+      ],
+      "rewards": {"gold": 210, "items": ["skycraft:steel_mace"]},
+      "outro": "Stendarr's Beacon burns again. The last Vigilant's log names Redwater, and the pale man who was proud of what he'd done."
+    },
+    {
+      "id": "pl_crystaldrift_cave",
+      "title": "Under the Lightning Stone",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "desc": "A Ratway thief named Svari hid a ring from a Goldenglow job under a cracked boulder near Crystaldrift Cave, and never came back for it.",
+      "pitch": "Svari the Quick hid his take near Crystaldrift Cave. Froze his toes off going back for it, the story goes. Probably still there, if you don't mind spiders.",
+      "objectives": [
+        {"type": "retrieve", "place": "crystaldrift_cave", "offset": [-20, 0], "item": "skycraft:gold_ring", "text": "Dig under the lightning-cracked boulder west of Crystaldrift Cave",
+         "spawn": [{"type": "skycraft:frostbite_spider", "count": 1}],
+         "journal": "Under the boulder: an old gold ring in a waxed purse. A frost spider had made a nest on top of the stone. Svari would have hated it."}
+      ],
+      "rewards": {"gold": 60},
+      "outro": "Svari's ring is mine now. The note says not to sell it in Riften. Good advice in general."
+    },
+    {
+      "id": "pl_the_shadow_stone",
+      "title": "The Shadow's Share",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "desc": "A thief named Tova Quickstep buried an offering for the Shadow twelve paces from the stone toward Snow-Shod Farm, under a rock scratched with a crescent.",
+      "pitch": "Thieves leave offerings at the Shadow Stone, everyone knows that. One of them buried a whole share. Whoever finds it keeps it, so the story goes.",
+      "objectives": [
+        {"type": "retrieve", "place": "the_shadow_stone", "offset": [-12, 0], "item": "skycraft:lockpick*5", "text": "Dig under the crescent-scratched rock between the Shadow Stone and Snow-Shod Farm",
+         "journal": "Under the crescent rock: a bundle of good picks and a small purse. The Shadow, it seems, is generous."}
+      ],
+      "rewards": {"gold": 80},
+      "outro": "I found Tova Quickstep's offering to the Shadow. Shadows don't need gold, she said. She was right."
+    },
+    {
+      "id": "pl_trevas_watch",
+      "title": "The River Tithe",
+      "region": "skyrim/the_rift",
+      "start": "manual",
+      "desc": "Bandits at Treva's Watch have claimed a 'tithe' on the river country, taking nirnroot from Sarethi Farm and breaking the arm of the farm's hand. Their leader calls herself Saltcheek.",
+      "pitch": "Avrusa Sarethi's lost a dozen nirnroot to the bandits at Treva's Watch, and her hand Brelas got his arm broken for his trouble. Their chief's called Saltcheek. She'd pay well to see her gone.",
+      "objectives": [
+        {"type": "go", "place": "trevas_watch", "text": "Go to Treva's Watch"},
+        {"type": "kill", "place": "trevas_watch", "text": "End Hjolfrid Saltcheek's claim on the river country",
+         "spawn": [{"type": "skycraft:bandit", "count": 4},
+                   {"type": "skycraft:bandit_chief", "name": "Hjolfrid Saltcheek", "target": true, "boss": true, "hp": 1.7, "dmg": 1.2}],
+         "journal": "Saltcheek wore a grey bear-cloak and fought like someone defending her inheritance. Maybe she was. It didn't help her."}
+      ],
+      "rewards": {"gold": 220, "items": ["skycraft:steel_sword"]},
+      "outro": "The river tithe is cancelled. Avrusa Sarethi's nirnroot can sing in peace again."
+    }
+  ]
+}

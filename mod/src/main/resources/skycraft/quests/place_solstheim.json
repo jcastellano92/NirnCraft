@@ -1,0 +1,453 @@
+{
+ "line": "place_solstheim",
+ "category": "side",
+ "npcs": [
+  {"id": "pln_solstheim_aulus", "name": "Aulus Vettrius", "role": "citizen", "place": "raven_rock", "offset": [-5, 3], "female": false,
+   "greet": "My family has buried its dead on this island for two hundred years. Some of them never got the burying."},
+  {"id": "pln_solstheim_mileth", "name": "Mileth Indaram", "role": "housecarl", "place": "raven_rock", "offset": [4, -6], "female": false,
+   "greet": "Redoran Guard. If you're here to make trouble, the Bulwark has seen worse. If you're here to help, it's seen less of that."},
+  {"id": "pln_solstheim_helga", "name": "Helga", "role": "citizen", "place": "raven_rock", "offset": [-3, -5], "female": true,
+   "greet": "If you've come down from the hills, did you pass the old lodge below Hvitkald? Was there smoke in the chimney?"},
+  {"id": "pln_solstheim_tilvur", "name": "Tilvur Sadas", "role": "farmer", "place": "old_attius_farm", "offset": [2, 2], "female": false,
+   "greet": "Ash-yams, fresh dug. Or as fresh as anything is under all this grey."},
+  {"id": "pln_solstheim_yrsa", "name": "Yrsa Seal-Singer", "role": "hunter", "place": "skaal_village", "offset": [-4, 5], "female": true,
+   "greet": "You walk loudly, outlander. The seals will hear you coming from Horker Island."},
+  {"id": "pln_solstheim_aevar", "name": "Aevar Stone-Ear", "role": "blacksmith", "place": "skaal_village", "offset": [5, 3], "female": false,
+   "greet": "I work stalhrim. No, I will not sell you any. No, I will not tell you how. Yes, you may watch, if you are quiet."},
+  {"id": "pln_solstheim_ulvo", "name": "Ulvo Nerano", "role": "scholar", "place": "tel_mithryn", "offset": [5, -3], "female": false,
+   "greet": "Are you sturdy? You look sturdy. I have a great deal of scholarship that needs a sturdy person."},
+  {"id": "pln_solstheim_brenna", "name": "Brenna Ice-Mead", "role": "innkeeper", "place": "thirsk_mead_hall", "offset": [3, -2], "female": true,
+   "greet": "Welcome to Thirsk. The mead's ours again. The spear isn't. Sit down, drink, and tell me whether you can fight."}
+ ],
+ "relics": [
+  {"id": "plr_kolbjorn_barrow_pass", "name": "Neral's Digging Pass", "desc": "A scrap of hide stamped with the Redoran Guard's seal, smeared with ash and lamp-soot. Neral's name is written on it in his father's careful hand."},
+  {"id": "plr_bujolds_retreat_mask", "name": "Old Skjald's Hunting Mask", "desc": "A carved wooden mask of a seal's face, worn smooth by three generations of Skaal hunters. The reavers scratched a price into the back of it."},
+  {"id": "plr_glacial_cave_pick", "name": "Aevar's Cutting Pick", "desc": "A small pick with a haft of bone, marked with a hand and a hammer. Its head is so cold it fogs the air."},
+  {"id": "plr_castle_karstaag_ruins_shard", "name": "Shard of the Ice Crown", "desc": "A jagged spike of ice that does not melt in the hand, taken from the fist of a frost giant. It hums faintly, like a struck bell."},
+  {"id": "plr_haknirs_shoal_brand", "name": "Haknir's Brand-Iron", "desc": "A heavy branding iron shaped like a burning ship. The oath of thirty-one drowned men is bound to it, and it is always cold and wet."},
+  {"id": "plr_broken_tusk_mine_claim", "name": "Broken Tusk Claim Stone", "desc": "A flat stone slab carved with the Jarl's seal and the boundaries of the Broken Tusk claim. A riekling has drawn a crown on it."},
+  {"id": "plr_stalhrim_source_slab", "name": "Smuggled Stalhrim Slab", "desc": "A slab of deep blue stalhrim, wrapped in sacking. It is colder than anything has a right to be, and it seems to look back at you."},
+  {"id": "plr_hrothmunds_barrow_key", "name": "Hrothmund's Key", "desc": "An iron key as long as a forearm, its bow shaped like a coiled serpent. It is warm, and the warmth feels like attention."},
+  {"id": "plr_fahlbtharz_regulator", "name": "Fahlbtharz Pressure Regulator", "desc": "A brass Dwemer heart the size of a ram's skull, still warm and ticking softly."},
+  {"id": "plr_frostmoon_crag_ring", "name": "Helga's Ring", "desc": "A plain silver ring on a leather thong, chewed at the knot. The inside is engraved: To S., from H., for every Loredas."},
+  {"id": "plr_damphall_mine_payroll", "name": "Damphall Payroll Chest", "desc": "A small iron-bound chest, scorched on one side. Inside, one hundred and twelve drakes and a list of eleven names."},
+  {"id": "plr_vahloks_tomb_rubbings", "name": "Satchel of Tomb Rubbings", "desc": "A leather satchel holding eleven charcoal rubbings of old Nordic inscriptions, a little scorched at the corners."},
+  {"id": "plr_highpoint_tower_grimoire", "name": "Arvyn's Grimoire", "desc": "A Telvanni grimoire bound in netch leather, full of star charts and notes on Red Mountain's fires."},
+  {"id": "plr_fort_frostmoth_standard", "name": "Frostmoth Cohort Standard", "desc": "A Legion standard, its cloth burned almost away, its bronze eagle green with two centuries of sea air."},
+  {"id": "plr_bloodskal_barrow_urn", "name": "Silver-Banded Ash Urn", "desc": "A Dunmer funerary urn banded in silver, bearing the crest of House Morvayn. It is heavier than it looks."},
+  {"id": "plr_gyldenhul_barrow_spear", "name": "Brandr's Seal-Tooth Spear", "desc": "A Skaal hunting spear with a seal's tooth bound to the shaft. The head is notched from a hard fight."},
+  {"id": "plr_kagrumez_key", "name": "Kagrumez Tuning Key", "desc": "A long brass Dwemer tuning fork. When struck it rings in a tone you feel in your teeth more than you hear."}
+ ],
+ "quests": [
+  {
+   "id": "pl_kolbjorn_barrow",
+   "title": "Behind the Third Pillar",
+   "region": "morrowind/solstheim",
+   "start": "manual",
+   "desc": "Neral Sadas, a farmer's son from Old Attius Farm, was trapped in Kolbjorn Barrow when a gallery collapsed. His diary says he is hiding behind the third pillar of a side chamber, and the dead are waking.",
+   "pitch": "Tilvur Sadas's boy is stuck down in Kolbjorn Barrow, behind a fallen gallery. The excavator says he's fine. The excavator says that about everything. Somebody ought to go and look.",
+   "objectives": [
+    {"type": "go", "place": "kolbjorn_barrow", "text": "Find the collapsed gallery in Kolbjorn Barrow"},
+    {"type": "kill", "place": "kolbjorn_barrow", "placement": "structure", "text": "Put down the barrow's waking warden",
+     "spawn": [{"type": "skycraft:draugr", "count": 2}, {"type": "skycraft:draugr_deathlord", "name": "Kolbjorn's Watcher", "target": true, "boss": true, "hp": 1.3}]},
+    {"type": "retrieve", "place": "kolbjorn_barrow", "placement": "structure", "relic": "plr_kolbjorn_barrow_pass", "text": "Find Neral behind the third pillar",
+     "journal": "Neral is alive, half-starved and shaking. He gave me his digging pass to show his father, and he'll follow the cleared path out on his own."},
+    {"type": "deliver", "npc": "pln_solstheim_tilvur", "relic": "plr_kolbjorn_barrow_pass", "text": "Bring Neral's pass to Tilvur at Old Attius Farm",
+     "topic": "Neral's alive. He's walking home behind me.", "reply": "Alive? Alive! Then I'll kill the boy myself for frightening me. After supper. After a very large supper. Thank you, friend, from the bottom of my ash-caked heart."}
+   ],
+   "rewards": {"gold": 180, "items": ["skycraft:chitin_dagger"]},
+   "outro": "Neral is home. Tilvur swears he'll never set foot in a barrow again. Neral is already asking whether Ralis Sedarys still owes him wages."
+  },
+  {
+   "id": "pl_bujolds_retreat",
+   "title": "The Seal's Face",
+   "region": "morrowind/solstheim",
+   "start": "manual",
+   "desc": "Reavers at Bujold's Retreat have been robbing Skaal sledges. Among their loot is Old Skjald's carved hunting mask, an heirloom three generations old, which their leader means to sell to a Telvanni.",
+   "pitch": "Reavers at Bujold's Retreat took the Skaal's sledges and an old hunting mask that means more to them than gold. The Skaal won't fight for it. Somebody else could.",
+   "objectives": [
+    {"type": "clear", "place": "bujolds_retreat", "text": "Drive the reavers out of Bujold's Retreat",
+     "spawn": [{"type": "npc:thug", "count": 3, "name": "Reaver"}]},
+    {"type": "kill", "place": "bujolds_retreat", "text": "Deal with Halvar Gut-Hook",
+     "spawn": [{"type": "skycraft:bandit_chief", "name": "Halvar Gut-Hook", "target": true, "boss": true, "hp": 1.4}]},
+    {"type": "retrieve", "place": "bujolds_retreat", "relic": "plr_bujolds_retreat_mask", "radius": 12, "text": "Recover Old Skjald's hunting mask"},
+    {"type": "deliver", "npc": "pln_solstheim_yrsa", "relic": "plr_bujolds_retreat_mask", "text": "Return the mask to Yrsa Seal-Singer in the Skaal Village",
+     "topic": "The reavers won't be raiding sledges any more. And this is Old Skjald's.", "reply": "His father's face, and his father's. Skjald will weep and pretend it is the wind. You did a thing the Skaal would not do, outlander, and I am not sure whether to thank you or scold you. I will thank you."}
+   ],
+   "rewards": {"gold": 220, "items": ["skycraft:fur_chestplate"]},
+   "outro": "Old Skjald wore the mask at the next hunt. The seals, Yrsa says, came closer than they have in years."
+  },
+  {
+   "id": "pl_glacial_cave",
+   "title": "The Ice Is Crying",
+   "region": "morrowind/solstheim",
+   "start": "manual",
+   "desc": "Smugglers have seized the Glacial Cave to cut stalhrim without the Skaal's words, and taken the cutting pick from Aevar Stone-Ear's apprentice. The ice has woken something cold in answer.",
+   "pitch": "Aevar Stone-Ear's apprentice went to the Glacial Cave and found smugglers hacking at the stalhrim. They took the pick his master gave him. Aevar wants it back, and wants the cutting stopped.",
+   "objectives": [
+    {"type": "clear", "place": "glacial_cave", "placement": "structure", "text": "Drive the stalhrim smugglers out of the Glacial Cave",
+     "spawn": [{"type": "npc:thug", "count": 3, "name": "Stalhrim Smuggler"}, {"type": "skycraft:ice_wraith", "count": 1}]},
+    {"type": "retrieve", "place": "glacial_cave", "placement": "structure", "relic": "plr_glacial_cave_pick", "text": "Recover Aevar's cutting pick",
+     "spawn": [{"type": "skycraft:frostbite_spider", "count": 2}],
+     "journal": "Hjalmar, the apprentice, is free and on his way home. He told me the smugglers never learned the words."},
+    {"type": "deliver", "npc": "pln_solstheim_aevar", "relic": "plr_glacial_cave_pick", "text": "Return the pick to Aevar Stone-Ear in the Skaal Village",
+     "topic": "Your apprentice is free, and here is your pick.", "reply": "Good. Good. The ice will settle now that the greedy ones are gone. You have done the All-Maker a kindness, which is rarer than you would think."}
+   ],
+   "rewards": {"gold": 240, "items": ["skycraft:fur_boots"]},
+   "outro": "Aevar has gone to the Glacial Cave to say the words over the broken slabs. He says the ice will forgive the cuts in time. He did not say whether it would forgive the cutters."
+  },
+  {
+   "id": "pl_castle_karstaag_ruins",
+   "title": "The Cold Throne",
+   "region": "morrowind/solstheim",
+   "start": "manual",
+   "requires": ["level:28"],
+   "desc": "A frozen hunter's journal speaks of a frost giant sitting on the old throne of Karstaag, holding a shard of the ice crown in its fist.",
+   "pitch": "There are giant tracks outside Castle Karstaag, big as a cart. Some say the old king's get has taken his throne. A hunter went in for the crown of ice and never came out.",
+   "objectives": [
+    {"type": "go", "place": "castle_karstaag_ruins", "text": "Enter the ruins of Castle Karstaag"},
+    {"type": "kill", "place": "castle_karstaag_ruins", "placement": "structure", "text": "Defeat the giant on the cold throne",
+     "spawn": [{"type": "skycraft:giant", "name": "Hjorn, Get of Karstaag", "target": true, "boss": true, "hp": 1.6}, {"type": "skycraft:ice_wraith", "count": 2}]},
+    {"type": "retrieve", "place": "castle_karstaag_ruins", "placement": "structure", "relic": "plr_castle_karstaag_ruins_shard", "text": "Take the shard of the ice crown"},
+    {"type": "deliver", "npc": "pln_solstheim_aevar", "relic": "plr_castle_karstaag_ruins_shard", "text": "Bring the shard to Aevar Stone-Ear, who knows the ice",
+     "topic": "This came from the fist of Karstaag's heir.", "reply": "So the cold king had children after all. This is not stalhrim, but it is its cousin. I will keep it where it cannot be cut into a Telvanni's toy. Take this for your trouble, and keep your fingers by the fire tonight."}
+   ],
+   "rewards": {"gold": 380, "items": ["skycraft:soul_gem_greater"]},
+   "outro": "The cold throne is empty again. The Skaal say that the next giant to sit on it will need a very long memory, and a great deal of patience."
+  },
+  {
+   "id": "pl_saerings_watch",
+   "title": "The Watcher on the Rock",
+   "region": "morrowind/solstheim",
+   "start": "manual",
+   "requires": ["level:30"],
+   "desc": "A dragon roosts on Saering's Watch, beside a word wall that glows when it speaks. A hunting party that came for it was burned to bones.",
+   "pitch": "A dragon sits on Saering's Watch every dusk and talks to the old wall up there. Ragnvald the Patient went after it with a bolt-thrower. Nobody's seen Ragnvald since. Somebody with a Voice might do better.",
+   "objectives": [
+    {"type": "go", "place": "saerings_watch", "text": "Climb to Saering's Watch"},
+    {"type": "kill", "place": "saerings_watch", "text": "Slay the dragon of Saering's Watch",
+     "spawn": [{"type": "skycraft:dragon", "name": "Saering's Heir", "target": true, "boss": true}],
+     "journal": "The dragon of Saering's Watch is dead. Ragnvald's burned log lay behind the word wall, untouched by the fire."}
+   ],
+   "rewards": {"gold": 450, "items": ["skycraft:soul_gem_greater"]},
+   "outro": "The Skaal sing that the watch on the high rock is ended. Then they sing a second verse, more quietly, about who will watch now."
+  },
+  {
+   "id": "pl_haknirs_shoal",
+   "title": "Leave the Oar",
+   "region": "morrowind/solstheim",
+   "start": "manual",
+   "desc": "The articles of Haknir Death-Brand's crew bind his drowned oarsmen to their benches through a brand-iron kept in the captain's chest. As long as it lies there, they row.",
+   "pitch": "On still nights you can hear oars at Haknir's Shoal. The old crew swore an oath on some iron of the captain's. Take the iron out of the wreck, they say, and the oars will stop.",
+   "objectives": [
+    {"type": "clear", "place": "haknirs_shoal", "text": "Lay the drowned oarsmen of the Death-Brand to rest",
+     "spawn": [{"type": "skycraft:draugr", "count": 3, "name": "Drowned Oarsman"}, {"type": "skycraft:slaughterfish", "count": 2}]},
+    {"type": "kill", "place": "haknirs_shoal", "text": "Face Haknir Death-Brand",
+     "spawn": [{"type": "skycraft:draugr_deathlord", "name": "Haknir Death-Brand", "target": true, "boss": true, "hp": 1.5}]},
+    {"type": "retrieve", "place": "haknirs_shoal", "relic": "plr_haknirs_shoal_brand", "radius": 10, "text": "Take the brand-iron from the captain's chest",
+     "journal": "With the brand-iron out of the chest, the water around the wreck is finally still."}
+   ],
+   "rewards": {"gold": 300, "items": ["skycraft:steel_war_axe"]},
+   "outro": "The fishermen of the north shore say the shoal is quiet now. One of them swears he heard thirty-one voices sigh at once, the night the iron left the wreck."
+  },
+  {
+   "id": "pl_horker_island",
+   "title": "Under the Old Bull",
+   "region": "morrowind/solstheim",
+   "start": "manual",
+   "desc": "A salvager buried the purser's coin from Haknir Death-Brand's ship on Horker Island, under the flat stone where the old bull horker sleeps, twenty paces north of the island's middle.",
+   "pitch": "Sigrid Net-Mender buried something on Horker Island before she drowned. Everyone knows it. Nobody wants to argue with the old bull horker about it.",
+   "objectives": [
+    {"type": "go", "place": "horker_island", "text": "Row out to Horker Island"},
+    {"type": "retrieve", "place": "horker_island", "offset": [0, -20], "radius": 6, "item": "skycraft:gold_ring", "text": "Dig under the old bull's sleeping stone",
+     "spawn": [{"type": "skycraft:horker", "count": 1, "name": "The Old Bull"}],
+     "journal": "Under the stone: a tarred purse of coin and a gold ring, and the old bull horker very offended about it."}
+   ],
+   "rewards": {"gold": 200},
+   "outro": "Sigrid never came back in the spring. The old bull, the Skaal say, has found a new stone to sleep on, and he is sulking."
+  },
+  {
+   "id": "pl_broken_tusk_mine",
+   "title": "The Riekling Claim",
+   "region": "morrowind/solstheim",
+   "start": "manual",
+   "desc": "Rieklings drove the miners out of Broken Tusk Mine. Foreman Hrefna's ledger says the claim stone bearing the Jarl's seal is still in the strongbox in the bottom gallery.",
+   "pitch": "Rieklings took Broken Tusk Mine. Hrefna the foreman says that without the claim stone from the bottom gallery, the Company will say the mine is anyone's. Bring it back and she'll cut you in.",
+   "objectives": [
+    {"type": "clear", "place": "broken_tusk_mine", "placement": "structure", "text": "Clear the rieklings out of Broken Tusk Mine",
+     "spawn": [{"type": "skycraft:riekling", "count": 5}]},
+    {"type": "kill", "place": "broken_tusk_mine", "placement": "structure", "text": "Topple the riekling who sits on the ore-cart throne",
+     "spawn": [{"type": "skycraft:riekling", "name": "Chief Cart-Rider", "target": true, "boss": true, "hp": 1.8}]},
+    {"type": "retrieve", "place": "broken_tusk_mine", "placement": "structure", "relic": "plr_broken_tusk_mine_claim", "text": "Recover the claim stone from the bottom gallery"}
+   ],
+   "rewards": {"gold": 210, "items": ["skycraft:studded_helmet"]},
+   "outro": "Hrefna has her mine back and has hung a new tusk over the door. The rieklings, from a ridge nearby, are drawing pictures of it."
+  },
+  {
+   "id": "pl_stalhrim_source",
+   "title": "The Slab with the Skaal Hand",
+   "region": "morrowind/solstheim",
+   "start": "manual",
+   "desc": "A smuggler's map scrap from White Ridge Barrow says a stash of cut stalhrim was moved to the Stalhrim Source and buried under a slab marked with a Skaal hand, a dozen paces west of the black ice.",
+   "pitch": "Smugglers buried cut stalhrim near the Stalhrim Source and blamed the Skaal for watching it. A slab with a hand carved on it, they say. The Skaal would like that ice back where it belongs.",
+   "objectives": [
+    {"type": "retrieve", "place": "stalhrim_source", "offset": [-12, 0], "radius": 6, "relic": "plr_stalhrim_source_slab", "text": "Find the slab marked with a Skaal hand, west of the black ice",
+     "spawn": [{"type": "npc:thug", "count": 1, "name": "Torvar Half-Ear"}]},
+    {"type": "talk", "npc": "pln_solstheim_aevar", "text": "Decide what becomes of the stalhrim",
+     "topic": "I found a smuggler's slab of stalhrim.",
+     "reply": "I can feel it from here. It was cut without the words, and it is angry. What will you do with it?",
+     "choices": [
+      {"label": "It belongs to the All-Maker. Take it back to the ice.", "reply": "Then I will carry it to the source and say the words over it, and it will sleep again. The Skaal will remember this, outlander.", "actions": "take:plr_stalhrim_source_slab;flag:sol_stalhrim_returned"},
+      {"label": "You know the words. Make something from it, for the village.", "reply": "Hm. A spear for the young hunters, perhaps, worked with the proper prayers. The ice may accept that. It is better than a smuggler's purse.", "actions": "take:plr_stalhrim_source_slab;flag:sol_stalhrim_worked"}
+     ]}
+   ],
+   "rewards": {"gold": 260, "items": ["skycraft:chitin_war_axe"]},
+   "outro": "Bjorn Cold-Hands' joke on Torvar ended in the snow. The stalhrim, at least, is out of smugglers' hands."
+  },
+  {
+   "id": "pl_hrothmunds_barrow",
+   "title": "The Traitor's Key",
+   "region": "morrowind/solstheim",
+   "start": "manual",
+   "desc": "Masked cultists are digging in Hrothmund's Barrow for a key buried with the turncoat Hrothmund, a key to a door their Master once used. Their leader, Brother Ulfgar, must not find it first.",
+   "pitch": "Masked folk with lanterns are going in and out of Hrothmund's Barrow, digging for something. The same masks as those that attacked travellers at the docks. Whatever they want, they shouldn't have it.",
+   "objectives": [
+    {"type": "clear", "place": "hrothmunds_barrow", "placement": "structure", "text": "Fight through the cultists and the barrow's dead",
+     "spawn": [{"type": "npc:mage", "count": 2, "name": "Masked Cultist"}, {"type": "skycraft:draugr", "count": 2}]},
+    {"type": "kill", "place": "hrothmunds_barrow", "placement": "structure", "text": "Stop Brother Ulfgar Ash-Mask",
+     "spawn": [{"type": "npc:mage", "name": "Brother Ulfgar Ash-Mask", "target": true, "boss": true, "hp": 1.6}]},
+    {"type": "retrieve", "place": "hrothmunds_barrow", "placement": "structure", "relic": "plr_hrothmunds_barrow_key", "text": "Take Hrothmund's key before anyone else can"},
+    {"type": "deliver", "npc": "pln_solstheim_yrsa", "relic": "plr_hrothmunds_barrow_key", "text": "Give the key to the Skaal for safe keeping",
+     "topic": "The masked ones were digging for this.", "reply": "It is warm. Iron should not be warm. We will take it far out on the ice where the sea is deepest and give it back to the All-Maker. Whoever wanted it can go and ask him."}
+   ],
+   "rewards": {"gold": 320, "items": ["skycraft:amulet_of_talos"]},
+   "outro": "The key is somewhere under the Sea of Ghosts. The cultists will find other doors; this one, at least, is shut."
+  },
+  {
+   "id": "pl_fahlbtharz",
+   "title": "The Brass Heart",
+   "region": "morrowind/solstheim",
+   "start": "manual",
+   "requires": ["level:22"],
+   "desc": "A Company prospector found a Dwemer pressure regulator at the heart of Fahlbtharz, guarded by a steam centurion the regulator itself keeps awake.",
+   "pitch": "There's a Company prospector, Decimus Vello, telling anyone at the Retching Netch about a brass heart in Fahlbtharz worth a fortune. He needs a fighter. The heart's got a guard.",
+   "objectives": [
+    {"type": "go", "place": "fahlbtharz", "text": "Enter the steam halls of Fahlbtharz"},
+    {"type": "kill", "place": "fahlbtharz", "placement": "structure", "text": "Destroy the centurion that guards the regulator",
+     "spawn": [{"type": "skycraft:dwarven_spider", "count": 2}, {"type": "skycraft:dwarven_centurion", "name": "Steam Warden", "target": true, "boss": true, "hp": 1.3}]},
+    {"type": "retrieve", "place": "fahlbtharz", "placement": "structure", "relic": "plr_fahlbtharz_regulator", "text": "Take the pressure regulator",
+     "journal": "The pipes went quiet the moment the regulator came loose. After four thousand years, Fahlbtharz has finally stopped breathing."}
+   ],
+   "rewards": {"gold": 340, "items": ["skycraft:dwarven_helmet"]},
+   "outro": "Decimus Vello paid his share and bought out his Company contract. Ulvo Nerano, hearing of it, has written him nine letters."
+  },
+  {
+   "id": "pl_frostmoon_crag",
+   "title": "Every Loredas",
+   "region": "morrowind/solstheim",
+   "start": "manual",
+   "desc": "Sigvar, the hunter of the Abandoned Lodge, followed a white wolf to Frostmoon Crag and joined the pack. He wears his wife Helga's ring on a thong around his throat. She is still waiting for him in Raven Rock.",
+   "pitch": "The hunter from the Abandoned Lodge went chasing a white wolf to Frostmoon Crag. His wife Helga goes up to the lodge every Loredas. Somebody should find out what became of him, for her sake.",
+   "objectives": [
+    {"type": "go", "place": "frostmoon_crag", "text": "Find the pack at Frostmoon Crag"},
+    {"type": "kill", "place": "frostmoon_crag", "placement": "structure", "text": "Face the pack's leader, the Grey Brother",
+     "spawn": [{"type": "skycraft:wolf", "count": 3}, {"type": "skycraft:werewolf", "name": "Grey Brother", "target": true, "boss": true, "hp": 1.5}]},
+    {"type": "retrieve", "place": "frostmoon_crag", "placement": "structure", "relic": "plr_frostmoon_crag_ring", "text": "Take the ring from the Grey Brother's throat",
+     "journal": "The Grey Brother wore a silver ring on a chewed thong. Inside it is engraved: To S., from H., for every Loredas."},
+    {"type": "deliver", "npc": "pln_solstheim_helga", "relic": "plr_frostmoon_crag_ring", "text": "Bring the ring to Helga in Raven Rock",
+     "topic": "I found Sigvar. I'm sorry.", "reply": "He kept it. All that time, whatever he was, he kept it. ...Then I can stop climbing that hill. Thank you. I think. Leave me a while."}
+   ],
+   "rewards": {"gold": 260, "items": ["skycraft:silver_ring"]},
+   "outro": "Helga no longer goes to the lodge on Loredas. She goes to the shrine instead, and lights a candle, and comes home before dark."
+  },
+  {
+   "id": "pl_damphall_mine",
+   "title": "Wages for the Dead Shift",
+   "region": "morrowind/solstheim",
+   "start": "manual",
+   "desc": "Damphall Mine was abandoned when scalding water broke into the lower galleries and ash spawn climbed out of the steam. The miners' payroll chest was left behind in the overseer's alcove.",
+   "pitch": "Eleven miners from Damphall are owed a month's wages. The payroll's still down in the mine, with the ash spawn. The overseer won't go back for it. Sergeant Indaram would see it fairly paid.",
+   "objectives": [
+    {"type": "clear", "place": "damphall_mine", "placement": "structure", "text": "Clear the ash spawn from the lower galleries",
+     "spawn": [{"type": "skycraft:ash_spawn", "count": 4}]},
+    {"type": "retrieve", "place": "damphall_mine", "placement": "structure", "relic": "plr_damphall_mine_payroll", "text": "Recover the payroll chest from the overseer's alcove"},
+    {"type": "deliver", "npc": "pln_solstheim_mileth", "relic": "plr_damphall_mine_payroll", "text": "Bring the payroll to Sergeant Mileth Indaram in Raven Rock",
+     "topic": "The Damphall payroll. All one hundred and twelve drakes.", "reply": "Every coin. I'll pay the miners myself, on the docks, where their families can see. The overseer will hear about this too, and not kindly. You have the Guard's thanks."}
+   ],
+   "rewards": {"gold": 190, "items": ["skycraft:bonemold_helmet"]},
+   "outro": "Eleven families on the Raven Rock docks ate well that week. The mine remains closed, and the steam still rises from it on cold mornings."
+  },
+  {
+   "id": "pl_vahloks_tomb",
+   "title": "Eleven Rubbings",
+   "region": "morrowind/solstheim",
+   "start": "manual",
+   "desc": "Ulvo Nerano's assistant dropped a satchel of eleven tomb rubbings in the long hall of Vahlok's Tomb when the dead woke. The rubbings describe the Jailor's oath to guard an unnamed prisoner.",
+   "pitch": "That scholar at Tel Mithryn, Ulvo Nerano, lost a satchel of rubbings in Vahlok's Tomb. His assistant ran out without his eyebrows. Nerano pays well, if you can stand him.",
+   "objectives": [
+    {"type": "go", "place": "vahloks_tomb", "text": "Enter Vahlok's Tomb"},
+    {"type": "retrieve", "place": "vahloks_tomb", "placement": "structure", "relic": "plr_vahloks_tomb_rubbings", "text": "Find the satchel by the dragon brazier in the long hall",
+     "spawn": [{"type": "skycraft:draugr", "count": 3}, {"type": "skycraft:draugr_deathlord", "count": 1, "name": "Jailor's Sworn"}]},
+    {"type": "deliver", "npc": "pln_solstheim_ulvo", "relic": "plr_vahloks_tomb_rubbings", "text": "Bring the rubbings to Ulvo Nerano at Tel Mithryn",
+     "topic": "Your rubbings. Somewhat scorched.", "reply": "Scorched is fine. Scorched is evidence of authenticity. Oh, look at this: they never name the prisoner, not once, in eleven panels. Do you know how hard it is to write that much about someone without naming them? Somebody was very frightened."}
+   ],
+   "rewards": {"gold": 250, "items": ["skycraft:spell_tome_lesser_ward"]},
+   "outro": "Ulvo Nerano has pinned the rubbings to his wall and is writing a paper. He says it will make Neloth jealous. Neloth has not noticed."
+  },
+  {
+   "id": "pl_ashfallow_citadel",
+   "title": "What the Ash Remembers",
+   "region": "morrowind/solstheim",
+   "start": "manual",
+   "requires": ["level:20"],
+   "desc": "The renegade Telvanni Seryne Dralas raises ash spawn at Ashfallow Citadel. When she has thirty, she means to march on Raven Rock for its ash; when she has a hundred, on Tel Mithryn.",
+   "pitch": "There's a cast-out Telvanni at Ashfallow Citadel raising ash spawn like a herd. Her creatures all stand facing Raven Rock. The Redoran Guard can't spare anyone. Can you?",
+   "objectives": [
+    {"type": "clear", "place": "ashfallow_citadel", "text": "Break the ash spawn that guard the citadel",
+     "spawn": [{"type": "skycraft:ash_spawn", "count": 4}, {"type": "npc:thug", "count": 2, "name": "Hired Guard"}]},
+    {"type": "kill", "place": "ashfallow_citadel", "text": "Stop Seryne Dralas",
+     "spawn": [{"type": "npc:mage", "name": "Seryne Dralas", "target": true, "boss": true, "hp": 1.8, "dmg": 1.3}],
+     "journal": "Seryne Dralas is dead. Her ash creatures crumbled where they stood, all facing south, toward Raven Rock."}
+   ],
+   "rewards": {"gold": 360, "items": ["skycraft:bonemold_chestplate"]},
+   "outro": "The yard of Ashfallow Citadel is full of grey heaps that were soldiers once. The Telvanni at the Sun Stone has gone home, relieved."
+  },
+  {
+   "id": "pl_highpoint_tower",
+   "title": "No One Up the Stair",
+   "region": "morrowind/solstheim",
+   "start": "manual",
+   "desc": "The Telvanni wizard Arvyn Hlervu left a guardian of fire and ash in Highpoint Tower with one order: let no one up the stair who is not him. He never came back, and it never stopped walking.",
+   "pitch": "Something burning walks round and round the top of Highpoint Tower. The wizard who left it there has been gone eleven years. His books are still up there, if you can get past his watchdog.",
+   "objectives": [
+    {"type": "kill", "place": "highpoint_tower", "placement": "structure", "text": "Unbind the guardian in the top chamber",
+     "spawn": [{"type": "skycraft:flame_atronach", "name": "Arvyn's Ash Guardian", "target": true, "boss": true, "hp": 1.6}, {"type": "skycraft:ash_spawn", "count": 2}]},
+    {"type": "retrieve", "place": "highpoint_tower", "placement": "structure", "relic": "plr_highpoint_tower_grimoire", "text": "Take Arvyn's grimoire from the top chamber",
+     "journal": "The grimoire is full of star charts and pages of notes on the fires of Red Mountain. Arvyn was right: the mountain is only sleeping."}
+   ],
+   "rewards": {"gold": 280, "items": ["skycraft:spell_tome_firebolt"]},
+   "outro": "The stair of Highpoint Tower is quiet. Whatever Arvyn found out about Red Mountain, you are now the only one who knows it."
+  },
+  {
+   "id": "pl_wreck_of_the_strident_squall",
+   "title": "The Cook's Sea-Chest",
+   "region": "morrowind/solstheim",
+   "start": "manual",
+   "desc": "Fennick, the cook of the Strident Squall, buried his life's savings in the shingle below the big black rock, thirty paces inland from the wreck's bow, before he swam for his life.",
+   "pitch": "Everyone went to the Strident Squall for the Company's strongbox. Nobody looked for the cook's chest. Old Fennick never trusted a box he didn't bury himself.",
+   "objectives": [
+    {"type": "retrieve", "place": "wreck_of_the_strident_squall", "offset": [0, -30], "radius": 6, "item": "skycraft:silver_ring", "text": "Dig below the big black rock, inland of the bow",
+     "spawn": [{"type": "skycraft:mudcrab", "count": 2}],
+     "journal": "Fennick's sea-chest: thirty years of a cook's wages and a silver ring meant for his sister Ottilie in Anvil."}
+   ],
+   "rewards": {"gold": 230},
+   "outro": "Nobody in Raven Rock remembers a cook called Fennick coming ashore. Somewhere in Anvil, Ottilie is still waiting for her little house by the lighthouse."
+  },
+  {
+   "id": "pl_fort_frostmoth",
+   "title": "Stand Down",
+   "region": "morrowind/solstheim",
+   "start": "npc:pln_solstheim_aulus",
+   "offer": "You look like a man with a weight on him.",
+   "pitch": "My brother Gaius went into Fort Frostmoth to bring our great-grandfather's cohort standard home. The dead there are still standing to, two hundred years after the mountain burst. Gaius hasn't come back. Bring the standard, and if you can, give those poor soldiers their orders to stand down.",
+   "desc": "Aulus Vettrius's brother Gaius went into Fort Frostmoth to recover the cohort standard of their great-grandfather's legion. The fort's dead still stand to at their posts, and Gaius has not returned.",
+   "objectives": [
+    {"type": "clear", "place": "fort_frostmoth", "text": "Lay the restless legionaries of Fort Frostmoth to rest",
+     "spawn": [{"type": "minecraft:skeleton", "count": 3, "name": "Restless Legionary"}, {"type": "skycraft:ash_spawn", "count": 2}]},
+    {"type": "kill", "place": "fort_frostmoth", "text": "Relieve the officer's shade of his command",
+     "spawn": [{"type": "skycraft:draugr_deathlord", "name": "Shade of Optio Salvius", "target": true, "boss": true, "hp": 1.5}],
+     "journal": "Gaius Vettrius lay by the inner hall, dead of his wounds, his hand still reaching for the standard."},
+    {"type": "retrieve", "place": "fort_frostmoth", "relic": "plr_fort_frostmoth_standard", "radius": 14, "text": "Take the cohort standard from the inner hall"},
+    {"type": "deliver", "npc": "pln_solstheim_aulus", "relic": "plr_fort_frostmoth_standard", "text": "Bring the standard to Aulus Vettrius in Raven Rock",
+     "topic": "The standard. And I'm sorry: Gaius didn't make it out.", "reply": "...He got further than anyone in two hundred years. That's a Vettrius for you. I'll hang the standard over my door, and I'll take the next ship to bring Gaius home. The cohort's dismissed. They've earned it."}
+   ],
+   "rewards": {"gold": 320, "items": ["skycraft:imperial_sword"]},
+   "outro": "Aulus has hung the cohort's standard over his door in Raven Rock. The Redoran Guard pretend not to see it. Some of them salute it anyway."
+  },
+  {
+   "id": "pl_bloodskal_barrow",
+   "title": "The Urns of Raven Rock",
+   "region": "morrowind/solstheim",
+   "start": "npc:pln_solstheim_mileth",
+   "offer": "The Guard looks stretched thin.",
+   "pitch": "We are. Grave robbers broke into the town tomb and took five ancestral urns, one of them from the Councilor's own family. The tracks go north to Bloodskal Barrow. I can't spare four guards. I can spare you, if you'll go. Quietly.",
+   "desc": "Grave robbers stole five ancestral urns from Raven Rock's tomb, including a silver-banded urn of House Morvayn, and hid them in Bloodskal Barrow. Sergeant Mileth Indaram wants them back, quietly.",
+   "objectives": [
+    {"type": "clear", "place": "bloodskal_barrow", "text": "Deal with the grave robbers in Bloodskal Barrow",
+     "spawn": [{"type": "npc:thug", "count": 3, "name": "Grave Robber"}]},
+    {"type": "kill", "place": "bloodskal_barrow", "text": "Stop Fevyn the Scrapper",
+     "spawn": [{"type": "skycraft:bandit_chief", "name": "Fevyn the Scrapper", "target": true, "boss": true, "hp": 1.3}]},
+    {"type": "retrieve", "place": "bloodskal_barrow", "relic": "plr_bloodskal_barrow_urn", "radius": 14, "text": "Recover the Morvayn urn and the others"},
+    {"type": "deliver", "npc": "pln_solstheim_mileth", "relic": "plr_bloodskal_barrow_urn", "text": "Return the urns to Sergeant Indaram",
+     "topic": "Your urns. All five. The Morvayn one was to be ransomed back to the Councilor.", "reply": "Ransomed. Of course it was. The ancestors will be back in their niches by nightfall, and the Councilor will never need to know how close it came. That is the Redoran way: the wall holds, and no one sees the cracks."}
+   ],
+   "rewards": {"gold": 260, "items": ["skycraft:chitin_helmet"]},
+   "outro": "The urns are home. Mileth has had the drainage cut in the tomb wall bricked up, and placed a guard on it who is, he admits, mostly for show."
+  },
+  {
+   "id": "pl_frossel",
+   "title": "The Spear of Thirsk",
+   "region": "morrowind/solstheim",
+   "start": "npc:pln_solstheim_brenna",
+   "requires": ["level:26"],
+   "offer": "What happened to the spear?",
+   "pitch": "The riekling chief Kruk Gnaw-Tooth carried it off to Frossel when his folk held our hall. We took the hall back with axes. The spear's still in his fists. Go at dusk, go loud, and bring it home. Swear to bring it to the hall on feast days, and you can keep it.",
+   "desc": "Brenna Ice-Mead of Thirsk Mead Hall wants the hall's heirloom spear back from Kruk Gnaw-Tooth, the riekling chief of Frossel. Her hunter Gunnar advises going at dusk, and going loud.",
+   "objectives": [
+    {"type": "go", "place": "frossel", "text": "Find the riekling den at Frossel"},
+    {"type": "clear", "place": "frossel", "placement": "structure", "text": "Break the rieklings of Frossel",
+     "spawn": [{"type": "skycraft:riekling", "count": 5}]},
+    {"type": "kill", "place": "frossel", "placement": "structure", "text": "Defeat Kruk Gnaw-Tooth",
+     "spawn": [{"type": "skycraft:riekling", "name": "Kruk Gnaw-Tooth", "target": true, "boss": true, "hp": 2.5, "dmg": 1.5}]},
+    {"type": "talk", "npc": "pln_solstheim_brenna", "text": "Tell Brenna Ice-Mead the spear is won",
+     "topic": "Kruk Gnaw-Tooth is dead, and the Spear of Thirsk is free.",
+     "reply": "Then carve the name on the beam, and somebody fetch the good mead. The spear is yours, as I swore. Bring it to the hall on feast days, or I'll come and get it myself."}
+   ],
+   "rewards": {"gold": 300, "items": ["unique:riekling_spear_of_thirsk"]},
+   "outro": "Your name is cut into the beam of Thirsk Mead Hall below the chieftains'. The rieklings of Frossel, Brenna says, have started telling a story about you too."
+  },
+  {
+   "id": "pl_gyldenhul_barrow",
+   "title": "The Proving",
+   "region": "morrowind/solstheim",
+   "start": "npc:pln_solstheim_yrsa",
+   "offer": "You seem troubled, hunter.",
+   "pitch": "My nephew Brandr took his father's spear and went into Gyldenhul Barrow to prove himself, though the old proving is long done with. He said not to send anyone who did not want to go. Do you want to go?",
+   "desc": "Yrsa Seal-Singer's nephew Brandr went into Gyldenhul Barrow alone to prove himself in the old Skaal way, carrying his father's seal-tooth spear.",
+   "objectives": [
+    {"type": "kill", "place": "gyldenhul_barrow", "placement": "structure", "text": "Face the warden of Gyldenhul",
+     "spawn": [{"type": "skycraft:draugr", "count": 2}, {"type": "skycraft:draugr_deathlord", "name": "Gyldenhul's Warden", "target": true, "boss": true, "hp": 1.4}]},
+    {"type": "retrieve", "place": "gyldenhul_barrow", "placement": "structure", "relic": "plr_gyldenhul_barrow_spear", "text": "Find what became of Brandr",
+     "journal": "Brandr is dead. He fell in the warden's hall, with three broken draugr around him and his father's spear still in his hand."},
+    {"type": "talk", "npc": "pln_solstheim_yrsa", "text": "Tell Yrsa what you found",
+     "topic": "I found Brandr.",
+     "reply": "Your face tells me before your mouth does. Tell me how.",
+     "choices": [
+      {"label": "He fell fighting. Three draugr lay broken around him.", "reply": "Then the old men will talk about him after all. I will cut his name on the stair myself. Give me the spear; it goes to the next hunter who has more sense than he did.", "actions": "take:plr_gyldenhul_barrow_spear;flag:sol_brandr_honoured"},
+      {"label": "He should never have gone. Tell the young ones the truth: the proving kills.", "reply": "...Yes. I will tell them that, and I will tell them his name with it, so they remember both. Give me the spear. It will hang over the door, and nobody will take it into that barrow again.", "actions": "take:plr_gyldenhul_barrow_spear;flag:sol_brandr_warning"}
+     ]}
+   ],
+   "rewards": {"gold": 240, "items": ["skycraft:fur_boots"]},
+   "outro": "There is a new name on the stair of Gyldenhul Barrow. Yrsa cut it herself, deep enough that the wind will not wear it away for a long time."
+  },
+  {
+   "id": "pl_kagrumez",
+   "title": "The Tuning Key",
+   "region": "morrowind/solstheim",
+   "start": "npc:pln_solstheim_ulvo",
+   "offer": "You said you needed someone sturdy?",
+   "pitch": "Precisely! In Kagrumez there is a brass tuning key on the master plinth of the deepest chamber. With it I can read the resonance chambers without guessing, and without being chased by spheres. I have guessed twice. Bring it to me and you will have advanced Dwemer scholarship more than Neloth has in a century.",
+   "desc": "Ulvo Nerano of Tel Mithryn wants the brass tuning key from the deepest resonance chamber of Kagrumez, a Dwemer ruin whose gem plinths wake its guardians when touched wrongly.",
+   "objectives": [
+    {"type": "go", "place": "kagrumez", "text": "Enter the resonance chambers of Kagrumez"},
+    {"type": "clear", "place": "kagrumez", "placement": "structure", "text": "Silence the guardians the chambers wake",
+     "spawn": [{"type": "skycraft:dwarven_spider", "count": 3}, {"type": "skycraft:dwarven_sphere", "count": 1}]},
+    {"type": "retrieve", "place": "kagrumez", "placement": "structure", "relic": "plr_kagrumez_key", "text": "Take the tuning key from the master plinth"},
+    {"type": "deliver", "npc": "pln_solstheim_ulvo", "relic": "plr_kagrumez_key", "text": "Bring the tuning key to Ulvo Nerano",
+     "topic": "Your tuning key. It hums.", "reply": "It does, doesn't it? Listen. That is the note the Dwemer thought held the world together. A little flat, if you ask me. Here, your payment, and my undying gratitude, which as a Dunmer of modest means is worth slightly less than the payment."}
+   ],
+   "rewards": {"gold": 280, "items": ["skycraft:soul_gem_common"]},
+   "outro": "Ulvo has opened the inner doors of Kagrumez without a single sphere chasing him. He has written to Neloth about it. Neloth has written back one word, and Ulvo will not say what it was."
+  }
+ ]
+}

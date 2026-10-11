@@ -1,0 +1,1057 @@
+{
+ "regions": {
+  "skyrim/whiterun": {
+   "rumours": [
+    "Somebody's been dragging the old shields off the walls of Whitewatch Tower and hanging them back up painted red. Bandits marking their road, my uncle says.",
+    "The guards swear they saw something big circling over the Western Watchtower last week. Something with wings. I told them to lay off Hulda's mead.",
+    "Honningbrew lost six casks on the river road this month. Sabjorn's sure it's the cave-folk at White River Watch, and he's not wrong often about his own mead.",
+    "The giants at Bleakwind Basin have been bolder since the snow came off the plains. One walked right past Pelagia Farm with a mammoth on a lead, calm as a priest.",
+    "Don't go near the stone with the skulls round it, east of the river. Lights there on moonless nights, and the farmers say the ground's been turned over like a field.",
+    "A Legion courier rode out from the camp near Rorikstead and never reached Whiterun. They've doubled the patrols, for all the good it does.",
+    "Fellglow Keep has smoke in its chimneys again. Nobody honest lives in that place, not since the Legion walked out of it.",
+    "The Battle-Borns and the Gray-Manes nearly came to blows at the Bannered Mare over a bowl of stew. Over the war, really. It's always over the war."
+   ],
+   "legends": [
+    "Before Whiterun had walls, the hill was called the Shield of the Plain, and Ysgramor's people raised Jorrvaskr there because a wounded eagle landed on the summit and would not leave. They took it as a sign that the hill would never fall, and so far it never has.",
+    "The plains were once a single forest, the old folk say, and a giant king named Gruv-Ulf cleared it in a night to make room for his herds. The trees he pulled up he threw into the White River, and the river has run pale with their bark ever since.",
+    "Kynareth is said to have walked the Tundra in the shape of a grey hawk the summer after the Dragon War, blessing every spring she drank from. Shepherds still leave a cup of water at a dry spring in hope that she will come back for it.",
+    "The Greybeards' first word, spoken when High Hrothgar was finished, rolled down the mountain and across the plains for three days. Where it passed, the grass lay flat in a line pointing at the Throat of the World, and the herdsmen of Rorikstead still call that line the Kneeling Road."
+   ],
+   "songs": [
+    {
+     "title": "The Tundra Wind",
+     "lines": [
+      "~Wind on the Tundra, wind on the hill,",
+      "~Blowing the barley, never stands still,",
+      "~Carry my love home from Rorikstead's plain,",
+      "~And I'll pour you a horn when you blow back again."
+     ]
+    },
+    {
+     "title": "Hold the Hill",
+     "lines": [
+      "~Stone on stone and shield on shield,",
+      "~Whiterun's sons will never yield,",
+      "~Let the dragon come, let the giants roar,",
+      "~We held this hill, and we'll hold it more.",
+      "~Bring me ale from the Bannered Mare,",
+      "~And a song for the dead who are drinking there."
+     ]
+    }
+   ]
+  }
+ },
+ "places": {
+  "whiterun": {
+   "hook": "The trading heart of Skyrim, built on a hill above the Tundra with Dragonsreach looming over the Gildergreen. Every road in the hold leads here, and every rumour too.",
+   "rumour": "Whiterun's the only city in Skyrim where a Nord, a Khajiit and a Legionnaire can all buy the same loaf from the same baker. Jarl Balgruuf likes it that way, and the war doesn't.",
+   "notes": [
+    {
+     "id": "steward_notice",
+     "kind": "warning",
+     "title": "Notice from the Steward of Whiterun",
+     "author": "Proventus Avenicci, Steward",
+     "at": "chest",
+     "pages": [
+      "^BY ORDER OF THE JARL\nAll farmsteads within a day's ride of the Plains District are to report any livestock taken from the open field, whether by wolf, giant or anything larger, to the guard captain at the main gate within two days of the loss.",
+      "Losses reported will be weighed against the grain levy of Hearthfire. Losses NOT reported will be assumed to have been sold privately, and will be taxed accordingly.\n\nFurther: the bell at the Western Watchtower is not to be rung for sport. The next fool who rings it will pay for the oil of every lamp lit in panic. Given this 3rd of Last Seed, 4E 201."
+     ]
+    },
+    {
+     "id": "feud_letter",
+     "kind": "letter",
+     "title": "Letter Folded Small",
+     "author": "Unsigned",
+     "at": "chest",
+     "pages": [
+      "You looked at me in the market today and my father saw. He said nothing, which is worse. If your uncle hears what I think of the Empire, and mine hears what you think of Ulfric, there will be blood on the steps of Jorrvaskr and we will be the reason.",
+      "So I will not wave. I will not sit at your table in the Bannered Mare. But on Fredas, when the Companions train, I will be at the Gildergreen with a flower for Kynareth, and if a flower should go missing from my hand, I will not tell anyone who took it.\n\nBurn this. I mean it. Burn it."
+     ]
+    }
+   ]
+  },
+  "riverwood": {
+   "hook": "A mill town where the White River leaves the mountains, smelling of sawdust and pine. Bleak Falls Barrow watches from the ridge above, and Riverwood watches it right back.",
+   "rumour": "Riverwood's quiet enough, if you don't count the barrow on the cliff. Thyra the fisher lost her father's charm in the river last week. Ask her about it, she's been in a black mood since.",
+   "quest": "pl_riverwood",
+   "notes": [
+    {
+     "id": "mill_letter",
+     "kind": "letter",
+     "title": "Letter to a Sister in Whiterun",
+     "author": "Torsten, mill hand",
+     "at": "chest",
+     "pages": [
+      "Dear Ingrid,\nThe mill keeps me busy and my back aches, so all is as it should be. Gerdur pays fair and feeds better. The river is high from the thaw and we lost two logs past the falls, which Hod blamed on me and I blamed on Kyne.",
+      "There is a thing I did not want to write, but you always know when I hide something. Three nights now there has been a light on the ridge, up at Bleak Falls Barrow. Not a campfire. Blue, and steady, and it goes out all at once when you stare at it.\n\nNobody here will talk of it after dark. Come for Mother's name-day if you can. Bring the honey cakes. Your brother, Torsten."
+     ]
+    },
+    {
+     "id": "fisher_tally",
+     "kind": "ledger",
+     "title": "Thyra's Catch Tally",
+     "author": "Thyra Stone-Brow",
+     "at": "chest",
+     "starts": "pl_riverwood",
+     "pages": [
+      "#Week of the 10th, Second Seed\nSalmon: 14. Two to the Sleeping Giant, Orgnar paid in coin for once. Six to the Riverwood Trader, Lucan haggled like a Khajiit. Rest smoked.\nSlaughterfish: 3. Bit the net through. Bit my thumb too.",
+      "#Week of the 17th\nSalmon: 4. The pool below the bridge has gone mean. Something big has moved in under the rocks, and on Tirdas it tore Father's net-charm right off the line, the iron fish he carved before I was born.\n\nI will get it back. Not alone, though. Not with those teeth in the water."
+     ]
+    }
+   ]
+  },
+  "rorikstead": {
+   "hook": "A farming village on the western edge of the Tundra, famous for crops that never fail even when the rest of Skyrim starves. Nobody can quite say why.",
+   "rumour": "Rorikstead's never had a bad harvest, not once in living memory. Some thank Kynareth, some thank Rorik's luck. Hjalla, the trapper's wife, just wants her husband back from the hills.",
+   "notes": [
+    {
+     "id": "frostfruit_board",
+     "kind": "list",
+     "title": "Board at the Frostfruit Inn",
+     "author": "Mralki, innkeeper",
+     "at": "chest",
+     "pages": [
+      "^FROSTFRUIT INN\n^Prices this season\nBed, one night: 10 septims\nBowl of cabbage stew: 3\nTankard of Honningbrew: 6\nTankard of anything else: 4, and you'll wish you'd paid the 6",
+      "WANTED: strong hands for the barley harvest. Board and wages. Ask Lemkil, if he is in a good mood. He is never in a good mood.\n\nLOST: one trapper, Lund by name, tall, grey beard, smells of pelts. Last seen heading for his hut in the northwest hills. His wife Hjalla asks anyone passing that way to knock on his door."
+     ]
+    },
+    {
+     "id": "soil_letter",
+     "kind": "letter",
+     "title": "Letter on the Soil of Rorikstead",
+     "author": "Aurelia Venn, of the Imperial agricultural survey",
+     "at": "chest",
+     "pages": [
+      "To the Office of the Imperial Steward at Solitude,\nI have spent nine days testing the soil of Rorikstead, as instructed. I regret to report that it is ordinary soil. Clay, a little sand, the usual stones. I have seen better earth in the Nibenay valley that produced half as much.",
+      "The villagers are unhelpful. One told me the founder Rorik made a bargain with the ground itself. Another told me to stop digging holes in his turnips. A third, the most honest, said that if I found the secret I should keep it to myself, because the Thalmor would want it next.\n\nI request leave to return to Cyrodiil. I do not like how well everything grows here."
+     ]
+    }
+   ]
+  },
+  "honningbrew_meadery": {
+   "hook": "A busy meadery south-east of Whiterun, its honey barrels rolling out by the cartload. Lately the carts have been coming back lighter than they left.",
+   "rumour": "Honningbrew's the best mead this side of Riften, and don't let a Black-Briar tell you otherwise. Trouble is, half of it gets stolen before it reaches the city. Eirik at the meadery is fit to be tied.",
+   "notes": [
+    {
+     "id": "cask_ledger",
+     "kind": "ledger",
+     "title": "Honningbrew Shipping Ledger",
+     "author": "Eirik Mead-Hand",
+     "at": "chest",
+     "pages": [
+      "#Last Seed, 4E 201\n2nd: 12 casks to the Bannered Mare. Delivered.\n6th: 8 casks to Riverwood. Delivered.\n9th: 10 casks to Rorikstead. Cart found empty near the river ford. Driver beaten, says the men wore wolf pelts and came from the east.",
+      "14th: 6 casks to Whiterun. Taken at the same ford.\n18th: 6 casks, with two guards. Guards drunk on our own mead when found. Casks gone.\n\nThe trail goes east along the river every time, toward that cave they call White River Watch. Sabjorn says hire swords. With what coin? They are drinking our coin."
+     ]
+    },
+    {
+     "id": "tasting_verse",
+     "kind": "poem",
+     "title": "Verse Chalked on a Barrel",
+     "at": "chest",
+     "pages": [
+      "~Honey from the hive and water from the hill,\n~Drink it slow, my friend, or drink it till you're ill.\n~Bees work all the summer so a Nord can sing,\n~One horn for the Jarl and two for everything.",
+      "~Black-Briar's for Riften, where the rain comes down,\n~Honningbrew's for Whiterun, best mead in the town.\n\nUnderneath, in a different hand: 'Whoever wrote this owes me a cask. You know who you are, Mallus.'",
+      "A third hand, smaller, beneath that: 'Mallus says he never wrote any verse in his life, and that he certainly owes nobody a cask. Sabjorn says to stop writing on the barrels. Sabjorn wrote that on a barrel.'"
+     ]
+    }
+   ]
+  },
+  "pelagia_farm": {
+   "hook": "An Imperial family's farm in the shadow of Whiterun's walls, its fences mended more often than they should be. Giant tracks cross the lower field.",
+   "rumour": "Severio Pelagia's a decent sort for an Imperial. His hand Gunnvor lost one of the cows to the giants at Bleakwind Basin. She wants it back, if you can believe that.",
+   "notes": [
+    {
+     "id": "severio_letter",
+     "kind": "letter",
+     "title": "Letter to Cyrodiil",
+     "author": "Severio Pelagia",
+     "at": "chest",
+     "pages": [
+      "Dear Cassius,\nYou ask if I regret coming north. Some mornings I do. The wind off the Tundra goes straight through a Colovian coat. The Nords at the market still call me 'the Imperial' after twenty years, as if it were my given name.",
+      "But the ground is good, and the city buys everything I grow. Our only real trouble is the giants of Bleakwind Basin. They mean no harm, I think. They just do not understand fences. Last month one stepped over ours, took a cow under each arm and walked home as if they were his.\n\nGunnvor, my farmhand, swears she will get Brindle back. I have told her she is mad. She says that is why I hired her."
+     ]
+    }
+   ]
+  },
+  "chillfurrow_farm": {
+   "hook": "A lonely farm east of Whiterun where the cabbages grow fat and the farmers grow nervous. Silver-armoured strangers have been seen at the edge of the fields.",
+   "rumour": "Chillfurrow's had a bad season. There was a pelt-trader killed out there, and folk say the killers wore silver. Now nobody wants to buy pelts in Whiterun at all.",
+   "notes": [
+    {
+     "id": "almanac",
+     "kind": "notes",
+     "title": "Chillfurrow Almanac",
+     "author": "Unknown farmer",
+     "at": "chest",
+     "pages": [
+      "#First Seed\nPlanted cabbage and leek in the north field. Frost late, as ever. Lost a row.\n#Rain's Hand\nWolves at the fence twice. Shot one. The other stood and watched me like it was counting.",
+      "#Second Seed\nMen camped past the east hedge. Clean armour, silver on the buckles, polishing their blades by the fire every night. They asked if I'd seen any big dogs. I said only wolves. One of them laughed and said, 'Wolves. Yes.'\n\nI keep the shutters barred now. Whatever they are hunting, I'd rather not be in the way."
+     ]
+    }
+   ]
+  },
+  "battle_born_farm": {
+   "hook": "The Battle-Born clan's own farmland east of Whiterun, with Imperial colours flying over the barn. Its hands talk loudly of loyalty and quietly of the grain levy.",
+   "rumour": "Old Olfrid Battle-Born doesn't plough a single furrow himself, but he'll tell you to your face whose farm it is. His foreman Hrongar does the work and takes the blame.",
+   "notes": [
+    {
+     "id": "foreman_report",
+     "kind": "report",
+     "title": "Foreman's Report to Olfrid Battle-Born",
+     "author": "Hrongar, foreman",
+     "at": "chest",
+     "pages": [
+      "Master Olfrid,\nThe wheat is in, forty sacks, two more than last year. The Legion quartermaster took twelve without paying, as promised. He gave me a paper with a seal on it. I have put the paper in the strongbox. I don't know what else to do with paper.",
+      "The Gray-Mane boy was seen at the north fence again, looking at the barn. I don't think he meant harm, but I set the dogs loose that night anyway.\n\nAlso, the hands want to know if they are expected to fight if the Stormcloaks come down from their camp past the river. I told them a Battle-Born never runs. They asked if that went for hired men too. Please advise. Hrongar."
+     ]
+    }
+   ]
+  },
+  "whiterun_stables": {
+   "hook": "The stables and carriage stand below Whiterun's gate, where every traveller in the hold eventually waits for a ride. The drivers know more gossip than the Jarl's court.",
+   "rumour": "Want a carriage? Twenty septims to anywhere, and the driver will tell you three secrets on the way. Kjeld lost a whole satchel of letters to bandits last month, mind. Redoran's Retreat, he says.",
+   "notes": [
+    {
+     "id": "fare_list",
+     "kind": "list",
+     "title": "Carriage Fares, Whiterun Stand",
+     "at": "chest",
+     "pages": [
+      "^WHITERUN CARRIAGE\nTo Riverwood and the southern road: 10 septims\nTo Rorikstead: 10\nTo Solitude, Windhelm, Riften, Markarth: 20 each\nTo Dawnstar, Winterhold, Morthal, Falkreath: 20 each, and bring a cloak",
+      "Rules of the stand:\nNo livestock inside the carriage. That means goats. That means YOU, Lemkil.\nThe driver does not wait past the second bell.\nThe driver is not responsible for dragons.\nTips are welcome and encouraged and remembered.\n\nThe driver will take you as far as the road goes and no further."
+     ]
+    },
+    {
+     "id": "courier_complaint",
+     "kind": "letter",
+     "title": "Courier's Complaint",
+     "author": "Kjeld the Rider",
+     "at": "chest",
+     "pages": [
+      "To the captain of the guard at Whiterun gate,\nOn the 22nd of Last Seed I was riding west with the satchel for Rorikstead and the Imperial camp when four men came out of the rocks near Redoran's Retreat and pulled me off my horse. They took the satchel and my boots.",
+      "I am told this is not the guard's concern, since it happened outside the walls. I would remind the captain that one letter in that satchel was sealed by the Jarl's own steward, and that I said so to the robbers, loudly, before I thought better of it.\n\nIf the guard will not go, I will pay someone who will. Kjeld."
+     ]
+    }
+   ]
+  },
+  "crabbers_shanty": {
+   "hook": "A leaning shack on a stony riverbank in the far west of the hold, ringed with old crab traps. Its owner died years ago, but the crabs never left, and neither did his savings.",
+   "rumour": "There was an old crabber out west, past Rorikstead, who never spent a coin in his life. When he died, nobody found a single septim in his shack. Folk say the mudcrabs are guarding it.",
+   "quest": "pl_crabbers_shanty",
+   "notes": [
+    {
+     "id": "crabber_journal",
+     "kind": "journal",
+     "title": "Old Grisvar's Journal",
+     "author": "Grisvar the Crabber",
+     "at": "chest",
+     "starts": "pl_crabbers_shanty",
+     "pages": [
+      "#Sun's Dusk\nSold forty crabs to the Imperial camp. Kept the shells for the garden. Kept the coin in the usual place. Nobody knows the usual place but me and the crabs, and the crabs are not talking.",
+      "#Evening Star\nCough is worse. Can't stand long in the cold water. If I don't see spring, whoever reads this can have the purse. It's under the third trap from the door, the one with the blue rope, buried an arm deep in the shingle by the water.\n\nMind the big crab. I named him Jarl. He bites."
+     ]
+    },
+    {
+     "id": "gorge_warning",
+     "kind": "warning",
+     "title": "Warning Scratched on a Plank",
+     "at": "chest",
+     "reveals": "robbers_gorge",
+     "pages": [
+      "DON'T TAKE THE GORGE ROAD WEST. Robbers in the gorge with a toll-chain across the water and bows on the cliffs. They took my boat, my nets and my good knife.\n\nIf you must go to the Reach, go by the high path past Orotheim and keep your torch low. If you see a man in a red hood waving at you from the rocks, he is not friendly. He is counting you.\n\nSigned with a crab's claw scratched in the wood. Grisvar, probably."
+     ]
+    }
+   ]
+  },
+  "north_cold_rock_pass": {
+   "hook": "A narrow, wind-cut pass in the western hills where the road squeezes between two cliffs. Travellers leave stones on the cairn for luck, and webs gather in the cracks overhead.",
+   "rumour": "Cold Rock Pass? Take it fast and take it in daylight. The spiders from Brood Cavern come down to hunt there when the frost bites hard.",
+   "notes": [
+    {
+     "id": "cairn_carving",
+     "kind": "warning",
+     "title": "Words Carved on the Cairn",
+     "at": "site",
+     "reveals": "brood_cavern",
+     "pages": [
+      "^TRAVELLER, ADD A STONE\nThis cairn was raised for Arngrim the drover, who was carried off in this pass in the winter of the year his son was born. We found his boots in the webs at the mouth of Brood Cavern, to the north-west, and nothing more.",
+      "Below, in fresher cuts: 'The webs are thicker this year. Keep to the middle of the road. Do not stop to look up.'\n\nAnd lower still, in a child's hand: 'I added two stones. One for Arngrim. One for me.'"
+     ]
+    }
+   ]
+  },
+  "south_cold_rock_pass": {
+   "hook": "The southern mouth of Cold Rock Pass, where the road drops toward the barrow of Rannveig's Fast. Old waymarkers here are carved with warnings no one bothers to read.",
+   "rumour": "There's a barrow past the south end of Cold Rock Pass. The Greybeards send pilgrims there, they say. Brave pilgrims, or stupid ones.",
+   "notes": [
+    {
+     "id": "waystone",
+     "kind": "inscription",
+     "title": "Weathered Waystone",
+     "at": "site",
+     "reveals": "rannveigs_fast",
+     "pages": [
+      "^SOUTH: RANNVEIG'S FAST\n^NORTH: THE COLD ROCK\n^EAST: THE SLOW ROAD TO WHITERUN\n\nUnder the old lettering, someone has added with a knife: 'The south road goes to the barrow and nowhere else. If a man tells you there is an inn down there, he wants your boots.'",
+      "Lower, worn almost smooth: 'Rannveig kept her fast here. She would not eat until the dead were quiet. They are not quiet yet.'\n\nThe rest has been scraped away by ice and time."
+     ]
+    }
+   ]
+  },
+  "drelas_cottage": {
+   "hook": "A neat little cottage in the western hills, smelling of brimstone and lavender. The Dunmer mage who lives there does not welcome visitors, and her fire atronach welcomes them even less.",
+   "rumour": "There's a Dunmer witch in a cottage out west. Arcadia lent her an alembic and a book of recipes, and got a scorched letter back telling her to come and collect them herself.",
+   "quest": "pl_drelas_cottage",
+   "notes": [
+    {
+     "id": "arcadia_letter",
+     "kind": "letter",
+     "title": "Letter from Arcadia's Cauldron",
+     "author": "Arcadia, alchemist of Whiterun",
+     "at": "chest",
+     "starts": "pl_drelas_cottage",
+     "pages": [
+      "Drelas,\nIt has been five months. I lent you my good alembic, the Breton glass one with the silver stopper, and my copy of the Ingredients of the Tundra, because you said you would return both by Midyear. It is now Hearthfire.",
+      "I have asked politely twice. The courier who brought my second letter came back with singed eyebrows and refused to go again. I am not a patient woman, but I am a fair one. Send them back, or I will send someone who is neither patient nor fair.\n\nArcadia, Arcadia's Cauldron, Whiterun."
+     ]
+    },
+    {
+     "id": "drelas_notes",
+     "kind": "notes",
+     "title": "Notes on the Binding of Flame",
+     "author": "Drelas",
+     "at": "boss",
+     "pages": [
+      "Third binding. The atronach answered faster tonight. I think it likes the cottage. It certainly likes the smell of Arcadia's alembic heating, which is why I have not returned it. Her glass holds the heat better than anything I own.",
+      "The Nords in Whiterun call me a witch. Good. Witches are left alone. The last courier fled when the atronach so much as looked at him, which saves me writing replies.\n\nNote: the summoning circle must be redrawn every third night in salt and fire salts mixed. If the circle fails, so does the leash. Do not let the circle fail."
+     ]
+    }
+   ]
+  },
+  "rannveigs_fast": {
+   "hook": "An old Nord barrow sunk into the hills west of Whiterun, named for a shieldmaiden who swore to starve beside its door until the dead inside lay still. A Word of Power waits in the deep halls.",
+   "rumour": "Rannveig's Fast, it's called. The old story says she sat at the door and didn't eat for a month. Her oath-ring's still in there somewhere, and the Gray-Manes would pay to see it home.",
+   "quest": "pl_rannveigs_fast",
+   "notes": [
+    {
+     "id": "rannveig_inscription",
+     "kind": "inscription",
+     "title": "Inscription Over the Inner Door",
+     "at": "chest",
+     "pages": [
+      "^HERE RANNVEIG IRON-MOUTH\n^KEPT HER FAST\n\nShe swore before Kyne that she would take neither bread nor water while the dead of this hall walked. On the thirtieth day the halls fell silent, and so did she.",
+      "Her shield-sisters set her oath-ring on the stone of the inner hall, where the dead would see it and remember that the living do not forget. Let none take the ring from this place while the dead still stir, lest the fast be broken."
+     ]
+    },
+    {
+     "id": "gray_mane_journal",
+     "kind": "journal",
+     "title": "Journal of Sigrid Gray-Mane",
+     "author": "Sigrid of the Gray-Mane line",
+     "at": "chest",
+     "starts": "pl_rannveigs_fast",
+     "pages": [
+      "#12th of Frostfall\nGrandmother always said Rannveig was a Gray-Mane, a hundred generations back, before we had the name. I never believed her. Then I found the ring drawn in the margin of the clan's old saga at the house in Whiterun: a band of iron with a wolf's mouth closing on a stone.",
+      "#14th of Frostfall\nI am inside. The dead are stirring and the ring is further in than I can reach alone. They move when I touch the walls.\n\nIf a stranger finds this: the ring belongs with the Gray-Manes in Whiterun. Bring it out of the dark and tell them Sigrid tried."
+     ]
+    }
+   ]
+  },
+  "hamvirs_rest": {
+   "hook": "A small sunken tomb in the western hills, where a forgotten chieftain was laid to rest with his favourite axe. Grave-robbers have been at the entrance, and something below didn't like it.",
+   "rumour": "Hamvir's Rest is near the Companions' old cairn. Couple of grave-robbers went in last month bragging about axes and silver. One came out. He doesn't brag any more.",
+   "quest": "pl_hamvirs_rest",
+   "notes": [
+    {
+     "id": "robber_notes",
+     "kind": "notes",
+     "title": "Grave-Robber's Notes",
+     "author": "Fjotli",
+     "at": "chest",
+     "starts": "pl_hamvirs_rest",
+     "pages": [
+      "Plan for Hamvir's Rest:\nGo in at dusk. Dustman's Cairn is close, so if the Companions are about, wait. Skeggi carries the rope, I carry the bag. Hamvir's axe is in the last room, the old woman in Rorikstead says. Bronze-headed, silver wire on the haft. Worth a hundred to the right buyer, three hundred to the wrong one.",
+      "Later, hand shaking:\nSkeggi is still in there. Hamvir is not resting. He sat up when we touched the axe and said something in the old tongue and the others got up too. I ran. Gods forgive me, I ran. If anyone goes in, put him down and bring Skeggi's body out. I'll pay what I have."
+     ]
+    },
+    {
+     "id": "hamvir_epitaph",
+     "kind": "inscription",
+     "title": "Hamvir's Epitaph",
+     "at": "boss",
+     "pages": [
+      "^HAMVIR THE PATIENT\n^CHIEF OF THE WESTERN HILLS\n\nHe waited forty winters for the raiders from the Reach to tire of raiding. They tired first. Lay his axe across his knees, that he may wait once more, until the end of all waiting.",
+      "Beneath, in a rougher hand, scratched with a knife point long after the barrow was sealed: 'We came for the axe. We were told he was only bones. He is not only bones. Skeggi, I am sorry. If anyone reads this, leave the axe where it lies. Whatever it is worth, it is not worth what he does to you for touching it.'"
+     ]
+    }
+   ]
+  },
+  "halted_stream_camp": {
+   "hook": "A bandit camp built around a choked-off mine north of Whiterun. The stream that once ran past it has been dammed with rubble, and the bandits are digging for something they won't name.",
+   "rumour": "Bandits at Halted Stream have been working that old mine day and night. Iron, some say. Others say they found a vein of something brighter, and that's why they've started killing anyone who gets close.",
+   "quest": "pl_halted_stream_camp",
+   "notes": [
+    {
+     "id": "brattvar_orders",
+     "kind": "orders",
+     "title": "Orders from Brattvar Stone-Hand",
+     "author": "Brattvar Stone-Hand",
+     "at": "chest",
+     "starts": "pl_halted_stream_camp",
+     "pages": [
+      "Listen, all of you, because I won't say it twice.\nThe ore goes to the fence at Swindler's Den every second Loredas. Not to Whiterun, not to the smith in Riverwood, not to your cousin. Anyone caught skimming loses the hand he skimmed with.",
+      "The good stuff, the pale ore from the deep end, does NOT go to the fence. It goes to Silent Moons Camp, to Hrodna and her forge. She says it takes the moonlight better than any steel she's seen.\n\nThe miners we took from Loreius Farm stay chained. Feed them. Dead men don't dig. Brattvar."
+     ]
+    },
+    {
+     "id": "miner_scratching",
+     "kind": "warning",
+     "title": "Scratched on a Mine Prop",
+     "at": "chest",
+     "pages": [
+      "Ulf of Loreius Farm. Taken 3rd of Sun's Height.\nAsbjorn, also of Loreius. Taken same day.\nWe dig. We dig. The big one with the stone hand counts the sacks every night and beats whoever is short.",
+      "If anyone reads this, tell Vantus Loreius that his men did not run away. We were taken on the road to Whitewatch Tower. Tell him to send someone. Tell him we are still alive. Tell him to hurry.\n\nAnd tell my mother in Whiterun that I said my prayers. Ulf."
+     ]
+    }
+   ]
+  },
+  "lunds_hut": {
+   "hook": "A trapper's hut in the hills north-west of Rorikstead, its door hanging open and its smokehouse cold. The wolves have been circling closer since its owner stopped coming home.",
+   "rumour": "Lund the trapper hasn't been down from his hut in two weeks. His wife Hjalla's in Rorikstead asking everyone to go and look. Nobody's gone. The wolves up there are bold this year.",
+   "notes": [
+    {
+     "id": "lund_journal",
+     "kind": "journal",
+     "title": "Lund's Trapping Journal",
+     "author": "Lund",
+     "at": "chest",
+     "pages": [
+      "#2nd of Hearthfire\nTraps on the west ridge empty again. Three snapped, not sprung. Something is taking the bait and the trap both. Wolf tracks, too many to count.",
+      "#5th of Hearthfire\nFound the pack's den in the rocks above Bleakwind Bluff. Big grey leader with a white blaze, bolder than any wolf I've seen. He watched me reset the traps and didn't run.\n#6th of Hearthfire\nGoing up to the den tomorrow with the long bow. If I'm not back by the 8th, Hjalla, don't come looking. Send someone with a sword. Take the good pelts to Whiterun and get a fair price from Belethor, not what he offers first."
+     ]
+    }
+   ]
+  },
+  "silent_moons_camp": {
+   "hook": "A bandit camp ringed around an ancient forge north-west of Whiterun. When the moons are up, the anvil glows with a cold light, and the blades made there burn with it.",
+   "rumour": "There's a forge at Silent Moons that only works under the moons. The bandits there make blades that glow like Masser on a clear night. I'd like to see one. I'd like even more not to be stabbed with one.",
+   "quest": "pl_silent_moons_camp",
+   "notes": [
+    {
+     "id": "hrodna_notes",
+     "kind": "notes",
+     "title": "Hrodna's Forge Notes",
+     "author": "Hrodna the Smith",
+     "at": "boss",
+     "starts": "pl_silent_moons_camp",
+     "pages": [
+      "Night of both moons full. Laid the pale ore from Halted Stream in the coals at moonrise. The forge drank the light and the iron went white, then blue, then silver. Quenched it in snowmelt. Struck the anvil once and it rang like a bell in the next valley.",
+      "Finest blade I have ever made. Brattvar thinks it is for him. It is not. I will call it Moonsliver and I will keep it in the iron chest by the forge until the day I leave this rabble and sell it in Solitude for enough to buy a house with a door that locks.\n\nThe lunar forge does not care who works it. That is the one thing I like about it."
+     ]
+    },
+    {
+     "id": "lunar_inscription",
+     "kind": "inscription",
+     "title": "Runes on the Forge Stone",
+     "at": "site",
+     "pages": [
+      "The stone around the forge is carved with old marks, Nordic but older than any Nord now living can read. Someone has scratched a rough translation beside them:\n\n'Two eyes of the night. One red, one pale. What is struck beneath them remembers them.'",
+      "Below, a second hand: 'The forge only takes when both moons look on. Under a new moon it is cold iron and nothing more. Don't waste good ore on a dark night.'\n\nA third note, in charcoal: 'Hrodna, the ore's here.'"
+     ]
+    }
+   ]
+  },
+  "greenspring_hollow": {
+   "hook": "A green, sheltered hollow in the western hills, fed by warm springs and watched over by a spriggan. Poachers have moved in, and the hollow is growing angry.",
+   "rumour": "Greenspring Hollow used to be the place to hunt elk. Now the trees there move when you're not looking. Some fools set up camp to trap the spriggan's deer, and the hollow's been wild ever since.",
+   "quest": "pl_greenspring_hollow",
+   "notes": [
+    {
+     "id": "hunter_journal",
+     "kind": "journal",
+     "title": "Hunter's Journal",
+     "author": "Haldor Elk-Runner",
+     "at": "chest",
+     "starts": "pl_greenspring_hollow",
+     "pages": [
+      "#9th of Last Seed\nGreenspring has a keeper. A spriggan, old and patient. I hunted here every autumn and it never troubled me, because I took one deer and said a word to Kynareth for it. That was the bargain, and we both kept it.",
+      "#20th of Last Seed\nThree men have made camp in the hollow. They set snares on every trail and leave the carcasses to rot for the pelts. The spriggan has stopped being patient. Last night the trees closed the path behind me.\n\nIt is not the spriggan that needs killing. It is the men. But the men have bows, and I am one hunter."
+     ]
+    },
+    {
+     "id": "kynareth_prayer",
+     "kind": "prayer",
+     "title": "Prayer Carved in Bark",
+     "at": "site",
+     "pages": [
+      "~Kynareth of the wind and leaf,\n~Take this one life and spare my grief.\n~I took no more than I could eat,\n~I left the fawn upon her feet.",
+      "~Keep the hollow green and wild,\n~Keep the keeper reconciled,\n~And if I break the bargain made,\n~Let me lie in your green shade.",
+      "Carved smaller, at the foot of the tree, newer and deeper: 'The poachers cut this bark for kindling and laughed at the words. Three of them went into the thicket after a wounded doe that night. Two came back. The keeper does not forgive greed, and neither, I think, does She.'"
+     ]
+    }
+   ]
+  },
+  "whitewatch_tower": {
+   "hook": "A crumbling watchtower north-east of Whiterun, built to guard the road and now used to rob it. The bandits who hold it paint their shields red and count every traveller who passes.",
+   "rumour": "Whitewatch Tower used to keep the north road safe. Now the only thing it keeps is a tally of every purse it's emptied. Vantus Loreius has lost two hands on that road already.",
+   "quest": "pl_whitewatch_tower",
+   "notes": [
+    {
+     "id": "toll_tally",
+     "kind": "ledger",
+     "title": "Whitewatch Toll Tally",
+     "author": "Red Ingjald",
+     "at": "chest",
+     "starts": "pl_whitewatch_tower",
+     "pages": [
+      "#Hearthfire\nDunmer pilgrim, going to High Hrothgar: 8 septims and a nice cloak.\nFarm cart from Loreius: 30 septims, one cabbage, one driver who talked back. He doesn't talk now.\nKhajiit caravan: tried. They had more swords than us. Let them by. Not writing that down. Wrote it down anyway.",
+      "Note to the lads: Brattvar at Halted Stream wants two men a week for his mine. He pays in ore, not coin. I say no. If he wants men he can take them off the road himself, like we do.\n\nAnyone who paints his shield and doesn't stand his watch gets thrown off the top. I'm not joking. Ask Svein. Oh wait. Ingjald."
+     ]
+    }
+   ]
+  },
+  "shimmermist_cave": {
+   "hook": "A deep cave north-east of Whiterun, named for the glittering mist that pours from its mouth at dawn. The Falmer who dwell below have started taking hunters who stray too near.",
+   "rumour": "Shimmermist Cave goes down a long way, past where any Nord should go. A hunter's brother went in after a wounded elk and never came out. They say the snow elves took him.",
+   "quest": "pl_shimmermist_cave",
+   "notes": [
+    {
+     "id": "brother_letter",
+     "kind": "letter",
+     "title": "Letter Left at the Cave Mouth",
+     "author": "Bodvar the Hunter",
+     "at": "chest",
+     "starts": "pl_shimmermist_cave",
+     "pages": [
+      "Eyvind,\nIf you crawl out of that hole and find this, you owe me a mead and a beating, in that order. I waited by the mist for three days. I heard you blow Father's horn once, deep down, on the second night. Then nothing.",
+      "I can't go in. I've seen the things that come out at dusk, pale and blind and sniffing the air like dogs, and I'm not ashamed to say I ran.\n\nIf it's not Eyvind reading this but some stranger with a stout heart: our father's hunting horn was carved from a mammoth's tusk with a running elk on the side. Bring it back and I'll know. Either way, I'll know. Bodvar."
+     ]
+    },
+    {
+     "id": "falmer_scratches",
+     "kind": "notes",
+     "title": "Scholar's Scrawl on Falmer Marks",
+     "author": "A lost apprentice of the College of Winterhold",
+     "at": "chest",
+     "pages": [
+      "The Falmer here mark their tunnels with scratched lines, three short and one long, repeated at every bend. I believe they are not words but distances, counted in steps, so the blind can find their way home.",
+      "I also believe I am lost. I have been following the marks the wrong way. They count toward the heart of the cave, not out of it. If I am right, I should be close to their nest. I can hear something breathing that is not me. I shall stop writing now."
+     ]
+    }
+   ]
+  },
+  "fellglow_keep": {
+   "hook": "An old Imperial keep in the hills north-east of Whiterun, abandoned by the Legion and taken by renegade mages. Lights burn in its windows, and the farms nearby have lost more than sheep.",
+   "rumour": "Fellglow Keep is full of mages the College threw out. They pay farmhands to fetch them things, and some of those farmhands don't come back. A young acolyte from the temple went there too. Sister Hildrun is beside herself.",
+   "notes": [
+    {
+     "id": "acolyte_letter",
+     "kind": "letter",
+     "title": "Unsent Letter from an Acolyte",
+     "author": "Brother Alvi",
+     "at": "chest",
+     "pages": [
+      "Sister Hildrun,\nYou will be angry, and you will be right. I left the Temple of Kynareth without leave. I came to Fellglow because they promised me what the Temple never could: an answer. They said they can call back the dead, and my mother has been dead since Sun's Dawn.",
+      "I have seen what they do now. It is not my mother they call. It is something that wears the shape of the dead and smiles wrongly. They have locked the lower cells and I hear voices there. I would leave, but they watch me.\n\nIf this reaches you, do not send the guard. They will not come. Send someone who can get me out. Alvi."
+     ]
+    },
+    {
+     "id": "keep_rota",
+     "kind": "orders",
+     "title": "Duties of the Lower Halls",
+     "author": "Magister of the keep",
+     "at": "boss",
+     "pages": [
+      "The thralls in the lower cells are to be fed every second day. More than that is waste. Less than that makes them useless for the work.\n\nThe new acolyte from Whiterun is talented but squeamish. Keep him from the cells. Keep him from the front gate. If he asks about his mother, tell him we are close.",
+      "Supplies due: grave dust from the Ritual Stone, where Moriva's circle is working; salt; two more bodies, fresh. The farms east of the river have been watchful lately. Send the collectors further out.\n\nWe do not answer the College's letters. We do not answer anyone's letters."
+     ]
+    }
+   ]
+  },
+  "redorans_retreat": {
+   "hook": "A bandit cave in the hills west of Whiterun, named for a Dunmer exile who held it long ago. Its new masters prey on couriers on the western road.",
+   "rumour": "Redoran's Retreat is a bandit hole now. They robbed Kjeld the courier last month, stripped him to his smallclothes and sent him walking. He's still angry about the boots.",
+   "quest": "pl_redorans_retreat",
+   "notes": [
+    {
+     "id": "chief_letter",
+     "kind": "letter",
+     "title": "Letter Found in a Bandit's Boot",
+     "author": "Astrid Half-Ear",
+     "at": "boss",
+     "starts": "pl_redorans_retreat",
+     "pages": [
+      "Thorgar,\nWe've got the courier's satchel. Most of it is rubbish: a Rorikstead widow's will, a love letter, three bills from Belethor. But one is sealed by the Steward of Whiterun, and that one might be worth more than the rest of this cave.",
+      "I've put it in the iron box with the rest of the satchel. Nobody opens that box but me. If the Steward wants it back, he can pay. If he sends guards instead, we burn it.\n\nAnd tell the lads to stop wearing the courier's boots. They are too small for all of you, and you look ridiculous. Astrid."
+     ]
+    },
+    {
+     "id": "redoran_carving",
+     "kind": "inscription",
+     "title": "Old Carving in Dunmeri",
+     "at": "chest",
+     "pages": [
+      "On the cave wall, half covered by bandit soot, an old carving in the Dunmeri script. A rough translation has been chalked beside it by some later visitor:\n\n'I, Faryn of House Redoran, was cast out for honour. Here I kept my honour alone. Let no thief shelter in this place.'",
+      "Under it, in fresh charcoal: 'Too late, Faryn.'",
+      "Further along the wall, a second old carving, smaller and more careful: a list of names, each with a mark beside it. Faryn's guests, perhaps, or Faryn's dead. The last name in the list is his own, carved by someone else, and under it the word for 'honoured' in the Dunmeri script."
+     ]
+    }
+   ]
+  },
+  "moldering_ruins": {
+   "hook": "A collapsed Nordic ruin on the western edge of the Tundra, half buried in turf and mould. The farmers of Rorikstead give it a wide berth, and their sheep refuse to graze near it.",
+   "rumour": "The Moldering Ruins? Lemkil's sheep won't go within a bowshot of them. Smart sheep. There's a cold comes out of that place even in Sun's Height.",
+   "quest": "pl_moldering_ruins",
+   "notes": [
+    {
+     "id": "shepherd_warning",
+     "kind": "warning",
+     "title": "Shepherd's Warning",
+     "author": "Svala of Rorikstead",
+     "at": "chest",
+     "starts": "pl_moldering_ruins",
+     "pages": [
+      "To anyone who finds this by the ruins:\nMy little brother Agnar came here looking for a lost lamb on the 4th of Sun's Height. He came home white as milk and has not spoken a whole sentence since. He keeps drawing the same thing: a man with a crown of bronze, sitting on a stone chair, with his eyes open.",
+      "Agnar dropped his knife in there, the one Father gave him. He cries for it in his sleep. I think if it came back, some of him would come back with it.\n\nI cannot go in. I am all Mother has left who can work the field. If you are braver than me, bring the knife to Rorikstead and ask for Svala."
+     ]
+    },
+    {
+     "id": "draugr_inscription",
+     "kind": "inscription",
+     "title": "Carving on the Throne Stone",
+     "at": "boss",
+     "pages": [
+      "^ODVAR BRONZE-CROWN\n^WHO WATCHED THE WEST\n\nHe watched for the Reachmen from this hill for sixty years, and when he died his people sat him on the stone so that he might keep watching. They closed the door upon him with his eyes open. Do not close his eyes. He has not finished watching.",
+      "Scratched beside it in charcoal, recently, by an unsteady hand: 'Agnar, if you ever come back here, his eyes follow you. They do. I saw them move. Don't look at the chair. Get your knife and don't look at the chair.' The rest of the charcoal has been smeared, as if by a sleeve dragged across it in a hurry."
+     ]
+    }
+   ]
+  },
+  "whiterun_imperial_camp": {
+   "hook": "A fortified Legion camp in the western Tundra, tents and palisades set to watch the road to the Reach. Its officers are short of men, short of patience and short one courier.",
+   "rumour": "The Legion camp out west lost a courier and a whole case of dispatches. The captain's been sending patrols up and down the road and swearing at the scouts. Somebody in Swindler's Den knows something, I'd wager.",
+   "notes": [
+    {
+     "id": "legion_orders",
+     "kind": "orders",
+     "title": "Standing Orders, Western Tundra Camp",
+     "author": "Captain Aurius Vell, Fourth Legion",
+     "at": "chest",
+     "pages": [
+      "1. Patrols to walk the Rorikstead road at first and last light, in fours, never threes.\n2. No soldier is to drink at the Frostfruit Inn in uniform. The innkeeper is sympathetic to the Empire. The patrons are not.\n3. Any deserter caught is to be held for the provost at Whiterun, not hanged on the spot. We are short enough of men without hanging the ones we have.",
+      "4. ADDENDUM, 19th of Last Seed. Courier Decianus has not reached Whiterun. The dispatch case he carried holds troop dispositions for the Whiterun garrison. If those reach Windhelm, men will die. Tracks lead east from the road to the bandit hole called Swindler's Den. Any soldier, or civilian of good character, who recovers the case will be paid from my own purse."
+     ]
+    },
+    {
+     "id": "soldier_letter",
+     "kind": "letter",
+     "title": "Letter Home to Bruma",
+     "author": "Legionary Quintus Avel",
+     "at": "chest",
+     "pages": [
+      "Dear Mother,\nThe north is cold. They say it isn't cold yet, which is worse. The Nords in Rorikstead sell us cabbages at three times the price and smile while they do it.",
+      "We lost a courier last week, Decianus, the one who used to sing. The captain pretends it is about the dispatches, but I saw him sitting alone by the fire afterwards with the man's spare helmet.\n\nI am well. I am fed. I have not had to fight anyone yet, except a mudcrab, and I won. Please send socks. Your loving son, Quintus."
+     ]
+    }
+   ]
+  },
+  "swindlers_den": {
+   "hook": "A cave in the western hills that serves as a thieves' market for every robber in the hold. Stolen ore, stolen mead and stolen secrets all pass through its fence's hands.",
+   "rumour": "Swindler's Den. You can buy anything there, if you don't ask where it came from and don't mind someone selling your purse back to you on the way out.",
+   "quest": "pl_swindlers_den",
+   "notes": [
+    {
+     "id": "fence_ledger",
+     "kind": "ledger",
+     "title": "The Fence's Ledger",
+     "author": "Grelka the Fence",
+     "at": "boss",
+     "starts": "pl_swindlers_den",
+     "pages": [
+      "Bought from Halted Stream (Brattvar's lot): 9 sacks iron ore at 4 each. Told him 3. He believed me.\nBought from White River Watch: 6 casks Honningbrew. Watered two and sold them to Redoran's Retreat at full price.",
+      "Bought from two Legion deserters: one leather dispatch case, Legion seal, unopened. Paid 40. Worth 400 to the right Stormcloak. Holding it in the strongbox till the right Stormcloak comes asking. There's a camp of them east of the river. Word will get round.\n\nNote: nobody touches the strongbox. Nobody."
+     ]
+    },
+    {
+     "id": "swindle_rules",
+     "kind": "list",
+     "title": "Rules of the Den",
+     "at": "chest",
+     "pages": [
+      "1. No stealing from each other. Steal from the customers.\n2. No fighting inside. Take it outside where the wolves can clean up.\n3. Everything has a price. Everyone has a price. Find it.\n4. If the guards come, you've never heard of Grelka.\n5. If Grelka asks, you've never heard of the guards.",
+      "6. The Legion seal is not to be broken. Sealed is worth more.\n7. Whoever keeps eating the cheese, stop.\n\n8. The cave belongs to whoever pays Grelka the most. Right now that is Grelka."
+     ]
+    }
+   ]
+  },
+  "bleakwind_basin": {
+   "hook": "A wide stony basin west of Whiterun where giants herd their mammoths beside a smouldering fire. They want to be left alone, and they mostly are.",
+   "rumour": "Giants at Bleakwind Basin. Leave them be and they'll leave you be. Unless you're a cow from Pelagia Farm, apparently. Ask Gunnvor over there about it.",
+   "notes": [
+    {
+     "id": "giant_watch",
+     "kind": "notes",
+     "title": "Gunnvor's Giant-Watching Notes",
+     "author": "Gunnvor Half-Wool",
+     "at": "chest",
+     "pages": [
+      "Watched the basin from the rocks for three days. Two giants, one old, one young. Four mammoths. One cow, ours, Brindle, standing by the fire like she was born there.",
+      "The young giant scratches Brindle behind the ears every morning. The old one milks the mammoths and gives the young one the first bowl. They are kinder to each other than half the families in Whiterun.\n\nI still want my cow back. But I don't want to fight for her. There must be another way. Giants like cheese, the old herders say. Maybe a trade."
+     ]
+    }
+   ]
+  },
+  "valtheim_towers": {
+   "hook": "Twin ruined towers bridging the river road east of Whiterun, held by raiders who charge a toll to cross. Lately their chief has a voice that shakes the stones.",
+   "rumour": "Valtheim Towers is a toll-gate now, and the toll goes up every week. The new chief there shouts so loud he knocks men off the bridge. Even the Greybeards have heard of him, they say.",
+   "notes": [
+    {
+     "id": "toll_schedule",
+     "kind": "list",
+     "title": "Valtheim Toll Schedule",
+     "at": "chest",
+     "pages": [
+      "^VALTHEIM CROSSING\n^Tolls by order of the master of the towers\nOn foot: 20 septims\nOn horse: 50\nCart: 100, or the cart\nAnyone wearing Stormcloak blue or Legion red: double\nAnyone who argues: the river",
+      "Below, scrawled: 'The master says the toll goes up again on Morndas. He says he can feel the stone sing when he shouts at it. He says a lot of things. Nobody's arguing. Hjorvald argued. Hjorvald's in the river.'\n\nNobody's crossing much either, these days, except the giants from Guldun Rock, and they don't pay."
+     ]
+    },
+    {
+     "id": "merchant_plea",
+     "kind": "letter",
+     "title": "A Merchant's Plea",
+     "author": "Ri'saad's courier",
+     "at": "chest",
+     "pages": [
+      "To any honest guard of Whiterun,\nThis one's caravan paid the Valtheim toll twice in a month, and was robbed anyway at Guldun Rock, where the giants took our salt and the raiders took what the giants left.",
+      "Khajiit are patient. Khajiit are not THIS patient. The towers stand on the Jarl's road, and the Jarl's road should not belong to a man who shouts down bridges. If Whiterun will not clear them, perhaps Windhelm will. This one does not care which flag flies over the towers, so long as the toll is less than our whole wagon."
+     ]
+    }
+   ]
+  },
+  "graywinter_watch": {
+   "hook": "A cold cave east of Whiterun, close by the Ritual Stone, where a troll has made its den among the bones of its meals. Hunters have stopped taking the eastern trails.",
+   "rumour": "Graywinter Watch has a troll in it, a big frost-grey one. It took a mammoth calf from the giants last month, which tells you how hungry it is. Don't go in without fire.",
+   "quest": "pl_graywinter_watch",
+   "notes": [
+    {
+     "id": "hunter_warning",
+     "kind": "warning",
+     "title": "Warning Pinned with an Arrow",
+     "author": "Ulfgar of the Hunters' Lodge",
+     "at": "chest",
+     "starts": "pl_graywinter_watch",
+     "pages": [
+      "TROLL. Big, grey, three eyes, one of them blinded by my first arrow. It heals faster than I can shoot. I put six arrows in it and it pulled them out and ate the shafts.",
+      "It took Gerd's hound and my good bow and it took the bounty notice the Jarl's steward nailed by the Battle-Born Farm road. The bounty still stands: 100 septims for the troll's head at the gate of Whiterun.\n\nBring fire. Bring friends. Bring more fire. Ulfgar."
+     ]
+    }
+   ]
+  },
+  "serpents_bluff_redoubt": {
+   "hook": "A Forsworn stronghold carved into a bluff south-west of Rorikstead, hung with bones and feathers. The Reachmen have pushed further east than ever, and Rorikstead's herds are paying for it.",
+   "rumour": "Forsworn at Serpent's Bluff, this far east! They took four of Lemkil's goats and left a ring of crow feathers round the pen. Their hag-mother calls herself Kaie Thorn-Mother, and she's sworn to burn Rorikstead's fields.",
+   "quest": "pl_serpents_bluff_redoubt",
+   "notes": [
+    {
+     "id": "forsworn_carving",
+     "kind": "inscription",
+     "title": "Carving on a Bone Totem",
+     "author": "Kaie Thorn-Mother",
+     "at": "boss",
+     "starts": "pl_serpents_bluff_redoubt",
+     "pages": [
+      "The Nords took the Reach. The Nords took Markarth. The Nords took our dead and buried them in the wrong earth.\n\nNow we take from them. The goats of the Rorik-town. The fat fields. The fat men.",
+      "When the briar heart is planted, we burn the Rorik-town's barley and salt its ground, so nothing grows there ever again. Then let them call it lucky.\n\nThe serpent on the bluff watches east. The thorn-mother watches with it.\n\nBlood of the Reach. Thorn of the Reach. We do not forget."
+     ]
+    },
+    {
+     "id": "captive_note",
+     "kind": "letter",
+     "title": "Note Pushed Through a Cage",
+     "author": "Lemkil's eldest, Sissel",
+     "at": "chest",
+     "pages": [
+      "Father, I'm alive. They caught me at the goat pen. They don't hurt me, they just stare and talk in that tongue. One of them, the old woman with the thorns in her hair, keeps a heart in a box and sings to it.",
+      "She says when the heart is ready, they'll go west and burn the farms. I heard her say 'Rorikstead' plain as day. Please tell the Legion camp. Please tell someone. I hid this in the wall of my cage. If you are not Father, please bring this to him in Rorikstead. Sissel."
+     ]
+    }
+   ]
+  },
+  "fort_greymoor": {
+   "hook": "An old stone fort west of Whiterun, long empty of Legion soldiers and now crawling with silver-clad hunters of beasts. Beneath its walls lies an older secret the hunters know nothing of.",
+   "rumour": "Fort Greymoor's held by the Silver Hand now. They say they hunt werewolves. They hunt anyone they don't like the look of. Old soldiers swear the last Legion paymaster buried the garrison's wages out there before the fort fell.",
+   "quest": "pl_fort_greymoor",
+   "notes": [
+    {
+     "id": "paymaster_letter",
+     "kind": "letter",
+     "title": "The Paymaster's Last Letter",
+     "author": "Optio Gratian Sabe, paymaster of Fort Greymoor",
+     "at": "chest",
+     "starts": "pl_fort_greymoor",
+     "reveals": "fort_greymoor",
+     "pages": [
+      "To the Legate at Solitude,\nThe garrison is ordered to withdraw from Greymoor on the 2nd. We have no wagon for the pay chest. The road is thick with bandits who know exactly what a pay chest looks like.",
+      "I have therefore buried it, as regulations permit in time of danger. It lies outside the walls, thirty paces from the south-west tower, under a flat stone marked with the eagle of the Legion. The men's back pay for two months: one hundred and sixty septims and the garrison's silver ring of service.\n\nI shall return for it with an escort. If I do not return, let it go to whoever serves the Empire best. Gratian Sabe."
+     ]
+    },
+    {
+     "id": "silver_scrawl",
+     "kind": "orders",
+     "title": "Silver Hand Watch List",
+     "author": "Hrafnhild Silver-Brand",
+     "at": "chest",
+     "pages": [
+      "Watch rota for the walls. Two on the north rampart, two at the gate, one in the south-west tower. The tower is the worst post. The wolves howl under it every night. Not those wolves. Ordinary wolves. I think.",
+      "Anyone who sees a Companion on the road is to report it at once. Anyone who sees a Companion and does nothing will answer to me. The beasts of Jorrvaskr think the plains belong to them. We will teach them otherwise."
+     ]
+    }
+   ]
+  },
+  "guldun_rock": {
+   "hook": "A giant camp on a rocky hill east of Whiterun, beside the river road. Caravans give it a wide berth, and the giants watch every wagon go by as if counting the cheeses inside.",
+   "rumour": "Guldun Rock's giants are touchy. A Khajiit caravan cut too close and lost a wagon of salt. The giants licked it clean, they say. Every grain.",
+   "notes": [
+    {
+     "id": "caravan_note",
+     "kind": "notes",
+     "title": "Caravan Guard's Notebook",
+     "author": "Ahkari's guard, J'datharr",
+     "at": "chest",
+     "pages": [
+      "Note to self: at the bend near Guldun Rock, do not stop. Do not stop to fix a wheel. Do not stop to relieve oneself. The giants consider the bend theirs, and they have opinions about wheels.",
+      "Second note to self: the toll at Valtheim Towers, just north, is now higher than the profit of the trip. J'datharr suggests the eastern pass next time, through the Rift. Ahkari says no. Ahkari is the boss. J'datharr will write it down anyway, so that later J'datharr can say he said so."
+     ]
+    }
+   ]
+  },
+  "white_river_watch": {
+   "hook": "A bandit cave on the White River south-east of Whiterun, with a lookout over the meadery road. Its band has developed a taste for Honningbrew mead and no taste at all for paying.",
+   "rumour": "White River Watch is where the stolen mead goes. You can hear the singing from the river some nights. Badly sung, too. Eirik at Honningbrew wants it stopped.",
+   "notes": [
+    {
+     "id": "bandit_orders",
+     "kind": "orders",
+     "title": "Orders of the Watch",
+     "author": "Kolskegg Mead-Belly",
+     "at": "boss",
+     "pages": [
+      "Right. New rules, since half of you were too drunk to stand watch on Middas.\nOne. Only ONE cask open at a time.\nTwo. The rest go to Grelka at Swindler's Den, and she pays us, and we buy food. Food, lads. Not more mead.",
+      "Three. The meadery is sending guards with its carts now. Good. Guards drink too. Leave a cask by the road with a sad face drawn on it. Works every time.\nFour. The key to the store-room stays on my belt. That's not a rule, that's a warning.\n\nKolskegg."
+     ]
+    },
+    {
+     "id": "lookout_diary",
+     "kind": "diary",
+     "title": "The Lookout's Diary",
+     "author": "Young Hroar",
+     "at": "chest",
+     "pages": [
+      "#Turdas\nStood lookout all day. Saw a fox, two Honningbrew carts and the Stormcloak camp's smoke over the hills to the east. Kolskegg says they won't bother us, we're too small to matter. I don't like being too small to matter.",
+      "#Fredas\nKolskegg drank a whole cask and fell in the river. We pulled him out. He made us swear not to tell anyone. I am writing it down because I swore not to TELL. I am thinking of leaving. My mother is in Riverwood. She thinks I work at the mill."
+     ]
+    }
+   ]
+  },
+  "western_watchtower": {
+   "hook": "A lone stone watchtower west of Whiterun, guarding the approach across the plains. Its guards have been jumpy since something with vast wings was seen over the hills.",
+   "rumour": "The lads at the Western Watchtower saw something in the sky. Something big. Captain told them to keep it quiet, which is why everyone in Whiterun's heard about it.",
+   "notes": [
+    {
+     "id": "watch_report",
+     "kind": "report",
+     "title": "Watch Report, Western Tower",
+     "author": "Guardsman Hreinn",
+     "at": "chest",
+     "pages": [
+      "Report for the captain at Dragonsreach:\nNight of the 24th. Clear sky. At the third hour Guardsman Brunolf saw a shape cross Secunda from south to north. He says it was too big for a bird and too fast for a cloud. He has been relieved of the watch and given a strong drink.",
+      "Night of the 25th. Same shape seen again by myself and by Guardsman Torsk. I have not been given a strong drink. I request one. I also request arrows, as we have nineteen between six men, and a second bell, as the first is cracked.\n\nThe giants at Bleakwind Basin have moved their mammoths to the far side of the basin. They are not afraid of us. They are afraid of something. Hreinn."
+     ]
+    }
+   ]
+  },
+  "broken_fang_cave": {
+   "hook": "A cave mouth like a snapped tooth in the hills west of Whiterun. Travellers on the road nearby have been vanishing at dusk, and the Vigilants of Stendarr have taken an interest.",
+   "rumour": "Broken Fang Cave. Folk who camp near it wake up tired and pale, if they wake up at all. A Vigilant came asking about it last week, all grey robes and grim looks.",
+   "notes": [
+    {
+     "id": "traveller_diary",
+     "kind": "diary",
+     "title": "A Traveller's Diary",
+     "author": "Ingvild of Falkreath",
+     "at": "chest",
+     "pages": [
+      "#Morndas\nCamped by the road near a cave shaped like a broken tooth. A kind man in a fine coat shared his fire and asked a great many questions about who would be expecting me in Whiterun. Nobody, I told him. He smiled at that.",
+      "#Tirdas\nSo tired. Slept until noon and woke with a sore neck. The kind man is still here. He says I should rest another day. His fire never seems to need wood.\n#Middas\nI cannot remember Tirdas night. There are two small marks on my neck. I think I should leave. I think I should leave now."
+     ]
+    }
+   ]
+  },
+  "whiterun_stormcloak_camp": {
+   "hook": "A Stormcloak war camp in the hills east of the White River, where Ulfric's soldiers sharpen their axes and wait for the order to march on Whiterun.",
+   "rumour": "There's a Stormcloak camp past the river, near the Ritual Stone. They buy bread from the farms and pay in Windhelm coin. Fair enough, until the day they march.",
+   "notes": [
+    {
+     "id": "stormcloak_orders",
+     "kind": "orders",
+     "title": "Orders from Windhelm",
+     "author": "Galmar Stone-Fist",
+     "at": "chest",
+     "pages": [
+      "Hold the camp. Do not engage the Whiterun garrison unless attacked. Balgruuf has not chosen a side, and as long as he keeps his gates shut to the Legion we can wait.",
+      "Buy from the farms. Pay fair. A farmer who sells us bread today opens his gate to us tomorrow. Any soldier caught stealing from a Nord farm will be sent back to Windhelm in irons and I will deal with him personally.\n\nReport any Legion movement on the western road. The Imperial camp near Rorikstead is short of men. Find out how short. Stone-Fist."
+     ]
+    },
+    {
+     "id": "recruit_diary",
+     "kind": "diary",
+     "title": "A Recruit's Diary",
+     "author": "Ormr of Ivarstead",
+     "at": "chest",
+     "pages": [
+      "#Second Seed\nJoined up in Windhelm. They gave me an axe and a blue sash and told me I'm fighting for Skyrim. I've lived in Skyrim my whole life and never knew it needed fighting for.",
+      "#Last Seed\nCamped above the White River. You can see High Hrothgar from here, white against the sky. The old sergeant says the Greybeards will never take a side. Lucky them. Some nights I watch the lights of Whiterun and think about how many people live behind those walls who've never done anything to me."
+     ]
+    }
+   ]
+  },
+  "sleeping_tree_camp": {
+   "hook": "A giant camp in the western Tundra, gathered around an ancient tree that weeps a drowsy golden sap. Alchemists pay well for the sap, if the giants let anyone near enough to tap it.",
+   "rumour": "The giants at Sleeping Tree drink the sap and snore for days. Arcadia in Whiterun pays good money for a flask. Just don't wake them. Gods, don't wake them.",
+   "quest": "pl_sleeping_tree_camp",
+   "notes": [
+    {
+     "id": "sap_notes",
+     "kind": "notes",
+     "title": "Notes on the Sleeping Tree",
+     "author": "Arcadia, alchemist of Whiterun",
+     "at": "chest",
+     "starts": "pl_sleeping_tree_camp",
+     "pages": [
+      "The sap of the great tree west of Whiterun is unlike any resin I know. A drop on the tongue brings visions and a deep, dreamless sleep. The giants drink it in the evening, and in the morning they are calm as lambs.",
+      "I have a buyer in Solitude who will pay three hundred septims for a full flask. I am too old to crawl past a sleeping giant, and too honest to send a child. If an adventurer with quiet feet brings me a flask, I will split the price fairly.\n\nApproach from the south, downwind. The giants sleep hardest just after the sun goes down. Take only what you need. The tree does not like greed."
+     ]
+    }
+   ]
+  },
+  "high_hrothgar": {
+   "hook": "The mountain monastery of the Greybeards, perched halfway up the Throat of the World above seven thousand steps. Those who climb it come looking for silence, or for the Voice.",
+   "rumour": "The Greybeards haven't said a word aloud in years, so they say, because their voices would shake the mountain down. Klimmek from Ivarstead hauls their supplies up. Nobody else bothers.",
+   "notes": [
+    {
+     "id": "pilgrim_prayer",
+     "kind": "prayer",
+     "title": "Pilgrim's Prayer Left on the Steps",
+     "author": "A pilgrim from Rorikstead",
+     "at": "site",
+     "pages": [
+      "~Kyne, I have climbed your seven thousand steps,\n~My knees are broken and my breath is gone.\n~I came to ask the Greybeards for a word,\n~And found I had no question left to ask.",
+      "I meant to ask why my son died in the war. I meant to ask which side was right. At the top there was only the wind, and the door, and the quiet, and somewhere above that, the mountain thinking. I left this prayer on the steps and walked back down. I think that was the answer."
+     ]
+    },
+    {
+     "id": "supply_list",
+     "kind": "list",
+     "title": "Supply List for the Monastery",
+     "author": "Klimmek of Ivarstead",
+     "at": "site",
+     "pages": [
+      "^FOR THE GREYBEARDS\nSalted fish: 2 crates\nBarley: 1 sack\nCandles: 40\nLamp oil: 1 jug\nWool blankets: 3 (Master Arngeir asked, through Brother Borri's gestures. I think it was blankets. It might have been goats.)",
+      "Paid in full, as always, with a nod. Note to self: the steps are icier this year past the fourth shrine. Bring the spiked boots. Do not stop to look down. Do not stop to look at the frost trolls either. Especially do not stop to look at the frost trolls."
+     ]
+    }
+   ]
+  },
+  "throat_of_the_world": {
+   "hook": "The highest peak in Tamriel, where the sky seems close enough to touch and the wind howls in the voice of dragons. Few who climb past High Hrothgar ever come down to speak of it.",
+   "rumour": "Nobody climbs past High Hrothgar. There's a wind up there that tears a man off his feet. Some say a dragon sits on the summit, but who'd believe that?",
+   "notes": [
+    {
+     "id": "summit_verse",
+     "kind": "poem",
+     "title": "Verse Scratched on a Summit Stone",
+     "at": "site",
+     "pages": [
+      "~Here the world ends and the sky begins,\n~Here Kyne breathed first upon the land,\n~Here the dragons came to talk with time,\n~Here the cold wind takes the climber's hand.",
+      "Under it, carved deep: 'I climbed for the view. I stayed for the silence. If you are reading this, look east. There is nothing in Tamriel you cannot see from here except yourself.'",
+      "Further down the stone, so faint it might be weather and not writing: 'There was a great grey shape on the peak when I came. It watched me carve this. It did not move, and it did not harm me. I think it was very old, and very tired, and glad of the company.'"
+     ]
+    }
+   ]
+  },
+  "the_ritual_stone": {
+   "hook": "A standing stone east of Whiterun ringed with old graves, said to grant the power to raise the dead. Someone has been testing that claim by moonlight.",
+   "rumour": "The Ritual Stone's been busy. Somebody's been digging up the old graves around it, and the guards found a skeleton walking the road by itself last Tirdas. Sister Hildrun at the temple wants it stopped.",
+   "quest": "pl_the_ritual_stone",
+   "notes": [
+    {
+     "id": "moriva_notes",
+     "kind": "notes",
+     "title": "Moriva's Working Notes",
+     "author": "Moriva the Grave-Singer",
+     "at": "site",
+     "starts": "pl_the_ritual_stone",
+     "pages": [
+      "The stone is honest. Stand in its shadow at midnight with the right words and the dead stand up beside you. Six of the old graves answered tonight. They are slow and forget their tasks, but the magister at Fellglow will be pleased with the grave dust.",
+      "Problem: the farmers have seen lights. A Whiterun priestess came to the road and sprinkled water about and sang. The dead did not like it. I did not like it.\n\nTomorrow I will raise all the rest, set them round the stone and see if the priestess wants to sing to them all at once."
+     ]
+    },
+    {
+     "id": "stone_inscription",
+     "kind": "inscription",
+     "title": "Inscription on the Ritual Stone",
+     "at": "site",
+     "pages": [
+      "^THE RITUAL\nCarved in the old Nord way around the base of the stone, half hidden by lichen: 'Those who lie here lay down their swords. Let no one take them up again.'",
+      "Someone has chipped at the carving with a knife, trying to scratch out the word 'no'. They have not quite managed it.",
+      "Around the far side of the stone, older marks again, nearly worn away: a ring of small figures lying down, and one figure standing over them with its arms raised. The standing figure has been carved with no face. Shepherds who graze nearby say the old priests did that on purpose, so the dead would never know who woke them."
+     ]
+    }
+   ]
+  },
+  "dragon_mound_greenspring_hollow": {
+   "hook": "A dragon burial mound in the western hills, its stones split open from within. Whatever slept here has woken and flown, and the earth still smells of fire.",
+   "rumour": "The old burial mound near Greenspring Hollow cracked open like an egg. Shepherds heard a roar that night they say they'll never forget. Now there's nothing there but a hole and bones.",
+   "notes": [
+    {
+     "id": "guard_report",
+     "kind": "report",
+     "title": "Guard Report on the Opened Mound",
+     "author": "Sergeant Ottar, Whiterun Guard",
+     "at": "site",
+     "pages": [
+      "To Irileth, Housecarl to the Jarl:\nInvestigated the stone mound near Greenspring Hollow as ordered. It is open. Not dug. Opened from beneath, the stones thrown outward as far as a bowshot. The pit is empty, its walls scorched black. Something left this place on its own.",
+      "The shepherds say a figure in a dark mask stood on the mound before it opened, and spoke words they did not know, and that the ground answered. I record this because they all say it, not because I believe it.\n\nRecommend a watch on the mound and an extra guard at the Western Watchtower. Ottar."
+     ]
+    },
+    {
+     "id": "scholar_rubbing",
+     "kind": "notes",
+     "title": "Rubbing of the Mound Script",
+     "author": "Farengar Secret-Fire's assistant",
+     "at": "site",
+     "pages": [
+      "Copied the claw-script from the fallen stones at the mound's edge. Three marks repeated, the same three I saw at the mound near Shimmermist Cave. If my master is right, they are a name.",
+      "If they are a name, then each mound held a single dragon, buried under its own name like a Nord under his barrow-stone. And if each is now empty, then each name is flying somewhere over Skyrim tonight. I will not mention this to the Jarl until my master tells me to. I would rather he heard it from someone with a better title."
+     ]
+    }
+   ]
+  },
+  "dragon_mound_shimmermist_cave": {
+   "hook": "A ring of ancient stones on a hill above Shimmermist Cave, marking a dragon's grave. The ring has been cracked, and the grass inside will not grow back.",
+   "rumour": "There's an old mound above Shimmermist Cave. Hunters say the stones sing in the wind now, where they never did before. Some of the bones inside are big as a man.",
+   "notes": [
+    {
+     "id": "farengar_letter",
+     "kind": "letter",
+     "title": "Letter to Farengar Secret-Fire",
+     "author": "Hedda of the Hunters' Lodge",
+     "at": "site",
+     "pages": [
+      "Court Wizard,\nYou asked to be told of any old stone mounds that look disturbed. There is one on the hill above Shimmermist Cave. I passed it on the 11th and the capstone was in place. I passed it on the 13th and it lay thirty paces down the slope, broken in two.",
+      "Inside, a pit, and scorch marks, and a great rib bone as long as my bow. I took a splinter of it for you, as you asked, wrapped in my spare scarf. You owe me a scarf.\n\nThe Falmer from the cave below were out on the hill in daylight, all of them facing the empty mound. I did not stay to see why. Hedda."
+     ]
+    }
+   ]
+  }
+ }
+}

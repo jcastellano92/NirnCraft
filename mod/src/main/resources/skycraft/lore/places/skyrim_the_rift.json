@@ -1,0 +1,1353 @@
+{
+ "regions": {
+  "skyrim/the_rift": {
+   "rumours": [
+    "Maven Black-Briar bought another farm outside Riften this season. Nobody remembers it being for sale.",
+    "The road guards at Fort Greenwall wave the Black-Briar wagons through and search everyone else down to their boot-soles. Make of that what you will.",
+    "Pilgrims keep coming through Ivarstead to climb the Seven Thousand Steps. Most come back down quiet. A few don't come back down at all.",
+    "Something's been taking sheep along the shore of Lake Honrich. Wolves, says the steward. Wolves don't open gates.",
+    "Somebody's selling Redwater skooma in the Ratway again. Bright red, sweet as berries. Two dockhands dead of it since Hearthfire.",
+    "Miners from Shor's Stone won't work the deep seams past dusk any more. They say they hear chanting coming up from the Ruunvald side.",
+    "The Ashwood Knives have been taking a toll on the Riften road. Pay them or walk home barefoot, that's how it goes now."
+   ],
+   "legends": [
+    "Before Riften had walls, the fishers of Lake Honrich say a Nord chieftain named Honrich drowned himself in it rather than yield to the Dragon Cult. On still autumn mornings the mist forms a man's shape over the water, and the old women set out a cup of mead on the docks for him.",
+    "The birches of the Rift turn gold every year because a priestess of Kynareth wept over them during the long winter after the Dragon War. Her tears were so warm the trees forgot how to go grey. Cut a Rift birch out of season, the woodsmen say, and its sap will run the colour of honey and blood.",
+    "Forelhost did not fall to the siege. The monks of the Dragon Cult poisoned their own well rather than open the gates, and the soldiers outside waited a month for a surrender that never came. When they finally broke in, the halls were full of the dead and every one of them was smiling.",
+    "There is a stone south of Riften that drinks the shadows of anyone who sleeps beside it. Thieves pray to it before a job. Honest folk walk the long way round."
+   ],
+   "songs": [
+    {
+     "title": "Gold on the Honrich",
+     "lines": [
+      "~The birch leaves fall like coin on the water,",
+      "~The mist rolls in from the eastern hills,",
+      "~I gave my heart to a fisher's daughter,",
+      "~And Lake Honrich keeps it still.",
+      "~The Jarl sits high and the Briar sits higher,",
+      "~The canal runs black and the bells ring thin,",
+      "~But a fire on the shore and a song for the singer",
+      "~Will warm the coldest Riften in."
+     ]
+    },
+    {
+     "title": "Seven Thousand Steps",
+     "lines": [
+      "~One for the mother and one for the son,",
+      "~One for the oath you swore to someone,",
+      "~Seven thousand steps and the wind on your face,",
+      "~And never a fire, and never a place.",
+      "~Climb if you must, but climb with your mouth shut,",
+      "~The Greybeards hear a whisper as loud as a shout."
+     ]
+    }
+   ]
+  }
+ },
+ "places": {
+  "riften": {
+   "hook": "Riften sits on the shore of Lake Honrich behind wooden walls and older debts. The Black-Briars own the meadery, the guards and most of the Jarl's good opinions, and the Thieves Guild owns the rest.",
+   "rumour": "Keep your purse in your shirt and your opinions in your mouth. In Riften, the walls have ears and the ears have friends.",
+   "quest": "pl_fort_greenwall",
+   "notes": [
+    {
+     "id": "briar_debt_ledger",
+     "kind": "ledger",
+     "title": "Torn Page from a Debt Ledger",
+     "author": "A Black-Briar factor",
+     "at": "chest",
+     "starts": "pl_fort_greenwall",
+     "reveals": "fort_greenwall",
+     "pages": [
+      "#Accounts due, Frostfall 4E 201\nMerryfair Farm: paid in full, as always.\nSnow-Shod Farm: forty septims short. Send someone polite. Then someone less polite.\nHeartwood Mill: lumber for the meadery vats, owed since Hearthfire.",
+      "#Road income\nFort Greenwall toll, the Brannoc arrangement: 310 septims this month, less his cut. He is skimming. Tell him so, once.\nLast Vigil: no payment. Those are not our people. Let the guard find them.",
+      "Note to self: the Greenwall toll book must never reach the Jarl's steward. Brannoc keeps it in his strongbox like a fool. If he hangs, the book must burn with him."
+     ]
+    },
+    {
+     "id": "guard_notice_knives",
+     "kind": "warning",
+     "title": "Notice Nailed by the Riften Gate",
+     "author": "Captain of the Riften Guard",
+     "at": "site",
+     "starts": "pl_faldars_tooth",
+     "reveals": "faldars_tooth",
+     "pages": [
+      "^BY ORDER OF JARL LAILA LAW-GIVER\nThe band calling itself the Ashwood Knives has robbed travellers on the western road between Heartwood Mill and Riften no fewer than eleven times since Last Seed.",
+      "The guard believes they shelter in the ruin of Faldar's Tooth. A bounty of two hundred septims is offered for proof that their captain, one Ottar Ashwood, will trouble the road no longer.\n\nThe guard will not be sending men. The guard has its hands full.",
+      "Scratched underneath in a different hand: 'hands full of Briar coin more like'"
+     ]
+    },
+    {
+     "id": "ratway_plank",
+     "kind": "warning",
+     "title": "Words Scratched on a Ratway Plank",
+     "at": "site",
+     "reveals": "redwater_den",
+     "pages": [
+      "DONT BUY THE RED\nit tastes like summer and then it takes you. Edda went to the den up north of the lake for more and never came back. Her boy went after her. Neither of them.\n\nRedwater. They say it's just a cabin by the spring. It goes down further than a cabin goes.",
+      "Somebody else has added: Ask for Hjalla Grey-Shawl by the canal if you are going up there. Her boy is the one who went. She pays what she has."
+     ]
+    }
+   ]
+  },
+  "ivarstead": {
+   "hook": "A small timber village on the Darkwater River at the foot of the Throat of the World. Every pilgrim bound for the Seven Thousand Steps sleeps a night at the Vilemyr Inn first.",
+   "rumour": "Ivarstead's quiet, mostly. Pilgrims, lumber, the river. Only the barrow up the hill keeps folk awake, and the bandits in that old tower on the pass.",
+   "quest": "pl_shroud_hearth_barrow",
+   "notes": [
+    {
+     "id": "pilgrim_tally",
+     "kind": "ledger",
+     "title": "Pilgrims' Tally at the Vilemyr Inn",
+     "author": "Wilhelm, innkeeper",
+     "at": "chest",
+     "pages": [
+      "#Pilgrims this year, 4E 201\nMorning Star: 2. Sun's Dawn: 0 (snow). First Seed: 4. Rain's Hand: 9, a whole family from Bruma, and they paid in Cyrodiilic coin which nobody here will take.\nSecond Seed: 11. Midyear: 14. Sun's Height: 6, and one of them a Khajiit who climbed in bare feet.",
+      "Last Seed: 3. Hearthfire: 5.\nFrostfall: 1, an old man with a brass bell who would not tell me his name and would not stop smiling. He wants to ring it at the top. Told him about the bandits at Nilheim. He said the Divines would see to them.\n\nThe Divines, in my experience, are slow on the pass road."
+     ]
+    },
+    {
+     "id": "barrow_complaint",
+     "kind": "letter",
+     "title": "Letter to the Steward of Riften",
+     "author": "Hjorvald the Stonemason",
+     "at": "chest",
+     "starts": "pl_shroud_hearth_barrow",
+     "reveals": "shroud_hearth_barrow",
+     "pages": [
+      "To the steward in Riften,\nThree weeks I have written and three weeks nobody has answered. My son Asvar is gone into Shroud Hearth Barrow, up the slope from our houses. He said a fence in the Ratway would pay forty septims for a burial urn with the old silver bands. Forty septims, for a boy who earns two a day hauling stone.",
+      "I went to the entrance myself with a lantern. There is a cold breath that comes out of it, and in that breath I heard something knocking. Slow. Like a man tapping a hammer on a coffin lid to see if anyone's inside.\n\nI am a coward and I came home. Send someone who isn't. I will pay what I can.\nHjorvald"
+     ]
+    }
+   ]
+  },
+  "shors_stone": {
+   "hook": "A huddle of miners' houses at the mouth of Redbelly Mine, named for a standing rock the first settlers swore was set there by Shor himself. Lately its miners have been going missing.",
+   "rumour": "Shor's Stone? Ore and spiders, friend. And now folk vanishing on the way to the Ruunvald dig. Three men since Hearthfire. Their wives are going grey waiting.",
+   "quest": "pl_ruunvald_excavation",
+   "notes": [
+    {
+     "id": "thrud_letter",
+     "kind": "letter",
+     "title": "Letter Never Sent",
+     "author": "Thrud Ore-Wife",
+     "at": "chest",
+     "starts": "pl_ruunvald_excavation",
+     "reveals": "ruunvald_excavation",
+     "pages": [
+      "Kolbjorn,\nI'm writing this because the priest says it helps, and I don't know where else to put it. You went to Ruunvald on the ninth of Hearthfire because the foreman there paid triple wages. Triple. I told you no honest dig pays triple.",
+      "Grogmar went up after you and came back white as milk. He says the dig has no foreman now, only people in black robes, and that they were singing over something in the deep cut. He won't say what.\n\nYou still have your father's iron token on the cord round your neck. If anyone finds it, I want it back. I want something back.\nThrud"
+     ]
+    },
+    {
+     "id": "redbelly_shift_list",
+     "kind": "list",
+     "title": "Redbelly Mine Shift Board",
+     "author": "Filnjar, smith",
+     "at": "site",
+     "pages": [
+      "#Shifts, week of Frostfall 12th\nMorning: Grogmar, Sylgja, Hrafn.\nAfternoon: Ulfr, Eyja, the Dunmer lad.\nNight shift: CANCELLED. No one goes below after dusk until the Jarl sends men.\n\nReminder: spiders in the east gallery again. Torches, not candles. Candles go out. Torches you can swing.\n\nOre for Riften leaves Loredas by cart. The Greenwall toll is twelve septims a cart now. Twelve. Mention this to the steward if you ever see one."
+     ]
+    }
+   ]
+  },
+  "heartwood_mill": {
+   "hook": "A sawmill on the western reaches of Lake Honrich, cutting the Rift's golden birch into planks for Riften's docks and the Black-Briar meadery. The road past it belongs to the Ashwood Knives now.",
+   "rumour": "Heartwood Mill's had its wagons robbed twice this month. Third time, the mill hands say, they'll go up to Faldar's Tooth with saws and settle it themselves.",
+   "notes": [
+    {
+     "id": "mill_order",
+     "kind": "contract",
+     "title": "Lumber Order, Black-Briar Meadery",
+     "author": "Hemming Black-Briar",
+     "at": "chest",
+     "pages": [
+      "Heartwood Mill is to supply forty planks of seasoned birch and twelve oak staves for new fermenting vats, delivered to the Black-Briar Meadery no later than the 30th of Frostfall.\n\nPrice as agreed: one hundred and sixty septims. Less sixty for the late delivery in Hearthfire. Less twenty for the warped stave. Less ten for my patience.",
+      "Written in the margin by the mill's owner: Seventy septims for forty planks. I'd sooner feed them to the lake. But you don't say no to a Black-Briar, not if you want the mill standing in spring."
+     ]
+    },
+    {
+     "id": "robbed_wagon_report",
+     "kind": "report",
+     "title": "What the Wagon Boy Saw",
+     "author": "Taken down by Grosta",
+     "at": "chest",
+     "reveals": "faldars_tooth",
+     "pages": [
+      "Leif, age twelve, says: five of them, birch leaves painted on their faces in ash. The big one had a knife with a bone handle and laughed the whole time. They took the planks, the mule and Leif's boots.\n\nThey went off east, up the old track toward Faldar's Tooth. Leif followed a little way, barefoot, because he wanted his boots back. He says the big one is called Ottar and the others are afraid of him."
+     ]
+    }
+   ]
+  },
+  "largashbur": {
+   "hook": "An Orc stronghold in the southern hills of the Rift, its palisade hung with bones and its people sick with a curse their chief will not name. Outsiders are not welcome. Outsiders who can fight are tolerated.",
+   "rumour": "Largashbur Orcs don't trade with us much since the sickness came on them. Their hunters still come down to the mill for salt. Proud folk. Grim folk.",
+   "quest": "pl_angarvunde",
+   "notes": [
+    {
+     "id": "gula_carving",
+     "kind": "inscription",
+     "title": "Carving on a Hunting Spear",
+     "author": "Gula gro-Ushnar",
+     "at": "site",
+     "pages": [
+      "Durz went west. To the Nord barrow, Angarvunde. He said: a blood-kin of Largashbur brings home a Nord dead-king's blade, the curse breaks, the chief smiles.\n\nCurse does not break for blades. Chief does not smile. Durz is a fool. Durz is my brother.\n\nNine days. I mark them here. Ten marks and I go myself. Or a stranger goes. Strangers are cheaper than sisters."
+     ]
+    }
+   ]
+  },
+  "snow_shod_farm": {
+   "hook": "A Nord farm south of Riften that grows more cabbages than sense and owes the Black-Briars more than it can pay. The family has started sleeping with axes by the bed.",
+   "rumour": "The Snow-Shods are behind on their Black-Briar debt. Heard Maven's men came round twice already. The third time, they bring a torch.",
+   "notes": [
+    {
+     "id": "farm_debt_letter",
+     "kind": "letter",
+     "title": "Letter from a Debt Collector",
+     "author": "Unsigned",
+     "at": "chest",
+     "pages": [
+      "Snow-Shod,\nForty septims by the end of Frostfall. You know whose forty. We've been patient because the Lady is patient, and the Lady is patient because she likes to see a thing grow before she takes it.\n\nYour barn is very dry this time of year. Your children play very near the barn. Nobody wants to be clumsy with a lantern.",
+      "Below, in a woman's careful hand: Asgeir, I counted again. Twenty-six. If we sell the mare, thirty-four. We could ask at Goldenglow; they buy honey-wax. Don't go to the Knives. I know you're thinking it. Don't."
+     ]
+    },
+    {
+     "id": "child_drawing",
+     "kind": "notes",
+     "title": "A Child's Notes on the Back of a Seed Bag",
+     "at": "chest",
+     "reveals": "darklight_tower",
+     "pages": [
+      "I saw a bird lady at the bottom field. She had feathers in her hair and a face like a dry apple. She said if I brought her a lock of Mama's hair she would make the bad men go away.\n\nShe lives in the tall tower behind the hills, the dark one. I did not give her anything. I am writing it down so I remember not to."
+     ]
+    }
+   ]
+  },
+  "merryfair_farm": {
+   "hook": "A tidy Black-Briar farm just west of Riften's stables, kept by a hired Dunmer mage who keeps the crops growing and the questions to a minimum.",
+   "rumour": "Merryfair always gets its harvest in on time and never pays the road toll. Funny, that. Owner's name starts with B and ends with an empty purse for everyone else.",
+   "notes": [
+    {
+     "id": "stoneweaver_notes",
+     "kind": "notes",
+     "title": "Field Notes on Frost-Hardened Wheat",
+     "author": "Ilvesa Dren, hired mage",
+     "at": "chest",
+     "pages": [
+      "#14th of Frostfall\nThe frost came down off the Velothi hills two weeks early. The north rows held. The south rows did not. I have tried a warming ward drawn in the soil, the kind my mother used on the ash farms near Kragenmoor. It works, but it drinks magicka like a Nord drinks mead.",
+      "#16th of Frostfall\nMaven's man came by asking why the yield is down. I explained frost. He explained that frost is not the Lady's concern. I will try the ward again tonight and pray to Mephala that nobody asks me to explain the weather twice."
+     ]
+    }
+   ]
+  },
+  "sarethi_farm": {
+   "hook": "A lonely Dunmer farm west of the lake where the Sarethi family grows nirnroot under careful cover, and trades it to every alchemist in the Rift. Bandits have learned it is worth stealing.",
+   "rumour": "Old Sarethi grows nirnroot, of all things. You can hear it singing in the rows at night. Somebody tried to rob her last month. Somebody from Treva's Watch.",
+   "quest": "pl_trevas_watch",
+   "notes": [
+    {
+     "id": "avrusa_letter",
+     "kind": "letter",
+     "title": "Letter to an Alchemist in Riften",
+     "author": "Avrusa Sarethi",
+     "at": "chest",
+     "starts": "pl_trevas_watch",
+     "reveals": "trevas_watch",
+     "pages": [
+      "Elgrim,\nI cannot send the nirnroot this month. The bandits who squat in Treva's Watch came down on the 8th and took twelve plants with the soil still on the roots. My hand, Brelas, tried to stop them. They broke his arm in two places and laughed while they did it.",
+      "Their leader wears a grey bear-cloak and calls herself Saltcheek. She told me the Watch is owed a share of everything that grows between the river and the lake. If someone could make her stop believing that, I would pay in coin and in root, both.\n\nAvrusa"
+     ]
+    }
+   ]
+  },
+  "goldenglow_estate": {
+   "hook": "An island honey farm on Lake Honrich whose hives supply the Black-Briar Meadery. Its owner pays mercenaries to guard bees, which tells you how much honey is worth in the Rift.",
+   "rumour": "Goldenglow's honey is the only reason Black-Briar mead tastes like anything. The owner keeps hired swords on the island. Over bees. Bees!",
+   "notes": [
+    {
+     "id": "hive_ledger",
+     "kind": "ledger",
+     "title": "Hive Count and Wax Ledger",
+     "author": "The estate's beekeeper",
+     "at": "chest",
+     "pages": [
+      "#Frostfall, 4E 201\nHives standing: 46. Hives lost to wet rot: 3. Hives lost to a bear that swam the channel: 1 (bear also lost, the guards saw to it).\nHoney to Black-Briar Meadery: 19 casks. Wax to the Temple of Mara for candles: 4 crates. Wax sold to Snow-Shod Farm on credit: 1 crate. Do not tell the master.",
+      "Personal note: I found a jar of our honey in a Ratway den last week, cut with something red. It smelled of berries and rot. Whoever is selling the Redwater stuff is using Goldenglow honey to sweeten it. I'd like to know who is buying from us twice."
+     ]
+    }
+   ]
+  },
+  "black_briar_lodge": {
+   "hook": "A hunting lodge in the eastern woods that belongs to the Black-Briar family. Its doors are always locked, its guards are always awake, and the wagons that leave it at night never carry game.",
+   "rumour": "Black-Briar Lodge? I'd not go knocking. The Briar sends people up there who are never seen in Riften again. Some of them are guests. Some aren't.",
+   "notes": [
+    {
+     "id": "lodge_orders",
+     "kind": "orders",
+     "title": "Instructions for the Lodge Keeper",
+     "author": "M.B.",
+     "at": "chest",
+     "pages": [
+      "The guest arriving on the 20th is to be fed, watered and kept from the windows. He is not to be harmed. He is also not to leave. If he asks why, tell him the roads are unsafe. That is true.\n\nThe cellar crates from Lost Prospect go to the meadery by the lake road, not the Greenwall road. I will not pay Brannoc's toll on my own goods.",
+      "Burn this when read. I mean it, Hrolfdir. The last keeper did not burn his, and you are the new keeper."
+     ]
+    },
+    {
+     "id": "guest_scratch",
+     "kind": "warning",
+     "title": "Words Scratched Under a Bed",
+     "at": "chest",
+     "reveals": "lost_prospect_mine",
+     "pages": [
+      "My name is Corvus Tullian, clerk of the Imperial customs at Riften. I counted the crates going in and out of Lost Prospect Mine and they don't match the ore tallies. I said so to the wrong person.\n\nIf I am not on the Imperial rolls next spring, someone should look in the mine. There's no ore in those crates. Never was."
+     ]
+    }
+   ]
+  },
+  "riften_stables": {
+   "hook": "The stables outside Riften's north gate, where caravans unload, carriages leave for the rest of Skyrim and every passing stranger is studied by somebody who works for somebody.",
+   "rumour": "Want to leave Riften quick? Carriage at the stables. Want to leave without anyone knowing? That costs more, and you don't ask the driver.",
+   "notes": [
+    {
+     "id": "carriage_bookings",
+     "kind": "ledger",
+     "title": "Carriage Bookings, Frostfall",
+     "author": "The carriage driver",
+     "at": "chest",
+     "pages": [
+      "#Frostfall bookings\n3rd: Two to Windhelm. Paid.\n7th: One to Whiterun, a nervous Imperial clerk. Paid double to leave at night. Never turned up.\n11th: One to Ivarstead, an old man with a bell. Paid in copper bits. Walked the last mile because the horse wouldn't go past Nilheim.\n15th: Black-Briar crates to the lake road. Not paid. Never paid.",
+      "Reminder to myself: if a man in a grey hood asks who went where, the answer is always 'I don't remember'. It's cheaper than remembering."
+     ]
+    }
+   ]
+  },
+  "shroud_hearth_barrow": {
+   "hook": "An old Nord barrow on the slope just above Ivarstead, close enough that the villagers can hear it at night. A stonemason's son went in for silver three weeks ago.",
+   "rumour": "Don't go poking at Shroud Hearth. Hjorvald's boy did, for a Ratway fence and forty septims. Now there's knocking at night, and Hjorvald doesn't sleep.",
+   "quest": "pl_shroud_hearth_barrow",
+   "notes": [
+    {
+     "id": "asvar_scrawl",
+     "kind": "journal",
+     "title": "Asvar's Scrawled Notes",
+     "author": "Asvar, son of Hjorvald",
+     "at": "chest",
+     "starts": "pl_shroud_hearth_barrow",
+     "pages": [
+      "#First night\nThe fence in the Ratway said the urns are in the deep hall, the ones with silver bands round the neck. He drew me a map. The map is wrong already. There's a door here he didn't draw, with a hearth carved over it and a bowl of cold ash in front.",
+      "#Second night, I think\nI took one urn. Just one. When I lifted it, every coffin in the hall knocked once, all together, like a heartbeat. I put it back. They kept knocking.\n\nThere's a big one at the end of the hall in a cloak of rotten fur. Its eyes are open. Hearthkeeper, the carving says. It keeps the fire. I took its fire. I'm sorry. Tell Father I'm sorry."
+     ]
+    },
+    {
+     "id": "hearth_inscription",
+     "kind": "inscription",
+     "title": "Carving Above the Hearth Door",
+     "at": "site",
+     "pages": [
+      "^Here the clan of Ivar banked the last fire\n^of the long winter, and swore\n^that it should never go out.\n\nThe ash in the bowl is grey and old. Somebody has written beneath it, in charcoal, much more recently: 'it went out. it went out. i'm sorry.'",
+      "Around the door the stone is blackened with old soot, as if the fire once burned right up against it for years on end. The villagers of Ivarstead still bank their hearths on the longest night and say the name of Ivar over the coals. Most of them have forgotten why. The barrow, it seems, has not forgotten. Whatever keeps this door expects the fire to be kept too."
+     ]
+    }
+   ]
+  },
+  "geirmunds_hall": {
+   "hook": "A sunken Nord hall on an island in Lake Geir, east of Ivarstead, said to hold the tomb of an ancient archmage's hunter. The lake around it has a reputation for swallowing boats.",
+   "rumour": "Nobody fishes near Geirmund's Hall if they can help it. Eydis's husband did. The lake gave back his boat, upside down. It kept him.",
+   "notes": [
+    {
+     "id": "eydis_prayer",
+     "kind": "prayer",
+     "title": "Prayer Tied to a Fishing Float",
+     "author": "Eydis Long-Net",
+     "at": "site",
+     "reveals": "geirmunds_hall",
+     "pages": [
+      "~Kynareth, keeper of the wind on the water,\n~you gave the lake its fish and you gave me my husband.\n~You kept one. Give me back the other.\n\nArne wore a net-weight of carved soapstone on a cord, a fish with a hole for an eye. I made it for him. If you find it, bring it to Ivarstead. I'll stand at the dock every night until somebody does."
+     ]
+    },
+    {
+     "id": "scholar_survey",
+     "kind": "notes",
+     "title": "Survey Notes, Lake Geir Island",
+     "author": "Aurenia Calvo, of the College of Winterhold",
+     "at": "chest",
+     "pages": [
+      "#Lake Geir, 21st of Hearthfire\nThe local tradition that the hall belongs to one 'Geirmund' is, as usual with Rift peasantry, half right. The burial is unquestionably of the Gauldur period (cf. my own monograph, chapter four, which nobody has read).",
+      "#Same day, later\nThe lower chambers are flooded and something moves in the flooding. The fisherman who rowed me here, a pleasant man named Arne, went to fetch the boat and has not returned. I am writing this by the light of my last candle. I shall finish chapter five in here if I must."
+     ]
+    }
+   ]
+  },
+  "pinepeak_cavern": {
+   "hook": "A bear den in the pines above Ivarstead. The hunters call its master Old Scarback, a grey sow with an arrow-scar across her snout who has killed two men and a horse.",
+   "rumour": "Old Scarback came down to Ivarstead last spring and carried off a goat in her mouth like a kitten. Nobody's been brave enough to follow her home.",
+   "quest": "pl_pinepeak_cavern",
+   "notes": [
+    {
+     "id": "hunter_journal",
+     "kind": "journal",
+     "title": "Hunter's Journal",
+     "author": "Bjarn the Tracker",
+     "at": "chest",
+     "starts": "pl_pinepeak_cavern",
+     "pages": [
+      "#3rd of Frostfall\nFound her prints again by the Pinepeak track, wide as a shield. She drags her left hind foot since I put an arrow in her hip two winters ago. She remembers me, I think. Bears do.",
+      "#5th of Frostfall\nWent into the cave mouth at first light. Bones everywhere. Goat, deer, the Ivarstead horse, and a boot with a foot still in it. That's Hakon's boot. I knew that boot.",
+      "#5th, later\nShe's awake. I can hear her breathing in the dark like a bellows. If you find this, I didn't get out. Kill her for Hakon, and for me. Aim for the scarred side. She can't see from it."
+     ]
+    }
+   ]
+  },
+  "honeystrand_cave": {
+   "hook": "A den of bears south of Ivarstead, named for the wild bee-strands that hang in the trees above it. The bears have learned that beekeepers taste better than honey.",
+   "rumour": "There's wild honey all round Honeystrand. There's also more bears than honey. My cousin went up for the comb and came back with half an ear.",
+   "quest": "pl_honeystrand_cave",
+   "notes": [
+    {
+     "id": "beekeeper_stash",
+     "kind": "treasure",
+     "title": "Beekeeper's Note to Himself",
+     "author": "Rolf the Beekeeper",
+     "at": "chest",
+     "starts": "pl_honeystrand_cave",
+     "reveals": "honeystrand_cave",
+     "pages": [
+      "Put the money from the Goldenglow wax by the old stump. Not the one by the cave mouth, the bears dig there. The one about thirty paces past the cave on the east side, with the bee-strand hanging over it, under the flat stone.\n\nRemember: thirty paces east. Not thirty paces north, Rolf. Last time you dug for a whole morning in the wrong place and a bear watched you do it."
+     ]
+    }
+   ]
+  },
+  "nilheim": {
+   "hook": "A crumbling Nord watchtower on the pass road east of Ivarstead, held by bandits who prey on pilgrims bound for the Seven Thousand Steps.",
+   "rumour": "Nilheim's bandits rob the pilgrims going up to High Hrothgar. Takes a special sort of villain to rob a man on his way to pray.",
+   "notes": [
+    {
+     "id": "nilheim_orders",
+     "kind": "orders",
+     "title": "Orders for the Nilheim Lookouts",
+     "author": "Svidi Half-Hand",
+     "at": "boss",
+     "pages": [
+      "Lookouts, listen. We don't rob soldiers, Stormcloak or Legion. We don't rob anything with a Black-Briar seal. We rob pilgrims. Pilgrims don't fight, pilgrims carry their offerings, and pilgrims are too holy to go to the guard.",
+      "Last week's best catch: one brass bell, very old, rings sweet. The old fool who carried it wept like a child. I'll sell it in Riften once I find a fence who won't ask whose temple it's from.\n\nAnyone caught ringing it for fun gets the other half of my hand on their face."
+     ]
+    },
+    {
+     "id": "pilgrim_plea",
+     "kind": "prayer",
+     "title": "Scrap of Prayer in a Shaky Hand",
+     "author": "Oddvar",
+     "at": "chest",
+     "pages": [
+      "Divines forgive them, for I can't. My father carried that bell up the Steps when I was a boy and rang it at the top for my mother's soul. I meant to ring it for his. I'm eighty-one years old and I walked all the way from Riften and they took it from me in the time it takes to sneeze.\n\nI'll wait at the Vilemyr Inn. If anyone brings it back, I'll ask the Greybeards to remember their name."
+     ]
+    }
+   ]
+  },
+  "rift_stormcloak_camp": {
+   "hook": "A Stormcloak war camp in the hills north-west of Lake Honrich, close enough to Riften to keep the Jarl honest and the Legion nervous.",
+   "rumour": "The Stormcloaks camp in the hills above Sarethi Farm. They buy bread and pay for it, which is more than I'll say for some.",
+   "notes": [
+    {
+     "id": "camp_dispatch",
+     "kind": "orders",
+     "title": "Dispatch to the Rift Camp",
+     "author": "Galmar Stone-Fist",
+     "at": "chest",
+     "pages": [
+      "Commander,\nUlfric wants the Rift held without a fight if a fight can be avoided. Jarl Laila is with us, but her court is not, and the Black-Briar woman sits on both sides of every fence.",
+      "Watch the Legion's camp south of Ivarstead. Watch the Watchtower east of you, which the bandits seem to think they own. Do not provoke Maven Black-Briar. Talos guard you, and remember: a man who pays for his bread is a man the farmers won't betray.\nGalmar"
+     ]
+    },
+    {
+     "id": "soldier_letter",
+     "kind": "letter",
+     "title": "Unsent Letter Home",
+     "author": "Ragnvald, Stormcloak recruit",
+     "at": "chest",
+     "pages": [
+      "Mother,\nThe Rift is beautiful this time of year. Gold leaves everywhere. You'd like it. The food is bad and the sergeant is worse and I have not killed anyone yet, which I am glad of, though I am not supposed to say so.\n\nThere is a Dunmer woman at the farm below us who grows singing plants. I bought one for you. It hums in my pack all night. The sergeant says it's an Imperial trick. I think it's just lonely."
+     ]
+    }
+   ]
+  },
+  "rift_watchtower": {
+   "hook": "A stone watchtower on the road between Ivarstead and Riften, abandoned by the guard and taken by whoever is boldest that season. This season, it's bandits.",
+   "rumour": "Rift Watchtower? Bandits, last I heard. They take the tower, the guard takes it back, the bandits take it again. Like a game of tafl nobody wins.",
+   "notes": [
+    {
+     "id": "tower_log",
+     "kind": "report",
+     "title": "Last Entries in the Tower Log",
+     "author": "Corporal Hadring, Riften Guard",
+     "at": "chest",
+     "pages": [
+      "#2nd of Frostfall\nTwo men short. Relief from Riften promised for the 5th.\n#5th of Frostfall\nNo relief. Captain sends word the Knives at Faldar's Tooth are the priority.\n#8th of Frostfall\nSmoke on the ridge. Six of them, maybe seven.",
+      "#8th, night\nThey're at the door. They asked if we'd rather walk to Riften or be carried. Jarl's tower or no, I'm not dying for a heap of stones the Jarl forgot she owned. Leaving this log for whoever cares. Nobody, I expect."
+     ]
+    }
+   ]
+  },
+  "rift_imperial_camp": {
+   "hook": "A Legion war camp in the forest south of Ivarstead, keeping watch over the pass road and the Stormcloak lines to the north.",
+   "rumour": "The Legion's camped in the woods south of Ivarstead. They don't buy bread, they requisition it. Still, nobody's been robbed on that road since they came.",
+   "notes": [
+    {
+     "id": "legate_report",
+     "kind": "report",
+     "title": "Field Report to Solitude",
+     "author": "Legate of the Rift Camp",
+     "at": "chest",
+     "pages": [
+      "General Tullius,\nThe Rift remains Ulfric's in name and Black-Briar's in fact. I recommend we stop thinking of the Jarl as the obstacle. Maven Black-Briar would sell Riften to us tomorrow if we offered her the right price and the right title.",
+      "Item: a customs clerk, Corvus Tullian, has not reported since the 6th of Frostfall. His last letter mentioned irregularities at a Black-Briar mine. I would like to send men. I do not have men.\n\nItem: the dragons. One was seen over Autumnwatch Tower on the 14th. My men are soldiers, sir, not dragon hunters."
+     ]
+    }
+   ]
+  },
+  "ruins_of_bthalft": {
+   "hook": "A tumble of Dwemer stonework in the woods south-east of Ivarstead, older than the Nords who now ignore it. Lately someone has been leaving burnt offerings on the steps.",
+   "rumour": "Hunters say there's red light at the old Dwemer stones at night now, and a smell like brimstone. Whoever's up there isn't praying to the Nine.",
+   "quest": "pl_ruins_of_bthalft",
+   "notes": [
+    {
+     "id": "ashwhisper_rite",
+     "kind": "notes",
+     "title": "Rite of the Burning Door",
+     "author": "Velyn Ashwhisper",
+     "at": "site",
+     "starts": "pl_ruins_of_bthalft",
+     "pages": [
+      "The Dwemer built here because the veil was thin. They were not fools, whatever else they were. The Prince of Change has touched these stones before and will again.\n\nThird offering made the 12th of Frostfall: a ram, a ledger stolen from a Riften tax clerk, and a lock of hair from a Legion deserter. The Prince prefers broken oaths to blood. Blood is merely convenient.",
+      "Fourth offering on the night of the dark moon. I need a living one this time. Someone the Legion camp will not miss. They never count their deserters properly."
+     ]
+    },
+    {
+     "id": "dwemer_plate",
+     "kind": "inscription",
+     "title": "Rubbing of a Dwemer Plate",
+     "author": "Copied by an unknown hand",
+     "at": "site",
+     "pages": [
+      "The plate is in the old Dwemer script, which nobody in the Rift reads. Someone has tried anyway and written their guesses beneath each line in charcoal:\n\n'...door... or gate?...'\n'...hot... beneath? under the hill?...'\n'...do not... (do not what? the rest is cracked)'\n\nAt the bottom, newer and in a firmer hand: 'Do not open it. That's what it says. I'd stake my life on it.'"
+     ]
+    }
+   ]
+  },
+  "darkwater_pass": {
+   "hook": "A cold cavern that tunnels under the mountains between the Rift and Eastmarch, used as a shortcut by the desperate. The Falmer use it too.",
+   "rumour": "Folk from Darkwater Crossing use the pass when the road's snowed in. They used to. Now they go the long way and don't say why.",
+   "quest": "pl_darkwater_pass",
+   "notes": [
+    {
+     "id": "surveyor_journal",
+     "kind": "journal",
+     "title": "Surveyor's Journal",
+     "author": "Hadvar Iron-Line, surveyor",
+     "at": "chest",
+     "starts": "pl_darkwater_pass",
+     "pages": [
+      "#11th of Frostfall\nCommissioned by the Darkwater Crossing mine to chart the pass for a cart road. I have my lodestone, my chain and my courage. The first two are reliable.",
+      "#12th of Frostfall\nThere are tracks in the mud that are not animal and not quite man. Bare feet, long toes. Some of the side passages have been walled up with chitin and bone.",
+      "#12th, deeper\nThey took the lodestone. Snatched it from my belt in the dark. I heard them chattering over it. It's a black stone in a brass cage, worth more than my house. Without it the survey's worthless, and so am I. I'm going back in for it."
+     ]
+    }
+   ]
+  },
+  "clearspring_tarn": {
+   "hook": "A clear mountain pool high in the northern Rift, so still that hunters swear they can see the stars in it at noon. Something drinks there at night that leaves no tracks.",
+   "rumour": "The water at Clearspring Tarn's sweet enough to cure a hangover, they say. But don't camp there. My uncle did. Said he woke up with the frost on him in the shape of a hand.",
+   "notes": [
+    {
+     "id": "tarn_carving",
+     "kind": "poem",
+     "title": "Verse Cut into a Birch",
+     "at": "site",
+     "pages": [
+      "~I came to the tarn with a heart full of stones,\n~I left with my heart and the stones in the water.\n~Drink if you're thirsty, but don't drink alone,\n~For the tarn keeps a little of every man's daughter.\n\nCut below, in a rougher hand: Ingrid, 4E 188. Come home.",
+      "The verse is old, the bark grown thick around the letters, but the name beneath it is fresher. Hunters from Shor's Stone say a girl called Ingrid walked up to the tarn in the autumn of 188 to fetch water for her sick mother and was never seen again. Her father carved the line and came back every year until he could no longer climb. Some say the frost-hand on sleeping travellers is hers, still trying to wake someone to take her home."
+     ]
+    }
+   ]
+  },
+  "trevas_watch": {
+   "hook": "A walled fort on a rocky spur west of Lake Honrich, built by the old Treva line and now squatted by bandits who call themselves the rightful lords of the river country.",
+   "rumour": "There's a bandit chief at Treva's Watch called Saltcheek. Broke the Sarethi hand's arm for trying to save a nirnroot. A nirnroot!",
+   "quest": "pl_trevas_watch",
+   "notes": [
+    {
+     "id": "saltcheek_tally",
+     "kind": "ledger",
+     "title": "The River Tithe",
+     "author": "Hjolfrid Saltcheek",
+     "at": "boss",
+     "pages": [
+      "#What the river country owes the Watch\nSarethi Farm: twelve nirnroot, taken. Alchemist in Riften pays nine septims a root. That's more than a year of tithe from a cabbage farm.\nHeartwood Mill: nothing yet. The Knives at Faldar's Tooth claim the mill. We'll see.\nStormcloak camp: they pay in nothing but threats. Leave them be.",
+      "My mother was a Treva on the wrong side of the blanket. That makes this my fort and this my land. A court in Riften would laugh at that. A court in Riften laughs at a lot of things, and it isn't laughing at me."
+     ]
+    },
+    {
+     "id": "treva_epitaph",
+     "kind": "inscription",
+     "title": "Stone Over the Gate",
+     "at": "site",
+     "pages": [
+      "^TREVA HOLDS THE RIVER\n^THE RIVER HOLDS THE LAND\n^THE LAND HOLDS THE DEAD\n\nThe old letters have been gouged with a knife, and new ones scratched in: SALTCHEEK HOLDS THE LOT. Someone else has added, smaller, beneath: for now.",
+      "The Treva family held this spur for three generations, taxing the river barges that came down from the Darkwater toward Lake Honrich. The last of the true line died without heirs in the year of the Red Mountain ash-fall, and the fort passed to the hold. The hold let it rot. Now anyone with a sharp enough knife and a loud enough voice can call themselves its lord, and the farmers between the river and the lake pay for it."
+     ]
+    }
+   ]
+  },
+  "angarvunde": {
+   "hook": "A vast Nord barrow in the woods south-west of Lake Honrich, its catacombs said to guard a dead war-leader and the wealth of his clan. An Orc of Largashbur went in nine days ago.",
+   "rumour": "An Orc lad from Largashbur walked into Angarvunde bold as a bull. His sister's been sitting at the mill road every evening since, sharpening a spear.",
+   "quest": "pl_angarvunde",
+   "notes": [
+    {
+     "id": "durz_marks",
+     "kind": "journal",
+     "title": "Marks on a Strip of Hide",
+     "author": "Durz gro-Ushnar",
+     "at": "chest",
+     "starts": "pl_angarvunde",
+     "pages": [
+      "Day one. Nord dead walk here. Slow. I break three. Easy.\nDay two. More dead. Not easy. Arm bleeds. Tusk-charm from Gula keeps me. She carved it from our father's tusk. I touch it, I fight better.",
+      "Day three. Big dead one in the deep hall. Blue eyes. Shouts. Wall fell on me. Charm cord snapped. Lost it in the dark.\nDay four. Cannot find charm. Cannot find way out. Gula, you were right. Do not tell chief you were right. Tell chief I was brave."
+     ]
+    },
+    {
+     "id": "angarvunde_epitaph",
+     "kind": "inscription",
+     "title": "Words on a Sarcophagus Lid",
+     "at": "site",
+     "pages": [
+      "^Here sleeps the Warden of Angarvunde\n^who held the pass for forty winters\n^and asked no thanks but this:\n^that no hand should lift his blade.\n\nSomeone has scratched an arrow beneath the last line, pointing down a side passage. Under it, in fresh soot: 'Orc went this way. Did not come back this way.'",
+      "The stone of the lid is cracked along one edge where something heavy struck it, very recently, and there is dark blood dried on the floor beneath it. Further down the side passage the soot arrow points to, the flagstones are scattered with draugr bones, broken in a way no Nord weapon breaks them: crushed, as if by a hammer swung by someone who was very angry and very strong."
+     ]
+    }
+   ]
+  },
+  "avanchnzel": {
+   "hook": "A sprawling Dwemer ruin in the southern hills near Largashbur. An Imperial scholarly expedition went in last summer and sent back only one letter.",
+   "rumour": "Some fancy Imperials went into the Dwemer ruin by Largashbur with mules and ledgers and a lot of bright ideas. The Orcs say the mules came out. Nobody else.",
+   "quest": "pl_avanchnzel",
+   "notes": [
+    {
+     "id": "expedition_journal",
+     "kind": "journal",
+     "title": "Expedition Journal of Lucan Varro",
+     "author": "Lucan Varro, of the Imperial Geographical Society",
+     "at": "chest",
+     "starts": "pl_avanchnzel",
+     "pages": [
+      "#17th of Sun's Height\nAvanchnzel at last. Six of us, four mules, and one Orc guide who left the moment we lit the first lamp. The machinery here still breathes. I have never been so happy in my life.",
+      "#2nd of Last Seed\nFound a small bronze key that hums at a single pitch when held near the larger engines. I am calling it the resonance key. The engines quiet when it hums. I believe it was a kind of master command. Petronia thinks I am being romantic.",
+      "#9th of Last Seed\nPetronia is dead. The large guardian in the lower hall woke when I took the key past it. The key does not quiet that one. That one, I think, was built to guard the key. I am hiding. If this book is found, the key must not go back to the Society. It must go into the lake."
+     ]
+    },
+    {
+     "id": "petronia_letter",
+     "kind": "letter",
+     "title": "Letter to Her Sister",
+     "author": "Petronia Sabinus",
+     "at": "chest",
+     "pages": [
+      "Dear Livia,\nYou'd hate it here: no baths, no wine and nowhere to sit that isn't brass. You would love the light, though. The Dwemer pipes glow faintly, as if the whole city were remembering a fire it can't quite recall.\n\nLucan is besotted with a key. Men and their keys. I'll be home by Hearthfire, I promise, with a crate of cogs for your boy and a story for you."
+     ]
+    }
+   ]
+  },
+  "frokis_shack": {
+   "hook": "A lonely hunting shack in the deep woods south of the lake, home to an old hermit who talks to the animals and claims they talk back.",
+   "rumour": "Old Froki lives out past the dragon mound, by himself. He knows every wolf in the Rift by name. Says the wolves have been frightened lately. Says something big's waking up.",
+   "notes": [
+    {
+     "id": "froki_almanac",
+     "kind": "diary",
+     "title": "Hermit's Almanac",
+     "author": "Froki Whetted-Blade",
+     "at": "chest",
+     "reveals": "dragon_mound_frokis_shack",
+     "pages": [
+      "#Frostfall\nBirch gold. Lake cold. The elk walk north early. The wolves sleep in the day and howl in the night, which is wrong.\n\nThe mound north of here has opened. Not dug, opened, from inside. The earth is pushed up and outward like a flower. The birds won't land on it.",
+      "Kyne, I have kept your woods sixty years and never asked for anything. I ask for this: let whatever crawled out of that mound fly the other way.\n\nKept a tally of the elk. Kept a tally of the bears. Didn't think I'd need a tally of dragons. Two, so far, over Autumnwatch."
+     ]
+    }
+   ]
+  },
+  "arcwind_point": {
+   "hook": "A ruined dragon shrine on a rocky height in the far south-west of the Rift. A great green-scaled dragon has claimed it and burns anything that climbs its stair.",
+   "rumour": "Arcwind Point's got a dragon on it now. Legion scouts went up to look and came back with their eyebrows gone. Two of them came back, anyway.",
+   "quest": "pl_arcwind_point",
+   "notes": [
+    {
+     "id": "scout_report",
+     "kind": "report",
+     "title": "Scout's Report, Arcwind Point",
+     "author": "Scout Junia Valens, Imperial Legion",
+     "at": "site",
+     "starts": "pl_arcwind_point",
+     "pages": [
+      "Legate,\nThree of us went to observe the dragon at Arcwind Point as ordered. Observation completed. The dragon also observed us. Marcus did not survive the observation.",
+      "The beast nests on the old stone platform at the summit. It has scales the colour of birch moss and it hunts the deer herds south of Autumnwatch Tower every third day, returning at dusk.\n\nRecommendation: someone kills it. Recommendation: that someone is not me. I am requesting transfer to a posting with fewer dragons."
+     ]
+    },
+    {
+     "id": "word_wall_rubbing",
+     "kind": "inscription",
+     "title": "Charcoal Rubbing of a Claw-Script",
+     "at": "site",
+     "pages": [
+      "A rubbing taken from the curved wall near the summit, in the angular claw-script of the old dragon tongue. Beside it, a pilgrim from Ivarstead has written:\n\n'The Greybeards say these walls remember the words of the dead. I touched it and heard a wind with no air in it. I don't know what I heard. I know I won't come back.'"
+     ]
+    }
+   ]
+  },
+  "autumnwatch_tower": {
+   "hook": "A ruined Nord watchtower in the birch woods south of Ivarstead. Dragons have been seen circling it since the mounds began to open.",
+   "rumour": "There's a dragon been circling Autumnwatch Tower like it's waiting for something. Froki says it's waiting for its friend to wake.",
+   "notes": [
+    {
+     "id": "tower_last_watch",
+     "kind": "journal",
+     "title": "The Last Watchman's Journal",
+     "author": "Erling, hired watchman",
+     "at": "site",
+     "pages": [
+      "#14th of Frostfall\nThe Legion pays me three septims a week to sit in this tower and shout if I see Stormcloaks. I have not seen any Stormcloaks.\n\nI have seen a dragon. It came over the trees at dawn, black against the sun, and circled twice and went north to where the burial mound is. I shouted. Nobody heard.",
+      "#16th of Frostfall\nTwo now. One green, from the direction of Arcwind Point. One black, from the mound. They spoke to each other in the air. Thunder that had words in it.\n\nI'm leaving. Three septims a week is not enough to be the fellow they speak about next."
+     ]
+    }
+   ]
+  },
+  "dragon_mound_frokis_shack": {
+   "hook": "An ancient dragon burial mound in the woods north of Froki's Shack. Its earth has been thrown open from beneath, and nothing grows on the spoil.",
+   "rumour": "Froki says the mound by his shack opened up on its own. I'd say he's mad, but my brother saw the hole, and he's not mad. He's just quieter now.",
+   "quest": "pl_dragon_mound_frokis_shack",
+   "notes": [
+    {
+     "id": "mound_keeper_survey_1",
+     "kind": "notes",
+     "title": "The Mound Keeper's Survey, First Leaf",
+     "author": "Hrelga Dawnmoor, Keeper of the Temple of Mara",
+     "at": "site",
+     "starts": "pl_dragon_mound_frokis_shack",
+     "pages": [
+      "#First mound, near Froki's Shack, 15th of Frostfall\nOpened from within. Spoil thrown outward six paces. No bones in the pit, which my old texts say is how a dragon rises: the bones are gone because they have been worn again.",
+      "The Temple asked me to count. I am counting. There are two more mounds in the Rift that I know of: one at Autumnshade Clearing, west of Riften, and one below Lost Tongue Overlook in the south. If you are braver than a temple keeper, go and see whether they are open too, and tell me in Riften. I would rather know."
+     ]
+    }
+   ]
+  },
+  "northwind_mine": {
+   "hook": "An abandoned iron mine in the northern Rift, closed when its miners broke into a nest of chaurus. The tools are still where they dropped them.",
+   "rumour": "Northwind Mine shut down years back. Chaurus, they said. Old Brandulf still talks about his grandfather's pick in there. Silver-bound, with runes on the haft.",
+   "quest": "pl_northwind_mine",
+   "notes": [
+    {
+     "id": "foreman_notice",
+     "kind": "warning",
+     "title": "Foreman's Notice on the Door",
+     "author": "Brandulf the Elder, foreman",
+     "at": "site",
+     "pages": [
+      "^MINE CLOSED\nBy my word as foreman, 4E 179.\nWe broke through into a cave below the third gallery. It was warm and smelled of vinegar and there were eggs in it as big as a man's head.\n\nOne of the eggs hatched while we watched. We left the carts. We left the ore. I left my father's pick in the third gallery, and if any Northwind man goes back for it I'll break his legs myself."
+     ]
+    },
+    {
+     "id": "grandson_note",
+     "kind": "letter",
+     "title": "A Grandson's Note",
+     "author": "Brandulf the Younger",
+     "at": "chest",
+     "starts": "pl_northwind_mine",
+     "pages": [
+      "Grandfather is dying. He won't say so but the healer at Shor's Stone does. Every night he asks about the pick. Silver bands, three runes on the haft: hearth, ore, home. His father made it. It was meant to be buried with him.\n\nI'm not brave. I went as far as the second gallery and heard clicking in the walls. If anyone with a sword goes deeper, the pick is in the third gallery, by the broken cart. Bring it to Shor's Stone. He'll die happy, or at least less angry."
+     ]
+    }
+   ]
+  },
+  "northwind_summit": {
+   "hook": "A wind-scoured peak above Northwind Mine crowned with an old dragon shrine. Bones and broken carts lie scattered below it, dropped from a great height.",
+   "rumour": "There's a dragon perch on Northwind Summit. My cousin the carter says a whole ore wagon went up into the sky last month. Came down in pieces near Shor's Stone.",
+   "notes": [
+    {
+     "id": "carter_account",
+     "kind": "report",
+     "title": "Statement of a Carter",
+     "author": "Taken down by Filnjar of Shor's Stone",
+     "at": "site",
+     "pages": [
+      "Ulfr says: he was taking ore to Riften by the high road when the light went out, like a cloud over the sun, only the cloud had wings. It took the lead ox in its claws, and the cart with it, because the traces held.\n\nIt carried them up to Northwind Summit and dropped the cart on the rocks. It ate the ox up there. Ulfr says he watched it eat from the ditch until dark and then walked home without his boots, because he'd run out of them."
+     ]
+    }
+   ]
+  },
+  "shors_watchtower": {
+   "hook": "A stone watchtower overlooking the northern road above Shor's Stone, its lookout fire long cold. Travellers report smoke from it again, and arrows.",
+   "rumour": "Somebody's moved into Shor's Watchtower. Not the guard. The guard doesn't shoot at carts.",
+   "notes": [
+    {
+     "id": "watchtower_wager",
+     "kind": "list",
+     "title": "Tally of Wagers",
+     "author": "The tower's new tenants",
+     "at": "chest",
+     "pages": [
+      "#Who can hit what from the top\nGeirlaug: ox at sixty paces, two out of three. Wins 5.\nThe Redguard: cart driver's hat, clean through. Wins 10.\nKjeld: missed the Shor's Stone smith twice. Pays 6.\n\nRule: we shoot to scare, not to kill. Dead men don't pay tolls. Rule two: when the Knives come up from Faldar's Tooth to talk, everybody keeps their bows unstrung. They think this road is theirs. Let them think it until spring."
+     ]
+    }
+   ]
+  },
+  "tolvalds_cave": {
+   "hook": "A deep cave in the north-eastern mountains named for the young Nord who went in looking for glory and found the Falmer instead. His mother still leaves a lantern burning for him.",
+   "rumour": "Tolvald went into that cave years ago. Never came out. His mother still lights a lantern in her window every night. Breaks your heart, it does.",
+   "quest": "pl_tolvalds_cave",
+   "notes": [
+    {
+     "id": "tolvald_last_entry",
+     "kind": "journal",
+     "title": "Water-Stained Journal",
+     "author": "Tolvald",
+     "at": "chest",
+     "starts": "pl_tolvalds_cave",
+     "pages": [
+      "#Day one\nMother gave me her brass lantern, the one Father carried in the Great War. 'So you can find your way home,' she said. I laughed. I'm twenty. I don't need to find my way home.",
+      "#Day six\nThe cave goes down into a city of the snow elves. They're blind, but they hear everything. I hear them too, now. Clicking. Always clicking.",
+      "#Day ?\nLantern oil nearly gone. I keep it lit anyway. I've hidden in a side passage near a pool of glowing mushrooms. If someone finds this, take the lantern home to her. She lives in Riften, by the canal. Tell her I tried to come home. Tell her it was dark."
+     ]
+    },
+    {
+     "id": "falmer_totem",
+     "kind": "inscription",
+     "title": "Scratches on a Chitin Totem",
+     "at": "boss",
+     "pages": [
+      "Crude scratches cut into a shell of chaurus chitin, arranged around a carving of a lantern with rays coming out of it. Someone who has seen Falmer shrines before has added a note in the margin of the scratchings:\n\n'They've made a god of it. A lantern that burned for weeks in the dark. They'll fight to keep it, I'd wager. You don't give up a god easily, even a stolen one.'"
+     ]
+    }
+   ]
+  },
+  "ruunvald_excavation": {
+   "hook": "A Nord ruin being dug out in the north-eastern hills, promising triple wages to miners from Shor's Stone. The miners go in. The wages never come out.",
+   "rumour": "Ruunvald pays triple. That's what they told Kolbjorn. That's what they told all of them. Haven't seen a coin of it come home yet, nor a man.",
+   "quest": "pl_ruunvald_excavation",
+   "notes": [
+    {
+     "id": "necro_tally",
+     "kind": "notes",
+     "title": "Tally of the Workers",
+     "author": "Sister Hrolfa",
+     "at": "boss",
+     "pages": [
+      "#Workers acquired\nFrom Shor's Stone: Kolbjorn (strong, stubborn), Hrafn's brother (weak), the one with the stammer. From the Riften Ratway: two, nameless, unmissed.\n\nThe miners dig the outer halls by day and are bound at night. When the cut reaches the vault of the old priest, they will be the vessel. Strong backs make strong thralls.",
+      "Our patron in Boulderfall sends word that the Riften supplier wants more coin. Tell him that dead men cost less than live ones, and we are very nearly finished with the live ones."
+     ]
+    },
+    {
+     "id": "kolbjorn_scratch",
+     "kind": "warning",
+     "title": "Scratched on a Pick Handle",
+     "author": "Kolbjorn",
+     "at": "chest",
+     "pages": [
+      "THRUD\nTHEY ARE NOT DIGGING FOR ORE\nthey are digging for a dead man and they want us for his hands\ni hid my father's token under the third cart in the cut so they can't use it on me. they use your own things to bind you. thrud dont let anyone come here for me. let someone come here for THEM"
+     ]
+    }
+   ]
+  },
+  "boulderfall_cave": {
+   "hook": "A cave in the boulder-strewn hills west of Fort Greenwall where the snow lingers into spring. Necromancers have made it a workshop, and corpses go in by the cartload.",
+   "rumour": "Grave robbers, I heard. Up by Boulderfall. Someone's buying bodies from the Hall of the Dead in Riften, and it's not for burying.",
+   "quest": "pl_boulderfall_cave",
+   "notes": [
+    {
+     "id": "corpse_ledger",
+     "kind": "ledger",
+     "title": "Ledger of Acquisitions",
+     "author": "Magister Aurelia Venn",
+     "at": "boss",
+     "starts": "pl_boulderfall_cave",
+     "pages": [
+      "#Received, Frostfall\nFrom the Riften supplier, by cart via the lake road: three adult males (drowned, fresh), one adult female (fever, poor), one child (refused, returned with a rebuke).\nPaid: 150 septims and a lesser soul gem, filled.",
+      "The supplier is a junior attendant at the Hall of the Dead who thinks Arkay will not notice. Arkay notices. That is rather the point of the exercise.\n\nSister Hrolfa at Ruunvald is to receive the strongest frames. The rest stay here for study. Note: the Shor's Stone men will not stop asking after their own. Discourage the asking."
+     ]
+    },
+    {
+     "id": "apprentice_doubts",
+     "kind": "diary",
+     "title": "An Apprentice's Diary",
+     "author": "Teodor",
+     "at": "chest",
+     "pages": [
+      "#16th of Frostfall\nThe Magister says the dead feel nothing. I believed her until tonight, when the drowned man from Riften opened his eyes on the table and looked at me. Not at her. At me.",
+      "#17th of Frostfall\nI could leave. The road to Riften is a day's walk. But the Magister keeps my name in her ledger and my lock of hair in her box, and she says that means wherever I go, she'll find me. I don't think she's lying. I wish I'd stayed in the Ratway."
+     ]
+    }
+   ]
+  },
+  "fort_greenwall": {
+   "hook": "A squat stone fort on the road north of Riften, held by bandits who charge a toll on every cart that passes. Every cart, that is, except the Black-Briars'.",
+   "rumour": "Brannoc Tollhand runs Fort Greenwall like a customs house. Twelve septims a cart. And the Black-Briar wagons roll through without paying a copper. Funny how the guard never comes.",
+   "quest": "pl_fort_greenwall",
+   "notes": [
+    {
+     "id": "toll_rules",
+     "kind": "orders",
+     "title": "Rules of the Greenwall Toll",
+     "author": "Brannoc Tollhand",
+     "at": "chest",
+     "starts": "pl_fort_greenwall",
+     "pages": [
+      "Twelve a cart. Five a horse. One a head on foot, unless they're carrying something worth taking, then whatever they're carrying.\n\nNOBODY touches a wagon with the Briar seal. You see a black thorn painted on the tailboard, you wave and smile. You don't look in the back. You don't wonder what's in the back.",
+      "The toll book stays in my strongbox. Everything's in that book, every coin in and every coin out, who paid and who got paid. That's my insurance. The day the Lady decides I'm more trouble than I'm worth, the book goes to the Jarl. She knows it. That's why I'm still breathing."
+     ]
+    },
+    {
+     "id": "prisoner_note",
+     "kind": "letter",
+     "title": "Note Passed Through a Grate",
+     "author": "A prisoner",
+     "at": "chest",
+     "pages": [
+      "To whoever finds this,\nI'm a carter from Shor's Stone and I couldn't pay the twelve. They've kept me in the cellar a week to work it off, hauling barrels.\n\nThe barrels go out on the Black-Briar wagons. They aren't mead. They're too heavy for mead and they slosh wrong. If you find Brannoc's book you'll find what's in them, I'd wager. Get me out first, if you please."
+     ]
+    }
+   ]
+  },
+  "last_vigil": {
+   "hook": "A cliffside bandit camp in the eastern mountains, perched over the old Dunmer border road. The bandits there take what they like and answer to nobody, not even Maven Black-Briar.",
+   "rumour": "Last Vigil's lot are mad. They hit a Black-Briar mead wagon last week. Can you imagine? Maven will have their skins for boot leather.",
+   "quest": "pl_last_vigil",
+   "notes": [
+    {
+     "id": "vigil_boast",
+     "kind": "journal",
+     "title": "Boastful Journal",
+     "author": "Rorik Unbowed",
+     "at": "boss",
+     "starts": "pl_last_vigil",
+     "pages": [
+      "#20th of Frostfall\nTook a Black-Briar wagon on the lake road. Two guards, both ran. One cask, sealed with the black thorn, so heavy it took three of us to roll it. Reserve stock, the label says. Must be the good stuff.",
+      "#21st of Frostfall\nTried to tap it. It's not mead. There's a false bottom with something red underneath, bottles of it, sweet as summer berries. I know what that is. Everyone in the Ratway knows what that is.\n\nMaven's selling the Redwater skooma. Or someone is, in her barrels. Either way, this cask is worth more to the right person in Riften than all the gold in the Rift."
+     ]
+    },
+    {
+     "id": "vigil_warning",
+     "kind": "warning",
+     "title": "Plank by the Path",
+     "at": "site",
+     "pages": [
+      "LAST VIGIL\nTURN BACK\nWE DON'T PAY THE BRIAR\nWE DON'T PAY THE KNIVES\nWE DON'T PAY THE JARL\nYOU PAY US\n\nBelow, painted over and then scratched out again: 'or come in and drink with us, we're not so bad'",
+      "The plank is nailed to a dead pine where the path from the lake road turns up toward the cliffs. Around it, on the lower branches, hang a dozen tin cups and a Black-Briar bottle with the neck snapped off, rattling in the wind like a warning bell. Whoever made the sign has a sense of humour. Whoever made the cliff path did not: it is steep, narrow and overlooked by bowmen the whole way up."
+     ]
+    }
+   ]
+  },
+  "redwater_den": {
+   "hook": "A modest cabin by a spring in the hills north-west of the lake. The skooma sold in the Ratway comes from here, red as blood and sweet as berries, and the people who come for more go down below and stay.",
+   "rumour": "There's a cabin up by a red spring where they sell a sweeter kind of skooma. Folk go up for a taste and never come down. Hjalla's son went up there after his mother's friend.",
+   "notes": [
+    {
+     "id": "den_rules",
+     "kind": "orders",
+     "title": "House Rules for the Lower Den",
+     "author": "Vanthel the Pourer",
+     "at": "boss",
+     "pages": [
+      "1. Guests pay upstairs. Guests drink downstairs. Guests never go back up the stairs.\n2. Feed them the red twice a day. They grow docile. They grow warm. They grow very, very sweet.\n3. Nobody touches the young Nord from Riften. He's reserved. He has his mother's eyes and I mean to have them.",
+      "4. Our Black-Briar casks come back empty and go out full. Whoever is rolling them through Greenwall does not know what is in them and does not need to. A good partnership is a quiet partnership."
+     ]
+    },
+    {
+     "id": "hjalmar_scratch",
+     "kind": "warning",
+     "title": "Scratched on a Cell Wall",
+     "author": "Hjalmar, son of Hjalla",
+     "at": "chest",
+     "pages": [
+      "My name is Hjalmar. I came for Edda. Edda's dead. They drank her. They're not people. Their mouths are red and it isn't the skooma.\n\nI've stopped drinking the red so I can stay awake. If my mother sends anyone, my copper bracelet is in the box by the stairs. They took it the first night. I want her to have it, whatever happens to me."
+     ]
+    }
+   ]
+  },
+  "autumnshade_clearing": {
+   "hook": "A quiet clearing in the gold birch woods north-west of Riften, where the leaves lie so deep you sink to the ankle. Hunters say it's a place the forest spirits come to rest.",
+   "rumour": "Autumnshade Clearing's the prettiest spot in the Rift. Also the quietest. No birds sing there, have you noticed? My mother said that's where the spriggans sleep.",
+   "notes": [
+    {
+     "id": "lovers_letter",
+     "kind": "letter",
+     "title": "A Letter Left Under a Stone",
+     "author": "Sibbi",
+     "at": "site",
+     "pages": [
+      "Ingun,\nI'll wait in the clearing until the moon's over the tallest birch. If you come, we'll go to Windhelm and never see a Black-Briar again. If you don't, I'll know your mother won, and I'll go anyway, and I'll write to you every month and burn every letter.\n\nThe leaves are very deep tonight. It's cold. Something big moved in the trees just now and then stopped. I'm sure it was a deer. Please come."
+     ]
+    },
+    {
+     "id": "spriggan_warning",
+     "kind": "warning",
+     "title": "Woodcutter's Mark",
+     "at": "site",
+     "pages": [
+      "Carved into a birch at the edge of the clearing, a hand with five fingers spread, the old woodcutters' sign for 'do not cut here'. Beneath it, a newer note pinned with a nail:\n\n'Heartwood Mill men: do NOT take timber from this clearing again. Remember what happened to Ottar's uncle. The trees remember too.'",
+      "Woodcutters in the Rift tell of a Heartwood man who felled three birches in this clearing to fill a Black-Briar order in a hurry. The next morning the stumps had grown back as thorn, and the man was found at the edge of the clearing with his own axe in his hand and moss in his mouth. The mill has kept to the far side of the woods ever since. Spriggans, folk say, do not forget a wrong, and they do not care whose order it was."
+     ]
+    }
+   ]
+  },
+  "dragon_mound_autumnshade_clearing": {
+   "hook": "An ancient dragon burial mound in the birch woods west of Autumnshade Clearing. The stone cap over it has been cracked across.",
+   "rumour": "The mound by Autumnshade's cracked open, they say. My husband walked past it and swears he heard breathing underneath. Big breathing.",
+   "notes": [
+    {
+     "id": "mound_keeper_survey_2",
+     "kind": "notes",
+     "title": "The Mound Keeper's Survey, Second Leaf",
+     "author": "Hrelga Dawnmoor, Keeper of the Temple of Mara",
+     "at": "site",
+     "pages": [
+      "#Second mound, Autumnshade, entered by a hired hand\nThe cap-stone is split from end to end, but the mound is not open. Not yet. My hired man put his ear to the crack and came back pale. He says the earth inside is warm, and that it hums.",
+      "I have left an offering to Mara and one to Akatosh, for whichever of them is listening. I have also left a note for the Jarl's steward. I expect the offerings to be the more useful of the two.\n\nThe third mound, below Lost Tongue Overlook, is next."
+     ]
+    }
+   ]
+  },
+  "fallowstone_cave": {
+   "hook": "A deep cave in the eastern hills above Riften, where trolls lair in the outer halls and old stories say a forgotten shrine waits beyond them.",
+   "rumour": "Fallowstone Cave's full of trolls, and past the trolls, the old folk say, there's something older. Nobody goes far enough to check.",
+   "notes": [
+    {
+     "id": "explorer_notes",
+     "kind": "journal",
+     "title": "Explorer's Notes",
+     "author": "Daro Velas",
+     "at": "chest",
+     "pages": [
+      "#8th of Frostfall\nTwo trolls in the first cavern. I waited until they slept and crept past. Their snoring is like rockfall. I'd rather a dragon. A dragon at least you see coming.",
+      "#9th of Frostfall\nBeyond the trolls the cave opens into a grotto with a waterfall falling from a crack in the roof, and moss on everything, and a light like dawn though there's no sun. I sat by the pool for an hour and forgot to be afraid.\n\nThere are stone markers at the far end, very old. Someone tended this place once. I'm going back to Riften for a lantern and a friend. Not necessarily in that order."
+     ]
+    }
+   ]
+  },
+  "lost_prospect_mine": {
+   "hook": "A small mine in the eastern hills near Black-Briar Lodge, worked out years ago. The Black-Briars bought it anyway, and crates still go in and out by night.",
+   "rumour": "Lost Prospect hasn't produced ore since my grandmother's time, but there's always a cart outside it with the Black-Briar thorn on the tailboard. Odd, for an empty mine.",
+   "notes": [
+    {
+     "id": "crate_manifest",
+     "kind": "list",
+     "title": "Crate Manifest",
+     "author": "Hrolfdir, lodge keeper",
+     "at": "chest",
+     "pages": [
+      "#Out, by night, Frostfall\n6 crates marked ORE. Contents: Cyrodiilic brandy, untaxed.\n2 crates marked ORE. Contents: Imperial customs seals, blank.\n4 casks marked MEAD. Contents: not my business, I'm told, and from Redwater.\n\n#In\n1 Imperial customs clerk, nosy. To the lodge. Not to be harmed. Not to leave.",
+      "I keep this list because nobody else does and someday someone will ask me what went through this mine, and I mean to have the answer when they ask. Lady forgive me. Or rather, Lady never find this."
+     ]
+    },
+    {
+     "id": "old_miner_mark",
+     "kind": "inscription",
+     "title": "Old Miner's Mark",
+     "at": "site",
+     "pages": [
+      "On the timber over the main shaft someone carved, many years ago:\n\n^LOST PROSPECT\n^NO SILVER, NO IRON, NO LUCK\n^4E 160\n\nBeneath, in fresh black paint: PROPERTY OF THE BLACK-BRIAR FAMILY. TRESPASSERS WILL BE DISCOURAGED.",
+      "The timber is old and grey and the carving has softened with damp, but the paint below it is new, still tacky in places. The track beneath the sign is rutted deep with cart wheels, far deeper than an empty mine needs, and the ruts lead not toward Riften but east, to the lodge in the woods. A miner's lamp hangs just inside the entrance, trimmed and full of oil. Someone comes here often, and comes here at night."
+     ]
+    }
+   ]
+  },
+  "faldars_tooth": {
+   "hook": "A ruined fort on a rocky knoll west of Goldenglow, home to the Ashwood Knives, a bandit band who paint birch leaves on their faces and rob the western road.",
+   "rumour": "The Ashwood Knives hole up in Faldar's Tooth. Ottar Ashwood's their chief. Mean as a sabre cat with a sore tooth and twice as fond of meat.",
+   "quest": "pl_faldars_tooth",
+   "notes": [
+    {
+     "id": "ottar_orders",
+     "kind": "orders",
+     "title": "Orders of the Ashwood Knives",
+     "author": "Ottar Ashwood",
+     "at": "boss",
+     "starts": "pl_faldars_tooth",
+     "pages": [
+      "Knives,\nThe western road is ours. Heartwood Mill pays or burns. Goldenglow's mercenaries we leave alone, for now; they've more swords than sense. The Watch at Treva's thinks the mill is theirs. Show them it isn't.",
+      "Anyone wearing a Black-Briar thorn is to be let past with a bow and a smile. Brannoc at Greenwall tells me that's the price of breathing in the Rift. I don't like it, but I like breathing.\n\nAnd whoever let that mill brat follow us halfway home last week owes me a pair of boots. His were too small for anyone."
+     ]
+    },
+    {
+     "id": "faldar_legend",
+     "kind": "book",
+     "title": "Faldar of the Tooth",
+     "author": "A Riften skald",
+     "at": "chest",
+     "pages": [
+      "Faldar was a Nord captain of the Second Era who held this knoll against a Dunmer raiding party for nine days with eleven men and a broken tooth. When the raiders asked him to surrender, he spat the tooth at their leader's feet and said he'd sooner give them the rest one at a time.",
+      "The fort they built on the spot was named for that tooth. It held for two hundred years. Then the Black-Briars of an older day bought the land, sold the stones and let it rot. Faldar, they say, still walks the wall at night, spitting at the bandits."
+     ]
+    }
+   ]
+  },
+  "nightingale_hall": {
+   "hook": "A cave in the wooded hills just south of Riften that the locals avoid without being able to say why. Thieves speak of it only in lowered voices, if at all.",
+   "rumour": "That cave south of town? Don't. I'm not saying why. I'm just saying don't. And if a man in a dark hood asks you what you saw there, you saw nothing.",
+   "notes": [
+    {
+     "id": "thief_musings",
+     "kind": "diary",
+     "title": "A Pickpocket's Musings",
+     "author": "Unknown",
+     "at": "chest",
+     "pages": [
+      "#Sun's Dusk, many years back\nOld Mercer sent me to drop a parcel at the mouth of the cave south of the Shadow Stone. 'Drop it and don't look,' he said. I dropped it. I looked.\n\nThere was nobody there. The parcel was gone by the time I'd turned round. I never heard a footstep.",
+      "Bad luck has followed me ever since. Every lock jams, every mark wakes up. Brynjolf says it's because I looked. He was joking. I think.\n\nIf you're in the trade, a word of advice: pray to the Shadow Stone before a job, never at the cave. The cave doesn't listen to prayers. It listens to oaths."
+     ]
+    }
+   ]
+  },
+  "broken_helm_hollow": {
+   "hook": "A cave in the south-eastern hills that the bandits inside have decorated with the helmets of everyone they have killed. The walls are getting crowded.",
+   "rumour": "Broken Helm Hollow, they call it, on account of all the helmets they nail up. My cousin's in the Riften guard. His brother's helm is up there. He knows the dent in it.",
+   "quest": "pl_broken_helm_hollow",
+   "notes": [
+    {
+     "id": "helm_count",
+     "kind": "list",
+     "title": "Trophy Wall Tally",
+     "author": "Ingvild the Breaker",
+     "at": "boss",
+     "starts": "pl_broken_helm_hollow",
+     "pages": [
+      "#The Wall, as of Frostfall\n14 iron. 3 steel. 1 Imperial with the red plume still on it. 2 Stormcloak, with blue paint. 1 Riften guard, purple, with a big dent over the left eye where I got him.\n\nThe Riften one's my favourite. He begged and then he stopped begging and swung at me, which I respect. His brother's in the guard too. I hope he comes. I've left a nail for him.",
+      "Rule of the Hollow: whoever brings in a new helm drinks first. Whoever loses theirs, goes on the wall."
+     ]
+    },
+    {
+     "id": "guard_letter",
+     "kind": "letter",
+     "title": "Letter from the Riften Guard",
+     "author": "Arnbjorn, Riften Guard",
+     "at": "chest",
+     "pages": [
+      "Brother,\nThe captain won't send men to the Hollow. Says it's out of our way, says the Briar would rather we kept to the city. You know what that means as well as I do.\n\nI'm going on my own on my day off. If I don't come back, don't come after me. Mother's buried one son to this hold already. Get out of the guard, Torbjorn. Get out of Riften. There's nothing left here worth guarding."
+     ]
+    }
+   ]
+  },
+  "forelhost": {
+   "hook": "A Dragon Cult monastery carved into the mountain south-east of Riften, where the last priests of the Cult chose death over surrender. A temple keeper in Riften wants to know how the siege really ended.",
+   "rumour": "Forelhost's been sealed since the First Era. Only fools and scholars go there, and the fools at least come back sooner.",
+   "quest": "pl_forelhost",
+   "notes": [
+    {
+     "id": "siege_captain_diary",
+     "kind": "diary",
+     "title": "Diary of a Siege Captain",
+     "author": "Captain Hroald of the Rift Muster, First Era",
+     "at": "chest",
+     "starts": "pl_forelhost",
+     "pages": [
+      "#Day thirty of the siege\nThe monks have not shown a face on the walls for three days. Our scouts say there is no smoke from their chimneys. The men are restless. We have eaten the last of the horses.",
+      "#Day thirty-two\nWe broke the gate at dawn. They are dead, all of them, at their tables, cups by their hands. Poison. Every one of them smiling. I have ordered the halls sealed.",
+      "#Day thirty-three\nWe did not find the High Priest. I took his door-signet, a ring of bronze with a dragon's head, to prove to the King that we entered. I will leave it in the lower hall, with my men's names cut beside it. Let whoever finds it tell the world we did not run."
+     ]
+    },
+    {
+     "id": "temple_request",
+     "kind": "letter",
+     "title": "Request from the Temple of Mara",
+     "author": "Hrelga Dawnmoor",
+     "at": "chest",
+     "pages": [
+      "To any brave soul who reads this,\nThe Temple of Mara in Riften keeps a roll of the dead of the Siege of Forelhost. It ends with a captain named Hroald, and beside his name an old priest wrote: 'signet left within'.\n\nIf the signet is still there, I would like it brought to the Temple, so the names of his men can be read aloud at the Hearthfire vigil. Mara is the goddess of love, and love remembers. Bring a strong sword. The Cult never forgave anyone for anything."
+     ]
+    }
+   ]
+  },
+  "darklight_tower": {
+   "hook": "A tall, dark tower in the southern hills of the Rift, home to hagravens who trade in hair, teeth and promises. Farm children have been seen walking towards it in their sleep.",
+   "rumour": "Hagravens in Darklight Tower. The Snow-Shod girl says one talked to her in the bottom field. Asgeir's sleeping in the barn with his axe now.",
+   "quest": "pl_darklight_tower",
+   "notes": [
+    {
+     "id": "hagraven_bargain",
+     "kind": "contract",
+     "title": "A Bargain Written in Ash",
+     "author": "The Gnarlmother",
+     "at": "boss",
+     "starts": "pl_darklight_tower",
+     "pages": [
+      "Little Snow-Shod girl wants the bad men gone. Bad men from the Briar who come about the debt. Gnarlmother can do it. Gnarlmother asks so little.\n\nA lock of the mother's hair. A tooth from the father. A song from the girl, sung into a bottle. Then the bad men never come again, and the farm is safe, and the family belongs to Gnarlmother a little bit, which is no bad thing.",
+      "Scratched below in a crabbed hand: She hasn't brought them. Send the crows. Children forget, but crows don't let them."
+     ]
+    },
+    {
+     "id": "witch_hunter_note",
+     "kind": "warning",
+     "title": "Warning Pinned to a Tree",
+     "author": "A Vigilant of Stendarr",
+     "at": "site",
+     "pages": [
+      "Traveller,\nThe tower above you is home to a hagraven called the Gnarlmother and her brood. Do not trade with her. Do not speak to her crows. Do not give her anything that has been part of you, not even a hair from your comb.\n\nI came here from Stendarr's Beacon to cleanse this place. I failed. If you are stronger than I was, aim for her before her spells take hold. Stendarr's mercy on you."
+     ]
+    }
+   ]
+  },
+  "stendarrs_beacon": {
+   "hook": "A stone watchtower in the south-eastern hills where the Vigilants of Stendarr once kept a fire burning against the darkness. The fire has gone out, and the Vigilants with it.",
+   "rumour": "The Vigilants' beacon has gone dark. First time in my life. My mother used to say as long as the beacon burns, nothing evil comes down from the hills.",
+   "quest": "pl_stendarrs_beacon",
+   "notes": [
+    {
+     "id": "vigilant_log",
+     "kind": "journal",
+     "title": "The Beacon Log",
+     "author": "Vigilant Ysolde Brandt",
+     "at": "chest",
+     "starts": "pl_stendarrs_beacon",
+     "pages": [
+      "#10th of Frostfall\nBrother Tolfr has not returned from Darklight Tower. Sister Imra has gone to look for him. The beacon burns. Stendarr keeps us.",
+      "#13th of Frostfall\nSomething came up the hill at moonrise. Skeletons, and behind them a pale man in a fine coat who smiled at the fire like a man smiles at an old enemy. He asked us to put it out. We refused.",
+      "#14th of Frostfall\nThey came at dawn. Only I am left. I have hidden the beacon log in the lower chest. If anyone finds it, relight the fire. Then go to Riften and tell them it was the Redwater man. He told me so himself. He was proud of it."
+     ]
+    },
+    {
+     "id": "vigilant_creed",
+     "kind": "prayer",
+     "title": "Creed Carved Over the Hearth",
+     "at": "site",
+     "pages": [
+      "~Stendarr, steadfast and merciful,\n~where the night grows long, let us be the fire,\n~where the dead walk, let us be the wall,\n~where the weak cry out, let us be the answer.\n\nBelow the carving the hearth is cold, and the ash is old. Someone has drawn a single burning candle in soot on the stone.",
+      "The Vigilants of Stendarr kept the beacon lit for longer than anyone in Riften can remember, feeding it with pine and tallow and prayer. Travellers on the southern roads steered by it, and mothers in the farms below told their children that while it burned, nothing from the hills would come for them. Before the hearth the flagstones are scorched, and a long dark smear leads out toward the stair."
+     ]
+    }
+   ]
+  },
+  "crystaldrift_cave": {
+   "hook": "A cave of glittering ice in the southern hills, where the walls shine blue even in the dark. A thief once hid his take there, and the ice has been keeping it ever since.",
+   "rumour": "Crystaldrift Cave's colder than Maven's heart. Pretty, though. They say a thief from the Ratway hid a whole purse in there and froze to death going back for it.",
+   "quest": "pl_crystaldrift_cave",
+   "notes": [
+    {
+     "id": "thief_treasure",
+     "kind": "treasure",
+     "title": "Ratway Thief's Reminder",
+     "author": "Svari the Quick",
+     "at": "chest",
+     "starts": "pl_crystaldrift_cave",
+     "reveals": "crystaldrift_cave",
+     "pages": [
+      "Hid the Goldenglow job's take where nobody will ever look. Crystaldrift, outside, round the west side of the hill. Twenty paces or so from the cave mouth there's a boulder with a crack in it shaped like a lightning bolt. Under that.\n\nGold ring, old setting. Don't sell it in Riften, they'll know it. Take it to Windhelm. And don't go into the cave itself. Ice spiders. Big ones. You hate spiders, Svari. Remember that you hate spiders."
+     ]
+    }
+   ]
+  },
+  "lost_tongue_overlook": {
+   "hook": "A high stone shrine in the far south of the Rift, built by the Dragon Cult to honour their masters. A word wall stands there still, and dragons come to it as if called.",
+   "rumour": "Lost Tongue Overlook? Up past the old mound. Dragons sit on it like it's their front porch. My uncle says there's writing on a wall up there only the dragons can read.",
+   "notes": [
+    {
+     "id": "cult_inscription",
+     "kind": "inscription",
+     "title": "Translation of a Shrine Inscription",
+     "author": "Copied by Hrelga Dawnmoor",
+     "at": "site",
+     "pages": [
+      "The stone at the foot of the stair carries a long text in the old Nord script, worn but legible. My rendering, with the help of an old priest's lexicon:\n\n'Here the people of the lake bowed their heads, and here the masters came down from the sky to drink their bows like wine. Speak softly here. The wall listens. The wall remembers every word given to it.'",
+      "My note: there is fresh ash on the stair and the bones of an elk picked very clean. Whatever comes here still comes."
+     ]
+    },
+    {
+     "id": "pilgrim_journal",
+     "kind": "journal",
+     "title": "Pilgrim's Journal",
+     "author": "Eira Silverhand",
+     "at": "chest",
+     "pages": [
+      "#Hearthfire, last week\nI came all the way from Ivarstead because the Greybeards wouldn't teach me. I thought: the words are written on walls, all over Skyrim. I'll learn them myself.",
+      "#Same day, evening\nI touched the wall. A word burned behind my eyes like the sun through closed lids, but I couldn't hold it. It slipped away. Something is circling overhead now, very high.\n\nI think I understand why the Greybeards wait so long to teach. It isn't that the words are hard to learn. It's that they get heard."
+     ]
+    }
+   ]
+  },
+  "ruins_of_rkund": {
+   "hook": "A broken circle of Nord stones in the southern hills, where the old clans of the Rift once made their oaths. The stones are cracked, and the oaths with them.",
+   "rumour": "Rkund's just old rocks now. Bandits camp there sometimes. My grandfather said a Nord swore an oath on those stones and broke it, and the stones broke too, out of shame.",
+   "notes": [
+    {
+     "id": "oath_stone",
+     "kind": "inscription",
+     "title": "The Oath-Stone of Rkund",
+     "at": "site",
+     "pages": [
+      "^WHAT IS SWORN HERE IS SWORN FOREVER\n^WHAT IS BROKEN HERE IS BROKEN FOREVER\n\nThe stone is cracked through from top to bottom. Around the crack, scratched by many hands over many years, are names: Hrothi swore to Asta. Gunnar swore to the Jarl. Ulf swore to his brother. Some names have been struck through. Most of them.",
+      "The most recent, cut deep: 'Ottar Ashwood swore to Brannoc Tollhand, the Knives and the Wall stand together.' It has not been struck through. Yet."
+     ]
+    }
+   ]
+  },
+  "the_shadow_stone": {
+   "hook": "An ancient standing stone in the woods south of Riften, carved with the sign of the Shadow. Those born under it slip through the world unseen, and thieves leave it small offerings for luck.",
+   "rumour": "Every cutpurse in Riften kisses the Shadow Stone before a job. I don't hold with it myself. Mind you, I've never been caught.",
+   "quest": "pl_the_shadow_stone",
+   "notes": [
+    {
+     "id": "offering_note",
+     "kind": "treasure",
+     "title": "A Thief's Promise",
+     "author": "Tova Quickstep",
+     "at": "site",
+     "starts": "pl_the_shadow_stone",
+     "pages": [
+      "To the Shadow,\nYou kept me hidden from Maven's men on the night of the Goldenglow fire, and I swore if I lived I'd give you a share. I lived.\n\nI've buried the share where only someone who knows how to look will find it: twelve paces from the stone toward Snow-Shod Farm, under a flat rock with a crescent scratched on it. Picks and a purse. Whoever finds it, you have my blessing. Shadows don't need gold, after all. People do."
+     ]
+    }
+   ]
+  },
+  "dragon_mound_lost_tongue_overlook": {
+   "hook": "A dragon burial mound in the hills below Lost Tongue Overlook. The ground around it is scorched black in a perfect circle.",
+   "rumour": "The mound below Lost Tongue's burnt round like someone drew a circle in fire. I don't know if something went in or came out. Either way, I'm not going.",
+   "notes": [
+    {
+     "id": "mound_keeper_survey_3",
+     "kind": "notes",
+     "title": "The Mound Keeper's Survey, Third Leaf",
+     "author": "Hrelga Dawnmoor, Keeper of the Temple of Mara",
+     "at": "site",
+     "pages": [
+      "#Third mound, below Lost Tongue Overlook\nThe ground is scorched in a ring twenty paces across. The mound itself is whole, but at its crown sits a great split, and from the split a thin smoke rises without any fire beneath it.",
+      "Three mounds: one open, one cracked, one smoking. I am not a scholar, only a keeper of candles. But I know what a pot looks like before it boils.\n\nI shall write to the Jarl. I shall write to Whiterun, where they say a dragon was killed this year. And I shall pray, because there is nothing else that a keeper of candles is good for."
+     ]
+    }
+   ]
+  },
+  "dead_mens_respite": {
+   "hook": "An old barrow in the wet hills near Morthal, its door half-sunk in bog-moss. The dead here are said to be restless over a song that was never finished.",
+   "rumour": "The bards of Solitude go misty-eyed over Dead Men's Respite. I'd be more interested in the treasure, myself. Mind you, a cousin of mine went for the treasure and came back singing.",
+   "notes": [
+    {
+     "id": "fisher_tale",
+     "kind": "journal",
+     "title": "A Fisherman's Tale",
+     "author": "Jorund of Crabber's Shanty",
+     "at": "chest",
+     "pages": [
+      "#Rain's Hand\nMy nets came up near the barrow with a bone flute tangled in them. Old work, Nord, with tiny wolves carved down the side. I played a note on it. Three nights now I've heard something answering from the barrow mound. The same note, back, slower.",
+      "#Second Seed\nThe lads at Robber's Gorge laugh at me. They won't go near the barrow either, mind. I put the flute back by the door and said sorry out loud, like a fool.\n\nWhoever's in there, they like music. Don't take any. Don't play any. Leave them their song."
+     ]
+    },
+    {
+     "id": "respite_verse",
+     "kind": "poem",
+     "title": "Verse Carved on a Door Post",
+     "at": "site",
+     "pages": [
+      "~Rest you here who sang too loud,\n~rest you here who sang too long,\n~the bog is deep, the mist a shroud,\n~and the dead are keeping the end of the song.\n\nUnder the verse, in another hand, newer: 'They are keeping it for someone. I hope it isn't me.'",
+      "The door post is half sunk in moss and the barrow mound behind it is wet and green. Fishermen from Crabber's Shanty leave small things at the door: a bone hook, a scrap of song written on bark, a cup of mead with a dead moth floating in it. Hunters from as far as Orotheim say that on still nights the barrow hums, a low steady note, as if someone inside were tuning an instrument and waiting for the others to join."
+     ]
+    }
+   ]
+  }
+ }
+}

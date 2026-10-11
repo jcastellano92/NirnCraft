@@ -1,0 +1,16 @@
+package com.skycraft.lore.place;
+
+import net.minecraftforge.eventbus.api.IEventBus;
+
+/**
+ * Place lore: the stories, readables, mini-quests and regional rumours of Tamriel's named places ({@link PlaceLore}).
+ * Registered from {@link com.skycraft.lore.LoreModule#init}. See docs/LORE.md.
+ */
+public final class PlaceLoreModule {
+    private PlaceLoreModule() {}
+
+    public static void init(IEventBus modBus) {
+        PlaceLoreLoot.init(modBus);
+        PlaceLoreDialogue.register();
+    }
+}

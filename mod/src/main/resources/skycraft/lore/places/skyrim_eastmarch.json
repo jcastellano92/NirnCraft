@@ -1,0 +1,1289 @@
+{
+ "regions": {
+  "skyrim/eastmarch": {
+   "rumours": [
+    "Ulfric's men drill in the snow below the Palace of the Kings every dawn now. Nobody drills like that unless they expect the Legion before the thaw.",
+    "The Grey Quarter's cistern froze solid again, and the guards told the Dunmer to melt snow like honest folk. As if the snow in that quarter were any cleaner.",
+    "Teamsters won't take the road past Mzulft after dark. The Imperials camped down there shoot at anything wearing blue, and they aren't fussy about the shade.",
+    "Darkwater Crossing sends good ore south every week, and half of it never gets past Mistwatch. Somebody up in that tower is eating very well this winter.",
+    "Giants came down off Steamcrag to sit in the hot pools again. Leave them be and they'll leave you be. Mostly. Ask the Mixwater carters about mostly.",
+    "That Dunmer at Hlaalu Farm pays his Argonian hands the same coin as his Nords. Half the Candlehearth thinks it's a scandal and the other half wants work there.",
+    "Kynesgrove's miners say the stone is warm under the snow this year, warmer than any of them remember. The priest says it's only the springs. He says it too quickly."
+   ],
+   "legends": [
+    "They say Ysgramor's people raised Windhelm's first stones before they had roofs over their own heads, because a king needs a hall before his people need beds. The great bridge over the White River was built in a single winter, and every mason who worked on it was buried in its piers so that it would never forget whom it served.",
+    "When Kyne wept for the warriors fallen at the end of the Dragon War, one tear struck the tundra east of the White River and the ground has never cooled since. That is why the springs steam, why the moss stays green under the snow, and why the old folk of Kynesgrove still leave a cup of water on the doorstep each First Seed.",
+    "The Eldergleam was old when the Dwemer still sang beneath Mzulft. Druids of the first Nords swore that whoever harmed the great tree would never again find their way home, and in Eastmarch to this day a lost traveller is said to have 'cut the gleam'.",
+    "The giants of Eastmarch count their years by the hot pools, not by the sun. Each clan has its own spring, and when a giant dies its kin carry the body to the water, wash it, and leave it to the steam. Nords who have seen it say no one was ever mourned so quietly."
+   ],
+   "songs": [
+    {
+     "title": "The Ice on the White River",
+     "lines": [
+      "~The ice on the White River is thick as a shield,",
+      "~And the Stormcloaks march out over furrow and field;",
+      "~My love wore the blue and he sang as he went,",
+      "~Now his song's in the snow and his summer is spent.",
+      "~So pour me the mead, and pour it for two,",
+      "~For the ice will break up, but my heart never knew."
+     ]
+    },
+    {
+     "title": "Ash in the Grey Quarter",
+     "lines": [
+      "~We came over the mountains with ash in our hair,",
+      "~And they gave us a corner and called it our share.",
+      "~The stones are all borrowed, the bread is all dear,",
+      "~But the dead of Red Mountain still find us here."
+     ]
+    }
+   ]
+  }
+ },
+ "places": {
+  "windhelm": {
+   "hook": "The City of Kings, oldest of the Nord cities, where Ulfric Stormcloak rules from the Palace of the Kings and the Dunmer of the Grey Quarter endure behind walls that never quite became home.",
+   "rumour": "Ulfric's guards will drink to Talos with you all night. Say one kind word about the Grey Quarter, though, and watch how fast the cups go empty.",
+   "notes": [
+    {
+     "id": "grey_quarter_petition",
+     "kind": "letter",
+     "title": "Petition from the Grey Quarter",
+     "author": "Galdrus Hlervu, for the families of the Grey Quarter",
+     "at": "chest",
+     "reveals": "refugees_rest",
+     "pages": [
+      "#To the Steward of the Palace of the Kings, 9th of Evening Star, 4E 200\nWe ask, again, for the watch to walk our streets after dark. Three doors were marked with soot this month. On the third night one of them burned.",
+      "We do not ask for charity. We pay our taxes in coin and our tolls in insults. We ask only that the men we pay to guard the city remember that the Grey Quarter is inside its walls.",
+      "Our grandparents spent their first winter in Skyrim at Refugees' Rest, east past Traitor's Post, sleeping in a tower with the wind for a blanket. Some of them are still there, in urns no one has visited for years. We would like not to join them before our time.\n^Respectfully, and with diminishing patience."
+     ]
+    },
+    {
+     "id": "quartermaster_ledger",
+     "kind": "ledger",
+     "title": "Quartermaster's Ledger, Palace Barracks",
+     "author": "Quartermaster Hrefna Ice-Vein",
+     "at": "chest",
+     "reveals": "traitors_post",
+     "pages": [
+      "#Sun's Dusk, 4E 201\nIssued: 40 cuirasses, blue, sized for boys who think they are men. 12 axes, 3 of them with handles that will not survive a winter. Salt fish, 9 barrels. Mead, not enough.",
+      "Missing: the payroll strongbox for the eastern pickets, 310 septims, last seen on the cart of Bjorlam Frost-Hand and two of his messmates. Cart found on the Hollyfrost road. Men not found.",
+      "Note to the captain: the scouts say smoke rises from the old cabin they call Traitor's Post. The name will amuse no one in the Palace. I recommend we let the name do our talking and send six men, not two."
+     ]
+    },
+    {
+     "id": "unsent_letter_mother",
+     "kind": "letter",
+     "title": "A Letter Never Sent",
+     "author": "Hjordis, a washerwoman of the Stone Quarter",
+     "at": "chest",
+     "pages": [
+      "Arnbjorn, my heart,\nThey say the Winterhold Stormcloak Camp is so cold the mead freezes in the horn. I hope you are drinking it faster than that. Your sister has had her baby, a loud girl with your chin, and we have named her Svana after your grandmother.",
+      "I washed the Jarl's linens again this week. You would laugh to see how ordinary they are. A king's sheets have the same stains as ours.\nCome home when the war lets you. Come home even if it doesn't. I will not tell anyone you were afraid. I was afraid too, the whole time you were growing up.\n^Your mother"
+     ]
+    }
+   ]
+  },
+  "kynesgrove": {
+   "hook": "A small mining village on the warm slopes south of Windhelm, its Braidwood Inn full of miners who swear the ground has been growing warmer, and a dragon mound watching from the ridge above.",
+   "rumour": "Kynesgrove? Good ore, bad sleep. The miners say the hill hums at night. And the graves behind the shrine have been dug up twice since Hearthfire.",
+   "quest": "pl_cragwallow_slope",
+   "notes": [
+    {
+     "id": "miner_tally",
+     "kind": "ledger",
+     "title": "Steamscorch Tally Board",
+     "author": "Ragnvald the Sooty, shift reckoner",
+     "at": "chest",
+     "pages": [
+      "#Week of the 3rd, Frostfall\nIron, 22 loads. Corundum, 4 loads. Men fainted from the heat in the lower drift: 2. Men who claim they heard singing in the rock: 3 (all the same three, all the same tavern).",
+      "#Week of the 10th, Frostfall\nIron, 19 loads. Lower drift closed after the floor went soft and hot as bread. Water runs from the walls steaming. The old hands say Kyne's Tear is restless. I say the drift is too deep and we should stop digging toward whatever is warming it.",
+      "#Week of the 17th, Frostfall\nIron, 21 loads. Someone left a cup of water on the mine step every morning this week. Nobody will own to it. I have started leaving one myself."
+     ]
+    },
+    {
+     "id": "priest_complaint",
+     "kind": "letter",
+     "title": "Letter to the Temple of Talos, Windhelm",
+     "author": "Sidgar, keeper of the Kynesgrove shrine",
+     "at": "chest",
+     "starts": "pl_cragwallow_slope",
+     "reveals": "cragwallow_slope",
+     "pages": [
+      "Brothers in Windhelm,\nThe graves behind our shrine have been opened twice since Hearthfire. Not looted: emptied. Old Thrunvar, buried in Last Seed, is gone, and the Widow Asta with him, and both their grave goods left lying in the snow as if they were worthless.",
+      "A herder saw lanterns moving along Cragwallow Slope on the night of the second digging, south-east past the mound, toward the old cairns. No honest man walks those slopes at night.",
+      "I am an old man and a priest, not a warrior. If you cannot spare a templar, send coin and I will hire someone with a strong arm and a short memory. Our dead deserve to lie where we put them."
+     ]
+    }
+   ]
+  },
+  "darkwater_crossing": {
+   "hook": "A mining hamlet where the Darkwater river is forded below the Goldenrock Mine, the last stop before the pass into the Rift and a favourite place for ore carts to go missing.",
+   "rumour": "Darkwater Crossing's carts have been robbed three times this season, always between the ford and Mistwatch. Strange luck, that. Very regular luck.",
+   "quest": "pl_mistwatch",
+   "notes": [
+    {
+     "id": "goldenrock_ledger",
+     "kind": "ledger",
+     "title": "Goldenrock Mine Shipping Ledger",
+     "author": "Haldis Copperhand",
+     "at": "chest",
+     "starts": "pl_mistwatch",
+     "reveals": "mistwatch",
+     "pages": [
+      "#Hearthfire, 4E 201\n2nd: 6 loads iron, 1 gold, to Windhelm by the east road. Arrived.\n9th: 5 loads iron, 2 gold. Cart overturned near Mistwatch, driver beaten, gold gone. Iron left in the ditch, too heavy to bother with.\n16th: sent two loads only, with Eirik and a spear. Arrived.",
+      "#Frostfall, 4E 201\n1st: 4 loads iron, 3 gold, with Eirik. Eirik came home on foot with an arrow in his shoulder. Gold gone.\nThey know when the gold goes out. They never take the iron. Someone is telling them, or someone is watching from that tower.",
+      "Whoever reads this: I will pay for the tally sheet those thieves keep. I want to know which of my neighbours is selling us."
+     ]
+    },
+    {
+     "id": "hunter_warning",
+     "kind": "warning",
+     "title": "Notice Nailed to the Ford Post",
+     "at": "chest",
+     "starts": "pl_snapleg_cave",
+     "reveals": "snapleg_cave",
+     "pages": [
+      "^TRAVELLERS SOUTH, MIND THIS",
+      "The hunter Orgnar Bent-Bow went to Snapleg Cave on the 5th of Frostfall to fetch back his hound and his grandfather's horn. The hound came home. Orgnar did not. The horn was heard blowing from the cave three nights after.",
+      "There is a hagraven in that hole and she has taken to calling men in with their own things. If you hear a horn in the hills below Darkwater Pass, do not answer it. If you are fool enough to go in, bring fire and bring the horn back to his widow."
+     ]
+    }
+   ]
+  },
+  "mixwater_mill": {
+   "hook": "A lumber mill where the White River's two streams meet, its saws running all day and its carters muttering about the giants of Broken Limb Camp just over the rise.",
+   "rumour": "Mixwater Mill pays well for anyone who'll sort out the giant at Broken Limb Camp. Funny how the foreman never says what started it.",
+   "notes": [
+    {
+     "id": "giant_bounty",
+     "kind": "contract",
+     "title": "Bounty Notice, Mixwater Mill",
+     "author": "Gralfr Bark-Back, foreman",
+     "at": "chest",
+     "reveals": "broken_limb_camp",
+     "pages": [
+      "^BOUNTY\n^200 SEPTIMS",
+      "For the death of the one-tusked giant of Broken Limb Camp, who on the 14th of Frostfall came down to the river road, smashed two log carts flat, and threw a yoke of oxen into the water like they were apples.",
+      "Proof required: the giant's club or its toes, whichever you can carry. Payment on delivery, in coin, from me, Gralfr, at the mill. No questions asked about how. None answered about why.",
+      "Scrawled beneath in another hand, by someone who did not sign: 'Ask Gralfr where he sold the little tusks. Ask Sten why he drinks alone now.'"
+     ]
+    },
+    {
+     "id": "torvar_letter",
+     "kind": "letter",
+     "title": "Letter to the Steward of Windhelm",
+     "author": "Torvar, sawyer of Mixwater Mill",
+     "at": "chest",
+     "starts": "pl_gallows_rock",
+     "reveals": "gallows_rock",
+     "pages": [
+      "Steward,\nMy brother Ulmir was taken from this mill on the 2nd of Frostfall by men in silver-buckled leathers who called him a beast and a murderer. They had no warrant and no Jarl's seal. They had chains, and they knew how to use them.",
+      "They have taken him to Gallows Rock, the old fort west of here where your grandfather's grandfather hanged traitors. I have heard screaming from that ridge at night. I am told it is not always a man's voice. I do not care whose voice it is. He is my brother.",
+      "I have asked the guards. I have asked the priests. Now I am asking you, and after you I will ask anyone with a blade."
+     ]
+    }
+   ]
+  },
+  "narzulbur": {
+   "hook": "An Orc stronghold sunk into the hills east of Kynesgrove, rich in ebony from Gloombound Mine and closed to outsiders who have not earned the chief's leave.",
+   "rumour": "The Orcs of Narzulbur will sell you ebony if you're polite, and break your arm if you're not. Lately they're short-tempered. Something's wrong in their mine.",
+   "notes": [
+    {
+     "id": "chief_tally",
+     "kind": "ledger",
+     "title": "Ore Tally of the Chief's Longhouse",
+     "author": "Mauhulakh's scribe",
+     "at": "chest",
+     "pages": [
+      "#Frostfall\nEbony out of Gloombound: 11 bars this moon. Last moon: 18. The moon before: 20.\nWhy the drop: miners won't work the deep east drift. Dushgar says the dark there eats lantern-light. Dushgar has never been afraid of anything, so the chief broke his nose for saying it.",
+      "#Later\nDushgar went back down to prove he was brave. Dushgar did not come back up. The chief has stopped breaking noses. That is how we know it is bad.",
+      "Trade for the moon: 4 bars to the Windhelm smith, 2 to the Kynesgrove tinker, 1 kept for Malacath's altar. The rest is spoken for, by blood."
+     ]
+    },
+    {
+     "id": "wife_prayer",
+     "kind": "prayer",
+     "title": "Prayer Scratched on a Hearthstone",
+     "author": "Mogdurz gro-Narzulbur",
+     "at": "chest",
+     "pages": [
+      "~Malacath, who keeps the oaths of the scorned,\n~Keep the oath my husband swore to come home.\n~He went down into Gloombound with a pick and a grudge.\n~Send him up with both, or send me the one who kept him.",
+      "~I do not ask you for mercy. You have none and that is why we love you.\n~I ask you for a debt to be paid.\n~Let the dark in the east drift learn the weight of an Orc's anger,\n~And if my arm is not enough, send me a stranger's."
+     ]
+    }
+   ]
+  },
+  "hollyfrost_farm": {
+   "hook": "A hardscrabble farm on the frozen fields east of Windhelm, where a widow keeps the hearth lit for a son who marched off with the Stormcloaks and has stopped writing.",
+   "rumour": "Ingrid at Hollyfrost asks every soldier who passes whether they've seen her Bjorlam. Most of them look away. I think they've heard something.",
+   "notes": [
+    {
+     "id": "ingrid_letter",
+     "kind": "letter",
+     "title": "Letter to a Son in Blue",
+     "author": "Ingrid of Hollyfrost",
+     "at": "chest",
+     "pages": [
+      "Bjorlam,\nThe snow has come early and the goat has stopped giving milk, which you will say is my fault for naming her after your aunt. I have sold the second plough. Do not be angry. I could not pull it alone and it was only sitting there reminding me.",
+      "The quartermaster's men came asking after you on the 3rd. They would not say why. They were polite in the way men are polite when they mean to be something else later.",
+      "Whatever you have done, you are mine. There is a bed here, and nobody in the world will look for you under your mother's roof but your mother.\n^Ingrid"
+     ]
+    }
+   ]
+  },
+  "hlaalu_farm": {
+   "hook": "A Dunmer-owned farm beside Hollyfrost, worked by Nord and Argonian hands for equal pay, which in Windhelm's shadow makes it either a scandal or a miracle depending on who is talking.",
+   "rumour": "The Dunmer at Hlaalu Farm pays his lizards the same as his Nords. Some say he'll be burned out by spring. Some say they'd like to see who tries.",
+   "notes": [
+    {
+     "id": "wages_ledger",
+     "kind": "ledger",
+     "title": "Wage Book of the Hlaalu Farm",
+     "author": "Aldis Hlaalu",
+     "at": "chest",
+     "pages": [
+      "#Sun's Dusk, week the first\nWorks-the-Furrow: 6 days, 18 septims.\nOlaf Stone-Knee: 6 days, 18 septims.\nTeeba-Dar: 5 days (fever), 18 septims all the same, because a fever is not a choice.\nGunnhild: 6 days, 18 septims, and a jar of saltrice for her mother.",
+      "A man from the Candlehearth Hall came to tell me that I was making the Nords of this farm look cheap by paying them as much as Argonians. I told him I was making the Argonians look expensive. He did not laugh.",
+      "Memo: buy a dog. A big one. And more oil for the lamp by the gate."
+     ]
+    },
+    {
+     "id": "argonian_note",
+     "kind": "notes",
+     "title": "Scratched Note Under a Bunk",
+     "author": "Teeba-Dar",
+     "at": "chest",
+     "pages": [
+      "Ten years on the Windhelm docks. Ten years of Shatter-Shield coin counted twice and paid once. Here the Dunmer counts once and pays once. The Nords in the bunkhouse do not like me, but they eat at the same table and nobody spits in the stew. This is what warm feels like, in Skyrim.",
+      "If the men from the Candlehearth come with torches, I will be at the gate. The hist did not bring me this far to watch a good roof burn."
+     ]
+    }
+   ]
+  },
+  "brandy_mug_farm": {
+   "hook": "A small farm on the road south of Windhelm, owned by a pair of friends who started it on a bet and have kept it going on stubbornness and very strong drink.",
+   "rumour": "Brandy-Mug Farm? They brew a cider out there that'll take the frost out of your toes and the sense out of your head. Stormcloaks keep 'buying' it without paying.",
+   "notes": [
+    {
+     "id": "requisition_complaint",
+     "kind": "letter",
+     "title": "Complaint to the Palace of the Kings",
+     "author": "Bolfrida Brandy-Mug",
+     "at": "chest",
+     "pages": [
+      "To whoever reads complaints in that great cold Palace,\nOn the 6th of Frostfall a patrol of your men came through and requisitioned four casks of our cider, two hams, and a wheel of goat cheese 'in the name of Skyrim'. I asked which part of Skyrim. They said the hungry part.",
+      "I am loyal to Ulfric. I am also loyal to my ledger, and my ledger is starving. If the Jarl wishes to fight the Empire on my cider, the Jarl may pay for my cider. 60 septims will do. 80 if he wants me to stop writing these.\n^Bolfrida, who is not leaving this alone"
+     ]
+    }
+   ]
+  },
+  "windhelm_stables": {
+   "hook": "The stables and carriage stand below Windhelm's great bridge, where every rumour in Eastmarch passes through at a horse's walk, and some of them pay the fare.",
+   "rumour": "Ask the carriage driver at the stables. He hears everything between Windhelm and Riften, and he forgets none of it, for the right price.",
+   "notes": [
+    {
+     "id": "carriage_log",
+     "kind": "ledger",
+     "title": "Carriage Driver's Fare Book",
+     "author": "Alfarinn the Driver",
+     "at": "chest",
+     "pages": [
+      "#Frostfall, 4E 201\n4th: a Breton scholar to Kynesgrove, asking about Mzulft the whole way. Overpaid. Left his gloves.\n7th: two Dunmer to Darkwater Crossing, paying in old Morrowind coin. Accepted it. Told nobody.\n9th: a man in silver-buckled leathers to Mixwater Mill, with chains in his pack. Did not ask. Did not like him.",
+      "#Frostfall, 4E 201\n12th: Imperial courier, Riften road, asked me to forget his face. Done, for 30 septims.\n15th: a widow from Darkwater, crying the whole way. Her husband went into Snapleg Cave. Took no fare. Some things a man doesn't charge for."
+     ]
+    }
+   ]
+  },
+  "traitors_post": {
+   "hook": "A lonely cabin in the hills east of Windhelm, named for a betrayal nobody remembers and now living up to it: Stormcloak deserters have holed up there with a stolen payroll.",
+   "rumour": "Smoke's been rising from Traitor's Post all month. The quartermaster's lost a strongbox and three soldiers, and I'd wager they're all keeping warm by the same fire.",
+   "quest": "pl_traitors_post",
+   "notes": [
+    {
+     "id": "deserters_pact",
+     "kind": "contract",
+     "title": "The Pact of the Three",
+     "author": "Bjorlam Frost-Hand, Kolgeir, and Ulfa Grey-Eye",
+     "at": "chest",
+     "starts": "pl_traitors_post",
+     "pages": [
+      "We three, having seen what was done at the picket on the Winterhold road to men who surrendered, swear that we are done with Ulfric's war and Ulfric's Palace and Ulfric's quartermaster.",
+      "The strongbox is ours by right, for four months' pay we were never given. We split it three ways, and none of us leaves this cabin alone before the thaw, for a man alone talks.",
+      "Any of us who sells the others to the Palace will be found. Any of us who sells the others to the Legion will be found faster.\n^Signed in blood, which Kolgeir says is foolish, and which he signed anyway."
+     ]
+    },
+    {
+     "id": "bjorlam_unsent",
+     "kind": "letter",
+     "title": "Bjorlam's Unfinished Letter",
+     "author": "Bjorlam Frost-Hand",
+     "at": "boss",
+     "pages": [
+      "Mother,\nHollyfrost is two hours' walk from here. I can see the smoke of the Hlaalu chimney from the ridge on clear days. I could be at your door by supper and I have not gone, because Kolgeir watches the path and he means what he signed.",
+      "I did not run because I was afraid. I ran because of what I was told to do to the men at the picket, and because I did it, once, before I ran. Tell no one that. Tell them I died somewhere cold and brave. It is nearly true."
+     ]
+    }
+   ]
+  },
+  "refugees_rest": {
+   "hook": "A crumbling watchtower on the eastern hills where Dunmer fleeing the Red Mountain sheltered their first Skyrim winter, and where their ashes still rest beneath the bandits' bedrolls.",
+   "rumour": "Refugees' Rest? The Dunmer call it a shrine. The bandits who sleep there call it a roof. I don't think either of them would like the other's word for it.",
+   "notes": [
+    {
+     "id": "refugee_inscription",
+     "kind": "inscription",
+     "title": "Words Carved Inside the Tower Door",
+     "at": "site",
+     "pages": [
+      "#4E 5, Evening Star\nWe walked from Ebonheart with the mountain behind us and the sky raining fire. We came over the snow with nothing but our dead. Here, at last, the Nords let us stop.",
+      "~Here lie Saryoni Ralen, potter, who carried her kiln-tools across three provinces.\n~Here lies Dravil Ralen, her son, who carried her.\n~Here lie the eleven whose names the cold took before we could carve them.\n~Do not forget us. We will not forget you."
+     ]
+    },
+    {
+     "id": "bandit_squat",
+     "kind": "notes",
+     "title": "Bandit's Inventory Scrap",
+     "author": "Hakon One-Eye",
+     "at": "boss",
+     "pages": [
+      "What we got: 3 sacks of grain off the Hollyfrost road, 1 Imperial saddle, 2 bows (one good), 1 urn with grey dust in it and a pretty silver band round the neck.",
+      "Tried to sell the urn at the Grey Quarter. Old Dunmer woman at the market went white as snow and offered me 100 septims for it, so I knew it was worth 500. Told her to come up here and haggle. She hasn't. Yet.",
+      "Note to self: tip the dust out before we sell it. Nobody wants a pot full of dead elf."
+     ]
+    }
+   ]
+  },
+  "sacellum_of_boethiah": {
+   "hook": "A ring of black stone on a hill east of Windhelm where the cult of Boethiah gathers, offering the Prince of Plots the one sacrifice she prizes most: a friend's trust.",
+   "rumour": "There's a temple to Boethiah out east, past the farms. They say the price of joining is a friend, and they don't mean a recommendation.",
+   "notes": [
+    {
+     "id": "pilgrim_confession",
+     "kind": "journal",
+     "title": "Journal of a Would-Be Champion",
+     "author": "Harrald Two-Faith",
+     "at": "site",
+     "pages": [
+      "#14th of Frostfall\nThe priestess said the Lady wants a betrayal, not a corpse. Any fool can kill. To be chosen, I must give her someone who would never have believed I would do it.",
+      "#16th of Frostfall\nI brought Eyvind. Twenty years we have hunted together. I told him there was a sabre cat at the shrine. I told him I would watch his back.",
+      "#17th of Frostfall\nThe Lady was pleased. I have her blessing. My hands do not stop shaking and the blessing does nothing for that. I cannot remember why I wanted this. I can only remember that Eyvind smiled at me, right at the end, as if it were a joke he did not yet understand."
+     ]
+    },
+    {
+     "id": "cult_rule",
+     "kind": "inscription",
+     "title": "Words Chiselled Beneath the Altar",
+     "at": "site",
+     "pages": [
+      "^THE SACELLUM ASKS NOTHING THAT YOU WOULD NOT TAKE",
+      "~Trust is a door. Walk through it.\n~Love is a blade. Hold it by the grip.\n~The weak are betrayed. The strong betray first.\n~Boethiah watches the hand, not the heart.",
+      "^Kneel. And when you rise, rise alone.",
+      "Below the chiselled words, someone has scratched a tally of names with a knife-point, each one crossed out by a different hand: Eyvind. Brunhild. Olfrid the Younger. Marcus, a legionary. Two dozen more. Beside the last uncrossed name, Harrald, a fresh line has been started, and left unfinished, as if whoever was cutting it was interrupted, or changed their mind."
+     ]
+    }
+   ]
+  },
+  "uttering_hills_cave": {
+   "hook": "A bandit hole in the hills west of Windhelm, where a chief who prices everything in pairs holds the road from Anga's Mill and charges a toll in coin or fingers.",
+   "rumour": "Uttering Hills Cave belongs to Hadring Two-Coins. Pay him twice what he asks and he lets you pass. Pay him once and he keeps one of your hands as change.",
+   "quest": "pl_uttering_hills_cave",
+   "notes": [
+    {
+     "id": "two_coins_orders",
+     "kind": "orders",
+     "title": "Hadring's Standing Orders",
+     "author": "Hadring Two-Coins",
+     "at": "chest",
+     "starts": "pl_uttering_hills_cave",
+     "pages": [
+      "^RULES OF THE HILL",
+      "One. Everything costs two. Two coins to pass, two days' food for a cart, two fingers if they argue. A man remembers a price that comes in pairs.",
+      "Two. Nobody touches the timber carts from Anga's Mill. Their foreman pays us every month to leave him be. If he stops, then we touch the carts, and then we touch the foreman.",
+      "Three. The Breton's book stays in my chest. I don't care if it's 'scholarly'. Somebody in Windhelm will pay for it, and they'll pay two."
+     ]
+    },
+    {
+     "id": "captive_scratching",
+     "kind": "warning",
+     "title": "Scratches on a Cell Wall",
+     "at": "boss",
+     "reveals": "mzulft",
+     "pages": [
+      "Bertrand Vanne, of the Imperial Geographical Society, held here eleven days. They took my survey of the Mzulft approaches. I have redrawn it on this wall from memory because I am too stubborn to let it be lost: south-east past Cragwallow Slope, the domes visible from the third ridge.",
+      "If I do not leave this place, I ask whoever reads this to tell the Society that the domes are warmer than they ought to be, and that something inside Mzulft is still awake."
+     ]
+    }
+   ]
+  },
+  "morvunskar": {
+   "hook": "A fort of three squat towers north-west of Kynesgrove, held now by mages who came to study the hot springs beneath it and stayed to study things a good deal hotter.",
+   "rumour": "Mages at Morvunskar. Not the friendly College kind. A girl from Winterhold went there to learn conjuration and her letters stopped coming.",
+   "quest": "pl_morvunskar",
+   "notes": [
+    {
+     "id": "conjurer_notes",
+     "kind": "notes",
+     "title": "Notes on the Morvunskar Springs",
+     "author": "Ralis Varvel, Master Conjurer",
+     "at": "boss",
+     "pages": [
+      "#Observation the ninth\nThe spring under the north tower is not volcanic, as the vulgar suppose. Its heat rises and falls with the moons. I propose that the boundary between Nirn and the Deadlands is thinner here than at any point in Eastmarch.",
+      "#Observation the twelfth\nA flame atronach summoned within six paces of the spring persists for nearly twice the expected duration. The girl, Elsbet, objects to the 'tethering' I propose. She objects to a great deal for an apprentice.",
+      "#Observation the fifteenth\nThe tethering requires a living anchor of some talent. Elsbet has some talent. She will thank me when she understands."
+     ]
+    },
+    {
+     "id": "elsbet_journal",
+     "kind": "journal",
+     "title": "Elsbet's Journal",
+     "author": "Elsbet of Winterhold",
+     "at": "chest",
+     "starts": "pl_morvunskar",
+     "pages": [
+      "#Sun's Height\nMaster Varvel says the College is too timid to teach what I need. He says it with such certainty that I believed him for nearly two months.",
+      "#Hearthfire\nHe has started locking the lower door at night. He keeps asking how far I can reach with my mind toward the spring, and writing down the answers.",
+      "#Frostfall\nI have hidden my copy of his notes in the chest by the stair. If I am chained in the cellar by the time anyone finds this, then I was right, and I would have very much liked to be wrong."
+     ]
+    },
+    {
+     "id": "college_letter",
+     "kind": "letter",
+     "title": "Letter from the College of Winterhold",
+     "author": "Tolfdir's clerk, on his behalf",
+     "at": "chest",
+     "pages": [
+      "To Ralis Varvel, wherever you have gone,\nThe Arch-Mage has instructed me to remind you that your expulsion was not a misunderstanding, that your notes on 'tethered summoning' remain confiscated, and that taking apprentices outside the College does not make you a teacher.",
+      "If the young woman named Elsbet is with you, she is to be returned to Winterhold before the snows close the road. Master Tolfdir has asked me to add that he remembers her fondly, and that he remembers you somewhat less so."
+     ]
+    }
+   ]
+  },
+  "maras_eye_pond": {
+   "hook": "A still, round pond in the hills north of Mixwater Mill where lovers come to swear oaths before Mara, and where, lately, some of them have not gone home.",
+   "rumour": "Couples go to Mara's Eye Pond to make their promises. Two went up there in Frostfall and only their lantern came down. Blood on it, they say.",
+   "notes": [
+    {
+     "id": "lovers_poem",
+     "kind": "poem",
+     "title": "Oath Carved on the Lovers' Stone",
+     "at": "site",
+     "pages": [
+      "~Mara, whose eye is this water, look on us.\n~We are two, and we would be one.\n~I, Sigrun of Mixwater, take Ottar of Kynesgrove.\n~I, Ottar, take her, and the cold of every winter with her.",
+      "~If either of us breaks this oath, let the water close over the oath-breaker.\n~If the world breaks it for us, let the water remember.\n^Sworn on the 20th of Frostfall, 4E 201, under a pale moon.",
+      "Cut beneath, in a rougher hand: SHE IS IN THE CAVE TO THE SOUTH. CRONVANGR. I COULD NOT FOLLOW."
+     ]
+    }
+   ]
+  },
+  "riverside_shack": {
+   "hook": "A trapper's shack on the White River south of Morvunskar, abandoned in a hurry with the stew still in the pot, and a dead hunter's warnings scrawled in its daybook.",
+   "rumour": "Old Kjeld at the Riverside Shack used to sell pelts at the Kynesgrove market every Fredas. He hasn't come since Frostfall. Nobody wants to be the one to check.",
+   "quest": "pl_maras_eye_pond",
+   "notes": [
+    {
+     "id": "kjeld_daybook",
+     "kind": "diary",
+     "title": "Kjeld's Daybook",
+     "author": "Kjeld the Trapper",
+     "at": "chest",
+     "reveals": "cronvangr_cave",
+     "pages": [
+      "#11th of Frostfall\nTraps by the pond empty three days running. Not robbed: emptied of blood. The fox in the last one was white as frost and light as a glove.",
+      "#13th of Frostfall\nSaw pale folk walking the bank at dusk, no torch between them, toward the hills where Cronvangr Cave opens. They did not leave tracks in the snow, or I could not see them. I do not know which is worse.",
+      "#14th of Frostfall\nI am going to Kynesgrove tomorrow and I am not coming back to this shack. Let them have the stew."
+     ]
+    },
+    {
+     "id": "kjeld_cache",
+     "kind": "treasure",
+     "title": "Note Tucked in a Boot",
+     "author": "Kjeld the Trapper",
+     "at": "chest",
+     "starts": "pl_maras_eye_pond",
+     "reveals": "maras_eye_pond",
+     "pages": [
+      "For my sister Rannveig, if I don't make it to Kynesgrove:",
+      "Thirty years of pelts are in an iron box under the flat stone on the west bank of Mara's Eye Pond, the one with the moss shaped like a hand. Dig on the side away from the water. It is not much. It is more than the Jarl ever thought a trapper was worth.",
+      "Buy yourself a house in town. Somewhere with a wall. And Mother's gold ring is in there too, wrapped in the fox fur. Wear it. She always said it was wasted on a trapper's sister, and she was wrong about that, as she was about most things."
+     ]
+    }
+   ]
+  },
+  "gallows_rock": {
+   "hook": "A ruined fort on a crag west of Mixwater Mill where Windhelm's old jarls hanged traitors, now held by grim hunters in silver-buckled leathers who keep a prisoner in chains.",
+   "rumour": "There's screaming from Gallows Rock some nights, and howling other nights. The men up there say they hunt beasts. I've never heard of a beast with a brother in Mixwater.",
+   "quest": "pl_gallows_rock",
+   "notes": [
+    {
+     "id": "hunt_captain_log",
+     "kind": "report",
+     "title": "Hunt-Captain's Log",
+     "author": "Hunt-Captain Vildis Silver-Wrist",
+     "at": "boss",
+     "pages": [
+      "#2nd of Frostfall\nTook the sawyer Ulmir at Mixwater Mill without trouble. His brother made a noise. Brothers always do. We were gone before the guard was sent for.",
+      "#6th of Frostfall\nUlmir swears he is no beast. They all swear. We keep him in silver and wait for the moon. If he is clean, we let him walk home and apologise for the inconvenience. We have never once had to apologise.",
+      "#9th of Frostfall\nThe moon came. We have not had to apologise. Two of my men are dead and the chains held, barely. When the brother comes, and he will come, we kill whatever comes with him."
+     ]
+    },
+    {
+     "id": "ulmir_confession",
+     "kind": "letter",
+     "title": "Confession Written in Charcoal",
+     "author": "Ulmir of Mixwater Mill",
+     "at": "chest",
+     "pages": [
+      "Torvar,\nThey let me write this because they want me to say it. So I will say it, and I will say it to you, because you are the only one it matters to.",
+      "Two winters ago, in the woods by Cradlecrush Rock, something bit me and I lived. Since then there have been nights I do not remember, and mornings I have washed blood off my hands in the river before you woke. I told myself it was deer. It was mostly deer.",
+      "Do not come for me. If you do come, do not open the chains on a full moon. Take the ring Father gave me, and remember me as I was in the daylight."
+     ]
+    }
+   ]
+  },
+  "gloombound_mine": {
+   "hook": "Narzulbur's ebony mine, a black throat in the hillside where the Orcs dig the finest ore in Eastmarch, and where the deepest drift has started swallowing miners.",
+   "rumour": "Gloombound's the richest hole in Eastmarch and the Orcs guard it like their own teeth. They've stopped working the east drift, though, and an Orc doesn't scare easy.",
+   "notes": [
+    {
+     "id": "dushgar_last",
+     "kind": "notes",
+     "title": "Chalk Marks in the East Drift",
+     "author": "Dushgar gro-Narzulbur",
+     "at": "chest",
+     "pages": [
+      "Chalked on a timber prop at the mouth of the east drift, where the Orc miners of Narzulbur leave word for the next shift, in big blunt letters:\nBROKE THROUGH. CAVE BEYOND. WARM. SMELLS OF ROT AND VINEGAR. BRING MORE OIL. DO NOT TELL CHIEF YET. WANT TO SEE IT FIRST.",
+      "Lower down, smaller:\nCLICKING IN THE DARK. LANTERN GOES DIM AT THE CRACK. NOT AFRAID. GOING IN.",
+      "At the bottom, scratched with a pick-point, barely legible:\nPALE THINGS. EYES SEWN SHUT. THEY HEAR YOUR HEART. TELL MOGDURZ"
+     ]
+    },
+    {
+     "id": "ore_ledger",
+     "kind": "ledger",
+     "title": "Gloombound Shift Ledger",
+     "at": "chest",
+     "pages": [
+      "#Hearthfire\nEast drift: 3 bars ebony, 1 good vein. West drift: 2 bars. Bad air in the low cut, two men sick.\n#Frostfall, first week\nEast drift: 4 bars and a breakthrough into old rock. Strange smell. Miners grumbling.",
+      "#Frostfall, second week\nEast drift: 0 bars. Lantern-oil missing. Dushgar's pick found by the crack, handle chewed.\n#Frostfall, third week\nEast drift closed by order of the chief. Nobody argued, and that is the most frightening line in this book.\nMogdurz came to the drift mouth every night this week and stood there with an axe. Nobody argued with that either."
+     ]
+    }
+   ]
+  },
+  "cragwallow_slope": {
+   "hook": "A cairn-pocked slope south of Narzulbur where a necromancer has made a workshop of the old burial caves, and where the dead of Kynesgrove have been going missing.",
+   "rumour": "Lanterns on Cragwallow Slope at night, and the Kynesgrove graves dug up by morning. Somebody up there is collecting, and it isn't flowers.",
+   "notes": [
+    {
+     "id": "necro_workbook",
+     "kind": "notes",
+     "title": "A Necromancer's Workbook",
+     "author": "Venkar the Patient",
+     "at": "boss",
+     "pages": [
+      "#On the warmth of Eastmarch soil\nBodies buried near Kynesgrove keep astonishingly well. The heat of the ground rises through the grave and slows the rot, so that a man three months dead is as useful as one three days. Kyne, it seems, is a friend to my art.",
+      "#Specimens to date\nThrunvar of Kynesgrove: strong back, good for hauling. The widow Asta: frail, but her hands are steady. Two from the Ansilvund cell, traded for a pouch of grave-salts. The cell asks too many questions about what I intend.",
+      "#Intent\nAn army that does not need to eat, sleep or be paid. Ulfric would understand. Ulfric would say no, of course, but he would understand."
+     ]
+    },
+    {
+     "id": "apprentice_doubt",
+     "kind": "letter",
+     "title": "Letter Left Under a Skull",
+     "author": "Hela, apprentice",
+     "at": "chest",
+     "reveals": "ansilvund",
+     "pages": [
+      "To the cell at Ansilvund,\nMaster Venkar has stopped sending you bodies because he has started keeping them. He talks to them. He calls the widow 'mother'. I came here to learn a craft, not to watch a man build himself a family from the Kynesgrove graveyard.",
+      "If you still want what you were promised, come and take it. I will leave the lower gate unbarred on the night of the next new moon. I ask only that you take me with you when you go."
+     ]
+    }
+   ]
+  },
+  "witchmist_grove": {
+   "hook": "A misty hollow of hot springs and gnarled trees south of Kynesgrove, where a hunter built a lodge against good advice and the wisps have been dancing on its roof ever since.",
+   "rumour": "Witchmist Grove's pretty as a painting from the road. Go closer and the mist starts following you home. Sensible people stay on the road.",
+   "quest": "pl_witchmist_grove",
+   "notes": [
+    {
+     "id": "hunter_lodge_diary",
+     "kind": "diary",
+     "title": "Diary of Agnar Steam-Lodge",
+     "author": "Agnar Steam-Lodge",
+     "at": "chest",
+     "starts": "pl_witchmist_grove",
+     "pages": [
+      "#Rain's Hand\nBuilt the lodge between the two warmest pools. Best hunting in Eastmarch: elk come to drink every dawn and never think to look up. Kynesgrove folk say the grove belongs to someone. Kynesgrove folk say a lot of things.",
+      "#Last Seed\nLights over the water at night, blue and cold. My daughter Tova calls them pretty and tries to follow them. I have tied a bell to her door.",
+      "#Frostfall\nThe bell rang. Tova's bed is empty. The lights are dancing over the far pool and there is a tall pale shape among them, singing with my daughter's voice."
+     ]
+    },
+    {
+     "id": "grove_offering",
+     "kind": "inscription",
+     "title": "Words on a Weathered Offering Stone",
+     "at": "site",
+     "pages": [
+      "~Leave milk at the water's edge and walk away.\n~Leave bread at the root and do not look back.\n~Take nothing from the grove that the grove has not given.\n~The mist-mother counts her children every night, and she counts in a voice like yours.",
+      "^Cut by the first folk of Kynesgrove, who knew better than to build here.",
+      "Someone has left fresh offerings on the stone: a heel of bread, a cup of goat's milk gone to ice, and a child's wooden doll with a scrap of red ribbon tied around its waist. Under the doll, scratched with a hunting knife: 'Take this one instead. Give her back.'"
+     ]
+    }
+   ]
+  },
+  "cronvangr_cave": {
+   "hook": "A cave in the hills between Mixwater Mill and the dragon mound, where a nest of vampires drains the trappers' snares and, lately, the lovers of Mara's Eye Pond.",
+   "rumour": "Don't walk the Cronvangr hills after dark. A Dunmer lady with lovely manners lives in that cave, and everyone she invites to supper ends up on the menu.",
+   "quest": "pl_cronvangr_cave",
+   "notes": [
+    {
+     "id": "vampire_menu",
+     "kind": "list",
+     "title": "A Very Particular Larder List",
+     "author": "Mistress Hlevala",
+     "at": "boss",
+     "starts": "pl_cronvangr_cave",
+     "pages": [
+      "#For the Frostfall table\nFoxes from the riverside traps: adequate for the thralls, no more.\nThe trapper himself: fled to Kynesgrove. Pity. Lean men keep well.\nTwo lovers from Mara's Eye Pond, taken mid-vow: exquisite. The girl first. The boy ran, which was rude of him.",
+      "#For Sun's Dusk\nSomething from Mixwater Mill. Sawyers have a wonderful vigour. Perhaps the brother of the one the silver hunters took; grief sweetens the blood.",
+      "Mind the giants of Broken Limb Camp. They do not taste of anything but they hit very hard, and Venreth has not yet grown back his arm."
+     ]
+    },
+    {
+     "id": "thrall_note",
+     "kind": "letter",
+     "title": "A Thrall's Hidden Letter",
+     "author": "Sigrun of Mixwater",
+     "at": "chest",
+     "pages": [
+      "Ottar,\nIf you got away, do not come back for me. She is old and she is patient and she laughs when the others are cruel. She says I am to be kept for a special night.",
+      "If you must come back, bring a priest and bring fire and bring someone who is not in love with me, because love makes a man slow and she is very fast.\nI still have the ring. I have kept it in my mouth so they would not take it. I am wearing it now. I am still sworn."
+     ]
+    }
+   ]
+  },
+  "cradlecrush_rock": {
+   "hook": "A giants' camp on a bare crag at the western edge of Eastmarch, where a great flat stone is said to have been the cradle of the first giant child, and where wolves run that are not always wolves.",
+   "rumour": "The giants at Cradlecrush Rock are the old kind, quiet unless you near the stone. It's the woods below the rock I'd mind. Something there bites, and the bitten don't stay men.",
+   "notes": [
+    {
+     "id": "hunter_tracks",
+     "kind": "report",
+     "title": "Tracker's Report to the Hunt-Captain",
+     "author": "Arngeir Silver-Spur",
+     "at": "chest",
+     "reveals": "gallows_rock",
+     "pages": [
+      "Captain Silver-Wrist,\nFollowed the beast's trail from the wolf-kill at Cradlecrush Rock to the river and lost it at the water. Found the same print, a man's foot halfway to a paw, outside the sawyers' bunkhouse at Mixwater Mill.",
+      "The giants did not interfere. One of them watched me the whole time from beside its stone, and when I went too near the stone it lifted its club, not to strike, only to show me. I took the hint. I recommend we all take it.",
+      "Bring the chains to Gallows Rock. I will point out our man."
+     ]
+    },
+    {
+     "id": "giant_cradle",
+     "kind": "inscription",
+     "title": "Marks Ground into the Cradle Stone",
+     "at": "site",
+     "pages": [
+      "There are no letters on the great stone, only shapes worn deep by many hands: a large hand and a small one, over and over, pressed side by side into the rock until it took their outline.",
+      "A Nord has cut beneath, more recently: 'Counted forty-one pairs. My grandfather counted thirty-nine. They are still adding to it.'",
+      "And lower still, in a hasty, frightened hand: 'Wolf-tracks all round the stone last full moon, and one set that started as a wolf's and ended as a man's bare feet, going east toward the river and Mixwater Mill. The giants would not come near them. Neither will I.'"
+     ]
+    }
+   ]
+  },
+  "steamcrag_camp": {
+   "hook": "A giants' camp among the steaming pools south of Kynesgrove, where the herds of mammoths wallow in warm water and the giants guard the springs as fiercely as any jarl guards a hall.",
+   "rumour": "The Steamcrag giants let mammoths bathe in the hot pools all winter. Kynesgrove herders say a mammoth that's had its bath is the happiest creature in Skyrim. Don't test that.",
+   "notes": [
+    {
+     "id": "herder_account",
+     "kind": "letter",
+     "title": "A Herder's Letter Home",
+     "author": "Ottar of Kynesgrove",
+     "at": "chest",
+     "pages": [
+      "Father,\nI am sorry I ran. I am sorry I ran from the pond and left Sigrun, and I am sorry I have not come home since. I am living rough near the Steamcrag springs. The giants tolerate me so long as I do not touch the water or the mammoths.",
+      "One of them, an old female with a broken tusk necklace, leaves bones by my fire sometimes, picked clean. I think she is feeding me. I think she thinks I am a stray.",
+      "Tell Sigrun's mother at Mixwater that I am going back for her daughter when I am brave enough. Tell her I am almost brave enough."
+     ]
+    },
+    {
+     "id": "spring_rules",
+     "kind": "notes",
+     "title": "Notes on Giant Custom",
+     "author": "Calcelmo's correspondent, Brother Aelius",
+     "at": "chest",
+     "pages": [
+      "Observed at the Steamcrag springs over nine days: the giants bathe in strict order, eldest first, mammoths last. A juvenile who broke the order was struck once, gently, and sat apart for the rest of the day. No sound was made by any party.",
+      "When a mammoth calf was taken by a sabre cat, the clan carried the calf's body to the hottest pool and left it there. They watched it until the steam hid it. I have seen Nord funerals with less ceremony and more noise.",
+      "I conclude that the giants are not savage, merely private. I further conclude that I am never coming back here."
+     ]
+    }
+   ]
+  },
+  "bonestrewn_crest": {
+   "hook": "A wind-scoured crest south of Witchmist Grove littered with the cracked bones of mammoths and men, where a dragon has made its roost and the giants no longer dare to graze.",
+   "rumour": "You can see the bones on Bonestrewn Crest from the Darkwater road. Mammoth ribs, mostly. Some that aren't. And something big circling up there at dusk.",
+   "quest": "pl_bonestrewn_crest",
+   "notes": [
+    {
+     "id": "adventurer_journal",
+     "kind": "journal",
+     "title": "Journal of Eydis the Bold",
+     "author": "Eydis the Bold",
+     "at": "boss",
+     "starts": "pl_bonestrewn_crest",
+     "pages": [
+      "#18th of Frostfall\nCamped below Bonestrewn Crest with Arvel and the twins. The giants at Steamcrag say a dragon came in Hearthfire and took the crest for its own. They call it a word I cannot spell. Arvel says it sounded like 'Sahqovul'. Arvel is guessing.",
+      "#19th of Frostfall\nWe went up at dawn. The dragon was asleep on a bed of mammoth tusks. Arvel said we could take it sleeping. The twins agreed. I agreed. We were all very brave at dawn.",
+      "#19th, later\nArvel is ash. The twins ran. My leg is broken and I am writing this under a mammoth's ribcage. It knows I am here. It is waiting until it is hungry."
+     ]
+    },
+    {
+     "id": "shout_marks",
+     "kind": "inscription",
+     "title": "Claw-Marks on a Boulder",
+     "at": "site",
+     "pages": [
+      "Deep gouges in the boulder at the crest's peak, too regular to be accident. Someone who knew the dragon tongue has scratched a translation beside them in charcoal:",
+      "'I am Sahqovul. The crest is mine. The bones are my count. Come and be counted.'\n\nBeneath, in a different hand: 'Thirty-one tallies. I have stopped adding to them. There is no room.'\n\nAnd at the very bottom, scratched with a broken arrowhead: 'Arvel, the twins, and me. Make it thirty-four. If anyone kills it, cut one more mark, for us.'"
+     ]
+    }
+   ]
+  },
+  "mzulft": {
+   "hook": "A Dwemer ruin in the steaming hills south-east of Kynesgrove, its brass domes still warm from the machines below, where scholars come to study the Oculory and the Falmer come to feed on the scholars.",
+   "rumour": "Mzulft? Scholars go in, Falmer come out. There's a Breton fellow from the Geographical Society asking about his partner who went down in Hearthfire. I didn't have the heart to tell him.",
+   "quest": "pl_mzulft",
+   "notes": [
+    {
+     "id": "survey_journal",
+     "kind": "journal",
+     "title": "Survey Journal of Livia Cassinia",
+     "author": "Livia Cassinia, Imperial Geographical Society",
+     "at": "chest",
+     "starts": "pl_mzulft",
+     "pages": [
+      "#3rd of Hearthfire\nEntered Mzulft by the south door. Bertrand stayed behind to finish his map of the approaches. He says I am too eager. I say a ruin that has waited four thousand years can wait while he sketches, but I cannot.",
+      "#5th of Hearthfire\nThe lower halls are warm and dry. The machines are dormant, mostly. I have taken a rubbing of the great resonance plate in the boiler hall: the Dwemer script on it speaks of 'tuning the earth', which I take to be poetic.",
+      "#8th of Hearthfire\nNot poetic. Something tuned. Something is answering. I have heard footsteps and seen no one. I am going down once more for the plate itself and then I will go home to Bertrand and let him say he told me so."
+     ]
+    },
+    {
+     "id": "falmer_shrine",
+     "kind": "inscription",
+     "title": "Falmer Scratchings on a Dwemer Door",
+     "at": "chest",
+     "pages": [
+      "Crude marks gouged into the brass by claws or bone knives, beside a translation chalked by a careful scholar's hand:",
+      "'The singers below took our eyes. Now we take theirs. The brass is ours. The warm halls are ours. The sound in the deep is our god's voice and it is hungry.'",
+      "And under the translation, the scholar's own note: 'They have built their shrine against the resonance pipes. They believe the hum is a god. I am no longer certain they are wrong.'"
+     ]
+    },
+    {
+     "id": "society_letter",
+     "kind": "letter",
+     "title": "Letter from the Geographical Society",
+     "author": "Bertrand Vanne",
+     "at": "boss",
+     "reveals": "uttering_hills_cave",
+     "pages": [
+      "Livia,\nI write this not knowing whether it will reach you. I was taken on the road by bandits who live in the Uttering Hills; I bought my freedom with my map and my boots. The map I can redraw. You I cannot.",
+      "If you find this, come out by the south door and walk north to Kynesgrove. I will be at the Braidwood Inn every evening until the snows close the road, and then, Mara help me, I will come in after you."
+     ]
+    }
+   ]
+  },
+  "broken_limb_camp": {
+   "hook": "A giants' camp on the hills south of Mixwater Mill, where a one-tusked giant has started smashing log carts on the river road, and the mill wants it dead without saying why.",
+   "rumour": "The giant at Broken Limb Camp's been smashing carts. Gralfr at the mill put a bounty on it. Funny, though: it never touched a cart in ten years before Frostfall.",
+   "notes": [
+    {
+     "id": "poachers_boast",
+     "kind": "letter",
+     "title": "Boastful Letter, Never Sent",
+     "author": "Sten, carter of Mixwater Mill",
+     "at": "chest",
+     "pages": [
+      "Brother,\nYou owe me five septims. I told you we would get a mammoth before you got a wife. Gralfr, Hroald and I took a calf by the Broken Limb pools on the 12th of Frostfall. Gralfr says the tusks will sell in Windhelm for more than a season's timber.",
+      "The big one with the single tusk came roaring after us, but we were across the river before it reached the bank. It stood in the water and howled. Gralfr laughed at it.",
+      "Two days later it found the river road. I am not laughing now. Gralfr says we tell nobody about the calf. Gralfr says a bounty is cheaper than the truth."
+     ]
+    },
+    {
+     "id": "calf_cairn",
+     "kind": "inscription",
+     "title": "Shapes on a Small Stone Cairn",
+     "at": "site",
+     "pages": [
+      "A low cairn of river stones beside the giants' pool, too small for a man, and on its top stone a mammoth's milk-tooth set in a hollow, surrounded by handprints in red clay: one large hand, pressed again and again, as though someone had not known how to stop.",
+      "Around the cairn the snow is trodden flat in a perfect circle, as if something enormous has walked around it every night since.",
+      "Wedged between two stones, half-hidden, lies a broken spear-shaft with a Mixwater Mill timber-brand burned into the wood, and a twist of rope of the kind the mill's carters use to lash their loads."
+     ]
+    }
+   ]
+  },
+  "abandoned_prison": {
+   "hook": "A gutted stone prison tower on the hills west of Fort Amol, abandoned since a fever swept its cells, though lamps still burn behind the bars on certain nights.",
+   "rumour": "The Abandoned Prison's not as abandoned as you'd think. Lamps in the cells, and the Lost Knife boys carry crates up there and come back without them.",
+   "notes": [
+    {
+     "id": "warden_last",
+     "kind": "report",
+     "title": "Last Report of the Warden",
+     "author": "Warden Ottmar Rime-Hand",
+     "at": "chest",
+     "pages": [
+      "#4E 188, Sun's Dusk\nTo the Jarl of Windhelm. Fever in cells four through nine. The healer from Fort Amol will not come. The prisoners beg for water and I have none to spare that is clean.",
+      "#Later\nI have opened the cells. Let the Jarl hang me for it. Better they run and die in the snow than die in here like rats in a barrel. Some of them thanked me. Most of them only ran.",
+      "#Later still\nI am staying. Someone has to keep the lamps lit, in case any of them come back."
+     ]
+    },
+    {
+     "id": "smuggler_tally",
+     "kind": "list",
+     "title": "Crate Tally in a Smuggler's Hand",
+     "author": "Ysolde Knife-Tongue",
+     "at": "boss",
+     "reveals": "lost_knife_hideout",
+     "pages": [
+      "Up from Lost Knife Hideout this month: 6 crates of Fort Amol grain (the garrison will never count), 2 casks of Brandy-Mug cider, 1 crate of Imperial arrows bought off the camp quartermaster, no questions asked.",
+      "Kept here because no Stormcloak will set foot in a fever-house, and no Imperial knows it's here. The old lamps make a fine excuse. Folk think it's ghosts. Let them.",
+      "Reminder: stop the new boys whispering to the warden's bones. It is bad for discipline."
+     ]
+    }
+   ]
+  },
+  "eastmarch_imperial_camp": {
+   "hook": "A Legion war camp pitched in the hot-spring hills south-east of Mzulft, deep in Ulfric's own hold, its soldiers watching Windhelm's roads and very much unwelcome.",
+   "rumour": "There's a Legion camp past Mzulft, cheeky as you like, right on Ulfric's doorstep. The Stormcloaks say they'll burn it out by spring. They said that last spring too.",
+   "notes": [
+    {
+     "id": "camp_report",
+     "kind": "report",
+     "title": "Dispatch to Legion Command, Solitude",
+     "author": "Legate Ancus Varo",
+     "at": "chest",
+     "starts": "pl_stony_creek_cave",
+     "reveals": "stony_creek_cave",
+     "pages": [
+      "#7th of Frostfall, 4E 201\nCamp holds. Rebel patrols probe the north perimeter every third night and withdraw. Morale fair, rations poor. The hot springs keep the men from freezing; they also make the camp smell like a boiled egg.",
+      "Supply: two wagons of arrows and salt pork lost this month at the Stony Creek ford, eighty paces from our own pickets. Not rebels. Bandits from the cave south of camp, who know our schedule better than our sergeants do.",
+      "I cannot spare a cohort to clear one cave. I can spare coin to anyone who will. Recommend a reward be posted at the camp gate for the head of their chief, a Redguard who calls herself Nazira the Ford-Keeper."
+     ]
+    },
+    {
+     "id": "soldier_letter",
+     "kind": "letter",
+     "title": "A Legionary's Letter to Cheydinhal",
+     "author": "Marcus Tullio, legionary",
+     "at": "chest",
+     "pages": [
+      "Dear Mother,\nYou asked what Skyrim is like. It is like Cheydinhal if Cheydinhal had been sat on by a mountain and then set on fire underneath. The ground steams. The rivers are warm. The people are not.",
+      "We are camped near a Dwemer ruin called Mzulft. Old Decius says there are blind elves in it who eat men. Old Decius says many things, but I have noticed he sleeps with his sword these days.",
+      "Do not worry. Tell Father I polish my boots every morning. Tell Julia I have not met anyone. Tell yourself I will be home for Midyear, and I will try to make it true."
+     ]
+    }
+   ]
+  },
+  "eldergleam_sanctuary": {
+   "hook": "A hidden cave north of Darkwater Crossing that opens onto a sunlit hollow and the Eldergleam itself, the oldest tree in Skyrim, tended by pilgrims and guarded by its spriggans.",
+   "rumour": "Pilgrims walk all the way from Cyrodiil to touch the Eldergleam. Just don't let them see you with an axe anywhere near the hollow. The spriggans don't take kindly to it, and neither do the pilgrims.",
+   "notes": [
+    {
+     "id": "pilgrim_book",
+     "kind": "book",
+     "title": "Pilgrims' Book of the Eldergleam",
+     "at": "site",
+     "pages": [
+      "Written by many hands in one leather-bound book chained to a root:\n'Came from Bravil to see it. Wept. Not ashamed.' - Junia\n'Asked it to heal my son's lungs. Will write when I know.' - Hrodmar of Darkwater Crossing",
+      "'Son is well. I walked back here barefoot to say so. Feet are not well. Worth it.' - Hrodmar\n'The spriggans watched me the whole time. One of them touched my hair. I have never felt so carefully examined.' - an anonymous Bosmer",
+      "'To whoever brought an axe in here on the 4th of Frostfall: we found what was left of you, and buried it at the cave mouth, which is more than the tree would have done.' - the keepers"
+     ]
+    },
+    {
+     "id": "druid_verse",
+     "kind": "poem",
+     "title": "Verse Cut into the Cave Mouth",
+     "at": "site",
+     "pages": [
+      "~Before the elves, before the men,\n~Before the Dwemer sang below,\n~The Gleam stood tall in Kyne's green glen\n~And drank the springs and let them flow.",
+      "~Walk soft, walk slow, and leave your steel;\n~The roots go deeper than your graves.\n~What the Gleam gives, the Gleam may heal;\n~What the Gleam keeps, the Gleam still saves.",
+      "~And if you come with fire or blade\n~To take a bough to warm your hall,\n~The path you walked will fail and fade,\n~And you will find no home at all."
+     ]
+    }
+   ]
+  },
+  "fort_amol": {
+   "hook": "A Stormcloak fort guarding the western road to Darkwater Pass, stripped of its garrison to reinforce Windhelm, and quietly taken over by the cutthroats of Lost Knife Hideout.",
+   "rumour": "Ulfric pulled the soldiers out of Fort Amol for Windhelm and didn't leave so much as a dog. Now there's smoke from the towers again, and it isn't blue cloaks lighting it.",
+   "quest": "pl_fort_amol",
+   "notes": [
+    {
+     "id": "withdrawal_order",
+     "kind": "orders",
+     "title": "Withdrawal Order, Fort Amol",
+     "author": "Galmar Stone-Fist, by his clerk",
+     "at": "chest",
+     "pages": [
+      "To the Captain of Fort Amol, from Galmar Stone-Fist, by the hand of his clerk:\nYou will withdraw your full garrison to Windhelm by the 1st of Frostfall. Leave the fort's stores sealed. Leave the regimental standard in the commander's chest; it is too old to carry and too proud to burn.",
+      "Should the Legion advance from Darkwater Pass, the fort is to be considered lost and retaken later. Should bandits advance on it, the fort is to be considered beneath our notice until spring.\n^For Skyrim."
+     ]
+    },
+    {
+     "id": "bandit_boast",
+     "kind": "letter",
+     "title": "Letter from a New Fort Commander",
+     "author": "Ulfgar the Unwashed",
+     "at": "boss",
+     "starts": "pl_fort_amol",
+     "pages": [
+      "Ysolde,\nYou said a fort was too big for us. I say a fort is just a cave somebody bothered to stack. We've got walls, a well, sealed stores of salt beef, and a blue banner with a bear on it that I'm using as a blanket.",
+      "Send the rest of the boys up from Lost Knife Hideout. With the Stormcloaks off in Windhelm and the Legion stuck behind Darkwater Pass, nobody's coming for Fort Amol before the thaw. We'll be lords by Morning Star.",
+      "P.S. The bear banner smells of old men. Bring a new blanket."
+     ]
+    }
+   ]
+  },
+  "stony_creek_cave": {
+   "hook": "A bandit cave by a cold creek south of the Eastmarch Imperial Camp, where a Redguard chief has grown fat on the Legion's supply wagons without either army ever catching her.",
+   "rumour": "Stony Creek Cave's chief robs the Legion and sells the loot to the Stormcloaks. Both sides want her dead and both sides keep buying. That's a businesswoman.",
+   "quest": "pl_stony_creek_cave",
+   "notes": [
+    {
+     "id": "nazira_accounts",
+     "kind": "ledger",
+     "title": "The Ford-Keeper's Accounts",
+     "author": "Nazira the Ford-Keeper",
+     "at": "boss",
+     "pages": [
+      "#Frostfall\nTaken at the ford: 400 arrows, 12 barrels salt pork, 1 legate's cloak (fur-lined, very fine, my new favourite).\nSold to the Stormcloak picket at Kynesgrove: 300 arrows at 2 septims the dozen. Kept 100. Never sell all your arrows to a man who might be your enemy next week.",
+      "Salt pork to the Cragslane boys in exchange for a cask of moon sugar. I do not touch it myself. I sell it to men who cannot stop touching it.",
+      "Rule of the cave: we do not kill legionaries unless we must. Dead men's officers come looking. Robbed men's officers only write letters."
+     ]
+    },
+    {
+     "id": "recruit_note",
+     "kind": "notes",
+     "title": "Crumpled Note in a Bedroll",
+     "author": "Jorn, new recruit",
+     "at": "chest",
+     "pages": [
+      "Ma, I said I'd tell you when I found steady work. It's steady. I stand at the ford, wave at the wagons, and when the Imperials stop, the others come out of the rocks. Nobody's been hurt. Mostly.",
+      "Nazira says I've a good honest face, and that's worth more than a sword in this trade. I don't know if that's a compliment. I've decided to take it as one.\nI'm sending you ten septims with this. Don't ask where it came from. Buy flour, and fix the roof before Sun's Dusk, and don't tell Uncle Bersi I'm south of Mzulft. Burn this."
+     ]
+    }
+   ]
+  },
+  "lost_knife_hideout": {
+   "hook": "A smugglers' cave in the hills south-west of Fort Amol, where the Lost Knife gang trades in everything the war has made scarce and lately fancies itself an army.",
+   "rumour": "Lost Knife Hideout? You can buy anything there: arrows, grain, a man's name off a Jarl's list. Lately they're buying, too. They want swords.",
+   "notes": [
+    {
+     "id": "ysolde_orders",
+     "kind": "orders",
+     "title": "Orders from Ysolde Knife-Tongue",
+     "author": "Ysolde Knife-Tongue",
+     "at": "boss",
+     "reveals": "fort_amol",
+     "pages": [
+      "Ulfgar has taken Fort Amol with eleven men and a bad smell. I am told he sleeps under the Stormcloak standard. If he lives to spring, I will be astonished, and I will be his partner.",
+      "Until then: half the grain goes up to the Abandoned Prison, half to Fort Amol. The arrows go to the fort. The cider goes to me.",
+      "Anyone caught selling our routes to Darkwater Crossing or the Imperial camp loses their knife hand. We are the Lost Knives. We can afford to lose a few more."
+     ]
+    },
+    {
+     "id": "initiation",
+     "kind": "inscription",
+     "title": "Words Cut Over the Hideout Door",
+     "at": "chest",
+     "pages": [
+      "^WE LOST OUR KNIVES ONCE",
+      "Below, in a dozen different hands, the names of members and the places they lost a blade: 'Hakon, at Refugees' Rest.' 'Ysolde, in a Riften magistrate's ribs.' 'Old Borkul, at Mistwatch, in a man who said no.'",
+      "And at the bottom, the gang's oath, cut deep: 'A knife lost is a debt owed. Somebody always pays.'",
+      "A newer name has been added under the oath, the cuts still pale: 'Ulfgar, at Fort Amol, in a Stormcloak bedroll.' Someone has scored a line through the word 'bedroll' and written 'banner' above it, and someone else has drawn a very rude picture beside it."
+     ]
+    }
+   ]
+  },
+  "kagrenzel": {
+   "hook": "A lonely Dwemer shaft in the far south-east hills, a single brass door over a drop so deep that dropped torches go out before they land, and something below that climbs.",
+   "rumour": "Kagrenzel's just a hole with a door on it. The Imperials lowered a man down on a rope last month. The rope came back. Cut clean.",
+   "quest": "pl_kagrenzel",
+   "notes": [
+    {
+     "id": "rope_log",
+     "kind": "report",
+     "title": "Sergeant's Report on the Kagrenzel Descent",
+     "author": "Sergeant Porcia Avitus",
+     "at": "chest",
+     "starts": "pl_kagrenzel",
+     "pages": [
+      "#22nd of Hearthfire\nOn the Legate's orders, legionary Gaius Septimus lowered into the Kagrenzel shaft on two hundred feet of rope to assess the ruin for use as a store. Signal agreed: two tugs for well, three for haul.",
+      "At a hundred and forty feet: two tugs. At a hundred and eighty: two tugs. At two hundred: three tugs, then many, then none. Rope hauled up. End cut cleanly as if by a blade. No blood.",
+      "Septimus carried the cohort's token on a chain at his neck. The Legate wants it recovered. I want Septimus recovered, but I am a sergeant, and I know which want carries weight."
+     ]
+    },
+    {
+     "id": "dwemer_plaque",
+     "kind": "inscription",
+     "title": "Translated Dwemer Plaque",
+     "author": "chalked by an unknown scholar",
+     "at": "boss",
+     "pages": [
+      "Above the shaft, a brass plaque in Dwemer script, with a scholar's chalk translation scrawled beneath it on the stone:",
+      "'Kagrenzel. Descent to the lower works. The guardians are tuned to the voices of the clan. Those who are not of the clan, descend at the pleasure of the guardians.'",
+      "And under that, smaller: 'The clan is gone. The guardians are not. Draw your own conclusions, and then draw your sword.'\n\nA last line, in a cramped Imperial hand, the chalk worn almost away: 'Septimus, if you climb back up this far, we lowered a second rope at dawn. Pull twice.'"
+     ]
+    }
+   ]
+  },
+  "cragslane_cavern": {
+   "hook": "A cavern in the south-eastern hills where a skooma ring runs a wolf-fighting pit for gamblers from Windhelm and Riften, and where losing bettors are fed to the winners.",
+   "rumour": "Rich fellows from Windhelm go down to Cragslane Cavern to watch wolves tear each other apart. Some of those rich fellows come back poorer. Some don't come back.",
+   "quest": "pl_cragslane_cavern",
+   "notes": [
+    {
+     "id": "pit_ledger",
+     "kind": "ledger",
+     "title": "The Wolf-Pit Book",
+     "author": "Dro'Marash, pit-master",
+     "at": "boss",
+     "starts": "pl_cragslane_cavern",
+     "pages": [
+      "#Frostfall\nFight the first: Greyjaw against the Ansilvund bitch. Greyjaw. 140 septims staked, 90 to the house.\nFight the second: Greyjaw against two of the Mixwater mutts. Greyjaw. 210 staked, 160 to the house.",
+      "Debts: the Windhelm Shatter-Shield cousin owes 400 and has stopped coming. Send the boys to remind him. The Riften man owes 120 in moon sugar. Accept it; we will sell it again at Stony Creek.",
+      "This one notes: Greyjaw is tired. A tired wolf loses. A losing wolf is dinner for the next one. This one does not like that, but this one likes going hungry less."
+     ]
+    },
+    {
+     "id": "addict_letter",
+     "kind": "letter",
+     "title": "Letter to a Sister in Windhelm",
+     "author": "Hrongar Shatter-Shield, a cousin",
+     "at": "chest",
+     "pages": [
+      "Sister,\nI need four hundred septims and I cannot tell you why. I can tell you that the Khajiit at Cragslane are patient people, and that patience has an end, and that I have found the end of it.",
+      "I only meant to watch one fight. Then I only meant to win back what I lost on it. Then there was the sugar, which only meant to help me sleep. Everything only meant one thing.",
+      "Do not tell Father. Do send the money. Do not come here yourself, whatever happens."
+     ]
+    }
+   ]
+  },
+  "mistwatch": {
+   "hook": "A tall stone tower south of the Atronach Stone, seized by bandits who watch the Darkwater ore road from its top and know, somehow, exactly which cart carries gold.",
+   "rumour": "Mistwatch bandits only ever take the gold carts from Darkwater Crossing. Never the iron, never the empties. That's not luck. That's somebody talking.",
+   "quest": "pl_mistwatch",
+   "notes": [
+    {
+     "id": "toll_tally",
+     "kind": "list",
+     "title": "Mistwatch Tally Sheet",
+     "author": "Brolfr Mistcaller",
+     "at": "boss",
+     "starts": "pl_mistwatch",
+     "pages": [
+      "#Payments to our friend at the Crossing\n9th of Hearthfire: 30 septims for word of the gold cart. Gold taken: 2 loads.\n1st of Frostfall: 40 septims, he asked for more. Gold taken: 3 loads.\n16th of Frostfall: no word sent. Cart came through with a spear on it. Our friend is getting nervous.",
+      "Our friend signs himself 'E.' Whoever he is, he lives close enough to the Goldenrock Mine to know which day the ore is weighed, and he wants his coin left under the third stone of the ford post.",
+      "Note: if E. grows a conscience, we sell his name to the mine. That way we get paid twice."
+     ]
+    },
+    {
+     "id": "mage_cache_note",
+     "kind": "treasure",
+     "title": "A Mage's Hurried Note",
+     "author": "Thessaly Vane",
+     "at": "chest",
+     "starts": "pl_the_atronach_stone",
+     "reveals": "the_atronach_stone",
+     "pages": [
+      "I was meditating at the Atronach Stone when these brutes came down from the tower. They took my purse, my robe and my dignity, in that order. They did not take what matters.",
+      "My soul gems and my coin are buried in a sealed pot, a dozen paces south of the Stone, where the snow never settles because the ground is warm. If I am still their 'guest' by the time anyone reads this, take what you find and spend some of it on getting me out."
+     ]
+    }
+   ]
+  },
+  "ansilvund": {
+   "hook": "An old Nord barrow in the south-eastern hills, opened by a cell of necromancers who believe its sleeping chieftain can be woken, and who are very close to being right.",
+   "rumour": "Robed folk came to Ansilvund in Last Seed with mule-loads of salt and books. Since then the hunters say the barrow sighs at night, like something stretching after a long sleep.",
+   "quest": "pl_ansilvund",
+   "notes": [
+    {
+     "id": "cell_journal",
+     "kind": "journal",
+     "title": "Journal of the Ansilvund Cell",
+     "author": "Sister Thyra of the Cell",
+     "at": "chest",
+     "starts": "pl_ansilvund",
+     "pages": [
+      "#12th of Last Seed\nThe outer seals broken. The barrow's lord is named on every lintel: Hrodvald Iron-Breath, who took this valley from the snow elves and was buried with his oath-guard around him.",
+      "#2nd of Hearthfire\nVenkar at Cragwallow Slope has stopped trading us bodies. Without fresh vessels we must wake the old ones. Hrodvald's guard stir at the sound of his name. Hrodvald himself has not.",
+      "#Frostfall\nWe have found the inner chamber. Master Feldir says three more nights of chanting. I counted the guard and counted us. They are more. I have not said so to Master Feldir."
+     ]
+    },
+    {
+     "id": "barrow_lintel",
+     "kind": "inscription",
+     "title": "Carving Over the Inner Door",
+     "at": "boss",
+     "pages": [
+      "Old runes, deep-cut, in a hand that pressed hard:\n'Hrodvald lies here, who drove the elves from the warm valleys. His guard lies with him. They sleep sworn. They wake sworn. Whoever wakes them is their lord until the oath is broken, and the oath is broken only by the blade that sealed it.'",
+      "Beneath, scratched fresh: 'Feldir thinks that makes him lord. Feldir has not read the part about the blade. The blade hangs on the eldest of the guard, and the guard does not sleep as deeply as the master.'"
+     ]
+    },
+    {
+     "id": "lover_letter",
+     "kind": "letter",
+     "title": "A Necromancer's Letter Home",
+     "author": "Aron, apprentice of the cell",
+     "at": "chest",
+     "pages": [
+      "Helga,\nYou were right. I am not cut out for this. I joined because Master Feldir promised me a way to bring back Mother. Now I spend every night chanting at a corpse in a crown and he has stopped mentioning Mother at all.",
+      "If I come home in spring, marry me. If I don't, marry the smith's boy; he has nice teeth and no interest in the dead.\nSister Thyra counts the oath-guard every night and goes pale. I have started counting the steps to the outer door instead. There are two hundred and twelve. I could run them in the dark."
+     ]
+    }
+   ]
+  },
+  "snapleg_cave": {
+   "hook": "A hagraven's den in the gorge below Darkwater Pass, where a missing hunter's horn sounds at night, calling his friends in one by one.",
+   "rumour": "There's a horn blowing at night down by Snapleg Cave, and it's Orgnar's horn. Orgnar's been dead a month. Don't you dare go and answer it.",
+   "quest": "pl_snapleg_cave",
+   "notes": [
+    {
+     "id": "hagraven_recipe",
+     "kind": "notes",
+     "title": "Feather-Bound Charm Recipe",
+     "author": "Mother Skrapa",
+     "at": "boss",
+     "pages": [
+      "To make a calling-horn:\nTake the horn of a man who hunted. Take his breath, the last one, in a bladder. Blow the breath through the horn under no moon. Those who knew the man will hear him calling and come.",
+      "Already come: the hunter's brother, the hunter's friend, a stupid boy who thought it was his father.\nStill to come: the hunter's woman at the Crossing. She is strong. Her heart will be strong. It will make a fine charm.",
+      "When she is here, burn the horn. Waste is a sin, but greed is a worse one."
+     ]
+    },
+    {
+     "id": "orgnar_last",
+     "kind": "letter",
+     "title": "Orgnar's Last Words",
+     "author": "Orgnar Bent-Bow",
+     "at": "chest",
+     "pages": [
+      "Haldis,\nI am writing this on the back of the mine bill you gave me to pay, which I never paid, so you will not be surprised at this, at least.",
+      "The witch has my horn. She blows it with something that is not my breath and calls out with something that is not my voice. If you hear me in the hills, it is not me. Stay at the Crossing.",
+      "I know you will not stay at the Crossing. So bring someone better with a blade than I was."
+     ]
+    }
+   ]
+  },
+  "the_atronach_stone": {
+   "hook": "One of the ancient standing stones, raised on a warm hillside north of Mistwatch, which deepens a mage's well of magicka at the price of slower recovery.",
+   "rumour": "Mages walk all the way from Winterhold to stand at the Atronach Stone. Most come back with more power. Some come back short a purse; the Mistwatch lot rob them on the road.",
+   "quest": "pl_the_atronach_stone",
+   "notes": [
+    {
+     "id": "stone_meditation",
+     "kind": "notes",
+     "title": "On the Atronach, A Meditation",
+     "author": "Thessaly Vane, Adept",
+     "at": "site",
+     "pages": [
+      "The Atronach is the Golem among the constellations, a vessel that absorbs what is thrown at it. Those born beneath it are deep wells that fill slowly. The Stone grants a similar gift to those who were not so fortunate in their birth.",
+      "I have stood here three nights. On the first I felt nothing. On the second I felt the ground's warmth climbing into my fingers. On the third I felt as though I were a cup someone was patiently making larger.",
+      "Note: the hill is pleasant, the view fine, and the tower to the south full of thieves. Do not meditate with your purse on the ground."
+     ]
+    }
+   ]
+  },
+  "dragon_mound_angas_mill": {
+   "hook": "An ancient dragon burial mound in the hills north-west of Anga's Mill, older than any hold, its stones blackened as though something has stirred beneath them.",
+   "rumour": "The mound above Anga's Mill was always just a hump in the snow. Now the snow won't settle on it. Melts as fast as it falls.",
+   "notes": [
+    {
+     "id": "woodcutter_note",
+     "kind": "warning",
+     "title": "Woodcutter's Warning on a Stake",
+     "at": "site",
+     "pages": [
+      "^KEEP OFF THE MOUND",
+      "My grandfather's grandfather was told by his grandfather that the Tongues of old buried a dragon here with its name cut into a stone, and the name was the only thing that kept it down.",
+      "On the 3rd of Frostfall the stone with the name split clean in two. I heard it from Anga's Mill like a tree coming down. Since then the snow will not lie on the mound, and the ravens that roosted on it have gone to the mill roof instead. Cut your wood somewhere else this winter.\n^Brynjolf the Cutter, of Anga's Mill"
+     ]
+    }
+   ]
+  },
+  "dragon_mound_bonestrewn_crest": {
+   "hook": "A dragon burial mound on the ridge west of Bonestrewn Crest, its stone lid long since cracked, perhaps the very bed from which the crest's dragon rose.",
+   "rumour": "That old mound by Bonestrewn Crest's empty. Lid's off. And there's a dragon roosting next door. I'm no scholar, but I can add.",
+   "notes": [
+    {
+     "id": "scholar_measure",
+     "kind": "notes",
+     "title": "Measurements at an Opened Mound",
+     "author": "Brother Aelius of Cyrodiil",
+     "at": "site",
+     "reveals": "bonestrewn_crest",
+     "pages": [
+      "The lid stone has not been broken from outside. The fractures radiate outward from the centre, as though pushed. Within: no bones, a great deal of ash, and claw marks on the inner walls.",
+      "Length of the hollow: sixty-one feet. Wingspan, by inference: considerable. Direction of departure, by scorch marks on the heather: east, toward Bonestrewn Crest, a hundred and twenty paces away.",
+      "I have stopped measuring. I recommend that whoever reads this also stop measuring, put away their quill, and walk west at a steady, unremarkable pace."
+     ]
+    }
+   ]
+  },
+  "dragon_mound_witchmist_grove": {
+   "hook": "A dragon burial mound on the slopes north-west of Witchmist Grove, where the mist of the springs gathers thickest and the old folk of Kynesgrove will not let their goats graze.",
+   "rumour": "The goats won't go near the mound above Witchmist Grove. Goats'll eat a boot. They won't eat the grass on that mound. Tells you something.",
+   "notes": [
+    {
+     "id": "goatherd_tale",
+     "kind": "notes",
+     "title": "Goatherd's Notes, Scratched on Bark",
+     "author": "Little Runa of Kynesgrove",
+     "at": "site",
+     "pages": [
+      "Things that are true about the mound: The goats will not eat there. The mist from Witchmist Grove comes up the slope and sits on it like a hat. On cold mornings there is no frost on it, only wet.",
+      "Things Grandfather says are true about the mound: Something is sleeping inside with its name in its mouth. If you say the name you wake it. Nobody knows the name. That is the point.",
+      "I put my ear to it once. It was warm. I did not hear anything. Grandfather says that is because it was holding its breath."
+     ]
+    }
+   ]
+  },
+  "dragon_mound_kynesgrove": {
+   "hook": "An ancient dragon burial mound on the ridge east of Kynesgrove, its great stones overlooking the village like a sleeping beast's spine.",
+   "rumour": "The mound above Kynesgrove's been there longer than Windhelm. The miners say on still nights the ground hums from the mound to the mine. I've felt it. Through my boots.",
+   "notes": [
+    {
+     "id": "keeper_tradition",
+     "kind": "book",
+     "title": "Customs of the Kynesgrove Mound",
+     "author": "set down by Sidgar, shrine-keeper",
+     "at": "site",
+     "pages": [
+      "From the oldest days, the families of Kynesgrove have kept a custom at the mound: on the first day of First Seed, each household brings a cup of spring water and pours it out on the highest stone, for Kyne, who wept the springs.",
+      "The children are told that the water keeps the dragon cool and drowsy. The adults say it is only a custom. The adults also never miss it.",
+      "This year, for the first time in my keeping, the water hissed as it touched the stone and rose as steam. I have not told the village. I have only begun to pour twice as much."
+     ]
+    }
+   ]
+  },
+  "dragon_mound_mzulft": {
+   "hook": "A dragon burial mound on the steaming slopes south-west of Mzulft, half-buried in old Dwemer rubble, as though the deep folk once tried to dig it out and thought better of it.",
+   "rumour": "There's a dragon mound by Mzulft with Dwemer gears in the dirt around it. Scholars argue over why. I reckon even the Dwemer knew better than to wake one.",
+   "notes": [
+    {
+     "id": "dwemer_survey",
+     "kind": "notes",
+     "title": "Field Notes on Dwemer Rubble",
+     "author": "Livia Cassinia",
+     "at": "site",
+     "reveals": "mzulft",
+     "pages": [
+      "#1st of Hearthfire\nCurious: Dwemer brass fittings and a broken digging-arm embedded in the slope of an ancient Nord burial mound below Mzulft. The arm points into the mound, as if the Dwemer dug toward it.",
+      "The digging stopped abruptly. The arm is bent backward, as though it struck something harder than itself. I have found three scorched Dwemer bolts in the turf and a gouge in the brass four fingers wide.",
+      "Hypothesis: the Dwemer dug for something here and found a dragon. Recommendation to myself: do not do what the Dwemer did. Go to Mzulft instead. Bertrand will laugh at the irony."
+     ]
+    }
+   ]
+  }
+ }
+}

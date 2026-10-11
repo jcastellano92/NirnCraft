@@ -404,6 +404,10 @@ public final class ClientAutotest {
             MountsAutotest.tick(mc);
             return;
         }
+        if (com.skycraft.lore.place.client.PlaceLoreAutotest.ENABLED) { // -Dskycraft.autotest.placelore=<place>: its notes
+            com.skycraft.lore.place.client.PlaceLoreAutotest.tick(mc);
+            return;
+        }
 
         // Run steps with pauses between to let renderers stabilize and draw
         if (tick % 40 == 0) {

@@ -1,0 +1,475 @@
+{
+ "line": "place_skyrim_eastmarch",
+ "category": "side",
+ "npcs": [
+  {"id": "pln_skyrim_eastmarch_drevyne", "name": "Drevyne Ralen", "role": "citizen", "place": "windhelm", "offset": [4, -3],
+   "female": true, "greet": "You look like someone who doesn't spit when they pass the Grey Quarter. That already makes you rare."},
+  {"id": "pln_skyrim_eastmarch_ingrid", "name": "Ingrid of Hollyfrost", "role": "farmer", "place": "hollyfrost_farm", "offset": [3, 2],
+   "female": true, "greet": "Have you come from Windhelm? Have you seen a tall lad in blue, with his father's crooked nose?"},
+  {"id": "pln_skyrim_eastmarch_torvar", "name": "Torvar", "role": "lumberjack", "place": "mixwater_mill", "offset": [-4, 3],
+   "female": false, "greet": "Mind the saw. And if you're headed west, past Gallows Rock... no. Never mind. Mind the saw."},
+  {"id": "pln_skyrim_eastmarch_gralfr", "name": "Gralfr Bark-Back", "role": "lumberjack", "place": "mixwater_mill", "offset": [5, -2],
+   "female": false, "greet": "Looking for work? I've got a giant that wants killing and two hundred septims that want spending."},
+  {"id": "pln_skyrim_eastmarch_sidgar", "name": "Sidgar", "role": "priest", "place": "kynesgrove", "offset": [2, 4],
+   "female": false, "greet": "Kyne's breath on you, traveller. Mind the graves as you pass. Some of them are emptier than they should be."},
+  {"id": "pln_skyrim_eastmarch_bertrand", "name": "Bertrand Vanne", "role": "scholar", "place": "kynesgrove", "offset": [-3, -2],
+   "female": false, "greet": "Bertrand Vanne, Imperial Geographical Society. Forgive the boots. They are borrowed. So, at present, is my dignity."},
+  {"id": "pln_skyrim_eastmarch_haldis", "name": "Haldis Copperhand", "role": "miner", "place": "darkwater_crossing", "offset": [3, -4],
+   "female": true, "greet": "Goldenrock ore, best in the hold. If you're buying, good. If you're asking about Mistwatch, better."},
+  {"id": "pln_skyrim_eastmarch_mogdurz", "name": "Mogdurz gro-Narzulbur", "role": "miner", "place": "narzulbur", "offset": [-2, 3],
+   "female": true, "greet": "You're a long way into Orc country, outsider. Either you're lost or you're useful. Which?"}
+ ],
+ "relics": [
+  {"id": "plr_refugees_rest_urn", "name": "Urn of Saryoni Ralen", "desc": "A small clay urn, crudely glazed, banded with tarnished silver. Something rattles faintly inside: kiln-tools, perhaps, or bone."},
+  {"id": "plr_traitors_post_letter", "name": "Bjorlam's Unfinished Letter", "desc": "A folded sheet addressed to 'Mother', the ink smeared where it was written in the cold."},
+  {"id": "plr_traitors_post_strongbox", "name": "Pickets' Payroll Strongbox", "desc": "An iron strongbox stamped with the Stormcloak bear, lighter than it should be, but not by much."},
+  {"id": "plr_uttering_hills_cave_survey", "name": "Survey of the Mzulft Approaches", "desc": "A water-stained surveyor's book full of careful ridgeline sketches, signed B. Vanne, I.G.S."},
+  {"id": "plr_morvunskar_notes", "name": "Varvel's Tethering Notes", "desc": "A bound sheaf of notes on binding summoned things to a living anchor. The margins are full of Elsbet's name."},
+  {"id": "plr_gallows_rock_ring", "name": "Ulmir's Father's Ring", "desc": "A plain iron ring with a saw-tooth pattern hammered into the band. It is too large for any finger that is fully human."},
+  {"id": "plr_cronvangr_cave_ring", "name": "Sigrun's Oath-Ring", "desc": "A thin copper ring, worn smooth, engraved inside with two names and the date of a vow."},
+  {"id": "plr_cragwallow_slope_brooch", "name": "Widow Asta's Burial Brooch", "desc": "A silver brooch shaped like a sheaf of wheat, the kind Kynesgrove widows are buried wearing."},
+  {"id": "plr_mzulft_rubbing", "name": "Livia's Resonance Rubbing", "desc": "A charcoal rubbing of a great Dwemer plate, folded into a scholar's journal. The last pages are blank."},
+  {"id": "plr_kagrenzel_token", "name": "Cohort Token of Gaius Septimus", "desc": "A bronze Legion token on a broken chain, stamped with a cohort number and a dragon."},
+  {"id": "plr_ansilvund_oath_blade", "name": "Oath-Blade of Hrodvald", "desc": "An ancient Nord knife, too short to fight with, made only for cutting palms and sealing vows."},
+  {"id": "plr_cragslane_cavern_marker", "name": "Hrongar's Debt Marker", "desc": "A wooden tally-stick notched forty times, with Hrongar Shatter-Shield's name burned into it."},
+  {"id": "plr_mistwatch_tally", "name": "Mistwatch Tally Sheet", "desc": "A grubby list of bribes paid to someone at Darkwater Crossing who signs himself only 'E.'"},
+  {"id": "plr_fort_amol_standard", "name": "Bear Standard of Fort Amol", "desc": "An old blue banner with a white bear on it, smelling strongly of bandit."},
+  {"id": "plr_snapleg_cave_horn", "name": "Orgnar's Hunting Horn", "desc": "A ram's horn bound with brass. When the wind blows across it, it makes a sound almost like a voice."},
+  {"id": "plr_gloombound_mine_ring", "name": "Dushgar's Clan Ring", "desc": "A heavy Orcish ring of black iron, set with a chip of raw ebony."},
+  {"id": "plr_witchmist_grove_bell", "name": "Tova's Little Bell", "desc": "A small brass door-bell on a red ribbon. It rings by itself, very softly, when no one is touching it."},
+  {"id": "plr_stony_creek_cave_cloak", "name": "Legate Varo's Fur Cloak", "desc": "A fine fur-lined Legion cloak, recently and lovingly worn by a bandit chief."}
+ ],
+ "quests": [
+  {
+   "id": "pl_refugees_rest",
+   "title": "Ashes of the Red Year",
+   "region": "skyrim/eastmarch",
+   "start": "npc:pln_skyrim_eastmarch_drevyne",
+   "offer": "Is something wrong?",
+   "pitch": "A bandit tried to sell me my own grandmother in the market. Her ashes, in her urn, with the silver band my father put on it. He said to come haggle at Refugees' Rest. I am too old to haggle with a sword. You are not.",
+   "desc": "Drevyne Ralen of the Grey Quarter wants back the urn holding her grandmother's ashes, stolen from the old refugee shrine at Refugees' Rest by bandits who now sleep there.",
+   "objectives": [
+    {"type": "kill", "place": "refugees_rest", "text": "Drive the bandits out of Refugees' Rest",
+     "spawn": [{"type": "skycraft:bandit", "count": 3},
+               {"type": "skycraft:bandit_chief", "name": "Hakon One-Eye", "target": true, "boss": true}]},
+    {"type": "retrieve", "place": "refugees_rest", "relic": "plr_refugees_rest_urn", "text": "Find the urn of Saryoni Ralen",
+     "journal": "The urn was wrapped in a bedroll, its seal unbroken. Hakon never got round to tipping out the dust."},
+    {"type": "deliver", "npc": "pln_skyrim_eastmarch_drevyne", "relic": "plr_refugees_rest_urn", "text": "Bring the urn to Drevyne in Windhelm",
+     "topic": "I brought your grandmother home.",
+     "reply": "...She carried her kiln-tools across three provinces, and I could not carry her across one hill. Thank you. We will put her back at the Rest, and this time we will leave a guard."}
+   ],
+   "rewards": {"gold": 180, "items": ["skycraft:amulet_of_mara"]},
+   "outro": "The families of the Grey Quarter will walk to Refugees' Rest at the next Evening Star, carrying lamps."
+  },
+  {
+   "id": "pl_traitors_post",
+   "title": "The Pact of the Three",
+   "region": "skyrim/eastmarch",
+   "start": "manual",
+   "pitch": "The quartermaster in Windhelm lost a payroll and three soldiers. There's smoke at Traitor's Post. You do the sums. And mind, one of them's Ingrid of Hollyfrost's boy.",
+   "desc": "Three Stormcloak deserters have holed up at Traitor's Post with a stolen payroll. One of them is Bjorlam, son of Ingrid of Hollyfrost Farm.",
+   "objectives": [
+    {"type": "kill", "place": "traitors_post", "text": "Confront the deserters at Traitor's Post",
+     "spawn": [{"type": "npc:stormcloak_soldier", "count": 2, "name": "Deserter"},
+               {"type": "npc:stormcloak_soldier", "name": "Kolgeir the Oath-Keeper", "target": true, "boss": true, "hp": 1.4}]},
+    {"type": "retrieve", "place": "traitors_post", "relic": "plr_traitors_post_strongbox", "text": "Recover the payroll and search the cabin",
+     "actions": "relic:plr_traitors_post_letter",
+     "journal": "Bjorlam lay by the door with Kolgeir's axe in his back. He had been trying to leave. In his coat was a letter to his mother."},
+    {"type": "talk", "npc": "pln_skyrim_eastmarch_ingrid", "text": "Tell Ingrid at Hollyfrost Farm what became of her son",
+     "topic": "It's about Bjorlam.",
+     "reply": "I know that face. Every soldier who has passed this gate has worn it. Tell me. Tell me all of it, or tell me the part I can live with.",
+     "choices": [
+      {"label": "Give her the letter and tell her the truth.", "reply": "...Then he ran from something worse than war. That is my son. That is the boy I raised. Leave me the letter. I will read it until I can bear it.", "actions": "take:plr_traitors_post_letter;flag:pl_traitors_post_truth"},
+      {"label": "Tell her he died fighting, cold and brave.", "reply": "Cold and brave. Yes. His father died the same way. Thank you, stranger. I will tell the goat. She always liked him best.", "actions": "take:plr_traitors_post_letter;flag:pl_traitors_post_lie"},
+      {"label": "Tell her the truth, and give her the strongbox too.", "reply": "Four months' pay they never gave him, and you give it to me? The Palace will hang you for it. ...I'll hide it under the hearthstone. Nobody looks for coin under a widow's fire.", "actions": "take:plr_traitors_post_letter;take:plr_traitors_post_strongbox;flag:pl_traitors_post_payroll"}
+     ]}
+   ],
+   "rewards": {"gold": 150, "items": ["skycraft:fur_boots"]},
+   "outro": "There is a new stone on the ridge above Hollyfrost Farm, facing the cabin on the hill."
+  },
+  {
+   "id": "pl_uttering_hills_cave",
+   "title": "Everything Costs Two",
+   "region": "skyrim/eastmarch",
+   "start": "manual",
+   "pitch": "Hadring Two-Coins at Uttering Hills Cave took a Breton scholar's book and boots and sent him off barefoot. The poor fellow's at the Braidwood Inn in Kynesgrove now, still shivering.",
+   "desc": "Hadring Two-Coins, chief of the Uttering Hills Cave bandits, keeps a stolen survey of the Mzulft approaches in his chest. Its owner, Bertrand Vanne, waits at Kynesgrove.",
+   "objectives": [
+    {"type": "kill", "place": "uttering_hills_cave", "placement": "structure", "text": "Settle Hadring Two-Coins' account",
+     "spawn": [{"type": "skycraft:bandit", "count": 4},
+               {"type": "skycraft:bandit_chief", "name": "Hadring Two-Coins", "target": true, "boss": true, "hp": 1.5}]},
+    {"type": "retrieve", "place": "uttering_hills_cave", "placement": "structure", "relic": "plr_uttering_hills_cave_survey", "text": "Find Bertrand Vanne's survey book",
+     "journal": "The book was in Hadring's chest, wrapped in a pair of good Breton boots."},
+    {"type": "deliver", "npc": "pln_skyrim_eastmarch_bertrand", "relic": "plr_uttering_hills_cave_survey", "text": "Return the survey to Bertrand Vanne in Kynesgrove",
+     "topic": "I believe this is yours.",
+     "reply": "My survey! And, oh, my boots, they kept my boots in it. You cannot imagine. Here, take this for your trouble. I must go back over the route to Mzulft at once. Livia is somewhere at the end of it."}
+   ],
+   "rewards": {"gold": 160, "items": ["skycraft:lockpick*5"]},
+   "outro": "Bertrand Vanne is redrawing the road to Mzulft by the Braidwood Inn's fire."
+  },
+  {
+   "id": "pl_morvunskar",
+   "title": "The Living Anchor",
+   "region": "skyrim/eastmarch",
+   "start": "manual",
+   "requires": ["level:12"],
+   "pitch": "There was a girl from Winterhold, Elsbet, went to study with the mages at Morvunskar. Her letters stopped in Hearthfire. Someone ought to look, before the snows close the College road.",
+   "desc": "Elsbet, a young mage from Winterhold, followed the expelled conjurer Ralis Varvel to Morvunskar. His notes say he means to 'tether' summoned things to her.",
+   "objectives": [
+    {"type": "clear", "place": "morvunskar", "text": "Break through Varvel's followers at Morvunskar",
+     "spawn": [{"type": "npc:mage", "count": 2, "name": "Varvel's Adept"}, {"type": "skycraft:flame_atronach", "count": 1}]},
+    {"type": "kill", "place": "morvunskar", "text": "Stop Ralis Varvel before the tethering",
+     "spawn": [{"type": "npc:mage", "name": "Ralis Varvel, Master Conjurer", "target": true, "boss": true, "hp": 1.8, "dmg": 1.3},
+               {"type": "skycraft:flame_atronach", "count": 1}]},
+    {"type": "retrieve", "place": "morvunskar", "relic": "plr_morvunskar_notes", "text": "Take Varvel's tethering notes",
+     "journal": "Elsbet was chained in the cellar beside the north spring, alive and furious. She took the key from me without a word, and then, at the door, she said: 'Burn the notes. Or don't. But never read them aloud.'"}
+   ],
+   "rewards": {"gold": 220, "items": ["skycraft:spell_tome_lesser_ward"]},
+   "outro": "Elsbet walked north toward Winterhold, and the spring under Morvunskar has cooled a little."
+  },
+  {
+   "id": "pl_gallows_rock",
+   "title": "The Beast of Mixwater",
+   "region": "skyrim/eastmarch",
+   "start": "manual",
+   "pitch": "Torvar at Mixwater Mill has been begging anyone with a blade to go to Gallows Rock. Hunters took his brother in chains. Torvar swears he's innocent. Torvar would.",
+   "desc": "Werewolf hunters dragged the sawyer Ulmir from Mixwater Mill to the old fort at Gallows Rock. His brother Torvar wants him freed.",
+   "objectives": [
+    {"type": "clear", "place": "gallows_rock", "text": "Break the hunters' hold on Gallows Rock",
+     "spawn": [{"type": "npc:thug", "count": 3, "name": "Silver-Buckled Hunter"},
+               {"type": "npc:adventurer", "name": "Hunt-Captain Vildis Silver-Wrist", "boss": true, "hp": 1.5}]},
+    {"type": "kill", "place": "gallows_rock", "text": "Face what waits in the chains",
+     "spawn": [{"type": "skycraft:werewolf", "name": "Ulmir, Unchained", "target": true, "boss": true, "hp": 1.3}],
+     "actions": "relic:plr_gallows_rock_ring",
+     "journal": "The chains were already broken when I reached the cell. The thing inside wore a man's iron ring on one claw. Ulmir's confession lay on the floor in charcoal."},
+    {"type": "talk", "npc": "pln_skyrim_eastmarch_torvar", "text": "Tell Torvar at Mixwater Mill what you found",
+     "topic": "I found your brother.",
+     "reply": "You've his ring. You wouldn't have his ring if... Tell me straight. I can take it straight.",
+     "choices": [
+      {"label": "Tell him Ulmir was a werewolf, and show him the confession.", "reply": "Two winters. Two winters of 'deer'. ...He washed his hands in the river every morning and I thought he was just tidy. Give me the ring. I'll bury it under the saw-pit, where he worked. In the daylight.", "actions": "take:plr_gallows_rock_ring;flag:pl_gallows_rock_truth"},
+      {"label": "Tell him the hunters killed Ulmir before you arrived.", "reply": "Then I'll see every one of them in the ground. ...You've done that already, haven't you? Good. Give me the ring. He was a good man. Whatever they said, he was a good man.", "actions": "take:plr_gallows_rock_ring;flag:pl_gallows_rock_lie"}
+     ]}
+   ],
+   "rewards": {"gold": 200, "items": ["skycraft:steel_war_axe"]},
+   "outro": "Torvar has started sleeping with a lamp lit."
+  },
+  {
+   "id": "pl_cronvangr_cave",
+   "title": "Taken Mid-Vow",
+   "region": "skyrim/eastmarch",
+   "start": "manual",
+   "requires": ["level:12"],
+   "pitch": "Sigrun of Mixwater went up to Mara's Eye Pond to marry her Ottar, and the vampires of Cronvangr Cave took her mid-vow. Ottar ran. Somebody has to go in after her.",
+   "desc": "A Dunmer vampire, Mistress Hlevala, keeps a larder in Cronvangr Cave. Among her captives is Sigrun of Mixwater, taken at Mara's Eye Pond on the night of her vow.",
+   "objectives": [
+    {"type": "clear", "place": "cronvangr_cave", "placement": "structure", "text": "Cut through Hlevala's thralls in Cronvangr Cave",
+     "spawn": [{"type": "skycraft:vampire", "count": 3}, {"type": "skycraft:skeever", "count": 2}]},
+    {"type": "kill", "place": "cronvangr_cave", "placement": "structure", "text": "Destroy Mistress Hlevala",
+     "spawn": [{"type": "skycraft:vampire", "name": "Mistress Hlevala", "target": true, "boss": true, "hp": 2.0, "dmg": 1.3}]},
+    {"type": "retrieve", "place": "cronvangr_cave", "placement": "structure", "relic": "plr_cronvangr_cave_ring", "text": "Find Sigrun",
+     "journal": "I came too late for Sigrun. She was laid out on a stone table like a guest of honour, with a copper ring still on her finger. She had kept her vow."}
+   ],
+   "rewards": {"gold": 240, "items": ["skycraft:silver_ring"]},
+   "outro": "Somewhere near the Steamcrag springs, Ottar is still working up his courage. He will want the ring."
+  },
+  {
+   "id": "pl_cragwallow_slope",
+   "title": "Kynesgrove's Missing Dead",
+   "region": "skyrim/eastmarch",
+   "start": "manual",
+   "pitch": "The graves behind Kynesgrove's shrine have been emptied twice since Hearthfire. Old Sidgar saw lanterns on Cragwallow Slope. He's a priest, not a fighter, and he's asking anyone who is.",
+   "desc": "Someone is digging up the dead of Kynesgrove and carrying them to Cragwallow Slope. Sidgar the shrine-keeper wants them brought home.",
+   "objectives": [
+    {"type": "clear", "place": "cragwallow_slope", "placement": "structure", "text": "Put Kynesgrove's risen dead back to rest",
+     "spawn": [{"type": "skycraft:draugr", "count": 2, "name": "Risen Villager"}, {"type": "npc:necromancer", "count": 1}]},
+    {"type": "kill", "place": "cragwallow_slope", "placement": "structure", "text": "End Venkar the Patient",
+     "spawn": [{"type": "skycraft:necromancer", "name": "Venkar the Patient", "target": true, "boss": true, "hp": 1.6}]},
+    {"type": "retrieve", "place": "cragwallow_slope", "placement": "structure", "relic": "plr_cragwallow_slope_brooch", "text": "Recover something to bury",
+     "journal": "Venkar had seated the widow Asta at the head of his table. I took the brooch from her shawl so that Kynesgrove would have something to bury."},
+    {"type": "deliver", "npc": "pln_skyrim_eastmarch_sidgar", "relic": "plr_cragwallow_slope_brooch", "text": "Bring Asta's brooch to Sidgar in Kynesgrove",
+     "topic": "Your dead won't be troubled again.",
+     "reply": "Asta's brooch. She wore it to every funeral in this village, and now it goes to her own, twice. Kyne keep you. And keep them, this time."}
+   ],
+   "rewards": {"gold": 200, "items": ["skycraft:soul_gem_lesser"]},
+   "outro": "Sidgar has begun walking the graveyard each night with a lantern of his own."
+  },
+  {
+   "id": "pl_mzulft",
+   "title": "The Tuning of the Earth",
+   "region": "skyrim/eastmarch",
+   "start": "manual",
+   "requires": ["level:14"],
+   "pitch": "A Breton scholar is sitting in the Braidwood Inn every night waiting for his partner, a lady who went into Mzulft in Hearthfire. It's Frostfall. Somebody should go and look, for his sake.",
+   "desc": "Livia Cassinia of the Imperial Geographical Society went into Mzulft in Hearthfire to study a Dwemer resonance plate. She has not come out. Her partner Bertrand Vanne waits at Kynesgrove.",
+   "objectives": [
+    {"type": "go", "place": "mzulft", "text": "Enter Mzulft and follow Livia's trail"},
+    {"type": "clear", "place": "mzulft", "placement": "structure", "text": "Fight past the Falmer of the boiler halls",
+     "spawn": [{"type": "skycraft:falmer", "count": 3}, {"type": "skycraft:dwarven_spider", "count": 2}]},
+    {"type": "retrieve", "place": "mzulft", "placement": "structure", "relic": "plr_mzulft_rubbing", "text": "Find Livia's journal and her rubbing of the plate",
+     "spawn": [{"type": "skycraft:falmer", "name": "Hum-Priest of the Deep", "boss": true, "hp": 1.6}],
+     "journal": "Livia's body lay at the foot of the great plate. Her journal was still in her hand, her charcoal rubbing folded inside. The Falmer had built their shrine around her."},
+    {"type": "deliver", "npc": "pln_skyrim_eastmarch_bertrand", "relic": "plr_mzulft_rubbing", "text": "Bring Livia's journal to Bertrand Vanne at Kynesgrove",
+     "topic": "I found Livia.",
+     "reply": "I know. I knew when I saw you come in the door with her book under your arm. ...She would want this published. I will see that it is, with her name first. It was always her name first."}
+   ],
+   "rewards": {"gold": 280, "items": ["skycraft:dwarven_helmet"]},
+   "outro": "The Imperial Geographical Society will one day print 'On the Tuning of the Earth', by L. Cassinia, with a foreword by B. Vanne."
+  },
+  {
+   "id": "pl_kagrenzel",
+   "title": "Two Hundred Feet of Rope",
+   "region": "skyrim/eastmarch",
+   "start": "manual",
+   "requires": ["level:16"],
+   "pitch": "The Imperials lowered a lad into the Kagrenzel shaft on a rope and pulled up only the rope. Their sergeant wants his cohort token back. Me, I'd just want him back.",
+   "desc": "Legionary Gaius Septimus was lowered into the Kagrenzel shaft and never hauled up. His cohort token is still somewhere at the bottom.",
+   "objectives": [
+    {"type": "go", "place": "kagrenzel", "text": "Descend into Kagrenzel"},
+    {"type": "retrieve", "place": "kagrenzel", "placement": "structure", "relic": "plr_kagrenzel_token", "text": "Recover Gaius Septimus' cohort token",
+     "spawn": [{"type": "skycraft:dwarven_sphere", "count": 2}, {"type": "skycraft:dwarven_spider", "count": 2}],
+     "journal": "Gaius Septimus lay at the bottom of the shaft beside a sphere guardian that had been waiting four thousand years for something to cut. The token was still around his neck."},
+    {"type": "kill", "place": "kagrenzel", "placement": "structure", "text": "Silence the shaft's last guardian",
+     "spawn": [{"type": "skycraft:dwarven_centurion", "name": "Warden of the Lower Works", "target": true, "boss": true, "hp": 1.2}]}
+   ],
+   "rewards": {"gold": 300, "items": ["skycraft:imperial_sword"]},
+   "outro": "Sergeant Avitus will hang the token over the Eastmarch Imperial Camp's gate, beside the cut rope."
+  },
+  {
+   "id": "pl_ansilvund",
+   "title": "The Blade That Sealed It",
+   "region": "skyrim/eastmarch",
+   "start": "manual",
+   "requires": ["level:14"],
+   "pitch": "Robed folk have been chanting in Ansilvund since Last Seed. The hunters say the barrow sighs at night. If they wake whatever's buried in there, it won't stop at the barrow door.",
+   "desc": "A cell of necromancers led by Master Feldir means to wake Hrodvald Iron-Breath, the chieftain buried in Ansilvund. His oath can only be broken by the blade that sealed it.",
+   "objectives": [
+    {"type": "kill", "place": "ansilvund", "placement": "structure", "text": "Stop Master Feldir's chanting",
+     "spawn": [{"type": "npc:necromancer", "count": 2},
+               {"type": "skycraft:necromancer", "name": "Master Feldir", "target": true, "boss": true, "hp": 1.5}]},
+    {"type": "retrieve", "place": "ansilvund", "placement": "structure", "relic": "plr_ansilvund_oath_blade", "text": "Take the oath-blade from the oath-guard",
+     "spawn": [{"type": "skycraft:draugr", "count": 3, "name": "Oath-Guard of Hrodvald"}],
+     "journal": "The oath-blade hung around the neck of the eldest guard, too short to fight with. It was warm, as though someone had just let go of it."},
+    {"type": "kill", "place": "ansilvund", "placement": "structure", "text": "Break Hrodvald's oath and lay him to rest",
+     "spawn": [{"type": "skycraft:draugr_deathlord", "name": "Hrodvald Iron-Breath", "target": true, "boss": true, "hp": 1.8, "dmg": 1.3}],
+     "journal": "When the oath-blade touched him, Hrodvald stopped fighting and simply lay down. I think he had been waiting a long time to be allowed to."}
+   ],
+   "rewards": {"gold": 300, "items": ["skycraft:steel_greatsword"]},
+   "outro": "Ansilvund is silent now. The hunters say the sighing has stopped."
+  },
+  {
+   "id": "pl_cragslane_cavern",
+   "title": "The Wolf-Pit",
+   "region": "skyrim/eastmarch",
+   "start": "manual",
+   "pitch": "Down at Cragslane Cavern they set wolves on each other for coin and sell moon sugar between bouts. A Shatter-Shield cousin owes them four hundred septims. They'll collect in blood if nobody stops them.",
+   "desc": "A Khajiit pit-master runs wolf fights and a skooma trade from Cragslane Cavern. Hrongar Shatter-Shield of Windhelm owes the house more than his life is worth.",
+   "objectives": [
+    {"type": "clear", "place": "cragslane_cavern", "placement": "structure", "text": "Clear out the pit's guards and fighting wolves",
+     "spawn": [{"type": "skycraft:bandit", "count": 3}, {"type": "skycraft:wolf", "count": 2}]},
+    {"type": "kill", "place": "cragslane_cavern", "placement": "structure", "text": "Put an end to Dro'Marash, the pit-master",
+     "spawn": [{"type": "skycraft:bandit_chief", "name": "Dro'Marash", "target": true, "boss": true, "hp": 1.5},
+               {"type": "skycraft:wolf", "name": "Greyjaw"}]},
+    {"type": "retrieve", "place": "cragslane_cavern", "placement": "structure", "relic": "plr_cragslane_cavern_marker", "text": "Burn the debt book, but keep Hrongar's marker",
+     "journal": "I let the old wolf Greyjaw go out the back way. He did not look back. Hrongar's debt marker can go to the fire in Windhelm, or to his sister. Either way it is paid."}
+   ],
+   "rewards": {"gold": 220, "items": ["skycraft:leather_chestplate"]},
+   "outro": "The wolf-pit is cold, and somewhere in the hills a grey wolf is learning to hunt for itself again."
+  },
+  {
+   "id": "pl_maras_eye_pond",
+   "title": "A Trapper's Thirty Years",
+   "region": "skyrim/eastmarch",
+   "start": "manual",
+   "pitch": "Kjeld the trapper left the Riverside Shack in a hurry and never reached Kynesgrove. He used to say his savings were safer by the water than in any town. Maybe somebody should check the pond.",
+   "desc": "Kjeld the trapper buried thirty years of savings under a flat mossy stone on the west bank of Mara's Eye Pond, meaning them for his sister.",
+   "objectives": [
+    {"type": "go", "place": "maras_eye_pond", "offset": [-12, 3], "radius": 10, "text": "Find the hand-shaped moss on the west bank of Mara's Eye Pond"},
+    {"type": "retrieve", "place": "maras_eye_pond", "offset": [-12, 3], "item": "skycraft:gold_ring", "text": "Dig up Kjeld's iron box",
+     "spawn": [{"type": "skycraft:mudcrab", "count": 2}],
+     "journal": "Under the stone: an iron box, a purse of old septims, and his mother's gold ring wrapped in a scrap of fox fur. Kjeld's sister, Rannveig, would want the ring at least."}
+   ],
+   "rewards": {"gold": 140},
+   "outro": "The trapper's thirty years fit in one hand. It seems too little, and somehow enough."
+  },
+  {
+   "id": "pl_mistwatch",
+   "title": "The Friend at the Crossing",
+   "region": "skyrim/eastmarch",
+   "start": "manual",
+   "pitch": "The Mistwatch bandits always know which Darkwater cart carries gold. Haldis Copperhand will pay well for the tally sheet they keep. She wants to know which neighbour is selling her.",
+   "desc": "Bandits at Mistwatch rob only the gold carts from the Goldenrock Mine. Someone at Darkwater Crossing, who signs himself 'E.', is selling them the schedule.",
+   "objectives": [
+    {"type": "clear", "place": "mistwatch", "text": "Fight your way up Mistwatch tower",
+     "spawn": [{"type": "skycraft:bandit", "count": 4}]},
+    {"type": "kill", "place": "mistwatch", "text": "Bring down Brolfr Mistcaller",
+     "spawn": [{"type": "skycraft:bandit_chief", "name": "Brolfr Mistcaller", "target": true, "boss": true, "hp": 1.6}],
+     "actions": "relic:plr_mistwatch_tally",
+     "journal": "Brolfr's tally sheet names payments to 'E.' at Darkwater Crossing. The last entry says E. stopped sending word in Frostfall, the same week Eirik the driver came home with an arrow in his shoulder."},
+    {"type": "talk", "npc": "pln_skyrim_eastmarch_haldis", "text": "Bring the tally sheet to Haldis Copperhand",
+     "topic": "I know who's been selling your carts.",
+     "reply": "Show me. ...E. Eirik. My own driver. He took an arrow for that cart. Did he take it because he stopped telling them? Tell me what you think I should do.",
+     "choices": [
+      {"label": "Name him. He sold you out and he should answer for it.", "reply": "Then he answers to the Jarl's steward, not to me. I'll not have the Crossing say I hanged my own man. Thank you. I think.", "actions": "take:plr_mistwatch_tally;flag:pl_mistwatch_named"},
+      {"label": "Burn it. He stopped, and he bled for it.", "reply": "...Aye. A man who takes an arrow for the thing he sold has paid something already. I'll burn it, and I'll watch him load the next cart. Closely.", "actions": "take:plr_mistwatch_tally;flag:pl_mistwatch_burned"}
+     ]}
+   ],
+   "rewards": {"gold": 220, "items": ["skycraft:steel_dagger"]},
+   "outro": "The gold carts from Darkwater Crossing pass Mistwatch unmolested, for now."
+  },
+  {
+   "id": "pl_the_atronach_stone",
+   "title": "The Adept's Buried Pot",
+   "region": "skyrim/eastmarch",
+   "start": "manual",
+   "pitch": "A mage was robbed on the road by the Atronach Stone last month. Says she buried her soul gems before the Mistwatch lot caught her. Warm ground south of the Stone, she says. Snow never settles there.",
+   "desc": "Thessaly Vane buried her soul gems and coin in a sealed pot a dozen paces south of the Atronach Stone, where the ground is warm and the snow never settles.",
+   "objectives": [
+    {"type": "go", "place": "the_atronach_stone", "offset": [0, 12], "radius": 8, "text": "Search the warm, snowless ground south of the Atronach Stone"},
+    {"type": "retrieve", "place": "the_atronach_stone", "offset": [0, 12], "item": "skycraft:soul_gem_common", "text": "Dig up Thessaly's sealed pot",
+     "journal": "The pot held two soul gems, a purse, and a scrap of paper: 'If you are not me, you have earned it. If you are me, well done for escaping.'"}
+   ],
+   "rewards": {"gold": 120},
+   "outro": "Somewhere in Eastmarch, an adept is either very relieved or very cross."
+  },
+  {
+   "id": "pl_fort_amol",
+   "title": "Lords by Morning Star",
+   "region": "skyrim/eastmarch",
+   "start": "manual",
+   "pitch": "Ulfric emptied Fort Amol to hold Windhelm, and the Lost Knife gang moved in before the gate had stopped swinging. They say their chief sleeps under the fort's own standard.",
+   "desc": "Ulfgar the Unwashed and the Lost Knife gang have taken the abandoned Stormcloak fort at Fort Amol. The garrison's old bear standard is his blanket.",
+   "objectives": [
+    {"type": "clear", "place": "fort_amol", "text": "Clear the Lost Knives out of Fort Amol",
+     "spawn": [{"type": "skycraft:bandit", "count": 5}]},
+    {"type": "kill", "place": "fort_amol", "text": "Unseat Ulfgar the Unwashed",
+     "spawn": [{"type": "skycraft:bandit_chief", "name": "Ulfgar the Unwashed", "target": true, "boss": true, "hp": 1.6}]},
+    {"type": "retrieve", "place": "fort_amol", "relic": "plr_fort_amol_standard", "text": "Recover the Bear Standard of Fort Amol",
+     "journal": "The standard was where Ulfgar's letter said it would be: on his bed. It will need washing before anyone in Windhelm sees it."}
+   ],
+   "rewards": {"gold": 250, "items": ["skycraft:studded_chestplate"]},
+   "outro": "Fort Amol stands empty again, its old banner folded, waiting for a garrison or a war."
+  },
+  {
+   "id": "pl_snapleg_cave",
+   "title": "The Calling-Horn",
+   "region": "skyrim/eastmarch",
+   "start": "manual",
+   "requires": ["level:12"],
+   "pitch": "Orgnar Bent-Bow's been dead a month, and his horn still blows at night from Snapleg Cave. His widow at Darkwater Crossing wants it back. I'd want it smashed, myself.",
+   "desc": "A hagraven in Snapleg Cave blows the stolen horn of the hunter Orgnar Bent-Bow to lure his friends and kin to her den. His widow, Haldis Copperhand, wants it back.",
+   "objectives": [
+    {"type": "clear", "place": "snapleg_cave", "placement": "structure", "text": "Fight through Snapleg Cave",
+     "spawn": [{"type": "skycraft:forsworn", "count": 2}, {"type": "skycraft:frostbite_spider", "count": 1}]},
+    {"type": "kill", "place": "snapleg_cave", "placement": "structure", "text": "Kill Mother Skrapa",
+     "spawn": [{"type": "skycraft:hagraven", "name": "Mother Skrapa", "target": true, "boss": true, "hp": 1.6}]},
+    {"type": "retrieve", "place": "snapleg_cave", "placement": "structure", "relic": "plr_snapleg_cave_horn", "text": "Take back Orgnar's horn",
+     "journal": "The horn lay on the hagraven's altar beside a bladder tied with a lock of grey hair. When I picked it up, the wind across its mouth sounded almost like a man saying thank you."},
+    {"type": "deliver", "npc": "pln_skyrim_eastmarch_haldis", "relic": "plr_snapleg_cave_horn", "text": "Bring the horn to Haldis at Darkwater Crossing",
+     "topic": "Orgnar's horn. The witch is dead.",
+     "reply": "It's quiet now. It was never quiet when he had it. ...I'll hang it over the door. If anything ever blows it again, I'll know to run toward it, not away."}
+   ],
+   "rewards": {"gold": 240, "items": ["minecraft:crossbow"]},
+   "outro": "There is no more horn-calling in the hills below Darkwater Pass."
+  },
+  {
+   "id": "pl_bonestrewn_crest",
+   "title": "Come and Be Counted",
+   "region": "skyrim/eastmarch",
+   "start": "manual",
+   "requires": ["level:18"],
+   "pitch": "A dragon roosts on Bonestrewn Crest, sleeping on a bed of mammoth tusks. Eydis the Bold went up with three friends. Only her journal came down, and that was carried by a giant.",
+   "desc": "The dragon Sahqovul has made Bonestrewn Crest its roost and counts its kills in claw-marks on a boulder. Eydis the Bold and her company died trying to take it sleeping.",
+   "objectives": [
+    {"type": "go", "place": "bonestrewn_crest", "text": "Climb Bonestrewn Crest"},
+    {"type": "kill", "place": "bonestrewn_crest", "text": "Slay Sahqovul",
+     "spawn": [{"type": "skycraft:dragon", "name": "Sahqovul", "target": true, "boss": true}],
+     "journal": "Sahqovul is dead. I scratched one last mark on its counting-stone, and it was not one of mine."}
+   ],
+   "rewards": {"gold": 380, "items": ["skycraft:steel_chestplate"]},
+   "outro": "The giants of Steamcrag have started grazing their mammoths below the crest again."
+  },
+  {
+   "id": "pl_broken_limb_camp",
+   "title": "One Tusk",
+   "region": "skyrim/eastmarch",
+   "start": "npc:pln_skyrim_eastmarch_gralfr",
+   "offer": "I heard there's a bounty on a giant.",
+   "pitch": "One-tusked brute from Broken Limb Camp smashed two of my carts and drowned my oxen. Two hundred septims for its toes. Don't ask me why it started. Giants don't need reasons.",
+   "desc": "Gralfr Bark-Back, foreman of Mixwater Mill, has put a bounty on a one-tusked giant from Broken Limb Camp who has been smashing his carts.",
+   "objectives": [
+    {"type": "go", "place": "broken_limb_camp", "text": "Find the one-tusked giant at Broken Limb Camp",
+     "journal": "Beside the giants' pool is a small cairn with a mammoth calf's milk-tooth on top. A carter's unsent letter in the camp's refuse tells the rest: Gralfr and his men killed the calf for its tusks."},
+    {"type": "kill", "place": "broken_limb_camp", "text": "Face the one-tusked giant",
+     "spawn": [{"type": "skycraft:giant", "name": "One-Tusk", "target": true, "boss": true}],
+     "journal": "One-Tusk came at me from the cairn. It did not stop until it fell, and it fell facing the stones."},
+    {"type": "talk", "npc": "pln_skyrim_eastmarch_gralfr", "text": "Collect from Gralfr at Mixwater Mill",
+     "topic": "Your giant is dead.",
+     "reply": "Ha! I knew it. Two hundred septims, as promised. Here. ...Why are you looking at me like that?",
+     "choices": [
+      {"label": "Take the coin and say nothing.", "reply": "Good. Good. Pleasure doing business. Mind how you go.", "actions": "flag:pl_broken_limb_camp_silent"},
+      {"label": "Tell him you know about the calf.", "reply": "...Who told you? Sten? Sten can't keep his mouth shut in a gale. Fine. Fine! Keep the coin, and keep your mouth shut too, and I'll... I'll pay the oxen-men double. Satisfied?", "actions": "flag:pl_broken_limb_camp_confronted"}
+     ]}
+   ],
+   "rewards": {"gold": 200},
+   "outro": "The cairn by the Broken Limb pools still stands. The giants walk around it every night."
+  },
+  {
+   "id": "pl_gloombound_mine",
+   "title": "The East Drift",
+   "region": "skyrim/eastmarch",
+   "start": "npc:pln_skyrim_eastmarch_mogdurz",
+   "offer": "You look like you're carrying a grudge.",
+   "pitch": "My husband Dushgar went down Gloombound's east drift to prove he wasn't afraid. He was right: he wasn't. Something down there ate him anyway. Bring me what's left, and the head of what did it.",
+   "desc": "Mogdurz of Narzulbur wants vengeance for her husband Dushgar, lost in the east drift of Gloombound Mine where the miners broke into something old and blind.",
+   "objectives": [
+    {"type": "clear", "place": "gloombound_mine", "placement": "structure", "text": "Clear the east drift of Gloombound Mine",
+     "spawn": [{"type": "skycraft:falmer", "count": 3}, {"type": "skycraft:chaurus", "count": 2}]},
+    {"type": "kill", "place": "gloombound_mine", "placement": "structure", "text": "Kill the creature that took Dushgar",
+     "spawn": [{"type": "skycraft:chaurus_hunter", "name": "The Clicking Dark", "target": true, "boss": true, "hp": 1.5}]},
+    {"type": "retrieve", "place": "gloombound_mine", "placement": "structure", "relic": "plr_gloombound_mine_ring", "text": "Find what remains of Dushgar",
+     "journal": "Dushgar went down fighting; there were three dead Falmer under him. His clan ring was still on his fist."},
+    {"type": "deliver", "npc": "pln_skyrim_eastmarch_mogdurz", "relic": "plr_gloombound_mine_ring", "text": "Bring Dushgar's ring to Mogdurz in Narzulbur",
+     "topic": "Dushgar died with his axe in his hand.",
+     "reply": "Of course he did. Malacath heard me, then, and sent you. ...Take this. Ebony from the drift he opened. He'd want it in an outsider's hand, if the outsider earned it. You earned it."}
+   ],
+   "rewards": {"gold": 260, "items": ["skycraft:orcish_war_axe"]},
+   "outro": "The east drift of Gloombound Mine is open again. The miners leave a cup of mead at the crack for Dushgar."
+  },
+  {
+   "id": "pl_witchmist_grove",
+   "title": "The Mist-Mother's Children",
+   "region": "skyrim/eastmarch",
+   "start": "manual",
+   "pitch": "Agnar the hunter built a lodge in Witchmist Grove, and now his little girl's gone into the mist. He sits by the Kynesgrove road asking every passer-by to go in. Nobody does.",
+   "desc": "Agnar Steam-Lodge's daughter Tova followed the lights of Witchmist Grove into the mist. Something tall and pale sings among the wisps with her voice.",
+   "objectives": [
+    {"type": "clear", "place": "witchmist_grove", "text": "Disperse the wisps over the far pool",
+     "spawn": [{"type": "skycraft:wisp", "count": 3}]},
+    {"type": "kill", "place": "witchmist_grove", "text": "Confront the Mist-Mother",
+     "spawn": [{"type": "skycraft:wispmother", "name": "The Mist-Mother", "target": true, "boss": true, "hp": 1.4}]},
+    {"type": "retrieve", "place": "witchmist_grove", "relic": "plr_witchmist_grove_bell", "text": "Find Tova",
+     "journal": "Tova was asleep in a hollow under the far tree, cold but breathing, with her door-bell clutched in her fist. When she woke she asked where the pretty lady had gone. I told her the lady had gone home. I carried her to the road, and Agnar ran the rest of the way to meet us."}
+   ],
+   "rewards": {"gold": 200, "items": ["skycraft:amulet_of_talos"]},
+   "outro": "Agnar has pulled down his lodge. Tova kept the bell. It has stopped ringing on its own."
+  },
+  {
+   "id": "pl_stony_creek_cave",
+   "title": "The Ford-Keeper",
+   "region": "skyrim/eastmarch",
+   "start": "manual",
+   "pitch": "The Legion at the Eastmarch Imperial Camp is offering coin for the head of a Redguard bandit called Nazira, who robs their wagons at Stony Creek. Odd, a Stormcloak hold paying a Legion bounty. Coin's coin, though.",
+   "desc": "Nazira the Ford-Keeper's bandits rob Legion supply wagons at the Stony Creek ford and sell the loot to both sides of the war.",
+   "objectives": [
+    {"type": "clear", "place": "stony_creek_cave", "placement": "structure", "text": "Clear the bandits from Stony Creek Cave",
+     "spawn": [{"type": "skycraft:bandit", "count": 4}]},
+    {"type": "kill", "place": "stony_creek_cave", "placement": "structure", "text": "End Nazira the Ford-Keeper's business",
+     "spawn": [{"type": "skycraft:bandit_chief", "name": "Nazira the Ford-Keeper", "target": true, "boss": true, "hp": 1.6, "dmg": 1.2}]},
+    {"type": "retrieve", "place": "stony_creek_cave", "placement": "structure", "relic": "plr_stony_creek_cave_cloak", "text": "Recover the legate's stolen cloak",
+     "journal": "Nazira died wearing Legate Varo's cloak. Her accounts show she sold the Legion's arrows to Stormcloaks for two septims the dozen, and never once killed a legionary she did not have to."}
+   ],
+   "rewards": {"gold": 230, "items": ["skycraft:imperial_light_chestplate"]},
+   "outro": "The Stony Creek ford is safe for wagons again. Both armies are quietly annoyed about it."
+  }
+ ]
+}

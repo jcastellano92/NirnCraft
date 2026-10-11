@@ -348,6 +348,13 @@ public final class NpcDialogue {
                     Math.max(64, place.radius() + 32));
             Component name = revealed != null ? revealed : place.name();
             String dir = direction(npc.getX(), npc.getZ(), place.x(), place.z());
+            // a place with written lore: the townsfolk's own rumour of it (lore module), else the generic line
+            Component lore = com.skycraft.lore.place.PlaceLore.rumour(place.id());
+            if (lore != null && (revealed == null || revealed.getString().equals(place.name().getString()))) {
+                Dialogue.open(player, npc, Component.translatable("place_lore.skycraft.say.news", lore, name,
+                        Component.translatable("society.skycraft.dir." + dir)));
+                return;
+            }
             Dialogue.open(player, npc, Component.translatable("society.skycraft.say.news.place." + player.getRandom().nextInt(4), name,
                     Component.translatable("society.skycraft.dir." + dir)));
             return;

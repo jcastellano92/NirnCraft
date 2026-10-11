@@ -207,9 +207,12 @@ public final class LoreBooks {
         if (!shelf.isEmpty()) shelf(shelf, id);
     }
 
+    /** A book by id; {@code place.<place>.<note>} ids are the place readables of {@link com.skycraft.lore.place.PlaceLore}. */
     @Nullable
     public static Book get(String id) {
-        return id == null ? null : BOOKS.get(id);
+        if (id == null) return null;
+        Book b = BOOKS.get(id);
+        return b != null ? b : com.skycraft.lore.place.PlaceLore.book(id);
     }
 
     public static List<Book> all() {

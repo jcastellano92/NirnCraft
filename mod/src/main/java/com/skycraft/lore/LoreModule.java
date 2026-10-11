@@ -93,6 +93,7 @@ public final class LoreModule {
         FEATURES.register(modBus);
         modBus.addListener(LoreModule::creativeTab);
         Progression.registerXpModifier(StandingStones::xpMultiplier);
+        com.skycraft.lore.place.PlaceLoreModule.init(modBus);
     }
 
     /** Registers this module's packets via {@link com.skycraft.network.SkyNetwork#register}. Called once at startup. */

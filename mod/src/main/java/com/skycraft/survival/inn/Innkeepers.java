@@ -302,7 +302,10 @@ public final class Innkeepers {
         if (loc != null) {
             Dialogue.open(player, npc, Component.translatable("society.skycraft.rumor.revealed", loc));
         } else {
-            Dialogue.open(player, npc, Component.translatable("survival.skycraft.rumor." + player.getRandom().nextInt(RUMORS)));
+            // half the time the region's own rumours (lore module), if it has any
+            Component local = player.getRandom().nextBoolean() ? com.skycraft.lore.place.PlaceLore.regionalRumour(
+                    com.skycraft.tamriel.Regions.at(npc.level(), npc.blockPosition()).id(), player.getRandom()) : null;
+            Dialogue.open(player, npc, local != null ? local : Component.translatable("survival.skycraft.rumor." + player.getRandom().nextInt(RUMORS)));
         }
     }
 }

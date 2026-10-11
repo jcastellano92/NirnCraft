@@ -257,6 +257,8 @@ public final class Discovery {
         data.markDirty();
         Notifier.send(player, NotifyKind.LOCATION_DISCOVERED, p.name(), LocationKind.forPlace(p).displayName());
         SkyNetwork.sendToPlayer(player, new WorldPackets.Cue(WorldPackets.Cue.DISCOVERY));
+        // the place's story in a line under the banner (and its lore lectern, the first time anyone comes)
+        com.skycraft.lore.place.PlaceLoreEvents.onDiscovered(player, p);
     }
 
     /**

@@ -44,7 +44,11 @@ public final class BookTexts {
     private static Optional<Text> load(String id) {
         ResourceLocation location = new ResourceLocation(Skycraft.MODID, "lore/books/" + id + ".json");
         Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(location);
-        if (resource.isEmpty()) return Optional.empty();
+        if (resource.isEmpty()) {
+            // a place readable: its text lives in the place lore data (and the language file)
+            com.skycraft.lore.place.PlaceLore.BookText t = com.skycraft.lore.place.PlaceLore.bookText(id);
+            return t == null ? Optional.empty() : Optional.of(new Text(t.author(), t.pages()));
+        }
         try (Reader reader = resource.get().openAsReader()) {
             JsonObject json = GsonHelper.parse(reader);
             String author = GsonHelper.getAsString(json, "author", "");

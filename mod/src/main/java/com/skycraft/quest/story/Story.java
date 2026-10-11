@@ -615,6 +615,8 @@ public final class Story {
             count = parseInt(spec.substring(star + 1), 1);
         }
         if (id.startsWith("relic:")) return relicStack(id.substring(6));
+        // a legendary unique of the loot module (a place quest's lost heirloom)
+        if (id.startsWith("unique:")) return com.skycraft.loot.LegendaryUniques.create(id.substring(7));
         Item item = item(id);
         if (item == null) return ItemStack.EMPTY;
         return new ItemStack(item, Math.max(1, Math.min(item.getMaxStackSize(), count)));

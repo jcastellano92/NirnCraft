@@ -195,7 +195,7 @@ public final class StoryCommands {
                 acts.add(od.actions);
                 for (StoryData.Choice ch : od.choices) acts.add(ch.actions());
                 if (!od.place.isEmpty() && !od.place.startsWith("@") && QuestPlaces.find(od.place).isEmpty()) problems.add(def.id + ": unknown place " + od.place);
-                if (!od.item.isEmpty() && Story.item(od.item) == null) problems.add(def.id + ": unknown item " + od.item);
+                if (!od.item.isEmpty() && Story.stack(od.item).isEmpty()) problems.add(def.id + ": unknown item " + od.item);
                 for (com.google.gson.JsonObject s : od.spawns) {
                     spawns++;
                     String type = StoryData.str(s, "type", "");

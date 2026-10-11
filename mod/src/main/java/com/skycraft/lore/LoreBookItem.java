@@ -84,6 +84,8 @@ public class LoreBookItem extends Item {
             data.markDirty();
         }
         SkyNetwork.sendToPlayer(player, new LorePackets.OpenBook(book.id()));
+        // place readables reveal what they point at and start their place's mini-quest
+        com.skycraft.lore.place.PlaceLoreEvents.onRead(player, book);
     }
 
     @Override

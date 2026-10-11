@@ -44,5 +44,15 @@
  "greybeards.json",
  "silver_hand.json",
  "forsworn.json",
- "vigilants.json"
+ "vigilants.json",
+ "place_skyrim_whiterun.json",
+ "place_skyrim_falkreath.json",
+ "place_skyrim_the_reach.json",
+ "place_skyrim_the_rift.json",
+ "place_skyrim_eastmarch.json",
+ "place_skyrim_west_coast.json",
+ "place_skyrim_north.json",
+ "place_solstheim.json",
+ "place_tamriel_east.json",
+ "place_tamriel_west.json"
 ]

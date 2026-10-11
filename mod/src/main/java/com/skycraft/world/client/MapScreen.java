@@ -782,6 +782,8 @@ public class MapScreen extends Screen {
                 lines.add(Component.literal(line).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
             }
         }
+        // the place's story (lore module)
+        if (pin.place() != null) lines.addAll(com.skycraft.lore.place.client.PlaceLoreClient.hookLines(pin.place().id(), font, 200));
         if (pin.cleared()) lines.add(Component.translatable("world.skycraft.map.cleared").withStyle(ChatFormatting.DARK_GREEN));
         double dx = pin.x() - player.getX();
         double dz = pin.z() - player.getZ();
