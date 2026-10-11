@@ -7,29 +7,22 @@
         {
           "type": "minecraft:item",
           "name": "skycraft:septim",
-          "weight": 60,
-          "functions": [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 5, "max": 45}}]
+          "weight": 85,
+          "functions": [
+            {
+              "function": "skycraft:scaled_gold",
+              "min": 5,
+              "max": 40,
+              "growth": 0.04
+            }
+          ]
         },
         {
-          "type": "minecraft:item",
-          "name": "skycraft:coin_purse",
-          "weight": 25,
-          "functions": [{"function": "minecraft:set_nbt", "tag": "{gold:75L}"}]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:coin_purse",
-          "weight": 10,
-          "functions": [{"function": "minecraft:set_nbt", "tag": "{gold:150L}"}]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:coin_purse",
-          "weight": 3,
-          "functions": [{"function": "minecraft:set_nbt", "tag": "{gold:400L}"}]
-        },
-        {"type": "minecraft:empty", "weight": 10}
+          "type": "minecraft:empty",
+          "weight": 15
+        }
       ]
     }
-  ]
+  ],
+  "random_sequence": "skycraft:chests/gold"
 }

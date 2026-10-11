@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.skycraft.Skycraft;
 import com.skycraft.arsenal.LeveledGear;
-import com.skycraft.crafting.item.SkyArmorItem;
 import com.skycraft.crafting.item.SkyAxeItem;
 import com.skycraft.crafting.item.SkyBowItem;
 import com.skycraft.crafting.item.SkyMeleeItem;
@@ -142,15 +141,9 @@ public class RegionalGear extends LootItemConditionalFunction {
         };
     }
 
-    /** Character level from which an item of the catalogue drops (1 for anything else). */
+    /** Character level from which an item of the catalogue drops (1 for anything else): {@link com.skycraft.loot.LootTiers#unlock(Item)}. */
     public static int minLevel(Item item) {
-        if (item instanceof SkyArmorItem a) return a.set.minLevel;
-        if (item instanceof SkyShieldItem s) return s.set.minLevel;
-        if (item instanceof SkyMeleeItem m) return m.smithingTier.minLevel;
-        if (item instanceof SkyAxeItem a) return a.smithingTier.minLevel;
-        if (item instanceof SkyBowItem b) return b.smithingTier.minLevel;
-        if (item instanceof com.skycraft.arsenal.item.PolearmItem p) return p.smithingTier.minLevel; // no Daedric spears at level 1
-        return 1;
+        return com.skycraft.loot.LootTiers.unlock(item);
     }
 
     // ------------------------------------------------------------------ JSON

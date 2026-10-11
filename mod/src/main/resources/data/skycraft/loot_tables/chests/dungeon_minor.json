@@ -2,55 +2,12 @@
   "type": "minecraft:chest",
   "pools": [
     {
-      "rolls": {
-        "type": "minecraft:uniform",
-        "min": 1,
-        "max": 2
-      },
+      "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:item",
-          "name": "skycraft:septim",
-          "weight": 60,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 3,
-                "max": 25
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:garnet",
-          "weight": 4
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:ruby",
-          "weight": 3
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:sapphire",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:amethyst_shard",
-          "weight": 4
-        },
-        {
           "type": "minecraft:loot_table",
-          "name": "skycraft:chests/alchemy_ingredients",
-          "weight": 30
-        },
-        {
-          "type": "minecraft:empty",
-          "weight": 25
+          "name": "skycraft:containers/dungeon/minor",
+          "weight": 1
         }
       ]
     }

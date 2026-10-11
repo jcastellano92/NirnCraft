@@ -5,6 +5,16 @@
       "rolls": 1,
       "entries": [
         {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:containers/corpse/dragon",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
           "type": "minecraft:item",
           "name": "skycraft:dragon_bone",
           "weight": 1,
@@ -40,32 +50,7 @@
           ]
         }
       ]
-    },
-    {
-      "rolls": 1,
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:septim",
-          "weight": 1,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 50,
-                "max": 200
-              }
-            }
-          ]
-        }
-      ],
-      "conditions": [
-        {
-          "condition": "minecraft:random_chance",
-          "chance": 0.5
-        }
-      ]
     }
-  ]
+  ],
+  "random_sequence": "skycraft:entities/dragon"
 }

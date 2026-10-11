@@ -53,20 +53,12 @@ import java.util.Locale;
  * <p>kind is {@code weapon}, {@code armor}, {@code bow} or {@code arrow} (arrows keep the incoming stack count).
  * The player is the context's THIS_ENTITY if it's a player (chests opened by a player, including Lootr's per-player
  * rolls), else the killer / last damaging player, else the nearest player within 64 blocks of the origin, else
- * level 1. Material bands (approximate Skyrim):</p>
- * <pre>
- *  level   weapons                     | heavy armour                / light armour
- *  1-5     iron                        | iron, banded iron           / hide, fur
- *  6-11    steel (silver)              | steel, banded iron          / leather, studded
- *  12-18   orcish, dwarven             | dwarven (steel)             / elven, scaled
- *  19-26   dwarven, elven              | orcish, steel plate         / elven gilded, scaled
- *  27-35   elven, glass (nordic)       | orcish, steel plate, nordic / glass
- *  36-45   glass, ebony (stalhrim 40+) | ebony (stalhrim 40+)        / glass (stalhrim 40+)
- *  46+     daedric, dragonbone         | daedric, dragonplate        / dragonscale
- * </pre>
- * Every pick also respects the material's own leveled-list level, so nothing above the character's level drops.
- * Like Skyrim's lists, lower bands still appear: 60% current band, 30% one below, 10% two below. Shields come from the
- * band's armour sets. {@link #regional} and {@link #outfit} give the other provinces their own gear.
+ * level 1; the level is clamped like Skyrim's encounter zones ({@link com.skycraft.loot.LootLevels}). Materials follow
+ * the ladders of {@link com.skycraft.loot.LootTiers} (Iron/Hide 1, Steel/Leather 6, Orcish/Elven armour 12,
+ * Dwarven/Scaled 18, Glass 27, Ebony 32, Daedric 46, Dragon 50): nothing above the level drops, the newest rung is 60%
+ * of the drops, the one before 30%, older ones 10%. Enchanted drops get one enchantment whose chance and strength grow
+ * with the level ({@link com.skycraft.loot.LootLevels#enchantChance}). Shields come from the armour ladders.
+ * {@link #regional} and {@link #outfit} give the other provinces their own gear.</p>
  */
 public class LeveledGear extends LootItemConditionalFunction {
     public static final DeferredRegister<LootItemFunctionType> FUNCTIONS = DeferredRegister.create(Registries.LOOT_FUNCTION_TYPE, Skycraft.MODID);
@@ -77,7 +69,8 @@ public class LeveledGear extends LootItemConditionalFunction {
 
     public enum Kind { WEAPON, ARMOR, BOW, ARROW, SHIELD }
 
-    private static final int[] BAND_START = {1, 6, 12, 19, 27, 36, 46};
+    /** Arrow bands (Iron, Steel, Orcish, Dwarven, Elven/Glass, Glass/Ebony, Daedric/Dragonbone), on the LootTiers ladder. */
+    private static final int[] BAND_START = {1, 6, 12, 18, 27, 32, 46};
 
     private final Kind kind;
     private final float enchantChance;
@@ -111,19 +104,12 @@ public class LeveledGear extends LootItemConditionalFunction {
 
     // ------------------------------------------------------------------ level lookup
 
-    /** Character level of the player this loot is for (see class doc). */
+    /**
+     * Loot level of the player this loot is for (see class doc): the character level, capped by the region's band and,
+     * for corpses, by the creature's level ({@link com.skycraft.loot.LootLevels#gear}).
+     */
     public static int levelOf(LootContext context) {
-        Player player = null;
-        Entity self = context.getParamOrNull(LootContextParams.THIS_ENTITY);
-        if (self instanceof Player p) player = p;
-        if (player == null && context.getParamOrNull(LootContextParams.KILLER_ENTITY) instanceof Player p) player = p;
-        if (player == null) player = context.getParamOrNull(LootContextParams.LAST_DAMAGE_PLAYER);
-        if (player == null) {
-            Vec3 origin = context.getParamOrNull(LootContextParams.ORIGIN);
-            if (origin == null && self != null) origin = self.position();
-            if (origin != null) player = context.getLevel().getNearestPlayer(origin.x, origin.y, origin.z, 64, false);
-        }
-        return player == null ? 1 : Math.max(1, SkyData.get(player).getLevel());
+        return com.skycraft.loot.LootLevels.gear(context);
     }
 
     // ------------------------------------------------------------------ rolls
@@ -173,19 +159,12 @@ public class LeveledGear extends LootItemConditionalFunction {
         };
     }
 
-    /** A band's weapon material that the character level allows (Stalhrim inside band 5 needs level 40). */
-    private static SmithingTier weaponTier(int band, int level, RandomSource random) {
-        SmithingTier tier = weaponTier(band, random);
-        for (int i = 0; i < 4 && tier.minLevel > level; i++) tier = weaponTier(Math.max(0, band - 1 - i / 2), random);
-        return tier.minLevel > level ? SmithingTier.IRON : tier;
-    }
-
     private static final WeaponType[] MELEE = {WeaponType.DAGGER, WeaponType.SWORD, WeaponType.WAR_AXE, WeaponType.MACE,
             WeaponType.GREATSWORD, WeaponType.BATTLEAXE, WeaponType.WARHAMMER};
     private static final int[] MELEE_WEIGHT = {15, 25, 16, 12, 12, 10, 10};
 
     public static ItemStack weapon(int level, RandomSource random) {
-        SmithingTier tier = weaponTier(rollBand(level, random), level, random);
+        SmithingTier tier = com.skycraft.loot.LootTiers.weapon(level, random);
         for (int attempt = 0; attempt < 4; attempt++) {
             int total = 0;
             for (int w : MELEE_WEIGHT) total += w;
@@ -205,8 +184,10 @@ public class LeveledGear extends LootItemConditionalFunction {
     }
 
     public static ItemStack bow(int level, RandomSource random) {
-        SmithingTier tier = weaponTier(rollBand(level, random), level, random);
-        Item bow = CraftingItems.weaponItem(tier, WeaponType.BOW);
+        Item bow = Items.AIR;
+        for (int attempt = 0; attempt < 4 && bow == Items.AIR; attempt++) {
+            bow = CraftingItems.weaponItem(com.skycraft.loot.LootTiers.weapon(level, random), WeaponType.BOW);
+        }
         if (bow == Items.AIR) bow = CraftingItems.weaponItem(SmithingTier.IRON, WeaponType.BOW);
         return new ItemStack(bow);
     }
@@ -236,24 +217,16 @@ public class LeveledGear extends LootItemConditionalFunction {
         };
     }
 
-    /** {@link #armorMaterial} limited to sets the character level allows (each set's leveled-list level). */
-    private static SkyArmorMaterial armorMaterial(int band, boolean heavy, int level, RandomSource random) {
-        SkyArmorMaterial mat = armorMaterial(band, heavy, random);
-        for (int b = band - 1; mat.minLevel > level && b >= 0; b--) mat = armorMaterial(b, heavy, random);
-        return mat.minLevel > level ? (heavy ? SkyArmorMaterial.IRON : SkyArmorMaterial.HIDE) : mat;
-    }
-
     public static ItemStack armor(int level, RandomSource random) {
         ArmorItem.Type piece = CraftingItems.ARMOR_TYPES[random.nextInt(CraftingItems.ARMOR_TYPES.length)];
-        return new ItemStack(CraftingItems.armor(armorMaterial(rollBand(level, random), random.nextBoolean(), level, random), piece));
+        return new ItemStack(CraftingItems.armor(com.skycraft.loot.LootTiers.armor(level, random.nextBoolean(), random), piece));
     }
 
-    /** A shield of the band's armour sets (sets without a shield fall back to a lower band, then to Iron). */
+    /** A shield of the armour ladders (sets without a shield roll again, then fall back to Iron). */
     public static ItemStack shield(int level, RandomSource random) {
-        int band = rollBand(level, random);
         boolean heavy = random.nextInt(3) > 0;
-        for (int b = band; b >= 0; b--) {
-            Item s = CraftingItems.shield(armorMaterial(b, heavy, level, random));
+        for (int attempt = 0; attempt < 6; attempt++) {
+            Item s = CraftingItems.shield(com.skycraft.loot.LootTiers.armor(level, attempt < 3 ? heavy : !heavy, random));
             if (s != null) return new ItemStack(s);
         }
         Item iron = CraftingItems.shield(SkyArmorMaterial.IRON);
@@ -348,7 +321,7 @@ public class LeveledGear extends LootItemConditionalFunction {
                 if (candidate.getItem() instanceof ArmorItem a && a.getType() == piece) stack = candidate;
             }
             if (stack.isEmpty()) {
-                stack = new ItemStack(CraftingItems.armor(armorMaterial(rollBand(level, random), random.nextBoolean(), level, random), piece));
+                stack = new ItemStack(CraftingItems.armor(com.skycraft.loot.LootTiers.armor(level, random.nextBoolean(), random), piece));
             }
             equip(mob, piece.getSlot(), stack, dropChance);
         }
@@ -396,15 +369,30 @@ public class LeveledGear extends LootItemConditionalFunction {
         return new ItemStack(ArsenalItems.arrow(kind), 4 + random.nextInt(9));
     }
 
-    /** Optional enchantment (scales with level) and tempering quality ({@code skycraft_quality}). */
+    /**
+     * Optional enchantment and tempering quality ({@code skycraft_quality}). {@code enchantChance} is the table's base
+     * chance, scaled by the level ({@link com.skycraft.loot.LootLevels#enchantChance}); an enchanted drop carries one
+     * enchantment (two, rarely, from level 36) whose level grows with the character's.
+     */
     public static void decorate(ItemStack stack, int level, RandomSource random, float enchantChance, float qualityChance) {
-        if (enchantChance > 0 && random.nextFloat() < enchantChance && stack.isEnchantable()) {
-            int power = Math.min(30, 5 + level / 2 + random.nextInt(6));
-            EnchantmentHelper.enchantItem(random, stack, power, false);
-        }
+        float chance = com.skycraft.loot.LootLevels.enchantChance(enchantChance, level);
+        if (chance > 0 && random.nextFloat() < chance && stack.isEnchantable()) enchantLeveled(stack, level, random);
         if (qualityChance > 0 && random.nextFloat() < qualityChance && Tempering.kind(stack) != Tempering.Kind.NONE) {
             int q = 1 + random.nextInt(Math.max(1, Math.min(5, 1 + level / 12)));
             Tempering.setQuality(stack, Math.min(5, q));
+        }
+    }
+
+    /** Puts one leveled enchantment on the item (Skyrim's enchanted leveled items: "of Embers", "of Scorching"...). */
+    public static void enchantLeveled(ItemStack stack, int level, RandomSource random) {
+        int cost = Math.max(1, Math.min(30, 4 + level / 2 + random.nextInt(6)));
+        java.util.List<net.minecraft.world.item.enchantment.EnchantmentInstance> options =
+                EnchantmentHelper.selectEnchantment(random, stack, cost, false);
+        if (options.isEmpty()) return;
+        int extra = level >= 36 && options.size() > 1 && random.nextFloat() < 0.15f ? 2 : 1;
+        for (int i = 0; i < extra; i++) {
+            net.minecraft.world.item.enchantment.Enchantment e = options.get(i).enchantment;
+            stack.enchant(e, com.skycraft.loot.LootLevels.enchantLevel(level, e.getMaxLevel(), random));
         }
     }
 

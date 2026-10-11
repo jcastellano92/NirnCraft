@@ -457,103 +457,13 @@ def chest_tables():
         pool([leveled("weapon", 40), leveled("armor", 35), leveled("bow", 10), leveled("shield", 10), leveled("arrow", 5)])],
         "chests/skyrim_gear"))
 
-    def boss(data):
-        for p in data["pools"]:
-            for e in p.get("entries", []):
-                if e.get("type") == "minecraft:tag" and e.get("name") == SK + "spell_tomes":
-                    e.clear()
-                    e.update(tome())
-        # province gear in the boss chest: Bonemold in Morrowind, Imperial in Cyrodiil...
-        for p in data["pools"]:
-            for e in p.get("entries", []):
-                fns = e.get("functions", [])
-                for f in fns:
-                    if f.get("function") == SK + "leveled_gear" and f.get("kind") in ("weapon", "armor"):
-                        f["function"] = SK + "regional_gear"
-        if not has_item(data, "skyrim_potion"):
-            data["pools"].append(pool([potion(3), potion(1, True)], {"type": "minecraft:uniform", "min": 1, "max": 2}))
-        if not has_item(data, '"shield"'):
-            data["pools"].append(pool([gear("shield", 1, 0.2, 0.2), {"type": "minecraft:empty", "weight": 2}]))
-    edit_loot("chests/dungeon_boss", boss)
-
-    def common(data):
-        for p in data["pools"]:
-            for e in p.get("entries", []):
-                if e.get("type") == "minecraft:tag" and e.get("name") == SK + "spell_tomes":
-                    e.clear()
-                    e.update(tome(2))
-                for f in e.get("functions", []):
-                    if f.get("function") == SK + "leveled_gear" and f.get("kind") in ("weapon", "armor"):
-                        f["function"] = SK + "regional_gear"
-        if not has_item(data, "skyrim_potion"):
-            data["pools"].append(pool([potion(4), potion(1, True), {"type": "minecraft:empty", "weight": 3}]))
-    edit_loot("chests/dungeon_common", common)
-
-    loot("chests/bandit_camp", table("chest", [
-        pool([gold(10, 60)]),
-        pool([item(SK + "coin_purse", 4, [{"function": "minecraft:set_nbt", "tag": "{gold:100L}"}]),
-              item("minecraft:iron_ingot", 6, [count(1, 3)]), item(SK + "steel_ingot", 4, [count(1, 2)]),
-              gear("weapon", 8), gear("armor", 6), gear("shield", 2), leveled("bow", 3), leveled("arrow", 6),
-              potion(8, False, 1, 2), potion(2, True), regional("loot/ingredients", 1, 2, 5), item(SK + "lockpick", 4, [count(1, 3)])]
-             + GEMS_SMALL,
-             {"type": "minecraft:uniform", "min": 3, "max": 6})], "chests/bandit_camp"))
-
-    def supplies(data):
-        for p in data["pools"]:
-            for e in p.get("entries", []):
-                if e.get("name") == "minecraft:potion":
-                    e["functions"] = [{"function": SK + "skyrim_potion", "poison": False}]
-    edit_loot("chests/bandit_camp_supplies", supplies)
+    # the dungeon chests (boss, common, minor), the bandit camp and every other container now come from
+    # tools/loot_data.py (skycraft:containers/*; the old ids are aliases)
 
 
 def entity_tables():
-    # people: gold, potions, ingredients and a chance of gear (they also drop what they wear, see LeveledGear.outfit)
-    loot("entities/bandit", table("entity", [
-        pool([gold(3, 25)]),
-        pool([potion(4), potion(1, True), {"type": "minecraft:empty", "weight": 5}]),
-        pool([regional("loot/ingredients", 1, 2, 2), leveled("arrow", 2), item("minecraft:bread", 1, [count(1, 2)]),
-              item(SK + "lockpick", 1), {"type": "minecraft:empty", "weight": 4}])], "entities/bandit"))
-    loot("entities/bandit_chief", table("entity", [
-        pool([gold(20, 80)]),
-        pool([item(SK + "coin_purse", 3, [{"function": "minecraft:set_nbt", "tag": "{gold:250L}"}]),
-              {"type": "minecraft:empty", "weight": 1}]),
-        pool([gear("weapon", 2, 0.35, 0.3), gear("armor", 2, 0.25, 0.3), gear("shield", 1, 0.2, 0.2)]),
-        pool([potion(3, False, 1, 2), potion(1, True)]),
-        pool(GEMS_SMALL)], "entities/bandit_chief"))
-    loot("entities/draugr", table("entity", [
-        pool([item(SK + "bone_meal_draugr", 1, [count(1, 2), {"function": "minecraft:looting_enchant",
-                                                               "count": {"type": "minecraft:uniform", "min": 0, "max": 1}}])],
-             conditions=[chance_looting(0.6, 0.05)]),
-        pool([gold(2, 18)], conditions=[chance(0.6)]),
-        pool([leveled("arrow", 3), item("minecraft:bone", 3, [count(1, 2)]), regional("loot/ingredients", 1, 1, 1),
-              {"type": "minecraft:empty", "weight": 5}] + GEMS_SMALL[:3])], "entities/draugr"))
-    loot("entities/draugr_deathlord", table("entity", [
-        pool([gold(20, 70)]),
-        pool([item(SK + "bone_meal_draugr", 1, [count(1, 3)])]),
-        pool([leveled("weapon", 2, 0.4, 0.2), leveled("armor", 1, 0.3, 0.2)]),
-        pool([tome(1), potion(2), {"type": "minecraft:empty", "weight": 3}]),
-        pool(GEMS_SMALL + [item(SK + "flawless_ruby", 1), item(SK + "flawless_sapphire", 1)])], "entities/draugr_deathlord"))
-    loot("entities/forsworn", table("entity", [
-        pool([gold(1, 12)], conditions=[chance(0.5)]),
-        pool([item(SK + "briar_heart", 1)], conditions=[chance_looting(0.15, 0.03)]),
-        pool([item(SK + "hide", 3, [count(1, 2)]), item("minecraft:bone", 2), item(SK + "hagraven_feathers", 1),
-              regional("loot/ingredients", 1, 2, 3), {"type": "minecraft:empty", "weight": 3}])], "entities/forsworn"))
-    loot("entities/falmer", table("entity", [
-        pool([item(SK + "falmer_ear", 1)], conditions=[chance_looting(0.5, 0.05)]),
-        pool([item(SK + "chaurus_chitin", 2, [count(1, 2)]), item(SK + "chaurus_eggs", 2), item(SK + "glowing_mushroom", 1),
-              item(SK + "refined_moonstone", 1), {"type": "minecraft:empty", "weight": 4}])], "entities/falmer"))
-    loot("entities/vampire", table("entity", [
-        pool([gold(5, 40)]),
-        pool([item(SK + "vampire_dust", 1)], conditions=[chance_looting(0.6, 0.05)]),
-        pool([potion(2), potion(1, True), tome(1, ["destruction", "conjuration", "illusion"]),
-              {"type": "minecraft:empty", "weight": 3}]),
-        pool(GEMS_SMALL + [{"type": "minecraft:empty", "weight": 10}])], "entities/vampire"))
-    loot("entities/necromancer", table("entity", [
-        pool([gold(5, 35)]),
-        pool([tome(1, ["conjuration"]), item(SK + "soul_gem_petty", 2), item(SK + "soul_gem_lesser", 1),
-              item(SK + "soul_gem_black", 1, conditions=[chance(0.25)]), {"type": "minecraft:empty", "weight": 2}]),
-        pool([item(SK + "bone_meal_draugr", 2, [count(1, 2)]), item(SK + "nightshade", 1), item(SK + "deathbell", 1),
-              potion(1), {"type": "minecraft:empty", "weight": 2}])], "entities/necromancer"))
+    # people (bandits, draugr, mages, vampires...) roll their corpse rank table from tools/loot_data.py
+    # (skycraft:containers/corpse/*) plus their own parts, which that script keeps
 
     # creature parts that are Skyrim ingredients
     add_pool_once("entities/frostbite_spider", SK + "spider_egg", pool([item(SK + "spider_egg")], conditions=[chance_looting(0.35, 0.05)]))
@@ -568,7 +478,6 @@ def entity_tables():
         add_pool_once(f"entities/{d}", SK + "dwarven_oil", pool([item(SK + "dwarven_oil", 1, [count(1, 2)])], conditions=[chance_looting(0.5, 0.05)]))
     add_pool_once("entities/mudcrab", SK + "small_pearl", pool([item(SK + "small_pearl")], conditions=[chance_looting(0.03, 0.01)]))
     add_pool_once("entities/slaughterfish", SK + "nordic_barnacle", pool([item(SK + "nordic_barnacle")], conditions=[chance_looting(0.1, 0.02)]))
-    add_pool_once("entities/dragon_priest", "skycraft:leveled_tome", pool([tome(1)]))
 
 
 def flora_tables():
@@ -706,6 +615,11 @@ def values_weights():
     weights.update({SK + k: v for k, v in JEWELRY_WEIGHTS.items()})
     values.update({"#skycraft:merchant/skill_books": 50, SK + "septim": 1, SK + "coin_purse": 0, SK + "jail_key": 0,
                    SK + "quest_relic": 50})
+    # other modules' items the item audit found without data: keys, boats, deposits
+    values.update({SK + "house_key": 0, SK + "rowboat": 60, SK + "longship": 1500, SK + "cog": 2500, SK + "shipwright_bench": 150,
+                   SK + "clay_deposit": 0, SK + "stone_deposit": 0})
+    weights.update({SK + "house_key": 0, SK + "rowboat": 30, SK + "longship": 80, SK + "cog": 100, SK + "shipwright_bench": 30,
+                    SK + "clay_deposit": 5, SK + "stone_deposit": 5})
     weights.update({"#skycraft:merchant/skill_books": 1, SK + "jail_key": 0, SK + "quest_relic": 1,
                     SK + "bound_sword": 0, SK + "bound_dagger": 0, SK + "bound_battleaxe": 0, SK + "bound_bow": 0})
     write(DATA / "skycraft_values" / "economy.json", {"values": dict(sorted(values.items()))})

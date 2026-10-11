@@ -5,60 +5,12 @@
       "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:item",
-          "name": "skycraft:coin_purse",
-          "weight": 60,
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{gold:400L}"
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:coin_purse",
-          "weight": 40,
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{gold:600L}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "rolls": { "type": "minecraft:uniform", "min": 1, "max": 2 },
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:lockpick",
-          "weight": 35,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": { "type": "minecraft:uniform", "min": 3, "max": 5 }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:flawless_ruby",
-          "weight": 25
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:soul_gem_greater",
-          "weight": 25
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:gold_ruby_necklace",
-          "weight": 15
+          "type": "minecraft:loot_table",
+          "name": "skycraft:containers/lock_bonus/expert",
+          "weight": 1
         }
       ]
     }
-  ]
+  ],
+  "random_sequence": "skycraft:chests/lock_bonus/expert"
 }
-

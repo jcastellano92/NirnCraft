@@ -95,7 +95,7 @@ public final class Theft {
         if (Jail.isJailDimension(level) || Jail.isJailArea(level, pos) || PlacedBlocks.isPlayerPlaced(level, pos)) return false;
         BlockEntity be = level.getBlockEntity(pos);
         String loot = lootTable(be);
-        if (loot != null && !loot.contains(VILLAGE_LOOT)) return false; // dungeon/structure loot: finders keepers
+        if (loot != null && !owned(loot)) return false; // dungeon/structure loot: finders keepers
         return inVillage(level, pos);
     }
 
@@ -106,6 +106,11 @@ public final class Theft {
         if (!level.getEntitiesOfClass(com.skycraft.society.entity.NpcEntity.class, new AABB(pos).inflate(32),
                 n -> n.isAlive() && n.getHome() != null).isEmpty()) return true;
         return level.getPoiManager().findClosest((Holder<PoiType> h) -> h.is(PoiTypes.MEETING), pos, 48, PoiManager.Occupancy.ANY).isPresent();
+    }
+
+    /** Household and shop loot (village tables and the loot module's {@code containers/household|shop}) belongs to someone. */
+    static boolean owned(String loot) {
+        return loot.contains(VILLAGE_LOOT) || com.skycraft.loot.Containers.isOwned(loot);
     }
 
     /** The loot table a container still has to generate, or null. */
@@ -122,7 +127,7 @@ public final class Theft {
         BlockEntity be = player.level().getBlockEntity(pos);
         String loot = lootTable(be);
         LAST_CLICK.put(player.getUUID(), new Click(pos.immutable(), player.level().getGameTime(),
-                loot != null && loot.contains(VILLAGE_LOOT), loot != null && !loot.contains(VILLAGE_LOOT)));
+                loot != null && owned(loot), loot != null && !owned(loot)));
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

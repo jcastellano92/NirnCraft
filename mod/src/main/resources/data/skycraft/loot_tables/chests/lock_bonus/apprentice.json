@@ -5,55 +5,12 @@
       "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:item",
-          "name": "skycraft:septim",
-          "weight": 60,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": { "type": "minecraft:uniform", "min": 25, "max": 75 }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:coin_purse",
-          "weight": 40,
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{gold:100L}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "rolls": 1,
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:lockpick",
-          "weight": 50,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": { "type": "minecraft:uniform", "min": 2, "max": 3 }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:ruby",
-          "weight": 25
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:soul_gem_lesser",
-          "weight": 25
+          "type": "minecraft:loot_table",
+          "name": "skycraft:containers/lock_bonus/apprentice",
+          "weight": 1
         }
       ]
     }
-  ]
+  ],
+  "random_sequence": "skycraft:chests/lock_bonus/apprentice"
 }
-

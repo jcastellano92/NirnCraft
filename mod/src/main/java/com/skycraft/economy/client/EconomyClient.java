@@ -32,8 +32,12 @@ public final class EconomyClient {
     }
 
     public static boolean hasReadBook(Skill skill) {
+        return hasReadBook(skill, 1);
+    }
+
+    public static boolean hasReadBook(Skill skill, int volume) {
         Player player = Minecraft.getInstance().player;
-        return player != null && SkillBookItem.hasRead(SkyData.get(player), skill);
+        return player != null && SkillBookItem.hasRead(SkyData.get(player), skill, volume);
     }
 
     /** Skyrim shows every item's gold value. */

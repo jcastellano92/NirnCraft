@@ -5,18 +5,9 @@
       "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:item",
-          "name": "skycraft:septim",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 100,
-                "max": 300
-              }
-            }
-          ]
+          "type": "minecraft:loot_table",
+          "name": "skycraft:containers/corpse/dragon_priest",
+          "weight": 1
         }
       ]
     },
@@ -62,21 +53,7 @@
           ]
         }
       ]
-    },
-    {
-      "rolls": 1,
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:book",
-          "weight": 1,
-          "functions": [
-            {
-              "function": "skycraft:leveled_tome"
-            }
-          ]
-        }
-      ]
     }
-  ]
+  ],
+  "random_sequence": "skycraft:entities/dragon_priest"
 }

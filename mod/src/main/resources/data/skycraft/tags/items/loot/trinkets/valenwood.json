@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:jade_pendant",
+      "required": false
+    },
+    {
+      "id": "skycraft:silver_ring",
+      "required": false
+    },
+    {
+      "id": "skycraft:copper_circlet",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:sapphire_pendant",
+      "required": false
+    },
+    {
+      "id": "skycraft:silver_ring",
+      "required": false
+    }
+  ]
+}

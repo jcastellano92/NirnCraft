@@ -1,0 +1,90 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/food",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:arrow",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 6,
+                "max": 14
+              }
+            },
+            {
+              "function": "skycraft:leveled_gear",
+              "kind": "arrow"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:torch",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 6
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:leather",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/potions",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "skycraft:scaled_gold",
+              "min": 2,
+              "max": 10,
+              "growth": 0.04
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 3
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:containers/camp/bandit_supplies"
+}

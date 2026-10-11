@@ -5,6 +5,16 @@
       "rolls": 1,
       "entries": [
         {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:containers/corpse/falmer",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
           "type": "minecraft:item",
           "name": "skycraft:falmer_ear",
           "weight": 1

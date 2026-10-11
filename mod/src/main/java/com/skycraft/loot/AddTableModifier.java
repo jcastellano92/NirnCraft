@@ -75,9 +75,9 @@ public class AddTableModifier extends LootModifier {
         sanitize(generatedLoot, id, village);
         boolean lore = table.equals(LORE_TABLE);
 
-        if (id.getNamespace().equals(Skycraft.MODID) && id.getPath().startsWith("chests/")) {
-            // Skycraft's own chests already carry Skyrim loot: only the lore modifier adds a book, once
-            if (lore && dungeonChest(id, context) && context.getRandom().nextFloat() < DUNGEON_LORE) addLoreBook(generatedLoot, context);
+        if (id.getNamespace().equals(Skycraft.MODID)) {
+            // Skycraft's own chests (the containers/* taxonomy and its chests/* aliases) carry their own Skyrim loot,
+            // lore books included
             return generatedLoot;
         }
         int before = generatedLoot.size();

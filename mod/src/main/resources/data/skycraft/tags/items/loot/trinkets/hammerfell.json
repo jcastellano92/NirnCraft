@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:gold_ring",
+      "required": false
+    },
+    {
+      "id": "skycraft:gold_necklace",
+      "required": false
+    },
+    {
+      "id": "skycraft:silver_circlet",
+      "required": false
+    }
+  ]
+}

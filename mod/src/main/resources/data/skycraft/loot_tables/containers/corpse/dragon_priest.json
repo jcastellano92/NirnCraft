@@ -1,0 +1,89 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "skycraft:scaled_gold",
+              "min": 80,
+              "max": 200,
+              "growth": 0.05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "skycraft:leveled_tome"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:soul_gem_grand",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/soul_gems",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/gems",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/staff",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "skycraft:loot_level",
+              "min": 10,
+              "max": 999
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 3
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:containers/corpse/dragon_priest"
+}

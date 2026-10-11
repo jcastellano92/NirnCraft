@@ -104,20 +104,6 @@
           "weight": 2
         }
       ]
-    },
-    {
-      "rolls": 1,
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:azuras_star",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:empty",
-          "weight": 399
-        }
-      ]
     }
   ],
   "random_sequence": "skycraft:chests/soul_gems"

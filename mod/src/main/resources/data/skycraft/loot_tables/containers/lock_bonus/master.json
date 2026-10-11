@@ -1,0 +1,67 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "skycraft:scaled_gold",
+              "min": 30,
+              "max": 60,
+              "growth": 0.02
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/lockpicks",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/gems",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/soul_gems",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:gold_ring",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "skycraft:regional_tag",
+              "tag": "skycraft:loot/trinkets"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:flawless_diamond",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "skycraft:loot_level",
+              "min": 27,
+              "max": 999
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:containers/lock_bonus/master"
+}

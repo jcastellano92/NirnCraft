@@ -1,0 +1,48 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/food",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:sugar",
+          "weight": 30,
+          "functions": [
+            {
+              "function": "skycraft:regional_tag",
+              "tag": "skycraft:loot/ingredients"
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 70
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:containers/household_stores/poor"
+}

@@ -1,0 +1,90 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "skycraft:scaled_gold",
+              "min": 10,
+              "max": 30,
+              "growth": 0.04
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/potions",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/soul_gems",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:candle",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 4
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 30,
+          "functions": [
+            {
+              "function": "skycraft:regional_book"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 10,
+          "functions": [
+            {
+              "function": "skycraft:leveled_tome",
+              "schools": [
+                "restoration"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 60
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:containers/shop/temple"
+}

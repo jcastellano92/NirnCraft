@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:gold_ring",
+      "required": false
+    },
+    {
+      "id": "skycraft:gold_necklace",
+      "required": false
+    },
+    {
+      "id": "skycraft:amulet_of_mara",
+      "required": false
+    },
+    {
+      "id": "skycraft:silver_circlet",
+      "required": false
+    },
+    {
+      "id": "skycraft:gold_ruby_necklace",
+      "required": false
+    }
+  ]
+}

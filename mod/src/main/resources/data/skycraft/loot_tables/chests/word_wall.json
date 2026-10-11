@@ -5,124 +5,12 @@
       "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:item",
-          "name": "skycraft:septim",
-          "weight": 3,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 25,
-                "max": 90
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:coin_purse",
-          "weight": 1,
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{gold:150L}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "rolls": {
-        "type": "minecraft:uniform",
-        "min": 1,
-        "max": 3
-      },
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:gold_ingot",
-          "weight": 6,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 3
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:gold_nugget",
-          "weight": 6,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 3,
-                "max": 9
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:amethyst_shard",
-          "weight": 3,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 4
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:emerald",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:bone",
-          "weight": 4,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 3
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "rolls": 1,
-      "entries": [
-        {
           "type": "minecraft:loot_table",
-          "name": "skycraft:chests/spell_tomes"
-        }
-      ]
-    },
-    {
-      "rolls": 1,
-      "entries": [
-        {
-          "type": "minecraft:loot_table",
-          "name": "skycraft:chests/soul_gems"
+          "name": "skycraft:containers/site/word_wall",
+          "weight": 1
         }
       ]
     }
-  ]
+  ],
+  "random_sequence": "skycraft:chests/word_wall"
 }

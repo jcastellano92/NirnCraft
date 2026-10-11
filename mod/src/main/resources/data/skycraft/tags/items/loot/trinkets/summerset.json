@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:gold_circlet",
+      "required": false
+    },
+    {
+      "id": "skycraft:sapphire_pendant",
+      "required": false
+    },
+    {
+      "id": "skycraft:gold_diamond_ring",
+      "required": false
+    },
+    {
+      "id": "skycraft:jade_circlet",
+      "required": false
+    }
+  ]
+}

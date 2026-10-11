@@ -1,0 +1,102 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "skycraft:scaled_gold",
+              "min": 60,
+              "max": 150,
+              "growth": 0.05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 3
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:gold_ring",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "skycraft:regional_tag",
+              "tag": "skycraft:loot/trinkets"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/gems",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/gear_rich",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "skycraft:leveled_tome"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 50,
+          "functions": [
+            {
+              "function": "skycraft:regional_book"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 50
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:regional_treasure",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "skycraft:regional_treasure"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 96
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:containers/shop/jarl"
+}

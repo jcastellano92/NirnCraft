@@ -1,0 +1,76 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 55,
+          "functions": [
+            {
+              "function": "skycraft:scaled_gold",
+              "min": 2,
+              "max": 15,
+              "growth": 0.04
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 45
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:sugar",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "skycraft:regional_tag",
+              "tag": "skycraft:loot/ingredients"
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/potions",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/lockpicks",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/lore_note",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/gems",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 3
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:containers/misc/satchel"
+}

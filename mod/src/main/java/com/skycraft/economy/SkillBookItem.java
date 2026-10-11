@@ -31,10 +31,17 @@ import java.util.List;
 /**
  * A Skyrim skill book. Reading it for the first time raises its skill by one level; the book is never consumed,
  * and reading it again does nothing. Read books are tracked per character in {@code module("economy").books_read}.
+ *
+ * <p>Every skill has {@value #VOLUMES} books, like Skyrim: volume 1 is the plain item (the one merchants sell, tracked
+ * by the skill id), volumes 2-5 carry the int NBT {@value #VOLUME_NBT}, have their own titles
+ * ({@code item.skycraft.skill_book_<skill>.v<n>}) and are tracked as {@code <skill>#<n>}. They turn up in loot
+ * ({@code skycraft:skill_book}); reading all five of a skill is a collection goal (the loot module's Journal page).</p>
  */
 public class SkillBookItem extends Item {
     public static final String MODULE = "economy";
     public static final String READ_KEY = "books_read";
+    public static final String VOLUME_NBT = "volume";
+    public static final int VOLUMES = 5;
 
     private final Skill skill;
 
@@ -48,11 +55,32 @@ public class SkillBookItem extends Item {
     }
 
     public static boolean hasRead(PlayerData data, Skill skill) {
+        return hasRead(data, skill, 1);
+    }
+
+    public static boolean hasRead(PlayerData data, Skill skill, int volume) {
+        String key = readKey(skill, volume);
         ListTag read = data.module(MODULE).getList(READ_KEY, Tag.TAG_STRING);
         for (int i = 0; i < read.size(); i++) {
-            if (read.getString(i).equals(skill.id())) return true;
+            if (read.getString(i).equals(key)) return true;
         }
         return false;
+    }
+
+    private static String readKey(Skill skill, int volume) {
+        return volume <= 1 ? skill.id() : skill.id() + "#" + volume;
+    }
+
+    /** The book's volume, 1..{@value #VOLUMES}. */
+    public static int volume(ItemStack stack) {
+        int v = stack.hasTag() ? stack.getTag().getInt(VOLUME_NBT) : 0;
+        return Math.max(1, Math.min(VOLUMES, v));
+    }
+
+    @Override
+    public Component getName(ItemStack stack) {
+        int v = volume(stack);
+        return v <= 1 ? super.getName(stack) : Component.translatable(getDescriptionId() + ".v" + v);
     }
 
     @Override
@@ -60,12 +88,13 @@ public class SkillBookItem extends Item {
         ItemStack stack = player.getItemInHand(hand);
         if (!level.isClientSide && player instanceof ServerPlayer sp) {
             PlayerData data = SkyData.get(sp);
-            if (hasRead(data, skill)) {
+            int volume = volume(stack);
+            if (hasRead(data, skill, volume)) {
                 Notifier.message(sp, Component.translatable("message.skycraft.economy.book_already_read"));
             } else {
                 CompoundTag module = data.module(MODULE);
                 ListTag read = module.getList(READ_KEY, Tag.TAG_STRING);
-                read.add(StringTag.valueOf(skill.id()));
+                read.add(StringTag.valueOf(readKey(skill, volume)));
                 module.put(READ_KEY, read);
                 data.addStat("skill_books_read", 1);
                 data.markDirty();
@@ -84,7 +113,8 @@ public class SkillBookItem extends Item {
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("tooltip.skycraft.economy.skill_book", skill.displayName()).withStyle(ChatFormatting.GRAY));
         if (level != null && level.isClientSide) {
-            Boolean read = DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> () -> EconomyClient.hasReadBook(skill));
+            int volume = volume(stack);
+            Boolean read = DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> () -> EconomyClient.hasReadBook(skill, volume));
             if (Boolean.TRUE.equals(read)) {
                 tooltip.add(Component.translatable("tooltip.skycraft.economy.skill_book_read").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
             }

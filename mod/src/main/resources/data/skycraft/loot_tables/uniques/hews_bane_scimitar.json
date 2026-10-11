@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:stick",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "skycraft:unique",
+              "id": "hews_bane_scimitar"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:uniques/hews_bane_scimitar"
+}

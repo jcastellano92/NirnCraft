@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:gold_circlet",
+      "required": false
+    },
+    {
+      "id": "skycraft:gold_ring",
+      "required": false
+    }
+  ]
+}

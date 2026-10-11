@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:silver_ring",
+      "required": false
+    },
+    {
+      "id": "skycraft:silver_circlet",
+      "required": false
+    },
+    {
+      "id": "skycraft:silver_necklace",
+      "required": false
+    },
+    {
+      "id": "skycraft:amulet_of_mara",
+      "required": false
+    }
+  ]
+}

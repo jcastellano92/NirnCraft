@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:silver_ring",
+      "required": false
+    },
+    {
+      "id": "skycraft:copper_circlet",
+      "required": false
+    },
+    {
+      "id": "skycraft:silver_necklace",
+      "required": false
+    }
+  ]
+}

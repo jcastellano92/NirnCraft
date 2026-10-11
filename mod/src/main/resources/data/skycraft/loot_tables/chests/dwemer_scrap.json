@@ -2,103 +2,15 @@
   "type": "minecraft:chest",
   "pools": [
     {
-      "rolls": {
-        "type": "minecraft:uniform",
-        "min": 1,
-        "max": 3
-      },
+      "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:item",
-          "name": "skycraft:dwarven_scrap",
-          "weight": 6,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 3
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:dwarven_metal_ingot",
-          "weight": 2,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 2
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:copper_ingot",
-          "weight": 3,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 2,
-                "max": 5
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:gold_nugget",
-          "weight": 2,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 2,
-                "max": 6
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:amethyst_shard",
-          "weight": 1,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 2
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:redstone",
-          "weight": 2,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 2,
-                "max": 5
-              }
-            }
-          ]
+          "type": "minecraft:loot_table",
+          "name": "skycraft:containers/dungeon/theme/dwemer",
+          "weight": 1
         }
       ]
     }
-  ]
+  ],
+  "random_sequence": "skycraft:chests/dwemer_scrap"
 }

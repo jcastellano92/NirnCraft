@@ -2,74 +2,15 @@
   "type": "minecraft:chest",
   "pools": [
     {
-      "rolls": {
-        "type": "minecraft:uniform",
-        "min": 2,
-        "max": 3
-      },
-      "bonus_rolls": 0,
+      "rolls": 1,
       "entries": [
         {
           "type": "minecraft:loot_table",
-          "name": "skycraft:chests/gold"
-        }
-      ]
-    },
-    {
-      "rolls": {
-        "type": "minecraft:uniform",
-        "min": 0,
-        "max": 1
-      },
-      "bonus_rolls": 0,
-      "entries": [
-        {
-          "type": "minecraft:loot_table",
-          "name": "skycraft:chests/skyrim_gear"
-        }
-      ]
-    },
-    {
-      "rolls": {
-        "type": "minecraft:uniform",
-        "min": 0,
-        "max": 1
-      },
-      "bonus_rolls": 0,
-      "entries": [
-        {
-          "type": "minecraft:loot_table",
-          "name": "skycraft:chests/soul_gems"
-        }
-      ]
-    },
-    {
-      "rolls": {
-        "type": "minecraft:uniform",
-        "min": 0,
-        "max": 1
-      },
-      "bonus_rolls": 0,
-      "entries": [
-        {
-          "type": "minecraft:loot_table",
-          "name": "skycraft:chests/lore_books"
-        }
-      ]
-    },
-    {
-      "rolls": {
-        "type": "minecraft:uniform",
-        "min": 0,
-        "max": 1
-      },
-      "bonus_rolls": 0,
-      "entries": [
-        {
-          "type": "minecraft:loot_table",
-          "name": "skycraft:chests/spell_tomes"
+          "name": "skycraft:containers/shop/jarl",
+          "weight": 1
         }
       ]
     }
-  ]
+  ],
+  "random_sequence": "skycraft:chests/village/palace"
 }

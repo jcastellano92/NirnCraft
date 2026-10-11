@@ -5,60 +5,12 @@
       "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:item",
-          "name": "skycraft:coin_purse",
-          "weight": 50,
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{gold:800L}"
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:coin_purse",
-          "weight": 50,
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{gold:1200L}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "rolls": 2,
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:lockpick",
-          "weight": 30,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": { "type": "minecraft:uniform", "min": 4, "max": 8 }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:flawless_diamond",
-          "weight": 25
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:soul_gem_grand",
-          "weight": 25
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:gold_diamond_ring",
-          "weight": 20
+          "type": "minecraft:loot_table",
+          "name": "skycraft:containers/lock_bonus/master",
+          "weight": 1
         }
       ]
     }
-  ]
+  ],
+  "random_sequence": "skycraft:chests/lock_bonus/master"
 }
-

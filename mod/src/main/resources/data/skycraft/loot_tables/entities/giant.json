@@ -5,6 +5,16 @@
       "rolls": 1,
       "entries": [
         {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:containers/corpse/giant",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
           "type": "minecraft:item",
           "name": "skycraft:giants_toe",
           "weight": 1,
@@ -15,26 +25,6 @@
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "rolls": 1,
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:septim",
-          "weight": 1,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 10,
-                "max": 50
               }
             }
           ]
@@ -96,43 +86,7 @@
           "chance": 0.6
         }
       ]
-    },
-    {
-      "rolls": 1,
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:coin_purse",
-          "weight": 1,
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{gold:150L}"
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:emerald",
-          "weight": 1,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 2
-              }
-            }
-          ]
-        }
-      ],
-      "conditions": [
-        {
-          "condition": "minecraft:random_chance",
-          "chance": 0.2
-        }
-      ]
     }
-  ]
+  ],
+  "random_sequence": "skycraft:entities/giant"
 }

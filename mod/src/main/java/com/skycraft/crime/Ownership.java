@@ -120,7 +120,7 @@ public final class Ownership {
             if (Jail.isJailDimension(level) || Jail.isJailArea(level, pos)) return false;
             BlockEntity be = level.getBlockEntity(pos);
             String loot = Theft.lootTable(be);
-            if (loot != null && !loot.contains("village")) {
+            if (loot != null && !loot.contains("village") && !com.skycraft.loot.Containers.isOwned(loot)) {
                 return false;
             }
 

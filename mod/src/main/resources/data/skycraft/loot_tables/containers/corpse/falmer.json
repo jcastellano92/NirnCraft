@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/gems",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/soul_gems",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 18
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:containers/corpse/falmer"
+}

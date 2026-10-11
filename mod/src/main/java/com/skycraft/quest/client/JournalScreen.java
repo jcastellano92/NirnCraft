@@ -34,11 +34,12 @@ import java.util.UUID;
 
 /**
  * The Skyrim journal: a parchment page with tabs for Quests (active / completed, objectives, rewards, compass
- * tracking), Factions (membership, rank, reputation), Stats and Party.
+ * tracking), Factions (membership, rank, reputation), Stats, Party and Collections (the loot module's
+ * {@link com.skycraft.loot.client.CollectionsPage}).
  */
 public class JournalScreen extends Screen {
-    private static final int MAIN = 0, SIDE = 1, MISC = 2, FACTIONS = 3, REPUTATION = 4, STATS = 5, PARTY = 6;
-    private static final String[] TABS = {"main", "side", "misc", "factions", "reputation", "stats", "party"};
+    private static final int MAIN = 0, SIDE = 1, MISC = 2, FACTIONS = 3, REPUTATION = 4, STATS = 5, PARTY = 6, COLLECTIONS = 7;
+    private static final String[] TABS = {"main", "side", "misc", "factions", "reputation", "stats", "party", "collections"};
     private static final int ROW = 12;
 
     private static int tab = MAIN;
@@ -221,6 +222,11 @@ public class JournalScreen extends Screen {
                         return true;
                     }
                 }
+            } else if (tab == COLLECTIONS) {
+                if (com.skycraft.loot.client.CollectionsPage.click(mx, my, x0 + 6, top, listX1, listScroll)) {
+                    detailScroll = 0;
+                    return true;
+                }
             } else if (tab == FACTIONS) {
                 int idx = (int) ((my - top + listScroll) / 22);
                 if (idx >= 0 && idx < Faction.VALUES.length) {
@@ -274,6 +280,11 @@ public class JournalScreen extends Screen {
             case FACTIONS -> renderFactions(g, mouseX, mouseY);
             case REPUTATION -> renderReputation(g);
             case STATS -> renderStats(g);
+            case COLLECTIONS -> {
+                int[] h = com.skycraft.loot.client.CollectionsPage.render(g, font, x0, y0, x1, y1, listX1, listScroll, detailScroll);
+                listHeight = h[0];
+                detailHeight = h[1];
+            }
             default -> renderParty(g);
         }
         super.render(g, mouseX, mouseY, partialTick);

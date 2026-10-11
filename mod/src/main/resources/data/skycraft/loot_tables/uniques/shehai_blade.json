@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:stick",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "skycraft:unique",
+              "id": "shehai_blade"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:uniques/shehai_blade"
+}

@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:jade_circlet",
+      "required": false
+    },
+    {
+      "id": "skycraft:jade_pendant",
+      "required": false
+    }
+  ]
+}

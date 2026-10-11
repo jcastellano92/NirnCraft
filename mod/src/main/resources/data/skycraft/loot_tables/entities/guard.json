@@ -5,25 +5,9 @@
       "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:item",
-          "name": "skycraft:septim",
-          "weight": 1,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 8
-              }
-            }
-          ]
-        }
-      ],
-      "conditions": [
-        {
-          "condition": "minecraft:random_chance",
-          "chance": 0.5
+          "type": "minecraft:loot_table",
+          "name": "skycraft:containers/corpse/soldier",
+          "weight": 1
         }
       ]
     },
@@ -48,5 +32,6 @@
         }
       ]
     }
-  ]
+  ],
+  "random_sequence": "skycraft:entities/guard"
 }

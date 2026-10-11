@@ -5,6 +5,16 @@
       "rolls": 1,
       "entries": [
         {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:containers/corpse/brute",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
           "type": "minecraft:item",
           "name": "skycraft:ogre_tooth",
           "functions": [
@@ -27,32 +37,7 @@
           ]
         }
       ]
-    },
-    {
-      "rolls": 1,
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:septim",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 5,
-                "max": 25
-              }
-            }
-          ]
-        }
-      ],
-      "conditions": [
-        {
-          "condition": "minecraft:random_chance_with_looting",
-          "chance": 0.5,
-          "looting_multiplier": 0.05
-        }
-      ]
     }
-  ]
+  ],
+  "random_sequence": "skycraft:entities/ogre"
 }

@@ -1,0 +1,79 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "skycraft:scaled_gold",
+              "min": 15,
+              "max": 50,
+              "growth": 0.04
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 3
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:moon_sugar",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:skooma",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/lockpicks",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/gems",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:gold_ring",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "skycraft:regional_tag",
+              "tag": "skycraft:loot/trinkets"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "skycraft:parts/potions",
+          "weight": 2
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:containers/camp/smuggler"
+}

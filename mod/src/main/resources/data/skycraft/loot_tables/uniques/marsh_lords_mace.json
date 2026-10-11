@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:stick",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "skycraft:unique",
+              "id": "marsh_lords_mace"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:uniques/marsh_lords_mace"
+}
