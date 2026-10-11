@@ -1,0 +1,16 @@
+== WARN land (7)
+  bronze_water_cave (dungeon_fixed/den @ 1014,-796 in skyrim_landmarks.json): on the lake (skyrim/the_pale lake 20)
+  eldergleam_sanctuary (dungeon_fixed/grove @ 1588,239 in skyrim_landmarks.json): on the lake (skyrim/eastmarch lake 7)
+  faldars_tooth (fort/fort @ 1996,1347 in skyrim_landmarks.json): on the lake (skyrim/the_rift lake 60)
+  half_moon_mill (village/mill @ -994,805 in skyrim_settlements.json): on the lake (skyrim/falkreath lake 4)
+  ilinaltas_deep (fort/fort_mage @ -795,661 in skyrim_landmarks.json): on the lake (skyrim/falkreath lake 12)
+  imperial_city_prison (landmark/district @ 1204,5491 in cyrodiil.json): on the lake (cyrodiil/heartlands lake 64)
+  solitude (capital/solitude @ -1216,-1740 in skyrim_settlements.json): on the shore line of a harbour city (sea/sea_of_ghosts coast -29); the road planner snaps to land within 160
+== WARN roads (6)
+  hundings_dojo (farm/estate @ -18800,4500 in foreign.json): no other settlement within 6400 blocks on its (off-raster) land
+  kjolvik (village/- @ 2400,-10800 in foreign.json): no other settlement within 2400 blocks on its (off-raster) land
+  mistveil_village (village/- @ -20171,18649 in foreign.json): no other settlement within 2400 blocks on its (off-raster) land
+  pyandonean_fleet_anchorage (town/- @ -18200,20812 in foreign.json): no other settlement within 2400 blocks on its (off-raster) land
+  tang_mo_harbor_village (village/- @ 22600,6000 in foreign.json): no other settlement within 2400 blocks on its (off-raster) land
+  tiger_plains_village (village/- @ 20000,3600 in foreign.json): no other settlement within 2400 blocks on its (off-raster) land
+== INFO: 6 settlements lie outside the Tamriel raster; the road planner (Landmass.near -> UNKNOWN) skips them

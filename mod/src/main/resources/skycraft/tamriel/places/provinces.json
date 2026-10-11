@@ -137,7 +137,8 @@
   "region": "morrowind/telvannis",
   "x": 8900,
   "z": 100,
-  "radius": 150
+  "radius": 150,
+  "isolated": true
  },
  {
   "id": "ebonheart",

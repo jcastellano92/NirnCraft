@@ -340,7 +340,8 @@
   "x": -11860,
   "z": 11288,
   "radius": 34,
-  "variant": "estate"
+  "variant": "estate",
+  "isolated": true
  },
  {
   "id": "oleander_coast_winery",
@@ -428,7 +429,8 @@
   "x": -11509,
   "z": 11326,
   "radius": 26,
-  "variant": "lodge"
+  "variant": "lodge",
+  "isolated": true
  },
  {
   "id": "castle_rilis",

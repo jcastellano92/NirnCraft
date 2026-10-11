@@ -5,6 +5,8 @@ Skycraft QA harness: one command, a short report. Built so automated sessions re
   tools\qa\qa.ps1 -Server         # + headless dedicated server: worldgen, all selftests, clean stop
   tools\qa\qa.ps1 -Server -Client # + client autotest tour and a single contact-sheet image of all screenshots
   tools\qa\qa.ps1 -NoBuild ...    # skip the Gradle build (reuse the last one)
+  tools\qa\qa.ps1 -Layout        # no build: static checks only, incl. the layout lint (places vs map rasters, ~2 s;
+                                  # the lint also runs in every default run)
 
 Writes the report to mod\run\qa-report.txt and prints it. Exit code 0 = all PASS.
 Extra server commands: -ServerCmds "cmd one|cmd two" ('+' or spaces both fine). Client tour spots: -Tour "Name:x:z;Name:x:z".
@@ -13,6 +15,7 @@ param(
     [switch]$Server,
     [switch]$Client,
     [switch]$NoBuild,
+    [switch]$Layout,
     [string]$ServerCmds = "",
     [string]$Tour = "",
     [int]$ServerTimeout = 900,
@@ -67,6 +70,10 @@ $d = & $py -3 -I tools/qa/data_checks.py 2>&1
 $derr = @($d | Where-Object { $_ -match "^ERR" })
 Result "data" ($derr.Count -eq 0) ("{0}" -f ($d | Select-Object -Last 1))
 $derr | Select-Object -First 15 | ForEach-Object { Add("       $_") }
+$ll = & $py -3 -I tools/qa/layout_lint.py 2>&1
+$llerr = @($ll | Where-Object { $_ -match "^ERR" })
+Result "layout" ($LASTEXITCODE -eq 0) ("{0}" -f ($ll | Select-Object -Last 1))
+$llerr | Select-Object -First 10 | ForEach-Object { Add("       $_") }
 Pop-Location
 
 # ------------------------------------------------------------------ headless server

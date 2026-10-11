@@ -341,7 +341,8 @@
   "region": "morrowind/sheogorad",
   "x": 7600,
   "z": -2580,
-  "radius": 40
+  "radius": 40,
+  "isolated": true
  },
  {
   "id": "urshilaku_camp",
