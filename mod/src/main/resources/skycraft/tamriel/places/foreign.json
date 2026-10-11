@@ -11,6 +11,7 @@
  },
  {
   "id": "kjolvik",
+  "isolated": true,
   "name": "place.skycraft.kjolvik",
   "type": "village",
   "culture": "atmoran",
@@ -21,6 +22,7 @@
  },
  {
   "id": "tiger_plains_village",
+  "isolated": true,
   "name": "place.skycraft.tiger_plains_village",
   "type": "village",
   "culture": "akaviri",
@@ -31,6 +33,7 @@
  },
  {
   "id": "tang_mo_harbor_village",
+  "isolated": true,
   "name": "place.skycraft.tang_mo_harbor_village",
   "type": "village",
   "culture": "akaviri",
@@ -51,6 +54,7 @@
  },
  {
   "id": "hundings_dojo",
+  "isolated": true,
   "name": "place.skycraft.hundings_dojo",
   "type": "farm",
   "culture": "yokudan",

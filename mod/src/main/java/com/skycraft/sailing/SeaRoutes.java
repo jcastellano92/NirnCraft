@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class SeaRoutes {
     private static final int CELL = 64;
     private static final int MIN_X = -23040, MIN_Z = -13312;
-    private static final int W = 660, H = 568;
+    private static final int W = 780, H = 568; // out to x = 26880: Akavir and the Tang Mo isles
 
     /** A route's path in block coordinates and its length in blocks. */
     public record Path(float[] xs, float[] zs, float length) {
@@ -123,11 +123,11 @@ public final class SeaRoutes {
         int goal = nearestSeaCell(sb.waterX(), sb.waterZ());
         List<float[]> pts = new ArrayList<>();
         pts.add(new float[]{sa.waterX(), sa.waterZ()});
-        if (start >= 0 && goal >= 0) {
-            int[] cells = astar(start, goal);
-            if (cells != null) {
-                for (int c : smooth(cells)) pts.add(new float[]{MIN_X + (c % W) * CELL + CELL / 2f, MIN_Z + (c / W) * CELL + CELL / 2f});
-            }
+        int[] cells = start >= 0 && goal >= 0 ? astar(start, goal) : null;
+        if (cells != null) {
+            for (int c : smooth(cells)) pts.add(new float[]{MIN_X + (c % W) * CELL + CELL / 2f, MIN_Z + (c / W) * CELL + CELL / 2f});
+        } else {
+            Skycraft.LOGGER.warn("Sea route {} - {} has no open-water path (straight line used)", r.a(), r.b());
         }
         pts.add(new float[]{sb.waterX(), sb.waterZ()});
         float[] xs = new float[pts.size()], zs = new float[pts.size()];

@@ -6,11 +6,7 @@
   ilinaltas_deep (fort/fort_mage @ -795,661 in skyrim_landmarks.json): on the lake (skyrim/falkreath lake 12)
   imperial_city_prison (landmark/district @ 1204,5491 in cyrodiil.json): on the lake (cyrodiil/heartlands lake 64)
   solitude (capital/solitude @ -1216,-1740 in skyrim_settlements.json): on the shore line of a harbour city (sea/sea_of_ghosts coast -29); the road planner snaps to land within 160
-== WARN roads (6)
-  hundings_dojo (farm/estate @ -18800,4500 in foreign.json): no other settlement within 6400 blocks on its (off-raster) land
-  kjolvik (village/- @ 2400,-10800 in foreign.json): no other settlement within 2400 blocks on its (off-raster) land
-  mistveil_village (village/- @ -20171,18649 in foreign.json): no other settlement within 2400 blocks on its (off-raster) land
-  pyandonean_fleet_anchorage (town/- @ -18200,20812 in foreign.json): no other settlement within 2400 blocks on its (off-raster) land
-  tang_mo_harbor_village (village/- @ 22600,6000 in foreign.json): no other settlement within 2400 blocks on its (off-raster) land
-  tiger_plains_village (village/- @ 20000,3600 in foreign.json): no other settlement within 2400 blocks on its (off-raster) land
-== INFO: 6 settlements lie outside the Tamriel raster; the road planner (Landmass.near -> UNKNOWN) skips them
+== WARN roads (2)
+  mistveil_village (village/- @ -20171,18649 in foreign.json): no hub within 2400 blocks on its island (planner joins it to the nearest group)
+  pyandonean_fleet_anchorage (town/- @ -18200,20812 in foreign.json): no hub within 2400 blocks on its island (planner joins it to the nearest group)
+== INFO: 2 settlements lie outside the Tamriel raster, on 5 islands (Landmass labels them; roads join places of one island only)

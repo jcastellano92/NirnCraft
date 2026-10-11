@@ -22,6 +22,10 @@
     {"id": "alinor", "place": "alinor", "style": "altmer", "ferry": "cog", "x": -11200, "z": 13000},
     {"id": "firsthold", "place": "firsthold", "style": "altmer", "ferry": "cog", "x": -9300, "z": 11000},
 
+    {"id": "tang_mo_harbor_village", "place": "tang_mo_harbor_village", "style": "akaviri", "ferry": "cog", "x": 22600, "z": 6000},
+    {"id": "pyandonean_fleet_anchorage", "place": "pyandonean_fleet_anchorage", "style": "maormer", "ferry": "cog", "x": -18200, "z": 20812},
+    {"id": "mistveil_village", "place": "mistveil_village", "style": "maormer", "ferry": "cog", "x": -20171, "z": 18649},
+
     {"id": "atmora", "kind": "landing", "land": "atmora", "approach": "dawnstar", "style": "atmoran", "ferry": "longship", "x": 0, "z": -11500},
     {"id": "akavir", "kind": "landing", "land": "akavir", "approach": "vivec", "style": "akaviri", "ferry": "cog", "x": 17600, "z": 2800},
     {"id": "yokuda", "kind": "landing", "land": "yokuda", "approach": "sentinel", "style": "yokudan", "ferry": "cog", "x": -19800, "z": 6300},
@@ -57,6 +61,12 @@
     {"a": "firsthold", "b": "anvil", "ship": "eagle_of_alinor"},
     {"a": "alinor", "b": "woodhearth", "ship": "green_pact"},
     {"a": "firsthold", "b": "woodhearth", "ship": "green_pact"},
+
+    {"a": "tang_mo_harbor_village", "b": "necrom", "ship": "tang_mo_lantern"},
+    {"a": "tang_mo_harbor_village", "b": "lilmoth", "ship": "tang_mo_lantern"},
+    {"a": "pyandonean_fleet_anchorage", "b": "alinor", "ship": "tide_serpent"},
+    {"a": "pyandonean_fleet_anchorage", "b": "woodhearth", "ship": "tide_serpent"},
+    {"a": "mistveil_village", "b": "pyandonean_fleet_anchorage", "ship": "mist_runner"},
 
     {"a": "dawnstar", "b": "atmora", "ship": "ysgramors_wake", "expedition": true},
     {"a": "winterhold", "b": "atmora", "ship": "ysgramors_wake", "expedition": true},

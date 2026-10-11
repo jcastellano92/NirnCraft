@@ -123,7 +123,7 @@ final class RoadPlanner {
             if (Corridors.on(x, z)) c.road = 1.6f; // a traced historic route: strongly preferred
             if (sample.inWater() && sample.waterLevel > c.raw) c.water = Math.max(c.water, Math.round(sample.waterLevel));
             float half = maxBridge / 2f + 8f;
-            if (sample.coastDistance < -half && (sample.inTamriel || sample.region == 0)) c.blocked = true;
+            if (sample.coastDistance < -half) c.blocked = true; // open sea, in the raster or beyond it
             if (c.water != Integer.MIN_VALUE) {
                 if (sample.lakeDistance > half) c.blocked = true;
                 if (sample.riverHalfWidth > half && sample.riverDistance < sample.riverHalfWidth - half) c.blocked = true;

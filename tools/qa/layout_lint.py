@@ -12,7 +12,7 @@ Checks (E = error, W = warning):
            complex (id prefix, or a site inside a settlement's radius).
   region   the declared region exists, is of the right province, and lies within REGION_SLACK blocks of the place.
   roads    settlements need a hub neighbour on their landmass (the road planner's MINOR_LINK / FARM_LINK), unless the
-           place JSON carries "isolated": true. Off-raster settlements are checked against each other.
+           place JSON carries "isolated": true. Off-raster settlements are checked against the others on their island (flood fill of the Beyond land test).
   dupes    near-identical ids at near-identical positions (septimus_outpost vs septimus_signuss_outpost).
 Stdlib + numpy + PIL only (rasters are read through tools/provinces.py's TamrielRasters / Beyond).
 """
@@ -117,6 +117,69 @@ class Land:
             return r["id"] if r else None
         f = self.beyond.land_at(x, z)
         return f[0] if f else None
+
+
+ISLAND_RADIUS, ISLAND_CELL, SEED_SEARCH = 3000, 64, 160
+
+
+def island_labels(land, pts):
+    """Off-raster islands, like Landmass.buildOff: flood fill of the Beyond land test (margin SHORE_ERR, 64-block
+    cells) around each point, bounded to ISLAND_RADIUS. Returns one island id per point (None: not on land)."""
+    cell = ISLAND_CELL
+    rr, sr = ISLAND_RADIUS // cell, SEED_SEARCH // cell
+    memo = {}
+
+    def is_land(cx, cz):
+        k = (cx, cz)
+        v = memo.get(k)
+        if v is None:
+            v = land.beyond.land_at(cx * cell + cell // 2, cz * cell + cell // 2, SHORE_ERR) is not None
+            memo[k] = v
+        return v
+
+    labels, parent, out = {}, [], []
+
+    def find(a):
+        while parent[a] != a:
+            parent[a] = parent[parent[a]]
+            a = parent[a]
+        return a
+
+    for x, z in pts:
+        sx, sz = x // cell, z // cell
+        best = None
+        for dz in range(-sr, sr + 1):
+            for dx in range(-sr, sr + 1):
+                d = dx * dx + dz * dz
+                if (best is None or d < best[0]) and is_land(sx + dx, sz + dz):
+                    best = (d, sx + dx, sz + dz)
+        if best is None:
+            out.append(None)
+            continue
+        _, bx, bz = best
+        out.append((bx, bz))
+        if (bx, bz) in labels:
+            continue
+        i = len(parent)
+        parent.append(i)
+        labels[(bx, bz)] = i
+        queue = [(bx, bz)]
+        while queue:
+            cx, cz = queue.pop()
+            for nx, nz in ((cx + 1, cz), (cx - 1, cz), (cx, cz + 1), (cx, cz - 1)):
+                if abs(nx - bx) > rr or abs(nz - bz) > rr:
+                    continue
+                o = labels.get((nx, nz))
+                if o is None:
+                    if not is_land(nx, nz):
+                        continue
+                    labels[(nx, nz)] = i
+                    queue.append((nx, nz))
+                else:
+                    ra, rb = find(i), find(o)
+                    if ra != rb:
+                        parent[max(ra, rb)] = min(ra, rb)
+    return [None if k is None else find(labels[k]) for k in out]
 
 
 def landmass_labels(c):
@@ -280,6 +343,13 @@ def main(argv):
                 key = "off"
             hubs_by_land.setdefault(key, []).append(p)
     off_raster = 0
+    off_pts = [p for p in settlements if not c.inside(p["x"], p["z"])]
+    off_label = dict(zip((p["id"] for p in off_pts), island_labels(land, [(p["x"], p["z"]) for p in off_pts])))
+    off_hubs = {}
+    for p in off_pts:
+        if p["type"] in HUBS and off_label[p["id"]] is not None:
+            off_hubs.setdefault(off_label[p["id"]], []).append(p)
+    off_islands = len({v for v in off_label.values() if v is not None})
     for p in settlements:
         if p.get("isolated"):
             continue
@@ -287,9 +357,16 @@ def main(argv):
         limit = MINOR_LINK if p["type"] in HUBS else FARM_LINK * 2
         if not c.inside(x, z):
             off_raster += 1
-            peers = [q for q in hubs_by_land.get("off", []) if q is not p and math.hypot(q["x"] - x, q["z"] - z) <= limit]
-            if not peers:
-                W("roads", p, f"no other settlement within {limit} blocks on its (off-raster) land")
+            il = off_label[p["id"]]
+            if il is None:
+                E("roads", p, "no off-raster land within 160 blocks: the road planner skips it (not on land)")
+                continue
+            hubs = off_hubs.get(il, [])
+            peers = [q for q in hubs if q is not p and math.hypot(q["x"] - x, q["z"] - z) <= limit]
+            if not peers and len(hubs) > (1 if p["type"] in HUBS else 0):
+                W("roads", p, f"no hub within {limit} blocks on its island (planner joins it to the nearest group)")
+            elif not peers:
+                W("roads", p, "only settlement on its (off-raster) island: no roads possible (flag \"isolated\": true)")
             continue
         cx, cz = c.cell(x, z)
         l = int(lab[cz, cx])
@@ -319,8 +396,8 @@ def main(argv):
                 lines.append(f"== {sev} {chk} ({len(sel)})")
                 lines.extend("  " + i[2] for i in sel)
     if off_raster:
-        lines.append(f"== INFO: {off_raster} settlements lie outside the Tamriel raster; the road planner "
-                     "(Landmass.near -> UNKNOWN) skips them")
+        lines.append(f"== INFO: {off_raster} settlements lie outside the Tamriel raster, on {off_islands} islands "
+                     "(Landmass labels them; roads join places of one island only)")
     with open(OUT, "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")
     summ = ", ".join(f"{k} {sum(1 for e in errs if e[0] == k)}E/{sum(1 for e in warns if e[0] == k)}W" for k in checks)
