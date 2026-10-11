@@ -1,0 +1,6 @@
+{
+  "parent": "skycraft:item/yokudan_bow",
+  "textures": {
+    "layer0": "skycraft:item/yokudan_bow_pulling_2"
+  }
+}

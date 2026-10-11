@@ -14,7 +14,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
-/** Mod-bus client setup of the smithing module: station screen and bow pull animations. */
+/** Mod-bus client setup of the smithing module: station screen, bow pull animations and shield blocking poses. */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class CraftingClient {
     private CraftingClient() {}
@@ -27,6 +27,7 @@ public final class CraftingClient {
             ResourceLocation pull = new ResourceLocation("pull");
             ResourceLocation pulling = new ResourceLocation("pulling");
             for (SmithingTier tier : SmithingTier.values()) {
+                if (!tier.has(WeaponType.BOW)) continue;
                 Item bow = CraftingItems.WEAPONS.get(tier).get(WeaponType.BOW).get();
                 // same predicates as the vanilla bow
                 ItemProperties.register(bow, pull, (stack, level, entity, seed) -> {
@@ -34,6 +35,12 @@ public final class CraftingClient {
                     return (stack.getUseDuration() - entity.getUseItemRemainingTicks()) / 20f;
                 });
                 ItemProperties.register(bow, pulling, (stack, level, entity, seed) ->
+                        entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1f : 0f);
+            }
+            // shields raise to the blocking pose like the vanilla shield
+            ResourceLocation blocking = new ResourceLocation("blocking");
+            for (var shield : CraftingItems.SHIELDS.values()) {
+                ItemProperties.register(shield.get(), blocking, (stack, level, entity, seed) ->
                         entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1f : 0f);
             }
         });

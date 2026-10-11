@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:argonian_dagger",
+    "skycraft:argonian_sword",
+    "skycraft:argonian_war_axe",
+    "skycraft:argonian_mace",
+    "skycraft:argonian_bow",
+    "skycraft:argonian_helmet",
+    "skycraft:argonian_chestplate",
+    "skycraft:argonian_leggings",
+    "skycraft:argonian_boots"
+  ]
+}

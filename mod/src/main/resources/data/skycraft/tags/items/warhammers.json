@@ -10,6 +10,17 @@
     "skycraft:ebony_warhammer",
     "skycraft:daedric_warhammer",
     "skycraft:dragonbone_warhammer",
+    "skycraft:silver_warhammer",
+    "skycraft:ancient_nord_warhammer",
+    "skycraft:forsworn_warhammer",
+    "skycraft:imperial_warhammer",
+    "skycraft:falmer_warhammer",
+    "skycraft:nordic_warhammer",
+    "skycraft:skyforge_warhammer",
+    "skycraft:akaviri_warhammer",
+    "skycraft:stalhrim_warhammer",
+    "skycraft:breton_warhammer",
+    "skycraft:atmoran_warhammer",
     {
       "id": "#skycraft:arsenal/warhammers",
       "required": false

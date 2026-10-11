@@ -1,0 +1,32 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:ancient_nord_dagger",
+    "skycraft:ancient_nord_sword",
+    "skycraft:ancient_nord_war_axe",
+    "skycraft:ancient_nord_mace",
+    "skycraft:ancient_nord_greatsword",
+    "skycraft:ancient_nord_battleaxe",
+    "skycraft:ancient_nord_warhammer",
+    "skycraft:ancient_nord_bow",
+    "skycraft:atmoran_dagger",
+    "skycraft:atmoran_sword",
+    "skycraft:atmoran_war_axe",
+    "skycraft:atmoran_greatsword",
+    "skycraft:atmoran_battleaxe",
+    "skycraft:atmoran_warhammer",
+    "skycraft:fur_helmet",
+    "skycraft:fur_chestplate",
+    "skycraft:fur_leggings",
+    "skycraft:fur_boots",
+    "skycraft:ancient_nord_helmet",
+    "skycraft:ancient_nord_chestplate",
+    "skycraft:ancient_nord_leggings",
+    "skycraft:ancient_nord_boots",
+    "skycraft:atmoran_helmet",
+    "skycraft:atmoran_chestplate",
+    "skycraft:atmoran_leggings",
+    "skycraft:atmoran_boots",
+    "skycraft:atmoran_shield"
+  ]
+}

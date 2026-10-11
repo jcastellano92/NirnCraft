@@ -52,6 +52,8 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
     private int category;
     private int selected;
     private int scroll;
+    /** First visible category (the forge lists more materials than fit). */
+    private int catScroll;
     private int selectedSlot = -1;
     private List<SmithingRecipe> recipes = List.of();
     private final List<Integer> temperSlots = new ArrayList<>();
@@ -123,6 +125,15 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
         return Math.max(1, listH / ROW);
     }
 
+    /** Keeps the selected category in view and returns the first visible one. */
+    private int catFirst() {
+        int rows = Math.max(1, listH / CAT_ROW);
+        if (category < catScroll) catScroll = category;
+        if (category >= catScroll + rows) catScroll = category - rows + 1;
+        catScroll = Mth.clamp(catScroll, 0, Math.max(0, categories.size() - rows));
+        return catScroll;
+    }
+
     private SmithingRecipe selectedRecipe() {
         return selected >= 0 && selected < recipes.size() ? recipes.get(selected) : null;
     }
@@ -146,8 +157,10 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
     public boolean mouseClicked(double mx, double my, int button) {
         if (button == 0) {
             if (!type.tempering()) {
-                for (int i = 0; i < categories.size(); i++) {
-                    int y = listY + i * CAT_ROW;
+                int first = catFirst();
+                for (int i = first; i < categories.size(); i++) {
+                    int y = listY + (i - first) * CAT_ROW;
+                    if (y + CAT_ROW > listY + listH) break;
                     if (inside(mx, my, catX, y, catW, CAT_ROW - 1)) {
                         if (category != i) {
                             category = i;
@@ -289,8 +302,10 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
     }
 
     private void renderCategories(GuiGraphics g, int mx, int my) {
-        for (int i = 0; i < categories.size(); i++) {
-            int y = listY + i * CAT_ROW;
+        int first = catFirst();
+        for (int i = first; i < categories.size(); i++) {
+            int y = listY + (i - first) * CAT_ROW;
+            if (y + CAT_ROW > listY + listH) break;
             boolean sel = i == category;
             boolean hover = inside(mx, my, catX, y, catW, CAT_ROW - 1);
             if (sel) g.fill(catX, y, catX + catW, y + CAT_ROW - 1, 0x50C8A050);

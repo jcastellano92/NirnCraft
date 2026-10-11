@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:maormer_dagger",
+    "skycraft:maormer_sword",
+    "skycraft:maormer_war_axe",
+    "skycraft:maormer_bow",
+    "skycraft:maormer_helmet",
+    "skycraft:maormer_chestplate",
+    "skycraft:maormer_leggings",
+    "skycraft:maormer_boots",
+    "skycraft:maormer_shield"
+  ]
+}

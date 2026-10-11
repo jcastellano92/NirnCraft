@@ -1,0 +1,6 @@
+{
+  "parent": "skycraft:item/bosmer_bow",
+  "textures": {
+    "layer0": "skycraft:item/bosmer_bow_pulling_1"
+  }
+}

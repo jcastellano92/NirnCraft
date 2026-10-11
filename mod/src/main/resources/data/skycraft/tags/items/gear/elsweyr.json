@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:khajiit_dagger",
+    "skycraft:khajiit_sword",
+    "skycraft:khajiit_war_axe",
+    "skycraft:khajiit_greatsword",
+    "skycraft:khajiit_bow",
+    "skycraft:khajiit_helmet",
+    "skycraft:khajiit_chestplate",
+    "skycraft:khajiit_leggings",
+    "skycraft:khajiit_boots",
+    "skycraft:khajiit_shield"
+  ]
+}

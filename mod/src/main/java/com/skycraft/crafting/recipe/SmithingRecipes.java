@@ -33,7 +33,10 @@ public final class SmithingRecipes {
     public static final Map<StationType, List<String>> CATEGORIES = new EnumMap<>(StationType.class);
 
     static {
-        CATEGORIES.put(StationType.FORGE, List.of("iron", "steel", "elven", "dwarven", "orcish", "glass", "ebony", "daedric", "dragon", "leather", "jewelry", "arrows", "stations"));
+        // Skyrim's forge lists materials in perk order; Dawnguard/Dragonborn, faction and provincial gear follow
+        CATEGORIES.put(StationType.FORGE, List.of("iron", "steel", "imperial", "elven", "advanced", "glass", "dwarven", "orcish", "ebony",
+                "daedric", "dragon", "silver", "stalhrim", "nordic", "ancient", "morrowind", "factions", "tamriel", "foreign", "leather",
+                "jewelry", "arrows", "stations"));
         CATEGORIES.put(StationType.SMELTER, List.of("ingots", "alloys"));
         CATEGORIES.put(StationType.TANNING_RACK, List.of("tanning", "leather"));
         CATEGORIES.put(StationType.GRINDSTONE, List.of());
@@ -77,49 +80,37 @@ public final class SmithingRecipes {
         // ---------------------------------------------------------------- forge: weapons
         for (SmithingTier tier : SmithingTier.values()) {
             for (WeaponType type : WeaponType.values()) {
+                if (!tier.has(type)) continue;
                 List<Cost> costs = new ArrayList<>();
                 int main = tier == SmithingTier.DRAGONBONE ? Math.min(type.materialCount, 3) : type.materialCount;
                 costs.add(Cost.of(tier::material, main));
-                switch (tier) {
-                    case STEEL, ORCISH, DWARVEN -> costs.add(Cost.of(iron, 1));
-                    case ELVEN -> {
-                        costs.add(Cost.of(iron, 1));
-                        costs.add(Cost.of(() -> CraftingItems.ingot(SkyOre.QUICKSILVER), 1));
-                    }
-                    case GLASS -> costs.add(Cost.of(moonstone, 1));
-                    case DAEDRIC -> costs.add(Cost.of(CraftingItems.DAEDRA_HEART, 1));
-                    case DRAGONBONE -> costs.add(Cost.of(() -> CraftingItems.ingot(SkyOre.EBONY), 1));
-                    default -> {
-                    }
-                }
+                for (SmithingTier.Material extra : tier.extras()) costs.add(Cost.of(extra::item, extra.count()));
                 if (type == WeaponType.BOW) costs.add(Cost.of(CraftingItems.FIREWOOD, 1));
                 costs.add(Cost.of(strips, type.strips));
                 Supplier<Item> result = CraftingItems.WEAPONS.get(tier).get(type);
                 out.add(recipe("forge/" + type.itemId(tier), StationType.FORGE, tier.category, result, 1, costs, tier.perk));
             }
-            if (tier == SmithingTier.IRON) {
-                // vanilla iron armor is Skyrim's Iron Armor
-                Item[] pieces = {Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS};
-                int[] ingots = {3, 5, 4, 2};
-                int[] stripCount = {1, 3, 2, 1};
-                for (int i = 0; i < 4; i++) {
-                    Item piece = pieces[i];
-                    out.add(recipe("forge/" + net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(piece).getPath(), StationType.FORGE, "iron",
-                            () -> piece, 1, List.of(Cost.of(iron, ingots[i]), Cost.of(strips, stripCount[i])), null));
-                }
-            }
         }
 
-        // ---------------------------------------------------------------- forge: armor
+        // ---------------------------------------------------------------- forge: armor and shields
+        // (Iron is Skycraft's Iron set; hide, leather, fur and studded sets can also be made at the tanning rack)
         int[] stripsByPiece = {1, 3, 2, 1};
         for (SkyArmorMaterial mat : SkyArmorMaterial.values()) {
             for (ArmorItem.Type type : CraftingItems.ARMOR_TYPES) {
                 int i = SkyArmorMaterial.index(type);
-                List<Cost> costs = armorCosts(mat, i, stripsByPiece[i]);
+                List<Cost> costs = armorCosts(mat, mat.mainCount(i), stripsByPiece[i]);
                 Supplier<Item> result = CraftingItems.ARMOR.get(mat).get(type);
                 out.add(recipe("forge/" + mat.itemId(type), StationType.FORGE, mat.category, result, 1, costs, mat.perk));
-                if (mat == SkyArmorMaterial.HIDE) {
+                if (mat.category.equals("leather")) {
                     out.add(recipe("tanning_rack/" + mat.itemId(type), StationType.TANNING_RACK, "leather", result, 1, costs, null));
+                }
+            }
+            if (mat.hasShield()) {
+                List<Cost> costs = armorCosts(mat, mat.heavy ? 4 : 3, 2);
+                Supplier<Item> result = CraftingItems.SHIELDS.get(mat);
+                out.add(recipe("forge/" + mat.shieldId(), StationType.FORGE, mat.category, result, 1, costs, mat.perk));
+                if (mat.category.equals("leather")) {
+                    out.add(recipe("tanning_rack/" + mat.shieldId(), StationType.TANNING_RACK, "leather", result, 1, costs, null));
                 }
             }
         }
@@ -269,14 +260,6 @@ public final class SmithingRecipes {
                 List.of(Cost.of(() -> Items.RABBIT_HIDE, 3)), null));
         out.add(recipe("tanning_rack/leather_strips", StationType.TANNING_RACK, "tanning", CraftingItems.LEATHER_STRIPS, 4,
                 List.of(Cost.of(() -> Items.LEATHER, 1)), null));
-        Item[] leather = {Items.LEATHER_HELMET, Items.LEATHER_CHESTPLATE, Items.LEATHER_LEGGINGS, Items.LEATHER_BOOTS};
-        int[] leatherCount = {2, 4, 3, 2};
-        int[] leatherStrips = {1, 2, 1, 1};
-        for (int i = 0; i < 4; i++) {
-            Item piece = leather[i];
-            out.add(recipe("tanning_rack/" + net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(piece).getPath(), StationType.TANNING_RACK,
-                    "leather", () -> piece, 1, List.of(Cost.of(() -> Items.LEATHER, leatherCount[i]), Cost.of(strips, leatherStrips[i])), null));
-        }
 
         // ---------------------------------------------------------------- index
         Map<String, SmithingRecipe> ids = new LinkedHashMap<>();
@@ -296,25 +279,10 @@ public final class SmithingRecipes {
         byStation = stations;
     }
 
-    private static List<Cost> armorCosts(SkyArmorMaterial mat, int piece, int strips) {
+    private static List<Cost> armorCosts(SkyArmorMaterial mat, int main, int strips) {
         List<Cost> costs = new ArrayList<>();
-        Supplier<Item> main = mat::material;
-        int[] mainCount = switch (mat) {
-            case HIDE, ELVEN, GLASS, DRAGONSCALE -> new int[]{2, 4, 3, 2};
-            case DRAGONPLATE -> new int[]{1, 2, 2, 1};
-            default -> new int[]{3, 5, 4, 2};
-        };
-        int[] scales = {1, 2, 1, 1};
-        costs.add(Cost.of(mat == SkyArmorMaterial.HIDE ? CraftingItems.HIDE : main, mainCount[piece]));
-        switch (mat) {
-            case STEEL, ORCISH, ELVEN -> costs.add(Cost.of(() -> Items.IRON_INGOT, 1));
-            case DWARVEN -> costs.add(Cost.of(CraftingItems.STEEL_INGOT, 1));
-            case GLASS -> costs.add(Cost.of(() -> CraftingItems.ingot(SkyOre.MOONSTONE), 1));
-            case DAEDRIC -> costs.add(Cost.of(CraftingItems.DAEDRA_HEART, 1));
-            case DRAGONPLATE -> costs.add(Cost.of(CraftingItems.DRAGON_SCALE, scales[piece]));
-            default -> {
-            }
-        }
+        costs.add(Cost.of(mat::material, main));
+        for (SmithingTier.Material extra : mat.extras()) costs.add(Cost.of(extra::item, extra.count()));
         costs.add(Cost.of(CraftingItems.LEATHER_STRIPS, strips));
         return List.copyOf(costs);
     }

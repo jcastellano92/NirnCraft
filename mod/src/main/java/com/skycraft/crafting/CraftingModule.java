@@ -20,6 +20,7 @@ public final class CraftingModule {
         CraftingBlocks.BLOCKS.register(modBus);
         CraftingItems.ITEMS.register(modBus);
         CraftingMenus.MENUS.register(modBus);
+        RegionalGear.FUNCTIONS.register(modBus);
         // keep: the arcane sub-module (enchanting, soul gems, alchemy) is developed separately
         ArcaneModule.init(modBus);
     }

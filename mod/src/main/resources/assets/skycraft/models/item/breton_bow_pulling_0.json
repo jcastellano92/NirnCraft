@@ -1,0 +1,6 @@
+{
+  "parent": "skycraft:item/breton_bow",
+  "textures": {
+    "layer0": "skycraft:item/breton_bow_pulling_0"
+  }
+}

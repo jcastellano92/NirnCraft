@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:yokudan_dagger",
+    "skycraft:yokudan_sword",
+    "skycraft:yokudan_greatsword",
+    "skycraft:yokudan_battleaxe",
+    "skycraft:yokudan_bow",
+    "skycraft:ra_gada_helmet",
+    "skycraft:ra_gada_chestplate",
+    "skycraft:ra_gada_leggings",
+    "skycraft:ra_gada_boots",
+    "skycraft:ra_gada_shield"
+  ]
+}

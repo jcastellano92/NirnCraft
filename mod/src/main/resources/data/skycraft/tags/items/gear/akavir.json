@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:akaviri_dagger",
+    "skycraft:akaviri_sword",
+    "skycraft:akaviri_war_axe",
+    "skycraft:akaviri_mace",
+    "skycraft:akaviri_greatsword",
+    "skycraft:akaviri_battleaxe",
+    "skycraft:akaviri_warhammer",
+    "skycraft:akaviri_bow",
+    "skycraft:blades_helmet",
+    "skycraft:blades_chestplate",
+    "skycraft:blades_leggings",
+    "skycraft:blades_boots",
+    "skycraft:blades_shield",
+    "skycraft:akaviri_helmet",
+    "skycraft:akaviri_chestplate",
+    "skycraft:akaviri_leggings",
+    "skycraft:akaviri_boots"
+  ]
+}

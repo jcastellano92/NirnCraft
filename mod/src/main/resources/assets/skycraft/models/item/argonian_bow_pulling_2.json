@@ -1,0 +1,6 @@
+{
+  "parent": "skycraft:item/argonian_bow",
+  "textures": {
+    "layer0": "skycraft:item/argonian_bow_pulling_2"
+  }
+}

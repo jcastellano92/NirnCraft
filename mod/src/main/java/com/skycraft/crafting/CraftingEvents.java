@@ -15,9 +15,11 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.ShieldItem;
 import net.minecraftforge.event.ItemAttributeModifierEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import com.skycraft.crafting.menu.StationMenu;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -30,7 +32,7 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.UUID;
 
-/** Forge-bus hooks of the smithing module: tempering bonuses and animal hides. */
+/** Forge-bus hooks of the smithing module: tempering bonuses, silver against the undead and animal hides. */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class CraftingEvents {
     private static final UUID WEAPON_UUID = UUID.fromString("5b7d3a2e-1c4f-4e8b-9a61-2f0d8c3e7a10");
@@ -40,6 +42,7 @@ public final class CraftingEvents {
             UUID.fromString("5b7d3a2e-1c4f-4e8b-9a61-2f0d8c3e7a13"), // chest
             UUID.fromString("5b7d3a2e-1c4f-4e8b-9a61-2f0d8c3e7a14")  // head
     };
+    private static final UUID SHIELD_UUID = UUID.fromString("5b7d3a2e-1c4f-4e8b-9a61-2f0d8c3e7a15");
     private static final String ARROW_FLAG = "skycraft_tempered_arrow";
     /** Animals that drop Skyrim hide when killed by a player. */
     public static final TagKey<EntityType<?>> DROPS_HIDE = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Skycraft.MODID, "drops_hide"));
@@ -56,6 +59,11 @@ public final class CraftingEvents {
         if (stack.getItem() instanceof ArmorItem armor) {
             if (slot == armor.getEquipmentSlot() && slot.getType() == EquipmentSlot.Type.ARMOR) {
                 event.addModifier(Attributes.ARMOR, new AttributeModifier(ARMOR_UUIDS[slot.getIndex()], "Skycraft tempering",
+                        0.5 * quality, AttributeModifier.Operation.ADDITION));
+            }
+        } else if (stack.getItem() instanceof ShieldItem) {
+            if (slot == EquipmentSlot.OFFHAND) {
+                event.addModifier(Attributes.ARMOR, new AttributeModifier(SHIELD_UUID, "Skycraft tempering",
                         0.5 * quality, AttributeModifier.Operation.ADDITION));
             }
         } else if (slot == EquipmentSlot.MAINHAND && Tempering.kind(stack) == Tempering.Kind.WEAPON
@@ -77,6 +85,20 @@ public final class CraftingEvents {
         if (!(weapon.getItem() instanceof ProjectileWeaponItem)) weapon = owner.getOffhandItem();
         int quality = Tempering.quality(weapon);
         if (quality > 0) arrow.setBaseDamage(arrow.getBaseDamage() + 0.15 * quality);
+    }
+
+    /**
+     * Silver weapons burn the undead (Skyrim: +20 damage to undead and werewolves): melee hits with a Silver weapon deal
+     * +50% (at least +3) to undead mobs.
+     */
+    @SubscribeEvent
+    public static void onSilverHit(LivingHurtEvent event) {
+        if (!(event.getSource().getDirectEntity() instanceof LivingEntity attacker) || attacker != event.getSource().getEntity()) return;
+        ItemStack weapon = attacker.getMainHandItem();
+        SmithingTier tier = weapon.getItem() instanceof com.skycraft.crafting.item.SkyMeleeItem m ? m.smithingTier
+                : weapon.getItem() instanceof com.skycraft.crafting.item.SkyAxeItem a ? a.smithingTier : null;
+        if (tier != SmithingTier.SILVER || event.getEntity().getMobType() != net.minecraft.world.entity.MobType.UNDEAD) return;
+        event.setAmount(event.getAmount() + Math.max(3f, event.getAmount() * 0.5f));
     }
 
     /** Skyrim animals leave hides: player kills of {@code #skycraft:drops_hide} creatures drop Hide. */

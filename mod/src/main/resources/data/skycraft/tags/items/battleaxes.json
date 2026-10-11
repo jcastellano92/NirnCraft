@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "skycraft:bound_battleaxe",
     "skycraft:iron_battleaxe",
     "skycraft:steel_battleaxe",
     "skycraft:orcish_battleaxe",
@@ -10,7 +11,17 @@
     "skycraft:ebony_battleaxe",
     "skycraft:daedric_battleaxe",
     "skycraft:dragonbone_battleaxe",
-    "skycraft:bound_battleaxe",
+    "skycraft:silver_battleaxe",
+    "skycraft:ancient_nord_battleaxe",
+    "skycraft:forsworn_battleaxe",
+    "skycraft:imperial_battleaxe",
+    "skycraft:falmer_battleaxe",
+    "skycraft:nordic_battleaxe",
+    "skycraft:skyforge_battleaxe",
+    "skycraft:akaviri_battleaxe",
+    "skycraft:stalhrim_battleaxe",
+    "skycraft:yokudan_battleaxe",
+    "skycraft:atmoran_battleaxe",
     {
       "id": "#skycraft:arsenal/battleaxes",
       "required": false

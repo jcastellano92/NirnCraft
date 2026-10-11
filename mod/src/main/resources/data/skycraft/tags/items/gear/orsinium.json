@@ -1,0 +1,23 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:orcish_dagger",
+    "skycraft:orcish_sword",
+    "skycraft:orcish_war_axe",
+    "skycraft:orcish_mace",
+    "skycraft:orcish_greatsword",
+    "skycraft:orcish_battleaxe",
+    "skycraft:orcish_warhammer",
+    "skycraft:orcish_bow",
+    "skycraft:orcish_helmet",
+    "skycraft:orcish_chestplate",
+    "skycraft:orcish_leggings",
+    "skycraft:orcish_boots",
+    "skycraft:orcish_shield",
+    "skycraft:orsinium_helmet",
+    "skycraft:orsinium_chestplate",
+    "skycraft:orsinium_leggings",
+    "skycraft:orsinium_boots",
+    "skycraft:orsinium_shield"
+  ]
+}

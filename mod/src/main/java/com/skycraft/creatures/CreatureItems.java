@@ -73,7 +73,7 @@ public final class CreatureItems {
     /** Creature ingredients and trophies. */
     public static final List<String> INGREDIENTS = List.of(
             "chaurus_eggs", "frostbite_venom", "spriggan_sap", "hagraven_feathers", "hagraven_claw", "ice_wraith_teeth",
-            "wolf_pelt", "ectoplasm", "glow_dust", "netch_jelly", "netch_leather", "guar_hide", "scamp_skin",
+            "wolf_pelt", "ectoplasm", "glow_dust", "netch_jelly", "guar_hide", "scamp_skin",
             "cliff_racer_plumes", "kagouti_hide", "alit_hide", "ash_salts", "harpy_feather", "scorpion_stinger",
             "sea_serpent_scale", "kamal_horn", "tsaesci_scale", "indrik_feather", "minotaur_horn", "ogre_tooth",
             "dreugh_wax", "echatere_hide", "leviathan_tooth", "wamasu_scale", "gargoyle_shard", "durzog_hide",

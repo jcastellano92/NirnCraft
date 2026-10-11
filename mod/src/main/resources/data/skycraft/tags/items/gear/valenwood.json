@@ -1,0 +1,28 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:elven_dagger",
+    "skycraft:elven_sword",
+    "skycraft:elven_war_axe",
+    "skycraft:elven_mace",
+    "skycraft:elven_greatsword",
+    "skycraft:elven_battleaxe",
+    "skycraft:elven_warhammer",
+    "skycraft:elven_bow",
+    "skycraft:bosmer_dagger",
+    "skycraft:bosmer_sword",
+    "skycraft:bosmer_war_axe",
+    "skycraft:bosmer_mace",
+    "skycraft:bosmer_bow",
+    "skycraft:elven_helmet",
+    "skycraft:elven_chestplate",
+    "skycraft:elven_leggings",
+    "skycraft:elven_boots",
+    "skycraft:elven_shield",
+    "skycraft:bosmer_helmet",
+    "skycraft:bosmer_chestplate",
+    "skycraft:bosmer_leggings",
+    "skycraft:bosmer_boots",
+    "skycraft:bosmer_shield"
+  ]
+}

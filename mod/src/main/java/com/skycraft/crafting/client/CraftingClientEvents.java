@@ -11,13 +11,19 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.List;
 
-/** Forge-bus client hooks: the tempering quality line under the item name ("Fine", "Legendary"...). */
+/** Forge-bus client hooks: the tempering quality line under the item name ("Fine", "Legendary"...) and Silver's note. */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class CraftingClientEvents {
     private CraftingClientEvents() {}
 
     @SubscribeEvent
     public static void onTooltip(ItemTooltipEvent event) {
+        var item = event.getItemStack().getItem();
+        com.skycraft.crafting.SmithingTier tier = item instanceof com.skycraft.crafting.item.SkyMeleeItem m ? m.smithingTier
+                : item instanceof com.skycraft.crafting.item.SkyAxeItem a ? a.smithingTier : null;
+        if (tier == com.skycraft.crafting.SmithingTier.SILVER) {
+            event.getToolTip().add(Component.translatable("tooltip.skycraft.silver_weapon").withStyle(ChatFormatting.GRAY));
+        }
         int quality = Tempering.quality(event.getItemStack());
         if (quality <= 0) return;
         List<Component> tooltip = event.getToolTip();

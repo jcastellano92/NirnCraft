@@ -1,0 +1,6 @@
+{
+  "parent": "skycraft:item/nordic_bow",
+  "textures": {
+    "layer0": "skycraft:item/nordic_bow_pulling_1"
+  }
+}

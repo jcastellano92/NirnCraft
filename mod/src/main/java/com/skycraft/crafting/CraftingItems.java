@@ -1,9 +1,11 @@
 package com.skycraft.crafting;
 
 import com.skycraft.Skycraft;
+import com.skycraft.crafting.item.SkyArmorItem;
 import com.skycraft.crafting.item.SkyAxeItem;
 import com.skycraft.crafting.item.SkyBowItem;
 import com.skycraft.crafting.item.SkyMeleeItem;
+import com.skycraft.crafting.item.SkyShieldItem;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -11,6 +13,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
@@ -18,8 +21,9 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * Every item of the smithing module: raw ores, ingots, creature parts, gems, jewelry, 72 Skyrim weapons, 40 armor
- * pieces and the block items of ore veins and stations. Gold values live in
+ * Every item of the smithing module: raw ores, ingots, creature parts, gems, jewelry, the weapons of every
+ * {@link SmithingTier} (only the families it makes), four pieces of every {@link SkyArmorMaterial} set plus its
+ * shield, and the block items of ore veins and stations. Gold values live in
  * {@code data/skycraft/skycraft_values/crafting.json} (see {@link CraftingValues}).
  */
 public final class CraftingItems {
@@ -29,6 +33,7 @@ public final class CraftingItems {
     public static final Map<SkyOre, RegistryObject<Item>> INGOTS = new EnumMap<>(SkyOre.class);
     public static final Map<SmithingTier, Map<WeaponType, RegistryObject<Item>>> WEAPONS = new EnumMap<>(SmithingTier.class);
     public static final Map<SkyArmorMaterial, Map<ArmorItem.Type, RegistryObject<Item>>> ARMOR = new EnumMap<>(SkyArmorMaterial.class);
+    public static final Map<SkyArmorMaterial, RegistryObject<Item>> SHIELDS = new EnumMap<>(SkyArmorMaterial.class);
     public static final Map<String, RegistryObject<Item>> BLOCK_ITEMS = new LinkedHashMap<>();
 
     public static final ArmorItem.Type[] ARMOR_TYPES = {ArmorItem.Type.HELMET, ArmorItem.Type.CHESTPLATE, ArmorItem.Type.LEGGINGS, ArmorItem.Type.BOOTS};
@@ -47,6 +52,11 @@ public final class CraftingItems {
     public static final RegistryObject<Item> LEATHER_STRIPS = simple("leather_strips");
     public static final RegistryObject<Item> HIDE = simple("hide");
     public static final RegistryObject<Item> FIREWOOD = simple("firewood");
+    // Dragonborn and Morrowind materials: Stalhrim, chitin (Bonemold & Chitin sets), chaurus chitin (Falmer), netch leather
+    public static final RegistryObject<Item> STALHRIM = item("stalhrim", () -> new Item(new Item.Properties().rarity(Rarity.UNCOMMON)));
+    public static final RegistryObject<Item> CHITIN_PLATE = simple("chitin_plate");
+    public static final RegistryObject<Item> CHAURUS_CHITIN = simple("chaurus_chitin");
+    public static final RegistryObject<Item> NETCH_LEATHER = simple("netch_leather");
 
     // ------------------------------------------------------------------ creature parts (dropped by creatures' loot tables)
     public static final RegistryObject<Item> DAEDRA_HEART = item("daedra_heart", () -> new Item(new Item.Properties().rarity(Rarity.UNCOMMON)));
@@ -88,7 +98,7 @@ public final class CraftingItems {
         for (SmithingTier tier : SmithingTier.values()) {
             Map<WeaponType, RegistryObject<Item>> byType = new EnumMap<>(WeaponType.class);
             for (WeaponType type : WeaponType.values()) {
-                byType.put(type, item(type.itemId(tier), () -> weapon(tier, type)));
+                if (tier.has(type)) byType.put(type, item(type.itemId(tier), () -> weapon(tier, type)));
             }
             WEAPONS.put(tier, byType);
         }
@@ -98,10 +108,17 @@ public final class CraftingItems {
                 byType.put(type, item(mat.itemId(type), () -> {
                     Item.Properties props = new Item.Properties().rarity(mat.rarity);
                     if (mat.fireResistant) props.fireResistant();
-                    return new ArmorItem(mat, type, props);
+                    return new SkyArmorItem(mat, type, props);
                 }));
             }
             ARMOR.put(mat, byType);
+            if (mat.hasShield()) {
+                SHIELDS.put(mat, item(mat.shieldId(), () -> {
+                    Item.Properties props = new Item.Properties().rarity(mat.rarity).durability(mat.shieldDurability());
+                    if (mat.fireResistant) props.fireResistant();
+                    return new SkyShieldItem(mat, props);
+                }));
+            }
         }
         CraftingBlocks.ALL.forEach((id, block) ->
                 BLOCK_ITEMS.put(id, ITEMS.register(id, () -> new BlockItem(block.get(), new Item.Properties()))));
@@ -143,8 +160,16 @@ public final class CraftingItems {
         return RAW.get(ore).get();
     }
 
+    /** The weapon of this material and family; check {@link SmithingTier#has} first (Air if the material lacks it). */
     public static Item weaponItem(SmithingTier tier, WeaponType type) {
-        return WEAPONS.get(tier).get(type).get();
+        RegistryObject<Item> item = WEAPONS.get(tier).get(type);
+        return item == null ? net.minecraft.world.item.Items.AIR : item.get();
+    }
+
+    @Nullable
+    public static Item shield(SkyArmorMaterial mat) {
+        RegistryObject<Item> item = SHIELDS.get(mat);
+        return item == null ? null : item.get();
     }
 
     public static Item armor(SkyArmorMaterial mat, ArmorItem.Type type) {

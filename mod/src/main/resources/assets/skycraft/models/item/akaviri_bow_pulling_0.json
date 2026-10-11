@@ -1,0 +1,6 @@
+{
+  "parent": "skycraft:item/akaviri_bow",
+  "textures": {
+    "layer0": "skycraft:item/akaviri_bow_pulling_0"
+  }
+}

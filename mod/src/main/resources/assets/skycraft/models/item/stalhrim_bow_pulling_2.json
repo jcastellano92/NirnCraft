@@ -1,0 +1,6 @@
+{
+  "parent": "skycraft:item/stalhrim_bow",
+  "textures": {
+    "layer0": "skycraft:item/stalhrim_bow_pulling_2"
+  }
+}

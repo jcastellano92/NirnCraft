@@ -1344,12 +1344,7 @@ PIECES = ["helmet", "chestplate", "leggings", "boots"]
 
 
 def main():
-    for tier in TIERS:
-        for wt in MELEE:
-            save(weapon_texture(tier, wt), ITEM, f"{tier}_{wt}")
-        save(bow_texture(tier, -1), ITEM, f"{tier}_bow")
-        for i in range(3):
-            save(bow_texture(tier, i), ITEM, f"{tier}_bow_pulling_{i}")
+    # weapons, bows, armour icons and armour layers are drawn by gear.py (tools/textures/gear_catalogue.py)
     for ore in ORES:
         save(ore_block(ore, False), BLOCK, f"{ore}_ore")
         save(ore_block(ore, True), BLOCK, f"deepslate_{ore}_ore")
@@ -1369,12 +1364,6 @@ def main():
     save(item_necklace(GOLD, GEMS["ruby"]), ITEM, "gold_ruby_necklace")
     for name, img in misc_items().items():
         save(img, ITEM, name)
-    for mat in ARMOR_MATS:
-        for piece in PIECES:
-            save(armor_icon(mat, piece), ITEM, f"{mat}_{piece}")
-        l1, l2 = armor_layers(mat)
-        save(l1, ARMOR, f"{mat}_layer_1")
-        save(l2, ARMOR, f"{mat}_layer_2")
     for name, img in station_textures().items():
         save(img, BLOCK, name)
     print(f"wrote {len(PREVIEW)} textures")

@@ -1,0 +1,6 @@
+{
+  "parent": "skycraft:item/falmer_bow",
+  "textures": {
+    "layer0": "skycraft:item/falmer_bow_pulling_0"
+  }
+}

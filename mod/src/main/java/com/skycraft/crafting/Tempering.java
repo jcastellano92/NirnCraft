@@ -8,6 +8,7 @@ import com.skycraft.core.Skill;
 import com.skycraft.crafting.item.SkyAxeItem;
 import com.skycraft.crafting.item.SkyBowItem;
 import com.skycraft.crafting.item.SkyMeleeItem;
+import com.skycraft.crafting.item.SkyShieldItem;
 import com.skycraft.crafting.recipe.Cost;
 import com.skycraft.perk.Perk;
 import com.skycraft.perk.Perks;
@@ -27,6 +28,7 @@ import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.item.Tiers;
@@ -37,7 +39,8 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Skyrim tempering at the grindstone (weapons) and armor workbench (armor). Quality is stored as ItemStack NBT int
  * {@value #TAG} (1 Fine, 2 Superior, 3 Exquisite, 4 Flawless, 5 Epic, 6 Legendary); each level adds +0.5 attack damage
- * (weapons, main hand) or +0.5 armor (armor, its slot) via {@link CraftingEvents}.
+ * (weapons, main hand) or +0.5 armor (armor in its slot, shields in the off hand) via {@link CraftingEvents}. Shields
+ * are improved at the armor workbench like armor.
  */
 public final class Tempering {
     public static final String TAG = "skycraft_quality";
@@ -76,7 +79,7 @@ public final class Tempering {
     public static Kind kind(ItemStack stack) {
         if (stack.isEmpty() || stack.getCount() != 1) return Kind.NONE;
         Item item = stack.getItem();
-        if (item instanceof ArmorItem) return Kind.ARMOR;
+        if (item instanceof ArmorItem || item instanceof ShieldItem) return Kind.ARMOR;
         if (!stack.isDamageableItem() && !(item instanceof SkyBowItem)) return Kind.NONE;
         WeaponClass wc = WeaponClass.of(stack);
         if (wc != WeaponClass.UNARMED && wc != WeaponClass.OTHER) return Kind.WEAPON;
@@ -96,6 +99,8 @@ public final class Tempering {
         if (item instanceof SkyBowItem bow) return Cost.of(bow.smithingTier::material, 1);
         if (item instanceof SkyMeleeItem melee) return Cost.of(melee.smithingTier::material, 1);
         if (item instanceof SkyAxeItem axe) return Cost.of(axe.smithingTier::material, 1);
+        if (item instanceof SkyShieldItem shield) return Cost.of(shield.set::material, 1);
+        if (item instanceof ShieldItem) return Cost.of(() -> Items.IRON_INGOT, 1);
         if (item instanceof ArmorItem armor) {
             ArmorMaterial mat = armor.getMaterial();
             if (mat instanceof SkyArmorMaterial sky) return Cost.of(sky::material, 1);
@@ -125,6 +130,7 @@ public final class Tempering {
         if (item instanceof SkyBowItem bow) return bow.smithingTier.temperPerk;
         if (item instanceof SkyMeleeItem melee) return melee.smithingTier.temperPerk;
         if (item instanceof SkyAxeItem axe) return axe.smithingTier.temperPerk;
+        if (item instanceof SkyShieldItem shield) return shield.set.temperPerk;
         if (item instanceof ArmorItem armor) {
             ArmorMaterial mat = armor.getMaterial();
             if (mat instanceof SkyArmorMaterial sky) return sky.temperPerk;

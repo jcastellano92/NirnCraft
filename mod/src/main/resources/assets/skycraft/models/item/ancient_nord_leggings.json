@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "skycraft:item/ancient_nord_leggings"
+  }
+}
