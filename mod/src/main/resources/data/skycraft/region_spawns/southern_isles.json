@@ -1,0 +1,82 @@
+[
+  {
+    "provinces": [
+      "pyandonea",
+      "thras"
+    ],
+    "families": [
+      "plains",
+      "forest",
+      "frozen",
+      "mountain",
+      "swamp",
+      "desert",
+      "jungle",
+      "ash",
+      "beach",
+      "river"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:land_dreugh",
+        "count": [
+          1,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          10,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:wamasu",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:hackwing",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:mudcrab",
+        "count": [
+          1,
+          3
+        ]
+      }
+    ]
+  }
+]

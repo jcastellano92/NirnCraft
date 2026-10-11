@@ -52,6 +52,10 @@ public final class CreaturesModule {
     public static void init(IEventBus modBus) {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CreaturesConfig.SPEC, "skycraft-creatures.toml");
         ModEntities.init(modBus);
+        Bestiary.init(modBus);
+        com.skycraft.creatures.dragons.NamedDragons.init();
+        com.skycraft.creatures.travel.StriderPorts.init();
+        CreatureItems.init(modBus);
         modBus.addListener(CreaturesModule::onAttributes);
         modBus.addListener(CreaturesModule::onSpawnPlacements);
     }

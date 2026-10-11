@@ -51,6 +51,53 @@ public class MudcrabEntity extends FaunaAnimal {
         return true;
     }
 
+    /** One in ten is a giant mudcrab: twice as big, much tougher. */
+    @Override
+    protected int chooseVariant(net.minecraft.world.level.ServerLevelAccessor level, BlockPos pos) {
+        return this.random.nextInt(10) == 0 ? 1 : 0;
+    }
+
+    public boolean isGiant() {
+        return getVariant() == 1;
+    }
+
+    @Override
+    @org.jetbrains.annotations.Nullable
+    public net.minecraft.world.entity.SpawnGroupData finalizeSpawn(net.minecraft.world.level.ServerLevelAccessor level,
+                                                                   net.minecraft.world.DifficultyInstance difficulty,
+                                                                   net.minecraft.world.entity.MobSpawnType reason,
+                                                                   @org.jetbrains.annotations.Nullable net.minecraft.world.entity.SpawnGroupData data,
+                                                                   @org.jetbrains.annotations.Nullable net.minecraft.nbt.CompoundTag tag) {
+        data = super.finalizeSpawn(level, difficulty, reason, data, tag);
+        if (isGiant()) {
+            var hp = this.getAttribute(Attributes.MAX_HEALTH);
+            if (hp != null) hp.setBaseValue(36.0);
+            var dmg = this.getAttribute(Attributes.ATTACK_DAMAGE);
+            if (dmg != null) dmg.setBaseValue(5.0);
+            this.setHealth(this.getMaxHealth());
+            this.xpReward = 8;
+        }
+        this.refreshDimensions();
+        return data;
+    }
+
+    @Override
+    public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
+        net.minecraft.world.entity.EntityDimensions d = super.getDimensions(pose);
+        return isGiant() ? d.scale(2.2f) : d;
+    }
+
+    @Override
+    public void onSyncedDataUpdated(net.minecraft.network.syncher.EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (VARIANT.equals(key)) this.refreshDimensions();
+    }
+
+    @Override
+    protected net.minecraft.network.chat.Component getTypeName() {
+        return isGiant() ? net.minecraft.network.chat.Component.translatable("entity.skycraft.mudcrab.giant") : super.getTypeName();
+    }
+
     @Override
     protected SoundEvent getAmbientSound() {
         return com.skycraft.audio.AudioSounds.creature("mudcrab", "ambient");

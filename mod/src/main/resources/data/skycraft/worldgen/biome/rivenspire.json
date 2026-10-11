@@ -53,24 +53,6 @@
         "weight": 3,
         "minCount": 1,
         "maxCount": 1
-      },
-      {
-        "type": "skycraft:vampire",
-        "weight": 2,
-        "minCount": 1,
-        "maxCount": 1
-      },
-      {
-        "type": "skycraft:necromancer",
-        "weight": 2,
-        "minCount": 1,
-        "maxCount": 1
-      },
-      {
-        "type": "skycraft:bandit",
-        "weight": 8,
-        "minCount": 1,
-        "maxCount": 3
       }
     ],
     "creature": [

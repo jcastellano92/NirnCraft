@@ -1,5 +1,8 @@
 package com.skycraft.creatures.entity;
 
+import com.skycraft.creatures.entity.anim.AnimSlot;
+import com.skycraft.creatures.entity.anim.AnimatedCreature;
+import com.skycraft.creatures.entity.anim.CreatureAnims;
 import com.skycraft.core.SkyData;
 import com.skycraft.core.Skill;
 import net.minecraft.core.BlockPos;
@@ -41,7 +44,7 @@ import org.jetbrains.annotations.Nullable;
  * Base for Skyrim's humanoid fighters (bandits, draugr): random skin, random gear chosen once, melee or archer
  * behaviour depending on the weapon in hand (like vanilla skeletons).
  */
-public abstract class SkyHumanoid extends Monster implements RangedAttackMob {
+public abstract class SkyHumanoid extends Monster implements AnimatedCreature, RangedAttackMob {
     private static final EntityDataAccessor<Integer> SKIN = SynchedEntityData.defineId(SkyHumanoid.class, EntityDataSerializers.INT);
 
     private final RangedBowAttackGoal<SkyHumanoid> bowGoal = new RangedBowAttackGoal<>(this, 1.0D, 30, 16.0F);
@@ -227,5 +230,26 @@ public abstract class SkyHumanoid extends Monster implements RangedAttackMob {
         setSkin(tag.getInt("Skin"));
         initialized = tag.getBoolean("SkycraftInit");
         reassessWeaponGoal();
+    }
+
+    // ------------------------------------------------------------------ animation (rig models)
+
+    private final CreatureAnims anims = new CreatureAnims();
+
+    @Override
+    public CreatureAnims anims() {
+        return anims;
+    }
+
+    @Override
+    public void handleEntityEvent(byte id) {
+        if (!anims.onEvent(this, id)) super.handleEntityEvent(id);
+    }
+
+    /** Every melee swing plays an attack animation (alternating blows). */
+    @Override
+    public void swing(net.minecraft.world.InteractionHand hand) {
+        super.swing(hand);
+        if (!this.level().isClientSide) CreatureAnims.play(this, this.getRandom().nextInt(3) == 0 ? AnimSlot.ATTACK2 : AnimSlot.ATTACK);
     }
 }

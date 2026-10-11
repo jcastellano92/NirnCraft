@@ -23,6 +23,9 @@
     {
       "id": "vampirism:advanced_vampire",
       "required": false
-    }
+    },
+    "skycraft:death_hound",
+    "skycraft:ash_spawn",
+    "skycraft:dragon_priest"
   ]
 }

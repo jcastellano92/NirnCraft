@@ -57,12 +57,6 @@
         "weight": 3,
         "minCount": 1,
         "maxCount": 1
-      },
-      {
-        "type": "skycraft:falmer",
-        "weight": 15,
-        "minCount": 1,
-        "maxCount": 2
       }
     ],
     "creature": [],

@@ -1,6 +1,7 @@
 package com.skycraft.fauna.client;
 
 import com.skycraft.Skycraft;
+import com.skycraft.creatures.client.BestiaryClient;
 import com.skycraft.fauna.FaunaEntities;
 import com.skycraft.fauna.entity.BearEntity;
 import com.skycraft.fauna.entity.DeerEntity;
@@ -21,26 +22,10 @@ import net.minecraftforge.fml.common.Mod;
 /** Mod-bus client registration for the fauna module: model layers and entity renderers. */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class FaunaClient {
-    public static final ModelLayerLocation DEER = layer("deer");
-    public static final ModelLayerLocation ELK = layer("elk");
-    public static final ModelLayerLocation SABRE_CAT = layer("sabre_cat");
-    public static final ModelLayerLocation HORKER = layer("horker");
-    public static final ModelLayerLocation MUDCRAB = layer("mudcrab");
-    public static final ModelLayerLocation MAMMOTH = layer("mammoth");
-    public static final ModelLayerLocation BEAR = layer("bear");
-    public static final ModelLayerLocation SLAUGHTERFISH = layer("slaughterfish");
     public static final ModelLayerLocation BUTTERFLY = layer("butterfly");
     public static final ModelLayerLocation DRAGONFLY = layer("dragonfly");
     public static final ModelLayerLocation TORCHBUG = layer("torchbug");
 
-    private static final ResourceLocation DEER_TEX = tex("deer");
-    private static final ResourceLocation ELK_TEX = tex("elk");
-    private static final ResourceLocation[] SABRE_CAT_TEX = {tex("sabre_cat"), tex("sabre_cat_snowy")};
-    private static final ResourceLocation HORKER_TEX = tex("horker");
-    private static final ResourceLocation MUDCRAB_TEX = tex("mudcrab");
-    private static final ResourceLocation MAMMOTH_TEX = tex("mammoth");
-    private static final ResourceLocation[] BEAR_TEX = {tex("bear_brown"), tex("bear_cave"), tex("bear_snow")};
-    private static final ResourceLocation SLAUGHTERFISH_TEX = tex("slaughterfish");
     private static final ResourceLocation[] BUTTERFLY_TEX = {tex("butterfly_monarch"), tex("butterfly_blue")};
     private static final ResourceLocation MOTH_TEX = tex("luna_moth");
     private static final ResourceLocation DRAGONFLY_TEX = tex("dragonfly");
@@ -63,14 +48,6 @@ public final class FaunaClient {
 
     @SubscribeEvent
     public static void layers(EntityRenderersEvent.RegisterLayerDefinitions event) {
-        event.registerLayerDefinition(DEER, () -> DeerModel.createLayer(false));
-        event.registerLayerDefinition(ELK, () -> DeerModel.createLayer(true));
-        event.registerLayerDefinition(SABRE_CAT, SabreCatModel::createLayer);
-        event.registerLayerDefinition(HORKER, HorkerModel::createLayer);
-        event.registerLayerDefinition(MUDCRAB, MudcrabModel::createLayer);
-        event.registerLayerDefinition(MAMMOTH, MammothModel::createLayer);
-        event.registerLayerDefinition(BEAR, BearModel::createLayer);
-        event.registerLayerDefinition(SLAUGHTERFISH, SlaughterfishModel::createLayer);
         event.registerLayerDefinition(BUTTERFLY, InsectModels.Butterfly::createLayer);
         event.registerLayerDefinition(DRAGONFLY, InsectModels.Dragonfly::createLayer);
         event.registerLayerDefinition(TORCHBUG, InsectModels.Torchbug::createLayer);
@@ -78,22 +55,15 @@ public final class FaunaClient {
 
     @SubscribeEvent
     public static void renderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(FaunaEntities.DEER.get(), ctx -> new FaunaRenderer<DeerEntity, DeerModel<DeerEntity>>(
-                ctx, new DeerModel<>(ctx.bakeLayer(DEER)), 0.6f, 0.8f, e -> DEER_TEX));
-        event.registerEntityRenderer(FaunaEntities.ELK.get(), ctx -> new FaunaRenderer<ElkEntity, DeerModel<ElkEntity>>(
-                ctx, new DeerModel<>(ctx.bakeLayer(ELK)), 0.6f, 1.05f, e -> ELK_TEX));
-        event.registerEntityRenderer(FaunaEntities.SABRE_CAT.get(), ctx -> new FaunaRenderer<SabreCatEntity, SabreCatModel<SabreCatEntity>>(
-                ctx, new SabreCatModel<>(ctx.bakeLayer(SABRE_CAT)), 0.6f, 1.0f, e -> pick(SABRE_CAT_TEX, e.getVariant())));
-        event.registerEntityRenderer(FaunaEntities.HORKER.get(), ctx -> new FaunaRenderer<HorkerEntity, HorkerModel<HorkerEntity>>(
-                ctx, new HorkerModel<>(ctx.bakeLayer(HORKER)), 0.8f, 1.1f, e -> HORKER_TEX));
-        event.registerEntityRenderer(FaunaEntities.MUDCRAB.get(), ctx -> new FaunaRenderer<MudcrabEntity, MudcrabModel<MudcrabEntity>>(
-                ctx, new MudcrabModel<>(ctx.bakeLayer(MUDCRAB)), 0.45f, 1.0f, e -> MUDCRAB_TEX));
-        event.registerEntityRenderer(FaunaEntities.MAMMOTH.get(), ctx -> new FaunaRenderer<MammothEntity, MammothModel<MammothEntity>>(
-                ctx, new MammothModel<>(ctx.bakeLayer(MAMMOTH)), 0.75f, 2.0f, e -> MAMMOTH_TEX));
-        event.registerEntityRenderer(FaunaEntities.BEAR.get(), ctx -> new FaunaRenderer<BearEntity, BearModel<BearEntity>>(
-                ctx, new BearModel<>(ctx.bakeLayer(BEAR)), 0.7f, 1.15f, e -> pick(BEAR_TEX, e.getVariant())));
-        event.registerEntityRenderer(FaunaEntities.SLAUGHTERFISH.get(), ctx -> new FaunaRenderer.Fish<SlaughterfishEntity, SlaughterfishModel<SlaughterfishEntity>>(
-                ctx, new SlaughterfishModel<>(ctx.bakeLayer(SLAUGHTERFISH)), 0.3f, 0.8f, e -> SLAUGHTERFISH_TEX));
+        BestiaryClient.rig(event, FaunaEntities.DEER, "deer", 0.5f, 1.0f, null, null, r -> {});
+        BestiaryClient.rig(event, FaunaEntities.ELK, "elk", 0.6f, 1.0f, null, null, r -> {});
+        BestiaryClient.rig(event, FaunaEntities.SABRE_CAT, "sabre_cat", 0.6f, 1.0f, new String[]{"sabre_cat", "sabre_cat_snowy"}, null, r -> {});
+        BestiaryClient.rig(event, FaunaEntities.HORKER, "horker", 0.8f, 1.0f, null, null, r -> {});
+        BestiaryClient.rig(event, FaunaEntities.MUDCRAB, "mudcrab", 0.45f, 1.0f, new String[]{"mudcrab", "mudcrab_giant"}, null,
+                r -> r.scaleBy(e -> e.getVariant() == 1 ? 2.2f : 1.0f));
+        BestiaryClient.rig(event, FaunaEntities.MAMMOTH, "mammoth", 0.75f, 2.0f, null, null, r -> {});
+        BestiaryClient.rig(event, FaunaEntities.BEAR, "bear", 0.7f, 1.0f, new String[]{"bear", "bear_cave", "bear_snow"}, null, r -> {});
+        BestiaryClient.rig(event, FaunaEntities.SLAUGHTERFISH, "slaughterfish", 0.3f, 1.0f, null, null, r -> {});
 
         event.registerEntityRenderer(FaunaEntities.BUTTERFLY.get(), ctx -> new FaunaRenderer<InsectEntity, InsectModels.Butterfly<InsectEntity>>(
                 ctx, new InsectModels.Butterfly<>(ctx.bakeLayer(BUTTERFLY)), 0.0f, 0.5f, e -> pick(BUTTERFLY_TEX, e.getVariant())));

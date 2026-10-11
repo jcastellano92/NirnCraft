@@ -6,6 +6,7 @@
     {
       "id": "#skycraft:dungeon_bosses",
       "required": false
-    }
+    },
+    "skycraft:dragon_priest"
   ]
 }

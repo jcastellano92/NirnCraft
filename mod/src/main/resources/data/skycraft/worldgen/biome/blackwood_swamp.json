@@ -53,12 +53,6 @@
         "weight": 8,
         "minCount": 1,
         "maxCount": 1
-      },
-      {
-        "type": "skycraft:bandit",
-        "weight": 8,
-        "minCount": 1,
-        "maxCount": 3
       }
     ],
     "creature": [

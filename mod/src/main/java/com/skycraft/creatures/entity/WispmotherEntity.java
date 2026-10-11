@@ -18,6 +18,7 @@ import net.minecraft.world.phys.Vec3;
 /** {@code skycraft:wispmother}: spectral frost queens haunting ancient ruins and misty bluffs. */
 public class WispmotherEntity extends SkyHumanoid {
     private int frostCooldown = 40;
+    private int wispCooldown = 60;
 
     public WispmotherEntity(EntityType<? extends WispmotherEntity> type, Level level) {
         super(type, level);
@@ -59,8 +60,24 @@ public class WispmotherEntity extends SkyHumanoid {
         if (target == null || !target.isAlive()) return;
 
         double distSqr = this.distanceToSqr(target);
+        if (--wispCooldown <= 0 && this.level() instanceof net.minecraft.server.level.ServerLevel sl
+                && sl.getEntities(com.skycraft.creatures.Bestiary.WISP.get(), this.getBoundingBox().inflate(16), e -> e.isAlive()).size() < 3) {
+            wispCooldown = 300;
+            com.skycraft.creatures.entity.anim.CreatureAnims.play(this, com.skycraft.creatures.entity.anim.AnimSlot.SUMMON);
+            for (int i = 0; i < 2; i++) {
+                var wisp = com.skycraft.creatures.Bestiary.WISP.get().create(sl);
+                if (wisp == null) break;
+                wisp.moveTo(this.getX() + (this.random.nextDouble() - 0.5) * 3, this.getY() + 1.5, this.getZ() + (this.random.nextDouble() - 0.5) * 3,
+                        this.getYRot(), 0);
+                wisp.finalizeSpawn(sl, sl.getCurrentDifficultyAt(this.blockPosition()), net.minecraft.world.entity.MobSpawnType.MOB_SUMMONED, null, null);
+                wisp.setTarget(target);
+                sl.addFreshEntity(wisp);
+            }
+            this.playSound(SoundEvents.ALLAY_AMBIENT_WITHOUT_ITEM, 1.5f, 0.6f);
+        }
         if (--frostCooldown <= 0 && distSqr < 144.0 && this.hasLineOfSight(target)) {
             frostCooldown = 50 + this.random.nextInt(25);
+            com.skycraft.creatures.entity.anim.CreatureAnims.play(this, com.skycraft.creatures.entity.anim.AnimSlot.CAST);
             target.hurt(this.damageSources().indirectMagic(this, this), 3.0f);
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1), this);
             if (target.canFreeze()) {

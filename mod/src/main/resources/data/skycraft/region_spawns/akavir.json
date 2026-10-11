@@ -1,0 +1,307 @@
+[
+  {
+    "regions": [
+      "akavir/kamal"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 8,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:kamal",
+        "count": [
+          1,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:ice_wraith",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:wolf",
+        "count": [
+          2,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 1,
+        "levels": [
+          26,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:frost_giant",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:elk",
+        "count": [
+          1,
+          2
+        ]
+      }
+    ]
+  },
+  {
+    "regions": [
+      "akavir/tsaesci"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 8,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:tsaesci",
+        "count": [
+          1,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          12,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:wamasu",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:hackwing",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 2,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:guar",
+        "count": [
+          1,
+          2
+        ]
+      }
+    ]
+  },
+  {
+    "regions": [
+      "akavir/ka_po_tun"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:senche_tiger",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:durzog",
+        "count": [
+          2,
+          3
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:echatere",
+        "count": [
+          2,
+          3
+        ]
+      }
+    ]
+  },
+  {
+    "regions": [
+      "akavir/tang_mo"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:hackwing",
+        "count": [
+          1,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:harpy",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:alfiq",
+        "count": [
+          1,
+          2
+        ]
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "akavir"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:kamal",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:tsaesci",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:skeever",
+        "count": [
+          2,
+          3
+        ]
+      }
+    ]
+  }
+]

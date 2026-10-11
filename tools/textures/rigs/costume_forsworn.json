@@ -1,0 +1,38 @@
+{
+  "name": "costume_forsworn",
+  "width": 64,
+  "height": 64,
+  "bones": [
+    {"name": "root", "parent": "", "x": 0.000, "y": 24.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "head", "parent": "root", "x": 0.000, "y": -24.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "body", "parent": "root", "x": 0.000, "y": -24.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "right_arm", "parent": "root", "x": -5.000, "y": -22.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "left_arm", "parent": "root", "x": 5.000, "y": -22.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "right_leg", "parent": "root", "x": -1.900, "y": -12.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "left_leg", "parent": "root", "x": 1.900, "y": -12.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "antler_right", "parent": "head", "x": -3.000, "y": -8.000, "z": 0.000, "rx": -15.000, "ry": -20.000, "rz": -25.000},
+    {"name": "antler_left", "parent": "head", "x": 3.000, "y": -8.000, "z": 0.000, "rx": -15.000, "ry": 20.000, "rz": 25.000},
+    {"name": "tine_right", "parent": "antler_right", "x": 0.000, "y": -4.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": -55.000},
+    {"name": "tine2_right", "parent": "antler_right", "x": 0.000, "y": -6.500, "z": 0.000, "rx": -40.000, "ry": 0.000, "rz": 20.000},
+    {"name": "tine_left", "parent": "antler_left", "x": -0.000, "y": -4.000, "z": 0.000, "rx": 0.000, "ry": -0.000, "rz": 55.000},
+    {"name": "tine2_left", "parent": "antler_left", "x": -0.000, "y": -6.500, "z": 0.000, "rx": -40.000, "ry": -0.000, "rz": -20.000}
+  ],
+  "boxes": [
+    {"id": "head#0", "bone": "head", "mat": "hide", "tag": "band", "u": 0, "v": 0, "w": 9, "h": 3, "d": 9, "mirror": false, "shared": false, "x": -4.500, "y": -8.700, "z": -4.500, "inflate": 0.100},
+    {"id": "head#1", "bone": "head", "mat": "feather", "tag": "feather", "u": 32, "v": 22, "w": 0, "h": 6, "d": 2, "mirror": false, "shared": false, "x": 2.500, "y": -12.000, "z": 3.500, "inflate": 0.000},
+    {"id": "head#2", "bone": "head", "mat": "feather", "tag": "feather", "u": 50, "v": 22, "w": 0, "h": 5, "d": 2, "mirror": false, "shared": false, "x": -2.500, "y": -11.000, "z": 3.500, "inflate": 0.000},
+    {"id": "body#0", "bone": "body", "mat": "fur", "tag": "wrap", "u": 0, "v": 12, "w": 10, "h": 4, "d": 6, "mirror": false, "shared": false, "x": -5.000, "y": -0.500, "z": -3.000, "inflate": 0.150},
+    {"id": "body#1", "bone": "body", "mat": "bone", "tag": "charm", "u": 22, "v": 30, "w": 4, "h": 1, "d": 1, "mirror": false, "shared": false, "x": -2.000, "y": 4.000, "z": -2.600, "inflate": 0.000},
+    {"id": "body#2", "bone": "body", "mat": "hide", "tag": "flap", "u": 0, "v": 30, "w": 7, "h": 6, "d": 0, "mirror": false, "shared": false, "x": -3.500, "y": 10.000, "z": -2.400, "inflate": 0.000},
+    {"id": "body#3", "bone": "body", "mat": "hide", "tag": "flap", "u": 36, "v": 22, "w": 7, "h": 7, "d": 0, "mirror": false, "shared": false, "x": -3.500, "y": 10.000, "z": 2.400, "inflate": 0.000},
+    {"id": "right_arm#0", "bone": "right_arm", "mat": "fur", "tag": "shoulder_fur", "u": 36, "v": 12, "w": 5, "h": 3, "d": 5, "mirror": false, "shared": false, "x": -3.500, "y": -2.500, "z": -2.500, "inflate": 0.050},
+    {"id": "right_leg#0", "bone": "right_leg", "mat": "hide", "tag": "wrap_leg", "u": 0, "v": 22, "w": 4, "h": 4, "d": 4, "mirror": false, "shared": false, "x": -2.000, "y": 7.000, "z": -2.000, "inflate": 0.200},
+    {"id": "left_leg#0", "bone": "left_leg", "mat": "hide", "tag": "wrap_leg", "u": 16, "v": 22, "w": 4, "h": 4, "d": 4, "mirror": false, "shared": false, "x": -2.000, "y": 7.000, "z": -2.000, "inflate": 0.200},
+    {"id": "antler_right#0", "bone": "antler_right", "mat": "bone", "tag": "antler", "u": 32, "v": 12, "w": 1, "h": 8, "d": 1, "mirror": false, "shared": false, "x": -0.500, "y": -8.000, "z": -0.500, "inflate": 0.000},
+    {"id": "antler_left#0", "bone": "antler_left", "mat": "bone", "tag": "antler", "u": 32, "v": 12, "w": 1, "h": 8, "d": 1, "mirror": true, "shared": true, "x": -0.500, "y": -8.000, "z": -0.500, "inflate": 0.000},
+    {"id": "tine_right#0", "bone": "tine_right", "mat": "bone", "tag": "antler", "u": 14, "v": 30, "w": 1, "h": 4, "d": 1, "mirror": false, "shared": false, "x": -0.500, "y": -4.000, "z": -0.500, "inflate": 0.000},
+    {"id": "tine2_right#0", "bone": "tine2_right", "mat": "bone", "tag": "antler", "u": 18, "v": 30, "w": 1, "h": 3, "d": 1, "mirror": false, "shared": false, "x": -0.500, "y": -3.000, "z": -0.500, "inflate": 0.000},
+    {"id": "tine_left#0", "bone": "tine_left", "mat": "bone", "tag": "antler", "u": 14, "v": 30, "w": 1, "h": 4, "d": 1, "mirror": true, "shared": true, "x": -0.500, "y": -4.000, "z": -0.500, "inflate": 0.000},
+    {"id": "tine2_left#0", "bone": "tine2_left", "mat": "bone", "tag": "antler", "u": 18, "v": 30, "w": 1, "h": 3, "d": 1, "mirror": true, "shared": true, "x": -0.500, "y": -3.000, "z": -0.500, "inflate": 0.000}
+  ]
+}

@@ -53,12 +53,6 @@
         "weight": 3,
         "minCount": 1,
         "maxCount": 1
-      },
-      {
-        "type": "skycraft:bandit",
-        "weight": 8,
-        "minCount": 1,
-        "maxCount": 3
       }
     ],
     "creature": [
@@ -97,12 +91,6 @@
         "weight": 3,
         "minCount": 2,
         "maxCount": 3
-      },
-      {
-        "type": "skycraft:deer",
-        "weight": 8,
-        "minCount": 2,
-        "maxCount": 4
       }
     ],
     "ambient": [

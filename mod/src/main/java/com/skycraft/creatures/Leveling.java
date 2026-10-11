@@ -136,6 +136,7 @@ public final class Leveling {
             Component name = ranked.rankName(level);
             if (name != null) mob.setCustomName(name);
         }
+        if (mob instanceof Ranked ranked) ranked.onLevelApplied(level);
     }
 
     private static void modify(AttributeInstance attribute, UUID id, String name, double amount) {

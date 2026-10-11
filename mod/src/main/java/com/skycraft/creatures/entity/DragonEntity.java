@@ -44,22 +44,58 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import com.skycraft.core.SkyData;
+import com.skycraft.creatures.entity.anim.AnimSlot;
+import com.skycraft.creatures.entity.anim.AnimatedCreature;
+import com.skycraft.creatures.entity.anim.CreatureAnims;
 import com.skycraft.magic.MagicDamage;
+import com.skycraft.tamriel.Place;
+import com.skycraft.tamriel.PlaceType;
+import com.skycraft.tamriel.Places;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * {@code skycraft:dragon}: flies, circles its prey high above, swoops in breathing fire (frost for Frost Dragons),
  * lands to bite and tail-sweep, then takes off again. Dragonrend (magic module) forces it to the ground:
  * {@code getPersistentData().getLong("skycraft_dragonrend_until") > gameTime}.
  *
- * <p>Variants by level: Dragon, Blood Dragon, Frost Dragon, Elder Dragon, Ancient Dragon. On death it burns and
- * falls for a few seconds; the magic module absorbs its soul (LivingDeathEvent, {@code #skycraft:dragons}) and the
- * creatures module leaves its body to loot.</p>
+ * <p>Variants by level: Dragon, Blood Dragon, Frost Dragon, Elder Dragon, Ancient Dragon, Revered Dragon, Legendary
+ * Dragon; Serpentine Dragons in Morrowind's lands, Skeletal Dragons risen without their flesh; and the named dragons
+ * Alduin, Paarthurnax and Odahviing ({@link NamedDragons}). On death it burns and falls for a few seconds; the magic
+ * module absorbs its soul (LivingDeathEvent, {@code #skycraft:dragons}) and the creatures module leaves its body to
+ * loot, which burns down to the skeleton.</p>
+ *
+ * <p>Dragons use the Thu'um: fire or frost breath, Unrelenting Force, Disarm, and (elder and older) Become Ethereal.
+ * Without prey they perch on dragon mounds and word walls ({@link Places}).</p>
+ *
+ * <p>Roles: {@link #ROLE_WILD} (attacks, despawns when alone), {@link #ROLE_LAIR} (perched at a word wall or mound,
+ * persistent), {@link #ROLE_FLYOVER} (scripted fly-past, e.g. Alduin raising a dragon; invulnerable),
+ * {@link #ROLE_PEACEFUL} (Paarthurnax: never starts a fight), {@link #ROLE_CAPTURED} (Odahviing in Dragonsreach's
+ * yoke: grounded and peaceful until a quest frees it).</p>
  */
-public class DragonEntity extends Monster {
+public class DragonEntity extends Monster implements AnimatedCreature {
     public static final String DRAGONREND_KEY = "skycraft_dragonrend_until";
-    public static final String[] VARIANTS = {"dragon", "blood", "frost", "elder", "ancient"};
-    private static final float[] TIER_HEALTH = {1.0f, 1.35f, 1.7f, 2.2f, 2.8f};
-    private static final float[] TIER_DAMAGE = {1.0f, 1.25f, 1.5f, 1.8f, 2.1f};
+    public static final String[] VARIANTS = {"dragon", "blood", "frost", "elder", "ancient", "revered", "legendary", "serpentine",
+            "skeletal", "alduin", "paarthurnax", "odahviing"};
+    public static final int BLOOD = 1;
+    public static final int FROST = 2;
+    public static final int ELDER = 3;
+    public static final int ANCIENT = 4;
+    public static final int REVERED = 5;
+    public static final int LEGENDARY = 6;
+    public static final int SERPENTINE = 7;
+    public static final int SKELETAL = 8;
+    public static final int ALDUIN = 9;
+    public static final int PAARTHURNAX = 10;
+    public static final int ODAHVIING = 11;
+    public static final int ROLE_WILD = 0;
+    public static final int ROLE_LAIR = 1;
+    public static final int ROLE_FLYOVER = 2;
+    public static final int ROLE_PEACEFUL = 3;
+    public static final int ROLE_CAPTURED = 4;
+    private static final float[] TIER_HEALTH = {1.0f, 1.35f, 1.7f, 2.2f, 2.8f, 3.4f, 4.0f, 2.0f, 1.6f, 6.0f, 3.0f, 2.4f};
+    private static final float[] TIER_DAMAGE = {1.0f, 1.25f, 1.5f, 1.8f, 2.1f, 2.4f, 2.7f, 1.6f, 1.4f, 3.0f, 2.0f, 1.8f};
     public static final double BASE_HEALTH = 300.0;
     public static final double BASE_DAMAGE = 12.0;
     /** Game ticks without a player within 256 blocks before a wild dragon leaves. */
@@ -72,6 +108,13 @@ public class DragonEntity extends Monster {
     private static final EntityDataAccessor<Boolean> FLYING = SynchedEntityData.defineId(DragonEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> BREATH_TARGET = SynchedEntityData.defineId(DragonEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> BREATHING = SynchedEntityData.defineId(DragonEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> FROST_BREATH = SynchedEntityData.defineId(DragonEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> ETHEREAL = SynchedEntityData.defineId(DragonEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> PERCHED = SynchedEntityData.defineId(DragonEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> ROLE = SynchedEntityData.defineId(DragonEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> RISING = SynchedEntityData.defineId(DragonEntity.class, EntityDataSerializers.INT);
+    /** Ticks a dragon takes to rise from its mound (bones first, then the flesh returns). */
+    public static final int RISE_TICKS = 220;
 
     private enum Phase { CIRCLE, SWOOP, LAND, GROUND, TAKEOFF }
 
@@ -106,6 +149,18 @@ public class DragonEntity extends Monster {
     private Entity pendingCorpse;
     /** Client-side only: this instance is a corpse dummy (wings folded, lying still). */
     private boolean corpsePose;
+    /** Client-side only (corpse dummies): how far the body has burned away, 0..1. */
+    private float burn;
+    private final CreatureAnims anims = new CreatureAnims();
+    private int shoutCooldown = 160;
+    private int etherealTicks;
+    private int etherealCooldown;
+    /** Where it perches when it has no prey (a dragon mound or word wall), if any. */
+    @Nullable
+    private Vec3 perch;
+    private int perchSearchCooldown;
+    /** Scripted fly-past: the point it circles and the ticks left. */
+    private int flyoverTicks;
 
     /** Hittable head, neck and wings (the body box is only the torso). */
     private final DragonPart head;
@@ -159,7 +214,7 @@ public class DragonEntity extends Monster {
         boolean flying = isFlying();
         Vec3 base = this.position();
         placePart(head, mouthPos().subtract(fwd.scale(0.8)));
-        placePart(neck, base.add(fwd.scale(3.2)).add(0, flying ? 1.3 : 2.4, 0));
+        placePart(neck, base.add(fwd.scale(3.8)).add(0, flying ? 2.0 : 3.4, 0));
         double span = flying ? 4.6 : 2.2;
         double wingY = flying ? 1.4 : 1.6;
         placePart(leftWing, base.add(right.scale(-span)).add(0, wingY, 0));
@@ -193,6 +248,48 @@ public class DragonEntity extends Monster {
         this.entityData.define(FLYING, false);
         this.entityData.define(BREATH_TARGET, -1);
         this.entityData.define(BREATHING, false);
+        this.entityData.define(FROST_BREATH, false);
+        this.entityData.define(ETHEREAL, false);
+        this.entityData.define(PERCHED, false);
+        this.entityData.define(ROLE, ROLE_WILD);
+        this.entityData.define(RISING, 0);
+    }
+
+    /** Ticks left of rising from a dragon mound (0 = risen). */
+    public int getRising() {
+        return this.entityData.get(RISING);
+    }
+
+    /** Makes this dragon rise from its burial mound: invulnerable bones that grow their flesh back, then it attacks. */
+    public void startRising() {
+        this.entityData.set(RISING, RISE_TICKS);
+        this.setFlying(false);
+        this.noPhysics = false;
+    }
+
+    @Override
+    public CreatureAnims anims() {
+        return anims;
+    }
+
+    @Override
+    public void handleEntityEvent(byte id) {
+        if (!anims.onEvent(this, id)) super.handleEntityEvent(id);
+    }
+
+    @Override
+    public boolean animFlying() {
+        return isFlying();
+    }
+
+    @Override
+    public boolean animSleeping() {
+        return isPerched() || getRising() > 0;
+    }
+
+    @Override
+    public int animVariant() {
+        return getVariant();
     }
 
     @Override
@@ -211,6 +308,11 @@ public class DragonEntity extends Monster {
     private static class DragonTargetGoal<T extends LivingEntity> extends NearestAttackableTargetGoal<T> {
         DragonTargetGoal(DragonEntity dragon, Class<T> type, int interval) {
             super(dragon, type, interval, true, false, null);
+        }
+
+        @Override
+        public boolean canUse() {
+            return ((DragonEntity) this.mob).startsFights() && super.canUse();
         }
 
         @Override
@@ -236,8 +338,80 @@ public class DragonEntity extends Monster {
         this.entityData.set(VARIANT, Mth.clamp(variant, 0, VARIANTS.length - 1));
     }
 
+    /** Frost-natured: frost breath, immune to cold, weak to fire. */
     public boolean isFrost() {
-        return getVariant() == 2;
+        return this.entityData.get(FROST_BREATH);
+    }
+
+    public void setFrostBreath(boolean frost) {
+        this.entityData.set(FROST_BREATH, frost);
+    }
+
+    public boolean isEthereal() {
+        return this.entityData.get(ETHEREAL);
+    }
+
+    public boolean isPerched() {
+        return this.entityData.get(PERCHED);
+    }
+
+    private void setPerched(boolean perched) {
+        if (perched != isPerched()) this.entityData.set(PERCHED, perched);
+    }
+
+    public int getRole() {
+        return this.entityData.get(ROLE);
+    }
+
+    public void setRole(int role) {
+        this.entityData.set(ROLE, role);
+        if (role != ROLE_WILD) this.setPersistenceRequired();
+    }
+
+    /** Wild and lair dragons hunt; Paarthurnax, captured and scripted dragons never start a fight. */
+    public boolean startsFights() {
+        int r = getRole();
+        return r == ROLE_WILD || r == ROLE_LAIR;
+    }
+
+    /** Captured (Odahviing): grounded, peaceful, persistent; {@link #setCaptured(boolean) false} frees it. */
+    public boolean isCaptured() {
+        return getRole() == ROLE_CAPTURED;
+    }
+
+    public void setCaptured(boolean captured) {
+        setRole(captured ? ROLE_CAPTURED : ROLE_WILD);
+        if (captured) {
+            this.setTarget(null);
+            if (isFlying()) setPhase(Phase.LAND);
+        } else {
+            setPhase(Phase.TAKEOFF);
+        }
+    }
+
+    /** Sets a perch (dragon mound, word wall, summit) the dragon returns to and rests on. */
+    public void setPerch(@Nullable Vec3 perch) {
+        this.perch = perch;
+        if (perch != null) this.anchor = perch;
+    }
+
+    /** Starts a scripted fly-past: circles {@code center} for {@code ticks}, then leaves and vanishes. */
+    public void startFlyover(Vec3 center, int ticks) {
+        setRole(ROLE_FLYOVER);
+        this.anchor = center;
+        this.flyoverTicks = ticks;
+        this.setFlying(true);
+        this.noPhysics = true;
+        setPhase(Phase.CIRCLE);
+    }
+
+    /** Client corpse dummies: burn progress 0..1 (set by the corpse renderer from the body's age). */
+    public float burnProgress() {
+        return burn;
+    }
+
+    public void setBurn(float burn) {
+        this.burn = burn;
     }
 
     public boolean isFlying() {
@@ -278,7 +452,7 @@ public class DragonEntity extends Monster {
 
     @Override
     public boolean fireImmune() {
-        return !isFrost() || super.fireImmune();
+        return !isFrost() && getVariant() != SKELETAL || super.fireImmune();
     }
 
     @Override
@@ -307,6 +481,14 @@ public class DragonEntity extends Monster {
     }
 
     @Override
+    public boolean isInvulnerableTo(DamageSource source) {
+        if (getRole() == ROLE_FLYOVER || isEthereal() || getRising() > 0) {
+            return !source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY);
+        }
+        return super.isInvulnerableTo(source);
+    }
+
+    @Override
     public AABB getBoundingBoxForCulling() {
         return this.getBoundingBox().inflate(8.0, 4.0, 8.0);
     }
@@ -315,6 +497,9 @@ public class DragonEntity extends Monster {
     public boolean hurt(DamageSource source, float amount) {
         // Frost dragons are weak to fire, like in Skyrim.
         if (isFrost() && source.is(net.minecraft.tags.DamageTypeTags.IS_FIRE)) amount *= 1.25f;
+        if (getVariant() == SKELETAL && source.is(net.minecraft.tags.DamageTypeTags.IS_FIRE)) amount *= 1.5f;
+        if (isCaptured() && source.getEntity() instanceof Player) return false;
+        if (isPerched()) setPerched(false);
         return super.hurt(source, amount);
     }
 
@@ -329,20 +514,33 @@ public class DragonEntity extends Monster {
         return data;
     }
 
-    /** Chooses the dragon type from the nearest player's level: Dragon, Blood, Frost, Elder, Ancient. */
+    /**
+     * Chooses the dragon type from the nearest player's level: Dragon, Blood, Frost, Elder, Ancient, Revered, Legendary;
+     * frost dragons more often in the cold, serpentine dragons in Morrowind's lands.
+     */
     private void initDragon() {
         initialized = true;
+        if (getVariant() != 0 || this.hasCustomName()) {
+            // a quest, an event or a command already chose (named dragons, skeletal risers)
+            applyVariant(getVariant());
+            return;
+        }
         Player nearest = this.level().getNearestPlayer(this, 160);
         int level = nearest != null ? SkyData.get(nearest).getLevel() : 1;
-        int tier = level >= 44 ? 4 : level >= 32 ? 3 : level >= 22 ? 2 : level >= 12 ? 1 : 0;
+        int tier = level >= 64 ? LEGENDARY : level >= 52 ? REVERED : level >= 44 ? ANCIENT : level >= 32 ? ELDER
+                : level >= 22 ? FROST : level >= 12 ? BLOOD : 0;
         BlockPos pos = this.blockPosition();
-        if (tier < 2 && this.level().getBiome(pos).value().coldEnoughToSnow(pos) && this.getRandom().nextFloat() < 0.5f) tier = 2;
+        if (tier < FROST && this.level().getBiome(pos).value().coldEnoughToSnow(pos) && this.getRandom().nextFloat() < 0.5f) tier = FROST;
+        String province = com.skycraft.tamriel.Regions.at(this.level(), pos).province();
+        if ("morrowind".equals(province) && tier < ELDER && this.getRandom().nextFloat() < 0.5f) tier = SERPENTINE;
         applyVariant(tier);
         this.getPersistentData().putInt("skycraft_level", level);
     }
 
     public void applyVariant(int tier) {
         setVariant(tier);
+        boolean frost = tier == FROST || tier == LEGENDARY || tier == SKELETAL || tier == SERPENTINE && this.getRandom().nextBoolean();
+        setFrostBreath(frost);
         AttributeInstance health = this.getAttribute(Attributes.MAX_HEALTH);
         if (health != null) health.setBaseValue(BASE_HEALTH * TIER_HEALTH[getVariant()]);
         AttributeInstance damage = this.getAttribute(Attributes.ATTACK_DAMAGE);
@@ -351,6 +549,7 @@ public class DragonEntity extends Monster {
         if (getVariant() > 0 && !this.hasCustomName()) {
             this.setCustomName(Component.translatable("entity.skycraft.dragon." + VARIANTS[getVariant()]));
         }
+        if (getVariant() == ALDUIN) this.bossEvent.setColor(BossEvent.BossBarColor.PURPLE);
         this.bossEvent.setName(this.getDisplayName());
     }
 
@@ -509,6 +708,17 @@ public class DragonEntity extends Monster {
             }
         }
         if (tickDespawn()) return;
+        if (getRole() == ROLE_FLYOVER) {
+            tickFlyover();
+            return;
+        }
+        if (getRising() > 0) {
+            tickRising();
+            return;
+        }
+        if (shoutCooldown > 0) shoutCooldown--;
+        if (etherealCooldown > 0) etherealCooldown--;
+        if (etherealTicks > 0 && --etherealTicks == 0) this.entityData.set(ETHEREAL, false);
 
         LivingEntity target = this.getTarget();
         if (target != null && (!target.isAlive() || target.level() != this.level()
@@ -521,7 +731,11 @@ public class DragonEntity extends Monster {
         if (tailCooldown > 0) tailCooldown--;
         if (groundBreathCooldown > 0) groundBreathCooldown--;
 
-        boolean rended = isDragonrended();
+        if (!startsFights() && target != null && this.getLastHurtByMob() != target) {
+            this.setTarget(null);
+            target = null;
+        }
+        boolean rended = isDragonrended() || isCaptured();
         if (rended && isFlying() && phase != Phase.LAND) setPhase(Phase.LAND);
         if (!isFlying() && phase != Phase.GROUND && phase != Phase.TAKEOFF) setPhase(Phase.GROUND);
         if (isFlying() && phase == Phase.GROUND) setPhase(Phase.CIRCLE);
@@ -534,6 +748,138 @@ public class DragonEntity extends Monster {
             case TAKEOFF -> tickTakeoff();
         }
         tickBreath(target);
+        if (target != null && breathTicks <= 0 && startsFights()) tickThuum(target);
+        if (isPerched() && (target != null || phase != Phase.GROUND)) setPerched(false);
+    }
+
+    @Override
+    protected net.minecraft.world.InteractionResult mobInteract(Player player, InteractionHand hand) {
+        if (!startsFights() && getRole() != ROLE_FLYOVER && hand == InteractionHand.MAIN_HAND) {
+            if (player instanceof ServerPlayer sp) com.skycraft.creatures.dragons.NamedDragons.talk(sp, this);
+            return net.minecraft.world.InteractionResult.sidedSuccess(this.level().isClientSide);
+        }
+        return super.mobInteract(player, hand);
+    }
+
+    // ------------------------------------------------------------------ the Thu'um
+
+    /** Shouts now and then: Unrelenting Force, Disarm, and (elder and older, when hurt) Become Ethereal. */
+    private void tickThuum(LivingEntity target) {
+        if (shoutCooldown > 0 || isEthereal()) return;
+        double dist = this.distanceTo(target);
+        int v = getVariant();
+        boolean elder = v == ELDER || v == ANCIENT || v == REVERED || v == LEGENDARY || v == ALDUIN;
+        if (elder && etherealCooldown <= 0 && this.getHealth() < this.getMaxHealth() * 0.5f && this.getRandom().nextInt(4) == 0) {
+            shout("ethereal");
+            this.entityData.set(ETHEREAL, true);
+            etherealTicks = 120;
+            etherealCooldown = 900;
+            shoutCooldown = 200;
+            return;
+        }
+        if (dist > 22 || !this.hasLineOfSight(target)) return;
+        if (!isFlying() && !facing(target, 0.6)) return;
+        if (target instanceof Player p && !p.getMainHandItem().isEmpty() && dist < 16 && this.getRandom().nextInt(4) == 0) {
+            shout("disarm");
+            ItemStack held = p.getMainHandItem().copy();
+            p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            ItemEntity dropped = p.drop(held, true, false);
+            if (dropped != null) dropped.setPickUpDelay(40);
+            shoutCooldown = 300 + this.getRandom().nextInt(200);
+            return;
+        }
+        if (this.getRandom().nextInt(3) != 0) {
+            shoutCooldown = 60;
+            return;
+        }
+        shout("force");
+        unrelentingForce();
+        shoutCooldown = 240 + this.getRandom().nextInt(160);
+    }
+
+    /** Plays the shout animation and shows the Words to everyone near. */
+    private void shout(String words) {
+        CreatureAnims.play(this, AnimSlot.SHOUT);
+        this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 5.0f, 1.2f);
+        if (this.level() instanceof ServerLevel sl) {
+            Component text = Component.translatable("shout.skycraft.dragon." + words);
+            for (ServerPlayer p : sl.players()) {
+                if (p.distanceToSqr(this) < 64 * 64) p.displayClientMessage(text, true);
+            }
+        }
+    }
+
+    /** Fus Ro Dah: everything in front is hurled away. */
+    private void unrelentingForce() {
+        Vec3 mouth = mouthPos();
+        Vec3 dir = breathDir(this.getTarget());
+        double range = 20.0;
+        if (this.level() instanceof ServerLevel sl) {
+            for (int i = 1; i <= 10; i++) {
+                Vec3 p = mouth.add(dir.scale(i * range / 10));
+                sl.sendParticles(ParticleTypes.SWEEP_ATTACK, p.x, p.y, p.z, 2, 0.4 * i / 3, 0.4 * i / 3, 0.4 * i / 3, 0);
+                sl.sendParticles(ParticleTypes.CLOUD, p.x, p.y, p.z, 3, 0.3 * i / 3, 0.3 * i / 3, 0.3 * i / 3, 0.05);
+            }
+        }
+        this.level().playSound(null, mouth.x, mouth.y, mouth.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.HOSTILE, 3.0f, 0.8f);
+        AABB box = new AABB(mouth, mouth.add(dir.scale(range))).inflate(5.0);
+        for (LivingEntity e : this.level().getEntitiesOfClass(LivingEntity.class, box, e -> e != this && e.isAlive() && !(e instanceof DragonEntity))) {
+            if (e instanceof Player p && (p.isCreative() || p.isSpectator())) continue;
+            Vec3 to = e.getBoundingBox().getCenter().subtract(mouth);
+            double along = to.dot(dir);
+            if (along < 0 || along > range) continue;
+            if (to.subtract(dir.scale(along)).length() > 2.0 + along * 0.35) continue;
+            e.hurt(MagicDamage.source(this.level(), MagicDamage.SPELL, null, this), 3.0f * tierDamage());
+            double kb = 2.6 * (1.0 - e.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+            Vec3 push = new Vec3(dir.x, 0, dir.z).normalize().scale(kb);
+            e.setDeltaMovement(e.getDeltaMovement().add(push.x, 0.6, push.z));
+            e.hurtMarked = true;
+        }
+    }
+
+    // ------------------------------------------------------------------ rising from a mound
+
+    private void tickRising() {
+        int left = getRising() - 1;
+        this.entityData.set(RISING, left);
+        this.getNavigation().stop();
+        this.setDeltaMovement(0, Math.min(0, this.getDeltaMovement().y), 0);
+        if (this.level() instanceof ServerLevel sl && left % 4 == 0) {
+            sl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, this.getX(), this.getY() + 1.5, this.getZ(), 6, 2.5, 1.2, 2.5, 0.02);
+            sl.sendParticles(ParticleTypes.LARGE_SMOKE, this.getX(), this.getY() + 0.5, this.getZ(), 4, 3.0, 0.4, 3.0, 0.02);
+        }
+        if (left == RISE_TICKS - 20) this.playSound(SoundEvents.WITHER_SPAWN, 2.0f, 0.6f);
+        if (left == 0) {
+            roar();
+            CreatureAnims.play(this, AnimSlot.ROAR);
+            Player near = this.level().getNearestPlayer(this, 64);
+            if (near != null && !near.isCreative() && !near.isSpectator()) this.setTarget(near);
+        }
+    }
+
+    // ------------------------------------------------------------------ scripted fly-past
+
+    private void tickFlyover() {
+        this.setTarget(null);
+        Vec3 center = anchor != null ? anchor : this.position();
+        if (flyoverTicks > 0) {
+            flyoverTicks--;
+            circleAngle += 0.03;
+            double gx = center.x + Math.cos(circleAngle) * 30;
+            double gz = center.z + Math.sin(circleAngle) * 30;
+            double gy = Math.max(center.y + 28, groundY(gx, gz) + 18);
+            steerTowards(new Vec3(gx, gy, gz), 0.9, 0.06);
+            this.noPhysics = true;
+            if (flyoverTicks % 100 == 50) roar();
+        } else {
+            // leave: climb away from the centre, then vanish out of sight
+            Vec3 away = this.position().subtract(center).multiply(1, 0, 1);
+            if (away.lengthSqr() < 1) away = new Vec3(1, 0, 0);
+            Vec3 dest = this.position().add(away.normalize().scale(40)).add(0, 20, 0);
+            steerTowards(dest, 1.2, 0.08);
+            this.noPhysics = true;
+            if (this.level().getNearestPlayer(this, 160) == null || this.position().distanceToSqr(center) > 200 * 200) this.discard();
+        }
     }
 
     /**
@@ -543,7 +889,7 @@ public class DragonEntity extends Monster {
      */
     private boolean tickDespawn() {
         long now = this.level().getGameTime();
-        if (this.isPersistenceRequired() || lastSeenTime < 0) {
+        if (this.isPersistenceRequired() || getRole() != ROLE_WILD || lastSeenTime < 0) {
             lastSeenTime = now;
             checkAbsence = false;
             return false;
@@ -578,7 +924,10 @@ public class DragonEntity extends Monster {
 
         if (target != null) {
             if (phaseTicks > 90 + this.getRandom().nextInt(80)) setPhase(swoops >= swoopsBeforeLanding ? Phase.LAND : Phase.SWOOP);
-        } else if (phaseTicks > 900 && this.getRandom().nextInt(300) == 0) {
+        } else if (perch != null && phaseTicks > 200) {
+            setPhase(Phase.LAND); // back to its perch
+        } else if (phaseTicks > 600 && this.getRandom().nextInt(200) == 0) {
+            findPerch();
             setPhase(Phase.LAND); // perch for a while
         }
     }
@@ -613,7 +962,27 @@ public class DragonEntity extends Monster {
         }
     }
 
+    /** Looks for the nearest dragon mound or word wall within 200 blocks to rest on. */
+    private void findPerch() {
+        if (perch != null || perchSearchCooldown-- > 0) return;
+        perchSearchCooldown = 4;
+        int x = Mth.floor(this.getX());
+        int z = Mth.floor(this.getZ());
+        Place best = Places.nearest(PlaceType.DRAGON_MOUND, x, z, 200).orElse(null);
+        Place wall = Places.nearest(PlaceType.WORD_WALL, x, z, 200).orElse(null);
+        if (best == null || wall != null && wall.distSqr(x, z) < best.distSqr(x, z)) best = wall;
+        if (best == null) return;
+        BlockPos col = new BlockPos(best.x(), 0, best.z());
+        if (!this.level().isLoaded(col)) return;
+        perch = new Vec3(best.x() + 0.5, groundY(best.x() + 0.5, best.z() + 0.5), best.z() + 0.5);
+        anchor = perch;
+    }
+
     private void chooseLandSpot(@Nullable LivingEntity target, boolean forced) {
+        if (target == null && perch != null && !forced) {
+            landSpot = new Vec3(perch.x, groundY(perch.x, perch.z), perch.z);
+            return;
+        }
         RandomSource r = this.getRandom();
         Vec3 center = forced || target == null ? this.position() : target.position();
         for (int i = 0; i < 10; i++) {
@@ -649,6 +1018,7 @@ public class DragonEntity extends Monster {
             this.yHeadRot = this.getYRot();
             if (this.onGround() || this.verticalCollision) {
                 setFlying(false);
+                CreatureAnims.play(this, AnimSlot.LAND);
                 this.setDeltaMovement(Vec3.ZERO);
                 anchor = this.position();
                 this.playSound(com.skycraft.audio.AudioSounds.creature("dragon", "land"), 3.0f, 0.9f + this.getRandom().nextFloat() * 0.2f);
@@ -682,6 +1052,22 @@ public class DragonEntity extends Monster {
         enableCollision();
         if (this.isNoGravity()) this.setNoGravity(false);
         if (target == null) {
+            boolean atPerch = perch != null && this.position().distanceToSqr(perch) < 12 * 12;
+            if (atPerch || isCaptured() || getRole() == ROLE_PEACEFUL) {
+                // resting on its perch: lies down, wakes when someone comes close
+                this.getNavigation().stop();
+                setPerched(phaseTicks > 60);
+                if (phaseTicks % 20 == 0 && startsFights()) {
+                    Player near = this.level().getNearestPlayer(this, 26);
+                    if (near != null && !near.isCreative() && !near.isSpectator()) {
+                        setPerched(false);
+                        roar();
+                        CreatureAnims.play(this, AnimSlot.ROAR);
+                        this.setTarget(near);
+                    }
+                }
+                return;
+            }
             if (phaseTicks % 120 == 0 && this.getRandom().nextBoolean()) {
                 Vec3 base = anchor != null ? anchor : this.position();
                 this.getMoveControl().setWantedPosition(base.x + this.getRandom().nextInt(17) - 8, base.y,
@@ -704,7 +1090,7 @@ public class DragonEntity extends Monster {
             this.yBodyRot = this.getYRot();
             if (biteCooldown <= 0 && facing(target, 0.5)) {
                 biteCooldown = 25;
-                this.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                CreatureAnims.play(this, AnimSlot.ATTACK);
                 this.doHurtTarget(target);
                 this.playSound(com.skycraft.audio.AudioSounds.creature("dragon", "growl"), 1.5f, 1.0f + this.getRandom().nextFloat() * 0.15f);
             }
@@ -735,6 +1121,7 @@ public class DragonEntity extends Monster {
     }
 
     private void tailSweep() {
+        CreatureAnims.play(this, AnimSlot.ATTACK2);
         Vec3 fwd = Vec3.directionFromRotation(0, this.yBodyRot);
         this.playSound(SoundEvents.PLAYER_ATTACK_SWEEP, 2.0f, 0.5f);
         for (LivingEntity e : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(5.0, 1.0, 5.0),
@@ -753,6 +1140,8 @@ public class DragonEntity extends Monster {
     private void tickTakeoff() {
         if (phaseTicks == 1) {
             setFlying(true);
+            setPerched(false);
+            CreatureAnims.play(this, AnimSlot.TAKEOFF);
             roar();
         }
         Vec3 fwd = Vec3.directionFromRotation(0, this.getYRot());
@@ -776,6 +1165,7 @@ public class DragonEntity extends Monster {
 
     private void startBreath(LivingEntity target, int ticks) {
         breathTicks = ticks;
+        CreatureAnims.play(this, AnimSlot.SPECIAL);
         setBreathing(true, target.getId());
         this.playSound(isFrost() ? com.skycraft.audio.AudioSounds.creature("dragon", "breath_frost") : com.skycraft.audio.AudioSounds.creature("dragon", "breath_fire"), 3.0f, 1.0f);
         // the dragon shouts its breath (Yol Toor Shul / Fo Krah Diin) in a deeper voice
@@ -786,7 +1176,7 @@ public class DragonEntity extends Monster {
     /** Where fire comes out: the head sits ~5 blocks ahead, higher when standing. */
     public Vec3 mouthPos() {
         Vec3 fwd = Vec3.directionFromRotation(0, this.yBodyRot);
-        return isFlying() ? this.position().add(fwd.scale(6.0)).add(0, 1.3, 0) : this.position().add(fwd.scale(5.0)).add(0, 3.0, 0);
+        return isFlying() ? this.position().add(fwd.scale(7.0)).add(0, 2.2, 0) : this.position().add(fwd.scale(6.0)).add(0, 4.4, 0);
     }
 
     /** Breath direction: towards the breath target when it's in front, otherwise forward and down. */
@@ -851,6 +1241,10 @@ public class DragonEntity extends Monster {
         if (!corpsePose) updateParts();
         if (!this.level().isClientSide || corpsePose) return;
         if (isBreathing()) spawnBreathParticles();
+        if (isEthereal() && this.tickCount % 2 == 0) {
+            this.level().addParticle(ParticleTypes.END_ROD, this.getX() + (this.random.nextDouble() - 0.5) * 4, this.getY() + this.random.nextDouble() * 3,
+                    this.getZ() + (this.random.nextDouble() - 0.5) * 4, 0, 0.02, 0);
+        }
         if (isFlying() && this.isAlive()) {
             float cycle = Mth.cos(this.tickCount * 0.3f);
             float prev = Mth.cos((this.tickCount - 1) * 0.3f);
@@ -945,6 +1339,15 @@ public class DragonEntity extends Monster {
         tag.putInt("Variant", getVariant());
         tag.putBoolean("Flying", isFlying());
         tag.putBoolean("SkycraftInit", initialized);
+        tag.putBoolean("FrostBreath", isFrost());
+        tag.putInt("Role", getRole());
+        if (perch != null) {
+            tag.putDouble("PerchX", perch.x);
+            tag.putDouble("PerchY", perch.y);
+            tag.putDouble("PerchZ", perch.z);
+        }
+        if (flyoverTicks > 0) tag.putInt("Flyover", flyoverTicks);
+        if (getRising() > 0) tag.putInt("Rising", getRising());
         if (lastSeenTime >= 0) tag.putLong("LastSeen", lastSeenTime);
         if (anchor != null) {
             tag.putDouble("AnchorX", anchor.x);
@@ -959,6 +1362,12 @@ public class DragonEntity extends Monster {
         setVariant(tag.getInt("Variant"));
         setFlying(tag.getBoolean("Flying"));
         initialized = tag.getBoolean("SkycraftInit");
+        setFrostBreath(tag.contains("FrostBreath") ? tag.getBoolean("FrostBreath") : getVariant() == FROST);
+        this.entityData.set(ROLE, tag.getInt("Role"));
+        if (tag.contains("PerchX")) perch = new Vec3(tag.getDouble("PerchX"), tag.getDouble("PerchY"), tag.getDouble("PerchZ"));
+        this.entityData.set(RISING, tag.getInt("Rising"));
+        flyoverTicks = tag.getInt("Flyover");
+        if (getRole() == ROLE_FLYOVER) this.discard(); // a fly-past never outlives its moment
         if (tag.contains("LastSeen")) {
             lastSeenTime = tag.getLong("LastSeen");
             checkAbsence = true;

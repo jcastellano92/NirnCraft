@@ -1,5 +1,8 @@
 package com.skycraft.creatures.entity;
 
+import com.skycraft.creatures.entity.anim.AnimSlot;
+import com.skycraft.creatures.entity.anim.AnimatedCreature;
+import com.skycraft.creatures.entity.anim.CreatureAnims;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -38,7 +41,7 @@ import org.jetbrains.annotations.Nullable;
  * {@code skycraft:troll}: three-eyed ape-like brutes. They regenerate quickly unless burning (Skyrim: use fire!).
  * Frost trolls live in snowy biomes.
  */
-public class TrollEntity extends Monster implements Ranked {
+public class TrollEntity extends Monster implements AnimatedCreature, Ranked {
     private static final EntityDataAccessor<Boolean> FROST = SynchedEntityData.defineId(TrollEntity.class, EntityDataSerializers.BOOLEAN);
     private boolean initialized;
     private int lastFireHurt = -1000;
@@ -184,6 +187,7 @@ public class TrollEntity extends Monster implements Ranked {
     public void setTarget(@Nullable LivingEntity target) {
         if (target != null && this.getTarget() == null && !this.level().isClientSide) {
             this.playSound(com.skycraft.audio.AudioSounds.creature("troll", "roar"), 1.5f, 1.0f);
+            CreatureAnims.play(this, AnimSlot.ROAR);
         }
         super.setTarget(target);
     }
@@ -200,5 +204,31 @@ public class TrollEntity extends Monster implements Ranked {
         super.readAdditionalSaveData(tag);
         setFrost(tag.getBoolean("Frost"));
         initialized = tag.getBoolean("SkycraftInit");
+    }
+
+    // ------------------------------------------------------------------ animation (rig models)
+
+    private final CreatureAnims anims = new CreatureAnims();
+
+    @Override
+    public CreatureAnims anims() {
+        return anims;
+    }
+
+    @Override
+    public void handleEntityEvent(byte id) {
+        if (!anims.onEvent(this, id)) super.handleEntityEvent(id);
+    }
+
+    /** Every melee swing plays an attack animation (alternating blows). */
+    @Override
+    public void swing(net.minecraft.world.InteractionHand hand) {
+        super.swing(hand);
+        if (!this.level().isClientSide) CreatureAnims.play(this, this.getRandom().nextInt(3) == 0 ? AnimSlot.ATTACK2 : AnimSlot.ATTACK);
+    }
+
+    @Override
+    public int animVariant() {
+        return isFrost() ? 1 : 0;
     }
 }

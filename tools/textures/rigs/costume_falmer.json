@@ -1,0 +1,34 @@
+{
+  "name": "costume_falmer",
+  "width": 64,
+  "height": 32,
+  "bones": [
+    {"name": "root", "parent": "", "x": 0.000, "y": 24.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "head", "parent": "root", "x": 0.000, "y": -24.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "body", "parent": "root", "x": 0.000, "y": -24.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "right_arm", "parent": "root", "x": -5.000, "y": -22.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "left_arm", "parent": "root", "x": 5.000, "y": -22.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "right_leg", "parent": "root", "x": -1.900, "y": -12.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "left_leg", "parent": "root", "x": 1.900, "y": -12.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "ear_right", "parent": "head", "x": -4.000, "y": -5.000, "z": 0.500, "rx": -20.000, "ry": -25.000, "rz": 0.000},
+    {"name": "ear_left", "parent": "head", "x": 4.000, "y": -5.000, "z": 0.500, "rx": -20.000, "ry": 25.000, "rz": -0.000}
+  ],
+  "boxes": [
+    {"id": "head#0", "bone": "head", "mat": "chitin", "tag": "brow", "u": 26, "v": 27, "w": 9, "h": 2, "d": 2, "mirror": false, "shared": false, "x": -4.500, "y": -6.000, "z": -4.600, "inflate": 0.100},
+    {"id": "head#1", "bone": "head", "mat": "chitin", "tag": "crest", "u": 0, "v": 0, "w": 8, "h": 2, "d": 8, "mirror": false, "shared": false, "x": -4.000, "y": -9.200, "z": -3.500, "inflate": 0.000},
+    {"id": "head#2", "bone": "head", "mat": "chitin", "tag": "crest_fin", "u": 0, "v": 10, "w": 1, "h": 2, "d": 7, "mirror": false, "shared": false, "x": -0.500, "y": -11.000, "z": -3.000, "inflate": 0.000},
+    {"id": "body#0", "bone": "body", "mat": "chitin", "tag": "chest", "u": 32, "v": 10, "w": 9, "h": 7, "d": 1, "mirror": false, "shared": false, "x": -4.500, "y": 0.000, "z": -2.700, "inflate": 0.100},
+    {"id": "body#1", "bone": "body", "mat": "chitin", "tag": "back", "u": 32, "v": 0, "w": 9, "h": 9, "d": 1, "mirror": false, "shared": false, "x": -4.500, "y": 0.000, "z": 1.800, "inflate": 0.100},
+    {"id": "body#2", "bone": "body", "mat": "leather", "tag": "flap", "u": 40, "v": 19, "w": 7, "h": 6, "d": 0, "mirror": false, "shared": false, "x": -3.500, "y": 10.000, "z": -2.400, "inflate": 0.000},
+    {"id": "right_arm#0", "bone": "right_arm", "mat": "chitin", "tag": "pauldron", "u": 0, "v": 19, "w": 5, "h": 3, "d": 5, "mirror": false, "shared": false, "x": -4.000, "y": -2.800, "z": -2.600, "inflate": 0.150},
+    {"id": "right_arm#1", "bone": "right_arm", "mat": "chitin", "tag": "spike", "u": 10, "v": 27, "w": 1, "h": 2, "d": 3, "mirror": false, "shared": false, "x": -4.500, "y": -3.500, "z": 0.000, "inflate": 0.000},
+    {"id": "left_arm#0", "bone": "left_arm", "mat": "chitin", "tag": "pauldron", "u": 20, "v": 19, "w": 5, "h": 3, "d": 5, "mirror": false, "shared": false, "x": -1.000, "y": -2.800, "z": -2.600, "inflate": 0.150},
+    {"id": "left_arm#1", "bone": "left_arm", "mat": "chitin", "tag": "spike", "u": 18, "v": 27, "w": 1, "h": 2, "d": 3, "mirror": false, "shared": false, "x": 3.500, "y": -3.500, "z": 0.000, "inflate": 0.000},
+    {"id": "right_leg#0", "bone": "right_leg", "mat": "chitin", "tag": "knee", "u": 54, "v": 19, "w": 4, "h": 4, "d": 1, "mirror": false, "shared": false, "x": -2.000, "y": 4.000, "z": -2.600, "inflate": 0.000},
+    {"id": "left_leg#0", "bone": "left_leg", "mat": "chitin", "tag": "knee", "u": 0, "v": 27, "w": 4, "h": 4, "d": 1, "mirror": false, "shared": false, "x": -2.000, "y": 4.000, "z": -2.600, "inflate": 0.000},
+    {"id": "ear_right#0", "bone": "ear_right", "mat": "skin", "tag": "ear", "u": 16, "v": 10, "w": 1, "h": 2, "d": 7, "mirror": false, "shared": false, "x": -1.000, "y": -1.000, "z": 0.000, "inflate": 0.000},
+    {"id": "ear_right#1", "bone": "ear_right", "mat": "skin", "tag": "ear_tip", "u": 48, "v": 27, "w": 1, "h": 1, "d": 3, "mirror": false, "shared": false, "x": -1.000, "y": -2.000, "z": 3.000, "inflate": 0.000},
+    {"id": "ear_left#0", "bone": "ear_left", "mat": "skin", "tag": "ear", "u": 16, "v": 10, "w": 1, "h": 2, "d": 7, "mirror": true, "shared": true, "x": -0.000, "y": -1.000, "z": 0.000, "inflate": 0.000},
+    {"id": "ear_left#1", "bone": "ear_left", "mat": "skin", "tag": "ear_tip", "u": 48, "v": 27, "w": 1, "h": 1, "d": 3, "mirror": true, "shared": true, "x": -0.000, "y": -2.000, "z": 3.000, "inflate": 0.000}
+  ]
+}

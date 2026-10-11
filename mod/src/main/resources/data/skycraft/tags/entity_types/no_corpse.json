@@ -15,6 +15,9 @@
     "minecraft:cod",
     "minecraft:salmon",
     "minecraft:tropical_fish",
-    "minecraft:pufferfish"
+    "minecraft:pufferfish",
+    "skycraft:wisp",
+    "skycraft:will_o_wisp",
+    "skycraft:creature_bolt"
   ]
 }

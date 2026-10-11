@@ -53,12 +53,6 @@
         "weight": 3,
         "minCount": 1,
         "maxCount": 1
-      },
-      {
-        "type": "skycraft:frostbite_spider",
-        "weight": 6,
-        "minCount": 1,
-        "maxCount": 2
       }
     ],
     "creature": [

@@ -2333,10 +2333,14 @@ def biome_json(b, where, order):
         out["temperature_modifier"] = "frozen"
     out["downfall"] = b["downfall"]
     out["effects"] = eff
+    # Skycraft creatures come from the region spawner (data/skycraft/region_spawns), never from biome spawners,
+    # so they don't spawn twice; biomes keep only vanilla wildlife.
+    def vanilla(lst):
+        return [e for e in lst if not e["type"].startswith("skycraft:")]
     out["spawners"] = {
-        "monster": b["monster"], "creature": b["creature"], "ambient": b["ambient"],
-        "axolotls": [], "underground_water_creature": b["underground"], "water_creature": b["water_creature"],
-        "water_ambient": b["water_ambient"], "misc": []}
+        "monster": vanilla(b["monster"]), "creature": vanilla(b["creature"]), "ambient": vanilla(b["ambient"]),
+        "axolotls": [], "underground_water_creature": vanilla(b["underground"]),
+        "water_creature": vanilla(b["water_creature"]), "water_ambient": vanilla(b["water_ambient"]), "misc": []}
     out["spawn_costs"] = {}
     out["carvers"] = {"air": ["minecraft:cave", "minecraft:cave_extra_underground", "minecraft:canyon"]}
     out["features"] = feats

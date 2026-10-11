@@ -1,0 +1,342 @@
+[
+  {
+    "provinces": [
+      "high_rock"
+    ],
+    "families": [
+      "plains",
+      "forest",
+      "frozen",
+      "mountain",
+      "swamp",
+      "desert",
+      "jungle",
+      "ash",
+      "beach",
+      "river"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 8,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:wolf",
+        "count": [
+          2,
+          4
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          4,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:bear",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          5,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:harpy",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          12,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:ogre",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:imp",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          8,
+          999
+        ],
+        "time": "night",
+        "place": "surface",
+        "entity": "skycraft:will_o_wisp",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          8,
+          999
+        ],
+        "time": "day",
+        "place": "surface",
+        "entity": "skycraft:spriggan",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:bandit",
+        "count": [
+          2,
+          4
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          12,
+          999
+        ],
+        "time": "night",
+        "place": "surface",
+        "members": [
+          {
+            "entity": "skycraft:vampire",
+            "count": [
+              1,
+              2
+            ]
+          },
+          {
+            "entity": "skycraft:death_hound",
+            "count": [
+              0,
+              2
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 8,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:deer",
+        "count": [
+          1,
+          3
+        ]
+      }
+    ]
+  },
+  {
+    "regions": [
+      "high_rock/wrothgar"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:durzog",
+        "count": [
+          2,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          8,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:troll",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          10,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:ogre",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:echatere",
+        "count": [
+          2,
+          4
+        ]
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "high_rock"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:skeever",
+        "count": [
+          2,
+          4
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          10,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:ogre",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:necromancer",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          12,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "members": [
+          {
+            "entity": "skycraft:vampire",
+            "count": [
+              1,
+              2
+            ]
+          },
+          {
+            "entity": "skycraft:death_hound",
+            "count": [
+              0,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 1,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:harpy",
+        "count": [
+          1,
+          1
+        ]
+      }
+    ]
+  }
+]

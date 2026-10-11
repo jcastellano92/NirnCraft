@@ -1,0 +1,39 @@
+[
+  {
+    "families": [
+      "ocean"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 1,
+        "levels": [
+          12,
+          999
+        ],
+        "time": "any",
+        "place": "water",
+        "entity": "skycraft:sea_serpent",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "water",
+        "entity": "skycraft:slaughterfish",
+        "count": [
+          1,
+          3
+        ]
+      }
+    ]
+  }
+]

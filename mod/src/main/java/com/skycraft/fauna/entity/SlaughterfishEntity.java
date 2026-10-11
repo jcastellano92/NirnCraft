@@ -1,5 +1,8 @@
 package com.skycraft.fauna.entity;
 
+import com.skycraft.creatures.entity.anim.AnimSlot;
+import com.skycraft.creatures.entity.anim.AnimatedCreature;
+import com.skycraft.creatures.entity.anim.CreatureAnims;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Difficulty;
@@ -25,7 +28,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 /** {@code skycraft:slaughterfish}: a toothy, aggressive fish of Skyrim's rivers and lakes that bites swimmers. */
-public class SlaughterfishEntity extends WaterAnimal {
+public class SlaughterfishEntity extends WaterAnimal implements AnimatedCreature {
     public SlaughterfishEntity(EntityType<? extends SlaughterfishEntity> type, Level level) {
         super(type, level);
         this.moveControl = new SmoothSwimmingMoveControl(this, 85, 10, 0.02f, 0.1f, true);
@@ -113,5 +116,31 @@ public class SlaughterfishEntity extends WaterAnimal {
     @Override
     protected SoundEvent getSwimSound() {
         return SoundEvents.FISH_SWIM;
+    }
+
+    // ------------------------------------------------------------------ animation (rig models)
+
+    private final CreatureAnims anims = new CreatureAnims();
+
+    @Override
+    public CreatureAnims anims() {
+        return anims;
+    }
+
+    @Override
+    public void handleEntityEvent(byte id) {
+        if (!anims.onEvent(this, id)) super.handleEntityEvent(id);
+    }
+
+    /** Every melee swing plays an attack animation (alternating blows). */
+    @Override
+    public void swing(net.minecraft.world.InteractionHand hand) {
+        super.swing(hand);
+        if (!this.level().isClientSide) CreatureAnims.play(this, AnimSlot.ATTACK);
+    }
+
+    @Override
+    public boolean animSwimming() {
+        return this.isInWater();
     }
 }

@@ -1,0 +1,452 @@
+[
+  {
+    "regions": [
+      "morrowind/vvardenfell_ashlands",
+      "morrowind/red_mountain",
+      "morrowind/bitter_coast",
+      "morrowind/west_gash",
+      "morrowind/ascadian_isles",
+      "morrowind/grazelands",
+      "morrowind/molag_amur",
+      "morrowind/azuras_coast",
+      "morrowind/sheogorad",
+      "morrowind/telvannis",
+      "morrowind/deshaan",
+      "morrowind/stonefalls"
+    ],
+    "families": [
+      "plains",
+      "forest",
+      "frozen",
+      "mountain",
+      "swamp",
+      "desert",
+      "jungle",
+      "ash",
+      "beach",
+      "river"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:cliff_racer",
+        "count": [
+          1,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          3,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:kagouti",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:alit",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          1,
+          30
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:nix_hound",
+        "count": [
+          2,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          5,
+          999
+        ],
+        "time": "night",
+        "place": "surface",
+        "entity": "skycraft:scamp",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:bandit",
+        "count": [
+          2,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 1,
+        "levels": [
+          8,
+          999
+        ],
+        "time": "night",
+        "place": "surface",
+        "entity": "skycraft:necromancer",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:netch",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:guar",
+        "count": [
+          1,
+          3
+        ]
+      }
+    ]
+  },
+  {
+    "regions": [
+      "morrowind/red_mountain",
+      "morrowind/molag_amur"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          8,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:ash_spawn",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          12,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:flame_atronach",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 1,
+        "levels": [
+          22,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:dremora",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          5,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:scamp",
+        "count": [
+          1,
+          2
+        ]
+      }
+    ]
+  },
+  {
+    "regions": [
+      "morrowind/vvardenfell_ashlands",
+      "morrowind/red_mountain",
+      "morrowind/bitter_coast",
+      "morrowind/west_gash",
+      "morrowind/ascadian_isles",
+      "morrowind/grazelands",
+      "morrowind/molag_amur",
+      "morrowind/azuras_coast",
+      "morrowind/sheogorad",
+      "morrowind/telvannis",
+      "morrowind/deshaan",
+      "morrowind/stonefalls"
+    ],
+    "families": [
+      "beach",
+      "river",
+      "swamp"
+    ],
+    "groups": [
+      {
+        "kind": "wildlife",
+        "weight": 8,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:mudcrab",
+        "count": [
+          1,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          10,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:land_dreugh",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 8,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "water",
+        "entity": "skycraft:slaughterfish",
+        "count": [
+          1,
+          3
+        ]
+      }
+    ]
+  },
+  {
+    "regions": [
+      "morrowind/vvardenfell_ashlands",
+      "morrowind/red_mountain",
+      "morrowind/bitter_coast",
+      "morrowind/west_gash",
+      "morrowind/ascadian_isles",
+      "morrowind/grazelands",
+      "morrowind/molag_amur",
+      "morrowind/azuras_coast",
+      "morrowind/sheogorad",
+      "morrowind/telvannis",
+      "morrowind/deshaan",
+      "morrowind/stonefalls"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:skeever",
+        "count": [
+          2,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:nix_hound",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          6,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:dwarven_spider",
+        "count": [
+          1,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          14,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:dwarven_ballista",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:scamp",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:necromancer",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          12,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "members": [
+          {
+            "entity": "skycraft:vampire",
+            "count": [
+              1,
+              2
+            ]
+          },
+          {
+            "entity": "skycraft:death_hound",
+            "count": [
+              0,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          8,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:ash_spawn",
+        "count": [
+          1,
+          2
+        ]
+      }
+    ]
+  }
+]

@@ -1,5 +1,8 @@
 package com.skycraft.creatures.entity;
 
+import com.skycraft.creatures.entity.anim.AnimSlot;
+import com.skycraft.creatures.entity.anim.AnimatedCreature;
+import com.skycraft.creatures.entity.anim.CreatureAnims;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -27,7 +30,7 @@ import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 /** {@code skycraft:skeever}: giant rats that come in packs. Their bites may carry Rattles (weakness/hunger). */
-public class SkeeverEntity extends Monster implements Ranked {
+public class SkeeverEntity extends Monster implements AnimatedCreature, Ranked {
     public SkeeverEntity(EntityType<? extends SkeeverEntity> type, Level level) {
         super(type, level);
         this.xpReward = 3;
@@ -99,5 +102,26 @@ public class SkeeverEntity extends Monster implements Ranked {
     @Override
     public boolean isPreventingPlayerRest(Player player) {
         return this.getTarget() == player;
+    }
+
+    // ------------------------------------------------------------------ animation (rig models)
+
+    private final CreatureAnims anims = new CreatureAnims();
+
+    @Override
+    public CreatureAnims anims() {
+        return anims;
+    }
+
+    @Override
+    public void handleEntityEvent(byte id) {
+        if (!anims.onEvent(this, id)) super.handleEntityEvent(id);
+    }
+
+    /** Every melee swing plays an attack animation (alternating blows). */
+    @Override
+    public void swing(net.minecraft.world.InteractionHand hand) {
+        super.swing(hand);
+        if (!this.level().isClientSide) CreatureAnims.play(this, this.getRandom().nextInt(3) == 0 ? AnimSlot.ATTACK2 : AnimSlot.ATTACK);
     }
 }

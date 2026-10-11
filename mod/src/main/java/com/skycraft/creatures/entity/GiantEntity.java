@@ -1,5 +1,8 @@
 package com.skycraft.creatures.entity;
 
+import com.skycraft.creatures.entity.anim.AnimSlot;
+import com.skycraft.creatures.entity.anim.AnimatedCreature;
+import com.skycraft.creatures.entity.anim.CreatureAnims;
 import com.skycraft.core.Notifier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -44,7 +47,7 @@ import java.util.UUID;
  * {@code skycraft:giant}: peaceful herders unless provoked. Get too close and the giant stomps the ground in
  * warning; stay and it attacks. Its club sends you flying into the sky.
  */
-public class GiantEntity extends Monster {
+public class GiantEntity extends Monster implements AnimatedCreature {
     private static final int SMASH_COOLDOWN = 36;
     @Nullable
     private BlockPos home;
@@ -141,6 +144,7 @@ public class GiantEntity extends Monster {
     /** The warning stomp: dust, a heavy thud and a clear message. */
     private void stomp(Player player) {
         this.getLookControl().setLookAt(player, 30f, 30f);
+        CreatureAnims.play(this, AnimSlot.ATTACK3);
         this.playSound(com.skycraft.audio.AudioSounds.creature("giant", "stomp"), 2.5f, 1.0f);
         this.playSound(com.skycraft.audio.AudioSounds.creature("giant", "ambient"), 1.5f, 0.9f);
         if (this.level() instanceof ServerLevel server) {
@@ -222,5 +226,26 @@ public class GiantEntity extends Monster {
         super.readAdditionalSaveData(tag);
         if (tag.contains("Home")) setHome(NbtUtils.readBlockPos(tag.getCompound("Home")));
         initialized = tag.getBoolean("SkycraftInit");
+    }
+
+    // ------------------------------------------------------------------ animation (rig models)
+
+    private final CreatureAnims anims = new CreatureAnims();
+
+    @Override
+    public CreatureAnims anims() {
+        return anims;
+    }
+
+    @Override
+    public void handleEntityEvent(byte id) {
+        if (!anims.onEvent(this, id)) super.handleEntityEvent(id);
+    }
+
+    /** Every melee swing plays an attack animation (alternating blows). */
+    @Override
+    public void swing(net.minecraft.world.InteractionHand hand) {
+        super.swing(hand);
+        if (!this.level().isClientSide) CreatureAnims.play(this, this.getRandom().nextInt(3) == 0 ? AnimSlot.ATTACK2 : AnimSlot.ATTACK);
     }
 }

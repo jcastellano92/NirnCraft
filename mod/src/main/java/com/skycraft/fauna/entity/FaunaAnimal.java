@@ -1,5 +1,8 @@
 package com.skycraft.fauna.entity;
 
+import com.skycraft.creatures.entity.anim.AnimSlot;
+import com.skycraft.creatures.entity.anim.AnimatedCreature;
+import com.skycraft.creatures.entity.anim.CreatureAnims;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -25,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
  * but can't be fed or bred, and never spawn as babies. Each carries a synced variant number and sex; the loot tables
  * read them through the NBT keys {@code Variant} and {@code Male}.
  */
-public abstract class FaunaAnimal extends Animal {
+public abstract class FaunaAnimal extends Animal implements AnimatedCreature {
     protected static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(FaunaAnimal.class, EntityDataSerializers.INT);
     protected static final EntityDataAccessor<Boolean> MALE = SynchedEntityData.defineId(FaunaAnimal.class, EntityDataSerializers.BOOLEAN);
 
@@ -105,5 +108,31 @@ public abstract class FaunaAnimal extends Animal {
     @Nullable
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
         return null;
+    }
+
+    // ------------------------------------------------------------------ animation (rig models)
+
+    private final CreatureAnims anims = new CreatureAnims();
+
+    @Override
+    public CreatureAnims anims() {
+        return anims;
+    }
+
+    @Override
+    public void handleEntityEvent(byte id) {
+        if (!anims.onEvent(this, id)) super.handleEntityEvent(id);
+    }
+
+    /** Every melee swing plays an attack animation (alternating blows). */
+    @Override
+    public void swing(net.minecraft.world.InteractionHand hand) {
+        super.swing(hand);
+        if (!this.level().isClientSide) CreatureAnims.play(this, this.getRandom().nextInt(3) == 0 ? AnimSlot.ATTACK2 : AnimSlot.ATTACK);
+    }
+
+    @Override
+    public int animVariant() {
+        return getVariant();
     }
 }

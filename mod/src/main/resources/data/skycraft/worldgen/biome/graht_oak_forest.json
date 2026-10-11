@@ -91,12 +91,6 @@
         "weight": 4,
         "minCount": 2,
         "maxCount": 4
-      },
-      {
-        "type": "skycraft:deer",
-        "weight": 8,
-        "minCount": 2,
-        "maxCount": 4
       }
     ],
     "ambient": [

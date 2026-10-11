@@ -50,6 +50,8 @@ public class DeerEntity extends FaunaAnimal {
                 (LivingEntity p) -> !p.isDiscrete() || this.distanceToSqr(p) < 25.0, spookDistance(), 1.5, 2.0,
                 EntitySelector.NO_CREATIVE_OR_SPECTATOR::test));
         this.goalSelector.addGoal(3, new AvoidEntityGoal<>(this, Wolf.class, 12f, 1.5, 2.0));
+        this.goalSelector.addGoal(3, new AvoidEntityGoal<>(this, net.minecraft.world.entity.LivingEntity.class, 14f, 1.5, 2.0,
+                e -> e instanceof com.skycraft.creatures.entity.SkyCreature sc && sc.spec().prey != null));
         this.goalSelector.addGoal(3, new AvoidEntityGoal<>(this, SabreCatEntity.class, 16f, 1.5, 2.0));
         this.goalSelector.addGoal(3, new AvoidEntityGoal<>(this, BearEntity.class, 12f, 1.5, 2.0));
         this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 0.9));

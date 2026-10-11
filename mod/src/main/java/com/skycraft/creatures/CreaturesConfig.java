@@ -16,6 +16,9 @@ public final class CreaturesConfig {
     public static final ForgeConfigSpec.BooleanValue GUARD_SPAWNING;
     public static final ForgeConfigSpec.DoubleValue DRAUGR_REPLACES_ZOMBIES;
     public static final ForgeConfigSpec.BooleanValue DISABLE_INSOMNIA;
+    public static final ForgeConfigSpec.BooleanValue REGION_SPAWNING;
+    public static final ForgeConfigSpec.IntValue HOSTILE_BUDGET;
+    public static final ForgeConfigSpec.IntValue WILDLIFE_BUDGET;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -46,6 +49,12 @@ public final class CreaturesConfig {
                 .defineInRange("draugrReplacesZombies", 0.6, 0.0, 1.0);
         DISABLE_INSOMNIA = b.comment("Set the doInsomnia game rule to false on server start (no phantoms / cliff racers from lack of sleep).")
                 .define("disableInsomnia", true);
+        REGION_SPAWNING = b.comment("Skyrim-style leveled spawning by region and biome (data/*/region_spawns/*.json), per player.")
+                .define("regionSpawning", true);
+        HOSTILE_BUDGET = b.comment("At most this many hostile creatures placed by the region spawner within 96 blocks of a player.")
+                .defineInRange("hostileBudget", 8, 0, 64);
+        WILDLIFE_BUDGET = b.comment("At most this many wild animals placed by the region spawner within 96 blocks of a player.")
+                .defineInRange("wildlifeBudget", 10, 0, 64);
         b.pop();
         SPEC = b.build();
     }

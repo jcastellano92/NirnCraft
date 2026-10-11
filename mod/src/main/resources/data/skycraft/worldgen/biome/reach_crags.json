@@ -53,12 +53,6 @@
         "weight": 3,
         "minCount": 1,
         "maxCount": 1
-      },
-      {
-        "type": "skycraft:hagraven",
-        "weight": 2,
-        "minCount": 1,
-        "maxCount": 1
       }
     ],
     "creature": [

@@ -1,0 +1,33 @@
+{
+  "name": "wisp",
+  "width": 64,
+  "height": 32,
+  "bones": [
+    {"name": "root", "parent": "", "x": 0.000, "y": 24.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "orb", "parent": "root", "x": 0.000, "y": -5.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000},
+    {"name": "tendril1", "parent": "orb", "x": 0.000, "y": 1.000, "z": 2.000, "rx": 30.000, "ry": 0.000, "rz": 0.000},
+    {"name": "tendril1_tip", "parent": "tendril1", "x": 0.000, "y": 0.000, "z": 2.500, "rx": 12.000, "ry": 0.000, "rz": 0.000},
+    {"name": "tendril2", "parent": "orb", "x": -1.200, "y": 0.500, "z": 1.800, "rx": 22.000, "ry": -25.000, "rz": 0.000},
+    {"name": "tendril2_tip", "parent": "tendril2", "x": 0.000, "y": 0.000, "z": 2.500, "rx": 12.000, "ry": 0.000, "rz": 0.000},
+    {"name": "tendril3", "parent": "orb", "x": 1.200, "y": 0.500, "z": 1.800, "rx": 22.000, "ry": 25.000, "rz": 0.000},
+    {"name": "tendril3_tip", "parent": "tendril3", "x": 0.000, "y": 0.000, "z": 2.500, "rx": 12.000, "ry": 0.000, "rz": 0.000},
+    {"name": "motes", "parent": "orb", "x": 0.000, "y": 0.000, "z": 0.000, "rx": 0.000, "ry": 0.000, "rz": 0.000}
+  ],
+  "boxes": [
+    {"id": "orb#0", "bone": "orb", "mat": "core", "tag": "core", "u": 46, "v": 10, "w": 2, "h": 2, "d": 2, "mirror": false, "shared": false, "x": -1.000, "y": -1.000, "z": -1.000, "inflate": 0.000},
+    {"id": "orb#1", "bone": "orb", "mat": "shell", "tag": "shell", "u": 0, "v": 10, "w": 4, "h": 4, "d": 4, "mirror": false, "shared": false, "x": -2.000, "y": -2.000, "z": -2.000, "inflate": 0.000},
+    {"id": "orb#2", "bone": "orb", "mat": "halo", "tag": "halo", "u": 36, "v": 0, "w": 6, "h": 4, "d": 4, "mirror": false, "shared": false, "x": -3.000, "y": -2.000, "z": -2.000, "inflate": 0.000},
+    {"id": "orb#3", "bone": "orb", "mat": "halo", "tag": "halo", "u": 20, "v": 0, "w": 4, "h": 6, "d": 4, "mirror": false, "shared": false, "x": -2.000, "y": -3.000, "z": -2.000, "inflate": 0.000},
+    {"id": "orb#4", "bone": "orb", "mat": "halo", "tag": "halo", "u": 0, "v": 0, "w": 4, "h": 4, "d": 6, "mirror": false, "shared": false, "x": -2.000, "y": -2.000, "z": -3.000, "inflate": 0.000},
+    {"id": "tendril1#0", "bone": "tendril1", "mat": "wisp", "tag": "tendril", "u": 16, "v": 10, "w": 2, "h": 2, "d": 3, "mirror": false, "shared": false, "x": -1.000, "y": -1.000, "z": 0.000, "inflate": 0.000},
+    {"id": "tendril1_tip#0", "bone": "tendril1_tip", "mat": "wisp", "tag": "tendril_tip", "u": 54, "v": 10, "w": 1, "h": 1, "d": 3, "mirror": false, "shared": false, "x": -0.500, "y": -0.500, "z": 0.000, "inflate": 0.000},
+    {"id": "tendril2#0", "bone": "tendril2", "mat": "wisp", "tag": "tendril", "u": 26, "v": 10, "w": 2, "h": 2, "d": 3, "mirror": false, "shared": false, "x": -1.000, "y": -1.000, "z": 0.000, "inflate": 0.000},
+    {"id": "tendril2_tip#0", "bone": "tendril2_tip", "mat": "wisp", "tag": "tendril_tip", "u": 0, "v": 18, "w": 1, "h": 1, "d": 3, "mirror": false, "shared": false, "x": -0.500, "y": -0.500, "z": 0.000, "inflate": 0.000},
+    {"id": "tendril3#0", "bone": "tendril3", "mat": "wisp", "tag": "tendril", "u": 36, "v": 10, "w": 2, "h": 2, "d": 3, "mirror": false, "shared": false, "x": -1.000, "y": -1.000, "z": 0.000, "inflate": 0.000},
+    {"id": "tendril3_tip#0", "bone": "tendril3_tip", "mat": "wisp", "tag": "tendril_tip", "u": 8, "v": 18, "w": 1, "h": 1, "d": 3, "mirror": false, "shared": false, "x": -0.500, "y": -0.500, "z": 0.000, "inflate": 0.000},
+    {"id": "motes#0", "bone": "motes", "mat": "mote", "tag": "mote", "u": 16, "v": 18, "w": 1, "h": 1, "d": 1, "mirror": false, "shared": false, "x": -4.500, "y": -1.000, "z": -0.500, "inflate": 0.000},
+    {"id": "motes#1", "bone": "motes", "mat": "mote", "tag": "mote", "u": 20, "v": 18, "w": 1, "h": 1, "d": 1, "mirror": false, "shared": false, "x": 3.500, "y": 1.000, "z": 0.000, "inflate": 0.000},
+    {"id": "motes#2", "bone": "motes", "mat": "mote", "tag": "mote", "u": 24, "v": 18, "w": 1, "h": 1, "d": 1, "mirror": false, "shared": false, "x": 0.000, "y": -3.000, "z": 3.500, "inflate": 0.000},
+    {"id": "motes#3", "bone": "motes", "mat": "mote", "tag": "mote", "u": 28, "v": 18, "w": 1, "h": 1, "d": 1, "mirror": false, "shared": false, "x": -0.500, "y": 2.000, "z": -4.500, "inflate": 0.000}
+  ]
+}

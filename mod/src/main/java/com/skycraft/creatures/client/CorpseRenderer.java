@@ -40,7 +40,9 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity> {
                     roll += Mth.sin(t * 0.35f) * 6.0f;
                     headLift = -10.0f + Mth.sin(t * 0.5f) * 2.0f;
                 }
-                if (dummy instanceof DragonEntity) {
+                if (dummy instanceof DragonEntity dragon) {
+                    // the soul is absorbed: the flesh burns away to the bones
+                    dragon.setBurn(Mth.clamp((corpse.tickCount + partialTick - 50f) / 120f, 0f, 1f));
                     poseStack.mulPose(Axis.ZP.rotationDegrees(10.0f + roll * 0.3f));
                 } else {
                     float half = corpse.isCentered() ? corpse.getBodyHeight() * 0.5f : 0.0f;

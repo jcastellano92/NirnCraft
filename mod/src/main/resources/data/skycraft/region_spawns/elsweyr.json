@@ -1,0 +1,244 @@
+[
+  {
+    "provinces": [
+      "elsweyr"
+    ],
+    "families": [
+      "plains",
+      "forest",
+      "frozen",
+      "mountain",
+      "swamp",
+      "desert",
+      "jungle",
+      "ash",
+      "beach",
+      "river"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          5,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:senche_tiger",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          3,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:giant_scorpion",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:nix_hound",
+        "count": [
+          2,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:bandit",
+        "count": [
+          2,
+          4
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:hackwing",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:alfiq",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 2,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:guar",
+        "count": [
+          1,
+          2
+        ]
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "elsweyr"
+    ],
+    "families": [
+      "desert"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 1,
+        "levels": [
+          18,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:sand_serpent",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "skycraft:giant_scorpion",
+        "count": [
+          1,
+          2
+        ]
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "elsweyr"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:skeever",
+        "count": [
+          2,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:giant_scorpion",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:necromancer",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          12,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "members": [
+          {
+            "entity": "skycraft:vampire",
+            "count": [
+              1,
+              2
+            ]
+          },
+          {
+            "entity": "skycraft:death_hound",
+            "count": [
+              0,
+              1
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

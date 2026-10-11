@@ -1,5 +1,8 @@
 package com.skycraft.creatures.entity;
 
+import com.skycraft.creatures.entity.anim.AnimSlot;
+import com.skycraft.creatures.entity.anim.AnimatedCreature;
+import com.skycraft.creatures.entity.anim.CreatureAnims;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -24,7 +27,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 /** {@code skycraft:ice_wraith}: translucent serpentine frost creatures native to Skyrim's high peaks. */
-public class IceWraithEntity extends Monster {
+public class IceWraithEntity extends Monster implements AnimatedCreature {
     public IceWraithEntity(EntityType<? extends IceWraithEntity> type, Level level) {
         super(type, level);
         this.xpReward = 15;
@@ -85,5 +88,31 @@ public class IceWraithEntity extends Monster {
     protected SoundEvent getDeathSound() {
         return com.skycraft.audio.AudioSounds.creature("ice_wraith", "death");
     }
-}
 
+    // ------------------------------------------------------------------ animation (rig models)
+
+    private final CreatureAnims anims = new CreatureAnims();
+
+    @Override
+    public CreatureAnims anims() {
+        return anims;
+    }
+
+    @Override
+    public void handleEntityEvent(byte id) {
+        if (!anims.onEvent(this, id)) super.handleEntityEvent(id);
+    }
+
+    /** Every melee swing plays an attack animation (alternating blows). */
+    @Override
+    public void swing(net.minecraft.world.InteractionHand hand) {
+        super.swing(hand);
+        if (!this.level().isClientSide) CreatureAnims.play(this, this.getRandom().nextInt(3) == 0 ? AnimSlot.ATTACK2 : AnimSlot.ATTACK);
+    }
+
+    /** Ice wraiths always slither through the air. */
+    @Override
+    public boolean animFlying() {
+        return true;
+    }
+}

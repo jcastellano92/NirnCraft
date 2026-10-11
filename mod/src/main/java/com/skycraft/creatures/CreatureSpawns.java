@@ -218,11 +218,12 @@ public final class CreatureSpawns {
                         serverLevel.addFreshEntity(skeever);
                     }
                 } else if (roll < 0.20f && fewWildWolves(serverLevel, pos)) {
-                    Wolf wolf = EntityType.WOLF.create(serverLevel);
+                    // Skyrim's wolves (ice wolves in the cold), cleaned up by the region spawner's despawn rule
+                    Mob wolf = Bestiary.WOLF.get().create(serverLevel);
                     if (wolf != null) {
                         wolf.moveTo(event.getX(), event.getY(), event.getZ(), mob.getYRot(), 0);
                         wolf.finalizeSpawn(serverLevel, event.getDifficulty(), MobSpawnType.NATURAL, null, null);
-                        wolf.addTag(WILD_WOLF_TAG);
+                        wolf.addTag(com.skycraft.creatures.entity.SkyCreature.REGION_SPAWN_TAG);
                         serverLevel.addFreshEntity(wolf);
                     }
                 }
@@ -311,10 +312,13 @@ public final class CreatureSpawns {
     }
 
     private static boolean fewWildWolves(ServerLevel level, BlockPos pos) {
-        return level.getEntitiesOfClass(Wolf.class, new AABB(pos).inflate(64), w -> w.getTags().contains(WILD_WOLF_TAG)).size() < MAX_WILD_WOLVES;
+        return level.getEntities(Bestiary.WOLF.get(), new AABB(pos).inflate(64), w -> true).size() < MAX_WILD_WOLVES;
     }
 
-    /** Wild night wolves leave when no player is within 96 blocks (unless someone tamed, leashed or named one). */
+    /**
+     * Vanilla wolves spawned as wild night wolves by older versions leave when no player is within 96 blocks (unless
+     * someone tamed, leashed or named one). New wild wolves are Skyrim wolves ({@link Bestiary#WOLF}).
+     */
     @SubscribeEvent
     public static void onLivingTick(LivingEvent.LivingTickEvent event) {
         if (!(event.getEntity() instanceof Wolf wolf) || wolf.tickCount % 100 != 0 || wolf.level().isClientSide

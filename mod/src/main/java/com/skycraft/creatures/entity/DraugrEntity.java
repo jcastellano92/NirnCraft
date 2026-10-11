@@ -31,6 +31,11 @@ import org.jetbrains.annotations.Nullable;
  */
 public class DraugrEntity extends SkyHumanoid implements Ranked {
     public static final int SKINS = 2;
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> RANK =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(DraugrEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+    /** Unrelenting Force, shouted by scourges and overlords. */
+    private static final com.skycraft.creatures.spec.Attack FUS = com.skycraft.creatures.spec.Attacks.shout(3f, 1.8, 9f);
+    private int shoutCooldown = 100;
 
     public DraugrEntity(EntityType<? extends DraugrEntity> type, Level level) {
         super(type, level);
@@ -45,6 +50,56 @@ public class DraugrEntity extends SkyHumanoid implements Ranked {
                 .add(Attributes.FOLLOW_RANGE, 28.0)
                 .add(Attributes.ARMOR, 4.0)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.2);
+    }
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(RANK, 1);
+    }
+
+    /** 0 restless, 1 draugr, 2 wight, 3 scourge, 4 overlord (helmets and armour follow it). */
+    public int getRank() {
+        return this.entityData.get(RANK);
+    }
+
+    @Override
+    public void onLevelApplied(int level) {
+        this.entityData.set(RANK, level >= 28 ? 4 : level >= 20 ? 3 : level >= 12 ? 2 : level >= 5 ? 1 : 0);
+    }
+
+    /** Scourges and overlords know the Thu'um: Unrelenting Force. */
+    @Override
+    protected void customServerAiStep() {
+        super.customServerAiStep();
+        if (shoutCooldown > 0) {
+            shoutCooldown--;
+            return;
+        }
+        LivingEntity target = this.getTarget();
+        if (getRank() < 3 || target == null || this.distanceToSqr(target) > 7.5 * 7.5 || !this.hasLineOfSight(target)) return;
+        shoutCooldown = 240 + this.getRandom().nextInt(200);
+        this.getLookControl().setLookAt(target, 60f, 60f);
+        this.setYRot((float) (net.minecraft.util.Mth.atan2(target.getZ() - this.getZ(), target.getX() - this.getX()) * net.minecraft.util.Mth.RAD_TO_DEG) - 90f);
+        if (this.level() instanceof net.minecraft.server.level.ServerLevel sl) {
+            Component words = Component.translatable("shout.skycraft.dragon.force");
+            for (net.minecraft.server.level.ServerPlayer p : sl.players()) {
+                if (p.distanceToSqr(this) < 24 * 24) p.displayClientMessage(words, true);
+            }
+        }
+        FUS.tick(this, target, FUS.windup);
+    }
+
+    @Override
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putInt("Rank", getRank());
+    }
+
+    @Override
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        if (tag.contains("Rank")) this.entityData.set(RANK, tag.getInt("Rank"));
     }
 
     @Override

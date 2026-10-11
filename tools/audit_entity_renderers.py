@@ -15,6 +15,7 @@ def audit():
     res_dir = os.path.join(base_dir, "mod", "src", "main", "resources")
 
     registered_entities = set()
+    registered_vars = {}
     rendered_entities = set()
 
     # 1. Find all entity registrations in Java files
@@ -30,10 +31,12 @@ def audit():
                 for match in reg_pattern.finditer(content):
                     var_name, entity_id = match.group(1), match.group(2)
                     registered_entities.add(entity_id)
+                    registered_vars[entity_id] = var_name.lower()
 
     # 2. Find all entity renderer registrations
     # Pattern: event.registerEntityRenderer(<TYPE>.get(), ...)
-    render_pattern = re.compile(r'registerEntityRenderer\(\s*([A-Za-z0-9_.]+)\.get\(\)')
+    render_pattern = re.compile(r'registerEntityRenderer\(\s*([A-Za-z0-9_.]+)\.get\(\)'
+                                r'|\brig\(\s*event,\s*([A-Za-z0-9_.]+)\s*,')
     for root, _, files in os.walk(java_dir):
         for f in files:
             if f.endswith(".java"):
@@ -41,7 +44,7 @@ def audit():
                 with open(fpath, "r", encoding="utf-8") as jf:
                     content = jf.read()
                 for match in render_pattern.finditer(content):
-                    ref = match.group(1) # e.g. ModEntities.BANDIT or DungeonsRegistry.DWARVEN_SPIDER
+                    ref = match.group(1) or match.group(2) # e.g. ModEntities.BANDIT or DungeonsRegistry.DWARVEN_SPIDER
                     target = ref.split(".")[-1].lower()
                     rendered_entities.add(target)
 
@@ -50,7 +53,8 @@ def audit():
 
     missing = []
     for entity in sorted(registered_entities):
-        if entity not in rendered_entities and entity.replace("_", "") not in [r.replace("_", "") for r in rendered_entities]:
+        if entity not in rendered_entities and registered_vars.get(entity) not in rendered_entities \
+                and entity.replace("_", "") not in [r.replace("_", "") for r in rendered_entities]:
             missing.append(entity)
 
     if missing:
