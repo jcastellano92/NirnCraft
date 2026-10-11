@@ -392,6 +392,10 @@ public final class ClientAutotest {
             tourTick(mc);
             return;
         }
+        if (com.skycraft.guide.client.GuideAutotest.ENABLED) { // -Dskycraft.autotest.guide=true: the handbook and hints
+            com.skycraft.guide.client.GuideAutotest.tick(mc);
+            return;
+        }
 
         // Run steps with pauses between to let renderers stabilize and draw
         if (tick % 40 == 0) {
@@ -502,7 +506,7 @@ public final class ClientAutotest {
         }
     }
 
-    private static void captureAndSave(Minecraft mc, String name) {
+    public static void captureAndSave(Minecraft mc, String name) {
         try {
             NativeImage img = Screenshot.takeScreenshot(mc.getMainRenderTarget());
             File outFile = SCREENSHOT_DIR.resolve(name + ".png").toFile();

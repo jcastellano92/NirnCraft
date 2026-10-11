@@ -57,6 +57,7 @@ public class Skycraft {
         com.skycraft.audio.AudioModule.init(modBus);
         com.skycraft.curse.CurseModule.init(modBus);
         com.skycraft.sailing.SailingModule.init(modBus);
+        com.skycraft.guide.GuideModule.init(modBus);
 
         modBus.addListener(this::registerCapabilities);
         modBus.addListener(this::commonSetup);

@@ -3,27 +3,113 @@
 Skycraft Core (`mod/`) is a **Forge 1.20.1 (47.3.x)** mod, **official Mojang mappings**, **Java 17**.
 GitHub Actions builds it on every push (`.github/workflows/build.yml`).
 
-## Layout
+## Architecture
 
-```
-mod/src/main/java/com/skycraft/
-  Skycraft.java            mod entry point; calls every module's init()
-  SkyConfig.java           common config (config/skycraft-common.toml)
-  core/                    PlayerData (+capability SkyData), Skill, Race, Currency, Holds, Buffs, Notifier, commands
-  perk/                    Perk + Perks (every constellation; ids are "<skill>.<perk>")
-  skills/                  Progression (skill XP, skill-ups, level-ups), LifeSkills (mining/woodcutting/fishing/hunting)
-  vitals/                  Vitals (magicka/stamina/health regen & costs), RacePowers, ActionHandler (key actions)
-  combat/                  CombatHandler (weapon/armor/block/sneak/archery rules), WeaponClass, ArmorClass
-  dig/                     DiggingRules (perk-gated terrain digging), PlacedBlocks (player-placed tracking)
-  dialogue/                Dialogue hub: NPC conversation menu that modules add topics to
-  loot/                    AddTableModifier: the skycraft:add_table global loot modifier
-  network/                 SkyNetwork (single channel), CorePackets, NotifyKind
-  registry/                ModItems (septim, coin purse), ModEffects, ModCreativeTab
-  client/                  SkyKeys, HUD (bars, compass, notifications), core screens
-  magic/ creatures/ economy/ crime/ quest/ crafting/ world/   feature modules
-mod/src/main/lang/<namespace>/<part>.json   language fragments, merged into assets/<ns>/lang/en_us.json at build
-tools/                     generators (core lang, textures)
-```
+`Skycraft.java` (`@Mod("skycraft")`) registers the common config. It then calls each module's `init(modBus)` in
+this order:
+
+1. `ModItems`, `ModEffects`, `ModCreativeTab`, `AddTableModifier`
+2. magic, creatures, economy, crime, quest, crafting, world, roads, inventory, survival, lore, fauna, dungeons,
+   society, arsenal, atmosphere, tamriel, audio, guide
+
+After that it registers the `PlayerData` and `PlacedBlocks.Store` capabilities and calls `SkyNetwork.init()`.
+
+Some modules are started by another module rather than by `Skycraft.java`:
+
+* `visual` by `AtmosphereModule`;
+* `crafting.arcane` by `CraftingModule`;
+* `homestead` by `SurvivalModule`;
+* `DungeonsRegistry` by `DungeonsModule`;
+* `TamrielRegionsSetup` by `TamrielModule`.
+
+### Core packages (no Module class)
+
+| Package | Purpose |
+| --- | --- |
+| `core` | `PlayerData` / `SkyData` capability, `Skill`, `Race`, `Currency`, `Holds` (a facade over `tamriel.Regions`), `Buffs`, `Notifier`; `/skycraft`, `/gold`, `/pay`, `/withdraw` |
+| `perk` | `Perk` + `Perks`: every constellation (ids are `<skill>.<perk>`) |
+| `skills` | `Progression` (skill XP, skill-ups, level-ups, legendary), `LifeSkills`, Acrobatics, Cookery, Polearms, Riding |
+| `vitals` | Magicka/Stamina/Health regen and costs, `RacePowers`, `RacePassives`, `ActionHandler` (key actions) |
+| `combat` | `CombatHandler` (weapon, armour, block, sneak and archery rules), `Stealth`, `Sheathe`, death and respawn, legendary prefixes |
+| `dig` | `DiggingRules` (perk-gated digging), `PlacedBlocks` |
+| `dialogue` | The NPC conversation hub that modules add topics to |
+| `loot` | The `skycraft:add_table` global loot modifier |
+| `network` | `SkyNetwork` (one channel), `CorePackets`, `NotifyKind` |
+| `registry` | `ModItems`, `ModEffects`, `ModCreativeTab` |
+| `client` | `ClientSetup` (keys, HUD overlays), `SkyKeys`, `KeyConflictResolver`, `RaceSkins`, `DialogueCamera` |
+| `client/hud` | Compass, compass markers, the HUD bars, target bar, sneak eye, crosshair, notifications |
+| `client/screen` | Race (character creator), Skills, Hub, Character Status and Dialogue screens; `title/` has the title, create-world, load, loading, options and pause screens |
+| `client/autotest` | `ClientAutotest`, `RaceShowcase` (see [Test harnesses](#test-harnesses)) |
+
+### Feature modules
+
+| Module | Purpose | Notable subpackages |
+| --- | --- | --- |
+| `magic` | Spells and tomes, casting, Shouts and Words of Power, Word Walls, dragon souls, spellmaking | `spell` (+`spellmaking`), `shout`, `bound`, `wordwall` |
+| `creatures` | Bestiary, leveled enemies, dragons, guards, corpses, region spawning | `entity` (+`anim`), `ai`, `spec` (data-driven creature specs), `spawn` (`RegionSpawner`, spawn tables), `dragons` (lairs, named dragons), `travel` (silt strider ports), `client/rig` (plain-Java rig kit) |
+| `economy` | Item values, barter, merchants, trainers, skill books, houses for sale, Speech | |
+| `crime` | Bounties, guards and arrest, the `skycraft:jail` dimension, theft, pickpocketing, lockpicking | |
+| `quest` | Radiant quests, factions, parties, the journal; data-driven story quests | `story` (reads `resources/skycraft/quests/*.json`), `party` |
+| `crafting` | Ores, ingots, smithing tiers, stations, tempering | `arcane` (enchanting, alchemy, soul gems; its own `ArcaneModule`) |
+| `world` | Discovery, compass sources, the map screen, fast travel, sleep and wait, calendar, music controller | |
+| `roads` | Road network (A* over noise heights), paver, signposts, travellers and caravans, carriages | |
+| `inventory` | The Skyrim inventory screen, item weights, carry weight, favorites, persistent drops | |
+| `survival` | Food, cooking, inns, diseases, shrines, ore veins, Survival Mode, fishing, camping, player corpses | `mode`, `fishing`, `camping`, `corpse`, `cooking`, `inn` |
+| `homestead` | Hearthfire plots, drafting table, building plans and materials (API: `Homesteads`) | |
+| `lore` | Standing Stones and All-Maker stones, readable books and notes (`BookScreen`) | |
+| `fauna` | Wildlife, livestock, insects, horses, stables, wild-horse taming | |
+| `dungeons` | One `skycraft:dungeon` structure type themed per JSON: named sites, long sites (the 7,000 Steps, Blackreach), random dungeons, Nordic puzzles, Dwemer automatons | `world` (rooms, kits, cultures, sites, landmarks), `puzzle` |
+| `society` | `skycraft:npc`: roles, cultures, names, looks, schedules, barks, relationships, followers, marriage, reputation, hit squads, encounters, PvP rules | |
+| `arsenal` | Leveled loot (`skycraft:leveled_gear`), artifacts, arrows and bolts, crossbows, staves, staff enchanting, polearms, kill cams | |
+| `atmosphere` | Sky renderer (Masser, Secunda, aurora, constellations), regional weather, music events | `weather` |
+| `visual` | Ambient particles, HUD and menu styling, loading screen and tips | |
+| `audio` | Province soundtracks, ambience engine, reverb and occlusion, sound events (`AudioSounds`) | |
+| `tamriel` | World generation and geography (below) | `terrain`, `biome`, `settlement` |
+| `guide` | *The Traveler's Handbook* (item, first-join gift, `HandbookScreen`), tutorial hints (`TutorialHints`), the `/handbook` client command | `client` |
+
+### The Tamriel worldgen pipeline
+
+1. **Map sampler.** `TamrielMap` is a static, thread-safe, allocation-free sampler; block 0, 0 is Whiterun. It fills
+   a `MapSample` from `terrain/MapRaster`, which reads the PNG rasters in `resources/skycraft/tamriel/` (regions,
+   elevation, features, terrain, water, coast). These are class-path resources, not datapack files, because both
+   the map screen and worldgen need them before datapacks load.
+2. **Beyond the map.** `terrain/Beyond` answers for everything outside the raster: the fixed foreign lands and the
+   endless super-cell realms. `MapNoise` is seed-independent noise.
+3. **Density functions.**
+   * `terrain/TamrielChannel` (`skycraft:tamriel_channel`) feeds map channels into the noise router: continentalness,
+     erosion, ridges, elevation, river and lake.
+   * `terrain/TamrielHeight` (`skycraft:tamriel_height`) is the map shape plus seeded hills, ridges, crags, dunes and
+     river/lake carving.
+   * `terrain/MapWaterFeature` (`skycraft:map_water`) fills lakes and rivers above sea level.
+   * The world preset `normal` (and `large_biomes`) points at `skycraft:tamriel` noise settings. The overworld
+     dimension type is raised to y −64..383.
+4. **Biomes.**
+   * `biome/TamrielBiomeSource` (`skycraft:tamriel`) picks the region from a domain-warped position, then the
+     terrain context, then a weighted pick from that region's palette (`biome/Palettes`, `palettes.json`).
+   * Giant features (Graht-oaks, Hist trees, Telvanni mushrooms, lava vents, hot springs...) write through `GenBox`,
+     which keeps them inside the 3×3-chunk region.
+5. **Regions and places.**
+   * `Region` / `Regions` load `regions.json`: index 0 is the sea, and negative indices are Beyond.
+   * `Place` / `Places` load `places/index.json` and the files it lists.
+   * `PlacesPlacement` (`skycraft:places`) starts a structure in the anchor chunk of a matching place.
+6. **Settlements.**
+   * `settlement/SettlementStructure` (`skycraft:settlement`) and `DistrictPlacement` build them.
+   * `plan/` lays them out: `Cities` holds the hand-planned capitals, and `Terrain` uses noise heights only.
+   * `build/` builds the shells, interiors, works, landmarks and props. `kit/` holds the culture palettes.
+   * `SettlementAnchors` and `Population` tell `society` where townsfolk live.
+7. **Spawn.** `TamrielSpawn` puts new worlds on dry, level ground just north of Helgen.
+
+All worldgen code samples noise only, never reads or writes outside the region it is generating, and never touches
+`ServerLevel`-only services off the server thread.
+
+### Files outside Java
+
+* **Language fragments.** `mod/src/main/lang/<namespace>/<module>.json`. The `mergeLang` Gradle task merges them into
+  `assets/<ns>/lang/en_us.json` at build time. A duplicate key with a different value only logs a warning, so keep
+  keys module-prefixed.
+* **Data.** Quests are in `resources/skycraft/quests/`, the map in `resources/skycraft/tamriel/`, regional spawns in
+  `data/skycraft/region_spawns/`, item values and weights in `data/<ns>/skycraft_values|skycraft_weights/`, and
+  biomes, features and structures in `data/skycraft/worldgen/`.
 
 ## Module rules
 
@@ -113,6 +199,110 @@ cd mod && ./gradlew build      # needs network access to Forge & Mojang maven
 ```
 The jar lands in `mod/build/libs/`.
 
+* **Toolchain.** ForgeGradle 6, Gradle 8.8 (wrapper), Java 17, official 1.20.1 mappings, compiled against Forge
+  `1.20.1-47.3.0` (the pack runs 47.4.10). There are no dependencies besides Forge.
+* **Run configurations** (working directory `mod/run`):
+  * `./gradlew runClient` starts a dev client with Forge and Skycraft only.
+  * `./gradlew runServer` starts a `--nogui` server. Accept the EULA in `mod/run/eula.txt`, delete `mod/run/world`
+    for a fresh world, and type `stop` to end it.
+* **Gradle flags don't reach the game.** Gradle's own `-D` flags never reach the forked game JVM. Pass game system
+  properties through `JAVA_TOOL_OPTIONS` (see [Test harnesses](#test-harnesses)).
+* **API signatures.** Check real 1.20.1 signatures with `javap -cp <the mapped forge jar> <class>`. The jar is in the
+  ForgeGradle cache, under `minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.3.0_mapped_official_1.20.1/`.
+
+## Generators (`tools/`)
+
+Everything in the repository is generated by these scripts or written by hand: textures, models, sounds and music,
+the Tamriel map, biomes and lang. Most scripts find their paths from their own location, so you can run them from
+anywhere.
+
+**Dependencies:**
+
+* **Python 3 and Pillow** for every texture script.
+* **numpy** for `tamriel_map.py`, `atmosphere.py`, `ui.py`, `rigview.py` and the music scripts.
+* **scipy** for `synth_ambience.py` and `synth_skyrim_sfx.py`. It's optional for `tamriel_map.py`.
+* **ffmpeg with libvorbis** for audio, found through the `FFMPEG` environment variable or `PATH`.
+* **Node** for `quest_lang.js`.
+* **Python 3.11 or later** for `build_prism_instance.py`.
+
+### The world (`tools/worldgen/`); run in this order
+
+1. `py -3 tools/worldgen/tamriel_map.py [--no-preview] [-v]`
+   * Reads the hand-drawn vectors in `tamriel_vectors.json` (coasts, ranges, rivers, lakes, provinces and holds) and
+     the anchors in `resources/skycraft/tamriel/places/provinces.json`.
+   * Writes the map PNGs (regions, elevation, features, terrain, water, coast), `regions.json` and
+     `lang/skycraft/tamriel_regions.json`, plus preview PNGs in `tools/worldgen/`.
+   * It exits 1 if a place anchor lands in the wrong region. The bounds must match `TamrielMap`.
+2. `python3 tools/worldgen/biomes.py`
+   * Generates the biome catalogue from one declarative table: `data/skycraft/worldgen/biome/*.json`, the biome
+     features, biome tags (Skycraft, vanilla, Forge and `c`), `palettes.json`, `lang/skycraft/tamriel_biomes.json`
+     and `tools/worldgen/generated/surface_rule.json`.
+   * It rewrites its own output folders, so never hand-edit a generated biome.
+3. `py -3 tools/worldgen/noise_settings.py`
+   * Writes the noise settings, density functions, the `normal` and `large_biomes` world presets, the raised
+     overworld dimension type and the `map_water` feature.
+   * It inlines `surface_rule.json`, so run it after `biomes.py`.
+
+### Other generators
+
+| Script | Generates |
+| --- | --- |
+| `py -3 tools/landmarks.py <markers.json>` | `places/skyrim_landmarks.json`, `tamriel_shrines.json`, `index.json`, `lang/skycraft/landmarks.json`, the dungeon structures and structure sets, and their tags. The input is a private marker extraction (names and positions only) that is not in the repository. |
+| `node tools/quest_lang.js` | Validates `resources/skycraft/quests/*.json` and writes `lang/skycraft/quest_story.json`. Run it after editing any quest. |
+| `python3 tools/gen_core_lang.py` | `lang/skycraft/core.json` |
+| `python tools/gen_bettercombat.py` | Better Combat weapon attributes, from the gear catalogue (`gear.py` also runs it) |
+| `python3 tools/textures/<module>.py` | Each module's pixel art, models and related data, for example `lore.py`, `magic.py` (reads `Spells.java`), `tamriel.py` (biome blocks), `ui.py` (HUD and loading art), `atmosphere.py` (moons, galaxy, particles) and `guide.py` (the handbook icon) |
+| `python3 tools/textures/gear.py [--preview DIR]` | All armour and weapons from `gear_catalogue.py`, including the generated enum constants between the `gear:` markers in `SmithingTier.java` and `SkyArmorMaterial.java` |
+| `bash tools/textures/dump_rigs.sh [Group]`, then `py -3 tools/textures/bestiary*.py [name...]` | Creature rigs (`tools/textures/rigs/*.json`) and their painted textures. `rigview.py <name> [--anim walk]` previews a rig without the game. |
+| `py -3 tools/music/compose.py [tracks]` | The original procedural soundtrack (`sounds/music/*.ogg`) |
+| `py -3 tools/music/synth_ambience.py`, `synth_skyrim_sfx.py` | Ambient beds and one-shots, and the creature, shout, magic, UI and world sound effects |
+| `py -3 tools/music/sound_catalog.py --write` / `--check` | Writes `sounds.json` and `lang/skycraft/audio.json` from the single sound catalogue; `--check` finds missing or unused `.ogg` files |
+
+`tools/check_assets.py` (missing item models or textures) and `tools/audit_entity_renderers.py` (every entity has a
+renderer) are checks; they generate nothing. `tools/music/import_skyrim_audio.py` is the players' personal-use
+importer (see [MUSIC.md](MUSIC.md)). It refuses to write inside the repository, and nothing it produces may be
+committed.
+
+## Test harnesses
+
+Each harness is an `@Mod.EventBusSubscriber` class that does nothing unless triggered. Client harnesses run under
+`./gradlew runClient`, whose game directory is `mod/run/`, so relative output paths land there. Pass system
+properties through `JAVA_TOOL_OPTIONS`, for example:
+
+```
+$env:JAVA_TOOL_OPTIONS="-Dskycraft.autotest=true -Dskycraft.autotest.world=autotest"; cd mod; ./gradlew runClient
+```
+
+`tools/autotest.ps1 [-World <name>]` does the same for the plain screen walk-through.
+
+| Harness | Trigger | What it does | Output |
+| --- | --- | --- | --- |
+| `client/autotest/ClientAutotest` | `-Dskycraft.autotest=true` | Walks through the race, skills, hub, inventory, magic, journal, map, spellmaking and staff screens, plus summoned wildlife. Ends with `mc.stop()`. | `mod/run/build/autotest-screenshots/*.png`, plus base64 JPEG thumbnails in stdout between `=== SCREENSHOT_START:<name> ===` markers |
+| ″ | `-Dskycraft.autotest.world=<name>` | Creates that creative, cheats-on world afresh (seed 1234) from the title screen, so no person is needed. | |
+| ″ | `-Dskycraft.autotest.createflow=true` (and optionally `-Dskycraft.autotest.load=<save>`) | Creates (or loads) the world through the real New Game screens and screenshots any prompt that waits | `00_create_world_*` |
+| ″ | `-Dskycraft.autotest.tour=Name:x:z[:yaw],...` (`-Dskycraft.autotest.tourWait=400`) | Flies to each spot and shoots it from the ground and the air | `tNN_<Name>_ground/_air` |
+| `guide/client/GuideAutotest` | `-Dskycraft.autotest.guide=true` (with `.autotest` and `.world`) | Steam Deck window (1280×800, GUI scale 3): the handbook's contents and chapters, two tutorial hints, the handbook in a 320×200 GUI. Also logs whether the first-join gift arrived. | `g_*.png` |
+| `client/autotest/RaceShowcase` | `-Dskycraft.raceshowcase=true` | Steam Deck window: character creator, race looks, townsfolk line-ups | `build/race-showcase/` |
+| `society/client/NpcShowcase` | `-Dskycraft.npcshowcase=true` or file `npc-showcase.flag` | Lines up every race and outfit | `build/npc-showcase/` |
+| `visual/client/VisualAutotest` | File `skycraft-visualtest.txt` or env `SKYCRAFT_VISUALTEST=1` | Night sky, weather kinds, HUD, banners, loading, pause and death screens | `build/visualtest-screenshots/` |
+| `survival/client/SurvivalAutotest` | File `skycraft-survivaltest.txt` or env `SKYCRAFT_SURVIVALTEST=1` | Survival meters, frost, fishing reel, tent, bedroll, player body, homestead | `build/survivaltest-screenshots/` |
+| `crafting/client/ArmsAutotest` | File `skycraft-armstest.txt` or env `SKYCRAFT_ARMSTEST=1` | Every armour set on stands and every weapon | `build/armstest-screenshots/` |
+| `creatures/client/CreatureGallery` | File `skycraft-gallery.txt`, one line per shot: `<entity> [variant=N] [anim=<slot>@<ticks>] [nbt={...}]` | Poses creatures in a superflat world | `screenshots/gallery/` |
+| `tamriel/settlement/client/SettlementTour` | `-Dskycraft.tour=<world>;<name>,x,y,z,yaw,pitch;...` (`-Dskycraft.tour.wait=500`) | Visits each settlement stop at noon | `screenshots/tour_<name>.png` |
+| `creatures/ServerSmokeTest` (server) | File `skycraft-smoketest.txt` in the server folder | Runs each line as a console command, one per tick (`wait <ticks>`, `#` comments) | `Smoke test>` log lines |
+| `TamrielBiomeSource` hook | `-Dskycraft.biomeTest=<palette>` or `grid` (env `SKYCRAFT_BIOME_TEST`) | Forces one palette everywhere, or lays every biome out on a 48-block grid | |
+| `dungeons/world/Cultures` hook | `-Dskycraft.dungeons.province=<id>` | Makes every position report that province | |
+
+**Adding a screenshot to `ClientAutotest`.**
+
+1. Add two cases to `runStep`: one opens the screen (`mc.setScreen(new MyScreen())`), and the next captures it
+   (`captureAndSave(mc, "13_my_screen")`) and closes it.
+2. Renumber the final "Completed successfully" case.
+
+Steps run 40 ticks apart. Screens that need preset state expose a static `preselect(...)`, as `SkillsScreen`,
+`MagicMenuScreen` and `HandbookScreen` do. For a longer scenario, write a step list as `GuideAutotest` and
+`VisualAutotest` do. `ClientAutotest.captureAndSave` is public for that purpose.
+
 ## The modpack (`pack/`, `tools/`)
 
 `pack/` is a [packwiz](https://packwiz.infra.link/) pack: `pack.toml`, `index.toml`, one `mods/*.pw.toml` per
@@ -149,12 +339,23 @@ configs that Forge copies into every new world's `serverconfig/`).
 
 ### CI (`.github/workflows/build.yml`)
 
-1. Builds Skycraft Core.
-2. Resolves `tools/modlist.txt` (fails if any entry can't be resolved) and commits `pack/` only if that changed it.
-3. Builds the client instance and server from the build copy with the jar injected, then exports `Skycraft.mrpack`
-   and `Skycraft-curseforge.zip` from the same copy (export failures are warnings: some mods exist on one platform
-   only).
-4. Runs the server and client smoke tests; either failing fails the build.
+It runs on every push and on manual dispatch. A newer run on the same ref cancels an older one.
+
+1. **Job `mod`** builds Skycraft Core (`./gradlew build`), prints a compile-error summary if that fails, and uploads
+   `skycraft-core-jar`.
+2. **Job `pack`** then runs these steps:
+   1. It installs a pinned packwiz and resolves `tools/modlist.txt` (`tools/build-pack.sh`), which fails if any entry
+      can't be resolved. On a push, it commits `pack/` as `[ci] Resolve modpack`, but only if that changed it.
+   2. It builds the client instance and the server from the build copy with the jar injected
+      (`tools/make-instances.sh`). Then it exports `Skycraft.mrpack` and `Skycraft-curseforge.zip` from the same
+      copy. Export failures are only warnings, because some mods exist on one platform only.
+   3. `tools/test-server.sh` boots the server zip. It generates the spawn area, runs `locate` on villages and
+      dungeons, then stops. It fails on a crash, client classes on the server, or any `com.skycraft` stack trace.
+   4. `tools/test-client.sh` boots the dev client under Xvfb (1280×800, software GL) for 60 seconds after resource
+      loading. It fails on crashes, `com.skycraft` traces, or missing Skycraft models and textures. It doesn't load
+      a world, so the screen walk-through runs only locally.
+   5. It uploads the server and client test logs, `Skycraft-client-instance`, `Skycraft-server` and
+      `Skycraft-exports` (which includes `pack/RESOLVE_REPORT.md`).
 
 ## Second-wave contracts
 

@@ -89,6 +89,16 @@ public final class HudNotifications {
         return currentBanner;
     }
 
+    /** Lines the top-left message log currently shows (the guide's tutorial hints sit below them). */
+    public static int messageLines() {
+        long now = Util.getMillis();
+        int n = 0;
+        for (Entry e : MESSAGES) {
+            if (now - e.start <= e.duration) n++;
+        }
+        return n;
+    }
+
     static void prune() {
         long now = Util.getMillis();
         for (Iterator<Entry> it = MESSAGES.iterator(); it.hasNext(); ) {
