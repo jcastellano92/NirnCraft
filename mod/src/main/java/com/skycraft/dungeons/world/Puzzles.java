@@ -104,6 +104,7 @@ public final class Puzzles {
             if (!room.interior(s[0], s[1]) || room.onLane(s[0], s[1]) || room.nearDoor(s[0], s[1], 1)) continue;
             p.set(s[0], room.floor, s[1], Deco.chest(BarrowRooms.towardCenter(room, s[0], s[1])));
             if (p.blockEntity(s[0], room.floor, s[1]) instanceof ChestBlockEntity chest) {
+                chest.setLootTable(null, 0L);
                 chest.setItem(13, new ItemStack(DungeonsRegistry.CLAWS.get(claw(room.piece)).get()));
             }
             int bx = s[0] + (s[0] > room.cx ? -1 : 1);

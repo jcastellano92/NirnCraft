@@ -150,6 +150,60 @@ public final class BuiltBuilder {
                 default -> gate(p, room, gate);
             }
         }
+        Direction exit = room.exit();
+        if (exit != null) Shafts.exitDoor(p, room, exit);
+        if (room.vista() != null) landing(p, room);
+        Story.dress(p, room);
+        Beats.dress(p, room);
+    }
+
+    /**
+     * The entrance hall's vista: the stair tunnel comes out on a landing {@value Layout#VISTA_LIFT} blocks above the
+     * hall's floor, railed, with a short flight down the middle, so the first look takes in the whole hall.
+     */
+    static void landing(Painter p, Room room) {
+        Direction v = room.vista();
+        Direction inward = v.getOpposite();
+        Direction right = v.getClockWise();
+        Theme t = room.theme();
+        int lift = Layout.VISTA_LIFT;
+        int halfL = room.half(right);
+        Block stair = stairBlock(p, t);
+        int wallX = v == Direction.EAST ? room.maxX : v == Direction.WEST ? room.minX : room.cx;
+        int wallZ = v == Direction.SOUTH ? room.maxZ : v == Direction.NORTH ? room.minZ : room.cz;
+        for (int lat = -(halfL - 1); lat <= halfL - 1; lat++) {
+            for (int in = 1; in <= lift + 1; in++) {
+                int x = wallX + inward.getStepX() * in + right.getStepX() * lat, z = wallZ + inward.getStepZ() * in + right.getStepZ() * lat;
+                for (int dy = 0; dy < lift; dy++) {
+                    p.set(x, room.floor + dy, z, dy == lift - 1 ? floor(p, t, x, room.floor + dy, z) : wall(p, t, x, room.floor + dy, z, 0));
+                }
+                for (int dy = lift; dy <= lift + 2; dy++) p.air(x, room.floor + dy, z);
+                // the railing along the landing's edge, open over the stairs
+                if (in == lift + 1 && Math.abs(lat) >= 2) {
+                    p.set(x, room.floor + lift, z, p.kit != Kit.NONE ? p.kit.palette().wallBlock.defaultBlockState()
+                            : t == Theme.DWEMER ? Blocks.POLISHED_BLACKSTONE_BRICK_WALL.defaultBlockState()
+                            : t == Theme.FORT ? Blocks.COBBLESTONE_WALL.defaultBlockState() : Blocks.STONE_BRICK_WALL.defaultBlockState());
+                }
+            }
+            // the flight down, three wide
+            if (Math.abs(lat) <= 1) {
+                for (int k = 0; k < lift; k++) {
+                    int in = lift + 2 + k;
+                    int x = wallX + inward.getStepX() * in + right.getStepX() * lat, z = wallZ + inward.getStepZ() * in + right.getStepZ() * lat;
+                    int y = room.floor + lift - 1 - k;
+                    for (int dy = 0; dy < y - room.floor; dy++) p.set(x, room.floor + dy, z, wall(p, t, x, room.floor + dy, z, 0));
+                    p.set(x, y, z, Deco.stair(stair, v, false));
+                    for (int dy = y + 1; dy <= y + 3; dy++) p.air(x, dy, z);
+                }
+            }
+        }
+        // lights on the landing
+        for (int s : new int[]{-3, 3}) {
+            if (Math.abs(s) > halfL - 1) continue;
+            int x = wallX + inward.getStepX() + right.getStepX() * s, z = wallZ + inward.getStepZ() + right.getStepZ() * s;
+            p.set(x, room.floor + lift, z, t == Theme.DWEMER ? Blocks.OCHRE_FROGLIGHT.defaultBlockState() : Deco.lantern(t == Theme.BARROW, false));
+        }
+        p.feature("setpiece:vista");
     }
 
     /** Four pillars set in from the corners, if the room is big enough. */
@@ -267,13 +321,37 @@ public final class BuiltBuilder {
             int k = len / 2;
             int f = c.corridorFloor(k);
             int ax = xAxis ? low + k : center, az = xAxis ? center : low + k;
-            int lx = latPlus.getStepX(), lz = latPlus.getStepZ();
-            BlockState plate = t == Theme.DWEMER ? Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE.defaultBlockState()
-                    : Blocks.STONE_PRESSURE_PLATE.defaultBlockState();
-            for (int s = -1; s <= 1; s++) p.set(ax + lx * s, f, az + lz * s, plate);
-            p.dispenser(ax - lx * 2, f, az - lz * 2, latPlus, Deco.ARROWS);
-            p.dispenser(ax + lx * 2, f, az + lz * 2, latPlus.getOpposite(), Deco.ARROWS);
+            boolean level = k > 0 && k < len - 1 && c.corridorFloor(k - 1) == f && c.corridorFloor(k + 1) == f;
+            if (c.variant % 2 == 0 && level) dartPlate(p, c, ax, f, az, latPlus);
+            else Traps.tripwire(p, ax, f, az, latPlus, trapAnchor(p, t), false);
         }
+        if (c.has(DungeonPiece.FLAG_BARRED) && len >= 1) {
+            int k = len / 2;
+            Traps.bars(p, xAxis ? low + k : center, c.corridorFloor(k), xAxis ? center : low + k, latPlus);
+        }
+    }
+
+    /** A block that carries a trap's redstone: the culture's trim, or carved masonry. */
+    static BlockState trapAnchor(Painter p, Theme t) {
+        if (p.kit != Kit.NONE) return p.kit.palette().trim;
+        return t == Theme.DWEMER ? Blocks.WAXED_COPPER_BLOCK.defaultBlockState() : Blocks.CHISELED_STONE_BRICKS.defaultBlockState();
+    }
+
+    /**
+     * Pressure plates down the middle of the walk, each over a dart thrower in the floor: the plates show, and a careful
+     * player steps round them on either side.
+     */
+    static void dartPlate(Painter p, DungeonPiece c, int ax, int f, int az, Direction latPlus) {
+        BlockState plate = c.theme == Theme.DWEMER ? Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE.defaultBlockState()
+                : Blocks.STONE_PRESSURE_PLATE.defaultBlockState();
+        Direction along = latPlus.getAxis() == Direction.Axis.X ? Direction.SOUTH : Direction.EAST;
+        for (int k : new int[]{-1, 1}) {
+            int x = ax + along.getStepX() * k, z = az + along.getStepZ() * k;
+            // the plate powers the dispenser it stands on, which fires straight up
+            p.dispenser(x, f - 1, z, Direction.UP, Deco.ARROWS);
+            p.set(x, f, z, plate);
+        }
+        p.feature("trap:dart_plate");
     }
 
     // ------------------------------------------------------------------ entrance tunnel

@@ -1,0 +1,28 @@
+{
+ "id": "war_council",
+ "themes": [
+  "barrow",
+  "fort",
+  "cave"
+ ],
+ "beats": [
+  "elite"
+ ],
+ "layers": [
+  [
+   "s.T.s",
+   "..T..",
+   "s.T.s"
+  ],
+  [
+   ".....",
+   "..l..",
+   "....."
+  ]
+ ],
+ "key": {
+  "T": "minecraft:dark_oak_fence",
+  "s": "minecraft:spruce_stairs@in",
+  "l": "minecraft:lantern"
+ }
+}

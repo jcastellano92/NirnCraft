@@ -1,0 +1,26 @@
+{
+ "id": "fallen_shelves",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "cache",
+  "story"
+ ],
+ "layers": [
+  [
+   "SbSbS",
+   "..p.."
+  ],
+  [
+   "s.s.s",
+   "....."
+  ]
+ ],
+ "key": {
+  "S": "minecraft:bookshelf",
+  "b": "minecraft:barrel[facing=up]",
+  "s": "minecraft:spruce_slab",
+  "p": "minecraft:decorated_pot"
+ }
+}

@@ -68,7 +68,49 @@ public final class NaturalRooms {
 
     static void loot(Painter p, Room room, int salt, BlockState container, net.minecraft.resources.ResourceLocation table) {
         int[] s = edgeSpot(p, room, salt);
-        if (s != null) p.container(s[0], room.floor, s[1], container, table);
+        // a cramped cavern still gets its chest: beside the middle, which is always carved
+        if (s == null) s = new int[]{room.cx + 2 * (p.chance(room.cx, salt, room.cz, 105, 2) ? 1 : -1), room.cz + 2};
+        p.container(s[0], room.floor, s[1], container, table);
+    }
+
+    /** The master of the cave, tagged as the dungeon's boss. */
+    static void boss(Painter p, Room room, int salt, String id, @Nullable String name) {
+        int[] s = spot(p, room, salt);
+        if (s == null) s = new int[]{room.cx + 1, room.cz + 1};
+        p.spawnBoss(id, s[0], room.floor, s[1], p.roll(s[0], salt, s[1], 104, 360), name);
+    }
+
+    /**
+     * Glow for caverns no one lights: lichen on the floor along the walls and among the stones (beasts see in the
+     * dark; players need to see them coming).
+     */
+    static void glow(Painter p, Room room) {
+        BlockState lichen = Blocks.GLOW_LICHEN.defaultBlockState().setValue(net.minecraft.world.level.block.MultifaceBlock.getFaceProperty(Direction.DOWN), true);
+        int n = 3 + room.halfX() * room.halfZ() / 9;
+        for (int i = 0; i < n; i++) {
+            int[] s = i % 3 == 2 ? spot(p, room, 320 + i) : edgeSpot(p, room, 320 + i);
+            if (s != null && p.ok(s[0], room.floor, s[1])) p.setIfOpen(s[0], room.floor, s[1], lichen);
+        }
+    }
+
+    /** The common foe of a cave's folk, for the extra guard of the deep rooms. */
+    static String commonFoe(Room room) {
+        return switch (room.theme()) {
+            case VAMPIRE_LAIR -> Mobs.vampire();
+            case NECROMANCER_LAIR -> "minecraft:skeleton";
+            case HAGRAVEN_LAIR -> Mobs.forsworn();
+            case MINE -> room.piece.flavor % 2 == 1 ? Mobs.bandit() : Mobs.skeever();
+            default -> switch (CaveRoster.of(room.piece.flavor)) {
+                case CaveRoster.BANDIT, CaveRoster.SMUGGLER -> Mobs.bandit();
+                case CaveRoster.SPIDER -> Mobs.spider();
+                case CaveRoster.FALMER -> Mobs.falmer();
+                case CaveRoster.FORSWORN -> Mobs.forsworn();
+                case CaveRoster.SPRIGGAN -> Mobs.spriggan();
+                case CaveRoster.ICE -> Mobs.iceWraith();
+                case CaveRoster.SKEEVER -> Mobs.skeever();
+                default -> Mobs.denBeast(room.cx + room.cz);
+            };
+        };
     }
 
     static void mob(Painter p, Room room, int salt, String id, @Nullable String name) {
@@ -130,6 +172,11 @@ public final class NaturalRooms {
             }
         }
         if (room.piece.has(DungeonPiece.FLAG_TREASURE) && !room.boss()) loot(p, room, 99, Deco.chest(Direction.NORTH), Deco.LOOT_COMMON);
+        // the deep rooms are guarded harder: the danger ramps towards the boss
+        if (!room.boss() && !room.start() && room.tier() >= 5) mob(p, room, 199, commonFoe(room), null);
+        boolean lit = t == Theme.CAVE && CaveRoster.inhabited(CaveRoster.of(flavor));
+        if (!lit && t != Theme.MINE) glow(p, room);
+        if (room.has(DungeonPiece.FLAG_SETPIECE)) SetPieces.natural(p, room);
         // dripping ceilings
         for (int i = 0; i < 3; i++) {
             int[] s = spot(p, room, 200 + i);
@@ -157,6 +204,8 @@ public final class NaturalRooms {
                 int roster = CaveRoster.of(flavor);
                 if (CaveRoster.inhabited(roster)) p.set(lx, f, lz, Blocks.TORCH.defaultBlockState());
                 else if (roster == CaveRoster.FALMER || roster == CaveRoster.SPRIGGAN) p.set(lx, f, lz, Blocks.SHROOMLIGHT.defaultBlockState());
+                else p.setIfOpen(lx, f, lz, Blocks.GLOW_LICHEN.defaultBlockState()
+                            .setValue(net.minecraft.world.level.block.MultifaceBlock.getFaceProperty(Direction.DOWN), true));
             }
             default -> {
             }
@@ -166,14 +215,15 @@ public final class NaturalRooms {
     // ------------------------------------------------------------------ bandit hideout
 
     static void bandits(Painter p, Room room) {
+        p.feature("room:bandits");
         if (room.boss()) {
             int[] s = edgeSpot(p, room, 1);
             if (s != null) {
                 Direction face = faceCenter(room, s[0], s[1]);
                 p.set(s[0], room.floor, s[1], Deco.stair(Blocks.SPRUCE_STAIRS, face.getOpposite(), false));
-                p.spawn(Mobs.banditChief(), s[0] + face.getStepX(), room.floor, s[1] + face.getStepZ(), Painter.yaw(face), null);
+                p.spawnBoss(Mobs.banditChief(), s[0] + face.getStepX(), room.floor, s[1] + face.getStepZ(), Painter.yaw(face), null);
             } else {
-                mob(p, room, 1, Mobs.banditChief(), null);
+                boss(p, room, 1, Mobs.banditChief(), null);
             }
             loot(p, room, 2, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
             loot(p, room, 3, Deco.chest(Direction.NORTH), Deco.LOOT_COMMON);
@@ -186,7 +236,7 @@ public final class NaturalRooms {
             return;
         }
         lampPost(p, room, 20, false);
-        int v = room.piece.variant % 4;
+        int v = room.kind() % 4;
         if (room.start()) v = 2;
         switch (v) {
             case 0 -> {
@@ -220,6 +270,7 @@ public final class NaturalRooms {
     // ------------------------------------------------------------------ animal den
 
     static void den(Painter p, Room room) {
+        p.feature("room:den");
         for (int i = 0; i < 6; i++) {
             int[] s = spot(p, room, 40 + i);
             if (s == null) continue;
@@ -230,7 +281,7 @@ public final class NaturalRooms {
             p.set(s[0], room.floor, s[1], st);
         }
         if (room.boss()) {
-            mob(p, room, 50, Mobs.denBoss(), null);
+            boss(p, room, 50, Mobs.denBoss(), null);
             mob(p, room, 51, Mobs.denBeast(0), null);
             loot(p, room, 52, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
             put(p, room, 53, Deco.pillar(Blocks.BONE_BLOCK, Direction.Axis.Y));
@@ -244,6 +295,7 @@ public final class NaturalRooms {
     // ------------------------------------------------------------------ vampire lair
 
     static void vampire(Painter p, Room room) {
+        p.feature("room:vampire");
         // blood pools sunk into the floor
         int[] pool = spot(p, room, 60);
         if (pool != null) {
@@ -281,7 +333,7 @@ public final class NaturalRooms {
             }
             loot(p, room, 76, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
             // the lair's master: a Vampire Lord, with its court, a hound and a stone guardian (curse module)
-            mob(p, room, 77, Mobs.vampireLord(), Painter.entityExists("skycraft:vampire_lord") ? null : "Vampire Lord");
+            boss(p, room, 77, Mobs.vampireLord(), Painter.entityExists("skycraft:vampire_lord") ? null : "Vampire Lord");
             mob(p, room, 78, Mobs.vampire(), null);
             mob(p, room, 79, Mobs.deathHound(), null);
             mob(p, room, 84, Mobs.gargoyle(), null);
@@ -295,6 +347,7 @@ public final class NaturalRooms {
     // ------------------------------------------------------------------ necromancer lair
 
     static void necromancer(Painter p, Room room) {
+        p.feature("room:necromancer");
         lampPost(p, room, 90, true);
         // a ritual altar
         int[] a = spot(p, room, 91);
@@ -317,7 +370,7 @@ public final class NaturalRooms {
             }
             loot(p, room, 96, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
             loot(p, room, 97, Deco.barrel(Direction.UP), Deco.LOOT_ALCHEMY);
-            mob(p, room, 98, Mobs.necromancer(), "Master Necromancer");
+            boss(p, room, 98, Mobs.necromancer(), "Master Necromancer");
             mob(p, room, 110, "minecraft:skeleton", null);
             mob(p, room, 111, "minecraft:skeleton", null);
             mob(p, room, 112, "minecraft:zombie", "Thrall");
@@ -332,6 +385,7 @@ public final class NaturalRooms {
     // ------------------------------------------------------------------ hagraven lair
 
     static void hagraven(Painter p, Room room) {
+        p.feature("room:hagraven");
         // nests of hay, roots and feathers
         for (int i = 0; i < 2; i++) {
             int[] s = edgeSpot(p, room, 120 + i);
@@ -355,7 +409,7 @@ public final class NaturalRooms {
         if (room.boss()) {
             loot(p, room, 127, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
             loot(p, room, 128, Deco.barrel(Direction.UP), Deco.LOOT_ALCHEMY);
-            mob(p, room, 129, Mobs.hagraven(), Painter.entityExists("skycraft:hagraven") ? null : "Hagraven Matriarch");
+            boss(p, room, 129, Mobs.hagraven(), Painter.entityExists("skycraft:hagraven") ? null : "Hagraven Matriarch");
             mob(p, room, 130, Mobs.forsworn(), "Forsworn Briarheart");
             mob(p, room, 131, Mobs.forsworn(), Painter.entityExists("skycraft:forsworn") ? null : "Forsworn");
             return;
@@ -369,6 +423,7 @@ public final class NaturalRooms {
     // ------------------------------------------------------------------ mine
 
     static void mine(Painter p, Room room, int flavor) {
+        p.feature("room:mine");
         // timber frames at the corners of the gallery
         for (int[] c : new int[][]{{-1, -1}, {1, -1}, {-1, 1}, {1, 1}}) {
             int x = room.cx + c[0] * Math.max(2, room.halfX() - 2), z = room.cz + c[1] * Math.max(2, room.halfZ() - 2);
@@ -413,7 +468,7 @@ public final class NaturalRooms {
                 loot(p, room, 173, Deco.barrel(Direction.UP), Deco.LOOT_MINE);
                 mob(p, room, 174, Mobs.forsworn(), null);
                 mob(p, room, 175, Mobs.forsworn(), null);
-                mob(p, room, 176, Mobs.hagraven(), null);
+                boss(p, room, 176, Mobs.hagraven(), null);
             } else {
                 mob(p, room, 177, Mobs.forsworn(), null);
             }
@@ -423,10 +478,10 @@ public final class NaturalRooms {
             loot(p, room, 148, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
             loot(p, room, 149, Deco.barrel(Direction.UP), Deco.LOOT_MINE);
             if (bandits) {
-                mob(p, room, 150, Mobs.banditChief(), null);
+                boss(p, room, 150, Mobs.banditChief(), null);
                 mob(p, room, 151, Mobs.bandit(), null);
             } else {
-                mob(p, room, 152, Mobs.denBoss(), null);
+                boss(p, room, 152, Mobs.denBoss(), null);
                 mob(p, room, 153, Mobs.skeever(), null);
                 mob(p, room, 154, Mobs.skeever(), null);
             }
@@ -434,7 +489,7 @@ public final class NaturalRooms {
         }
         if (bandits) {
             mob(p, room, 155, Mobs.bandit(), null);
-            if (room.piece.variant % 3 == 0) bedroll(p, room, 156);
+            if (room.kind() % 3 == 0) bedroll(p, room, 156);
         } else {
             int n = 1 + p.roll(room.cx, 0, room.cz, 157, 3);
             for (int i = 0; i < n; i++) mob(p, room, 158 + i, Mobs.skeever(), null);

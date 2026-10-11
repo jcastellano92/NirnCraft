@@ -1,0 +1,23 @@
+{
+ "id": "map_table",
+ "themes": [
+  "cave",
+  "fort",
+  "mine"
+ ],
+ "beats": [
+  "elite",
+  "setpiece"
+ ],
+ "layers": [
+  [
+   "B.M.B",
+   "..l.."
+  ]
+ ],
+ "key": {
+  "M": "minecraft:cartography_table",
+  "B": "minecraft:barrel[facing=up]",
+  "l": "minecraft:lantern"
+ }
+}

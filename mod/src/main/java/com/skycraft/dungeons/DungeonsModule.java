@@ -25,6 +25,8 @@ public final class DungeonsModule {
     /** Registers this module's DeferredRegisters and mod-bus listeners. Called from the mod constructor. */
     public static void init(IEventBus modBus) {
         DungeonsRegistry.init(modBus);
+        net.minecraftforge.fml.ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON,
+                DungeonsConfig.SPEC, "skycraft-dungeons.toml");
         modBus.addListener(DungeonsModule::onAttributes);
         modBus.addListener(DungeonsModule::onSpawnPlacements);
     }

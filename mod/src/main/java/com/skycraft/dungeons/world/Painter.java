@@ -71,6 +71,20 @@ public final class Painter {
         return x0 > x1 || y0 > y1 || z0 > z1;
     }
 
+    // ------------------------------------------------------------------ analyzer hook
+
+    /**
+     * The dungeon analyzer ({@code dungeons.qa}) listens here for the set pieces and furnishings the builders announce,
+     * keyed by the piece's box. Unset (and free) during real world generation.
+     */
+    public static final ThreadLocal<java.util.function.BiConsumer<BoundingBox, String>> FEATURES = new ThreadLocal<>();
+
+    /** Announces a set piece or room purpose ("sarcophagus_hall", "story:journal"...) to the analyzer, if one listens. */
+    public void feature(String id) {
+        java.util.function.BiConsumer<BoundingBox, String> c = FEATURES.get();
+        if (c != null) c.accept(box, id);
+    }
+
     public boolean ok(int x, int y, int z) {
         return x >= x0 && x <= x1 && y >= y0 && y <= y1 && z >= z0 && z <= z1;
     }
@@ -290,6 +304,39 @@ public final class Painter {
     @Nullable
     public Mob spawnDormant(@Nullable String id, int x, int y, int z, float yaw) {
         return spawn(id, x, y, z, yaw, null, DormantMobs::makeDormant);
+    }
+
+    /** The dungeon's boss: tagged for playtest telemetry and the analyzer ({@code DungeonTelemetry#BOSS_TAG}). */
+    @Nullable
+    public Mob spawnBoss(@Nullable String id, int x, int y, int z, float yaw, @Nullable String name) {
+        return spawn(id, x, y, z, yaw, name, m -> {
+            // the master of the place outlasts its guards
+            var hp = m.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+            if (hp != null) hp.setBaseValue(hp.getBaseValue() * 1.5);
+            m.setHealth(m.getMaxHealth());
+            m.getPersistentData().putBoolean(com.skycraft.dungeons.DungeonTelemetry.BOSS_TAG, true);
+        });
+    }
+
+    /** A tougher guard (the mini-boss beat): more health and a harder hit than its kind, tagged for the analyzer. */
+    @Nullable
+    public Mob spawnElite(@Nullable String id, int x, int y, int z, float yaw, @Nullable String name) {
+        return spawn(id, x, y, z, yaw, name, m -> {
+            var hp = m.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+            if (hp != null) hp.setBaseValue(hp.getBaseValue() * 1.75);
+            var dmg = m.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
+            if (dmg != null) dmg.setBaseValue(dmg.getBaseValue() * 1.3);
+            m.setHealth(m.getMaxHealth());
+            m.getPersistentData().putBoolean("skycraft_dungeon_elite", true);
+        });
+    }
+
+    /** Asks the fluid at (x, y, z) to start flowing once the chunk ticks (a waterfall's source). */
+    public void scheduleFluid(int x, int y, int z) {
+        if (!ok(x, y, z)) return;
+        BlockPos at = new BlockPos(x, y, z);
+        net.minecraft.world.level.material.FluidState f = level.getFluidState(at);
+        if (!f.isEmpty()) level.scheduleTick(at, f.getType(), 1);
     }
 
     /** {@link #spawn} with a hook that runs before the mob is added (proto chunks serialize entities on add). */

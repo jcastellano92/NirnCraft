@@ -50,12 +50,13 @@ public final class NaturalBuilder {
         for (int x = p.minX(); x <= p.maxX(); x++) {
             for (int z = p.minZ(); z <= p.maxZ(); z++) {
                 boolean carvedColumn = false;
+                int lift = vistaLift(room, x, z);
                 for (int y = Math.max(p.minY(), room.floor - 1); y <= p.maxY(); y++) {
                     double d = shape(p, room, x, y, z, rx, rz, ry, mine);
-                    boolean inside = y >= room.floor && y < room.maxY && (d < 1.0 || passage(room, x, y, z));
+                    boolean inside = y >= room.floor + lift && y < room.maxY && (d < 1.0 || passage(room, x, y, z));
                     if (inside) {
                         p.carve(x, y, z, rock(y));
-                        if (y == room.floor) carvedColumn = true;
+                        if (y == room.floor + lift) carvedColumn = true;
                     } else if (mine && y >= room.floor - 1 && d < 1.3 && p.noise(x, y, z, 2.5, 81) > 0.42) {
                         if (p.get(x, y, z).is(BlockTags.BASE_STONE_OVERWORLD)) p.set(x, y, z, Deco.ore(p, x, y, z, y < 0));
                     } else if (lined && y >= room.floor - 1 && d < 1.25 && p.get(x, y, z).is(BlockTags.BASE_STONE_OVERWORLD)) {
@@ -63,10 +64,26 @@ public final class NaturalBuilder {
                         p.set(x, y, z, p.noise(x, y, z, 3.0, 86) > 0.2 ? p.kit.palette().rock : p.kit.palette().caveFloor);
                     }
                 }
-                if (carvedColumn && p.ok(x, room.floor - 1, z)) p.set(x, room.floor - 1, z, floorBlock(p, t, x, room.floor - 1, z));
+                int fy = room.floor + lift - 1;
+                if (carvedColumn && p.ok(x, fy, z)) p.set(x, fy, z, floorBlock(p, t, x, fy, z));
             }
         }
         NaturalRooms.decorate(p, room, r);
+        Direction exit = room.exit();
+        if (exit != null) Shafts.exitDoor(p, room, exit);
+        if (room.vista() != null) p.feature("setpiece:vista");
+        Story.dress(p, room);
+        Beats.dress(p, room);
+    }
+
+    /**
+     * The entrance cavern's vista: the floor rises in a ramp to the tunnel mouth, {@value Layout#VISTA_LIFT} blocks
+     * over the cavern floor.
+     */
+    static int vistaLift(Room room, int x, int z) {
+        Direction v = room.vista();
+        if (v == null) return 0;
+        return Mth.clamp(Layout.VISTA_LIFT + 1 - room.inward(v, x, z), 0, Layout.VISTA_LIFT);
     }
 
     private static double shape(Painter p, Room room, int x, int y, int z, double rx, double rz, double ry, boolean mine) {
@@ -82,9 +99,11 @@ public final class NaturalBuilder {
 
     /** The 3x3 passages from the centre to each doorway, so tunnels always connect. */
     private static boolean passage(Room room, int x, int y, int z) {
-        if (y > room.floor + 2) return false;
+        Direction v = room.vista();
         for (Direction d : Direction.Plane.HORIZONTAL) {
             if (!room.hasDoor(d)) continue;
+            int base = room.floor + (d == v ? vistaLift(room, x, z) : 0);
+            if (y < base || y > base + 2) continue;
             if (d.getAxis() == Direction.Axis.X) {
                 if (Math.abs(z - room.cz) > 1) continue;
                 if (d == Direction.EAST ? x >= room.cx : x <= room.cx) return true;
@@ -131,6 +150,12 @@ public final class NaturalBuilder {
                 int ax = xAxis ? low + k : center, az = xAxis ? center : low + k;
                 NaturalRooms.tunnelLight(p, c.theme, ax, f, az, latPlus, c.flavor);
             }
+        }
+        if ((c.has(DungeonPiece.FLAG_TRAP) || c.has(DungeonPiece.FLAG_BARRED)) && len >= 1) {
+            int k = len / 2;
+            int ax = xAxis ? low + k : center, az = xAxis ? center : low + k;
+            if (c.has(DungeonPiece.FLAG_BARRED)) Traps.bars(p, ax, c.corridorFloor(k), az, latPlus);
+            else Traps.tripwire(p, ax, c.corridorFloor(k), az, latPlus, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), true);
         }
     }
 

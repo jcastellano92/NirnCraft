@@ -1,0 +1,23 @@
+{
+ "id": "bone_nest",
+ "themes": [
+  "cave",
+  "hagraven_lair",
+  "vampire_lair"
+ ],
+ "beats": [
+  "cache",
+  "elite"
+ ],
+ "layers": [
+  [
+   "xkxkx",
+   "x.C.x"
+  ]
+ ],
+ "key": {
+  "x": "minecraft:bone_block",
+  "k": "minecraft:skeleton_skull",
+  "C": "loot:chest:skycraft:chests/dungeon_cache"
+ }
+}

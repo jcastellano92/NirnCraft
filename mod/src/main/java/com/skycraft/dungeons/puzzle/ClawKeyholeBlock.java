@@ -12,6 +12,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -68,21 +69,48 @@ public class ClawKeyholeBlock extends Block {
             return InteractionResult.CONSUME;
         }
         Direction facing = state.getValue(FACING);
-        BlockPos base = ringBase(pos, facing);
-        for (int i = 0; i < 3; i++) {
-            Symbol s = SymbolStoneBlock.symbol(level.getBlockState(base.above(2 - i)));
-            if (s != claw.symbol(i)) {
-                player.displayClientMessage(Component.translatable("message.skycraft.claw_door.rings"), true);
-                level.playSound(null, pos, SoundEvents.CHAIN_HIT, SoundSource.BLOCKS, 0.8f, 0.5f);
-                return InteractionResult.CONSUME;
-            }
+        if (!ringsMatch(level, pos, state)) {
+            player.displayClientMessage(Component.translatable("message.skycraft.claw_door.rings"), true);
+            level.playSound(null, pos, SoundEvents.CHAIN_HIT, SoundSource.BLOCKS, 0.8f, 0.5f);
+            return InteractionResult.CONSUME;
         }
-        open(level, base, facing);
+        BlockPos base = ringBase(pos, facing);
+        // sinks the 3x3 door into the floor (removes it) with dust and a rumble
+        for (BlockPos p : doorBlocks(level, pos, facing)) {
+            if (level instanceof ServerLevel server) {
+                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(p)), p.getX() + 0.5, p.getY() + 0.5,
+                        p.getZ() + 0.5, 12, 0.3, 0.3, 0.3, 0.05);
+            }
+            level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+        }
+        level.playSound(null, base, SoundEvents.PISTON_CONTRACT, SoundSource.BLOCKS, 1.2f, 0.45f);
+        level.playSound(null, base, SoundEvents.STONE_BREAK, SoundSource.BLOCKS, 1.0f, 0.5f);
         return InteractionResult.CONSUME;
     }
 
-    /** Sinks the 3x3 door into the floor (removes it) with dust and a rumble. */
-    private static void open(Level level, BlockPos base, Direction facing) {
+    /** The claw this keyhole wants. */
+    public static Claw claw(BlockState keyhole) {
+        return Claw.byIndex(keyhole.getValue(CLAW));
+    }
+
+    /** True if the door's rings show the claw's palm, top to bottom (the dungeon analyzer asks too). */
+    public static boolean ringsMatch(BlockGetter level, BlockPos keyhole, BlockState state) {
+        Claw claw = claw(state);
+        for (int i = 0; i < 3; i++) {
+            if (SymbolStoneBlock.symbol(level.getBlockState(ring(keyhole, state.getValue(FACING), i))) != claw.symbol(i)) return false;
+        }
+        return true;
+    }
+
+    /** The ring that must show glyph {@code i} of the palm (0 = top) of the door this keyhole belongs to. */
+    public static BlockPos ring(BlockPos keyhole, Direction facing, int i) {
+        return ringBase(keyhole, facing).above(2 - i);
+    }
+
+    /** The blocks of the 3x3 door that sink when it opens. */
+    public static java.util.List<BlockPos> doorBlocks(BlockGetter level, BlockPos keyhole, Direction facing) {
+        java.util.List<BlockPos> out = new java.util.ArrayList<>();
+        BlockPos base = ringBase(keyhole, facing);
         Direction side = keyholeSide(facing);
         for (int lat = -1; lat <= 1; lat++) {
             for (int dy = 0; dy <= 2; dy++) {
@@ -90,15 +118,10 @@ public class ClawKeyholeBlock extends Block {
                 BlockState s = level.getBlockState(p);
                 if (s.getBlock() instanceof SymbolStoneBlock || s.getBlock() instanceof ClawKeyholeBlock || s.is(Blocks.CHISELED_STONE_BRICKS)
                         || s.is(Blocks.CHISELED_DEEPSLATE) || s.is(Blocks.POLISHED_DEEPSLATE)) {
-                    if (level instanceof ServerLevel server) {
-                        server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, s), p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5,
-                                12, 0.3, 0.3, 0.3, 0.05);
-                    }
-                    level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+                    out.add(p);
                 }
             }
         }
-        level.playSound(null, base, SoundEvents.PISTON_CONTRACT, SoundSource.BLOCKS, 1.2f, 0.45f);
-        level.playSound(null, base, SoundEvents.STONE_BREAK, SoundSource.BLOCKS, 1.0f, 0.5f);
+        return out;
     }
 }

@@ -22,8 +22,16 @@ public final class BarrowRooms {
             start(p, room);
             return;
         }
-        int v = room.piece.variant % 5;
+        int v = room.kind() % 5;
         if (room.puzzle()) v = 3;
+        if (room.has(DungeonPiece.FLAG_SETPIECE)) {
+            // the set piece: the sarcophagus hall, its dead waking as you pass
+            SetPieces.sarcophagusHall(p, room);
+            common(p, room);
+            if (room.piece.has(DungeonPiece.FLAG_TREASURE)) treasure(p, room, 1, Deco.LOOT_COMMON);
+            return;
+        }
+        if (room.puzzle()) SetPieces.hallOfStories(p, room);
         switch (v) {
             case 0 -> alcoves(p, room);
             case 1 -> sarcophagi(p, room);
@@ -90,6 +98,7 @@ public final class BarrowRooms {
 
     /** A thick inner wall pierced with burial niches: urns, skulls, candles and sleeping draugr. */
     static void alcoves(Painter p, Room room) {
+        p.feature("room:alcoves");
         int draugr = 0;
         int ringTop = Math.min(room.floor + 2, room.maxY - 2);
         for (int x = room.minX + 1; x < room.maxX; x++) {
@@ -112,7 +121,7 @@ public final class BarrowRooms {
                 if (roll <= 2) p.set(x, room.floor, z, Deco.skull(Blocks.SKELETON_SKULL, Deco.skullRotation(inward)));
                 else if (roll <= 4) p.set(x, room.floor, z, Blocks.DECORATED_POT.defaultBlockState());
                 else if (roll == 5) p.container(x, room.floor, z, Deco.barrel(inward), Deco.LOOT_MINOR);
-                else if (roll <= 7 && draugr < 3) {
+                else if (roll <= 7 && draugr < 1 + room.tier() / 2) {
                     draugr++;
                     p.spawnDormant(Mobs.draugr(), x, room.floor, z, Painter.yaw(inward));
                 } else if (roll == 8) p.set(x, room.floor, z, Deco.candle(Blocks.CANDLE, 2 + roll % 2, true));
@@ -124,6 +133,7 @@ public final class BarrowRooms {
 
     /** Stone coffins against the long walls, their occupants already standing. */
     static void sarcophagi(Painter p, Room room) {
+        p.feature("room:sarcophagi");
         boolean alongX = room.halfX() >= room.halfZ();
         int draugr = 0;
         for (Direction wall : alongX ? new Direction[]{Direction.NORTH, Direction.SOUTH} : new Direction[]{Direction.WEST, Direction.EAST}) {
@@ -141,7 +151,7 @@ public final class BarrowRooms {
                 p.set(fx, room.floor + 1, fz, Deco.slab(Blocks.DEEPSLATE_TILE_SLAB, false));
                 p.set(hx, room.floor + 2, hz, Deco.candle(Blocks.CANDLE, 1, p.chance(hx, 0, hz, 22, 2)));
                 int sx = fx + inward.getStepX(), sz = fz + inward.getStepZ();
-                if (draugr < 3 && !room.onLane(sx, sz) && p.chance(sx, room.floor, sz, 23, 2)) {
+                if (draugr < 1 + room.tier() / 2 && !room.onLane(sx, sz) && p.chance(sx, room.floor, sz, 23, 2)) {
                     draugr++;
                     p.spawnDormant(Mobs.draugr(), sx, room.floor, sz, Painter.yaw(inward));
                 }
@@ -152,6 +162,7 @@ public final class BarrowRooms {
 
     /** An altar against a doorless wall with pews facing it. */
     static boolean chapel(Painter p, Room room) {
+        p.feature("room:chapel");
         Direction side = null;
         for (Direction d : Direction.Plane.HORIZONTAL) if (!room.hasDoor(d)) side = d;
         if (side == null) return false;
@@ -181,6 +192,7 @@ public final class BarrowRooms {
 
     /** Bone-lined walls and skull shelves. */
     static void ossuary(Painter p, Room room) {
+        p.feature("room:ossuary");
         int count = 0;
         for (int x = room.minX + 1; x < room.maxX; x++) {
             for (int z = room.minZ + 1; z < room.maxZ; z++) {
@@ -205,6 +217,7 @@ public final class BarrowRooms {
 
     /** Fallen masonry, webs and skeevers. */
     static void collapsed(Painter p, Room room) {
+        p.feature("room:collapsed");
         for (int x = room.minX + 1; x < room.maxX; x++) {
             for (int z = room.minZ + 1; z < room.maxZ; z++) {
                 if (room.onLane(x, z) || room.nearDoor(x, z, 1)) continue;
@@ -226,6 +239,7 @@ public final class BarrowRooms {
 
     /** The antechamber at the foot of the entrance stairs: braziers, urns and an unlucky adventurer. */
     static void start(Painter p, Room room) {
+        p.feature("room:start");
         BuiltBuilder.cornerPillars(p, room, 1);
         Direction out = null;
         for (Direction d : Direction.Plane.HORIZONTAL) if (room.hasDoor(d)) { out = d; break; }
@@ -251,6 +265,7 @@ public final class BarrowRooms {
      * at its side, guards in the hall and soul-light hanging from chains.
      */
     static void boss(Painter p, Room room, RandomSource r) {
+        p.feature("room:boss");
         Direction entered = room.entered();
         Direction f = entered != null ? entered.getOpposite() : Direction.NORTH;
         Direction back = f.getOpposite();
@@ -294,7 +309,7 @@ public final class BarrowRooms {
         }
         p.set(room.localX(f, halfF - 3, ss + Integer.signum(ss)), room.floor + 1, room.localZ(f, halfF - 3, ss + Integer.signum(ss)),
                 Deco.slab(Blocks.DEEPSLATE_TILE_SLAB, false));
-        p.spawn(Mobs.deathlord(), room.localX(f, halfF - 2, 0), room.floor + 1, room.localZ(f, halfF - 2, 0), Painter.yaw(back), null);
+        p.spawnBoss(Mobs.deathlord(), room.localX(f, halfF - 2, 0), room.floor + 1, room.localZ(f, halfF - 2, 0), Painter.yaw(back), null);
         // pillars down the hall
         int top = room.height - 1;
         for (int fwd = -(halfF - 2); fwd <= halfF - 5; fwd += 3) {

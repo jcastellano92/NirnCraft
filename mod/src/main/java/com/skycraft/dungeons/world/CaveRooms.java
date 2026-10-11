@@ -4,6 +4,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
+import static com.skycraft.dungeons.world.NaturalRooms.boss;
 import static com.skycraft.dungeons.world.NaturalRooms.edgeSpot;
 import static com.skycraft.dungeons.world.NaturalRooms.inside;
 import static com.skycraft.dungeons.world.NaturalRooms.loot;
@@ -30,6 +31,7 @@ public final class CaveRooms {
     // ------------------------------------------------------------------ frostbite spiders
 
     static void spiders(Painter p, Room room) {
+        p.feature("room:spiders");
         // webs everywhere, egg sacs (sniffer-egg stand-ins) and wrapped victims
         for (int x = room.minX + 1; x < room.maxX; x++) {
             for (int z = room.minZ + 1; z < room.maxZ; z++) {
@@ -42,7 +44,7 @@ public final class CaveRooms {
         scatter(p, room, 610, 3, r -> r % 3 == 0 ? Blocks.BONE_BLOCK.defaultBlockState() : Deco.skull(Blocks.SKELETON_SKULL, r % 16));
         putEdge(p, room, 615, Blocks.WHITE_WOOL.defaultBlockState());
         if (room.boss()) {
-            mob(p, room, 620, Mobs.orElse("skycraft:giant_frostbite_spider", "skycraft:frostbite_spider", "minecraft:spider"), "Giant Frostbite Spider");
+            boss(p, room, 620, Mobs.orElse("skycraft:giant_frostbite_spider", "skycraft:frostbite_spider", "minecraft:spider"), "Giant Frostbite Spider");
             mob(p, room, 621, Mobs.spider(), null);
             mob(p, room, 622, Mobs.spider(), null);
             loot(p, room, 623, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
@@ -55,6 +57,7 @@ public final class CaveRooms {
     // ------------------------------------------------------------------ troll den
 
     static void troll(Painter p, Room room) {
+        p.feature("room:troll");
         scatter(p, room, 630, 7, r -> switch (r % 4) {
             case 0 -> Deco.pillar(Blocks.BONE_BLOCK, Direction.Axis.X);
             case 1 -> Deco.skull(Blocks.SKELETON_SKULL, r % 16);
@@ -62,7 +65,7 @@ public final class CaveRooms {
             default -> Blocks.MOSS_CARPET.defaultBlockState();
         });
         if (room.boss()) {
-            mob(p, room, 640, Mobs.troll(), null);
+            boss(p, room, 640, Mobs.troll(), null);
             loot(p, room, 641, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
             put(p, room, 642, Deco.pillar(Blocks.BONE_BLOCK, Direction.Axis.Y));
             return;
@@ -100,6 +103,7 @@ public final class CaveRooms {
     }
 
     static void falmer(Painter p, Room room) {
+        p.feature("room:falmer");
         hut(p, room, 660);
         if (room.halfX() >= 5 && room.halfZ() >= 5) hut(p, room, 661);
         scatter(p, room, 665, 5, r -> switch (r % 4) {
@@ -109,7 +113,7 @@ public final class CaveRooms {
             default -> Blocks.MYCELIUM.defaultBlockState();
         });
         if (room.boss()) {
-            mob(p, room, 670, Mobs.falmer(), "Falmer Gloomlurker");
+            boss(p, room, 670, Mobs.falmer(), "Falmer Gloomlurker");
             mob(p, room, 671, Mobs.falmer(), null);
             mob(p, room, 672, Mobs.spider(), "Chaurus");
             loot(p, room, 673, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
@@ -124,6 +128,7 @@ public final class CaveRooms {
     // ------------------------------------------------------------------ Forsworn hideout
 
     static void forsworn(Painter p, Room room) {
+        p.feature("room:forsworn");
         put(p, room, 680, Deco.campfire(false, true));
         putEdge(p, room, 681, Deco.pillar(Blocks.BONE_BLOCK, Direction.Axis.Y));
         putEdge(p, room, 682, Deco.skull(Blocks.SKELETON_SKULL, 4));
@@ -136,7 +141,7 @@ public final class CaveRooms {
         }
         String named = Painter.entityExists("skycraft:forsworn") ? null : "Forsworn";
         if (room.boss()) {
-            mob(p, room, 690, Mobs.forsworn(), "Forsworn Briarheart");
+            boss(p, room, 690, Mobs.forsworn(), "Forsworn Briarheart");
             mob(p, room, 691, Mobs.hagraven(), Painter.entityExists("skycraft:hagraven") ? null : "Hagraven");
             mob(p, room, 692, Mobs.forsworn(), named);
             loot(p, room, 693, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
@@ -150,6 +155,7 @@ public final class CaveRooms {
     // ------------------------------------------------------------------ spriggan grotto
 
     static void spriggans(Painter p, Room room) {
+        p.feature("room:spriggans");
         for (int x = room.minX + 1; x < room.maxX; x++) {
             for (int z = room.minZ + 1; z < room.maxZ; z++) {
                 if (!inside(p, room, x, z, 0.9) || !p.ok(x, room.floor - 1, z)) continue;
@@ -163,7 +169,7 @@ public final class CaveRooms {
         put(p, room, 702, Blocks.SHROOMLIGHT.defaultBlockState());
         putEdge(p, room, 703, Blocks.AZALEA.defaultBlockState());
         if (room.boss()) {
-            mob(p, room, 710, Mobs.spriggan(), "Spriggan Matron");
+            boss(p, room, 710, Mobs.spriggan(), "Spriggan Matron");
             mob(p, room, 711, Mobs.spriggan(), null);
             mob(p, room, 712, Mobs.denBeast(0), null);
             loot(p, room, 713, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
@@ -177,6 +183,7 @@ public final class CaveRooms {
     // ------------------------------------------------------------------ ice cave
 
     static void ice(Painter p, Room room) {
+        p.feature("room:ice");
         for (int x = room.minX + 1; x < room.maxX; x++) {
             for (int z = room.minZ + 1; z < room.maxZ; z++) {
                 if (!inside(p, room, x, z, 0.95) || !p.ok(x, room.floor - 1, z)) continue;
@@ -197,7 +204,7 @@ public final class CaveRooms {
             }
         }
         if (room.boss()) {
-            mob(p, room, 730, Mobs.troll(), "Frost Troll");
+            boss(p, room, 730, Mobs.troll(), "Frost Troll");
             mob(p, room, 731, Mobs.iceWraith(), null);
             mob(p, room, 732, Mobs.iceWraith(), null);
             loot(p, room, 733, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
@@ -210,6 +217,7 @@ public final class CaveRooms {
     // ------------------------------------------------------------------ skeever warren
 
     static void skeevers(Painter p, Room room) {
+        p.feature("room:skeevers");
         scatter(p, room, 740, 6, r -> switch (r % 3) {
             case 0 -> Blocks.COARSE_DIRT.defaultBlockState();
             case 1 -> Blocks.BONE_BLOCK.defaultBlockState();
@@ -218,7 +226,7 @@ public final class CaveRooms {
         int n = 2 + p.roll(room.cx, 0, room.cz, 741, 3);
         for (int i = 0; i < n; i++) mob(p, room, 742 + i, Mobs.skeever(), null);
         if (room.boss()) {
-            mob(p, room, 750, Mobs.skeever(), "Giant Skeever");
+            boss(p, room, 750, Mobs.skeever(), "Giant Skeever");
             loot(p, room, 751, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
         }
     }

@@ -1,0 +1,29 @@
+{
+ "id": "priest_shrine",
+ "themes": [
+  "barrow",
+  "ruin"
+ ],
+ "beats": [
+  "elite",
+  "setpiece"
+ ],
+ "layers": [
+  [
+   "c#S#c",
+   "..f.."
+  ],
+  [
+   "._k_.",
+   "....."
+  ]
+ ],
+ "key": {
+  "#": "minecraft:chiseled_stone_bricks",
+  "S": "minecraft:polished_deepslate",
+  "c": "minecraft:candle[candles=4,lit=true]",
+  "k": "minecraft:skeleton_skull",
+  "_": "minecraft:stone_brick_slab",
+  "f": "foe:dormant"
+ }
+}

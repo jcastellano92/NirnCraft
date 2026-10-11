@@ -1,0 +1,28 @@
+{
+ "id": "offering_altar",
+ "themes": [
+  "ruin",
+  "barrow",
+  "necromancer_lair"
+ ],
+ "beats": [
+  "cache",
+  "setpiece"
+ ],
+ "layers": [
+  [
+   "#L#L#",
+   "..C.."
+  ],
+  [
+   "c.c.c",
+   "....."
+  ]
+ ],
+ "key": {
+  "#": "minecraft:chiseled_stone_bricks",
+  "L": "light",
+  "C": "loot:chest:skycraft:chests/daedric_offerings",
+  "c": "minecraft:candle[candles=2,lit=true]"
+ }
+}

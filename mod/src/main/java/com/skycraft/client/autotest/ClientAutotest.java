@@ -362,6 +362,49 @@ public final class ClientAutotest {
         }
     }
 
+    /**
+     * Optional {@code -Dskycraft.autotest.commands=cmd,cmd,...} ('+' for spaces; '@p' is the player): run each server
+     * command (as the player, spectating) and screenshot what it shows, e.g. the dungeon analyzer's
+     * {@code skycraft-dungeon-qa view <place> boss} to look at a dungeon's set pieces.
+     */
+    private static final String COMMANDS = System.getProperty("skycraft.autotest.commands", "");
+    private static int commandStep;
+
+    private static void commandTick(Minecraft mc) {
+        if (tourWait-- > 0) return;
+        String[] cmds = COMMANDS.split(",");
+        int s = commandStep++;
+        tourWait = 40;
+        if (s == 0) {
+            com.skycraft.network.SkyNetwork.sendToServer(new com.skycraft.network.CorePackets.ChooseRace(com.skycraft.core.Race.NORD.id()));
+            mc.setScreen(null);
+            serverCommand(mc, "gamerule doDaylightCycle false");
+            serverCommand(mc, "gamerule doMobSpawning false");
+            serverCommand(mc, "time set 6000");
+            serverCommand(mc, "gamemode spectator @p");
+            tourWait = 60;
+            return;
+        }
+        int i = (s - 1) / 2;
+        if (i >= cmds.length) {
+            Skycraft.LOGGER.info("=== Skycraft Autotest: command tour finished. Closing client. ===");
+            mc.stop();
+            return;
+        }
+        String cmd = cmds[i].trim().replace('+', ' ');
+        // no pause menu (a window without focus opens it and stops the integrated server), no HUD or chat in the shot
+        mc.setScreen(null);
+        mc.options.hideGui = true;
+        if ((s - 1) % 2 == 0) {
+            serverCommand(mc, "execute as @p at @p run " + cmd);
+            tourWait = TOUR_WAIT;
+        } else {
+            String[] w = cmd.split(" ");
+            String tag = w.length >= 3 ? w[w.length - 2] + "_" + w[w.length - 1] : "shot";
+            captureAndSave(mc, String.format(java.util.Locale.ROOT, "c%02d_%s", i, tag.replaceAll("[^a-z0-9_]", "")));
+        }
+    }
+
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (!ENABLED || event.phase != TickEvent.Phase.END) return;
@@ -406,6 +449,10 @@ public final class ClientAutotest {
         }
         if (com.skycraft.lore.place.client.PlaceLoreAutotest.ENABLED) { // -Dskycraft.autotest.placelore=<place>: its notes
             com.skycraft.lore.place.client.PlaceLoreAutotest.tick(mc);
+            return;
+        }
+        if (!COMMANDS.isEmpty()) {
+            commandTick(mc);
             return;
         }
 

@@ -28,8 +28,10 @@ public final class DwemerRooms {
             p.spawn(Mobs.DWARVEN_SPIDER, room.cx + 2, room.floor, room.cz - 2, 0f, null);
             return;
         }
-        int v = room.piece.variant % 5;
+        int v = room.kind() % 5;
+        if (room.has(DungeonPiece.FLAG_SETPIECE)) v = 5;
         switch (v) {
+            case 5 -> SetPieces.machineHall(p, room);
             case 0 -> {
                 boilers(p, room);
                 vents(p, room, 2);
@@ -110,6 +112,7 @@ public final class DwemerRooms {
     }
 
     static void boilers(Painter p, Room room) {
+        p.feature("room:boilers");
         for (int[] c : new int[][]{{-1, -1}, {1, 1}}) {
             int bx = room.cx + c[0] * Math.max(2, room.halfX() - 2), bz = room.cz + c[1] * Math.max(2, room.halfZ() - 2);
             if (room.onLane(bx, bz) || room.nearDoor(bx, bz, 1)) continue;
@@ -122,6 +125,7 @@ public final class DwemerRooms {
     }
 
     static void workshop(Painter p, Room room) {
+        p.feature("room:workshop");
         BlockState[] benches = {
                 Blocks.SMITHING_TABLE.defaultBlockState(),
                 Blocks.CHIPPED_ANVIL.defaultBlockState().setValue(AnvilBlock.FACING, Direction.NORTH),
@@ -140,6 +144,7 @@ public final class DwemerRooms {
 
     /** A boiler machine on a platform in the middle of the room, with docking cradles for spheres. */
     static void machine(Painter p, Room room) {
+        p.feature("room:machine");
         int ox = room.cx + (room.halfX() >= 5 ? 3 : 0), oz = room.cz + (room.halfZ() >= 5 ? 3 : 0);
         if (room.onLane(ox, oz)) {
             ox = room.cx - Math.max(2, room.halfX() - 2);
@@ -162,6 +167,7 @@ public final class DwemerRooms {
 
     /** Copper colonnade with iron railings. */
     static void gallery(Painter p, Room room) {
+        p.feature("room:gallery");
         int top = room.height - 1;
         for (int x = room.minX + 2; x < room.maxX - 1; x += 3) {
             for (int z : new int[]{room.minZ + 2, room.maxZ - 2}) {
@@ -175,6 +181,7 @@ public final class DwemerRooms {
     }
 
     static void storeroom(Painter p, Room room) {
+        p.feature("room:storeroom");
         scrap(p, room, 3);
         BarrowRooms.treasure(p, room, 1, Deco.LOOT_COMMON);
     }
@@ -192,6 +199,7 @@ public final class DwemerRooms {
 
     /** The great hall: the Centurion on its platform, a boss chest, sphere sentries and steam everywhere. */
     static void boss(Painter p, Room room) {
+        p.feature("room:boss");
         Direction entered = room.entered();
         Direction f = entered != null ? entered.getOpposite() : Direction.NORTH;
         Direction back = f.getOpposite();
@@ -207,6 +215,7 @@ public final class DwemerRooms {
                         : (Math.floorMod(s, 2) == 0 ? Blocks.WAXED_CUT_COPPER.defaultBlockState() : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState()));
             }
         }
+        p.feature("setpiece:centurion_arena");
         // giant pipes on the far wall
         for (int s : new int[]{-3, -1, 1, 3}) {
             int x = room.localX(f, halfF - 1, s), z = room.localZ(f, halfF - 1, s);
@@ -226,7 +235,7 @@ public final class DwemerRooms {
         int side = halfL >= 5 ? 4 : 2;
         p.container(room.localX(f, halfF - 1, side), room.floor + 1, room.localZ(f, halfF - 1, side), Deco.chest(back), Deco.LOOT_BOSS);
         p.container(room.localX(f, halfF - 1, -side), room.floor + 1, room.localZ(f, halfF - 1, -side), Deco.barrel(back), Deco.LOOT_DWEMER);
-        p.spawn(Mobs.DWARVEN_CENTURION, room.localX(f, halfF - 3, 0), room.floor + 1, room.localZ(f, halfF - 3, 0), Painter.yaw(back), null);
+        p.spawnBoss(Mobs.DWARVEN_CENTURION, room.localX(f, halfF - 3, 0), room.floor + 1, room.localZ(f, halfF - 3, 0), Painter.yaw(back), null);
         p.spawn(Mobs.DWARVEN_SPHERE, room.localX(f, 0, 3), room.floor, room.localZ(f, 0, 3), Painter.yaw(back), null);
         p.spawn(Mobs.DWARVEN_SPHERE, room.localX(f, 0, -3), room.floor, room.localZ(f, 0, -3), Painter.yaw(back), null);
     }

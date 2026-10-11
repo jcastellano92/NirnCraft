@@ -156,11 +156,14 @@ public class DungeonStructure extends Structure {
             int base = theme == Theme.DRAGON_LAIR ? sorted[1] : sorted[2];
             if (theme == Theme.FORT) {
                 int depth = theme.minDepth + random.nextInt(theme.maxDepth - theme.minDepth + 1);
-                if (base - depth < minY + 12) return Optional.empty();
+                // the cellars stay under the hill even where it falls away from the walls
+                int fDepth = Math.min(44, coverDepth(ctx, x, z, out, base, depth));
+                if (base - fDepth < minY + 12) return Optional.empty();
+                Layout.Ground g = ground(ctx);
                 return Optional.of(new GenerationStub(new BlockPos(x, base, z), builder -> {
                     Layout.surface(builder, site, x, base, z, out, seed, false);
-                    Layout.underground(builder, site, x + out.getStepX() * 3, base, z + out.getStepZ() * 3, out, depth,
-                            seed ^ 0x5DEECE66DL, minY + 10, true);
+                    Layout.underground(builder, site, x + out.getStepX() * 3, base, z + out.getStepZ() * 3, out, fDepth,
+                            seed ^ 0x5DEECE66DL, minY + 10, true, g);
                 }));
             }
             return Optional.of(new GenerationStub(new BlockPos(x, base, z),
@@ -170,17 +173,42 @@ public class DungeonStructure extends Structure {
         int surface = surface(ctx, x, z);
         if (surface == WATER || surface <= sea) return Optional.empty();
         int depth = theme.minDepth + random.nextInt(theme.maxDepth - theme.minDepth + 1);
-        depth = coverDepth(ctx, x, z, out, surface, depth);
+        Direction dOut = downhill(ctx, x, z, surface, out);
+        depth = coverDepth(ctx, x, z, dOut, surface, depth);
         if (depth > 44) return Optional.empty();
         if (surface - depth < minY + 12) return Optional.empty();
         int fDepth = depth;
+        Layout.Ground g = ground(ctx);
         return Optional.of(new GenerationStub(new BlockPos(x, surface, z),
-                builder -> Layout.underground(builder, site, x, surface, z, out, fDepth, seed, minY + 10, false)));
+                builder -> Layout.underground(builder, site, x, surface, z, dOut, fDepth, seed, minY + 10, false, g)));
     }
 
     /** Sub-themes for random sites: caves pick among their rosters, everything else splits two ways. */
     private int randomFlavor(WorldgenRandom random) {
         return theme == Theme.CAVE ? CaveRoster.random(random.nextInt(CaveRoster.RANDOM_COUNT)) : random.nextInt(4);
+    }
+
+    /**
+     * The side the ground falls away to, for a dungeon's mouth: the lowest of the four directions 12 and 24 blocks out
+     * (the rolled direction wins ties and gentle slopes, so flat sites keep their variety).
+     */
+    private static Direction downhill(GenerationContext ctx, int x, int z, int here, Direction rolled) {
+        Direction best = rolled;
+        int bestH = rise(ctx, x, z, rolled) - 2;
+        for (Direction d : Direction.Plane.HORIZONTAL) {
+            int h = rise(ctx, x, z, d);
+            if (h < bestH) {
+                bestH = h;
+                best = d;
+            }
+        }
+        return best;
+    }
+
+    private static int rise(GenerationContext ctx, int x, int z, Direction d) {
+        int a = ground(ctx, x + d.getStepX() * 12, z + d.getStepZ() * 12);
+        int b = ground(ctx, x + d.getStepX() * 24, z + d.getStepZ() * 24);
+        return Math.max(a, b);
     }
 
     /** Deepens the dungeon until the ground over the room grid covers it. */
@@ -189,7 +217,9 @@ public class DungeonStructure extends Structure {
         int lx = x - out.getStepX() * back;
         int lz = z - out.getStepZ() * back;
         int lowest = surface;
-        int[][] offsets = {{0, 0}, {28, 0}, {-28, 0}, {0, 28}, {0, -28}};
+        // the room grid reaches about 50 blocks round the entrance hall: probe its middle, edges and corners
+        int[][] offsets = {{0, 0}, {28, 0}, {-28, 0}, {0, 28}, {0, -28}, {42, 42}, {-42, 42}, {42, -42}, {-42, -42},
+                {45, 0}, {-45, 0}, {0, 45}, {0, -45}};
         for (int[] o : offsets) lowest = Math.min(lowest, ground(ctx, lx + o[0], lz + o[1]));
         int cover = theme.maxHeight + 3 + 7;
         if (surface - depth + cover > lowest) depth = surface - (lowest - cover);
@@ -212,7 +242,9 @@ public class DungeonStructure extends Structure {
         long seed = random.nextLong() ^ pl.id().hashCode();
         Direction rolled = Direction.Plane.HORIZONTAL.getRandomDirection(random);
         // Labyrinthian's stair opens towards the city's main street
-        Direction out = special == Special.LABYRINTHIAN ? Direction.NORTH : rolled;
+        // a dungeon's mouth opens downhill, never into the slope above it
+        int h0 = theme.underground() && theme != Theme.FORT && special != Special.LABYRINTHIAN ? surface(ctx, pl.x(), pl.z()) : WATER;
+        Direction out = special == Special.LABYRINTHIAN ? Direction.NORTH : h0 != WATER ? downhill(ctx, pl.x(), pl.z(), h0, rolled) : rolled;
         int fl = flavor >= 0 ? flavor : randomFlavor(random);
         Kit k = regionalKit ? Cultures.kitFor(TamrielMap.region(pl.x(), pl.z()), pl.x(), pl.z()) : kit;
         Site site = new Site(theme, k, special, fl, SiteParams.forPlace(theme, pl));
@@ -243,11 +275,12 @@ public class DungeonStructure extends Structure {
         }
         if (theme == Theme.FORT) {
             int base = h;
-            int depth = Math.max(4, Math.min(theme.maxDepth, base - (minY + 14)));
+            int depth = Math.max(4, Math.min(44, Math.min(coverDepth(ctx, x, z, out, base, theme.maxDepth), base - (minY + 14))));
+            Layout.Ground g = ground(ctx);
             return Optional.of(new GenerationStub(new BlockPos(x, base, z), builder -> {
                 Layout.surface(builder, site, fx, base, fz, out, seed, false);
                 Layout.underground(builder, site, fx + out.getStepX() * 3, base, fz + out.getStepZ() * 3, out, depth,
-                        seed ^ 0x5DEECE66DL, minY + 10, true);
+                        seed ^ 0x5DEECE66DL, minY + 10, true, g);
             }));
         }
         if (!theme.underground()) {
@@ -267,8 +300,9 @@ public class DungeonStructure extends Structure {
         depth = Math.max(6, Math.min(depth, surface - (minY + 14)));
         int fDepth = depth;
         Direction fOut = out;
+        Layout.Ground g = ground(ctx);
         return Optional.of(new GenerationStub(new BlockPos(x, surface, z), builder -> {
-            Layout.underground(builder, site, fx, surface, fz, fOut, fDepth, seed, minY + 10, false);
+            Layout.underground(builder, site, fx, surface, fz, fOut, fDepth, seed, minY + 10, false, g);
             if (special != Special.NONE && special != Special.LABYRINTHIAN) Layout.exterior(builder, site, fx, surface, fz, fOut, seed);
         }));
     }
@@ -345,6 +379,14 @@ public class DungeonStructure extends Structure {
             if (s.coastDistance > 32 && land < s.elevation - 24) return WATER;
         }
         return land;
+    }
+
+    /** The back exit's surface probe: noise heights only (the planner asks for one or two columns). */
+    private static Layout.Ground ground(GenerationContext ctx) {
+        return (x, z) -> {
+            int h = surface(ctx, x, z);
+            return h == WATER ? Integer.MIN_VALUE : h;
+        };
     }
 
     /** Solid ground level at (x, z), even under water. */

@@ -130,7 +130,8 @@ public final class SurfaceBuilder {
                 }
             }
         }
-        // courtyard camp
+        // courtyard camp: the garrison fights in the open before the cellars
+        p.feature("setpiece:courtyard_battle");
         tent(s, 0, -7);
         tent(s, 0, 7);
         s.set(7, base, -4, Deco.campfire(false, true));

@@ -2,6 +2,7 @@ package com.skycraft.dungeons.world;
 
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RailBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -111,6 +112,7 @@ public final class Portals {
                 f.set(at, yy, lat, Math.abs(lat) == halfWidth || yy == y + height ? pal.trim : pal.wall(p, f.x(at, lat), yy, f.z(at, lat), yy - y));
             }
         }
+        descent(f, c, 1, c.tunnelLength() + 6);
     }
 
     private static void ayleid(Frame f, DungeonPiece c, Kit.Palette pal) {
@@ -204,7 +206,8 @@ public final class Portals {
                     }
                     f.set(t, yy, lat, yy == top && (r0 - d) % 2 == 1 ? Deco.slab(pal.slab, false) : pal.wall(p, f.x(t, lat), yy, f.z(t, lat), yy - y));
                 }
-                f.foundation(t, y - 2, lat, pal.wall(p, f.x(t, lat), y - 2, f.z(t, lat), 0));
+                // (never down the stairwell: the foundation would wall up the stairs)
+                if (Math.abs(lat) > 1 || t > T) f.foundation(t, y - 2, lat, pal.wall(p, f.x(t, lat), y - 2, f.z(t, lat), 0));
             }
         }
         // the shrine on top, and vines down the faces
@@ -348,7 +351,33 @@ public final class Portals {
                 }
             }
         }
+        descent(f, c, halfWidth, T + length);
     }
+
+    /**
+     * Where the ground falls away beyond the forecourt, steps lead down to it (a mouth on a slope is never a ledge
+     * over a drop the player can't climb back). Each column checks only its own ground, so chunks agree.
+     */
+    private static void descent(Frame f, DungeonPiece c, int halfWidth, int from) {
+        Painter p = f.p();
+        Direction up = c.facing().getOpposite();
+        Block stairs = c.theme.natural() ? Blocks.COBBLESTONE_STAIRS : BuiltBuilder.stairBlock(p, c.theme);
+        for (int t = from + 1; t <= c.tunnelLength() + APPROACH; t++) {
+            int walk = c.aux - (t - from);
+            for (int lat = -halfWidth; lat <= halfWidth; lat++) {
+                int x = f.x(t, lat), z = f.z(t, lat);
+                if (!p.ownsColumn(x, z)) continue;
+                int ground = p.surfaceAt(x, z) - 1;
+                if (ground >= walk - 1) continue;
+                p.set(x, walk - 1, z, Deco.stair(stairs, up, false));
+                p.foundation(x, walk - 2, z, c.theme.natural() ? Blocks.COBBLESTONE.defaultBlockState() : BuiltBuilder.wall(p, c.theme, x, walk - 2, z, 0), 24);
+                f.clear(t, walk, lat, walk + 3);
+            }
+        }
+    }
+
+    /** How far beyond the tunnel's surface end the portal piece reaches (forecourt and descent). */
+    public static final int APPROACH = 16;
 
     /** A burial mound / hill over the last stretch of the tunnel so the entrance sits in the ground. */
     private static void mound(Frame f, DungeonPiece c, boolean stone) {
@@ -420,6 +449,7 @@ public final class Portals {
             for (int yy = y; yy <= y + 1; yy++) f.set(T + 7, yy, s, Blocks.MOSSY_STONE_BRICKS.defaultBlockState());
             f.set(T + 7, y + 2, s, Deco.slab(Blocks.MOSSY_STONE_BRICK_SLAB, false));
         }
+        descent(f, c, 1, c.tunnelLength() + 6);
     }
 
     // ------------------------------------------------------------------ Dwemer gatehouse
@@ -471,6 +501,7 @@ public final class Portals {
         f.set(T + 6, y, -2, Blocks.WAXED_EXPOSED_COPPER.defaultBlockState());
         f.set(T + 6, y + 1, -2, DwemerRooms.rod());
         p.spawn(Mobs.DWARVEN_SPIDER, f.x(T + 3, 0), y, f.z(T + 3, 0), Painter.yaw(c.facing()), null);
+        descent(f, c, 1, c.tunnelLength() + 6);
     }
 
     // ------------------------------------------------------------------ caves and lairs

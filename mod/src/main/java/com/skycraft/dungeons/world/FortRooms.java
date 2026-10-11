@@ -20,17 +20,23 @@ public final class FortRooms {
     static void occupant(Painter p, int flavor, int x, int y, int z, float yaw, boolean chief) {
         if (p.kit != Kit.NONE && p.kit != Kit.NORD && p.kit != Kit.IMPERIAL) {
             Kit.Spawn s = chief ? p.kit.boss() : p.kit.minion(p.roll(x, y, z, 72, 6));
-            p.spawn(s.id(), x, y, z, yaw, s.label());
+            put(p, chief, s.id(), x, y, z, yaw, s.label());
             return;
         }
         switch (Math.floorMod(flavor, 4)) {
-            case 1 -> p.spawn(Mobs.forsworn(), x, y, z, yaw,
+            case 1 -> put(p, chief, Mobs.forsworn(), x, y, z, yaw,
                     chief ? "Forsworn Briarheart" : Painter.entityExists("skycraft:forsworn") ? null : "Forsworn");
-            case 2 -> p.spawn(chief ? Mobs.vampireLord() : Mobs.vampire(), x, y, z, yaw,
+            case 2 -> put(p, chief, chief ? Mobs.vampireLord() : Mobs.vampire(), x, y, z, yaw,
                     chief && !Painter.entityExists("skycraft:vampire_lord") ? "Vampire Master" : null);
-            case 3 -> p.spawn(Mobs.necromancer(), x, y, z, yaw, chief ? "Master Wizard" : null);
-            default -> p.spawn(chief ? Mobs.banditChief() : Mobs.bandit(), x, y, z, yaw, null);
+            case 3 -> put(p, chief, Mobs.necromancer(), x, y, z, yaw, chief ? "Master Wizard" : null);
+            default -> put(p, chief, chief ? Mobs.banditChief() : Mobs.bandit(), x, y, z, yaw, null);
         }
+    }
+
+    /** The chief is the fort's boss. */
+    private static void put(Painter p, boolean chief, String id, int x, int y, int z, float yaw, String name) {
+        if (chief) p.spawnBoss(id, x, y, z, yaw, name);
+        else p.spawn(id, x, y, z, yaw, name);
     }
 
     public static void decorate(Painter p, Room room, RandomSource r) {
@@ -45,7 +51,11 @@ public final class FortRooms {
             occupant(p, flavor, room.cx + 1, room.floor, room.cz + 1, 0f, false);
             return;
         }
-        switch (room.piece.variant % 5) {
+        if (room.has(DungeonPiece.FLAG_SETPIECE)) {
+            // the cell block: the garrison's prisoners, and their gaoler
+            prison(p, room);
+            p.feature("setpiece:cell_block");
+        } else switch (room.kind() % 5) {
             case 0 -> prison(p, room);
             case 1 -> armory(p, room);
             case 2 -> barracks(p, room);
@@ -72,6 +82,7 @@ public final class FortRooms {
 
     /** Barred cells along a doorless wall with what's left of their prisoners. */
     static void prison(Painter p, Room room) {
+        p.feature("room:prison");
         Direction side = blankWall(room);
         if (side == null) {
             stores(p, room);
@@ -104,6 +115,7 @@ public final class FortRooms {
     }
 
     static void armory(Painter p, Room room) {
+        p.feature("room:armory");
         BlockState[] gear = {
                 Blocks.GRINDSTONE.defaultBlockState(), Blocks.SMITHING_TABLE.defaultBlockState(),
                 Blocks.ANVIL.defaultBlockState().setValue(AnvilBlock.FACING, Direction.EAST), Blocks.FLETCHING_TABLE.defaultBlockState()};
@@ -122,6 +134,7 @@ public final class FortRooms {
 
     /** Bedrolls in rows with footlockers. */
     static void barracks(Painter p, Room room) {
+        p.feature("room:barracks");
         for (int x = room.minX + 1; x < room.maxX; x += 2) {
             for (int z : new int[]{room.minZ + 1, room.maxZ - 2}) {
                 if (room.nearDoor(x, z, 1) || room.nearDoor(x, z + 1, 1) || room.onLane(x, z) || room.onLane(x, z + 1)) continue;
@@ -135,6 +148,7 @@ public final class FortRooms {
 
     /** A long table with benches. */
     static void mess(Painter p, Room room) {
+        p.feature("room:mess");
         boolean alongX = room.halfX() >= room.halfZ();
         Direction side = alongX ? Direction.NORTH : Direction.WEST;
         int off = 2;
@@ -151,6 +165,7 @@ public final class FortRooms {
     }
 
     static void stores(Painter p, Room room) {
+        p.feature("room:stores");
         for (int x = room.minX + 1; x < room.maxX; x++) {
             for (int z = room.minZ + 1; z < room.maxZ; z++) {
                 boolean edge = x == room.minX + 1 || x == room.maxX - 1 || z == room.minZ + 1 || z == room.maxZ - 1;
@@ -165,6 +180,7 @@ public final class FortRooms {
 
     /** The chief's hall: a seat of furs, the strongbox and bodyguards. */
     static void boss(Painter p, Room room, int flavor) {
+        p.feature("room:boss");
         Direction entered = room.entered();
         Direction f = entered != null ? entered.getOpposite() : Direction.NORTH;
         Direction back = f.getOpposite();

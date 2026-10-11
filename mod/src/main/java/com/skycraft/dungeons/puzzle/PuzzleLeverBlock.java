@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -53,7 +54,19 @@ public class PuzzleLeverBlock extends LeverBlock {
     }
 
     /** True if every pillar shows the glyph its tablet asks for (no tablets found counts as solved). */
-    public static boolean solved(Level level, BlockPos lever, Direction inward) {
+    public static boolean solved(BlockGetter level, BlockPos lever, Direction inward) {
+        for (java.util.Map.Entry<BlockPos, Symbol> e : answer(level, lever, inward).entrySet()) {
+            if (SymbolStoneBlock.symbol(level.getBlockState(e.getKey())) != e.getValue()) return false;
+        }
+        return true;
+    }
+
+    /**
+     * What the puzzle asks: each glyph stone over the door and the glyph its tablet shows (empty when no tablets are
+     * found, which counts as solved). The dungeon analyzer solves the puzzle with this.
+     */
+    public static java.util.Map<BlockPos, Symbol> answer(BlockGetter level, BlockPos lever, Direction inward) {
+        java.util.Map<BlockPos, Symbol> out = new java.util.LinkedHashMap<>();
         BlockPos door = doorBase(lever, inward);
         Direction right = inward.getOpposite().getClockWise();
         BlockPos hintMid = null;
@@ -64,13 +77,12 @@ public class PuzzleLeverBlock extends LeverBlock {
                 break;
             }
         }
-        if (hintMid == null) return true;
+        if (hintMid == null) return out;
         for (int lat = -1; lat <= 1; lat++) {
             Symbol want = SymbolStoneBlock.symbol(level.getBlockState(hintMid.relative(right, -lat)));
-            Symbol have = SymbolStoneBlock.symbol(level.getBlockState(door.relative(right, lat).above(3)));
-            if (want != null && want != have) return false;
+            if (want != null) out.put(door.relative(right, lat).above(3), want);
         }
-        return true;
+        return out;
     }
 
     private static void darts(Level level, BlockPos lever, Direction inward, Player player) {

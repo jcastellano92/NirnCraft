@@ -29,9 +29,11 @@ public final class CultureRooms {
             if (p.chance(room.cx, room.floor, room.cz, 300, 2)) mob(p, room, kit, room.cx + 1, room.cz + 1, 0);
             return;
         }
-        int v = room.piece.variant % 6;
+        int v = room.kind() % 6;
         if (room.puzzle()) v = 0;
+        if (room.has(DungeonPiece.FLAG_SETPIECE)) v = 6;
         switch (v) {
+            case 6 -> SetPieces.sanctum(p, room, kit, pal);
             case 0 -> colonnade(p, room, pal);
             case 1 -> niches(p, room, kit, pal);
             case 2 -> altar(p, room, kit, pal);
@@ -99,6 +101,7 @@ public final class CultureRooms {
 
     /** Two rows of pillars with the culture's accent between them. */
     static void colonnade(Painter p, Room room, Kit.Palette pal) {
+        p.feature("room:colonnade");
         int top = room.height - 1;
         boolean alongX = room.halfX() >= room.halfZ();
         int half = alongX ? room.halfX() : room.halfZ();
@@ -115,6 +118,7 @@ public final class CultureRooms {
 
     /** Burial niches in the walls, the dead laid in them. */
     static void niches(Painter p, Room room, Kit kit, Kit.Palette pal) {
+        p.feature("room:niches");
         int sleepers = 0;
         for (int x = room.minX + 1; x < room.maxX; x++) {
             for (int z = room.minZ + 1; z < room.maxZ; z++) {
@@ -144,6 +148,7 @@ public final class CultureRooms {
 
     /** An altar against a doorless wall, flanked by lights, with offerings. */
     static void altar(Painter p, Room room, Kit kit, Kit.Palette pal) {
+        p.feature("room:altar");
         Direction side = null;
         for (Direction d : Direction.Plane.HORIZONTAL) if (!room.hasDoor(d)) side = d;
         if (side == null) {
@@ -183,6 +188,7 @@ public final class CultureRooms {
 
     /** Fallen masonry, roots and moss. */
     static void overgrown(Painter p, Room room, Kit.Palette pal) {
+        p.feature("room:overgrown");
         for (int x = room.minX + 1; x < room.maxX; x++) {
             for (int z = room.minZ + 1; z < room.maxZ; z++) {
                 if (room.onLane(x, z) || room.nearDoor(x, z, 1)) continue;
@@ -204,6 +210,7 @@ public final class CultureRooms {
 
     /** A sunken basin of water (or lava, in Daedric ruins) ringed with trim. */
     static void pool(Painter p, Room room, Kit kit, Kit.Palette pal) {
+        p.feature("room:pool");
         int r = Math.min(2, Math.min(room.halfX(), room.halfZ()) - 2);
         if (r < 1) {
             colonnade(p, room, pal);
@@ -228,6 +235,7 @@ public final class CultureRooms {
     }
 
     static void stores(Painter p, Room room) {
+        p.feature("room:stores");
         for (int x = room.minX + 1; x < room.maxX; x++) {
             for (int z = room.minZ + 1; z < room.maxZ; z++) {
                 boolean edge = x == room.minX + 1 || x == room.maxX - 1 || z == room.minZ + 1 || z == room.maxZ - 1;
@@ -242,6 +250,7 @@ public final class CultureRooms {
 
     /** The ruin's heart: a dais with the culture's relic, the master of the place and its hoard. */
     static void boss(Painter p, Room room, Kit kit, Kit.Palette pal) {
+        p.feature("room:boss");
         Direction entered = room.entered();
         Direction f = entered != null ? entered.getOpposite() : Direction.NORTH;
         Direction back = f.getOpposite();
@@ -275,7 +284,7 @@ public final class CultureRooms {
         p.container(room.localX(f, halfF - 1, cs), room.floor + 1, room.localZ(f, halfF - 1, cs), Deco.chest(back), Deco.LOOT_BOSS);
         p.container(room.localX(f, halfF - 1, -cs), room.floor + 1, room.localZ(f, halfF - 1, -cs), Deco.barrel(back), Deco.LOOT_COMMON);
         Kit.Spawn boss = kit.boss();
-        p.spawn(boss.id(), room.localX(f, halfF - 4, 0), room.floor, room.localZ(f, halfF - 4, 0), Painter.yaw(back), boss.label());
+        p.spawnBoss(boss.id(), room.localX(f, halfF - 4, 0), room.floor, room.localZ(f, halfF - 4, 0), Painter.yaw(back), boss.label());
         mob(p, room, kit, room.localX(f, 0, 3), room.localZ(f, 0, 3), 3);
         mob(p, room, kit, room.localX(f, 0, -3), room.localZ(f, 0, -3), 4);
         BarrowRooms.urns(p, room, 1);

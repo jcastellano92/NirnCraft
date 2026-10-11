@@ -48,7 +48,8 @@ public final class Exteriors {
 
     /** True for the portal's arch and approach, which the exterior must leave alone. */
     private static boolean reserved(int ef, int fw, int lt) {
-        return fw >= ef - 4 && fw <= ef + 11 && Math.abs(lt) <= 6;
+        // the approach, and the stair tunnel running back under the grounds (paving over it would cap its headroom)
+        return (fw >= ef - 4 && fw <= ef + 11 && Math.abs(lt) <= 6) || (fw < ef && Math.abs(lt) <= 3);
     }
 
     // ------------------------------------------------------------------ Bleak Falls Barrow

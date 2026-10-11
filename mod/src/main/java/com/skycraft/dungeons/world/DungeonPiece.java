@@ -19,12 +19,25 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
  * its theme, which paints it chunk by chunk through a {@link Painter}.
  */
 public class DungeonPiece extends StructurePiece {
-    public enum Kind { ROOM, CORRIDOR, TUNNEL, PORTAL, SURFACE }
+    /** Saved by ordinal: append only. SHAFT: the ladder shaft of a boss chamber's back exit. */
+    public enum Kind { ROOM, CORRIDOR, TUNNEL, PORTAL, SURFACE, SHAFT }
 
     public static final int ROLE_START = 0, ROLE_NORMAL = 1, ROLE_BOSS = 2, ROLE_PUZZLE = 3;
     public static final int FLAG_TREASURE = 1, FLAG_DEAD_END = 2, FLAG_TRAP = 4, FLAG_OPEN_TOP = 8;
     /** SURFACE: the structure levels the ground with terrain adaptation; the box starts at ground level. */
     public static final int FLAG_PAD = 16;
+    /** ROOM: the side branch's adventurer's cache. */
+    public static final int FLAG_CACHE = 32;
+    /** ROOM: environmental story (a dead adventurer and their journal). */
+    public static final int FLAG_STORY = 64;
+    /** ROOM: the theme's set piece (sarcophagus hall, steam machinery hall, waterfall cavern...). */
+    public static final int FLAG_SETPIECE = 128;
+    /** ROOM: an elite guard waits here, before the gate (the mini-boss beat). */
+    public static final int FLAG_ELITE = 256;
+    /** ROOM: the ambush beat: sleepers that wake as the player crosses. */
+    public static final int FLAG_AMBUSH = 512;
+    /** CORRIDOR: barred across (a window into the boss chamber, seen before it is reached). */
+    public static final int FLAG_BARRED = 1024;
 
     public final Theme theme;
     /** Culture kit (palette and roster), {@link Kit#NONE} for the theme's own. */
@@ -37,11 +50,14 @@ public class DungeonPiece extends StructurePiece {
     public final long seed;
     /** ROOM: walking level. CORRIDOR: floor at the low-coordinate end. TUNNEL/PORTAL: walking level at the bottom. SURFACE: ground level. */
     public final int floor;
-    /** CORRIDOR: floor at the high-coordinate end. TUNNEL/PORTAL: walking level at the surface. */
+    /**
+     * CORRIDOR: floor at the high-coordinate end. TUNNEL/PORTAL: walking level at the surface. ROOM: 1 + the side of a
+     * raised entrance landing (the vista), 0 for none. SHAFT: walking level at the surface hatch.
+     */
     public final int aux;
     /** ROOM: side the room was entered from (2D data value, -1 = start). CORRIDOR: axis (0 = x, 1 = z). TUNNEL/PORTAL/SURFACE: facing. */
     public final int dir;
-    /** ROOM: gated side (-1 none). TUNNEL/PORTAL: depth. */
+    /** ROOM: gated side (-1 none; the boss chamber's back door). TUNNEL/PORTAL: depth. */
     public final int extra;
     public final int role;
     public final int doors;
@@ -154,6 +170,7 @@ public class DungeonPiece extends StructurePiece {
                 else BuiltBuilder.tunnel(p, this, r);
             }
             case PORTAL -> Portals.build(p, this, r);
+            case SHAFT -> Shafts.build(p, this);
             case SURFACE -> SurfaceBuilder.build(p, this, r);
         }
     }

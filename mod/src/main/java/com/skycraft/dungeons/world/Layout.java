@@ -14,9 +14,11 @@ import java.util.Set;
 
 /**
  * Roguelike planner. Underground dungeons are a tree of rooms on a grid of {@value #CELL}-block cells around the
- * start room (grown with a "growing tree" walk, plus a loop or two), each joined to its parent by a corridor that
- * may climb or descend with stairs. The deepest room becomes the boss chamber; in barrows and Dwemer ruins the room
- * before it is sealed by a lever gate. The start room connects to the surface through a straight stair tunnel.
+ * start room (grown with a "growing tree" walk, plus loops), each joined to its parent by a corridor that may climb or
+ * descend with stairs. The deepest room becomes the boss chamber; in barrows and Dwemer ruins the room before it is
+ * sealed by a lever gate. The start room connects to the surface through a straight stair tunnel. See
+ * {@link #underground(StructurePiecesBuilder, Site, int, int, int, Direction, int, long, int, boolean, Ground)} for how
+ * a medium dungeon's candidates, beats and cycles are chosen.
  *
  * <p>Everything stays within ~70 blocks of the start chunk so the structure start references cover it.</p>
  */
@@ -25,12 +27,17 @@ public final class Layout {
     private static final int RADIUS = 3;
     private static final int START_HALF = 4;
     private static final int MAX_HALF = 6;
+    /** The entrance hall of a medium dungeon: its half size, and how far its floor lies below the entrance landing. */
+    private static final int VISTA_HALF = 6;
+    public static final int VISTA_LIFT = 2;
+    /** Distance from the boss chamber's wall to the centre of the back exit's shaft, beyond its half size. */
+    private static final int SHAFT_OFFSET = 6;
 
     private Layout() {}
 
     private static final class Cell {
         final int i, j;
-        int hx, hz, floor, height, depth, doors, role = DungeonPiece.ROLE_NORMAL, entered = -1, gate = -1, variant, flags;
+        int hx, hz, floor, height, depth, doors, role = DungeonPiece.ROLE_NORMAL, entered = -1, gate = -1, variant, flags, vista;
         Cell parent;
         final List<Cell> links = new ArrayList<>();
 
@@ -178,8 +185,57 @@ public final class Layout {
 
     public static void underground(StructurePiecesBuilder builder, Site site, int ex, int surfaceY, int ez, Direction out,
                                    int depth, long seed, int minFloor, boolean openTop) {
+        underground(builder, site, ex, surfaceY, ez, out, depth, seed, minFloor, openTop, null);
+    }
+
+    /** Surface height probe for the back exit's shaft (noise heights only); {@link Integer#MIN_VALUE} = water. */
+    public interface Ground {
+        int surface(int x, int z);
+    }
+
+    /** One candidate layout: the room tree on the grid, its main path and the RNG that will finish it. */
+    private static final class Plan {
+        final RandomSource r;
+        final Map<Long, Cell> grid = new HashMap<>();
+        final List<Cell> cells = new ArrayList<>();
+        /** Entrance hall to boss chamber, in order. */
+        final List<Cell> path = new ArrayList<>();
+        Cell start, boss;
+        double score;
+
+        Plan(long seed) {
+            this.r = RandomSource.create(seed);
+        }
+    }
+
+    /**
+     * Plans a whole underground dungeon the way Skyrim's are built: mission first, then space.
+     * <ol>
+     *     <li><b>Candidates.</b> {@value #CANDIDATES} room trees are grown from the seed. Each is scored for fun (a long
+     *     enough main path, a side branch, a loop, height changes, few unrewarded dead ends) and for how well it fits
+     *     the niche the seed asks for (linear or branching, flat or vertical: a MAP-Elites style grid, so neighbouring
+     *     dungeons differ in shape). The best one is kept.</li>
+     *     <li><b>Beats.</b> Along its main path: the entrance vista, light combat, a trap corridor, an ambush, the set
+     *     piece, an elite guard before the gate, the puzzle gate (barrows, Dwemer and culture ruins), the boss chamber
+     *     and its reward, and the one-way back door to a ladder shaft (the loop-back exit). Every room knows how deep it
+     *     lies (tier 0..7) so the danger ramps.</li>
+     *     <li><b>Cycles.</b> Besides the shortcut exit: a loop between branches (two ways round), and a barred window
+     *     from a room beside the boss chamber, which shows the boss before the way in is found (foreshadowing).</li>
+     *     <li><b>Off the path.</b> The first side room holds a cache, another an adventurer's last journal, and no dead
+     *     end is left empty.</li>
+     * </ol>
+     *
+     * @param ground surface probe for the back exit, or null for none
+     */
+    public static void underground(StructurePiecesBuilder builder, Site site, int ex, int surfaceY, int ez, Direction out,
+                                   int depth, long seed, int minFloor, boolean openTop, Ground ground) {
         Theme theme = site.theme();
-        RandomSource r = RandomSource.create(seed);
+        RandomSource base = RandomSource.create(seed);
+        int target = theme.minRooms + base.nextInt(theme.maxRooms - theme.minRooms + 1) + (site.special() != Special.NONE ? 3 : 0);
+        boolean medium = target >= 5;
+        // the vista: a bigger, taller entrance hall entered from a raised landing
+        boolean vista = medium && !openTop;
+        int startHalf = vista ? VISTA_HALF : START_HALF;
         int floor0 = surfaceY - depth;
         int tunnelLen = depth + 4;
         Direction.Axis axis = out.getAxis();
@@ -187,62 +243,292 @@ public final class Layout {
         int lateral = axis == Direction.Axis.X ? ez : ex;
         int step = out.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 1 : -1;
         int wall = eAxis - step * tunnelLen;
-        int startAxis = wall - step * START_HALF;
+        int startAxis = wall - step * startHalf;
         int ox = axis == Direction.Axis.X ? startAxis : lateral;
         int oz = axis == Direction.Axis.X ? lateral : startAxis;
-
-        Map<Long, Cell> grid = new HashMap<>();
         Set<Long> reserved = new HashSet<>();
-        int reach = (tunnelLen + START_HALF + 17 + CELL - 1) / CELL;
+        int reach = (tunnelLen + startHalf + 17 + CELL - 1) / CELL;
         for (int k = 1; k <= reach; k++) reserved.add(key(out.getStepX() * k, out.getStepZ() * k));
 
+        // the niche this dungeon should fill: branching (vs linear) and vertical (vs flat)
+        int niche = base.nextInt(4);
+        Plan plan = null;
+        for (int k = 0; k < (medium ? CANDIDATES : 1); k++) {
+            Plan c = grow(site, seed + k * 0x9E3779B97F4A7C15L, target, vista, startHalf, floor0, minFloor, out, reserved);
+            c.score = medium ? score(c, niche) : 0;
+            if (plan == null || c.score > plan.score) plan = c;
+        }
+        RandomSource r = plan.r;
+        List<Cell> cells = plan.cells;
+        Map<Long, Cell> grid = plan.grid;
+        Cell start = plan.start, boss = plan.boss;
+        List<Cell> path = plan.path;
+        Set<Cell> onPath = new HashSet<>(path);
+
+        // a loop or two so it isn't strictly linear: prefer joining a side branch back to the main path
+        for (int attempt = 0; attempt < 12; attempt++) {
+            Cell a = cells.get(r.nextInt(cells.size()));
+            Direction d = Direction.Plane.HORIZONTAL.getRandomDirection(r);
+            Cell b = grid.get(key(a.i + d.getStepX(), a.j + d.getStepZ()));
+            if (b == null || a == boss || b == boss || a.links.contains(b)) continue;
+            if (attempt < 8 && onPath.contains(a) == onPath.contains(b)) continue;
+            if ((a == start || b == start) && cells.size() > 3 && r.nextBoolean()) continue;
+            int gap = CELL - a.half(d.getAxis()) - b.half(d.getAxis()) - 1;
+            if (Math.abs(a.floor - b.floor) > gap - 1) continue;
+            link(a, b, d);
+            break;
+        }
+        // escalation: each room knows how deep it lies (tier 0..7), so its builder can ramp up the danger
+        int deepest = 1;
+        for (Cell c : cells) deepest = Math.max(deepest, c.depth);
+        for (Cell c : cells) c.variant = (c.variant & 15) | (Math.min(7, Math.round(c.depth * 7f / deepest)) << 4);
+
+        // the beats along the main path (mission first): ambush, set piece, the elite before the gate
+        List<Cell> inner = new ArrayList<>();
+        for (Cell c : path) if (c.role == DungeonPiece.ROLE_NORMAL) inner.add(c);
+        Cell setPiece = null, ambush = null, elite = null;
+        if (medium && !inner.isEmpty()) {
+            // the set piece: the roomiest room in the middle stretch
+            for (int i = 0; i < inner.size(); i++) {
+                double f = (i + 1.0) / (inner.size() + 1.0);
+                Cell c = inner.get(i);
+                if (f < 0.34 && inner.size() > 2) continue;
+                if (setPiece == null || c.hx * c.hz > setPiece.hx * setPiece.hz) setPiece = c;
+            }
+            elite = inner.get(inner.size() - 1);
+            if (elite == setPiece && inner.size() > 1) elite = inner.get(inner.size() - 2);
+            for (Cell c : inner) if (c != setPiece && c != elite && ambush == null && inner.indexOf(c) >= inner.size() / 3) ambush = c;
+            if (setPiece != null) setPiece.flags |= DungeonPiece.FLAG_SETPIECE;
+            if (elite != null && elite != setPiece) elite.flags |= DungeonPiece.FLAG_ELITE;
+            if (ambush != null) ambush.flags |= DungeonPiece.FLAG_AMBUSH;
+        }
+
+        // off the path: the cache and the story, and no empty dead end
+        List<Cell> side = new ArrayList<>();
+        List<Cell> candidates = new ArrayList<>();
+        for (Cell c : cells) {
+            if (c.role != DungeonPiece.ROLE_NORMAL) continue;
+            if (c.links.size() == 1) c.flags |= DungeonPiece.FLAG_DEAD_END;
+            candidates.add(c);
+            if (!onPath.contains(c)) side.add(c);
+        }
+        side.sort((p, q) -> Integer.compare(q.flags & DungeonPiece.FLAG_DEAD_END, p.flags & DungeonPiece.FLAG_DEAD_END));
+        if (!side.isEmpty()) side.get(0).flags |= DungeonPiece.FLAG_TREASURE | DungeonPiece.FLAG_CACHE;
+        if (medium) {
+            Cell story = side.size() > 1 ? side.get(1) : !side.isEmpty() ? side.get(0) : null;
+            if (story == null && !inner.isEmpty()) story = inner.get(0);
+            if (story != null) story.flags |= DungeonPiece.FLAG_STORY;
+        }
+        for (Cell c : candidates) {
+            if ((c.flags & DungeonPiece.FLAG_DEAD_END) != 0 && (c.flags & (DungeonPiece.FLAG_CACHE | DungeonPiece.FLAG_STORY)) == 0) {
+                c.flags |= DungeonPiece.FLAG_TREASURE;
+            }
+        }
+        if (candidates.stream().noneMatch(c -> (c.flags & DungeonPiece.FLAG_TREASURE) != 0) && !candidates.isEmpty()) {
+            candidates.get(r.nextInt(candidates.size())).flags |= DungeonPiece.FLAG_TREASURE;
+        }
+
+        // the loop-back: a one-way door out of the boss chamber to a ladder shaft up to the surface
+        int[] exitShaft = null;
+        if (boss != null && ground != null) {
+            Direction front = Direction.from2DDataValue(boss.entered).getOpposite();
+            List<Direction> sides = new ArrayList<>(List.of(front.getClockWise(), front.getCounterClockWise()));
+            if (r.nextBoolean()) java.util.Collections.reverse(sides);
+            // caverns have no dais against the far wall: the back way may leave from there too
+            if (theme.natural()) sides.add(front);
+            for (Direction d : sides) {
+                if ((boss.doors & (1 << d.get2DDataValue())) != 0) continue;
+                long k = key(boss.i + d.getStepX(), boss.j + d.getStepZ());
+                if (grid.containsKey(k) || reserved.contains(k)) continue;
+                int bx = ox + boss.i * CELL, bz = oz + boss.j * CELL;
+                int sx = bx + d.getStepX() * (MAX_HALF + SHAFT_OFFSET), sz = bz + d.getStepZ() * (MAX_HALF + SHAFT_OFFSET);
+                int top = ground.surface(sx, sz);
+                if (top == Integer.MIN_VALUE || top - boss.floor < 4 || top - boss.floor > 72) continue;
+                boss.doors |= 1 << d.get2DDataValue();
+                boss.gate = d.get2DDataValue();
+                exitShaft = new int[]{d.get2DDataValue(), sx, sz, top};
+                break;
+            }
+        }
+        // no room for a shaft: a one-way door from the boss chamber back into the shallowest room beside it
+        Cell shortcut = null;
+        Direction shortcutDir = null;
+        if (boss != null && exitShaft == null && medium) {
+            Direction front = Direction.from2DDataValue(boss.entered).getOpposite();
+            for (Direction d : Direction.Plane.HORIZONTAL) {
+                if (d == front || (boss.doors & (1 << d.get2DDataValue())) != 0) continue;
+                Cell n = grid.get(key(boss.i + d.getStepX(), boss.j + d.getStepZ()));
+                if (n == null || n.role == DungeonPiece.ROLE_PUZZLE || boss.links.contains(n)) continue;
+                int gap = CELL - boss.half(d.getAxis()) - n.half(d.getAxis()) - 1;
+                if (gap < 1 || Math.abs(boss.floor - n.floor) > gap - 1) continue;
+                if (shortcut == null || n.depth < shortcut.depth) {
+                    shortcut = n;
+                    shortcutDir = d;
+                }
+            }
+            if (shortcut != null) {
+                link(boss, shortcut, shortcutDir);
+                boss.gate = shortcutDir.get2DDataValue();
+            }
+        }
+
+        // foreshadowing: a barred window into the boss chamber from a room beside it (seen early, reached last)
+        Cell window = null;
+        Direction windowDir = null;
+        if (boss != null && medium) {
+            for (Direction d : Direction.Plane.HORIZONTAL) {
+                Cell n = grid.get(key(boss.i + d.getStepX(), boss.j + d.getStepZ()));
+                if (n == null || n == boss.parent || boss.links.contains(n) || n.role == DungeonPiece.ROLE_PUZZLE) continue;
+                // never through the far wall, where the boss's dais and the Word Wall stand
+                if (d == Direction.from2DDataValue(boss.entered).getOpposite()) continue;
+                int gap = CELL - boss.half(d.getAxis()) - n.half(d.getAxis()) - 1;
+                if (gap < 1 || Math.abs(boss.floor - n.floor) > gap - 1) continue;
+                window = n;
+                windowDir = d;
+                break;
+            }
+            if (window != null) {
+                boss.doors |= 1 << windowDir.get2DDataValue();
+                window.doors |= 1 << windowDir.getOpposite().get2DDataValue();
+            }
+        }
+
+        // ---- emit pieces
+        boolean natural = theme.natural();
+        int lat = natural ? 3 : 2;
+        int head = natural ? 4 : 3;
+        // every dungeon may hold a trap: tomb builders' darts, bandits' and old hunters' triplines
+        boolean trapsHere = true;
+
+        // tunnel
+        {
+            int a1 = wall + step, a2 = wall + step * tunnelLen;
+            BoundingBox box = axisBox(axis, a1, a2, lateral - lat, lateral + lat, floor0 - 1, surfaceY + head);
+            builder.addPiece(new DungeonPiece(site, DungeonPiece.Kind.TUNNEL, box, r.nextLong(), floor0, surfaceY,
+                    out.get2DDataValue(), depth, DungeonPiece.ROLE_NORMAL, lateral, wall, openTop ? DungeonPiece.FLAG_OPEN_TOP : 0));
+        }
+        if (!openTop) {
+            // culture ruins raise bigger facades (pyramids, hollow trees, spires) over the stairs
+            boolean big = theme == Theme.RUIN || site.kit() == Kit.ATMORAN;
+            int a1 = wall + step * (tunnelLen - (big ? 12 : 3)), a2 = wall + step * (tunnelLen + Portals.APPROACH);
+            int w = big ? 8 : 6;
+            BoundingBox box = axisBox(axis, a1, a2, lateral - w, lateral + w, surfaceY - 24, surfaceY + (big ? 20 : 10));
+            builder.addPiece(new DungeonPiece(site, DungeonPiece.Kind.PORTAL, box, r.nextLong(), floor0, surfaceY,
+                    out.get2DDataValue(), depth, DungeonPiece.ROLE_NORMAL, lateral, wall, 0));
+        }
+
+        // rooms
+        for (Cell c : cells) {
+            int cx = ox + c.i * CELL, cz = oz + c.j * CELL;
+            BoundingBox box = new BoundingBox(cx - c.hx, c.floor - 1, cz - c.hz, cx + c.hx, c.floor + c.height, cz + c.hz);
+            builder.addPiece(new DungeonPiece(site, DungeonPiece.Kind.ROOM, box, r.nextLong(), c.floor, c.vista, c.entered, c.gate,
+                    c.role, c.doors, c.variant, c.flags));
+        }
+
+        // corridors (each link once: from the lower-coordinate cell); the trap beat falls on the main path's middle third
+        List<Cell[]> links = new ArrayList<>();
+        for (Cell a : cells) for (Cell b : a.links) if (!(b.i < a.i || b.j < a.j)) links.add(new Cell[]{a, b});
+        if (window != null) links.add(windowDir.getAxisDirection() == Direction.AxisDirection.POSITIVE ? new Cell[]{boss, window} : new Cell[]{window, boss});
+        // the trap beat: the main path's corridor nearest its middle (long enough to read the trap), else any corridor
+        Cell[] trapLink = null;
+        double bestWhere = 9;
+        for (Cell[] ab : links) {
+            int ia = path.indexOf(ab[0]), ib = path.indexOf(ab[1]);
+            boolean onMain = ia >= 0 && ib >= 0 && Math.abs(ia - ib) == 1;
+            if (ab[0] == boss && ab[1] == window || ab[1] == boss && ab[0] == window) continue;
+            if (Math.max(ab[0].depth, ab[1].depth) < 2 || corridorLength(ab[0], ab[1]) < 3) continue;
+            double where = onMain ? Math.abs(Math.max(ia, ib) / (double) path.size() - 0.5) : 1 + r.nextDouble();
+            if (where < bestWhere) {
+                bestWhere = where;
+                trapLink = ab;
+            }
+        }
+        for (Cell[] ab : links) {
+            Cell a = ab[0], b = ab[1];
+            int ax = ox + a.i * CELL, az = oz + a.j * CELL;
+            int bx = ox + b.i * CELL, bz = oz + b.j * CELL;
+            BoundingBox box;
+            int axisId;
+            if (b.i != a.i) {
+                int x1 = ax + a.hx + 1, x2 = bx - b.hx - 1;
+                if (x2 < x1) continue;
+                box = new BoundingBox(x1, Math.min(a.floor, b.floor) - 1, az - lat, x2, Math.max(a.floor, b.floor) + head, az + lat);
+                axisId = 0;
+            } else {
+                int z1 = az + a.hz + 1, z2 = bz - b.hz - 1;
+                if (z2 < z1) continue;
+                box = new BoundingBox(ax - lat, Math.min(a.floor, b.floor) - 1, z1, ax + lat, Math.max(a.floor, b.floor) + head, z2);
+                axisId = 1;
+            }
+            int flags = 0;
+            boolean barred = (a == boss && b == window) || (a == window && b == boss);
+            if (barred) flags |= DungeonPiece.FLAG_BARRED;
+            // the beat's trap, and now and then another deeper in
+            if (!barred && trapsHere && (ab == trapLink
+                    || (Math.max(a.depth, b.depth) >= 2 && corridorLength(a, b) >= 3 && r.nextInt(10) < 2))) {
+                flags |= DungeonPiece.FLAG_TRAP;
+            }
+            builder.addPiece(new DungeonPiece(site, DungeonPiece.Kind.CORRIDOR, box, r.nextLong(), a.floor, b.floor, axisId, 0,
+                    DungeonPiece.ROLE_NORMAL, 0, r.nextInt(8), flags));
+        }
+
+        // the back exit: a short passage from the boss chamber's one-way door to the shaft
+        if (exitShaft != null) {
+            Direction d = Direction.from2DDataValue(exitShaft[0]);
+            int bx = ox + boss.i * CELL, bz = oz + boss.j * CELL;
+            int a1 = MAX_HALF + 1, a2 = MAX_HALF + SHAFT_OFFSET - 3;
+            BoundingBox box = d.getAxis() == Direction.Axis.X
+                    ? new BoundingBox(Math.min(bx + d.getStepX() * a1, bx + d.getStepX() * a2), boss.floor - 1, bz - lat,
+                    Math.max(bx + d.getStepX() * a1, bx + d.getStepX() * a2), boss.floor + head, bz + lat)
+                    : new BoundingBox(bx - lat, boss.floor - 1, Math.min(bz + d.getStepZ() * a1, bz + d.getStepZ() * a2),
+                    bx + lat, boss.floor + head, Math.max(bz + d.getStepZ() * a1, bz + d.getStepZ() * a2));
+            builder.addPiece(new DungeonPiece(site, DungeonPiece.Kind.CORRIDOR, box, r.nextLong(), boss.floor, boss.floor,
+                    d.getAxis() == Direction.Axis.X ? 0 : 1, 0, DungeonPiece.ROLE_NORMAL, 0, r.nextInt(8), 0));
+            int sx = exitShaft[1], sz = exitShaft[2], top = exitShaft[3];
+            BoundingBox shaft = new BoundingBox(sx - 2, boss.floor - 1, sz - 2, sx + 2, top + 4, sz + 2);
+            builder.addPiece(new DungeonPiece(site, DungeonPiece.Kind.SHAFT, shaft, r.nextLong(), boss.floor, top, exitShaft[0], 0,
+                    DungeonPiece.ROLE_NORMAL, 0, 0, 0));
+        }
+    }
+
+    /** Blocks of corridor between two neighbouring rooms' walls. */
+    private static int corridorLength(Cell a, Cell b) {
+        Direction.Axis axis = a.i != b.i ? Direction.Axis.X : Direction.Axis.Z;
+        return CELL - a.half(axis) - b.half(axis) - 1;
+    }
+
+    /** Number of candidate layouts grown per medium dungeon. */
+    private static final int CANDIDATES = 4;
+
+    /** Grows one candidate room tree, picks its boss chamber and gate room, and grows a side branch if it has none. */
+    private static Plan grow(Site site, long seed, int target, boolean vista, int startHalf, int floor0, int minFloor, Direction out,
+                             Set<Long> reserved) {
+        Theme theme = site.theme();
+        Plan plan = new Plan(seed);
+        RandomSource r = plan.r;
         Cell start = new Cell(0, 0);
-        start.hx = start.hz = START_HALF;
-        start.floor = floor0;
-        start.height = Math.min(theme.maxHeight, theme.minHeight + 1);
+        start.hx = start.hz = startHalf;
+        start.floor = vista ? floor0 - VISTA_LIFT : floor0;
+        start.height = vista ? theme.maxHeight + VISTA_LIFT : Math.min(theme.maxHeight, theme.minHeight + 1);
         start.role = DungeonPiece.ROLE_START;
         start.doors |= 1 << out.get2DDataValue();
         start.variant = r.nextInt(8);
-        grid.put(key(0, 0), start);
-        List<Cell> cells = new ArrayList<>();
-        cells.add(start);
-
-        int target = theme.minRooms + r.nextInt(theme.maxRooms - theme.minRooms + 1) + (site.special() != Special.NONE ? 3 : 0);
+        if (vista) start.vista = out.get2DDataValue() + 1;
+        plan.grid.put(key(0, 0), start);
+        plan.cells.add(start);
+        plan.start = start;
         int maxFloor = floor0 + 2;
+        List<Cell> cells = plan.cells;
         for (int attempt = 0; attempt < 240 && cells.size() < target; attempt++) {
             Cell from = r.nextFloat() < 0.6f ? cells.get(cells.size() - 1 - r.nextInt(Math.min(2, cells.size()))) : cells.get(r.nextInt(cells.size()));
             Direction d = Direction.Plane.HORIZONTAL.getRandomDirection(r);
             if (from == start && d == out) continue;
-            int ni = from.i + d.getStepX(), nj = from.j + d.getStepZ();
-            if (Math.abs(ni) > RADIUS || Math.abs(nj) > RADIUS) continue;
-            long k = key(ni, nj);
-            if (grid.containsKey(k) || reserved.contains(k)) continue;
-            Cell c = new Cell(ni, nj);
-            c.hx = 3 + r.nextInt(MAX_HALF - 2);
-            c.hz = 3 + r.nextInt(MAX_HALF - 2);
-            c.height = theme.minHeight + r.nextInt(theme.maxHeight - theme.minHeight + 1);
-            int gap = CELL - from.half(d.getAxis()) - c.half(d.getAxis()) - 1;
-            int maxDy = Math.max(0, Math.min(3, gap - 1));
-            int dy = 0;
-            if (maxDy > 0) {
-                int roll = r.nextInt(10);
-                if (roll < 5) dy = -1 - r.nextInt(maxDy);          // dungeons lead downwards
-                else if (roll < 7) dy = 1 + r.nextInt(Math.min(2, maxDy));
-            }
-            c.floor = Math.max(minFloor, Math.min(maxFloor, from.floor + dy));
-            if (Math.abs(c.floor - from.floor) > maxDy) c.floor = from.floor;
-            c.depth = from.depth + 1;
-            c.parent = from;
-            c.entered = d.getOpposite().get2DDataValue();
-            c.variant = r.nextInt(8);
-            link(from, c, d);
-            grid.put(k, c);
-            cells.add(c);
+            grow(r, plan.grid, reserved, cells, from, d, theme, minFloor, maxFloor);
         }
-
         // boss: the deepest room (a leaf of the tree)
         Cell boss = null;
         for (Cell c : cells) if (c != start && (boss == null || c.depth > boss.depth)) boss = c;
+        plan.boss = boss;
         if (boss != null) {
             boss.role = DungeonPiece.ROLE_BOSS;
             Direction toParent = Direction.from2DDataValue(boss.entered);
@@ -258,88 +544,78 @@ public final class Layout {
                 gateRoom.gate = toParent.getOpposite().get2DDataValue();
             }
         }
-
-        // a loop or two so it isn't strictly linear
-        for (int attempt = 0; attempt < 6; attempt++) {
-            Cell a = cells.get(r.nextInt(cells.size()));
-            Direction d = Direction.Plane.HORIZONTAL.getRandomDirection(r);
-            Cell b = grid.get(key(a.i + d.getStepX(), a.j + d.getStepZ()));
-            if (b == null || a == boss || b == boss || a.links.contains(b)) continue;
-            if ((a == start || b == start) && cells.size() > 3 && r.nextBoolean()) continue;
-            int gap = CELL - a.half(d.getAxis()) - b.half(d.getAxis()) - 1;
-            if (Math.abs(a.floor - b.floor) > gap - 1) continue;
-            link(a, b, d);
-            if (attempt >= 2) break;
-        }
-
-        // dead ends and treasure
-        List<Cell> candidates = new ArrayList<>();
-        for (Cell c : cells) {
-            if (c.role != DungeonPiece.ROLE_NORMAL) continue;
-            if (c.links.size() == 1) c.flags |= DungeonPiece.FLAG_DEAD_END;
-            candidates.add(c);
-        }
-        candidates.sort((p, q) -> Integer.compare(q.flags & DungeonPiece.FLAG_DEAD_END, p.flags & DungeonPiece.FLAG_DEAD_END));
-        int treasures = Math.min(candidates.size(), 1 + r.nextInt(2));
-        for (int t = 0; t < treasures; t++) candidates.get(t).flags |= DungeonPiece.FLAG_TREASURE;
-
-        // ---- emit pieces
-        boolean natural = theme.natural();
-        int lat = natural ? 3 : 2;
-        int head = natural ? 4 : 3;
-
-        // tunnel
-        {
-            int a1 = wall + step, a2 = wall + step * tunnelLen;
-            BoundingBox box = axisBox(axis, a1, a2, lateral - lat, lateral + lat, floor0 - 1, surfaceY + head);
-            builder.addPiece(new DungeonPiece(site, DungeonPiece.Kind.TUNNEL, box, r.nextLong(), floor0, surfaceY,
-                    out.get2DDataValue(), depth, DungeonPiece.ROLE_NORMAL, lateral, wall, openTop ? DungeonPiece.FLAG_OPEN_TOP : 0));
-        }
-        if (!openTop) {
-            // culture ruins raise bigger facades (pyramids, hollow trees, spires) over the stairs
-            boolean big = theme == Theme.RUIN || site.kit() == Kit.ATMORAN;
-            int a1 = wall + step * (tunnelLen - (big ? 12 : 3)), a2 = wall + step * (tunnelLen + 9);
-            int w = big ? 8 : 6;
-            BoundingBox box = axisBox(axis, a1, a2, lateral - w, lateral + w, surfaceY - 10, surfaceY + (big ? 20 : 10));
-            builder.addPiece(new DungeonPiece(site, DungeonPiece.Kind.PORTAL, box, r.nextLong(), floor0, surfaceY,
-                    out.get2DDataValue(), depth, DungeonPiece.ROLE_NORMAL, lateral, wall, 0));
-        }
-
-        // rooms
-        for (Cell c : cells) {
-            int cx = ox + c.i * CELL, cz = oz + c.j * CELL;
-            BoundingBox box = new BoundingBox(cx - c.hx, c.floor - 1, cz - c.hz, cx + c.hx, c.floor + c.height, cz + c.hz);
-            builder.addPiece(new DungeonPiece(site, DungeonPiece.Kind.ROOM, box, r.nextLong(), c.floor, 0, c.entered, c.gate,
-                    c.role, c.doors, c.variant, c.flags));
-        }
-
-        // corridors (each link once: from the lower-coordinate cell)
-        for (Cell a : cells) {
-            for (Cell b : a.links) {
-                if (b.i < a.i || b.j < a.j) continue;
-                int ax = ox + a.i * CELL, az = oz + a.j * CELL;
-                int bx = ox + b.i * CELL, bz = oz + b.j * CELL;
-                BoundingBox box;
-                int axisId;
-                if (b.i != a.i) {
-                    int x1 = ax + a.hx + 1, x2 = bx - b.hx - 1;
-                    if (x2 < x1) continue;
-                    box = new BoundingBox(x1, Math.min(a.floor, b.floor) - 1, az - lat, x2, Math.max(a.floor, b.floor) + head, az + lat);
-                    axisId = 0;
-                } else {
-                    int z1 = az + a.hz + 1, z2 = bz - b.hz - 1;
-                    if (z2 < z1) continue;
-                    box = new BoundingBox(ax - lat, Math.min(a.floor, b.floor) - 1, z1, ax + lat, Math.max(a.floor, b.floor) + head, z2);
-                    axisId = 1;
-                }
-                int flags = 0;
-                boolean flat = a.floor == b.floor;
-                int len = axisId == 0 ? box.getXSpan() : box.getZSpan();
-                if (!natural && flat && len >= 3 && r.nextInt(10) < 3) flags |= DungeonPiece.FLAG_TRAP;
-                builder.addPiece(new DungeonPiece(site, DungeonPiece.Kind.CORRIDOR, box, r.nextLong(), a.floor, b.floor, axisId, 0,
-                        DungeonPiece.ROLE_NORMAL, 0, r.nextInt(8), flags));
+        for (Cell c = boss; c != null; c = c.parent) plan.path.add(0, c);
+        // a side branch: medium dungeons always get one room off the main path (grown from the middle of it)
+        if (target >= 5 && boss != null) {
+            Set<Cell> on = new HashSet<>(plan.path);
+            boolean hasSide = cells.stream().anyMatch(c -> !on.contains(c));
+            List<Cell> mids = new ArrayList<>(plan.path);
+            Cell b = boss;
+            mids.removeIf(c -> c == b || c.role == DungeonPiece.ROLE_PUZZLE);
+            mids.sort((p, q) -> Integer.compare(Math.abs(p.depth - b.depth / 2), Math.abs(q.depth - b.depth / 2)));
+            for (int attempt = 0; !hasSide && attempt < 24 && !mids.isEmpty(); attempt++) {
+                Cell from = mids.get(attempt % mids.size());
+                Direction d = Direction.Plane.HORIZONTAL.getRandomDirection(r);
+                if (from == start && d == out) continue;
+                if (grow(r, plan.grid, reserved, cells, from, d, theme, minFloor, maxFloor) != null) hasSide = true;
             }
         }
+        return plan;
+    }
+
+    /**
+     * Fun, then fit: a long enough main path, a side branch, few dead ends, height changes; plus how well the layout
+     * matches its niche (bit 0: branching vs linear, bit 1: vertical vs flat).
+     */
+    private static double score(Plan p, int niche) {
+        int n = p.cells.size(), pathLen = p.path.size();
+        int side = n - pathLen, deadEnds = 0, minF = Integer.MAX_VALUE, maxF = Integer.MIN_VALUE;
+        for (Cell c : p.cells) {
+            if (c.links.size() == 1 && c != p.boss && c != p.start) deadEnds++;
+            minF = Math.min(minF, c.floor);
+            maxF = Math.max(maxF, c.floor);
+        }
+        double s = 0;
+        s += Math.min(pathLen, 6) * 1.0;                 // a journey, not a closet
+        s += side >= 1 ? 2.0 : -3.0;                     // something to find off the way
+        s -= Math.max(0, deadEnds - 2) * 1.0;            // but not a warren of dead ends
+        s += Math.min(maxF - minF, 10) * 0.15;           // up and down
+        double branchy = side / (double) Math.max(1, n);
+        boolean wantBranchy = (niche & 1) != 0, wantVertical = (niche & 2) != 0;
+        s += wantBranchy ? branchy * 4 : (1 - branchy) * 4;
+        s += wantVertical ? Math.min(maxF - minF, 12) * 0.25 : (12 - Math.min(maxF - minF, 12)) * 0.15;
+        return s;
+    }
+
+    /** Grows a new room from {@code from} towards {@code d}, or returns null if the cell is taken or out of reach. */
+    private static Cell grow(RandomSource r, Map<Long, Cell> grid, Set<Long> reserved, List<Cell> cells, Cell from, Direction d,
+                             Theme theme, int minFloor, int maxFloor) {
+        int ni = from.i + d.getStepX(), nj = from.j + d.getStepZ();
+        if (Math.abs(ni) > RADIUS || Math.abs(nj) > RADIUS) return null;
+        long k = key(ni, nj);
+        if (grid.containsKey(k) || reserved.contains(k)) return null;
+        Cell c = new Cell(ni, nj);
+        c.hx = 3 + r.nextInt(MAX_HALF - 2);
+        c.hz = 3 + r.nextInt(MAX_HALF - 2);
+        c.height = theme.minHeight + r.nextInt(theme.maxHeight - theme.minHeight + 1);
+        int gap = CELL - from.half(d.getAxis()) - c.half(d.getAxis()) - 1;
+        int maxDy = Math.max(0, Math.min(3, gap - 1));
+        int dy = 0;
+        if (maxDy > 0) {
+            int roll = r.nextInt(10);
+            if (roll < 5) dy = -1 - r.nextInt(maxDy);          // dungeons lead downwards
+            else if (roll < 7) dy = 1 + r.nextInt(Math.min(2, maxDy));
+        }
+        c.floor = Math.max(minFloor, Math.min(maxFloor, from.floor + dy));
+        if (Math.abs(c.floor - from.floor) > maxDy) c.floor = from.floor;
+        c.depth = from.depth + 1;
+        c.parent = from;
+        c.entered = d.getOpposite().get2DDataValue();
+        c.variant = r.nextInt(8);
+        link(from, c, d);
+        grid.put(k, c);
+        cells.add(c);
+        return c;
     }
 
     private static void link(Cell a, Cell b, Direction d) {

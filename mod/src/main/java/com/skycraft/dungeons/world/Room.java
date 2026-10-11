@@ -60,6 +60,49 @@ public final class Room {
         return piece.extra >= 0 && piece.role == DungeonPiece.ROLE_PUZZLE ? Direction.from2DDataValue(piece.extra) : null;
     }
 
+    /** The room's furnishing roll (0..15): which variant its builder picks. */
+    public int kind() {
+        return piece.variant & 15;
+    }
+
+    /** How deep the room lies on its dungeon's tree, 0 (the entrance) to 7 (the deepest): the danger ramps with it. */
+    public int tier() {
+        return (piece.variant >> 4) & 7;
+    }
+
+    public boolean has(int flag) {
+        return piece.has(flag);
+    }
+
+    /** The boss chamber's one-way back door (to the exit shaft), or null. */
+    public Direction exit() {
+        return piece.role == DungeonPiece.ROLE_BOSS && piece.extra >= 0 ? Direction.from2DDataValue(piece.extra) : null;
+    }
+
+    /** The wall of the raised entrance landing (an entrance hall's vista), or null. */
+    public Direction vista() {
+        return piece.aux > 0 && piece.aux <= 4 ? Direction.from2DDataValue(piece.aux - 1) : null;
+    }
+
+    /** Distance inwards from wall {@code d} (1 = the first block inside). */
+    public int inward(Direction d, int x, int z) {
+        return switch (d) {
+            case EAST -> maxX - x;
+            case WEST -> x - minX;
+            case SOUTH -> maxZ - z;
+            default -> z - minZ;
+        };
+    }
+
+    /** True on the entrance landing and its stairs (kept free of furniture and spawns). */
+    public boolean inVista(int x, int z) {
+        Direction v = vista();
+        if (v == null) return false;
+        int in = inward(v, x, z);
+        int lat = v.getAxis() == Direction.Axis.X ? z - cz : x - cx;
+        return in <= Layout.VISTA_LIFT + 1 || (in <= Layout.VISTA_LIFT + 3 && Math.abs(lat) <= 2);
+    }
+
     /** The side the room was entered from (null for the start room). */
     public Direction entered() {
         return piece.dir >= 0 ? Direction.from2DDataValue(piece.dir) : null;
@@ -87,9 +130,11 @@ public final class Room {
 
     /** True for the open part of a doorway in a wall. */
     public boolean doorway(int x, int y, int z) {
-        if (y < floor || y > floor + 2) return false;
+        Direction v = vista();
         for (Direction d : Direction.Plane.HORIZONTAL) {
             if (!hasDoor(d)) continue;
+            int base = d == v ? floor + Layout.VISTA_LIFT : floor;
+            if (y < base || y > base + 2) continue;
             if (d.getAxis() == Direction.Axis.X) {
                 int wx = d == Direction.EAST ? maxX : minX;
                 if (x == wx && Math.abs(z - cz) <= 1) return true;
@@ -103,6 +148,7 @@ public final class Room {
 
     /** True if (x, z) is within {@code r} blocks (inward and sideways) of any doorway: keep it clear of furniture. */
     public boolean nearDoor(int x, int z, int r) {
+        if (inVista(x, z)) return true;
         for (Direction d : Direction.Plane.HORIZONTAL) {
             if (!hasDoor(d)) continue;
             int inward, lateral;

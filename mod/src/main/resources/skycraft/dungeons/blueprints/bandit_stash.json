@@ -1,0 +1,22 @@
+{
+ "id": "bandit_stash",
+ "themes": [
+  "cave",
+  "mine",
+  "fort"
+ ],
+ "beats": [
+  "cache"
+ ],
+ "layers": [
+  [
+   "bH.Hb",
+   "..w.."
+  ]
+ ],
+ "key": {
+  "b": "minecraft:barrel[facing=up]",
+  "H": "minecraft:hay_block",
+  "w": "minecraft:white_carpet"
+ }
+}
