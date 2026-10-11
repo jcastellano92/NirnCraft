@@ -24,7 +24,7 @@ import org.lwjgl.glfw.GLFW;
 public final class LoreClientSetup {
     /** Uses the active Standing Stone's once-a-day power. Owned by the lore module. */
     public static final KeyMapping STONE_POWER = new KeyMapping("key.skycraft.stone_power", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_O, SkyKeys.CATEGORY);
+            InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), SkyKeys.CATEGORY);
 
     public static final ResourceLocation COVER = new ResourceLocation(Skycraft.MODID, "cover");
 

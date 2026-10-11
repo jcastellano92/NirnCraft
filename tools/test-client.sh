@@ -5,7 +5,7 @@
 # under Xvfb, loads every Skycraft resource (models, blockstates, textures, sounds, lang) and reaches the main menu
 # without a crash. -Dskycraft.autotest=true is passed to the game JVM (through JAVA_TOOL_OPTIONS, because Gradle's own
 # -D flags never reach the forked game); if a world is loaded, ClientAutotest then walks through the Skyrim screens,
-# saves screenshots to mod/build/autotest-screenshots and closes the game.
+# saves screenshots to mod/run/build/autotest-screenshots and closes the game.
 #
 # It fails on: a crash report, the game exiting with an error, never finishing resource loading within the time
 # limit, any exception stack trace through com.skycraft, a client class loaded on the wrong side, or a missing
@@ -20,7 +20,7 @@ rm -rf "$OUT"
 mkdir -p "$OUT"
 LOG="$OUT/client.log"
 cd "$ROOT/mod"
-rm -rf run/crash-reports build/autotest-screenshots
+rm -rf run/crash-reports run/build/autotest-screenshots
 
 echo "=== Skycraft client smoke test (Xvfb + Mesa software OpenGL) ==="
 export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:-} -Dskycraft.autotest=true"
@@ -52,7 +52,7 @@ status=0
 if [ "$exited" = 1 ]; then wait "$GAME"; status=$?; else stop_game; fi
 trap - EXIT
 
-cp -r build/autotest-screenshots "$OUT/" 2>/dev/null || true
+cp -r run/build/autotest-screenshots "$OUT/" 2>/dev/null || true
 cp -r run/crash-reports "$OUT/" 2>/dev/null || true
 cp run/logs/latest.log "$OUT/latest.log" 2>/dev/null || true
 cp run/logs/debug.log "$OUT/debug.log" 2>/dev/null || true

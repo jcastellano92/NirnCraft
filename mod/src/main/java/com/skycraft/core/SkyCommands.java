@@ -29,8 +29,9 @@ public final class SkyCommands {
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skycraft").requires(s -> s.hasPermission(2))
-                .then(Commands.literal("setskill").then(Commands.argument("player", EntityArgument.player())
+        // the /skycraft root is shared with other modules (e.g. /skycraft magic), so each admin subcommand carries its own op check
+        d.register(Commands.literal("skycraft")
+                .then(Commands.literal("setskill").requires(s -> s.hasPermission(2)).then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("skill", StringArgumentType.word())
                                 .suggests((c, b) -> SharedSuggestionProvider.suggest(Arrays.stream(Skill.VALUES).map(Skill::id), b))
                                 .then(Commands.argument("level", IntegerArgumentType.integer(0, 100)).executes(c -> {
@@ -41,7 +42,7 @@ public final class SkyCommands {
                                     c.getSource().sendSuccess(() -> Component.literal("Set " + skill.id()), true);
                                     return 1;
                                 })))))
-                .then(Commands.literal("addskill").then(Commands.argument("player", EntityArgument.player())
+                .then(Commands.literal("addskill").requires(s -> s.hasPermission(2)).then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("skill", StringArgumentType.word())
                                 .suggests((c, b) -> SharedSuggestionProvider.suggest(Arrays.stream(Skill.VALUES).map(Skill::id), b))
                                 .then(Commands.argument("levels", IntegerArgumentType.integer(1, 100)).executes(c -> {
@@ -51,14 +52,14 @@ public final class SkyCommands {
                                     Progression.increaseSkill(p, skill, IntegerArgumentType.getInteger(c, "levels"));
                                     return 1;
                                 })))))
-                .then(Commands.literal("perkpoints").then(Commands.argument("player", EntityArgument.player())
+                .then(Commands.literal("perkpoints").requires(s -> s.hasPermission(2)).then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("amount", IntegerArgumentType.integer(0)).executes(c -> {
                             ServerPlayer p = EntityArgument.getPlayer(c, "player");
                             PlayerData data = SkyData.get(p);
                             data.setPerkPoints(data.getPerkPoints() + IntegerArgumentType.getInteger(c, "amount"));
                             return 1;
                         }))))
-                .then(Commands.literal("gold").then(Commands.argument("player", EntityArgument.player())
+                .then(Commands.literal("gold").requires(s -> s.hasPermission(2)).then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("amount", LongArgumentType.longArg()).executes(c -> {
                             ServerPlayer p = EntityArgument.getPlayer(c, "player");
                             long amount = LongArgumentType.getLong(c, "amount");
@@ -66,12 +67,12 @@ public final class SkyCommands {
                             data.setGold(data.getGold() + amount);
                             return 1;
                         }))))
-                .then(Commands.literal("resetrace").then(Commands.argument("player", EntityArgument.player()).executes(c -> {
+                .then(Commands.literal("resetrace").requires(s -> s.hasPermission(2)).then(Commands.argument("player", EntityArgument.player()).executes(c -> {
                     ServerPlayer p = EntityArgument.getPlayer(c, "player");
                     SkyData.get(p).setRace(null);
                     return 1;
                 })))
-                .then(Commands.literal("reset").then(Commands.argument("player", EntityArgument.player()).executes(c -> {
+                .then(Commands.literal("reset").requires(s -> s.hasPermission(2)).then(Commands.argument("player", EntityArgument.player()).executes(c -> {
                     ServerPlayer p = EntityArgument.getPlayer(c, "player");
                     SkyData.get(p).load(new PlayerData().save());
                     Vitals.refreshAttributes(p);
