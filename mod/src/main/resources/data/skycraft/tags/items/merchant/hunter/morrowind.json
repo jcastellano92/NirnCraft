@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:guar_hide",
+      "required": false
+    },
+    {
+      "id": "skycraft:alit_hide",
+      "required": false
+    },
+    {
+      "id": "skycraft:kagouti_hide",
+      "required": false
+    },
+    {
+      "id": "skycraft:netch_leather",
+      "required": false
+    },
+    {
+      "id": "skycraft:cliff_racer_plumes",
+      "required": false
+    }
+  ]
+}

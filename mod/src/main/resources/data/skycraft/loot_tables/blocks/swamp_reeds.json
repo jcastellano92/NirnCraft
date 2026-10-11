@@ -22,6 +22,38 @@
           }
         }
       ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:marshmerrow",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:swamp_fungal_pod",
+          "weight": 1
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.3
+        },
+        {
+          "condition": "minecraft:inverted",
+          "term": {
+            "condition": "minecraft:match_tool",
+            "predicate": {
+              "items": [
+                "minecraft:shears"
+              ]
+            }
+          }
+        }
+      ]
     }
   ],
   "random_sequence": "skycraft:blocks/swamp_reeds"

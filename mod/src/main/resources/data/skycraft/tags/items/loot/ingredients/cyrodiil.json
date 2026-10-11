@@ -1,0 +1,88 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:nirnroot",
+      "required": false
+    },
+    {
+      "id": "skycraft:elves_ear",
+      "required": false
+    },
+    {
+      "id": "skycraft:canis_root",
+      "required": false
+    },
+    {
+      "id": "skycraft:imp_stool",
+      "required": false
+    },
+    {
+      "id": "skycraft:nightshade",
+      "required": false
+    },
+    {
+      "id": "skycraft:jazbay_grapes",
+      "required": false
+    },
+    {
+      "id": "skycraft:monarch_wing",
+      "required": false
+    },
+    {
+      "id": "skycraft:minotaur_horn",
+      "required": false
+    },
+    {
+      "id": "skycraft:ogre_tooth",
+      "required": false
+    },
+    {
+      "id": "skycraft:spriggan_sap",
+      "required": false
+    },
+    {
+      "id": "skycraft:wisp_wrappings",
+      "required": false
+    },
+    {
+      "id": "skycraft:dreugh_wax",
+      "required": false
+    },
+    {
+      "id": "skycraft:bleeding_crown",
+      "required": false
+    },
+    {
+      "id": "skycraft:white_cap",
+      "required": false
+    },
+    {
+      "id": "skycraft:ectoplasm",
+      "required": false
+    },
+    {
+      "id": "skycraft:scamp_skin",
+      "required": false
+    },
+    {
+      "id": "skycraft:bear_claws",
+      "required": false
+    },
+    {
+      "id": "skycraft:salt_pile",
+      "required": false
+    },
+    {
+      "id": "skycraft:hawk_feather",
+      "required": false
+    },
+    {
+      "id": "skycraft:garlic",
+      "required": false
+    },
+    "minecraft:lilac",
+    "minecraft:red_tulip",
+    "minecraft:white_tulip"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:chitin_plate",
+      "required": false
+    },
+    "minecraft:bone"
+  ]
+}

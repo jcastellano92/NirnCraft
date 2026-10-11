@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:ash_yam",
+      "required": false
+    },
+    {
+      "id": "skycraft:kwama_egg",
+      "required": false
+    },
+    {
+      "id": "skycraft:boar_tusk",
+      "required": false
+    }
+  ]
+}

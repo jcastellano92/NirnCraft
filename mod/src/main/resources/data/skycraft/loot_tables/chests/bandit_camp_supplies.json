@@ -179,8 +179,8 @@
           "weight": 2,
           "functions": [
             {
-              "function": "minecraft:set_potion",
-              "id": "minecraft:healing"
+              "function": "skycraft:skyrim_potion",
+              "poison": false
             }
           ]
         },

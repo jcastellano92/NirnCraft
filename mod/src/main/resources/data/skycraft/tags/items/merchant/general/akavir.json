@@ -1,0 +1,18 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:pearl",
+      "required": false
+    },
+    {
+      "id": "skycraft:small_pearl",
+      "required": false
+    },
+    "minecraft:sugar",
+    {
+      "id": "skycraft:steel_ingot",
+      "required": false
+    }
+  ]
+}

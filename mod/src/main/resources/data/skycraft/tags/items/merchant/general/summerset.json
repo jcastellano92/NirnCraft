@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:alto_wine",
+      "required": false
+    },
+    {
+      "id": "skycraft:pearl",
+      "required": false
+    },
+    {
+      "id": "skycraft:elves_ear",
+      "required": false
+    },
+    {
+      "id": "skycraft:refined_moonstone",
+      "required": false
+    }
+  ]
+}

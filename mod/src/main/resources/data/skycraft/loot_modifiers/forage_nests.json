@@ -1,0 +1,52 @@
+{
+  "type": "skycraft:add_table",
+  "conditions": [
+    {
+      "condition": "minecraft:any_of",
+      "terms": [
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "minecraft:blocks/spruce_leaves"
+        },
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "minecraft:blocks/oak_leaves"
+        },
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "minecraft:blocks/birch_leaves"
+        },
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "minecraft:blocks/dark_oak_leaves"
+        },
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "skycraft:blocks/snowy_spruce_leaves"
+        },
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "skycraft:blocks/golden_aspen_leaves"
+        },
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "skycraft:blocks/orange_aspen_leaves"
+        }
+      ]
+    },
+    {
+      "condition": "minecraft:inverted",
+      "term": {
+        "condition": "minecraft:match_tool",
+        "predicate": {
+          "items": [
+            "minecraft:shears"
+          ]
+        }
+      }
+    }
+  ],
+  "table": "skycraft:forage/nests",
+  "prefix": "blocks/",
+  "chance": 0.012
+}

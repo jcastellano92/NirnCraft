@@ -1,0 +1,62 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:hist_sap",
+      "required": false
+    },
+    {
+      "id": "skycraft:swamp_fungal_pod",
+      "required": false
+    },
+    {
+      "id": "skycraft:wamasu_scale",
+      "required": false
+    },
+    {
+      "id": "skycraft:leviathan_tooth",
+      "required": false
+    },
+    {
+      "id": "skycraft:hanging_moss",
+      "required": false
+    },
+    {
+      "id": "skycraft:nightshade",
+      "required": false
+    },
+    {
+      "id": "skycraft:deathbell",
+      "required": false
+    },
+    {
+      "id": "skycraft:chaurus_eggs",
+      "required": false
+    },
+    {
+      "id": "skycraft:bittergreen_petals",
+      "required": false
+    },
+    {
+      "id": "skycraft:hypha_facia",
+      "required": false
+    },
+    {
+      "id": "skycraft:mudcrab_chitin",
+      "required": false
+    },
+    {
+      "id": "skycraft:slaughterfish_scales",
+      "required": false
+    },
+    {
+      "id": "skycraft:marshmerrow",
+      "required": false
+    },
+    "minecraft:blue_orchid",
+    {
+      "id": "skycraft:poison_bloom",
+      "required": false
+    }
+  ]
+}

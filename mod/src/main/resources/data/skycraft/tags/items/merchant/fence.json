@@ -1,28 +1,40 @@
 {
   "replace": false,
   "values": [
+    {
+      "id": "skycraft:lockpick",
+      "required": false
+    },
     "minecraft:gold_ingot",
+    {
+      "id": "skycraft:silver_ingot",
+      "required": false
+    },
     "minecraft:gold_nugget",
-    "minecraft:diamond",
-    "minecraft:emerald",
-    "minecraft:amethyst_shard",
-    "minecraft:lapis_lazuli",
-    "minecraft:quartz",
-    "minecraft:name_tag",
-    "minecraft:clock",
-    "minecraft:compass",
-    "minecraft:ender_pearl",
-    "minecraft:golden_apple",
-    "minecraft:spyglass",
-    "minecraft:golden_carrot",
-    "minecraft:music_disc_cat",
-    "minecraft:music_disc_13",
-    "minecraft:music_disc_mellohi",
-    "minecraft:skeleton_skull",
-    "minecraft:saddle",
+    "minecraft:splash_potion",
+    "minecraft:splash_potion",
+    {
+      "id": "skycraft:skooma",
+      "required": false
+    },
+    {
+      "id": "skycraft:moon_sugar",
+      "required": false
+    },
     {
       "id": "#skycraft:thief_goods",
       "required": false
-    }
+    },
+    {
+      "id": "#skycraft:merchant/gems",
+      "required": false
+    },
+    {
+      "id": "#skycraft:jewelry",
+      "required": false
+    },
+    "minecraft:name_tag",
+    "minecraft:spyglass",
+    "minecraft:clock"
   ]
 }

@@ -225,6 +225,50 @@ public final class ArcaneEvents {
         if (lvl > 0 && entity.isShiftKeyDown()) event.modifyVisibility(Math.max(0.2, 1.0 - 0.15 * lvl));
     }
 
+    // ------------------------------------------------------------------ Fortify Magicka / Stamina / Carry Weight
+
+    /** Pool keys of the core's {@code module("bonus")} and what one level of the matching fortify effect adds. */
+    private static final String[] FORTIFY_KEYS = {"magicka", "stamina", "carry"};
+    private static final float FORTIFY_STEP = 25f;
+    private static final String APPLIED_FORTIFY = "applied_fortify";
+
+    /**
+     * Keeps this module's share of {@code module("bonus")} equal to what the active Fortify Magicka, Fortify Stamina
+     * and Fortify Carry Weight effects call for (+25 per level). Only the difference to what was applied before is
+     * added, so standing stones, blessings and other modules sharing the keys are left alone; when the effect ends
+     * (or the player dies) the next check takes the bonus back.
+     */
+    @SubscribeEvent
+    public static void onPlayerTick(net.minecraftforge.event.TickEvent.PlayerTickEvent event) {
+        if (event.phase != net.minecraftforge.event.TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+        if (player.tickCount % 10 != 3) return;
+        float[] want = {
+                FORTIFY_STEP * ArcaneEffects.level(player, ArcaneEffects.FORTIFY_MAGICKA),
+                FORTIFY_STEP * ArcaneEffects.level(player, ArcaneEffects.FORTIFY_STAMINA),
+                FORTIFY_STEP * ArcaneEffects.level(player, ArcaneEffects.FORTIFY_CARRY_WEIGHT)
+        };
+        com.skycraft.core.PlayerData data = com.skycraft.core.SkyData.get(player);
+        CompoundTag module = data.module(ArcaneModule.DATA);
+        CompoundTag applied = module.getCompound(APPLIED_FORTIFY);
+        CompoundTag bonus = data.module("bonus");
+        boolean changed = false;
+        for (int i = 0; i < FORTIFY_KEYS.length; i++) {
+            float diff = want[i] - applied.getFloat(FORTIFY_KEYS[i]);
+            if (diff == 0f) continue;
+            bonus.putFloat(FORTIFY_KEYS[i], bonus.getFloat(FORTIFY_KEYS[i]) + diff);
+            applied.putFloat(FORTIFY_KEYS[i], want[i]);
+            changed = true;
+        }
+        if (!changed) return;
+        module.put(APPLIED_FORTIFY, applied);
+        // the pools may now exceed a lowered maximum
+        data.setMagicka(data.getMagicka());
+        data.setStamina(data.getStamina());
+        data.markDirty();
+        data.markVitalsDirty();
+        com.skycraft.vitals.Vitals.refreshAttributes(player);
+    }
+
     // ------------------------------------------------------------------ Soul Siphon
 
     @SubscribeEvent

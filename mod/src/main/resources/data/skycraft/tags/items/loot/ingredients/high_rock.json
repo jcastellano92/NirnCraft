@@ -1,0 +1,65 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:ogre_tooth",
+      "required": false
+    },
+    {
+      "id": "skycraft:gargoyle_shard",
+      "required": false
+    },
+    {
+      "id": "skycraft:harpy_feather",
+      "required": false
+    },
+    {
+      "id": "skycraft:nightshade",
+      "required": false
+    },
+    {
+      "id": "skycraft:deathbell",
+      "required": false
+    },
+    {
+      "id": "skycraft:white_cap",
+      "required": false
+    },
+    {
+      "id": "skycraft:bleeding_crown",
+      "required": false
+    },
+    {
+      "id": "skycraft:imp_stool",
+      "required": false
+    },
+    {
+      "id": "skycraft:hagraven_feathers",
+      "required": false
+    },
+    {
+      "id": "skycraft:hagraven_claw",
+      "required": false
+    },
+    {
+      "id": "skycraft:spriggan_sap",
+      "required": false
+    },
+    {
+      "id": "skycraft:juniper_berries",
+      "required": false
+    },
+    {
+      "id": "skycraft:nirnroot",
+      "required": false
+    },
+    {
+      "id": "skycraft:canis_root",
+      "required": false
+    },
+    {
+      "id": "skycraft:hawk_feather",
+      "required": false
+    }
+  ]
+}

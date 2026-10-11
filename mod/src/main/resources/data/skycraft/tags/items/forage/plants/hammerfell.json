@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:juniper_berries",
+      "required": false
+    },
+    {
+      "id": "skycraft:elves_ear",
+      "required": false
+    }
+  ]
+}

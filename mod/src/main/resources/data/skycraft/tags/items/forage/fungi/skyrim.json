@@ -1,0 +1,37 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:imp_stool",
+      "required": false
+    },
+    {
+      "id": "skycraft:namiras_rot",
+      "required": false
+    },
+    {
+      "id": "skycraft:white_cap",
+      "required": false
+    },
+    {
+      "id": "skycraft:bleeding_crown",
+      "required": false
+    },
+    {
+      "id": "skycraft:mora_tapinella",
+      "required": false
+    },
+    {
+      "id": "skycraft:glowing_mushroom",
+      "required": false
+    },
+    {
+      "id": "skycraft:swamp_fungal_pod",
+      "required": false
+    },
+    {
+      "id": "skycraft:creep_cluster",
+      "required": false
+    }
+  ]
+}

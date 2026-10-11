@@ -1,0 +1,44 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:moon_sugar",
+      "required": false
+    },
+    "minecraft:sugar",
+    "minecraft:cocoa_beans",
+    {
+      "id": "skycraft:scorpion_stinger",
+      "required": false
+    },
+    {
+      "id": "skycraft:harpy_feather",
+      "required": false
+    },
+    {
+      "id": "skycraft:sabre_cat_tooth",
+      "required": false
+    },
+    {
+      "id": "skycraft:jazbay_grapes",
+      "required": false
+    },
+    {
+      "id": "skycraft:mudcrab_chitin",
+      "required": false
+    },
+    {
+      "id": "skycraft:juniper_berries",
+      "required": false
+    },
+    {
+      "id": "skycraft:salt_pile",
+      "required": false
+    },
+    {
+      "id": "skycraft:hawk_feather",
+      "required": false
+    },
+    "minecraft:orange_tulip"
+  ]
+}

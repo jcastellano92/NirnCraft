@@ -38,6 +38,38 @@
           ]
         }
       ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:ashen_grass_pod",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:ash_yam",
+          "weight": 1
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.25
+        },
+        {
+          "condition": "minecraft:inverted",
+          "term": {
+            "condition": "minecraft:match_tool",
+            "predicate": {
+              "items": [
+                "minecraft:shears"
+              ]
+            }
+          }
+        }
+      ]
     }
   ],
   "random_sequence": "skycraft:blocks/ash_grass"

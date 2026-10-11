@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:moon_sugar",
+      "required": false
+    },
+    "minecraft:sugar",
+    {
+      "id": "skycraft:elsweyr_fondue",
+      "required": false
+    }
+  ]
+}

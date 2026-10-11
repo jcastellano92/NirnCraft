@@ -1,0 +1,53 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:frost_atronach",
+      "required": false
+    },
+    {
+      "id": "skycraft:storm_atronach",
+      "required": false
+    },
+    {
+      "id": "skycraft:minotaur",
+      "required": false
+    },
+    {
+      "id": "skycraft:wamasu",
+      "required": false
+    },
+    {
+      "id": "skycraft:sand_serpent",
+      "required": false
+    },
+    {
+      "id": "skycraft:indrik",
+      "required": false
+    },
+    {
+      "id": "skycraft:dremora",
+      "required": false
+    },
+    {
+      "id": "skycraft:wispmother",
+      "required": false
+    },
+    {
+      "id": "skycraft:mammoth",
+      "required": false
+    },
+    {
+      "id": "skycraft:draugr_deathlord",
+      "required": false
+    },
+    {
+      "id": "skycraft:silt_strider",
+      "required": false
+    },
+    {
+      "id": "skycraft:tsaesci",
+      "required": false
+    }
+  ]
+}

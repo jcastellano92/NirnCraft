@@ -43,10 +43,26 @@ public final class SoulGems {
         return entity instanceof Player || entity.getType().is(BLACK_SOULS);
     }
 
-    /** Soul size 1 (petty) .. 5 (grand), or 6 for a black soul. */
+    /** Creature tiers: {@code #skycraft:souls/petty} .. {@code #skycraft:souls/grand} fix a creature's soul size. */
+    private static final java.util.List<TagKey<EntityType<?>>> SOUL_TIERS = java.util.List.of(
+            soulTag("petty"), soulTag("lesser"), soulTag("common"), soulTag("greater"), soulTag("grand"));
+
+    private static TagKey<EntityType<?>> soulTag(String size) {
+        return TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Skycraft.MODID, "souls/" + size));
+    }
+
+    /**
+     * Soul size 1 (petty) .. 5 (grand), or 6 for a black soul. Skyrim sizes souls by creature tier: the
+     * {@code #skycraft:souls/*} tags say it for the bestiary (a skeever is petty, a frost atronach greater, a dragon
+     * priest grand); anything else goes by its base max health, before Skycraft's leveling bonus.
+     */
     public static int soulSize(LivingEntity entity) {
         if (isBlackSoul(entity)) return BLACK;
-        float hp = entity.getMaxHealth();
+        for (int i = 0; i < SOUL_TIERS.size(); i++) {
+            if (entity.getType().is(SOUL_TIERS.get(i))) return PETTY + i;
+        }
+        var attr = entity.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+        float hp = attr != null ? (float) attr.getBaseValue() : entity.getMaxHealth();
         if (hp < 10) return PETTY;
         if (hp < 20) return LESSER;
         if (hp < 40) return COMMON;

@@ -108,6 +108,9 @@ public final class ArsenalItems {
 
     static {
         for (SmithingTier tier : SmithingTier.values()) {
+            // only the nine classic materials have polearm art, recipes, values and tags (tools/textures/arsenal.py
+            // POLEARM_TIERS); the province materials added later have none
+            if (tier.ordinal() > SmithingTier.DRAGONBONE.ordinal()) continue;
             Map<PolearmKind, RegistryObject<Item>> byKind = new EnumMap<>(PolearmKind.class);
             for (PolearmKind kind : PolearmKind.VALUES) {
                 byKind.put(kind, ITEMS.register(kind.itemId(tier), () -> {

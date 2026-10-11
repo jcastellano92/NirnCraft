@@ -3,475 +3,77 @@
   "pools": [
     {
       "rolls": 1,
-      "bonus_rolls": 0,
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "skycraft:iron_dagger",
-          "weight": 6
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:iron_sword",
-          "weight": 6
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:iron_war_axe",
-          "weight": 6
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:iron_mace",
-          "weight": 6
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:iron_greatsword",
-          "weight": 6
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:iron_battleaxe",
-          "weight": 6
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:iron_warhammer",
-          "weight": 6
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:iron_bow",
-          "weight": 6
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:steel_dagger",
-          "weight": 4
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:steel_sword",
-          "weight": 4
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:steel_war_axe",
-          "weight": 4
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:steel_mace",
-          "weight": 4
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:steel_greatsword",
-          "weight": 4
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:steel_battleaxe",
-          "weight": 4
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:steel_warhammer",
-          "weight": 4
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:steel_bow",
-          "weight": 4
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:elven_dagger",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:elven_sword",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:elven_war_axe",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:elven_mace",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:elven_greatsword",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:elven_battleaxe",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:elven_warhammer",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:elven_bow",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:orcish_dagger",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:orcish_sword",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:orcish_war_axe",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:orcish_mace",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:orcish_greatsword",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:orcish_battleaxe",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:orcish_warhammer",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:orcish_bow",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:dwarven_dagger",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:dwarven_sword",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:dwarven_war_axe",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:dwarven_mace",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:dwarven_greatsword",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:dwarven_battleaxe",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:dwarven_warhammer",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:dwarven_bow",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:glass_dagger",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:glass_sword",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:glass_war_axe",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:glass_mace",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:glass_greatsword",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:glass_battleaxe",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:glass_warhammer",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:glass_bow",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:ebony_dagger",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:ebony_sword",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:ebony_war_axe",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:ebony_mace",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:ebony_greatsword",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:ebony_battleaxe",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:ebony_warhammer",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:ebony_bow",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:daedric_dagger",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:daedric_sword",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:daedric_war_axe",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:daedric_bow",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:hide_helmet",
-          "weight": 5
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:hide_chestplate",
-          "weight": 5
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:hide_leggings",
-          "weight": 5
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:hide_boots",
-          "weight": 5
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:steel_helmet",
-          "weight": 3
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:steel_chestplate",
-          "weight": 3
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:steel_leggings",
-          "weight": 3
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:steel_boots",
-          "weight": 3
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:elven_helmet",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:elven_chestplate",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:elven_leggings",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:elven_boots",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:orcish_helmet",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:orcish_chestplate",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:orcish_leggings",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:orcish_boots",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:dwarven_helmet",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:dwarven_chestplate",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:dwarven_leggings",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:dwarven_boots",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:glass_helmet",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:glass_chestplate",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:glass_leggings",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:glass_boots",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:ebony_helmet",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "skycraft:ebony_boots",
-          "weight": 1
-        }
-      ],
-      "functions": [
-        {
-          "function": "minecraft:set_damage",
-          "damage": {
-            "type": "minecraft:uniform",
-            "min": 0.55,
-            "max": 1.0
-          }
-        },
-        {
-          "function": "minecraft:set_nbt",
-          "tag": "{skycraft_quality:1}",
-          "conditions": [
+          "name": "minecraft:iron_sword",
+          "weight": 40,
+          "functions": [
             {
-              "condition": "minecraft:random_chance",
-              "chance": 0.3
+              "function": "skycraft:leveled_gear",
+              "kind": "weapon",
+              "enchant_chance": 0.1,
+              "quality_chance": 0.15
             }
           ]
         },
         {
-          "function": "minecraft:set_nbt",
-          "tag": "{skycraft_quality:2}",
-          "conditions": [
+          "type": "minecraft:item",
+          "name": "minecraft:iron_sword",
+          "weight": 35,
+          "functions": [
             {
-              "condition": "minecraft:random_chance",
-              "chance": 0.12
+              "function": "skycraft:leveled_gear",
+              "kind": "armor",
+              "enchant_chance": 0.1,
+              "quality_chance": 0.15
             }
           ]
         },
         {
-          "function": "minecraft:set_nbt",
-          "tag": "{skycraft_quality:3}",
-          "conditions": [
+          "type": "minecraft:item",
+          "name": "minecraft:iron_sword",
+          "weight": 10,
+          "functions": [
             {
-              "condition": "minecraft:random_chance",
-              "chance": 0.04
+              "function": "skycraft:leveled_gear",
+              "kind": "bow",
+              "enchant_chance": 0.1,
+              "quality_chance": 0.15
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_sword",
+          "weight": 10,
+          "functions": [
+            {
+              "function": "skycraft:leveled_gear",
+              "kind": "shield",
+              "enchant_chance": 0.1,
+              "quality_chance": 0.15
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:arrow",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 6,
+                "max": 14
+              }
+            },
+            {
+              "function": "skycraft:leveled_gear",
+              "kind": "arrow",
+              "enchant_chance": 0.1,
+              "quality_chance": 0.15
             }
           ]
         }

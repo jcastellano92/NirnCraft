@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:alto_wine",
+      "required": false
+    },
+    {
+      "id": "skycraft:spiced_wine",
+      "required": false
+    },
+    {
+      "id": "skycraft:jazbay_grapes",
+      "required": false
+    }
+  ]
+}

@@ -5,27 +5,50 @@
     "minecraft:potion",
     "minecraft:splash_potion",
     "minecraft:glass_bottle",
-    "minecraft:nether_wart",
-    "minecraft:blaze_powder",
-    "minecraft:spider_eye",
-    "minecraft:fermented_spider_eye",
-    "minecraft:sugar",
-    "minecraft:glistering_melon_slice",
-    "minecraft:golden_carrot",
-    "minecraft:magma_cream",
-    "minecraft:ghast_tear",
-    "minecraft:rabbit_foot",
-    "minecraft:phantom_membrane",
-    "minecraft:glowstone_dust",
-    "minecraft:redstone",
-    "minecraft:gunpowder",
-    "minecraft:brown_mushroom",
-    "minecraft:red_mushroom",
-    "minecraft:honey_bottle",
-    "minecraft:lingering_potion",
-    "minecraft:pufferfish",
     {
-      "id": "#skycraft:alchemy_goods",
+      "id": "skycraft:salt_pile",
+      "required": false
+    },
+    {
+      "id": "skycraft:nightshade",
+      "required": false
+    },
+    {
+      "id": "skycraft:deathbell",
+      "required": false
+    },
+    {
+      "id": "skycraft:frost_mirriam",
+      "required": false
+    },
+    {
+      "id": "skycraft:bear_claws",
+      "required": false
+    },
+    {
+      "id": "skycraft:hawk_feather",
+      "required": false
+    },
+    {
+      "id": "skycraft:garlic",
+      "required": false
+    },
+    "minecraft:nether_wart",
+    "minecraft:spider_eye",
+    "minecraft:glowstone_dust",
+    "minecraft:red_mushroom",
+    "minecraft:brown_mushroom",
+    "minecraft:honeycomb",
+    {
+      "id": "skycraft:fire_salts",
+      "required": false
+    },
+    {
+      "id": "skycraft:frost_salts",
+      "required": false
+    },
+    {
+      "id": "skycraft:vampire_dust",
       "required": false
     }
   ]

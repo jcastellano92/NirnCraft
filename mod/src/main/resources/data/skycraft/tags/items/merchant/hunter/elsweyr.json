@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:sabre_cat_tooth",
+      "required": false
+    },
+    {
+      "id": "skycraft:scorpion_stinger",
+      "required": false
+    }
+  ]
+}

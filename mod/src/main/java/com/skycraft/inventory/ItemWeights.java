@@ -87,6 +87,15 @@ public final class ItemWeights {
         return t.cache.computeIfAbsent(item, t::resolve);
     }
 
+    /** Where an item's weight comes from: {@code "item"} (listed), {@code "tag"} or {@code "heuristic"} (audits). */
+    public static String source(Item item) {
+        Table t = table;
+        if (t.items.containsKey(BuiltInRegistries.ITEM.getKey(item))) return "item";
+        ItemStack probe = new ItemStack(item);
+        for (Map.Entry<TagKey<Item>, Float> e : t.tagKeys) if (probe.is(e.getKey())) return "tag";
+        return "heuristic";
+    }
+
     /** Pretty "9", "0.5", "12.3" (one decimal at most). */
     public static String format(float weight) {
         float rounded = Math.round(weight * 10f) / 10f;

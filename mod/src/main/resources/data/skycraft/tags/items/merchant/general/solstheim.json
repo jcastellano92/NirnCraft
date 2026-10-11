@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:netch_leather",
+      "required": false
+    },
+    {
+      "id": "skycraft:chitin_plate",
+      "required": false
+    },
+    {
+      "id": "skycraft:boar_tusk",
+      "required": false
+    },
+    {
+      "id": "skycraft:ashen_grass_pod",
+      "required": false
+    },
+    {
+      "id": "skycraft:trama_root",
+      "required": false
+    },
+    {
+      "id": "skycraft:hide",
+      "required": false
+    }
+  ]
+}

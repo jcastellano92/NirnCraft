@@ -1,0 +1,37 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:salt_pile",
+      "required": false
+    },
+    {
+      "id": "skycraft:scorpion_stinger",
+      "required": false
+    },
+    {
+      "id": "skycraft:sea_serpent_scale",
+      "required": false
+    },
+    {
+      "id": "skycraft:pearl",
+      "required": false
+    },
+    {
+      "id": "skycraft:small_pearl",
+      "required": false
+    },
+    {
+      "id": "skycraft:harpy_feather",
+      "required": false
+    },
+    {
+      "id": "skycraft:juniper_berries",
+      "required": false
+    },
+    {
+      "id": "skycraft:fire_salts",
+      "required": false
+    }
+  ]
+}

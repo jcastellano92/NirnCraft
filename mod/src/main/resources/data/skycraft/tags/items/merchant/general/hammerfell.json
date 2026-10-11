@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:cocoa_beans",
+    {
+      "id": "skycraft:salt_pile",
+      "required": false
+    },
+    {
+      "id": "skycraft:juniper_berries",
+      "required": false
+    },
+    "minecraft:sugar"
+  ]
+}

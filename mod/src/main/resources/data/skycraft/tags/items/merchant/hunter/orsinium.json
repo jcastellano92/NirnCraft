@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:echatere_hide",
+      "required": false
+    },
+    {
+      "id": "skycraft:durzog_hide",
+      "required": false
+    },
+    {
+      "id": "skycraft:troll_fat",
+      "required": false
+    }
+  ]
+}

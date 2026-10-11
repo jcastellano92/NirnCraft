@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:silver_ingot",
+      "required": false
+    },
+    {
+      "id": "skycraft:steel_ingot",
+      "required": false
+    }
+  ]
+}

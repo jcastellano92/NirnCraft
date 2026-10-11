@@ -1,25 +1,37 @@
 {
   "replace": false,
   "values": [
-    "minecraft:enchanted_book",
-    "minecraft:enchanted_book",
-    "minecraft:experience_bottle",
-    "minecraft:lapis_lazuli",
+    "minecraft:book",
+    "minecraft:paper",
     "minecraft:amethyst_shard",
-    "minecraft:ender_pearl",
-    "minecraft:ender_eye",
-    "minecraft:blaze_rod",
     "minecraft:glowstone_dust",
     "minecraft:potion",
-    "minecraft:book",
-    "minecraft:echo_shard",
-    "minecraft:glow_ink_sac",
     {
-      "id": "#skycraft:arcane_goods",
+      "id": "skycraft:void_salts",
       "required": false
     },
     {
-      "id": "#skycraft:spell_tomes",
+      "id": "skycraft:fire_salts",
+      "required": false
+    },
+    {
+      "id": "skycraft:frost_salts",
+      "required": false
+    },
+    {
+      "id": "skycraft:glow_dust",
+      "required": false
+    },
+    {
+      "id": "skycraft:ectoplasm",
+      "required": false
+    },
+    {
+      "id": "skycraft:soul_gem_petty",
+      "required": false
+    },
+    {
+      "id": "skycraft:soul_gem_lesser",
       "required": false
     }
   ]

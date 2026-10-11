@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:rock_warbler_egg",
+      "required": false
+    },
+    {
+      "id": "skycraft:pine_thrush_egg",
+      "required": false
+    },
+    {
+      "id": "skycraft:hawks_egg",
+      "required": false
+    }
+  ]
+}

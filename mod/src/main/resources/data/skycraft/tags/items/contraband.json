@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:moon_sugar",
+      "required": false
+    },
+    {
+      "id": "skycraft:skooma",
+      "required": false
+    }
+  ]
+}

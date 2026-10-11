@@ -1,0 +1,69 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:troll",
+      "required": false
+    },
+    {
+      "id": "skycraft:chaurus_hunter",
+      "required": false
+    },
+    {
+      "id": "skycraft:flame_atronach",
+      "required": false
+    },
+    {
+      "id": "skycraft:draugr",
+      "required": false
+    },
+    {
+      "id": "skycraft:dwarven_sphere",
+      "required": false
+    },
+    {
+      "id": "skycraft:gargoyle",
+      "required": false
+    },
+    {
+      "id": "skycraft:ogre",
+      "required": false
+    },
+    {
+      "id": "skycraft:land_dreugh",
+      "required": false
+    },
+    {
+      "id": "skycraft:netch",
+      "required": false
+    },
+    {
+      "id": "skycraft:echatere",
+      "required": false
+    },
+    {
+      "id": "skycraft:kamal",
+      "required": false
+    },
+    {
+      "id": "skycraft:ash_spawn",
+      "required": false
+    },
+    {
+      "id": "skycraft:giant_scorpion",
+      "required": false
+    },
+    {
+      "id": "skycraft:dwarven_ballista",
+      "required": false
+    },
+    {
+      "id": "skycraft:realm_wyrm",
+      "required": false
+    },
+    {
+      "id": "skycraft:hagraven",
+      "required": false
+    }
+  ]
+}

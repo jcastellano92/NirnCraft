@@ -19,7 +19,7 @@
           "name": "minecraft:iron_sword",
           "functions": [
             {
-              "function": "skycraft:leveled_gear",
+              "function": "skycraft:regional_gear",
               "kind": "weapon",
               "enchant_chance": 0.12,
               "quality_chance": 0.15
@@ -32,7 +32,7 @@
           "name": "minecraft:iron_chestplate",
           "functions": [
             {
-              "function": "skycraft:leveled_gear",
+              "function": "skycraft:regional_gear",
               "kind": "armor",
               "enchant_chance": 0.12,
               "quality_chance": 0.15
@@ -126,10 +126,14 @@
           "weight": 3
         },
         {
-          "type": "minecraft:tag",
-          "name": "skycraft:spell_tomes",
-          "expand": true,
-          "weight": 1
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "skycraft:leveled_tome"
+            }
+          ]
         },
         {
           "type": "minecraft:item",
@@ -149,6 +153,53 @@
         {
           "type": "minecraft:empty",
           "weight": 30
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "skycraft:skyrim_potion",
+              "poison": false
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "skycraft:skyrim_potion",
+              "poison": true
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 3
         }
       ]
     }

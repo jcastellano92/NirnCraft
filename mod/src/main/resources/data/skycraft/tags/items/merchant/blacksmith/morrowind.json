@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:chitin_plate",
+      "required": false
+    },
+    {
+      "id": "skycraft:netch_leather",
+      "required": false
+    },
+    "minecraft:bone",
+    {
+      "id": "skycraft:ebony_ingot",
+      "required": false
+    },
+    {
+      "id": "skycraft:raw_ebony",
+      "required": false
+    }
+  ]
+}

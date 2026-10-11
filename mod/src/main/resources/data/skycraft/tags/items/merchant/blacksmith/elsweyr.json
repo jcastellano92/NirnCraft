@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:gold_ingot",
+    {
+      "id": "skycraft:steel_ingot",
+      "required": false
+    }
+  ]
+}

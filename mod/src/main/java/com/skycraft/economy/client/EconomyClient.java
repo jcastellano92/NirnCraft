@@ -41,6 +41,9 @@ public final class EconomyClient {
     public static void onTooltip(ItemTooltipEvent event) {
         ItemStack stack = event.getItemStack();
         if (stack.isEmpty() || Currency.valueOf(stack) > 0) return;
+        if (stack.is(com.skycraft.economy.Merchants.CONTRABAND)) {
+            event.getToolTip().add(Component.translatable("tooltip.skycraft.economy.contraband").withStyle(ChatFormatting.DARK_RED));
+        }
         int value = ItemValues.get(stack);
         if (value <= 0) return;
         event.getToolTip().add(Component.translatable("tooltip.skycraft.economy.value", value).withStyle(ChatFormatting.GOLD));

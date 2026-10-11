@@ -1,0 +1,35 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:kamal_horn",
+      "required": false
+    },
+    {
+      "id": "skycraft:tsaesci_scale",
+      "required": false
+    },
+    {
+      "id": "skycraft:frost_salts",
+      "required": false
+    },
+    {
+      "id": "skycraft:small_pearl",
+      "required": false
+    },
+    {
+      "id": "skycraft:pearl",
+      "required": false
+    },
+    {
+      "id": "skycraft:ectoplasm",
+      "required": false
+    },
+    {
+      "id": "skycraft:glowing_mushroom",
+      "required": false
+    },
+    "minecraft:pink_tulip",
+    "minecraft:white_tulip"
+  ]
+}

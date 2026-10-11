@@ -141,6 +141,15 @@ public final class ItemValues {
         return t.cache.computeIfAbsent(item, t::resolve);
     }
 
+    /** Where an item's base value comes from: {@code "item"} (listed), {@code "tag"} or {@code "heuristic"} (audits). */
+    public static String source(Item item) {
+        Table t = table;
+        if (t.items.containsKey(BuiltInRegistries.ITEM.getKey(item))) return "item";
+        ItemStack probe = new ItemStack(item);
+        for (Map.Entry<TagKey<Item>, Integer> e : t.tagKeys) if (probe.is(e.getKey())) return "tag";
+        return "heuristic";
+    }
+
     // ------------------------------------------------------------------ table
 
     /** Immutable snapshot of the loaded data (swapped atomically on reload / client sync). */

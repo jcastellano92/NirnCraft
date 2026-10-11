@@ -163,13 +163,29 @@ public final class Enchanting {
     /** Whether the enchantment can be bound into the item (known, applicable and compatible). */
     public static boolean canApply(Player player, ItemStack stack, Enchantment ench) {
         if (ench.isCurse() || !knows(player, ench)) return false;
-        boolean canOnItem = ench.canEnchant(stack) || isJewelryEnchant(stack, ench);
-        if (!canOnItem) return false;
+        if (!fits(stack, ench)) return false;
         Set<Enchantment> existing = EnchantmentHelper.getEnchantments(stack).keySet();
         for (Enchantment other : existing) {
             if (other == ench || !other.isCompatibleWith(ench)) return false;
         }
         return true;
+    }
+
+    /**
+     * Whether the enchantment belongs on this kind of item at the Arcane Enchanter (ignoring knowledge and what is
+     * already on it). Weapons, bows, crossbows and armour use the enchantment's own category; like Skyrim, shields
+     * also take armour enchantments (Protection and its kin) and rings, necklaces and circlets take armour and
+     * wearable enchantments.
+     */
+    public static boolean fits(ItemStack stack, Enchantment ench) {
+        if (ench.canEnchant(stack) || isJewelryEnchant(stack, ench)) return true;
+        if (stack.getItem() instanceof net.minecraft.world.item.ShieldItem) {
+            var cat = ench.category;
+            return cat == net.minecraft.world.item.enchantment.EnchantmentCategory.ARMOR
+                    || cat == net.minecraft.world.item.enchantment.EnchantmentCategory.ARMOR_CHEST
+                    || cat == net.minecraft.world.item.enchantment.EnchantmentCategory.WEARABLE;
+        }
+        return false;
     }
 
     private static boolean isJewelryEnchant(ItemStack stack, Enchantment ench) {

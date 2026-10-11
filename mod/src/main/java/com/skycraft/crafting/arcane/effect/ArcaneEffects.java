@@ -47,6 +47,12 @@ public final class ArcaneEffects {
     public static final RegistryObject<MobEffect> DAMAGE_STAMINA_REGEN = EFFECTS.register("damage_stamina_regen", () -> new PoolTickEffect(BAD, 0x607040, false, -1.5f));
     public static final RegistryObject<MobEffect> RAVAGE_MAGICKA = EFFECTS.register("ravage_magicka", () -> new PoolTickEffect(BAD, 0x302060, true, -4f));
     public static final RegistryObject<MobEffect> RAVAGE_STAMINA = EFFECTS.register("ravage_stamina", () -> new PoolTickEffect(BAD, 0x505020, false, -4f));
+    /** Skyrim's "Lingering Damage Magicka/Stamina" poisons: a slow drain (Ravage drains faster but for less time). */
+    public static final RegistryObject<MobEffect> LINGERING_DAMAGE_MAGICKA = EFFECTS.register("lingering_damage_magicka", () -> new PoolTickEffect(BAD, 0x283868, true, -2.5f));
+    public static final RegistryObject<MobEffect> LINGERING_DAMAGE_STAMINA = EFFECTS.register("lingering_damage_stamina", () -> new PoolTickEffect(BAD, 0x48562A, false, -2.5f));
+    /** Fortify Magicka/Stamina: +25 to the pool's maximum per level, kept in the core's {@code module("bonus")} by ArcaneEvents. */
+    public static final RegistryObject<MobEffect> FORTIFY_MAGICKA = marker("fortify_magicka", GOOD, 0x3C78F0);
+    public static final RegistryObject<MobEffect> FORTIFY_STAMINA = marker("fortify_stamina", GOOD, 0x4CC04C);
 
     // ---------------------------------------------------------------- resistances & weaknesses (ArcaneEvents)
     public static final RegistryObject<MobEffect> RESIST_FROST = marker("resist_frost", GOOD, 0x9AD8F0);
@@ -77,7 +83,10 @@ public final class ArcaneEffects {
     public static final RegistryObject<MobEffect> FORTIFY_LOCKPICKING = marker("fortify_lockpicking", GOOD, 0x909090);
     public static final RegistryObject<MobEffect> FORTIFY_PICKPOCKET = marker("fortify_pickpocket", GOOD, 0x60A060);
     public static final RegistryObject<MobEffect> FORTIFY_BARTER = marker("fortify_barter", GOOD, 0xE0C040);
-    /** Minecraft has no carry weight: the effect offsets heavy-armor slowness instead (+5% speed per level). */
+    /**
+     * +25 carry weight per level (kept in the core's {@code module("bonus").carry} by ArcaneEvents), and it offsets
+     * heavy-armor slowness a little (+5% speed per level).
+     */
     public static final RegistryObject<MobEffect> FORTIFY_CARRY_WEIGHT = EFFECTS.register("fortify_carry_weight",
             () -> new MarkerEffect(GOOD, 0xA07850).addAttributeModifier(Attributes.MOVEMENT_SPEED,
                     "8a3c1f52-6b0e-4c1d-9e57-2f4a7b3c9d01", 0.05, AttributeModifier.Operation.MULTIPLY_TOTAL));
@@ -86,6 +95,7 @@ public final class ArcaneEffects {
     public static final RegistryObject<MobEffect> FEAR = EFFECTS.register("fear", () -> new FearEffect(BAD, 0x502040));
     public static final RegistryObject<MobEffect> FRENZY = EFFECTS.register("frenzy", () -> new FrenzyEffect(BAD, 0xC02020));
     public static final RegistryObject<MobEffect> CURE_DISEASE = EFFECTS.register("cure_disease", () -> new CureEffect(GOOD, 0xE0E0C0));
+    public static final RegistryObject<MobEffect> CURE_POISON = EFFECTS.register("cure_poison", () -> new CurePoisonEffect(GOOD, 0x9CE07A));
 
     private ArcaneEffects() {}
 
@@ -262,5 +272,25 @@ public final class ArcaneEffects {
 
         // applyEffectTick intentionally does nothing: removing effects while the entity iterates its effects would
         // throw a ConcurrentModificationException (only reachable through /effect).
+    }
+
+    /** Instantly cures poisons: vanilla poison and the lingering pool drains. */
+    public static class CurePoisonEffect extends MobEffect {
+        public CurePoisonEffect(MobEffectCategory category, int color) {
+            super(category, color);
+        }
+
+        @Override
+        public boolean isInstantenous() {
+            return true;
+        }
+
+        @Override
+        public void applyInstantenousEffect(@Nullable Entity source, @Nullable Entity indirectSource, LivingEntity target, int amplifier, double health) {
+            if (target.level().isClientSide) return;
+            target.removeEffect(MobEffects.POISON);
+            target.removeEffect(LINGERING_DAMAGE_MAGICKA.get());
+            target.removeEffect(LINGERING_DAMAGE_STAMINA.get());
+        }
     }
 }

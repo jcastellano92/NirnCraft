@@ -43,7 +43,7 @@ public final class Barter {
             Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.economy.closed"));
             return;
         }
-        Shop shop = Shop.of(npc);
+        Shop shop = Shop.of(npc, player);
         sendState(player, npc, shop, Merchants.greeting(npc), true);
     }
 
@@ -54,7 +54,7 @@ public final class Barter {
     /** C2S: buy (from stock index) or sell (from inventory slot) one item or the whole stack. */
     static void handleAction(ServerPlayer player, int entityId, boolean buy, int index, boolean all, ResourceLocation itemId) {
         if (!(player.level().getEntity(entityId) instanceof LivingEntity npc) || !Merchants.isMerchant(npc) || !canReach(player, npc)) return;
-        Shop shop = Shop.of(npc);
+        Shop shop = Shop.of(npc, player);
         Component msg = buy ? buy(player, shop, index, all, itemId) : sell(player, shop, index, all, itemId);
         sendState(player, npc, shop, msg, false);
 
@@ -112,6 +112,9 @@ public final class Barter {
         if (!Merchants.buysFrom(player, npc, stack)) return Component.translatable("message.skycraft.economy.not_dealt");
         boolean stolen = Merchants.isStolen(stack);
         if (stolen && !Merchants.isFence(player, npc, shop)) return Component.translatable("message.skycraft.economy.stolen");
+        if (Merchants.isContraband(npc, stack) && !Merchants.takesContraband(player, npc, shop)) {
+            return Component.translatable("message.skycraft.economy.contraband");
+        }
 
         int unit = Pricing.sellPrice(player, stack);
         int want = all ? stack.getCount() : 1;
@@ -156,6 +159,7 @@ public final class Barter {
         }
         List<EconomyPackets.Entry> mine = new ArrayList<>();
         boolean fence = Merchants.isFence(player, npc, shop);
+        boolean smuggler = Merchants.takesContraband(player, npc, shop);
         Inventory inv = player.getInventory();
         for (int slot = 0; slot < inv.getContainerSize(); slot++) {
             ItemStack s = inv.getItem(slot);
@@ -167,6 +171,7 @@ public final class Barter {
                 if (!com.skycraft.perk.Perks.has(player, "speech.merchant")) continue;
             }
             if (Merchants.isStolen(s) && !fence) status = STATUS_STOLEN;
+            if (!smuggler && Merchants.isContraband(npc, s)) status = STATUS_STOLEN;
             mine.add(new EconomyPackets.Entry(slot, s.copy(), price, (byte) ItemCategory.of(s).ordinal(), status));
         }
         SkyNetwork.sendToPlayer(player, new EconomyPackets.BarterState(npc.getId(), npc.getDisplayName(), open,
@@ -187,7 +192,7 @@ public final class Barter {
     /** Sells every (non-stolen) item matching {@code filter} from the main inventory in one go, then reopens the dialogue. */
     public static void bulkSell(ServerPlayer player, LivingEntity npc, TagKey<Item> filter) {
         if (!Merchants.isMerchant(npc) || !canReach(player, npc)) return;
-        Shop shop = Shop.of(npc);
+        Shop shop = Shop.of(npc, player);
         Inventory inv = player.getInventory();
         int total = 0;
         int count = 0;

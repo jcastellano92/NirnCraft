@@ -127,6 +127,11 @@ public class DraugrEntity extends SkyHumanoid implements Ranked {
 
     @Override
     protected void equip(RandomSource random, DifficultyInstance difficulty) {
+        // economy workstream: Ancient Nord weapons and armour pieces
+        if (!this.level().isClientSide) {
+            com.skycraft.arsenal.LeveledGear.outfit(this, com.skycraft.arsenal.LeveledGear.Outfit.DRAUGR, random, 0.05f);
+            return;
+        }
         if (random.nextFloat() < 0.25f) {
             Gear.equip(this, EquipmentSlot.MAINHAND, new ItemStack(Items.BOW), 0.05f);
         } else {

@@ -5,6 +5,18 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.skycraft.Skycraft;
 import com.skycraft.arsenal.item.ArrowKind;
+import com.skycraft.arsenal.item.ArtifactItem;
+import com.skycraft.arsenal.item.PolearmItem;
+import com.skycraft.arsenal.item.SkyArrowItem;
+import com.skycraft.crafting.item.SkyAxeItem;
+import com.skycraft.crafting.item.SkyBowItem;
+import com.skycraft.crafting.item.SkyMeleeItem;
+import com.skycraft.crafting.item.SkyShieldItem;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.EquipmentSlot;
+import java.util.ArrayList;
+import java.util.List;
 import com.skycraft.core.SkyData;
 import com.skycraft.crafting.CraftingItems;
 import com.skycraft.crafting.SkyArmorMaterial;
@@ -43,15 +55,18 @@ import java.util.Locale;
  * rolls), else the killer / last damaging player, else the nearest player within 64 blocks of the origin, else
  * level 1. Material bands (approximate Skyrim):</p>
  * <pre>
- *  level  1-5   iron        | iron / hide
- *  level  6-11  steel       | steel / leather
- *  level 12-18  orcish/elven| dwarven / elven
- *  level 19-26  dwarven/elven| orcish / elven
- *  level 27-35  glass/dwarven| orcish / glass
- *  level 36-45  ebony/glass | ebony / glass
- *  level 46+    daedric/dragonbone | daedric, dragonplate / dragonscale
+ *  level   weapons                     | heavy armour                / light armour
+ *  1-5     iron                        | iron, banded iron           / hide, fur
+ *  6-11    steel (silver)              | steel, banded iron          / leather, studded
+ *  12-18   orcish, dwarven             | dwarven (steel)             / elven, scaled
+ *  19-26   dwarven, elven              | orcish, steel plate         / elven gilded, scaled
+ *  27-35   elven, glass (nordic)       | orcish, steel plate, nordic / glass
+ *  36-45   glass, ebony (stalhrim 40+) | ebony (stalhrim 40+)        / glass (stalhrim 40+)
+ *  46+     daedric, dragonbone         | daedric, dragonplate        / dragonscale
  * </pre>
- * Like Skyrim's lists, lower bands still appear: 60% current band, 30% one below, 10% two below.
+ * Every pick also respects the material's own leveled-list level, so nothing above the character's level drops.
+ * Like Skyrim's lists, lower bands still appear: 60% current band, 30% one below, 10% two below. Shields come from the
+ * band's armour sets. {@link #regional} and {@link #outfit} give the other provinces their own gear.
  */
 public class LeveledGear extends LootItemConditionalFunction {
     public static final DeferredRegister<LootItemFunctionType> FUNCTIONS = DeferredRegister.create(Registries.LOOT_FUNCTION_TYPE, Skycraft.MODID);
@@ -60,7 +75,7 @@ public class LeveledGear extends LootItemConditionalFunction {
     public static final RegistryObject<LootItemFunctionType> LEGENDARY_ITEM = FUNCTIONS.register("legendary_item",
             () -> new LootItemFunctionType(new com.skycraft.combat.LegendaryItemFunction.Serializer()));
 
-    public enum Kind { WEAPON, ARMOR, BOW, ARROW }
+    public enum Kind { WEAPON, ARMOR, BOW, ARROW, SHIELD }
 
     private static final int[] BAND_START = {1, 6, 12, 19, 27, 36, 46};
 
@@ -137,20 +152,32 @@ public class LeveledGear extends LootItemConditionalFunction {
             case ARMOR -> armor(level, random);
             case BOW -> bow(level, random);
             case ARROW -> arrows(level, random);
+            case SHIELD -> shield(level, random);
         };
     }
 
+    /**
+     * Weapon material of a band (Skyrim's leveled lists follow each material's level: Orcish and Dwarven from 12, Elven
+     * from 19, Glass and Nordic from 27, Ebony from 36, Stalhrim from 40, Daedric and Dragonbone from 46).
+     */
     public static SmithingTier weaponTier(int band, RandomSource random) {
         boolean alt = random.nextBoolean();
         return switch (band) {
             case 0 -> SmithingTier.IRON;
-            case 1 -> SmithingTier.STEEL;
-            case 2 -> alt ? SmithingTier.ORCISH : SmithingTier.ELVEN;
+            case 1 -> random.nextInt(6) == 0 ? SmithingTier.SILVER : SmithingTier.STEEL;
+            case 2 -> alt ? SmithingTier.ORCISH : SmithingTier.DWARVEN;
             case 3 -> alt ? SmithingTier.DWARVEN : SmithingTier.ELVEN;
-            case 4 -> alt ? SmithingTier.GLASS : SmithingTier.DWARVEN;
-            case 5 -> alt ? SmithingTier.EBONY : SmithingTier.GLASS;
+            case 4 -> random.nextInt(4) == 0 ? SmithingTier.NORDIC : alt ? SmithingTier.ELVEN : SmithingTier.GLASS;
+            case 5 -> random.nextInt(5) == 0 ? SmithingTier.STALHRIM : alt ? SmithingTier.GLASS : SmithingTier.EBONY;
             default -> alt ? SmithingTier.DAEDRIC : SmithingTier.DRAGONBONE;
         };
+    }
+
+    /** A band's weapon material that the character level allows (Stalhrim inside band 5 needs level 40). */
+    private static SmithingTier weaponTier(int band, int level, RandomSource random) {
+        SmithingTier tier = weaponTier(band, random);
+        for (int i = 0; i < 4 && tier.minLevel > level; i++) tier = weaponTier(Math.max(0, band - 1 - i / 2), random);
+        return tier.minLevel > level ? SmithingTier.IRON : tier;
     }
 
     private static final WeaponType[] MELEE = {WeaponType.DAGGER, WeaponType.SWORD, WeaponType.WAR_AXE, WeaponType.MACE,
@@ -158,55 +185,193 @@ public class LeveledGear extends LootItemConditionalFunction {
     private static final int[] MELEE_WEIGHT = {15, 25, 16, 12, 12, 10, 10};
 
     public static ItemStack weapon(int level, RandomSource random) {
-        SmithingTier tier = weaponTier(rollBand(level, random), random);
-        int total = 0;
-        for (int w : MELEE_WEIGHT) total += w;
-        int pick = random.nextInt(total);
-        WeaponType type = MELEE[0];
-        for (int i = 0; i < MELEE.length; i++) {
-            pick -= MELEE_WEIGHT[i];
-            if (pick < 0) {
-                type = MELEE[i];
-                break;
+        SmithingTier tier = weaponTier(rollBand(level, random), level, random);
+        for (int attempt = 0; attempt < 4; attempt++) {
+            int total = 0;
+            for (int w : MELEE_WEIGHT) total += w;
+            int pick = random.nextInt(total);
+            WeaponType type = MELEE[0];
+            for (int i = 0; i < MELEE.length; i++) {
+                pick -= MELEE_WEIGHT[i];
+                if (pick < 0) {
+                    type = MELEE[i];
+                    break;
+                }
             }
+            Item item = CraftingItems.weaponItem(tier, type);
+            if (item != Items.AIR) return new ItemStack(item);
         }
-        return new ItemStack(CraftingItems.weaponItem(tier, type));
+        return new ItemStack(CraftingItems.weaponItem(SmithingTier.IRON, WeaponType.SWORD));
     }
 
     public static ItemStack bow(int level, RandomSource random) {
-        SmithingTier tier = weaponTier(rollBand(level, random), random);
-        return new ItemStack(CraftingItems.weaponItem(tier, WeaponType.BOW));
+        SmithingTier tier = weaponTier(rollBand(level, random), level, random);
+        Item bow = CraftingItems.weaponItem(tier, WeaponType.BOW);
+        if (bow == Items.AIR) bow = CraftingItems.weaponItem(SmithingTier.IRON, WeaponType.BOW);
+        return new ItemStack(bow);
+    }
+
+    /** Armour set of a band: heavy or light, Skycraft's own Iron and Hide at the bottom, Daedric and Dragonscale on top. */
+    public static SkyArmorMaterial armorMaterial(int band, boolean heavy, RandomSource random) {
+        boolean alt = random.nextBoolean();
+        if (heavy) {
+            return switch (band) {
+                case 0 -> random.nextInt(3) == 0 ? SkyArmorMaterial.BANDED_IRON : SkyArmorMaterial.IRON;
+                case 1 -> alt ? SkyArmorMaterial.STEEL : SkyArmorMaterial.BANDED_IRON;
+                case 2 -> random.nextInt(3) == 0 ? SkyArmorMaterial.STEEL : SkyArmorMaterial.DWARVEN;
+                case 3 -> alt ? SkyArmorMaterial.ORCISH : SkyArmorMaterial.STEEL_PLATE;
+                case 4 -> random.nextInt(3) == 0 ? SkyArmorMaterial.NORDIC : alt ? SkyArmorMaterial.ORCISH : SkyArmorMaterial.STEEL_PLATE;
+                case 5 -> random.nextInt(4) == 0 ? SkyArmorMaterial.STALHRIM_HEAVY : SkyArmorMaterial.EBONY;
+                default -> alt ? SkyArmorMaterial.DAEDRIC : SkyArmorMaterial.DRAGONPLATE;
+            };
+        }
+        return switch (band) {
+            case 0 -> alt ? SkyArmorMaterial.HIDE : SkyArmorMaterial.FUR;
+            case 1 -> alt ? SkyArmorMaterial.LEATHER : SkyArmorMaterial.STUDDED;
+            case 2 -> alt ? SkyArmorMaterial.ELVEN : SkyArmorMaterial.SCALED;
+            case 3 -> alt ? SkyArmorMaterial.ELVEN_GILDED : SkyArmorMaterial.SCALED;
+            case 4 -> SkyArmorMaterial.GLASS;
+            case 5 -> random.nextInt(4) == 0 ? SkyArmorMaterial.STALHRIM_LIGHT : SkyArmorMaterial.GLASS;
+            default -> SkyArmorMaterial.DRAGONSCALE;
+        };
+    }
+
+    /** {@link #armorMaterial} limited to sets the character level allows (each set's leveled-list level). */
+    private static SkyArmorMaterial armorMaterial(int band, boolean heavy, int level, RandomSource random) {
+        SkyArmorMaterial mat = armorMaterial(band, heavy, random);
+        for (int b = band - 1; mat.minLevel > level && b >= 0; b--) mat = armorMaterial(b, heavy, random);
+        return mat.minLevel > level ? (heavy ? SkyArmorMaterial.IRON : SkyArmorMaterial.HIDE) : mat;
     }
 
     public static ItemStack armor(int level, RandomSource random) {
-        int band = rollBand(level, random);
         ArmorItem.Type piece = CraftingItems.ARMOR_TYPES[random.nextInt(CraftingItems.ARMOR_TYPES.length)];
-        boolean heavy = random.nextBoolean();
-        if (band == 0) {
-            return new ItemStack(heavy ? vanilla(piece, Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS)
-                    : CraftingItems.armor(SkyArmorMaterial.HIDE, piece));
-        }
-        if (band == 1 && !heavy) {
-            return new ItemStack(vanilla(piece, Items.LEATHER_HELMET, Items.LEATHER_CHESTPLATE, Items.LEATHER_LEGGINGS, Items.LEATHER_BOOTS));
-        }
-        SkyArmorMaterial mat = switch (band) {
-            case 1 -> SkyArmorMaterial.STEEL;
-            case 2 -> heavy ? SkyArmorMaterial.DWARVEN : SkyArmorMaterial.ELVEN;
-            case 3 -> heavy ? SkyArmorMaterial.ORCISH : SkyArmorMaterial.ELVEN;
-            case 4 -> heavy ? SkyArmorMaterial.ORCISH : SkyArmorMaterial.GLASS;
-            case 5 -> heavy ? SkyArmorMaterial.EBONY : SkyArmorMaterial.GLASS;
-            default -> heavy ? (random.nextBoolean() ? SkyArmorMaterial.DAEDRIC : SkyArmorMaterial.DRAGONPLATE) : SkyArmorMaterial.DRAGONSCALE;
-        };
-        return new ItemStack(CraftingItems.armor(mat, piece));
+        return new ItemStack(CraftingItems.armor(armorMaterial(rollBand(level, random), random.nextBoolean(), level, random), piece));
     }
 
-    private static Item vanilla(ArmorItem.Type piece, Item helmet, Item chest, Item legs, Item boots) {
-        return switch (piece) {
-            case HELMET -> helmet;
-            case CHESTPLATE -> chest;
-            case LEGGINGS -> legs;
-            default -> boots;
+    /** A shield of the band's armour sets (sets without a shield fall back to a lower band, then to Iron). */
+    public static ItemStack shield(int level, RandomSource random) {
+        int band = rollBand(level, random);
+        boolean heavy = random.nextInt(3) > 0;
+        for (int b = band; b >= 0; b--) {
+            Item s = CraftingItems.shield(armorMaterial(b, heavy, level, random));
+            if (s != null) return new ItemStack(s);
+        }
+        Item iron = CraftingItems.shield(SkyArmorMaterial.IRON);
+        return iron == null ? ItemStack.EMPTY : new ItemStack(iron);
+    }
+
+    // ------------------------------------------------------------------ the other provinces' gear
+
+    /**
+     * Province gear from {@code #skycraft:gear/<gearKey>} (see {@link com.skycraft.crafting.RegionalGear}): a piece of the
+     * kind that the level allows, recent materials three times as likely as old ones. Falls back to Skyrim's leveled
+     * lists when the province has nothing of that kind.
+     */
+    public static ItemStack regional(String gearKey, Kind kind, int level, RandomSource random) {
+        List<Item> items = new ArrayList<>();
+        List<Integer> weights = new ArrayList<>();
+        int total = 0;
+        int best = 0;
+        for (Holder<Item> h : BuiltInRegistries.ITEM.getTagOrEmpty(com.skycraft.crafting.RegionalGear.tag(gearKey))) {
+            Item item = h.value();
+            if (!kindMatches(kind, item)) continue;
+            int min = com.skycraft.crafting.RegionalGear.minLevel(item);
+            if (min > level) continue;
+            int w = level - min < 12 ? 3 : 1;
+            items.add(item);
+            weights.add(w);
+            total += w;
+            best = Math.max(best, min);
+        }
+        // a province whose own gear tops out far below the character (Elsweyr's Khajiit steel at level 40) mixes in the
+        // high materials traded across Tamriel: Glass, Ebony, Daedric
+        if (total > 0 && level - best >= 15 && random.nextInt(3) == 0) {
+            return kind == Kind.SHIELD ? shield(level, random) : roll(kind, level, random);
+        }
+        if (total > 0) {
+            int pick = random.nextInt(total);
+            for (int i = 0; i < items.size(); i++) {
+                pick -= weights.get(i);
+                if (pick < 0) return new ItemStack(items.get(i));
+            }
+        }
+        return kind == Kind.SHIELD ? shield(level, random) : roll(kind, level, random);
+    }
+
+    private static boolean kindMatches(Kind kind, Item item) {
+        return switch (kind) {
+            case WEAPON -> (item instanceof SkyMeleeItem || item instanceof SkyAxeItem || item instanceof PolearmItem)
+                    && !(item instanceof ArtifactItem);
+            case BOW -> item instanceof SkyBowItem && !(item instanceof ArtifactItem);
+            case ARMOR -> item instanceof ArmorItem && !(item instanceof ArtifactItem);
+            case SHIELD -> item instanceof SkyShieldItem;
+            case ARROW -> item instanceof SkyArrowItem;
         };
+    }
+
+    /** What an NPC fighter wears (see {@link #outfit}). */
+    public enum Outfit { BANDIT, DRAUGR, SOLDIER }
+
+    /**
+     * Dresses a fighter from the leveled lists of the province it stands in: bandits in Morrowind wear Chitin and
+     * Netch leather, in Hammerfell Ra Gada, in Cyrodiil Imperial gear; draugr wear Ancient Nord pieces. Level is the
+     * creature's Skycraft level, else its region's level band.
+     */
+    public static void outfit(net.minecraft.world.entity.Mob mob, Outfit style, RandomSource random, float dropChance) {
+        int level = npcLevel(mob);
+        String key = com.skycraft.crafting.RegionalGear.gearKey(com.skycraft.economy.EconomyLoot.regionAt(mob.level(), mob.blockPosition()));
+        boolean archer = random.nextFloat() < (style == Outfit.DRAUGR ? 0.25f : 0.33f);
+        if (style == Outfit.DRAUGR) {
+            equip(mob, EquipmentSlot.MAINHAND, archer ? ancientNord(WeaponType.BOW) : ancientNord(MELEE[1 + random.nextInt(MELEE.length - 1)]), dropChance);
+            for (ArmorItem.Type piece : CraftingItems.ARMOR_TYPES) {
+                if (piece != ArmorItem.Type.HELMET && random.nextFloat() < 0.4f) {
+                    equip(mob, piece.getSlot(), new ItemStack(CraftingItems.armor(SkyArmorMaterial.ANCIENT_NORD, piece)), dropChance);
+                } else if (piece == ArmorItem.Type.HELMET && random.nextFloat() < 0.25f) {
+                    equip(mob, piece.getSlot(), new ItemStack(CraftingItems.armor(SkyArmorMaterial.ANCIENT_NORD, piece)), dropChance);
+                }
+            }
+            return;
+        }
+        equip(mob, EquipmentSlot.MAINHAND, regional(key, archer ? Kind.BOW : Kind.WEAPON, level, random), dropChance);
+        if (!archer && random.nextFloat() < (style == Outfit.SOLDIER ? 0.7f : 0.3f)) {
+            ItemStack main = mob.getMainHandItem();
+            boolean twoHanded = main.getItem() instanceof SkyMeleeItem m && m.type.twoHanded()
+                    || main.getItem() instanceof SkyAxeItem a && a.type.twoHanded() || main.getItem() instanceof PolearmItem;
+            if (!twoHanded) equip(mob, EquipmentSlot.OFFHAND, regional(key, Kind.SHIELD, level, random), dropChance);
+        }
+        float wear = style == Outfit.SOLDIER ? 0.9f : 0.5f;
+        for (ArmorItem.Type piece : CraftingItems.ARMOR_TYPES) {
+            if (random.nextFloat() > wear) continue;
+            ItemStack stack = ItemStack.EMPTY;
+            for (int attempt = 0; attempt < 8 && stack.isEmpty(); attempt++) {
+                ItemStack candidate = regional(key, Kind.ARMOR, level, random);
+                if (candidate.getItem() instanceof ArmorItem a && a.getType() == piece) stack = candidate;
+            }
+            if (stack.isEmpty()) {
+                stack = new ItemStack(CraftingItems.armor(armorMaterial(rollBand(level, random), random.nextBoolean(), level, random), piece));
+            }
+            equip(mob, piece.getSlot(), stack, dropChance);
+        }
+    }
+
+    private static ItemStack ancientNord(WeaponType type) {
+        Item item = CraftingItems.weaponItem(SmithingTier.ANCIENT_NORD, type);
+        return new ItemStack(item == Items.AIR ? CraftingItems.weaponItem(SmithingTier.ANCIENT_NORD, WeaponType.SWORD) : item);
+    }
+
+    private static void equip(net.minecraft.world.entity.Mob mob, EquipmentSlot slot, ItemStack stack, float dropChance) {
+        if (stack.isEmpty()) return;
+        mob.setItemSlot(slot, stack);
+        mob.setDropChance(slot, dropChance);
+    }
+
+    /** A creature's level: its Skycraft level, else the middle of its region's level band, else 1. */
+    public static int npcLevel(net.minecraft.world.entity.Mob mob) {
+        int lvl = mob.getPersistentData().getInt("skycraft_level");
+        if (lvl > 0) return lvl;
+        com.skycraft.tamriel.Region region = com.skycraft.economy.EconomyLoot.regionAt(mob.level(), mob.blockPosition());
+        if (region == null) return 1;
+        return Math.max(1, (region.minLevel() + region.maxLevel()) / 2);
     }
 
     public static ItemStack arrows(int level, RandomSource random) {
@@ -262,7 +427,7 @@ public class LeveledGear extends LootItemConditionalFunction {
                 kind = Kind.valueOf(kindName);
             } catch (IllegalArgumentException e) {
                 throw new com.google.gson.JsonSyntaxException("Unknown leveled_gear kind '" + kindName.toLowerCase(Locale.ROOT)
-                        + "' (expected weapon, armor, bow or arrow)");
+                        + "' (expected weapon, armor, bow, arrow or shield)");
             }
             float enchant = GsonHelper.getAsFloat(json, "enchant_chance", 0f);
             float quality = GsonHelper.getAsFloat(json, "quality_chance", 0f);

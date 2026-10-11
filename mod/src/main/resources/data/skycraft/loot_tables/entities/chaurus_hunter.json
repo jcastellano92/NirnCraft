@@ -60,6 +60,23 @@
           "looting_multiplier": 0.05
         }
       ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:chaurus_hunter_antennae",
+          "weight": 1
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance_with_looting",
+          "chance": 0.6,
+          "looting_multiplier": 0.05
+        }
+      ]
     }
   ]
 }

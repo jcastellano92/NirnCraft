@@ -1,0 +1,105 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:comberry",
+      "required": false
+    },
+    {
+      "id": "skycraft:marshmerrow",
+      "required": false
+    },
+    {
+      "id": "skycraft:saltrice",
+      "required": false
+    },
+    {
+      "id": "skycraft:hypha_facia",
+      "required": false
+    },
+    {
+      "id": "skycraft:bittergreen_petals",
+      "required": false
+    },
+    {
+      "id": "skycraft:gold_kanet",
+      "required": false
+    },
+    {
+      "id": "skycraft:scrib_jelly",
+      "required": false
+    },
+    {
+      "id": "skycraft:kwama_egg",
+      "required": false
+    },
+    {
+      "id": "skycraft:ash_yam",
+      "required": false
+    },
+    {
+      "id": "skycraft:ash_salts",
+      "required": false
+    },
+    {
+      "id": "skycraft:trama_root",
+      "required": false
+    },
+    {
+      "id": "skycraft:scathecraw",
+      "required": false
+    },
+    {
+      "id": "skycraft:netch_jelly",
+      "required": false
+    },
+    {
+      "id": "skycraft:guar_hide",
+      "required": false
+    },
+    {
+      "id": "skycraft:alit_hide",
+      "required": false
+    },
+    {
+      "id": "skycraft:kagouti_hide",
+      "required": false
+    },
+    {
+      "id": "skycraft:cliff_racer_plumes",
+      "required": false
+    },
+    {
+      "id": "skycraft:nix_hound_meat",
+      "required": false
+    },
+    {
+      "id": "skycraft:emperor_parasol_moss",
+      "required": false
+    },
+    {
+      "id": "skycraft:fire_salts",
+      "required": false
+    },
+    {
+      "id": "skycraft:daedra_heart",
+      "required": false
+    },
+    {
+      "id": "skycraft:glowing_mushroom",
+      "required": false
+    },
+    {
+      "id": "skycraft:ashen_grass_pod",
+      "required": false
+    },
+    {
+      "id": "skycraft:ash_creep_cluster",
+      "required": false
+    },
+    {
+      "id": "skycraft:scamp_skin",
+      "required": false
+    }
+  ]
+}

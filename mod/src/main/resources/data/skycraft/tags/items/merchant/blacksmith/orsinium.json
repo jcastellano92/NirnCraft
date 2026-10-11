@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:orichalcum_ingot",
+      "required": false
+    },
+    {
+      "id": "skycraft:raw_orichalcum",
+      "required": false
+    }
+  ]
+}

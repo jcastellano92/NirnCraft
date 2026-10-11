@@ -1,0 +1,37 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:frost_salts",
+      "required": false
+    },
+    {
+      "id": "skycraft:frost_mirriam",
+      "required": false
+    },
+    {
+      "id": "skycraft:ice_wraith_teeth",
+      "required": false
+    },
+    {
+      "id": "skycraft:white_cap",
+      "required": false
+    },
+    {
+      "id": "skycraft:thistle_branch",
+      "required": false
+    },
+    {
+      "id": "skycraft:sabre_cat_tooth",
+      "required": false
+    },
+    {
+      "id": "skycraft:large_antlers",
+      "required": false
+    },
+    {
+      "id": "skycraft:nordic_barnacle",
+      "required": false
+    }
+  ]
+}

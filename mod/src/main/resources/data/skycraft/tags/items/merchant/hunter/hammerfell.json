@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:scorpion_stinger",
+      "required": false
+    },
+    {
+      "id": "skycraft:harpy_feather",
+      "required": false
+    }
+  ]
+}

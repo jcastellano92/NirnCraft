@@ -1,0 +1,47 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:elves_ear",
+      "required": false
+    },
+    {
+      "id": "skycraft:pearl",
+      "required": false
+    },
+    {
+      "id": "skycraft:small_pearl",
+      "required": false
+    },
+    {
+      "id": "skycraft:void_salts",
+      "required": false
+    },
+    {
+      "id": "skycraft:frost_salts",
+      "required": false
+    },
+    {
+      "id": "skycraft:fire_salts",
+      "required": false
+    },
+    {
+      "id": "skycraft:dreugh_wax",
+      "required": false
+    },
+    {
+      "id": "skycraft:indrik_feather",
+      "required": false
+    },
+    {
+      "id": "skycraft:mora_tapinella",
+      "required": false
+    },
+    {
+      "id": "skycraft:gold_kanet",
+      "required": false
+    },
+    "minecraft:white_tulip",
+    "minecraft:lily_of_the_valley"
+  ]
+}

@@ -12,6 +12,13 @@
     "skycraft:leveled_loot",
     "skycraft:lore_books",
     "skycraft:skyrim_food",
-    "skycraft:regional_gear"
+    "skycraft:regional_gear",
+    "skycraft:forage_plants",
+    "skycraft:forage_fungi",
+    "skycraft:forage_nests",
+    "skycraft:forage_moss",
+    "skycraft:forage_moon_sugar",
+    "skycraft:forage_trama_root",
+    "skycraft:forage_saltrice"
   ]
 }

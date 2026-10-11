@@ -1,0 +1,37 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:pearl",
+      "required": false
+    },
+    {
+      "id": "skycraft:small_pearl",
+      "required": false
+    },
+    {
+      "id": "skycraft:sea_serpent_scale",
+      "required": false
+    },
+    {
+      "id": "skycraft:leviathan_tooth",
+      "required": false
+    },
+    {
+      "id": "skycraft:luna_moth_wing",
+      "required": false
+    },
+    {
+      "id": "skycraft:dreugh_wax",
+      "required": false
+    },
+    {
+      "id": "skycraft:hist_sap",
+      "required": false
+    },
+    {
+      "id": "skycraft:slaughterfish_scales",
+      "required": false
+    }
+  ]
+}

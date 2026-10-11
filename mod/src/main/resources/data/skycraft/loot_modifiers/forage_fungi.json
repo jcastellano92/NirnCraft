@@ -1,0 +1,21 @@
+{
+  "type": "skycraft:add_table",
+  "conditions": [
+    {
+      "condition": "minecraft:any_of",
+      "terms": [
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "minecraft:blocks/brown_mushroom"
+        },
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "minecraft:blocks/red_mushroom"
+        }
+      ]
+    }
+  ],
+  "table": "skycraft:forage/fungi",
+  "prefix": "blocks/",
+  "chance": 0.3
+}

@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:boar_tusk",
+      "required": false
+    },
+    {
+      "id": "skycraft:netch_leather",
+      "required": false
+    },
+    {
+      "id": "skycraft:hide",
+      "required": false
+    }
+  ]
+}

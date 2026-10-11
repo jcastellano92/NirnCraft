@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:refined_moonstone",
+      "required": false
+    },
+    {
+      "id": "skycraft:refined_malachite",
+      "required": false
+    },
+    {
+      "id": "skycraft:quicksilver_ingot",
+      "required": false
+    }
+  ]
+}

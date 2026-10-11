@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:nordic_barnacle",
+      "required": false
+    },
+    {
+      "id": "skycraft:small_pearl",
+      "required": false
+    },
+    {
+      "id": "skycraft:slaughterfish_scales",
+      "required": false
+    },
+    {
+      "id": "skycraft:mudcrab_chitin",
+      "required": false
+    }
+  ]
+}

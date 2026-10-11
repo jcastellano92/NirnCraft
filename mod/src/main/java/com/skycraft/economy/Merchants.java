@@ -93,6 +93,20 @@ public final class Merchants {
             out.add(ShopType.EXOTIC);
             return out;
         }
+        // Skycraft trades without a vanilla profession (settlements may give townsfolk these ids)
+        String trade = npc.getPersistentData().getString(PROFESSION_KEY);
+        if (trade.equals("skycraft:jeweler")) {
+            out.add(ShopType.JEWELER);
+            return out;
+        }
+        if (trade.equals("skycraft:court_wizard")) {
+            out.add(ShopType.ARCANE);
+            return out;
+        }
+        if (trade.equals("skycraft:bookseller")) {
+            out.add(ShopType.LIBRARY);
+            return out;
+        }
         VillagerProfession p = profession(npc);
         if (p == VillagerProfession.WEAPONSMITH || p == VillagerProfession.ARMORER || p == VillagerProfession.TOOLSMITH) {
             out.add(ShopType.BLACKSMITH);
@@ -137,6 +151,29 @@ public final class Merchants {
         return stack.getTag() != null && stack.getTag().getBoolean(STOLEN_NBT);
     }
 
+    /** Moon sugar and skooma: legal in Elsweyr, Morrowind and the south, smuggled goods in Skyrim and Cyrodiil. */
+    public static final TagKey<net.minecraft.world.item.Item> CONTRABAND = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "contraband"));
+
+    /** Provinces whose law bans {@link #CONTRABAND} (the Empire's heartland and Skyrim). */
+    public static boolean contrabandBannedIn(String province) {
+        return province.equals("skyrim") || province.equals("cyrodiil");
+    }
+
+    /**
+     * Whether a stack is contraband where this merchant trades. Like stolen goods, only fences (and the Khajiit
+     * caravans, who smuggle it in) buy it there.
+     */
+    public static boolean isContraband(LivingEntity npc, ItemStack stack) {
+        if (!stack.is(CONTRABAND)) return false;
+        com.skycraft.tamriel.Region region = EconomyLoot.regionAt(npc.level(), npc.blockPosition());
+        return contrabandBannedIn(region == null ? "skyrim" : region.province());
+    }
+
+    /** Whether this merchant takes contraband: fences (for this player) and Khajiit caravans. */
+    public static boolean takesContraband(Player player, LivingEntity npc, Shop shop) {
+        return isCaravan(npc) || pools(npc).contains(ShopType.EXOTIC) || isFence(player, npc, shop);
+    }
+
     /** Removes the stolen flag (a fence's copy of the item). */
     public static void clearStolen(ItemStack stack) {
         CompoundTag tag = stack.getTag();
@@ -170,6 +207,7 @@ public final class Merchants {
                 case BLACKSMITH -> "blacksmith";
                 case APOTHECARY -> "apothecary";
                 case LIBRARY, ARCANE -> "arcane";
+                case JEWELER -> "jeweler";
                 case FOOD, FISHER, HUNTER -> "food";
                 default -> "general";
             };

@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:comberry",
+      "required": false
+    },
+    {
+      "id": "skycraft:bittergreen_petals",
+      "required": false
+    },
+    {
+      "id": "skycraft:gold_kanet",
+      "required": false
+    },
+    {
+      "id": "skycraft:ashen_grass_pod",
+      "required": false
+    },
+    {
+      "id": "skycraft:trama_root",
+      "required": false
+    }
+  ]
+}

@@ -1,50 +1,88 @@
 {
   "replace": false,
   "values": [
-    "minecraft:iron_sword",
-    "minecraft:iron_axe",
-    "minecraft:iron_pickaxe",
-    "minecraft:iron_shovel",
-    "minecraft:iron_hoe",
-    "minecraft:stone_sword",
-    "minecraft:stone_axe",
-    "minecraft:iron_helmet",
-    "minecraft:iron_chestplate",
-    "minecraft:iron_leggings",
-    "minecraft:iron_boots",
-    "minecraft:chainmail_helmet",
-    "minecraft:chainmail_chestplate",
-    "minecraft:chainmail_leggings",
-    "minecraft:chainmail_boots",
-    "minecraft:shield",
     "minecraft:iron_ingot",
-    "minecraft:gold_ingot",
-    "minecraft:copper_ingot",
-    "minecraft:iron_nugget",
-    "minecraft:leather",
-    "minecraft:coal",
-    "minecraft:raw_iron",
-    "minecraft:golden_sword",
-    "minecraft:golden_helmet",
-    "minecraft:golden_chestplate",
-    "minecraft:golden_leggings",
-    "minecraft:golden_boots",
-    "minecraft:diamond_sword",
-    "minecraft:diamond_axe",
-    "minecraft:diamond_helmet",
-    "minecraft:diamond_chestplate",
-    "minecraft:diamond_leggings",
-    "minecraft:diamond_boots",
-    "minecraft:iron_horse_armor",
-    "minecraft:bucket",
-    "minecraft:shears",
     {
-      "id": "#skycraft:smithing_goods",
+      "id": "skycraft:steel_ingot",
       "required": false
     },
     {
-      "id": "#skycraft:arsenal_goods",
+      "id": "skycraft:corundum_ingot",
       "required": false
-    }
+    },
+    {
+      "id": "skycraft:orichalcum_ingot",
+      "required": false
+    },
+    {
+      "id": "skycraft:silver_ingot",
+      "required": false
+    },
+    {
+      "id": "skycraft:quicksilver_ingot",
+      "required": false
+    },
+    {
+      "id": "skycraft:refined_moonstone",
+      "required": false
+    },
+    {
+      "id": "skycraft:refined_malachite",
+      "required": false
+    },
+    {
+      "id": "skycraft:ebony_ingot",
+      "required": false
+    },
+    {
+      "id": "skycraft:dwarven_metal_ingot",
+      "required": false
+    },
+    "minecraft:gold_ingot",
+    "minecraft:leather",
+    {
+      "id": "skycraft:leather_strips",
+      "required": false
+    },
+    {
+      "id": "skycraft:hide",
+      "required": false
+    },
+    {
+      "id": "skycraft:firewood",
+      "required": false
+    },
+    {
+      "id": "skycraft:raw_corundum",
+      "required": false
+    },
+    {
+      "id": "skycraft:raw_orichalcum",
+      "required": false
+    },
+    {
+      "id": "skycraft:raw_silver",
+      "required": false
+    },
+    {
+      "id": "skycraft:raw_quicksilver",
+      "required": false
+    },
+    {
+      "id": "skycraft:raw_moonstone",
+      "required": false
+    },
+    {
+      "id": "skycraft:raw_malachite",
+      "required": false
+    },
+    {
+      "id": "skycraft:raw_ebony",
+      "required": false
+    },
+    "minecraft:coal",
+    "minecraft:iron_pickaxe",
+    "minecraft:iron_axe",
+    "minecraft:iron_shovel"
   ]
 }

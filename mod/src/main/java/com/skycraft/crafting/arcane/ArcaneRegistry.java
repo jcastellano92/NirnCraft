@@ -77,6 +77,26 @@ public final class ArcaneRegistry {
     public static final RegistryObject<Item> BEAR_CLAWS = ingredient("bear_claws");
     public static final RegistryObject<Item> HAWK_FEATHER = ingredient("hawk_feather");
 
+    /**
+     * Skyrim's other ingredients plus the classic ingredients of Morrowind, Elsweyr and Black Marsh. Their effects are in
+     * {@link com.skycraft.crafting.arcane.alchemy.Ingredients}; they come from flora loot tables, foraging, creature
+     * loot, chests and province merchants. Icons are drawn by {@code tools/textures/ingredients.py}.
+     */
+    public static final List<String> MORE_INGREDIENTS = List.of(
+            "canis_root", "creep_cluster", "elves_ear", "imp_stool", "jazbay_grapes", "juniper_berries", "namiras_rot",
+            "white_cap", "glowing_mushroom", "bleeding_crown", "hanging_moss", "swamp_fungal_pod", "thistle_branch",
+            "giant_lichen", "mora_tapinella", "poison_bloom", "emperor_parasol_moss", "burnt_spriggan_wood",
+            "rock_warbler_egg", "pine_thrush_egg", "hawks_egg", "hawk_beak", "pearl", "small_pearl", "nordic_barnacle",
+            "trama_root", "ashen_grass_pod", "ash_creep_cluster", "ash_hopper_jelly", "boar_tusk", "spawn_ash",
+            "comberry", "marshmerrow", "saltrice", "hypha_facia", "bittergreen_petals", "gold_kanet", "scrib_jelly",
+            "kwama_egg", "ash_yam", "moon_sugar", "hist_sap",
+            "briar_heart", "falmer_ear", "spider_egg", "eye_of_sabre_cat", "powdered_mammoth_tusk", "wisp_wrappings",
+            "dwarven_oil", "chaurus_hunter_antennae");
+
+    static {
+        for (String id : MORE_INGREDIENTS) ingredient(id);
+    }
+
     private ArcaneRegistry() {}
 
     private static RegistryObject<Item> gem(String id, int capacity, boolean black, int value, Rarity rarity) {

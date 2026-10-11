@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:bittergreen_petals",
+      "required": false
+    },
+    {
+      "id": "skycraft:marshmerrow",
+      "required": false
+    }
+  ]
+}

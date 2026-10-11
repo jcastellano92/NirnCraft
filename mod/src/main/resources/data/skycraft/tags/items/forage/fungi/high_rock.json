@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:bleeding_crown",
+      "required": false
+    },
+    {
+      "id": "skycraft:white_cap",
+      "required": false
+    },
+    {
+      "id": "skycraft:namiras_rot",
+      "required": false
+    },
+    {
+      "id": "skycraft:imp_stool",
+      "required": false
+    }
+  ]
+}

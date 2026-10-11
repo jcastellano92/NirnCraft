@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:kwama_egg",
+      "required": false
+    },
+    {
+      "id": "skycraft:saltrice",
+      "required": false
+    },
+    {
+      "id": "skycraft:ash_yam",
+      "required": false
+    },
+    {
+      "id": "skycraft:comberry",
+      "required": false
+    },
+    {
+      "id": "skycraft:marshmerrow",
+      "required": false
+    },
+    {
+      "id": "skycraft:scrib_jelly",
+      "required": false
+    }
+  ]
+}

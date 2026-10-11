@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#skycraft:loot/ingredients/high_rock",
+      "required": false
+    }
+  ]
+}

@@ -19,6 +19,7 @@ public final class EconomyModule {
     /** Registers this module's DeferredRegisters and mod-bus listeners. Called from the mod constructor. */
     public static void init(IEventBus modBus) {
         EconomyItems.init(modBus);
+        EconomyLoot.init(modBus);
         EconomyDialogue.register();
         // a homestead deed bought from a steward counts as the drafting-table plot purchase
         com.skycraft.homestead.Homesteads.setPlotOwnership((player, plotId) -> Houses.HOUSES.stream()

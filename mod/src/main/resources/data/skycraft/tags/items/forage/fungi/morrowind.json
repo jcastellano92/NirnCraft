@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:hypha_facia",
+      "required": false
+    },
+    {
+      "id": "skycraft:emperor_parasol_moss",
+      "required": false
+    },
+    {
+      "id": "skycraft:ash_creep_cluster",
+      "required": false
+    },
+    {
+      "id": "skycraft:glowing_mushroom",
+      "required": false
+    }
+  ]
+}

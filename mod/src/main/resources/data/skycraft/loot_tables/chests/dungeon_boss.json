@@ -82,7 +82,7 @@
           "name": "minecraft:iron_sword",
           "functions": [
             {
-              "function": "skycraft:leveled_gear",
+              "function": "skycraft:regional_gear",
               "kind": "weapon",
               "enchant_chance": 0.35,
               "quality_chance": 0.4
@@ -95,7 +95,7 @@
           "name": "minecraft:iron_chestplate",
           "functions": [
             {
-              "function": "skycraft:leveled_gear",
+              "function": "skycraft:regional_gear",
               "kind": "armor",
               "enchant_chance": 0.35,
               "quality_chance": 0.4
@@ -215,10 +215,14 @@
       "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:tag",
-          "name": "skycraft:spell_tomes",
-          "expand": true,
-          "weight": 3
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "skycraft:leveled_tome"
+            }
+          ]
         },
         {
           "type": "minecraft:empty",
@@ -251,6 +255,75 @@
         {
           "type": "minecraft:empty",
           "weight": 199
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "skycraft:skyrim_potion",
+              "poison": false
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "skycraft:skyrim_potion",
+              "poison": true
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_sword",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "skycraft:regional_gear",
+              "kind": "shield",
+              "enchant_chance": 0.2,
+              "quality_chance": 0.2
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 2
         }
       ]
     }

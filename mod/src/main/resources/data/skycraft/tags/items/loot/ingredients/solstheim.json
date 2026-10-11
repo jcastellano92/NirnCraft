@@ -1,0 +1,65 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:trama_root",
+      "required": false
+    },
+    {
+      "id": "skycraft:ashen_grass_pod",
+      "required": false
+    },
+    {
+      "id": "skycraft:ash_creep_cluster",
+      "required": false
+    },
+    {
+      "id": "skycraft:ash_hopper_jelly",
+      "required": false
+    },
+    {
+      "id": "skycraft:boar_tusk",
+      "required": false
+    },
+    {
+      "id": "skycraft:spawn_ash",
+      "required": false
+    },
+    {
+      "id": "skycraft:scathecraw",
+      "required": false
+    },
+    {
+      "id": "skycraft:netch_jelly",
+      "required": false
+    },
+    {
+      "id": "skycraft:emperor_parasol_moss",
+      "required": false
+    },
+    {
+      "id": "skycraft:burnt_spriggan_wood",
+      "required": false
+    },
+    {
+      "id": "skycraft:frost_mirriam",
+      "required": false
+    },
+    {
+      "id": "skycraft:nordic_barnacle",
+      "required": false
+    },
+    {
+      "id": "skycraft:salt_pile",
+      "required": false
+    },
+    {
+      "id": "skycraft:white_cap",
+      "required": false
+    },
+    {
+      "id": "skycraft:bone_meal_draugr",
+      "required": false
+    }
+  ]
+}

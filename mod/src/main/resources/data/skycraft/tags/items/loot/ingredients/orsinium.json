@@ -1,0 +1,45 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:troll_fat",
+      "required": false
+    },
+    {
+      "id": "skycraft:ogre_tooth",
+      "required": false
+    },
+    {
+      "id": "skycraft:juniper_berries",
+      "required": false
+    },
+    {
+      "id": "skycraft:frost_mirriam",
+      "required": false
+    },
+    {
+      "id": "skycraft:thistle_branch",
+      "required": false
+    },
+    {
+      "id": "skycraft:bear_claws",
+      "required": false
+    },
+    {
+      "id": "skycraft:sabre_cat_tooth",
+      "required": false
+    },
+    {
+      "id": "skycraft:large_antlers",
+      "required": false
+    },
+    {
+      "id": "skycraft:white_cap",
+      "required": false
+    },
+    {
+      "id": "skycraft:garlic",
+      "required": false
+    }
+  ]
+}

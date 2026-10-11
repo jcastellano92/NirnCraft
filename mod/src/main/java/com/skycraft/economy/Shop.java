@@ -70,10 +70,18 @@ public final class Shop {
 
     /** Loads (and restocks if due) the shop of a merchant. Server side only. */
     public static Shop of(LivingEntity npc) {
+        return of(npc, null);
+    }
+
+    /**
+     * Loads (and restocks if due) the shop of a merchant for a customer. Like Skyrim's vendors, a restock follows the
+     * customer: blacksmiths' gear their character level, court wizards' tomes their skill in each school.
+     */
+    public static Shop of(LivingEntity npc, @org.jetbrains.annotations.Nullable Player customer) {
         CompoundTag root = npc.getPersistentData();
         if (!root.contains(KEY, Tag.TAG_COMPOUND)) root.put(KEY, new CompoundTag());
         Shop shop = new Shop(npc, root.getCompound(KEY));
-        shop.restockIfDue();
+        shop.restockIfDue(customer);
         return shop;
     }
 
@@ -155,67 +163,45 @@ public final class Shop {
     }
 
     public void restockIfDue() {
+        restockIfDue(null);
+    }
+
+    public void restockIfDue(@org.jetbrains.annotations.Nullable Player customer) {
         // day time advances when sleeping; game time keeps going even with the daylight cycle off
         long day = Math.max(npc.level().getDayTime(), npc.level().getGameTime()) / 24000L;
         boolean fresh = !tag.contains("restock_day");
         long last = tag.getLong("restock_day");
         if (fresh || day - last >= RESTOCK_DAYS || day < last) {
-            restock(day);
+            restock(day, customer);
         }
     }
 
-    private void restock(long day) {
+    private void restock(long day, @org.jetbrains.annotations.Nullable Player customer) {
         tag.putLong("restock_day", day);
         tag.putInt("gold", baseGold());
         tag.remove("mt_used");
         stock.clear();
-        generateStock(npc.getRandom());
+        ShopStock.generate(this, customer, npc.getRandom());
         save();
     }
 
-    private void generateStock(RandomSource rnd) {
-        int level = Merchants.level(npc);
-        List<ShopType> pools = Merchants.pools(npc);
-        List<List<Item>> items = new ArrayList<>();
-        for (ShopType t : pools) {
-            List<Item> list = t.stockItems();
-            if (!list.isEmpty()) items.add(list);
-        }
-        if (!items.isEmpty()) {
-            int entries = 6 + 3 * level;
-            for (int i = 0; i < entries; i++) {
-                List<Item> pool = items.get(rnd.nextInt(items.size()));
-                ItemStack stack = ItemStack.EMPTY;
-                // pricey items are rarer, and rarer still in small shops
-                for (int attempt = 0; attempt < 6 && stack.isEmpty(); attempt++) {
-                    Item item = pool.get(rnd.nextInt(pool.size()));
-                    ItemStack candidate = makeStock(item, rnd, level);
-                    if (candidate.isEmpty()) continue;
-                    int value = ItemValues.get(candidate);
-                    float accept = value <= 0 ? 1f : Math.min(1f, 120f * level / value);
-                    if (rnd.nextFloat() < accept) stack = candidate;
-                }
-                if (!stack.isEmpty()) addToStock(stack);
-            }
-        }
-        if (pools.contains(ShopType.LIBRARY)) {
-            List<Item> books = new ArrayList<>();
-            for (Holder<Item> h : BuiltInRegistries.ITEM.getTagOrEmpty(ItemCategory.SKILL_BOOKS)) books.add(h.value());
-            int n = 1 + (level >= 3 ? 1 : 0) + (level >= 5 ? 1 : 0);
-            for (int i = 0; i < n && !books.isEmpty(); i++) addToStock(new ItemStack(books.get(rnd.nextInt(books.size()))));
-        }
-    }
-
-    private static ItemStack makeStock(Item item, RandomSource rnd, int level) {
+    /**
+     * One stock entry of {@code item}: enchanted books get an enchantment, potions become Skyrim potions (poison for a
+     * splash potion), higher-level shops enchant some gear, and stack sizes shrink as the value grows.
+     */
+    static ItemStack makeStock(Item item, RandomSource rnd, int level) {
         if (item == Items.AIR) return ItemStack.EMPTY;
         if (item == Items.ENCHANTED_BOOK) {
             ItemStack book = EnchantmentHelper.enchantItem(rnd, new ItemStack(Items.BOOK), 5 + 5 * level, false);
             return book.is(Items.ENCHANTED_BOOK) ? book : ItemStack.EMPTY;
         }
         ItemStack stack = new ItemStack(item);
-        if (item instanceof PotionItem || item instanceof TippedArrowItem) {
+        if (item == Items.POTION || item == Items.SPLASH_POTION) {
+            stack = EconomyLoot.skyrimPotion(item == Items.SPLASH_POTION, 4 + 8 * level, rnd);
+        } else if (item instanceof PotionItem || item instanceof TippedArrowItem) {
             PotionUtils.setPotion(stack, SHOP_POTIONS[rnd.nextInt(SHOP_POTIONS.length)]);
-        } else if (level >= 3 && stack.isEnchantable() && stack.getMaxStackSize() == 1 && rnd.nextFloat() < 0.12f * (level - 2)) {
+        } else if (level >= 3 && stack.isEnchantable() && stack.getMaxStackSize() == 1 && !(item instanceof net.minecraft.world.item.DiggerItem)
+                && rnd.nextFloat() < 0.12f * (level - 2)) {
             // Skyrim shops sell some enchanted gear at higher levels
             stack = EnchantmentHelper.enchantItem(rnd, stack, 5 + 4 * level, false);
         }

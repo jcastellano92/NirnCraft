@@ -1,19 +1,51 @@
 {
   "replace": false,
   "values": [
-    "minecraft:bow",
-    "minecraft:bow",
-    "minecraft:crossbow",
-    "minecraft:arrow",
-    "minecraft:arrow",
-    "minecraft:spectral_arrow",
-    "minecraft:tipped_arrow",
+    {
+      "id": "skycraft:iron_arrow",
+      "required": false
+    },
+    {
+      "id": "skycraft:steel_arrow",
+      "required": false
+    },
+    {
+      "id": "skycraft:orcish_arrow",
+      "required": false
+    },
+    {
+      "id": "skycraft:dwarven_arrow",
+      "required": false
+    },
+    {
+      "id": "skycraft:elven_arrow",
+      "required": false
+    },
+    {
+      "id": "skycraft:steel_bolt",
+      "required": false
+    },
+    {
+      "id": "skycraft:dwarven_bolt",
+      "required": false
+    },
     "minecraft:feather",
     "minecraft:flint",
     "minecraft:string",
-    "minecraft:stick",
     {
-      "id": "#skycraft:arsenal_goods",
+      "id": "skycraft:firewood",
+      "required": false
+    },
+    {
+      "id": "skycraft:leather_strips",
+      "required": false
+    },
+    {
+      "id": "skycraft:imperial_crossbow",
+      "required": false
+    },
+    {
+      "id": "skycraft:hunting_bow",
       "required": false
     }
   ]

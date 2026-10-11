@@ -149,6 +149,7 @@ public class RegionalGear extends LootItemConditionalFunction {
         if (item instanceof SkyMeleeItem m) return m.smithingTier.minLevel;
         if (item instanceof SkyAxeItem a) return a.smithingTier.minLevel;
         if (item instanceof SkyBowItem b) return b.smithingTier.minLevel;
+        if (item instanceof com.skycraft.arsenal.item.PolearmItem p) return p.smithingTier.minLevel; // no Daedric spears at level 1
         return 1;
     }
 

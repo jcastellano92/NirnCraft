@@ -1,29 +1,65 @@
 {
   "replace": false,
   "values": [
+    {
+      "id": "skycraft:hide",
+      "required": false
+    },
     "minecraft:leather",
+    {
+      "id": "skycraft:leather_strips",
+      "required": false
+    },
+    {
+      "id": "skycraft:wolf_pelt",
+      "required": false
+    },
     "minecraft:rabbit_hide",
     "minecraft:rabbit_foot",
     "minecraft:feather",
-    "minecraft:string",
     "minecraft:bone",
-    "minecraft:beef",
-    "minecraft:porkchop",
-    "minecraft:mutton",
-    "minecraft:chicken",
-    "minecraft:rabbit",
-    "minecraft:bow",
-    "minecraft:arrow",
-    "minecraft:leather_helmet",
-    "minecraft:leather_chestplate",
-    "minecraft:leather_leggings",
-    "minecraft:leather_boots",
-    "minecraft:white_wool",
-    "minecraft:lead",
-    "minecraft:cooked_beef",
-    "minecraft:cooked_mutton",
     {
-      "id": "skycraft:hide",
+      "id": "skycraft:small_antlers",
+      "required": false
+    },
+    {
+      "id": "skycraft:large_antlers",
+      "required": false
+    },
+    {
+      "id": "skycraft:sabre_cat_tooth",
+      "required": false
+    },
+    {
+      "id": "skycraft:bear_claws",
+      "required": false
+    },
+    {
+      "id": "skycraft:hawk_feather",
+      "required": false
+    },
+    {
+      "id": "skycraft:horker_tusk",
+      "required": false
+    },
+    {
+      "id": "skycraft:raw_venison",
+      "required": false
+    },
+    {
+      "id": "skycraft:raw_horker_meat",
+      "required": false
+    },
+    {
+      "id": "skycraft:raw_goat_meat",
+      "required": false
+    },
+    {
+      "id": "skycraft:iron_arrow",
+      "required": false
+    },
+    {
+      "id": "skycraft:steel_arrow",
       "required": false
     }
   ]

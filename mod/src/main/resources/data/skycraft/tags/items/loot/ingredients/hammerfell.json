@@ -1,0 +1,46 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:scorpion_stinger",
+      "required": false
+    },
+    {
+      "id": "skycraft:harpy_feather",
+      "required": false
+    },
+    {
+      "id": "skycraft:ogre_tooth",
+      "required": false
+    },
+    {
+      "id": "skycraft:juniper_berries",
+      "required": false
+    },
+    {
+      "id": "skycraft:salt_pile",
+      "required": false
+    },
+    {
+      "id": "skycraft:dreugh_wax",
+      "required": false
+    },
+    {
+      "id": "skycraft:pearl",
+      "required": false
+    },
+    {
+      "id": "skycraft:sea_serpent_scale",
+      "required": false
+    },
+    {
+      "id": "skycraft:gargoyle_shard",
+      "required": false
+    },
+    "minecraft:cocoa_beans",
+    {
+      "id": "skycraft:mudcrab_chitin",
+      "required": false
+    }
+  ]
+}

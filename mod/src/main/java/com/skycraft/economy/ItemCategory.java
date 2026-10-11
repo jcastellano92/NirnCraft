@@ -36,7 +36,8 @@ public enum ItemCategory {
 
     public static final TagKey<Item> INGREDIENTS_TAG = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "merchant/ingredients"));
     public static final TagKey<Item> SPELL_TOMES = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "spell_tomes"));
-    public static final TagKey<Item> SKILL_BOOKS = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "merchant/skill_books"));
+    public static final TagKey<Item> STAVES = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "staves"));
+    public static final TagKey<Item> SKILL_BOOKS =TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "merchant/skill_books"));
 
     public Component displayName() {
         return Component.translatable("barter.skycraft.category." + name().toLowerCase(Locale.ROOT));
@@ -51,7 +52,10 @@ public enum ItemCategory {
         Item item = stack.getItem();
         if (item instanceof BookItem || item instanceof WritableBookItem || item instanceof WrittenBookItem
                 || item instanceof EnchantedBookItem || item instanceof KnowledgeBookItem || item instanceof SkillBookItem
-                || stack.is(SPELL_TOMES) || stack.is(SKILL_BOOKS)) return BOOKS;
+                || stack.is(SPELL_TOMES) || stack.is(SKILL_BOOKS) || item instanceof com.skycraft.lore.LoreBookItem) return BOOKS;
+        // Skyrim lists staves with the weapons
+        if (stack.is(STAVES) || item instanceof com.skycraft.arsenal.item.StaffItem
+                || item instanceof com.skycraft.arsenal.item.EnchantedStaffItem) return WEAPONS;
         if (item instanceof PotionItem) return POTIONS;
         if (item instanceof SwordItem || item instanceof AxeItem || item instanceof TridentItem
                 || item instanceof ProjectileWeaponItem || item instanceof ArrowItem) return WEAPONS;
@@ -65,11 +69,20 @@ public enum ItemCategory {
     /** Rings, amulets, necklaces, circlets, pendants and curios count as apparel and can be enchanted. */
     public static boolean isJewelry(ItemStack stack) {
         if (stack.isEmpty()) return false;
+        if (stack.is(ShopType.JEWELRY)) return true;
         net.minecraft.resources.ResourceLocation key = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem());
         if (key == null) return false;
-        String path = key.getPath();
-        return path.contains("ring") || path.contains("necklace") || path.contains("amulet")
-                || path.contains("circlet") || path.contains("pendant") || path.contains("curio");
+        // whole words only: "gold_ring" is jewellery, "string" and "spring_water" are not
+        for (String word : key.getPath().split("_")) {
+            switch (word) {
+                case "ring", "rings", "necklace", "amulet", "circlet", "pendant", "curio", "torc", "choker" -> {
+                    return true;
+                }
+                default -> {
+                }
+            }
+        }
+        return false;
     }
 
     /** Modded weapons that don't extend SwordItem: anything with a big main-hand damage bonus. */

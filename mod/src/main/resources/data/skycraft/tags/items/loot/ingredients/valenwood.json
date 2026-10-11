@@ -1,0 +1,61 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:spriggan_sap",
+      "required": false
+    },
+    {
+      "id": "skycraft:jazbay_grapes",
+      "required": false
+    },
+    {
+      "id": "skycraft:elves_ear",
+      "required": false
+    },
+    {
+      "id": "skycraft:canis_root",
+      "required": false
+    },
+    {
+      "id": "skycraft:hanging_moss",
+      "required": false
+    },
+    {
+      "id": "skycraft:monarch_wing",
+      "required": false
+    },
+    {
+      "id": "skycraft:luna_moth_wing",
+      "required": false
+    },
+    {
+      "id": "skycraft:blue_butterfly_wing",
+      "required": false
+    },
+    {
+      "id": "skycraft:imp_stool",
+      "required": false
+    },
+    {
+      "id": "skycraft:poison_bloom",
+      "required": false
+    },
+    {
+      "id": "skycraft:wisp_wrappings",
+      "required": false
+    },
+    {
+      "id": "skycraft:glowing_mushroom",
+      "required": false
+    },
+    {
+      "id": "skycraft:hawk_feather",
+      "required": false
+    },
+    {
+      "id": "skycraft:small_antlers",
+      "required": false
+    }
+  ]
+}

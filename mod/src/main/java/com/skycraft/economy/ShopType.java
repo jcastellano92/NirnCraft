@@ -32,11 +32,15 @@ public enum ShopType {
     MASON(EnumSet.noneOf(ItemCategory.class), false),
     LIBRARY(EnumSet.of(ItemCategory.BOOKS), false),
     FLETCHER(EnumSet.noneOf(ItemCategory.class), false),
-    EXOTIC(EnumSet.noneOf(ItemCategory.class), true);
+    EXOTIC(EnumSet.noneOf(ItemCategory.class), true),
+    /** Jewellers buy and sell rings, necklaces, circlets, gems and precious metals. */
+    JEWELER(EnumSet.noneOf(ItemCategory.class), false, "jewelry", "merchant/gems");
 
     public static final TagKey<Item> CROPS = tag("merchant/crops");
     public static final TagKey<Item> PELTS = tag("merchant/pelts");
     public static final TagKey<Item> ORES = tag("merchant/ores");
+    /** Rings, amulets, necklaces, circlets and the Dragon Priest masks' lesser kin: what jewellers deal in. */
+    public static final TagKey<Item> JEWELRY = tag("jewelry");
 
     private final Set<ItemCategory> buys;
     private final boolean buysAnything;
@@ -78,8 +82,20 @@ public enum ShopType {
 
     /** Every item this type can stock (resolved from its tag; empty while tags are not loaded). */
     public List<Item> stockItems() {
+        return items(stockTag);
+    }
+
+    /**
+     * The province goods of this type: {@code #skycraft:merchant/<type>/<gear key>} (an apothecary in Morrowind sells
+     * kwama eggs and saltrice, a Khajiit caravan moon sugar). Empty if the province has none.
+     */
+    public List<Item> provinceItems(String gearKey) {
+        return items(tag("merchant/" + id() + "/" + gearKey));
+    }
+
+    private static List<Item> items(TagKey<Item> tag) {
         List<Item> out = new ArrayList<>();
-        for (Holder<Item> h : BuiltInRegistries.ITEM.getTagOrEmpty(stockTag)) {
+        for (Holder<Item> h : BuiltInRegistries.ITEM.getTagOrEmpty(tag)) {
             Item item = h.value();
             if (item != Items.AIR) out.add(item);
         }

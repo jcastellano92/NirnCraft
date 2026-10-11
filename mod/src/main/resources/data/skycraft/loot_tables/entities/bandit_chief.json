@@ -13,7 +13,7 @@
               "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 25,
+                "min": 20,
                 "max": 80
               }
             }
@@ -31,27 +31,13 @@
           "functions": [
             {
               "function": "minecraft:set_nbt",
-              "tag": "{gold:100L}"
+              "tag": "{gold:250L}"
             }
           ]
         },
         {
-          "type": "minecraft:item",
-          "name": "skycraft:coin_purse",
-          "weight": 1,
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{gold:250L}"
-            }
-          ]
-        }
-      ],
-      "conditions": [
-        {
-          "condition": "minecraft:random_chance_with_looting",
-          "chance": 0.35,
-          "looting_multiplier": 0.05
+          "type": "minecraft:empty",
+          "weight": 1
         }
       ]
     },
@@ -60,11 +46,14 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:iron_axe",
+          "name": "minecraft:iron_sword",
           "weight": 2,
           "functions": [
             {
-              "function": "minecraft:enchant_randomly"
+              "function": "skycraft:regional_gear",
+              "kind": "weapon",
+              "enchant_chance": 0.35,
+              "quality_chance": 0.3
             }
           ]
         },
@@ -74,29 +63,25 @@
           "weight": 2,
           "functions": [
             {
-              "function": "minecraft:enchant_randomly"
+              "function": "skycraft:regional_gear",
+              "kind": "armor",
+              "enchant_chance": 0.25,
+              "quality_chance": 0.3
             }
           ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:iron_chestplate",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:diamond",
-          "weight": 1
-        }
-      ],
-      "conditions": [
-        {
-          "condition": "minecraft:killed_by_player"
-        },
-        {
-          "condition": "minecraft:random_chance_with_looting",
-          "chance": 0.5,
-          "looting_multiplier": 0.02
+          "name": "minecraft:iron_sword",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "skycraft:regional_gear",
+              "kind": "shield",
+              "enchant_chance": 0.2,
+              "quality_chance": 0.2
+            }
+          ]
         }
       ]
     },
@@ -106,67 +91,12 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:potion",
-          "weight": 2,
+          "weight": 3,
           "functions": [
             {
-              "function": "minecraft:set_potion",
-              "id": "minecraft:healing"
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:potion",
-          "weight": 1,
-          "functions": [
-            {
-              "function": "minecraft:set_potion",
-              "id": "minecraft:strong_healing"
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:potion",
-          "weight": 1,
-          "functions": [
-            {
-              "function": "minecraft:set_potion",
-              "id": "minecraft:strength"
-            }
-          ]
-        }
-      ],
-      "conditions": [
-        {
-          "condition": "minecraft:random_chance",
-          "chance": 0.5
-        }
-      ]
-    },
-    {
-      "rolls": 1,
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:iron_ingot",
-          "weight": 1,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 4
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:gold_ingot",
-          "weight": 1,
-          "functions": [
+              "function": "skycraft:skyrim_potion",
+              "poison": false
+            },
             {
               "function": "minecraft:set_count",
               "count": {
@@ -176,14 +106,63 @@
               }
             }
           ]
-        }
-      ],
-      "conditions": [
+        },
         {
-          "condition": "minecraft:random_chance",
-          "chance": 0.5
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "skycraft:skyrim_potion",
+              "poison": true
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:garnet",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:ruby",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:sapphire",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:amethyst_shard",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:small_pearl",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:flawless_garnet",
+          "weight": 1
         }
       ]
     }
-  ]
+  ],
+  "random_sequence": "skycraft:entities/bandit_chief"
 }

@@ -55,6 +55,11 @@ public class BanditEntity extends SkyHumanoid implements Ranked {
 
     @Override
     protected void equip(RandomSource random, DifficultyInstance difficulty) {
+        // economy workstream: leveled, province-appropriate gear (Chitin in Morrowind, Ra Gada in Hammerfell...)
+        if (!this.level().isClientSide) {
+            com.skycraft.arsenal.LeveledGear.outfit(this, com.skycraft.arsenal.LeveledGear.Outfit.BANDIT, random, 0.06f);
+            return;
+        }
         if (random.nextFloat() < 0.35f) {
             Gear.equip(this, EquipmentSlot.MAINHAND, new ItemStack(Gear.modItem("iron_bow", Items.BOW)), 0.06f);
         } else {

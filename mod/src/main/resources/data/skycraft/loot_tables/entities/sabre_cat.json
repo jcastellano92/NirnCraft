@@ -52,6 +52,23 @@
           "looting_multiplier": 0.05
         }
       ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:eye_of_sabre_cat",
+          "weight": 1
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance_with_looting",
+          "chance": 0.5,
+          "looting_multiplier": 0.05
+        }
+      ]
     }
   ],
   "random_sequence": "skycraft:entities/sabre_cat"

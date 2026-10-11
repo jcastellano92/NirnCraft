@@ -101,5 +101,10 @@
   "dialogue.skycraft.economy.house.none_available": "There are no homes for sale in this hold right now.",
   "message.skycraft.economy.house.bought": "You are now the proud owner of %s!",
   "message.skycraft.economy.house.not_enough_gold": "You need %s gold to purchase %s.",
-  "message.skycraft.economy.house.furnish_bought": "Purchased %s for %s!"
+  "message.skycraft.economy.house.furnish_bought": "Purchased %s for %s!",
+  "dialogue.skycraft.economy.greeting.jeweler.0": "Rings, circlets, a fine necklace. Only the best stones here.",
+  "dialogue.skycraft.economy.greeting.jeweler.1": "Mind the cases. Every piece is set by hand.",
+  "dialogue.skycraft.economy.greeting.jeweler.2": "Looking for something that sparkles? Or something to sell?",
+  "message.skycraft.economy.contraband": "Moon sugar? Skooma? Get that out of my shop before the guards see it.",
+  "tooltip.skycraft.economy.contraband": "Contraband in Skyrim and Cyrodiil: only fences and Khajiit caravans buy it there"
 }
