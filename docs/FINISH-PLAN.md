@@ -134,6 +134,25 @@ ids; writes `mod/run/qa-exports/*.bin` with a block palette + run-length data) a
 agent with the rubric in section 3. Run it on: all 9 Skyrim capitals, 1 generic town per culture, 1 dungeon per
 theme, each realm's keep/landmark, 2 road junctions with bridges.
 
+**T4 notes — prefer existing offline renderers and snapshot diffing over custom work:**
+* Generation needs only the headless dedicated server (~30 s boot, no graphics/DH/shaders); it saves region files.
+  Rendering never needs the Minecraft client: offline renderers read the saved world folder directly.
+* Evaluate first (keep whichever works with 1.20.1 + Skycraft blocks; load the mod jar as a resource pack for
+  textures): **BlueMap CLI** (open source; 3D/top-down renders from a world folder), **uNmINeD** (fast top-down,
+  Windows), **Chunky** (path-traced beauty shots, optional). Use our own `render.py` only for what they can't do
+  (e.g. per-floor dungeon cutaways).
+* Two image types: **map views** (top-down, 1 px per block column: kilometres of terrain/roads/towns in one image)
+  and **contact sheets** (`tools/qa/contact_sheet.py`: many close-ups tiled into one image).
+* **Snapshot (golden-image) testing:** a fixed list of sample locations (`tools/qa/snapshots.json`) is rendered after
+  each change and compared to the last approved images (pixel-diff threshold); only CHANGED tiles go into the
+  review sheet. Unchanged world = zero review cost. Approve by copying renders to `tools/qa/golden/` (gitignored if
+  large; keep small JPGs).
+* Pure-data views need no Minecraft at all: terrain/biome/region maps from the rasters (`tamriel_map.py` previews,
+  `/skycraft-tamriel heightmap` uses noise only), settlement and dungeon PLANS drawn as 2D diagrams from planner
+  output, the road network render (`roads/NetworkRender`). Use these for layout questions before generating blocks.
+* Forge GameTest (headless, built in) is the right tool for small behavioural checks (dungeon reachability,
+  NPC at anchor, loot container present) if the census command grows unwieldy.
+
 **T5. ILIAC BAY** (prompt in section 5): redraw High Rock/Hammerfell to Daggerfall's geography, add its 45
 political regions, ingest its locations (subsampled). Then T2 lint.
 
