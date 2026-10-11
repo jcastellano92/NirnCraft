@@ -88,8 +88,10 @@ public final class MagicPackets {
         static void handle(Cast m, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayer player = ctx.get().getSender();
             if (player != null && (m.hand == SpellCasting.RIGHT || m.hand == SpellCasting.LEFT)) {
-                if (m.start) SpellCasting.start(player, m.hand);
-                else SpellCasting.stop(player, m.hand);
+                // curse module: no spells in Beast Form or Vampire Lord form (they have their own)
+                if (m.start) {
+                    if (!com.skycraft.curse.Curses.transformed(player)) SpellCasting.start(player, m.hand);
+                } else SpellCasting.stop(player, m.hand);
             }
             ctx.get().setPacketHandled(true);
         }

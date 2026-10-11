@@ -203,6 +203,15 @@ public final class Story {
                 return entityTypeExists(arg);
             case "mod":
                 return net.minecraftforge.fml.ModList.get().isLoaded(arg);
+            case "curse":
+                // curse:vampire | curse:werewolf | curse:vampire_lord | curse:sanguinare (curse module)
+                return switch (arg) {
+                    case "vampire" -> com.skycraft.curse.Curses.isVampire(p);
+                    case "werewolf" -> com.skycraft.curse.Curses.isWerewolf(p);
+                    case "vampire_lord" -> com.skycraft.curse.Curses.hasVampireLord(p);
+                    case "sanguinare" -> com.skycraft.curse.Curses.hasSanguinare(p);
+                    default -> false;
+                };
             case "control": {
                 // control:<region>:<side>
                 int c = arg.lastIndexOf(':');
@@ -950,16 +959,24 @@ public final class Story {
                     Notifier.title(m, Component.translatable("notify.skycraft.dragon_soul"), Component.translatable("notify.skycraft.dragonborn"));
                 }
             }
+            // the curse module owns lycanthropy and vampirism (it keeps the quest module's beast_blood flag in step)
             case "beast_blood" -> {
-                for (ServerPlayer m : audience(online, receiver)) {
-                    SkyData.get(m).module("quest").putBoolean("beast_blood", true);
-                    SkyData.get(m).markDirty();
-                }
+                for (ServerPlayer m : audience(online, receiver)) com.skycraft.curse.Curses.grantBeastBlood(m);
             }
             case "cure_beast_blood" -> {
+                for (ServerPlayer m : audience(online, receiver)) com.skycraft.curse.Curses.cure(m, com.skycraft.curse.CurseType.LYCANTHROPY);
+            }
+            case "vampire_lord" -> {
+                if (receiver != null) com.skycraft.curse.Curses.grantVampireLord(receiver);
+            }
+            case "cure" -> {
+                // cure:vampirism | cure:lycanthropy, for whoever nearby carries it
+                com.skycraft.curse.CurseType type = com.skycraft.curse.CurseType.byId(arg);
+                if (type == null) return;
                 for (ServerPlayer m : audience(online, receiver)) {
-                    SkyData.get(m).module("quest").putBoolean("beast_blood", false);
-                    SkyData.get(m).markDirty();
+                    boolean has = type == com.skycraft.curse.CurseType.VAMPIRISM
+                            ? com.skycraft.curse.Curses.isVampire(m) || com.skycraft.curse.Curses.hasSanguinare(m) : com.skycraft.curse.Curses.isWerewolf(m);
+                    if (has) com.skycraft.curse.Curses.cure(m, type);
                 }
             }
             case "retire" -> {

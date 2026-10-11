@@ -36,9 +36,7 @@ mr:itemphysic-lite | cf:item-physic-lite   # dropped items lie in the world with
 
 # --- NPCs, factions: townsfolk, companions, followers and marriage are Skycraft's own (society module) ---
 
-# --- Vampires, werewolves ---
-mr:vampirism                     # vampirism: become a vampire (or hunter)
-mr:werewolves | cf:werewolves-become-a-beast   # werewolf transformation
+# --- Vampires, werewolves: Skycraft's own (curse module) ---
 
 # --- Towns, cities, dungeons, roads and secrets ---
 

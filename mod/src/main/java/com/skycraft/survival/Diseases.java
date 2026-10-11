@@ -61,7 +61,8 @@ public final class Diseases {
             Map.entry("minecraft:zombie", List.of(SurvivalEffects.COLLYWOBBLES)),
             Map.entry("minecraft:husk", List.of(SurvivalEffects.COLLYWOBBLES)),
             Map.entry("skycraft:spriggan", List.of(SurvivalEffects.GREENSPORE)),
-            Map.entry("vampirism:*", List.of(SurvivalEffects.DROOPS, SurvivalEffects.BRAIN_ROT)));
+            // vampires also pass on Sanguinare Vampiris (curse module)
+            Map.entry("skycraft:vampire", List.of(SurvivalEffects.DROOPS, SurvivalEffects.BRAIN_ROT)));
 
     private Diseases() {}
 
@@ -97,6 +98,8 @@ public final class Diseases {
         for (RegistryObject<MobEffect> d : ALL) {
             if (entity.removeEffect(d.get())) cured++;
         }
+        // Sanguinare Vampiris (curse module) is cured like any disease until it has turned its carrier
+        if (com.skycraft.curse.Curses.cureSanguinare(entity)) cured++;
         if (cured > 0 && entity instanceof Player player) {
             SurvivalEvents.reconcileBonuses(player);
             if (player instanceof ServerPlayer sp) Notifier.message(sp, Component.translatable("message.skycraft.survival.cured"));
@@ -112,6 +115,8 @@ public final class Diseases {
     /** Gives the entity a disease. Returns false if it already had it. */
     public static boolean infect(LivingEntity entity, MobEffect disease) {
         if (entity.hasEffect(disease)) return false;
+        // vampires and werewolves never catch diseases (curse module)
+        if (com.skycraft.curse.Curses.immuneToDisease(entity)) return false;
         entity.addEffect(instance(disease));
         if (entity instanceof Player player) {
             SurvivalEvents.reconcileBonuses(player);

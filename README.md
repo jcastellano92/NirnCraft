@@ -7,9 +7,9 @@ bounties, trade with merchants, get thrown in jail, and adventure with your frie
 
 * **Minecraft 1.20.1, Forge 47.4.10, Java 17**: the most complete RPG mod ecosystem.
 * **Skycraft Core** (`mod/`) is a custom mod that builds the Skyrim rules into Minecraft.
-* About 60 well-known mods (`tools/modlist.txt`) supply towns, dungeons, villagers, vampires, werewolves,
+* About 60 well-known mods (`tools/modlist.txt`) supply towns, dungeons, villagers,
   Distant Horizons, and performance. Skycraft prefers its own systems over third-party feature mods: followers, NPC
-  dialogue, tree felling and the Skyrim map are all Skycraft Core.
+  dialogue, vampirism and lycanthropy, tree felling and the Skyrim map are all Skycraft Core.
 
 ## Install
 

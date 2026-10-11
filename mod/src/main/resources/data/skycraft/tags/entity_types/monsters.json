@@ -10,22 +10,11 @@
     "minecraft:spider",
     "minecraft:cave_spider",
     "minecraft:witch",
-    {
-      "id": "werewolves:werewolf",
-      "required": false
-    },
-    {
-      "id": "vampirism:vampire",
-      "required": false
-    },
-    {
-      "id": "vampirism:advanced_vampire",
-      "required": false
-    },
-    {
-      "id": "vampirism:vampire_baron",
-      "required": false
-    },
+    "skycraft:werewolf",
+    "skycraft:vampire",
+    "skycraft:vampire_lord",
+    "skycraft:death_hound",
+    "skycraft:gargoyle",
     {
       "id": "#skycraft:automatons",
       "required": false

@@ -176,9 +176,8 @@ public final class Factions {
                         Currency.give(p, 200);
                     }
                     case 2 -> {
-                        PlayerData data = SkyData.get(p);
-                        data.module("quest").putBoolean("beast_blood", true);
-                        data.markDirty();
+                        // the curse module grants lycanthropy (and sets the quest flag)
+                        com.skycraft.curse.Curses.grantBeastBlood(p);
                         Notifier.message(p, Component.translatable("faction.skycraft.companions.beast_blood"));
                         Currency.give(p, 500);
                     }

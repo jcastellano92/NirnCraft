@@ -75,6 +75,27 @@ public class VampireEntity extends SkyHumanoid implements Ranked {
         return hit;
     }
 
+    /** A wandering vampire sometimes hunts with a death hound at its heel (curse module). */
+    @Override
+    @Nullable
+    public net.minecraft.world.entity.SpawnGroupData finalizeSpawn(net.minecraft.world.level.ServerLevelAccessor level, DifficultyInstance difficulty,
+                                                                   net.minecraft.world.entity.MobSpawnType reason,
+                                                                   @Nullable net.minecraft.world.entity.SpawnGroupData data,
+                                                                   @Nullable net.minecraft.nbt.CompoundTag tag) {
+        data = super.finalizeSpawn(level, difficulty, reason, data, tag);
+        if (reason == net.minecraft.world.entity.MobSpawnType.NATURAL && this.random.nextInt(4) == 0) {
+            var hound = com.skycraft.curse.CurseRegistry.DEATH_HOUND.get().create(level.getLevel());
+            if (hound != null) {
+                hound.moveTo(getX() + 1, getY(), getZ(), getYRot(), 0);
+                if (level.noCollision(hound)) {
+                    hound.finalizeSpawn(level, difficulty, net.minecraft.world.entity.MobSpawnType.REINFORCEMENT, null, null);
+                    level.addFreshEntity(hound);
+                }
+            }
+        }
+        return data;
+    }
+
     @Override
     @Nullable
     public Component rankName(int level) {

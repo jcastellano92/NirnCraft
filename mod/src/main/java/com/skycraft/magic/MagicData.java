@@ -163,6 +163,10 @@ public final class MagicData {
             StandingStone stone = StandingStones.current(player);
             return stone != null && stone.hasPower && voice.equals("power:stone:" + stone.id());
         }
+        // curse module: Beast Form, the Vampire Lord and the vampire's powers
+        if (voice.startsWith(com.skycraft.curse.CursePowers.PREFIX)) {
+            return com.skycraft.curse.CursePowers.has(player, voice.substring(com.skycraft.curse.CursePowers.PREFIX.length()));
+        }
         return false;
     }
 

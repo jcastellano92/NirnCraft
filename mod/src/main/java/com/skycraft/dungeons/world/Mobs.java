@@ -43,11 +43,26 @@ public final class Mobs {
     }
 
     public static String vampire() {
-        return orElse("skycraft:vampire", "vampirism:vampire", "minecraft:spider");
+        return orElse("skycraft:vampire", "minecraft:spider");
     }
 
     public static String vampireMaster() {
-        return orElse("skycraft:vampire", "vampirism:advanced_vampire", "minecraft:witch");
+        return orElse("skycraft:vampire", "minecraft:witch");
+    }
+
+    /** The master of a vampire lair (curse module). */
+    public static String vampireLord() {
+        return orElse("skycraft:vampire_lord", "skycraft:vampire", "minecraft:witch");
+    }
+
+    /** The vampires' undead hounds (curse module). */
+    public static String deathHound() {
+        return orElse("skycraft:death_hound", "minecraft:wolf");
+    }
+
+    /** Stone guardians of vampire lairs; they wait as statues (curse module). */
+    public static String gargoyle() {
+        return orElse("skycraft:gargoyle", "minecraft:iron_golem");
     }
 
     public static String necromancer() {

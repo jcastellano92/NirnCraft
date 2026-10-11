@@ -26,7 +26,8 @@ public final class FortRooms {
         switch (Math.floorMod(flavor, 4)) {
             case 1 -> p.spawn(Mobs.forsworn(), x, y, z, yaw,
                     chief ? "Forsworn Briarheart" : Painter.entityExists("skycraft:forsworn") ? null : "Forsworn");
-            case 2 -> p.spawn(chief ? Mobs.vampireMaster() : Mobs.vampire(), x, y, z, yaw, chief ? "Vampire Master" : null);
+            case 2 -> p.spawn(chief ? Mobs.vampireLord() : Mobs.vampire(), x, y, z, yaw,
+                    chief && !Painter.entityExists("skycraft:vampire_lord") ? "Vampire Master" : null);
             case 3 -> p.spawn(Mobs.necromancer(), x, y, z, yaw, chief ? "Master Wizard" : null);
             default -> p.spawn(chief ? Mobs.banditChief() : Mobs.bandit(), x, y, z, yaw, null);
         }

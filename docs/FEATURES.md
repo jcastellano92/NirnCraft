@@ -280,9 +280,23 @@ Spell sounds all go through `SpellSounds` (slots the audio module can override),
   tracks with a resource pack (see `docs/MUSIC.md`).
 * **Oblivion.** The Nether is Oblivion: Deadlands, Daedra and Oblivion Gates.
 * **Sovngarde.** The End is Sovngarde, where Alduin awaits.
-* **Vampires and werewolves** (Vampirism, Werewolves: Become a Beast) let you transform, with their own skill
-  trees. As in Skyrim, vampires keep to caves and lairs: Vampirism's vampire forest biome, hunter tent camps and
-  faction-controlled villages are switched off (`config/vampirism-common.toml`).
+* **Vampires and werewolves** are Skycraft's own (curse module), as in Skyrim and Dawnguard:
+  * **Vampirism.** Vampires and death hounds can pass on Sanguinare Vampiris; cure it (potion, shrine, priest) within
+    three days or you turn. Every day without feeding raises your stage (Sated to Blood-Starved): more Health, Magicka
+    and Stamina lost in sunlight (where nothing regenerates), more weakness to fire, more resistance to frost, and at
+    stage 4 townsfolk attack on sight. Vampires are immune to disease and poison. Feed on sleeping people (use key; a
+    crime if seen). Powers: Vampire's Sight, Vampire's Servant, Embrace of Shadows (stage 3+). Falion in Morthal cures
+    it ("Rising at Dawn").
+  * **Vampire Lord** (Harkon's gift in "Bloodline"): a winged form with its own model and animations. It levitates
+    (jump twice), casts Drain Life (attack) and a night spell (use), uses night powers on the Voice key (Bats, Mist
+    Form, Supernatural Reflexes, Detect Life, Summon Gargoyle, Night Cloak), bites people on the ground, and grows
+    its own 11-perk tree by feeding. Sneak + Voice reverts.
+  * **Lycanthropy** (the Companions' beast blood): Beast Form once a day from the Powers tab (Voice key), 150 s
+    extended by feeding on corpses, claws, howls (Howl of Terror and the Totems), immune to disease, no Well Rested,
+    its own 11-perk tree. Cured by burning a Glenmoril witch head (Companions).
+  * The magic menu (P) and skills (K) show the form's abilities and perk tree while transformed. Being seen changing
+    is a 1000 gold crime. Vampire lairs have Vampire Lords, death hounds and gargoyles that wait as statues; rare
+    werewolves hunt the wilds at night. `/skycraft-curse` (operators) tests it all.
 * **Fast travel & Carriages.** The Skyrim map on **M** takes you to discovered locations and party members. Horse carriages outside hold capitals provide paid travel (20–50 Septims) across all 9 Skyrim holds with follower and horse teleportation.
 * **Terrain map.** The integrated Skyrim map on **M** replaces third-party maps, featuring explored terrain and fog of war.
 * **Woodcutting** [Core]: chop a trunk with an axe and the whole tree comes down into harvestable logs; a sapling is

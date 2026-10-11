@@ -65,6 +65,8 @@ public final class Shouting {
     public static void executeVoice(ServerPlayer p, int requested) {
         if (!p.isAlive() || p.isSpectator() || p.hasEffect(ModEffects.PARALYSIS.get())) return;
         String voice = MagicData.selectedVoice(p);
+        // curse module: howls and Vampire Lord powers while transformed, curse powers in the Voice slot
+        if (com.skycraft.curse.CursePowers.onVoice(p, voice)) return;
         if (voice.startsWith("shout:")) {
             String shoutId = voice.substring("shout:".length());
             shout(p, shoutId, requested);

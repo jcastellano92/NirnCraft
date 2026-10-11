@@ -280,13 +280,15 @@ public final class NaturalRooms {
                 p.set(s[0] - face.getStepX(), room.floor + 1, s[1] - face.getStepZ(), Deco.lantern(true, false));
             }
             loot(p, room, 76, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
-            mob(p, room, 77, Mobs.vampireMaster(), Painter.entityExists("vampirism:advanced_vampire") ? null : "Vampire Master");
+            // the lair's master: a Vampire Lord, with its court, a hound and a stone guardian (curse module)
+            mob(p, room, 77, Mobs.vampireLord(), Painter.entityExists("skycraft:vampire_lord") ? null : "Vampire Lord");
             mob(p, room, 78, Mobs.vampire(), null);
-            mob(p, room, 79, Mobs.vampire(), null);
+            mob(p, room, 79, Mobs.deathHound(), null);
+            mob(p, room, 84, Mobs.gargoyle(), null);
             return;
         }
         mob(p, room, 80, Mobs.vampire(), null);
-        if (p.chance(room.cx, 0, room.cz, 81, 2)) mob(p, room, 82, "minecraft:cave_spider", null);
+        if (p.chance(room.cx, 0, room.cz, 81, 2)) mob(p, room, 82, Mobs.deathHound(), null);
         if (room.start()) lampPost(p, room, 83, true);
     }
 

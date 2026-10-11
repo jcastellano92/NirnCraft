@@ -130,7 +130,11 @@ public final class CombatHandler {
                 // Vanilla's sweeping edge hits several mobs in the same tick: only the first is the swing.
                 long now = attacker.level().getGameTime();
                 Long last = LAST_SWING.put(attacker.getUUID(), now);
-                if (last == null || last != now) amount = meleeDamage(attacker, target, amount);
+                if (last == null || last != now) {
+                    // curse module: in Beast Form or as the Vampire Lord the claws replace any weapon
+                    amount = com.skycraft.curse.Curses.transformed(attacker) ? com.skycraft.curse.CurseCombat.clawDamage(attacker, target, amount)
+                            : meleeDamage(attacker, target, amount);
+                }
             } else if (source.getDirectEntity() instanceof AbstractArrow arrow) {
                 amount = arrowDamage(attacker, target, arrow, amount);
             }

@@ -60,10 +60,9 @@ public final class Bestiary {
     public static final RegistryObject<EntityType<SkyMonster>> CHAURUS_HUNTER = monster(BestiarySpecs.chaurusHunter());
     public static final RegistryObject<EntityType<SkyMonster>> RIEKLING = monster(BestiarySpecs.riekling());
     public static final RegistryObject<EntityType<SkyMonster>> ASH_SPAWN = monster(BestiarySpecs.ashSpawn());
-    public static final RegistryObject<EntityType<SkyMonster>> GARGOYLE = monster(BestiarySpecs.gargoyle());
+    // gargoyle and death_hound are registered by com.skycraft.curse (statue gargoyles, vampire hounds)
     public static final RegistryObject<EntityType<SkyMonster>> WISP = monster(BestiarySpecs.wisp());
     public static final RegistryObject<EntityType<SkyMonster>> WILL_O_WISP = monster(BestiarySpecs.willOWisp());
-    public static final RegistryObject<EntityType<SkyMonster>> DEATH_HOUND = monster(BestiarySpecs.deathHound());
     public static final RegistryObject<EntityType<SkyMonster>> DWARVEN_BALLISTA = monster(BestiarySpecs.dwarvenBallista());
     public static final RegistryObject<EntityType<DragonPriestEntity>> DRAGON_PRIEST = register(BestiarySpecs.dragonPriest(), DragonPriestEntity::new);
 

@@ -29,6 +29,8 @@ public final class MagicHud {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null || mc.level == null || mc.options.hideGui || player.isSpectator()) return;
+        // curse module: a transformed player's abilities are drawn by CurseHud instead
+        if (com.skycraft.curse.Curses.transformed(player)) return;
         Font font = mc.font;
         PlayerData data = SkyData.get(player);
 
@@ -57,6 +59,13 @@ public final class MagicHud {
                 powerName = race != null ? race.powerName() : Component.literal("Power");
                 ready = data.getPowerReadyAt();
                 if (race != null) total = race.powerCooldown();
+            } else if (voice.startsWith(com.skycraft.curse.CursePowers.PREFIX)) {
+                // curse module powers
+                String id = voice.substring(com.skycraft.curse.CursePowers.PREFIX.length());
+                powerName = com.skycraft.curse.CursePowers.name(id);
+                ready = com.skycraft.curse.CursePowers.readyAt(data, id);
+                total = com.skycraft.curse.CursePowers.cooldown(id);
+                powerColor = 0xFFD04850;
             } else {
                 String stoneId = voice.substring("power:stone:".length());
                 com.skycraft.lore.StandingStone stone = com.skycraft.lore.StandingStone.byId(stoneId);

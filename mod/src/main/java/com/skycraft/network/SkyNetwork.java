@@ -59,6 +59,7 @@ public final class SkyNetwork {
         com.skycraft.society.SocietyModule.registerPackets();
         com.skycraft.arsenal.ArsenalModule.registerPackets();
         com.skycraft.atmosphere.AtmosphereModule.registerPackets();
+        com.skycraft.curse.CurseModule.registerPackets();
     }
 
     public static void sendToPlayer(ServerPlayer player, Object msg) {

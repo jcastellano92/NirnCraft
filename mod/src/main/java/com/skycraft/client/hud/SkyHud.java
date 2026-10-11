@@ -57,9 +57,9 @@ public final class SkyHud {
             g.drawString(font, hint, width - font.width(hint) - 6, 6, 0xFFE8D9A0, true);
         }
 
-        // Daily racial power recharge indicator
+        // Daily racial power recharge indicator (not while transformed: the Voice key is the beast's then, curse module)
         com.skycraft.core.Race race = data.getRace();
-        if (race != null && !race.power.isEmpty() && mc.level != null) {
+        if (race != null && !race.power.isEmpty() && mc.level != null && !com.skycraft.curse.Curses.transformed(mc.player)) {
             long readyAt = data.getPowerReadyAt();
             long now = mc.level.getGameTime();
             long diff = readyAt - now;

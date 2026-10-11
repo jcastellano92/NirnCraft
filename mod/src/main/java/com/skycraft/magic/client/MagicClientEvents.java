@@ -72,12 +72,14 @@ public final class MagicClientEvents {
 
     private static boolean canStartRightCast(Minecraft mc, LocalPlayer player) {
         if (player.isSpectator() || player.isUsingItem()) return false;
+        if (com.skycraft.curse.Curses.transformed(player)) return false;
         if (!player.getMainHandItem().isEmpty() && !(player.getMainHandItem().getItem() instanceof SpellTomeItem)) return false;
         return !MagicData.selectedSpell(player).isEmpty();
     }
 
     private static boolean canStartLeftCast(Minecraft mc, LocalPlayer player) {
         if (player.isSpectator() || player.isUsingItem() || !player.getOffhandItem().isEmpty()) return false;
+        if (com.skycraft.curse.Curses.transformed(player)) return false;
         if (!castFriendly(player.getMainHandItem())) return false;
         if (mc.hitResult != null && mc.hitResult.getType() != HitResult.Type.MISS) return false;
         return !MagicData.selectedSpell(player).isEmpty() || !MagicData.leftSpell(player).isEmpty();

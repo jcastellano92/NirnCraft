@@ -320,7 +320,8 @@ public final class Npcs {
             case IMPERIAL_SOLDIER -> Reputation.hostile(p, Reputation.IMPERIAL_LEGION) || isMember(p, Reputation.STORMCLOAKS);
             case STORMCLOAK_SOLDIER -> Reputation.hostile(p, Reputation.STORMCLOAKS) || isMember(p, Reputation.IMPERIAL_LEGION);
             case FORSWORN -> Reputation.get(p, Reputation.FORSWORN) < 40;
-            case VAMPIRE -> isNight(p.level()) || Reputation.hostile(p, Reputation.VAMPIRES);
+            // vampires leave their own kind alone (curse module)
+            case VAMPIRE -> !com.skycraft.curse.Curses.isVampire(p) && (isNight(p.level()) || Reputation.hostile(p, Reputation.VAMPIRES));
             case NECROMANCER -> true;
             case ASSASSIN -> !isMember(p, Reputation.DARK_BROTHERHOOD) && Reputation.hostile(p, Reputation.DARK_BROTHERHOOD);
             case HOUSECARL, ADVENTURER -> Reputation.get(p, Reputation.TOWNSFOLK) <= -90;

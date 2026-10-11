@@ -1,0 +1,40 @@
+{
+  "line": "curses",
+  "category": "side",
+  "region": "skyrim/hjaalmarch",
+  "speakers": {"falion": "Falion"},
+  "npcs": [
+    {"id": "falion", "name": "Falion", "role": "mage", "place": "morthal", "offset": [6, -4], "greet": "Morthal has little use for a conjurer, and less for questions. Still, you have the look of someone who needs one."}
+  ],
+  "scenes": {
+    "falion_ritual": [
+      ["narrator", "At the summoning circle the marsh mist turns gold with the first light. Falion raises the black soul gem, and it drinks."],
+      ["falion", "Hold still. The thing in your blood is leaving, and it does not go quietly."],
+      ["narrator", "Cold rushes through you, then warmth: the sun on your face, and nothing in it but light."]
+    ]
+  },
+  "quests": [
+    {
+      "id": "curse_rising_at_dawn",
+      "title": "Rising at Dawn",
+      "start": "npc:falion",
+      "repeatable": true,
+      "requires": ["curse:vampire"],
+      "offer": "I've heard you know a cure for vampirism.",
+      "pitch": "I do, and I'll not ask how you came by the need. Bring me a black soul gem, then meet me at the summoning circle outside town at dawn. The soul pays for the ritual, not you.",
+      "desc": "Falion, the wizard of Morthal, can cure my vampirism with an old ritual. He needs a black soul gem, and the ritual must be done at dawn at the summoning circle outside Morthal.",
+      "objectives": [
+        {"type": "deliver", "npc": "falion", "item": "skycraft:soul_gem_black", "count": 1, "text": "Bring Falion a black soul gem",
+         "topic": "I have the black soul gem.",
+         "reply": "Good. Go to the summoning circle east of town and wait for first light. I'll be there before you.",
+         "actions": "relocate:falion:morthal:84:-36"},
+        {"type": "go", "place": "morthal", "offset": [84, -36], "radius": 8, "text": "Go to the summoning circle outside Morthal"},
+        {"type": "cond", "cond": "day", "text": "Wait for dawn at the summoning circle"},
+        {"type": "talk", "npc": "falion", "text": "Let Falion perform the ritual", "topic": "I'm ready.",
+         "reply": "Then kneel in the circle, and let the sun see you.",
+         "actions": "scene:falion_ritual;cure:vampirism;relocate:falion:morthal:6:-4"}
+      ],
+      "rewards": {"gold": 0}
+    }
+  ]
+}

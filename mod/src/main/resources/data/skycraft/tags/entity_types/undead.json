@@ -16,15 +16,10 @@
     "minecraft:wither",
     "minecraft:skeleton_horse",
     "minecraft:zombie_horse",
-    {
-      "id": "vampirism:vampire",
-      "required": false
-    },
-    {
-      "id": "vampirism:advanced_vampire",
-      "required": false
-    },
+    "skycraft:vampire",
+    "skycraft:vampire_lord",
     "skycraft:death_hound",
+    "skycraft:gargoyle",
     "skycraft:ash_spawn",
     "skycraft:dragon_priest"
   ]

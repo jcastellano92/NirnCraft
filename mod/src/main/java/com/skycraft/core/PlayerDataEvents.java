@@ -72,7 +72,7 @@ public final class PlayerDataEvents {
     public static void login(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             player.setMaxUpStep(1.0625f);
-            // A Skycraft invisibility spell doesn't survive a relog; potions, Vampirism etc. are left alone.
+            // A Skycraft invisibility spell doesn't survive a relog; potions, Embrace of Shadows etc. are left alone.
             if (player.getPersistentData().getBoolean(SPELL_INVISIBILITY)) {
                 player.getPersistentData().remove(SPELL_INVISIBILITY);
                 player.removeEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY);

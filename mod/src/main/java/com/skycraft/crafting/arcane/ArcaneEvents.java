@@ -306,7 +306,8 @@ public final class ArcaneEvents {
         else if (type == EntityType.WITCH) drop(event, ArcaneRegistry.SALT_PILE.get(), 0.30f + bonus, r);
         else {
             ResourceLocation key = ForgeRegistries.ENTITY_TYPES.getKey(type);
-            if (key != null && key.getNamespace().equals("vampirism") && key.getPath().contains("vampire")) {
+            // Skycraft's vampires (and their lords) leave vampire dust (curse module)
+            if (key != null && key.getNamespace().equals("skycraft") && key.getPath().startsWith("vampire")) {
                 drop(event, ArcaneRegistry.VAMPIRE_DUST.get(), 0.50f + bonus, r);
             }
             if (key != null && key.getPath().contains("bear") && !key.getPath().contains("polar")) {

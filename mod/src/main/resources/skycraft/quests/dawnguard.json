@@ -48,8 +48,8 @@
         {"type": "talk", "npc": "isran", "text": "Speak with Isran", "topic": "I want to join the Dawnguard.",
          "reply": "Good, because I'm not turning anyone away. There's a crypt, Dimhollow, where the vampires have been digging. I want to know why. Go."},
         {"type": "clear", "place": "fort_dawnguard", "text": "Help drive off the vampires testing the fort's walls",
-         "spawn": [{"type": "skycraft:vampire", "count": 3, "name": "Volkihar Vampire", "if": "!mod:vampirism"},
-                   {"type": "vampirism:advanced_vampire", "count": 2, "name": "Volkihar Vampire", "if": "mod:vampirism"}]}
+         "spawn": [{"type": "skycraft:vampire", "count": 3, "name": "Volkihar Vampire"},
+                   {"type": "skycraft:death_hound", "count": 2}]}
       ],
       "rewards": {"gold": 200, "flags": ["dawnguard"], "items": [{"item": "minecraft:crossbow", "name": "Dawnguard Crossbow", "enchant": {"quick_charge": 2}}]}
     },
@@ -62,7 +62,7 @@
       "objectives": [
         {"type": "go", "place": "dimhollow_crypt", "text": "Travel to Dimhollow Crypt"},
         {"type": "clear", "place": "dimhollow_crypt", "placement": "structure", "text": "Fight through the crypt",
-         "spawn": [{"type": "skycraft:vampire", "count": 2}, {"type": "skycraft:troll", "count": 1, "name": "Gargoyle"}]},
+         "spawn": [{"type": "skycraft:vampire", "count": 2}, {"type": "skycraft:gargoyle", "count": 1}]},
         {"type": "talk", "npc": "serana", "text": "Open the sealed sarcophagus", "topic": "Who are you?",
          "reply": "Serana. Please, no more questions. I need to get home to Castle Volkihar. My family will want to know I'm awake.",
          "actions": "scene:serana_wakes"},
@@ -79,7 +79,7 @@
       "objectives": [
         {"type": "talk", "npc": "harkon", "text": "Hear Lord Harkon's offer", "actions": "scene:harkon_gift",
          "choices": [
-           {"label": "I accept your gift.", "reply": "Then drink, and rise as a lord of the night. Serana will guide you. We have a prophecy to fulfill.", "actions": "flag:dg_vampire;effect:night_vision:600:0;relocate:serana:fort_dawnguard"},
+           {"label": "I accept your gift.", "reply": "Then drink, and rise as a lord of the night. Serana will guide you. We have a prophecy to fulfill.", "actions": "flag:dg_vampire;vampire_lord;relocate:serana:fort_dawnguard"},
            {"label": "I refuse. I'm Dawnguard.", "reply": "A pity. Leave my hall while I'm still in a generous mood. Serana stays with me.", "actions": "flag:dg_hunter;relocate:serana:fort_dawnguard"}
          ]},
         {"type": "talk", "npc": "isran", "text": "Report to Isran at Fort Dawnguard", "topic": "Volkihar's lord wants to blot out the sun.",
@@ -151,9 +151,9 @@
       "objectives": [
         {"type": "go", "place": "castle_volkihar", "text": "Storm Castle Volkihar", "actions": "summon:serana"},
         {"type": "clear", "place": "castle_volkihar", "text": "Fight through Harkon's court",
-         "spawn": [{"type": "skycraft:vampire", "count": 4, "name": "Volkihar Vampire", "if": "!mod:vampirism"},
-                   {"type": "vampirism:advanced_vampire", "count": 3, "name": "Volkihar Vampire", "if": "mod:vampirism"},
-                   {"type": "skycraft:troll", "count": 1, "name": "Gargoyle"}]},
+         "spawn": [{"type": "skycraft:vampire", "count": 4, "name": "Volkihar Vampire"},
+                   {"type": "skycraft:death_hound", "count": 2},
+                   {"type": "skycraft:gargoyle", "count": 1}]},
         {"type": "kill", "place": "castle_volkihar", "text": "Destroy Harkon",
          "spawn": [{"type": "skycraft:vampire_lord", "name": "Harkon, Vampire Lord", "target": true, "boss": true, "hp": 4.0, "dmg": 1.3}],
          "actions": "retire:harkon;take:aetherial_bow;scene:harkon_falls"},

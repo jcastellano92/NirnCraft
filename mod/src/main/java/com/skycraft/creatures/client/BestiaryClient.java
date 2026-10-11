@@ -148,10 +148,8 @@ public final class BestiaryClient {
         rig(event, Bestiary.CHAURUS_HUNTER, "chaurus_hunter", 0.6f, 1.0f, null, null, r -> r.bank().translucent());
         rig(event, Bestiary.RIEKLING, "riekling", 0.4f, 1.0f, null, null, r -> {});
         rig(event, Bestiary.ASH_SPAWN, "ash_spawn", 0.5f, 1.0f, null, v("ash_spawn_glow"), r -> {});
-        rig(event, Bestiary.GARGOYLE, "gargoyle", 0.6f, 1.0f, null, v("gargoyle_glow"), r -> {});
         rig(event, Bestiary.WISP, "wisp", 0.0f, 1.0f, null, v("wisp_glow"), RigRenderer::translucent);
         rig(event, Bestiary.WILL_O_WISP, "will_o_wisp", 0.0f, 1.0f, null, v("will_o_wisp_glow"), RigRenderer::translucent);
-        rig(event, Bestiary.DEATH_HOUND, "death_hound", 0.5f, 1.0f, null, v("death_hound_glow"), r -> {});
         rig(event, Bestiary.DWARVEN_BALLISTA, "dwarven_ballista", 0.7f, 1.0f, null, v("dwarven_ballista_glow"), r -> {});
         rig(event, Bestiary.DRAGON_PRIEST, "dragon_priest", 0.6f, 1.0f, numbered("dragon_priest", "", "morokei", "rahgot", "vokun",
                 "volsung", "nahkriin", "otar", "krosis", "hevnoraak", "konahrik"), v("dragon_priest_glow"), r -> {});

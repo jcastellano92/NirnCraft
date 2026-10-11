@@ -157,6 +157,8 @@ public class MagicMenuScreen extends Screen {
                     } else if (id.startsWith("power:stone:")) {
                         com.skycraft.lore.StandingStone stone = com.skycraft.lore.StandingStone.byId(id.substring("power:stone:".length()));
                         if (stone != null && stone.hasPower) entries.add(new Entry(Kind.POWER, id, stone.powerName(), stone.color));
+                    } else if (id.startsWith(com.skycraft.curse.CursePowers.PREFIX) && MagicData.hasPower(p, id)) {
+                        entries.add(new Entry(Kind.POWER, id, com.skycraft.curse.CursePowers.name(id.substring(com.skycraft.curse.CursePowers.PREFIX.length())), 0xC8303A));
                     }
                 }
             }
@@ -171,6 +173,10 @@ public class MagicMenuScreen extends Screen {
                 com.skycraft.lore.StandingStone stone = com.skycraft.lore.StandingStones.current(p);
                 if (stone != null && stone.hasPower) {
                     entries.add(new Entry(Kind.POWER, "power:stone:" + stone.id(), stone.powerName(), stone.color));
+                }
+                // curse module: Beast Form, the Vampire Lord, the vampire's powers
+                for (String id : com.skycraft.curse.CursePowers.powers(p)) {
+                    entries.add(new Entry(Kind.POWER, com.skycraft.curse.CursePowers.PREFIX + id, com.skycraft.curse.CursePowers.name(id), 0xC8303A));
                 }
             }
             default -> {
@@ -562,6 +568,22 @@ public class MagicMenuScreen extends Screen {
     }
 
     private void powerDetails(GuiGraphics g, Font font, LocalPlayer p, PlayerData data, Entry entry) {
+        if (entry.id.startsWith(com.skycraft.curse.CursePowers.PREFIX)) {
+            String id = entry.id.substring(com.skycraft.curse.CursePowers.PREFIX.length());
+            int y = heading(g, font, com.skycraft.curse.CursePowers.name(id), 0xC8303A);
+            g.drawString(font, Component.translatable(com.skycraft.curse.CursePowers.greater(id) ? "curse.skycraft.power.greater" : "curse.skycraft.power.lesser"),
+                    detailX, y, 0xFFB04048, false);
+            y += 12;
+            long now = p.level().getGameTime();
+            long ready = com.skycraft.curse.CursePowers.readyAt(data, id);
+            Component status = ready <= now ? Component.translatable("magic.skycraft.power_ready")
+                    : Component.translatable("magic.skycraft.power_recharging", (ready - now) / 1000 + 1);
+            g.drawString(font, status, detailX, y, ready <= now ? 0xFF90D090 : 0xFFE8C080, false);
+            y += 16;
+            y = paragraph(g, font, com.skycraft.curse.CursePowers.description(id), y, 0xFFD8D2C0);
+            paragraph(g, font, Component.translatable("magic.skycraft.power_hint", SkyKeys.SHOUT.getTranslatedKeyMessage()), y + 6, 0xFF807A6A);
+            return;
+        }
         if (entry.id.startsWith("power:stone:")) {
             String stoneId = entry.id.substring("power:stone:".length());
             com.skycraft.lore.StandingStone stone = com.skycraft.lore.StandingStone.byId(stoneId);

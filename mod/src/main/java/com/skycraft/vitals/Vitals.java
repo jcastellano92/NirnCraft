@@ -168,6 +168,8 @@ public final class Vitals {
         magPct *= 1f + 0.25f * Perks.rank(data, "restoration.recovery");
         if (Buffs.active(player, "highborn")) magPct *= 25f;
         if (combat) magPct *= 0.33f;
+        // curse module: vampires regenerate nothing in sunlight, beasts only heal by feeding
+        magPct *= com.skycraft.curse.Curses.regenMultiplier(player, 'm');
         if (now - data.getLastMagickaUseTick() > 20) {
             data.setMagicka(data.getMagicka() + data.maxMagicka() * magPct * seconds);
         }
@@ -181,6 +183,7 @@ public final class Vitals {
         if (Perks.has(data, "light_armor.wind_walker") && ArmorClass.countLight(player) >= 4) stPct *= 1.5f;
         if (Buffs.active(player, "adrenaline_rush")) stPct *= 10f;
         if (combat) stPct *= 0.5f;
+        stPct *= com.skycraft.curse.Curses.regenMultiplier(player, 's');
 
         // Armor trade-offs
         int heavy = ArmorClass.countHeavy(player);
@@ -200,7 +203,8 @@ public final class Vitals {
             float hpPct = (float) (double) SkyConfig.HEALTH_REGEN_PERCENT.get() / 100f;
             if (Buffs.active(player, "histskin")) hpPct *= 10f;
             if (combat) hpPct *= 0.1f;
-            player.heal(player.getMaxHealth() * hpPct * seconds);
+            hpPct *= com.skycraft.curse.Curses.regenMultiplier(player, 'h');
+            if (hpPct > 0) player.heal(player.getMaxHealth() * hpPct * seconds);
         }
         if (SkyConfig.SKYRIM_REGEN.get() && player.server.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION)) {
             player.server.getGameRules().getRule(GameRules.RULE_NATURAL_REGENERATION).set(false, player.server);

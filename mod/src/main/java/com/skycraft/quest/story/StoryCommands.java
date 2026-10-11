@@ -161,7 +161,7 @@ public final class StoryCommands {
 
     private static final java.util.Set<String> ACTIONS = java.util.Set.of("give", "relic", "take", "scene", "flag", "unflag", "start",
             "word", "souls", "teleport_dim", "flight", "effect", "control", "relocate", "summon", "flyover", "helgen", "thunder",
-            "absorb_soul", "beast_blood", "cure_beast_blood", "retire", "victory");
+            "absorb_soul", "beast_blood", "cure_beast_blood", "vampire_lord", "cure", "retire", "victory");
 
     /**
      * Builds every story quest for a stand-in player and checks what a playthrough would hit: places, NPCs, relics,

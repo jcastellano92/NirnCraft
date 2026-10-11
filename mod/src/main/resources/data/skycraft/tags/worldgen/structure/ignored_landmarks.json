@@ -433,10 +433,6 @@
       "required": false
     },
     {
-      "id": "vampirism:hunter_camp",
-      "required": false
-    },
-    {
       "id": "terralith:rubble_forest",
       "required": false
     },
