@@ -1,0 +1,187 @@
+{
+ "note": "Dungeon audit sample (tools/qa/dungeon_audit.py): 20 named dungeon places covering every theme and province. rooms_ref = room count from the last tools/dungeon_qa run (largest: bleak_falls_barrow 13, smallest: fort_fellhammer 3).",
+ "ids": [
+  "bleak_falls_barrow",
+  "angarvunde",
+  "gyldenhul_barrow",
+  "alftand",
+  "nchardak",
+  "mthartzel",
+  "bonechill_passage",
+  "ahabah_hollow",
+  "bilegulch_mine",
+  "badgerrun_quarry",
+  "amelion_tomb",
+  "alas_ancestral_tomb",
+  "ahaleb_necropolis",
+  "aphrens_tomb",
+  "wolf_jarls_howe",
+  "fort_fellhammer",
+  "castle_volkihar",
+  "ravenscar_hollow",
+  "haemars_shame",
+  "bramcliff_crypt"
+ ],
+ "places": [
+  {
+   "id": "bleak_falls_barrow",
+   "theme": "barrow",
+   "region": "skyrim/falkreath",
+   "structure": "unique/bleak_falls_barrow.json",
+   "rooms_ref": 13,
+   "variant": "bleak_falls_barrow"
+  },
+  {
+   "id": "angarvunde",
+   "theme": "barrow",
+   "region": "skyrim/the_rift",
+   "structure": "site/barrow.json",
+   "rooms_ref": 7,
+   "variant": "barrow"
+  },
+  {
+   "id": "gyldenhul_barrow",
+   "theme": "barrow",
+   "region": "morrowind/solstheim",
+   "structure": "site/barrow.json",
+   "rooms_ref": 9,
+   "variant": "barrow"
+  },
+  {
+   "id": "alftand",
+   "theme": "dwemer",
+   "region": "skyrim/winterhold",
+   "structure": "site/dwemer.json",
+   "rooms_ref": 11,
+   "variant": "dwemer_ruin"
+  },
+  {
+   "id": "nchardak",
+   "theme": "dwemer",
+   "region": "morrowind/solstheim",
+   "structure": "site/dwemer.json",
+   "rooms_ref": 8,
+   "variant": "dwemer_ruin"
+  },
+  {
+   "id": "mthartzel",
+   "theme": "dwemer",
+   "region": "high_rock/glenumbra",
+   "structure": "site/dwemer.json",
+   "rooms_ref": null,
+   "variant": "dwemer_ruin"
+  },
+  {
+   "id": "bonechill_passage",
+   "theme": "cave",
+   "region": "skyrim/falkreath",
+   "structure": "site/ice_cave.json",
+   "rooms_ref": 6,
+   "variant": "ice_cave"
+  },
+  {
+   "id": "ahabah_hollow",
+   "theme": "cave",
+   "region": "hammerfell/alikr_desert",
+   "structure": "site/cave.json",
+   "rooms_ref": null,
+   "variant": "cave"
+  },
+  {
+   "id": "bilegulch_mine",
+   "theme": "mine",
+   "region": "skyrim/falkreath",
+   "structure": "site/mine.json",
+   "rooms_ref": 6,
+   "variant": "mine"
+  },
+  {
+   "id": "badgerrun_quarry",
+   "theme": "mine",
+   "region": "cyrodiil/gold_coast",
+   "structure": "site/mine.json",
+   "rooms_ref": null,
+   "variant": "mine"
+  },
+  {
+   "id": "amelion_tomb",
+   "theme": "ruin",
+   "region": "cyrodiil/blackwood",
+   "structure": "site/imperial_crypt.json",
+   "rooms_ref": null,
+   "variant": "imperial_crypt"
+  },
+  {
+   "id": "alas_ancestral_tomb",
+   "theme": "ruin",
+   "region": "morrowind/grazelands",
+   "structure": "site/velothi_tomb.json",
+   "rooms_ref": null,
+   "variant": "velothi_tomb"
+  },
+  {
+   "id": "ahaleb_necropolis",
+   "theme": "ruin",
+   "region": "hammerfell/hews_bane",
+   "structure": "site/yokudan_tomb.json",
+   "rooms_ref": null,
+   "variant": "yokudan_tomb"
+  },
+  {
+   "id": "aphrens_tomb",
+   "theme": "ruin",
+   "region": "high_rock/stormhaven",
+   "structure": "site/breton_crypt.json",
+   "rooms_ref": null,
+   "variant": "breton_crypt"
+  },
+  {
+   "id": "wolf_jarls_howe",
+   "theme": "ruin",
+   "region": "atmora/ice_waste",
+   "structure": "site/atmoran_tomb.json",
+   "rooms_ref": null,
+   "variant": "atmoran_tomb"
+  },
+  {
+   "id": "fort_fellhammer",
+   "theme": "fort",
+   "region": "skyrim/winterhold",
+   "structure": "site/fort.json",
+   "rooms_ref": 3,
+   "variant": "fort"
+  },
+  {
+   "id": "castle_volkihar",
+   "theme": "fort",
+   "region": "skyrim/haafingar",
+   "structure": "site/fort_vampire.json",
+   "rooms_ref": 4,
+   "variant": "fort_vampire"
+  },
+  {
+   "id": "ravenscar_hollow",
+   "theme": "hagraven_lair",
+   "region": "skyrim/haafingar",
+   "structure": "site/hagraven_lair.json",
+   "rooms_ref": 7,
+   "variant": "hagraven_lair"
+  },
+  {
+   "id": "haemars_shame",
+   "theme": "vampire_lair",
+   "region": "skyrim/falkreath",
+   "structure": "site/vampire_lair.json",
+   "rooms_ref": 7,
+   "variant": "vampire_lair"
+  },
+  {
+   "id": "bramcliff_crypt",
+   "theme": "necromancer_lair",
+   "region": "high_rock/glenumbra",
+   "structure": "site/necromancer_lair.json",
+   "rooms_ref": null,
+   "variant": "necromancer_lair"
+  }
+ ]
+}

@@ -36,3 +36,6 @@ tools/worldgen/preview_places*.png
 
 # private reference data extracted from the owner's own game installs (facts only; never commit)
 .reference/
+
+# offline QA renders (large); small contact sheets are copied to docs/screens/
+tools/qa/out/

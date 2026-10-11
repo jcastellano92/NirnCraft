@@ -95,6 +95,8 @@ public final class DungeonQa {
                                 .then(Commands.argument("z", IntegerArgumentType.integer()).executes(c -> dump(c.getSource(),
                                         StringArgumentType.getString(c, "id"), IntegerArgumentType.getInteger(c, "x"),
                                         IntegerArgumentType.getInteger(c, "y"), IntegerArgumentType.getInteger(c, "z"))))))))
+                .then(Commands.literal("export").then(Commands.argument("ids", StringArgumentType.greedyString())
+                        .executes(c -> export(c.getSource(), StringArgumentType.getString(c, "ids")))))
                 .then(Commands.literal("view").then(Commands.argument("id", StringArgumentType.word())
                         .executes(c -> view(c.getSource(), StringArgumentType.getString(c, "id"), "boss", 0))
                         .then(Commands.literal("boss").executes(c -> view(c.getSource(), StringArgumentType.getString(c, "id"), "boss", 0)))
@@ -229,6 +231,38 @@ public final class DungeonQa {
         }
         src.sendSuccess(() -> Component.literal("Wrote " + out), false);
         return 1;
+    }
+
+    /**
+     * {@code export <place id>...}: paints each named dungeon in memory and writes {@code qa-exports/<id>.json.gz} in
+     * the server folder (blocks + markers; see {@link QaExport}) for {@code tools/qa/render_dungeon.py} and
+     * {@code tools/qa/dungeon_reach.py}. Nothing is generated in the world.
+     */
+    private static int export(CommandSourceStack src, String ids) {
+        Path dir = src.getServer().getServerDirectory().toPath().resolve("qa-exports");
+        int ok = 0;
+        for (String id : ids.split("[\\s,;|]+")) {
+            if (id.isBlank()) continue;
+            Job j = new Job(src.getServer(), src, "export");
+            try {
+                QaSample s = id.startsWith("r.") ? j.randomAt(id) : j.namedSample(id);
+                QaDungeon d = s == null ? null : j.analyse(s);
+                if (d == null) {
+                    Skycraft.LOGGER.warn("Skycraft dungeon QA export: {} is not a dungeon place or did not start", id);
+                    src.sendFailure(Component.literal("export: no dungeon for " + id));
+                    continue;
+                }
+                Path out = QaExport.write(d, id, dir);
+                Skycraft.LOGGER.info("Skycraft dungeon QA export: {} -> {}", id, out);
+                ok++;
+            } catch (IOException | RuntimeException ex) {
+                Skycraft.LOGGER.error("Skycraft dungeon QA export: {} failed", id, ex);
+                src.sendFailure(Component.literal("export failed for " + id + ": " + ex));
+            }
+        }
+        int n = ok;
+        src.sendSuccess(() -> Component.literal("Exported " + n + " dungeons to " + dir), false);
+        return ok;
     }
 
     private static char glyph(QaLevel lvl, int x, int y, int z) {

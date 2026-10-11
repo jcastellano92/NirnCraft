@@ -1,6 +1,6 @@
 """Tiles every screenshot in a folder into ONE labelled JPG, so a reviewer looks at a single image.
 
-usage: py -3 -I tools/qa/contact_sheet.py <screenshot dir> <out.jpg> [columns]
+usage: py -3 -I tools/qa/contact_sheet.py <screenshot dir> <out.jpg> [columns] [tile width]
 """
 import os
 import sys
@@ -18,7 +18,12 @@ def main():
     if not files:
         print("no screenshots in", src)
         return
-    tw, th = 480, 270
+    # optional 4th argument: tile width (square tiles, for tall plan images); otherwise 16:9 480 px tiles
+    if len(sys.argv) > 4:
+        tw = int(sys.argv[4])
+        th = tw
+    else:
+        tw, th = 480, 270
     rows = (len(files) + cols - 1) // cols
     sheet = Image.new("RGB", (cols * tw, rows * (th + 16)), (20, 20, 20))
     draw = ImageDraw.Draw(sheet)

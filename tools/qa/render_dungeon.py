@@ -3,6 +3,8 @@
 usage:
   py -3 -I tools/qa/render_dungeon.py <world_dir> <place_id | x,z | x,y,z> <out_dir> [--name N]
   py -3 -I tools/qa/render_dungeon.py <world_dir> box <out_dir> --box x1 z1 x2 z2 y1 y2
+  py -3 -I tools/qa/render_dungeon.py <export.json.gz> <out_dir> [--name N]     (no world needed: an export written by
+      `/skycraft-dungeon-qa export <place id>...`; also draws enemy / boss / chest / lectern / trap markers)
 
 Outputs (PNG, <=1600 px wide): 00_exterior_iso, 01_exterior_top, 10..1n_level_*, 20..2n_interior_*, plus a
 legend strip in each cutaway.  No Minecraft client needed; stdlib + numpy + PIL.
@@ -18,6 +20,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from mca import World  # noqa: E402
+import dungeon_export  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 TEX = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'assets', 'skycraft', 'textures', 'block')
@@ -210,6 +213,129 @@ def find_place(pid):
     return None
 
 
+# ------------------------------------------------------------------ export-backed world (no .mca files)
+class ExportWorld:
+    """Same surface as mca.World (names, box, block_entities) over a /skycraft-dungeon-qa export."""
+
+    def __init__(self, ex):
+        self.ex = ex
+        self.names = list(ex.names)
+
+    def box(self, x1, z1, x2, z2, y1, y2):
+        ex = self.ex
+        bx1, by1, bz1, bx2, by2, bz2 = ex.box
+        out = np.zeros((y2 - y1 + 1, z2 - z1 + 1, x2 - x1 + 1), np.uint16)
+        xa, xb = max(x1, bx1), min(x2, bx2)
+        za, zb = max(z1, bz1), min(z2, bz2)
+        ya, yb = max(y1, by1), min(y2, by2)
+        if xa <= xb and za <= zb and ya <= yb:
+            out[ya - y1:yb - y1 + 1, za - z1:zb - z1 + 1, xa - x1:xb - x1 + 1] = \
+                ex.A[ya - by1:yb - by1 + 1, za - bz1:zb - bz1 + 1, xa - bx1:xb - bx1 + 1]
+        return out
+
+    def block_entities(self, x1, z1, x2, z2):
+        ex = self.ex
+        res = []
+        for c in ex.containers:
+            res.append({'id': c.get('block', 'minecraft:chest'), 'x': c['x'], 'y': c['y'], 'z': c['z']})
+        for c in ex.spawners:
+            res.append({'id': 'minecraft:mob_spawner', 'x': c['x'], 'y': c['y'], 'z': c['z']})
+        for c in ex.lecterns:
+            res.append({'id': 'minecraft:lectern', 'x': c['x'], 'y': c['y'], 'z': c['z']})
+        for c in ex.mechanisms:
+            if c['kind'] == 'word_wall':
+                res.append({'id': 'skycraft:word_wall', 'x': c['x'], 'y': c['y'], 'z': c['z']})
+        return [b for b in res if x1 <= b['x'] <= x2 and z1 <= b['z'] <= z2]
+
+
+EX_COL = {
+    'enemy': (255, 60, 60), 'sleeper': (60, 210, 255), 'elite': (255, 205, 0), 'boss': (255, 0, 200),
+    'chest': (255, 150, 10), 'lectern': (60, 230, 150), 'trap': (255, 100, 255), 'mech': (230, 230, 120),
+    'spawner': (190, 40, 255), 'entrance': (255, 255, 255),
+}
+EX_LABEL = {
+    'enemy': 'enemy (awake)', 'sleeper': 'enemy (dormant sleeper)', 'elite': 'elite guard', 'boss': 'BOSS',
+    'chest': 'chest / loot', 'lectern': 'lectern / journal / word wall', 'trap': 'trap (plate, dispenser, tripwire)',
+    'mech': 'lever / keyhole / glyph ring', 'spawner': 'spawner', 'entrance': 'entrance (surface end)',
+}
+EX_ORDER = ['boss', 'elite', 'enemy', 'sleeper', 'chest', 'lectern', 'trap', 'mech', 'spawner', 'entrance']
+EX_LEGEND = [(EX_LABEL[k], EX_COL[k]) for k in EX_ORDER]
+_TRAPS = ('plate', 'dispenser', 'tripwire')
+
+
+def export_markers(ex):
+    """-> [(kind, x, y, z, label)] from the export's semantic markers."""
+    out = []
+    for e in ex.entities:
+        t = e['type'].split(':')[-1]
+        if 'dormant' not in e:
+            out.append(('chest', e['x'], e['y'], e['z'], t))
+        elif e.get('boss'):
+            out.append(('boss', e['x'], e['y'], e['z'], e.get('name') or t))
+        elif e.get('elite'):
+            out.append(('elite', e['x'], e['y'], e['z'], e.get('name') or t))
+        elif e.get('dormant'):
+            out.append(('sleeper', e['x'], e['y'], e['z'], t))
+        else:
+            out.append(('enemy', e['x'], e['y'], e['z'], t))
+    for c in ex.containers:
+        out.append(('chest', c['x'], c['y'], c['z'], c.get('loot', '')))
+    for c in ex.lecterns:
+        out.append(('lectern', c['x'], c['y'], c['z'], ''))
+    for c in ex.spawners:
+        out.append(('spawner', c['x'], c['y'], c['z'], c.get('entity', '')))
+    for c in ex.mechanisms:
+        k = c['kind']
+        if k in _TRAPS:
+            out.append(('trap', c['x'], c['y'], c['z'], k))
+        elif k == 'word_wall':
+            out.append(('lectern', c['x'], c['y'], c['z'], 'word wall'))
+        else:
+            out.append(('mech', c['x'], c['y'], c['z'], k))
+    for e in ex.entrances:
+        out.append(('entrance', e['x'], e['y'], e['z'], ''))
+    return out
+
+
+def draw_markers(d, m, scale, ylo_w, yhi_w):
+    """Draw export markers whose y is in [ylo_w, yhi_w] onto a plan image (x/z -> pixels)."""
+    if not m.ex:
+        return
+    f = font(max(9, min(12, scale + 4)))
+    r = max(3, int(scale * 0.55))
+    for kind, x, y, z, lab in sorted(export_markers(m.ex), key=lambda t: -EX_ORDER.index(t[0])):
+        if not (ylo_w <= y <= yhi_w):
+            continue
+        if not (m.x1 <= x <= m.x2 and m.z1 <= z <= m.z2):
+            continue
+        px, pz = (x - m.x1) * scale + scale // 2, (z - m.z1) * scale + scale // 2
+        c = EX_COL[kind]
+        if kind == 'boss':
+            R = r * 2
+            d.ellipse([px - R, pz - R, px + R, pz + R], fill=c, outline=(255, 255, 255), width=2)
+            d.line([px - R, pz, px + R, pz], fill=(0, 0, 0), width=2)
+            d.line([px, pz - R, px, pz + R], fill=(0, 0, 0), width=2)
+            d.text((px + R + 3, pz - 6), str(lab)[:24], fill=(255, 255, 255), font=f, stroke_width=1, stroke_fill=(0, 0, 0))
+        elif kind in ('enemy', 'sleeper', 'elite'):
+            d.ellipse([px - r, pz - r, px + r, pz + r], fill=c, outline=(0, 0, 0))
+            if kind == 'elite':
+                d.ellipse([px - r - 2, pz - r - 2, px + r + 2, pz + r + 2], outline=(255, 60, 60), width=2)
+        elif kind == 'chest':
+            d.rectangle([px - r, pz - r, px + r, pz + r], fill=c, outline=(0, 0, 0), width=1)
+        elif kind == 'lectern':
+            d.polygon([(px, pz - r - 1), (px + r + 1, pz), (px, pz + r + 1), (px - r - 1, pz)], fill=c, outline=(0, 0, 0))
+        elif kind == 'trap':
+            d.polygon([(px, pz - r - 1), (px + r + 1, pz + r), (px - r - 1, pz + r)], fill=c, outline=(0, 0, 0))
+        elif kind == 'mech':
+            d.rectangle([px - 2, pz - 2, px + 2, pz + 2], fill=c, outline=(0, 0, 0))
+        elif kind == 'spawner':
+            d.rectangle([px - r, pz - r, px + r, pz + r], outline=c, width=2)
+        elif kind == 'entrance':
+            R = r * 2
+            d.rectangle([px - R, pz - R, px + R, pz + R], fill=c, outline=(0, 0, 0), width=2)
+            d.text((px - 4, pz - 7), 'E', fill=(0, 0, 0), font=f)
+
+
 # ------------------------------------------------------------------ model
 class Model:
     def __init__(self, world, x1, z1, x2, z2, y1, y2):
@@ -223,6 +349,18 @@ class Model:
         self.cat = self.cl['cat']
         self.built = (~self.cl['air']) & (~self.cl['natural']) & (~self.cl['fluid'])
         self.be = world.block_entities(x1, z1, x2, z2)
+        self.ex = getattr(world, 'ex', None)
+        # export mode: cells inside a room / corridor / tunnel piece count as built, so natural-cave floors
+        # (plain stone) still show up as walkable levels
+        self.pm = None
+        if self.ex:
+            pm = np.zeros(self.A.shape, bool)
+            for p in self.ex.pieces:
+                if p['kind'] in ('room', 'corridor', 'tunnel', 'shaft'):
+                    bx1, by1, bz1, bx2, by2, bz2 = p['box']
+                    pm[max(0, by1 - y1):max(0, by2 - y1 + 1), max(0, bz1 - z1):max(0, bz2 - z1 + 1),
+                       max(0, bx1 - x1):max(0, bx2 - x1 + 1)] = True
+            self.pm = pm
 
     def solid_mask(self):
         return self.cl['solid'][self.A]
@@ -235,7 +373,7 @@ def detect_levels(m, min_cells=60):
     """walkable cells: solid built block below, two non-solid cells above. Returns list of (lo, hi, count)."""
     A = m.A
     solid = m.cl['solid'][A]
-    built_floor = m.built[A] & solid
+    built_floor = (m.built[A] | m.pm if m.pm is not None else m.built[A]) & solid
     free = ~solid & ~m.cl['fluid'][A]
     walk = np.zeros_like(solid)
     walk[1:-2] = built_floor[:-3] & free[1:-2] & free[2:-1]
@@ -309,8 +447,11 @@ def level_cutaway(m, lo, hi, walk, scale):
     s0, s1 = max(ylo + 1, 0), min(yhi + 4, Y)
     slab = A[s0:s1]
     sol_slab = solid[s0:s1]
-    built_slab = m.built[slab] & sol_slab
-    nat_slab = (~m.built[slab]) & sol_slab & ~m.cl['air'][slab]
+    isb = m.built[slab]
+    if m.pm is not None:
+        isb = isb | m.pm[s0:s1]
+    built_slab = isb & sol_slab
+    nat_slab = (~isb) & sol_slab & ~m.cl['air'][slab]
     wall_any = built_slab.any(0)
     nat_any = nat_slab.any(0)
     # wall colour: first built solid block at lowest y in slab
@@ -355,6 +496,8 @@ def level_cutaway(m, lo, hi, walk, scale):
         else:
             d.rectangle([x0 + pad, y0 + pad, x0 + scale - pad - 1, y0 + scale - pad - 1], fill=c,
                         outline=(0, 0, 0))
+    # export markers (enemy anchors, boss, chests, lecterns, traps) in this level's band
+    draw_markers(d, m, scale, lo - 1, hi + 3)
     # axis ticks every 16 blocks
     f = font(11)
     for gx in range((m.x1 + 15) // 16 * 16, m.x2 + 1, 16):
@@ -398,6 +541,11 @@ def surface_topdown(m, scale, built_hilite=True):
             c = MARK_COL['spawner' if k == 'mob_spawner' else 'chest']
             r = max(3, scale)
             d.ellipse([x - r, z - r, x + r, z + r], outline=c, width=2)
+    if m.ex:
+        for e in m.ex.entrances:
+            px, pz = (e['x'] - m.x1) * scale, (e['z'] - m.z1) * scale
+            R = max(4, scale)
+            d.rectangle([px - R, pz - R, px + R, pz + R], fill=EX_COL['entrance'], outline=(0, 0, 0), width=2)
     return im
 
 
@@ -522,7 +670,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('world')
     ap.add_argument('target')
-    ap.add_argument('out')
+    ap.add_argument('out', nargs='?')
     ap.add_argument('--box', nargs=6, type=int, metavar=('X1', 'Z1', 'X2', 'Z2', 'Y1', 'Y2'))
     ap.add_argument('--name', default=None)
     ap.add_argument('--pad', type=int, default=14)
@@ -530,12 +678,31 @@ def main():
     ap.add_argument('--max-levels', type=int, default=6)
     ap.add_argument('--foci', default='', help='extra interior close-ups "name:x:y:z;..." (world coords)')
     a = ap.parse_args()
+    export_mode = a.world.endswith(('.json.gz', '.json'))
+    if export_mode and a.out is None:
+        a.out = a.target            # render_dungeon.py <export> <out_dir>
+    if a.out is None:
+        ap.error('out_dir required')
     os.makedirs(a.out, exist_ok=True)
-    w = World(a.world)
+    ex = None
+    if export_mode:
+        ex = dungeon_export.load(a.world)
+        w = ExportWorld(ex)
+    else:
+        w = World(a.world)
     cx = cz = None
     radius = 40
     name = a.name
-    if a.box:
+    if export_mode:
+        x1, y1, z1, x2, y2, z2 = ex.box
+        name = name or ex.id
+        a.pad = 0
+        ent = ex.entrances[0] if ex.entrances else None
+        if ent:
+            cx, cz = ent['x'], ent['z']
+        else:
+            cx, cz = (x1 + x2) // 2, (z1 + z2) // 2
+    elif a.box:
         x1, z1, x2, z2, y1, y2 = a.box
         name = name or 'box'
     else:
@@ -567,7 +734,10 @@ def main():
         del m0
     name = name or 'structure'
     pad = a.pad
-    m = Model(w, x1 - pad, z1 - pad, x2 + pad, z2 + pad, max(-64, y1 - 6), min(319, y2 + 30))
+    if export_mode:
+        m = Model(w, x1, z1, x2, z2, max(-64, y1), min(319, y2))
+    else:
+        m = Model(w, x1 - pad, z1 - pad, x2 + pad, z2 + pad, max(-64, y1 - 6), min(319, y2 + 30))
     print('model', m.A.shape, 'block types', len(m.names))
     # levels
     walk, cnt = detect_levels(m)
@@ -579,7 +749,8 @@ def main():
     scale = max(2, min(8, 1500 // (m.A.shape[2])))
     top = surface_topdown(m, scale)
     finish(compose(top, [('built solid (brightened)', (200, 200, 190)), ('chest', MARK_COL['chest']),
-                         ('spawner', MARK_COL['spawner'])], name + ': exterior top-down (north up)'),
+                         ('spawner', MARK_COL['spawner'])] + ([('entrance', EX_COL['entrance'])] if ex else []),
+                   name + ': exterior top-down (north up)'),
            os.path.join(a.out, '01_exterior_top.png'))
     ymax_ext = m.y2
     iso = iso_render(m, view=0, ymax=ymax_ext, ybottom=max(m.y1, (levels[0][0] - 4) if levels else m.y1))
@@ -597,7 +768,8 @@ def main():
     for i, (lo_, hi_, tot) in enumerate(levels):
         im, n = level_cutaway(m, lo_, hi_, walk, scale if scale >= 4 else 4)
         title = '%s: level %d  y=%d..%d  (%d walkable cells)' % (name, i + 1, lo_, hi_, n)
-        finish(compose(im, CUT_LEGEND, title), os.path.join(a.out, '1%d_level_y%d.png' % (i, lo_)))
+        finish(compose(im, CUT_LEGEND[:6] + (EX_LEGEND if ex else CUT_LEGEND[6:]), title),
+               os.path.join(a.out, '1%d_level_y%d.png' % (i, lo_)))
     # interior close-ups
     foci = []
     for f in a.foci.split(';'):
@@ -656,16 +828,21 @@ def auto_foci(m, walk, levels, cx=None, cz=None):
 
 
 def stats(m, levels, out, name):
+    import collections
     ids, cnt = np.unique(m.A[m.built[m.A]], return_counts=True)
     order = np.argsort(-cnt)[:25]
     lines = ['# %s: top built block types' % name]
     tot = cnt.sum()
     for i in order:
         lines.append('%6d %5.1f%% %s' % (cnt[i], 100.0 * cnt[i] / tot, m.names[ids[i]]))
-    import collections
     c = collections.Counter(be['id'] for be in m.be)
     lines.append('# block entities: ' + ', '.join('%s=%d' % kv for kv in c.most_common()))
     lines.append('# levels: ' + str(levels))
+    if m.ex:
+        mk = collections.Counter(k for k, *_ in export_markers(m.ex))
+        lines.append('# markers: ' + ', '.join('%s=%d' % kv for kv in mk.most_common()))
+        mt = collections.Counter(lab for k, _, _, _, lab in export_markers(m.ex) if k in ('enemy', 'sleeper', 'elite', 'boss'))
+        lines.append('# enemies: ' + ', '.join('%s=%d' % kv for kv in mt.most_common()))
     open(os.path.join(out, 'stats.txt'), 'w').write('\n'.join(lines) + '\n')
     print('\n'.join(lines[:14]))
 
