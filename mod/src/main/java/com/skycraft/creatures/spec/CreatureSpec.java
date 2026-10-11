@@ -107,6 +107,8 @@ public final class CreatureSpec {
     public float voicePitch = 1f;
     public float soundVolume = 1f;
     public int ambientInterval = 120;
+    /** Cries played when a move starts, by the move's {@link Attack#cry} key ({@code attack}, {@code roar}, {@code cast}, {@code breath}). */
+    public final java.util.Map<String, Supplier<SoundEvent>> cries = new java.util.HashMap<>();
 
     /** Server tick hook (every tick; keep it cheap), e.g. auras. */
     @Nullable
@@ -217,6 +219,39 @@ public final class CreatureSpec {
         this.deathSound = death;
         this.voicePitch = pitch;
         return this;
+    }
+
+    /**
+     * Skycraft's own voice from the audio module: ambient, hurt and death from {@code entity.<creature>.<kind>}, plus every
+     * registered cry ({@code attack}, {@code roar}, {@code cast}, {@code breath}) and footstep ({@code step}).
+     */
+    public CreatureSpec voice(String creature, float pitch) {
+        this.ambientSound = () -> com.skycraft.audio.AudioSounds.creature(creature, "ambient");
+        this.hurtSound = () -> com.skycraft.audio.AudioSounds.creature(creature, "hurt");
+        this.deathSound = () -> com.skycraft.audio.AudioSounds.creature(creature, "death");
+        this.voicePitch = pitch;
+        for (String kind : new String[]{"attack", "roar", "cast", "breath"}) {
+            if (com.skycraft.audio.AudioSounds.has("entity." + creature + "." + kind)) {
+                cries.put(kind, () -> com.skycraft.audio.AudioSounds.creature(creature, kind));
+            }
+        }
+        if (com.skycraft.audio.AudioSounds.has("entity." + creature + ".step")) {
+            this.stepSound = () -> com.skycraft.audio.AudioSounds.creature(creature, "step");
+        }
+        return this;
+    }
+
+    /** Adds (or replaces) the cry played when a move with this {@link Attack#cry} key starts. */
+    public CreatureSpec cry(String kind, Supplier<SoundEvent> sound) {
+        cries.put(kind, sound);
+        return this;
+    }
+
+    /** The cry for a move key, or null. */
+    @Nullable
+    public SoundEvent cry(@Nullable String kind) {
+        Supplier<SoundEvent> s = kind == null ? null : cries.get(kind);
+        return s == null ? null : s.get();
     }
 
     public CreatureSpec step(Supplier<SoundEvent> step) {

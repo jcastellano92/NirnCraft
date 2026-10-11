@@ -1073,6 +1073,201 @@ def bed_sovngarde(B):
     B.add(B.noise(0.6, 2500, 7000, corr=0.1) * B.lfo(0.1).u(B.t, 2.0), -27)
 
 
+def bed_swamp_night(B):
+    """Warm swamps (Black Marsh, the Bitter Coast, Blackwood) after dark: a dense frog chorus over insects."""
+    fr = frog_texture(B, 14 * B.secs, ["croak", "croak", "kruk", "krr", "creek", "tink"], (-16, 0), pitch=(0.8, 1.15),
+                      bout=(2, 8), gap=(0.1, 0.4))
+    B.add(unit(B.verb(fr, 1.4, 0.4)), 0)
+    x = cicada_layer(B, 3900 * B.rng.uniform(0.95, 1.05), 110, q=4.0, swell_f=0.08)
+    B.add(B.pan(x, B.rng.uniform(-0.6, 0.6)), -9)
+    kat = [(katydid_track(B, B.rng.uniform(5000, 8000), B.rng.uniform(0.6, 1.2), (2, 4),
+                          level=float(db(B.rng.uniform(-8, 0)))), B.rng.uniform(-0.9, 0.9)) for _ in range(3)]
+    B.add(unit(chorus(B, kat, 1.0, 0.3)), -9)
+    B.add(midge_drone(B, 8), -15)
+    B.add(lapping(B, 0.7), -12)
+    B.add(B.noise(1.6, 40, 300, corr=0.5), -12)
+
+
+def bed_savanna_day(B):
+    """Hot grassland by day: dry grass in the wind and loud, swelling cicadas."""
+    gl = B.lfo(0.1)
+    gust = lambda t: gl.u(t)  # noqa: E731
+    g = gust(B.t)
+    body, _ = wind_layer(B, gust, 1.2, 60, 600, 1800, gust_db=9)
+    B.add(body, -2)
+    B.add(B.crackle(800 + 4000 * g ** 2, 2500, 8000) * (0.2 + 0.8 * g), -12)
+    for fc, rate, lv in ((6200, 160, -4), (7400, 210, -9)):
+        x = cicada_layer(B, fc * B.rng.uniform(0.95, 1.05), rate * B.rng.uniform(0.95, 1.05), q=3.5, swell_f=0.1, depth=0.9)
+        B.add(B.pan(x, B.rng.uniform(-0.7, 0.7)), lv)
+    B.add(insect_hums(B, 3), -18)
+    B.add(distant_chirps(B, 3 * B.secs, (2000, 5000)), -16)
+
+
+def bed_hot_springs(B):
+    """Eastmarch's hot springs: bubbling pools, steam and a light wind."""
+    rng, sr = B.rng, B.sr
+    bub = B.track()
+    for _ in range(int(60 * B.secs)):
+        f0 = np.exp(rng.uniform(np.log(150), np.log(900)))
+        B.put(bub, bubble(sr, f0, xi=rng.uniform(0.1, 0.4), damp=0.8), rng.uniform(0, B.secs), rng.uniform(-0.8, 0.8),
+              db(rng.uniform(-14, 0)))
+    B.add(unit(B.verb(bub, 0.6, 0.3)), 0)
+    blub = B.track()
+    for _ in range(int(3 * B.secs)):
+        B.put(blub, bubble(sr, np.exp(rng.uniform(np.log(60), np.log(160))), xi=0.4, damp=0.5), rng.uniform(0, B.secs),
+              rng.uniform(-0.6, 0.6), db(rng.uniform(-8, 0)))
+    B.add(unit(B.verb(blub, 0.8, 0.3)), -6)
+    B.add(B.noise(0.2, 2500, 9000, corr=0.2) * B.lfo(0.1).u(B.t, 2.0), -12)
+    gl = B.lfo(0.1)
+    body, _ = wind_layer(B, lambda t: gl.u(t), 1.4, 60, 400, 1100, gust_db=8)
+    B.add(body, -12)
+
+
+def bed_volcanic_rumble(B):
+    """Red Mountain, Molag Amur, lava caves: the ground's slow surging rumble, distant booms and venting gas."""
+    rng, sr = B.rng, B.sr
+    surge = np.clip(B.lfo(0.08, 0.8)(B.t), 0, None) ** 2
+    B.add(B.noise(2.0, 16, 90, corr=0.7) * (0.4 + 0.6 * B.lfo(0.05).u(B.t)), 0)
+    rum = B.noise(1.6, 30, 220, corr=0.5) * (0.2 + surge)
+    B.add(unit(B.verb(rum, 2.5, 0.6, 0.7, damp=0.9)), -2)
+    booms = B.track()
+    for _ in range(int(B.secs / 9) + 1):
+        m = int(sr * 1.6)
+        t = np.arange(m) / sr
+        y = np.sin(TAU * np.cumsum(36 * (1 - 0.3 * t / 1.6)) / sr) * np.exp(-t / 0.45) * (1 - np.exp(-t / 0.02))
+        y = y + 0.6 * filt(rng.standard_normal(m), sr, "lowpass", 180, 2) * np.exp(-t / 0.3)
+        B.put(booms, y, rng.uniform(0, B.secs), rng.uniform(-0.7, 0.7), db(rng.uniform(-6, 0)))
+    B.add(unit(B.verb(booms, 2.5, 0.7, damp=0.9)), -6)
+    B.add(B.noise(0.3, 1500, 7000, corr=0.2) * B.lfo(0.12).u(B.t, 3.0), -17)
+    B.add(drone(B, [29.1, 43.6], (1.0, 0.4)), -13)
+    B.add(shape(B.crackle(150 + 500 * surge, 1500, 5000), B.sr, lambda f: g_lp(f, 4000, 2)), -22)
+
+
+def bed_crystal_shimmer(B):
+    """Crystal land (Summerset's crystal coast and spires, glassland realms): glassy chimes and singing air."""
+    rng = B.rng
+    glass = B.track()
+    for _ in range(34):
+        f0 = np.exp(rng.uniform(np.log(1500), np.log(5000)))
+        g = modal(rng, B.sr, 2.5, [(f0, 1.0, rng.uniform(0.8, 1.8)), (f0 * 2.76, 0.35, 0.6), (f0 * 5.4, 0.12, 0.3)],
+                  beat=2.0, att=0.003)
+        B.put(glass, g, rng.uniform(0, B.secs), rng.uniform(-0.9, 0.9), db(rng.uniform(-16, 0)))
+    B.add(unit(B.verb(glass, 4.0, 1.0, 0.25, damp=0.3, bright=9000)), -4)
+
+    def airy(tc, f):
+        G = np.zeros((len(tc), len(f)))
+        for fc in (1760.0, 2637.0, 3520.0, 5274.0):
+            G += B.lfo(0.08).u(tc, 2.0)[:, None] * g_bp(f[None, :], fc, 60)
+        return G
+    B.add(B.tv(airy, 3840, 0.2), -6)
+    gl = B.lfo(0.1)
+    body, _ = wind_layer(B, lambda t: gl.u(t), 1.2, 80, 300, 900, gust_db=8)
+    B.add(body, -10)
+    pad_ = sum(B.tone_loop(f) * B.lfo(0.06).u(B.t, 1.5) for f in (440.0, 660.5, 880.7))
+    B.add(unit(pad_), -18)
+    B.mix = B.verb(B.mix, 3.0, 0.3, 1.0, damp=0.3)
+
+
+def bed_dwemer_machinery(B):
+    """Dwemer caverns and ruins: the deep hum of the old machines, pistons, ratchets and venting steam."""
+    rng, sr = B.rng, B.sr
+    B.add(drone(B, [49.0, 98.2, 147.1], (1.0, 0.5, 0.3, 0.2), det=0.3), -4)
+    k = max(1, B.secs // 2)
+    period = B.secs / k
+    pist = B.track()
+    clank = B.track()
+    for i in range(k):
+        m = int(sr * 0.6)
+        t = np.arange(m) / sr
+        th = np.sin(TAU * np.cumsum(55 * (1 - 0.3 * t / 0.6)) / sr) * np.exp(-t / 0.12) * (1 - np.exp(-t / 0.005))
+        th = th + 0.5 * filt(rng.standard_normal(m), sr, "lowpass", 400, 2) * np.exp(-t / 0.05)
+        B.put(pist, th, i * period + 0.37 * period, -0.3, 1.0)   # (off the loop seam)
+        if i % 3 != 2:
+            f0 = rng.uniform(300, 700)
+            hit = modal(rng, sr, 0.8, [(f0, 1.0, 0.25), (f0 * 1.594, 0.6, 0.18), (f0 * 2.136, 0.4, 0.12), (f0 * 2.653, 0.3, 0.08)],
+                        att=0.0008)
+            B.put(clank, hit, i * period + period * 0.82, 0.4, db(rng.uniform(-6, 0)))
+    B.add(unit(B.verb(pist, 1.5, 0.5)), -3)
+    B.add(unit(B.verb(clank, 2.2, 0.6)), -12)
+    steam = B.track()
+    for _ in range(int(B.secs / 6) + 1):
+        m = int(sr * rng.uniform(0.5, 1.3))
+        y = filt(rng.standard_normal(m), sr, "highpass", 1500, 2) * win_grain(m, 0.08)
+        B.put(steam, y, rng.uniform(0, B.secs), rng.uniform(-0.9, 0.9), db(rng.uniform(-6, 0)))
+    B.add(unit(B.verb(steam, 1.8, 0.4)), -14)
+    tick = B.track()
+    tt = 0.05
+    while tt < B.secs:
+        f0 = rng.uniform(2200, 3200)
+        B.put(tick, modal(rng, sr, 0.05, [(f0, 1.0, 0.008), (f0 * 1.6, 0.5, 0.005)], att=0.0004), tt, 0.6, db(rng.uniform(-6, 0)))
+        tt += 1 / 6.0
+    B.add(unit(tick), -22)
+    B.add(B.noise(2.0, 20, 70, corr=0.6), -12)
+    B.mix = B.verb(B.mix, 2.5, 0.35, 1.0, damp=0.7)
+
+
+def bed_lava_cave(B):
+    """Lava caves: slow, heavy bubbling, hissing rock and the cave's hot air."""
+    rng, sr = B.rng, B.sr
+    lava = B.track()
+    for _ in range(int(14 * B.secs)):
+        f0 = np.exp(rng.uniform(np.log(40), np.log(170)))
+        B.put(lava, bubble(sr, f0, xi=rng.uniform(0.2, 0.6), damp=0.6), rng.uniform(0, B.secs), rng.uniform(-0.8, 0.8),
+              db(rng.uniform(-12, 0)))
+    B.add(unit(B.verb(lava, 2.0, 0.5)), 0)
+    B.add(shape(B.crackle(300 + 400 * B.lfo(0.1).u(B.t), 1500, 6000), B.sr, lambda f: g_lp(f, 5000, 2)), -16)
+    B.add(B.noise(0.4, 1800, 6500, corr=0.2) * B.lfo(0.1).u(B.t, 3.0), -18)
+    B.add(B.noise(2.0, 18, 80, corr=0.6) * (0.7 + 0.3 * B.lfo(0.05).u(B.t)), -6)
+    B.mix = B.verb(B.mix, 2.6, 0.3, 1.0, damp=0.8)
+
+
+def bed_ice_cave(B):
+    """Ice caves (and, faintly, glaciers): hollow wind moaning through the tunnels, groaning ice, cold drips."""
+    rng = B.rng
+    gl = B.lfo(0.08)
+    gust = lambda t: gl.u(t)  # noqa: E731
+    body, wh = wind_layer(B, gust, 1.6, 40, 200, 600, whistle_set(B, gust, [220, 330, 495], 40, spread=0.06, amp_floor=0.35),
+                          gust_db=6)
+    B.add(body, -4)
+    B.add(B.verb(wh, 3.0, 0.6), -6)
+    groans = B.track()
+    for _ in range(int(B.secs / 7) + 1):
+        bank = [(f, 40, a) for f, a in ((310, 1.0), (720, 0.7), (1340, 0.45), (2150, 0.25))]
+        y = pulse_voice(rng, B.sr, rng.uniform(1.0, 1.8), [(0, rng.uniform(15, 25)), (0.5, rng.uniform(40, 70)), (1, 20)], bank,
+                        env=[(0, 0), (0.2, 1), (0.8, 0.7), (1, 0)], jitter=0.15, amp_jit=0.5)
+        B.put(groans, y, rng.uniform(0, B.secs), rng.uniform(-0.8, 0.8), db(rng.uniform(-8, 0)))
+    B.add(unit(B.verb(groans, 3.0, 0.8, 0.4, damp=0.5)), -8)
+    dr = cave_drips(B, 16, (1200, 3200), (-14, 0))
+    B.add(unit(B.verb(dr, 3.0, 1.0, 0.2, predelay=0.02, damp=0.4, bright=9000)), -12)
+    tink = B.track()
+    for _ in range(18):
+        f0 = rng.uniform(3000, 7000)
+        B.put(tink, modal(rng, B.sr, 0.6, [(f0, 1.0, 0.15), (f0 * 2.76, 0.3, 0.06)], att=0.001), rng.uniform(0, B.secs),
+              rng.uniform(-0.9, 0.9), db(rng.uniform(-14, 0)))
+    B.add(unit(B.verb(tink, 2.5, 0.8)), -20)
+
+
+def bed_mushroom_grotto(B):
+    """Mushroom grottos and Telvanni fungus: damp, softly glowing caverns - wet drips, spore puffs, a gentle hum."""
+    rng, sr = B.rng, B.sr
+    hum = np.zeros(B.n)
+    for f, a in ((73.4, 1.0), (110.0, 0.6), (146.8, 0.4), (220.2, 0.2)):
+        hum += a * B.tone_loop(f) * B.lfo(0.06).u(B.t, 1.5)
+    B.add(B.verb(unit(hum), 3.0, 0.4), -10)
+    dr = cave_drips(B, 30, (600, 2000), (-14, 0))
+    B.add(unit(B.verb(dr, 2.2, 0.9, 0.3, predelay=0.015, damp=0.6)), -4)
+    puffs = B.track()
+    for _ in range(int(1.2 * B.secs)):
+        m = int(sr * rng.uniform(0.08, 0.2))
+        y = filt(rng.standard_normal(m), sr, "bandpass", [rng.uniform(300, 600), rng.uniform(1500, 3000)], 2) * win_grain(m, 0.2) ** 2
+        B.put(puffs, y, rng.uniform(0, B.secs), rng.uniform(-0.9, 0.9), db(rng.uniform(-12, 0)))
+    B.add(unit(B.verb(puffs, 1.6, 0.6)), -12)
+    B.add(B.noise(1.0, 150, 900, corr=0.2) * B.lfo(0.08).u(B.t, 2.0), -12)
+    B.add(B.noise(2.0, 20, 70, corr=0.6), -10)
+    B.add(unit(B.verb(lapping(B, 0.4), 1.5, 0.5)), -16)
+    B.mix = B.verb(B.mix, 2.4, 0.3, 1.0, damp=0.6)
+
+
 # name: (generator, loop seconds[, stereo width]). Lengths are chosen so each q1 file stays under ~170 KB: the dense
 # insect / frog choruses cost ~55 kb/s in Vorbis, smooth wind and water textures ~40 kb/s.
 BEDS = {
@@ -1084,6 +1279,10 @@ BEDS = {
     "coast_waves": (bed_coast_waves, 32), "open_ocean": (bed_open_ocean, 32), "river": (bed_river, 28),
     "cave": (bed_cave, 34), "cave_deep": (bed_cave_deep, 36), "glow_cave": (bed_glow_cave, 32),
     "oblivion": (bed_oblivion, 32), "sovngarde": (bed_sovngarde, 34),
+    "swamp_night": (bed_swamp_night, 24, 0.7), "savanna_day": (bed_savanna_day, 26), "hot_springs": (bed_hot_springs, 24),
+    "volcanic_rumble": (bed_volcanic_rumble, 30), "crystal_shimmer": (bed_crystal_shimmer, 28),
+    "dwemer_machinery": (bed_dwemer_machinery, 30), "lava_cave": (bed_lava_cave, 26), "ice_cave": (bed_ice_cave, 30),
+    "mushroom_grotto": (bed_mushroom_grotto, 28),
 }
 
 
@@ -1672,6 +1871,96 @@ def sh_glow_chime(rng, v, sr):
     return verb(out, sr, rng, 3.0, 0.5, damp=0.3, bright=9000)
 
 
+def sh_distant_screech(rng, v, sr):
+    """Something screeching far down the tunnels (Falmer glow caves)."""
+    if v == 1:
+        y = voice(rng, sr, 1.0, [(0, 700), (0.2, 1150), (0.6, 1000), (1, 650)], [(0, 0), (0.1, 1), (0.6, 0.7), (1, 0)], nh=12,
+                  tilt=1.0, rasp=0.6, rasp_fc=60, jitter=0.03, breath=0.4, formants=[(2300, 300, 1.0), (3400, 400, 0.5)])
+    else:
+        y = np.zeros(int(sr * 1.4))
+        for k, t0 in enumerate((0.0, 0.32, 0.55)):
+            g = voice(rng, sr, 0.28, [(0, 900 - 80 * k), (0.3, 1300 - 80 * k), (1, 800)], [(0, 0), (0.1, 1), (1, 0)], nh=10,
+                      tilt=1.0, rasp=0.7, rasp_fc=70, jitter=0.03, breath=0.5, formants=[(2100, 300, 1.0), (3200, 400, 0.5)])
+            place(y, g * (1 - 0.25 * k), int(t0 * sr))
+    y = filt(y, sr, "lowpass", 2600, 2)
+    return verb(y, sr, rng, 3.5, 0.9, dry=0.35, predelay=0.06, damp=0.7, bright=3000, echoes=((0.45, 0.4), (0.9, 0.2)))
+
+
+def sh_machinery(rng, v, sr):
+    """Dwemer machinery somewhere in the dark: a clanking run, a steam vent, a piston and grinding gears."""
+    def metal(f0, dur=0.9):
+        return modal(rng, sr, dur, [(f0, 1.0, 0.3), (f0 * 1.594, 0.6, 0.2), (f0 * 2.136, 0.45, 0.14), (f0 * 2.653, 0.3, 0.1),
+                                    (f0 * 3.156, 0.2, 0.07)], beat=1.0, att=0.0008)
+    if v == 1:
+        y = np.zeros(int(sr * 2.0))
+        t0 = 0.02
+        for _ in range(rng.integers(4, 7)):
+            place(y, metal(rng.uniform(250, 650)) * rng.uniform(0.5, 1.0), int(t0 * sr))
+            t0 += rng.uniform(0.12, 0.3)
+    elif v == 2:
+        n = int(sr * 2.2)
+        u = np.arange(n) / n
+        y = bandnoise(rng, n, sr, 1500, 9000) * curve(u, [(0, 0), (0.04, 1), (0.6, 0.6), (1, 0)])
+        y = y + 0.3 * bandnoise(rng, n, sr, 300, 1200) * curve(u, [(0, 0), (0.05, 1), (1, 0)])
+        y = y + 0.15 * tone(sr, 2.2, rng.uniform(1800, 2400), harm=(1, 0.2), att=0.05) * curve(u, [(0, 0), (0.1, 1), (0.5, 0.3), (1, 0)])
+    else:
+        y = np.zeros(int(sr * 2.0))
+        m = int(sr * 0.7)
+        t = np.arange(m) / sr
+        th = np.sin(TAU * np.cumsum(60 * (1 - 0.35 * t / 0.7)) / sr) * np.exp(-t / 0.15) * (1 - np.exp(-t / 0.004))
+        place(y, th, int(0.02 * sr))
+        place(y, metal(rng.uniform(380, 520), 1.2) * 0.6, int(0.03 * sr))
+        gear = pulse_voice(rng, sr, 1.1, [(0, 20), (1, 34)], [(900, 120, 1.0), (1900, 200, 0.6), (3100, 300, 0.3)], jitter=0.05)
+        place(y, gear * 0.5, int(0.6 * sr))
+    return verb(filt(y, sr, "lowpass", 5000, 2), sr, rng, 2.5, 0.6, dry=0.6, predelay=0.03, damp=0.6)
+
+
+def sh_lava_bubble(rng, v, sr):
+    if v == 1:   # one big, slow blorp and a hiss
+        y = np.zeros(int(sr * 1.6))
+        place(y, bubble(sr, rng.uniform(55, 75), xi=0.5, damp=0.4), 0)
+        place(y, 0.6 * bubble(sr, rng.uniform(110, 150), xi=0.4, damp=0.5), int(0.25 * sr))
+        m = int(0.9 * sr)
+        place(y, 0.08 * bandnoise(rng, m, sr, 2500, 8000) * win_grain(m, 0.1), int(0.3 * sr))
+    else:        # a cluster of pops and a sizzle
+        y = np.zeros(int(sr * 1.8))
+        for _ in range(rng.integers(6, 11)):
+            place(y, bubble(sr, np.exp(rng.uniform(np.log(70), np.log(260))), xi=0.4, damp=0.6) * rng.uniform(0.3, 1.0),
+                  int(rng.uniform(0, 1.2) * sr))
+        m = int(1.6 * sr)
+        cr = np.where(rng.random(m) < 300 / sr, rng.standard_normal(m), 0.0)
+        place(y, 0.3 * unit(filt(cr, sr, "bandpass", [2000, 7000], 2)) * curve(np.arange(m) / m, [(0, 0), (0.3, 1), (1, 0)]) * 0.05, 0)
+    return verb(filt(y, sr, "highpass", 35, 2), sr, rng, 1.5, 0.35, damp=0.8)
+
+
+def sh_ice_creak(rng, v, sr):
+    bank = [(310, 30, 1.0), (720, 45, 0.7), (1340, 60, 0.45), (2150, 80, 0.3), (3400, 120, 0.15)]
+    if v == 1:   # a long, slow groan of moving ice
+        y = pulse_voice(rng, sr, 2.2, [(0, 12), (0.4, 45), (0.7, 30), (1, 14)], bank,
+                        env=[(0, 0), (0.15, 0.8), (0.5, 1.0), (0.85, 0.6), (1, 0)], jitter=0.2, amp_jit=0.5)
+    else:        # a sharp crack, then a creak
+        y = np.zeros(int(sr * 2.0))
+        m = int(0.08 * sr)
+        crack = rng.standard_normal(m) * np.exp(-np.arange(m) / (0.006 * sr))
+        place(y, filt(crack, sr, "highpass", 1200, 2) * 2.0, 0)
+        place(y, modal(rng, sr, 1.0, [(rng.uniform(3000, 6000), 0.5, 0.2), (rng.uniform(1500, 2500), 0.4, 0.3)], att=0.001), 0)
+        place(y, pulse_voice(rng, sr, 1.2, [(0, 60), (1, 20)], [(f * 1.4, bw, g) for f, bw, g in bank], jitter=0.2, amp_jit=0.5) * 0.7,
+              int(0.35 * sr))
+    return verb(y, sr, rng, 2.6, 0.5, dry=0.7, predelay=0.03, damp=0.5, bright=7000, echoes=((0.5, 0.25),))
+
+
+def sh_cicada(rng, v, sr):
+    D = 2.8 if v == 1 else 2.2
+    n = int(sr * D)
+    u = np.arange(n) / n
+    fc = rng.uniform(5200, 6800) if v == 1 else rng.uniform(3800, 4600)
+    rate = rng.uniform(140, 200) if v == 1 else rng.uniform(80, 110)
+    x = bandnoise(rng, n, sr, fc * 0.8, fc * 1.25, 3)
+    am = 1.0 - 0.9 * (0.5 + 0.5 * np.cos(TAU * rate * np.arange(n) / sr))
+    e = curve(u, [(0, 0), (0.3, 1), (0.8, 0.9), (1, 0)]) if v == 1 else curve(u, [(0, 0), (0.15, 1), (0.5, 0.5), (0.65, 1), (1, 0)])
+    return x * am * e
+
+
 SHOTS = {
     "bird_song": (sh_bird_song, 4), "crow": (sh_crow, 2), "hawk": (sh_hawk, 2), "gull": (sh_gull, 2),
     "jungle_bird": (sh_jungle_bird, 3), "owl": (sh_owl, 2), "loon": (sh_loon, 2), "frog": (sh_frog, 3),
@@ -1680,6 +1969,8 @@ SHOTS = {
     "tree_creak": (sh_tree_creak, 2), "volcano": (sh_volcano, 2), "distant_dragon": (sh_distant_dragon, 2),
     "wave_crash": (sh_wave_crash, 2), "whale": (sh_whale, 2), "sand_hiss": (sh_sand_hiss, 2),
     "oblivion_wail": (sh_oblivion_wail, 2), "sovngarde_horn": (sh_sovngarde_horn, 1), "glow_chime": (sh_glow_chime, 2),
+    "distant_screech": (sh_distant_screech, 2), "machinery": (sh_machinery, 3), "lava_bubble": (sh_lava_bubble, 2),
+    "ice_creak": (sh_ice_creak, 2), "cicada": (sh_cicada, 2),
 }
 
 

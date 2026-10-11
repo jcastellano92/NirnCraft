@@ -43,7 +43,9 @@ The `MusicController` checks the situation once a second and plays a `skycraft:m
   * Nordic barrows and generic dungeons play `music.dungeon`.
   * Dwemer ruins play `music.dungeon.dwemer`.
   * Ayleid ruins play `music.dungeon.ayleid`.
-  * Deep glowing caverns play `music.blackreach`.
+  * Deep glowing caverns (the Falmer glow caves, mushroom grottos and lush caves, 20 blocks below sea level) play
+    `music.blackreach`.
+  * The Dwemer caverns biome plays `music.dungeon.dwemer` anywhere underground in it.
 * **Combat** only starts in a real fight: you hit something or were hit recently (the server's in-combat flag), or a
   hostile mob in attack mode is facing you within 20 blocks and can see you. Being "detected" doesn't count. Combat
   music holds for 8 seconds after the last sign of a fight.
@@ -131,9 +133,14 @@ The seeds are fixed, so a run reproduces the same pieces. To get a new piece, ch
 The `AmbienceEngine` mixes looping **beds** (stereo, streamed, on the *Ambient/Environment* slider). It reads the
 surroundings twice a second:
 
-* the biome under you and in a ring 24 blocks around you, using vanilla tags (`#minecraft:is_forest`, `is_ocean`,
-  `is_river`...), Forge tags (`#forge:is_swamp`, `is_snowy`, `is_desert`, `is_lush`...) and keywords in Skycraft biome
-  names (marsh, ash, glacier, dune, jungle, glow...);
+* the biome under you and in a ring 24 blocks around you. `Soundscapes` maps every one of Skycraft's 113 biomes
+  (`data/skycraft/worldgen/biome`, from `tools/worldgen/biomes.py`) onto a weighted mix of soundscape families:
+  forest, pine, plains (tundra and meadows), cold marsh, warm swamp, jungle, desert, savanna, ash, volcanic, snow,
+  glacier, mountain, mushroom, crystal, hot springs, ocean, river and beach. Biomes it doesn't know (vanilla, other
+  mods) are classified by their vanilla and Forge tags and by keywords in their names;
+* the kind of cave biome you are in: Dwemer caverns, Falmer glow caves, ice caves, lava caves, mushroom grottos, and
+  vanilla's lush caves and deep dark;
+* the province (Skyrim's wolves and dragons, Vvardenfell's cliff racers and netch);
 * the time of day, with smooth dusk and dawn;
 * rain, snow and thunder;
 * your altitude;
@@ -147,11 +154,21 @@ At most five beds play at once, each fading towards its target level.
 | `wind_light`, `wind_strong`, `blizzard` | open land; stronger with altitude, on peaks and in storms; blizzards in snowy biomes when it snows |
 | `forest_day`, `forest_night` | forests: leaves and birds by day, crickets at night |
 | `plains_day`, `plains_night` | grassland and tundra |
-| `marsh_day`, `marsh_night` | swamps: insects, water, frogs |
-| `jungle_day`, `jungle_night` | jungles and rainforests |
-| `desert_wind`, `ash_storm` | deserts and badlands; ashlands and volcanic land (stronger in storms) |
-| `coast_waves`, `open_ocean`, `river` | at the shore, out on the water, near rivers |
-| `cave`, `cave_deep`, `glow_cave` | underground, by depth; Blackreach-like glowing caves |
+| `savanna_day` | Elsweyr's savanna, the Grazelands, Ka Po' Tun's steppe: dry grass and swelling cicadas |
+| `marsh_day`, `marsh_night` | Hjaalmarch's cold marsh (and warm swamps by day): insects, water, frogs |
+| `swamp_night` | warm swamps after dark (Black Marsh, the Bitter Coast, Blackwood, mangroves): a dense frog chorus over insects |
+| `jungle_day`, `jungle_night` | jungles and rainforests (Valenwood, Pellitine, Tsaesci jungle, Pyandonea) |
+| `desert_wind`, `ash_storm` | deserts and badlands; ashlands (stronger in storms) |
+| `volcanic_rumble` | Red Mountain, Molag Amur, Stonefalls, lava caves: the ground's surging rumble, distant booms, venting gas |
+| `hot_springs` | Eastmarch's hot springs: bubbling pools and steam |
+| `crystal_shimmer` | Summerset's crystal coast and spires, Artaeum, Thras: glassy chimes and singing air |
+| `coast_waves`, `open_ocean`, `river` | at the shore and on beach biomes, out on the water, near rivers and lakes |
+| `cave`, `cave_deep` | ordinary caves, by depth; the deep dark |
+| `dwemer_machinery` | the Dwemer caverns: the old machines' hum, pistons, ratchets and venting steam |
+| `glow_cave` | the Falmer glow caves (and faintly in grottos and lush caves): Blackreach's crystalline hum |
+| `ice_cave` | ice caves, and faintly on glaciers (Winterhold, Atmora): moaning wind, groaning ice, cold drips |
+| `lava_cave` | lava caves: slow heavy bubbling and hissing rock |
+| `mushroom_grotto` | mushroom grottos and lush caves, faintly in Telvanni fungus forests: drips, spore puffs, a soft hum |
 | `oblivion`, `sovngarde` | the other realms |
 
 Indoors and underground, the outdoor beds drop and are low-passed (see Acoustics). Rain silences birds and insects.
@@ -162,9 +179,12 @@ Indoors and underground, the outdoor beds drop and are low-passed (see Acoustics
 * at night: owls, crickets and Skyrim's wolves howling far away;
 * in marshes and by the water: frogs, insects, loons, gulls and crashing waves;
 * out at sea: whales;
-* in jungles: exotic birds;
-* in deserts and ashlands: sand hiss, wind gusts and a distant volcano;
-* in caves: drips, rumbles, falling pebbles and crystal chimes;
+* in jungles: exotic birds; on savannas and in jungles: cicadas;
+* in deserts and ashlands: sand hiss, wind gusts and a distant volcano; lava bubbling on volcanic land and in hot
+  springs; ice creaking on glaciers; crystals chiming in crystal land;
+* on Vvardenfell: cliff racers screeching overhead by day and netch humming far off (their own creature voices);
+* in caves: drips, rumbles, falling pebbles; crystal chimes in glowing caves; distant screeches in the Falmer glow
+  caves; machinery clanking and steam venting in the Dwemer caverns; creaking ice in ice caves; lava in lava caves;
 * in the realms: daedric wails in Oblivion and a distant horn in Sovngarde;
 * very rarely in Skyrim's wilds, a far-away dragon roar (`distantDragons`).
 
@@ -173,7 +193,7 @@ Vanilla wolves use Skycraft's howl and growl.
 `synth_ambience.py` synthesises everything:
 
 * noise shaping, wind-whistle resonator banks, granular insects and frogs, FM bird calls and modal drops;
-* beds are 24–40 s seamless loops (equal-power crossfaded seams), stereo at 24 kHz, Vorbis q1;
+* beds are 24–40 s seamless loops (exactly periodic, checked at the seam), stereo at 24 kHz, Vorbis q1;
 * calls are mono at 32 kHz.
 
 ```
@@ -209,16 +229,45 @@ py -3 tools/music/synth_ambience.py wind cave  # only matching stems
 * sub-harmonic roughness for growls;
 * noise sweeps, granular crackle, electric arcs, modal metal, wood and stone, booms, and short reverbs.
 
-All of its output is mono (so it can be positioned) at 32 kHz.
+All of its output is mono (so it can be positioned) at 32 kHz. The bestiary voices and the later shouts (`LOFI` in the
+catalogue) are encoded at 24 kHz, Vorbis q1.5: short creature clips lose nothing audible and the jar stays lean (the
+bestiary pass added about 4.4 MB: 2.3 MB of creature voices, 0.5 MB of shouts, 1.6 MB of beds and calls).
 
 Loudness is set per category: UI is quiet (about −24 dBFS) and shouts are loud (−10). It renders:
 
 * **Creatures:**
   * Dragons: roars, growls, wingbeats, fire and frost breath, landing thud, hurt and death. A dragon also shouts its
     breath (Yol Toor Shul / Fo Krah Diin) in a deeper voice.
-  * Draugr, skeevers, trolls, giants (with stomps), mammoths, frostbite spiders, wolves, bears, sabre cats, Falmer,
-    Dwarven automatons (steam, clank), wisps, spriggans, hagravens, horkers, mudcrabs and ice wraiths.
-* **Shouts:** every shout has a one-, two- and three-word chant (`shout.<shout>.<words>`). A phoneme parser builds
+  * Alduin has his own voice: the dragon voice slowed and deepened, with a vast reverb and an echo. Paarthurnax's is
+    old and calm: slow, breathy rumbles and a gentler roar. Dragons shout Fus Ro Dah, Disarm and Become Ethereal with
+    the Thu'um chant (Alduin deeper still), breathe with the spell streams, and rise from their mounds with a rattle of
+    bones and a ghostly swell (`entity.dragon.rise`).
+  * Draugr, skeevers, trolls, giants (with stomps), mammoths, frostbite spiders (giants deeper), wolves, bears, sabre
+    cats, Falmer, Dwarven automatons (steam, clank), wisps, spriggans, hagravens, horkers, mudcrabs (giants deeper) and
+    ice wraiths.
+  * **The bestiary of Nirn** (`BESTIARY` in the catalogue, `entity.<creature>.<kind>`): ambient, hurt and death for
+    every bestiary creature, plus cries and specials. A vocal profile table (tract size, pitch, breathiness,
+    roughness, rattle) gives every beast a generic grunt, snap, roar, hurt and death; creatures with a character of
+    their own have their own generators:
+    * chaurus clicks, hisses and spit, and the hunter's buzzing wings; giant scorpions' chitin and sting; land
+      dreugh clicks and gurgles; nix-hounds' whistling chirr;
+    * rieklings' gabbling chitter and war cry; scamps' cackle; imps' giggling chitter and wings;
+    * ash spawn's ashy rasp and rising from the ash; gargoyles' stone grind, waking from a statue, and crumbling;
+    * dragon priests' whispered syllables, chanted spells, hiss and dying wail; dremora's double (octave-down) voice;
+    * flame atronachs' roaring fire and breathy hiss; frost atronachs' grinding ice, groans, footsteps and shattering;
+      storm atronachs' thunder crackle and whirling stone;
+    * wisps' and will-o'-the-wisps' chimes (flickering when hurt, fading when slain); the death hound's dark howl;
+    * the cliff racer's infamous screech; hackwings' and harpies' shrieks; senche-tigers' chuff and roar; alfiqs' trill;
+    * the netch's deep, whale-like hum (and its deflating death); the silt strider's low, booming horn call;
+    * wamasu growls over an electric hum and their lightning breath; sand serpents' hiss, tail rattle and eruption;
+      sea serpents' and swamp leviathans' deep moans; frost giants' rumbles; minotaurs', echatere's and realm
+      grazers' lowing; tsaesci and kamal hisses; the Dwemer ballista's ratcheting winch and twang.
+
+    Bestiary specs pick their voice up by name (`CreatureSpec.voice(id, pitch)`). The attack goal plays a creature's
+    cry when a move starts: `attack` (bites and blows, now and then), `roar` (roars, war cries, charges), `cast`
+    (spells and bolts) and `breath`. Creature bolts and breath use the spell sounds; summons use the conjuring portal;
+    ground slams the giant's stomp; a dragon priest's Unrelenting Force the Thu'um chant.
+* **Shouts:** every shout of `com.skycraft.magic.shout.Shout` (all 26) has a one-, two- and three-word chant (`shout.<shout>.<words>`). A phoneme parser builds
   each dragon word (plosives, sibilants, trilled R, vowels) as a deep chanted voice with a sub-octave and doubled
   voices. A concussive impact and an echoing tail follow, both scaling with the word count. Draugr deathlords use the
   same "Fus Ro Dah". The old `shout.fus_ro_dah` events still work.
@@ -245,7 +294,7 @@ streams. After changing it:
 
 ```
 py -3 tools/music/sound_catalog.py --write   # regenerate sounds.json and lang/skycraft/audio.json
-py -3 tools/music/sound_catalog.py --check   # missing or unused files, Java registration, sizes per category
+py -3 tools/music/sound_catalog.py --check   # missing or unused files, Java registration both ways, sizes per category
 ```
 
 ## Replacing sounds with your own resource pack

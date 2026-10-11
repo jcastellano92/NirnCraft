@@ -92,6 +92,10 @@ public final class Attacks {
     /** A bite, claw or weapon blow: hits on the windup frame if the target is still in reach and in front. */
     public static Attack melee(float mult, HitEffect... effects) {
         return new Attack() {
+            {
+                cry = "attack";
+            }
+
             @Override
             protected void perform(Mob mob, LivingEntity target) {
                 if (gap(mob, target) <= maxRange + 0.9 && facing(mob, target, 0.2)) strike(mob, target, mult, effects);
@@ -102,6 +106,10 @@ public final class Attacks {
     /** A sweeping blow that hits everything in a wide arc in front (giant clubs, troll swipes, tail sweeps). */
     public static Attack sweep(float mult, float radius, float arcDot, HitEffect... effects) {
         return new Attack() {
+            {
+                cry = "attack";
+            }
+
             @Override
             protected void perform(Mob mob, LivingEntity target) {
                 Vec3 fwd = Vec3.directionFromRotation(0, mob.getYRot());
@@ -121,6 +129,10 @@ public final class Attacks {
     /** Leaps at the target; the first contact while airborne deals the blow. */
     public static Attack pounce(float mult, float power, HitEffect... effects) {
         Attack a = new Attack() {
+            {
+                cry = "attack";
+            }
+
             @Override
             public void tick(Mob mob, LivingEntity target, int t) {
                 if (t == windup) {
@@ -150,6 +162,10 @@ public final class Attacks {
     /** Lowers its head and charges in a straight line; trampling contact deals a heavy blow and throws the victim. */
     public static Attack charge(float mult, double speed, HitEffect... effects) {
         Attack a = new Attack() {
+            {
+                cry = "roar";
+            }
+
             @Override
             public void tick(Mob mob, LivingEntity target, int t) {
                 var pd = mob.getPersistentData();
@@ -160,7 +176,10 @@ public final class Attacks {
                     pd.putDouble("skycraft_cx", d.x);
                     pd.putDouble("skycraft_cz", d.z);
                     pd.putBoolean("skycraft_charging", true);
-                    mob.playSound(SoundEvents.RAVAGER_ROAR, 1.0f, 1.2f);
+                    // creatures with a roar of their own bellow when the charge starts (the goal plays their cry)
+                    if (!(mob instanceof com.skycraft.creatures.entity.SkyCreature sc && sc.spec().cries.containsKey("roar"))) {
+                        mob.playSound(SoundEvents.RAVAGER_ROAR, 1.0f, 1.2f);
+                    }
                 }
                 if (t > windup && pd.getBoolean("skycraft_charging")) {
                     double cx = pd.getDouble("skycraft_cx");
@@ -196,6 +215,10 @@ public final class Attacks {
     /** Pounds the ground: everything around takes damage and is thrown up (giants, trolls, centurions). */
     public static Attack slam(float mult, float radius, double up, HitEffect... effects) {
         return new Attack() {
+            {
+                cry = "attack";
+            }
+
             @Override
             protected void perform(Mob mob, LivingEntity target) {
                 double r = radius + mob.getBbWidth() * 0.5;
@@ -216,7 +239,7 @@ public final class Attacks {
                                 2, 0.2, 0.05, 0.2, 0.15);
                     }
                 }
-                mob.playSound(SoundEvents.GENERIC_EXPLODE, 1.0f, 0.6f);
+                mob.playSound(com.skycraft.audio.AudioSounds.creature("giant", "stomp"), 1.5f, 0.9f + mob.getRandom().nextFloat() * 0.2f);
             }
         };
     }
@@ -226,18 +249,22 @@ public final class Attacks {
     /** Throws or casts {@code count} bolts of an element at the target. */
     public static Attack bolt(CreatureBolt.Kind kind, float damage, float speed, int count, float spread) {
         Attack a = new Attack() {
+            {
+                cry = "cast";
+            }
+
             @Override
             protected void perform(Mob mob, LivingEntity target) {
                 for (int i = 0; i < count; i++) shoot(mob, target, kind, damage, speed, spread * (count > 1 ? 1 : 0.3f));
                 SoundEvent s = switch (kind) {
-                    case FIRE -> SoundEvents.BLAZE_SHOOT;
-                    case FROST -> SoundEvents.SNOW_GOLEM_SHOOT;
-                    case SHOCK -> SoundEvents.TRIDENT_THUNDER;
+                    case FIRE -> com.skycraft.audio.AudioSounds.spell("fire");
+                    case FROST -> com.skycraft.audio.AudioSounds.spell("frost");
+                    case SHOCK -> com.skycraft.audio.AudioSounds.spell("shock");
                     case ROCK -> SoundEvents.SNOWBALL_THROW;
                     case BOLT -> SoundEvents.CROSSBOW_SHOOT;
                     default -> SoundEvents.LLAMA_SPIT;
                 };
-                mob.playSound(s, 1.0f, kind == CreatureBolt.Kind.SHOCK ? 2.0f : 1.0f);
+                mob.playSound(s, 1.0f, 0.95f + mob.getRandom().nextFloat() * 0.1f);
             }
         };
         a.anim(AnimSlot.CAST).range(3f, 22f).timing(10, 20, 50);
@@ -261,9 +288,22 @@ public final class Attacks {
     /** A continuous cone of fire, frost or shock (breath weapons) for the move's whole duration. */
     public static Attack breath(CreatureBolt.Kind kind, float range, float damagePerTick) {
         Attack a = new Attack() {
+            {
+                cry = "breath";
+            }
+
             @Override
             public void tick(Mob mob, LivingEntity target, int t) {
                 if (t < windup) return;
+                if ((t - windup) % 14 == 0) {
+                    SoundEvent s = switch (kind) {
+                        case FROST -> com.skycraft.audio.AudioSounds.spell("frost_stream");
+                        case SHOCK -> com.skycraft.audio.AudioSounds.spell("shock_stream");
+                        case POISON -> com.skycraft.audio.AudioSounds.creature("chaurus", "attack");
+                        default -> com.skycraft.audio.AudioSounds.spell("fire_stream");
+                    };
+                    mob.playSound(s, 1.2f, kind == CreatureBolt.Kind.POISON ? 0.6f : 0.85f);
+                }
                 mob.getLookControl().setLookAt(target, 20f, 20f);
                 Vec3 mouth = mob.getEyePosition().add(Vec3.directionFromRotation(0, mob.getYRot()).scale(mob.getBbWidth() * 0.6));
                 Vec3 dir = target.getEyePosition().subtract(mouth).normalize();
@@ -317,6 +357,10 @@ public final class Attacks {
     /** Calls allies: spawns {@code count} creatures around itself, at most {@code max} of that kind nearby. */
     public static Attack summon(Supplier<? extends EntityType<? extends Mob>> type, int count, int max) {
         Attack a = new Attack() {
+            {
+                cry = "cast";
+            }
+
             @Override
             public boolean canUse(Mob mob, LivingEntity target, double gap) {
                 return super.canUse(mob, target, gap)
@@ -341,7 +385,7 @@ public final class Attacks {
                     sl.addFreshEntity(m);
                     sl.sendParticles(ParticleTypes.SOUL, x, y + 1, z, 12, 0.3, 0.6, 0.3, 0.02);
                 }
-                mob.playSound(SoundEvents.EVOKER_PREPARE_SUMMON, 1.0f, 0.8f);
+                mob.playSound(com.skycraft.audio.AudioSounds.spell("conjure"), 1.2f, 0.9f);
             }
         };
         a.anim(AnimSlot.SUMMON).range(0f, 30f).timing(14, 30, 400);
@@ -381,6 +425,10 @@ public final class Attacks {
     /** A roar that rattles nearby players (slowness, weakness) and rallies kin. */
     public static Attack roar(float radius, int ticks) {
         Attack a = new Attack() {
+            {
+                cry = "roar";
+            }
+
             @Override
             protected void perform(Mob mob, LivingEntity target) {
                 List<LivingEntity> near = mob.level().getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(radius));
@@ -412,7 +460,7 @@ public final class Attacks {
                         sl.sendParticles(ParticleTypes.SWEEP_ATTACK, p.x, p.y - 0.3, p.z, 1, 0.3 * i / 4, 0.3, 0.3 * i / 4, 0);
                     }
                 }
-                mob.playSound(SoundEvents.WARDEN_SONIC_BOOM, 1.4f, 1.3f);
+                mob.playSound(com.skycraft.audio.AudioSounds.shout(com.skycraft.magic.shout.Shout.UNRELENTING_FORCE, 3), 2.5f, 0.9f);
                 for (LivingEntity e : mob.level().getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(range),
                         e -> validVictim(mob, e))) {
                     Vec3 to = e.position().subtract(mob.position());

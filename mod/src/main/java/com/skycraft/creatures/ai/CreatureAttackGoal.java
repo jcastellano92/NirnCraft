@@ -151,6 +151,11 @@ public class CreatureAttackGoal extends Goal {
                 if (current.roots) mob.getNavigation().stop();
                 CreatureAnims.play(mob, current.anim);
                 current.start(mob, target);
+                // the creature's cry for the move (bites and blows only now and then, roars and spells always)
+                net.minecraft.sounds.SoundEvent cry = spec.cry(current.cry);
+                if (cry != null && (!"attack".equals(current.cry) || mob.getRandom().nextFloat() < 0.6f)) {
+                    mob.playSound(cry, spec.soundVolume, mob.getVoicePitch());
+                }
                 return true;
             }
         }

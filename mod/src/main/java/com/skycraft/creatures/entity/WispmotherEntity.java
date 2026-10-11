@@ -73,7 +73,7 @@ public class WispmotherEntity extends SkyHumanoid {
                 wisp.setTarget(target);
                 sl.addFreshEntity(wisp);
             }
-            this.playSound(SoundEvents.ALLAY_AMBIENT_WITHOUT_ITEM, 1.5f, 0.6f);
+            this.playSound(com.skycraft.audio.AudioSounds.creature("will_o_wisp", "ambient"), 1.5f, 0.8f);
         }
         if (--frostCooldown <= 0 && distSqr < 144.0 && this.hasLineOfSight(target)) {
             frostCooldown = 50 + this.random.nextInt(25);
@@ -103,11 +103,11 @@ public class WispmotherEntity extends SkyHumanoid {
 
     @Override
     protected net.minecraft.sounds.SoundEvent getHurtSound(net.minecraft.world.damagesource.DamageSource source) {
-        return com.skycraft.audio.AudioSounds.creature("wisp", "ambient");
+        return com.skycraft.audio.AudioSounds.creature("wisp", "hurt");
     }
 
     @Override
     protected net.minecraft.sounds.SoundEvent getDeathSound() {
-        return com.skycraft.audio.AudioSounds.creature("wisp", "ambient");
+        return com.skycraft.audio.AudioSounds.creature("wisp", "death");
     }
 }

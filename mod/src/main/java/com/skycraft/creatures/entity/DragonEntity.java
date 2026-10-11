@@ -797,10 +797,21 @@ public class DragonEntity extends Monster implements AnimatedCreature {
         shoutCooldown = 240 + this.getRandom().nextInt(160);
     }
 
-    /** Plays the shout animation and shows the Words to everyone near. */
+    /** This dragon's voice: Alduin and Paarthurnax have their own, every other dragon the common one. */
+    private SoundEvent voice(String kind) {
+        return com.skycraft.audio.AudioSounds.dragon(VARIANTS[getVariant()], kind);
+    }
+
+    /** Plays the shout animation, speaks the Words (the Thu'um chant, deeper than a mortal's) and shows them to everyone near. */
     private void shout(String words) {
         CreatureAnims.play(this, AnimSlot.SHOUT);
-        this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 5.0f, 1.2f);
+        com.skycraft.magic.shout.Shout thuum = switch (words) {
+            case "ethereal" -> com.skycraft.magic.shout.Shout.BECOME_ETHEREAL;
+            case "disarm" -> com.skycraft.magic.shout.Shout.DISARM;
+            default -> com.skycraft.magic.shout.Shout.UNRELENTING_FORCE;
+        };
+        this.level().playSound(null, this.getX(), this.getY(), this.getZ(), com.skycraft.audio.AudioSounds.shout(thuum, 3), SoundSource.HOSTILE,
+                5.0f, getVariant() == ALDUIN ? 0.68f : 0.78f);
         if (this.level() instanceof ServerLevel sl) {
             Component text = Component.translatable("shout.skycraft.dragon." + words);
             for (ServerPlayer p : sl.players()) {
@@ -821,7 +832,6 @@ public class DragonEntity extends Monster implements AnimatedCreature {
                 sl.sendParticles(ParticleTypes.CLOUD, p.x, p.y, p.z, 3, 0.3 * i / 3, 0.3 * i / 3, 0.3 * i / 3, 0.05);
             }
         }
-        this.level().playSound(null, mouth.x, mouth.y, mouth.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.HOSTILE, 3.0f, 0.8f);
         AABB box = new AABB(mouth, mouth.add(dir.scale(range))).inflate(5.0);
         for (LivingEntity e : this.level().getEntitiesOfClass(LivingEntity.class, box, e -> e != this && e.isAlive() && !(e instanceof DragonEntity))) {
             if (e instanceof Player p && (p.isCreative() || p.isSpectator())) continue;
@@ -848,7 +858,7 @@ public class DragonEntity extends Monster implements AnimatedCreature {
             sl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, this.getX(), this.getY() + 1.5, this.getZ(), 6, 2.5, 1.2, 2.5, 0.02);
             sl.sendParticles(ParticleTypes.LARGE_SMOKE, this.getX(), this.getY() + 0.5, this.getZ(), 4, 3.0, 0.4, 3.0, 0.02);
         }
-        if (left == RISE_TICKS - 20) this.playSound(SoundEvents.WITHER_SPAWN, 2.0f, 0.6f);
+        if (left == RISE_TICKS - 20) this.playSound(com.skycraft.audio.AudioSounds.creature("dragon", "rise"), 4.0f, 1.0f);
         if (left == 0) {
             roar();
             CreatureAnims.play(this, AnimSlot.ROAR);
@@ -1092,7 +1102,7 @@ public class DragonEntity extends Monster implements AnimatedCreature {
                 biteCooldown = 25;
                 CreatureAnims.play(this, AnimSlot.ATTACK);
                 this.doHurtTarget(target);
-                this.playSound(com.skycraft.audio.AudioSounds.creature("dragon", "growl"), 1.5f, 1.0f + this.getRandom().nextFloat() * 0.15f);
+                this.playSound(voice("growl"), 1.5f, 1.0f + this.getRandom().nextFloat() * 0.15f);
             }
         } else {
             this.getMoveControl().setWantedPosition(target.getX(), target.getY(), target.getZ(), 1.0);
@@ -1157,7 +1167,7 @@ public class DragonEntity extends Monster implements AnimatedCreature {
     }
 
     public void roar() {
-        this.level().playSound(null, this.getX(), this.getY(), this.getZ(), com.skycraft.audio.AudioSounds.creature("dragon", "roar"), SoundSource.HOSTILE, 6.0f,
+        this.level().playSound(null, this.getX(), this.getY(), this.getZ(), voice("roar"), SoundSource.HOSTILE, 6.0f,
                 0.9f + this.getRandom().nextFloat() * 0.15f);
     }
 
@@ -1205,7 +1215,7 @@ public class DragonEntity extends Monster implements AnimatedCreature {
         Vec3 dir = breathDir(breathTarget);
         if (breathTicks % 5 == 0) breathDamage(mouth, dir);
         if (breathTicks % 10 == 0) {
-            this.playSound(isFrost() ? SoundEvents.POWDER_SNOW_BREAK : SoundEvents.BLAZE_SHOOT, 2.0f, 0.5f);
+            this.playSound(com.skycraft.audio.AudioSounds.spell(isFrost() ? "frost_stream" : "fire_stream"), 2.5f, 0.6f);
         }
         if (breathTicks <= 0) setBreathing(false, -1);
     }
@@ -1308,22 +1318,22 @@ public class DragonEntity extends Monster implements AnimatedCreature {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return com.skycraft.audio.AudioSounds.creature("dragon", "growl");
+        return voice("growl");
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return com.skycraft.audio.AudioSounds.creature("dragon", "hurt");
+        return voice("hurt");
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return com.skycraft.audio.AudioSounds.creature("dragon", "death");
+        return voice("death");
     }
 
     @Override
     protected float getSoundVolume() {
-        return 4.0f;
+        return getVariant() == ALDUIN ? 6.0f : 4.0f;
     }
 
     @Override

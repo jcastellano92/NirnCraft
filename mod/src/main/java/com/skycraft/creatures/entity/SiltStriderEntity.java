@@ -55,7 +55,7 @@ public class SiltStriderEntity extends SkyBeast {
         super.customServerAiStep();
         if (this.tickCount % 600 == 300 && this.getRandom().nextInt(3) == 0) {
             CreatureAnims.play(this, AnimSlot.SPECIAL);
-            this.playSound(net.minecraft.sounds.SoundEvents.ELDER_GUARDIAN_AMBIENT_LAND, 4.0f, 0.35f);
+            this.playSound(com.skycraft.audio.AudioSounds.creature("silt_strider", "ambient"), 4.0f, 0.95f + this.getRandom().nextFloat() * 0.1f);
         }
         if (home != null && this.tickCount % 100 == 0 && this.blockPosition().distSqr(home) > 24 * 24) {
             this.getNavigation().moveTo(home.getX() + 0.5, home.getY(), home.getZ() + 0.5, 0.8);

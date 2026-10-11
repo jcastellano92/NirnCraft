@@ -85,7 +85,15 @@ public class SkyMonster extends Monster implements SkyCreature {
         if (was && !dormant && !this.level().isClientSide) {
             CreatureAnims.play(this, com.skycraft.creatures.entity.anim.AnimSlot.EMERGE);
             emergeTicks = 30;
+            playEmergeSound();
         }
+    }
+
+    /** A statue grinding awake, ash spawn rising from the ash: the creature's wake or emerge sound, if it has one. */
+    private void playEmergeSound() {
+        SoundEvent s = com.skycraft.audio.AudioSounds.creatureOrNull(spec().id, "wake");
+        if (s == null) s = com.skycraft.audio.AudioSounds.creatureOrNull(spec().id, "emerge");
+        if (s != null) this.playSound(s, spec().soundVolume * 1.2f, this.getVoicePitch());
     }
 
     @Override
@@ -100,6 +108,7 @@ public class SkyMonster extends Monster implements SkyCreature {
             pendingEmerge = false;
             CreatureAnims.play(this, com.skycraft.creatures.entity.anim.AnimSlot.EMERGE);
             emergeTicks = 30;
+            playEmergeSound();
         }
         if (isDormant()) {
             this.setTarget(null);

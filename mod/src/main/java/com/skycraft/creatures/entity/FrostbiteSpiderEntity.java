@@ -46,6 +46,12 @@ public class FrostbiteSpiderEntity extends Spider implements AnimatedCreature {
         return hit;
     }
 
+    /** Giant frostbite spiders hiss deeper. */
+    @Override
+    public float getVoicePitch() {
+        return super.getVoicePitch() * (isGiant() ? 0.72f : 1.0f);
+    }
+
     @Override
     protected net.minecraft.sounds.SoundEvent getAmbientSound() {
         return com.skycraft.audio.AudioSounds.creature("frostbite_spider", "ambient");

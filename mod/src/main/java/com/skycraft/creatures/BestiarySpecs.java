@@ -99,7 +99,7 @@ final class BestiarySpecs {
                 .attack(Attacks.roar(20, 60).anim(AnimSlot.SPECIAL).chance(0.15f))
                 .prey(BestiarySpecs::smallGame)
                 .variants(2, (level, pos, r) -> cold(level, pos) ? 1 : 0, "", "ice")
-                .sounds(() -> SoundEvents.WOLF_GROWL, () -> SoundEvents.WOLF_HURT, () -> SoundEvents.WOLF_DEATH, 0.85f)
+                .voice("wolf", 1.0f)
                 .step(() -> SoundEvents.WOLF_STEP);
         s.category = MobCategory.MONSTER;
         s.aggroRange = 18;
@@ -115,7 +115,7 @@ final class BestiarySpecs {
                 .attack(Attacks.melee(1.0f, HitEffect.poison(80, 0)).timing(8, 16, 20))
                 .attack(Attacks.bolt(Kind.POISON, 4f, 1.1f, 1, 0.1f).anim(AnimSlot.SPECIAL).range(3f, 14f).timing(10, 22, 80))
                 .ranks(1, "chaurus", 18, "reaper")
-                .sounds(() -> SoundEvents.SILVERFISH_AMBIENT, () -> SoundEvents.SILVERFISH_HURT, () -> SoundEvents.SILVERFISH_DEATH, 0.5f)
+                .voice("chaurus", 1.0f)
                 .step(() -> SoundEvents.SPIDER_STEP);
         s.poisonMult = 0;
         return s;
@@ -128,8 +128,9 @@ final class BestiarySpecs {
                 .attack(Attacks.melee(1.0f, HitEffect.poison(80, 0)).timing(8, 16, 20))
                 .attack(Attacks.melee(1.3f).anim(AnimSlot.ATTACK2).timing(10, 18, 40))
                 .attack(Attacks.bolt(Kind.POISON, 4f, 1.2f, 2, 0.15f).anim(AnimSlot.SPECIAL).range(3f, 16f).timing(10, 22, 90))
-                .sounds(() -> SoundEvents.BEE_LOOP_AGGRESSIVE, () -> SoundEvents.SILVERFISH_HURT, () -> SoundEvents.SILVERFISH_DEATH, 0.6f);
+                .voice("chaurus", 0.85f);
         s.category = MobCategory.MONSTER;
+        s.ambientSound = () -> com.skycraft.audio.AudioSounds.creature("chaurus", "wings");
         s.poisonMult = 0;
         s.flySpeed = 0.5;
         return s;
@@ -143,7 +144,7 @@ final class BestiarySpecs {
                 .attack(Attacks.roar(14, 60).anim(AnimSlot.SPECIAL).chance(0.2f))
                 .ranks(1, "riekling", 8, "hunter", 14, "scout", 22, "chief")
                 .resist(1f, 0.5f, 1f, 1f)
-                .sounds(() -> SoundEvents.PIGLIN_AMBIENT, () -> SoundEvents.PIGLIN_HURT, () -> SoundEvents.PIGLIN_DEATH, 1.4f);
+                .voice("riekling", 1.0f);
     }
 
     /** Ash spawn rise out of Solstheim's ash and throw searing cinders. */
@@ -154,7 +155,7 @@ final class BestiarySpecs {
                 .attack(Attacks.bolt(Kind.ASH, 4f, 1.0f, 1, 0.1f).range(4f, 16f).timing(12, 24, 70))
                 .resist(0.5f, 1.5f, 1f, 0f)
                 .tickClient(particles(ParticleTypes.SMOKE, 3, 0.8f))
-                .sounds(() -> SoundEvents.BLAZE_AMBIENT, () -> SoundEvents.BLAZE_HURT, () -> SoundEvents.BLAZE_DEATH, 0.6f);
+                .voice("ash_spawn", 1.0f);
         s.emergeOnSpawn = true;
         s.undead = true;
         return s;
@@ -168,7 +169,7 @@ final class BestiarySpecs {
                 .attack(Attacks.roar(16, 80).anim(AnimSlot.SPECIAL).chance(0.15f))
                 .resist(1f, 1f, 1.25f, 0f)
                 .ranks(1, "gargoyle", 20, "brute", 32, "sentinel")
-                .sounds(() -> SoundEvents.RAVAGER_AMBIENT, () -> SoundEvents.STONE_HIT, () -> SoundEvents.STONE_BREAK, 0.8f);
+                .voice("gargoyle", 1.0f);
         s.ambush = 7;
         s.dormantChance = 0.6f;
         s.kbResist = 0.6;
@@ -182,7 +183,7 @@ final class BestiarySpecs {
                 .attack(Attacks.melee(1.0f, HitEffect.chill(2f)).timing(5, 10, 18).range(0, 1.2f))
                 .resist(1f, 0f, 1f, 0f)
                 .tickClient(particles(ParticleTypes.SOUL_FIRE_FLAME, 4, 0.6f))
-                .sounds(() -> SoundEvents.ALLAY_AMBIENT_WITHOUT_ITEM, () -> SoundEvents.ALLAY_HURT, () -> SoundEvents.ALLAY_DEATH, 0.7f);
+                .voice("wisp", 1.0f);
         s.flySpeed = 0.45;
         return s;
     }
@@ -196,7 +197,7 @@ final class BestiarySpecs {
                 .attack(Attacks.blink(true).chance(0.3f))
                 .resist(1f, 0.5f, 0f, 0f)
                 .tickClient(particles(ParticleTypes.END_ROD, 5, 0.8f))
-                .sounds(() -> SoundEvents.ALLAY_AMBIENT_WITH_ITEM, () -> SoundEvents.ALLAY_HURT, () -> SoundEvents.ALLAY_DEATH, 0.5f);
+                .voice("will_o_wisp", 1.0f);
         s.keepDistance = 6;
         s.flySpeed = 0.4;
         return s;
@@ -208,7 +209,7 @@ final class BestiarySpecs {
                 .attack(Attacks.melee(1.0f, HitEffect.chill(1.5f)).timing(6, 13, 18).range(0, 1.4f))
                 .attack(Attacks.pounce(1.3f, 1.3f, HitEffect.chill(2f)).anim(AnimSlot.ATTACK2).weight(0.5f))
                 .attack(Attacks.roar(20, 60).anim(AnimSlot.SPECIAL).chance(0.15f))
-                .sounds(() -> SoundEvents.WOLF_GROWL, () -> SoundEvents.WOLF_HURT, () -> SoundEvents.WOLF_DEATH, 0.6f);
+                .voice("death_hound", 1.0f);
         s.undead = true;
         s.frostMult = 0.5f;
         s.aggroRange = 20;
@@ -221,7 +222,9 @@ final class BestiarySpecs {
                 .attack(Attacks.bolt(Kind.BOLT, 8f, 2.2f, 1, 0.02f).range(3f, 24f).timing(14, 26, 40))
                 .attack(Attacks.melee(1.0f, HitEffect.knock(0.8, 0.2)).timing(8, 16, 30))
                 .resist(1f, 0.75f, 1.25f, 0f)
-                .sounds(() -> SoundEvents.IRON_GOLEM_STEP, () -> SoundEvents.IRON_GOLEM_HURT, () -> SoundEvents.IRON_GOLEM_DEATH, 1.4f)
+                .sounds(() -> com.skycraft.audio.AudioSounds.creature("dwarven", "clank"), () -> com.skycraft.audio.AudioSounds.creature("dwarven", "hurt"),
+                        () -> com.skycraft.audio.AudioSounds.creature("dwarven", "death"), 1.0f)
+                .cry("cast", () -> com.skycraft.audio.AudioSounds.creature("dwarven_ballista", "cast"))
                 .step(() -> SoundEvents.IRON_GOLEM_STEP);
         s.keepDistance = 10;
         s.kbResist = 0.7;
@@ -241,7 +244,7 @@ final class BestiarySpecs {
                 .attack(Attacks.roar(16, 60).anim(AnimSlot.SPECIAL).chance(0.15f))
                 .resist(0.5f, 1f, 1f, 1f)
                 .ranks(1, "churl", 8, "caitiff", 15, "kynval", 22, "kynreeve", 30, "kynmarcher", 40, "markynaz", 50, "valkynaz")
-                .sounds(() -> SoundEvents.PIGLIN_BRUTE_AMBIENT, () -> SoundEvents.PIGLIN_BRUTE_HURT, () -> SoundEvents.PIGLIN_BRUTE_DEATH, 0.7f);
+                .voice("dremora", 1.0f);
         s.daedra = true;
         return s;
     }
@@ -254,7 +257,7 @@ final class BestiarySpecs {
                 .attack(Attacks.melee(1.0f, HitEffect.burn(4)).timing(7, 14, 20))
                 .resist(0f, 1.5f, 1f, 0f)
                 .tickClient(particles(ParticleTypes.FLAME, 1, 0.7f))
-                .sounds(() -> SoundEvents.BLAZE_AMBIENT, () -> SoundEvents.BLAZE_HURT, () -> SoundEvents.BLAZE_DEATH, 1.2f);
+                .voice("flame_atronach", 1.0f);
         s.keepDistance = 8;
         s.daedra = true;
         s.flySpeed = 0.35;
@@ -277,8 +280,7 @@ final class BestiarySpecs {
                 .resist(1.5f, 0f, 1f, 0f)
                 .tickServer(aura(MagicDamage.FROST, 2.5f, 1f))
                 .tickClient(particles(ParticleTypes.SNOWFLAKE, 2, 1f))
-                .sounds(() -> SoundEvents.SNOW_GOLEM_AMBIENT, () -> SoundEvents.GLASS_HIT, () -> SoundEvents.GLASS_BREAK, 0.5f)
-                .step(() -> SoundEvents.GLASS_STEP);
+                .voice("frost_atronach", 1.0f);
         s.kbResist = 1.0;
         s.daedra = true;
         return s;
@@ -294,7 +296,7 @@ final class BestiarySpecs {
                 .resist(1f, 1f, 0f, 0f)
                 .tickServer(aura(MagicDamage.SHOCK, 3f, 1.5f))
                 .tickClient(particles(ParticleTypes.ELECTRIC_SPARK, 1, 1.2f))
-                .sounds(() -> SoundEvents.LIGHTNING_BOLT_THUNDER, () -> SoundEvents.STONE_HIT, () -> SoundEvents.LIGHTNING_BOLT_IMPACT, 1.4f);
+                .voice("storm_atronach", 1.0f);
         s.daedra = true;
         s.kbResist = 0.8;
         s.flySpeed = 0.3;
@@ -309,7 +311,7 @@ final class BestiarySpecs {
                 .attack(Attacks.bolt(Kind.FIRE, 4f, 1.2f, 1, 0.05f).range(4f, 16f).timing(10, 20, 60))
                 .attack(Attacks.roar(12, 40).anim(AnimSlot.SPECIAL).chance(0.15f))
                 .resist(0.5f, 1f, 1f, 1f)
-                .sounds(() -> SoundEvents.VEX_AMBIENT, () -> SoundEvents.VEX_HURT, () -> SoundEvents.VEX_DEATH, 0.8f);
+                .voice("scamp", 1.0f);
         s.daedra = true;
         return s;
     }
@@ -321,7 +323,7 @@ final class BestiarySpecs {
                 .attack(Attacks.melee(1.0f).timing(6, 12, 18))
                 .attack(Attacks.bolt(Kind.SHOCK, 4f, 1.3f, 1, 0.05f).range(4f, 16f).timing(10, 20, 50))
                 .resist(1f, 1f, 0.5f, 1f)
-                .sounds(() -> SoundEvents.VEX_CHARGE, () -> SoundEvents.VEX_HURT, () -> SoundEvents.VEX_DEATH, 1.2f);
+                .voice("imp", 1.0f);
         s.category = MobCategory.MONSTER;
         s.keepDistance = 6;
         s.daedra = true;
@@ -343,7 +345,7 @@ final class BestiarySpecs {
                 .resist(1f, 0.5f, 1f, 0f)
                 .variants(10, (level, pos, r) -> r.nextFloat() < 0.6f ? 0 : 1 + r.nextInt(9), "", "morokei", "rahgot", "vokun", "volsung", "nahkriin", "otar", "krosis", "hevnoraak", "konahrik")
                 .tickClient(particles(ParticleTypes.SOUL, 6, 0.7f))
-                .sounds(() -> SoundEvents.WITHER_AMBIENT, () -> SoundEvents.WITHER_SKELETON_HURT, () -> SoundEvents.WITHER_DEATH, 0.6f);
+                .voice("dragon_priest", 1.0f);
         s.keepDistance = 8;
         s.undead = true;
         s.boss = true;
@@ -363,7 +365,7 @@ final class BestiarySpecs {
                 .attack(Attacks.melee(1.0f, HitEffect.chance(0.3f, HitEffect.poison(60, 0))).timing(6, 12, 20).range(0, 1.4f))
                 .attack(Attacks.melee(1.1f).anim(AnimSlot.ATTACK2).timing(6, 12, 30).range(0, 1.4f))
                 .attack(Attacks.roar(16, 40).anim(AnimSlot.SPECIAL).chance(0.1f))
-                .sounds(() -> SoundEvents.PHANTOM_AMBIENT, () -> SoundEvents.PHANTOM_HURT, () -> SoundEvents.PHANTOM_DEATH, 1.3f);
+                .voice("cliff_racer", 1.0f);
         s.category = MobCategory.MONSTER;
         s.aggroRange = 24;
         s.flySpeed = 0.6;
@@ -376,7 +378,7 @@ final class BestiarySpecs {
                 .temper(Temper.NEUTRAL)
                 .attack(Attacks.melee(1.0f, HitEffect.knock(0.8, 0.2)).timing(8, 16, 30))
                 .variants(2, (level, pos, r) -> r.nextInt(5) == 0 ? 1 : 0, "", "pack")
-                .sounds(() -> SoundEvents.HOGLIN_AMBIENT, () -> SoundEvents.HOGLIN_HURT, () -> SoundEvents.HOGLIN_DEATH, 1.3f);
+                .voice("guar", 1.0f);
         s.stepHeight = 1.0f;
         return s;
     }
@@ -388,7 +390,7 @@ final class BestiarySpecs {
                 .attack(Attacks.charge(1.5f, 0.55, HitEffect.knock(1.4, 0.4)).anim(AnimSlot.ATTACK2))
                 .attack(Attacks.roar(16, 60).anim(AnimSlot.SPECIAL).chance(0.15f))
                 .prey(BestiarySpecs::smallGame)
-                .sounds(() -> SoundEvents.HOGLIN_ANGRY, () -> SoundEvents.HOGLIN_HURT, () -> SoundEvents.HOGLIN_DEATH, 0.8f);
+                .voice("kagouti", 1.0f);
     }
 
     /** Alit: all jaws, two legs and a temper. */
@@ -398,7 +400,7 @@ final class BestiarySpecs {
                 .attack(Attacks.pounce(1.3f, 1.1f).anim(AnimSlot.ATTACK2).weight(0.5f))
                 .attack(Attacks.roar(14, 40).anim(AnimSlot.SPECIAL).chance(0.15f))
                 .prey(BestiarySpecs::smallGame)
-                .sounds(() -> SoundEvents.RAVAGER_AMBIENT, () -> SoundEvents.RAVAGER_HURT, () -> SoundEvents.RAVAGER_DEATH, 1.4f);
+                .voice("alit", 1.0f);
     }
 
     /** Nix-hounds hunt the Ascadian Isles in packs. */
@@ -408,7 +410,7 @@ final class BestiarySpecs {
                 .attack(Attacks.pounce(1.2f, 1.2f).anim(AnimSlot.ATTACK2).weight(0.5f))
                 .attack(Attacks.roar(16, 40).anim(AnimSlot.SPECIAL).chance(0.1f))
                 .prey(BestiarySpecs::smallGame)
-                .sounds(() -> SoundEvents.SPIDER_AMBIENT, () -> SoundEvents.SPIDER_HURT, () -> SoundEvents.SPIDER_DEATH, 1.3f);
+                .voice("nix_hound", 1.0f);
         s.fleeBelow = 0.15f;
         return s;
     }
@@ -420,7 +422,7 @@ final class BestiarySpecs {
                 .attack(Attacks.melee(1.0f, HitEffect.poison(100, 0)).timing(10, 20, 24).range(0, 2.5f))
                 .attack(Attacks.breath(Kind.POISON, 6f, 1f).range(1f, 5f).timing(10, 40, 160))
                 .variants(2, (level, pos, r) -> r.nextBoolean() ? 1 : 0, "bull", "betty")
-                .sounds(() -> SoundEvents.SLIME_SQUISH, () -> SoundEvents.SLIME_HURT, () -> SoundEvents.SLIME_DEATH, 0.4f);
+                .voice("netch", 1.0f);
         s.poisonMult = 0;
         s.flySpeed = 0.15;
         s.kbResist = 0.5;
@@ -432,8 +434,7 @@ final class BestiarySpecs {
     static CreatureSpec siltStrider() {
         CreatureSpec s = new CreatureSpec("silt_strider").size(4.0f, 8.0f).stats(400, 0, 0.12).armor(10).xp(0).egg(0x8A7A6A, 0xD8C8A8)
                 .temper(Temper.NEUTRAL)
-                .sounds(() -> SoundEvents.ELDER_GUARDIAN_AMBIENT_LAND, () -> SoundEvents.ELDER_GUARDIAN_HURT_LAND,
-                        () -> SoundEvents.ELDER_GUARDIAN_DEATH_LAND, 0.4f);
+                .voice("silt_strider", 1.0f);
         s.kbResist = 1.0;
         s.persistent = true;
         s.stepHeight = 2.0f;
@@ -453,7 +454,7 @@ final class BestiarySpecs {
                 .attack(Attacks.slam(1.1f, 3f, 0.5).anim(AnimSlot.ATTACK3).timing(14, 26, 100).range(0, 2.5f))
                 .attack(Attacks.roar(18, 80).anim(AnimSlot.SPECIAL).chance(0.2f))
                 .ranks(1, "minotaur", 25, "lord")
-                .sounds(() -> SoundEvents.RAVAGER_ROAR, () -> SoundEvents.RAVAGER_HURT, () -> SoundEvents.RAVAGER_DEATH, 0.8f);
+                .voice("minotaur", 1.0f);
         s.kbResist = 0.8;
         return s;
     }
@@ -465,7 +466,7 @@ final class BestiarySpecs {
                 .attack(Attacks.slam(1.3f, 3f, 0.6).anim(AnimSlot.ATTACK3).timing(16, 28, 100).range(0, 2.8f))
                 .attack(Attacks.roar(16, 60).anim(AnimSlot.SPECIAL).chance(0.15f))
                 .ranks(1, "ogre", 22, "elder")
-                .sounds(() -> SoundEvents.RAVAGER_AMBIENT, () -> SoundEvents.RAVAGER_HURT, () -> SoundEvents.RAVAGER_DEATH, 0.6f);
+                .voice("ogre", 1.0f);
         s.kbResist = 0.9;
         return s;
     }
@@ -476,7 +477,7 @@ final class BestiarySpecs {
                 .attack(Attacks.melee(1.0f).timing(8, 16, 18).range(0, 1.8f))
                 .attack(Attacks.melee(1.2f, HitEffect.stagger(12)).anim(AnimSlot.ATTACK2).timing(10, 18, 40).range(0, 1.8f))
                 .attack(Attacks.roar(12, 40).anim(AnimSlot.SPECIAL).chance(0.1f))
-                .sounds(() -> SoundEvents.TURTLE_AMBIENT_LAND, () -> SoundEvents.TURTLE_HURT, () -> SoundEvents.TURTLE_DEATH, 0.6f);
+                .voice("land_dreugh", 1.0f);
         s.waterBreathing = true;
         return s;
     }
@@ -489,7 +490,7 @@ final class BestiarySpecs {
                 .attack(Attacks.breath(Kind.SHOCK, 11f, 1.2f).timing(10, 40, 160))
                 .resist(1f, 1f, 0f, 1f)
                 .tickClient(particles(ParticleTypes.ELECTRIC_SPARK, 6, 1f))
-                .sounds(() -> SoundEvents.RAVAGER_ROAR, () -> SoundEvents.RAVAGER_HURT, () -> SoundEvents.RAVAGER_DEATH, 1.3f);
+                .voice("wamasu", 1.0f);
         s.waterBreathing = true;
         return s;
     }
@@ -501,7 +502,7 @@ final class BestiarySpecs {
                 .attack(Attacks.sweep(1.0f, 4.5f, -0.3f, HitEffect.knock(1.5, 0.4)).anim(AnimSlot.ATTACK2).timing(14, 26, 70))
                 .attack(Attacks.roar(24, 100).anim(AnimSlot.SPECIAL).chance(0.15f))
                 .prey(BestiarySpecs::bigGame)
-                .sounds(() -> SoundEvents.RAVAGER_ROAR, () -> SoundEvents.RAVAGER_HURT, () -> SoundEvents.RAVAGER_DEATH, 0.5f);
+                .voice("swamp_leviathan", 1.0f);
         s.waterBreathing = true;
         s.kbResist = 1.0;
         s.tracking(12);
@@ -515,7 +516,7 @@ final class BestiarySpecs {
                 .attack(Attacks.melee(1.0f).timing(6, 12, 18).range(0, 1.4f))
                 .attack(Attacks.melee(1.2f).anim(AnimSlot.ATTACK2).timing(6, 12, 30).range(0, 1.4f))
                 .prey(BestiarySpecs::smallGame)
-                .sounds(() -> SoundEvents.PARROT_AMBIENT, () -> SoundEvents.PARROT_HURT, () -> SoundEvents.PARROT_DEATH, 0.7f);
+                .voice("hackwing", 1.0f);
         s.category = MobCategory.MONSTER;
         s.flySpeed = 0.6;
         return s;
@@ -530,7 +531,7 @@ final class BestiarySpecs {
                 .attack(Attacks.pounce(1.5f, 1.4f, HitEffect.stagger(15)).anim(AnimSlot.ATTACK3))
                 .attack(Attacks.roar(18, 60).anim(AnimSlot.SPECIAL).chance(0.15f))
                 .prey(BestiarySpecs::bigGame)
-                .sounds(() -> SoundEvents.OCELOT_AMBIENT, () -> SoundEvents.CAT_HURT, () -> SoundEvents.CAT_DEATH, 0.5f);
+                .voice("senche_tiger", 1.0f);
         s.aggroRange = 10;
         s.category = MobCategory.MONSTER;
         return s;
@@ -542,7 +543,7 @@ final class BestiarySpecs {
                 .temper(Temper.NEUTRAL)
                 .attack(Attacks.melee(1.0f).timing(5, 10, 14).range(0, 1.0f))
                 .attack(Attacks.bolt(Kind.SHOCK, 3f, 1.3f, 1, 0.05f).range(3f, 14f).timing(10, 20, 80))
-                .sounds(() -> SoundEvents.CAT_AMBIENT, () -> SoundEvents.CAT_HURT, () -> SoundEvents.CAT_DEATH, 1.0f);
+                .voice("alfiq", 1.0f);
     }
 
     // ================================================================================================ the west
@@ -552,7 +553,7 @@ final class BestiarySpecs {
         CreatureSpec s = new CreatureSpec("sand_serpent").size(1.5f, 2.5f).stats(90, 9, 0.28).armor(8).xp(40).egg(0xC8A060, 0x6A4A2A)
                 .attack(Attacks.melee(1.2f, HitEffect.stagger(15)).timing(12, 22, 24).range(0, 2.6f))
                 .attack(Attacks.melee(1.0f, HitEffect.poison(80, 0)).anim(AnimSlot.ATTACK2).timing(8, 16, 30).range(0, 2.2f))
-                .sounds(() -> SoundEvents.RAVAGER_ROAR, () -> SoundEvents.RAVAGER_HURT, () -> SoundEvents.RAVAGER_DEATH, 1.6f);
+                .voice("sand_serpent", 1.0f);
         s.kbResist = 1.0;
         return s;
     }
@@ -563,7 +564,7 @@ final class BestiarySpecs {
                 .attack(Attacks.melee(1.0f).timing(7, 14, 16).range(0, 1.8f))
                 .attack(Attacks.melee(1.0f).anim(AnimSlot.ATTACK2).timing(7, 14, 16).range(0, 1.8f))
                 .attack(Attacks.melee(1.3f, HitEffect.poison(120, 1)).anim(AnimSlot.ATTACK3).timing(10, 20, 60).range(0, 2.2f))
-                .sounds(() -> SoundEvents.SPIDER_AMBIENT, () -> SoundEvents.SPIDER_HURT, () -> SoundEvents.SPIDER_DEATH, 0.6f)
+                .voice("giant_scorpion", 1.0f)
                 .step(() -> SoundEvents.SPIDER_STEP);
     }
 
@@ -574,7 +575,7 @@ final class BestiarySpecs {
                 .attack(Attacks.melee(1.0f).timing(7, 14, 18).range(0, 1.6f))
                 .attack(Attacks.melee(0.8f, HitEffect.knock(1.2, 0.5)).anim(AnimSlot.ATTACK2).timing(8, 16, 40).range(0, 1.8f))
                 .attack(Attacks.roar(14, 80).anim(AnimSlot.SPECIAL).chance(0.2f))
-                .sounds(() -> SoundEvents.PHANTOM_AMBIENT, () -> SoundEvents.PHANTOM_HURT, () -> SoundEvents.PHANTOM_DEATH, 1.5f);
+                .voice("harpy", 1.0f);
         s.category = MobCategory.MONSTER;
         s.flySpeed = 0.55;
         return s;
@@ -584,7 +585,7 @@ final class BestiarySpecs {
     static CreatureSpec indrik() {
         return new CreatureSpec("indrik").size(1.2f, 1.9f).stats(40, 0, 0.32).xp(6).egg(0xF0E8D0, 0x80B0E0)
                 .temper(Temper.PASSIVE)
-                .sounds(() -> SoundEvents.HORSE_AMBIENT, () -> SoundEvents.HORSE_HURT, () -> SoundEvents.HORSE_DEATH, 1.3f)
+                .voice("indrik", 1.0f)
                 .step(() -> SoundEvents.HORSE_STEP);
     }
 
@@ -594,7 +595,7 @@ final class BestiarySpecs {
                 .move(Move.SWIM)
                 .attack(Attacks.melee(1.0f, HitEffect.stagger(15)).timing(10, 20, 24).range(0, 2.6f))
                 .attack(Attacks.melee(1.3f, HitEffect.knock(1.5, 0.4)).anim(AnimSlot.ATTACK2).timing(12, 24, 60).range(0, 3f))
-                .sounds(() -> SoundEvents.ELDER_GUARDIAN_AMBIENT, () -> SoundEvents.ELDER_GUARDIAN_HURT, () -> SoundEvents.ELDER_GUARDIAN_DEATH, 0.6f);
+                .voice("sea_serpent", 1.0f);
         s.kbResist = 1.0;
         s.chaseSpeed = 1.6;
         s.tracking(12);
@@ -606,7 +607,7 @@ final class BestiarySpecs {
         CreatureSpec s = new CreatureSpec("echatere").size(1.8f, 1.8f).stats(60, 7, 0.22).armor(4).xp(10).egg(0x4A4038, 0x9A8A70)
                 .temper(Temper.NEUTRAL)
                 .attack(Attacks.melee(1.0f, HitEffect.knock(1.2, 0.3)).timing(10, 20, 30).range(0, 2f))
-                .sounds(() -> SoundEvents.COW_AMBIENT, () -> SoundEvents.COW_HURT, () -> SoundEvents.COW_DEATH, 0.6f);
+                .voice("echatere", 1.0f);
         s.kbResist = 0.6;
         return s;
     }
@@ -618,7 +619,7 @@ final class BestiarySpecs {
                 .attack(Attacks.pounce(1.3f, 1.2f).anim(AnimSlot.ATTACK2).weight(0.5f))
                 .attack(Attacks.roar(14, 40).anim(AnimSlot.SPECIAL).chance(0.15f))
                 .prey(BestiarySpecs::smallGame)
-                .sounds(() -> SoundEvents.HOGLIN_ANGRY, () -> SoundEvents.WOLF_HURT, () -> SoundEvents.WOLF_DEATH, 0.9f);
+                .voice("durzog", 1.0f);
     }
 
     /** Atmora's frost giants: colossal, ice-armoured, hurling boulders of ice. */
@@ -630,7 +631,7 @@ final class BestiarySpecs {
                 .attack(Attacks.bolt(Kind.FROST, 10f, 1.1f, 1, 0.05f).range(6f, 24f).timing(16, 30, 120))
                 .attack(Attacks.roar(24, 80).anim(AnimSlot.SPECIAL).chance(0.15f))
                 .resist(1.5f, 0f, 1f, 1f)
-                .sounds(() -> SoundEvents.RAVAGER_AMBIENT, () -> SoundEvents.RAVAGER_HURT, () -> SoundEvents.RAVAGER_DEATH, 0.45f);
+                .voice("frost_giant", 1.0f);
         s.aggroRange = 9;
         s.kbResist = 1.0;
         s.stepHeight = 1.5f;
@@ -646,7 +647,7 @@ final class BestiarySpecs {
                 .attack(Attacks.breath(Kind.FROST, 8f, 1f).timing(10, 40, 150))
                 .attack(Attacks.bolt(Kind.FROST, 6f, 1.4f, 2, 0.1f).range(4f, 18f).timing(12, 22, 80).weight(0.6f))
                 .resist(1.5f, 0f, 1f, 1f)
-                .sounds(() -> SoundEvents.STRAY_AMBIENT, () -> SoundEvents.STRAY_HURT, () -> SoundEvents.STRAY_DEATH, 0.7f);
+                .voice("kamal", 1.0f);
     }
 
     /** Tsaesci: serpent-folk warriors of Akavir. */
@@ -657,7 +658,7 @@ final class BestiarySpecs {
                 .attack(Attacks.bolt(Kind.SHADOW, 6f, 1.4f, 1, 0.05f).range(4f, 18f).timing(12, 22, 90))
                 .attack(Attacks.roar(14, 60).anim(AnimSlot.SPECIAL).chance(0.1f))
                 .ranks(1, "tsaesci", 20, "warden", 35, "lord")
-                .sounds(() -> SoundEvents.CAT_HISS, () -> SoundEvents.HOGLIN_HURT, () -> SoundEvents.RAVAGER_DEATH, 1.2f);
+                .voice("tsaesci", 1.0f);
     }
 
     // ================================================================================================ the endless lands
@@ -669,7 +670,7 @@ final class BestiarySpecs {
                 .attack(Attacks.roar(16, 40).anim(AnimSlot.SPECIAL).chance(0.1f))
                 .prey(BestiarySpecs::smallGame)
                 .variants(1, BestiarySpecs::regionTint)
-                .sounds(() -> SoundEvents.WOLF_GROWL, () -> SoundEvents.WOLF_HURT, () -> SoundEvents.WOLF_DEATH, 0.7f);
+                .voice("realm_stalker", 1.0f);
         s.tinted = true;
         return s;
     }
@@ -679,7 +680,7 @@ final class BestiarySpecs {
                 .temper(Temper.NEUTRAL)
                 .attack(Attacks.melee(1.0f, HitEffect.knock(1.0, 0.2)).timing(8, 16, 30))
                 .variants(1, BestiarySpecs::regionTint)
-                .sounds(() -> SoundEvents.GOAT_AMBIENT, () -> SoundEvents.GOAT_HURT, () -> SoundEvents.GOAT_DEATH, 0.6f);
+                .voice("realm_grazer", 1.0f);
         s.tinted = true;
         s.fleeBelow = 0.4f;
         return s;
@@ -691,7 +692,7 @@ final class BestiarySpecs {
                 .attack(Attacks.melee(1.2f, HitEffect.poison(80, 0)).anim(AnimSlot.ATTACK2).timing(10, 18, 40).range(0, 1.8f))
                 .attack(Attacks.roar(14, 40).anim(AnimSlot.SPECIAL).chance(0.1f))
                 .variants(1, BestiarySpecs::regionTint)
-                .sounds(() -> SoundEvents.CAT_HISS, () -> SoundEvents.SPIDER_HURT, () -> SoundEvents.SPIDER_DEATH, 0.5f);
+                .voice("realm_wyrm", 1.0f);
         s.tinted = true;
         return s;
     }

@@ -160,9 +160,9 @@ public class CreatureBolt extends ThrowableProjectile {
         if (!(this.level() instanceof ServerLevel server)) return;
         server.sendParticles(trail(), this.getX(), this.getY(), this.getZ(), 12, 0.25, 0.25, 0.25, 0.05);
         switch (kind()) {
-            case FIRE -> this.playSound(SoundEvents.FIRECHARGE_USE, 0.8f, 1.2f);
-            case FROST -> this.playSound(SoundEvents.GLASS_BREAK, 0.6f, 1.5f);
-            case SHOCK -> this.playSound(SoundEvents.LIGHTNING_BOLT_IMPACT, 0.4f, 1.8f);
+            case FIRE -> this.playSound(com.skycraft.audio.AudioSounds.spell("impact_fire"), 0.8f, 1.1f);
+            case FROST -> this.playSound(com.skycraft.audio.AudioSounds.spell("impact_frost"), 0.7f, 1.1f);
+            case SHOCK -> this.playSound(com.skycraft.audio.AudioSounds.spell("impact_shock"), 0.6f, 1.2f);
             case ROCK -> this.playSound(SoundEvents.STONE_BREAK, 1.0f, 0.7f);
             default -> this.playSound(SoundEvents.SLIME_SQUISH_SMALL, 0.8f, 1.0f);
         }

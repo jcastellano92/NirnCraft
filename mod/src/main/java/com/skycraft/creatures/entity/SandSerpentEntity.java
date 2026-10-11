@@ -86,7 +86,7 @@ public class SandSerpentEntity extends SkyMonster {
         setBurrowed(false);
         surfaceTicks = 0;
         CreatureAnims.play(this, AnimSlot.EMERGE);
-        this.playSound(SoundEvents.RAVAGER_ROAR, 2.0f, 1.4f);
+        this.playSound(com.skycraft.audio.AudioSounds.creature("sand_serpent", "roar"), 2.0f, 0.95f + this.getRandom().nextFloat() * 0.1f);
         for (LivingEntity e : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(2.5), e -> Attacks.validVictim(this, e))) {
             Attacks.strike(this, e, 0.8f, HitEffect.knock(0.4, 0.9));
         }

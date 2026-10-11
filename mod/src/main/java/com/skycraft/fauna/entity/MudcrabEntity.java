@@ -98,6 +98,12 @@ public class MudcrabEntity extends FaunaAnimal {
         return isGiant() ? net.minecraft.network.chat.Component.translatable("entity.skycraft.mudcrab.giant") : super.getTypeName();
     }
 
+    /** Giant mudcrabs click and crunch deeper. */
+    @Override
+    public float getVoicePitch() {
+        return super.getVoicePitch() * (isGiant() ? 0.7f : 1.0f);
+    }
+
     @Override
     protected SoundEvent getAmbientSound() {
         return com.skycraft.audio.AudioSounds.creature("mudcrab", "ambient");

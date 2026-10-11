@@ -82,7 +82,7 @@ public final class DragonLairs {
         risen.setPersistenceRequired();
         risen.startRising();
         level.addFreshEntity(risen);
-        level.playSound(null, at, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 10f, 0.5f);
+        level.playSound(null, at, com.skycraft.audio.AudioSounds.creature("dragon", "roar"), SoundSource.HOSTILE, 10f, 0.8f);
         player.displayClientMessage(Component.translatable("message.skycraft.dragon.mound_rises"), true);
     }
 

@@ -684,9 +684,8 @@ SHOUT_FLAVOUR = {
     "become_ethereal": "shimmer", "clear_skies": "wind", "aura_whisper": "shimmer", "slow_time": "time",
     "marked_for_death": "dark", "disarm": "metal", "elemental_fury": "wind", "kynes_peace": "shimmer",
     "animal_allegiance": "wind", "storm_call": "storm", "dragonrend": "dark",
-    "ice_form": "frost", "throw_voice": "shimmer", "dismay": "dark", "call_dragon": "storm", "call_of_valor": "shimmer",
-    "cyclone": "wind", "drain_vitality": "dark", "soul_tear": "dark", "bend_will": "force", "dragon_aspect": "force",
-    "battle_fury": "force",
+    "ice_form": "frost", "throw_voice": "shimmer", "dismay": "dark", "call_dragon": "wind", "call_of_valor": "shimmer",
+    "cyclone": "wind", "drain_vitality": "dark", "soul_tear": "dark", "bend_will": "shimmer", "dragon_aspect": "fire",
 }
 
 
@@ -1872,6 +1871,1225 @@ def ui_lockpick_unlock(rng, v):
     return reverb(rng, y, 0.3, 0.1)
 
 
+# =====================================================================================================  the bestiary of Nirn
+# Voices for the creatures of the wider bestiary. Vocal beasts share a profile table (VOX, merged into BEASTS) and a
+# generic generator per kind; everything with a character of its own (chitin, stone, fire, ice, thunder, chimes,
+# machinery, gasbags, whispers) has its own generator below. register_bestiary() fills every catalogued stem that has
+# no specific generator with the generic vocal one.
+
+VOX = {  # tract scale, base f0, voice character (same keys as BEASTS)
+    "wolf": dict(scale=1.1, f0=210, breath=0.9, sub=0.3, rattle=0.5, rattle_hz=30, oq=0.45, jitter=0.03, shimmer=0.15, flutter=0.04),
+    "riekling": dict(scale=1.35, f0=250, breath=0.6, sub=0.25, rattle=0.3, rattle_hz=40, oq=0.5, jitter=0.04, shimmer=0.12, flutter=0.05),
+    "ash_spawn": dict(scale=0.9, f0=88, breath=2.6, sub=0.4, rattle=0.5, rattle_hz=18, oq=0.4, jitter=0.05, shimmer=0.3, flutter=0.04),
+    "gargoyle": dict(scale=0.75, f0=70, breath=0.6, sub=0.45, sub3=0.15, rattle=0.4, rattle_hz=20, oq=0.45, jitter=0.02, shimmer=0.12, flutter=0.03),
+    "death_hound": dict(scale=1.0, f0=130, breath=1.6, sub=0.5, rattle=0.65, rattle_hz=22, oq=0.4, jitter=0.05, shimmer=0.3, flutter=0.04),
+    "dremora": dict(scale=0.85, f0=72, breath=0.5, sub=0.5, sub3=0.15, rattle=0.3, rattle_hz=18, oq=0.45, jitter=0.02, shimmer=0.1, flutter=0.02),
+    "scamp": dict(scale=1.25, f0=230, breath=0.8, sub=0.3, rattle=0.3, rattle_hz=35, oq=0.45, jitter=0.04, shimmer=0.15, flutter=0.05),
+    "imp": dict(scale=1.5, f0=380, breath=0.7, sub=0.2, rattle=0.2, rattle_hz=45, oq=0.45, jitter=0.03, shimmer=0.12, flutter=0.06, src_lp=7000),
+    "guar": dict(scale=0.95, f0=140, breath=0.9, sub=0.5, rattle=0.35, rattle_hz=32, oq=0.45, jitter=0.03, shimmer=0.15, flutter=0.05),
+    "kagouti": dict(scale=0.8, f0=110, breath=1.0, sub=0.45, rattle=0.45, rattle_hz=30, oq=0.45, jitter=0.03, shimmer=0.15, flutter=0.04),
+    "alit": dict(scale=0.8, f0=120, breath=1.1, sub=0.4, rattle=0.55, rattle_hz=26, oq=0.45, jitter=0.03, shimmer=0.15, flutter=0.04),
+    "nix_hound": dict(scale=1.2, f0=300, breath=1.0, sub=0.3, rattle=0.4, rattle_hz=38, oq=0.45, jitter=0.03, shimmer=0.15, flutter=0.06),
+    "minotaur": dict(scale=0.7, f0=85, breath=0.9, sub=0.35, rattle=0.3, rattle_hz=20, oq=0.5, jitter=0.02, shimmer=0.12, flutter=0.03),
+    "ogre": dict(scale=0.72, f0=75, breath=0.7, sub=0.4, rattle=0.4, rattle_hz=22, oq=0.5, jitter=0.02, shimmer=0.12, flutter=0.03),
+    "wamasu": dict(scale=0.7, f0=90, breath=0.9, sub=0.4, rattle=0.45, rattle_hz=24, oq=0.45, jitter=0.02, shimmer=0.12, flutter=0.04),
+    "swamp_leviathan": dict(scale=0.5, f0=42, breath=0.6, sub=0.5, rattle=0.5, rattle_hz=12, oq=0.5, jitter=0.02, shimmer=0.12, flutter=0.03),
+    "hackwing": dict(scale=1.5, f0=900, breath=1.0, sub=0.3, rattle=0.25, rattle_hz=60, oq=0.4, jitter=0.03, shimmer=0.15, flutter=0.06, src_lp=8000),
+    "senche_tiger": dict(scale=0.7, f0=95, breath=1.0, sub=0.35, rattle=0.55, rattle_hz=24, oq=0.45, jitter=0.03, shimmer=0.15, flutter=0.05),
+    "alfiq": dict(scale=1.6, f0=480, breath=0.4, sub=0.1, rattle=0.1, rattle_hz=40, oq=0.55, jitter=0.02, shimmer=0.08, flutter=0.03, src_lp=7000),
+    "harpy": dict(scale=1.1, f0=470, breath=1.3, sub=0.3, rattle=0.25, rattle_hz=45, oq=0.4, jitter=0.04, shimmer=0.15, flutter=0.07, src_lp=7000),
+    "indrik": dict(scale=1.05, f0=330, breath=0.5, sub=0.1, rattle=0.1, rattle_hz=30, oq=0.6, jitter=0.015, shimmer=0.06, flutter=0.03, src_lp=7000),
+    "echatere": dict(scale=0.7, f0=88, breath=0.6, sub=0.25, rattle=0.2, rattle_hz=18, oq=0.55, jitter=0.015, shimmer=0.08, flutter=0.02),
+    "durzog": dict(scale=0.95, f0=165, breath=1.1, sub=0.45, rattle=0.6, rattle_hz=28, oq=0.45, jitter=0.03, shimmer=0.15, flutter=0.05),
+    "frost_giant": dict(scale=0.56, f0=50, breath=0.5, sub=0.3, rattle=0.25, rattle_hz=14, oq=0.6, jitter=0.015, shimmer=0.08, flutter=0.02),
+    "kamal": dict(scale=0.85, f0=120, breath=2.0, sub=0.45, rattle=0.5, rattle_hz=30, oq=0.4, jitter=0.04, shimmer=0.2, flutter=0.05),
+    "tsaesci": dict(scale=0.9, f0=110, breath=1.2, sub=0.35, rattle=0.3, rattle_hz=26, oq=0.45, jitter=0.02, shimmer=0.12, flutter=0.03),
+    "realm_stalker": dict(scale=0.95, f0=150, breath=1.0, sub=0.4, rattle=0.55, rattle_hz=26, oq=0.45, jitter=0.03, shimmer=0.15, flutter=0.05),
+    "realm_grazer": dict(scale=0.8, f0=120, breath=0.6, sub=0.2, rattle=0.15, rattle_hz=20, oq=0.55, jitter=0.015, shimmer=0.08, flutter=0.02),
+    "sea_serpent": dict(scale=0.55, f0=70, breath=0.5, sub=0.3, rattle=0.2, rattle_hz=14, oq=0.55, jitter=0.015, shimmer=0.08, flutter=0.03),
+    "land_dreugh": dict(scale=0.9, f0=120, breath=1.4, sub=0.4, rattle=0.6, rattle_hz=34, oq=0.4, jitter=0.04, shimmer=0.2, flutter=0.05),
+    "sand_serpent": dict(scale=0.7, f0=100, breath=2.0, sub=0.4, rattle=0.4, rattle_hz=26, oq=0.4, jitter=0.03, shimmer=0.15, flutter=0.04),
+    "realm_wyrm": dict(scale=0.85, f0=130, breath=1.8, sub=0.4, rattle=0.45, rattle_hz=30, oq=0.4, jitter=0.03, shimmer=0.15, flutter=0.04),
+}
+BEASTS.update(VOX)
+
+
+def vocal(rng, who, kind, v):
+    """Generic voice of a VOX creature for one sound kind."""
+    p = BEASTS[who]
+    if kind == "ambient":
+        parts = [call(rng, who, "grunt", f_mul=rng.uniform(0.88, 1.15)) for _ in range(int(rng.integers(1, 3)) + (v == 2))]
+        return reverb(rng, sat(seq(parts, (0.08, 0.22), rng), 1.8), 0.6, 0.15)
+    if kind == "attack":
+        x = call(rng, who, "hurt", rng.uniform(0.28, 0.42), f_mul=1.2, path=[(0, "a"), (0.6, "ah"), (1, "uh")], oq=0.4)
+        return reverb(rng, sat(x, 2.4), 0.5, 0.14)
+    if kind == "roar":
+        x = call(rng, who, "roar", sub=min(0.6, p.get("sub", 0.3) + 0.1), rattle=min(0.8, p.get("rattle", 0.3) + 0.1))
+        return reverb(rng, sat(x, 2.3), 0.9, 0.2)
+    if kind == "hurt":
+        return reverb(rng, sat(call(rng, who, "hurt"), 2.0), 0.6, 0.15)
+    if kind == "death":
+        return reverb(rng, sat(call(rng, who, "death"), 1.8), 0.8, 0.2)
+    raise KeyError(f"{who}/{kind}")
+
+
+def stretch(x, factor):
+    """Resample by `factor` (< 1: slower, deeper and longer - a bigger animal)."""
+    m = int(len(x) / factor)
+    return np.interp(np.arange(m) * factor, np.arange(len(x)), x)
+
+
+def lay(*parts):
+    """Mix clips of different lengths (each unit-peak scaled by its gain): lay((x, 1.0), (y, 0.5))."""
+    n = max(len(p) for p, _ in parts)
+    y = np.zeros(n)
+    for p, g in parts:
+        y[:len(p)] += g * unit(p)
+    return y
+
+
+def hiss(rng, n, lo=3000, hi=9000, env=None):
+    x = bp(white(rng, n), lo, hi) * np.clip(1 + 0.3 * wander(rng, n, 15), 0.2, None)
+    return x * (env if env is not None else curve(n, [(0, 0), (0.1, 1), (0.6, 0.7), (1, 0)]))
+
+
+def whisper(rng, dur, path, f0=110.0, scale=1.0):
+    """A breathy, almost unvoiced syllable: aspiration through the formants with a ghost of voicing."""
+    n = ns(dur)
+    x = voice(rng, np.full(n, f0) * (1 + 0.03 * wander(rng, n, 3)), tract(n, path, scale),
+              curve(n, [(0, 0), (0.2, 1), (0.7, 0.8), (1, 0)]), breath=9.0, oq=0.7, jitter=0.05, shimmer=0.3)
+    return hp(x, 300)
+
+
+def howl_dark(rng, dur, b, rough=0.3):
+    n = ns(dur)
+    pts = [(0, b), (0.15, b * 1.35), (0.45, b * 1.5), (0.8, b * 1.38), (1, b * 0.9)]
+    f0 = curve(n, pts, log=True)
+    f0 = f0 * (1 + 0.01 * np.sin(TAU * 5 * tline(n)) * np.clip((tline(n) - 0.3) / 0.5, 0, 1))
+    amp = curve(n, [(0, 0), (0.1, 0.8), (0.35, 1), (0.85, 0.85), (1, 0)])
+    return voice(rng, f0, tract(n, [(0, "u"), (0.3, "o"), (0.75, "a"), (1, "u")], 1.15), amp, breath=0.5, tilt=-0.3,
+                 oq=0.65, sk=0.65, jitter=0.01, shimmer=0.06, sub=rough, rattle=rough * 0.6, rattle_hz=24, src_lp=5000)
+
+
+def wingbeats(rng, n, rate, lo=300, hi=1600, depth=1.0):
+    flap = (0.5 + 0.5 * np.sin(TAU * rate * (1 + 0.05 * wander(rng, n, 2)) * tline(n))) ** 3
+    return bp(white(rng, n), lo, hi) * (1 - depth + depth * flap)
+
+
+def stone_grind(rng, dur, pts):
+    return creak(rng, dur, pts, wood=(180, 410, 760, 1250))
+
+
+def ice_grind(rng, dur, pts):
+    return creak(rng, dur, pts, wood=(310, 720, 1340, 2150))
+
+
+def bones(rng, n, t0, count, spread):
+    """Dry bone / chitin rattle: hollow wooden clicks."""
+    return scatter(rng, n, count, t0, spread, 900, 3200, (0.006, 0.02), WOOD[:3], 0.6, glass=False)
+
+
+def screech(rng, dur, b, peak=1.45, vib=16.0, depth=0.05, path=None, scale=1.3):
+    """Nasal, warbling, bright screech (cliff racers, hackwings, harpies)."""
+    n = ns(dur)
+    f0 = curve(n, [(0, b * 0.8), (0.12, b * peak), (0.5, b * peak * 0.92), (1, b * 0.7)], log=True)
+    f0 = f0 * (1 + depth * np.sin(TAU * vib * tline(n) + rng.uniform(0, TAU)) + 0.01 * wander(rng, n, 20))
+    amp = curve(n, [(0, 0), (0.06, 1), (0.6, 0.85), (1, 0)])
+    x = voice(rng, f0, tract(n, path or [(0, "ii"), (0.3, "e"), (0.8, "ae"), (1, "a")], scale), amp, breath=1.0,
+              tilt=0.9, oq=0.35, sk=0.85, jitter=0.03, shimmer=0.15, sub=0.25, src_lp=9000)
+    return sat(x, 2.6)
+
+
+# wolf ----------------------------------------------------------------------------------------
+@sfx("creature/wolf/attack")
+def wolf_attack(rng, v):
+    sn = call(rng, "wolf", "hurt", rng.uniform(0.25, 0.35), f_mul=0.6, path=[(0, "a"), (1, "uh")], rattle=0.7)
+    y = pad(unit(sn), len(sn) + ns(0.1))
+    place(y, unit(modal_hit(rng, rng.uniform(900, 1300), 0.15, 0.03, WOOD, 0.8)), len(sn) / SR * 0.6, 0.5)
+    return reverb(rng, sat(y, 2.0), 0.4, 0.12)
+
+
+@sfx("creature/wolf/hurt")
+def wolf_hurt(rng, v):
+    b = rng.uniform(650, 760)
+    x = beast(rng, 0.32, [(0, b), (0.2, b * 1.5), (1, b * 0.8)], [(0, "ii"), (0.4, "a"), (1, "u")], 1.3,
+              [(0, 0), (0.05, 1), (0.5, 0.7), (1, 0)], breath=0.6, oq=0.5, jitter=0.02, shimmer=0.1)
+    return reverb(rng, sat(x, 1.8), 0.4, 0.12)
+
+
+@sfx("creature/wolf/death")
+def wolf_death(rng, v):
+    b = rng.uniform(560, 640)
+    yelp = beast(rng, 0.25, [(0, b), (0.2, b * 1.4), (1, b)], [(0, "ii"), (1, "a")], 1.3, breath=0.6, oq=0.5)
+    whine = beast(rng, 0.9, [(0, b * 1.2), (0.3, b * 1.05), (1, b * 0.55)], [(0, "ii"), (0.6, "u"), (1, "m")], 1.3,
+                  [(0, 0), (0.1, 0.8), (0.7, 0.5), (1, 0)], breath=1.2, oq=0.55, jitter=0.03)
+    return reverb(rng, seq([unit(yelp), 0.7 * unit(whine)], (0.1, 0.18), rng), 0.5, 0.15)
+
+
+# chaurus ---------------------------------------------------------------------------------------
+@sfx("creature/chaurus/ambient")
+def chaurus_ambient(rng, v):
+    n = ns(rng.uniform(0.9, 1.3))
+    h = hiss(rng, n, 1800, 5500, curve(n, [(0, 0), (0.25, 1), (0.5, 0.5), (0.7, 0.8), (1, 0)]))
+    ch = pad(chitter(rng, int(rng.integers(8, 16)), rng.uniform(18, 30), 1200, 3200, (0.004, 0.01)), n)
+    cl = clicks(rng, n, rng.uniform(0.0, 0.3), int(rng.integers(4, 9)), 14)
+    return reverb(rng, 0.7 * unit(h) + unit(ch) + 0.6 * unit(cl), 0.5, 0.14)
+
+
+@sfx("creature/chaurus/attack")
+def chaurus_attack(rng, v):
+    n = ns(0.45)
+    h = hiss(rng, n, 2000, 7000, env_ad(n, 0.01, 0.12))
+    return reverb(rng, unit(h) + 0.6 * unit(clicks(rng, n, 0.0, 5, 50)), 0.4, 0.12)
+
+
+@sfx("creature/chaurus/cast")
+def chaurus_cast(rng, v):
+    n = ns(0.5)
+    spit = bp(white(rng, n), 700, 4000) * env_ad(n, 0.004, 0.05)
+    sq = osc(curve(n, [(0, 700), (1, 180)], log=True), (1, 0.4)) * env_ad(n, 0.005, 0.08)
+    return reverb(rng, unit(spit) + 0.4 * unit(sq) + 0.4 * unit(hiss(rng, n, 2500, 6000, env_ad(n, 0.02, 0.1))), 0.4, 0.12)
+
+
+@sfx("creature/chaurus/wings")
+def chaurus_wings(rng, v):
+    n = ns(1.4)
+    f = rng.uniform(120, 150) * (1 + 0.04 * wander(rng, n, 3))
+    buzz = osc(f, tuple(1 / k for k in range(1, 16))) * (0.6 + 0.4 * np.sin(TAU * 28 * tline(n)) ** 2)
+    buzz = bp(buzz, 150, 3000) * curve(n, [(0, 0), (0.2, 1), (0.8, 1), (1, 0)])
+    air = wingbeats(rng, n, 28, 400, 2500, 0.8) * curve(n, [(0, 0), (0.2, 1), (0.8, 1), (1, 0)])
+    return reverb(rng, unit(buzz) + 0.5 * unit(air) + 0.3 * unit(clicks(rng, n, 0.4, 4, 12)), 0.4, 0.1)
+
+
+@sfx("creature/chaurus/hurt")
+def chaurus_hurt(rng, v):
+    n = ns(0.5)
+    sq = tvf(white(rng, n), curve(n, [(0, 1800), (0.2, 3000), (1, 1400)], log=True), 6.0, "bp") * env_ad(n, 0.01, 0.15)
+    return reverb(rng, unit(sq) + 0.5 * unit(clicks(rng, n, 0.02, 7, 45)), 0.4, 0.12)
+
+
+@sfx("creature/chaurus/death")
+def chaurus_death(rng, v):
+    n = ns(1.3)
+    h = hiss(rng, n, 1500, 4500, env_ad(n, 0.02, 0.4))
+    return reverb(rng, unit(h) + 0.8 * unit(legs(rng, n, 0.05, 14, 30, 1.12)), 0.5, 0.12)
+
+
+# riekling ------------------------------------------------------------------------------------
+def gabble(rng, who, count, f_mul=1.0):
+    p = BEASTS[who]
+    vowels = ["a", "e", "o", "ae", "ii", "uh", "u"]
+    parts = []
+    for _ in range(count):
+        d = rng.uniform(0.07, 0.16)
+        f = p["f0"] * f_mul * rng.uniform(0.85, 1.25)
+        parts.append(beast(rng, d, [(0, f), (0.5, f * rng.uniform(1.05, 1.35)), (1, f * 0.9)],
+                           [(0, str(rng.choice(vowels))), (1, str(rng.choice(vowels)))], p["scale"],
+                           [(0, 0), (0.2, 1), (0.7, 0.8), (1, 0)], breath=p["breath"], sub=p["sub"], rattle=p["rattle"],
+                           rattle_hz=p["rattle_hz"], oq=p["oq"], jitter=p["jitter"], shimmer=p["shimmer"]))
+    return seq(parts, (0.02, 0.08), rng)
+
+
+@sfx("creature/riekling/ambient")
+def riekling_ambient(rng, v):
+    return reverb(rng, sat(gabble(rng, "riekling", int(rng.integers(4, 8))), 1.6), 0.5, 0.14)
+
+
+# ash spawn -----------------------------------------------------------------------------------
+@sfx("creature/ash_spawn/ambient")
+def ash_spawn_ambient(rng, v):
+    x = vocal(rng, "ash_spawn", "ambient", v)
+    n = len(x)
+    grit = crackle(rng, n, 160, 1500, 6000, env=curve(n, [(0, 0.2), (0.5, 1), (1, 0.1)]))
+    return unit(x) + 0.35 * unit(grit)
+
+
+@sfx("creature/ash_spawn/emerge")
+def ash_spawn_emerge(rng, v):
+    n = ns(1.8)
+    e = curve(n, [(0, 0), (0.6, 1), (0.85, 0.7), (1, 0)])
+    pour = crackle(rng, n, 900, 900, 5000, env=e, alpha=2.5) + 0.4 * bp(pink(rng, n), 300, 2500) * e
+    groan = beast(rng, 1.5, [(0, 70), (0.6, 95), (1, 80)], [(0, "u"), (0.5, "o"), (1, "a")], 0.9,
+                  [(0, 0), (0.5, 0.6), (0.9, 1), (1, 0)], breath=2.5, sub=0.4, rattle=0.5, rattle_hz=16, oq=0.4)
+    rumble = lp(brown(rng, n), 150) * e
+    return reverb(rng, unit(pour) + 0.6 * unit(pad(groan, n)) + 0.4 * unit(rumble), 0.8, 0.2)
+
+
+@sfx("creature/ash_spawn/death")
+def ash_spawn_death(rng, v):
+    n = ns(1.6)
+    g = call(rng, "ash_spawn", "death", 1.0)
+    crumble = crackle(rng, n, 1500, 800, 5000, env=curve(n, [(0, 0), (0.3, 1), (1, 0)]), alpha=2.2)
+    sigh = whoosh(rng, n, [(0, 1500), (1, 300)], 0.8, env_ad(n, 0.2, 0.5))
+    return reverb(rng, lay((g, 1.0), (crumble, 0.7), (sigh, 0.4)), 0.7, 0.18)
+
+
+# gargoyle ------------------------------------------------------------------------------------
+@sfx("creature/gargoyle/ambient")
+def gargoyle_ambient(rng, v):
+    g = vocal(rng, "gargoyle", "ambient", v)
+    gr = stone_grind(rng, len(g) / SR, [(0, rng.uniform(25, 40)), (0.5, rng.uniform(50, 80)), (1, rng.uniform(25, 40))])
+    return lay((g, 1.0), (gr, 0.5))
+
+
+@sfx("creature/gargoyle/roar")
+def gargoyle_roar(rng, v):
+    r = vocal(rng, "gargoyle", "roar", v)
+    gr = stone_grind(rng, 0.8, [(0, 60), (1, 30)])
+    return lay((r, 1.0), (gr, 0.4))
+
+
+@sfx("creature/gargoyle/wake")
+def gargoyle_wake(rng, v):
+    n = ns(2.0)
+    gr = stone_grind(rng, 1.7, [(0, 18), (0.4, 45), (0.8, 30), (1, 15)])
+    deb = debris(rng, n, 0.1, 40, 0.6, 1.2)
+    crack = modal_hit(rng, 260, 0.6, 0.05, STONE, 0.9, 0.004)
+    y = lay((pad(gr, n), 1.0), (deb, 0.5))
+    place(y, unit(crack), 0.05, 0.8)
+    place(y, unit(call(rng, "gargoyle", "grunt", 0.6)), 1.3, 0.7)
+    return reverb(rng, y, 0.9, 0.22)
+
+
+@sfx("creature/gargoyle/hurt")
+def gargoyle_hurt(rng, v):
+    n = ns(0.7)
+    crack = modal_hit(rng, rng.uniform(300, 450), 0.7, 0.05, STONE, 0.9, 0.004)
+    g = call(rng, "gargoyle", "hurt", 0.45)
+    return reverb(rng, lay((crack, 1.0), (bp(white(rng, n), 1200, 6000) * np.exp(-tline(n) / 0.02), 0.5), (g, 0.7)), 0.6, 0.18)
+
+
+@sfx("creature/gargoyle/death")
+def gargoyle_death(rng, v):
+    n = ns(2.4)
+    y = np.zeros(n)
+    place(y, unit(call(rng, "gargoyle", "death", 1.2)), 0.0, 0.8)
+    t = 0.6
+    for _ in range(int(rng.integers(5, 9))):
+        place(y, unit(modal_hit(rng, rng.uniform(220, 700), 0.4, rng.uniform(0.03, 0.08), STONE, 0.9, 0.004)), t,
+              rng.uniform(0.4, 0.9))
+        t += rng.uniform(0.06, 0.18)
+    y += 0.5 * unit(debris(rng, n, 0.65, 50, 0.4, 0.8))
+    y += 0.7 * unit(ground_impact(rng, n, 1.1, 0.5, 15))
+    return reverb(rng, y, 0.9, 0.22)
+
+
+# wisps ---------------------------------------------------------------------------------------
+def chimes(rng, n, base, count, spread, t0=0.0, down=False):
+    y = np.zeros(n)
+    scale = np.array([1, 9 / 8, 6 / 5, 3 / 2, 8 / 5, 2]) * base
+    t = t0
+    for i in range(count):
+        f = float(scale[(count - 1 - i) % len(scale)] if down else rng.choice(scale)) * (0.5 ** (i // 6) if down else 1)
+        d = rng.uniform(0.3, 0.7)
+        c = ping(f, d, ns(d * 5)) + 0.25 * ping(f * 2.76, d * 0.4, ns(d * 5)) + 0.6 * ping(f * 1.003, d, ns(d * 5))
+        place(y, c, t, rng.uniform(0.5, 1.0))
+        t += rng.uniform(0.3, 1.0) * spread
+    return y
+
+
+@sfx("creature/wisp/hurt")
+def wisp_hurt(rng, v):
+    n = ns(1.0)
+    y = chimes(rng, n, rng.uniform(1300, 1700), 4, 0.06)
+    y = y * (1 + 0.6 * np.sign(np.sin(TAU * 31 * tline(n))))   # a flickering, dissonant stutter
+    zap = arc(rng, n, 2500) * env_ad(n, 0.002, 0.06)
+    return reverb(rng, unit(y) + 0.3 * unit(zap), 1.2, 0.35, damp=6000)
+
+
+@sfx("creature/wisp/death")
+def wisp_death(rng, v):
+    n = ns(2.6)
+    y = chimes(rng, n, rng.uniform(900, 1200), 7, 0.25, down=True)
+    air = whoosh(rng, n, [(0, 4000), (1, 800)], 1.2, env_ad(n, 0.05, 0.8))
+    return reverb(rng, unit(y) + 0.2 * unit(air), 2.0, 0.45, damp=6000)
+
+
+@sfx("creature/will_o_wisp/ambient")
+def will_o_wisp_ambient(rng, v):
+    n = ns(2.0)
+    y = chimes(rng, n, rng.uniform(600, 800), int(rng.integers(4, 7)), 0.5)
+    f = rng.uniform(200, 240)
+    hum = (osc(np.full(n, f), (1, 0.3)) + osc(np.full(n, f * 1.007), (1, 0.3))) * curve(n, [(0, 0), (0.4, 1), (1, 0)])
+    hum *= 1 + 0.4 * np.sin(TAU * 3.0 * tline(n))
+    return reverb(rng, unit(y) + 0.25 * unit(hum) + 0.05 * unit(bp(white(rng, n), 2000, 6000)), 2.2, 0.5, damp=6000)
+
+
+@sfx("creature/will_o_wisp/hurt")
+def will_o_wisp_hurt(rng, v):
+    n = ns(0.9)
+    y = chimes(rng, n, rng.uniform(700, 900), 3, 0.05)
+    return reverb(rng, unit(y) + 0.6 * unit(arc(rng, n, 3500) * env_ad(n, 0.002, 0.1)), 1.0, 0.3, damp=6000)
+
+
+@sfx("creature/will_o_wisp/death")
+def will_o_wisp_death(rng, v):
+    n = ns(2.6)
+    y = chimes(rng, n, rng.uniform(500, 650), 6, 0.3, down=True)
+    puff = burst(rng, n, 500, 3000, 0.005, 0.15)
+    return reverb(rng, unit(y) + 0.4 * unit(puff), 2.0, 0.45)
+
+
+# death hound ---------------------------------------------------------------------------------
+@sfx("creature/death_hound/roar")
+def death_hound_roar(rng, v):
+    return reverb(rng, sat(howl_dark(rng, rng.uniform(1.8, 2.2), rng.uniform(250, 290), 0.45), 1.6), 1.8, 0.35, damp=2500)
+
+
+# dwarven ballista ----------------------------------------------------------------------------
+@sfx("creature/dwarven_ballista/cast")
+def ballista_cast(rng, v):
+    n = ns(1.2)
+    y = np.zeros(n)
+    t = 0.0
+    for i in range(9):    # the winch ratchets back
+        place(y, unit(modal_hit(rng, rng.uniform(1800, 2600), 0.08, 0.01, METAL, 0.7, 0.001)), t, 0.35)
+        t += 0.045 * 0.93 ** i
+    twang = osc(curve(ns(0.5), [(0, 190), (1, 150)], log=True), (1, 0.6, 0.4, 0.3, 0.2)) * env_ad(ns(0.5), 0.002, 0.12)
+    place(y, unit(twang), t + 0.05, 0.8)
+    place(y, unit(modal_hit(rng, 340, 0.6, 0.15, METAL, 0.85)), t + 0.05, 0.8)
+    place(y, unit(whoosh(rng, ns(0.3), [(0, 2500), (1, 600)], 1.0, env_ad(ns(0.3), 0.005, 0.08))), t + 0.07, 0.5)
+    place(y, unit(bp(white(rng, ns(0.3)), 300, 1200) * env_ad(ns(0.3), 0.01, 0.06)), t + 0.25, 0.4)
+    return reverb(rng, y, 0.8, 0.22)
+
+
+# dragon priest -------------------------------------------------------------------------------
+@sfx("creature/dragon_priest/ambient")
+def dragon_priest_ambient(rng, v):
+    paths = [[(0, "o"), (1, "u")], [(0, "a"), (1, "e")], [(0, "ii"), (1, "a")], [(0, "u"), (1, "o")]]
+    parts = []
+    for i in range(int(rng.integers(2, 4))):
+        d = rng.uniform(0.25, 0.5)
+        w = whisper(rng, d, paths[(i + v) % 4], rng.uniform(90, 120))
+        if rng.random() < 0.6:   # a sibilant on the end
+            m = ns(rng.uniform(0.1, 0.2))
+            w = np.concatenate([w, 0.4 * unit(hiss(rng, m, 4000, 9000)) * np.max(np.abs(w))])
+        parts.append(w)
+    x = seq(parts, (0.06, 0.18), rng)
+    n = len(x)
+    drone = osc(np.full(n, 55.0), (1, 0.5, 0.3)) * curve(n, [(0, 0), (0.3, 1), (1, 0)]) * 0.05
+    return reverb(rng, unit(x) + drone, 1.8, 0.4, damp=4000)
+
+
+@sfx("creature/dragon_priest/cast")
+def dragon_priest_cast(rng, v):
+    n = ns(1.6)
+    chant = beast(rng, 1.4, [(0, 82), (0.4, 92), (1, 76)], [(0, "o"), (0.5, "a" if v == 1 else "u"), (1, "o")], 0.95,
+                  [(0, 0), (0.15, 1), (0.8, 0.8), (1, 0)], breath=1.5, oq=0.55, jitter=0.02, sub=0.3)
+    w = whisper(rng, 1.2, [(0, "a"), (0.5, "o"), (1, "u")], 100)
+    rise = whoosh(rng, n, [(0, 400), (0.8, 3500), (1, 2000)], 1.5, curve(n, [(0, 0), (0.8, 1), (1, 0)]))
+    sh = scatter(rng, n, 14, 0.5, 0.4, 2000, 5000, (0.1, 0.3), GLASS[:2], 1.0)
+    return reverb(rng, lay((chant, 0.7), (w, 0.6), (rise, 0.4), (sh, 0.2)), 1.8, 0.35)
+
+
+@sfx("creature/dragon_priest/hurt")
+def dragon_priest_hurt(rng, v):
+    n = ns(0.6)
+    w = whisper(rng, 0.5, [(0, "a"), (1, "ae")], 140)
+    return reverb(rng, lay((w, 1.0), (hiss(rng, n, 3000, 9000, env_ad(n, 0.005, 0.15)), 0.6),
+                           (crackle(rng, n, 200, 2000, 6000, env=env_ad(n, 0.01, 0.2)), 0.3)), 1.2, 0.35)
+
+
+@sfx("creature/dragon_priest/death")
+def dragon_priest_death(rng, v):
+    n = ns(2.8)
+    wail = beast(rng, 2.3, [(0, 280), (0.2, 330), (1, 85)], [(0, "a"), (0.5, "o"), (1, "u")], 1.0,
+                 [(0, 0), (0.1, 1), (0.6, 0.6), (1, 0)], breath=curve(ns(2.3), [(0, 1.5), (1, 6.0)]), oq=0.5, jitter=0.03,
+                 shimmer=0.2, flutter=0.05)
+    wind = whoosh(rng, n, [(0, 600), (0.4, 2200), (1, 300)], 1.2, curve(n, [(0, 0), (0.3, 1), (1, 0)]))
+    souls = crackle(rng, n, 120, 1500, 6000, env=curve(n, [(0, 0), (0.4, 1), (1, 0)]))
+    return reverb(rng, lay((wail, 1.0), (wind, 0.5), (souls, 0.2)), 2.4, 0.45)
+
+
+# dremora -------------------------------------------------------------------------------------
+def demonic(rng, x):
+    """Add an octave-down shadow under a voice (the dremora's double voice)."""
+    low = stretch(x, 0.5)[:len(x)]
+    return unit(x) + 0.45 * unit(lp(pad(low, len(x)), 900))
+
+
+@sfx("creature/dremora/ambient")
+def dremora_ambient(rng, v):
+    a = call(rng, "dremora", "grunt", rng.uniform(0.5, 0.75), path=[(0, "uh"), (0.6, "er"), (1, "m")])
+    b = call(rng, "dremora", "grunt", rng.uniform(0.35, 0.5), f_mul=rng.uniform(0.9, 1.1), path=[(0, "a"), (1, "uh")])
+    return reverb(rng, sat(demonic(rng, seq([a, b] if v == 1 else [b, a], (0.1, 0.25), rng)), 1.7), 0.7, 0.18)
+
+
+@sfx("creature/dremora/attack")
+def dremora_attack(rng, v):
+    x = call(rng, "dremora", "hurt", rng.uniform(0.25, 0.35), f_mul=1.3, path=[(0, "a" if v == 1 else "ah"), (1, "uh")], oq=0.4)
+    return reverb(rng, sat(demonic(rng, x), 2.4), 0.5, 0.15)
+
+
+@sfx("creature/dremora/roar")
+def dremora_roar(rng, v):
+    x = call(rng, "dremora", "roar", 1.4, path=[(0, "a"), (0.3, "ah"), (0.8, "a"), (1, "o")])
+    return reverb(rng, sat(demonic(rng, x), 2.3), 1.0, 0.25)
+
+
+@sfx("creature/dremora/hurt")
+def dremora_hurt(rng, v):
+    return reverb(rng, sat(demonic(rng, call(rng, "dremora", "hurt")), 2.0), 0.6, 0.15)
+
+
+@sfx("creature/dremora/death")
+def dremora_death(rng, v):
+    x = demonic(rng, call(rng, "dremora", "death"))
+    n = len(x) + ns(0.5)
+    fire = flame(rng, n, 1200, 0.3, 40) * curve(n, [(0, 0), (0.5, 0.3), (0.85, 1), (1, 0)])
+    return reverb(rng, lay((pad(x, n), 1.0), (fire, 0.35)), 0.8, 0.2)
+
+
+# atronachs -----------------------------------------------------------------------------------
+@sfx("creature/flame_atronach/ambient")
+def flame_atronach_ambient(rng, v):
+    n = ns(rng.uniform(1.4, 1.8))
+    e = curve(n, [(0, 0), (0.3, 1), (0.7, 0.8), (1, 0)])
+    f = flame(rng, n, rng.uniform(1300, 1800), 0.4, 90) * e
+    breathv = beast(rng, n / SR, [(0, 210), (0.5, 240), (1, 190)], [(0, "a"), (1, "ae")], 1.15,
+                    [(0, 0), (0.4, 1), (1, 0)], breath=4.0, oq=0.6, jitter=0.03)
+    sw = whoosh(rng, n, [(0, 300), (0.4, 1600), (1, 500)], 0.8, e)
+    return reverb(rng, unit(f) + 0.3 * unit(breathv) + 0.4 * unit(sw), 0.6, 0.15)
+
+
+@sfx("creature/flame_atronach/hurt")
+def flame_atronach_hurt(rng, v):
+    n = ns(0.6)
+    siz = crackle(rng, n, 1500, 2500, 9000, env=env_ad(n, 0.005, 0.18)) + hiss(rng, n, 3000, 9000, env_ad(n, 0.005, 0.15))
+    gasp = beast(rng, 0.35, [(0, 300), (0.3, 380), (1, 260)], [(0, "ae"), (1, "a")], 1.15, breath=1.5, oq=0.5)
+    return reverb(rng, lay((siz, 1.0), (gasp, 0.6)), 0.5, 0.15)
+
+
+@sfx("creature/flame_atronach/death")
+def flame_atronach_death(rng, v):
+    n = ns(1.6)
+    rise = whoosh(rng, n, [(0, 300), (0.25, 2500), (1, 400)], 0.8, curve(n, [(0, 0), (0.25, 1), (0.3, 0.6), (1, 0)]))
+    blast = tvf(white(rng, n), curve(n, [(0, 6000), (0.4, 400), (1, 250)], log=True), 0.7, "lp") * env_ad(n, 0.25, 0.2)
+    bm = np.concatenate([np.zeros(ns(0.25)), boom(n - ns(0.25), 90, 35, 0.06, 0.3)])
+    tail = flame(rng, n, 1400, 0.4, 120) * curve(n, [(0, 0), (0.3, 1), (1, 0)])
+    return reverb(rng, sat(unit(rise) * 0.6 + unit(blast) + 0.8 * unit(bm) + 0.5 * unit(tail), 1.6), 1.1, 0.22)
+
+
+@sfx("creature/frost_atronach/ambient")
+def frost_atronach_ambient(rng, v):
+    dur = rng.uniform(1.3, 1.7)
+    n = ns(dur)
+    gr = ice_grind(rng, dur, [(0, rng.uniform(25, 40)), (0.5, rng.uniform(60, 90)), (1, rng.uniform(25, 35))])
+    groan = beast(rng, dur, [(0, 52), (0.5, 60), (1, 48)], [(0, "u"), (0.5, "o"), (1, "u")], 0.6,
+                  [(0, 0), (0.3, 1), (1, 0)], breath=0.8, sub=0.3, rattle=0.4, rattle_hz=12, oq=0.5)
+    tink = scatter(rng, n, 10, 0.2, 0.5, 3000, 8000, (0.03, 0.1), GLASS[:2], 1.0)
+    return reverb(rng, unit(gr) + 0.6 * unit(groan) + 0.25 * unit(tink), 1.0, 0.25, damp=5000)
+
+
+@sfx("creature/frost_atronach/attack")
+def frost_atronach_attack(rng, v):
+    groan = beast(rng, 0.6, [(0, 60), (0.3, 80), (1, 55)], [(0, "o"), (1, "a")], 0.6, breath=0.8, sub=0.4, rattle=0.5, rattle_hz=14)
+    return reverb(rng, lay((groan, 1.0), (ice_crack(rng, ns(0.4)), 0.5)), 0.7, 0.2, damp=5000)
+
+
+@sfx("creature/frost_atronach/hurt")
+def frost_atronach_hurt(rng, v):
+    groan = beast(rng, 0.5, [(0, 70), (0.3, 90), (1, 60)], [(0, "o"), (1, "u")], 0.6, breath=0.8, sub=0.4, rattle=0.5, rattle_hz=14)
+    return reverb(rng, lay((ice_crack(rng, ns(0.5)), 1.0), (groan, 0.5)), 0.8, 0.25, damp=6000)
+
+
+@sfx("creature/frost_atronach/step")
+def frost_atronach_step(rng, v):
+    n = ns(0.35)
+    crunch = crackle(rng, n, 2500, 1500, 8000, env=env_ad(n, 0.003, 0.07), alpha=2.5)
+    thud = lp(white(rng, n), 200) * env_ad(n, 0.003, 0.05)
+    return unit(crunch) + 0.7 * unit(thud) + 0.2 * unit(scatter(rng, n, 4, 0.01, 0.05, 3000, 7000, (0.02, 0.05), GLASS[:2]))
+
+
+@sfx("creature/frost_atronach/death")
+def frost_atronach_death(rng, v):
+    n = ns(2.2)
+    y = ice_crack(rng, n)
+    y += 0.9 * unit(scatter(rng, n, 90, 0.03, 0.35, 2000, 9500, (0.02, 0.18), GLASS[:3], 0.7))
+    t = 0.3
+    for _ in range(5):
+        place(y, unit(ground_impact(rng, ns(0.8), 0.0, 0.35, 8)), t, rng.uniform(0.3, 0.6))
+        t += rng.uniform(0.12, 0.3)
+    return reverb(rng, y, 1.2, 0.28, damp=5500)
+
+
+@sfx("creature/storm_atronach/ambient")
+def storm_atronach_ambient(rng, v):
+    dur = rng.uniform(1.6, 2.2)
+    n = ns(dur)
+    rum = lp(brown(rng, n), 160) * curve(n, [(0, 0), (0.3, 1), (0.7, 0.8), (1, 0)])
+    a = arc(rng, n, 1500, rng.uniform(90, 120), 0.5) * np.clip(wander(rng, n, 4), 0, None) ** 2
+    gr = stone_grind(rng, dur, [(0, 30), (0.5, 55), (1, 30)])
+    zap = np.zeros(n)
+    for _ in range(int(rng.integers(1, 4))):
+        m = ns(0.2)
+        place(zap, unit(arc(rng, m, 6000) * env_ad(m, 0.001, 0.04)), rng.uniform(0.1, dur - 0.3))
+    return reverb(rng, unit(rum) + 0.7 * unit(a) + 0.5 * unit(gr) + 1.0 * zap, 1.2, 0.3)
+
+
+@sfx("creature/storm_atronach/hurt")
+def storm_atronach_hurt(rng, v):
+    n = ns(0.6)
+    return reverb(rng, lay((modal_hit(rng, rng.uniform(250, 380), 0.6, 0.05, STONE, 0.9, 0.004), 1.0),
+                           (arc(rng, n, 5000) * env_ad(n, 0.001, 0.08), 0.7)), 0.8, 0.22)
+
+
+@sfx("creature/storm_atronach/death")
+def storm_atronach_death(rng, v):
+    n = ns(2.6)
+    crack = hp(white(rng, n), 1200) * np.exp(-tline(n) / 0.006)
+    bm = boom(n, 95, 30, 0.08, 0.6)
+    rum = lp(brown(rng, n), 140) * env_ad(n, 0.05, 0.9)
+    y = unit(crack) + 0.8 * unit(bm) + 0.8 * unit(rum)
+    t = 0.35
+    for _ in range(int(rng.integers(6, 10))):
+        place(y, unit(modal_hit(rng, rng.uniform(200, 600), 0.4, 0.05, STONE, 0.9, 0.004)), t, rng.uniform(0.3, 0.7))
+        t += rng.uniform(0.05, 0.2)
+    y += 0.4 * unit(debris(rng, n, 0.4, 40, 0.5))
+    return reverb(rng, sat(y, 1.5), 1.5, 0.3)
+
+
+# scamp / imp ---------------------------------------------------------------------------------
+@sfx("creature/scamp/ambient")
+def scamp_ambient(rng, v):
+    p = BEASTS["scamp"]
+    parts = []
+    k = int(rng.integers(5, 9))
+    b = p["f0"] * rng.uniform(0.95, 1.15)
+    for i in range(k):
+        f = b * (1.25 - 0.4 * i / k if v == 1 else 0.95 + 0.3 * i / k)
+        parts.append(beast(rng, rng.uniform(0.06, 0.09), [(0, f), (0.4, f * 1.15), (1, f * 0.9)], [(0, "a"), (1, "ah")],
+                           p["scale"], [(0, 0), (0.15, 1), (1, 0)], breath=1.2, sub=0.3, oq=0.45, jitter=0.03))
+    return reverb(rng, sat(seq(parts, (0.035, 0.06), rng), 1.8), 0.5, 0.14)
+
+
+@sfx("creature/scamp/roar")
+def scamp_roar(rng, v):
+    x = call(rng, "scamp", "hurt", 0.8, f_mul=1.4, path=[(0, "ii"), (0.4, "ae"), (1, "a")])
+    return reverb(rng, sat(x, 2.4), 0.6, 0.16)
+
+
+@sfx("creature/imp/ambient")
+def imp_ambient(rng, v):
+    n = ns(1.2)
+    parts = [squeak(rng, rng.uniform(0.05, 0.11), [(0, f), (0.5, f * 1.3), (1, f * 0.95)], 0.3)
+             for f in rng.uniform(900, 1500, int(rng.integers(3, 6)))]
+    gig = pad(seq(parts, (0.03, 0.09), rng), n)
+    wings = wingbeats(rng, n, 18, 300, 1500, 0.9) * curve(n, [(0, 0.3), (0.5, 1), (1, 0.3)])
+    return reverb(rng, unit(gig) + 0.45 * unit(wings), 0.5, 0.14)
+
+
+# cliff racer ---------------------------------------------------------------------------------
+@sfx("creature/cliff_racer/ambient")
+def cliff_racer_ambient(rng, v):
+    b = rng.uniform(640, 760)
+    a = screech(rng, rng.uniform(1.1, 1.4), b, rng.uniform(1.4, 1.6), rng.uniform(14, 19), 0.06)
+    if v == 2:
+        a = seq([a, 0.7 * screech(rng, rng.uniform(0.5, 0.7), b * 1.1, 1.35, 18, 0.07)], (0.12, 0.2), rng)
+    return reverb(rng, a, 1.0, 0.25, damp=5000)
+
+
+@sfx("creature/cliff_racer/attack")
+def cliff_racer_attack(rng, v):
+    n = ns(0.9)
+    s = screech(rng, 0.7, rng.uniform(800, 900), 1.6, 20, 0.08)
+    dive = whoosh(rng, n, [(0, 600), (0.6, 2600), (1, 900)], 1.0, curve(n, [(0, 0), (0.6, 1), (1, 0)]))
+    return reverb(rng, lay((s, 1.0), (dive, 0.4)), 0.7, 0.2, damp=5000)
+
+
+@sfx("creature/cliff_racer/roar")
+def cliff_racer_roar(rng, v):
+    b = rng.uniform(600, 700)
+    x = seq([screech(rng, 0.45, b * 1.2, 1.3, 18, 0.05), screech(rng, 1.4, b, 1.7, 15, 0.09)], (0.08, 0.12), rng)
+    return reverb(rng, x, 1.2, 0.28, damp=5000)
+
+
+@sfx("creature/cliff_racer/hurt")
+def cliff_racer_hurt(rng, v):
+    return reverb(rng, screech(rng, 0.35, rng.uniform(900, 1000), 1.3, 24, 0.1, [(0, "ae"), (1, "a")]), 0.6, 0.16)
+
+
+@sfx("creature/cliff_racer/death")
+def cliff_racer_death(rng, v):
+    n = ns(1.6)
+    s = screech(rng, 1.0, 760, 1.2, 12, 0.08, [(0, "ae"), (0.5, "a"), (1, "u")])
+    s = s * curve(len(s), [(0, 1), (0.5, 0.8), (1, 0.2)])
+    flaps = wingbeats(rng, n, 7, 200, 1200, 1.0) * curve(n, [(0, 0), (0.3, 1), (1, 0)])
+    thud = np.concatenate([np.zeros(ns(1.3)), lp(white(rng, ns(0.3)), 300) * env_ad(ns(0.3), 0.003, 0.05)])
+    return reverb(rng, lay((s, 1.0), (flaps, 0.35), (thud, 0.4)), 0.8, 0.2)
+
+
+# guar / kagouti / alit / nix-hound -----------------------------------------------------------
+@sfx("creature/guar/ambient")
+def guar_ambient(rng, v):
+    parts = [call(rng, "guar", "grunt", rng.uniform(0.18, 0.28), f_mul=rng.uniform(0.9, 1.3),
+                  path=[(0, "uh"), (0.5, "er"), (1, "o")], rattle=0.5, rattle_hz=34) for _ in range(int(rng.integers(2, 4)))]
+    if v == 2:
+        parts.append(0.6 * unit(huff(rng, 0.22)))
+    return reverb(rng, sat(seq(parts, (0.05, 0.14), rng), 1.8), 0.5, 0.14)
+
+
+@sfx("creature/kagouti/ambient")
+def kagouti_ambient(rng, v):
+    parts = [0.6 * unit(huff(rng, rng.uniform(0.12, 0.2))) for _ in range(int(rng.integers(1, 3)))]
+    parts.append(unit(call(rng, "kagouti", "grunt", rng.uniform(0.3, 0.45), path=[(0, "o"), (1, "uh")])))
+    if v == 2:
+        parts = parts[::-1]
+    return reverb(rng, sat(seq(parts, (0.05, 0.15), rng), 1.9), 0.5, 0.14)
+
+
+@sfx("creature/kagouti/roar")
+def kagouti_roar(rng, v):
+    r = call(rng, "kagouti", "roar", 1.3)
+    sq = call(rng, "kagouti", "hurt", 0.8, f_mul=2.2, path=[(0, "ae"), (1, "a")], breath=1.5)
+    return reverb(rng, sat(lay((r, 1.0), (sq, 0.35)), 2.3), 0.9, 0.2)
+
+
+@sfx("creature/alit/attack")
+def alit_attack(rng, v):
+    sn = call(rng, "alit", "hurt", 0.3, f_mul=0.9, path=[(0, "a"), (1, "uh")], rattle=0.7)
+    clack = modal_hit(rng, rng.uniform(700, 1000), 0.2, 0.03, WOOD, 0.8)
+    y = pad(unit(sn), len(sn) + ns(0.1))
+    place(y, unit(clack), len(sn) / SR * 0.7, 0.8)
+    return reverb(rng, sat(y, 2.0), 0.4, 0.12)
+
+
+@sfx("creature/nix_hound/ambient")
+def nix_hound_ambient(rng, v):
+    n = ns(rng.uniform(0.8, 1.1))
+    f = curve(n, [(0, rng.uniform(1700, 2000)), (0.4, rng.uniform(2300, 2700)), (1, rng.uniform(1600, 1900))], log=True)
+    whistle = osc(f, (1, 0.25, 0.1)) * (0.5 + 0.5 * np.sin(TAU * rng.uniform(35, 45) * tline(n))) ** 2
+    whistle *= curve(n, [(0, 0), (0.1, 1), (0.7, 0.7), (1, 0)])
+    ch = pad(chitter(rng, int(rng.integers(6, 12)), rng.uniform(25, 35), 2000, 4500), n)
+    g = pad(call(rng, "nix_hound", "grunt", 0.3, path=[(0, "e"), (1, "uh")]), n)
+    return reverb(rng, unit(whistle) + 0.5 * unit(ch) + 0.4 * unit(g), 0.6, 0.15)
+
+
+@sfx("creature/nix_hound/roar")
+def nix_hound_roar(rng, v):
+    n = ns(1.0)
+    sh = tvf(white(rng, n), curve(n, [(0, 1800), (0.3, 3400), (1, 1500)], log=True), 9.0, "bp")
+    sh *= curve(n, [(0, 0), (0.1, 1), (0.7, 0.8), (1, 0)])
+    sq = osc(curve(n, [(0, 1500), (0.3, 2600), (1, 1300)], log=True), (1, 0.3)) * curve(n, [(0, 0), (0.1, 1), (1, 0)])
+    return reverb(rng, sat(unit(sh) + 0.6 * unit(sq), 1.8), 0.8, 0.2)
+
+
+# netch / silt strider ------------------------------------------------------------------------
+def deep_call(rng, dur, pts, path, scale, oq=0.6, tilt=-0.6, breath=0.2, sub=0.1):
+    n = ns(dur)
+    f0 = curve(n, pts, log=True) * (1 + 0.006 * wander(rng, n, 3))
+    amp = curve(n, [(0, 0), (0.15, 0.9), (0.5, 1), (0.85, 0.8), (1, 0)])
+    return voice(rng, f0, tract(n, path, scale), amp, breath=breath, tilt=tilt, oq=oq, sk=0.7, jitter=0.006,
+                 shimmer=0.04, sub=sub, src_lp=3000)
+
+
+@sfx("creature/netch/ambient")
+def netch_ambient(rng, v):
+    b = rng.uniform(46, 54)
+    pts = [(0, b), (0.35, b * 1.3), (0.7, b * 1.22), (1, b * 0.9)] if v == 1 else \
+          [(0, b * 1.1), (0.25, b * 0.95), (0.6, b * 1.35), (1, b)]
+    x = deep_call(rng, rng.uniform(2.0, 2.5), pts, [(0, "u"), (0.4, "o"), (0.8, "o"), (1, "u")], 0.5)
+    n = len(x)
+    # the whale-like song an octave or three above the hum: what carries on small speakers
+    song = osc(curve(n, [(p, f * 6.02) for p, f in pts], log=True) * (1 + 0.004 * np.sin(TAU * 5 * tline(n))), (1, 0.35, 0.12))
+    song = bp(song, 200, 1600) * curve(n, [(0, 0), (0.3, 1), (0.8, 0.7), (1, 0)])
+    return reverb(rng, unit(x) + 0.3 * unit(song), 2.4, 0.4, damp=2000)
+
+
+@sfx("creature/netch/hurt")
+def netch_hurt(rng, v):
+    x = deep_call(rng, 0.8, [(0, 70), (0.25, 95), (1, 60)], [(0, "o"), (1, "u")], 0.55, oq=0.5, tilt=-0.2, breath=0.6, sub=0.3)
+    return reverb(rng, x, 1.2, 0.3, damp=2200)
+
+
+@sfx("creature/netch/death")
+def netch_death(rng, v):
+    n = ns(2.6)
+    air = tvf(white(rng, n), curve(n, [(0, 3500), (1, 250)], log=True), 1.8, "bp") * curve(n, [(0, 0), (0.05, 1), (0.7, 0.5), (1, 0)])
+    groan = deep_call(rng, 2.2, [(0, 80), (0.2, 70), (1, 32)], [(0, "o"), (1, "u")], 0.5, breath=0.8, sub=0.3)
+    flap = lp(white(rng, n), 300) * np.clip(np.sin(TAU * curve(n, [(0, 9), (1, 3)]) * tline(n)), 0, None) ** 4 * \
+        curve(n, [(0, 0), (0.2, 0.6), (1, 0)])
+    return reverb(rng, lay((air, 0.6), (groan, 1.0), (flap, 0.3)), 1.8, 0.35)
+
+
+@sfx("creature/silt_strider/ambient")
+def silt_strider_ambient(rng, v):
+    b = rng.uniform(36, 42)
+    pts = [(0, b * 0.9), (0.2, b * 1.15), (0.6, b * 1.1), (1, b * 0.8)] if v == 1 else \
+          [(0, b), (0.3, b * 1.3), (0.45, b * 1.05), (0.75, b * 1.25), (1, b * 0.85)]
+    x = deep_call(rng, rng.uniform(2.4, 2.9), pts, [(0, "er"), (0.3, "o"), (0.7, "o"), (1, "u")], 0.42, oq=0.35, tilt=0.3,
+                  breath=0.3, sub=0.25)
+    n = len(x)
+    sub = osc(curve(n, [(p, f * 0.5) for p, f in pts], log=True), (1, 0.3)) * curve(n, [(0, 0), (0.2, 1), (0.9, 0.8), (1, 0)])
+    # a brassy, nasal horn an octave and a fifth up, so the call reads as a call and not only as rumble
+    horn = deep_call(rng, n / SR, [(p, f * 3.0) for p, f in pts], [(0, "er"), (0.4, "a"), (1, "o")], 0.7, oq=0.3, tilt=0.8,
+                     breath=0.2, sub=0.15)
+    return reverb(rng, sat(unit(x) + 0.5 * unit(sub) + 0.45 * unit(pad(horn, n)), 1.8), 3.0, 0.42, damp=1800)
+
+
+@sfx("creature/silt_strider/hurt")
+def silt_strider_hurt(rng, v):
+    x = deep_call(rng, 1.2, [(0, 55), (0.2, 80), (1, 45)], [(0, "o"), (0.5, "a"), (1, "u")], 0.45, oq=0.4, tilt=0.2,
+                  breath=0.6, sub=0.35)
+    return reverb(rng, sat(x, 1.6), 1.8, 0.35, damp=2000)
+
+
+@sfx("creature/silt_strider/death")
+def silt_strider_death(rng, v):
+    n = ns(3.4)
+    x = deep_call(rng, 2.6, [(0, 60), (0.15, 72), (1, 24)], [(0, "a"), (0.5, "o"), (1, "u")], 0.42, oq=0.4, tilt=0.1,
+                  breath=curve(ns(2.6), [(0, 0.4), (1, 2.5)]), sub=0.35)
+    y = pad(unit(x), n)
+    y += 0.8 * unit(ground_impact(rng, n, 2.5, 1.0, 30))
+    return reverb(rng, y, 2.4, 0.38, damp=2000)
+
+
+# minotaur / echatere / grazer (bovine) -------------------------------------------------------
+def low(rng, who, dur, path=(("m", 0.0), ("o", 0.3), ("u", 1.0)), f_mul=1.0):
+    p = BEASTS[who]
+    b = p["f0"] * f_mul * rng.uniform(0.92, 1.08)
+    pts = [(0, b * 0.9), (0.25, b * 1.15), (0.7, b * 1.05), (1, b * 0.8)]
+    return beast(rng, dur, pts, [(t, vw) for vw, t in path], p["scale"], [(0, 0), (0.15, 0.9), (0.6, 1), (1, 0)],
+                 breath=p["breath"], sub=p["sub"], rattle=p["rattle"], rattle_hz=p["rattle_hz"], oq=p["oq"],
+                 jitter=p["jitter"], shimmer=p["shimmer"])
+
+
+@sfx("creature/minotaur/ambient")
+def minotaur_ambient(rng, v):
+    parts = [0.7 * unit(huff(rng, rng.uniform(0.2, 0.3))), unit(low(rng, "minotaur", rng.uniform(0.6, 0.9)))]
+    if v == 2:
+        parts.append(0.6 * unit(huff(rng, 0.25)))
+    return reverb(rng, sat(seq(parts, (0.08, 0.2), rng), 1.8), 0.7, 0.18)
+
+
+@sfx("creature/minotaur/roar")
+def minotaur_roar(rng, v):
+    x = call(rng, "minotaur", "roar", 1.6, path=[(0, "m"), (0.15, "o"), (0.5, "a"), (1, "o")])
+    return reverb(rng, sat(x, 2.4), 1.0, 0.22)
+
+
+@sfx("creature/echatere/ambient")
+def echatere_ambient(rng, v):
+    return reverb(rng, sat(low(rng, "echatere", rng.uniform(1.0, 1.4), f_mul=1.0 if v == 1 else 0.9), 1.5), 0.9, 0.2)
+
+
+@sfx("creature/realm_grazer/ambient")
+def realm_grazer_ambient(rng, v):
+    x = low(rng, "realm_grazer", rng.uniform(0.8, 1.1), path=(("m", 0.0), ("u", 0.3), ("o", 1.0)))
+    n = len(x)
+    chirp = osc(curve(n, [(0, 900), (1, 1400)], log=True), (1, 0.2)) * curve(n, [(0, 0), (0.7, 0), (0.8, 1), (1, 0)])
+    return reverb(rng, unit(x) + 0.15 * unit(chirp), 1.0, 0.25)
+
+
+# land dreugh ---------------------------------------------------------------------------------
+def gurgle(rng, n, rate=25.0):
+    y = np.zeros(n)
+    for _ in range(int(rate * n / SR)):
+        d = rng.uniform(0.02, 0.06)
+        m = ns(d)
+        f0 = rng.uniform(250, 900)
+        b = osc(curve(m, [(0, f0), (1, f0 * rng.uniform(1.3, 1.8))], log=True)) * env_ad(m, 0.003, d / 3)
+        place(y, b, rng.uniform(0, n / SR), rng.uniform(0.3, 1.0))
+    return y
+
+
+@sfx("creature/land_dreugh/ambient")
+def land_dreugh_ambient(rng, v):
+    n = ns(rng.uniform(0.8, 1.2))
+    cl = clicks(rng, n, 0.0, int(rng.integers(5, 10)), rng.uniform(15, 25))
+    g = gurgle(rng, n, 30) * curve(n, [(0, 0), (0.3, 1), (1, 0)])
+    return reverb(rng, unit(cl) + 0.6 * unit(g) + 0.3 * unit(pad(chitter(rng, 6, 20, 900, 2000), n)), 0.4, 0.12)
+
+
+@sfx("creature/land_dreugh/roar")
+def land_dreugh_roar(rng, v):
+    n = ns(0.9)
+    ch = pad(chitter(rng, 26, 32, 1000, 2600, (0.004, 0.01)), n)
+    h = hiss(rng, n, 1500, 5000, curve(n, [(0, 0), (0.2, 1), (1, 0)]))
+    return reverb(rng, unit(ch) + 0.6 * unit(h) + 0.4 * unit(gurgle(rng, n, 50)), 0.6, 0.16)
+
+
+# wamasu --------------------------------------------------------------------------------------
+def electric_hum(rng, n, f=110.0):
+    h = osc(np.full(n, f) * (1 + 0.01 * wander(rng, n, 2)), (1, 0.6, 0.45, 0.3, 0.25, 0.2, 0.15))
+    return h * (0.7 + 0.3 * np.clip(wander(rng, n, 6), -1, 1))
+
+
+@sfx("creature/wamasu/ambient")
+def wamasu_ambient(rng, v):
+    g = vocal(rng, "wamasu", "ambient", v)
+    n = len(g)
+    hum = electric_hum(rng, n, rng.uniform(100, 125)) * curve(n, [(0, 0), (0.2, 1), (0.8, 1), (1, 0)])
+    a = arc(rng, n, 600, 110, 0.6) * np.clip(wander(rng, n, 3), 0, None) ** 2
+    return unit(g) + 0.3 * unit(hum) + 0.2 * unit(a)
+
+
+@sfx("creature/wamasu/roar")
+def wamasu_roar(rng, v):
+    r = vocal(rng, "wamasu", "roar", v)
+    n = len(r)
+    a = arc(rng, n, 4000) * curve(n, [(0, 0), (0.25, 1), (0.6, 0.5), (1, 0)])
+    return unit(r) + 0.35 * unit(a)
+
+
+@sfx("creature/wamasu/breath")
+def wamasu_breath(rng, v):
+    n = ns(1.8)
+    e = curve(n, [(0, 0), (0.08, 1), (0.7, 0.9), (1, 0)])
+    a = arc(rng, n, 4500, 120, 0.5) * e
+    hum = electric_hum(rng, n, 120) * e
+    rum = lp(brown(rng, n), 150) * env_ad(n, 0.05, 0.6)
+    return reverb(rng, unit(a) + 0.35 * unit(hum) + 0.5 * unit(rum), 0.9, 0.2)
+
+
+# swamp leviathan / sea serpent ---------------------------------------------------------------
+@sfx("creature/swamp_leviathan/ambient")
+def swamp_leviathan_ambient(rng, v):
+    g = vocal(rng, "swamp_leviathan", "ambient", v)
+    n = len(g)
+    bub = gurgle(rng, n, 18) * curve(n, [(0, 0), (0.5, 1), (1, 0)])
+    return unit(g) + 0.3 * unit(lp(bub, 1200))
+
+
+@sfx("creature/sea_serpent/ambient")
+def sea_serpent_ambient(rng, v):
+    b = rng.uniform(62, 75)
+    pts = [(0, b), (0.3, b * 1.35), (0.65, b * 1.2), (1, b * 0.85)] if v == 1 else [(0, b * 1.2), (0.4, b), (0.7, b * 1.4), (1, b * 0.9)]
+    x = deep_call(rng, rng.uniform(1.8, 2.3), pts, [(0, "u"), (0.3, "o"), (0.6, "a"), (1, "u")], 0.55, oq=0.5, tilt=-0.3,
+                  breath=0.5, sub=0.25)
+    n = len(x)
+    slosh = lp(white(rng, n), 500) * np.clip(1 + wander(rng, n, 2), 0, None) * 0.5
+    return reverb(rng, unit(x) + 0.2 * unit(slosh), 2.0, 0.35, damp=2200)
+
+
+@sfx("creature/sea_serpent/death")
+def sea_serpent_death(rng, v):
+    x = deep_call(rng, 2.3, [(0, 110), (0.2, 95), (1, 40)], [(0, "a"), (0.5, "o"), (1, "u")], 0.55, oq=0.45, tilt=0.0,
+                  breath=1.2, sub=0.35)
+    n = len(x) + ns(0.6)
+    splash = bp(white(rng, n), 300, 5000) * np.concatenate([np.zeros(len(x) - ns(0.3)), env_ad(n - len(x) + ns(0.3), 0.01, 0.35)])
+    return reverb(rng, lay((x, 1.0), (splash, 0.6)), 1.8, 0.35)
+
+
+# hackwing / harpy ----------------------------------------------------------------------------
+@sfx("creature/hackwing/ambient")
+def hackwing_ambient(rng, v):
+    b = rng.uniform(1000, 1200)
+    parts = [screech(rng, rng.uniform(0.35, 0.55), b * rng.uniform(0.95, 1.05), 1.35, 28, 0.04, [(0, "ae"), (1, "a")], 1.5)
+             for _ in range(1 if v == 1 else 3)]
+    return reverb(rng, seq(parts, (0.06, 0.14), rng), 0.9, 0.22, damp=6000)
+
+
+@sfx("creature/harpy/ambient")
+def harpy_ambient(rng, v):
+    n = ns(1.4)
+    s = call(rng, "harpy", "hurt", rng.uniform(0.6, 0.9), f_mul=1.1, path=[(0, "ii"), (0.4, "ae"), (1, "a")])
+    flaps = wingbeats(rng, n, 4, 200, 1400, 1.0) * curve(n, [(0, 0.5), (1, 0.5)])
+    y = pad(unit(s), n) if v == 1 else pad(np.concatenate([np.zeros(ns(0.4)), unit(s)]), n)
+    return reverb(rng, y + 0.3 * unit(flaps), 0.9, 0.22)
+
+
+@sfx("creature/harpy/roar")
+def harpy_roar(rng, v):
+    x = call(rng, "harpy", "roar", 1.4, f_mul=1.2, path=[(0, "ii"), (0.3, "ae"), (0.8, "a"), (1, "ae")])
+    return reverb(rng, sat(x, 2.6), 1.2, 0.28)
+
+
+# senche-tiger / alfiq ------------------------------------------------------------------------
+@sfx("creature/senche_tiger/ambient")
+def senche_ambient(rng, v):
+    dur = rng.uniform(1.0, 1.4)
+    n = ns(dur)
+    amp = [(0, 0), (0.05, 1), (0.3, 0.9), (1, 0)]
+    chuff = formant_bank(white(rng, n), tract(n, [(0, "a"), (1, "o")], 0.7)) * curve(n, amp)
+    growl = beast(rng, dur, [(0, 60), (0.3, 72), (1, 55)], [(0, "a"), (1, "o")], 0.7, amp, breath=0.9, rattle=0.7,
+                  rattle_hz=rng.uniform(20, 26), sub=0.35, oq=0.45)
+    return reverb(rng, sat(0.6 * unit(chuff) + unit(growl), 1.8), 0.6, 0.15)
+
+
+@sfx("creature/senche_tiger/roar")
+def senche_roar(rng, v):
+    x = call(rng, "senche_tiger", "roar", 1.5, path=[(0, "a"), (0.3, "ah"), (0.7, "o"), (1, "u")], rattle=0.6)
+    return reverb(rng, sat(x, 2.4), 1.0, 0.22)
+
+
+@sfx("creature/alfiq/ambient")
+def alfiq_ambient(rng, v):
+    b = rng.uniform(440, 520)
+    dur = rng.uniform(0.5, 0.75)
+    n = ns(dur)
+    x = beast(rng, dur, [(0, b), (0.3, b * 1.35), (1, b * 0.95)], [(0, "m"), (0.2, "ii"), (0.6, "a"), (1, "u")], 1.6,
+              [(0, 0), (0.15, 1), (0.7, 0.8), (1, 0)], breath=0.4, oq=0.55, jitter=0.015, src_lp=7000)
+    if v == 2:   # a rolling trill first
+        x = x * (1 - 0.6 * (tline(n) < dur * 0.35) * (0.5 + 0.5 * np.sin(TAU * 26 * tline(n))))
+    return reverb(rng, x, 0.5, 0.14)
+
+
+@sfx("creature/alfiq/hurt")
+def alfiq_hurt(rng, v):
+    n = ns(0.5)
+    h = formant_bank(white(rng, n), tract(n, "ae", 1.5)) * env_ad(n, 0.01, 0.15)
+    yowl = beast(rng, 0.4, [(0, 600), (0.3, 800), (1, 500)], [(0, "ae"), (1, "a")], 1.6, breath=0.8, oq=0.45)
+    return reverb(rng, lay((h, 0.7), (yowl, 1.0)), 0.5, 0.14)
+
+
+@sfx("creature/alfiq/death")
+def alfiq_death(rng, v):
+    x = beast(rng, 0.9, [(0, 650), (0.2, 720), (1, 300)], [(0, "ii"), (0.4, "a"), (1, "u")], 1.6,
+              [(0, 0), (0.1, 1), (0.6, 0.6), (1, 0)], breath=1.0, oq=0.5, jitter=0.03)
+    return reverb(rng, x, 0.6, 0.16)
+
+
+# indrik --------------------------------------------------------------------------------------
+@sfx("creature/indrik/ambient")
+def indrik_ambient(rng, v):
+    if v == 1:   # a soft, rising trill
+        n = ns(1.0)
+        f = curve(n, [(0, 700), (0.5, 980), (1, 880)], log=True) * (1 + 0.04 * np.sin(TAU * 22 * tline(n)))
+        x = osc(f, (1, 0.2, 0.05)) * curve(n, [(0, 0), (0.15, 1), (0.8, 0.8), (1, 0)])
+        x = unit(x) + 0.08 * unit(bp(white(rng, n), 1500, 5000) * curve(n, [(0, 0), (0.5, 1), (1, 0)]))
+    else:        # a gentle, fluttering whinny
+        dur = 0.9
+        n = ns(dur)
+        x = beast(rng, dur, [(0, 380), (0.2, 480), (1, 300)], [(0, "ii"), (0.4, "e"), (1, "a")], 1.05,
+                  [(0, 0), (0.1, 1), (0.8, 0.6), (1, 0)], breath=0.6, oq=0.6, jitter=0.02)
+        x = x * (1 - 0.35 * (0.5 + 0.5 * np.sin(TAU * 11 * tline(n))))
+    return reverb(rng, x, 1.0, 0.25, damp=6000)
+
+
+# sand serpent --------------------------------------------------------------------------------
+def rattle_tail(rng, n, rate=45.0):
+    y = np.zeros(n)
+    t = 0.0
+    while t < n / SR:
+        m = ns(0.012)
+        place(y, bp(white(rng, m), 3000, 9000) * np.hanning(m), t, rng.uniform(0.6, 1.0))
+        t += 1.0 / rate * rng.uniform(0.9, 1.1)
+    return y
+
+
+@sfx("creature/sand_serpent/ambient")
+def sand_serpent_ambient(rng, v):
+    n = ns(rng.uniform(1.0, 1.4))
+    e = curve(n, [(0, 0), (0.15, 1), (0.8, 0.8), (1, 0)])
+    h = hiss(rng, n, 2500, 8000, e)
+    r = rattle_tail(rng, n, rng.uniform(38, 50)) * e
+    sand = crackle(rng, n, 800, 3000, 9000, env=e)
+    return reverb(rng, unit(h) + (0.6 * unit(r) if v == 1 else 0.2 * unit(r)) + 0.3 * unit(sand), 0.5, 0.14)
+
+
+@sfx("creature/sand_serpent/roar")
+def sand_serpent_roar(rng, v):
+    n = ns(1.8)
+    burst_ = crackle(rng, n, 9000, 1500, 9000, env=env_ad(n, 0.01, 0.35), alpha=2.2)
+    sw = whoosh(rng, n, [(0, 300), (0.1, 2500), (1, 400)], 0.8, env_ad(n, 0.02, 0.4))
+    bm = boom(n, 80, 30, 0.05, 0.4)
+    r = call(rng, "sand_serpent", "roar", 1.4, path=[(0, "a"), (0.5, "ae"), (1, "a")])
+    return reverb(rng, sat(lay((burst_, 0.8), (sw, 0.5), (bm, 0.7), (pad(np.concatenate([np.zeros(ns(0.15)), r]), n), 1.0)), 1.8),
+                  1.0, 0.22)
+
+
+# giant scorpion ------------------------------------------------------------------------------
+@sfx("creature/giant_scorpion/ambient")
+def scorpion_ambient(rng, v):
+    n = ns(rng.uniform(0.8, 1.1))
+    cl = clicks(rng, n, 0.0, int(rng.integers(5, 11)), rng.uniform(14, 24))
+    lg = legs(rng, n, 0.1, int(rng.integers(5, 10)), 22)
+    h = hiss(rng, n, 3000, 7000, curve(n, [(0, 0), (0.5, 0.6), (1, 0)]))
+    return reverb(rng, unit(cl) + 0.5 * unit(lg) + 0.25 * unit(h), 0.4, 0.12)
+
+
+@sfx("creature/giant_scorpion/attack")
+def scorpion_attack(rng, v):
+    n = ns(0.5)
+    sw = whoosh(rng, n, [(0, 800), (0.3, 3500), (1, 1200)], 1.2, env_ad(n, 0.05, 0.08))
+    h = hiss(rng, n, 3500, 9000, env_ad(n, 0.12, 0.1))
+    cl = np.zeros(n)
+    place(cl, unit(modal_hit(rng, 1600, 0.1, 0.02, WOOD, 0.8)), 0.13)
+    return reverb(rng, unit(sw) + 0.7 * unit(h) + 0.6 * cl, 0.4, 0.12)
+
+
+@sfx("creature/giant_scorpion/hurt")
+def scorpion_hurt(rng, v):
+    n = ns(0.5)
+    sq = tvf(white(rng, n), curve(n, [(0, 1400), (0.2, 2400), (1, 1100)], log=True), 6.0, "bp") * env_ad(n, 0.01, 0.15)
+    return reverb(rng, unit(sq) + 0.6 * unit(clicks(rng, n, 0.02, 8, 40)), 0.4, 0.12)
+
+
+@sfx("creature/giant_scorpion/death")
+def scorpion_death(rng, v):
+    n = ns(1.3)
+    h = hiss(rng, n, 2000, 6000, env_ad(n, 0.02, 0.35))
+    return reverb(rng, unit(h) + 0.8 * unit(legs(rng, n, 0.05, 12, 25, 1.14)) + 0.4 * unit(clicks(rng, n, 0.1, 5, 8)), 0.5, 0.12)
+
+
+# tsaesci / kamal / realm beasts --------------------------------------------------------------
+@sfx("creature/tsaesci/ambient")
+def tsaesci_ambient(rng, v):
+    n = ns(rng.uniform(1.0, 1.3))
+    h = hiss(rng, n, 4000, 9500, curve(n, [(0, 0), (0.1, 1), (0.5, 0.8), (1, 0)]))
+    g = pad(call(rng, "tsaesci", "grunt", 0.6, path=[(0, "a"), (1, "uh")]), n)
+    if v == 2:
+        g = np.roll(g, ns(0.3))
+    return reverb(rng, unit(h) + 0.7 * unit(g), 0.6, 0.15)
+
+
+@sfx("creature/tsaesci/roar")
+def tsaesci_roar(rng, v):
+    r = call(rng, "tsaesci", "roar", 1.2, f_mul=1.1, path=[(0, "a"), (0.4, "ah"), (1, "a")])
+    n = len(r) + ns(0.5)
+    tail = np.concatenate([np.zeros(len(r) - ns(0.2)), hiss(rng, ns(0.7), 4000, 9500, env_ad(ns(0.7), 0.02, 0.2))])
+    return reverb(rng, sat(lay((pad(r, n), 1.0), (pad(tail, n), 0.6)), 2.2), 0.8, 0.2)
+
+
+@sfx("creature/kamal/ambient")
+def kamal_ambient(rng, v):
+    g = vocal(rng, "kamal", "ambient", v)
+    n = len(g)
+    frost = hiss(rng, n, 2500, 9000, curve(n, [(0, 0), (0.3, 1), (1, 0)]))
+    tink = scatter(rng, n, 8, 0.1, 0.4, 3000, 8000, (0.03, 0.1), GLASS[:2], 1.0)
+    return unit(g) + 0.35 * unit(frost) + 0.15 * unit(tink)
+
+
+@sfx("creature/realm_stalker/ambient")
+def realm_stalker_ambient(rng, v):
+    g = vocal(rng, "realm_stalker", "ambient", v)
+    n = len(g)
+    shimmer_ = g * np.sin(TAU * rng.uniform(55, 75) * tline(n))   # a faint, otherworldly ring-modulated edge
+    return unit(g) + 0.18 * unit(shimmer_)
+
+
+@sfx("creature/realm_stalker/roar")
+def realm_stalker_roar(rng, v):
+    x = howl_dark(rng, rng.uniform(1.6, 2.0), rng.uniform(300, 340), 0.3)
+    return reverb(rng, sat(x, 1.5), 1.8, 0.35, damp=3000)
+
+
+@sfx("creature/realm_wyrm/ambient")
+def realm_wyrm_ambient(rng, v):
+    n = ns(rng.uniform(0.9, 1.2))
+    h = hiss(rng, n, 2500, 8000, curve(n, [(0, 0), (0.15, 1), (0.6, 0.7), (1, 0)]))
+    g = pad(call(rng, "realm_wyrm", "grunt", 0.5, path=[(0, "a"), (1, "u")]), n)
+    return reverb(rng, unit(h) + 0.6 * unit(np.roll(g, ns(0.2) * (v - 1))), 0.5, 0.14)
+
+
+@sfx("creature/durzog/roar")
+def durzog_roar(rng, v):
+    barks = [call(rng, "durzog", "hurt", rng.uniform(0.16, 0.22), f_mul=0.9, path=[(0, "a"), (1, "uh")], rattle=0.6)
+             for _ in range(2)]
+    howl = howl_dark(rng, 1.3, rng.uniform(330, 370), 0.4)
+    return reverb(rng, sat(seq(barks + [howl], (0.08, 0.14), rng), 1.8), 1.2, 0.28)
+
+
+@sfx("creature/frost_giant/roar")
+def frost_giant_roar(rng, v):
+    r = vocal(rng, "frost_giant", "roar", v)
+    n = len(r)
+    return unit(r) + 0.2 * unit(hiss(rng, n, 2500, 9000, curve(n, [(0, 0), (0.3, 1), (1, 0)])))
+
+
+@sfx("creature/frost_giant/death")
+def frost_giant_death(rng, v):
+    n = ns(3.0)
+    x = np.zeros(n)
+    place(x, unit(call(rng, "frost_giant", "death", 2.0)), 0.0)
+    x += 0.8 * unit(ground_impact(rng, n, 1.9, 0.8, 25))
+    x += 0.3 * unit(scatter(rng, n, 40, 1.95, 0.3, 2500, 8000, (0.03, 0.15), GLASS[:2], 0.6))
+    return reverb(rng, sat(x, 1.5), 1.1, 0.22)
+
+
+# dragons: Alduin, Paarthurnax, rising from a mound -------------------------------------------
+def alduin_voice(x, rng, factor=0.78, rt=3.0):
+    """The World-Eater: the dragon voice slowed and deepened, in a vast space with an echo."""
+    y = stretch(x, factor)
+    y = echo(y, [(0.33, 0.18), (0.71, 0.1)], 1800)
+    return reverb(rng, sat(y, 1.6), rt, 0.32, damp=2200)
+
+
+@sfx("creature/alduin/roar")
+def alduin_roar(rng, v):
+    return alduin_voice(dragon_roar(rng, v), rng)
+
+
+@sfx("creature/alduin/growl")
+def alduin_growl(rng, v):
+    return alduin_voice(dragon_growl(rng, v), rng, 0.75, 2.0)
+
+
+@sfx("creature/alduin/hurt")
+def alduin_hurt(rng, v):
+    return alduin_voice(dragon_hurt(rng, v), rng, 0.8, 2.0)
+
+
+@sfx("creature/alduin/death")
+def alduin_death(rng, v):
+    x = alduin_voice(dragon_death(rng, v), rng, 0.85, 3.0)
+    n = len(x)
+    souls = whoosh(rng, n, [(0, 400), (0.5, 2500), (1, 300)], 1.2, curve(n, [(0, 0), (0.3, 0.2), (0.7, 1), (1, 0)]))
+    return unit(x) + 0.25 * unit(souls)
+
+
+@sfx("creature/paarthurnax/growl")
+def paarthurnax_growl(rng, v):
+    """The old master: slow, breathy and calm - a rumbling sigh rather than a threat."""
+    dur = rng.uniform(1.8, 2.3)
+    b = rng.uniform(36, 42)
+    f0p = [(0, b), (0.4, b * 1.08), (1, b * 0.9)] if v == 1 else [(0, b * 1.05), (0.3, b * 0.95), (0.7, b * 1.1), (1, b * 0.85)]
+    amp = [(0, 0), (0.25, 0.8), (0.6, 1), (1, 0)]
+    x = beast(rng, dur, f0p, [(0, "u"), (0.5, "o"), (1, "u")], 0.5, amp, breath=1.4, sub=0.15, rattle=0.3, rattle_hz=11,
+              oq=0.6, jitter=0.02, shimmer=0.1)
+    n = len(x)
+    air = formant_bank(white(rng, n), tract(n, [(0, "o"), (1, "u")], 0.5)) * curve(n, amp)
+    return reverb(rng, unit(x) + 0.35 * unit(air) + 0.3 * unit(lp(brown(rng, n), 100) * curve(n, amp)), 1.6, 0.3, damp=2000)
+
+
+@sfx("creature/paarthurnax/roar")
+def paarthurnax_roar(rng, v):
+    x = stretch(dragon_roar(rng, 1), 0.88)
+    x = x * curve(len(x), [(0, 1), (0.7, 0.9), (1, 0.6)])
+    return reverb(rng, sat(x, 1.2), 2.4, 0.3, damp=2200)
+
+
+@sfx("creature/paarthurnax/hurt")
+def paarthurnax_hurt(rng, v):
+    return reverb(rng, sat(stretch(dragon_hurt(rng, v), 0.82), 1.3), 1.4, 0.25)
+
+
+@sfx("creature/paarthurnax/death")
+def paarthurnax_death(rng, v):
+    x = stretch(dragon_death(rng, v), 0.9)
+    n = len(x)
+    sigh = formant_bank(white(rng, n), tract(n, [(0, "a"), (1, "u")], 0.5)) * curve(n, [(0, 0), (0.6, 0), (0.8, 1), (1, 0)])
+    return reverb(rng, unit(x) + 0.3 * unit(sigh), 2.0, 0.3)
+
+
+@sfx("creature/dragon/rise")
+def dragon_rise(rng, v):
+    n = ns(3.4)
+    swell = curve(n, [(0, 0), (0.7, 1), (0.85, 0.8), (1, 0)])
+    bone = bones(rng, n, 0.2, 140, 0.9) * swell
+    ghost = whoosh(rng, n, [(0, 200), (0.7, 1800), (1, 500)], 1.5, swell)
+    groan = beast(rng, 2.8, [(0, 45), (0.6, 60), (1, 52)], [(0, "u"), (0.7, "o"), (1, "a")], 0.55,
+                  [(0, 0), (0.6, 0.6), (0.95, 1), (1, 0)], breath=1.5, sub=0.4, rattle=0.6, rattle_hz=14, oq=0.45)
+    fire = crackle(rng, n, 200, 1500, 6000, env=swell)
+    rum = lp(brown(rng, n), 110) * swell
+    return reverb(rng, lay((bone, 0.6), (ghost, 0.6), (pad(groan, n), 0.9), (fire, 0.25), (rum, 0.5)), 2.0, 0.32, damp=2500)
+
+
+def register_bestiary():
+    """Every catalogued bestiary stem without its own generator gets the generic voice of its creature."""
+    for creature, kinds in catalog.BESTIARY.items():
+        for kind, *_ in kinds:
+            base = f"creature/{creature}/{kind}"
+            if base in GENERATORS:
+                continue
+            if creature in VOX and kind in ("ambient", "attack", "roar", "hurt", "death"):
+                GENERATORS[base] = (lambda c, k: lambda rng, v: vocal(rng, c, k, v))(creature, kind)
+
+
+register_bestiary()
+
+
 # =====================================================================================================  rendering
 
 def target_db(stem: str) -> float:
@@ -1879,8 +3097,14 @@ def target_db(stem: str) -> float:
         return -22.0
     if stem.startswith("ui/"):
         return -24.0
-    if stem in ("creature/dragon/death1",) or stem.startswith("creature/dragon/roar"):
+    if stem in ("creature/dragon/death1",) or stem.startswith("creature/dragon/roar")             or stem.startswith("creature/alduin/roar") or stem == "creature/alduin/death1":
         return -11.0
+    if stem.startswith("creature/paarthurnax/roar") or stem.startswith("creature/silt_strider/ambient"):
+        return -12.0
+    if stem == "creature/dragon/rise1":
+        return -13.0
+    if stem.startswith("creature/frost_atronach/step"):
+        return -22.0
     if stem.startswith("creature/giant/stomp") or stem == "creature/dragon/land1":
         return -12.0
     if stem.startswith("creature/"):
@@ -1909,7 +3133,9 @@ def max_dur(stem: str) -> float:
         return 4.5
     if stem == "magic/dragon_soul":
         return 4.4
-    if stem.startswith("creature/dragon/") or stem.startswith("creature/giant/death"):
+    if stem.startswith("creature/alduin/") or stem.startswith("creature/paarthurnax/"):
+        return 4.6
+    if stem.startswith("creature/dragon/") or stem.startswith("creature/giant/death") or stem.startswith("creature/silt_strider/")             or stem.startswith("creature/frost_giant/death") or stem.startswith("creature/dragon_priest/death"):
         return 3.5
     if stem.startswith("ui/") and "level_up" not in stem and "quest" not in stem:
         return 1.5
@@ -1937,6 +3163,14 @@ def finish(x: np.ndarray, stem: str) -> np.ndarray:
     return audiolib.loudness_normalise(x, target_db(stem), SR, -1.0)
 
 
+def encoding(stem: str) -> tuple:
+    """(Vorbis quality, output sample rate) of a stem. The bestiary voices and the later shouts (catalog.LOFI) are
+    encoded at 24 kHz, q1.5: short creature clips lose nothing audible there and the jar stays lean."""
+    if stem in catalog.LOFI:
+        return 1.5, 24000
+    return (2 if stem.startswith("ui/") else 3), None
+
+
 def stats(x: np.ndarray) -> dict:
     spec = np.abs(np.fft.rfft(x)) ** 2
     fr = np.fft.rfftfreq(len(x), 1 / SR)
@@ -1960,8 +3194,8 @@ def _render(stem: str, wav_dir: str | None) -> dict:
     rng = np.random.default_rng(zlib.crc32(stem.encode("utf-8")))
     x = finish(gen(rng), stem)
     out = catalog.SOUNDS / (stem + ".ogg")
-    q = 2 if stem.startswith("ui/") else 3
-    audiolib.write_ogg(x, out, SR, q)
+    q, out_sr = encoding(stem)
+    audiolib.write_ogg(x, out, SR, q, out_sr=out_sr)
     if wav_dir:
         wp = pathlib.Path(wav_dir) / (stem.replace("/", "__") + ".wav")
         wp.parent.mkdir(parents=True, exist_ok=True)
@@ -2041,8 +3275,8 @@ def main() -> int:
         total += size
         print(f"  {c:9s} {len(files):6d} {secs:9.1f} {size / 1e6:8.2f} MB")
     print(f"  {'total':9s} {len(stems):6d} {'':9s} {total / 1e6:8.2f} MB   ({len(results)} rendered in {time.time() - t0:.1f}s)")
-    if total > 3.2e6:
-        print("  WARNING: over the ~3 MB budget")
+    if total > 6.5e6:
+        print("  WARNING: over the ~6.5 MB budget")
     if failed:
         print(f"ERROR: {len(failed)} file(s) failed: " + ", ".join(r["stem"] for r in failed), file=sys.stderr)
         return 1

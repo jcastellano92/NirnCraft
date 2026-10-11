@@ -28,6 +28,8 @@ public abstract class Attack {
     public boolean needsSight = true;
     /** Chance per decision tick to use it when ready (rare specials). */
     public float chance = 1f;
+    /** The creature's cry when the move starts ({@link CreatureSpec#cry(String)}): attack, roar, cast, breath; null = none. */
+    public String cry;
 
     public boolean canUse(Mob mob, LivingEntity target, double gap) {
         return gap >= minRange && gap <= maxRange;

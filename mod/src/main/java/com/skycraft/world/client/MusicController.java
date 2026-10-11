@@ -402,6 +402,8 @@ public final class MusicController {
     @Nullable
     private static String dungeon(Minecraft mc, BlockPos pos, Region region) {
         Level level = mc.level;
+        // the Dwemer caverns biome is one great ruin of the Deep Elves
+        if (AmbienceEngine.inDwemerCaverns()) return "music.dungeon.dwemer";
         boolean dark = level.getBrightness(LightLayer.SKY, pos) < 4;
         // inside a discovered dungeon-like place (barrows, mines, Dwemer ruins...)
         ListTag list = SkyData.get(mc.player).module(WorldData.MODULE).getList("discovered", Tag.TAG_COMPOUND);

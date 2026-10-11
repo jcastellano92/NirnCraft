@@ -116,7 +116,11 @@ ev("music.level_up", ["music/level_up"], "music", stream=True)
 # Looping beds: stereo, streamed (so they don't sit decoded in memory), played non-positionally by the ambience engine.
 BEDS = ["wind_light", "wind_strong", "blizzard", "forest_day", "forest_night", "plains_day", "plains_night",
         "marsh_day", "marsh_night", "jungle_day", "jungle_night", "desert_wind", "ash_storm", "coast_waves",
-        "open_ocean", "river", "cave", "cave_deep", "glow_cave", "oblivion", "sovngarde"]
+        "open_ocean", "river", "cave", "cave_deep", "glow_cave", "oblivion", "sovngarde",
+        # added with the real biomes: warm swamps at night, savanna, Eastmarch's hot springs, volcanic land, crystal
+        # land, and the cave biomes (Dwemer caverns, lava caves, ice caves, mushroom grottos)
+        "swamp_night", "savanna_day", "hot_springs", "volcanic_rumble", "crystal_shimmer", "dwemer_machinery", "lava_cave",
+        "ice_cave", "mushroom_grotto"]
 for b in BEDS:
     ev(f"ambient.bed.{b}", [f"ambient/bed/{b}"], "bed", stream=True)
 
@@ -146,6 +150,11 @@ ONESHOTS = [
     ("oblivion_wail", "oblivion_wail", 2, "Daedric wail", 96),
     ("sovngarde_horn", "sovngarde_horn", 1, "Distant horn", 192),
     ("glow_chime", "glow_chime", 2, "Crystals chime", 32),
+    ("distant_screech", "distant_screech", 2, "Distant screech", 96),
+    ("machinery", "machinery", 3, "Machinery clanks", 48),
+    ("lava_bubble", "lava_bubble", 2, "Lava bubbles", 24),
+    ("ice_creak", "ice_creak", 2, "Ice creaks", 48),
+    ("cicada", "cicada", 2, "Cicada buzzes", 32),
 ]
 for name, stem, count, sub, dist in ONESHOTS:
     ev(f"ambient.{name}", n(f"ambient/{stem}", count), "ambient", sub, distance=dist)
@@ -185,6 +194,102 @@ for creature, kinds in CREATURES.items():
         ev(f"entity.{creature}.{kind}", n(f"creature/{creature}/{kind}", count), "creature", sub,
            distance=dist if dist != 16 else None)
 
+# The bestiary of Nirn: voices for the creatures added with it (and the extra kinds of a few older ones). Kinds besides
+# ambient / hurt / death are cries the attack goal plays when a move starts: "attack" (bites, blows), "roar" (roars,
+# war cries, charges), "cast" (spells, bolts), "breath"; and specials ("wings", "step", "wake", "emerge", "rise").
+# These files are encoded smaller than the older ones (24 kHz, Vorbis q1.5) to keep the jar lean: see LOFI below.
+BESTIARY = {
+    "wolf": [("attack", 2, "Wolf snarls", 16), ("hurt", 1, "Wolf yelps", 16), ("death", 1, "Wolf dies", 16)],
+    "chaurus": [("ambient", 2, "Chaurus clicks", 16), ("attack", 1, "Chaurus hisses", 16), ("cast", 1, "Chaurus spits", 16),
+                ("wings", 1, "Chaurus hunter buzzes", 24), ("hurt", 1, "Chaurus hurts", 16), ("death", 1, "Chaurus dies", 16)],
+    "riekling": [("ambient", 2, "Riekling chitters", 16), ("attack", 1, "Riekling yelps", 16), ("roar", 1, "Riekling war cry", 32),
+                 ("hurt", 1, "Riekling hurts", 16), ("death", 1, "Riekling dies", 16)],
+    "ash_spawn": [("ambient", 2, "Ash spawn rasps", 16), ("attack", 1, "Ash spawn hisses", 16), ("emerge", 1, "Ash spawn rises", 24),
+                  ("hurt", 1, "Ash spawn hurts", 16), ("death", 1, "Ash spawn crumbles", 16)],
+    "gargoyle": [("ambient", 2, "Gargoyle growls", 16), ("roar", 1, "Gargoyle roars", 32), ("wake", 1, "Stone grinds", 24),
+                 ("hurt", 1, "Stone cracks", 16), ("death", 1, "Gargoyle crumbles", 24)],
+    "wisp": [("hurt", 1, "Wisp flickers", 16), ("death", 1, "Wisp fades", 16)],
+    "will_o_wisp": [("ambient", 2, "Will-o'-the-wisp chimes", 24), ("hurt", 1, "Will-o'-the-wisp flickers", 16),
+                    ("death", 1, "Will-o'-the-wisp fades", 16)],
+    "death_hound": [("ambient", 2, "Death hound snarls", 24), ("attack", 1, "Death hound snaps", 16), ("roar", 1, "Death hound howls", 48),
+                    ("hurt", 1, "Death hound hurts", 16), ("death", 1, "Death hound dies", 16)],
+    "dwarven_ballista": [("cast", 1, "Ballista fires", 32)],
+    "dragon_priest": [("ambient", 2, "Dragon priest whispers", 24), ("cast", 2, "Dragon priest chants", 32),
+                      ("hurt", 1, "Dragon priest hisses", 24), ("death", 1, "Dragon priest wails", 48)],
+    "dremora": [("ambient", 2, "Dremora growls", 16), ("attack", 2, "Dremora grunts", 16), ("roar", 1, "Dremora bellows", 32),
+                ("hurt", 1, "Dremora hurts", 16), ("death", 1, "Dremora dies", 16)],
+    "flame_atronach": [("ambient", 2, "Flame atronach crackles", 16), ("hurt", 1, "Flame atronach hisses", 16),
+                       ("death", 1, "Flame atronach bursts", 24)],
+    "frost_atronach": [("ambient", 2, "Frost atronach grinds", 16), ("attack", 1, "Frost atronach groans", 16),
+                       ("step", 2, None, 16), ("hurt", 1, "Ice cracks", 16), ("death", 1, "Frost atronach shatters", 24)],
+    "storm_atronach": [("ambient", 2, "Storm atronach crackles", 32), ("hurt", 1, "Storm atronach sparks", 16),
+                       ("death", 1, "Storm atronach collapses", 48)],
+    "scamp": [("ambient", 2, "Scamp cackles", 16), ("roar", 1, "Scamp shrieks", 24), ("hurt", 1, "Scamp hurts", 16),
+              ("death", 1, "Scamp dies", 16)],
+    "imp": [("ambient", 2, "Imp chitters", 16), ("hurt", 1, "Imp hurts", 16), ("death", 1, "Imp dies", 16)],
+    "cliff_racer": [("ambient", 2, "Cliff racer screeches", 64), ("attack", 1, "Cliff racer dives", 24),
+                    ("roar", 1, "Cliff racer shrieks", 48), ("hurt", 1, "Cliff racer hurts", 16), ("death", 1, "Cliff racer dies", 24)],
+    "guar": [("ambient", 2, "Guar grunts", 16), ("hurt", 1, "Guar hurts", 16), ("death", 1, "Guar dies", 16)],
+    "kagouti": [("ambient", 2, "Kagouti snorts", 16), ("roar", 1, "Kagouti bellows", 32), ("hurt", 1, "Kagouti hurts", 16),
+                ("death", 1, "Kagouti dies", 16)],
+    "alit": [("ambient", 2, "Alit growls", 16), ("attack", 1, "Alit snaps", 16), ("roar", 1, "Alit roars", 32),
+             ("hurt", 1, "Alit hurts", 16), ("death", 1, "Alit dies", 16)],
+    "nix_hound": [("ambient", 2, "Nix-hound chirrs", 16), ("roar", 1, "Nix-hound shrieks", 32), ("hurt", 1, "Nix-hound hurts", 16),
+                  ("death", 1, "Nix-hound dies", 16)],
+    "netch": [("ambient", 2, "Netch hums", 64), ("hurt", 1, "Netch groans", 24), ("death", 1, "Netch deflates", 32)],
+    "silt_strider": [("ambient", 2, "Silt strider calls", 160), ("hurt", 1, "Silt strider groans", 48),
+                     ("death", 1, "Silt strider dies", 96)],
+    "minotaur": [("ambient", 2, "Minotaur snorts", 16), ("attack", 1, "Minotaur grunts", 16), ("roar", 1, "Minotaur bellows", 48),
+                 ("hurt", 1, "Minotaur hurts", 16), ("death", 1, "Minotaur dies", 24)],
+    "ogre": [("ambient", 2, "Ogre grunts", 16), ("roar", 1, "Ogre roars", 48), ("hurt", 1, "Ogre hurts", 16),
+             ("death", 1, "Ogre dies", 24)],
+    "land_dreugh": [("ambient", 2, "Dreugh clicks", 16), ("roar", 1, "Dreugh chitters", 24), ("hurt", 1, "Dreugh hurts", 16),
+                    ("death", 1, "Dreugh dies", 16)],
+    "wamasu": [("ambient", 2, "Wamasu hums", 24), ("roar", 1, "Wamasu roars", 48), ("breath", 1, "Wamasu breathes lightning", 32),
+               ("hurt", 1, "Wamasu hurts", 16), ("death", 1, "Wamasu dies", 24)],
+    "swamp_leviathan": [("ambient", 2, "Leviathan rumbles", 32), ("roar", 1, "Leviathan bellows", 64),
+                        ("hurt", 1, "Leviathan hurts", 24), ("death", 1, "Leviathan dies", 48)],
+    "hackwing": [("ambient", 2, "Hackwing screeches", 48), ("hurt", 1, "Hackwing hurts", 16), ("death", 1, "Hackwing dies", 16)],
+    "senche_tiger": [("ambient", 2, "Senche-tiger growls", 24), ("roar", 1, "Senche-tiger roars", 48),
+                     ("hurt", 1, "Senche-tiger hurts", 16), ("death", 1, "Senche-tiger dies", 16)],
+    "alfiq": [("ambient", 2, "Alfiq trills", 16), ("hurt", 1, "Alfiq hisses", 16), ("death", 1, "Alfiq dies", 16)],
+    "sand_serpent": [("ambient", 2, "Sand serpent hisses", 24), ("roar", 1, "Sand serpent erupts", 48),
+                     ("hurt", 1, "Sand serpent hurts", 16), ("death", 1, "Sand serpent dies", 24)],
+    "giant_scorpion": [("ambient", 2, "Scorpion clicks", 16), ("attack", 1, "Scorpion stings", 16),
+                       ("hurt", 1, "Scorpion hurts", 16), ("death", 1, "Scorpion dies", 16)],
+    "harpy": [("ambient", 2, "Harpy shrieks", 32), ("roar", 1, "Harpy screams", 48), ("hurt", 1, "Harpy hurts", 16),
+              ("death", 1, "Harpy dies", 16)],
+    "indrik": [("ambient", 2, "Indrik trills", 24), ("hurt", 1, "Indrik hurts", 16), ("death", 1, "Indrik dies", 16)],
+    "sea_serpent": [("ambient", 2, "Sea serpent moans", 64), ("hurt", 1, "Sea serpent hurts", 24),
+                    ("death", 1, "Sea serpent dies", 48)],
+    "echatere": [("ambient", 2, "Echatere lows", 24), ("hurt", 1, "Echatere hurts", 16), ("death", 1, "Echatere dies", 16)],
+    "durzog": [("ambient", 2, "Durzog snarls", 16), ("roar", 1, "Durzog howls", 32), ("hurt", 1, "Durzog hurts", 16),
+               ("death", 1, "Durzog dies", 16)],
+    "frost_giant": [("ambient", 2, "Frost giant rumbles", 32), ("roar", 1, "Frost giant roars", 64),
+                    ("hurt", 1, "Frost giant hurts", 32), ("death", 1, "Frost giant dies", 48)],
+    "kamal": [("ambient", 2, "Kamal hisses", 16), ("hurt", 1, "Kamal hurts", 16), ("death", 1, "Kamal dies", 16)],
+    "tsaesci": [("ambient", 2, "Tsaesci hisses", 16), ("roar", 1, "Tsaesci war cry", 32), ("hurt", 1, "Tsaesci hurts", 16),
+                ("death", 1, "Tsaesci dies", 16)],
+    "realm_stalker": [("ambient", 2, "Stalker growls", 16), ("roar", 1, "Stalker howls", 32), ("hurt", 1, "Stalker hurts", 16),
+                      ("death", 1, "Stalker dies", 16)],
+    "realm_grazer": [("ambient", 2, "Grazer lows", 24), ("hurt", 1, "Grazer hurts", 16), ("death", 1, "Grazer dies", 16)],
+    "realm_wyrm": [("ambient", 2, "Wyrm hisses", 16), ("hurt", 1, "Wyrm hurts", 16), ("death", 1, "Wyrm dies", 16)],
+    # dragons: the World-Eater and the old master have their own voices; any dragon rising from its mound
+    "dragon": [("rise", 1, "Dragon rises from its mound", 128)],
+    "alduin": [("roar", 2, "Alduin roars", 256), ("growl", 1, "Alduin growls", 64), ("hurt", 1, "Alduin hurts", 64),
+               ("death", 1, "Alduin dies", 256)],
+    "paarthurnax": [("roar", 1, "Paarthurnax roars", 192), ("growl", 2, "Paarthurnax rumbles", 48),
+                    ("hurt", 1, "Paarthurnax hurts", 48), ("death", 1, "Paarthurnax dies", 192)],
+}
+LOFI = set()   # file stems encoded at 24 kHz, Vorbis q1.5 (see synth_skyrim_sfx.encoding)
+for creature, kinds in BESTIARY.items():
+    for kind, count, sub, dist in kinds:
+        stems = n(f"creature/{creature}/{kind}", count)
+        LOFI.update(stems)
+        ev(f"entity.{creature}.{kind}", stems, "creature", sub, distance=dist if dist != 16 else None)
+# the wolf's idle sound is its growl
+ev("entity.wolf.ambient", ["@entity.wolf.growl"], "creature", "Wolf growls")
+
 # =====================================================================================================  shouts
 # Every shout has a chant for one, two and three words (the words are lore names; the voice is synthesised).
 SHOUTS = {
@@ -193,14 +298,20 @@ SHOUTS = {
     "aura_whisper": ["LAAS", "YAH", "NIR"], "slow_time": ["TIID", "KLO", "UL"], "marked_for_death": ["KRII", "LUN", "AUS"],
     "disarm": ["ZUN", "HAAL", "VIIK"], "elemental_fury": ["SU", "GRAH", "DUN"], "kynes_peace": ["KAAN", "DREM", "OV"],
     "animal_allegiance": ["RAAN", "MIR", "TAH"], "storm_call": ["STRUN", "BAH", "QO"], "dragonrend": ["JOOR", "ZAH", "FRUL"],
+}
+# shouts added later (Dawnguard / Dragonborn and the rest of com.skycraft.magic.shout.Shout): encoded smaller (LOFI)
+NEW_SHOUTS = {
     "ice_form": ["IIZ", "SLEN", "NUS"], "throw_voice": ["ZUL", "MEY", "GUT"], "dismay": ["FAAS", "RU", "MAAR"],
     "call_dragon": ["OD", "AH", "VIING"], "call_of_valor": ["HUN", "KAAL", "ZOOR"], "cyclone": ["VEN", "GAAR", "NOS"],
     "drain_vitality": ["GAAN", "LAH", "HAAS"], "soul_tear": ["RII", "VAAZ", "ZOL"], "bend_will": ["GOL", "HAH", "DOV"],
     "dragon_aspect": ["MUL", "QAH", "DIIV"], "battle_fury": ["MID", "VUR", "SHAAN"],
 }
+SHOUTS.update(NEW_SHOUTS)
 for shout, words in SHOUTS.items():
     for k in (1, 2, 3):
         ev(f"shout.{shout}.{k}", [f"shout/{shout}_{k}"], "shout", "Thu'um: " + " ".join(w.title() for w in words[:k]), distance=64)
+        if shout in NEW_SHOUTS:
+            LOFI.add(f"shout/{shout}_{k}")
 # historical names (still referenced by resource packs); they point at the three-word chants
 ev("shout.fus_ro_dah", ["@shout.unrelenting_force.3"], "shout", "Thu'um: Fus Ro Dah")
 ev("shout.wuld_nah_kest", ["@shout.whirlwind_sprint.3"], "shout", "Thu'um: Wuld Nah Kest")
@@ -294,6 +405,32 @@ def check() -> int:
         if parts and all(p in literals or p.isdigit() for p in parts):
             continue
         print(f"  not registered in Java: {e.name}")
+        bad += 1
+    # ...and the other way round: every event Java registers needs a catalogue entry, or Minecraft logs "Not having sound
+    # event for" and the event plays nothing. Rebuild AudioSounds' computed names from its arrays and the Shout enum.
+    audio = (JAVA / "audio/AudioSounds.java").read_text(encoding="utf-8")
+
+    def arr(name):
+        m = re.search(r"\b" + name + r"\s*=\s*\{(.*?)\};", audio, re.S)
+        return m.group(1) if m else ""
+    java_names = set(registered)
+    for s in re.findall(r'"([a-z0-9_]+)"', arr("MUSIC_SETS")):
+        java_names |= {f"music.explore.{s}", f"music.explore_night.{s}"}
+    java_names |= {f"music.town.{s}" for s in re.findall(r'"([a-z0-9_]+)"', arr("TOWN_SETS"))}
+    java_names |= {f"ambient.bed.{s}" for s in re.findall(r'"([a-z0-9_]+)"', arr("BEDS"))}
+    java_names |= {f"ambient.{s}" for s in re.findall(r'"([a-z0-9_]+)"', arr("ONESHOTS"))}
+    java_names |= {f"spell.{s}" for s in re.findall(r'"([a-z0-9_]+)"', arr("SPELLS"))}
+    java_names |= {f"ui.{s}" for s in re.findall(r'"([a-z0-9_]+)"', arr("UI"))}
+    for table in ("CREATURES", "BESTIARY"):
+        for row in re.findall(r"\{([^{}]*)\}", arr(table)):
+            words = re.findall(r'"([a-z0-9_]+)"', row)
+            java_names |= {f"entity.{words[0]}.{k}" for k in words[1:]}
+    if shout_java.exists():
+        for c in re.findall(r"^\s*([A-Z_]+)\(new String", shout_java.read_text(encoding="utf-8"), re.M):
+            java_names |= {f"shout.{c.lower()}.{k}" for k in (1, 2, 3)}
+    catalogued = {e.name for e in EVENTS}
+    for name in sorted(java_names - catalogued):
+        print(f"  registered in Java but not catalogued (no sounds.json entry): {name}")
         bad += 1
     total = sum(sizes.values())
     for c, s in sorted(sizes.items()):
