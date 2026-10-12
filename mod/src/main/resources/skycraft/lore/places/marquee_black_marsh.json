@@ -1,0 +1,240 @@
+{
+ "places": {
+  "thorn": {
+   "hook": "A hub-town hung from the roots of one enormous Hist tree, its huts swaying on rope-walks above a sap-lit pool, where every hatchling drinks once and sees what it will.",
+   "rumour": "The Hist-Keeper of Thorn has asked for a stranger to drink at the pool, they say, and a stranger the Hist asks for does not usually say no.",
+   "notes": [
+    {
+     "id": "gazetteer",
+     "kind": "list",
+     "title": "The Root-Walks and Who Keeps Them",
+     "author": "Walker Yill",
+     "at": "site",
+     "pages": [
+      "#Names under the tree\nHist-Keeper Eeka hums to the pool and will not say what it answers. Walker Yill knows every root-walk and has fallen off most. Sap-Cutter Horu asks the tree before he cuts, and the tree decides. Hush-Moss at the Root Cellar serves what the tree gives that day. It gave soup.",
+      "#Rules of the rite\nNever hold the blade by the edge. Never speak while the tree listens. If the tree sighs, stop and wait. If it bleeds gold, you have been polite. Carry the cup to the pool in the dark. Do not look at the eyes in the bark; they look at you only once."
+     ]
+    },
+    {
+     "id": "rite_warning",
+     "kind": "warning",
+     "title": "Warning Carved at the Third Root",
+     "author": "The Keepers of Thorn",
+     "at": "site",
+     "pages": [
+      "^THE THIRD ROOT\nWhere the bark is soft as a cheek, you may cut. Where it is hard, you may not. The tree knows the difference. So will you, if you have been quiet."
+     ]
+    }
+   ]
+  },
+  "soulrest": {
+   "hook": "A necropolis-town on a black lagoon, stilt-houses divided by narrow canals and white lily-beds, where the dead go by barge and the living speak softly.",
+   "rumour": "The Barge-Mother of Soulrest carries one dead a night to the Isle of Tombs, and tonight her oar-arm will not hold. She wants a steady stranger, a good song, and a blade.",
+   "notes": [
+    {
+     "id": "gazetteer",
+     "kind": "list",
+     "title": "The Lilies and the Barge",
+     "author": "Lily-Tender Pi",
+     "at": "site",
+     "pages": [
+      "#The living\nBarge-Mother Seeth carries the dead to the isle and is paid in lilies. Lily-Tender Pi keeps the beds: white for the quiet, red for the angry, and if one blooms black she stops. Priest Eesh tells the dead where they are; it is astonishing how few know. Gaar the Lantern-Seller sells waterproof, windproof and argument-proof lamps.",
+      "#One bed that will not bloom\nThe Teeb bed has been bare three years. The family keeps a lantern lit in the window for a daughter who went into the marsh. They will not bury what they have not lost."
+     ]
+    }
+   ]
+  },
+  "the_stable_steed": {
+   "hook": "A Gideon inn where the guar eat first, the riders second and the accountants last, in the shade of a plateau that has not seen rain in eleven years.",
+   "rumour": "A merchant's guar vanished from the Stable Steed last week and the merchant will not leave until it returns. It has eaten first at every meal for six days. Folk say it found dates.",
+   "notes": [
+    {
+     "id": "house_rules",
+     "kind": "notes",
+     "title": "House Rules of the Stable Steed",
+     "author": "Ku-Lasha",
+     "at": "site",
+     "pages": [
+      "#Order of service\n1. The guar eats first. It is not discrimination. It is economics.\n2. The rider eats second, and is charged for both.\n3. The accountant eats last and is charged for the shade.\n\nGuests who attempt to bargain with the guar will be asked to leave. The guar will be asked to stay."
+     ]
+    }
+   ]
+  },
+  "gideon_courthouse": {
+   "hook": "The clay courthouse of Gideon, where the Magistrate rules with the sun in her eyes and a goat in her past.",
+   "rumour": "Two farmers dispute the Eastern Cut and both hold forged deeds. The Magistrate has read them and will not rule for a lie. She wants the original grant.",
+   "notes": [
+    {
+     "id": "docket",
+     "kind": "list",
+     "title": "Docket of the Courthouse",
+     "author": "The clerk of court",
+     "at": "site",
+     "pages": [
+      "#Cases pending\nThe water of the Eastern Cut: two farmers, two forgeries. The goat matter: closed, reopened, closed. The granary valve: referred to the well-keeper. The guar of the Stable Steed: ruled a wanderer, not a thief.\n\nMagistrate Verrus notes that she is delighted to rule whenever the facts are short and the law is shorter."
+     ]
+    }
+   ]
+  },
+  "twyllbek_ruins": {
+   "hook": "A tumbled Imperial survey-post on the plateau road, its archive niche sealed under a lead cap nobody has lifted in two hundred years.",
+   "rumour": "The old survey ruins on the Gideon road hold a lead tube with the original grant of the Eastern Cut. Folk say it was never lost, only filed under the wrong river.",
+   "notes": [
+    {
+     "id": "survey_stone",
+     "kind": "inscription",
+     "title": "Survey Stone",
+     "author": "An Imperial surveyor",
+     "at": "site",
+     "pages": [
+      "#Surveyed and recorded\nThe Cut to the road. The road to the people. The people to the stones. We have set this post so that it may be found by those who need it, and missed by those who do not. A lead tube is in the niche, capped, dated, signed. Read it before you build a fence."
+     ]
+    }
+   ]
+  },
+  "white_rose_prison": {
+   "hook": "A river-fort prison above the Stormhold gorge, its cells half-flooded and its last prisoner the only one who wanted to stay.",
+   "rumour": "Twelve went into the White Rose by boat at dawn and eleven came out, a scout says. The twelfth is an old man who has waited twelve years for someone to ask him a question.",
+   "notes": [
+    {
+     "id": "wall_scratch",
+     "kind": "notes",
+     "title": "Scratched on the Cell Wall",
+     "author": "The twelfth prisoner",
+     "at": "site",
+     "pages": [
+      "#Day four thousand and some\nI was convicted of a theft I did not commit. I was not angry for long. I have been listening ever since to the river, and I have learned the names of everything that passes. I do not wish to be freed. I wish to be asked.\n\nIf you are reading this, ask me anything. It has been a long time."
+     ]
+    }
+   ]
+  },
+  "silyanorn_ruins": {
+   "hook": "An Ayleid watchpost in the gorge below Stormhold, half-swallowed by moss, where river-thieves hide what they should not have borrowed.",
+   "rumour": "A river man called Gorge-Eel uses the old ruins below the south hill as a storehouse. He took the north hill's sleeping idol and carried it down in a sling, and he rocks it like a child.",
+   "notes": [
+    {
+     "id": "thief_tally",
+     "kind": "notes",
+     "title": "A Thief's Tally",
+     "author": "Gorge-Eel",
+     "at": "chest",
+     "pages": [
+      "#Tally\nIdol, one, stone, grey-green, heavy. Sling, one, rope, mine. Pursuers, none, so far. I did not take it for coin. I took it because it looked lonely on its hill and I could not sleep for the thought. If it wakes, I shall tell it I am sorry."
+     ]
+    }
+   ]
+  },
+  "sun_egg_ruins": {
+   "hook": "A broken temple of the Helstrom ring at the top of a stair that ends at the sky, where a sealed gate waits for its keeper's key.",
+   "rumour": "The ninth stair of the Broken Ring climbs two hundred steps and stops at nothing. The elder says there was a gate once, and a keeper, and something beyond it that was not meant for the sun.",
+   "notes": [
+    {
+     "id": "gate_inscription",
+     "kind": "inscription",
+     "title": "Inscription at the Seam",
+     "author": "The builders of the ring",
+     "at": "site",
+     "pages": [
+      "^THE NINTH GATE\nWe built eight stairs for the living and one for the keeper. The keeper holds the gate. The gate holds the knowing. If you carry the key, step lightly and speak plainly. If you carry nothing, turn back."
+     ]
+    }
+   ]
+  },
+  "sun_fang_sanctum": {
+   "hook": "The Isle of Tombs: a hill of white stone in black water with one open door and one patient candle, where the barge-dead are laid down.",
+   "rumour": "A funeral barge goes to the Isle of Tombs every night. The priest on the isle says the dead hear everything said to them, even when they say nothing back.",
+   "notes": [
+    {
+     "id": "isle_rule",
+     "kind": "prayer",
+     "title": "The Priest's Greeting",
+     "author": "Priest Eesh",
+     "at": "site",
+     "pages": [
+      "#To the one who has arrived\nYou are at the Isle of Tombs. You are not alone. You are not lost. You were carried here by someone who did not want you to go the last mile on your own. Rest. The candle is lit. The lilies on the far bed are for you."
+     ]
+    }
+   ]
+  },
+  "green_eye_ruins": {
+   "hook": "A ring of green-stained stones in the marsh where an herbalist's tent still stands, a journal still open inside it.",
+   "rumour": "A Soulrest daughter went into the marsh three years ago to find a cure and never came back. Her family keeps her lantern lit in the window and will not bury what they have not lost.",
+   "notes": [
+    {
+     "id": "journal",
+     "kind": "journal",
+     "title": "A Daughter's Last Pages",
+     "author": "Teeb the herbalist",
+     "at": "chest",
+     "pages": [
+      "#Day ninety-one\nFound it. A grey root, a white flower, three nights' steeping. It works on the mud-fever. I have tried it on myself. I am bitten. It was a small bite. I will finish this page and then the next.\n\n#Day ninety-two\nIf anyone finds this: tell them I was not afraid. Tell Mother the lilies were never meant to be anything but white."
+     ]
+    }
+   ]
+  },
+  "soft_scale_clearing": {
+   "hook": "A clearing of pale sand and leaning stones beyond Helstrom, in whose middle sits a single hand of baked clay, palm up.",
+   "rumour": "Mason Noo's mortar sets in the shape of a hand, whatever mould he uses. It came from the old quarry sand beyond Helstrom, where a mason once fell and was never found.",
+   "notes": [
+    {
+     "id": "mason_mark",
+     "kind": "notes",
+     "title": "A Mason's Mark Scratched on a Stone",
+     "author": "The fallen mason",
+     "at": "site",
+     "pages": [
+      "#Mine\nThis wall was mine. I was halfway up the second course when the ground went. If you are laying stones here, mind the line, mind the mortar, and set one more for me. I never finished. It is a small request."
+     ]
+    }
+   ]
+  },
+  "alten_meerhleel": {
+   "hook": "A tidy canal-town east of Lilmoth, every house with a lantern in the window, one of them lit for a man who never came home.",
+   "rumour": "A widow in Alten Meerhleel keeps a lantern in the window for her husband, who went out in the reed-boats and was never found. The Dripping Reed says the reeds have been whispering his way home.",
+   "notes": [
+    {
+     "id": "widow_note",
+     "kind": "letter",
+     "title": "A Widow's Note",
+     "author": "Teshi of Alten Meerhleel",
+     "at": "site",
+     "pages": [
+      "#To whoever the reeds speak to\nMy husband Jorun poled out on the fourth day of Rain's Hand and did not come back. I have lit the lantern each night since. If he is lost, tell him the way is east, then left, then east again. If he is gone, tell him the lantern is still lit."
+     ]
+    }
+   ]
+  },
+  "hist_stride_camp": {
+   "hook": "A ragged tent-camp of Gideon's edge, where children feed dates to whatever wanders in, whether or not it has a rider.",
+   "rumour": "A guar wandered into the Hist-Stride camp last week and was fed dates by three delighted children. It has been looking vindicated ever since.",
+   "notes": [
+    {
+     "id": "children_chalk",
+     "kind": "notes",
+     "title": "Chalk on the Water-Barrel",
+     "author": "The camp children",
+     "at": "site",
+     "pages": [
+      "#Rules\nNo scaring the guar. No riding the guar. No telling the grown-ups where the guar is. If the guar likes you, it will eat your dates. If the guar does not like you, it will still eat your dates."
+     ]
+    }
+   ]
+  },
+  "mire_song_burrow": {
+   "hook": "A burrow beneath the dry plateau where a hidden cistern sings softly, and the singing has lately drawn thieves.",
+   "rumour": "Water has been drawn from the Basin Well at night, a hand a night, for three nights. The well-keeper says there is a second pipe, and a cistern, and a song in the dark that does not come from a throat.",
+   "notes": [
+    {
+     "id": "cistern_tally",
+     "kind": "list",
+     "title": "A Thief's Water Tally",
+     "author": "The cistern crew",
+     "at": "chest",
+     "pages": [
+      "#Drawn\nNight one: one hand. Night two: one hand. Night three: one hand and a half. The trader pays by the barrel and does not ask. The valve is cracked and weeps at the seam; we have packed it with clay and prayed.\n\nIf the keeper finds the pipe, run. If the keeper finds the cistern, run faster."
+     ]
+    }
+   ]
+  }
+ }
+}

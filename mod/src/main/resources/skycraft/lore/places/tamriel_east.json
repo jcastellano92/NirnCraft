@@ -988,6 +988,18 @@
       "Uvren,\nThe new stone in the lower city is pale. It looks like a scar on the old black. The masters say it will darken with ash in thirty years. I don't want to wait thirty years. I want it to look like home now.",
       "Priestess Ilvari came through the gardens this evening and stood by the south wall till the sun was gone. I asked her what she was looking at. She said 'something of the Lady's, in the hands of something that isn't'. Then she gave me a twilight rose to plant. It took. It's the only thing this season that has."
      ]
+    },
+    {
+     "id": "gazetteer",
+     "kind": "list",
+     "title": "The Bazaar and the Temple: A Short Guide",
+     "author": "Lisara Tervyn, palace archivist",
+     "at": "site",
+     "pages": [
+      "#Names worth knowing\nArchcanon Teris Ulvani receives visitors in the temple courtyard and asks for nothing. Mistress Hlaren runs the Great Bazaar's guild stall and stamps contracts. Old Sedyn leads a lantern into Old Mournhold every Sundas and has never been lost. Gaela Nelvan serves cold tea at the Silver Samovar whenever someone is listening.",
+      "#What the guide does not say\nThe Silver Samovar's back table is where deals are made. Orlen Veloth's smithy opens when he has stopped shouting at the anvil. Ravos Dren is a student of public architecture; keep your purse in your hand. The palace archive has a second basement. We have all agreed that it does not."
+     ],
+     "reveals": "old_mournhold"
     }
    ]
   },
@@ -1014,6 +1026,18 @@
       "#Rents collected, Hearthfire\nThe Dren cousins, ground floor: paid in full, with a note complaining of the smell of the Waterworks. Complaint filed under 'water'.\nThe Argonian fishmonger Sweet-Tail: paid in full in fish. Fish accepted at market rate minus the smell.",
       "Unit 14, upper tier: unpaid three months. The tenant is a 'scholar of the Boethiah stones' and says he will pay when the Prince of Plots grants him a fortune. Councillor Curio says to leave him be, as he finds the man amusing. I find him behind in his rent. We are both right."
      ]
+    },
+    {
+     "id": "gazetteer",
+     "kind": "list",
+     "title": "A Visitor's Directory of the Hlaalu Canton",
+     "author": "Tosa the Cantonkeeper",
+     "at": "site",
+     "pages": [
+      "#Who is where\nWarden Telyne Aryon keeps the canton stairs, mornings, and knows which are loose. Tosa the Cantonkeeper minds the water-gates; find her at low tide, never at flood. Brother Fendil sells blessings on the Temple stairs at any hour that has pilgrims. Hlenil Dro ferries to every canton and will not discuss what lies under the water.",
+      "#Inns, shops and small secrets\nThe Sunken Lantern (Ruvene Olvyn) charges by the flight of stairs to your room; she has counted them all. Bethal's Dry Goods and Wet Alibis sells umbrellas in a city where it never rains. The handles are hollow. Do not ask. The Last Stair at the Palace gate is a wall; the hospice behind the shrine, sixteen cots, is not."
+     ],
+     "reveals": "hawia_egg_mine"
     }
    ]
   },
@@ -1040,6 +1064,18 @@
       "#Night of the 2nd\nDrals got up at the second hour and walked to the door with his eyes open. I said his name. He said 'the Mother is singing'. Our mother is twelve years in the ground.",
       "#Night of the 5th\nTied him to the bed. Woke to find the rope bitten through and the door open. Found him at the edge of town at dawn, facing north-east, toward the Vaermina stones, standing in a ring of others. All sleeping. All smiling.\n#Night of the 6th\nI am going to ask the outlanders at the Council Club. One of them might be mad enough to walk up there."
      ]
+    },
+    {
+     "id": "gazetteer",
+     "kind": "list",
+     "title": "Factor, Fence and Ferry: Balmora by Name",
+     "author": "Port-Master Orrel",
+     "at": "site",
+     "pages": [
+      "#The people of the river\nFactor Dron Hlaalu keeps the Council Manor and the river with equal care. Nilena Vandas is a freight consultant on the south bank and will tell you she has never held anything for anyone. Hesta Girith the apothecary sells poultices and, on quieter days, apologies. Rilvo Aleth of the Legion watches the high bridge and will tell you to keep to the left.",
+      "#Eating, drinking and being cheated\nEight Plates serves eight plates a night; the ninth guest goes hungry. It is a policy, not a shortage. South Wall Cornerclub has rules about singing before sundown and cheating after; everything between is a negotiation. The silt strider called Dowager has been known to sit on caches of silk. Do not tell her she is brave."
+     ],
+     "reveals": "eight_plates"
     }
    ]
   },
@@ -1066,6 +1102,18 @@
       "Garyn,\nYou write that Cyrodiil is green and wet and that nobody coughs. I am happy for you. Here the ash is so thick this year we eat it in our bread and call it pepper.",
       "Your sister has joined the Redoran Guard. She says she is protecting the house. She is protecting a wall. But she is good at it, and the wall is still standing, and so is she.\nCome home when your service ends. Bring Imperial tea. Do not bring an Imperial wife, your father is too old for the argument."
      ]
+    },
+    {
+     "id": "gazetteer",
+     "kind": "list",
+     "title": "A Roster of the Shell",
+     "author": "Rolfa Skar-Guard",
+     "at": "site",
+     "pages": [
+      "#The Council and the town\nCouncilor Brara Redoran sits in the Skar and counts honour like debt. Captain Rolfa Skar-Guard keeps the gate and explains rules slowly. Brarmin the egg-miner knows the tunnels under the town and does not whistle. Tevra Dren the apothecary sells marshmerrow and, she says, no poisons. Durgul Ash-Born duels for hire and insists he is no assassin.",
+      "#Inns and secrets\nThe Rat in the Pot has a pot and no rat. There was a rat; it is on the sign, and has recently been given a very small crown. The Ald Skar Inn's smith, Velan Arethi, will replace any chitin plate he did not break. The shell hums three notes on certain nights. The third is wrong."
+     ],
+     "reveals": "ahallaraddon_egg_mine"
     }
    ]
   },
@@ -1092,6 +1140,18 @@
       "Honoured Steward,\nThe Mistress's tower has been coughing spores onto the harbour for nine days. My nets are white with them. My catch has grown little caps. My wife's hair has grown a little cap. I ask, with every respect, that the Mistress be asked to cover her tower's mouth.",
       "I understand that the Mistress does not answer petitions from fishermen. I understand that the Mistress has a long memory. I would point out, respectfully, that I also have a long memory, and a boat, and I know which rocks the Mistress's supply ships like to avoid."
      ]
+    },
+    {
+     "id": "gazetteer",
+     "kind": "list",
+     "title": "Towers, Spores and Rooms That Move",
+     "author": "Dalyne Hlaren of the Gateway Inn",
+     "at": "site",
+     "pages": [
+      "#Who lives where\nMagister Gaenor Dreth levitates above the Council Spire and is perpetually bored. Magister Ulveni Rathra keeps fourteen floors, eleven guardians and a singing teapot at Tel Naga. Skeema the Sporekeeper tends the greenhouses and will tell you not to look at the grey ones. Apprentice Veya carries slippers up fourteen floors and would like to learn something else.",
+      "#Rooms and rumours\nEvery window of the Gateway Inn shows somewhere; room nine has recently shown a woman in a green shawl. Fennik Sul's Spore & Sundry sells fumigation salts and asks that glowing jars be closed again. Sergeant Maro Gallus keeps the Wolverine Hall garrison and the Legion's distance from the towers."
+     ],
+     "reveals": "tel_naga"
     }
    ]
   },
@@ -1118,6 +1178,18 @@
       "#Arrivals, Last Seed\nThe Abecean Rose from Anvil: wine, salt, and an inspector from the Company's head office. Inspector given the best room and the worst figures we could find, so as to set expectations.",
       "#Departures, Last Seed\nThe Ondusi Gull for Windhelm: kwama eggs, saltrice, three crates of 'Telvanni pottery'. The pottery hums. Passengers: two Orc masons for the Malacath festival, one widow, one Bosmer who would not stop asking whether the ship was haunted. It is not. That we know of."
      ]
+    },
+    {
+     "id": "gazetteer",
+     "kind": "list",
+     "title": "Bastion and Quarter: Who Is Who",
+     "author": "Chaplain Loris",
+     "at": "site",
+     "pages": [
+      "#Garrison and Company\nLegate Corvus Pello wants order and a name by evening. Chaplain Loris hears the garrison's confessions, which are short. Felmin Rothal at the Company Hall will discuss margins openly; it is the only thing the Company does not hide. Guardsman Tolan Veyl keeps the south gate and an eye on his mother's medicine.",
+      "#The Quarter and its fixers\nAryn the Informer stands lower than anyone else and charges for the view. Marga Ironhand's Bastion's Heel serves two kinds of beer; ask for the one the garrison pretends it does not drink. Three guards salute a stone in the ash-flowers each dusk. Nobody has mentioned it to the Legate."
+     ],
+     "reveals": "imperial_chapels"
     }
    ]
   },
@@ -1146,6 +1218,18 @@
       "#Arrived Necrom\nThe city is bone-white and silent. The priests walk softly. A child asked me whose grandmother I had come to visit. I said mine. She said 'which one?' and pointed down. I did not sleep well.",
       "#Second day\nLaid Mother's ashes in the Ules alcove. The alcove was already full. The priest said 'they'll make room', and something below the floor shifted. I gave a larger donation than I had planned. I suspect that is how the mortuary is funded."
      ]
+    },
+    {
+     "id": "gazetteer",
+     "kind": "list",
+     "title": "A Pilgrim's Reckoning of the Row",
+     "author": "Mirele Sathil of the Pilgrims' Rest",
+     "at": "site",
+     "pages": [
+      "#The living of the Row\nKeeper Salvu hears the dead and passes on the polite ones. Elder Nerevi guards the Row and lets no outlander in without a guest list. Aldrin the Restless has dug four hundred graves and will not dig one more. Tadrik Ulvo sells shrouds, urns and sympathy cards, with no refunds.",
+      "#Candles, counts and one small secret\nThe Pilgrims' Rest sets out forty-one candles each night and finds forty-two each morning. The extra belongs to a girl who never reached the shrine. Say her name aloud. It helps. Mind the third step of the Row; the elder's husband did."
+     ],
+     "reveals": "iveran_ancestral_tomb"
     }
    ]
   },
@@ -1488,6 +1572,18 @@
       "^By the King's word\nAll Saxhleel held in debt-service on the lands of any foreigner are free from this day, and the debts are void. Any foreigner who disputes this is invited to dispute it with the Envoy in Stormhold, in person, at dusk.",
       "The Envoy notes that few have accepted this invitation. The Envoy notes that those who did were persuaded. The Envoy wishes all foreigners a pleasant and lawful stay in the King's marsh, and reminds them that the marsh has a very long memory and very many eyes."
      ]
+    },
+    {
+     "id": "gazetteer",
+     "kind": "list",
+     "title": "Two Hills, One Bridge: A Directory",
+     "author": "Bridge-Wife Soft-Step",
+     "at": "site",
+     "pages": [
+      "#People of the stones\nWarden Scales-Her-Chains keeps the bridge and the peace between the hills. Stone-Carver Nook carves what is not the stone and refuses to touch the idol. Scout Fast-Eyes sees much and says a tenth. Pebble-Pocket sells rope, hook, oil and boots, and will not sell the gorge.",
+      "#Beds and a quiet secret\nThe Two Hills Rest has a door for each ziggurat and soup on the bridge. Do not drop the bowl. The sleeping idol of the north hill has one eye very slightly open, and the south hill carved it so. The old White Rose prison holds one elder who wishes only to be asked a question."
+     ],
+     "reveals": "silyanorn_ruins"
     }
    ]
   },
@@ -1514,6 +1610,18 @@
       "Reward offered for the recovery of the field journal of Adrienne Lirrian, Associate of the Guild, who travelled to the Daedric monument of Hermaeus Mora west of Stormhold to study the alleged intertwining of a Hist root with the monument's stone.",
       "Associate Lirrian is presumed lost. Her assistant, Kassus, returned to Gideon, briefly, and then left again in the night for the shrine, reciting what we believe to be page numbers. If he is found, do not argue with him. He knows things now that do not bear arguing with. Bring the journal. Bring Kassus too, if he still answers to his name."
      ]
+    },
+    {
+     "id": "gazetteer",
+     "kind": "list",
+     "title": "The Plateau by Name",
+     "author": "Magistrate Lucia Verrus",
+     "at": "site",
+     "pages": [
+      "#Water, grain, law\nWell-Keeper Dusk measures the Basin Well each dusk and each dawn and trusts nobody's plumb-line. Granary-Mother Seshi knows each person's debts by their pockets. Watcher Tamtam has watched for rain for eleven years. Magistrate Lucia Verrus keeps the courthouse and will not discuss the goat.",
+      "#Inn and clay\nThe Stable Steed feeds the guar first; it is economics, not discrimination. Nesa Clay-Hand makes pots and one very ugly, much-loved idol. Twyllbek ruins hold a lead tube with the grant to the Eastern Cut. It belongs to the road."
+     ],
+     "reveals": "twyllbek_ruins"
     }
    ]
   },
@@ -1540,6 +1648,18 @@
       "^Here we sank the chains\nIn the year the mountain burned we went north. We went to the houses where our grandparents were kept. We did not take gold. We took the chains, every one we could find, and we brought them home, and we gave them to the water.",
       "The water turned black and has stayed black. The elders say it is the chains rusting. The young say it is the water refusing to forget. Both are true. Any Saxhleel may come here and drop a stone for an ancestor who wore iron. The pool is very full of stones."
      ]
+    },
+    {
+     "id": "gazetteer",
+     "kind": "list",
+     "title": "Rebuilders and the Ring: A Roll",
+     "author": "Mason Noo",
+     "at": "site",
+     "pages": [
+      "#Who lifts what\nRebuilder Pa-Dar wants to know why the ninth stair stops at the sky. Mason Noo measures twice and still apologises to the stone. Elder Teeba remembers where the stairs led and has told no one. Kessa Rope-Walker sells rope, pitch and plumb, and will not discuss the bridge.",
+      "#Beds and a stair\nThe Broken Ring's roof is new and its walls are old. The rope-walks sway; the long one has won a week's pay for a nameless stranger. The ninth stair needs a black wedge from a jar marked with a spiral. It is in the mason's old yard."
+     ],
+     "reveals": "sun_egg_ruins"
     }
    ]
   },
@@ -1568,6 +1688,18 @@
       "To the Mission in Alinor:\nI have attended the so-called court of the so-called King of Argonia. There is no throne. There is a tree. The King sits beneath it and listens to petitioners who speak to the tree, not to him. When I asked to be presented, I was told that the tree had already been informed of my presence and was considering it.",
       "I recommend we not attempt anything in Lilmoth. Every Argonian in the room looked at me at once when I entered, and I am quite certain none of them turned their heads."
      ]
+    },
+    {
+     "id": "gazetteer",
+     "kind": "list",
+     "title": "Canals, Boats and Who Rows Them",
+     "author": "Boatwife Mudtoe",
+     "at": "site",
+     "pages": [
+      "#Names on the water\nKeeper Sees-Many-Moons tends the Hist pool. Boatwife Mudtoe knows every canal's name and mood. Trader Ocheeva imports Cyrodiilic cloth and wine and regrets it. Tribune Lucius Varro counts what comes in and refuses to accept that it does not match. Sap-Fence Ruu sells the not-sacred kind of sap, by the thimble.",
+      "#Beds, bowls and small debts\nThe Dripping Reed asks guests to say where they are going; the canals are patient, not forgiving. A rice merchant on the fourth canal keeps seven debt-boats and a second ledger in the rafters. The fourth canal's old tenant is bad-tempered but not yet hungry. Keep to the left of every bend."
+     ],
+     "reveals": "alten_meerhleel"
     }
    ]
   },
@@ -1593,6 +1725,17 @@
      "pages": [
       "Dear Society,\nI have mapped the path from Lilmoth to Murkmire four times. It has been a different path each time. My guide says the path did not change; I did. I have asked him to clarify. He says I will understand when I hatch.",
       "I enclose all four maps. Please file them together under 'Murkmire, approaches, provisional'. Please do not send another cartographer. Please do send boots. Mine have been adopted by a family of frogs, and the village elders say it would be rude to reclaim them."
+     ]
+    },
+    {
+     "id": "gazetteer",
+     "kind": "list",
+     "title": "What Is Said and Not Said in Murkmire",
+     "author": "Child Pip",
+     "at": "site",
+     "pages": [
+      "#The people\nElder Nulaa keeps the fire in the middle of the spiral. Hunter Teek hunts in silence and has found that most things can wait. Rice-Mother Mussa grows three crops a year and says you are too thin. Pip is a child, and talks more than the rest together.",
+      "#The path\nEvery child walks the spiral once and brings a coal back to their own door. You do not speak. You do not drop the coal. Nobody tells what the fire said. The north paddy had a frog in a noble's collar; the scarecrow wears it now."
      ]
     }
    ]

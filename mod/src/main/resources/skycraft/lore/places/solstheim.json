@@ -67,6 +67,18 @@
       "Brother,\nYou asked whether Raven Rock is better than Windhelm. The Nords here do not spit at us. The ash, on the other hand, gets into everything: the bedding, the scuttle, my teeth. I sweep the step four times a day and Mother says it is the ancestors visiting.",
       "Something else, and do not laugh. Three nights ago I woke on the road outside the gate with my hands bleeding and a stone in each fist. Old Aulus, the Imperial, found me and walked me back. He says he saw a dozen others out there, all carrying stones toward the west. Nobody remembers. Nobody wants to talk about it. Send word from Windhelm if you hear of a cure for walking in one's sleep. Your sister, Ilvi."
      ]
+    },
+    {
+     "id": "gazetteer",
+     "kind": "list",
+     "title": "Bulwark Roll: Who Keeps What",
+     "author": "Captain Veleth Adren",
+     "at": "site",
+     "pages": [
+      "#The garrison and the diggers\nCaptain Veleth Adren counts rations by the bowl and the dead by the grave. Foreman Gorm Stonehand reports nine; the graves say fourteen. Sister Ilvani keeps the one-hall chapel and a congregation of forty on a good Sundas. Ashlander Tuvi trades at the gate and sleeps outside it.",
+      "#The wharf and the heap\nTindra Hael's Salvage and Salt prices everything the mine spits out. Rolan the dockhand will teach you the middle plank. The windward wall has two sentries too many at the second bell. Whatever you do, do not whistle on the third landing of the shaft."
+     ],
+     "reveals": "damphall_mine"
     }
    ]
   },
@@ -95,6 +107,18 @@
       "~All-Maker, you made the snow and the seal beneath it.\n~You made the spear-arm and the hunger.\n~What I take today I do not own;\n~I hold it for a while, as I hold my breath.\n~When I fall, take me back the way you take the beast:\n~without anger, and without waste.",
       "Spoken by every Skaal hunter at the edge of the village before the hunt, with the right hand on the doorpost and the left on the spear. Children learn it before they learn to throw. Outlanders who hear it sometimes laugh. The Skaal let them laugh, and notice which ones come home from the ice with full sledges and which do not."
      ]
+    },
+    {
+     "id": "gazetteer",
+     "kind": "list",
+     "title": "Counting the Skaal Fire",
+     "author": "Little Ketil",
+     "at": "site",
+     "pages": [
+      "#Who sits at the fire\nElder Hjalmgerd keeps the fire that has never gone out and the Telling, ninety-nine verses of a hundred. Aslfur Wide-Eye hunts and brings home trophies that are slightly wrong. Wren Wind-Listener says the wind has gone quiet. Bodil Hide-Scraper trades pelts and silence. Torvald Boat-Mender talks politely to the sea.",
+      "#The hundredth verse\nIt is said chief Frodi named Haknir's Shoal with his last breath. A bone slip lies in a cairn there. Ketil says the wind has a name, and it is Frodi. Wren did not say no."
+     ],
+     "reveals": "haknirs_shoal"
     }
    ]
   },
@@ -123,6 +147,18 @@
       "To Geldis Sadri at the Retching Netch,\nYou owe me for four casks of honey-mead, and I owe you an apology for the state of your back room after my cousins drank there. Call it even. I need a favour instead of coin.",
       "Send me anyone who can fight and does not drink more than they kill. The riekling chief who calls himself Kruk Gnaw-Tooth sits at Frossel on the north shore with the Spear of Thirsk across his knees. My people will not follow me into that den again until someone shows them it can be done. I will pay what I have, and the spear goes to the one who takes it, if they swear to bring it to the hall on feast days. Brenna."
      ]
+    },
+    {
+     "id": "gazetteer",
+     "kind": "list",
+     "title": "Notes for Guests of Thirsk",
+     "author": "Sigrun Rib-Wright",
+     "at": "site",
+     "pages": [
+      "#Under the ribs\nSkald Hrolf Iron-Brow wants a beast. Ingrid Bone-Singer sings battles that did not happen to crowds that weep. Odd the Brewer's mead is honest; his dice are not. Brynja Trail-Reader reads tracks like letters. Sigrun Rib-Wright hangs the beams and mends the spears.",
+      "#The yard and the dice\nThe oldest rib-beam was once carried off by a boar who thought it was its grandfather's. The dice have lead on the one. The ridge above the Beast Stone has a snow-boar the size of a hut."
+     ],
+     "reveals": "allmaker_beast_stone"
     }
    ]
   },
@@ -151,6 +187,18 @@
      "pages": [
       "Visitors to the tower are reminded:\nDo not touch the netches. They are not pets.\nDo not touch the apprentices. They are not pets either, though some of them may be experiments.\nDo not ask the master about his age, his health, his rivals, or Vvardenfell.\nDo not climb the stalks. The levitation stops working at the top for anyone the master has not keyed into it. He has keyed in no one.\nThe steward accepts no responsibility for growths, curses, or transfigurations acquired while ignoring this notice."
      ]
+    },
+    {
+     "id": "gazetteer",
+     "kind": "list",
+     "title": "A Visitor's Guide to the Tower",
+     "author": "Pelli Sporeheart",
+     "at": "site",
+     "pages": [
+      "#Who lives in the cap\nMagister Ildar Neloth-Kin is brilliant and petulant and wishes to be his uncle. Apprentice Duvren has touched the mushroom with the ribbon on it. Yarda Net-Girl sells rumours for cake and coin. Pelli Sporeheart tends the garden and says: wipe your boots.",
+      "#Rules of the tower\nThe tower grows by a rule: one spore asked, one spore given. The cellar holds a second mushroom that eats compliments. Do not say anyone looks well. The test chamber breathes; count to four before you act."
+     ],
+     "reveals": "black_book_epistolary"
     }
    ]
   },

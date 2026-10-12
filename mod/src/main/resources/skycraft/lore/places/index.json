@@ -8,5 +8,7 @@
  "skyrim_north.json",
  "solstheim.json",
  "tamriel_east.json",
- "tamriel_west.json"
+ "tamriel_west.json",
+ "marquee_morrowind.json",
+ "marquee_black_marsh.json"
 ]
