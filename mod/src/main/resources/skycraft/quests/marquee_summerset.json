@@ -1,0 +1,2454 @@
+{
+ "line": "marquee_summerset",
+ "category": "side",
+ "npcs": [
+  {
+   "id": "mq_sum_aelwen",
+   "name": "Chancellor Aelwen",
+   "role": "steward",
+   "place": "alinor",
+   "offset": [
+    5,
+    6
+   ],
+   "female": true,
+   "greet": "Aelwen guards the Ledger of Precedent, in which is written every ruling the Royal Court has made since the Dawn. She has never once been seen to consult it. She simply knows. That, she says, is the whole point of a ledger."
+  },
+  {
+   "id": "mq_sum_ildren",
+   "name": "Prism-Smith Ildren",
+   "role": "blacksmith",
+   "place": "alinor",
+   "offset": [
+    -8,
+    7
+   ],
+   "greet": "Ildren cuts light for a living. He keeps a rack of quartz wedges by the window and says he can make a ray bend, a beam split or a sunrise last four minutes longer. He says no one has ever asked for the fourth."
+  },
+  {
+   "id": "mq_sum_valia",
+   "name": "Seneschal Valia",
+   "role": "steward",
+   "place": "alinor",
+   "offset": [
+    10,
+    -6
+   ],
+   "female": true,
+   "greet": "Valia tests the loyalty of Alinor's lesser officials by leaving gold in unlocked rooms and noting who takes what. She considers it a courtesy. They do not."
+  },
+  {
+   "id": "mq_sum_prism_plover",
+   "name": "Ondolemar of the Prism and Plover",
+   "role": "innkeeper",
+   "place": "alinor",
+   "offset": [
+    -3,
+    -10
+   ],
+   "greet": "The Prism and Plover is a glass-walled tavern whose roof is a ceiling of faceted quartz that splits the noon sun into forty separate rainbows. Ondolemar charges extra for the rainbows. He has never explained why they are optional."
+  },
+  {
+   "id": "mq_sum_maelia",
+   "name": "Chief Librarian Maelia",
+   "role": "scholar",
+   "place": "lillandril",
+   "offset": [
+    5,
+    5
+   ],
+   "female": true,
+   "greet": "Maelia keeps the Great Library's catalogue and has not misplaced a book in forty years. She has misplaced one this week. She is holding herself together very precisely."
+  },
+  {
+   "id": "mq_sum_thalor",
+   "name": "Orrery-Keeper Thalor",
+   "role": "mage",
+   "place": "lillandril",
+   "offset": [
+    -8,
+    6
+   ],
+   "greet": "Thalor tends the bronze rings of the Orrery Court. He winds them every dawn with a golden key and a brief apology to each. The planets, he says, have feelings, and the feelings are mostly regret."
+  },
+  {
+   "id": "mq_sum_rilen",
+   "name": "Student Rilen",
+   "role": "scholar",
+   "place": "lillandril",
+   "offset": [
+    10,
+    -5
+   ],
+   "greet": "Rilen is nineteen, brilliant and very sure of it. He is hoping for a particular forbidden volume. He will tell you that it is \"for research.\" He has been saying that for a month."
+  },
+  {
+   "id": "mq_sum_dog_ear",
+   "name": "Ellanwe of the Dog-Eared Page",
+   "role": "innkeeper",
+   "place": "lillandril",
+   "offset": [
+    -3,
+    -9
+   ],
+   "female": true,
+   "greet": "The Dog-Eared Page is a quiet tavern where conversation is held at a whisper and every drink comes with a small slip of paper bearing a line from a poem. Ellanwe selects the poem. She says it is a diagnosis."
+  },
+  {
+   "id": "mq_sum_calantir",
+   "name": "Lord Calantir",
+   "role": "steward",
+   "place": "cloudrest",
+   "offset": [
+    6,
+    5
+   ],
+   "greet": "Lord Calantir has inherited a palace with no walls and a title with no duties. He is bored in a very expensive way. He will pay almost anything to be entertained, and almost nothing to be amused."
+  },
+  {
+   "id": "mq_sum_ewen",
+   "name": "Sea-Lift Pilot Ewen",
+   "role": "citizen",
+   "place": "cloudrest",
+   "offset": [
+    -7,
+    6
+   ],
+   "greet": "Ewen pilots the sea-lift, a counterweighted cage that carries visitors from the palace balconies to the water. He is afraid of heights, which he considers a professional qualification."
+  },
+  {
+   "id": "mq_sum_aviel",
+   "name": "Steward Aviel",
+   "role": "steward",
+   "place": "cloudrest",
+   "offset": [
+    9,
+    -7
+   ],
+   "female": true,
+   "greet": "Aviel keeps the palace running and the lord from noticing. She has been loyal for twenty years and mildly insane for fifteen. She counts the glass panes of the Balcony Walk every morning, and has not yet arrived at the same number twice."
+  },
+  {
+   "id": "mq_sum_wall_less",
+   "name": "Ariadwe of the Wall-Less Inn",
+   "role": "innkeeper",
+   "place": "cloudrest",
+   "offset": [
+    -3,
+    -10
+   ],
+   "female": true,
+   "greet": "The Wall-Less Inn has a roof and a floor and no walls whatever. It is therefore always in a draught. Ariadwe serves hot drinks in cups with lids, and warns every patron, kindly, not to lean back."
+  },
+  {
+   "id": "mq_sum_taleth",
+   "name": "Astronomer Taleth",
+   "role": "mage",
+   "place": "skywatch",
+   "offset": [
+    5,
+    6
+   ],
+   "female": true,
+   "greet": "Taleth measures the heavens to the fourth decimal and has never once been caught guessing. She wears three pairs of spectacles at once, each ground for a different star."
+  },
+  {
+   "id": "mq_sum_maril",
+   "name": "Student Maril",
+   "role": "scholar",
+   "place": "skywatch",
+   "offset": [
+    -7,
+    5
+   ],
+   "female": true,
+   "greet": "Maril is the brightest student at Skywatch and the quickest to say so. She has found a planet that is not on the charts. She has not yet decided whether to tell the Astronomer."
+  },
+  {
+   "id": "mq_sum_ond",
+   "name": "Ring-Keeper Ond",
+   "role": "citizen",
+   "place": "skywatch",
+   "offset": [
+    10,
+    -5
+   ],
+   "greet": "Ond has swept the outer ring of the Great Orrery for sixty years. He has not looked up in all that time, because \"it is not my department.\""
+  },
+  {
+   "id": "mq_sum_seventh_ring",
+   "name": "Eilis of the Seventh Ring",
+   "role": "innkeeper",
+   "place": "skywatch",
+   "offset": [
+    -3,
+    -10
+   ],
+   "female": true,
+   "greet": "The Seventh Ring is a round tavern at the top of the Orrery, where the tables turn very slowly on a hidden gear. Eilis says it makes one full turn per night, so everyone sees every view. She has never explained who winds the gear."
+  },
+  {
+   "id": "mq_sum_sen",
+   "name": "Lamp-Keeper Sen",
+   "role": "citizen",
+   "place": "dusk",
+   "offset": [
+    5,
+    6
+   ],
+   "greet": "Sen lights the lamps of Dusk at the first purple hour and puts them out at the first grey one. He knows every lamp by name and calls the dim ones \"the sleepy\". He has not been seen in daylight since the winter of his wedding."
+  },
+  {
+   "id": "mq_sum_eilen",
+   "name": "Harbourmaster Eilen",
+   "role": "steward",
+   "place": "dusk",
+   "offset": [
+    -7,
+    5
+   ],
+   "female": true,
+   "greet": "Eilen keeps the quay of Dusk with a voice like a closing door. She speaks seldom and never repeats herself. When she does speak, ships turn."
+  },
+  {
+   "id": "mq_sum_orla",
+   "name": "Pale Merchant Orla",
+   "role": "merchant",
+   "place": "dusk",
+   "offset": [
+    9,
+    -6
+   ],
+   "female": true,
+   "greet": "Orla sells bone-white lace, lilac wax and candles that burn the colour of twilight. She only opens her stall after sunset, and no one has ever seen her eat. Customers describe her as \"restful\"."
+  },
+  {
+   "id": "mq_sum_lilac_quill",
+   "name": "Wenlin of the Lilac Quill",
+   "role": "innkeeper",
+   "place": "dusk",
+   "offset": [
+    -3,
+    -10
+   ],
+   "female": true,
+   "greet": "The Lilac Quill is a harbour tavern with lilac-paned windows through which the whole town looks bruised at dusk. Wenlin keeps a book of every ship that failed to return. He writes a new page each night, in lilac ink."
+  },
+  {
+   "id": "mq_sum_fen",
+   "name": "Dock-Master Fen",
+   "role": "steward",
+   "place": "shimmerene",
+   "offset": [
+    6,
+    5
+   ],
+   "greet": "Fen runs the Lantern Docks like a clock. He keeps a rota for every ship, every crane and every seagull he has personally named. He does not have friends. He has a very large number of acquaintances."
+  },
+  {
+   "id": "mq_sum_yeli",
+   "name": "Sail-Maker Yeli",
+   "role": "merchant",
+   "place": "shimmerene",
+   "offset": [
+    -8,
+    6
+   ],
+   "female": true,
+   "greet": "Yeli stitches teal sails in the sail-loft and says a sail is a wish with a seam. She will sew your name into the hem of your sail for free, so the wind knows whom to blow."
+  },
+  {
+   "id": "mq_sum_tor",
+   "name": "Navigator Tor",
+   "role": "adventurer",
+   "place": "shimmerene",
+   "offset": [
+    10,
+    -6
+   ],
+   "greet": "Tor steers by a knot of coloured string that he refuses to explain. He is gruff, patient and has never been lost. This, he says, is because he has never admitted to it."
+  },
+  {
+   "id": "mq_sum_lantern_pole",
+   "name": "Miravel of the Lantern Pole",
+   "role": "innkeeper",
+   "place": "shimmerene",
+   "offset": [
+    -3,
+    -10
+   ],
+   "female": true,
+   "greet": "The Lantern Pole is a dockside tavern with a single enormous lamp-pole in the middle of the common room, hung with eleven lanterns for every ship that has docked here. Miravel lights them in order. She has never once been wrong about the order."
+  },
+  {
+   "id": "mq_sum_ro",
+   "name": "Gate-Keeper Ro",
+   "role": "steward",
+   "place": "firsthold",
+   "offset": [
+    5,
+    -5
+   ],
+   "greet": "Ro keeps the Tide Gate and knows the water's moods the way a baker knows dough. He says the sea has three tempers: sulking, working and showing off. It is always one of the three."
+  },
+  {
+   "id": "mq_sum_lyn",
+   "name": "Fisher Lyn",
+   "role": "fisher",
+   "place": "firsthold",
+   "offset": [
+    -6,
+    6
+   ],
+   "female": true,
+   "greet": "Lyn fishes from the platforms at low tide and is never in a hurry. She says the fish are not afraid of nets, they are afraid of people who are in a rush."
+  },
+  {
+   "id": "mq_sum_cael_priest",
+   "name": "Priest Cael of the Rock Chapel",
+   "role": "priest",
+   "place": "firsthold",
+   "offset": [
+    8,
+    6
+   ],
+   "greet": "Cael rings the Rock Chapel's bell at every tide and prays a different prayer for each one. He says the sea is a congregation and he is its very patient clerk."
+  },
+  {
+   "id": "mq_sum_tide_inn",
+   "name": "Naereth of the Tide-Turn Inn",
+   "role": "innkeeper",
+   "place": "firsthold",
+   "offset": [
+    -3,
+    -9
+   ],
+   "female": true,
+   "greet": "The Tide-Turn Inn sits on the causeway itself, so that at high tide its front steps are underwater and at low tide its back steps are dry. Naereth keeps two doors and charges accordingly."
+  },
+  {
+   "id": "mq_sum_quenel",
+   "name": "Adept Quenel of the Psijic Order",
+   "role": "mage",
+   "place": "college_of_psijics_ruins",
+   "offset": [
+    4,
+    4
+   ],
+   "greet": "Quenel is polite, patient and not entirely sure what hour it is. He tends the ruins of the old college with a small silver broom and says the stones prefer to be swept in the order they fell."
+  },
+  {
+   "id": "mq_sum_thel",
+   "name": "Initiate Thel",
+   "role": "scholar",
+   "place": "college_of_psijics_ruins",
+   "offset": [
+    -4,
+    5
+   ],
+   "greet": "Thel is an initiate of the Order and has not yet learned to forget what he is not allowed to say. He says half of every sentence aloud and the other half, he insists, is understood."
+  },
+  {
+   "id": "mq_sum_olo",
+   "name": "Ferrywoman Olo",
+   "role": "fisher",
+   "place": "statue_of_syrabane",
+   "offset": [
+    3,
+    -3
+   ],
+   "female": true,
+   "greet": "Olo rows the narrow strait to Artaeum and says she has done so for eleven years, though every year she has made exactly the same number of crossings. She is not sure how. She has stopped asking."
+  },
+  {
+   "id": "mq_sum_apple_claimant",
+   "name": "Orchard-Dame Syllaen",
+   "role": "farmer",
+   "place": "kings_haven",
+   "offset": [
+    3,
+    3
+   ],
+   "female": true,
+   "greet": "Syllaen swears the great apple tree at King's Haven is hers by right of her grandmother's grandmother. Her neighbour swears otherwise. Both of them harvest the same branches on alternate days and leave a polite apple at the other's door, which neither will eat."
+  },
+  {
+   "id": "mq_sum_bell_sexton",
+   "name": "Sexton Aldaer of Dawnbreak",
+   "role": "priest",
+   "place": "dawnbreak",
+   "offset": [
+    3,
+    -2
+   ],
+   "greet": "Aldaer rings the dawn bell every morning. For two weeks it has been ringing at midnight, and he has not touched the rope. He sleeps in the belfry now, with a lantern, to catch it in the act."
+  },
+  {
+   "id": "mq_sum_grove_watcher",
+   "name": "Grove-Watcher Ilmen",
+   "role": "scholar",
+   "place": "shattered_grove",
+   "offset": [
+    2,
+    2
+   ],
+   "greet": "Ilmen watches a single tree at Shattered Grove that has grown eleven feet in a week. He has measured it with a gold ribbon, twice a day, and the ribbon is no longer long enough."
+  },
+  {
+   "id": "mq_sum_netch_pilot",
+   "name": "Racer Quil of the Golden Netch",
+   "role": "adventurer",
+   "place": "the_golden_netch",
+   "offset": [
+    3,
+    3
+   ],
+   "female": true,
+   "greet": "Quil has entered the Golden Netch race eleven times and come second in every one. The winner never returns. Quil is of two minds about it."
+  },
+  {
+   "id": "mq_sum_matchmaker",
+   "name": "Matchmaker Belenwe",
+   "role": "innkeeper",
+   "place": "maras_kiss_public_house",
+   "offset": [
+    -3,
+    3
+   ],
+   "female": true,
+   "greet": "Belenwe has made four hundred matches at Mara's Kiss, of which three hundred and ninety-nine have held. She talks about the one that did not as though it were an old friend."
+  },
+  {
+   "id": "mq_sum_novice_mute",
+   "name": "Novice Tevildo",
+   "role": "priest",
+   "place": "trebbite_monastery",
+   "offset": [
+    2,
+    -3
+   ],
+   "greet": "Tevildo has broken a vow of silence, and will say why only to a stranger. He writes his name in the dust and rubs it out, again and again, as if testing whether it will stay."
+  }
+ ],
+ "relics": [
+  {
+   "id": "mq_sum_sixteenth_prism",
+   "name": "The Sixteenth Prism",
+   "desc": "A prism of rose quartz no larger than a thumb, cut with sixteen faces. One face is blank. Held to the light, it throws a seventeenth colour that no one has a name for.",
+   "icon": 20
+  },
+  {
+   "id": "mq_sum_precedent_leaf",
+   "name": "Leaf of the Ledger of Precedent",
+   "desc": "A single unbound page, gilded at the edges, written in the Chancellery's hand. It records a ruling nobody remembers and a judgment nobody has overturned. The ink has not faded in three thousand years.",
+   "icon": 11
+  },
+  {
+   "id": "mq_sum_missing_folio",
+   "name": "The Folio of Unbound Years",
+   "desc": "A single folio bound in grey buckram, its pages written in a hand that is somehow always slightly ahead of the reader. It lists dates that have not yet happened and names that do not yet exist.",
+   "icon": 15
+  },
+  {
+   "id": "mq_sum_catalogue_slip",
+   "name": "Catalogue Slip, Third Hand",
+   "desc": "A card-slip filed by a librarian who is not on the staff roll. The shelf-mark is correct. The library it refers to is not this one.",
+   "icon": 11
+  },
+  {
+   "id": "mq_sum_floor_crack_shard",
+   "name": "Shard of the Cracked Pane",
+   "desc": "A thumb-wide sliver of balcony glass, thick as a coin, its edge as sharp as a razor. A line of fine, grey sediment runs through it that is not frost, not dust and not salt.",
+   "icon": 20
+  },
+  {
+   "id": "mq_sum_orrery_gear",
+   "name": "The Seventh Gear",
+   "desc": "A palm-sized gear of bronze with seventeen teeth, one of them filed down and replaced by a stranger's metal. It still spins freely, though no axle is anywhere near it.",
+   "icon": 18
+  },
+  {
+   "id": "mq_sum_last_lamp",
+   "name": "The Unlit Lamp of Dusk",
+   "desc": "A tall lantern of bone-white glass and brass, its wick fresh, its oil full, never once lit. A tag in a child's hand is tied to its handle: 'for the one who is coming'.",
+   "icon": 17
+  },
+  {
+   "id": "mq_sum_drowned_cap",
+   "name": "Cap of the Lost Boatman",
+   "desc": "A small knitted cap of undyed wool with a lilac ribbon, stiff with salt. A single thread in the ribbon is a different, older wool that does not belong to any Summerset flock.",
+   "icon": 11
+  },
+  {
+   "id": "mq_sum_smuggler_manifest",
+   "name": "The Second Manifest",
+   "desc": "A ship's manifest written on thin slate-paper, with a pale blue Maormer wave-mark pressed beside every third entry. The cargo it lists is not on any customs roll.",
+   "icon": 11
+  },
+  {
+   "id": "mq_sum_lamp_tag",
+   "name": "Tag of the Replaced Lantern",
+   "desc": "A brass tag from a dock lantern pole, stamped with a number that does not match any lantern in the harbour. The paint on the lantern it hung beneath was a different blue.",
+   "icon": 26
+  },
+  {
+   "id": "mq_sum_hem_sail",
+   "name": "The Sail with a Name in Its Hem",
+   "desc": "A small teal sail, folded in thirds and kept dry in oilcloth. Along the hem, in tiny stitches of dark thread, is a girl's name and a date. A seam inside has been mended three times by somebody who did not have to.",
+   "icon": 11
+  },
+  {
+   "id": "mq_sum_gate_key",
+   "name": "Key of the Tide Gate",
+   "desc": "An iron key green with verdigris, as long as a forearm, its bow cast as a closing wave. A salt-crust has grown over the bit, and a very small crab has made its home in the ward.",
+   "icon": 26
+  },
+  {
+   "id": "mq_sum_psijic_token",
+   "name": "Psijic Token of Passage",
+   "desc": "A flat disc of grey-green stone, warm as a cheek. When it is dropped, it lands at a different place on the floor each time, and none of them are where it fell.",
+   "icon": 26
+  },
+  {
+   "id": "mq_sum_mirror_shard",
+   "name": "Shard of the False Door",
+   "desc": "A sliver of mirror from the Traitor's Vault. It shows not your face, but the face you would wear if you had said yes to the last thing that tempted you.",
+   "icon": 20
+  },
+  {
+   "id": "mq_sum_eleventh_apple",
+   "name": "The Eleventh Apple",
+   "desc": "A single golden apple from the disputed tree at King's Haven, heavy as a fist, warm to the touch. A ring of tiny script is pressed into its skin: the names of every orchard-dame who has ever claimed it.",
+   "icon": 20
+  },
+  {
+   "id": "mq_sum_midnight_rope",
+   "name": "Knotted Dawn-Bell Rope",
+   "desc": "A short length of bell-rope, tied in a complicated knot that unties itself and re-ties whenever it is looked away from. The knot is neither Altmer nor Psijic in make.",
+   "icon": 11
+  },
+  {
+   "id": "mq_sum_race_banner",
+   "name": "The Winner's Banner",
+   "desc": "A cloth banner embroidered with a golden netch and the word WINNER in a silver thread. It has been washed many times. It does not smell of balloons or of sky. It smells faintly of a place that has no weather.",
+   "icon": 11
+  },
+  {
+   "id": "mq_sum_orchard_deed",
+   "name": "Deed of the Eleven Apples",
+   "desc": "A parchment deed in an archaic hand, leaf-stamped, granting the orchard of King's Haven 'to the two daughters of the house, jointly, for as long as the tree bears'. The word jointly has been underlined by a very patient clerk.",
+   "icon": 11
+  },
+  {
+   "id": "mq_sum_groom_note",
+   "name": "Drathelin's Note",
+   "desc": "A hurried note on a torn menu-card, folded in four and pinned with a lover's hairpin. It is neatly written and unashamed.",
+   "icon": 11
+  },
+  {
+   "id": "mq_sum_courier_letter",
+   "name": "The Courier's Letter",
+   "desc": "A sealed letter in a courier's oilskin, the wax stamped with the Dominion's sun and, beneath it, a small private mark: a harbour lamp and a daughter's initial.",
+   "icon": 11
+  },
+  {
+   "id": "mq_sum_lost_signet",
+   "name": "Signet of the Sea-Lift Heir",
+   "desc": "A small gold signet of a rising sun over a wave, worn smooth at the edge by a nervous thumb. The heir of a very minor house of Cloudrest dropped it in the lift and has not been seen since.",
+   "icon": 26
+  },
+  {
+   "id": "mq_sum_eclipse_table",
+   "name": "The Contested Eclipse Table",
+   "desc": "A folded table of predicted eclipses, written in two hands that disagree on the third line. Each hand has initialled its own correction, and each has crossed out the other's.",
+   "icon": 15
+  },
+  {
+   "id": "mq_sum_knot_string",
+   "name": "Tor's Knotted String",
+   "desc": "A length of coloured twine, knotted in a code of seventeen colours and a hundred and four knots. It is a navigator's memory, and it is wrong by exactly one knot in the middle.",
+   "icon": 11
+  },
+  {
+   "id": "mq_sum_drowned_bell_clapper",
+   "name": "Clapper of the Drowned Bell",
+   "desc": "A bronze bell-clapper green with weed, still faintly ringing a note too low to hear. When held to the ear it sounds like a church on the sea-floor.",
+   "icon": 22
+  },
+  {
+   "id": "mq_sum_dune_lantern",
+   "name": "Dune-Ghost's Lantern",
+   "desc": "A very small lantern of pale glass, its wick burnt black but never consumed. It gives off no light at all in the dark, and a very faint pearly glow in sunlight.",
+   "icon": 17
+  }
+ ],
+ "bosses": {
+  "mq_sum_gate_warden": {
+   "name": "The Warden of the Sixteenth Gate",
+   "type": "skycraft:dwarven_centurion",
+   "hp": 3.8,
+   "dmg": 1.6,
+   "level": 34,
+   "drop": "loot:major",
+   "glow": true
+  },
+  "mq_sum_stack_keeper": {
+   "name": "The Unlent Reader",
+   "type": "skycraft:draugr_deathlord",
+   "hp": 3.4,
+   "dmg": 1.5,
+   "level": 30,
+   "weapon": "skycraft:elven_sword",
+   "gear": {
+    "head": "skycraft:elven_gilded_helmet"
+   },
+   "drop": "loot:major",
+   "glow": true
+  },
+  "mq_sum_glass_stalker": {
+   "name": "The Glass-Walker",
+   "type": "skycraft:wispmother",
+   "hp": 3.8,
+   "dmg": 1.6,
+   "level": 30,
+   "drop": "loot:major",
+   "glow": true
+  },
+  "mq_sum_ring_saboteur": {
+   "name": "Valdis the Unwinder",
+   "type": "skycraft:necromancer",
+   "hp": 3.2,
+   "dmg": 1.5,
+   "level": 28,
+   "weapon": "skycraft:staff_of_sparks",
+   "gear": {
+    "head": "skycraft:elven_helmet"
+   },
+   "drop": "loot:standard",
+   "glow": true
+  },
+  "mq_sum_hollow_skiff": {
+   "name": "The Skiff-Taker",
+   "type": "skycraft:draugr_deathlord",
+   "hp": 3.6,
+   "dmg": 1.5,
+   "level": 28,
+   "weapon": "skycraft:elven_sword",
+   "drop": "loot:major",
+   "glow": true
+  },
+  "mq_sum_maormer_runner": {
+   "name": "Sea-Captain Ssir-Vaal",
+   "type": "skycraft:bandit_chief",
+   "hp": 3.4,
+   "dmg": 1.5,
+   "level": 26,
+   "weapon": "skycraft:maormer_sword",
+   "gear": {
+    "head": "skycraft:maormer_helmet",
+    "chest": "skycraft:maormer_chestplate"
+   },
+   "drop": "loot:standard",
+   "glow": false
+  },
+  "mq_sum_tide_hag": {
+   "name": "Old Maud Saltrib",
+   "type": "skycraft:hagraven",
+   "hp": 3.2,
+   "dmg": 1.5,
+   "level": 24,
+   "drop": "loot:standard",
+   "glow": true
+  },
+  "mq_sum_false_door_keeper": {
+   "name": "The Door That Wore a Face",
+   "type": "skycraft:dremora",
+   "hp": 3.8,
+   "dmg": 1.6,
+   "level": 36,
+   "weapon": "skycraft:elven_sword",
+   "drop": "loot:major",
+   "glow": true
+  },
+  "mq_sum_grove_stalker": {
+   "name": "The Growing One",
+   "type": "skycraft:spriggan",
+   "hp": 3.4,
+   "dmg": 1.5,
+   "level": 26,
+   "drop": "loot:standard",
+   "glow": true
+  },
+  "mq_sum_dune_wraith": {
+   "name": "The Pale Dune-Wraith",
+   "type": "skycraft:draugr_deathlord",
+   "hp": 3.4,
+   "dmg": 1.5,
+   "level": 26,
+   "weapon": "skycraft:elven_sword",
+   "drop": "loot:standard",
+   "glow": true
+  },
+  "mq_sum_knot_cutter": {
+   "name": "Sethis Knot-Cutter",
+   "type": "skycraft:bandit_chief",
+   "hp": 3,
+   "dmg": 1.4,
+   "level": 24,
+   "weapon": "skycraft:maormer_sword",
+   "gear": {
+    "chest": "skycraft:maormer_chestplate"
+   },
+   "drop": "loot:standard",
+   "glow": false
+  },
+  "mq_sum_sinking_bell_keeper": {
+   "name": "The Bell-Warden Below",
+   "type": "skycraft:draugr_deathlord",
+   "hp": 3.2,
+   "dmg": 1.5,
+   "level": 24,
+   "weapon": "skycraft:elven_mace",
+   "drop": "loot:standard",
+   "glow": true
+  }
+ },
+ "scenes": {
+  "mq_sum_ali_avenue": [
+   [
+    "narrator",
+    "Fifteen avenues of white garden-lined stone radiate from the Crystal Tower. Between the fourteenth and the fifteenth the pavement forms a seam you would take for decoration, unless you held a prism to it."
+   ],
+   [
+    "mq_sum_ildren",
+    "There. Look through the sixteenth face. The seam is a door. It has been drawn over by every Court mason since the first, with such care that no one has noticed they were drawing around it."
+   ]
+  ],
+  "mq_sum_lil_stacks": [
+   [
+    "narrator",
+    "The terraced stacks climb the rock in rings, open to the sky, each shelf labelled in a silver hand. Wind turns pages somewhere you cannot see."
+   ],
+   [
+    "mq_sum_maelia",
+    "The catalogue says the folio was on Shelf Nine of the Ninth Ring on Tuesday. It was not. Someone has been moving the shelf-marks, and whoever it is knows the system better than I do."
+   ]
+  ],
+  "mq_sum_clo_crack": [
+   [
+    "narrator",
+    "The Balcony Walk is a pane of clear glass three hundred feet above a restless sea. Halfway across, a hair-thin line runs from rail to rail, and below it, in the dark water, something pale has turned over and is looking up."
+   ],
+   [
+    "mq_sum_aviel",
+    "Seventeen thousand, four hundred and eleven panes. Seventeen thousand, four hundred and ten. Walker, the count has changed. I have counted this walk for fifteen years. A pane is missing, and the sea has begun to notice."
+   ]
+  ],
+  "mq_sum_sky_slip": [
+   [
+    "narrator",
+    "The Great Orrery is a lattice of nine bronze rings turning in a stone well, each a degree behind where the last one ought to be. The shadows on the ring-walks do not agree with the sun."
+   ],
+   [
+    "mq_sum_taleth",
+    "Seven minutes behind. Every day for a week. It should be impossible: the rings are wound by gravity and a single weight. Walker, someone has put a hand inside the sky."
+   ]
+  ],
+  "mq_sum_dus_lamps": [
+   [
+    "narrator",
+    "Dusk puts on her lamps one by one. The Lantern Tower flares, the quay flickers into gold, and one lamp on the south wall stays dark, no matter how often it is lit."
+   ],
+   [
+    "mq_sum_sen",
+    "That one. The southernmost. It was lit last by a man who has not come home. Every night Sen lights it and it goes out. It goes out because it is waiting. Not for oil. For him."
+   ]
+  ],
+  "mq_sum_shi_pole": [
+   [
+    "narrator",
+    "Eleven lantern poles stand along the docks, each topped with a brass lamp the colour of warm honey. The twelfth, at the end of the quay, burns a faint, cold blue, and its shadow falls the wrong way."
+   ],
+   [
+    "mq_sum_fen",
+    "That is not one of mine. It has been there four days. It lights at the hour of the tide, and every ship that passes under it has a new crewman at the wheel in the morning. I have not been able to remove it. Nobody wants to touch it."
+   ]
+  ],
+  "mq_sum_art_vault": [
+   [
+    "narrator",
+    "A hall of doors, all identical, stretches away in both directions. Each door has a handle and a mirror and a faint, patient smile. When you open one, you are back in the hall, and the other doors have changed places."
+   ],
+   [
+    "mq_sum_quenel",
+    "Three doors, two lies. One truth. A thousand years ago a Psijic was locked in here for a betrayal. The vault was built to hold a mind that could not be broken, only mistaken. Walker, I would not trust the door that looks the most like the way out."
+   ]
+  ]
+ },
+ "quests": [
+  {
+   "id": "mq_sum_the_sixteenth_avenue",
+   "title": "The Sixteenth Avenue",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_ildren",
+   "requires": [
+    "level:22"
+   ],
+   "offer": "You are looking at the city the way I look at a stone.",
+   "pitch": "Walker, count the avenues with me. Fifteen from the Crystal Tower, I was taught, and the plan on the Chancellery wall says sixteen. The sixteenth was struck out in the third century, by an order that has been lost. I have cut a prism that shows what a mason's eye is trained not to see. Walk each avenue with it. Tell me where the city is lying.",
+   "desc": "Prism-Smith Ildren believes Alinor's plan hides a sixteenth avenue, struck from the map by a lost order. He has cut a prism to reveal it and wants it walked.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "alinor_royal_palace",
+     "text": "Walk the avenue that leads from the Royal Palace, prism in hand"
+    },
+    {
+     "type": "go",
+     "place": "golden_gryphon_garret",
+     "text": "Walk the avenue that leads past the Golden Gryphon Garret"
+    },
+    {
+     "type": "go",
+     "place": "alinor_docks",
+     "text": "Walk the avenue that ends at the Alinor Docks",
+     "actions": "scene:mq_sum_ali_avenue"
+    },
+    {
+     "type": "go",
+     "place": "crystal_tower_summerset",
+     "text": "Open the sealed seam beneath the Crystal Tower"
+    },
+    {
+     "type": "kill",
+     "place": "crystal_tower_summerset",
+     "text": "Defeat the Warden of the Sixteenth Gate",
+     "spawn": [
+      {
+       "boss_id": "mq_sum_gate_warden"
+      }
+     ],
+     "actions": "relic:mq_sum_precedent_leaf"
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_sum_aelwen",
+     "relic": "mq_sum_precedent_leaf",
+     "text": "Bring the leaf from the sixteenth avenue to Chancellor Aelwen",
+     "topic": "The sixteenth avenue is real. Behind the gate lies a single page of the Ledger. It records why the avenue was struck.",
+     "reply": "Aelwen reads the leaf in total stillness. When she is done she folds her hands. \"It was struck because it led to the mourning garden of the first Queen's sister, who was exiled. The Court wished the avenue forgotten, and the sister with it. The Chancellery has kept this leaf for three thousand years, in the one place no one would think to look. Walker, shall it be published, or sealed?\"",
+     "choices": [
+      {
+       "label": "Publish it. The city should know what it forgot.",
+       "reply": "Aelwen bows, very slightly. \"Then the avenue will be walked again, and the exile's name read at the Hall of Law. Alinor will remember. It will be uncomfortable. Perhaps it should be.\"",
+       "actions": "flag:mq_sum_avenue_published"
+      },
+      {
+       "label": "Seal it. Some gardens are better left in mourning.",
+       "reply": "Aelwen takes the leaf and sets it, gently, back in the Ledger. \"Then it returns to its place, and the city remains as it believes itself. A mercy. You have the Chancellor's gratitude, and her silence.\"",
+       "actions": "flag:mq_sum_avenue_sealed;loot:standard"
+      }
+     ]
+    }
+   ],
+   "outro": "Alinor has sixteen avenues now, or has always had, depending on who is asked. The mourning garden is quiet, and the prism is back in its smith's window.",
+   "rewards": {
+    "gold": 1100,
+    "loot": "major",
+    "items": [
+     {
+      "item": "skycraft:elven_gilded_helmet",
+      "name": "Circlet of the Sixteenth Face",
+      "enchant": {
+       "protection": 3,
+       "unbreaking": 3
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_sum_the_seneschals_gold",
+   "title": "The Seneschal's Gold",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_valia",
+   "requires": [
+    "level:20"
+   ],
+   "offer": "You seem to have been waiting for someone honest.",
+   "pitch": "Honest is a very expensive thing in Alinor, walker. Valia leaves gold in unlocked rooms, and notes who takes what. Last week, thirty crowns vanished from the third room, and the only person who entered was Valia herself. She is very sure she did not take it. She is slightly less sure she did not forget. Valia has never been a suspect in her own tests before. It is a most unsettling experience.",
+   "desc": "Seneschal Valia's loyalty test went wrong: thirty crowns vanished from a room only she entered. She wants an outsider to find the thief, even if it is herself.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "alinor_royal_palace",
+     "text": "Search the third room of the Palace test-wing"
+    },
+    {
+     "type": "cond",
+     "cond": "night",
+     "text": "Hide in the room and watch the coins at night",
+     "place": "alinor_royal_palace"
+    },
+    {
+     "type": "kill",
+     "place": "alinor_royal_palace",
+     "text": "Catch the one who takes the gold",
+     "spawn": [
+      {
+       "type": "npc:thief",
+       "count": 1,
+       "name": "Veiled Courtier",
+       "hostile": true
+      }
+     ]
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_valia",
+     "text": "Tell Valia who took her gold",
+     "topic": "It was a courtier of the Chancellery, veiled, who was trying to learn who else was tested. She wanted to know your list.",
+     "reply": "Valia looks at the coin you place in her palm and for the first time, a smile flickers. \"She was after my list. Of course. The Chancellery has been trying to learn who is trusted and who is tested for years. Walker, you have found a thief, and you have also found that Valia is not the only tester in Alinor. That is a very useful piece of knowledge, and a very unwelcome one.\""
+    }
+   ],
+   "outro": "Thirty crowns returned to their room. Valia now leaves a second set, in a second room, just in case.",
+   "rewards": {
+    "gold": 520,
+    "loot": "standard"
+   }
+  },
+  {
+   "id": "mq_sum_forty_rainbows",
+   "title": "Forty Rainbows",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_prism_plover",
+   "requires": [
+    "level:14"
+   ],
+   "offer": "Your ceiling has stopped sparkling, Ondolemar.",
+   "pitch": "It has, walker, and it was not a cloud. At noon the Prism and Plover makes forty rainbows. For three days, thirty-nine. One has simply left. Ondolemar has measured the ceiling. Every pane is whole. The rainbow went somewhere else. He is not sure if it is a theft or a vacation, and he would like it back.",
+   "desc": "One of the forty rainbows of the Prism and Plover has gone missing. Ondolemar thinks it may have been taken, or wandered off.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "direnni_acropolis",
+     "text": "Follow the missing rainbow's colour to the Direnni Acropolis"
+    },
+    {
+     "type": "cond",
+     "cond": "day",
+     "text": "Wait for noon, when the forty-first colour appears",
+     "place": "direnni_acropolis"
+    },
+    {
+     "type": "retrieve",
+     "place": "direnni_acropolis",
+     "text": "Gather a shard of lens-quartz from the Acropolis columns",
+     "item": "skycraft:refined_moonstone",
+     "count": 1
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_prism_plover",
+     "text": "Return the shard to Ondolemar",
+     "topic": "The rainbow was caught on a column of the Acropolis, which hung it like a banner. Here is the shard that kept it there.",
+     "reply": "Ondolemar holds the shard to the roof and a fortieth rainbow blooms across the ceiling, bright and slightly smug. \"Ha! Home. Walker, you have cost me no more than a small shard and a half-day's work. The house owes you, and the house always pays.\""
+    }
+   ],
+   "outro": "The Prism and Plover has forty rainbows again. Ondolemar insists the fortieth is a little brighter than the others, and a little prouder.",
+   "rewards": {
+    "gold": 260,
+    "loot": "minor"
+   }
+  },
+  {
+   "id": "mq_sum_the_missing_folio",
+   "title": "The Missing Folio",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_maelia",
+   "requires": [
+    "level:22"
+   ],
+   "offer": "Your ledger is the only thing in this library that looks angry.",
+   "pitch": "The Folio of Unbound Years, walker. A single volume in the Restricted Ring, absent from its shelf for seven days. Not borrowed: the catalogue has no record of anyone touching it. The library has, in forty years, never lost a book. It has been mislaid, and the shelf-marks changed behind it, by someone who knew the cataloguing system in more detail than I do. I would like to ask you very quietly to find out who.",
+   "desc": "The Great Library's Folio of Unbound Years has vanished with no record. Chief Librarian Maelia wants it found, quietly, by someone outside the staff.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "lillandril",
+     "text": "Search the stacks by catalogue number",
+     "actions": "scene:mq_sum_lil_stacks"
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_rilen",
+     "text": "Ask Student Rilen what he knows of the folio",
+     "topic": "The folio is missing, and the shelf-marks were changed by someone who knew the system. You study here every night. What did you see?",
+     "reply": "Rilen's ears go pink. \"Nothing! I mean, a person. A tall one, in a grey hood. I did not see her face. She went east of the Orrery Court, carrying something flat. Walker, I would like to say I was reading a different book entirely.\"",
+     "actions": "relic:mq_sum_catalogue_slip"
+    },
+    {
+     "type": "go",
+     "place": "direnni_acropolis",
+     "text": "Follow the grey-hooded librarian to the Direnni Acropolis"
+    },
+    {
+     "type": "kill",
+     "place": "direnni_acropolis",
+     "text": "Confront the Unlent Reader who has taken the folio",
+     "spawn": [
+      {
+       "boss_id": "mq_sum_stack_keeper"
+      }
+     ],
+     "actions": "relic:mq_sum_missing_folio"
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_sum_maelia",
+     "relic": "mq_sum_missing_folio",
+     "text": "Return the folio to Maelia",
+     "topic": "Your folio. It was taken by a former librarian, long dead, who wished to finish reading it. It is safe.",
+     "reply": "Maelia holds the folio to her chest, and for a moment looks very much younger. \"Finish reading it. Oh. Of course. She was the Chief Librarian before me, and she never had the chance. Walker, the folio is a book of years not yet lived. Shall I return it to its shelf and let the library lend it, or shall I make a copy for the scholars and place the original under lock?\"",
+     "choices": [
+      {
+       "label": "Return it to the shelf. Books are for readers.",
+       "reply": "Maelia nods slowly. \"A librarian's answer. It will be on Shelf Nine, and I will move no shelf-marks. Thank you, walker. You have brought a book home.\"",
+       "actions": "flag:mq_sum_folio_shelved"
+      },
+      {
+       "label": "Lock the original. Copies for the scholars.",
+       "reply": "Maelia pauses. \"Prudent. A cold answer, but a safe one. The copy will be on Shelf Nine, and the original in my desk. Thank you.\"",
+       "actions": "flag:mq_sum_folio_locked;loot:standard"
+      }
+     ]
+    }
+   ],
+   "outro": "The Great Library lost a book and found a ghost, and the ghost, having finished, rests. The shelf-marks have been put back, and no one has changed them since.",
+   "rewards": {
+    "gold": 1000,
+    "loot": "major"
+   }
+  },
+  {
+   "id": "mq_sum_rilens_forbidden_volume",
+   "title": "The Student's Forbidden Volume",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_rilen",
+   "requires": [
+    "level:16"
+   ],
+   "offer": "You look like a student about to confess.",
+   "pitch": "Confess! No. Rilen is not confessing. He is hypothesising. There is a volume in the Restricted Ring, \"On the Seventh Colour of Light\", and he has applied for access four times. The librarians say no. But Rilen has a theory: it is not in the Library. It was moved, long ago, to a private collection in the Direnni Acropolis. He would be very grateful if someone went and looked. Not removed. Looked.",
+   "desc": "Student Rilen believes a banned volume on the seventh colour of light sits in a private collection at the Direnni Acropolis. He wants someone to look, and only look.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "direnni_acropolis",
+     "text": "Search the private collection at the Direnni Acropolis"
+    },
+    {
+     "type": "clear",
+     "place": "direnni_acropolis",
+     "text": "Drive off the collection's guardians",
+     "spawn": [
+      {
+       "type": "skycraft:gargoyle",
+       "count": 2,
+       "name": "Reading-Room Gargoyle"
+      },
+      {
+       "type": "minecraft:skeleton",
+       "count": 2,
+       "name": "Silent Attendant"
+      }
+     ]
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_rilen",
+     "text": "Tell Rilen what the volume says",
+     "topic": "The volume was there. I read the first page. It describes a colour the eye cannot hold, and ends: 'if you have read this far, you have already seen it.'",
+     "reply": "Rilen sits down hard on a step. \"Already seen it. Walker, did you... did you feel anything? No. Of course not. It was only a joke. It was only a very good joke, from a very old scholar who wished to be remembered for one clever sentence. Rilen is nineteen. He will remember it for a very long time.\""
+    }
+   ],
+   "outro": "Rilen has stopped applying for the forbidden volume, and has started writing his own. The first page is a single sentence, and it is very good.",
+   "rewards": {
+    "gold": 360,
+    "loot": "standard"
+   }
+  },
+  {
+   "id": "mq_sum_the_ring_that_sighs",
+   "title": "The Ring That Sighs",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_thalor",
+   "requires": [
+    "level:18"
+   ],
+   "offer": "You are very still for someone beside a machine.",
+   "pitch": "The ring sighs, walker. The fourth. Every night at the hour of Secunda's zenith, a tiny, human sigh, as if the ring were bored. Thalor has oiled it, tightened it, pulled it apart. It sighs. Thalor believes there is a person inside. He does not wish to know how. He would like you to ask it what it wants.",
+   "desc": "The fourth ring of the Orrery Court sighs every night. Orrery-Keeper Thalor believes something is trapped inside.",
+   "objectives": [
+    {
+     "type": "cond",
+     "cond": "night",
+     "text": "Wait in the Orrery Court until the fourth ring sighs",
+     "place": "lillandril"
+    },
+    {
+     "type": "clear",
+     "place": "lillandril",
+     "text": "Drive off the bronze things that crawl from the fourth ring",
+     "spawn": [
+      {
+       "type": "skycraft:dwarven_spider",
+       "count": 3,
+       "name": "Ring-Mite"
+      },
+      {
+       "type": "skycraft:dwarven_sphere",
+       "count": 1,
+       "name": "Sighing Sphere"
+      }
+     ]
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_thalor",
+     "text": "Tell Thalor what the ring wanted",
+     "topic": "It was not a person. It was the ring itself. It is tired of turning the same orbit and wishes to turn one other way.",
+     "reply": "Thalor listens in profound silence. \"Tired. Of turning. Walker, a ring may wish to rest, may it not? May it rest in a different place? It is a heavy thing, to ask the heavens to change a little, to please a machine. But we have asked greater things of heaven for worse reasons. Thalor will turn the ring. Slowly. And see.\""
+    }
+   ],
+   "outro": "The fourth ring now turns in a gentle reverse for one hour a night. It no longer sighs, and the astronomers say the sky is a little more interesting for it.",
+   "rewards": {
+    "gold": 400,
+    "loot": "standard"
+   }
+  },
+  {
+   "id": "mq_sum_the_glass_floor",
+   "title": "The Glass Floor",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_aviel",
+   "requires": [
+    "level:20"
+   ],
+   "offer": "You are counting something under your breath.",
+   "pitch": "Panes, walker. The Balcony Walk. Seventeen thousand four hundred and eleven, and then, this morning, ten. One has gone, and no one has seen it fall, and no fragments have been found on the rocks. Lord Calantir will not hear of it. He says a palace with no walls cannot have a missing floor. I would like someone to walk the length of the Walk and find the gap. And then descend by the sea-lift and tell me what is looking back up.",
+   "desc": "A pane of the Cloudrest Balcony Walk has vanished without trace. Steward Aviel wants the gap found and what lies beneath it identified.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "cloudrest",
+     "text": "Walk the Balcony Walk and find the gap",
+     "actions": "scene:mq_sum_clo_crack;relic:mq_sum_floor_crack_shard"
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_ewen",
+     "text": "Ask Pilot Ewen to lower the sea-lift beneath the gap",
+     "topic": "I need the lift lowered. Beneath the missing pane. Something is looking up from the water.",
+     "reply": "Ewen grips the lever until his knuckles whiten. \"Beneath. Walker, Ewen has taken the lift to the water ten thousand times and has never once looked down. He will look down now. Hold the rail. If the thing in the water speaks, please do not answer in Ewen's hearing.\""
+    },
+    {
+     "type": "kill",
+     "place": "cloudrest",
+     "text": "Defeat the Glass-Walker that haunts the water below the walk",
+     "spawn": [
+      {
+       "boss_id": "mq_sum_glass_stalker"
+      }
+     ]
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_calantir",
+     "text": "Tell Lord Calantir what was beneath his floor",
+     "topic": "There was a thing in the water that wanted to be walked upon. It took a pane to see if it was allowed. It is gone now.",
+     "reply": "Calantir leans back in his chair and for the first time in years looks properly awake. \"Wanted to be walked upon. A creature that wished to be a floor. Walker, this is the most interesting thing that has happened in my palace since the roof collapsed. May I ask: shall I replace the pane, or leave the gap, and have it be the most famous gap in Summerset?\"",
+     "choices": [
+      {
+       "label": "Replace the pane. A floor must be whole.",
+       "reply": "Calantir sighs. \"Duty. How dull. Very well. The Walk will be whole, and I shall tell visitors a ghost lives beneath it. They will love it.\"",
+       "actions": "flag:mq_sum_glass_replaced"
+      },
+      {
+       "label": "Leave the gap. Let the thing see up, now and then.",
+       "reply": "Calantir's grin is slow and delighted. \"A gap! A famous gap! Walker, you are very bad for the dignity of my house, and I adore you.\"",
+       "actions": "flag:mq_sum_glass_gap;loot:standard"
+      }
+     ]
+    }
+   ],
+   "outro": "The Balcony Walk of Cloudrest has a gap in it, or does not, depending on who is asked. The thing in the water has stopped looking up.",
+   "rewards": {
+    "gold": 880,
+    "loot": "major"
+   }
+  },
+  {
+   "id": "mq_sum_a_bored_lords_wager",
+   "title": "A Bored Lord's Wager",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_calantir",
+   "requires": [
+    "level:16"
+   ],
+   "offer": "You have not yet been shown the chair.",
+   "pitch": "The chair, walker. Calantir has a chair in the middle of the Balcony Walk, directly above the sea. It is an excellent chair. But a visitor from Skywatch has boasted that she can sit in it for an hour without looking down. Calantir has bet a pearl that she cannot. He would very much like to win. He would like someone to tamper with the chair. Gently. Imperceptibly. He does not want to know how.",
+   "desc": "Lord Calantir has wagered a pearl that a visiting astronomer cannot sit an hour without looking down. He wants the chair tampered with.",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "mq_sum_ewen",
+     "text": "Ask Ewen what might unsettle a chair above the sea",
+     "topic": "Lord Calantir wishes the astronomer to look down. What does a cautious man do, who is paid not to?",
+     "reply": "Ewen looks at his hands. \"Ewen could loosen a screw. Ewen could. But the sea-lift pilot does not tamper with seats on the Walk. If a lord wants a thing done, a lord should do it. Ewen suggests you tell Calantir that the best distraction is a very good story, told at exactly the right moment. And the best storyteller is the one who has never been bored.\"",
+     "choices": [
+      {
+       "label": "Tamper with the chair, as Lord Calantir asked.",
+       "reply": "Ewen closes his eyes. \"Then Ewen did not see it. A loose screw, a slight tilt. She will look down. The pearl will be won. And Calantir will be exactly as bored as before.\"",
+       "actions": "flag:mq_sum_wager_tampered"
+      },
+      {
+       "label": "Tell Calantir to tell her a story instead.",
+       "reply": "Ewen almost smiles. \"A story! Ha! The lord has never told one in his life. Walker, that is either the best idea Cloudrest has had in a century, or the worst.\"",
+       "actions": "flag:mq_sum_wager_story;loot:standard"
+      }
+     ]
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_calantir",
+     "text": "Report back to Lord Calantir",
+     "topic": "It is done. You will see how the wager falls.",
+     "reply": "Calantir rubs his hands. \"Splendid. The pearl will be won, or I will have learned a great deal about the character of astronomers. Either way, walker, I shall not be bored today. Take this. It is a very small pearl. It is not the pearl.\""
+    }
+   ],
+   "outro": "The wager was won, or lost, or never settled, and the chair stood empty for a week. Calantir was not bored for three days, which in Cloudrest is a record.",
+   "rewards": {
+    "gold": 420,
+    "loot": "standard"
+   }
+  },
+  {
+   "id": "mq_sum_the_slipped_ring",
+   "title": "The Slipped Ring",
+   "region": "summerset/auridon",
+   "start": "npc:mq_sum_taleth",
+   "requires": [
+    "level:18"
+   ],
+   "offer": "Your Orrery is running late.",
+   "pitch": "Late, walker, by seven minutes a day. A week of it. The outer rings keep slipping behind the inner, and the Orrery now shows a sky that is a week out of date. A week! Navigators will steer by it. Farmers will sow by it. I have measured every gear. All are whole. One alone is unaccounted for: the seventh. It is missing from the log. It should not exist, and I cannot take the Orrery apart to find it. Climb up. Find what is hiding in the machine.",
+   "desc": "The Great Orrery of Skywatch is slipping by seven minutes a day. Astronomer Taleth suspects a hidden gear and wants someone to climb the rings and find it.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "skywatch",
+     "text": "Measure the slip on the ring-walks",
+     "actions": "scene:mq_sum_sky_slip"
+    },
+    {
+     "type": "go",
+     "place": "the_veiled_keep",
+     "text": "Climb to the Veiled Keep above the outer ring, where the hidden gear is said to be"
+    },
+    {
+     "type": "kill",
+     "place": "the_veiled_keep",
+     "text": "Stop Valdis the Unwinder, who has been slowing the rings",
+     "spawn": [
+      {
+       "boss_id": "mq_sum_ring_saboteur"
+      }
+     ],
+     "actions": "relic:mq_sum_orrery_gear"
+    },
+    {
+     "type": "cond",
+     "cond": "night",
+     "text": "Return to Skywatch and wait for midnight, the moment of true alignment",
+     "place": "skywatch"
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_sum_taleth",
+     "relic": "mq_sum_orrery_gear",
+     "text": "Set the seventh gear into its place at midnight",
+     "topic": "The gear is whole. Valdis was unwinding it, a degree each day, to hide a theft in the star-charts. Let us set it back.",
+     "reply": "Taleth takes the gear with both hands. \"Set it. Hold it. Count to seven. Now release. The rings align. Listen, walker. Hear that? Nine rings, one sky, at last. Valdis stole a star-chart of the southern sky. It is still missing. Will you search for it, or shall I report the theft to the Dominion?\"",
+     "choices": [
+      {
+       "label": "Report the theft. The Dominion should know the southern sky is missing.",
+       "reply": "Taleth pauses. \"The Dominion will want to know why we kept it. They will send a Justiciar. A grim answer. But the rings are aligned, so perhaps a grim answer will do.\"",
+       "actions": "flag:mq_sum_ring_reported"
+      },
+      {
+       "label": "Search for it ourselves. The southern sky is ours.",
+       "reply": "Taleth sets her three spectacles very straight. \"Then we do. Quietly. Walker, you are the first outsider the Orrery has ever trusted. Do not make me regret it.\"",
+       "actions": "flag:mq_sum_ring_searched;loot:standard"
+      }
+     ]
+    }
+   ],
+   "outro": "The Great Orrery of Skywatch keeps true time again. Nine rings, one sky, and one very grateful astronomer in three pairs of spectacles.",
+   "rewards": {
+    "gold": 840,
+    "loot": "major"
+   }
+  },
+  {
+   "id": "mq_sum_marils_other_planet",
+   "title": "Maril's Other Planet",
+   "region": "summerset/auridon",
+   "start": "npc:mq_sum_maril",
+   "requires": [
+    "level:14"
+   ],
+   "offer": "You look like someone who has a secret.",
+   "pitch": "I do! Maril has a planet. A new one. It is very small and very dim and orbits Masser at an angle nobody expected. The charts say it does not exist. But Maril has seen it, four nights running, from the Star-Chart Terrace. She would like someone to confirm it. Someone who is not Maril, who is not Taleth, who will not tell Taleth. Taleth would take the credit. Taleth would be very gracious about it.",
+   "desc": "Student Maril claims to have found an unrecorded planet and wants a secret witness to confirm it from the Star-Chart Terrace.",
+   "objectives": [
+    {
+     "type": "cond",
+     "cond": "night",
+     "text": "Climb to the Star-Chart Terrace after dusk and look where Maril points",
+     "place": "skywatch"
+    },
+    {
+     "type": "wait",
+     "hours": 2,
+     "text": "Watch the southern sky for two hours",
+     "place": "skywatch"
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_maril",
+     "text": "Tell Maril what you saw",
+     "topic": "There is a small, faint light south of Masser. It moves. It is not on any chart I have seen.",
+     "reply": "Maril claps both hands over her mouth, then lowers them very slowly. \"You saw it. Walker, you saw it. A planet. Mine. Maril's. She will call it... no, she does not know. Something bright. Something stupid. She will think of it at midnight, and regret it at dawn. Thank you. You are the only other person in Tamriel who knows.\""
+    }
+   ],
+   "outro": "A small, dim planet circles Masser in the margins of one student's notebook. When she names it, she will tell you first.",
+   "rewards": {
+    "gold": 240,
+    "loot": "minor"
+   }
+  },
+  {
+   "id": "mq_sum_lamps_at_dusk",
+   "title": "Lamps at Dusk",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_sen",
+   "requires": [
+    "level:14"
+   ],
+   "offer": "There is one lamp on your wall that will not stay lit.",
+   "pitch": "The southernmost, walker. A fisherman's lamp, hung when his boat went out and never taken down. It goes out each night at the same hour. Sen has changed the wick, the oil, the glass. It goes out because something is waiting for it to go out. A boat came in last week with no crew. The tide brought it. The harbourmaster has not been seen at her desk since.",
+   "desc": "One lamp on Dusk's south wall goes out every night. Lamp-Keeper Sen believes it is waiting for a lost boatman who never came home.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "dusk",
+     "text": "Light the south lamp at dusk and watch it go out",
+     "actions": "scene:mq_sum_dus_lamps"
+    },
+    {
+     "type": "go",
+     "place": "dusk_keep",
+     "text": "Follow the lamp's failing light to Dusk Keep, where the lost boat was moored"
+    },
+    {
+     "type": "kill",
+     "place": "dusk_keep",
+     "text": "Defeat the Skiff-Taker and recover the boatman's cap",
+     "spawn": [
+      {
+       "boss_id": "mq_sum_hollow_skiff"
+      },
+      {
+       "type": "minecraft:drowned",
+       "count": 2,
+       "name": "Skiff-Drowned"
+      }
+     ],
+     "actions": "relic:mq_sum_drowned_cap",
+     "placement": "structure"
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_sum_sen",
+     "relic": "mq_sum_drowned_cap",
+     "text": "Show the cap to Sen",
+     "topic": "The boatman drowned beyond the headland, years ago. A thing took his skiff and kept it for company. It is at rest now. Here is his cap.",
+     "reply": "Sen holds the cap and for a moment the whole quay seems to hold its breath. \"His cap. His ribbon. Walker, Sen has lit this lamp for nine winters and told himself the man was only late. He was not late. He was waiting for someone to bring him a lamp that was already lit. Shall we keep the lamp lit, or put it out?\"",
+     "choices": [
+      {
+       "label": "Keep it lit. Let it burn for the ones still out there.",
+       "reply": "Sen nods, and his eyes are very bright. \"Then it burns. Not for him. For everyone. Thank you, walker. Dusk will never put it out.\"",
+       "actions": "flag:mq_sum_lamp_burns"
+      },
+      {
+       "label": "Put it out. He is home now. Let him rest in the dark.",
+       "reply": "Sen takes the lamp down with great gentleness. \"Then it is finished. A kindness. It will be hard to walk past that wall tomorrow, and easier the day after.\"",
+       "actions": "flag:mq_sum_lamp_out;loot:standard"
+      }
+     ]
+    }
+   ],
+   "outro": "A cap with a lilac ribbon was brought home. The south wall of Dusk, whether lit or dark, is no longer waiting.",
+   "rewards": {
+    "gold": 560,
+    "loot": "standard",
+    "items": [
+     {
+      "item": "skycraft:elven_dagger",
+      "name": "Lamplighter's Wick-Knife",
+      "enchant": {
+       "sharpness": 2,
+       "fire_aspect": 1
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_sum_what_orla_sells_at_night",
+   "title": "What Orla Sells at Night",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_lilac_quill",
+   "requires": [
+    "level:16"
+   ],
+   "offer": "Your quill is hovering rather than writing.",
+   "pitch": "There is a new page, walker, and Wenlin does not like it. For three weeks, the same name has appeared in the book of ships that did not return: a Pale Merchant's. Every one of them bought a candle from Orla's stall on the night before they sailed. Every one of them was never seen again. Orla is a pleasant person. Everyone says so. Wenlin has not been able to find a single complaint. That, to him, is the most alarming thing about her.",
+   "desc": "Every crew that bought a candle from the Pale Merchant Orla has vanished at sea. Wenlin cannot find a single complaint against her, which worries him more.",
+   "objectives": [
+    {
+     "type": "cond",
+     "cond": "night",
+     "text": "Visit Orla's stall after dusk and watch her sell",
+     "place": "dusk"
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_orla",
+     "text": "Ask Orla what is in the candles",
+     "topic": "Your candles are very fine. What gives them their colour?",
+     "reply": "Orla smiles, pale and lovely and entirely without warmth. \"The colour of the hour, dear. The light before the dark. A fisherman who burns one will find his way home, though he may not like where he finds it. I do not sell death. I sell a light that guides the lost. If they do not return, it is the sea that does not release them.\"",
+     "choices": [
+      {
+       "label": "Buy a candle and light it at the quay at midnight.",
+       "reply": "Orla's eyes glint, once. \"Brave. Take it. Light it where the water is deepest, and say a name. We shall see which of us was right.\"",
+       "actions": "flag:mq_sum_orla_candle"
+      },
+      {
+       "label": "Break the stall and burn the candles.",
+       "reply": "Orla does not move. \"A pity. But a very natural reaction. The candles will burn, of course. They always do. And what they light, I cannot say. Go carefully, walker.\"",
+       "actions": "flag:mq_sum_orla_burned"
+      }
+     ]
+    },
+    {
+     "type": "kill",
+     "place": "dusk",
+     "text": "Face Orla's true shape at the quay at midnight",
+     "spawn": [
+      {
+       "type": "skycraft:vampire",
+       "count": 1,
+       "name": "Orla of the Lilac Hour",
+       "hostile": true
+      }
+     ]
+    }
+   ],
+   "outro": "The Pale Merchant's stall stood empty from that night, and the book of ships has a single clean page at the back, in lilac ink, in Wenlin's hand: 'The sea is not hungry tonight.'",
+   "rewards": {
+    "gold": 640,
+    "loot": "standard"
+   }
+  },
+  {
+   "id": "mq_sum_lantern_poles",
+   "title": "Lantern Poles",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_fen",
+   "requires": [
+    "level:20"
+   ],
+   "offer": "You are counting lamps.",
+   "pitch": "Eleven, walker. There should be eleven. There are twelve. The twelfth burns blue and no one hung it. Every ship that docks beneath it is boarded that night, and the cargo changes, and nobody on the dock can say who did it. Fen has a rota for everything on this wharf and cannot find a single entry for that lantern. He is very close to being very upset.",
+   "desc": "A twelfth lantern burns blue at the end of the Shimmerene quay, and ships docking beneath it have their cargo secretly swapped. Dock-Master Fen wants it explained.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "shimmerene_dockworks",
+     "text": "Inspect the blue lantern on the dockworks",
+     "actions": "scene:mq_sum_shi_pole;relic:mq_sum_lamp_tag"
+    },
+    {
+     "type": "cond",
+     "cond": "night",
+     "text": "Hide in the sail-loft and watch the quay at the tide",
+     "place": "shimmerene"
+    },
+    {
+     "type": "kill",
+     "place": "shimmerene_dockworks",
+     "text": "Take down Sea-Captain Ssir-Vaal and his boarding crew",
+     "spawn": [
+      {
+       "boss_id": "mq_sum_maormer_runner"
+      },
+      {
+       "type": "skycraft:bandit",
+       "count": 3,
+       "name": "Wave-Mark Deckhand"
+      }
+     ],
+     "actions": "relic:mq_sum_smuggler_manifest"
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_sum_fen",
+     "relic": "mq_sum_smuggler_manifest",
+     "text": "Bring the second manifest to Fen",
+     "topic": "The twelfth lantern was a Maormer runner's signal. The cargo they swapped was weapons for the sea-raiders of Pyandonea. The manifest names the dock-hand who took the bribe.",
+     "reply": "Fen reads the manifest line by line, and the colour drains from his face. \"Yeli. The sail-maker's brother. He has run the east crane for ten years. Walker, I have a rota. I know every entry. I did not know this. What would you have Fen do with a man who sold a harbour for a handful of silver?\"",
+     "choices": [
+      {
+       "label": "Report him to the Dominion. The harbour cannot be sold.",
+       "reply": "Fen nods, grim. \"Then it is done properly. The Thalmor will take him. It will break Yeli's heart. It is still correct.\"",
+       "actions": "flag:mq_sum_lantern_reported"
+      },
+      {
+       "label": "Dismiss him quietly and warn the Maormer off.",
+       "reply": "Fen is silent for a moment. \"A quiet answer. Perhaps a wise one. A harbour that cannot trust its cranes is a harbour that must be rebuilt. Fen will watch him for the rest of his life.\"",
+       "actions": "flag:mq_sum_lantern_quiet;loot:standard"
+      }
+     ]
+    }
+   ],
+   "outro": "The twelfth lantern was cut down, and its blue flame went out with a sound like a held breath. Shimmerene counts eleven poles again, and counts them twice.",
+   "rewards": {
+    "gold": 760,
+    "loot": "major"
+   }
+  },
+  {
+   "id": "mq_sum_a_wish_with_a_seam",
+   "title": "A Wish with a Seam",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_yeli",
+   "requires": [
+    "level:12"
+   ],
+   "offer": "You look like someone who has been told a sail is a promise.",
+   "pitch": "It is a promise, walker. And Yeli has a promise to keep. A boy came to the loft three years ago, asking for a sail with his sister's name in the hem. He paid in shells. He was nine. The sister was already lost at sea. Yeli made the sail. She stitched the name, and the sail was taken out, and never returned. Yeli would like someone to find where it went. The boy has grown. He has not stopped coming.",
+   "desc": "Sail-Maker Yeli stitched a sail for a boy whose sister drowned, and it was never returned. She wants it found and brought home.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "shimmerene_dockworks",
+     "text": "Search the old sail-store of the dockworks for the missing sail"
+    },
+    {
+     "type": "clear",
+     "place": "colossal_aldmeri_grotto",
+     "text": "Drive off the smugglers who store stolen goods in the Colossal Aldmeri Grotto",
+     "spawn": [
+      {
+       "type": "skycraft:bandit",
+       "count": 3,
+       "name": "Grotto Smuggler"
+      }
+     ]
+    },
+    {
+     "type": "retrieve",
+     "place": "colossal_aldmeri_grotto",
+     "text": "Find the sail with the hem-name",
+     "relic": "mq_sum_hem_sail",
+     "placement": "structure"
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_yeli",
+     "text": "Bring Yeli the sail and tell her where it was kept",
+     "topic": "The sail was hung in a smuggler's cave, folded with great care. Whoever kept it did not use it. They only kept it.",
+     "reply": "Yeli runs her thumb along the hem and finds the stitched name by touch. Her breath catches. \"Kept. Folded. Oh, walker. Someone has looked after it all this while. I will take it to the boy. He will not know what to say. Neither will I.\""
+    }
+   ],
+   "outro": "A sail with a name in its hem was carried back, folded very carefully, across the whole quay. The boy, now a man, did not speak for a long time.",
+   "rewards": {
+    "gold": 320,
+    "loot": "minor"
+   }
+  },
+  {
+   "id": "mq_sum_the_tide_gate",
+   "title": "The Tide Gate",
+   "region": "summerset/auridon",
+   "start": "npc:mq_sum_ro",
+   "requires": [
+    "level:16"
+   ],
+   "offer": "Your gate-key looks heavier than it should.",
+   "pitch": "It is, walker. The key is not the one the gate was made for. Ro found the real key was taken by a hag in the shoal-caves, who left a copy of rusted iron in its place. The gate is jammed half-closed. At next high tide it will flood the lower causeway with half the town on it. The tide waits for no one. You have until the water turns. Cross at low tide, get the key, bring it back before the flood.",
+   "desc": "The key to the Tide Gate of Firsthold was stolen by a hag and replaced with a copy. The gate is jammed, and the next high tide will flood the lower town.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "firsthold",
+     "text": "Check the Tide Gate and confirm the jam"
+    },
+    {
+     "type": "go",
+     "place": "the_veiled_keep",
+     "text": "Cross the causeway at low tide to the shoal-caves beyond the Veiled Keep"
+    },
+    {
+     "type": "kill",
+     "place": "the_veiled_keep",
+     "text": "Defeat Old Maud Saltrib and take back the key",
+     "spawn": [
+      {
+       "boss_id": "mq_sum_tide_hag"
+      }
+     ],
+     "actions": "relic:mq_sum_gate_key"
+    },
+    {
+     "type": "wait",
+     "hours": 1,
+     "text": "Race back across the causeway before the tide turns",
+     "place": "firsthold"
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_sum_ro",
+     "relic": "mq_sum_gate_key",
+     "text": "Bring the key to Ro",
+     "topic": "The key is whole. Maud kept it as a keepsake. She said she wished to feel the sea lock behind her at least once.",
+     "reply": "Ro fits the key and the gate begins to move, shuddering and grinding like a very old man standing. Water thunders against it and holds. \"In time. Barely. Walker, you have saved the lower town from a drowning. Shall Ro report Maud's theft to the Watch, or let it lie? She was a gate-keeper before me, and she did not mean harm.\"",
+     "choices": [
+      {
+       "label": "Report her. The gate cannot be trusted to anyone with a grudge.",
+       "reply": "Ro sighs. \"Then she will be found, and brought, and judged. It is right. It will not feel right. Thank you.\"",
+       "actions": "flag:mq_sum_tide_reported"
+      },
+      {
+       "label": "Let it lie. She is old, and the sea has already taken everything else from her.",
+       "reply": "Ro looks at the water for a long time. \"A mercy. Ro will say nothing. The sea will keep its own accounts.\"",
+       "actions": "flag:mq_sum_tide_mercy;loot:standard"
+      }
+     ]
+    }
+   ],
+   "outro": "The Tide Gate of Firsthold holds against the flood. The lower town was spared, and an old woman in a cave goes unreported.",
+   "rewards": {
+    "gold": 520,
+    "loot": "standard"
+   }
+  },
+  {
+   "id": "mq_sum_the_net_that_sings",
+   "title": "The Net That Sings",
+   "region": "summerset/auridon",
+   "start": "npc:mq_sum_lyn",
+   "requires": [
+    "level:12"
+   ],
+   "offer": "Your net has a tune.",
+   "pitch": "It does, walker. It hums. Not the wind. A low, patient melody, the same notes every low tide. Lyn pulled it from the water last month. It was snagged on a ring of old stone, deep, where there is no shipwreck in any chart. The tune is sweet. It is also getting louder. Lyn thinks something under the water would like to be answered.",
+   "desc": "Fisher Lyn's net hums a tune it picked up from a sunken stone ring. She wants someone to find the ring and answer the song.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "greenwater_cove",
+     "text": "Follow the net's tune along the shore to Greenwater Cove"
+    },
+    {
+     "type": "cond",
+     "cond": "night",
+     "text": "Wait until the tide drops and the stone ring is exposed",
+     "place": "greenwater_cove"
+    },
+    {
+     "type": "kill",
+     "place": "greenwater_cove",
+     "text": "Quiet what sings beneath the ring",
+     "spawn": [
+      {
+       "type": "skycraft:sea_serpent",
+       "count": 1,
+       "name": "The Singing Eel",
+       "target": true
+      },
+      {
+       "type": "minecraft:drowned",
+       "count": 2,
+       "name": "Ring-Drowned"
+      }
+     ]
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_lyn",
+     "text": "Tell Lyn the song is finished",
+     "topic": "It was an eel, an old one, calling for a mate that died long ago. It is quiet now. Your net will hum no more.",
+     "reply": "Lyn is quiet. Then, softly: \"An eel. A lonely one. It is a sad thing to answer a song and silence it. But thank you. Lyn will keep the net, with its tune. A net should remember whom it has been called by.\""
+    }
+   ],
+   "outro": "Lyn hangs the net each night where the sea air can reach it. It hums, very softly, and she says it is more peaceful.",
+   "rewards": {
+    "gold": 300,
+    "loot": "standard"
+   }
+  },
+  {
+   "id": "mq_sum_the_traitors_door",
+   "title": "The Traitor's Door",
+   "region": "summerset/artaeum",
+   "start": "npc:mq_sum_quenel",
+   "requires": [
+    "level:28"
+   ],
+   "offer": "You have a very careful way of holding a broom.",
+   "pitch": "Careful. Yes. The stones of this place do not like to be hurried. Walker, I have a difficulty. A fragment of the Traitor's Vault has begun to leak into the college. A mirror that shows what one would say yes to. An initiate sat before it for three hours last night, and has not spoken since. The Order has asked me to deal with it quietly. I would prefer you did, since I would very much like to be a person who has never seen the mirror. Take this token. It is how the island knows you are expected.",
+   "desc": "A fragment of the Traitor's Vault is leaking into the ruined Psijic college on Artaeum. Adept Quenel wants a stranger to enter the vault and silence the door that wears a face.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "statue_of_syrabane",
+     "text": "Cross to Artaeum by Olo's ferry",
+     "actions": "relic:mq_sum_psijic_token"
+    },
+    {
+     "type": "go",
+     "place": "traitors_vault",
+     "text": "Enter the Traitor's Vault and begin the corridor of doors",
+     "actions": "scene:mq_sum_art_vault"
+    },
+    {
+     "type": "kill",
+     "place": "traitors_vault",
+     "text": "Defeat the Door That Wore a Face",
+     "spawn": [
+      {
+       "boss_id": "mq_sum_false_door_keeper"
+      }
+     ],
+     "placement": "structure",
+     "actions": "relic:mq_sum_mirror_shard"
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_sum_thel",
+     "relic": "mq_sum_mirror_shard",
+     "text": "Show the mirror shard to Initiate Thel",
+     "topic": "The mirror is broken. A shard remains. It shows whatever the holder would say yes to.",
+     "reply": "Thel does not speak for a very long moment. \"I looked into it once, for three hours. I saw myself as a teacher, an old one, with a hundred students. I said yes. I would have stayed there forever. Walker, I do not know whether to break the shard or keep it. Shall I lock it in the Order's vault, or return it to the world?\"",
+     "choices": [
+      {
+       "label": "Lock it in the Order's vault. Some temptations do not belong in the world.",
+       "reply": "Thel inclines his head. \"Then it is bound, and I am bound to it, and neither of us will speak of it again. It is a heavy answer, and a safe one.\"",
+       "actions": "flag:mq_sum_door_sealed"
+      },
+      {
+       "label": "Break the shard. Let no one look into it again.",
+       "reply": "Thel does not hesitate. The shard shatters in his palm, and the hall seems to breathe out. \"It is done. I will never know whether the old man was a vision or a vice. Thank you.\"",
+       "actions": "flag:mq_sum_door_broken;loot:standard"
+      }
+     ]
+    }
+   ],
+   "outro": "The Traitor's Vault has one fewer door. The initiate who sat before the mirror spoke again that evening, and said only: 'Good morning.'",
+   "rewards": {
+    "gold": 1200,
+    "loot": "major",
+    "items": [
+     {
+      "item": "skycraft:elven_gilded_chestplate",
+      "name": "Mantle of the Last Refusal",
+      "enchant": {
+       "protection": 4,
+       "unbreaking": 3
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_sum_the_boat_that_returns",
+   "title": "The Boat That Returns",
+   "region": "summerset/artaeum",
+   "start": "npc:mq_sum_olo",
+   "requires": [
+    "level:20"
+   ],
+   "offer": "You row very precisely.",
+   "pitch": "Eleven years, walker, and every crossing is the same number. Eleven thousand, give or take. I do not count. Something counts for me. Yesterday the number was one more than it should have been. I rowed over and rowed back, and there was a passenger in the boat who had never been in it. A tall man in a grey cloak. He thanked me, and he stepped off, and I have not been able to find the place he stepped to. I would like to know whose crossing I was rowing.",
+   "desc": "Ferrywoman Olo carried a passenger she did not take aboard, and the extra crossing has thrown off the count she did not know she was keeping.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "ceporah_tower",
+     "text": "Climb Ceporah Tower, where the grey-cloaked passenger vanished"
+    },
+    {
+     "type": "clear",
+     "place": "ceporah_tower",
+     "text": "Drive off the shades that keep the tower's stair",
+     "spawn": [
+      {
+       "type": "minecraft:vex",
+       "count": 3,
+       "name": "Tower-Vex"
+      },
+      {
+       "type": "skycraft:necromancer",
+       "count": 1,
+       "name": "Staircase Wraith"
+      }
+     ],
+     "placement": "structure"
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_quenel",
+     "text": "Ask Quenel who the grey-cloaked man was",
+     "topic": "Olo rowed a man who was not in her boat. He went to Ceporah Tower. Who was he?",
+     "reply": "Quenel is very still. \"A man in a grey cloak. Tall. Walker, there was a Psijic, long ago, who rowed the strait before Olo. He drowned with his boat. He has not stopped his crossings. He is a very patient man. Olo has been doing his work, quite without knowing. The Order has a question: shall Olo be told, or shall the work go on?\"",
+     "choices": [
+      {
+       "label": "Tell her. She has a right to know whose crossing she rows.",
+       "reply": "Quenel nods slowly. \"She will be shaken. And then she will row, as she always has, with a little more care. A good answer.\"",
+       "actions": "flag:mq_sum_boat_told"
+      },
+      {
+       "label": "Let her row. The man is at peace in his work.",
+       "reply": "Quenel closes his eyes. \"A gentle answer. The strait is quiet. He is satisfied, and Olo is content, and neither will ever be the wiser.\"",
+       "actions": "flag:mq_sum_boat_unspoken;loot:standard"
+      }
+     ]
+    }
+   ],
+   "outro": "Olo rows the strait of Artaeum. Whether she knows whose boat she rows, there is one more passenger on every crossing than there is room for, and she makes a place for him.",
+   "rewards": {
+    "gold": 700,
+    "loot": "standard"
+   }
+  },
+  {
+   "id": "mq_sum_the_tree_of_two_claims",
+   "title": "The Tree of Two Claims",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_apple_claimant",
+   "requires": [
+    "level:10"
+   ],
+   "offer": "You are carrying an apple like an unexploded charm.",
+   "pitch": "It is a gift, walker, from the other woman. She leaves one every day. Syllaen has eleven in her cellar, rotting. She cannot throw them out. She cannot eat them. The tree is theirs, both. A hundred years of lawsuits. The neighbour is old. Syllaen is old. Someone should settle it before one of them dies and the tree goes to cousins. Find the original deed. The Direnni Acropolis keeps the older registers.",
+   "desc": "Two old women of King's Haven have fought over an apple tree for a hundred years. Syllaen wants the original deed found in the Direnni registers.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "direnni_acropolis",
+     "text": "Search the old registers at the Direnni Acropolis"
+    },
+    {
+     "type": "retrieve",
+     "place": "direnni_acropolis",
+     "text": "Recover the original orchard deed",
+     "relic": "mq_sum_orchard_deed"
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_apple_claimant",
+     "text": "Read the deed to Syllaen and her neighbour together",
+     "topic": "The deed is clear. The tree is held jointly. It was always meant to be shared.",
+     "reply": "Syllaen stares. Behind her, her neighbour sits down on the step. Neither speaks. Then, slowly, Syllaen takes the eleventh apple from your hand and offers it across the fence, and her neighbour takes it, and the two old women eat it between them, on the wall, in the sun. Neither says a word, and neither needs to."
+    }
+   ],
+   "outro": "A hundred-year quarrel ended with a single apple, divided. The tree has been well pruned since.",
+   "rewards": {
+    "gold": 180,
+    "loot": "minor"
+   }
+  },
+  {
+   "id": "mq_sum_the_bell_at_midnight",
+   "title": "The Bell at Midnight",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_bell_sexton",
+   "requires": [
+    "level:14"
+   ],
+   "offer": "You sleep with one eye on the rope.",
+   "pitch": "Two weeks, walker. Every midnight, three strokes. Nobody touches the rope. The bell is a plain bronze thing, cast in the third century, and it has never done this in its life. Aldaer has sat in the belfry with a lantern, a mallet and his courage. He fell asleep. When he woke, the rope was knotted in a shape he has never seen, and the bell was still swinging.",
+   "desc": "The dawn-bell of Dawnbreak rings by itself at midnight and ties its own rope in an unfamiliar knot. Sexton Aldaer wants the culprit found.",
+   "objectives": [
+    {
+     "type": "cond",
+     "cond": "night",
+     "text": "Keep vigil in the belfry until the bell rings",
+     "place": "dawnbreak"
+    },
+    {
+     "type": "kill",
+     "place": "dawnbreak",
+     "text": "Strike down whatever is ringing the bell",
+     "spawn": [
+      {
+       "type": "skycraft:will_o_wisp",
+       "count": 1,
+       "name": "Bell-Ringer Wisp",
+       "target": true
+      },
+      {
+       "type": "minecraft:vex",
+       "count": 1,
+       "name": "Rope-Knotter"
+      }
+     ],
+     "actions": "relic:mq_sum_midnight_rope"
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_bell_sexton",
+     "text": "Tell Aldaer what rang his bell",
+     "topic": "A wisp, with a vex to help. They were ringing the hour a drowned bell-ringer once kept. Here is the rope.",
+     "reply": "Aldaer holds the rope and, for the first time in a fortnight, breathes out fully. \"A drowned ringer. His boat was lost the night the third century ended. He is still ringing the hour he missed. Walker, shall we let him? Midnight is a quiet hour. Aldaer does not mind losing sleep, if the ringer has found his bell.\"",
+     "choices": [
+      {
+       "label": "Let him ring. Midnight is his hour.",
+       "reply": "Aldaer smiles, tired and very sincere. \"Then he rings. Aldaer will sleep through the first stroke, and wake for the third, and say a prayer. A fair bargain.\"",
+       "actions": "flag:mq_sum_bell_allowed"
+      },
+      {
+       "label": "Ask him to stop. The village needs its sleep.",
+       "reply": "Aldaer is quiet. \"A kindness to the many. A cruelty to one. Still, Aldaer will ask him, politely, once. If he asks politely enough, I think the ringer will go.\"",
+       "actions": "flag:mq_sum_bell_quieted;loot:standard"
+      }
+     ]
+    }
+   ],
+   "outro": "The bell at Dawnbreak still rings at midnight, in its own time, or does not. Aldaer sleeps in a bed now, and the rope is tied in the knot the ringer taught him.",
+   "rewards": {
+    "gold": 360,
+    "loot": "standard"
+   }
+  },
+  {
+   "id": "mq_sum_the_growing_one",
+   "title": "The Growing One",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_grove_watcher",
+   "requires": [
+    "level:16"
+   ],
+   "offer": "Your ribbon is not long enough.",
+   "pitch": "It is not, walker. Eleven feet in a week, and it is accelerating. The tree is not a tree. It has a heartbeat, a slow one, in the second ring. Ilmen has put a stethoscope to it. Something is growing inside the trunk, and it is not a sapling. It would be wise to know what, before the tree reaches a size that makes the question academic.",
+   "desc": "A tree at Shattered Grove has grown eleven feet in a week and has a heartbeat. Grove-Watcher Ilmen wants to know what is growing inside it.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "shattered_grove",
+     "text": "Examine the growing tree at Shattered Grove"
+    },
+    {
+     "type": "kill",
+     "place": "shattered_grove",
+     "text": "Destroy the Growing One before it breaks the trunk",
+     "spawn": [
+      {
+       "boss_id": "mq_sum_grove_stalker"
+      },
+      {
+       "type": "skycraft:spriggan",
+       "count": 2,
+       "name": "Grove-Sprout"
+      }
+     ]
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_grove_watcher",
+     "text": "Tell Ilmen what grew within the tree",
+     "topic": "A spriggan, a very old one, was seeding itself inside the trunk to be born. It is dead now. The tree has stopped growing.",
+     "reply": "Ilmen lowers his gold ribbon, which has become a very long, very useless gold line. \"Stopped. Quite stopped. Walker, a tree is a gift and a danger, and I have measured one and dissected another. Shall I plant a seed in the same hollow, and see what grows? Or let it lie fallow, in case the old thing was a symptom of something older?\"",
+     "choices": [
+      {
+       "label": "Plant a seed. Let the grove begin again.",
+       "reply": "Ilmen takes a seed from his pocket, warm. \"An acorn. Plain. A plain tree. After that, I think I could do with plain. Thank you.\"",
+       "actions": "flag:mq_sum_grove_planted"
+      },
+      {
+       "label": "Let it lie fallow. The grove has had enough.",
+       "reply": "Ilmen nods. \"A fallow field. A fair season. We shall see what the earth wants, and not insist.\"",
+       "actions": "flag:mq_sum_grove_fallow;loot:minor"
+      }
+     ]
+    }
+   ],
+   "outro": "The Growing One lies in the grove's soil, and the tree beside it has stopped counting its own height. Ilmen's ribbon is now a very handsome scarf.",
+   "rewards": {
+    "gold": 400,
+    "loot": "standard"
+   }
+  },
+  {
+   "id": "mq_sum_the_winner_never_returns",
+   "title": "The Winner Never Returns",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_netch_pilot",
+   "requires": [
+    "level:14"
+   ],
+   "offer": "You are second in everything.",
+   "pitch": "Second in everything, walker, and proud. The Golden Netch race is a whole afternoon of balloons and cheating and sweetmeats. The winner takes the Golden Netch up, and waves, and sails over the sea, and never comes back. Not once in nine years. Quil thinks it is a secret. Quil thinks there is a prize in the sky that nobody tells about. Quil would like to know, and would like it not to be Quil who finds out. Go up in her balloon, and win. Then, please, come back.",
+   "desc": "Every winner of the Golden Netch race sails off and never returns. Racer Quil wants a stranger to win, find out why, and come back alive.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "the_golden_netch",
+     "text": "Enter the Golden Netch race"
+    },
+    {
+     "type": "cond",
+     "cond": "day",
+     "text": "Win the race by crossing the line before the sun is at its height",
+     "place": "the_golden_netch"
+    },
+    {
+     "type": "go",
+     "place": "gryphon_aerie",
+     "text": "Ride the winning balloon to the end of its course at the Gryphon Aerie"
+    },
+    {
+     "type": "retrieve",
+     "place": "gryphon_aerie",
+     "text": "Take the Winner's Banner from the nest where the previous winners landed",
+     "relic": "mq_sum_race_banner"
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_netch_pilot",
+     "text": "Return to Quil and tell her where the winners went",
+     "topic": "The winners did not vanish. They landed on a cliff nest, and were not able to climb down. They have been waiting, with a very good view, for someone to come and ask them about it.",
+     "reply": "Quil laughs until she has to hold her sides. \"A cliff! A very good view! Nine years! They were embarrassed. Of course they were. Walker, I have never been so pleased to be second. I shall go up there next year, and ask them how they managed to lose a balloon and keep their dignity.\""
+    }
+   ],
+   "outro": "Nine winners were found waiting on a cliff, none of them keen to be rescued. Quil is still second. She has never been happier.",
+   "rewards": {
+    "gold": 340,
+    "loot": "standard"
+   }
+  },
+  {
+   "id": "mq_sum_a_match_gone_wrong",
+   "title": "A Match Gone Wrong",
+   "region": "summerset/auridon",
+   "start": "npc:mq_sum_matchmaker",
+   "requires": [
+    "level:14"
+   ],
+   "offer": "You look like a person who has never been matched.",
+   "pitch": "Ha! Perhaps. Walker, Belenwe has a difficulty. One of her four hundred has gone badly. Not a divorce. A disappearance. A groom of a very fine family, Drathelin, left on the wedding morning, and has not been seen. The bride is of the better house, and her family is gathering outside with torches. Belenwe would like him found, and she would like him found before anyone else finds him.",
+   "desc": "A groom matched at Mara's Kiss has vanished on his wedding morning, and the bride's family is gathering with torches. Belenwe wants him found first.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "shrine_of_lamae_bal",
+     "text": "Search the Shrine of Lamae Bal where the groom was last seen"
+    },
+    {
+     "type": "retrieve",
+     "place": "shrine_of_lamae_bal",
+     "text": "Find the note he left behind",
+     "relic": "mq_sum_groom_note"
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_matchmaker",
+     "text": "Bring the groom's note to Belenwe",
+     "topic": "He ran off because he loved someone else. The note says: 'I cannot lie. I would rather be shamed than false.' He is waiting at the shrine.",
+     "reply": "Belenwe reads the note and her lips tighten. \"Loved someone else. And I matched him. Four hundred matches and not a single one has been wrong in this way. Walker, shall Belenwe stand between him and the bride's family, or tell the truth and let the torches fall where they will?\"",
+     "choices": [
+      {
+       "label": "Stand between them. The groom was honest, not cruel.",
+       "reply": "Belenwe straightens her back. \"Then she stands. A matchmaker is not a mother, but she may be a shield. Thank you. Four hundred and one, then, and she shall do it properly.\"",
+       "actions": "flag:mq_sum_match_shield"
+      },
+      {
+       "label": "Tell the truth plainly. The family deserves to hear it.",
+       "reply": "Belenwe nods. \"Plainly. A matchmaker's sin is to dress a thing up. Very well. The torches will come. The truth will be the only thing in the room that is not burning.\"",
+       "actions": "flag:mq_sum_match_truth;loot:standard"
+      }
+     ]
+    }
+   ],
+   "outro": "A wedding that did not happen was explained to a very angry family by a very small woman who had never once been afraid of fire.",
+   "rewards": {
+    "gold": 380,
+    "loot": "standard"
+   }
+  },
+  {
+   "id": "mq_sum_a_vow_broken_for_a_reason",
+   "title": "A Vow Broken for a Reason",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_novice_mute",
+   "requires": [
+    "level:12"
+   ],
+   "offer": "You write your name in the dust.",
+   "pitch": "To see whether it stays, walker. A vow of silence, and Tevildo has broken it. Not out of weakness. A traveller stopped at the gate, wounded and half-mad, and begged for a priest to hear her confession, and the Abbot was away, and Tevildo spoke. A few words. The wrong words. The Order will cast him out when the Abbot returns. He would rather be cast out for a reason than kept for a lie. He wishes only to tell it to someone who will not tell the Abbot.",
+   "desc": "Novice Tevildo broke his vow of silence to comfort a dying traveller. He wants a stranger to hear why, and to carry the traveller's last message.",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "mq_sum_novice_mute",
+     "text": "Hear Novice Tevildo's confession",
+     "topic": "I will not tell the Abbot. Speak.",
+     "reply": "Tevildo speaks, hoarse from long silence. \"She was a courier of the Dominion. She carried a letter. She was dying. She asked me to deliver it to a man in Dusk named Eilen. She said he would know what to do with it. I did not read it. She died before I could ask the man's house.\"",
+     "actions": "relic:mq_sum_courier_letter"
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_sum_eilen",
+     "relic": "mq_sum_courier_letter",
+     "text": "Carry the courier's letter to Harbourmaster Eilen at Dusk",
+     "topic": "A courier died at Trebbite Monastery with a letter for you. A novice broke his vow to comfort her. I have it.",
+     "reply": "Eilen takes the letter and reads it. For a moment her face does not change at all, which is how you know. \"My daughter. She went east three years ago. I had stopped hoping. Walker, a novice broke a vow to hold my daughter's hand as she died. I would like him to know that Eilen holds the harbour of Dusk, and that harbour keeps its debts.\"",
+     "choices": [
+      {
+       "label": "Tell Tevildo that the harbour will stand for him before the Abbot.",
+       "reply": "Eilen nods once. \"It will. Harbourmasters speak, in the end, only when it matters. Tell him it matters.\"",
+       "actions": "flag:mq_sum_vow_defended"
+      },
+      {
+       "label": "Say nothing. Let the novice's act stand on its own.",
+       "reply": "Eilen is quiet. \"Then it stands. Good. A kind thing needs no witness. But I shall remember it.\"",
+       "actions": "flag:mq_sum_vow_unspoken;loot:minor"
+      }
+     ]
+    }
+   ],
+   "outro": "The Abbot, returning, found a novice in the garden who had broken his vow and had a harbourmaster's letter of thanks tucked inside his sleeve. The vow was amended.",
+   "rewards": {
+    "gold": 280,
+    "loot": "minor"
+   }
+  },
+  {
+   "id": "mq_sum_the_heir_in_the_sea_lift",
+   "title": "The Heir in the Sea-Lift",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_ewen",
+   "requires": [
+    "level:16"
+   ],
+   "offer": "Your lift is empty, Ewen. Why is your hand shaking?",
+   "pitch": "Because it was not, walker. A young lord of a very minor house stepped in at dusk, said he wished to see the sea at its closest, and Ewen lowered him. When the lift came up he was gone. No splash. A signet on the floor. Ewen has not been able to look at the water since. If he fell, the sea has him. If he did not, someone took him. Ewen is a coward. He needs someone who is not.",
+   "desc": "A young lord vanished from Cloudrest's sea-lift at dusk, leaving only his signet. Ewen wants him found.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "cloudrest",
+     "text": "Examine the sea-lift and take the lord's signet",
+     "actions": "relic:mq_sum_lost_signet"
+    },
+    {
+     "type": "go",
+     "place": "wreck_of_the_bent_stag",
+     "text": "Search the sea-caves and wreck below Cloudrest"
+    },
+    {
+     "type": "clear",
+     "place": "wreck_of_the_bent_stag",
+     "text": "Drive off the smugglers holding the young lord",
+     "spawn": [
+      {
+       "type": "skycraft:bandit",
+       "count": 3,
+       "name": "Cave Smuggler"
+      },
+      {
+       "type": "npc:thug",
+       "count": 1,
+       "name": "Hostage-Keeper",
+       "hostile": true
+      }
+     ],
+     "placement": "structure"
+    },
+    {
+     "type": "escort",
+     "npc": "mq_sum_ewen",
+     "place": "cloudrest",
+     "text": "Bring the young lord home through the sea-lift"
+    }
+   ],
+   "outro": "A young lord of a very minor house rose by sea-lift at dawn, pale, damp and apologetic. Ewen looked at the water again that day, for the first time in a week.",
+   "rewards": {
+    "gold": 480,
+    "loot": "standard"
+   }
+  },
+  {
+   "id": "mq_sum_the_eclipse_debate",
+   "title": "The Eclipse Debate",
+   "region": "summerset/auridon",
+   "start": "npc:mq_sum_ond",
+   "requires": [
+    "level:16"
+   ],
+   "offer": "You are sweeping a very clean ring.",
+   "pitch": "I am, walker, and I am not looking up. Two astronomers in the ring-walk have been shouting for three days about the next eclipse. One says Thursday, one says Saturday. Both have tables. Both are certain. A stranger could fetch a third reading from the old observer at the Ring Observatory and settle it. Ond has a broom and a very strong feeling of not being his department.",
+   "desc": "Two Skywatch astronomers disagree on the date of the next eclipse. Ring-Keeper Ond wants a stranger to fetch a third reading from the old observer.",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "mq_sum_taleth",
+     "text": "Ask Taleth for her table of the eclipse",
+     "topic": "Two tables, two dates. Give me yours and I will carry it to the observatory.",
+     "reply": "Taleth hands over a folded sheet with the briefest sniff. \"Thursday. Obviously. My rival will claim Saturday, as he claims everything. He has not the patience to measure. Tell the observer to be exact, and to say so loudly.\"",
+     "actions": "relic:mq_sum_eclipse_table"
+    },
+    {
+     "type": "go",
+     "place": "the_veiled_keep",
+     "text": "Carry the contested table to the old observer in the Veiled Keep"
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_sum_maril",
+     "relic": "mq_sum_eclipse_table",
+     "text": "Bring the observer's reading back to the Ring-Walk",
+     "topic": "The observer says: Friday. Neither of you is right. You each made the same error in the third line, from opposite directions.",
+     "reply": "Maril reads the third line, and her face does something complicated. \"Friday. Friday! Neither, and both! Walker, please do not tell Taleth I laughed. Or the rival. They will each hate me. It is, I think, the first time they have ever agreed on being wrong.\"",
+     "choices": [
+      {
+       "label": "Announce it jointly, so neither feels bested.",
+       "reply": "Maril claps. \"Jointly! A diplomat! The pair of them will sulk for an hour, and then they will share a pot of tea and a table, and neither will say what they did to deserve it.\"",
+       "actions": "flag:mq_sum_eclipse_joint"
+      },
+      {
+       "label": "Let each find the error on their own.",
+       "reply": "Maril grins. \"A cruelty with a bow on it. Very well. They will find it in a week. Each will say they found it first. Ond will keep sweeping.\"",
+       "actions": "flag:mq_sum_eclipse_alone;loot:standard"
+      }
+     ]
+    }
+   ],
+   "outro": "The eclipse was on Friday. Two astronomers shared a ring-walk and a sulk, and the broom of Ring-Keeper Ond swept on, undisturbed.",
+   "rewards": {
+    "gold": 330,
+    "loot": "standard"
+   }
+  },
+  {
+   "id": "mq_sum_the_lantern_of_the_pale_dunes",
+   "title": "The Lantern of the Pale Dunes",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_eilen",
+   "requires": [
+    "level:18"
+   ],
+   "offer": "You walk the quay like someone who has been told not to.",
+   "pitch": "I have, walker, and I am going to say it, once. The dunes behind Dusk are haunted by a lantern. A small, pale light, low on the sand, seen at the edge of the evening by those who work late. It does not move. It waits. Three sailors who followed it did not return. Eilen is not a woman who believes in lights. She has seen her own daughter's name written in the sand beneath it. Please put it out.",
+   "desc": "A pale lantern haunts the dunes behind Dusk, and three sailors who followed it did not return. Harbourmaster Eilen asks a stranger to put it out.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "dusk_keep",
+     "text": "Walk the dunes at dusk to Dusk Keep"
+    },
+    {
+     "type": "cond",
+     "cond": "night",
+     "text": "Wait for the pale lantern to appear",
+     "place": "dusk_keep"
+    },
+    {
+     "type": "kill",
+     "place": "dusk_keep",
+     "text": "Face the Pale Dune-Wraith that carries the lantern",
+     "spawn": [
+      {
+       "boss_id": "mq_sum_dune_wraith"
+      }
+     ],
+     "placement": "structure",
+     "actions": "relic:mq_sum_dune_lantern"
+    },
+    {
+     "type": "talk",
+     "npc": "mq_sum_eilen",
+     "text": "Tell Eilen what the lantern was for",
+     "topic": "The wraith was a keeper of the old keep, waiting for ships that never returned. It lit its lantern for them. It is at rest. The lantern is here.",
+     "reply": "Eilen takes the small glass lantern, and for a long moment she says nothing at all. \"For ships that did not return. And my daughter's name. It had been waiting for her. Walker, I shall hang it in the Lantern Tower, under the first lamp. A lantern that has waited that long is owed a place.\"",
+     "choices": [
+      {
+       "label": "Hang it in the tower. Let it light the sea for the lost.",
+       "reply": "Eilen nods, and her eyes shine. \"Under the first lamp, then. It will give no light, but it will give company. Thank you.\"",
+       "actions": "flag:mq_sum_dune_lantern_tower"
+      },
+      {
+       "label": "Bury it in the dunes where it was lit.",
+       "reply": "Eilen is quiet. \"Where it waited. Yes. The sand will keep it. The dunes will be quiet. It is a kindness. It will be a hard walk to the place, and I will make it.\"",
+       "actions": "flag:mq_sum_dune_lantern_buried;loot:standard"
+      }
+     ]
+    }
+   ],
+   "outro": "The pale lantern of the dunes no longer burns. Whether hung or buried, it is no longer waiting, and nobody has followed a light off the quay since.",
+   "rewards": {
+    "gold": 560,
+    "loot": "standard"
+   }
+  },
+  {
+   "id": "mq_sum_the_wrong_knot",
+   "title": "The Wrong Knot",
+   "region": "summerset/summerset_isle",
+   "start": "npc:mq_sum_tor",
+   "requires": [
+    "level:18"
+   ],
+   "offer": "You are staring at a bit of string.",
+   "pitch": "I am, walker, because it is wrong. A hundred and four knots, seventeen colours. Tor has steered by it for thirty years and never once been lost. Last week, near Galorne Obelisk, the string said port and the coast said starboard. One knot in the middle. Wrong. Not slipped. Re-tied, by a hand that knew the pattern. Somebody has been in his cabin. Somebody wants him on the rocks.",
+   "desc": "One knot in Navigator Tor's memory-string was re-tied by a stranger, steering him toward the rocks. He wants the tamperer found.",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "mq_sum_yeli",
+     "text": "Ask Yeli which sailor was seen in Tor's sail-locker",
+     "topic": "Someone re-tied a knot in Tor's string. You see everyone who goes into the loft. Who was there?",
+     "reply": "Yeli puts down her needle and her face goes thoughtful. \"A man in a very good cloak, who said he was a ship's broker. Spoke Altmer like a Maormer, if you follow. He bought a bolt of teal and asked after Tor's cabin. Yeli thought nothing of it. She thinks something of it now.\"",
+     "actions": "relic:mq_sum_knot_string"
+    },
+    {
+     "type": "go",
+     "place": "galorne_obelisk",
+     "text": "Follow the broker's trail to Galorne Obelisk"
+    },
+    {
+     "type": "kill",
+     "place": "galorne_obelisk",
+     "text": "Take down Sethis Knot-Cutter, the Maormer agent",
+     "spawn": [
+      {
+       "boss_id": "mq_sum_knot_cutter"
+      },
+      {
+       "type": "skycraft:bandit",
+       "count": 2,
+       "name": "Wave-Mark Guard"
+      }
+     ]
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_sum_tor",
+     "relic": "mq_sum_knot_string",
+     "text": "Return the string and tell Tor who tied it",
+     "topic": "The knot was tied by a Maormer agent who hoped to wreck your ship on the Galorne rocks. He is dead. The string is whole.",
+     "reply": "Tor holds the string and does not speak for a long time. He runs his thumb along the wrong knot, and then, very deliberately, ties it right. \"Thirty years. A Maormer in my cabin. Walker, shall Tor tell the Dock-Master, and have every cabin searched? Or keep it, and use the string to lead them somewhere the Maormer wish they had not gone?\"",
+     "choices": [
+      {
+       "label": "Tell the Dock-Master. Every cabin should be searched.",
+       "reply": "Tor nods. \"Then it will be done, loudly, with a ledger. A good answer. A dull one. Tor is very fond of dull.\"",
+       "actions": "flag:mq_sum_knot_reported"
+      },
+      {
+       "label": "Leave the wrong knot. Let it lead the Maormer astray.",
+       "reply": "Tor smiles, slow and cold. \"A false string for a false sailor. Tor will keep the wrong knot in the chart, and see who follows it. It will be a very interesting season.\"",
+       "actions": "flag:mq_sum_knot_trap;loot:major"
+      }
+     ]
+    }
+   ],
+   "outro": "A navigator's string has one wrong knot, either put right or kept as bait. Somewhere off Galorne, a Maormer ship has begun to follow a very old, very trusted lie.",
+   "rewards": {
+    "gold": 640,
+    "loot": "standard"
+   }
+  },
+  {
+   "id": "mq_sum_the_bell_beneath_the_water",
+   "title": "The Bell Beneath the Water",
+   "region": "summerset/auridon",
+   "start": "npc:mq_sum_cael_priest",
+   "requires": [
+    "level:16"
+   ],
+   "offer": "Your bell rings, Priest. But it rings late.",
+   "pitch": "Late, walker, because it is not the only one. At the turn of the tide, a second bell rings, under the water, a half-beat behind mine. It is slow and green with weed. A drowned bell, from a drowned chapel, that has not been rung in four hundred years. Cael would not mind a ghost. He minds that it is out of tune. He would like to hear it hushed, or tuned, or at least introduced.",
+   "desc": "A second bell rings under the water at Firsthold at every tide-turn. Priest Cael wants it found, tuned or quieted.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "greenwater_cove",
+     "text": "Search the tide-pools of Greenwater Cove at the turn of the tide"
+    },
+    {
+     "type": "clear",
+     "place": "greenwater_cove",
+     "text": "Drive off the drowned that guard the sunken chapel",
+     "spawn": [
+      {
+       "type": "minecraft:drowned",
+       "count": 3,
+       "name": "Chapel-Drowned"
+      }
+     ],
+     "placement": "structure"
+    },
+    {
+     "type": "kill",
+     "place": "greenwater_cove",
+     "text": "Face the Bell-Warden Below",
+     "spawn": [
+      {
+       "boss_id": "mq_sum_sinking_bell_keeper"
+      }
+     ],
+     "placement": "structure",
+     "actions": "relic:mq_sum_drowned_bell_clapper"
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_sum_cael_priest",
+     "relic": "mq_sum_drowned_bell_clapper",
+     "text": "Bring the clapper to Cael",
+     "topic": "The drowned bell's clapper, weed and all. The warden rang it every tide to call the congregation he lost. He is at rest.",
+     "reply": "Cael takes the clapper and holds it gently, as though it were a sleeping bird. \"Four hundred years. Calling a congregation that was already under the water. Walker, shall I hang the clapper in the Rock Chapel, and let its voice join mine? Or return it to the sea, and let him ring his own congregation?\"",
+     "choices": [
+      {
+       "label": "Hang it in the Rock Chapel. Let the two bells sing together.",
+       "reply": "Cael's voice is thick. \"Two bells. One above, one below. And a priest between. Yes. It will be out of tune, and it will be the finest sound in Auridon.\"",
+       "actions": "flag:mq_sum_bell_joined"
+      },
+      {
+       "label": "Return it to the sea. Let the warden have his chapel.",
+       "reply": "Cael bows. \"Then it goes home. Quietly, on the tide. A very good answer, and a very sad one. The chapel will have its bell. I shall ring mine alone, and listen.\"",
+       "actions": "flag:mq_sum_bell_returned;loot:standard"
+      }
+     ]
+    }
+   ],
+   "outro": "The drowned bell of Firsthold rings no more at the turn of the tide, or rings in harmony with the chapel's own. A priest has stopped being annoyed.",
+   "rewards": {
+    "gold": 480,
+    "loot": "standard"
+   }
+  }
+ ]
+}

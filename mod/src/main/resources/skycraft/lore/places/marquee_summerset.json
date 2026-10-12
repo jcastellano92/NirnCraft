@@ -1,0 +1,384 @@
+{
+ "places": {
+  "lillandril": {
+   "hook": "A city of open-air libraries and bronze observatories climbing a seaside rock in terraces, where ring galleries of book-stacks stand open to the sky and no voice is raised above a whisper.",
+   "rumour": "The library of Lillandril has no roof, they say, because its books are not afraid of weather. They are afraid of people who cannot read the weather. It is a distinction that scholars love to explain.",
+   "notes": [
+    {
+     "id": "reading_room_rules",
+     "kind": "orders",
+     "title": "Rules of the Open Stacks",
+     "author": "Chief Librarian Maelia",
+     "at": "chest",
+     "pages": [
+      "#THE STACKS ASK ONLY THIS\nFind the shelf. Read the book. Return the book to the shelf it left, and not the nearest one. Do not whisper to the volumes; they are shy. Do not lend a book you have not read, and do not read a book you have not been lent.",
+      "In pencil: 'The catalogue is a mirror. The books are the room behind it. When the catalogue disagrees with the room, trust the room. I have asked the room very politely to stop disagreeing. It has not answered.'"
+     ]
+    },
+    {
+     "id": "student_slate",
+     "kind": "notes",
+     "title": "A Student's Reading Slate",
+     "author": "Rilen",
+     "at": "site",
+     "reveals": "direnni_acropolis",
+     "pages": [
+      "#THINGS TO CHECK\n1. On the Seventh Colour of Light: not in the Restricted Ring. Not on the shelf. Ask the Acropolis. 2. Maelia leaves her office every Tuesday at the third bell, for exactly forty minutes. Where does she go? 3. Why is the Ninth Ring's dust always freshly disturbed?"
+     ]
+    }
+   ]
+  },
+  "cloudrest": {
+   "hook": "A palace-city cantilevered over the cliff with balconies of glass over a restless sea, a long causeway and no walls at all. The sky itself is the defence.",
+   "rumour": "Cloudrest has never been besieged. No one knows how you would begin. The few who tried reportedly looked down, and went home.",
+   "notes": [
+    {
+     "id": "balcony_register",
+     "kind": "ledger",
+     "title": "Pane Register of the Balcony Walk",
+     "author": "Steward Aviel",
+     "at": "chest",
+     "pages": [
+      "#THE COUNT\nSeventeen thousand, four hundred and eleven. Entered on the first of every month. The count is not an accounting, it is a courtesy. Every pane is a person, once, a mason who laid it. I call them by their panes.",
+      "A different ink, a later hand: 'It is seventeen thousand, four hundred and ten. I have counted it four times. I do not like to write it. A pane that was there is not there. The floor is not lonely. The floor is not anything. I should like to be sure.'"
+     ]
+    }
+   ]
+  },
+  "skywatch": {
+   "hook": "A hill-city of blue-white stone crowned by a vast ring-orrery, with concentric ring-walks, a star-chart terrace and observatories on every ring.",
+   "rumour": "Skywatch has more clocks than people, and the clocks disagree on purpose. The city keeps a hundred times, and picks the one that is least wrong.",
+   "notes": [
+    {
+     "id": "ring_log",
+     "kind": "journal",
+     "title": "Log of the Outer Ring",
+     "author": "Ring-Keeper Ond",
+     "at": "chest",
+     "pages": [
+      "#Fifty-ninth year\nI am told the heavens move. I have swept the same ring for sixty years and I have noticed only that the dust is the same colour. If the heavens move, they do it when I am looking at the broom.",
+      "I once saw a very small light on the south edge of the sky, from the outer ring, past midnight. I told no one. It is not my department. But I think it is moving, and I think it knows my name."
+     ]
+    }
+   ]
+  },
+  "dusk": {
+   "hook": "A crescent harbour city under pale dunes, lilac in the evening, with a tall lantern tower and low pastel houses that never seem quite awake before dusk.",
+   "rumour": "Everything in Dusk is a little off-colour. Not ill; just late. The bread, the sails, the sun: they all arrive an hour behind the rest of Tamriel and are quietly offended when it is mentioned.",
+   "notes": [
+    {
+     "id": "lamp_rota",
+     "kind": "orders",
+     "title": "Rota of the Lamps of Dusk",
+     "author": "Lamp-Keeper Sen",
+     "at": "chest",
+     "pages": [
+      "#LIGHTING ORDER\nLantern Tower first, then the quay, then the south wall in order, east to west. The last lamp, the south one, is lit with a separate match, struck with the left hand. Do not ask why. Say nothing while it is lit. Do not look at it when it goes out.",
+      "Below, in a child's hand: 'Grandfather lit it every night and never said who for. I think it was for Grandmother, who went out on the Seventh, and who said she would come back by lantern.'"
+     ]
+    }
+   ]
+  },
+  "shimmerene": {
+   "hook": "A busy bay port of white-wood wharves, dockside lanterns on high poles, crane-masts and sail-lofts, where every ship in the west of Summerset is repaired, provisioned and gossiped about.",
+   "rumour": "You can tell a Shimmerene sailor by his rope-burns and his opinions. He has strong views on the Maormer, the tides and which tavern waters its wine. All three views are correct, and no two sailors agree.",
+   "notes": [
+    {
+     "id": "wharf_board",
+     "kind": "list",
+     "title": "Notice Board of the Lantern Docks",
+     "author": "Dock-Master Fen",
+     "at": "chest",
+     "pages": [
+      "#THIS WEEK\nIn: the Silver Plover, the Brine Wasp, three unnamed lighters, and a ship that did not give its name and has been moved on. Out: the Teal Heron, the Loyalty, and every fisher who would like to be paid.",
+      "Fen's own addendum, underlined: 'Pole twelve is not mine. It is not on the rota. If it is lit, do not tie up beneath it. If it is dark, do not trust it.'"
+     ]
+    }
+   ]
+  },
+  "crystal_tower_summerset": {
+   "hook": "A needle of crystal, many times taller than anything else on the isle, glowing faintly at night with a light that does not seem to come from the sun or the moons.",
+   "rumour": "They say the Tower does not cast a shadow. Look on a clear noon and you will see it does not, though the sun is above it. The Altmer say this is a trick of the angle. The angle, they add, is very hard to find.",
+   "notes": [
+    {
+     "id": "tower_inscription",
+     "kind": "inscription",
+     "title": "Inscription at the Tower's Foot",
+     "at": "site",
+     "pages": [
+      "^HERE THE ANCESTORS PLANTED A SEED OF LIGHT.\n^HERE THE LIGHT GREW A SPINE OF CRYSTAL.\n^HERE THE SPINE REACHES UPWARD, AND NO FURTHER.",
+      "A tourist's scratch below it: 'It reaches further than the guides admit. I measured it. The shadow of the top fell in the sea, at noon, at a distance of two miles. Nobody believes me.'"
+     ]
+    }
+   ]
+  },
+  "direnni_acropolis": {
+   "hook": "A ruined hilltop acropolis of white columns and fallen architraves, once the seat of the great Direnni clan, now home to a private collection and a very quiet wind.",
+   "rumour": "Every column at the Acropolis was named. Walk among them and a ghost will tell you which. Walk between them at dusk and the ghosts have a joke they have been rehearsing for four thousand years.",
+   "notes": [
+    {
+     "id": "column_names",
+     "kind": "list",
+     "title": "Names of the Columns, Eastern Row",
+     "author": "A visiting scholar",
+     "at": "chest",
+     "pages": [
+      "#THE EASTERN ROW\nFirst: Patient. Second: Oath-Keeper. Third: He Who Waits at Windows. Fourth: Second-Best. Fifth: Wise. Sixth: Quarrel. Seventh: the one that fell, without a name; nobody agreed.",
+      "In the margin: 'I tried to read the plinths. Every second one is blank. The scholars say the names have worn away. The columns say otherwise. The columns say they were never given.'"
+     ]
+    }
+   ]
+  },
+  "colosseum_of_the_old_ways": {
+   "hook": "A ruined ring arena of pale stone on Artaeum's coast, where the old Psijic champions once fought with arts rather than steel, and where the sand still remembers every bout.",
+   "rumour": "The Colosseum has no gate. It has a door that appears when you stop looking for it, and the sand inside always bears the print of a shoe that is slightly too small.",
+   "notes": [
+    {
+     "id": "bout_card",
+     "kind": "notes",
+     "title": "Torn Programme of a Bout of the Old Ways",
+     "at": "site",
+     "pages": [
+      "#TONIGHT\nA contest of Illusion, no blood, no blows, no applause. The victor shall be the one who persuades the other that the other has already won. The loser shall be the one who believes it. The audience shall be asked to leave quietly.",
+      "Scrawled: 'I do not know who won. I know that I left feeling triumphant, and woke at dawn on the steps with no memory of the evening and a very strong sense that someone had enjoyed themselves at my expense.'"
+     ]
+    }
+   ]
+  },
+  "gryphon_aerie": {
+   "hook": "A cliff nest of enormous gryphons high above the Summerset coast, where the great birds of the Dominion's riders roost between patrols.",
+   "rumour": "Every gryphon in the aerie has a name and a temper, and the riders say the temper is the better guide. A rider who cannot tell a sulking gryphon from a cross one does not last the season.",
+   "notes": [
+    {
+     "id": "rider_chalk",
+     "kind": "list",
+     "title": "Chalk Roster of the Aerie",
+     "author": "Aerie-Master Calindor",
+     "at": "site",
+     "pages": [
+      "#ON THE LEDGE TODAY\nStormbrow: cross. Willowfeather: sulking. Brass: asleep, do not wake. Old Mother: out hunting, leave her perch. The new one: unnamed, nipped Dalwe, do not leave sweetmeats near.",
+      "Beneath, in a rider's scrawl: 'The new one has not been named because it has not decided. It has watched every rider that came to the ledge. It has made no choice. Which is, to Calindor's mind, the most intelligent thing a gryphon has done in a hundred years.'"
+     ]
+    }
+   ]
+  },
+  "isle_of_contemplation": {
+   "hook": "A tiny isle off the Auridon coast with a single meditation platform, reachable only at low tide, where Altmer mystics sit in silence for weeks and are not disturbed.",
+   "rumour": "No one has ever seen the same mystic twice on the isle. The old fishermen say there is only one, and he has been sitting there for eleven hundred years, and he is very patient.",
+   "notes": [
+    {
+     "id": "platform_verse",
+     "kind": "inscription",
+     "title": "Verse Cut in the Meditation Platform",
+     "at": "site",
+     "pages": [
+      "^SIT AND BE A STONE.\n^LET THE TIDE COME AND GO.\n^WHEN YOU CANNOT TELL YOURSELF FROM THE SEA, RISE, AND BE A PERSON AGAIN.",
+      "A pilgrim has added in charcoal: 'I tried for nine days. On the tenth I realised the stone had been trying for eleven hundred years and had not got anywhere either. We shared a very comfortable silence.'"
+     ]
+    }
+   ]
+  },
+  "alinor_royal_palace": {
+   "hook": "The royal palace of Alinor on its terrace of white quartz, a stack of arches and prism-roofed halls where the Dominion's Queen holds court beneath the Crystal Tower.",
+   "rumour": "The Palace has three hundred rooms and the Queen uses six. The rest are kept in exquisite order, for no one, by servants who do not know why. It is the greatest compliment the court knows how to pay a ghost.",
+   "notes": [
+    {
+     "id": "court_protocol",
+     "kind": "orders",
+     "title": "Protocol of the Prism Hall",
+     "author": "Chancellor Aelwen",
+     "at": "chest",
+     "pages": [
+      "#PROTOCOL\nBow when the sun is above the left-hand arch. Bow lower when it is above the right. If the sun is behind a cloud, bow as though it were not. Do not speak of the Queen's sister. Do not speak of the Queen's other sister. Do not mention that there are two.",
+      "A courtier's marginal note: 'There are, of course, three. The third has not been spoken of since the winter before the Great War. The Chancellor has asked that her name be omitted from this protocol, and from every other.'"
+     ]
+    }
+   ]
+  },
+  "garden_of_the_sacred_numbers": {
+   "hook": "A terraced garden in Shimmerene where every bed, path and fountain has been laid out according to a sacred ratio, so that the whole place hums when the wind is right.",
+   "rumour": "The gardeners of the Sacred Numbers never prune by eye. They prune by arithmetic. The flowers, by all accounts, resent it, and bloom in perfectly regular, perfectly sulky rows.",
+   "notes": [
+    {
+     "id": "garden_plan",
+     "kind": "notes",
+     "title": "Plan of the Seventh Bed",
+     "author": "Head Gardener Elwinde",
+     "at": "chest",
+     "pages": [
+      "#THE SEVENTH BED\nSeven hyacinths for the seven winds, spaced one-point-six paces apart. Three roses for the three sisters, each one a hand-span taller than the last. One fern in the centre, placed by moonlight, and not watered by anyone who has seen it do something unusual.",
+      "The fern is not mentioned in the original plan. It arrived on its own the winter before I took the post. It has never wilted. It has never grown. It is the only thing in the garden that has refused to be counted."
+     ]
+    }
+   ]
+  },
+  "statue_of_syrabane": {
+   "hook": "A colossal statue of the Psijic archmage Syrabane standing on the strait before Artaeum, one hand raised in a gesture that is either a blessing or a warning.",
+   "rumour": "The statue's hand was lowered once, a thousand years ago, and the whole island vanished from the charts until it was raised again. Nobody now touches the hand. Nobody even points.",
+   "notes": [
+    {
+     "id": "plinth_script",
+     "kind": "inscription",
+     "title": "Plinth of Syrabane",
+     "at": "site",
+     "pages": [
+      "^SYRABANE STANDS BETWEEN THE ISLE AND THE WORLD.\n^HE DOES NOT KEEP YOU OUT. HE ASKS WHETHER YOU WISH TO COME IN.\n^ANSWER HONESTLY. THE SEA IS LISTENING.",
+      "Carved beneath, very small: 'If the answer is yes, bring a lantern. If the answer is no, bring two.'"
+     ]
+    }
+   ]
+  },
+  "college_of_psijics_ruins": {
+   "hook": "The ruined seaside college of the Psijic Order on Artaeum, where broken arches and half-open doors lead into halls that are sometimes here and sometimes elsewhere.",
+   "rumour": "The Psijics say the college is not ruined. It is simply between versions. They promise it will be rebuilt as soon as they decide which of the two they prefer.",
+   "notes": [
+    {
+     "id": "initiate_rule",
+     "kind": "orders",
+     "title": "Rule of the Initiates",
+     "author": "Adept Quenel",
+     "at": "chest",
+     "pages": [
+      "#RULE THE FIRST\nDo not hurry; the day will arrive. Rule the second: Do not say what you have not yet thought. Rule the third: if a door is open that was closed, close it, and wait to see whether it was you who opened it. Rule the fourth: you are not late.",
+      "On the back, in pencil, in a very young hand: 'I have been late for three years and the rule says I am not. I am beginning to understand that the Psijics are not strict, only very, very patient.'"
+     ]
+    }
+   ]
+  },
+  "kings_haven": {
+   "hook": "A keep and an orchard of golden apples at the foot of the Summerset downs, where two ancient dames dispute whose tree the great one is, and have done so for a hundred years.",
+   "rumour": "The apples of King's Haven are said to cure grief, which is why nobody dares eat them while the dispute lasts. One must be perfectly sad to enjoy one, and the dames are only furious.",
+   "notes": [
+    {
+     "id": "apple_label",
+     "kind": "notes",
+     "title": "Orchard Labels, Eleven Years",
+     "author": "Syllaen",
+     "at": "chest",
+     "pages": [
+      "#ELEVEN LABELS, ELEVEN APPLES\n'From her', each one. A tidy script. Eleven apples, kept in a cool cellar in a row, each one exactly as red as the day it was given. They do not rot. I do not know what that means.",
+      "I have a twelfth. I picked it myself, from the very tree. I have not eaten it. I have not given it. It sits on the kitchen sill, between the salt and the bread, and watches me with an expression I can only describe as fond."
+     ]
+    }
+   ]
+  },
+  "dawnbreak": {
+   "hook": "A hamlet on a sea bluff where the dawn bell rings at midnight, and no one has been seen to pull the rope.",
+   "rumour": "The bell at Dawnbreak is the only one in Summerset that is never late. It is simply early, by about six hours, and has been since the first day of spring.",
+   "notes": [
+    {
+     "id": "sexton_log",
+     "kind": "journal",
+     "title": "Sexton's Night Log",
+     "author": "Aldaer",
+     "at": "chest",
+     "pages": [
+      "#Eleventh night\nThe bell rang three times. I was awake. I saw the rope move, slowly, as if drawn by a very slow person. I called out. The rope paused, and I could have sworn it was apologetic. Then it went on.",
+      "Twelfth night. I left a candle on the sill, and a cup of milk. In the morning the milk was gone, and the candle was lit, and a very small knot had been tied in the rope. A sailor's knot. I have taken it down and put it on the shelf."
+     ]
+    }
+   ]
+  },
+  "shattered_grove": {
+   "hook": "A fallen grove of white trees on the Summerset coast, once a Direnni garden, in which a single young tree has begun to grow at a rate that alarms the gardeners.",
+   "rumour": "The Grove is called Shattered because every tree in it was struck by lightning on the same night, three hundred years ago. All except one. It stood in a ring of burnt wood, untouched. People say it is thinking of something.",
+   "notes": [
+    {
+     "id": "gardener_note",
+     "kind": "notes",
+     "title": "Gardener's Note on the New Growth",
+     "author": "Ilmen",
+     "at": "chest",
+     "pages": [
+      "#DAY ONE\nThe sapling is a forearm tall. The ribbon says three feet by dusk. I measure again at midnight. It is taller. I measure again at dawn. I am no longer sure what I am measuring.",
+      "On the third day I put my ear to the bark. It is not a tree's heartbeat. It is slower, and larger, and there is a second one, faint, behind it. I will not say what I think. I am a gardener. I am only measuring."
+     ]
+    }
+   ]
+  },
+  "the_golden_netch": {
+   "hook": "An inn under a bobbing netch-balloon where the yearly balloon race begins, and where, for nine years running, the winner has gone up and never come down.",
+   "rumour": "The Golden Netch has a wall of winners' portraits, nine of them. They are hung high, out of reach, so no one can see that all nine are smiling in exactly the same way.",
+   "notes": [
+    {
+     "id": "race_poster",
+     "kind": "notes",
+     "title": "Poster for the Great Netch Race",
+     "author": "The Race Committee",
+     "at": "site",
+     "pages": [
+      "#THE GREAT NETCH RACE\nOpen to any balloon of any make and any pilot of any nerve. Course: from the Golden Netch, over the coast, to a marker set at the Committee's discretion. Prize: a golden netch, and the freedom of the skies.",
+      "A small note at the bottom: 'The Committee regrets that it cannot be responsible for the pilot's whereabouts after the finish. Pilots are advised to leave a forwarding address. Nobody has ever collected one.'"
+     ]
+    }
+   ]
+  },
+  "maras_kiss_public_house": {
+   "hook": "A bright public house famed for its matchmaking, where a matchmaker with four hundred pairs to her name keeps a ledger and a very good sherry.",
+   "rumour": "They say a match made at Mara's Kiss is the strongest in Summerset. A couple that quarrels there is asked to leave. A couple that does not is asked to stay.",
+   "notes": [
+    {
+     "id": "match_book",
+     "kind": "ledger",
+     "title": "The Matchmaker's Book",
+     "author": "Belenwe",
+     "at": "chest",
+     "pages": [
+      "#THE MATCHES\nFour hundred and one, and the last the oddest. Drathelin and Merelin. A good family, a better name, and, I now believe, a very bad fit. He wishes to be a fisher. She wishes to be a Justiciar. I did not ask. Matchmakers do not ask. That is the whole of the art, and the whole of the sin.",
+      "Beneath it, in a different, harder ink: 'To make a match is to wager that two people will not change. They always change. That is the only thing I have ever been sure of. I should like to be sure of something else before I die.'"
+     ]
+    }
+   ]
+  },
+  "trebbite_monastery": {
+   "hook": "A monastery of a silent vow on the Summerset shore, where a novice has broken it and will say why only to a stranger.",
+   "rumour": "The monks of Trebbite are not forbidden to speak. They have simply never found anything worth the effort. Speak to one, and you will be given a very long, very kind look, and a bowl of soup.",
+   "notes": [
+    {
+     "id": "abbot_notice",
+     "kind": "orders",
+     "title": "Notice of the Abbot, Left at the Gate",
+     "author": "Abbot Imrel",
+     "at": "site",
+     "pages": [
+      "^THE VOW IS A GIFT, NOT A CHAIN.\n^A MAN WHO BREAKS IT FOR LOVE HAS NOT BROKEN IT.\n^A MAN WHO BREAKS IT FOR VANITY HAS NOT KEPT IT.",
+      "The Abbot has added in a different, smaller hand: 'I am away three weeks, on pilgrimage to the Isle of Contemplation. If any brother has done a great wrong, I ask that he wait to be forgiven until my return, and not, in the meanwhile, forgive himself.'"
+     ]
+    }
+   ]
+  },
+  "golden_gryphon_garret": {
+   "hook": "A tiny turret-room above a tavern in Alinor, said to be the oldest gryphon-rider's garret in the city, hung with feathers, saddles and a single very worn flying helm.",
+   "rumour": "The garret has been let to a different rider each decade, and every one of them was lost over the sea. The rent is very low. People take it anyway, for the view.",
+   "notes": [
+    {
+     "id": "rider_wall",
+     "kind": "notes",
+     "title": "Names Pencilled on the Garret Wall",
+     "at": "site",
+     "pages": [
+      "#THEY LIVED HERE\nDalwe, who flew too high. Oren, who flew too low. Mirimel, who flew exactly as she should and still did not return. Calindor, who is the only one who came back, and he does not talk about it.",
+      "At the bottom, in a fresh hand: 'I took the room for the view. It is a very good view. It looks out, over the harbour, to a headland where a lantern is lit every evening. I have not asked who lights it. I think it is for us.'"
+     ]
+    }
+   ]
+  },
+  "shimmerene_dockworks": {
+   "hook": "The great timber dockworks of Shimmerene, an unbroken sweep of wharves, cranes, rope-walks and sail-lofts that has been rebuilt after every storm for three thousand years.",
+   "rumour": "The dockworks have never fallen down, they say, because the cranes are too proud to be seen on their knees. A crane that is tired simply pretends to be asleep until the tide is high.",
+   "notes": [
+    {
+     "id": "crane_log",
+     "kind": "journal",
+     "title": "Log of the East Crane",
+     "author": "Crane-Hand Yelnor",
+     "at": "chest",
+     "pages": [
+      "#Third watch\nLoaded: forty crates, a barrel, one unlabelled box marked FRAGILE and kept apart. I did not open it. It was warm. It hummed. I put it where the Dock-Master said, between the sail-loft and the quay, and did not ask.",
+      "Fifth watch. A man in a blue cloak asked me the weight of the unlabelled box. I told him. He gave me a very small, very heavy coin. I have it. I shall not spend it. It has a wave on one side and a serpent on the other."
+     ]
+    }
+   ]
+  }
+ }
+}

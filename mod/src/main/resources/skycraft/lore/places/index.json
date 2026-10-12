@@ -14,5 +14,9 @@
  "loreweb.json",
  "marquee_cyrodiil.json",
  "marquee_high_rock.json",
- "marquee_hammerfell.json"
+ "marquee_hammerfell.json",
+ "marquee_elsweyr.json",
+ "marquee_valenwood.json",
+ "marquee_summerset.json",
+ "marquee_foreign.json"
 ]

@@ -641,23 +641,6 @@
     }
    ]
   },
-  "glenpoint": {
-   "hook": "A small walled port on a headland with a single gate, a beacon keep and houses crowded to the end of the quay.",
-   "rumour": "The beacon at Glenpoint is lit on nights no ship is expected, and a grinding wheel runs in the boat-shed until dawn.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "report",
-     "title": "Beacon-Keeper's Report",
-     "author": "Beacon-Keeper Orla",
-     "at": "chest",
-     "reveals": "wayrest",
-     "pages": [
-      "Beacon lit nine nights this month on orders I did not give. A grinding wheel runs in the old boat-shed, and the quay is wet with stone dust at dawn. The barge that pauses there carries no flag. Its passengers are masons, and its cargo is wrapped in sacking. They pay me in good coin to look at the sea. I look at the sea."
-     ]
-    }
-   ]
-  },
   "cath_bedraud": {
    "hook": "A knight's crypt under a ruined chapel with long vaulted aisles of effigies, a bone-lined crypt and a hollow font.",
    "rumour": "In Cath Bedraud the knights' stone faces all look one way: toward a niche that has been plastered shut.",
@@ -720,23 +703,6 @@
      "reveals": "northpoint",
      "pages": [
       "Lady of hope, hold my lantern. I said I would not go, and then I did, and then I could not tell you which way is back. If the fog sings tonight, do not let me answer. If the fog asks, let me remember I have a name."
-     ]
-    }
-   ]
-  },
-  "northpoint": {
-   "hook": "A rock-bound northern port on a moor with houses clinging to a sea cliff, stairs down to the quay and a squat lighthouse in the mist.",
-   "rumour": "The lighthouse at Northpoint is dark at the fog hour, by order of the harbour-master, who wears a small silver bell round his neck.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "orders",
-     "title": "Harbour-Master's Orders",
-     "author": "Harbour-Master Dunstan",
-     "at": "chest",
-     "reveals": "shornhelm",
-     "pages": [
-      "Light to be extinguished at the fog hour. Ships to take their bearing by the moor-lanterns, not the great lamp. If a ship answers a voice from the fog, it is to be hailed back by the silver bell. If the ship does not respond, it is the Captain's affair and God keep him. Do not ask who is calling. The caller is polite."
      ]
     }
    ]
@@ -1096,23 +1062,6 @@
     }
    ]
   },
-  "dragonstar": {
-   "hook": "A fortress-city with a huge circular arena at its heart, spokes of streets running to a ringed wall and a stepped palace beyond.",
-   "rumour": "The arena-master of Dragonstar sets his bouts by a schedule he keeps in a locked chest, and the fighters who have read it won't discuss it.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "orders",
-     "title": "Arena-Master's Schedule",
-     "author": "Arena-Master Idris",
-     "at": "chest",
-     "reveals": "aetherian_archive",
-     "pages": [
-      "Bout one: a red-sash against a blue-sash, ending on the stair's third rung. Bout two: a drawn sword, a dropped shield, a kneeling. The valley's panels are filling at a rate of one bout a week. Fighters who refuse wake bruised in the shape of the bout they skipped. I do not make the fights. I merely schedule them."
-     ]
-    }
-   ]
-  },
   "aetherian_archive": {
    "hook": "A giant sealed library sphere half out of the sand, its surface covered in turning glyph-rings.",
    "rumour": "The great sphere's rings turn at dusk, always to the same heading. Scholars come to watch and write nothing down.",
@@ -1180,23 +1129,6 @@
     }
    ]
   },
-  "abahs_landing": {
-   "hook": "A pier-and-stilt harbour on a bay, with rope walkways, nets and a lighthouse on a mole.",
-   "rumour": "The stilt harbour at Abah's Landing ships palm-seeds in sealed jars. Nobody knows which garden they are for, and the harbour-master has stopped asking.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "report",
-     "title": "Harbour-Master's Report",
-     "author": "Harbour-Master Nasir",
-     "at": "chest",
-     "reveals": "taneth",
-     "pages": [
-      "Jars of palm-seed received this season: 212, labelled 'for the garden', each stamped with a lord's palm-seal. Destination: overland, by night cart. I asked a cart-driver which garden. He said he only drove as far as the necropolis road and was paid not to look. I have kept the manifests in a locked drawer."
-     ]
-    }
-   ]
-  },
   "hubalajad_palace": {
    "hook": "A walled lord's estate in the Hews Bane hills, with a long colonnade and a conservatory of potted palms.",
    "rumour": "At Hubalajad the lord has been dead twenty years and still orders palms by the barrow-load.",
@@ -1227,34 +1159,6 @@
      "reveals": "port_hunding",
      "pages": [
       "I do not remember coming. I remember a contract, a palm, and a glass of water. I tend. The dead are warm. The bloom is gold and very beautiful, and when I touch it I feel my name loosening. I think this is how the gardens keep their gardeners. I must remember my name. Hadiya. Hadiya. Hadiya."
-     ]
-    }
-   ]
-  },
-  "port_hunding": {
-   "hook": "A small port gate and pier on Stros M'Kai's coast, a customs hut and a harbour crane, with a sealed manifest cabinet.",
-   "rumour": "Every fifth year a ship leaves Port Hunding with sealed cargo and the clerks are told to stay home.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "report",
-     "title": "Customs Note",
-     "author": "Clerk Rahim",
-     "at": "site",
-     "reveals": "saintsport",
-     "pages": [
-      "Fifth year: one ship, sealed, no passengers declared. Crew: twelve, all of the old families. Destination: unrecorded. Return: not expected. I was ordered to accept the form without reading the cargo. I read it. I will not say what I read, except that the ship is old."
-     ]
-    },
-    {
-     "id": "thread",
-     "kind": "notes",
-     "title": "Harbour Page Note",
-     "author": "Navigator Idris",
-     "at": "site",
-     "reveals": "stros_mkai",
-     "pages": [
-      "Page two of nine: hidden in the manifest cabinet at Port Hunding. It gives a tide-hour and a heading for the first stage. Hide it again. Do not carry it on the sea unless you have the others; a single page leads to a reef."
      ]
     }
    ]
@@ -1320,40 +1224,6 @@
     }
    ]
   },
-  "star_haven_adeptorium": {
-   "hook": "A tiny academy under a dome on an Anequina hillside, with a roof opening and brass quadrants on every windowsill.",
-   "rumour": "The Star Haven mage says Secunda is late and gets laughed at. He keeps measuring anyway.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "journal",
-     "title": "Observation Log",
-     "author": "Brother Za'ren",
-     "at": "chest",
-     "reveals": "shrine_of_the_cats_divine",
-     "pages": [
-      "Secunda late by seven minutes on the twelfth. Eleven on the fourteenth. The almanac of the priests declares the moon on time. I wrote respectfully, three times. The third answer asked me to stop looking up. I have bought a larger quadrant. The moon is not wrong. The moon is moving."
-     ]
-    }
-   ]
-  },
-  "shrine_of_the_cats_divine": {
-   "hook": "A stepped shrine of giant cat statues on an Anequina hillside, with a moon-pool and a stair of prayer tablets.",
-   "rumour": "The great cats at the shrine have started casting shadows that don't match the day.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "warning",
-     "title": "Pilgrim's Warning",
-     "author": "a pilgrim",
-     "at": "site",
-     "reveals": "torval",
-     "pages": [
-      "Do not light the evening lamp by the pool. The priests have changed the marks and the cats do not like it. A mason told me the new mark is wrong by a finger's breadth, and that a finger's breadth of moon is a month's grain. Say nothing to the priests. They will say it is blasphemy."
-     ]
-    }
-   ]
-  },
   "temple_of_agamanus": {
    "hook": "A ridge-top temple with terraces in four stages, prayer-wheels and a hollow dome, whose sanctum is aligned to a single moonrise.",
    "rumour": "The temple of Agamanus no longer lights its lamp. The keepers say it will be lit again once the moon is on time.",
@@ -1404,96 +1274,6 @@
     }
    ]
   },
-  "roadside_twin_moons": {
-   "hook": "A roadhouse with two lanterns by the Rimmen road, one pale and one rose, each the colour of a moon.",
-   "rumour": "A faceless Khajiit walked past the Twin Moons last night and bowed to the lanterns.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "letter",
-     "title": "Lanternkeeper's Letter",
-     "author": "Mazri",
-     "at": "chest",
-     "reveals": "baandari_caravan_stop",
-     "pages": [
-      "To the Rimmen guard: I found a mask in the pack of a Baandari trader. It was one of the honoured dead's, with the family seal inside the rim. A faceless one came to the door later that night and stood in the road with its hands out. I did not give it anything. I am ashamed. Please send someone."
-     ]
-    }
-   ]
-  },
-  "baandari_caravan_stop": {
-   "hook": "A tent camp by the Rimmen road with painted wagons, cooking fires and a bright awning for the trade.",
-   "rumour": "The Baandari tent camp by the Rimmen road will sell you anything, and lately that includes carved faces nobody asks about.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "ledger",
-     "title": "Caravan-Mother's Account Book",
-     "author": "Caravan-Mother Rasha",
-     "at": "site",
-     "reveals": "hakoshae",
-     "pages": [
-      "Faces bought this season: 38 (cedar), 21 (bone), 4 (gilt). Faces sold north: 51. Faces unsold: 12, kept in the wagon with the red awning. I had thought them craft-work. A priest told me otherwise and left in tears. I will sell no more. I cannot afford to stop."
-     ]
-    },
-    {
-     "id": "thread",
-     "kind": "ledger",
-     "title": "Caravan-Mother's Slips",
-     "author": "Caravan-Mother Rasha",
-     "at": "site",
-     "reveals": "rawlkha",
-     "pages": [
-      "Caravans in debt: forty-six. Debts held by the Crescent Ledger: forty-one. We have always paid the Counting-House with a cut of the sugar and a season's labour of the young. Nobody has seen the lender. Nobody wishes to. It is said he sleeps by day and by night and pays his debts in years."
-     ]
-    }
-   ]
-  },
-  "hakoshae": {
-   "hook": "A hamlet around a ring of upright moonstones where tomb-guardians live, low houses in the circle's shadow.",
-   "rumour": "The Hakoshae guardians keep faceless dead in the ring at night. Don't walk near after dark.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "diary",
-     "title": "A Guardian's Diary",
-     "author": "Guardian Mur'ti",
-     "at": "chest",
-     "reveals": "rimmen",
-     "pages": [
-      "Three more came last night. I counted them into the ring and gave them each a lamp. They stand and wait, and the moon looks down on their smooth faces. I have written to the priests of Rimmen four times. The fifth I shall carry myself. I am afraid of what I shall say."
-     ]
-    }
-   ]
-  },
-  "anequina_aqueduct": {
-   "hook": "A long arched aqueduct across a gorge, with a channel on top and maintenance galleries running through its piers.",
-   "rumour": "The aqueduct's piers are hollow, and on moonless nights lamps burn inside them.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "list",
-     "title": "Smugglers' Packing List",
-     "author": "unsigned",
-     "at": "site",
-     "reveals": "rimmen_necropolis",
-     "pages": [
-      "Box 1: eighteen masks, cedar. Box 2: eleven masks, bone. Box 3: the family seal-mask of House Rukhal, which is not for sale and I will not carry it. Box 4: empty, return with ballast. Water in the channel is low this season; take the lower gallery."
-     ]
-    },
-    {
-     "id": "thread",
-     "kind": "report",
-     "title": "Aqueduct-Keeper's Report",
-     "author": "Keeper Hakim",
-     "at": "site",
-     "reveals": "molag_mar",
-     "pages": [
-      "The channel went quiet at the second bell. Not dry: quiet. The water stood still in its bed and a note came from the stones, a lullaby, a hum that I felt in my teeth. I tried to cry out and found I could not. At dawn I was lying in the channel with my cheek on the wet stone, and my face was wet with tears."
-     ]
-    }
-   ]
-  },
   "rimmen_necropolis": {
    "hook": "A vast city of the dead in layers, with crypt avenues, moon-lit atria and a lunar clock chamber that descends with the moons' cycle.",
    "rumour": "The Rimmen necropolis has a clock that stopped between two moons. Some say it is waiting for faces.",
@@ -1506,85 +1286,6 @@
      "reveals": "tathara_sugar_farm",
      "pages": [
       "EACH NICHE A FACE, EACH FACE A NAME. The clock does not run while a niche stands empty. It is not cruelty; it is order. Return what was taken. The dead are not impatient. They have time."
-     ]
-    }
-   ]
-  },
-  "tathara_sugar_farm": {
-   "hook": "A sugar farm with a boil-house at the edge of a meadow where the cane is lit with a faint, moon-coloured glow.",
-   "rumour": "The Tathara sugar is brighter than any harvest. It tastes of iron, and the wife sleeps three days.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "notes",
-     "title": "Farmer's Notes",
-     "author": "Rashid of Tathara",
-     "at": "chest",
-     "reveals": "moon_sugar_meadow",
-     "pages": [
-      "Sugar sold: two hundred weight. Sugar returned by customers: sixty. Complaints: the sleeping, the taste, the glow. The glow is worse by the meadow's lower ditch. I put my hand in the ditch and it came out shining. I have washed it twice. It is still shining."
-     ]
-    }
-   ]
-  },
-  "moon_sugar_meadow": {
-   "hook": "A field of luminous moon-sugar flowers in a shallow bowl of pale earth, brightest along a drainage ditch.",
-   "rumour": "The meadow glows brightest along the ditch, and the ditch never freezes.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "report",
-     "title": "Surveyor's Report",
-     "author": "Hasani",
-     "at": "chest",
-     "reveals": "the_prancing_netch",
-     "pages": [
-      "The ditch leads under the hill, into a gallery of brass. The stone is warm. The glowing liquid is oil, not water, and it ticks as it cools. The farmers call it the moon's milk. I would call it a leak. I would also call for a very long rope."
-     ]
-    },
-    {
-     "id": "thread",
-     "kind": "contract",
-     "title": "A Debt-Slip",
-     "author": "the Counting-House",
-     "at": "chest",
-     "reveals": "tathara_sugar_farm",
-     "pages": [
-      "The bearer of this slip owes, to the Counting-House of the Crescent Ledger, thirty-one years of labour at the rate of one year per hundred weight of sugar. The debt is purchased from the farm of Tathara and transferred without notice. The bearer will continue to be paid in the farm's own coin, minus interest."
-     ]
-    }
-   ]
-  },
-  "the_prancing_netch": {
-   "hook": "An inn built beneath a hanging netch-balloon on the Anequina road, with a long common room and a rooftop landing for ropes.",
-   "rumour": "The Prancing Netch's beer glows faintly on Fridays and nobody will say why.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "ledger",
-     "title": "Cellar Ledger",
-     "author": "Innkeeper Tabu",
-     "at": "chest",
-     "reveals": "corinthe",
-     "pages": [
-      "Kegs: 40. Tank: one, full, glowing. Complaints: three drinkers who slept for a day. Praise: sixteen drinkers who say it is the best they ever had. I have stopped serving it to the old and the very young. I have not stopped serving it. Do not tell the Senchal buyers."
-     ]
-    }
-   ]
-  },
-  "corinthe": {
-   "hook": "A green river city of terraced gardens, canals with arching bridges and a garden-roofed cathedral.",
-   "rumour": "The cathedral of Corinthe has a ward of sleepers laid out like a field of sheaves, and the herbalists say the cure costs more than the town has.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "report",
-     "title": "Herbalists' Ward Report",
-     "author": "Herbalist Mireth",
-     "at": "chest",
-     "reveals": "senchal",
-     "pages": [
-      "Sleepers in the nave: 63. Waking after a dose of river-moss: 41. Waking cleanly: 22. The moss grows only in the third canal and costs us a week's labour per dose. The cause is a glow in the sugar. The sugar-port buyers know it. We have written to them politely, then less politely. Please send moss."
      ]
     }
    ]
@@ -1616,73 +1317,6 @@
     }
    ]
   },
-  "orcrest": {
-   "hook": "A mesa-top fort-town in orange rock, with a gate shaped like a pair of claws, cisterns and rooftop banners.",
-   "rumour": "Every caravan out of Orcrest carries one broken blade-shard. Nobody knows who sends them.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "orders",
-     "title": "Gate-Captain's Orders",
-     "author": "Captain Ja'dar",
-     "at": "chest",
-     "reveals": "dune",
-     "pages": [
-      "One shard per caravan, ribbon tied, delivered to the hill. If asked, say it is custom. If asked again, say it is old. If asked a third time, hand over the ledger of oaths and let the questioner choose whether to carry the weight."
-     ]
-    }
-   ]
-  },
-  "dune": {
-   "hook": "A caravan crossroads with a wheel-shaped market, eight radial lanes, striped tents and camel pens at the rim.",
-   "rumour": "The caravan market at Dune has a wagon at its hub that sells nothing and is never left unguarded.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "ledger",
-     "title": "Hub-Wagon Ledger",
-     "author": "Wagon-Keeper Zhasira",
-     "at": "chest",
-     "reveals": "ne_quin_al",
-     "pages": [
-      "Shards received: 31. Shards forwarded to the plateau city: 24. Shards held back for the final carry: 7. I am told they are an old custom. I am told many things. The shards are warm in my hands at dusk, and they rattle in the night as though trying to arrange themselves. I keep them wrapped in wool and I do not look at them."
-     ]
-    }
-   ]
-  },
-  "ne_quin_al": {
-   "hook": "An ancient ruined city on a plateau, with a processional road, collapsed towers and a single standing arch.",
-   "rumour": "At Ne Quin-al the old smiths' oath-hall has a floor that someone has been tallying by hand, and the smith's anvil is warm to the touch.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "inscription",
-     "title": "The Floor Tally",
-     "at": "site",
-     "reveals": "hill_of_shattered_swords",
-     "pages": [
-      "NINE HUNDRED COLUMNS OF OATHS, NINE HUNDRED NAMES IN EACH. Each who swore on a blade is counted here, and each who broke it is counted twice. The blade that was shattered is not lost. It is borne to the hill. Whoever carries it must have broken a vow, and kept another. Such is the order of the forge."
-     ]
-    }
-   ]
-  },
-  "hill_of_shattered_swords": {
-   "hook": "A hill planted with thousands of broken sword-blades, shining in the wind like a cold field of wheat.",
-   "rumour": "The shards on the hill move at night. By morning they are in a ring, and there is always a gap.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "poem",
-     "title": "Song of the Hundred Oaths",
-     "author": "unknown",
-     "at": "site",
-     "reveals": "prowls_edge_dragonscour",
-     "pages": [
-      "~A hundred oaths on a hundred steel,~a hundred hands that learned to kneel.~Bring the broken, bring the bent,~bring the oath that was never spent.~The hill is cold and the wind is long.~Come and be forged in the dragon's song."
-     ]
-    }
-   ]
-  },
   "prowls_edge_dragonscour": {
    "hook": "A ridge of colossal bones leading to a lair on a mesa, an open-air scour you can walk inside with ribs forming arches.",
    "rumour": "At Prowl's Edge a steam rises from the bones on a cold night, as if something were quenched.",
@@ -1695,23 +1329,6 @@
      "reveals": "star_haven_adeptorium",
      "pages": [
       "WHAT IS SWORN IS SWORN. WHAT IS BROKEN IS BROKEN. WHAT IS FORGED HERE IS BOTH. Let no hand take the blade who has not broken a vow. Let no hand put it down who has not kept one."
-     ]
-    }
-   ]
-  },
-  "elden_tree": {
-   "hook": "The great tree seen from the whole province, a trunk wide as a hill with a faintly glowing crown above the clouds.",
-   "rumour": "The great tree's glow is a shade dimmer than last year. The keepers say it will be fine. The keepers are not looking up.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "warning",
-     "title": "Keeper's Warning",
-     "author": "Keeper Alduin Ro",
-     "at": "site",
-     "reveals": "ne_salas",
-     "pages": [
-      "Do not touch the splinters. They are for the keepers' use only. Do not ask what they are for. If the crown goes dark we shall have the Ayleid dead to deal with, and I do not think the Green Pact has the words for it. Feed the lamp. Feed it names. We have run out of ours."
      ]
     }
    ]
@@ -1788,91 +1405,6 @@
     }
    ]
   },
-  "roadside_green_bough": {
-   "hook": "An inn in a boughed tree on the Malabal Tor road, with stair-ladders and a landing of woven rope.",
-   "rumour": "The walking city has been going in a straight line since spring. The innkeeper drew it on the wall.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "notes",
-     "title": "Route-Board Notes",
-     "author": "Innkeeper Nila",
-     "at": "chest",
-     "reveals": "supplication_house",
-     "pages": [
-      "The city's usual circle: spring in the north, summer to the east, autumn south, winter west. This year it has not circled. It goes straight, as though led. A hermit at Supplication House has a better map. She cut one of the guide-trees. Please do not tell the wardens."
-     ]
-    }
-   ]
-  },
-  "supplication_house": {
-   "hook": "A hermit's hut deep in Malabal Tor with a prayer-bench, a wind-chime of bone and a ring of stumps around it.",
-   "rumour": "The hermit at Supplication House is cutting trees and weeping while she does it. The wardens pretend not to hear.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "diary",
-     "title": "A Hermit's Confession",
-     "author": "Wynlith of the Stumps",
-     "at": "chest",
-     "reveals": "drabul",
-     "pages": [
-      "I have cut nine. The Pact says one cut is a death-sentence for the cutter, and I have cut nine, and still I breathe. The apostates' chant goes on. They call the great walker to them and I cannot bear what it will do. I have asked the Orcs. Orcs do not hold with the Pact. Orcs have axes."
-     ]
-    }
-   ]
-  },
-  "drabul": {
-   "hook": "An Orc outpost in the Malabal forest, a palisade of cut trunks and a forge-pit beneath a canopy hole.",
-   "rumour": "The Orcs of Drabul have been felling trees that Bosmer would not touch, and no Bosmer has said a word against them.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "list",
-     "title": "Chief's Stump Tally",
-     "author": "Chief Gruzbash",
-     "at": "chest",
-     "reveals": "jathsogur",
-     "pages": [
-      "Guide-trees felled: 7. Remaining on our line: 4. Paid: smoked fish, two casks of ale, and a hermit's gratitude, which is the best I have been paid in. The hermit weeps when she hands over the axes. I do not understand her people's gods. I understand a good axe and a woman who needs a tree cut."
-     ]
-    }
-   ]
-  },
-  "jathsogur": {
-   "hook": "An Orc stronghold on a ridge above the forest, with a stone keep and a view of the guide-tree line.",
-   "rumour": "From Jathsogur's wall you can see the city's route. The Orcs have been shooting at the trees along it.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "orders",
-     "title": "Chieftain's Orders",
-     "author": "Chief Mazgar",
-     "at": "chest",
-     "reveals": "silvenar",
-     "pages": [
-      "Eleven guide-trees remain on the line. Fell nine with the ballista, two by axe at dusk. Do not shoot at the city itself. Do not shoot at the Pact-wardens. If asked, we are hunting boar. Our payment is in smoked fish and the hermit's gratitude. It will have to do."
-     ]
-    }
-   ]
-  },
-  "silvenar": {
-   "hook": "A hidden court under hollowed root arches, a sheltered amphitheatre of roots with a single audience hall lit by fireflies.",
-   "rumour": "The hidden court at Silvenar knows who is cutting guide-trees, and a councillor passes the cutters coin in secret.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "letter",
-     "title": "Councillor's Secret Letter",
-     "author": "Councillor Aerin",
-     "at": "chest",
-     "reveals": "falinesti",
-     "pages": [
-      "To the hermit: the court cannot approve and will not forbid. A purse is enclosed, and a seal that will open the walking city's inner stairs. The chant of the apostates is a poison to the Pact and a danger to the city. Cut the last guide-trees at night. Do not be found. If you are found, we have never met."
-     ]
-    }
-   ]
-  },
   "tomb_of_the_apostates": {
    "hook": "A hollow great tree whose heartwood is carved with tombs, stairs spiralling inside the trunk.",
    "rumour": "At dusk the hollow tree sings. The Pact-wardens put their hands over their ears and call it wind.",
@@ -1897,22 +1429,6 @@
      "reveals": "soulrest",
      "pages": [
       "One panel gone from the heartwood: a carving of a crowned figure with its face hollowed out. The tree is not a tomb for the Pact's dead; it was a tomb for something older, planted over it to keep it quiet. The apostates' chant, I now suspect, was never to the great walker. It was to the thing in the heartwood."
-     ]
-    }
-   ]
-  },
-  "marbruk": {
-   "hook": "A fort-town in a glade ringed by a living wall of thorn and stone, with a central fire pit and watch posts.",
-   "rumour": "The thorn wall of Marbruk has names pricked into it. The watchers bow every dusk and nobody asks why.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "inscription",
-     "title": "The Thorn Plaque",
-     "at": "chest",
-     "reveals": "woodhearth",
-     "pages": [
-      "THESE ARE THE MERCIED. NEVER CUT. NEVER MOVED. We spared them from the fire and the sword, and they are green now, and they are ours, and they may not go home. Forgive us, keepers who come after: this is the cost of mercy."
      ]
     }
    ]
@@ -1962,151 +1478,6 @@
     }
    ]
   },
-  "waterdancer_falls": {
-   "hook": "A tall waterfall in Reaper's March with a spray rainbow and a prayer-stone at its base cut with eight notches.",
-   "rumour": "The prayer-stone at Waterdancer has eight notches and only seven bones. Both peoples avoid talking about the eighth.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "prayer",
-     "title": "Falls Prayer",
-     "author": "Falls-priest",
-     "at": "site",
-     "reveals": "sren_ja",
-     "pages": [
-      "Water that falls and does not break, hold the Truce for the two peoples. The bones are laid, the bones are white. If one is missing, let the water speak. If one is missing, let the water rise. We have not been honest with the water, and the water is patient, and the water remembers."
-     ]
-    },
-    {
-     "id": "thread",
-     "kind": "warning",
-     "title": "Falls-Priest's Warning",
-     "author": "Falls-priest",
-     "at": "site",
-     "reveals": "tor_hame_khard",
-     "pages": [
-      "Do not stand at the base at midnight. The water stops, and you will hear a woman singing a lullaby in the old tongue. It is very gentle. It is not for you. Every fall is a verse and every verse a drowsier one. I do not know who she is singing to. I know that I will not be here when it is finished."
-     ]
-    }
-   ]
-  },
-  "sren_ja": {
-   "hook": "A tree village of Khajiit in Reaper's March, with rope-bridges between boughs and drums at every platform.",
-   "rumour": "At Sren Ja the drums stop at the eighth beat. The elders say it is for the dead drummer.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "poem",
-     "title": "The Seven Verses",
-     "author": "Sren Ja drummer",
-     "at": "chest",
-     "reveals": "dokrin_monastery",
-     "pages": [
-      "~One for the bough and two for the root,~three for the river and four for the fruit,~five for the sun and six for the moon,~seven for the rain and eight for the...~the drum is still and the verse is gone.~Whoever finds it, carry it on."
-     ]
-    }
-   ]
-  },
-  "dokrin_monastery": {
-   "hook": "A forest monastery of the Khajiit with a courtyard of prayer-wheels and a small library of drum-scores.",
-   "rumour": "The monks at Dokrin keep the oldest drum-scores in the March. One page has been replaced with a pressed leaf, and the abbot weeps when anyone asks.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "notes",
-     "title": "Abbot's Library Notes",
-     "author": "Abbot Rasi",
-     "at": "chest",
-     "reveals": "rawlkha",
-     "pages": [
-      "Score nine, the Truce-song: eight verses, of which the eighth has been cut out and a leaf pressed in its place. The cutter left no mark but a clay thumb. I replaced the leaf nine times and nine times it was removed. I now keep it where it is. Whoever wants the verse may bring me the hand that holds it."
-     ]
-    }
-   ]
-  },
-  "rawlkha": {
-   "hook": "A Khajiiti trade-town of canvas and bamboo stalls strung between trees, a lantern forest.",
-   "rumour": "Rawlkha's lantern-market sells paper from a dozen stalls, and a verse that was stolen from a monastery has passed through eleven hands there.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "ledger",
-     "title": "Paper-Seller's Ledger",
-     "author": "Paper-Seller Mizra",
-     "at": "chest",
-     "reveals": "arenthia",
-     "pages": [
-      "Sold: one verse-leaf, pressed, from a monastery library. Buyer: a Bosmer in a scholar's coat. Previous buyers: ten. Glosses in the margin: eleven, in eleven hands. Each says something different about whose it was. I sold it for three coin and was glad. I was told afterward what it was, and have been unwell since."
-     ]
-    }
-   ]
-  },
-  "thizzrini_arena": {
-   "hook": "A ruined arena in the jungle with a sand floor and tiers of stone seats half-eaten by roots.",
-   "rumour": "In the old arena a single footprint stays in the sand. No rain washes it out.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "report",
-     "title": "Arena Keeper's Report",
-     "author": "Keeper Zhasi",
-     "at": "site",
-     "reveals": "reapers_henge",
-     "pages": [
-      "The footprint is neither Bosmer nor Khajiit. It has five toes and a heel. It sits in the exact centre of the sand and has been there for ten years. If you dance, you must step around it, as though around a sleeping animal. The eighth step is to step into it."
-     ]
-    }
-   ]
-  },
-  "reapers_henge": {
-   "hook": "A stone circle with a bone-white altar on a rise in Reaper's March, ringed by eight standing stones.",
-   "rumour": "At the henge the altar is bright with bone. One seat has been empty for ten years.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "inscription",
-     "title": "The Altar's Edge",
-     "at": "site",
-     "reveals": "elden_tree",
-     "pages": [
-      "EIGHT BONES FOR THE EIGHT WINDS, ONE FOR EACH WHO WALKS HERE. The eighth is given by a stranger to both. It is not a bone of blood but a bone of choice. Lay it down, and the Truce is renewed. Hold it, and the Truce is broken."
-     ]
-    }
-   ]
-  },
-  "isle_of_contemplation": {
-   "hook": "A tiny isle off Auridon with a single meditation platform, a sundial and a boat-landing of white stone.",
-   "rumour": "The hermit on the Isle of Contemplation counts twenty-three bells every dusk and swears there should be twenty-four.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "journal",
-     "title": "Hermit's Bell-Tally",
-     "author": "Eldrael the Counting",
-     "at": "site",
-     "reveals": "colosseum_of_the_old_ways",
-     "pages": [
-      "Dusk, day 21,918. Twenty-three bells. Dusk, day 21,919. Twenty-three. I asked the sun and the sun looked away. I asked the Order and was sent a kindly letter. I have filed the gnomon down so I will not be taunted by a shadow that has nowhere to fall. The missing hour is a place; I can feel it like a missing tooth."
-     ]
-    }
-   ]
-  },
-  "colosseum_of_the_old_ways": {
-   "hook": "A ruined ring arena on Artaeum's shore, its floor a pale mosaic of hours and its tiers half-sunk in sand.",
-   "rumour": "The Old Ways arena's floor has a grey tile where an hour should be. Nobody remembers the fight that was held there.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "inscription",
-     "title": "Floor Inscription",
-     "at": "site",
-     "reveals": "alinor",
-     "pages": [
-      "TWENTY-FOUR TILES FOR TWENTY-FOUR HOURS. LET NO HOUR BE PRIED. The tile that was lifted lies not here but where the hours are kept. A fight is held in every hour, and one was held in this, and one man lost it. His name is not the one on the pedestal."
-     ]
-    }
-   ]
-  },
   "traitors_vault": {
    "hook": "A vault of false doors on Artaeum where each room offers three exits, two of which loop back through mirrors.",
    "rumour": "The Traitor's Vault has more doors than rooms. The ones that open lead to the same place.",
@@ -2120,34 +1491,6 @@
      "reveals": "crystal_tower_summerset",
      "pages": [
       "A hundred false doors, one real. The real one is the wall. Do not break it with a sword; use a hammer that remembers. The reward behind it is not gold but a thing the Order wished to forget, and they have paid me well for forgetting. I have forgotten. I am frightened at how easily."
-     ]
-    }
-   ]
-  },
-  "crystal_tower_summerset": {
-   "hook": "A needle of crystal many times taller than anything, glowing at night, with a spiral of lens-rooms at its summit.",
-   "rumour": "The Crystal Tower's summit lenses were covered with a cloth at the spring equinox. The wardens won't say what they saw before they did it.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "report",
-     "title": "Warden's Lens-Room Log",
-     "author": "Warden Aelwyn",
-     "at": "site",
-     "reveals": "psijic_relic_vaults",
-     "pages": [
-      "The first lens shows the sky as it is. The second shows the sky as it was a hundred years ago. The third shows a night with stars I cannot name and a door in the sky. I have covered the third with a cloth and set a guard, and told no one why. It is not my place to say. It is not my place to look."
-     ]
-    },
-    {
-     "id": "thread",
-     "kind": "letter",
-     "title": "Magister's Orders",
-     "author": "the Lampwright Magister",
-     "at": "site",
-     "reveals": "psijic_relic_vaults",
-     "pages": [
-      "The ninth stone is the Tower's lens. When it is lit, the sky will show as it was. Be ready. The Ayleid names in the vaults below will rise, and the Psijic wardens will not be pleased. Do not let anyone near the lens-lever. It is not a thing that can be taken back."
      ]
     }
    ]
@@ -2174,74 +1517,6 @@
      "reveals": "gate_of_alma_ruma",
      "pages": [
       "THE NINTH LAMP BURNS NOT FOR LIGHT BUT FOR REMEMBRANCE. Those who tend it tend the dead. Those who extinguish it forget the dead. Those who keep it must be willing to hear, in the dark, all that was done in the light."
-     ]
-    }
-   ]
-  },
-  "dawnbreak": {
-   "hook": "A hamlet on an Auridon bluff above the sea, with white cottages and a row of weathered crosses of crystal.",
-   "rumour": "At Dawnbreak a man walked into the sea last winter. His eyes shone like cut glass the week before.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "diary",
-     "title": "A Widow's Diary",
-     "author": "Tilwen of Dawnbreak",
-     "at": "chest",
-     "reveals": "maras_kiss_public_house",
-     "pages": [
-      "He began to see the stars at noon. Then to hear them. Then his eyes began to glitter in lamplight, and I put a lamp in his lap and watched them go from brown to something like cut quartz. He walked into the sea on the ninth day. I put the splinters in a jar. I have not looked at it since."
-     ]
-    }
-   ]
-  },
-  "maras_kiss_public_house": {
-   "hook": "A bright tavern on the Auridon road with a garden of fruit trees, a lantern for each drinker and a wide stone hearth.",
-   "rumour": "Mara's Kiss serves a cider that sparkles on the tongue. They stopped pouring it after the second drinker went quiet.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "ledger",
-     "title": "Cider Ledger",
-     "author": "Innkeeper Merilin",
-     "at": "site",
-     "reveals": "shattered_grove",
-     "pages": [
-      "Barrels pressed: 12. Barrels returned: 11, unopened. Barrel twelve: poured to the last. Patrons affected: 9. Orchard supplier: Shattered Grove, who say it is the best harvest in years and glitter when they speak. I have burned the barrel. The smoke was blue. The splinters were not burned."
-     ]
-    }
-   ]
-  },
-  "shattered_grove": {
-   "hook": "A grove of splintered crystal trees in Auridon, their bark cracked and the fallen fruit sparkling in the grass.",
-   "rumour": "The Shattered Grove bore the largest fruit of its life this year. The folk who ate it have all begun to glitter.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "warning",
-     "title": "Wardens' Notice",
-     "author": "Grove-Warden",
-     "at": "chest",
-     "reveals": "firsthold",
-     "pages": [
-      "DO NOT EAT THE FRUIT. DO NOT TOUCH THE BARK. DO NOT SLEEP UNDER THE BOUGH. A cult has been seen at dusk amongst the splintered trees. They sing, and the grove answers. The wardens have fallen back to the road. Send mages, not soldiers. The trees do not fear blades."
-     ]
-    }
-   ]
-  },
-  "skywatch": {
-   "hook": "A hill-city topped by a vast ring-orrery with concentric stone ring-walks and observatories on each ring.",
-   "rumour": "The great orrery at Skywatch was tilted by a degree one night, and the star-watchers can't say by whom. The conjunction comes sooner now.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "report",
-     "title": "Star-Watcher's Alarm",
-     "author": "Star-Watcher Elenwe",
-     "at": "chest",
-     "reveals": "the_banished_cells",
-     "pages": [
-      "The third ring is out of true by one degree. I re-trued it last night and found it tilted again at dawn. Cult marks on the underside: a spiral of tiny crystals. The conjunction is nine weeks away by the old reckoning, and seven by the new. Someone is bringing the seed's waking forward. Send mages."
      ]
     }
    ]
@@ -2280,91 +1555,6 @@
     }
    ]
   },
-  "kings_haven": {
-   "hook": "A small keep and orchard on the Summerset coast, with a reeve's house and a walled egg-yard where gryphon clutches were once gathered.",
-   "rumour": "The reeve at King's Haven swears the gryphons have stopped laying and then tells you he doesn't believe it.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "ledger",
-     "title": "Egg-Tithe Ledger",
-     "author": "Reeve Ordin",
-     "at": "chest",
-     "reveals": "the_golden_netch",
-     "pages": [
-      "Spring: 30 clutches forwarded to the steward. Summer: 28. Autumn: 31. Winter: 29. Spring this year: 0 laid, 12 stolen from the nest. The steward's receipt says 'received 30, as customary'. There is no customary thirty. The gryphons stopped when the steward's agents first came. I have written to the court. The court has not written back."
-     ]
-    }
-   ]
-  },
-  "the_golden_netch": {
-   "hook": "An inn under a gilded netch-balloon on the Summerset coast road with a rope-ladder entrance and a wide kitchen.",
-   "rumour": "A dealer at the Golden Netch pays for his room in coin and his crates in silence. The crates are warm.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "contract",
-     "title": "Dealer's Bill of Lading",
-     "author": "Dealer Quorin",
-     "at": "chest",
-     "reveals": "shimmerene",
-     "pages": [
-      "To be carried from the Netch to the Shimmerene quay: twelve crates, packed in straw, to remain warm. The steward's seal appears on each. The buyer pays on arrival in Pyandonean coin. Do not shake. Do not let it be said these are eggs. They are 'mineral specimens' on any manifest."
-     ]
-    }
-   ]
-  },
-  "shimmerene": {
-   "hook": "A busy port on a bay with dockside lanterns on high poles, long wharves and crane-masts.",
-   "rumour": "The quiet quay at Shimmerene has no lantern, and crates marked 'minerals' go aboard a foreign ship after dark. The customs man looks away.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "report",
-     "title": "Night-Watch Report",
-     "author": "Watchman Corin",
-     "at": "chest",
-     "reveals": "gryphon_aerie",
-     "pages": [
-      "Quiet quay, third night: seven crates marked 'minerals', warm to the touch, carried aboard a foreign ship under no flag. Customs official seen to turn his back and pocket something. I inquired. I was told the quay was private. A crate had a feather caught in its seam, long as my arm and the colour of the cliffs."
-     ]
-    }
-   ]
-  },
-  "gryphon_aerie": {
-   "hook": "A cliff nest of enormous gryphons on the Summerset coast, ledges of straw and wind-scoured stone.",
-   "rumour": "The gryphons at the aerie have started calling at night, and their calls are shorter than they used to be.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "report",
-     "title": "Aerie Warden's Report",
-     "author": "Warden Syrel",
-     "at": "site",
-     "reveals": "cloudrest",
-     "pages": [
-      "Nests: 40. Occupied: 11. Eggs: 0 laid, 0 hatched. The song has gone thin. I fear for the palace more than for the birds: the stone is tuned to them, and the stone is beginning to tick. If the gryphons stop singing the balconies will fall. If the steward is the cause, I would like to look him in the eye."
-     ]
-    }
-   ]
-  },
-  "cloudrest": {
-   "hook": "A palace-city on a sea cliff with cantilevered balconies over open air, glass floors and no walls.",
-   "rumour": "Cloudrest hangs its balconies over open air. The steward has been shoring the lower ones with iron where the courtiers will not see.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "report",
-     "title": "Master-Builder's Report",
-     "author": "Master-Builder Tolwen",
-     "at": "chest",
-     "reveals": "tor_hame_khard",
-     "pages": [
-      "Balcony nine ticks. Balcony eleven ticks and has dropped a hand's breadth. I recommended closing the south wing and was told the steward's office does not recognise the word 'closing'. I have braced the worst of them with iron. The stone was always held by song, and I hear less of it each week."
-     ]
-    }
-   ]
-  },
   "tor_hame_khard": {
    "hook": "A crystal fortress carved into a sea cliff with sea-gates at wave level, a waterfall court and a lightning-rod tower.",
    "rumour": "The fortress's tower hums at storm-time in a voice like a very large bird.",
@@ -2377,74 +1567,6 @@
      "reveals": "trebbite_monastery",
      "pages": [
       "HERE THE SONG IS HATCHED AND HERE THE STONE IS TUNED. No palace stands on its own weight; it stands on the voices beneath it. Feed the mothers, warm the clutch, hear the note. If you take the egg, you take the balcony."
-     ]
-    }
-   ]
-  },
-  "trebbite_monastery": {
-   "hook": "A small monastery on the Auridon coast with a cloister of white stone, a silent refectory and an urn of silk spools.",
-   "rumour": "The Trebbite brothers have found silk in the orchard with words woven in it. They say please don't eat it.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "notes",
-     "title": "Brother Abelar's Notes",
-     "author": "Brother Abelar",
-     "at": "chest",
-     "reveals": "dusk",
-     "pages": [
-      "Found in the north cloister: thread, with a word wound in. 'Concerning the tides of Lillandril, a treatise.' A book from the great library, in thread! I do not think it was stolen. I think it was woven, or read aloud and caught. The spiders are the only ones who could have done it. I have left them honey."
-     ]
-    }
-   ]
-  },
-  "dusk": {
-   "hook": "A crescent harbour city under pale dunes, lilac in the evening, with a tall lantern tower and pastel houses.",
-   "rumour": "Book-barges come into Dusk at night with cargo that's all blank paper. The bookbinders are doing a brisk trade in covers.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "list",
-     "title": "Shipping Manifest, Library-Barge",
-     "author": "Dockmaster Elorin",
-     "at": "chest",
-     "reveals": "lillandril",
-     "pages": [
-      "Barge 'Patience': 400 volumes, water-damaged. Barge 'Quill': 612 volumes, water-damaged. Barge 'Ink': 88 volumes, water-damaged. Inspected: all blank. The librarians cry and the buyers cry. I sealed the manifest. 'Water-damaged' is cheaper than 'devoured'."
-     ]
-    }
-   ]
-  },
-  "lillandril": {
-   "hook": "A city of terraced libraries and observatories on a rock, with ring galleries of book-stacks open to the sky and bronze orreries.",
-   "rumour": "A third of Lillandril's stacks are blank, and the head librarian has gone missing. The assistants say they can hear reading from beyond the cliff.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "notes",
-     "title": "Assistant's Catalogue Note",
-     "author": "Assistant Faleril",
-     "at": "chest",
-     "reveals": "direnni_acropolis",
-     "pages": [
-      "Shelf nine: blank. Shelf ten: blank. Shelf eleven: contents intact, but the dust on the spines is arranged in rows like something walked along it. The head librarian left her tea half-drunk. A silk-thread is tied to the chair. I am not brave. I am the only one who remembers the catalogue. I am writing it all down."
-     ]
-    }
-   ]
-  },
-  "direnni_acropolis": {
-   "hook": "A ruined hilltop acropolis of white columns, a stage of marble and a high cistern of black water.",
-   "rumour": "The old acropolis has webs across every column, and some say you can hear a voice reading in them.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "poem",
-     "title": "Spider's Verse",
-     "author": "unknown",
-     "at": "site",
-     "reveals": "cathedral_of_webs",
-     "pages": [
-      "~Weave the word and weave the line,~weave the story into twine.~Eight small hands for a thousand tomes,~eight small hands for the dying homes.~What is read is never lost.~What is spun is worth its cost."
      ]
     }
    ]
@@ -2790,23 +1912,6 @@
     }
    ]
   },
-  "kjolvik": {
-   "hook": "A last Atmoran hold on an ice shelf with ten long halls half-buried in drifts, whale-bone arches and a stone-lined harbour where ice cracks.",
-   "rumour": "Kjolvik's elders sing in the long hall at night, loudly, so the ice cannot be heard. The children ask to be taught the old ship-songs.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "letter",
-     "title": "A Child's Letter to the Shield-Fort",
-     "author": "Tove of Kjolvik",
-     "at": "chest",
-     "reveals": "the_frozen_dragon_mound",
-     "pages": [
-      "To the Captain: the ice is talking again. The grown-ups sing to cover it. I counted the cracks in the harbour and there are forty-one now. Papa says not to count. Nana says to count and to pack. We have packed sledges and left them by the door. Please send the captain of the howe's ship if there is one."
-     ]
-    }
-   ]
-  },
   "the_frozen_dragon_mound": {
    "hook": "A mound of ice with a dragon's head frozen at its crown, jaws open in a final roar.",
    "rumour": "The frozen dragon has begun to weep at the throat, and the ice-seam under the halls is following it.",
@@ -2875,40 +1980,6 @@
      "reveals": "tang_mo_harbor_village",
      "pages": [
       "Do not let pilgrims chip the stone. The fourth quarter is cold. Do not touch it with bare hands. Send word to the harbour that the seal's strength fails by a quarter per generation. The court that holds the last has not answered in two hundred years. Keep the lantern lit."
-     ]
-    }
-   ]
-  },
-  "tang_mo_harbor_village": {
-   "hook": "A harbour of lacquered junks and floating lantern-masts, houses raised on bamboo piles with curved roofs and a dragon-prowed ship at the quay.",
-   "rumour": "The dragon-prow at Tang Mo's quay has a jade tablet set in its throat that glows when the tide is high. The ferrymen have a seal tattooed on their palms.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "journal",
-     "title": "Ferryman's Journal",
-     "author": "Ferryman Wen",
-     "at": "chest",
-     "reveals": "tiger_plains_village",
-     "pages": [
-      "Tide high: the jade glows. Tide low: it sleeps. My grandfather's palm bore the same mark as mine, a quarter-circle with a notch. We carry the harbour's quarter of the seal, though none of us knows what it seals. A monk once asked to read it. I let him. He wept, and took nothing. It is a heavy thing to keep and a heavier thing to lose."
-     ]
-    }
-   ]
-  },
-  "tiger_plains_village": {
-   "hook": "A mountain village of curved-roof pagodas on rice terraces with a vermilion shrine gate, bamboo and paper lanterns.",
-   "rumour": "A lantern in the headman's house at Tiger Plains has burned without oil since before the village had a name, and he says it is a family heirloom.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "notes",
-     "title": "Headman's Lantern Note",
-     "author": "Headman Li",
-     "at": "chest",
-     "reveals": "temple_of_the_serpent_emperor",
-     "pages": [
-      "The lantern was lit by my ancestor's ancestor and has never gone out. In the rain, in the wind, in the long dark of the third winter. It is set in a quarter-circle of jade that does not match any craftsman's art. A traveller offered a great sum. I told him it was not mine to sell. I did not tell him it was not mine to keep."
      ]
     }
    ]
@@ -3011,23 +2082,6 @@
     }
    ]
   },
-  "pyandonean_fleet_anchorage": {
-   "hook": "A fleet at anchor, a raft-city of shell-hulled ships lashed together, a coral flagship and serpent-prowed boats, gleaming wet.",
-   "rumour": "The shell-hulled fleet at anchor keeps pulling south against its lashings. The admiral says it is the current. The deck-hands do not.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "report",
-     "title": "Quartermaster's Drift Report",
-     "author": "Quartermaster Hesh",
-     "at": "chest",
-     "reveals": "coral_tower_of_thras",
-     "pages": [
-      "Fleet drift: four fathoms south-east since the last tide. Lashings tightened nightly. Anchor chain of the flagship: strained. The current does not run that way. I took a pink coral-shard from the flagship's keel; it was warm, and moved a little in my palm when the fleet turned. The admiral says it is a trick of the water. I say the water has a will."
-     ]
-    }
-   ]
-  },
   "coral_tower_of_thras": {
    "hook": "A tower of living coral in a sea of plague, with rooms of pulsing polyps, bright pink and poison green and a spiral reef stair.",
    "rumour": "The tower in the plague sea has grown a fathom this year. The folk of Thras say it is thinking.",
@@ -3096,23 +2150,6 @@
      "reveals": "sunken_temple_of_the_yokudan_kings",
      "pages": [
       "A seventh page, nailed under the lesson-post by a hand I did not see. I have no wish to read it. It is the property of the kings, not the camp. The final two pages lie beyond the water, in a place where the kings sleep. If you mean to read the ledger, you must first complete the Last Lesson."
-     ]
-    }
-   ]
-  },
-  "hundings_dojo": {
-   "hook": "A sunken courtyard dojo on a Yokudan island with a bowl of sand, a ring of columns, tiers of benches and a single bright pavilion.",
-   "rumour": "The sand bowl at Hunding's dojo is raked in a spiral every dawn. The master bows to an empty bench and no one has told him it is empty.",
-   "notes": [
-    {
-     "id": "web",
-     "kind": "notes",
-     "title": "Master's Teaching Notes",
-     "author": "Master Yazid",
-     "at": "chest",
-     "reveals": "temple_of_satakal",
-     "pages": [
-      "Students this year: none. Students last year: two, both gone before the second form. The second form is the Wind, which cannot be taught on land. It is learned on the shore, when the tide is going out. I will bow to the empty bench until one fills it. I am old, and the sand does not tire, and the lesson is not yet finished."
      ]
     }
    ]
