@@ -91,6 +91,27 @@ public final class NaturalRooms {
             int[] s = i % 3 == 2 ? spot(p, room, 320 + i) : edgeSpot(p, room, 320 + i);
             if (s != null && p.ok(s[0], room.floor, s[1])) p.setIfOpen(s[0], room.floor, s[1], lichen);
         }
+        // glowing rock in the roof (ice, fungus, mineral): lichen alone leaves a big cavern dim
+        BlockState lamp = switch (room.theme()) {
+            case VAMPIRE_LAIR, NECROMANCER_LAIR -> Blocks.CRYING_OBSIDIAN.defaultBlockState();
+            case HAGRAVEN_LAIR -> Blocks.SHROOMLIGHT.defaultBlockState();
+            default -> switch (CaveRoster.of(room.piece.flavor)) {
+                case CaveRoster.ICE -> Blocks.SEA_LANTERN.defaultBlockState();
+                case CaveRoster.FALMER, CaveRoster.SPRIGGAN, CaveRoster.SPIDER -> Blocks.SHROOMLIGHT.defaultBlockState();
+                default -> Blocks.GLOWSTONE.defaultBlockState();
+            };
+        };
+        int lamps = 1 + room.halfX() * room.halfZ() / 36;
+        for (int i = 0; i < lamps; i++) {
+            int[] s = spot(p, room, 340 + i);
+            if (s == null) continue;
+            for (int y = room.maxY - 1; y > room.floor + 3; y--) {
+                if (p.ok(s[0], y + 1, s[1]) && p.get(s[0], y, s[1]).isAir() && !p.get(s[0], y + 1, s[1]).isAir()) {
+                    p.set(s[0], y + 1, s[1], lamp);
+                    break;
+                }
+            }
+        }
     }
 
     /** The common foe of a cave's folk, for the extra guard of the deep rooms. */
@@ -132,12 +153,13 @@ public final class NaturalRooms {
     }
 
     /** A 1x2 bedroll of carpet. */
-    static void bedroll(Painter p, Room room, int salt) {
+    @Nullable
+    static int[] bedroll(Painter p, Room room, int salt) {
         int[] s = spot(p, room, salt);
-        if (s == null) return;
+        if (s == null) return null;
         boolean alongX = p.chance(s[0], salt, s[1], 105, 2);
         int x2 = s[0] + (alongX ? 1 : 0), z2 = s[1] + (alongX ? 0 : 1);
-        if (room.onLane(x2, z2) || !inside(p, room, x2, z2, 0.8)) return;
+        if (room.onLane(x2, z2) || !inside(p, room, x2, z2, 0.8)) return null;
         BlockState c = switch (p.roll(s[0], salt, s[1], 106, 3)) {
             case 0 -> Blocks.BROWN_CARPET.defaultBlockState();
             case 1 -> Blocks.WHITE_CARPET.defaultBlockState();
@@ -145,6 +167,7 @@ public final class NaturalRooms {
         };
         p.set(s[0], room.floor, s[1], c);
         p.set(x2, room.floor, z2, c);
+        return s;
     }
 
     // ------------------------------------------------------------------ dispatch
@@ -172,6 +195,7 @@ public final class NaturalRooms {
             }
         }
         if (room.piece.has(DungeonPiece.FLAG_TREASURE) && !room.boss()) loot(p, room, 99, Deco.chest(Direction.NORTH), Deco.LOOT_COMMON);
+        CaveVariants.dress(p, room);
         // the deep rooms are guarded harder: the danger ramps towards the boss
         if (!room.boss() && !room.start() && room.tier() >= 5) mob(p, room, 199, commonFoe(room), null);
         boolean lit = t == Theme.CAVE && CaveRoster.inhabited(CaveRoster.of(flavor));
@@ -240,9 +264,11 @@ public final class NaturalRooms {
         if (room.start()) v = 2;
         switch (v) {
             case 0 -> {
-                bedroll(p, room, 21);
-                bedroll(p, room, 22);
-                bedroll(p, room, 23);
+                // asleep in their bedrolls: they wake as the player comes close
+                for (int salt = 21; salt <= 23; salt++) {
+                    int[] b = bedroll(p, room, salt);
+                    if (b != null && (salt != 23 || p.chance(room.cx, 0, room.cz, 24, 2))) p.spawnDormant(Mobs.bandit(), b[0], room.floor, b[1], p.roll(b[0], 0, b[1], 104, 360));
+                }
                 put(p, room, 24, Deco.campfire(false, true));
                 loot(p, room, 25, Deco.barrel(Direction.UP), Deco.LOOT_MINOR);
             }
@@ -445,6 +471,8 @@ public final class NaturalRooms {
             for (int z = z0; z <= z1; z++) p.set(room.cx, room.floor, z, Blocks.RAIL.defaultBlockState().setValue(RailBlock.SHAPE, RailShape.NORTH_SOUTH));
         }
         lampPost(p, room, 140, false);
+        lampPost(p, room, 178, false);
+        if (room.halfX() * room.halfZ() >= 20) lampPost(p, room, 179, false);
         putEdge(p, room, 141, p.chance(room.cx, 0, room.cz, 142, 2) ? Blocks.RAW_IRON_BLOCK.defaultBlockState() : Blocks.COAL_BLOCK.defaultBlockState());
         loot(p, room, 143, Deco.barrel(Direction.UP), Deco.LOOT_MINE);
         if (p.chance(room.cx, room.floor, room.cz, 144, 3) || room.start()) {

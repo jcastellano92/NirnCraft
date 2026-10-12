@@ -25,6 +25,7 @@ public final class DormantMobs {
     private static final double WAKE = 4.5;
     private static final double WAKE_SNEAKING = 2.5;
     private static final double CHAIN = 6.0;
+    private static final double PLATE_RANGE = 14.0;
 
     private DormantMobs() {}
 
@@ -45,6 +46,12 @@ public final class DormantMobs {
         for (ServerPlayer p : level.players()) {
             if (p.isSpectator() || p.isCreative() || !p.isAlive()) continue;
             double r = p.isCrouching() ? WAKE_SNEAKING : WAKE;
+            // a plate trodden anywhere in the sleepers' hall rouses them (the Dwemer's automatons)
+            if (p.distanceToSqr(mob) <= PLATE_RANGE * PLATE_RANGE
+                    && level.getBlockState(p.blockPosition()).getBlock() instanceof net.minecraft.world.level.block.BasePressurePlateBlock) {
+                wake(level, mob, true);
+                return;
+            }
             if (p.distanceToSqr(mob) <= r * r) {
                 wake(level, mob, true);
                 return;

@@ -70,8 +70,13 @@ public final class CaveRooms {
             put(p, room, 642, Deco.pillar(Blocks.BONE_BLOCK, Direction.Axis.Y));
             return;
         }
-        if (p.chance(room.cx, 0, room.cz, 643, 2)) mob(p, room, 644, Mobs.troll(), null);
-        else mob(p, room, 645, Mobs.denBeast(p.roll(room.cx, 1, room.cz, 646, 4)), null);
+        if (p.chance(room.cx, 0, room.cz, 643, 2)) {
+            // the troll sleeps off its meal until someone comes near
+            int[] s = spot(p, room, 644);
+            if (s != null) p.spawnDormant(Mobs.troll(), s[0], room.floor, s[1], p.roll(s[0], 0, s[1], 104, 360));
+        } else {
+            mob(p, room, 645, Mobs.denBeast(p.roll(room.cx, 1, room.cz, 646, 4)), null);
+        }
     }
 
     // ------------------------------------------------------------------ Falmer warren

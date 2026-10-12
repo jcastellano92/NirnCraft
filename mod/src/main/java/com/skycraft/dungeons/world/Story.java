@@ -6,6 +6,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LecternBlock;
+import net.minecraft.world.level.block.entity.LecternBlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 
 import javax.annotation.Nullable;
@@ -72,19 +74,33 @@ public final class Story {
         if (room.interior(sx, sz) && !room.onLane(sx, sz) && !room.nearDoor(sx, sz, 0)) {
             p.set(sx, y, sz, Deco.skull(Blocks.SKELETON_SKULL, Deco.skullRotation(face) + 2));
         }
-        // the pack, with the journal in it, and the lantern that went out
+        // the journal on a reading lectern in front of the body, where it can be seen from across the room
+        int jx = x + face.getStepX(), jz = z + face.getStepZ();
+        boolean onLectern = false;
+        if (room.interior(jx, jz) && !room.onLane(jx, jz) && !room.nearDoor(jx, jz, 0)
+                && (!room.theme().natural() || NaturalRooms.inside(p, room, jx, jz, 0.85)) && p.ok(jx, y, jz)) {
+            p.set(jx, y, jz, Blocks.LECTERN.defaultBlockState().setValue(LecternBlock.FACING, face).setValue(LecternBlock.HAS_BOOK, true));
+            if (p.blockEntity(jx, y, jz) instanceof LecternBlockEntity lectern) {
+                lectern.setBook(journal(p, room));
+                onLectern = true;
+            } else {
+                p.set(jx, y, jz, Blocks.AIR.defaultBlockState());
+            }
+        }
+        // the pack, with the journal in it when there is no lectern, and the lantern that went out
         int bx = x + face.getCounterClockWise().getStepX(), bz = z + face.getCounterClockWise().getStepZ();
         if (!room.interior(bx, bz) || room.onLane(bx, bz) || room.nearDoor(bx, bz, 0)) {
             bx = x + face.getStepX();
             bz = z + face.getStepZ();
+            if (onLectern) bx = -1;
         }
-        if (room.interior(bx, bz) && !room.onLane(bx, bz)) {
+        if (bx != -1 && room.interior(bx, bz) && !room.onLane(bx, bz)) {
             // no loot table: filling a container that still has one would unpack it, which needs a live level
             p.set(bx, y, bz, Deco.barrel(face));
             if (p.blockEntity(bx, y, bz) instanceof RandomizableContainerBlockEntity be) {
                 // the spot may have held a loot barrel already: drop its table, filling it would unpack it
                 be.setLootTable(null, 0L);
-                be.setItem(13, journal(p, room));
+                if (!onLectern) be.setItem(13, journal(p, room));
                 be.setItem(11, new ItemStack(Blocks.TORCH, 2 + p.roll(bx, y, bz, 612, 4)));
                 net.minecraft.world.item.Item coin = net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(new ResourceLocation(Skycraft.MODID, "septim"));
                 if (coin != null && coin != net.minecraft.world.item.Items.AIR) be.setItem(15, new ItemStack(coin, 5 + p.roll(bx, y, bz, 613, 20)));
@@ -106,17 +122,53 @@ public final class Story {
                     ? "barrow." + p.roll(room.cx, 1, room.cz, 611, BARROW) : "ruin." + p.roll(room.cx, 1, room.cz, 611, RUIN);
             default -> "cave." + p.roll(room.cx, 1, room.cz, 611, CAVE);
         };
-        return Exteriors.book("Weathered Journal", List.of(Component.translatable("book.skycraft.journal." + key)));
+        String who = adventurer(p, room, 0);
+        String what = adventurer(p, room, 1);
+        return Exteriors.book("Journal of " + who, List.of(
+                Component.literal(who + "\n" + what + "\n\nFound with the remains of its owner."),
+                Component.translatable("book.skycraft.journal." + key)));
+    }
+
+    private static final String[] FIRST = {"Aldric", "Berren", "Cassia", "Dunwald", "Edda", "Fenwick", "Garrick", "Halla",
+            "Isolde", "Jorund", "Kestrel", "Liora", "Marek", "Nessa", "Orsin", "Petra", "Quillon", "Rolf", "Sigrun", "Tamsin",
+            "Varek", "Wynne", "Yorick", "Zora"};
+    private static final String[] LAST = {"Ashmere", "Blackbriar", "Coldwater", "Dunmoor", "Elmstead", "Frostholm", "Greywell",
+            "Hollowmere", "Ironvale", "Kettleburn", "Longstride", "Mossgrove", "Northcote", "Pinecrest", "Quickwater",
+            "Ravenhollow", "Stonehand", "Thornfield", "Varnell", "Whitlock", "Yarrow", "Brightwater", "Cairnwood", "Dunhallow"};
+    private static final String[] TRADE = {"a sellsword out of work", "a prospector and part-time cartographer", "a pilgrim",
+            "a hedge-mage who read too far", "a bounty hunter", "a treasure-hunter with debts", "a scout of the old war",
+            "a deserter from the garrison"};
+
+    /** The dead adventurer's name (kind 0) or trade (kind 1): every dungeon has its own. */
+    private static String adventurer(Painter p, Room room, int kind) {
+        if (kind == 0) {
+            return FIRST[p.roll(room.cx, 21, room.cz, 620, FIRST.length)] + " " + LAST[p.roll(room.cx, 22, room.cz, 621, LAST.length)];
+        }
+        return TRADE[p.roll(room.cx, 23, room.cz, 622, TRADE.length)];
     }
 
     // ------------------------------------------------------------------ the cache
+
+    /** The side branch's strongbox: a relic table of the dungeon's own kind two times in three, the common cache otherwise. */
+    static ResourceLocation relicTable(Theme theme, int roll) {
+        if (roll == 0) return LOOT_CACHE;
+        String id = switch (theme) {
+            case MINE -> "mine";
+            case VAMPIRE_LAIR, NECROMANCER_LAIR, HAGRAVEN_LAIR -> "lair";
+            case BARROW -> "barrow";
+            case DWEMER -> "dwemer";
+            case RUIN, FORT -> "ruin";
+            default -> "cave";
+        };
+        return new ResourceLocation(Skycraft.MODID, "chests/relic_" + id);
+    }
 
     static void cache(Painter p, Room room) {
         Blueprints.place(p, room, "cache");
         int[] s = spot(p, room, 2);
         if (s == null) return;
         Direction face = BarrowRooms.towardCenter(room, s[0], s[1]);
-        p.container(s[0], room.floor, s[1], Deco.chest(face), LOOT_CACHE);
+        p.container(s[0], room.floor, s[1], Deco.chest(face), relicTable(room.theme(), p.roll(room.cx, 5, room.cz, 640, 3)));
         int cx = s[0] + face.getClockWise().getStepX(), cz = s[1] + face.getClockWise().getStepZ();
         if (room.interior(cx, cz) && !room.onLane(cx, cz) && !room.nearDoor(cx, cz, 0)) {
             p.set(cx, room.floor, cz, Deco.candle(Blocks.CANDLE, 2, true));

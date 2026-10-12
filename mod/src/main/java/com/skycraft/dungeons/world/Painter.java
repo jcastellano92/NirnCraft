@@ -42,6 +42,12 @@ public final class Painter {
     public final long seed;
     /** The piece's culture kit: masonry palettes consult it ({@link BuiltBuilder#wall} and friends). */
     public Kit kit = Kit.NONE;
+    /**
+     * How the room being painted is staffed ({@link Pacing}): ordinary mobs of an empty room never spawn, those of a
+     * sleeping room spawn dormant, and a packed room gets a second of each. Bosses and elites ignore it.
+     */
+    public int mood = Pacing.NORMAL;
+    private boolean packing;
     private final int x0, y0, z0, x1, y1, z1;
     private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
@@ -303,7 +309,7 @@ public final class Painter {
      */
     @Nullable
     public Mob spawnDormant(@Nullable String id, int x, int y, int z, float yaw) {
-        return spawn(id, x, y, z, yaw, null, DormantMobs::makeDormant);
+        return spawn(id, x, y, z, yaw, null, DormantMobs::makeDormant, true);
     }
 
     /** The dungeon's boss: tagged for playtest telemetry and the analyzer ({@code DungeonTelemetry#BOSS_TAG}). */
@@ -315,7 +321,7 @@ public final class Painter {
             if (hp != null) hp.setBaseValue(hp.getBaseValue() * 1.5);
             m.setHealth(m.getMaxHealth());
             m.getPersistentData().putBoolean(com.skycraft.dungeons.DungeonTelemetry.BOSS_TAG, true);
-        });
+        }, true);
     }
 
     /** A tougher guard (the mini-boss beat): more health and a harder hit than its kind, tagged for the analyzer. */
@@ -328,7 +334,7 @@ public final class Painter {
             if (dmg != null) dmg.setBaseValue(dmg.getBaseValue() * 1.3);
             m.setHealth(m.getMaxHealth());
             m.getPersistentData().putBoolean("skycraft_dungeon_elite", true);
-        });
+        }, true);
     }
 
     /** Asks the fluid at (x, y, z) to start flowing once the chunk ticks (a waterfall's source). */
@@ -343,6 +349,23 @@ public final class Painter {
     @Nullable
     public Mob spawn(@Nullable String id, int x, int y, int z, float yaw, @Nullable String name,
                      @Nullable java.util.function.Consumer<Mob> setup) {
+        return spawn(id, x, y, z, yaw, name, setup, false);
+    }
+
+    /** @param essential bosses, elites and sleepers placed on purpose: the room's {@link #mood} does not touch them */
+    @Nullable
+    private Mob spawn(@Nullable String id, int x, int y, int z, float yaw, @Nullable String name,
+                      @Nullable java.util.function.Consumer<Mob> setup, boolean essential) {
+        if (!essential) {
+            if (mood == Pacing.EMPTY) return null;
+            if (mood == Pacing.SLEEP) {
+                java.util.function.Consumer<Mob> inner = setup;
+                setup = m -> {
+                    if (inner != null) inner.accept(m);
+                    DormantMobs.makeDormant(m);
+                };
+            }
+        }
         if (id == null || !ok(x, y, z) || !chunk.isInside(new BlockPos(x, y, z))) return null;
         ResourceLocation rl = ResourceLocation.tryParse(id);
         if (rl == null || !ForgeRegistries.ENTITY_TYPES.containsKey(rl)) return null;
@@ -369,6 +392,21 @@ public final class Painter {
             data.putBoolean("skycraft_dungeon", true);
             if (setup != null) setup.accept(mob);
             level.addFreshEntityWithPassengers(mob);
+            if (!essential && mood == Pacing.PACK && !packing && setup == null && name == null) {
+                // a packed room: a second of each, on a free spot beside the first
+                packing = true;
+                try {
+                    for (Direction d : Direction.Plane.HORIZONTAL) {
+                        int sx = x + d.getStepX(), sz = z + d.getStepZ();
+                        if (ok(sx, y, sz) && get(sx, y, sz).isAir() && get(sx, y + 1, sz).isAir() && !get(sx, y - 1, sz).isAir()) {
+                            spawn(id, sx, y, sz, yaw + 90f, null, null, false);
+                            break;
+                        }
+                    }
+                } finally {
+                    packing = false;
+                }
+            }
             return mob;
         } catch (RuntimeException ex) {
             Skycraft.LOGGER.debug("Skycraft dungeons: could not spawn {}", id, ex);

@@ -33,6 +33,7 @@ def pick_tiles(d):
     want += sorted(lv[:3])
     it = [f for f in files if f.startswith('2') and '_interior_' in f]
     want += it[:1]
+    want += [f for f in files if f.endswith(('_cavern0_half.png', '_cavern0_plan.png'))]
     return want
 
 
@@ -42,10 +43,12 @@ def main():
     ap.add_argument('--out', default=os.path.join(ROOT, 'tools', 'qa', 'out', 'dungeon_audit'))
     ap.add_argument('--sample', default=os.path.join(HERE, 'dungeon_sample.json'))
     ap.add_argument('--only', nargs='*')
+    ap.add_argument('--extra', nargs='*', default=[], help='more export ids beyond the sample list')
     a = ap.parse_args()
     ids = json.load(open(a.sample, encoding='utf8'))['ids']
     if a.only:
         ids = [i for i in ids if i in a.only]
+    ids = ids + [i for i in a.extra if i not in ids]
     os.makedirs(a.out, exist_ok=True)
     done = []
     for i in ids:
@@ -59,6 +62,8 @@ def main():
         if r.returncode != 0:
             print('render failed', i, r.stderr[-400:])
             continue
+        # the grand caverns (if any): a half cutaway and a plan, which join the sheet
+        subprocess.run(PY + [os.path.join(HERE, 'dungeon_cavern_view.py'), src, od, '--max', '1'], capture_output=True, text=True)
         tiles = pick_tiles(od)
         tmp = tempfile.mkdtemp()
         for k, f in enumerate(tiles):

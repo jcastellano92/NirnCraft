@@ -40,6 +40,28 @@ public final class NaturalBuilder {
         };
     }
 
+    /** Patches of the cavern wall: mixed rock, ores, mud, moss or soil, by what lives here. */
+    static BlockState wallPatch(Painter p, Theme t, int x, int y, int z) {
+        int roll = p.roll(x, y, z, 88, 100);
+        boolean deep = y < 0;
+        BlockState base = rock(y);
+        return switch (t) {
+            case MINE -> roll < 26 ? (deep ? Blocks.COBBLED_DEEPSLATE : Blocks.ANDESITE).defaultBlockState()
+                    : roll < 44 ? Blocks.COBBLESTONE.defaultBlockState() : roll < 56 ? Blocks.TUFF.defaultBlockState()
+                    : roll < 66 ? Blocks.GRAVEL.defaultBlockState() : roll < 72 ? Blocks.COARSE_DIRT.defaultBlockState() : base;
+            case VAMPIRE_LAIR -> roll < 34 ? Blocks.BLACKSTONE.defaultBlockState() : roll < 52 ? Blocks.CRACKED_DEEPSLATE_BRICKS.defaultBlockState()
+                    : roll < 60 ? Blocks.RED_TERRACOTTA.defaultBlockState() : roll < 66 ? Blocks.BONE_BLOCK.defaultBlockState() : base;
+            case NECROMANCER_LAIR -> roll < 30 ? Blocks.TUFF.defaultBlockState() : roll < 50 ? Blocks.SOUL_SOIL.defaultBlockState()
+                    : roll < 66 ? Blocks.COBBLED_DEEPSLATE.defaultBlockState() : roll < 72 ? Blocks.AMETHYST_BLOCK.defaultBlockState() : base;
+            case HAGRAVEN_LAIR -> roll < 36 ? Blocks.MOSS_BLOCK.defaultBlockState() : roll < 56 ? Blocks.MUD.defaultBlockState()
+                    : roll < 70 ? Blocks.ROOTED_DIRT.defaultBlockState() : roll < 78 ? Blocks.MANGROVE_ROOTS.defaultBlockState() : base;
+            default -> roll < 28 ? (deep ? Blocks.COBBLED_DEEPSLATE : Blocks.ANDESITE).defaultBlockState()
+                    : roll < 42 ? Blocks.MOSS_BLOCK.defaultBlockState() : roll < 52 ? Blocks.DRIPSTONE_BLOCK.defaultBlockState()
+                    : roll < 60 ? Blocks.CLAY.defaultBlockState() : roll < 68 ? Blocks.GRAVEL.defaultBlockState()
+                    : roll < 72 ? Blocks.CALCITE.defaultBlockState() : base;
+        };
+    }
+
     // ------------------------------------------------------------------ rooms
 
     public static void room(Painter p, Room room, RandomSource r) {
@@ -62,12 +84,17 @@ public final class NaturalBuilder {
                     } else if (lined && y >= room.floor - 1 && d < 1.25 && p.get(x, y, z).is(BlockTags.BASE_STONE_OVERWORLD)) {
                         // the cave's own rock: ice, coral, sandstone, ash...
                         p.set(x, y, z, p.noise(x, y, z, 3.0, 86) > 0.2 ? p.kit.palette().rock : p.kit.palette().caveFloor);
+                    } else if (!lined && y >= room.floor - 1 && d < 1.25 && p.noise(x, y, z, 3.0, 87) > 0.12
+                            && p.get(x, y, z).is(BlockTags.BASE_STONE_OVERWORLD)) {
+                        // a wider palette than stone: each kind of lair and cave has its own rock mixes
+                        p.set(x, y, z, wallPatch(p, t, x, y, z));
                     }
                 }
                 int fy = room.floor + lift - 1;
                 if (carvedColumn && p.ok(x, fy, z)) p.set(x, fy, z, floorBlock(p, t, x, fy, z));
             }
         }
+        p.mood = Pacing.of(p, room);
         NaturalRooms.decorate(p, room, r);
         Direction exit = room.exit();
         if (exit != null) Shafts.exitDoor(p, room, exit);
@@ -157,6 +184,7 @@ public final class NaturalBuilder {
             if (c.has(DungeonPiece.FLAG_BARRED)) Traps.bars(p, ax, c.corridorFloor(k), az, latPlus);
             else Traps.tripwire(p, ax, c.corridorFloor(k), az, latPlus, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), true);
         }
+        Pacing.patrol(p, c);
     }
 
     /** Carves one column of a winding tunnel; position k of len, lateral offset lat, walking level f. */

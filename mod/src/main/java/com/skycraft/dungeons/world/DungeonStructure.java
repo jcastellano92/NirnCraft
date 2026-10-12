@@ -163,7 +163,7 @@ public class DungeonStructure extends Structure {
                 return Optional.of(new GenerationStub(new BlockPos(x, base, z), builder -> {
                     Layout.surface(builder, site, x, base, z, out, seed, false);
                     Layout.underground(builder, site, x + out.getStepX() * 3, base, z + out.getStepZ() * 3, out, fDepth,
-                            seed ^ 0x5DEECE66DL, minY + 10, true, g);
+                            seed ^ 0x5DEECE66DL, minY + 10, true, g, -2);
                 }));
             }
             return Optional.of(new GenerationStub(new BlockPos(x, base, z),
@@ -180,7 +180,7 @@ public class DungeonStructure extends Structure {
         int fDepth = depth;
         Layout.Ground g = ground(ctx);
         return Optional.of(new GenerationStub(new BlockPos(x, surface, z),
-                builder -> Layout.underground(builder, site, x, surface, z, dOut, fDepth, seed, minY + 10, false, g)));
+                builder -> Layout.underground(builder, site, x, surface, z, dOut, fDepth, seed, minY + 10, false, g, -2)));
     }
 
     /** Sub-themes for random sites: caves pick among their rosters, everything else splits two ways. */
@@ -280,7 +280,7 @@ public class DungeonStructure extends Structure {
             return Optional.of(new GenerationStub(new BlockPos(x, base, z), builder -> {
                 Layout.surface(builder, site, fx, base, fz, out, seed, false);
                 Layout.underground(builder, site, fx + out.getStepX() * 3, base, fz + out.getStepZ() * 3, out, depth,
-                        seed ^ 0x5DEECE66DL, minY + 10, true, g);
+                        seed ^ 0x5DEECE66DL, minY + 10, true, g, 3);
             }));
         }
         if (!theme.underground()) {
@@ -302,7 +302,7 @@ public class DungeonStructure extends Structure {
         Direction fOut = out;
         Layout.Ground g = ground(ctx);
         return Optional.of(new GenerationStub(new BlockPos(x, surface, z), builder -> {
-            Layout.underground(builder, site, fx, surface, fz, fOut, fDepth, seed, minY + 10, false, g);
+            Layout.underground(builder, site, fx, surface, fz, fOut, fDepth, seed, minY + 10, false, g, 3);
             if (special != Special.NONE && special != Special.LABYRINTHIAN) Layout.exterior(builder, site, fx, surface, fz, fOut, seed);
         }));
     }

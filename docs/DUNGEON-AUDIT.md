@@ -121,3 +121,82 @@ anything broken or odd (floating blocks, disconnected stairs, empty boxes). Scor
 five/six-tile sheet per dungeon and are coarse; the measured columns and the reachability report are exact.
 Known reviewer noise: the structure-only tile hides natural rock, so cave floors look like "floating" cubes there;
 Haiku's "chest markers vs chest block entities" mismatch complaints are wrong (markers include barrels and minecarts).
+
+## Round 2: grand caverns, longer dungeons, pacing (after)
+
+Code: `GrandCavern` (new), `Layout` (multi-cell caverns, loops, deeper descents), `Theme` (room counts, depths),
+`Pacing` (moods, patrols), `CaveVariants` (room templates), `Story` (lecterns, names, relic caches),
+`NaturalBuilder`/`NaturalRooms` (rock palettes, light), `DormantMobs` (pressure plates). Tools: `tools/qa/dungeon_cavern_view.py`
+(cutaways), `dungeon_stats.py` (the measured columns), `dungeon_audit.py --extra` (more ids, adds the cavern tiles).
+
+What was added:
+
+* **Grand caverns** (`FLAG_GRAND`, one piece, bounded volume): 43x43 or 73x43 (and 43x73) blocks, 15-32 tall, dome roof.
+  A walkway ring at the doors' level with galleries raised 4-6 blocks on the wall side; a terraced bowl with a lake
+  (never more than one block per step) or a chasm with ladders back up; five-wide natural-rock bridges over it to a central
+  platform; giant columns, stalactites, stalagmite mounds; a waterfall where there is water; posts of light along every
+  walkway. Five looks: fungal grotto, crystal cavern, frozen cavern, ember cavern (lava lake, bowl only), flooded cavern;
+  chosen by theme and roster. Fluids sit in basins whose rim is never lower than the surface, so they are sealed.
+  Caves/mines/lairs/forts-undercroft get one from 8 rooms and two from 12; the entrance of a natural dungeon may open onto
+  the first from a ledge (the vista). Barrows, ruins and Dwemer delves use it as a deep level.
+* **Length**: named dungeons +3 rooms, random sites -2; theme counts raised (cave 7-11, mine 7-10, lairs 6-9, barrow 9-12,
+  dwemer 9-12, ruin 8-12, fort 4-6); descents up to 5 blocks a step, depths 16-32; up to three loops in a big dungeon.
+* **Variety**: ten room templates for carved dungeons (collapsed gallery, flooded pool, shrine, ore outcrop, bone nest,
+  fungal garden, ritual circle, prison, armoury, camp), wider rock palettes per lair/mine/cave, ceiling glow stones.
+* **Enemies**: `Pacing` gives each ordinary room a mood: a fifth empty, three in ten sleeping (dormant: bears, trolls,
+  bandits in bedrolls, Dwemer automatons until a pressure plate is stepped on), one in seven a pack; one corridor in four
+  has a two-foe patrol. Beats (ambush, elite, boss) are untouched.
+* **Story**: the adventurer's journal lies on a lectern in front of the bones, titled with a name of their own; caches use
+  a relic loot table of the dungeon's kind (`chests/relic_*`); grand caverns hold a cache on a gallery and a platform chest.
+
+Measured (24 dungeons, one world seed, `skycraft-dungeon-qa place` + `export`; analyzer: 0 blockers; 2 offline-checker
+"chest unreachable" cases, both ordinary cache rooms, no room or boss unreachable):
+
+| | before (20) | after (same 20) |
+|---|---|---|
+| rooms, mean (range) | 7.5 (4-12) | 12.2 (7-18) |
+| mobs, mean / asleep share | 14.8 / 13% | 29.3 / 34% |
+| containers, mean | 14.8 | 21.4 |
+| dungeons with a grand cavern | 0 | 18 of 20 (forts excepted) |
+
+Haiku sheet scores after (1-5 per column, sum out of 35, WOW = "epic / vista / glow cavern" 1-5, new column):
+
+| dungeon | before sum | after sum | WOW | note |
+|---|---|---|---|---|
+| bleak_falls_barrow | 23 | 19 | 3 | blank zones on level plans |
+| angarvunde | 24 | 19 | 4 | |
+| gyldenhul_barrow | 20 | 17 | 3 | level 2 nearly empty |
+| alftand | 24 | 22 | 2 | |
+| nchardak | 20 | 22 | 3 | |
+| mthartzel | 21 | 20 | 3 | |
+| bonechill_passage | 18 | 19 | 4 | ice chasm reads well |
+| ahabah_hollow | 15 | 20 | 3 | |
+| bilegulch_mine | 18 | 24 | 3 | |
+| badgerrun_quarry | 18 | 22 | 3 | |
+| amelion_tomb | 20 | 19 | 2 | |
+| alas_ancestral_tomb | 24 | 24 | 3 | |
+| ahaleb_necropolis | 27 | 21 | 3 | |
+| aphrens_tomb | 19 | 20 | 2 | |
+| wolf_jarls_howe | 23 | 23 | 3 | |
+| fort_fellhammer | 23 | 16 | 1 | no cavern, linear fort |
+| castle_volkihar | 22 | 19 | 2 | |
+| ravenscar_hollow | 17 | 22 | 3 | |
+| haemars_shame | 15 | 24 | 4 | lava-lake cavern strong |
+| bramcliff_crypt | 17 | 21 | 3 | |
+| lost_echo_cave (new) | - | 22 | 3 | |
+| whistling_mine (new) | - | 23 | 4 | |
+| movarths_lair (new) | - | 21 | 4 | |
+| crystaldrift_cave (new) | - | 24 | 4 | |
+
+The mean of the 20 is 20.4 before and 20.7 after: the weakest ones rose by 5-9 points (haemars_shame, ahabah_hollow,
+ravenscar_hollow, bilegulch_mine, bramcliff_crypt) and the strongest barrows and forts fell 3-8, which is mostly the
+reviewer (Haiku scored different seeds' sheets: this round's worlds differ from the last, and it marks big blank level
+plans down). WOW averages 3.0 over the 24. The scores are coarse; the measured table above is the reliable part.
+
+Views of the new caverns: `docs/screens/dungeon-audit/<id>_cavern0_half.png` (cut along the middle), `_dome.png` (roof off)
+and `_plan.png`, for bonechill_passage (frozen chasm 73x43), whistling_mine, haemars_shame (lava bowl), alftand,
+angarvunde and ravenscar_hollow. The contact sheets `<id>.jpg` in the same folder now include the cavern tiles.
+
+Open in game: the look of the glow (froglights, sea lanterns, shroomlights), the waterfalls (fluid ticks start on first
+chunk tick), pressure plates waking the automatons, the 2 offline "chest unreachable" cases, and worldgen time of a
+73x43x32 cavern (analyser paints it with the rest in under a second of CPU; not measured in the real chunk pipeline).

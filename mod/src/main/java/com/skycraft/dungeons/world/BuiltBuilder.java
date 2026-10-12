@@ -133,12 +133,14 @@ public final class BuiltBuilder {
                 }
             }
         }
+        p.mood = Pacing.of(p, room);
         switch (t) {
             case DWEMER -> DwemerRooms.decorate(p, room, r);
             case FORT -> FortRooms.decorate(p, room, r);
             case RUIN -> CultureRooms.decorate(p, room, r);
             default -> BarrowRooms.decorate(p, room, r);
         }
+        Pacing.plate(p, room);
         Direction gate = room.gate();
         if (gate != null) {
             switch (Puzzles.kind(room.piece)) {
@@ -329,6 +331,7 @@ public final class BuiltBuilder {
             int k = len / 2;
             Traps.bars(p, xAxis ? low + k : center, c.corridorFloor(k), xAxis ? center : low + k, latPlus);
         }
+        Pacing.patrol(p, c);
     }
 
     /** A block that carries a trap's redstone: the culture's trim, or carved masonry. */

@@ -9,14 +9,14 @@ import net.minecraft.util.StringRepresentable;
  */
 public enum Theme implements StringRepresentable {
     //               id                  style           rooms  depth   room height  puzzle
-    BARROW("barrow", Style.BUILT, 7, 11, 14, 22, 5, 7, true),
-    CAVE("cave", Style.NATURAL, 5, 8, 10, 16, 4, 6, false),
-    DWEMER("dwemer", Style.BUILT, 7, 11, 18, 28, 6, 8, true),
-    VAMPIRE_LAIR("vampire_lair", Style.NATURAL, 4, 7, 10, 16, 4, 6, false),
-    NECROMANCER_LAIR("necromancer_lair", Style.NATURAL, 4, 7, 10, 16, 4, 6, false),
-    HAGRAVEN_LAIR("hagraven_lair", Style.NATURAL, 4, 6, 9, 14, 4, 6, false),
-    MINE("mine", Style.NATURAL, 5, 8, 10, 18, 4, 5, false),
-    FORT("fort", Style.BUILT, 3, 5, 8, 11, 4, 5, false),
+    BARROW("barrow", Style.BUILT, 9, 12, 16, 24, 5, 7, true),
+    CAVE("cave", Style.NATURAL, 7, 11, 24, 32, 4, 6, false),
+    DWEMER("dwemer", Style.BUILT, 9, 12, 20, 30, 6, 8, true),
+    VAMPIRE_LAIR("vampire_lair", Style.NATURAL, 6, 9, 24, 30, 4, 6, false),
+    NECROMANCER_LAIR("necromancer_lair", Style.NATURAL, 6, 9, 24, 30, 4, 6, false),
+    HAGRAVEN_LAIR("hagraven_lair", Style.NATURAL, 6, 8, 22, 30, 4, 6, false),
+    MINE("mine", Style.NATURAL, 7, 10, 24, 32, 4, 5, false),
+    FORT("fort", Style.BUILT, 4, 6, 18, 26, 4, 5, false),
     GIANT_CAMP("giant_camp", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
     DRAGON_LAIR("dragon_lair", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
     DAEDRIC_SHRINE("daedric_shrine", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
@@ -39,7 +39,7 @@ public enum Theme implements StringRepresentable {
     PRINCE_SHRINE("prince_shrine", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
     MAGE_TOWER("mage_tower", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
     // culture tombs and ruins: masonry like a barrow, dressed by the kit
-    RUIN("ruin", Style.BUILT, 6, 10, 14, 24, 5, 8, true),
+    RUIN("ruin", Style.BUILT, 8, 12, 16, 26, 5, 8, true),
     // unique sites
     HIGH_HROTHGAR("high_hrothgar", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
     THROAT_SUMMIT("throat_summit", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),

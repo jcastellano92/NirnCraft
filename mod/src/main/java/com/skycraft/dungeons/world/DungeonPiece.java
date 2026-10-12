@@ -38,6 +38,8 @@ public class DungeonPiece extends StructurePiece {
     public static final int FLAG_AMBUSH = 512;
     /** CORRIDOR: barred across (a window into the boss chamber, seen before it is reached). */
     public static final int FLAG_BARRED = 1024;
+    /** ROOM: a grand cavern ({@link GrandCavern}): one huge irregular chamber instead of a box or a single cavern. */
+    public static final int FLAG_GRAND = 2048;
 
     public final Theme theme;
     /** Culture kit (palette and roster), {@link Kit#NONE} for the theme's own. */
@@ -158,7 +160,8 @@ public class DungeonPiece extends StructurePiece {
         switch (kind) {
             case ROOM -> {
                 Room room = new Room(this);
-                if (theme.natural()) NaturalBuilder.room(p, room, r);
+                if (has(FLAG_GRAND)) GrandCavern.build(p, this);
+                else if (theme.natural()) NaturalBuilder.room(p, room, r);
                 else BuiltBuilder.room(p, room, r);
             }
             case CORRIDOR -> {
