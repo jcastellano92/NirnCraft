@@ -433,3 +433,8 @@ in-flight cap when DH is installed).
 `status` reports it finished, stop the server, zip `world/` (without `playerdata/`, `advancements/`, `stats/`) and host
 it as a release asset; players unzip it into `saves/` or a dedicated server's world folder. Chunks stay valid while the
 worldgen data is unchanged, so regenerate it per release.
+
+## Release build (always includes an up-to-date bake)
+`tools\build_release.ps1` builds, re-bakes, rebuilds, creates `dist/Skycraft-client-instance.zip` and runs the QA
+server + bake check. Use it for every build you hand to a player: the bake's hash covers the computing classes'
+bytecode, so any code change makes an old bake stale (it then silently falls back to computing at runtime).
