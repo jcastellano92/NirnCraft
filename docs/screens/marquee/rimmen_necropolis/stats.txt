@@ -1,0 +1,30 @@
+# rimmen_necropolis: top built block types
+  4909  47.6% minecraft:cut_sandstone
+  3923  38.0% minecraft:smooth_sandstone
+   428   4.1% minecraft:light_blue_terracotta
+   244   2.4% minecraft:chiseled_sandstone
+   198   1.9% minecraft:light_blue_glazed_terracotta
+   170   1.6% minecraft:orange_terracotta
+   117   1.1% minecraft:sea_lantern
+    72   0.7% minecraft:sandstone_stairs
+    63   0.6% minecraft:smooth_sandstone_stairs
+    53   0.5% minecraft:cut_sandstone_slab
+    50   0.5% minecraft:glass
+    17   0.2% minecraft:sandstone_stairs
+     9   0.1% minecraft:smooth_sandstone_stairs
+     9   0.1% minecraft:smooth_sandstone_stairs
+     8   0.1% minecraft:cobweb
+     7   0.1% minecraft:soul_lantern
+     7   0.1% minecraft:gold_block
+     6   0.1% minecraft:iron_bars
+     4   0.0% minecraft:chest
+     3   0.0% minecraft:chest
+     2   0.0% minecraft:white_glazed_terracotta
+     2   0.0% minecraft:chest
+     1   0.0% minecraft:dispenser
+     1   0.0% minecraft:iron_door
+     1   0.0% minecraft:sandstone_stairs
+# block entities: minecraft:chest=10, minecraft:dispenser=2, minecraft:lectern=1
+# levels: [(38, 39, 328), (42, 45, 393), (50, 50, 207), (54, 56, 186), (84, 84, 150)]
+# markers: sleeper=34, chest=12, trap=4, enemy=3, mech=2, entrance=2, boss=1, elite=1, lectern=1
+# enemies: husk=25, skeleton=12, The Necropolis Regent=1, Lunar Champion=1

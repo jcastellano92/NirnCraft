@@ -30,7 +30,9 @@ public enum Special implements StringRepresentable {
     /** Castle Volkihar: the vampire lord's castle on its island. */
     VOLKIHAR("volkihar"),
     /** Shalidor's maze on the Labyrinthian surface. */
-    SHALIDOR("shalidor");
+    SHALIDOR("shalidor"),
+    /** A hand-authored marquee plan ({@code com.skycraft.dungeons.marquee}); the piece's param names the plan. */
+    MARQUEE("marquee");
 
     public static final Codec<Special> CODEC = StringRepresentable.fromEnum(Special::values);
 

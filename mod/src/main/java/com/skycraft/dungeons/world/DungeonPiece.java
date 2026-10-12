@@ -157,6 +157,11 @@ public class DungeonPiece extends StructurePiece {
             Steps.build(p, this);
             return;
         }
+        if (special == Special.MARQUEE && (kind == Kind.ROOM || kind == Kind.CORRIDOR)) {
+            if (kind == Kind.ROOM) com.skycraft.dungeons.marquee.MarqueeBuilder.room(p, this);
+            else com.skycraft.dungeons.marquee.MarqueeBuilder.corridor(p, this);
+            return;
+        }
         switch (kind) {
             case ROOM -> {
                 Room room = new Room(this);

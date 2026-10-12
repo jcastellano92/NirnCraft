@@ -1,0 +1,1169 @@
+{
+ "id": "sancre_tor",
+ "kit": "akaviri",
+ "entry_depth": 14,
+ "open_top": true,
+ "palette": {
+  "wall": [
+   "minecraft:deepslate_bricks*6",
+   "minecraft:polished_blackstone_bricks*4",
+   "minecraft:cracked_deepslate_bricks*2",
+   "minecraft:dark_oak_planks*1"
+  ],
+  "floor": [
+   "minecraft:deepslate_tiles*5",
+   "minecraft:polished_blackstone*3",
+   "minecraft:cracked_deepslate_tiles*1"
+  ],
+  "ceiling": [
+   "minecraft:deepslate_bricks*4",
+   "minecraft:dark_oak_planks*3"
+  ],
+  "rock": "minecraft:polished_deepslate",
+  "trim": "minecraft:chiseled_deepslate",
+  "pillar": "minecraft:stripped_dark_oak_log",
+  "cap": "minecraft:chiseled_deepslate",
+  "light": "minecraft:shroomlight",
+  "dim": "minecraft:redstone_lamp",
+  "rail": "minecraft:dark_oak_fence",
+  "stair": "minecraft:deepslate_brick_stairs"
+ },
+ "boss": {
+  "id": "skycraft:dragon_priest|skycraft:draugr_deathlord|minecraft:wither_skeleton",
+  "name": "The Hundred-Blade Revenant"
+ },
+ "books": {
+  "dragonguard": {
+   "title": "Oath of the Hundred",
+   "author": "A Blade-keeper",
+   "pages": [
+    "Each blade in the hall was sworn to one name, and each name to one oath: that the dragon-hunters' last duty is to be forgotten gently.\n\nThe mountain is cold. The oath is warm. Carry it down."
+   ]
+  },
+  "hunters": {
+   "title": "Hunters' Tally",
+   "author": "unknown",
+   "pages": [
+    "Notched on the shrine's edge: nine hundred and forty cuts, and one deeper than the rest.\n\nThe last hunter wrote beneath it that she would count again when the dead stopped answering."
+   ]
+  }
+ },
+ "rooms": [
+  {
+   "id": "gatehouse",
+   "name": "The Rampart Gatehouse",
+   "at": [
+    0,
+    0
+   ],
+   "y": -6,
+   "half": [
+    5,
+    5
+   ],
+   "h": 10,
+   "role": "start",
+   "doors": {
+    "s": 6
+   },
+   "ops": [
+    {
+     "op": "landing",
+     "y": 6,
+     "depth": 3,
+     "stairs": 3
+    },
+    {
+     "op": "pillars",
+     "inset": 2,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "scatter",
+     "block": "minecraft:cobweb",
+     "on": "ceiling",
+     "chance": 14
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:vindicator",
+       "name": "Tsaesci Sentinel",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      },
+      {
+       "id": "skycraft:draugr|minecraft:zombie",
+       "name": "Dragon-Hunter Draugr",
+       "mode": "awake",
+       "n": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "armory",
+   "name": "The Broken Armoury",
+   "at": [
+    -1,
+    0
+   ],
+   "y": -6,
+   "half": [
+    4,
+    4
+   ],
+   "h": 6,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 3
+    },
+    {
+     "op": "fill",
+     "from": [
+      -3,
+      -3,
+      0
+     ],
+     "to": [
+      -3,
+      3,
+      0
+     ],
+     "block": "minecraft:dark_oak_planks"
+    },
+    {
+     "op": "blocks",
+     "list": [
+      {
+       "at": [
+        -3,
+        -3,
+        1
+       ],
+       "block": "minecraft:iron_bars"
+      },
+      {
+       "at": [
+        -3,
+        0,
+        1
+       ],
+       "block": "minecraft:iron_bars"
+      },
+      {
+       "at": [
+        -3,
+        3,
+        1
+       ],
+       "block": "minecraft:iron_bars"
+      }
+     ]
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "skycraft:draugr|minecraft:zombie",
+       "name": "Dragon-Hunter Draugr",
+       "mode": "sleep",
+       "at": [
+        [
+         -2,
+         -3
+        ],
+        [
+         -2,
+         3
+        ],
+        [
+         2,
+         -3
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "skycraft:chests/dungeon_common",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "chapel",
+   "name": "The Blade Chapel",
+   "at": [
+    1,
+    0
+   ],
+   "y": -6,
+   "half": [
+    4,
+    4
+   ],
+   "h": 6,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 3
+    },
+    {
+     "op": "fill",
+     "from": [
+      2,
+      -3,
+      0
+     ],
+     "to": [
+      3,
+      -3,
+      1
+     ],
+     "block": "trim"
+    },
+    {
+     "op": "blocks",
+     "list": [
+      {
+       "at": [
+        3,
+        -2,
+        0
+       ],
+       "block": "minecraft:candle[candles=4,lit=true]"
+      }
+     ]
+    },
+    {
+     "op": "lectern",
+     "at": [
+      2,
+      2,
+      0
+     ],
+     "book": "dragonguard",
+     "candle": true,
+     "face": "w"
+    },
+    {
+     "op": "chest",
+     "at": [
+      -3,
+      -3
+     ],
+     "table": "skycraft:chests/dungeon_cache",
+     "face": "e"
+    }
+   ]
+  },
+  {
+   "id": "sigil_hall",
+   "name": "Hall of Sigils",
+   "at": [
+    0,
+    -1
+   ],
+   "y": -10,
+   "half": [
+    5,
+    4
+   ],
+   "h": 9,
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "blocks",
+     "list": [
+      {
+       "at": [
+        -3,
+        -2,
+        0
+       ],
+       "block": "minecraft:chiseled_deepslate"
+      },
+      {
+       "at": [
+        3,
+        -2,
+        0
+       ],
+       "block": "minecraft:chiseled_deepslate"
+      },
+      {
+       "at": [
+        -3,
+        -2,
+        1
+       ],
+       "block": "minecraft:candle[candles=3,lit=true]"
+      },
+      {
+       "at": [
+        3,
+        -2,
+        1
+       ],
+       "block": "minecraft:candle[candles=3,lit=true]"
+      }
+     ]
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "skycraft:draugr|minecraft:zombie",
+       "name": "Dragon-Hunter Draugr",
+       "mode": "ambush",
+       "n": 3,
+       "where": "wall"
+      },
+      {
+       "id": "minecraft:vindicator",
+       "name": "Tsaesci Sentinel",
+       "mode": "awake",
+       "n": 1,
+       "where": "lane"
+      }
+     ]
+    },
+    {
+     "op": "feature",
+     "id": "setpiece:sigil_door"
+    }
+   ]
+  },
+  {
+   "id": "crypt_w",
+   "name": "West Crypt",
+   "at": [
+    -1,
+    -1
+   ],
+   "y": -14,
+   "half": [
+    4,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "fill",
+     "from": [
+      -3,
+      -3,
+      0
+     ],
+     "to": [
+      -3,
+      3,
+      1
+     ],
+     "block": "minecraft:chiseled_deepslate"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "skycraft:draugr|minecraft:zombie",
+       "name": "Dragon-Hunter Draugr",
+       "mode": "sleep",
+       "at": [
+        [
+         -2,
+         -3
+        ],
+        [
+         -2,
+         0
+        ],
+        [
+         -2,
+         3
+        ]
+       ]
+      },
+      {
+       "id": "minecraft:vindicator",
+       "name": "Tsaesci Sentinel",
+       "mode": "ambush",
+       "n": 1,
+       "where": "any"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      -3
+     ],
+     "table": "skycraft:chests/dungeon_cache",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "crypt_e",
+   "name": "East Crypt",
+   "at": [
+    1,
+    -1
+   ],
+   "y": -14,
+   "half": [
+    4,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "fill",
+     "from": [
+      3,
+      -3,
+      0
+     ],
+     "to": [
+      3,
+      3,
+      1
+     ],
+     "block": "minecraft:chiseled_deepslate"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "skycraft:draugr|minecraft:zombie",
+       "name": "Dragon-Hunter Draugr",
+       "mode": "sleep",
+       "at": [
+        [
+         2,
+         -3
+        ],
+        [
+         2,
+         0
+        ],
+        [
+         2,
+         3
+        ]
+       ]
+      },
+      {
+       "id": "minecraft:vindicator",
+       "name": "Tsaesci Sentinel",
+       "mode": "ambush",
+       "n": 1,
+       "where": "any"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      -3,
+      3
+     ],
+     "table": "skycraft:chests/dungeon_cache",
+     "face": "e"
+    }
+   ]
+  },
+  {
+   "id": "hall_hundred",
+   "name": "Hall of the Hundred Blades",
+   "at": [
+    0,
+    -2
+   ],
+   "y": -14,
+   "half": [
+    5,
+    5
+   ],
+   "h": 12,
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 3,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 8
+    },
+    {
+     "op": "fill",
+     "from": [
+      -4,
+      -4,
+      0
+     ],
+     "to": [
+      -4,
+      -4,
+      5
+     ],
+     "block": "minecraft:iron_bars"
+    },
+    {
+     "op": "fill",
+     "from": [
+      4,
+      -4,
+      0
+     ],
+     "to": [
+      4,
+      -4,
+      5
+     ],
+     "block": "minecraft:iron_bars"
+    },
+    {
+     "op": "scatter",
+     "block": "minecraft:iron_bars",
+     "on": "ceiling",
+     "chance": 30
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "skycraft:draugr|minecraft:zombie",
+       "name": "Revenant Captain",
+       "mode": "elite",
+       "at": [
+        [
+         0,
+         -3
+        ]
+       ]
+      },
+      {
+       "id": "skycraft:draugr|minecraft:zombie",
+       "name": "Dragon-Hunter Draugr",
+       "mode": "ambush",
+       "n": 4,
+       "where": "wall"
+      },
+      {
+       "id": "minecraft:vindicator",
+       "name": "Tsaesci Sentinel",
+       "mode": "awake",
+       "n": 2,
+       "where": "lane"
+      }
+     ]
+    },
+    {
+     "op": "feature",
+     "id": "setpiece:hundred_blades"
+    }
+   ]
+  },
+  {
+   "id": "gallery_w",
+   "name": "West Gallery",
+   "at": [
+    -1,
+    -2
+   ],
+   "y": -18,
+   "half": [
+    4,
+    5
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "skycraft:draugr|minecraft:zombie",
+       "name": "Dragon-Hunter Draugr",
+       "mode": "sleep",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      -3,
+      3
+     ],
+     "table": "skycraft:chests/dungeon_common",
+     "face": "e"
+    }
+   ]
+  },
+  {
+   "id": "gallery_e",
+   "name": "East Gallery",
+   "at": [
+    1,
+    -2
+   ],
+   "y": -18,
+   "half": [
+    4,
+    5
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "skycraft:draugr|minecraft:zombie",
+       "name": "Dragon-Hunter Draugr",
+       "mode": "sleep",
+       "n": 3,
+       "where": "wall"
+      },
+      {
+       "id": "minecraft:vindicator",
+       "name": "Tsaesci Sentinel",
+       "mode": "awake",
+       "n": 1,
+       "where": "any"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "skycraft:chests/dungeon_common",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "shrine",
+   "name": "Hunters' Shrine",
+   "at": [
+    -2,
+    -2
+   ],
+   "y": -18,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "fill",
+     "from": [
+      0,
+      -3,
+      0
+     ],
+     "to": [
+      0,
+      -3,
+      0
+     ],
+     "block": "trim"
+    },
+    {
+     "op": "lectern",
+     "at": [
+      0,
+      -3,
+      1
+     ],
+     "book": "hunters",
+     "candle": true,
+     "face": "s"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "skycraft:draugr|minecraft:zombie",
+       "name": "Dragon-Hunter Draugr",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "banner",
+   "name": "Banner Hall",
+   "at": [
+    2,
+    -2
+   ],
+   "y": -18,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "scatter",
+     "block": "minecraft:red_banner",
+     "on": "floor",
+     "chance": 18
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:vindicator",
+       "name": "Tsaesci Sentinel",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      2,
+      3
+     ],
+     "table": "skycraft:chests/dungeon_cache",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "ossuary",
+   "name": "Ossuary of the Slain",
+   "at": [
+    -1,
+    -3
+   ],
+   "y": -22,
+   "half": [
+    4,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "fill",
+     "from": [
+      -3,
+      -3,
+      0
+     ],
+     "to": [
+      3,
+      -3,
+      1
+     ],
+     "block": "minecraft:bone_block"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "skycraft:draugr|minecraft:zombie",
+       "name": "Dragon-Hunter Draugr",
+       "mode": "sleep",
+       "at": [
+        [
+         -2,
+         -2
+        ],
+        [
+         0,
+         -2
+        ],
+        [
+         2,
+         -2
+        ],
+        [
+         -2,
+         2
+        ],
+        [
+         2,
+         2
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      3
+     ],
+     "table": "skycraft:chests/dungeon_cache",
+     "face": "n"
+    }
+   ]
+  },
+  {
+   "id": "reliquary",
+   "name": "Dragonguard Reliquary",
+   "at": [
+    1,
+    -3
+   ],
+   "y": -22,
+   "half": [
+    4,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "fill",
+     "from": [
+      -1,
+      -3,
+      0
+     ],
+     "to": [
+      1,
+      -3,
+      0
+     ],
+     "block": "trim"
+    },
+    {
+     "op": "blocks",
+     "list": [
+      {
+       "at": [
+        0,
+        -3,
+        1
+       ],
+       "block": "minecraft:candle[candles=4,lit=true]"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      -2
+     ],
+     "table": "skycraft:chests/dungeon_boss",
+     "face": "s"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "skycraft:draugr|minecraft:zombie",
+       "name": "Dragon-Hunter Draugr",
+       "mode": "ambush",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "revenant",
+   "name": "The Hundred Names Vault",
+   "at": [
+    0,
+    -3
+   ],
+   "y": -22,
+   "half": [
+    6,
+    6
+   ],
+   "h": 16,
+   "role": "boss",
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 2,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 10
+    },
+    {
+     "op": "boss",
+     "at": [
+      0,
+      -1
+     ],
+     "dais": 2
+    },
+    {
+     "op": "fill",
+     "from": [
+      -6,
+      -6,
+      1
+     ],
+     "to": [
+      6,
+      -6,
+      9
+     ],
+     "block": "minecraft:chiseled_deepslate"
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      -4,
+      1
+     ],
+     "table": "skycraft:chests/marquee_sancre_tor",
+     "face": "s",
+     "capstone": true
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:vindicator",
+       "name": "Tsaesci Sentinel",
+       "mode": "sleep",
+       "at": [
+        [
+         -4,
+         3
+        ],
+        [
+         4,
+         3
+        ],
+        [
+         -4,
+         -3
+        ],
+        [
+         4,
+         -3
+        ]
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pit_3",
+   "name": "Back Passage",
+   "at": [
+    -2,
+    -3
+   ],
+   "y": -22,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "skycraft:draugr|minecraft:zombie",
+       "name": "Dragon-Hunter Draugr",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      3
+     ],
+     "table": "skycraft:chests/dungeon_cache",
+     "face": "n"
+    }
+   ]
+  }
+ ],
+ "links": [
+  {
+   "a": "gatehouse",
+   "b": "armory"
+  },
+  {
+   "a": "gatehouse",
+   "b": "chapel"
+  },
+  {
+   "a": "gatehouse",
+   "b": "sigil_hall"
+  },
+  {
+   "a": "sigil_hall",
+   "b": "crypt_w"
+  },
+  {
+   "a": "sigil_hall",
+   "b": "crypt_e"
+  },
+  {
+   "a": "sigil_hall",
+   "b": "hall_hundred",
+   "gate": "sigil_hall"
+  },
+  {
+   "a": "hall_hundred",
+   "b": "gallery_w"
+  },
+  {
+   "a": "hall_hundred",
+   "b": "gallery_e"
+  },
+  {
+   "a": "gallery_w",
+   "b": "shrine"
+  },
+  {
+   "a": "gallery_e",
+   "b": "banner"
+  },
+  {
+   "a": "gallery_w",
+   "b": "ossuary"
+  },
+  {
+   "a": "gallery_e",
+   "b": "reliquary"
+  },
+  {
+   "a": "reliquary",
+   "b": "revenant",
+   "gate": "reliquary",
+   "trap": true
+  },
+  {
+   "a": "shrine",
+   "b": "pit_3"
+  },
+  {
+   "a": "pit_3",
+   "b": "ossuary"
+  }
+ ]
+}

@@ -1,0 +1,1097 @@
+{
+ "id": "psijic_relic_vaults",
+ "kit": "altmer",
+ "entry_depth": 24,
+ "palette": {
+  "wall": [
+   "minecraft:purpur_block*5",
+   "minecraft:end_stone_bricks*4",
+   "minecraft:calcite*2",
+   "minecraft:amethyst_block*1"
+  ],
+  "floor": [
+   "minecraft:end_stone_bricks*4",
+   "minecraft:purpur_block*3",
+   "minecraft:polished_diorite*2"
+  ],
+  "ceiling": [
+   "minecraft:end_stone_bricks*4",
+   "minecraft:purpur_block*3"
+  ],
+  "rock": "minecraft:end_stone_bricks",
+  "trim": "minecraft:chiseled_quartz_block",
+  "pillar": "minecraft:purpur_block",
+  "cap": "minecraft:chiseled_quartz_block",
+  "light": "minecraft:sea_lantern",
+  "dim": "minecraft:blue_ice",
+  "rail": "minecraft:iron_bars",
+  "stair": "minecraft:purpur_stairs"
+ },
+ "boss": {
+  "id": "skycraft:dragon_priest|skycraft:draugr_deathlord|minecraft:wither_skeleton",
+  "name": "The Warden of Hours"
+ },
+ "books": {
+  "between": {
+   "title": "The Hour Between",
+   "author": "unknown",
+   "pages": [
+    "A moment is a room. A vault is a corridor of moments, each shut against the next.\n\nWhen the wall slides, it is not the wall that moves."
+   ]
+  },
+  "initiate": {
+   "title": "Initiate Faen's Notes",
+   "author": "Faen",
+   "pages": [
+    "First rule: never step through a door you have not already stepped through. Second rule: you will, and the door will not mind.\n\nThe frozen room does not stop time. It stops one flame's share of it, and watches who walks by."
+   ]
+  }
+ },
+ "rooms": [
+  {
+   "id": "foyer",
+   "name": "The Vault Foyer",
+   "at": [
+    0,
+    0
+   ],
+   "y": -8,
+   "half": [
+    5,
+    6
+   ],
+   "h": 12,
+   "role": "start",
+   "doors": {
+    "s": 8
+   },
+   "ops": [
+    {
+     "op": "landing",
+     "y": 8,
+     "depth": 3,
+     "stairs": 3
+    },
+    {
+     "op": "pillars",
+     "inset": 2,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "scatter",
+     "block": "minecraft:amethyst_cluster[facing=up]",
+     "on": "floor",
+     "chance": 10,
+     "salt": 464
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Temporal Guard",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "phase_w",
+   "name": "West Phase-Door",
+   "at": [
+    -1,
+    0
+   ],
+   "y": -8,
+   "half": [
+    4,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "fill",
+     "from": [
+      -3,
+      -3,
+      0
+     ],
+     "to": [
+      -3,
+      3,
+      2
+     ],
+     "block": "minecraft:amethyst_block"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Temporal Guard",
+       "mode": "ambush",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "skycraft:chests/dungeon_common",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "phase_e",
+   "name": "East Phase-Door",
+   "at": [
+    1,
+    0
+   ],
+   "y": -8,
+   "half": [
+    4,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "fill",
+     "from": [
+      3,
+      -3,
+      0
+     ],
+     "to": [
+      3,
+      3,
+      2
+     ],
+     "block": "minecraft:amethyst_block"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:vex|minecraft:skeleton",
+       "name": "Crystal Sentinel",
+       "mode": "ambush",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      -3,
+      -3
+     ],
+     "table": "skycraft:chests/dungeon_cache",
+     "face": "e"
+    }
+   ]
+  },
+  {
+   "id": "slide_1",
+   "name": "The First Sliding Wall",
+   "at": [
+    0,
+    -1
+   ],
+   "y": -11,
+   "half": [
+    5,
+    4
+   ],
+   "h": 9,
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "fill",
+     "from": [
+      -4,
+      -3,
+      0
+     ],
+     "to": [
+      -3,
+      -3,
+      4
+     ],
+     "block": "minecraft:purpur_block"
+    },
+    {
+     "op": "fill",
+     "from": [
+      3,
+      3,
+      0
+     ],
+     "to": [
+      4,
+      3,
+      4
+     ],
+     "block": "minecraft:purpur_block"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Temporal Guard",
+       "mode": "awake",
+       "n": 1,
+       "where": "lane"
+      },
+      {
+       "id": "minecraft:vex|minecraft:skeleton",
+       "name": "Crystal Sentinel",
+       "mode": "ambush",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "feature",
+     "id": "setpiece:sliding_wall"
+    }
+   ]
+  },
+  {
+   "id": "frozen_hour",
+   "name": "The Frozen Hour",
+   "at": [
+    -1,
+    -1
+   ],
+   "y": -12,
+   "half": [
+    4,
+    4
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "scatter",
+     "block": "minecraft:blue_ice",
+     "on": "floor",
+     "chance": 12,
+     "salt": 465
+    },
+    {
+     "op": "fill",
+     "from": [
+      0,
+      0,
+      0
+     ],
+     "to": [
+      0,
+      0,
+      3
+     ],
+     "block": "minecraft:ice"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Frozen Guard",
+       "mode": "sleep",
+       "at": [
+        [
+         -2,
+         -2
+        ],
+        [
+         2,
+         2
+        ],
+        [
+         -2,
+         2
+        ],
+        [
+         2,
+         -2
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "skycraft:chests/dungeon_cache",
+     "face": "w"
+    },
+    {
+     "op": "feature",
+     "id": "setpiece:frozen_room"
+    }
+   ]
+  },
+  {
+   "id": "echo_room",
+   "name": "The Echo Room",
+   "at": [
+    1,
+    -1
+   ],
+   "y": -12,
+   "half": [
+    4,
+    4
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:vex|minecraft:skeleton",
+       "name": "Crystal Sentinel",
+       "mode": "ambush",
+       "n": 3,
+       "where": "any"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      -3,
+      -3
+     ],
+     "table": "skycraft:chests/dungeon_common",
+     "face": "e"
+    }
+   ]
+  },
+  {
+   "id": "slide_2",
+   "name": "The Second Sliding Wall",
+   "at": [
+    0,
+    -2
+   ],
+   "y": -15,
+   "half": [
+    5,
+    5
+   ],
+   "h": 12,
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 9
+    },
+    {
+     "op": "fill",
+     "from": [
+      -4,
+      -4,
+      0
+     ],
+     "to": [
+      -3,
+      -4,
+      5
+     ],
+     "block": "minecraft:end_stone_bricks"
+    },
+    {
+     "op": "fill",
+     "from": [
+      3,
+      4,
+      0
+     ],
+     "to": [
+      4,
+      4,
+      5
+     ],
+     "block": "minecraft:end_stone_bricks"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Temporal Champion",
+       "mode": "elite",
+       "at": [
+        [
+         0,
+         -3
+        ]
+       ]
+      },
+      {
+       "id": "minecraft:vex|minecraft:skeleton",
+       "name": "Crystal Sentinel",
+       "mode": "ambush",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "feature",
+     "id": "setpiece:sliding_wall"
+    }
+   ]
+  },
+  {
+   "id": "orrery",
+   "name": "The Hour Orrery",
+   "at": [
+    -1,
+    -2
+   ],
+   "y": -16,
+   "half": [
+    4,
+    5
+   ],
+   "h": 12,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "fill",
+     "from": [
+      -1,
+      -1,
+      0
+     ],
+     "to": [
+      1,
+      1,
+      0
+     ],
+     "block": "minecraft:chiseled_quartz_block"
+    },
+    {
+     "op": "fill",
+     "from": [
+      0,
+      0,
+      1
+     ],
+     "to": [
+      0,
+      0,
+      7
+     ],
+     "block": "minecraft:amethyst_block"
+    },
+    {
+     "op": "blocks",
+     "list": [
+      {
+       "at": [
+        0,
+        0,
+        8
+       ],
+       "block": "minecraft:sea_lantern"
+      }
+     ]
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:vex|minecraft:skeleton",
+       "name": "Crystal Sentinel",
+       "mode": "awake",
+       "n": 2,
+       "where": "any"
+      },
+      {
+       "id": "minecraft:skeleton",
+       "name": "Temporal Guard",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "feature",
+     "id": "setpiece:orrery"
+    }
+   ]
+  },
+  {
+   "id": "relic_gallery",
+   "name": "Gallery of Relics",
+   "at": [
+    1,
+    -2
+   ],
+   "y": -16,
+   "half": [
+    4,
+    5
+   ],
+   "h": 9,
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      4
+     ],
+     "table": "skycraft:chests/dungeon_cache",
+     "face": "w"
+    },
+    {
+     "op": "chest",
+     "at": [
+      -3,
+      -4
+     ],
+     "table": "skycraft:chests/dungeon_common",
+     "face": "e"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Temporal Guard",
+       "mode": "ambush",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fold_w",
+   "name": "The West Fold",
+   "at": [
+    -1,
+    -3
+   ],
+   "y": -20,
+   "half": [
+    4,
+    4
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:vex|minecraft:skeleton",
+       "name": "Crystal Sentinel",
+       "mode": "sleep",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "skycraft:chests/dungeon_cache",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "fold_e",
+   "name": "The East Fold",
+   "at": [
+    1,
+    -3
+   ],
+   "y": -20,
+   "half": [
+    4,
+    4
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "fill",
+     "from": [
+      3,
+      -3,
+      0
+     ],
+     "to": [
+      3,
+      -3,
+      0
+     ],
+     "block": "trim"
+    },
+    {
+     "op": "lectern",
+     "at": [
+      3,
+      -3,
+      1
+     ],
+     "book": "between",
+     "candle": true,
+     "face": "w"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Temporal Guard",
+       "mode": "ambush",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "warden",
+   "name": "The Warden's Hall",
+   "at": [
+    0,
+    -3
+   ],
+   "y": -20,
+   "half": [
+    6,
+    6
+   ],
+   "h": 16,
+   "role": "boss",
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 2,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 10
+    },
+    {
+     "op": "boss",
+     "at": [
+      0,
+      -2
+     ],
+     "dais": 2
+    },
+    {
+     "op": "fill",
+     "from": [
+      -6,
+      -6,
+      1
+     ],
+     "to": [
+      6,
+      -6,
+      9
+     ],
+     "block": "minecraft:chiseled_quartz_block"
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      -5
+     ],
+     "table": "skycraft:chests/marquee_psijic_relic_vaults",
+     "face": "s",
+     "capstone": true
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Temporal Guard",
+       "mode": "sleep",
+       "at": [
+        [
+         -4,
+         3
+        ],
+        [
+         4,
+         3
+        ],
+        [
+         -4,
+         0
+        ],
+        [
+         4,
+         0
+        ]
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "initiate_cell",
+   "name": "The Initiate's Cell",
+   "at": [
+    -2,
+    -1
+   ],
+   "y": -12,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "fill",
+     "from": [
+      0,
+      -3,
+      0
+     ],
+     "to": [
+      0,
+      -3,
+      0
+     ],
+     "block": "trim"
+    },
+    {
+     "op": "lectern",
+     "at": [
+      0,
+      -3,
+      1
+     ],
+     "book": "initiate",
+     "candle": true,
+     "face": "s"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Temporal Guard",
+       "mode": "sleep",
+       "n": 1,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "chronicle",
+   "name": "The Chronicle Room",
+   "at": [
+    2,
+    -1
+   ],
+   "y": -12,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      -3
+     ],
+     "table": "skycraft:chests/dungeon_cache",
+     "face": "s"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:vex|minecraft:skeleton",
+       "name": "Crystal Sentinel",
+       "mode": "sleep",
+       "n": 1,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pass_2",
+   "name": "Side Passage",
+   "at": [
+    -2,
+    -2
+   ],
+   "y": -16,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Temporal Guard",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      3
+     ],
+     "table": "skycraft:chests/dungeon_minor",
+     "face": "n"
+    }
+   ]
+  },
+  {
+   "id": "pass_3",
+   "name": "Back Passage",
+   "at": [
+    -2,
+    -3
+   ],
+   "y": -20,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Temporal Guard",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      3
+     ],
+     "table": "skycraft:chests/dungeon_cache",
+     "face": "n"
+    }
+   ]
+  }
+ ],
+ "links": [
+  {
+   "a": "foyer",
+   "b": "phase_w"
+  },
+  {
+   "a": "foyer",
+   "b": "phase_e"
+  },
+  {
+   "a": "foyer",
+   "b": "slide_1"
+  },
+  {
+   "a": "slide_1",
+   "b": "frozen_hour"
+  },
+  {
+   "a": "slide_1",
+   "b": "echo_room"
+  },
+  {
+   "a": "frozen_hour",
+   "b": "initiate_cell"
+  },
+  {
+   "a": "echo_room",
+   "b": "chronicle"
+  },
+  {
+   "a": "slide_1",
+   "b": "slide_2",
+   "gate": "slide_1"
+  },
+  {
+   "a": "slide_2",
+   "b": "orrery"
+  },
+  {
+   "a": "slide_2",
+   "b": "relic_gallery"
+  },
+  {
+   "a": "orrery",
+   "b": "fold_w"
+  },
+  {
+   "a": "relic_gallery",
+   "b": "fold_e"
+  },
+  {
+   "a": "fold_e",
+   "b": "warden",
+   "gate": "fold_e",
+   "trap": true
+  },
+  {
+   "a": "orrery",
+   "b": "pass_2"
+  },
+  {
+   "a": "pass_2",
+   "b": "pass_3"
+  },
+  {
+   "a": "pass_3",
+   "b": "fold_w"
+  }
+ ]
+}

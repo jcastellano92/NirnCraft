@@ -275,10 +275,15 @@ public class DungeonStructure extends Structure {
         }
         if (theme == Theme.FORT) {
             int base = h;
-            int depth = Math.max(4, Math.min(44, Math.min(coverDepth(ctx, x, z, out, base, theme.maxDepth), base - (minY + 14))));
+            int depth = Math.max(4, Math.min(44, Math.min(coverDepth(ctx, x, z, out, base,
+                    com.skycraft.dungeons.marquee.MarqueePlans.depth(pl.id(), theme.maxDepth)), base - (minY + 14))));
             Layout.Ground g = ground(ctx);
+            String fortId = pl.id();
             return Optional.of(new GenerationStub(new BlockPos(x, base, z), builder -> {
                 Layout.surface(builder, site, fx, base, fz, out, seed, false);
+                // a hand-authored marquee plan replaces the cellars
+                if (com.skycraft.dungeons.marquee.MarqueePlans.build(builder, site, fortId, fx + out.getStepX() * 3, base,
+                        fz + out.getStepZ() * 3, out, depth, seed ^ 0x5DEECE66DL, minY + 10)) return;
                 Layout.underground(builder, site, fx + out.getStepX() * 3, base, fz + out.getStepZ() * 3, out, depth,
                         seed ^ 0x5DEECE66DL, minY + 10, true, g, 3);
             }));
@@ -296,12 +301,16 @@ public class DungeonStructure extends Structure {
         // underground: the place is the entrance
         int surface = h;
         int depth = theme.minDepth + random.nextInt(theme.maxDepth - theme.minDepth + 1) + (special != Special.NONE ? 4 : 0);
+        depth = com.skycraft.dungeons.marquee.MarqueePlans.depth(pl.id(), depth);
         depth = Math.min(44, coverDepth(ctx, x, z, out, surface, depth));
         depth = Math.max(6, Math.min(depth, surface - (minY + 14)));
         int fDepth = depth;
         Direction fOut = out;
         Layout.Ground g = ground(ctx);
+        String placeId = pl.id();
         return Optional.of(new GenerationStub(new BlockPos(x, surface, z), builder -> {
+            // a hand-authored marquee plan replaces the procedural layout
+            if (com.skycraft.dungeons.marquee.MarqueePlans.build(builder, site, placeId, fx, surface, fz, fOut, fDepth, seed, minY + 10)) return;
             Layout.underground(builder, site, fx, surface, fz, fOut, fDepth, seed, minY + 10, false, g, 3);
             if (special != Special.NONE && special != Special.LABYRINTHIAN) Layout.exterior(builder, site, fx, surface, fz, fOut, seed);
         }));
