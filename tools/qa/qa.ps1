@@ -7,6 +7,7 @@ Skycraft QA harness: one command, a short report. Built so automated sessions re
   tools\qa\qa.ps1 -NoBuild ...    # skip the Gradle build (reuse the last one)
   tools\qa\qa.ps1 -Layout        # no build: static checks only, incl. the layout lint (places vs map rasters, ~2 s;
                                   # the lint also runs in every default run)
+  tools\qa\qa.ps1 -NoBuild -Parity # + print the 10 lowest cells of the Skyrim-parity scorecard (tools/qa/parity.py)
 
 Writes the report to mod\run\qa-report.txt and prints it. Exit code 0 = all PASS.
 Extra server commands: -ServerCmds "cmd one|cmd two" ('+' or spaces both fine). Client tour spots: -Tour "Name:x:z;Name:x:z".
@@ -16,6 +17,7 @@ param(
     [switch]$Client,
     [switch]$NoBuild,
     [switch]$Layout,
+    [switch]$Parity,
     [string]$ServerCmds = "",
     [string]$Tour = "",
     [int]$ServerTimeout = 900,
@@ -74,6 +76,12 @@ $ll = & $py -3 -I tools/qa/layout_lint.py 2>&1
 $llerr = @($ll | Where-Object { $_ -match "^ERR" })
 Result "layout" ($LASTEXITCODE -eq 0) ("{0}" -f ($ll | Select-Object -Last 1))
 $llerr | Select-Object -First 10 | ForEach-Object { Add("       $_") }
+if ($Parity) {
+    # informational only (never fails the run): the 10 lowest region x category cells vs Skyrim = 100. docs/PARITY.md.
+    $pr = @(& $py -3 -I tools/qa/parity.py --lowest 10 2>&1)
+    Add("INFO   parity            lowest cells vs Skyrim (full table: py -3 -I tools/qa/parity.py; plan: docs/PARITY.md)")
+    $pr | ForEach-Object { Add("       $_") }
+}
 Pop-Location
 
 # ------------------------------------------------------------------ headless server
