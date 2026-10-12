@@ -7,6 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RenderNameTagEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -120,5 +121,12 @@ public final class DialogueCamera {
         double targetFov = baseFov * 0.82;
         event.setFOV(Mth.lerp(smoothFactor, baseFov, targetFov));
     }
-}
 
+    /** The talker's floating nameplate would draw giant over its own face (and the dialogue's plate): hide it while talking. */
+    @SubscribeEvent
+    public static void onNameTag(RenderNameTagEvent event) {
+        if ((active || easeProgress > 0.0f) && event.getEntity().getId() == targetEntityId) {
+            event.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY);
+        }
+    }
+}

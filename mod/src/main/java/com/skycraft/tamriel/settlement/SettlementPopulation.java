@@ -44,6 +44,9 @@ public final class SettlementPopulation {
     /** Upper bounds per settlement and kind (capital / town / village). */
     private static final int[] GUARDS = {12, 4, 2}, MERCHANTS = {8, 3, 2}, CITIZENS = {14, 7, 4};
 
+    /** Most ambient townsfolk (beds, workers, farmers, bards...) standing around one settlement: capital / town / village. */
+    private static final int[] AMBIENT = {26, 15, 8};
+
     private SettlementPopulation() {}
 
     static void tick(ServerLevel level, ServerPlayer player) {
@@ -70,6 +73,7 @@ public final class SettlementPopulation {
         RandomSource r = level.getRandom();
         boolean changed = false;
         NpcEntity jarl = null;
+        int crowd = -1; // civilians already around the settlement, counted once and lazily
         for (int i = 0; i < list.size(); i++) {
             if (e.spawned.contains(i)) continue;
             Anchor a = list.get(i);
@@ -96,6 +100,18 @@ public final class SettlementPopulation {
                 continue;
             }
             if (!level.isPositionEntityTicking(a.pos())) continue;
+            if (ambient(a.type())) {
+                if (crowd < 0) {
+                    int r2 = Math.max(e.radius, 32) + 8;
+                    crowd = level.getEntitiesOfClass(NpcEntity.class, new net.minecraft.world.phys.AABB(e.x - r2, level.getMinBuildHeight(), e.z - r2,
+                            e.x + r2, level.getMaxBuildHeight(), e.z + r2), n -> n.isAlive() && n.role().civilian).size();
+                }
+                if (crowd >= AMBIENT[tier]) { // enough people about: this anchor stays empty
+                    e.spawned.add(i);
+                    changed = true;
+                    continue;
+                }
+            }
             BlockPos at = standing(level, a.pos());
             boolean done;
             try {
@@ -136,8 +152,8 @@ public final class SettlementPopulation {
                             com.skycraft.quest.faction.FactionStaff.populate(level, a, at, e.key);
                     case JAIL_PRISONER -> npc(level, at, NpcRole.BEGGAR, Component.translatable("entity.skycraft.prisoner"), 2) != null;
                     case BED -> {
-                        // about one townsperson for every two beds
-                        if (r.nextBoolean()) yield true;
+                        // about one townsperson for every three beds
+                        if (r.nextInt(3) != 0) yield true;
                         NpcRole role = switch (r.nextInt(5)) {
                             case 0 -> NpcRole.HUNTER;
                             case 1 -> NpcRole.LUMBERJACK;
@@ -156,10 +172,69 @@ public final class SettlementPopulation {
             if (done) {
                 e.spawned.add(i);
                 counts.merge(a.type(), 1, Integer::sum);
+                if (crowd >= 0 && ambient(a.type())) crowd++;
                 changed = true;
             }
         }
         if (changed) data.setDirty();
+    }
+
+    /** Anchors that are scenery population rather than a named post (jarl, guards, shopkeepers, guilds). */
+    private static boolean ambient(AnchorType t) {
+        return switch (t) {
+            case BED, WORKER, MINER, LUMBERJACK, MILLER, FARMER, HUNTER, FISHER, BARD, FLETCHER, TAILOR, BUTCHER -> true;
+            default -> false;
+        };
+    }
+
+    /** Settlement tier at a position: 0 capital/city, 1 town, 2 village, 3 not in a settlement. */
+    public static int tierAt(ServerLevel level, BlockPos p) {
+        for (SettlementAnchors.Entry e : SettlementAnchors.get(level).entries()) {
+            if (e.contains(p.getX(), p.getZ(), 16)) return tier(e);
+        }
+        return 3;
+    }
+
+    /** Minimum gap between two freshly placed people. Tuning knob. */
+    private static final double SPAWN_GAP = 2.5D;
+
+    private static boolean doorway(ServerLevel level, BlockPos p) {
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                for (int dy = 0; dy <= 1; dy++) {
+                    var b = level.getBlockState(p.offset(dx, dy, dz)).getBlock();
+                    if (b instanceof net.minecraft.world.level.block.DoorBlock || b instanceof net.minecraft.world.level.block.FenceGateBlock
+                            || b instanceof net.minecraft.world.level.block.TrapDoorBlock) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * The anchor itself when it is free standing room (1x2 clearance, floor underneath, not in a gate or doorway, nobody
+     * within {@link #SPAWN_GAP}); else the nearest such spot within three blocks; else null (try again later).
+     */
+    static BlockPos freeSpot(ServerLevel level, BlockPos at) {
+        RandomSource r = level.getRandom();
+        for (int i = 0; i < 14; i++) {
+            int dx = i == 0 ? 0 : r.nextInt(7) - 3;
+            int dz = i == 0 ? 0 : r.nextInt(7) - 3;
+            for (int dy : new int[]{0, 1, -1}) {
+                BlockPos p = at.offset(dx, dy, dz);
+                if (!level.isLoaded(p)) continue;
+                if (!level.getBlockState(p).getCollisionShape(level, p).isEmpty()
+                        || !level.getBlockState(p.above()).getCollisionShape(level, p.above()).isEmpty()
+                        || !level.getBlockState(p.below()).isFaceSturdy(level, p.below(), net.minecraft.core.Direction.UP)) continue;
+                if (doorway(level, p)) continue;
+                boolean crowded = !level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
+                        new net.minecraft.world.phys.AABB(p).inflate(SPAWN_GAP),
+                        l -> l.isAlive() && (l instanceof NpcEntity || l instanceof net.minecraft.world.entity.npc.AbstractVillager
+                                || l instanceof GuardEntity)).isEmpty();
+                if (!crowded) return p;
+            }
+        }
+        return null;
     }
 
     /** The position to stand an NPC at: the anchor, or the block above it when the anchor is solid (bed, throne). */
@@ -168,6 +243,8 @@ public final class SettlementPopulation {
     }
 
     static NpcEntity npc(ServerLevel level, BlockPos at, NpcRole role, Component name, int homeRadius) {
+        at = freeSpot(level, at);
+        if (at == null) return null;
         NpcEntity npc = Npcs.create(level, at, role);
         if (npc == null) return null;
         npc.setPersistenceRequired();
@@ -178,6 +255,8 @@ public final class SettlementPopulation {
     }
 
     static NpcEntity steward(ServerLevel level, BlockPos at, SettlementAnchors.Entry e) {
+        at = freeSpot(level, at);
+        if (at == null) return null;
         NpcEntity npc = Npcs.create(level, at, NpcRole.COURIER);
         if (npc == null) return null;
         npc.setPersistenceRequired();
@@ -189,6 +268,8 @@ public final class SettlementPopulation {
     }
 
     static boolean guard(ServerLevel level, BlockPos at) {
+        at = freeSpot(level, at);
+        if (at == null) return false;
         GuardEntity g = ModEntities.GUARD.get().create(level);
         if (g == null) return false;
         g.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
@@ -200,6 +281,8 @@ public final class SettlementPopulation {
 
     /** A villager merchant with a Skycraft shop of the given pool. */
     static Villager merchant(ServerLevel level, BlockPos at, VillagerProfession prof, String pool, String nameKey, String... morePools) {
+        at = freeSpot(level, at);
+        if (at == null) return null;
         Villager v = EntityType.VILLAGER.create(level);
         if (v == null) return null;
         v.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0f);

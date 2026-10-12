@@ -505,7 +505,7 @@ public final class Followers {
                     recruit(p, (LivingEntity) n);
                     Dialogue.open(p, (LivingEntity) n, Component.translatable("society.skycraft.say.follower_accept"));
                 }));
-            } else if (canPersuade) {
+            } else if (canPersuade && com.skycraft.quest.story.QuestNpcs.idOf(npc).isEmpty()) {
                 out.add(new DialogueOption("follower.persuade_friend", Component.translatable("dialogue.skycraft.follower.persuade"), 61,
                         (p, n) -> persuade(p, (LivingEntity) n, 40)));
             }

@@ -81,6 +81,8 @@ public final class Chatter {
     }
 
     private static final List<Talk> ACTIVE = new ArrayList<>();
+    /** Blocks around a running conversation in which no other starts. Tuning knob. */
+    private static final double CLUSTER_GAP = 10.0D;
 
     /** Bard songs ({@code society.skycraft.song.<n>.title} and {@code .0..5} lyric lines, all original). */
     public static final int SONGS = 5;
@@ -130,6 +132,9 @@ public final class Chatter {
         if (!(npc.level() instanceof ServerLevel level) || npc.isConversing() || npc.getTarget() != null) return;
         if ((npc.tickCount + npc.getId() * 7) % 9 != 0 || npc.getRandom().nextInt(4) != 0) return;
         if (level.getNearestPlayer(npc, HEAR) == null) return; // nobody to overhear it
+        for (Talk t : ACTIVE) { // one speaker per cluster: no bubbles stacked over a crowd
+            if (t.a.level() == level && t.a.distanceToSqr(npc) < CLUSTER_GAP * CLUSTER_GAP) return;
+        }
         NpcEntity partner = null;
         double best = 7 * 7;
         for (NpcEntity o : level.getEntitiesOfClass(NpcEntity.class, npc.getBoundingBox().inflate(6, 2, 6),

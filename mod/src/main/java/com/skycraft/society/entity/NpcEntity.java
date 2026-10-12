@@ -165,11 +165,13 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         this.goalSelector.addGoal(1, new NpcGoals.Follower(this));
         this.goalSelector.addGoal(1, new NpcGoals.Panic(this));
         this.goalSelector.addGoal(2, new NpcGoals.Avoid(this));
+        this.goalSelector.addGoal(2, new NpcGoals.Shelter(this));
+        this.goalSelector.addGoal(11, new NpcGoals.Spread(this));
         this.goalSelector.addGoal(2, new NpcGoals.Caster(this));
         this.goalSelector.addGoal(3, new NpcGoals.Bow(this));
         this.goalSelector.addGoal(3, new NpcGoals.Melee(this));
         this.goalSelector.addGoal(4, new NpcGoals.Travel(this));
-        this.goalSelector.addGoal(5, new OpenDoorGoal(this, true));
+        this.goalSelector.addGoal(5, new NpcGoals.Door(this));
         this.goalSelector.addGoal(5, new NpcGoals.Work(this));
         this.goalSelector.addGoal(6, new NpcGoals.Routine(this));
         this.goalSelector.addGoal(7, new MoveTowardsRestrictionGoal(this, 0.6D));

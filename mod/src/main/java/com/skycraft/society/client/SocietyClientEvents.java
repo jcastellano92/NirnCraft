@@ -22,7 +22,8 @@ import java.util.List;
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class SocietyClientEvents {
     private static final int TEXT = 0xF5EBC8;
-    private static final int WRAP = 150;
+    private static final int WRAP = 110;
+    private static final int MAX_BUBBLE_LINES = 4;
     private static final float FADE_IN = 4f;
     private static final float FADE_OUT = 15f;
 
@@ -98,12 +99,16 @@ public final class SocietyClientEvents {
         Font font = mc.font;
         List<FormattedCharSequence> lines = font.split(bark.text(), WRAP);
         if (lines.isEmpty()) return;
+        if (lines.size() > MAX_BUBBLE_LINES) lines = lines.subList(0, MAX_BUBBLE_LINES);
         PoseStack pose = event.getPoseStack();
         MultiBufferSource buffers = event.getMultiBufferSource();
         pose.pushPose();
         pose.translate(0.0, entity.getBbHeight() + 0.8, 0.0);
         pose.mulPose(mc.getEntityRenderDispatcher().cameraOrientation());
-        pose.scale(-0.025f, -0.025f, 0.025f);
+        // roughly constant on-screen size: shrink up close (a speaker at your elbow would fill the screen and clip), grow a little far away
+        float dist = (float) Math.sqrt(entity.distanceToSqr(mc.player));
+        float k = 0.025f * Math.max(0.55f, Math.min(1.5f, dist / 6f));
+        pose.scale(-k, -k, k);
         Matrix4f matrix = pose.last().pose();
         int color = (a << 24) | TEXT;
         int background = ((int) (alpha * 0.6f * 255f) << 24);
@@ -112,7 +117,7 @@ public final class SocietyClientEvents {
         for (int i = 0; i < lines.size(); i++) {
             FormattedCharSequence line = lines.get(i);
             float x = -font.width(line) / 2f;
-            font.drawInBatch(line, x, top + i * lineHeight, color, false, matrix, buffers, Font.DisplayMode.NORMAL,
+            font.drawInBatch(line, x, top + i * lineHeight, color, false, matrix, buffers, Font.DisplayMode.SEE_THROUGH,
                     background, LightTexture.FULL_BRIGHT);
         }
         pose.popPose();

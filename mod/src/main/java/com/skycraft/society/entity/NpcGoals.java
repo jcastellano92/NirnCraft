@@ -87,6 +87,111 @@ final class NpcGoals {
         }
     }
 
+    /** A door-opener with a cooldown: an NPC wedged in a doorway can't strobe a shop door open and shut every tick. */
+    static final class Door extends net.minecraft.world.entity.ai.goal.OpenDoorGoal {
+        /** Game ticks before the same NPC may work a door again. Tuning knob. */
+        private static final int COOLDOWN = 60;
+        private final NpcEntity npc;
+        private long readyAt;
+
+        Door(NpcEntity npc) {
+            super(npc, true);
+            this.npc = npc;
+        }
+
+        @Override
+        public boolean canUse() {
+            return npc.level().getGameTime() >= readyAt && super.canUse();
+        }
+
+        @Override
+        public void stop() {
+            super.stop();
+            readyAt = npc.level().getGameTime() + COOLDOWN;
+        }
+    }
+
+    /** Dissolves stacks: an NPC standing inside (or on) another is nudged apart, so gates and doorways never jam. */
+    static final class Spread extends Goal {
+        /** Blocks within which two idle NPCs are pushed apart. Tuning knob. */
+        private static final double PERSONAL_SPACE = 1.0D;
+        private final NpcEntity npc;
+
+        Spread(NpcEntity npc) {
+            this.npc = npc;
+        }
+
+        @Override
+        public boolean canUse() {
+            if ((npc.tickCount + npc.getId()) % 8 != 0 || npc.isConversing() || npc.isSleeping() || npc.getTarget() != null) return false;
+            for (NpcEntity o : npc.level().getEntitiesOfClass(NpcEntity.class, npc.getBoundingBox().inflate(PERSONAL_SPACE, 0.6, PERSONAL_SPACE),
+                    x -> x != npc && x.isAlive() && !x.isSleeping())) {
+                double dx = npc.getX() - o.getX();
+                double dz = npc.getZ() - o.getZ();
+                double d = Math.sqrt(dx * dx + dz * dz);
+                if (d < 0.05) { // exactly stacked: pick a stable direction from the ids
+                    double a = (npc.getId() * 2.399963D);
+                    dx = Math.cos(a);
+                    dz = Math.sin(a);
+                    d = 1.0D;
+                }
+                double push = 0.12D * (PERSONAL_SPACE - Math.min(PERSONAL_SPACE, d)) + 0.05D;
+                npc.setDeltaMovement(npc.getDeltaMovement().add(dx / d * push, 0.0D, dz / d * push));
+                npc.hurtMarked = true;
+                break;
+            }
+            return false; // pure side effect: never takes the goal slot
+        }
+    }
+
+    /** Non-combatant townsfolk run for home when something hostile (a dragon, a raider band) is close. */
+    static final class Shelter extends Goal {
+        /** Blocks within which a hostile sends civilians indoors. Tuning knob. */
+        private static final double RANGE = 36.0D;
+        private final NpcEntity npc;
+        private BlockPos refuge;
+        private int ticks;
+
+        Shelter(NpcEntity npc) {
+            this.npc = npc;
+            this.setFlags(EnumSet.of(Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse() {
+            if (npc.isBusy() || npc.getHome() == null || !npc.role().civilian || npc.role().combatant) return false;
+            if ((npc.tickCount + npc.getId()) % 20 != 0) return false;
+            var threats = npc.level().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, npc.getBoundingBox().inflate(RANGE, 24, RANGE),
+                    m -> m instanceof net.minecraft.world.entity.monster.Enemy && m.isAlive() && !m.isNoAi() && m.getTarget() != null);
+            if (threats.isEmpty()) return false;
+            refuge = npc.getHome();
+            return npc.distanceToSqr(refuge.getX() + 0.5, refuge.getY(), refuge.getZ() + 0.5) > 9.0D;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return refuge != null && !npc.isBusy() && ticks < 400
+                    && npc.distanceToSqr(refuge.getX() + 0.5, refuge.getY(), refuge.getZ() + 0.5) > 6.0D;
+        }
+
+        @Override
+        public void start() {
+            ticks = 0;
+            npc.getNavigation().moveTo(refuge.getX() + 0.5, refuge.getY(), refuge.getZ() + 0.5, 1.15D);
+        }
+
+        @Override
+        public void tick() {
+            ticks++;
+            if (npc.getNavigation().isDone()) npc.getNavigation().moveTo(refuge.getX() + 0.5, refuge.getY(), refuge.getZ() + 0.5, 1.15D);
+        }
+
+        @Override
+        public void stop() {
+            refuge = null;
+        }
+    }
+
     // ------------------------------------------------------------------ fighting
 
     static final class Melee extends MeleeAttackGoal {
@@ -842,6 +947,11 @@ final class NpcGoals {
         private double speed = 0.6D;
         private int strollTimer;
         private int eatTimer;
+        /** A destination the pathfinder couldn't reach (blocked door, walled-in anchor): ignored for a while. */
+        @Nullable
+        private BlockPos unreachable;
+        private int unreachableUntil;
+        private int pathFails;
 
         Routine(NpcEntity npc) {
             this.npc = npc;
@@ -957,6 +1067,11 @@ final class NpcGoals {
                 target = null;
                 return;
             }
+            if (pos.equals(unreachable) && npc.tickCount < unreachableUntil) {
+                // can't get in: loiter at a nearby spot instead of grinding on the wall/door
+                stroll(npc.blockPosition(), 5, 0.45D, 4);
+                return;
+            }
             if (!pos.equals(target) || npc.getNavigation().isDone()) {
                 if (!npc.level().isLoaded(pos)) {
                     target = null; // never pull chunks in: wait for them to load
@@ -964,7 +1079,14 @@ final class NpcGoals {
                 }
                 target = pos;
                 this.speed = speed;
-                npc.getNavigation().moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, speed);
+                if (npc.getNavigation().moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, speed)) {
+                    pathFails = 0;
+                } else if (++pathFails >= 3) {
+                    pathFails = 0;
+                    unreachable = pos;
+                    unreachableUntil = npc.tickCount + 1200;
+                    target = null;
+                }
             }
         }
 

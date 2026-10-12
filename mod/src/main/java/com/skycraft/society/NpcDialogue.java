@@ -252,7 +252,11 @@ public final class NpcDialogue {
             return;
         }
 
-        out.add(new DialogueOption("society.job", opt("job"), 600,
+        // "what do you do around here?" is a silly thing to ask a jarl, a steward, a mage or a court wizard
+        boolean obviousJob = role == NpcRole.JARL || role == NpcRole.STEWARD || role == NpcRole.HOUSECARL || role == NpcRole.MAGE
+                || npc.getPersistentData().getString(com.skycraft.economy.Merchants.PROFESSION_KEY).equals("skycraft:court_wizard")
+                || !com.skycraft.quest.story.QuestNpcs.idOf(npc).isEmpty();
+        if (!obviousJob) out.add(new DialogueOption("society.job", opt("job"), 600,
                 (p, n) -> Dialogue.open(p, n, jobLine(n, role))));
         Relationships.addOptions(player, npc, out);
         Marriage.addOptions(player, npc, out);

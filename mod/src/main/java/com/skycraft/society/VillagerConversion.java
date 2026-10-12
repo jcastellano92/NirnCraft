@@ -38,7 +38,7 @@ import java.util.Set;
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class VillagerConversion {
-    private static final int MAX_NEARBY = 40;
+    private static final int MAX_NEARBY = 28;
 
     private record Pending(ServerLevel level, Vec3 pos, float yaw, NpcRole role, @Nullable String profession, int level5,
                            @Nullable Component name, CompoundTag persistent, Set<String> tags, boolean persistentMob,

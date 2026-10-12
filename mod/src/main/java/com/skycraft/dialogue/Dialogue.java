@@ -63,18 +63,156 @@ public final class Dialogue {
         return entity instanceof AbstractVillager || entity.getType().is(TALKERS);
     }
 
+    /** Most lines on the main menu (Goodbye and the submenu entries count). Tuning knob. */
+    public static final int MAX_VISIBLE = 6;
+    /** Most lines on a submenu page. */
+    public static final int MAX_SUBMENU = 9;
+    private static final int MENU_MAIN = 0, MENU_TALK = 1, MENU_MORE = 2;
+    /** Entity ID -> which page of the conversation menu is showing (absent = main). */
+    private static final Map<Integer, Integer> MENU = new ConcurrentHashMap<>();
+    /** Ids (or id prefixes ending in '.') of generic small talk: kept under "Ask about..." when anything else is on offer. */
+    private static final List<String> SMALL_TALK = List.of("society.job", "society.region", "society.news", "society.how",
+            "society.favor", "society.gift", "follower.persuade_friend", "place_lore.", "crime.rumor", "survival.rumors");
+    /** Different sources, same question: keep the one with the lowest order. */
+    private static final Map<String, String> SAME_TOPIC = Map.of("society.favor", "help", "quest.help", "help",
+            "society.news", "news", "survival.rumors", "news", "crime.rumor", "news");
+
+    static boolean isSmallTalk(String id) {
+        for (String s : SMALL_TALK) {
+            if (s.endsWith(".") ? id.startsWith(s) : id.equals(s)) return true;
+        }
+        return false;
+    }
+
+    /** Every option the providers offer, de-duplicated (same id, same topic or same label), sorted, Goodbye last. */
     public static List<DialogueOption> collect(ServerPlayer player, LivingEntity npc) {
-        List<DialogueOption> out = new ArrayList<>();
+        List<DialogueOption> raw = new ArrayList<>();
         for (DialogueProvider p : PROVIDERS) {
             try {
-                p.addOptions(player, npc, out);
+                p.addOptions(player, npc, raw);
             } catch (Exception e) {
                 Skycraft.LOGGER.error("Dialogue provider failed", e);
             }
         }
+        raw.sort(Comparator.comparingInt(DialogueOption::order)); // stable: ties keep provider order
+        List<DialogueOption> out = new ArrayList<>();
+        Set<String> ids = new java.util.HashSet<>();
+        Set<String> topics = new java.util.HashSet<>();
+        for (DialogueOption o : raw) {
+            if (o.id().equals("core.goodbye") || !offers(o, npc) || !ids.add(o.id())) continue;
+            String topic = SAME_TOPIC.get(o.id());
+            if (topic != null && !topics.add(topic)) continue;
+            boolean sameLabel = false;
+            for (DialogueOption k : out) {
+                if (k.label().equals(o.label()) || k.label().getString().equals(o.label().getString())) {
+                    sameLabel = true;
+                    break;
+                }
+            }
+            if (!sameLabel) out.add(o);
+        }
         out.add(new DialogueOption("core.goodbye", Component.translatable("dialogue.skycraft.goodbye"), 1000, Dialogue::onGoodbye));
-        out.sort(Comparator.comparingInt(DialogueOption::order));
         return out;
+    }
+
+    /** The lines to show on a menu page: topics first, small talk under "Ask about...", Goodbye last. */
+    private static List<DialogueOption> visible(List<DialogueOption> all, int menu, ServerPlayer player, LivingEntity npc) {
+        DialogueOption goodbye = all.get(all.size() - 1);
+        List<DialogueOption> main = new ArrayList<>();
+        List<DialogueOption> talk = new ArrayList<>();
+        for (int i = 0; i < all.size() - 1; i++) {
+            DialogueOption o = all.get(i);
+            (isSmallTalk(o.id()) ? talk : main).add(o);
+        }
+        // importance and place scale the budget: capitals and posts of note say more than a farmhand in a hamlet
+        int tier = player.level() instanceof net.minecraft.server.level.ServerLevel sl
+                ? com.skycraft.tamriel.settlement.SettlementPopulation.tierAt(sl, npc.blockPosition()) : 3;
+        boolean important = important(npc) || main.size() >= 3;
+        int[] topicCap = important ? TOPICS_IMPORTANT : TOPICS_ORDINARY;
+        int[] talkCap = important ? TALK_IMPORTANT : TALK_ORDINARY;
+        // each person carries their own few small-talk lines (stable per NPC), so neighbours don't all repeat one script
+        int salt = npc.getUUID().hashCode();
+        talk.sort(Comparator.comparingInt(o -> (o.id().hashCode() * 0x9E3779B1) ^ salt));
+        List<DialogueOption> keptTalk = new ArrayList<>();
+        for (DialogueOption o : talk) {
+            if (o.id().equals("society.gift") || keptTalk.size() < talkCap[tier]) keptTalk.add(o);
+        }
+        talk = keptTalk;
+        if (main.isEmpty()) { // nothing but chit-chat on offer: it IS the menu
+            main = talk;
+            talk = new ArrayList<>();
+        }
+        List<DialogueOption> out = new ArrayList<>();
+        DialogueOption back = new DialogueOption("core.back", Component.translatable("dialogue.skycraft.menu.back"), 999, Dialogue::onBack);
+        if (menu == MENU_TALK && !talk.isEmpty()) {
+            out.addAll(talk.subList(0, Math.min(talk.size(), MAX_SUBMENU)));
+            out.add(back);
+            return out;
+        }
+        int budget = Math.max(2, topicCap[tier]) - (talk.isEmpty() ? 0 : 1); // minus the "Ask about" entry
+        List<DialogueOption> overflow = new ArrayList<>();
+        if (main.size() > budget) {
+            overflow.addAll(main.subList(budget - 1, main.size())); // one slot goes to "More..."
+            main = main.subList(0, budget - 1);
+        }
+        if (menu == MENU_MORE && !overflow.isEmpty()) {
+            out.addAll(overflow.subList(0, Math.min(overflow.size(), MAX_SUBMENU)));
+            out.add(back);
+            return out;
+        }
+        out.addAll(main);
+        if (!overflow.isEmpty()) out.add(new DialogueOption("core.more", Component.translatable("dialogue.skycraft.menu.more"), 900, Dialogue::onMore));
+        if (!talk.isEmpty()) out.add(new DialogueOption("core.ask", Component.translatable("dialogue.skycraft.menu.ask"), 910, Dialogue::onAsk));
+        out.add(goodbye);
+        return out;
+    }
+
+    /** Topic budgets by settlement tier (capital, town, village, wild) for ordinary and important people. Tuning knobs. */
+    private static final int[] TOPICS_ORDINARY = {4, 3, 3, 3};
+    private static final int[] TOPICS_IMPORTANT = {7, 6, 5, 5};
+    /** Small-talk lines kept under "Ask about..." per person. */
+    private static final int[] TALK_ORDINARY = {2, 2, 1, 1};
+    private static final int[] TALK_IMPORTANT = {5, 4, 3, 3};
+
+    /** Jarls, stewards, innkeepers, priests, court mages, caravans, named quest givers: the people with something to say. */
+    private static boolean important(LivingEntity npc) {
+        if (npc instanceof com.skycraft.society.entity.NpcEntity n) {
+            switch (n.role()) {
+                case JARL, STEWARD, HOUSECARL, INNKEEPER, PRIEST, MAGE, CARAVAN_TRADER -> {
+                    return true;
+                }
+                default -> {
+                }
+            }
+        }
+        return !com.skycraft.quest.story.QuestNpcs.idOf(npc).isEmpty() || com.skycraft.survival.inn.Innkeepers.isInnkeeper(npc)
+                || npc.getPersistentData().getBoolean("skycraft_steward");
+    }
+
+    /** Ordinary folk only offer to put you to work now and then (about one in three), so quests mean something. */
+    private static boolean offers(DialogueOption o, LivingEntity npc) {
+        if (!o.id().equals("quest.help") && !o.id().equals("society.favor")) return true;
+        return important(npc) || Math.floorMod(npc.getUUID().hashCode(), 3) == 0;
+    }
+
+    private static void onAsk(ServerPlayer player, LivingEntity npc) {
+        sendMenu(player, npc, Component.translatable("dialogue.skycraft.menu.prompt"), MENU_TALK);
+    }
+
+    private static void onMore(ServerPlayer player, LivingEntity npc) {
+        sendMenu(player, npc, Component.translatable("dialogue.skycraft.menu.prompt"), MENU_MORE);
+    }
+
+    private static void onBack(ServerPlayer player, LivingEntity npc) {
+        sendMenu(player, npc, Component.translatable("dialogue.skycraft.menu.prompt"), MENU_MAIN);
+    }
+
+    private static void sendMenu(ServerPlayer player, LivingEntity npc, Component greeting, int menu) {
+        if (menu == MENU_MAIN) MENU.remove(npc.getId());
+        else MENU.put(npc.getId(), menu);
+        List<DialoguePackets.Line> lines = new ArrayList<>();
+        for (DialogueOption o : visible(collect(player, npc), menu, player, npc)) lines.add(new DialoguePackets.Line(o.id(), o.label()));
+        SkyNetwork.sendToPlayer(player, new DialoguePackets.OpenDialogue(npc.getId(), npc.getDisplayName(), greeting, lines));
     }
 
     private static void onGoodbye(ServerPlayer player, LivingEntity npc) {
@@ -97,16 +235,14 @@ public final class Dialogue {
             n.getNavigation().stop();
             n.getLookControl().setLookAt(player, 30.0F, 30.0F);
         }
-        List<DialogueOption> options = collect(player, npc);
-        List<DialoguePackets.Line> lines = new ArrayList<>();
-        for (DialogueOption o : options) lines.add(new DialoguePackets.Line(o.id(), o.label()));
-        SkyNetwork.sendToPlayer(player, new DialoguePackets.OpenDialogue(npc.getId(), npc.getDisplayName(), greeting, lines));
+        sendMenu(player, npc, greeting, MENU_MAIN);
     }
 
     public static void endConversation(ServerPlayer player, int entityId) {
         UUID partner = TALKING.get(entityId);
         if (partner != null && partner.equals(player.getUUID())) {
             TALKING.remove(entityId);
+            MENU.remove(entityId);
             if (player.level().getEntity(entityId) instanceof com.skycraft.society.entity.NpcEntity n) {
                 n.setConversationPartner(-1);
             }
@@ -120,7 +256,7 @@ public final class Dialogue {
             endConversation(player, entityId);
             return;
         }
-        for (DialogueOption option : collect(player, npc)) {
+        for (DialogueOption option : visible(collect(player, npc), MENU.getOrDefault(entityId, MENU_MAIN), player, npc)) {
             if (option.id().equals(optionId)) {
                 option.action().accept(player, npc);
                 return;
@@ -143,7 +279,10 @@ public final class Dialogue {
     /** NPC died, unloaded or changed dimension: whoever talked to it is done. */
     @SubscribeEvent
     public static void onLeave(EntityLeaveLevelEvent event) {
-        if (!event.getLevel().isClientSide) TALKING.remove(event.getEntity().getId());
+        if (!event.getLevel().isClientSide) {
+            TALKING.remove(event.getEntity().getId());
+            MENU.remove(event.getEntity().getId());
+        }
     }
 
     /** Once a second: conversations whose player walked away (> 8 blocks) or is gone end. */
