@@ -27,6 +27,11 @@ public final class CreaturesConfig {
     public static final ForgeConfigSpec.IntValue MIN_HOSTILE_DISTANCE;
     public static final ForgeConfigSpec.DoubleValue ROAD_HOSTILE_FACTOR;
     public static final ForgeConfigSpec.DoubleValue DAY_HOSTILE_FACTOR;
+    public static final ForgeConfigSpec.IntValue GUARD_ALERT_RADIUS;
+    public static final ForgeConfigSpec.BooleanValue GUARD_HELP_PLAYER;
+    public static final ForgeConfigSpec.BooleanValue TOWN_ALARM;
+    public static final ForgeConfigSpec.IntValue ALARM_CLEAR_SECONDS;
+    public static final ForgeConfigSpec.BooleanValue CIVILIANS_FLEE;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -79,6 +84,18 @@ public final class CreaturesConfig {
                 .defineInRange("roadHostileFactor", 0.08, 0.0, 1.0);
         DAY_HOSTILE_FACTOR = b.comment("Chance multiplier for hostile spawn attempts in daylight (1.0 at night).")
                 .defineInRange("dayHostileFactor", 0.5, 0.0, 1.0);
+        b.pop();
+        b.push("guards");
+        GUARD_ALERT_RADIUS = b.comment("Guards engage hostile creatures and anyone attacking a citizen or the player within this many blocks of themselves (settlement and nearby road).")
+                .defineInRange("guardAlertRadius", 40, 16, 96);
+        GUARD_HELP_PLAYER = b.comment("Guards defend the player (who has no hostile bounty) from hostile creatures.")
+                .define("guardHelpPlayer", true);
+        TOWN_ALARM = b.comment("Three or more hostiles near a town raise an alarm: every guard in range converges, a bell rings and citizens shelter.")
+                .define("townAlarm", true);
+        ALARM_CLEAR_SECONDS = b.comment("Seconds without hostiles before the town alarm is cleared.")
+                .defineInRange("alarmClearSeconds", 30, 5, 600);
+        CIVILIANS_FLEE = b.comment("Villagers and townsfolk run away from hostiles near them.")
+                .define("civiliansFlee", true);
         b.pop();
         SPEC = b.build();
     }

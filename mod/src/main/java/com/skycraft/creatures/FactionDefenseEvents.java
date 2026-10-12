@@ -96,9 +96,15 @@ public final class FactionDefenseEvents {
 
         // 6. Villagers / Townsfolk -> Hold Guards
         if (victim instanceof Villager || victim instanceof NpcEntity) {
-            List<GuardEntity> guards = victim.level().getEntitiesOfClass(GuardEntity.class, victim.getBoundingBox().inflate(36), Mob::isAlive);
-            for (GuardEntity guard : guards) {
-                guard.setTarget(attacker);
+            boolean ignore = attacker instanceof GuardEntity || attacker instanceof Villager || attacker instanceof NpcEntity
+                    || attacker instanceof Player p && (p.isCreative() || p.isSpectator()
+                    || com.skycraft.crime.Crimes.selfDefense(victim, (net.minecraft.server.level.ServerPlayer) p));
+            if (!ignore) {
+                double r = CreaturesConfig.GUARD_ALERT_RADIUS.get();
+                List<GuardEntity> guards = victim.level().getEntitiesOfClass(GuardEntity.class, victim.getBoundingBox().inflate(r, 16, r), Mob::isAlive);
+                for (GuardEntity guard : guards) {
+                    if (!(guard.getTarget() instanceof Player)) guard.setTarget(attacker);
+                }
             }
         }
     }

@@ -364,15 +364,34 @@ public final class CreatureSpawns {
         if (player.isSpectator()) return;
         Optional<BlockPos> bell = level.getPoiManager().findClosest(holder -> holder.is(PoiTypes.MEETING), player.blockPosition(), 64,
                 PoiManager.Occupancy.ANY);
-        if (bell.isEmpty()) return;
-        BlockPos center = bell.get();
+        BlockPos center;
+        int spread = 10;
+        if (bell.isPresent()) {
+            center = bell.get();
+        } else {
+            // Tamriel settlements have no bell: replace dead guards at the nearest settlement within reach
+            com.skycraft.tamriel.Place best = null;
+            long bd = Long.MAX_VALUE;
+            int px = player.getBlockX(), pz = player.getBlockZ();
+            for (com.skycraft.tamriel.Place p : com.skycraft.tamriel.Places.overlapping(px - 64, pz - 64, px + 64, pz + 64)) {
+                if (!p.type().isSettlement()) continue;
+                long d = p.distSqr(px, pz);
+                if (d < bd) {
+                    bd = d;
+                    best = p;
+                }
+            }
+            if (best == null || !level.isLoaded(new BlockPos(best.x(), level.getSeaLevel(), best.z()))) return;
+            center = new BlockPos(best.x(), level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, best.x(), best.z()), best.z());
+            spread = Math.max(10, Math.min(30, best.radius() / 2));
+        }
         if (!level.isLoaded(center)) return;
         int guards = level.getEntitiesOfClass(GuardEntity.class, new AABB(center).inflate(64)).size();
         if (guards >= MIN_GUARDS) return;
         RandomSource random = level.getRandom();
         int wanted = Math.min(MAX_GUARDS, MIN_GUARDS + random.nextInt(2)) - guards;
         for (int i = 0; i < wanted; i++) {
-            BlockPos pos = findGroundNear(level, center, 10, random);
+            BlockPos pos = findGroundNear(level, center, spread, random);
             if (pos == null) continue;
             GuardEntity guard = ModEntities.GUARD.get().create(level);
             if (guard == null) continue;

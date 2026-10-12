@@ -70,7 +70,7 @@ public class GuardEntity extends PathfinderMob {
                 .add(Attributes.MAX_HEALTH, 34.0)
                 .add(Attributes.ATTACK_DAMAGE, 5.0)
                 .add(Attributes.MOVEMENT_SPEED, 0.28)
-                .add(Attributes.FOLLOW_RANGE, 32.0)
+                .add(Attributes.FOLLOW_RANGE, 48.0)
                 .add(Attributes.ARMOR, 12.0)
                 .add(Attributes.ARMOR_TOUGHNESS, 2.0)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.3);
@@ -92,7 +92,7 @@ public class GuardEntity extends PathfinderMob {
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this, GuardEntity.class).setAlertOthers());
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Mob.class, 5, true, false,
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Mob.class, 5, false, false,
                 e -> e instanceof Enemy && !(e instanceof Creeper) && !(e instanceof EnderMan) && !(e instanceof GiantEntity)) {
             @Override
             public boolean canUse() {
@@ -126,7 +126,7 @@ public class GuardEntity extends PathfinderMob {
     /** Guards patrol within 32 blocks of their home (the village meeting point). */
     public void setHome(BlockPos pos) {
         this.home = pos.immutable();
-        this.restrictTo(this.home, 32);
+        this.restrictTo(this.home, 40);
     }
 
     @Override

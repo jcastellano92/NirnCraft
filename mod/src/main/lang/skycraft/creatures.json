@@ -67,6 +67,7 @@
   "entity.skycraft.vampire.master_vampire": "Master Vampire",
   "entity.skycraft.wispmother": "Wispmother",
   "item.skycraft.wispmother_spawn_egg": "Wispmother Spawn Egg",
+  "creatures.skycraft.town_alarm": "The town is under attack!",
   "creatures.skycraft.guard.says": "%s: \"%s\"",
   "creatures.skycraft.guard.line.0": "I walked the old roads once, same as you. Then a draugr's axe found my shoulder, and here I stand.",
   "creatures.skycraft.guard.line.1": "Lost something, traveller? Check the tavern before you check with me.",
