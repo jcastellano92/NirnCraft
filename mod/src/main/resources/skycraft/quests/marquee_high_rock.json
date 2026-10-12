@@ -1,0 +1,3111 @@
+{
+ "line": "mq_high_rock",
+ "category": "side",
+ "speakers": {
+  "mq_hr_ev_canon_voice": "The Drowned Canon"
+ },
+ "npcs": [
+  {
+   "id": "mq_hr_wy_aumaric",
+   "name": "Chamberlain Aumaric Dessaux",
+   "role": "steward",
+   "place": "castle_wayrest",
+   "offset": [
+    6,
+    10
+   ],
+   "greet": "You have the look of a person with a delicate matter. Good. The duchess has a great many indelicate ones, and a chamberlain deserves variety."
+  },
+  {
+   "id": "mq_hr_wy_jules",
+   "name": "Quartermaster Jules Garrow",
+   "role": "imperial_soldier",
+   "place": "wayrest",
+   "offset": [
+    -14,
+    20
+   ],
+   "greet": "I count crates. Crates have no opinions, no politics and no hands. I like crates. If you are carrying a crate of unusual weight, you may stop now and show it to me."
+  },
+  {
+   "id": "mq_hr_wy_odelle",
+   "name": "Sister Odelle",
+   "role": "priest",
+   "place": "wayrest",
+   "offset": [
+    18,
+    24
+   ],
+   "female": true,
+   "greet": "The harbour shrine of Mara is small. It is meant to be. The sea is large, and a small thing standing in front of a large thing is, I find, a very good arrangement."
+  },
+  {
+   "id": "mq_hr_wy_ferrand",
+   "name": "Master Ferrand Lisle",
+   "role": "innkeeper",
+   "place": "wayrest",
+   "offset": [
+    -6,
+    -22
+   ],
+   "greet": "Welcome to the Courteous Cormorant. A complaint, if you must make one, is to be submitted in rhyming couplets. Prose complaints are filed under weather and ignored. Yes, it is a house rule. Yes, it is law."
+  },
+  {
+   "id": "mq_hr_wy_corisande",
+   "name": "Madame Corisande Vray",
+   "role": "merchant",
+   "place": "wayrest",
+   "offset": [
+    26,
+    -8
+   ],
+   "female": true,
+   "greet": "Gloves. Fans. A very few small knives, under the fans. I sell to ladies and to the ladies who wish to be seen as ladies, and I know which is which by their gloves. Do come in."
+  },
+  {
+   "id": "mq_hr_wy_pike",
+   "name": "Pike the Sewer-Warden",
+   "role": "citizen",
+   "place": "wayrest_sewers",
+   "offset": [
+    4,
+    4
+   ],
+   "greet": "Down here, you can tell a Wayrest nobleman from a Wayrest thief by how loudly he complains about the smell. The thief is quieter. He also knows the way out."
+  },
+  {
+   "id": "mq_hr_or_gulmak",
+   "name": "Chief Gulmak gro-Dushnikh",
+   "role": "jarl",
+   "place": "orsinium",
+   "offset": [
+    0,
+    12
+   ],
+   "greet": "You are in Orsinium. It was built stone by stone. We do not say please. We say, show me. Show me you can lift. Show me you can last. Then, perhaps, we will say please."
+  },
+  {
+   "id": "mq_hr_or_ushra",
+   "name": "Smith-Mother Ushra",
+   "role": "blacksmith",
+   "place": "orsinium",
+   "offset": [
+    -14,
+    -8
+   ],
+   "female": true,
+   "greet": "The forge burns because I tell it to. The iron bends because I allow it. If you came to ask for a blade, bring ore. If you came to ask for advice, bring ale. If you came for neither, stand somewhere else."
+  },
+  {
+   "id": "mq_hr_or_torog",
+   "name": "Skald Torog",
+   "role": "bard",
+   "place": "orsinium",
+   "offset": [
+    18,
+    6
+   ],
+   "greet": "Sit. Not there; that is the Chieftain's. There. I sing of old victories. I sing them loud, and a little long, and I add a few more orcs to each one. A song with more orcs in it is a better song."
+  },
+  {
+   "id": "mq_hr_or_mazgul",
+   "name": "Mazgul gro-Dumbug",
+   "role": "innkeeper",
+   "place": "orsinium",
+   "offset": [
+    -22,
+    14
+   ],
+   "greet": "The Iron Throat. One drink, house brew, awful. If you complain I give you a second one for free. If you praise it I know you are lying, and I charge double. There is a rule; there is no logic to it."
+  },
+  {
+   "id": "mq_hr_or_bolgrat",
+   "name": "Hoardkeeper Bolgrat",
+   "role": "merchant",
+   "place": "orsinium",
+   "offset": [
+    8,
+    -22
+   ],
+   "greet": "Trophies, trinkets, tusks. Every orc has one thing he is ashamed of selling and one he cannot get rid of fast enough. I stock both. I can tell which is which by the way you sniff."
+  },
+  {
+   "id": "mq_hr_dg_alaric",
+   "name": "Sir Alaric Brune",
+   "role": "adventurer",
+   "place": "castle_daggerfall",
+   "offset": [
+    8,
+    8
+   ],
+   "greet": "I bear a letter that must reach its lady without a seal on it. No, I cannot say why. No, I cannot say who. Yes, I am aware that sounds like a crime. It is a very small one."
+  },
+  {
+   "id": "mq_hr_dg_pelline",
+   "name": "Madam Pelline Tessier",
+   "role": "steward",
+   "place": "daggerfall",
+   "offset": [
+    -8,
+    14
+   ],
+   "female": true,
+   "greet": "The Bridge Toll, per person, per crossing, per animal, per wagon. I do not set the toll. I collect it, and I collect it correctly, and I will thank you not to look at my scale in that tone."
+  },
+  {
+   "id": "mq_hr_dg_perrin",
+   "name": "Tanner Perrin Voss",
+   "role": "butcher",
+   "place": "daggerfall",
+   "offset": [
+    22,
+    -14
+   ],
+   "greet": "Don't stand downwind. Don't stand upwind either. Stand where I tell you and breathe through your mouth. I know smells and secrets, and I know which of them is which by the third lungful."
+  },
+  {
+   "id": "mq_hr_dg_hobb",
+   "name": "Hobb Cressey",
+   "role": "innkeeper",
+   "place": "daggerfall",
+   "offset": [
+    -20,
+    -10
+   ],
+   "greet": "Three Bridges Inn! Rooms on all three. The bridge you sleep on is your choice, and the toll to reach it is on your bill, itemised. Keep your receipts. The Madam audits every guest."
+  },
+  {
+   "id": "mq_hr_dg_ines",
+   "name": "Ines Balancier",
+   "role": "merchant",
+   "place": "daggerfall",
+   "offset": [
+    14,
+    20
+   ],
+   "female": true,
+   "greet": "Weights, measures, counterweights and, if you ask quietly, one very old pair of brass scales that are never wrong. They have never been used, because they frighten people. Would you like to see them?"
+  },
+  {
+   "id": "mq_hr_dg_clemence",
+   "name": "Dame Clemence Aubry",
+   "role": "steward",
+   "place": "castle_daggerfall",
+   "offset": [
+    -6,
+    12
+   ],
+   "female": true,
+   "greet": "I run the castle's correspondence, and I am the only person in Daggerfall who has never once been surprised by a letter. Please do not try."
+  },
+  {
+   "id": "mq_hr_cm_elric",
+   "name": "Archpriest Elric Ashby",
+   "role": "priest",
+   "place": "camlorn",
+   "offset": [
+    0,
+    14
+   ],
+   "greet": "Penance is a bell, child. A bell with a very low voice and a very long memory. Say what you have to say. Afterward, I will tell you what it weighs."
+  },
+  {
+   "id": "mq_hr_cm_hvarine",
+   "name": "Lady Hvarine Mauvesse",
+   "role": "steward",
+   "place": "camlorn",
+   "offset": [
+    -18,
+    8
+   ],
+   "female": true,
+   "greet": "Darling, you must be new. Sit. I will tell you who is sleeping with whom in the black slate spires, and, for a very small fee, who is not and wishes they were."
+  },
+  {
+   "id": "mq_hr_cm_tam",
+   "name": "Bellwright Tam Selby",
+   "role": "blacksmith",
+   "place": "camlorn",
+   "offset": [
+    20,
+    -8
+   ],
+   "greet": "I cast bells. Small, large, cracked, mute. A bell that does not ring is just a very heavy cup. If you want a story, I sell those too. The price is whatever you think a story is worth to a man in your boots."
+  },
+  {
+   "id": "mq_hr_cm_wynn",
+   "name": "Innkeeper Wynn Arrowsmith",
+   "role": "innkeeper",
+   "place": "camlorn",
+   "offset": [
+    -24,
+    -14
+   ],
+   "female": true,
+   "greet": "Welcome to the Quiet Peal. We are soundproofed. No singing, no shouting, no bells. Whispers only, and I fine for laughter. If you want to be loud, there is a cellar. If you want to be very loud, there is a different cellar."
+  },
+  {
+   "id": "mq_hr_cm_osric",
+   "name": "Sexton Osric Pell",
+   "role": "citizen",
+   "place": "camlorn",
+   "offset": [
+    10,
+    22
+   ],
+   "greet": "Hush. Keep your voice down. The bell hears everything. I mean that quite literally. It has a very good memory. I should not have said that. Forget I said that."
+  },
+  {
+   "id": "mq_hr_sh_ysolde",
+   "name": "Marshal Ysolde Garreth",
+   "role": "housecarl",
+   "place": "castle_shornhelm",
+   "offset": [
+    6,
+    10
+   ],
+   "female": true,
+   "greet": "You are standing in the muster-ground of Shornhelm. Every banner here has a number, every number has a man, and every man has a bunk. If you are carrying a sword for hire, sign the book. If not, stand to the side."
+  },
+  {
+   "id": "mq_hr_sh_brom",
+   "name": "Sergeant Brom Halloway",
+   "role": "imperial_soldier",
+   "place": "shornhelm",
+   "offset": [
+    -14,
+    6
+   ],
+   "greet": "I am drunk, and I am correct. Both are true. Neither is a problem. The sergeant's art is knowing the first without ever losing the second. Now, if you are not here to sign the book, buy me one."
+  },
+  {
+   "id": "mq_hr_sh_alder",
+   "name": "Alder the Fletcher",
+   "role": "merchant",
+   "place": "shornhelm",
+   "offset": [
+    18,
+    -10
+   ],
+   "greet": "Goose-feather, grey-goose, and the odd crow for the fussy. Arrows are honest things. They go where you point them. The people who buy arrows are the ones I trade secrets with. No, I do not give them away."
+  },
+  {
+   "id": "mq_hr_sh_hazel",
+   "name": "Hazel Pryor",
+   "role": "innkeeper",
+   "place": "shornhelm",
+   "offset": [
+    -22,
+    -12
+   ],
+   "female": true,
+   "greet": "The Red Muster Tap. We sort drinks by banner. Blue for Daggerfall, green for Wayrest, red for the house. If you ask for the wrong colour I will serve you, but I will give you a look."
+  },
+  {
+   "id": "mq_hr_sh_hale",
+   "name": "Corporal Wat Hale",
+   "role": "imperial_soldier",
+   "place": "shornhelm",
+   "offset": [
+    70,
+    44
+   ],
+   "greet": "Don't. Don't call the Marshal. We are not deserters, we are... on extended leave. A very long leave. Three of us. We saw something in the wall. We will tell you, but you must not tell her yet."
+  },
+  {
+   "id": "mq_hr_np_maude",
+   "name": "Reeve Maude Harrow",
+   "role": "steward",
+   "place": "northpoint",
+   "offset": [
+    0,
+    14
+   ],
+   "female": true,
+   "greet": "Northpoint is a town of seven hundred souls, one lighthouse, and one very large moor. It runs on salt, peat and common sense. If you came for any of the first two, you are welcome. If you came for the third, you are in the wrong town."
+  },
+  {
+   "id": "mq_hr_np_gill",
+   "name": "Peat-Cutter Gill Thrupp",
+   "role": "miner",
+   "place": "northpoint",
+   "offset": [
+    -18,
+    -10
+   ],
+   "greet": "The moor moves. I know what you will say. Moors do not move. This one does. I have cut the same bank for forty years, and each spring it is nearer the lighthouse by a stride."
+  },
+  {
+   "id": "mq_hr_np_sorley",
+   "name": "Keeper Sorley Vance",
+   "role": "citizen",
+   "place": "northpoint",
+   "offset": [
+    14,
+    -20
+   ],
+   "greet": "There is one lamp in the tower and one lamp on the moor. If you have been told otherwise, you have been told wrong by someone who has never kept either."
+  },
+  {
+   "id": "mq_hr_np_hester",
+   "name": "Hester Dunmoor",
+   "role": "innkeeper",
+   "place": "northpoint",
+   "offset": [
+    -6,
+    22
+   ],
+   "female": true,
+   "greet": "The Fog Horn Arms. When someone buys a round, I sound the horn, so every sailor in the bay knows there is a free drink going. It has not once been mistaken for a fog. It has been mistaken for a very large cow."
+  },
+  {
+   "id": "mq_hr_np_tolliver",
+   "name": "Tolliver Quill",
+   "role": "merchant",
+   "place": "northpoint",
+   "offset": [
+    24,
+    8
+   ],
+   "greet": "Smoked herring, smoked eel, smoked mutton, and a very good smoked cheese that is entirely a rumour. Taste a sliver. Everything is smoked here. We find it keeps the sea from getting in."
+  },
+  {
+   "id": "mq_hr_ev_mallory",
+   "name": "Bishop Mallory Fenn",
+   "role": "priest",
+   "place": "evermor",
+   "offset": [
+    0,
+    12
+   ],
+   "female": true,
+   "greet": "The cathedral stands on its island because the lake would not have it anywhere else. If you have come to pray, the nave is open. If you have come to ask questions, the bishop is, as ever, reluctantly available."
+  },
+  {
+   "id": "mq_hr_ev_vey",
+   "name": "Lamplighter Vey",
+   "role": "citizen",
+   "place": "evermor",
+   "offset": [
+    -16,
+    -6
+   ],
+   "greet": "Seven hundred lamps and a long pole, and a lake that tries to put them out. I do not mind the lake. It is only doing what a lake does. It is the people who live beside it I do not trust."
+  },
+  {
+   "id": "mq_hr_ev_iselle",
+   "name": "Ferrywoman Iselle",
+   "role": "fisher",
+   "place": "evermor",
+   "offset": [
+    22,
+    10
+   ],
+   "female": true,
+   "greet": "Four coppers across, six back, ten if you are carrying a corpse and do not want to discuss it. I hear everything on the water, and I say nothing on the land. That is my one rule."
+  },
+  {
+   "id": "mq_hr_ev_pernel",
+   "name": "Pernel Oak",
+   "role": "innkeeper",
+   "place": "evermor",
+   "offset": [
+    -24,
+    14
+   ],
+   "greet": "The Wet Candle. Yes, the candles burn upside down. Yes, it is a miracle. No, I do not know why. If you can prove it is a trick, I will give you a month of free ale. Many have tried. The ale is still mine."
+  },
+  {
+   "id": "mq_hr_ev_ansel",
+   "name": "Brother Ansel",
+   "role": "scholar",
+   "place": "evermor",
+   "offset": [
+    14,
+    -16
+   ],
+   "greet": "The cathedral records go back nine centuries and the cathedral cellar goes back eleven. I am the archivist. I am also, as of this winter, the only person who will go down there."
+  },
+  {
+   "id": "mq_hr_gp_dunstan",
+   "name": "Reeve Dunstan Blythe",
+   "role": "steward",
+   "place": "glenpoint",
+   "offset": [
+    0,
+    10
+   ],
+   "greet": "Glenpoint is small and honest, and I would like it to stay both. If you have come to smuggle, do it somewhere else. If you have come to buy salt, the pans are on the left, and the price is posted. It is the same price for everyone, and it is fair."
+  },
+  {
+   "id": "mq_hr_gp_edda",
+   "name": "Pilot Edda Marrow",
+   "role": "fisher",
+   "place": "glenpoint",
+   "offset": [
+    -14,
+    8
+   ],
+   "female": true,
+   "greet": "I read the water the way you read a face. The tide says someone is lying, and the moon says it is not the tide. If you need a boat taken through the Spiral, I am your woman. If you need a lie told convincingly, ask someone else."
+  },
+  {
+   "id": "mq_hr_gp_corwin",
+   "name": "Old Corwin Tarne",
+   "role": "hunter",
+   "place": "glenpoint",
+   "offset": [
+    18,
+    -6
+   ],
+   "greet": "There was a wreck, you know. The Lonely Tortoise. A fine ship, a poor captain, a lovely wind. Went down in a night. They say her bell still rings at low tide. I say it is only the sea being clever."
+  },
+  {
+   "id": "mq_hr_gp_sorrel",
+   "name": "Sorrel Whitlow",
+   "role": "innkeeper",
+   "place": "glenpoint",
+   "offset": [
+    -20,
+    -12
+   ],
+   "female": true,
+   "greet": "The Brine Pan. Everything here is salted: bread, butter, stew, ale, and my husband's jokes. Don't ask for water. The well is salted. We are all salted. It keeps us."
+  }
+ ],
+ "relics": [
+  {
+   "id": "mq_hr_wy_chain_key",
+   "name": "Harbour-Chain Winding Key",
+   "desc": "A great iron crank-key as long as a forearm, its handle polished by a century of palms. Etched into the shaft: PULL ONCE FOR THE KING, TWICE FOR THE TIDE.",
+   "icon": 11
+  },
+  {
+   "id": "mq_hr_wy_forged_manifest",
+   "name": "Doubled Manifest",
+   "desc": "A ship's manifest with two columns, the left in a clerk's cramped hand, the right in a stranger's looping script. Where they disagree, the right column is much more interesting.",
+   "icon": 7
+  },
+  {
+   "id": "mq_hr_wy_masque_diadem",
+   "name": "The Dessaux Diadem",
+   "desc": "A silver circlet set with a single moonstone, small enough to hide in a glove. A tiny, tight crack runs through the stone, as though it has been dropped, and forgiven.",
+   "icon": 11
+  },
+  {
+   "id": "mq_hr_wy_false_weights",
+   "name": "Set of False Weights",
+   "desc": "Brass quay-weights, each stamped with a lawful mark. Each is a hair lighter than it ought to be. Together they would cheat a hundred merchants of a hundred crowns.",
+   "icon": 7
+  },
+  {
+   "id": "mq_hr_wy_ring",
+   "name": "Mussel-Crusted Betrothal Ring",
+   "desc": "A thin silver band, scabbed with barnacles but whole. The inside reads: Hold fast.",
+   "icon": 17
+  },
+  {
+   "id": "mq_hr_or_ancestor_tusk",
+   "name": "Ancestor's Tusk",
+   "desc": "A yellow orcish tusk as long as a hand, carved on its inner curve with a column of small notches. Each notch is a kill, a debt, or a name.",
+   "icon": 11
+  },
+  {
+   "id": "mq_hr_or_cup_token",
+   "name": "Seven-Cup Token",
+   "desc": "A rough iron token stamped with a cup and a fist. Seven of them make a lawful claim to the Chieftain's own cup, which is, by all accounts, very small.",
+   "icon": 7
+  },
+  {
+   "id": "mq_hr_dg_letter",
+   "name": "Unsealed Letter of Sir Alaric",
+   "desc": "A single folded sheet with no wax on it and no name on the front, held shut by a loop of green thread. It feels dangerous to carry for no reason a person could explain.",
+   "icon": 7
+  },
+  {
+   "id": "mq_hr_dg_double_tally",
+   "name": "Toll-House Double Tally",
+   "desc": "Two ledgers bound in one cover, the left lawful and the right not. Every crossing in the right column appears also in the left, twice.",
+   "icon": 7
+  },
+  {
+   "id": "mq_hr_dg_finished_boots",
+   "name": "A Dead Apprentice's Boots",
+   "desc": "A pair of small boots, half-stitched and never finished, in the old Daggerfall cut. The last stitch is a sloppy one, and has been picked out and redone twice.",
+   "icon": 17
+  },
+  {
+   "id": "mq_hr_dg_pledge_ledger",
+   "name": "The Bridge-House Pledge Ledger",
+   "desc": "A heavy book of debts pledged against furniture, kin and kitchen tools. The pages for the Tarn family are marked with a pressed violet.",
+   "icon": 7
+  },
+  {
+   "id": "mq_hr_cm_clapper_scroll",
+   "name": "Clapper Scroll",
+   "desc": "A curl of oiled vellum, thin as an onion skin, wrapped around the bell's clapper and stitched to it with copper wire. A grid of dots and short bars covers one side. The other is blank, and warm.",
+   "icon": 7
+  },
+  {
+   "id": "mq_hr_cm_peal_key",
+   "name": "Peal Key",
+   "desc": "A pair of bone discs on a cord, each notched along its rim. When aligned, the notches read as a sequence of change-ringing, the way a peal is written down.",
+   "icon": 11
+  },
+  {
+   "id": "mq_hr_sh_muster_list",
+   "name": "The Night Muster Roll",
+   "desc": "A long scroll of names in the Marshal's square hand, each with a column of ticks. Three names have been circled in red. The third is Sergeant Brom's.",
+   "icon": 7
+  },
+  {
+   "id": "mq_hr_sh_wall_note",
+   "name": "Corporal Hale's Wall-Note",
+   "desc": "A grease-stained scrap in a soldier's print: \"Something moves behind the third buttress at night. Not a man. Four of us saw it. We are not cowards. We are only not fools.\"",
+   "icon": 7
+  },
+  {
+   "id": "mq_hr_sh_banner",
+   "name": "The Red Keep's Standard",
+   "desc": "A swallow-tailed crimson banner on a three-foot pole, its hem torn and sewn so many times that the stitching has become its own pattern.",
+   "icon": 11
+  },
+  {
+   "id": "mq_hr_np_ship_lantern",
+   "name": "Lantern of the Blue Tankard",
+   "desc": "A storm-lantern of black iron, its horn panes clouded with salt. The shutter is welded open. A line scratched into the base reads: HOME IS WHERE THIS IS LIT.",
+   "icon": 11
+  },
+  {
+   "id": "mq_hr_np_peat_diary",
+   "name": "The Bog-Preserved Diary",
+   "desc": "A little oilskin-wrapped ledger, perfectly preserved. The ink has not run. The last entry reads: \"I will leave the lamp lit. Come back when you can.\"",
+   "icon": 7
+  },
+  {
+   "id": "mq_hr_np_peat_diary2",
+   "name": "The Westfield Diary",
+   "desc": "A little oilskin-wrapped ledger from the Westfield cutting, perfectly preserved. Every entry ends with the same line.",
+   "icon": 7
+  },
+  {
+   "id": "mq_hr_ev_water_rose",
+   "name": "The Water Rose",
+   "desc": "A cold rosette of grey lake-glass, no larger than a hand, its petals frozen in the instant of opening. Held up to the light it is faintly, steadily wet.",
+   "icon": 11
+  },
+  {
+   "id": "mq_hr_ev_candle_proof",
+   "name": "Inverted Candle-Wick",
+   "desc": "A short stub of pale wax, its wick burned from the bottom up. The flame had climbed rather than fallen, and left a tiny spiral of soot like a drawn question.",
+   "icon": 7
+  },
+  {
+   "id": "mq_hr_ev_vey_candle",
+   "name": "Cathedral-Step Candle",
+   "desc": "A plain tallow candle, half-burned, taken from the cathedral steps. It has never in its life burned upside down.",
+   "icon": 17
+  },
+  {
+   "id": "mq_hr_gp_salt_tally",
+   "name": "Salt-Pan Tally Book",
+   "desc": "A lawful tally of salt sold, kept in a clerk's hand. At the back, where no clerk would look, a second tally in a different ink lists crates by the number of men it took to carry them.",
+   "icon": 7
+  },
+  {
+   "id": "mq_hr_gp_tortoise_bell",
+   "name": "The Tortoise's Ship-Bell",
+   "desc": "A bronze ship's bell, green with salt, its clapper tied back with a strip of oilcloth. Engraved around the rim: SHE RINGS FOR THE LOST AND THE FOUND.",
+   "icon": 11
+  }
+ ],
+ "bosses": {
+  "mq_hr_wy_traitor_pilot": {
+   "name": "Pilot Renaud Sabin",
+   "type": "npc:thug",
+   "hostile": true,
+   "hp": 4,
+   "dmg": 1.5,
+   "level": 18,
+   "weapon": "skycraft:breton_sword",
+   "gear": {
+    "chest": "skycraft:breton_chestplate",
+    "head": "skycraft:breton_helmet"
+   },
+   "drop": "loot:major",
+   "glow": false
+  },
+  "mq_hr_or_trial_champion": {
+   "name": "Durbul Hammer-Knuckle",
+   "type": "skycraft:ogre",
+   "hp": 3.5,
+   "dmg": 1.5,
+   "level": 20,
+   "drop": "loot:major",
+   "glow": false
+  },
+  "mq_hr_or_gate_breaker": {
+   "name": "Lurth the Gate-Breaker",
+   "type": "skycraft:giant",
+   "hp": 4,
+   "dmg": 1.6,
+   "level": 24,
+   "drop": "loot:major",
+   "glow": false
+  },
+  "mq_hr_or_tusk_thief": {
+   "name": "Fenwick Bree",
+   "type": "skycraft:bandit_chief",
+   "hp": 3,
+   "dmg": 1.4,
+   "level": 15,
+   "weapon": "skycraft:steel_dagger",
+   "drop": "loot:standard",
+   "glow": false
+  },
+  "mq_hr_dg_tollmaster": {
+   "name": "Tollmaster Garrick Sorel",
+   "type": "npc:thug",
+   "hostile": true,
+   "hp": 3.5,
+   "dmg": 1.5,
+   "level": 16,
+   "weapon": "skycraft:breton_mace",
+   "gear": {
+    "chest": "skycraft:breton_chestplate"
+   },
+   "drop": "loot:standard",
+   "glow": false
+  },
+  "mq_hr_cm_silencer": {
+   "name": "Brother Cael the Hushed",
+   "type": "skycraft:necromancer",
+   "hp": 3.5,
+   "dmg": 1.4,
+   "level": 17,
+   "weapon": "skycraft:staff_of_frostbite",
+   "gear": {
+    "head": "skycraft:shrouded_helmet"
+   },
+   "drop": "loot:major",
+   "glow": false
+  },
+  "mq_hr_sh_wallthing": {
+   "name": "The Buttress Hag",
+   "type": "skycraft:hagraven",
+   "hp": 3.5,
+   "dmg": 1.4,
+   "level": 15,
+   "drop": "loot:major",
+   "glow": false
+  },
+  "mq_hr_np_moor_hunter": {
+   "name": "The Blue Tankard's Mate",
+   "type": "minecraft:stray",
+   "hp": 3,
+   "dmg": 1.4,
+   "level": 14,
+   "weapon": "skycraft:steel_sword",
+   "drop": "loot:major",
+   "glow": true
+  },
+  "mq_hr_ev_drowned_canon": {
+   "name": "The Drowned Canon",
+   "type": "minecraft:drowned",
+   "hp": 4,
+   "dmg": 1.4,
+   "level": 16,
+   "weapon": "skycraft:silver_mace",
+   "gear": {
+    "head": "skycraft:silver_circlet"
+   },
+   "drop": "loot:major",
+   "glow": true
+  },
+  "mq_hr_gp_cove_master": {
+   "name": "Marrick Saltfist",
+   "type": "skycraft:bandit_chief",
+   "hp": 3.5,
+   "dmg": 1.5,
+   "level": 15,
+   "weapon": "skycraft:steel_sword",
+   "gear": {
+    "chest": "skycraft:scaled_chestplate"
+   },
+   "drop": "loot:major",
+   "glow": false
+  }
+ },
+ "scenes": {
+  "mq_hr_wy_chain_rises": [
+   [
+    "narrator",
+    "The great chain comes up out of the harbour in a long, dripping arc, link after link, each as heavy as a barrel. At the middle, the ship that should not have been there is stopped dead, hull-first, like a fish in a net."
+   ]
+  ],
+  "mq_hr_or_gate_horn": [
+   [
+    "narrator",
+    "A horn winds from the wall, three blasts, a pause, three more. Along the parapets the garrison turns as one. From the west, the sound of something very large walking toward a very strong gate."
+   ]
+  ],
+  "mq_hr_cm_peal_rings": [
+   [
+    "narrator",
+    "The great bell swings once, twice, and speaks. It is not the call to prayer. It is a long falling sequence of notes that curls round the black spires and goes out over the roofs. In the streets below, a hundred heads turn, one after another, toward the tower."
+   ]
+  ],
+  "mq_hr_np_moor_lamp": [
+   [
+    "narrator",
+    "Out on the moor, a lamp is lit. Not a will-o-wisp, not a fire. A steady yellow lamp with a hand around it, held at the level of a woman's hip. Behind it, dark shapes move in line, as if arriving home from a very long voyage."
+   ]
+  ],
+  "mq_hr_ev_rose_rises": [
+   [
+    "narrator",
+    "The rose breaks the surface and every candle in the nave gutters at once. Below the cathedral floor, a long way down, something that has been waiting patiently begins, equally patiently, to stir."
+   ],
+   [
+    "mq_hr_ev_canon_voice",
+    "It was lent. Only lent. The lake has an excellent memory, and an excellent sense of what is owed."
+   ]
+  ]
+ },
+ "quests": [
+  {
+   "id": "mq_hr_wy_chain",
+   "title": "The Boom Chain",
+   "region": "high_rock/wayrest",
+   "start": "npc:mq_hr_wy_aumaric",
+   "requires": [
+    "level:14"
+   ],
+   "offer": "Chamberlain, you spoke of a delicate matter.",
+   "pitch": "A ship came through the harbour mouth four nights ago, in the dark, with no pilot of ours aboard and no manifest of ours on the quay. She is called the Marguerite. She is not listed. She should not exist. The duchess would prefer that she not be discussed. But she is, I assure you, in the harbour, and the boom chain was not raised to stop her. Someone in the harbour office decided it should not be. I want to know whom.",
+   "desc": "An unlisted ship, the Marguerite, passed Wayrest's harbour chain unchallenged four nights ago. Chamberlain Aumaric Dessaux wants to know who lowered the chain and why.",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "mq_hr_wy_jules",
+     "text": "Ask Quartermaster Garrow about the Marguerite",
+     "topic": "The Chamberlain says an unlisted ship passed the chain. You count the crates. What did she carry?",
+     "reply": "Nothing. That is what troubles me. No cargo on the manifest, no ballast in the log, and a draught that says she was riding heavy as a bull. A ship that carries nothing and rides like a bull has hidden something in her bones. I would look at her hold. But the harbour office will not let me go aboard."
+    },
+    {
+     "type": "retrieve",
+     "place": "wayrest",
+     "relic": "mq_hr_wy_chain_key",
+     "text": "Take the winding key from the Chain Tower lever-house",
+     "offset": [
+      30,
+      36
+     ],
+     "radius": 8
+    },
+    {
+     "type": "go",
+     "place": "wayrest",
+     "text": "Raise the harbour chain by hand at the Chain Tower",
+     "offset": [
+      30,
+      36
+     ],
+     "radius": 6,
+     "actions": "scene:mq_hr_wy_chain_rises"
+    },
+    {
+     "type": "clear",
+     "place": "wayrest",
+     "placement": "near",
+     "text": "Fight your way past the Marguerite's deck crew",
+     "spawn": [
+      {
+       "type": "npc:thug",
+       "name": "Marguerite Deckhand",
+       "count": 4,
+       "hostile": true,
+       "armor": "#2e3a52"
+      }
+     ],
+     "offset": [
+      38,
+      30
+     ],
+     "radius": 14
+    },
+    {
+     "type": "retrieve",
+     "place": "wayrest",
+     "relic": "mq_hr_wy_forged_manifest",
+     "text": "Search the Marguerite's hold under the Chamberlain's eye",
+     "offset": [
+      38,
+      30
+     ],
+     "radius": 10,
+     "journal": "The hold was clean. No crates, no casks, no bilge. But under a false deck I found a cabin with a table and a locked chest, and in the chest, a doubled manifest, in two hands. The right column listed passengers, not cargo. One name had been struck through in the Chamberlain's own hand."
+    },
+    {
+     "type": "kill",
+     "place": "wayrest",
+     "placement": "near",
+     "text": "Take down Pilot Renaud Sabin, who lowered the chain",
+     "spawn": [
+      {
+       "boss_id": "mq_hr_wy_traitor_pilot"
+      }
+     ],
+     "offset": [
+      38,
+      30
+     ],
+     "radius": 14
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_hr_wy_aumaric",
+     "relic": "mq_hr_wy_forged_manifest",
+     "text": "Bring the doubled manifest to Chamberlain Dessaux",
+     "topic": "The ship carried passengers, not cargo. And your own name is struck through in the right column.",
+     "reply": "Struck through. My own name. In my own hand. Ah. I see. I should tell you that this was a very small mistake, committed a long time ago, and that it has a very large shadow. The duchess does not know. I wrote it to protect a friend. The friend is on that list, and the friend is the duchess's sister, and she is not meant to be in Wayrest at all. What would you have me do?",
+     "choices": [
+      {
+       "label": "Name the traitor and the master. The duchess should know what stands behind her own harbour.",
+       "reply": "Then I will carry the book to her myself. I have been a coward for eleven years. Let me finish what I started.",
+       "actions": "flag:mq_hr_wy_chain_named;take:mq_hr_wy_forged_manifest;points:knights_of_the_rose:2;loot:standard"
+      },
+      {
+       "label": "Name only the pilot. The sister is not a danger. She is a person who needs hiding.",
+       "reply": "Then the pilot hangs, the book burns, and the harbour goes back to counting crates. I owe you, and I do not forget debts.",
+       "actions": "flag:mq_hr_wy_chain_buried;take:mq_hr_wy_forged_manifest;give:skycraft:breton_shield;give:minecraft:emerald*9"
+      }
+     ]
+    }
+   ],
+   "outro": "The boom chain of Wayrest has been raised and lowered by lawful hands since. The Marguerite does not exist, and everyone in the harbour office has become very good at not looking at the third berth.",
+   "rewards": {
+    "gold": 900,
+    "loot": "major",
+    "items": [
+     {
+      "item": "skycraft:breton_sword",
+      "name": "Chain-Warden's Blade",
+      "enchant": {
+       "sharpness": 3,
+       "unbreaking": 2
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_wy_masque",
+   "title": "The Masque of Seven Bridges",
+   "region": "high_rock/wayrest",
+   "start": "npc:mq_hr_wy_corisande",
+   "requires": [
+    "level:8"
+   ],
+   "offer": "Madame Vray, you needed a masked guest?",
+   "pitch": "I have sold three hundred masks for the Seven Bridges Masque, and the duchess's moonstone diadem has gone missing from the Dessaux box before the music has even begun. It was taken by someone wearing one of my masks. Someone I sold a mask to. That is, shall we say, bad for business. Go as a guest, find the mask that does not fit its face, and bring me back the diadem before anyone is embarrassed.",
+   "desc": "The duchess's moonstone diadem has been stolen during the Seven Bridges Masque, and Madame Corisande Vray wants it found by a masked guest before anyone is embarrassed.",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "mq_hr_wy_ferrand",
+     "text": "Question the Cormorant's host about the masked guests",
+     "topic": "Someone at the Masque lifted the diadem. You host half the city. Who left early?",
+     "reply": "Early? No one leaves the Cormorant early. They leave late, or they leave embarrassed. But a masked woman asked me for the way to the sewers. A woman in grey silk, with a gold fox mask. I told her the sewers are not on the menu. She laughed. She said she knew."
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_wy_pike",
+     "text": "Ask Pike the Sewer-Warden about a woman in a gold fox mask",
+     "topic": "A woman in a gold fox mask came down your stairs, tonight. Where did she go?",
+     "reply": "To the old overflow, where the Gaudrel sisters used to keep their less respectable correspondence. She said she wanted to see what was left. She seemed disappointed. A gold fox, you say. I would follow her, but I am a man of fixed habits and the overflow is not one of them."
+    },
+    {
+     "type": "retrieve",
+     "place": "wayrest_sewers",
+     "relic": "mq_hr_wy_masque_diadem",
+     "text": "Find the diadem in the overflow chamber below the Masque",
+     "offset": [
+      0,
+      0
+     ],
+     "radius": 18,
+     "journal": "The overflow chamber was empty, but for a small gold fox mask on the floor and a moonstone diadem set carefully on a cold stone altar, as if it had been returned. A note under it said: \"I only wanted to wear it once.\""
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_hr_wy_corisande",
+     "relic": "mq_hr_wy_masque_diadem",
+     "text": "Return the diadem to Madame Vray",
+     "topic": "The diadem is whole. Whoever wore it left a note, and a gold fox mask.",
+     "reply": "A gold fox. I sold that mask to a duchess. Not this duchess. The old one, who is, I am told, a very fine person. Well, the mask is gone and the diadem is back, and I shall say nothing. Take this. If you ever need a glove that fits a very particular hand, come and see me.",
+     "choices": [
+      {
+       "label": "Say nothing to the Dessaux household. The note is not yours to answer.",
+       "reply": "Then it is a quiet little matter, and very Breton. I thank you.",
+       "actions": "flag:mq_hr_wy_masque_quiet;take:mq_hr_wy_masque_diadem;give:skycraft:gold_necklace"
+      },
+      {
+       "label": "Return it to the duchess in person and tell her of the note.",
+       "reply": "Then she will have a very interesting evening. You are a braver soul than I.",
+       "actions": "flag:mq_hr_wy_masque_told;take:mq_hr_wy_masque_diadem;points:knights_of_the_rose:1;give:minecraft:emerald*7"
+      }
+     ]
+    }
+   ],
+   "outro": "The Seven Bridges Masque ended with one moonstone diadem and no embarrassment. Madame Corisande Vray has put a gold fox mask in her window, and does not sell it.",
+   "rewards": {
+    "gold": 350,
+    "items": [
+     {
+      "item": "skycraft:breton_dagger",
+      "name": "Masquer's Needle",
+      "enchant": {
+       "sharpness": 1,
+       "looting": 1
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_wy_quay",
+   "title": "The Quay Tithe",
+   "region": "high_rock/wayrest",
+   "start": "npc:mq_hr_wy_jules",
+   "requires": [
+    "level:7"
+   ],
+   "offer": "Quartermaster, you said the weights were wrong.",
+   "pitch": "Every merchant on the Wayrest quay pays a tithe by weight, and every merchant on the quay says the scale is cheating him. The Merchant Guildhall says it is the Quartermaster. I say it is a set of false weights somebody has slipped into the guild's own cupboard. I cannot search the Guildhall. You can. Find them. Let a Breton merchant be cheated by a Breton merchant for once, and let it be provable.",
+   "desc": "Wayrest's quay merchants think the Quartermaster's scales are rigged. Quartermaster Jules Garrow says the false weights are inside the Merchant Guildhall itself.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "wayrest",
+     "text": "Search the Merchant Guildhall's weight cupboard on the quay",
+     "offset": [
+      22,
+      18
+     ],
+     "radius": 10
+    },
+    {
+     "type": "clear",
+     "place": "wayrest",
+     "placement": "near",
+     "text": "Drive off the Guildhall's hired watchmen",
+     "spawn": [
+      {
+       "type": "npc:thug",
+       "name": "Guild Watchman",
+       "count": 3,
+       "hostile": true,
+       "armor": "#5b4a2a"
+      }
+     ],
+     "offset": [
+      22,
+      18
+     ],
+     "radius": 12,
+     "actions": "relic:mq_hr_wy_false_weights"
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_hr_wy_jules",
+     "relic": "mq_hr_wy_false_weights",
+     "text": "Bring the false weights to the Quartermaster",
+     "topic": "The cupboard held these. Every one is a hair too light.",
+     "reply": "A hair. Yes. It adds up to a stone in a week and a sack in a month. Now. A Guildhall that cheats its own members is a Guildhall that can be unseated, and there are men on the council who will pay a good deal to unseat it. Or I can fix the weights quietly and let the Guildhall keep its dignity. Which is the less Breton?",
+     "choices": [
+      {
+       "label": "Expose them. A cheat on the quay is a cheat on the whole bay.",
+       "reply": "Then I shall nail the weights to the Guildhall door. A long overdue lesson in the cost of courtesy.",
+       "actions": "flag:mq_hr_wy_quay_exposed;take:mq_hr_wy_false_weights;points:knights_of_the_rose:1;loot:minor"
+      },
+      {
+       "label": "Swap the weights quietly. The quay needs honest scales more than a scandal.",
+       "reply": "Then it shall be done by morning, and no one the wiser. You have a politician's soul.",
+       "actions": "flag:mq_hr_wy_quay_swapped;take:mq_hr_wy_false_weights;give:minecraft:emerald*6"
+      }
+     ]
+    }
+   ],
+   "outro": "The quay at Wayrest weighs honest now, or very nearly. Master Ferrand Lisle was heard to compose a couplet about it, which was the highest praise the harbour could give.",
+   "rewards": {
+    "gold": 260
+   }
+  },
+  {
+   "id": "mq_hr_wy_ring",
+   "title": "A Ring for the Sea-Wives",
+   "region": "high_rock/wayrest",
+   "start": "npc:mq_hr_wy_odelle",
+   "requires": [
+    "level:6"
+   ],
+   "offer": "Sister Odelle, you wanted a diver?",
+   "pitch": "There is a custom here. A sailor's betrothed drops a ring into the harbour for luck, and the sailor fishes it out on his return. Eleven years ago a girl dropped hers off the old pier, and her sailor never returned, and the ring is still down there. She has married since. Another man. She is happy. But a woman in her last years wishes to know the ring was not lost. Will you look? I would ask her husband, but he would be hurt.",
+   "desc": "An old woman of Wayrest dropped a betrothal ring into the harbour eleven years ago, and wishes to know it was not lost. Sister Odelle asks you to dive for it.",
+   "objectives": [
+    {
+     "type": "clear",
+     "place": "wayrest",
+     "placement": "near",
+     "text": "Drive off the harbour crabs at the old pier",
+     "spawn": [
+      {
+       "type": "minecraft:drowned",
+       "name": "Harbour Drowned",
+       "count": 3
+      }
+     ],
+     "offset": [
+      34,
+      40
+     ],
+     "radius": 12
+    },
+    {
+     "type": "retrieve",
+     "place": "wayrest",
+     "relic": "mq_hr_wy_ring",
+     "text": "Dive for the ring beneath the old pier",
+     "offset": [
+      34,
+      40
+     ],
+     "radius": 10
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_hr_wy_odelle",
+     "relic": "mq_hr_wy_ring",
+     "text": "Return the ring to Sister Odelle",
+     "topic": "It was under the old pier, in the mud, in a bed of mussels. The mussels had kept it.",
+     "reply": "The mussels! Of course. Thank you. I will take it to her. And I shall say nothing of the sailor, who is a better man for being forgotten. Take this, with the Sisterhood's blessing.",
+     "actions": "give:skycraft:amulet_of_mara"
+    }
+   ],
+   "outro": "An old woman of Wayrest wears a ring on a ribbon round her neck now. Sister Odelle says it is for luck, and that the sea has never been unkind to her since.",
+   "rewards": {
+    "gold": 180
+   }
+  },
+  {
+   "id": "mq_hr_or_hammer",
+   "title": "Hammer on the Gate",
+   "region": "high_rock/wrothgar",
+   "start": "npc:mq_hr_or_ushra",
+   "requires": [
+    "level:15"
+   ],
+   "offer": "Smith-Mother, you said the gate needs a hammer.",
+   "pitch": "Orsinium is half a city and half a promise. The gate is the promise. Every orc who wishes to stand under the Chieftain's banner must strike the gate with the great hammer, once, and say a name. It is a simple rite. Most orcs strike it and are done. A few strike it and are asked to prove it. I say you will be asked. Prove yourself at the forge first. A hammer that has not been tempered will not carry the name.",
+   "desc": "To stand beneath Chief Gulmak's banner, an outsider must prove worth at the forge, in the trial, at the wall, and by taking a clan name. Smith-Mother Ushra will set the first test.",
+   "objectives": [
+    {
+     "type": "deliver",
+     "npc": "mq_hr_or_ushra",
+     "item": "skycraft:orichalcum_ingot",
+     "count": 4,
+     "text": "Bring four orichalcum ingots to Smith-Mother Ushra",
+     "topic": "Four orichalcum ingots. For the forging.",
+     "reply": "Orichalcum. Green iron, orc-iron. A softer metal than the Bretons think, and a harder one than they deserve. Stand by the forge and watch your hands. A smith who cannot watch her hands is a smith who cannot be watched. Now. Carry the hammer to the Chieftain's hall. Do not drop it."
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_or_gulmak",
+     "text": "Report to Chief Gulmak at the Chieftain's Hall",
+     "topic": "Smith-Mother Ushra says I have passed the forge. I am ready for the Chieftain's trial.",
+     "reply": "Ready. The word is a hammer and a lie. No one is ready. You will fight Durbul Hammer-Knuckle in the yard, with your hands and a rough shield. If you fall, you rise. If you rise, he falls. If neither falls, he and I drink. I have never seen it come to that."
+    },
+    {
+     "type": "kill",
+     "place": "orsinium",
+     "placement": "near",
+     "text": "Defeat Durbul Hammer-Knuckle in the Chieftain's Trial",
+     "spawn": [
+      {
+       "boss_id": "mq_hr_or_trial_champion"
+      }
+     ],
+     "offset": [
+      -10,
+      14
+     ],
+     "radius": 14
+    },
+    {
+     "type": "go",
+     "place": "orsinium",
+     "text": "Man the wall with the garrison as the horn sounds",
+     "offset": [
+      0,
+      60
+     ],
+     "radius": 10,
+     "actions": "scene:mq_hr_or_gate_horn"
+    },
+    {
+     "type": "kill",
+     "place": "orsinium",
+     "placement": "near",
+     "text": "Defend the gate against Lurth the Gate-Breaker",
+     "spawn": [
+      {
+       "boss_id": "mq_hr_or_gate_breaker"
+      },
+      {
+       "type": "skycraft:ogre",
+       "name": "Gate Ogre",
+       "count": 2
+      }
+     ],
+     "offset": [
+      0,
+      70
+     ],
+     "radius": 20
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_or_gulmak",
+     "text": "Return to Chief Gulmak to take your clan name",
+     "topic": "The gate stands. Lurth is down. I stand under your banner.",
+     "reply": "Gate stands, Lurth is down, and you stand. Then you will take a name. Not a clan name. A clan name is a thing you give a stranger. Yours will be one you earned, and I will give it to you in front of my whole hall. Choose whom to honour: the forge, or the wall?",
+     "choices": [
+      {
+       "label": "The forge. Smith-Mother Ushra tempered me.",
+       "reply": "Then you are a Forge-Born. Gro-Ushra. Your hammer-mark goes beside hers, and your name goes on the great anvil. Orsinium has a new smith.",
+       "actions": "flag:mq_hr_or_forgeborn;points:orc_strongholds:3;give:skycraft:orcish_warhammer"
+      },
+      {
+       "label": "The wall. The garrison held, and I held beside them.",
+       "reply": "Then you are a Wall-Born. Gro-Gulmak. A very old name, and a very loud one. The garrison will drink in your honour for a week.",
+       "actions": "flag:mq_hr_or_wallborn;points:orc_strongholds:3;give:skycraft:orcish_shield"
+      }
+     ]
+    }
+   ],
+   "outro": "The gate-hammer of Orsinium hangs a little differently on its chain. A new name has been cut into the stone, and Skald Torog has been up all night composing a song with several more orcs in it than there were.",
+   "rewards": {
+    "gold": 1000,
+    "loot": "major",
+    "items": [
+     {
+      "item": "skycraft:orcish_battleaxe",
+      "name": "Gate-Hammer's Heir",
+      "enchant": {
+       "sharpness": 3,
+       "unbreaking": 3
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_or_cups",
+   "title": "The Trial of Seven Cups",
+   "region": "high_rock/wrothgar",
+   "start": "npc:mq_hr_or_mazgul",
+   "requires": [
+    "level:6"
+   ],
+   "offer": "Mazgul, what are the seven cups?",
+   "pitch": "The Iron Throat has a tradition. Seven cups, seven houses of Orsinium, seven awful brews. Drink one from each and you are an honorary orc. Fail, and you pay for the other six. I do not care which. But if you take the challenge, bring me three ales from outside, so that the cup-bearers can compare. A fair contest needs a control.",
+   "desc": "Mazgul gro-Dumbug runs the Seven Cups challenge at the Iron Throat. He wants three outside ales to compare against, and an outsider with a strong stomach.",
+   "objectives": [
+    {
+     "type": "deliver",
+     "npc": "mq_hr_or_mazgul",
+     "item": "skycraft:ale",
+     "count": 3,
+     "text": "Bring Mazgul three tankards of ale from outside",
+     "topic": "Three ales, brewed in Wayrest, as asked. Let the cup-bearers compare.",
+     "reply": "Wayrest ale. Hmm. Thin. Sweet. A Breton's drink. Good, it will make the others look worse. Now: I have seven tokens. Go to each of the seven cup-bearers in Orsinium. Each will give you a cup. Drink. Return. We shall see who is an orc."
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_or_bolgrat",
+     "text": "Take the first cup from Hoardkeeper Bolgrat",
+     "topic": "Mazgul sent me. Seven cups. You are the first.",
+     "reply": "First cup. It is not ale, it is a fermented tusk-broth. Drink. Do not breathe through your nose. ... Good. You did not cry. I have a second cup for you if you wish, which is worse."
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_or_torog",
+     "text": "Take the second cup from Skald Torog",
+     "topic": "Bolgrat sent me. Your cup, Skald.",
+     "reply": "Cup the second. I sing as you drink. It is a lament for orcs who did not finish theirs. Ahem. \"Oh the cup, the cup, the bitter cup...\" Done. Drink. That was a very fine song, and I shall not accept payment."
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_or_mazgul",
+     "text": "Return to Mazgul to claim the Iron Throat token",
+     "topic": "Two cups, and I stand. The rest I will take when I am less brave.",
+     "reply": "Two! Two is more than most. Two is a fine number. Take the token. If you ever come back for the other five, I will have them ready, and I will have made them worse. It is, you understand, a compliment.",
+     "actions": "relic:mq_hr_or_cup_token;give:skycraft:honningbrew_mead*2"
+    }
+   ],
+   "outro": "The Iron Throat has a new name on its wall. It is small, and in chalk, and underlined twice. Mazgul has promised the other five cups will be ready any time you like.",
+   "rewards": {
+    "gold": 180,
+    "items": [
+     {
+      "item": "skycraft:orcish_boots",
+      "name": "Cup-Bearer's Treads",
+      "enchant": {
+       "feather_falling": 1
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_or_tusk",
+   "title": "The Ancestor's Tusk",
+   "region": "high_rock/wrothgar",
+   "start": "npc:mq_hr_or_bolgrat",
+   "requires": [
+    "level:11"
+   ],
+   "offer": "Hoardkeeper, what was taken?",
+   "pitch": "A tusk. Not for sale, never for sale. It belongs to Skald Torog's grandfather. It was in my keeping because the Skald did not have a place for it. A Breton took it three days ago, a thin man with a very good coat. He said it was a curio. I said it was a grandfather. He did not think that was funny. He went west toward Ogrmok Delve. I would go myself, but I am old, and I am already angry, and an old angry orc is a dangerous thing to be.",
+   "desc": "A Breton thief has taken the ancestor's tusk of Skald Torog's grandfather and fled west toward Ogrmok Delve. Hoardkeeper Bolgrat wants it back.",
+   "objectives": [
+    {
+     "type": "clear",
+     "place": "ogrmok_delve",
+     "placement": "structure",
+     "text": "Clear the thief's hideout at Ogrmok Delve",
+     "spawn": [
+      {
+       "type": "skycraft:bandit",
+       "name": "Delve Bandit",
+       "count": 4
+      }
+     ]
+    },
+    {
+     "type": "kill",
+     "place": "ogrmok_delve",
+     "placement": "structure",
+     "text": "Catch Fenwick Bree, the thief with the good coat",
+     "spawn": [
+      {
+       "boss_id": "mq_hr_or_tusk_thief"
+      }
+     ],
+     "actions": "relic:mq_hr_or_ancestor_tusk"
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_hr_or_torog",
+     "relic": "mq_hr_or_ancestor_tusk",
+     "text": "Return the tusk to Skald Torog",
+     "topic": "Your grandfather's tusk. A thin Breton had it. He is not a thin Breton any longer.",
+     "reply": "The tusk. I thought I would never hold it again. Do not smile at me. I am an orc. I am not crying. I have a cold. Sit. I will sing the ancestor's song, and you will hear it. It is not long. It is only the length of one man's whole life.",
+     "actions": "give:skycraft:gold_ruby_necklace"
+    }
+   ],
+   "outro": "Skald Torog sings a new verse now, about a stranger who walked through a Breton thief and returned a grandfather. The verse is long, and the thief grows taller in every telling.",
+   "rewards": {
+    "gold": 420,
+    "loot": "minor"
+   }
+  },
+  {
+   "id": "mq_hr_or_toll",
+   "title": "The Price of the Merchant's Gate",
+   "region": "high_rock/wrothgar",
+   "start": "npc:mq_hr_or_gulmak",
+   "requires": [
+    "level:10",
+    "!flag:mq_hr_or_toll_done"
+   ],
+   "offer": "Chieftain, the Merchant's Gate. A dispute?",
+   "pitch": "The Bretons say we charge too much to enter. We say they are charged what the stone cost. Neither is lying. A Breton factor, Lysander Bray, has been waiting at the Merchant's Gate for six days and will not pay. My gate-wardens will not let him in. I will not be seen to lose to a Breton accountant. Go. Find a bargain.",
+   "desc": "A Breton factor has been stuck outside the Merchant's Gate of Orsinium for six days, refusing to pay the toll. Chief Gulmak wants a bargain.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "merchants_gate",
+     "text": "Meet the Breton factor Lysander Bray at the Merchant's Gate",
+     "offset": [
+      0,
+      0
+     ],
+     "radius": 18
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_or_bolgrat",
+     "text": "Ask Hoardkeeper Bolgrat what the toll truly pays for",
+     "topic": "The Bretons say the toll is excessive. What does it truly pay for?",
+     "reply": "Walls. The garrison. The road to the gate, which we mend each spring. And a portion for the tusk-shrine, which the Bretons do not know about. I will not take their silver for a shrine they do not worship. Tell Gulmak: charge them the stone-price, and let the tusk-shrine be paid by orcs."
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_or_gulmak",
+     "text": "Carry the bargain to Chief Gulmak",
+     "topic": "Charge the Bretons for the stone only. Let orcs pay for the shrine. They will bring twice the trade.",
+     "reply": "Charge less and sell more. It is not an orcish idea. It is a good one. The Breton may enter. Tell him I said so, and that he may bring whatever he likes, provided it is not a sword.",
+     "choices": [
+      {
+       "label": "Tell the factor it was Gulmak's generosity.",
+       "reply": "A generous Chieftain. He will like that. It will cost him nothing and buy him a great deal.",
+       "actions": "flag:mq_hr_or_toll_done;flag:mq_hr_or_toll_gulmak;points:orc_strongholds:1"
+      },
+      {
+       "label": "Tell the factor it was Bolgrat's suggestion. The Hoardkeeper deserves the credit.",
+       "reply": "Then Bolgrat will be insufferable for a month, and Orsinium will be a little richer for it.",
+       "actions": "flag:mq_hr_or_toll_done;flag:mq_hr_or_toll_bolgrat;give:skycraft:amulet_of_talos"
+      }
+     ]
+    }
+   ],
+   "outro": "The Merchant's Gate of Orsinium has a new sign in two languages. The Breton factor is said to be very pleased, and the garrison is said to be less so, and the tusk-shrine is, as ever, paid by orcs.",
+   "rewards": {
+    "gold": 300
+   }
+  },
+  {
+   "id": "mq_hr_dg_toll",
+   "title": "A Toll on the Bridges",
+   "region": "high_rock/glenumbra",
+   "start": "npc:mq_hr_dg_alaric",
+   "requires": [
+    "level:11"
+   ],
+   "offer": "Sir Alaric, what is the letter?",
+   "pitch": "It is a letter, and it must cross two toll-houses, the Guild Span and the Gate Span, to reach the castle. The tolls there are not tolls, they are tithes, and each toll-house reads every letter that passes. This one must not be read. Buy the right to cross, as any honest traveller does, and then be a good deal less honest. If caught, I never met you.",
+   "desc": "Sir Alaric Brune has a letter that must cross Daggerfall's two toll-bridges unread. He wants a traveller who can pay the toll, then slip through the toll-houses.",
+   "objectives": [
+    {
+     "type": "deliver",
+     "npc": "mq_hr_dg_pelline",
+     "item": "minecraft:emerald",
+     "count": 4,
+     "text": "Pay Madam Pelline Tessier the bridge toll in emeralds",
+     "topic": "Four emeralds. A passage for one, and one letter, as the schedule says.",
+     "reply": "Four. Per person, per crossing. The letter is an additional charge, and I shall have to inspect it. No? A matter of principle. Very well. Here is your tally-stick. Show it at every toll-house. Do not lose it. We count sticks at the end of the day.",
+     "actions": "relic:mq_hr_dg_letter"
+    },
+    {
+     "type": "cond",
+     "cond": "night",
+     "place": "daggerfall",
+     "text": "Wait for dark and slip across the Guild Span",
+     "offset": [
+      -10,
+      6
+     ]
+    },
+    {
+     "type": "go",
+     "place": "daggerfall",
+     "text": "Reach the Gate Span without being read",
+     "offset": [
+      16,
+      -4
+     ],
+     "radius": 8
+    },
+    {
+     "type": "clear",
+     "place": "daggerfall",
+     "placement": "near",
+     "text": "Break the Gate Span's toll-gang before they search you",
+     "spawn": [
+      {
+       "type": "npc:thug",
+       "name": "Span Tollman",
+       "count": 3,
+       "hostile": true,
+       "armor": "#4c3d5a"
+      }
+     ],
+     "offset": [
+      16,
+      -4
+     ],
+     "radius": 12
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_hr_dg_clemence",
+     "relic": "mq_hr_dg_letter",
+     "text": "Deliver the unsealed letter to Dame Clemence Aubry in the castle",
+     "topic": "Sir Alaric Brune sent this. It has no seal. I did not read it.",
+     "reply": "No seal. Of course. That is the point. Hm. It is from the Duchess of Daggerfall to a lady in Camlorn, and it says that the bridges are to be opened, free of toll, for one year. The Guild will not like it. Madam Pelline will like it even less. She has taken this city's bridges for twenty years, and I believe she has been cheating on the count. Foil her, and the Duchess's hand is free."
+    },
+    {
+     "type": "go",
+     "place": "daggerfall",
+     "text": "Catch Tollmaster Sorel counting double at the Guild Span at night",
+     "offset": [
+      -10,
+      6
+     ],
+     "radius": 10
+    },
+    {
+     "type": "kill",
+     "place": "daggerfall",
+     "placement": "near",
+     "text": "Take down Tollmaster Garrick Sorel",
+     "spawn": [
+      {
+       "boss_id": "mq_hr_dg_tollmaster"
+      }
+     ],
+     "offset": [
+      -10,
+      6
+     ],
+     "radius": 14,
+     "actions": "relic:mq_hr_dg_double_tally"
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_hr_dg_pelline",
+     "relic": "mq_hr_dg_double_tally",
+     "text": "Confront Madam Pelline Tessier with the double tally",
+     "topic": "Your toll-house counts every crossing twice. You pocket the second count.",
+     "reply": "Let me see. ... Yes. That is my scale. That is my master's hand. That is Garrick, who I trusted. I have been cheated by my own tollmaster for four years, and I did not see it, because the scale is always right. I am not a thief. I am a fool. Daggerfall has a right to know either way. Tell me what to do. Raise the toll, to cover what I have lost? Or open the bridges, and let the Guild hold the debt?",
+     "choices": [
+      {
+       "label": "Raise the tolls. Daggerfall pays for its bridges. Better honest than free.",
+       "reply": "Then it shall be a penny more on the Gate Span, and a promise to the Duchess that no one will count twice again. Take this, from the Guild's box.",
+       "actions": "flag:mq_hr_dg_tolls_raised;take:mq_hr_dg_double_tally;points:knights_of_the_dragon:2;loot:standard"
+      },
+      {
+       "label": "Open the bridges. A city that taxes every crossing has stopped being a city.",
+       "reply": "Then the Guild will howl, and I will weep, and the bridges will open at dawn. I will go to the Duchess myself.",
+       "actions": "flag:mq_hr_dg_tolls_ruined;take:mq_hr_dg_double_tally;give:skycraft:breton_shield;give:minecraft:emerald*10"
+      }
+     ]
+    }
+   ],
+   "outro": "Daggerfall's bridges are either more honest or more free, depending on whom you ask, and Madam Pelline Tessier has taken to checking her own scales twice. Sir Alaric Brune has never once admitted he was involved.",
+   "rewards": {
+    "gold": 850,
+    "loot": "major",
+    "items": [
+     {
+      "item": "skycraft:breton_mace",
+      "name": "Bridge-Warden's Mace",
+      "enchant": {
+       "sharpness": 2,
+       "unbreaking": 2
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_dg_boots",
+   "title": "Skins That Will Not Settle",
+   "region": "high_rock/glenumbra",
+   "start": "npc:mq_hr_dg_perrin",
+   "requires": [
+    "level:6",
+    "!flag:mq_hr_dg_boots_done"
+   ],
+   "offer": "Tanner, you said the frames make noise?",
+   "pitch": "Every night, on the third drying frame, the hides rattle. Not the wind: the wind is on the north side and the frame is sheltered. I have asked the priest. The priest says leave a candle. I have left four candles. The frame has not been satisfied. I do not believe in ghosts. I do believe in noise at three in the morning, and I would like it to stop.",
+   "desc": "The third drying frame in Tannery Row rattles every night with no wind to blame. Tanner Perrin Voss wants the noise to stop.",
+   "objectives": [
+    {
+     "type": "cond",
+     "cond": "night",
+     "place": "daggerfall",
+     "text": "Keep watch at the third drying frame after midnight",
+     "offset": [
+      22,
+      -14
+     ]
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_dg_hobb",
+     "text": "Ask Hobb Cressey if an apprentice of Tannery Row died unfinished",
+     "topic": "The hides on the third frame rattle at night. Do you know of an apprentice who died on the Row?",
+     "reply": "The boy! Wulfric. Fourteen. A fever. He was working on a pair of boots for his sister's wedding, and he died before they were stitched. The sister married barefoot. The family has never forgiven the Row. I thought it was forgotten. It is not."
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_hr_dg_perrin",
+     "item": "skycraft:leather_boots",
+     "count": 1,
+     "text": "Bring a pair of leather boots to the third frame",
+     "topic": "A pair of leather boots, as Hobb described. Do you think it will be enough?",
+     "reply": "Enough? Gods, I do not know. But put them on the frame. Tonight. Say his name. Wulfric. And say that the sister was not to blame.",
+     "actions": "flag:mq_hr_dg_boots_done;relic:mq_hr_dg_finished_boots"
+    }
+   ],
+   "outro": "The third drying frame in Tannery Row is quiet. Tanner Perrin Voss says the hides hang straight, and a pair of very small boots sits on a shelf by the door, which no one touches.",
+   "rewards": {
+    "gold": 200,
+    "loot": "minor"
+   }
+  },
+  {
+   "id": "mq_hr_dg_pledge",
+   "title": "The Widow's Pledge",
+   "region": "high_rock/glenumbra",
+   "start": "npc:mq_hr_dg_ines",
+   "requires": [
+    "level:9"
+   ],
+   "offer": "Ines, what is the pledge book?",
+   "pitch": "The Bridge-House lends against furniture and kin. My friend Berenice Tarn pledged her wedding bed against her late husband's debt, and the bed has been taken, and a pledge-ledger in the Bridge-House cellar says she owes three times what she borrowed. I cannot read the ledger and I cannot enter the cellar. Someone who knows how to be quiet could do both. I shall pay.",
+   "desc": "The Bridge-House has taken a widow's bed in pledge and the ledger says she owes three times what she borrowed. Ines Balancier wants the ledger copied, or taken.",
+   "objectives": [
+    {
+     "type": "cond",
+     "cond": "night",
+     "place": "daggerfall",
+     "text": "Wait for night, then approach the Bridge-House cellar",
+     "offset": [
+      -24,
+      8
+     ]
+    },
+    {
+     "type": "clear",
+     "place": "daggerfall",
+     "placement": "near",
+     "text": "Quiet the cellar guard in the Bridge-House",
+     "spawn": [
+      {
+       "type": "npc:thug",
+       "name": "Bridge-House Guard",
+       "count": 2,
+       "hostile": true,
+       "armor": "#5b3a2a"
+      }
+     ],
+     "offset": [
+      -24,
+      8
+     ],
+     "radius": 10
+    },
+    {
+     "type": "retrieve",
+     "place": "daggerfall",
+     "relic": "mq_hr_dg_pledge_ledger",
+     "text": "Take the pledge ledger from the cellar strongbox",
+     "offset": [
+      -24,
+      8
+     ],
+     "radius": 8
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_hr_dg_ines",
+     "relic": "mq_hr_dg_pledge_ledger",
+     "text": "Bring the ledger to Ines Balancier",
+     "topic": "The ledger is here. Berenice's page is marked with a violet. The sum is wrong.",
+     "reply": "Wrong by two hundred, in her favour, not theirs. They have been forging the count and sticking to it. I shall have the page copied tonight. Now. The book is a hot thing. If we keep it, the Bridge-House will know within the week. If we return it, with the page cut out, they will think a rat took it. Which?",
+     "choices": [
+      {
+       "label": "Keep the ledger. Publish the forgery to the Guild council.",
+       "reply": "Then a hundred widows will thank you, and the Bridge-House will not. Take this. It is Berenice's thanks.",
+       "actions": "flag:mq_hr_dg_pledge_published;take:mq_hr_dg_pledge_ledger;points:knights_of_the_dragon:1;give:skycraft:amulet_of_mara"
+      },
+      {
+       "label": "Cut the page and return the book. Quiet is cheaper than war.",
+       "reply": "Then it is quiet. The widow keeps her bed and the Bridge-House keeps its shame. I will not tell a soul.",
+       "actions": "flag:mq_hr_dg_pledge_quiet;take:mq_hr_dg_pledge_ledger;give:minecraft:emerald*8"
+      }
+     ]
+    }
+   ],
+   "outro": "Berenice Tarn sleeps in her own bed again, and Ines Balancier's brass scales stand in her window, weighing nothing, balanced perfectly.",
+   "rewards": {
+    "gold": 450,
+    "loot": "standard"
+   }
+  },
+  {
+   "id": "mq_hr_dg_spans",
+   "title": "The Race of Seven Spans",
+   "region": "high_rock/glenumbra",
+   "start": "npc:mq_hr_dg_hobb",
+   "requires": [
+    "level:5"
+   ],
+   "offer": "Hobb, there is a race?",
+   "pitch": "Every Tirdas of Sun's Height we run the Seven Spans, from the Three Bridges to the castle gate and back, one foot on each bridge and one hand on the rail. The winner drinks free for a month. The Guild would like it banned, because nobody pays toll during the race. Hence, it is free to enter, and I am entering you.",
+   "desc": "Hobb Cressey of the Three Bridges Inn has entered you in Daggerfall's Race of Seven Spans, a run across every toll-bridge in the city, free of charge for one day only.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "daggerfall",
+     "text": "Start the Race of Seven Spans at the Three Bridges",
+     "offset": [
+      -20,
+      -10
+     ],
+     "radius": 6
+    },
+    {
+     "type": "go",
+     "place": "daggerfall",
+     "text": "Cross the Guild Span without breaking stride",
+     "offset": [
+      -10,
+      6
+     ],
+     "radius": 6
+    },
+    {
+     "type": "go",
+     "place": "daggerfall",
+     "text": "Cross the Gate Span and touch the castle gate",
+     "offset": [
+      16,
+      -4
+     ],
+     "radius": 6,
+     "journal": "You touched the castle gate a full breath ahead of a baker's son and a very large dog. The crowd cheered. Madam Pelline Tessier did not."
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_dg_hobb",
+     "text": "Claim the winner's month of free ale from Hobb Cressey",
+     "topic": "I touched the gate first. A month, you said.",
+     "reply": "A month! And I shall give you thirty tankards, all in a row, so the Guild sees. Sit down. Drink slowly. And please do not tell the Madam that the race was not entirely legal.",
+     "actions": "give:skycraft:ale*4"
+    }
+   ],
+   "outro": "The Race of Seven Spans is run each year now, and the winner's name is cut into the lintel of the Three Bridges Inn. Yours is the first.",
+   "rewards": {
+    "gold": 150,
+    "items": [
+     {
+      "item": "skycraft:leather_boots",
+      "name": "Span-Runner's Boots",
+      "enchant": {
+       "feather_falling": 2
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_cm_peal",
+   "title": "The Peal That Rang Alone",
+   "region": "high_rock/glenumbra",
+   "start": "npc:mq_hr_cm_osric",
+   "requires": [
+    "level:12"
+   ],
+   "offer": "Sexton, what do you mean, the bell has a memory?",
+   "pitch": "It rang three nights ago. Alone. No ringers, no ropes, no wind. A long sequence, falling, and then silence. Every ringer in the Company of the Peal knows what it was. They will not say. I tried to ring it myself, to see, and someone cut the rope. Look at the clapper. There is a thing wound round it that should not be there.",
+   "desc": "Camlorn's great bell rang by itself three nights ago, in a pattern every ringer recognises but will not name. Sexton Osric Pell wants the clapper examined.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "camlorn",
+     "text": "Climb the bell tower of the Cathedral of Mara",
+     "offset": [
+      0,
+      14
+     ],
+     "radius": 8
+    },
+    {
+     "type": "retrieve",
+     "place": "camlorn",
+     "relic": "mq_hr_cm_clapper_scroll",
+     "text": "Take the scroll wound round the bell's clapper",
+     "offset": [
+      0,
+      14
+     ],
+     "radius": 8
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_cm_tam",
+     "text": "Ask Bellwright Tam Selby to read the dots on the clapper scroll",
+     "topic": "This grid of dots was wound round the clapper. Can you read it?",
+     "reply": "Dots and bars. Ha. That is change-ringing, boy. Not the call, the code. Every bell in the bay can speak in it, if the ringers are bored enough. This one says: seven, three, nine, nine. The old signal for danger-to-the-keep. It was not meant for here. It was rung for Daggerfall, and someone is blocking it before it can be sent.",
+     "actions": "relic:mq_hr_cm_peal_key"
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_cm_hvarine",
+     "text": "Ask Lady Hvarine who benefits from a silenced bell",
+     "topic": "Someone is blocking a danger-signal meant for Daggerfall. Who in Camlorn would want that?",
+     "reply": "Darling. Anyone who sells to the Dragon's enemies. Anyone who takes silver from a certain Direnni house that shall remain nameless. Anyone, in short, with a pocket. If you want one name, ask the Archpriest why he asked for the ringers to be sent home early last month. I overheard. I always overhear."
+    },
+    {
+     "type": "cond",
+     "cond": "night",
+     "place": "camlorn",
+     "text": "Wait for dark and climb the tower again",
+     "offset": [
+      0,
+      14
+     ]
+    },
+    {
+     "type": "kill",
+     "place": "camlorn",
+     "placement": "near",
+     "text": "Confront Brother Cael the Hushed, who has been silencing the bell",
+     "spawn": [
+      {
+       "boss_id": "mq_hr_cm_silencer"
+      }
+     ],
+     "offset": [
+      0,
+      14
+     ],
+     "radius": 10
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_cm_elric",
+     "text": "Confront Archpriest Elric Ashby with the Peal Key",
+     "topic": "The Peal Key was in the tower. Cael has been silencing the bell for you. Why?",
+     "reply": "For the peace. Do you think I do it for coin? Camlorn has two thousand people, and the danger-signal means a war, and the war means a thousand of them dead. I have been keeping the bell quiet for the sake of the quiet. I am not proud. I am not repentant. Decide for yourself. Ring it true, and send the warning. Or ring it plain, and let the bay sleep.",
+     "choices": [
+      {
+       "label": "Ring the true peal. The warning must reach Daggerfall.",
+       "reply": "Then I will not stop you. And I will pray, as I have not prayed in a decade, that you are right.",
+       "actions": "flag:mq_hr_cm_peal_true;take:mq_hr_cm_peal_key;take:mq_hr_cm_clapper_scroll;scene:mq_hr_cm_peal_rings;points:knights_of_the_dragon:2;loot:standard"
+      },
+      {
+       "label": "Ring the plain peal. A false alarm is worse than a missed one.",
+       "reply": "Then I have gained a friend, and I do not deserve one. Take this. It is the Cathedral's thanks, in hard coin.",
+       "actions": "flag:mq_hr_cm_peal_plain;take:mq_hr_cm_peal_key;take:mq_hr_cm_clapper_scroll;give:skycraft:amulet_of_mara;give:minecraft:emerald*9"
+      }
+     ]
+    }
+   ],
+   "outro": "The great bell of Camlorn rings on schedule now, and the ringers go home at the proper hour. Whether the warning reached Daggerfall is something the Company of the Peal will not say, but they hum the sequence in the street, and children skip to it.",
+   "rewards": {
+    "gold": 800,
+    "loot": "major",
+    "items": [
+     {
+      "item": "skycraft:breton_greatsword",
+      "name": "Peal-Breaker",
+      "enchant": {
+       "sharpness": 2,
+       "unbreaking": 2
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_cm_courtship",
+   "title": "A Courtship in Black Slate",
+   "region": "high_rock/glenumbra",
+   "start": "npc:mq_hr_cm_hvarine",
+   "requires": [
+    "level:5"
+   ],
+   "offer": "Lady Hvarine, you have a letter to deliver?",
+   "pitch": "Two letters. One from Lord Alden Vesey to the lovely Dame Rosamund, and one from Dame Rosamund to Lord Alden. Each thinks the other has been cruel. Neither has. I wrote both, you understand, to settle a bet. Now I should like them to meet, before one of them proposes to a different person. Carry them to each other, and do not let either see the other's envelope.",
+   "desc": "Lady Hvarine Mauvesse forged a pair of love letters for a wager and now wants them delivered, and the two lovers brought together, before the joke turns into a tragedy.",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "mq_hr_cm_wynn",
+     "text": "Ask Wynn Arrowsmith whether Lord Alden Vesey is at the Quiet Peal",
+     "topic": "I have a letter for Lord Alden Vesey. Is he a guest of yours?",
+     "reply": "Lord Alden. A very quiet guest. Third table, back. He has been drinking since noon and has asked for a pen four times, and each time has thrown it down. If I had a coin for each ruined sheet, I would be a Duchess."
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_cm_osric",
+     "text": "Take the second letter to Dame Rosamund at the Cathedral",
+     "topic": "I have a letter for Dame Rosamund. Is she at the Cathedral?",
+     "reply": "She is in the bell tower. She comes up every night to look at the Daggerfall road. She is waiting for someone. I should not say. You cannot say I said."
+    },
+    {
+     "type": "go",
+     "place": "camlorn",
+     "text": "Bring the lovers together at the tower stair",
+     "offset": [
+      0,
+      14
+     ],
+     "radius": 8,
+     "journal": "They met on the stair, each holding an envelope, each looking at the other as though at a stranger and a certainty. Neither said a word for a long while. Then Dame Rosamund laughed, and Lord Alden, who had been wearing the face of a man at a funeral, began to cry, and they went down the stair together."
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_cm_hvarine",
+     "text": "Tell Lady Hvarine how it ended",
+     "topic": "They met. They laughed and they wept. Your forged letters did exactly what you hoped.",
+     "reply": "Darling. I did not hope. I merely wagered. But I am delighted, I am simply delighted. Take this, and, if you can, tell no one that the letters were forged. They think the other wrote them. It is much more romantic, and I have never been so proud of a lie.",
+     "actions": "give:skycraft:gold_diamond_ring"
+    }
+   ],
+   "outro": "Lord Alden Vesey and Dame Rosamund are to be married at the Cathedral of Mara before Frostfall. Lady Hvarine will wear green, and tell everyone she is not at all smug.",
+   "rewards": {
+    "gold": 220
+   }
+  },
+  {
+   "id": "mq_hr_cm_quiet",
+   "title": "What the Quiet Peal Hears",
+   "region": "high_rock/glenumbra",
+   "start": "npc:mq_hr_cm_wynn",
+   "requires": [
+    "level:9"
+   ],
+   "offer": "Wynn, why is your inn soundproofed?",
+   "pitch": "My grandmother lined the walls with wool and wax, and nobody has asked why. I know why. There is a cellar. In the cellar, once a month, six people meet and speak in whispers. I do not listen, because I am a professional. But someone has been coming up the cellar stair with ink on their hands. I would like to know what is being written down.",
+   "desc": "The Quiet Peal Inn's cellar hosts a monthly meeting of six whispering guests, and someone is leaving with ink on their hands. Wynn Arrowsmith wants to know what is written.",
+   "objectives": [
+    {
+     "type": "cond",
+     "cond": "night",
+     "place": "camlorn",
+     "text": "Wait for the cellar meeting at the Quiet Peal",
+     "offset": [
+      -24,
+      -14
+     ]
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_cm_hvarine",
+     "text": "Ask Lady Hvarine who attends the monthly cellar meeting",
+     "topic": "There is a monthly meeting at the Quiet Peal. Six whispering guests. Who are they?",
+     "reply": "Six. Three bell-ringers, a clerk, a goldsmith, and the Archpriest's own scribe. They are writing a peal of their own, darling. A private code that does not use the Cathedral's bells. They think I do not know. I have been invited, twice. I declined. It is rude to eavesdrop on a meeting you are already in."
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_cm_tam",
+     "text": "Ask Bellwright Tam Selby what the private peal is for",
+     "topic": "Six of them are writing a private peal. What is it for?",
+     "reply": "It is for the day the Cathedral's bells are silenced. A free peal, rung on small hand-bells from six rooftops at once. It is meant to be heard all over the city and traced to no one. I have cast the bells. I am sworn to say nothing. I have said it. Gods. I need a drink."
+    }
+   ],
+   "outro": "The Quiet Peal is just as quiet as it was, and the meeting in the cellar goes on, and the ink on the whisperers' hands is a little fainter than it was.",
+   "rewards": {
+    "gold": 180
+   }
+  },
+  {
+   "id": "mq_hr_sh_muster",
+   "title": "Night Muster",
+   "region": "high_rock/rivenspire",
+   "start": "npc:mq_hr_sh_ysolde",
+   "requires": [
+    "level:10"
+   ],
+   "offer": "Marshal, you want someone to run the muster?",
+   "pitch": "Every garrison has a night muster. Count the posts, count the men, count the bunks, report. Tonight, three names are missing from the count. One of them is my best sergeant. He is a drunk and I love him. The other two are men I do not know well enough to miss. I do not like missing men, and I like missing men I do not know even less. Run the list. Report.",
+   "desc": "Marshal Ysolde Garreth has three men missing from the night muster of Shornhelm, one of them her best sergeant. She wants the list run, and the men found.",
+   "on_start": "relic:mq_hr_sh_muster_list",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "shornhelm",
+     "text": "Check the east gate post of the Night Muster",
+     "offset": [
+      50,
+      0
+     ],
+     "radius": 8
+    },
+    {
+     "type": "go",
+     "place": "shornhelm",
+     "text": "Check the north wall post of the Night Muster",
+     "offset": [
+      0,
+      -50
+     ],
+     "radius": 8
+    },
+    {
+     "type": "go",
+     "place": "shornhelm",
+     "text": "Check the outer wall post of the Night Muster",
+     "offset": [
+      70,
+      44
+     ],
+     "radius": 8
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_hr_sh_alder",
+     "item": "skycraft:steel_arrow",
+     "count": 8,
+     "text": "Pay Alder the Fletcher eight steel arrows for what he overheard",
+     "topic": "Eight steel arrows. Marshal Garreth has three men missing. What did you hear?",
+     "reply": "Three men who were at my stall a week ago, buying very expensive arrows and talking low. Brom was one. The others were Hale and a boy called Pip. They were going to a place in the old wall. Hale said, \"a thing behind the buttress.\" I did not ask. A fletcher who asks is a fletcher who loses his best customers."
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_sh_hale",
+     "text": "Find Corporal Wat Hale at the outer wall",
+     "topic": "Marshal Garreth has you down as missing, Corporal. What is behind the buttress?",
+     "reply": "A thing. A hag, I think, or something that has been a hag for a hundred years. It came out of the stone one night, and Brom went in after it, and we have not seen him since. We ran. I am not proud of it. We saw nothing, and then we saw too much.",
+     "actions": "relic:mq_hr_sh_wall_note"
+    },
+    {
+     "type": "cond",
+     "cond": "night",
+     "place": "shornhelm",
+     "text": "Wait for night and enter the outer wall behind the third buttress",
+     "offset": [
+      70,
+      44
+     ]
+    },
+    {
+     "type": "kill",
+     "place": "shornhelm",
+     "placement": "near",
+     "text": "Slay the Buttress Hag in the outer wall",
+     "spawn": [
+      {
+       "boss_id": "mq_hr_sh_wallthing"
+      }
+     ],
+     "offset": [
+      70,
+      44
+     ],
+     "radius": 14
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_sh_brom",
+     "text": "Find Sergeant Brom Halloway where the Hag held him",
+     "topic": "You were in the wall for a week, Sergeant. You are alive. Why did you not come out?",
+     "reply": "Because I was drinking the hag's wine, which is considerably better than the garrison's, and I did not wish to leave until it was gone. I am joking. I was bound, and gagged, and a very bad poet. Ysolde will have me flogged. Hale will have me thanked. Come, I know how to be sober for a day. I will do it for her."
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_sh_ysolde",
+     "text": "Report the night muster to Marshal Garreth",
+     "topic": "Brom is alive. Hale and the boy ran, but not from cowardice. A hag was in the wall. I have killed it.",
+     "reply": "A hag. In my wall. Gods. And my men ran from her. I should flog them. I should not. Tell me honestly, and I will decide. Should I bring them home, as soldiers, or let them go as men?",
+     "choices": [
+      {
+       "label": "Bring them home. A soldier who runs and returns is still a soldier.",
+       "reply": "Then I will mark them returned and say nothing of the leave. A soldier is what a soldier is allowed to be. Thank you.",
+       "actions": "flag:mq_hr_sh_men_home;take:mq_hr_sh_wall_note;take:mq_hr_sh_muster_list;points:knights_of_the_dragon:1;loot:standard"
+      },
+      {
+       "label": "Let them go. They have done enough for a lifetime of muster.",
+       "reply": "Then they are on extended leave, in perpetuity, with my blessing. I will tell Brom to say a very sober prayer.",
+       "actions": "flag:mq_hr_sh_men_free;take:mq_hr_sh_wall_note;take:mq_hr_sh_muster_list;give:skycraft:breton_boots;give:minecraft:emerald*7"
+      }
+     ]
+    }
+   ],
+   "outro": "The night muster of Shornhelm counts true again. Sergeant Brom Halloway has been seen sober on three consecutive days, which the garrison regards as an omen.",
+   "rewards": {
+    "gold": 650,
+    "loot": "standard",
+    "items": [
+     {
+      "item": "skycraft:breton_chestplate",
+      "name": "Marshal's Plate",
+      "enchant": {
+       "protection": 2,
+       "unbreaking": 2
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_sh_fletching",
+   "title": "The Red Fletching",
+   "region": "high_rock/rivenspire",
+   "start": "npc:mq_hr_sh_alder",
+   "requires": [
+    "level:5"
+   ],
+   "offer": "Alder, you are running a shooting match?",
+   "pitch": "The garrison has an archery match on the muster-ground every year. Three targets, three arrows each, nine arrows for the glory. The winner gets a red feather for the cap and the right to say the Marshal's name without being struck. I have sixty arrows to sell, and nobody to buy them. Win, and you will be famous. Lose, and you will be a customer.",
+   "desc": "Alder the Fletcher sponsors the garrison's annual shooting match at Shornhelm and wants an entrant who will buy his arrows and win with them.",
+   "objectives": [
+    {
+     "type": "deliver",
+     "npc": "mq_hr_sh_alder",
+     "item": "skycraft:steel_arrow",
+     "count": 9,
+     "text": "Buy nine steel arrows from Alder the Fletcher for the match",
+     "topic": "Nine arrows, fletched in goose. I will shoot them honestly.",
+     "reply": "Honestly! Ha. Let me see. There. Nine arrows, and a very good quiver. Walk to the muster-ground and shoot. If you miss, the targets are not at fault."
+    },
+    {
+     "type": "go",
+     "place": "shornhelm",
+     "text": "Shoot the first target from the muster-ground line",
+     "offset": [
+      10,
+      12
+     ],
+     "radius": 6
+    },
+    {
+     "type": "go",
+     "place": "shornhelm",
+     "text": "Shoot the second target from the palisade",
+     "offset": [
+      24,
+      12
+     ],
+     "radius": 6
+    },
+    {
+     "type": "go",
+     "place": "shornhelm",
+     "text": "Shoot the third target from the gate arch",
+     "offset": [
+      40,
+      14
+     ],
+     "radius": 6,
+     "journal": "The third target was a swinging barrel, and your last arrow caught the stave just as it turned. The garrison cheered. Sergeant Brom, rather unsteadily, raised a mug."
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_sh_ysolde",
+     "text": "Collect the red feather from Marshal Garreth",
+     "topic": "Nine arrows, three targets, one barrel. I believe I have won.",
+     "reply": "You have. The red feather is yours, and the right to say my name without being struck. Do try to say it sparingly. And, if anyone asks, tell them Alder's arrows are, as always, grossly overpriced and exactly right.",
+     "actions": "give:skycraft:steel_arrow*12"
+    }
+   ],
+   "outro": "A red feather sits in the cap of the garrison's newest champion. Alder the Fletcher sold sixty arrows in an afternoon and has promised, in the name of his own honour, to not mention it.",
+   "rewards": {
+    "gold": 180,
+    "items": [
+     {
+      "item": "skycraft:breton_bow",
+      "name": "Red Fletching",
+      "enchant": {
+       "power": 2,
+       "unbreaking": 1
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_sh_standard",
+   "title": "The Banner on the Wrong Pole",
+   "region": "high_rock/rivenspire",
+   "start": "npc:mq_hr_sh_hazel",
+   "requires": [
+    "level:7"
+   ],
+   "offer": "Hazel, someone moved a banner?",
+   "pitch": "The red keep's own standard has gone missing from the muster pole. It turned up three nights later on the Thornham Stones, on a staff of ash, with wolves around it. I cannot say who put it there. I can say that the garrison will not march until it is back. A standard on the wrong pole is, as any soldier will tell you, bad luck, and bad luck in Rivenspire has teeth.",
+   "desc": "The red keep's standard has turned up on the Thornham Stones, ringed by wolves. The garrison won't march without it.",
+   "objectives": [
+    {
+     "type": "clear",
+     "place": "thornham_stones",
+     "placement": "near",
+     "text": "Drive the wolves off the Thornham Stones",
+     "spawn": [
+      {
+       "type": "skycraft:wolf",
+       "name": "Standard Wolf",
+       "count": 5
+      }
+     ]
+    },
+    {
+     "type": "retrieve",
+     "place": "thornham_stones",
+     "relic": "mq_hr_sh_banner",
+     "text": "Take the standard from its ash staff",
+     "offset": [
+      0,
+      0
+     ],
+     "radius": 12
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_hr_sh_ysolde",
+     "relic": "mq_hr_sh_banner",
+     "text": "Return the standard to Marshal Garreth",
+     "topic": "The standard, Marshal. It was on the Thornham Stones among wolves. It was tied to an ash staff with red wool.",
+     "reply": "Red wool. Of course. Someone from the Red Keep put it there, or someone from the Red Keep was meant to think so. I will have the knot examined. Good. We march at dawn. Tell Hazel the garrison drinks free tonight, and tell her I said so only once."
+    }
+   ],
+   "outro": "The standard of the Red Keep flies from its proper pole once more. No one has claimed to have put it on the Thornham Stones, and the knot has been placed in a drawer.",
+   "rewards": {
+    "gold": 240,
+    "loot": "minor"
+   }
+  },
+  {
+   "id": "mq_hr_np_lamp",
+   "title": "The Second Lamp",
+   "region": "high_rock/rivenspire",
+   "start": "npc:mq_hr_np_maude",
+   "requires": [
+    "level:11"
+   ],
+   "offer": "Reeve, what is the matter with the moor?",
+   "pitch": "There is a second light on the moor. It comes at moonless dusk and burns until dawn, and every ship that passes Northpoint has seen it and set a course by it. I do not like that. A ship that steers by a light that is not on the chart is a ship that will find a rock. The lighthouse keeper says it is nothing. I say it is not nothing. Go and look, and bring me back a reason.",
+   "desc": "A second, unmapped lamp burns on the Northpoint moor on moonless nights, and ships are steering by it. Reeve Maude Harrow wants to know whose it is.",
+   "objectives": [
+    {
+     "type": "cond",
+     "cond": "night",
+     "place": "bramgate_stones",
+     "text": "Watch the moor from the Bramgate Stones at dusk",
+     "offset": [
+      0,
+      0
+     ],
+     "actions": "scene:mq_hr_np_moor_lamp"
+    },
+    {
+     "type": "clear",
+     "place": "bramgate_stones",
+     "placement": "near",
+     "text": "Drive off the moor-lights luring travellers into the peat",
+     "spawn": [
+      {
+       "type": "skycraft:will_o_wisp",
+       "name": "Peat-Light",
+       "count": 4
+      }
+     ]
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_np_gill",
+     "text": "Ask Gill Thrupp what the peat cuttings have given up",
+     "topic": "Reeve Harrow says a lamp burns on the moor. You cut the banks. What have you found?",
+     "reply": "A book, a month ago. Preserved. A ship's diary, I think, from the Blue Tankard. It was in the oldest bank, at the bottom, tied to a skeleton's wrist. I did not read it. I put it in the church. The priest is not, I think, a man for old things.",
+     "actions": "relic:mq_hr_np_peat_diary"
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_np_tolliver",
+     "text": "Ask Tolliver Quill what the shipmen say of the second lamp",
+     "topic": "Reeve Harrow says ships are steering by a lamp on the moor. Do your customers say so?",
+     "reply": "Every captain who smokes his catch in my shed says the same thing. \"The lamp on the moor is a good lamp.\" They say it as though it were a friend. I asked one of them whose it was. He said, \"It is the Tankard's, and the Tankard is still out.\" Then he ordered a pound of eel and would not speak again."
+    },
+    {
+     "type": "kill",
+     "place": "wreck_of_the_blue_tankard",
+     "placement": "structure",
+     "text": "Lay the Blue Tankard's mate to rest",
+     "spawn": [
+      {
+       "boss_id": "mq_hr_np_moor_hunter"
+      }
+     ]
+    },
+    {
+     "type": "retrieve",
+     "place": "wreck_of_the_blue_tankard",
+     "relic": "mq_hr_np_ship_lantern",
+     "text": "Dive the wreck of the Blue Tankard for the ship's lantern",
+     "offset": [
+      0,
+      0
+     ],
+     "radius": 14
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_np_sorley",
+     "text": "Show the lantern to Keeper Sorley Vance",
+     "topic": "I found the Blue Tankard's lantern. And the diary, from the peat. Whose is the second lamp?",
+     "reply": "Mine. Hers. My wife Isolde's. She was the Tankard's navigator, and she did not come back. I light her lamp every moonless night, so she can find the shore. It is the only thing I have done right. And now ships steer by it, and I know it is wrong, and I cannot stop. What would you have me do?",
+     "choices": [
+      {
+       "label": "Douse it. A lamp meant for one ship should not mislead a hundred.",
+       "reply": "Then I will douse it, tonight, and sit in the dark, and she will not find her way. But the bay will. It is the right thing. I wish it were not.",
+       "actions": "flag:mq_hr_np_lamp_doused;take:mq_hr_np_ship_lantern;take:mq_hr_np_peat_diary;points:knights_of_the_dragon:1;loot:standard"
+      },
+      {
+       "label": "Keep it, but have the Reeve post a notice: this is a grave-light, not a beacon.",
+       "reply": "A grave-light. Yes. That is what it is. Notice it is, and the ships will steer by the tower, as they were meant to. Thank you. You have a kinder head than most.",
+       "actions": "flag:mq_hr_np_lamp_kept;take:mq_hr_np_ship_lantern;take:mq_hr_np_peat_diary;give:skycraft:amulet_of_mara;give:minecraft:emerald*6"
+      }
+     ]
+    }
+   ],
+   "outro": "The second lamp of Northpoint burns on, or does not, depending on the night and the notice board. The ships steer by the tower, and Sorley Vance sleeps better than he has in years.",
+   "rewards": {
+    "gold": 800,
+    "loot": "major",
+    "items": [
+     {
+      "item": "skycraft:breton_helmet",
+      "name": "Mourning-Lamp Helm",
+      "enchant": {
+       "protection": 2,
+       "unbreaking": 2
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_np_peat",
+   "title": "The Bank That Moves",
+   "region": "high_rock/rivenspire",
+   "start": "npc:mq_hr_np_gill",
+   "requires": [
+    "level:8"
+   ],
+   "offer": "Gill, you said the moor moves?",
+   "pitch": "I have been tracking it with stakes. Eight stakes, set forty years ago, each a stride from the last. Now the third is gone, the fifth is where the sixth was, and the eighth is in the lighthouse yard. The moor is going somewhere, and it takes its dead with it. I do not like where they are going. Go to Westfield and look at the cutting. Tell me what is digging.",
+   "desc": "Peat-Cutter Gill Thrupp says the moor is moving, and wants someone to look at the Westfield cutting and tell him what is digging.",
+   "objectives": [
+    {
+     "type": "clear",
+     "place": "westfield_mine",
+     "placement": "structure",
+     "text": "Clear whatever is digging in the Westfield peat cutting",
+     "spawn": [
+      {
+       "type": "skycraft:skeever",
+       "name": "Peat Skeever",
+       "count": 4
+      },
+      {
+       "type": "minecraft:zombie",
+       "name": "Bog Walker",
+       "count": 2
+      }
+     ]
+    },
+    {
+     "type": "retrieve",
+     "place": "westfield_mine",
+     "relic": "mq_hr_np_peat_diary2",
+     "text": "Search the cutting for what the bog gave up",
+     "offset": [
+      0,
+      0
+     ],
+     "radius": 14
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_hr_np_gill",
+     "relic": "mq_hr_np_peat_diary2",
+     "text": "Take what you found to Gill Thrupp",
+     "topic": "The cutting was full of bog-walkers. Under the last bank I found this diary.",
+     "reply": "A diary. Another. Gods. They all say the same thing. \"I will leave the lamp lit.\" Forty diaries in forty years, and every one of them says it. I think the moor has been keeping its own. And I think the lamp is not Sorley's. I think it is older than the lighthouse. Thank you. I will put this in the church.",
+     "actions": "give:skycraft:amulet_of_mara"
+    }
+   ],
+   "outro": "Gill Thrupp has moved his stakes. The bank still creeps, but slower, and he has begun leaving a lamp on the cut's edge, lit, at dusk.",
+   "rewards": {
+    "gold": 240,
+    "loot": "minor"
+   }
+  },
+  {
+   "id": "mq_hr_np_fog",
+   "title": "Lost in the Fog",
+   "region": "high_rock/rivenspire",
+   "start": "npc:mq_hr_np_hester",
+   "requires": [
+    "level:6"
+   ],
+   "offer": "Hester, a child is missing?",
+   "pitch": "The fog came in at noon and Wilmer Dunmoor's boy went out for the sheep. It is now dusk. The horn is going every minute, and he cannot hear it, or will not. I cannot leave the horn. You can. Take a lantern and go east, along the fence, and look for a small boy with a very large stick.",
+   "desc": "A boy has wandered out onto the Northpoint moor in the fog and the town's horn has not brought him home.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "northpoint",
+     "text": "Search the east fence of the moor in the fog",
+     "offset": [
+      60,
+      10
+     ],
+     "radius": 14
+    },
+    {
+     "type": "clear",
+     "place": "northpoint",
+     "placement": "near",
+     "text": "Drive off the moor-wolves circling the lost boy",
+     "spawn": [
+      {
+       "type": "skycraft:wolf",
+       "name": "Fog Wolf",
+       "count": 3
+      }
+     ],
+     "offset": [
+      70,
+      12
+     ],
+     "radius": 12
+    },
+    {
+     "type": "escort",
+     "npc": "mq_hr_np_hester",
+     "place": "northpoint",
+     "text": "Bring the boy home to Hester Dunmoor at the Fog Horn Arms",
+     "offset": [
+      -6,
+      22
+     ],
+     "radius": 10
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_np_hester",
+     "text": "Tell Hester Dunmoor the boy is safe",
+     "topic": "He had a stick as long as a spear and a very bad attitude. He is safe.",
+     "reply": "He is safe! And scolded. And fed. And scolded again. Take this. It is the horn's own silver, struck on the night of the great fog. I have been saving it for someone who would walk into a fog without a lantern, and I find it was you.",
+     "actions": "give:skycraft:silver_necklace"
+    }
+   ],
+   "outro": "The boy of the Dunmoor farm has been forbidden to walk the moor alone. He has taken it as a challenge.",
+   "rewards": {
+    "gold": 180
+   }
+  },
+  {
+   "id": "mq_hr_ev_rose",
+   "title": "The Water Rose",
+   "region": "high_rock/bjoulsae",
+   "start": "npc:mq_hr_ev_mallory",
+   "requires": [
+    "level:12"
+   ],
+   "offer": "Bishop, you said the cathedral lost something?",
+   "pitch": "There is a glass rose in the lakebed, under the cathedral. It was set in the sill of the east window when the cathedral was founded, and it fell. Not stolen: fell. The window has wept since, and the nave floor is damp. The lake is rising a finger-joint each winter. I think the rose is holding something back, and I think it must be put back, or at least found. Take a boat. Look.",
+   "desc": "The Water Rose, a glass rosette that once sat in the cathedral's east window, has fallen into the lakebed, and the lake is rising a finger-joint each winter. Bishop Mallory Fenn wants it found.",
+   "objectives": [
+    {
+     "type": "escort",
+     "npc": "mq_hr_ev_iselle",
+     "place": "evermor",
+     "text": "Take Ferrywoman Iselle's boat out to the cathedral island",
+     "offset": [
+      40,
+      -50
+     ],
+     "radius": 14
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_ev_ansel",
+     "text": "Ask Brother Ansel where the Water Rose fell",
+     "topic": "Brother Ansel, the Bishop says the rose fell into the lake. Where?",
+     "reply": "Not the lake. The undercroft. The cathedral is built over a lower cathedral, and the lower one is flooded. The rose fell through the east sill and into the old nave, and the old nave is a hundred feet down. I can draw you a map. I will not come."
+    },
+    {
+     "type": "retrieve",
+     "place": "evermor",
+     "relic": "mq_hr_ev_water_rose",
+     "text": "Dive the shallows below the east window and find the Water Rose",
+     "offset": [
+      40,
+      -50
+     ],
+     "radius": 12
+    },
+    {
+     "type": "clear",
+     "place": "evermor",
+     "placement": "near",
+     "text": "Fight through the drowned canons of the lower nave",
+     "spawn": [
+      {
+       "type": "minecraft:drowned",
+       "name": "Drowned Canon",
+       "count": 5
+      }
+     ],
+     "offset": [
+      40,
+      -50
+     ],
+     "radius": 16,
+     "journal": "The lower nave was lit with a pale glow that came from no lamp. Pews rose from silt like rows of drowned teeth. At the far end, below an arch, a figure in a canon's robe knelt in the silt, with its hands cupped around nothing."
+    },
+    {
+     "type": "kill",
+     "place": "evermor",
+     "placement": "near",
+     "text": "Put down the Drowned Canon who has kept the rose",
+     "spawn": [
+      {
+       "boss_id": "mq_hr_ev_drowned_canon"
+      }
+     ],
+     "offset": [
+      40,
+      -50
+     ],
+     "radius": 16,
+     "actions": "scene:mq_hr_ev_rose_rises"
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_hr_ev_mallory",
+     "relic": "mq_hr_ev_water_rose",
+     "text": "Bring the Water Rose to Bishop Mallory Fenn",
+     "topic": "I have the rose. A canon in the lower nave was holding it. The lake rises because of it, I think.",
+     "reply": "The lake rises because it is lent. Whoever set that rose in the sill was not decorating. They were holding a promise. I may put it back, and the lake will settle, and the lower nave will drown for another nine centuries. Or I may leave it in the cold lower dark, and the lake will rise, and the cathedral will have to be abandoned in a generation. Which of these is the lesser sorrow?",
+     "choices": [
+      {
+       "label": "Put the rose back in the sill. A promise should be kept.",
+       "reply": "Then the lake will settle, and the lower nave will sleep. I will say a mass for the Canon. Thank you.",
+       "actions": "flag:mq_hr_ev_rose_placed;take:mq_hr_ev_water_rose;points:knights_of_the_rose:1;loot:standard"
+      },
+      {
+       "label": "Keep it down. Let the lake have its due, and let the cathedral move to higher ground.",
+       "reply": "Then we will move the altar, a stone at a time, to the hill. It will take a hundred years. I will not see it done. It is a good plan. I will go on saying so.",
+       "actions": "flag:mq_hr_ev_rose_kept;take:mq_hr_ev_water_rose;give:skycraft:amulet_of_mara;give:minecraft:emerald*9"
+      }
+     ]
+    }
+   ],
+   "outro": "The Cathedral of Evermor still stands on its island. The lake is a little higher or a little lower than it was, and Lamplighter Vey, who has no opinion on the matter, goes on lighting seven hundred lamps.",
+   "rewards": {
+    "gold": 780,
+    "loot": "major",
+    "items": [
+     {
+      "item": "skycraft:breton_shield",
+      "name": "Rose-Warden's Shield",
+      "enchant": {
+       "protection": 2,
+       "unbreaking": 2
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_ev_candle",
+   "title": "The Upside-Down Candles",
+   "region": "high_rock/bjoulsae",
+   "start": "npc:mq_hr_ev_pernel",
+   "requires": [
+    "level:5"
+   ],
+   "offer": "Pernel, you said you would pay to have the trick revealed?",
+   "pitch": "Every candle in the Wet Candle burns upside down. The flame holds at the bottom and the wax runs up. It has done so since my grandmother lit the first. The priests call it a miracle. A man from the Wayrest chandlers' guild says it is a trick of the wick. I would like both of them to be quiet. Bring me a candle from a different inn, and I will show you what it does under this roof.",
+   "desc": "The candles of the Wet Candle burn upside down, by miracle or by trick. Pernel Oak wants a test, with a candle from outside.",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "mq_hr_ev_vey",
+     "text": "Ask Lamplighter Vey for a candle burned elsewhere in Evermor",
+     "topic": "I need a candle from a different house in Evermor, to test the Wet Candle's miracle.",
+     "reply": "A candle. Here. It is from the cathedral steps. It has never burned upside down in its life, and I would be very pleased if it did. I will say that every candle I have lit in the Wet Candle has gone right way up, and nobody has ever believed me, because nobody has ever asked.",
+     "actions": "relic:mq_hr_ev_vey_candle"
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_hr_ev_pernel",
+     "relic": "mq_hr_ev_vey_candle",
+     "text": "Light Vey's candle in the Wet Candle with Pernel Oak",
+     "topic": "Here is Vey's candle, from the cathedral steps. Let us see what it does.",
+     "reply": "There. A fresh candle. Watch. ... It burns the right way up. Of course. Because it is a cathedral candle and the cathedral does not believe in miracles. Now this one. ... There. Upside down. Do you see? It is the room. It is not the candle. It is the room, and the room is built over something, and I have never been brave enough to dig.",
+     "actions": "relic:mq_hr_ev_candle_proof"
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_ev_ansel",
+     "text": "Show Brother Ansel the inverted wick",
+     "topic": "The candle burned upside down only inside the Wet Candle. The room is the cause. What is below it?",
+     "reply": "Below it? The old cathedral, the first one, the one built before the lake rose. The Wet Candle is a guesthouse built on its crypt. The air down there is drawn from the lake, and the lake breathes. I suspect that is all it is. A draught that runs the wrong way. But I would not tell Pernel. It is a lovely draught."
+    }
+   ],
+   "outro": "The candles of the Wet Candle burn upside down, as they have since the first. Pernel Oak has put up a new sign that reads: A MIRACLE, OR A DRAUGHT. PLEASE DO NOT ASK WHICH.",
+   "rewards": {
+    "gold": 150,
+    "loot": "minor"
+   }
+  },
+  {
+   "id": "mq_hr_ev_race",
+   "title": "The Ferry Race to the Island",
+   "region": "high_rock/bjoulsae",
+   "start": "npc:mq_hr_ev_iselle",
+   "requires": [
+    "level:4"
+   ],
+   "offer": "Iselle, what is this about a race?",
+   "pitch": "Every feast of Mara the ferrymen race to the island. Four oars, two steersmen, and a dispute about who won. I have a place in the stern and nobody to bail. You will bail. You will bail very hard. I have been beaten six years by Hob Corwin, who is a cheat, and I wish to be beaten this year by someone more honest.",
+   "desc": "Ferrywoman Iselle needs a bailer for the Evermor feast-of-Mara ferry race, which she has lost six years running.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "evermor",
+     "text": "Take your place in the ferry at the quay",
+     "offset": [
+      22,
+      10
+     ],
+     "radius": 6
+    },
+    {
+     "type": "go",
+     "place": "evermor",
+     "text": "Race the ferry round the Pilot's Rock",
+     "offset": [
+      50,
+      -20
+     ],
+     "radius": 10
+    },
+    {
+     "type": "go",
+     "place": "evermor",
+     "text": "Reach the cathedral island steps first",
+     "offset": [
+      40,
+      -50
+     ],
+     "radius": 8
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_ev_iselle",
+     "text": "Celebrate with Ferrywoman Iselle",
+     "topic": "The ferry beat the others by a boat-length. You are the winner.",
+     "reply": "The winner! Seven years, and not once did I think... Take this. I stole it from Hob Corwin's boat last night. It is a very good oar-lock. Do not tell him. Tell him it is a gift from a grateful lake.",
+     "actions": "give:skycraft:fine_fishing_rod"
+    }
+   ],
+   "outro": "The ferry race of Evermor has a new champion. Hob Corwin sulks, and Iselle has added a very small flag to her stern, which says nothing, in an extremely pointed manner.",
+   "rewards": {
+    "gold": 160
+   }
+  },
+  {
+   "id": "mq_hr_gp_salt",
+   "title": "The Salt Run",
+   "region": "high_rock/glenumbra",
+   "start": "npc:mq_hr_gp_dunstan",
+   "requires": [
+    "level:9"
+   ],
+   "offer": "Reeve, what is wrong with the pans?",
+   "pitch": "Salt tax is paid at the Gate, and every crate is stamped. This quarter we sold twice the salt we produced, and the Count's tax-man is on the road. Someone is landing untaxed salt, and mixing it into ours, and the books look as if we have made a miracle. I do not mind a miracle. I mind the hanging at the end of it. Find the landing. Stop it.",
+   "desc": "Glenpoint's salt-pans are selling twice what they produce, and the Count's tax-man is on the road. Reeve Dunstan Blythe wants the smugglers found and the landing sealed.",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "mq_hr_gp_edda",
+     "text": "Ask Pilot Edda Marrow when the tides are wrong",
+     "topic": "Someone is landing salt at Glenpoint. When would a boat come in unseen?",
+     "reply": "On the dark of the moon, at slack water, between the Pilot's Rock and the lee of the headland. The tide is dead for a quarter-hour, and you can slip a ship in sideways. I have watched it three times and said nothing. I did not like my choices. Go to the pans tonight. They will land at the second hour."
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_gp_sorrel",
+     "text": "Ask Sorrel Whitlow who has been buying more salt than the Brine Pan needs",
+     "topic": "The pans have sold twice what they produced. Has anyone been buying more salt than a kitchen could use?",
+     "reply": "More than a kitchen! A man called Marrick, who says he cures hams. I have never seen a ham. He buys forty pounds at a time and pays in Skingrad silver. And he does not drink. A man who buys that much salt and does not drink is a man with something to preserve, and I would not like to know what."
+    },
+    {
+     "type": "cond",
+     "cond": "night",
+     "place": "glenpoint",
+     "text": "Watch the salt pans at the dark of the moon",
+     "offset": [
+      24,
+      18
+     ]
+    },
+    {
+     "type": "clear",
+     "place": "glenpoint",
+     "placement": "near",
+     "text": "Catch the landing crew at the salt pans",
+     "spawn": [
+      {
+       "type": "skycraft:bandit",
+       "name": "Pan Smuggler",
+       "count": 4
+      }
+     ],
+     "offset": [
+      24,
+      18
+     ],
+     "radius": 14,
+     "actions": "relic:mq_hr_gp_salt_tally"
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_hr_gp_dunstan",
+     "relic": "mq_hr_gp_salt_tally",
+     "text": "Show the Reeve the second tally",
+     "topic": "The crew carried this. A second tally in the back. It names the cove they ship from.",
+     "reply": "The Emeric Crypt cove. Of course. That is where my father kept his boat. I thought it was sealed. It was merely quiet. Go. Seal it. Take as many men as you like from the Reeve's own, which is to say three."
+    },
+    {
+     "type": "kill",
+     "place": "emeric_crypt",
+     "placement": "structure",
+     "text": "Seal the smugglers' cove and take Marrick Saltfist",
+     "spawn": [
+      {
+       "boss_id": "mq_hr_gp_cove_master"
+      },
+      {
+       "type": "skycraft:bandit",
+       "name": "Cove Hand",
+       "count": 3
+      }
+     ]
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_gp_dunstan",
+     "text": "Report to Reeve Blythe",
+     "topic": "The cove is sealed. Saltfist is down. What do you want to do with the tally?",
+     "reply": "The tally. The tax-man will want it. I will not give it to him. The pans were landed honest by the men who sold salt in the lee of the headland, and who did not know it was untaxed. Or I will give it to him, and the tax-man will find the smugglers, and the honest ones will pay for the crooked. Which is it?",
+     "choices": [
+      {
+       "label": "Give it to the tax-man. The crooked pay. The honest ones can be spared.",
+       "reply": "Then I will name only Saltfist's crew, and the pans will stand. It is the law, and it is just enough.",
+       "actions": "flag:mq_hr_gp_tally_filed;take:mq_hr_gp_salt_tally;points:knights_of_the_dragon:1;loot:standard"
+      },
+      {
+       "label": "Burn it. Let the tax-man find nothing, and the pans go on.",
+       "reply": "Then there is no tally, and no landing, and the salt is only a very good harvest. I shall say so to anyone who asks.",
+       "actions": "flag:mq_hr_gp_tally_burned;take:mq_hr_gp_salt_tally;give:minecraft:emerald*8;give:skycraft:salt_pile*6"
+      }
+     ]
+    }
+   ],
+   "outro": "The salt of Glenpoint is exactly the quantity it should be. The Brine Pan serves it with every dish, and Sorrel Whitlow has been heard to say that it has never tasted better.",
+   "rewards": {
+    "gold": 620,
+    "loot": "standard",
+    "items": [
+     {
+      "item": "skycraft:breton_dagger",
+      "name": "Saltfist's Needle",
+      "enchant": {
+       "sharpness": 2,
+       "looting": 1
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_gp_bell",
+   "title": "The Bell of the Lonely Tortoise",
+   "region": "high_rock/glenumbra",
+   "start": "npc:mq_hr_gp_corwin",
+   "requires": [
+    "level:8"
+   ],
+   "offer": "Corwin, the bell rings at low tide?",
+   "pitch": "At low tide, in the dead of night, the Tortoise's bell rings. I have heard it every winter for thirty-one years. I have never been brave enough to go down and look. I am an old man. I should like to know, before I die, whether it is a bell, or a ghost, or a crab. Take the bell and bring it up, if you can. Or tell me it is a crab.",
+   "desc": "Old Corwin Tarne has heard the Lonely Tortoise's bell ring at low tide for thirty-one years. He wants it brought up, or explained.",
+   "objectives": [
+    {
+     "type": "cond",
+     "cond": "night",
+     "place": "wreck_of_the_lonely_tortoise",
+     "text": "Wait for low tide at the wreck of the Lonely Tortoise",
+     "offset": [
+      0,
+      0
+     ]
+    },
+    {
+     "type": "clear",
+     "place": "wreck_of_the_lonely_tortoise",
+     "placement": "structure",
+     "text": "Drive the drowned crew from the wreck",
+     "spawn": [
+      {
+       "type": "minecraft:drowned",
+       "name": "Tortoise Crew",
+       "count": 4
+      }
+     ]
+    },
+    {
+     "type": "retrieve",
+     "place": "wreck_of_the_lonely_tortoise",
+     "relic": "mq_hr_gp_tortoise_bell",
+     "text": "Recover the ship-bell from the Tortoise's forecastle",
+     "offset": [
+      0,
+      0
+     ],
+     "radius": 14,
+     "journal": "The bell hung in the forecastle on a rotten bracket. Wedged beside it was a crab no bigger than a thumbnail, working a small iron ring back and forth against the clapper. The bell rang once, in the dark, quite beautifully."
+    },
+    {
+     "type": "deliver",
+     "npc": "mq_hr_gp_corwin",
+     "relic": "mq_hr_gp_tortoise_bell",
+     "text": "Show Old Corwin the bell",
+     "topic": "A crab, Corwin. A very small crab, and a very good bell.",
+     "reply": "A crab! Thirty-one years, and it was a crab. Gods, I could weep. A crab that rings a bell for no reason. I could take its example. Give me the bell. I shall put it on my mantle. And at low tide, I shall go down to the shore with a bucket, and take the crab home, and call it the Captain.",
+     "actions": "give:skycraft:glenumbra_herring*3"
+    }
+   ],
+   "outro": "The bell of the Lonely Tortoise hangs on Old Corwin's mantle, and a very small crab named the Captain lives in a bucket by the fire.",
+   "rewards": {
+    "gold": 300,
+    "loot": "minor"
+   }
+  },
+  {
+   "id": "mq_hr_gp_light",
+   "title": "The Keeper of Glencombe",
+   "region": "high_rock/glenumbra",
+   "start": "npc:mq_hr_gp_edda",
+   "requires": [
+    "level:7"
+   ],
+   "offer": "Edda, the lighthouse is dark?",
+   "pitch": "Glencombe Light has not shown in three nights. Old Fenwick, the keeper, has kept it fifty years and never let it go out. Something has happened to him. I cannot leave my boat; the tide will not wait. If you are brave, and if you are not sensible, go up there and see.",
+   "desc": "Glencombe Lighthouse has been dark for three nights and its keeper, Old Fenwick, has not been seen. Pilot Edda Marrow asks you to climb the tower and see.",
+   "objectives": [
+    {
+     "type": "clear",
+     "place": "glencombe_lighthouse",
+     "placement": "structure",
+     "text": "Clear the lighthouse of what has crept in at the base",
+     "spawn": [
+      {
+       "type": "skycraft:skeever",
+       "name": "Tower Skeever",
+       "count": 4
+      },
+      {
+       "type": "minecraft:zombie",
+       "name": "Salt Walker",
+       "count": 2
+      }
+     ]
+    },
+    {
+     "type": "go",
+     "place": "glencombe_lighthouse",
+     "text": "Climb to the lamp room and find Old Fenwick",
+     "offset": [
+      0,
+      0
+     ],
+     "radius": 12
+    },
+    {
+     "type": "talk",
+     "npc": "mq_hr_gp_edda",
+     "text": "Tell Edda what you found",
+     "topic": "The keeper is alive, Edda. He fell on the stair and broke his leg. Two days in the dark. He has asked for his lamp.",
+     "reply": "His lamp! The stubborn old fool. Fifty years and he will not sit still. I will take the lamp up myself tonight. And I shall sit with him until the leg is mended. Thank you. Take this. It is the pilot's knot, and it has never been tied for a stranger.",
+     "actions": "give:skycraft:amulet_of_mara"
+    }
+   ],
+   "outro": "Glencombe Light burns again, tended by a pilot who has promised to spend a week in the tower, and a keeper who has promised, with his leg in a splint, to say thank you.",
+   "rewards": {
+    "gold": 220
+   }
+  },
+  {
+   "id": "mq_hr_wy_after_named",
+   "title": "A Chamberlain Confesses",
+   "region": "high_rock/wayrest",
+   "start": "auto",
+   "requires": [
+    "level:14",
+    "quest:mq_hr_wy_chain",
+    "flag:mq_hr_wy_chain_named"
+   ],
+   "pitch": "Chamberlain Aumaric Dessaux took the doubled manifest to the Duchess himself. He wants to speak.",
+   "desc": "Chamberlain Aumaric Dessaux took the doubled manifest to the Duchess himself. He wants to speak.",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "mq_hr_wy_aumaric",
+     "text": "Call on Chamberlain Dessaux after his audience with the Duchess",
+     "topic": "You told the Duchess. How did she take it?",
+     "reply": "With a long silence, and then a very short sentence. She said: \"You might have told me.\" I had no answer. She has not dismissed me. She has restored her sister to a house in the Lower Bridges and told no one. The Marguerite is a berth fee in the harbour book now, in plain ink. I sleep. Not well. But I sleep. Take this, in the Chamberlain's name."
+    }
+   ],
+   "outro": "The Duchess of Wayrest knows her sister is in the city. The Marguerite has a berth, and the harbour chain is raised by honest hands.",
+   "rewards": {
+    "gold": 350,
+    "items": [
+     {
+      "item": "skycraft:breton_helmet",
+      "name": "Chamberlain's Gift",
+      "enchant": {
+       "protection": 1,
+       "unbreaking": 1
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_wy_after_buried",
+   "title": "A Debt Kept Quiet",
+   "region": "high_rock/wayrest",
+   "start": "auto",
+   "requires": [
+    "level:14",
+    "quest:mq_hr_wy_chain",
+    "flag:mq_hr_wy_chain_buried"
+   ],
+   "pitch": "The doubled manifest was burned and only the pilot named. Quartermaster Jules Garrow knows more than he says.",
+   "desc": "The doubled manifest was burned and only the pilot named. Quartermaster Jules Garrow knows more than he says.",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "mq_hr_wy_jules",
+     "text": "Hear the Quartermaster's thoughts on the buried manifest",
+     "topic": "The book is ash. What do you count now?",
+     "reply": "Crates. I count crates, as I always have. But I count one more than I did before, and I put it on no manifest, and I carry it up to a certain house in the Lower Bridges every month. The pilot is hanged. The ship is a rumour. A woman who should not be in Wayrest is, and sleeps in her own bed. I have not told you any of this. I do not know you. Good evening."
+    }
+   ],
+   "outro": "Quartermaster Jules Garrow counts one extra crate each month and carries it up to a house in the Lower Bridges. Wayrest's harbour book has no record of it.",
+   "rewards": {
+    "gold": 350,
+    "items": [
+     {
+      "item": "skycraft:gold_ring",
+      "name": "Counted Ring",
+      "enchant": {}
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_cm_after_true",
+   "title": "The Peal Answered",
+   "region": "high_rock/glenumbra",
+   "start": "auto",
+   "requires": [
+    "level:12",
+    "quest:mq_hr_cm_peal",
+    "flag:mq_hr_cm_peal_true"
+   ],
+   "pitch": "The true peal rang out over the bay. Bellwright Tam Selby has heard the answer.",
+   "desc": "The true peal rang out over the bay. Bellwright Tam Selby has heard the answer.",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "mq_hr_cm_tam",
+     "text": "Hear from Bellwright Tam Selby how the true peal was answered",
+     "topic": "The true peal rang. Did anyone answer?",
+     "reply": "From Daggerfall, at dusk, on the Gate Span's small bell, which is the only bell in the city nobody remembers casting. The reply was one note, held very long. I have been told it meant: received. The Knights of the Dragon have doubled the watch on the Glenumbra road. I cast a new clapper this morning. It rings like a promise. Take this."
+    }
+   ],
+   "outro": "The bells of Daggerfall and Camlorn speak in the old code again, and the Knights of the Dragon watch the Glenumbra road.",
+   "rewards": {
+    "gold": 300,
+    "items": [
+     {
+      "item": "skycraft:breton_dagger",
+      "name": "Clapper-Cutter",
+      "enchant": {
+       "sharpness": 1
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_cm_after_plain",
+   "title": "A Quiet Bay",
+   "region": "high_rock/glenumbra",
+   "start": "auto",
+   "requires": [
+    "level:12",
+    "quest:mq_hr_cm_peal",
+    "flag:mq_hr_cm_peal_plain"
+   ],
+   "pitch": "The plain peal rang and the warning stayed silent. Archpriest Elric Ashby wants a word.",
+   "desc": "The plain peal rang and the warning stayed silent. Archpriest Elric Ashby wants a word.",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "mq_hr_cm_elric",
+     "text": "Visit Archpriest Elric Ashby after the plain peal",
+     "topic": "The plain peal rang. Is the bay quiet?",
+     "reply": "Quiet. Too quiet, some say, and I do not know if they are right. I have lit a candle at the Mara altar each night for the warning I did not send. If the war comes, I will answer for it. If it does not, I will have answered for a silence. I am an old man. I have learned that a silence can be a sin as readily as a word. Thank you, stranger, for not saying so."
+    }
+   ],
+   "outro": "Camlorn rings its bells on schedule. Archpriest Elric Ashby lights a candle each night, and does not say for whom.",
+   "rewards": {
+    "gold": 300,
+    "items": [
+     {
+      "item": "skycraft:amulet_of_mara",
+      "name": "Archpriest's Blessing",
+      "enchant": {}
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_np_after_doused",
+   "title": "A Dark Moor",
+   "region": "high_rock/rivenspire",
+   "start": "auto",
+   "requires": [
+    "level:11",
+    "quest:mq_hr_np_lamp",
+    "flag:mq_hr_np_lamp_doused"
+   ],
+   "pitch": "The second lamp has been doused. Keeper Sorley Vance asks you to sit with her.",
+   "desc": "The second lamp has been doused. Keeper Sorley Vance asks you to sit with her.",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "mq_hr_np_sorley",
+     "text": "Sit with Keeper Sorley Vance on the first dark night",
+     "topic": "The moor is dark tonight. How are you?",
+     "reply": "Dark. I put the lamp out at dusk and sat on the step and waited for the moor to be angry. It was not. A mist came up at midnight, very soft, and I thought I heard footsteps on the peat. Going away. Not coming. It is a kind of peace. I think they have gone home. I think Isolde has gone with them. I am not sure I mind. Take this. It was hers."
+    }
+   ],
+   "outro": "The second lamp of Northpoint is dark, and the moor is quiet. Keeper Sorley Vance sits on the step each dusk and watches the mist go out.",
+   "rewards": {
+    "gold": 280,
+    "items": [
+     {
+      "item": "skycraft:amulet_of_mara",
+      "name": "Isolde's Lamp-Charm",
+      "enchant": {}
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_np_after_kept",
+   "title": "A Grave-Light Noticed",
+   "region": "high_rock/rivenspire",
+   "start": "auto",
+   "requires": [
+    "level:11",
+    "quest:mq_hr_np_lamp",
+    "flag:mq_hr_np_lamp_kept"
+   ],
+   "pitch": "The second lamp burns on as a grave-light, with a notice posted. Reeve Maude Harrow has news.",
+   "desc": "The second lamp burns on as a grave-light, with a notice posted. Reeve Maude Harrow has news.",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "mq_hr_np_maude",
+     "text": "Hear the Reeve's news of the posted notice",
+     "topic": "The notice is posted. Have the ships learned?",
+     "reply": "They have. Captains read it twice, and bow to the moor as they pass. One man left a ribbon at the first stake. The lamp burns, and a boy asked me yesterday why it is not a lighthouse. I told him that a lighthouse is for the living, and a grave-light is for the ones who did not get a lighthouse. He nodded. It is the best answer I have ever given."
+    }
+   ],
+   "outro": "Ships steer by the tower and bow to the moor. The grave-light burns on, and no one has followed it astray.",
+   "rewards": {
+    "gold": 280,
+    "items": [
+     {
+      "item": "skycraft:silver_ring",
+      "name": "Grave-Lamp Token",
+      "enchant": {}
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_ev_after_placed",
+   "title": "The Window Mended",
+   "region": "high_rock/bjoulsae",
+   "start": "auto",
+   "requires": [
+    "level:12",
+    "quest:mq_hr_ev_rose",
+    "flag:mq_hr_ev_rose_placed"
+   ],
+   "pitch": "The Water Rose has been set back in the east window of the cathedral. Bishop Mallory Fenn invites you to see it.",
+   "desc": "The Water Rose has been set back in the east window of the cathedral. Bishop Mallory Fenn invites you to see it.",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "mq_hr_ev_mallory",
+     "text": "See the east window with Bishop Mallory Fenn",
+     "topic": "The rose is back in the sill. How does the nave feel?",
+     "reply": "Dry. For the first time in my life the nave floor does not weep. The glass is cold in the mornings and warm at dusk, and the candles stand upright. The lake has settled a finger-joint, and the lower nave is quiet. I have said a mass for the Canon. I felt, at the end of it, very faintly, that someone said Amen. It was not a human voice. It was not unkind."
+    }
+   ],
+   "outro": "The Water Rose sits in the east window of Evermor Cathedral, and the nave floor is dry. The Canon of the lower nave has not spoken again.",
+   "rewards": {
+    "gold": 300,
+    "items": [
+     {
+      "item": "skycraft:silver_circlet",
+      "name": "Canon's Circlet",
+      "enchant": {}
+     }
+    ]
+   }
+  },
+  {
+   "id": "mq_hr_ev_after_kept",
+   "title": "Stone by Stone to the Hill",
+   "region": "high_rock/bjoulsae",
+   "start": "auto",
+   "requires": [
+    "level:12",
+    "quest:mq_hr_ev_rose",
+    "flag:mq_hr_ev_rose_kept"
+   ],
+   "pitch": "The Water Rose stays in the lakebed, and Evermor Cathedral will be moved to the hill. Brother Ansel has the plans.",
+   "desc": "The Water Rose stays in the lakebed, and Evermor Cathedral will be moved to the hill. Brother Ansel has the plans.",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "mq_hr_ev_ansel",
+     "text": "Hear Brother Ansel's plan to move the cathedral",
+     "topic": "The rose stays down. What of the cathedral?",
+     "reply": "A hundred years, give or take a flood. We have marked the first stone, and I have drawn the plan: a nave on the hill, a tower with a bell, a window of plain glass. The Bishop will not live to see the roof. I will not live to see the door. But a child has been baptised in the old font and will see it, and she is only two. Take this. It is the first stone, and it is yours to lay."
+    }
+   ],
+   "outro": "The first stone of the new cathedral of Evermor stands on the hill, and the lake is a little higher each winter. Nobody in the town is frightened of it.",
+   "rewards": {
+    "gold": 300,
+    "items": [
+     {
+      "item": "skycraft:quarried_stone",
+      "name": "First Stone of the New Nave",
+      "enchant": {}
+     }
+    ]
+   }
+  }
+ ]
+}

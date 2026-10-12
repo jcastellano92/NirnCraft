@@ -1,0 +1,157 @@
+{
+ "places": {
+  "castle_wayrest": {
+   "hook": "The twin-towered seat of the Duchess of Wayrest, a keep of pale stone and green banners whose cellars are said to be older than its cathedral.",
+   "rumour": "The Chamberlain keeps two sets of keys: one for the rooms the Duchess has seen, and one for those she has not. He is said to be quite scrupulous about the second set.",
+   "notes": [
+    {
+     "id": "dessaux_card",
+     "kind": "letter",
+     "title": "A Card from the Chamberlain",
+     "author": "Aumaric Dessaux",
+     "at": "chest",
+     "pages": [
+      "#To whomever finds this,\nIf this card has come to you, you are in a room you ought not to be, and I admire the effort. I will not call the guard. I will say only that the third drawer is not what it seems, and the fourth is exactly what it seems, and the fifth has a rat in it. Be kind to the rat.",
+      "If you are a thief, take the silver and leave the ledgers. If you are a spy, take the ledgers, but replace them with forgeries; they will not be read. If you are an honest person, I am sorry, and I hope the rat is well."
+     ]
+    }
+   ]
+  },
+  "wayrest_sewers": {
+   "hook": "The brick-vaulted drains beneath Wayrest, where the city's politeness runs out and its gutters begin.",
+   "rumour": "There is a stretch of the Wayrest sewers where a ledger is said to be hidden, and the Sewer-Warden has never found it, and he has looked every day for thirty years.",
+   "notes": [
+    {
+     "id": "warden_complaint",
+     "kind": "report",
+     "title": "Sewer-Warden's Complaint, in Couplets",
+     "author": "Pike the Sewer-Warden",
+     "at": "chest",
+     "pages": [
+      "^A report, in the form required by the Cormorant's house rule:\nThe water in the third arch has risen with the tide,\nAnd something below it has opened its eye.\nI have counted the bricks, and the bricks are all there,\nBut the count has been wrong since the Duchess's heir.",
+      "The overflow chamber, which was dry as a book,\nIs now full of shining. I will not look.\nThe fox mask, the diadem, and the cold altar:\nI have sealed the door and laid down the halter."
+     ]
+    }
+   ]
+  },
+  "orsinium_outlaws_refuge": {
+   "hook": "A smugglers' stair under the wall of Orsinium, where Breton merchants buy what orc smiths are not supposed to sell.",
+   "rumour": "The refuge beneath Orsinium is run by a woman who is half orc and wholly unconcerned. She pays the wardens in iron and the Chieftain in jokes.",
+   "notes": [
+    {
+     "id": "refuge_tally",
+     "kind": "ledger",
+     "title": "Refuge Tally of Goods Passing the Wall",
+     "author": "Grisha gra-Mogh",
+     "at": "chest",
+     "pages": [
+      "^PASSED THE WALL THIS WEEK\n^Four bolts of Breton wool, for the forge-aprons (the aprons are wool; the forge does not care).\n^One crate of real wine, labelled as vinegar.\n^Three iron ingots, entering. Three, leaving, with a different mark.\n^One grandfather, in a barrel. Do not ask.",
+      "Note for the Chieftain, should he read this: the grandfather has since been returned to his family. He was not dead. He had merely fallen asleep in the barrel, and been shipped. Orsinium is, at heart, a very forgiving city."
+     ]
+    }
+   ]
+  },
+  "daggerfall_outlaws_refuge": {
+   "hook": "A cellar beneath the Guild Span's tollhouse where those with unpaid tolls wait out the Guild's patience.",
+   "rumour": "The cellar under the Guild Span is dry in winter and flooded in summer. The smugglers who use it say the river keeps its own schedule.",
+   "notes": [
+    {
+     "id": "span_chalk_wall",
+     "kind": "notes",
+     "title": "The Chalk Wall",
+     "author": "Anonymous",
+     "at": "site",
+     "pages": [
+      "^Scratched and chalked on the cellar wall, in forty hands:\n\"Paid in full, 4E 184. Paid again, 4E 188. Paid thrice, 4E 193, and still I cross.\"\n\"The Madam is lawful. The Madam is thorough. The Madam is a perfectly tuned bell, and nobody asks who tuned her.\"",
+      "\"If you are reading this, you owe nothing. Nobody does. The bridge is a hole, and the hole is a coin, and the coin is a bridge. Cross, and say nothing, and do not count.\""
+     ]
+    }
+   ]
+  },
+  "wynley_ruins": {
+   "hook": "A tumbled chapel-yard east of Camlorn whose broken tower still holds the oldest bell in Glenumbra, tolled once a year by the Company of the Peal.",
+   "rumour": "In Camlorn the bell-ringers have a code. It is not a secret. Every child knows it. That is what makes it so useful. At Wynley, they say, the old bell keeps the original.",
+   "notes": [
+    {
+     "id": "ringers_roll",
+     "kind": "list",
+     "title": "Roll of the Company of the Peal",
+     "author": "Bellwright Tam Selby",
+     "at": "chest",
+     "pages": [
+      "^THE COMPANY OF THE PEAL\n^Treble: Ysoldt Garrick (fifty years, deaf in the left ear, ringing true).\n^Second: Pell the younger (talks while ringing; no one minds).\n^Third: unfilled, since the Winter of Bells. Do not offer the rope to a stranger.\n^Tenor: Brother Cael, who rings but does not speak.",
+      "Note: the third rope is never to be pulled. The bell rang it alone last Tirdas. The Archpriest says it was the wind. The wind in Camlorn, I may say, has never once rung a bell in the correct order."
+     ]
+    }
+   ]
+  },
+  "shornhelm_outlaws_refuge": {
+   "hook": "A cellar beneath the old armoury of Shornhelm where men who have left the garrison without leave wait for forgiveness or boat.",
+   "rumour": "In the wall under Shornhelm there is a place for men who have run. The Marshal knows. She leaves it unlocked. She is, in her way, a kind woman.",
+   "notes": [
+    {
+     "id": "refuge_orders",
+     "kind": "orders",
+     "title": "Standing Order Concerning the Lower Cellar",
+     "author": "Marshal Ysolde Garreth",
+     "at": "chest",
+     "pages": [
+      "^STANDING ORDER, NOT TO BE POSTED\n^The lower armoury cellar is to be kept dry, lit and stocked with bread and a barrel. No soldier of this garrison is to enter it in the first hour of any watch. No soldier who finds a man there is to ask his name.",
+      "^A man who has run has already paid. A man who has been asked to pay twice has nothing left to give. I will not have my garrison made poorer by the loss of a single one. Anyone who objects may take it up with me."
+     ]
+    }
+   ]
+  },
+  "northpoint": {
+   "hook": "A salt-and-peat town on the Rivenspire coast, where a single lighthouse watches seven hundred souls and a moor that does not hold still.",
+   "rumour": "There are two lights at Northpoint, the tower and the moor. The tower is for ships. The moor is for the ones who did not come home.",
+   "notes": [
+    {
+     "id": "reeve_notice",
+     "kind": "notes",
+     "title": "Notice of the Northpoint Reeve",
+     "author": "Reeve Maude Harrow",
+     "at": "site",
+     "pages": [
+      "^NOTICE\n^Citizens are reminded that the moor is not a road. It does not take a person from one place to another; it takes a person to another place entirely.\n^Peat-cutters are to carry a lantern and a rope. Children are to carry nothing and go nowhere. The Fog Horn Arms will sound the horn on the hour. If you cannot hear it, you are too far from home.",
+      "^Anyone who sees a second lamp on the moor is to remember that it is a grave-light and not a beacon. It is to be left lit. It is not to be followed. If it is followed, report to the Reeve what you saw. The Reeve will not say what happened. The Reeve will only write it down."
+     ]
+    }
+   ]
+  },
+  "glenmoor_memorial": {
+   "hook": "A weathered obelisk on the Bjoulsae shore, carved with the names of boatmen drowned between the founding of Evermor and the last great flood.",
+   "rumour": "The names on the Glenmoor Memorial are re-cut every year by an old woman who is nobody's kin. She says the lake asked her.",
+   "notes": [
+    {
+     "id": "memorial_stonecutter",
+     "kind": "notes",
+     "title": "The Stonecutter's Note",
+     "author": "A Mason of Evermor",
+     "at": "site",
+     "pages": [
+      "^Left on the plinth beneath a flat stone:\n\"I have cut four hundred and twelve names. The last was my own son's. I am to cut mine when it is time. I have the chisel ready, and the stone, and the dates. Only the final mark is left, and I will not carve it until I am sure.\"",
+      "\"There is a space at the bottom, a hand's width, with nothing in it. People say the lake will fill it. I think the lake fills it every year and I merely keep it clean. If you are reading this, I hope you are not a boatman. If you are, stay on land awhile. The lake is a great reader of obelisks.\""
+     ]
+    }
+   ]
+  },
+  "glenpoint": {
+   "hook": "A small salt-and-fishing harbour on the western tip of Glenumbra, where honest men sell salt at the same price to everyone and nobody quite believes it.",
+   "rumour": "In Glenpoint the salt is salted twice. The first time for taste, and the second for luck, which the Reeve says is also a kind of tax.",
+   "notes": [
+    {
+     "id": "pan_notice",
+     "kind": "notes",
+     "title": "Notice of the Glenpoint Salt Pans",
+     "author": "Reeve Dunstan Blythe",
+     "at": "site",
+     "pages": [
+      "^NOTICE\n^Salt is sold at the pans at a fixed price, in sealed crates, on market days only. No salt is to be carried from the pans after dusk. No salt is to be carried to the pans at any hour. Any crate arriving by water will be treated as a bad omen and a crime, in that order.",
+      "^By order of the Reeve: the tide-tables are to be posted at the quay each dawn. Anyone who tampers with them will be fined. Anyone who corrects them will be thanked, and told to stop. This town has always been small. It intends to remain honest."
+     ]
+    }
+   ]
+  }
+ }
+}

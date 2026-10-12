@@ -11,5 +11,8 @@
  "tamriel_west.json",
  "marquee_morrowind.json",
  "marquee_black_marsh.json",
- "loreweb.json"
+ "loreweb.json",
+ "marquee_cyrodiil.json",
+ "marquee_high_rock.json",
+ "marquee_hammerfell.json"
 ]
