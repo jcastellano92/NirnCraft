@@ -1,0 +1,63 @@
+{
+  "_doc": "Per-zone draws. density = expected props per 16x16 chunk before scaling. scale: human = 0.35+1.3*humanity (humanity 1 at a settlement edge, 0 beyond its reach); wild = 1.3-0.9*humanity; remote = 0.7+0.9*remoteness (0 beside any settlement, 1 a long walk from every one); none = 1. kinds: weights. caps: props per chunk (clusters count their members), per kind per chunk, placement attempts. reach: blocks beyond a settlement's footprint over which its human traces fade out.",
+  "caps": { "chunk": 12, "perKind": 2, "attempts": 5 },
+  "reach": { "capital": 260, "city": 220, "town": 160, "village": 110, "farm": 80 },
+  "wayside": { "density": 0.9, "kinds": {
+      "cart_wreck": 2, "crate_stack": 2, "firewood_stack": 1.5, "cairn": 1.5, "fire_pit_cold": 1, "camp_leavings": 0.7,
+      "rubbish_heap": 0.7, "hay_pile": 0.5, "tool_litter": 0.5, "grave": 0.4, "bedroll": 0.4, "boulder_field": 0.6, "fallen_log": 0.6 } },
+  "zones": {
+    "urban_fringe": [
+      { "scale": "human", "density": 6.5, "kinds": {
+          "cart_wreck": 2, "crate_stack": 3, "firewood_stack": 3, "hay_pile": 2.5, "broken_fence": 2.5, "tool_litter": 2,
+          "laundry_line": 1.5, "rubbish_heap": 2.5, "cairn": 0.7, "grave": 1.2, "rubble_pile": 1.5, "scarecrow": 1,
+          "water_trough": 1, "plank_stack": 1.5, "lean_to": 1.3, "drying_rack": 0.8, "fire_pit_cold": 0.5, "broken_pen": 1,
+          "cemetery": 0.35, "rubbish_yard": 0.5, "farmstead_clutter": 0.5 } },
+      { "scale": "wild", "density": 0.7, "kinds": { "boulder_field": 2, "wildflowers": 3, "fallen_log": 1, "berry_patch": 1 } }
+    ],
+    "farmland": [
+      { "scale": "human", "density": 4.0, "kinds": {
+          "field_plot": 4, "hay_pile": 3, "broken_fence": 3, "scarecrow": 1.5, "broken_pen": 1.5, "water_trough": 1.5,
+          "firewood_stack": 1.5, "cart_wreck": 1, "tool_litter": 1.5, "cairn": 0.6, "plank_stack": 1, "farmstead_clutter": 0.8,
+          "grave": 0.3, "lean_to": 0.4 } },
+      { "scale": "wild", "density": 2.4, "kinds": {
+          "wildflowers": 3, "boulder_field": 2, "fallen_log": 2, "berry_patch": 2, "hollow_stump": 0.6, "mushroom_ring": 0.5, "bone_pile": 0.3 } }
+    ],
+    "roadside": [
+      { "scale": "human", "density": 2.0, "kinds": {
+          "cart_wreck": 2.5, "crate_stack": 2, "firewood_stack": 1.5, "cairn": 1.5, "fire_pit_cold": 1.5, "camp_leavings": 0.9,
+          "tool_litter": 0.8, "rubbish_heap": 0.8, "broken_fence": 0.8, "hay_pile": 0.8, "grave": 0.5, "bedroll": 0.5 } },
+      { "scale": "wild", "density": 2.2, "kinds": {
+          "boulder_field": 2, "wildflowers": 2, "fallen_log": 1.5, "berry_patch": 1.2, "hollow_stump": 0.5, "mushroom_ring": 0.4 } }
+    ],
+    "shore": [
+      { "scale": "none", "density": 3.2, "kinds": {
+          "driftwood": 3, "reed_bed": 3, "fish_rack": 1.2, "boat_wreck": 0.8, "stepping_stones": 1.2, "crate_stack": 0.4,
+          "boulder_field": 1.5, "fallen_log": 1, "wildflowers": 1 } },
+      { "scale": "human", "density": 0.9, "kinds": { "firewood_stack": 1, "fire_pit_cold": 1, "camp_leavings": 0.5, "cairn": 0.5 } }
+    ],
+    "ruin_adjacent": [
+      { "scale": "none", "density": 4.2, "kinds": {
+          "broken_weapons": 3, "rubble_pile": 3, "skull_stakes": 1, "bone_pile": 1.5, "fallen_banner": 2, "collapsed_wall": 2,
+          "battle_remains": 0.9, "boulder_field": 1, "grave": 0.5, "cairn": 0.5 } },
+      { "scale": "wild", "density": 1.2, "kinds": { "fallen_log": 1, "hollow_stump": 0.6, "wildflowers": 1 } }
+    ],
+    "dungeon_adjacent": [
+      { "scale": "none", "density": 4.0, "kinds": {
+          "bone_pile": 3, "skull_stakes": 2, "warning_cairn": 2, "blood_trail": 2.5, "webbed_corpse": 1.5, "rubble_pile": 1,
+          "boulder_field": 1.5, "broken_weapons": 0.8, "dungeon_warnings": 0.8, "fallen_log": 1 } }
+    ],
+    "wild": [
+      { "scale": "human", "density": 0.8, "kinds": {
+          "cairn": 2, "fire_pit_cold": 1.5, "camp_leavings": 0.5, "grave": 0.5, "cart_wreck": 0.4, "firewood_stack": 0.6 } },
+      { "scale": "wild", "density": 3.0, "kinds": {
+          "boulder_field": 3, "fallen_log": 3, "hollow_stump": 1.5, "mushroom_ring": 1.2, "bone_pile": 1.2, "animal_den": 1,
+          "rock_arch": 0.35, "spire": 0.7, "ledge": 1.2, "crystal_outcrop": 0.5, "ore_outcrop": 0.9, "wildflowers": 3, "berry_patch": 1.5 } }
+    ],
+    "deep_wild": [
+      { "scale": "human", "density": 0.2, "kinds": { "cairn": 2, "fire_pit_cold": 1, "grave": 0.5 } },
+      { "scale": "remote", "density": 3.6, "kinds": {
+          "boulder_field": 3, "fallen_log": 3, "hollow_stump": 1.8, "mushroom_ring": 1.5, "bone_pile": 1.8, "animal_den": 1.6,
+          "rock_arch": 0.7, "spire": 1.3, "ledge": 1.4, "crystal_outcrop": 0.9, "ore_outcrop": 1.2, "wildflowers": 2.5, "berry_patch": 1.2 } }
+    ]
+  }
+}
