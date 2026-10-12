@@ -144,6 +144,7 @@ public final class CityPlans {
         for (CityPlan.Building b : cp.buildings) building(plan, b);
         for (CityPlan.Line l : cp.streets) line(plan, l);
         for (CityPlan.Ring r : cp.rings) ring(plan, r);
+        Nets.apply(plan, cp);
         for (CityPlan.Plaza z : cp.plazas) {
             Spec s = Cities.plaza(plan, z.x(), z.z(), z.size(), z.variant(), z.raise());
             if (!z.name().isEmpty()) s.name = z.name();

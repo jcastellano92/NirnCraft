@@ -439,6 +439,36 @@ public final class SettlementDevCommands {
             o.addProperty("culture", plan.culture.id());
             o.addProperty("style", plan.style);
             o.addProperty("base", plan.base);
+            // built-area ratios over the same disc (0.8 of the plan radius) before and after the fabric pass
+            int mr = (int) (plan.radius * 0.8);
+            double[] ratio = com.skycraft.tamriel.settlement.grammar.Fabric.measure(plan, mr);
+            o.addProperty("measure_r", mr);
+            o.addProperty("built_ratio", Math.round(ratio[0] * 1000) / 1000.0);
+            o.addProperty("developed_ratio", Math.round(ratio[1] * 1000) / 1000.0);
+            o.addProperty("fabric", plan.fabricReport);
+            // the predicted road ends (SettlementAnchors.gates, the road planner's contract), in the plan's local frame
+            com.google.gson.JsonArray gj = new com.google.gson.JsonArray();
+            for (int[] g : SettlementAnchors.gates(p)) {
+                int dx = g[0] - plan.cx, dz = g[1] - plan.cz;
+                int lx = switch (plan.back) {
+                    case EAST -> dz;
+                    case SOUTH -> -dx;
+                    case WEST -> -dz;
+                    default -> dx;
+                };
+                int lz = switch (plan.back) {
+                    case EAST -> -dx;
+                    case SOUTH -> -dz;
+                    case WEST -> dx;
+                    default -> dz;
+                };
+                com.google.gson.JsonArray pr = new com.google.gson.JsonArray();
+                pr.add(lx);
+                pr.add(lz);
+                gj.add(pr);
+            }
+            o.add("gates", gj);
+            o.addProperty("chains", plan.chains.size());
             o.add("specs", com.skycraft.tamriel.settlement.plan.CityPlans.describe(plan));
             DIR.mkdirs();
             try (FileWriter fw = new FileWriter(new File(DIR, "plan_" + id + ".json"))) {

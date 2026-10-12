@@ -9,15 +9,20 @@
     "imperial_city",
     "lillandril",
     "lilmoth",
+    "markarth",
     "orsinium",
     "raven_rock",
     "rihad",
+    "riften",
     "rimmen",
     "sadrith_mora",
     "sentinel",
     "skaal_village",
+    "solitude",
     "torval",
-    "wayrest"
+    "wayrest",
+    "whiterun",
+    "windhelm"
   ],
   "overlays": []
 }

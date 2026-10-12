@@ -1,0 +1,23 @@
+{
+  "id": "riften",
+  "base": "java",
+  "zones": [
+    {"at": [0, -50], "r": 26, "zone": "noble"},
+    {"at": [0, 20], "r": 24, "zone": "centre"},
+    {"at": [40, 50], "r": 22, "zone": "poor"}
+  ],
+  "fabric": {"radius": 72, "target": 0.55},
+  "features": [
+    {"type": "statue", "theme": "divine:mara", "where": "square"},
+    {"type": "shrine", "theme": "divine:mara", "where": "free"},
+    {"type": "great_tree", "theme": "birch", "where": "free"},
+    {"type": "pond", "where": "edge"},
+    {"type": "well", "count": 2, "where": "free"},
+    {"type": "banners", "count": 3, "where": "gate"},
+    {"type": "fountain", "where": "square"},
+    {"type": "lamps", "count": 3, "where": "free"},
+    {"type": "market", "where": "free"},
+    {"type": "bench", "where": "square"},
+    {"type": "memorial", "where": "free"}
+  ]
+}

@@ -75,6 +75,7 @@ function checkPoint(where, plan, pt, slack) {
   if (r > limit) err(`${where}: (${pt}) is ${Math.round(r)} from the anchor, beyond radius ${plan.radius || 110} + ${slack}`);
 }
 
+const featureSets = {};
 const usedNames = new Map();
 const use = (id, key) => { if (key) usedNames.set(key, id); };
 
@@ -130,9 +131,40 @@ for (const id of index.plans) {
     checkKind(`${id} queue`, q.kind);
     checkFlags(`${id} queue ${q.kind}`, q.flags);
     use(id, q.name);
-    if (q.on && !(plan.streets || []).some((s) => s.tag === q.on) && !(plan.rings || []).some((s) => s.tag === q.on)) {
-      err(`${id}: queue entry on "${q.on}" matches no street tag`);
+    if (q.on && !(plan.streets || []).some((s) => s.tag === q.on) && !(plan.rings || []).some((s) => s.tag === q.on)
+        && !(plan.nets || []).some((s) => (s.tag || (s.type === "radial" ? "spoke" : "")) === q.on || (s.type === "radial" && (s.ring_tag || "ring") === q.on))) {
+      err(`${id}: queue entry on "${q.on}" matches no street or net tag`);
     }
+  }
+  // organic nets
+  const NETS = new Set(["path", "loop", "radial", "switchback", "contour", "canal", "wall", "terraces"]);
+  for (const n of plan.nets || []) {
+    if (!NETS.has(n.type)) err(`${id}: unknown net type ${n.type}`);
+    for (const key of ["via", "gates"]) for (const pt of n[key] || []) if (Array.isArray(pt)) checkPoint(`${id} net ${n.type} ${key}`, p2, pt, slack + 14);
+    for (const key of ["from", "to", "at"]) if (Array.isArray(n[key])) checkPoint(`${id} net ${n.type} ${key}`, p2, n[key], slack + 14);
+    if (n.type === "radial" && n.r1 > radius + slack) err(`${id}: radial net r1 ${n.r1} beyond radius ${radius}`);
+    if (n.type === "canal" || n.type === "wall") if ((n.via || []).length < 2) err(`${id}: ${n.type} net needs via points`);
+  }
+  // civic features: known types, per-tier counts (hamlet 1-2, village 2-4, town 4-8, city 8-15, capital 15+), unique sets
+  const FEATURES = new Set(["great_tree", "tree", "tree_row", "fountain", "well", "pond", "pool", "basin", "aqueduct", "waterwheel",
+    "statue", "shrine", "memorial", "bell_tower", "banners", "lamps", "garden", "orchard", "market", "flowers", "bench", "gatehouse"]);
+  if ((plan.features || []).length) {
+    let total = 0;
+    const sig = [];
+    for (const f of plan.features) {
+      if (!FEATURES.has(f.type)) err(`${id}: unknown feature type ${f.type}`);
+      total += f.count || 1;
+      sig.push(`${f.type}:${f.theme || ""}x${f.count || 1}`);
+      if (Array.isArray(f.at)) checkPoint(`${id} feature ${f.type}`, p2, f.at, slack + 10);
+    }
+    const t = place.type;
+    const range = { capital: [15, 99], city: [8, 15], town: [4, 8], village: [2, 4], hamlet: [1, 2] }[t];
+    if (range && (total < range[0] || total > range[1])) err(`${id}: ${total} civic features, a ${t} wants ${range[0]}-${range[1]}`);
+    const key = sig.sort().join("|");
+    if (featureSets[key]) err(`${id}: same feature set as ${featureSets[key]}`);
+    featureSets[key] = id;
+  } else if (base !== "zoning") {
+    warn(`${id}: no civic features listed (a seeded set is drawn from the culture catalogue)`);
   }
   if ((plan.queue || []).length && base === "zoning") warn(`${id}: queue is ignored for base zoning`);
   for (const q of plan.quarters || []) {

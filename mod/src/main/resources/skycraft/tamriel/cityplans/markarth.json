@@ -1,0 +1,30 @@
+{
+  "id": "markarth",
+  "base": "java",
+  "nets": [
+    {"type": "path", "via": [[-74, 40], [-48, 48], [-24, 40], [0, 46]], "width": 3, "tag": "low", "raise": 0},
+    {"type": "path", "via": [[74, 40], [48, 48], [24, 40], [0, 46]], "width": 3, "tag": "low", "raise": 0},
+    {"type": "switchback", "from": [0, 36], "to": [0, -26], "legs": 4, "amp": 30, "width": 3, "tag": "stair"},
+    {"type": "path", "via": [[-72, -30], [-48, -36], [-22, -28], [0, -32], [22, -28], [48, -36], [72, -30]], "width": 3, "tag": "mid", "raise": 4},
+    {"type": "switchback", "from": [0, -34], "to": [0, -66], "legs": 3, "amp": 26, "width": 3, "tag": "stair"},
+    {"type": "path", "via": [[-70, -68], [-44, -74], [-20, -66], [0, -70], [20, -66], [44, -74], [70, -68]], "width": 3, "tag": "up", "raise": 9}
+  ],
+  "zones": [
+    {"at": [0, -60], "r": 30, "zone": "noble"},
+    {"at": [0, 40], "r": 20, "zone": "centre"},
+    {"at": [-56, 60], "r": 24, "zone": "poor"}
+  ],
+  "fabric": {"radius": 78, "target": 0.5},
+  "features": [
+    {"type": "statue", "theme": "divine:dibella", "where": "square"},
+    {"type": "memorial", "where": "free"},
+    {"type": "shrine", "theme": "divine:talos", "where": "street", "tag": "stair"},
+    {"type": "well", "count": 2, "where": "free"},
+    {"type": "banners", "count": 3, "where": "gate"},
+    {"type": "lamps", "count": 3, "where": "street", "tag": "mid"},
+    {"type": "market", "where": "free"},
+    {"type": "pool", "where": "free"},
+    {"type": "bench", "where": "square"},
+    {"type": "great_tree", "theme": "spruce", "where": "edge"}
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "whiterun",
+  "base": "java",
+  "zones": [
+    {"at": [0, -76], "r": 34, "zone": "noble"},
+    {"at": [0, 40], "r": 24, "zone": "centre"},
+    {"at": [64, 64], "r": 26, "zone": "craft"},
+    {"at": [-64, 64], "r": 26, "zone": "common"}
+  ],
+  "fabric": {"radius": 104, "target": 0.5},
+  "features": [
+    {"type": "great_tree", "theme": "oak", "at": [0, -8]},
+    {"type": "fountain", "where": "square"},
+    {"type": "shrine", "theme": "divine:kynareth", "count": 2, "where": "free"},
+    {"type": "memorial", "where": "free"},
+    {"type": "banners", "count": 3, "where": "gate"},
+    {"type": "lamps", "count": 3, "where": "free"},
+    {"type": "well", "count": 2, "where": "free"},
+    {"type": "market", "where": "free"},
+    {"type": "bench", "count": 2, "where": "square"},
+    {"type": "garden", "count": 2, "where": "free"},
+    {"type": "orchard", "where": "edge"}
+  ]
+}

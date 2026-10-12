@@ -1,18 +1,59 @@
 {
   "id": "rihad",
-  "base": "zoning",
+  "base": "none",
   "sil": "walled-bazaar-maze",
   "reach": 120,
   "radius": 120,
   "overlay": "rihad",
   "names": {"inn": "rihad_caravanserai", "store": "rihad_spice_gate_stalls", "smithy": "rihad_brass_and_steel"},
   "innKey": "rihad_caravanserai",
-  "walls": [{"r": 108, "sides": 16, "h": 10, "gates": [0, 1.5708, -1.5708], "flags": ["major"]}],
+  "gates": [[0, 74], [61, 23], [44, -55], [-57, 36]],
   "landmarks": [
     {"id": "minaret", "at": [-34, -46], "size": [11, 11], "h": 46},
     {"id": "minaret", "at": [38, -40], "size": [11, 11], "h": 38},
     {"id": "awning_row", "at": [-18, 24], "size": [7, 41], "h": 7, "name": "red", "face": "S"},
     {"id": "awning_row", "at": [18, 24], "size": [7, 41], "h": 7, "name": "yellow", "face": "S"}
+  ],
+  "nets": [
+    {"type": "wall", "via": [[0, 76], [32, 68], [61, 44], [66, 23], [70, -14], [44, -55], [6, -74], [-40, -60], [-66, -16], [-68, 20], [-57, 36], [-34, 66]], "closed": true, "h": 10, "gates": [[0, 74], [61, 23], [44, -55], [-57, 36]], "flags": ["major"]},
+    {"type": "path", "via": [[0, 74], [-8, 56], [6, 36], [-4, 14], [0, 0]], "width": 5, "major": true, "tag": "gate"},
+    {"type": "path", "via": [[61, 23], [44, 28], [30, 14], [16, 6], [0, 0]], "width": 4, "major": true, "tag": "gate"},
+    {"type": "path", "via": [[44, -55], [34, -38], [20, -22], [8, -10], [0, 0]], "width": 4, "major": true, "tag": "gate"},
+    {"type": "path", "via": [[-57, 36], [-42, 30], [-26, 16], [-12, 6], [0, 0]], "width": 4, "major": true, "tag": "gate"},
+    {"type": "loop", "at": [0, 0], "rx": 26, "rz": 24, "wobble": 5, "lobes": 3, "phase": 0.4, "width": 3, "rank": 1, "tag": "bazaar"},
+    {"type": "loop", "at": [2, -2], "rx": 46, "rz": 42, "wobble": 7, "lobes": 5, "phase": 1.3, "width": 3, "rank": 1, "tag": "bazaar"},
+    {"type": "radial", "at": [0, 0], "spokes": 7, "r0": 28, "r1": 66, "wobble": 8, "offset": 0.45, "width": 3, "tag": "alley"},
+    {"type": "path", "via": [[-30, 58], [-14, 46], [4, 52], [22, 44], [40, 52]], "width": 3, "tag": "alley"}
+  ],
+  "plazas": [
+    {"at": [0, 0], "size": 13, "variant": 0, "stalls": 6}
+  ],
+  "zones": [
+    {"at": [0, 0], "r": 30, "zone": "centre"},
+    {"at": [-8, -52], "r": 28, "zone": "noble"},
+    {"at": [48, 36], "r": 24, "zone": "craft"},
+    {"at": [-50, 24], "r": 24, "zone": "poor"}
+  ],
+  "fabric": {"radius": 104, "target": 0.7},
+  "queue": [
+    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "rihad_caravanserai", "on": "gate"},
+    {"kind": "store", "count": 3, "name": "rihad_spice_gate_stalls", "on": "bazaar"},
+    {"kind": "smithy", "size": [11, 9], "name": "rihad_brass_and_steel", "on": "bazaar"},
+    {"kind": "alchemist", "count": 2, "on": "bazaar"},
+    {"kind": "temple", "size": [11, 17], "on": "gate"}
+  ],
+  "features": [
+    {"type": "fountain", "where": "square"},
+    {"type": "pool", "where": "free"},
+    {"type": "great_tree", "theme": "acacia", "where": "free"},
+    {"type": "statue", "theme": "divine:zenithar", "where": "square"},
+    {"type": "shrine", "theme": "divine:stendarr", "where": "street", "tag": "gate"},
+    {"type": "banners", "count": 3, "where": "gate"},
+    {"type": "lamps", "count": 3, "where": "street", "tag": "gate"},
+    {"type": "market", "where": "free"},
+    {"type": "memorial", "where": "free"},
+    {"type": "gatehouse", "where": "gate"},
+    {"type": "well", "where": "free"}
   ],
   "titles": {
     "rihad_caravanserai": "The Courtyard Caravanserai",

@@ -21,6 +21,34 @@
     {"ring": [92, 136], "overlay": "imperial_garden"},
     {"ring": [136, 260], "overlay": "imperial_waterfront"}
   ],
+  "zones": [
+    {"at": [0, -100], "r": 40, "zone": "noble"},
+    {"at": [20, 20], "r": 40, "zone": "centre"},
+    {"at": [-70, 40], "r": 30, "zone": "craft"},
+    {"at": [90, 60], "r": 30, "zone": "common"},
+    {"at": [-90, -70], "r": 24, "zone": "noble"}
+  ],
+  "fabric": {"radius": 140, "target": 0.5},
+  "features": [
+    {"type": "great_tree", "theme": "oak", "at": [-84, -66]},
+    {"type": "great_tree", "theme": "birch", "at": [84, -62]},
+    {"type": "statue", "theme": "emperor", "at": [0, 40]},
+    {"type": "statue", "theme": "divine:talos", "at": [44, 66]},
+    {"type": "statue", "theme": "divine:akatosh", "where": "square"},
+    {"type": "fountain", "count": 2, "where": "square"},
+    {"type": "pool", "where": "free"},
+    {"type": "memorial", "count": 2, "where": "square"},
+    {"type": "bell_tower", "count": 2, "where": "free"},
+    {"type": "banners", "count": 4, "where": "gate"},
+    {"type": "lamps", "count": 3, "where": "free"},
+    {"type": "garden", "count": 2, "where": "free"},
+    {"type": "market", "where": "free"},
+    {"type": "aqueduct", "where": "edge"},
+    {"type": "tree_row", "count": 2, "where": "free"},
+    {"type": "shrine", "theme": "divine:arkay", "where": "free"},
+    {"type": "flowers", "count": 2, "where": "free"},
+    {"type": "bench", "count": 2, "where": "square"}
+  ],
   "titles": {
     "imperial_ward_temple": "Temple District",
     "imperial_ward_talos_plaza": "Talos Plaza District",

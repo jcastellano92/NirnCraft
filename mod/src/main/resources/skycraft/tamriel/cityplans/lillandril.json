@@ -19,22 +19,43 @@
     {"kind": "tower", "at": [-58, -40], "size": [7, 7], "h": 30, "margin": 1, "raise": 3, "name": "lillandril_astronomers_tower"},
     {"kind": "dock", "at": [-20, 108], "size": [5, 15], "face": "S", "flags": ["no_beard"], "count": 3, "step": [20, 0]}
   ],
-  "streets": [
-    {"from": [0, 100], "to": [0, 24], "width": 5, "major": true},
-    {"from": [-90, 50], "to": [90, 50], "width": 3},
-    {"from": [-70, 4], "to": [-26, 4], "width": 3},
-    {"from": [26, 4], "to": [70, 4], "width": 3}
+  "nets": [
+    {"type": "path", "via": [[0, 100], [8, 82], [-6, 62], [4, 44], [0, 26]], "width": 5, "major": true, "tag": "stair"},
+    {"type": "radial", "at": [0, 12], "spokes": 7, "r0": 26, "r1": 92, "wobble": 5, "offset": 0.3, "width": 3, "tag": "stair",
+     "rings": [40, 64], "ring_wobble": 5, "ring_width": 3, "ring_tag": "ring"},
+    {"type": "path", "via": [[-92, 72], [-60, 88], [-24, 94], [24, 94], [60, 88], [92, 72]], "width": 4, "major": true, "tag": "quay"},
+    {"type": "path", "via": [[-84, -6], [-50, -10], [-30, -22]], "width": 3, "tag": "ring"},
+    {"type": "path", "via": [[84, -6], [50, -10], [30, -22]], "width": 3, "tag": "ring"}
   ],
   "plazas": [
     {"at": [0, 76], "size": 15, "variant": 1, "stalls": 4, "name": "lillandril_scholars_square"}
   ],
+  "zones": [
+    {"at": [0, -34], "r": 34, "zone": "noble"},
+    {"at": [0, 40], "r": 26, "zone": "centre"},
+    {"at": [64, 50], "r": 24, "zone": "craft"},
+    {"at": [-64, 56], "r": 24, "zone": "common"}
+  ],
+  "fabric": {"radius": 100, "target": 0.55},
   "queue": [
-    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "lillandril_scholars_hostel"},
-    {"kind": "store", "count": 3, "name": "lillandril_inkwell_and_vellum"},
-    {"kind": "alchemist"},
-    {"kind": "temple", "size": [11, 17]},
-    {"kind": "manor", "count": 3, "flags": ["upper", "rich"]},
-    {"kind": "house", "count": 22, "flags": ["upper"], "plain_every": 3, "small_every": 4}
+    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "lillandril_scholars_hostel", "on": "stair"},
+    {"kind": "store", "count": 3, "name": "lillandril_inkwell_and_vellum", "on": "ring"},
+    {"kind": "alchemist", "on": "stair"},
+    {"kind": "temple", "size": [11, 17], "on": "ring"},
+    {"kind": "manor", "count": 3, "flags": ["upper", "rich"], "on": "ring"}
+  ],
+  "features": [
+    {"type": "pool", "at": [0, -16]},
+    {"type": "fountain", "where": "square"},
+    {"type": "great_tree", "theme": "cherry", "where": "free"},
+    {"type": "statue", "theme": "divine:julianos", "where": "square"},
+    {"type": "memorial", "where": "free"},
+    {"type": "lamps", "count": 2, "where": "street", "tag": "stair"},
+    {"type": "banners", "count": 2, "where": "gate"},
+    {"type": "garden", "count": 2, "where": "free"},
+    {"type": "bench", "where": "square"},
+    {"type": "basin", "where": "edge"},
+    {"type": "flowers", "where": "street", "tag": "quay"}
   ],
   "titles": {
     "lillandril_scholars_hostel": "Scholars' Hostel",

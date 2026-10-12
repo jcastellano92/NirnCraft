@@ -1,21 +1,58 @@
 {
   "id": "bruma",
-  "base": "zoning",
+  "base": "none",
   "sil": "switchback-alpine",
   "reach": 115,
   "radius": 115,
   "overlay": "bruma",
   "names": {"inn": "bruma_jerall_view_inn", "store": "bruma_candle_and_wick", "smithy": "bruma_mountain_smithy"},
   "innKey": "bruma_jerall_view_inn",
+  "gates": [[0, 71]],
   "terraces": [
     {"rect": [-40, -78, 40, -34], "level": 6, "parapet": 1}
   ],
-  "walls": [{"r": 100, "sides": 12, "h": 10, "gates": [0], "flags": ["major"]}],
   "landmarks": [
     {"id": "chapel_spire", "at": [0, -56], "size": [17, 25], "h": 50, "margin": 3, "raise": 6, "face": "S"}
   ],
+  "nets": [
+    {"type": "wall", "via": [[0, 72], [-26, 70], [-52, 56], [-72, 30], [-80, -6], [-72, -46], [-50, -80], [-16, -98], [20, -98], [52, -78], [74, -44], [80, -6], [72, 30], [52, 56], [26, 70]], "closed": true, "h": 9, "gates": [[0, 71]], "flags": ["major"]},
+    {"type": "switchback", "from": [0, 70], "to": [0, -30], "legs": 4, "amp": 24, "width": 5, "major": true, "tag": "climb"},
+    {"type": "contour", "from": [-30, 40], "len": 110, "dir": 0, "width": 3, "tag": "terrace"},
+    {"type": "contour", "from": [-20, 6], "len": 110, "dir": 0, "width": 3, "tag": "terrace"},
+    {"type": "contour", "from": [-16, -22], "len": 100, "dir": 0, "width": 3, "tag": "terrace"},
+    {"type": "contour", "from": [-30, 56], "len": 90, "dir": 0, "width": 3, "tag": "terrace"},
+    {"type": "path", "via": [[-70, 20], [-50, 24], [-30, 10]], "width": 3, "tag": "terrace"},
+    {"type": "path", "via": [[70, 20], [50, 24], [30, 10]], "width": 3, "tag": "terrace"},
+    {"type": "path", "via": [[-60, -30], [-36, -42], [-20, -60]], "width": 3, "tag": "terrace"},
+    {"type": "path", "via": [[60, -30], [36, -42], [20, -60]], "width": 3, "tag": "terrace"}
+  ],
   "plazas": [
     {"at": [0, 4], "size": 13, "variant": 3, "name": "bruma_chapel_steps"}
+  ],
+  "zones": [
+    {"at": [0, -60], "r": 28, "zone": "noble"},
+    {"at": [0, 6], "r": 22, "zone": "centre"},
+    {"at": [-46, 36], "r": 24, "zone": "craft"},
+    {"at": [48, 40], "r": 24, "zone": "poor"}
+  ],
+  "fabric": {"radius": 100, "target": 0.6},
+  "queue": [
+    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "bruma_jerall_view_inn", "on": "climb"},
+    {"kind": "store", "count": 2, "name": "bruma_candle_and_wick", "on": "climb"},
+    {"kind": "smithy", "size": [11, 9], "name": "bruma_mountain_smithy", "on": "terrace"},
+    {"kind": "alchemist", "on": "terrace"},
+    {"kind": "temple", "size": [11, 17], "on": "climb"}
+  ],
+  "features": [
+    {"type": "bell_tower", "where": "square"},
+    {"type": "great_tree", "theme": "spruce", "where": "free"},
+    {"type": "well", "count": 2, "where": "free"},
+    {"type": "shrine", "theme": "divine:akatosh", "where": "street", "tag": "climb"},
+    {"type": "lamps", "count": 3, "where": "street", "tag": "climb"},
+    {"type": "banners", "where": "gate"},
+    {"type": "memorial", "where": "free"},
+    {"type": "market", "where": "free"},
+    {"type": "gatehouse", "where": "gate"}
   ],
   "titles": {
     "bruma_jerall_view_inn": "The Jerall View Inn",

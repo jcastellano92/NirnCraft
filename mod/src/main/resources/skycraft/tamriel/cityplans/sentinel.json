@@ -19,12 +19,18 @@
     {"kind": "tower", "at": [-62, -36], "size": [7, 7], "h": 30, "margin": 1},
     {"kind": "barracks", "at": [-44, -40], "size": [9, 15], "face": "E"}
   ],
-  "streets": [
-    {"from": [0, 104], "to": [0, -44], "width": 5, "major": true},
-    {"from": [-104, 12], "to": [104, 12], "width": 5, "major": true},
-    {"from": [-92, 88], "to": [92, 88], "width": 3}
+  "nets": [
+    {"type": "path", "via": [[0, 104], [10, 86], [-8, 68], [6, 48], [0, 28], [-4, 10], [0, -10], [0, -44]], "width": 5, "major": true, "tag": "main"},
+    {"type": "path", "via": [[-104, 0], [-84, 12], [-62, 4], [-40, 16], [-20, 8], [0, 12]], "width": 5, "major": true, "tag": "cross"},
+    {"type": "path", "via": [[104, 0], [84, 10], [62, 2], [40, 14], [20, 8], [0, 12]], "width": 5, "major": true, "tag": "cross"},
+    {"type": "loop", "at": [0, 8], "rx": 62, "rz": 56, "wobble": 5, "lobes": 3, "phase": 0.9, "width": 3, "rank": 1, "tag": "ring"},
+    {"type": "loop", "at": [0, 14], "rx": 88, "rz": 70, "wobble": 7, "lobes": 5, "phase": 0.1, "width": 3, "rank": 1, "tag": "ring"},
+    {"type": "path", "via": [[-92, 88], [-60, 80], [-32, 90], [0, 84], [32, 90], [60, 80], [92, 88]], "width": 3, "tag": "quay"},
+    {"type": "path", "via": [[-60, -20], [-44, -36], [-20, -40], [0, -44]], "width": 3, "tag": "ring"},
+    {"type": "path", "via": [[60, -50], [40, -54], [20, -50], [0, -44]], "width": 3, "tag": "ring"},
+    {"type": "path", "via": [[-40, 30], [-24, 38], [-10, 56]], "width": 2, "tag": "ring"},
+    {"type": "path", "via": [[36, 30], [30, 46], [18, 60]], "width": 2, "tag": "ring"}
   ],
-  "rings": [{"r": 62, "sides": 8, "width": 3, "offset": 0.3927, "fill": true}],
   "plazas": [
     {"at": [0, 40], "size": 17, "variant": 2, "stalls": 6},
     {"at": [66, 56], "size": 11, "name": "sentinel_ward_bazaar_of_winds"}
@@ -32,14 +38,37 @@
   "quarters": [
     {"rect": [-110, -110, 110, -30], "overlay": "sentinel_gold"}
   ],
+  "zones": [
+    {"at": [0, -60], "r": 36, "zone": "noble"},
+    {"at": [0, 40], "r": 28, "zone": "centre"},
+    {"at": [66, 56], "r": 26, "zone": "craft"},
+    {"at": [-70, 60], "r": 28, "zone": "poor"}
+  ],
+  "fabric": {"radius": 100, "target": 0.6},
   "queue": [
-    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "sentinel_oasis_rest"},
-    {"kind": "smithy", "size": [11, 9], "name": "sentinel_scimitar_works"},
-    {"kind": "store", "count": 3, "name": "sentinel_spice_and_silk"},
-    {"kind": "alchemist"},
-    {"kind": "temple", "size": [11, 17]},
-    {"kind": "manor", "count": 4, "flags": ["upper", "rich"]},
-    {"kind": "house", "count": 30, "flags": ["upper"], "plain_every": 3, "small_every": 4}
+    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "sentinel_oasis_rest", "on": "main"},
+    {"kind": "smithy", "size": [11, 9], "name": "sentinel_scimitar_works", "on": "cross"},
+    {"kind": "store", "count": 3, "name": "sentinel_spice_and_silk", "on": "cross"},
+    {"kind": "alchemist", "on": "ring"},
+    {"kind": "temple", "size": [11, 17], "on": "ring"},
+    {"kind": "manor", "count": 4, "flags": ["upper", "rich"], "on": "ring"}
+  ],
+  "features": [
+    {"type": "pool", "count": 2, "where": "square"},
+    {"type": "fountain", "count": 2, "where": "square"},
+    {"type": "great_tree", "theme": "acacia", "count": 2, "where": "free"},
+    {"type": "statue", "theme": "divine:zenithar", "where": "square"},
+    {"type": "statue", "theme": "divine:stendarr", "at": [50, 10]},
+    {"type": "shrine", "theme": "divine:zenithar", "count": 2, "where": "street", "tag": "cross"},
+    {"type": "memorial", "count": 2, "where": "free"},
+    {"type": "banners", "count": 4, "where": "gate"},
+    {"type": "lamps", "count": 3, "where": "street", "tag": "main"},
+    {"type": "market", "count": 2, "where": "free"},
+    {"type": "aqueduct", "where": "edge"},
+    {"type": "basin", "where": "edge"},
+    {"type": "garden", "where": "free"},
+    {"type": "flowers", "count": 2, "where": "street", "tag": "ring"},
+    {"type": "bench", "where": "square"}
   ],
   "titles": {
     "sentinel_oasis_rest": "The Oasis Rest",

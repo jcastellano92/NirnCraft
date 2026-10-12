@@ -95,6 +95,9 @@ public final class CityPlan {
     public final List<Quarter> quarters = new ArrayList<>();
     public final List<Queued> queue = new ArrayList<>();
     public final int fillGap;
+    /** Organic street networks, civic features, quality zones and the fabric (density) settings: raw JSON, read by {@link Nets}, Features and Fabric. */
+    public final List<JsonObject> nets = new ArrayList<>(), zones = new ArrayList<>(), features = new ArrayList<>();
+    public final JsonObject fabric;
 
     CityPlan(JsonObject o) {
         id = str(o, "id", "");
@@ -121,6 +124,10 @@ public final class CityPlan {
             gates = null;
         }
         fillGap = o.has("fill_gap") ? o.get("fill_gap").getAsInt() : 2;
+        nets.addAll(objs(o, "nets"));
+        zones.addAll(objs(o, "zones"));
+        features.addAll(objs(o, "features"));
+        fabric = o.has("fabric") ? o.getAsJsonObject("fabric") : null;
         for (JsonObject t : objs(o, "terraces")) {
             int[] r = ints(t.getAsJsonArray("rect"));
             terraces.add(new Terrace(r[0], r[1], r[2], r[3], num(t, "level", 0), num(t, "parapet", 1)));

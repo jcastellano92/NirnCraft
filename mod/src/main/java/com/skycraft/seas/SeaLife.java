@@ -76,7 +76,7 @@ public final class SeaLife {
             if (depth < 3 || !level.getFluidState(new BlockPos(x, surface - 1, z)).is(FluidTags.WATER)) continue;
             MapSample s = TamrielMap.sampleScratch(x, z);
             boolean sea = s.coastDistance < 4 && !s.inWater() && surface <= 64;
-            List<Pick> picks = sea ? seaPicks(level, x, z, s, depth) : freshPicks(depth);
+            List<Pick> picks = sea ? seaPicks(level, x, z, s, depth) : freshPicks(level, depth, s);
             Pick p = weighted(picks, r);
             if (p == null) return;
             long same = mine.stream().filter(m -> EntityType.getKey(m.getType()).toString().equals(p.id)).count();
@@ -124,10 +124,12 @@ public final class SeaLife {
         return out;
     }
 
-    private static List<Pick> freshPicks(int depth) {
+    private static List<Pick> freshPicks(ServerLevel level, int depth, MapSample s) {
         List<Pick> out = new ArrayList<>();
         out.add(new Pick("skycraft:river_betty", 5, 4, 8, false));
         if (depth >= 3) out.add(new Pick("skycraft:slaughterfish", 1, 1, 2, false));
+        // salmon in the real rivers; the autumn run (RiverRun) swells their numbers and drives them upstream
+        if (s.riverHalfWidth >= 2f && depth >= 2) out.add(new Pick("minecraft:salmon", RiverRun.running(level) ? 9 : 2, 2, 5, false));
         return out;
     }
 

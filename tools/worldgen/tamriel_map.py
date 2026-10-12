@@ -36,8 +36,13 @@ except ImportError:  # pragma: no cover
     _ndi = None
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)  # `py -3 -I` does not add the script's folder
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+import hydrology as hy  # noqa: E402  (tributaries, lake basins, deltas, waterfalls)
+import hydrology_build as hb  # noqa: E402
 RES_DIR = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft", "tamriel")
+OUT_DIR = os.environ.get("TAMRIEL_OUT") or RES_DIR  # rasters go here (set TAMRIEL_OUT to experiment without touching the resources)
 PLACES = os.path.join(RES_DIR, "places", "provinces.json")
 SKYRIM_SETTLEMENTS = os.path.join(RES_DIR, "places", "skyrim_settlements.json")
 
@@ -519,6 +524,22 @@ def build():
         h = h + (target - h) * w * land
         flat = np.maximum(flat, w)
 
+    # --- hydrology: where places stand, and closed depressions that deserve to be lakes -------------------------------
+    print("hydrology: lake basins")
+    grid = hy.Grid(MIN_X, MIN_Z, W, H)
+    excl = hb.place_exclusion(grid)
+    near_auth = dist_to(raster_polys([lk["poly"] for lk in V["lakes"]], CELL, W, H)) * CELL < 220
+    rd0 = np.full((H, W), 1e5)
+    for rv in V["rivers"]:
+        d0, _, _ = polyline_field(rv["line"], 400)
+        rd0 = np.minimum(rd0, np.where(np.isfinite(d0), d0, 1e5))
+    near_auth = near_auth | (rd0 < 260)
+    pit_lab, pit_specs = hy.find_pits(grid, h, land, D, wet, near_auth, excl)
+    n_auth_lakes = len(V["lakes"])
+    basin_lakes = [dict(name="basin_%d" % s["id"], level=round(s["level"], 1), depth=round(s["depth"], 1), poly=[],
+                        cx=s["cx"], cz=s["cz"], cells=s["cells"], basin=True) for s in pit_specs]
+    all_lakes = list(V["lakes"]) + basin_lakes
+
     # --- lakes -----------------------------------------------------------------------------------------------------
     print("lakes")
     lake_mask_f = np.zeros((fh, fw), bool)
@@ -529,21 +550,36 @@ def build():
             m &= ~raster_polys(lk["islands"], FRES, fw, fh)
         lake_mask_f |= m
         lake_id_f[m] = i
+    if basin_lakes:
+        # basin lakes come from cell masks: upsample, round the corners with a blur and threshold
+        bl = np.kron(pit_lab, np.ones((FINE, FINE), np.int32))
+        bm = blur((bl > 0).astype(np.float32), FINE) > 0.5
+        bm &= ~lake_mask_f
+        bid = np.where(bm, bl, 0)
+        if bm.any():
+            rr0, cc0 = nearest(bl > 0)
+            bid = np.where(bm, bl[rr0, cc0], 0)
+        for j in range(len(basin_lakes)):
+            lake_id_f[bm & (bid == j + 1)] = n_auth_lakes + j
+        lake_mask_f |= bm
+        del bl, bm, bid
     lsd_f = signed_dist(lake_mask_f, FRES)
     rr, cc = nearest(lake_mask_f)
     lid = lake_id_f[rr, cc]
     lake_sd = lsd_f[FINE // 2::FINE, FINE // 2::FINE][:H, :W]
     lid = lid[FINE // 2::FINE, FINE // 2::FINE][:H, :W]
-    levels = np.array([lk["level"] for lk in V["lakes"]], float)
-    depths = np.array([lk.get("depth", 8) for lk in V["lakes"]], float)
+    levels = np.array([lk["level"] for lk in all_lakes], float)
+    depths = np.array([lk.get("depth", 8) for lk in all_lakes], float)
     lake_level = levels[lid]
-    near_lake = lake_sd > -260
+    is_auth = lid < n_auth_lakes
+    near_lake = (lake_sd > -260) & is_auth  # basin lakes sit in natural hollows: no shore guard or height cap around them
     guard = lake_level + 1.6
     shore = 1 - smoothstep(0, 220, -lake_sd)
     h_l = np.maximum(h, h + (guard - h) * shore)
     h_l = np.minimum(h_l, guard + np.maximum(-lake_sd, 0) * 0.45)
     bed = lake_level - np.minimum(depths[lid], 1.5 + np.maximum(lake_sd, 0) * 0.22)
     h = np.where(near_lake & land, np.where(lake_sd > 0, bed, h_l), h)
+    h = np.where(~is_auth & (lake_sd > 0) & land, np.minimum(h, bed), h)
     for lk in V["lakes"]:
         for isl in lk.get("islands", []):
             m = raster_polys([isl], CELL, W, H)
@@ -554,10 +590,22 @@ def build():
     riv_d = np.full((H, W), 1e5)
     riv_level = np.zeros((H, W))
     riv_hw = np.zeros((H, W))
+    auth_lines = []   # dense authored centre lines for the tributary snap, the deltas and the river sites
+    falls_all = []
     for rv in V["rivers"]:
         line = river_profile(rv, h)
-        lv = [p[2] for p in line]
         width = rv["width"]
+        # waterfalls where the authored profile already drops steeply: the drop is squared into one step
+        larr = np.array(line)
+        dp, dl, _ = hy.densify(larr[:, :2], larr[:, 2], np.full(len(larr), width / 2.0), 16.0)
+        if width <= 16:
+            dl, fl = hy.add_falls(dp, dl, np.full(len(dp), width / 2.0), "river", hy.FALL_MIN_RIVER, [], rv.get("id", ""))
+            falls_all += fl
+            line = [[float(p[0]), float(p[1]), float(l)] for p, l in zip(dp, dl)]
+        lv = [p[2] for p in line]
+        hwa = (width + (rv.get("mouth_width", width) - width) * np.linspace(0, 1, len(line)) ** 3) / 2.0
+        auth_lines.append(dict(name=rv.get("name", rv.get("id", "river")), pts=np.array([p[:2] for p in line]),
+                               lev=np.array(lv), hw=hwa, width=width))
         mw = rv.get("mouth_width", width)
         valley = rv.get("valley", 90 + width * 4)
         d, tp, lev = polyline_field(line, valley * 2.5 + 80, lv)
@@ -573,6 +621,15 @@ def build():
         riv_d[m] = d[m]
         riv_level[m] = lev[m]
         riv_hw[m] = hw[m]
+
+    # --- hydrology: tributaries, lake outlets, deltas, waterfalls ---------------------------------------------------
+    print("hydrology: streams")
+    hyd = hb.integrate(grid, h, land, D, wet, reg, regions, ridge, dunes, riv_d, riv_hw, riv_level, lake_sd,
+                          levels[lid], excl, auth_lines, falls_all,
+                          delta_names={"niben_river", "onkobra_river", "karth_river", "strid_river", "xylo_river"})
+    h = hyd["h"]
+    hyd["basin_lakes"] = basin_lakes
+    riv_d, riv_hw, riv_level = hyd["riv_d"], hyd["riv_hw"], hyd["riv_level"]
 
     h = np.clip(h, -40, 568)
 
@@ -616,9 +673,15 @@ def build():
     wlevel = np.where((wlevel == 0) & (lake_sd > -260), lake_level, wlevel)
     wl_code = np.where(wlevel > 0, np.round((wlevel + 64) * 64), 0).astype(np.uint32)
 
+    print("hydrology: river sites")
+    sites, site_counts = hb.plan_sites(grid, h, D, lake_sd, riv_d, riv_hw, hyd["auth_lines"], hyd["net"].lines,
+                                       hyd["falls"], hyd["springs"], hb.load_places(), V["roads"], basin_lakes,
+                                       V["lakes"], excl)
+    hyd["sites"], hyd["site_counts"] = sites, site_counts
+
     return dict(regions=regions, reg=reg, h=h, D=D, land=land, ridge=ridge, rough=rough_t, crag=crag_t,
                 dunes=dunes_t, wet=wet_t, lake_sd=lake_sd, riv_d=riv_d, riv_hw=riv_hw, road_d=road_d,
-                wl_code=wl_code, wflags=wflags, wlevel=wlevel, h_view=h_view, sharp=sharp, flat=flat, roadw=roadw)
+                wl_code=wl_code, wflags=wflags, wlevel=wlevel, h_view=h_view, sharp=sharp, flat=flat, roadw=roadw, hyd=hyd)
 
 
 D8 = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
@@ -783,14 +846,14 @@ def region_palette(regions):
 
 
 def write_assets(o):
-    os.makedirs(RES_DIR, exist_ok=True)
+    os.makedirs(OUT_DIR, exist_ok=True)
     regions = o["regions"]
     img = Image.fromarray(o["reg"].astype(np.uint8), "P")
     img.putpalette(region_palette(regions))
-    img.save(os.path.join(RES_DIR, "regions.png"), optimize=True)
+    img.save(os.path.join(OUT_DIR, "regions.png"), optimize=True)
 
     elev = np.clip(np.round((o["h"] + 64) * 32), 0, 65535).astype(np.uint16)
-    Image.fromarray(elev).save(os.path.join(RES_DIR, "elevation.png"))  # PIL writes uint16 as 16-bit grey
+    Image.fromarray(elev).save(os.path.join(OUT_DIR, "elevation.png"))  # PIL writes uint16 as 16-bit grey
 
     feat = np.zeros((H, W, 4), np.uint8)
     feat[..., 0] = np.clip(255 - 2 * o["riv_d"], 0, 255)
@@ -798,22 +861,24 @@ def write_assets(o):
     feat[..., 2] = np.clip(128 + 2 * o["lake_sd"], 0, 255)
     # the road corridor channel also covers settlement pads: both calm the seeded detail and keep cave mouths shut
     feat[..., 3] = np.clip(np.maximum(255 - 4 * o["road_d"], o["flat"] * 255), 0, 255)
-    Image.fromarray(feat, "RGBA").save(os.path.join(RES_DIR, "features.png"))
+    Image.fromarray(feat, "RGBA").save(os.path.join(OUT_DIR, "features.png"))
 
     ter = np.zeros((H, W, 4), np.uint8)
     for k, key in enumerate(("rough", "crag", "dunes", "wet")):
         ter[..., k] = np.clip(np.round(o[key] * 255), 0, 255)
-    Image.fromarray(ter, "RGBA").save(os.path.join(RES_DIR, "terrain.png"))
+    Image.fromarray(ter, "RGBA").save(os.path.join(OUT_DIR, "terrain.png"))
 
     wat = np.zeros((H, W, 4), np.uint8)
     wat[..., 0] = (o["wl_code"] >> 8) & 255
     wat[..., 1] = o["wl_code"] & 255
     wat[..., 2] = np.clip(np.round(np.where(o["riv_d"] < 220, o["riv_hw"], 0)), 0, 255)
     wat[..., 3] = o["wflags"]
-    Image.fromarray(wat, "RGBA").save(os.path.join(RES_DIR, "water.png"))
+    Image.fromarray(wat, "RGBA").save(os.path.join(OUT_DIR, "water.png"))
 
+    hy.write_json(os.path.join(OUT_DIR, "hydrology.json"), hb.hydrology_json(o["hyd"], o["hyd"]["sites"],
+                                                                             o["hyd"]["site_counts"]))
     coast = np.clip(np.round(o["D"]) + 32768, 0, 65535).astype(np.uint16)
-    Image.fromarray(coast).save(os.path.join(RES_DIR, "coast.png"))
+    Image.fromarray(coast).save(os.path.join(OUT_DIR, "coast.png"))
 
     # sharp peaks for MapPeaks.java: the profile parameters, shelves with their levelled height, calm path corridors
     peaks = []
@@ -823,7 +888,7 @@ def write_assets(o):
                       "shape": s.get("shape", 1.0), "power": s["power"], "horn": s.get("horn", [0, 1]),
                       "spurs": s["spurs"], "shelves": pk["_shelves"], "clear": s.get("clear", []),
                       "paths": pk["_paths"], "jag": s.get("jag", 20)})
-    with open(os.path.join(RES_DIR, "peaks.json"), "w", encoding="utf-8", newline="\n") as f:
+    with open(os.path.join(OUT_DIR, "peaks.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump({"_comment": "Written by tools/worldgen/tamriel_map.py from the sharp peaks in tamriel_vectors.json",
                    "peaks": peaks}, f, indent=1)
         f.write("\n")
@@ -841,7 +906,7 @@ def write_assets(o):
         if r.get("procedural"):
             e["procedural"] = True
         table.append(e)
-    with open(os.path.join(RES_DIR, "regions.json"), "w", encoding="utf-8", newline="\n") as f:
+    with open(os.path.join(OUT_DIR, "regions.json"), "w", encoding="utf-8", newline="\n") as f:
         f.write("[\n" + ",\n".join(" " + json.dumps(e) for e in table) + "\n]\n")
 
     lang = {e["name"]: REGION_NAMES.get(e["id"], e["id"].split("/")[1].replace("_", " ").title()) for e in table}
@@ -1055,6 +1120,8 @@ def main():
     o = build()
     write_assets(o)
     problems = validate(o)
+    print("hydrology:", json.dumps(o["hyd"]["stats"]), "basin lakes:", len(o["hyd"].get("basin_lakes", [])),
+          "sites:", json.dumps(o["hyd"]["site_counts"]))
     if "--no-preview" not in sys.argv:
         preview(o, "preview_tamriel.png", MIN_X, MIN_Z, MIN_X + W * CELL, MIN_Z + H * CELL, 16)
         preview(o, "preview_skyrim.png", -3800, -2700, 3600, 2900, 4)

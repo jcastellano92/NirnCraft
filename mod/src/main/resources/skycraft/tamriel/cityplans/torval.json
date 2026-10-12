@@ -17,16 +17,15 @@
     {"kind": "tower", "at": [-70, -50], "size": [7, 7], "h": 28, "margin": 1},
     {"kind": "tower", "at": [70, -50], "size": [7, 7], "h": 28, "margin": 1}
   ],
-  "streets": [
-    {"from": [0, 104], "to": [0, 22], "width": 5, "major": true},
-    {"from": [-104, 0], "to": [-24, 0], "width": 5, "major": true},
-    {"from": [104, 0], "to": [24, 0], "width": 5, "major": true},
-    {"from": [0, -24], "to": [0, -60], "width": 5, "major": true}
-  ],
-  "rings": [
-    {"r": 34, "sides": 16, "width": 5, "major": true},
-    {"r": 66, "sides": 8, "width": 3, "offset": 0.3927, "fill": true},
-    {"r": 94, "sides": 8, "width": 3, "offset": 0.3927, "fill": true}
+  "nets": [
+    {"type": "path", "via": [[0, 104], [-10, 86], [8, 70], [-4, 50], [0, 30]], "width": 5, "major": true, "tag": "main"},
+    {"type": "path", "via": [[-104, 0], [-84, 8], [-62, -2], [-42, 6], [-24, 0]], "width": 5, "major": true, "tag": "main"},
+    {"type": "path", "via": [[104, 0], [84, 8], [62, -2], [42, 6], [24, 0]], "width": 5, "major": true, "tag": "main"},
+    {"type": "path", "via": [[0, -26], [6, -40], [-4, -52]], "width": 5, "major": true, "tag": "main"},
+    {"type": "loop", "at": [0, -2], "rx": 38, "rz": 30, "wobble": 3, "lobes": 2, "phase": 0.0, "width": 5, "rank": 0, "tag": "moon"},
+    {"type": "loop", "at": [0, 0], "rx": 66, "rz": 60, "wobble": 5, "lobes": 3, "phase": 0.7, "width": 3, "rank": 1, "tag": "moon"},
+    {"type": "loop", "at": [0, 4], "rx": 94, "rz": 80, "wobble": 6, "lobes": 5, "phase": 1.4, "width": 3, "rank": 1, "tag": "moon"},
+    {"type": "radial", "at": [0, 0], "spokes": 10, "r0": 40, "r1": 96, "wobble": 5, "offset": 0.31, "width": 3, "tag": "spoke"}
   ],
   "plazas": [
     {"at": [0, 54], "size": 19, "variant": 3, "stalls": 6, "name": "torval_moon_sugar_exchange"}
@@ -34,14 +33,36 @@
   "quarters": [
     {"ring": [0, 44], "overlay": "torval_court"}
   ],
+  "zones": [
+    {"at": [0, -60], "r": 30, "zone": "noble"},
+    {"at": [0, 54], "r": 26, "zone": "centre"},
+    {"at": [-66, 50], "r": 26, "zone": "craft"},
+    {"at": [70, 50], "r": 26, "zone": "poor"}
+  ],
+  "fabric": {"radius": 100, "target": 0.6},
   "queue": [
-    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "torval_two_moons_rest"},
-    {"kind": "smithy", "size": [11, 9], "name": "torval_clawsmith"},
-    {"kind": "store", "count": 3, "name": "torval_sugar_exchange_stalls"},
-    {"kind": "alchemist", "count": 2},
-    {"kind": "temple", "size": [11, 17]},
-    {"kind": "manor", "count": 4, "flags": ["upper", "rich"]},
-    {"kind": "house", "count": 30, "flags": ["upper"], "plain_every": 3, "small_every": 4}
+    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "torval_two_moons_rest", "on": "moon"},
+    {"kind": "smithy", "size": [11, 9], "name": "torval_clawsmith", "on": "moon"},
+    {"kind": "store", "count": 3, "name": "torval_sugar_exchange_stalls", "on": "main"},
+    {"kind": "alchemist", "count": 2, "on": "moon"},
+    {"kind": "temple", "size": [11, 17], "on": "moon"},
+    {"kind": "manor", "count": 4, "flags": ["upper", "rich"], "on": "spoke"}
+  ],
+  "features": [
+    {"type": "fountain", "count": 2, "where": "square"},
+    {"type": "great_tree", "theme": "jungle", "count": 2, "where": "free"},
+    {"type": "pool", "where": "free"},
+    {"type": "statue", "theme": "divine:kynareth", "where": "square"},
+    {"type": "statue", "theme": "divine:mara", "at": [0, 28]},
+    {"type": "shrine", "theme": "divine:azura", "count": 2, "where": "street", "tag": "moon"},
+    {"type": "memorial", "where": "free"},
+    {"type": "banners", "count": 4, "where": "gate"},
+    {"type": "lamps", "count": 3, "where": "street", "tag": "main"},
+    {"type": "market", "count": 2, "where": "free"},
+    {"type": "garden", "count": 2, "where": "free"},
+    {"type": "bell_tower", "where": "free"},
+    {"type": "flowers", "where": "street", "tag": "moon"},
+    {"type": "tree_row", "where": "street", "tag": "main"}
   ],
   "titles": {
     "torval_two_moons_rest": "The Two Moons' Rest",

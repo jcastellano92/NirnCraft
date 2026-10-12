@@ -22,8 +22,21 @@
     {"kind": "temple", "at": [-37, -20], "size": [9, 13], "face": "E", "name": "skaal_totem_hall"},
     {"kind": "lumber", "at": [37, -24], "size": [7, 5], "face": "W", "name": "skaal_skinning_racks"}
   ],
-  "streets": [
-    {"from": [0, 44], "to": [0, 16], "width": 3, "major": true}
+  "nets": [
+    {"type": "path", "via": [[0, 44], [4, 36], [-3, 30], [0, 18]], "width": 3, "major": true, "tag": "gate"},
+    {"type": "loop", "at": [0, 0], "rx": 18, "rz": 18, "wobble": 1, "lobes": 3, "phase": 0.2, "width": 2, "rank": 1, "tag": "ring"},
+    {"type": "loop", "at": [0, 0], "rx": 34, "rz": 32, "wobble": 3, "lobes": 4, "phase": 0.8, "width": 2, "rank": 1, "tag": "ring"}
+  ],
+  "zones": [
+    {"at": [0, -34], "r": 12, "zone": "noble"},
+    {"at": [0, 0], "r": 24, "zone": "centre"}
+  ],
+  "fabric": {"radius": 42, "target": 0.4, "tier": 1},
+  "features": [
+    {"type": "great_tree", "theme": "spruce", "at": [-28, 30]},
+    {"type": "memorial", "at": [28, 30]},
+    {"type": "well", "at": [-30, -34]},
+    {"type": "banners", "where": "gate"}
   ],
   "titles": {
     "skaal_elders_firehouse": "The Elder's Firehouse",

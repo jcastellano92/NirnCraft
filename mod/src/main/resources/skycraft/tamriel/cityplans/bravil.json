@@ -1,12 +1,13 @@
 {
   "id": "bravil",
-  "base": "zoning",
+  "base": "none",
   "sil": "stacked-shanty-hill",
   "reach": 115,
   "radius": 115,
   "overlay": "bravil",
   "names": {"inn": "bravil_lonely_suitor_lodge", "store": "bravil_fishmarket_stalls", "smithy": "bravil_riverside_smithy"},
   "innKey": "bravil_lonely_suitor_lodge",
+  "gates": [[0, 71]],
   "terraces": [
     {"rect": [-30, -86, 30, -46], "level": 8, "parapet": 1}
   ],
@@ -19,6 +20,39 @@
   ],
   "buildings": [
     {"kind": "shrine", "at": [-46, -40], "size": [5, 5], "face": "S", "name": "bravil_ratcatchers_shrine", "raise": 6}
+  ],
+  "nets": [
+    {"type": "switchback", "from": [0, 71], "to": [0, -40], "legs": 5, "amp": 26, "width": 5, "major": true, "tag": "climb"},
+    {"type": "contour", "from": [-60, 40], "len": 130, "dir": 0.1, "width": 3, "tag": "lane"},
+    {"type": "contour", "from": [-56, 14], "len": 130, "dir": 0.0, "width": 3, "tag": "lane"},
+    {"type": "contour", "from": [-52, -12], "len": 120, "dir": 0.0, "width": 3, "tag": "lane"},
+    {"type": "contour", "from": [-30, -38], "len": 100, "dir": 0.0, "width": 3, "tag": "lane"},
+    {"type": "contour", "from": [-80, 60], "len": 150, "dir": 0.05, "width": 3, "tag": "lane"},
+    {"type": "path", "via": [[-84, 70], [-60, 78], [-30, 84], [0, 86], [30, 84], [60, 78], [84, 70]], "width": 3, "tag": "quay"}
+  ],
+  "zones": [
+    {"at": [0, -50], "r": 32, "zone": "noble"},
+    {"at": [0, 40], "r": 24, "zone": "centre"},
+    {"at": [-60, 50], "r": 28, "zone": "poor"},
+    {"at": [64, 40], "r": 26, "zone": "craft"}
+  ],
+  "fabric": {"radius": 104, "target": 0.55},
+  "queue": [
+    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "bravil_lonely_suitor_lodge", "on": "climb"},
+    {"kind": "store", "count": 2, "name": "bravil_fishmarket_stalls", "on": "quay"},
+    {"kind": "smithy", "size": [11, 9], "name": "bravil_riverside_smithy", "on": "lane"},
+    {"kind": "alchemist", "on": "climb"}
+  ],
+  "features": [
+    {"type": "shrine", "theme": "divine:mara", "where": "street", "tag": "climb"},
+    {"type": "pond", "where": "free"},
+    {"type": "great_tree", "theme": "willow", "where": "free"},
+    {"type": "well", "count": 2, "where": "free"},
+    {"type": "banners", "count": 1, "where": "gate"},
+    {"type": "lamps", "count": 2, "where": "street", "tag": "climb"},
+    {"type": "market", "where": "free"},
+    {"type": "memorial", "where": "free"},
+    {"type": "bench", "where": "street", "tag": "quay"}
   ],
   "titles": {
     "bravil_lonely_suitor_lodge": "The Lonely Suitor Lodge",

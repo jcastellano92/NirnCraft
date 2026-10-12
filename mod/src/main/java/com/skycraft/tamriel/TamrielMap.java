@@ -86,6 +86,9 @@ public final class TamrielMap {
         return MapRaster.get().loaded();
     }
 
+    /** Narrowest channel (half width, blocks) that counts as a river for the biome context. */
+    public static final float RIVER_BIOME_HALF_WIDTH = 3.5f;
+
     /** Derives the 0..1 river/lake strengths of a sample from its distances. */
     public static void deriveStrengths(MapSample s) {
         if (Float.isNaN(s.waterLevel)) {
@@ -94,7 +97,8 @@ public final class TamrielMap {
             return;
         }
         float over = Math.max(0f, s.riverDistance - s.riverHalfWidth);
-        s.river = s.riverHalfWidth > 0 ? Math.max(0f, 1f - over / 24f) : 0f;
+        // brooks and small streams carve and fill but do not turn the biome into "river"
+        s.river = s.riverHalfWidth >= RIVER_BIOME_HALF_WIDTH ? Math.max(0f, 1f - over / 24f) : 0f;
         s.lake = Math.max(0f, Math.min(1f, 0.5f + s.lakeDistance / 32f));
     }
 }

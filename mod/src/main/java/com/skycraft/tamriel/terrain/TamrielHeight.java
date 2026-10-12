@@ -55,7 +55,9 @@ public record TamrielHeight(DensityFunction.NoiseHolder hills, DensityFunction.N
         double amp = MapNoise.smoothstep(0, 56, cd) * (1 - 0.75 * s.road) * (1 - s.calm);
         boolean water = !Float.isNaN(s.waterLevel);
         if (water) {
-            amp *= Math.min(MapNoise.smoothstep(s.riverHalfWidth + 4, s.riverHalfWidth + 70, s.riverDistance),
+            // brooks calm the ground over a shorter reach than rivers (every authored river has a half width of 4+)
+            double reach = 30 + 40 * MapNoise.clamp((s.riverHalfWidth - 1) / 3.0, 0, 1);
+            amp *= Math.min(MapNoise.smoothstep(s.riverHalfWidth + 4, s.riverHalfWidth + reach, s.riverDistance),
                     MapNoise.smoothstep(0, 70, -s.lakeDistance));
         }
 
@@ -134,10 +136,11 @@ public record TamrielHeight(DensityFunction.NoiseHolder hills, DensityFunction.N
                 }
             }
             double hw = s.riverHalfWidth;
-            if (hw > 0 && s.riverDistance < hw + 16) {
+            double bankReach = 6 + 10 * MapNoise.clamp((hw - 1) / 3.0, 0, 1);
+            if (hw > 0 && s.riverDistance < hw + bankReach) {
                 double d = s.riverDistance;
                 if (d < hw) {
-                    double depth = MapNoise.clamp(hw * 0.3, 1.5, 5);
+                    double depth = MapNoise.clamp(hw * 0.3, hw < 4 ? 1.0 + 0.25 * hw : 1.5, 5);
                     double u = d / hw;
                     h = Math.min(h, wl - 0.6 - depth * (1 - u * u));
                 } else if (s.lakeDistance < -8) {

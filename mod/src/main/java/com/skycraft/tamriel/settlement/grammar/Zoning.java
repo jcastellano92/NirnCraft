@@ -353,6 +353,7 @@ public final class Zoning {
         plan.place = p;
         if (com.skycraft.tamriel.settlement.plan.Cities.build(plan, p)) {
             if (!plan.zoned) civic(plan);
+            Fabric.apply(plan, p, sz);
             adopt(plan, sz);
         } else {
             generic(plan, sz, p.variant(), com.skycraft.tamriel.settlement.plan.Cities.names(p));
@@ -423,6 +424,7 @@ public final class Zoning {
         plan.specs.subList(base, plan.specs.size()).clear();
         plan.specs.addAll(best);
         clearing(plan, base, R + 6);
+        Fabric.decorate(plan, size, R);
         plan.zoned = true;
         if (bestM != null) com.skycraft.Skycraft.LOGGER.debug("Zoned {}: {}", plan.key, bestM);
     }
@@ -975,7 +977,14 @@ public final class Zoning {
             double ux = (st.x2() - st.x1()) / len, uz = (st.z2() - st.z1()) / len;
             int every = st.rank() == 0 ? 10 + x.r.nextInt(3) : 14 + x.r.nextInt(4);
             int side = 1;
-            for (double t = every / 2.0; t < len - 2; t += every) {
+            double first = every / 2.0;
+            if (len < every && plan.chains.size() > 0) {
+                // a curved street is many short segments: one lamp per segment would crowd it, so thin them by length
+                double roll = (mix(plan.seed, st.x1(), st.z1()) >>> 11) % 1000 / 1000.0;
+                if (roll >= len / every) continue;
+                first = len / 2.0;
+            }
+            for (double t = first; t < len - 2; t += every) {
                 side = -side;
                 double nx = -uz * side, nz = ux * side;
                 double off = st.width() / 2.0 + 1;

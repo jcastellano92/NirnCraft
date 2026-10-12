@@ -1,0 +1,26 @@
+{
+  "id": "windhelm",
+  "base": "java",
+  "nets": [
+    {"type": "loop", "at": [0, 10], "rx": 70, "rz": 66, "wobble": 6, "lobes": 3, "phase": 1.2, "width": 3, "rank": 1, "tag": "ring"}
+  ],
+  "zones": [
+    {"at": [0, -60], "r": 30, "zone": "noble"},
+    {"at": [0, 30], "r": 24, "zone": "centre"},
+    {"at": [66, 20], "r": 24, "zone": "poor"},
+    {"at": [-50, 50], "r": 22, "zone": "craft"}
+  ],
+  "fabric": {"radius": 92, "target": 0.55},
+  "features": [
+    {"type": "statue", "theme": "divine:talos", "where": "square"},
+    {"type": "shrine", "theme": "divine:talos", "count": 2, "where": "free"},
+    {"type": "memorial", "where": "free"},
+    {"type": "great_tree", "theme": "spruce", "where": "free"},
+    {"type": "well", "count": 2, "where": "free"},
+    {"type": "banners", "count": 3, "where": "gate"},
+    {"type": "lamps", "count": 3, "where": "street", "tag": "ring"},
+    {"type": "market", "where": "free"},
+    {"type": "bench", "where": "square"},
+    {"type": "garden", "where": "free"}
+  ]
+}

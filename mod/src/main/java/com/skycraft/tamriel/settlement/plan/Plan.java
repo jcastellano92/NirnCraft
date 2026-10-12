@@ -37,6 +37,34 @@ public final class Plan {
     public com.skycraft.tamriel.Place place;
     /** Jail, guild halls and player-home plots have been placed (plan/Halls, plan/HousePlots). */
     public boolean civicDone;
+    /** The organic street chains of a city plan ({@link Nets}), local coordinates; the fabric pass walks them. */
+    public final List<Chain> chains = new ArrayList<>();
+    /** Summary of the fabric pass (built-area ratio...), or empty. */
+    public String fabricReport = "";
+
+    /** A smooth street (or bridge link) of a city plan: its polyline, width, rank (0 main, 1 secondary, 2 alley) and tag. */
+    public record Chain(List<double[]> pts, int width, int rank, String tag) {
+        public double length() {
+            double l = 0;
+            for (int i = 0; i + 1 < pts.size(); i++) l += Math.hypot(pts.get(i + 1)[0] - pts.get(i)[0], pts.get(i + 1)[1] - pts.get(i)[1]);
+            return l;
+        }
+
+        /** The point at arclength {@code s} (clamped to the chain). */
+        public double[] at(double s) {
+            double rem = Math.max(0, s);
+            for (int i = 0; i + 1 < pts.size(); i++) {
+                double[] a = pts.get(i), b = pts.get(i + 1);
+                double l = Math.hypot(b[0] - a[0], b[1] - a[1]);
+                if (rem <= l || i + 2 == pts.size()) {
+                    double t = l < 1e-9 ? 0 : Math.min(1, rem / l);
+                    return new double[]{a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t};
+                }
+                rem -= l;
+            }
+            return pts.get(0);
+        }
+    }
 
     public Plan(String key, int cx, int cz, int radius, Culture culture, int style, long seed, Terrain terrain, Direction back) {
         this.key = key;

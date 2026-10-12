@@ -27,24 +27,46 @@
     {"kind": "temple", "at": [-42, 54], "size": [11, 15], "face": "E", "name": "orsinium_shrine_of_malacath", "raise": 4},
     {"kind": "barracks", "at": [42, 54], "size": [9, 15], "face": "W", "raise": 4}
   ],
-  "streets": [
-    {"from": [0, 118], "to": [0, 78], "width": 5, "major": true, "tag": "outer"},
-    {"from": [-62, 90], "to": [62, 90], "width": 3, "tag": "outer"},
-    {"from": [0, 78], "to": [0, 50], "width": 5, "major": true, "tag": "mid", "raise": 4},
-    {"from": [-52, 60], "to": [52, 60], "width": 3, "tag": "mid", "raise": 4},
-    {"from": [0, 50], "to": [0, 6], "width": 5, "major": true, "tag": "inner", "raise": 8},
-    {"from": [-34, 6], "to": [34, 6], "width": 3, "tag": "inner", "raise": 8}
+  "nets": [
+    {"type": "path", "via": [[0, 118], [-8, 108], [6, 94], [0, 80]], "width": 5, "major": true, "tag": "outer"},
+    {"type": "loop", "at": [0, 0], "rx": 92, "rz": 90, "wobble": 8, "lobes": 5, "phase": 0.3, "width": 3, "rank": 1, "tag": "outer"},
+    {"type": "path", "via": [[0, 80], [10, 68], [-6, 56], [0, 50]], "width": 5, "major": true, "tag": "mid", "raise": 4},
+    {"type": "loop", "at": [0, 0], "rx": 62, "rz": 60, "wobble": 6, "lobes": 4, "phase": 1.0, "width": 3, "rank": 1, "tag": "mid", "raise": 4},
+    {"type": "path", "via": [[0, 50], [-6, 34], [6, 20], [0, 6]], "width": 5, "major": true, "tag": "inner", "raise": 8},
+    {"type": "loop", "at": [0, -2], "rx": 34, "rz": 30, "wobble": 4, "lobes": 3, "phase": 0.2, "width": 3, "rank": 1, "tag": "inner", "raise": 8},
+    {"type": "path", "via": [[-100, 46], [-82, 70], [-54, 92]], "width": 3, "tag": "outer"},
+    {"type": "path", "via": [[100, 46], [82, 70], [54, 92]], "width": 3, "tag": "outer"}
   ],
   "plazas": [
     {"at": [0, 26], "size": 15, "variant": 3, "raise": 8, "name": "orsinium_forge_pit"},
     {"at": [34, 100], "size": 11, "stalls": 3}
   ],
+  "zones": [
+    {"at": [0, 4], "r": 34, "zone": "noble"},
+    {"at": [0, 66], "r": 24, "zone": "centre"},
+    {"at": [66, 20], "r": 30, "zone": "craft"},
+    {"at": [-76, -30], "r": 30, "zone": "poor"}
+  ],
+  "fabric": {"radius": 112, "target": 0.5},
   "queue": [
     {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "orsinium_bone_and_ember", "on": "outer"},
-    {"kind": "store", "count": 2, "name": "orsinium_tradestone", "on": "outer"},
-    {"kind": "house", "count": 9, "on": "outer", "small_every": 4},
-    {"kind": "house", "count": 9, "on": "mid", "raise": 4, "small_every": 4},
-    {"kind": "house", "count": 5, "flags": ["upper"], "on": "inner", "raise": 8}
+    {"kind": "store", "count": 2, "name": "orsinium_tradestone", "on": "outer"}
+  ],
+  "features": [
+    {"type": "statue", "theme": "daedric:malacath", "at": [0, 100]},
+    {"type": "statue", "theme": "daedric:malacath", "at": [0, 38]},
+    {"type": "memorial", "count": 2, "where": "free"},
+    {"type": "great_tree", "theme": "dark_oak", "count": 2, "where": "free"},
+    {"type": "banners", "count": 4, "where": "gate"},
+    {"type": "lamps", "count": 3, "where": "street", "tag": "mid"},
+    {"type": "well", "count": 2, "where": "free"},
+    {"type": "market", "where": "free"},
+    {"type": "gatehouse", "where": "gate"},
+    {"type": "shrine", "theme": "divine:stendarr", "where": "free"},
+    {"type": "bench", "where": "square"},
+    {"type": "pond", "where": "edge"},
+    {"type": "orchard", "where": "edge"},
+    {"type": "waterwheel", "where": "edge"}
   ],
   "titles": {
     "orsinium_bone_and_ember": "The Bone and Ember",

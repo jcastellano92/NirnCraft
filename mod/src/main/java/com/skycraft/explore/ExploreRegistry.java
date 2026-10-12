@@ -22,6 +22,8 @@ public final class ExploreRegistry {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Skycraft.MODID);
     public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, Skycraft.MODID);
 
+    public static final RegistryObject<Feature<NoneFeatureConfiguration>> RIVER_SITE = FEATURES.register("river_site",
+            () -> new RiverSiteFeature(NoneFeatureConfiguration.CODEC));
     public static final RegistryObject<Feature<NoneFeatureConfiguration>> MINOR_SITE = FEATURES.register("minor_site",
             () -> new MinorSiteFeature(NoneFeatureConfiguration.CODEC));
 

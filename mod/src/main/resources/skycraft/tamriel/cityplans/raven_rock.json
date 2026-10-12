@@ -1,15 +1,48 @@
 {
   "id": "raven_rock",
-  "base": "zoning",
+  "base": "none",
   "sil": "bulwark-mining-colony",
   "overlay": "raven_rock",
   "names": {"inn": "the_retching_netch", "store": "milores_ingredients", "smithy": "glover_mallorys_smithy"},
-  "walls": [{"r": 70, "sides": 12, "h": 9, "gates": [0, 3.1416], "flags": ["major"]}],
+  "gates": [[0, 49]],
   "landmarks": [
     {"id": "headframe", "at": [-46, -44], "size": [15, 15], "h": 26}
   ],
   "buildings": [
     {"kind": "shrine", "at": [38, -22], "size": [5, 5], "face": "S", "name": "raven_rock_tribunal_chapel", "variant": 1}
+  ],
+  "nets": [
+    {"type": "wall", "via": [[0, 52], [-26, 50], [-50, 38], [-66, 12], [-70, -22], [-56, -54], [-28, -72], [6, -76], [36, -66], [58, -42], [66, -10], [58, 24], [38, 44], [18, 52]], "closed": true, "h": 9, "gates": [[0, 49]], "flags": ["major"]},
+    {"type": "path", "via": [[0, 49], [6, 36], [-4, 20], [4, 4], [0, -10]], "width": 5, "major": true, "tag": "main"},
+    {"type": "loop", "at": [-2, -14], "rx": 40, "rz": 36, "wobble": 5, "lobes": 3, "phase": 0.9, "width": 3, "rank": 1, "tag": "ring"},
+    {"type": "path", "via": [[-54, 20], [-30, 28], [-8, 22]], "width": 3, "tag": "ring"},
+    {"type": "path", "via": [[56, 10], [32, 22], [8, 20]], "width": 3, "tag": "ring"},
+    {"type": "path", "via": [[-30, -60], [-22, -42], [-32, -28]], "width": 3, "tag": "ring"},
+    {"type": "path", "via": [[28, -56], [18, -36], [24, -22]], "width": 3, "tag": "ring"}
+  ],
+  "plazas": [
+    {"at": [0, -10], "size": 13, "variant": 3}
+  ],
+  "zones": [
+    {"at": [-46, -44], "r": 24, "zone": "craft"},
+    {"at": [0, -8], "r": 20, "zone": "centre"},
+    {"at": [40, 24], "r": 24, "zone": "poor"},
+    {"at": [30, -40], "r": 22, "zone": "common"}
+  ],
+  "fabric": {"radius": 78, "target": 0.6},
+  "queue": [
+    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "the_retching_netch", "on": "main"},
+    {"kind": "store", "name": "milores_ingredients", "on": "main"},
+    {"kind": "smithy", "size": [11, 9], "name": "glover_mallorys_smithy", "on": "ring"}
+  ],
+  "features": [
+    {"type": "shrine", "theme": "tribunal:vivec", "where": "street", "tag": "main"},
+    {"type": "statue", "theme": "tribunal:almalexia", "where": "square"},
+    {"type": "well", "where": "free"},
+    {"type": "banners", "where": "gate"},
+    {"type": "lamps", "where": "street", "tag": "main"},
+    {"type": "memorial", "where": "free"},
+    {"type": "gatehouse", "where": "gate"}
   ],
   "titles": {
     "raven_rock_tribunal_chapel": "Chapel of the Tribunal"

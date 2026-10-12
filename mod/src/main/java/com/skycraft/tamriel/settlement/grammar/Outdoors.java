@@ -35,7 +35,9 @@ public final class Outdoors {
     public static final int CART = 0, WOODPILE = 1, CRATES = 2, HAY = 3, LAUNDRY = 4, BENCH = 5, LAMP_POST = 6, BRAZIER = 7,
             NOTICE_BOARD = 8, WELL = 9, FOUNTAIN = 10, STATUE = 11, FLOWER_BED = 12, VENDOR = 13, DUMMY = 14, COOP = 15,
             TREE = 16, SIGNPOST = 17, BARRELS = 18, KENNEL = 19, SHRINE = 20, TROUGH = 21;
-    public static final int YARD_KINDS = 22;
+    public static final int POND = 22, REFLECTING_POOL = 23, MEMORIAL = 24, BELL_TOWER = 25, BANNER = 26, GREAT_TREE = 27,
+            WATERWHEEL = 28, AQUEDUCT = 29, BASIN = 30, STATUE_THEMED = 31;
+    public static final int YARD_KINDS = 32;
 
     // ---- camp kinds (Spec.variant of a CAMP)
     public static final int FELLED = 0, DRYING = 1, HUNTING = 2, APIARY = 3, VINEYARD = 4, PADDY = 5, SUGAR = 6, KWAMA = 7,
@@ -249,14 +251,15 @@ public final class Outdoors {
             case SHRINE -> {
                 int g = ground(c, 0, 0);
                 c.set(0, g + 1, 0, p.wallLow);
-                c.set(0, g + 2, 0, Props.shrine(st.faiths().isEmpty() ? "mara" : st.faiths().get(Math.floorMod(c.roll(0, 0, 0, 3, 64), st.faiths().size()))));
+                String themed = s.name.startsWith("divine:") ? s.name.substring(7) : null;
+                c.set(0, g + 2, 0, Props.shrine(themed != null ? themed
+                        : st.faiths().isEmpty() ? "mara" : st.faiths().get(Math.floorMod(c.roll(0, 0, 0, 3, 64), st.faiths().size()))));
                 Props.candles(c, w > 1 ? 1 : 0, g + 1, 0, 3);
             }
             case TROUGH -> {
                 for (int x = 0; x < w; x++) gset(c, x, 1, 0, B.s(Blocks.WATER_CAULDRON).setValue(LayeredCauldronBlock.LEVEL, 3));
             }
-            default -> {
-            }
+            default -> Civic.build(c, p, s, st, Math.floorMod(s.variant, YARD_KINDS));
         }
     }
 

@@ -209,6 +209,8 @@ public final class MapRaster {
             out.riverHalfWidth = 0f;
         }
 
+        Hydrology.get().apply(x, z, out);
+
         int rc = regionAt(wx, wz);
         out.region = rc;
         int cx = clampI((int) Math.floor((wx - TamrielMap.MIN_X) / CELL), W - 1);

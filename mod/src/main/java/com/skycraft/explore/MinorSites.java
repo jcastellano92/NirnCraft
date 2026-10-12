@@ -360,7 +360,7 @@ public final class MinorSites {
             c.coast = s.coastDistance >= 3 && s.coastDistance <= 64 && s.elevation < TamrielMap.SEA_LEVEL + 14;
             boolean hasWater = !Float.isNaN(s.waterLevel);
             c.shore = hasWater && ((s.lakeDistance >= -40 && s.lakeDistance <= -3)
-                    || (s.riverHalfWidth >= 2 && s.riverDistance >= s.riverHalfWidth + 3 && s.riverDistance <= s.riverHalfWidth + 40));
+                    || (s.riverHalfWidth >= 4 && s.riverDistance >= s.riverHalfWidth + 3 && s.riverDistance <= s.riverHalfWidth + 40));
             // height over the surroundings (a ring of map samples)
             MapSample p = new MapSample();
             double sum = 0;

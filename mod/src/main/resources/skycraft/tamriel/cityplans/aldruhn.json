@@ -20,24 +20,43 @@
     {"kind": "inn", "at": [38, 8], "size": [13, 17], "face": "W", "flags": ["upper"], "name": "aldruhn_rat_walk_inn"},
     {"kind": "manor", "at": [0, -78], "size": [15, 17], "face": "S", "flags": ["upper", "rich", "seat"], "name": "aldruhn_council_manor"}
   ],
-  "streets": [
-    {"from": [0, 118], "to": [0, 56], "width": 5, "major": true},
-    {"from": [-20, 56], "to": [-20, -50], "width": 4, "major": true, "tag": "spine"},
-    {"from": [20, 56], "to": [20, -50], "width": 4, "major": true, "tag": "spine"},
-    {"from": [-80, 56], "to": [80, 56], "width": 3, "tag": "market"},
-    {"from": [-70, -56], "to": [70, -56], "width": 3, "tag": "back"}
+  "nets": [
+    {"type": "path", "via": [[0, 118], [9, 98], [-6, 78], [5, 58], [0, 40], [0, 12]], "width": 5, "major": true, "tag": "gate"},
+    {"type": "loop", "at": [0, -26], "rx": 54, "rz": 38, "wobble": 4, "lobes": 3, "phase": 0.6, "width": 4, "rank": 0, "tag": "inner"},
+    {"type": "loop", "at": [0, 2], "rx": 90, "rz": 68, "wobble": 7, "lobes": 4, "phase": 1.1, "width": 3, "rank": 1, "tag": "outer"},
+    {"type": "radial", "at": [0, -26], "spokes": 6, "r0": 56, "r1": 100, "wobble": 6, "offset": 0.52, "width": 3, "tag": "spoke"},
+    {"type": "path", "via": [[-104, 46], [-72, 56], [-36, 66], [0, 64], [36, 66], [72, 56], [104, 46]], "width": 3, "tag": "market"},
+    {"type": "path", "via": [[-84, -62], [-48, -84], [-14, -94], [16, -94], [48, -84], [84, -62]], "width": 3, "tag": "back"}
   ],
   "plazas": [
     {"at": [0, 18], "size": 15, "variant": 3, "name": "aldruhn_skar_plaza"},
-    {"at": [0, 82], "size": 13, "stalls": 5}
+    {"at": [0, 84], "size": 13, "stalls": 5}
   ],
+  "zones": [
+    {"at": [0, -72], "r": 40, "zone": "noble"},
+    {"at": [0, 34], "r": 26, "zone": "centre"},
+    {"at": [64, 40], "r": 26, "zone": "craft"},
+    {"at": [-72, 66], "r": 30, "zone": "poor"}
+  ],
+  "fabric": {"radius": 112, "target": 0.55},
   "queue": [
     {"kind": "store", "count": 2, "name": "aldruhn_ashlander_goods", "on": "market"},
     {"kind": "smithy", "size": [11, 9], "name": "aldruhn_chitin_forge", "on": "market"},
     {"kind": "alchemist", "on": "market"},
-    {"kind": "house", "count": 14, "flags": ["upper"], "plain_every": 3, "small_every": 4, "on": "spine"},
-    {"kind": "house", "count": 10, "on": "back", "small_every": 4},
     {"kind": "manor", "count": 2, "flags": ["upper", "rich"], "on": "back"}
+  ],
+  "features": [
+    {"type": "statue", "theme": "tribunal:almalexia", "at": [0, 36]},
+    {"type": "shrine", "theme": "tribunal:vivec", "where": "street", "tag": "gate"},
+    {"type": "fountain", "where": "square"},
+    {"type": "memorial", "where": "free"},
+    {"type": "banners", "count": 2, "where": "gate"},
+    {"type": "lamps", "count": 2, "where": "street", "tag": "inner"},
+    {"type": "well", "count": 2, "where": "free"},
+    {"type": "pond", "where": "edge"},
+    {"type": "garden", "where": "free"},
+    {"type": "market", "where": "free"},
+    {"type": "great_tree", "theme": "dark_oak", "where": "free"}
   ],
   "titles": {
     "aldruhn_rat_walk_inn": "The Rat-Walk Inn",

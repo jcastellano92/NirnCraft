@@ -30,18 +30,45 @@
     {"kind": "tower", "at": [-26, 90], "size": [7, 7], "h": 22, "margin": 1},
     {"kind": "tower", "at": [26, 94], "size": [7, 7], "h": 22, "margin": 1}
   ],
-  "streets": [
-    {"from": [0, 112], "to": [0, 20], "width": 4, "major": true},
-    {"from": [-72, 48], "to": [72, 48], "width": 3},
-    {"from": [-70, 78], "to": [70, 78], "width": 3}
+  "nets": [
+    {"type": "path", "via": [[0, 112], [-10, 94], [8, 76], [-6, 56], [4, 38], [0, 20]], "width": 4, "major": true, "tag": "spore"},
+    {"type": "radial", "at": [0, -8], "spokes": 6, "r0": 14, "r1": 34, "wobble": 5, "offset": 0.5, "width": 3, "tag": "court"},
+    {"type": "loop", "at": [0, -8], "rx": 36, "rz": 30, "wobble": 7, "lobes": 3, "phase": 0.2, "width": 3, "rank": 1, "tag": "court"},
+    {"type": "path", "via": [[-50, -22], [-40, -4], [-48, 14], [-56, 14]], "width": 3, "tag": "court"},
+    {"type": "path", "via": [[52, -18], [44, 2], [52, 18], [58, 18]], "width": 3, "tag": "court"},
+    {"type": "path", "via": [[-30, -48], [-12, -52], [0, -54]], "width": 3, "tag": "court"},
+    {"type": "path", "via": [[-84, 54], [-62, 60], [-40, 50], [-18, 56], [4, 44]], "width": 3, "tag": "spore"},
+    {"type": "path", "via": [[86, 52], [64, 62], [42, 52], [20, 58], [4, 44]], "width": 3, "tag": "spore"},
+    {"type": "path", "via": [[-84, 24], [-70, 36], [-56, 44]], "width": 2, "tag": "court"},
+    {"type": "path", "via": [[84, 18], [72, 32], [58, 48]], "width": 2, "tag": "court"},
+    {"type": "path", "via": [[-92, 84], [-64, 88], [-40, 100], [-10, 100]], "width": 3, "tag": "spore"},
+    {"type": "path", "via": [[92, 84], [64, 90], [44, 100], [10, 100]], "width": 3, "tag": "spore"}
   ],
   "plazas": [
     {"at": [0, 36], "size": 15, "variant": 2, "name": "sadrith_mora_council_court"}
   ],
+  "zones": [
+    {"at": [0, -50], "r": 30, "zone": "noble"},
+    {"at": [0, 36], "r": 24, "zone": "centre"},
+    {"at": [-60, 70], "r": 28, "zone": "poor"},
+    {"at": [62, 66], "r": 26, "zone": "craft"}
+  ],
+  "fabric": {"radius": 108, "target": 0.5},
   "queue": [
-    {"kind": "store", "count": 2, "name": "sadrith_mora_spore_traders"},
-    {"kind": "alchemist", "count": 2},
-    {"kind": "house", "count": 16, "flags": ["upper"], "plain_every": 2, "small_every": 3}
+    {"kind": "store", "count": 2, "name": "sadrith_mora_spore_traders", "on": "spore"},
+    {"kind": "alchemist", "count": 2, "on": "spore"}
+  ],
+  "features": [
+    {"type": "statue", "theme": "daedric:azura", "where": "square"},
+    {"type": "shrine", "theme": "daedric:azura", "where": "street", "tag": "spore"},
+    {"type": "pond", "count": 2, "where": "free"},
+    {"type": "garden", "count": 2, "where": "free"},
+    {"type": "great_tree", "theme": "dark_oak", "where": "free"},
+    {"type": "well", "count": 2, "where": "free"},
+    {"type": "lamps", "count": 3, "where": "street", "tag": "court"},
+    {"type": "banners", "where": "gate"},
+    {"type": "memorial", "where": "free"},
+    {"type": "market", "where": "free"}
   ],
   "titles": {
     "sadrith_mora_gateway_inn": "The Rope-Bridge Tavern",

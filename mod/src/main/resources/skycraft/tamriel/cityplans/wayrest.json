@@ -20,23 +20,50 @@
     {"kind": "temple", "at": [42, -14], "size": [13, 19], "face": "W", "name": "wayrest_chapel_of_the_divines"},
     {"kind": "barracks", "at": [-44, -22], "size": [9, 15], "face": "E"}
   ],
-  "streets": [
-    {"from": [0, 104], "to": [0, -42], "width": 5, "major": true},
-    {"from": [-104, 0], "to": [104, 0], "width": 5, "major": true},
-    {"from": [-92, 50], "to": [92, 50], "width": 3}
+  "nets": [
+    {"type": "path", "via": [[0, 104], [-8, 86], [6, 66], [-4, 46], [0, 26], [0, -2], [0, -42]], "width": 5, "major": true, "tag": "main"},
+    {"type": "path", "via": [[-104, 0], [-82, -8], [-60, 4], [-34, -6], [-12, 2], [0, -2]], "width": 5, "major": true, "tag": "cross"},
+    {"type": "path", "via": [[104, 0], [82, -8], [60, 4], [34, -6], [12, 2], [0, -2]], "width": 5, "major": true, "tag": "cross"},
+    {"type": "radial", "at": [0, 8], "spokes": 9, "r0": 24, "r1": 98, "wobble": 5, "offset": 0.17, "width": 3, "tag": "wheel",
+     "rings": [38, 64, 88], "ring_wobble": 4, "ring_width": 3, "ring_tag": "rim"},
+    {"type": "path", "via": [[-92, 84], [-60, 94], [-30, 86], [0, 92], [30, 86], [60, 94], [92, 84]], "width": 4, "major": true, "tag": "quay"},
+    {"type": "path", "via": [[-60, -50], [-44, -40], [-30, -46]], "width": 3, "tag": "rim"},
+    {"type": "path", "via": [[60, -50], [44, -40], [30, -46]], "width": 3, "tag": "rim"}
   ],
-  "rings": [{"r": 58, "sides": 8, "width": 3, "offset": 0.3927, "fill": true}],
   "plazas": [
-    {"at": [0, 26], "size": 17, "variant": 1, "stalls": 6},
+    {"at": [0, 30], "size": 17, "variant": 1, "stalls": 6},
     {"at": [60, 74], "size": 11, "variant": 3, "name": "wayrest_ward_quay"}
   ],
+  "zones": [
+    {"at": [0, -62], "r": 36, "zone": "noble"},
+    {"at": [0, 30], "r": 26, "zone": "centre"},
+    {"at": [66, 64], "r": 26, "zone": "craft"},
+    {"at": [-72, 40], "r": 26, "zone": "poor"}
+  ],
+  "fabric": {"radius": 100, "target": 0.6},
   "queue": [
-    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "wayrest_silver_lantern"},
-    {"kind": "smithy", "size": [11, 9], "name": "wayrest_anchor_and_hammer"},
-    {"kind": "store", "count": 3, "name": "wayrest_quay_provisions"},
-    {"kind": "alchemist"},
-    {"kind": "manor", "count": 4, "flags": ["upper", "rich"]},
-    {"kind": "house", "count": 32, "flags": ["upper"], "plain_every": 3, "small_every": 4}
+    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "wayrest_silver_lantern", "on": "main"},
+    {"kind": "smithy", "size": [11, 9], "name": "wayrest_anchor_and_hammer", "on": "quay"},
+    {"kind": "store", "count": 3, "name": "wayrest_quay_provisions", "on": "quay"},
+    {"kind": "alchemist", "on": "cross"},
+    {"kind": "manor", "count": 4, "flags": ["upper", "rich"], "on": "rim"}
+  ],
+  "features": [
+    {"type": "fountain", "where": "square"},
+    {"type": "great_tree", "theme": "oak", "where": "free"},
+    {"type": "great_tree", "theme": "birch", "where": "free"},
+    {"type": "basin", "where": "edge"},
+    {"type": "bell_tower", "where": "free"},
+    {"type": "statue", "theme": "divine:stendarr", "where": "square"},
+    {"type": "statue", "theme": "divine:julianos", "where": "free"},
+    {"type": "shrine", "theme": "divine:mara", "count": 2, "where": "street", "tag": "cross"},
+    {"type": "memorial", "count": 2, "where": "free"},
+    {"type": "banners", "count": 4, "where": "gate"},
+    {"type": "lamps", "count": 3, "where": "street", "tag": "main"},
+    {"type": "market", "where": "free"},
+    {"type": "garden", "count": 2, "where": "free"},
+    {"type": "waterwheel", "where": "edge"},
+    {"type": "tree_row", "where": "street", "tag": "cross"}
   ],
   "titles": {
     "wayrest_silver_lantern": "The Silver Lantern",
