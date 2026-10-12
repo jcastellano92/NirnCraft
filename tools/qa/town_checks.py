@@ -300,6 +300,28 @@ def floating_vegetation(world, cx, cz, r=150, y1=40, y2=330):
     grounded[np.unique(lab[edge & veg])] = True
     bad = ~grounded
     bad[0] = False
+    # a component holding a builder's beam (stripped log) or touching a built block (planks, bricks, stairs...) is part
+    # of a structure, not a fallen crown: same rule as world/OrphanSweep.leansOnBuilt
+    built_names = ('plank', 'brick', 'slab', 'stair', 'wall', 'fence', 'door', 'glass', 'wool', 'concrete', 'polished',
+                   'smooth', 'chiseled', 'stripped', 'tile', 'thatch', 'hay_block', 'scaffolding', 'bars', 'cut_',
+                   'cobble', 'lantern', 'barrel', 'chest', 'bookshelf', 'terracotta')
+    isbuilt = np.array([any(k in b for k in built_names) and not b.endswith('leaves') for b in base]) & ~isleaf
+    isstrip = np.array([b.startswith('stripped') for b in base])
+    bl = isbuilt[A] & ~veg
+    nbuilt = np.zeros_like(bl)
+    nbuilt[1:] |= bl[:-1]
+    nbuilt[:-1] |= bl[1:]
+    nbuilt[:, 1:] |= bl[:, :-1]
+    nbuilt[:, :-1] |= bl[:, 1:]
+    nbuilt[:, :, 1:] |= bl[:, :, :-1]
+    nbuilt[:, :, :-1] |= bl[:, :, 1:]
+    attached = np.zeros(n + 1, bool)
+    sizes = np.bincount(lab.ravel(), minlength=n + 1)
+    attached[np.unique(lab[veg & isstrip[A]])] = True
+    touching = np.zeros(n + 1, bool)
+    touching[np.unique(lab[veg & nbuilt])] = True
+    attached |= touching & (sizes <= 12)   # a big crown that merely touches a wall is still a crown without a trunk
+    bad &= ~attached
     ids = np.nonzero(bad)[0]
     logs = leaves = 0
     samples = []
@@ -621,13 +643,15 @@ def access_report(area):
         dx, dz = sides[0] if cnt[0] > cnt[1] else sides[1]
         # the opposite side must be roofed (it is, by the single open direction)
         doors += 1
-        ok = True
-        for k in (1, 2):
-            cx, cz = x + dx * k, z + dz * k
-            if not (P[y, cz, cx] and P[min(y + 1, H - 1), cz, cx]):
-                ok = False
-            if y > 0 and not solid_top[y - 1, cz, cx] and k == 1:
-                ok = False
+        def stand(cx, cz, lv):  # a 2-high free cell on a floor at level lv
+            return (1 <= lv < H - 2 and P[lv, cz, cx] and P[lv + 1, cz, cx] and solid_top[lv - 1, cz, cx])
+        # the doorstep is a standing cell; from it the way on is the cell beyond, or a cell beside it, at the same
+        # level or one step up/down (mobs and players step one block)
+        ok = stand(x + dx, z + dz, y)
+        if ok:
+            ox, oz = (1, 0) if dx == 0 else (0, 1)
+            nxt = [(x + dx * 2, z + dz * 2), (x + dx + ox, z + dz + oz), (x + dx - ox, z + dz - oz)]
+            ok = any(stand(cx, cz, lv) for cx, cz in nxt for lv in (y, y + 1, y - 1))
         if not ok:
             bad_doors += 1
             if len(bad_door_pos) < 8:
@@ -698,21 +722,33 @@ def sealed_report(area, pieces):
     for p in pieces:
         if not p.building or p.kind in ('TENT', 'RESERVED') or p.w < 4 or p.d < 4:
             continue
-        sides = {'front': [(x, 0) for x in range(p.w)], 'back': [(x, p.d - 1) for x in range(p.w)],
-                 'left': [(0, z) for z in range(p.d)], 'right': [(p.w - 1, z) for z in range(p.d)]}
+        # a side is the best of its outer three rows: porches, eaves and margins put the wall one or two cells in
+        sides = {}
+        for k in range(3):
+            if k >= min(p.w, p.d) // 2:
+                break
+            sides.setdefault('front', []).append([(x, k) for x in range(p.w)])
+            sides.setdefault('back', []).append([(x, p.d - 1 - k) for x in range(p.w)])
+            sides.setdefault('left', []).append([(k, z) for z in range(p.d)])
+            sides.setdefault('right', []).append([(p.w - 1 - k, z) for z in range(p.d)])
         res = {}
-        for name, cells in sides.items():
-            solid = tot = 0
-            for lx, lz in cells:
-                wx, wz = local_to_world(p, lx, lz)
-                if not area.in_box(wx, wz) or not area.loaded[wz - area.z1, wx - area.x1]:
-                    continue
-                tot += 1
-                a = area.block(wx, p.floor + 2, wz)
-                b = area.block(wx, p.floor + 3, wz)
-                if not (_is_air(a) and _is_air(b)):
-                    solid += 1
-            res[name] = round(solid / tot, 2) if tot else None
+        for name, rows in sides.items():
+            best = None
+            for cells in rows:
+                solid = tot = 0
+                for lx, lz in cells:
+                    wx, wz = local_to_world(p, lx, lz)
+                    if not area.in_box(wx, wz) or not area.loaded[wz - area.z1, wx - area.x1]:
+                        continue
+                    tot += 1
+                    a = area.block(wx, p.floor + 2, wz)
+                    b = area.block(wx, p.floor + 3, wz)
+                    if not (_is_air(a) and _is_air(b)):
+                        solid += 1
+                if tot:
+                    v = round(solid / tot, 2)
+                    best = v if best is None else max(best, v)
+            res[name] = best
         if all(v is None for v in res.values()):
             continue
         open_sides = [k for k, v in res.items() if v is not None and v < 0.55]

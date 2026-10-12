@@ -475,6 +475,7 @@ public final class Zoning {
         // ---- required trades in their quarters, then homes on every frontage
         List<Want> wants = wants(x, names);
         for (Want w : wants) placeWanted(x, w);
+        ensureTrades(x, names);
         for (Street s : streetsByRank(x)) {
             frontage(x, s, 1);
             frontage(x, s, -1);
@@ -775,6 +776,87 @@ public final class Zoning {
             }
             x.plan.relaxed = false;
         }
+    }
+
+    /**
+     * A village or larger place must have an inn and a shop (a smithy from village up, an apothecary from town up, a
+     * shrine in a city): whatever planning left out (no lot on rough ground, a layout that never asked) is placed on the
+     * nearest free ground to the square, with a footpath to the nearest street.
+     */
+    static void ensureTrades(Ctx x, Layouts.Names names) {
+        if (x.size != Layouts.Size.VILLAGE && x.size != Layouts.Size.TOWN && x.size != Layouts.Size.CITY) return;
+        boolean town = x.size != Layouts.Size.VILLAGE, city = x.size == Layouts.Size.CITY;
+        List<Want> need = new ArrayList<>();
+        need.add(new Want(Use.INN, Wealth.COMMON, Zone.CENTRE, names.inn()));
+        need.add(new Want(Use.GENERAL_STORE, Wealth.COMMON, Zone.CENTRE, names.store()));
+        need.add(new Want(Use.SMITHY, Wealth.COMMON, Zone.CRAFT, names.smithy()));
+        if (town) need.add(new Want(Use.ALCHEMIST, Wealth.COMMON, Zone.CENTRE, ""));
+        if (city) need.add(new Want(Use.TEMPLE, Wealth.WEALTHY, Zone.CENTRE, ""));
+        for (Want w : need) {
+            boolean have = false;
+            for (Spec b : x.buildings) if (b.use == w.use().ordinal()) have = true;
+            if (!have) placeFree(x, w);
+        }
+    }
+
+    /** Places one building of {@code want} on free ground near its quarter, facing the nearest street. */
+    static void placeFree(Ctx x, Want want) {
+        Plan plan = x.plan;
+        int[] anchor = switch (want.zone()) {
+            case CRAFT -> x.craft;
+            case NOBLE -> x.noble;
+            default -> x.sk.squares.isEmpty() ? new int[]{0, 0} : x.sk.squares.get(0);
+        };
+        int R = Math.max(18, Math.min(x.R, 80));
+        List<int[]> pts = new ArrayList<>();
+        for (int gx = -R; gx <= R; gx += 3) for (int gz = -R; gz <= R; gz += 3) {
+            if (Math.hypot(gx, gz) < R * 0.95) pts.add(new int[]{gx, gz});
+        }
+        pts.sort(Comparator.comparingDouble(p -> Math.hypot(p[0] - anchor[0], p[1] - anchor[1])));
+        int[] sz = want.use().size(want.wealth(), x.r);
+        for (int pass = 0; pass < (x.named ? 2 : 1); pass++) {
+            plan.relaxed = pass == 1;
+            for (int i = 0, n = 0; i < pts.size() && n < 160; i++) {
+                int[] p = pts.get(i);
+                // the nearest street point: the lot faces it and a footpath joins them
+                double best = Double.MAX_VALUE, bx = 0, bz = 0;
+                for (Street st : x.sk.streets) {
+                    double vx = st.x2() - st.x1(), vz = st.z2() - st.z1();
+                    double l2 = vx * vx + vz * vz;
+                    double t = l2 < 1e-6 ? 0 : Math.max(0, Math.min(1, ((p[0] - st.x1()) * vx + (p[1] - st.z1()) * vz) / l2));
+                    double qx = st.x1() + vx * t, qz = st.z1() + vz * t;
+                    double dd = Math.hypot(qx - p[0], qz - p[1]) - st.width() / 2.0;
+                    if (dd < best) {
+                        best = dd;
+                        bx = qx;
+                        bz = qz;
+                    }
+                }
+                if (best == Double.MAX_VALUE || best < 2 || best > 24) continue;
+                n++;
+                Direction face = cardinal(bx - p[0], bz - p[1]);
+                for (int shrink = 0; shrink <= 2; shrink++) {
+                    int w = Math.max(want.use().wMin, sz[0] - shrink * 2), d = Math.max(want.use().dMin, sz[1] - shrink * 2);
+                    Spec s = plan.at(want.use().archetype(), p[0], p[1], face).size(w, d);
+                    s.use(want.use(), want.wealth());
+                    s.margin = 1;
+                    if (!want.name().isEmpty()) {
+                        s.name = want.name();
+                        s.flag(Spec.SIGN);
+                    }
+                    if (!tryPlace(x, s)) continue;
+                    plan.relaxed = false;
+                    int fx = face.getStepX(), fz = face.getStepZ();
+                    int half = (face.getAxis() == Direction.Axis.Z ? d : w) / 2;
+                    int sx = p[0] + fx * (half + 2), sz2 = p[1] + fz * (half + 2);
+                    int ex = (int) Math.round(bx), ez = (int) Math.round(bz);
+                    Spec path = plan.line(Archetype.STREET, sx, sz2, fx != 0 ? ex : sx, fz != 0 ? ez : sz2, 1);
+                    if (plan.fits(path, 0)) plan.add(path);
+                    return;
+                }
+            }
+        }
+        plan.relaxed = false;
     }
 
     /** Packs one side of a street with homes: two to five blocks apart, no holes left unfilled. */
@@ -1584,7 +1666,12 @@ public final class Zoning {
             reserved(x);
             lining(x);
         }
+        if (plan.place != null && !special(plan.place.variant()) && x.named) {
+            ensureTrades(x, com.skycraft.tamriel.settlement.plan.Cities.names(plan.place));
+        }
         fillGaps(x);
+        // the homes of a hand-laid layout (and the ones the fill added) get a yard behind them like generated towns do
+        if (x.tier >= 1) backyards(x);
         variety(plan);
         clearing(plan, 0, Math.min(plan.radius, 120));
     }
