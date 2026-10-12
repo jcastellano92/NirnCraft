@@ -382,6 +382,16 @@ public final class RoadsData extends SavedData {
         return zoneAt(x, z, false);
     }
 
+    /** The destination whose no-road ground (zone, inside the gates of a planned town) contains this column, if any. */
+    @Nullable
+    Settlement noRoadZoneAt(int x, int z) {
+        ensureZoneIndex();
+        List<Settlement> list = zoneIndex.get(ChunkPos.asLong(x >> ZONE_SHIFT, z >> ZONE_SHIFT));
+        if (list == null) return null;
+        for (Settlement s : list) if (s.noRoadZone(x, z, zoneIndexRadius)) return s;
+        return null;
+    }
+
     @Nullable
     private Settlement zoneAt(int x, int z, boolean townsOnly) {
         ensureZoneIndex();

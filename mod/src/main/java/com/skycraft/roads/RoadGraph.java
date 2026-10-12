@@ -93,11 +93,12 @@ final class RoadGraph {
     }
 
     /**
-     * Where roads meet a place: the main gate (local south of its layout, past its walls and bridges) for capitals and
-     * cities, the centre for everything else.
+     * Fallback where roads meet a place the settlement plan cannot predict gates for ({@link GateEnds} is used first):
+     * the main gate guess (local south of its layout, past its walls and bridges) for capitals and cities, the centre
+     * for everything else; never a point in water (the nearest dry one is taken, as for a town on a river).
      */
     static int[] endpoint(Place p) {
-        if (p.type() != PlaceType.CAPITAL && p.type() != PlaceType.CITY) return new int[]{p.x(), p.z()};
+        if (p.type() != PlaceType.CAPITAL && p.type() != PlaceType.CITY) return GateEnds.dryNear(p.x(), p.z(), 96);
         int reach;
         Direction back;
         try {
@@ -115,7 +116,7 @@ final class RoadGraph {
             TamrielMap.sample(x, z, s);
             if (s.region != 0 && s.coastDistance > 12 && !s.inWater() && s.lakeDistance < -12) return new int[]{x, z};
         }
-        return new int[]{p.x(), p.z()};
+        return GateEnds.dryNear(p.x(), p.z(), 96);
     }
 
     // ------------------------------------------------------------------ named roads

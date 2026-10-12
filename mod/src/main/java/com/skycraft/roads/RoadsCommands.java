@@ -72,7 +72,7 @@ public final class RoadsCommands {
         RoadsData data = RoadsData.get(overworld(c));
         int signs = 0;
         for (RoadFeature f : data.features) if (f.type == RoadFeature.SIGNPOST) signs++;
-        int lanterns = data.features.size() - signs;
+        int lanterns = (int) data.features.stream().filter(f -> f.type == RoadFeature.LANTERN).count();
         float km = 0;
         for (Road r : data.roads.values()) km += r.length() / 1000f;
         String length = String.format(java.util.Locale.ROOT, "%.1f", km);
@@ -165,7 +165,7 @@ public final class RoadsCommands {
         Skycraft.LOGGER.info("Skycraft roads: inspect {} {} {} {}: {}", x0, z0, x1, z1, text);
         RoadsData data = RoadsData.get(level);
         for (RoadFeature f : data.features) {
-            if (f.type == RoadFeature.LANTERN || f.x < ax || f.z < az || f.x >= ax + w || f.z >= az + h) continue;
+            if (f.type == RoadFeature.LANTERN || f.type == RoadFeature.DRESSING || f.x < ax || f.z < az || f.x >= ax + w || f.z >= az + h) continue;
             Skycraft.LOGGER.info("Skycraft roads: inspect feature {} at {} {} ({} signs)", f.type, f.x, f.z, f.dests.size());
         }
         c.getSource().sendSuccess(() -> Component.literal(text), false);

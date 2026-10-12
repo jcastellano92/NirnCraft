@@ -60,6 +60,32 @@ public final class Settlement {
         return px >= minX - BOX_MARGIN && px <= maxX + BOX_MARGIN && pz >= minZ - BOX_MARGIN && pz <= maxZ + BOX_MARGIN;
     }
 
+    /** Radius of the built town (its nearest gate) from {@link GateEnds}; -1 = not computed yet, 0 = unknown. */
+    private int core = -1;
+
+    /**
+     * Roads leave this unpaved: the zone of {@link #inZone}, but for a planned town only the ground inside its gates
+     * (so roads are paved right up to the gate instead of stopping at the edge of the zone box, which for a city lies
+     * far outside its walls).
+     */
+    boolean noRoadZone(int px, int pz, int radius) {
+        if (!inZone(px, pz, radius)) return false;
+        if (core < 0) {
+            int c = 0;
+            if (town && !placeId.isEmpty()) {
+                try {
+                    c = place().filter(p -> p.type().isSettlement()).map(GateEnds::coreRadius).orElse(0);
+                } catch (RuntimeException e) {
+                    c = 0;
+                }
+            }
+            core = c;
+        }
+        if (core <= 0) return true;
+        double dx = px - x, dz = pz - z;
+        return dx * dx + dz * dz <= (double) core * core;
+    }
+
     /** The named place, if this destination is one. */
     public java.util.Optional<Place> place() {
         return placeId.isEmpty() ? java.util.Optional.empty() : Places.byId(placeId);

@@ -321,8 +321,14 @@ def analyse(world, roads, place, half):
         gate_pts = [(p.x, p.z, 'signpost') for p in props if p.label() == 'SIGNPOST' and p.flags & F_MAJOR]
     bad_gate = []
     gate_info = []
+    bridges = [p for p in pieces if p.kind == 'BRIDGE']
     for gx, gz, what in gate_pts:
         d, r = road_dist(near_roads, gx, gz)
+        # the plan's road end is the far foot of the gate's bridge/ramp when it has one (Solitude, Windhelm...)
+        for b in bridges:
+            for (ax, az), (bx, bz) in (((b.x, b.z), (b.x2, b.z2)), ((b.x2, b.z2), (b.x, b.z))):
+                if math.hypot(ax - gx, az - gz) <= 12:
+                    d = min(d, road_dist(near_roads, bx, bz)[0])
         # also accept the town's own street ending there
         sd = min([min(math.hypot(s.x - gx, s.z - gz), math.hypot(s.x2 - gx, s.z2 - gz)) for s in streets] or [999])
         gate_info.append((gx, gz, round(d, 1), round(sd, 1)))
@@ -386,6 +392,9 @@ def analyse(world, roads, place, half):
                 on_street.append((p.label(), int(px), int(pz)))
                 break
         if p.kind in PROP_KINDS:
+            # signposts and lamps AT a gate / road end are where the road is meant to arrive
+            if any(math.hypot(px - gx, pz - gz) < 8 for gx, gz, _ in gate_pts):
+                continue
             d, r = road_dist(near_roads, px, pz)
             if r is not None and d < ROAD_WIDTH[min(3, r['kind'])] / 2.0:
                 on_road.append((p.label(), int(px), int(pz), ROAD_KIND[min(3, r['kind'])]))
@@ -438,6 +447,26 @@ def analyse(world, roads, place, half):
         res['density_inner'] = round(inner, 2)
         res['density_outer'] = round(outer, 2)
         res['density_falls_with_distance'] = bool(inner > outer)
+
+    # --- 4b. what stands OUTSIDE the wall: road features (lanterns, signposts, milestones, shrines, roadside dressing)
+    # by distance beyond the built radius, per 1000 m2 of the annulus (the plan props above stop at the wall)
+    names = {0: 'lantern', 1: 'signpost', 2: 'milestone', 3: 'shrine', 4: 'dressing'}
+    br = res['built_radius']
+    outer = []
+    for r0 in range(0, 200, 50):
+        a0, a1 = br + r0, br + r0 + 50
+        cnt = {}
+        for f in roads.features:
+            d = math.hypot(f['x'] - cx0, f['z'] - cz0)
+            if a0 <= d < a1:
+                k = names.get(f['type'], str(f['type']))
+                cnt[k] = cnt.get(k, 0) + 1
+        n = sum(cnt.values())
+        outer.append(dict(from_wall=r0, to_wall=r0 + 50, features=n, dressing=cnt.get('dressing', 0),
+                          per1000=round(n / (math.pi * (a1 * a1 - a0 * a0)) * 1000, 3), kinds=cnt))
+    res['outer_features'] = outer
+    res['outer_dressing_100'] = sum(o['dressing'] for o in outer[:2])
+    res['outer_features_100'] = sum(o['features'] for o in outer[:2])
 
     # --- 5. prop presence + floating
     missing, floating = [], []
@@ -531,6 +560,20 @@ def main():
                      res.get('gate_points', 0), res.get('gates_without_road_24', 0), res.get('road_end_stubs', 0),
                      res.get('road_ends', 0), res.get('props_in_buildings', 0), res.get('props_on_street', 0),
                      res.get('props_floating', 0), verdict(res)))
+    ok = [r for r in allres if not r.get('note')]
+    tot = lambda k: sum(r.get(k, 0) or 0 for r in ok)  # noqa: E731
+    print('TOTAL towns=%d gate_points=%d gates_without_road_24=%d stubs=%d props_on_road=%d props_on_street=%d '
+          'props_in_buildings=%d' % (len(ok), tot('gate_points'), tot('gates_without_road_24'), tot('road_end_stubs'),
+                                     tot('props_on_road'), tot('props_on_street'), tot('props_in_buildings')))
+    if ok:
+        for k, lab in ((0, '0-50 m'), (1, '50-100 m'), (2, '100-150 m'), (3, '150-200 m')):
+            rows = [r['outer_features'][k] for r in ok if r.get('outer_features')]
+            if rows:
+                print('OUTSIDE %-10s beyond the built radius: %.3f road features / 1000 m2 (mean), dressing %d, all %d' % (
+                    lab, sum(x['per1000'] for x in rows) / len(rows), sum(x['dressing'] for x in rows),
+                    sum(x['features'] for x in rows)))
+        print('towns with no road feature within 100 m of the wall: %d of %d' % (
+            sum(1 for r in ok if r.get('outer_features_100', 0) == 0), len(ok)))
     if a.json:
         json.dump(allres, open(a.json, 'w'), indent=1, default=str)
 

@@ -16,6 +16,7 @@ public final class RoadsConfig {
     public static final ForgeConfigSpec.IntValue LANTERN_SPACING;
     public static final ForgeConfigSpec.BooleanValue SIGNPOSTS;
     public static final ForgeConfigSpec.BooleanValue LANTERNS;
+    public static final ForgeConfigSpec.BooleanValue ROADSIDE;
 
     // ------------------------------------------------------------------ performance
     public static final ForgeConfigSpec.IntValue PAVE_BLOCKS_PER_TICK;
@@ -59,6 +60,8 @@ public final class RoadsConfig {
                 .defineInRange("lanternSpacing", 40, 0, 4096);
         SIGNPOSTS = b.comment("Place signposts at settlement exits and road junctions.").define("signposts", true);
         LANTERNS = b.comment("Place lantern posts along roads.").define("lanterns", true);
+        ROADSIDE = b.comment("Dress the verges of new roads: carts, barrels, hay, fences, cairns, camps, woodpiles (denser near towns).")
+                .define("roadsideDressing", true);
         b.pop();
 
         b.push("performance");

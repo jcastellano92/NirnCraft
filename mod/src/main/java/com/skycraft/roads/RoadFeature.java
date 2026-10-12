@@ -15,6 +15,11 @@ public final class RoadFeature {
     public static final int MILESTONE = 2;
     /** A small shrine of one of the Divines beside a highway ({@link #dests} empty; {@link #variant} = which). */
     public static final int SHRINE = 3;
+    /**
+     * Roadside dressing (a cart, barrels, hay, a fence run, a cairn, a camp, a woodpile): {@link #variant} holds the
+     * kind (low 4 bits, see {@link Dressing}) and the direction away from the road (2D data value, bits 4-5).
+     */
+    public static final int DRESSING = 4;
     /** A signpost carries at most this many destination signs. */
     public static final int MAX_DESTINATIONS = 3;
 

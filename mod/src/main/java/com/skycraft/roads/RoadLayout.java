@@ -40,7 +40,7 @@ final class RoadLayout {
         int n = road.size();
         if (n < 4) return touched;
         boolean[] inZone = new boolean[n];
-        for (int i = 0; i < n; i++) inZone[i] = data.anyZoneAt(road.xs[i], road.zs[i]) != null;
+        for (int i = 0; i < n; i++) inZone[i] = data.noRoadZoneAt(road.xs[i], road.zs[i]) != null;
         int first = -1, last = -1;
         for (int i = 0; i < n; i++) {
             if (!inZone[i]) {
@@ -53,6 +53,7 @@ final class RoadLayout {
         List<RoadFeature> created = new ArrayList<>();
         if (road.kind == Road.TRAIL) {
             if (RoadsConfig.SIGNPOSTS.get()) trailSign(data, road, inZone, created, touched);
+            Dressing.layout(data, road, inZone, created, touched);
             return touched;
         }
         if (road.kind <= Road.ROAD) milestonesAndShrines(data, road, inZone, created, touched);
@@ -79,12 +80,13 @@ final class RoadLayout {
                 int x = (int) Math.round(road.xs[i] + r[0] * LANTERN_OFFSET * side);
                 int z = (int) Math.round(road.zs[i] + r[1] * LANTERN_OFFSET * side);
                 side = -side;
-                if (data.anyZoneAt(x, z) != null) continue;
+                if (data.noRoadZoneAt(x, z) != null) continue;
                 if (data.signpostNear(x, z, 8) == null && !near(created, x, z, 8)) {
                     touched.add(data.addFeature(new RoadFeature(RoadFeature.LANTERN, x, z, road.id)));
                 }
             }
         }
+        Dressing.layout(data, road, inZone, created, touched);
         return touched;
     }
 
@@ -140,7 +142,7 @@ final class RoadLayout {
                 int x = (int) Math.round(road.xs[i] + r[0] * SIGN_OFFSET * side);
                 int z = (int) Math.round(road.zs[i] + r[1] * SIGN_OFFSET * side);
                 side = -side;
-                if (data.anyZoneAt(x, z) != null || data.signpostNear(x, z, 24) != null || near(created, x, z, 24)) continue;
+                if (data.noRoadZoneAt(x, z) != null || data.signpostNear(x, z, 24) != null || near(created, x, z, 24)) continue;
                 RoadFeature f = new RoadFeature(RoadFeature.MILESTONE, x, z, road.id);
                 f.dests.add(dest(road, i, -1, road.a));
                 f.dests.add(dest(road, i, +1, road.b));
@@ -155,7 +157,7 @@ final class RoadLayout {
                 int s = (i & 1) == 0 ? 1 : -1;
                 int x = (int) Math.round(road.xs[i] + r[0] * SHRINE_OFFSET * s);
                 int z = (int) Math.round(road.zs[i] + r[1] * SHRINE_OFFSET * s);
-                if (data.anyZoneAt(x, z) != null || near(created, x, z, 16)) continue;
+                if (data.noRoadZoneAt(x, z) != null || near(created, x, z, 16)) continue;
                 RoadFeature f = new RoadFeature(RoadFeature.SHRINE, x, z, road.id);
                 f.variant = divine;
                 // the shrine faces the road
@@ -174,7 +176,7 @@ final class RoadLayout {
         double[] r = right(road, at);
         int x = (int) Math.round(road.xs[at] + r[0] * 2);
         int z = (int) Math.round(road.zs[at] + r[1] * 2);
-        if (data.anyZoneAt(x, z) != null) return;
+        if (data.noRoadZoneAt(x, z) != null) return;
         RoadFeature existing = data.signpostNear(x, z, 10);
         RoadFeature.Dest toSite = dest(road, at, -1, road.a);
         if (existing != null) {
@@ -241,6 +243,16 @@ final class RoadLayout {
             created.add(f);
             touched.add(data.addFeature(f));
             made++;
+            // a lantern post a few blocks further along, on the same verge, lights the junction
+            int li = Math.max(first, Math.min(last, at + 3));
+            double[] lr = right(road, li);
+            int lx = (int) Math.round(road.xs[li] + lr[0] * JUNCTION_OFFSET * side);
+            int lz = (int) Math.round(road.zs[li] + lr[1] * JUNCTION_OFFSET * side);
+            if (RoadsConfig.LANTERNS.get() && data.noRoadZoneAt(lx, lz) == null && !near(created, lx, lz, 3)
+                    && !inZone[li] && road.flags[li] == 0) {
+                created.add(new RoadFeature(RoadFeature.LANTERN, lx, lz, road.id));
+                touched.add(data.addFeature(created.get(created.size() - 1)));
+            }
         }
     }
 

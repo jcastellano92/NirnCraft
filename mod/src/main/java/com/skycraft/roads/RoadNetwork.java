@@ -364,7 +364,7 @@ public final class RoadNetwork {
             Settlement a = data.settlement(RoadsData.pairA(pair)), b = data.settlement(RoadsData.pairB(pair));
             if (a == null || b == null) return pair; // dropped by the caller
             // never two neighbouring roads at once: the second must see the first to share its way
-            if (overlapsInFlight(box(data, pair, a, b))) continue;
+            if (overlapsInFlight(box(data, pair, a, b, null, null))) continue;
             double mx = (a.x + b.x) * 0.5, mz = (a.z + b.z) * 0.5;
             for (double[] p : anchors) {
                 double d = (mx - p[0]) * (mx - p[0]) + (mz - p[1]) * (mz - p[1]);
@@ -378,7 +378,7 @@ public final class RoadNetwork {
     }
 
     /** Area a link's planning may touch (endpoints plus a margin). */
-    private static int[] box(RoadsData data, long pair, Settlement a, Settlement b) {
+    private static int[] box(RoadsData data, long pair, Settlement a, Settlement b, int[] ea, int[] eb) {
         int m = 160;
         RoadsData.Link link = data.link(pair);
         int ax = a.x, az = a.z, bx = b.x, bz = b.z;
@@ -389,6 +389,14 @@ public final class RoadNetwork {
             bx = link.tx();
             bz = link.tz();
             m = 48;
+        }
+        if (ea != null) {
+            ax = ea[0];
+            az = ea[1];
+        }
+        if (eb != null) {
+            bx = eb[0];
+            bz = eb[1];
         }
         return new int[]{Math.min(ax, bx) - m, Math.min(az, bz) - m, Math.max(ax, bx) + m, Math.max(az, bz) + m};
     }
@@ -422,9 +430,10 @@ public final class RoadNetwork {
                 a = b;
                 b = t;
             }
-            int[] ea = end(a), eb = link.trail() ? new int[]{link.tx(), link.tz()} : end(b);
+            int[] ea = end(data, a, link.trail() ? Integer.MIN_VALUE : b.id, link.trail() ? link.tx() : b.x, link.trail() ? link.tz() : b.z);
+            int[] eb = link.trail() ? new int[]{link.tx(), link.tz()} : end(data, b, a.id, a.x, a.z);
             data.inFlight.add(pair);
-            IN_FLIGHT_BOXES.put(pair, box(data, pair, a, b));
+            IN_FLIGHT_BOXES.put(pair, box(data, pair, a, b, ea, eb));
             ChunkGenerator generator = level.getChunkSource().getGenerator();
             RandomState random = level.getChunkSource().randomState();
             int bridge = link.maxBridge() > RoadGraph.DEFAULT_BRIDGE ? link.maxBridge()
@@ -452,9 +461,34 @@ public final class RoadNetwork {
         }
     }
 
-    /** Where roads meet a destination: a city's main gate, otherwise its centre. */
-    static int[] end(Settlement s) {
-        return s.place().map(RoadGraph::endpoint).orElseGet(() -> new int[]{s.x, s.z});
+    /**
+     * Where the road to {@code otherId} (a settlement at ox, oz; or a trail's target point, otherId MIN_VALUE) meets
+     * {@code s}: the gate of its plan that faces that neighbour (see {@link GateEnds}), else the old per-type guess, and
+     * for a destination found in the world its centre.
+     */
+    static int[] end(RoadsData data, Settlement s, int otherId, int ox, int oz) {
+        java.util.Optional<com.skycraft.tamriel.Place> place = s.place();
+        if (place.isEmpty()) return new int[]{s.x, s.z};
+        com.skycraft.tamriel.Place p = place.get();
+        if (s.town && p.type().isSettlement()) {
+            int[] g = GateEnds.pick(p, otherId, ox, oz, neighbours(data, s));
+            if (g != null) return g;
+        }
+        return RoadGraph.endpoint(p);
+    }
+
+    /** The settlements linked to {@code s} by planned (non-trail) roads, as {id, x, z} sorted by id. */
+    private static int[][] neighbours(RoadsData data, Settlement s) {
+        List<int[]> out = new ArrayList<>();
+        for (long pair : data.pairs) {
+            int a = RoadsData.pairA(pair), b = RoadsData.pairB(pair);
+            if (a != s.id && b != s.id) continue;
+            if (data.failed.contains(pair) || data.link(pair).trail()) continue;
+            Settlement o = data.settlement(a == s.id ? b : a);
+            if (o != null) out.add(new int[]{o.id, o.x, o.z});
+        }
+        out.sort(java.util.Comparator.comparingInt(r -> r[0]));
+        return out.toArray(new int[0][]);
     }
 
     /** Walled cities near the link (centre and radius triples): the road goes round them to the gate. */
@@ -464,10 +498,17 @@ public final class RoadNetwork {
         it.unimi.dsi.fastutil.ints.IntArrayList out = new it.unimi.dsi.fastutil.ints.IntArrayList();
         for (Settlement s : data.near(x, z, reach, s -> s.town && !s.placeId.isEmpty())) {
             s.place().ifPresent(p -> {
-                if (p.type() != com.skycraft.tamriel.PlaceType.CAPITAL && p.type() != com.skycraft.tamriel.PlaceType.CITY) return;
+                boolean city = p.type() == com.skycraft.tamriel.PlaceType.CAPITAL || p.type() == com.skycraft.tamriel.PlaceType.CITY;
+                if (!city && !p.type().isSettlement()) return;
+                int core = GateEnds.coreRadius(p);
+                // a road never crosses a town: it goes round to the gate (a city also keeps clear of its outer ground)
+                boolean own = Math.hypot(a[0] - p.x(), a[1] - p.z()) <= Math.max(p.radius(), core) + 60
+                        || Math.hypot(b[0] - p.x(), b[1] - p.z()) <= Math.max(p.radius(), core) + 60;
+                int r = own ? core - 8 : city ? p.radius() : core;
+                if (r < 16) return;
                 out.add(p.x());
                 out.add(p.z());
-                out.add(p.radius());
+                out.add(r);
             });
         }
         return out.toIntArray();

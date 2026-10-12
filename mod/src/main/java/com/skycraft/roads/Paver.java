@@ -246,7 +246,7 @@ final class Paver {
                     int px = r.xs[i], pz = r.zs[i];
                     boolean skip = false;
                     for (Settlement s : zones) {
-                        if (s.inZone(px, pz, radius)) {
+                        if (s.noRoadZone(px, pz, radius)) {
                             skip = true;
                             break;
                         }
@@ -312,6 +312,8 @@ final class Paver {
                     case RoadFeature.SIGNPOST -> placeSignpost(level, this, data, feature, false);
                     case RoadFeature.MILESTONE -> placeSignpost(level, this, data, feature, true);
                     case RoadFeature.SHRINE -> placeShrine(level, this, feature);
+                    case RoadFeature.DRESSING -> Dressing.place(level, data, feature, culture,
+                            (x, y, z) -> reserved(level, x, y, z));
                     default -> placeLantern(level, this, feature);
                 };
             }
@@ -522,7 +524,7 @@ final class Paver {
     }
 
     /** The natural ground block under a (possibly already built) post, or null if unsuitable. */
-    private static BlockPos ground(ServerLevel level, int x, int z) {
+    static BlockPos ground(ServerLevel level, int x, int z) {
         int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, y, z);
         int guard = 0;

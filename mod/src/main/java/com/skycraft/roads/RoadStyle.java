@@ -152,6 +152,49 @@ final class RoadStyle {
         }
     }
 
+    /** The wood of a culture's roadside carts, fences and woodpiles. */
+    record Wood(Block planks, Block fence, Block slab, Block log, Block trapdoor, Block gate) {
+    }
+
+    /** The stone of a culture's cairns. */
+    record Stone(Block block, Block mossy, Block slab) {
+    }
+
+    private static final Wood SPRUCE = new Wood(Blocks.SPRUCE_PLANKS, Blocks.SPRUCE_FENCE, Blocks.SPRUCE_SLAB,
+            Blocks.SPRUCE_LOG, Blocks.SPRUCE_TRAPDOOR, Blocks.SPRUCE_FENCE_GATE);
+    private static final Wood OAK = new Wood(Blocks.OAK_PLANKS, Blocks.OAK_FENCE, Blocks.OAK_SLAB, Blocks.OAK_LOG,
+            Blocks.OAK_TRAPDOOR, Blocks.OAK_FENCE_GATE);
+    private static final Wood BIRCH = new Wood(Blocks.BIRCH_PLANKS, Blocks.BIRCH_FENCE, Blocks.BIRCH_SLAB,
+            Blocks.BIRCH_LOG, Blocks.BIRCH_TRAPDOOR, Blocks.BIRCH_FENCE_GATE);
+    private static final Wood DARK_OAK = new Wood(Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_FENCE, Blocks.DARK_OAK_SLAB,
+            Blocks.DARK_OAK_LOG, Blocks.DARK_OAK_TRAPDOOR, Blocks.DARK_OAK_FENCE_GATE);
+    private static final Wood MANGROVE = new Wood(Blocks.MANGROVE_PLANKS, Blocks.MANGROVE_FENCE, Blocks.MANGROVE_SLAB,
+            Blocks.MANGROVE_LOG, Blocks.MANGROVE_TRAPDOOR, Blocks.MANGROVE_FENCE_GATE);
+    private static final Wood ACACIA = new Wood(Blocks.ACACIA_PLANKS, Blocks.ACACIA_FENCE, Blocks.ACACIA_SLAB,
+            Blocks.ACACIA_LOG, Blocks.ACACIA_TRAPDOOR, Blocks.ACACIA_FENCE_GATE);
+
+    static Wood wood(Culture c) {
+        return switch (c) {
+            case BRETON, BOSMER -> OAK;
+            case ALTMER -> BIRCH;
+            case DUNMER -> DARK_OAK;
+            case ARGONIAN, MAORMER -> MANGROVE;
+            case KHAJIIT, REDGUARD, YOKUDAN -> ACACIA;
+            default -> SPRUCE;
+        };
+    }
+
+    static Stone stone(Culture c) {
+        return switch (c) {
+            case DUNMER -> new Stone(Blocks.POLISHED_BLACKSTONE_BRICKS, Blocks.BASALT, Blocks.POLISHED_BLACKSTONE_BRICK_SLAB);
+            case KHAJIIT, REDGUARD, YOKUDAN -> new Stone(Blocks.SANDSTONE, Blocks.CUT_SANDSTONE, Blocks.SANDSTONE_SLAB);
+            case ALTMER -> new Stone(Blocks.CALCITE, Blocks.QUARTZ_BRICKS, Blocks.QUARTZ_SLAB);
+            case IMPERIAL, AKAVIRI -> new Stone(Blocks.STONE_BRICKS, Blocks.MOSSY_STONE_BRICKS, Blocks.STONE_BRICK_SLAB);
+            case ARGONIAN, MAORMER -> new Stone(Blocks.MUD_BRICKS, Blocks.PACKED_MUD, Blocks.MUD_BRICK_SLAB);
+            default -> new Stone(Blocks.COBBLESTONE, Blocks.MOSSY_COBBLESTONE, Blocks.COBBLESTONE_SLAB);
+        };
+    }
+
     /** The building culture of the land at (x, z). */
     static Culture cultureAt(int x, int z) {
         try {

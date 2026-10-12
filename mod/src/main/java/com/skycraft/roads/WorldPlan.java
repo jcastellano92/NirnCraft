@@ -246,6 +246,8 @@ final class WorldPlan {
                     Road road = data.road(RoadsData.entryRoad(e));
                     int i = RoadsData.entryIndex(e);
                     if (road == null || i < 0 || i >= road.size() || road.kind == Road.TRAIL || road.water(i)) continue;
+                    // not at a bridge's foot either: a trail ending there would stop in the water
+                    if (road.water(road.clamp(i - 3)) || road.water(road.clamp(i + 3))) continue;
                     long ddx = road.xs[i] - x, ddz = road.zs[i] - z;
                     long d = ddx * ddx + ddz * ddz;
                     if (d < bestD) {
