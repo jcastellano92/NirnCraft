@@ -1,0 +1,23 @@
+{
+ "id": "motif_cauldron_fire",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:cauldron_fire"
+ ],
+ "layers": [
+  [
+   ".C.",
+   "fWf"
+  ],
+  [
+   "..."
+  ]
+ ],
+ "key": {
+  "C": "minecraft:cauldron",
+  "f": "minecraft:campfire[lit=true]",
+  "W": "minecraft:mangrove_roots"
+ }
+}

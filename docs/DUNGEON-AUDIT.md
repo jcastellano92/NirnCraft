@@ -200,3 +200,82 @@ angarvunde and ravenscar_hollow. The contact sheets `<id>.jpg` in the same folde
 Open in game: the look of the glow (froglights, sea lanterns, shroomlights), the waterfalls (fluid ticks start on first
 chunk tick), pressure plates waking the automatons, the 2 offline "chest unreachable" cases, and worldgen time of a
 73x43x32 cavern (analyser paints it with the rest in under a second of CPU; not measured in the real chunk pipeline).
+
+## Skyrim identity (named dungeons: story hook, set piece, loot, master)
+
+Goal: each of Skyrim's 292 named dungeons and forts (dungeon_fixed + fort of `skyrim_landmarks.json`; the Tower of Mzark
+does not start, see below) reads as its own place, not a generic one. Everything below is data written by
+`tools/qa/dungeon_identity_gen.py` from the places and the place lore (`skycraft/dungeons/identity/skyrim.json`,
+`blueprints/motif_*.json`, `loot_tables/chests/story_*.json`), plus a small Java layer (`dungeons/world/Identity`).
+
+What a player meets:
+
+* **Entrance**: a sign naming the place and the person its story is about (the author of the lore's first reader note, or
+  who lies in the barrow), and a lectern with that note (a named person's letter, journal or orders). Surface sites (forts,
+  camps, towers, ruins) get the same at the front edge of the footprint, plus a stash chest of the place's own loot.
+* **Master**: a named boss. Chiefs of bandit, Forsworn, vampire, necromancer, hagraven and mage places carry the name the lore
+  gives them (e.g. Ingvild the Breaker, Mistress Hlevala); all others get a deterministic original name from per-family pools
+  (draugr jarls, Falmer elders, Dwemer warden-engines, beasts), unique across the 292. Surface ruins and camps now have a master too.
+* **Boss chamber**: the master's own note on a lectern and a hoard chest of the place's story loot.
+* **Set piece**: one of 46 motif blueprints chosen by the place's name (throne, urn wall, ossuary, trophy wall, prisoner cage,
+  blood altar, bone table, chaurus nest, ice shrine, ore cart...) or by family and the id's hash; it stands against the far
+  wall of the set-piece room and of the boss chamber (on open ground at surface sites).
+* **Loot**: half of the ordinary chests (common/minor tables) and 2 of 3 caches use `chests/story_<family>` (20 families:
+  barrow, ruin, dwemer, bandit, necromancer, vampire, hagraven, forsworn, falmer, den, ice, mine, grove, smuggler, cave, giant,
+  dragon, tower, cabin, wreck), built from the existing theme/camp/relic/corpse tables plus a signature item.
+* **The adventurer's room** uses the lore's person for the journal title when the entrance note is a journal or diary.
+* Lectern notes are written books tagged `SkyNote` (a vanilla lectern only shows written books; `PlaceLoreEvents` turns
+  the right-click into the place note's reading screen, so quests and discovery hooks still fire).
+* **Discoverable**: every Skyrim dungeon now has a road or trail: lairs, dens, camps and cabins joined the long-footpath
+  list (`RoadGraph.TOURIST_VARIANTS`, mirrored in `reach_lint.py`): isolated Skyrim places 9 to 0. The map already marks
+  discovered dungeons.
+
+### The lint
+
+`py -3 -I tools/qa/dungeon_identity_lint.py [--exports mod/run/qa-exports] [--compare old.json] [--static]` reads the exports
+(`/skycraft-dungeon-qa export <ids>`, at most 12 ids per command: one command is one tick and more than ~12 trip the 60 s
+watchdog; chain the commands with `|` in `qa.ps1 -ServerCmds`), the place data, the lore and the reach lint, and flags per
+dungeon: `no_sign`, `no_lectern`, `no_lore_note`, `no_boss`, `unnamed_boss`, `roster` (enemies do not match the family),
+`no_motif`, `generic_loot` (no story table and under a quarter themed), `no_trail`, `lore_mismatch` (hook vs structure).
+It lists the worst offenders and writes `tools/qa/out/dungeon_identity.json`. The exporter now also records signs and the
+lore note a lectern holds.
+
+| flag (292 Skyrim dungeons) | before | after |
+|---|---|---|
+| no_sign | 292 | 11 |
+| no_lectern (no book anywhere) | 139 | 7 |
+| no_lore_note (no named person's words on a lectern) | 292 | 8 |
+| no_boss | 70 | 2 |
+| unnamed_boss | 42 | 0 |
+| roster | 3 | 1 |
+| no_motif | 292 | 9 |
+| generic_loot | 210 | 4 |
+| no_trail | 9 | 0 |
+| lore_mismatch | 1 | 1 |
+| **total flags** | **1350** | **43** |
+| dungeons with no flag | 0 | 268 |
+
+Worst before: the 12 Nordic ruins, 16 Imperial/Stormcloak camps, the Forsworn towers and camps, shipwrecks, vampire lairs
+and the bandit camps (5 to 7 flags each: no sign, no book, no master, no motif, generic loot). Worst after: the shipwrecks
+(11, 1.5 flags each: they sit in the shallows and no dry post fits), a few cabins and dragon lairs without a motif
+(rough ground), Temple of Miraak (a unique layout).
+
+Known leftovers: `deepwood_redoubt` is a Forsworn stronghold in the lore but the `barrow` variant builds draugr (a variant
+change would lose its word wall; needs a decision); `tower_of_mzark` (variant `mzark`) has no structure and does not start;
+`castle_karstaag_ruins` and a few Solstheim barrows mix in ash spawn and ice wraiths from their cavern look.
+
+### Analyzer
+
+`skycraft-dungeon-qa place` on one dungeon per variant (45), fixed world seed: 3 dungeons report blockers (`frossel` den:
+2 rooms stuck in terrain; `shadowgreen_cavern`: 80 spots with no way back out; `brucas_leap_redoubt`: boss room unreachable).
+All three reproduce identically with the identity layer switched off (index.json removed), so they are existing layout and
+terrain faults of those seeds, not caused by this work; other seeds show other places (benkongerike, ashfallow_citadel,
+fahlbtharz, ysgramors_tomb, lower_steepfall_burrow). The earlier "0 blockers" held for the 24-dungeon sample only. Server
+selftests, population and data checks pass.
+
+### Open in game
+
+Sign text width (14 characters per line is tuned for the standard font), the lectern note reading screen (right-click on the
+written book), the look of the motifs on rough cave floors, hoard chests next to bosses, and whether the stash/boss
+spawn at surface sites stand clear of the walls. `PlaceLorePlacer` puts `skycraft:book` items on its site lecterns, which a
+vanilla lectern does not show (`hasBook` only accepts written books); the same `SkyNote` trick would fix those.

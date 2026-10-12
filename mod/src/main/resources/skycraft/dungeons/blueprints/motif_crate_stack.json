@@ -1,0 +1,24 @@
+{
+ "id": "motif_crate_stack",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:crate_stack"
+ ],
+ "layers": [
+  [
+   "bbbbb",
+   "bb.bb"
+  ],
+  [
+   "b...b"
+  ],
+  [
+   "..b.."
+  ]
+ ],
+ "key": {
+  "b": "minecraft:barrel[facing=up]"
+ }
+}

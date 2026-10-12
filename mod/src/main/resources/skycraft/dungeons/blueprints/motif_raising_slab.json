@@ -1,0 +1,27 @@
+{
+ "id": "motif_raising_slab",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:raising_slab"
+ ],
+ "layers": [
+  [
+   ".SSS.",
+   ".SBS.",
+   ".SSS."
+  ],
+  [
+   ".fff.",
+   "..s..",
+   "....."
+  ]
+ ],
+ "key": {
+  "S": "minecraft:polished_blackstone",
+  "B": "minecraft:bone_block[axis=y]",
+  "f": "minecraft:soul_campfire[lit=true]",
+  "s": "minecraft:skeleton_skull[rotation=0]"
+ }
+}

@@ -1,0 +1,24 @@
+{
+ "id": "motif_mammoth_bones",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:mammoth_bones"
+ ],
+ "layers": [
+  [
+   "B.B.B",
+   "BBBBB"
+  ],
+  [
+   "B...B"
+  ],
+  [
+   "B...B"
+  ]
+ ],
+ "key": {
+  "B": "minecraft:bone_block[axis=y]"
+ }
+}

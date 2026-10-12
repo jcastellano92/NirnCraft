@@ -1,0 +1,24 @@
+{
+ "id": "motif_armory_rack",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:armory_rack"
+ ],
+ "layers": [
+  [
+   "PPPPP",
+   "g.a.g"
+  ],
+  [
+   "I.I.I"
+  ]
+ ],
+ "key": {
+  "P": "minecraft:spruce_planks",
+  "g": "minecraft:grindstone[face=floor,facing=north]",
+  "a": "minecraft:anvil[facing=north]",
+  "I": "minecraft:iron_bars"
+ }
+}

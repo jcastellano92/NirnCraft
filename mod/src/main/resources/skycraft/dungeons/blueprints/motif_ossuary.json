@@ -1,0 +1,26 @@
+{
+ "id": "motif_ossuary",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:ossuary"
+ ],
+ "layers": [
+  [
+   "BBBBBB",
+   "BsBsBs"
+  ],
+  [
+   "BsBsBs"
+  ],
+  [
+   "bbbbbb"
+  ]
+ ],
+ "key": {
+  "B": "minecraft:bone_block[axis=y]",
+  "s": "minecraft:skeleton_skull[rotation=0]",
+  "b": "minecraft:candle[candles=3,lit=true]"
+ }
+}

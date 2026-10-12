@@ -1,0 +1,20 @@
+{
+ "id": "motif_bone_fire",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:bone_fire"
+ ],
+ "layers": [
+  [
+   "BfB",
+   "...",
+   "..."
+  ]
+ ],
+ "key": {
+  "B": "minecraft:bone_block[axis=y]",
+  "f": "minecraft:campfire[lit=true]"
+ }
+}

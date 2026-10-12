@@ -67,14 +67,17 @@ public class DungeonPiece extends StructurePiece {
     /** Dungeon-wide sub-theme (bandit cave vs animal den, ...). */
     public final int flavor;
     public final int flags;
+    /** The named place this piece belongs to ({@link Site#place}), "" for random sites. */
+    public final String place;
 
-    public DungeonPiece(Site site, Kind kind, BoundingBox box, long seed, int floor, int aux, int dir, int extra,
+    public DungeonPiece(Site site,Kind kind, BoundingBox box, long seed, int floor, int aux, int dir, int extra,
                         int role, int doors, int variant, int flags) {
         super(DungeonsRegistry.DUNGEON_PIECE.get(), 0, box);
         this.theme = site.theme();
         this.kit = site.kit();
         this.special = site.special();
         this.param = site.param();
+        this.place = site.place();
         int flavor = site.flavor();
         this.kind = kind;
         this.seed = seed;
@@ -108,6 +111,7 @@ public class DungeonPiece extends StructurePiece {
         this.variant = tag.getInt("Variant");
         this.flavor = tag.getInt("Flavor");
         this.flags = tag.getInt("Flags");
+        this.place = tag.getString("Place");
     }
 
     @Override
@@ -127,11 +131,12 @@ public class DungeonPiece extends StructurePiece {
         tag.putInt("Variant", variant);
         tag.putInt("Flavor", flavor);
         tag.putInt("Flags", flags);
+        if (!place.isEmpty()) tag.putString("Place", place);
     }
 
     /** The site this piece belongs to (for builders that hand it on). */
     public Site site() {
-        return new Site(theme, kit, special, flavor, param);
+        return new Site(theme, kit, special, flavor, param, place);
     }
 
     public boolean has(int flag) {
@@ -159,6 +164,7 @@ public class DungeonPiece extends StructurePiece {
         Painter p = new Painter(level, chunkBox, this.boundingBox, seed);
         if (p.empty()) return;
         p.kit = kit;
+        p.place = place;
         RandomSource r = RandomSource.create(seed);
         if (theme == Theme.BLACKREACH) {
             Blackreach.build(p, this);
@@ -188,9 +194,15 @@ public class DungeonPiece extends StructurePiece {
                 if (theme.natural()) NaturalBuilder.tunnel(p, this, r);
                 else BuiltBuilder.tunnel(p, this, r);
             }
-            case PORTAL -> Portals.build(p, this, r);
+            case PORTAL -> {
+                Portals.build(p, this, r);
+                Identity.entrance(p, this);
+            }
             case SHAFT -> Shafts.build(p, this);
-            case SURFACE -> SurfaceBuilder.build(p, this, r);
+            case SURFACE -> {
+                SurfaceBuilder.build(p, this, r);
+                Identity.surfaceMarker(p, this);
+            }
         }
     }
 

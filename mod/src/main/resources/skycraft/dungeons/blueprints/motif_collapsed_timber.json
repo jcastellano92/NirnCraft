@@ -1,0 +1,23 @@
+{
+ "id": "motif_collapsed_timber",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:collapsed_timber"
+ ],
+ "layers": [
+  [
+   "gGgGg",
+   "G.g.G"
+  ],
+  [
+   "g...g"
+  ]
+ ],
+ "key": {
+  "g": "minecraft:gravel",
+  "G": "minecraft:cobblestone",
+  "p": "minecraft:oak_log[axis=x]"
+ }
+}

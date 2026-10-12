@@ -1,0 +1,25 @@
+{
+ "id": "motif_trophy_wall",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:trophy_wall"
+ ],
+ "layers": [
+  [
+   "fffff"
+  ],
+  [
+   "s.s.s"
+  ],
+  [
+   "..B.."
+  ]
+ ],
+ "key": {
+  "f": "minecraft:spruce_fence",
+  "s": "minecraft:skeleton_skull[rotation=0]",
+  "B": "minecraft:white_banner[rotation=0]"
+ }
+}

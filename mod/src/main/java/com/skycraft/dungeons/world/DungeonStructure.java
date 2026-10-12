@@ -247,7 +247,7 @@ public class DungeonStructure extends Structure {
         Direction out = special == Special.LABYRINTHIAN ? Direction.NORTH : h0 != WATER ? downhill(ctx, pl.x(), pl.z(), h0, rolled) : rolled;
         int fl = flavor >= 0 ? flavor : randomFlavor(random);
         Kit k = regionalKit ? Cultures.kitFor(TamrielMap.region(pl.x(), pl.z()), pl.x(), pl.z()) : kit;
-        Site site = new Site(theme, k, special, fl, SiteParams.forPlace(theme, pl));
+        Site site = new Site(theme, k, special, fl, SiteParams.forPlace(theme, pl), pl.id());
         int sea = ctx.chunkGenerator().getSeaLevel();
         int minY = ctx.heightAccessor().getMinBuildHeight();
         boolean pad = terrainAdaptation() != TerrainAdjustment.NONE;

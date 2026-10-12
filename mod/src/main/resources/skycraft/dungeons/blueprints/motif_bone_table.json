@@ -1,0 +1,25 @@
+{
+ "id": "motif_bone_table",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:bone_table"
+ ],
+ "layers": [
+  [
+   "BBBBB",
+   "b.t.b"
+  ],
+  [
+   ".l.s."
+  ]
+ ],
+ "key": {
+  "B": "minecraft:bone_block[axis=y]",
+  "b": "minecraft:brewing_stand",
+  "t": "minecraft:lectern[facing=north]@in",
+  "l": "minecraft:soul_lantern[hanging=false]",
+  "s": "minecraft:skeleton_skull[rotation=0]"
+ }
+}

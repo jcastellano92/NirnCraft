@@ -42,6 +42,8 @@ public final class Painter {
     public final long seed;
     /** The piece's culture kit: masonry palettes consult it ({@link BuiltBuilder#wall} and friends). */
     public Kit kit = Kit.NONE;
+    /** The named place being painted ({@link Identity}), "" for random sites. */
+    public String place = "";
     /**
      * How the room being painted is staffed ({@link Pacing}): ordinary mobs of an empty room never spawn, those of a
      * sleeping room spawn dormant, and a packed room gets a second of each. Bosses and elites ignore it.
@@ -248,6 +250,8 @@ public final class Painter {
         if (!ok(x, y, z)) return;
         set(x, y, z, state);
         pos.set(x, y, z);
+        // a named place's ordinary chests hold what its story says (half of them; boss and cache chests keep theirs)
+        loot = Identity.loot(place, loot, hash(x, y, z, 32));
         if (level.getBlockEntity(pos) instanceof RandomizableContainerBlockEntity) {
             RandomizableContainerBlockEntity.setLootTable(level, RandomSource.create(hash(x, y, z, 31)), pos.immutable(), loot);
         }
@@ -315,6 +319,8 @@ public final class Painter {
     /** The dungeon's boss: tagged for playtest telemetry and the analyzer ({@code DungeonTelemetry#BOSS_TAG}). */
     @Nullable
     public Mob spawnBoss(@Nullable String id, int x, int y, int z, float yaw, @Nullable String name) {
+        // a named place's master carries the name its story gives it
+        if (name == null) name = Identity.bossName(place);
         return spawn(id, x, y, z, yaw, name, m -> {
             // the master of the place outlasts its guards
             var hp = m.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);

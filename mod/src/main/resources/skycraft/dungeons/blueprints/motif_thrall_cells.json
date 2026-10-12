@@ -1,0 +1,23 @@
+{
+ "id": "motif_thrall_cells",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:thrall_cells"
+ ],
+ "layers": [
+  [
+   "I.I.I",
+   "I.I.I"
+  ],
+  [
+   "I.I.I",
+   "IsIsI"
+  ]
+ ],
+ "key": {
+  "I": "minecraft:iron_bars",
+  "s": "minecraft:skeleton_skull[rotation=0]"
+ }
+}

@@ -1,0 +1,25 @@
+{
+ "id": "motif_root_throne",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:root_throne"
+ ],
+ "layers": [
+  [
+   "RRRRR",
+   ".RsR."
+  ],
+  [
+   "R...R"
+  ],
+  [
+   "R...R"
+  ]
+ ],
+ "key": {
+  "R": "minecraft:mangrove_roots",
+  "s": "minecraft:moss_carpet"
+ }
+}

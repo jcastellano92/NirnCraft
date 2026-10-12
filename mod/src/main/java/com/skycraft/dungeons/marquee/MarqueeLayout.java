@@ -47,7 +47,7 @@ final class MarqueeLayout {
     static void emit(StructurePiecesBuilder builder, Site base, MarqueePlans.Plan plan, int ex, int surfaceY, int ez,
                      Direction out, int depthIn, long seed, int minFloor) {
         Site site = new Site(base.theme() == null ? Theme.RUIN : base.theme(), base.kit() != com.skycraft.dungeons.world.Kit.NONE ? base.kit() : plan.kit,
-                Special.MARQUEE, out.get2DDataValue(), plan.hash);
+                Special.MARQUEE, out.get2DDataValue(), plan.hash, base.place());
         RandomSource r = RandomSource.create(seed);
         List<MarqueePlans.Room> rooms = plan.rooms;
         MarqueePlans.Room start = null;

@@ -1,0 +1,22 @@
+{
+ "id": "motif_loot_heap",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:loot_heap"
+ ],
+ "layers": [
+  [
+   "bbhbb",
+   "b.b.h"
+  ],
+  [
+   "h.b.."
+  ]
+ ],
+ "key": {
+  "b": "minecraft:barrel[facing=up]",
+  "h": "minecraft:hay_block[axis=y]"
+ }
+}

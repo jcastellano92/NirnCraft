@@ -1,0 +1,23 @@
+{
+ "id": "motif_ore_cart",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:ore_cart"
+ ],
+ "layers": [
+  [
+   "rrrrr",
+   "..M.."
+  ],
+  [
+   "..O.."
+  ]
+ ],
+ "key": {
+  "r": "minecraft:rail[shape=east_west]",
+  "M": "minecraft:barrel[facing=up]",
+  "O": "minecraft:raw_iron_block"
+ }
+}

@@ -1,0 +1,23 @@
+{
+ "id": "motif_hearth_corner",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:hearth_corner"
+ ],
+ "layers": [
+  [
+   "SSS..",
+   "SFS.b"
+  ],
+  [
+   "S.S.."
+  ]
+ ],
+ "key": {
+  "S": "minecraft:cobblestone",
+  "F": "minecraft:campfire[lit=true]",
+  "b": "minecraft:barrel[facing=up]"
+ }
+}

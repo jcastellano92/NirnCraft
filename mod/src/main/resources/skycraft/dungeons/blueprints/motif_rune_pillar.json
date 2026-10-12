@@ -1,0 +1,26 @@
+{
+ "id": "motif_rune_pillar",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:rune_pillar"
+ ],
+ "layers": [
+  [
+   "P.P",
+   "...",
+   "..."
+  ],
+  [
+   "P.P"
+  ],
+  [
+   "L.L"
+  ]
+ ],
+ "key": {
+  "P": "minecraft:chiseled_stone_bricks",
+  "L": "minecraft:lantern[hanging=false]"
+ }
+}

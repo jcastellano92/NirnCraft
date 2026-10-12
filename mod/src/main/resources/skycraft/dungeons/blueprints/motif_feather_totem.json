@@ -1,0 +1,28 @@
+{
+ "id": "motif_feather_totem",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:feather_totem"
+ ],
+ "layers": [
+  [
+   "...",
+   ".B."
+  ],
+  [
+   ".B."
+  ],
+  [
+   ".B."
+  ],
+  [
+   ".s."
+  ]
+ ],
+ "key": {
+  "B": "minecraft:dark_oak_fence",
+  "s": "minecraft:skeleton_skull[rotation=0]"
+ }
+}

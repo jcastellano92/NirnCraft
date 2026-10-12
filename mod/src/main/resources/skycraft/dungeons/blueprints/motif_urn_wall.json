@@ -1,0 +1,23 @@
+{
+ "id": "motif_urn_wall",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:urn_wall"
+ ],
+ "layers": [
+  [
+   "PPPPP",
+   "c.c.c"
+  ],
+  [
+   "pcpcp"
+  ]
+ ],
+ "key": {
+  "P": "minecraft:decorated_pot",
+  "p": "minecraft:flower_pot",
+  "c": "minecraft:candle[candles=3,lit=true]"
+ }
+}

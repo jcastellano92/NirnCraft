@@ -1,0 +1,22 @@
+{
+ "id": "motif_hide_rack",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:hide_rack"
+ ],
+ "layers": [
+  [
+   "fffff",
+   "w.w.w"
+  ],
+  [
+   "w...w"
+  ]
+ ],
+ "key": {
+  "f": "minecraft:oak_fence",
+  "w": "minecraft:white_carpet"
+ }
+}

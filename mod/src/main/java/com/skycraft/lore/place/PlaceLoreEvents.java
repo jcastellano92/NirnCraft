@@ -114,6 +114,8 @@ public final class PlaceLoreEvents {
         if (!(player.level().getBlockEntity(event.getPos()) instanceof LecternBlockEntity lectern) || !lectern.hasBook()) return;
         ItemStack held = lectern.getBook();
         LoreBooks.Book book = LoreBookItem.bookOf(held);
+        // a dungeon's lectern holds the note as a written book (vanilla lecterns only show those), tagged with the note id
+        if (book == null && held.getTag() != null && held.getTag().contains("SkyNote", 8)) book = PlaceLore.book(held.getTag().getString("SkyNote"));
         if (book == null || PlaceLore.note(book.id()) == null) return;
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.SUCCESS);

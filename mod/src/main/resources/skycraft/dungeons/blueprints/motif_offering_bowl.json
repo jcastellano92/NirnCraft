@@ -1,0 +1,21 @@
+{
+ "id": "motif_offering_bowl",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:offering_bowl"
+ ],
+ "layers": [
+  [
+   ".C.",
+   "bFb",
+   "..."
+  ]
+ ],
+ "key": {
+  "C": "minecraft:chiseled_stone_bricks",
+  "F": "minecraft:soul_campfire[lit=true]",
+  "b": "minecraft:candle[candles=3,lit=true]"
+ }
+}

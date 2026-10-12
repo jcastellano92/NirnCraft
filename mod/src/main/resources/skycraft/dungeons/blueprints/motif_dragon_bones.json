@@ -1,0 +1,27 @@
+{
+ "id": "motif_dragon_bones",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:dragon_bones"
+ ],
+ "layers": [
+  [
+   "BBBBBBB",
+   "B.....B"
+  ],
+  [
+   "B.....B"
+  ],
+  [
+   "B.....B"
+  ],
+  [
+   "BBBBBBB"
+  ]
+ ],
+ "key": {
+  "B": "minecraft:bone_block[axis=x]"
+ }
+}

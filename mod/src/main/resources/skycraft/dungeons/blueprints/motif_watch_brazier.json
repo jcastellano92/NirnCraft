@@ -1,0 +1,23 @@
+{
+ "id": "motif_watch_brazier",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:watch_brazier"
+ ],
+ "layers": [
+  [
+   "ccc",
+   ".F."
+  ],
+  [
+   ".L."
+  ]
+ ],
+ "key": {
+  "c": "minecraft:cobblestone_wall",
+  "F": "minecraft:campfire[lit=true]",
+  "L": "minecraft:lantern[hanging=false]"
+ }
+}

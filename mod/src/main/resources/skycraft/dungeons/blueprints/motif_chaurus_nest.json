@@ -1,0 +1,23 @@
+{
+ "id": "motif_chaurus_nest",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:chaurus_nest"
+ ],
+ "layers": [
+  [
+   "wwwww",
+   "weEew"
+  ],
+  [
+   "w.e.w"
+  ]
+ ],
+ "key": {
+  "w": "minecraft:cobweb",
+  "e": "minecraft:turtle_egg[eggs=4]",
+  "E": "minecraft:sculk"
+ }
+}

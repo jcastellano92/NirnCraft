@@ -1,0 +1,22 @@
+{
+ "id": "motif_bone_heap",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:bone_heap"
+ ],
+ "layers": [
+  [
+   "BsB..",
+   "sBBs."
+  ],
+  [
+   "Bs..."
+  ]
+ ],
+ "key": {
+  "B": "minecraft:bone_block[axis=y]",
+  "s": "minecraft:skeleton_skull[rotation=0]"
+ }
+}

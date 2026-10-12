@@ -1,0 +1,23 @@
+{
+ "id": "motif_moss_shrine",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:moss_shrine"
+ ],
+ "layers": [
+  [
+   "mmmmm",
+   ".mCm."
+  ],
+  [
+   "..F.."
+  ]
+ ],
+ "key": {
+  "m": "minecraft:moss_block",
+  "C": "minecraft:chiseled_stone_bricks",
+  "F": "minecraft:azalea"
+ }
+}

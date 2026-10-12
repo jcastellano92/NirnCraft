@@ -1,0 +1,21 @@
+{
+ "id": "motif_coffin_row",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:coffin_row"
+ ],
+ "layers": [
+  [
+   "bbbbb",
+   "b.b.b"
+  ],
+  [
+   "....."
+  ]
+ ],
+ "key": {
+  "b": "minecraft:black_concrete"
+ }
+}

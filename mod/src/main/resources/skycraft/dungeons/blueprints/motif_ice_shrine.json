@@ -1,0 +1,25 @@
+{
+ "id": "motif_ice_shrine",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:ice_shrine"
+ ],
+ "layers": [
+  [
+   "BBBBB",
+   "B.A.B"
+  ],
+  [
+   "..A.."
+  ],
+  [
+   "..A.."
+  ]
+ ],
+ "key": {
+  "B": "minecraft:blue_ice",
+  "A": "minecraft:amethyst_cluster[facing=up]"
+ }
+}

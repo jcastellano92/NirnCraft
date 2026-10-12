@@ -1,0 +1,27 @@
+{
+ "id": "motif_blood_altar",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:blood_altar"
+ ],
+ "layers": [
+  [
+   "..R..",
+   ".RrR.",
+   "..R.."
+  ],
+  [
+   ".c.c.",
+   "..C..",
+   "....."
+  ]
+ ],
+ "key": {
+  "R": "minecraft:crimson_planks",
+  "r": "minecraft:red_nether_bricks",
+  "c": "minecraft:red_candle[candles=3,lit=true]",
+  "C": "minecraft:cauldron"
+ }
+}

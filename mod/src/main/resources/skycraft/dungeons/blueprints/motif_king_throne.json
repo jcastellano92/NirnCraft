@@ -1,0 +1,35 @@
+{
+ "id": "motif_king_throne",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:king_throne"
+ ],
+ "layers": [
+  [
+   "SBBBS",
+   ".sTs.",
+   "..f.."
+  ],
+  [
+   ".b.b.",
+   "..B..",
+   "....."
+  ],
+  [
+   ".....",
+   "..K..",
+   "....."
+  ]
+ ],
+ "key": {
+  "S": "minecraft:polished_deepslate",
+  "B": "minecraft:chiseled_stone_bricks",
+  "s": "minecraft:stone_brick_stairs[facing=south,half=bottom]@in",
+  "T": "minecraft:polished_andesite",
+  "b": "minecraft:red_banner[rotation=0]",
+  "K": "minecraft:skeleton_skull[rotation=0]",
+  "f": "minecraft:soul_campfire[lit=true]"
+ }
+}

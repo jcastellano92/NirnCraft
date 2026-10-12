@@ -1,0 +1,24 @@
+{
+ "id": "motif_foreman_desk",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:foreman_desk"
+ ],
+ "layers": [
+  [
+   "tttt.",
+   "tLCt."
+  ],
+  [
+   "B...B"
+  ]
+ ],
+ "key": {
+  "t": "minecraft:spruce_planks",
+  "L": "minecraft:lantern[hanging=false]",
+  "C": "minecraft:crafting_table",
+  "B": "minecraft:barrel[facing=up]"
+ }
+}

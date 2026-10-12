@@ -103,7 +103,44 @@ public final class Blueprints {
         return true;
     }
 
-    private static void put(Painter p, Room room, int x, int y, int z, String v, Direction inward) {
+    /**
+     * Places the blueprint of this beat on open ground of a surface site: rows run from (ox, oz) along {@code inward},
+     * columns across, layer 0 at {@code y}. Cells that are not open air over solid ground are left alone (it never
+     * replaces a wall); every decision is per cell, so chunks agree. False if no blueprint has the beat.
+     */
+    static boolean placeAt(Painter p, String beat, int ox, int oz, int y, Direction inward) {
+        Blueprint b = null;
+        for (Blueprint c : ALL) if (c.beats().contains(beat)) b = c;
+        if (b == null) return false;
+        Direction right = inward.getClockWise();
+        int w = b.width(), placed = 0;
+        for (int layer = 0; layer < b.layers().size(); layer++) {
+            List<String> rows = b.layers().get(layer);
+            for (int row = 0; row < rows.size(); row++) {
+                String line = rows.get(row);
+                for (int col = 0; col < line.length(); col++) {
+                    char ch = line.charAt(col);
+                    if (ch == ' ' || ch == '.') continue;
+                    String v = b.key().get(ch);
+                    if (v == null) continue;
+                    int x = ox + inward.getStepX() * row + right.getStepX() * (col - w / 2);
+                    int z = oz + inward.getStepZ() * row + right.getStepZ() * (col - w / 2);
+                    int yy = y + layer;
+                    if (!p.ok(x, yy, z) || !p.ok(x, y - 1, z)) continue;
+                    var here = p.get(x, yy, z);
+                    if (!(here.isAir() || here.canBeReplaced()) || !here.getFluidState().isEmpty()) continue;
+                    var below = layer == 0 ? p.get(x, y - 1, z) : p.get(x, yy - 1, z);
+                    if (below.isAir() || !below.getFluidState().isEmpty() || !below.canOcclude()) continue;
+                    put(p, null, x, yy, z, v, inward);
+                    placed++;
+                }
+            }
+        }
+        if (placed > 0) p.feature("blueprint:" + b.id());
+        return placed > 0;
+    }
+
+    private static void put(Painter p, @Nullable Room room, int x, int y, int z, String v, Direction inward) {
         if (v.equals("air")) {
             p.air(x, y, z);
         } else if (v.equals("light")) {

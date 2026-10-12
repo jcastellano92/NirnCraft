@@ -133,6 +133,7 @@ final class QaExport {
         o.addProperty("kit", String.valueOf(d.m.get("kit")));
         o.addProperty("special", String.valueOf(d.m.get("special")));
         o.addProperty("surfaceY", d.surfaceY);
+        if (d.sample.placeId() != null) o.addProperty("place", d.sample.placeId());
         JsonArray box = new JsonArray();
         for (int v : new int[]{x1, y1, z1, x2, y2, z2}) box.add(v);
         o.add("box", box);
@@ -202,7 +203,7 @@ final class QaExport {
         o.add("entities", ents);
 
         // block entities: containers, lecterns, spawners
-        JsonArray chests = new JsonArray(), lecterns = new JsonArray(), spawners = new JsonArray();
+        JsonArray chests = new JsonArray(), lecterns = new JsonArray(), spawners = new JsonArray(), signs = new JsonArray();
         for (Map.Entry<BlockPos, BlockEntity> e : lvl.blockEntities().entrySet()) {
             BlockPos p = e.getKey();
             BlockEntity be = e.getValue();
@@ -213,7 +214,20 @@ final class QaExport {
             m.addProperty("block", BuiltInRegistries.BLOCK.getKey(be.getBlockState().getBlock()).toString());
             if (be instanceof LecternBlockEntity lec) {
                 m.addProperty("book", lec.hasBook());
+                if (lec.hasBook() && lec.getBook().getTag() != null) {
+                    // a place's lore note (its book id) or a written book's title
+                    CompoundTag bt = lec.getBook().getTag();
+                    for (String k : bt.getAllKeys()) {
+                        if (bt.getTagType(k) == 8 && bt.getString(k).startsWith("place.")) m.addProperty("note", bt.getString(k));
+                    }
+                    if (bt.contains("title", 8)) m.addProperty("title", bt.getString("title"));
+                }
                 lecterns.add(m);
+            } else if (be instanceof net.minecraft.world.level.block.entity.SignBlockEntity sign) {
+                JsonArray lines = new JsonArray();
+                for (net.minecraft.network.chat.Component c : sign.getFrontText().getMessages(false)) lines.add(c.getString());
+                m.add("lines", lines);
+                signs.add(m);
             } else if (be instanceof Container) {
                 CompoundTag tag = be.saveWithoutMetadata();
                 if (tag.contains("LootTable")) m.addProperty("loot", tag.getString("LootTable"));
@@ -233,6 +247,7 @@ final class QaExport {
         }
         o.add("containers", chests);
         o.add("lecterns", lecterns);
+        o.add("signs", signs);
         o.add("spawners", spawners);
         o.add("mechanisms", mech);
 

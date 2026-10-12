@@ -1,0 +1,29 @@
+{
+ "id": "motif_antler_totem",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:antler_totem"
+ ],
+ "layers": [
+  [
+   "...",
+   ".B."
+  ],
+  [
+   ".B."
+  ],
+  [
+   "fBf"
+  ],
+  [
+   ".s."
+  ]
+ ],
+ "key": {
+  "B": "minecraft:bone_block[axis=y]",
+  "f": "minecraft:dark_oak_fence",
+  "s": "minecraft:skeleton_skull[rotation=0]"
+ }
+}

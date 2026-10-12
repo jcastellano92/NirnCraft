@@ -1,0 +1,19 @@
+{
+ "id": "motif_driftwood_hoard",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:driftwood_hoard"
+ ],
+ "layers": [
+  [
+   "lblbl",
+   "b.b.b"
+  ]
+ ],
+ "key": {
+  "l": "minecraft:stripped_oak_log[axis=x]",
+  "b": "minecraft:barrel[facing=up]"
+ }
+}

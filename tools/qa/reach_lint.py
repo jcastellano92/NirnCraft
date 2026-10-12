@@ -55,7 +55,12 @@ TOURIST_VARIANTS = {"altar", "monument", "stones", "ruin", "keep", "barrow", "no
                     "ayleid_ruin", "velothi_tomb", "xanmeer", "daedric_ruin", "tower", "mage_tower", "watchtower",
                     "lighthouse", "dragon_lair", "imperial_crypt", "yokudan_tomb", "orc_ruin", "giant_camp",
                     "fort_mage", "fort_vampire", "oblivion_gate", "pass", "peak", "waterfall", "sixth_house_base",
-                    "crystal_vault", "tree_tomb", "breton_crypt", "ice_cave"}
+                    "crystal_vault", "tree_tomb", "breton_crypt", "ice_cave",
+                    # every story dungeon is meant to be found (RoadGraph.TOURIST_VARIANTS): lairs, dens and camps too
+                    "den", "troll_cave", "smuggler_cave", "skeever_cave", "spider_cave", "spriggan_cave", "falmer_cave",
+                    "bandit_cave", "forsworn_cave", "necromancer_lair", "vampire_lair", "hagraven_lair", "mine",
+                    "bandit_camp", "forsworn_camp", "imperial_camp", "stormcloak_camp", "forsworn_tower",
+                    "nordic_tower", "cave", "cabin"}
 MINOR_LANDMARKS = {"clearing", "rock", "source", "island", "district"}
 
 AREAS = {  # name -> (x0, z0, x1, z1) block box, Whiterun = 0,0 (north = -Z)

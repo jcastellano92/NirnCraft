@@ -1,0 +1,23 @@
+{
+ "id": "motif_war_table",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:war_table"
+ ],
+ "layers": [
+  [
+   "ttttt",
+   "t.m.t"
+  ],
+  [
+   "..L.."
+  ]
+ ],
+ "key": {
+  "t": "minecraft:spruce_slab[type=top]",
+  "m": "minecraft:cartography_table",
+  "L": "minecraft:lantern[hanging=false]"
+ }
+}

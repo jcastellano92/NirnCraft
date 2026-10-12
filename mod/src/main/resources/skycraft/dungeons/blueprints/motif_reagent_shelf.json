@@ -1,0 +1,24 @@
+{
+ "id": "motif_reagent_shelf",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:reagent_shelf"
+ ],
+ "layers": [
+  [
+   "BBBBB"
+  ],
+  [
+   "BBBBB"
+  ],
+  [
+   "ccccc"
+  ]
+ ],
+ "key": {
+  "B": "minecraft:bookshelf",
+  "c": "minecraft:soul_lantern[hanging=false]"
+ }
+}

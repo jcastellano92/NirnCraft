@@ -32,7 +32,12 @@ public final class Story {
 
     /** Adds the room's story and cache, if the planner gave it one. */
     public static void dress(Painter p, Room room) {
-        if (room.boss() || room.start()) return;
+        if (room.boss()) {
+            // a named place's master keeps its own note and hoard in the chamber
+            Identity.bossRoom(p, room);
+            return;
+        }
+        if (room.start()) return;
         if (room.has(DungeonPiece.FLAG_STORY)) adventurer(p, room);
         if (room.has(DungeonPiece.FLAG_CACHE)) cache(p, room);
     }
@@ -112,6 +117,9 @@ public final class Story {
     }
 
     static ItemStack journal(Painter p, Room room) {
+        // a named place's own note (written about someone in its lore) lies here when its lore left one for this room
+        ItemStack lore = Identity.storyBook(p.place);
+        if (lore != null) return lore;
         String key = switch (room.theme()) {
             case BARROW -> "barrow." + p.roll(room.cx, 1, room.cz, 611, BARROW);
             case DWEMER -> "dwemer." + p.roll(room.cx, 1, room.cz, 611, DWEMER);
@@ -122,7 +130,8 @@ public final class Story {
                     ? "barrow." + p.roll(room.cx, 1, room.cz, 611, BARROW) : "ruin." + p.roll(room.cx, 1, room.cz, 611, RUIN);
             default -> "cave." + p.roll(room.cx, 1, room.cz, 611, CAVE);
         };
-        String who = adventurer(p, room, 0);
+        String named = Identity.storyPerson(p.place);
+        String who = named != null ? named : adventurer(p, room, 0);
         String what = adventurer(p, room, 1);
         return Exteriors.book("Journal of " + who, List.of(
                 Component.literal(who + "\n" + what + "\n\nFound with the remains of its owner."),
@@ -168,7 +177,8 @@ public final class Story {
         int[] s = spot(p, room, 2);
         if (s == null) return;
         Direction face = BarrowRooms.towardCenter(room, s[0], s[1]);
-        p.container(s[0], room.floor, s[1], Deco.chest(face), relicTable(room.theme(), p.roll(room.cx, 5, room.cz, 640, 3)));
+        int roll = p.roll(room.cx, 5, room.cz, 640, 3);
+        p.container(s[0], room.floor, s[1], Deco.chest(face), Identity.cacheLoot(p.place, relicTable(room.theme(), roll), roll));
         int cx = s[0] + face.getClockWise().getStepX(), cz = s[1] + face.getClockWise().getStepZ();
         if (room.interior(cx, cz) && !room.onLane(cx, cz) && !room.nearDoor(cx, cz, 0)) {
             p.set(cx, room.floor, cz, Deco.candle(Blocks.CANDLE, 2, true));

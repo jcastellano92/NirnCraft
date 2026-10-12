@@ -1,0 +1,20 @@
+{
+ "id": "motif_hunter_cache",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:hunter_cache"
+ ],
+ "layers": [
+  [
+   "hbh..",
+   "w.w.."
+  ]
+ ],
+ "key": {
+  "h": "minecraft:hay_block[axis=y]",
+  "b": "minecraft:barrel[facing=up]",
+  "w": "minecraft:brown_carpet"
+ }
+}

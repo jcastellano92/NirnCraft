@@ -1,0 +1,24 @@
+{
+ "id": "motif_frozen_dead",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:frozen_dead"
+ ],
+ "layers": [
+  [
+   "IIIII",
+   "IiBiI"
+  ],
+  [
+   "IisiI"
+  ]
+ ],
+ "key": {
+  "I": "minecraft:packed_ice",
+  "i": "minecraft:ice",
+  "B": "minecraft:bone_block[axis=y]",
+  "s": "minecraft:skeleton_skull[rotation=0]"
+ }
+}

@@ -1,0 +1,24 @@
+{
+ "id": "motif_centurion_bay",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:centurion_bay"
+ ],
+ "layers": [
+  [
+   "CCCCC",
+   "C...C"
+  ],
+  [
+   "C...C"
+  ],
+  [
+   "C...C"
+  ]
+ ],
+ "key": {
+  "C": "minecraft:waxed_copper_block"
+ }
+}

@@ -1,0 +1,22 @@
+{
+ "id": "motif_fungus_garden",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:fungus_garden"
+ ],
+ "layers": [
+  [
+   "mmmmm",
+   "mRmRm"
+  ],
+  [
+   ".R.R."
+  ]
+ ],
+ "key": {
+  "m": "minecraft:moss_block",
+  "R": "minecraft:red_mushroom"
+ }
+}

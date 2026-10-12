@@ -1,0 +1,24 @@
+{
+ "id": "motif_scholar_desk",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:scholar_desk"
+ ],
+ "layers": [
+  [
+   "BBBBB",
+   "t.l.t"
+  ],
+  [
+   "..L.."
+  ]
+ ],
+ "key": {
+  "B": "minecraft:bookshelf",
+  "t": "minecraft:spruce_slab[type=top]",
+  "l": "minecraft:lectern[facing=north]@in",
+  "L": "minecraft:lantern[hanging=false]"
+ }
+}

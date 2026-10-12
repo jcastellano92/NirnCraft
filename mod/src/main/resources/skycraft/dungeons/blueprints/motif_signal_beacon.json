@@ -1,0 +1,26 @@
+{
+ "id": "motif_signal_beacon",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:signal_beacon"
+ ],
+ "layers": [
+  [
+   ".O.",
+   "OFO"
+  ],
+  [
+   "..."
+  ],
+  [
+   "..L"
+  ]
+ ],
+ "key": {
+  "O": "minecraft:cobblestone",
+  "F": "minecraft:campfire[lit=true]",
+  "L": "minecraft:lantern[hanging=false]"
+ }
+}

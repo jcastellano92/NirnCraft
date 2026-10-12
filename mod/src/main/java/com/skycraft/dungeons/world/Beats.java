@@ -20,8 +20,10 @@ public final class Beats {
             Blueprints.place(p, room, "elite");
             elite(p, room);
         }
+        // a named place's own motif (its name and story) stands against the far wall of the set-piece room
+        boolean motif = room.has(DungeonPiece.FLAG_SETPIECE) && Identity.motif(p, room);
         // a second, authored set piece against the far wall of the bigger machine halls and sanctums
-        if (room.has(DungeonPiece.FLAG_SETPIECE) && (room.theme() == Theme.DWEMER || room.theme() == Theme.RUIN)
+        if (!motif && room.has(DungeonPiece.FLAG_SETPIECE) && (room.theme() == Theme.DWEMER || room.theme() == Theme.RUIN)
                 && p.chance(room.cx, room.floor, room.cz, 981, 2)) {
             Blueprints.place(p, room, "setpiece");
         }

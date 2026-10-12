@@ -1,0 +1,21 @@
+{
+ "id": "motif_hermit_camp",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:hermit_camp"
+ ],
+ "layers": [
+  [
+   "wcw..",
+   ".F.b."
+  ]
+ ],
+ "key": {
+  "w": "minecraft:white_carpet",
+  "c": "minecraft:barrel[facing=up]",
+  "F": "minecraft:campfire[lit=true]",
+  "b": "minecraft:barrel[facing=up]"
+ }
+}

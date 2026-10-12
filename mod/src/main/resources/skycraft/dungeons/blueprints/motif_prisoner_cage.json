@@ -1,0 +1,31 @@
+{
+ "id": "motif_prisoner_cage",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:prisoner_cage"
+ ],
+ "layers": [
+  [
+   "IIIII",
+   "I...I",
+   "IIIII"
+  ],
+  [
+   "I...I",
+   "I.s.I",
+   "I...I"
+  ],
+  [
+   "IIIII",
+   "ICCCI",
+   "IIIII"
+  ]
+ ],
+ "key": {
+  "I": "minecraft:iron_bars",
+  "s": "minecraft:skeleton_skull[rotation=0]",
+  "C": "minecraft:chain[axis=y]"
+ }
+}

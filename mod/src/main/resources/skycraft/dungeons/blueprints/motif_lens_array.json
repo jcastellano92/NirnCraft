@@ -1,0 +1,27 @@
+{
+ "id": "motif_lens_array",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:lens_array"
+ ],
+ "layers": [
+  [
+   "g...g",
+   ".lAl."
+  ],
+  [
+   "..e.."
+  ],
+  [
+   "..e.."
+  ]
+ ],
+ "key": {
+  "g": "minecraft:glass",
+  "l": "minecraft:sea_lantern",
+  "A": "minecraft:amethyst_cluster[facing=up]",
+  "e": "minecraft:end_rod[facing=up]"
+ }
+}

@@ -1,0 +1,27 @@
+{
+ "id": "motif_tonal_console",
+ "themes": [
+  "*"
+ ],
+ "beats": [
+  "motif:tonal_console"
+ ],
+ "layers": [
+  [
+   "CCCCC",
+   "CgGgC"
+  ],
+  [
+   "C.e.C"
+  ],
+  [
+   "..e.."
+  ]
+ ],
+ "key": {
+  "C": "minecraft:waxed_cut_copper",
+  "g": "minecraft:amethyst_block",
+  "G": "minecraft:ochre_froglight[axis=y]",
+  "e": "minecraft:end_rod[facing=up]"
+ }
+}
