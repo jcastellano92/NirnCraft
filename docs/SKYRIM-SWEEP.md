@@ -170,6 +170,93 @@ layout lint 0 errors, 9 warnings (7 land, 2 roads).
 * `tools/qa/town_checks.py`: floating (built-structure rule), sealed (best of three rows), doorstep (one-block step and
   lateral exit).
 * `docs/SKYRIM-SWEEP.md` (this file).
+* Content pass 2 (section 7): `mod/src/main/resources/skycraft/tamriel/cityplans/{dragon_bridge,falkreath,morthal,dawnstar,
+  winterhold,college_of_winterhold,heartwood_mill,largashbur,dushnikh_yal,karthwasten,kynesgrove,darkwater_crossing,
+  old_hroldan,riverwood,helgen}.json` and `index.json`; `mod/src/main/lang/skycraft/settlements.json` (113 name keys);
+  `plan/CityPlan.java`, `plan/CityPlans.java` (`use` / `wealth` on buildings and queue entries),
+  `grammar/Fabric.java` (`bare*` chains, `use` in the queue), `grammar/Zoning.java` (`fill_cap` / `yard_cap`, stamp
+  plan grammar pieces), `settlement/SettlementDevCommands.java` (`/skysettle terrain`),
+  `tools/marquee/validate_cityplans.js` (uses, reach of a java-base plan).
 
 Verification: `tools\qa\qa.ps1 -Server` PASS (build, assets, items, quests 1072/1072, data, layout, reach, world boots,
 magic selftest, population lint 0 errors).
+
+## 7. Authored plans for the thin settlements (content pass 2)
+
+Fifteen of the section 4 settlements now have a city plan (`resources/skycraft/tamriel/cityplans/<id>.json`, `base: none`
+except the College, which keeps its hand-laid stack and bridge as `base: java`). Each plan keeps its gates exactly (the
+gate list is copied from `SettlementAnchors.gates`, so the road planner's contract is unchanged), pins its named
+buildings, draws its streets as nets and lets the fabric pass (`grammar/Fabric`) put frontage on them; the old town
+fill that invented 33-74 homes is capped by `fabric.fill_cap`. Quest NPCs of these places get a named lot or an open
+square at their quest offset. Numbers are `skysettle plan` + `skypop` on the `Nirn` seed (headless, no client),
+before > after:
+
+| settlement | buildings | built ratio | developed | beds | residents | unstaffed jobs |
+|---|---|---|---|---|---|---|
+| dragon_bridge | 7 > 36 | 0.07 > 0.14 | 0.24 > 0.41 | 11 > 49 | 10 > 20 | 0 > 0 |
+| falkreath | 91 > 84 | 0.34 > 0.33 | 0.52 > 0.70 | 93 > 124 | 33 > 40 | 0 > 0 |
+| morthal | 55 > 65 | 0.34 > 0.33 | 0.45 > 0.67 | 60 > 96 | 35 > 41 | 0 > 0 |
+| dawnstar | 89 > 98 | 0.35 > 0.37 | 0.47 > 0.68 | 93 > 168 | 34 > 42 | 0 > 0 |
+| winterhold | 65 > 52 | 0.39 > 0.33 | 0.51 > 0.68 | 71 > 70 | 32 > 40 | 0 > 0 |
+| college_of_winterhold | 0 > 10 | 0 > 0 (pieces lie beyond 0.8 r) | 0.38 > 0.38 | 2 > 13 | 1 > 11 | 1 > 0 |
+| heartwood_mill | 1 > 9 | 0.05 > 0.23 | 0.10 > 0.43 | 3 > 11 | 2 > 9 | 0 > 0 |
+| largashbur | 2 > 13 | 0.13 > 0.35 | 0.23 > 0.69 | 3 > 20 | 1 > 10 | 1 > 0 |
+| dushnikh_yal | 2 > 11 | 0.13 > 0.30 | 0.22 > 0.67 | 5 > 12 | 1 > 9 | 1 > 0 |
+| karthwasten | 8 > 30 | 0.20 > 0.29 | 0.37 > 0.63 | 9 > 44 | 7 > 21 | 8 > 0 |
+| kynesgrove | 13 > 43 | 0.31 > 0.36 | 0.51 > 0.69 | 24 > 66 | 14 > 21 | 2 > 0 |
+| darkwater_crossing | 4 > 13 | 0.13 > 0.09 | 0.27 > 0.38 | 9 > 15 | 8 > 12 | 0 > 0 |
+| old_hroldan | 2 > 10 | 0.25 > 0.34 | 0.37 > 0.62 | 2 > 16 | 2 > 9 | 0 > 0 |
+| riverwood | 12 > 34 | 0.19 > 0.20 | 0.33 > 0.44 | 10 > 39 | 10 > 20 | 3 > 0 |
+| helgen | 58 > 61 | 0.32 > 0.37 | 0.56 > 0.67 | 56 > 52 | 22 > 19 | 0 > 0 |
+
+`built ratio` is the sweep's buildings-over-area figure at 0.8 of the plan radius (`Fabric.measure`); `developed`
+counts yards, pens, gardens and streets too. Beds are resident beds (`Housing.capacity`). Every job now has a bed.
+
+* **Dragon Bridge**: a stone arch (Dragon Bridge) joins the two flank gates over the river; Toll Square and the
+  Four Shields Tavern by the south gate, Dragon Bridge Mill with its log yard on the south-west bank, the Overlook tower
+  on the north-west height, a bank street on the north shore. The old generic town had 7 buildings.
+* **Falkreath**: Pine Road from the gate to Dengeir's Hall, Market Row across it, west and east lanes; Dead Man's
+  Drink on the row, the Hall of the Dead and two graveyards on the east lane, guard quarters, a lumber yard. The town
+  fill is off, so every home sits on an authored street (was 17 authored plus 74 invented).
+* **Morthal**: Highmoon Hall at the head of the road, the Thaumaturgist's Hut with two herb gardens behind it, the
+  Burnt House left ruined, the sawmill, and five plank walkways (width 2) over the marsh.
+* **Dawnstar**: White Hall, the Temple of Mara on its own lot (the generic temple lot never fitted), barracks, a harbour
+  street with drying racks and a fishmonger, the quicksilver and iron mine heads joined by mine lanes. The map has no
+  sea inside the town box, so the harbour quarter is fishing lanes, not quays (dock pins would be dropped).
+* **Winterhold**: the collapsed quarter is pinned as seven ruined houses, a ruined inn and a ruined tower with no
+  street through it; a small shrine of Talos with a priest; the living town keeps its main street and row. Ruins give
+  no beds, so beds track residents (70 / 40).
+* **College of Winterhold**: the stack and bridge are untouched; a campus at the mainland end: two dormitory manors,
+  masters' lodge, scholars' house, the Bridgeward Inn, alchemy workshop, enchanting workroom, forge and provisioner.
+  11 residents on 13 beds (the stack's two tower beds plus the campus).
+* **Heartwood Mill**: the main street follows the pre-planned Treva road; mill, sawmill (grammar use `sawmill`), two
+  lumber yards, felled ground, log yard, the Sawyer's Rest and worker rows.
+* **Largashbur / Dushnikh Yal**: palisade ring with its gate, chief's longhouse, two longhouses, the forge, a cave
+  mouth (mine adit), two pens, a hide camp with tanning racks, a fire ring, plus a shaman's tent (Largashbur) or a
+  shrine of Malacath (Dushnikh Yal). 10 and 9 residents on 20 and 12 beds.
+* **Karthwasten**: Sanuarach Mine and a second adit on the west slope, Karthwasten Hall, a bunkhouse, the Miners'
+  Rest and the ore yard; the eight unstaffed jobs are gone (44 beds for 21 residents).
+* **Kynesgrove**: Tusk Square, Braidwood Inn, the Malachite Mine and a second adit, a shrine, a farmhouse with fields.
+* **Darkwater Crossing**: a timber causeway over the ford between the two gates, Ford's Rest, a ferry landing, the
+  mine on the west slope, east-bank and south-east streets (13 buildings).
+* **Old Hroldan**: the inn kept, a stable, the Hroldan shrine, gardens and a pen, two named houses.
+* **Riverwood**: a stone bridge to the north gate and a pier to the west gate (both gates stand in the lake), the lumber
+  mill with a timber store and log yard, a hunting camp, the Sleeping Giant Inn, Alvor's smithy; the hunter, the
+  labourer and the bard are now staffed.
+* **Helgen**: not a town: the keep is a ruined hall (`ruined` palace) with a ruined watchtower, the wall is rebuilt, ten
+  ruined houses lie in the north half on a frontage-less track (`bare_north`), survivors' tents round two campfires,
+  stalled carts and crates outside the south gate, the Legion barracks, the Charred Tankard and Mason's Forge.
+
+Checks on this pass (headless server, `Nirn`): `tools/marquee/validate_cityplans.js` 0 errors (38 plans);
+`town_checks.py` over the 15 generated towns: 627 exterior doors, 38 unreachable (6 %, the rate of section 1), 0
+blocked stair ends, 0 props inside buildings, 0 dead road stubs, floating crowns falkreath 17 > 8 and helgen 25 > 13;
+`population_lint.py` 0 errors. Props standing on a pre-planned road polyline rose (falkreath 16 before banners were
+cut, heartwood 8 before its street was aligned): the polylines run through the town interior and the paver only paves
+outside the gate ring. Largashbur's gate reads "no road" only because the far end of its road lies in a region this
+reduced world never generated.
+
+Plan format additions (all optional): building and queue entries take `"use": "<grammar use>"` (sawmill, warehouse,
+mage_tower, fishery...) and `"wealth"`; `fabric.fill_cap` / `fabric.yard_cap` bound the town fill that runs behind
+authored streets (0 = none); a net tagged `bare*` is a road with no frontage (ruins, tracks); the dev command
+`/skysettle terrain <id>` writes the planner's terrain model (height and wet flag every 3 blocks, local frame) to
+`skycraft-previews/terrain_<id>.json` so a plan can be authored against real ground.

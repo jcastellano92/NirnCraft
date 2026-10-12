@@ -1,0 +1,58 @@
+{
+  "id": "dragon_bridge",
+  "base": "none",
+  "sil": "stone-arch-river-crossing",
+  "names": {"inn": "four_shields_tavern", "store": "dragon_bridge_trader", "smithy": "dragon_bridge_smithy"},
+  "innKey": "four_shields_tavern",
+  "gates": [[-34, -8], [34, -8], [0, 23]],
+  "lines": [
+    {"kind": "bridge", "from": [-34, -8], "to": [34, -8], "width": 7, "variant": 1}
+  ],
+  "buildings": [
+    {"kind": "mill", "at": [-33, 40], "size": [9, 11], "face": "E", "margin": 3, "name": "dragon_bridge_mill"},
+    {"kind": "lumber", "at": [-47, 50], "size": [7, 5], "face": "E"},
+    {"kind": "camp", "at": [-39, 56], "size": [13, 13], "variant": 11},
+    {"kind": "tower", "at": [-46, -44], "size": [7, 7], "face": "S", "h": 16, "name": "dragon_bridge_overlook"}
+  ],
+  "plazas": [
+    {"at": [8, 35], "size": 11, "variant": 0, "stalls": 4, "name": "dragon_bridge_toll_square"}
+  ],
+  "nets": [
+    {"type": "path", "via": [[0, 23], [1, 34], [-2, 46], [0, 62]], "width": 5, "major": true, "tag": "south"},
+    {"type": "path", "via": [[-52, 40], [-28, 36], [0, 34], [26, 32], [52, 38]], "width": 3, "rank": 1, "tag": "row"},
+    {"type": "path", "via": [[-34, -8], [-44, -20], [-30, -34], [-10, -40], [12, -40], [30, -33], [44, -20], [34, -8]], "width": 3, "rank": 1, "tag": "bank"},
+    {"type": "path", "via": [[-30, 38], [-38, 52], [-14, 58], [14, 56], [32, 46]], "width": 2, "rank": 2, "tag": "lane"}
+  ],
+  "zones": [
+    {"at": [0, 36], "r": 20, "zone": "centre"},
+    {"at": [-34, 40], "r": 18, "zone": "craft"},
+    {"at": [30, 52], "r": 18, "zone": "poor"}
+  ],
+  "fabric": {"radius": 56, "target": 0.28, "fill_cap": 4, "yard_cap": 6},
+  "queue": [
+    {"kind": "inn", "size": [15, 17], "flags": ["upper"], "name": "four_shields_tavern", "on": "south"},
+    {"kind": "store", "size": [9, 11], "name": "dragon_bridge_trader", "on": "row"},
+    {"kind": "smithy", "size": [11, 9], "name": "dragon_bridge_smithy", "on": "row"},
+    {"kind": "house", "name": "dragon_bridge_arnleif_house", "on": "bank"},
+    {"kind": "house", "name": "dragon_bridge_kolfinn_hut", "on": "bank"},
+    {"kind": "house", "name": "dragon_bridge_tollkeepers_house", "on": "south"}
+  ],
+  "features": [
+    {"type": "shrine", "theme": "divine:kynareth", "where": "free"},
+    {"type": "lamps", "count": 2, "where": "street", "tag": "south"},
+    {"type": "well", "where": "free"},
+    {"type": "banners", "where": "gate"},
+    {"type": "bench", "where": "square"},
+    {"type": "great_tree", "theme": "spruce", "where": "edge"}
+  ],
+  "titles": {
+    "dragon_bridge_mill": "Dragon Bridge Mill",
+    "dragon_bridge_overlook": "Dragon Bridge Overlook",
+    "dragon_bridge_toll_square": "Toll Square",
+    "dragon_bridge_trader": "Bridgeside Goods",
+    "dragon_bridge_smithy": "Dragon Bridge Smithy",
+    "dragon_bridge_arnleif_house": "Arnleif House",
+    "dragon_bridge_kolfinn_hut": "Kolfinn's Hut",
+    "dragon_bridge_tollkeepers_house": "Tollkeeper's House"
+  }
+}

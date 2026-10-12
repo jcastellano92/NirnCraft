@@ -34,7 +34,8 @@ import java.util.Locale;
  *   "landmarks": [{"id": "shell", "at": [0,-30], "size": [41,17], "h": 28, "margin": 2, "face": "S",
  *                  "flags": ["no_beard"], "raise": 0, "name": "", "kit": "", "overlay": ""}],
  *   "buildings": [{"kind": "inn", "at": [x,z], "size": [13,17], "face": "E", "name": "key", "flags": ["upper"],
- *                  "variant": 0, "raise": 0, "h": 0, "count": 1, "step": [0,12], "kit": "", "overlay": ""}],
+ *                  "variant": 0, "raise": 0, "h": 0, "count": 1, "step": [0,12], "kit": "", "overlay": "",
+ *                  "use": "sawmill", "wealth": "common"}],   // use: a building-grammar use (kind "building"); see grammar/Use
  *   "streets": [{"from": [0,100], "to": [0,-10], "width": 5, "major": true, "raise": 0, "fill": true}],
  *   "rings": [{"r": 60, "sides": 16, "width": 3, "major": false, "raise": 0, "fill": false, "at": [0,0], "offset": 0}],
  *   "lines": [{"kind": "bridge|canal|wall|street", "from": [..], "to": [..], "width": 5, "variant": 1,
@@ -57,7 +58,7 @@ public final class CityPlan {
 
     public record Building(Archetype kind, int x, int z, int w, int d, int h, int margin, Direction face, int flags,
                            int raise, int variant, String name, String culture, String kit, String overlay, int count,
-                           int stepX, int stepZ) {}
+                           int stepX, int stepZ, String use, String wealth) {}
 
     public record Line(String kind, int x1, int z1, int x2, int z2, int width, boolean major, int raise, int variant,
                        Integer lift, Integer lift2, int h, int flags, boolean fill, String tag) {}
@@ -71,7 +72,7 @@ public final class CityPlan {
     public record Quarter(int[] rect, int[] ring, String culture, String kit, String overlay) {}
 
     public record Queued(Archetype kind, int count, int w, int d, int flags, int plainEvery, int smallEvery, String name,
-                         int variant, int raise, String on) {}
+                         int variant, int raise, String on, String use, String wealth) {}
 
     public final String id;
     public final Base base;
@@ -143,7 +144,8 @@ public final class CityPlan {
             buildings.add(new Building(Archetype.valueOf(str(b, "kind", "house").toUpperCase(Locale.ROOT)), at[0], at[1],
                     size[0], size[1], num(b, "h", 0), num(b, "margin", -1), dir(str(b, "face", "S"), Direction.SOUTH),
                     flags(b), num(b, "raise", 0), num(b, "variant", 0), str(b, "name", ""), str(b, "culture", ""),
-                    str(b, "kit", ""), str(b, "overlay", ""), Math.max(1, num(b, "count", 1)), step[0], step[1]));
+                    str(b, "kit", ""), str(b, "overlay", ""), Math.max(1, num(b, "count", 1)), step[0], step[1],
+                    str(b, "use", ""), str(b, "wealth", "")));
         }
         for (JsonObject s : objs(o, "streets")) streets.add(line(s, "street"));
         for (JsonObject s : objs(o, "lines")) lines.add(line(s, str(s, "kind", "street")));
@@ -176,7 +178,7 @@ public final class CityPlan {
             int[] size = pair(q, "size", 0, 0);
             queue.add(new Queued(Archetype.valueOf(str(q, "kind", "house").toUpperCase(Locale.ROOT)), Math.max(1, num(q, "count", 1)),
                     size[0], size[1], flags(q), num(q, "plain_every", 0), num(q, "small_every", 0), str(q, "name", ""),
-                    num(q, "variant", 0), num(q, "raise", 0), str(q, "on", "")));
+                    num(q, "variant", 0), num(q, "raise", 0), str(q, "on", ""), str(q, "use", ""), str(q, "wealth", "")));
         }
     }
 

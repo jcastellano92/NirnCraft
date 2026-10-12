@@ -1,0 +1,48 @@
+{
+  "id": "heartwood_mill",
+  "base": "none",
+  "sil": "lakeside-mill-lumber-yard",
+  "names": {"inn": "heartwood_sawyers_rest", "store": "heartwood_trader", "smithy": "heartwood_smithy"},
+  "innKey": "heartwood_sawyers_rest",
+  "gates": [[0, 32]],
+  "buildings": [
+    {"kind": "mill", "at": [0, 12], "size": [9, 11], "face": "W", "margin": 3, "name": "heartwood_mill"},
+    {"kind": "building", "use": "sawmill", "wealth": "common", "at": [-12, -4], "size": [13, 11], "face": "S", "name": "heartwood_sawmill"},
+    {"kind": "lumber", "at": [-32, 10], "size": [7, 5], "face": "E"},
+    {"kind": "lumber", "at": [-30, 20], "size": [7, 5], "face": "E"},
+    {"kind": "camp", "at": [-44, 8], "size": [13, 13], "variant": 0},
+    {"kind": "camp", "at": [-22, 28], "size": [13, 13], "variant": 11}
+  ],
+  "nets": [
+    {"type": "path", "via": [[0, 32], [-5, 26], [-9, 21], [-13, 16], [-17, 12], [-21, 7], [-25, 3], [-29, -2], [-33, -7]], "width": 3, "major": true, "tag": "main"},
+    {"type": "path", "via": [[-5, 26], [-2, 18], [0, 8]], "width": 2, "rank": 2, "tag": "lane"},
+    {"type": "path", "via": [[-21, 7], [-26, 16], [-32, 26]], "width": 2, "rank": 2, "tag": "lane"}
+  ],
+  "zones": [
+    {"at": [-8, 16], "r": 20, "zone": "craft"},
+    {"at": [-20, 28], "r": 16, "zone": "poor"}
+  ],
+  "fabric": {"radius": 30, "target": 0.26, "fill_cap": 4, "yard_cap": 4},
+  "queue": [
+    {"kind": "inn", "size": [13, 15], "flags": ["upper"], "name": "heartwood_sawyers_rest", "on": "main"},
+    {"kind": "house", "name": "heartwood_foremans_house", "flags": ["upper"], "on": "main"},
+    {"kind": "house", "name": "heartwood_workers_row_one", "on": "lane"},
+    {"kind": "house", "name": "heartwood_workers_row_two", "on": "lane"},
+    {"kind": "house", "count": 3, "on": "main"},
+    {"kind": "store", "size": [9, 9], "name": "heartwood_trader", "on": "main"}
+  ],
+  "features": [
+    {"type": "well", "where": "free"},
+    {"type": "lamps", "where": "street", "tag": "main"}
+  ],
+  "titles": {
+    "heartwood_sawyers_rest": "The Sawyer's Rest",
+    "heartwood_trader": "Heartwood Goods",
+    "heartwood_smithy": "Heartwood Smithy",
+    "heartwood_mill": "Heartwood Mill",
+    "heartwood_sawmill": "Heartwood Sawmill",
+    "heartwood_foremans_house": "Foreman's House",
+    "heartwood_workers_row_one": "Workers' Row",
+    "heartwood_workers_row_two": "Sawyers' Cottage"
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "id": "morthal",
+  "base": "none",
+  "sil": "marsh-boardwalk-hall",
+  "names": {"inn": "moorside_inn", "store": "morthal_trader", "smithy": "morthal_smithy"},
+  "innKey": "moorside_inn",
+  "gates": [[0, 72]],
+  "buildings": [
+    {"kind": "palace", "at": [0, -46], "size": [17, 25], "face": "S", "flags": ["seat"], "name": "highmoon_hall"},
+    {"kind": "alchemist", "at": [24, 8], "size": [9, 11], "face": "W", "name": "thaumaturgists_hut"},
+    {"kind": "house", "at": [36, 30], "size": [7, 9], "face": "W", "flags": ["ruined"], "name": "morthal_burnt_house"},
+    {"kind": "garden", "at": [38, 12], "size": [11, 9], "variant": 2},
+    {"kind": "garden", "at": [38, -2], "size": [11, 9], "variant": 5},
+    {"kind": "mill", "at": [48, 40], "size": [9, 11], "face": "S", "margin": 4, "name": "morthal_sawmill"},
+    {"kind": "lumber", "at": [58, 28], "size": [7, 5], "face": "W"},
+    {"kind": "camp", "at": [60, 14], "size": [13, 13], "variant": 0}
+  ],
+  "plazas": [
+    {"at": [0, 12], "size": 13, "variant": 0, "stalls": 3, "name": "morthal_moot_square"}
+  ],
+  "nets": [
+    {"type": "path", "via": [[0, 72], [-1, 52], [2, 30], [0, 12], [0, -14], [0, -30]], "width": 4, "major": true, "tag": "main"},
+    {"type": "path", "via": [[-60, 26], [-36, 22], [-12, 26], [14, 24], [34, 28]], "width": 3, "rank": 1, "tag": "row"},
+    {"type": "path", "via": [[-46, -30], [-40, -8], [-34, 8], [-22, 22]], "width": 2, "rank": 2, "tag": "walk"},
+    {"type": "path", "via": [[-38, 60], [-30, 44], [-26, 30]], "width": 2, "rank": 2, "tag": "walk"},
+    {"type": "path", "via": [[20, -20], [28, -4], [34, 8]], "width": 2, "rank": 2, "tag": "walk"},
+    {"type": "path", "via": [[10, 56], [22, 50], [40, 46]], "width": 2, "rank": 2, "tag": "walk"},
+    {"type": "path", "via": [[-20, -34], [-30, -22], [-44, -14]], "width": 2, "rank": 2, "tag": "walk"}
+  ],
+  "zones": [
+    {"at": [0, -46], "r": 24, "zone": "noble"},
+    {"at": [0, 14], "r": 20, "zone": "centre"},
+    {"at": [30, 20], "r": 20, "zone": "craft"},
+    {"at": [-40, 20], "r": 28, "zone": "poor"}
+  ],
+  "fabric": {"radius": 68, "target": 0.34, "fill_cap": 0, "yard_cap": 8},
+  "queue": [
+    {"kind": "inn", "size": [13, 15], "flags": ["upper"], "name": "moorside_inn", "on": "main"},
+    {"kind": "store", "size": [9, 11], "name": "morthal_trader", "on": "main"},
+    {"kind": "smithy", "size": [11, 9], "name": "morthal_smithy", "on": "row"},
+    {"kind": "house", "name": "morthal_stewards_house", "flags": ["upper"], "on": "main"},
+    {"kind": "house", "name": "morthal_brynjas_house", "on": "row"},
+    {"kind": "house", "name": "morthal_idrins_house", "on": "row"},
+    {"kind": "house", "name": "morthal_jorunns_house", "on": "walk"},
+    {"kind": "house", "name": "morthal_falions_house", "on": "walk"}
+  ],
+  "features": [
+    {"type": "shrine", "theme": "divine:kynareth", "where": "street", "tag": "main"},
+    {"type": "memorial", "where": "free"},
+    {"type": "great_tree", "theme": "willow", "at": [-34, -4]},
+    {"type": "great_tree", "theme": "willow", "where": "edge"},
+    {"type": "banners", "count": 2, "where": "gate"},
+    {"type": "lamps", "count": 3, "where": "street", "tag": "main"},
+    {"type": "well", "count": 3, "where": "free"},
+    {"type": "market", "where": "free"},
+    {"type": "bench", "where": "square"},
+    {"type": "garden", "count": 2, "where": "free"},
+    {"type": "flowers", "count": 2, "where": "free"},
+    {"type": "pond", "count": 2, "where": "free"}
+  ],
+  "titles": {
+    "morthal_moot_square": "Moorside Square",
+    "morthal_trader": "Morthal General Goods",
+    "morthal_smithy": "Morthal Smithy",
+    "morthal_burnt_house": "The Burnt House",
+    "morthal_sawmill": "Morthal Sawmill",
+    "morthal_stewards_house": "Steward's House",
+    "morthal_brynjas_house": "Brynja's Cabin",
+    "morthal_idrins_house": "Idrin's House",
+    "morthal_jorunns_house": "Jorunn's House",
+    "morthal_falions_house": "Falion's Study"
+  }
+}

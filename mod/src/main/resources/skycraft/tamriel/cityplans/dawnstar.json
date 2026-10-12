@@ -1,0 +1,74 @@
+{
+  "id": "dawnstar",
+  "base": "none",
+  "sil": "harbour-shelf-mines",
+  "names": {"inn": "windpeak_inn", "store": "dawnstar_trader", "smithy": "dawnstar_smithy"},
+  "innKey": "windpeak_inn",
+  "gates": [[0, 78]],
+  "buildings": [
+    {"kind": "palace", "at": [0, -48], "size": [17, 25], "face": "S", "flags": ["seat"], "name": "white_hall"},
+    {"kind": "mine", "at": [-56, 44], "size": [7, 14], "face": "S", "variant": 4, "flags": ["no_beard"], "name": "quicksilver_mine"},
+    {"kind": "mine", "at": [56, 44], "size": [7, 14], "face": "S", "variant": 5, "flags": ["no_beard"], "name": "iron_breaker_mine"},
+    {"kind": "temple", "at": [26, -14], "size": [11, 17], "face": "W", "variant": 5, "name": "dawnstar_temple_of_mara"},
+    {"kind": "barracks", "at": [-34, -36], "size": [9, 15], "face": "E", "name": "dawnstar_barracks"},
+    {"kind": "camp", "at": [-58, -18], "size": [13, 13], "variant": 1},
+    {"kind": "camp", "at": [-58, -2], "size": [13, 13], "variant": 1}
+  ],
+  "plazas": [
+    {"at": [0, 4], "size": 13, "variant": 0, "stalls": 4, "name": "dawnstar_market_square"}
+  ],
+  "nets": [
+    {"type": "path", "via": [[0, 78], [-2, 58], [2, 38], [0, 18], [0, -4], [0, -24], [0, -34]], "width": 5, "major": true, "tag": "main"},
+    {"type": "path", "via": [[-62, 22], [-34, 18], [-10, 22], [14, 20], [40, 22], [64, 24]], "width": 4, "rank": 1, "tag": "row"},
+    {"type": "path", "via": [[-30, -34], [-46, -26], [-60, -14], [-54, 6], [-44, 22]], "width": 3, "rank": 1, "tag": "harbour"},
+    {"type": "path", "via": [[-60, -30], [-48, -44], [-30, -56], [-8, -62]], "width": 3, "rank": 1, "tag": "quay"},
+    {"type": "path", "via": [[10, -40], [26, -34], [40, -24], [52, -2], [50, 22]], "width": 3, "rank": 1, "tag": "mara"},
+    {"type": "path", "via": [[-56, 44], [-56, 34], [-44, 22]], "width": 3, "rank": 2, "tag": "mine"},
+    {"type": "path", "via": [[56, 44], [56, 34], [44, 22]], "width": 3, "rank": 2, "tag": "mine"},
+    {"type": "path", "via": [[-14, 50], [-30, 54], [-48, 54]], "width": 2, "rank": 2, "tag": "lane"},
+    {"type": "path", "via": [[14, 50], [30, 54], [48, 54]], "width": 2, "rank": 2, "tag": "lane"}
+  ],
+  "zones": [
+    {"at": [0, -46], "r": 26, "zone": "noble"},
+    {"at": [0, 8], "r": 22, "zone": "centre"},
+    {"at": [-46, 0], "r": 26, "zone": "craft"},
+    {"at": [30, 46], "r": 26, "zone": "poor"}
+  ],
+  "fabric": {"radius": 78, "target": 0.36, "fill_cap": 0, "yard_cap": 8},
+  "queue": [
+    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "windpeak_inn", "on": "main"},
+    {"kind": "alchemist", "size": [9, 11], "name": "the_mortar_and_pestle", "on": "main"},
+    {"kind": "smithy", "size": [11, 9], "name": "dawnstar_smithy", "on": "row"},
+    {"kind": "store", "size": [9, 11], "name": "dawnstar_trader", "on": "row"},
+    {"kind": "store", "size": [9, 9], "name": "dawnstar_fishmonger", "on": "harbour"},
+    {"kind": "house", "name": "dawnstar_thyras_house", "on": "harbour"},
+    {"kind": "house", "name": "dawnstar_skjolds_house", "on": "quay"},
+    {"kind": "house", "name": "dawnstar_factors_house", "flags": ["upper"], "on": "row"},
+    {"kind": "house", "name": "dawnstar_hestors_house", "on": "mara"}
+  ],
+  "features": [
+    {"type": "shrine", "theme": "divine:mara", "where": "street", "tag": "mara"},
+    {"type": "statue", "theme": "divine:talos", "where": "square"},
+    {"type": "memorial", "where": "free"},
+    {"type": "great_tree", "theme": "spruce", "where": "free"},
+    {"type": "banners", "count": 3, "where": "gate"},
+    {"type": "lamps", "count": 3, "where": "street", "tag": "main"},
+    {"type": "lamps", "count": 2, "where": "street", "tag": "quay"},
+    {"type": "well", "count": 2, "where": "free"},
+    {"type": "bench", "count": 2, "where": "square"},
+    {"type": "market", "where": "free"},
+    {"type": "flowers", "where": "street", "tag": "row"},
+    {"type": "garden", "where": "free"}
+  ],
+  "titles": {
+    "dawnstar_market_square": "Dawnstar Market Square",
+    "dawnstar_temple_of_mara": "Temple of Mara",
+    "dawnstar_barracks": "Dawnstar Barracks",
+    "dawnstar_trader": "Dawnstar Trading Post",
+    "dawnstar_fishmonger": "Harbour Fishmonger",
+    "dawnstar_thyras_house": "Thyra's House",
+    "dawnstar_skjolds_house": "Skjold's House",
+    "dawnstar_factors_house": "Factor's House",
+    "dawnstar_hestors_house": "Hestor's House"
+  }
+}

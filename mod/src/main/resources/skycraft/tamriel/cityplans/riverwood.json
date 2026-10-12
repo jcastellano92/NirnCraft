@@ -1,0 +1,63 @@
+{
+  "id": "riverwood",
+  "base": "none",
+  "sil": "lakeshore-bridge-sawmill",
+  "names": {"inn": "sleeping_giant_inn", "store": "riverwood_trader", "smithy": "alvors_smithy"},
+  "innKey": "sleeping_giant_inn",
+  "gates": [[0, 34], [-7, -30], [-33, -2]],
+  "lines": [
+    {"kind": "bridge", "from": [17, -10], "to": [-7, -30], "width": 5, "variant": 1},
+    {"kind": "bridge", "from": [-24, 6], "to": [-33, -2], "width": 3, "variant": 0}
+  ],
+  "buildings": [
+    {"kind": "building", "use": "sawmill", "wealth": "common", "at": [46, 38], "size": [13, 11], "face": "W", "name": "riverwood_lumber_mill"},
+    {"kind": "camp", "at": [58, 50], "size": [13, 13], "variant": 11},
+    {"kind": "lumber", "at": [60, 34], "size": [7, 5], "face": "W"},
+    {"kind": "camp", "at": [58, 6], "size": [13, 13], "variant": 2},
+    {"kind": "mill", "at": [-20, 26], "size": [9, 11], "face": "E", "margin": 3, "name": "riverwood_water_mill"}
+  ],
+  "plazas": [
+    {"at": [12, 22], "size": 11, "variant": 0, "stalls": 3, "name": "riverwood_green"}
+  ],
+  "nets": [
+    {"type": "path", "via": [[0, 34], [2, 20], [8, 4], [14, -4], [17, -10]], "width": 4, "major": true, "tag": "main"},
+    {"type": "path", "via": [[-24, 8], [-6, 10], [14, 8], [34, 6], [54, 8]], "width": 3, "rank": 1, "tag": "row"},
+    {"type": "path", "via": [[38, 14], [44, 28], [38, 46], [20, 52]], "width": 3, "rank": 1, "tag": "mill"}
+  ],
+  "zones": [
+    {"at": [10, 12], "r": 22, "zone": "centre"},
+    {"at": [44, 34], "r": 20, "zone": "craft"},
+    {"at": [-6, 40], "r": 20, "zone": "poor"}
+  ],
+  "fabric": {"radius": 56, "target": 0.30, "fill_cap": 8, "yard_cap": 6},
+  "queue": [
+    {"kind": "inn", "size": [15, 17], "flags": ["upper"], "name": "sleeping_giant_inn", "on": "main"},
+    {"kind": "store", "size": [9, 11], "name": "riverwood_trader", "on": "main"},
+    {"kind": "smithy", "size": [11, 9], "name": "alvors_smithy", "on": "row"},
+    {"kind": "house", "name": "riverwood_alvors_house", "flags": ["upper"], "on": "row"},
+    {"kind": "house", "name": "riverwood_delphines_room", "on": "main"},
+    {"kind": "house", "name": "riverwood_gerdurs_house", "on": "mill"},
+    {"kind": "house", "name": "riverwood_ylvas_house", "on": "row"},
+    {"kind": "house", "name": "riverwood_thyras_house", "on": "row"},
+    {"kind": "building", "use": "warehouse", "wealth": "common", "size": [11, 13], "name": "riverwood_timber_store", "on": "mill"}
+  ],
+  "features": [
+    {"type": "shrine", "theme": "divine:talos", "where": "square"},
+    {"type": "lamps", "count": 2, "where": "street", "tag": "main"},
+    {"type": "well", "where": "free"},
+    {"type": "banners", "where": "gate"},
+    {"type": "bench", "where": "square"},
+    {"type": "garden", "where": "free"}
+  ],
+  "titles": {
+    "riverwood_lumber_mill": "Riverwood Lumber Mill",
+    "riverwood_water_mill": "Riverwood Water Mill",
+    "riverwood_green": "Riverwood Green",
+    "riverwood_alvors_house": "Alvor's House",
+    "riverwood_delphines_room": "Delphine's Rooms",
+    "riverwood_gerdurs_house": "Gerdur's House",
+    "riverwood_ylvas_house": "Ylva's House",
+    "riverwood_thyras_house": "Thyra's House",
+    "riverwood_timber_store": "Timber Store"
+  }
+}

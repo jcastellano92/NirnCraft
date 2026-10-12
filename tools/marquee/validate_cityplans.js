@@ -37,6 +37,8 @@ const reg = fs.readFileSync(path.join(root, "mod", "src", "main", "java", "com",
 const landmarkIds = new Set([...reg.matchAll(/reg\("([a-z_]+)"/g)].map((m) => m[1]));
 const arche = fs.readFileSync(path.join(root, "mod", "src", "main", "java", "com", "skycraft", "tamriel", "settlement", "plan", "Archetype.java"), "utf8");
 const archetypes = new Set([...arche.matchAll(/^\s+([A-Z_]+)\((?:true|false),/gm)].map((m) => m[1].toLowerCase()));
+const useSrc = fs.readFileSync(path.join(root, "mod", "src", "main", "java", "com", "skycraft", "tamriel", "settlement", "grammar", "Use.java"), "utf8");
+const uses = new Set([...useSrc.matchAll(/^\s+([A-Z_]+)\(\d+, \d+, \d+, \d+,/gm)].map((m) => m[1].toLowerCase()));
 const FLAGS = new Set(["for_sale", "upper", "rich", "water", "no_beard", "fixed", "major", "palisade", "ruined", "sign", "seat", "ground"]);
 const LINE_KINDS = new Set(["street", "wall", "bridge", "canal"]);
 
@@ -93,7 +95,9 @@ for (const id of index.plans) {
   const radius = plan.radius || (base === "java" ? place.radius : Math.min(place.radius, 110));
   const reach = plan.reach || radius;
   if (plan.radius && plan.radius > place.radius) err(`${id}: radius ${plan.radius} > place radius ${place.radius}`);
-  if (plan.reach && plan.reach > place.radius + 40) err(`${id}: reach ${plan.reach} too far past place radius ${place.radius} (spacing lint)`);
+  // a java-base plan may declare the hand layout's own reach (the College bridge runs 112 from a 60-block place)
+  const reachCap = base === "java" ? Math.max(place.radius + 40, 112) : place.radius + 40;
+  if (plan.reach && plan.reach > reachCap) err(`${id}: reach ${plan.reach} too far past place radius ${place.radius} (spacing lint)`);
   if (base === "none" && !(plan.gates && plan.gates.length)) err(`${id}: base none needs gates`);
   for (const g of plan.gates || []) if (Math.hypot(g[0], g[1]) > reach + 10) err(`${id}: gate ${g} beyond reach ${reach}`);
   if (plan.sil) {
@@ -103,7 +107,8 @@ for (const id of index.plans) {
   } else {
     warn(`${id}: no sil tag`);
   }
-  const p2 = { radius };
+  // pieces may stand anywhere the layout reaches (bridge landings, outworks), not only inside the build radius
+  const p2 = { radius: Math.max(radius, plan.reach || 0) };
   const slack = 14;
   for (const t of plan.terraces || []) checkPoint(`${id} terrace`, p2, [t.rect[0], t.rect[1]], slack + 10);
   for (const l of plan.landmarks || []) {
@@ -114,6 +119,7 @@ for (const id of index.plans) {
   }
   for (const b of plan.buildings || []) {
     checkKind(`${id} building`, b.kind);
+    if (b.use && !uses.has(String(b.use).toLowerCase())) err(`${id} building ${b.kind}: unknown use ${b.use}`);
     checkPoint(`${id} building ${b.kind}`, p2, b.at, slack + 10);
     checkFlags(`${id} building ${b.kind}`, b.flags);
     use(id, b.name);
@@ -129,6 +135,7 @@ for (const id of index.plans) {
   for (const z of plan.plazas || []) { checkPoint(`${id} plaza`, p2, z.at, slack); use(id, z.name); }
   for (const q of plan.queue || []) {
     checkKind(`${id} queue`, q.kind);
+    if (q.use && !uses.has(String(q.use).toLowerCase())) err(`${id} queue ${q.kind}: unknown use ${q.use}`);
     checkFlags(`${id} queue ${q.kind}`, q.flags);
     use(id, q.name);
     if (q.on && !(plan.streets || []).some((s) => s.tag === q.on) && !(plan.rings || []).some((s) => s.tag === q.on)

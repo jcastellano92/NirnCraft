@@ -1644,6 +1644,8 @@ public final class Zoning {
         x.craft = new int[]{(int) (plan.radius * 0.5), (int) (plan.radius * 0.3)};
         x.poor = new int[]{-(int) (plan.radius * 0.5), (int) (plan.radius * 0.6)};
         for (Spec s : new ArrayList<>(plan.specs)) {
+            // a plan piece given a grammar use ("use": "sawmill") needs its seed and slope like a lot the fabric found
+            if (s.kind.building && s.grammar() && s.gseed == 0 && !s.has(Spec.RESERVED)) stamp(x, s);
             if (!s.kind.building || s.grammar() || s.has(Spec.RUINED) || s.has(Spec.RESERVED)) continue;
             if (s.kind == Archetype.PALACE || s.kind == Archetype.TOWER || s.kind == Archetype.TENT || s.kind == Archetype.SHRINE) continue;
             if (s.culture >= 0 && s.culture != plan.culture.ordinal() && s.style >= 0) {
@@ -1700,6 +1702,14 @@ public final class Zoning {
         }
         int[] kinds = {Outdoors.TREE, Outdoors.FLOWER_BED, Outdoors.WELL, Outdoors.HAY, Outdoors.WOODPILE, Outdoors.BENCH, Outdoors.BARRELS, Outdoors.TREE};
         int houses = 0, yards = 0, cap = 40 + R / 2, yardCap = Math.max(6, before.townBuildings() / 2);
+        // an authored plan sets its own limits ("fabric": {"fill_cap": homes, "yard_cap": yards}; 0 = none: its streets are the town)
+        if (plan.place != null) {
+            com.skycraft.tamriel.settlement.plan.CityPlan cp = com.skycraft.tamriel.settlement.plan.CityPlans.of(plan.place);
+            if (cp != null && cp.fabric != null) {
+                if (cp.fabric.has("fill_cap")) cap = cp.fabric.get("fill_cap").getAsInt();
+                if (cp.fabric.has("yard_cap")) yardCap = cp.fabric.get("yard_cap").getAsInt();
+            }
+        }
         for (int[] p : pts) {
             double best = Double.MAX_VALUE, bx = 0, bz = 0;
             for (Street st : x.sk.streets) {

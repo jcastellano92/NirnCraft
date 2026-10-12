@@ -1,0 +1,38 @@
+{
+  "id": "old_hroldan",
+  "base": "none",
+  "sil": "hillside-inn-stable-shrine",
+  "names": {"inn": "old_hroldan_inn"},
+  "innKey": "old_hroldan_inn",
+  "gates": [[0, 26]],
+  "buildings": [
+    {"kind": "inn", "at": [0, -2], "size": [13, 17], "face": "S", "flags": ["upper"], "name": "old_hroldan_inn"},
+    {"kind": "stables", "at": [-22, 12], "size": [11, 13], "face": "E", "name": "old_hroldan_stables"},
+    {"kind": "shrine", "at": [-14, -14], "size": [5, 5], "face": "S", "variant": 4, "name": "old_hroldan_shrine"},
+    {"kind": "garden", "at": [-10, 8], "size": [7, 5], "variant": 1},
+    {"kind": "pen", "at": [-8, 20], "size": [9, 9]},
+    {"kind": "garden", "at": [10, 8], "size": [7, 5], "variant": 3}
+  ],
+  "nets": [
+    {"type": "path", "via": [[0, 26], [-2, 14], [-4, 4], [-4, -8]], "width": 3, "major": true, "tag": "main"},
+    {"type": "path", "via": [[-4, 12], [-14, 14], [-22, 10]], "width": 2, "rank": 2, "tag": "lane"},
+    {"type": "path", "via": [[-4, -8], [-12, -12], [-16, -4]], "width": 2, "rank": 2, "tag": "lane"}
+  ],
+  "fabric": {"radius": 24, "target": 0.24, "fill_cap": 2, "yard_cap": 6},
+  "queue": [
+    {"kind": "house", "name": "old_hroldan_elders_house", "on": "main"},
+    {"kind": "house", "name": "old_hroldan_lamp_keepers_house", "on": "lane"},
+    {"kind": "house", "on": "lane"}
+  ],
+  "features": [
+    {"type": "well", "where": "free"},
+    {"type": "lamps", "where": "street", "tag": "main"},
+    {"type": "bench", "where": "free"}
+  ],
+  "titles": {
+    "old_hroldan_stables": "Old Hroldan Stables",
+    "old_hroldan_shrine": "Hroldan Shrine",
+    "old_hroldan_elders_house": "Elder's House",
+    "old_hroldan_lamp_keepers_house": "Lamp-Keeper's House"
+  }
+}

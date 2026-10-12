@@ -244,10 +244,32 @@ public final class CityPlans {
                 s.flag(Spec.SIGN);
             }
             if (b.raise() != 0) s.minFloor = b.raise();
+            if (!b.use().isEmpty()) grammarUse(plan, s, b.use(), b.wealth());
             if (!b.culture().isEmpty() || !b.kit().isEmpty() || !b.overlay().isEmpty()) {
                 s.style = styleOf(plan, s, b.culture(), b.kit(), b.overlay());
             }
         }
+    }
+
+    /** Makes a pinned piece a building-grammar building of {@code use} (a sawmill, a mage tower, a warehouse...). */
+    public static void grammarUse(Plan plan, Spec s, String use, String wealth) {
+        com.skycraft.tamriel.settlement.grammar.Use u = com.skycraft.tamriel.settlement.grammar.Use.byId(use.toLowerCase(java.util.Locale.ROOT));
+        if (u == null) {
+            Skycraft.LOGGER.error("City plan {}: unknown use {}", plan.key, use);
+            return;
+        }
+        com.skycraft.tamriel.settlement.grammar.Wealth w = com.skycraft.tamriel.settlement.grammar.Wealth.COMMON;
+        for (com.skycraft.tamriel.settlement.grammar.Wealth c : com.skycraft.tamriel.settlement.grammar.Wealth.values()) {
+            if (c.name().equalsIgnoreCase(wealth)) w = c;
+        }
+        s.use(u, w);
+        long h = plan.seed ^ (s.x * 0x9E3779B97F4A7C15L) ^ (s.z * 0xC2B2AE3D27D4EB4FL);
+        h ^= h >>> 31;
+        h *= 0xBF58476D1CE4E5B9L;
+        h ^= h >>> 29;
+        s.gseed = (int) h;
+        s.slope = plan.terrain.spread(s.x, s.z, Math.max(1, s.halfX() - s.margin), Math.max(1, s.halfZ() - s.margin));
+        if (w.atLeast(com.skycraft.tamriel.settlement.grammar.Wealth.WEALTHY) || u == com.skycraft.tamriel.settlement.grammar.Use.MANOR) s.flags |= Spec.RICH;
     }
 
     /** Fills the axis-aligned street frontages with the plan's queue of buildings. */
@@ -279,6 +301,17 @@ public final class CityPlans {
         }
     }
 
+    /** Queue pieces are unplaced: the use and wealth are set now, the seed and slope are stamped when the lot is found. */
+    private static void grammarUseQueued(Spec h, String use, String wealth) {
+        com.skycraft.tamriel.settlement.grammar.Use u = com.skycraft.tamriel.settlement.grammar.Use.byId(use.toLowerCase(java.util.Locale.ROOT));
+        if (u == null) return;
+        com.skycraft.tamriel.settlement.grammar.Wealth w = com.skycraft.tamriel.settlement.grammar.Wealth.COMMON;
+        for (com.skycraft.tamriel.settlement.grammar.Wealth c : com.skycraft.tamriel.settlement.grammar.Wealth.values()) {
+            if (c.name().equalsIgnoreCase(wealth)) w = c;
+        }
+        h.use(u, w);
+    }
+
     private static void enqueue(Deque<Spec> q, CityPlan.Queued e) {
         {
             for (int i = 0; i < e.count(); i++) {
@@ -289,6 +322,7 @@ public final class CityPlans {
                 if (e.smallEvery() > 0 && e.w() == 0 && i % e.smallEvery() == 1) h.size(9, 9);
                 h.variant = e.variant();
                 h.minFloor = e.raise() == 0 ? Spec.UNSET : e.raise();
+                if (!e.use().isEmpty()) grammarUseQueued(h, e.use(), e.wealth());
                 if (!e.name().isEmpty() && i == 0) {
                     h.name = e.name();
                     h.flag(Spec.SIGN);

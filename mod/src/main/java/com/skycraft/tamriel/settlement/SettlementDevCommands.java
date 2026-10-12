@@ -94,6 +94,7 @@ public final class SettlementDevCommands {
                                         .executes(SettlementDevCommands::site))))))
                 .then(Commands.literal("plan").then(Commands.argument("id", StringArgumentType.word()).executes(SettlementDevCommands::planOne)))
                 .then(Commands.literal("plans").executes(SettlementDevCommands::planAll))
+                .then(Commands.literal("terrain").then(Commands.argument("id", StringArgumentType.word()).executes(SettlementDevCommands::terrainMap)))
                 .then(Commands.literal("reload").executes(c -> {
                     Styles.reload();
                     com.skycraft.tamriel.settlement.plan.CityPlans.reload();
@@ -416,6 +417,55 @@ public final class SettlementDevCommands {
         }
         say(c, "Exported " + n + " city plans");
         return n;
+    }
+
+    /**
+     * {@code /skysettle terrain <id>}: the planner's own terrain model round a named place in the plan's local frame
+     * (every 3 blocks): height over the plan base and a wet flag (sea, lake, river), as {@code terrain_<id>.json}, so
+     * a city plan can be authored against real ground without a world.
+     */
+    static int terrainMap(CommandContext<CommandSourceStack> c) {
+        String id = StringArgumentType.getString(c, "id");
+        Place p = Places.byId(id).orElse(null);
+        if (p == null) {
+            c.getSource().sendFailure(Component.literal("No place " + id));
+            return 0;
+        }
+        ServerLevel level = c.getSource().getLevel();
+        int R = Math.max(p.radius(), Cities.reach(p)) + 24, step = 3;
+        Terrain t = new Terrain(context(level, p.x(), p.z()), 4);
+        int[] o = Cities.world(p, 0, 0);
+        int base = t.land(o[0], o[1]);
+        com.google.gson.JsonObject out = new com.google.gson.JsonObject();
+        out.addProperty("id", id);
+        out.addProperty("r", R);
+        out.addProperty("step", step);
+        out.addProperty("base", base);
+        out.addProperty("sea", t.sea);
+        com.google.gson.JsonArray rows = new com.google.gson.JsonArray();
+        for (int lz = -R; lz <= R; lz += step) {
+            StringBuilder h = new StringBuilder();
+            for (int lx = -R; lx <= R; lx += step) {
+                int[] w = Cities.world(p, lx, lz);
+                int d = t.land(w[0], w[1]) - base;
+                // wet cells are written as letters (a = level with the base), dry ones as a signed height in base-36
+                h.append(t.wet(w[0], w[1]) ? "~" : d < -35 ? "v" : d > 35 ? "^" : Character.toString(Character.forDigit(Math.abs(d) % 36, 36)));
+                h.append(d < 0 ? "-" : "+");
+            }
+            rows.add(h.toString());
+        }
+        out.add("rows", rows);
+        try {
+            DIR.mkdirs();
+            try (FileWriter fw = new FileWriter(new File(DIR, "terrain_" + id + ".json"))) {
+                fw.write(out.toString());
+            }
+        } catch (IOException e) {
+            Skycraft.LOGGER.error("Terrain export failed", e);
+            return 0;
+        }
+        say(c, "Terrain " + id + ": " + rows.size() + " rows");
+        return 1;
     }
 
     static boolean exportPlan(ServerLevel level, String id, java.util.function.Consumer<String> say) {

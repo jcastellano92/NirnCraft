@@ -30,7 +30,8 @@ import java.util.Locale;
  *
  * <p>Plan data ({@code "fabric"}): {@code radius} the built radius (default 0.8 of the plan radius), {@code target}
  * the buildings/developed ratio to reach, {@code tier} (0..3) to override the size class, {@code gap} false to skip
- * the gap filler, {@code outskirts} false to skip farms and fields.</p>
+ * the gap filler, {@code outskirts} false to skip farms and fields, {@code fill_cap} / {@code yard_cap} the most homes
+ * / yards the town fill ({@link Zoning#adopt}) may add behind the authored streets (0 = none).</p>
  */
 public final class Fabric {
     private Fabric() {}
@@ -57,6 +58,7 @@ public final class Fabric {
         if (x.sk.gates.isEmpty()) x.sk.gates.add(new int[]{0, x.R});
         for (Spec s : plan.specs) {
             if (s.kind == Archetype.STREET) {
+                if (onBareChain(plan, s)) continue;
                 int ax = Zoning.localX(plan, s.x, s.z), az = Zoning.localZ(plan, s.x, s.z), bx = Zoning.localX(plan, s.x2, s.z2), bz = Zoning.localZ(plan, s.x2, s.z2);
                 x.sk.streets.add(new Street(ax, az, bx, bz, s.w, s.has(Spec.MAJOR) ? 0 : s.w >= 3 ? 1 : 2));
             } else if (s.kind == Archetype.PLAZA) {
@@ -102,7 +104,7 @@ public final class Fabric {
         List<Plan.Chain> chains = new ArrayList<>(plan.chains);
         chains.sort((a, b) -> Integer.compare(a.rank(), b.rank()));
         for (Plan.Chain ch : chains) {
-            if (ch.tag().equals("bridge")) continue;
+            if (ch.tag().equals("bridge") || ch.tag().startsWith("bare")) continue;
             walk(x, zoner, ch, 1);
             walk(x, zoner, ch, -1);
         }
@@ -193,6 +195,20 @@ public final class Fabric {
         }
     }
 
+    /** A street piece that lies on a chain tagged `bare*`: a road with no frontage (ruins, wilderness tracks). */
+    private static boolean onBareChain(Plan plan, Spec s) {
+        int ax = Zoning.localX(plan, s.x, s.z), az = Zoning.localZ(plan, s.x, s.z), bx = Zoning.localX(plan, s.x2, s.z2), bz = Zoning.localZ(plan, s.x2, s.z2);
+        for (Plan.Chain c : plan.chains) {
+            if (!c.tag().startsWith("bare")) continue;
+            for (int i = 0; i + 1 < c.pts().size(); i++) {
+                double[] a = c.pts().get(i), b = c.pts().get(i + 1);
+                if (Math.abs(a[0] - ax) < 1.5 && Math.abs(a[1] - az) < 1.5 && Math.abs(b[0] - bx) < 1.5 && Math.abs(b[1] - bz) < 1.5) return true;
+                if (Math.abs(b[0] - ax) < 1.5 && Math.abs(b[1] - az) < 1.5 && Math.abs(a[0] - bx) < 1.5 && Math.abs(a[1] - bz) < 1.5) return true;
+            }
+        }
+        return false;
+    }
+
     private static boolean coveredByChain(Plan plan, Street st) {
         double mx = (st.x1() + st.x2()) / 2.0, mz = (st.z1() + st.z2()) / 2.0;
         for (Plan.Chain c : plan.chains) {
@@ -245,6 +261,7 @@ public final class Fabric {
                             int lx = (int) Math.round(p0[0] + ux * along + nx * off), lz = (int) Math.round(p0[1] + uz * along + nz * off);
                             Spec s = plan.at(q.kind(), lx, lz, face).size(w, d);
                             s.flags = q.flags();
+                            if (!q.use().isEmpty()) CityPlans.grammarUse(plan, s, q.use(), q.wealth());
                             s.variant = q.variant();
                             s.minFloor = q.raise() == 0 ? Spec.UNSET : q.raise();
                             s.margin = Math.max(1, s.margin);
@@ -263,6 +280,7 @@ public final class Fabric {
                     double[] p0 = ch.at(ch.length() / 2);
                     Spec s = plan.at(q.kind(), (int) Math.round(p0[0]) + ch.width() + w / 2 + 2, (int) Math.round(p0[1]), Direction.WEST).size(w, d);
                     s.flags = q.flags();
+                    if (!q.use().isEmpty()) CityPlans.grammarUse(plan, s, q.use(), q.wealth());
                     s.variant = q.variant();
                     s.minFloor = q.raise() == 0 ? Spec.UNSET : q.raise();
                     if (!q.name().isEmpty() && i == 0) {
