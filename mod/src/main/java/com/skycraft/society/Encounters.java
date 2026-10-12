@@ -96,6 +96,11 @@ public final class Encounters {
         }
     }
 
+    /** Encounters that put hostile creatures near the player (they obey the hostile pacing rules). */
+    private static final Set<Kind> THREATENING = java.util.EnumSet.of(Kind.THIEF, Kind.MAGE_VS_NECROMANCER, Kind.ADVENTURERS_VS_BANDITS,
+            Kind.GIANT_VS_HUNTER, Kind.WOLF_PACK, Kind.VAMPIRES, Kind.DRAGON, Kind.FORSWORN_AMBUSH, Kind.SKIRMISH,
+            Kind.FUGITIVE_AND_HUNTER);
+
     private static final Map<UUID, Mob> TRACKED = new HashMap<>();
     private static final Map<UUID, Integer> NEXT = new HashMap<>();
 
@@ -195,6 +200,8 @@ public final class Encounters {
             if (prey == null || prey.isCreative() || prey.isSpectator() || !prey.isAlive()) continue;
             double d = mob.distanceToSqr(prey);
             if (d > 160 * 160) continue;
+            // a sneaking, unseen player is not tracked by their live position
+            if (com.skycraft.combat.Stealth.hiddenFrom(mob, prey)) continue;
             if (d < 24 * 24 && mob.hasLineOfSight(prey)) mob.setTarget(prey);
             else mob.getNavigation().moveTo(prey, 1.0D);
         }
@@ -308,10 +315,16 @@ public final class Encounters {
         }
         Kind kind = forced != null ? forced : pick(player);
         if (kind == null || !available(level, kind)) return null;
+        // pacing: threatening encounters share the hostile cooldown (and grace period) with the region spawner and
+        // stay out of the calm zones around the world spawn and settlements
+        boolean threat = forced == null && THREATENING.contains(kind);
+        if (threat && !com.skycraft.creatures.spawn.SpawnPacing.hostileReady(player)) return null;
         BlockPos center = findSpawn(level, player, kind == Kind.DRAGON ? 70 : 40, kind == Kind.DRAGON ? 100 : 80, forced == null);
         if (center == null) return null;
+        if (threat && com.skycraft.creatures.spawn.SpawnPacing.calm(level, center)) return null;
         Group g = new Group(level, player, center);
         boolean ok = spawn(kind, g);
+        if (ok && threat) com.skycraft.creatures.spawn.SpawnPacing.noteHostile(player);
         return ok ? kind : null;
     }
 

@@ -105,6 +105,15 @@ public final class CorpseEvents {
             }
         }
         event.getDrops().removeAll(stored);
+        // What an armed NPC had on is exactly what lies on (and can be taken from) its body: equipment that missed its
+        // drop chance used to stay on the model but could not be looted.
+        if (worn != null && wearsOwnGear(dead) && level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+            for (int i = 0; i < worn.length; i++) {
+                ItemStack w = worn[i];
+                if (w == null || w.isEmpty() || net.minecraft.world.item.enchantment.EnchantmentHelper.hasVanishingCurse(w)) continue;
+                corpse.addWorn(i, w.copy()); // false (ignored) when that slot already holds the dropped item
+            }
+        }
         for (ItemStack arrow : arrows) {
             ItemStack rest = corpse.addLoot(arrow);
             if (!rest.isEmpty()) event.getDrops().add(new ItemEntity(level, dead.getX(), dead.getY() + 0.5, dead.getZ(), rest));
@@ -141,7 +150,21 @@ public final class CorpseEvents {
         for (int i = 0; i < worn.length; i++) {
             if (worn[i] == stack) return i;
         }
+        // not the same object (another mod copied the drop): the same item from that slot
+        for (int i = 0; i < worn.length; i++) {
+            if (worn[i] != null && !worn[i].isEmpty() && ItemStack.isSameItemSameTags(worn[i], stack)) return i;
+        }
         return -1;
+    }
+
+    /** Fighters and townspeople whose worn gear is a visible part of them (not creatures with a hidden prop item). */
+    private static boolean wearsOwnGear(LivingEntity dead) {
+        return dead instanceof com.skycraft.creatures.entity.SkyHumanoid
+                || dead instanceof com.skycraft.society.entity.NpcEntity
+                || dead instanceof com.skycraft.creatures.entity.GuardEntity
+                || dead instanceof net.minecraft.world.entity.monster.AbstractSkeleton
+                || dead instanceof net.minecraft.world.entity.monster.Zombie
+                || dead instanceof net.minecraft.world.entity.monster.AbstractIllager;
     }
 
     /**

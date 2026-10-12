@@ -369,6 +369,9 @@ public final class Painter {
         if (id == null || !ok(x, y, z) || !chunk.isInside(new BlockPos(x, y, z))) return null;
         ResourceLocation rl = ResourceLocation.tryParse(id);
         if (rl == null || !ForgeRegistries.ENTITY_TYPES.containsKey(rl)) return null;
+        // bosses and bandits are never placed near the world spawn
+        if ("skycraft".equals(rl.getNamespace()) && com.skycraft.creatures.spawn.SpawnPacing.bannedNearStart(rl.getPath())
+                && com.skycraft.creatures.spawn.SpawnPacing.nearStart(level.getLevel(), x, z)) return null;
         EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(rl);
         if (type == null) return null;
         try {

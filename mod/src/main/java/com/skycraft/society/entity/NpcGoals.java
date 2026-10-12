@@ -308,6 +308,8 @@ final class NpcGoals {
                 npc.setTarget(p);
                 return true;
             }
+            // a sneaking player the hunter cannot see up close is not followed by their live position
+            if (p.distanceToSqr(npc) < 48 * 48 && com.skycraft.combat.Stealth.hiddenFrom(npc, p)) return false;
             npc.getNavigation().moveTo(p, 1.0D);
             return true;
         }

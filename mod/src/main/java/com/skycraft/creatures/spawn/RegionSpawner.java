@@ -61,6 +61,7 @@ public final class RegionSpawner {
     private static final double BUDGET_RADIUS = 96;
     private static final int MAX_PER_TYPE = 6;
     private static final String SEEN_KEY = "skycraft_rs_seen";
+    private static final String GROUP_KEY = "skycraft_rs_group";
 
     private RegionSpawner() {}
 
@@ -83,20 +84,32 @@ public final class RegionSpawner {
                 m -> m.getTags().contains(SkyCreature.REGION_SPAWN_TAG));
         int hostile = 0;
         int wild = 0;
+        java.util.Set<Long> groups = new java.util.HashSet<>();
         for (Mob m : mine) {
-            if (m instanceof Enemy) hostile++;
-            else wild++;
+            if (m instanceof Enemy) {
+                hostile++;
+                groups.add(m.getPersistentData().getLong(GROUP_KEY));
+            } else {
+                wild++;
+            }
         }
         RandomSource random = level.getRandom();
         boolean peaceful = level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL;
-        if (!peaceful && hostile < CreaturesConfig.HOSTILE_BUDGET.get()) attempt(level, player, SpawnTables.Kind.HOSTILE, mine, random);
+        // pacing: one hostile group near a player at a time, a cooldown between events, quiet after (re)spawning
+        if (!peaceful && hostile < CreaturesConfig.HOSTILE_BUDGET.get() && groups.size() < CreaturesConfig.MAX_HOSTILE_GROUPS.get()
+                && SpawnPacing.hostileReady(player)) {
+            attempt(level, player, SpawnTables.Kind.HOSTILE, mine, random);
+        }
         if (wild < CreaturesConfig.WILDLIFE_BUDGET.get()) attempt(level, player, SpawnTables.Kind.WILDLIFE, mine, random);
     }
 
     // ------------------------------------------------------------------ one attempt
 
     private static void attempt(ServerLevel level, ServerPlayer player, SpawnTables.Kind kind, List<Mob> mine, RandomSource random) {
-        BlockPos column = pickColumn(level, player, random);
+        boolean hostileKind = kind == SpawnTables.Kind.HOSTILE;
+        // daylight makes hostile attempts rarer; night is when the wild is dangerous
+        if (hostileKind && !level.isNight() && random.nextDouble() > CreaturesConfig.DAY_HOSTILE_FACTOR.get()) return;
+        BlockPos column = pickColumn(level, player, random, hostileKind ? CreaturesConfig.MIN_HOSTILE_DISTANCE.get() : MIN_DIST);
         if (column == null) return;
         int surface = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column.getX(), column.getZ());
         // underground when the player is: caves get cave spawns
@@ -106,11 +119,20 @@ public final class RegionSpawner {
         SpawnTables.Placement place = classify(level, spot, surface);
         if (place == SpawnTables.Placement.SURFACE && underground) return;
         if (inSettlement(level, spot)) return;
+        if (hostileKind) {
+            if (SpawnPacing.calm(level, spot)) return; // around the world spawn and towns
+            // main roads feel safe: hostile attempts there mostly fail
+            if (SpawnPacing.onRoad(level, spot) && random.nextDouble() > CreaturesConfig.ROAD_HOSTILE_FACTOR.get()) return;
+        }
 
         Holder<Biome> biome = level.getBiome(spot);
         BiomeFamily family = BiomeFamily.of(biome, spot);
         Region region = Regions.at(level, spot);
         int regionLevel = Leveling.regionLevel(level, spot);
+        // the start area ramps up gently: weak enemies close to where new characters arrive
+        double fromStart = SpawnPacing.distFromStart(level, spot.getX(), spot.getZ());
+        if (fromStart < 900) regionLevel = Math.min(regionLevel, 2 + (int) (fromStart / 90));
+        boolean nearStart = SpawnPacing.nearStart(level, spot.getX(), spot.getZ());
         boolean night = level.isNight();
 
         List<SpawnTables.Group> candidates = new ArrayList<>();
@@ -121,6 +143,7 @@ public final class RegionSpawner {
                 if (g.kind() != kind || regionLevel < g.minLevel() || regionLevel > g.maxLevel()) continue;
                 if (g.time() == SpawnTables.Time.DAY && night || g.time() == SpawnTables.Time.NIGHT && !night) continue;
                 if (g.place() != SpawnTables.Placement.ANY && g.place() != place) continue;
+                if (nearStart && hasBanned(g)) continue; // no bosses or bandits near the start
                 candidates.add(g);
                 total += g.weight();
             }
@@ -135,7 +158,15 @@ public final class RegionSpawner {
                 break;
             }
         }
-        spawnGroup(level, spot, chosen, mine, random);
+        if (spawnGroup(level, spot, chosen, mine, random) && hostileKind) SpawnPacing.noteHostile(player);
+    }
+
+    private static boolean hasBanned(SpawnTables.Group g) {
+        for (SpawnTables.Member m : g.members()) {
+            net.minecraft.resources.ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(m.type());
+            if (id != null && Skycraft.MODID.equals(id.getNamespace()) && SpawnPacing.bannedNearStart(id.getPath())) return true;
+        }
+        return false;
     }
 
     private static boolean matches(SpawnTables.Rule rule, Region region, BiomeFamily family, Holder<Biome> biome) {
@@ -158,7 +189,7 @@ public final class RegionSpawner {
     }
 
     /** A loaded, entity-ticking column 28-72 blocks away, outside the player's view cone. */
-    private static BlockPos pickColumn(ServerLevel level, ServerPlayer player, RandomSource random) {
+    private static BlockPos pickColumn(ServerLevel level, ServerPlayer player, RandomSource random, double minDist) {
         Vec3 look = player.getViewVector(1f).multiply(1, 0, 1);
         if (look.lengthSqr() < 1.0E-4) look = new Vec3(0, 0, 1);
         look = look.normalize();
@@ -166,7 +197,7 @@ public final class RegionSpawner {
             double ang = random.nextDouble() * Math.PI * 2;
             Vec3 dir = new Vec3(Math.cos(ang), 0, Math.sin(ang));
             if (dir.dot(look) > 0.2) continue; // in front of the player: they would see it pop in
-            double dist = MIN_DIST + random.nextDouble() * (MAX_DIST - MIN_DIST);
+            double dist = minDist + random.nextDouble() * (Math.max(MAX_DIST, minDist + 8) - minDist);
             BlockPos col = BlockPos.containing(player.getX() + dir.x * dist, player.getY(), player.getZ() + dir.z * dist);
             if (!level.isLoaded(col) || !level.isPositionEntityTicking(col)) continue;
             return col;
@@ -210,17 +241,26 @@ public final class RegionSpawner {
 
     // ------------------------------------------------------------------ spawning a group
 
-    private static void spawnGroup(ServerLevel level, BlockPos spot, SpawnTables.Group group, List<Mob> mine, RandomSource random) {
+    private static boolean spawnGroup(ServerLevel level, BlockPos spot, SpawnTables.Group group, List<Mob> mine, RandomSource random) {
+        groupId = level.getGameTime() + 1;
+        boolean any = false;
         for (SpawnTables.Member m : group.members()) {
             long sameKind = mine.stream().filter(e -> e.getType() == m.type()).count();
             int count = m.min() + (m.max() > m.min() ? random.nextInt(m.max() - m.min() + 1) : 0);
             for (int i = 0; i < count && sameKind < MAX_PER_TYPE; i++) {
                 BlockPos at = i == 0 ? spot : near(level, spot, random, group.place());
                 if (at == null) continue;
-                if (spawnOne(level, m.type(), at, group.place())) sameKind++;
+                if (spawnOne(level, m.type(), at, group.place())) {
+                    sameKind++;
+                    any = true;
+                }
             }
         }
+        return any;
     }
+
+    /** Id (game time) of the group being placed, stored on each member so groups can be counted. */
+    private static long groupId;
 
     private static BlockPos near(ServerLevel level, BlockPos spot, RandomSource random, SpawnTables.Placement place) {
         for (int i = 0; i < 6; i++) {
@@ -255,6 +295,7 @@ public final class RegionSpawner {
         }
         mob.addTag(SkyCreature.REGION_SPAWN_TAG);
         mob.getPersistentData().putLong(SEEN_KEY, level.getGameTime());
+        mob.getPersistentData().putLong(GROUP_KEY, groupId);
         mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.NATURAL, null, null);
         level.addFreshEntityWithPassengers(mob);
         return true;

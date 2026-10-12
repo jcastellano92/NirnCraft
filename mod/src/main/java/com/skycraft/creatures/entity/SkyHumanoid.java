@@ -69,7 +69,8 @@ public abstract class SkyHumanoid extends Monster implements AnimatedCreature, R
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
+                p -> !(p instanceof Player pl) || detects(pl)));
     }
 
     // ------------------------------------------------------------------ skins & gear
@@ -106,7 +107,6 @@ public abstract class SkyHumanoid extends Monster implements AnimatedCreature, R
         return data;
     }
 
-    private int searchTicks = 0;
     @Nullable
     private BlockPos lastKnownTargetPos;
 
@@ -125,56 +125,33 @@ public abstract class SkyHumanoid extends Monster implements AnimatedCreature, R
         if (target instanceof Player player) {
             if (player.isCreative() || player.isSpectator() || !player.isAlive()) {
                 this.setTarget(null);
-                this.searchTicks = 0;
                 return;
             }
-
-            boolean hasLos = this.hasLineOfSight(player);
-            boolean sneaking = player.isCrouching();
-            boolean detected = true;
-
-            if (!hasLos) {
-                detected = false;
-            } else if (sneaking) {
-                double dist = this.distanceTo(player);
-                int light = player.level().getMaxLocalRawBrightness(player.blockPosition());
-                int sneakSkill = (player instanceof ServerPlayer sp) ? SkyData.get(sp).getSkill(Skill.SNEAK) : 15;
-                Vec3 look = this.getViewVector(1.0F);
-                Vec3 toPlayer = player.position().subtract(this.position()).normalize();
-                double dot = look.dot(toPlayer);
-
-                if (dot < 0.2 && dist > 3.0) {
-                    detected = false; // Behind or side of enemy
-                } else if (light <= 7 && dist > 8.0) {
-                    detected = false; // Hidden in shadows
-                } else if (sneakSkill >= 45 && dist > 12.0) {
-                    detected = false; // Master of shadows
-                }
-            }
-
-            if (detected) {
-                this.searchTicks = 0;
+            if (detects(player)) {
                 this.lastKnownTargetPos = player.blockPosition();
             } else {
-                if (this.searchTicks == 0) {
-                    this.searchTicks = 140; // 7 seconds search state
-                    if (this.lastKnownTargetPos != null) {
-                        this.getNavigation().moveTo(lastKnownTargetPos.getX(), lastKnownTargetPos.getY(), lastKnownTargetPos.getZ(), 1.0D);
-                    }
-                } else {
-                    this.searchTicks--;
-                    if (this.searchTicks % 40 == 0 && player instanceof ServerPlayer sp) {
-                        com.skycraft.skills.Progression.addSkillXp(sp, Skill.SNEAK, 0.6f / Skill.SNEAK.useMult);
-                    }
-                    if (this.searchTicks <= 0) {
-                        // Lost the player: give up and return to normal
-                        this.setTarget(null);
-                        this.lastKnownTargetPos = null;
-                        this.getNavigation().stop();
-                    }
-                }
+                // Not seen: drop the target (the attack goals path to the LIVE position), go to where the player was
+                // last seen, look around, then return to the post (Stealth.beginSearch).
+                BlockPos where = this.lastKnownTargetPos != null ? this.lastKnownTargetPos : player.blockPosition();
+                this.lastKnownTargetPos = null;
+                com.skycraft.combat.Stealth.beginSearch(this, Vec3.atBottomCenterOf(where));
             }
         }
+    }
+
+    /** Whether this fighter can currently make out the player (always, unless they are sneaking out of sight). */
+    public boolean detects(Player player) {
+        if (com.skycraft.combat.Stealth.provoked(this, player)) return true;
+        if (!this.hasLineOfSight(player)) return false;
+        if (!player.isCrouching()) return true;
+        double dist = this.distanceTo(player);
+        int light = player.level().getMaxLocalRawBrightness(player.blockPosition());
+        int sneakSkill = (player instanceof ServerPlayer sp) ? SkyData.get(sp).getSkill(Skill.SNEAK) : 15;
+        Vec3 look = this.getViewVector(1.0F);
+        Vec3 toPlayer = player.position().subtract(this.position()).normalize();
+        if (look.dot(toPlayer) < 0.2 && dist > 3.0) return false; // behind or beside
+        if (light <= 7 && dist > 8.0) return false; // hidden in shadows
+        return !(sneakSkill >= 45 && dist > 12.0); // master of shadows
     }
 
     public boolean isArcher() {

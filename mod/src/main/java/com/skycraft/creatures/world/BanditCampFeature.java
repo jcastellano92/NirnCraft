@@ -45,6 +45,8 @@ public class BanditCampFeature extends Feature<NoneFeatureConfiguration> {
         int baseY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, origin.getX(), origin.getZ());
         BlockPos center = new BlockPos(origin.getX(), baseY, origin.getZ());
         if (!suitable(level, center)) return false;
+        // no camps in the start area (they are placed encounters, not something to stumble into at the spawn)
+        if (com.skycraft.creatures.spawn.SpawnPacing.nearStart(level.getLevel(), center.getX(), center.getZ())) return false;
 
         flatten(level, center, random);
         BlockState wool = random.nextBoolean() ? Blocks.BROWN_WOOL.defaultBlockState() : Blocks.WHITE_WOOL.defaultBlockState();

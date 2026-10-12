@@ -19,6 +19,14 @@ public final class CreaturesConfig {
     public static final ForgeConfigSpec.BooleanValue REGION_SPAWNING;
     public static final ForgeConfigSpec.IntValue HOSTILE_BUDGET;
     public static final ForgeConfigSpec.IntValue WILDLIFE_BUDGET;
+    public static final ForgeConfigSpec.IntValue CALM_RADIUS;
+    public static final ForgeConfigSpec.IntValue START_AREA_RADIUS;
+    public static final ForgeConfigSpec.IntValue HOSTILE_COOLDOWN_SECONDS;
+    public static final ForgeConfigSpec.IntValue GRACE_SECONDS;
+    public static final ForgeConfigSpec.IntValue MAX_HOSTILE_GROUPS;
+    public static final ForgeConfigSpec.IntValue MIN_HOSTILE_DISTANCE;
+    public static final ForgeConfigSpec.DoubleValue ROAD_HOSTILE_FACTOR;
+    public static final ForgeConfigSpec.DoubleValue DAY_HOSTILE_FACTOR;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -55,6 +63,22 @@ public final class CreaturesConfig {
                 .defineInRange("hostileBudget", 8, 0, 64);
         WILDLIFE_BUDGET = b.comment("At most this many wild animals placed by the region spawner within 96 blocks of a player.")
                 .defineInRange("wildlifeBudget", 10, 0, 64);
+        CALM_RADIUS = b.comment("No natural hostile spawns or hostile encounters within this many blocks of the world spawn or a settlement (0 = off).")
+                .defineInRange("calmRadius", 150, 0, 1000);
+        START_AREA_RADIUS = b.comment("No bosses and no bandit camps/bandits within this many blocks of the world spawn (0 = off).")
+                .defineInRange("startAreaRadius", 300, 0, 2000);
+        HOSTILE_COOLDOWN_SECONDS = b.comment("Minimum seconds between two hostile spawn events (region spawner, night spawns, hostile encounters) near one player.")
+                .defineInRange("hostileCooldownSeconds", 100, 0, 3600);
+        GRACE_SECONDS = b.comment("No hostile spawn events for this many seconds after a player logs in or respawns.")
+                .defineInRange("graceSeconds", 180, 0, 3600);
+        MAX_HOSTILE_GROUPS = b.comment("Most hostile region-spawned groups alive within 96 blocks of a player.")
+                .defineInRange("maxHostileGroups", 1, 1, 8);
+        MIN_HOSTILE_DISTANCE = b.comment("Hostile groups never spawn closer than this many blocks to a player.")
+                .defineInRange("minHostileDistance", 40, 28, 64);
+        ROAD_HOSTILE_FACTOR = b.comment("Chance multiplier for hostile spawn attempts on or beside a road (main roads feel safe).")
+                .defineInRange("roadHostileFactor", 0.08, 0.0, 1.0);
+        DAY_HOSTILE_FACTOR = b.comment("Chance multiplier for hostile spawn attempts in daylight (1.0 at night).")
+                .defineInRange("dayHostileFactor", 0.5, 0.0, 1.0);
         b.pop();
         SPEC = b.build();
     }

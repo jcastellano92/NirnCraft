@@ -95,6 +95,12 @@ public final class Stealth {
         }
         if (player.isCrouching() && entity instanceof Mob mob && !canNotice(mob, player, data)) {
             event.setCanceled(true);
+            return;
+        }
+        // remember the post a hostile leaves when it starts a chase, so it can walk back after losing the player
+        if (entity instanceof Mob mob && mob instanceof Enemy && !mob.hasRestriction() && !SEARCHES.containsKey(mob.getUUID())
+                && !mob.getPersistentData().contains(POST_KEY)) {
+            mob.getPersistentData().putLong(POST_KEY, mob.blockPosition().asLong());
         }
     }
 
@@ -113,10 +119,12 @@ public final class Stealth {
             boolean enemy = mob instanceof Enemy;
             if (mob.getTarget() == player) {
                 if (crouching && !keepsTrack(mob, player, data)) {
-                    mob.setTarget(null);
-                    mob.getNavigation().stop();
-                } else if (enemy) {
-                    detected = true;
+                    // lost them: go to where they were last seen, look around, return to the post
+                    beginSearch(mob, SEEN.getOrDefault(mob.getUUID(), player.position()));
+                } else {
+                    if (SEEN.size() > 512) SEEN.clear();
+                    if (mob.hasLineOfSight(player)) SEEN.put(mob.getUUID(), player.position());
+                    if (enemy) detected = true;
                 }
             } else if (train && enemy && mob.distanceToSqr(player) <= trainSq) {
                 nearHiddenFrom = true;
@@ -125,5 +133,93 @@ public final class Stealth {
         data.module("vitals").putBoolean("detected", detected);
         // Sneak trains while you are hidden near enemies.
         if (nearHiddenFrom) Progression.addSkillXp(player, Skill.SNEAK, 0.75f);
+    }
+
+    // ------------------------------------------------------------------ searching the last known position
+
+    /** Persistent-data key: where a hostile stood before it started chasing (its post), as a packed block position. */
+    private static final String POST_KEY = "skycraft_post";
+    private static final java.util.Map<java.util.UUID, Search> SEARCHES = new java.util.HashMap<>();
+    private static final java.util.Map<java.util.UUID, net.minecraft.world.phys.Vec3> SEEN = new java.util.HashMap<>();
+
+    private static final class Search {
+        final Mob mob;
+        final net.minecraft.world.phys.Vec3 spot;
+        int phase; // 0 go to the last known spot, 1 look around, 2 return to the post
+        long until;
+        long started;
+
+        Search(Mob mob, net.minecraft.world.phys.Vec3 spot, long now) {
+            this.mob = mob;
+            this.spot = spot;
+            this.started = now;
+        }
+    }
+
+    /** Sneaking out of sight: this mob would not notice the player right now. */
+    public static boolean hiddenFrom(Mob mob, Player player) {
+        return player.isCrouching() && !canNotice(mob, player, SkyData.get(player));
+    }
+
+    /**
+     * A mob that lost its target (the player is hidden) stops chasing the live position: it walks to the last place
+     * it saw them, looks around for a few seconds, then returns to its post. A new target interrupts the search.
+     */
+    public static void beginSearch(Mob mob, net.minecraft.world.phys.Vec3 spot) {
+        if (mob.level().isClientSide) return;
+        mob.setTarget(null);
+        mob.getNavigation().stop();
+        SEARCHES.put(mob.getUUID(), new Search(mob, spot, mob.level().getGameTime()));
+        SEEN.remove(mob.getUUID());
+    }
+
+    private static net.minecraft.world.phys.Vec3 postOf(Mob mob) {
+        if (mob.hasRestriction()) return net.minecraft.world.phys.Vec3.atBottomCenterOf(mob.getRestrictCenter());
+        if (!mob.getPersistentData().contains(POST_KEY)) return null;
+        return net.minecraft.world.phys.Vec3.atBottomCenterOf(net.minecraft.core.BlockPos.of(mob.getPersistentData().getLong(POST_KEY)));
+    }
+
+    @SubscribeEvent
+    public static void onLevelTick(TickEvent.LevelTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || event.level.isClientSide || SEARCHES.isEmpty()) return;
+        long now = event.level.getGameTime();
+        if (now % 10 != 3) return;
+        java.util.Iterator<Search> it = SEARCHES.values().iterator();
+        while (it.hasNext()) {
+            Search s = it.next();
+            Mob mob = s.mob;
+            if (mob.level() != event.level) continue;
+            if (mob.isRemoved() || !mob.isAlive() || mob.getTarget() != null) {
+                it.remove();
+                continue;
+            }
+            switch (s.phase) {
+                case 0 -> {
+                    if (mob.distanceToSqr(s.spot) < 6.0 || now - s.started > 160) {
+                        s.phase = 1;
+                        s.until = now + 60 + mob.getRandom().nextInt(60);
+                        mob.getNavigation().stop();
+                    } else if (mob.getNavigation().isDone()) {
+                        mob.getNavigation().moveTo(s.spot.x, s.spot.y, s.spot.z, 1.0D);
+                    }
+                }
+                case 1 -> {
+                    if (now > s.until) {
+                        s.phase = 2;
+                        s.started = now;
+                    }
+                }
+                default -> {
+                    net.minecraft.world.phys.Vec3 post = postOf(mob);
+                    if (post == null || mob.distanceToSqr(post) < 9.0 || now - s.started > 400) {
+                        mob.getPersistentData().remove(POST_KEY);
+                        mob.getNavigation().stop();
+                        it.remove();
+                    } else if (mob.getNavigation().isDone()) {
+                        mob.getNavigation().moveTo(post.x, post.y, post.z, 0.9D);
+                    }
+                }
+            }
+        }
     }
 }

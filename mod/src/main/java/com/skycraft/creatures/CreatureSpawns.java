@@ -194,14 +194,25 @@ public final class CreatureSpawns {
         // 2. Vanilla natural night hostiles in the Overworld make way for Skyrim's creatures
         if (serverLevel.dimension() == Level.OVERWORLD && type == MobSpawnType.NATURAL && isVanillaDarkHostile(entityType)) {
             RandomSource random = serverLevel.getRandom();
+            // pacing: calm around spawn and towns, safe roads, one hostile event per cooldown near a player
+            net.minecraft.server.level.ServerPlayer near = com.skycraft.creatures.spawn.SpawnPacing.playerNear(serverLevel, pos, 128);
+            if (com.skycraft.creatures.spawn.SpawnPacing.calm(serverLevel, pos)
+                    || com.skycraft.creatures.spawn.SpawnPacing.onRoad(serverLevel, pos)
+                    && random.nextDouble() > CreaturesConfig.ROAD_HOSTILE_FACTOR.get()
+                    || near != null && !com.skycraft.creatures.spawn.SpawnPacing.hostileReady(near)) {
+                event.setSpawnCancelled(true);
+                return;
+            }
             // draugr rise in the cold north, frostbite spiders lurk underground
             if (entityType == EntityType.ZOMBIE && isNorth(serverLevel, pos) && random.nextFloat() < CreaturesConfig.DRAUGR_REPLACES_ZOMBIES.get()
                     && fewNearby(serverLevel, ModEntities.DRAUGR.get(), pos, 48, 4)) {
+                if (near != null) com.skycraft.creatures.spawn.SpawnPacing.noteHostile(near);
                 replace(event, ModEntities.DRAUGR.get().create(serverLevel));
                 return;
             }
             if ((entityType == EntityType.SPIDER || entityType == EntityType.CAVE_SPIDER) && !serverLevel.canSeeSky(pos)
                     && random.nextFloat() < 0.35f && fewNearby(serverLevel, ModEntities.FROSTBITE_SPIDER.get(), pos, 32, 3)) {
+                if (near != null) com.skycraft.creatures.spawn.SpawnPacing.noteHostile(near);
                 replace(event, ModEntities.FROSTBITE_SPIDER.get().create(serverLevel));
                 return;
             }
@@ -211,6 +222,7 @@ public final class CreatureSpawns {
             if (serverLevel.isNight() && !isSettlementOrHouse(serverLevel, pos)) {
                 float roll = random.nextFloat();
                 if (roll < 0.12f) {
+                    if (near != null) com.skycraft.creatures.spawn.SpawnPacing.noteHostile(near);
                     SkeeverEntity skeever = ModEntities.SKEEVER.get().create(serverLevel);
                     if (skeever != null) {
                         skeever.moveTo(event.getX(), event.getY(), event.getZ(), mob.getYRot(), 0);
@@ -219,6 +231,7 @@ public final class CreatureSpawns {
                     }
                 } else if (roll < 0.20f && fewWildWolves(serverLevel, pos)) {
                     // Skyrim's wolves (ice wolves in the cold), cleaned up by the region spawner's despawn rule
+                    if (near != null) com.skycraft.creatures.spawn.SpawnPacing.noteHostile(near);
                     Mob wolf = Bestiary.WOLF.get().create(serverLevel);
                     if (wolf != null) {
                         wolf.moveTo(event.getX(), event.getY(), event.getZ(), mob.getYRot(), 0);
