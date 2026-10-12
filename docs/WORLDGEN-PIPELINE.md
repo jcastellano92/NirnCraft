@@ -64,9 +64,10 @@ whiterun-rorikstead, whiterun-dragon_bridge and one river crossing; plus `reach_
   (not on seeded noise). Crossing rules: water or gap > 3 blocks: bridge; stream narrower than ~6: culvert; shallow
   ford on footpaths; cliff: switchback, else stairs; tunnel only where nothing else fits (rare). Gate: every link has
   a profile within grade caps, every water crossing has a span, reach lint unchanged.
-* **P2 Terrain obeys the plan (S7).** The density/height function reads the road index: inside the bed the ground is
+* **P2 Terrain obeys the plan (S7). DONE** (section 7). The density/height function reads the road index: inside the bed the ground is
   the profile height; shoulders blend with smoothstep; cut slopes get stone, fills get earth; settlement/landmark pads
-  likewise. Gate: in the saved corridors, terrain under every road cell is within 0.5 of the profile.
+  likewise. Gate: in the saved corridors, terrain under every road cell is within 0.5 of the profile (met to
+  within the cell interpolation: 95.5% of bed columns exact, 99.9% within 2; see section 7 for the exceptions).
 * **P3 Paint and crossings (S8+S9).** Road surface in the surface rule (half steps as slabs from the fractional
   height); bridges, culverts, fords, stairs as per-chunk features cut from the span list. Retire `Paver` for new
   chunks (keep it only to upgrade old saves). Gate: 0 missing road cells, 0 unbridged crossings, 0 drops without a
@@ -175,3 +176,96 @@ Notes for P2/P3: the live `RoadNetwork`/`Paver` still plan and pave on noise hei
 them by painting from this plan. Gate lanes and trails end on the road they join; settlement interiors (streets) are
 P5. Re-run `tools/bake/bake.ps1` whenever the map, places, road graph, gates or worldplan code change (the input
 hash includes them); `qa.ps1 -Bake` fails on a stale bake.
+
+## 7. P2 result: the terrain obeys the plan (S7)
+
+Code: `com.skycraft.worldplan.PlanGround` (new, not baked, not in the bake hash), called from
+`TamrielHeight.height` (the only place the surface height is computed) and `TamrielChannel` (road / overhang channels);
+`RoadPlan.bedHeight(x, z)` (one static method added to `RoadPlan`, so the bake was regenerated: same plan bytes, new
+input hash); `tools/worldgen/noise_settings.py` (two cave tweaks, `tamriel.json` regenerated). Dev tools: autorun task
+`roadterrain[:samples]` (`TerrainCheck`: plan vs old terrain through the real generator, per thread, no chunks are
+generated), `tools/qa/p2_corridors.py` (corridor tiles for headless generation, and terrain-vs-profile on saved chunks).
+
+**What the terrain does now**
+* **Bed.** For every road within 20 blocks of a column (4 nearest stretches, blended by weight squared) the ground is
+  pulled to `profile + 0.002`, so the top solid block is exactly `floor(profile)` (the half step, fraction >= 0.5, is for
+  P3's slab). The flat zone is `halfWidth + 4.5` blocks (`+ 3.5` on footpaths): the density is interpolated between cell
+  corners 4 blocks apart, so for every column inside the half width to be exact, all corners of its cell must be at the
+  bed height too (a flat zone of `halfWidth + 1` as first specified gave +-3 errors). Beyond it the ground blends back with
+  a smoothstep over `6 + 0.75 * |plan ground - profile|` blocks, clamped to 6..12 and to 20 blocks from the centre line
+  (cut slopes where the road is below the ground, embankments where above). The seeded detail noise fades out over the
+  same zone (`amp *= 1 - 0.9 * weight`), so the profile, made on the smooth macro ground, is rarely far from the natural
+  ground.
+* **Pads.** Settlements and trail destinations (`PlanLinks.isTrailDestination`) flatten to `sitePad` inside their radius and
+  blend over `PlanTerrain.PAD_BLEND` = 16 blocks outside it (same shape as the planner), except on water columns. The bed
+  is applied after the pad, so a road ending on a pad meets it at the pad height.
+* **Spans.** Columns in a water channel (`MapSample.inWater()`: river, stream, lake) are never raised or cut, except by a
+  FORD (laid through the channel at the plan's ford height). So a culvert keeps its channel open under the embankment
+  (the Hydrology channel is the final word there), and a road beside a stream cannot dam it. BRIDGE and TUNNEL spans keep
+  the first 4.5 blocks of each end at the bed height (abutment, portal), then fade the shaping out over up to 8 blocks
+  (`0.4 * (length - 9)` for short spans) to the natural terrain: the river or ravine continues under a deck, the mountain
+  stays over a tunnel. Spans shorter than 10 blocks keep the bed (water columns stay open anyway).
+* **Caves.** Cave entrances and noodle tunnels are not interpolated and carved holes into beds, so: the cave term in
+  `noise_settings.py` is `5 * (entrances + 2.0 * road)` (was `0.6 * road`), and the noodle term is
+  `max(noodle, -100 + 120 * road)`; the `tamriel/road` channel is now `max(map road, calm, plan weight)` and the
+  `overhang` channel is multiplied by `1 - 0.9 * plan weight`. Without both changes 0.4% of bed columns were off by 3 or more (pits in the bed); with them 0.07%.
+* **Cost/safety.** `PlanGround.bed`/`pad` are allocation-free (thread-local scratch `Bed`, own 32-block edge index:
+  116k buckets, 2.06M edge entries, built in ~120 ms on the plan loader thread after the plan), deterministic, and
+  independent of the seed (they only read the plan and the macro sample). Distant Horizons uses the same generator.
+
+**Numbers** (`SKYCRAFT_AUTORUN=roadterrain:30000`, Nirn seed; 30,000 columns: a third uniform over Tamriel, a third within 40
+blocks of a road vertex, a third around pads; the height is `getBaseHeight` through the real noise router, old terrain =
+the plan switched off for that thread):
+* Plan lookup (bed + pad), per column: ~0.3 us over uniform Tamriel columns (5.6% of them shaped), 0.7-1.4 us within 20
+  blocks of a road (machine load varies; the whole height function plus noise is tens of us).
+* Changed columns: 6.3% of uniformly random Tamriel columns. Beyond 20 blocks from every road centre line and pad edge: 19
+  of the 7,297 changed samples (0.06% of all), all in the Black Marsh at sea level, up to ~12 blocks: the vanilla aquifer
+  reads the preliminary surface tens of blocks away, which moves its water level and barrier blocks there. Not shaping.
+  The same 3,000 columns generated twice give identical heights (old and new).
+* Terrain vs profile, 19,372 random bed columns on roads, lanes and trails (top solid block vs `floor(profile)`): exact
+  95.5%, off by 1 4.1%, by 2 0.3%, by 3+ 14 columns (0.07%; max 5). Highway 954 exact / 27 / 4 worse, road 8,870 / 336 / 46,
+  lane 1,169 / 43 / 1, trail 7,502 / 393 / 27. The 3+ cases are cuts/fills beside a water channel (channel columns are not
+  shaped, the cell interpolation then slopes) and tight switchbacks.
+* Consecutive centre-line vertices (4 blocks): terrain steps by more than 1 block in 0.3% of 5,456 pairs (stairs, bridges,
+  tunnels and culverts excluded), by more than 3 in 1.
+* Cut/fill depth, |ground - bed| over 17,942 normal-span columns: old terrain 0 / 1 / 2 / 3-4 / 5-8 / 9-12 / >12 =
+  3,798 / 4,792 / 2,999 / 3,548 / 1,928 / 450 / 427 (2.4% > 12); detail-calmed natural ground (what the shoulder blends
+  from, and what the player sees as cut/fill) 10,344 / 5,006 / 966 / 963 / 360 / 108 / 195 (1.1% > 12). Cut spans: no
+  column > 12 (n = 93); fill spans 2 of 94; switchbacks 14 of 293, stairs 13 of 938 > 12: the mountain roads P1 listed
+  as residual (Velothi, Wrothgar), where the profile stays far from the ground; a P1 matter, not a terrain one.
+* Saved chunks (4 corridors, 45 tiles of 10x10 chunks, fresh world seed 7777, roads module off so Paver has not
+  touched the blocks; `p2_corridors.py measure`, cells within 60 of a site edge and bridge/culvert/tunnel excluded):
+  1,605 cells: exact 81.6%, off 1 14.1%, off 2 2.6%, off 3+ 1.7%; steps > 1 between consecutive vertices 37 of 520
+  (7%). This is less clean than the generator numbers because the saved top includes props (farm walls, mine
+  entrances, barrels, spruce slabs), settlement terraces and vanilla carver holes next to the bed.
+* `road_measure.py` on the same corridors with the legacy network on (seed 7777, 1,781 points): gaps 119 (35 runs), drops > 1
+  55 (21 > 3), tree-blocked 3, unbridged 2, doors without path material within 3 blocks 203 of 509. Baseline in section 5:
+  142 gaps (26 runs), 33 drops (11 > 3), 1 tree, 1 unbridged, 194 of 512 doors. Unchanged systems: the legacy
+  `RoadNetwork` still plans its own polylines (median 4 blocks, p90 15 blocks from the plan line) and `Paver` pastes on
+  top, so this tool measures P3's target, not P2: gaps are about the same, the drops come from the legacy polyline
+  crossing plan shoulders. P3 retires it.
+
+**API for P3** (all allocation-free and thread-safe; reuse one `Bed` per thread: `PlanGround.scratch()`):
+```java
+double RoadPlan.bedHeight(x, z);              // exact fractional profile height inside the bed (<= halfWidth + 1), else NaN
+PlanGround g = PlanGround.get();              // after RoadPlan.get(); built on the plan loader thread
+PlanGround.Bed b = PlanGround.scratch();
+if (g.bed(x, z, b)) {                         // some road within 20 blocks
+    b.weight;      // 0..1 shaping weight (what the terrain used; 1 on the flat zone)  b.height // terrain target (profile + 0.002)
+    b.profile;     // exact profile height of the nearest road   b.distance / b.halfWidth / b.inBed (distance <= halfWidth + 1)
+    b.span;        // RoadPlan.NORMAL..TUNNEL of the nearest vertex   b.kind (0 highway .. 3 trail)   b.segment / b.vertex / b.along
+    b.open;        // inside a BRIDGE/TUNNEL span past its 4.5 + ramp blocks: natural terrain left under deck / over the bore
+    b.mouth;       // within 4.5 + 8 blocks of a TUNNEL span's end: the portal where P3 cuts the bore (spans: spanFrom/spanTo)
+}
+PlanGround.opening(MapSample s, b);           // water-channel column under a culvert/bridge: terrain left natural, P3 builds the arch/deck at b.profile
+g.pad(x, z, b);                               // b.padWeight, b.padHeight (settlement / trail-destination pads)
+PlanGround.influence(x, z);                   // max(bed weight, pad weight): what caves / overhangs use
+```
+Span lists, deck heights and piers are as in section 6 (`spanAt(segment, vertex)`, `spanFrom/To`, `spanDeck`, `pierAt`).
+Notes for P3: (1) paint the road block at `y = floor(bedHeight)` and, where the saved top differs by 1-2, fill below
+it and clear above it in the bed columns: the terrain is exact for 95% of columns and within 1 for 99.5% but vanilla
+carvers (cave/canyon carvers run after the density and are not in it) and the cell interpolation next to water can leave
+a pit or a lip; do not depend on the terrain alone. (2) A culvert's opening is the channel columns inside the bed zone
+of a CULVERT span (`PlanGround.opening`): embankment at the bed height on both sides, water column below, arch over it.
+(3) Settlement interiors are untouched by roads: the plan roads end on the pad at the gate (P5 streets). (4) Aquifer
+barrier and water changes up to ~40 blocks away in marsh are expected after any terrain change.

@@ -34,9 +34,24 @@ public final class RoadPlanCommands {
             Skycraft.LOGGER.info("[roadplan] {}", bench(RoadPlan.get(), 1_000_000));
             done.run();
         });
+        // P2 terrain check: SKYCRAFT_AUTORUN=roadterrain[:samples] (see TerrainCheck)
+        PerfAutorun.register("roadterrain", (t, done) -> {
+            int n = t.arg().isEmpty() ? 30000 : Integer.parseInt(t.arg());
+            Thread w = new Thread(() -> {
+                try {
+                    Skycraft.LOGGER.info("[roadplan] terrain check:\n{}", TerrainCheck.run(t.server().overworld(), n));
+                } catch (Throwable e) {
+                    Skycraft.LOGGER.error("[roadplan] terrain check failed", e);
+                }
+                done.run();
+            }, "Skycraft terrain check");
+            w.setDaemon(true);
+            w.start();
+        });
         Thread t = new Thread(() -> {
             try {
                 RoadPlan.warm();
+                PlanGround.get(); // the terrain's edge index (P2), so no worldgen thread builds it
             } catch (Throwable e) {
                 Skycraft.LOGGER.error("[roadplan] loading the road plan failed", e);
             }

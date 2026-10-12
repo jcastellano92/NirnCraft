@@ -4,6 +4,8 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycraft.tamriel.MapSample;
 import com.skycraft.tamriel.TamrielMap;
+import com.skycraft.worldplan.PlanGround;
+import com.skycraft.worldplan.RoadPlan;
 import net.minecraft.util.KeyDispatchDataCodec;
 import net.minecraft.world.level.levelgen.DensityFunction;
 
@@ -41,9 +43,10 @@ public record TamrielHeight(DensityFunction.NoiseHolder hills, DensityFunction.N
         Object owner = hills.noise() != null ? hills.noise() : this;
         com.skycraft.perf.ColumnCache.Table t = com.skycraft.perf.ColumnCache.table();
         int slot = t.slot(x, z);
-        if (!com.skycraft.perf.ColumnCache.OFF && t.hit(slot, owner, x, z)) return t.value(slot);
+        boolean memo = PlanGround.blending(); // the dev diff harness modes are never memoised
+        if (memo && !com.skycraft.perf.ColumnCache.OFF && t.hit(slot, owner, x, z)) return t.value(slot);
         double v = height(x, z, TamrielMap.sampleScratch(x, z));
-        t.put(slot, owner, x, z, v);
+        if (memo) t.put(slot, owner, x, z, v);
         return v;
     }
 
@@ -59,8 +62,24 @@ public record TamrielHeight(DensityFunction.NoiseHolder hills, DensityFunction.N
             return Math.min(h + (hillsN * 5 + detailN * 1.5) * (0.4 + 0.6 * MapNoise.smoothstep(-600, 0, cd)), TamrielMap.SEA_LEVEL - 1);
         }
 
-        // detail amplitude: calm at the shoreline, along roads and in towns, next to water, on ledges and paths
-        double amp = MapNoise.smoothstep(0, 56, cd) * (1 - 0.75 * s.road) * (1 - s.calm);
+        // P2: the road plan and the site pads (docs/WORLDGEN-PIPELINE.md section 7): bed and pad weights, applied last
+        float wBed = 0f, wPad = 0f;
+        PlanGround.Bed pb = null;
+        if (PlanGround.enabled()) {
+            PlanGround g = PlanGround.get();
+            pb = PlanGround.scratch();
+            boolean inWater = s.inWater();
+            // channel columns (river, stream, lake) are never raised or cut by a road, except by a ford: culverts stay
+            // open under their embankment and a road next to a stream does not dam it
+            if (g.bed(x, z, pb) && (!inWater || pb.span == RoadPlan.FORD)) wBed = pb.weight;
+            boolean tidal = s.elevation < TamrielMap.SEA_LEVEL - 0.5f && cd < 24;
+            if (!inWater && !tidal && g.pad(x, z, pb)) wPad = pb.padWeight;
+        }
+
+        // detail amplitude: calm at the shoreline, along roads and in towns, next to water, on ledges and paths; and
+        // fading out over the planned road beds and pads, so the profile never sits far from the natural ground
+        double amp = MapNoise.smoothstep(0, 56, cd) * (1 - 0.75 * s.road) * (1 - s.calm)
+                * (1 - PlanGround.CALM * Math.max(wBed, wPad));
         boolean water = !Float.isNaN(s.waterLevel);
         if (water) {
             // brooks calm the ground over a shorter reach than rivers (every authored river has a half width of 4+)
@@ -155,6 +174,11 @@ public record TamrielHeight(DensityFunction.NoiseHolder hills, DensityFunction.N
                     h = Math.max(h, wl + 1.0 + (d - hw) * 0.05);
                 }
             }
+        }
+        // site pads, then the road bed (profile + shoulders); the bed wins where they meet (roads end on the pad height)
+        if (PlanGround.blending()) {
+            if (wPad > 0f) h += (pb.padHeight - h) * wPad;
+            if (wBed > 0f) h += (pb.height - h) * wBed;
         }
         return Math.min(h, MAX_SURFACE);
     }

@@ -94,7 +94,7 @@ CAVES = {
     "type": "minecraft:range_choice", "input": SLOPED, "min_inclusive": -1000000.0, "max_exclusive": 1.5625,
     "when_in_range": {"type": "minecraft:min", "argument1": SLOPED,
                       "argument2": mul(5.0, add("minecraft:overworld/caves/entrances",
-                                                mul(0.6, "skycraft:tamriel/road")))},
+                                                mul(2.0, "skycraft:tamriel/road")))},
     "when_out_of_range": {"type": "minecraft:max",
         "argument1": {"type": "minecraft:min",
             "argument1": {"type": "minecraft:min",
@@ -116,7 +116,10 @@ TERRAIN = {"type": "minecraft:range_choice", "input": "skycraft:tamriel/below_su
 FINAL = {"type": "minecraft:min",
          "argument1": {"type": "minecraft:squeeze", "argument": mul(0.64, {"type": "minecraft:interpolated", "argument": {
              "type": "minecraft:blend_density", "argument": fades(TERRAIN)}})},
-         "argument2": "minecraft:overworld/caves/noodle"}
+         # noodle caves are not interpolated (evaluated per block): keep them off road beds and pads (P2), where the
+         # road plan sets the ground exactly (the road channel includes the planned beds and site pads)
+         "argument2": {"type": "minecraft:max", "argument1": "minecraft:overworld/caves/noodle",
+                       "argument2": add(-100.0, mul(120.0, "skycraft:tamriel/road"))}}
 
 SHIFTED = lambda n: {"type": "minecraft:shifted_noise", "noise": n, "shift_x": "minecraft:shift_x", "shift_y": 0.0,
                      "shift_z": "minecraft:shift_z", "xz_scale": 0.25, "y_scale": 0.0}

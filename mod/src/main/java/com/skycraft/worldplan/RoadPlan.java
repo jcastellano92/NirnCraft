@@ -267,6 +267,16 @@ public final class RoadPlan {
         return true;
     }
 
+    /**
+     * P2: the exact bed height (fractional profile height, the terrain's height target) of the road at column (x, z),
+     * or NaN when the column is not within the road bed (half width + 1) of any planned road. The terrain's top solid
+     * block there is {@code floor(bedHeight)}; the half step (fraction >= 0.5) is for P3's slabs. Allocation-free and
+     * thread-safe. Richer lookups (spans, tunnel mouths, pads): {@link PlanGround}.
+     */
+    public static double bedHeight(double x, double z) {
+        return PlanGround.bedHeight(get(), (int) Math.floor(x), (int) Math.floor(z));
+    }
+
     /** Span index of segment {@code s} containing global vertex {@code v}, or -1. */
     public int spanAt(int s, int v) {
         for (int k = spanOff[s]; k < spanOff[s + 1]; k++) if (v >= spanFrom[k] && v <= spanTo[k]) return k;

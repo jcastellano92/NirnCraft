@@ -170,7 +170,7 @@
                                     "argument1": "minecraft:overworld/caves/entrances",
                                     "argument2": {
                                       "type": "minecraft:mul",
-                                      "argument1": 0.6,
+                                      "argument1": 2.0,
                                       "argument2": "skycraft:tamriel/road"
                                     }
                                   }
@@ -259,7 +259,19 @@
           }
         }
       },
-      "argument2": "minecraft:overworld/caves/noodle"
+      "argument2": {
+        "type": "minecraft:max",
+        "argument1": "minecraft:overworld/caves/noodle",
+        "argument2": {
+          "type": "minecraft:add",
+          "argument1": -100.0,
+          "argument2": {
+            "type": "minecraft:mul",
+            "argument1": 120.0,
+            "argument2": "skycraft:tamriel/road"
+          }
+        }
+      }
     },
     "vein_toggle": {
       "type": "minecraft:interpolated",
