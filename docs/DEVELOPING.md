@@ -381,3 +381,55 @@ It runs on every push and on manual dispatch. A newer run on the same ref cancel
 26. **Global loot modifier entries** added: `skycraft:leveled_loot` (arsenal), `skycraft:lore_books` (lore), `skycraft:skyrim_food` (survival).
 27. **Corpse loot**: arrows that hit a mob are recorded in its persistent data `skycraft_arrows` (ListTag of ItemStack NBT) by
     arsenal; the creatures corpse adds them to the body's loot.
+
+## Performance, bake and pre-generation (`com.skycraft.perf`, `com.skycraft.bake`, `tools/bake/`)
+**Default seed.** `WorldSeed.NAME = "Nirn"` (`"Nirn".hashCode() = 2428247`). `SkyCreateWorldScreen` pre-fills the seed box
+with it and uses it when the box is blank; `tools/test-server.sh` uses it. A dedicated server needs
+`level-seed=Nirn`. The Tamriel map, places, road graph inputs and landmass labels do not depend on the seed (nothing in
+`TamrielMap` reads one), so every cache keyed on map data is valid for any seed; only the noise fields (terrain detail,
+biome noise, structures) are seeded, and those are never baked.
+
+**Benchmark.** `tools/bake/bench.ps1 -Radius 3 -Label x [-JvmOpts "-Dskycraft.perf.off=true"]` boots the dev server on a
+fresh Nirn world, generates five fixed areas and writes `mod/run/skycraft-perf/bench-*.txt` (chunks/s, per-stage CPU
+split, hot frames; JFR file next to it). `-Dskycraft.perf.off=true` disables the optimisations below for an A/B run.
+Known caveat: the per-chunk block hashes (`compare_hashes.ps1`) differ run to run even with identical code (about half of
+the interior chunks), so they cannot prove equivalence; the nondeterminism is in the full-chunk result (features), and
+is present with the optimisations off. Measured (245 chunks, 5 areas, 20 cores): 11.0 -> 14.0 chunks/s, worker CPU per
+chunk 1725 -> 1358 ms (surface stage 565 -> 297 ms/chunk).
+
+**Hotspots fixed.** (1) `perf.ColumnCache` memoises `TamrielHeight.compute` per thread (the biome fill and structure
+probes alternate columns, defeating `cache_2d`). (2) `perf.FastSurfaceRule` (`skycraft:fast_surface`, wrapped around the
+Tamriel surface rule by `tools/worldgen/noise_settings.py`) turns the ~100-entry biome-test sequence into a switch; the
+profile showed the surface stage at ~30-40% of generation. (3) `Places.overlapping` is bucket-indexed (verified by
+`/skycraft-perf columns`). Left: `Beardifier.compute` (~17% of the noise stage, structure terrain adaptation) and the
+aquifer fluid computation (vanilla).
+
+**Bake.** `bake.Bake` loads `skycraft/baked/<name>.bin` only when its stored input hash equals the live one (map files,
+places files, and the bytecode of the classes that compute the data), otherwise computes live. Baked now: the landmass
+raster labels and off-map island labels (`roads.Landmass`). Regenerate with `tools/bake/bake.ps1` (boots the dev server,
+runs the `bake` autorun task, copies into `mod/src/main/resources/skycraft/baked/`); `/skycraft-bake check|write` in
+game; `tools\qa\qa.ps1 -Server -Bake` fails when the bake is stale. Rebake and commit after changing map data, places,
+or `Landmass`/`TamrielMap`/`Places`. Not baked (deferred): the road network plan (depends on world heights and is
+persisted per save), the city-plan fabric cache; hydrology rasters already ship as PNG/JSON.
+
+**Pre-generator** (`perf.Pregen`, config `skycraft-perf-server.toml` `[pregen]`, commands `/skycraft-pregen start|stop|status`).
+A region ticket per chunk, released when the chunk is ready; progress and last positions are saved in the overworld data
+`skycraft_pregen`. Sources: a frontier ahead of each player weighted by the smoothed (about 30 s) movement vector, the
+spawn spiral to `autoRadius`, spirals around remembered positions. Paused by tick time above `maxTickMs` and by players
+moving faster than 12 blocks/s. Default: on for integrated servers, off for dedicated.
+
+**Fast-travel prewarm** (`perf.Prewarm`, `PerfPackets.PrewarmProgress`, `perf.client.PrewarmOverlay`): `FastTravelHandler`
+and `Carriages` load the 7x7 chunks around the destination with tickets first (the client shows "Travelling to ...",
+chunks ready/needed), then complete the travel (25 s timeout fallback). `Prewarm.hold(...)` keeps an area loaded
+silently. `sailing.Ferries` already requests the destination chunks at departure.
+
+**Distant Horizons.** DH builds LODs from chunks that are loaded or saved, so pre-generated chunks are picked up like
+explored ones; no DH API is called. Its server-side generation runs through the normal chunk path of our noise-based
+generator; the custom biome source is read through `getNoiseBiome`. Not verified in game. Suggested: DH distant
+generation on the internal server with a modest radius and let the pre-generator do the loading (it halves its
+in-flight cap when DH is installed).
+
+**Shipping a starter world (not implemented).** Run `/skycraft-pregen start <radius> now` on a Nirn server until
+`status` reports it finished, stop the server, zip `world/` (without `playerdata/`, `advancements/`, `stats/`) and host
+it as a release asset; players unzip it into `saves/` or a dedicated server's world folder. Chunks stay valid while the
+worldgen data is unchanged, so regenerate it per release.

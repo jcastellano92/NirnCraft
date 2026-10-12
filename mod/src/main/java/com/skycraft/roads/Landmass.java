@@ -40,10 +40,61 @@ public final class Landmass {
     private Landmass() {}
 
     private static final class Holder {
-        static final short[] LABELS = build();
         static int count;
-        static final Long2ShortOpenHashMap OFF = buildOff(count, LABELS);
         static int offCount;
+        static final short[] LABELS;
+        static final Long2ShortOpenHashMap OFF;
+
+        static {
+            short[] l = null;
+            Long2ShortOpenHashMap o = null;
+            byte[] baked = com.skycraft.bake.Bake.load("landmass");
+            if (baked != null) {
+                try (java.io.DataInputStream in = new java.io.DataInputStream(new java.io.ByteArrayInputStream(baked))) {
+                    count = in.readInt();
+                    offCount = in.readInt();
+                    l = new short[in.readInt()];
+                    for (int i = 0; i < l.length; i++) l[i] = in.readShort();
+                    int n = in.readInt();
+                    o = new Long2ShortOpenHashMap(n);
+                    for (int i = 0; i < n; i++) {
+                        long k = in.readLong();
+                        o.put(k, in.readShort());
+                    }
+                } catch (java.io.IOException | RuntimeException e) {
+                    l = null;
+                    o = null;
+                }
+            }
+            if (l == null || l.length != W * H) {
+                l = build();
+                o = buildOff(count, l);
+            }
+            LABELS = l;
+            OFF = o;
+        }
+    }
+
+    /** The landmass labels computed from scratch, serialised for {@code com.skycraft.bake.Bake}. */
+    public static byte[] computeLive() throws java.io.IOException {
+        short[] l = build();
+        int c = Holder.count;
+        Long2ShortOpenHashMap o = buildOff(c, l);
+        java.io.ByteArrayOutputStream bo = new java.io.ByteArrayOutputStream();
+        try (java.io.DataOutputStream out = new java.io.DataOutputStream(bo)) {
+            out.writeInt(c);
+            out.writeInt(Holder.offCount);
+            out.writeInt(l.length);
+            for (short v : l) out.writeShort(v);
+            out.writeInt(o.size());
+            var it = o.long2ShortEntrySet().fastIterator();
+            while (it.hasNext()) {
+                var e = it.next();
+                out.writeLong(e.getLongKey());
+                out.writeShort(e.getShortValue());
+            }
+        }
+        return bo.toByteArray();
     }
 
     private static short[] build() {

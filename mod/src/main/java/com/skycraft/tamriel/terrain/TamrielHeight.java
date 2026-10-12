@@ -36,7 +36,15 @@ public record TamrielHeight(DensityFunction.NoiseHolder hills, DensityFunction.N
 
     @Override
     public double compute(FunctionContext ctx) {
-        return height(ctx.blockX(), ctx.blockZ(), TamrielMap.sampleScratch(ctx.blockX(), ctx.blockZ()));
+        int x = ctx.blockX(), z = ctx.blockZ();
+        // per-thread column memo (perf): cache_2d keeps one column, the biome fill and structure probes alternate
+        Object owner = hills.noise() != null ? hills.noise() : this;
+        com.skycraft.perf.ColumnCache.Table t = com.skycraft.perf.ColumnCache.table();
+        int slot = t.slot(x, z);
+        if (!com.skycraft.perf.ColumnCache.OFF && t.hit(slot, owner, x, z)) return t.value(slot);
+        double v = height(x, z, TamrielMap.sampleScratch(x, z));
+        t.put(slot, owner, x, z, v);
+        return v;
     }
 
     /** Surface height at (x, z) for an already filled sample of that column. */

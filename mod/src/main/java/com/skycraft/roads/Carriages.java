@@ -143,6 +143,16 @@ public final class Carriages {
             return;
         }
 
+        if (!com.skycraft.perf.Prewarm.isReady(player.serverLevel(), dest.x(), dest.z())
+                && com.skycraft.perf.Prewarm.start(player, dest.x(), dest.z(), dest.name(),
+                () -> finishTravel(player, npc, dest, fare))) {
+            return; // the destination loads first (progress bar), then the ride completes
+        }
+        finishTravel(player, npc, dest, fare);
+    }
+
+    private static void finishTravel(ServerPlayer player, LivingEntity npc, Place dest, int fare) {
+        if (!player.isAlive()) return;
         ServerLevel level = player.serverLevel();
         BlockPos targetPos = stopFor(level, dest);
 

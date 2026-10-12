@@ -1,0 +1,13 @@
+java.lang.UnsupportedOperationException: Reflective setAccessible(true) disabled
+java.lang.IllegalAccessException: class io.netty.util.internal.PlatformDependent0$7 (in module io.netty.common) cannot access class jdk.internal.misc.Unsafe (in module java.base) because module java.base does not export jdk.internal.misc to module io.netty.common
+	at jdk.internal.reflect.Reflection.newIllegalAccessException(Reflection.java:392) ~[?:?] {}
+[23:36:56] [Server thread/INFO] [co.sk.Skycraft/]: [autorun] tasks: [bake:skycraft-bake, verify]
+[23:36:56] [Server thread/INFO] [co.sk.Skycraft/]: [autorun] running bake:skycraft-bake
+[23:36:56] [Server thread/INFO] [co.sk.Skycraft/]: [bake] landmass is stale (inputs changed); computing live
+[23:36:56] [Server thread/INFO] [co.sk.Skycraft/]: [bake] baked landmass (2526 KB raw) into F:\Projects\Personal\Skycraft\Skycraft\mod\run\skycraft-bake
+[23:36:56] [Server thread/INFO] [co.sk.Skycraft/]: [autorun] finished bake:skycraft-bake
+[23:36:56] [Server thread/INFO] [co.sk.Skycraft/]: [autorun] running verify
+[23:36:56] [Server thread/INFO] [co.sk.Skycraft/]: [bake] landmass is stale (inputs changed); computing live
+[23:36:56] [Server thread/ERROR] [co.sk.Skycraft/]: [bake] STALE: [manifest is stale: inputs changed, landmass.bin missing or stale]
+[23:36:56] [Server thread/INFO] [co.sk.Skycraft/]: [autorun] finished verify
+[23:36:56] [Server thread/INFO] [co.sk.Skycraft/]: [autorun] all tasks done, stopping the server

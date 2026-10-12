@@ -96,7 +96,8 @@ public class SkyCreateWorldScreen extends Screen {
         // Seed EditBox (Optional)
         int seedY = startY + 104;
         seedBox = new EditBox(font, cx - boxW / 2, seedY, boxW, boxH, Component.literal("World Seed"));
-        seedBox.setHint(Component.literal("Optional Seed (leave blank for random)"));
+        seedBox.setHint(Component.literal("Seed (blank = " + com.skycraft.bake.WorldSeed.NAME + ")"));
+        seedBox.setValue(com.skycraft.bake.WorldSeed.NAME);
         addRenderableWidget(seedBox);
 
         // Bottom Action Buttons: [BEGIN JOURNEY] and [CANCEL]
@@ -124,9 +125,8 @@ public class SkyCreateWorldScreen extends Screen {
         state.setName(worldName);
 
         String seed = seedBox.getValue().trim();
-        if (!seed.isEmpty()) {
-            state.setSeed(seed);
-        }
+        // blank means the fixed default world (Nirn); any other seed still works, it just skips the baked data
+        state.setSeed(seed.isEmpty() ? com.skycraft.bake.WorldSeed.NAME : seed);
 
         state.setGameMode(WorldCreationUiState.SelectedGameMode.SURVIVAL);
         state.setAllowCheats(false);
@@ -204,7 +204,7 @@ public class SkyCreateWorldScreen extends Screen {
         int boxW = 200;
         g.drawString(font, "ADVENTURE NAME", cx - boxW / 2, startY + 10, TEXT_COLOR, false);
         g.drawString(font, "DIFFICULTY", cx - boxW / 2, startY + 50, TEXT_COLOR, false);
-        g.drawString(font, "WORLD SEED (OPTIONAL)", cx - boxW / 2, startY + 92, TEXT_COLOR, false);
+        g.drawString(font, "WORLD SEED (DEFAULT: NIRN)", cx - boxW / 2, startY + 92, TEXT_COLOR, false);
 
         super.render(g, mouseX, mouseY, partialTick);
     }

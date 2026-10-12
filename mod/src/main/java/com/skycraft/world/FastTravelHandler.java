@@ -36,6 +36,10 @@ public final class FastTravelHandler {
     private FastTravelHandler() {}
 
     public static void travel(ServerPlayer player, String id) {
+        travel(player, id, false);
+    }
+
+    private static void travel(ServerPlayer player, String id, boolean prewarmed) {
         if (!WorldConfig.FAST_TRAVEL.get()) {
             fail(player, "disabled");
             return;
@@ -82,6 +86,14 @@ public final class FastTravelHandler {
 
         LocationKind kind = LocationKind.byId(loc.getString("type"));
         BlockPos arrival = new BlockPos(loc.getInt("ax"), loc.getInt("ay"), loc.getInt("az"));
+        if (!prewarmed && !com.skycraft.perf.Prewarm.isReady(level, arrival.getX(), arrival.getZ())) {
+            // load/generate the destination first (progress bar on the client), then run the whole request again
+            if (!com.skycraft.perf.Prewarm.start(player, arrival.getX(), arrival.getZ(), WorldData.displayName(loc),
+                    () -> travel(player, id, true))) {
+                fail(player, "blocked");
+            }
+            return;
+        }
         BlockPos target = findArrival(level, arrival, kind);
         if (target == null) {
             fail(player, "blocked");

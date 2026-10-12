@@ -3,6 +3,7 @@ Skycraft QA harness: one command, a short report. Built so automated sessions re
 
   tools\qa\qa.ps1                 # build + static checks (fast, ~3-5 min)
   tools\qa\qa.ps1 -Server         # + headless dedicated server: worldgen, all selftests, clean stop
+  tools\qa\qa.ps1 -Server -Bake   # server run + check that the baked data (skycraft/baked) is up to date
   tools\qa\qa.ps1 -Server -Client # + client autotest tour and a single contact-sheet image of all screenshots
   tools\qa\qa.ps1 -NoBuild ...    # skip the Gradle build (reuse the last one)
   tools\qa\qa.ps1 -Layout        # no build: static checks only, incl. the layout lint (places vs map rasters, ~2 s;
@@ -19,6 +20,7 @@ param(
     [switch]$Layout,
     [switch]$Parity,
     [switch]$Novelty,
+    [switch]$Bake,
     [string]$ServerCmds = "",
     [string]$Tour = "",
     [int]$ServerTimeout = 900,
@@ -92,6 +94,7 @@ if ($Novelty) {
 Pop-Location
 
 # ------------------------------------------------------------------ headless server
+if ($Bake) { $Server = [System.Management.Automation.SwitchParameter]::new($true) }
 if ($Server) {
     Set-Content (Join-Path $Run "eula.txt") "eula=true" -Encoding ascii
     $props = Join-Path $Run "server.properties"
@@ -99,6 +102,7 @@ if ($Server) {
     Remove-Item -Recurse -Force (Join-Path $Run "world") -ErrorAction SilentlyContinue
     Remove-Item -Recurse -Force (Join-Path $Run "crash-reports") -ErrorAction SilentlyContinue
     $cmds = @("forceload add -96 -96 96 96", "skycraft-quest selftest flow", "skycraft magic selftest")
+    if ($Bake) { $cmds += "skycraft-bake check" }
     if ($ServerCmds) { $cmds += ($ServerCmds -split "\|") }
     $cmds += "stop"
     $auto = (($cmds | ForEach-Object { $_.Trim().Replace(' ', '+') }) -join "|")
@@ -119,6 +123,10 @@ if ($Server) {
     $sfail = @($summary | Where-Object { $_ -match "^FAIL" })
     Result "server" ($sfail.Count -eq 0) "ran ${secs}s"
     $summary | ForEach-Object { Add("       $_") }
+    if ($Bake) {
+        $b = Select-String -Path $out -Pattern "Bake is up to date|Bake problems" | Select-Object -Last 1
+        Result "bake" ($b -and $b.Line -match "up to date") $(if ($b) { ($b.Line -replace "^.*?\]: ", "") } else { "no bake check output" })
+    }
 }
 
 # ------------------------------------------------------------------ client autotest + contact sheet

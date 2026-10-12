@@ -54,6 +54,7 @@ public class Skycraft {
         com.skycraft.arsenal.ArsenalModule.init(modBus);
         com.skycraft.atmosphere.AtmosphereModule.init(modBus);
         com.skycraft.tamriel.TamrielModule.init(modBus);
+        com.skycraft.perf.PerfModule.init(modBus);
         com.skycraft.audio.AudioModule.init(modBus);
         com.skycraft.curse.CurseModule.init(modBus);
         com.skycraft.sailing.SailingModule.init(modBus);

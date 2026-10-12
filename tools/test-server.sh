@@ -20,7 +20,7 @@ cd "$SRV"
 echo "eula=true" > eula.txt
 cat > server.properties <<PROPS
 online-mode=false
-level-seed=skycraft
+level-seed=Nirn
 view-distance=6
 simulation-distance=6
 spawn-protection=0

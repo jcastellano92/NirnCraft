@@ -232,7 +232,7 @@ def main():
         "noise_router": ROUTER,
         "spawn_target": [{"temperature": [-1.0, 1.0], "humidity": [-1.0, 1.0], "continentalness": [-0.11, 1.0],
                           "erosion": [-1.0, 1.0], "weirdness": [-1.0, 1.0], "depth": 0.0, "offset": 0.0}],
-        "surface_rule": surface_rule(),
+        "surface_rule": {"type": "skycraft:fast_surface", "rule": surface_rule()},
     }
     write("skycraft/worldgen/noise_settings/tamriel.json", settings)
 

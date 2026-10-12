@@ -25,8 +25,8 @@ will not match new chunks. For an existing save, `/skycraft-roads replan` picks 
 | Sea routes | any port; Tang Mo, Pyandonean anchorage | ships follow routes; Solitude routes use straight lines (no open-water path) |
 
 ## 3. Known gaps (not bugs to report; not done yet)
-- Not built: ILIAC BAY (Daggerfall geography for High Rock/Hammerfell), ITEMS AFFIX, PERF+BAKE (fixed seed "Nirn",
-  pre-baking, pregenerator). World generation may be slow on first visits.
+- Not built: ILIAC BAY (Daggerfall geography for High Rock/Hammerfell), ITEMS AFFIX. World generation is still
+  the slowest thing on first visits (see section 4 for what was done).
 - Roads: 1 unserved gate (Riverwood); foreign islands have roads only on the Pyandonean pair; sea routes
   solitude-dawnstar/windhelm/raven_rock fall back to straight lines.
 - Not verified visually: cloud lighting changes, distant lightning, waterfall caves, ford beds, shaft ramps,
@@ -42,3 +42,14 @@ will not match new chunks. For an existing save, `/skycraft-roads replan` picks 
 ## 5. When reporting
 Screenshot + coordinates (F3) + what you expected. Server log: `logs/latest.log`. The audits to re-run after fixes:
 `tools\qa\qa.ps1 -Server`, `py -3 -I tools/qa/parity.py --lowest 10`, `py -3 -I tools/qa/dungeon_audit.py`.
+
+## 4. Performance, seed and pre-generation (new)
+- New worlds default to the seed text **Nirn** (the create-world screen shows it; type another seed to change it, blank
+  means Nirn). On a dedicated server set `level-seed=Nirn` in `server.properties` before the first start.
+- The idle pre-generator is on for single-player/LAN worlds (throttled: one chunk at a time while you play, paused
+  when the server is slow or you move fast) and off on dedicated servers (`skycraft-perf-server.toml`, `[pregen]`).
+  `/skycraft-pregen start <blocks> [now]`, `stop`, `status`. Look for: no "Can't keep up" while it runs, and the
+  area ahead of where you ride/walk being ready.
+- Fast travel (map, carriage) now shows "Travelling to ..." with a progress bar while the destination loads, then
+  arrives with no hitch. Ferries already load the destination during the voyage.
+- Baked data (landmass labels) loads at startup; `/skycraft-bake check` (op 4) says "up to date".
