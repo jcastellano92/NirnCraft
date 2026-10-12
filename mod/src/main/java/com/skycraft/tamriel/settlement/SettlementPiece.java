@@ -173,6 +173,13 @@ public class SettlementPiece extends StructurePiece {
             // crowns and trunk stubs the clearing left hanging, here and in the neighbouring chunks of the region
             com.skycraft.world.OrphanSweep.sweep(level, clip.minX(), clip.minZ(), clip.maxX(), clip.maxZ(), 10,
                     chunkBox.minX() - 14, chunkBox.minZ() - 14, chunkBox.maxX() + 14, chunkBox.maxZ() + 14, null);
+            {
+                // a yard, garden, fence line or stall painted after a building can fence its door in: sweep the neighbourhood too
+                BoundingBox wide = new BoundingBox(
+                        Math.max(chunkBox.minX(), clip.minX() - 7), Math.max(chunkBox.minY(), clip.minY() - 2), Math.max(chunkBox.minZ(), clip.minZ() - 7),
+                        Math.min(chunkBox.maxX(), clip.maxX() + 7), Math.min(chunkBox.maxY(), clip.maxY() + 4), Math.min(chunkBox.maxZ(), clip.maxZ() + 7));
+                com.skycraft.tamriel.settlement.build.Accessibility.sweep(level, wide, chunkBox);
+            }
         } catch (RuntimeException e) {
             Skycraft.LOGGER.error("Settlement piece {} of {} failed in chunk {}", spec.kind, settlement, chunkPos, e);
         }

@@ -203,6 +203,25 @@ public final class SettlementAnchors extends SavedData {
         return out;
     }
 
+    /** True if a recorded anchor of {@code type} stands at {@code pos} (or, for beds, one block beside it: foot or head). */
+    public static boolean hasAnchor(ServerLevel level, BlockPos pos, AnchorType type, boolean bed) {
+        Optional<Entry> e = near(level, pos, 8);
+        if (e.isEmpty()) return false;
+        for (Anchor a : e.get().anchors) {
+            if (a.type() != type) continue;
+            BlockPos q = a.pos();
+            if (q.equals(pos)) return true;
+            if (bed && q.getY() == pos.getY() && Math.abs(q.getX() - pos.getX()) + Math.abs(q.getZ() - pos.getZ()) == 1) return true;
+        }
+        return false;
+    }
+
+    /** True if the position lies in a settlement whose beds are recorded (so a bed there without an anchor is owned). */
+    public static boolean hasBeds(ServerLevel level, BlockPos pos) {
+        Optional<Entry> e = near(level, pos, 8);
+        return e.isPresent() && !e.get().anchors.isEmpty();
+    }
+
     /** A house for sale as built: its bounds, front door and the owner's bed. */
     public record HouseSite(String houseId, String settlement, BlockPos min, BlockPos max, @Nullable BlockPos door, @Nullable BlockPos bed) {
         public boolean contains(BlockPos p) {

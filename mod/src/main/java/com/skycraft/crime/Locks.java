@@ -128,9 +128,17 @@ public final class Locks {
         return be instanceof RandomizableContainerBlockEntity && Theft.lootTable(be) != null;
     }
 
+    /** Whether the door at {@code pos} (lower half) is the door of an inn's private guest room. */
+    public static boolean isInnRoomDoor(ServerLevel level, BlockPos pos) {
+        return level.getBlockState(pos).getBlock() instanceof DoorBlock && !Jail.isJailDimension(level)
+                && com.skycraft.tamriel.settlement.SettlementAnchors.hasAnchor(level, pos,
+                com.skycraft.tamriel.settlement.AnchorType.INN_DOOR, false);
+    }
+
     /** The lock difficulty of the container or door at {@code pos}, or {@link #NOT_LOCKED}. Decides (and remembers) on first use. */
     public static int lockLevel(ServerLevel level, BlockPos rawPos) {
         BlockPos pos = normalizePos(level, rawPos);
+        if (isInnRoomDoor(level, pos)) return ADEPT;
         LockData data = LockData.get(level.getServer());
         String key = key(level, pos);
         Integer stored = data.locks.get(key);
@@ -250,6 +258,11 @@ public final class Locks {
         if (player.isCreative() || player.isSpectator()) return false;
         BlockPos pos = normalizePos(level, rawPos);
         BlockState state = level.getBlockState(pos);
+        if (isInnRoomDoor(level, pos)) {
+            // an inn's guest room: open to whoever rented a room there, locked (and pickable) for everyone else
+            if (com.skycraft.survival.inn.Innkeepers.roomHere(player) != null) return false;
+            return !isUnlocked(player, level, pos);
+        }
         if (state.getBlock() instanceof DoorBlock || state.getBlock() instanceof TrapDoorBlock) {
             if (!Jail.isJailDimension(level) && !Ownership.isOwnedByOther(player, level, pos)) {
                 String key = key(level, pos);

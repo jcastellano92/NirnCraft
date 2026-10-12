@@ -58,7 +58,7 @@ public final class Programs {
                 for (Room w : wings) kitchen(c, p, w, homeLoot);
                 boolean first = true;
                 for (Room u : res.upper) {
-                    if (first) bedroom(c, p, u, true, bed, homeLoot, 1);
+                    if (first) bedroom(c, p, u, true, bed, homeLoot, 2);
                     else study(c, p, u, homeLoot);
                     first = false;
                 }
@@ -190,7 +190,9 @@ public final class Programs {
         int y = r.y();
         int placed = 0;
         for (int x = r.x0() + (r.w() >= 5 ? 1 : 0); x <= r.x1() && placed < beds; x += 2) {
+            int before = c.bedCount();
             c.bed(x, y, r.z1() - 1, p.bed, Direction.SOUTH);
+            if (c.bedCount() == before) continue; // a stair landing is there: no bed (and no chest) on it
             c.anchor(bed, x, y, r.z1() - 1);
             if (r.d() >= 4) Props.chest(c, x, y, r.z1() - 2 >= r.z0() ? r.z1() - 2 : r.z0(), Direction.NORTH, bed == AnchorType.HOUSE_BED ? null : loot);
             placed++;
@@ -277,13 +279,9 @@ public final class Programs {
         Props.lantern(c, p, r.cx(), r.ceil() - 1, r.cz(), true);
     }
 
+    /** More guest floors of an inn: a corridor with locked private rooms (the dormitory is on the first guest floor). */
     static void innRooms(Canvas c, Palette p, Room r) {
-        int y = r.y();
-        for (int x = r.x0(); x + 1 <= r.x1(); x += 3) {
-            c.bed(x, y, r.z1() - 1, p.bed, Direction.SOUTH);
-            c.anchor(AnchorType.INN_BED, x, y, r.z1() - 1);
-            Props.chest(c, x + 1, y, r.z1(), Direction.NORTH, null);
-        }
+        Interiors.innUpper(c, p, r, false);
         Props.lantern(c, p, r.cx(), r.ceil() - 1, r.cz(), true);
     }
 

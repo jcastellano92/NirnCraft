@@ -113,7 +113,7 @@ public final class Shells {
     }
 
     static void door(Canvas c, Palette p, int x, int z) {
-        c.door(x, 1, z, p.door, Direction.SOUTH);
+        c.entrance(x, 1, z, p.door, Direction.SOUTH);
     }
 
     /** Window openings along a wall segment (local x or z fixed), every third block, avoiding the ends. */

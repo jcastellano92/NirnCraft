@@ -562,7 +562,113 @@ def analyse(world, roads, place, half):
     if iso.any():
         ys, zs, xs = np.nonzero(iso)
         res['isolated_detail'] = [(int(xs[i]) + x1, int(ys[i]) + area.y1, int(zs[i]) + z1, area.names[A[ys[i], zs[i], xs[i]]]) for i in range(min(6, len(xs)))]
+    res.update(access_report(area))
     return res, pieces, area
+
+
+# ------------------------------------------------------------------ accessibility check
+_PASS_END = ('_carpet', '_pressure_plate', '_door', '_fence_gate', '_trapdoor', '_sign', '_hanging_sign', '_banner', '_button',
+             '_torch', '_candle', '_rail')
+
+
+def access_report(area):
+    """Unreachable doors and blocked stairs, from the blocks alone (block names carry no state).
+
+    Doors: every lower door half with exactly one side open to the sky (within 4 blocks) is an exterior door; its
+    doorstep (the cell in front and the one behind it) must have 2 passable cells and a floor. Stairs: every run end
+    (a stair cell with exactly one stair neighbour one level up or down, under a roof) needs a free 2-high standing cell
+    beside it (same level for a bottom end, one up for a top end). Returns counts and the first few positions."""
+    names = area.names
+    def passable(n):
+        n = n.split(':')[-1]
+        return (n.endswith(_PASS_END) or 'crop' in n or n in ('snow', 'torch', 'lever', 'vine', 'candle', 'wheat', 'carrots',
+                                                              'potatoes', 'beetroots', 'sweet_berry_bush'))
+    pas = np.array([passable(n) for n in names])
+    isdoor = np.array([n.endswith('_door') and 'trapdoor' not in n for n in names])
+    isstair = np.array([n.endswith('_stairs') for n in names])
+    isfurn = np.array([any(k in n.split(':')[-1] for k in ('chest', 'barrel', 'bed', 'cauldron', 'furnace', 'smoker',
+                                                           'crafting_table', 'bookshelf', 'lectern', 'flower_pot', 'loom',
+                                                           'grindstone', 'anvil', 'brewing', 'cooking', 'enchant'))
+                       and 'bedrock' not in n for n in names])
+    A = area.A
+    H, D, W = A.shape
+    y1 = area.y1
+    P = pas[A] | area.soft[A] | area.air[A]
+    DR = isdoor[A]
+    ST = isstair[A]
+    FU = isfurn[A]
+    solid_top = ~(area.air[A] | area.soft[A] | area.water[A])
+    def sky(x, z, y):  # column open to the sky above y (cells y+2 .. top)
+        return area.top[z, x] <= y + 1
+    doors = bad_doors = 0
+    bad_door_pos = []
+    ys, zs, xs = np.nonzero(DR)
+    for y, z, x in zip(ys, zs, xs):
+        if y > 0 and DR[y - 1, z, x]:
+            continue  # upper half
+        if x < 5 or z < 5 or x >= W - 5 or z >= D - 5:
+            continue
+        wy = int(y) + y1
+        # the wall runs along the axis whose two neighbours are both non-passable; the door's sides are the other axis
+        wx_ = (not P[y, z, x - 1]) and (not P[y, z, x + 1])
+        wz_ = (not P[y, z - 1, x]) and (not P[y, z + 1, x])
+        if wx_ == wz_:
+            continue
+        sides = ((0, 1), (0, -1)) if wx_ else ((1, 0), (-1, 0))
+        cnt = [sum(1 for k in range(1, 5) if sky(x + dx * k, z + dz * k, wy)) for dx, dz in sides]
+        if cnt[0] == cnt[1] or max(cnt) == 0:
+            continue
+        dx, dz = sides[0] if cnt[0] > cnt[1] else sides[1]
+        # the opposite side must be roofed (it is, by the single open direction)
+        doors += 1
+        ok = True
+        for k in (1, 2):
+            cx, cz = x + dx * k, z + dz * k
+            if not (P[y, cz, cx] and P[min(y + 1, H - 1), cz, cx]):
+                ok = False
+            if y > 0 and not solid_top[y - 1, cz, cx] and k == 1:
+                ok = False
+        if not ok:
+            bad_doors += 1
+            if len(bad_door_pos) < 8:
+                bad_door_pos.append((int(x) + area.x1, wy, int(z) + area.z1, names[A[y, z, x]].split(':')[-1]))
+    runs = bad_ends = 0
+    bad_end_pos = []
+    ys, zs, xs = np.nonzero(ST)
+    for y, z, x in zip(ys, zs, xs):
+        if x < 3 or z < 3 or x >= W - 3 or z >= D - 3 or y < 1 or y >= H - 4:
+            continue
+        wy = int(y) + y1
+        roofed = any(not P[y + k, z, x] for k in range(3, 7) if y + k < H)
+        if not roofed:
+            continue
+        nb = []
+        for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            for dy in (1, -1):
+                if ST[y + dy, z + dz, x + dx]:
+                    nb.append((dx, dz, dy))
+        if len(nb) != 1:
+            continue
+        runs += 1
+        ndx, ndz, ndy = nb[0]
+        land_y = y if ndy == 1 else y + 1   # bottom end: stand beside it at its level; top end: one up
+        free = False
+        furn = False
+        for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            if (dx, dz) == (ndx, ndz):
+                continue
+            cx, cz = x + dx, z + dz
+            if land_y + 1 < H and P[land_y, cz, cx] and P[land_y + 1, cz, cx] and solid_top[land_y - 1, cz, cx]:
+                free = True
+                break
+            if land_y + 1 < H and (FU[land_y, cz, cx] or FU[land_y + 1, cz, cx]):
+                furn = True
+        if not free and furn:  # blocked by furniture (roof and exterior stair ends have none beside them)
+            bad_ends += 1
+            if len(bad_end_pos) < 8:
+                bad_end_pos.append((int(x) + area.x1, wy, int(z) + area.z1, 'bottom' if ndy == 1 else 'top'))
+    return dict(exterior_doors=doors, doors_unreachable=bad_doors, doors_unreachable_detail=bad_door_pos,
+                stair_runs=runs, stairs_blocked=bad_ends, stairs_blocked_detail=bad_end_pos)
 
 
 # ------------------------------------------------------------------ sealed-building check
@@ -627,6 +733,8 @@ def verdict(res):
         bad.append('stubs')
     if res.get('props_in_buildings') or res.get('props_on_street') or res.get('props_on_road'):
         bad.append('props-overlap')
+    if res.get('doors_unreachable') or res.get('stairs_blocked'):
+        bad.append('access')
     if res.get('props_floating') or res.get('isolated_blocks', 0) > 3:
         bad.append('floating')
     if res.get('density_falls_with_distance') is False:
@@ -659,6 +767,9 @@ def main():
                      res.get('props_floating', 0), verdict(res)))
     ok = [r for r in allres if not r.get('note')]
     tot = lambda k: sum(r.get(k, 0) or 0 for r in ok)  # noqa: E731
+    print('ACCESS exterior_doors=%d unreachable=%d stair_runs=%d blocked_ends=%d' % (
+        sum(r.get('exterior_doors', 0) for r in allres), sum(r.get('doors_unreachable', 0) for r in allres),
+        sum(r.get('stair_runs', 0) for r in allres), sum(r.get('stairs_blocked', 0) for r in allres)))
     print('TOTAL towns=%d gate_points=%d gates_without_road_24=%d stubs=%d props_on_road=%d props_on_street=%d '
           'props_in_buildings=%d' % (len(ok), tot('gate_points'), tot('gates_without_road_24'), tot('road_end_stubs'),
                                      tot('props_on_road'), tot('props_on_street'), tot('props_in_buildings')))

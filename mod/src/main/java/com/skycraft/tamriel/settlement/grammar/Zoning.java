@@ -1584,8 +1584,84 @@ public final class Zoning {
             reserved(x);
             lining(x);
         }
+        fillGaps(x);
         variety(plan);
         clearing(plan, 0, Math.min(plan.radius, 120));
+    }
+
+    /**
+     * Fills the empty ground inside the built area of an adopted (hand-laid) layout so it reads as a full town: homes
+     * in the holes behind the street fronts (facing the nearest street, with a footpath), and where no house fits
+     * yards: trees, flower beds, wells, hay, woodpiles, benches. Streets stay clear (everything goes through the plan's
+     * collision test). The density before and after is logged.
+     */
+    static void fillGaps(Ctx x) {
+        Plan plan = x.plan;
+        if (x.size == Layouts.Size.FARM || x.size == Layouts.Size.INN || x.size == Layouts.Size.HOMESTEAD || x.size == Layouts.Size.HAMLET) return;
+        int R = Math.min(plan.radius, Math.max(builtRadius(x.size, plan.radius) + 6, (int) (plan.radius * 0.8)));
+        Metrics before = Metrics.of(plan, 0, R + 8);
+        // a real town only: a lone mill or meadery is not "filled in"
+        if (before.townBuildings() < 8) return;
+        RandomSource r = RandomSource.create(plan.seed ^ 0xF177L);
+        List<int[]> pts = new ArrayList<>();
+        for (int gx = -R; gx <= R; gx += 3) for (int gz = -R; gz <= R; gz += 3) if (Math.hypot(gx, gz) < R * 0.95) pts.add(new int[]{gx, gz});
+        for (int i = pts.size() - 1; i > 0; i--) {
+            int j = r.nextInt(i + 1);
+            int[] t = pts.get(i);
+            pts.set(i, pts.get(j));
+            pts.set(j, t);
+        }
+        int[] kinds = {Outdoors.TREE, Outdoors.FLOWER_BED, Outdoors.WELL, Outdoors.HAY, Outdoors.WOODPILE, Outdoors.BENCH, Outdoors.BARRELS, Outdoors.TREE};
+        int houses = 0, yards = 0, cap = 40 + R / 2, yardCap = Math.max(6, before.townBuildings() / 2);
+        for (int[] p : pts) {
+            double best = Double.MAX_VALUE, bx = 0, bz = 0;
+            for (Street st : x.sk.streets) {
+                double vx = st.x2() - st.x1(), vz = st.z2() - st.z1();
+                double l2 = vx * vx + vz * vz;
+                double t = l2 < 1e-6 ? 0 : Math.max(0, Math.min(1, ((p[0] - st.x1()) * vx + (p[1] - st.z1()) * vz) / l2));
+                double qx = st.x1() + vx * t, qz = st.z1() + vz * t;
+                double dd = Math.hypot(qx - p[0], qz - p[1]) - st.width() / 2.0;
+                if (dd < best) {
+                    best = dd;
+                    bx = qx;
+                    bz = qz;
+                }
+            }
+            boolean haveStreet = best < Double.MAX_VALUE;
+            Direction face = haveStreet ? cardinal(bx - p[0], bz - p[1]) : Direction.SOUTH;
+            boolean placed = false;
+            if (haveStreet && best >= 3 && best <= 28 && houses < cap) {
+                Zone z = zoneAt(x, p[0], p[1]);
+                Wealth wl = wealthOf(x, z);
+                Use use0 = wl == Wealth.POOR ? (r.nextBoolean() ? Use.HOVEL : Use.COTTAGE) : wl == Wealth.COMMON ? Use.COTTAGE : Use.HOUSE;
+                for (int shrink = 0; shrink <= 2 && !placed; shrink++) {
+                    Use use = shrink == 2 ? Use.COTTAGE : use0;
+                    int[] sz = use.size(wl, r);
+                    int sw = Math.max(5, sz[0] - shrink * 2), sd = Math.max(5, sz[1] - shrink * 2);
+                    Spec s = plan.at(use.archetype(), p[0], p[1], face).size(sw, sd);
+                    s.use(use, wl);
+                    s.margin = 1;
+                    if (!tryPlace(x, s)) continue;
+                    houses++;
+                    placed = true;
+                    int fx = face.getStepX(), fz = face.getStepZ();
+                    int half = (face.getAxis() == Direction.Axis.Z ? sd : sw) / 2;
+                    int sx = p[0] + fx * (half + 2), sz2 = p[1] + fz * (half + 2);
+                    int ex = (int) Math.round(bx), ez = (int) Math.round(bz);
+                    Spec path = plan.line(Archetype.STREET, sx, sz2, fx != 0 ? ex : sx, fz != 0 ? ez : sz2, 1);
+                    if (plan.fits(path, 0)) plan.add(path);
+                }
+            }
+            if (!placed && yards < yardCap) {
+                int kind = kinds[r.nextInt(kinds.length)];
+                int w = kind == Outdoors.TREE ? 5 : 3, d = kind == Outdoors.TREE ? 5 : 2;
+                if (yard(x, kind, p[0], p[1], face, w, d, 1) != null) yards++;
+            }
+        }
+        Metrics after = Metrics.of(plan, 0, R + 8);
+        com.skycraft.Skycraft.LOGGER.info("Town fill {}: density {}% -> {}%, buildings {} -> {}, +{} homes, +{} yards",
+                plan.key, Math.round(before.density() * 100), Math.round(after.density() * 100), before.townBuildings(),
+                after.townBuildings(), houses, yards);
     }
 
     /**

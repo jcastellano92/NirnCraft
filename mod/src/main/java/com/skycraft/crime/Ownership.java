@@ -134,12 +134,18 @@ public final class Ownership {
                         || state.is(Blocks.FLOWER_POT) || state.getBlock() instanceof net.minecraft.world.level.block.FlowerPotBlock) {
                     return false;
                 }
-                // Bed check: rented rooms are permitted
+                // Beds: an inn's dormitory beds are public, an inn room's bed is free to whoever rented a room there,
+                // every other bed in a recorded settlement belongs to the household that sleeps in it
                 if (state.getBlock() instanceof BedBlock) {
-                    if (player instanceof ServerPlayer sp && com.skycraft.survival.inn.Innkeepers.roomHere(sp) != null) {
+                    if (com.skycraft.tamriel.settlement.SettlementAnchors.hasAnchor(sl, pos, com.skycraft.tamriel.settlement.AnchorType.GUEST_BED, true)) {
                         return false;
                     }
-                    return true;
+                    boolean rented = player instanceof ServerPlayer sp && com.skycraft.survival.inn.Innkeepers.roomHere(sp) != null;
+                    if (com.skycraft.tamriel.settlement.SettlementAnchors.hasAnchor(sl, pos, com.skycraft.tamriel.settlement.AnchorType.INN_BED, true)) {
+                        return !rented;
+                    }
+                    if (com.skycraft.tamriel.settlement.SettlementAnchors.hasBeds(sl, pos)) return true;
+                    return !rented;
                 }
                 // Doors during daytime (8:00 - 20:00) are public to allow visiting shops & homes
                 if (state.getBlock() instanceof DoorBlock || state.getBlock() instanceof TrapDoorBlock) {

@@ -182,15 +182,17 @@ public final class Grammar {
                 for (int y = fyPrev + 1; y <= fy + 1; y++) c.set(main.x0() + 1, y, main.z1() - 1, B.face(B.s(Blocks.LADDER), Direction.NORTH));
             }
         }
+        // ---- the foot and head of every stair stay clear: no bed, chest or table is ever put on a landing
+        for (int k = 1; k < b.storeys; k++) reserveStairs(c, stairMode, main, floorH, k);
         // ---- front door, steps, back door
         res.doorX = b.doorX;
         res.doorZ = main.z0();
-        c.door(b.doorX, 1, main.z0(), p.door, Direction.SOUTH);
+        c.entrance(b.doorX, 1, main.z0(), p.door, Direction.SOUTH);
         if (b.wallH >= 4) c.set(b.doorX, 3, main.z0(), b.timber ? B.axis(p.beam, Direction.Axis.X) : B.stair(p.trim, Direction.NORTH, true));
         if (b.porchD == 0) steps(c, b, p, b.doorX, main.z0() - 1);
         if (b.wealth.atLeast(Wealth.COMMON) && b.use.home() && main.z1() == b.bz1 && b.parts.size() == 1) {
             int bx = b.doorX + (b.doorX + 2 <= main.x1() - 1 ? 1 : 0);
-            c.door(bx, 1, main.z1(), p.door, Direction.NORTH);
+            c.entrance(bx, 1, main.z1(), p.door, Direction.NORTH);
         }
         // ---- roofs (wings first: the main roof overwrites where they meet)
         int ridgeTop = roofY;
@@ -241,6 +243,30 @@ public final class Grammar {
         if (b.stairSide != 0) outsideStairs(c, b, p);
         if (b.foundation == Foundation.STILTS) stiltWalk(c, b, p, main);
         return res;
+    }
+
+    /** Reserves the cells a person walks through at the bottom and top of the stairs (or ladder) up to storey {@code k}. */
+    static void reserveStairs(Canvas c, int mode, Part main, int floorH, int k) {
+        int fy = k * floorH, fyPrev = (k - 1) * floorH;
+        int x0 = main.x0(), z1 = main.z1();
+        if (mode == 1) {
+            int zs = z1 - floorH;
+            c.keepClear(x0 + 1, fyPrev + 1, fyPrev + 2, zs - 1);
+            c.keepClear(x0 + 2, fyPrev + 1, fyPrev + 2, zs - 1);
+            c.keepClear(x0 + 2, fyPrev + 1, fyPrev + 2, zs);
+            c.keepClear(x0 + 2, fy + 1, fy + 2, z1 - 1);
+            c.keepClear(x0 + 2, fy + 1, fy + 2, z1 - 2);
+        } else if (mode == 2) {
+            int xs = x0 + 1, zz = z1 - 1;
+            c.keepClear(xs, fyPrev + 1, fyPrev + 2, zz - 1);
+            c.keepClear(xs + 1, fyPrev + 1, fyPrev + 2, zz - 1);
+            c.keepClear(xs + floorH, fy + 1, fy + 2, zz);
+            c.keepClear(xs + floorH - 1, fy + 1, fy + 2, zz - 1);
+            c.keepClear(xs + floorH - 2, fy + 1, fy + 2, zz - 1);
+        } else if (mode == 3) {
+            c.keepClear(x0 + 1, fyPrev + 1, fyPrev + 2, z1 - 2);
+            c.keepClear(x0 + 1, fy + 1, fy + 2, z1 - 2);
+        }
     }
 
     /** True if the column is in the footprint with a neighbour (8-way) outside it. */
@@ -611,6 +637,13 @@ public final class Grammar {
 
     // ------------------------------------------------------------------ dressing: signs, banners, lights
 
+    /** The wall hanging sign of the same wood as a palette's wall sign. */
+    public static BlockState hanging(BlockState wallSign) {
+        net.minecraft.resources.ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(wallSign.getBlock());
+        if (id == null) return Blocks.SPRUCE_WALL_HANGING_SIGN.defaultBlockState();
+        return B.id(id.toString().replace("_wall_sign", "_wall_hanging_sign"), Blocks.SPRUCE_WALL_HANGING_SIGN);
+    }
+
     static void dress(Canvas c, Blueprint b, Result res) {
         Palette p = b.pal;
         Spec s = b.spec;
@@ -621,8 +654,10 @@ public final class Grammar {
             Component title = s.name.isEmpty() || s.has(Spec.FOR_SALE) || s.kind == com.skycraft.tamriel.settlement.plan.Archetype.RESERVED
                     ? Component.translatable("settlement.skycraft.kind." + (s.kind == com.skycraft.tamriel.settlement.plan.Archetype.RESERVED && !s.name.isEmpty() ? s.name : b.use.id()))
                     : Component.translatable("settlement.skycraft.name." + s.name);
+            // one hanging sign on a bracket beside the door, sticking out from the facade (never flat over the wall)
             int sx = res.doorX + 1;
-            if (!c.recording() && Canvas.open(c.get(sx, 3, dz))) c.sign(sx, 3, dz, p.sign, Direction.NORTH, Component.empty(), title);
+            if (sx > b.bx1 - 1) sx = res.doorX - 1;
+            if (!c.recording() && Canvas.open(c.get(sx, 3, dz))) c.sign(sx, 3, dz, hanging(p.sign), Direction.EAST, Component.empty(), title);
         }
         if (b.banner) {
             BlockState banner = B.face(Materials.banner(b.color), Direction.NORTH);

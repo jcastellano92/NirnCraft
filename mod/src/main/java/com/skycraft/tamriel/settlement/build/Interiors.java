@@ -32,7 +32,9 @@ public final class Interiors {
         for (int x = r.x0(); x <= r.x1() && placed < beds; x += 2) {
             if (chimney && x >= r.x1() - 2) break;
             if (r.d() < 4) break;
+            int before = c.bedCount();
             c.bed(x, y, r.z1() - 1, p.bed, Direction.SOUTH);
+            if (c.bedCount() == before) continue; // a stair landing is there: no bed (and no chest) on it
             c.anchor(bed, x, y, r.z1() - 1);
             if (r.d() >= 5) Props.chest(c, x, y, r.z1() - 2, Direction.NORTH, bed == AnchorType.HOUSE_BED ? null : loot);
             placed++;
@@ -70,34 +72,58 @@ public final class Interiors {
 
     // ------------------------------------------------------------------ inns
 
+    /**
+     * An inn. Ground floor: the common room with a hearth or fire pit, tables with chairs for eating, a bar counter in a
+     * back corner (an L of planks with a gap for the innkeeper, kegs behind) and a bard's corner. Upstairs: see
+     * {@link #innUpper}. Without an upper floor a partitioned back corner of the common room holds one locked room.
+     */
     public static void inn(Canvas c, Palette p, Room hall, Room upstairs, int doorX, boolean firePit) {
         int y = hall.y();
-        // bar counter in the back left corner, kegs behind it
-        int cx1 = Math.min(hall.x1(), hall.x0() + 4);
         int cz = hall.z1() - 3;
-        for (int x = hall.x0(); x <= cx1; x++) {
-            c.set(x, y, cz, p.planks);
-            c.set(x, y + 1, cz, x % 2 == 0 ? B.slab(p.slab, false) : B.s(Blocks.AIR));
+        if (cz <= hall.z0() + 2) cz = hall.z1() - 2;
+        // the bar sits in the back left corner, or the right one when the stairs claim the left
+        int s = 1, xa = hall.x0();
+        if (c.anyReserved(xa, cz, xa + 4, hall.z1(), y)) {
+            s = -1;
+            xa = hall.x1();
         }
-        for (int z = cz + 1; z < hall.z1(); z++) c.set(cx1, y, z, p.planks);
-        c.set(hall.x0() + 1, y + 1, cz, B.s(Blocks.CANDLE).setValue(net.minecraft.world.level.block.CandleBlock.LIT, true));
-        c.set(hall.x0() + 3, y + 1, cz, Props.cheese());
-        for (int x = hall.x0(); x < cx1; x++) {
-            Props.barrel(c, x, y, hall.z1(), "inn");
-            if (x % 2 == 0) Props.barrel(c, x, y + 1, hall.z1(), "inn");
+        int xe = xa + s * 4;
+        boolean bar = hall.w() >= 9 && cz > hall.z0() + 2 && !c.anyReserved(Math.min(xa, xe), cz, Math.max(xa, xe), hall.z1(), y);
+        if (bar) {
+            for (int i = 0; i <= 4; i++) {
+                int x = xa + s * i;
+                c.set(x, y, cz, p.planks);
+                c.set(x, y + 1, cz, i % 2 == 0 ? B.slab(p.slab, false) : B.s(Blocks.AIR));
+            }
+            c.set(xe, y, cz + 1, p.planks); // the counter turns the corner; the open cells behind it are the flap
+            c.set(xa + s, y + 1, cz, B.s(Blocks.CANDLE).setValue(net.minecraft.world.level.block.CandleBlock.LIT, true));
+            c.set(xa + s * 3, y + 1, cz, Props.cheese());
+            for (int i = 0; i < 4; i++) {
+                int x = xa + s * i;
+                // one kept keg carries the inn's stock; the rest are plain empty barrels (not counted as containers)
+                if (i == 1) Props.barrel(c, x, y, hall.z1(), "inn");
+                else c.set(x, y, hall.z1(), B.face(B.s(Blocks.BARREL), Direction.UP));
+                if (i % 2 == 0) c.set(x, y + 1, hall.z1(), B.face(B.s(Blocks.BARREL), Direction.UP));
+            }
+            c.anchor(AnchorType.INN, xa + s * 2, y, cz + 1);
+            Props.lantern(c, p, xa + s * 2, hall.ceil() - 1, cz + 1, true);
+        } else {
+            // a small hall: the innkeeper stands behind a single counter run against the back wall
+            for (int x = hall.x0() + 1; x <= hall.x1() - 1; x += 1) if (x % 3 != 0) c.set(x, y, hall.z1(), p.planks);
+            c.anchor(AnchorType.INN, hall.cx(), y, hall.z1() - 1);
         }
-        c.anchor(AnchorType.INN, hall.x0() + 1, y, hall.z1() - 1);
         // fire and cooking
         if (firePit && hall.d() >= 9) {
             Props.firePit(c, p, hall.cx(), y, hall.z0() + 3, 3, true);
-        } else {
+        } else if (s == 1) {
             Props.hearth(c, p, hall.x1() - 1, y, hall.z1(), Direction.NORTH);
         }
-        // tables either side of the fire
+        // tables for eating, either side of the fire, each with a chair at both ends
         for (int z = hall.z0() + 2; z <= cz - 2; z += 3) {
             for (int side = -1; side <= 1; side += 2) {
                 int tx = hall.cx() + side * 3;
-                if (tx < hall.x0() || tx > hall.x1()) continue;
+                if (tx < hall.x0() || tx > hall.x1() || Math.abs(tx - doorX) <= 1 && z <= hall.z0() + 3) continue;
+                if (c.anyReserved(tx, z - 1, tx, z + 1, y)) continue;
                 Props.table(c, p, tx, y, z);
                 Props.chair(c, p, tx, y, z - 1, Direction.NORTH);
                 Props.chair(c, p, tx, y, z + 1, Direction.SOUTH);
@@ -108,33 +134,93 @@ public final class Interiors {
         c.anchor(AnchorType.BARD, hall.x1(), y, hall.z0() + 1);
         Props.lantern(c, p, hall.cx(), hall.ceil() - 1, hall.cz(), true);
         Props.rug(c, p.carpet, hall.x1() - 1, y, hall.z0(), hall.x1(), hall.z0() + 1);
-        // rentable rooms upstairs, or a partitioned back corner
         if (upstairs != null) {
-            int uy = upstairs.y();
-            int n = 0;
-            for (int x = upstairs.x0(); x + 1 <= upstairs.x1() && n < 4; x += 3) {
-                c.bed(x, uy, upstairs.z1() - 1, p.bed, Direction.SOUTH);
-                c.anchor(AnchorType.INN_BED, x, uy, upstairs.z1() - 1);
-                Props.chest(c, x + 1, uy, upstairs.z1(), Direction.NORTH, null);
-                Props.candles(c, x + 1, uy + 1, upstairs.z1(), 1);
-                n++;
+            innUpper(c, p, upstairs, true);
+        } else if (hall.w() >= 8 && hall.d() >= 8) {
+            // no upper floor: one partitioned room in the back corner opposite the bar, behind a locked door
+            int px = s == 1 ? hall.x1() - 3 : hall.x0() + 3;
+            int xa2 = Math.min(px, s == 1 ? hall.x1() : hall.x0()), xb2 = Math.max(px, s == 1 ? hall.x1() : hall.x0());
+            int pz = hall.z1() - 3;
+            if (!c.anyReserved(xa2, pz, xb2, hall.z1(), y)) {
+                for (int z = pz; z <= hall.z1(); z++) for (int yy = y; yy < hall.ceil() - 1; yy++) c.set(px, yy, z, p.wall);
+                for (int x = xa2; x <= xb2; x++) for (int yy = y; yy < hall.ceil() - 1; yy++) c.set(x, yy, pz, p.wall);
+                int dx = s == 1 ? px + 1 : px - 1;
+                c.door(dx, y, pz, p.door, Direction.NORTH);
+                c.anchor(AnchorType.INN_DOOR, dx, y, pz);
+                int bx = s == 1 ? px + 2 : px - 2;
+                c.bed(bx, y, hall.z1() - 1, p.bed, Direction.SOUTH);
+                c.anchor(AnchorType.INN_BED, bx, y, hall.z1() - 1);
+                Props.chest(c, dx, y, hall.z1(), Direction.NORTH, null);
             }
-            for (int x = upstairs.x0() + 1; x + 1 <= upstairs.x1() && n < 6; x += 3) {
-                c.bed(x, uy, upstairs.z0() + 1, p.bed, Direction.NORTH);
-                c.anchor(AnchorType.INN_BED, x, uy, upstairs.z0() + 1);
-                n++;
-            }
-            Props.rug(c, p.carpet, upstairs.x0() + 1, uy, upstairs.cz() - 1, upstairs.x1() - 1, upstairs.cz() + 1);
-            Props.lantern(c, p, upstairs.cx(), upstairs.ceil() - 1, upstairs.cz(), true);
-        } else if (hall.w() >= 8) {
-            int px = hall.x1() - 3;
-            for (int z = hall.z1() - 3; z <= hall.z1(); z++) for (int yy = y; yy < hall.ceil() - 1; yy++) c.set(px, yy, z, p.wall);
-            for (int x = px; x <= hall.x1(); x++) for (int yy = y; yy < hall.ceil() - 1; yy++) c.set(x, yy, hall.z1() - 3, p.wall);
-            c.door(px + 1, y, hall.z1() - 3, p.door, Direction.NORTH);
-            c.bed(px + 2, y, hall.z1() - 1, p.bed, Direction.SOUTH);
-            c.anchor(AnchorType.INN_BED, px + 2, y, hall.z1() - 1);
-            Props.chest(c, px + 1, y, hall.z1(), Direction.NORTH, null);
         }
+    }
+
+    /**
+     * The guest floor of an inn: a corridor along the room with small private rooms (door, bed, chest) on the back
+     * wall, or the front wall when the stairs leave too little room there. Every door is an {@link AnchorType#INN_DOOR}
+     * (locked unless rented), every private bed an {@link AnchorType#INN_BED}. {@code dorm} adds a few public
+     * dormitory beds ({@link AnchorType#GUEST_BED}, no chests) along the side wall. The stair landings stay clear.
+     */
+    public static void innUpper(Canvas c, Palette p, Room r, boolean dorm) {
+        int y = r.y();
+        int rooms = 0;
+        boolean frontRooms = false;
+        if (r.w() >= 6 && r.d() >= 7) {
+            rooms += privateRooms(c, p, r, true, 6);
+            if (rooms < 3) {
+                int more = privateRooms(c, p, r, false, 6 - rooms);
+                frontRooms = more > 0;
+                rooms += more;
+            }
+        }
+        if (rooms == 0) {
+            // a narrow wing: two plain bunks, nothing to lock
+            for (int x = r.x0(); x + 1 <= r.x1() && x < r.x0() + 6; x += 3) {
+                c.bed(x, y, r.z1() - 1, p.bed, Direction.SOUTH);
+                c.anchor(AnchorType.INN_BED, x, y, r.z1() - 1);
+            }
+        } else if (dorm && !frontRooms && r.d() >= 9) {
+            int bx = r.x1() - 1;
+            for (int z = r.z0(); z + 1 <= r.z1() - 6 && z < r.z0() + 6; z += 2) {
+                c.bed(bx, y, z, p.bed, Direction.EAST);
+                c.anchor(AnchorType.GUEST_BED, bx, y, z);
+            }
+        }
+        // a runner down the corridor and lamps
+        Props.rug(c, p.carpet, r.x0(), y, r.z1() - 4, r.x1(), r.z1() - 4);
+        for (int x = r.x0() + 2; x <= r.x1(); x += 4) Props.lantern(c, p, x, r.ceil() - 1, r.z1() - 4, true);
+    }
+
+    /** Private rooms along one long wall of {@code r}; returns how many were built. */
+    private static int privateRooms(Canvas c, Palette p, Room r, boolean back, int max) {
+        int y = r.y();
+        int zr0 = back ? r.z1() - 2 : r.z0() + 2;       // the room's row farthest from the back/front wall
+        int zw = back ? zr0 - 1 : zr0 + 1;               // the partition row with the doors
+        int zFar = back ? r.z1() : r.z0();               // against the outer wall
+        int n = 0;
+        Direction toHead = back ? Direction.SOUTH : Direction.NORTH;
+        for (int xw = r.x0() + 1; xw + 3 <= r.x1() + 1 && n < max; xw += 3) {
+            int za = Math.min(zw, zFar), zb = Math.max(zw, zFar);
+            if (c.anyReserved(xw, za, xw + 3, zb, y)) continue;
+            for (int z = za; z <= zb; z++) {
+                for (int yy = y; yy < r.ceil() - 1; yy++) {
+                    c.set(xw, yy, z, p.planks);
+                    if (xw + 3 <= r.x1()) c.set(xw + 3, yy, z, p.planks);
+                }
+            }
+            for (int x = xw + 1; x <= xw + 2; x++) for (int yy = y; yy < r.ceil() - 1; yy++) c.set(x, yy, zw, p.planks);
+            c.door(xw + 1, y, zw, p.door, back ? Direction.SOUTH : Direction.NORTH);
+            c.anchor(AnchorType.INN_DOOR, xw + 1, y, zw);
+            int footZ = back ? r.z1() - 1 : r.z0() + 1;
+            c.bed(xw + 2, y, footZ, p.bed, toHead);
+            c.anchor(AnchorType.INN_BED, xw + 2, y, footZ);
+            // the guest's own chest: empty, owned by the inn, and outside the building's container budget
+            c.set(xw + 1, y, zFar, B.face(B.s(Blocks.CHEST), back ? Direction.NORTH : Direction.SOUTH));
+            Props.candles(c, xw + 1, y + 1, zFar, 1);
+            Props.lantern(c, p, xw + 1, r.ceil() - 1, (zr0 + zFar) / 2, true);
+            n++;
+        }
+        return n;
     }
 
     // ------------------------------------------------------------------ crafts and trade

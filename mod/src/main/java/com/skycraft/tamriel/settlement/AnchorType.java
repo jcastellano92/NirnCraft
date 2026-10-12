@@ -99,7 +99,11 @@ public enum AnchorType {
      * A settlement gate: where internal streets end and outer roads join (main gate first). Recorded per gate opening,
      * on the ground in the middle of the passage.
      */
-    GATE;
+    GATE,
+    /** An inn room's door (lower half): locked unless the player has rented a room there. */
+    INN_DOOR,
+    /** A public bed (an inn's dormitory): anyone may sleep in it. */
+    GUEST_BED;
 
     public static final AnchorType[] VALUES = values();
 

@@ -76,7 +76,7 @@
   "world.skycraft.rest.air.wait": "You cannot wait in the air",
   "world.skycraft.rest.air.sleep": "You cannot sleep in the air",
   "world.skycraft.rest.no_bed": "You need to be next to a bed to sleep",
-  "world.skycraft.rest.bed_owned": "You cannot sleep in an owned bed",
+  "world.skycraft.rest.bed_owned": "This bed isn't yours. Rent a room at the inn, or use a dormitory bed.",
   "world.skycraft.rest.well_rested": "You feel well rested.",
   "world.skycraft.rest.vanilla_hint": "Sneak and use the bed with an empty hand to sleep through the night as usual",
   "world.skycraft.vote.waiting": "Waiting for %s more player(s) to rest...",

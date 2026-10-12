@@ -184,7 +184,7 @@ public final class Builders {
                     : Component.translatable("settlement.skycraft.name." + s.name);
             int sx = Math.min(s.w - 1, doorX + 1);
             if (f.stilts) c.set(sx, 3, -1, B.s(Blocks.AIR));
-            c.sign(sx, 3, -1, p.sign, Direction.NORTH, Component.empty(), title);
+            c.sign(sx, 3, -1, com.skycraft.tamriel.settlement.grammar.Grammar.hanging(p.sign), Direction.EAST, Component.empty(), title);
         }
     }
 

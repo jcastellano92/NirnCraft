@@ -55,6 +55,12 @@ public final class Canvas {
     public String owner = "";
     /** Containers declared so far by this building (shared by its frames); capped, see {@link #container}. */
     private int[] containers = new int[1];
+    /** Cells (world positions) kept clear of furniture: stair landings and exits. Shared by the building's frames. */
+    private java.util.Set<Long> reserved = new java.util.HashSet<>();
+    /** Beds skipped because they would block a reserved cell (their anchors are dropped too). */
+    private java.util.Set<Long> deadBeds = new java.util.HashSet<>();
+    /** Beds placed so far by this building (shared by its frames; counted identically in every chunk's replay). */
+    private int[] beds = new int[1];
     private static final int MAX_CONTAINERS = 6, MAX_LOOT = 3;
     private final BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
 
@@ -101,6 +107,9 @@ public final class Canvas {
                 : new Canvas(level, new BoundingBox(x0, y0, z0, x1, y1, z1), nox, noy, noz, nf, seed);
         c.owner = owner;
         c.containers = containers;
+        c.reserved = reserved;
+        c.deadBeds = deadBeds;
+        c.beds = beds;
         return c;
     }
 
@@ -240,13 +249,37 @@ public final class Canvas {
     public void set(int lx, int ly, int lz, BlockState s) {
         int x = wx(lx, lz), y = oy + ly, z = wz(lx, lz);
         if (!okWorld(x, y, z)) return;
+        if (!reserved.isEmpty() && !s.isAir() && reserved.contains(BlockPos.asLong(x, y, z))) return;
         wset(x, y, z, rot(s));
+    }
+
+    /** Keeps the local cells (lx, ly0..ly1, lz) free of furniture: nothing but air is set there from now on. */
+    public void keepClear(int lx, int ly0, int ly1, int lz) {
+        for (int y = ly0; y <= ly1; y++) reserved.add(BlockPos.asLong(wx(lx, lz), oy + y, wz(lx, lz)));
+    }
+
+    public boolean isReserved(int lx, int ly, int lz) {
+        return !reserved.isEmpty() && reserved.contains(BlockPos.asLong(wx(lx, lz), oy + ly, wz(lx, lz)));
+    }
+
+    /** Whether any cell of the local rectangle (feet and head height at {@code ly}) is kept clear. */
+    public boolean anyReserved(int lx0, int lz0, int lx1, int lz1, int ly) {
+        if (reserved.isEmpty()) return false;
+        for (int x = lx0; x <= lx1; x++) for (int z = lz0; z <= lz1; z++) if (isReserved(x, ly, z) || isReserved(x, ly + 1, z)) return true;
+        return false;
+    }
+
+    /** Number of beds this building has so far. */
+    public int bedCount() {
+        return beds[0];
     }
 
     /** Sets only if the block there is open (air, fluid, plant, snow, leaves). */
     public void setIfOpen(int lx, int ly, int lz, BlockState s) {
         int x = wx(lx, lz), y = oy + ly, z = wz(lx, lz);
         if (!okWorld(x, y, z)) return;
+        if (!reserved.isEmpty() && !s.isAir() && !(s.getBlock() instanceof net.minecraft.world.level.block.CarpetBlock)
+                && reserved.contains(BlockPos.asLong(x, y, z))) return;
         if (open(wget(x, y, z))) wset(x, y, z, rot(s));
     }
 
@@ -375,6 +408,8 @@ public final class Canvas {
     }
 
     public void anchor(AnchorType type, int lx, int ly, int lz, String who) {
+        if ((type == AnchorType.BED || type == AnchorType.INN_BED || type == AnchorType.HOUSE_BED || type == AnchorType.GUEST_BED
+                || type == AnchorType.GUILD_BED) && deadBeds.contains(BlockPos.asLong(wx(lx, lz), oy + ly, wz(lx, lz)))) return;
         if (anchors != null) anchors.add(new Anchor(type, new BlockPos(wx(lx, lz), oy + ly, wz(lx, lz)), who));
     }
 
@@ -385,8 +420,34 @@ public final class Canvas {
         set(lx, ly + 1, lz, d.setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER));
     }
 
+    /** World positions (lower door halves) of declared entrances -> the direction leading away from the building. */
+    private static final java.util.Map<Long, Direction> ENTRANCES = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * An entrance: a door in an outer wall, opening towards local {@code face} (the interior lies that way). Declared so
+     * that {@link Accessibility} can keep its approach free.
+     */
+    public void entrance(int lx, int ly, int lz, BlockState door, Direction face) {
+        door(lx, ly, lz, door, face);
+        int x = wx(lx, lz), y = oy + ly, z = wz(lx, lz);
+        if (level == null || !okWorld(x, y, z)) return;
+        if (ENTRANCES.size() > 100_000) ENTRANCES.clear();
+        ENTRANCES.put(BlockPos.asLong(x, y, z), dir(face.getOpposite()));
+    }
+
+    /** The outward direction of an entrance declared by {@link #entrance}, or null. */
+    @Nullable
+    public static Direction entranceOutward(BlockPos lowerHalf) {
+        return ENTRANCES.get(lowerHalf.asLong());
+    }
+
     /** A bed whose foot is at (lx, ly, lz) and whose head lies towards local {@code toHead}. */
     public void bed(int lx, int ly, int lz, BlockState bed, Direction toHead) {
+        if (isReserved(lx, ly, lz) || isReserved(lx + toHead.getStepX(), ly, lz + toHead.getStepZ())) {
+            deadBeds.add(BlockPos.asLong(wx(lx, lz), oy + ly, wz(lx, lz)));
+            return;
+        }
+        beds[0]++;
         BlockState b = B.face(bed, toHead);
         set(lx, ly, lz, b.setValue(BedBlock.PART, BedPart.FOOT));
         set(lx + toHead.getStepX(), ly, lz + toHead.getStepZ(), b.setValue(BedBlock.PART, BedPart.HEAD));
@@ -396,6 +457,7 @@ public final class Canvas {
     public void container(int lx, int ly, int lz, BlockState state, @Nullable ResourceLocation loot) {
         // per building (the count runs through every frame and every chunk's identical replay): few containers, and
         // only the first ones carry loot
+        if (isReserved(lx, ly, lz)) return;
         int n = containers[0]++;
         if (n >= MAX_CONTAINERS) return;
         if (n >= MAX_LOOT) loot = null;
