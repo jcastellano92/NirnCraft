@@ -34,16 +34,16 @@ final class Dressing {
 
     /** Mean distance (blocks) between two pieces along a road: [class][0 near a town, 1 midway, 2 remote]. */
     private static final int[][] GAP = {
-            {34, 85, 260},   // highway
-            {44, 105, 320},  // road
-            {80, 210, 640},  // lane
+            {70, 150, 360},   // highway
+            {90, 190, 420},  // road
+            {140, 320, 800},  // lane
             {320, 560, 900}, // trail
     };
     /** Kind weights by distance band: cart, barrels, hay, fence, cairn, camp, woodpile. */
     private static final int[][] WEIGHT = {
-            {20, 18, 18, 16, 2, 0, 14},
-            {12, 12, 14, 12, 12, 6, 12},
-            {8, 4, 6, 0, 38, 24, 12},
+            {20, 18, 4, 16, 2, 0, 14},
+            {12, 12, 4, 12, 12, 6, 12},
+            {8, 4, 0, 0, 38, 24, 12},
     };
     private static final int NEAR = 260, MID = 700;
     /** Per road, so a thousand-block highway through a city's hinterland stays within budget. */

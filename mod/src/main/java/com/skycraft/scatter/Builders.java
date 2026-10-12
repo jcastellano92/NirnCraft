@@ -250,7 +250,6 @@ public final class Builders {
             int dx = i - len / 2;
             if (br.b.waterAt(dx, 0)) continue;
             any |= br.top(dx, 0, 0, pillar(log, Direction.Axis.X));
-            if (moss && br.r.nextInt(3) > 0) br.top(dx, 0, 1, Blocks.MOSS_CARPET);
             if (br.r.nextInt(5) == 0) br.top(dx, 1, 0, br.r.nextBoolean() ? Blocks.BROWN_MUSHROOM : Blocks.RED_MUSHROOM);
         }
         // snapped branches
@@ -286,7 +285,7 @@ public final class Builders {
             if (soilBelow(br, dx, dz)) br.force(dx, br.gy(dx, dz) - 1, dz, Blocks.PODZOL.defaultBlockState());
             any |= br.top(dx, dz, 0, red ? Blocks.RED_MUSHROOM : Blocks.BROWN_MUSHROOM);
         }
-        br.top(0, 0, 0, Blocks.MOSS_CARPET);
+
         return any;
     }
 

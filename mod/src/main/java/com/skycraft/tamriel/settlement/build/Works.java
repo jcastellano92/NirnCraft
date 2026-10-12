@@ -310,6 +310,7 @@ public final class Works {
         int top = s.floor + s.h;
         boolean palisade = s.has(Spec.PALISADE);
         Direction out = s.facing;
+        double segLen = Math.hypot(s.x2 - s.x, s.z2 - s.z);
         line(c, s, half, (x, z, t, side) -> {
             int g = c.wground(x, z);
             double outward = (x + 0.5 - (s.x + s.x2) / 2.0) * out.getStepX() + (z + 0.5 - (s.z + s.z2) / 2.0) * out.getStepZ();
@@ -350,6 +351,24 @@ public final class Works {
             } else {
                 c.wset(x, top, z, s.has(Spec.RUINED) && c.hash(x, 0, z, 3) % 3 == 0 ? Blocks.AIR.defaultBlockState() : p.cityWall);
             }
+        });
+        // access: a ladder up the inner face, mid-segment (a wall part is about 22 blocks), so soldiers can climb to
+        // the wall-walk; the parapet is open there (stone) or the walkway reaches it (palisade)
+        if (segLen < 8 || s.w < 3 || s.has(Spec.RUINED)) return;
+        Direction in = out.getOpposite();
+        BlockState ladder = B.face(B.s(Blocks.LADDER), in);
+        line(c, s, half, (x, z, t, side) -> {
+            double outward = (x + 0.5 - (s.x + s.x2) / 2.0) * out.getStepX() + (z + 0.5 - (s.z + s.z2) / 2.0) * out.getStepZ();
+            if (outward >= -half + 1.0 || Math.abs(t * segLen - segLen / 2) >= 0.55) return;
+            int g = c.wground(x, z);
+            if (top - g < 3) return;
+            int ladderTop = palisade ? top - 2 : top + 1;
+            for (int y = g + 1; y <= ladderTop; y++) c.wset(x, y, z, ladder);
+            int bx = x + out.getStepX(), bz = z + out.getStepZ();
+            for (int y = g + 1; y < ladderTop - (palisade ? 0 : 1); y++) {
+                c.wset(bx, y, bz, palisade ? B.axis(p.post, Direction.Axis.Y) : p.cityWall);
+            }
+            if (!palisade) c.wset(x, top + 2, z, Blocks.AIR.defaultBlockState());
         });
     }
 
@@ -481,6 +500,17 @@ public final class Works {
         line(c, s, half, (x, z, t, side) -> {
             int y = (int) Math.round(s.floor + (f2 - s.floor) * t);
             boolean rail = Math.abs(side) > half - 0.9;
+            int ground = c.wground(x, z);
+            if (c.wwater(x, z) == Integer.MIN_VALUE && y - ground <= 2 && y - ground >= -1) {
+                // over dry land (a gate's approach): the road's own surface mix on a graded bed, not a stone deck
+                int yy = Math.max(ground, y - 1);
+                for (int fy = ground + 1; fy < yy; fy++) c.wset(x, fy, z, p.foundation);
+                c.wset(x, yy, z, c.hash(x, 0, z, 17) % 100 < 28 ? p.path2 : p.path);
+                for (int cy = yy + 1; cy <= yy + 3; cy++) {
+                    if (!c.wget(x, cy, z).isAir()) c.wset(x, cy, z, Blocks.AIR.defaultBlockState());
+                }
+                return;
+            }
             c.wset(x, y, z, stone ? (rail ? p.cityWall : p.plaza) : (rail ? B.axis(p.beam, Direction.Axis.Y) : p.planks));
             for (int yy = y + 1; yy <= y + 3; yy++) c.wset(x, yy, z, Blocks.AIR.defaultBlockState());
             if (rail) c.wset(x, y + 1, z, stone ? p.cityWallWall : p.fence);

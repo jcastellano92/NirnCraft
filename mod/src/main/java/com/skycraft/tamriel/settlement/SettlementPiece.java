@@ -169,6 +169,7 @@ public class SettlementPiece extends StructurePiece {
         c.owner = owner();
         try {
             Builders.build(c, this);
+            com.skycraft.tamriel.settlement.build.Sanity.sweep(level, clip, chunkBox);
         } catch (RuntimeException e) {
             Skycraft.LOGGER.error("Settlement piece {} of {} failed in chunk {}", spec.kind, settlement, chunkPos, e);
         }

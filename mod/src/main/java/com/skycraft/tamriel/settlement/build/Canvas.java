@@ -53,6 +53,9 @@ public final class Canvas {
     private final List<Anchor> anchors;
     /** Owner label of the building being painted (anchor owner). */
     public String owner = "";
+    /** Containers declared so far by this building (shared by its frames); capped, see {@link #container}. */
+    private int[] containers = new int[1];
+    private static final int MAX_CONTAINERS = 6, MAX_LOOT = 3;
     private final BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
 
     /** Painting canvas, clipped to {@code clip}. */
@@ -97,6 +100,7 @@ public final class Canvas {
                 ? new Canvas(anchors, nox, noy, noz, nf, seed)
                 : new Canvas(level, new BoundingBox(x0, y0, z0, x1, y1, z1), nox, noy, noz, nf, seed);
         c.owner = owner;
+        c.containers = containers;
         return c;
     }
 
@@ -284,6 +288,7 @@ public final class Canvas {
         int minZ = Math.max(Math.min(wza, wzb), z0), maxZ = Math.min(Math.max(wza, wzb), z1);
         int minY = Math.max(oy + Math.min(ay, by), y0), maxY = Math.min(oy + Math.max(ay, by), y1);
         BlockState air = Blocks.AIR.defaultBlockState();
+        java.util.ArrayList<int[]> cut = new java.util.ArrayList<>();
         for (int x = minX; x <= maxX; x++)
             for (int z = minZ; z <= maxZ; z++)
                 for (int y = minY; y <= maxY; y++) {
@@ -292,9 +297,45 @@ public final class Canvas {
                     if (s.is(BlockTags.LEAVES) || (s.is(BlockTags.LOGS) && natural(s))
                             || (s.canBeReplaced() && s.getFluidState().isEmpty()) || s.is(Blocks.SNOW) || s.is(BlockTags.FLOWERS)
                             || s.is(Blocks.BAMBOO) || s.is(Blocks.SUGAR_CANE) || s.is(Blocks.CACTUS)) {
+                        if (s.is(BlockTags.LOGS) && cut.size() < 48) cut.add(new int[]{x, y, z});
                         wset(x, y, z, air);
                     }
                 }
+        sweepCrowns(cut);
+    }
+
+    /**
+     * Leaves of trees whose trunk was just cleared hang in the air outside the cleared box (and persistent crown
+     * leaves never decay): removes the leaves within 5 blocks of a cut log that no remaining log within 3 holds up.
+     * Only inside this canvas's chunk clip.
+     */
+    private void sweepCrowns(java.util.List<int[]> cut) {
+        if (cut.isEmpty()) return;
+        BlockState air = Blocks.AIR.defaultBlockState();
+        java.util.HashSet<Long> done = new java.util.HashSet<>();
+        for (int[] l : cut) {
+            for (int x = Math.max(x0, l[0] - 5); x <= Math.min(x1, l[0] + 5); x++)
+                for (int z = Math.max(z0, l[2] - 5); z <= Math.min(z1, l[2] + 5); z++)
+                    for (int y = Math.max(y0, l[1] - 2); y <= Math.min(y1, l[1] + 9); y++) {
+                        if (!level.getBlockState(m.set(x, y, z)).is(BlockTags.LEAVES)) continue;
+                        if (!done.add(net.minecraft.core.BlockPos.asLong(x, y, z))) continue;
+                        boolean held = false;
+                        for (int dx = -3; dx <= 3 && !held; dx++)
+                            for (int dz = -3; dz <= 3 && !held; dz++) {
+                                int px = x + dx, pz = z + dz;
+                                if (px < x0 || px > x1 || pz < z0 || pz > z1) continue;
+                                for (int dy = -3; dy <= 3; dy++) {
+                                    int py = y + dy;
+                                    if (py < y0 || py > y1) continue;
+                                    if (level.getBlockState(m.set(px, py, pz)).is(BlockTags.LOGS)) {
+                                        held = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        if (!held) wset(x, y, z, air);
+                    }
+        }
     }
 
     private static boolean natural(BlockState s) {
@@ -353,6 +394,11 @@ public final class Canvas {
 
     /** A loot container; its owner is recorded as a {@link AnchorType#CONTAINER} anchor. */
     public void container(int lx, int ly, int lz, BlockState state, @Nullable ResourceLocation loot) {
+        // per building (the count runs through every frame and every chunk's identical replay): few containers, and
+        // only the first ones carry loot
+        int n = containers[0]++;
+        if (n >= MAX_CONTAINERS) return;
+        if (n >= MAX_LOOT) loot = null;
         anchor(AnchorType.CONTAINER, lx, ly, lz);
         int x = wx(lx, lz), y = oy + ly, z = wz(lx, lz);
         if (!okWorld(x, y, z)) return;

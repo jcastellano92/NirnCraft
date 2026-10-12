@@ -521,6 +521,58 @@ def analyse(world, roads, place, half):
     return res, pieces, area
 
 
+# ------------------------------------------------------------------ sealed-building check
+_MAPX = {'EAST': lambda lx, lz: -lz, 'SOUTH': lambda lx, lz: -lx, 'WEST': lambda lx, lz: lz}
+_MAPZ = {'EAST': lambda lx, lz: lx, 'SOUTH': lambda lx, lz: -lz, 'WEST': lambda lx, lz: -lx}
+
+
+def local_to_world(p, lx, lz):
+    """World column of local building cell (lx, lz) (mirrors SettlementPiece.origin/mapX/mapZ)."""
+    mx = _MAPX.get(p.facing, lambda a, b: a)
+    mz = _MAPZ.get(p.facing, lambda a, b: b)
+    lcx, lcz = (p.w - 1) // 2, (p.d - 1) // 2
+    ox, oz = p.x - mx(lcx, lcz), p.z - mz(lcx, lcz)
+    return ox + mx(lx, lz), oz + mz(lx, lz)
+
+
+def _is_air(name):
+    return name.split(':')[-1] in ('air', 'cave_air', 'void_air')
+
+
+def sealed_report(area, pieces):
+    """Per building: share of wall cells that are solid at head height of the first storey, by side (front, back,
+    left, right). A side below 55% is 'open'; a building with an open side is not sealed (a window leaves one of
+    the two rows above the floor non-air, an open cell is air in both).
+    Returns (list of dicts, summary dict)."""
+    out = []
+    for p in pieces:
+        if not p.building or p.kind in ('TENT', 'RESERVED') or p.w < 4 or p.d < 4:
+            continue
+        sides = {'front': [(x, 0) for x in range(p.w)], 'back': [(x, p.d - 1) for x in range(p.w)],
+                 'left': [(0, z) for z in range(p.d)], 'right': [(p.w - 1, z) for z in range(p.d)]}
+        res = {}
+        for name, cells in sides.items():
+            solid = tot = 0
+            for lx, lz in cells:
+                wx, wz = local_to_world(p, lx, lz)
+                if not area.in_box(wx, wz) or not area.loaded[wz - area.z1, wx - area.x1]:
+                    continue
+                tot += 1
+                a = area.block(wx, p.floor + 2, wz)
+                b = area.block(wx, p.floor + 3, wz)
+                if not (_is_air(a) and _is_air(b)):
+                    solid += 1
+            res[name] = round(solid / tot, 2) if tot else None
+        if all(v is None for v in res.values()):
+            continue
+        open_sides = [k for k, v in res.items() if v is not None and v < 0.55]
+        out.append(dict(label=p.label(), kind=p.kind, x=p.x, z=p.z, w=p.w, d=p.d, facing=p.facing, floor=p.floor,
+                        sides=res, open=open_sides))
+    bad = [o for o in out if o['open']]
+    return out, dict(buildings=len(out), not_sealed=len(bad),
+                     open_sides={k: sum(1 for o in out if k in o['open']) for k in ('front', 'back', 'left', 'right')})
+
+
 def verdict(res):
     if res.get('note'):
         return 'NOGEN'

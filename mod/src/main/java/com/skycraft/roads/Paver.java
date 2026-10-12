@@ -58,6 +58,11 @@ final class Paver {
     private static final float[] RAIL_SQ = {6.25f, 2.5f, 1.3f, 0.6f};
     private static final float BRIDGE_HALF_SQ = 2.25f, BRIDGE_RAIL_SQ = 4.0f;
     private static final int MAX_PILLAR = 24;
+    /** Blocks of clearance kept free of trees and plants beside the paved band. */
+    private static final float CLEAR_MARGIN = 2.0f;
+    /** Road points averaged either side of a column when grading the road surface (about 2 blocks apart each). */
+    private static final int GRADE_W = 6;
+    private static final int MAX_CUT = 3, MAX_FILL = 3;
 
     private static final LongLinkedOpenHashSet QUEUE = new LongLinkedOpenHashSet();
     private static final LongOpenHashSet WAITING = new LongOpenHashSet();
@@ -152,6 +157,8 @@ final class Paver {
         final int cx, cz;
         final int[] colX, colZ, colRoad, colIdx;
         final boolean[] colEdge, colCenter;
+        /** Graded surface heights per (road, point), computed once per task. */
+        final java.util.HashMap<Long, Double> grades = new java.util.HashMap<>();
         /** The building culture of the chunk's land (road style and bridge kind). */
         final com.skycraft.tamriel.settlement.Culture culture;
         final List<RoadFeature> features;
@@ -231,6 +238,7 @@ final class Paver {
             float[] best = new float[256];
             boolean[] edgeOf = new boolean[256];
             float[] d2Of = new float[256];
+            boolean[] clearOf = new boolean[256];
             int[] road = new int[256];
             int[] idx = new int[256];
             java.util.Arrays.fill(best, Float.MAX_VALUE);
@@ -256,6 +264,7 @@ final class Paver {
                     boolean water = r.water(i) || (i > 0 && r.water(i - 1)) || (i + 1 < r.size() && r.water(i + 1));
                     float half = water ? Math.max(HALF_SQ[kind], BRIDGE_HALF_SQ) : HALF_SQ[kind];
                     float rail = water ? Math.max(RAIL_SQ[kind], BRIDGE_RAIL_SQ) : RAIL_SQ[kind];
+                    float clearSq = (float) Math.pow(Math.sqrt(rail) + CLEAR_MARGIN, 2);
                     for (int dx = -RoadsData.FOOTPRINT; dx <= RoadsData.FOOTPRINT; dx++) {
                         int x = px + dx;
                         if ((x >> 4) != cx) continue;
@@ -263,9 +272,13 @@ final class Paver {
                             int z = pz + dz;
                             if ((z >> 4) != cz) continue;
                             float d2 = dx * dx + dz * dz;
-                            if (d2 > rail) continue;
-                            float q = d2 / half;
+                            if (d2 > clearSq) continue;
                             int li = ((z - bz) << 4) | (x - bx);
+                            if (d2 > rail) {
+                                clearOf[li] = true; // beside the road: trees and plants go, nothing is paved
+                                continue;
+                            }
+                            float q = d2 / half;
                             if (q < best[li]) {
                                 best[li] = q;
                                 d2Of[li] = d2;
@@ -278,15 +291,15 @@ final class Paver {
                 }
             }
             int n = 0;
-            for (float b : best) if (b != Float.MAX_VALUE) n++;
+            for (int li = 0; li < 256; li++) if (best[li] != Float.MAX_VALUE || clearOf[li]) n++;
             List<RoadFeature> feats = data.featuresByChunk.get(chunk);
             Task t = new Task(chunk, n, feats == null ? List.of() : new ArrayList<>(feats), pieces(level, cx, cz), claims(level, cx, cz));
             int j = 0;
             for (int li = 0; li < 256; li++) {
-                if (best[li] == Float.MAX_VALUE) continue;
+                if (best[li] == Float.MAX_VALUE && !clearOf[li]) continue;
                 t.colX[j] = bx + (li & 15);
                 t.colZ[j] = bz + (li >> 4);
-                t.colRoad[j] = road[li];
+                t.colRoad[j] = best[li] == Float.MAX_VALUE ? -1 : road[li];
                 t.colIdx[j] = idx[li];
                 t.colEdge[j] = edgeOf[li];
                 t.colCenter[j] = d2Of[li] < 0.5f;
@@ -300,6 +313,7 @@ final class Paver {
             int columns = colX.length;
             if (cursor < columns) {
                 int i = cursor++;
+                if (colRoad[i] < 0) return clearBeside(level, this, colX[i], colZ[i]);
                 Road r = data.road(colRoad[i]);
                 if (r == null) return 0;
                 return paveColumn(level, this, r, colIdx[i], colX[i], colZ[i], colEdge[i], colCenter[i]);
@@ -324,47 +338,232 @@ final class Paver {
     // ------------------------------------------------------------------ road surface
 
     private static int paveColumn(ServerLevel level, Task task, Road road, int idx, int x, int z, boolean edge, boolean center) {
+        int changes = clearTrees(level, task, x, z, false);
         BlockPos top = naturalTop(level, x, z);
-        if (top == null) return 0;
+        if (top == null) return changes;
         BlockState ts = level.getBlockState(top);
-        if (task.reserved(level, x, top.getY(), z)) return 0; // another mod's building, a tree structure, a homestead
+        if (task.reserved(level, x, top.getY(), z)) return changes; // another mod's building, a tree structure, a homestead
         FluidState fluid = ts.getFluidState();
         if (!fluid.isEmpty()) {
-            if (!fluid.is(FluidTags.WATER) || road.longWater(idx)) return 0;
-            return bridge(level, task, road, idx, top, ts, edge, center);
+            if (!fluid.is(FluidTags.WATER) || road.longWater(idx)) return changes;
+            return changes + bridge(level, task, road, idx, top, ts, edge, center);
         }
         // a bridge deck we built (one above the water surface): leave it be
-        if (isBridgeDeck(level, task, top, ts)) return 0;
+        if (isBridgeDeck(level, task, top, ts)) return changes;
         // only ever on natural ground (or our own road): never on roofs, logs or other mods' floors
-        if (!isNaturalGround(ts) && !isRoadMaterial(ts)) return 0;
+        if (!isNaturalGround(ts) && !isRoadMaterial(ts)) return changes;
         BlockPos above = top.above();
-        BlockPos above2 = above.above();
-        BlockPos above3 = above2.above();
         BlockState a1 = level.getBlockState(above);
-        BlockState a2 = level.getBlockState(above2);
-        BlockState a3 = level.getBlockState(above3);
-        if (!clearable(a1)) return 0;
-        if (PlacedBlocks.isPlayerPlaced(level, top) || (!a1.isAir() && PlacedBlocks.isPlayerPlaced(level, above))) return 0;
+        if (!clearable(a1)) return changes;
+        if (PlacedBlocks.isPlayerPlaced(level, top) || (!a1.isAir() && PlacedBlocks.isPlayerPlaced(level, above))) return changes;
 
+        // graded profile: the surface follows the smoothed ground of the road's neighbourhood in half-block steps
+        // (a slab for the half step), cutting into rises and filling dips by at most MAX_CUT / MAX_FILL
+        int natural = top.getY();
+        double t = grade(level, task, road, idx, natural);
+        int sy = (int) Math.floor(t);
+        boolean slab = t - sy >= 0.5;
         int roll = roll(x, z);
         BlockState want = edge ? RoadStyle.edge(task.culture, roll) : RoadStyle.surface(task.culture, road.kind, roll);
         if (want.getBlock() instanceof FallingBlock && !supported(level, top)) want = Blocks.COARSE_DIRT.defaultBlockState();
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        if (sy < natural) {
+            for (int y = natural; y > sy; y--) {
+                p.set(x, y, z);
+                BlockState s = level.getBlockState(p);
+                if (!s.isAir() && !PlacedBlocks.isPlayerPlaced(level, p) && level.setBlock(p, Blocks.AIR.defaultBlockState(), QUIET)) changes++;
+            }
+        } else if (sy > natural) {
+            BlockState fill = Blocks.DIRT.defaultBlockState();
+            for (int y = natural + 1; y < sy; y++) {
+                p.set(x, y, z);
+                if (level.setBlock(p, fill, QUIET)) changes++;
+            }
+        }
+        // headroom: plants and leaves above the surface (and above the half step) go
+        for (int y = sy + 4; y > sy; y--) {
+            p.set(x, y, z);
+            BlockState s = level.getBlockState(p);
+            if (!s.isAir() && clearable(s) && !PlacedBlocks.isPlayerPlaced(level, p)
+                    && level.setBlock(p, Blocks.AIR.defaultBlockState(), QUIET)) changes++;
+        }
+        p.set(x, sy, z);
+        if (level.getBlockState(p).getBlock() != want.getBlock() && level.setBlock(p, want, QUIET)) changes++;
+        if (slab) {
+            p.set(x, sy + 1, z);
+            if (level.setBlock(p, RoadStyle.deckSlab(task.culture), QUIET)) changes++;
+        }
+        return changes;
+    }
+
+    /**
+     * Surface height of the road at point {@code idx}: the ground height averaged (triangular weights) over the
+     * neighbouring road points, limited to MAX_CUT / MAX_FILL from the column's own ground, in half blocks.
+     */
+    private static double grade(ServerLevel level, Task task, Road road, int idx, int natural) {
+        long key = ((long) road.id << 32) | (idx & 0xFFFFFFFFL);
+        Double hit = task.grades.get(key);
+        double t;
+        if (hit != null) {
+            t = hit;
+        } else {
+            double sum = 0, wsum = 0;
+            for (int d = -GRADE_W; d <= GRADE_W; d++) {
+                int j = idx + d;
+                if (j < 0 || j >= road.size()) continue;
+                int px = road.xs[j], pz = road.zs[j];
+                if (level.getChunkSource().getChunkNow(px >> 4, pz >> 4) == null) continue;
+                int gy = groundY(level, px, pz);
+                if (gy == Integer.MIN_VALUE) continue;
+                double w = GRADE_W + 1 - Math.abs(d);
+                sum += gy * w;
+                wsum += w;
+            }
+            t = wsum == 0 ? Double.NaN : sum / wsum;
+            task.grades.put(key, t);
+        }
+        if (Double.isNaN(t)) return natural;
+        t = Math.max(natural - MAX_CUT, Math.min(natural + MAX_FILL, t));
+        return Math.round(t * 2) / 2.0;
+    }
+
+    /** Ground height of a column (through trees and plants), or MIN_VALUE for water and unreadable columns. */
+    private static int groundY(ServerLevel level, int x, int z) {
+        int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, y, z);
+        for (int guard = 0; guard < 40 && p.getY() > level.getMinBuildHeight(); guard++) {
+            BlockState s = level.getBlockState(p);
+            if (!s.getFluidState().isEmpty()) return Integer.MIN_VALUE;
+            boolean passable = s.isAir() || s.is(BlockTags.LOGS) || s.is(BlockTags.LEAVES) || s.is(Blocks.SNOW)
+                    || s.getBlock() instanceof BushBlock || s.canBeReplaced();
+            if (!passable) return p.getY();
+            p.move(Direction.DOWN);
+        }
+        return Integer.MIN_VALUE;
+    }
+
+    // ------------------------------------------------------------------ clearance
+
+    /** A column beside the paved band: trees, leaves and ground plants go, so the road reads against the forest. */
+    private static int clearBeside(ServerLevel level, Task task, int x, int z) {
+        int g = groundY(level, x, z);
+        if (g == Integer.MIN_VALUE || task.reserved(level, x, g, z)) return 0;
+        return clearTrees(level, task, x, z, true);
+    }
+
+    /**
+     * Removes the trees standing in a column (a whole tree: trunk, branches and the crown that hung on it) and the
+     * leaves above it; with {@code plants} also the ground plants and flowers. Never touches player-placed blocks.
+     */
+    private static int clearTrees(ServerLevel level, Task task, int x, int z, boolean plants) {
         int changes = 0;
-        if (!a3.isAir() && clearable(a3) && !PlacedBlocks.isPlayerPlaced(level, above3)) {
-            level.setBlock(above3, Blocks.AIR.defaultBlockState(), QUIET);
-            changes++;
+        int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        BlockState air = Blocks.AIR.defaultBlockState();
+        for (int y = top - 1, guard = 0; y > level.getMinBuildHeight() && guard < 48; y--, guard++) {
+            p.set(x, y, z);
+            BlockState s = level.getBlockState(p);
+            if (s.isAir()) continue;
+            if (s.is(BlockTags.LOGS)) {
+                if (!task.reserved(level, x, y, z)) changes += removeTree(level, task, p.immutable());
+                s = level.getBlockState(p);
+                if (s.is(BlockTags.LOGS)) break; // not a tree we may cut
+                if (s.isAir()) continue;
+            }
+            if (s.is(BlockTags.LEAVES)) {
+                if (!PlacedBlocks.isPlayerPlaced(level, p) && level.setBlock(p, air, QUIET)) changes++;
+                continue;
+            }
+            if (plants && s.getFluidState().isEmpty() && (s.getBlock() instanceof BushBlock || s.is(BlockTags.FLOWERS)
+                    || s.canBeReplaced() || s.is(Blocks.SNOW))) {
+                if (!PlacedBlocks.isPlayerPlaced(level, p) && level.setBlock(p, air, QUIET)) changes++;
+                continue;
+            }
+            break; // ground, a roof, water: done
         }
-        if (!a2.isAir() && clearable(a2) && !PlacedBlocks.isPlayerPlaced(level, above2)) {
-            level.setBlock(above2, Blocks.AIR.defaultBlockState(), QUIET);
-            changes++;
+        return changes;
+    }
+
+    private static final int TREE_MAX_LOGS = 160;
+
+    /**
+     * Cuts the tree whose trunk or branch is at {@code start}: connected natural logs (26-neighbourhood) and the leaves
+     * within 3 blocks of no remaining log. Refuses anything that is not a tree (cabins, player builds, structure
+     * pieces) and anything reaching outside the loaded 3x3 chunks.
+     */
+    private static int removeTree(ServerLevel level, Task task, BlockPos start) {
+        int minX = task.cx * 16 - 14, maxX = task.cx * 16 + 29, minZ = task.cz * 16 - 14, maxZ = task.cz * 16 + 29;
+        LongOpenHashSet seen = new LongOpenHashSet();
+        ArrayList<BlockPos> logs = new ArrayList<>();
+        ArrayList<BlockPos> queue = new ArrayList<>();
+        queue.add(start);
+        seen.add(start.asLong());
+        for (int qi = 0; qi < queue.size(); qi++) {
+            BlockPos c = queue.get(qi);
+            BlockState s = level.getBlockState(c);
+            if (!s.is(BlockTags.LOGS)) continue;
+            if (logs.size() >= TREE_MAX_LOGS || c.getX() < minX || c.getX() > maxX || c.getZ() < minZ || c.getZ() > maxZ) return 0;
+            if (PlacedBlocks.isPlayerPlaced(level, c) || task.reserved(level, c.getX(), c.getY(), c.getZ())) return 0;
+            String path = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(s.getBlock()).getPath();
+            if (path.startsWith("stripped")) return 0; // builders' beams
+            logs.add(c);
+            for (int dx = -1; dx <= 1; dx++) for (int dy = -1; dy <= 1; dy++) for (int dz = -1; dz <= 1; dz++) {
+                if (dx == 0 && dy == 0 && dz == 0) continue;
+                BlockPos n = c.offset(dx, dy, dz);
+                if (seen.add(n.asLong()) && level.getBlockState(n).is(BlockTags.LOGS)) queue.add(n);
+            }
         }
-        if (!a1.isAir() && clearable(a1) && !PlacedBlocks.isPlayerPlaced(level, above)) {
-            level.setBlock(above, Blocks.AIR.defaultBlockState(), QUIET);
-            changes++;
+        if (logs.isEmpty()) return 0;
+        // only trees: a crown on some log, or a bare vertical snag
+        boolean leafy = false;
+        int minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE, lx0 = Integer.MAX_VALUE, lx1 = Integer.MIN_VALUE, lz0 = Integer.MAX_VALUE, lz1 = Integer.MIN_VALUE;
+        for (BlockPos l : logs) {
+            minY = Math.min(minY, l.getY());
+            maxY = Math.max(maxY, l.getY());
+            lx0 = Math.min(lx0, l.getX());
+            lx1 = Math.max(lx1, l.getX());
+            lz0 = Math.min(lz0, l.getZ());
+            lz1 = Math.max(lz1, l.getZ());
+            for (int dx = -2; dx <= 2 && !leafy; dx++) for (int dy = -1; dy <= 2 && !leafy; dy++) for (int dz = -2; dz <= 2; dz++) {
+                if (level.getBlockState(l.offset(dx, dy, dz)).is(BlockTags.LEAVES)) {
+                    leafy = true;
+                    break;
+                }
+            }
         }
-        if (ts.getBlock() != want.getBlock()) {
-            level.setBlock(top, want, QUIET);
-            changes++;
+        boolean snag = lx0 == lx1 && lz0 == lz1 && logs.size() >= 2;
+        if (!leafy && !snag) return 0;
+        BlockState air = Blocks.AIR.defaultBlockState();
+        int changes = 0;
+        for (BlockPos l : logs) if (level.setBlock(l, air, QUIET)) changes++;
+        // leaves: those that no remaining log within 3 blocks holds up
+        int rx0 = Math.max(minX, lx0 - 6), rx1 = Math.min(maxX, lx1 + 6), rz0 = Math.max(minZ, lz0 - 6), rz1 = Math.min(maxZ, lz1 + 6);
+        int ry0 = Math.max(level.getMinBuildHeight(), minY - 2), ry1 = Math.min(level.getMaxBuildHeight() - 1, maxY + 5);
+        ArrayList<BlockPos> rest = new ArrayList<>();
+        ArrayList<BlockPos> leaves = new ArrayList<>();
+        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        for (int ax = rx0 - 3; ax <= rx1 + 3; ax++) {
+            if (ax < minX || ax > maxX) continue;
+            for (int az = rz0 - 3; az <= rz1 + 3; az++) {
+                if (az < minZ || az > maxZ) continue;
+                boolean inner = ax >= rx0 && ax <= rx1 && az >= rz0 && az <= rz1;
+                for (int ay = ry0 - 3; ay <= ry1 + 3; ay++) {
+                    m.set(ax, ay, az);
+                    BlockState s = level.getBlockState(m);
+                    if (s.is(BlockTags.LOGS)) rest.add(m.immutable());
+                    else if (inner && ay >= ry0 && ay <= ry1 && s.is(BlockTags.LEAVES)) leaves.add(m.immutable());
+                }
+            }
+        }
+        for (BlockPos lf : leaves) {
+            boolean held = false;
+            for (BlockPos r : rest) {
+                if (Math.abs(r.getX() - lf.getX()) <= 3 && Math.abs(r.getY() - lf.getY()) <= 3 && Math.abs(r.getZ() - lf.getZ()) <= 3) {
+                    held = true;
+                    break;
+                }
+            }
+            if (!held && !PlacedBlocks.isPlayerPlaced(level, lf) && level.setBlock(lf, air, QUIET)) changes++;
         }
         return changes;
     }

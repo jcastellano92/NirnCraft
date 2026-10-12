@@ -124,7 +124,21 @@ public final class SurfaceBuilder {
                 } else if (cheb == 12) {
                     fortWall(s, x, z, fwd, lat);
                 } else if (cheb == 11) {
-                    if (p.noise(x, 0, z, 4.0, 401) <= 0.5) p.set(x, base + 5, z, Deco.slab(Blocks.STONE_BRICK_SLAB, true));
+                    boolean landing = fwd == -11 && al >= 7 && al <= 9; // where the stairs come up: always a walkway
+                    if (landing || p.noise(x, 0, z, 4.0, 401) <= 0.5) {
+                        p.set(x, base + 5, z, Deco.slab(Blocks.STONE_BRICK_SLAB, true));
+                        // the wall-walk stands on timber posts
+                        if (Math.floorMod(x + z, 4) == 0) {
+                            for (int y = base; y < base + 5; y++) p.set(x, y, z, Blocks.SPRUCE_FENCE.defaultBlockState());
+                        }
+                    }
+                } else if (cheb == 10 && fwd == -10 && al >= 3 && al <= 8) {
+                    // a stair run up the back wall from the courtyard to the wall-walk (both sides)
+                    int k = al - 3;
+                    Direction up = lat > 0 ? s.r() : s.r().getOpposite();
+                    for (int y = base; y < base + k; y++) p.set(x, y, z, Blocks.STONE_BRICKS.defaultBlockState());
+                    p.set(x, base + k, z, Blocks.STONE_BRICK_STAIRS.defaultBlockState()
+                            .setValue(net.minecraft.world.level.block.StairBlock.FACING, up));
                 } else if (cheb <= 4) {
                     fortKeep(s, x, z, fwd, lat, cheb);
                 }

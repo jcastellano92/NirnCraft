@@ -81,6 +81,11 @@ public final class Settlement {
             }
             core = c;
         }
+        if (!town) {
+            // a dungeon mouth, camp or landmark: only its own footprint is left alone, the road is paved up to it
+            long ddx = px - x, ddz = pz - z;
+            return ddx * ddx + ddz * ddz <= 36L || (px >= minX && px <= maxX && pz >= minZ && pz <= maxZ);
+        }
         if (core <= 0) return true;
         double dx = px - x, dz = pz - z;
         return dx * dx + dz * dz <= (double) core * core;

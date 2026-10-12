@@ -46,6 +46,10 @@ public final class Scatter {
     /** Centre margin inside the chunk: props reach 3-4 blocks, so they stay within one chunk of their own. */
     private static final int MARGIN = 3;
 
+    /** Kinds that mark a place somebody comes to (not just rubbish): they get a worn trail towards the road. */
+    private static final java.util.Set<String> TRAILED = java.util.Set.of("camp_leavings", "fire_pit_cold", "bedroll",
+            "lean_to", "cemetery", "grave", "cairn", "drying_rack", "water_trough", "fish_rack");
+
     /** Reason the last failed {@link #dress} gave (diagnostics). */
     static volatile String LAST_WHY = "";
 
@@ -241,6 +245,46 @@ public final class Scatter {
             return placed > 0;
         }
 
+        /**
+         * A short worn path from a camp or shrine towards the nearest road corridor of the map (within 36 blocks), laid
+         * as dirt path where the ground is soft; stays inside the 3x3 chunks the feature owns.
+         */
+        void trail(SiteBuilder b, int x, int z) {
+            final int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+            MapSample t = new MapSample();
+            int best = -1, bestDist = 999;
+            for (int d = 0; d < dirs.length; d++) {
+                for (int dist = 6; dist <= 36 && dist < bestDist; dist += 6) {
+                    TamrielMap.sample(x + dirs[d][0] * dist, z + dirs[d][1] * dist, t);
+                    if (t.road >= 0.6f) {
+                        best = d;
+                        bestDist = dist;
+                        break;
+                    }
+                }
+            }
+            if (best < 0) return;
+            int minX = cp.x * 16 - 14, maxX = cp.x * 16 + 29, minZ = cp.z * 16 - 14, maxZ = cp.z * 16 + 29;
+            int len = Math.min(bestDist, 26);
+            int wob = 0;
+            BlockState path = net.minecraft.world.level.block.Blocks.DIRT_PATH.defaultBlockState();
+            for (int i = 2; i <= len; i++) {
+                if (i % 5 == 0) wob = r.nextInt(3) - 1;
+                int px = x + dirs[best][0] * i + (dirs[best][0] == 0 ? wob : 0);
+                int pz = z + dirs[best][1] * i + (dirs[best][1] == 0 ? wob : 0);
+                if (px < minX || px > maxX || pz < minZ || pz > maxZ) break;
+                int gy = b.groundAt(px, pz);
+                BlockPos p = new BlockPos(px, gy, pz);
+                BlockState gs = level.getBlockState(p);
+                if (!gs.is(net.minecraft.world.level.block.Blocks.GRASS_BLOCK) && !gs.is(net.minecraft.world.level.block.Blocks.DIRT)
+                        && !gs.is(net.minecraft.world.level.block.Blocks.COARSE_DIRT) && !gs.is(net.minecraft.world.level.block.Blocks.PODZOL)) continue;
+                BlockState up = level.getBlockState(p.above());
+                if (!up.isAir() && !up.canBeReplaced()) continue;
+                if (!up.isAir()) level.setBlock(p.above(), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
+                level.setBlock(p, path, 2);
+            }
+        }
+
         /** Checks and builds {@code k} centred on (x, z). */
         boolean fail(String reason) {
             why = reason;
@@ -265,6 +309,11 @@ public final class Scatter {
             TamrielMap.sample(x, z, ms);
             if (ms.coastDistance < -1f || (!k.wet && ms.inWater())) return fail("map water");
             if (ms.elevation < k.minElev || ms.elevation > k.maxElev) return fail("elevation " + (int) ms.elevation);
+            // human traces need a reason to be there: a road, a settlement, a ruin or a dungeon mouth
+            if (k.human && !k.wet && zone != ScatterZone.RUIN_ADJACENT && zone != ScatterZone.DUNGEON_ADJACENT
+                    && zone != ScatterZone.SHORE && ms.road < 0.3f && info.settleEdge() > 70) {
+                return fail("no context");
+            }
             if (k.waterMin >= 0 || k.waterMax >= 0) {
                 int wd = ZoneModel.waterDistance(ms);
                 if (k.waterMin >= 0 && wd < k.waterMin) return fail("water too near " + wd);
@@ -307,6 +356,7 @@ public final class Scatter {
                 return fail("exception");
             }
             if (!ok) return fail("builder refused");
+            if (k.human && !k.wet && ms.road < 0.6f && TRAILED.contains(k.id)) trail(b, x, z);
             centres.add(new int[]{x, z, k.radius});
             count += Math.max(1, k.items);
             perKind.merge(k.id, 1, Integer::sum);

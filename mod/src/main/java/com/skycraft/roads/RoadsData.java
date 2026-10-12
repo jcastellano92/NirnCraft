@@ -31,7 +31,7 @@ import java.util.List;
 public final class RoadsData extends SavedData {
     public static final String NAME = "skycraft_roads";
     /** Road points are indexed into every chunk their footprint (this many blocks around the point) touches. */
-    static final int FOOTPRINT = 3;
+    static final int FOOTPRINT = 5;
     /** Size (log2 blocks) of the regions used to look up settlement zones. */
     private static final int ZONE_SHIFT = 8;
 

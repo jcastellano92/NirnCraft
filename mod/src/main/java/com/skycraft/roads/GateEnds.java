@@ -55,7 +55,9 @@ final class GateEnds {
     static int coreRadius(Place p) {
         double best = Double.MAX_VALUE;
         for (int[] g : raw(p)) best = Math.min(best, Math.hypot(g[0] - p.x(), g[1] - p.z()));
-        return best == Double.MAX_VALUE || best < 12 ? 0 : (int) Math.floor(best) - 1;
+        // a road leaves a gate sideways along the wall: a core as wide as the gate distance would leave that stretch
+        // unpaved (the road runs inside the circle for a long way), so it is kept clearly inside the wall
+        return best == Double.MAX_VALUE || best < 12 ? 0 : Math.max(6, (int) Math.floor(best) - 14);
     }
 
     /**

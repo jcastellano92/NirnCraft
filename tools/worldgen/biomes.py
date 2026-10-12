@@ -1255,11 +1255,17 @@ FLORA.update({
 
 def apply_flora():
     """Gives every biome in FLORA its flora: the old vegetation entries out, the table's in (in canonical order)."""
+    # pumpkin patches and moss carpets scattered over open land read as random clutter: only farms (Java props),
+    # ruins and caves place them now
+    spam = {resolve_feature(f) for f in (C_MOSS, C_MOSS_DENSE, C_PUMPKINS, "pumpkins_rare", "moss_carpets")}
     for bid, plants in FLORA.items():
         assert bid in BIOMES, "flora for unknown biome " + bid
         b = BIOMES[bid]
-        keep = [f for f in b["features"] if resolve_feature(f) not in OLD_VEG]
+        plants = [f for f in plants if resolve_feature(f) not in spam]
+        keep = [f for f in b["features"] if resolve_feature(f) not in OLD_VEG and resolve_feature(f) not in spam]
         b["features"] = keep + [f for f in plants if f not in keep]
+    for b in BIOMES.values():
+        b["features"] = [f for f in b["features"] if resolve_feature(f) not in spam]
 
 
 # map_water placeholder ordering: lakes = [map_water, hot springs] then vanilla lava lakes (see canonical()).

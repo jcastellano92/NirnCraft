@@ -177,7 +177,7 @@ final class Formations {
         Builders.blob(br, 2, 1, 1, 1, 1, true);
         Builders.blob(br, -2, -1, 1, 2, 1, true);
         br.top(1, -2, 0, br.rock.slab());
-        br.top(0, 3, 0, Blocks.MOSS_CARPET);
+
         return true;
     }
 }
