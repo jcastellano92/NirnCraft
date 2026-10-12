@@ -326,5 +326,11 @@
   "item.skycraft.gargoyle_shard": "Gargoyle Shard",
   "item.skycraft.durzog_hide": "Durzog Hide",
   "item.skycraft.nix_hound_meat": "Nix-Hound Meat",
-  "item.skycraft.dwemer_gear": "Dwemer Gear"
+  "item.skycraft.dwemer_gear": "Dwemer Gear",
+  "creatures.skycraft.scene.caravan_trader": "Caravan Trader",
+  "creatures.skycraft.scene.caravan_guard": "Hired Sword",
+  "creatures.skycraft.scene.tracker": "Elk Tracker",
+  "creatures.skycraft.scene.pilgrim": "Pilgrim",
+  "creatures.skycraft.scene.squabbler": "Quarrelling Bandit",
+  "creatures.skycraft.scene.camp_hunter": "Camp Hunter"
 }

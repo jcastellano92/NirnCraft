@@ -26,6 +26,7 @@ public final class CreaturesConfig {
     public static final ForgeConfigSpec.IntValue MAX_HOSTILE_GROUPS;
     public static final ForgeConfigSpec.IntValue MIN_HOSTILE_DISTANCE;
     public static final ForgeConfigSpec.DoubleValue ROAD_HOSTILE_FACTOR;
+    public static final ForgeConfigSpec.DoubleValue ROAD_PLAYER_FACTOR;
     public static final ForgeConfigSpec.DoubleValue DAY_HOSTILE_FACTOR;
     public static final ForgeConfigSpec.IntValue GUARD_ALERT_RADIUS;
     public static final ForgeConfigSpec.BooleanValue GUARD_HELP_PLAYER;
@@ -84,6 +85,8 @@ public final class CreaturesConfig {
                 .defineInRange("minHostileDistance", 40, 28, 64);
         ROAD_HOSTILE_FACTOR = b.comment("Chance multiplier for hostile spawn attempts on or beside a road (main roads feel safe).")
                 .defineInRange("roadHostileFactor", 0.08, 0.0, 1.0);
+        ROAD_PLAYER_FACTOR = b.comment("Chance multiplier for hostile spawn attempts while the PLAYER is on or beside a road (quiet stretches: a 300-block walk of road meets a hostile group roughly one time in eight by day).")
+                .defineInRange("roadPlayerFactor", 0.01, 0.0, 1.0);
         DAY_HOSTILE_FACTOR = b.comment("Chance multiplier for hostile spawn attempts in daylight (1.0 at night).")
                 .defineInRange("dayHostileFactor", 0.5, 0.0, 1.0);
         b.pop();

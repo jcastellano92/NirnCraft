@@ -1,928 +1,422 @@
 [
   {
-    "provinces": [
-      "skyrim"
-    ],
-    "families": [
-      "plains",
-      "forest",
-      "frozen",
-      "mountain",
-      "swamp"
-    ],
+    "provinces": ["skyrim"],
+    "biomes": ["skycraft:whiterun_tundra", "skycraft:whiterun_plains", "skycraft:alpine_meadow", "skycraft:pale_heath"],
     "groups": [
-      {
-        "kind": "hostile",
-        "weight": 12,
-        "levels": [
-          1,
-          45
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:wolf",
-        "count": [
-          2,
-          4
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 4,
-        "levels": [
-          1,
-          20
-        ],
-        "time": "night",
-        "place": "surface",
-        "entity": "skycraft:skeever",
-        "count": [
-          1,
-          3
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 6,
-        "levels": [
-          1,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:bandit",
-        "count": [
-          2,
-          4
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 2,
-        "levels": [
-          10,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "members": [
-          {
-            "entity": "skycraft:bandit_chief",
-            "count": [
-              1,
-              1
-            ]
-          },
-          {
-            "entity": "skycraft:bandit",
-            "count": [
-              2,
-              3
-            ]
-          }
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 4,
-        "levels": [
-          1,
-          999
-        ],
-        "time": "night",
-        "place": "surface",
-        "entity": "skycraft:draugr",
-        "count": [
-          1,
-          3
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 2,
-        "levels": [
-          5,
-          999
-        ],
-        "time": "night",
-        "place": "surface",
-        "entity": "skycraft:necromancer",
-        "count": [
-          1,
-          1
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 2,
-        "levels": [
-          14,
-          999
-        ],
-        "time": "night",
-        "place": "surface",
-        "members": [
-          {
-            "entity": "skycraft:vampire",
-            "count": [
-              1,
-              2
-            ]
-          },
-          {
-            "entity": "skycraft:death_hound",
-            "count": [
-              1,
-              2
-            ]
-          }
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 1,
-        "levels": [
-          22,
-          999
-        ],
-        "time": "night",
-        "place": "surface",
-        "entity": "skycraft:gargoyle",
-        "count": [
-          1,
-          1
-        ]
-      },
-      {
-        "kind": "wildlife",
-        "weight": 10,
-        "levels": [
-          1,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:deer",
-        "count": [
-          1,
-          3
-        ]
-      },
-      {
-        "kind": "wildlife",
-        "weight": 5,
-        "levels": [
-          3,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:elk",
-        "count": [
-          1,
-          2
-        ]
-      }
+      {"kind": "wildlife", "weight": 12, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:deer", "count": [1, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 16, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "skycraft:deer", "count": [1, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "skycraft:deer", "count": [1, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:rabbit", "count": [2, 4], "tag": "passive"},
+      {"kind": "wildlife", "weight": 5, "levels": [3, 999], "time": "any", "place": "surface", "entity": "skycraft:elk", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 3, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "minecraft:fox", "count": [1, 1], "tag": "passive"},
+      {"kind": "wildlife", "weight": 3, "levels": [1, 999], "time": "night", "place": "surface", "entity": "minecraft:fox", "count": [1, 1], "tag": "passive"},
+      {"kind": "wildlife", "weight": 3, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:horse", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [4, 999], "time": "any", "place": "surface", "entity": "skycraft:mammoth", "count": [1, 2], "tag": "passive", "maxY": 150, "townMin": 200},
+      {"kind": "wildlife", "weight": 6, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:cow", "count": [1, 3], "tag": "passive", "townMin": 40, "townMax": 230},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:sheep", "count": [2, 4], "tag": "passive", "townMin": 40, "townMax": 230},
+      {"kind": "wildlife", "weight": 3, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:chicken", "count": [2, 4], "tag": "passive", "townMin": 40, "townMax": 160},
+      {"kind": "hostile", "weight": 2, "levels": [1, 5], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [1, 2], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [6, 999], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [2, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 7, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:wolf", "count": [2, 4], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "skycraft:wolf", "count": [1, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [6, 999], "time": "day", "place": "surface", "entity": "skycraft:bear", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [8, 999], "time": "day", "place": "surface", "entity": "skycraft:sabre_cat", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 1, "levels": [12, 999], "time": "day", "place": "surface", "members": [{"entity": "skycraft:giant", "count": [1, 1]}, {"entity": "skycraft:mammoth", "count": [1, 2]}], "tag": "rare", "townMin": 300, "maxY": 160},
+      {"kind": "hostile", "weight": 2, "levels": [5, 999], "time": "day", "place": "surface", "entity": "skycraft:bandit", "count": [2, 3], "tag": "humanoid", "road": "on", "townMin": 300},
+      {"kind": "hostile", "weight": 1, "levels": [3, 999], "time": "night", "place": "surface", "entity": "skycraft:frostbite_spider", "count": [1, 2], "tag": "vermin", "weather": "rain"},
+      {"kind": "hostile", "weight": 60, "quiet": true, "time": "day", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 40, "quiet": true, "time": "dawn", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 25, "quiet": true, "time": "dusk", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 14, "quiet": true, "time": "night", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 4, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:draugr", "count": [1, 3], "tag": "undead", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170},
+      {"kind": "hostile", "weight": 2, "levels": [5, 999], "time": "night", "place": "surface", "entity": "skycraft:necromancer", "count": [1, 1], "tag": "humanoid", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170},
+      {"kind": "hostile", "weight": 1, "levels": [14, 999], "time": "night", "place": "surface", "members": [{"entity": "skycraft:vampire", "count": [1, 2]}, {"entity": "skycraft:death_hound", "count": [1, 2]}], "tag": "undead", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170}
     ]
   },
   {
-    "provinces": [
-      "skyrim"
-    ],
-    "families": [
-      "forest",
-      "plains"
-    ],
+    "provinces": ["skyrim"],
+    "biomes": ["skycraft:pine_forest", "skycraft:falkreath_forest"],
     "groups": [
-      {
-        "kind": "hostile",
-        "weight": 5,
-        "levels": [
-          4,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:bear",
-        "count": [
-          1,
-          1
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 4,
-        "levels": [
-          6,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:sabre_cat",
-        "count": [
-          1,
-          1
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 2,
-        "levels": [
-          8,
-          999
-        ],
-        "time": "day",
-        "place": "surface",
-        "entity": "skycraft:spriggan",
-        "count": [
-          1,
-          2
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 1,
-        "levels": [
-          16,
-          999
-        ],
-        "time": "night",
-        "place": "surface",
-        "members": [
-          {
-            "entity": "skycraft:wispmother",
-            "count": [
-              1,
-              1
-            ]
-          },
-          {
-            "entity": "skycraft:wisp",
-            "count": [
-              2,
-              3
-            ]
-          }
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 2,
-        "levels": [
-          3,
-          999
-        ],
-        "time": "night",
-        "place": "surface",
-        "entity": "skycraft:frostbite_spider",
-        "count": [
-          1,
-          2
-        ]
-      }
+      {"kind": "wildlife", "weight": 14, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:deer", "count": [1, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 18, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "skycraft:deer", "count": [1, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 9, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "skycraft:deer", "count": [1, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 6, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:rabbit", "count": [2, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 5, "levels": [3, 999], "time": "any", "place": "surface", "entity": "skycraft:elk", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "minecraft:fox", "count": [1, 1], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "night", "place": "surface", "entity": "minecraft:fox", "count": [1, 1], "tag": "passive"},
+      {"kind": "wildlife", "weight": 2, "levels": [1, 999], "time": "any", "place": "surface", "entity": "minecraft:goat", "count": [1, 2], "tag": "passive", "minY": 110},
+      {"kind": "wildlife", "weight": 3, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:horse", "count": [1, 1], "tag": "passive"},
+      {"kind": "hostile", "weight": 3, "levels": [1, 5], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [1, 2], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [6, 999], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [2, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 8, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:wolf", "count": [2, 4], "tag": "predator"},
+      {"kind": "hostile", "weight": 4, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "skycraft:wolf", "count": [1, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 4, "levels": [5, 999], "time": "day", "place": "surface", "entity": "skycraft:bear", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [5, 999], "time": "dusk", "place": "surface", "entity": "skycraft:bear", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [8, 999], "time": "any", "place": "surface", "entity": "skycraft:sabre_cat", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [3, 999], "time": "day", "place": "surface", "entity": "skycraft:frostbite_spider", "count": [1, 2], "tag": "vermin"},
+      {"kind": "hostile", "weight": 4, "levels": [3, 999], "time": "any", "place": "surface", "entity": "skycraft:frostbite_spider", "count": [1, 3], "tag": "vermin", "weather": "rain"},
+      {"kind": "hostile", "weight": 1, "levels": [10, 999], "time": "day", "place": "surface", "entity": "skycraft:spriggan", "count": [1, 1], "tag": "rare", "weather": "rain"},
+      {"kind": "hostile", "weight": 2, "levels": [4, 999], "time": "day", "place": "surface", "entity": "skycraft:bandit", "count": [2, 3], "tag": "humanoid", "road": "on", "townMin": 300},
+      {"kind": "hostile", "weight": 1, "levels": [16, 999], "time": "night", "place": "surface", "members": [{"entity": "skycraft:wispmother", "count": [1, 1]}, {"entity": "skycraft:wisp", "count": [2, 3]}], "tag": "rare", "minY": 70},
+      {"kind": "hostile", "weight": 55, "quiet": true, "time": "day", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 35, "quiet": true, "time": "dawn", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 22, "quiet": true, "time": "dusk", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 12, "quiet": true, "time": "night", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 4, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:draugr", "count": [1, 3], "tag": "undead", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170},
+      {"kind": "hostile", "weight": 2, "levels": [5, 999], "time": "night", "place": "surface", "entity": "skycraft:necromancer", "count": [1, 1], "tag": "humanoid", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170},
+      {"kind": "hostile", "weight": 1, "levels": [14, 999], "time": "night", "place": "surface", "members": [{"entity": "skycraft:vampire", "count": [1, 2]}, {"entity": "skycraft:death_hound", "count": [1, 2]}], "tag": "undead", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170}
     ]
   },
   {
-    "provinces": [
-      "skyrim"
-    ],
-    "families": [
-      "frozen",
-      "mountain"
-    ],
+    "provinces": ["skyrim"],
+    "regions": ["skyrim/falkreath"],
+    "biomes": ["skycraft:pine_forest", "skycraft:falkreath_forest"],
     "groups": [
-      {
-        "kind": "hostile",
-        "weight": 5,
-        "levels": [
-          8,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:troll",
-        "count": [
-          1,
-          1
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 4,
-        "levels": [
-          10,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:ice_wraith",
-        "count": [
-          1,
-          2
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 3,
-        "levels": [
-          6,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:sabre_cat",
-        "count": [
-          1,
-          1
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 2,
-        "levels": [
-          4,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:frostbite_spider",
-        "count": [
-          1,
-          2
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 2,
-        "levels": [
-          6,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:bear",
-        "count": [
-          1,
-          1
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 1,
-        "levels": [
-          18,
-          999
-        ],
-        "time": "night",
-        "place": "surface",
-        "members": [
-          {
-            "entity": "skycraft:wispmother",
-            "count": [
-              1,
-              1
-            ]
-          },
-          {
-            "entity": "skycraft:wisp",
-            "count": [
-              2,
-              3
-            ]
-          }
-        ]
-      },
-      {
-        "kind": "wildlife",
-        "weight": 4,
-        "levels": [
-          1,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:elk",
-        "count": [
-          1,
-          3
-        ]
-      },
-      {
-        "kind": "wildlife",
-        "weight": 1,
-        "levels": [
-          4,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:mammoth",
-        "count": [
-          1,
-          2
-        ]
-      }
+      {"kind": "hostile", "weight": 5, "levels": [5, 999], "time": "night", "place": "surface", "entity": "skycraft:draugr", "count": [2, 3], "tag": "undead", "nearPlace": ["dungeon_fixed", "landmark", "fort"], "nearDist": 220},
+      {"kind": "hostile", "weight": 3, "levels": [6, 999], "time": "night", "place": "surface", "entity": "skycraft:necromancer", "count": [1, 1], "tag": "humanoid", "nearPlace": ["dungeon_fixed", "landmark"], "nearDist": 220},
+      {"kind": "hostile", "weight": 2, "levels": [14, 999], "time": "night", "place": "surface", "members": [{"entity": "skycraft:vampire", "count": [1, 1]}, {"entity": "skycraft:death_hound", "count": [1, 1]}], "tag": "undead", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 220}
     ]
   },
   {
-    "provinces": [
-      "skyrim"
-    ],
-    "families": [
-      "plains"
-    ],
+    "provinces": ["skyrim"],
+    "regions": ["skyrim/haafingar"],
+    "biomes": ["skycraft:pine_forest", "skycraft:snowy_pine_forest", "skycraft:skyrim_highlands"],
     "groups": [
-      {
-        "kind": "hostile",
-        "weight": 1,
-        "levels": [
-          8,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "members": [
-          {
-            "entity": "skycraft:giant",
-            "count": [
-              1,
-              1
-            ]
-          },
-          {
-            "entity": "skycraft:mammoth",
-            "count": [
-              1,
-              2
-            ]
-          }
-        ]
-      },
-      {
-        "kind": "wildlife",
-        "weight": 2,
-        "levels": [
-          4,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:mammoth",
-        "count": [
-          2,
-          3
-        ]
-      }
+      {"kind": "hostile", "weight": 25, "quiet": true, "time": "day", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 15, "quiet": true, "time": "dawn", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 10, "quiet": true, "time": "dusk", "place": "surface", "tag": "quiet"}
     ]
   },
   {
-    "provinces": [
-      "skyrim"
-    ],
-    "families": [
-      "swamp"
-    ],
+    "provinces": ["skyrim"],
+    "biomes": ["skycraft:snowy_pine_forest"],
     "groups": [
-      {
-        "kind": "hostile",
-        "weight": 4,
-        "levels": [
-          1,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:frostbite_spider",
-        "count": [
-          1,
-          2
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 1,
-        "levels": [
-          14,
-          999
-        ],
-        "time": "night",
-        "place": "surface",
-        "members": [
-          {
-            "entity": "skycraft:wispmother",
-            "count": [
-              1,
-              1
-            ]
-          },
-          {
-            "entity": "skycraft:wisp",
-            "count": [
-              2,
-              3
-            ]
-          }
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 1,
-        "levels": [
-          16,
-          999
-        ],
-        "time": "night",
-        "place": "surface",
-        "entity": "skycraft:chaurus",
-        "count": [
-          1,
-          2
-        ]
-      },
-      {
-        "kind": "wildlife",
-        "weight": 6,
-        "levels": [
-          1,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:mudcrab",
-        "count": [
-          1,
-          3
-        ]
-      }
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:deer", "count": [1, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 12, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "skycraft:deer", "count": [1, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 6, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "skycraft:deer", "count": [1, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 6, "levels": [3, 999], "time": "any", "place": "surface", "entity": "skycraft:elk", "count": [1, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 10, "levels": [3, 999], "time": "dawn", "place": "surface", "entity": "skycraft:elk", "count": [1, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 5, "levels": [3, 999], "time": "dusk", "place": "surface", "entity": "skycraft:elk", "count": [1, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 5, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:rabbit", "count": [2, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "minecraft:fox", "count": [1, 1], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "night", "place": "surface", "entity": "minecraft:fox", "count": [1, 1], "tag": "passive"},
+      {"kind": "wildlife", "weight": 3, "levels": [1, 999], "time": "any", "place": "surface", "entity": "minecraft:goat", "count": [1, 2], "tag": "passive", "minY": 110},
+      {"kind": "hostile", "weight": 4, "levels": [1, 5], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [1, 2], "tag": "predator"},
+      {"kind": "hostile", "weight": 4, "levels": [6, 999], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [2, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 9, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:wolf", "count": [2, 4], "tag": "predator"},
+      {"kind": "hostile", "weight": 4, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "skycraft:wolf", "count": [1, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [5, 999], "time": "day", "place": "surface", "entity": "skycraft:bear", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 4, "levels": [6, 999], "time": "any", "place": "surface", "entity": "skycraft:sabre_cat", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [14, 999], "time": "any", "place": "surface", "entity": "skycraft:troll", "count": [1, 1], "tag": "predator", "minY": 140},
+      {"kind": "hostile", "weight": 3, "levels": [3, 999], "time": "day", "place": "surface", "entity": "skycraft:frostbite_spider", "count": [1, 2], "tag": "vermin"},
+      {"kind": "hostile", "weight": 2, "levels": [4, 999], "time": "day", "place": "surface", "entity": "skycraft:bandit", "count": [2, 3], "tag": "humanoid", "road": "on", "townMin": 300},
+      {"kind": "hostile", "weight": 1, "levels": [16, 999], "time": "night", "place": "surface", "members": [{"entity": "skycraft:wispmother", "count": [1, 1]}, {"entity": "skycraft:wisp", "count": [2, 3]}], "tag": "rare"},
+      {"kind": "hostile", "weight": 50, "quiet": true, "time": "day", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 35, "quiet": true, "time": "dawn", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 20, "quiet": true, "time": "dusk", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 12, "quiet": true, "time": "night", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 4, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:draugr", "count": [1, 3], "tag": "undead", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170},
+      {"kind": "hostile", "weight": 2, "levels": [5, 999], "time": "night", "place": "surface", "entity": "skycraft:necromancer", "count": [1, 1], "tag": "humanoid", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170},
+      {"kind": "hostile", "weight": 1, "levels": [14, 999], "time": "night", "place": "surface", "members": [{"entity": "skycraft:vampire", "count": [1, 2]}, {"entity": "skycraft:death_hound", "count": [1, 2]}], "tag": "undead", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170}
     ]
   },
   {
-    "provinces": [
-      "skyrim"
-    ],
-    "families": [
-      "beach",
-      "river"
-    ],
+    "provinces": ["skyrim"],
+    "biomes": ["skycraft:rift_autumn_forest"],
     "groups": [
-      {
-        "kind": "wildlife",
-        "weight": 8,
-        "levels": [
-          1,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:mudcrab",
-        "count": [
-          1,
-          3
-        ]
-      },
-      {
-        "kind": "wildlife",
-        "weight": 6,
-        "levels": [
-          1,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:horker",
-        "count": [
-          2,
-          4
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 2,
-        "levels": [
-          1,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:bandit",
-        "count": [
-          2,
-          3
-        ]
-      },
-      {
-        "kind": "wildlife",
-        "weight": 8,
-        "levels": [
-          1,
-          999
-        ],
-        "time": "any",
-        "place": "water",
-        "entity": "skycraft:slaughterfish",
-        "count": [
-          1,
-          3
-        ]
-      }
+      {"kind": "wildlife", "weight": 14, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:deer", "count": [1, 4], "tag": "passive"},
+      {"kind": "wildlife", "weight": 18, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "skycraft:deer", "count": [1, 4], "tag": "passive"},
+      {"kind": "wildlife", "weight": 9, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "skycraft:deer", "count": [1, 4], "tag": "passive"},
+      {"kind": "wildlife", "weight": 5, "levels": [3, 999], "time": "any", "place": "surface", "entity": "skycraft:elk", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 9, "levels": [3, 999], "time": "dawn", "place": "surface", "entity": "skycraft:elk", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [3, 999], "time": "dusk", "place": "surface", "entity": "skycraft:elk", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 7, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:rabbit", "count": [2, 4], "tag": "passive"},
+      {"kind": "wildlife", "weight": 5, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "minecraft:fox", "count": [1, 1], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "minecraft:fox", "count": [1, 1], "tag": "passive"},
+      {"kind": "wildlife", "weight": 3, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:horse", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 3, "levels": [1, 999], "time": "any", "place": "surface", "entity": "minecraft:goat", "count": [1, 1], "tag": "passive", "minY": 130},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:cow", "count": [1, 3], "tag": "passive", "townMin": 40, "townMax": 230},
+      {"kind": "wildlife", "weight": 3, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:sheep", "count": [2, 3], "tag": "passive", "townMin": 40, "townMax": 230},
+      {"kind": "hostile", "weight": 2, "levels": [1, 5], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [1, 2], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [6, 999], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [2, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 6, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:wolf", "count": [2, 4], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "skycraft:wolf", "count": [1, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [5, 999], "time": "day", "place": "surface", "entity": "skycraft:bear", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [8, 999], "time": "any", "place": "surface", "entity": "skycraft:sabre_cat", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [3, 999], "time": "day", "place": "surface", "entity": "skycraft:frostbite_spider", "count": [1, 2], "tag": "vermin"},
+      {"kind": "hostile", "weight": 3, "levels": [4, 999], "time": "day", "place": "surface", "entity": "skycraft:bandit", "count": [2, 4], "tag": "humanoid", "road": "on", "townMin": 300},
+      {"kind": "hostile", "weight": 2, "levels": [12, 999], "time": "day", "place": "surface", "members": [{"entity": "skycraft:bandit_chief", "count": [1, 1]}, {"entity": "skycraft:bandit", "count": [2, 3]}], "tag": "humanoid", "road": "on", "townMin": 300},
+      {"kind": "hostile", "weight": 1, "levels": [10, 999], "time": "day", "place": "surface", "entity": "skycraft:spriggan", "count": [1, 1], "tag": "rare", "weather": "rain"},
+      {"kind": "hostile", "weight": 55, "quiet": true, "time": "day", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 35, "quiet": true, "time": "dawn", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 22, "quiet": true, "time": "dusk", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 12, "quiet": true, "time": "night", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 4, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:draugr", "count": [1, 3], "tag": "undead", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170},
+      {"kind": "hostile", "weight": 2, "levels": [5, 999], "time": "night", "place": "surface", "entity": "skycraft:necromancer", "count": [1, 1], "tag": "humanoid", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170},
+      {"kind": "hostile", "weight": 1, "levels": [14, 999], "time": "night", "place": "surface", "members": [{"entity": "skycraft:vampire", "count": [1, 2]}, {"entity": "skycraft:death_hound", "count": [1, 2]}], "tag": "undead", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170}
     ]
   },
   {
-    "regions": [
-      "skyrim/the_reach"
-    ],
+    "provinces": ["skyrim"],
+    "biomes": ["skycraft:reach_crags", "skycraft:reach_valley"],
     "groups": [
-      {
-        "kind": "hostile",
-        "weight": 10,
-        "levels": [
-          1,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:forsworn",
-        "count": [
-          2,
-          4
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 3,
-        "levels": [
-          8,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "members": [
-          {
-            "entity": "skycraft:hagraven",
-            "count": [
-              1,
-              1
-            ]
-          },
-          {
-            "entity": "skycraft:forsworn",
-            "count": [
-              2,
-              3
-            ]
-          }
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 2,
-        "levels": [
-          8,
-          999
-        ],
-        "time": "any",
-        "place": "surface",
-        "entity": "skycraft:spriggan",
-        "count": [
-          1,
-          1
-        ]
-      }
+      {"kind": "wildlife", "weight": 10, "levels": [1, 999], "time": "any", "place": "surface", "entity": "minecraft:goat", "count": [2, 4], "tag": "passive", "minY": 95},
+      {"kind": "wildlife", "weight": 14, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "minecraft:goat", "count": [2, 4], "tag": "passive", "minY": 95},
+      {"kind": "wildlife", "weight": 7, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "minecraft:goat", "count": [2, 4], "tag": "passive", "minY": 95},
+      {"kind": "wildlife", "weight": 5, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:deer", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 9, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "skycraft:deer", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "skycraft:deer", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:rabbit", "count": [2, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 2, "levels": [4, 999], "time": "any", "place": "surface", "entity": "skycraft:elk", "count": [1, 1], "tag": "passive"},
+      {"kind": "wildlife", "weight": 3, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "minecraft:fox", "count": [1, 1], "tag": "passive"},
+      {"kind": "hostile", "weight": 3, "levels": [1, 5], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [1, 2], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [6, 999], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [2, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 6, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:wolf", "count": [2, 4], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "skycraft:wolf", "count": [1, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [6, 999], "time": "day", "place": "surface", "entity": "skycraft:bear", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [8, 999], "time": "any", "place": "surface", "entity": "skycraft:sabre_cat", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [12, 999], "time": "any", "place": "surface", "entity": "skycraft:troll", "count": [1, 1], "tag": "predator", "minY": 110},
+      {"kind": "hostile", "weight": 3, "levels": [8, 999], "time": "day", "place": "surface", "entity": "skycraft:forsworn", "count": [2, 3], "tag": "humanoid", "townMin": 150},
+      {"kind": "hostile", "weight": 2, "levels": [8, 999], "time": "dusk", "place": "surface", "entity": "skycraft:forsworn", "count": [2, 4], "tag": "humanoid", "townMin": 150},
+      {"kind": "hostile", "weight": 1, "levels": [14, 999], "time": "any", "place": "surface", "members": [{"entity": "skycraft:hagraven", "count": [1, 1]}, {"entity": "skycraft:forsworn", "count": [2, 3]}], "tag": "humanoid", "townMin": 200, "minY": 120, "nearPlace": ["dungeon_fixed", "landmark"], "nearDist": 200},
+      {"kind": "hostile", "weight": 2, "levels": [8, 999], "time": "day", "place": "surface", "entity": "skycraft:spriggan", "count": [1, 1], "tag": "rare", "weather": "rain"},
+      {"kind": "hostile", "weight": 2, "levels": [3, 999], "time": "night", "place": "surface", "entity": "skycraft:frostbite_spider", "count": [1, 2], "tag": "vermin"},
+      {"kind": "hostile", "weight": 32, "quiet": true, "time": "day", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 22, "quiet": true, "time": "dawn", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 14, "quiet": true, "time": "dusk", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 8, "quiet": true, "time": "night", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 4, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:draugr", "count": [1, 3], "tag": "undead", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170},
+      {"kind": "hostile", "weight": 2, "levels": [5, 999], "time": "night", "place": "surface", "entity": "skycraft:necromancer", "count": [1, 1], "tag": "humanoid", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170},
+      {"kind": "hostile", "weight": 1, "levels": [14, 999], "time": "night", "place": "surface", "members": [{"entity": "skycraft:vampire", "count": [1, 2]}, {"entity": "skycraft:death_hound", "count": [1, 2]}], "tag": "undead", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170}
     ]
   },
   {
-    "provinces": [
-      "skyrim"
-    ],
+    "provinces": ["skyrim"],
+    "biomes": ["skycraft:hjaalmarch_marsh"],
     "groups": [
-      {
-        "kind": "hostile",
-        "weight": 8,
-        "levels": [
-          1,
-          30
-        ],
-        "time": "any",
-        "place": "cave",
-        "entity": "skycraft:skeever",
-        "count": [
-          2,
-          4
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 8,
-        "levels": [
-          1,
-          999
-        ],
-        "time": "any",
-        "place": "cave",
-        "entity": "skycraft:frostbite_spider",
-        "count": [
-          1,
-          3
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 6,
-        "levels": [
-          1,
-          999
-        ],
-        "time": "any",
-        "place": "cave",
-        "entity": "skycraft:draugr",
-        "count": [
-          1,
-          3
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 1,
-        "levels": [
-          30,
-          999
-        ],
-        "time": "any",
-        "place": "cave",
-        "entity": "skycraft:draugr_deathlord",
-        "count": [
-          1,
-          1
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 5,
-        "levels": [
-          12,
-          999
-        ],
-        "time": "any",
-        "place": "cave",
-        "members": [
-          {
-            "entity": "skycraft:falmer",
-            "count": [
-              2,
-              3
-            ]
-          },
-          {
-            "entity": "skycraft:chaurus",
-            "count": [
-              1,
-              2
-            ]
-          }
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 2,
-        "levels": [
-          20,
-          999
-        ],
-        "time": "any",
-        "place": "cave",
-        "entity": "skycraft:chaurus_hunter",
-        "count": [
-          1,
-          2
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 2,
-        "levels": [
-          5,
-          999
-        ],
-        "time": "any",
-        "place": "cave",
-        "entity": "skycraft:necromancer",
-        "count": [
-          1,
-          2
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 2,
-        "levels": [
-          12,
-          999
-        ],
-        "time": "any",
-        "place": "cave",
-        "members": [
-          {
-            "entity": "skycraft:vampire",
-            "count": [
-              1,
-              2
-            ]
-          },
-          {
-            "entity": "skycraft:death_hound",
-            "count": [
-              1,
-              2
-            ]
-          }
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 2,
-        "levels": [
-          8,
-          999
-        ],
-        "time": "any",
-        "place": "cave",
-        "entity": "skycraft:troll",
-        "count": [
-          1,
-          1
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 2,
-        "levels": [
-          4,
-          999
-        ],
-        "time": "any",
-        "place": "cave",
-        "entity": "skycraft:bear",
-        "count": [
-          1,
-          1
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 1,
-        "levels": [
-          8,
-          999
-        ],
-        "time": "any",
-        "place": "cave",
-        "entity": "skycraft:dwarven_spider",
-        "count": [
-          1,
-          2
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 1,
-        "levels": [
-          18,
-          999
-        ],
-        "time": "any",
-        "place": "cave",
-        "entity": "skycraft:dwarven_ballista",
-        "count": [
-          1,
-          1
-        ]
-      },
-      {
-        "kind": "hostile",
-        "weight": 1,
-        "levels": [
-          32,
-          999
-        ],
-        "time": "any",
-        "place": "cave",
-        "members": [
-          {
-            "entity": "skycraft:dragon_priest",
-            "count": [
-              1,
-              1
-            ]
-          },
-          {
-            "entity": "skycraft:draugr",
-            "count": [
-              2,
-              3
-            ]
-          }
-        ]
-      }
+      {"kind": "wildlife", "weight": 10, "levels": [1, 999], "time": "day", "place": "surface", "entity": "skycraft:mudcrab", "count": [1, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:deer", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "skycraft:deer", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "skycraft:deer", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 3, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:rabbit", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 3, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:horker", "count": [2, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "any", "place": "water", "entity": "skycraft:slaughterfish", "count": [1, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [1, 5], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [1, 2], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [6, 999], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [2, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 5, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:wolf", "count": [2, 4], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "skycraft:wolf", "count": [1, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 5, "levels": [1, 999], "time": "day", "place": "surface", "entity": "skycraft:frostbite_spider", "count": [1, 2], "tag": "vermin"},
+      {"kind": "hostile", "weight": 8, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:frostbite_spider", "count": [1, 3], "tag": "vermin"},
+      {"kind": "hostile", "weight": 4, "levels": [1, 20], "time": "night", "place": "surface", "entity": "skycraft:skeever", "count": [1, 3], "tag": "vermin"},
+      {"kind": "hostile", "weight": 2, "levels": [8, 999], "time": "day", "place": "surface", "entity": "skycraft:bear", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [14, 999], "time": "night", "place": "surface", "entity": "skycraft:chaurus", "count": [1, 2], "tag": "vermin"},
+      {"kind": "hostile", "weight": 2, "levels": [14, 999], "time": "night", "place": "surface", "members": [{"entity": "skycraft:wispmother", "count": [1, 1]}, {"entity": "skycraft:wisp", "count": [2, 3]}], "tag": "rare"},
+      {"kind": "hostile", "weight": 1, "levels": [16, 999], "time": "night", "place": "surface", "entity": "skycraft:hagraven", "count": [1, 1], "tag": "humanoid", "nearPlace": ["dungeon_fixed", "landmark"], "nearDist": 200},
+      {"kind": "hostile", "weight": 2, "levels": [5, 999], "time": "day", "place": "surface", "entity": "skycraft:bandit", "count": [2, 3], "tag": "humanoid", "road": "on", "townMin": 300},
+      {"kind": "hostile", "weight": 36, "quiet": true, "time": "day", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 25, "quiet": true, "time": "dawn", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 14, "quiet": true, "time": "dusk", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 8, "quiet": true, "time": "night", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 4, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:draugr", "count": [1, 3], "tag": "undead", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170},
+      {"kind": "hostile", "weight": 2, "levels": [5, 999], "time": "night", "place": "surface", "entity": "skycraft:necromancer", "count": [1, 1], "tag": "humanoid", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170},
+      {"kind": "hostile", "weight": 1, "levels": [14, 999], "time": "night", "place": "surface", "members": [{"entity": "skycraft:vampire", "count": [1, 2]}, {"entity": "skycraft:death_hound", "count": [1, 2]}], "tag": "undead", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "biomes": ["skycraft:eastmarch_volcanic_tundra"],
+    "groups": [
+      {"kind": "wildlife", "weight": 5, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:rabbit", "count": [2, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 5, "levels": [1, 999], "time": "any", "place": "surface", "entity": "minecraft:goat", "count": [1, 3], "tag": "passive", "minY": 90},
+      {"kind": "wildlife", "weight": 9, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "minecraft:goat", "count": [1, 3], "tag": "passive", "minY": 90},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "minecraft:goat", "count": [1, 3], "tag": "passive", "minY": 90},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:deer", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "skycraft:deer", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "skycraft:deer", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 2, "levels": [6, 999], "time": "any", "place": "surface", "entity": "skycraft:mammoth", "count": [1, 2], "tag": "passive", "townMin": 200},
+      {"kind": "wildlife", "weight": 3, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "minecraft:fox", "count": [1, 1], "tag": "passive"},
+      {"kind": "hostile", "weight": 3, "levels": [1, 5], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [1, 2], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [6, 999], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [2, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 7, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:wolf", "count": [2, 4], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "skycraft:wolf", "count": [1, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [8, 999], "time": "any", "place": "surface", "entity": "skycraft:sabre_cat", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [8, 999], "time": "day", "place": "surface", "entity": "skycraft:bear", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [14, 999], "time": "any", "place": "surface", "entity": "skycraft:troll", "count": [1, 1], "tag": "predator", "minY": 120},
+      {"kind": "hostile", "weight": 1, "levels": [22, 999], "time": "night", "place": "surface", "entity": "skycraft:gargoyle", "count": [1, 1], "tag": "rare", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170},
+      {"kind": "hostile", "weight": 2, "levels": [5, 999], "time": "day", "place": "surface", "entity": "skycraft:bandit", "count": [2, 3], "tag": "humanoid", "road": "on", "townMin": 300},
+      {"kind": "hostile", "weight": 1, "levels": [3, 999], "time": "night", "place": "surface", "entity": "skycraft:frostbite_spider", "count": [1, 2], "tag": "vermin"},
+      {"kind": "hostile", "weight": 48, "quiet": true, "time": "day", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 30, "quiet": true, "time": "dawn", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 18, "quiet": true, "time": "dusk", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 10, "quiet": true, "time": "night", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 4, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:draugr", "count": [1, 3], "tag": "undead", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170},
+      {"kind": "hostile", "weight": 2, "levels": [5, 999], "time": "night", "place": "surface", "entity": "skycraft:necromancer", "count": [1, 1], "tag": "humanoid", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170},
+      {"kind": "hostile", "weight": 1, "levels": [14, 999], "time": "night", "place": "surface", "members": [{"entity": "skycraft:vampire", "count": [1, 2]}, {"entity": "skycraft:death_hound", "count": [1, 2]}], "tag": "undead", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "biomes": ["skycraft:eastmarch_hot_springs"],
+    "groups": [
+      {"kind": "wildlife", "weight": 12, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:deer", "count": [2, 4], "tag": "passive"},
+      {"kind": "wildlife", "weight": 16, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "skycraft:deer", "count": [2, 4], "tag": "passive"},
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "skycraft:deer", "count": [2, 4], "tag": "passive"},
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "any", "place": "surface", "entity": "minecraft:rabbit", "count": [2, 4], "tag": "passive"},
+      {"kind": "wildlife", "weight": 12, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "minecraft:rabbit", "count": [2, 4], "tag": "passive"},
+      {"kind": "wildlife", "weight": 6, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "minecraft:rabbit", "count": [2, 4], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [3, 999], "time": "any", "place": "surface", "entity": "skycraft:elk", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 8, "levels": [3, 999], "time": "dawn", "place": "surface", "entity": "skycraft:elk", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [3, 999], "time": "dusk", "place": "surface", "entity": "skycraft:elk", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "minecraft:fox", "count": [1, 1], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "minecraft:fox", "count": [1, 1], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "any", "place": "surface", "entity": "minecraft:goat", "count": [1, 2], "tag": "passive", "minY": 90},
+      {"kind": "wildlife", "weight": 3, "levels": [1, 999], "time": "day", "place": "surface", "entity": "skycraft:mudcrab", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 3, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:horse", "count": [1, 1], "tag": "passive"},
+      {"kind": "hostile", "weight": 1, "levels": [1, 5], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [1, 2], "tag": "predator"},
+      {"kind": "hostile", "weight": 1, "levels": [6, 999], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [2, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:wolf", "count": [2, 4], "tag": "predator"},
+      {"kind": "hostile", "weight": 1, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "skycraft:wolf", "count": [1, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 1, "levels": [10, 999], "time": "night", "place": "surface", "entity": "skycraft:sabre_cat", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [3, 999], "time": "night", "place": "surface", "entity": "skycraft:frostbite_spider", "count": [1, 1], "tag": "vermin"},
+      {"kind": "hostile", "weight": 80, "quiet": true, "time": "day", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 50, "quiet": true, "time": "dawn", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 40, "quiet": true, "time": "dusk", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 30, "quiet": true, "time": "night", "place": "surface", "tag": "quiet"}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "biomes": ["skycraft:winterhold_glacier", "skycraft:pale_snowfield"],
+    "groups": [
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:horker", "count": [2, 4], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "day", "place": "surface", "entity": "skycraft:mudcrab", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 5, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:rabbit", "count": [1, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 3, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "minecraft:fox", "count": [1, 1], "tag": "passive"},
+      {"kind": "wildlife", "weight": 2, "levels": [4, 999], "time": "dawn", "place": "surface", "entity": "skycraft:elk", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 2, "levels": [6, 999], "time": "any", "place": "surface", "entity": "skycraft:mammoth", "count": [1, 2], "tag": "passive", "townMin": 200},
+      {"kind": "hostile", "weight": 4, "levels": [1, 5], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [1, 2], "tag": "predator"},
+      {"kind": "hostile", "weight": 4, "levels": [6, 999], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [2, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 8, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:wolf", "count": [2, 4], "tag": "predator"},
+      {"kind": "hostile", "weight": 4, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "skycraft:wolf", "count": [1, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [12, 999], "time": "any", "place": "surface", "entity": "skycraft:ice_wraith", "count": [1, 2], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [14, 999], "time": "any", "place": "surface", "entity": "skycraft:troll", "count": [1, 1], "tag": "predator", "minY": 100},
+      {"kind": "hostile", "weight": 3, "levels": [8, 999], "time": "any", "place": "surface", "entity": "skycraft:sabre_cat", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [8, 999], "time": "day", "place": "surface", "entity": "skycraft:bear", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 1, "levels": [18, 999], "time": "day", "place": "surface", "entity": "skycraft:frost_giant", "count": [1, 1], "tag": "rare", "townMin": 300},
+      {"kind": "hostile", "weight": 1, "levels": [18, 999], "time": "night", "place": "surface", "members": [{"entity": "skycraft:wispmother", "count": [1, 1]}, {"entity": "skycraft:wisp", "count": [2, 3]}], "tag": "rare"},
+      {"kind": "hostile", "weight": 2, "levels": [6, 999], "time": "day", "place": "surface", "entity": "skycraft:bandit", "count": [2, 3], "tag": "humanoid", "road": "on", "townMin": 300},
+      {"kind": "hostile", "weight": 40, "quiet": true, "time": "day", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 28, "quiet": true, "time": "dawn", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 16, "quiet": true, "time": "dusk", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 9, "quiet": true, "time": "night", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 3, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:draugr", "count": [1, 3], "tag": "undead", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170},
+      {"kind": "hostile", "weight": 2, "levels": [5, 999], "time": "night", "place": "surface", "entity": "skycraft:necromancer", "count": [1, 1], "tag": "humanoid", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170},
+      {"kind": "hostile", "weight": 1, "levels": [14, 999], "time": "night", "place": "surface", "members": [{"entity": "skycraft:vampire", "count": [1, 2]}, {"entity": "skycraft:death_hound", "count": [1, 2]}], "tag": "undead", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "biomes": ["skycraft:skyrim_highlands", "skycraft:snowy_slopes", "skycraft:throat_of_the_world"],
+    "groups": [
+      {"kind": "wildlife", "weight": 10, "levels": [1, 999], "time": "any", "place": "surface", "entity": "minecraft:goat", "count": [2, 4], "tag": "passive", "minY": 105},
+      {"kind": "wildlife", "weight": 14, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "minecraft:goat", "count": [2, 4], "tag": "passive", "minY": 105},
+      {"kind": "wildlife", "weight": 7, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "minecraft:goat", "count": [2, 4], "tag": "passive", "minY": 105},
+      {"kind": "wildlife", "weight": 3, "levels": [4, 999], "time": "any", "place": "surface", "entity": "skycraft:elk", "count": [1, 1], "tag": "passive", "maxY": 190},
+      {"kind": "wildlife", "weight": 3, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:rabbit", "count": [1, 2], "tag": "passive", "maxY": 200},
+      {"kind": "wildlife", "weight": 3, "levels": [5, 999], "time": "any", "place": "surface", "entity": "skycraft:mammoth", "count": [1, 2], "tag": "passive", "maxY": 170, "townMin": 200},
+      {"kind": "hostile", "weight": 3, "levels": [1, 5], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [1, 2], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [6, 999], "time": "day", "place": "surface", "entity": "skycraft:wolf", "count": [2, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 6, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:wolf", "count": [2, 4], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "skycraft:wolf", "count": [1, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [6, 999], "time": "day", "place": "surface", "entity": "skycraft:bear", "count": [1, 1], "tag": "predator", "maxY": 220},
+      {"kind": "hostile", "weight": 3, "levels": [8, 999], "time": "any", "place": "surface", "entity": "skycraft:sabre_cat", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 5, "levels": [12, 999], "time": "any", "place": "surface", "entity": "skycraft:troll", "count": [1, 1], "tag": "predator", "minY": 145},
+      {"kind": "hostile", "weight": 3, "levels": [14, 999], "time": "any", "place": "surface", "entity": "skycraft:ice_wraith", "count": [1, 2], "tag": "predator", "minY": 150},
+      {"kind": "hostile", "weight": 2, "levels": [16, 999], "time": "any", "place": "surface", "entity": "skycraft:ice_wraith", "count": [1, 2], "tag": "predator", "minY": 230},
+      {"kind": "hostile", "weight": 2, "levels": [4, 999], "time": "night", "place": "surface", "entity": "skycraft:frostbite_spider", "count": [1, 2], "tag": "vermin"},
+      {"kind": "hostile", "weight": 1, "levels": [14, 999], "time": "day", "place": "surface", "members": [{"entity": "skycraft:giant", "count": [1, 1]}, {"entity": "skycraft:mammoth", "count": [1, 2]}], "tag": "rare", "townMin": 300, "minY": 110, "maxY": 200},
+      {"kind": "hostile", "weight": 1, "levels": [16, 999], "time": "night", "place": "surface", "members": [{"entity": "skycraft:wispmother", "count": [1, 1]}, {"entity": "skycraft:wisp", "count": [2, 3]}], "tag": "rare"},
+      {"kind": "hostile", "weight": 38, "quiet": true, "time": "day", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 26, "quiet": true, "time": "dawn", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 14, "quiet": true, "time": "dusk", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 8, "quiet": true, "time": "night", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 3, "levels": [1, 999], "time": "night", "place": "surface", "entity": "skycraft:draugr", "count": [1, 3], "tag": "undead", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170},
+      {"kind": "hostile", "weight": 2, "levels": [5, 999], "time": "night", "place": "surface", "entity": "skycraft:necromancer", "count": [1, 1], "tag": "humanoid", "nearPlace": ["dungeon_fixed", "fort"], "nearDist": 170}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "biomes": ["skycraft:skyrim_coast", "skycraft:rocky_shore", "skycraft:frozen_shore"],
+    "groups": [
+      {"kind": "wildlife", "weight": 10, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:mudcrab", "count": [1, 3], "tag": "passive"},
+      {"kind": "wildlife", "weight": 5, "levels": [1, 999], "time": "day", "place": "surface", "entity": "skycraft:horker", "count": [2, 4], "tag": "passive"},
+      {"kind": "wildlife", "weight": 2, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "skycraft:deer", "count": [1, 1], "tag": "passive"},
+      {"kind": "wildlife", "weight": 2, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "minecraft:fox", "count": [1, 1], "tag": "passive"},
+      {"kind": "hostile", "weight": 1, "levels": [3, 999], "time": "night", "place": "surface", "entity": "skycraft:wolf", "count": [1, 2], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [6, 999], "time": "day", "place": "surface", "entity": "skycraft:bandit", "count": [2, 3], "tag": "humanoid", "townMin": 300},
+      {"kind": "hostile", "weight": 2, "levels": [6, 999], "time": "night", "place": "surface", "entity": "skycraft:draugr", "count": [1, 2], "tag": "undead", "nearPlace": ["fort", "landmark", "dungeon_fixed"], "nearDist": 200},
+      {"kind": "hostile", "weight": 60, "quiet": true, "time": "day", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 40, "quiet": true, "time": "dawn", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 24, "quiet": true, "time": "dusk", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 14, "quiet": true, "time": "night", "place": "surface", "tag": "quiet"}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "biomes": ["skycraft:skyrim_river", "skycraft:skyrim_lake", "skycraft:frozen_river"],
+    "groups": [
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "any", "place": "water", "entity": "skycraft:slaughterfish", "count": [1, 3], "tag": "predator"},
+      {"kind": "wildlife", "weight": 5, "levels": [1, 999], "time": "day", "place": "surface", "entity": "skycraft:mudcrab", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "skycraft:deer", "count": [1, 2], "tag": "passive"},
+      {"kind": "wildlife", "weight": 3, "levels": [1, 999], "time": "dusk", "place": "surface", "entity": "minecraft:fox", "count": [1, 1], "tag": "passive"},
+      {"kind": "hostile", "weight": 2, "levels": [5, 999], "time": "day", "place": "surface", "entity": "skycraft:bear", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [3, 999], "time": "dusk", "place": "surface", "entity": "skycraft:wolf", "count": [1, 2], "tag": "predator"},
+      {"kind": "hostile", "weight": 60, "quiet": true, "time": "day", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 40, "quiet": true, "time": "dawn", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 26, "quiet": true, "time": "dusk", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 15, "quiet": true, "time": "night", "place": "surface", "tag": "quiet"}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "regions": ["skyrim/whiterun"],
+    "groups": [
+      {"kind": "hostile", "weight": 30, "quiet": true, "time": "day", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 18, "quiet": true, "time": "dawn", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 12, "quiet": true, "time": "dusk", "place": "surface", "tag": "quiet"},
+      {"kind": "hostile", "weight": 10, "quiet": true, "time": "night", "place": "surface", "tag": "quiet"}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "regions": ["skyrim/the_pale", "skyrim/winterhold", "skyrim/the_reach"],
+    "groups": [
+      {"kind": "hostile", "weight": 3, "levels": [10, 999], "time": "any", "place": "surface", "entity": "skycraft:troll", "count": [1, 1], "tag": "predator", "minY": 95},
+      {"kind": "hostile", "weight": 2, "levels": [10, 999], "time": "night", "place": "surface", "entity": "skycraft:ice_wraith", "count": [1, 2], "tag": "predator", "minY": 95},
+      {"kind": "hostile", "weight": 2, "levels": [16, 999], "time": "day", "place": "surface", "entity": "skycraft:frost_giant", "count": [1, 1], "tag": "rare", "townMin": 300}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "groups": [
+      {"kind": "hostile", "weight": 8, "levels": [1, 30], "time": "any", "place": "cave", "entity": "skycraft:skeever", "count": [2, 4], "tag": "vermin"},
+      {"kind": "hostile", "weight": 8, "levels": [1, 999], "time": "any", "place": "cave", "entity": "skycraft:frostbite_spider", "count": [1, 3], "tag": "vermin"},
+      {"kind": "hostile", "weight": 6, "levels": [1, 999], "time": "any", "place": "cave", "entity": "skycraft:draugr", "count": [1, 3], "tag": "undead"},
+      {"kind": "hostile", "weight": 1, "levels": [30, 999], "time": "any", "place": "cave", "entity": "skycraft:draugr_deathlord", "count": [1, 1], "tag": "undead"},
+      {"kind": "hostile", "weight": 5, "levels": [12, 999], "time": "any", "place": "cave", "members": [{"entity": "skycraft:falmer", "count": [2, 3]}, {"entity": "skycraft:chaurus", "count": [1, 2]}], "tag": "humanoid"},
+      {"kind": "hostile", "weight": 2, "levels": [20, 999], "time": "any", "place": "cave", "entity": "skycraft:chaurus_hunter", "count": [1, 2], "tag": "vermin"},
+      {"kind": "hostile", "weight": 2, "levels": [5, 999], "time": "any", "place": "cave", "entity": "skycraft:necromancer", "count": [1, 2], "tag": "humanoid"},
+      {"kind": "hostile", "weight": 2, "levels": [12, 999], "time": "any", "place": "cave", "members": [{"entity": "skycraft:vampire", "count": [1, 2]}, {"entity": "skycraft:death_hound", "count": [1, 2]}], "tag": "undead"},
+      {"kind": "hostile", "weight": 3, "levels": [10, 999], "time": "any", "place": "cave", "entity": "skycraft:troll", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [4, 999], "time": "any", "place": "cave", "entity": "skycraft:bear", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 2, "levels": [4, 999], "time": "any", "place": "cave", "entity": "skycraft:bandit", "count": [2, 3], "tag": "humanoid"},
+      {"kind": "hostile", "weight": 2, "levels": [8, 999], "time": "any", "place": "cave", "entity": "skycraft:sabre_cat", "count": [1, 1], "tag": "predator"},
+      {"kind": "hostile", "weight": 1, "levels": [14, 999], "time": "any", "place": "cave", "entity": "skycraft:ice_wraith", "count": [1, 1], "tag": "predator", "minY": 80},
+      {"kind": "hostile", "weight": 1, "levels": [8, 999], "time": "any", "place": "cave", "entity": "skycraft:dwarven_spider", "count": [1, 2], "tag": "vermin"},
+      {"kind": "hostile", "weight": 1, "levels": [18, 999], "time": "any", "place": "cave", "entity": "skycraft:dwarven_ballista", "count": [1, 1], "tag": "rare"},
+      {"kind": "hostile", "weight": 1, "levels": [32, 999], "time": "any", "place": "cave", "members": [{"entity": "skycraft:dragon_priest", "count": [1, 1]}, {"entity": "skycraft:draugr", "count": [2, 3]}], "tag": "rare"},
+      {"kind": "wildlife", "weight": 6, "levels": [1, 999], "time": "any", "place": "cave", "entity": "minecraft:bat", "count": [2, 4], "tag": "passive"},
+      {"kind": "hostile", "weight": 14, "quiet": true, "time": "any", "place": "cave", "tag": "quiet"}
     ]
   }
 ]

@@ -12,6 +12,7 @@
     "automaton": ["skycraft:dwarven_spider", "skycraft:dwarven_sphere", "skycraft:dwarven_centurion"],
     "predator": ["skycraft:wolf", "skycraft:bear", "skycraft:sabre_cat"],
     "prey": ["skycraft:deer", "skycraft:elk", "minecraft:rabbit", "minecraft:goat", "minecraft:horse", "skycraft:mudcrab"],
+    "hunter": [],
     "legion": [],
     "stormcloak": [],
     "thalmor": []
@@ -23,7 +24,8 @@
     "THUG": "bandit",
     "FORSWORN": "forsworn",
     "NECROMANCER": "necromancer",
-    "VAMPIRE": "vampire"
+    "VAMPIRE": "vampire",
+    "HUNTER": "hunter"
   },
   "relations": [
     {"a": "bandit",     "b": "forsworn",    "kind": "mutual", "chance": 0.5},
@@ -40,6 +42,9 @@
     {"a": "stormcloak", "b": "bandit",      "kind": "mutual", "chance": 0.6},
     {"a": "stormcloak", "b": "forsworn",    "kind": "mutual", "chance": 0.6},
     {"a": "stormcloak", "b": "vampire",     "kind": "mutual", "chance": 0.6},
-    {"a": "predator",   "b": "prey",        "kind": "hunts",  "chance": 0.15}
+    {"a": "predator",   "b": "prey",        "kind": "hunts",  "chance": 0.15},
+    {"a": "hunter",     "b": "prey",        "kind": "hunts",  "chance": 0.4},
+    {"a": "hunter",     "b": "predator",    "kind": "hunts",  "chance": 0.3},
+    {"a": "predator",   "b": "hunter",      "kind": "hunts",  "chance": 0.2}
   ]
 }

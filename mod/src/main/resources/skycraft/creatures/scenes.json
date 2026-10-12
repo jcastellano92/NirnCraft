@@ -1,0 +1,44 @@
+{
+  "_comment": "Wandering ecology scenes (creatures/spawn/WildScenes). One roll per player per cooldownSeconds (random in the range), skipped at night with probability 1-nightFactor; hostile scenes share the hostile pacing rules (cooldown, calm zones, none near the start). Members: 'npc' (NpcRole id) or 'entity'; 'as' names a role others can 'target' or 'leader'; 'dest':'past' walks the NPC past the player; 'hold' keeps it near the scene; dx/dz offset it. calmAfter ends mutual fights after N seconds. Scenes end when nobody is near and never survive a restart.",
+  "cooldownSeconds": [900, 1500],
+  "firstSeconds": [240, 480],
+  "distance": [45, 85],
+  "nightFactor": 0.3,
+  "lifetimeSeconds": 900,
+  "scenes": [
+    {"id": "caravan_under_attack", "weight": 4, "time": "day", "levels": [3, 999], "hostile": true, "road": "on", "townMin": 200,
+     "members": [
+       {"npc": "caravan_trader", "as": "victim", "hold": true, "name": "creatures.skycraft.scene.caravan_trader"},
+       {"entity": "minecraft:mule", "dx": 2, "hold": true},
+       {"entity": "skycraft:wolf", "count": [2, 3], "as": "wolf", "target": "victim", "dx": -9},
+       {"npc": "adventurer", "as": "guard", "target": "wolf", "dx": 3, "name": "creatures.skycraft.scene.caravan_guard"}
+     ]},
+    {"id": "hunters_tracking_elk", "weight": 6, "time": "day", "levels": [1, 999], "road": "off", "townMin": 150,
+     "families": ["forest", "plains", "frozen"],
+     "members": [
+       {"entity": "skycraft:elk", "count": [1, 2], "as": "prey", "dx": 14},
+       {"npc": "hunter", "count": [1, 2], "target": "prey", "name": "creatures.skycraft.scene.tracker"}
+     ]},
+    {"id": "lone_pilgrim", "weight": 6, "time": "day", "levels": [1, 999], "townMin": 120,
+     "members": [
+       {"npc": "priest", "dest": "past", "name": "creatures.skycraft.scene.pilgrim"}
+     ]},
+    {"id": "bandits_arguing", "weight": 3, "time": "day", "levels": [5, 999], "hostile": true, "road": "off", "townMin": 300, "calmAfter": 25,
+     "members": [
+       {"npc": "thug", "as": "thief_a", "name": "creatures.skycraft.scene.squabbler"},
+       {"npc": "thug", "target": "thief_a", "dx": 3, "name": "creatures.skycraft.scene.squabbler"}
+     ]},
+    {"id": "hunters_camp", "weight": 4, "time": "day", "levels": [1, 999], "road": "off", "townMin": 200, "campfire": true,
+     "families": ["forest", "plains", "frozen", "mountain"],
+     "members": [
+       {"npc": "hunter", "count": [1, 2], "hold": true, "name": "creatures.skycraft.scene.camp_hunter"},
+       {"entity": "minecraft:horse", "dx": 5, "hold": true}
+     ]},
+    {"id": "wolves_on_a_kill", "weight": 4, "time": "day", "levels": [2, 999], "hostile": true, "road": "off", "townMin": 150,
+     "families": ["forest", "plains", "frozen", "mountain"],
+     "members": [
+       {"entity": "skycraft:deer", "count": [1, 2], "as": "prey", "dx": 12},
+       {"entity": "skycraft:wolf", "count": [2, 3], "target": "prey"}
+     ]}
+  ]
+}

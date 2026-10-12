@@ -75,6 +75,15 @@ public final class SpawnPacing {
         }
     }
 
+    /** Whether any settlement's footprint lies within {@code radius} blocks (box test) of the position. */
+    public static boolean settlementWithin(Level level, BlockPos pos, int radius) {
+        if (radius <= 0 || level.dimension() != Level.OVERWORLD) return false;
+        for (Place p : Places.overlapping(pos.getX() - radius, pos.getZ() - radius, pos.getX() + radius, pos.getZ() + radius)) {
+            if (p.type().isSettlement()) return true;
+        }
+        return false;
+    }
+
     // ------------------------------------------------------------------ per-player cooldown
 
     @SubscribeEvent

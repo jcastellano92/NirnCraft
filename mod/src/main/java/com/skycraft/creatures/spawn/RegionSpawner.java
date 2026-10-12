@@ -119,10 +119,14 @@ public final class RegionSpawner {
         SpawnTables.Placement place = classify(level, spot, surface);
         if (place == SpawnTables.Placement.SURFACE && underground) return;
         if (inSettlement(level, spot)) return;
+        boolean roadSpot = false;
         if (hostileKind) {
             if (SpawnPacing.calm(level, spot)) return; // around the world spawn and towns
             // main roads feel safe: hostile attempts there mostly fail
-            if (SpawnPacing.onRoad(level, spot) && random.nextDouble() > CreaturesConfig.ROAD_HOSTILE_FACTOR.get()) return;
+            roadSpot = SpawnPacing.onRoad(level, spot);
+            if (roadSpot && random.nextDouble() > CreaturesConfig.ROAD_HOSTILE_FACTOR.get()) return;
+            // ...and so does walking along one: quiet stretches (the spot is 40+ blocks away, off the road itself)
+            if (SpawnPacing.onRoad(level, player.blockPosition()) && random.nextDouble() > CreaturesConfig.ROAD_PLAYER_FACTOR.get()) return;
         }
 
         Holder<Biome> biome = level.getBiome(spot);
@@ -134,6 +138,12 @@ public final class RegionSpawner {
         if (fromStart < 900) regionLevel = Math.min(regionLevel, 2 + (int) (fromStart / 90));
         boolean nearStart = SpawnPacing.nearStart(level, spot.getX(), spot.getZ());
         boolean night = level.isNight();
+        long dayTime = level.getDayTime() % 24000L;
+        SpawnTables.Weather weather = level.isThundering() ? SpawnTables.Weather.STORM
+                : level.isRaining() ? SpawnTables.Weather.RAIN : SpawnTables.Weather.CLEAR;
+        // road and settlement distances are only looked up when a rule asks for them (cached per attempt)
+        Boolean roadHere = hostileKind ? Boolean.valueOf(roadSpot) : null;
+        java.util.Map<Integer, Boolean> townNear = new java.util.HashMap<>();
 
         List<SpawnTables.Group> candidates = new ArrayList<>();
         int total = 0;
@@ -141,8 +151,19 @@ public final class RegionSpawner {
             if (!matches(rule, region, family, biome)) continue;
             for (SpawnTables.Group g : rule.groups()) {
                 if (g.kind() != kind || regionLevel < g.minLevel() || regionLevel > g.maxLevel()) continue;
-                if (g.time() == SpawnTables.Time.DAY && night || g.time() == SpawnTables.Time.NIGHT && !night) continue;
+                if (!timeOk(g.time(), night, dayTime)) continue;
                 if (g.place() != SpawnTables.Placement.ANY && g.place() != place) continue;
+                SpawnTables.Where w = g.where();
+                if (spot.getY() < w.minY() || spot.getY() > w.maxY()) continue;
+                if (w.weather() != SpawnTables.Weather.ANY && w.weather() != weather
+                        && !(w.weather() == SpawnTables.Weather.RAIN && weather == SpawnTables.Weather.STORM)) continue;
+                if (w.road() != SpawnTables.RoadRule.ANY) {
+                    if (roadHere == null) roadHere = SpawnPacing.onRoad(level, spot);
+                    if (roadHere != (w.road() == SpawnTables.RoadRule.ON)) continue;
+                }
+                if (!w.nearPlaces().isEmpty() && !nearPlace(w, spot)) continue;
+                if (w.townMin() > 0 && townNear.computeIfAbsent(w.townMin(), r -> SpawnPacing.settlementWithin(level, spot, r))) continue;
+                if (w.townMax() > 0 && !townNear.computeIfAbsent(w.townMax(), r -> SpawnPacing.settlementWithin(level, spot, r))) continue;
                 if (nearStart && hasBanned(g)) continue; // no bosses or bandits near the start
                 candidates.add(g);
                 total += g.weight();
@@ -159,6 +180,25 @@ public final class RegionSpawner {
             }
         }
         if (spawnGroup(level, spot, chosen, mine, random) && hostileKind) SpawnPacing.noteHostile(player);
+    }
+
+    /** Whether one of the group's place types lies within its reach (barrows and ruins for the dead). */
+    private static boolean nearPlace(SpawnTables.Where w, BlockPos spot) {
+        for (com.skycraft.tamriel.PlaceType t : w.nearPlaces()) {
+            if (Places.nearest(t, spot.getX(), spot.getZ(), w.nearDist()).isPresent()) return true;
+        }
+        return false;
+    }
+
+    /** DAWN is the first ~2500 ticks of daylight, DUSK the last stretch before dark. */
+    private static boolean timeOk(SpawnTables.Time t, boolean night, long dayTime) {
+        return switch (t) {
+            case ANY -> true;
+            case DAY -> !night;
+            case NIGHT -> night;
+            case DAWN -> !night && (dayTime < 2500 || dayTime > 22800);
+            case DUSK -> !night && dayTime > 10500 && dayTime < 13000;
+        };
     }
 
     private static boolean hasBanned(SpawnTables.Group g) {
