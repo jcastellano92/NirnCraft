@@ -71,6 +71,11 @@ public final class ScatterRules {
         public Cluster cluster;
         /** Items the prop counts for against the chunk cap. */
         public int items = 1;
+        /** World reason this stands here (required), the zones it may be drawn in (required) and its trace of story. */
+        public String purpose, clue;
+        public Set<String> needs = Set.of();
+        /** Fewer than three related props and no anchor structure: capped per chunk ({@link Caps#isolated}). */
+        public boolean isolated;
     }
 
     /** One weighted draw of a zone: a density per chunk, scaled by humanity or remoteness, over a weighted kind list. */
@@ -91,7 +96,7 @@ public final class ScatterRules {
     }
 
     public static final class Caps {
-        public int chunk = 12, perKind = 2, attempts = 5;
+        public int chunk = 12, perKind = 2, attempts = 5, isolated = 1;
     }
 
     public final Map<String, Kind> kinds = new LinkedHashMap<>();
@@ -127,7 +132,12 @@ public final class ScatterRules {
         for (Map.Entry<String, JsonElement> e : kinds.entrySet()) {
             if (e.getKey().startsWith("_")) continue;
             try {
-                r.kinds.put(e.getKey(), parseKind(e.getKey(), e.getValue().getAsJsonObject()));
+                Kind pk = parseKind(e.getKey(), e.getValue().getAsJsonObject());
+                if (pk.purpose == null || pk.purpose.isBlank() || pk.needs.isEmpty()) {
+                    Skycraft.LOGGER.warn("Skycraft scatter: kind {} refused: no purpose/needs", pk.id);
+                    continue;
+                }
+                r.kinds.put(e.getKey(), pk);
             } catch (RuntimeException ex) {
                 Skycraft.LOGGER.warn("Skycraft scatter: bad kind {}", e.getKey(), ex);
             }
@@ -252,6 +262,21 @@ public final class ScatterRules {
             cl.radius = intOf(c, "radius", 6);
             for (JsonElement m : c.getAsJsonArray("members")) cl.members.add(m.getAsString());
             k.cluster = cl;
+        }
+        k.purpose = o.has("purpose") ? o.get("purpose").getAsString() : null;
+        k.clue = o.has("clue") ? o.get("clue").getAsString() : null;
+        k.needs = strings(o, "needs");
+        boolean anchor = o.has("anchor") && o.get("anchor").getAsBoolean();
+        if (k.builder == null && k.cluster == null && !anchor) {
+            int most = 0;
+            for (List<Entry> v : k.variants) {
+                int n = 0;
+                for (Entry en : v) {
+                    n += en.p2 == null ? 1 : (Math.abs(en.p2[0] - en.p[0]) + 1) * (Math.abs(en.p2[1] - en.p[1]) + 1) * (Math.abs(en.p2[2] - en.p[2]) + 1);
+                }
+                most = Math.max(most, n);
+            }
+            k.isolated = most < 3;
         }
         if (k.builder == null && k.variants.isEmpty() && k.cluster == null) {
             throw new IllegalArgumentException("kind " + id + " has no builder, variants or cluster");

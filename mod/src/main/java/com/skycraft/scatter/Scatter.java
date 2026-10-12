@@ -156,6 +156,7 @@ public final class Scatter {
         final Map<String, Integer> perKind = new HashMap<>();
         final MapSample ms = new MapSample();
         int count;
+        int isolated;
         /** Why the last {@link #build} said no (diagnostics for {@code dress}). */
         String why = "";
 
@@ -293,6 +294,7 @@ public final class Scatter {
 
         boolean build(Kind k, int x, int z, boolean spacing) {
             if (count >= rules.caps.chunk) return fail("chunk cap");
+            if (k.isolated && isolated >= rules.caps.isolated) return fail("isolated cap");
             int clear = spacing ? k.radius : 0;
             // clearance from other props of this chunk
             for (int[] c : centres) {
@@ -359,6 +361,7 @@ public final class Scatter {
             if (k.human && !k.wet && ms.road < 0.6f && TRAILED.contains(k.id)) trail(b, x, z);
             centres.add(new int[]{x, z, k.radius});
             count += Math.max(1, k.items);
+            if (k.isolated) isolated++;
             perKind.merge(k.id, 1, Integer::sum);
             ScatterStats.placed(cp.x, cp.z, zone, k, x, z, info.humanity());
             return true;

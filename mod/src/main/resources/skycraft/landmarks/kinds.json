@@ -22,7 +22,10 @@
     "mountain": 2,
     "coast": 1
    },
-   "style": "headstone"
+   "style": "headstone",
+   "purpose": "a burial of someone who died on this spot",
+   "context": "off the roads, any open ground",
+   "clue": "a name and a line on the marker"
   },
   {
    "id": "s_grave_cross",
@@ -39,7 +42,10 @@
     "crystal": 1,
     "coast": 1
    },
-   "style": "cross"
+   "style": "cross",
+   "purpose": "a burial of someone who died on this spot",
+   "context": "off the roads, any open ground",
+   "clue": "a name and a line on the marker"
   },
   {
    "id": "s_grave_cairn",
@@ -56,7 +62,10 @@
     "desert": 1,
     "forest": 1
    },
-   "style": "cairn"
+   "style": "cairn",
+   "purpose": "a burial of someone who died on this spot",
+   "context": "off the roads, any open ground",
+   "clue": "a name and a line on the marker"
   },
   {
    "id": "s_grave_slab",
@@ -73,7 +82,10 @@
     "coast": 1,
     "mountain": 1
    },
-   "style": "slab"
+   "style": "slab",
+   "purpose": "a burial of someone who died on this spot",
+   "context": "off the roads, any open ground",
+   "clue": "a name and a line on the marker"
   },
   {
    "id": "s_grave_mound",
@@ -89,7 +101,10 @@
     "mushroom": 1,
     "coast": 1
    },
-   "style": "mound"
+   "style": "mound",
+   "purpose": "a burial of someone who died on this spot",
+   "context": "off the roads, any open ground",
+   "clue": "a name and a line on the marker"
   },
   {
    "id": "s_grave_stakes",
@@ -105,7 +120,10 @@
     "tundra": 1,
     "plains": 1
    },
-   "style": "stakes"
+   "style": "stakes",
+   "purpose": "a burial of someone who died on this spot",
+   "context": "off the roads, any open ground",
+   "clue": "a name and a line on the marker"
   },
   {
    "id": "s_grave_sunken",
@@ -120,7 +138,10 @@
     "mushroom": 2,
     "shore": 2
    },
-   "style": "sunken"
+   "style": "sunken",
+   "purpose": "a burial of someone who died on this spot",
+   "context": "off the roads, any open ground",
+   "clue": "a name and a line on the marker"
   },
   {
    "id": "s_grave_flowers",
@@ -135,7 +156,10 @@
     "savanna": 1,
     "shore": 1
    },
-   "style": "flowers"
+   "style": "flowers",
+   "purpose": "a burial of someone who died on this spot",
+   "context": "off the roads, any open ground",
+   "clue": "a name and a line on the marker"
   },
   {
    "id": "s_cairn_pile",
@@ -157,7 +181,10 @@
     "mountain": 3,
     "coast": 1
    },
-   "style": "pile"
+   "style": "pile",
+   "purpose": "travellers stack a stone each to mark a path or remember someone",
+   "context": "trail or ridge",
+   "clue": "a scratched direction"
   },
   {
    "id": "s_cairn_spire",
@@ -174,7 +201,10 @@
     "savanna": 1,
     "high": 3
    },
-   "style": "spire"
+   "style": "spire",
+   "purpose": "travellers stack a stone each to mark a path or remember someone",
+   "context": "trail or ridge",
+   "clue": "a scratched direction"
   },
   {
    "id": "s_cairn_ring",
@@ -190,7 +220,10 @@
     "mountain": 1,
     "marsh": 1
    },
-   "style": "ring"
+   "style": "ring",
+   "purpose": "travellers stack a stone each to mark a path or remember someone",
+   "context": "trail or ridge",
+   "clue": "a scratched direction"
   },
   {
    "id": "s_cairn_marker",
@@ -212,7 +245,10 @@
     "mountain": 2,
     "coast": 1
    },
-   "style": "marker"
+   "style": "marker",
+   "purpose": "travellers stack a stone each to mark a path or remember someone",
+   "context": "trail or ridge",
+   "clue": "a scratched direction"
   },
   {
    "id": "s_bedroll_cold",
@@ -234,7 +270,10 @@
     "mountain": 2,
     "coast": 1
    },
-   "style": "roll"
+   "style": "roll",
+   "purpose": "a traveller's night camp",
+   "context": "beside a road or trail",
+   "clue": "an ash ring and a pack"
   },
   {
    "id": "s_bedroll_leanto",
@@ -250,7 +289,10 @@
     "ash": 1,
     "savanna": 1
    },
-   "style": "lean_to"
+   "style": "lean_to",
+   "purpose": "a traveller's night camp",
+   "context": "beside a road or trail",
+   "clue": "an ash ring and a pack"
   },
   {
    "id": "s_lovers_tree",
@@ -266,7 +308,10 @@
     "coast": 1,
     "shore": 2
    },
-   "style": "carved"
+   "style": "carved",
+   "purpose": "a tree where two people carved their names",
+   "context": "forest or plains with a lone tree",
+   "clue": "two names cut in the bark"
   },
   {
    "id": "s_lovers_tree_ribbon",
@@ -280,7 +325,10 @@
     "savanna": 1,
     "shore": 1
    },
-   "style": "ribbon"
+   "style": "ribbon",
+   "purpose": "a tree where two people carved their names",
+   "context": "forest or plains with a lone tree",
+   "clue": "two names cut in the bark"
   },
   {
    "id": "s_offering_niche",
@@ -302,7 +350,10 @@
     "mountain": 3,
     "coast": 1
    },
-   "style": "niche"
+   "style": "niche",
+   "purpose": "a small shrine where locals leave tokens to a spirit of the place",
+   "context": "spring, stone or old tree",
+   "clue": "the offering itself"
   },
   {
    "id": "s_offering_stump",
@@ -317,7 +368,10 @@
     "mushroom": 3,
     "tundra": 1
    },
-   "style": "stump"
+   "style": "stump",
+   "purpose": "a small shrine where locals leave tokens to a spirit of the place",
+   "context": "spring, stone or old tree",
+   "clue": "the offering itself"
   },
   {
    "id": "s_offering_bowl",
@@ -333,7 +387,10 @@
     "tundra": 1,
     "volcanic": 1
    },
-   "style": "bowl"
+   "style": "bowl",
+   "purpose": "a small shrine where locals leave tokens to a spirit of the place",
+   "context": "spring, stone or old tree",
+   "clue": "the offering itself"
   },
   {
    "id": "s_offering_bones",
@@ -349,7 +406,10 @@
     "mountain": 1,
     "mushroom": 1
    },
-   "style": "bones"
+   "style": "bones",
+   "purpose": "a small shrine where locals leave tokens to a spirit of the place",
+   "context": "spring, stone or old tree",
+   "clue": "the offering itself"
   },
   {
    "id": "s_pack_satchel",
@@ -371,7 +431,10 @@
     "mountain": 3,
     "coast": 1
    },
-   "style": "satchel"
+   "style": "satchel",
+   "purpose": "a traveller's pack dropped in flight or death",
+   "context": "near a road or trail",
+   "clue": "a satchel with a note or token"
   },
   {
    "id": "s_pack_crate",
@@ -387,7 +450,10 @@
     "marsh": 1,
     "desert": 1
    },
-   "style": "crate"
+   "style": "crate",
+   "purpose": "a traveller's pack dropped in flight or death",
+   "context": "near a road or trail",
+   "clue": "a satchel with a note or token"
   },
   {
    "id": "s_pack_saddlebag",
@@ -402,7 +468,10 @@
     "tundra": 1,
     "ash": 1
    },
-   "style": "saddlebag"
+   "style": "saddlebag",
+   "purpose": "a traveller's pack dropped in flight or death",
+   "context": "near a road or trail",
+   "clue": "a satchel with a note or token"
   },
   {
    "id": "s_warn_skull_pike",
@@ -419,7 +488,10 @@
     "desert": 1,
     "jungle": 1
    },
-   "style": "skull_pike"
+   "style": "skull_pike",
+   "purpose": "a sign set by locals so travellers avoid something nearby",
+   "context": "near a danger",
+   "clue": "a painted warning with a name"
   },
   {
    "id": "s_warn_crow_post",
@@ -434,7 +506,10 @@
     "marsh": 1,
     "tundra": 1
    },
-   "style": "crow_post"
+   "style": "crow_post",
+   "purpose": "a sign set by locals so travellers avoid something nearby",
+   "context": "near a danger",
+   "clue": "a painted warning with a name"
   },
   {
    "id": "s_warn_scrawl",
@@ -456,7 +531,10 @@
     "mountain": 3,
     "coast": 1
    },
-   "style": "scrawl"
+   "style": "scrawl",
+   "purpose": "a sign set by locals so travellers avoid something nearby",
+   "context": "near a danger",
+   "clue": "a painted warning with a name"
   },
   {
    "id": "s_spring_basin",
@@ -473,7 +551,10 @@
     "crystal": 2,
     "savanna": 1
    },
-   "style": "basin"
+   "style": "basin",
+   "purpose": "a clean spring that travellers rely on",
+   "context": "slope or cave mouth",
+   "clue": "a cup left on a rock"
   },
   {
    "id": "s_spring_trough",
@@ -488,7 +569,10 @@
     "desert": 1,
     "tundra": 1
    },
-   "style": "trough"
+   "style": "trough",
+   "purpose": "a clean spring that travellers rely on",
+   "context": "slope or cave mouth",
+   "clue": "a cup left on a rock"
   },
   {
    "id": "s_remains_ribcage",
@@ -504,7 +588,10 @@
     "mountain": 1,
     "volcanic": 1
    },
-   "style": "ribcage"
+   "style": "ribcage",
+   "purpose": "a victim or a traveller who did not make it",
+   "context": "near road, den or ruin",
+   "clue": "a possession that names them"
   },
   {
    "id": "s_remains_driftwood",
@@ -516,7 +603,10 @@
     "shore": 3,
     "marsh": 1
    },
-   "style": "driftwood"
+   "style": "driftwood",
+   "purpose": "a victim or a traveller who did not make it",
+   "context": "near road, den or ruin",
+   "clue": "a possession that names them"
   },
   {
    "id": "s_remains_antlers",
@@ -531,7 +621,10 @@
     "ash": 1,
     "jungle": 1
    },
-   "style": "antlers"
+   "style": "antlers",
+   "purpose": "a victim or a traveller who did not make it",
+   "context": "near road, den or ruin",
+   "clue": "a possession that names them"
   },
   {
    "id": "s_fire_cold",
@@ -553,7 +646,10 @@
     "mountain": 2,
     "coast": 1
    },
-   "style": "cold"
+   "style": "cold",
+   "purpose": "a camp site travellers reuse because of shelter and water",
+   "context": "near water or lee of a rise",
+   "clue": "cold ash and a half-burnt log"
   },
   {
    "id": "s_fire_embers",
@@ -568,7 +664,10 @@
     "savanna": 1,
     "mountain": 1
    },
-   "style": "embers"
+   "style": "embers",
+   "purpose": "a camp site travellers reuse because of shelter and water",
+   "context": "near water or lee of a rise",
+   "clue": "cold ash and a half-burnt log"
   },
   {
    "id": "s_charms_tree",
@@ -585,7 +684,10 @@
     "jungle": 1,
     "savanna": 1
    },
-   "style": "wind"
+   "style": "wind",
+   "purpose": "a ward hung where the dead or the wild are feared",
+   "context": "forest or marsh edge",
+   "clue": "a bone charm on a branch"
   },
   {
    "id": "m_pilgrim_stone",
@@ -608,7 +710,10 @@
    "cast": [
     "npc:priest"
    ],
-   "note": "pilgrim"
+   "note": "pilgrim",
+   "purpose": "a halt on a pilgrim path to a shrine",
+   "context": "near a shrine or old road",
+   "clue": "a prayer stone and a bowl"
   },
   {
    "id": "m_pilgrim_grove",
@@ -628,7 +733,10 @@
    "cast": [
     "npc:priest"
    ],
-   "note": "pilgrim"
+   "note": "pilgrim",
+   "purpose": "a halt on a pilgrim path to a shrine",
+   "context": "near a shrine or old road",
+   "clue": "a prayer stone and a bowl"
   },
   {
    "id": "m_pilgrim_pool",
@@ -649,7 +757,10 @@
    "cast": [
     "npc:priest"
    ],
-   "note": "pilgrim"
+   "note": "pilgrim",
+   "purpose": "a halt on a pilgrim path to a shrine",
+   "context": "near a shrine or old road",
+   "clue": "a prayer stone and a bowl"
   },
   {
    "id": "m_hermit_goats",
@@ -672,7 +783,10 @@
     "mob:minecraft:goat",
     "mob:minecraft:goat"
    ],
-   "note": "hermit"
+   "note": "hermit",
+   "purpose": "a recluse who chose the wild",
+   "context": "far from settlements",
+   "clue": "a hut and a garden"
   },
   {
    "id": "m_hermit_marsh",
@@ -690,7 +804,10 @@
    "cast": [
     "npc:apothecary"
    ],
-   "note": "hermit"
+   "note": "hermit",
+   "purpose": "a recluse who chose the wild",
+   "context": "far from settlements",
+   "clue": "a hut and a garden"
   },
   {
    "id": "m_hunters_kill",
@@ -712,7 +829,10 @@
     "npc:hunter",
     "npc:hunter"
    ],
-   "note": "hunter"
+   "note": "hunter",
+   "purpose": "hunters dressing a kill near the forest edge",
+   "context": "forest edge",
+   "clue": "a carcass and a rack"
   },
   {
    "id": "m_travellers_rest",
@@ -737,7 +857,10 @@
     "npc:citizen",
     "npc:merchant"
    ],
-   "note": "traveller"
+   "note": "traveller",
+   "purpose": "a pair or group resting where the road crests",
+   "context": "on or beside a road",
+   "clue": "a pot and two bedrolls"
   },
   {
    "id": "m_smuggler_cave",
@@ -751,7 +874,10 @@
     "ash": 1
    },
    "noun": "Drop",
-   "note": "smuggler"
+   "note": "smuggler",
+   "purpose": "a hidden cache of goods outside the toll roads",
+   "context": "coast or ravine",
+   "clue": "a marker and a stowed crate"
   },
   {
    "id": "m_ghost_stone",
@@ -771,7 +897,10 @@
    },
    "style": "stone",
    "noun": "House",
-   "note": "ghost"
+   "note": "ghost",
+   "purpose": "the foundations of a farm or hamlet that failed",
+   "context": "open ground near a road or stream",
+   "clue": "a hearthstone and a toppled wall"
   },
   {
    "id": "m_ghost_timber",
@@ -788,7 +917,10 @@
    },
    "style": "timber",
    "noun": "Hall",
-   "note": "ghost"
+   "note": "ghost",
+   "purpose": "the foundations of a farm or hamlet that failed",
+   "context": "open ground near a road or stream",
+   "clue": "a hearthstone and a toppled wall"
   },
   {
    "id": "m_ghost_mud",
@@ -805,7 +937,10 @@
    },
    "style": "mud",
    "noun": "Hearth",
-   "note": "ghost"
+   "note": "ghost",
+   "purpose": "the foundations of a farm or hamlet that failed",
+   "context": "open ground near a road or stream",
+   "clue": "a hearthstone and a toppled wall"
   },
   {
    "id": "m_ambush_cart",
@@ -823,7 +958,10 @@
     "marsh": 1
    },
    "noun": "Wreck",
-   "note": "ambush"
+   "note": "ambush",
+   "purpose": "bandits waiting where the road narrows",
+   "context": "near road, cut or bend",
+   "clue": "a lookout post and discarded gear"
   },
   {
    "id": "m_skirmish",
@@ -841,7 +979,10 @@
     "marsh": 1,
     "volcanic": 1
    },
-   "noun": "Field"
+   "noun": "Field",
+   "purpose": "a small fight whose dead were never buried",
+   "context": "near road or border",
+   "clue": "dropped arms of both sides"
   },
   {
    "id": "m_boat_wreck",
@@ -854,7 +995,10 @@
     "marsh": 2
    },
    "noun": "Wreck",
-   "note": "traveller"
+   "note": "traveller",
+   "purpose": "a boat that failed on the shore",
+   "context": "shoreline",
+   "clue": "a name on the transom"
   },
   {
    "id": "m_sacrifice",
@@ -872,7 +1016,10 @@
     "mushroom": 2
    },
    "noun": "Altar",
-   "note": "scholar"
+   "note": "scholar",
+   "purpose": "a cult's or a clan's offering site",
+   "context": "remote hilltop",
+   "clue": "an altar stone and old stains"
   },
   {
    "id": "m_hunting_blind",
@@ -888,7 +1035,10 @@
     "mountain": 1,
     "savanna": 1
    },
-   "noun": "Blind"
+   "noun": "Blind",
+   "purpose": "a hunter's hide above a game trail",
+   "context": "forest or tundra with game",
+   "clue": "a stand and a spent arrow"
   },
   {
    "id": "m_prospector_claim",
@@ -903,7 +1053,10 @@
     "volcanic": 3,
     "savanna": 1
    },
-   "noun": "Claim"
+   "noun": "Claim",
+   "purpose": "a prospector's staked claim",
+   "context": "ore-bearing slope",
+   "clue": "a claim marker and a pickaxe"
   },
   {
    "id": "m_dolmen",
@@ -919,7 +1072,10 @@
     "marsh": 1,
     "ash": 1
    },
-   "noun": "Dolmen"
+   "noun": "Dolmen",
+   "purpose": "an old standing-stone grave of an earlier people",
+   "context": "high open ground",
+   "clue": "carved glyphs"
   },
   {
    "id": "m_dig_site",
@@ -938,7 +1094,10 @@
     "volcanic": 1
    },
    "noun": "Dig",
-   "note": "scholar"
+   "note": "scholar",
+   "purpose": "a treasure hunter's or scholar's excavation",
+   "context": "ruin edge or old ground",
+   "clue": "a spade and a half-sorted trench"
   },
   {
    "id": "m_beacon_pyre",
@@ -955,7 +1114,10 @@
     "desert": 1,
     "high": 3
    },
-   "noun": "Beacon"
+   "noun": "Beacon",
+   "purpose": "a signal fire laid for the nearest hold watch",
+   "context": "ridge or high ground",
+   "clue": "a woodstack and a flint"
   },
   {
    "id": "l_rock_arch",
@@ -977,7 +1139,10 @@
    "style": "natural",
    "noun": "Arch",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_rock_arch_twin",
@@ -995,7 +1160,10 @@
    "style": "twin",
    "noun": "Arches",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_ice_arch",
@@ -1012,7 +1180,10 @@
    "sign": true,
    "params": {
     "rock": "ice"
-   }
+   },
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_hoodoos",
@@ -1030,7 +1201,10 @@
    },
    "noun": "Hoodoos",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_hoodoos_ash",
@@ -1047,7 +1221,10 @@
    "sign": true,
    "params": {
     "rock": "ashrock"
-   }
+   },
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_split_boulder",
@@ -1068,7 +1245,10 @@
    "noun": "Cleft",
    "secret": 0.17,
    "sign": true,
-   "spread": 14
+   "spread": 14,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_menhir_lone",
@@ -1089,7 +1269,10 @@
    "style": "lone",
    "noun": "Stone",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_menhir_leaning",
@@ -1108,7 +1291,10 @@
    "style": "leaning",
    "noun": "Leaning Stone",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_menhir_broken",
@@ -1128,7 +1314,10 @@
    "style": "broken",
    "noun": "Stone",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_sinkhole_dry",
@@ -1147,7 +1336,10 @@
    "style": "dry",
    "noun": "Sink",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_sinkhole_pond",
@@ -1167,7 +1359,10 @@
    "style": "pond",
    "noun": "Pit",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_tower_ruin",
@@ -1189,7 +1384,10 @@
    },
    "noun": "Tower",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_cliff_nests",
@@ -1209,7 +1407,10 @@
    "noun": "Eyrie",
    "secret": 0.17,
    "sign": true,
-   "spread": 16
+   "spread": 16,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_petrified_tree",
@@ -1229,7 +1430,10 @@
    },
    "noun": "Snag",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_bone_field_dragon",
@@ -1247,7 +1451,10 @@
    "style": "dragon",
    "noun": "Bones",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_bone_field_mammoth",
@@ -1264,7 +1471,10 @@
    "style": "mammoth",
    "noun": "Bones",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_bone_field_leviathan",
@@ -1279,7 +1489,10 @@
    "style": "leviathan",
    "noun": "Ribs",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_terraces_springs",
@@ -1297,7 +1510,10 @@
    },
    "noun": "Springs",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_geode",
@@ -1316,7 +1532,10 @@
    },
    "noun": "Geode",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_ice_fall",
@@ -1330,7 +1549,10 @@
    "noun": "Frostfall",
    "secret": 0.17,
    "sign": true,
-   "spread": 16
+   "spread": 16,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_glass_dune",
@@ -1344,7 +1566,10 @@
    },
    "noun": "Glassfield",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_columns",
@@ -1361,7 +1586,10 @@
    },
    "noun": "Pillars",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_sea_stacks",
@@ -1376,7 +1604,10 @@
    "sign": true,
    "needs": [
     "coast"
-   ]
+   ],
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_mushroom_grove",
@@ -1391,7 +1622,10 @@
    },
    "noun": "Grove",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_vent_sulfur",
@@ -1408,7 +1642,10 @@
    "style": "sulfur",
    "noun": "Vent",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_vent_tar",
@@ -1426,7 +1663,10 @@
    "style": "tar",
    "noun": "Tarpit",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_crater_impact",
@@ -1445,7 +1685,10 @@
    },
    "noun": "Scar",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_statue_head",
@@ -1466,7 +1709,10 @@
    "style": "head",
    "noun": "Head",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_statue_hand",
@@ -1485,7 +1731,10 @@
    "style": "hand",
    "noun": "Hand",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_statue_torso",
@@ -1504,7 +1753,10 @@
    "style": "torso",
    "noun": "Colossus",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_aqueduct",
@@ -1522,7 +1774,10 @@
    "noun": "Aqueduct",
    "secret": 0.17,
    "sign": true,
-   "spread": 10
+   "spread": 10,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_bridge_stub",
@@ -1541,7 +1796,10 @@
    "noun": "Span",
    "secret": 0.17,
    "sign": true,
-   "spread": 10
+   "spread": 10,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_fallen_log",
@@ -1557,7 +1815,10 @@
    },
    "noun": "Trunk",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_rune_circle",
@@ -1575,7 +1836,10 @@
    },
    "noun": "Circle",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_ice_spires",
@@ -1591,7 +1855,10 @@
    "sign": true,
    "params": {
     "rock": "ice"
-   }
+   },
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_obsidian_fangs",
@@ -1607,7 +1874,10 @@
    "sign": true,
    "params": {
     "rock": "obsidian"
-   }
+   },
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_dry_lake",
@@ -1623,7 +1893,10 @@
    },
    "noun": "Pan",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_drowned_grove",
@@ -1638,7 +1911,10 @@
    },
    "noun": "Grove",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_old_walls",
@@ -1656,7 +1932,10 @@
    },
    "noun": "Holding",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_fins",
@@ -1672,7 +1951,10 @@
    },
    "noun": "Fins",
    "secret": 0.17,
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "l_butte",
@@ -1690,7 +1972,10 @@
    "noun": "Butte",
    "secret": 0.17,
    "sign": true,
-   "spread": 14
+   "spread": 14,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_colossal_tree_forest",
@@ -1707,7 +1992,10 @@
    "sign": true,
    "params": {
     "shape": "broadleaf"
-   }
+   },
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_colossal_tree_jungle",
@@ -1723,7 +2011,10 @@
    "sign": true,
    "params": {
     "shape": "broadleaf"
-   }
+   },
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_colossal_tree_marsh",
@@ -1739,7 +2030,10 @@
    "sign": true,
    "params": {
     "shape": "broadleaf"
-   }
+   },
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_colossal_tree_tundra",
@@ -1754,7 +2048,10 @@
    "sign": true,
    "params": {
     "shape": "conifer"
-   }
+   },
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_colossal_tree_dead",
@@ -1772,7 +2069,10 @@
    "sign": true,
    "params": {
     "shape": "dead"
-   }
+   },
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_colossal_tree_savanna",
@@ -1788,7 +2088,10 @@
    "sign": true,
    "params": {
     "shape": "broadleaf"
-   }
+   },
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_colossal_tree_crystal",
@@ -1802,7 +2105,10 @@
    "sign": true,
    "params": {
     "shape": "broadleaf"
-   }
+   },
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_fungal_spire",
@@ -1815,7 +2121,10 @@
     "jungle": 1
    },
    "noun": "Spire",
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_giant_ribcage_dragon",
@@ -1831,7 +2140,10 @@
    },
    "style": "dragon",
    "noun": "Ribs",
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_giant_ribcage_leviathan",
@@ -1845,7 +2157,10 @@
    },
    "style": "leviathan",
    "noun": "Bones",
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_giant_ribcage_giant",
@@ -1863,7 +2178,10 @@
    },
    "style": "giant",
    "noun": "Rest",
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_bridge_arch",
@@ -1880,7 +2198,10 @@
     "coast": 1
    },
    "noun": "Bridge",
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_spire_stack",
@@ -1899,7 +2220,10 @@
     "jungle": 1
    },
    "noun": "Needles",
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_spire_twist",
@@ -1914,7 +2238,10 @@
     "coast": 1
    },
    "noun": "Twist",
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_antler_spires",
@@ -1928,7 +2255,10 @@
     "volcanic": 2
    },
    "noun": "Antlers",
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_crater_lake",
@@ -1946,7 +2276,10 @@
     "marsh": 1
    },
    "noun": "Mirror",
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_mesa_path",
@@ -1963,7 +2296,10 @@
     "volcanic": 1
    },
    "noun": "Table",
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_crystal_spire",
@@ -1976,7 +2312,10 @@
     "mountain": 1
    },
    "noun": "Crystal",
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_glacier_tower",
@@ -1988,7 +2327,10 @@
     "mountain": 2
    },
    "noun": "Shard",
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   },
   {
    "id": "xl_obsidian_spire",
@@ -2000,7 +2342,10 @@
     "ash": 4
    },
    "noun": "Spire",
-   "sign": true
+   "sign": true,
+   "purpose": "a natural formation: the land shaped by water, wind, ice or fire",
+   "context": "any ground matching its biome",
+   "clue": "a sign names it for travellers"
   }
  ]
 }

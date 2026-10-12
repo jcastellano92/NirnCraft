@@ -32,6 +32,8 @@ public final class CreaturesConfig {
     public static final ForgeConfigSpec.BooleanValue TOWN_ALARM;
     public static final ForgeConfigSpec.IntValue ALARM_CLEAR_SECONDS;
     public static final ForgeConfigSpec.BooleanValue CIVILIANS_FLEE;
+    public static final ForgeConfigSpec.BooleanValue FACTION_WARS;
+    public static final ForgeConfigSpec.IntValue WAR_RADIUS;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -96,6 +98,12 @@ public final class CreaturesConfig {
                 .defineInRange("alarmClearSeconds", 30, 5, 600);
         CIVILIANS_FLEE = b.comment("Villagers and townsfolk run away from hostiles near them.")
                 .define("civiliansFlee", true);
+        b.pop();
+        b.push("wars");
+        FACTION_WARS = b.comment("Opposed groups (bandits vs Forsworn, Legion vs Stormcloaks, predators vs prey, Falmer vs automata) fight each other on sight; see skycraft/creatures/relations.json.")
+                .define("factionWars", true);
+        WAR_RADIUS = b.comment("Blocks within which opposed mobs notice each other.")
+                .defineInRange("warRadius", 16, 4, 32);
         b.pop();
         SPEC = b.build();
     }

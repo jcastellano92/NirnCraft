@@ -56,6 +56,8 @@ public final class Kinds {
     private static Kind parse(JsonObject o) {
         Tier tier = Tier.byId(o.get("tier").getAsString());
         if (tier == null) throw new IllegalArgumentException("tier");
+        // placement must have a world reason: gen_kinds.py writes purpose/context/clue for every kind
+        if (!o.has("purpose") || !o.has("context")) throw new IllegalArgumentException("no purpose/context");
         Map<String, Double> w = new HashMap<>();
         if (o.has("w")) for (var en : o.getAsJsonObject("w").entrySet()) w.put(en.getKey(), en.getValue().getAsDouble());
         int radius = Math.min(tier.radiusCap, o.has("radius") ? o.get("radius").getAsInt() : tier.radiusCap);

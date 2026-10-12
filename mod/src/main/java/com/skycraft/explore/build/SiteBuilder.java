@@ -308,7 +308,7 @@ public final class SiteBuilder {
 
     /** Puts a stack into the first free slot of the container at {@code p} (worldgen-time, before any loot roll). */
     public void addItem(BlockPos p, ItemStack stack) {
-        if (stack.isEmpty() || !writable(p)) return;
+        if (level == null || stack.isEmpty() || !writable(p)) return;
         BlockEntity be = level.getBlockEntity(p);
         if (be instanceof Container c) {
             for (int i = 0; i < c.getContainerSize(); i++) {
