@@ -1,0 +1,360 @@
+{
+ "line": "loreweb_valenwood",
+ "category": "side",
+ "bosses": {
+  "lw_val_1_boss": {
+   "name": "Keeper of the Crown",
+   "type": "skycraft:spriggan",
+   "hp": 3.4,
+   "dmg": 1.5,
+   "level": 26,
+   "drop": "loot:standard",
+   "glow": false
+  },
+  "lw_val_2_boss": {
+   "name": "The Chanting Apostate",
+   "type": "skycraft:necromancer",
+   "hp": 3.2,
+   "dmg": 1.4,
+   "level": 24,
+   "drop": "loot:standard",
+   "glow": false
+  },
+  "lw_val_3_boss": {
+   "name": "Ashen Archon",
+   "type": "skycraft:wispmother",
+   "hp": 3,
+   "dmg": 1.4,
+   "level": 24,
+   "drop": "loot:standard",
+   "glow": false
+  },
+  "lw_val_4_boss": {
+   "name": "Gorrim of the Broken Bone",
+   "type": "skycraft:werewolf",
+   "hp": 3.2,
+   "dmg": 1.5,
+   "level": 24,
+   "drop": "loot:standard",
+   "glow": false
+  }
+ },
+ "quests": [
+  {
+   "id": "lw_val_1_a",
+   "title": "The Crown Lamp",
+   "region": "valenwood/grahtwood",
+   "start": "find",
+   "find": {
+    "place": "elden_tree",
+    "offset": [
+     9,
+     5
+    ],
+    "radius": 4,
+    "clue": "totem",
+    "text": "A root-totem at the trunk's base has been drilled with a dozen small holes. In each a pale glass splinter glows faintly. A tag in Bosmer script: 'The crown is thirsty. Feed it names.'"
+   },
+   "requires": [
+    "level:20"
+   ],
+   "desc": "A root-totem studded with glass splinters at the base of the great tree says the crown is thirsty and must be fed names.",
+   "pitch": "The totem-carvers say the great tree's glow has dimmed one shade each season.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "ne_salas",
+     "text": "Copy a ring of name-plates from Ne Salas and take it to the star-vault."
+    },
+    {
+     "type": "go",
+     "place": "reliquary_of_stars",
+     "text": "Re-light the dark stars in the Reliquary and take the scroll to Elden Root."
+    }
+   ],
+   "rewards": {
+    "gold": 230,
+    "loot": "minor"
+   },
+   "outro": "One thread of the trail ends here and the next begins. The lamp's trail dips into an underground tower-city and a star-vault, climbs the tree's capital, and ends in a bone-walled ossuary."
+  },
+  {
+   "id": "lw_val_1_b",
+   "title": "The Crown Lamp (II)",
+   "region": "valenwood/grahtwood",
+   "start": "auto",
+   "requires": [
+    "quest:lw_val_1_a"
+   ],
+   "desc": "The lamp's trail dips into an underground tower-city and a star-vault, climbs the tree's capital, and ends in a bone-walled ossuary.",
+   "pitch": "The totem-carvers say the great tree's glow has dimmed one shade each season.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "elden_root",
+     "text": "Open the keepers' hall and read the debate's ballot."
+    },
+    {
+     "type": "kill",
+     "place": "ossuary_of_telacar",
+     "text": "Read the lamp-warden's name at the lowest tier and relight the crown.",
+     "spawn": [
+      {
+       "boss_id": "lw_val_1_boss"
+      }
+     ],
+     "placement": "structure"
+    }
+   ],
+   "rewards": {
+    "gold": 580,
+    "loot": "major",
+    "flags": [
+     "lw_val_1_done"
+    ],
+    "unique": "green_pact_fang"
+   },
+   "outro": "I laid the last name in the ossuary's tier and the glow in the crown flickered up like a lit wick. The Pact's keepers will be less grateful than I hoped. The lamp, though, burned bright."
+  },
+  {
+   "id": "lw_val_2_a",
+   "title": "Where the City Walks",
+   "region": "valenwood/malabal_tor",
+   "start": "find",
+   "find": {
+    "place": "roadside_green_bough",
+    "offset": [
+     -3,
+     8
+    ],
+    "radius": 4,
+    "clue": "lectern",
+    "text": "An inn's travel-board lists the walking city's seasons, in one column the old route and in another, a new straight line drawn in charcoal, heading for a hollow tree."
+   },
+   "requires": [
+    "level:12"
+   ],
+   "desc": "A charcoal line on an inn's route-board shows the walking city heading in a straight line for a hollow tree.",
+   "pitch": "The innkeeper says the walking city has stopped wandering and started to march.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "supplication_house",
+     "text": "Take the chant tablet from the hermit to the Orc outposts that will help cut."
+    },
+    {
+     "type": "go",
+     "place": "drabul",
+     "text": "Take the Drabul chief's tally to the next outpost at Jathsogur."
+    },
+    {
+     "type": "go",
+     "place": "jathsogur",
+     "text": "Take the guide-line bearing from Jathsogur to the hidden court at Silvenar."
+    }
+   ],
+   "rewards": {
+    "gold": 220,
+    "loot": "minor"
+   },
+   "outro": "One thread of the trail ends here and the next begins. The cutters' trail runs through Orc outposts and a hidden court to the walking city and the tree-tomb itself."
+  },
+  {
+   "id": "lw_val_2_b",
+   "title": "Where the City Walks (II)",
+   "region": "valenwood/malabal_tor",
+   "start": "auto",
+   "requires": [
+    "quest:lw_val_2_a"
+   ],
+   "desc": "The cutters' trail runs through Orc outposts and a hidden court to the walking city and the tree-tomb itself.",
+   "pitch": "The innkeeper says the walking city has stopped wandering and started to march.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "silvenar",
+     "text": "Secure the court seal at Silvenar and join the walking city."
+    },
+    {
+     "type": "go",
+     "place": "falinesti",
+     "text": "Sever the walking city's final guide-root at the base of Falinesti."
+    },
+    {
+     "type": "kill",
+     "place": "tomb_of_the_apostates",
+     "text": "Descend the hollow tree and silence the apostates' chant.",
+     "spawn": [
+      {
+       "boss_id": "lw_val_2_boss"
+      }
+     ],
+     "placement": "structure"
+    }
+   ],
+   "rewards": {
+    "gold": 540,
+    "loot": "major",
+    "flags": [
+     "lw_val_2_done"
+    ]
+   },
+   "outro": "At the tomb I silenced the chant and the city, far behind me, slowed and began, at long last, to turn. A Pact-warden saw me cut the last guide-tree and said nothing. Some silences are a kind of thanks."
+  },
+  {
+   "id": "lw_val_3_a",
+   "title": "The Citizens' Orchard",
+   "region": "valenwood/greenshade",
+   "start": "find",
+   "find": {
+    "place": "marbruk",
+    "offset": [
+     5,
+     -9
+    ],
+    "radius": 4,
+    "clue": "stone",
+    "text": "A thorn-wall plaque at the glade's rim lists forty names in a looping Ayleid script, each pricked out with a thorn. Below it, in Bosmer: 'The Mercy. Never be cut. Never be moved.'"
+   },
+   "requires": [
+    "level:12"
+   ],
+   "desc": "A thorn-wall plaque lists forty Ayleid names with a Bosmer warning never to cut the trees.",
+   "pitch": "The thorn-wardens say the trees of Woodhearth are leaning, a finger a year, to the south.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "woodhearth",
+     "text": "Take a leaf from the Woodhearth ring and follow where the trees lean."
+    }
+   ],
+   "rewards": {
+    "gold": 200,
+    "loot": "minor"
+   },
+   "outro": "One thread of the trail ends here and the next begins. The orchard's roots lean through a hedge-maze toward a burned city."
+  },
+  {
+   "id": "lw_val_3_b",
+   "title": "The Citizens' Orchard (II)",
+   "region": "valenwood/greenshade",
+   "start": "auto",
+   "requires": [
+    "quest:lw_val_3_a"
+   ],
+   "desc": "The orchard's roots lean through a hedge-maze toward a burned city.",
+   "pitch": "The thorn-wardens say the trees of Woodhearth are leaning, a finger a year, to the south.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "labyrinth",
+     "text": "Climb the ridge, read the maze as a map and walk it to the burned city's gate."
+    },
+    {
+     "type": "kill",
+     "place": "city_of_ash",
+     "text": "Carry the orchard leaf to the cistern lamp and let the citizens go home.",
+     "spawn": [
+      {
+       "boss_id": "lw_val_3_boss"
+      }
+     ],
+     "placement": "structure"
+    }
+   ],
+   "rewards": {
+    "gold": 500,
+    "loot": "major",
+    "flags": [
+     "lw_val_3_done"
+    ]
+   },
+   "outro": "I walked the last road with the orchard's leaf in my hand and set it on a melted lamp in the burned city. For an hour the ash-grey terraces were green. The trees will not lean further. They are home."
+  },
+  {
+   "id": "lw_val_4_a",
+   "title": "The Truce of Bones",
+   "region": "valenwood/reapers_march",
+   "start": "find",
+   "find": {
+    "place": "waterdancer_falls",
+    "offset": [
+     6,
+     9
+    ],
+    "radius": 4,
+    "clue": "stone",
+    "text": "A prayer-stone beside the falls is cut with eight notches for the Truce's bones. Seven are filled in white. The eighth is red clay, still wet, with a thumb-print."
+   },
+   "requires": [
+    "level:12"
+   ],
+   "desc": "A prayer-stone at the falls has eight notches for the Truce's bones, and the eighth is wet red clay.",
+   "pitch": "A priest at Waterdancer Falls says the Truce's eighth bone has not been laid and the two peoples are not speaking of it.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "sren_ja",
+     "text": "Learn the seven verses at Sren Ja and take them to the monastery of Dokrin."
+    },
+    {
+     "type": "go",
+     "place": "dokrin_monastery",
+     "text": "Recover the pressed leaf from the Dokrin library and trace the hand."
+    },
+    {
+     "type": "go",
+     "place": "rawlkha",
+     "text": "Trace the stolen verse through the Rawlkha market's eleven buyers."
+    }
+   ],
+   "rewards": {
+    "gold": 220,
+    "loot": "minor"
+   },
+   "outro": "One thread of the trail ends here and the next begins. Each stop on the trail holds a part of the rite, from a tree village and a monastery to an arena and the bone-white henge."
+  },
+  {
+   "id": "lw_val_4_b",
+   "title": "The Truce of Bones (II)",
+   "region": "valenwood/reapers_march",
+   "start": "auto",
+   "requires": [
+    "quest:lw_val_4_a"
+   ],
+   "desc": "Each stop on the trail holds a part of the rite, from a tree village and a monastery to an arena and the bone-white henge.",
+   "pitch": "A priest at Waterdancer Falls says the Truce's eighth bone has not been laid and the two peoples are not speaking of it.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "arenthia",
+     "text": "Convince the Arenthia scholar to return the Truce's eighth verse."
+    },
+    {
+     "type": "go",
+     "place": "thizzrini_arena",
+     "text": "Dance the eighth step on the Thizzrini sand and carry the full rite to the henge."
+    },
+    {
+     "type": "kill",
+     "place": "reapers_henge",
+     "text": "Lay the eighth bone on the altar and renew the Truce.",
+     "spawn": [
+      {
+       "boss_id": "lw_val_4_boss"
+      }
+     ]
+    }
+   ],
+   "rewards": {
+    "gold": 540,
+    "loot": "major",
+    "flags": [
+     "lw_val_4_done"
+    ],
+    "unique": "wild_hunt_axe"
+   },
+   "outro": "At the henge I laid the eighth bone on the altar, white as the other seven, and the circle's wind dropped. Bosmer and Khajiit stood on opposite sides and, for the first time in a generation, looked at one another."
+  }
+ ]
+}

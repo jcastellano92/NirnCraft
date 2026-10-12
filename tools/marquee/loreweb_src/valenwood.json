@@ -1,0 +1,272 @@
+{
+ "province": "valenwood",
+ "arcs": [
+  {
+   "id": "val_1", "title": "The Crown Lamp", "tier": "S",
+   "secret": "The Elden Tree's glow is not the tree's own. An Ayleid star-lamp lodged in its crown by the first Bosmer settlers holds the Ayleid dead at bay, and its keepers have run out of names to feed it.",
+   "order": ["elden_tree", "ne_salas", "reliquary_of_stars", "elden_root", "ossuary_of_telacar"],
+   "entry": {"clue": "totem", "offset": [9, 5], "text": "A root-totem at the trunk's base has been drilled with a dozen small holes. In each a pale glass splinter glows faintly. A tag in Bosmer script: 'The crown is thirsty. Feed it names.'"},
+   "quest": {"title": "The Crown Lamp", "desc": "A root-totem studded with glass splinters at the base of the great tree says the crown is thirsty and must be fed names.", "desc2": "The lamp's trail dips into an underground tower-city and a star-vault, climbs the tree's capital, and ends in a bone-walled ossuary.", "pitch": "The totem-carvers say the great tree's glow has dimmed one shade each season.", "outro": "I laid the last name in the ossuary's tier and the glow in the crown flickered up like a lit wick. The Pact's keepers will be less grateful than I hoped. The lamp, though, burned bright.", "boss": {"name": "Keeper of the Crown", "type": "skycraft:spriggan", "hp": 3.4, "dmg": 1.5, "level": 26}, "reward": {"gold": 580, "loot": "major", "unique": "green_pact_fang"}}
+  },
+  {
+   "id": "val_2", "title": "Where the City Walks", "tier": "A",
+   "secret": "Falinesti is not walking by season: it is being led, by the chant of the apostates in a hollow tree-tomb, toward a hollow that will drown it in roots. Hermits and Orc outposts are secretly cutting guide-trees to break the chant, which the Green Pact forbids.",
+   "order": ["roadside_green_bough", "supplication_house", "drabul", "jathsogur", "silvenar", "falinesti", "tomb_of_the_apostates"],
+   "entry": {"clue": "lectern", "offset": [-3, 8], "text": "An inn's travel-board lists the walking city's seasons, in one column the old route and in another, a new straight line drawn in charcoal, heading for a hollow tree."},
+   "quest": {"title": "Where the City Walks", "desc": "A charcoal line on an inn's route-board shows the walking city heading in a straight line for a hollow tree.", "desc2": "The cutters' trail runs through Orc outposts and a hidden court to the walking city and the tree-tomb itself.", "pitch": "The innkeeper says the walking city has stopped wandering and started to march.", "outro": "At the tomb I silenced the chant and the city, far behind me, slowed and began, at long last, to turn. A Pact-warden saw me cut the last guide-tree and said nothing. Some silences are a kind of thanks.", "boss": {"name": "The Chanting Apostate", "type": "skycraft:necromancer", "hp": 3.2, "dmg": 1.4, "level": 24}, "reward": {"gold": 540, "loot": "major"}}
+  },
+  {
+   "id": "val_3", "title": "The Citizens' Orchard", "tier": "A",
+   "secret": "The ring of living trees at Woodhearth are the Ayleid citizens of the burned city, turned by a Bosmer 'mercy' ritual rather than let die. Their roots remember, and they are leaning toward the ash-city, to go home.",
+   "order": ["marbruk", "woodhearth", "labyrinth", "city_of_ash"],
+   "entry": {"clue": "stone", "offset": [5, -9], "text": "A thorn-wall plaque at the glade's rim lists forty names in a looping Ayleid script, each pricked out with a thorn. Below it, in Bosmer: 'The Mercy. Never be cut. Never be moved.'"},
+   "quest": {"title": "The Citizens' Orchard", "desc": "A thorn-wall plaque lists forty Ayleid names with a Bosmer warning never to cut the trees.", "desc2": "The orchard's roots lean through a hedge-maze toward a burned city.", "pitch": "The thorn-wardens say the trees of Woodhearth are leaning, a finger a year, to the south.", "outro": "I walked the last road with the orchard's leaf in my hand and set it on a melted lamp in the burned city. For an hour the ash-grey terraces were green. The trees will not lean further. They are home.", "boss": {"name": "Ashen Archon", "type": "skycraft:wispmother", "hp": 3.0, "dmg": 1.4, "level": 24}, "reward": {"gold": 500, "loot": "major"}}
+  },
+  {
+   "id": "val_4", "title": "The Truce of Bones", "tier": "A",
+   "secret": "Each generation the Bosmer and Khajiit elders of Reaper's March place a bone on the henge altar to renew the Truce. This time one bone is missing, and each stop on the trail holds a piece of the Truce's rite: a song, an arena's sand, a falls' name.",
+   "order": ["waterdancer_falls", "sren_ja", "dokrin_monastery", "rawlkha", "arenthia", "thizzrini_arena", "reapers_henge"],
+   "entry": {"clue": "stone", "offset": [6, 9], "text": "A prayer-stone beside the falls is cut with eight notches for the Truce's bones. Seven are filled in white. The eighth is red clay, still wet, with a thumb-print."},
+   "quest": {"title": "The Truce of Bones", "desc": "A prayer-stone at the falls has eight notches for the Truce's bones, and the eighth is wet red clay.", "desc2": "Each stop on the trail holds a part of the rite, from a tree village and a monastery to an arena and the bone-white henge.", "pitch": "A priest at Waterdancer Falls says the Truce's eighth bone has not been laid and the two peoples are not speaking of it.", "outro": "At the henge I laid the eighth bone on the altar, white as the other seven, and the circle's wind dropped. Bosmer and Khajiit stood on opposite sides and, for the first time in a generation, looked at one another.", "boss": {"name": "Gorrim of the Broken Bone", "type": "skycraft:werewolf", "hp": 3.2, "dmg": 1.5, "level": 24}, "reward": {"gold": 540, "loot": "major", "unique": "wild_hunt_axe"}}
+  }
+ ],
+ "sit": {
+  "elden_tree": {
+   "name": "Elden Tree",
+   "g": "The great tree seen from the whole province, a trunk wide as a hill with a faintly glowing crown above the clouds.",
+   "m": "The crown's glow is dimming a shade each season. A root-totem at its base is studded with glass splinters, each fed a name by the keepers.",
+   "c": ["a root-totem drilled with glowing splinters", "a trunk-stair worn at the keepers' door", "crown-leaves falling pale at the base"],
+   "x": ["ne_salas"],
+   "p": "A glass splinter that opens the underground tower's door.",
+   "r": "The great tree's glow is a shade dimmer than last year. The keepers say it will be fine. The keepers are not looking up.",
+   "lead": "Take the glass splinter from the Elden Tree totem into the underground tower of Ne Salas.",
+   "n": {"k": "warning", "t": "Keeper's Warning", "a": "Keeper Alduin Ro", "x": "Do not touch the splinters. They are for the keepers' use only. Do not ask what they are for. If the crown goes dark we shall have the Ayleid dead to deal with, and I do not think the Green Pact has the words for it. Feed the lamp. Feed it names. We have run out of ours."}
+  },
+  "ne_salas": {
+   "name": "Ne Salas",
+   "g": "A tower-city underground, a spiral of ring galleries around a central crystal pillar, bright and cold.",
+   "m": "The central pillar is the tree-lamp's twin, the star-lamp's counterpart. Each gallery holds a ring of names the Ayleid wrote to feed it.",
+   "c": ["ring galleries lined with name-plates", "a crystal pillar bright at its heart", "a lift-platform that rises toward the roots"],
+   "x": ["reliquary_of_stars"],
+   "p": "A ring of Ayleid names, enough to feed the crown for a season.",
+   "r": "Under the great tree is a second light, say the root-diggers, one that doesn't flicker.",
+   "lead": "Copy a ring of name-plates from Ne Salas and take it to the star-vault.",
+   "n": {"k": "inscription", "t": "The Pillar's Dedication", "a": "", "x": "WHAT WE NAME, WE KEEP. WHAT WE KEEP, WE LIGHT. Each lamp burns a name and each name must be renewed. Let no keeper forget this, nor the one who tends the crown: a lamp unfed becomes a door."}
+  },
+  "reliquary_of_stars": {
+   "name": "Reliquary of Stars",
+   "g": "A domed observatory-vault whose ceiling is a map of the night sky in inlaid crystal, with floor rings that rotate by lever.",
+   "m": "Each lit star in the ceiling opens an archive niche of names. Half the stars have gone dark, because the Ayleid keepers' successors no longer renew them.",
+   "c": ["a ceiling with half its stars dark", "floor rings turned to a stale alignment", "an archive niche packed with unspoken name-scrolls"],
+   "x": ["elden_root"],
+   "p": "A star-lit scroll of renewal names that can be fed to the crown.",
+   "r": "Under the reliquary's dome the stars go out one by one. The cartographers swear it was full of them a decade ago.",
+   "lead": "Re-light the dark stars in the Reliquary and take the scroll to Elden Root.",
+   "n": {"k": "book", "t": "The Keeper's Manual of Stars", "a": "a lamp-warden", "x": "The star-lamp is lit by names, the sky by lamps. Each star is a name; each name a debt. When the debt is paid the star may rest. When the debt is unpaid the star must be fed. The Keepers have forgotten how to feed them. The Reliquary remembers. It will not forgive."}
+  },
+  "elden_root": {
+   "name": "Elden Root",
+   "g": "A city built into and around one colossal tree, with root markets, spiral stairs inside the trunk and three canopy tiers of platforms.",
+   "m": "The Green Pact's keepers meet in a locked hall at the crown. They have debated for a generation whether to feed the lamp with Bosmer names. Nobody wants to be first.",
+   "c": ["a locked keepers' hall at the crown", "a ballot-urn with a single name inside", "a trunk-stair carved with a crown and a ring of blank glyphs"],
+   "x": ["ossuary_of_telacar"],
+   "p": "The keepers' ballot, and the key to the ossuary's lowest tier.",
+   "lead": "Open the keepers' hall and read the debate's ballot."
+  },
+  "ossuary_of_telacar": {
+   "name": "Ossuary of Telacar",
+   "g": "A bone-walled ossuary built in terraced galleries, skulls arranged by family line, each tier's door answering to a name read aloud.",
+   "m": "The lowest tier is flooded. The name that would open it was the last Ayleid lamp-warden's, long forgotten. When read, it calls the crown to full light.",
+   "c": ["skull rows labelled by lineage", "a door that answers only to a read-aloud name", "a flooded lowest tier with a lamp floating on the water"],
+   "x": ["elden_tree", "ne_salas"],
+   "p": "The lamp-warden's name and the crown's full light: a unique relic that lights without fuel.",
+   "r": "The Ossuary doors will open if you read the right name aloud. Nobody remembers the right name.",
+   "lead": "Read the lamp-warden's name at the lowest tier and relight the crown.",
+   "n": {"k": "list", "t": "Lineage Plaque", "a": "the ossuary's founders", "x": "First tier: the Keepers. Second: the Lamp-Wardens. Third: the Name-Singers. Fourth: those who were not named. Fifth, flooded: the Warden whose name was struck. Speak it, and the lamp will know its keeper. Fail to speak it, and the lamp will not be fooled."}
+  },
+  "roadside_green_bough": {
+   "name": "Roadside Green Bough",
+   "g": "An inn in a boughed tree on the Malabal Tor road, with stair-ladders and a landing of woven rope.",
+   "m": "The innkeeper's route-board shows the walking city's path in two lines: the old seasonal route and a straight charcoal line toward a hollow tree.",
+   "c": ["a route-board with a second charcoal line", "a pair of tree-cutters' axes left at the stair", "a cut stump with fresh sap"],
+   "x": ["supplication_house"],
+   "p": "The route-board's charcoal line and a hermit's address.",
+   "r": "The walking city has been going in a straight line since spring. The innkeeper drew it on the wall.",
+   "lead": "Take the route-board's charcoal line to the hermit's hut at Supplication House.",
+   "n": {"k": "notes", "t": "Route-Board Notes", "a": "Innkeeper Nila", "x": "The city's usual circle: spring in the north, summer to the east, autumn south, winter west. This year it has not circled. It goes straight, as though led. A hermit at Supplication House has a better map. She cut one of the guide-trees. Please do not tell the wardens."}
+  },
+  "supplication_house": {
+   "name": "Supplication House",
+   "g": "A hermit's hut deep in Malabal Tor with a prayer-bench, a wind-chime of bone and a ring of stumps around it.",
+   "m": "The hermit has been cutting guide-trees to break the apostates' chant. She counts each stump as a sin and a service.",
+   "c": ["a ring of fresh stumps with prayer-ribbons", "a wind-chime of bone that rings off-pitch", "a chant tablet with a Pact-curse scratched through"],
+   "x": ["drabul"],
+   "p": "A tablet of the apostates' chant, and a map of the guide-trees.",
+   "r": "The hermit at Supplication House is cutting trees and weeping while she does it. The wardens pretend not to hear.",
+   "lead": "Take the chant tablet from the hermit to the Orc outposts that will help cut.",
+   "n": {"k": "diary", "t": "A Hermit's Confession", "a": "Wynlith of the Stumps", "x": "I have cut nine. The Pact says one cut is a death-sentence for the cutter, and I have cut nine, and still I breathe. The apostates' chant goes on. They call the great walker to them and I cannot bear what it will do. I have asked the Orcs. Orcs do not hold with the Pact. Orcs have axes."}
+  },
+  "drabul": {
+   "name": "Drabul",
+   "g": "An Orc outpost in the Malabal forest, a palisade of cut trunks and a forge-pit beneath a canopy hole.",
+   "m": "The Orcs of Drabul were hired by the hermit to fell guide-trees. They do not hold to the Pact but have been warned; their axes are marked with strange glyphs.",
+   "c": ["axes marked with a guide-tree glyph", "a log pile of cut guide-trunks", "a chief's tally of stumps felled"],
+   "x": ["jathsogur"],
+   "p": "The chief's tally of felled guide-trees.",
+   "lead": "Take the Drabul chief's tally to the next outpost at Jathsogur."
+  },
+  "jathsogur": {
+   "name": "Jathsogur",
+   "g": "An Orc stronghold on a ridge above the forest, with a stone keep and a view of the guide-tree line.",
+   "m": "From the ridge, the straight line of the walking city's route is clear. The stronghold has been shooting down the last guide-trees with ballistae.",
+   "c": ["a ballista aimed at a lone tall tree", "a map-table with the guide-line inked", "arrows fletched with a Pact-curse mark"],
+   "x": ["silvenar"],
+   "p": "The last guide-tree's bearing and a ballista bolt.",
+   "r": "From Jathsogur's wall you can see the city's route. The Orcs have been shooting at the trees along it.",
+   "lead": "Take the guide-line bearing from Jathsogur to the hidden court at Silvenar.",
+   "n": {"k": "orders", "t": "Chieftain's Orders", "a": "Chief Mazgar", "x": "Eleven guide-trees remain on the line. Fell nine with the ballista, two by axe at dusk. Do not shoot at the city itself. Do not shoot at the Pact-wardens. If asked, we are hunting boar. Our payment is in smoked fish and the hermit's gratitude. It will have to do."}
+  },
+  "silvenar": {
+   "name": "Silvenar",
+   "g": "A hidden court under hollowed root arches, a sheltered amphitheatre of roots with a single audience hall lit by fireflies.",
+   "m": "The court knows of the apostates' chant and has done nothing, for the chant is the dissolution of the Pact itself. A court councillor passes the cutters coin in secret.",
+   "c": ["a root arch carved with the walking city's route", "a council chair left empty", "fireflies that gather on a map"],
+   "x": ["falinesti"],
+   "p": "A court seal, giving access to the walking city's inner stairs.",
+   "lead": "Secure the court seal at Silvenar and join the walking city."
+  },
+  "falinesti": {
+   "name": "Falinesti",
+   "g": "A tree-city that is in a different place each season, with four sites of the same tree-plan in different foliage.",
+   "m": "The city is leaning in its walk toward the hollow tree. Its lowest roots have found the line; in a month its trunk will be wedged in the tomb mouth.",
+   "c": ["roots running in a single straight furrow", "a harbour of rope-bridges that bows toward the east", "a council that has stopped meeting"],
+   "x": ["tomb_of_the_apostates"],
+   "p": "A root-cutter's chisel, to sever the walker's final guiding root.",
+   "lead": "Sever the walking city's final guide-root at the base of Falinesti."
+  },
+  "tomb_of_the_apostates": {
+   "name": "Tomb of the Apostates",
+   "g": "A hollow great tree whose heartwood is carved with tombs, stairs spiralling inside the trunk.",
+   "m": "The apostates' chant rises from the lowest tier, every dusk. They believe the walker will bring them communion; it will bring a tonne of root.",
+   "c": ["a chanting figure at the base of the hollow", "stairs worn only on one side", "heartwood carved with a walking tree"],
+   "x": ["roadside_green_bough", "supplication_house"],
+   "p": "The chant-stone: a unique that silences or turns a tree-walker.",
+   "r": "At dusk the hollow tree sings. The Pact-wardens put their hands over their ears and call it wind.",
+   "lead": "Descend the hollow tree and silence the apostates' chant.",
+   "n": {"k": "prayer", "t": "Apostate's Chant", "a": "the apostates", "x": "Walk to us, great walker, tree of ten thousand roots. Walk to us who have been forgotten by the Pact. We offer the hollow, we offer the dark, we offer the quiet that is not a death. Walk and be ours. Walk and be still."}
+  },
+  "marbruk": {
+   "name": "Marbruk",
+   "g": "A fort-town in a glade ringed by a living wall of thorn and stone, with a central fire pit and watch posts.",
+   "m": "The thorn-wall's plaque lists forty Ayleid names pricked in thorns. Never cut, never move. The wall's keepers add to it each solstice.",
+   "c": ["a thorn plaque with forty pricked names", "a fire-pit with a ring of undried stones", "watchers who bow to the wall at dusk"],
+   "x": ["woodhearth"],
+   "p": "A thorn that opens the orchard's inner ring.",
+   "r": "The thorn wall of Marbruk has names pricked into it. The watchers bow every dusk and nobody asks why.",
+   "lead": "Take the pricked names from the Marbruk thorn-wall to the living orchard at Woodhearth.",
+   "n": {"k": "inscription", "t": "The Thorn Plaque", "a": "", "x": "THESE ARE THE MERCIED. NEVER CUT. NEVER MOVED. We spared them from the fire and the sword, and they are green now, and they are ours, and they may not go home. Forgive us, keepers who come after: this is the cost of mercy."}
+  },
+  "woodhearth": {
+   "name": "Woodhearth",
+   "g": "A harbour city of Greenshade grown from a ring of living trees, with rope-and-plank bridges strung among their boughs.",
+   "m": "The ring of trees leans by a finger a year to the south. The city's gardeners wedge it with stakes; the trees patiently push them out.",
+   "c": ["wedge-stakes bent and snapped", "a ring of trees all tilted the same way", "bark carved with faces that look south"],
+   "x": ["labyrinth"],
+   "p": "A leaf of the orchard that retains an Ayleid voice.",
+   "lead": "Take a leaf from the Woodhearth ring and follow where the trees lean."
+  },
+  "labyrinth": {
+   "name": "Labyrinth",
+   "g": "A hedge-and-root maze that rearranges each time you leave a junction, with carved arrows that lie and wisp-lights as false guides.",
+   "m": "The maze is the street-plan of the burned city, grown over: each junction was a crossing and each dead end a house. The exit is a gate.",
+   "c": ["carved arrows pointing at walls", "wisp-lights circling a junction", "a ridge from which the maze looks like a map"],
+   "x": ["city_of_ash"],
+   "p": "The maze's true plan: a map to the burned city's gate.",
+   "r": "The Labyrinth hedge changes each time you look away. From the ridge you can see it is a map.",
+   "lead": "Climb the ridge, read the maze as a map and walk it to the burned city's gate.",
+   "n": {"k": "treasure", "t": "Maze-Walker's Map", "a": "Elorin the Wanderer", "x": "From the ridge, the hedge is a street grid. The central cross is the market, the north lobes the lamp-wards. I have walked it three times and left a ribbon at each turning. The ribbons were gone by morning. The exit is at the old gate, and the gate is a thing you must be invited through."}
+  },
+  "city_of_ash": {
+   "name": "City of Ash",
+   "g": "A burned Ayleid city with ash-choked terraces, melted crystal lamps and a scorched grand cistern.",
+   "m": "The Ayleid lords burned their own lamps to keep their slaves from using them. The ash on the terraces is shaped like people. A single lamp still burns in the cistern.",
+   "c": ["ash lying in the shapes of people", "melted lamps in rows on the terraces", "a single lamp lit in the dry cistern"],
+   "x": ["marbruk", "woodhearth"],
+   "p": "The cistern lamp: a unique crystal that lets the dead go home.",
+   "r": "The City of Ash is quiet. The ash holds the shape of people who sat down and did not get up.",
+   "lead": "Carry the orchard leaf to the cistern lamp and let the citizens go home.",
+   "n": {"k": "poem", "t": "Elegy for the Lamps", "a": "unknown", "x": "~Our lords put out the lamps and wept,~and wept, and fed the fire.~The trees took us, the trees have kept~the ash of our desire.~We lean, we lean, we lean for home,~for stone that has no tire."}
+  },
+  "waterdancer_falls": {
+   "name": "Waterdancer Falls",
+   "g": "A tall waterfall in Reaper's March with a spray rainbow and a prayer-stone at its base cut with eight notches.",
+   "m": "Seven of the Truce's eight notches are filled with white bone. The eighth has been filled with red clay, a stand-in for a missing bone.",
+   "c": ["a prayer-stone with seven white notches and one red", "a spray rainbow that ends at the stone", "offering-ribbons in two colours knotted together"],
+   "x": ["sren_ja"],
+   "p": "A clay thumb-print, an impression that can be matched to a hand.",
+   "r": "The prayer-stone at Waterdancer has eight notches and only seven bones. Both peoples avoid talking about the eighth.",
+   "lead": "Take the clay thumb-print from the prayer-stone to the tree village of Sren Ja.",
+   "n": {"k": "prayer", "t": "Falls Prayer", "a": "Falls-priest", "x": "Water that falls and does not break, hold the Truce for the two peoples. The bones are laid, the bones are white. If one is missing, let the water speak. If one is missing, let the water rise. We have not been honest with the water, and the water is patient, and the water remembers."}
+  },
+  "sren_ja": {
+   "name": "Sren Ja",
+   "g": "A tree village of Khajiit in Reaper's March, with rope-bridges between boughs and drums at every platform.",
+   "m": "The village's drum-song carries the Truce's rite. The drummer who knew the eighth verse died without teaching it. The drums stop at the eighth beat.",
+   "c": ["drums that stop at the eighth beat", "a drummer's empty seat at the central platform", "a bone-whistle carved with a gap"],
+   "x": ["dokrin_monastery"],
+   "p": "The first seven verses of the Truce-song.",
+   "r": "At Sren Ja the drums stop at the eighth beat. The elders say it is for the dead drummer.",
+   "lead": "Learn the seven verses at Sren Ja and take them to the monastery of Dokrin.",
+   "n": {"k": "poem", "t": "The Seven Verses", "a": "Sren Ja drummer", "x": "~One for the bough and two for the root,~three for the river and four for the fruit,~five for the sun and six for the moon,~seven for the rain and eight for the...~the drum is still and the verse is gone.~Whoever finds it, carry it on."}
+  },
+  "dokrin_monastery": {
+   "name": "Dokrin Monastery",
+   "g": "A forest monastery of the Khajiit with a courtyard of prayer-wheels and a small library of drum-scores.",
+   "m": "The monks hold the oldest drum-score of the Truce. The eighth verse has been cut out and replaced with a pressed leaf. The abbot weeps when asked.",
+   "c": ["a drum-score with a pressed leaf where a verse was", "prayer-wheels with their last panel blank", "an abbot's cell with a clay thumb-mould on the shelf"],
+   "x": ["rawlkha"],
+   "p": "The pressed leaf, tracing a Bosmer hand.",
+   "lead": "Recover the pressed leaf from the Dokrin library and trace the hand."
+  },
+  "rawlkha": {
+   "name": "Rawlkha",
+   "g": "A Khajiiti trade-town of canvas and bamboo stalls strung between trees, a lantern forest.",
+   "m": "The Bosmer who cut the verse out sold it in the Rawlkha market, and the verse has changed hands eleven times. Each buyer wrote a gloss in the margin.",
+   "c": ["a stall of manuscripts, one with a stolen verse", "lantern strings in two colours", "a margin gloss in a Bosmer hand"],
+   "x": ["arenthia"],
+   "p": "The stolen verse with eleven glosses.",
+   "lead": "Trace the stolen verse through the Rawlkha market's eleven buyers."
+  },
+  "arenthia": {
+   "name": "Arenthia",
+   "g": "A river-cliff town of gardens hung on rope terraces over a waterfall, with houses cut into the cliff face.",
+   "m": "A Bosmer scholar bought the verse to prove the Truce's rite was Bosmer in origin. She would rather the rite be forgotten than shared.",
+   "c": ["a scholar's study with a pressed leaf in a frame", "gardens divided by a thin line of two colours", "a river gate where Bosmer and Khajiit boats avoid each other"],
+   "x": ["thizzrini_arena"],
+   "p": "The scholar's confession and the verse restored.",
+   "lead": "Convince the Arenthia scholar to return the Truce's eighth verse."
+  },
+  "thizzrini_arena": {
+   "name": "Thizzrini Arena",
+   "g": "A ruined arena in the jungle with a sand floor and tiers of stone seats half-eaten by roots.",
+   "m": "The arena was where the Truce's rite was danced. The sand holds the eighth step: a footprint of one dancer, neither Bosmer nor Khajiit.",
+   "c": ["a sand floor with a single deep footprint", "seats worn by two peoples' sitting", "a dancers' gate with two doors facing each other"],
+   "x": ["reapers_henge"],
+   "p": "The eighth step: a dance-form that fits the final verse.",
+   "r": "In the old arena a single footprint stays in the sand. No rain washes it out.",
+   "lead": "Dance the eighth step on the Thizzrini sand and carry the full rite to the henge.",
+   "n": {"k": "report", "t": "Arena Keeper's Report", "a": "Keeper Zhasi", "x": "The footprint is neither Bosmer nor Khajiit. It has five toes and a heel. It sits in the exact centre of the sand and has been there for ten years. If you dance, you must step around it, as though around a sleeping animal. The eighth step is to step into it."}
+  },
+  "reapers_henge": {
+   "name": "Reaper's Henge",
+   "g": "A stone circle with a bone-white altar on a rise in Reaper's March, ringed by eight standing stones.",
+   "m": "The altar is a place for peace-bones. The eighth must be given by one who is both peoples and neither. The land asks the wanderer what they are.",
+   "c": ["seven bones on the altar in a white ring", "a vacant eighth bone-seat in red clay", "stones with ribbons of both peoples' colours"],
+   "x": ["waterdancer_falls", "arenthia"],
+   "p": "The eighth bone and the Truce renewed: a unique axe of the Wild Hunt.",
+   "r": "At the henge the altar is bright with bone. One seat has been empty for ten years.",
+   "lead": "Lay the eighth bone on the altar and renew the Truce.",
+   "n": {"k": "inscription", "t": "The Altar's Edge", "a": "", "x": "EIGHT BONES FOR THE EIGHT WINDS, ONE FOR EACH WHO WALKS HERE. The eighth is given by a stranger to both. It is not a bone of blood but a bone of choice. Lay it down, and the Truce is renewed. Hold it, and the Truce is broken."}
+  }
+ }
+}

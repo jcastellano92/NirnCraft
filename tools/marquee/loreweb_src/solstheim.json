@@ -1,0 +1,217 @@
+{
+ "province": "solstheim",
+ "arcs": [
+  {
+   "id": "sol_1", "title": "The Last Seed-Bank", "tier": "A",
+   "secret": "Before the first eruption an Imperial botanist sealed a seed-bank of unblighted crops in the cellar of an old Nordic temple. The yam farmers, the Telvanni gardener and the Redoran bulwark each know a third of the way in.",
+   "order": ["old_attius_farm", "raven_rock", "brodir_grove", "fort_frostmoth", "ashfallow_citadel", "tel_mithryn", "temple_of_miraak"],
+   "entry": {"clue": "urn", "offset": [-9, 6], "text": "An old seed-jar in the yam shed holds nothing but a label in a careful Imperial hand: 'Third of three. The other two lie with Raven Rock's ledger and the grove that grows in spirals.'"},
+   "quest": {"title": "The Last Seed-Bank", "desc": "An empty seed-jar at a farm in the ash names two other pieces of a map. One is in Raven Rock, the other in a spiral grove.", "desc2": "The map's three parts point to a sealed cellar in the Nordic temple under the mountain.", "pitch": "The yam farmer at Old Attius Farm keeps a jar that is labelled 'third of three'.", "outro": "The cellar was cold and dry, its shelves lined with sealed jars, each labelled in a careful hand. I carried one out. In a year, the island may not need to eat ash.", "boss": {"name": "Warden of the Greenhouse", "type": "skycraft:spriggan", "hp": 3.2, "dmg": 1.4, "level": 26}, "reward": {"gold": 520, "loot": "major"}}
+  },
+  {
+   "id": "sol_2", "title": "Six Stones, Five Songs", "tier": "A",
+   "secret": "One of the Skaal's six All-Maker stones has gone mute. The elder hid it. The lost hunter at the lodge went to wake it, and is held in the barrow's mural, still singing the missing verse.",
+   "order": ["abandoned_lodge", "hvitkald_peak", "stalhrim_source", "allmaker_water_stone", "skaal_village", "altar_of_thrond", "gyldenhul_barrow"],
+   "entry": {"clue": "skeleton", "offset": [8, -5], "text": "A hunter's cloak is spread across the lodge porch with a bone flute tucked in its folds. A scratch on the rail: 'Five answer. One does not. I have gone to ask it why.'"},
+   "quest": {"title": "Six Stones, Five Songs", "desc": "A hunter's flute and a note at the lodge door say five of the island's stones answer and one does not.", "desc2": "The five stones' songs lead to the Skaal's circle and a sealed barrow where the sixth waits.", "pitch": "A Skaal hunter's door hangs open and the larder is untouched.", "outro": "In the barrow, the mural sang its missing verse through my flute and the sixth stone woke, far away, with a sound like a kettle boiling over. The Skaal elder will have to be told, and will not thank me.", "boss": {"name": "Hjorda Ice-Voice", "type": "skycraft:ice_wraith", "hp": 3.0, "dmg": 1.3, "level": 24}, "reward": {"gold": 500, "loot": "major"}}
+  },
+  {
+   "id": "sol_3", "title": "The Frozen Engine", "tier": "A",
+   "secret": "Karstaag's throne of ice is a Dwemer cold-engine. Haknir's crew sailed for it, split its charts among four hands, and lost the ship. The pieces are in the trader's crates, the lodge, the mead-hall's saga and the wreck.",
+   "order": ["ramshackle_trading_post", "bujolds_retreat", "haknirs_shoal", "thirsk_mead_hall", "kagrumez", "nchardak", "castle_karstaag_ruins"],
+   "entry": {"clue": "lever", "offset": [5, 4], "text": "A stove-lid in the trader's shed is stamped with a ship's-wheel and the words 'Chart Four of Four'. A lever behind it opens a drawer of oiled bone charts."},
+   "quest": {"title": "The Frozen Engine", "desc": "A trader's stove-lid carries a stamp and a drawer of bone charts, the last of four sets that belonged to a lost ship.", "desc2": "The charts lead through two Dwemer ruins and end at the giant's castle of ice.", "pitch": "The Orc at the trading post buys anything, but the stove-lid he will not sell.", "outro": "The throne of ice hummed under my hand, a cold-engine the giant had mistaken for a seat. I took the vane and left the rest. Better the island stays cold than learn what it is to be warm.", "boss": {"name": "Karstaag's Last Thrall", "type": "skycraft:giant", "hp": 3.4, "dmg": 1.5, "level": 28}, "reward": {"gold": 560, "loot": "major", "unique": "atmoran_frostaxe"}}
+  }
+ ],
+ "sit": {
+  "old_attius_farm": {
+   "name": "Old Attius Farm",
+   "g": "A farm in the ash south of Raven Rock, with rows of ash-yams on volcanic dirt and a storage shed with empty seed-jars.",
+   "m": "The Attius family's seed-jars are labelled 'third of three' in a careful hand that is not theirs. The farm is a single link in an old botanist's trail.",
+   "c": ["seed-jars labelled in an Imperial hand", "yam rows planted in a surveyor's straight lines", "a scarecrow wearing a botanist's field-coat"],
+   "x": ["raven_rock"],
+   "p": "The third of three: a seed-bank key stamp.",
+   "lead": "Take the 'third of three' label from Old Attius Farm to the Raven Rock ledger-keeper."
+  },
+  "raven_rock": {
+   "name": "Raven Rock",
+   "g": "A mining colony behind a hastily built stone bulwark, with ebony-spoil heaps, a headframe over the shaft and Redoran long-houses.",
+   "m": "The bulwark's cornerstone hides the second third of the map. The mine foreman says the first settlers were not miners but a botanical survey.",
+   "c": ["a cornerstone chiselled with a plant glyph", "mine-shaft timbers stamped with a survey seal", "a ledger-room where a page is cut out"],
+   "x": ["brodir_grove"],
+   "p": "The second third of the seed-bank map.",
+   "lead": "Recover the cornerstone's second map-piece in Raven Rock."
+  },
+  "brodir_grove": {
+   "name": "Brodir Grove",
+   "g": "A grove of ancient trees in the ash wastes, one of the few green places left, whose trunks spiral in unison toward the north.",
+   "m": "The trees' spirals point to the temple under the mountain. The settlers' survey marked each spiral as a bearing.",
+   "c": ["trunks spiralling in the same direction", "survey stakes still bearing fading ribbons", "a stone marker in the roots with a glyph for 'seed'"],
+   "x": ["fort_frostmoth"],
+   "p": "The grove's bearing, the last third of the map.",
+   "lead": "Follow the spiral bearing of Brodir Grove north through the Frostmoth ruins."
+  },
+  "fort_frostmoth": {
+   "name": "Fort Frostmoth",
+   "g": "A broken Imperial fort in a snowfield, with a square curtain wall, a frozen moat and a tower with a blue lantern.",
+   "m": "The garrison guarded a survey party and were ordered to say nothing. Their cellar holds crates of seed-sacks sealed in wax.",
+   "c": ["wax-sealed crates in the fort cellar", "a blue lantern that points inland", "a garrison log with its last page torn"],
+   "x": ["ashfallow_citadel"],
+   "p": "A sealed crate of seed-sacks that unlocks the greenhouse door.",
+   "lead": "Open the sealed crates in Fort Frostmoth's cellar and take the greenhouse key."
+  },
+  "ashfallow_citadel": {
+   "name": "Ashfallow Citadel",
+   "g": "A walled Telvanni citadel in the ash wastes with ruined wings and a ward-ring, held by a renegade wizard.",
+   "m": "The renegade wizard wants the seed-bank as a breeding stock for fungal crops. He has a third of the key, taken from a surveyor's corpse.",
+   "c": ["a surveyor's skeleton on the ward-ring", "fungal beds of failed grain", "a ledger of hybrid crops, all labelled 'incomplete'"],
+   "x": ["tel_mithryn"],
+   "p": "The surveyor's key, which opens the temple cellar.",
+   "lead": "Take the surveyor's key from the Ashfallow wizard."
+  },
+  "tel_mithryn": {
+   "name": "Tel Mithryn",
+   "g": "A massive mushroom tower on an ash-flat wrapped in spore-stairs with a small garden of glowing fungi.",
+   "m": "The tower's master has already tried a path to the seed-bank and failed: his garden's glowing fungi are descendants of what he took. The master wants a witness.",
+   "c": ["glowing fungi in rows labelled with failed species", "a master's workbook of crop crosses", "a boat-shaped stable full of seed-barrels"],
+   "x": ["temple_of_miraak"],
+   "p": "A master's workbook that shows which seeds the cellar will hold.",
+   "lead": "Ask the Tel Mithryn master for his workbook and the route to the old temple."
+  },
+  "temple_of_miraak": {
+   "name": "Temple of Miraak",
+   "g": "A Dragon Priest's mountain temple, frost-sealed, with a long stair, grand chambers and a sunken inner sanctum where the walls move like ink.",
+   "m": "The cellar of the temple's lowest nave is the seed-bank. A sealing ward keeps it fresh, and a warden of grown green guards it from anyone who tries to take the jars.",
+   "c": ["jars lined on shelves behind a ward of ink-black stone", "roots that grow only inside the lowest nave", "a stair worn by botanists' boots, older than the ward"],
+   "x": ["brodir_grove", "old_attius_farm"],
+   "p": "A sealed jar of unblighted seed: a unique that grows safe crops in ashland.",
+   "lead": "Open the cellar of the lowest nave and face the warden of the green."
+  },
+  "abandoned_lodge": {
+   "name": "Abandoned Lodge",
+   "g": "A hunting lodge below Hvitkald Peak with its door hanging open, a pot still hanging over cold coals and a bone flute in a cloak on the porch.",
+   "m": "The hunter went to ask the sixth All-Maker stone why it had gone quiet. His flute and note remain; he does not.",
+   "c": ["a bone flute in a folded cloak", "a note scratched on the porch rail", "a larder untouched, with meat gone cold under its cloth"],
+   "x": ["hvitkald_peak"],
+   "p": "The hunter's flute: a ceremonial instrument that wakes a stone.",
+   "lead": "Take the hunter's flute from the lodge porch and climb Hvitkald Peak."
+  },
+  "hvitkald_peak": {
+   "name": "Hvitkald Peak",
+   "g": "A conical peak with a crown of ice, streaked with ash on its flanks, with a hunters' cairn at the summit.",
+   "m": "The cairn holds the first of the island's five answers: a note in the wind. The sixth is missing from the peak, and the cairn-keepers' count stops at five.",
+   "c": ["a cairn with five notched stones and one blank", "ash stripes on the summit ice", "wind that carries a single plucked note"],
+   "x": ["stalhrim_source"],
+   "p": "The first answer: a note that harmonises with the flute.",
+   "lead": "Play the flute at the Hvitkald cairn and head for the stalhrim basin."
+  },
+  "stalhrim_source": {
+   "name": "Stalhrim Source",
+   "g": "A frozen crack of blue-white glow in a basin, the ice itself humming at a pitch just below hearing.",
+   "m": "The stalhrim hums the second answer. The Skaal guard it not because it is valuable but because it is the only stone in the island that sings back.",
+   "c": ["ice that hums when a flute is held to it", "Skaal guards who tie wool over the crack at night", "frost-rime in the shape of a half-open hand"],
+   "x": ["allmaker_water_stone"],
+   "p": "The second answer, a stalhrim shard that rings true.",
+   "lead": "Harmonise the flute with the stalhrim and find the water stone in the west."
+  },
+  "allmaker_water_stone": {
+   "name": "All-Maker Water Stone",
+   "g": "One of six standing stones of the All-Maker, raised by the Skaal on the island's west shore, wet with spray.",
+   "m": "The water stone answers but with a weeping note. Alone of the six it grieves, and the Skaal pretend not to hear.",
+   "c": ["wet stone that does not dry in sun", "offerings of fish-bone left with fresh flowers", "a hollow beside it in the shape of a sitting person"],
+   "x": ["skaal_village"],
+   "p": "The third answer: a weeping note that opens the barrow door.",
+   "lead": "Play the flute at the water stone and bring its note back to the Skaal circle."
+  },
+  "skaal_village": {
+   "name": "Skaal Village",
+   "g": "A ring of low hide-and-bone houses around a central stone circle and fire, with drying racks and hanging totems.",
+   "m": "The elder knows the sixth stone is mute and has told no one. The village sings only five verses at the winter fire, and the children have begun to hum the sixth.",
+   "c": ["a sixth, blank carving on the circle's stone", "children's songs with a gap where the sixth verse sits", "an elder's door closed on the winter fire"],
+   "x": ["altar_of_thrond"],
+   "p": "The elder's confession and the sixth verse's first line.",
+   "lead": "Confront the Skaal elder and learn the sixth verse's first line."
+  },
+  "altar_of_thrond": {
+   "name": "Altar of Thrond",
+   "g": "A weathered stone altar between the mountain and the temple, older than the Skaal, ringed by carved posts with a view of the island.",
+   "m": "The altar's posts form a tally of verses. Five are weathered smooth, the sixth was deliberately defaced. The scrape is recent.",
+   "c": ["a sixth post defaced with fresh tool marks", "offerings of antler and honey, unclaimed", "a worn path leading east toward the barrow"],
+   "x": ["gyldenhul_barrow"],
+   "p": "A rubbing of the defaced verse and a map of the barrow's mural wall.",
+   "lead": "Take the rubbing of the defaced post to the barrow by the east shore."
+  },
+  "gyldenhul_barrow": {
+   "name": "Gyldenhul Barrow",
+   "g": "A large Nordic barrow on the east shore with a tiered nave and a glowing mural of a long-dead king.",
+   "m": "The mural's king is the first Skaal chief who promised the island silence. The lost hunter is painted into its edge, still singing the sixth verse.",
+   "c": ["a mural with a figure painted into its border", "a tiered nave echoing with a hummed note", "fresh paint where the sixth verse was overwritten"],
+   "x": ["skaal_village", "abandoned_lodge"],
+   "p": "The sixth verse, restoring the stone and the island's voice.",
+   "lead": "Sing the sixth verse before the barrow mural and free the hunter."
+  },
+  "ramshackle_trading_post": {
+   "name": "Ramshackle Trading Post",
+   "g": "A wind-battered trading post on the road between Kagrumez and the coast, shacks around a single stove.",
+   "m": "The Orc trader buys anything but will not sell the stove-lid, which bears the last of four sets of charts from a lost ship.",
+   "c": ["a stove-lid stamped with a ship's-wheel", "a drawer of oiled bone charts under the trader's cot", "crates marked with a wrecked ship's crest"],
+   "x": ["bujolds_retreat"],
+   "p": "Chart Four: the compass-line to the Dwemer cold-engine.",
+   "lead": "Open the stove-lid drawer and carry Chart Four to Bujold's Retreat."
+  },
+  "bujolds_retreat": {
+   "name": "Bujold's Retreat",
+   "g": "A Nord homestead on the east coast abandoned by the family who built it, occupied by reavers.",
+   "m": "The reavers are the last of Haknir's crew, who vowed never to sail again. They keep Chart Three nailed beneath a table.",
+   "c": ["a table with a chart pinned underneath", "reaver tallies of ships lost", "a hearth with a ship's name burnt into the beam"],
+   "x": ["haknirs_shoal"],
+   "p": "Chart Three, with a note of the wreck's last position.",
+   "lead": "Take Chart Three from the reavers' table and find the wreck on the north shore."
+  },
+  "haknirs_shoal": {
+   "name": "Haknir's Shoal",
+   "g": "The rotting wreck of a ship's ribs caught on rocks in surf on the north shore.",
+   "m": "Chart Two was sealed in the ship's bow. The crew swore not to sail; the ship went anyway, steered by a thing in the hold.",
+   "c": ["a ship's ribs with a sealed bow-chest", "a steering oar tied off at a heading", "barnacle-encrusted cold-engine vanes in the bilge"],
+   "x": ["thirsk_mead_hall"],
+   "p": "Chart Two and a vane from the cold-engine.",
+   "lead": "Pry open the wreck's bow-chest for Chart Two."
+  },
+  "thirsk_mead_hall": {
+   "name": "Thirsk Mead Hall",
+   "g": "One immense hall in a walled compound with whale-rib arches, a trophy yard and a fenced boar run.",
+   "m": "The skald sings Haknir's saga with a verse that is wrong on purpose, naming the last chart's hiding place. No one realised it was a clue.",
+   "c": ["a whale-rib arch carved with a ship and a snowflake", "a skald who lingers on one verse", "a trophy shield stamped with a wheel"],
+   "x": ["kagrumez"],
+   "p": "Chart One: tucked behind the trophy shield.",
+   "lead": "Hear the skald's wrong verse and take Chart One from behind the trophy shield."
+  },
+  "kagrumez": {
+   "name": "Kagrumez",
+   "g": "A Dwemer observatory on a ridge with an open sky-dome room, star-maps and a long gantry over a pit.",
+   "m": "The star-maps are set to a night that has not happened yet, the night the cold-engine will wake. The ridge's resonance chambers hum a lower note.",
+   "c": ["star-maps set to a future night", "a gantry with a worn guide-rail", "a resonance chamber whose frost creeps in one direction"],
+   "x": ["nchardak"],
+   "p": "A star-map key aligned to the engine's awakening.",
+   "lead": "Align the four charts under the Kagrumez dome."
+  },
+  "nchardak": {
+   "name": "Nchardak",
+   "g": "A Dwemer city half sunk in ice with a crystalline roof, flooded lower levels and a steam-lift.",
+   "m": "The ice here is a coolant. The giant's throne, a day's march away, is the outlet of the same engine. Break the coolant and the island thaws.",
+   "c": ["coolant pipes frosted white", "a lift whose cage is carved with the engine's mark", "a flooded hall with a gauge reading 'cold'"],
+   "x": ["castle_karstaag_ruins"],
+   "p": "A pressure valve that can open or close the engine.",
+   "lead": "Find the valve in Nchardak's flooded hall and take it to Karstaag's castle."
+  },
+  "castle_karstaag_ruins": {
+   "name": "Castle Karstaag",
+   "g": "A giant's frozen castle, big-scale rooms with towering doors, a throne of ice and frozen warriors.",
+   "m": "The throne is the engine's outlet. Something took up Karstaag's seat after him and has been warming its hands on the ice.",
+   "c": ["a throne that radiates cold", "frozen giant-warriors turned toward it", "engine vanes half-sunk in the throne's base"],
+   "x": ["nchardak", "kagrumez"],
+   "p": "The engine's vane: a unique frost-relic that sets the island's winter.",
+   "lead": "Stand before Karstaag's throne and decide what the island's winter will be."
+  }
+ }
+}

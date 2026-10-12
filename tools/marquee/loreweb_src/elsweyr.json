@@ -1,0 +1,274 @@
+{
+ "province": "elsweyr",
+ "arcs": [
+  {
+   "id": "els_1", "title": "The Late Moon", "tier": "S",
+   "secret": "Secunda rises a few minutes later each month. The Moon-Priests know and hide it, because the holy calendar sets the sugar harvest and the temple fees. The vault of lunar blades is waking to a moonrise that no longer comes on time.",
+   "order": ["star_haven_adeptorium", "shrine_of_the_cats_divine", "torval", "temple_of_agamanus", "tomb_of_the_moon_singers", "vault_of_the_heavenly_scourge"],
+   "entry": {"clue": "lectern", "offset": [4, -6], "text": "A little academy's observation log, kept by a mage who has never been believed: 'Secunda late again, seven minutes. The priests' almanac says on time. One of us is lying to the moon.'"},
+   "quest": {"title": "The Late Moon", "desc": "A star-watcher's log insists that the second moon is rising late, and that the priests' almanac is a lie.", "desc2": "The drift of the moon leads through a capital, a ridge-top temple and a choir-tomb to a vault of blades that wake at moonrise.", "pitch": "A mage at the Star Haven Adeptorium says the priests' almanac is wrong, and gets laughed at.", "outro": "I stood in the vault as Secunda rose seven minutes late and, one by one, the lunar blades woke. I set the three keys and slowed the waking. The Moon-Priests will have to admit the almanac is a story.", "boss": {"name": "The Blade That Woke Early", "type": "skycraft:will_o_wisp", "hp": 3.6, "dmg": 1.5, "level": 28}, "reward": {"gold": 640, "loot": "legendary", "unique": "moonblade_of_the_mane"}}
+  },
+  {
+   "id": "els_2", "title": "The Faceless of Rimmen", "tier": "A",
+   "secret": "Burial masks of Rimmen's honoured dead are being stolen and sold abroad by the Baandari. A dead Khajiit without a mask wanders as a faceless guardian, and the moonstone-ring village at Hakoshae has run out of ways to bury them.",
+   "order": ["roadside_twin_moons", "baandari_caravan_stop", "hakoshae", "rimmen", "anequina_aqueduct", "rimmen_necropolis"],
+   "entry": {"clue": "urn", "offset": [7, -3], "text": "A funerary mask lies in an urn behind the roadhouse's second lantern, the mask's mouth stuffed with a receipt: 'Delivered, Baandari stop, one of nine. The priests ask no questions.'"},
+   "quest": {"title": "The Faceless of Rimmen", "desc": "A burial mask in a roadhouse urn, with a receipt from the Baandari caravan stop.", "desc2": "The masks' trail runs through the moonstone ring, the cliff city and its aqueduct to the lunar clock under the dead.", "pitch": "A traveller at the Twin Moons says a faceless Khajiit walked past the lanterns last night and bowed.", "outro": "In the clock chamber I set the masks back, one by one, until the last faceless stopped. They did not thank me. They knelt, and their masks, for a moment, almost smiled.", "boss": {"name": "The Unmasked Warden", "type": "skycraft:draugr_deathlord", "hp": 3.2, "dmg": 1.5, "level": 24}, "reward": {"gold": 540, "loot": "major"}}
+  },
+  {
+   "id": "els_3", "title": "The Glow Beneath the Sugar", "tier": "A",
+   "secret": "Moon-sugar's glow comes from a coolant that leaked from a Dwemer colossus. The meadow blooms over the leak, the boil-houses of Senchal cut the refined with colossus dust, and the sleepwalkers of Corinthe are a symptom, not an addiction.",
+   "order": ["tathara_sugar_farm", "moon_sugar_meadow", "the_prancing_netch", "corinthe", "senchal", "halls_of_colossus"],
+   "entry": {"clue": "urn", "offset": [-6, 8], "text": "A sugar-jar at the boil-house is warm and humming. A farmer has written on its lid: 'Does not taste like the meadow. Tastes of iron. Asked my wife. She slept three days.'"},
+   "quest": {"title": "The Glow Beneath the Sugar", "desc": "A sugar-jar that hums and tastes of iron, and a farmer's wife who slept three days.", "desc2": "The glow's source runs through a meadow, an inn and a garden city to a hall of colossal machines.", "pitch": "The farmer at Tathara says this year's sugar glows too bright and tastes wrong.", "outro": "The colossus's chest was cracked and weeping a luminous oil. I sealed it and the glow in the meadow dimmed to a gentler moon-colour. The sugar will be less sweet. It will be safe.", "boss": {"name": "The Unfinished Colossus", "type": "skycraft:dwarven_centurion", "hp": 4.0, "dmg": 1.6, "level": 26}, "reward": {"gold": 560, "loot": "major"}}
+  },
+  {
+   "id": "els_4", "title": "The Oath-Forge", "tier": "A",
+   "secret": "Every sword broken in Anequina's wars is carried by caravan to the hill. They re-form each year into a single blade of a hundred oaths, quenched in the bone trough of the dragon-scour. A faction of clan-chiefs wants to claim it; the blade wants none of them.",
+   "order": ["orcrest", "dune", "ne_quin_al", "hill_of_shattered_swords", "prowls_edge_dragonscour"],
+   "entry": {"clue": "stone", "offset": [11, 2], "text": "A fort gate-post is scored with a hundred small crosses, one for each oath. A blade-shard is jammed in the crack and tied with a ribbon: 'Carry to the hill. Don't ask whose.'"},
+   "quest": {"title": "The Oath-Forge", "desc": "A blade-shard tied with a ribbon at the claw-gate fort, with orders to carry it to the hill.", "desc2": "The shards lead from a caravan crossroads and a plateau city to a hill of blades and a bone-trough.", "pitch": "A guard at the claw-gate says every caravan out of Orcrest carries one blade-shard, and no one asks.", "outro": "The blade quenched in the dragon's ribs and I held it for a breath before laying it back. A hundred oaths is too heavy for one hand. Someone had to carry the weight; I put it down in the bone.", "boss": {"name": "Khasra the Oathless", "type": "skycraft:werewolf", "hp": 3.4, "dmg": 1.5, "level": 26}, "reward": {"gold": 560, "loot": "major"}}
+  }
+ ],
+ "sit": {
+  "star_haven_adeptorium": {
+   "name": "Star Haven Adeptorium",
+   "g": "A tiny academy under a dome on an Anequina hillside, with a roof opening and brass quadrants on every windowsill.",
+   "m": "The academy's mage has measured Secunda rising late for eleven months. The priests call it error and refuse to share their almanac.",
+   "c": ["quadrants on every windowsill, all aimed at one gap", "an observation log with a column of minutes", "a roof dome with scorch marks from priests' lamps"],
+   "x": ["shrine_of_the_cats_divine"],
+   "p": "The mage's observation log and a lunar chart.",
+   "r": "The Star Haven mage says Secunda is late and gets laughed at. He keeps measuring anyway.",
+   "lead": "Take the observation log from Star Haven to the shrine of the great cats.",
+   "n": {"k": "journal", "t": "Observation Log", "a": "Brother Za'ren", "x": "Secunda late by seven minutes on the twelfth. Eleven on the fourteenth. The almanac of the priests declares the moon on time. I wrote respectfully, three times. The third answer asked me to stop looking up. I have bought a larger quadrant. The moon is not wrong. The moon is moving."}
+  },
+  "shrine_of_the_cats_divine": {
+   "name": "Shrine of the Cats Divine",
+   "g": "A stepped shrine of giant cat statues on an Anequina hillside, with a moon-pool and a stair of prayer tablets.",
+   "m": "The statues' shadows no longer line up with the shrine's moon-mark at moonrise. Someone has chipped a new mark into the pool's lip, hastily, to hide the drift.",
+   "c": ["a new moon-mark chipped into the pool's lip", "shadows misaligned by a hand's width", "prayer tablets with the dates scraped and re-cut"],
+   "x": ["torval"],
+   "p": "A rubbing of the old moon-mark.",
+   "r": "The great cats at the shrine have started casting shadows that don't match the day.",
+   "lead": "Compare the new and old moon-marks and take the rubbing to Torval's priests.",
+   "n": {"k": "warning", "t": "Pilgrim's Warning", "a": "a pilgrim", "x": "Do not light the evening lamp by the pool. The priests have changed the marks and the cats do not like it. A mason told me the new mark is wrong by a finger's breadth, and that a finger's breadth of moon is a month's grain. Say nothing to the priests. They will say it is blasphemy."}
+  },
+  "torval": {
+   "name": "Torval",
+   "g": "A capital of concentric rings with a palace of two linked domes at the centre and a processional road aligned to moonrise.",
+   "m": "The Moon-Priests keep two almanacs: a true one in the palace dome and a public one. The true almanac shows the drift. Only the high priest may read it.",
+   "c": ["a palace dome with a locked inner almanac chamber", "a procession road re-paved to a new alignment", "priests' lamps lit at the old moonrise"],
+   "x": ["temple_of_agamanus"],
+   "p": "A copy of the true almanac.",
+   "lead": "Slip into the palace dome and copy the true almanac."
+  },
+  "temple_of_agamanus": {
+   "name": "Temple of Agamanus",
+   "g": "A ridge-top temple with terraces in four stages, prayer-wheels and a hollow dome, whose sanctum is aligned to a single moonrise.",
+   "m": "The alignment is wrong now. The sanctum's lamp lights seven minutes after the moon touches the dome, and the temple keepers have stopped lighting the lamp.",
+   "c": ["a sanctum lamp left unlit", "prayer-wheels stilled by wedges", "a dome with a brass line scored over by a second line"],
+   "x": ["tomb_of_the_moon_singers"],
+   "p": "A key-wheel which sets the choir-tomb's tuning.",
+   "r": "The temple of Agamanus no longer lights its lamp. The keepers say it will be lit again once the moon is on time.",
+   "lead": "Take the key-wheel from Agamanus to the tuned rooms of the choir-tomb.",
+   "n": {"k": "orders", "t": "Keeper's Standing Orders", "a": "High Keeper", "x": "The lamp is not to be lit until the moon touches the dome. If it is late, it is late; do not alter the dome or the brass. Do not post this order. Do not tell the pilgrims. The moon is the moon, and it is the priests' duty to be right even when the moon is wrong."}
+  },
+  "tomb_of_the_moon_singers": {
+   "name": "Tomb of the Moon Singers",
+   "g": "A choir-tomb of echoing chambers, each room tuned to a note of the moon's phase, cut into an Anequina hill.",
+   "m": "Every chamber has drifted out of tune, a half-tone flat. The singers' choir-mistress stands at the lowest room and sings the true note, once a night.",
+   "c": ["tuning-forks stacked in wall niches", "a chamber whose echo returns a half-tone flat", "a choir-mistress's footprints in dust, going down"],
+   "x": ["vault_of_the_heavenly_scourge"],
+   "p": "A tuning-fork which fits the vault's keyed moon-gates.",
+   "r": "The Moon Singers' tomb hums a note lower than it did when my mother was a kitten.",
+   "lead": "Fetch the tuning-fork from the lowest chamber of the Moon Singers' tomb.",
+   "n": {"k": "poem", "t": "The Choir-Mistress's Song", "a": "Mistress Sa'ira", "x": "~Low is the moon and the note is low,~low is the song where the singers go.~Three keys for the gates, and a choir for each,~and the vault to the blades is a thing out of reach.~Sing it true, sing it true, sing it true,~till the moon rises up and is late no more."}
+  },
+  "vault_of_the_heavenly_scourge": {
+   "name": "Vault of the Heavenly Scourge",
+   "g": "A sealed vault of lunar weapons, a long hall of racked blades that wake when moonlight enters the skylights and an antechamber of three keyed moon-gates.",
+   "m": "The blades wake seven minutes late, and in the interval they hunger. The gates' three keys no longer fit by moonlight alone: each needs a note to turn.",
+   "c": ["racked blades that tremble in the dark", "skylights stained with seven minutes of dawn-light", "three keyholes shaped like crescents with a notch missing"],
+   "x": ["torval", "star_haven_adeptorium"],
+   "p": "A unique lunar blade, the moonblade of the mane, and the real almanac.",
+   "r": "The vault's blades hum at moonrise. Folk say they have started to hum before the moon comes.",
+   "lead": "Set the three keys at moonrise and quiet the waking blades.",
+   "n": {"k": "inscription", "t": "The Gate-Lintel", "a": "", "x": "THREE KEYS, THREE NOTES, THREE MOONRISES. Do not enter before the moon. Do not enter after. The blades wake to the moon that is, not the moon that was. If the moon is late, the blades are hungry."}
+  },
+  "roadside_twin_moons": {
+   "name": "Roadside Twin Moons",
+   "g": "A roadhouse with two lanterns by the Rimmen road, one pale and one rose, each the colour of a moon.",
+   "m": "The lanterns' keeper found a burial mask in a traveller's pack and hid it in the second lantern's urn. A faceless Khajiit bowed to him last night.",
+   "c": ["an urn behind the second lantern", "a faceless traveller's footprints", "a mask with its mouth stuffed with a receipt"],
+   "x": ["baandari_caravan_stop"],
+   "p": "A burial mask and a receipt naming a caravan stop.",
+   "r": "A faceless Khajiit walked past the Twin Moons last night and bowed to the lanterns.",
+   "lead": "Take the mask and receipt from Twin Moons to the Baandari tent camp.",
+   "n": {"k": "letter", "t": "Lanternkeeper's Letter", "a": "Mazri", "x": "To the Rimmen guard: I found a mask in the pack of a Baandari trader. It was one of the honoured dead's, with the family seal inside the rim. A faceless one came to the door later that night and stood in the road with its hands out. I did not give it anything. I am ashamed. Please send someone."}
+  },
+  "baandari_caravan_stop": {
+   "name": "Baandari Caravan Stop",
+   "g": "A tent camp by the Rimmen road with painted wagons, cooking fires and a bright awning for the trade.",
+   "m": "The Baandari buy masks cheap from grave-robbers and sell them to collectors abroad. The caravan-mother doesn't know the masks have been the dead's faces.",
+   "c": ["a tent of wrapped masks in hay", "a caravan-mother's account book with 'faces' as a column", "a wagon painted with a face that is not a face"],
+   "x": ["hakoshae"],
+   "p": "The caravan-mother's account of who sells her the masks.",
+   "lead": "Take the mask-account to the moonstone-ring village at Hakoshae."
+  },
+  "hakoshae": {
+   "name": "Hakoshae",
+   "g": "A hamlet around a ring of upright moonstones where tomb-guardians live, low houses in the circle's shadow.",
+   "m": "The guardians have run out of graves for the faceless who come asking for faces. They keep them in the circle at night, bound by moonlight, and weep.",
+   "c": ["faceless figures standing within the circle at night", "low houses with a mask hung over each door", "a ring stone chipped at the base where a name was"],
+   "x": ["rimmen"],
+   "p": "A circle-stone key which lets a bearer into the necropolis' upper tier.",
+   "r": "The Hakoshae guardians keep faceless dead in the ring at night. Don't walk near after dark.",
+   "lead": "Take the circle-stone key from Hakoshae to Rimmen's cliff gate.",
+   "n": {"k": "diary", "t": "A Guardian's Diary", "a": "Guardian Mur'ti", "x": "Three more came last night. I counted them into the ring and gave them each a lamp. They stand and wait, and the moon looks down on their smooth faces. I have written to the priests of Rimmen four times. The fifth I shall carry myself. I am afraid of what I shall say."}
+  },
+  "rimmen": {
+   "name": "Rimmen",
+   "g": "A cliff city of artisans with a palace on the high cliff, craft districts stepped below and a necropolis door cut at its base.",
+   "m": "The city's mask-carvers are paid to make blanks for the dead, but the commissions have tripled and none of the buyers are Rimmen's. The carvers' guild has stopped counting.",
+   "c": ["a mask-carvers' shop with a queue of foreign buyers", "a necropolis door with a chain freshly oiled", "a guild ledger with sums that no longer add up"],
+   "x": ["anequina_aqueduct"],
+   "p": "The carvers' ledger, with the buyers' names.",
+   "lead": "Find the mask-carvers' ledger and the buyers' names."
+  },
+  "anequina_aqueduct": {
+   "name": "Anequina Aqueduct",
+   "g": "A long arched aqueduct across a gorge, with a channel on top and maintenance galleries running through its piers.",
+   "m": "The aqueduct's galleries are a smuggler's route. The masks pass under the water in lead boxes, so the necropolis guards never see them leave.",
+   "c": ["lead boxes in an arch recess", "a channel-gate with a secret second latch", "a gallery lamp lit only on moonless nights"],
+   "x": ["rimmen_necropolis"],
+   "p": "A gallery key, opening the smugglers' door under the necropolis.",
+   "r": "The aqueduct's piers are hollow, and on moonless nights lamps burn inside them.",
+   "lead": "Follow the smugglers' lead boxes through the aqueduct to the necropolis undergate.",
+   "n": {"k": "list", "t": "Smugglers' Packing List", "a": "unsigned", "x": "Box 1: eighteen masks, cedar. Box 2: eleven masks, bone. Box 3: the family seal-mask of House Rukhal, which is not for sale and I will not carry it. Box 4: empty, return with ballast. Water in the channel is low this season; take the lower gallery."}
+  },
+  "rimmen_necropolis": {
+   "name": "Rimmen Necropolis",
+   "g": "A vast city of the dead in layers, with crypt avenues, moon-lit atria and a lunar clock chamber that descends with the moons' cycle.",
+   "m": "In the lunar clock chamber stand the empty mask-niches. Each must be filled before the moon is full, or the faceless will not rest.",
+   "c": ["an empty niche on every column of the clock chamber", "a lunar clock stopped between two phases", "a path of footprints that all end in a single niche"],
+   "x": ["hakoshae", "baandari_caravan_stop"],
+   "p": "The honoured dead's masks restored: a unique mask that lets the wearer walk among the dead.",
+   "r": "The Rimmen necropolis has a clock that stopped between two moons. Some say it is waiting for faces.",
+   "lead": "Fill the niches of the lunar clock chamber with the masks you have gathered.",
+   "n": {"k": "inscription", "t": "Clock-Chamber Epigraph", "a": "", "x": "EACH NICHE A FACE, EACH FACE A NAME. The clock does not run while a niche stands empty. It is not cruelty; it is order. Return what was taken. The dead are not impatient. They have time."}
+  },
+  "tathara_sugar_farm": {
+   "name": "Tathara Sugar Farm",
+   "g": "A sugar farm with a boil-house at the edge of a meadow where the cane is lit with a faint, moon-coloured glow.",
+   "m": "This season's moon-sugar glows too bright and tastes of iron. The farmer's wife slept three days after a spoonful.",
+   "c": ["a sugar-jar that hums when set down", "cane rows bright enough to read by", "a boil-house chimney that smokes violet"],
+   "x": ["moon_sugar_meadow"],
+   "p": "A humming jar: evidence the glow is not natural.",
+   "r": "The Tathara sugar is brighter than any harvest. It tastes of iron, and the wife sleeps three days.",
+   "lead": "Take the humming jar from Tathara to the glowing meadow.",
+   "n": {"k": "notes", "t": "Farmer's Notes", "a": "Rashid of Tathara", "x": "Sugar sold: two hundred weight. Sugar returned by customers: sixty. Complaints: the sleeping, the taste, the glow. The glow is worse by the meadow's lower ditch. I put my hand in the ditch and it came out shining. I have washed it twice. It is still shining."}
+  },
+  "moon_sugar_meadow": {
+   "name": "Moon-Sugar Meadow",
+   "g": "A field of luminous moon-sugar flowers in a shallow bowl of pale earth, brightest along a drainage ditch.",
+   "m": "The ditch drains from a sealed hall of the Dwemer. The meadow's glow is a coolant, and the flowers drink it.",
+   "c": ["a ditch glowing brighter than the flowers", "a flagstone in the ditch stamped with a gear", "flowers bent toward a single drain grate"],
+   "x": ["the_prancing_netch"],
+   "p": "A drain-grate key to the colossus hall.",
+   "r": "The meadow glows brightest along the ditch, and the ditch never freezes.",
+   "lead": "Follow the glowing ditch from the meadow to the hanging inn.",
+   "n": {"k": "report", "t": "Surveyor's Report", "a": "Hasani", "x": "The ditch leads under the hill, into a gallery of brass. The stone is warm. The glowing liquid is oil, not water, and it ticks as it cools. The farmers call it the moon's milk. I would call it a leak. I would also call for a very long rope."}
+  },
+  "the_prancing_netch": {
+   "name": "The Prancing Netch",
+   "g": "An inn built beneath a hanging netch-balloon on the Anequina road, with a long common room and a rooftop landing for ropes.",
+   "m": "The inn's cellar is the Dwemer drain's overflow tank. The innkeeper has tasted the glowing oil and says it makes the beer interesting.",
+   "c": ["a cellar tank glowing blue-green", "a beer-tap handle cast of brass with a gear on it", "a balloon rope that ties to a pipe-end"],
+   "x": ["corinthe"],
+   "p": "The cellar tank's sample vial.",
+   "r": "The Prancing Netch's beer glows faintly on Fridays and nobody will say why.",
+   "lead": "Take the sample vial from the Netch's cellar to the garden city of Corinthe.",
+   "n": {"k": "ledger", "t": "Cellar Ledger", "a": "Innkeeper Tabu", "x": "Kegs: 40. Tank: one, full, glowing. Complaints: three drinkers who slept for a day. Praise: sixteen drinkers who say it is the best they ever had. I have stopped serving it to the old and the very young. I have not stopped serving it. Do not tell the Senchal buyers."}
+  },
+  "corinthe": {
+   "name": "Corinthe",
+   "g": "A green river city of terraced gardens, canals with arching bridges and a garden-roofed cathedral.",
+   "m": "The cathedral's herbalists have identified the sleep-sickness as a symptom of the glow. They have a cure grown from a river-moss and no way to afford more.",
+   "c": ["a cathedral herbarium with a glowing bed", "hospital cots of sleepwalkers in the nave", "a ledger of costs with a red 'unpaid' stamp"],
+   "x": ["senchal"],
+   "p": "A herbalist's cure-moss, which cleanses the glow.",
+   "lead": "Take the herbalists' findings from Corinthe to the sugar port at Senchal."
+  },
+  "senchal": {
+   "name": "Senchal",
+   "g": "A port of terraced sugar warehouses with stepped white roofs, striped awnings and sugar-boil chimneys.",
+   "m": "The boil-houses cut the refined sugar with colossus dust, because the dust makes it glow brighter and sell faster. The boil-masters know the cost.",
+   "c": ["boil-house sacks stamped with a gear", "a warehouse where the dust is mixed at night", "a quay-side sugar-barrel that glows through the slats"],
+   "x": ["halls_of_colossus"],
+   "p": "A boil-master's confession and a sack of colossus dust.",
+   "lead": "Take the boil-house's colossus dust from Senchal back to its source."
+  },
+  "halls_of_colossus": {
+   "name": "Halls of Colossus",
+   "g": "A Dwemer hall of colossal machines with too-large doors and a giant half-assembled construct whose chest is cracked.",
+   "m": "The colossus's cracked chest weeps coolant down the ditch. If it is sealed, the meadow's glow will fade and the sugar will be only sweet.",
+   "c": ["a colossus's chest weeping a luminous oil", "doors three times human height", "a gantry of brass lines leading to a drain"],
+   "x": ["moon_sugar_meadow", "tathara_sugar_farm"],
+   "p": "A colossus seal-plate, a unique that closes the leak.",
+   "r": "The Halls of Colossus drip at night. The sugar-folk say the meadow grows from its tears.",
+   "lead": "Seal the colossus's chest and end the leak.",
+   "n": {"k": "inscription", "t": "Colossus Plate", "a": "", "x": "UNFINISHED. DO NOT DRAIN. The cold-water must not touch the meadow-soil, for the soil is the colossus's keeper. Close the chest. Do not wake the chest. Do not wake the colossus."}
+  },
+  "orcrest": {
+   "name": "Orcrest",
+   "g": "A mesa-top fort-town in orange rock, with a gate shaped like a pair of claws, cisterns and rooftop banners.",
+   "m": "Every caravan out of Orcrest carries one blade-shard with a ribbon. The guard-captain says it is an old custom. He does not know what the shards are for.",
+   "c": ["a gatepost scored with a hundred crosses", "caravan wagons each with one shard tied to the axle", "banners with a single sword stitched half-broken"],
+   "x": ["dune"],
+   "p": "A blade-shard tied with a red ribbon.",
+   "r": "Every caravan out of Orcrest carries one broken blade-shard. Nobody knows who sends them.",
+   "lead": "Carry the blade-shard from Orcrest down to the caravan-wheel market at Dune.",
+   "n": {"k": "orders", "t": "Gate-Captain's Orders", "a": "Captain Ja'dar", "x": "One shard per caravan, ribbon tied, delivered to the hill. If asked, say it is custom. If asked again, say it is old. If asked a third time, hand over the ledger of oaths and let the questioner choose whether to carry the weight."}
+  },
+  "dune": {
+   "name": "Dune",
+   "g": "A caravan crossroads with a wheel-shaped market, eight radial lanes, striped tents and camel pens at the rim.",
+   "m": "All eight lanes of the market end at the same wagon, which sells nothing. It stores the shards until a caravan-mother has enough for a full carry.",
+   "c": ["a wagon at the wheel's hub that sells nothing", "eight lanes marked with different blades", "a camel whose saddle is a sheath of shards"],
+   "x": ["ne_quin_al"],
+   "p": "A caravan-mother's ledger of the blade-shards' carry.",
+   "lead": "Take the shard-wagon's ledger from Dune to the ruined plateau city."
+  },
+  "ne_quin_al": {
+   "name": "Ne Quin-al",
+   "g": "An ancient ruined city on a plateau, with a processional road, collapsed towers and a single standing arch.",
+   "m": "The old city's smiths were the first to swear on blades. Their oath-hall is the last stop before the hill. A tally of oaths decorates its floor.",
+   "c": ["a floor tally of oaths in nine hundred columns", "a standing arch with a sword-shaped keystone", "a forge-hall with a cold anvil that is warm to the touch"],
+   "x": ["hill_of_shattered_swords"],
+   "p": "The oath-hall's broken sword: the first piece of the great blade.",
+   "lead": "Gather the oath-hall's first shard and climb the hill of swords."
+  },
+  "hill_of_shattered_swords": {
+   "name": "Hill of Shattered Swords",
+   "g": "A hill planted with thousands of broken sword-blades, shining in the wind like a cold field of wheat.",
+   "m": "Each season the shards on the hill rearrange themselves into a ring around a hollow where a single whole blade should stand. It is still not whole.",
+   "c": ["shards arranged in a ring around a hollow", "a shard at the centre with a ribbon from every caravan", "wind that rings the shards in a single chord"],
+   "x": ["prowls_edge_dragonscour"],
+   "p": "A hundred-oath shard that fits the quenching trough.",
+   "r": "The shards on the hill move at night. By morning they are in a ring, and there is always a gap.",
+   "lead": "Gather the hundred-oath shard from the hill and carry it to the dragon-scour.",
+   "n": {"k": "poem", "t": "Song of the Hundred Oaths", "a": "unknown", "x": "~A hundred oaths on a hundred steel,~a hundred hands that learned to kneel.~Bring the broken, bring the bent,~bring the oath that was never spent.~The hill is cold and the wind is long.~Come and be forged in the dragon's song."}
+  },
+  "prowls_edge_dragonscour": {
+   "name": "Prowl's Edge Dragonscour",
+   "g": "A ridge of colossal bones leading to a lair on a mesa, an open-air scour you can walk inside with ribs forming arches.",
+   "m": "The dragon's ribcage is the quench-trough where the great blade is made. The blade that rises is a hundred oaths heavy, and the lair's guardian wants it back in the bone.",
+   "c": ["a rib-arch scored with tally marks", "a bone trough full of cold water that steams", "a blade-shaped hollow in the sand under the ribs"],
+   "x": ["orcrest", "ne_quin_al"],
+   "p": "The oath-forged blade, a unique relic that binds its wielder's word.",
+   "r": "At Prowl's Edge a steam rises from the bones on a cold night, as if something were quenched.",
+   "lead": "Quench the hundred-oath blade in the dragon's ribs and decide who carries it.",
+   "n": {"k": "inscription", "t": "The Quench-Trough Rim", "a": "", "x": "WHAT IS SWORN IS SWORN. WHAT IS BROKEN IS BROKEN. WHAT IS FORGED HERE IS BOTH. Let no hand take the blade who has not broken a vow. Let no hand put it down who has not kept one."}
+  }
+ }
+}

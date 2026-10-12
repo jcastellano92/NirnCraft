@@ -1,0 +1,116 @@
+{
+ "abahs_landing": {
+  "r": "The stilt harbour at Abah's Landing ships palm-seeds in sealed jars. Nobody knows which garden they are for, and the harbour-master has stopped asking.",
+  "n": {"k": "report", "t": "Harbour-Master's Report", "a": "Harbour-Master Nasir", "x": "Jars of palm-seed received this season: 212, labelled 'for the garden', each stamped with a lord's palm-seal. Destination: overland, by night cart. I asked a cart-driver which garden. He said he only drove as far as the necropolis road and was paid not to look. I have kept the manifests in a locked drawer."}
+ },
+ "baandari_caravan_stop": {
+  "r": "The Baandari tent camp by the Rimmen road will sell you anything, and lately that includes carved faces nobody asks about.",
+  "n": {"k": "ledger", "t": "Caravan-Mother's Account Book", "a": "Caravan-Mother Rasha", "x": "Faces bought this season: 38 (cedar), 21 (bone), 4 (gilt). Faces sold north: 51. Faces unsold: 12, kept in the wagon with the red awning. I had thought them craft-work. A priest told me otherwise and left in tears. I will sell no more. I cannot afford to stop."}
+ },
+ "cloudrest": {
+  "r": "Cloudrest hangs its balconies over open air. The steward has been shoring the lower ones with iron where the courtiers will not see.",
+  "n": {"k": "report", "t": "Master-Builder's Report", "a": "Master-Builder Tolwen", "x": "Balcony nine ticks. Balcony eleven ticks and has dropped a hand's breadth. I recommended closing the south wing and was told the steward's office does not recognise the word 'closing'. I have braced the worst of them with iron. The stone was always held by song, and I hear less of it each week."}
+ },
+ "corinthe": {
+  "r": "The cathedral of Corinthe has a ward of sleepers laid out like a field of sheaves, and the herbalists say the cure costs more than the town has.",
+  "n": {"k": "report", "t": "Herbalists' Ward Report", "a": "Herbalist Mireth", "x": "Sleepers in the nave: 63. Waking after a dose of river-moss: 41. Waking cleanly: 22. The moss grows only in the third canal and costs us a week's labour per dose. The cause is a glow in the sugar. The sugar-port buyers know it. We have written to them politely, then less politely. Please send moss."}
+ },
+ "crystal_tower_summerset": {
+  "r": "The Crystal Tower's summit lenses were covered with a cloth at the spring equinox. The wardens won't say what they saw before they did it.",
+  "n": {"k": "report", "t": "Warden's Lens-Room Log", "a": "Warden Aelwyn", "x": "The first lens shows the sky as it is. The second shows the sky as it was a hundred years ago. The third shows a night with stars I cannot name and a door in the sky. I have covered the third with a cloth and set a guard, and told no one why. It is not my place to say. It is not my place to look."}
+ },
+ "direnni_tower": {
+  "r": "The old white tower of the Direnni stands on its island and a light burns in its lens-room every night. No one has been seen to climb the stair."
+ },
+ "dokrin_monastery": {
+  "r": "The monks at Dokrin keep the oldest drum-scores in the March. One page has been replaced with a pressed leaf, and the abbot weeps when anyone asks.",
+  "n": {"k": "notes", "t": "Abbot's Library Notes", "a": "Abbot Rasi", "x": "Score nine, the Truce-song: eight verses, of which the eighth has been cut out and a leaf pressed in its place. The cutter left no mark but a clay thumb. I replaced the leaf nine times and nine times it was removed. I now keep it where it is. Whoever wants the verse may bring me the hand that holds it."}
+ },
+ "drabul": {
+  "r": "The Orcs of Drabul have been felling trees that Bosmer would not touch, and no Bosmer has said a word against them.",
+  "n": {"k": "list", "t": "Chief's Stump Tally", "a": "Chief Gruzbash", "x": "Guide-trees felled: 7. Remaining on our line: 4. Paid: smoked fish, two casks of ale, and a hermit's gratitude, which is the best I have been paid in. The hermit weeps when she hands over the axes. I do not understand her people's gods. I understand a good axe and a woman who needs a tree cut."}
+ },
+ "dragonstar": {
+  "r": "The arena-master of Dragonstar sets his bouts by a schedule he keeps in a locked chest, and the fighters who have read it won't discuss it.",
+  "n": {"k": "orders", "t": "Arena-Master's Schedule", "a": "Arena-Master Idris", "x": "Bout one: a red-sash against a blue-sash, ending on the stair's third rung. Bout two: a drawn sword, a dropped shield, a kneeling. The valley's panels are filling at a rate of one bout a week. Fighters who refuse wake bruised in the shape of the bout they skipped. I do not make the fights. I merely schedule them."}
+ },
+ "dune": {
+  "r": "The caravan market at Dune has a wagon at its hub that sells nothing and is never left unguarded.",
+  "n": {"k": "ledger", "t": "Hub-Wagon Ledger", "a": "Wagon-Keeper Zhasira", "x": "Shards received: 31. Shards forwarded to the plateau city: 24. Shards held back for the final carry: 7. I am told they are an old custom. I am told many things. The shards are warm in my hands at dusk, and they rattle in the night as though trying to arrange themselves. I keep them wrapped in wool and I do not look at them."}
+ },
+ "glenpoint": {
+  "r": "The beacon at Glenpoint is lit on nights no ship is expected, and a grinding wheel runs in the boat-shed until dawn.",
+  "n": {"k": "report", "t": "Beacon-Keeper's Report", "a": "Beacon-Keeper Orla", "x": "Beacon lit nine nights this month on orders I did not give. A grinding wheel runs in the old boat-shed, and the quay is wet with stone dust at dawn. The barge that pauses there carries no flag. Its passengers are masons, and its cargo is wrapped in sacking. They pay me in good coin to look at the sea. I look at the sea."}
+ },
+ "hundings_dojo": {
+  "r": "The sand bowl at Hunding's dojo is raked in a spiral every dawn. The master bows to an empty bench and no one has told him it is empty.",
+  "n": {"k": "notes", "t": "Master's Teaching Notes", "a": "Master Yazid", "x": "Students this year: none. Students last year: two, both gone before the second form. The second form is the Wind, which cannot be taught on land. It is learned on the shore, when the tide is going out. I will bow to the empty bench until one fills it. I am old, and the sand does not tire, and the lesson is not yet finished."}
+ },
+ "kjolvik": {
+  "r": "Kjolvik's elders sing in the long hall at night, loudly, so the ice cannot be heard. The children ask to be taught the old ship-songs.",
+  "n": {"k": "letter", "t": "A Child's Letter to the Shield-Fort", "a": "Tove of Kjolvik", "x": "To the Captain: the ice is talking again. The grown-ups sing to cover it. I counted the cracks in the harbour and there are forty-one now. Papa says not to count. Nana says to count and to pack. We have packed sledges and left them by the door. Please send the captain of the howe's ship if there is one."}
+ },
+ "lillandril": {
+  "r": "A third of Lillandril's stacks are blank, and the head librarian has gone missing. The assistants say they can hear reading from beyond the cliff.",
+  "n": {"k": "notes", "t": "Assistant's Catalogue Note", "a": "Assistant Faleril", "x": "Shelf nine: blank. Shelf ten: blank. Shelf eleven: contents intact, but the dust on the spines is arranged in rows like something walked along it. The head librarian left her tea half-drunk. A silk-thread is tied to the chair. I am not brave. I am the only one who remembers the catalogue. I am writing it all down."}
+ },
+ "ne_quin_al": {
+  "r": "At Ne Quin-al the old smiths' oath-hall has a floor that someone has been tallying by hand, and the smith's anvil is warm to the touch.",
+  "n": {"k": "inscription", "t": "The Floor Tally", "a": "", "x": "NINE HUNDRED COLUMNS OF OATHS, NINE HUNDRED NAMES IN EACH. Each who swore on a blade is counted here, and each who broke it is counted twice. The blade that was shattered is not lost. It is borne to the hill. Whoever carries it must have broken a vow, and kept another. Such is the order of the forge."}
+ },
+ "northpoint": {
+  "r": "The lighthouse at Northpoint is dark at the fog hour, by order of the harbour-master, who wears a small silver bell round his neck.",
+  "n": {"k": "orders", "t": "Harbour-Master's Orders", "a": "Harbour-Master Dunstan", "x": "Light to be extinguished at the fog hour. Ships to take their bearing by the moor-lanterns, not the great lamp. If a ship answers a voice from the fog, it is to be hailed back by the silver bell. If the ship does not respond, it is the Captain's affair and God keep him. Do not ask who is calling. The caller is polite."}
+ },
+ "pyandonean_fleet_anchorage": {
+  "r": "The shell-hulled fleet at anchor keeps pulling south against its lashings. The admiral says it is the current. The deck-hands do not.",
+  "n": {"k": "report", "t": "Quartermaster's Drift Report", "a": "Quartermaster Hesh", "x": "Fleet drift: four fathoms south-east since the last tide. Lashings tightened nightly. Anchor chain of the flagship: strained. The current does not run that way. I took a pink coral-shard from the flagship's keel; it was warm, and moved a little in my palm when the fleet turned. The admiral says it is a trick of the water. I say the water has a will."}
+ },
+ "rawlkha": {
+  "r": "Rawlkha's lantern-market sells paper from a dozen stalls, and a verse that was stolen from a monastery has passed through eleven hands there.",
+  "n": {"k": "ledger", "t": "Paper-Seller's Ledger", "a": "Paper-Seller Mizra", "x": "Sold: one verse-leaf, pressed, from a monastery library. Buyer: a Bosmer in a scholar's coat. Previous buyers: ten. Glosses in the margin: eleven, in eleven hands. Each says something different about whose it was. I sold it for three coin and was glad. I was told afterward what it was, and have been unwell since."}
+ },
+ "sanctum_ophidia": {
+  "r": "The serpent cult of Sanctum Ophidia coils its pool-mirror toward the stair and awaits an end to the world with perfect good manners.",
+  "n": {"k": "prayer", "t": "Serpent Cult's Evening Prayer", "a": "the Ophidian cult", "x": "Coil, coil, and coil once more. The stair is long and the mirror deep. We have seen what the panels foretell: a figure on a stair, a stepping off. We ask only to be swallowed gently when the Great Coil comes. We have swept the floors, polished the scales, and kept the pool quite clear. Come when you are ready."}
+ },
+ "sanguines_demesne": {
+  "r": "The invitations say the supper is held in a demesne of red velvet, where no one is unhappy and no one remembers the way home."
+ },
+ "shimmerene": {
+  "r": "The quiet quay at Shimmerene has no lantern, and crates marked 'minerals' go aboard a foreign ship after dark. The customs man looks away.",
+  "n": {"k": "report", "t": "Night-Watch Report", "a": "Watchman Corin", "x": "Quiet quay, third night: seven crates marked 'minerals', warm to the touch, carried aboard a foreign ship under no flag. Customs official seen to turn his back and pocket something. I inquired. I was told the quay was private. A crate had a feather caught in its seam, long as my arm and the colour of the cliffs."}
+ },
+ "silvenar": {
+  "r": "The hidden court at Silvenar knows who is cutting guide-trees, and a councillor passes the cutters coin in secret.",
+  "n": {"k": "letter", "t": "Councillor's Secret Letter", "a": "Councillor Aerin", "x": "To the hermit: the court cannot approve and will not forbid. A purse is enclosed, and a seal that will open the walking city's inner stairs. The chant of the apostates is a poison to the Pact and a danger to the city. Cut the last guide-trees at night. Do not be found. If you are found, we have never met."}
+ },
+ "skyreach_pinnacle": {
+  "r": "The lone spire of Skyreach has a stair wound around it and a step-off notch at the top. The cult wants a figure to fall, and so does the arena.",
+  "n": {"k": "inscription", "t": "The Platform's Notch", "a": "", "x": "HERE THE LAST PANEL STANDS. A figure steps; a figure falls; a figure walks on. The stone does not say which. The valley's carving is a forecast, not a command. Stand where the panel stands and choose, and let the stone be surprised."}
+ },
+ "skywatch": {
+  "r": "The great orrery at Skywatch was tilted by a degree one night, and the star-watchers can't say by whom. The conjunction comes sooner now.",
+  "n": {"k": "report", "t": "Star-Watcher's Alarm", "a": "Star-Watcher Elenwe", "x": "The third ring is out of true by one degree. I re-trued it last night and found it tilted again at dawn. Cult marks on the underside: a spiral of tiny crystals. The conjunction is nine weeks away by the old reckoning, and seven by the new. Someone is bringing the seed's waking forward. Send mages."}
+ },
+ "soulrest": {
+  "r": "No bone-barge has docked at Soulrest in a year, and the island's keepers watch the delta for a dirge that does not come.",
+  "n": {"k": "ledger", "t": "Island Keeper's Ledger", "a": "Keeper Ssivu", "x": "Barges received: 0 this year. Last year: 71. Dead awaiting passage: unknown. Lilies in the beds: withering, for want of the dead's warmth. I ring the watch-bell nightly and no one answers. I have sent boys up the delta to find the singers. One came back. He said the dirge goes east now, through the dry fields."}
+ },
+ "tang_mo_harbor_village": {
+  "r": "The dragon-prow at Tang Mo's quay has a jade tablet set in its throat that glows when the tide is high. The ferrymen have a seal tattooed on their palms.",
+  "n": {"k": "journal", "t": "Ferryman's Journal", "a": "Ferryman Wen", "x": "Tide high: the jade glows. Tide low: it sleeps. My grandfather's palm bore the same mark as mine, a quarter-circle with a notch. We carry the harbour's quarter of the seal, though none of us knows what it seals. A monk once asked to read it. I let him. He wept, and took nothing. It is a heavy thing to keep and a heavier thing to lose."}
+ },
+ "thorn": {
+  "r": "The great pool at Thorn shows a figure at the back of every festival crowd that nobody can name.",
+  "n": {"k": "notes", "t": "Sage's Pool Notes", "a": "Sage Teeba-Neel", "x": "In the pool this solstice: forty faces in the crowd, forty-one in the water. The forty-first sits at the back, hooded, patient, a guest of the Hist. I have asked the Hist. It remembers. It does not say. The forty-first has been at every festival since before the pool was named. Please, do not drive it from the seat."}
+ },
+ "tiger_plains_village": {
+  "r": "A lantern in the headman's house at Tiger Plains has burned without oil since before the village had a name, and he says it is a family heirloom.",
+  "n": {"k": "notes", "t": "Headman's Lantern Note", "a": "Headman Li", "x": "The lantern was lit by my ancestor's ancestor and has never gone out. In the rain, in the wind, in the long dark of the third winter. It is set in a quarter-circle of jade that does not match any craftsman's art. A traveller offered a great sum. I told him it was not mine to sell. I did not tell him it was not mine to keep."}
+ },
+ "wrothgarian_mountains": {
+  "r": "At noon the shadows on the Wrothgarian ridge fall the wrong way, and the sky there is the colour of permanent dusk.",
+  "n": {"k": "warning", "t": "Cairn Warning", "a": "a ridge-warden", "x": "Do not look at the shadow's tip at noon. It is a line, and it points to a place, and the place is a hammer. The Orcs who looked have not slept well since. The line crosses the Chief's hall and ends in the old forge beneath the city. I have built a cairn on it in the hope it will think twice."}
+ }
+}

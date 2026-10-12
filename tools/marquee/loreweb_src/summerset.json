@@ -1,0 +1,285 @@
+{
+ "province": "summerset",
+ "arcs": [
+  {
+   "id": "sum_1", "title": "The Skipped Hour", "tier": "S",
+   "secret": "Alinor's bells chime twenty-three hours, not twenty-four. The Psijic Order excised one hour from the capital's record to bury a single act. The hour survives as a room that rearranges itself in the relic vaults.",
+   "order": ["isle_of_contemplation", "colosseum_of_the_old_ways", "alinor", "traitors_vault", "crystal_tower_summerset", "psijic_relic_vaults"],
+   "entry": {"clue": "lectern", "offset": [3, 4], "text": "On the meditation platform a sun-dial's gnomon has been filed to a stub, and beneath it a note in a careful hand: 'Count the bells at dusk. There are twenty-three. Which hour was taken?'"},
+   "quest": {"title": "The Skipped Hour", "desc": "A filed-down sundial on a meditation isle says Alinor's bells chime only twenty-three hours.", "desc2": "The missing hour is traced through an old arena, the capital and a vault of false doors to the tower of crystal and the Psijics' rearranging vault.", "pitch": "A hermit on the Isle of Contemplation insists that one bell of the day is missing, and has been for sixty years.", "outro": "I stepped through the last door into a room that was lit by a single candle and an hour long gone. Someone had killed a man in that hour, and the Order had folded it away. I walked out carrying its name.", "boss": {"name": "The Hour's Keeper", "type": "skycraft:will_o_wisp", "hp": 3.4, "dmg": 1.5, "level": 30}, "reward": {"gold": 700, "loot": "legendary", "unique": "psijic_longbow"}}
+  },
+  {
+   "id": "sum_2", "title": "The Glass Fever", "tier": "A",
+   "secret": "Crystal splinters from a Daedric seed in Shattered Grove are rooting in the villagers. A Dagon cult in a red fortress coaxes the fever, and the victims hide under the cells of the prison under the spire.",
+   "order": ["dawnbreak", "maras_kiss_public_house", "shattered_grove", "firsthold", "skywatch", "the_banished_cells", "mehrunes_spite"],
+   "entry": {"clue": "grave", "offset": [-6, 9], "text": "A bluff-top grave is covered in a fine scatter of crystal splinters, glinting in the grass. A small wooden marker reads only: 'Glass-fevered. Do not dig.'"},
+   "quest": {"title": "The Glass Fever", "desc": "A glinting grave on a bluff marked 'Glass-fevered. Do not dig.' and a scatter of crystal splinters.", "desc2": "The fever's spread runs through a tavern, a splintered grove and a tide-island to the star-ringed hill, a prison and the red fortress.", "pitch": "A woman at Dawnbreak says her husband's eyes glittered like cut glass before he walked into the bluff.", "outro": "At the red fortress's heart I broke the seed-crystal and the splinters in every vein of Auridon dimmed, one by one. The glass-fevered will take years to recover, but they will.", "boss": {"name": "The Splinter-Prophet", "type": "skycraft:dremora", "hp": 3.4, "dmg": 1.5, "level": 26}, "reward": {"gold": 600, "loot": "major", "unique": "alinor_dawnblade"}}
+  },
+  {
+   "id": "sum_3", "title": "The Egg-Tithe", "tier": "A",
+   "secret": "The cantilevered balconies of Cloudrest are held up by stone tuned to gryphon-song. Eggs are not hatching because the palace steward has been selling them to pay a debt, and the song is fading.",
+   "order": ["kings_haven", "the_golden_netch", "shimmerene", "gryphon_aerie", "cloudrest", "tor_hame_khard"],
+   "entry": {"clue": "lectern", "offset": [5, -5], "text": "An orchard-keep's accounts list 'egg-tithe, forwarded to the steward at Cloudrest': thirty clutches in each of five seasons, and none in the sixth. 'The gryphons stopped,' it adds. 'Or were stopped.'"},
+   "quest": {"title": "The Egg-Tithe", "desc": "An orchard-keep's ledger lists an egg-tithe forwarded to a steward and a sixth season where no clutch came.", "desc2": "The trail goes from a balloon-inn and a dock to the aerie, the palace of balconies and a lightning-rod fortress.", "pitch": "The orchard-keep's reeve says no gryphon has hatched on the coast this spring.", "outro": "I returned the clutch to the aerie and heard, far above, a single clear note. The balconies of Cloudrest steadied. The steward will have a great deal to explain to the court.", "boss": {"name": "Steward Aelindor", "type": "skycraft:bandit_chief", "hp": 2.8, "dmg": 1.3, "level": 24}, "reward": {"gold": 520, "loot": "major"}}
+  },
+  {
+   "id": "sum_4", "title": "The Silk Library", "tier": "A",
+   "secret": "Lillandril's books are vanishing because giant spiders are weaving their words into silk. A vanished librarian lives in the web, reading the silk aloud to keep it from being lost.",
+   "order": ["trebbite_monastery", "dusk", "lillandril", "direnni_acropolis", "cathedral_of_webs"],
+   "entry": {"clue": "urn", "offset": [8, 3], "text": "A monastery urn is full of silk-thread spools, each wound around a tiny rolled slip with a word. A monk has tagged them: 'These are the library's lost books. Please do not eat them.'"},
+   "quest": {"title": "The Silk Library", "desc": "An urn of silk-thread spools at a monastery, each wound around a rolled slip with a single word.", "desc2": "The lost words lead through a dune port and the great library to an acropolis and a vault wrapped in webs.", "pitch": "The Trebbite monks found silk with words in it and have no idea how it got there.", "outro": "I found the librarian at a silk-lectern, reading aloud to a roomful of patient spiders. She did not look up. I sat down and listened until the afternoon had gone.", "boss": {"name": "The Loom-Mother", "type": "skycraft:frostbite_spider", "hp": 3.6, "dmg": 1.5, "level": 22}, "reward": {"gold": 460, "loot": "major"}}
+  }
+ ],
+ "sit": {
+  "isle_of_contemplation": {
+   "name": "Isle of Contemplation",
+   "g": "A tiny isle off Auridon with a single meditation platform, a sundial and a boat-landing of white stone.",
+   "m": "The sundial's gnomon is filed to a stub. A hermit counts the bells of Alinor from here and says one is missing from the day's twenty-four.",
+   "c": ["a sundial with its gnomon filed down", "tally marks of sixty years of dusk", "a hermit's cup beside a single empty chair"],
+   "x": ["colosseum_of_the_old_ways"],
+   "p": "The hermit's bell-tally, with sixty years of dusk counted.",
+   "r": "The hermit on the Isle of Contemplation counts twenty-three bells every dusk and swears there should be twenty-four.",
+   "lead": "Take the hermit's bell-tally from the Isle of Contemplation to the old arena.",
+   "n": {"k": "journal", "t": "Hermit's Bell-Tally", "a": "Eldrael the Counting", "x": "Dusk, day 21,918. Twenty-three bells. Dusk, day 21,919. Twenty-three. I asked the sun and the sun looked away. I asked the Order and was sent a kindly letter. I have filed the gnomon down so I will not be taunted by a shadow that has nowhere to fall. The missing hour is a place; I can feel it like a missing tooth."}
+  },
+  "colosseum_of_the_old_ways": {
+   "name": "Colosseum of the Old Ways",
+   "g": "A ruined ring arena on Artaeum's shore, its floor a pale mosaic of hours and its tiers half-sunk in sand.",
+   "m": "The mosaic of hours shows twenty-three. One tile has been pried out and replaced by a patch of bare grey stone. A match was held in that hour, and no one remembers who won.",
+   "c": ["a mosaic with a bare grey tile at the twenty-fourth place", "a sand floor with a scuff-ring around a fighter's stance", "a trophy-stand with one empty pedestal"],
+   "x": ["alinor"],
+   "p": "The pried-out tile's edge-pattern, a rubbing to match a missing door.",
+   "r": "The Old Ways arena's floor has a grey tile where an hour should be. Nobody remembers the fight that was held there.",
+   "lead": "Take a rubbing of the grey tile from the Colosseum to the capital's clock-square.",
+   "n": {"k": "inscription", "t": "Floor Inscription", "a": "", "x": "TWENTY-FOUR TILES FOR TWENTY-FOUR HOURS. LET NO HOUR BE PRIED. The tile that was lifted lies not here but where the hours are kept. A fight is held in every hour, and one was held in this, and one man lost it. His name is not the one on the pedestal."}
+  },
+  "alinor": {
+   "name": "Alinor",
+   "g": "A radial city of quartz with a Crystal Tower at the hub, sixteen avenues and a palace on a terrace.",
+   "m": "The city's bell-tower chimes twenty-three each dusk, and its clock has a blank face at the twenty-fourth. The bell-ringer was dismissed for asking.",
+   "c": ["a clock-face with a blank at the twenty-fourth", "a bell-ringer's dismissal notice nailed to the tower door", "chimes that pause one beat too long at dusk"],
+   "x": ["traitors_vault"],
+   "p": "The bell-ringer's warding-word, which opens the vault of false doors.",
+   "lead": "Find the bell-ringer's warding-word in Alinor's clock tower."
+  },
+  "traitors_vault": {
+   "name": "Traitor's Vault",
+   "g": "A vault of false doors on Artaeum where each room offers three exits, two of which loop back through mirrors.",
+   "m": "The vault was built to hold evidence of an act that the Order erased. The true vault lies behind a wall that must be broken, and the gold on show is bait.",
+   "c": ["rooms with three doors and two mirrors", "a wall with a hairline crack of cold light", "treasure chests trapped and empty"],
+   "x": ["crystal_tower_summerset"],
+   "p": "The true vault's brick, a key for the tower's lens-door.",
+   "r": "The Traitor's Vault has more doors than rooms. The ones that open lead to the same place.",
+   "lead": "Break the wall behind the false doors and retrieve the brick.",
+   "n": {"k": "notes", "t": "Vault-Builder's Notes", "a": "Architect Ilwen", "x": "A hundred false doors, one real. The real one is the wall. Do not break it with a sword; use a hammer that remembers. The reward behind it is not gold but a thing the Order wished to forget, and they have paid me well for forgetting. I have forgotten. I am frightened at how easily."}
+  },
+  "crystal_tower_summerset": {
+   "name": "Crystal Tower",
+   "g": "A needle of crystal many times taller than anything, glowing at night, with a spiral of lens-rooms at its summit.",
+   "m": "The tower's summit lens refracts the hours. One of its panes shows the skipped hour as a faint ghost room. The tower's wardens keep it covered with a cloth.",
+   "c": ["a lens-room pane covered by a cloth", "a clock-face on the stair with no hands", "a wardens' register missing a single page"],
+   "x": ["psijic_relic_vaults"],
+   "p": "A ghost-lens that shows the hour as a room.",
+   "lead": "Remove the cloth from the lens at the tower's summit and look through."
+  },
+  "psijic_relic_vaults": {
+   "name": "Psijic Relic Vaults",
+   "g": "A vault of sliding walls and phase-doors where rooms rearrange as you move and time-eddies freeze torches.",
+   "m": "The skipped hour is a room in this vault that rearranges to hide itself. In it, a candle burns on a table beside a stopped clock and a hand reaching for a cup.",
+   "c": ["a room whose candle burns without shortening", "a clock stopped at the twenty-fourth hour", "a hand-print in dust on a cup that was never lifted"],
+   "x": ["isle_of_contemplation", "alinor"],
+   "p": "A unique relic: the skipped hour itself, a candle that returns an hour.",
+   "r": "The Psijic vaults move their rooms. Folk say there is one that has been moved so often it is no longer anywhere.",
+   "lead": "Find the room that is no longer anywhere and take the candle.",
+   "n": {"k": "inscription", "t": "The Candle's Plate", "a": "", "x": "THE HOUR IS KEPT, NOT KILLED. Let it burn until the one who spilled the cup is known. Let it not be hidden from the one who lost it. The Order has been wrong before; the Order will be wrong again. Let the hour be remembered."}
+  },
+  "dawnbreak": {
+   "name": "Dawnbreak",
+   "g": "A hamlet on an Auridon bluff above the sea, with white cottages and a row of weathered crosses of crystal.",
+   "m": "A villager's grave is scattered with crystal splinters. The villagers say the fever starts as a glint in the eye and ends with a walk into the sea.",
+   "c": ["a grave scattered with fine crystal splinters", "cottages with glass shards pressed in the window sills", "a child's chalk drawing of a glittering eye"],
+   "x": ["maras_kiss_public_house"],
+   "p": "A glint-ward amulet, a crude shield against the fever.",
+   "r": "At Dawnbreak a man walked into the sea last winter. His eyes shone like cut glass the week before.",
+   "lead": "Take the glint-ward from Dawnbreak to the tavern where the fever first showed.",
+   "n": {"k": "diary", "t": "A Widow's Diary", "a": "Tilwen of Dawnbreak", "x": "He began to see the stars at noon. Then to hear them. Then his eyes began to glitter in lamplight, and I put a lamp in his lap and watched them go from brown to something like cut quartz. He walked into the sea on the ninth day. I put the splinters in a jar. I have not looked at it since."}
+  },
+  "maras_kiss_public_house": {
+   "name": "Mara's Kiss Public House",
+   "g": "A bright tavern on the Auridon road with a garden of fruit trees, a lantern for each drinker and a wide stone hearth.",
+   "m": "The fever first showed in the tavern's customers. The innkeeper traced it to a barrel of cider pressed from Shattered Grove apples. The apples glittered.",
+   "c": ["a cider barrel with a seam of crystal along the stave", "lantern-glass fractured in a spiderweb", "a drinker's cup with a splinter in the dregs"],
+   "x": ["shattered_grove"],
+   "p": "A sealed cider-sample and a map of the grove.",
+   "r": "Mara's Kiss serves a cider that sparkles on the tongue. They stopped pouring it after the second drinker went quiet.",
+   "lead": "Take the cider sample from Mara's Kiss and trace the apples to Shattered Grove.",
+   "n": {"k": "ledger", "t": "Cider Ledger", "a": "Innkeeper Merilin", "x": "Barrels pressed: 12. Barrels returned: 11, unopened. Barrel twelve: poured to the last. Patrons affected: 9. Orchard supplier: Shattered Grove, who say it is the best harvest in years and glitter when they speak. I have burned the barrel. The smoke was blue. The splinters were not burned."}
+  },
+  "shattered_grove": {
+   "name": "Shattered Grove",
+   "g": "A grove of splintered crystal trees in Auridon, their bark cracked and the fallen fruit sparkling in the grass.",
+   "m": "The grove is a Daedric seed that took root in a lightning-struck ash. The crystals are not stone but patient teeth, and each fruit holds a thread of the cult's whisper.",
+   "c": ["bark cracked into glassy shards", "fruit that glitters but bruises like flesh", "a ring of villagers' footprints that end at a root"],
+   "x": ["firsthold"],
+   "p": "A grove-shard that responds to the seed's heart.",
+   "r": "The Shattered Grove bore the largest fruit of its life this year. The folk who ate it have all begun to glitter.",
+   "lead": "Take a grove-shard to the tidal port of Firsthold to match its resonance.",
+   "n": {"k": "warning", "t": "Wardens' Notice", "a": "Grove-Warden", "x": "DO NOT EAT THE FRUIT. DO NOT TOUCH THE BARK. DO NOT SLEEP UNDER THE BOUGH. A cult has been seen at dusk amongst the splintered trees. They sing, and the grove answers. The wardens have fallen back to the road. Send mages, not soldiers. The trees do not fear blades."}
+  },
+  "firsthold": {
+   "name": "Firsthold",
+   "g": "A white-walled tidal port of Auridon where every ship from the mainland must anchor under the eye of a lighthouse.",
+   "m": "The harbour-master has been quietly turning away ships carrying glittering passengers, who then come ashore in boats at night.",
+   "c": ["a harbour-master's quarantine list", "night-boats with unlit lanterns", "a ward-line of salt along the quay"],
+   "x": ["skywatch"],
+   "p": "The harbour-master's quarantine list of the glittering.",
+   "lead": "Take the quarantine list from Firsthold to the star-ring hill of Skywatch."
+  },
+  "skywatch": {
+   "name": "Skywatch",
+   "g": "A hill-city topped by a vast ring-orrery with concentric stone ring-walks and observatories on each ring.",
+   "m": "The star-watchers calculate that the seed's heart will awaken at a conjunction nine weeks hence. A cult has been tilting the orrery to bring it sooner.",
+   "c": ["an orrery ring out of true by a degree", "a star-watcher's calculation scrawled on a wall", "cult marks on the lowest ring's underside"],
+   "x": ["the_banished_cells"],
+   "p": "The conjunction date and the cult's bearing.",
+   "lead": "Re-true the orrery at Skywatch and learn the cult's bearing."
+  },
+  "the_banished_cells": {
+   "name": "The Banished Cells",
+   "g": "A Daedric prison under a spire with cell-blocks of obsidian, chains and windows on nothing.",
+   "m": "The cult's refusers are held here, the glass-fevered who would not walk to the sea. Their splinters grow inward, and they are lucid.",
+   "c": ["cells of obsidian with names scratched on the bars", "a prisoner who glitters but speaks in full sentences", "windows that open on a red sky"],
+   "x": ["mehrunes_spite"],
+   "p": "A prisoner's testimony and a key to the red fortress.",
+   "r": "A prison under a spire holds those who said no to the fever. They are asking to be let out and they are right.",
+   "lead": "Free the cells' refusers and take their testimony to the red fortress.",
+   "n": {"k": "letter", "t": "A Prisoner's Smuggled Letter", "a": "Lyrian Sol", "x": "To whom it may concern, I am not mad, I am glass. The seed sings to me but I do not sing back. They keep us because we are proof the fever can be borne. The fortress's heart is a crystal as tall as a man. Break it and the grove will fall silent. I cannot reach it; my legs are no longer mine."}
+  },
+  "mehrunes_spite": {
+   "name": "Mehrunes' Spite",
+   "g": "A red-spired fortress of Dagon's cult with lava channels around a central court, spike gardens and a ritual hall under a brazier-crown.",
+   "m": "The seed-crystal stands in the ritual hall like a throne. The cult's prophet believes it a seed of a new world. It is a seed of an old one.",
+   "c": ["a crystal throne in a ritual hall", "spike gardens of glass-bladed flowers", "braziers lit with blue flame"],
+   "x": ["dawnbreak", "shattered_grove"],
+   "p": "The seed-crystal's heart: a unique crystal that heals glass-fever.",
+   "r": "A red fortress on the Auridon cliffs has a hall where a crystal hums. The cult say it is the future. The grove says otherwise.",
+   "lead": "Break the seed-crystal at the heart of the red fortress.",
+   "n": {"k": "prayer", "t": "Cult Hymn", "a": "the Splinter Court", "x": "Break the glass in the heart of the world and let the new light in. Break the heart in the glass of the world and let the old night out. We are the splinters, we are the sharp, we are the ones who do not sleep. Let the grove sing us, let the sea receive us, let the seed be sown."}
+  },
+  "kings_haven": {
+   "name": "King's Haven",
+   "g": "A small keep and orchard on the Summerset coast, with a reeve's house and a walled egg-yard where gryphon clutches were once gathered.",
+   "m": "The reeve's ledger lists thirty clutches a season forwarded to Cloudrest, then none this spring. He suspects the steward has been selling them and says so to anyone who will listen.",
+   "c": ["an egg-yard with empty straw nests", "a ledger's tithe column with a ruled-off blank", "gryphon feathers in the orchard grass, none fresh"],
+   "x": ["the_golden_netch"],
+   "p": "The reeve's ledger of eggs sent and unaccounted for.",
+   "r": "The reeve at King's Haven swears the gryphons have stopped laying and then tells you he doesn't believe it.",
+   "lead": "Take the reeve's egg-ledger from King's Haven to the inn under the balloon.",
+   "n": {"k": "ledger", "t": "Egg-Tithe Ledger", "a": "Reeve Ordin", "x": "Spring: 30 clutches forwarded to the steward. Summer: 28. Autumn: 31. Winter: 29. Spring this year: 0 laid, 12 stolen from the nest. The steward's receipt says 'received 30, as customary'. There is no customary thirty. The gryphons stopped when the steward's agents first came. I have written to the court. The court has not written back."}
+  },
+  "the_golden_netch": {
+   "name": "The Golden Netch",
+   "g": "An inn under a gilded netch-balloon on the Summerset coast road with a rope-ladder entrance and a wide kitchen.",
+   "m": "A dealer has lodged here for a week, leaving each night with a heavy crate. The innkeeper says the crate clinked and was warm.",
+   "c": ["a warm crate on the dealer's cart", "straw on the stair that smells of gryphon", "a bill of lading with the steward's seal"],
+   "x": ["shimmerene"],
+   "p": "The dealer's bill of lading, naming the port.",
+   "r": "A dealer at the Golden Netch pays for his room in coin and his crates in silence. The crates are warm.",
+   "lead": "Follow the dealer's crate from the Golden Netch to the port of Shimmerene.",
+   "n": {"k": "contract", "t": "Dealer's Bill of Lading", "a": "Dealer Quorin", "x": "To be carried from the Netch to the Shimmerene quay: twelve crates, packed in straw, to remain warm. The steward's seal appears on each. The buyer pays on arrival in Pyandonean coin. Do not shake. Do not let it be said these are eggs. They are 'mineral specimens' on any manifest."}
+  },
+  "shimmerene": {
+   "name": "Shimmerene",
+   "g": "A busy port on a bay with dockside lanterns on high poles, long wharves and crane-masts.",
+   "m": "The harbour has a quiet quay where crates marked 'minerals' are loaded for a foreign ship at night. A customs man looks away.",
+   "c": ["crates marked 'minerals' that tick softly", "a quiet quay with no lantern", "a customs man's palm freshly gilded"],
+   "x": ["gryphon_aerie"],
+   "p": "A stolen clutch recovered from the quiet quay.",
+   "lead": "Raid the quiet quay at Shimmerene and take the stolen clutch back to its aerie."
+  },
+  "gryphon_aerie": {
+   "name": "Gryphon Aerie",
+   "g": "A cliff nest of enormous gryphons on the Summerset coast, ledges of straw and wind-scoured stone.",
+   "m": "The nesting ledges are empty. The mother gryphons circle, calling for their clutches. Their song, which should hold up a palace, has dwindled to a thread.",
+   "c": ["empty nests on a cliff of fresh feathers", "mother gryphons calling in a thin note", "a climbing rope left by the thieves"],
+   "x": ["cloudrest"],
+   "p": "The recovered clutch, and the mother's song.",
+   "r": "The gryphons at the aerie have started calling at night, and their calls are shorter than they used to be.",
+   "lead": "Return the clutch to the aerie and carry the mother's thread of song to Cloudrest.",
+   "n": {"k": "report", "t": "Aerie Warden's Report", "a": "Warden Syrel", "x": "Nests: 40. Occupied: 11. Eggs: 0 laid, 0 hatched. The song has gone thin. I fear for the palace more than for the birds: the stone is tuned to them, and the stone is beginning to tick. If the gryphons stop singing the balconies will fall. If the steward is the cause, I would like to look him in the eye."}
+  },
+  "cloudrest": {
+   "name": "Cloudrest",
+   "g": "A palace-city on a sea cliff with cantilevered balconies over open air, glass floors and no walls.",
+   "m": "The balconies' stone ticks in the dark. The steward has been quietly shoring up the lower rooms with iron to hide the fault.",
+   "c": ["iron braces bolted under a balcony", "a glass floor with a hairline crack", "a steward's strongbox full of Pyandonean coin"],
+   "x": ["tor_hame_khard"],
+   "p": "The steward's strongbox ledger, proof of the egg sales.",
+   "lead": "Open the steward's strongbox under Cloudrest and take the ledger."
+  },
+  "tor_hame_khard": {
+   "name": "Tor Hame Khard",
+   "g": "A crystal fortress carved into a sea cliff with sea-gates at wave level, a waterfall court and a lightning-rod tower.",
+   "m": "The lightning-rod tower is an amplifier for the gryphons' song, tuned to the palace above. Without a clutch to hatch in its warm court, it falls silent.",
+   "c": ["a lightning rod that hums in the key of a gryphon", "a warm court with an empty brooding-floor", "waterfall steps lit by tuned crystals"],
+   "x": ["gryphon_aerie", "kings_haven"],
+   "p": "A tuning-fork of the song: a unique that steadies Cloudrest's stones.",
+   "r": "The fortress's tower hums at storm-time in a voice like a very large bird.",
+   "lead": "Hatch the clutch in Tor Hame Khard's warm court and sing the palace back to strength.",
+   "n": {"k": "inscription", "t": "Brooding-Court Plate", "a": "", "x": "HERE THE SONG IS HATCHED AND HERE THE STONE IS TUNED. No palace stands on its own weight; it stands on the voices beneath it. Feed the mothers, warm the clutch, hear the note. If you take the egg, you take the balcony."}
+  },
+  "trebbite_monastery": {
+   "name": "Trebbite Monastery",
+   "g": "A small monastery on the Auridon coast with a cloister of white stone, a silent refectory and an urn of silk spools.",
+   "m": "The monks found silk with words in it caught in their orchard. They think a spider is writing and fear it is a blessing.",
+   "c": ["an urn of spools wound around tiny slips", "a refectory with a web across one wall", "monks who whisper the words they find"],
+   "x": ["dusk"],
+   "p": "The spools' first words: a list of lost titles.",
+   "r": "The Trebbite brothers have found silk in the orchard with words woven in it. They say please don't eat it.",
+   "lead": "Take the silk-spools from the monastery to the dune port of Dusk.",
+   "n": {"k": "notes", "t": "Brother Abelar's Notes", "a": "Brother Abelar", "x": "Found in the north cloister: thread, with a word wound in. 'Concerning the tides of Lillandril, a treatise.' A book from the great library, in thread! I do not think it was stolen. I think it was woven, or read aloud and caught. The spiders are the only ones who could have done it. I have left them honey."}
+  },
+  "dusk": {
+   "name": "Dusk",
+   "g": "A crescent harbour city under pale dunes, lilac in the evening, with a tall lantern tower and pastel houses.",
+   "m": "Library-barges from Lillandril dock here by night with sealed crates marked 'water-damaged'. The books inside are blank.",
+   "c": ["crates of blank books on the quay", "a lantern tower lit lilac at dusk", "a bookbinder's shop with empty covers in the window"],
+   "x": ["lillandril"],
+   "p": "A blank book, proof the words have been taken.",
+   "r": "Book-barges come into Dusk at night with cargo that's all blank paper. The bookbinders are doing a brisk trade in covers.",
+   "lead": "Take the blank book from Dusk to the library city of Lillandril.",
+   "n": {"k": "list", "t": "Shipping Manifest, Library-Barge", "a": "Dockmaster Elorin", "x": "Barge 'Patience': 400 volumes, water-damaged. Barge 'Quill': 612 volumes, water-damaged. Barge 'Ink': 88 volumes, water-damaged. Inspected: all blank. The librarians cry and the buyers cry. I sealed the manifest. 'Water-damaged' is cheaper than 'devoured'."}
+  },
+  "lillandril": {
+   "name": "Lillandril",
+   "g": "A city of terraced libraries and observatories on a rock, with ring galleries of book-stacks open to the sky and bronze orreries.",
+   "m": "A third of the stacks are blank and the head librarian has gone missing. A librarian's assistant claims to hear reading from beyond the cliff.",
+   "c": ["stacks with blank spines", "a head librarian's empty chair and half-eaten supper", "a gallery window with a web spun across it"],
+   "x": ["direnni_acropolis"],
+   "p": "The head librarian's last catalogue entry, a bearing to the acropolis.",
+   "lead": "Find the missing librarian's last catalogue entry and follow its bearing."
+  },
+  "direnni_acropolis": {
+   "name": "Direnni Acropolis",
+   "g": "A ruined hilltop acropolis of white columns, a stage of marble and a high cistern of black water.",
+   "m": "The acropolis is where the spiders first came to read, drawn by an echo in the cistern. Their webs span every column.",
+   "c": ["columns webbed from base to capital", "a cistern whose surface carries letters", "a lectern with a book that is open to a page of silk"],
+   "x": ["cathedral_of_webs"],
+   "p": "A silk-page that lets its reader hear the vault's reading.",
+   "r": "The old acropolis has webs across every column, and some say you can hear a voice reading in them.",
+   "lead": "Take a silk-page from the acropolis to the vault wrapped in webs.",
+   "n": {"k": "poem", "t": "Spider's Verse", "a": "unknown", "x": "~Weave the word and weave the line,~weave the story into twine.~Eight small hands for a thousand tomes,~eight small hands for the dying homes.~What is read is never lost.~What is spun is worth its cost."}
+  },
+  "cathedral_of_webs": {
+   "name": "Cathedral of Webs",
+   "g": "A crystal vault wrapped in giant spider-silk, shafts of light through white webs onto lecterns of woven thread.",
+   "m": "The missing librarian sits at a silk-lectern reading to a roomful of patient spiders, and has been for months. She says it is the finest audience she has ever had.",
+   "c": ["lecterns of woven thread with open silk-books", "a librarian's cup refilled by no one", "spiders arranged in tiers like a congregation"],
+   "x": ["lillandril", "trebbite_monastery"],
+   "p": "The Silk Library's catalogue: a unique tome that restores a lost book.",
+   "r": "The Cathedral of Webs is a place of reading. The spiders sit very still.",
+   "lead": "Listen to the librarian's reading and decide what to do about the Loom-Mother.",
+   "n": {"k": "diary", "t": "The Librarian's Diary", "a": "Head Librarian Sorendil", "x": "I came to rescue a book and stayed to hear it read. The spiders do not eat us; they eat nothing but silk and light. They weave the words so they will not be lost. If I stop reading, they stop weaving. I have not stopped. I think I have been reading for a hundred days. I am quite happy."}
+  }
+ }
+}

@@ -1,0 +1,234 @@
+{
+ "province": "foreign",
+ "arcs": [
+  {
+   "id": "for_1", "title": "The Last Voyage Home", "tier": "A",
+   "secret": "The last Atmoran hold stands on an ice shelf that is about to calve. A frozen dragon in the mound keeps the shelf bound; the whole ship of the dead captain in the howe is the only vessel left to carry the living out.",
+   "order": ["saarvik_landing", "skjaldborg", "kjolvik", "the_frozen_dragon_mound", "wolf_jarls_howe"],
+   "entry": {"clue": "skeleton", "offset": [6, 5], "text": "A broken ship's ribs, and in the sand a dead sailor with a rune-tablet clutched in both hands: 'Ice cracks under the long halls. The captain's ship sleeps in the howe. Wake her before the thaw.'"},
+   "quest": {"title": "The Last Voyage Home", "desc": "A sailor's skeleton at a landing of broken ships holds a rune-tablet: the ice will crack and a ship sleeps in a howe.", "desc2": "The tablet's trail passes a shield-fort and the last long halls to a frozen dragon and a buried ship.", "pitch": "The old hold at Kjolvik keeps hearing the ice speak at night.", "outro": "The great ship shook the barrow's snow from her ribs and rose. Her ropes were rotten, her mast a frozen pole, but the hold's people climbed aboard, one by one, with their ancestors' shields.", "boss": {"name": "Hjalti the Ice-Sworn", "type": "skycraft:draugr_deathlord", "hp": 3.6, "dmg": 1.6, "level": 30}, "reward": {"gold": 700, "loot": "legendary", "unique": "atmoran_frostaxe"}}
+  },
+  {
+   "id": "for_2", "title": "The Four-Court Seal", "tier": "S",
+   "secret": "Each of Akavir's four courts holds one quarter of a seal-name that keeps the dragon-graveyard shut. The Tsaesci serpent-court wishes to gather all four and open the valley. The ice throne of Kamal holds the last quarter.",
+   "order": ["tang_mo_watch", "tang_mo_harbor_village", "tiger_plains_village", "temple_of_the_serpent_emperor", "dragon_graveyard_of_akavir", "frost_throne_of_kamal"],
+   "entry": {"clue": "stone", "offset": [8, 7], "text": "A watch-tower's border stone carries a fourfold seal, three quarters worn smooth. On the fourth, a handful of Akaviri characters: 'Three bow. One waits in the ice.'"},
+   "quest": {"title": "The Four-Court Seal", "desc": "A watch-tower's border stone carries a fourfold seal, three quarters worn smooth.", "desc2": "The seal's quarters are held across a harbour village, a mountain village and a serpent temple, ending at a valley of ribs and an ice throne.", "pitch": "The watchmen at Tang Mo say the border stone has been rubbed away by pilgrims who pay no coin.", "outro": "I laid the fourth quarter against the other three and the valley of ribs, which had been groaning for a thousand years, fell quiet. The serpent-court will come, but not through that door.", "boss": {"name": "Kamal's Frost-Warden", "type": "skycraft:ice_wraith", "hp": 4.0, "dmg": 1.6, "level": 32}, "reward": {"gold": 760, "loot": "legendary", "unique": "shehai_blade"}}
+  },
+  {
+   "id": "for_3", "title": "The Walking Reef", "tier": "A",
+   "secret": "A reef of plague-coral from the Thras sea is spreading across the Maormer isles, slowly walking toward the fleet raft. The serpent pens feed on it and grow monstrous, and the citadel's window on the deep shows the reef's head.",
+   "order": ["serpent_pens", "pyandonean_fleet_anchorage", "coral_tower_of_thras", "orgnums_citadel"],
+   "entry": {"clue": "totem", "offset": [4, 8], "text": "A pen-keeper's totem is hung with pink coral-shards that have started to take root in the wood. A scratch on its post: 'The pens are eating it. The pens are growing. Who feeds the pens?'"},
+   "quest": {"title": "The Walking Reef", "desc": "A pen-keeper's totem sprouting pink coral, with a note that the pens are growing strangely.", "desc2": "The reef's walk leads past the shell-raft fleet and the coral tower of Thras to the sea-serpent citadel's window on the deep.", "pitch": "The pen-keepers say the serpents have been eating something pink, and it has not agreed with them.", "outro": "At the citadel's window, the reef's great pink head lay pressed to the glass. I closed the sea-gate against it. For a week the fleet slept. Then, far below, the head turned, patient, to wait for the next tide.", "boss": {"name": "Orgnum's Reef-Warden", "type": "skycraft:flame_atronach", "hp": 3.4, "dmg": 1.5, "level": 28}, "reward": {"gold": 600, "loot": "major", "unique": "hist_fang"}}
+  },
+  {
+   "id": "for_4", "title": "The Last Lesson", "tier": "A",
+   "secret": "The Ra Gada sword-masters' final lesson is a voyage: each school teaches one form, and the last student rows the funeral barge of the Yokudan kings home. No student has finished in three hundred years.",
+   "order": ["ra_gada_encampment", "hundings_dojo", "temple_of_satakal", "sunken_temple_of_the_yokudan_kings"],
+   "entry": {"clue": "lectern", "offset": [5, -3], "text": "A training-post is carved with four forms. Three have a student's name. The fourth reads only: 'The Last Lesson, taught on the water.' A master's sandal sits on the step."},
+   "quest": {"title": "The Last Lesson", "desc": "A training-post carved with four forms, the fourth to be taught on the water.", "desc2": "The lesson's next forms are in a sunken dojo and a serpent temple, and the last in a sunken temple of kings.", "pitch": "A veteran at the Ra Gada camp says the fourth form has not been taught in living memory.", "outro": "I rowed the funeral barge out of the sunken temple's flooded hall and through a gate of light. The kings did not speak. I think they were satisfied that someone, finally, had finished the lesson.", "boss": {"name": "The Barge-Master", "type": "skycraft:draugr_deathlord", "hp": 3.4, "dmg": 1.5, "level": 28}, "reward": {"gold": 620, "loot": "major", "unique": "claw_of_alkosh"}}
+  }
+ ],
+ "sit": {
+  "saarvik_landing": {
+   "name": "Saarvik Landing",
+   "g": "A landing of broken ships on an Atmoran shore, ribs and masts half-buried in drifts, a single cairn at the tide line.",
+   "m": "A dead sailor kneels in the wreckage clutching a rune-tablet that warns of the ice. The tablet is fresh to the touch.",
+   "c": ["ship's ribs frosted over a tablet", "a cairn with a warning rune", "a boat-ramp cracked by a seam of ice"],
+   "x": ["skjaldborg"],
+   "p": "The rune-tablet: a warning and a map of the hold.",
+   "r": "At Saarvik the ships sit in drifts, and the cairn's rune glows when the ice speaks.",
+   "lead": "Take the rune-tablet from Saarvik Landing to the shield-fort at Skjaldborg.",
+   "n": {"k": "inscription", "t": "The Cairn Rune", "a": "", "x": "ICE CRACKS UNDER THE LONG HALLS. WHO HAS EARS, HEAR IT. The ships here were broken by those who chose not to leave. Do not make their choice. The captain's ship waits in the howe. Wake her before the thaw."}
+  },
+  "skjaldborg": {
+   "name": "Skjaldborg",
+   "g": "A shield-fort on the Atmoran ice, its wall a ring of battered shields and a single hall of frosted wood.",
+   "m": "The fort's shield-wall has been rearranged: each shield now faces the ice shelf. The garrison's captain says the shields remember what they once guarded.",
+   "c": ["shields all turned toward the ice shelf", "a hall of frosted wood with a hearth cold for a decade", "a captain's log with all pages blank but one"],
+   "x": ["kjolvik"],
+   "p": "The captain's last page: a call to the hold.",
+   "r": "The shields at Skjaldborg all face the ice now. The captain won't say who turned them.",
+   "lead": "Take the captain's last page to the hold at Kjolvik.",
+   "n": {"k": "report", "t": "Shield-Captain's Last Page", "a": "Captain Ragnhild", "x": "The ice is groaning at night; the seam runs under the halls of Kjolvik and out to sea. The old chiefs swore to keep the howe's ship, but nobody has been to the howe in three generations. Send word to the hold. Tell them the dragon-mound is the pin. If the pin goes, the shelf goes."}
+  },
+  "kjolvik": {
+   "name": "Kjolvik",
+   "g": "A last Atmoran hold on an ice shelf with ten long halls half-buried in drifts, whale-bone arches and a stone-lined harbour where ice cracks.",
+   "m": "The ice is cracking beneath the halls. The elders deny it and sing in the long hall, drowning out the groan. The children carry the news.",
+   "c": ["a harbour where ice splits at night", "elders singing against the groan", "children's sledges loaded with winter-stores for a journey"],
+   "x": ["the_frozen_dragon_mound"],
+   "p": "A hold-token that persuades the mound's wardens.",
+   "lead": "Persuade the elders of Kjolvik and take the hold-token to the dragon mound."
+  },
+  "the_frozen_dragon_mound": {
+   "name": "The Frozen Dragon Mound",
+   "g": "A mound of ice with a dragon's head frozen at its crown, jaws open in a final roar.",
+   "m": "The dragon is the pin of the ice shelf: its cold keeps the seam bound. It has begun to thaw at the throat, and the seam answers.",
+   "c": ["a dragon's head dripping from the throat", "a seam running from the mound out to sea", "a ring of stones where chiefs once swore"],
+   "x": ["wolf_jarls_howe"],
+   "p": "A shard of the dragon's cold, which can hold the seam a season.",
+   "r": "The frozen dragon has begun to weep at the throat, and the ice-seam under the halls is following it.",
+   "lead": "Bind the dragon's thaw with the cold shard and go on to the howe.",
+   "n": {"k": "notes", "t": "Chief's Last Oath-Notes", "a": "Chief Vigdis", "x": "The head is the pin and the pin must hold. If it thaws, the shelf will break, and the hold will drift out to sea in ten halves. We swore to keep the howe's ship ready for such a day. Ready, I say, as if we had ever opened her gate. The oath is an old man's boast. Wake the ship, whoever comes."}
+  },
+  "wolf_jarls_howe": {
+   "name": "Wolf-Jarl's Howe",
+   "g": "A great Atmoran barrow under a hill of snow with a long ship buried whole as the dungeon's central room.",
+   "m": "The burial ship waits for its captain, sealed with oaths. The wolf-jarl's ghost has guarded her for a thousand years and will release her only to one who speaks the word the hold has forgotten.",
+   "c": ["a long ship's prow rising from the central hall", "a ghost-captain at the helm", "ropes frozen taut to the barrow's walls"],
+   "x": ["kjolvik", "saarvik_landing"],
+   "p": "The ship's release and the wolf-jarl's axe: a unique Atmoran frostaxe.",
+   "r": "The howe's ship is whole. They say you can hear her creak in the dark of the barrow.",
+   "lead": "Speak the forgotten word before the wolf-jarl's ship and set her free.",
+   "n": {"k": "inscription", "t": "The Prow-Stone", "a": "", "x": "SHE SLEEPS TO CARRY US HOME. The word is the name of the hold, spoken as a promise. When the ice breaks, wake the ship. When the ship wakes, board her. Do not look back at the shelf. It was only ever a place to wait."}
+  },
+  "tang_mo_watch": {
+   "name": "Tang Mo Watch",
+   "g": "A border watchtower on the Tang Mo coast with a lantern at its crown and a stone at its foot carved with a fourfold seal.",
+   "m": "Pilgrims rub the border stone smooth, and the fourth quarter is the only one that has not worn. The guards say it is cold to the touch, even in summer.",
+   "c": ["a border stone with three worn quarters and one fresh", "pilgrim sandals left in a row at the foot", "a lantern lit by day"],
+   "x": ["tang_mo_harbor_village"],
+   "p": "A rubbing of the stone's fourfold seal.",
+   "r": "The watchmen say the border stone has been rubbed smooth by pilgrims, all but one corner that stays cold.",
+   "lead": "Take the rubbing from Tang Mo Watch to the harbour of lacquered junks.",
+   "n": {"k": "orders", "t": "Watch Orders", "a": "Watch-Captain Chen", "x": "Do not let pilgrims chip the stone. The fourth quarter is cold. Do not touch it with bare hands. Send word to the harbour that the seal's strength fails by a quarter per generation. The court that holds the last has not answered in two hundred years. Keep the lantern lit."}
+  },
+  "tang_mo_harbor_village": {
+   "name": "Tang Mo Harbor Village",
+   "g": "A harbour of lacquered junks and floating lantern-masts, houses raised on bamboo piles with curved roofs and a dragon-prowed ship at the quay.",
+   "m": "The harbour keeps one quarter of the seal inside the dragon-prow: a jade tablet that glows when the tide is high.",
+   "c": ["a jade tablet glowing in the dragon-prow", "lantern-masts lit in a pattern of four", "a ferryman with a seal's quarter tattooed on his palm"],
+   "x": ["tiger_plains_village"],
+   "p": "The harbour's quarter of the seal.",
+   "lead": "Take the harbour's quarter from the dragon-prow and cross to the mountain village."
+  },
+  "tiger_plains_village": {
+   "name": "Tiger Plains Village",
+   "g": "A mountain village of curved-roof pagodas on rice terraces with a vermilion shrine gate, bamboo and paper lanterns.",
+   "m": "The village keeps a second quarter in a lantern that never goes out. The headman says it is a family heirloom; he does not say whose family.",
+   "c": ["a lantern that burns in the rain", "a vermilion gate with a quarter-seal in its lintel", "paper lanterns painted with four courts"],
+   "x": ["temple_of_the_serpent_emperor"],
+   "p": "The village's quarter of the seal.",
+   "lead": "Take the lantern's quarter and climb to the serpent temple."
+  },
+  "temple_of_the_serpent_emperor": {
+   "name": "Temple of the Serpent Emperor",
+   "g": "A tall serpent-roofed temple on a Tsaesci ridge, with coils of painted stair and a bell-gate at the summit.",
+   "m": "The Tsaesci hold the third quarter and want the fourth. Their priests wait patiently on the ridge, coiled in the temple's shadow.",
+   "c": ["coiled stair carved with a countdown", "priests who bow but do not speak", "a bell-gate with a missing clapper"],
+   "x": ["dragon_graveyard_of_akavir"],
+   "p": "The third quarter and a ridge-path to the valley.",
+   "r": "The serpent-priests wait. They wait without hurry, and they are not the ones who fear.",
+   "lead": "Barter or take the third quarter from the serpent temple.",
+   "n": {"k": "prayer", "t": "Priests' Patient Prayer", "a": "the Tsaesci priests", "x": "Three have bowed, one waits. Let the emperor's coil close upon the last. We are patient: we were patient in the ice and patient in the fire. We will be patient until the fourth is brought to us in a cold hand. Great coil, great hunger, great quiet."}
+  },
+  "dragon_graveyard_of_akavir": {
+   "name": "Dragon Graveyard of Akavir",
+   "g": "A valley floor of enormous ribcages, white as salt under a low sky, with a path of vertebrae winding between them.",
+   "m": "The dragons died here by choice. Each ribcage points to the ice throne. The valley groans when the seal is touched.",
+   "c": ["ribcages all open toward the north", "a path of vertebrae worn smooth", "a groan when the wind drops"],
+   "x": ["frost_throne_of_kamal"],
+   "p": "A rib-key which opens the ice throne's hall.",
+   "r": "The valley of ribs groans at dusk. The Akaviri say it is the dragons turning over in their sleep.",
+   "lead": "Cross the valley of ribs with the three quarters and find the ice throne.",
+   "n": {"k": "poem", "t": "Dirge of the Valley", "a": "unknown", "x": "~We came to die where the north wind breathes,~we came to lie where the ice-flower seethes.~Rib by rib and wing by wing,~we left our names to the silent thing.~If you would wake us, bring the four.~If you would sleep, then close the door."}
+  },
+  "frost_throne_of_kamal": {
+   "name": "Frost Throne of Kamal",
+   "g": "A throne-hall of ice and iron with a giant ice throne in a hall of ice pagodas.",
+   "m": "The fourth quarter is set in the throne's arm. A frost-warden sits on the throne in a cold that does not melt. He guards against the day the seal is joined.",
+   "c": ["a throne with a socket in its arm", "ice pagodas with names frozen inside", "a warden whose breath makes no cloud"],
+   "x": ["tang_mo_watch", "tiger_plains_village"],
+   "p": "The fourth quarter, completing the seal: a unique shehai that cuts frost.",
+   "r": "The throne of Kamal is cold even in summer. The frost-warden has not blinked in a thousand years.",
+   "lead": "Join the four quarters on the throne and decide whether the valley stays shut.",
+   "n": {"k": "inscription", "t": "The Throne's Arm", "a": "", "x": "FOUR COURTS, FOUR QUARTERS, ONE SEAL. Whoever joins them keeps the valley shut. Whoever breaks them opens it. It is the warden's duty to ask which you choose, and to remember."}
+  },
+  "serpent_pens": {
+   "name": "Serpent Pens",
+   "g": "A serpent pen of coral-walled pools on a Maormer isle, with feeding platforms and pole-and-net gates.",
+   "m": "The serpents have been feeding on pink coral drifted in from the south, and have swollen strangely. Some pens have burst.",
+   "c": ["a pen-gate of netting torn from within", "pink coral rooted in the pole-gates", "serpents bloated and slow, scales gone pink at the edges"],
+   "x": ["pyandonean_fleet_anchorage"],
+   "p": "A pink coral-shard: proof the reef is spreading.",
+   "r": "The serpents at the pens eat a pink weed and grow, and one pen has already burst. The keepers don't speak of it.",
+   "lead": "Take a coral-shard from the burst pen to the shell-raft fleet.",
+   "n": {"k": "report", "t": "Pen-Keeper's Report", "a": "Pen-Keeper Isaal", "x": "Pen 4: burst. Pen 7: bloated, one dead. Pen 9: normal, but the coral grows through the gate. The coral is from the Thras sea; it drifts. I fed them on it because the fish run is poor. They are bigger. They are hungrier. I do not think the coral is food. I think it is an invitation."}
+  },
+  "pyandonean_fleet_anchorage": {
+   "name": "Pyandonean Fleet Anchorage",
+   "g": "A fleet at anchor, a raft-city of shell-hulled ships lashed together, a coral flagship and serpent-prowed boats, gleaming wet.",
+   "m": "The fleet's captains have noticed the reef drifts closer each tide. The flagship has begun to drag its anchor. The admiral keeps the chart secret.",
+   "c": ["lashings re-tied nightly against drift", "a flagship's anchor chain taut", "an admiral's chart with a pink line that crosses the fleet"],
+   "x": ["coral_tower_of_thras"],
+   "p": "The admiral's drift-chart: the reef's path.",
+   "lead": "Take the admiral's chart from the flagship and sail for the plague-coral sea."
+  },
+  "coral_tower_of_thras": {
+   "name": "Coral Tower of Thras",
+   "g": "A tower of living coral in a sea of plague, with rooms of pulsing polyps, bright pink and poison green and a spiral reef stair.",
+   "m": "The tower is the reef's head: it grows a fathom a year and sends its spawn to drift. The tower's heart-chamber is a nursery of coral.",
+   "c": ["rooms of pulsing polyps", "a spiral stair with each step a coral-shell", "a heart-chamber that beats once a minute"],
+   "x": ["orgnums_citadel"],
+   "p": "A coral-heart: a unique that can kill or call a reef.",
+   "r": "The tower in the plague sea has grown a fathom this year. The folk of Thras say it is thinking.",
+   "lead": "Reach the heart-chamber of the coral tower and take the seed.",
+   "n": {"k": "diary", "t": "A Diver's Last Entry", "a": "Diver Moraleth", "x": "The tower breathes. I did not believe it, but there it is: each room expands and contracts. The heart is down below, a thing like a lung the size of a house. It is not ill. It is not mad. It is simply patient, and it wants to be larger. It does not know there is a fleet. It does not know there is a shore. It only knows 'more'."}
+  },
+  "orgnums_citadel": {
+   "name": "Orgnum's Citadel",
+   "g": "A sea-serpent citadel on a crag with boat-lifts, brine tanks, serpent pens and a throne hall with a window onto the deep.",
+   "m": "The throne hall's window faces the reef's head. The sea-king has been staring at it for a year, and has not slept. He cannot decide whether to kill it or crown it.",
+   "c": ["a throne hall whose window is filled with pink", "a king's chair with an untouched cup", "boat-lifts rusted from disuse"],
+   "x": ["serpent_pens", "pyandonean_fleet_anchorage"],
+   "p": "A sea-gate key that shuts the reef out of the citadel's waters.",
+   "r": "The sea-king stares into the deep and will not eat. The court says he is waiting for it to blink.",
+   "lead": "Close the sea-gate against the reef and counsel the sleepless king.",
+   "n": {"k": "letter", "t": "A Counsellor's Letter", "a": "Counsellor Veshra", "x": "My lord does not sleep. He has stood at the great window since the reef came within sight. I fear he will go out to it. Some say he should: that it is a gift from the sea. Others say it is a plague. I say it does not matter what it is: we cannot hold it, and we cannot feed it, and we have not the sense to leave."}
+  },
+  "ra_gada_encampment": {
+   "name": "Ra Gada Encampment",
+   "g": "A camp on the Yokudan desert's edge, sand-coloured tents, a drill-yard and a training-post carved with four forms.",
+   "m": "Three forms are carved with students' names. The fourth, 'taught on the water,' has no name. A master's sandal sits on the step.",
+   "c": ["a training-post with three names and one blank", "a master's sandal on a step, dust on its strap", "a drill-yard marked with a lesson's circle"],
+   "x": ["hundings_dojo"],
+   "p": "A master's sandal: a token of the lesson.",
+   "r": "At the Ra Gada camp they will tell you the fourth form is taught on the water, and then they stop speaking.",
+   "lead": "Take the master's sandal from the Ra Gada camp to the sunken dojo.",
+   "n": {"k": "notes", "t": "Drill-Master's Notes", "a": "Master Baradi", "x": "Four forms: the Wave, the Wind, the Stone, the Return. The first three I taught in this yard. The fourth is a thing the old masters said could only be taught on the water, to one who has learnt the others. None has learnt. The last student drowned. The sandal is his. I keep it, as one keeps a lesson not yet finished."}
+  },
+  "hundings_dojo": {
+   "name": "Hunding's Dojo",
+   "g": "A sunken courtyard dojo on a Yokudan island with a bowl of sand, a ring of columns, tiers of benches and a single bright pavilion.",
+   "m": "The dojo teaches the second form. Its master has taught it a thousand times, and the last lesson, he says, was never given because no student remained long enough.",
+   "c": ["a sand bowl raked into a spiral", "a pavilion with a single cushion", "a master who bows to an empty bench"],
+   "x": ["temple_of_satakal"],
+   "p": "The second form's token: a polished stone.",
+   "lead": "Earn the second form's stone at the sunken dojo and go on to the serpent temple."
+  },
+  "temple_of_satakal": {
+   "name": "Temple of Satakal",
+   "g": "A temple to the world-eater snake on an island, its roof a great coil and its floor a mosaic of scales.",
+   "m": "The third form is danced on the scales, and the dance ends at the snake's mouth. The priests say the student must be willing to be swallowed.",
+   "c": ["a coil-roof wound about the mosaic", "a mouth-shaped door at the dance's end", "priests who smile and ask nothing"],
+   "x": ["sunken_temple_of_the_yokudan_kings"],
+   "p": "The third form's token: a scale.",
+   "r": "The temple's priests teach a dance on a floor of scales. They say it ends where it should.",
+   "lead": "Dance the third form on the scales and bring the token to the sunken temple.",
+   "n": {"k": "inscription", "t": "The Scale Floor", "a": "", "x": "WHO DANCES HERE DANCES TOWARD THE MOUTH. The world-eater is patient, the world-eater is kind in its way. Dance, and be swallowed, and be returned. The fourth form is taught on the water. The snake is the water's friend."}
+  },
+  "sunken_temple_of_the_yokudan_kings": {
+   "name": "Sunken Temple of the Yokudan Kings",
+   "g": "A sunken sea-temple of flooded halls, coral shelves and air pockets, with a king's funeral barge filling the central hall and walls carved with a voyage.",
+   "m": "The barge is the lesson's last classroom. Its oars are carved with the forms. The student who rows it out through the sea-gate finishes the lesson, and brings the kings home.",
+   "c": ["a barge with oars carved with four forms", "walls carved with a voyage's phases", "an air-pocket with a master's sandal pair, one missing"],
+   "x": ["ra_gada_encampment", "hundings_dojo"],
+   "p": "The final form and a unique Ra Gada blade: Claw of Alkosh.",
+   "r": "The sunken temple's barge has never left. The Ra Gada say it is waiting for someone who has finished their lessons.",
+   "lead": "Row the funeral barge out through the sea-gate and finish the Last Lesson.",
+   "n": {"k": "poem", "t": "The Rower's Verse", "a": "the Ra Gada", "x": "~The Wave, the Wind, the Stone, the Return.~The first you learn and the last you earn.~Row, row, the barge is old,~the kings are heavy, the water cold.~But a hand on the oar and a heart that is true~will carry the lesson, and the kings, home too."}
+  }
+ }
+}

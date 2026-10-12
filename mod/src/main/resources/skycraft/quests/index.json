@@ -69,5 +69,16 @@
  "side_hammerfell.json",
  "side_high_rock.json",
  "side_skyrim.json",
- "side_foreign.json"
+ "side_foreign.json",
+ "loreweb_cyrodiil.json",
+ "loreweb_morrowind.json",
+ "loreweb_solstheim.json",
+ "loreweb_high_rock.json",
+ "loreweb_hammerfell.json",
+ "loreweb_elsweyr.json",
+ "loreweb_valenwood.json",
+ "loreweb_summerset.json",
+ "loreweb_black_marsh.json",
+ "loreweb_foreign.json",
+ "loreweb_threads.json"
 ]

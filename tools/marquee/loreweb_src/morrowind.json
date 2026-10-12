@@ -1,0 +1,316 @@
+{
+ "province": "morrowind",
+ "arcs": [
+  {
+   "id": "mor_1", "title": "The Sleepers of the Ashlands", "tier": "S",
+   "secret": "Since the blight faded, the ash itself dreams. The north-coast sleepers who walk uphill by night are not corprus victims but the ash's chosen audience, and a dwindling dream-cult keeps them from reaching the crater.",
+   "order": ["khuul", "ald_velothi", "urshilaku_camp", "ghostfence_morrowind", "missamsi", "kogoruhn", "red_mountain"],
+   "entry": {"clue": "grave", "offset": [12, 8], "text": "A fresh grave on the cliff stair is empty. Slippers lie beside it, ash on their soles, and a child's chalk map pins down a route up the mountain with one word: 'Sleeping'."},
+   "quest": {"title": "The Sleepers of the Ashlands", "desc": "An empty grave and a pair of slippers in Khuul. The ash around them has pressed a path uphill.", "desc2": "The path of the sleepers crosses the ghostfence and ends in a ruined fortress at the foot of the mountain.", "pitch": "In Khuul they say someone walks up the cliff stairs every night, asleep, and no one will wake them.", "outro": "At the crater lip the ash lay in rows like beds. I lit the dream-lantern and the sleepers on the slope turned, one by one, and began to walk down.", "boss": {"name": "The Ash-Dreamer", "type": "skycraft:ash_spawn", "hp": 3.6, "dmg": 1.5, "level": 28}, "reward": {"gold": 650, "loot": "legendary", "unique": "sunder"}}
+  },
+  {
+   "id": "mor_2", "title": "The Seventh Canton", "tier": "S",
+   "secret": "Vivec's six cantons are a cover: a seventh sits below the lagoon, a quiet administrative afterlife where the Temple files every pilgrim who never came home. Imperial Ebonheart has been paying for it.",
+   "order": ["seyda_neen", "pelagiad", "fields_of_kummu", "ald_sotha", "vivecs_antlers", "ebonheart", "vivec"],
+   "entry": {"clue": "lectern", "offset": [6, -9], "text": "A customs ledger on the pier has one column crossed out: 'Pilgrims Landed' and 'Pilgrims Left'. The difference is circled in red every month, and written beneath: 'Where do they sleep?'"},
+   "quest": {"title": "The Seventh Canton", "desc": "A pier ledger at Seyda Neen counts pilgrims landed against pilgrims left. The gap grows each month.", "desc2": "The missing pilgrims trail through shrines and an Imperial fortress to the six cantons of Vivec, and the seventh below them.", "pitch": "The customs clerk at Seyda Neen says more pilgrims land than ever sail home.", "outro": "I walked out of the quiet canton at dawn with a roll of names the Temple had filed and forgotten. The Archcanon's clerks asked me politely to hand it back. I have not decided.", "boss": {"name": "Canon-Clerk Ravel Maryon", "type": "skycraft:necromancer", "hp": 3.2, "dmg": 1.4, "level": 28}, "reward": {"gold": 650, "loot": "legendary"}}
+  },
+  {
+   "id": "mor_3", "title": "The Guest of Brass", "tier": "A",
+   "secret": "A Hlaalu collector is reassembling a single Dwemer attendant from fisherman-salvaged fragments. The machine, when whole, asks only for one thing: to be told whether its makers are coming back.",
+   "order": ["hla_oad", "gnaar_mok", "balmora", "rkuldumz_spire", "halls_of_fabrication", "arkngthand"],
+   "entry": {"clue": "urn", "offset": [-7, 5], "text": "A fishing urn at the smoke-racks is full of tiny brass cogs, each stamped with the same little hand. A note says: 'Same buyer. Pays double for the ones with the thumb-print.'"},
+   "quest": {"title": "The Guest of Brass", "desc": "Fishermen at Hla Oad are hauling up brass cogs stamped with a thumb, and selling them all to one buyer.", "desc2": "The buyer, the spire and the old fabrication floor are all building the same machine.", "pitch": "Smoke-rack fishers at Hla Oad say a trader pays triple for brass cogs, as long as they carry a thumb-print.", "outro": "The brass guest knelt in the centrifuge hall and asked me, in a voice like struck copper, whether its makers had been seen. I told it the truth. It asked me to stay a while.", "boss": {"name": "Collector Mavos Hlaren", "type": "skycraft:dwarven_centurion", "hp": 3.0, "dmg": 1.5, "level": 24}, "reward": {"gold": 520, "loot": "major", "unique": "keening"}}
+  },
+  {
+   "id": "mor_4", "title": "The Council of the Quiet", "tier": "A",
+   "secret": "The Great Houses' ancestor ghosts have begun to vote: a shadow council in Old Mournhold's lower mirror-hall that steers the living by bequest. The Temple clerks of Necrom keep its minutes.",
+   "order": ["tel_branora", "molag_mar", "necrom", "sadrith_mora", "aldruhn", "mournhold", "old_mournhold"],
+   "entry": {"clue": "lectern", "offset": [3, 12], "text": "A servant's lectern in the tower hall has a stack of bequests, all dated after the heirs' deaths, all signed by ancestors. Beneath: 'To the quiet vote, with respect. Seat unfilled.'"},
+   "quest": {"title": "The Council of the Quiet", "desc": "A Telvanni tower's servants keep bequests dated after the heirs died, signed by ancestors.", "desc2": "The dead's votes lead from Necrom's tombs through the great houses to the lightless streets under Mournhold.", "pitch": "A servant at Tel Branora whispers that the old masters are still signing documents.", "outro": "The mirror-hall was silent when I left it, the long table still set for forty. I carried the minutes up to the daylight. The living will have to decide what to do with a dead majority.", "boss": {"name": "Speaker of the Quiet Vote", "type": "skycraft:draugr_deathlord", "hp": 3.4, "dmg": 1.5, "level": 26}, "reward": {"gold": 600, "loot": "major"}}
+  }
+ ],
+ "sit": {
+  "khuul": {
+   "name": "Khuul",
+   "g": "A single street of ash-grey houses on a sea cliff with a long wooden stair running down to the water and a lantern at every landing.",
+   "m": "Every night at least one villager walks up the cliff stair asleep. The elders put slippers by the graves of those who do not return.",
+   "c": ["slippers left beside empty cliff-graves", "ash on stair treads in the shape of bare feet", "a lantern on every landing that is kept burning against sleep"],
+   "x": ["ald_velothi"],
+   "p": "A child's chalk map marking the sleepers' route up the mountain.",
+   "r": "In Khuul, someone walks the cliff stair asleep every night. The elders leave the lanterns lit and do not wake them.",
+   "lead": "Follow the sleepers' route from Khuul along the coast to the harbour village.",
+   "n": {"k": "diary", "t": "The Elder's Diary", "a": "Selvil Sathram", "x": "Eleven this winter. Nine walked up the stair in the night with their eyes shut and their lips moving. I asked the youngest what she was saying. She said, 'Counting steps.' A Temple pilgrim told me the ash is dreaming, not them. I told her to take her theology elsewhere. We keep lanterns lit. It is all we can do."}
+  },
+  "ald_velothi": {
+   "name": "Ald Velothi",
+   "g": "A harbour village of one temple and many boat-houses along a bay where the water goes grey from fallen ash.",
+   "m": "The village's boats are drawn up in a ring and none sails by night; the dreamers wade out and fall asleep in the water, and are found at dawn standing in a line, facing inland.",
+   "c": ["boats drawn up in a ring at the tide line", "a line of wet footprints leading into the sea and out again", "a temple wall scratched with a count that stops at forty"],
+   "x": ["urshilaku_camp"],
+   "p": "The temple's night-watch roster, a map of the sleepers' wading line.",
+   "r": "Ald Velothi hasn't put a boat out at night in months. They say the dreamers wade into the bay and stand there till dawn.",
+   "lead": "Take the Ald Velothi night-watch roster to the Urshilaku wise woman.",
+   "n": {"k": "orders", "t": "Night-Watch Roster", "a": "Priest Ilar Dren", "x": "Watch rotates to the bay at dusk. DO NOT wake a standing sleeper. If one reaches the temple wall, tie a ribbon to the wrist; in the morning, count the ribbons. Last night: nineteen. We carried three back. Two of the three still ask which way is the mountain."}
+  },
+  "urshilaku_camp": {
+   "name": "Urshilaku Camp",
+   "g": "An Ashlander camp of yurts under hide, a wise woman's fire in the centre, and sleeping-mats ringed in ash-cord.",
+   "m": "The Ashlanders say the dreaming has a fire in its heart. The wise woman keeps a cord of knots, one for each sleeper taken, and says the ghostfence is thinning in the shape of a doorway.",
+   "c": ["knotted cords hung from every yurt-pole", "a fire that burns without smoke", "a sleeping-mat laid at the camp's edge facing the mountain"],
+   "x": ["ghostfence_morrowind"],
+   "p": "A dream-lantern: a ward-light that stops a sleeper's walk.",
+   "r": "The Urshilaku wise woman has been saying the ash is awake and has been for a year. The Temple laughs. The sleepers do not.",
+   "lead": "Take the wise woman's dream-lantern to the thinning in the ghostfence.",
+   "n": {"k": "prayer", "t": "Wise Woman's Fireside Prayer", "a": "Sul-Matuul's heir", "x": "Hold the knot, keep the flame, say each name, do not sleep. The ash has eyes this season. The fence is wearing thin and something stands at the doorway of it, patient as a stone. Ancestors, lend me your eyes, for I have kept them closed too long."}
+  },
+  "ghostfence_morrowind": {
+   "name": "Ghostfence",
+   "g": "A long wall of shimmering ghost-light enclosing the mountain, broken at gate-posts and humming at a pitch just below hearing.",
+   "m": "A section of the fence has thinned into the shape of a person walking. The gap moves up the slope an inch a night, and the sleepers' footprints line up with it.",
+   "c": ["a shimmer in the fence shaped like a walking figure", "gate-posts wrapped in tied ribbons", "sleepers' slippers piled neatly at the fence line"],
+   "x": ["missamsi"],
+   "p": "A shard of ghostfence light that opens the rear door of an ash sanctum.",
+   "r": "The ghostfence has a gap you can see only at dusk, shaped like a person. It moves.",
+   "lead": "Pass through the person-shaped gap in the ghostfence and find the sanctum behind it.",
+   "n": {"k": "warning", "t": "Warden's Notice", "a": "Ghostfence Warden", "x": "THE FENCE HAS A WALKER. Do not go through at dusk, do not carry a lantern through, do not follow the sleepers. The breach is a mile from the gate-posts and growing. Every night a little closer to the crater. Report to the Temple at once. They have not answered the last six."}
+  },
+  "missamsi": {
+   "name": "Missamsi",
+   "g": "A corrupted ashland sanctum of blighted stone and red crystal growths, descending through ash-choked halls to a pulsing chamber.",
+   "m": "A remnant of dream-cultists still feeds the ash its 'audience'. They believe they will wake something kindly. They do not know the ash only wants company.",
+   "c": ["beds of ash arranged in rows in the lowest hall", "red crystal that grows toward sleepers' hands", "a mural of figures walking uphill with closed eyes"],
+   "x": ["kogoruhn"],
+   "p": "A crystal that records a sleeper's dream, and a key to the Kogoruhn amphitheatre.",
+   "r": "Something under Missamsi is still keeping a bed warm. Stay out of the ash after dusk.",
+   "lead": "Descend Missamsi and take the dream-crystal from the cultists' sleeping hall.",
+   "n": {"k": "journal", "t": "Cultist's Journal", "a": "Neloth Ulven", "x": "Eighth night. They come to us now unbidden and lie down in the ash as quietly as children. The Voice does not speak but the crystals hum in our teeth. It does not want worship, it wants us to stay. I think it is lonely. When I told the others, they laughed. I have started to dream of rooms with no doors."}
+  },
+  "kogoruhn": {
+   "name": "Kogoruhn",
+   "g": "A blasted ash-fortress at the foot of the mountain, with broken keeps half-buried in drifts and a collapsed amphitheatre.",
+   "m": "The amphitheatre is the sleepers' destination. They stand in tiers on the ash and watch a performance only they can see. A performer's mask hangs on the stage.",
+   "c": ["an amphitheatre with ash-seats facing an empty stage", "a mask hung on a peg with eye-slots worn smooth", "drifts shaped like people with their heads bowed"],
+   "x": ["red_mountain"],
+   "p": "The performer's mask: a one-use item that lets the wearer be seen by the dreamers.",
+   "r": "At Kogoruhn the ash seats are full of sleepers. They don't turn their heads when you walk through.",
+   "lead": "Take the performer's mask from the Kogoruhn stage and climb the mountain.",
+   "n": {"k": "poem", "t": "The Audience", "a": "a Kogoruhn sleeper", "x": "~We came in slippers and we came in silk,~we came by milk-road and by milk,~we sat in rows on a seat of ash,~the lights went down with a gentle crash.~Someone hums on the stage tonight:~it is not a song, it is only light."}
+  },
+  "red_mountain": {
+   "name": "Red Mountain",
+   "g": "A bruised volcano whose ash plume shades the sky, with a glowing crown and a ring of broken wall.",
+   "m": "At the crater rim, ash lies in rows like beds, and the dreamer's seat is carved into the lip facing inward. Whoever sits there is heard.",
+   "c": ["rows of ash-beds along the crater rim", "a carved seat on the lip facing inward", "a plume that bends toward the watchers"],
+   "x": ["ald_velothi", "kogoruhn"],
+   "p": "The dreamer's seat's rest: a unique ash-ward that quiets the Ashlands for a season.",
+   "lead": "Sit in the dreamer's seat and face the ash's audience."
+  },
+  "seyda_neen": {
+   "name": "Seyda Neen",
+   "g": "A tiny customs-house port at a lagoon edge, with a silt-strider stop, a pier and a lighthouse with a ledger-room.",
+   "m": "The customs ledger counts more pilgrims landed than ever sail home, a difference of eleven hundred this year. The clerk has begun writing the difference in the margin in red.",
+   "c": ["a customs ledger with a red margin column", "a pier with sets of luggage nobody collects", "a customs seal cracked and glued back"],
+   "x": ["pelagiad"],
+   "p": "The red-margin ledger, proof of the missing pilgrims.",
+   "r": "The Seyda Neen clerk says there are more pilgrims coming in than going out. She has stopped opening the post.",
+   "lead": "Take the pilgrim ledger from the Seyda Neen customs house to the fort at Pelagiad.",
+   "n": {"k": "ledger", "t": "Customs Ledger, Pilgrims", "a": "Clerk Edeth Brine", "x": "Landed this month: 212. Departed: 41. Marked 'in transit': 171. In transit to where? The Temple says the canton, the canton says Mournhold, Mournhold says Seyda Neen. I stamp them and they walk inland. Not one has come back through my gate."}
+  },
+  "pelagiad": {
+   "name": "Pelagiad",
+   "g": "A fortified hill village with a half-built fort and a granary where the roads from the pier all meet.",
+   "m": "Pilgrims are fed at the granary and sent in groups at night along the old road. The fort's captain has stopped asking where.",
+   "c": ["pilgrim bundles stacked in the granary loft", "a road marked with chalk crescents at every milestone", "a fort gate left unbarred by order"],
+   "x": ["fields_of_kummu"],
+   "p": "A road-pass chalked on a roof tile, valid at the next shrine field.",
+   "r": "Every night the pilgrims leave the Pelagiad granary in a quiet line. The captain locks his door.",
+   "lead": "Follow the chalk crescents out of Pelagiad to the old shrine fields.",
+   "n": {"k": "report", "t": "Captain's Night Report", "a": "Captain Ulric Dorn", "x": "Pilgrims: 44 departed on the old road, 0 returned. Escort refused; the order was countersigned by the Temple's own seal. I would like it noted that I do not like this. The chalk crescents change colour after rain, and the line of travellers follows the new colour."}
+  },
+  "fields_of_kummu": {
+   "name": "Fields of Kummu",
+   "g": "A green flat of old standing shrines in ash grass, each carved with a face that looks toward the lagoon.",
+   "m": "The shrine faces each hold a pilgrim's token, deposited and never collected. A dozen shrines are freshly tended by clerks in plain robes.",
+   "c": ["tokens in niches in every shrine face", "grass trampled in a path to the lagoon edge", "a clerk's desk set up beside a shrine, deserted"],
+   "x": ["ald_sotha"],
+   "p": "A shrine-token that opens a sunken door in Ald Sotha.",
+   "r": "The Kummu shrines are tended by clerks nobody has met. They keep a ledger of tokens left and tokens never taken.",
+   "lead": "Take a pilgrim's token from the Kummu shrines to Ald Sotha's sunken door.",
+   "n": {"k": "list", "t": "Shrine Token Inventory", "a": "Unsigned clerk", "x": "Faces tended: 31. Tokens collected: 388. Tokens waiting: 1,904. Procedure: return tokens to the Sunken House at Ald Sotha, where the canton's keepers will file them. If a pilgrim asks for their token, tell them it is being kept safe. Do not tell them where."}
+  },
+  "ald_sotha": {
+   "name": "Ald Sotha",
+   "g": "A huge ancient Velothi shrine fortress with dusky green stone, great doors and a sunken lower temple of a long-silent god.",
+   "m": "The lower temple is a filing room: drawer upon drawer of tokens and names, and a stair that descends under the water toward the lagoon.",
+   "c": ["drawers of tokens along every wall of the lower hall", "a stair that runs straight into dark water", "a door whose lock is worked with a shrine-token"],
+   "x": ["vivecs_antlers"],
+   "p": "A filing-room key and a map of the stair under the lagoon.",
+   "r": "Ald Sotha's lower rooms flood and drain on a schedule. Some say a clerk's bell rings down there.",
+   "lead": "Use the Kummu token at Ald Sotha and follow the underwater stair toward Vivec.",
+   "n": {"k": "inscription", "t": "Lintel of the Filing Hall", "a": "", "x": "HERE THE WAITING ARE KEPT. Whoever comes in faith shall be remembered, whoever comes in doubt shall be counted. Take a token, leave a token. The quiet house does not close."}
+  },
+  "vivecs_antlers": {
+   "name": "Vivec's Antlers",
+   "g": "Two giant antlered peaks over the Stonefalls coast, one broken, with a pilgrims' ladder rungs worn smooth.",
+   "m": "The broken antler's rungs end in a sealed door half-way up. The pilgrims who climb it are not seen coming down.",
+   "c": ["a ladder with rungs worn glassy at the broken antler", "a door sealed in blue wax halfway up", "pilgrim shoes left in a line at the base"],
+   "x": ["ebonheart"],
+   "p": "A wax-seal stamp that unseals the pilgrims' door.",
+   "r": "The pilgrims' ladder on the broken antler goes up and the pilgrims go up and I have never seen one come down.",
+   "lead": "Climb the pilgrims' ladder to the sealed door and read its wax seal.",
+   "n": {"k": "inscription", "t": "Rung Inscription", "a": "", "x": "THE LADDER ENDS WHERE THE FAITHFUL DO. Take off your shoes at the bottom: you shall not need them. The quiet house welcomes all who climb with a quiet heart. Do not look down."}
+  },
+  "ebonheart": {
+   "name": "Ebonheart",
+   "g": "An old Imperial fortress-port on the Stonefalls coast, black-walled and salt-stained, with a star-shaped castle on a river island.",
+   "m": "A line in the Imperial accounts pays a stipend for 'the seventh quiet', and the Imperial factor is scared of it. The ledger was kept by the East Empire Company.",
+   "c": ["a stipend line for 'the seventh quiet' in the factor's books", "star-fort cellars with a sealed lagoon-door", "crates marked for Vivec that never left the quay"],
+   "x": ["vivec"],
+   "p": "The factor's sealed stipend ledger, naming the canton's payers.",
+   "lead": "Take the 'seventh quiet' stipend ledger from the Ebonheart factor's cellar."
+  },
+  "vivec": {
+   "name": "Vivec City",
+   "g": "Six pyramidal cantons standing in water, joined by long arched bridges, with the Palace as a stepped ziggurat at the centre.",
+   "m": "A seventh canton lies beneath the lagoon: lamplit offices where the pilgrims who never left are filed, fed and kept patient by Temple clerks.",
+   "c": ["a seventh door in the harbour wall nobody uses", "a canton bridge that stops at the water", "a clerk's bell that rings below the lagoon"],
+   "x": ["ald_sotha", "ebonheart"],
+   "p": "A roll of the quiet canton's filed names, and a sealed permit for any who wish to leave.",
+   "lead": "Enter the quiet canton under Vivec and face its keepers."
+  },
+  "hla_oad": {
+   "name": "Hla Oad",
+   "g": "A tidal fishing village of smoke-racks where the tide leaves mudflats scattered with brass glints.",
+   "m": "Fishermen haul brass cogs and tiny levers from the flats and sell them to one buyer who pays triple for those carrying a thumb-print.",
+   "c": ["urns full of small brass cogs", "smoke-racks hung with brass chains alongside fish", "a trader's tent with a scale and a stamped receipt-book"],
+   "x": ["gnaar_mok"],
+   "p": "The buyer's receipt-book, naming a Balmora collector.",
+   "r": "The Hla Oad mudflats give up brass at every ebb. A trader pays triple if it has a little thumb-print.",
+   "lead": "Take the brass-buyer's receipt-book from Hla Oad to the mangrove market.",
+   "n": {"k": "ledger", "t": "Brass Receipts", "a": "Collector's agent", "x": "Paid: 3 coin per thumbed cog, 1 coin per plain. Total this month: 214 thumbs. Deliver to the master at Balmora via Gnaar Mok. Do not clean them. The print is the point. No questions of the sea-folk; they have found more than we can carry."}
+  },
+  "gnaar_mok": {
+   "name": "Gnaar Mok",
+   "g": "A muddy swamp town raised on stilts with a mangrove market and a landing for silt striders.",
+   "m": "The stilt market's most expensive stall sells nothing, only receipts for brass; the stall-keeper is a courier for a master in Balmora. A single stilt-house is kept sealed and ticks.",
+   "c": ["a stall that sells no goods and only issues receipts", "a stilt-house door that ticks softly in the night", "mangrove roots wired with brass chains"],
+   "x": ["balmora"],
+   "p": "A courier's token that opens a Balmora cellar door.",
+   "r": "A stall in the Gnaar Mok market sells receipts and nothing else. Someone's always buying.",
+   "lead": "Carry the courier's token from Gnaar Mok to the collector's cellar in Balmora.",
+   "n": {"k": "contract", "t": "Courier's Contract", "a": "Mavos Hlaren", "x": "I, the undersigned courier, agree to deliver parcels of brass to the Balmora cellar without opening them, listening to them, or answering when they speak. The master pays on delivery. The master will explain, in due time, what the guest requires."}
+  },
+  "balmora": {
+   "name": "Balmora",
+   "g": "A river town on both banks of the Odai, with low spreading Hlaalu houses on terraces and a giant silt strider docked at the south side.",
+   "m": "A Hlaalu collector's cellar holds a brass guest in pieces, assembled by night. He calls it 'the Attendant' and tells guests it is a sculpture.",
+   "c": ["a cellar door with a thumb-print plate", "brass dust on the stair of a council-house", "a silt strider laden with crates marked 'sculpture'"],
+   "x": ["rkuldumz_spire"],
+   "p": "A coil spring, the Attendant's missing power piece.",
+   "lead": "Break into the Balmora cellar and take the Attendant's missing spring."
+  },
+  "rkuldumz_spire": {
+   "name": "Rkuldumz Spire",
+   "g": "A tall brass-pipe tower on a rock island off the Telvannis coast, whose top vents steam at fixed hours.",
+   "m": "The spire is a radio of sorts, calling the Attendant's parts together. Its vents steam at the same hour the cogs are found on the flats.",
+   "c": ["steam venting at a fixed hour each tide", "pipework wrapped in dead fishing nets", "a boat landing with brass-cog barnacles"],
+   "x": ["halls_of_fabrication"],
+   "p": "A tuning rod that silences the spire's call.",
+   "r": "Rkuldumz steams once at the turn of every tide and the brass glints on the mud shift on the hour.",
+   "lead": "Reach the vent-chamber of Rkuldumz Spire and take the tuning rod.",
+   "n": {"k": "notes", "t": "Telvanni Surveyor's Notes", "a": "Master-Surveyor Erilas", "x": "The spire sounds a note I cannot hear but my mushroom-tower's tiles do. Each steam-peak, the cogs on the coast shift an inch toward Balmora, as if called. It is not a beacon; it is a summons. Something wants to be whole and has been asking politely for two thousand years."}
+  },
+  "halls_of_fabrication": {
+   "name": "Halls of Fabrication",
+   "g": "A conveyor-and-forge hall with long assembly lines of half-built animunculi and a forge-pit finale, hammer sounds echoing in foundry glow.",
+   "m": "The assembly lines have been restarted by something. The half-built figures are all missing the same part, the one the collector is gathering.",
+   "c": ["assembly-line slots empty at the same station", "a forge-pit glowing beyond all reason", "a conveyor stamped with a thumb-print mould"],
+   "x": ["arkngthand"],
+   "p": "A mould of the Attendant's thumb, which lets any animunculus accept the wearer as a master.",
+   "r": "Hammer-sounds in the Halls of Fabrication again. The machines are making something, but they never finish.",
+   "lead": "Cross the Halls of Fabrication to the forge-pit and recover the thumb-mould.",
+   "n": {"k": "notes", "t": "Dwemer Line-Overseer's Slate", "a": "an unknown Dwemer hand", "x": "All lines run. All parts accounted for, save one: the Attendant's thumb. Without the thumb the Attendant cannot sign, and without the signature the Attendant cannot be released. Hold station until it returns. We will hold station."}
+  },
+  "arkngthand": {
+   "name": "Arkngthand",
+   "g": "A Dwemer city-hall of cranking bronze with giant gear-halls, steam vents and a centrifuge chamber at the core.",
+   "m": "The centrifuge chamber holds the Attendant's seat. The assembled guest knelt there and asked, in a voice of struck copper, whether its makers will return.",
+   "c": ["a bronze seat worn smooth by a single occupant", "a centrifuge turning one revolution an hour", "a ledger plate with a single tick-mark"],
+   "x": ["balmora", "halls_of_fabrication"],
+   "p": "A Dwemer command-rod, a unique tool of Brass that sets a construct free.",
+   "r": "Arkngthand still turns, one revolution an hour. Locals say there is someone in the middle of it, waiting.",
+   "lead": "Reach the centrifuge chamber and answer the Attendant's question.",
+   "n": {"k": "inscription", "t": "Centrifuge Plate", "a": "", "x": "ATTENDANT, SEAT UNTIL RETURN. The masters will come back by the third turn of the age. If they do not, the Attendant is released. If they do, the Attendant will answer for the delay."}
+  },
+  "tel_branora": {
+   "name": "Tel Branora",
+   "g": "A single huge mushroom tower on a lagoon, with a master and his servants and a tidal causeway that floods twice a day.",
+   "m": "The master has been dead for years. The tower's bequests are signed by him every season, in a hand that has gone slightly wrong.",
+   "c": ["bequests dated after the master's death", "a signature that drifts leftward year on year", "servants who set the master's place at every meal"],
+   "x": ["molag_mar"],
+   "p": "A bequest-seal that lets a bearer attend the quiet vote in Mournhold.",
+   "r": "The master of Tel Branora has been dead for six years. His letters still arrive every season.",
+   "lead": "Take the signed bequest from Tel Branora to the temple-town of Molag Mar.",
+   "n": {"k": "letter", "t": "A Steward's Confession", "a": "Steward Vanya", "x": "My lord has not left the lower hall since the third flood. The papers still need signing, and each season the signature appears on its own, a little more crooked. I have stopped asking. The servants set his place and clear it. The vote requires his seat, they say; the seat is filled."}
+  },
+  "molag_mar": {
+   "name": "Molag Mar",
+   "g": "A town cut into a sea cliff with a lava-lit grotto at its heart, houses balanced on ledges above a glowing channel and a temple canton reached by long stairs.",
+   "m": "The grotto's lava channel carries a dead man's ash urn each night down to the sea, unsigned. The channel-keepers say there is nowhere left to bury them.",
+   "c": ["urns sliding down the lava channel at night", "a grotto wall of unmarked memorial plaques", "ash stairs where each step bears a different family sigil"],
+   "x": ["necrom"],
+   "p": "A memorial plaque with a seat number: the dead's voting seat.",
+   "r": "The urns come down the lava channel at Molag Mar every night. No one will say who throws them.",
+   "lead": "Recover a seat-plaque from the Molag Mar grotto and take it to the holy tomb city of Necrom.",
+   "n": {"k": "list", "t": "Urn Count, Lava Channel", "a": "Channel-keeper", "x": "Last night 14 urns. The night before, 11. Plaques read: Redoran, Hlaalu, Hlaalu, Telvanni, Indoril, Telvanni, Indoril. Each marked with a seat number, 1 to 40. I asked the priest. He told me they have to go somewhere. He did not say where."}
+  },
+  "necrom": {
+   "name": "Necrom",
+   "g": "A city of the dead and the living, with ancestral tomb-houses in terraced rows climbing a hillside and lantern-lined processional avenues.",
+   "m": "Tomb-houses are emptying: the ancestors walk out at dusk in a line for Mournhold. Temple clerks keep minutes of what they vote on.",
+   "c": ["tomb doors left ajar at dusk", "a clerk's desk with minute-books in the tomb-house cellars", "lanterns trimmed for a procession that nobody sees"],
+   "x": ["sadrith_mora"],
+   "p": "A minute-book of the quiet vote, with the seats and who sits in them.",
+   "lead": "Slip into Necrom's tomb-house cellars and take the minute-book."
+  },
+  "sadrith_mora": {
+   "name": "Sadrith Mora",
+   "g": "A cluster of giant fungal towers on a lagoon island, each noble's tower a different cap colour, joined by rope footbridges.",
+   "m": "The towers each keep a seat in the quiet vote. The masters are not quite alive, and a shadow-secretary collects their ballots by lamp at midnight.",
+   "c": ["tower windows lit at midnight in a rotating order", "a shadow-secretary who is nobody's servant", "spore-lamps burning on the empty chairs"],
+   "x": ["aldruhn"],
+   "p": "A ballot, which shows the quiet vote's current question.",
+   "lead": "Intercept the shadow-secretary's ballot at midnight and read it."
+  },
+  "aldruhn": {
+   "name": "Ald'ruhn",
+   "g": "A fortress-town built inside and along a monstrous crab shell with ribs forming gate arches and long halls.",
+   "m": "The Redoran council hall holds a chair no one is allowed to sit in, with a cushion that is always warm. The council's votes tally forty-one, and there are forty living members.",
+   "c": ["a chair under dust sheets that is always warm", "votes tallied at forty-one", "a gate arch whose rib is carved with a seat number"],
+   "x": ["mournhold"],
+   "p": "The forty-first seat's summons, an invitation to the lower council.",
+   "lead": "Sit in the Ald'ruhn warm seat's place and take its summons."
+  },
+  "mournhold": {
+   "name": "Mournhold",
+   "g": "A walled white-and-gold citadel of domed Temple, palace and great plaza, with the Great Bazaar as an enclosed arcade.",
+   "m": "A grating under the Temple's plaza opens on the lightless city below, where a long table sits set for forty. The Temple has paved the plaza over it twice.",
+   "c": ["a grating under the plaza that exhales cold", "pavers' marks on stones laid over the grating twice", "a bell below ground that rings at midnight"],
+   "x": ["old_mournhold"],
+   "p": "A pavers' key to the lower grating.",
+   "lead": "Open the plaza grating in Mournhold and descend to the lightless city."
+  },
+  "old_mournhold": {
+   "name": "Old Mournhold",
+   "g": "The sunken twin of Mournhold: the same plazas lying one level down, lightless, with collapsed arcades and a flooded bazaar.",
+   "m": "A mirror-hall in the lower Temple holds a table set for forty. The dead sit in it, and vote. Their speaker has begun to say 'we' for the living.",
+   "c": ["a table in a mirror-hall set for forty", "mirrors in which the living do not appear", "a gavel that rings on its own at the hour"],
+   "x": ["necrom", "tel_branora"],
+   "p": "The Quiet Vote's gavel: a unique relic that can adjourn the dead's council.",
+   "r": "Under Mournhold's plaza a table is set for forty. Those who've seen it won't say who sat there.",
+   "lead": "Enter the mirror-hall and face the Speaker of the Quiet Vote.",
+   "n": {"k": "book", "t": "Standing Orders of the Quiet", "a": "the Quiet's clerk", "x": "Order the First: all votes by ancestors shall be binding on their bloodlines. Order the Second: the living shall be informed by bequest only. Order the Third: none shall be informed of the First or the Second. Meetings at the hour of the lamp. Adjournment at the discretion of the gavel, which is not to be touched."}
+  }
+ }
+}

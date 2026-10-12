@@ -1,0 +1,378 @@
+{
+ "line": "loreweb_morrowind",
+ "category": "side",
+ "bosses": {
+  "lw_mor_1_boss": {
+   "name": "The Ash-Dreamer",
+   "type": "skycraft:ash_spawn",
+   "hp": 3.6,
+   "dmg": 1.5,
+   "level": 28,
+   "drop": "loot:major",
+   "glow": false
+  },
+  "lw_mor_2_boss": {
+   "name": "Canon-Clerk Ravel Maryon",
+   "type": "skycraft:necromancer",
+   "hp": 3.2,
+   "dmg": 1.4,
+   "level": 28,
+   "drop": "loot:major",
+   "glow": false
+  },
+  "lw_mor_3_boss": {
+   "name": "Collector Mavos Hlaren",
+   "type": "skycraft:dwarven_centurion",
+   "hp": 3,
+   "dmg": 1.5,
+   "level": 24,
+   "drop": "loot:standard",
+   "glow": false
+  },
+  "lw_mor_4_boss": {
+   "name": "Speaker of the Quiet Vote",
+   "type": "skycraft:draugr_deathlord",
+   "hp": 3.4,
+   "dmg": 1.5,
+   "level": 26,
+   "drop": "loot:standard",
+   "glow": false
+  }
+ },
+ "quests": [
+  {
+   "id": "lw_mor_1_a",
+   "title": "The Sleepers of the Ashlands",
+   "region": "morrowind/vvardenfell_ashlands",
+   "start": "find",
+   "find": {
+    "place": "khuul",
+    "offset": [
+     12,
+     8
+    ],
+    "radius": 4,
+    "clue": "grave",
+    "text": "A fresh grave on the cliff stair is empty. Slippers lie beside it, ash on their soles, and a child's chalk map pins down a route up the mountain with one word: 'Sleeping'."
+   },
+   "requires": [
+    "level:20"
+   ],
+   "desc": "An empty grave and a pair of slippers in Khuul. The ash around them has pressed a path uphill.",
+   "pitch": "In Khuul they say someone walks up the cliff stairs every night, asleep, and no one will wake them.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "ald_velothi",
+     "text": "Take the Ald Velothi night-watch roster to the Urshilaku wise woman."
+    },
+    {
+     "type": "go",
+     "place": "urshilaku_camp",
+     "text": "Take the wise woman's dream-lantern to the thinning in the ghostfence."
+    },
+    {
+     "type": "go",
+     "place": "ghostfence_morrowind",
+     "text": "Pass through the person-shaped gap in the ghostfence and find the sanctum behind it."
+    }
+   ],
+   "rewards": {
+    "gold": 260,
+    "loot": "minor"
+   },
+   "outro": "One thread of the trail ends here and the next begins. The path of the sleepers crosses the ghostfence and ends in a ruined fortress at the foot of the mountain."
+  },
+  {
+   "id": "lw_mor_1_b",
+   "title": "The Sleepers of the Ashlands (II)",
+   "region": "morrowind/vvardenfell_ashlands",
+   "start": "auto",
+   "requires": [
+    "quest:lw_mor_1_a"
+   ],
+   "desc": "The path of the sleepers crosses the ghostfence and ends in a ruined fortress at the foot of the mountain.",
+   "pitch": "In Khuul they say someone walks up the cliff stairs every night, asleep, and no one will wake them.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "missamsi",
+     "text": "Descend Missamsi and take the dream-crystal from the cultists' sleeping hall."
+    },
+    {
+     "type": "go",
+     "place": "kogoruhn",
+     "text": "Take the performer's mask from the Kogoruhn stage and climb the mountain."
+    },
+    {
+     "type": "kill",
+     "place": "red_mountain",
+     "text": "Sit in the dreamer's seat and face the ash's audience.",
+     "spawn": [
+      {
+       "boss_id": "lw_mor_1_boss"
+      }
+     ]
+    }
+   ],
+   "rewards": {
+    "gold": 650,
+    "loot": "legendary",
+    "flags": [
+     "lw_mor_1_done"
+    ],
+    "unique": "sunder"
+   },
+   "outro": "At the crater lip the ash lay in rows like beds. I lit the dream-lantern and the sleepers on the slope turned, one by one, and began to walk down."
+  },
+  {
+   "id": "lw_mor_2_a",
+   "title": "The Seventh Canton",
+   "region": "morrowind/ascadian_isles",
+   "start": "find",
+   "find": {
+    "place": "seyda_neen",
+    "offset": [
+     6,
+     -9
+    ],
+    "radius": 4,
+    "clue": "lectern",
+    "text": "A customs ledger on the pier has one column crossed out: 'Pilgrims Landed' and 'Pilgrims Left'. The difference is circled in red every month, and written beneath: 'Where do they sleep?'"
+   },
+   "requires": [
+    "level:20"
+   ],
+   "desc": "A pier ledger at Seyda Neen counts pilgrims landed against pilgrims left. The gap grows each month.",
+   "pitch": "The customs clerk at Seyda Neen says more pilgrims land than ever sail home.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "pelagiad",
+     "text": "Follow the chalk crescents out of Pelagiad to the old shrine fields."
+    },
+    {
+     "type": "go",
+     "place": "fields_of_kummu",
+     "text": "Take a pilgrim's token from the Kummu shrines to Ald Sotha's sunken door."
+    },
+    {
+     "type": "go",
+     "place": "ald_sotha",
+     "text": "Use the Kummu token at Ald Sotha and follow the underwater stair toward Vivec."
+    }
+   ],
+   "rewards": {
+    "gold": 260,
+    "loot": "minor"
+   },
+   "outro": "One thread of the trail ends here and the next begins. The missing pilgrims trail through shrines and an Imperial fortress to the six cantons of Vivec, and the seventh below them."
+  },
+  {
+   "id": "lw_mor_2_b",
+   "title": "The Seventh Canton (II)",
+   "region": "morrowind/ascadian_isles",
+   "start": "auto",
+   "requires": [
+    "quest:lw_mor_2_a"
+   ],
+   "desc": "The missing pilgrims trail through shrines and an Imperial fortress to the six cantons of Vivec, and the seventh below them.",
+   "pitch": "The customs clerk at Seyda Neen says more pilgrims land than ever sail home.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "vivecs_antlers",
+     "text": "Climb the pilgrims' ladder to the sealed door and read its wax seal."
+    },
+    {
+     "type": "go",
+     "place": "ebonheart",
+     "text": "Take the 'seventh quiet' stipend ledger from the Ebonheart factor's cellar."
+    },
+    {
+     "type": "kill",
+     "place": "vivec",
+     "text": "Enter the quiet canton under Vivec and face its keepers.",
+     "spawn": [
+      {
+       "boss_id": "lw_mor_2_boss"
+      }
+     ]
+    }
+   ],
+   "rewards": {
+    "gold": 650,
+    "loot": "legendary",
+    "flags": [
+     "lw_mor_2_done"
+    ]
+   },
+   "outro": "I walked out of the quiet canton at dawn with a roll of names the Temple had filed and forgotten. The Archcanon's clerks asked me politely to hand it back. I have not decided."
+  },
+  {
+   "id": "lw_mor_3_a",
+   "title": "The Guest of Brass",
+   "region": "morrowind/west_gash",
+   "start": "find",
+   "find": {
+    "place": "hla_oad",
+    "offset": [
+     -7,
+     5
+    ],
+    "radius": 4,
+    "clue": "urn",
+    "text": "A fishing urn at the smoke-racks is full of tiny brass cogs, each stamped with the same little hand. A note says: 'Same buyer. Pays double for the ones with the thumb-print.'"
+   },
+   "requires": [
+    "level:12"
+   ],
+   "desc": "Fishermen at Hla Oad are hauling up brass cogs stamped with a thumb, and selling them all to one buyer.",
+   "pitch": "Smoke-rack fishers at Hla Oad say a trader pays triple for brass cogs, as long as they carry a thumb-print.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "gnaar_mok",
+     "text": "Carry the courier's token from Gnaar Mok to the collector's cellar in Balmora."
+    },
+    {
+     "type": "go",
+     "place": "balmora",
+     "text": "Break into the Balmora cellar and take the Attendant's missing spring."
+    }
+   ],
+   "rewards": {
+    "gold": 210,
+    "loot": "minor"
+   },
+   "outro": "One thread of the trail ends here and the next begins. The buyer, the spire and the old fabrication floor are all building the same machine."
+  },
+  {
+   "id": "lw_mor_3_b",
+   "title": "The Guest of Brass (II)",
+   "region": "morrowind/west_gash",
+   "start": "auto",
+   "requires": [
+    "quest:lw_mor_3_a"
+   ],
+   "desc": "The buyer, the spire and the old fabrication floor are all building the same machine.",
+   "pitch": "Smoke-rack fishers at Hla Oad say a trader pays triple for brass cogs, as long as they carry a thumb-print.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "rkuldumz_spire",
+     "text": "Reach the vent-chamber of Rkuldumz Spire and take the tuning rod."
+    },
+    {
+     "type": "go",
+     "place": "halls_of_fabrication",
+     "text": "Cross the Halls of Fabrication to the forge-pit and recover the thumb-mould."
+    },
+    {
+     "type": "kill",
+     "place": "arkngthand",
+     "text": "Reach the centrifuge chamber and answer the Attendant's question.",
+     "spawn": [
+      {
+       "boss_id": "lw_mor_3_boss"
+      }
+     ],
+     "placement": "structure"
+    }
+   ],
+   "rewards": {
+    "gold": 520,
+    "loot": "major",
+    "flags": [
+     "lw_mor_3_done"
+    ],
+    "unique": "keening"
+   },
+   "outro": "The brass guest knelt in the centrifuge hall and asked me, in a voice like struck copper, whether its makers had been seen. I told it the truth. It asked me to stay a while."
+  },
+  {
+   "id": "lw_mor_4_a",
+   "title": "The Council of the Quiet",
+   "region": "morrowind/ascadian_isles",
+   "start": "find",
+   "find": {
+    "place": "tel_branora",
+    "offset": [
+     3,
+     12
+    ],
+    "radius": 4,
+    "clue": "lectern",
+    "text": "A servant's lectern in the tower hall has a stack of bequests, all dated after the heirs' deaths, all signed by ancestors. Beneath: 'To the quiet vote, with respect. Seat unfilled.'"
+   },
+   "requires": [
+    "level:12"
+   ],
+   "desc": "A Telvanni tower's servants keep bequests dated after the heirs died, signed by ancestors.",
+   "pitch": "A servant at Tel Branora whispers that the old masters are still signing documents.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "molag_mar",
+     "text": "Recover a seat-plaque from the Molag Mar grotto and take it to the holy tomb city of Necrom."
+    },
+    {
+     "type": "go",
+     "place": "necrom",
+     "text": "Slip into Necrom's tomb-house cellars and take the minute-book."
+    },
+    {
+     "type": "go",
+     "place": "sadrith_mora",
+     "text": "Intercept the shadow-secretary's ballot at midnight and read it."
+    }
+   ],
+   "rewards": {
+    "gold": 240,
+    "loot": "minor"
+   },
+   "outro": "One thread of the trail ends here and the next begins. The dead's votes lead from Necrom's tombs through the great houses to the lightless streets under Mournhold."
+  },
+  {
+   "id": "lw_mor_4_b",
+   "title": "The Council of the Quiet (II)",
+   "region": "morrowind/ascadian_isles",
+   "start": "auto",
+   "requires": [
+    "quest:lw_mor_4_a"
+   ],
+   "desc": "The dead's votes lead from Necrom's tombs through the great houses to the lightless streets under Mournhold.",
+   "pitch": "A servant at Tel Branora whispers that the old masters are still signing documents.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "aldruhn",
+     "text": "Sit in the Ald'ruhn warm seat's place and take its summons."
+    },
+    {
+     "type": "go",
+     "place": "mournhold",
+     "text": "Open the plaza grating in Mournhold and descend to the lightless city."
+    },
+    {
+     "type": "kill",
+     "place": "old_mournhold",
+     "text": "Enter the mirror-hall and face the Speaker of the Quiet Vote.",
+     "spawn": [
+      {
+       "boss_id": "lw_mor_4_boss"
+      }
+     ]
+    }
+   ],
+   "rewards": {
+    "gold": 600,
+    "loot": "major",
+    "flags": [
+     "lw_mor_4_done"
+    ]
+   },
+   "outro": "The mirror-hall was silent when I left it, the long table still set for forty. I carried the minutes up to the daylight. The living will have to decide what to do with a dead majority."
+  }
+ ]
+}

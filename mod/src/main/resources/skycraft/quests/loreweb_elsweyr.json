@@ -1,0 +1,360 @@
+{
+ "line": "loreweb_elsweyr",
+ "category": "side",
+ "bosses": {
+  "lw_els_1_boss": {
+   "name": "The Blade That Woke Early",
+   "type": "skycraft:will_o_wisp",
+   "hp": 3.6,
+   "dmg": 1.5,
+   "level": 28,
+   "drop": "loot:major",
+   "glow": false
+  },
+  "lw_els_2_boss": {
+   "name": "The Unmasked Warden",
+   "type": "skycraft:draugr_deathlord",
+   "hp": 3.2,
+   "dmg": 1.5,
+   "level": 24,
+   "drop": "loot:standard",
+   "glow": false
+  },
+  "lw_els_3_boss": {
+   "name": "The Unfinished Colossus",
+   "type": "skycraft:dwarven_centurion",
+   "hp": 4,
+   "dmg": 1.6,
+   "level": 26,
+   "drop": "loot:standard",
+   "glow": false
+  },
+  "lw_els_4_boss": {
+   "name": "Khasra the Oathless",
+   "type": "skycraft:werewolf",
+   "hp": 3.4,
+   "dmg": 1.5,
+   "level": 26,
+   "drop": "loot:standard",
+   "glow": false
+  }
+ },
+ "quests": [
+  {
+   "id": "lw_els_1_a",
+   "title": "The Late Moon",
+   "region": "elsweyr/anequina",
+   "start": "find",
+   "find": {
+    "place": "star_haven_adeptorium",
+    "offset": [
+     4,
+     -6
+    ],
+    "radius": 4,
+    "clue": "lectern",
+    "text": "A little academy's observation log, kept by a mage who has never been believed: 'Secunda late again, seven minutes. The priests' almanac says on time. One of us is lying to the moon.'"
+   },
+   "requires": [
+    "level:20"
+   ],
+   "desc": "A star-watcher's log insists that the second moon is rising late, and that the priests' almanac is a lie.",
+   "pitch": "A mage at the Star Haven Adeptorium says the priests' almanac is wrong, and gets laughed at.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "shrine_of_the_cats_divine",
+     "text": "Compare the new and old moon-marks and take the rubbing to Torval's priests."
+    },
+    {
+     "type": "go",
+     "place": "torval",
+     "text": "Slip into the palace dome and copy the true almanac."
+    }
+   ],
+   "rewards": {
+    "gold": 260,
+    "loot": "minor"
+   },
+   "outro": "One thread of the trail ends here and the next begins. The drift of the moon leads through a capital, a ridge-top temple and a choir-tomb to a vault of blades that wake at moonrise."
+  },
+  {
+   "id": "lw_els_1_b",
+   "title": "The Late Moon (II)",
+   "region": "elsweyr/anequina",
+   "start": "auto",
+   "requires": [
+    "quest:lw_els_1_a"
+   ],
+   "desc": "The drift of the moon leads through a capital, a ridge-top temple and a choir-tomb to a vault of blades that wake at moonrise.",
+   "pitch": "A mage at the Star Haven Adeptorium says the priests' almanac is wrong, and gets laughed at.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "temple_of_agamanus",
+     "text": "Take the key-wheel from Agamanus to the tuned rooms of the choir-tomb."
+    },
+    {
+     "type": "go",
+     "place": "tomb_of_the_moon_singers",
+     "text": "Fetch the tuning-fork from the lowest chamber of the Moon Singers' tomb."
+    },
+    {
+     "type": "kill",
+     "place": "vault_of_the_heavenly_scourge",
+     "text": "Set the three keys at moonrise and quiet the waking blades.",
+     "spawn": [
+      {
+       "boss_id": "lw_els_1_boss"
+      }
+     ],
+     "placement": "structure"
+    }
+   ],
+   "rewards": {
+    "gold": 640,
+    "loot": "legendary",
+    "flags": [
+     "lw_els_1_done"
+    ],
+    "unique": "moonblade_of_the_mane"
+   },
+   "outro": "I stood in the vault as Secunda rose seven minutes late and, one by one, the lunar blades woke. I set the three keys and slowed the waking. The Moon-Priests will have to admit the almanac is a story."
+  },
+  {
+   "id": "lw_els_2_a",
+   "title": "The Faceless of Rimmen",
+   "region": "elsweyr/rimmen",
+   "start": "find",
+   "find": {
+    "place": "roadside_twin_moons",
+    "offset": [
+     7,
+     -3
+    ],
+    "radius": 4,
+    "clue": "urn",
+    "text": "A funerary mask lies in an urn behind the roadhouse's second lantern, the mask's mouth stuffed with a receipt: 'Delivered, Baandari stop, one of nine. The priests ask no questions.'"
+   },
+   "requires": [
+    "level:12"
+   ],
+   "desc": "A burial mask in a roadhouse urn, with a receipt from the Baandari caravan stop.",
+   "pitch": "A traveller at the Twin Moons says a faceless Khajiit walked past the lanterns last night and bowed.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "baandari_caravan_stop",
+     "text": "Take the mask-account to the moonstone-ring village at Hakoshae."
+    },
+    {
+     "type": "go",
+     "place": "hakoshae",
+     "text": "Take the circle-stone key from Hakoshae to Rimmen's cliff gate."
+    }
+   ],
+   "rewards": {
+    "gold": 220,
+    "loot": "minor"
+   },
+   "outro": "One thread of the trail ends here and the next begins. The masks' trail runs through the moonstone ring, the cliff city and its aqueduct to the lunar clock under the dead."
+  },
+  {
+   "id": "lw_els_2_b",
+   "title": "The Faceless of Rimmen (II)",
+   "region": "elsweyr/rimmen",
+   "start": "auto",
+   "requires": [
+    "quest:lw_els_2_a"
+   ],
+   "desc": "The masks' trail runs through the moonstone ring, the cliff city and its aqueduct to the lunar clock under the dead.",
+   "pitch": "A traveller at the Twin Moons says a faceless Khajiit walked past the lanterns last night and bowed.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "rimmen",
+     "text": "Find the mask-carvers' ledger and the buyers' names."
+    },
+    {
+     "type": "go",
+     "place": "anequina_aqueduct",
+     "text": "Follow the smugglers' lead boxes through the aqueduct to the necropolis undergate."
+    },
+    {
+     "type": "kill",
+     "place": "rimmen_necropolis",
+     "text": "Fill the niches of the lunar clock chamber with the masks you have gathered.",
+     "spawn": [
+      {
+       "boss_id": "lw_els_2_boss"
+      }
+     ],
+     "placement": "structure"
+    }
+   ],
+   "rewards": {
+    "gold": 540,
+    "loot": "major",
+    "flags": [
+     "lw_els_2_done"
+    ]
+   },
+   "outro": "In the clock chamber I set the masks back, one by one, until the last faceless stopped. They did not thank me. They knelt, and their masks, for a moment, almost smiled."
+  },
+  {
+   "id": "lw_els_3_a",
+   "title": "The Glow Beneath the Sugar",
+   "region": "elsweyr/pellitine",
+   "start": "find",
+   "find": {
+    "place": "tathara_sugar_farm",
+    "offset": [
+     -6,
+     8
+    ],
+    "radius": 4,
+    "clue": "urn",
+    "text": "A sugar-jar at the boil-house is warm and humming. A farmer has written on its lid: 'Does not taste like the meadow. Tastes of iron. Asked my wife. She slept three days.'"
+   },
+   "requires": [
+    "level:12"
+   ],
+   "desc": "A sugar-jar that hums and tastes of iron, and a farmer's wife who slept three days.",
+   "pitch": "The farmer at Tathara says this year's sugar glows too bright and tastes wrong.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "moon_sugar_meadow",
+     "text": "Follow the glowing ditch from the meadow to the hanging inn."
+    },
+    {
+     "type": "go",
+     "place": "the_prancing_netch",
+     "text": "Take the sample vial from the Netch's cellar to the garden city of Corinthe."
+    }
+   ],
+   "rewards": {
+    "gold": 220,
+    "loot": "minor"
+   },
+   "outro": "One thread of the trail ends here and the next begins. The glow's source runs through a meadow, an inn and a garden city to a hall of colossal machines."
+  },
+  {
+   "id": "lw_els_3_b",
+   "title": "The Glow Beneath the Sugar (II)",
+   "region": "elsweyr/pellitine",
+   "start": "auto",
+   "requires": [
+    "quest:lw_els_3_a"
+   ],
+   "desc": "The glow's source runs through a meadow, an inn and a garden city to a hall of colossal machines.",
+   "pitch": "The farmer at Tathara says this year's sugar glows too bright and tastes wrong.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "corinthe",
+     "text": "Take the herbalists' findings from Corinthe to the sugar port at Senchal."
+    },
+    {
+     "type": "go",
+     "place": "senchal",
+     "text": "Take the boil-house's colossus dust from Senchal back to its source."
+    },
+    {
+     "type": "kill",
+     "place": "halls_of_colossus",
+     "text": "Seal the colossus's chest and end the leak.",
+     "spawn": [
+      {
+       "boss_id": "lw_els_3_boss"
+      }
+     ],
+     "placement": "structure"
+    }
+   ],
+   "rewards": {
+    "gold": 560,
+    "loot": "major",
+    "flags": [
+     "lw_els_3_done"
+    ]
+   },
+   "outro": "The colossus's chest was cracked and weeping a luminous oil. I sealed it and the glow in the meadow dimmed to a gentler moon-colour. The sugar will be less sweet. It will be safe."
+  },
+  {
+   "id": "lw_els_4_a",
+   "title": "The Oath-Forge",
+   "region": "elsweyr/anequina",
+   "start": "find",
+   "find": {
+    "place": "orcrest",
+    "offset": [
+     11,
+     2
+    ],
+    "radius": 4,
+    "clue": "stone",
+    "text": "A fort gate-post is scored with a hundred small crosses, one for each oath. A blade-shard is jammed in the crack and tied with a ribbon: 'Carry to the hill. Don't ask whose.'"
+   },
+   "requires": [
+    "level:12"
+   ],
+   "desc": "A blade-shard tied with a ribbon at the claw-gate fort, with orders to carry it to the hill.",
+   "pitch": "A guard at the claw-gate says every caravan out of Orcrest carries one blade-shard, and no one asks.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "dune",
+     "text": "Take the shard-wagon's ledger from Dune to the ruined plateau city."
+    },
+    {
+     "type": "go",
+     "place": "ne_quin_al",
+     "text": "Gather the oath-hall's first shard and climb the hill of swords."
+    }
+   ],
+   "rewards": {
+    "gold": 220,
+    "loot": "minor"
+   },
+   "outro": "One thread of the trail ends here and the next begins. The shards lead from a caravan crossroads and a plateau city to a hill of blades and a bone-trough."
+  },
+  {
+   "id": "lw_els_4_b",
+   "title": "The Oath-Forge (II)",
+   "region": "elsweyr/anequina",
+   "start": "auto",
+   "requires": [
+    "quest:lw_els_4_a"
+   ],
+   "desc": "The shards lead from a caravan crossroads and a plateau city to a hill of blades and a bone-trough.",
+   "pitch": "A guard at the claw-gate says every caravan out of Orcrest carries one blade-shard, and no one asks.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "hill_of_shattered_swords",
+     "text": "Gather the hundred-oath shard from the hill and carry it to the dragon-scour."
+    },
+    {
+     "type": "kill",
+     "place": "prowls_edge_dragonscour",
+     "text": "Quench the hundred-oath blade in the dragon's ribs and decide who carries it.",
+     "spawn": [
+      {
+       "boss_id": "lw_els_4_boss"
+      }
+     ],
+     "placement": "structure"
+    }
+   ],
+   "rewards": {
+    "gold": 560,
+    "loot": "major",
+    "flags": [
+     "lw_els_4_done"
+    ]
+   },
+   "outro": "The blade quenched in the dragon's ribs and I held it for a breath before laying it back. A hundred oaths is too heavy for one hand. Someone had to carry the weight; I put it down in the bone."
+  }
+ ]
+}

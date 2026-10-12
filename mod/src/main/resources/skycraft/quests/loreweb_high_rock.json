@@ -1,0 +1,367 @@
+{
+ "line": "loreweb_high_rock",
+ "category": "side",
+ "bosses": {
+  "lw_hr_1_boss": {
+   "name": "Master-Mason Orvane",
+   "type": "skycraft:necromancer",
+   "hp": 3,
+   "dmg": 1.4,
+   "level": 22,
+   "drop": "loot:standard",
+   "glow": false
+  },
+  "lw_hr_2_boss": {
+   "name": "The Host of Plums",
+   "type": "skycraft:dremora",
+   "hp": 3.4,
+   "dmg": 1.5,
+   "level": 26,
+   "drop": "loot:standard",
+   "glow": false
+  },
+  "lw_hr_3_boss": {
+   "name": "Hargruk the Unwritten",
+   "type": "skycraft:troll",
+   "hp": 3.6,
+   "dmg": 1.6,
+   "level": 26,
+   "drop": "loot:standard",
+   "glow": false
+  },
+  "lw_hr_4_boss": {
+   "name": "The Keeper of the Pump",
+   "type": "skycraft:dwarven_centurion",
+   "hp": 3,
+   "dmg": 1.5,
+   "level": 24,
+   "drop": "loot:standard",
+   "glow": false
+  }
+ },
+ "quests": [
+  {
+   "id": "lw_hr_1_a",
+   "title": "The Uncounted King",
+   "region": "high_rock/wayrest",
+   "start": "find",
+   "find": {
+    "place": "aldhaven_harbor",
+    "offset": [
+     7,
+     4
+    ],
+    "radius": 4,
+    "clue": "lectern",
+    "text": "The harbour-master's chain-log has a line where the same barge sails at night, three times a month, with a manifest that reads only 'stone dust, chisels, one priest'."
+   },
+   "requires": [
+    "level:12"
+   ],
+   "desc": "A barge with only stone dust, chisels and a priest on its manifest sails from Aldhaven by night.",
+   "pitch": "The chain-keeper at Aldhaven Harbor says the same barge leaves every ninth night, riding low and quiet.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "glenpoint",
+     "text": "Take the mason's apron from the Glenpoint boat-shed to Wayrest."
+    },
+    {
+     "type": "go",
+     "place": "wayrest",
+     "text": "Take the Quiet Chisel's payment list from Wayrest's archives."
+    },
+    {
+     "type": "go",
+     "place": "daggerfall",
+     "text": "Convince the Daggerfall scribe to part with his marginal genealogy."
+    }
+   ],
+   "rewards": {
+    "gold": 190,
+    "loot": "minor"
+   },
+   "outro": "One thread of the trail ends here and the next begins. The masons' trail crosses three crowns and a cursed crypt, and ends in the tomb of the lost kings."
+  },
+  {
+   "id": "lw_hr_1_b",
+   "title": "The Uncounted King (II)",
+   "region": "high_rock/wayrest",
+   "start": "auto",
+   "requires": [
+    "quest:lw_hr_1_a"
+   ],
+   "desc": "The masons' trail crosses three crowns and a cursed crypt, and ends in the tomb of the lost kings.",
+   "pitch": "The chain-keeper at Aldhaven Harbor says the same barge leaves every ninth night, riding low and quiet.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "camlorn",
+     "text": "Copy the half-erased inscription in the lower chapel of Camlorn's cathedral."
+    },
+    {
+     "type": "go",
+     "place": "cath_bedraud",
+     "text": "Break the plaster in the Cath Bedraud niche and read the buried name."
+    },
+    {
+     "type": "kill",
+     "place": "tomb_of_lost_kings",
+     "text": "Reach the sealed eighth king-room before the master-mason finishes the wall.",
+     "spawn": [
+      {
+       "boss_id": "lw_hr_1_boss"
+      }
+     ],
+     "placement": "structure"
+    }
+   ],
+   "rewards": {
+    "gold": 480,
+    "loot": "major",
+    "flags": [
+     "lw_hr_1_done"
+    ]
+   },
+   "outro": "The eighth king's name was almost gone, scraped to a ghost in the stone. I traced it in charcoal before the masons returned. What three crowns do with it is theirs to decide."
+  },
+  {
+   "id": "lw_hr_2_a",
+   "title": "Cream-Coloured Invitations",
+   "region": "high_rock/glenumbra",
+   "start": "find",
+   "find": {
+    "place": "the_lonely_lantern",
+    "offset": [
+     -5,
+     7
+    ],
+    "radius": 4,
+    "clue": "lectern",
+    "text": "A cream-coloured card lies on the inn's single table, perfumed with plum. 'You are cordially invited. Dress as you were when you were happiest. Do not bring your lantern.'"
+   },
+   "requires": [
+    "level:12"
+   ],
+   "desc": "A perfumed invitation on the table of a one-lamp inn says to leave your lantern behind.",
+   "pitch": "The innkeeper says every guest who stayed the night is gone, and leaves a card on the table.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "moiras_hope",
+     "text": "Take the shrine's candle-end ward to the fog-bound port of Northpoint."
+    },
+    {
+     "type": "go",
+     "place": "northpoint",
+     "text": "Take the silver bell from the Northpoint harbour-master toward Shornhelm."
+    }
+   ],
+   "rewards": {
+    "gold": 230,
+    "loot": "minor"
+   },
+   "outro": "One thread of the trail ends here and the next begins. The guest-list led from a hamlet shrine and a fog-bound port to a black spire and on to the party itself."
+  },
+  {
+   "id": "lw_hr_2_b",
+   "title": "Cream-Coloured Invitations (II)",
+   "region": "high_rock/glenumbra",
+   "start": "auto",
+   "requires": [
+    "quest:lw_hr_2_a"
+   ],
+   "desc": "The guest-list led from a hamlet shrine and a fog-bound port to a black spire and on to the party itself.",
+   "pitch": "The innkeeper says every guest who stayed the night is gone, and leaves a card on the table.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "shornhelm",
+     "text": "Take the plum-ink guest-book from the Shornhelm keep's cellars."
+    },
+    {
+     "type": "go",
+     "place": "doomcrag",
+     "text": "Take the necromancer's second ledger and find the Host's door."
+    },
+    {
+     "type": "kill",
+     "place": "sanguines_demesne",
+     "text": "Enter the demesne and decline the Host's final invitation.",
+     "spawn": [
+      {
+       "boss_id": "lw_hr_2_boss"
+      }
+     ],
+     "placement": "structure"
+    }
+   ],
+   "rewards": {
+    "gold": 580,
+    "loot": "major",
+    "flags": [
+     "lw_hr_2_done"
+    ],
+    "unique": "umbra"
+   },
+   "outro": "The hall was warm, music still playing, the table laid. No one asked me to leave. It was the hardest door I have ever closed behind me."
+  },
+  {
+   "id": "lw_hr_3_a",
+   "title": "Names Before Death",
+   "region": "high_rock/wrothgar",
+   "start": "find",
+   "find": {
+    "place": "morkul_stronghold_high_rock",
+    "offset": [
+     8,
+     -6
+    ],
+    "radius": 4,
+    "clue": "stone",
+    "text": "A freshly chiselled name stands at the foot of the palisade, with a date nine days ahead. Below, in Orcish letters: 'Carved by no hand.' The stronghold's smith has covered it with a hide."
+   },
+   "requires": [
+    "level:12"
+   ],
+   "desc": "A name has been carved at the stronghold gate with a date nine days ahead.",
+   "pitch": "The smith at the Morkul stronghold keeps a hide over a stone that gets a new name each dusk.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "paragons_remembrance",
+     "text": "Take the rubbing of the newest names to the broken ridge of the Wrothgarian peaks."
+    },
+    {
+     "type": "go",
+     "place": "wrothgarian_mountains",
+     "text": "Follow the wrong-way shadow down to the rebuilt city."
+    }
+   ],
+   "rewards": {
+    "gold": 220,
+    "loot": "minor"
+   },
+   "outro": "One thread of the trail ends here and the next begins. The column's unseen carver leads through the broken ridge and the rebuilt city to the first city's cold forge."
+  },
+  {
+   "id": "lw_hr_3_b",
+   "title": "Names Before Death (II)",
+   "region": "high_rock/wrothgar",
+   "start": "auto",
+   "requires": [
+    "quest:lw_hr_3_a"
+   ],
+   "desc": "The column's unseen carver leads through the broken ridge and the rebuilt city to the first city's cold forge.",
+   "pitch": "The smith at the Morkul stronghold keeps a hide over a stone that gets a new name each dusk.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "orsinium",
+     "text": "Find the sealed door below Orsinium's forge-pits and descend."
+    },
+    {
+     "type": "kill",
+     "place": "old_orsinium",
+     "text": "Stand at the anvil in Old Orsinium and take the hammer from the smith-spirit.",
+     "spawn": [
+      {
+       "boss_id": "lw_hr_3_boss"
+      }
+     ],
+     "placement": "structure"
+    }
+   ],
+   "rewards": {
+    "gold": 540,
+    "loot": "major",
+    "flags": [
+     "lw_hr_3_done"
+    ],
+    "unique": "malacaths_cleaver"
+   },
+   "outro": "The forge-spirit stilled its hammer as I broke the last unlit name on the anvil. I do not know whether it will begin again, but the names on the column are, for now, only names."
+  },
+  {
+   "id": "lw_hr_4_a",
+   "title": "The Giant That Drinks",
+   "region": "high_rock/stormhaven",
+   "start": "find",
+   "find": {
+    "place": "koeglin_village",
+    "offset": [
+     5,
+     7
+    ],
+    "radius": 4,
+    "clue": "totem",
+    "text": "A fisherman's totem at the lighthouse base has been wired with a small brass drip-cup. Scratched on it: 'The tide is wrong. The giant is drinking again. Ask Evermor.'"
+   },
+   "requires": [
+    "level:12"
+   ],
+   "desc": "A fisherman's totem says the tide is wrong because a giant has begun to drink again.",
+   "pitch": "Koeglin fishermen say their nets come up full of salt water where there is no sea.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "weeping_giant",
+     "text": "Taste the giant's tears and follow the water toward the lake city."
+    },
+    {
+     "type": "go",
+     "place": "evermor",
+     "text": "Take the engineer's flooding survey from Evermor to the ring of towers on Balfiera."
+    }
+   ],
+   "rewards": {
+    "gold": 210,
+    "loot": "minor"
+   },
+   "outro": "One thread of the trail ends here and the next begins. The giant's thirst runs from a lake city and a ring of towers to a Dwemer pump and the old Direnni seat."
+  },
+  {
+   "id": "lw_hr_4_b",
+   "title": "The Giant That Drinks (II)",
+   "region": "high_rock/stormhaven",
+   "start": "auto",
+   "requires": [
+    "quest:lw_hr_4_a"
+   ],
+   "desc": "The giant's thirst runs from a lake city and a ring of towers to a Dwemer pump and the old Direnni seat.",
+   "pitch": "Koeglin fishermen say their nets come up full of salt water where there is no sea.",
+   "objectives": [
+    {
+     "type": "go",
+     "place": "isle_of_balfiera",
+     "text": "Take the key-bar from the lock tower on Balfiera to the Dwemer bastion at Mthartzel."
+    },
+    {
+     "type": "go",
+     "place": "mthartzel",
+     "text": "Reach the pump hall at Mthartzel and silence the Keeper."
+    },
+    {
+     "type": "kill",
+     "place": "direnni_tower",
+     "text": "Climb to the lens room and meet the last Direnni heir.",
+     "spawn": [
+      {
+       "boss_id": "lw_hr_4_boss"
+      }
+     ],
+     "placement": "structure"
+    }
+   ],
+   "rewards": {
+    "gold": 520,
+    "loot": "major",
+    "flags": [
+     "lw_hr_4_done"
+    ],
+    "unique": "direnni_warhammer"
+   },
+   "outro": "The pump fell silent and the great stone chest of the giant sighed one last time. In the bay, the ring of towers on Balfiera slowly lifted toward the sun."
+  }
+ ]
+}

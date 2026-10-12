@@ -1,0 +1,274 @@
+{
+ "province": "black_marsh",
+ "arcs": [
+  {
+   "id": "bm_1", "title": "The Tapped Root", "tier": "A",
+   "secret": "A merchant's stilt mansion has been tapping a Hist root for sap sold abroad. The falls that weep, the hag that spawns and the black pool are all the marsh's own ways of crying out.",
+   "order": ["stay_moist_mansion", "xal_haj_ei_shrine", "weeping_wamasu_falls", "stormhold", "temple_of_sul", "bogmother", "shrine_of_the_black_maw"],
+   "entry": {"clue": "urn", "offset": [6, 5], "text": "A sap-barrel behind the mansion's boat-shed is stamped with a golden sun and a tally of casks sold abroad. Beneath, in an Argonian hand: 'The Root is not ours to sell.'"},
+   "quest": {"title": "The Tapped Root", "desc": "A barrel stamped with a sun and a tally of casks sold abroad, and a scratched warning that the Root is not for sale.", "desc2": "The tapped root's cries lead from a hollow shrine and a weeping falls through a river fortress to a hag-lair and the black pool.", "pitch": "A boatman says the merchant's mansion has more sap than anyone should.", "outro": "At the black pool I stopped the tap and the sap ran clear into the pool again. The merchant's coffers will be lighter. The marsh is quieter. The Root remembers who listened.", "boss": {"name": "Factor Delvyn Sull", "type": "skycraft:bandit_chief", "hp": 2.8, "dmg": 1.3, "level": 24}, "reward": {"gold": 540, "loot": "major", "unique": "hist_fang"}}
+  },
+  {
+   "id": "bm_2", "title": "The Warm Count", "tier": "A",
+   "secret": "The hatching pools are cooling and the eggs hatching pale. A banquet-ghost in the rotting pavilion draws heat for the plates of a supper that never ends.",
+   "order": ["hatchlings_crown", "hatching_pools", "lilmoth", "the_vile_pavilion"],
+   "entry": {"clue": "stone", "offset": [7, -4], "text": "An egg-shaped stone on the hill has a warm-count carved in it, each season's temperature a notch lower than the last. A fresh notch is chiselled this week, deeper than any."},
+   "quest": {"title": "The Warm Count", "desc": "A warm-count carved on an egg-shaped stone shows each season's heat a notch lower than the last.", "desc2": "The cooling pools, the capital's ziggurat and a rotting pavilion are all part of the same missing warmth.", "pitch": "The hatchery keepers say the pools are a degree colder each season.", "outro": "The pavilion's guests rose from their chairs and drifted out into the mire, and the plates cooled. In the warm pools, a week later, the eggs began to hatch with ordinary colour.", "boss": {"name": "The Lord of the Long Supper", "type": "skycraft:necromancer", "hp": 3.0, "dmg": 1.4, "level": 22}, "reward": {"gold": 480, "loot": "major"}}
+  },
+  {
+   "id": "bm_3", "title": "The Extra One", "tier": "A",
+   "secret": "Every census in the Shadowfen counts one more than the roll. The extra is the village's first settler, who was never named, and whose seat has been kept for generations at a rice-paddy table, a village fire and a Hist pool.",
+   "order": ["jeevu_rice_paddy", "root_whisper_village", "thorn", "helstrom", "ruins_of_mazzatun"],
+   "entry": {"clue": "lectern", "offset": [3, 6], "text": "A rice-counter's tally: forty-one workers at sunrise, forty-two at dusk. Below, in a careful hand: 'Did I miscount? I never miscount.'"},
+   "quest": {"title": "The Extra One", "desc": "A rice-counter's tally has forty-one workers at sunrise and forty-two at dusk.", "desc2": "The extra one's seat has been kept at a village table, a Hist pool and a border-post, and its owner waits in the xanmeer.", "pitch": "The rice-counter says there is always one more to feed at the evening bowl.", "outro": "I named him, at last, in the flooded hall: not a name of any tribe but a name of the marsh. The last chair at every table was, for the first time in a thousand years, empty. The Hist hummed a note I had not heard.", "boss": {"name": "The Counted Shade", "type": "skycraft:will_o_wisp", "hp": 3.2, "dmg": 1.4, "level": 24}, "reward": {"gold": 520, "loot": "major"}}
+  },
+  {
+   "id": "bm_4", "title": "The Rerouted Dirge", "tier": "A",
+   "secret": "The grave-singers carry the dead down the delta to the island necropolis by song. A Gideon plantation lord has quietly rerouted the dirge's path through his dry fields, in the belief that the dead's blessing will bring rain.",
+   "order": ["hutan_tzel", "grave_singers_lodge", "plateau_of_the_traveler", "gideon", "soulrest", "murkmire", "teeth_of_sithis"],
+   "entry": {"clue": "grave", "offset": [-8, 6], "text": "A fishing-hamlet grave is empty, its marker moved a hundred paces inland from the shore. Scratched on the stone: 'The dirge doesn't go to the water any more.'"},
+   "quest": {"title": "The Rerouted Dirge", "desc": "A fishing hamlet's grave, its marker moved inland from the shore, with a note that the dirge no longer goes to the water.", "desc2": "The dirge's new path crosses a plateau and a plantation city and ends in a mire ringed by black teeth.", "pitch": "A fisher says the grave-singers no longer sing the dead to the sea, and nobody will tell why.", "outro": "At the ring of teeth I sang the old verse and the dirge came back to its water. The plantation lord's fields went dry. The marsh knows the debt it owes and the debt it must still collect.", "boss": {"name": "Lord Heel of the Dry Fields", "type": "skycraft:vampire", "hp": 3.0, "dmg": 1.4, "level": 26}, "reward": {"gold": 580, "loot": "major", "unique": "marsh_lords_mace"}}
+  }
+ ],
+ "sit": {
+  "stay_moist_mansion": {
+   "name": "Stay-Moist Mansion",
+   "g": "A merchant's stilt mansion in the Stormhold marsh with a boat-shed, a bright awning and a lantern-lit veranda.",
+   "m": "The merchant sells sap to Imperial pharmacists. His storehouse is full of casks stamped with a golden sun, though the Hist should not be tapped.",
+   "c": ["casks stamped with a sun and a tally", "a boat-shed with a sap-pump on its dock", "a veranda lantern that burns green sap"],
+   "x": ["xal_haj_ei_shrine"],
+   "p": "A sap-cask seal, proof the root is being sold.",
+   "r": "The merchant at Stay-Moist has more sap than a thousand trees could give, and he sells it by the cask to the Imperials.",
+   "lead": "Take the sap-cask seal from the mansion's boat-shed to the hollow shrine in the reeds.",
+   "n": {"k": "ledger", "t": "Cask Ledger", "a": "Factor Delvyn Sull", "x": "Casks tapped: 214 this season. Sold to the Imperial pharmacists: 198. Retained for private use: 12. Spoiled: 4. The Root yields well to a determined hand. If the Hist-folk complain, remind them that a tree is not a person. I have never believed in it, but I wouldn't say it aloud in the hearing of the Root."}
+  },
+  "xal_haj_ei_shrine": {
+   "name": "Xal Haj-Ei Shrine",
+   "g": "A shrine in a hollow reed-forest, half-sunk in a pool, its walls carved with root-patterns.",
+   "m": "The shrine's pool is a mouth of the Root. Its water has turned grey, and the shrine-keepers weep at dawn.",
+   "c": ["a pool grey as ash in the shrine's heart", "root-carvings with chiselled gaps", "keepers' drums stilled and wrapped in cloth"],
+   "x": ["weeping_wamasu_falls"],
+   "p": "A shrine-keeper's tear-vial, an offering that can lull the falls.",
+   "r": "The shrine in the reeds has gone grey. The keepers say the Root is in pain.",
+   "lead": "Take the keeper's tear-vial from the shrine to the weeping falls.",
+   "n": {"k": "prayer", "t": "Keeper's Dawn Prayer", "a": "Keeper Sa-Heet", "x": "Root of the marsh, root of the sky, we are in pain and so are you. A cut is a cut, a tap is a tap, and no one asks the tree. We keep the shrine and we weep, because the shrine weeps. Forgive those who do not know, and those who do. Let the sap run clean."}
+  },
+  "weeping_wamasu_falls": {
+   "name": "Weeping Wamasu Falls",
+   "g": "A high waterfall with the shape of a giant weeping creature carved into the rock behind its sheet.",
+   "m": "The falls' note has sunk to a whisper this season. The wamasu in the rock is losing its voice, and the Argonians say the Root is the throat of the world.",
+   "c": ["a waterfall with its note gone thin", "a rock face where tear-lines have dried", "offerings of reeds at the base, withered"],
+   "x": ["stormhold"],
+   "p": "A wamasu-tear, a drop that changes tone when near a tapped root.",
+   "r": "The Weeping Wamasu has fallen quiet. The Argonians say it is losing its voice because the marsh has a cut in it.",
+   "lead": "Carry the wamasu-tear to the river-fortress of Stormhold.",
+   "n": {"k": "poem", "t": "The Wamasu's Elegy", "a": "unknown Argonian", "x": "~The falls once sang and now they sigh.~The wamasu weeps and the clouds go by.~A root is cut and a throat is sore,~a song unsung is a closing door.~We are the marsh and the marsh is we,~and nobody asked the old Hist tree."}
+  },
+  "stormhold": {
+   "name": "Stormhold",
+   "g": "A fortress city of two stepped ziggurats on facing hills, joined by a long bridge across a gorge.",
+   "m": "The Imperial pharmacists' guild has an office at the river gate. Its sap manifest is bound in a ledger that is not allowed to be photographed or copied.",
+   "c": ["a pharmacists' office with a locked ledger", "river-gate crates stamped with a sun", "a bridge guard with a sap-sweetened breath"],
+   "x": ["temple_of_sul"],
+   "p": "The pharmacists' manifest, naming the buyers and the amounts.",
+   "lead": "Copy the pharmacists' sap manifest at Stormhold's river gate."
+  },
+  "temple_of_sul": {
+   "name": "Temple of Sul",
+   "g": "A sun-temple with bright shafts and a gold altar, its roof carved to focus a single beam at noon.",
+   "m": "The merchant's sun-stamp is borrowed from this temple. A corrupt priest sold the temple's mark and a licence for sap-gathering, and the altar's gold is his payment.",
+   "c": ["a gold altar with a priest's footprints in the dust", "a roof beam that falls on the wrong spot", "a licence-plate stamped with a sun"],
+   "x": ["bogmother"],
+   "p": "A temple licence that exposes the corrupt priest.",
+   "r": "The Temple of Sul's gold is real, but the priest who kept it hasn't prayed in a year.",
+   "lead": "Take the corrupt priest's licence to the hag-lair in the swamp.",
+   "n": {"k": "contract", "t": "The Priest's Licence", "a": "High Priest Thar-Sul", "x": "In the name of the sun, the bearer is granted the right to gather sap from the Root at such sites as the bearer chooses, for the sum of three hundred pieces of gold per season. The temple will not be held to account. The sun is a witness, and the sun does not testify."}
+  },
+  "bogmother": {
+   "name": "Bogmother",
+   "g": "A fetid root-cave and hag-lair where a mother-of-bog spawns, with walls of knotted root and a dripping ceiling.",
+   "m": "The hag is the Root's antibody: each time the tap is drawn she spawns a clutch of guardians. The more sap is drawn, the more she must bear.",
+   "c": ["knotted root-walls weeping green", "spawn-clutches in every alcove", "a tap-pipe running in through the ceiling"],
+   "x": ["shrine_of_the_black_maw"],
+   "p": "A hag's root-knot that quiets her spawn.",
+   "r": "Something big has been laying in the swamp lately. The hunters won't go past the bend.",
+   "lead": "Cut the tap-pipe in the hag-lair and quiet the bogmother.",
+   "n": {"k": "warning", "t": "Hunter's Warning", "a": "Hunter Ta-Shu", "x": "Do not go near the bend. Her spawn come in clutches of nine now, where it was three. She is enraged, and she has cause. Whoever put the pipe through her ceiling should be fed to the next clutch. I will not go in. I have children."}
+  },
+  "shrine_of_the_black_maw": {
+   "name": "Shrine of the Black Maw",
+   "g": "A sacred shrine built into a gaping rock mouth with processional halls and a great black pool.",
+   "m": "The pool is the Root's mouth, where it drinks the dead's names. The tap's other end is here, a brass fitting driven into the pool's bottom.",
+   "c": ["a brass fitting driven into the black pool", "processional halls wet with sap", "a pool whose surface shows the faces of the dead"],
+   "x": ["xal_haj_ei_shrine", "stay_moist_mansion"],
+   "p": "The tap-fitting itself, and a unique Hist fang that heals what was cut.",
+   "r": "The Black Maw's pool has a metal thing in it now. The shrine-keepers say it is a thorn in the world's tongue.",
+   "lead": "Pull the brass tap-fitting from the Black Maw's pool.",
+   "n": {"k": "inscription", "t": "The Maw's Lip", "a": "", "x": "WHAT IS DRAWN RETURNS, WHAT IS TAKEN IS OWED. The Root remembers every hand that touched it. Draw not what is not yours; and if you have drawn it, return it threefold. The black water is patient, but it is not blind."}
+  },
+  "hatchlings_crown": {
+   "name": "Hatchling's Crown",
+   "g": "A hill crowned with a ring of egg-shaped stones near Lilmoth, each carved with a notch-count of warmth.",
+   "m": "The stones hold the warm-count of every season. The latest notch is the deepest cut: the heat has fallen by a degree.",
+   "c": ["egg-shaped stones with notch-counts", "a deep new notch chiselled this week", "a keeper's string of pale eggshells"],
+   "x": ["hatching_pools"],
+   "p": "The warm-count rubbing.",
+   "r": "The egg-stones of the crown measure the warmth of the pools. The last cut is the deepest anyone has seen.",
+   "lead": "Carry the warm-count rubbing from the Crown to the hatching pools.",
+   "n": {"k": "notes", "t": "Egg-Keeper's Count", "a": "Egg-Keeper Ushu", "x": "Count at dawn: 92 degrees. Last year: 94. The year before: 96. The eggs hatch pale now, and some do not hatch. A degree each year for ten years. I have asked the Hist-sages. They say the heat has been called elsewhere, and nobody called it. I have a strong suspicion. I will not say it aloud."}
+  },
+  "hatching_pools": {
+   "name": "Hatching Pools",
+   "g": "A ring of warm pools in Stormhold's lowland, each steaming faintly with a clutch in a nest of reeds.",
+   "m": "The pools are cooler by a degree each year, and the hatchlings come pale and weak. Steam rises from the pools toward the southern mire instead of upward.",
+   "c": ["steam trailing south in a single thread", "pale hatchlings at the pool edge", "keepers wrapping eggs in warmed cloth"],
+   "x": ["lilmoth"],
+   "p": "A steam-vial that shows the direction of the stolen heat.",
+   "r": "The hatching pools are cooler. The steam goes south in a thread, and the keepers follow it with their eyes.",
+   "lead": "Follow the steam-thread from the pools into Lilmoth.",
+   "n": {"k": "report", "t": "Pool-Keeper's Report", "a": "Keeper Sh-Thissa", "x": "Pool one: 88 degrees, was 90. Pool two: 87, was 89. Steam goes south. I followed it to the wall of Lilmoth and lost it among the market stalls. I do not think the market is the thief. I think the thief is further. The steam is a thread, and a thread may be followed."}
+  },
+  "lilmoth": {
+   "name": "Lilmoth",
+   "g": "A delta city on stilts with canals instead of streets, hundreds of boats and a ziggurat over a market of woven mats.",
+   "m": "The ziggurat's lowest cistern is cold, and has been for a year. The priest-keepers say something draws on it from underneath.",
+   "c": ["a cold cistern in a warm ziggurat", "a fishmonger's catch frozen where it should be fresh", "a thread of steam that trails south-east"],
+   "x": ["the_vile_pavilion"],
+   "p": "A priest-keeper's chart of the cold's direction.",
+   "lead": "Follow the cold's direction from Lilmoth's ziggurat into the mire."
+  },
+  "the_vile_pavilion": {
+   "name": "The Vile Pavilion",
+   "g": "A rotting banquet pavilion on the mire with floating platforms joined by plank walks and a long table with plates that still steam.",
+   "m": "The plates steam because the pavilion's lord draws the pools' heat. He thinks you are late for dinner. His guests cannot leave until the supper ends.",
+   "c": ["a long table with steaming plates", "guests seated, unmoving, ankle-deep in mire", "a lord's chair with a cold hearth behind it"],
+   "x": ["hatchlings_crown", "hatching_pools"],
+   "p": "The lord's carving knife, a unique that draws heat or cold.",
+   "r": "A pavilion in the mire has food that steams on a night with frost. Nobody who sits there has returned for dessert.",
+   "lead": "Take a seat at the pavilion's table and end the supper.",
+   "n": {"k": "letter", "t": "An Invitation, Late", "a": "The Lord of the Long Supper", "x": "My dear guest: you are late, and the soup has gone cold, but I have made it warm again. Sit. Eat. We have been so long without company. The plates were set at the turn of the season, and the season turned eighteen times. I am so sorry about the weather. Do not leave before the sweets."}
+  },
+  "jeevu_rice_paddy": {
+   "name": "Jeevu Rice Paddy",
+   "g": "A rice paddy in the Shadowfen, with rows of seedlings in black water and a harvest-counter's high chair.",
+   "m": "The counter's tally has an extra worker each dusk. The evening bowl is set out by habit for a person nobody can name.",
+   "c": ["a tally sheet with one extra worker each dusk", "a bowl set at the end of the field", "a row of seedlings planted by someone no one saw"],
+   "x": ["root_whisper_village"],
+   "p": "The counter's tally of the extra one.",
+   "r": "The rice-counter at Jeevu counts forty-two at dusk where there were forty-one at dawn. She doesn't like it.",
+   "lead": "Take the rice-counter's tally to the abandoned hist-village.",
+   "n": {"k": "ledger", "t": "Rice-Counter's Tally", "a": "Counter Sheena", "x": "Dawn count: 41. Dusk count: 42. Bowls set: 42. Bowls emptied: 42. I do not feed one extra worker. I feed forty-one and the forty-second bowl is emptied by morning. The harvest has been good, and I will not question what labours in the dark. But I count, and the count does not lie."}
+  },
+  "root_whisper_village": {
+   "name": "Root Whisper Village",
+   "g": "An abandoned Hist-village, huts overgrown with root-vine and a central fire-pit still warm at the edges.",
+   "m": "The village fled when the Hist spoke a name no one knew, and every bowl was set for one more. The roots have grown through the walls to the table.",
+   "c": ["a long table with a chair at the head no one will sit in", "roots grown through the walls reaching the table", "a fire-pit warm at dawn"],
+   "x": ["thorn"],
+   "p": "A speaker-reed that records the Hist's whisper.",
+   "r": "Root Whisper's folk left in a night. The roots have grown into their huts and their table has a chair that stays warm.",
+   "lead": "Record the Hist's whisper at Root Whisper and bring it to Thorn.",
+   "n": {"k": "diary", "t": "A Villager's Last Diary", "a": "Uziah of Root Whisper", "x": "The root spoke, three nights running. A name, nothing more. We could not hear it exactly, but we knew it was a name. We began to set a place. The elders thought it was an ancestor. The children said no. It was someone who had never been counted. The thirteenth night, the root said it again, and we left. I am sorry."}
+  },
+  "thorn": {
+   "name": "Thorn",
+   "g": "A hub of a single enormous Hist tree whose roots carry walkways, huts hung from the roots, a pool at the base and sap-lanterns.",
+   "m": "The pool's reflection shows a figure who is not a villager, seated at the back of the crowd at festivals. The Hist-sages say it is a guest of the Hist.",
+   "c": ["a reflection in the pool of a figure at the back", "a festival-seat left empty at the rear of the crowd", "a sap-lantern that burns blue when the figure is near"],
+   "x": ["helstrom"],
+   "p": "A reflection-bowl that shows the figure's face.",
+   "lead": "Look into the Hist-pool at Thorn and follow the figure to the border."
+  },
+  "helstrom": {
+   "name": "Helstrom",
+   "g": "A border town on the edge of the Shadowfen, with new stilt-houses grown among broken monoliths and rope walkways.",
+   "m": "The border-post's tally always has one more than the roll. The captain has stopped correcting it and writes 'plus one' in his book.",
+   "c": ["a border-post book with 'plus one' in the margin", "a gate whose latch opens by itself at dusk", "monoliths carved with a name no one can read"],
+   "x": ["ruins_of_mazzatun"],
+   "p": "The captain's roll with 'plus one' and the monoliths' inscription.",
+   "lead": "Copy the monolith's unreadable name and carry it into the xanmeer."
+  },
+  "ruins_of_mazzatun": {
+   "name": "Ruins of Mazzatun",
+   "g": "A xanmeer of stepped chambers where the floor is a flooded city, with sap-vein walls and a central shaft.",
+   "m": "At the bottom of the shaft sits a figure who does not breathe. It is the village's founder, never named, who counts the water as it rises. He wishes only to be named.",
+   "c": ["a seated figure at the bottom of the shaft", "walls with sap-veins that pulse in sequence", "a bowl set at the water's edge, still warm"],
+   "x": ["jeevu_rice_paddy", "root_whisper_village"],
+   "p": "The founder's name, and a unique that calms a restless shade.",
+   "r": "Mazzatun's flood rises a hand per year. Folk say a quiet figure sits at the bottom and counts.",
+   "lead": "Descend the shaft and speak the founder's name.",
+   "n": {"k": "inscription", "t": "The Founder's Wall", "a": "", "x": "HE WHO WAS FIRST HAS NO NAME BECAUSE NONE WAS GIVEN. He built the first hut, and the first fire. He wished to be counted and was not. Let whoever finds this give him a name of the marsh, and let it be a good one."}
+  },
+  "hutan_tzel": {
+   "name": "Hutan Tzel",
+   "g": "A fishing hamlet on the southern delta, with drying racks and a graveyard whose markers are wooden reeds.",
+   "m": "The graves are moved inland every year, because the dirge no longer goes to the water. The singers say the path was moved by a hand with money.",
+   "c": ["grave-markers moved a hundred paces inland", "drying-racks hung with mourning ribbons", "a fisher's empty chair at the water's edge"],
+   "x": ["grave_singers_lodge"],
+   "p": "A mourning-ribbon braid that opens the singers' lodge.",
+   "r": "At Hutan Tzel the dead are buried inland, now. The singers don't sing them to the water.",
+   "lead": "Take the mourning-ribbon braid from Hutan Tzel to the singers' lodge.",
+   "n": {"k": "letter", "t": "A Fisher's Plea", "a": "Fisher Lutha", "x": "To the Grave-Singers: my father was not sung to the water. He lies in a field that is not ours, in a place that will be dry within a year. Please. The dirge is the only road he has and it has been closed. Someone has money in the Gideon fields and my father has been sold for rain."}
+  },
+  "grave_singers_lodge": {
+   "name": "Grave Singers' Lodge",
+   "g": "A lodge of singers on a hummock in the delta, hung with reed-chimes, with a single long table of seven empty chairs.",
+   "m": "The singers' choir has dwindled to three. Four were bribed to sing the new route, and they have not sung since. The three keep the old verse.",
+   "c": ["seven chairs at a table, four dusty", "a verse tablet with a line crossed out and rewritten", "reed-chimes bound with a coin-string"],
+   "x": ["plateau_of_the_traveler"],
+   "p": "The old verse's final line and a map of the dirge's new route.",
+   "r": "The singers' lodge has seven chairs and three singers. The other four have taken the lord's coin.",
+   "lead": "Take the singers' map to the lone plateau to see the dirge's new road.",
+   "n": {"k": "poem", "t": "The Old Verse", "a": "the Grave-Singers", "x": "~Down the delta, down the water,~sing the sons and sing the daughters.~Past the reeds and past the flood,~to the teeth that drink the blood.~Lay them where the tide is slow.~Sing them home. We'll sing them so."}
+  },
+  "plateau_of_the_traveler": {
+   "name": "Plateau of the Traveler",
+   "g": "A lone rock plateau with a view across the delta and a flat stone, polished by feet, at its edge.",
+   "m": "From the plateau's edge the dirge's old path is a silver thread to the sea. The new path is a dark scar through the dry fields.",
+   "c": ["a polished flat stone at the plateau's edge", "a silver thread across the delta at dusk", "a dark scar through the fields beyond"],
+   "x": ["gideon"],
+   "p": "A surveyor's sighting of the dirge's two routes.",
+   "r": "From the lone plateau you can see two paths. One is silver, one is dark. Choose carefully which you follow.",
+   "lead": "Sight the dirge's two routes from the plateau and take the survey to Gideon.",
+   "n": {"k": "notes", "t": "Surveyor's Sighting", "a": "Surveyor Haleth", "x": "At dusk the old route shines like a fish's back down to the sea. The new route runs due east through the drier fields of Gideon. The two paths part at a mound near the third marsh-bend. I walked the new route. It ended in a plantation courtyard with a bell. The bell was silent, and the courtyard was full of coffins waiting."}
+  },
+  "gideon": {
+   "name": "Gideon",
+   "g": "A walled plateau town in the drier east of the delta with rings of terraced clay houses and a high watchtower.",
+   "m": "The plantation lord's courtyard holds stacked coffins waiting to be sung over. He believes the dead's blessing will bring rain.",
+   "c": ["a courtyard of waiting coffins", "a watchtower with a bell silent for years", "a well half-dry with a ring of white salt"],
+   "x": ["soulrest"],
+   "p": "A lord's contract with the four bribed singers.",
+   "lead": "Take the lord's contract from the plantation courtyard at Gideon."
+  },
+  "soulrest": {
+   "name": "Soulrest",
+   "g": "A necropolis island city of stilt-house rows, canals, white lily beds and bone-barges.",
+   "m": "The island's quiet has been broken: no bone-barge has docked in a year. The island's keepers watch the delta for the dirge and see nothing.",
+   "c": ["empty bone-barges at their moorings", "lily beds withering for want of the dead's warmth", "a watch-bell rung nightly with no answer"],
+   "x": ["murkmire"],
+   "p": "A keeper's chart of the dirge's true end, in the mire.",
+   "lead": "Take the island keepers' chart to the deep mire."
+  },
+  "murkmire": {
+   "name": "Murkmire",
+   "g": "A remote hut spiral in the deep mire with a path winding to the centre fire, mist and croaks.",
+   "m": "The huts' spiral points to a ring of teeth in the mire where the dirge ends. The villagers sing the last verse alone each night.",
+   "c": ["huts arranged in a spiral toward the mire's heart", "a fire that burns with no smoke", "a night-chant of a single voice"],
+   "x": ["teeth_of_sithis"],
+   "p": "The last verse of the dirge, sung to the teeth.",
+   "lead": "Learn the last verse from the Murkmire singer and take it to the ring of teeth."
+  },
+  "teeth_of_sithis": {
+   "name": "Teeth of Sithis",
+   "g": "A ring of black teeth rising from the mire around a sunken hollow, with root paths between each tooth, each tooth a different trial.",
+   "m": "The dirge ends in the hollow's centre, where the dead's songs are laid. The rerouted dirge has left it silent, and the hollow has begun to sink.",
+   "c": ["black teeth ringed around a sunken hollow", "root paths between each tooth", "a sinking centre where the song should rest"],
+   "x": ["hutan_tzel", "grave_singers_lodge"],
+   "p": "The final verse's key: a unique mace that calls the dead's song.",
+   "r": "The ring of teeth is quiet. The old folk say it used to sing.",
+   "lead": "Sing the old verse in the centre of the teeth and restore the dirge.",
+   "n": {"k": "inscription", "t": "The Tooth Inscription", "a": "", "x": "WHEN THE DIRGE IS SUNG THE TEETH ARE QUIET. WHEN THE DIRGE IS LOST THE TEETH ARE HUNGRY. Sing the dead down the water. Do not sell the road. Do not bend the song. The teeth are patient but they are not kind."}
+  }
+ }
+}

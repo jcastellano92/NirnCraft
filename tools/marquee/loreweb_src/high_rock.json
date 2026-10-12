@@ -1,0 +1,279 @@
+{
+ "province": "high_rock",
+ "arcs": [
+  {
+   "id": "hr_1", "title": "The Uncounted King", "tier": "A",
+   "secret": "The royal tomb carves seven kings of the old line. There were eight. A stonemasons' guild paid by three Iliac crowns is quietly recarving the family tree to erase the eighth, whose heirs would void three thrones.",
+   "order": ["aldhaven_harbor", "glenpoint", "wayrest", "daggerfall", "camlorn", "cath_bedraud", "tomb_of_lost_kings"],
+   "entry": {"clue": "lectern", "offset": [7, 4], "text": "The harbour-master's chain-log has a line where the same barge sails at night, three times a month, with a manifest that reads only 'stone dust, chisels, one priest'."},
+   "quest": {"title": "The Uncounted King", "desc": "A barge with only stone dust, chisels and a priest on its manifest sails from Aldhaven by night.", "desc2": "The masons' trail crosses three crowns and a cursed crypt, and ends in the tomb of the lost kings.", "pitch": "The chain-keeper at Aldhaven Harbor says the same barge leaves every ninth night, riding low and quiet.", "outro": "The eighth king's name was almost gone, scraped to a ghost in the stone. I traced it in charcoal before the masons returned. What three crowns do with it is theirs to decide.", "boss": {"name": "Master-Mason Orvane", "type": "skycraft:necromancer", "hp": 3.0, "dmg": 1.4, "level": 22}, "reward": {"gold": 480, "loot": "major"}}
+  },
+  {
+   "id": "hr_2", "title": "Cream-Coloured Invitations", "tier": "A",
+   "secret": "The Rivenspire fog is the carpet of a party that never ended. Invitations on cream paper appear in lanterns and doorframes, and those who say yes are collected by the fog. The Doomcrag necromancer sold the guest list.",
+   "order": ["the_lonely_lantern", "moiras_hope", "northpoint", "shornhelm", "doomcrag", "sanguines_demesne"],
+   "entry": {"clue": "lectern", "offset": [-5, 7], "text": "A cream-coloured card lies on the inn's single table, perfumed with plum. 'You are cordially invited. Dress as you were when you were happiest. Do not bring your lantern.'"},
+   "quest": {"title": "Cream-Coloured Invitations", "desc": "A perfumed invitation on the table of a one-lamp inn says to leave your lantern behind.", "desc2": "The guest-list led from a hamlet shrine and a fog-bound port to a black spire and on to the party itself.", "pitch": "The innkeeper says every guest who stayed the night is gone, and leaves a card on the table.", "outro": "The hall was warm, music still playing, the table laid. No one asked me to leave. It was the hardest door I have ever closed behind me.", "boss": {"name": "The Host of Plums", "type": "skycraft:dremora", "hp": 3.4, "dmg": 1.5, "level": 26}, "reward": {"gold": 580, "loot": "major", "unique": "umbra"}}
+  },
+  {
+   "id": "hr_3", "title": "Names Before Death", "tier": "A",
+   "secret": "A new name is carved on the memorial column every dusk, of Orcs not yet dead. A smith-spirit in the old city's collapsed forge keeps an account of those who will fall in the rebuilding, and cannot stop.",
+   "order": ["morkul_stronghold_high_rock", "paragons_remembrance", "wrothgarian_mountains", "orsinium", "old_orsinium"],
+   "entry": {"clue": "stone", "offset": [8, -6], "text": "A freshly chiselled name stands at the foot of the palisade, with a date nine days ahead. Below, in Orcish letters: 'Carved by no hand.' The stronghold's smith has covered it with a hide."},
+   "quest": {"title": "Names Before Death", "desc": "A name has been carved at the stronghold gate with a date nine days ahead.", "desc2": "The column's unseen carver leads through the broken ridge and the rebuilt city to the first city's cold forge.", "pitch": "The smith at the Morkul stronghold keeps a hide over a stone that gets a new name each dusk.", "outro": "The forge-spirit stilled its hammer as I broke the last unlit name on the anvil. I do not know whether it will begin again, but the names on the column are, for now, only names.", "boss": {"name": "Hargruk the Unwritten", "type": "skycraft:troll", "hp": 3.6, "dmg": 1.6, "level": 26}, "reward": {"gold": 540, "loot": "major", "unique": "malacaths_cleaver"}}
+  },
+  {
+   "id": "hr_4", "title": "The Giant That Drinks", "tier": "A",
+   "secret": "The toppled giant beneath the inn is a Direnni construct kept alive by a Dwemer pump at Mthartzel; its tears are seawater from a drowned cavern. When the pump is stopped, the island of Balfiera rises.",
+   "order": ["koeglin_village", "weeping_giant", "evermor", "isle_of_balfiera", "mthartzel", "direnni_tower"],
+   "entry": {"clue": "totem", "offset": [5, 7], "text": "A fisherman's totem at the lighthouse base has been wired with a small brass drip-cup. Scratched on it: 'The tide is wrong. The giant is drinking again. Ask Evermor.'"},
+   "quest": {"title": "The Giant That Drinks", "desc": "A fisherman's totem says the tide is wrong because a giant has begun to drink again.", "desc2": "The giant's thirst runs from a lake city and a ring of towers to a Dwemer pump and the old Direnni seat.", "pitch": "Koeglin fishermen say their nets come up full of salt water where there is no sea.", "outro": "The pump fell silent and the great stone chest of the giant sighed one last time. In the bay, the ring of towers on Balfiera slowly lifted toward the sun.", "boss": {"name": "The Keeper of the Pump", "type": "skycraft:dwarven_centurion", "hp": 3.0, "dmg": 1.5, "level": 24}, "reward": {"gold": 520, "loot": "major", "unique": "direnni_warhammer"}}
+  }
+ ],
+ "sit": {
+  "aldhaven_harbor": {
+   "name": "Aldhaven Harbor",
+   "g": "A small harbour on the Iliac Bay's shore with a heavy chain across the mouth and a tidal slip for night barges.",
+   "m": "A barge leaves the chain gate every ninth night with a manifest of 'stone dust, chisels, one priest' and returns lighter. Nobody has seen the priest come back.",
+   "c": ["chisel dust in the slip's wet planks", "a chain-keeper's log with the same entry every ninth night", "a priest's stole snagged on a mooring ring"],
+   "x": ["glenpoint"],
+   "p": "A chain-gate pass that lets the barge be followed to the tomb.",
+   "r": "A barge with no cargo but dust slips out of Aldhaven every ninth night and comes back lighter.",
+   "lead": "Trace the barge's night route from Aldhaven to the headland port of Glenpoint.",
+   "n": {"k": "ledger", "t": "Chain-Keeper's Log", "a": "Hob Cranley", "x": "Ninth night. Manifest: stone dust, chisels, one priest. Departed the chain at the ninth bell. Returned the third. No priest. No dust. Fresh-cut chips on the deck. I was paid to open the chain and asked to forget. I have not forgotten. The priest wore a Wayrest-sealed ring."}
+  },
+  "glenpoint": {
+   "name": "Glenpoint",
+   "g": "A small walled port on a headland with a single gate, a beacon keep and houses crowded to the end of the quay.",
+   "m": "The beacon is lit on the barge's nights though no ship is expected. A chisel-sharpening wheel runs in a boat-shed all night.",
+   "c": ["a beacon lit at odd hours", "a boat-shed wheel throwing sparks past midnight", "masons' aprons stacked wet on the quay"],
+   "x": ["wayrest"],
+   "p": "A mason's apron with a Wayrest guild-seal sewn in.",
+   "lead": "Take the mason's apron from the Glenpoint boat-shed to Wayrest."
+  },
+  "wayrest": {
+   "name": "Wayrest",
+   "g": "A harbour capital in a bay with a castle on a rock spur, a chain-boom across the harbour and guild streets rising in a bowl.",
+   "m": "The masons' guild is paid by the crown to maintain the royal archives, and a clerk's accounts show payments to 'the Quiet Chisel' from three courts.",
+   "c": ["a payment line to 'the Quiet Chisel'", "masons' guildhall doors shut at the ninth bell", "a clerk's desk with a drawer lined in stone dust"],
+   "x": ["daggerfall"],
+   "p": "The Quiet Chisel's payment list, with three royal seals.",
+   "lead": "Take the Quiet Chisel's payment list from Wayrest's archives."
+  },
+  "daggerfall": {
+   "name": "Daggerfall",
+   "g": "A fortified river-mouth town with a castle on an island linked by two stone bridges and tall houses over the water.",
+   "m": "The court archives were closed to scholars last year. A single scribe argues in the margins of the royal genealogy that there are eight kings, not seven.",
+   "c": ["a scholar's marginal note: 'eight, not seven'", "archive doors sealed with fresh wax", "a scribe who keeps a counting-rod on his belt"],
+   "x": ["camlorn"],
+   "p": "The scribe's marginal copy of the genealogy.",
+   "lead": "Convince the Daggerfall scribe to part with his marginal genealogy."
+  },
+  "camlorn": {
+   "name": "Camlorn",
+   "g": "A hill-top city of cream stone and spiky slate roofs with many spires and a cathedral of flying buttresses.",
+   "m": "The cathedral's bell-keeper retired in tears after a mason asked to 'tidy' the lower chapel's inscription. The chapel is now locked.",
+   "c": ["a lower chapel inscription half-chiselled", "a bell-keeper's farewell letter pinned to the door", "mason's marks in three different guild hands"],
+   "x": ["cath_bedraud"],
+   "p": "The cathedral's original inscription, copied before the chisel came.",
+   "lead": "Copy the half-erased inscription in the lower chapel of Camlorn's cathedral."
+  },
+  "cath_bedraud": {
+   "name": "Cath Bedraud",
+   "g": "A knight's crypt under a ruined chapel with long vaulted aisles of effigies, a bone-lined crypt and a hollow font.",
+   "m": "One effigy in the long aisle is a king, not a knight, and was carved by hand after the others. Its name has been struck out and refilled with plaster.",
+   "c": ["an effigy with a crown among knights", "plaster in the cut where a name once was", "a font that fills with chisel dust"],
+   "x": ["tomb_of_lost_kings"],
+   "p": "The plaster-cast of the eighth king's name.",
+   "r": "In Cath Bedraud the knights' stone faces all look one way: toward a niche that has been plastered shut.",
+   "lead": "Break the plaster in the Cath Bedraud niche and read the buried name.",
+   "n": {"k": "inscription", "t": "Effigy Plinth", "a": "", "x": "HE WHO WAS NOT COUNTED LIES HERE UNDER A BORROWED NAME. Seven he stood beside and an eighth he stood above. Let the chisel rest. Let the plaster crack. Let the heirs be found."}
+  },
+  "tomb_of_lost_kings": {
+   "name": "Tomb of Lost Kings",
+   "g": "A dynasty's necropolis with named sarcophagi and a family tree carved on the great wall, each room one king.",
+   "m": "There are seven king-rooms and a sealed eighth, its door already half-recarved into wall. The master-mason works inside, erasing the last name.",
+   "c": ["a family tree with a branch recently planed away", "a king-room whose door is now a wall", "tools laid neatly in a sarcophagus"],
+   "x": ["wayrest", "daggerfall"],
+   "p": "A unique charcoal rubbing of the eighth king's name and his legitimate heirs' line.",
+   "r": "The Tomb of Lost Kings has an eighth door that some days is there and some days is not.",
+   "lead": "Reach the sealed eighth king-room before the master-mason finishes the wall.",
+   "n": {"k": "list", "t": "The Seven (and One)", "a": "the Archivist of the Tomb", "x": "First: seated. Second: seated. Third: seated. Fourth: seated. Fifth: seated. Sixth: seated. Seventh: seated. Eighth: to be replastered under the seal of Wayrest, Daggerfall and Camlorn. The Eighth had two sons. Do not look for them."}
+  },
+  "the_lonely_lantern": {
+   "name": "The Lonely Lantern",
+   "g": "A one-lamp inn on a moor in the fog, with a single lantern in the window and a table laid for a guest.",
+   "m": "Every guest who stayed the night is gone by morning, leaving a cream-coloured card on the table. The innkeeper counts them and says she will be next.",
+   "c": ["cream cards stacked in a jar", "one place set at the table with no chair", "a lantern that burns lavender at midnight"],
+   "x": ["moiras_hope"],
+   "p": "A card whose invitation can be answered.",
+   "r": "The Lonely Lantern keeps its one lamp lit all night. Guests who sleep there leave a card and no footprints.",
+   "lead": "Take a card from The Lonely Lantern to the hamlet shrine.",
+   "n": {"k": "letter", "t": "A Card on the Table", "a": "", "x": "You are cordially invited to the supper that never ends. Wear what you wore when you were happiest. Leave your lantern at the door. The host is quite certain you will come. R.S.V.P. with the fog."}
+  },
+  "moiras_hope": {
+   "name": "Moira's Hope",
+   "g": "A tiny shrine hamlet on a moor-edge, with a single prayer-stone ringed in candle-ends and a bell that does not ring.",
+   "m": "The villagers say yes to the invitations out of grief, one at a time. The shrine keeps their candle-ends in a box with the cards.",
+   "c": ["candle-ends in a box labelled with names", "a bell with its clapper tied", "cream cards tucked into the prayer-stone"],
+   "x": ["northpoint"],
+   "p": "A candle-end that lets the bearer keep their name against the fog.",
+   "r": "At Moira's Hope the villagers light a candle for each who says yes to the fog.",
+   "lead": "Take the shrine's candle-end ward to the fog-bound port of Northpoint.",
+   "n": {"k": "prayer", "t": "A Mourner's Prayer", "a": "Wynne of Moira's Hope", "x": "Lady of hope, hold my lantern. I said I would not go, and then I did, and then I could not tell you which way is back. If the fog sings tonight, do not let me answer. If the fog asks, let me remember I have a name."}
+  },
+  "northpoint": {
+   "name": "Northpoint",
+   "g": "A rock-bound northern port on a moor with houses clinging to a sea cliff, stairs down to the quay and a squat lighthouse in the mist.",
+   "m": "The lighthouse keeper turns the lamp off at the party's hour, because ships that keep their bearings do not accept invitations.",
+   "c": ["a lighthouse dark at the fog hour", "ships moored by moor-lanterns in a ring", "a harbour-master with a silver bell round his neck"],
+   "x": ["shornhelm"],
+   "p": "A silver ward-bell that rings a warning against fog-voices.",
+   "lead": "Take the silver bell from the Northpoint harbour-master toward Shornhelm."
+  },
+  "shornhelm": {
+   "name": "Shornhelm",
+   "g": "The black-roofed capital of Rivenspire, a city of fog, feuding houses and a heavy red keep in a grid-planned wall.",
+   "m": "The feuding houses sent heirs to the party to settle old debts. None returned. The keep's cellars hold a guest-book, signed with plum ink.",
+   "c": ["a guest-book signed in plum ink", "a house's mourning flags in every colour", "heirs' empty seats at a council table"],
+   "x": ["doomcrag"],
+   "p": "The guest-book, naming who sold the guest list.",
+   "lead": "Take the plum-ink guest-book from the Shornhelm keep's cellars."
+  },
+  "doomcrag": {
+   "name": "Doomcrag",
+   "g": "A black spire on a crag with spiral wards, a library of bound books and a roof with a storm engine.",
+   "m": "The necromancer sold the guest list to the Host in exchange for a tome. He keeps a copy to know who is going to disappear next.",
+   "c": ["a library with a second ledger of 'next invitees'", "a storm engine whose dial reads 'fog'", "a desk with a plum-inked quill"],
+   "x": ["sanguines_demesne"],
+   "p": "The second ledger and a door-key to the demesne.",
+   "r": "The Doomcrag library has a ledger of names, and the necromancer reads it every night.",
+   "lead": "Take the necromancer's second ledger and find the Host's door.",
+   "n": {"k": "contract", "t": "A Bargain in Plum Ink", "a": "Hestrel Doom", "x": "I, Hestrel of the Crag, hereby supply to the Host of the Supper the register of the grieving of Rivenspire, with notes. In return I receive one tome of my choosing, and the Host's solemn word that I shall never be asked to attend. Signed, in my own best hand and a little fear."}
+  },
+  "sanguines_demesne": {
+   "name": "Sanguine's Demesne",
+   "g": "A realm-pocket of red velvet with banqueting halls, endless mirror corridors and a throne of bones where the party has gone on too long.",
+   "m": "The guests are not unhappy. They are happy and cannot leave. The Host wants a single witness to sign the register, so that the party can formally end and begin again.",
+   "c": ["a long table with plates that steam", "mirror corridors that show a different guest each pass", "a register on a bone lectern waiting for a signature"],
+   "x": ["the_lonely_lantern", "northpoint"],
+   "p": "The register, a unique that frees a named guest from the party.",
+   "lead": "Enter the demesne and decline the Host's final invitation.",
+   "n": {"k": "poem", "t": "Supper Song", "a": "a guest", "x": "~The wine is red and the music high,~the candles never think to die.~We dance and eat and laugh and bow,~and none of us remember how~we came, or why, or when to leave.~The fog is thick. We do not grieve."}
+  },
+  "morkul_stronghold_high_rock": {
+   "name": "Morkul Stronghold",
+   "g": "A small Orc palisade in the Wrothgarian foothills with forges roaring and a hide-covered stone at its gate.",
+   "m": "A name is carved at the gate each dusk by no hand, with a date nine days ahead. The smith covers it with a hide so the stronghold will not see.",
+   "c": ["a hide over a stone with a fresh name", "a smith's tally of who is carved this season", "a palisade post with one more notch every night"],
+   "x": ["paragons_remembrance"],
+   "p": "A dusk-carved name that the smith dare not read aloud.",
+   "r": "At Morkul they carve no name on the stone, and yet one appears each dusk. The smith won't speak of it.",
+   "lead": "Take the dusk-carved name from Morkul to the memorial column.",
+   "n": {"k": "warning", "t": "Smith's Warning", "a": "Gro-Bramma", "x": "Do not read the stone. If you read a name you know, say nothing. The date is nine days. If a name is yours, go to the Paragon's column before the date and ask who carved it. Do not tell your clan. They will try to stop it with spears."}
+  },
+  "paragons_remembrance": {
+   "name": "Paragon's Remembrance",
+   "g": "A tall memorial column of names, with a flat processional ground before it and a bowl for offerings.",
+   "m": "The column's lowest names are new and the stonemason denies cutting them. Several have already come true.",
+   "c": ["new names on the lowest tier, still pale", "a bowl of offerings left to the nameless", "chisel marks that do not match any tool"],
+   "x": ["wrothgarian_mountains"],
+   "p": "A rubbing of the newest names, a list of who is next.",
+   "r": "The Paragon's column shows names of Orcs who are still alive, and they have started to die in that order.",
+   "lead": "Take the rubbing of the newest names to the broken ridge of the Wrothgarian peaks.",
+   "n": {"k": "list", "t": "The Newest Names", "a": "the mason", "x": "Cut this season by no hand I know: Dura gro-Mazog, Grat Quick-Eye, Ushnar. Dura died on the date. Grat has seven days. Ushnar I do not know. I have tried covering the lower tier; the names grow up through the cloth. Someone is writing on the stone from the inside."}
+  },
+  "wrothgarian_mountains": {
+   "name": "Wrothgarian Mountains",
+   "g": "A broken ridge where the sky is a permanent dusk and sharp peaks throw shadows that never change.",
+   "m": "A shadow on the ridge falls toward the old city at a time when the sun is on the other side. The shadow's edge is a name.",
+   "c": ["a shadow pointing the wrong direction", "a cairn of broken hammers", "dusk that holds on the ridge at noon"],
+   "x": ["orsinium"],
+   "p": "The shadow's bearing: a straight line down to the old forge.",
+   "lead": "Follow the wrong-way shadow down to the rebuilt city."
+  },
+  "orsinium": {
+   "name": "Orsinium",
+   "g": "A stepped fortress-city on a mountain flank where each ring is a separate bastion of black stone and forge pits roar.",
+   "m": "The city's founders dug the new foundations into the old, and the old forge answers at night: hammer-blows heard from under the Chief's hall.",
+   "c": ["hammer-blows from under the foundation at night", "a forge-pit with an unlit coal that is warm", "stone steps leading down behind a sealed door"],
+   "x": ["old_orsinium"],
+   "p": "The sealed door's hammer-key.",
+   "lead": "Find the sealed door below Orsinium's forge-pits and descend."
+  },
+  "old_orsinium": {
+   "name": "Old Orsinium",
+   "g": "The first Orc city, buried, with huge sloping halls in blackened stone, tilted streets, a trophy-ringed throne and a collapsed forge.",
+   "m": "A smith-spirit hammers names onto the anvil and cannot stop. Each hammer-blow is a name for the column above. It needs someone to take the hammer from its hand.",
+   "c": ["an anvil covered in freshly cut names", "a spectral hammer rising and falling", "a throne ringed by trophies of nobody known"],
+   "x": ["paragons_remembrance", "morkul_stronghold_high_rock"],
+   "p": "The unwritten hammer: a unique relic that unwrites a carved name.",
+   "r": "In Old Orsinium a hammer rings against an anvil with no smith, and it is carving something.",
+   "lead": "Stand at the anvil in Old Orsinium and take the hammer from the smith-spirit.",
+   "n": {"k": "inscription", "t": "The Anvil's Edge", "a": "", "x": "HE WHO HOLDS THE HAMMER KEEPS THE ACCOUNT. I do not choose, I only cut. If you would stop me, take the hammer, and be the one who cuts. Or break it, and let the names be what they are: unwritten, free."}
+  },
+  "koeglin_village": {
+   "name": "Koeglin Village",
+   "g": "A cliff-side village under a lighthouse on the Stormhaven coast, with steep stairs and nets hung from the cliff edge.",
+   "m": "Nets draw up salt water from a stretch of bay where there is no sea beneath the nets. The village measures the water with a brass drip-cup.",
+   "c": ["a brass drip-cup wired to the totem", "nets that come up wet but empty", "a lighthouse lamp trimmed to a slow pulse"],
+   "x": ["weeping_giant"],
+   "p": "A brass drip-cup, an instrument to measure the giant's tears.",
+   "r": "The Koeglin nets are hauling up salt water from where there's no water to haul.",
+   "lead": "Carry the brass drip-cup from Koeglin to the inn under the toppled giant.",
+   "n": {"k": "notes", "t": "Net-Mender's Notes", "a": "Brenna of Koeglin", "x": "Drip count, cup one: forty to the hour. Cup two, from the inn: sixty. The giant's cheek is wet at noon. I asked the old men. They said his tears are the sea and he has never stopped. I asked who is making him cry. Nobody knew. The water tastes of iron and hot copper."}
+  },
+  "weeping_giant": {
+   "name": "Weeping Giant",
+   "g": "An inn built under a toppled stone giant, whose cheek is wet at every hour and whose tears fall into a basin by the door.",
+   "m": "The giant is a Direnni construct that drinks from a pump. Its tears are not tears but the overflow. The innkeeper has collected a brimming cup of it.",
+   "c": ["a basin that never empties", "a cheek-stone stained with salt", "a hand-cranked drain-wheel in the cellar"],
+   "x": ["evermor"],
+   "p": "A cup of the giant's tears, which shows the pump's location.",
+   "r": "The giant over the Weeping Giant inn weeps salt. Folk say it is the sea trying to get out.",
+   "lead": "Taste the giant's tears and follow the water toward the lake city.",
+   "n": {"k": "diary", "t": "The Innkeeper's Cup", "a": "Maddoc Fell", "x": "Day 112 of pouring. The tears do not stop. I collect them in a cup and pour the cup into the sea, and in the morning the cup is full again. The water tastes of rust and something sweeter. I asked a Direnni scholar. He did not laugh. He asked where the cellar drain leads."}
+  },
+  "evermor": {
+   "name": "Evermor",
+   "g": "A city on lake islands linked by long stone causeways, with a central cathedral and boat-lanes that seem to float at dawn.",
+   "m": "The lake level is rising. The causeways, built to a mark, have begun to flood; the city's engineers have traced the source to a drain beneath the water.",
+   "c": ["a water-gauge with an old mark sunk below the surface", "causeway stones waterlogged and cracked", "a boat-lane that now has a current"],
+   "x": ["isle_of_balfiera"],
+   "p": "The engineer's survey: a drain-line to Balfiera.",
+   "lead": "Take the engineer's flooding survey from Evermor to the ring of towers on Balfiera."
+  },
+  "isle_of_balfiera": {
+   "name": "Isle of Balfiera",
+   "g": "A hill-island with a ring of ruined towers in the bay, half-sunk at high tide.",
+   "m": "The towers are a lock on the drain, and the island is sinking by a hand per year. It would rise if the pump stopped.",
+   "c": ["a ring of towers with water-marks at four heights", "a stone tide-gauge cut into the island's side", "a causeway that appears at low tide only"],
+   "x": ["mthartzel"],
+   "p": "A key-bar from the lock tower that fits the pump's mechanism.",
+   "r": "The Isle of Balfiera is a few inches lower each year, though the tides are the same.",
+   "lead": "Take the key-bar from the lock tower on Balfiera to the Dwemer bastion at Mthartzel.",
+   "n": {"k": "report", "t": "Lock-Tower Survey", "a": "Magistrate Anwen", "x": "The ring of towers is a lock, not a fortification. Each tower guards a drain-sluice to the isle's underside. The island is sinking because the pump drinks from beneath it. If the pump is closed at the cliff-bastion, the isle will rise. I will submit this to the court. They will not read it."}
+  },
+  "mthartzel": {
+   "name": "Mthartzel",
+   "g": "A Dwemer cliff-bastion with a bridge-and-gear gate and high steam halls above a drained cavern.",
+   "m": "The pump sits in the lowest hall, still drinking from the drowned cavern. Its keeper is a brass attendant who no longer remembers what it is pumping.",
+   "c": ["a pump-arm rising and falling with no operator", "a gauge needle pointing to 'tide'", "a brass attendant polishing a valve"],
+   "x": ["direnni_tower"],
+   "p": "The pump's brake-lever, a unique tool that closes the drain.",
+   "r": "Mthartzel's steam rises on the hour, and every hour a little more water vanishes from the bay.",
+   "lead": "Reach the pump hall at Mthartzel and silence the Keeper.",
+   "n": {"k": "notes", "t": "Overseer's Pump Notes", "a": "a Dwemer hand", "x": "Pump One draws from the Lower Cavern at forty gallons a bell. The Direnni asked for a thing that could weep; we built it, and ran it dry. It must be fed. It must be fed. Do not close the valve while the giant still thirsts."}
+  },
+  "direnni_tower": {
+   "name": "Direnni Tower",
+   "g": "A tall white elven tower on an island, the old Direnni seat, with a spiral stair and a crystal lens at the summit.",
+   "m": "The Direnni built the giant out of grief for a fallen queen. The tower's lens still points at the toppled statue. The last Direnni heir has never left.",
+   "c": ["a lens aimed at the giant across the bay", "a queen's portrait with the face worn smooth", "stairs polished by a single occupant"],
+   "x": ["weeping_giant", "evermor"],
+   "p": "The lens-focus, a unique crystal that heals the land the giant drained.",
+   "lead": "Climb to the lens room and meet the last Direnni heir.",
+   "n": {"k": "letter", "t": "A Letter Unsent", "a": "Aralorne Direnni", "x": "I made the giant to weep for her because I could not. She would have laughed. Now the sea comes through the giant's eyes and the isle sinks by an inch. I cannot stop it; I cannot bear the silence of a still cheek. Forgive an old man. Let the pump close when I am gone."}
+  }
+ }
+}

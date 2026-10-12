@@ -1,0 +1,272 @@
+{
+ "province": "cyrodiil",
+ "arcs": [
+  {
+   "id": "cyr_1", "title": "The Debt of Names", "tier": "A",
+   "secret": "Ayleid captives' names were never freed; a Colovian winemaking family has kept a name-vault alive under their vines for generations, and someone in Skingrad is quietly buying the vintages.",
+   "order": ["shardiuss_excavation", "gate_of_alma_ruma", "thalaras_winery", "mist_mirror_refuge", "skingrad", "miscarcand"],
+   "entry": {"clue": "stone", "offset": [18, 12], "text": "A scaffold post has been chalked with a tally of a thousand strokes, and beneath it, scratched deep: 'Do not say them aloud. Take the rubbing to the Alessian gate.' A grape leaf is pinned through the tally."},
+   "quest": {"title": "The Debt of Names", "desc": "A tally of a thousand names at an abandoned Ayleid dig led me toward an Alessian gate and a family of winemakers.", "desc2": "The wine, the pool and the Count's silent castle all point at the vault of names under Miscarcand.", "pitch": "Diggers at the cut-away stopped work when someone read a name aloud. They were paid in wine, not coin.", "outro": "The last warden fell silent and the plate of names lay in my hands. I could carry it to a priest, a vintner or a flame. What is owed to the dead is a hard thing to settle.", "boss": {"name": "The Warden of Names", "type": "skycraft:necromancer", "hp": 3.0, "dmg": 1.4, "level": 20}, "reward": {"gold": 420, "loot": "major", "unique": "welkynd_sliver"}}
+  },
+  {
+   "id": "cyr_2", "title": "The Gate That Was Opened", "tier": "S",
+   "secret": "The Oblivion gate at Kvatch was not opened by a stranger: the Ashen Candle, a lay brotherhood of Gold Coast fishermen who prayed for the drowned, was tricked into leaving a door unlatched. The survivors still hide among the rebuilders.",
+   "order": ["lunar_fang_docks", "dark_brotherhood_sanctuary_cyrodiil", "anvil", "deepscorn_hollow", "kvatch", "kvatch_gate"],
+   "entry": {"clue": "lectern", "offset": [10, -6], "text": "A dock lectern holds a salt-stained prayer-sheet to 'the ones the water kept', every line struck through but the last: 'Light the Candle when the tide is out. The door is only latched, not locked.'"},
+   "quest": {"title": "The Gate That Was Opened", "desc": "A drowned-men's prayer at the Lunar Fang Docks speaks of a door that was only latched. It led me to a hidden sanctuary and a ruined city.", "desc2": "The trail of the Ashen Candle ends at the crater edge where the Gate first opened.", "pitch": "Fishermen at the Lunar Fang Docks light a single candle each low tide and will not say for whom.", "outro": "At the crater lip I found the last candle still burning in a ring of lava glass. Whoever latched the door is long dead, but the debt they left is the city's to settle, not theirs.", "boss": {"name": "Maelis the Candle-Bearer", "type": "skycraft:dremora", "hp": 3.2, "dmg": 1.5, "level": 22}, "reward": {"gold": 520, "loot": "major", "unique": "umbra"}}
+  },
+  {
+   "id": "cyr_3", "title": "The Dragon-Hunters' Vigil", "tier": "A",
+   "secret": "The Akaviri who built Sancre Tor did not come to conquer; they came to bury something. A Blades archivist has been quietly relocating the vigil-bells of the Jerall passes to keep a seal from being rung open.",
+   "order": ["weynon_priory", "the_sentinel", "bruma", "cloud_ruler_temple", "frostcrag_spire", "sancre_tor"],
+   "entry": {"clue": "stone", "offset": [-14, 20], "text": "A bell without a clapper hangs from the priory orchard wall. Scratched on its rim: 'Seven bells keep the door shut. Four are missing. Ask the statue what it watches.'"},
+   "quest": {"title": "The Dragon-Hunters' Vigil", "desc": "A clapperless bell in a priory orchard says seven bells keep a door shut and four are gone. It points to a statue on the Valus road.", "desc2": "The missing bells led from Bruma to a cliff-top keep and a wizard's rock, and on to the old Akaviri fortress.", "pitch": "A priory brother says the bell in the orchard rings once a night with no hand on it.", "outro": "I set the last bell in its cradle at Sancre Tor and the air, which had been humming for days, went still. Whatever sleeps beneath the barrow, it sleeps for now.", "boss": {"name": "Hatsu the Unrung", "type": "skycraft:draugr_deathlord", "hp": 3.4, "dmg": 1.5, "level": 24}, "reward": {"gold": 560, "loot": "major", "unique": "dragonguard_katana"}}
+  },
+  {
+   "id": "cyr_4", "title": "The Ring Beneath the Rings", "tier": "A",
+   "secret": "A pre-Alessian reservoir runs under every great Cyrodiil city. The Imperial Treasury has been quietly draining it into private vaults, and the drowned Ayleid water-magic is going sour.",
+   "order": ["imperial_bridge_inn", "chorrol", "cheydinhal", "bravil", "imperial_city"],
+   "entry": {"clue": "lectern", "offset": [4, 9], "text": "The innkeeper's accounts hang on a hook: a column headed 'water' where the bridge-inn pays more every season, in a hand that signs only 'by order of the Ring'."},
+   "quest": {"title": "The Ring Beneath the Rings", "desc": "An inn on a bridge pays a water-tax to something called the Ring. The same signature shows up in three cities.", "desc2": "The Ring's water runs under every great city and ends beneath the Imperial City itself.", "pitch": "The innkeeper at the Imperial Bridge Inn says the river is falling, though it rained all week.", "outro": "Below the Waterfront the old reservoir lay black and still, ringed by sluice-gates stamped with a clerk's seal. I closed one. It was a start, and I left proof for the Palace.", "boss": {"name": "Auditor Vell Corvus", "type": "skycraft:vampire", "hp": 2.8, "dmg": 1.3, "level": 22}, "reward": {"gold": 480, "loot": "major"}}
+  }
+ ],
+ "sit": {
+  "shardiuss_excavation": {
+   "name": "Shardiuss Excavation",
+   "g": "A cut-away of a Blackwood hillside held in scaffolds above a stepped Ayleid terrace, with ladders going down into pale-white stone.",
+   "m": "The diggers were paid in wine and stopped the day someone read a carved name aloud. No one will say what the pit answered.",
+   "c": ["scaffold posts tallied with a thousand chalk strokes", "crates stamped with a grape-leaf seal", "a wall where 'DO NOT SPEAK' is written in four hands"],
+   "x": [],
+   "p": "A rubbing of the first name-glyph set and a hidden dig-chamber holding an Ayleid lamp.",
+   "r": "They say the diggers at Shardiuss all quit on one day, paid in barrels instead of coin, and none will go near the pit.",
+   "lead": "Take the rubbing from the Shardiuss dig to the Alessian gate of Alma Ruma.",
+   "n": {"k": "report", "t": "Foreman's Tally, Shardiuss", "a": "Dorrel Ansgate", "x": "Day 31. Sixty names read off the lintel, as the contract asks. At the sixtieth the lamps came on without oil and a voice answered from the cut. I have paid the men in wine as I was told and sent the rubbing to the gate at Alma Ruma. Do not read aloud. Do not say them."}
+  },
+  "gate_of_alma_ruma": {
+   "name": "Gate of Alma Ruma",
+   "g": "A worn Alessian gate of white stone with a scroll-temple annex leaning against its flank, still ringed by a dry processional road.",
+   "m": "The annex keeps a register of Ayleid names taken in the wars, each to be struck through when freed. Almost none are struck.",
+   "c": ["rows of name-plates pinned to the annex walls", "a brazier of ash where unburnt scrolls are stacked", "an arch whose last inscription line was chiselled away"],
+   "x": ["skingrad"],
+   "p": "A chiselled-away line that, read with the rubbing, names a vineyard.",
+   "r": "The Alma Ruma annex has a ledger of names and the old priest there weeps when anyone asks to see the page that was cut out.",
+   "lead": "At the Gate of Alma Ruma, match the rubbing to the cut-out page and follow it to a winery.",
+   "n": {"k": "ledger", "t": "Register of Unfreed Names", "a": "Brother Hesperin", "x": "Struck through: 11. Unstruck: 4,208. The page that held the Nibenay vintners was cut out in the year of my predecessor's death and the wine-house of Thalaras never answered my letters. I have kept the register open. The dead are not finished."}
+  },
+  "thalaras_winery": {
+   "name": "Thalaras Winery",
+   "g": "A single-family cellar estate with a stone press, where the vines have grown over a flagstone floor that is, in fact, a lamp-hall roof.",
+   "m": "Every barrel is labelled with a dead person's name, and the 'Remembrance' vintage lets a drinker recall the one it is named for. The family keeps a name unsaid.",
+   "c": ["cellar barrels tagged with names not dates", "grapes with crystalline skins on the oldest vines", "a cellar lintel carved in Ayleid script, half-hidden by ivy"],
+   "x": ["miscarcand"],
+   "p": "The 'Remembrance' bottle, a one-use item that shows a stranger's last day.",
+   "r": "The Thalaras cellar sells a wine that tastes like a memory. No one who drinks it will say whose.",
+   "lead": "Drink the Remembrance vintage at Thalaras Winery and follow what it shows.",
+   "n": {"k": "letter", "t": "A Vintner's Last Letter", "a": "Orsolya Thalaras", "x": "To whoever holds the estate after me. Do not sell the oldest rows to the Count's steward. The vines drink from the vault, and the vault is full of names that the Warden keeps. Press them, bottle them, give each its day, but never let one be spoken whole at once. Miscarcand is only a door. We are the lock."}
+  },
+  "mist_mirror_refuge": {
+   "name": "Mist Mirror Refuge",
+   "g": "A hidden waterfall pool in the Nibenay valley that mirrors a different night sky from the one overhead, ringed in cut stones under the water.",
+   "m": "In the reflection, certain stars carry names that burn briefly and go out. Pilgrims believe each is an Ayleid soul passing on.",
+   "c": ["pilgrims' ribbons tied to a ring of sunken stones", "a rowing-boat whose oars are carved in glyphs", "a wading-line of footprints that goes into the pool and does not come out"],
+   "x": ["thalaras_winery"],
+   "p": "A ring of 'star-names' to read at night, enough to open a cellar door.",
+   "r": "The pool at Mist Mirror shows the wrong stars. I do not go at night, and I do not go alone.",
+   "lead": "Read the names in the mirror pool at night, then carry them to Skingrad.",
+   "n": {"k": "poem", "t": "The Pool Remembers", "a": "unknown pilgrim", "x": "~Water lies still and the stars come down,~not ours, not ours, but some old town.~Each star a name, each name a flame,~each flame put out by a man who came.~Say it not aloud, say it not twice,~the pool will give you your price."}
+  },
+  "skingrad": {
+   "name": "Skingrad",
+   "g": "A vineyard-ringed hill town whose castle crowns a rock, with long vine rows from the air that form one repeating glyph.",
+   "m": "The Count has never been seen. The castle's steward buys the entire Thalaras vintage and burns the empty bottles.",
+   "c": ["vineyard rows planted in a glyph visible from the castle rock", "wax seals smelling of wine rather than tallow", "a bell in the keep that rings nightly with no ringer"],
+   "x": ["miscarcand"],
+   "p": "The steward's sealed key, opening the Count's wine vault.",
+   "lead": "Slip into the Count's cellar at Skingrad and take the steward's key."
+  },
+  "miscarcand": {
+   "name": "Miscarcand",
+   "g": "A buried Ayleid city-vault of lit welkynd stone, tiered cisterns and bridges over drowned galleries.",
+   "m": "The Last Warden counts every name it holds and wants one to be restored: its own. Whoever frees or binds it decides what the dead are owed.",
+   "c": ["lamp-gates that open only to a spoken syllable", "plates of names stacked in the cold vault", "a cistern whose water rises when a name is read"],
+   "x": ["kvatch_gate", "sancre_tor"],
+   "p": "The sealed name-plate, a unique welkynd-lit relic that can free or bind shades.",
+   "r": "Miscarcand's gate lamps burn blue when a name is read, and some say the dead there are waiting to be asked.",
+   "lead": "Reach the vault under Miscarcand and settle the Warden's debt.",
+   "n": {"k": "inscription", "t": "The Cold Vault Lintel", "a": "", "x": "HERE LIES THE ACCOUNT OF THE UNNUMBERED. Whoever takes a plate takes a person. Whoever restores a plate restores a debt. The Warden counts, and the count will not be closed by force, only by name."}
+  },
+  "lunar_fang_docks": {
+   "name": "Lunar Fang Docks",
+   "g": "Rickety lake docks lit by a string of pale moonlamps, with a dozen boats that never leave and a single candle on the harbour-master's step.",
+   "m": "Each low tide the fishermen light one candle for someone they will not name. They flinch at any talk of Kvatch.",
+   "c": ["a single candle on the harbour step, lit at low tide only", "boats named for the drowned, never launched", "moonlamps painted over with soot on the Kvatch side"],
+   "x": ["anvil"],
+   "p": "The Ashen Candle's token, a salt-crusted wick, which opens a hidden sanctuary door.",
+   "r": "The Lunar Fang boats don't fish the south reach any more. They light a candle and sit in the dark instead.",
+   "lead": "Take the salt-crusted wick from the Lunar Fang Docks and find who lit the candle first.",
+   "n": {"k": "warning", "t": "Pinned to the Harbour Post", "a": "", "x": "To the brothers of the Candle. The man from Kvatch asked us to leave the sea-door unbarred for one night so the dead might walk home. We did. Do not light the candle again until we know what came through. If anyone asks, the docks were never ours."}
+  },
+  "dark_brotherhood_sanctuary_cyrodiil": {
+   "name": "Cyrodiil Sanctuary",
+   "g": "A hidden cellar sanctuary under a nondescript house on the Gold Coast, with a small crypt-warren, a communal hall and a locked inner coffin-room.",
+   "m": "The Family here took a contract on a man who was already dead: a Kvatch priest who said the gate would be latched, not locked. They kept his last letter.",
+   "c": ["a locked coffin-room with a candle burning inside", "contract slips filed under a Kvatch lintel-stone", "a shrine whose offerings are all salted fish"],
+   "x": ["kvatch"],
+   "p": "The Kvatch priest's letter, naming the Ashen Candle's surviving members.",
+   "r": "A house on the Gold Coast road has no windows and a smoke-hole that smells of fish. People cross the street.",
+   "lead": "Break the inner coffin-room at the Cyrodiil Sanctuary and read the dead priest's letter.",
+   "n": {"k": "orders", "t": "Contract: The Priest", "a": "the Listener's scribe", "x": "Target: Father Aldric Merenth of Kvatch. Fee: unpaid, client cannot be found. Note: the priest asked us to hold his last letter until the Candle came for it. No one has. File under unfinished. Do not open the coffin."}
+  },
+  "anvil": {
+   "name": "Anvil",
+   "g": "A crescent harbour town with a white mole curling out to a lighthouse, blue-roofed houses on two terraces and a castle at the seaward point.",
+   "m": "Anvil's lighthouse is lit every night by a keeper nobody has hired. It was first lit the night Kvatch burned.",
+   "c": ["a lighthouse lamp trimmed by no visible hand", "children's chalk candles on the quays", "a ship's figurehead pulled from the water that bears a burning wick"],
+   "x": ["deepscorn_hollow"],
+   "p": "A lighthouse key that opens the lamp-room hatch.",
+   "lead": "Climb the Anvil lighthouse and ask who has been lighting it."
+  },
+  "deepscorn_hollow": {
+   "name": "Deepscorn Hollow",
+   "g": "A coastal cave with a drowned lower level, a moon-lit sink-hole and a bone-white hall that shows different rooms at different tides.",
+   "m": "A vampire court hid here from the Crisis and took in the survivors of the Candle. Their price: a steady supply of bells.",
+   "c": ["tide-marks scored on the cave wall with names beneath", "candle stubs in the sink-hole's mud", "a hall where the table is laid for twelve and only ten have settings"],
+   "x": ["kvatch"],
+   "p": "A bone candle that stays lit under water and burns only for the Candle's survivors.",
+   "r": "The Hollow's caves flood and empty twice a day. Folk say a candle burns down there that never goes out.",
+   "lead": "Wade the Hollow at low tide and carry its bone candle to Kvatch.",
+   "n": {"k": "diary", "t": "A Survivor's Diary", "a": "Wren of Kvatch", "x": "They took us in because we could say where the Candle's keepers lived. We said. Now they ask for the one name I will not give: my brother's. He kept the book of the night the Gate opened. I tell them nothing. The tide is out. I light the candle."}
+  },
+  "kvatch": {
+   "name": "Kvatch",
+   "g": "A slope city half-rebuilt in pale new timber against black scorched stone, with a crater at its heart and a castle clinging to its upper wall.",
+   "m": "A hidden register of the night the Gate opened lies under the new masonry. The town will not rebuild the north ward; the masons say the foundations hum.",
+   "c": ["new timber scaffolds against scorched basalt", "a ward where no mason will lay a stone", "a chapel bell cast from the Gate's melted slag"],
+   "x": ["kvatch_gate"],
+   "p": "The register itself, a book that names who latched the door.",
+   "lead": "Dig through the north ward of Kvatch for the register of the night the Gate opened."
+  },
+  "kvatch_gate": {
+   "name": "Kvatch Gate",
+   "g": "The burning crater edge where the Gate first opened, with a wrecked siege-tower, a plume of ash and a ring of lava glass.",
+   "m": "A ring of lava glass at the crater edge holds a last candle that never gutters. It marks the door that was only latched.",
+   "c": ["lava glass fused into a ring of candle-stubs", "a siege-tower leaning toward the crater with a latch carved on its spar", "a plume of ash that falls upward at dusk"],
+   "x": ["miscarcand", "deepscorn_hollow"],
+   "p": "A shard of Gate-glass that, held up, shows the door as it was before the night.",
+   "r": "At dusk the ash at the crater rises instead of falling. The masons say it is looking for someone.",
+   "lead": "At the crater lip of Kvatch Gate, face the last keeper of the door.",
+   "n": {"k": "prayer", "t": "Prayer for a Latched Door", "a": "the Ashen Candle", "x": "Light the wick, close the door, and leave the latch alone. Let the drowned go home and let the burning stay out. We did not know the door had two sides. Forgive us the one we left on the latch."}
+  },
+  "weynon_priory": {
+   "name": "Weynon Priory",
+   "g": "A grey-stone cloister with a bell tower and an orchard on the Colovian slopes, where a single clapperless bell hangs from the orchard wall.",
+   "m": "Seven bells hold a seal shut in the Jerall passes. The priory's clapper was taken by an archivist of the Blades, who is quietly relocating all seven.",
+   "c": ["a clapperless bell hanging in the orchard", "monks' soles worn from walking a path to the high pass", "a bell tower where a rope has been replaced by a chain"],
+   "x": ["bruma"],
+   "p": "The clapper, which rings only for the other six bells.",
+   "r": "The priory's bell rings once at night with no hand on it. The brothers say to leave it be.",
+   "lead": "Take the clapper's inscription from Weynon Priory to the statue on the Valus road.",
+   "n": {"k": "notes", "t": "Brother Jaren's Notes", "a": "Brother Jaren", "x": "Seven bells: Weynon, Sentinel's ridge, Bruma chapel, the Cloud Ruler cloister, Frostcrag, a small bell at the barrow, and Sancre Tor. A woman in grey took the Weynon clapper and left a donation. She says she keeps a vigil older than the Empire. I did not like her smile."}
+  },
+  "the_sentinel": {
+   "name": "The Sentinel",
+   "g": "A lone statue guardian on a ridge above the Valus road, hand raised against something no traveller can see.",
+   "m": "The Sentinel's raised hand points to a notch in the far ridge where a bell once hung. Ravens avoid it, and wind drops around its feet.",
+   "c": ["a raised hand aimed at a notch in the far ridge", "ring-bolts in the plinth where a rope once ran", "a ridge where ravens never settle"],
+   "x": ["bruma"],
+   "p": "A bell-pull bolt that fits the Bruma chapel's rope.",
+   "r": "Wind drops dead at the foot of the Sentinel, and the ravens won't land on it.",
+   "lead": "Read the line of the Sentinel's hand and follow it to Bruma.",
+   "n": {"k": "inscription", "t": "Plinth Inscription", "a": "", "x": "KEEP THE VIGIL. Whoever raises a bell on this ridge lets something hear. Whoever takes one down keeps the dark in its place. Sentinel, watch the seven. Sentinel, watch the door."}
+  },
+  "bruma": {
+   "name": "Bruma",
+   "g": "A mountain town climbing a switchback valley under the Jerall ridge, with terraces stacked above a fast stream and a tall chapel spire.",
+   "m": "The chapel's bell was recast in secret last winter. The old bell now lies in the foundation of the Talos shrine, and nobody will say who ordered it moved.",
+   "c": ["a chapel bell that rings a slightly wrong note", "fresh mortar in the shrine's foundation stones", "a chain where a bell-rope hung"],
+   "x": ["cloud_ruler_temple"],
+   "p": "The old chapel bell's clapper, wrapped in sackcloth in a crypt.",
+   "lead": "Find the old Bruma chapel bell and carry its clapper up to the Cloud Ruler."
+  },
+  "cloud_ruler_temple": {
+   "name": "Cloud Ruler Temple",
+   "g": "The Blades' cliff keep above the cloud line, with banners, wind and a rope bridge over the whole Jerall range.",
+   "m": "A Blades archivist is hanging the bells in its highest cloister, away from any road. She calls it 'the long watch' and will not say who she keeps it against.",
+   "c": ["a cloister where bells hang silent in a row", "rope-bridge planks recently replaced", "a Blades officer's journal entry crossed out in red"],
+   "x": ["frostcrag_spire"],
+   "p": "A key to the archive's lowest ledger, listing the seven vigils.",
+   "r": "The Cloud Ruler cloister has a row of bells that don't ring, and a woman in grey who polishes them.",
+   "lead": "Ask the Cloud Ruler archivist for the lowest ledger and follow it to the wizard's rock.",
+   "n": {"k": "journal", "t": "The Long Watch", "a": "Archivist Sevrin Dal", "x": "We hold the seven. Four are in the high rooms, three are lost or stolen, the one at Frostcrag was sold to a wizard who wanted it as a curiosity. A wizard! If the seal opens, it will not be a cloud-keep that answers. Fetch the Frostcrag bell and I will trust you with the rest."}
+  },
+  "frostcrag_spire": {
+   "name": "Frostcrag Spire",
+   "g": "A single obsidian spire on a rock in a cold sea, with no stairs: only a levitation or boat to the door and a storm-room at the top.",
+   "m": "The wizard who bought the bell fell in love with its note. The spire hums in it. The bell is bolted to the storm-room floor and the wizard will not let it go.",
+   "c": ["a hum that matches the Weynon clapper's pitch", "a sea-door with a bell-shaped keyhole", "a storm-room whose floor is a bell's inverted mouth"],
+   "x": ["sancre_tor"],
+   "p": "The Frostcrag bell itself, a staff-length of Akaviri bronze.",
+   "r": "The Spire sings in storm weather. Fishermen say it hums the same note as the old priory bell.",
+   "lead": "Take the Frostcrag bell from the storm-room, or persuade its keeper to part with it.",
+   "n": {"k": "letter", "t": "A Wizard's Refusal", "a": "Aldaril Fenmoore", "x": "You ask me to give up the best bell I have ever heard, to men in grey who say a door will open. Doors have been opening in my head for forty years and I rather like the draught. Bring me a better note and we will talk."}
+  },
+  "sancre_tor": {
+   "name": "Sancre Tor",
+   "g": "A mountaintop Akaviri fortress above a barrow of dragon-hunters, with pagoda-curved halls over long tomb galleries.",
+   "m": "The Akaviri came to bury a thing, not to rule. The seventh bell hangs in the barrow's deepest nave, tied to a seal no one remembers.",
+   "c": ["pagoda eaves with bell-shaped hooks and no bells", "tomb galleries whose lamp-niches face one direction", "a rope worn through at the same height on every beam"],
+   "x": ["the_sentinel", "weynon_priory"],
+   "p": "A dragonguard sabre in the deepest nave and the vigil's closing words.",
+   "r": "Sancre Tor's walls once rang. The hunters swore the barrow's gate rings three notes on the night before a storm.",
+   "lead": "Hang the seven bells in the deepest nave of Sancre Tor and face what answers.",
+   "n": {"k": "book", "t": "On the Vigils of Sancre Tor", "a": "Hatsu the Archivist", "x": "We came in boats from the east with orders to guard a door. The door was already guarded by the ones who built it. We stayed. We hung our bells to keep our dead company. When the empire forgot us, the bells became a lock. If you ring all seven, you will know what we are guarding. Do not."}
+  },
+  "imperial_bridge_inn": {
+   "name": "Imperial Bridge Inn",
+   "g": "An inn half on a stone bridge and half on the bank, with lanterns strung along the span and the river passing beneath its floorboards.",
+   "m": "The river under the inn has fallen a hand's breadth every season. The innkeeper pays a 'water-tax' to a body named only 'the Ring'.",
+   "c": ["a water-line scored on the pier with a hand's-width gap each year", "tax receipts stamped by a ringed seal", "a cellar sluice with a rusted wheel and fresh oil"],
+   "x": ["chorrol"],
+   "p": "A water-tax seal, usable to pass as a clerk of the Ring.",
+   "r": "The river under the Bridge Inn drops every year though it rains. The keeper pays a tax nobody can name.",
+   "lead": "Take the water-tax receipt from the Imperial Bridge Inn to the Chorrol guildhall clerks.",
+   "n": {"k": "ledger", "t": "Water Tax, Bridge Inn", "a": "Haldis Merrow", "x": "Paid to the Ring: 22 gold, spring. 24, summer. 29, autumn. For the Bridge Inn's water rights, granted in a charter nobody has seen. I asked a clerk in Chorrol. She went white and said 'sluice 14'. I do not know what that means. The cellar wheel turns by itself some nights."}
+  },
+  "chorrol": {
+   "name": "Chorrol",
+   "g": "A town gathered under a great oak whose canopy roofs the central green, with honey-stone houses and a tiled guildhall.",
+   "m": "A clerk's cipher in the oak's roots lists 'sluice 1 to 40'. The Ring's records are kept in a hollow under the tree.",
+   "c": ["a hollow in the oak's root scored with numbers", "guild clerks who lock their drawers when a plumber enters", "a pump-house with a plate stamped with a ring"],
+   "x": ["cheydinhal"],
+   "p": "A sluice-list naming forty reservoir gates under Cyrodiil.",
+   "lead": "Find the clerk's cipher in Chorrol's oak and read the sluice-list."
+  },
+  "cheydinhal": {
+   "name": "Cheydinhal",
+   "g": "A canal-split town where the Corbolo river bisects houses, Nibenese blue tile beside Dunmer ash-grey flat roofs.",
+   "m": "Dunmer refugees say the canals were bone dry in the year they arrived and fill only when an old tax is paid. The ash-houses keep a well that tastes of iron.",
+   "c": ["a canal lock with a ringed plate", "a refugee well whose bucket is always cold", "a canal-bank mural that shows forty gates in a ring"],
+   "x": ["bravil"],
+   "p": "A well-key, showing which of the forty gates is poisoned.",
+   "lead": "Lower a bucket in Cheydinhal's refugee well and read the gate-list on the stone."
+  },
+  "bravil": {
+   "name": "Bravil",
+   "g": "A city piled up a steep river-bay hill of leaning plank houses, stairs and rope bridges below a statue of the Lucky Old Lady.",
+   "m": "The statue's plinth holds a sluice access that the Ring has welded shut. Bravil floods more with each season's tax.",
+   "c": ["a plinth with a welded hatch", "flooded cellars across the lower bay", "a rope bridge hung with a ringed charm"],
+   "x": ["imperial_city"],
+   "p": "A hatch-cutter's tool and the plan of the lowest cistern.",
+   "lead": "Cut the welded hatch under the Lucky Old Lady and follow the water upriver."
+  },
+  "imperial_city": {
+   "name": "Imperial City",
+   "g": "Concentric rings of districts on a lake island under a white tower, with one bridge and separate walled wards.",
+   "m": "The Ring of reservoirs ends beneath the Waterfront, where a private vault of the Treasury sits among Ayleid cisterns and drowned names. A sealed sewer grate opens only to a ringed seal.",
+   "c": ["a sewer grate under the Waterfront stamped with a ring", "a wardrobe in the Palace with a sluice-wheel inside", "a lake whose level is chalked daily by clerks"],
+   "x": ["miscarcand", "chorrol"],
+   "p": "The reservoir ledger: proof of the theft and a way to turn the Ring's water back.",
+   "lead": "Open the sealed grate under the Waterfront and close the Ring."
+  }
+ }
+}
