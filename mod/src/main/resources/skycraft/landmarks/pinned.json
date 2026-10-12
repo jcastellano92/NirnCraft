@@ -1,0 +1,24 @@
+{
+  "_doc": "Pinned XL landmarks: one to two per province, each stood a few hundred blocks from a marquee landmark (an existing place id) so the great shapes of the land answer the named landmarks. 'dist' and 'angle' (degrees, 0 = +x, 90 = +z) place it from the anchor place; the spot is nudged onto dry land inside its cell if needed. A missing anchor skips the entry.",
+  "pinned": [
+    {"id": "skyrim_maras_eye", "kind": "xl_crater_lake", "place": "maras_eye_pond", "dist": 260, "angle": 200, "name": "The Old Eye"},
+    {"id": "skyrim_reachwind", "kind": "xl_spire_stack", "place": "reachwind_eyrie", "dist": 200, "angle": 120, "name": "The Eyrie Stack"},
+    {"id": "skyrim_wayward", "kind": "xl_glacier_tower", "place": "wayward_pass", "dist": 220, "angle": 330, "name": "The Shard of Winterhold"},
+    {"id": "atmora_giants_rest", "kind": "xl_giant_ribcage_giant", "place": "atmoran_giants_cairn", "dist": 180, "angle": 80, "name": "The Giant's Rest"},
+    {"id": "akavir_dragon_ribs", "kind": "xl_giant_ribcage_dragon", "place": "dragon_graveyard_of_akavir", "dist": 220, "angle": 250, "name": "The Ribs of the Elder Wyrm"},
+    {"id": "cyrodiil_cloudstep", "kind": "xl_spire_stack", "place": "cloud_ruler_temple", "dist": 260, "angle": 20, "name": "Cloudstep Needles"},
+    {"id": "cyrodiil_white_fall", "kind": "xl_crater_lake", "place": "white_fall_mountain", "dist": 280, "angle": 160, "name": "The Mirror Basin"},
+    {"id": "morrowind_antlers", "kind": "xl_antler_spires", "place": "vivecs_antlers", "dist": 240, "angle": 200, "name": "The Grey Antlers"},
+    {"id": "morrowind_cinder", "kind": "xl_obsidian_spire", "place": "red_mountain", "dist": 300, "angle": 100, "name": "Cinder Spire"},
+    {"id": "solstheim_shard", "kind": "xl_glacier_tower", "place": "hvitkald_peak", "dist": 230, "angle": 60, "name": "The Hvitkald Shard"},
+    {"id": "high_rock_wrothgar_eye", "kind": "xl_crater_lake", "place": "wrothgarian_mountains", "dist": 240, "angle": 140, "name": "Wrothgar's Eye"},
+    {"id": "hammerfell_wind_sister", "kind": "xl_spire_twist", "place": "skyreach_pinnacle", "dist": 240, "angle": 300, "name": "The Wind-Sister"},
+    {"id": "hammerfell_breath_bridge", "kind": "xl_bridge_arch", "place": "onsis_breath", "dist": 220, "angle": 20, "name": "The Breath Bridge"},
+    {"id": "elsweyr_table", "kind": "xl_mesa_path", "place": "anequina_aqueduct", "dist": 260, "angle": 210, "name": "Anequina Table"},
+    {"id": "valenwood_elder_sapling", "kind": "xl_colossal_tree_jungle", "place": "elden_tree", "dist": 300, "angle": 110, "name": "The Elder Sapling"},
+    {"id": "summerset_glass_needle", "kind": "xl_crystal_spire", "place": "gryphon_aerie", "dist": 240, "angle": 350, "name": "The Glass Needle"},
+    {"id": "black_marsh_wamasu_bones", "kind": "xl_giant_ribcage_leviathan", "place": "weeping_wamasu_falls", "dist": 240, "angle": 70, "name": "The Wamasu Bones"},
+    {"id": "black_marsh_parasol", "kind": "xl_fungal_spire", "place": "hatchlings_crown", "dist": 220, "angle": 190, "name": "Hatchling's Parasol"},
+    {"id": "yokuda_papas_cousin", "kind": "xl_spire_twist", "place": "tall_papas_spire", "dist": 220, "angle": 140, "name": "The Lesser Spire"}
+  ]
+}

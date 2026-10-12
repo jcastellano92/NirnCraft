@@ -1,0 +1,55 @@
+{
+  "_doc": "Material sets of the natural landmarks. Entries are 'block_id:weight' (weight 0 = only used by detail passes). A rock set is picked per site from its family's list, so one formation kind looks different in the tundra, the desert and the ash waste. 'band' (optional) lays horizontal strata by height; 'rubble' is what spills at the foot.",
+  "rocks": {
+    "granite":   {"main": ["minecraft:stone:5", "minecraft:andesite:3", "minecraft:cobblestone:2"], "alt": ["minecraft:tuff:2", "minecraft:diorite:1"], "moss": ["minecraft:mossy_cobblestone:3", "minecraft:moss_block:1"], "rubble": ["minecraft:cobblestone:3", "minecraft:andesite:2", "minecraft:stone:2"], "cap": ["minecraft:stone:1"]},
+    "slate":     {"main": ["minecraft:deepslate:4", "minecraft:cobbled_deepslate:3", "minecraft:tuff:2"], "alt": ["minecraft:polished_deepslate:1", "minecraft:smooth_basalt:1"], "moss": ["minecraft:moss_block:1", "minecraft:mossy_cobblestone:1"], "rubble": ["minecraft:cobbled_deepslate:3", "minecraft:tuff:2"], "cap": ["minecraft:deepslate:1"]},
+    "sandstone": {"main": ["minecraft:sandstone:6", "minecraft:cut_sandstone:2", "minecraft:smooth_sandstone:2"], "alt": ["minecraft:chiseled_sandstone:1"], "moss": ["minecraft:sandstone:1"], "rubble": ["minecraft:sandstone:3", "minecraft:smooth_sandstone:1"], "cap": ["minecraft:cut_sandstone:1"]},
+    "redrock":   {"main": ["minecraft:red_sandstone:6", "minecraft:cut_red_sandstone:2", "minecraft:smooth_red_sandstone:2"], "alt": ["minecraft:terracotta:2", "minecraft:orange_terracotta:2"], "moss": ["minecraft:red_sandstone:1"], "rubble": ["minecraft:red_sandstone:3", "minecraft:terracotta:2"], "cap": ["minecraft:smooth_red_sandstone:1"],
+                  "band": ["minecraft:red_sandstone:3", "minecraft:orange_terracotta:2", "minecraft:terracotta:2", "minecraft:yellow_terracotta:1", "minecraft:red_terracotta:1"]},
+    "badlands":  {"main": ["minecraft:terracotta:4", "minecraft:orange_terracotta:3", "minecraft:brown_terracotta:2"], "alt": ["minecraft:red_terracotta:2", "minecraft:yellow_terracotta:1", "minecraft:white_terracotta:1"], "moss": ["minecraft:terracotta:1"], "rubble": ["minecraft:terracotta:3", "minecraft:brown_terracotta:1"], "cap": ["minecraft:red_sandstone:1"],
+                  "band": ["minecraft:terracotta:3", "minecraft:white_terracotta:1", "minecraft:orange_terracotta:2", "minecraft:yellow_terracotta:1", "minecraft:brown_terracotta:2", "minecraft:red_terracotta:1"]},
+    "basalt":    {"main": ["minecraft:basalt:5", "minecraft:smooth_basalt:3", "minecraft:blackstone:2"], "alt": ["minecraft:polished_basalt:1", "minecraft:tuff:1"], "moss": ["minecraft:blackstone:1"], "rubble": ["minecraft:basalt:3", "minecraft:blackstone:2", "minecraft:cobbled_deepslate:1"], "cap": ["minecraft:smooth_basalt:1"]},
+    "ashrock":   {"main": ["minecraft:blackstone:4", "minecraft:tuff:3", "minecraft:cobbled_deepslate:2"], "alt": ["minecraft:basalt:2", "minecraft:magma_block:0"], "moss": ["minecraft:coarse_dirt:1"], "rubble": ["minecraft:blackstone:2", "minecraft:gravel:2", "minecraft:tuff:2"], "cap": ["minecraft:blackstone:1"]},
+    "ice":       {"main": ["minecraft:packed_ice:4", "minecraft:blue_ice:2", "minecraft:snow_block:3"], "alt": ["minecraft:stone:1"], "moss": ["minecraft:snow_block:1"], "rubble": ["minecraft:snow_block:3", "minecraft:packed_ice:2", "minecraft:stone:1"], "cap": ["minecraft:snow_block:1"]},
+    "calcite":   {"main": ["minecraft:calcite:5", "minecraft:diorite:3", "minecraft:smooth_quartz:1"], "alt": ["minecraft:quartz_block:1", "minecraft:polished_diorite:1"], "moss": ["minecraft:moss_block:1"], "rubble": ["minecraft:calcite:2", "minecraft:diorite:2"], "cap": ["minecraft:quartz_block:1"]},
+    "bone":      {"main": ["minecraft:bone_block:5", "minecraft:calcite:2", "minecraft:diorite:1"], "alt": ["minecraft:quartz_block:1"], "moss": ["minecraft:moss_block:1"], "rubble": ["minecraft:bone_block:2", "minecraft:calcite:2"], "cap": ["minecraft:bone_block:1"]},
+    "mud":       {"main": ["minecraft:packed_mud:4", "minecraft:mud_bricks:3", "minecraft:mud:2"], "alt": ["minecraft:coarse_dirt:2", "minecraft:rooted_dirt:1"], "moss": ["minecraft:moss_block:2", "minecraft:mossy_cobblestone:1"], "rubble": ["minecraft:mud:3", "minecraft:packed_mud:2"], "cap": ["minecraft:mud_bricks:1"]},
+    "crystal":   {"main": ["minecraft:calcite:3", "minecraft:amethyst_block:4", "minecraft:smooth_quartz:2"], "alt": ["minecraft:tinted_glass:1"], "moss": ["minecraft:calcite:1"], "rubble": ["minecraft:calcite:3", "minecraft:amethyst_block:1"], "cap": ["minecraft:amethyst_block:1"]},
+    "dripstone": {"main": ["minecraft:dripstone_block:5", "minecraft:tuff:2", "minecraft:granite:2"], "alt": ["minecraft:terracotta:1", "minecraft:brown_terracotta:1"], "moss": ["minecraft:moss_block:1"], "rubble": ["minecraft:dripstone_block:2", "minecraft:coarse_dirt:2"], "cap": ["minecraft:dripstone_block:1"]},
+    "obsidian":  {"main": ["minecraft:obsidian:5", "minecraft:blackstone:3", "minecraft:polished_blackstone:1"], "alt": ["minecraft:crying_obsidian:1", "minecraft:magma_block:1", "minecraft:gilded_blackstone:1"], "moss": ["minecraft:blackstone:1"], "rubble": ["minecraft:blackstone:3", "minecraft:basalt:2"], "cap": ["minecraft:obsidian:1"]},
+    "mossrock":  {"main": ["minecraft:mossy_cobblestone:4", "minecraft:stone:3", "minecraft:andesite:2", "minecraft:moss_block:2"], "alt": ["minecraft:mossy_stone_bricks:1", "minecraft:tuff:1"], "moss": ["minecraft:moss_block:3", "minecraft:mossy_cobblestone:2"], "rubble": ["minecraft:mossy_cobblestone:3", "minecraft:cobblestone:2"], "cap": ["minecraft:moss_block:1"]}
+  },
+  "family_rocks": {
+    "tundra":   ["granite:4", "slate:3", "ice:2", "mossrock:1"],
+    "forest":   ["granite:4", "mossrock:3", "slate:1"],
+    "plains":   ["granite:4", "calcite:2", "mossrock:1", "dripstone:1"],
+    "marsh":    ["mud:4", "mossrock:3", "slate:2"],
+    "desert":   ["sandstone:5", "redrock:3", "badlands:2"],
+    "savanna":  ["redrock:4", "sandstone:3", "badlands:3", "dripstone:1"],
+    "ash":      ["ashrock:5", "basalt:3", "slate:2", "dripstone:1", "obsidian:1"],
+    "volcanic": ["basalt:5", "ashrock:3", "obsidian:2", "slate:1"],
+    "jungle":   ["mossrock:5", "granite:2", "mud:2"],
+    "crystal":  ["calcite:5", "crystal:3", "bone:1"],
+    "mushroom": ["mud:3", "mossrock:3", "slate:2"],
+    "mountain": ["granite:4", "slate:3", "calcite:2", "dripstone:1"],
+    "coast":    ["granite:3", "sandstone:2", "calcite:2", "dripstone:1"],
+    "shore":    ["granite:3", "mossrock:2", "mud:1"]
+  },
+  "woods": {
+    "oak":      {"log": "minecraft:oak_log", "planks": "minecraft:oak_planks", "leaves": "minecraft:oak_leaves", "fence": "minecraft:oak_fence", "slab": "minecraft:oak_slab", "sign": "minecraft:oak_sign", "wall_sign": "minecraft:oak_wall_sign"},
+    "spruce":   {"log": "minecraft:spruce_log", "planks": "minecraft:spruce_planks", "leaves": "minecraft:spruce_leaves", "fence": "minecraft:spruce_fence", "slab": "minecraft:spruce_slab", "sign": "minecraft:spruce_sign", "wall_sign": "minecraft:spruce_wall_sign"},
+    "birch":    {"log": "minecraft:birch_log", "planks": "minecraft:birch_planks", "leaves": "minecraft:birch_leaves", "fence": "minecraft:birch_fence", "slab": "minecraft:birch_slab", "sign": "minecraft:birch_sign", "wall_sign": "minecraft:birch_wall_sign"},
+    "dark_oak": {"log": "minecraft:dark_oak_log", "planks": "minecraft:dark_oak_planks", "leaves": "minecraft:dark_oak_leaves", "fence": "minecraft:dark_oak_fence", "slab": "minecraft:dark_oak_slab", "sign": "minecraft:dark_oak_sign", "wall_sign": "minecraft:dark_oak_wall_sign"},
+    "jungle":   {"log": "minecraft:jungle_log", "planks": "minecraft:jungle_planks", "leaves": "minecraft:jungle_leaves", "fence": "minecraft:jungle_fence", "slab": "minecraft:jungle_slab", "sign": "minecraft:jungle_sign", "wall_sign": "minecraft:jungle_wall_sign"},
+    "acacia":   {"log": "minecraft:acacia_log", "planks": "minecraft:acacia_planks", "leaves": "minecraft:acacia_leaves", "fence": "minecraft:acacia_fence", "slab": "minecraft:acacia_slab", "sign": "minecraft:acacia_sign", "wall_sign": "minecraft:acacia_wall_sign"},
+    "mangrove": {"log": "minecraft:mangrove_log", "planks": "minecraft:mangrove_planks", "leaves": "minecraft:mangrove_leaves", "fence": "minecraft:mangrove_fence", "slab": "minecraft:mangrove_slab", "sign": "minecraft:mangrove_sign", "wall_sign": "minecraft:mangrove_wall_sign"},
+    "cherry":   {"log": "minecraft:cherry_log", "planks": "minecraft:cherry_planks", "leaves": "minecraft:cherry_leaves", "fence": "minecraft:cherry_fence", "slab": "minecraft:cherry_slab", "sign": "minecraft:cherry_sign", "wall_sign": "minecraft:cherry_wall_sign"}
+  },
+  "family_woods": {
+    "tundra": ["spruce:6", "birch:1"], "forest": ["oak:4", "birch:2", "dark_oak:2", "spruce:1"], "plains": ["oak:4", "birch:3"],
+    "marsh": ["mangrove:4", "dark_oak:3", "oak:1"], "desert": ["acacia:3", "oak:1"], "savanna": ["acacia:5", "birch:1"],
+    "ash": ["dark_oak:4", "acacia:1"], "volcanic": ["dark_oak:3", "spruce:1"], "jungle": ["jungle:6", "mangrove:1"],
+    "crystal": ["birch:3", "cherry:3", "oak:1"], "mushroom": ["dark_oak:3", "oak:2"], "mountain": ["spruce:5", "oak:1"],
+    "coast": ["oak:2", "spruce:2", "dark_oak:1"], "shore": ["oak:2", "birch:2"]
+  }
+}

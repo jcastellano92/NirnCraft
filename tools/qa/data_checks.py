@@ -73,6 +73,18 @@ def main():
             if len(where) > 1 and len(files) > 1:
                 err(f"{kind} id '{i}' registered in {', '.join(files)}")
 
+    # natural landmarks: kinds.json must match the generator's table and builders (tools/landmarks/gen_kinds.py)
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "landmarks"))
+        import gen_kinds
+        for e in gen_kinds.check():
+            err("landmarks: " + e)
+        on_disk = json.load(open(gen_kinds.OUT, encoding="utf-8"))["kinds"]
+        if [k["id"] for k in on_disk] != [k["id"] for k in gen_kinds.KINDS]:
+            err("landmarks: kinds.json is stale, run tools/landmarks/gen_kinds.py")
+    except Exception as ex:  # a broken generator must show up as a check failure, not a crash
+        err(f"landmarks: {ex}")
+
     print(f"{n} json files, {places} places, {sum(len(v) for v in kinds.values())} registry ids checked, {len(errs)} errors")
 
 

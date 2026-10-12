@@ -1,0 +1,117 @@
+{
+  "_doc": "Original text for the natural landmarks and vignettes: who lies where, what they wrote, and what the land is called. Epitaph lines must be 15 characters or fewer (one sign line). Placeholders in notes: {name} {other} {place} {trade} {cause} {weather} {item} {dir} {thing}. Names come from NpcNames by the province's folk (races), so every culture sounds like itself.",
+  "races": {
+    "skyrim": ["NORD:9", "IMPERIAL:1", "BRETON:1", "ORC:1", "REACHMAN:1"],
+    "atmora": ["ATMORAN:6", "NORD:3"],
+    "solstheim": ["NORD:6", "DUNMER:3", "REACHMAN:1"],
+    "cyrodiil": ["IMPERIAL:8", "BRETON:1", "NORD:1", "REDGUARD:1", "ALTMER:1"],
+    "high_rock": ["BRETON:8", "REACHMAN:1", "IMPERIAL:1", "REDGUARD:1"],
+    "hammerfell": ["REDGUARD:8", "IMPERIAL:1", "KHAJIIT:1"],
+    "yokuda": ["REDGUARD:8", "KHAJIIT:1"],
+    "summerset": ["ALTMER:8", "BOSMER:1", "BRETON:1"],
+    "valenwood": ["BOSMER:8", "KHAJIIT:1", "ALTMER:1"],
+    "morrowind": ["DUNMER:8", "ARGONIAN:1", "NORD:1", "IMPERIAL:1"],
+    "black_marsh": ["ARGONIAN:9", "DUNMER:1", "IMPERIAL:1"],
+    "elsweyr": ["KHAJIIT:9", "REDGUARD:1", "IMPERIAL:1"],
+    "akavir": ["TSAESCI:3", "KA_PO_TUN:2", "TANG_MO:2"],
+    "pyandonea": ["MAORMER:6", "BOSMER:1"],
+    "thras": ["IMGA:3", "MAORMER:2", "ARGONIAN:1"],
+    "realm": ["NORD:2", "IMPERIAL:2", "BRETON:1", "DUNMER:1", "KHAJIIT:1", "BOSMER:1", "REDGUARD:1", "ORC:1"]
+  },
+  "group": {
+    "skyrim": "nord", "atmora": "nord", "solstheim": "nord", "cyrodiil": "imperial", "high_rock": "breton",
+    "hammerfell": "redguard", "yokuda": "redguard", "summerset": "altmer", "valenwood": "bosmer", "morrowind": "dunmer",
+    "black_marsh": "argonian", "elsweyr": "khajiit", "akavir": "far", "pyandonea": "far", "thras": "far", "realm": "any"
+  },
+  "epitaph": {
+    "any": ["Rest easy", "Gone, not lost", "Walked far", "Home at last", "Beloved", "Remembered", "Slept at last", "Worn out", "Travel well", "No more roads", "One of many", "Too soon", "Missed", "Peace, at last", "Kept his word", "Kept her word", "Laughed often", "Fed the poor", "Stood firm", "Last watch kept"],
+    "nord": ["Sovngarde-bound", "Shor keeps him", "Died standing", "Hall of Valor", "Fell facing it", "Axe in hand", "Frost took her", "Old as hills", "Wolf-hearted", "Mead and glory", "Skald's friend"],
+    "imperial": ["Served the Nine", "Faithful to all", "For hearth", "Dutiful son", "Good daughter", "Gods keep her", "Gods keep him", "Honest in trade", "Loved her town", "Kept the peace"],
+    "breton": ["Kept the faith", "Old oak, ash", "Candle burns on", "Lady's grace", "Sang at dusk", "Heart of Bay", "Of good blood", "Loved her hills"],
+    "redguard": ["Sword at rest", "Sand takes all", "Fell with honor", "Crossed dunes", "Dust and glory", "Walked at dawn", "Kept the oath", "Heart of desert"],
+    "altmer": ["Light kept him", "Home to Aldmeri", "Long her song", "Ink, starlight", "Fair, then dim", "Learned, kind", "Of the old line", "Her spark rests"],
+    "bosmer": ["Home in boughs", "Wood takes back", "Green Pact kept", "The Hunt ends", "Sleeps in roots", "Leaf, then loam", "Fed the wood", "Arrow to dust"],
+    "dunmer": ["Ancestors keep", "House remembers", "Ash to ash", "Watch over us", "Joined ghosts", "Honored kin", "Blessed in ash", "Walk with them"],
+    "argonian": ["Hist remembers", "Back to root", "Sap and rain", "Swims in memory", "The Hist sings", "Mud, then star", "Tall in reeds", "Her egg hatched"],
+    "khajiit": ["Walk in sand", "Moons guide", "Lorkhaj knows", "Dance is done", "Sweet dreams", "Many moons gone", "Sleep, small", "Warm in sand"],
+    "far": ["Under old sky", "Wave to wave", "Salt remembers", "Return to tide", "Far from home", "Sky took him", "Blown to rest"]
+  },
+  "trades": ["Hunter", "Trapper", "Pilgrim", "Drover", "Woodcutter", "Miner", "Peddler", "Courier", "Fisher", "Shepherd", "Mason", "Scribe", "Herbalist", "Smith", "Soldier", "Singer", "Guide", "Pack-bearer", "Cart-driver", "Surveyor", "Healer", "Priest", "Farmhand", "Wanderer", "Smuggler", "Tinker"],
+  "causes": ["the cold", "a fever", "bandits", "a fall from the crag", "an old wound", "wolves", "bad water", "a rockslide", "thirst", "a wrong turn in the dark", "the long winter", "a bad winter", "a spider's bite", "a drowned ford", "exhaustion", "a hunting accident", "hunger", "a stranger's knife", "the storm", "fever and rain"],
+  "things": ["the Long Watch", "Three Winds", "Quiet Tears", "the Old Road", "Last Light", "the Hollow Moon", "Broken Oaths", "the Lost Pilgrim", "the Patient Dead", "Ash and Ember", "the Grey King", "Low Water", "the Singing Wind", "the Stooped Woman", "Cold Hearth", "the Seventh Brother", "Hidden Water", "the Last Flame"],
+  "weather": ["rain", "snow", "fog", "wind", "ash-fall", "heat", "frost", "mist", "sleet", "a clear night"],
+  "items": ["a wooden spoon", "a bone comb", "a blue ribbon", "a child's wooden horse", "a bent ring", "a twist of dried flowers", "a cracked pipe", "a small bronze bell", "a brass thimble", "a carved bird", "a folded letter", "a lucky coin"],
+  "warnings": ["TURN BACK", "NOT SAFE", "ROAD IS WATCHED", "DEATH AHEAD", "TOLL PAID HERE", "NO WATER", "BAD GROUND", "WOLVES", "THIEVES", "KEEP OUT", "TRAPPED", "STAY ON ROAD"],
+  "notes": {
+    "grave": [
+      "To {name}, {trade}. {other} dug this grave in {weather} and could not find a priest. Whoever you are, leave the stones as they lie. Taken by {cause}.",
+      "Here we put {name}. Not the finest of us, not the worst. {cause} took what it took. {other} will come back in spring with a proper marker, if the road lets her.",
+      "{name} asked to be buried where she could hear the water. It is not far. {other} carried the stones up one at a time and said the words as best he could.",
+      "I never knew your name, traveller, so I gave you {name}. You had {item} in your hand. I left it with you. {other}, passing through.",
+      "{name}, {trade}, died of {cause} three days from the nearest roof. We stayed with the body one night. We did not sleep. Please do not disturb the stones.",
+      "My brother {name} rests here. He was a {trade} and never harmed anyone who did not ask for it. If you are a decent person, say his name once and go on."
+    ],
+    "traveller": [
+      "Day nine, and the pack is lighter every morning. {weather} all night. I keep to the {dir} ridge and talk to myself so I remember what a voice sounds like. If {other} finds this, tell her I tried.",
+      "I lost the road for a day. Found it again by luck near {place}. The water here is fit to drink; the ground to the {dir} is not. I marked it with three stones.",
+      "Slept badly. Something walked around the camp twice in the dark and did not touch a thing. In the morning there were no prints. I am leaving this note, and the fire cold, and going on at first light.",
+      "To whoever finds this: I was a {trade} and I owed {other} a debt. If I do not return, the {item} under the rock is yours. Please do not tell {other} where I went.",
+      "The pass was closed by {weather}, so I waited. Three days is a long time with only my thoughts. I counted every stone in the cairn. There are forty-one. Do not move them.",
+      "The map I bought is wrong. The river is not where it says. I have been walking {dir} since the morning and I have seen nothing but {weather}. If you are reading this you are lost, too."
+    ],
+    "hunter": [
+      "A good stag, four days from the hold. {other} and I took him at dusk and dressed him here. We left the head for whatever the land wants. Do not take the hide from the rack; it is ours.",
+      "Tracks lead {dir} from here, big, deeper than a bear's. {name} would not follow them. I have never seen him afraid. We are leaving the traps and going home.",
+      "Rule of this place: leave dry wood for the next hunter, leave the fire laid, and take only what you eat. {name}, {trade}, first of the camp.",
+      "Season's tally: eleven deer, two boar, one elk the size of a cart. {other} claims it was twelve. Writing it down so we stop arguing. {weather} tomorrow, by the smell of it."
+    ],
+    "smuggler": [
+      "Drop is behind the loose stone. Two barrels, one crate. Do not touch the crate. Leave the coin in the pot and be gone by dawn. - {name}",
+      "The watch came through at {weather} and did not look hard. We moved the stock to the {dir} cave. If you are the buyer, the price is the same as before, and not a copper less.",
+      "To {other}: you were told twice not to carry it past {place}. Whatever happens now is yours. I have a boat and a long way to be. - {name}",
+      "Three signs of safe drop: a stone on the sign, a cloth on the post, a knot in the line. If any is missing, go away and do not return for a month."
+    ],
+    "ghost": [
+      "The house was empty before {name} came to it. People say he bought it cheap because no one else would stay past midnight. He stayed. Now no one says if he left.",
+      "They say {name} still tends the hearth. The ash is always warm, though no one has lit it in years. Do not take anything from the table. Do not answer if it asks your name.",
+      "A traveller slept here in {weather} and woke to find his boots set neatly by the door and a cup of water by his hand. He did not stay for breakfast. He did leave a coin.",
+      "Whatever lives here is not cruel. It only wants the door shut and the light kept low. A lamp left burning will be found out in the morning, and the oil topped up."
+    ],
+    "pilgrim": [
+      "I came this way to give thanks. The shrine is old and small and no one tends it, so I have swept it and set flowers. If you pass, say a word for {name}, who is why I came.",
+      "Four days of walking to kneel for a minute. Worth it. The stone is warm, even in {weather}. I left {item} on the ledge. I think it will be gone by morning. I hope so.",
+      "Every year I come. Every year there is a little more moss and a little less paint on the face of the stone. Next year I will bring a brush. The year after, the family.",
+      "The old priest said it is not the gods who need the shrine, but we, and so we build one wherever we have to stand still. I stand still here. - {name}"
+    ],
+    "scholar": [
+      "Measured the stones today. Eleven stand, four are fallen, one is missing. The missing one is not in the field. Someone took it with care. {other} thinks a mason. I think a person who wanted to be remembered.",
+      "Rubbing taken from the east face. The glyphs are old and not Nordic; not Ayleid; not anything I have in the books. Left a copy under the cairn for the next scholar. - {name}",
+      "The dig has yielded a bone comb, {item}, and a layer of ash older than the road. The ash is from a fire so big that nothing grew after. Add that to the list of things we do not discuss at the college.",
+      "Dated the strata: the grave is older than the stone, the stone is older than the road, and the road is older than whatever the locals say is the oldest thing here. Humility, everyone."
+    ],
+    "hermit": [
+      "I came here to be alone, and I have been. It is quieter than I expected and louder than I deserve. The goat is good company; she judges me only when I deserve it.",
+      "Visitors: one this year. A girl who wanted to know the way. I told her. She did not say thanks. I took it as a compliment; manners are for people with company.",
+      "Rules of the house: knock if you must, leave a coin if you take bread, do not touch the third shelf. The third shelf is where I keep the old letters."
+    ],
+    "ambush": [
+      "The cart was loaded for market: wool, salt, a small cask of something strong. We were three hours from {place} when the arrows came. I write this with the shaft still in my arm. Do not follow the road.",
+      "They took the horses, the coin, and the boots from the dead. Not the cargo. That means they will come back for it with a wagon. Take what you can carry and go.",
+      "{name} put himself between the cart and the road. It did not help, but it was a good thing to do. I am leaving this note on his chest so someone knows."
+    ]
+  },
+  "adj": {
+    "nord": ["Frostbitten", "Hoarfrost", "Raven's", "Wolf's", "Giant's", "Old Man's", "Skald's", "Bleak", "Grey", "Thunder", "Drowned", "Whispering", "Windswept", "Black-Ice", "Shieldbreaker's"],
+    "imperial": ["Old", "Weeping", "Sunken", "Hanging", "Pale", "Ivory", "Gilded", "Silent", "Broken", "Hollow", "Forgotten", "Gentle", "Brass", "Stooped"],
+    "breton": ["Moonlit", "Hollow", "Lady's", "Thorned", "Pale", "Misted", "Candlelit", "Fey", "Standing", "Greywater", "Loom", "Stooped"],
+    "redguard": ["Sun-bitten", "Sworn", "Dune", "Whispering", "Salt", "Old Sword", "Wind-carved", "Burning", "Stooped", "Hammer", "Silent", "Bleached"],
+    "altmer": ["Silvered", "Sunlit", "Glass", "Waking", "Ever-lit", "High", "Singing", "Cloudless", "Starlit", "Pearl", "Mirrored"],
+    "bosmer": ["Whispering", "Green", "Strangler", "Hollow", "Hunter's", "Rotted", "Thousand-Root", "Heartwood", "Moss-draped", "Sleeping", "Humming"],
+    "dunmer": ["Ash-borne", "Ancestor's", "Weeping", "Red", "Smoke", "Sulfur", "Watcher's", "Drowned", "Cinder", "Salt-sworn", "Silent"],
+    "argonian": ["Weeping", "Drowned", "Sleeping", "Sun-warmed", "Reed", "Hist's", "Silt", "Low-tide", "Black-water", "Egg-warm", "Whispering"],
+    "khajiit": ["Moonlit", "Sugar", "Sweet", "Sleeping", "Bright", "Sand-dancer's", "Warm", "Hidden", "Moon-struck", "Quiet", "Watching"],
+    "far": ["Far", "Old", "Tide-worn", "Salt", "Storm", "Pale", "Weathered", "Silent", "Lone", "Windward", "Salt-scoured"],
+    "any": ["Lone", "Forgotten", "Old", "Quiet", "Standing", "Grey", "Hidden", "Last", "First", "Worn", "Broken", "Silent"]
+  },
+  "ofs": ["the Wanderer", "the Lost Pilgrim", "the Long Watch", "Three Winds", "Quiet Tears", "the Old Road", "Last Light", "Broken Oaths", "the Patient Dead", "Ash and Ember", "the Grey King", "Hidden Water", "the Singing Wind", "the Seventh Brother", "the Last Flame"]
+}

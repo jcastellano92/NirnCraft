@@ -61,6 +61,7 @@ public class Skycraft {
         com.skycraft.realms.RealmsModule.init(modBus);
         com.skycraft.explore.ExploreModule.init(modBus);
         com.skycraft.scatter.ScatterModule.init(modBus);
+        com.skycraft.landmarks.LandmarksModule.init(modBus);
 
         modBus.addListener(this::registerCapabilities);
         modBus.addListener(this::commonSetup);
