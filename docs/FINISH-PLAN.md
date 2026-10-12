@@ -210,3 +210,10 @@ and give the agent `isolation: worktree` (or point it at the existing worktree t
 * Haiku visual review of the T4 sheet set returns no blocking issues.
 * One full Prism run: no crash, no Skycraft errors in the log, acceptable FPS with Complementary + DH.
 * Docs reflect the shipped features and counts; `dist/Skycraft-client-instance.zip` built from the final commit.
+
+## Playtest-1 feedback fixes (intro, death, saves, abilities)
+* **Intro**: no cart/teleport. One fixed start (world spawn, SafeSpawn: never a treetop). `main_unbound` is a short road walk to Riverwood; the `intro:` action plays a 3-line scene and ONE distant dragon flyby per player (flag `intro_played`). Config `quest/intro` (default on) skips it; `helgenStart` (legacy teleport) now defaults off. Ralof/Hadvar no longer fight each other; encounter skirmishes break off after 30 s; the dragon wing-beat volume was cut and scenery dragons are capped at 3.
+* **Death**: the death screen no longer offers "Title Screen"; respawn is at the bed, else the nearest settlement THIS player has discovered (market square; inns preferred; config `death/respawnMode`), else world spawn, always on solid ground (`core/SafeSpawn`). Config `death/dropMode` = VALUABLES (default: keep armour, weapons, ammo, tools, food; drop gold share + gems, jewellery, soul gems, costly misc), GEAR, EVERYTHING; `goldDropPercent` (25).
+* **Saves**: the pause menu "Save Game" saves the world (host / single-player only; hidden on remote servers). "Save and Choose Character" saves, leaves the world and opens the character list (local server only). There is no named in-world snapshot (vanilla has no safe live reload); revert by re-opening the character.
+* **Abilities**: greater powers (racial, standing stone, curse) recharge in 5 min at level 1 down to 2 min at level 50 (`powerCooldownMaxSeconds`/`powerCooldownMinSeconds`); the HUD shows the timer. KeyConflictResolver moves a Skycraft key off chat/command.
+* **Golden Claw**: only a merchant standing in Riverwood can give it.

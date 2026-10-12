@@ -56,6 +56,22 @@ public final class ScreenSkins {
         }
     }
 
+    /**
+     * Dying should just respawn you: the death screen's "Title Screen" button (which dropped players out to the
+     * character/world selector) is removed. Quitting is still possible from the pause menu once respawned.
+     */
+    @SubscribeEvent
+    public static void onDeathScreenInit(ScreenEvent.Init.Post event) {
+        if (event.getScreen().getClass() != DeathScreen.class) return;
+        for (GuiEventListener child : List.copyOf(event.getListenersList())) {
+            if (child instanceof AbstractButton b && b.getMessage().getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t
+                    && t.getKey().equals("deathScreen.titleScreen")) {
+                b.visible = false;
+                b.active = false;
+            }
+        }
+    }
+
     // ------------------------------------------------------------------ death
 
     private static void renderDeath(DeathScreen screen, GuiGraphics g, int mouseX, int mouseY) {

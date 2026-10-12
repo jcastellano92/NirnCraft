@@ -63,10 +63,10 @@
 
   "message.skycraft.lore.stone_already": "You already bear the blessing of %s.",
   "message.skycraft.lore.stone_replaced": "The blessing of %s fades.",
-  "message.skycraft.lore.stone_power_hint": "Press %2$s to use %1$s (once a day).",
+  "message.skycraft.lore.stone_power_hint": "Press %2$s to use %1$s (a few minutes to recharge).",
   "message.skycraft.lore.no_stone": "You have not received the blessing of a Standing Stone.",
   "message.skycraft.lore.no_power": "%s grants no power to call upon.",
-  "message.skycraft.lore.power_cooldown": "%s can be used once a day (%s hours left).",
+  "message.skycraft.lore.power_cooldown": "%s is recharging (%s remaining).",
   "message.skycraft.lore.power_used": "You call upon %s.",
   "message.skycraft.lore.serpent_no_target": "There is nothing to strike.",
   "message.skycraft.lore.tower_ready": "The next lock you try will open by itself.",

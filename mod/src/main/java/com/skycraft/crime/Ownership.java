@@ -147,7 +147,7 @@ public final class Ownership {
                 }
                 // Containers: only village loot or locked containers belong to the household
                 if (be instanceof net.minecraft.world.Container) {
-                    return loot != null && loot.contains("village");
+                    return loot == null || Theft.owned(loot);
                 }
                 return false;
             }

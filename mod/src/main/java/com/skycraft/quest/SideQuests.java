@@ -226,7 +226,13 @@ public final class SideQuests {
         if (!hasSideQuest(player, "side_golden_claw")) {
             boolean isMerchant = com.skycraft.economy.Merchants.isMerchant(npc);
             boolean openHours = com.skycraft.economy.Shop.isOpen(player.level());
-            if (isMerchant && openHours) {
+            // Lucan Valerius lives in Riverwood: only a merchant standing in Riverwood can be the quest giver
+            boolean inRiverwood = com.skycraft.tamriel.Places.byId("riverwood")
+                    .map(p -> player.level().dimension() == net.minecraft.world.level.Level.OVERWORLD
+                            && p.distSqr(npc.blockPosition().getX(), npc.blockPosition().getZ())
+                            <= (long) (p.radius() + 48) * (p.radius() + 48))
+                    .orElse(false);
+            if (isMerchant && openHours && inRiverwood) {
                 QuestStore qs = QuestStore.get(player.server);
                 java.util.UUID designated = qs.getDesignatedGiver("side_golden_claw");
                 if (designated == null) {

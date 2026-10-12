@@ -23,6 +23,18 @@ public final class SkyConfig {
     public static final ForgeConfigSpec.BooleanValue SNEAK_ATTACKS;
     public static final ForgeConfigSpec.BooleanValue PROMPT_RACE;
     public static final ForgeConfigSpec.IntValue MAX_TRAININGS_PER_LEVEL;
+    public static final ForgeConfigSpec.IntValue POWER_COOLDOWN_MAX_SECONDS;
+    public static final ForgeConfigSpec.IntValue POWER_COOLDOWN_MIN_SECONDS;
+    public static final ForgeConfigSpec.EnumValue<DeathDrops> DEATH_DROPS;
+    public static final ForgeConfigSpec.DoubleValue DEATH_GOLD_DROP_PERCENT;
+    public static final ForgeConfigSpec.IntValue DEATH_VALUABLE_MIN_VALUE;
+    public static final ForgeConfigSpec.EnumValue<RespawnMode> RESPAWN_MODE;
+
+    /** Where you wake after dying with no bed: the nearest settlement you have visited, or the world spawn. */
+    public enum RespawnMode { VISITED_SETTLEMENT, WORLD_SPAWN }
+
+    /** What a player loses on death. VALUABLES: only gold and valuables; GEAR: everything but equipped gear; EVERYTHING: vanilla. */
+    public enum DeathDrops { VALUABLES, GEAR, EVERYTHING }
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -35,6 +47,22 @@ public final class SkyConfig {
         MAX_TRAININGS_PER_LEVEL = b.comment("How many times a trainer can be paid per character level (Skyrim: 5).")
                 .defineInRange("maxTrainingsPerLevel", 5, 0, 100);
         PROMPT_RACE = b.comment("Show the race selection screen to new players.").define("promptRace", true);
+        POWER_COOLDOWN_MAX_SECONDS = b.comment("Greater power (racial, stone, curse) cooldown at character level 1, in seconds (use, don't abuse).")
+                .defineInRange("powerCooldownMaxSeconds", 300, 10, 86400);
+        POWER_COOLDOWN_MIN_SECONDS = b.comment("Greater power cooldown at character level 50 and above, in seconds.")
+                .defineInRange("powerCooldownMinSeconds", 120, 10, 86400);
+        b.pop();
+
+        b.push("death");
+        DEATH_DROPS = b.comment("VALUABLES: you keep armour, weapons, ammo, tools and food and drop only gold and valuables (gems, jewellery, soul gems, costly misc).",
+                        "GEAR: you keep only what you wear and hold. EVERYTHING: vanilla, all items drop to your corpse. Quest items are always kept.")
+                .defineEnum("dropMode", DeathDrops.VALUABLES);
+        DEATH_GOLD_DROP_PERCENT = b.comment("Percent of the gold wallet dropped (as coins in your corpse) on death.")
+                .defineInRange("goldDropPercent", 25.0, 0.0, 100.0);
+        DEATH_VALUABLE_MIN_VALUE = b.comment("A misc item worth at least this many septims counts as a valuable.")
+                .defineInRange("valuableMinValue", 150, 1, 1000000);
+        RESPAWN_MODE = b.comment("With no bed or home set: VISITED_SETTLEMENT = the nearest settlement this player has discovered (their own record), WORLD_SPAWN = the spawn point.")
+                .defineEnum("respawnMode", RespawnMode.VISITED_SETTLEMENT);
         b.pop();
 
         b.push("survival");
@@ -65,6 +93,20 @@ public final class SkyConfig {
         b.pop();
 
         SPEC = b.build();
+    }
+
+    /** Greater power cooldown in ticks: max at level 1 easing to min at level 50. */
+    public static int powerCooldownTicks(int level) {
+        int max = POWER_COOLDOWN_MAX_SECONDS.get();
+        int min = Math.min(max, POWER_COOLDOWN_MIN_SECONDS.get());
+        double t = Math.max(0, Math.min(1, (level - 1) / 49.0));
+        return (int) Math.round((max - (max - min) * t) * 20);
+    }
+
+    /** "2m 10s" for a tick count. */
+    public static String formatTicks(long ticks) {
+        long s = Math.max(0, ticks) / 20 + 1;
+        return s >= 60 ? (s / 60) + "m " + (s % 60) + "s" : s + "s";
     }
 
     private SkyConfig() {}

@@ -105,7 +105,8 @@ public final class KeyConflictResolver {
 
         // Every launch: move a Skycraft key still at its default off a clash (never touch anyone else's keys).
         for (KeyMapping ours : all) {
-            if (!isOurs(ours) || !ours.isDefault() || ours.isUnbound()) continue;
+            if (!isOurs(ours) || ours.isUnbound()) continue;
+            if (!ours.isDefault() && !sharesWithChat(ours, all)) continue;
             if (!conflicts(ours, ours.getKey(), all)) continue;
             Set<Integer> used = usedKeys(all, ours);
             for (int code : FALLBACKS) {
@@ -130,6 +131,14 @@ public final class KeyConflictResolver {
                 Skycraft.LOGGER.warn("Could not write {}", marker, e);
             }
         }
+    }
+
+    private static boolean sharesWithChat(KeyMapping ours, KeyMapping[] all) {
+        for (KeyMapping other : all) {
+            String n = other.getName();
+            if ((n.equals("key.chat") || n.equals("key.command")) && !other.isUnbound() && other.getKey().equals(ours.getKey())) return true;
+        }
+        return false;
     }
 
     private static boolean isOurs(KeyMapping key) {

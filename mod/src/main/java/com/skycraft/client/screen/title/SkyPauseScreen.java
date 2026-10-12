@@ -28,8 +28,8 @@ public class SkyPauseScreen extends Screen {
 
     private enum MenuItem {
         RESUME("menu.skycraft.resume", "Resume"),
-        QUICKSAVE("menu.skycraft.quicksave", "Quicksave"),
-        LOAD("menu.skycraft.load", "Load Game"),
+        QUICKSAVE("menu.skycraft.quicksave", "Save Game"),
+        LOAD("menu.skycraft.load", "Save and Choose Character"),
         SETTINGS("menu.skycraft.settings", "Settings"),
         MODS("menu.skycraft.mods", "Mods"),
         INVITE("menu.skycraft.invite", "Multiplayer / Invite Friends"),
@@ -72,7 +72,8 @@ public class SkyPauseScreen extends Screen {
         menuItems.add(MenuItem.RESUME);
         // Only the host can save; on a remote server the item is hidden.
         if (Minecraft.getInstance().getSingleplayerServer() != null) menuItems.add(MenuItem.QUICKSAVE);
-        menuItems.add(MenuItem.LOAD);
+        // Switching characters needs a world of your own: hidden when joined to somebody else's server.
+        if (Minecraft.getInstance().isLocalServer()) menuItems.add(MenuItem.LOAD);
         menuItems.add(MenuItem.SETTINGS);
         menuItems.add(MenuItem.MODS);
         menuItems.add(MenuItem.INVITE);
@@ -223,7 +224,16 @@ public class SkyPauseScreen extends Screen {
                     });
                 }
             }
-            case LOAD -> mc.setScreen(new SkyLoadWorldScreen(this));
+            case LOAD -> mc.setScreen(new ConfirmScreen(confirmed -> {
+                if (confirmed) {
+                    // save and leave this world first (a world list can't be used from inside a running one), then pick
+                    if (mc.level != null) mc.level.disconnect();
+                    mc.clearLevel(new net.minecraft.client.gui.screens.GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
+                    mc.setScreen(new SkyLoadWorldScreen(new SkyTitleScreen()));
+                } else {
+                    mc.setScreen(this);
+                }
+            }, Component.literal("Save and choose another character?"), Component.literal("Your progress is saved first.")));
             case SETTINGS -> mc.setScreen(new net.minecraft.client.gui.screens.OptionsScreen(this, mc.options));
             case MODS -> mc.setScreen(new net.minecraftforge.client.gui.ModListScreen(this));
             case INVITE -> openInviteScreen();

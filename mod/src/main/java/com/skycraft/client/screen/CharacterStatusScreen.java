@@ -90,7 +90,7 @@ public class CharacterStatusScreen extends Screen {
             y += 11;
             long now = minecraft.player.level().getGameTime();
             if (now < data.getPowerReadyAt()) {
-                long hours = (data.getPowerReadyAt() - now) / 1000 + 1;
+                String hours = com.skycraft.SkyConfig.formatTicks(data.getPowerReadyAt() - now);
                 g.drawString(font, Component.translatable("message.skycraft.power_cooldown", "", hours).getString().trim(), leftX + 4, y, 0xFFD06050, false);
             } else {
                 g.drawString(font, Component.translatable("screen.skycraft.power_ready").getString(), leftX + 4, y, 0xFF70D070, false);

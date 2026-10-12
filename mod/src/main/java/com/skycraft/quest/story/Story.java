@@ -981,6 +981,17 @@ public final class Story {
             case "helgen" -> {
                 if (receiver != null) helgen(receiver);
             }
+            case "intro" -> {
+                // the short opening: a scene plus a single distant dragon flyby, once per player (config: quest intro)
+                if (QuestConfig.INTRO.get()) {
+                    for (ServerPlayer m : audience(online, receiver)) {
+                        if (hasFlag(SkyData.get(m), "intro_played")) continue;
+                        setFlag(SkyData.get(m), "intro_played", true);
+                        Scenes.play(server, List.of(m), arg);
+                        Scenes.flyby(m, "skycraft:alduin");
+                    }
+                }
+            }
             case "absorb_soul" -> {
                 // the first dragon's soul, for whoever wasn't close enough when it died (absorption needs 64 blocks)
                 for (ServerPlayer m : audience(online, receiver)) {

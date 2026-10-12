@@ -55,7 +55,7 @@ public final class Lycanthropy {
         CompoundTag t = Curses.tag(player);
         long now = player.level().getGameTime();
         if (!player.isCreative() && now < t.getLong(Curses.BEAST_READY)) {
-            long hours = (t.getLong(Curses.BEAST_READY) - now) / 1000 + 1;
+            String hours = com.skycraft.SkyConfig.formatTicks(t.getLong(Curses.BEAST_READY) - now);
             Notifier.message(player, Component.translatable("message.skycraft.power_cooldown", CursePowers.name(CursePowers.BEAST_FORM), hours));
             return false;
         }
@@ -63,7 +63,7 @@ public final class Lycanthropy {
         if (CursePerks.has(player, CursePerks.HIRCINES_FAVOR)) duration = duration * 3 / 2;
         t.putString(Curses.FORM, Form.BEAST.id);
         t.putLong(Curses.FORM_UNTIL, now + duration);
-        t.putLong(Curses.BEAST_READY, now + DAY);
+        t.putLong(Curses.BEAST_READY, now + com.skycraft.SkyConfig.POWER_COOLDOWN_MAX_SECONDS.get() * 20L);
         Curses.dirty(player);
         applyAttributes(player, true);
         Vampirism.refreshBonuses(player);

@@ -113,7 +113,7 @@ public final class CursePowers {
     /** Recharge time of a power or form ability, in ticks. */
     public static long cooldown(String id) {
         return switch (id) {
-            case BEAST_FORM, VAMPIRES_SERVANT, EMBRACE_OF_SHADOWS -> DAY;
+            case BEAST_FORM, VAMPIRES_SERVANT, EMBRACE_OF_SHADOWS -> com.skycraft.SkyConfig.POWER_COOLDOWN_MAX_SECONDS.get() * 20L;
             case VAMPIRE_LORD -> 20 * 10;
             case VAMPIRES_SIGHT -> 20;
             case HOWL_OF_TERROR, HOWL_PREDATOR -> 20 * 20;
@@ -143,7 +143,7 @@ public final class CursePowers {
         long at = readyAt(player, id);
         if (player.isCreative() || now >= at) return true;
         long left = at - now;
-        if (left > 2000) Notifier.message(player, Component.translatable("message.skycraft.power_cooldown", name(id), left / 1000 + 1));
+        if (left > 2000) Notifier.message(player, Component.translatable("message.skycraft.power_cooldown", name(id), com.skycraft.SkyConfig.formatTicks(left)));
         else Notifier.message(player, Component.translatable("curse.skycraft.power.recharging", name(id), left / 20 + 1));
         return false;
     }

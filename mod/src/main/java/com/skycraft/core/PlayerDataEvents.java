@@ -42,6 +42,9 @@ public final class PlayerDataEvents {
     /** Server tick at which each raceless player's race prompt (and protection) started this session. */
     private static final Map<UUID, Integer> RACE_PROMPT_START = new ConcurrentHashMap<>();
 
+    /** Where each player last died, until their respawn has been placed. */
+    private static final Map<UUID, BlockPos> DEATH_POS = new ConcurrentHashMap<>();
+
     private PlayerDataEvents() {}
 
     @SubscribeEvent
@@ -64,6 +67,7 @@ public final class PlayerDataEvents {
             now.setMagicka(now.maxMagicka());
             now.setStamina(now.maxStamina());
         }
+        if (event.isWasDeath()) DEATH_POS.put(event.getEntity().getUUID(), original.blockPosition());
         event.getEntity().setMaxUpStep(1.0625f);
         original.invalidateCaps();
     }
@@ -99,7 +103,8 @@ public final class PlayerDataEvents {
         BlockPos target = level.getSharedSpawnPos();
         LevelChunk chunk = level.getChunk(target.getX() >> 4, target.getZ() >> 4);
 
-        BlockPos safe = findSafeSpot(level, chunk, target);
+        BlockPos safe = SafeSpawn.find(level, target, 24);
+        if (safe == null) safe = findSafeSpot(level, chunk, target);
         if (safe != null) {
             player.teleportTo(level, safe.getX() + 0.5, safe.getY() + 0.05, safe.getZ() + 0.5, player.getYRot(), player.getXRot());
             player.fallDistance = 0f;
@@ -141,7 +146,69 @@ public final class PlayerDataEvents {
             fullSync(player);
             // refreshAttributes only clamps down; a fresh body after death starts at full (Skyrim) health.
             if (!event.isEndConquered()) player.setHealth(player.getMaxHealth());
+            BlockPos died = DEATH_POS.remove(player.getUUID());
+            if (!event.isEndConquered()) placeRespawn(player, died);
         }
+    }
+
+    /**
+     * A normal respawn: at the bed (vanilla keeps the last bed, inn room or home), otherwise at the nearest hold
+     * capital or city, otherwise the world spawn. The spot is always solid ground, never a treetop.
+     */
+    /**
+     * The settlement this player has discovered (their own record) nearest to {@code from}; ones with an inn count
+     * as 30% closer. The target is the market square (meeting anchor), else a gate, else the place's centre.
+     */
+    @javax.annotation.Nullable
+    private static BlockPos nearestVisitedSettlement(ServerPlayer player, ServerLevel level, BlockPos from) {
+        net.minecraft.nbt.ListTag list = com.skycraft.world.WorldData.discovered(SkyData.get(player));
+        BlockPos best = null;
+        double bestScore = Double.MAX_VALUE;
+        for (int i = 0; i < list.size(); i++) {
+            net.minecraft.nbt.CompoundTag loc = list.getCompound(i);
+            if (loc.getBoolean("known") || !level.dimension().location().toString().equals(
+                    loc.getString("dim").isEmpty() ? "minecraft:overworld" : loc.getString("dim"))) continue;
+            java.util.Optional<com.skycraft.tamriel.Place> place = com.skycraft.world.WorldData.place(loc);
+            if (place.isEmpty() || !place.get().type().isSettlement()) continue;
+            com.skycraft.tamriel.Place p = place.get();
+            java.util.Optional<com.skycraft.tamriel.settlement.SettlementAnchors.Entry> e =
+                    com.skycraft.tamriel.settlement.SettlementAnchors.find(level, p.id());
+            double score = Math.sqrt(p.distSqr(from.getX(), from.getZ()));
+            BlockPos at = new BlockPos(p.x(), level.getSharedSpawnPos().getY(), p.z());
+            if (e.isPresent()) {
+                if (e.get().first(com.skycraft.tamriel.settlement.AnchorType.INN) != null) score *= 0.7;
+                com.skycraft.tamriel.settlement.Anchor m = e.get().first(com.skycraft.tamriel.settlement.AnchorType.MEETING);
+                if (m != null) at = m.pos();
+            }
+            if (score < bestScore) {
+                bestScore = score;
+                best = at;
+            }
+        }
+        return best;
+    }
+
+    private static void placeRespawn(ServerPlayer player, @javax.annotation.Nullable BlockPos died) {
+        ServerLevel level = player.serverLevel();
+        if (level.dimension() != Level.OVERWORLD) return;
+        BlockPos here = player.blockPosition();
+        boolean hasBed = player.getRespawnPosition() != null && player.getRespawnDimension() == Level.OVERWORLD;
+        BlockPos target = here;
+        if (!hasBed) {
+            target = level.getSharedSpawnPos();
+            BlockPos from = died != null ? died : here;
+            if (SkyConfig.RESPAWN_MODE.get() == SkyConfig.RespawnMode.VISITED_SETTLEMENT) {
+                BlockPos town = nearestVisitedSettlement(player, level, from);
+                if (town != null) target = town;
+            }
+        } else if (SafeSpawn.isSafe(level, here)) {
+            return;
+        }
+        BlockPos safe = SafeSpawn.find(level, target, 40);
+        if (safe == null) return;
+        player.teleportTo(level, safe.getX() + 0.5, safe.getY() + 0.05, safe.getZ() + 0.5, player.getYRot(), player.getXRot());
+        player.fallDistance = 0f;
+        player.setDeltaMovement(0, 0, 0);
     }
 
     @SubscribeEvent
@@ -164,6 +231,7 @@ public final class PlayerDataEvents {
         Vitals.forget(id);
         com.skycraft.combat.CombatHandler.forget(id);
         RACE_PROMPT_START.remove(id);
+        DEATH_POS.remove(id);
     }
 
     /** Sends the whole player data to its owner right now (login, respawn, dimension change, big changes). */

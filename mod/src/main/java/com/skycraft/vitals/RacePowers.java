@@ -42,7 +42,7 @@ public final class RacePowers {
         if (race == null) return;
         long now = player.level().getGameTime();
         if (now < data.getPowerReadyAt()) {
-            long hours = (data.getPowerReadyAt() - now) / 1000 + 1;
+            String hours = com.skycraft.SkyConfig.formatTicks(data.getPowerReadyAt() - now);
             Notifier.message(player, Component.translatable("message.skycraft.power_cooldown", race.powerName(), hours));
             return;
         }
@@ -175,7 +175,7 @@ public final class RacePowers {
                 sound = SoundEvents.AMETHYST_BLOCK_CHIME;
             }
         }
-        data.setPowerReadyAt(now + race.powerCooldown());
+        data.setPowerReadyAt(now + race.powerCooldown(data.getLevel()));
         player.level().playSound(null, player.blockPosition(), sound, SoundSource.PLAYERS, 1f, 0.8f * race.voicePitch);
         Notifier.message(player, Component.translatable("message.skycraft.power_used", race.powerName()));
     }

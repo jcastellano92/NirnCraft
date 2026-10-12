@@ -34,6 +34,35 @@ public final class Scenes {
 
     private Scenes() {}
 
+    private record Flyby(UUID entity, ServerLevel level, Vec3 from, Vec3 to, long start, long end) {
+    }
+
+    private static final List<Flyby> FLYBYS = new ArrayList<>();
+
+    /**
+     * One quiet, distant crossing: a dragon passes {@code p} at ~100 blocks and 50 up, once, with a single soft roar
+     * (to that player only, never repeating) and no ambient sound. Removed when it has crossed.
+     */
+    public static void flyby(ServerPlayer p, String entityType) {
+        ServerLevel level = p.serverLevel();
+        Entity e = com.skycraft.quest.QuestSpawner.create(level, entityType);
+        if (e == null) return;
+        double side = level.random.nextBoolean() ? 1 : -1;
+        Vec3 c = p.position();
+        Vec3 from = new Vec3(c.x - 130 * side, c.y + 55, c.z - 90);
+        Vec3 to = new Vec3(c.x + 130 * side, c.y + 60, c.z - 90);
+        if (e instanceof Mob mob) mob.setNoAi(true);
+        e.setInvulnerable(true);
+        e.setSilent(true);
+        e.setNoGravity(true);
+        float yaw = (float) Math.toDegrees(Math.atan2(to.z - from.z, to.x - from.x)) - 90f;
+        e.moveTo(from.x, from.y, from.z, yaw, 0f);
+        if (!level.addFreshEntity(e)) return;
+        long now = level.getGameTime();
+        FLYBYS.add(new Flyby(e.getUUID(), level, from, to, now, now + 20 * 22));
+        p.playNotifySound(SoundEvents.ENDER_DRAGON_GROWL, SoundSource.AMBIENT, 0.5f, 0.75f);
+    }
+
     /** Plays scene {@code id} to the given players. */
     public static void play(MinecraftServer server, List<ServerPlayer> audience, String id) {
         List<StoryData.SceneLine> lines = StoryData.scene(id);
@@ -59,11 +88,16 @@ public final class Scenes {
     /** Flies {@code e} in circles around {@code center} for {@code ticks}, then removes it. */
     public static void circle(Entity e, Vec3 center, double radius, double height, int ticks) {
         if (!(e.level() instanceof ServerLevel level)) return;
+        // never more than a few scenery dragons at once (their wing beats are what the player hears)
+        if (CIRCLES.size() >= 3) {
+            e.discard();
+            return;
+        }
         if (e instanceof Mob mob) mob.setNoAi(true);
         e.setInvulnerable(true);
         long now = level.getGameTime();
         CIRCLES.add(new Circle(e.getUUID(), level, center, radius, height, now, now + ticks));
-        level.playSound(null, center.x, center.y, center.z, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 6f, 0.8f);
+        level.playSound(null, center.x, center.y, center.z, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 2.5f, 0.8f);
     }
 
     public static void tick(MinecraftServer server) {
@@ -78,6 +112,22 @@ public final class Scenes {
                     ServerPlayer pl = server.getPlayerList().getPlayer(id);
                     if (pl != null) pl.sendSystemMessage(p.line());
                 }
+            }
+        }
+        if (!FLYBYS.isEmpty()) {
+            Iterator<Flyby> it = FLYBYS.iterator();
+            while (it.hasNext()) {
+                Flyby f = it.next();
+                Entity e = f.level().getEntity(f.entity());
+                long t = f.level().getGameTime();
+                if (e == null || !e.isAlive() || t >= f.end()) {
+                    if (e != null) e.discard();
+                    it.remove();
+                    continue;
+                }
+                double k = (t - f.start()) / (double) (f.end() - f.start());
+                Vec3 at = f.from().lerp(f.to(), k);
+                e.moveTo(at.x, at.y, at.z, e.getYRot(), 0f);
             }
         }
         if (!CIRCLES.isEmpty()) {
@@ -107,7 +157,7 @@ public final class Scenes {
                 e.moveTo(x, y, z, yaw, 0f);
                 e.setYHeadRot(yaw);
                 if ((t - c.start()) % 60 == 30) {
-                    c.level().playSound(null, x, y, z, SoundEvents.ENDER_DRAGON_FLAP, SoundSource.HOSTILE, 4f, 0.7f);
+                    c.level().playSound(null, x, y, z, SoundEvents.ENDER_DRAGON_FLAP, SoundSource.HOSTILE, 1.2f, 0.7f);
                     c.level().sendParticles(ParticleTypes.FLAME, x, y - 2, z, 30, 1.5, 1.0, 1.5, 0.08);
                 }
             }
@@ -116,6 +166,7 @@ public final class Scenes {
 
     public static void reset() {
         LINES.clear();
+        FLYBYS.clear();
         CIRCLES.clear();
     }
 }

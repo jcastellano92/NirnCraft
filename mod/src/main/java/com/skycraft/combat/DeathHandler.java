@@ -1,6 +1,8 @@
 package com.skycraft.combat;
 
+import com.skycraft.SkyConfig;
 import com.skycraft.Skycraft;
+import com.skycraft.core.Notifier;
 import com.skycraft.core.PlayerData;
 import com.skycraft.core.SkyData;
 import com.skycraft.quest.QuestItems;
@@ -11,6 +13,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -38,6 +45,10 @@ import java.util.UUID;
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class DeathHandler {
+    private static final TagKey<Item> JEWELRY = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "jewelry"));
+    private static final TagKey<Item> SOUL_GEMS = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "soul_gems"));
+    private static final TagKey<Item> GEMS = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "merchant/gems"));
+
     private DeathHandler() {}
 
     /**
@@ -56,10 +67,12 @@ public final class DeathHandler {
         }
         ListTag list = new ListTag();
 
-        // 1. Equipped gear: head, chest, legs, feet, mainhand, offhand
+        SkyConfig.DeathDrops mode = SkyConfig.DEATH_DROPS.get();
+
+        // 1. Equipped gear: head, chest, legs, feet, mainhand, offhand (armour, weapons, ammo in hand...)
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             ItemStack stack = player.getItemBySlot(slot);
-            if (!stack.isEmpty()) {
+            if (!stack.isEmpty() && (mode != SkyConfig.DeathDrops.EVERYTHING || QuestItems.isQuestItem(stack))) {
                 CompoundTag entry = new CompoundTag();
                 entry.putString("slot", slot.getName());
                 entry.put("item", stack.save(new CompoundTag()));
@@ -67,12 +80,16 @@ public final class DeathHandler {
             }
         }
 
-        // 2. Quest items in backpack
+        // 2. Quest items in backpack; in VALUABLES mode everything that is not a valuable (weapons, ammo, tools,
+        // food, potions...) too: only gold and valuables are lost
         Inventory inv = player.getInventory();
         for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
             if (i == inv.selected) continue; // main hand already saved above
             ItemStack stack = inv.getItem(i);
-            if (!stack.isEmpty() && QuestItems.isQuestItem(stack)) {
+            if (stack.isEmpty()) continue;
+            boolean keep = QuestItems.isQuestItem(stack)
+                    || (mode == SkyConfig.DeathDrops.VALUABLES && !isValuable(stack));
+            if (keep) {
                 CompoundTag entry = new CompoundTag();
                 entry.putInt("inv_slot", i);
                 entry.put("item", stack.save(new CompoundTag()));
@@ -80,6 +97,21 @@ public final class DeathHandler {
             }
         }
         PENDING.put(player.getUUID(), list);
+    }
+
+    /** Gold, gems, jewellery, soul gems and costly misc items: what a death drops in VALUABLES mode. */
+    public static boolean isValuable(ItemStack stack) {
+        if (com.skycraft.core.Currency.valueOf(stack) > 0) return true;
+        if (stack.is(JEWELRY) || stack.is(SOUL_GEMS) || stack.is(GEMS)) return true;
+        if (stack.is(Items.GOLD_INGOT) || stack.is(Items.GOLD_NUGGET) || stack.is(Items.RAW_GOLD) || stack.is(Items.GOLD_BLOCK)
+                || stack.is(Items.DIAMOND) || stack.is(Items.DIAMOND_BLOCK) || stack.is(Items.EMERALD) || stack.is(Items.EMERALD_BLOCK)
+                || stack.is(Items.AMETHYST_SHARD) || stack.is(Items.NETHERITE_INGOT) || stack.is(Items.NETHERITE_SCRAP)) return true;
+        if (com.skycraft.economy.ItemCategory.isJewelry(stack)) return true;
+        // tools, weapons, shields, ammo and anything with durability are kit, never a valuable
+        if (stack.isDamageableItem() || stack.getItem() instanceof net.minecraft.world.item.ArrowItem
+                || stack.is(net.minecraft.tags.ItemTags.ARROWS)) return false;
+        return com.skycraft.economy.ItemCategory.of(stack) == com.skycraft.economy.ItemCategory.MISC
+                && com.skycraft.economy.ItemValues.get(stack) >= SkyConfig.DEATH_VALUABLE_MIN_VALUE.get();
     }
 
     /** Commits the kept items and the corpse marker once every other handler had its say. */
@@ -149,6 +181,7 @@ public final class DeathHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onPlayerDrops(LivingDropsEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        dropGold(player, event);
         CompoundTag keptTag = SkyData.get(player).module("death_kept");
         if (!keptTag.contains("items", Tag.TAG_LIST)) return;
 
@@ -203,6 +236,19 @@ public final class DeathHandler {
         }
         keptTag.put("items", confirmed);
         keptTag.putBoolean("confirmed", true);
+    }
+
+    /** A share of the gold wallet falls to the corpse as coins (configurable, 0 disables). */
+    private static void dropGold(ServerPlayer player, LivingDropsEvent event) {
+        if (player.isSpectator() || player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) return;
+        double pct = SkyConfig.DEATH_GOLD_DROP_PERCENT.get();
+        PlayerData data = SkyData.get(player);
+        long lose = (long) (data.getGold() * pct / 100.0);
+        if (lose <= 0) return;
+        data.setGold(data.getGold() - lose);
+        ItemEntity coins = new ItemEntity(player.level(), player.getX(), player.getY() + 0.5, player.getZ(), com.skycraft.core.Currency.coins(lose));
+        event.getDrops().add(coins);
+        Notifier.message(player, Component.translatable("message.skycraft.death_gold_lost", lose));
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)

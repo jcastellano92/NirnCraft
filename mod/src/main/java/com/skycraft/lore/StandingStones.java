@@ -282,7 +282,7 @@ public final class StandingStones {
         long now = player.level().getGameTime();
         long ready = tag.getLong(key);
         if (now < ready) {
-            long hours = (ready - now) / 1000 + 1;
+            String hours = com.skycraft.SkyConfig.formatTicks(ready - now);
             Notifier.message(player, Component.translatable("message.skycraft.lore.power_cooldown", s.powerName(), hours));
             return;
         }
@@ -294,7 +294,7 @@ public final class StandingStones {
             default -> false;
         };
         if (!used) return;
-        tag.putLong(key, now + DAY);
+        tag.putLong(key, now + com.skycraft.SkyConfig.powerCooldownTicks(data.getLevel()));
         data.markDirty();
         player.level().playSound(null, player.blockPosition(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 1f, 0.7f);
         Notifier.message(player, Component.translatable("message.skycraft.lore.power_used", s.powerName()));

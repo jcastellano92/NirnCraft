@@ -451,6 +451,8 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         }
         if (e instanceof NpcEntity o) {
             if (o.isPrisoner()) return false;
+            // story NPCs (Ralof, Hadvar...) never fight each other: they stand side by side as quest givers
+            if (this.getPersistentData().contains(com.skycraft.quest.story.QuestNpcs.TAG) && o.getPersistentData().contains(com.skycraft.quest.story.QuestNpcs.TAG)) return false;
             NpcRole or = o.role();
             if (or == NpcRole.VAMPIRE && !Npcs.isNight(this.level()) && r != NpcRole.MAGE) return false;
             return NpcRole.opposed(r, or) || (r.protector && or.villain && o.getTarget() != null);

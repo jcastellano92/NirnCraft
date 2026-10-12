@@ -222,6 +222,11 @@ public final class Encounters {
                 continue;
             }
             long until = t.getLong("until");
+            long skirmishUntil = t.getLong("skirmish_until");
+            if (skirmishUntil > 0 && now > skirmishUntil) {
+                gone.add(mob);
+                continue;
+            }
             if (t.getBoolean("summon")) {
                 if (now > until) gone.add(mob);
                 continue;
@@ -694,6 +699,10 @@ public final class Encounters {
                     if (b != null) cloaks.add(b);
                 }
                 for (int i = 0; i < Math.min(legion.size(), cloaks.size()); i++) fight(legion.get(i), cloaks.get(i));
+                // a skirmish is a moment, not a war: it breaks off after half a minute (despawnPass)
+                long skirmishEnd = g.level.getGameTime() + 20 * 30;
+                for (NpcEntity n : legion) { CompoundTag st = tag(n); if (st != null) st.putLong("skirmish_until", skirmishEnd); }
+                for (NpcEntity n : cloaks) { CompoundTag st = tag(n); if (st != null) st.putLong("skirmish_until", skirmishEnd); }
                 return !legion.isEmpty() || !cloaks.isEmpty();
             }
             case OLD_ORC -> {

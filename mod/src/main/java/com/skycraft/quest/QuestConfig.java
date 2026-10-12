@@ -14,6 +14,7 @@ public final class QuestConfig {
     public static final ForgeConfigSpec.BooleanValue MAIN_QUEST;
     public static final ForgeConfigSpec.BooleanValue DARK_WHISPER;
     public static final ForgeConfigSpec.BooleanValue HELGEN_START;
+    public static final ForgeConfigSpec.BooleanValue INTRO;
     public static final ForgeConfigSpec.IntValue SKIP_DAYS;
 
     static {
@@ -31,8 +32,10 @@ public final class QuestConfig {
                 .defineInRange("spawnDistance", 64, 16, 160);
         MAIN_QUEST = b.comment("Start the main quest 'The Dragonborn' automatically once a race is chosen.").define("mainQuest", true);
         DARK_WHISPER = b.comment("Murderers receive a whisper from the Dark Brotherhood at night.").define("darkBrotherhoodWhisper", true);
-        HELGEN_START = b.comment("The main quest opens with the prisoner cart at Helgen: new players are taken there once they chose a race.")
-                .define("helgenStart", true);
+        HELGEN_START = b.comment("Legacy: teleport new players to Helgen at the start of the main quest (off: everybody starts at the world spawn on the road).")
+                .define("helgenStart", false);
+        INTRO = b.comment("Play the short opening (a wake-up scene and one distant dragon sighting). False skips it: the first objective is still set.")
+                .define("intro", true);
         SKIP_DAYS = b.comment("In-game days a quest step must stay unfinished before the journal offers to skip it (0 = never).",
                         "A fallback against broken states, e.g. a quest NPC or relic lost to another mod.")
                 .defineInRange("skipAfterDays", 3, 0, 365);

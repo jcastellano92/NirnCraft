@@ -303,7 +303,12 @@ public enum Race {
 
     /** Ticks before the racial power can be used again (Night Eye is a lesser power). */
     public int powerCooldown() {
-        return this == KHAJIIT ? 200 : DAY;
+        return this == KHAJIIT ? 200 : com.skycraft.SkyConfig.powerCooldownTicks(1);
+    }
+
+    /** Cooldown scaled by character level (2-5 minutes by default, configurable). */
+    public int powerCooldown(int level) {
+        return this == KHAJIIT ? 200 : com.skycraft.SkyConfig.powerCooldownTicks(level);
     }
 
     public static Race byId(String id) {

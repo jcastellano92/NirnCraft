@@ -49,6 +49,11 @@
       ["narrator", "Before the axe can fall, a roar splits the sky. Something vast and black lands on the watchtower."],
       ["hadvar", "Dragon! Everyone, to the keep! You, prisoner, with me or with him, but MOVE!"]
     ],
+    "helgen_wake": [
+      ["narrator", "You wake on a quiet stretch of the old road, the cold sun on your face. No one is chasing you. Far off to the north, smoke stains the sky."],
+      ["narrator", "A dragon crosses the mountains, a black shape and a sound like tearing cloth. Whatever it is, the villages ahead will need warning."],
+      ["narrator", "Follow the road to Riverwood. Your journal marks the way, and the compass points to it."]
+    ],
     "helgen_escape": [
       ["narrator", "Daylight. Behind you, smoke climbs from what was Helgen. Far off, the black dragon wheels north over the mountains."],
       ["ralof", "Riverwood is just down the road. My sister Gerdur will help us, if you sided with me back there."],
@@ -149,34 +154,43 @@
       "title": "Unbound",
       "stage": 1,
       "start": "auto",
-      "on_start": "helgen;scene:helgen_cart",
-      "desc": "I was caught crossing the border and carted to Helgen with a band of rebels to lose my head. Then the sky split open and a black dragon came down on the town. I have to get out.",
+      "on_start": "intro:helgen_wake;relocate:ralof:riverwood:-10:6;relocate:hadvar:riverwood:12:-4",
+      "desc": "I woke on the road with smoke on the northern horizon and a black dragon crossing the mountains. Riverwood is the nearest village; they need to be warned.",
       "objectives": [
-        {"type": "talk", "npc": "ralof|hadvar", "text": "Choose whom to follow out of Helgen: Ralof or Hadvar",
-         "journal": "With the headsman's block still wet and the dragon tearing the town apart, I picked a side and ran.",
-         "spawn": [{"type": "skycraft:alduin", "name": "Alduin", "decor": true, "circle": [40, 32, 900]}],
-         "choices": [
-           {"npc": "ralof", "label": "I'm with you, Ralof. Lead the way.", "reply": "Then stay close and keep low. The keep's this way, and the Legion won't hold the door for us.", "actions": "flag:helgen_ralof"},
-           {"npc": "hadvar", "label": "Hadvar! Get me out of here.", "reply": "Follow me, prisoner. I'll cut those bindings once we're inside the keep. Move!", "actions": "flag:helgen_hadvar"}
-         ]},
-        {"type": "clear", "place": "helgen", "offset": [0, -30], "radius": 30, "text": "Fight your way through Helgen Keep",
-         "journal": "Inside the keep, soldiers of the other side stood between us and the tunnels. We cut our way through, and the spiders in the deep caves were worse.",
-         "spawn": [
-           {"type": "npc:imperial_soldier", "count": 2, "name": "Imperial Soldier", "hostile": true, "if": "flag:helgen_ralof"},
-           {"type": "npc:stormcloak_soldier", "count": 2, "name": "Stormcloak Soldier", "hostile": true, "if": "flag:helgen_hadvar"},
-           {"type": "skycraft:frostbite_spider", "count": 1, "name": "Frostbite Spider"}
-         ]},
-        {"type": "go", "place": "helgen", "offset": [60, -140], "radius": 14, "text": "Escape through the caves beneath the keep", "label": "Cave Exit",
-         "actions": "scene:helgen_escape;relocate:ralof:riverwood:-10:6;relocate:hadvar:riverwood:12:-4",
-         "journal": "We came out into daylight just as the dragon flew north over the mountains."},
-        {"type": "go", "place": "riverwood", "text": "Make for Riverwood"},
-        {"type": "talk", "npc": "gerdur|alvor", "text": "Find help in Riverwood: Ralof's sister Gerdur, or Hadvar's uncle Alvor",
-         "choices": [
-           {"npc": "gerdur", "label": "Ralof sent me. Helgen is gone. A dragon burned it.", "reply": "A dragon? Shor's bones. Then Riverwood is next and we have no walls. Take what you need from the mill. And go to Whiterun, tell the Jarl we need soldiers.", "actions": "give:minecraft:bread*3,minecraft:leather_boots"},
-           {"npc": "alvor", "label": "Hadvar sent me. A dragon destroyed Helgen.", "reply": "Hadvar's alive, thank the Nine. Here, take some iron from the forge and something to eat. Someone has to warn Jarl Balgruuf. Will you go?", "actions": "give:minecraft:bread*3,minecraft:iron_helmet"}
-         ]}
+        {
+          "type": "go",
+          "place": "riverwood",
+          "text": "Follow the road to Riverwood",
+          "label": "Riverwood",
+          "journal": "No one was chasing me. I followed the road toward the nearest village, the dragon's roar fading behind me."
+        },
+        {
+          "type": "talk",
+          "npc": "gerdur|alvor",
+          "text": "Find help in Riverwood: Gerdur at the mill, or Alvor the smith",
+          "choices": [
+            {
+              "npc": "gerdur",
+              "label": "A dragon is burning the north. Riverwood needs to know.",
+              "reply": "A dragon? Shor's bones. Then Riverwood is next and we have no walls. Take what you need from the mill. And go to Whiterun, tell the Jarl we need soldiers.",
+              "actions": "flag:helgen_ralof;give:minecraft:bread*3,minecraft:leather_boots"
+            },
+            {
+              "npc": "alvor",
+              "label": "I saw a dragon in the north. Riverwood needs to know.",
+              "reply": "A dragon! The Nine preserve us. Here, take some iron from the forge and something to eat. Someone has to warn Jarl Balgruuf. Will you go?",
+              "actions": "flag:helgen_hadvar;give:minecraft:bread*3,minecraft:iron_helmet"
+            }
+          ]
+        }
       ],
-      "rewards": {"gold": 50, "items": ["minecraft:iron_sword", "minecraft:leather_chestplate"]}
+      "rewards": {
+        "gold": 50,
+        "items": [
+          "minecraft:iron_sword",
+          "minecraft:leather_chestplate"
+        ]
+      }
     },
     {
       "id": "main_before_the_storm",

@@ -51,7 +51,7 @@
   "curse.skycraft.beast.cannot_feed": "The beast wants better prey than this.",
   "curse.skycraft.beast.no_rest": "The beast in your blood allows you no rest.",
 
-  "curse.skycraft.power.greater": "Greater power (once a day)",
+  "curse.skycraft.power.greater": "Greater power (minutes to recharge)",
   "curse.skycraft.power.lesser": "Lesser power",
   "curse.skycraft.power.recharging": "%s is not ready (%s s).",
   "curse.skycraft.sight.on": "Vampire's Sight: the night is clear to you.",

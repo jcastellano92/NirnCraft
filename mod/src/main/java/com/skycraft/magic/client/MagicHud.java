@@ -58,7 +58,7 @@ public final class MagicHud {
                 com.skycraft.core.Race race = data.getRace();
                 powerName = race != null ? race.powerName() : Component.literal("Power");
                 ready = data.getPowerReadyAt();
-                if (race != null) total = race.powerCooldown();
+                if (race != null) total = race.powerCooldown(data.getLevel());
             } else if (voice.startsWith(com.skycraft.curse.CursePowers.PREFIX)) {
                 // curse module powers
                 String id = voice.substring(com.skycraft.curse.CursePowers.PREFIX.length());
