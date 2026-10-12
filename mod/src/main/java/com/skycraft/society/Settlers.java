@@ -92,6 +92,9 @@ public final class Settlers {
         List<NpcRole> roles = roster(size, seat, r);
         int cap = SocietyConfig.MAX_RESIDENTS.get();
         if (roles.size() > cap) roles = roles.subList(0, cap);
+        // housing model: never more residents than free beds around the centre (the roster is most important first)
+        int beds = freeBeds(level, center, data);
+        if (roles.size() > beds) roles = roles.subList(0, beds);
         com.skycraft.crafting.SettlementStations.populate(level, s, center, r);
 
         NpcEntity jarl = null;
@@ -116,6 +119,9 @@ public final class Settlers {
         List<NpcRole> roles = roster(size, false, level.getRandom());
         int cap = SocietyConfig.MAX_RESIDENTS.get();
         if (roles.size() > cap) roles = roles.subList(0, cap);
+        // housing model: never more residents than free beds around the centre (the roster is most important first)
+        int beds = freeBeds(level, center, data);
+        if (roles.size() > beds) roles = roles.subList(0, beds);
         for (NpcRole role : roles) {
             NpcEntity npc = spawnResident(level, center, role, freeBed(level, center, taken, data), radiusFor(role));
             if (npc == null) continue;
@@ -191,6 +197,13 @@ public final class Settlers {
             case CHILD -> 20;
             default -> 28;
         };
+    }
+
+    /** How many unclaimed, non-player beds the POI manager knows within 64 blocks of the centre (the housing capacity). */
+    private static int freeBeds(ServerLevel level, BlockPos center, Data data) {
+        return (int) level.getPoiManager().findAll(h -> h.is(PoiTypes.HOME),
+                p -> !data.beds.containsKey(p.asLong()) && !Ownership.isPlayerOwned(level, p),
+                center, 64, PoiManager.Occupancy.ANY).count();
     }
 
     /** A free bed near the settlement center (POI lookup), or null. */
@@ -330,6 +343,51 @@ public final class Settlers {
         if (!brain.hasMemoryValue(home)) {
             brain.setMemory(home, net.minecraft.core.GlobalPos.of(level.dimension(), mine));
         }
+    }
+
+    /** Whether nobody holds {@code bed} yet and it is still a bed (a bed in an unloaded chunk is assumed fine). */
+    public static boolean bedFree(ServerLevel level, BlockPos bed) {
+        if (Data.get(level).beds.containsKey(bed.asLong())) return false;
+        return !level.isLoaded(bed) || level.getBlockState(bed).is(BlockTags.BEDS);
+    }
+
+    /**
+     * Claims exactly {@code bed} for {@code who} (the housing model hands specific beds to specific residents). False
+     * when somebody else holds it. The bed also gets its POI when worldgen did not register one.
+     */
+    public static boolean reserveBed(ServerLevel level, BlockPos bed, UUID who) {
+        Data data = Data.get(level);
+        UUID held = data.beds.get(bed.asLong());
+        if (held != null && !held.equals(who)) return false;
+        if (held == null) {
+            data.beds.put(bed.asLong(), who);
+            data.setDirty();
+        }
+        if (level.isLoaded(bed)) {
+            var state = level.getBlockState(bed);
+            if (state.hasProperty(net.minecraft.world.level.block.BedBlock.PART)
+                    && state.getValue(net.minecraft.world.level.block.BedBlock.PART) == net.minecraft.world.level.block.state.properties.BedPart.HEAD
+                    && !level.getPoiManager().exists(bed, h -> h.is(PoiTypes.HOME))) {
+                net.minecraft.core.registries.BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolder(PoiTypes.HOME)
+                        .ifPresent(h -> level.getPoiManager().add(bed, h));
+            }
+        }
+        return true;
+    }
+
+    /** Gives {@code npc} that bed to sleep in and makes it their home. */
+    public static boolean assignBed(NpcEntity npc, BlockPos bed, int homeRadius) {
+        if (!(npc.level() instanceof ServerLevel level) || !reserveBed(level, bed, npc.getUUID())) return false;
+        npc.setBed(bed);
+        npc.setHome(bed, homeRadius);
+        return true;
+    }
+
+    /** Gives a settler villager that bed (its HOME memory, which the vanilla schedule sleeps in). */
+    public static boolean assignBed(net.minecraft.world.entity.npc.Villager v, BlockPos bed) {
+        if (!(v.level() instanceof ServerLevel level) || !reserveBed(level, bed, v.getUUID())) return false;
+        v.getBrain().setMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME, net.minecraft.core.GlobalPos.of(level.dimension(), bed));
+        return true;
     }
 
     /** Frees the NPC's bed claim (death or despawn). */

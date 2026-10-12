@@ -36,6 +36,12 @@ public final class Schedule {
         boolean social = ((npc.getUUID().getLeastSignificantBits() >>> 3) + day) % 3 != 0;
         NpcRole role = npc.role();
         if (Marriage.isSpouse(npc)) return spouse(h);
+        // settlement residents with a housing-model job (inn staff, housekeepers, elders) keep that job's hours
+        String job = npc.getPersistentData().getString(Housing.JOB_KEY);
+        if (role == NpcRole.CITIZEN && !job.isEmpty()) {
+            if (job.equals("cook") || job.equals("server")) return h >= 1 && h < 8 ? Activity.SLEEP : Activity.WORK;
+            return household(h, social);
+        }
         return switch (role) {
             case INNKEEPER -> h < 6 ? Activity.SLEEP : Activity.WORK;
             case BARD -> h >= 2 && h < 10 ? Activity.SLEEP : h < 12 ? Activity.WANDER : h < 14 ? Activity.WORK
@@ -69,6 +75,17 @@ public final class Schedule {
         if (h < 13) return social ? Activity.LUNCH : Activity.EAT;
         if (h < 18) return Activity.WORK;
         if (h < 20) return Activity.WANDER;
+        return social ? Activity.INN : Activity.HOME;
+    }
+
+    /** Housekeeping adults and elders: chores indoors by day, the plaza or the inn in the evening. */
+    private static Activity household(int h, boolean social) {
+        if (h >= 22 || h < 6) return Activity.SLEEP;
+        if (h < 8) return Activity.EAT;
+        if (h < 12) return Activity.WORK;
+        if (h < 13) return social ? Activity.LUNCH : Activity.EAT;
+        if (h < 17) return Activity.WORK;
+        if (h < 19) return Activity.WANDER;
         return social ? Activity.INN : Activity.HOME;
     }
 

@@ -6,7 +6,12 @@ import com.skycraft.creatures.entity.GuardEntity;
 import com.skycraft.economy.Shop;
 import com.skycraft.roads.RoadsData;
 import com.skycraft.roads.Settlement;
+import com.skycraft.society.Housing;
 import com.skycraft.society.NpcRole;
+import com.skycraft.society.Settlers;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.npc.AbstractVillager;
+import org.jetbrains.annotations.Nullable;
 import com.skycraft.society.Npcs;
 import com.skycraft.society.entity.NpcEntity;
 import com.skycraft.survival.inn.Innkeepers;
@@ -39,14 +44,12 @@ import java.util.Optional;
  * counters (economy merchants); priests at the altar; hold guards at barracks, gates and palace; farmers, millers,
  * miners and townsfolk at their fields, mills, mines and beds. Each anchor is filled once (recorded in
  * {@link SettlementAnchors}), only while its chunk is entity-ticking.
+ *
+ * <p>How many people each settlement gets is decided by {@link Housing}: one resident per bed at most, a job tied to
+ * a workplace anchor for each, households in the beds that are left. Guild staff, guards, innkeepers and townsfolk
+ * all come through that plan; {@link #housing} is its cached form.</p>
  */
 public final class SettlementPopulation {
-    /** Upper bounds per settlement and kind (capital / town / village). */
-    private static final int[] GUARDS = {12, 4, 2}, MERCHANTS = {8, 3, 2}, CITIZENS = {14, 7, 4};
-
-    /** Most ambient townsfolk (beds, workers, farmers, bards...) standing around one settlement: capital / town / village. */
-    private static final int[] AMBIENT = {26, 15, 8};
-
     private SettlementPopulation() {}
 
     static void tick(ServerLevel level, ServerPlayer player) {
@@ -64,49 +67,54 @@ public final class SettlementPopulation {
         return 2;
     }
 
+    /** The housing plan per settlement, recomputed when more of its anchors have been recorded. */
+    private static final Map<String, Housing.Plan> PLANS = new java.util.HashMap<>();
+    private static final Map<String, Integer> PLAN_SIZE = new java.util.HashMap<>();
+
+    /** The housing model of a recorded settlement (cached until its anchor list grows). */
+    public static Housing.Plan housing(SettlementAnchors.Entry e) {
+        int size = e.anchors().size();
+        Integer have = PLAN_SIZE.get(e.key);
+        Housing.Plan plan = PLANS.get(e.key);
+        if (plan == null || have == null || have != size) {
+            plan = Housing.plan(e.key, e.anchors(), tier(e));
+            PLANS.put(e.key, plan);
+            PLAN_SIZE.put(e.key, size);
+        }
+        return plan;
+    }
+
+    /**
+     * Fills the settlement's workplaces and beds as the housing model allows: one person per job anchor (only when a
+     * bed is free for them), households in what is left, a bed claimed for every resident at spawn. Anchors are filled
+     * once ({@link SettlementAnchors.Entry#spawned}, saved); nothing is spawned from an anchor the plan has no one for.
+     */
     static void populate(ServerLevel level, SettlementAnchors data, SettlementAnchors.Entry e) {
         List<Anchor> list = e.anchors;
-        Map<AnchorType, Integer> counts = new EnumMap<>(AnchorType.class);
-        for (int i : e.spawned) if (i < list.size()) counts.merge(list.get(i).type(), 1, Integer::sum);
-        int tier = tier(e);
-        boolean capital = tier == 0;
-        RandomSource r = level.getRandom();
+        if (list.isEmpty() || e.homestead()) return;
+        Housing.Plan plan = housing(e);
+        boolean capital = tier(e) == 0;
         boolean changed = false;
         NpcEntity jarl = null;
-        int crowd = -1; // civilians already around the settlement, counted once and lazily
         for (int i = 0; i < list.size(); i++) {
             if (e.spawned.contains(i)) continue;
             Anchor a = list.get(i);
-            int have = counts.getOrDefault(a.type(), 0);
-            int cap = switch (a.type()) {
-                case JARL, STEWARD, WIZARD, HOUSECARL -> 1;
-                case GUARD -> GUARDS[tier];
-                case MERCHANT -> MERCHANTS[tier];
-                case BED -> CITIZENS[tier];
-                case INN, BARD, SMITH, ALCHEMIST, PRIEST, FARMER, MILLER, MINER, LUMBERJACK -> 3;
-                // faction halls (a city may keep several) and the jail's other inmates
-                case GUILD_LEADER, GUILD_VENDOR -> 12;
-                case GUILD_TRAINER -> 24;
-                case GUILD_BED -> 96;
-                case JAIL_PRISONER -> 4;
-                case JEWELER, BOOKSELLER, TAILOR, BUTCHER, FLETCHER, FISHER, HUNTER, WORKER -> 3;
-                case FENCE -> 1;
-                default -> 0;
-            };
-            if (cap == 0) continue;
-            if (have >= cap) {
-                e.spawned.add(i);
-                changed = true;
+            Housing.Resident res = plan.at(i);
+            if (res == null) {
+                // members' beds of a guild hall: no person, just the faction's ownership of the bed
+                if (a.type() == AnchorType.GUILD_BED && level.isPositionEntityTicking(a.pos())) {
+                    com.skycraft.quest.faction.FactionStaff.populate(level, a, a.pos(), e.key);
+                    e.spawned.add(i);
+                    changed = true;
+                }
                 continue;
             }
             if (!level.isPositionEntityTicking(a.pos())) continue;
-            if (ambient(a.type())) {
-                if (crowd < 0) {
-                    int r2 = Math.max(e.radius, 32) + 8;
-                    crowd = level.getEntitiesOfClass(NpcEntity.class, new net.minecraft.world.phys.AABB(e.x - r2, level.getMinBuildHeight(), e.z - r2,
-                            e.x + r2, level.getMaxBuildHeight(), e.z + r2), n -> n.isAlive() && n.role().civilian).size();
-                }
-                if (crowd >= AMBIENT[tier]) { // enough people about: this anchor stays empty
+            BlockPos bed = null;
+            if (res.bed() >= 0) {
+                bed = list.get(res.bed()).pos();
+                if (!Settlers.bedFree(level, bed)) bed = nearestFreeBed(level, list, a.pos());
+                if (bed == null) { // every bed is taken or gone: nobody lives here
                     e.spawned.add(i);
                     changed = true;
                     continue;
@@ -115,14 +123,13 @@ public final class SettlementPopulation {
             BlockPos at = standing(level, a.pos());
             boolean done;
             try {
-                done = switch (a.type()) {
+                AnchorType t = res.slotType();
+                done = switch (t) {
                     case JARL -> {
-                        if (!capital) yield true;
                         jarl = npc(level, at, NpcRole.JARL, jarlName(e.key), 10);
                         yield jarl != null;
                     }
                     case HOUSECARL -> {
-                        if (!capital) yield true;
                         NpcEntity hc = npc(level, at, NpcRole.HOUSECARL, null, 12);
                         if (hc != null && jarl != null) hc.setLeader(jarl.getUUID());
                         yield hc != null;
@@ -146,23 +153,13 @@ public final class SettlementPopulation {
                     case FENCE -> merchant(level, at, VillagerProfession.CARTOGRAPHER, "fence", "entity.skycraft.fence") != null;
                     case FISHER -> merchant(level, at, VillagerProfession.FISHERMAN, "fisher", "entity.skycraft.fishmonger", "food") != null;
                     case HUNTER -> merchant(level, at, VillagerProfession.LEATHERWORKER, "hunter", "entity.skycraft.hunter") != null;
-                    case WORKER -> npc(level, at, level.getRandom().nextBoolean() ? NpcRole.LUMBERJACK : NpcRole.MINER, null, 24) != null;
+                    case WORKER -> npc(level, at, i % 2 == 0 ? NpcRole.LUMBERJACK : NpcRole.MINER, null, 24) != null;
                     case GUARD -> guard(level, at);
-                    case GUILD_LEADER, GUILD_TRAINER, GUILD_VENDOR, GUILD_BED ->
+                    case GUILD_LEADER, GUILD_TRAINER, GUILD_VENDOR ->
                             com.skycraft.quest.faction.FactionStaff.populate(level, a, at, e.key);
                     case JAIL_PRISONER -> npc(level, at, NpcRole.BEGGAR, Component.translatable("entity.skycraft.prisoner"), 2) != null;
-                    case BED -> {
-                        // about one townsperson for every three beds
-                        if (r.nextInt(3) != 0) yield true;
-                        NpcRole role = switch (r.nextInt(5)) {
-                            case 0 -> NpcRole.HUNTER;
-                            case 1 -> NpcRole.LUMBERJACK;
-                            case 2 -> NpcRole.MINER;
-                            case 3 -> capital ? NpcRole.BARD : NpcRole.HUNTER;
-                            default -> r.nextInt(6) == 0 ? NpcRole.BEGGAR : NpcRole.LUMBERJACK;
-                        };
-                        yield npc(level, at, role, null, 20) != null;
-                    }
+                    // a bed's household: child, elder, a pair of hands at the nearest field or camp, inn cook/server
+                    case BED -> res.role() != null && npc(level, at, res.role(), null, 40) != null;
                     default -> true;
                 };
             } catch (RuntimeException ex) {
@@ -170,21 +167,56 @@ public final class SettlementPopulation {
                 done = true;
             }
             if (done) {
+                adopt(level, at, res, list, bed);
                 e.spawned.add(i);
-                counts.merge(a.type(), 1, Integer::sum);
-                if (crowd >= 0 && ambient(a.type())) crowd++;
                 changed = true;
             }
         }
         if (changed) data.setDirty();
     }
 
-    /** Anchors that are scenery population rather than a named post (jarl, guards, shopkeepers, guilds). */
-    private static boolean ambient(AnchorType t) {
-        return switch (t) {
-            case BED, WORKER, MINER, LUMBERJACK, MILLER, FARMER, HUNTER, FISHER, BARD, FLETCHER, TAILOR, BUTCHER -> true;
-            default -> false;
-        };
+    /** The nearest household bed anchor of the settlement that nobody holds, or null. */
+    @Nullable
+    private static BlockPos nearestFreeBed(ServerLevel level, List<Anchor> list, BlockPos from) {
+        BlockPos best = null;
+        double bestD = Double.MAX_VALUE;
+        for (Anchor b : list) {
+            if (b.type() != AnchorType.BED || !Settlers.bedFree(level, b.pos())) continue;
+            double d = b.pos().distSqr(from);
+            if (d < bestD) {
+                bestD = d;
+                best = b.pos();
+            }
+        }
+        return best;
+    }
+
+    /**
+     * Ties the person just spawned at {@code at} to the housing plan: records the job, the workplace anchor (for
+     * villager shopkeepers' hours and the NPC routine) and the exact bed they sleep in (their home from then on).
+     */
+    private static void adopt(ServerLevel level, BlockPos at, Housing.Resident res, List<Anchor> list, @Nullable BlockPos bed) {
+        BlockPos post = res.work() >= 0 && res.work() < list.size() ? standing(level, list.get(res.work()).pos()) : null;
+        for (LivingEntity l : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(at).inflate(5),
+                x -> x.isAlive() && x.tickCount <= 2 && !x.getPersistentData().contains(Housing.JOB_KEY)
+                        && (x instanceof NpcEntity || x instanceof AbstractVillager || x instanceof GuardEntity))) {
+            CompoundTag pd = l.getPersistentData();
+            pd.putString(Housing.JOB_KEY, res.job());
+            if (post != null) pd.putLong(Housing.WORK_KEY, post.asLong());
+            if (res.household()) { // free hours at the plaza the plan picked for them, or indoors when it is full
+                pd.putLong(com.skycraft.society.Workplaces.PLAZA_KEY,
+                        res.leisure() >= 0 ? list.get(res.leisure()).pos().asLong() : Long.MIN_VALUE);
+            }
+            if (l instanceof NpcEntity n) {
+                if (post != null) n.setWorkplace(post);
+                if (bed != null) Settlers.assignBed(n, bed, 40);
+            } else if (l instanceof Villager v) {
+                if (bed != null) Settlers.assignBed(v, bed);
+            } else if (bed != null) {
+                Settlers.reserveBed(level, bed, l.getUUID()); // a barracks bed: held for the guard
+            }
+            return;
+        }
     }
 
     /** Settlement tier at a position: 0 capital/city, 1 town, 2 village, 3 not in a settlement. */

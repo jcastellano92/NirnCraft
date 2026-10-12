@@ -1044,7 +1044,7 @@ final class NpcGoals {
                 case WORK -> {
                     BlockPos work = Workplaces.workplaceOf(npc);
                     if (work == null) {
-                        stroll(home, 10, 0.5D, 4);
+                        chores(home); // no workplace: household tasks indoors, never loitering in the street
                     } else if (!arrived(work, 5)) {
                         go(work, 0.65D, 3);
                     } else {
@@ -1064,17 +1064,47 @@ final class NpcGoals {
                     }
                 }
                 case WANDER -> {
-                    stroll(home, Math.max(8, (int) Math.min(24, npc.getRestrictRadius() * 0.7)), 0.5D, 3);
+                    // free hours: the plaza (their own slot around a meeting point) from midday, indoors chores before
+                    BlockPos spot = leisureSpot();
+                    if (spot == null || com.skycraft.society.Schedule.hour(level) < 12) chores(home);
+                    else if (!arrived(spot, 4)) go(spot, 0.55D, 3);
+                    else stroll(spot, 2, 0.4D, 8);
                     com.skycraft.society.Chatter.tryStart(npc);
                 }
                 case PLAY -> {
-                    stroll(home, 14, 0.85D, 2);
+                    BlockPos spot = leisureSpot();
+                    if (spot == null) stroll(npc.getBed() != null ? npc.getBed() : home, 5, 0.85D, 2);
+                    else if (!arrived(spot, 6)) go(spot, 0.8D, 4);
+                    else stroll(spot, 5, 0.85D, 2);
                     com.skycraft.society.Chatter.tryStart(npc);
                 }
                 default -> {
                 }
             }
             follow();
+        }
+
+        // -------- idle places
+
+        @Nullable
+        private BlockPos leisure;
+        private int nextLeisure;
+
+        /** This person's own spot at the settlement's plaza/meeting point (see {@link Workplaces#leisureFor}). */
+        @Nullable
+        private BlockPos leisureSpot() {
+            if (leisure == null && npc.tickCount >= nextLeisure) {
+                leisure = Workplaces.leisureFor(npc);
+                if (leisure == null) nextLeisure = npc.tickCount + 1200;
+            }
+            return leisure;
+        }
+
+        /** Household tasks: stay at (or in) the home, by the bed, instead of standing about in the street. */
+        private void chores(BlockPos home) {
+            BlockPos at = npc.getBed() != null ? npc.getBed() : home;
+            if (!arrived(at, 5)) go(at, 0.55D, 3);
+            else stroll(at, 3, 0.4D, 6);
         }
 
         // -------- movement

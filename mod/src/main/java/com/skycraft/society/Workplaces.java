@@ -71,6 +71,70 @@ public final class Workplaces {
         return Anchors.get(level).nearest(kind, near, radius);
     }
 
+    /** Every anchor of a kind within {@code radius} of {@code near}, nearest first (horizontal distance). */
+    public static java.util.List<BlockPos> anchors(ServerLevel level, BlockPos near, Kind kind, int radius) {
+        return Anchors.get(level).within(kind, near, radius);
+    }
+
+    /** Persistent-data key of the leisure spot cached on a person (a packed block position). */
+    public static final String LEISURE_KEY = "skycraft_leisure";
+    /** The meeting point the housing plan assigned (packed position; {@code Long.MIN_VALUE}: none, stays indoors). */
+    public static final String PLAZA_KEY = "skycraft_plaza";
+
+    /**
+     * Where this person spends free hours: a slot around one of the settlement's meeting points (the three nearest are
+     * shared out by the person's id, each person gets their own offset on a ring), so nobody idles in the street in
+     * front of a house and a plaza fills evenly. Cached on the NPC; null when the settlement has no meeting point.
+     */
+    @Nullable
+    public static BlockPos leisureFor(NpcEntity npc) {
+        if (!(npc.level() instanceof ServerLevel level)) return null;
+        return leisureFor(level, npc, npc.getHome() != null ? npc.getHome() : npc.blockPosition());
+    }
+
+    /** {@link #leisureFor(NpcEntity)} for any settler (villager shopkeepers too), cached in its persistent data. */
+    @Nullable
+    public static BlockPos leisureFor(ServerLevel level, net.minecraft.world.entity.Entity who, BlockPos home) {
+        CompoundTag pd = who.getPersistentData();
+        if (pd.contains(LEISURE_KEY)) return BlockPos.of(pd.getLong(LEISURE_KEY));
+        long id = who.getUUID().getLeastSignificantBits();
+        BlockPos centre;
+        if (pd.contains(PLAZA_KEY)) { // the housing plan chose this person's plaza (or none: chores indoors)
+            long v = pd.getLong(PLAZA_KEY);
+            if (v == Long.MIN_VALUE) return null;
+            centre = BlockPos.of(v);
+        } else {
+            java.util.List<BlockPos> spots = anchors(level, home, Kind.MARKET, 72);
+            if (spots.isEmpty()) return null;
+            centre = spots.get((int) Math.floorMod(id >>> 5, (long) Math.min(3, spots.size())));
+        }
+        int ring = 2 + (int) Math.floorMod(id >>> 11, 4L);
+        int steps = 12;
+        int first = (int) Math.floorMod(id >>> 17, (long) steps);
+        BlockPos best = centre;
+        boolean found = false;
+        for (int k = 0; k < steps && !found; k++) {
+            double ang = (first + k) * (Math.PI * 2 / steps);
+            int x = centre.getX() + (int) Math.round(Math.cos(ang) * ring);
+            int z = centre.getZ() + (int) Math.round(Math.sin(ang) * ring);
+            if (!level.isLoaded(new BlockPos(x, centre.getY(), z))) continue;
+            // the plaza floor: about the bell's level, open above, solid below, dry
+            for (int dy : new int[]{0, 1, -1}) {
+                BlockPos q = new BlockPos(x, centre.getY() + dy, z);
+                if (level.getBlockState(q).getCollisionShape(level, q).isEmpty()
+                        && level.getBlockState(q.above()).getCollisionShape(level, q.above()).isEmpty()
+                        && level.getBlockState(q.below()).isFaceSturdy(level, q.below(), net.minecraft.core.Direction.UP)
+                        && level.getFluidState(q).isEmpty()) {
+                    best = q;
+                    found = true;
+                    break;
+                }
+            }
+        }
+        pd.putLong(LEISURE_KEY, best.asLong());
+        return best;
+    }
+
     // ------------------------------------------------------------------ lookups
 
     /** The kind of place a role works at, or null if it works wherever it is (citizens, beggars...). */
@@ -245,6 +309,24 @@ public final class Workplaces {
                 }
             }
             return found == Long.MIN_VALUE ? null : BlockPos.of(found);
+        }
+
+        java.util.List<BlockPos> within(Kind kind, BlockPos near, int radius) {
+            LongArrayList list = byKind.get(kind);
+            java.util.List<BlockPos> out = new java.util.ArrayList<>();
+            if (list == null) return out;
+            long max = (long) radius * radius;
+            java.util.List<long[]> hits = new java.util.ArrayList<>();
+            for (int i = 0; i < list.size(); i++) {
+                long l = list.getLong(i);
+                long dx = BlockPos.getX(l) - near.getX();
+                long dz = BlockPos.getZ(l) - near.getZ();
+                long d = dx * dx + dz * dz;
+                if (d <= max) hits.add(new long[]{d, l});
+            }
+            hits.sort(java.util.Comparator.comparingLong(h -> h[0]));
+            for (long[] h : hits) out.add(BlockPos.of(h[1]));
+            return out;
         }
 
         static Anchors load(CompoundTag tag) {
