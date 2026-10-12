@@ -145,6 +145,17 @@ public class DungeonPiece extends StructurePiece {
     @Override
     public void postProcess(WorldGenLevel level, StructureManager structures, ChunkGenerator generator, RandomSource random,
                             BoundingBox chunkBox, ChunkPos chunkPos, BlockPos pivot) {
+        paint(level, chunkBox);
+        // entrances and surface works cut trees: take the crowns and stubs they left hanging with them
+        int cx = (chunkBox.minX() + chunkBox.maxX()) >> 1, cz = (chunkBox.minZ() + chunkBox.maxZ()) >> 1;
+        if (boundingBox.maxY() >= level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE_WG, cx, cz) - 8) {
+            com.skycraft.world.OrphanSweep.sweep(level, Math.max(boundingBox.minX(), chunkBox.minX()), Math.max(boundingBox.minZ(), chunkBox.minZ()),
+                    Math.min(boundingBox.maxX(), chunkBox.maxX()), Math.min(boundingBox.maxZ(), chunkBox.maxZ()), 8,
+                    chunkBox.minX() - 14, chunkBox.minZ() - 14, chunkBox.maxX() + 14, chunkBox.maxZ() + 14, null);
+        }
+    }
+
+    private void paint(WorldGenLevel level, BoundingBox chunkBox) {
         Painter p = new Painter(level, chunkBox, this.boundingBox, seed);
         if (p.empty()) return;
         p.kit = kit;

@@ -471,7 +471,7 @@ public final class Builders {
         int dx = 0, dz = 0;
         boolean any = false;
         for (int i = 0; i < len; i++) {
-            if (br.r.nextInt(4) > 0) any |= br.top(dx, dz, 0, Blocks.RED_CARPET);
+            // (no carpet "blood": a red carpet strip outdoors reads as litter; the skull, bone and gear tell it)
             int step = br.r.nextInt(5);
             if (step < 3) dz++;
             else if (step == 3) dx++;
@@ -479,7 +479,10 @@ public final class Builders {
             if (br.b.waterAt(dx, dz)) break;
         }
         int y = br.gy(dx, dz);
-        if (br.b.free(dx, y, dz)) br.b.skull(dx, y, dz);
+        if (br.b.free(dx, y, dz)) {
+            br.b.skull(dx, y, dz);
+            any = true;
+        }
         br.b.lying(dx + 1, br.gy(dx + 1, dz), dz, new ItemStack(Items.BONE));
         int lvl = br.b.gearLevel();
         ItemStack w = LeveledGear.weapon(lvl, br.r);

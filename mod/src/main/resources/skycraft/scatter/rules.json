@@ -5,15 +5,15 @@
   "wayside": { "density": 0.48, "kinds": {"cart_wreck": 1.4, "firewood_stack": 1.5, "cairn": 1.5, "fire_pit_cold": 1, "camp_leavings": 0.7, "grave": 0.4, "boulder_field": 0.6, "fallen_log": 0.6} },
   "zones": {
     "urban_fringe": [
-      { "scale": "human", "density": 2.38, "kinds": {"cart_wreck": 1.4, "crate_stack": 3, "firewood_stack": 3, "broken_fence": 2.5, "tool_litter": 2, "rubbish_heap": 2.5, "grave": 1.2, "rubble_pile": 1.5, "water_trough": 1, "plank_stack": 1.5, "lean_to": 1.3, "drying_rack": 0.8, "broken_pen": 1, "cemetery": 0.35, "rubbish_yard": 0.5, "farmstead_clutter": 0.5} },
+      { "scale": "human", "density": 2.38, "kinds": {"cart_wreck": 1.4, "crate_stack": 3, "firewood_stack": 3, "tool_litter": 2, "rubbish_heap": 2.5, "grave": 1.2, "water_trough": 1, "plank_stack": 1.5, "lean_to": 1.3, "drying_rack": 0.8, "cemetery": 0.35, "rubbish_yard": 0.5, "farmstead_clutter": 0.5} },
       { "scale": "wild", "density": 0.49, "kinds": {"boulder_field": 2, "fallen_log": 1} }
     ],
     "farmland": [
-      { "scale": "human", "density": 1.82, "kinds": {"field_plot": 4, "hay_pile": 1.5, "broken_fence": 3, "scarecrow": 1.5, "broken_pen": 1.5, "water_trough": 1.5, "firewood_stack": 1.5, "cart_wreck": 0.7, "tool_litter": 1.5, "plank_stack": 1, "farmstead_clutter": 0.8, "lean_to": 0.4} },
+      { "scale": "human", "density": 1.82, "kinds": {"field_plot": 4, "hay_pile": 1.5, "scarecrow": 1.5, "water_trough": 1.5, "firewood_stack": 1.5, "cart_wreck": 0.7, "tool_litter": 1.5, "plank_stack": 1, "farmstead_clutter": 0.8, "lean_to": 0.4} },
       { "scale": "wild", "density": 1.68, "kinds": {"wildflowers": 3, "boulder_field": 2, "fallen_log": 2, "berry_patch": 2, "hollow_stump": 0.6, "mushroom_ring": 0.5, "bone_pile": 0.3} }
     ],
     "roadside": [
-      { "scale": "human", "density": 0.91, "kinds": {"cart_wreck": 1.75, "cairn": 1.5, "fire_pit_cold": 1.5, "camp_leavings": 0.9, "broken_fence": 0.8, "grave": 0.5} },
+      { "scale": "human", "density": 0.91, "kinds": {"cart_wreck": 1.75, "cairn": 1.5, "fire_pit_cold": 1.5, "camp_leavings": 0.9, "grave": 0.5} },
       { "scale": "wild", "density": 1.54, "kinds": {"boulder_field": 2, "wildflowers": 2, "fallen_log": 1.5, "berry_patch": 1.2, "hollow_stump": 0.5, "mushroom_ring": 0.4} }
     ],
     "shore": [

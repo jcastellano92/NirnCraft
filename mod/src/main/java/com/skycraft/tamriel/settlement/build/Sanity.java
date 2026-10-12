@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.LadderBlock;
 import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.PressurePlateBlock;
+import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -49,6 +50,8 @@ public final class Sanity {
                         }
                     } else if (b instanceof TrapDoorBlock) {
                         if (!anyNeighbour(level, chunkBox, p)) level.setBlock(p, air, 2);
+                    } else if (b instanceof StairBlock) {
+                        if (strayStair(level, chunkBox, p)) level.setBlock(p, air, 2);
                     } else if (b instanceof CarpetBlock || b instanceof PressurePlateBlock) {
                         if (!supported(level, chunkBox, p.below())) level.setBlock(p, air, 2);
                     } else if (b instanceof LanternBlock) {
@@ -67,6 +70,22 @@ public final class Sanity {
                 }
             }
         }
+    }
+
+    /**
+     * A stair that hangs on nothing: air below it and no block beside it, above it or one step up/down any side
+     * (a flight's neighbours are the next steps; a stair against a wall or on a deck has something). Unknown
+     * (outside the chunk) neighbours count as present.
+     */
+    private static boolean strayStair(WorldGenLevel level, BoundingBox chunkBox, BlockPos p) {
+        if (supported(level, chunkBox, p.below())) return false;
+        for (Direction d : Direction.Plane.HORIZONTAL) {
+            for (int dy = -1; dy <= 1; dy++) {
+                BlockPos n = p.relative(d).above(dy);
+                if (supported(level, chunkBox, n)) return false;
+            }
+        }
+        return !supported(level, chunkBox, p.above()) ;
     }
 
     private static boolean inside(BoundingBox box, BlockPos p) {

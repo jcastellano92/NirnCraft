@@ -36,7 +36,8 @@ final class RoadPlanner {
     private static final int[] DX = {0, 1, 1, 1, 0, -1, -1, -1};
     private static final int[] DZ = {-1, -1, 0, 1, 1, 1, 0, -1};
     private static final double SLOPE_K = 25.0;
-    private static final int CLIFF = 8;
+    /** A rise above 1:2 between neighbouring cells is a cliff: the road switches back instead (stairs/ramp only where nothing else fits). */
+    private static final int CLIFF = CELL / 2;
     private static final double CLIFF_COST = 400.0;
     private static final double SHALLOW_WATER = 6.0;
     private static final double DEEP_WATER = 30.0;
@@ -253,7 +254,7 @@ final class RoadPlanner {
         int sea = job.seaLevel();
         boolean fineGrid = cell == CELL;
         // a cliff is a rise steeper than 1:1 between neighbouring cells, whatever the grid size
-        int cliff = fineGrid ? CLIFF : (int) Math.round(cell * 0.6);
+        int cliff = fineGrid ? CLIFF : (int) Math.round(cell * 0.5);
         double cliffCost = CLIFF_COST * cell / CELL;
 
         Long2ObjectOpenHashMap<Node> nodes = new Long2ObjectOpenHashMap<>();

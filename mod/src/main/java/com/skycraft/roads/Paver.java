@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.WallSignBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
@@ -168,6 +169,7 @@ final class Paver {
         final List<HomesteadClaim> claims;
         int cursor;
         long tick = Long.MIN_VALUE;
+        boolean swept;
 
         private Task(long chunk, int n, List<RoadFeature> features, List<BoundingBox> pieces, List<HomesteadClaim> claims) {
             this.chunk = chunk;
@@ -331,8 +333,74 @@ final class Paver {
                     default -> placeLantern(level, this, feature);
                 };
             }
+            if (!swept) {
+                swept = true;
+                int ramps = rampFix(level, this);
+                // crowns and stubs the cutting left hanging (a tree too big to cut whole, a crown past the cut radius)
+                int n = com.skycraft.world.OrphanSweep.sweep(level, cx * 16, cz * 16, cx * 16 + 15, cz * 16 + 15, 6,
+                        cx * 16 - 14, cz * 16 - 14, cx * 16 + 29, cz * 16 + 29,
+                        p -> PlacedBlocks.isPlayerPlaced(level, p) || reserved(level, p.getX(), p.getY(), p.getZ()));
+                if (n + ramps > 0) return n + ramps;
+            }
             return -1;
         }
+    }
+
+    // ------------------------------------------------------------------ ramps
+
+    /** Height of a column's road surface block, or MIN_VALUE where the top is not our road (or is a bridge deck). */
+    private static int roadTop(ServerLevel level, int x, int z) {
+        if (level.getChunkSource().getChunkNow(x >> 4, z >> 4) == null) return Integer.MIN_VALUE;
+        int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
+        BlockState s = level.getBlockState(new BlockPos(x, y, z));
+        if (!isRoadMaterial(s) || s.getBlock() instanceof SlabBlock) return Integer.MIN_VALUE;
+        if (!level.getBlockState(new BlockPos(x, y - 1, z)).getFluidState().isEmpty()) return Integer.MIN_VALUE;
+        return y;
+    }
+
+    /**
+     * No cliff inside a road: where a paved column stands more than one block under a paved neighbour, it is
+     * raised to one block below it (a few passes spread the step into a ramp of one block per column, a stair
+     * the width of the road). Only this task's own columns are changed; deep drops (over four blocks) are left
+     * to the planner's switchbacks.
+     */
+    private static int rampFix(ServerLevel level, Task task) {
+        int changes = 0;
+        BlockState dirt = Blocks.DIRT.defaultBlockState();
+        BlockState air = Blocks.AIR.defaultBlockState();
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        for (int pass = 0; pass < 8; pass++) {
+            int fixed = 0;
+            for (int i = 0; i < task.colX.length; i++) {
+                if (task.colRoad[i] < 0) continue;
+                int x = task.colX[i], z = task.colZ[i];
+                int y = roadTop(level, x, z);
+                if (y == Integer.MIN_VALUE) continue;
+                int want = y;
+                for (Direction d : Direction.Plane.HORIZONTAL) {
+                    int ny = roadTop(level, x + d.getStepX(), z + d.getStepZ());
+                    if (ny != Integer.MIN_VALUE && ny - y > 1) want = Math.max(want, ny - 1);
+                }
+                if (want == y || want - y > 4 || task.reserved(level, x, y, z)) continue;
+                p.set(x, y, z);
+                BlockState surf = level.getBlockState(p);
+                if (PlacedBlocks.isPlayerPlaced(level, p)) continue;
+                for (int yy = y; yy < want; yy++) {
+                    p.set(x, yy, z);
+                    if (level.setBlock(p, dirt, QUIET)) changes++;
+                }
+                p.set(x, want, z);
+                if (level.setBlock(p, surf, QUIET)) changes++;
+                for (int yy = want + 1; yy <= want + 3; yy++) {
+                    p.set(x, yy, z);
+                    BlockState s = level.getBlockState(p);
+                    if (!s.isAir() && clearable(s) && !PlacedBlocks.isPlayerPlaced(level, p) && level.setBlock(p, air, QUIET)) changes++;
+                }
+                fixed++;
+            }
+            if (fixed == 0) break;
+        }
+        return changes;
     }
 
     // ------------------------------------------------------------------ road surface
@@ -484,7 +552,7 @@ final class Paver {
         return changes;
     }
 
-    private static final int TREE_MAX_LOGS = 160;
+    private static final int TREE_MAX_LOGS = 700;
 
     /**
      * Cuts the tree whose trunk or branch is at {@code start}: connected natural logs (26-neighbourhood) and the leaves

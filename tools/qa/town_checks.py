@@ -269,6 +269,50 @@ def floating_column(area, cx, cz):
                     return None
     return y + area.y1
 
+def floating_vegetation(world, cx, cz, r=150, y1=40, y2=330):
+    """Count log/leaf blocks that float: connected (6-neighbour) components of logs+leaves+wood where no log has a
+    non-vegetation solid block directly below it and no leaf sits on one. Components touching the box edge or an
+    unloaded column are ignored. Returns dict(components, logs, leaves, samples)."""
+    from scipy import ndimage
+    x1, z1, x2, z2 = cx - r, cz - r, cx + r, cz + r
+    A = world.box(x1, z1, x2, z2, y1, y2)
+    names = list(world.names)
+    air, water, _soft = block_flags(names)
+    base = [n.split(':')[-1] for n in names]
+    isleaf = np.array([b.endswith('leaves') for b in base])
+    islog = np.array([b.endswith('_log') or b.endswith('_wood') or b.endswith('_stem') for b in base])
+    leaf, log = isleaf[A], islog[A]
+    veg = leaf | log
+    loaded = (A != 0).any(0)
+    solid_other = ~air[A] & ~water[A] & ~veg
+    sup = np.zeros_like(veg)
+    sup[1:] = veg[1:] & solid_other[:-1]
+    sup[0] = veg[0]
+    lab, n = ndimage.label(veg, structure=np.ones((3, 3, 3), bool))  # 26-connected: diagonal contact reads as attached
+    if n == 0:
+        return dict(components=0, logs=0, leaves=0, samples=[])
+    grounded = np.zeros(n + 1, bool)
+    grounded[np.unique(lab[sup])] = True
+    edge = np.zeros(veg.shape, bool)
+    edge[:, 0, :] = edge[:, -1, :] = edge[:, :, 0] = edge[:, :, -1] = True
+    edge[0] = True
+    edge |= ndimage.binary_dilation(~loaded, iterations=2)[None]
+    grounded[np.unique(lab[edge & veg])] = True
+    bad = ~grounded
+    bad[0] = False
+    ids = np.nonzero(bad)[0]
+    logs = leaves = 0
+    samples = []
+    if len(ids):
+        m = bad[lab]
+        logs = int((m & log).sum())
+        leaves = int((m & leaf).sum())
+        objs = ndimage.find_objects(lab)
+        for i in ids[:6]:
+            sl = objs[i - 1]
+            samples.append((x1 + (sl[2].start + sl[2].stop) // 2, y1 + sl[0].start, z1 + (sl[1].start + sl[1].stop) // 2))
+    return dict(components=int(len(ids)), logs=logs, leaves=leaves, samples=samples)
+
 PROP_KINDS = {'YARD', 'STALL'}
 SOFT_PROPS = {'GARDEN', 'PEN'}
 
@@ -596,6 +640,7 @@ def main():
     ap.add_argument('world')
     ap.add_argument('samples', nargs='?', default=None)
     ap.add_argument('--json', default=None)
+    ap.add_argument('--floating', default=None, help='comma list of place ids: count floating logs/leaves within 150')
     a = ap.parse_args()
     samples = json.load(open(a.samples, encoding='utf8')) if a.samples else []
     world = World(a.world)
@@ -626,6 +671,15 @@ def main():
                     sum(x['features'] for x in rows)))
         print('towns with no road feature within 100 m of the wall: %d of %d' % (
             sum(1 for r in ok if r.get('outer_features_100', 0) == 0), len(ok)))
+    if a.floating:
+        for nm in a.floating.split(','):
+            pl = next((x for x in roads.settlements.values() if x['place'] == nm), None)
+            if pl is None:
+                print('FLOATING %s: not in road data' % nm)
+                continue
+            f = floating_vegetation(world, pl['x'], pl['z'])
+            print('FLOATING %-12s within 150 blocks: components=%d log_blocks=%d leaf_blocks=%d %s' % (
+                nm, f['components'], f['logs'], f['leaves'], f['samples'][:3]))
     if a.json:
         json.dump(allres, open(a.json, 'w'), indent=1, default=str)
 

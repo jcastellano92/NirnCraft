@@ -70,7 +70,7 @@
     "variants": [
       [ {"p": [0,-1,0], "b": "coarse_dirt"}, {"p": [1,-1,0], "b": "podzol"}, {"p": [0,-1,1], "b": "gravel"},
         {"p": [0,0,0], "b": "gravel"}, {"p": [1,0,0], "b": "coarse_dirt"}, {"p": [0,0,1], "b": "dead_bush", "chance": 0.5},
-        {"p": [0,1,0], "b": "cobweb", "chance": 0.3}, {"p": [-1,0,0], "item": "rotten_flesh", "chance": 0.7},
+        {"p": [-1,0,0], "item": "rotten_flesh", "chance": 0.7},
         {"p": [1,0,1], "item": "bone", "chance": 0.6}, {"p": [0,0,-1], "item": "bowl", "chance": 0.5}, {"p": [2,0,0], "item": "stick", "chance": 0.5},
         {"p": [1,1,0], "b": "brown_mushroom", "chance": 0.3} ]
     ]
@@ -90,8 +90,7 @@
         {"p": [0,1,-1], "b": "$rockslab", "chance": 0.7}, {"p": [0,0,0], "b": ["poppy", "lily_of_the_valley", "azure_bluet", "dandelion"], "chance": 0.7} ],
       [ {"p": [0,0,-1], "b": "$fence"}, {"p": [0,1,-1], "b": "$fence"}, {"p": [1,1,-1], "b": "$fence"}, {"p": [-1,1,-1], "b": "$fence"},
         {"p": [0,-1,0], "b": "coarse_dirt"}, {"p": [0,-1,1], "b": "coarse_dirt"}, {"p": [0,0,1], "b": "$rockslab"} ],
-      [ {"p": [0,-1,0], "b": "coarse_dirt"}, {"p": [0,0,-1], "b": "$rock"}, {"p": [0,1,-1], "b": "$rockslab"}, {"skull": [0,0,0], "chance": 0.4},
-        {"p": [1,0,0], "b": "cobweb", "chance": 0.2} ]
+      [ {"p": [0,-1,0], "b": "coarse_dirt"}, {"p": [0,0,-1], "b": "$rock"}, {"p": [0,1,-1], "b": "$rockslab"}, {"skull": [0,0,0], "chance": 0.4} ]
     ]
   },
   "rubble_pile": { "purpose": "fallen masonry of a wall that has not been repaired", "needs": ["dungeon_adjacent", "ruin_adjacent", "urban_fringe"], "clue": "a mason's mark on a block", "tags": ["human"], "builder": "rubble_pile", "radius": 4, "items": 2, "ground": ["soil", "sand", "stone", "snow", "mud", "ash"] },
@@ -151,7 +150,7 @@
     "tags": ["human"], "radius": 2, "items": 1,
     "variants": [
       [ {"p": [0,0,0], "b": "$rock"}, {"p": [1,0,0], "b": "$rock"}, {"p": [0,0,1], "b": "$rock"}, {"p": [-1,0,0], "b": "$rockslab"},
-        {"p": [0,1,0], "b": "$rock"}, {"p": [0,2,0], "b": "$rockwall"}, {"skull": [0,3,0]}, {"p": [0,0,-1], "b": "cobweb", "chance": 0.4} ]
+        {"p": [0,1,0], "b": "$rock"}, {"p": [0,2,0], "b": "$rockwall"}, {"skull": [0,3,0]} ]
     ]
   },
   "webbed_corpse": { "purpose": "a victim wrapped by spiders from the cave nearby", "needs": ["dungeon_adjacent"], "clue": "a satchel with a name tag",

@@ -170,6 +170,9 @@ public class SettlementPiece extends StructurePiece {
         try {
             Builders.build(c, this);
             com.skycraft.tamriel.settlement.build.Sanity.sweep(level, clip, chunkBox);
+            // crowns and trunk stubs the clearing left hanging, here and in the neighbouring chunks of the region
+            com.skycraft.world.OrphanSweep.sweep(level, clip.minX(), clip.minZ(), clip.maxX(), clip.maxZ(), 10,
+                    chunkBox.minX() - 14, chunkBox.minZ() - 14, chunkBox.maxX() + 14, chunkBox.maxZ() + 14, null);
         } catch (RuntimeException e) {
             Skycraft.LOGGER.error("Settlement piece {} of {} failed in chunk {}", spec.kind, settlement, chunkPos, e);
         }

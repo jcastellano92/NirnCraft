@@ -269,26 +269,68 @@ final class TreeBuilder {
 
     // ---------------------------------------------------------------------------------------------- writing
     /**
-     * Writes the tree. Logs replace only air, plants, snow, water and leaves (anchors may also replace soil); leaves
-     * get their distance to the nearest log, and those too far for vanilla's decay rule become persistent.
-     * Returns false (writing nothing) when the trunk's foot is blocked.
+     * Writes the tree. Logs replace only air, plants, snow, water and leaves (anchors may also replace soil). Only
+     * what is really connected is written: logs that can be written and reach a log standing on solid ground, and
+     * leaves touching those logs (through other leaves), so a branch blocked by a cliff or by the box edge never
+     * leaves a crown or a trunk stub hanging in the air. Leaves get their distance to the nearest log, and those
+     * too far for vanilla's decay rule become persistent. Returns false (writing nothing) when the trunk's foot is
+     * blocked or nothing of the tree would stand on the ground.
      */
     boolean commit(int baseX, int baseY, int baseZ) {
         if (!GenBox.isSoft(box.get(baseX, baseY, baseZ)) && !logs.containsKey(key(baseX, baseY, baseZ))) return false;
         BlockState atBase = box.get(baseX, baseY, baseZ);
         if (atBase.is(BlockTags.LOGS)) return false;
+        // logs that can be written at all
+        LongOpenHashSet writable = new LongOpenHashSet();
         for (Long2ObjectMap.Entry<BlockState> e : logs.long2ObjectEntrySet()) {
             long k = e.getLongKey();
             int x = BlockPos.getX(k), y = BlockPos.getY(k), z = BlockPos.getZ(k);
+            if (!box.contains(x, y, z)) continue;
             BlockState here = box.get(x, y, z);
-            boolean ok = GenBox.isSoft(here) || (anchors.contains(k) && isGround(here));
-            if (ok) box.set(x, y, z, waterlog(e.getValue(), here));
+            if (GenBox.isSoft(here) || (anchors.contains(k) && isGround(here))) writable.add(k);
+        }
+        // the logs connected (26-neighbourhood) to one standing on solid ground
+        LongOpenHashSet rooted = new LongOpenHashSet();
+        LongArrayFIFOQueue queue = new LongArrayFIFOQueue();
+        for (long k : writable) {
+            long below = BlockPos.offset(k, Direction.DOWN);
+            if (writable.contains(below)) continue;
+            int bx = BlockPos.getX(below), by = BlockPos.getY(below), bz = BlockPos.getZ(below);
+            if (!box.contains(bx, by, bz)) continue;
+            BlockState b = box.get(bx, by, bz);
+            if (!GenBox.isSoft(b) && !b.is(BlockTags.LOGS) && b.blocksMotion() && rooted.add(k)) queue.enqueue(k);
+        }
+        if (rooted.isEmpty()) return false;
+        while (!queue.isEmpty()) {
+            long k = queue.dequeueLong();
+            int x = BlockPos.getX(k), y = BlockPos.getY(k), z = BlockPos.getZ(k);
+            for (int dx = -1; dx <= 1; dx++) for (int dy = -1; dy <= 1; dy++) for (int dz = -1; dz <= 1; dz++) {
+                if ((dx | dy | dz) == 0) continue;
+                long n = key(x + dx, y + dy, z + dz);
+                if (writable.contains(n) && rooted.add(n)) queue.enqueue(n);
+            }
+        }
+        for (long k : rooted) {
+            int x = BlockPos.getX(k), y = BlockPos.getY(k), z = BlockPos.getZ(k);
+            BlockState here = box.get(x, y, z);
+            box.set(x, y, z, waterlog(logs.get(k), here));
+        }
+        // leaves reachable from the written logs through leaves (26-neighbourhood: nothing hangs on its own)
+        LongOpenHashSet kept = new LongOpenHashSet();
+        for (long k : rooted) queue.enqueue(k);
+        while (!queue.isEmpty()) {
+            long k = queue.dequeueLong();
+            int x = BlockPos.getX(k), y = BlockPos.getY(k), z = BlockPos.getZ(k);
+            for (int dx = -1; dx <= 1; dx++) for (int dy = -1; dy <= 1; dy++) for (int dz = -1; dz <= 1; dz++) {
+                if ((dx | dy | dz) == 0) continue;
+                long n = key(x + dx, y + dy, z + dz);
+                if (leaves.containsKey(n) && box.contains(x + dx, y + dy, z + dz) && kept.add(n)) queue.enqueue(n);
+            }
         }
         // leaf distances: breadth-first from the logs, through leaves only
-        Long2IntOpenHashMap dist = new Long2IntOpenHashMap(leaves.size() * 2);
+        Long2IntOpenHashMap dist = new Long2IntOpenHashMap(kept.size() * 2);
         dist.defaultReturnValue(99);
-        LongArrayFIFOQueue queue = new LongArrayFIFOQueue();
-        for (long k : logs.keySet()) {
+        for (long k : rooted) {
             dist.put(k, 0);
             queue.enqueue(k);
         }
@@ -298,15 +340,14 @@ final class TreeBuilder {
             if (d >= 6) continue;
             for (Direction dir : Direction.values()) {
                 long n = BlockPos.offset(k, dir);
-                if (leaves.containsKey(n) && dist.get(n) > d + 1) {
+                if (kept.contains(n) && dist.get(n) > d + 1) {
                     dist.put(n, d + 1);
                     queue.enqueue(n);
                 }
             }
         }
-        for (Long2ObjectMap.Entry<BlockState> e : leaves.long2ObjectEntrySet()) {
-            long k = e.getLongKey();
-            BlockState state = e.getValue();
+        for (long k : kept) {
+            BlockState state = leaves.get(k);
             if (state.hasProperty(LeavesBlock.DISTANCE)) {
                 int d = dist.get(k);
                 state = d <= 6 ? state.setValue(LeavesBlock.DISTANCE, d).setValue(LeavesBlock.PERSISTENT, false)
@@ -317,11 +358,23 @@ final class TreeBuilder {
             if (GenBox.isSoft(here) && !here.is(BlockTags.LEAVES)) box.set(x, y, z, waterlog(state, here));
             else if (here.is(BlockTags.LEAVES)) box.set(x, y, z, waterlog(state, here));
         }
-        for (Long2ObjectMap.Entry<BlockState> e : extras.long2ObjectEntrySet()) {
+        // trimmings (vines): only where they hang on a written leaf or log, or on another trimming above
+        java.util.ArrayList<Long2ObjectMap.Entry<BlockState>> ex = new java.util.ArrayList<>(extras.long2ObjectEntrySet());
+        ex.sort((a, b) -> Integer.compare(BlockPos.getY(b.getLongKey()), BlockPos.getY(a.getLongKey())));
+        LongOpenHashSet placed = new LongOpenHashSet();
+        for (Long2ObjectMap.Entry<BlockState> e : ex) {
             long k = e.getLongKey();
+            boolean held = false;
+            for (Direction dir : Direction.values()) {
+                long n = BlockPos.offset(k, dir);
+                if (rooted.contains(n) || kept.contains(n) || placed.contains(n)) {
+                    held = true;
+                    break;
+                }
+            }
+            if (!held) continue;
             int x = BlockPos.getX(k), y = BlockPos.getY(k), z = BlockPos.getZ(k);
-            BlockState here = box.get(x, y, z);
-            if (here.isAir()) box.set(x, y, z, e.getValue());
+            if (box.get(x, y, z).isAir() && box.set(x, y, z, e.getValue())) placed.add(k);
         }
         return true;
     }
