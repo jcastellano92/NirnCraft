@@ -89,3 +89,13 @@ whiterun-rorikstead, whiterun-dragon_bridge and one river crossing; plus `reach_
   allocation. All baked data immutable and thread-safe.
 * Distant Horizons generates through our chunk generator, so plan-first terrain shows correctly in its LODs too (a
   bonus: post-hoc paving never reached DH LODs).
+
+## 5. Baseline (old pipeline, measured on saved blocks)
+
+`py -3 -I tools/qa/road_measure.py <world> whiterun:riverwood riverwood:helgen whiterun:rorikstead dragon_bridge:karthwasten`
+(commands in the script's docstring). One fresh seed, 1,684 road points, after the paver stopgaps:
+142 gap points in 26 runs; 33 drops > 1 block (11 > 3); 1 tree-blocked point; 1 unbridged crossing (riverwood-helgen
+river: the road dives into water); 194 of 512 doors with no path block within 3 blocks.
+Root causes confirmed: bridge decks sit 1 block above water (no real bridge over high-banked rivers); lanes/trails are
+paved narrower than the 2-block point spacing (dotted); unnamed towns leave 40 blocks round the centre unpaved; cabins,
+towers and camps are not road destinations; nothing joins doors to roads. P1-P5 target all of these.

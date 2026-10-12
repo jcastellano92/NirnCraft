@@ -408,12 +408,19 @@ final class Paver {
     private static int paveColumn(ServerLevel level, Task task, Road road, int idx, int x, int z, boolean edge, boolean center) {
         int changes = clearTrees(level, task, x, z, false);
         BlockPos top = naturalTop(level, x, z);
-        if (top == null) return changes;
+        if (top == null) {
+            // a trunk too big to cut whole (giant tree, tree over the loaded area): chop it out of the road column only
+            int chopped = chopLogs(level, task, x, z);
+            if (chopped == 0) return changes;
+            changes += chopped;
+            top = naturalTop(level, x, z);
+            if (top == null) return changes;
+        }
         BlockState ts = level.getBlockState(top);
         if (task.reserved(level, x, top.getY(), z)) return changes; // another mod's building, a tree structure, a homestead
         FluidState fluid = ts.getFluidState();
         if (!fluid.isEmpty()) {
-            if (!fluid.is(FluidTags.WATER) || road.longWater(idx)) return changes;
+            if (!fluid.is(FluidTags.WATER)) return changes; // long crossings are bridged too
             return changes + bridge(level, task, road, idx, top, ts, edge, center);
         }
         // a bridge deck we built (one above the water surface): leave it be
@@ -422,7 +429,14 @@ final class Paver {
         if (!isNaturalGround(ts) && !isRoadMaterial(ts)) return changes;
         BlockPos above = top.above();
         BlockState a1 = level.getBlockState(above);
-        if (!clearable(a1)) return changes;
+        if (!clearable(a1)) {
+            // nothing may stand on a road: shrines, statues, barrels, wells... in the way are removed (not player builds)
+            int removed = clearObstacle(level, task, x, top.getY(), z);
+            if (removed < 0) return changes;
+            changes += removed;
+            a1 = level.getBlockState(above);
+            if (!clearable(a1)) return changes;
+        }
         if (PlacedBlocks.isPlayerPlaced(level, top) || (!a1.isAir() && PlacedBlocks.isPlayerPlaced(level, above))) return changes;
 
         // graded profile: the surface follows the smoothed ground of the road's neighbourhood in half-block steps
@@ -460,6 +474,40 @@ final class Paver {
         if (slab) {
             p.set(x, sy + 1, z);
             if (level.setBlock(p, RoadStyle.deckSlab(task.culture), QUIET)) changes++;
+        }
+        return changes;
+    }
+
+    /** Removes logs and leaves of one column down to the ground (a trunk that could not be cut as a whole tree). */
+    private static int chopLogs(ServerLevel level, Task task, int x, int z) {
+        int changes = 0;
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+        for (int y = top - 1, guard = 0; y > level.getMinBuildHeight() && guard < 64; y--, guard++) {
+            p.set(x, y, z);
+            BlockState s = level.getBlockState(p);
+            if (s.isAir()) continue;
+            if (!(s.is(BlockTags.LOGS) || s.is(BlockTags.LEAVES))) break;
+            if (PlacedBlocks.isPlayerPlaced(level, p) || task.reserved(level, x, y, z)) return changes;
+            if (level.setBlock(p, Blocks.AIR.defaultBlockState(), QUIET)) changes++;
+        }
+        return changes;
+    }
+
+    /**
+     * Clears the three blocks over a road surface of props that are not player-placed and not part of a structure
+     * piece. Returns the blocks removed, or -1 if something there must stay.
+     */
+    private static int clearObstacle(ServerLevel level, Task task, int x, int topY, int z) {
+        int changes = 0;
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        for (int y = topY + 1; y <= topY + 3; y++) {
+            p.set(x, y, z);
+            BlockState s = level.getBlockState(p);
+            if (s.isAir() || clearable(s)) continue;
+            if (!s.getFluidState().isEmpty() || PlacedBlocks.isPlayerPlaced(level, p) || task.reserved(level, x, y, z)) return -1;
+            level.removeBlockEntity(p);
+            if (level.setBlock(p, Blocks.AIR.defaultBlockState(), QUIET)) changes++;
         }
         return changes;
     }

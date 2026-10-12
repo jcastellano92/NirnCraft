@@ -165,11 +165,14 @@ public final class Works {
                 }
             }
         }
-        c.set(x0, 2, z0, p.fence);
-        c.set(x0 + 2, 2, z0 + 2, p.fence);
-        c.set(x0, 2, z0 + 2, p.fence);
-        c.set(x0 + 2, 2, z0, p.fence);
-        for (int x = x0; x <= x0 + 2; x++) for (int z = z0; z <= z0 + 2; z++) c.set(x, 3, z, B.slab(p.roofSlab, false));
+        // four 2-high corner posts, a roof over the 3x3 and a chain hanging over the water: a proper well house
+        for (int[] q : new int[][]{{x0, z0}, {x0 + 2, z0}, {x0, z0 + 2}, {x0 + 2, z0 + 2}}) {
+            c.set(q[0], 2, q[1], p.fence);
+            c.set(q[0], 3, q[1], p.fence);
+        }
+        for (int x = x0; x <= x0 + 2; x++) for (int z = z0; z <= z0 + 2; z++) c.set(x, 4, z, B.slab(p.roofSlab, false));
+        c.set(x0 + 1, 3, z0 + 1, B.s(Blocks.CHAIN));
+        c.set(x0 + 1, 2, z0 + 1, B.s(Blocks.CHAIN));
     }
 
     public static void statue(Canvas c, Palette p, int cx, int cz) {

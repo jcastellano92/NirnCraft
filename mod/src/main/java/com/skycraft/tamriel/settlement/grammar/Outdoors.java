@@ -183,7 +183,6 @@ public final class Outdoors {
                 }
                 if (!c.recording()) c.clearPlants(-1, 1, -1, 3, 5, 3);
                 Works.well(c, p, 0, 0);
-                c.set(1, 2, 0, B.s(Blocks.CHAIN));
             }
             case FOUNTAIN -> fountain(c, p, w, d);
             case STATUE -> {
