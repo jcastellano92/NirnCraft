@@ -5,8 +5,8 @@
 #   tools/bake/bake.ps1 [-Port 25748] [-Threads 0]
 #
 # What it does: boots the dev server (./gradlew runServer) on a fresh world with the Nirn seed and runs the autorun
-# tasks "bake,verify" (com.skycraft.bake.Baker): every registered Bakeable (POI index of all structure starts,
-# BakedRoads / BakedPlans when their systems provide them) writes skycraft-bake/<name>.bin plus manifest.json; then
+# tasks "bake,verify" (com.skycraft.bake.Bake): every registered Bakeable (landmass, roadplan = the plan-first road
+# plan, see docs/WORLDGEN-PIPELINE.md section 6) writes skycraft-bake/<name>.bin plus manifest.json; then
 # a verify pass re-checks a sample against live generation. The files are copied into the resources.
 # Runtime: the loaders use the baked data only when the world seed and the worldgen data hash match the manifest;
 # otherwise they compute live (log lines "[bake] ...").

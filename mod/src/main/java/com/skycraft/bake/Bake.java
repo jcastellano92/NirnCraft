@@ -48,7 +48,23 @@ public final class Bake {
     private static final String[] CLASSES = {"com.skycraft.roads.Landmass", "com.skycraft.tamriel.TamrielMap",
             "com.skycraft.tamriel.Places", "com.skycraft.tamriel.Place", "com.skycraft.tamriel.terrain.MapNoise",
             "com.skycraft.tamriel.terrain.MapRaster", "com.skycraft.tamriel.terrain.Beyond",
-            "com.skycraft.tamriel.terrain.Hydrology"};
+            "com.skycraft.tamriel.terrain.Hydrology",
+            // the road plan (worldplan) and what it reads: the road graph, gates, corridors, settlement plans
+            "com.skycraft.worldplan.RoadPlan", "com.skycraft.worldplan.RoadPlan$Builder", "com.skycraft.worldplan.RoadPlan$Hit",
+            "com.skycraft.worldplan.RoadPlanBuilder", "com.skycraft.worldplan.RoadPlanBuilder$Run",
+            "com.skycraft.worldplan.RoadPlanBuilder$Poly", "com.skycraft.worldplan.RoadPlanBuilder$Seg",
+            "com.skycraft.worldplan.RoadPlanBuilder$Task", "com.skycraft.worldplan.PlanRouter",
+            "com.skycraft.worldplan.PlanRouter$Grid", "com.skycraft.worldplan.PlanRouter$Cell", "com.skycraft.worldplan.PlanRouter$Job",
+            "com.skycraft.worldplan.PlanTerrain", "com.skycraft.worldplan.PlanTerrain$Col", "com.skycraft.worldplan.Profile",
+            "com.skycraft.roads.PlanLinks", "com.skycraft.roads.RoadGraph", "com.skycraft.roads.RoadGraph$Links",
+            "com.skycraft.roads.GateEnds", "com.skycraft.roads.Corridors", "com.skycraft.tamriel.settlement.SettlementAnchors",
+            "com.skycraft.tamriel.settlement.plan.Cities", "com.skycraft.tamriel.settlement.grammar.Zoning"};
+    /** Other data files the baked data reads. */
+    private static final String[] DATA_FILES = {"/skycraft/roads/named_roads.json", "/skycraft/roads/corridors.json"};
+    /** Everything baked, in order. */
+    private static final List<Bakeable> BAKES = List.of(
+            new Bakeable("landmass", com.skycraft.roads.Landmass::computeLive),
+            new Bakeable(com.skycraft.worldplan.RoadPlanBuilder.BAKE_NAME, com.skycraft.worldplan.RoadPlanBuilder::computeLive));
 
     private static volatile String inputs;
 
@@ -68,6 +84,7 @@ public final class Bake {
                 JsonArray names = JsonParser.parseString(new String(index, StandardCharsets.UTF_8)).getAsJsonArray();
                 for (JsonElement e : names) feed(md, TAMRIEL + "places/" + e.getAsString());
             }
+            for (String f : DATA_FILES) feed(md, f);
             for (String c : CLASSES) feed(md, "/" + c.replace('.', '/') + ".class");
             StringBuilder sb = new StringBuilder();
             for (byte b : md.digest()) sb.append(String.format("%02x", b));
@@ -127,11 +144,29 @@ public final class Bake {
 
     /** Bakes everything into {@code dir} and writes {@code manifest.json}. Returns a one-line summary. */
     public static String bakeAll(Path dir) throws IOException {
-        byte[] landmass = com.skycraft.roads.Landmass.computeLive();
-        write(dir, "landmass", landmass);
+        StringBuilder files = new StringBuilder(), msg = new StringBuilder("baked");
+        for (Bakeable b : BAKES) {
+            long t0 = System.nanoTime();
+            byte[] data = b.compute().run();
+            write(dir, b.name(), data);
+            files.append(files.length() == 0 ? "" : ", ").append('"').append(b.name()).append(".bin\"");
+            msg.append(' ').append(b.name()).append(" (").append(data.length / 1024).append(" KB raw, sha ")
+                    .append(sha(data), 0, 12).append(", ").append((System.nanoTime() - t0) / 1_000_000).append(" ms)");
+        }
         Files.writeString(dir.resolve("manifest.json"),
-                "{\n  \"format\": " + FORMAT + ",\n  \"inputs\": \"" + inputsHash() + "\",\n  \"files\": [\"landmass.bin\"]\n}\n");
-        return "baked landmass (" + landmass.length / 1024 + " KB raw) into " + dir.toAbsolutePath();
+                "{\n  \"format\": " + FORMAT + ",\n  \"inputs\": \"" + inputsHash() + "\",\n  \"files\": [" + files + "]\n}\n");
+        return msg + " into " + dir.toAbsolutePath();
+    }
+
+    /** Hex SHA-256 of a payload (the content hash logged by bake and check). */
+    public static String sha(byte[] data) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            for (byte b : MessageDigest.getInstance("SHA-256").digest(data)) sb.append(String.format("%02x", b));
+            return sb.toString();
+        } catch (java.security.NoSuchAlgorithmException e) {
+            return "unhashable";
+        }
     }
 
     /** Checks the shipped bake against the live inputs and a fresh computation. Returns problems (empty = ok). */
@@ -143,13 +178,20 @@ public final class Bake {
             return bad;
         }
         if (!new String(manifest, StandardCharsets.UTF_8).contains(inputsHash())) bad.add("manifest is stale: inputs changed");
-        byte[] baked = load("landmass");
-        if (baked == null) bad.add("landmass.bin missing or stale");
-        else {
+        for (Bakeable b : BAKES) {
+            byte[] baked = load(b.name());
+            if (baked == null) {
+                bad.add(b.name() + ".bin missing or stale");
+                continue;
+            }
             try {
-                if (!java.util.Arrays.equals(baked, com.skycraft.roads.Landmass.computeLive())) bad.add("landmass.bin differs from live computation");
-            } catch (IOException e) {
-                bad.add("could not recompute landmass: " + e);
+                long t0 = System.nanoTime();
+                byte[] live = b.compute().run();
+                if (!java.util.Arrays.equals(baked, live)) bad.add(b.name() + ".bin differs from live computation");
+                else Skycraft.LOGGER.info("[bake] {} matches a live computation (sha {}, {} ms)", b.name(), sha(live).substring(0, 12),
+                        (System.nanoTime() - t0) / 1_000_000);
+            } catch (IOException | RuntimeException e) {
+                bad.add("could not recompute " + b.name() + ": " + e);
             }
         }
         return bad;
