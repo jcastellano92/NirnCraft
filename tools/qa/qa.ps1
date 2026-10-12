@@ -8,6 +8,8 @@ Skycraft QA harness: one command, a short report. Built so automated sessions re
   tools\qa\qa.ps1 -NoBuild ...    # skip the Gradle build (reuse the last one)
   tools\qa\qa.ps1 -Layout        # no build: static checks only, incl. the layout lint (places vs map rasters, ~2 s;
                                   # the lint also runs in every default run)
+  tools\qa\qa.ps1 -NoBuild -Reach  # + the reachability lint in full: per-province class table, isolated places, road
+                                  # networks (tools/qa/reach_lint.py, ~2 s; a one-line summary runs in every default run)
   tools\qa\qa.ps1 -NoBuild -Parity # + print the 10 lowest cells of the Skyrim-parity scorecard (tools/qa/parity.py)
 
 Writes the report to mod\run\qa-report.txt and prints it. Exit code 0 = all PASS.
@@ -18,6 +20,7 @@ param(
     [switch]$Client,
     [switch]$NoBuild,
     [switch]$Layout,
+    [switch]$Reach,
     [switch]$Parity,
     [switch]$Novelty,
     [switch]$Bake,
@@ -79,6 +82,18 @@ $ll = & $py -3 -I tools/qa/layout_lint.py 2>&1
 $llerr = @($ll | Where-Object { $_ -match "^ERR" })
 Result "layout" ($LASTEXITCODE -eq 0) ("{0}" -f ($ll | Select-Object -Last 1))
 $llerr | Select-Object -First 10 | ForEach-Object { Add("       $_") }
+# reachability: does a road or trail reach every place (settlements joined per landmass, trails to destinations)
+$rl = @(& $py -3 -I tools/qa/reach_lint.py 2>&1)
+$rlerr = @($rl | Where-Object { $_ -match "^ERR" })
+Result "reach" ($LASTEXITCODE -eq 0) ("{0}" -f ($rl | Select-Object -Last 1))
+$rlerr | Select-Object -First 10 | ForEach-Object { Add("       $_") }
+if ($Reach) {
+    $rtxt = Join-Path $Root "tools\qa\out\reach_lint.txt"
+    if (Test-Path $rtxt) {
+        Add("INFO   reach             class table, networks and the worst isolated places per province (full: tools/qa/out/reach_lint.txt)")
+        Get-Content $rtxt -TotalCount 60 | ForEach-Object { Add("       $_") }
+    }
+}
 if ($Parity) {
     # informational only (never fails the run): the 10 lowest region x category cells vs Skyrim = 100. docs/PARITY.md.
     $pr = @(& $py -3 -I tools/qa/parity.py --lowest 10 2>&1)

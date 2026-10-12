@@ -19,7 +19,7 @@ import net.minecraftforge.fml.common.Mod;
 import java.util.Arrays;
 
 /**
- * {@code /skycraft-roads info | stats | render [x0 z0 x1 z1 blocksPerPixel] | export-inns | replan | repave | nearest |
+ * {@code /skycraft-roads info | stats | render [x0 z0 x1 z1 blocksPerPixel] | export-inns | export | replan | repave | nearest |
  * traveler [kind]} (operators only).
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
@@ -48,6 +48,7 @@ public final class RoadsCommands {
                                                                         IntegerArgumentType.getInteger(c, "z1"),
                                                                         IntegerArgumentType.getInteger(c, "blocksPerPixel")))))))))
                 .then(Commands.literal("export-inns").executes(RoadsCommands::exportInns))
+                .then(Commands.literal("export").executes(RoadsCommands::exportNetwork))
                 .then(Commands.literal("inspect")
                         .then(Commands.argument("x0", IntegerArgumentType.integer())
                                 .then(Commands.argument("z0", IntegerArgumentType.integer())
@@ -178,6 +179,20 @@ public final class RoadsCommands {
         try {
             int n = InnSites.export(data, file);
             c.getSource().sendSuccess(() -> Component.translatable("command.skycraft.roads.export_inns", n, file.getAbsolutePath()), false);
+            return n;
+        } catch (java.io.IOException e) {
+            c.getSource().sendFailure(Component.literal(e.getMessage()));
+            return 0;
+        }
+    }
+
+    /** The planned network (roads, settlements, gates) as skycraft-roads-export.json, for tools/qa/reach_lint.py --export. */
+    private static int exportNetwork(CommandContext<CommandSourceStack> c) {
+        RoadsData data = RoadsData.get(overworld(c));
+        java.io.File file = c.getSource().getServer().getFile("skycraft-roads-export.json");
+        try {
+            int n = RoadExport.write(data, file);
+            c.getSource().sendSuccess(() -> Component.translatable("command.skycraft.roads.export", n, file.getAbsolutePath()), false);
             return n;
         } catch (java.io.IOException e) {
             c.getSource().sendFailure(Component.literal(e.getMessage()));

@@ -51,7 +51,7 @@ final class RoadLayout {
         if (first < 0) return touched; // the whole road lies inside settlements
 
         List<RoadFeature> created = new ArrayList<>();
-        if (road.kind == Road.TRAIL) {
+        if (road.isTrail()) {
             if (RoadsConfig.SIGNPOSTS.get()) trailSign(data, road, inZone, created, touched);
             Dressing.layout(data, road, inZone, created, touched);
             return touched;

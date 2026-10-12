@@ -26,6 +26,7 @@
   "dialogue.skycraft.carriage.arrived": "Here we are: %s.",
   "dialogue.skycraft.carriage.arrived_hours": "Here we are: %s. The journey took %s hours.",
   "command.skycraft.roads.render": "Rendering the road network to %s (a few seconds).",
+  "command.skycraft.roads.export": "Exported %s roads; written to %s.",
   "command.skycraft.roads.export_inns": "Proposed %s roadside inns; written to %s.",
   "road.skycraft.talos_bridge": "Talos Bridge",
   "road.skycraft.red_ring_road": "Red Ring Road",

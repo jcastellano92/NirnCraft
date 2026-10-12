@@ -49,7 +49,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 final class WorldPlan {
     /** Bump to re-plan the named network of existing saves (roads already planned stay). */
-    static final int VERSION = 1;
+    static final int VERSION = 2;
     static final int TRAIL_RANGE = 300;
     private static final int TRAIL_MIN = 20;
     /** Generic-site prediction regions: 1024 blocks. */
@@ -163,6 +163,10 @@ final class WorldPlan {
             data.link(a.id, b.id);
             queued++;
         }
+        if (data.planVersion > 0) {
+            // plan 2 (word walls, dragon mounds, long footpaths, gate lanes): destinations without a trail look again
+            for (Settlement s : data.settlements) if (!s.town && !data.hasSpur(s.id)) data.trailChecked.remove(s.id);
+        }
         data.planVersion = VERSION;
         data.setDirty();
         double km = 0;
@@ -193,24 +197,44 @@ final class WorldPlan {
 
     // ------------------------------------------------------------------ trails
 
+    /** Tourist-grade destinations (shrines, stones, word walls, dragon mounds, forts, marquee ruins) go this far. */
+    static final int FOOTPATH_RANGE = 900;
+    /** A settlement's gate counts as served by a road point this close; one farther gets a lane to the nearest road. */
+    static final int GATE_SERVED = 28;
+    static final int GATE_RANGE = 220;
+    /** Added to a settlement id in {@code trailChecked}: the settlement's gates were checked. */
+    private static final int GATE_KEY = 1 << 28;
+    /** A failed trail is tried once more towards another road point; then the destination is left alone. */
+    private static final int TRAIL_ATTEMPTS = 2;
+    /** Destinations wait for planned links this close to them (blocks) before looking for their road. */
+    private static final int WAIT_RADIUS = 600;
+
     /**
-     * Gives a few unchecked trail destinations their trail per call: once the network near them is planned (nothing
-     * else is waiting), the nearest road point within {@link #TRAIL_RANGE} is found and a trail is queued to it.
+     * Gives a few unchecked destinations their trail per call: once the network near them is planned (nothing else
+     * near is waiting), the nearest road point within range ({@link #TRAIL_RANGE}, {@link #FOOTPATH_RANGE} for the
+     * tourist-grade) is found and a trail is queued to it. Towns get a lane from each gate no road serves.
      */
     private static void trails(ServerLevel level, RoadsData data) {
-        int mainWaiting = 0;
-        for (long p : data.pending) if (!data.link(p).trail()) mainWaiting++;
-        for (long p : data.inFlight) if (!data.link(p).trail()) mainWaiting++;
-        if (mainWaiting > 0) return;
+        List<int[]> waiting = new ArrayList<>();
+        for (long p : data.pending) addWaiting(data, p, waiting);
+        for (long p : data.inFlight) addWaiting(data, p, waiting);
         int budget = 3;
         for (Settlement s : data.settlements) {
+            if (budget <= 0) break;
             boolean spur = s.town && s.place().map(RoadGraph::isSpur).orElse(false);
-            if ((s.town && !spur) || data.trailChecked.contains(s.id)) continue;
-            if (budget-- <= 0) break;
+            if (s.town && !spur) {
+                if (gateLanes(data, s, waiting)) budget--;
+                continue;
+            }
+            if (data.trailChecked.contains(s.id) || near(waiting, s.x, s.z, WAIT_RADIUS)) continue;
+            budget--;
             data.trailChecked.add(s.id);
             data.setDirty();
             if (spur ? !data.roadsAt(s.id).isEmpty() : data.hasSpur(s.id)) continue;
-            long hit = nearestRoadPoint(data, s.x, s.z, TRAIL_RANGE);
+            int[] bad = failedTargets(data, s.id);
+            if (bad.length / 2 >= TRAIL_ATTEMPTS) continue;
+            int range = s.place().filter(RoadGraph::isTourist).isPresent() ? FOOTPATH_RANGE : TRAIL_RANGE;
+            long hit = nearestRoadPoint(data, s.x, s.z, range, bad, false);
             if (hit == -1) continue;
             Road road = data.road(RoadsData.entryRoad(hit));
             int idx = RoadsData.entryIndex(hit);
@@ -219,10 +243,10 @@ final class WorldPlan {
             if (d < TRAIL_MIN) continue; // right beside the road: the junction sign of a neighbour will do
             int end = road.cum[idx] <= road.length() / 2 ? road.a : road.b;
             long pair = RoadsData.pairKey(s.id, end);
-            if (data.pairs.contains(pair)) {
+            if (end == s.id || end < 0 || data.pairs.contains(pair) || data.failed.contains(pair)) {
                 end = end == road.a ? road.b : road.a;
                 pair = RoadsData.pairKey(s.id, end);
-                if (data.pairs.contains(pair)) continue;
+                if (end == s.id || end < 0 || data.pairs.contains(pair) || data.failed.contains(pair)) continue;
             }
             data.links.put(pair, new RoadsData.Link(Road.TRAIL, "", 24, road.xs[idx], road.zs[idx], s.id));
             data.pairs.add(pair);
@@ -231,8 +255,78 @@ final class WorldPlan {
         }
     }
 
+    /** Pending or running links that are not trails, as {ax, az, bx, bz}. */
+    private static void addWaiting(RoadsData data, long pair, List<int[]> out) {
+        if (data.link(pair).trail()) return;
+        Settlement a = data.settlement(RoadsData.pairA(pair)), b = data.settlement(RoadsData.pairB(pair));
+        if (a == null || b == null) return;
+        out.add(new int[]{a.x, a.z, b.x, b.z});
+    }
+
+    /** True if one of the waiting links passes within {@code r} blocks of (x, z). */
+    private static boolean near(List<int[]> waiting, int x, int z, int r) {
+        for (int[] w : waiting) {
+            double dx = w[2] - w[0], dz = w[3] - w[1], l2 = dx * dx + dz * dz;
+            double t = l2 == 0 ? 0 : Math.max(0, Math.min(1, ((x - w[0]) * dx + (z - w[1]) * dz) / l2));
+            double px = w[0] + dx * t - x, pz = w[1] + dz * t - z;
+            if (px * px + pz * pz <= (double) r * r) return true;
+        }
+        return false;
+    }
+
+    /** The road points {x, z, ...} that failed trails of this destination were aimed at. */
+    private static int[] failedTargets(RoadsData data, int id) {
+        it.unimi.dsi.fastutil.ints.IntArrayList out = new it.unimi.dsi.fastutil.ints.IntArrayList();
+        for (long p : data.failed) {
+            RoadsData.Link l = data.link(p);
+            if (l.trail() && l.from() == id && RoadsData.pairA(p) >= 0) {
+                out.add(l.tx());
+                out.add(l.tz());
+            }
+        }
+        return out.toIntArray();
+    }
+
+    /**
+     * Lanes from the gates of a planned town that no road serves to the nearest road: every gate has its road end.
+     * A gate lane is a link of the town to a virtual end (-(1 + gate index)). True if it did the check.
+     */
+    private static boolean gateLanes(RoadsData data, Settlement s, List<int[]> waiting) {
+        int key = s.id + GATE_KEY;
+        if (data.trailChecked.contains(key)) return false;
+        Place p = s.place().orElse(null);
+        if (p == null || !p.type().isSettlement() || RoadGraph.isSpur(p)) return false;
+        if (data.roadsAt(s.id).isEmpty() || near(waiting, s.x, s.z, WAIT_RADIUS)) return false;
+        data.trailChecked.add(key);
+        data.setDirty();
+        List<int[]> gates = GateEnds.usable(p);
+        for (int gi = 0; gi < gates.size() && gi < 8; gi++) {
+            int[] g = gates.get(gi);
+            if (nearestRoadPoint(data, g[0], g[1], GATE_SERVED, new int[0], true) != -1) continue; // a road ends here
+            long hit = nearestRoadPoint(data, g[0], g[1], GATE_RANGE, new int[0], true);
+            if (hit == -1) continue;
+            Road road = data.road(RoadsData.entryRoad(hit));
+            int idx = RoadsData.entryIndex(hit);
+            if (road == null) continue;
+            long pair = RoadsData.pairKey(s.id, -(1 + gi));
+            if (data.pairs.contains(pair) || data.failed.contains(pair)) continue;
+            data.links.put(pair, new RoadsData.Link(Road.LANE, "", 24, road.xs[idx], road.zs[idx], s.id));
+            data.pairs.add(pair);
+            data.pending.add(pair);
+        }
+        return true;
+    }
+
     /** The road point nearest to (x, z) within {@code range} (encoded as in the chunk index), or -1. */
     static long nearestRoadPoint(RoadsData data, int x, int z, int range) {
+        return nearestRoadPoint(data, x, z, range, new int[0], false);
+    }
+
+    /**
+     * As above; points within 90 blocks of an {@code avoid} point ({x, z, ...}: targets of failed trails) are skipped,
+     * and {@code anyKind} also counts trails and gate lanes (is a gate served at all).
+     */
+    static long nearestRoadPoint(RoadsData data, int x, int z, int range, int[] avoid, boolean anyKind) {
         long best = -1;
         long bestD = (long) range * range;
         int r = (range >> 4) + 1;
@@ -245,15 +339,23 @@ final class WorldPlan {
                     long e = entries.getLong(k);
                     Road road = data.road(RoadsData.entryRoad(e));
                     int i = RoadsData.entryIndex(e);
-                    if (road == null || i < 0 || i >= road.size() || road.kind == Road.TRAIL || road.water(i)) continue;
+                    if (road == null || i < 0 || i >= road.size() || (!anyKind && road.isTrail()) || road.water(i)) continue;
                     // not at a bridge's foot either: a trail ending there would stop in the water
-                    if (road.water(road.clamp(i - 3)) || road.water(road.clamp(i + 3))) continue;
+                    if (!anyKind && (road.water(road.clamp(i - 3)) || road.water(road.clamp(i + 3)))) continue;
                     long ddx = road.xs[i] - x, ddz = road.zs[i] - z;
                     long d = ddx * ddx + ddz * ddz;
-                    if (d < bestD) {
-                        bestD = d;
-                        best = e;
+                    if (d >= bestD) continue;
+                    boolean skip = false;
+                    for (int a = 0; a + 1 < avoid.length; a += 2) {
+                        long ax = road.xs[i] - avoid[a], az = road.zs[i] - avoid[a + 1];
+                        if (ax * ax + az * az < 90L * 90L) {
+                            skip = true;
+                            break;
+                        }
                     }
+                    if (skip) continue;
+                    bestD = d;
+                    best = e;
                 }
             }
         }

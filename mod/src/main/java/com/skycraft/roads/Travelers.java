@@ -305,7 +305,7 @@ public final class Travelers {
         it.unimi.dsi.fastutil.ints.IntArrayList options = new it.unimi.dsi.fastutil.ints.IntArrayList();
         for (int id : data.roadsAt(at)) {
             Road r = data.road(id);
-            if (r == null || r.id == road.id || r.kind == Road.TRAIL || r.size() < 40) continue;
+            if (r == null || r.id == road.id || r.isTrail() || r.size() < 40) continue;
             options.add(id);
         }
         if (options.isEmpty()) return false;
@@ -376,7 +376,7 @@ public final class Travelers {
                     long e = entries.getLong(k);
                     Road road = data.road(RoadsData.entryRoad(e));
                     int i = RoadsData.entryIndex(e);
-                    if (road == null || i < 0 || i >= road.size() || road.kind == Road.TRAIL) continue; // traffic keeps to the roads
+                    if (road == null || i < 0 || i >= road.size() || road.isTrail()) continue; // traffic keeps to the roads
                     int x = road.xs[i], z = road.zs[i];
                     if ((x >> 4) != cx || (z >> 4) != cz) continue; // each point once
                     double dx = x + 0.5 - player.getX(), dz = z + 0.5 - player.getZ();

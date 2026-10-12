@@ -89,7 +89,31 @@ final class RoadGraph {
     /** Places that are trail destinations (one signposted trail from the nearest road, if it is close enough). */
     static boolean isTrailDestination(PlaceType t) {
         return t == PlaceType.DUNGEON_FIXED || t == PlaceType.FORT || t == PlaceType.STANDING_STONE
-                || t == PlaceType.DAEDRIC_SHRINE || t == PlaceType.LANDMARK;
+                || t == PlaceType.DAEDRIC_SHRINE || t == PlaceType.LANDMARK || t == PlaceType.WORD_WALL
+                || t == PlaceType.DRAGON_MOUND;
+    }
+
+    /** Dungeon and landmark variants worth a long footpath (keep in step with TOURIST_VARIANTS in tools/qa/reach_lint.py). */
+    private static final Set<String> TOURIST_VARIANTS = Set.of("altar", "monument", "stones", "ruin", "keep", "barrow",
+            "nordic_ruin", "moon_temple", "dwemer_ruin", "ayleid_ruin", "velothi_tomb", "xanmeer", "daedric_ruin", "tower",
+            "mage_tower", "watchtower", "lighthouse", "dragon_lair", "imperial_crypt", "yokudan_tomb", "orc_ruin",
+            "giant_camp", "fort_mage", "fort_vampire", "oblivion_gate", "pass", "peak", "waterfall", "sixth_house_base",
+            "crystal_vault", "tree_tomb", "breton_crypt", "ice_cave");
+    private static final Set<String> MINOR_LANDMARKS = Set.of("clearing", "rock", "source", "island", "district");
+
+    /**
+     * Tourist-grade destinations (shrines, stones, word walls, dragon mounds, forts, marquee ruins and tombs): they get
+     * a footpath from the nearest road even when it is farther than an ordinary trail goes.
+     */
+    static boolean isTourist(Place p) {
+        PlaceType t = p.type();
+        String v = p.variant() == null ? "" : p.variant();
+        return switch (t) {
+            case WORD_WALL, DRAGON_MOUND, DAEDRIC_SHRINE, STANDING_STONE, FORT -> true;
+            case LANDMARK -> !MINOR_LANDMARKS.contains(v);
+            case DUNGEON_FIXED -> TOURIST_VARIANTS.contains(v);
+            default -> false;
+        };
     }
 
     /**

@@ -350,6 +350,14 @@ public final class RoadNetwork {
         return !RUNNING.isEmpty();
     }
 
+    /** The settlement at one end of a link; the virtual end (negative id) of a gate lane is its town itself. */
+    @org.jetbrains.annotations.Nullable
+    private static Settlement endOf(RoadsData data, long pair, int id) {
+        Settlement s = data.settlement(id);
+        if (s != null || id >= 0) return s;
+        return data.settlement(RoadsData.pairA(pair) == id ? RoadsData.pairB(pair) : RoadsData.pairA(pair));
+    }
+
     /**
      * The waiting pair to plan next: the one whose midpoint is nearest to a player (or to the world spawn), so the
      * roads around the players are ready first.
@@ -361,7 +369,7 @@ public final class RoadNetwork {
         long best = -1;
         double bestD = Double.MAX_VALUE;
         for (long pair : data.pending) {
-            Settlement a = data.settlement(RoadsData.pairA(pair)), b = data.settlement(RoadsData.pairB(pair));
+            Settlement a = endOf(data, pair, RoadsData.pairA(pair)), b = endOf(data, pair, RoadsData.pairB(pair));
             if (a == null || b == null) return pair; // dropped by the caller
             // never two neighbouring roads at once: the second must see the first to share its way
             if (overlapsInFlight(box(data, pair, a, b, null, null))) continue;
@@ -415,8 +423,9 @@ public final class RoadNetwork {
             long pair = nextPair(level, data);
             if (pair == -1) break; // everything waiting overlaps a road being planned
             data.pending.remove(pair);
-            Settlement a = data.settlement(RoadsData.pairA(pair));
-            Settlement b = data.settlement(RoadsData.pairB(pair));
+            Settlement a = endOf(data, pair, RoadsData.pairA(pair));
+            Settlement b = endOf(data, pair, RoadsData.pairB(pair));
+            int virtual = RoadsData.pairA(pair) < 0 ? RoadsData.pairA(pair) : 0; // a gate lane's second end
             if (a == null || b == null) {
                 data.pairs.remove(pair);
                 data.rebuildLinks();
@@ -430,7 +439,12 @@ public final class RoadNetwork {
                 a = b;
                 b = t;
             }
-            int[] ea = end(data, a, link.trail() ? Integer.MIN_VALUE : b.id, link.trail() ? link.tx() : b.x, link.trail() ? link.tz() : b.z);
+            int[] ea = null;
+            if (virtual < 0) { // the gate this lane leaves from
+                java.util.List<int[]> gates = a.place().map(GateEnds::usable).orElse(java.util.List.of());
+                if (-virtual - 1 < gates.size()) ea = gates.get(-virtual - 1);
+            }
+            if (ea == null) ea = end(data, a, link.trail() ? Integer.MIN_VALUE : b.id, link.trail() ? link.tx() : b.x, link.trail() ? link.tz() : b.z);
             int[] eb = link.trail() ? new int[]{link.tx(), link.tz()} : end(data, b, a.id, a.x, a.z);
             data.inFlight.add(pair);
             IN_FLIGHT_BOXES.put(pair, box(data, pair, a, b, ea, eb));
@@ -440,7 +454,7 @@ public final class RoadNetwork {
                     : Math.min(link.maxBridge(), RoadsConfig.MAX_BRIDGE_LENGTH.get());
             int longWater = Math.max(1, (int) Math.round(bridge / RoadPlanner.SPACING));
             if (cellsSnapshot == null) cellsSnapshot = new LongOpenHashSet(data.roadCells);
-            RoadPlanner.Job job = new RoadPlanner.Job(data.generation, a.id, b.id, ea[0], ea[1], eb[0], eb[1], level.getSeaLevel(),
+            RoadPlanner.Job job = new RoadPlanner.Job(data.generation, a.id, virtual < 0 ? virtual : b.id, ea[0], ea[1], eb[0], eb[1], level.getSeaLevel(),
                     RoadsConfig.MAX_EXPANSIONS.get(), longWater, cellsSnapshot, bridge, avoid(data, ea, eb));
             Settlement fa = a, fb = b;
             RUNNING.add(planner().submit(() -> {
@@ -450,7 +464,7 @@ public final class RoadNetwork {
                     r = RoadPlanner.plan(job, generator, random, level);
                 } catch (Throwable t) {
                     Skycraft.LOGGER.warn("Skycraft roads: planning {} -> {} failed", fa.name, fb.name, t);
-                    r = new RoadPlanner.Result(job.generation(), fa.id, fb.id, new int[0], new int[0], new byte[0], true, 0, 0);
+                    r = new RoadPlanner.Result(job.generation(), job.a(), job.b(), new int[0], new int[0], new byte[0], true, 0, 0);
                 }
                 synchronized (RoadNetwork.class) {
                     plannedNanos += System.nanoTime() - t0;
@@ -521,7 +535,7 @@ public final class RoadNetwork {
             long pair = RoadsData.pairKey(r.a(), r.b());
             data.inFlight.remove(pair);
             IN_FLIGHT_BOXES.remove(pair);
-            Settlement a = data.settlement(r.a()), b = data.settlement(r.b());
+            Settlement a = endOf(data, pair, r.a()), b = endOf(data, pair, r.b());
             if (a == null || b == null || r.xs().length < 2) {
                 data.pairs.remove(pair);
                 data.rebuildLinks();
@@ -549,6 +563,8 @@ public final class RoadNetwork {
                     if (!link.trail()) {
                         if (isolated(data, a)) planConnections(data, a);
                         if (isolated(data, b)) planConnections(data, b);
+                    } else if (r.a() >= 0 && link.from() != 0) {
+                        data.trailChecked.remove(link.from()); // WorldPlan tries another road point (limited)
                     }
                 }
                 continue;

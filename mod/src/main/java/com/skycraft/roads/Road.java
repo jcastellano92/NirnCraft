@@ -53,6 +53,14 @@ public final class Road {
         }
     }
 
+    /**
+     * A trail or a gate lane (its second end is virtual: a negative id): a path from a destination or a gate to the
+     * nearest road, not a link between two settlements. No traffic, no milestones, its own signpost where it joins.
+     */
+    public boolean isTrail() {
+        return kind == TRAIL || b < 0;
+    }
+
     public int size() {
         return xs.length;
     }
