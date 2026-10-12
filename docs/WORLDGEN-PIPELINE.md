@@ -269,3 +269,31 @@ a pit or a lip; do not depend on the terrain alone. (2) A culvert's opening is t
 of a CULVERT span (`PlanGround.opening`): embankment at the bed height on both sides, water column below, arch over it.
 (3) Settlement interiors are untouched by roads: the plan roads end on the pad at the gate (P5 streets). (4) Aquifer
 barrier and water changes up to ~40 blocks away in marsh are expected after any terrain change.
+
+## 8. Contracts for P5 and P6 (so they can run in parallel with P3)
+
+Both are baked like `roadplan` (seed-independent, versioned, input-hashed, loaded at start, queried allocation-free).
+P3 only needs to know that these exist; P5/P6 must not change `RoadPlan`'s format.
+
+**P5 `streetplan` (bake name `streetplan`, package `com.skycraft.worldplan.street`)**
+* Per settlement id: a street graph `nodes[] {id, x, z, h}` (h = pad/street height, fractional) and
+  `edges[] {a, b, width, class: MAIN|LANE|ALLEY|PATH|STAIRS|BRIDGE, surface}`; every node of class GATE carries the
+  `RoadPlan` segment id + vertex it joins (`join.segment`, `join.vertex`), so streets and roads meet at one cell.
+* `doors[] {buildingId, x, y, z, facing, node}`: every building door is linked to a street node by an edge (doorstep
+  path); a door with no reachable node is a lint error.
+* `plots[] {buildingId, polygon, padHeight}` go into the terrain like site pads (P2 `PlanGround`), and into
+  `PlacementMask` as plot masks.
+* Query API: `StreetPlan.at(x, z)` -> nearest street edge, distance, height, class (same contract as `RoadPlan.at`),
+  `StreetPlan.doorsOf(settlementId)`; the settlement grammar consumes the plan instead of inventing streets (city
+  plans become the authored input, the bake their resolved output).
+* Gate (P5): unreachable doors <= 1% on the Skyrim sweep sample; every GATE node joins a road plan vertex.
+
+**P6 `sceneplan` (bake name `sceneplan`, package `com.skycraft.worldplan.scene`)**
+* A list of scenes `{id, kind, x, z, h, facing, anchor: {type: ROAD_BEND|CROSSROADS|FORD|BRIDGE_END|FARM|CAMP_SITE|
+  SHRINE_SITE|BATTLE_SITE|RUIN_EDGE|DUNGEON_MOUTH|LOREWEB_CLUE, ref}, reason, props[], clue?}` produced from the road
+  plan (bends, crossroads, fords, bridge ends: one wayside every 1.5-3 km of road, rarer on trails), sites (farms,
+  camps), the lore web (`tools/marquee/loreweb.json` clues) and landmarks; kinds come from `scatter/kinds.json`
+  entries that have `purpose`/`needs` (human kinds only; natural micro-scatter stays per-chunk random).
+* Chunk features only realise scenes whose footprint intersects the chunk (deterministic, no neighbour reads).
+* Gate (P6): every human prop placed belongs to a scene (placement lint); scene density per km of road and per km²
+  within targets; zero human-prop placements from per-chunk rolls.
