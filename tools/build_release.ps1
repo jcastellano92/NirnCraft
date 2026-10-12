@@ -8,7 +8,7 @@
 # 4. packwiz refresh, Prism instance zip (dist\Skycraft-client-instance.zip)
 # 5. qa.ps1 -Server -Bake -NoBuild (world boots, quests complete, "Bake is up to date")
 param([switch]$SkipQa)
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"  # native tools write notices to stderr; failures are caught via $LASTEXITCODE
 $root = Resolve-Path (Join-Path $PSScriptRoot "..")
 Set-Location $root
 function Step($n) { Write-Host "`n=== $n ===" -ForegroundColor Cyan }
@@ -24,7 +24,7 @@ Step "3/5 build with bake"
 Push-Location mod; & .\gradlew.bat build -x test -q; if ($LASTEXITCODE) { throw "gradle build failed" }; Pop-Location
 
 Step "4/5 pack + Prism instance"
-py -3 -I tools/refresh_packwiz.py
+py -3 -I tools/refresh_packwiz.py; if ($LASTEXITCODE) { throw "packwiz refresh failed" }
 py -3 -I tools/build_prism_instance.py
 if ($LASTEXITCODE) { throw "prism build failed" }
 
