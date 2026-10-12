@@ -139,11 +139,11 @@ public final class CrimeHud {
             }
 
             CrimePackets.ContainerInfo info = CrimeClientHandlers.containerInfo;
-            boolean hasLock = info != null && info.pos().equals(bpos) && info.lock() != Locks.NOT_LOCKED && !info.unlocked();
+            boolean hasLock = info != null && (info.pos().equals(bpos) || info.pos().equals(bpos.below()) || info.pos().equals(bpos.above())) && info.lock() != Locks.NOT_LOCKED && !info.unlocked();
             if (hasLock) {
                 Component lock = Component.translatable("hud.skycraft.crime.locked",
                         Component.translatable("crime.skycraft.lock." + Locks.TIERS[Math.max(0, Math.min(4, info.lock()))]));
-                drawSmall(g, font, lock, cx, cy, 0.75f, 0xD0D8C8A8);
+                drawSmall(g, font, lock, cx, cy, 0.75f, 0xD0000000 | RED);
                 cy += 8;
             }
 

@@ -45,7 +45,17 @@ public final class PlayerDataEvents {
     /** Where each player last died, until their respawn has been placed. */
     private static final Map<UUID, BlockPos> DEATH_POS = new ConcurrentHashMap<>();
 
+    /** Game time until which a freshly respawned player is invulnerable / left alone by hostile mobs (grace). */
+    private static final Map<UUID, Long> RESPAWN_INVULN_UNTIL = new ConcurrentHashMap<>();
+    private static final Map<UUID, Long> RESPAWN_GRACE_UNTIL = new ConcurrentHashMap<>();
+
     private PlayerDataEvents() {}
+
+    /** True while this player's post-respawn grace (no hostile aggro, the creatures grace period) is running. */
+    public static boolean inRespawnGrace(Player player) {
+        Long until = RESPAWN_GRACE_UNTIL.get(player.getUUID());
+        return until != null && player.level().getGameTime() < until;
+    }
 
     @SubscribeEvent
     public static void attach(AttachCapabilitiesEvent<Entity> event) {
@@ -147,7 +157,14 @@ public final class PlayerDataEvents {
             // refreshAttributes only clamps down; a fresh body after death starts at full (Skyrim) health.
             if (!event.isEndConquered()) player.setHealth(player.getMaxHealth());
             BlockPos died = DEATH_POS.remove(player.getUUID());
-            if (!event.isEndConquered()) placeRespawn(player, died);
+            if (!event.isEndConquered()) {
+                long now = player.level().getGameTime();
+                int invuln = SkyConfig.RESPAWN_INVULN_SECONDS.get();
+                if (invuln > 0) RESPAWN_INVULN_UNTIL.put(player.getUUID(), now + invuln * 20L);
+                // the creatures module's hostile grace also keeps camps and wanderers from charging the spawn point
+                RESPAWN_GRACE_UNTIL.put(player.getUUID(), now + com.skycraft.creatures.CreaturesConfig.GRACE_SECONDS.get() * 20L);
+                placeRespawn(player, died);
+            }
         }
     }
 
@@ -205,10 +222,36 @@ public final class PlayerDataEvents {
             return;
         }
         BlockPos safe = SafeSpawn.find(level, target, 40);
+        int quiet = SkyConfig.RESPAWN_SAFE_RADIUS.get();
+        if (quiet > 0 && (safe == null || hostileNear(level, safe, quiet))) {
+            // a bandit camp or wanderer at the spot: try the settlement/spawn ring further out for a hostile-free place
+            BlockPos fallback = null;
+            BlockPos[] centres = {target, level.getSharedSpawnPos(), here};
+            outer:
+            for (BlockPos c : centres) {
+                for (int r = 24; r <= 160; r += 24) {
+                    for (int k = 0; k < 8; k++) {
+                        double a = k * Math.PI / 4 + r * 0.37;
+                        BlockPos s = SafeSpawn.find(level, c.offset((int) (Math.cos(a) * r), 0, (int) (Math.sin(a) * r)), 8);
+                        if (s != null && !hostileNear(level, s, quiet)) {
+                            fallback = s;
+                            break outer;
+                        }
+                    }
+                }
+            }
+            if (fallback != null) safe = fallback;
+        }
         if (safe == null) return;
         player.teleportTo(level, safe.getX() + 0.5, safe.getY() + 0.05, safe.getZ() + 0.5, player.getYRot(), player.getXRot());
         player.fallDistance = 0f;
         player.setDeltaMovement(0, 0, 0);
+    }
+
+    private static boolean hostileNear(ServerLevel level, BlockPos pos, int radius) {
+        net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(pos).inflate(radius, 40, radius);
+        return !level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, box,
+                m -> m instanceof net.minecraft.world.entity.monster.Enemy && m.isAlive()).isEmpty();
     }
 
     @SubscribeEvent
@@ -232,6 +275,8 @@ public final class PlayerDataEvents {
         com.skycraft.combat.CombatHandler.forget(id);
         RACE_PROMPT_START.remove(id);
         DEATH_POS.remove(id);
+        RESPAWN_INVULN_UNTIL.remove(id);
+        RESPAWN_GRACE_UNTIL.remove(id);
     }
 
     /** Sends the whole player data to its owner right now (login, respawn, dimension change, big changes). */
@@ -307,12 +352,26 @@ public final class PlayerDataEvents {
                 && isRacePending(player)) {
             event.setCanceled(true);
         }
+        // a few seconds of invulnerability after respawning (never against /kill or the void)
+        if (event.getEntity() instanceof ServerPlayer sp && !event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+            Long until = RESPAWN_INVULN_UNTIL.get(sp.getUUID());
+            if (until != null) {
+                if (sp.level().getGameTime() < until) event.setCanceled(true);
+                else RESPAWN_INVULN_UNTIL.remove(sp.getUUID());
+            }
+        }
     }
 
     /** Mobs ignore a player whose race menu is pending. Stealth targeting rules live in combat/Stealth. */
     @SubscribeEvent
     public static void onTarget(net.minecraftforge.event.entity.living.LivingChangeTargetEvent event) {
         if (event.getNewTarget() instanceof Player player && isRacePending(player)) {
+            event.setCanceled(true);
+        }
+        // respawn grace: hostile mobs (bandit camps included) do not pick the player as a target; one the player
+        // struck first may still fight back
+        if (event.getNewTarget() instanceof ServerPlayer sp && event.getEntity() instanceof net.minecraft.world.entity.monster.Enemy
+                && inRespawnGrace(sp) && event.getEntity().getLastHurtByMob() != sp) {
             event.setCanceled(true);
         }
     }

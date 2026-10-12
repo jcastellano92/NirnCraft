@@ -19,7 +19,7 @@
   },
   "npcs": [
     {"id": "ralof", "name": "Ralof", "role": "stormcloak_soldier", "place": "helgen", "offset": [3, 27], "greet": "Gerdur's cooking, a roof, and a dragon somewhere to the north. Talos keep us, what a day."},
-    {"id": "hadvar", "name": "Hadvar", "role": "imperial_soldier", "place": "helgen", "offset": [10, 27], "greet": "I keep hearing that roar in my sleep. Whatever that thing was, the Legion will need every sword."},
+    {"id": "hadvar", "name": "Hadvar", "role": "imperial_soldier", "place": "helgen", "offset": [10, 27], "greet": "Mind the keep, the walls are still coming down. Whatever that thing was, the Legion will need every sword."},
     {"id": "gerdur", "name": "Gerdur", "role": "lumberjack", "place": "riverwood", "offset": [-12, 8], "female": true, "greet": "The mill doesn't run itself. But for a friend of my brother's, I can spare a minute."},
     {"id": "alvor", "name": "Alvor", "role": "adventurer", "place": "riverwood", "offset": [10, -6], "greet": "Iron, steel, a bit of leather. If you need it mended, my forge is warm."},
     {"id": "balgruuf", "name": "Jarl Balgruuf the Greater", "role": "jarl", "place": "dragonsreach", "offset": [0, 0], "greet": "Whiterun stands at the heart of Skyrim, and I intend to keep it standing. What brings you before me?"},
@@ -154,15 +154,30 @@
       "title": "Unbound",
       "stage": 1,
       "start": "auto",
-      "on_start": "intro:helgen_wake;relocate:ralof:riverwood:-10:6;relocate:hadvar:riverwood:12:-4",
-      "desc": "The Legion turned me away at the gates of Helgen, and then a black dragon crossed the sky. The guard told me to take the road to Riverwood and warn them.",
+      "on_start": "intro:helgen_wake;relocate:ralof:riverwood:-10:6",
+      "desc": "I woke in a cottage on the hill to the sound of a landslide, and watched a dragon burn Helgen from afar. Somebody down there may still be alive.",
       "objectives": [
         {
           "type": "go",
+          "place": "helgen",
+          "text": "Follow the road down to Helgen",
+          "label": "Helgen",
+          "journal": "The walls are still standing, but the roofs are gone and the whole town smells of burning. People are crawling out of the ruins."
+        },
+        {
+          "type": "talk",
+          "npc": "hadvar",
+          "text": "Find a survivor in the ruins: Hadvar, the Legion soldier by the gate",
+          "topic": "What happened here?",
+          "reply": "It came out of the sky as if the sky had split. It took the keep first, then the roofs. Half the garrison is under that rubble. If it flew north it will come to Riverwood next, and Riverwood has no walls and no soldiers. Go. Warn Gerdur at the mill, or my uncle Alvor at the forge. I can't leave my men.",
+          "journal": "A Legion soldier named Hadvar held what is left of the gate. He wants me to carry the warning to Riverwood before the dragon finds it."
+        },
+        {
+          "type": "go",
           "place": "riverwood",
-          "text": "Follow the road to Riverwood",
+          "text": "Follow the road north to Riverwood",
           "label": "Riverwood",
-          "journal": "I followed the road toward the nearest village, the dragon's roar fading behind me."
+          "journal": "I left Helgen to its dead and took the road toward the nearest village, the smoke behind me."
         },
         {
           "type": "talk",

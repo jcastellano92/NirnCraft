@@ -111,6 +111,8 @@ public final class Innkeepers {
         SurvivalData data = SurvivalData.get(level);
         SurvivalData.Inn inn = data.inn(s.id);
         long now = level.getGameTime();
+        // Helgen is a ruin after the dragon (the opening): its inn is dead, nobody keeps it
+        if (com.skycraft.quest.QuestConfig.RUINED_HELGEN.get() && com.skycraft.quest.story.StartCottage.nearHelgen(s.x, s.z, 40)) return;
         if (now - inn.lastCheck < 600) return;
         inn.lastCheck = now;
         BlockPos center = new BlockPos(s.x, Math.max(level.getMinBuildHeight(), s.y), s.z);

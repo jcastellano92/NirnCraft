@@ -64,6 +64,7 @@
   "hud.skycraft.crime.wanted": " - Wanted dead or alive",
   "hud.skycraft.crime.steal": "(Steal)",
   "hud.skycraft.crime.locked": "Locked (%s)",
+  "hud.skycraft.crime.locked_msg": "Locked. You need a lockpick.",
   "hud.skycraft.crime.pickpocket": "Pickpocket",
 
   "screen.skycraft.pickpocket.title": "Pickpocket: %s",

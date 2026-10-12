@@ -201,20 +201,12 @@ public final class AmbienceEngine {
         float cold = h.snowy;
         float warmSwamp = h.swamp;
 
+        // Playtest 3: the leaf rustle / insect chitter beds (forest, plains, savanna, jungle, marsh) and the cricket, cicada
+        // and insect calls are removed on purpose: wind, water, weather, birds and the cave beds remain.
         TARGET.put("wind_light", Mth.clamp((0.25f + 0.25f * h.rain + 0.3f * h.plains + 0.2f * cold + 0.2f * h.glacier) * open
                 * (1f - h.altitude), 0f, 0.7f));
         TARGET.put("wind_strong", Mth.clamp((h.altitude * 1.1f + h.mountain * 0.35f + h.glacier * 0.3f + h.thunder * 0.4f) * open, 0f, 1f));
         TARGET.put("blizzard", Mth.clamp(cold * h.rain * 1.1f, 0f, 1f));
-        TARGET.put("forest_day", h.forest * day * wet * (1f - cold * 0.5f) * 0.9f);
-        TARGET.put("forest_night", h.forest * h.night * wet * (1f - cold * 0.7f) * 0.8f);
-        TARGET.put("plains_day", h.plains * day * wet * (1f - cold * 0.8f) * 0.7f);
-        TARGET.put("plains_night", (h.plains + h.savanna * 0.8f) * h.night * wet * (1f - cold * 0.9f) * 0.7f);
-        TARGET.put("savanna_day", h.savanna * day * wet * 0.8f);
-        TARGET.put("marsh_day", (h.marsh + warmSwamp) * day * (1f - 0.4f * h.rain) * 0.9f);
-        TARGET.put("marsh_night", h.marsh * h.night * (1f - 0.3f * h.rain) * 0.9f);
-        TARGET.put("swamp_night", warmSwamp * h.night * (1f - 0.3f * h.rain) * 0.9f);
-        TARGET.put("jungle_day", h.jungle * day * (1f - 0.4f * h.rain) * 0.9f);
-        TARGET.put("jungle_night", h.jungle * h.night * (1f - 0.3f * h.rain) * 0.9f);
         TARGET.put("desert_wind", h.desert * (0.6f + 0.4f * h.rain) * 0.8f);
         TARGET.put("ash_storm", h.ash * (0.45f + 0.55f * h.rain));
         TARGET.put("volcanic_rumble", h.volcanic * 0.7f);
@@ -313,11 +305,8 @@ public final class AmbienceEngine {
             pool.add(new Call("hawk", 1.2f * day * dry * (h.mountain + h.altitude + h.desert * 0.5f + h.savanna * 0.5f), 30, 70, 30, 0.8f));
             pool.add(new Call("tree_creak", 1.5f * (h.forest + h.jungle * 0.5f) * (0.4f + h.rain + h.thunder), 6, 18, 4, 0.6f));
             pool.add(new Call("owl", 2f * h.night * dry * h.forest, 12, 32, 8, 0.7f));
-            pool.add(new Call("cricket", 4f * h.night * dry * (h.plains + h.forest * 0.5f + h.savanna + h.desert * 0.3f) * (1f - h.snowy), 4, 14, 0, 0.5f));
             pool.add(new Call("wolf_howl", 0.6f * h.night * (h.forest + h.snowy + h.plains * 0.5f) * (h.skyrim ? 1f : 0.4f), 60, 120, 6, 1f));
             pool.add(new Call("frog", 6f * wetland * (0.4f + h.night), 5, 20, 0, 0.7f));
-            pool.add(new Call("insect", 3f * day * dry * (wetland + h.jungle + h.plains * 0.3f + h.savanna * 0.5f) * (1f - h.snowy), 2, 7, 1, 0.5f));
-            pool.add(new Call("cicada", 2f * day * dry * (h.savanna + h.jungle * 0.5f + h.desert * 0.2f + h.swamp * 0.3f) * (1f - h.snowy), 8, 28, 4, 0.7f));
             pool.add(new Call("loon", 1f * (h.river + h.marsh * 0.6f) * (0.4f + h.night) * (1f - h.desert), 40, 90, 2, 0.8f));
             pool.add(new Call("jungle_bird", 5f * h.jungle * (0.3f + day) * dry, 10, 32, 8, 0.8f));
             pool.add(new Call("gull", 3f * (h.coast + h.ocean * 0.6f) * day * dry, 12, 36, 10, 0.8f));

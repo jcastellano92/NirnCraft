@@ -42,6 +42,11 @@ public final class MagicClientEvents {
     public static final int WORD2_TICKS = 7;
     public static final int WORD3_TICKS = 14;
 
+    /** Fists / previous loadout toggle (default B); the magic menu also has Unequip and Unarmed buttons. */
+    public static final net.minecraft.client.KeyMapping HANDS_CYCLE = new net.minecraft.client.KeyMapping("key.skycraft.hands_cycle",
+            net.minecraftforge.client.settings.KeyConflictContext.IN_GAME, com.mojang.blaze3d.platform.InputConstants.Type.KEYSYM,
+            org.lwjgl.glfw.GLFW.GLFW_KEY_B, com.skycraft.client.SkyKeys.CATEGORY);
+
     private static boolean rightDown;
     private static boolean leftDown;
     private static boolean useWasDown;
@@ -82,7 +87,7 @@ public final class MagicClientEvents {
         if (com.skycraft.curse.Curses.transformed(player)) return false;
         if (!castFriendly(player.getMainHandItem())) return false;
         if (mc.hitResult != null && mc.hitResult.getType() != HitResult.Type.MISS) return false;
-        return !MagicData.selectedSpell(player).isEmpty() || !MagicData.leftSpell(player).isEmpty();
+        return !MagicData.leftEffective(player).isEmpty();
     }
 
     @SubscribeEvent
@@ -129,6 +134,18 @@ public final class MagicClientEvents {
             if (leftDown) handGlow(mc, player, SpellCasting.LEFT);
         }
 
+        // Hands cycle key: fists (no spells, nothing held) <-> your previous loadout.
+        while (HANDS_CYCLE.consumeClick()) {
+            if (mc.screen == null) SkyNetwork.sendToServer(new MagicPackets.MenuAction(MagicPackets.MenuAction.CYCLE_HANDS, ""));
+        }
+
+        // An equipped spell shows as a small glow in its hand (no item model, nothing drawn over the arm).
+        if (!leftDown && !rightDown && player.tickCount % 12 == 0 && mc.level != null && com.skycraft.SkyConfig.HAND_SPELL_GLOW.get()
+                && !com.skycraft.combat.Sheathe.isSheathed(player) && !player.isSpectator()) {
+            if (spellIn(player, SpellCasting.RIGHT) != null) handGlow(mc, player, SpellCasting.RIGHT);
+            if (spellIn(player, SpellCasting.LEFT) != null) handGlow(mc, player, SpellCasting.LEFT);
+        }
+
         // Shouting: hold to charge more words, release to shout.
         while (SkyKeys.SHOUT.consumeClick()) {
             // drained; handled through isDown()
@@ -172,9 +189,8 @@ public final class MagicClientEvents {
 
     /** The spell the local player has in a hand (left falls back to right, like the server). */
     public static Spell spellIn(LocalPlayer player, int hand) {
-        String id = hand == SpellCasting.LEFT ? MagicData.leftSpell(player) : "";
-        if (id.isEmpty()) id = MagicData.selectedSpell(player);
-        return Spells.byId(id);
+        String id = hand == SpellCasting.LEFT ? MagicData.leftEffective(player) : MagicData.selectedSpell(player);
+        return id.isEmpty() ? null : Spells.byId(id);
     }
 
     private static void handGlow(Minecraft mc, LocalPlayer player, int hand) {
@@ -209,9 +225,11 @@ public final class MagicClientEvents {
         LocalPlayer player = mc.player;
         if (player == null || player.isInvisible()) return;
 
-        String leftSpell = MagicData.leftSpell(player);
-        if (leftSpell.isEmpty()) leftSpell = MagicData.selectedSpell(player);
-        if (leftSpell.isEmpty() && !isCasting()) return;
+        // Playtest 3: an equipped spell used to draw this arm over the fists all the time. The arm is only raised while
+        // the left hand actually casts, and only when the main hand holds something (empty hands already show both
+        // fists via core.ClientEvents); an equipped-but-idle spell is just a faint glow (see handGlows).
+        if (!leftDown || player.getMainHandItem().isEmpty()) return;
+        if (com.skycraft.combat.Sheathe.isSheathed(player)) return;
 
         var poseStack = event.getPoseStack();
         var buffer = event.getMultiBufferSource();

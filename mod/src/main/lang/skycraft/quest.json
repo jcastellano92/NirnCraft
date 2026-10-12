@@ -784,6 +784,16 @@
   "quest.skycraft.intro.pointer": "Your compass now points toward Riverwood.",
   "quest.skycraft.intro.sighted": "Dragon sighted",
   "quest.skycraft.intro.sighted_sub": "Riverwood must be warned.",
-  "quest.skycraft.intro.journal": "A dragon crossed the sky above the gate, so low I felt its roar in my chest. The guards ran. I will do as I was told and warn Riverwood.",
+  "quest.skycraft.intro.journal": "I woke in the cottage on the hill to a sound like a landslide, and watched a dragon burn Helgen from a distance. Somebody down there may still be alive. I will take the road and see.",
+  "quest.skycraft.intro2.a": "You wake to a low rumble that is not thunder. The shutters rattle in their frames.",
+  "quest.skycraft.intro2.b": "Through the window lies the valley. Helgen sits inside its walls, and something dark is lifting off the keep.",
+  "quest.skycraft.intro2.c": "A dragon. Nobody alive has seen one. Fire runs over the rooftops, and the horns begin, far too late.",
+  "quest.skycraft.intro2.d": "Columns of smoke climb the sky. Even from here you can hear the screaming.",
+  "quest.skycraft.intro2.e": "Then the wings turn away over the ridge and the valley goes quiet. Someone down there is still alive. Take the road and find out who.",
+  "quest.skycraft.intro2.title": "Helgen is burning",
+  "quest.skycraft.intro2.subtitle": "Follow the road down to the town.",
+  "entity.skycraft.helgen_survivor": "Helgen Survivor",
+  "entity.skycraft.helgen_wounded": "Wounded Townsperson",
+  "entity.skycraft.helgen_legionnaire": "Shaken Legionnaire",
   "quest.skycraft.obj.uncharted_lair": "Clear the lair of the land's great beast"
 }

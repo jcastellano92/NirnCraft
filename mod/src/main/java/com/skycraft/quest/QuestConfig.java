@@ -15,6 +15,7 @@ public final class QuestConfig {
     public static final ForgeConfigSpec.BooleanValue DARK_WHISPER;
     public static final ForgeConfigSpec.BooleanValue HELGEN_START;
     public static final ForgeConfigSpec.BooleanValue INTRO;
+    public static final ForgeConfigSpec.BooleanValue RUINED_HELGEN;
     public static final ForgeConfigSpec.IntValue SKIP_DAYS;
 
     static {
@@ -36,6 +37,8 @@ public final class QuestConfig {
                 .define("helgenStart", false);
         INTRO = b.comment("Play the short opening (a wake-up scene and one distant dragon sighting). False skips it: the first objective is still set.")
                 .define("intro", true);
+        RUINED_HELGEN = b.comment("Helgen is a ruin after the dragon: only survivors and soldiers live there (no shopkeepers, no innkeeper).")
+                .define("ruinedHelgen", true);
         SKIP_DAYS = b.comment("In-game days a quest step must stay unfinished before the journal offers to skip it (0 = never).",
                         "A fallback against broken states, e.g. a quest NPC or relic lost to another mod.")
                 .defineInRange("skipAfterDays", 3, 0, 365);

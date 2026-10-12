@@ -91,9 +91,9 @@ public final class SpellCasting {
     /** The spell equipped in a hand; an empty left hand falls back to the right hand's spell. */
     @Nullable
     public static Spell spellFor(ServerPlayer p, int hand) {
-        String id = hand == LEFT ? MagicData.leftSpell(p) : "";
-        if (id.isEmpty()) id = MagicData.selectedSpell(p);
-        return Spells.byId(id);
+        // a hand unequipped from the menu holds nothing (it no longer falls back to the other hand's spell)
+        String id = hand == LEFT ? MagicData.leftEffective(p) : MagicData.selectedSpell(p);
+        return id.isEmpty() ? null : Spells.byId(id);
     }
 
     private static Active[] hands(ServerPlayer p) {

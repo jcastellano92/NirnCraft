@@ -43,6 +43,11 @@ public final class MagicHud {
                 && leftCast != null && leftCast == right && right.dualCastable;
         if (left != null) drawSpell(g, font, player, data, left, 12, height - 40, false, MagicClientEvents.isCasting(SpellCasting.LEFT), dual);
         if (right != null) drawSpell(g, font, player, data, right, width - 12, height - 46, true, MagicClientEvents.isCasting(SpellCasting.RIGHT), dual);
+        // empty hands are shown too, so "what do I have equipped" is never a guess
+        if (left == null && right == null && player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty()) {
+            g.drawString(font, Component.translatable("magic.skycraft.hud_unarmed", MagicClientEvents.HANDS_CYCLE.getTranslatedKeyMessage()),
+                    12, height - 40, 0xFFB8B2A0, true);
+        }
 
         // ---------------------------------------------------------- equipped voice / shout / power (bottom right)
         String voice = MagicData.selectedVoice(player);

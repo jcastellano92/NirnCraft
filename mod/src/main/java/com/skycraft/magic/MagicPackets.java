@@ -126,6 +126,11 @@ public final class MagicPackets {
         public static final int SELECT_POWER = 5;
         /** Forget a spell made at a Spellmaking Altar. */
         public static final int FORGET_CUSTOM = 6;
+        /** Hands: unequip the right hand (spell, else held item), unequip the left, go unarmed, toggle unarmed. */
+        public static final int UNEQUIP_RIGHT = 7;
+        public static final int UNEQUIP_LEFT = 8;
+        public static final int UNARMED = 9;
+        public static final int CYCLE_HANDS = 10;
 
         static void encode(MenuAction m, FriendlyByteBuf buf) {
             buf.writeVarInt(m.action);
@@ -162,6 +167,10 @@ public final class MagicPackets {
                         if (MagicData.hasPower(player, m.id)) MagicData.setSelectedVoice(player, m.id);
                     }
                     case FORGET_CUSTOM -> com.skycraft.magic.spell.spellmaking.SpellmakingAltarBlock.forget(player, m.id);
+                    case UNEQUIP_RIGHT -> Hands.unequipRight(player);
+                    case UNEQUIP_LEFT -> Hands.unequipLeft(player);
+                    case UNARMED -> Hands.goUnarmed(player);
+                    case CYCLE_HANDS -> Hands.cycle(player);
                     case UNLOCK_WORD -> {
                         Shout shout = Shout.byId(m.id);
                         if (shout != null) Shouting.unlockWord(player, shout);

@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -21,6 +22,11 @@ public final class MagicClientSetup {
     @SubscribeEvent
     public static void overlays(RegisterGuiOverlaysEvent event) {
         event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "magic_hud", MagicHud::render);
+    }
+
+    @SubscribeEvent
+    public static void keys(RegisterKeyMappingsEvent event) {
+        event.register(MagicClientEvents.HANDS_CYCLE);
     }
 
     @SubscribeEvent

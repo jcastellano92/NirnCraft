@@ -29,6 +29,9 @@ public final class SkyConfig {
     public static final ForgeConfigSpec.DoubleValue DEATH_GOLD_DROP_PERCENT;
     public static final ForgeConfigSpec.IntValue DEATH_VALUABLE_MIN_VALUE;
     public static final ForgeConfigSpec.EnumValue<RespawnMode> RESPAWN_MODE;
+    public static final ForgeConfigSpec.IntValue RESPAWN_INVULN_SECONDS;
+    public static final ForgeConfigSpec.IntValue RESPAWN_SAFE_RADIUS;
+    public static final ForgeConfigSpec.BooleanValue HAND_SPELL_GLOW;
 
     /** Where you wake after dying with no bed: the nearest settlement you have visited, or the world spawn. */
     public enum RespawnMode { VISITED_SETTLEMENT, WORLD_SPAWN }
@@ -63,6 +66,10 @@ public final class SkyConfig {
                 .defineInRange("valuableMinValue", 150, 1, 1000000);
         RESPAWN_MODE = b.comment("With no bed or home set: VISITED_SETTLEMENT = the nearest settlement this player has discovered (their own record), WORLD_SPAWN = the spawn point.")
                 .defineEnum("respawnMode", RespawnMode.VISITED_SETTLEMENT);
+        RESPAWN_INVULN_SECONDS = b.comment("Seconds of invulnerability after respawning (hostiles also ignore you for the creatures grace period).")
+                .defineInRange("respawnInvulnSeconds", 5, 0, 60);
+        RESPAWN_SAFE_RADIUS = b.comment("A respawn spot is moved if a hostile mob stands within this many blocks (0 = off).")
+                .defineInRange("respawnSafeRadius", 60, 0, 200);
         b.pop();
 
         b.push("survival");
@@ -90,6 +97,8 @@ public final class SkyConfig {
         WEAPON_SKILL_DAMAGE_SCALE = b.comment("Extra weapon damage per skill level (0.005 = +50% at skill 100, like Skyrim).")
                 .defineInRange("weaponSkillDamageScale", 0.005, 0.0, 1.0);
         SNEAK_ATTACKS = b.define("sneakAttacks", true);
+        HAND_SPELL_GLOW = b.comment("Equipped spells show a small glow in their hand (no item is drawn over the arm).")
+                .define("handSpellGlow", true);
         b.pop();
 
         SPEC = b.build();

@@ -114,6 +114,24 @@ public final class MagicData {
         return tag(player).getString("left_spell");
     }
 
+    /** Marks the left hand as deliberately empty (an empty {@code left_spell} falls back to the right-hand spell). */
+    public static final String NONE = "none";
+
+    /** The spell the left hand actually casts: its own, else the right-hand spell, or "" when unequipped on purpose. */
+    public static String leftEffective(Player player) {
+        String left = leftSpell(player);
+        if (NONE.equals(left)) return "";
+        return left.isEmpty() ? selectedSpell(player) : left;
+    }
+
+    /** Empties the right hand (both the new key and the older alias). */
+    public static void clearRightSpell(Player player) {
+        CompoundTag tag = tag(player);
+        tag.putString("right_spell", "");
+        tag.putString("selected_spell", "");
+        dirty(player);
+    }
+
     public static void setLeftSpell(Player player, String spellId) {
         tag(player).putString("left_spell", spellId);
         dirty(player);

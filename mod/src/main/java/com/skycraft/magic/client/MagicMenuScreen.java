@@ -109,6 +109,18 @@ public class MagicMenuScreen extends Screen {
             if (e != null && e.kind == Kind.SHOUT) SkyNetwork.sendToServer(new MagicPackets.MenuAction(MagicPackets.MenuAction.UNLOCK_WORD, e.id));
         }).bounds(detailX, height - 52, Math.min(detailW, 160), 20).build());
         unlockButton.visible = false;
+        // hands: unequip each one (spell, else the held item) or go unarmed (fists)
+        int bw = Mth.clamp((width - 40) / 4, 60, 96);
+        int bx = width - 14;
+        bx -= bw;
+        addRenderableWidget(Button.builder(Component.translatable("magic.skycraft.unarmed"), b ->
+                handsAction(MagicPackets.MenuAction.UNARMED)).bounds(bx, 8, bw, 18).build());
+        bx -= bw + 4;
+        addRenderableWidget(Button.builder(Component.translatable("magic.skycraft.unequip_left"), b ->
+                handsAction(MagicPackets.MenuAction.UNEQUIP_LEFT)).bounds(bx, 8, bw, 18).build());
+        bx -= bw + 4;
+        addRenderableWidget(Button.builder(Component.translatable("magic.skycraft.unequip_right"), b ->
+                handsAction(MagicPackets.MenuAction.UNEQUIP_RIGHT)).bounds(bx, 8, bw, 18).build());
         if (!opened) {
             // First time: start on the school of the equipped spell.
             opened = true;
@@ -244,6 +256,12 @@ public class MagicMenuScreen extends Screen {
                 net.minecraft.sounds.SoundEvents.BOOK_PAGE_TURN, 1.4f, 0.6f));
     }
 
+    private void handsAction(int action) {
+        SkyNetwork.sendToServer(new MagicPackets.MenuAction(action, ""));
+        Minecraft.getInstance().getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
+                net.minecraft.sounds.SoundEvents.BOOK_PAGE_TURN, 1.0f, 0.5f));
+    }
+
     private void favorite(Entry e) {
         SkyNetwork.sendToServer(new MagicPackets.MenuAction(MagicPackets.MenuAction.TOGGLE_FAVORITE, e.id));
     }
@@ -350,6 +368,18 @@ public class MagicMenuScreen extends Screen {
             }
             case GLFW.GLFW_KEY_F -> {
                 if (cursor >= 0 && cursor < entries.size()) favorite(entries.get(cursor));
+                return true;
+            }
+            case GLFW.GLFW_KEY_Z -> {
+                handsAction(MagicPackets.MenuAction.UNEQUIP_RIGHT);
+                return true;
+            }
+            case GLFW.GLFW_KEY_C -> {
+                handsAction(MagicPackets.MenuAction.UNEQUIP_LEFT);
+                return true;
+            }
+            case GLFW.GLFW_KEY_V -> {
+                handsAction(MagicPackets.MenuAction.UNARMED);
                 return true;
             }
             case GLFW.GLFW_KEY_X, GLFW.GLFW_KEY_DELETE -> {

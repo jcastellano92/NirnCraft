@@ -124,6 +124,16 @@ public final class SettlementPopulation {
             boolean done;
             try {
                 AnchorType t = res.slotType();
+                if ("helgen".equals(e.key) && com.skycraft.quest.QuestConfig.RUINED_HELGEN.get()) {
+                    // the dragon has been: only survivors and shaken soldiers, no shopkeepers, innkeeper, bard or court
+                    done = ruinedHelgen(level, at, t, i);
+                    if (done) {
+                        adopt(level, at, res, list, bed);
+                        e.spawned.add(i);
+                        changed = true;
+                    }
+                    continue;
+                }
                 done = switch (t) {
                     case JARL -> {
                         jarl = npc(level, at, NpcRole.JARL, jarlName(e.key), 10);
@@ -173,6 +183,33 @@ public final class SettlementPopulation {
             }
         }
         if (changed) data.setDirty();
+    }
+
+    /**
+     * Helgen after the attack (the intro's "ruined" set): the soldiers stay at their posts, everyone else who would have
+     * kept a shop, an inn or a court is a dazed survivor sitting among the rubble, and only some of the households are
+     * still there. Returns true when the anchor is dealt with.
+     */
+    private static boolean ruinedHelgen(ServerLevel level, BlockPos at, AnchorType t, int i) {
+        switch (t) {
+            case GUARD -> {
+                return guard(level, at);
+            }
+            case JARL, HOUSECARL, STEWARD, WIZARD, BARD, PRIEST, INN, SMITH, MERCHANT, ALCHEMIST, FARMER, MILLER, LUMBERJACK, MINER, JEWELER,
+                    BOOKSELLER, TAILOR, BUTCHER, FLETCHER, FENCE, FISHER, HUNTER, WORKER -> {
+                // roughly one in two of the old jobs left a survivor behind
+                if (i % 2 == 0) return true;
+                boolean wounded = i % 4 == 1;
+                return npc(level, at, wounded ? NpcRole.BEGGAR : NpcRole.CITIZEN,
+                        Component.translatable(wounded ? "entity.skycraft.helgen_wounded" : "entity.skycraft.helgen_survivor"), 6) != null;
+            }
+            case BED -> {
+                return i % 3 != 0 || npc(level, at, NpcRole.CITIZEN, Component.translatable("entity.skycraft.helgen_survivor"), 8) != null;
+            }
+            default -> {
+                return true;
+            }
+        }
     }
 
     /** The nearest household bed anchor of the settlement that nobody holds, or null. */

@@ -205,6 +205,16 @@ public final class CrimePackets {
             LAST_QUERY.put(player.getUUID(), now);
             if (player.distanceToSqr(Vec3.atCenterOf(pos)) > 100 || !player.level().isLoaded(pos)) return;
             var level = player.serverLevel();
+            var queried = level.getBlockState(pos).getBlock();
+            if (queried instanceof net.minecraft.world.level.block.DoorBlock || queried instanceof net.minecraft.world.level.block.TrapDoorBlock) {
+                // Doors have no block entity, so they used to get no answer at all: the client then predicted the door
+                // opening and the server snapped it shut again. Answer with the real lock decision (inn rooms, owned
+                // doors, picked locks included) so the client can refuse the click before the door moves.
+                boolean blocked = Locks.blocks(player, level, pos);
+                int tier = Math.max(0, Locks.lockLevel(level, Locks.normalizePos(level, pos)));
+                SkyNetwork.sendToPlayer(player, new ContainerInfo(pos, false, blocked ? tier : Locks.NOT_LOCKED, !blocked));
+                return;
+            }
             if (level.getBlockEntity(pos) == null) return;
             boolean owned = !player.isCreative() && Theft.isOwned(level, pos);
             int lock = Locks.lockLevel(level, pos);

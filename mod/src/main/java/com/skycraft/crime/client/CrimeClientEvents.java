@@ -54,9 +54,15 @@ public final class CrimeClientEvents {
         var cstate = mc.level.getBlockState(cpos);
         if (cstate.getBlock() instanceof net.minecraft.world.level.block.DoorBlock || cstate.getBlock() instanceof net.minecraft.world.level.block.TrapDoorBlock) {
             var info = CrimeClientHandlers.containerInfo;
-            if (info != null && (info.pos().equals(cpos) || info.pos().equals(cpos.below())) && info.lock() != com.skycraft.crime.Locks.NOT_LOCKED && !info.unlocked()) {
+            if (info != null && (info.pos().equals(cpos) || info.pos().equals(cpos.below()) || info.pos().equals(cpos.above()))
+                    && info.lock() != com.skycraft.crime.Locks.NOT_LOCKED && !info.unlocked()) {
+                // refuse on the client too, so the door never animates open before the server's lockpick check
                 event.setCanceled(true);
                 event.setCancellationResult(net.minecraft.world.InteractionResult.FAIL);
+                if (event.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND) {
+                    mc.level.playLocalSound(cpos, net.minecraft.sounds.SoundEvents.CHEST_LOCKED, net.minecraft.sounds.SoundSource.BLOCKS, 0.5f, 1.3f, false);
+                    mc.player.displayClientMessage(Component.translatable("hud.skycraft.crime.locked_msg").withStyle(ChatFormatting.RED), true);
+                }
             }
         }
     }

@@ -37,10 +37,14 @@ public final class SkyData {
 
     public static class Provider implements ICapabilitySerializable<CompoundTag> {
         private final PlayerData data = new PlayerData();
-        private final LazyOptional<PlayerData> optional = LazyOptional.of(() -> data);
+        private LazyOptional<PlayerData> optional = LazyOptional.of(() -> data);
 
         @Override
         public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+            // A dead player's caps are invalidated when the old body is removed, and reviveCaps() (used in
+            // PlayerEvent.Clone) does not revive an invalidated LazyOptional: without a fresh one the clone read an
+            // empty capability, so respawn lost race, stats and quests and re-opened the character creator.
+            if (!optional.isPresent()) optional = LazyOptional.of(() -> data);
             return CAP.orEmpty(cap, optional);
         }
 

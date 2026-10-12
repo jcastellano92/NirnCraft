@@ -30,6 +30,7 @@ public final class QuestPackets {
         SkyNetwork.register(QuestAction.class, NetworkDirection.PLAY_TO_SERVER, QuestAction::encode, QuestAction::decode, QuestAction::handle);
         SkyNetwork.register(PartyTravelPrompt.class, NetworkDirection.PLAY_TO_CLIENT, PartyTravelPrompt::encode, PartyTravelPrompt::decode, PartyTravelPrompt::handle);
         SkyNetwork.register(PartyTravel.class, NetworkDirection.PLAY_TO_SERVER, PartyTravel::encode, PartyTravel::decode, PartyTravel::handle);
+        SkyNetwork.register(NarrationCard.class, NetworkDirection.PLAY_TO_CLIENT, NarrationCard::encode, NarrationCard::decode, NarrationCard::handle);
     }
 
     // ------------------------------------------------------------------ S2C
@@ -47,6 +48,23 @@ public final class QuestPackets {
 
         static void handle(SyncQuests m, Supplier<NetworkEvent.Context> ctx) {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientQuestData.onQuests(m.tag));
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
+    /** A narration card (the opening): a short text shown wrapped in a band on screen for {@code stay} ticks. */
+    public record NarrationCard(net.minecraft.network.chat.Component text, int stay) {
+        static void encode(NarrationCard m, FriendlyByteBuf buf) {
+            buf.writeComponent(m.text);
+            buf.writeVarInt(m.stay);
+        }
+
+        static NarrationCard decode(FriendlyByteBuf buf) {
+            return new NarrationCard(buf.readComponent(), buf.readVarInt());
+        }
+
+        static void handle(NarrationCard m, Supplier<NetworkEvent.Context> ctx) {
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.quest.client.NarrationOverlay.show(m.text, m.stay));
             ctx.get().setPacketHandled(true);
         }
     }

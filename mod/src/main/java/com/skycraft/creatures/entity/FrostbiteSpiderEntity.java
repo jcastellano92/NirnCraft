@@ -54,7 +54,8 @@ public class FrostbiteSpiderEntity extends Spider implements AnimatedCreature {
 
     @Override
     protected net.minecraft.sounds.SoundEvent getAmbientSound() {
-        return com.skycraft.audio.AudioSounds.creature("frostbite_spider", "ambient");
+        // playtest 3: the constant chittering/hissing was dropped; the spider is silent until hurt or killed
+        return null;
     }
 
     @Override
@@ -125,6 +126,8 @@ public class FrostbiteSpiderEntity extends Spider implements AnimatedCreature {
                                                                    @org.jetbrains.annotations.Nullable net.minecraft.world.entity.SpawnGroupData data,
                                                                    @org.jetbrains.annotations.Nullable net.minecraft.nbt.CompoundTag tag) {
         data = super.finalizeSpawn(level, difficulty, reason, data, tag);
+        // vanilla spiders may roll Invisibility from their effect group on hard: a Skycraft spider is always seen
+        this.removeEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY);
         if (this.random.nextInt(12) == 0) setGiant(true);
         return data;
     }
