@@ -1,0 +1,44 @@
+# First full playtest: what to check
+
+Build: `dist/Skycraft-client-instance.zip` (Prism Launcher: Add Instance -> Import). Branch `tamriel-overhaul`.
+Everything below was verified only headless (`tools\qa\qa.ps1 -Server`: build, data, layout lint, world boot, 1,072
+quests played to completion, magic selftest) and with offline renders. **Nothing in this list has been seen in game.**
+
+**Use a NEW world.** Worldgen changed (terrain rasters, hydrology, caverns, dungeon layouts, cities), so old saves
+will not match new chunks. For an existing save, `/skycraft-roads replan` picks up the new road ends only.
+
+## 1. Boot and spawn (5 min)
+- World creates without a crash; you spawn at Whiterun (0,0). Check the log for `ERROR`.
+- Flying/teleport around Whiterun: terrain, rivers (White River), clouds at y 330, shader/DH if installed.
+
+## 2. Look at (each: does it look good, is it broken?)
+| Area | Where / how | What to judge |
+| --- | --- | --- |
+| Organic cities | `/skysettle plan <id>` for a diagram; visit Markarth, Riften, Solitude, Windhelm, Whiterun, then Balmora, Aldruhn, Bravil, Lilmoth, Alinor, Elden Root, Rimmen | curved streets, density, civic features (trees, fountains, shrines), no big empty gaps, gates meet roads |
+| Roads | walk Whiterun -> Riverwood, Chorrol -> Skingrad | roads reach gates, roadside carts/barrels/lanterns, bridges at streams |
+| Rivers and waterfalls | `/skycraft-explore near`, any big river in the Rift/Cyrodiil | streams from mountains, lakes with outlets, waterfalls (some with a cave behind), salmon run in autumn |
+| Dungeons | Bleak Falls Barrow, Alftand, Miscarcand, Ruins of Mazzatun, any cave/mine | length, grand caverns (glow, bridges, lakes), sleepers vs awake, lectern journals, boss room, back-door shortcut |
+| Landmarks and scatter | wander 500+ blocks from a town | S/M/L/XL landmarks, graves with names, camps, debris thinning with distance |
+| Region borders | walk Jerall -> Stonefalls, Craglorn -> Wrothgar | transitions look natural, no straight seams |
+| Quests and NPCs | pick up a chain in a marquee town (Vivec, Mournhold, Balmora, Imperial City, Alinor, Torval) | text, choices, consequences, NPC placement |
+| Lore web | find a clue note, follow it | hidden quest starts, points to next place |
+| Sea routes | any port; Tang Mo, Pyandonean anchorage | ships follow routes; Solitude routes use straight lines (no open-water path) |
+
+## 3. Known gaps (not bugs to report; not done yet)
+- Not built: ILIAC BAY (Daggerfall geography for High Rock/Hammerfell), ITEMS AFFIX, PERF+BAKE (fixed seed "Nirn",
+  pre-baking, pregenerator). World generation may be slow on first visits.
+- Roads: 1 unserved gate (Riverwood); foreign islands have roads only on the Pyandonean pair; sea routes
+  solitude-dawnstar/windhelm/raven_rock fall back to straight lines.
+- Not verified visually: cloud lighting changes, distant lightning, waterfall caves, ford beds, shaft ramps,
+  honeycomb/city-wall cavern shapes, floating props flagged by the town audit (pond, themed statue, bell tower).
+- Engine limits: NPC daily routines (fixed anchor only), no trainer role, no moon phases for quest gates.
+- Content depth outside Skyrim is still below Skyrim (see `docs/PARITY.md` for the scorecard and backlog).
+- `Tried to load a block entity for block skycraft:bedroll` warnings at worldgen (harmless, to be fixed).
+
+## 4. Useful commands
+`/skycraft-dungeon-qa view <place> [boss|start]` teleports into a dungeon room; `/skycraft-landmarks showcase`;
+`/skycraft-scatter stats <x> <z> <r>`; `/skysettle plan <city>`; `/skycraft-explore near`; `/skycraft-quest selftest`.
+
+## 5. When reporting
+Screenshot + coordinates (F3) + what you expected. Server log: `logs/latest.log`. The audits to re-run after fixes:
+`tools\qa\qa.ps1 -Server`, `py -3 -I tools/qa/parity.py --lowest 10`, `py -3 -I tools/qa/dungeon_audit.py`.

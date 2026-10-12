@@ -18,6 +18,7 @@ param(
     [switch]$NoBuild,
     [switch]$Layout,
     [switch]$Parity,
+    [switch]$Novelty,
     [string]$ServerCmds = "",
     [string]$Tour = "",
     [int]$ServerTimeout = 900,
@@ -81,6 +82,12 @@ if ($Parity) {
     $pr = @(& $py -3 -I tools/qa/parity.py --lowest 10 2>&1)
     Add("INFO   parity            lowest cells vs Skyrim (full table: py -3 -I tools/qa/parity.py; plan: docs/PARITY.md)")
     $pr | ForEach-Object { Add("       $_") }
+}
+if ($Novelty) {
+    # informational: near-duplicate text clusters in the lang files (tools/qa/novelty_lint.py, docs/PARITY.md)
+    $nv = @(& $py -3 -I tools/qa/novelty_lint.py --top 10 2>&1)
+    Add("INFO   novelty           10 worst near-duplicate clusters (py -3 -I tools/qa/novelty_lint.py --strict gates)")
+    $nv | ForEach-Object { Add("       $_") }
 }
 Pop-Location
 

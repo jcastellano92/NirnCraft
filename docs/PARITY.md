@@ -433,6 +433,20 @@ Each batch owns files nobody else in its wave touches. At most 3 batches at once
 | **PA1 Per-province loaders** | `explore/Uniques.java` reads `explore/uniques*.json`; confirm `tools/place_lore.js` merges `regions` blocks of several lore files and `lore/places/index.json` unions; otherwise fix. | `explore/Uniques.java`, `tools/place_lore.js` | S | `node tools/place_lore.js`, qa.ps1 -Server | Two lore files naming the same province both load; two uniques files both load. |
 | **PA2 Novelty lint** | `tools/qa/novelty_lint.py`: flags near-duplicate text across lore hooks, rumours, greetings, quest pitches and lang lines (4-gram Jaccard above 0.55 within a province, shared sentence skeleton above 3 uses), plus per-template reuse counts. Wire as an optional `qa.ps1 -Novelty` switch. | `tools/qa/novelty_lint.py`, `tools/qa/qa.ps1` (one switch) | S | runs in under 10 s; first run records the baseline (Skyrim's hand-written text is the reference for "acceptable") | Every generator batch below must pass it at 0 pairs. This is the "never copy-paste" gate. |
 
+**Wave 0 status (enablers in place).**
+* PA0: `society/RegionVoice.java` reads `resources/skycraft/society/region_voice.json` (`regions`, `provinces`, `gossip`
+  variant counts). `NpcDialogue.aboutRegion` and `Chatter` use it (region -> province -> `say.region.unknown`). To add a
+  region: lang keys `say.region.<id>` / `chat.gossip_<id>.<v>.<0..2>` plus its id in the JSON; no Java edit. Note
+  `parity.py` `n_say` still reads only `society.json`; PA10's `society_<province>.json` needs that counter widened.
+* PA1: `explore/Uniques.java` loads `uniques.json` plus every file listed in `explore/uniques_index.json` (a JSON array
+  of names; append). `tools/place_lore.js` and `PlaceLore.java` now merge a region written in several lore files (rumours,
+  legends and songs append, key indices continue) and the lore index is a union. `parity.py` still counts uniques from
+  `uniques.json` only (widen it when the first `uniques_<province>.json` lands).
+* PA2: `py -3 -I tools/qa/novelty_lint.py [--top N] [--strict]`, or `qa.ps1 -Novelty`. Baseline on current content
+  (9,001 texts, 0.4 s): 4 near-duplicate pairs (quest objective lines such as "Pray at the Chapel of ..." and bark
+  repeats), 2 shared skeletons ("pray at the X of X in X", "go to the shrine of X north of X"). Generators must keep
+  `--strict` at 0 pairs and 0 skeletons beyond this baseline.
+
 ### Wave 1: depth per place (data; the biggest score movers; parallel by province)
 
 | Batch | Scope | Owns | Size | Verified by | Done means (per region unless stated) |

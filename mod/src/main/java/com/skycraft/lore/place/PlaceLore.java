@@ -246,8 +246,10 @@ public final class PlaceLore {
             for (Map.Entry<String, JsonElement> e : root.getAsJsonObject("regions").entrySet()) {
                 String k = "place_lore.skycraft.region." + e.getKey().replace('/', '.');
                 JsonObject o = e.getValue().getAsJsonObject();
-                List<Song> songs = new ArrayList<>();
-                int i = 0;
+                // a region written in several lore files: later files append (key indices continue)
+                RegionLore prior = REGIONS.get(e.getKey());
+                List<Song> songs = new ArrayList<>(prior == null ? List.of() : prior.songs());
+                int i = songs.size();
                 for (JsonElement s : arr(o, "songs")) {
                     JsonObject so = s.getAsJsonObject();
                     String sk = k + ".song." + i++;
@@ -256,8 +258,13 @@ public final class PlaceLore {
                     for (Txt t : txts(arr(so, "lines"), sk + ".line.")) lines.add(new Txt(t.key(), t.text().replaceFirst("^[~^#]\\s*", "")));
                     songs.add(new Song(new Txt(sk + ".title", str(so, "title")), List.copyOf(lines)));
                 }
-                REGIONS.put(e.getKey(), new RegionLore(e.getKey(), txts(arr(o, "rumours"), k + ".rumour."),
-                        txts(arr(o, "legends"), k + ".legend."), List.copyOf(songs)));
+                List<Txt> rumours = new ArrayList<>(prior == null ? List.of() : prior.rumours());
+                JsonArray ra = arr(o, "rumours");
+                for (int n = 0; n < ra.size(); n++) rumours.add(new Txt(k + ".rumour." + rumours.size(), ra.get(n).getAsString()));
+                List<Txt> legends = new ArrayList<>(prior == null ? List.of() : prior.legends());
+                JsonArray la = arr(o, "legends");
+                for (int n = 0; n < la.size(); n++) legends.add(new Txt(k + ".legend." + legends.size(), la.get(n).getAsString()));
+                REGIONS.put(e.getKey(), new RegionLore(e.getKey(), List.copyOf(rumours), List.copyOf(legends), List.copyOf(songs)));
             }
         }
         if (root.has("places")) {

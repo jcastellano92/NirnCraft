@@ -99,10 +99,11 @@ const KINDS = new Set(['journal', 'letter', 'orders', 'notes', 'report', 'ledger
 const AT = new Set(['chest', 'boss', 'site']);
 const ID = /^[a-z0-9_]+$/;
 const lore = {};           // place id -> {file, entry}
-const regionLore = {};     // region key -> file
+const regionLore = {};     // region key -> first file
+const regionCount = {};    // region key -> {rumour, legend, song} written so far (files merge)
 const startedBy = {};      // quest id -> how it starts (place/note)
 let noteCount = 0, pageCount = 0, words = 0;
-const files = readJson(path.join(loreDir, 'index.json'));
+const files = [...new Set(readJson(path.join(loreDir, 'index.json')))]; // a union: a file listed twice loads once
 const regionKey = r => r.replace(/\//g, '.');
 for (const f of files) {
   let j;
@@ -110,18 +111,24 @@ for (const f of files) {
   const P = (msg) => problems.push(`${f}: ${msg}`);
   for (const [rid, t] of Object.entries(j.regions || {})) {
     if (!regions.has(rid) && !provinces.has(rid)) P(`unknown region or province ${rid}`);
-    if (regionLore[rid]) P(`region ${rid} also written in ${regionLore[rid]}`);
-    regionLore[rid] = f;
+    // several lore files may write the same region: their rumours, legends and songs are appended (indices continue)
+    const base = regionLore[rid] ? regionCount[rid] : { rumour: 0, legend: 0, song: 0 };
+    regionCount[rid] = base;
+    const first = !regionLore[rid];
+    if (first) regionLore[rid] = f;
     const k = `place_lore.skycraft.region.${regionKey(rid)}`;
-    if (!Array.isArray(t.rumours) || t.rumours.length < 3) P(`region ${rid}: needs at least 3 rumours`);
-    if (!Array.isArray(t.legends) || t.legends.length < 1) P(`region ${rid}: needs at least 1 legend`);
-    (t.rumours || []).forEach((s, i) => { if (typeof s !== 'string' || s.length < 20) P(`region ${rid}: rumour ${i} is too short`); put(`${k}.rumour.${i}`, s); });
-    (t.legends || []).forEach((s, i) => { if (typeof s !== 'string' || s.length < 40) P(`region ${rid}: legend ${i} is too short`); put(`${k}.legend.${i}`, s); });
+    if (first && (!Array.isArray(t.rumours) || t.rumours.length < 3)) P(`region ${rid}: needs at least 3 rumours`);
+    if (first && (!Array.isArray(t.legends) || t.legends.length < 1)) P(`region ${rid}: needs at least 1 legend`);
+    (t.rumours || []).forEach((s, i) => { if (typeof s !== 'string' || s.length < 20) P(`region ${rid}: rumour ${i} is too short`); put(`${k}.rumour.${base.rumour + i}`, s); });
+    (t.legends || []).forEach((s, i) => { if (typeof s !== 'string' || s.length < 40) P(`region ${rid}: legend ${i} is too short`); put(`${k}.legend.${base.legend + i}`, s); });
     (t.songs || []).forEach((s, i) => {
       if (!s.title || !Array.isArray(s.lines) || s.lines.length < 2) P(`region ${rid}: song ${i} needs a title and lines`);
-      put(`${k}.song.${i}.title`, s.title);
-      (s.lines || []).forEach((l, li) => put(`${k}.song.${i}.line.${li}`, l.replace(/^[~^#]\s*/, '')));
+      put(`${k}.song.${base.song + i}.title`, s.title);
+      (s.lines || []).forEach((l, li) => put(`${k}.song.${base.song + i}.line.${li}`, l.replace(/^[~^#]\s*/, '')));
     });
+    base.rumour += (t.rumours || []).length;
+    base.legend += (t.legends || []).length;
+    base.song += (t.songs || []).length;
   }
   for (const [pid, e] of Object.entries(j.places || {})) {
     if (!ID.test(pid)) P(`bad place id ${pid}`);

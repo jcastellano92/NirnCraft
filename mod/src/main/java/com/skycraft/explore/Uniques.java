@@ -36,6 +36,7 @@ import java.util.Map;
 public final class Uniques {
     public static final String TAG = "skycraft_unique";
     private static final String FILE = "/skycraft/explore/uniques.json";
+    private static final String INDEX = "/skycraft/explore/uniques_index.json";
 
     public record UniqueSite(String id, SiteKind kind, int x, int z, String item, Map<String, Integer> enchant,
                              @Nullable String note) {
@@ -47,7 +48,20 @@ public final class Uniques {
     static {
         Map<String, UniqueSite> byId = new LinkedHashMap<>();
         Map<Long, UniqueSite> byCell = new HashMap<>();
-        try (InputStream in = Uniques.class.getResourceAsStream(FILE)) {
+        // uniques.json plus every file named in uniques_index.json (a JSON array of file names, e.g. "uniques_cyrodiil.json")
+        List<String> files = new ArrayList<>();
+        files.add(FILE);
+        try (InputStream in = Uniques.class.getResourceAsStream(INDEX)) {
+            if (in != null) {
+                for (JsonElement e : JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonArray()) {
+                    files.add("/skycraft/explore/" + e.getAsString());
+                }
+            }
+        } catch (Exception ex) {
+            Skycraft.LOGGER.warn("Could not read {}", INDEX, ex);
+        }
+        for (String file : files) {
+        try (InputStream in = Uniques.class.getResourceAsStream(file)) {
             if (in != null) {
                 for (JsonElement e : JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonArray()) {
                     JsonObject o = e.getAsJsonObject();
@@ -69,7 +83,8 @@ public final class Uniques {
                 }
             }
         } catch (Exception ex) {
-            Skycraft.LOGGER.warn("Could not read {}", FILE, ex);
+            Skycraft.LOGGER.warn("Could not read {}", file, ex);
+        }
         }
         BY_ID = Collections.unmodifiableMap(byId);
         BY_CELL = byCell;

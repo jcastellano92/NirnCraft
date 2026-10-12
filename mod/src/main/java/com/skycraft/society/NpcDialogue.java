@@ -318,17 +318,10 @@ public final class NpcDialogue {
         return say("job." + role.id);
     }
 
-    /** Regions and provinces with their own "Tell me about this place." lines in the language file. */
-    private static final java.util.Set<String> REGION_LORE = java.util.Set.of("haafingar", "hjaalmarch", "the_pale", "winterhold",
-            "the_reach", "whiterun", "eastmarch", "falkreath", "the_rift", "solstheim");
-    private static final java.util.Set<String> PROVINCE_LORE = java.util.Set.of("skyrim", "cyrodiil", "morrowind", "black_marsh",
-            "elsweyr", "valenwood", "summerset", "hammerfell", "high_rock", "atmora", "akavir", "yokuda");
-
-    /** "Tell me about this place.": hold lore, or the province's. */
+    /** "Tell me about this place.": the region's own line, else its province's (ids listed in society/region_voice.json). */
     private static void aboutRegion(ServerPlayer player, LivingEntity npc) {
         com.skycraft.tamriel.Region region = Cultures.regionAt(player.level(), npc.blockPosition());
-        String key = REGION_LORE.contains(region.shortId()) ? "region." + region.shortId()
-                : PROVINCE_LORE.contains(region.province()) ? "province." + region.province() : "region.unknown";
+        String key = RegionVoice.sayKey(region.shortId(), region.province());
         Dialogue.open(player, npc, say(key));
     }
 

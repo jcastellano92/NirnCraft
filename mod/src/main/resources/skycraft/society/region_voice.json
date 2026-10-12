@@ -1,0 +1,9 @@
+{
+  "_doc": "Which regions and provinces have their own voice lines. A region id listed in 'regions' needs the lang key society.skycraft.say.region.<id> (the 'Tell me about this place.' answer); one in 'provinces' needs society.skycraft.say.province.<id>. Lookup order: region, then province, then say.region.unknown. 'gossip' maps a region or province id to its number of three-line townsfolk chats society.skycraft.chat.gossip_<id>.<0..n-1>.<0..2>. Region ids are the part of the regions.json id after the slash. Append only: lang files add the keys, no Java edit is needed.",
+  "regions": ["haafingar", "hjaalmarch", "the_pale", "winterhold", "the_reach", "whiterun", "eastmarch", "falkreath", "the_rift", "solstheim"],
+  "provinces": ["skyrim", "cyrodiil", "morrowind", "black_marsh", "elsweyr", "valenwood", "summerset", "hammerfell", "high_rock", "atmora", "akavir", "yokuda"],
+  "gossip": {
+    "skyrim": 3, "eastmarch": 2, "the_reach": 2, "the_rift": 2, "haafingar": 2, "whiterun": 2, "winterhold": 1,
+    "cyrodiil": 2, "morrowind": 2, "hammerfell": 1, "high_rock": 1, "elsweyr": 1, "black_marsh": 1, "valenwood": 1, "summerset": 1
+  }
+}

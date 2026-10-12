@@ -59,21 +59,7 @@ public final class Chatter {
         TOPICS.put("work_priest", 1);
         TOPICS.put("work_bard", 1);
         TOPICS.put("children", 4);
-        TOPICS.put("gossip_skyrim", 3);
-        TOPICS.put("gossip_eastmarch", 2);
-        TOPICS.put("gossip_the_reach", 2);
-        TOPICS.put("gossip_the_rift", 2);
-        TOPICS.put("gossip_haafingar", 2);
-        TOPICS.put("gossip_whiterun", 2);
-        TOPICS.put("gossip_winterhold", 1);
-        TOPICS.put("gossip_cyrodiil", 2);
-        TOPICS.put("gossip_morrowind", 2);
-        TOPICS.put("gossip_hammerfell", 1);
-        TOPICS.put("gossip_high_rock", 1);
-        TOPICS.put("gossip_elsweyr", 1);
-        TOPICS.put("gossip_black_marsh", 1);
-        TOPICS.put("gossip_valenwood", 1);
-        TOPICS.put("gossip_summerset", 1);
+        TOPICS.putAll(RegionVoice.gossipTopics()); // region/province gossip: skycraft/society/region_voice.json
     }
 
     private static final class Talk {
@@ -192,10 +178,8 @@ public final class Chatter {
         boolean skyrim = "skyrim".equals(region.province());
         switch (roll) {
             case 0, 1 -> {
-                String local = "gossip_" + region.shortId();
-                if (TOPICS.containsKey(local) && r.nextBoolean()) return local;
-                String province = "gossip_" + region.province();
-                return TOPICS.containsKey(province) ? province : "generic";
+                String gossip = RegionVoice.gossipTopic(region.shortId(), region.province(), r.nextBoolean());
+                return gossip != null && TOPICS.containsKey(gossip) ? gossip : "generic";
             }
             case 2 -> {
                 return skyrim ? "dragons" : "generic";
