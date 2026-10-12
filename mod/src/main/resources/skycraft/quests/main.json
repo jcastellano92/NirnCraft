@@ -155,14 +155,14 @@
       "stage": 1,
       "start": "auto",
       "on_start": "intro:helgen_wake;relocate:ralof:riverwood:-10:6;relocate:hadvar:riverwood:12:-4",
-      "desc": "I woke on the road with smoke on the northern horizon and a black dragon crossing the mountains. Riverwood is the nearest village; they need to be warned.",
+      "desc": "The Legion turned me away at the gates of Helgen, and then a black dragon crossed the sky. The guard told me to take the road to Riverwood and warn them.",
       "objectives": [
         {
           "type": "go",
           "place": "riverwood",
           "text": "Follow the road to Riverwood",
           "label": "Riverwood",
-          "journal": "No one was chasing me. I followed the road toward the nearest village, the dragon's roar fading behind me."
+          "journal": "I followed the road toward the nearest village, the dragon's roar fading behind me."
         },
         {
           "type": "talk",

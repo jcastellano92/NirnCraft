@@ -40,17 +40,20 @@ public final class Scenes {
     private static final List<Flyby> FLYBYS = new ArrayList<>();
 
     /**
-     * One quiet, distant crossing: a dragon passes {@code p} at ~100 blocks and 50 up, once, with a single soft roar
-     * (to that player only, never repeating) and no ambient sound. Removed when it has crossed.
+     * A dragon crosses low over {@code p}: the path passes ~18 blocks to the side and ~22 up, 150 blocks in 7 s, so it
+     * is inside entity tracking range and plainly visible. Roar, camera shake and fleeing NPCs are timed by
+     * {@link #tick}; the entity is removed when it has crossed.
      */
     public static void flyby(ServerPlayer p, String entityType) {
         ServerLevel level = p.serverLevel();
         Entity e = com.skycraft.quest.QuestSpawner.create(level, entityType);
         if (e == null) return;
-        double side = level.random.nextBoolean() ? 1 : -1;
-        Vec3 c = p.position();
-        Vec3 from = new Vec3(c.x - 130 * side, c.y + 55, c.z - 90);
-        Vec3 to = new Vec3(c.x + 130 * side, c.y + 60, c.z - 90);
+        double ang = level.random.nextDouble() * Math.PI * 2;
+        Vec3 dir = new Vec3(Math.cos(ang), 0, Math.sin(ang));
+        Vec3 side = new Vec3(-dir.z, 0, dir.x).scale(18);
+        Vec3 c = p.position().add(side).add(0, 22, 0);
+        Vec3 from = c.subtract(dir.scale(75));
+        Vec3 to = c.add(dir.scale(75));
         if (e instanceof Mob mob) mob.setNoAi(true);
         e.setInvulnerable(true);
         e.setSilent(true);
@@ -59,8 +62,103 @@ public final class Scenes {
         e.moveTo(from.x, from.y, from.z, yaw, 0f);
         if (!level.addFreshEntity(e)) return;
         long now = level.getGameTime();
-        FLYBYS.add(new Flyby(e.getUUID(), level, from, to, now, now + 20 * 22));
-        p.playNotifySound(SoundEvents.ENDER_DRAGON_GROWL, SoundSource.AMBIENT, 0.5f, 0.75f);
+        FLYBYS.add(new Flyby(e.getUUID(), level, from, to, now, now + 20 * 7));
+        // the far roar as it appears, the near roar and the shake as it passes (see tick)
+        p.playNotifySound(com.skycraft.audio.AudioSounds.dragon("alduin", "roar"), SoundSource.HOSTILE, 1.4f, 0.8f);
+        shake(p, 8);
+        INTRO.add(new Beat(p.getUUID(), now + 20 * 3, 10));
+        INTRO.add(new Beat(p.getUUID(), now + 20 * 7 + 10, 11));
+    }
+
+    // ---------------------------------------------------------------- the opening (once per player)
+
+    private record Beat(UUID player, long at, int step) {
+    }
+
+    private static final List<Beat> INTRO = new ArrayList<>();
+    private static final int NARRATION_LINES = 4;
+    private static final int LINE_TICKS = 90;
+
+    /**
+     * The opening: fade from black, four narration lines (title overlay, repeated in chat), the gate guard's line and
+     * a pointer to Riverwood; 10-20 s later the dragon flyby ({@link #flyby}). Per player, nothing blocks the quest.
+     */
+    public static void intro(ServerPlayer p, String entityType) {
+        long now = p.serverLevel().getGameTime();
+        int fade = LINE_TICKS * NARRATION_LINES;
+        p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.BLINDNESS, 70, 0, false, false, false));
+        p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, fade, 6, false, false, false));
+        for (int i = 0; i < NARRATION_LINES; i++) INTRO.add(new Beat(p.getUUID(), now + 20 + (long) i * LINE_TICKS, i));
+        long after = now + 20 + fade;
+        INTRO.add(new Beat(p.getUUID(), after, 4));
+        // 10-20 s after the narration ends
+        INTRO.add(new Beat(p.getUUID(), after + 20 * (10 + p.getRandom().nextInt(11)), 5));
+        introType = entityType;
+    }
+
+    private static String introType = "skycraft:alduin";
+
+    /** A short camera shake: vanilla hurt-tilt packets (no damage), one every 3 ticks. */
+    private static void shake(ServerPlayer p, int pulses) {
+        long now = p.serverLevel().getGameTime();
+        for (int i = 0; i < pulses; i++) INTRO.add(new Beat(p.getUUID(), now + (long) i * 3, 20));
+    }
+
+    private static void beat(MinecraftServer server, ServerPlayer p, int step) {
+        switch (step) {
+            case 0, 1, 2, 3 -> {
+                Component line = Component.translatable("quest.skycraft.intro." + step).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY);
+                p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket(12, LINE_TICKS - 30, 18));
+                p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(Component.empty()));
+                p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(line));
+                p.sendSystemMessage(line);
+            }
+            case 4 -> {
+                p.sendSystemMessage(Component.translatable("quest.skycraft.intro.guard").withStyle(ChatFormatting.WHITE));
+                p.sendSystemMessage(Component.translatable("quest.skycraft.intro.pointer").withStyle(ChatFormatting.YELLOW));
+                p.removeEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN);
+            }
+            case 5 -> flyby(p, introType);
+            case 10 -> {
+                p.serverLevel().playSound(null, p.getX(), p.getY() + 20, p.getZ(),
+                        com.skycraft.audio.AudioSounds.dragon("alduin", "roar"), SoundSource.HOSTILE, 4f, 0.9f);
+                p.serverLevel().playSound(null, p.getX(), p.getY() + 20, p.getZ(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 2f, 0.7f);
+                shake(p, 14);
+                scare(p);
+            }
+            case 11 -> {
+                p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket(10, 50, 20));
+                p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(
+                        Component.translatable("quest.skycraft.intro.sighted").withStyle(ChatFormatting.GOLD)));
+                p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(
+                        Component.translatable("quest.skycraft.intro.sighted_sub").withStyle(ChatFormatting.GRAY)));
+                journal(server, p);
+            }
+            case 20 -> p.connection.send(new net.minecraft.network.protocol.game.ClientboundHurtAnimationPacket(p));
+            default -> {
+            }
+        }
+    }
+
+    /** NPCs within 40 blocks run from the player's spot (they are looking up at the thing, not at them). */
+    private static void scare(ServerPlayer p) {
+        for (com.skycraft.society.entity.NpcEntity n : p.serverLevel().getEntitiesOfClass(
+                com.skycraft.society.entity.NpcEntity.class, p.getBoundingBox().inflate(40))) {
+            Vec3 away = n.position().subtract(p.position());
+            away = away.lengthSqr() < 1e-3 ? new Vec3(1, 0, 0) : away.normalize();
+            Vec3 goal = n.position().add(away.scale(14));
+            n.getNavigation().moveTo(goal.x, goal.y, goal.z, 1.3);
+        }
+    }
+
+    /** The journal entry 'Dragon sighted' on the opening quest (if it is there and active). */
+    private static void journal(MinecraftServer server, ServerPlayer p) {
+        com.skycraft.quest.Quest q = com.skycraft.quest.QuestStore.get(server)
+                .find(com.skycraft.quest.Quests.personalKey(p.getUUID()), "main_unbound");
+        if (q == null) return;
+        Story.addJournal(q, Component.translatable("quest.skycraft.intro.journal"));
+        com.skycraft.quest.Quests.markPlayerDirty(p.getUUID());
+        Story.setFlag(com.skycraft.core.SkyData.get(p), "dragon_sighted", true);
     }
 
     /** Plays scene {@code id} to the given players. */
@@ -112,6 +210,20 @@ public final class Scenes {
                     ServerPlayer pl = server.getPlayerList().getPlayer(id);
                     if (pl != null) pl.sendSystemMessage(p.line());
                 }
+            }
+        }
+        if (!INTRO.isEmpty()) {
+            Iterator<Beat> it = INTRO.iterator();
+            List<Beat> due = new ArrayList<>();
+            while (it.hasNext()) {
+                Beat b = it.next();
+                if (b.at() > now) continue;
+                it.remove();
+                due.add(b);
+            }
+            for (Beat b : due) {
+                ServerPlayer pl = server.getPlayerList().getPlayer(b.player());
+                if (pl != null && pl.isAlive()) beat(server, pl, b.step());
             }
         }
         if (!FLYBYS.isEmpty()) {
@@ -167,6 +279,7 @@ public final class Scenes {
     public static void reset() {
         LINES.clear();
         FLYBYS.clear();
+        INTRO.clear();
         CIRCLES.clear();
     }
 }

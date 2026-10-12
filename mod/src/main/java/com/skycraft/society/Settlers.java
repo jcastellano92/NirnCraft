@@ -262,12 +262,74 @@ public final class Settlers {
         Optional<BlockPos> found = level.getPoiManager().findClosest(h -> h.is(PoiTypes.HOME),
                 p -> !data.beds.containsKey(p.asLong()) && (spouse || !Ownership.isPlayerOwned(level, p)),
                 home, spouse ? 20 : 32, PoiManager.Occupancy.HAS_SPACE);
-        if (found.isEmpty()) return null;
-        BlockPos bed = found.get().immutable();
+        // Skycraft-built settlements: the recorded household beds (no POI needed, no chunk loads)
+        BlockPos bed = found.isPresent() ? found.get().immutable() : anchorBed(level, data, home, spouse);
+        if (bed == null) return null;
         data.beds.put(bed.asLong(), npc.getUUID());
         data.setDirty();
         npc.setBed(bed);
         return bed;
+    }
+
+    /**
+     * The nearest unclaimed household bed ({@link com.skycraft.tamriel.settlement.AnchorType#BED}) recorded by the
+     * settlement near {@code near}: read-only use of the settlement anchors, loaded chunks only. The bed also gets
+     * its POI when worldgen did not register one, so villagers' own AI can use it too. Null when there is none.
+     */
+    @Nullable
+    static BlockPos anchorBed(ServerLevel level, Data data, BlockPos near, boolean allowPlayerOwned) {
+        Optional<com.skycraft.tamriel.settlement.SettlementAnchors.Entry> entry =
+                com.skycraft.tamriel.settlement.SettlementAnchors.near(level, near, 64);
+        if (entry.isEmpty()) return null;
+        BlockPos best = null;
+        double bestD = Double.MAX_VALUE;
+        for (com.skycraft.tamriel.settlement.Anchor a : entry.get().anchors(com.skycraft.tamriel.settlement.AnchorType.BED)) {
+            BlockPos p = a.pos();
+            if (data.beds.containsKey(p.asLong()) || !level.isLoaded(p) || !level.getBlockState(p).is(BlockTags.BEDS)) continue;
+            if (!allowPlayerOwned && Ownership.isPlayerOwned(level, p)) continue;
+            double d = p.distSqr(near);
+            if (d < bestD) {
+                bestD = d;
+                best = p;
+            }
+        }
+        if (best == null) return null;
+        final BlockPos bedPos = best;
+        var state = level.getBlockState(best);
+        if (state.hasProperty(net.minecraft.world.level.block.BedBlock.PART)
+                && state.getValue(net.minecraft.world.level.block.BedBlock.PART) == net.minecraft.world.level.block.state.properties.BedPart.HEAD
+                && !level.getPoiManager().exists(best, h -> h.is(PoiTypes.HOME))) {
+            net.minecraft.core.registries.BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolder(PoiTypes.HOME)
+                    .ifPresent(h -> level.getPoiManager().add(bedPos, h));
+        }
+        return best.immutable();
+    }
+
+    /**
+     * A bed for a settler villager (merchants, smiths, farmers...): claims one and sets the villager's HOME memory so
+     * the vanilla schedule sends it to sleep there. Called every ~2 s per villager by {@link SettlerVillagers}.
+     */
+    static void homeForVillager(net.minecraft.world.entity.npc.Villager v) {
+        if (!(v.level() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) return;
+        var brain = v.getBrain();
+        var home = net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME;
+        Data data = Data.get(level);
+        BlockPos mine = null;
+        for (Map.Entry<Long, UUID> e : data.beds.entrySet()) {
+            if (e.getValue().equals(v.getUUID())) {
+                mine = BlockPos.of(e.getKey());
+                break;
+            }
+        }
+        if (mine == null) {
+            mine = anchorBed(level, data, v.blockPosition(), false);
+            if (mine == null) return;
+            data.beds.put(mine.asLong(), v.getUUID());
+            data.setDirty();
+        }
+        if (!brain.hasMemoryValue(home)) {
+            brain.setMemory(home, net.minecraft.core.GlobalPos.of(level.dimension(), mine));
+        }
     }
 
     /** Frees the NPC's bed claim (death or despawn). */

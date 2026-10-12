@@ -27,6 +27,7 @@ public final class AudioClientEvents {
         ListenerEnvironment.tick(mc);
         AmbienceEngine.tick(mc);
         Acoustics.tick(mc);
+        AudioDebug.tick(mc);
     }
 
     /** Skyrim's wolves: vanilla wolves howl and growl with Skycraft's voices. */
@@ -48,6 +49,7 @@ public final class AudioClientEvents {
     /** Runs last, so it sees the sound that will really play: estimates its occlusion. */
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onPlaySound(PlaySoundEvent event) {
+        AudioDebug.record(event.getSound());
         Acoustics.onPlay(event.getSound());
     }
 

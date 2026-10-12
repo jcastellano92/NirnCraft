@@ -37,7 +37,17 @@ import java.util.Map;
  * placed in 3D at random spots around the listener.</p>
  */
 public final class AmbienceEngine {
-    private static final int MAX_BEDS = 5;
+    private static final int MAX_BEDS = 3;
+    /**
+     * Foliage and grass beds carry synthesised leaf/grass crackle (a rustle or shuffle when loud): their level is
+     * capped, whatever the habitat asks for. Playtest 2: a loud rustling on the plains/forest at spawn.
+     */
+    private static final Map<String, Float> BED_CAP = Map.of(
+            "forest_day", 0.35f, "forest_night", 0.4f, "plains_day", 0.3f, "plains_night", 0.45f,
+            "wind_light", 0.4f, "savanna_day", 0.35f, "jungle_day", 0.4f, "marsh_day", 0.4f);
+    /** Game ticks since the last positional call started, and calls started in the last few seconds. */
+    private static int lastCallTick = -100;
+    private static final int CALL_COOLDOWN_TICKS = 30;
     private static final RandomSource RANDOM = RandomSource.create();
 
     private static final Map<String, Bed> PLAYING = new HashMap<>();
@@ -248,7 +258,8 @@ public final class AmbienceEngine {
         Map<String, Float> want = new HashMap<>();
         for (int i = 0; i < order.size() && want.size() < MAX_BEDS; i++) {
             float t = order.get(i).getValue();
-            if (t > 0.03f) want.put(order.get(i).getKey(), Mth.clamp(t * outdoor * vol, 0f, 1f));
+            if (t > 0.03f) want.put(order.get(i).getKey(), Math.min(BED_CAP.getOrDefault(order.get(i).getKey(), 1f),
+                    Mth.clamp(t * outdoor * vol, 0f, 1f)));
         }
         for (Map.Entry<String, Bed> e : PLAYING.entrySet()) {
             e.getValue().target = want.getOrDefault(e.getKey(), 0f);
@@ -328,7 +339,10 @@ public final class AmbienceEngine {
             }
         }
         for (Call c : pool) {
+            // master cooldown: never more than one call every 1.5 s, however busy the habitat
+            if (ticks - lastCallTick < CALL_COOLDOWN_TICKS) break;
             if (c.perMinute <= 0f || RANDOM.nextFloat() >= c.perMinute / 60f) continue;
+            lastCallTick = ticks;
             play(mc, eye, c);
         }
     }

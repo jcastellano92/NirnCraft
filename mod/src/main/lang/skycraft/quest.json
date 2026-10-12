@@ -776,5 +776,14 @@
   "quest.skycraft.uncharted_survey.beast": "Uncharted Behemoth",
   "quest.skycraft.uncharted_survey.lair": "Beast's Lair",
   "quest.skycraft.obj.uncharted_point": "Chart vantage point %s of %s",
+  "quest.skycraft.intro.0": "You came north on the Imperial road, a hired sword with a sealed letter and not much else.",
+  "quest.skycraft.intro.1": "At the border gate of Helgen the Legion was turning travellers back. Smoke hung over the northern mountains.",
+  "quest.skycraft.intro.2": "You had barely reached the front of the line when the guards began to stare at the sky.",
+  "quest.skycraft.intro.3": "Whatever is coming, you do not mean to be standing here when it arrives.",
+  "quest.skycraft.intro.guard": "<Gate Guard> The gate is shut, traveller. Something is wrong in the north. Take the road to Riverwood and warn them. Go, now.",
+  "quest.skycraft.intro.pointer": "Your compass now points toward Riverwood.",
+  "quest.skycraft.intro.sighted": "Dragon sighted",
+  "quest.skycraft.intro.sighted_sub": "Riverwood must be warned.",
+  "quest.skycraft.intro.journal": "A dragon crossed the sky above the gate, so low I felt its roar in my chest. The guards ran. I will do as I was told and warn Riverwood.",
   "quest.skycraft.obj.uncharted_lair": "Clear the lair of the land's great beast"
 }

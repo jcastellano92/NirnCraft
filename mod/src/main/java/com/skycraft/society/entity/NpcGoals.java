@@ -614,6 +614,19 @@ final class NpcGoals {
             return found.isEmpty() ? null : found.get(npc.getRandom().nextInt(found.size()));
         }
 
+        private static long laborWindow;
+        private static int laborCount;
+
+        /** A global budget: at most 3 labor sounds per second in a level. */
+        private static boolean laborSoundAllowed(ServerLevel level) {
+            long t = level.getGameTime() / 20;
+            if (t != laborWindow) {
+                laborWindow = t;
+                laborCount = 0;
+            }
+            return ++laborCount <= 3;
+        }
+
         private void labor(ServerLevel level) {
             if (spot == null) {
                 ticks = 0;
@@ -633,7 +646,17 @@ final class NpcGoals {
             npc.getNavigation().stop();
             if (ticks % 14 == 0) {
                 npc.swing(InteractionHand.MAIN_HAND);
-                level.playSound(null, spot, state.getSoundType(level, spot, npc).getHitSound(), SoundSource.NEUTRAL, 0.7f, 0.9f);
+                // The hit sound of a crop / farmland / leaf is a grass or gravel scuff: every 0.7 s per worker it was the
+                // "loud shuffling and rustling" of playtest 2. Now one soft sound every ~2 s, only with a player within
+                // 20 blocks, and at most a few per second across all workers.
+                if (ticks % 42 == 0 && laborSoundAllowed(level)) {
+                    boolean soft = state.is(BlockTags.CROPS) || state.getBlock() instanceof net.minecraft.world.level.block.FarmBlock
+                            || state.is(BlockTags.LEAVES);
+                    if (level.getNearestPlayer(npc, 20) != null) {
+                        level.playSound(null, spot, state.getSoundType(level, spot, npc).getHitSound(), SoundSource.NEUTRAL,
+                                soft ? 0.18f : 0.5f, 0.9f);
+                    }
+                }
                 level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), spot.getX() + 0.5, spot.getY() + 0.6,
                         spot.getZ() + 0.5, 4, 0.25, 0.25, 0.25, 0.05);
             }
@@ -1162,7 +1185,11 @@ final class NpcGoals {
                     }
                 }
             } else {
-                go(home, 0.7D, 4);
+                // no free bed: spend the night indoors at the inn (anchor, innkeeper or meeting bell), else at home
+                BlockPos shelter = Workplaces.innFor(npc);
+                if (shelter == null) shelter = home;
+                if (!arrived(shelter, 6)) go(shelter, 0.7D, 5);
+                else stroll(shelter, 3, 0.35D, 10);
             }
         }
 

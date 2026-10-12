@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Skycraft procedural ambience synthesiser: every file of the sound-catalogue categories "bed" and "ambient".
 
@@ -628,7 +628,7 @@ def bed_forest_day(B):
     flutter = np.clip(1 + 0.6 * B.smooth(6.0), 0, None)
     leaves = B.crackle(900 + 5000 * g ** 2, 1500, 7500) * flutter * (0.25 + 0.75 * g)
     B.add(body, -2)
-    B.add(leaves, -3)
+    B.add(leaves, -15)  # was -3: the loud rustle of playtest 2 (engine also caps this bed)
     B.add(B.noise(0.6, 1800, 6000, corr=0.1) * (0.2 + 0.8 * g), -16)
     B.add(distant_chirps(B, 7 * B.secs), -13)
 

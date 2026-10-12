@@ -987,8 +987,7 @@ public final class Story {
                     for (ServerPlayer m : audience(online, receiver)) {
                         if (hasFlag(SkyData.get(m), "intro_played")) continue;
                         setFlag(SkyData.get(m), "intro_played", true);
-                        Scenes.play(server, List.of(m), arg);
-                        Scenes.flyby(m, "skycraft:alduin");
+                        Scenes.intro(m, "skycraft:alduin");
                     }
                 }
             }
