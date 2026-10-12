@@ -122,6 +122,8 @@ public final class Plan {
     public Spec add(Spec s) {
         if (s.culture < 0) s.culture = culture.ordinal();
         if (s.style < 0) s.style = s.culture == culture.ordinal() ? style : 0;
+        // every inn of a size to hold them gets the guest floor: private lockable rooms upstairs, the bar below
+        if (s.kind == Archetype.INN && !s.isLine() && s.w >= 9 && s.d >= 9) s.flags |= Spec.UPPER;
         specs.add(s);
         return s;
     }

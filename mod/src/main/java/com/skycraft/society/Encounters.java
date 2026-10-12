@@ -83,7 +83,9 @@ public final class Encounters {
     public enum Kind {
         HUNTER, BARD, THIEF, IMPERIAL_ESCORT, STORMCLOAK_ESCORT, THALMOR_ESCORT, MAGE_VS_NECROMANCER, ADVENTURERS_VS_BANDITS,
         GIANT_VS_HUNTER, WOLF_PACK, VAMPIRES, COURIER, BEGGAR, STRANDED_MERCHANT, DRAGON, FORSWORN_AMBUSH, ADVENTURER,
-        THALMOR_PATROL, SKIRMISH, OLD_ORC, FUGITIVE_AND_HUNTER, REVELERS;
+        THALMOR_PATROL, SKIRMISH, OLD_ORC, FUGITIVE_AND_HUNTER, REVELERS,
+        /** The scripted highway robbery ({@link Ambush}): a demand, a clock and four ways to answer. */
+        BANDIT_AMBUSH;
 
         public String id() {
             return name().toLowerCase(Locale.ROOT);
@@ -99,7 +101,7 @@ public final class Encounters {
     /** Encounters that put hostile creatures near the player (they obey the hostile pacing rules). */
     private static final Set<Kind> THREATENING = java.util.EnumSet.of(Kind.THIEF, Kind.MAGE_VS_NECROMANCER, Kind.ADVENTURERS_VS_BANDITS,
             Kind.GIANT_VS_HUNTER, Kind.WOLF_PACK, Kind.VAMPIRES, Kind.DRAGON, Kind.FORSWORN_AMBUSH, Kind.SKIRMISH,
-            Kind.FUGITIVE_AND_HUNTER);
+            Kind.FUGITIVE_AND_HUNTER, Kind.BANDIT_AMBUSH);
 
     private static final Map<UUID, Mob> TRACKED = new HashMap<>();
     private static final Map<UUID, Integer> NEXT = new HashMap<>();
@@ -320,6 +322,7 @@ public final class Encounters {
         }
         Kind kind = forced != null ? forced : pick(player);
         if (kind == null || !available(level, kind)) return null;
+        if (kind == Kind.BANDIT_AMBUSH && forced == null && !Ambush.eligible(player)) return null;
         // pacing: threatening encounters share the hostile cooldown (and grace period) with the region spawner and
         // stay out of the calm zones around the world spawn and settlements
         boolean threat = forced == null && THREATENING.contains(kind);
@@ -340,6 +343,7 @@ public final class Encounters {
             case GIANT_VS_HUNTER -> exists(GIANT);
             case DRAGON -> exists(DRAGON) && SocietyConfig.DRAGON_FLYBYS.get() && level.getDifficulty() != Difficulty.PEACEFUL;
             case VAMPIRES, FORSWORN_AMBUSH -> hostileOk;
+            case BANDIT_AMBUSH -> hostileOk && exists(BANDIT);
             default -> true;
         };
     }
@@ -383,6 +387,7 @@ public final class Encounters {
         w.put(Kind.OLD_ORC, mountain || snowy ? 5 : 2);
         w.put(Kind.FUGITIVE_AND_HUNTER, 4);
         w.put(Kind.REVELERS, night ? 2 : 5);
+        w.put(Kind.BANDIT_AMBUSH, lvl >= 2 ? 2 : 0);
 
         int total = 0;
         for (Map.Entry<Kind, Integer> e : w.entrySet()) {
@@ -735,6 +740,9 @@ public final class Encounters {
                     hunter.setDestination(g.player.blockPosition());
                 }
                 return true;
+            }
+            case BANDIT_AMBUSH -> {
+                return Ambush.start(g.player);
             }
             case REVELERS -> {
                 int count = 2 + g.random.nextInt(2);

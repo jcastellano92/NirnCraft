@@ -241,6 +241,21 @@ public final class Outdoors {
                 c.set(0, g + 2, 0, B.axis(p.post, Direction.Axis.Y));
                 c.set(0, g + 3, 0, p.fence);
                 if (s.has(Spec.MAJOR)) c.anchor(AnchorType.GATE, 0, 1, 2);
+                // the destinations named on the post (see Zoning#labelPosts): one wall sign per side, kind and compass
+                if (s.name.startsWith("signs:") && !c.recording()) {
+                    String[] entries = s.name.substring(6).split(";");
+                    int[][] side = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+                    Direction[] face = {Direction.EAST, Direction.WEST, Direction.SOUTH, Direction.NORTH};
+                    for (int i = 0; i < entries.length && i < 4; i++) {
+                        String[] kv = entries[i].split("=");
+                        if (kv.length != 2) continue;
+                        net.minecraft.network.chat.Component line = net.minecraft.network.chat.Component.translatable("settlement.skycraft.kind." + kv[0]);
+                        net.minecraft.network.chat.Component dir = net.minecraft.network.chat.Component.translatable("settlement.skycraft.sign.dir." + kv[1].toLowerCase(java.util.Locale.ROOT));
+                        int sx = side[i][0], sz = side[i][1];
+                        if (!Canvas.open(c.get(sx, g + 2, sz))) continue;
+                        c.sign(sx, g + 2, sz, p.sign, face[i], net.minecraft.network.chat.Component.empty(), line, dir);
+                    }
+                }
             }
             case KENNEL -> {
                 gset(c, 0, 1, 0, p.planks);

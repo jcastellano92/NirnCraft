@@ -976,5 +976,22 @@
   "society.skycraft.bark.guard.generic.27": "Wolves, bandits, trolls, and now dragons. What's next, angry mudcrabs?",
   "society.skycraft.bark.guard.generic.28": "Mind the cart ruts, traveler. Broke my ankle on one last winter.",
   "society.skycraft.bark.guard.generic.29": "Seen anything strange? Besides me, I mean.",
-  "command.skycraft.society.populated": "Settled %s townsfolk here."
+  "command.skycraft.society.populated": "Settled %s townsfolk here.",
+  "society.skycraft.ambush.demand": "Your money or your life! %s gold, and be quick about it.",
+  "society.skycraft.ambush.prompt": "Bandits bar your way!",
+  "society.skycraft.ambush.opt.pay": "[Pay %s gold]",
+  "society.skycraft.ambush.opt.persuade": "[Persuade]",
+  "society.skycraft.ambush.opt.flee": "[Flee]",
+  "society.skycraft.ambush.opt.fight": "[Fight]",
+  "society.skycraft.ambush.hover.pay": "Hand over the gold and walk on",
+  "society.skycraft.ambush.hover.persuade": "Talk them down (Speech)",
+  "society.skycraft.ambush.hover.flee": "Run for it: they take a moment to react",
+  "society.skycraft.ambush.hover.fight": "Draw steel",
+  "society.skycraft.ambush.timer": "The bandits grow impatient... %s",
+  "society.skycraft.ambush.poor": "You do not have %s gold.",
+  "society.skycraft.ambush.paid": "Pleasure doing business. Off with you.",
+  "society.skycraft.ambush.talked": "...Fine. Move along, and keep your mouth shut.",
+  "society.skycraft.ambush.attack": "Wrong answer!",
+  "society.skycraft.ambush.fled": "You run. They shout after you.",
+  "society.skycraft.ambush.none": "No one is demanding anything of you."
 }

@@ -179,6 +179,12 @@ public final class RegionSpawner {
                 break;
             }
         }
+        // bandits no longer charge out of the woods: on the surface a bandit group becomes the scripted ambush
+        // (a demand, a ten-second clock and a choice), rare, and only where the pacing rules allow a hostile event
+        if (hostileKind && place == SpawnTables.Placement.SURFACE && hasBandit(chosen)) {
+            if (random.nextInt(3) == 0) com.skycraft.society.Ambush.tryStart(player);
+            return;
+        }
         if (spawnGroup(level, spot, chosen, mine, random) && hostileKind) SpawnPacing.noteHostile(player);
     }
 
@@ -199,6 +205,14 @@ public final class RegionSpawner {
             case DAWN -> !night && (dayTime < 2500 || dayTime > 22800);
             case DUSK -> !night && dayTime > 10500 && dayTime < 13000;
         };
+    }
+
+    private static boolean hasBandit(SpawnTables.Group g) {
+        for (SpawnTables.Member m : g.members()) {
+            net.minecraft.resources.ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(m.type());
+            if (id != null && Skycraft.MODID.equals(id.getNamespace()) && (id.getPath().equals("bandit") || id.getPath().equals("bandit_chief"))) return true;
+        }
+        return false;
     }
 
     private static boolean hasBanned(SpawnTables.Group g) {

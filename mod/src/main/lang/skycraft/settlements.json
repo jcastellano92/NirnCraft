@@ -444,5 +444,9 @@
   "settlement.skycraft.site.shepherd": "Shepherd's Hut",
   "settlement.skycraft.site.vineyard": "Vineyard",
   "settlement.skycraft.site.watchtower": "Watchtower",
-  "settlement.skycraft.site.waystation": "Waystation"
+  "settlement.skycraft.site.waystation": "Waystation",
+  "settlement.skycraft.sign.dir.n": "to the North",
+  "settlement.skycraft.sign.dir.e": "to the East",
+  "settlement.skycraft.sign.dir.s": "to the South",
+  "settlement.skycraft.sign.dir.w": "to the West"
 }

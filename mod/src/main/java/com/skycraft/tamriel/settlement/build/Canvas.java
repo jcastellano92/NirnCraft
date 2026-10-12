@@ -464,12 +464,39 @@ public final class Canvas {
         anchor(AnchorType.CONTAINER, lx, ly, lz);
         int x = wx(lx, lz), y = oy + ly, z = wz(lx, lz);
         if (!okWorld(x, y, z)) return;
+        if (!supportContainer(x, y, z)) return;
         wset(x, y, z, rot(state));
         if (loot == null) return;
         m.set(x, y, z);
         if (level.getBlockEntity(m) instanceof RandomizableContainerBlockEntity c) {
             c.setLootTable(loot, hash(x, y, z, 31));
         }
+    }
+
+    /**
+     * Hard rule: no container stands on air, liquid or a non-solid block, or is buried in the ground. A missing
+     * floor under it is filled with the neighbouring floor block; a container sealed inside terrain is skipped.
+     */
+    private boolean supportContainer(int x, int y, int z) {
+        BlockState above = wget(x, y + 1, z);
+        BlockState here = wget(x, y, z);
+        if (!here.isAir() && !open(here) && !above.isAir() && !open(above) && above.isSolid()) return false;
+        BlockState below = wget(x, y - 1, z);
+        boolean ok = !open(below) && (below.isSolid() || below.getBlock() instanceof net.minecraft.world.level.block.CarpetBlock);
+        if (ok) return true;
+        if (!okWorld(x, y - 1, z)) return true;
+        BlockState fill = null;
+        int[][] nb = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        for (int[] d : nb) {
+            BlockState s = wget(x + d[0], y - 1, z + d[1]);
+            if (solidGround(s) && !s.hasBlockEntity()) {
+                fill = s;
+                break;
+            }
+        }
+        if (fill == null) fill = Blocks.SPRUCE_PLANKS.defaultBlockState();
+        wset(x, y - 1, z, fill);
+        return true;
     }
 
     /** A wall sign at (lx, ly, lz) facing local {@code face}, with up to four lines. */

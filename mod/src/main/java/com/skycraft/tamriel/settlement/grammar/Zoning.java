@@ -1495,6 +1495,9 @@ public final class Zoning {
         Spec f = x.plan.at(Archetype.FIELD, (int) Math.round(lx - tx * 15), (int) Math.round(lz - tz * 15), Direction.SOUTH).size(13, 11);
         f.variant = cropVariant(x);
         x.plan.place(f, 1);
+        // the stock: a gated pen near the barn
+        Spec pen = outside(x, Archetype.PEN, 9, 7, r0, r1 + 6);
+        if (pen != null) pen.variant = x.r.nextInt(8);
     }
 
     static Direction localFacing(Ctx x, Spec s) {
@@ -1532,7 +1535,11 @@ public final class Zoning {
         x.sk.gates.add(new int[]{0, plan.radius});
         int fields = 2 + x.r.nextInt(2);
         for (int i = 0; i < fields; i++) field(x, 10, plan.radius);
+        // a farmstead always keeps stock: a fenced pen with a gate and animals (retry wider, then a smaller pen)
         Spec pen = outside(x, Archetype.PEN, 9, 7, 8, plan.radius - 4);
+        for (int tries = 0; tries < 4 && pen == null; tries++) {
+            pen = outside(x, Archetype.PEN, 7, 5, 7, plan.radius - 1);
+        }
         if (pen != null) pen.variant = x.r.nextInt(8);
         Spec g = plan.at(Archetype.GARDEN, 9, -5, Direction.SOUTH);
         g.variant = cropVariant(x);
@@ -1789,7 +1796,44 @@ public final class Zoning {
     // ------------------------------------------------------------------ variety
 
     /** No two neighbouring grammar buildings share footprint, roof and materials: reseed the later one until they differ. */
+    /**
+     * Street signposts name where to find the trades: up to three of the nearest inn, smith, store, apothecary or temple,
+     * each with its compass direction (world axes), written into the post's name for {@link Outdoors} to hang as signs.
+     */
+    static void labelPosts(Plan plan) {
+        String[] wanted = {"inn", "smithy", "general_store", "alchemist", "temple", "store"};
+        for (Spec post : plan.specs) {
+            if (post.kind != Archetype.YARD || post.variant != Outdoors.SIGNPOST || !post.name.isEmpty()) continue;
+            List<double[]> found = new ArrayList<>();
+            List<String> keys = new ArrayList<>();
+            for (String id : wanted) {
+                Spec best = null;
+                double bd = 1e18;
+                for (Spec b : plan.specs) {
+                    if (!b.kind.building) continue;
+                    String bid = b.grammar() ? Use.values()[b.use].id() : b.kind.name().toLowerCase(java.util.Locale.ROOT);
+                    if (!bid.equals(id)) continue;
+                    double dx = b.x - post.x, dz = b.z - post.z, d = dx * dx + dz * dz;
+                    if (d < bd) {
+                        bd = d;
+                        best = b;
+                    }
+                }
+                if (best == null || bd > 90.0 * 90.0 || bd < 3.0 * 3.0) continue;
+                double dx = best.x - post.x, dz = best.z - post.z;
+                String dir = Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? "e" : "w") : (dz > 0 ? "s" : "n");
+                String key = id.equals("general_store") ? "store" : id;
+                if (keys.contains(key)) continue;
+                keys.add(key);
+                found.add(new double[]{bd, found.size()});
+                post.name = post.name.isEmpty() ? "signs:" + key + "=" + dir : post.name + ";" + key + "=" + dir;
+                if (keys.size() >= 3) break;
+            }
+        }
+    }
+
     public static void variety(Plan plan) {
+        labelPosts(plan);
         List<Spec> bs = new ArrayList<>();
         for (Spec s : plan.specs) if (s.grammar() && s.kind.building) bs.add(s);
         int[] sig = new int[bs.size()];

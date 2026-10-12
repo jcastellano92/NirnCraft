@@ -285,9 +285,35 @@ public final class SiteBuilder {
 
     // ------------------------------------------------------------------ props
 
+    /**
+     * Hard rule: a container never stands over air, liquid or a non-solid block. A short gap is filled with the
+     * site's stone; a container with no ground under it (over water, a cliff edge) is not placed at all.
+     */
+    private boolean supportContainer(int dx, int dy, int dz) {
+        BlockPos below = at(dx, dy - 1, dz);
+        if (!writable(below) || !writable(at(dx, dy, dz))) return false;
+        if (solidSupport(below)) return true;
+        BlockState fill = pal.stone().defaultBlockState();
+        BlockPos q = below;
+        for (int i = 0; i < 6 && writable(q); i++) {
+            BlockState s = level.getBlockState(q);
+            if (solidSupport(q)) break;
+            if (!s.getFluidState().isEmpty() || !(s.isAir() || s.canBeReplaced())) return false;
+            level.setBlock(q, fill, 2);
+            q = q.below();
+        }
+        return solidSupport(below);
+    }
+
+    private boolean solidSupport(BlockPos p) {
+        BlockState s = level.getBlockState(p);
+        return !s.isAir() && !s.canBeReplaced() && s.getFluidState().isEmpty() && s.isFaceSturdy(level, p, Direction.UP);
+    }
+
     /** A loot chest; returns its position. */
     public BlockPos chest(int dx, int dy, int dz, Direction local, ResourceLocation loot) {
         BlockPos p = at(dx, dy, dz);
+        if (!supportContainer(dx, dy, dz)) return p;
         put(p, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, dir(local)));
         if (writable(p)) {
             RandomizableContainerBlockEntity.setLootTable(level, r, p, loot);
@@ -298,6 +324,7 @@ public final class SiteBuilder {
 
     public BlockPos barrel(int dx, int dy, int dz, @Nullable ResourceLocation loot) {
         BlockPos p = at(dx, dy, dz);
+        if (!supportContainer(dx, dy, dz)) return p;
         put(p, Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP));
         if (loot != null && writable(p)) {
             RandomizableContainerBlockEntity.setLootTable(level, r, p, loot);
@@ -331,8 +358,10 @@ public final class SiteBuilder {
         put(at(dx, dy, dz), BannerBlock.byColor(color).defaultBlockState().setValue(BannerBlock.ROTATION, r.nextInt(16)));
     }
 
+    /** Playtest 3: loose skulls read as "random heads for no reason"; surface sites use bones instead. */
     public void skull(int dx, int dy, int dz) {
-        put(at(dx, dy, dz), Blocks.SKELETON_SKULL.defaultBlockState().setValue(SkullBlock.ROTATION, r.nextInt(16)));
+        BlockPos p = at(dx, dy, dz);
+        if (free(dx, dy, dz)) put(p, Blocks.BONE_BLOCK.defaultBlockState());
     }
 
     /**

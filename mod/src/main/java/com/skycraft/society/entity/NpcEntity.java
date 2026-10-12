@@ -590,9 +590,56 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         Npcs.outfit(this);
     }
 
+    // ------------------------------------------------------------------ crowds
+
+    /** People pass through each other (townsfolk, villagers): no NPC-vs-NPC shoving, so doorways and gates never jam. */
+    private static boolean passThrough(Entity other) {
+        return other instanceof NpcEntity || other instanceof net.minecraft.world.entity.npc.AbstractVillager;
+    }
+
+    @Override
+    public void push(Entity other) {
+        if (passThrough(other)) return;
+        super.push(other);
+    }
+
+    @Override
+    protected void doPush(Entity other) {
+        if (passThrough(other)) return;
+        super.doPush(other);
+    }
+
+    /** Roofs are not places to wander to: walk targets well above the person's anchors that stand open to the sky score nothing. */
+    @Override
+    public float getWalkTargetValue(BlockPos pos, net.minecraft.world.level.LevelReader level) {
+        if (!this.level().isClientSide && home != null && com.skycraft.society.NpcPlacement.isRoof(this, pos)) return -1.0e9F;
+        return super.getWalkTargetValue(pos, level);
+    }
+
+    /** Set once the schedule has put this person where they should be right now (re-done on every load). */
+    private boolean placed;
+    private int placeTries;
+
+    private void placeBySchedule() {
+        if (placed || this.tickCount < 4 || this.tickCount % 10 != 0) return;
+        if (!com.skycraft.society.SocietyConfig.ROUTINES.get() || home == null || isBusy() || getTarget() != null || isPrisoner()
+                || !(role().townsfolk() || com.skycraft.society.Marriage.isSpouse(this)) || social.hasUUID("engaged") || isSleeping()) {
+            placed = true;
+            return;
+        }
+        boolean done;
+        try {
+            done = com.skycraft.society.NpcPlacement.snapToSchedule(this);
+        } catch (RuntimeException e) {
+            done = true;
+        }
+        if (done || ++placeTries > 12) placed = true;
+    }
+
     @Override
     public void tick() {
         super.tick();
+        if (!this.level().isClientSide) placeBySchedule();
         if (!this.level().isClientSide && !initialized) initialize();
         if (!this.level().isClientSide && getLook() < 0 && this.tickCount % 20 == 1) Npcs.ensureLook(this); // older saves
         if (!this.level().isClientSide && isConversing()) {

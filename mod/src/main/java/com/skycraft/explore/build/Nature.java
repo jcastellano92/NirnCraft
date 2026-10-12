@@ -138,9 +138,6 @@ public final class Nature {
         b.set(4, 0, -2, Blocks.BARREL);
         b.set(4, 1, -2, Blocks.BREWING_STAND);
         b.chest(4, 0, 0, Direction.WEST, ExploreLoot.table("herbalist"));
-        b.set(-4, 0, 0, b.pal.fence());
-        b.set(-4, 1, 0, Blocks.HAY_BLOCK);
-        b.set(-4, 2, 0, Blocks.CARVED_PUMPKIN.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH));
         return true;
     }
 

@@ -7,22 +7,20 @@
       [ {"fill": [0,0,0,2,0,1], "b": "$planks"}, {"p": [1,0,1], "b": "$slab", "chance": 0.5},
         {"fill": [0,1,0,2,1,0], "b": "$fence"}, {"p": [0,1,1], "b": "$fence"},
         {"p": [3,0,0], "b": "$log[axis=x]"}, {"p": [4,0,0], "b": "$fence"},
-        {"p": [1,0,-1], "b": "$trapdoor[facing=south,half=bottom,open=true]"},
-        {"p": [3,0,2], "b": "hay_block", "chance": 0.7}, {"p": [2,0,2], "b": "$slab", "chance": 0.5},
+        {"p": [1,0,-1], "b": "$trapdoor[facing=south,half=bottom,open=true]"}, {"p": [2,0,2], "b": "$slab", "chance": 0.5},
         {"barrel": [2,1,1], "loot": "explore/camp", "chance": 0.3},
         {"p": [-1,0,1], "item": "stick", "chance": 0.6} ],
       [ {"fill": [0,0,0,1,0,2], "b": "$planks"}, {"p": [2,0,1], "b": "$stairs[facing=west,half=bottom]"},
         {"fill": [0,1,0,0,1,2], "b": "$fence", "chance": 0.7}, {"p": [1,0,3], "b": "$trapdoor[facing=north,half=bottom,open=true]"},
         {"p": [-1,0,0], "b": "$log[axis=z]"}, {"p": [-1,0,1], "b": "$log[axis=z]"},
-        {"p": [2,0,3], "b": "barrel[facing=up]"}, {"p": [2,1,3], "b": "barrel[facing=north]", "chance": 0.5},
-        {"chest": [-2,0,2], "loot": "explore/camp", "facing": "east", "chance": 0.25} ]
+        {"p": [2,0,3], "b": "barrel[facing=up]"}, {"p": [2,1,3], "b": "barrel[facing=north]", "chance": 0.5} ]
     ]
   },
   "crate_stack": { "purpose": "goods stacked at a settlement edge awaiting the carter", "needs": ["urban_fringe"], "clue": "a merchant house brand burned on the lid",
     "tags": ["human"], "radius": 2, "items": 1,
     "variants": [
       [ {"p": [0,0,0], "b": "barrel[facing=up]"}, {"p": [1,0,0], "b": "barrel[facing=up]"}, {"p": [0,1,0], "b": "barrel[facing=north]"},
-        {"p": [0,0,1], "b": "composter", "chance": 0.4}, {"chest": [-1,0,0], "facing": "east", "loot": "explore/camp", "chance": 0.2} ],
+        {"p": [0,0,1], "b": "composter", "chance": 0.4} ],
       [ {"p": [0,0,0], "b": "barrel[facing=east]"}, {"p": [0,0,1], "b": "barrel[facing=up]"}, {"p": [1,0,1], "b": "barrel[facing=up]"},
         {"p": [0,1,1], "b": "barrel[facing=up]", "chance": 0.6}, {"p": [2,0,0], "b": "$slab", "chance": 0.5} ],
       [ {"p": [0,0,0], "b": "$planks"}, {"p": [1,0,0], "b": "$planks"}, {"p": [0,1,0], "b": "$trapdoor[facing=south,half=bottom]"},
@@ -40,29 +38,12 @@
         {"p": [0,2,1], "b": "$log[axis=z]", "chance": 0.7}, {"p": [2,0,2], "b": "$log[axis=y]"}, {"p": [2,1,2], "item": "stick"} ]
     ]
   },
-  "hay_pile": { "purpose": "the field's cut hay stacked at the edge of the farm that grew it", "needs": ["farmland"], "clue": "a pitchfork driven into the stack",
-    "tags": ["human"], "radius": 3, "items": 1,
-    "variants": [
-      [ {"fill": [0,0,0,1,0,1], "b": "hay_block[axis=y]"}, {"p": [0,1,0], "b": "hay_block[axis=x]"}, {"p": [1,1,1], "b": "hay_block", "chance": 0.5},
-        {"p": [2,0,0], "b": "hay_block[axis=z]", "chance": 0.7}, {"p": [-1,0,2], "item": "iron_shovel", "chance": 0.5, "damage": 0.2} ],
-      [ {"fill": [0,0,0,2,0,0], "b": "hay_block"}, {"p": [1,1,0], "b": "hay_block"}, {"p": [3,0,1], "b": "hay_block", "chance": 0.5},
-        {"p": [0,0,2], "b": "$fence", "chance": 0.5} ]
-    ]
-  },
   "tool_litter": { "purpose": "tools dropped where a farmhand was called away from the work", "needs": ["farmland", "urban_fringe"], "clue": "a half-finished row and a dropped bucket",
     "tags": ["human"], "radius": 3, "items": 1,
     "variants": [
       [ {"p": [0,0,0], "b": "$log[axis=y]"}, {"p": [0,1,0], "item": "iron_axe", "damage": 0.4, "chance": 0.7},
         {"p": [2,0,1], "item": "iron_shovel", "damage": 0.3}, {"p": [-1,0,2], "item": "bucket", "chance": 0.5},
         {"p": [1,0,-2], "item": "iron_hoe", "damage": 0.5, "chance": 0.6}, {"p": [-2,0,-1], "item": "shears", "damage": 0.5, "chance": 0.3} ]
-    ]
-  },
-  "laundry_line": { "purpose": "a washerwoman's line strung between posts at a farmstead", "needs": ["farmland"], "clue": "a child's tunic among the linen",
-    "tags": ["human"], "radius": 4, "items": 2, "maxSlope": 1,
-    "variants": [
-      [ {"fill": [0,0,0,0,2,0], "b": "$fence"}, {"fill": [4,0,0,4,2,0], "b": "$fence"}, {"fill": [1,2,0,3,2,0], "b": "$fence"},
-        {"p": [1,1,0], "b": "white_wool"}, {"p": [2,1,0], "b": "$accent", "chance": 0.8}, {"p": [3,1,0], "b": "$wool"},
-        {"p": [2,0,1], "b": "barrel[facing=up]", "chance": 0.5}, {"p": [3,0,1], "b": "water_cauldron[level=3]", "chance": 0.4} ]
     ]
   },
   "rubbish_heap": { "purpose": "a settlement's midden dug just outside the walls, downwind", "needs": ["urban_fringe"], "clue": "bones of last feast days and broken crockery",
@@ -90,22 +71,14 @@
         {"p": [0,1,-1], "b": "$rockslab", "chance": 0.7}, {"p": [0,0,0], "b": ["poppy", "lily_of_the_valley", "azure_bluet", "dandelion"], "chance": 0.7} ],
       [ {"p": [0,0,-1], "b": "$fence"}, {"p": [0,1,-1], "b": "$fence"}, {"p": [1,1,-1], "b": "$fence"}, {"p": [-1,1,-1], "b": "$fence"},
         {"p": [0,-1,0], "b": "coarse_dirt"}, {"p": [0,-1,1], "b": "coarse_dirt"}, {"p": [0,0,1], "b": "$rockslab"} ],
-      [ {"p": [0,-1,0], "b": "coarse_dirt"}, {"p": [0,0,-1], "b": "$rock"}, {"p": [0,1,-1], "b": "$rockslab"}, {"skull": [0,0,0], "chance": 0.4} ]
+      [ {"p": [0,-1,0], "b": "coarse_dirt"}, {"p": [0,0,-1], "b": "$rock"}, {"p": [0,1,-1], "b": "$rockslab"} ]
     ]
   },
   "rubble_pile": { "purpose": "fallen masonry of a wall that has not been repaired", "needs": ["dungeon_adjacent", "ruin_adjacent", "urban_fringe"], "clue": "a mason's mark on a block", "tags": ["human"], "builder": "rubble_pile", "radius": 4, "items": 2, "ground": ["soil", "sand", "stone", "snow", "mud", "ash"] },
-  "scarecrow": { "purpose": "a field guardian stood among the crops it protects", "needs": ["farmland"], "clue": "the hat of a missing farmhand",
-    "tags": ["human"], "radius": 2, "items": 1, "maxSlope": 1, "ground": ["soil", "sand", "snow"],
-    "variants": [
-      [ {"p": [0,0,0], "b": "$fence"}, {"p": [0,1,0], "b": "hay_block"}, {"p": [-1,1,0], "b": "$fence", "chance": 0.8}, {"p": [1,1,0], "b": "$fence", "chance": 0.8},
-        {"p": [0,2,0], "b": "carved_pumpkin[facing=south]"}, {"p": [1,0,1], "b": "hay_block", "chance": 0.4} ]
-    ]
-  },
   "water_trough": { "purpose": "a watering place for stock beside the pens", "needs": ["farmland", "urban_fringe"], "clue": "a worn hoof path",
     "tags": ["human"], "radius": 2, "items": 1, "maxSlope": 1,
     "variants": [
-      [ {"p": [0,0,0], "b": "water_cauldron[level=3]"}, {"p": [1,0,0], "b": "$slab", "chance": 0.7}, {"p": [-1,0,0], "b": "hay_block", "chance": 0.6},
-        {"p": [0,0,1], "b": "$fence", "chance": 0.5} ]
+      [ {"p": [0,0,0], "b": "water_cauldron[level=3]"}, {"p": [1,0,0], "b": "$slab", "chance": 0.7} ]
     ]
   },
   "plank_stack": { "purpose": "seasoning timber set aside for a barn that is being built", "needs": ["farmland", "urban_fringe"], "clue": "a carpenter's mark and a saw",
@@ -115,19 +88,11 @@
         {"p": [0,2,0], "b": "$slab[type=bottom]", "chance": 0.5}, {"p": [3,0,0], "b": "$log[axis=z]", "chance": 0.5} ]
     ]
   },
-  "lean_to": { "purpose": "a field shelter where hands rest at noon and shepherds sleep", "needs": ["farmland", "urban_fringe"], "clue": "a cold hearth and a worn blanket",
-    "tags": ["human"], "radius": 4, "items": 2, "maxSlope": 1,
-    "variants": [
-      [ {"fill": [0,0,0,0,1,0], "b": "$fence"}, {"fill": [2,0,0,2,1,0], "b": "$fence"}, {"fill": [0,0,-1,2,0,-1], "b": "$planks", "chance": 0.8},
-        {"fill": [0,2,-1,2,2,0], "b": "$slab[type=bottom]"}, {"p": [1,0,0], "b": "hay_block"}, {"p": [1,0,1], "item": "stick", "chance": 0.5},
-        {"p": [-1,0,0], "b": "barrel[facing=up]", "chance": 0.4} ]
-    ]
-  },
   "drying_rack": { "purpose": "a rack where hides or herbs are cured near the dwellings", "needs": ["urban_fringe"], "clue": "half-dry pelts of the season's hunt",
     "tags": ["human"], "radius": 3, "items": 1, "maxSlope": 1,
     "variants": [
       [ {"fill": [0,0,0,0,2,0], "b": "$fence"}, {"fill": [3,0,0,3,2,0], "b": "$fence"}, {"fill": [1,2,0,2,2,0], "b": "$fence"},
-        {"p": [1,1,0], "b": "brown_wool"}, {"p": [2,1,0], "b": "$wool"}, {"barrel": [1,0,1], "loot": "explore/hunter", "chance": 0.3},
+        {"p": [1,1,0], "b": "brown_wool"}, {"p": [2,1,0], "b": "$wool"},
         {"p": [2,0,1], "item": "leather", "chance": 0.5} ]
     ]
   },
@@ -142,7 +107,7 @@
   "bedroll": { "purpose": "a night's sleeping place of a traveller (placed only inside a camp)", "needs": ["wild"], "clue": "a pack left and a spent torch",
     "tags": ["human"], "radius": 2, "items": 1, "maxSlope": 1,
     "variants": [
-      [ {"p": [0,0,0], "b": "$carpet"}, {"p": [0,0,1], "b": "$carpet"}, {"p": [1,0,0], "b": "$carpet", "chance": 0.3},
+      [ {"p": [0,0,0], "b": "brown_carpet"}, {"p": [0,0,1], "b": "brown_carpet"}, {"p": [1,0,0], "b": "brown_carpet", "chance": 0.3},
         {"p": [1,0,2], "item": "bowl", "chance": 0.4}, {"p": [-1,0,0], "b": "$log[axis=z]", "chance": 0.5} ]
     ]
   },
@@ -150,15 +115,7 @@
     "tags": ["human"], "radius": 2, "items": 1,
     "variants": [
       [ {"p": [0,0,0], "b": "$rock"}, {"p": [1,0,0], "b": "$rock"}, {"p": [0,0,1], "b": "$rock"}, {"p": [-1,0,0], "b": "$rockslab"},
-        {"p": [0,1,0], "b": "$rock"}, {"p": [0,2,0], "b": "$rockwall"}, {"skull": [0,3,0]} ]
-    ]
-  },
-  "webbed_corpse": { "purpose": "a victim wrapped by spiders from the cave nearby", "needs": ["dungeon_adjacent"], "clue": "a satchel with a name tag",
-    "tags": ["human"], "radius": 3, "items": 1,
-    "variants": [
-      [ {"p": [0,0,0], "b": "cobweb"}, {"p": [1,0,0], "b": "cobweb"}, {"p": [0,0,1], "b": "cobweb"}, {"p": [0,1,0], "b": "cobweb", "chance": 0.6},
-        {"skull": [0,0,0], "chance": 0.0}, {"p": [-1,0,0], "item": "bone"}, {"p": [0,0,-1], "item": "bone", "chance": 0.7},
-        {"p": [1,0,1], "item": "string", "count": 2}, {"p": [2,0,0], "b": "cobweb", "chance": 0.5} ]
+        {"p": [0,1,0], "b": "$rock"}, {"p": [0,2,0], "b": "$rockwall"} ]
     ]
   },
   "fallen_banner": { "purpose": "a standard dropped where a column was broken", "needs": ["ruin_adjacent"], "clue": "the sigil of the losing side",
@@ -179,11 +136,8 @@
     ]
   },
 
-  "broken_fence": { "purpose": "a field fence broken by stock or a hard winter", "needs": ["farmland", "roadside", "urban_fringe"], "clue": "a split post with a bit of wool", "tags": ["human"], "builder": "broken_fence", "radius": 4, "items": 1, "follow": true, "maxSlope": 2 },
-  "broken_pen": { "purpose": "a stock pen whose gate was forced", "needs": ["farmland", "urban_fringe"], "clue": "drag marks and tufts of hair", "tags": ["human"], "builder": "broken_pen", "radius": 5, "items": 2, "maxSlope": 1 },
   "field_plot": { "purpose": "a tilled plot at a farm, planted in the local crop", "needs": ["farmland"], "clue": "a scarecrow or a seed sack", "tags": ["human"], "builder": "field_plot", "radius": 4, "items": 2, "maxSlope": 1, "ground": ["soil"] },
   "broken_weapons": { "purpose": "arms left where a fight ended", "needs": ["dungeon_adjacent", "ruin_adjacent"], "clue": "a notched blade of one faction", "tags": ["human"], "builder": "broken_weapons", "radius": 4, "items": 2 },
-  "skull_stakes": { "purpose": "a warning set by whoever holds the nearby ruin or den", "needs": ["dungeon_adjacent", "ruin_adjacent"], "clue": "a crude painted sign of the clan", "tags": ["human"], "builder": "skull_stakes", "radius": 3, "items": 1 },
   "blood_trail": { "purpose": "drag marks of a kill taken into the dungeon", "needs": ["dungeon_adjacent"], "clue": "a torn pack along the trail", "tags": ["human"], "builder": "blood_trail", "radius": 4, "items": 1, "ground": ["soil", "sand", "stone", "snow", "mud", "ash"] },
   "fish_rack": { "purpose": "a fisher's drying rack by the water he works", "needs": ["shore"], "clue": "a net and a narrow boat on the shingle", "tags": ["human"], "builder": "fish_rack", "radius": 4, "items": 1, "maxSlope": 1, "waterMin": 3, "waterMax": 30 },
 
@@ -212,11 +166,11 @@
   },
   "farmstead_clutter": { "purpose": "the working edge of a farm: hay, planks, pens, trough", "needs": ["farmland", "urban_fringe"], "clue": "a scarecrow facing the house",
     "tags": ["human"], "items": 0,
-    "cluster": {"min": 3, "max": 6, "radius": 6, "members": ["hay_pile", "plank_stack", "broken_fence", "tool_litter", "water_trough", "firewood_stack", "laundry_line", "scarecrow"]}
+    "cluster": {"min": 3, "max": 6, "radius": 6, "members": ["plank_stack", "tool_litter", "water_trough", "firewood_stack"]}
   },
   "cemetery": { "purpose": "a graveyard on the rise outside a settlement", "needs": ["urban_fringe"], "clue": "a sign naming the families",
     "tags": ["human"], "items": 0,
-    "cluster": {"min": 4, "max": 7, "radius": 6, "members": ["grave", "grave", "grave", "cairn", "broken_fence"]}
+    "cluster": {"min": 4, "max": 7, "radius": 6, "members": ["grave", "grave", "grave", "cairn"]}
   },
   "rubbish_yard": { "purpose": "a settlement's tip: crates, a broken cart and planks", "needs": ["urban_fringe"], "clue": "bones of last feast days",
     "tags": ["human"], "items": 0,
@@ -224,11 +178,11 @@
   },
   "battle_remains": { "purpose": "where two parties fought and neither came back for the dead", "needs": ["ruin_adjacent"], "clue": "a banner and the weapons of both sides",
     "tags": ["human"], "items": 0,
-    "cluster": {"min": 3, "max": 6, "radius": 6, "members": ["broken_weapons", "bone_pile", "rubble_pile", "fallen_banner", "skull_stakes", "collapsed_wall"]}
+    "cluster": {"min": 3, "max": 6, "radius": 6, "members": ["broken_weapons", "bone_pile", "rubble_pile", "fallen_banner", "collapsed_wall"]}
   },
   "dungeon_warnings": { "purpose": "bones, spikes and a cairn warning travellers off the nearby dungeon", "needs": ["dungeon_adjacent"], "clue": "a scratched sign with the last victim's name",
     "tags": ["human"], "items": 0,
-    "cluster": {"min": 3, "max": 5, "radius": 6, "members": ["bone_pile", "skull_stakes", "warning_cairn", "blood_trail", "webbed_corpse"]}
+    "cluster": {"min": 3, "max": 5, "radius": 6, "members": ["bone_pile", "warning_cairn", "blood_trail"]}
   },
 
   "great_arch": { "purpose": "a large arch carved by wind in the high rocks", "needs": ["deep_wild", "wild"], "clue": "none (natural)", "tags": ["nature"], "builder": "rock_arch", "params": {"scale": 2}, "items": 0 },

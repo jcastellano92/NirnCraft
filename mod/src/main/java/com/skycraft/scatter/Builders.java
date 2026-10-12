@@ -252,9 +252,6 @@ public final class Builders {
             any |= br.top(dx, 0, 0, pillar(log, Direction.Axis.X));
             if (br.r.nextInt(5) == 0) br.top(dx, 1, 0, br.r.nextBoolean() ? Blocks.BROWN_MUSHROOM : Blocks.RED_MUSHROOM);
         }
-        // snapped branches
-        br.top(len / 2 - 1, 0, 1, br.b.pal.fence());
-        if (br.r.nextBoolean()) br.top(-len / 2 + 1, -1, 1, br.b.pal.fence());
         return any;
     }
 
@@ -387,7 +384,6 @@ public final class Builders {
                 any |= br.top(start + i, oz, 0, pillar(log, Direction.Axis.X));
             }
         }
-        if (br.r.nextInt(3) == 0) br.top(2, 2, 0, br.b.pal.fence());
         return any;
     }
 
@@ -614,11 +610,6 @@ public final class Builders {
         }
         br.force(-3, -1, 0, br.b.pal.planks().defaultBlockState());
         br.force(3, -1, 0, br.b.pal.planks().defaultBlockState());
-        br.set(-3, 0, -2, br.b.pal.fence());
-        br.set(3, 0, 2, br.b.pal.fence());
-        if (br.r.nextInt(3) == 0) {
-            br.set(3, 0, -2, Blocks.HAY_BLOCK);
-        }
         return any;
     }
 

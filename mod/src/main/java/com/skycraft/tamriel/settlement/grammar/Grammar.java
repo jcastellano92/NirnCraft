@@ -517,6 +517,19 @@ public final class Grammar {
                     c.foundation(x, -1, z, B.s(Blocks.DIRT), 6);
                     if (edge && x != (b.annexSide < 0 ? ax1 : ax0)) c.set(x, 1, z, z == az0 && x == (ax0 + ax1) / 2 ? B.face(p.gate, Direction.NORTH) : p.fence);
                 }
+                // the stock inside (persistent): a trough corner and two to four animals
+                String[] stock = {"sheep", "cow", "pig", "chicken"};
+                String kind = stock[Math.floorMod(c.roll(ax0, 0, az0, 91, 4), stock.length)];
+                int ix0 = ax0 + 1, ix1 = ax1 - 1, iz0 = az0 + 1, iz1 = az1 - 1;
+                if (ix1 >= ix0 && iz1 >= iz0) {
+                    c.set(ix1, 1, iz1, B.s(Blocks.HAY_BLOCK));
+                    int n = 2 + c.roll(ax0, 0, az0, 93, 3);
+                    for (int i = 0; i < n; i++) {
+                        int ax = ix0 + c.roll(i, 0, 5, 95, ix1 - ix0 + 1), az = iz0 + c.roll(i, 0, 7, 97, iz1 - iz0 + 1);
+                        if (ax == ix1 && az == iz1) continue;
+                        Outdoors.animal(c, ax, 1, az, Outdoors.animalType(kind));
+                    }
+                }
             }
             default -> {
             }

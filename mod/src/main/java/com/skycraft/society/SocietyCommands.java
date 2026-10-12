@@ -33,6 +33,15 @@ final class SocietyCommands {
         for (Encounters.Kind k : Encounters.Kind.values()) kinds.add(k.id());
         List<String> factions = Arrays.asList(Reputation.FACTIONS);
 
+        // the answers of a highway ambush (clickable chat options); anyone may use them, the server checks the state
+        d.register(Commands.literal("skycraft-ambush")
+                .then(Commands.argument("choice", StringArgumentType.word())
+                        .suggests((c, b) -> SharedSuggestionProvider.suggest(List.of("pay", "persuade", "flee", "fight"), b))
+                        .executes(c -> {
+                            Ambush.choose(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "choice"));
+                            return 1;
+                        })));
+
         d.register(Commands.literal("skycraft-society").requires(s -> s.hasPermission(2))
                 .then(Commands.literal("npc")
                         .then(Commands.argument("role", StringArgumentType.word())

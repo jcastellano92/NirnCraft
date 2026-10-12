@@ -520,6 +520,20 @@ public final class SettlementDevCommands {
             o.add("gates", gj);
             o.addProperty("chains", plan.chains.size());
             o.add("specs", com.skycraft.tamriel.settlement.plan.CityPlans.describe(plan));
+            // inns: every inn is built by Interiors#inn (bar, innkeeper behind it, lockable guest rooms); count them
+            int inns = 0, innsUpper = 0, innsGrammar = 0;
+            for (var sp : plan.specs) {
+                boolean inn = sp.kind == com.skycraft.tamriel.settlement.plan.Archetype.INN
+                        || sp.grammar() && com.skycraft.tamriel.settlement.grammar.Use.values()[sp.use] == com.skycraft.tamriel.settlement.grammar.Use.INN;
+                if (!inn) continue;
+                inns++;
+                if (sp.has(com.skycraft.tamriel.settlement.plan.Spec.UPPER)
+                        || sp.grammar() && com.skycraft.tamriel.settlement.grammar.Blueprint.of(sp).storeys >= 2) innsUpper++;
+                if (sp.grammar()) innsGrammar++;
+            }
+            o.addProperty("inns", inns);
+            o.addProperty("inns_with_guest_floor", innsUpper);
+            o.addProperty("inns_grammar", innsGrammar);
             DIR.mkdirs();
             try (FileWriter fw = new FileWriter(new File(DIR, "plan_" + id + ".json"))) {
                 fw.write(o.toString());

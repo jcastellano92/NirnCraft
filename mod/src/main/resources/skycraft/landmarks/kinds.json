@@ -474,44 +474,6 @@
    "clue": "a satchel with a note or token"
   },
   {
-   "id": "s_warn_skull_pike",
-   "tier": "S",
-   "builder": "warning",
-   "radius": 4,
-   "w": {
-    "ash": 3,
-    "volcanic": 3,
-    "marsh": 2,
-    "mountain": 3,
-    "forest": 1,
-    "tundra": 1,
-    "desert": 1,
-    "jungle": 1
-   },
-   "style": "skull_pike",
-   "purpose": "a sign set by locals so travellers avoid something nearby",
-   "context": "near a danger",
-   "clue": "a painted warning with a name"
-  },
-  {
-   "id": "s_warn_crow_post",
-   "tier": "S",
-   "builder": "warning",
-   "radius": 4,
-   "w": {
-    "plains": 4,
-    "forest": 2,
-    "savanna": 3,
-    "desert": 1,
-    "marsh": 1,
-    "tundra": 1
-   },
-   "style": "crow_post",
-   "purpose": "a sign set by locals so travellers avoid something nearby",
-   "context": "near a danger",
-   "clue": "a painted warning with a name"
-  },
-  {
    "id": "s_warn_scrawl",
    "tier": "S",
    "builder": "warning",

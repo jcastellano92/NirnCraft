@@ -8,6 +8,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CarpetBlock;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.IronBarsBlock;
+import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.LadderBlock;
 import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.PressurePlateBlock;
@@ -30,6 +33,7 @@ public final class Sanity {
     public static void sweep(WorldGenLevel level, BoundingBox clip, BoundingBox chunkBox) {
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         BlockState air = Blocks.AIR.defaultBlockState();
+        java.util.List<BlockPos> shaped = new java.util.ArrayList<>();
         int minY = Math.max(clip.minY(), level.getMinBuildHeight() + 1), maxY = Math.min(clip.maxY(), level.getMaxBuildHeight() - 2);
         for (int x = clip.minX(); x <= clip.maxX(); x++) {
             for (int z = clip.minZ(); z <= clip.maxZ(); z++) {
@@ -63,12 +67,62 @@ public final class Sanity {
                         boolean climbs = level.getBlockState(p.below()).is(b) || level.getBlockState(p.above()).is(b);
                         if (!supported(level, chunkBox, behind) && !climbs) level.setBlock(p, air, 2);
                     } else if (b instanceof ChestBlock || b instanceof BarrelBlock) {
-                        if (!reachable(level, chunkBox, p, s)) {
+                        // hard rule: no container over air, liquid or a non-solid block
+                        BlockPos under = p.below();
+                        BlockState us = inside(chunkBox, under) ? level.getBlockState(under) : null;
+                        if (us != null && (us.isAir() || us.canBeReplaced() || !us.getFluidState().isEmpty())) {
+                            level.removeBlock(p, false);
+                        } else if (!reachable(level, chunkBox, p, s)) {
                             level.removeBlock(p, false);
                         }
+                    } else if (b instanceof FenceBlock || b instanceof WallBlock || b instanceof IronBarsBlock) {
+                        shaped.add(p.immutable());
                     }
                 }
             }
+        }
+        try {
+            connect(level, chunkBox, shaped);
+        } catch (RuntimeException ignored) {
+            // a neighbour chunk outside the region: the fences stay as placed
+        }
+    }
+
+    private static boolean connectable(BlockState s) {
+        var b = s.getBlock();
+        return b instanceof FenceBlock || b instanceof WallBlock || b instanceof IronBarsBlock;
+    }
+
+    /** The region neighbourhood this chunk may read: its own chunk and the eight around it. */
+    private static boolean readable(BoundingBox chunkBox, BlockPos p) {
+        return p.getX() >= chunkBox.minX() - 16 && p.getX() <= chunkBox.maxX() + 16
+                && p.getZ() >= chunkBox.minZ() - 16 && p.getZ() <= chunkBox.maxZ() + 16;
+    }
+
+    /**
+     * Worldgen skips neighbour updates, so every fence, wall and pane would stay a lone post. Connects each one to
+     * its neighbours (and the neighbours back to it, across piece and chunk edges).
+     */
+    private static void connect(WorldGenLevel level, BoundingBox chunkBox, java.util.List<BlockPos> shaped) {
+        if (shaped.isEmpty()) return;
+        java.util.Set<BlockPos> todo = new java.util.LinkedHashSet<>(shaped);
+        for (BlockPos p : shaped) {
+            for (Direction d : Direction.Plane.HORIZONTAL) {
+                BlockPos np = p.relative(d);
+                if (readable(chunkBox, np) && connectable(level.getBlockState(np))) todo.add(np.immutable());
+            }
+        }
+        BlockPos.MutableBlockPos np = new BlockPos.MutableBlockPos();
+        for (BlockPos p : todo) {
+            BlockState s = level.getBlockState(p);
+            if (!connectable(s)) continue;
+            BlockState n = s;
+            for (Direction d : Direction.Plane.HORIZONTAL) {
+                np.set(p).move(d);
+                BlockState ns = readable(chunkBox, np) ? level.getBlockState(np) : Blocks.AIR.defaultBlockState();
+                n = n.updateShape(d, ns, level, p, np);
+            }
+            if (n != s) level.setBlock(p, n, 2);
         }
     }
 

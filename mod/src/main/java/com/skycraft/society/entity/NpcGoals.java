@@ -2,6 +2,7 @@ package com.skycraft.society.entity;
 
 import com.skycraft.society.Barks;
 import com.skycraft.society.NpcRole;
+import com.skycraft.society.NpcPlacement;
 import com.skycraft.society.Npcs;
 import com.skycraft.society.Reputation;
 import com.skycraft.society.Schedule;
@@ -90,7 +91,7 @@ final class NpcGoals {
     /** A door-opener with a cooldown: an NPC wedged in a doorway can't strobe a shop door open and shut every tick. */
     static final class Door extends net.minecraft.world.entity.ai.goal.OpenDoorGoal {
         /** Game ticks before the same NPC may work a door again. Tuning knob. */
-        private static final int COOLDOWN = 60;
+        private static final int COOLDOWN = 8;
         private final NpcEntity npc;
         private long readyAt;
 
@@ -1017,7 +1018,13 @@ final class NpcGoals {
         public void tick() {
             var level = npc.level();
             Schedule.Activity activity = routines() ? Schedule.activity(npc) : Schedule.Activity.SLEEP;
+            // at night only the few who are meant to be out (watchmen are not townsfolk; a drunk, a late vendor) stay in the street
+            if (Npcs.isNight(level) && routines() && !NpcPlacement.outAtNight(npc)
+                    && (activity == Schedule.Activity.WANDER || activity == Schedule.Activity.PLAY)) {
+                activity = Schedule.Activity.HOME;
+            }
             if (activity != Schedule.Activity.SLEEP && npc.isSleeping()) npc.stopSleeping();
+            watchdog(activity);
             if (activity == Schedule.Activity.SLEEP || activity == Schedule.Activity.HOME) {
                 if (npc.tickCount % 10 == 0 && guardHome()) return;
             }
@@ -1082,6 +1089,69 @@ final class NpcGoals {
                 }
             }
             follow();
+        }
+
+        // -------- unsticking
+
+        private net.minecraft.world.phys.Vec3 lastPos;
+        private int stuck;
+        private int stuckRounds;
+        private int outdoorNight;
+
+        /**
+         * No progress towards a destination for 40 ticks sends the person to it (or the nearest free spot beside
+         * it); a person on a roof is put back down; at night a resident left in the street goes indoors.
+         */
+        private void watchdog(Schedule.Activity activity) {
+            if (npc.tickCount % 10 != 0 || npc.isSleeping() || npc.isConversing()) return;
+            var level = npc.level();
+            if (npc.tickCount % 20 == 0) NpcPlacement.rescueFromRoof(npc);
+            // stuck against a door, a wall or another body
+            BlockPos t = target;
+            if (t != null && !arrived(t, 2.5) && level.isLoaded(t)) {
+                net.minecraft.world.phys.Vec3 p = npc.position();
+                if (lastPos != null && p.distanceToSqr(lastPos) < 0.04) stuck += 10;
+                else {
+                    stuck = 0;
+                    stuckRounds = 0;
+                }
+                lastPos = p;
+                if (stuck >= 40) {
+                    stuck = 0;
+                    boolean watched = level.getNearestPlayer(npc, 7.0) != null;
+                    if (watched && stuckRounds++ < 2) {
+                        // someone is looking: try the pathfinder once more before popping across
+                        npc.getNavigation().stop();
+                        npc.getNavigation().moveTo(t.getX() + 0.5, t.getY(), t.getZ() + 0.5, speed);
+                    } else {
+                        BlockPos spot = NpcPlacement.freeSpot(npc, t, 2);
+                        if (spot != null && npc.distanceToSqr(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5) < 56.0 * 56.0) {
+                            NpcPlacement.moveTo(npc, spot);
+                        } else {
+                            BlockPos near = NpcPlacement.freeSpot(npc, npc.blockPosition().relative(npc.getDirection(), 2), 2);
+                            if (near != null) NpcPlacement.moveTo(npc, near);
+                        }
+                        stuckRounds = 0;
+                    }
+                }
+            } else {
+                stuck = 0;
+                lastPos = null;
+            }
+            // the street at night
+            if (Npcs.isNight(level) && routines() && !NpcPlacement.outAtNight(npc) && level.canSeeSky(npc.blockPosition())
+                    && activity != Schedule.Activity.WORK) {
+                if ((outdoorNight += 10) >= 300) {
+                    outdoorNight = 0;
+                    BlockPos in = NpcPlacement.anchorFor(npc, Schedule.Activity.SLEEP);
+                    if (in != null && level.isLoaded(in) && !level.canSeeSky(in)) {
+                        BlockPos spot = NpcPlacement.freeSpot(npc, in, 3);
+                        if (spot != null) NpcPlacement.moveTo(npc, spot);
+                    }
+                }
+            } else {
+                outdoorNight = 0;
+            }
         }
 
         // -------- idle places
@@ -1160,6 +1230,7 @@ final class NpcGoals {
             if (!npc.level().isLoaded(probe)) return;
             // stay on the floor the anchor is on (indoors) unless it's outside
             int y = npc.level().canSeeSky(center) ? npc.level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) : center.getY();
+            if (y > center.getY() + 3) return; // the cell is a rooftop: never a place to stroll to
             target = new BlockPos(x, y, z);
             this.speed = speed;
             npc.getNavigation().moveTo(x + 0.5, y, z + 0.5, speed);
