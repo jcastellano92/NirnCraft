@@ -52,6 +52,8 @@ public class FloraTreeFeature extends Feature<FloraTreeFeature.Config> {
         long seed = level.getSeed();
         TreeSpecies sp = pick(ctx.config(), seed, x, z, ctx.random().nextDouble());
         if (sp == null) return false;
+        // no tree (trunk or crown) where a road, street, plot, pad or site will be: skipped whole, never cut later
+        if (!com.skycraft.world.PlacementMask.clear(level, x, z, sp.crownReach())) return false;
         int water = Math.max(0, box.surfaceWithWater(x, z) - y);
         if (water > sp.maxWater) return false;
         BlockState here = box.get(x, y, z);

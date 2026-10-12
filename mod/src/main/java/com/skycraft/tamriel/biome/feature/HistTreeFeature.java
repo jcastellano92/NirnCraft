@@ -29,6 +29,7 @@ public class HistTreeFeature extends Feature<NoneFeatureConfiguration> {
         GenBox box = GenBox.of(ctx.level(), ctx.origin());
         int cx = box.center.getMiddleBlockX() + random.nextInt(7) - 3;
         int cz = box.center.getMiddleBlockZ() + random.nextInt(7) - 3;
+        if (!com.skycraft.world.PlacementMask.clear(ctx.level(), cx, cz, 12)) return false;
         int floor = box.surface(cx, cz);
         BlockState ground = box.get(cx, floor - 1, cz);
         if (!ground.is(BlockTags.DIRT) && !ground.is(Blocks.MUD) && !ground.is(Blocks.CLAY) && !ground.is(BlockTags.SAND)) {

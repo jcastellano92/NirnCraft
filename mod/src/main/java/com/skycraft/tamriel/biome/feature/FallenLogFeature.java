@@ -28,6 +28,7 @@ public class FallenLogFeature extends Feature<BlockStateConfiguration> {
         int len = 4 + random.nextInt(4);
         int x = o.getX(), y = o.getY(), z = o.getZ();
         if (box.reach(x, z) < len + 2) return false;
+        if (!com.skycraft.world.PlacementMask.clear(ctx.level(), x, z, 5)) return false;
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         // every block of the log needs air to lie in and ground under it
         for (int s = 0; s < len; s++) {

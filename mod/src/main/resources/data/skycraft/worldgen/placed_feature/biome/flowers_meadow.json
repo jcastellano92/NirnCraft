@@ -13,6 +13,9 @@
       "heightmap": "MOTION_BLOCKING"
     },
     {
+      "type": "skycraft:placement_mask"
+    },
+    {
       "type": "minecraft:biome"
     }
   ]

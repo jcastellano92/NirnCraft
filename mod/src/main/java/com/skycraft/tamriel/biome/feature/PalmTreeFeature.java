@@ -31,6 +31,7 @@ public class PalmTreeFeature extends Feature<NoneFeatureConfiguration> {
         if (!ground.is(BlockTags.SAND) && !ground.is(BlockTags.DIRT) && !ground.is(BiomeBlocks.DUNE_SAND.get())) return false;
         if (!GenBox.isSoft(box.get(x, y, z)) || !box.get(x, y, z).getFluidState().isEmpty()) return false;
         if (box.reach(x, z) < 8) return false;
+        if (!com.skycraft.world.PlacementMask.clear(ctx.level(), x, z, 6)) return false;
         boolean date = random.nextInt(3) == 0;
         int height = date ? 5 + random.nextInt(3) : 7 + random.nextInt(5);
         double a = random.nextDouble() * Math.PI * 2;

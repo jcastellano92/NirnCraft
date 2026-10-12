@@ -33,6 +33,9 @@ public final class Flora {
     public static final RegistryObject<PlacementModifierType<DensityFilter>> DENSITY =
             PLACEMENTS.register("flora_density", () -> type(DensityFilter.CODEC));
 
+    public static final RegistryObject<PlacementModifierType<MaskFilter>> MASK =
+            PLACEMENTS.register("placement_mask", () -> type(MaskFilter.CODEC));
+
     private Flora() {}
 
     private static <P extends net.minecraft.world.level.levelgen.placement.PlacementModifier> PlacementModifierType<P> type(Codec<P> codec) {

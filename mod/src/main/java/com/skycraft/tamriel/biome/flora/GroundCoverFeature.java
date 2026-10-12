@@ -72,6 +72,8 @@ public class GroundCoverFeature extends Feature<GroundCoverFeature.Config> {
             }
             // stay in the decorated chunk: its heightmaps are the only ones ready
             if ((x >> 4) != box.center.x || (z >> 4) != box.center.z) continue;
+            // not on a road, street, plot or pad (the paver would only have to clear it again)
+            if (!com.skycraft.world.PlacementMask.clear(level, x, z, 0)) continue;
             int y = k == 0 ? o.getY() : level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
             p.set(x, y, z);
             if (!level.getBlockState(p).isAir()) continue;

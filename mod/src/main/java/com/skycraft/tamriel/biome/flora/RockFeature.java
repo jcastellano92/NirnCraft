@@ -62,6 +62,7 @@ public class RockFeature extends Feature<RockFeature.Config> {
         int x = ctx.origin().getX(), y = ctx.origin().getY(), z = ctx.origin().getZ();
         if (!box.get(x, y, z).getFluidState().isEmpty() || !box.get(x, y - 1, z).getFluidState().isEmpty()) return false;
         if (box.get(x, y - 1, z).isAir() || box.reach(x, z) < 9) return false;
+        if (!com.skycraft.world.PlacementMask.clear(level, x, z, 4)) return false;
         Style style = cfg.style();
         if (style == Style.MIXED) {
             int roll = r.nextInt(10);

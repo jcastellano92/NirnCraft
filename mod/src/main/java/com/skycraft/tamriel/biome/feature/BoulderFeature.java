@@ -33,6 +33,7 @@ public class BoulderFeature extends Feature<BoulderFeature.Config> {
         GenBox box = GenBox.of(ctx.level(), ctx.origin());
         BlockPos o = ctx.origin();
         int x = o.getX(), z = o.getZ();
+        if (!com.skycraft.world.PlacementMask.clear(ctx.level(), x, z, 6)) return false;
         int y = box.surface(x, z);
         if (y == Integer.MIN_VALUE || !box.get(x, y - 1, z).getFluidState().isEmpty()
                 || !box.get(x, y, z).getFluidState().isEmpty()) return false;

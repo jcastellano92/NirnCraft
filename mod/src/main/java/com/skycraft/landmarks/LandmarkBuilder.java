@@ -36,6 +36,9 @@ public final class LandmarkBuilder {
         Kind kind = site.kind();
         ChunkPos chunk = new ChunkPos(site.chunkX(), site.chunkZ());
         if (!force && site.pinned() == null && surfaceStructureHere(level, chunk, kind.tier() == Tier.XL ? 1 : 1)) return false;
+        // a site gives way to a planned road corridor, street, plot or pad (named pinned sites are placed on purpose)
+        if (!force && site.pinned() == null
+                && !com.skycraft.world.PlacementMask.clearOfPlans(level, site.x(), site.z(), Math.min(kind.radius(), 10))) return false;
         LandCtx ctx = LandCtx.of(site.x(), site.z());
         if (family != null) ctx.base = family;
         RandomSource random = RandomSource.create(site.seed());

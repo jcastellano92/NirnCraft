@@ -17,6 +17,10 @@
       "heightmap": "OCEAN_FLOOR"
     },
     {
+      "type": "skycraft:placement_mask",
+      "radius": 4
+    },
+    {
       "type": "minecraft:biome"
     }
   ]

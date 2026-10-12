@@ -32,6 +32,8 @@ public class GrahtOakFeature extends Feature<NoneFeatureConfiguration> {
         GenBox box = GenBox.of(level, ctx.origin());
         int cx = box.center.getMiddleBlockX() + random.nextInt(5) - 2;
         int cz = box.center.getMiddleBlockZ() + random.nextInt(5) - 2;
+        // a huge tree never stands over a road, street, plot or pad: skipped whole
+        if (!com.skycraft.world.PlacementMask.clear(level, cx, cz, 12)) return false;
         int y0 = box.surface(cx, cz);
         BlockState ground = box.get(cx, y0 - 1, cz);
         if (!ground.is(BlockTags.DIRT) && !ground.is(net.minecraft.world.level.block.Blocks.MUD)) return false;

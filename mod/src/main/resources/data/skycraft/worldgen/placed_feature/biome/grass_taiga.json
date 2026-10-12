@@ -13,6 +13,9 @@
       "heightmap": "WORLD_SURFACE_WG"
     },
     {
+      "type": "skycraft:placement_mask"
+    },
+    {
       "type": "minecraft:biome"
     }
   ]

@@ -41,6 +41,7 @@ public class GiantMushroomFeature extends Feature<GiantMushroomFeature.Config> {
         int y = ctx.origin().getY();
         BlockState below = box.get(x, y - 1, z);
         if (!below.isSolidRender(ctx.level(), ctx.origin().below()) || !GenBox.isSoft(box.get(x, y, z))) return false;
+        if (!com.skycraft.world.PlacementMask.clear(ctx.level(), x, z, 8)) return false;
         int height = cfg.height().sample(random);
         return switch (cfg.style()) {
             case "tower" -> tower(box, cfg, random, x, y, z, height);

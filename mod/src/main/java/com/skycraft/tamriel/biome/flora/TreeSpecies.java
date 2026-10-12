@@ -55,6 +55,15 @@ public final class TreeSpecies {
     /** Deepest water the tree may stand in. */
     int maxWater = 0;
 
+    /**
+     * How far (blocks) any part of a grown tree can reach from its trunk base: the crown or limb radius, a block of
+     * slack for ragged edges and the wind sweep. {@link com.skycraft.world.PlacementMask} keeps this much clear.
+     */
+    public int crownReach() {
+        double r = radius + 1.0 + wind * 2.0 + lean * 4.0 + (trunk >= 3 ? 2 : 0);
+        return shape == Shape.SHRUB || shape == Shape.STUMP || shape == Shape.FALLEN_LOG ? Math.min(3, (int) Math.ceil(r)) : (int) Math.ceil(r);
+    }
+
     private TreeSpecies(String name, Shape shape) {
         this.name = name;
         this.shape = shape;

@@ -73,6 +73,11 @@ whiterun-rorikstead, whiterun-dragon_bridge and one river crossing; plus `reach_
   step on the corridors.
 * **P4 Vegetation masks (S10).** Tree and flora features check the road/street/pad/plot masks before placing; remove the
   clearing code paths that create floating crowns. Gate: floating vegetation within 150 blocks of the sample towns ~0.
+  *Status:* `com.skycraft.world.PlacementMask` is in (per-chunk clearance grid from structure pieces, settlement cores,
+  site pads and the map road channel; trees, huge trees, ground cover, rocks, natural scatter, patches via the
+  `skycraft:placement_mask` filter). The road corridors are weak until P1: the map channel does not follow the
+  planner's roads, so `roads/worldplan` must `PlacementMask.register(Source)` its baked polylines (class half width + 2).
+  Paver/Canvas clearing and `OrphanSweep` stay as the safety net and as the upgrade path for old saves.
 * **P5 Streets to every door (S5).** Settlement plans emit a street graph that reaches every door (and gate lanes that
   meet S4 road ends); plot pads go into S7. Gate: unreachable doors <= 1% on the Skyrim sweep sample.
 * **P6 Planned scenes (S6+S11).** Replace per-chunk human-prop rolls with the planned scene list (scene = anchor,

@@ -304,6 +304,9 @@ public final class Scatter {
             }
             // settlement and structure footprints, minor sites
             if (!Places.overlapping(x - 3, z - 3, x + 3, z + 3).isEmpty()) return fail("place footprint");
+            // natural scatter keeps off planned road corridors, street/plot/pad footprints and site pads (dress() is
+            // the roadside system's own call and stands where the road is)
+            if (spacing && !com.skycraft.world.PlacementMask.clear(level, x, z, 0)) return fail("placement mask");
             for (MinorSites.Site s : sites) {
                 int need = s.kind().radius + 4 + clear / 2;
                 if (s.distSqr(x, z) < (long) need * need) return fail("minor site");

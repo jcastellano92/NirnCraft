@@ -143,6 +143,9 @@ def rarity(n):
 
 SQUARE = {"type": "minecraft:in_square"}
 BIOME = {"type": "minecraft:biome"}
+# skycraft:placement_mask (com.skycraft.world.PlacementMask): no vegetation where a road, street, plot, pad or site
+# will be, so nothing has to be cut afterwards. The Java flora features ask the mask themselves.
+MASK = {"type": "skycraft:placement_mask"}
 
 
 def hm(kind):
@@ -255,7 +258,7 @@ def selector(name, default, *choices):
 
 def trees_placed(name, cf, base, extra=1, step="vegetal_decoration", chance=None):
     mods = [count_extra(base, extra)] if base > 0 else [rarity(chance)]
-    return placed(name, cf, mods + [SQUARE, water_depth(0), hm("OCEAN_FLOOR"), BIOME], step)
+    return placed(name, cf, mods + [SQUARE, water_depth(0), hm("OCEAN_FLOOR"), dict(MASK, radius=4), BIOME], step)
 
 
 def patch(name, provider, tries=32, xz=7, y=3, predicate=None):
@@ -271,7 +274,7 @@ def patch_placed(name, cf, n=None, chance=None, heightmap="WORLD_SURFACE_WG", st
         mods.append(count(n))
     if chance is not None:
         mods.append(rarity(chance))
-    return placed(name, cf, mods + [SQUARE, hm(heightmap), BIOME], step)
+    return placed(name, cf, mods + [SQUARE, hm(heightmap), MASK, BIOME], step)
 
 
 def ore(name, targets, size, air_discard=0.0):

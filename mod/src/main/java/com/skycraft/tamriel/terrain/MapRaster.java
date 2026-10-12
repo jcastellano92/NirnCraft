@@ -173,6 +173,53 @@ public final class MapRaster {
         return regionAt(x + warpX(x, z), z + warpZ(x, z));
     }
 
+    /** The road channel saturates at this many blocks from an authored road centre line (255 - 4 * blocks). */
+    public static final float ROAD_REACH = 63.75f;
+
+    /**
+     * Blocks from (x, z) to the nearest authored road centre line (or settlement pad) of the raster, or
+     * {@link #ROAD_REACH} when none is near. The channel stores the distance at 32-block cells; a plain bilinear
+     * read over-estimates it by up to 16 blocks right on a line, so the four surrounding cell distances are fitted
+     * with the plane of a straight road (unit gradient, signs chosen for the best fit) and the answer is clamped
+     * between the 1-Lipschitz lower bound and the bilinear value. Allocation free; caller checked {@link #covers}.
+     */
+    public float roadDistance(int x, int z) {
+        double wx = x + warpX(x, z), wz = z + warpZ(x, z);
+        double fx = (wx - TamrielMap.MIN_X) / CELL - 0.5, fz = (wz - TamrielMap.MIN_Z) / CELL - 0.5;
+        int ix = clampI((int) Math.floor(fx), W - 2), iz = clampI((int) Math.floor(fz), H - 2);
+        float tx = (float) MapNoise.clamp(fx - ix, 0, 1), tz = (float) MapNoise.clamp(fz - iz, 0, 1);
+        int o00 = (iz * W + ix) * CH + ROAD, o01 = o00 + W * CH;
+        float[] d = data;
+        float a = (1f - d[o00]) * ROAD_REACH, b = (1f - d[o00 + CH]) * ROAD_REACH;
+        float c = (1f - d[o01]) * ROAD_REACH, e = (1f - d[o01 + CH]) * ROAD_REACH;
+        float min = Math.min(Math.min(a, b), Math.min(c, e));
+        if (min >= ROAD_REACH - 0.01f) return ROAD_REACH;
+        float lin = (1 - tz) * ((1 - tx) * a + tx * b) + tz * ((1 - tx) * c + tx * e);
+        float u = tx * CELL, w = tz * CELL;
+        // lower bound: distance is 1-Lipschitz, so no corner can be nearer than its value minus the way to it
+        float lb = 0f;
+        lb = Math.max(lb, a - (float) Math.sqrt(u * u + w * w));
+        lb = Math.max(lb, b - (float) Math.sqrt((CELL - u) * (CELL - u) + w * w));
+        lb = Math.max(lb, c - (float) Math.sqrt(u * u + (CELL - w) * (CELL - w)));
+        lb = Math.max(lb, e - (float) Math.sqrt((CELL - u) * (CELL - u) + (CELL - w) * (CELL - w)));
+        // plane of a straight line through the cell: v = a' + qx * u + qz * w with signed corner distances
+        float best = Float.MAX_VALUE, bq = 0, bz = 0;
+        for (int m = 0; m < 8; m++) {
+            float sb = (m & 1) == 0 ? b : -b, sc = (m & 2) == 0 ? c : -c, se = (m & 4) == 0 ? e : -e;
+            float resid = Math.abs(a + se - sb - sc);
+            float qx = (sb - a) / CELL, qz = (sc - a) / CELL;
+            float score = resid + CELL * Math.abs((float) Math.sqrt(qx * qx + qz * qz) - 1f);
+            if (score < best) {
+                best = score;
+                bq = qx;
+                bz = qz;
+            }
+        }
+        float v = Math.min(lin, ROAD_REACH);
+        if (best < 4f) v = Math.min(v, Math.abs(a + bq * u + bz * w));
+        return Math.max(lb, Math.min(v, ROAD_REACH));
+    }
+
     /** Fills {@code out} from the raster (caller checked {@link #covers}). */
     public void sample(int x, int z, MapSample out) {
         double wx = x + warpX(x, z), wz = z + warpZ(x, z);

@@ -27,6 +27,7 @@ public class DeadTreeFeature extends Feature<BlockStateConfiguration> {
         int x = o.getX(), y = o.getY(), z = o.getZ();
         BlockState below = box.get(x, y - 1, z);
         if (!below.isFaceSturdy(ctx.level(), o.below(), Direction.UP) || box.reach(x, z) < 5) return false;
+        if (!com.skycraft.world.PlacementMask.clear(ctx.level(), x, z, 3)) return false;
         BlockState log = ctx.config().state;
         if (!log.hasProperty(RotatedPillarBlock.AXIS)) return false;
         int height = 4 + random.nextInt(6);
