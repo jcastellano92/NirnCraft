@@ -492,13 +492,14 @@ public final class Layout {
                     out.get2DDataValue(), depth, DungeonPiece.ROLE_NORMAL, lateral, wall, 0));
         }
 
-        // rooms
+        // rooms (a grand cavern also carries its dungeon's tag: which cavern it is, the lattice colour, a key: see CavernTag)
+        int grandOrdinal = 0;
         for (Cell c : cells) {
             int cx = ox + c.i * CELL, cz = oz + c.j * CELL;
             int bottom = c.grand() ? c.floor - GrandCavern.BELOW : c.floor - 1;
             BoundingBox box = new BoundingBox(cx - c.hx, bottom, cz - c.hz, cx + c.hx, c.floor + c.height, cz + c.hz);
             builder.addPiece(new DungeonPiece(site, DungeonPiece.Kind.ROOM, box, r.nextLong(), c.floor, c.vista, c.entered, c.gate,
-                    c.role, c.doors, c.variant, c.flags | (c.grand() ? DungeonPiece.FLAG_GRAND : 0)));
+                    c.role, c.doors, c.variant, c.flags | (c.grand() ? DungeonPiece.FLAG_GRAND | com.skycraft.dungeons.world.cavern.CavernTag.encode(seed, ox, oz, grandOrdinal++) : 0)));
         }
 
         // corridors (each link once: from the lower-coordinate cell); the trap beat falls on the main path's middle third

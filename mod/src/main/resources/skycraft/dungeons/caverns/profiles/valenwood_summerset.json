@@ -1,0 +1,755 @@
+[
+ {
+  "id": "valenwood_root_cathedral",
+  "name": "Root Cathedral",
+  "lore": "The Bosmer do not build; they ask. The roots here arch in ribs and aisles, and every pillar is still alive.",
+  "weight": 2.0,
+  "match": {
+   "provinces": [
+    "valenwood"
+   ]
+  },
+  "shapes": {
+   "cathedral": 4,
+   "root_cavern": 3,
+   "karst": 1,
+   "bowl_bridges": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:moss_block@18",
+    "minecraft:rooted_dirt@10",
+    "minecraft:mud@6",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:mangrove_log@12",
+    "minecraft:moss_block@18",
+    "minecraft:rooted_dirt@12",
+    "minecraft:mangrove_roots@10",
+    "rock@38"
+   ],
+   "spike": [
+    "minecraft:mangrove_roots@2",
+    "minecraft:dripstone_block@1"
+   ],
+   "platform": [
+    "minecraft:mossy_stone_bricks@2",
+    "minecraft:mangrove_planks@3"
+   ],
+   "pillar": [
+    "minecraft:mangrove_log@4",
+    "minecraft:mangrove_roots@2",
+    "minecraft:jungle_log@1"
+   ],
+   "patch": [
+    "minecraft:moss_block"
+   ],
+   "patchAt": 0.2
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.5
+  },
+  "flora": [
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:hanging_roots"
+    ],
+    "density": 50,
+    "len": [
+     3,
+     9
+    ]
+   },
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:vine"
+    ],
+    "density": 30,
+    "len": [
+     3,
+     8
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:fern",
+     "minecraft:large_fern",
+     "minecraft:flowering_azalea"
+    ],
+    "density": 70
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:moss_carpet"
+    ],
+    "density": 50
+   },
+   {
+    "type": "ceil",
+    "block": [
+     "minecraft:glow_lichen[down=true]"
+    ],
+    "density": 40
+   }
+  ],
+  "features": [
+   {
+    "type": "ribs",
+    "block": [
+     "minecraft:mangrove_log",
+     "minecraft:mangrove_roots"
+    ],
+    "count": [
+     6,
+     6
+    ]
+   },
+   {
+    "type": "vein",
+    "block": [
+     "minecraft:mangrove_roots"
+    ],
+    "scale": 5.0,
+    "amount": 0.035
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:verdant_froglight",
+    "minecraft:shroomlight"
+   ],
+   "density": 44,
+   "cluster": 1
+  },
+  "setpiece": {
+   "type": "tree",
+   "block": [
+    "minecraft:mangrove_log"
+   ],
+   "accent": [
+    "minecraft:flowering_azalea_leaves[persistent=true]"
+   ]
+  },
+  "foes": [
+   "skycraft:spriggan",
+   "skycraft:wispmother"
+  ],
+  "loot": {
+   "relic": "skycraft:chests/relic_cave",
+   "platform": "skycraft:chests/cavern/root",
+   "minor": "skycraft:chests/cavern/root"
+  },
+  "ambient": [
+   {
+    "entity": "minecraft:bat",
+    "count": [
+     1,
+     3
+    ],
+    "where": "air"
+   }
+  ],
+  "lightColor": "green"
+ },
+ {
+  "id": "valenwood_spore_grotto",
+  "name": "Spore Grotto",
+  "lore": "Pollen hangs in clouds and the blossoms nod in a wind that doesn't exist. Do not sleep here.",
+  "weight": 1.6,
+  "match": {
+   "provinces": [
+    "valenwood",
+    "elsweyr"
+   ],
+   "weather": [
+    "jungle",
+    "tropical",
+    "temperate"
+   ]
+  },
+  "shapes": {
+   "karst": 3,
+   "bowl_bridges": 2,
+   "root_cavern": 2,
+   "pillar_maze": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:moss_block@20",
+    "minecraft:rooted_dirt@8",
+    "minecraft:podzol@6",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:moss_block@24",
+    "minecraft:rooted_dirt@12",
+    "minecraft:dripstone_block@10",
+    "minecraft:azalea_leaves[persistent=true]@6",
+    "rock@40"
+   ],
+   "spike": [
+    "minecraft:dripstone_block@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:mossy_stone_bricks@3",
+    "minecraft:stone_bricks@1"
+   ],
+   "patch": [
+    "minecraft:moss_block"
+   ],
+   "patchAt": 0.2
+  },
+  "fluid": "water",
+  "flora": [
+   {
+    "type": "ceil",
+    "block": [
+     "minecraft:spore_blossom"
+    ],
+    "density": 14
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:azalea",
+     "minecraft:flowering_azalea",
+     "minecraft:fern"
+    ],
+    "density": 70
+   },
+   {
+    "type": "mushroom",
+    "block": [
+     "minecraft:mushroom_stem"
+    ],
+    "cap": [
+     "minecraft:red_mushroom_block"
+    ],
+    "tip": [
+     "minecraft:shroomlight"
+    ],
+    "density": 12,
+    "radius": 2
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:moss_carpet"
+    ],
+    "density": 60
+   },
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:cave_vines_plant[berries=true]"
+    ],
+    "density": 24,
+    "len": [
+     3,
+     7
+    ],
+    "tip": [
+     "minecraft:cave_vines[berries=true]"
+    ]
+   },
+   {
+    "type": "float",
+    "block": [
+     "minecraft:lily_pad"
+    ],
+    "density": 40
+   }
+  ],
+  "features": [
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.04
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:verdant_froglight",
+    "minecraft:shroomlight"
+   ],
+   "density": 44,
+   "cluster": 2
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [],
+  "loot": {
+   "relic": "skycraft:chests/relic_cave",
+   "platform": "skycraft:chests/cavern/fungal",
+   "minor": "skycraft:chests/cavern/fungal"
+  },
+  "ambient": [
+   {
+    "entity": "minecraft:axolotl",
+    "count": [
+     2,
+     4
+    ],
+    "where": "water"
+   },
+   {
+    "entity": "minecraft:bat",
+    "count": [
+     1,
+     3
+    ],
+    "where": "air"
+   }
+  ],
+  "particle": "spore",
+  "lightColor": "green"
+ },
+ {
+  "id": "summerset_crystal_sea_cave",
+  "name": "Crystal Sea Cave",
+  "lore": "The sea comes in on a clear tide, through a mouth of white rock. The water is lit from below and nothing is ever dark.",
+  "weight": 1.9,
+  "match": {
+   "regions": [
+    "summerset/summerset_isle",
+    "summerset/auridon",
+    "summerset/artaeum"
+   ]
+  },
+  "shapes": {
+   "sea_cave": 4,
+   "floating_islands": 2,
+   "bowl_bridges": 1,
+   "karst": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:quartz_block@6",
+    "minecraft:calcite@12",
+    "minecraft:sand@10",
+    "rock@50"
+   ],
+   "wall": [
+    "minecraft:calcite@28",
+    "minecraft:quartz_block@12",
+    "minecraft:prismarine@10",
+    "minecraft:amethyst_block@6",
+    "rock@30"
+   ],
+   "spike": [
+    "minecraft:calcite@2",
+    "minecraft:prismarine@1",
+    "minecraft:quartz_block@1"
+   ],
+   "platform": [
+    "minecraft:smooth_quartz@2",
+    "minecraft:quartz_bricks@2",
+    "minecraft:prismarine_bricks@1"
+   ],
+   "terrace": [
+    "minecraft:sand@3",
+    "minecraft:calcite@1"
+   ]
+  },
+  "fluid": "water",
+  "flora": [
+   {
+    "type": "spire",
+    "block": [
+     "minecraft:prismarine"
+    ],
+    "density": 8,
+    "len": [
+     3,
+     7
+    ],
+    "cap": [
+     "minecraft:sea_lantern"
+    ],
+    "tip": [
+     "minecraft:light_blue_stained_glass"
+    ]
+   },
+   {
+    "type": "bed",
+    "block": [
+     "minecraft:seagrass",
+     "minecraft:sea_pickle[pickles=3]"
+    ],
+    "density": 80
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:amethyst_cluster[facing=up]"
+    ],
+    "density": 20
+   }
+  ],
+  "features": [
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.08
+   },
+   {
+    "type": "pool",
+    "fluid": "water",
+    "count": [
+     2,
+     4
+    ],
+    "size": [
+     2,
+     3
+    ],
+    "accent": [
+     "minecraft:sea_lantern"
+    ],
+    "block": [
+     "minecraft:calcite"
+    ]
+   },
+   {
+    "type": "bubbles",
+    "amount": 0.04
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:sea_lantern",
+    "minecraft:pearlescent_froglight"
+   ],
+   "density": 44,
+   "cluster": 2
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [
+   "minecraft:drowned"
+  ],
+  "loot": {
+   "relic": "skycraft:chests/relic_cave",
+   "platform": "skycraft:chests/cavern/sea",
+   "minor": "skycraft:chests/cavern/sea"
+  },
+  "ambient": [
+   {
+    "entity": "minecraft:glow_squid",
+    "count": [
+     3,
+     6
+    ],
+    "where": "water"
+   },
+   {
+    "entity": "minecraft:tropical_fish",
+    "count": [
+     4,
+     8
+    ],
+    "where": "water"
+   },
+   {
+    "entity": "minecraft:dolphin",
+    "count": [
+     1,
+     1
+    ],
+    "where": "water"
+   }
+  ],
+  "lightColor": "cyan"
+ },
+ {
+  "id": "summerset_quartz_cavern",
+  "name": "Quartz Cavern",
+  "lore": "Altmer masons took the quartz out in great clean sheets and left the hollows to be polished by the damp.",
+  "weight": 1.7,
+  "match": {
+   "provinces": [
+    "summerset"
+   ],
+   "themes": [
+    "cave",
+    "mine",
+    "ruin",
+    "barrow",
+    "fort"
+   ]
+  },
+  "shapes": {
+   "cathedral": 3,
+   "amphitheatre": 3,
+   "karst": 1,
+   "bowl_bridges": 1,
+   "collapsed_city": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:smooth_quartz@14",
+    "minecraft:quartz_block@8",
+    "minecraft:calcite@8",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:quartz_block@24",
+    "minecraft:calcite@20",
+    "minecraft:smooth_quartz@10",
+    "minecraft:gold_block@2",
+    "rock@30"
+   ],
+   "spike": [
+    "minecraft:quartz_block@2",
+    "minecraft:calcite@1"
+   ],
+   "platform": [
+    "minecraft:smooth_quartz@3",
+    "minecraft:chiseled_quartz_block@1",
+    "minecraft:gold_block@1"
+   ],
+   "pillar": [
+    "minecraft:quartz_pillar@4",
+    "minecraft:chiseled_quartz_block@1"
+   ],
+   "ruin": [
+    "minecraft:quartz_bricks@2",
+    "minecraft:smooth_quartz@2"
+   ]
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.4
+  },
+  "flora": [
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:amethyst_cluster[facing=up]",
+     "minecraft:calcite"
+    ],
+    "density": 20
+   },
+   {
+    "type": "spire",
+    "block": [
+     "minecraft:quartz_block"
+    ],
+    "density": 8,
+    "len": [
+     4,
+     8
+    ],
+    "cap": [
+     "minecraft:sea_lantern"
+    ],
+    "tip": [
+     "minecraft:amethyst_cluster[facing=up]"
+    ]
+   }
+  ],
+  "features": [
+   {
+    "type": "statue",
+    "block": [
+     "minecraft:smooth_quartz",
+     "minecraft:quartz_bricks"
+    ],
+    "count": [
+     2,
+     3
+    ],
+    "accent": [
+     "minecraft:sea_lantern"
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:sea_lantern",
+    "minecraft:glowstone"
+   ],
+   "density": 44,
+   "cluster": 0,
+   "post": [
+    "minecraft:lantern"
+   ]
+  },
+  "setpiece": {
+   "type": "statue",
+   "block": [
+    "minecraft:smooth_quartz"
+   ],
+   "accent": [
+    "minecraft:sea_lantern"
+   ]
+  },
+  "foes": [
+   "minecraft:skeleton",
+   "skycraft:wisp"
+  ],
+  "loot": {
+   "relic": "skycraft:chests/relic_ruin",
+   "platform": "skycraft:chests/cavern/arcane",
+   "minor": "skycraft:chests/cavern/arcane"
+  },
+  "lightColor": "white"
+ },
+ {
+  "id": "summerset_psijic_time_cave",
+  "name": "Time Cave",
+  "lore": "A hollow the Psijics keep out of step with the rest of the day: stones hang in the air above their own reflections.",
+  "weight": 1.6,
+  "match": {
+   "regions": [
+    "summerset/artaeum",
+    "summerset/summerset_isle"
+   ]
+  },
+  "shapes": {
+   "floating_islands": 4,
+   "shaft": 2,
+   "cathedral": 1,
+   "amphitheatre": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:end_stone@12",
+    "minecraft:calcite@10",
+    "minecraft:smooth_quartz@6",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:end_stone@18",
+    "minecraft:calcite@16",
+    "minecraft:purpur_block@6",
+    "minecraft:amethyst_block@10",
+    "minecraft:obsidian@4",
+    "rock@30"
+   ],
+   "spike": [
+    "minecraft:end_stone@2",
+    "minecraft:amethyst_block@1"
+   ],
+   "platform": [
+    "minecraft:purpur_pillar@2",
+    "minecraft:end_stone_bricks@2",
+    "minecraft:amethyst_block@1"
+   ],
+   "pillar": [
+    "minecraft:purpur_pillar@3",
+    "minecraft:end_stone_bricks@1"
+   ]
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.5
+  },
+  "flora": [
+   {
+    "type": "spire",
+    "block": [
+     "minecraft:amethyst_block"
+    ],
+    "density": 12,
+    "len": [
+     4,
+     8
+    ],
+    "cap": [
+     "minecraft:end_rod"
+    ],
+    "tip": [
+     "minecraft:amethyst_cluster[facing=up]"
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:amethyst_cluster[facing=up]",
+     "minecraft:end_rod"
+    ],
+    "density": 40
+   },
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:chain"
+    ],
+    "density": 4,
+    "len": [
+     3,
+     6
+    ],
+    "tip": [
+     "minecraft:lantern[hanging=true]"
+    ]
+   }
+  ],
+  "features": [
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.05
+   },
+   {
+    "type": "pool",
+    "fluid": "water",
+    "count": [
+     1,
+     2
+    ],
+    "size": [
+     2,
+     2
+    ],
+    "accent": [
+     "minecraft:sea_lantern"
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:pearlescent_froglight",
+    "minecraft:end_rod"
+   ],
+   "density": 40,
+   "cluster": 2
+  },
+  "setpiece": {
+   "type": "obelisk",
+   "block": [
+    "minecraft:purpur_pillar"
+   ],
+   "accent": [
+    "minecraft:end_rod"
+   ]
+  },
+  "foes": [
+   "minecraft:stray",
+   "skycraft:wisp"
+  ],
+  "loot": {
+   "relic": "skycraft:chests/relic_cave",
+   "platform": "skycraft:chests/cavern/arcane",
+   "minor": "skycraft:chests/cavern/arcane"
+  },
+  "particle": "portal",
+  "lightColor": "violet"
+ }
+]

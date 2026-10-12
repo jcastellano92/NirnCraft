@@ -1,0 +1,85 @@
+{
+ "type": "minecraft:chest",
+ "pools": [
+  {
+   "rolls": 1,
+   "entries": [
+    {
+     "type": "minecraft:loot_table",
+     "name": "skycraft:chests/gold",
+     "weight": 1
+    }
+   ]
+  },
+  {
+   "rolls": {
+    "type": "minecraft:uniform",
+    "min": 1,
+    "max": 2
+   },
+   "entries": [
+    {
+     "type": "minecraft:loot_table",
+     "name": "skycraft:chests/mine_ore",
+     "weight": 5
+    },
+    {
+     "type": "minecraft:loot_table",
+     "name": "skycraft:chests/smithing_materials",
+     "weight": 3
+    },
+    {
+     "type": "minecraft:item",
+     "name": "minecraft:raw_iron",
+     "weight": 2,
+     "functions": [
+      {
+       "function": "minecraft:set_count",
+       "count": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 6
+       }
+      }
+     ]
+    },
+    {
+     "type": "minecraft:item",
+     "name": "minecraft:raw_gold",
+     "weight": 1,
+     "functions": [
+      {
+       "function": "minecraft:set_count",
+       "count": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 4
+       }
+      }
+     ]
+    },
+    {
+     "type": "minecraft:item",
+     "name": "minecraft:coal",
+     "weight": 2,
+     "functions": [
+      {
+       "function": "minecraft:set_count",
+       "count": {
+        "type": "minecraft:uniform",
+        "min": 4,
+        "max": 10
+       }
+      }
+     ]
+    },
+    {
+     "type": "minecraft:loot_table",
+     "name": "skycraft:chests/soul_gems",
+     "weight": 1
+    }
+   ]
+  }
+ ],
+ "random_sequence": "skycraft:chests/cavern/mine"
+}

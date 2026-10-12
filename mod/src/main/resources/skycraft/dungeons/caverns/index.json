@@ -1,0 +1,14 @@
+{
+ "_comment": "Cavern library: shapes + profile files; see tools/worldgen/caverns.py",
+ "shapes": "shapes.json",
+ "profiles": [
+  "profiles/generic.json",
+  "profiles/skyrim.json",
+  "profiles/morrowind.json",
+  "profiles/cyrodiil.json",
+  "profiles/elsweyr.json",
+  "profiles/valenwood_summerset.json",
+  "profiles/highrock_hammerfell.json",
+  "profiles/blackmarsh_foreign.json"
+ ]
+}

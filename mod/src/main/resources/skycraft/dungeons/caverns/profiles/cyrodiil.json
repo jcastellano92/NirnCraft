@@ -1,0 +1,942 @@
+[
+ {
+  "id": "cyrodiil_ayleid_welkynd",
+  "name": "Welkynd Cavern",
+  "lore": "The Ayleids cut their cities into the white bedrock and lit them with caught starlight. The stones are still burning.",
+  "weight": 1.6,
+  "match": {
+   "provinces": [
+    "cyrodiil"
+   ],
+   "kits": [
+    "ayleid",
+    "none"
+   ],
+   "themes": [
+    "ruin",
+    "cave",
+    "barrow",
+    "fort"
+   ]
+  },
+  "shapes": {
+   "cathedral": 3,
+   "collapsed_city": 2,
+   "amphitheatre": 2,
+   "karst": 1,
+   "bowl_bridges": 1,
+   "floating_islands": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:quartz_block@10",
+    "minecraft:smooth_quartz@8",
+    "minecraft:calcite@10",
+    "rock@50"
+   ],
+   "wall": [
+    "minecraft:calcite@30",
+    "minecraft:quartz_block@16",
+    "minecraft:smooth_quartz@8",
+    "minecraft:amethyst_block@6",
+    "rock@40"
+   ],
+   "spike": [
+    "minecraft:calcite@2",
+    "minecraft:quartz_block@1"
+   ],
+   "platform": [
+    "minecraft:polished_diorite@2",
+    "minecraft:quartz_bricks@2",
+    "minecraft:chiseled_quartz_block@1"
+   ],
+   "pillar": [
+    "minecraft:quartz_pillar@3",
+    "minecraft:calcite@1"
+   ],
+   "ruin": [
+    "minecraft:quartz_bricks@2",
+    "minecraft:calcite@2",
+    "minecraft:smooth_quartz@1"
+   ]
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.6
+  },
+  "flora": [
+   {
+    "type": "spire",
+    "block": [
+     "minecraft:calcite",
+     "minecraft:quartz_block"
+    ],
+    "density": 10,
+    "len": [
+     4,
+     8
+    ],
+    "cap": [
+     "minecraft:sea_lantern"
+    ],
+    "tip": [
+     "minecraft:light_blue_stained_glass"
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:amethyst_cluster[facing=up]"
+    ],
+    "density": 30
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:moss_carpet"
+    ],
+    "density": 20
+   }
+  ],
+  "features": [
+   {
+    "type": "statue",
+    "block": [
+     "minecraft:quartz_bricks",
+     "minecraft:smooth_quartz"
+    ],
+    "count": [
+     2,
+     3
+    ],
+    "accent": [
+     "minecraft:sea_lantern"
+    ]
+   },
+   {
+    "type": "ruin",
+    "block": [
+     "minecraft:quartz_bricks",
+     "minecraft:calcite"
+    ],
+    "count": [
+     3,
+     6
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:sea_lantern",
+    "minecraft:pearlescent_froglight"
+   ],
+   "density": 44,
+   "cluster": 2
+  },
+  "setpiece": {
+   "type": "obelisk",
+   "block": [
+    "minecraft:quartz_pillar"
+   ],
+   "accent": [
+    "minecraft:sea_lantern"
+   ]
+  },
+  "foes": [
+   "minecraft:stray",
+   "minecraft:skeleton"
+  ],
+  "elite": "Ayleid Lich-Guard",
+  "loot": {
+   "relic": "skycraft:chests/relic_ruin",
+   "platform": "skycraft:chests/cavern/arcane",
+   "minor": "skycraft:chests/cavern/arcane"
+  },
+  "lightColor": "cyan"
+ },
+ {
+  "id": "cyrodiil_great_forest_roots",
+  "name": "Great Forest Root Cave",
+  "lore": "The oaks of the forest go down as far as they go up, and this is where their roots finally find water.",
+  "weight": 1.6,
+  "match": {
+   "regions": [
+    "cyrodiil/great_forest",
+    "cyrodiil/west_weald",
+    "cyrodiil/heartlands",
+    "cyrodiil/gold_coast"
+   ]
+  },
+  "shapes": {
+   "root_cavern": 4,
+   "karst": 2,
+   "bowl_bridges": 1,
+   "cathedral": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:rooted_dirt@18",
+    "minecraft:moss_block@14",
+    "minecraft:podzol@8",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:rooted_dirt@22",
+    "minecraft:moss_block@16",
+    "minecraft:mangrove_roots@8",
+    "minecraft:oak_log@4",
+    "rock@40"
+   ],
+   "spike": [
+    "minecraft:mangrove_roots@1",
+    "minecraft:dripstone_block@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:mossy_stone_bricks@3",
+    "minecraft:stone_bricks@2"
+   ],
+   "pillar": [
+    "minecraft:oak_log@4",
+    "minecraft:mangrove_roots@1"
+   ],
+   "patch": [
+    "minecraft:moss_block"
+   ],
+   "patchAt": 0.25
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.7
+  },
+  "flora": [
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:hanging_roots"
+    ],
+    "density": 50,
+    "len": [
+     3,
+     9
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:fern",
+     "minecraft:large_fern",
+     "minecraft:azalea",
+     "minecraft:flowering_azalea"
+    ],
+    "density": 80
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:moss_carpet"
+    ],
+    "density": 50
+   },
+   {
+    "type": "ceil",
+    "block": [
+     "minecraft:glow_lichen[down=true]"
+    ],
+    "density": 40
+   },
+   {
+    "type": "tree",
+    "block": [
+     "minecraft:oak_log"
+    ],
+    "cap": [
+     "minecraft:azalea_leaves[persistent=true]"
+    ],
+    "density": 6,
+    "len": [
+     9,
+     14
+    ],
+    "radius": 3,
+    "tip": [
+     "minecraft:shroomlight"
+    ]
+   }
+  ],
+  "features": [
+   {
+    "type": "vein",
+    "block": [
+     "minecraft:mangrove_roots"
+    ],
+    "scale": 5.0,
+    "amount": 0.03
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:shroomlight",
+    "minecraft:verdant_froglight"
+   ],
+   "density": 52,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "tree",
+   "block": [
+    "minecraft:oak_log"
+   ],
+   "accent": [
+    "minecraft:flowering_azalea_leaves[persistent=true]"
+   ]
+  },
+  "foes": [
+   "skycraft:spriggan",
+   "skycraft:wispmother"
+  ],
+  "loot": {
+   "relic": "skycraft:chests/relic_cave",
+   "platform": "skycraft:chests/cavern/root",
+   "minor": "skycraft:chests/cavern/root"
+  },
+  "ambient": [
+   {
+    "entity": "minecraft:bat",
+    "count": [
+     1,
+     3
+    ],
+    "where": "air"
+   }
+  ],
+  "lightColor": "green"
+ },
+ {
+  "id": "cyrodiil_jerall_ice_cave",
+  "name": "Jerall Ice Cave",
+  "lore": "The Jerall peaks keep their snow all year; here, the snow compacted and went blue and never came back out.",
+  "weight": 1.6,
+  "match": {
+   "regions": [
+    "cyrodiil/jerall_mountains",
+    "cyrodiil/colovian_highlands"
+   ]
+  },
+  "shapes": {
+   "crevasse": 3,
+   "canyon": 2,
+   "amphitheatre": 2,
+   "bowl_bridges": 1,
+   "cathedral": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:packed_ice@18",
+    "minecraft:snow_block@14",
+    "minecraft:blue_ice@6",
+    "rock@62"
+   ],
+   "wall": [
+    "minecraft:packed_ice@36",
+    "minecraft:blue_ice@28",
+    "minecraft:snow_block@14",
+    "minecraft:stone@18",
+    "minecraft:sea_lantern@4"
+   ],
+   "spike": [
+    "minecraft:packed_ice@2",
+    "minecraft:blue_ice@1"
+   ],
+   "platform": [
+    "minecraft:polished_diorite@3",
+    "minecraft:blue_ice@1"
+   ]
+  },
+  "fluid": {
+   "kind": "ice"
+  },
+  "flora": [
+   {
+    "type": "spire",
+    "block": [
+     "minecraft:blue_ice"
+    ],
+    "density": 14,
+    "len": [
+     4,
+     8
+    ],
+    "cap": [
+     "minecraft:sea_lantern"
+    ],
+    "tip": [
+     "minecraft:packed_ice"
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:snow"
+    ],
+    "density": 100
+   }
+  ],
+  "features": [
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.05
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:sea_lantern",
+    "minecraft:blue_ice"
+   ],
+   "density": 50,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [
+   "skycraft:ice_wraith",
+   "skycraft:wolf"
+  ],
+  "loot": {
+   "relic": "skycraft:chests/relic_cave",
+   "platform": "skycraft:chests/cavern/frost",
+   "minor": "skycraft:chests/cavern/frost"
+  },
+  "lightColor": "blue"
+ },
+ {
+  "id": "cyrodiil_nibenay_river_cave",
+  "name": "Nibenay River Cave",
+  "lore": "A river that went underground a long time ago and kept going. The banks are clay, and the fish are pale.",
+  "weight": 1.7,
+  "match": {
+   "regions": [
+    "cyrodiil/nibenay_basin",
+    "cyrodiil/nibenay_valley",
+    "cyrodiil/heartlands"
+   ]
+  },
+  "shapes": {
+   "canyon": 3,
+   "sea_cave": 2,
+   "bowl_bridges": 2,
+   "karst": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:clay@14",
+    "minecraft:gravel@14",
+    "minecraft:sand@8",
+    "rock@50"
+   ],
+   "wall": [
+    "minecraft:clay@16",
+    "minecraft:andesite@24",
+    "minecraft:gravel@12",
+    "minecraft:dripstone_block@14",
+    "minecraft:moss_block@8",
+    "rock@26"
+   ],
+   "spike": [
+    "minecraft:dripstone_block@1",
+    "minecraft:andesite@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:stone_bricks@3",
+    "minecraft:mossy_stone_bricks@1"
+   ]
+  },
+  "fluid": "water",
+  "flora": [
+   {
+    "type": "bed",
+    "block": [
+     "minecraft:seagrass",
+     "minecraft:kelp"
+    ],
+    "density": 80
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:fern",
+     "minecraft:grass"
+    ],
+    "density": 40
+   },
+   {
+    "type": "float",
+    "block": [
+     "minecraft:lily_pad"
+    ],
+    "density": 20
+   }
+  ],
+  "features": [
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.04
+   },
+   {
+    "type": "bubbles",
+    "amount": 0.03
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:ochre_froglight",
+    "minecraft:sea_lantern"
+   ],
+   "density": 54,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [
+   "skycraft:slaughterfish"
+  ],
+  "loot": {
+   "relic": "skycraft:chests/relic_cave",
+   "platform": "skycraft:chests/cavern/sea",
+   "minor": "skycraft:chests/cavern/sea"
+  },
+  "ambient": [
+   {
+    "entity": "minecraft:cod",
+    "count": [
+     4,
+     8
+    ],
+    "where": "water"
+   },
+   {
+    "entity": "minecraft:salmon",
+    "count": [
+     3,
+     5
+    ],
+    "where": "water"
+   }
+  ],
+  "lightColor": "warm"
+ },
+ {
+  "id": "cyrodiil_blackwood_sinkhole",
+  "name": "Blackwood Sinkhole",
+  "lore": "The jungle floor collapsed in a night, taking trees and all. The trunks lie at angles and the vines have already moved in.",
+  "weight": 2.0,
+  "match": {
+   "regions": [
+    "cyrodiil/blackwood"
+   ]
+  },
+  "shapes": {
+   "karst": 3,
+   "shaft": 2,
+   "root_cavern": 2,
+   "bowl_bridges": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:moss_block@18",
+    "minecraft:mud@10",
+    "minecraft:rooted_dirt@8",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:moss_block@24",
+    "minecraft:mud@12",
+    "minecraft:jungle_log@8",
+    "minecraft:rooted_dirt@14",
+    "rock@36"
+   ],
+   "spike": [
+    "minecraft:dripstone_block@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:mossy_stone_bricks@3",
+    "minecraft:stone_bricks@1"
+   ],
+   "pillar": [
+    "minecraft:jungle_log@4",
+    "minecraft:mangrove_roots@1"
+   ],
+   "patch": [
+    "minecraft:moss_block"
+   ],
+   "patchAt": 0.2
+  },
+  "fluid": "water",
+  "flora": [
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:vine"
+    ],
+    "density": 60,
+    "len": [
+     3,
+     9
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:fern",
+     "minecraft:large_fern",
+     "minecraft:azalea"
+    ],
+    "density": 80
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:moss_carpet"
+    ],
+    "density": 40
+   },
+   {
+    "type": "float",
+    "block": [
+     "minecraft:lily_pad"
+    ],
+    "density": 40
+   },
+   {
+    "type": "tree",
+    "block": [
+     "minecraft:jungle_log"
+    ],
+    "cap": [
+     "minecraft:jungle_leaves[persistent=true]"
+    ],
+    "density": 6,
+    "len": [
+     9,
+     14
+    ],
+    "radius": 3
+   }
+  ],
+  "features": [
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.04
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:verdant_froglight",
+    "minecraft:shroomlight"
+   ],
+   "density": 48,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [],
+  "loot": {
+   "relic": "skycraft:chests/relic_cave",
+   "platform": "skycraft:chests/cavern/root",
+   "minor": "skycraft:chests/cavern/root"
+  },
+  "ambient": [
+   {
+    "entity": "minecraft:bat",
+    "count": [
+     2,
+     4
+    ],
+    "where": "air"
+   },
+   {
+    "entity": "minecraft:frog",
+    "count": [
+     2,
+     3
+    ],
+    "where": "floor"
+   }
+  ],
+  "lightColor": "green"
+ },
+ {
+  "id": "cyrodiil_colovian_mine",
+  "name": "Colovian Iron Works",
+  "lore": "Iron and a little silver, the empire's grudging wealth. The timber is sound still; the miners aren't.",
+  "weight": 1.8,
+  "match": {
+   "regions": [
+    "cyrodiil/colovian_highlands",
+    "cyrodiil/gold_coast",
+    "cyrodiil/west_weald",
+    "cyrodiil/jerall_mountains"
+   ],
+   "themes": [
+    "mine",
+    "cave"
+   ]
+  },
+  "shapes": {
+   "shaft": 3,
+   "canyon": 3,
+   "bowl_bridges": 1,
+   "floating_islands": 1,
+   "pillar_maze": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:andesite@14",
+    "minecraft:cobblestone@10",
+    "minecraft:gravel@10",
+    "rock@62"
+   ],
+   "wall": [
+    "minecraft:andesite@24",
+    "minecraft:iron_ore@8",
+    "minecraft:gold_ore@4",
+    "minecraft:coal_ore@6",
+    "minecraft:cobblestone@12",
+    "rock@40"
+   ],
+   "spike": [
+    "minecraft:andesite@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:spruce_planks@2",
+    "minecraft:stone_bricks@2"
+   ],
+   "pillar": [
+    "minecraft:spruce_log@3",
+    "minecraft:andesite@1"
+   ]
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.5
+  },
+  "flora": [
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:iron_ore",
+     "minecraft:coal_ore"
+    ],
+    "density": 14
+   },
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:chain"
+    ],
+    "density": 8,
+    "len": [
+     3,
+     5
+    ],
+    "tip": [
+     "minecraft:lantern[hanging=true]"
+    ]
+   }
+  ],
+  "features": [
+   {
+    "type": "vein",
+    "block": [
+     "minecraft:iron_ore",
+     "minecraft:gold_ore",
+     "minecraft:coal_ore"
+    ],
+    "scale": 5.0,
+    "amount": 0.045
+   },
+   {
+    "type": "ruin",
+    "block": [
+     "minecraft:spruce_planks"
+    ],
+    "count": [
+     3,
+     6
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:glowstone"
+   ],
+   "density": 64,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [
+   "skycraft:bandit"
+  ],
+  "loot": {
+   "relic": "skycraft:chests/relic_mine",
+   "platform": "skycraft:chests/cavern/mine",
+   "minor": "skycraft:chests/cavern/mine"
+  },
+  "lightColor": "warm"
+ },
+ {
+  "id": "cyrodiil_imperial_catacomb",
+  "name": "Imperial Catacomb Hall",
+  "lore": "The Empire builds even its graves to a standard: plain arches, tidy niches, and the faint smell of lamp oil.",
+  "weight": 1.4,
+  "match": {
+   "provinces": [
+    "cyrodiil"
+   ],
+   "themes": [
+    "barrow",
+    "ruin",
+    "fort"
+   ],
+   "kits": [
+    "imperial",
+    "none"
+   ]
+  },
+  "shapes": {
+   "cathedral": 3,
+   "amphitheatre": 2,
+   "collapsed_city": 2,
+   "pillar_maze": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:stone_bricks@20",
+    "minecraft:polished_andesite@8",
+    "minecraft:gravel@6",
+    "rock@50"
+   ],
+   "wall": [
+    "minecraft:stone_bricks@28",
+    "minecraft:polished_andesite@10",
+    "minecraft:andesite@16",
+    "rock@40"
+   ],
+   "spike": [
+    "minecraft:andesite@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:polished_andesite@3",
+    "minecraft:chiseled_stone_bricks@1"
+   ],
+   "pillar": [
+    "minecraft:polished_andesite@3",
+    "minecraft:stone_bricks@2"
+   ],
+   "ruin": [
+    "minecraft:stone_bricks@2",
+    "minecraft:cracked_stone_bricks@1"
+   ]
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.35
+  },
+  "flora": [
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:candle[lit=true]"
+    ],
+    "density": 16
+   },
+   {
+    "type": "ceil",
+    "block": [
+     "minecraft:cobweb"
+    ],
+    "density": 14
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:moss_carpet"
+    ],
+    "density": 20
+   }
+  ],
+  "features": [
+   {
+    "type": "statue",
+    "block": [
+     "minecraft:polished_andesite",
+     "minecraft:stone_bricks"
+    ],
+    "count": [
+     2,
+     3
+    ],
+    "accent": [
+     "minecraft:lantern"
+    ]
+   },
+   {
+    "type": "ruin",
+    "block": [
+     "minecraft:stone_bricks",
+     "minecraft:cracked_stone_bricks"
+    ],
+    "count": [
+     3,
+     6
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:ochre_froglight"
+   ],
+   "density": 60,
+   "cluster": 0,
+   "post": [
+    "minecraft:lantern"
+   ]
+  },
+  "setpiece": {
+   "type": "gate",
+   "block": [
+    "minecraft:polished_andesite"
+   ],
+   "accent": [
+    "minecraft:lantern"
+   ]
+  },
+  "foes": [
+   "skycraft:draugr"
+  ],
+  "loot": {
+   "relic": "skycraft:chests/relic_barrow",
+   "platform": "skycraft:chests/cavern/ancient",
+   "minor": "skycraft:chests/cavern/ancient"
+  },
+  "lightColor": "warm"
+ }
+]

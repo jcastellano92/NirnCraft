@@ -1,0 +1,1165 @@
+[
+ {
+  "id": "blackmarsh_hist_root_cave",
+  "name": "Hist Root Cave",
+  "lore": "The Hist send roots down through the marsh into the dark, and the roots weep a sap that glows. The Argonians come to be near it.",
+  "weight": 2.0,
+  "match": {
+   "provinces": [
+    "black_marsh"
+   ]
+  },
+  "shapes": {
+   "root_cavern": 4,
+   "cathedral": 2,
+   "karst": 1,
+   "pillar_maze": 1,
+   "bowl_bridges": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:mud@16",
+    "minecraft:muddy_mangrove_roots@6",
+    "minecraft:moss_block@10",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:mangrove_log@10",
+    "minecraft:mud@16",
+    "minecraft:mangrove_roots@12",
+    "minecraft:moss_block@12",
+    "minecraft:honeycomb_block@2",
+    "rock@30"
+   ],
+   "spike": [
+    "minecraft:mangrove_roots@2",
+    "minecraft:mud@1"
+   ],
+   "platform": [
+    "minecraft:mud_bricks@3",
+    "minecraft:mossy_stone_bricks@1"
+   ],
+   "pillar": [
+    "minecraft:mangrove_log@4",
+    "minecraft:mangrove_roots@2"
+   ],
+   "patch": [
+    "minecraft:moss_block"
+   ],
+   "patchAt": 0.3
+  },
+  "fluid": "water",
+  "flora": [
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:hanging_roots"
+    ],
+    "density": 50,
+    "len": [
+     3,
+     9
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:fern",
+     "minecraft:brown_mushroom"
+    ],
+    "density": 60
+   },
+   {
+    "type": "float",
+    "block": [
+     "minecraft:lily_pad"
+    ],
+    "density": 40
+   },
+   {
+    "type": "bed",
+    "block": [
+     "minecraft:seagrass"
+    ],
+    "density": 50
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:moss_carpet"
+    ],
+    "density": 40
+   }
+  ],
+  "features": [
+   {
+    "type": "vein",
+    "block": [
+     "minecraft:shroomlight",
+     "minecraft:honeycomb_block"
+    ],
+    "scale": 5.0,
+    "amount": 0.04
+   },
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.04
+   },
+   {
+    "type": "ribs",
+    "block": [
+     "minecraft:mangrove_log",
+     "minecraft:mangrove_roots"
+    ],
+    "count": [
+     6,
+     6
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:shroomlight",
+    "minecraft:ochre_froglight"
+   ],
+   "density": 40,
+   "cluster": 3
+  },
+  "setpiece": {
+   "type": "tree",
+   "block": [
+    "minecraft:mangrove_log"
+   ],
+   "accent": [
+    "minecraft:mangrove_leaves[persistent=true]"
+   ]
+  },
+  "foes": [
+   "skycraft:wisp",
+   "skycraft:spriggan"
+  ],
+  "loot": {
+   "relic": "skycraft:chests/relic_cave",
+   "platform": "skycraft:chests/cavern/sap",
+   "minor": "skycraft:chests/cavern/sap"
+  },
+  "ambient": [
+   {
+    "entity": "minecraft:glow_squid",
+    "count": [
+     3,
+     5
+    ],
+    "where": "water"
+   },
+   {
+    "entity": "minecraft:frog",
+    "count": [
+     2,
+     4
+    ],
+    "where": "floor"
+   }
+  ],
+  "particle": "spore",
+  "lightColor": "amber"
+ },
+ {
+  "id": "blackmarsh_bog_cavern",
+  "name": "Bog Cavern",
+  "lore": "A drowned room: black water to the knee, the stumps of pillars, and a stillness that has learned to wait.",
+  "weight": 1.7,
+  "match": {
+   "provinces": [
+    "black_marsh"
+   ],
+   "weather": [
+    "swamp",
+    "jungle"
+   ]
+  },
+  "shapes": {
+   "pillar_maze": 4,
+   "root_cavern": 2,
+   "karst": 1,
+   "collapsed_city": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:mud@24",
+    "minecraft:clay@8",
+    "minecraft:muddy_mangrove_roots@4",
+    "rock@30"
+   ],
+   "wall": [
+    "minecraft:mud@26",
+    "minecraft:mangrove_roots@12",
+    "minecraft:moss_block@16",
+    "minecraft:clay@8",
+    "rock@30"
+   ],
+   "spike": [
+    "minecraft:mud@1",
+    "minecraft:mangrove_roots@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:mud_bricks@3",
+    "minecraft:stone_bricks@1"
+   ],
+   "pillar": [
+    "minecraft:mangrove_log@3",
+    "minecraft:mud_bricks@1"
+   ],
+   "ruin": [
+    "minecraft:mud_bricks@3",
+    "minecraft:mossy_stone_bricks@1"
+   ]
+  },
+  "fluid": "water",
+  "flora": [
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:hanging_roots"
+    ],
+    "density": 30,
+    "len": [
+     2,
+     7
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:brown_mushroom",
+     "minecraft:fern"
+    ],
+    "density": 40
+   },
+   {
+    "type": "float",
+    "block": [
+     "minecraft:lily_pad"
+    ],
+    "density": 60
+   },
+   {
+    "type": "bed",
+    "block": [
+     "minecraft:seagrass"
+    ],
+    "density": 60
+   }
+  ],
+  "features": [
+   {
+    "type": "ruin",
+    "block": [
+     "minecraft:mud_bricks"
+    ],
+    "count": [
+     3,
+     6
+    ]
+   },
+   {
+    "type": "bubbles",
+    "amount": 0.04
+   },
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.03
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:verdant_froglight",
+    "minecraft:shroomlight"
+   ],
+   "density": 56,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [
+   "skycraft:mudcrab",
+   "skycraft:slaughterfish",
+   "skycraft:wisp"
+  ],
+  "loot": {
+   "relic": "skycraft:chests/relic_cave",
+   "platform": "skycraft:chests/cavern/root",
+   "minor": "skycraft:chests/cavern/root"
+  },
+  "ambient": [
+   {
+    "entity": "minecraft:frog",
+    "count": [
+     2,
+     4
+    ],
+    "where": "floor"
+   }
+  ],
+  "particle": "mist",
+  "lightColor": "green"
+ },
+ {
+  "id": "blackmarsh_sap_vault",
+  "name": "Sap Vault",
+  "lore": "The Hist's amber blood pools in the old temple basements, thick as honey and just as slow. It remembers what it was fed.",
+  "weight": 1.6,
+  "match": {
+   "provinces": [
+    "black_marsh"
+   ],
+   "themes": [
+    "ruin",
+    "barrow",
+    "fort",
+    "cave"
+   ],
+   "kits": [
+    "xanmeer",
+    "none"
+   ]
+  },
+  "shapes": {
+   "amphitheatre": 3,
+   "cathedral": 2,
+   "collapsed_city": 2,
+   "bowl_bridges": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:mud_bricks@14",
+    "minecraft:mossy_stone_bricks@8",
+    "minecraft:mud@10",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:mud_bricks@20",
+    "minecraft:mossy_stone_bricks@12",
+    "minecraft:orange_terracotta@8",
+    "minecraft:honeycomb_block@6",
+    "rock@38"
+   ],
+   "spike": [
+    "minecraft:mud_bricks@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:mud_bricks@3",
+    "minecraft:chiseled_stone_bricks@1"
+   ],
+   "pillar": [
+    "minecraft:mud_bricks@3",
+    "minecraft:orange_terracotta@1"
+   ],
+   "ruin": [
+    "minecraft:mud_bricks@3",
+    "minecraft:orange_terracotta@1"
+   ]
+  },
+  "fluid": {
+   "kind": "pool",
+   "block": [
+    "minecraft:honey_block"
+   ],
+   "chance": 1.0
+  },
+  "flora": [
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:orange_terracotta"
+    ],
+    "density": 10
+   },
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:hanging_roots"
+    ],
+    "density": 20,
+    "len": [
+     2,
+     6
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:moss_carpet"
+    ],
+    "density": 30
+   }
+  ],
+  "features": [
+   {
+    "type": "vein",
+    "block": [
+     "minecraft:honeycomb_block",
+     "minecraft:orange_terracotta"
+    ],
+    "scale": 5.0,
+    "amount": 0.045
+   },
+   {
+    "type": "statue",
+    "block": [
+     "minecraft:mud_bricks"
+    ],
+    "count": [
+     1,
+     2
+    ],
+    "accent": [
+     "minecraft:shroomlight"
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:shroomlight",
+    "minecraft:ochre_froglight"
+   ],
+   "density": 44,
+   "cluster": 2
+  },
+  "setpiece": {
+   "type": "altar",
+   "block": [
+    "minecraft:mud_bricks"
+   ],
+   "accent": [
+    "minecraft:shroomlight"
+   ]
+  },
+  "foes": [
+   "skycraft:wisp"
+  ],
+  "loot": {
+   "relic": "skycraft:chests/relic_ruin",
+   "platform": "skycraft:chests/cavern/sap",
+   "minor": "skycraft:chests/cavern/sap"
+  },
+  "lightColor": "amber"
+ },
+ {
+  "id": "atmora_glacier_hall",
+  "name": "Glacier Hall",
+  "lore": "Atmora's ice is older than any language. The Ancient Nords carved halls here and left them to the cold, and the cold kept them.",
+  "weight": 2.0,
+  "match": {
+   "provinces": [
+    "atmora",
+    "akavir"
+   ],
+   "weather": [
+    "frozen"
+   ]
+  },
+  "shapes": {
+   "crevasse": 3,
+   "amphitheatre": 2,
+   "cathedral": 2,
+   "canyon": 2,
+   "bowl_bridges": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:packed_ice@20",
+    "minecraft:blue_ice@10",
+    "minecraft:snow_block@12",
+    "rock@58"
+   ],
+   "wall": [
+    "minecraft:packed_ice@36",
+    "minecraft:blue_ice@34",
+    "minecraft:snow_block@10",
+    "minecraft:sea_lantern@4",
+    "rock@16"
+   ],
+   "spike": [
+    "minecraft:blue_ice@2",
+    "minecraft:packed_ice@1"
+   ],
+   "platform": [
+    "minecraft:polished_diorite@2",
+    "minecraft:blue_ice@2",
+    "minecraft:stone_bricks@1"
+   ],
+   "pillar": [
+    "minecraft:blue_ice@3",
+    "minecraft:packed_ice@2"
+   ]
+  },
+  "fluid": {
+   "kind": "ice"
+  },
+  "flora": [
+   {
+    "type": "spire",
+    "block": [
+     "minecraft:blue_ice"
+    ],
+    "density": 14,
+    "len": [
+     5,
+     10
+    ],
+    "cap": [
+     "minecraft:sea_lantern"
+    ],
+    "tip": [
+     "minecraft:packed_ice"
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:snow"
+    ],
+    "density": 110
+   }
+  ],
+  "features": [
+   {
+    "type": "statue",
+    "block": [
+     "minecraft:blue_ice",
+     "minecraft:packed_ice"
+    ],
+    "count": [
+     2,
+     3
+    ],
+    "accent": [
+     "minecraft:sea_lantern"
+    ]
+   },
+   {
+    "type": "pool",
+    "fluid": "powder_snow",
+    "count": [
+     1,
+     2
+    ],
+    "size": [
+     2,
+     3
+    ]
+   },
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.05
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:sea_lantern",
+    "minecraft:blue_ice"
+   ],
+   "density": 46,
+   "cluster": 2
+  },
+  "setpiece": {
+   "type": "statue",
+   "block": [
+    "minecraft:blue_ice"
+   ],
+   "accent": [
+    "minecraft:sea_lantern"
+   ]
+  },
+  "foes": [
+   "skycraft:ice_wraith",
+   "skycraft:frost_atronach",
+   "skycraft:frost_giant"
+  ],
+  "elite": "Frost Warden",
+  "loot": {
+   "relic": "skycraft:chests/relic_barrow",
+   "platform": "skycraft:chests/cavern/frost",
+   "minor": "skycraft:chests/cavern/frost"
+  },
+  "lightColor": "blue"
+ },
+ {
+  "id": "akavir_serpent_hall",
+  "name": "Serpent Hall",
+  "lore": "Lacquer-red pillars and scale-patterned floors: the snake-folk of Akavir built their halls to be coiled through.",
+  "weight": 2.0,
+  "match": {
+   "regions": [
+    "akavir/tsaesci",
+    "akavir/tang_mo",
+    "akavir/ka_po_tun"
+   ],
+   "themes": [
+    "ruin",
+    "barrow",
+    "fort",
+    "cave"
+   ]
+  },
+  "shapes": {
+   "cathedral": 3,
+   "collapsed_city": 2,
+   "amphitheatre": 2,
+   "pillar_maze": 1,
+   "bone_cavern": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:red_nether_bricks@10",
+    "minecraft:polished_blackstone_bricks@8",
+    "minecraft:stone_bricks@6",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:red_nether_bricks@16",
+    "minecraft:polished_blackstone@14",
+    "minecraft:blackstone@16",
+    "rock@40"
+   ],
+   "spike": [
+    "minecraft:blackstone@2",
+    "minecraft:red_nether_bricks@1"
+   ],
+   "platform": [
+    "minecraft:red_nether_bricks@2",
+    "minecraft:gilded_blackstone@1",
+    "minecraft:polished_blackstone_bricks@2"
+   ],
+   "pillar": [
+    "minecraft:red_nether_bricks@3",
+    "minecraft:crimson_stem@2"
+   ],
+   "ruin": [
+    "minecraft:red_nether_bricks@2",
+    "minecraft:cracked_nether_bricks@1"
+   ]
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.3
+  },
+  "flora": [
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:candle[lit=true]"
+    ],
+    "density": 14
+   },
+   {
+    "type": "ceil",
+    "block": [
+     "minecraft:hanging_roots"
+    ],
+    "density": 16
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:bone_block"
+    ],
+    "density": 8
+   }
+  ],
+  "features": [
+   {
+    "type": "statue",
+    "block": [
+     "minecraft:red_nether_bricks",
+     "minecraft:polished_blackstone_bricks"
+    ],
+    "count": [
+     2,
+     3
+    ],
+    "accent": [
+     "minecraft:lantern"
+    ]
+   },
+   {
+    "type": "ribs",
+    "block": [
+     "minecraft:crimson_stem",
+     "minecraft:red_nether_bricks"
+    ],
+    "count": [
+     6,
+     6
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:shroomlight",
+    "minecraft:glowstone"
+   ],
+   "density": 54,
+   "cluster": 0,
+   "post": [
+    "minecraft:lantern"
+   ]
+  },
+  "setpiece": {
+   "type": "statue",
+   "block": [
+    "minecraft:red_nether_bricks"
+   ],
+   "accent": [
+    "minecraft:lantern"
+   ]
+  },
+  "foes": [
+   "skycraft:tsaesci",
+   "skycraft:draugr"
+  ],
+  "elite": "Serpent Guard",
+  "loot": {
+   "relic": "skycraft:chests/relic_ruin",
+   "platform": "skycraft:chests/cavern/ancient",
+   "minor": "skycraft:chests/cavern/ancient"
+  },
+  "lightColor": "red"
+ },
+ {
+  "id": "akavir_bamboo_grotto",
+  "name": "Bamboo Grotto",
+  "lore": "Bamboo grows in the dark under a skylight no one has ever found, and the sound of it is like quiet rain.",
+  "weight": 1.6,
+  "match": {
+   "regions": [
+    "akavir/tang_mo",
+    "akavir/ka_po_tun",
+    "akavir/tsaesci",
+    "valenwood/malabal_tor"
+   ]
+  },
+  "shapes": {
+   "karst": 3,
+   "root_cavern": 2,
+   "bowl_bridges": 2,
+   "shaft": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:moss_block@16",
+    "minecraft:podzol@10",
+    "minecraft:rooted_dirt@8",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:moss_block@20",
+    "minecraft:mud@10",
+    "minecraft:rooted_dirt@12",
+    "minecraft:bamboo_block@6",
+    "rock@42"
+   ],
+   "spike": [
+    "minecraft:dripstone_block@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:bamboo_planks@2",
+    "minecraft:stone_bricks@2"
+   ],
+   "pillar": [
+    "minecraft:bamboo_block@4",
+    "minecraft:dripstone_block@1"
+   ],
+   "patch": [
+    "minecraft:moss_block"
+   ],
+   "patchAt": 0.25
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.7
+  },
+  "flora": [
+   {
+    "type": "column",
+    "block": [
+     "minecraft:bamboo[age=1]"
+    ],
+    "density": 60,
+    "len": [
+     3,
+     6
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:fern",
+     "minecraft:grass"
+    ],
+    "density": 50
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:moss_carpet"
+    ],
+    "density": 40
+   },
+   {
+    "type": "float",
+    "block": [
+     "minecraft:lily_pad"
+    ],
+    "density": 30
+   }
+  ],
+  "features": [
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.04
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:verdant_froglight",
+    "minecraft:shroomlight"
+   ],
+   "density": 48,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [],
+  "loot": {
+   "relic": "skycraft:chests/relic_cave",
+   "platform": "skycraft:chests/cavern/root",
+   "minor": "skycraft:chests/cavern/root"
+  },
+  "ambient": [
+   {
+    "entity": "minecraft:bat",
+    "count": [
+     1,
+     3
+    ],
+    "where": "air"
+   },
+   {
+    "entity": "minecraft:frog",
+    "count": [
+     1,
+     3
+    ],
+    "where": "floor"
+   }
+  ],
+  "lightColor": "green"
+ },
+ {
+  "id": "yokuda_coral_cave",
+  "name": "Coral Cave",
+  "lore": "The Sunken Isles never quite stopped being sea. Coral crusts the ceiling, and the fish go about their business above your head.",
+  "weight": 2.0,
+  "match": {
+   "regions": [
+    "yokuda/sunken_isles",
+    "thras/coral_kingdom",
+    "pyandonea/maormer_isles",
+    "yokuda/yokudan_desert"
+   ]
+  },
+  "shapes": {
+   "sea_cave": 3,
+   "floating_islands": 2,
+   "pillar_maze": 2,
+   "bowl_bridges": 1,
+   "karst": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:sand@16",
+    "minecraft:gravel@8",
+    "minecraft:tube_coral_block@4",
+    "minecraft:brain_coral_block@3",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:tube_coral_block@10",
+    "minecraft:brain_coral_block@8",
+    "minecraft:bubble_coral_block@6",
+    "minecraft:horn_coral_block@6",
+    "minecraft:prismarine@8",
+    "rock@40"
+   ],
+   "spike": [
+    "minecraft:tube_coral_block@1",
+    "minecraft:brain_coral_block@1",
+    "minecraft:prismarine@1"
+   ],
+   "platform": [
+    "minecraft:prismarine_bricks@3",
+    "minecraft:dark_prismarine@1"
+   ],
+   "pillar": [
+    "minecraft:tube_coral_block@2",
+    "minecraft:brain_coral_block@2",
+    "minecraft:prismarine@2"
+   ],
+   "terrace": [
+    "minecraft:sand@3",
+    "minecraft:gravel@1"
+   ]
+  },
+  "fluid": "water",
+  "flora": [
+   {
+    "type": "bed",
+    "block": [
+     "minecraft:tube_coral",
+     "minecraft:brain_coral",
+     "minecraft:bubble_coral",
+     "minecraft:fire_coral",
+     "minecraft:horn_coral",
+     "minecraft:tube_coral_fan",
+     "minecraft:brain_coral_fan",
+     "minecraft:sea_pickle[pickles=4]",
+     "minecraft:seagrass",
+     "minecraft:kelp"
+    ],
+    "density": 120
+   }
+  ],
+  "features": [
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.08
+   },
+   {
+    "type": "bubbles",
+    "amount": 0.04
+   },
+   {
+    "type": "boulders",
+    "block": [
+     "minecraft:tube_coral_block",
+     "minecraft:brain_coral_block"
+    ],
+    "count": [
+     2,
+     4
+    ],
+    "size": [
+     1,
+     2
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:sea_lantern",
+    "minecraft:pearlescent_froglight"
+   ],
+   "density": 40,
+   "cluster": 2
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [
+   "minecraft:drowned",
+   "skycraft:slaughterfish"
+  ],
+  "loot": {
+   "relic": "skycraft:chests/relic_cave",
+   "platform": "skycraft:chests/cavern/sea",
+   "minor": "skycraft:chests/cavern/sea"
+  },
+  "ambient": [
+   {
+    "entity": "minecraft:tropical_fish",
+    "count": [
+     6,
+     10
+    ],
+    "where": "water"
+   },
+   {
+    "entity": "minecraft:glow_squid",
+    "count": [
+     3,
+     5
+    ],
+    "where": "water"
+   },
+   {
+    "entity": "minecraft:dolphin",
+    "count": [
+     1,
+     2
+    ],
+    "where": "water"
+   }
+  ],
+  "lightColor": "cyan"
+ },
+ {
+  "id": "yokuda_sunken_vault",
+  "name": "Sunken Vault",
+  "lore": "The Yokudans left in ships and the sea took the rest. Their sand-coloured vaults lie under it, level on level, and still full.",
+  "weight": 1.9,
+  "match": {
+   "regions": [
+    "yokuda/yokudan_desert",
+    "yokuda/sunken_isles",
+    "pyandonea/maormer_isles"
+   ],
+   "themes": [
+    "ruin",
+    "barrow",
+    "fort",
+    "cave"
+   ]
+  },
+  "shapes": {
+   "collapsed_city": 3,
+   "cathedral": 2,
+   "amphitheatre": 2,
+   "pillar_maze": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:cut_sandstone@12",
+    "minecraft:sand@12",
+    "minecraft:sandstone@8",
+    "rock@38"
+   ],
+   "wall": [
+    "minecraft:sandstone@22",
+    "minecraft:cut_sandstone@16",
+    "minecraft:prismarine@8",
+    "minecraft:smooth_sandstone@10",
+    "rock@30"
+   ],
+   "spike": [
+    "minecraft:sandstone@2",
+    "minecraft:prismarine@1"
+   ],
+   "platform": [
+    "minecraft:cut_sandstone@3",
+    "minecraft:chiseled_sandstone@1",
+    "minecraft:gold_block@1"
+   ],
+   "pillar": [
+    "minecraft:cut_sandstone@3",
+    "minecraft:prismarine@1"
+   ],
+   "ruin": [
+    "minecraft:cut_sandstone@3",
+    "minecraft:sandstone@2",
+    "minecraft:prismarine@1"
+   ]
+  },
+  "fluid": "water",
+  "flora": [
+   {
+    "type": "bed",
+    "block": [
+     "minecraft:seagrass",
+     "minecraft:tube_coral",
+     "minecraft:sea_pickle[pickles=3]"
+    ],
+    "density": 60
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:dead_bush"
+    ],
+    "density": 20
+   }
+  ],
+  "features": [
+   {
+    "type": "statue",
+    "block": [
+     "minecraft:cut_sandstone",
+     "minecraft:sandstone"
+    ],
+    "count": [
+     2,
+     3
+    ],
+    "accent": [
+     "minecraft:sea_lantern"
+    ]
+   },
+   {
+    "type": "ruin",
+    "block": [
+     "minecraft:cut_sandstone",
+     "minecraft:prismarine_bricks"
+    ],
+    "count": [
+     4,
+     7
+    ]
+   },
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.05
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:sea_lantern",
+    "minecraft:ochre_froglight"
+   ],
+   "density": 48,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "statue",
+   "block": [
+    "minecraft:cut_sandstone"
+   ],
+   "accent": [
+    "minecraft:sea_lantern"
+   ]
+  },
+  "foes": [
+   "minecraft:drowned",
+   "skycraft:draugr"
+  ],
+  "loot": {
+   "relic": "skycraft:chests/relic_ruin",
+   "platform": "skycraft:chests/cavern/sea",
+   "minor": "skycraft:chests/cavern/sea"
+  },
+  "lightColor": "cyan"
+ }
+]
