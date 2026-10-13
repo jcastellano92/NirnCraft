@@ -87,14 +87,6 @@ public final class ScatterRules {
         public double total;
     }
 
-    /** The leavings placed beside real, planned roads after paving ({@link Waysides}). */
-    public static final class Wayside {
-        public double density = 1.0;
-        public final List<Kind> kinds = new ArrayList<>();
-        public final List<Double> weights = new ArrayList<>();
-        public double total;
-    }
-
     public static final class Caps {
         public int chunk = 12, perKind = 2, attempts = 5, isolated = 1;
     }
@@ -102,7 +94,6 @@ public final class ScatterRules {
     public final Map<String, Kind> kinds = new LinkedHashMap<>();
     public final EnumMap<ScatterZone, List<Group>> zones = new EnumMap<>(ScatterZone.class);
     public final Caps caps = new Caps();
-    public final Wayside wayside = new Wayside();
     /** Blocks beyond a settlement's footprint over which its human traces fade to nothing, per size class. */
     public final EnumMap<PlaceType, Integer> reach = new EnumMap<>(PlaceType.class);
 
@@ -159,17 +150,7 @@ public final class ScatterRules {
                 r.reach.put(PlaceType.byId(e.getKey()), e.getValue().getAsInt());
             }
         }
-        if (rules.has("wayside")) {
-            JsonObject w = rules.getAsJsonObject("wayside");
-            if (w.has("density")) r.wayside.density = w.get("density").getAsDouble();
-            for (Map.Entry<String, JsonElement> ke : w.getAsJsonObject("kinds").entrySet()) {
-                Kind k = r.kinds.get(ke.getKey());
-                if (k == null) continue;
-                r.wayside.kinds.add(k);
-                r.wayside.weights.add(ke.getValue().getAsDouble() * k.rarity);
-                r.wayside.total += ke.getValue().getAsDouble() * k.rarity;
-            }
-        }
+        // the planned scenes (rules.json "scenes") are read by the scene plan's builder, not here
         if (rules.has("zones")) {
             for (Map.Entry<String, JsonElement> e : rules.getAsJsonObject("zones").entrySet()) {
                 ScatterZone z = ScatterZone.byId(e.getKey());
@@ -187,6 +168,11 @@ public final class ScatterRules {
                         Kind k = r.kinds.get(ke.getKey());
                         if (k == null) {
                             Skycraft.LOGGER.warn("Skycraft scatter: zone {} names unknown kind {}", e.getKey(), ke.getKey());
+                            continue;
+                        }
+                        if (k.human) {
+                            // pipeline P6: human props belong to planned scenes, never to a per-chunk roll
+                            Skycraft.LOGGER.warn("Skycraft scatter: zone {} names human kind {}; refused (scenes place it)", e.getKey(), k.id);
                             continue;
                         }
                         double w = ke.getValue().getAsDouble() * k.rarity;

@@ -62,6 +62,8 @@ final class Dressing {
     /** Adds the dressing of a new road (before it is indexed, like the other features). */
     static void layout(RoadsData data, Road road, boolean[] inZone, List<RoadFeature> created, LongOpenHashSet touched) {
         if (!RoadsConfig.ROADSIDE.get()) return;
+        // pipeline P6: in a plan-era world the baked scene plan places every roadside human prop (waysides)
+        if (data.planEra && com.skycraft.worldplan.scene.ScenePlan.active()) return;
         int n = road.size();
         float len = road.length();
         if (n < 12 || len < 70) return;

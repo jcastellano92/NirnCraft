@@ -1,39 +1,65 @@
 {
-  "_doc": "Per-zone draws. density = expected props per 16x16 chunk before scaling. scale: human = 0.35+1.3*humanity (humanity 1 at a settlement edge, 0 beyond its reach); wild = 1.3-0.9*humanity; remote = 0.7+0.9*remoteness (0 beside any settlement, 1 a long walk from every one); none = 1. kinds: weights. caps: props per chunk (clusters count their members), per kind per chunk, placement attempts. reach: blocks beyond a settlement's footprint over which its human traces fade out. isolated: single-prop kinds (fewer than three related props, no anchor) allowed per chunk. Every kind in kinds.json needs purpose + needs (the zones it may be drawn in, plus wayside) + clue; the loader refuses a kind without them and refuses it in any zone not in its needs.",
+  "_doc": "Per-zone draws of NATURAL micro-scatter only (pipeline P6): every kind tagged human is refused in a zone and is placed solely by the baked scene plan (section scenes, com.skycraft.worldplan.scene). density = expected props per 16x16 chunk before scaling. scale: human = 0.35+1.3*humanity (humanity 1 at a settlement edge, 0 beyond its reach); wild = 1.3-0.9*humanity; remote = 0.7+0.9*remoteness (0 beside any settlement, 1 a long walk from every one); none = 1. kinds: weights. caps: props per chunk (clusters count their members), per kind per chunk, placement attempts. reach: blocks beyond a settlement's footprint over which its human traces fade out (zone model). isolated: single-prop kinds (fewer than three related props, no anchor) allowed per chunk. Every kind in kinds.json needs purpose + needs + clue; the loader refuses a kind without them.",
   "caps": {"chunk": 5, "perKind": 1, "attempts": 5, "isolated": 1},
   "reach": {"capital": 260, "city": 220, "town": 160, "village": 110, "farm": 80},
-  "wayside": { "density": 0.48, "kinds": {"cart_wreck": 1.4, "firewood_stack": 1.5, "cairn": 1.5, "fire_pit_cold": 1, "camp_leavings": 0.7, "grave": 0.4, "boulder_field": 0.6, "fallen_log": 0.6} },
   "zones": {
     "urban_fringe": [
-      { "scale": "human", "density": 2.38, "kinds": {"cart_wreck": 1.4, "crate_stack": 3, "firewood_stack": 3, "tool_litter": 2, "rubbish_heap": 2.5, "grave": 1.2, "water_trough": 1, "plank_stack": 1.5, "drying_rack": 0.8, "cemetery": 0.35, "rubbish_yard": 0.5, "farmstead_clutter": 0.5} },
       { "scale": "wild", "density": 0.49, "kinds": {"boulder_field": 2, "fallen_log": 1} }
     ],
     "farmland": [
-      { "scale": "human", "density": 1.82, "kinds": {"field_plot": 4, "water_trough": 1.5, "firewood_stack": 1.5, "cart_wreck": 0.7, "tool_litter": 1.5, "plank_stack": 1, "farmstead_clutter": 0.8} },
       { "scale": "wild", "density": 1.68, "kinds": {"wildflowers": 3, "boulder_field": 2, "fallen_log": 2, "berry_patch": 2, "hollow_stump": 0.6, "mushroom_ring": 0.5, "bone_pile": 0.3} }
     ],
     "roadside": [
-      { "scale": "human", "density": 0.91, "kinds": {"cart_wreck": 1.75, "cairn": 1.5, "fire_pit_cold": 1.5, "camp_leavings": 0.9, "grave": 0.5} },
       { "scale": "wild", "density": 1.54, "kinds": {"boulder_field": 2, "wildflowers": 2, "fallen_log": 1.5, "berry_patch": 1.2, "hollow_stump": 0.5, "mushroom_ring": 0.4} }
     ],
     "shore": [
-      { "scale": "none", "density": 2.24, "kinds": {"driftwood": 3, "reed_bed": 3, "fish_rack": 1.2, "boat_wreck": 0.8, "stepping_stones": 1.2, "boulder_field": 1.5, "fallen_log": 1} },
-      { "scale": "human", "density": 0.63, "kinds": {"fire_pit_cold": 1, "camp_leavings": 0.5} }
+      { "scale": "none", "density": 1.86, "kinds": {"driftwood": 3, "reed_bed": 3, "stepping_stones": 1.2, "boulder_field": 1.5, "fallen_log": 1} }
     ],
     "ruin_adjacent": [
-      { "scale": "none", "density": 2.94, "kinds": {"broken_weapons": 3, "rubble_pile": 3, "bone_pile": 1.5, "fallen_banner": 2, "collapsed_wall": 2, "battle_remains": 0.9, "boulder_field": 1, "grave": 0.5, "cairn": 0.5} },
+      { "scale": "none", "density": 0.51, "kinds": {"boulder_field": 1, "bone_pile": 1.5} },
       { "scale": "wild", "density": 0.84, "kinds": {"fallen_log": 1, "hollow_stump": 0.6} }
     ],
     "dungeon_adjacent": [
-      { "scale": "none", "density": 2.8, "kinds": {"bone_pile": 3, "warning_cairn": 2, "blood_trail": 2.5, "rubble_pile": 1, "boulder_field": 1.5, "broken_weapons": 0.8, "dungeon_warnings": 0.8, "fallen_log": 1} }
+      { "scale": "none", "density": 1.22, "kinds": {"bone_pile": 3, "boulder_field": 1.5, "fallen_log": 1} }
     ],
     "wild": [
-      { "scale": "human", "density": 0.28, "kinds": {"cairn": 2, "fire_pit_cold": 1.5, "camp_leavings": 0.5, "grave": 0.5} },
       { "scale": "wild", "density": 2.1, "kinds": {"boulder_field": 3, "fallen_log": 3, "hollow_stump": 1.5, "mushroom_ring": 1.2, "bone_pile": 1.2, "animal_den": 1, "rock_arch": 0.35, "spire": 0.7, "ledge": 1.2, "crystal_outcrop": 0.5, "ore_outcrop": 0.9, "wildflowers": 3, "berry_patch": 1.5} }
     ],
     "deep_wild": [
-      { "scale": "human", "density": 0.14, "kinds": {"cairn": 2, "fire_pit_cold": 1} },
       { "scale": "remote", "density": 2.52, "kinds": {"boulder_field": 3, "fallen_log": 3, "hollow_stump": 1.8, "mushroom_ring": 1.5, "bone_pile": 1.8, "animal_den": 1.6, "rock_arch": 0.7, "spire": 1.3, "ledge": 1.4, "crystal_outcrop": 0.9, "ore_outcrop": 1.2, "wildflowers": 2.5, "berry_patch": 1.2} }
+    ]
+  },
+  "scenes": {
+    "_doc": "The planned scenes (baked sceneplan, seed independent). wayside.gap: blocks of road between two waysides per class, [min, max] (a hashed draw); offset: extra blocks beyond the road's half width to the scene centre; settlementClear: no wayside within this many blocks of a settlement's edge (its own edge scenes cover it). share: chance that a place of that anchor gets a scene. settlement: edge scenes per settlement size; shore: a fishing scene where the settlement edge is 3-24 blocks from water. anchors: kind weights per anchor type; 'lm:<builder>' is a landmark vignette of that builder family (landmarks/kinds.json, tiers S and M), no longer placed on the landmark grid. signs: kinds that carry a sign (@grave = a name and an epitaph of the province's folk, @warning = a scrawled warning). Lore-web clue scenes take their kind from the clue's words (clueWords, first match; else cairn).",
+    "wayside": {"gap": {"highway": [1500, 3000], "road": [1500, 3000], "lane": [1400, 2800], "trail": [3500, 6000]}, "offset": 7, "settlementClear": 60},
+    "share": {"SHRINE_SITE": 0.7, "BATTLE_SITE": 0.5, "RUIN_EDGE": 0.5, "CAMP_SITE": 1.0, "DUNGEON_MOUTH": 0.35, "FARM": 1.0},
+    "settlement": {"capital": 4, "city": 3, "town": 2, "village": 1, "shore": 0.6},
+    "anchors": {
+      "ROAD_BEND": {"cart_wreck": 1.4, "firewood_stack": 1.2, "fire_pit_cold": 1, "camp_leavings": 0.7, "grave": 0.4, "lm:grave": 0.3, "lm:pack": 0.4, "lm:remains": 0.3, "lm:ambush": 0.25, "lm:travellers": 0.3},
+      "CROSSROADS": {"cairn": 2, "grave": 0.4, "lm:cairn_token": 1, "lm:offering": 0.3, "lm:pilgrim": 0.3},
+      "FORD": {"camp_leavings": 2, "fire_pit_cold": 1, "lm:fire_ring": 0.8, "lm:bedroll": 0.5},
+      "BRIDGE_END": {"cart_wreck": 1, "crate_stack": 0.6, "fire_pit_cold": 0.8, "firewood_stack": 0.6, "lm:pack": 0.4},
+      "FARM": {"farmstead_clutter": 3, "field_plot": 1.5, "water_trough": 1, "plank_stack": 0.8, "tool_litter": 1},
+      "SETTLEMENT_EDGE": {"cemetery": 1, "rubbish_yard": 1, "crate_stack": 1.5, "firewood_stack": 1.5, "drying_rack": 0.8, "rubbish_heap": 1.2, "plank_stack": 0.6, "farmstead_clutter": 0.6, "cart_wreck": 0.4},
+      "SETTLEMENT_SHORE": {"fish_rack": 2, "boat_wreck": 1, "lm:boat_wreck": 0.5},
+      "CAMP_SITE": {"camp_leavings": 2, "lm:bedroll": 0.8, "lm:fire_ring": 0.8, "lm:hunters": 0.6, "lm:blind": 0.3},
+      "SHRINE_SITE": {"lm:offering": 2, "lm:pilgrim": 1, "lm:charms": 0.6, "cairn": 0.6, "grave": 0.4, "lm:sacrifice": 0.4, "lm:beacon": 0.2},
+      "BATTLE_SITE": {"battle_remains": 3, "fallen_banner": 1, "broken_weapons": 1, "lm:skirmish": 0.8, "lm:grave": 0.4},
+      "RUIN_EDGE": {"collapsed_wall": 2, "rubble_pile": 2, "broken_weapons": 0.6, "fallen_banner": 0.5, "lm:dig": 0.6, "lm:claim": 0.3, "grave": 0.3},
+      "DUNGEON_MOUTH": {"dungeon_warnings": 2, "warning_cairn": 1.2, "blood_trail": 1, "broken_weapons": 0.5, "lm:warning": 0.8, "lm:remains": 0.5, "lm:smuggler": 0.2}
+    },
+    "signs": {"grave": "@grave", "cemetery": "@grave", "dungeon_warnings": "@warning", "warning_cairn": "@warning"},
+    "clueWords": [
+      ["crate|cask|barrel|sack|stamp|ledger|cargo|goods|bale|keg|jar|amphora", "crate_stack"],
+      ["grave|buried|burial|tomb|coffin|epitaph|mourn", "grave"],
+      ["bone|skull|skeleton|corpse|remains|carcass", "bone_pile"],
+      ["banner|flag|standard|pennant|sigil", "fallen_banner"],
+      ["fire|ash|ember|soot|charred|burnt|smoke|campfire|hearth", "fire_pit_cold"],
+      ["cart|wheel|wagon|axle|caravan", "cart_wreck"],
+      ["sword|blade|spear|arrow|weapon|shield|helm|armou?r", "broken_weapons"],
+      ["tool|pick|shovel|spade|chisel|hammer|axe|scaffold", "tool_litter"],
+      ["wood|log|timber|plank|post|stake|net|oar|rope", "plank_stack"],
+      ["wall|mason|brick|column|pillar|arch", "rubble_pile"]
     ]
   }
 }

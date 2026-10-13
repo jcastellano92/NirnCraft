@@ -28,6 +28,10 @@ public final class ScatterStats {
     private static final ConcurrentHashMap<String, LongAdder> CLUSTERS = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, LongAdder> DISCOVERIES = new ConcurrentHashMap<>();
     private static final LongAdder TOTAL = new LongAdder();
+    /** P6 gate: human props placed by a per-chunk roll (must stay 0), by scenes, and scene props that found no ground. */
+    private static final LongAdder HUMAN_ROLLED = new LongAdder(), SCENE_PROPS = new LongAdder(), SCENE_FAILED = new LongAdder(),
+            SCENES = new LongAdder();
+    private static final ConcurrentHashMap<String, LongAdder> SCENE_FAIL_WHY = new ConcurrentHashMap<>();
     private static final LongAdder NANOS = new LongAdder(), CALLS = new LongAdder();
     private static volatile long maxNanos;
     private static PrintWriter log;
@@ -52,8 +56,33 @@ public final class ScatterStats {
         return ((long) cx << 32) ^ (cz & 0xFFFFFFFFL);
     }
 
-    static void placed(int cx, int cz, ScatterZone zone, Kind k, int x, int z, float humanity) {
+    /** A prop of a planned scene was built ({@code ok}) or found no ground ({@code why}). */
+    static void sceneProp(boolean ok, String why) {
+        if (ok) {
+            SCENE_PROPS.increment();
+        } else {
+            SCENE_FAILED.increment();
+            String key = why == null || why.isEmpty() ? "?" : why.split(" ")[0];
+            SCENE_FAIL_WHY.computeIfAbsent(key, k -> new LongAdder()).increment();
+        }
+    }
+
+    /** A scene had at least one of its props realised in some chunk. */
+    static void scene() {
+        SCENES.increment();
+    }
+
+    /** One line for the stats command and the autorun: the P6 gate counters. */
+    public static String sceneLine() {
+        Map<String, Long> why = new TreeMap<>();
+        SCENE_FAIL_WHY.forEach((k, v) -> why.put(k, v.sum()));
+        return String.format("scene props built %d, refused by the ground %d %s (scene/chunk touches %d); human props from per-chunk rolls %d",
+                SCENE_PROPS.sum(), SCENE_FAILED.sum(), why, SCENES.sum(), HUMAN_ROLLED.sum());
+    }
+
+    static void placed(int cx, int cz, ScatterZone zone, Kind k, int x, int z, float humanity, boolean planned) {
         TOTAL.increment();
+        if (k.human && !planned) HUMAN_ROLLED.increment();
         CHUNKS.compute(key(cx, cz), (key, old) -> {
             Map<String, Integer> m = old == null ? new TreeMap<>() : new TreeMap<>(old.kinds());
             m.merge(k.id, 1, Integer::sum);
@@ -62,7 +91,8 @@ public final class ScatterStats {
         PrintWriter l = log;
         if (l != null) {
             synchronized (ScatterStats.class) {
-                l.println(x + "," + z + "," + zone.id + "," + k.id + "," + (k.human ? 1 : 0) + "," + String.format("%.2f", humanity));
+                l.println(x + "," + z + "," + zone.id + "," + k.id + "," + (k.human ? 1 : 0) + "," + String.format("%.2f", humanity)
+                        + "," + (planned ? "scene" : "roll"));
             }
         }
     }
@@ -127,6 +157,11 @@ public final class ScatterStats {
         CLUSTERS.clear();
         DISCOVERIES.clear();
         TOTAL.reset();
+        HUMAN_ROLLED.reset();
+        SCENE_PROPS.reset();
+        SCENE_FAILED.reset();
+        SCENES.reset();
+        SCENE_FAIL_WHY.clear();
         NANOS.reset();
         CALLS.reset();
         maxNanos = 0;

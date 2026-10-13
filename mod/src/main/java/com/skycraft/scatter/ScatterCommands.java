@@ -141,6 +141,7 @@ public final class ScatterCommands {
         lines.add("clusters: " + ScatterStats.clusters());
         lines.add("discoveries built: " + ScatterStats.discoveries());
         lines.add("feature time: " + ScatterStats.timing());
+        lines.add(ScatterStats.sceneLine());
         for (String l : lines) src.sendSuccess(() -> Component.literal(l), false);
         return 1;
     }

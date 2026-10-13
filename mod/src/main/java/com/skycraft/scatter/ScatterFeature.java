@@ -9,7 +9,8 @@ import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 /**
- * Scatters the clutter of the decorated chunk: the discovery whose centre is in it (if any), then the zone's props.
+ * Scatters the clutter of the decorated chunk: the discovery whose centre is in it (if any), the planned scenes that
+ * reach it ({@link SceneRealiser}), then the zone's natural props.
  * Placed once per chunk (count 1) in every overworld biome at the last decoration step, after the trees and plants,
  * like {@code skycraft:minor_site}. See {@link Scatter}.
  */
@@ -26,6 +27,8 @@ public class ScatterFeature extends Feature<NoneFeatureConfiguration> {
         long t0 = System.nanoTime();
         try {
             any = Discoveries.generate(level, chunk);
+            // the planned scenes first (every human prop), then the chunk's natural micro-scatter around them
+            any |= SceneRealiser.generate(level, chunk) > 0;
             any |= Scatter.generate(level, chunk) > 0;
         } catch (RuntimeException e) {
             Skycraft.LOGGER.warn("Skycraft scatter: failed in chunk {}", chunk, e);

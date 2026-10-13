@@ -174,6 +174,8 @@ public final class Landmarks {
         if (ctx.province.equals("sea") || ctx.s.inWater() || ctx.s.coastDistance < 3) return null;
         Kind kind = Kinds.choose(tier, ctx, H.unit(h, 4));
         if (kind == null) return null;
+        // human vignettes (graves, packs, camps, ambushes...) are planned scenes now (P6): their cell stays empty
+        if (com.skycraft.worldplan.scene.SceneKinds.planned(kind.builder())) return null;
         if (!clear(seed, tier, kind, x, z)) return null;
         if (tier == Tier.XL) {
             for (Pinned p : pinned()) {

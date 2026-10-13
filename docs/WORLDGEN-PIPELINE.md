@@ -81,7 +81,7 @@ whiterun-rorikstead, whiterun-dragon_bridge and one river crossing; plus `reach_
   Paver/Canvas clearing and `OrphanSweep` stay as the safety net and as the upgrade path for old saves.
 * **P5 Streets to every door (S5).** Settlement plans emit a street graph that reaches every door (and gate lanes that
   meet S4 road ends); plot pads go into S7. Gate: unreachable doors <= 1% on the Skyrim sweep sample.
-* **P6 Planned scenes (S6+S11).** Replace per-chunk human-prop rolls with the planned scene list (scene = anchor,
+* **P6 Planned scenes (S6+S11). DONE** (section 9). Replace per-chunk human-prop rolls with the planned scene list (scene = anchor,
   reason, props, optional clue/note from the lore web). Keep only natural micro-scatter random. Gate: placement lint
   shows every human prop belongs to a scene; scene density per km of road and per km² within targets.
 * **Later P7.** The endless lands beyond the map: the same pipeline per 4 km tile, planned lazily on a worker thread
@@ -355,3 +355,64 @@ P3 only needs to know that these exist; P5/P6 must not change `RoadPlan`'s forma
 * Chunk features only realise scenes whose footprint intersects the chunk (deterministic, no neighbour reads).
 * Gate (P6): every human prop placed belongs to a scene (placement lint); scene density per km of road and per km²
   within targets; zero human-prop placements from per-chunk rolls.
+* As built (section 9): one anchor type was added, `SETTLEMENT_EDGE` (ref = place id, or `<id>@shore` for a fishing
+  shore); road anchor refs are `seg:<segment>:v<vertex in segment>`, lore refs `<place>#<clue index>`; props are
+  `{kind, dx, dz}` with kind a scatter kind, `lm:<landmark kind>`, `clue_sign` or `clue_note`; scenes also carry a
+  `note` (place-lore book id) and an optional worn `path` end on the road's edge.
+
+## 9. P6 result: planned scenes (S6 + S11)
+
+Code: package `com.skycraft.worldplan.scene` (`ScenePlan` data + chunk index, `ScenePlanBuilder`, `SceneKinds`,
+`ScenePlanCommands`), `com.skycraft.scatter.SceneRealiser` (new); changed `scatter/Scatter`, `ScatterRules`,
+`ScatterFeature`, `ScatterStats`, `ScatterCommands`, `scatter/rules.json` (zones natural only; new `scenes` section);
+`scatter/Waysides` deleted (the server-thread per-chunk wayside pass). Outside the package, two one-line guards:
+`landmarks/Landmarks.compute` leaves cells of human vignettes empty, `roads/Dressing.layout` returns in plan-era
+worlds. Bake: name `sceneplan` (`skycraft/baked/sceneplan.bin`, format version 1, 140 KB deflated / 636 KB raw), its
+classes and data files (`scatter/kinds.json`, `rules.json`, `loreweb_clues.json`, `landmarks/kinds.json`) are in the
+`Bake` input hash; loaded on a background thread at server start (17 ms; ~0.3 s live). New data:
+`scatter/loreweb_clues.json` from `tools/marquee/loreweb.json` (`py -3 -I tools/marquee/loreweb_clues.py`).
+
+**How it is made** (`ScenePlanBuilder`, ~0.2 s after the road plan; only map, places, road plan and data tables, every
+choice a hash of stable ids; byte-identical when recomputed under another seed, `qa.ps1 -Server -Bake`):
+1. lore-web clues: each of the 758 clues of the 231 lore-web places is set 10-50 blocks outside its place, kind from the
+   clue's words (`scenes.clueWords`, else a cairn), with a sign carrying the clue text (front and back, 15-character
+   lines) and, for the first clue (and the thread clue), the place's `web`/`thread` note in a barrel beside it;
+2. places: daedric shrines, standing stones, word walls (SHRINE_SITE, 70%), forts and Oblivion gates (BATTLE_SITE,
+   50%), ruin/altar/monument/stones landmarks (RUIN_EDGE, 50%), campsite landmarks (CAMP_SITE), dungeon mouths (35%);
+3. settlement edges (capital 4, city 3, town 2, village 1; a cemetery takes the highest spot of its ring), fishing
+   shores (water 3-24 blocks off the edge), one farm yard per farm;
+4. waysides: per road link a hashed gap of 1.5-3 km (lanes 1.4-2.8, trails 3.5-6), at the best anchor within ±240
+   blocks of the drawn spot: crossroads (sign naming the places the roads lead to), ford bank, bridge end, else the
+   sharpest bend; never within 60 blocks of a settlement's edge; 7 blocks beyond the bed plus the scene's radius, with
+   a worn dirt path to the road's edge.
+Validity everywhere: dry map ground, macro slope <= 0.9, outside every place's radius (+4/+6), every prop off every
+road bed, scenes 6 blocks apart. Kinds per anchor: `rules.json` `scenes.anchors` (scatter human kinds, clusters
+expanded into member props at bake time, `lm:<builder>` = a landmark S/M vignette of that family).
+
+**Realising** (`SceneRealiser`, called first by the `skycraft:scatter` feature): for the chunk being decorated,
+`ScenePlan.inChunk` (a chunk -> scenes index of footprints and paths); each prop whose centre is in the chunk is built
+(scatter kinds through `Scatter.planned`: ground, slope, water, structure/road mask checks, up to 3 retries within 2
+blocks inside the chunk; vignettes through `LandmarkBuilder`; sign, note barrel), and the path columns inside the
+chunk. Variants are seeded by scene, prop and world seed; positions come from the plan. Natural scatter keeps off scene
+footprints (`ScenePlan.covers`). Per-chunk rolls: `Scatter.Run.allowed` refuses human kinds and `ScatterRules` refuses
+them in zones, so `rules.json` cannot bring them back.
+
+**Numbers** (bake of this phase): 3,962 scenes, 8,539 props (591 landmark vignettes, 1,655 signs, 140 notes), 522
+worn paths. Per anchor: ROAD_BEND 113, CROSSROADS 389, FORD 5, BRIDGE_END 26, FARM 306, CAMP_SITE 58, SHRINE_SITE 105,
+BATTLE_SITE 171, RUIN_EDGE 152, DUNGEON_MOUTH 958, LOREWEB_CLUE 746 (12 of 758 found no dry spot), SETTLEMENT_EDGE
+933. Density (targets in `placement_lint.py`): waysides per km of highway+road 0.46 (364 / 793 km; target 0.33-0.67),
+lane 0.34 (32 / 95 km; 0.25-0.71), trail 0.22 (137 / 620 km; 0.17-0.29); scenes per km² of land 9.1 (3,962 / 436 km²;
+target 5-15, i.e. one scene every ~330 blocks). Few fords and bridge ends: crossroads win the anchor choice in the
+dense network. Realisation on the dev world (6 regenerated areas, 654 chunks): 27 scene props built, 4 refused by
+the ground (2 placement mask, 1 blocked, 1 sign), 0 human props from per-chunk rolls (`/skycraft-scatter stats` line
+`scene props built ...`). Feature time 0.25 ms per chunk on average. `placement_lint.py`: 0 problems (0 human kinds
+rolled, 5/5 code guards, 0 scene errors, densities in target).
+Screens: `docs/screens/worldplan/p6_crossroads.jpg` (cairn and road sign at the Whiterun-Rorikstead crossroads),
+`p6_loreclue.jpg` (Ald Velothi clue: cairn, sign with the clue, barrel with the place's note), `p6_cemetery.jpg`
+(Whiterun's cemetery on the rise).
+**Tools:** `/skycraft-sceneplan stats|near <x> <z>|list <anchor|kind> [n]|verify`, autorun task `sceneplan`.
+**Known limits / next:** minor sites (`explore/MinorSites`) and hidden stashes stay on their seeded cell grids (sites
+with a purpose each, not clutter; making them seed-independent is a separate step); props near a structure or in a
+dense forest can still be refused at realisation (the plan cannot see seeded trees: registering scene footprints
+with `PlacementMask` would need a site-pad slot there); the slope probes of a prop read up to 2 blocks into a
+neighbour chunk (its ground height, which is generated before any feature runs).

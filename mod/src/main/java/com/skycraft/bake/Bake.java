@@ -58,13 +58,22 @@ public final class Bake {
             "com.skycraft.worldplan.PlanTerrain", "com.skycraft.worldplan.PlanTerrain$Col", "com.skycraft.worldplan.Profile",
             "com.skycraft.roads.PlanLinks", "com.skycraft.roads.RoadGraph", "com.skycraft.roads.RoadGraph$Links",
             "com.skycraft.roads.GateEnds", "com.skycraft.roads.Corridors", "com.skycraft.tamriel.settlement.SettlementAnchors",
-            "com.skycraft.tamriel.settlement.plan.Cities", "com.skycraft.tamriel.settlement.grammar.Zoning"};
+            "com.skycraft.tamriel.settlement.plan.Cities", "com.skycraft.tamriel.settlement.grammar.Zoning",
+            // the scene plan (P6) and its builder
+            "com.skycraft.worldplan.scene.ScenePlan", "com.skycraft.worldplan.scene.ScenePlanBuilder",
+            "com.skycraft.worldplan.scene.ScenePlanBuilder$Run", "com.skycraft.worldplan.scene.ScenePlanBuilder$Layout",
+            "com.skycraft.worldplan.scene.ScenePlanBuilder$SceneB", "com.skycraft.worldplan.scene.ScenePlanBuilder$Table",
+            "com.skycraft.worldplan.scene.ScenePlanBuilder$KindInfo", "com.skycraft.worldplan.scene.ScenePlanBuilder$LmKind",
+            "com.skycraft.worldplan.scene.SceneKinds"};
     /** Other data files the baked data reads. */
-    private static final String[] DATA_FILES = {"/skycraft/roads/named_roads.json", "/skycraft/roads/corridors.json"};
-    /** Everything baked, in order. */
+    private static final String[] DATA_FILES = {"/skycraft/roads/named_roads.json", "/skycraft/roads/corridors.json",
+            "/skycraft/scatter/kinds.json", "/skycraft/scatter/rules.json", "/skycraft/scatter/loreweb_clues.json",
+            "/skycraft/landmarks/kinds.json"};
+    /** Everything baked, in order (the scene plan reads the road plan, so it comes after it). */
     private static final List<Bakeable> BAKES = List.of(
             new Bakeable("landmass", com.skycraft.roads.Landmass::computeLive),
-            new Bakeable(com.skycraft.worldplan.RoadPlanBuilder.BAKE_NAME, com.skycraft.worldplan.RoadPlanBuilder::computeLive));
+            new Bakeable(com.skycraft.worldplan.RoadPlanBuilder.BAKE_NAME, com.skycraft.worldplan.RoadPlanBuilder::computeLive),
+            new Bakeable(com.skycraft.worldplan.scene.ScenePlanBuilder.BAKE_NAME, com.skycraft.worldplan.scene.ScenePlanBuilder::computeLive));
 
     private static volatile String inputs;
 

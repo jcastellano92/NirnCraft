@@ -37,6 +37,11 @@ import java.util.Map;
  * their ground, slope, water and clearance checks. Everything is derived from the world seed, the map and the chunk
  * position, so the same chunk always gets the same clutter whatever order chunks are generated in.
  *
+ * <p>Pipeline P6: the per-chunk rolls place NATURAL micro-scatter only (stones, logs, flowers, dens); a kind tagged
+ * {@code human} is never rolled (the rule loader refuses it in a zone and {@link Run#allowed} skips it). Human props
+ * belong to the baked scene plan and are built through {@link #planned} by {@link SceneRealiser}, each at its
+ * scene's planned spot; natural props keep off scene footprints.</p>
+ *
  * <p>Safety: it only ever reads and writes inside the 3x3 chunks a feature may use (props are centred in the chunk's
  * core), stays off settlement footprints and any chunk with a surface structure, and sets items and armour stands
  * through NBT ({@link SiteBuilder}), never through live chunk lookups.</p>
@@ -45,10 +50,6 @@ public final class Scatter {
     static final long SALT = 0x5CA77E12B0A7L;
     /** Centre margin inside the chunk: props reach 3-4 blocks, so they stay within one chunk of their own. */
     private static final int MARGIN = 3;
-
-    /** Kinds that mark a place somebody comes to (not just rubbish): they get a worn trail towards the road. */
-    private static final java.util.Set<String> TRAILED = java.util.Set.of("camp_leavings", "fire_pit_cold", "bedroll",
-            "lean_to", "cemetery", "grave", "cairn", "drying_rack", "water_trough", "fish_rack");
 
     /** Reason the last failed {@link #dress} gave (diagnostics). */
     static volatile String LAST_WHY = "";
@@ -97,9 +98,29 @@ public final class Scatter {
     }
 
     /**
-     * API for the road module's roadside dressing (and anything else that wants one prop at a spot): builds the kind
-     * {@code kindId} centred on (x, z) of a level that is ready for writes, subject to the same checks. Returns
-     * whether it was built. The level must be generated at least one chunk around the point.
+     * Builds one prop of a planned scene: kind {@code k} centred on (x, z) inside chunk {@code cp} (the chunk being
+     * decorated), with the ground, slope, water and footprint checks but no zone, cap or context rule: the scene plan
+     * gave it its reason. A blocked spot is retried up to three times within two blocks, inside the same chunk.
+     */
+    static boolean planned(WorldGenLevel level, ChunkPos cp, Kind k, int x, int z, RandomSource rnd) {
+        long seed = level.getSeed();
+        Info info = ZoneModel.at(seed, x, z);
+        Run run = new Run(level, cp, info, info.zone(), rnd, ScatterRules.get());
+        run.planned = true;
+        int minX = cp.x * 16 + 1, maxX = cp.x * 16 + 14, minZ = cp.z * 16 + 1, maxZ = cp.z * 16 + 14;
+        for (int attempt = 0; attempt < 4; attempt++) {
+            int px = attempt == 0 ? x : Math.max(minX, Math.min(maxX, x + rnd.nextInt(5) - 2));
+            int pz = attempt == 0 ? z : Math.max(minZ, Math.min(maxZ, z + rnd.nextInt(5) - 2));
+            if (run.build(k, px, pz, false)) return true;
+        }
+        LAST_WHY = run.why;
+        return false;
+    }
+
+    /**
+     * Developer API ({@code /skycraft-scatter dress}): builds the kind {@code kindId} centred on (x, z) of a level that
+     * is ready for writes, subject to the same checks. Returns whether it was built. The level must be generated at
+     * least one chunk around the point.
      */
     public static boolean dress(WorldGenLevel level, String kindId, int x, int z, long salt) {
         ScatterRules rules = ScatterRules.get();
@@ -109,6 +130,7 @@ public final class Scatter {
         Info info = ZoneModel.at(seed, x, z);
         RandomSource rnd = RandomSource.create(mix(seed ^ mix(salt ^ ((long) x << 32) ^ (z & 0xFFFFFFFFL))));
         Run run = new Run(level, new ChunkPos(x >> 4, z >> 4), info, info.zone(), rnd, rules);
+        run.planned = true; // an explicit placement (developer command), not a roll
         for (int attempt = 0; attempt < 4; attempt++) {
             int jx = attempt == 0 ? 0 : rnd.nextInt(9) - 4, jz = attempt == 0 ? 0 : rnd.nextInt(9) - 4;
             if (run.placeAt(k, x + jx, z + jz)) return true;
@@ -157,6 +179,8 @@ public final class Scatter {
         final MapSample ms = new MapSample();
         int count;
         int isolated;
+        /** A prop of a planned scene ({@link Scatter#planned}): no caps, zone or context rules. */
+        boolean planned;
         /** Why the last {@link #build} said no (diagnostics for {@code dress}). */
         String why = "";
 
@@ -189,6 +213,7 @@ public final class Scatter {
         }
 
         boolean allowed(Kind k) {
+            if (k.human) return false; // human props come from the scene plan only (P6)
             if (!k.provinces.isEmpty() && !k.provinces.contains(info.province())) return false;
             if (k.denyProvinces.contains(info.province())) return false;
             if (info.elevation() < k.minElev || info.elevation() > k.maxElev) return false;
@@ -246,46 +271,6 @@ public final class Scatter {
             return placed > 0;
         }
 
-        /**
-         * A short worn path from a camp or shrine towards the nearest road corridor of the map (within 36 blocks), laid
-         * as dirt path where the ground is soft; stays inside the 3x3 chunks the feature owns.
-         */
-        void trail(SiteBuilder b, int x, int z) {
-            final int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
-            MapSample t = new MapSample();
-            int best = -1, bestDist = 999;
-            for (int d = 0; d < dirs.length; d++) {
-                for (int dist = 6; dist <= 36 && dist < bestDist; dist += 6) {
-                    TamrielMap.sample(x + dirs[d][0] * dist, z + dirs[d][1] * dist, t);
-                    if (t.road >= 0.6f) {
-                        best = d;
-                        bestDist = dist;
-                        break;
-                    }
-                }
-            }
-            if (best < 0) return;
-            int minX = cp.x * 16 - 14, maxX = cp.x * 16 + 29, minZ = cp.z * 16 - 14, maxZ = cp.z * 16 + 29;
-            int len = Math.min(bestDist, 26);
-            int wob = 0;
-            BlockState path = net.minecraft.world.level.block.Blocks.DIRT_PATH.defaultBlockState();
-            for (int i = 2; i <= len; i++) {
-                if (i % 5 == 0) wob = r.nextInt(3) - 1;
-                int px = x + dirs[best][0] * i + (dirs[best][0] == 0 ? wob : 0);
-                int pz = z + dirs[best][1] * i + (dirs[best][1] == 0 ? wob : 0);
-                if (px < minX || px > maxX || pz < minZ || pz > maxZ) break;
-                int gy = b.groundAt(px, pz);
-                BlockPos p = new BlockPos(px, gy, pz);
-                BlockState gs = level.getBlockState(p);
-                if (!gs.is(net.minecraft.world.level.block.Blocks.GRASS_BLOCK) && !gs.is(net.minecraft.world.level.block.Blocks.DIRT)
-                        && !gs.is(net.minecraft.world.level.block.Blocks.COARSE_DIRT) && !gs.is(net.minecraft.world.level.block.Blocks.PODZOL)) continue;
-                BlockState up = level.getBlockState(p.above());
-                if (!up.isAir() && !up.canBeReplaced()) continue;
-                if (!up.isAir()) level.setBlock(p.above(), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
-                level.setBlock(p, path, 2);
-            }
-        }
-
         /** Checks and builds {@code k} centred on (x, z). */
         boolean fail(String reason) {
             why = reason;
@@ -293,8 +278,8 @@ public final class Scatter {
         }
 
         boolean build(Kind k, int x, int z, boolean spacing) {
-            if (count >= rules.caps.chunk) return fail("chunk cap");
-            if (k.isolated && isolated >= rules.caps.isolated) return fail("isolated cap");
+            if (!planned && count >= rules.caps.chunk) return fail("chunk cap");
+            if (!planned && k.isolated && isolated >= rules.caps.isolated) return fail("isolated cap");
             int clear = spacing ? k.radius : 0;
             // clearance from other props of this chunk
             for (int[] c : centres) {
@@ -303,10 +288,20 @@ public final class Scatter {
                 if (dx * dx + dz * dz < need * need) return fail("clearance");
             }
             // settlement and structure footprints, minor sites
-            if (!Places.overlapping(x - 3, z - 3, x + 3, z + 3).isEmpty()) return fail("place footprint");
-            // natural scatter keeps off planned road corridors, street/plot/pad footprints and site pads (dress() is
-            // the roadside system's own call and stands where the road is)
-            if (spacing && !com.skycraft.world.PlacementMask.clear(level, x, z, 0)) return fail("placement mask");
+            if (planned) {
+                // a scene stands at a place's edge on purpose: only its disc (plus a step) is out of bounds
+                for (com.skycraft.tamriel.Place p : Places.overlapping(x - 3, z - 3, x + 3, z + 3)) {
+                    long need = p.radius() + 2L;
+                    if (p.distSqr(x, z) < need * need) return fail("place footprint");
+                }
+                if (!com.skycraft.world.PlacementMask.clearOfPlans(level, x, z, 0)) return fail("placement mask");
+            } else {
+                if (!Places.overlapping(x - 3, z - 3, x + 3, z + 3).isEmpty()) return fail("place footprint");
+                // natural scatter keeps off planned road corridors, street/plot/pad footprints and site pads
+                if (spacing && !com.skycraft.world.PlacementMask.clear(level, x, z, 0)) return fail("placement mask");
+                // ... and off the planned scenes, which may be built after it in a neighbouring chunk
+                if (com.skycraft.worldplan.scene.ScenePlan.get().covers(x, z, k.radius + 1)) return fail("scene");
+            }
             for (MinorSites.Site s : sites) {
                 int need = s.kind().radius + 4 + clear / 2;
                 if (s.distSqr(x, z) < (long) need * need) return fail("minor site");
@@ -315,7 +310,7 @@ public final class Scatter {
             if (ms.coastDistance < -1f || (!k.wet && ms.inWater())) return fail("map water");
             if (ms.elevation < k.minElev || ms.elevation > k.maxElev) return fail("elevation " + (int) ms.elevation);
             // human traces need a reason to be there: a road, a settlement, a ruin or a dungeon mouth
-            if (k.human && !k.wet && zone != ScatterZone.RUIN_ADJACENT && zone != ScatterZone.DUNGEON_ADJACENT
+            if (!planned && k.human && !k.wet && zone != ScatterZone.RUIN_ADJACENT && zone != ScatterZone.DUNGEON_ADJACENT
                     && zone != ScatterZone.SHORE && ms.road < 0.3f && info.settleEdge() > 70) {
                 return fail("no context");
             }
@@ -361,12 +356,11 @@ public final class Scatter {
                 return fail("exception");
             }
             if (!ok) return fail("builder refused");
-            if (k.human && !k.wet && ms.road < 0.6f && TRAILED.contains(k.id)) trail(b, x, z);
             centres.add(new int[]{x, z, k.radius});
             count += Math.max(1, k.items);
             if (k.isolated) isolated++;
             perKind.merge(k.id, 1, Integer::sum);
-            ScatterStats.placed(cp.x, cp.z, zone, k, x, z, info.humanity());
+            ScatterStats.placed(cp.x, cp.z, zone, k, x, z, info.humanity(), planned);
             return true;
         }
     }
