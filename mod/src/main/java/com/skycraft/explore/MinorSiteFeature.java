@@ -56,6 +56,17 @@ public class MinorSiteFeature extends Feature<NoneFeatureConfiguration> {
             Skycraft.LOGGER.warn("Skycraft explore: failed to build {}", MinorSites.describe(site), e);
             return false;
         }
+        if (built && com.skycraft.landmarks.Grounding.enabled) {
+            // post-placement support check (same as the landmarks): whatever hovers is pillared down to the ground or removed
+            try {
+                int pad = site.kind().radius + 4;
+                int minX = Math.max(site.x() - pad, (chunk.x - 1) << 4), maxX = Math.min(site.x() + pad, ((chunk.x + 1) << 4) + 15);
+                int minZ = Math.max(site.z() - pad, (chunk.z - 1) << 4), maxZ = Math.min(site.z() + pad, ((chunk.z + 1) << 4) + 15);
+                com.skycraft.landmarks.Grounding.fix(level, minX, minZ, maxX, maxZ, b::writable, b.pal.stone().defaultBlockState());
+            } catch (RuntimeException e) {
+                Skycraft.LOGGER.debug("Skycraft explore: support check failed for {}", MinorSites.describe(site), e);
+            }
+        }
         if (built && site.unique() != null && b.mainChest != null) {
             b.addItem(b.mainChest, Uniques.stack(site.unique()));
             Uniques.UniqueSite u = Uniques.get(site.unique());

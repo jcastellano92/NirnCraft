@@ -11,6 +11,7 @@ import com.skycraft.landmarks.LandmarkSite;
 import com.skycraft.lore.LoreBookItem;
 import com.skycraft.lore.LoreBooks;
 import com.skycraft.lore.place.PlaceLore;
+import com.skycraft.lore.place.StoryReader;
 import com.skycraft.scatter.ScatterRules.Kind;
 import com.skycraft.scatter.ZoneModel.Info;
 import com.skycraft.tamriel.Place;
@@ -147,6 +148,21 @@ public final class SceneRealiser {
         SignText.DIRECT_CODEC.encodeStart(NbtOps.INSTANCE, back).result().ifPresent(t -> tag.put("back_text", t));
         tag.putBoolean("is_waxed", true);
         sign.load(tag);
+        // right-click / [F] reads the whole clue in the reading screen (the sign's own lines are small and split in two)
+        StringBuilder text = new StringBuilder();
+        boolean prose = !plan.clue[s].startsWith("@");
+        for (Component line : lines) {
+            String t = line.getString();
+            if (t.isBlank()) continue;
+            if (text.length() > 0) text.append(prose ? ' ' : '\n');
+            text.append(t);
+        }
+        if (text.length() > 0) {
+            String clue = plan.clue[s];
+            String title = clue.equals("@grave") ? "A Grave Marker" : clue.equals("@warning") ? "A Warning" : clue.startsWith("@roads:") ? "A Signpost"
+                    : "A Notice";
+            StoryReader.mark(sign, title, "", List.of(text.toString()));
+        }
         return true;
     }
 
@@ -215,6 +231,9 @@ public final class SceneRealiser {
         level.setBlock(p, Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP), 2);
         ItemStack stack = LoreBookItem.create(book);
         b.addItem(p, stack);
+        // right-click / [F] reads the note in the reading screen (sneaking opens the barrel)
+        BlockEntity be = level.getBlockEntity(p);
+        if (be != null) StoryReader.markNoteContainer(be);
         return true;
     }
 

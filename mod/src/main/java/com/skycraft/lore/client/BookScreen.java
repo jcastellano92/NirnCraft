@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -35,7 +36,12 @@ public class BookScreen extends Screen {
 
     private record Line(FormattedCharSequence text, boolean center, int indent, int color) {}
 
+    /** The lore book shown (null for a story read off a lectern, sign or barrel: its text is {@link #inline}). */
+    @Nullable
     private final LoreBooks.Book book;
+    @Nullable
+    private final BookTexts.Text inline;
+    private final Component label;
     private final boolean sheet;
     private List<List<Line>> pages = new ArrayList<>();
     private String author = "";
@@ -46,7 +52,21 @@ public class BookScreen extends Screen {
     public BookScreen(LoreBooks.Book book) {
         super(book.title());
         this.book = book;
+        this.inline = null;
+        this.label = book.category().displayName();
         this.sheet = book.category().isSheet();
+    }
+
+    /**
+     * A story that has no lore-book id: the text a lectern, a clue sign or a note barrel holds, sent by the server.
+     * Same typography as a lore book; {@code sheet} = a single loose sheet, else a bound spread with a title page.
+     */
+    public BookScreen(Component title, String author, List<String> pages, boolean sheet, Component label) {
+        super(title);
+        this.book = null;
+        this.inline = new BookTexts.Text(author == null ? "" : author, pages);
+        this.label = label;
+        this.sheet = sheet;
     }
 
     @Override
@@ -55,7 +75,7 @@ public class BookScreen extends Screen {
         int h = sheet ? SHEET_H : SPREAD_H;
         left = (width - w) / 2;
         top = (height - h) / 2;
-        BookTexts.Text text = BookTexts.get(book.id());
+        BookTexts.Text text = inline != null ? inline : book == null ? null : BookTexts.get(book.id());
         author = text == null ? "" : text.author();
         pages = paginate(text, sheet ? SHEET_TEXT_W : PAGE_TEXT_W, sheet ? SHEET_LINES : PAGE_LINES);
         prev = addRenderableWidget(new PageButton(left + 20, top + h - 24, false, b -> turn(-1, false), true));
@@ -70,7 +90,7 @@ public class BookScreen extends Screen {
         List<List<Line>> out = new ArrayList<>();
         List<Line> cur = new ArrayList<>();
         if (sheet) {
-            for (FormattedCharSequence s : font.split(book.title().copy().withStyle(Style.EMPTY.withBold(true)), textWidth)) {
+            for (FormattedCharSequence s : font.split(title.copy().withStyle(Style.EMPTY.withBold(true)), textWidth)) {
                 cur.add(new Line(s, true, 0, HEADING));
             }
             cur.add(new Line(FormattedCharSequence.EMPTY, false, 0, INK));
@@ -215,7 +235,7 @@ public class BookScreen extends Screen {
         int cx = x + PAGE_TEXT_W / 2;
         int yy = y + 24;
         float scale = 1.25f;
-        for (FormattedCharSequence line : font.split(book.title(), (int) (PAGE_TEXT_W / scale))) {
+        for (FormattedCharSequence line : font.split(title, (int) (PAGE_TEXT_W / scale))) {
             g.pose().pushPose();
             g.pose().translate(cx, yy, 0);
             g.pose().scale(scale, scale, 1f);
@@ -237,7 +257,6 @@ public class BookScreen extends Screen {
                 yy += LINE_H;
             }
         }
-        Component category = book.category().displayName();
-        g.drawString(font, category, cx - font.width(category) / 2, y + PAGE_LINES * LINE_H - 4, FADED, false);
+        g.drawString(font, label, cx - font.width(label) / 2, y + PAGE_LINES * LINE_H - 4, FADED, false);
     }
 }

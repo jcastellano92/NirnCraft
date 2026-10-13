@@ -1,6 +1,5 @@
 package com.skycraft.lore.place;
 
-import com.skycraft.Skycraft;
 import com.skycraft.core.Notifier;
 import com.skycraft.core.PlayerData;
 import com.skycraft.core.SkyData;
@@ -19,18 +18,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.LecternBlockEntity;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -39,7 +27,6 @@ import java.util.Optional;
  * reader's pack; discovering a place shows its hook. Per-player state in {@code module("place_lore")}: {@code found}
  * (note book ids the player was handed, so containers don't hand them out twice).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class PlaceLoreEvents {
     public static final String MODULE = "place_lore";
     private static final String FOUND = "found";
@@ -105,33 +92,5 @@ public final class PlaceLoreEvents {
         PlaceLorePlacer.onEnter(player, place);
     }
 
-    // ------------------------------------------------------------------ notes on lecterns
-
-    /** Right-clicking a lectern that holds a place readable reads it, and the reader keeps a copy. */
-    @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (!(player.level().getBlockEntity(event.getPos()) instanceof LecternBlockEntity lectern) || !lectern.hasBook()) return;
-        ItemStack held = lectern.getBook();
-        LoreBooks.Book book = LoreBookItem.bookOf(held);
-        // a dungeon's lectern holds the note as a written book (vanilla lecterns only show those), tagged with the note id
-        if (book == null && held.getTag() != null && held.getTag().contains("SkyNote", 8)) book = PlaceLore.book(held.getTag().getString("SkyNote"));
-        if (book == null || PlaceLore.note(book.id()) == null) return;
-        event.setCanceled(true);
-        event.setCancellationResult(InteractionResult.SUCCESS);
-        PlayerData d = SkyData.get(player);
-        PlaceLore.Note note = PlaceLore.note(book.id());
-        // the reader takes copies of every lectern note of the place they haven't found yet (this one first)
-        List<PlaceLore.Note> take = new ArrayList<>();
-        if (!hasFound(d, book.id())) take.add(note);
-        PlaceLore.contentFor(note.placeId()).ifPresent(c -> {
-            for (PlaceLore.Note n : PlaceLorePlacer.lecternNotes(c)) if (n != note && !hasFound(d, n.bookId())) take.add(n);
-        });
-        LoreBookItem.read(player, book);
-        player.level().playSound(null, event.getPos(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1f, 1f);
-        for (PlaceLore.Note n : take) {
-            Quests.give(player, LoreBookItem.create(n.book()));
-            markFound(d, n.bookId());
-        }
-    }
+    // notes on lecterns: StoryReader (a lectern note opens in the reading screen and the reader keeps a copy)
 }

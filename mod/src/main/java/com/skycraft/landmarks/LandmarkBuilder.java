@@ -38,17 +38,33 @@ public final class LandmarkBuilder {
         if (!force && site.pinned() == null && surfaceStructureHere(level, chunk, kind.tier() == Tier.XL ? 1 : 1)) return false;
         // a site gives way to a planned road corridor, street, plot or pad (named pinned sites are placed on purpose)
         if (!force && site.pinned() == null
-                && !com.skycraft.world.PlacementMask.clearOfPlans(level, site.x(), site.z(), Math.min(kind.radius(), 10))) return false;
+                && !com.skycraft.world.PlacementMask.clearOfPlans(level, site.x(), site.z(),
+                        Grounding.enabled ? kind.radius() + 2 : Math.min(kind.radius(), 10))) return false;
         LandCtx ctx = LandCtx.of(site.x(), site.z());
         if (family != null) ctx.base = family;
         RandomSource random = RandomSource.create(site.seed());
         String arch = ctx.archetype;
         SiteBuilder b = new SiteBuilder(level, random, site.asMinorSite(), Palette.of(site.province(), arch));
-        int spread = b.settle(Math.min(kind.radius(), 12));
-        if (!force) {
-            if (spread > kind.maxSpread()) return false;
-            boolean coastal = kind.needs().contains("coast");
-            if (!coastal && b.footprintWet(kind.radius())) return false;
+        // ground the site: the whole footprint is measured (not five points), a site on a slope that is too steep,
+        // too wet or too deep to found is refused, and the low columns are raised to the base level
+        boolean coastal = kind.needs().contains("coast") || kind.needs().contains("shore");
+        int footed = 0;
+        if (Grounding.enabled) {
+            Grounding.Footprint fp = Grounding.sample(b, kind.radius());
+            if (!force) {
+                if (fp.spread() > kind.maxSpread()) return Grounding.refuse("slope");
+                if (!coastal && b.footprintWet(kind.radius())) return Grounding.refuse("water");
+                if (!coastal && fp.wetShare() > Grounding.MAX_WET_SHARE) return Grounding.refuse("water");
+                if (fp.depth() > Grounding.MAX_FILL || fp.tooDeep > Math.max(1, fp.dry / 20)) return Grounding.refuse("deep");
+            }
+            b.y = fp.baseTop + 1;
+            if (!Grounding.WATER_BUILDERS.contains(kind.builder()) && !coastal) footed = Grounding.foundation(b, fp.baseTop, kind.radius());
+        } else {
+            int spread = b.settle(Math.min(kind.radius(), 12));
+            if (!force) {
+                if (spread > kind.maxSpread()) return false;
+                if (!kind.needs().contains("coast") && b.footprintWet(kind.radius())) return false;
+            }
         }
         Stage stage = new Stage(level, b, site, ctx);
         boolean built;
@@ -64,6 +80,20 @@ public final class LandmarkBuilder {
             if (kind.secret() > 0 && H.unit(site.seed(), 90) < kind.secret()) secret(stage);
         } catch (RuntimeException e) {
             Skycraft.LOGGER.debug("Skycraft landmarks: extras failed for {}", kind.id(), e);
+        }
+        // post-placement support check: whatever hovers gets a pillar down to the ground (up to 8 blocks) or goes
+        try {
+            int pad = kind.radius() + 4;
+            int minX = Math.max(site.x() - pad, (site.chunkX() - 1) << 4), maxX = Math.min(site.x() + pad, ((site.chunkX() + 1) << 4) + 15);
+            int minZ = Math.max(site.z() - pad, (site.chunkZ() - 1) << 4), maxZ = Math.min(site.z() + pad, ((site.chunkZ() + 1) << 4) + 15);
+            Grounding.Repair rep = Grounding.fix(level, minX, minZ, maxX, maxZ, b::writable, stage.rk(0, -1, 0));
+            Grounding.built(footed, rep);
+            if (rep.parts() > 0) {
+                Skycraft.LOGGER.debug("Skycraft landmarks: {} at {} {} had {} hovering parts ({} pillared, {} removed)", kind.id(),
+                        site.x(), site.z(), rep.parts(), rep.filled(), rep.removed());
+            }
+        } catch (RuntimeException e) {
+            Skycraft.LOGGER.debug("Skycraft landmarks: support check failed for {}", kind.id(), e);
         }
         // the buried marker (a skull two blocks under the centre ground) tells the server the site stands
         int my = b.ground(0, 0) - 2;

@@ -699,6 +699,7 @@ public final class MarqueeBuilder {
         for (String page : b.pages()) list.add(StringTag.valueOf(Component.Serializer.toJson(Component.literal(page))));
         tag.put("pages", list);
         tag.putBoolean("resolved", true);
+        tag.putBoolean(com.skycraft.lore.place.StoryReader.STORY_TAG, true);
         return stack;
     }
 

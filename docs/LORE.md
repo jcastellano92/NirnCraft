@@ -14,7 +14,8 @@ All of it is original writing. Lore facts and names come from the Elder Scrolls;
 
 * Code: `com.skycraft.lore.place`.
   * `PlaceLore`: the data and the API.
-  * `PlaceLoreEvents`: reading, lecterns and the discovery line.
+  * `PlaceLoreEvents`: reading hooks (reveal, mini-quest) and the discovery line.
+  * `StoryReader`: right-click / [F] on a story lectern, clue sign or note barrel opens the Skycraft reading screen.
   * `PlaceLoreLoot`: the notes in containers.
   * `PlaceLorePlacer`: lecterns.
   * `PlaceLoreDialogue`: townsfolk topics.
@@ -87,8 +88,12 @@ PlaceLore.hook(placeId) / rumour(placeId) / region(regionId) / regionalRumour(re
 ```
 
 To place a note, put the stack in any container, or on a vanilla lectern with
-`LecternBlockEntity.setBook(stack)` and `HAS_BOOK` set. The lectern click handler works for any lectern that holds
-a place readable.
+`LecternBlockEntity.setBook(stack)` and `HAS_BOOK` set. `StoryReader` opens the Skycraft reading screen (the one lore
+books use) for a lectern that holds a `skycraft:book`, a written book tagged `SkyNote` (the place note id) or `SkyStory`,
+or any written book on a lectern no player placed. The vanilla lectern menu is never reached, so the book stays (set
+`lore.storyLecternTakeable` and sneak to take it). A sign or barrel is readable the same way when its block entity has
+the `SkyRead` marker (`StoryReader.mark` / `markNoteContainer`); the scene realiser marks its clue signs and note
+barrels. `/skylore selftest lecterns` simulates the clicks headless (run by `qa.ps1 -Server`).
 
 ## 3. Data format
 

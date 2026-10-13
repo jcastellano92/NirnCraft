@@ -29,6 +29,7 @@ import java.util.List;
  *  /skylore give &lt;place&gt; [note]      the note items (all of the place's without a note id)
  *  /skylore read &lt;place&gt; [note]      opens a note as if read (runs its reveal and quest start)
  *  /skylore lectern &lt;place&gt;           places the place's lectern now (if the player stands near its centre)
+ *  /skylore selftest lecterns        story reader self-test: simulated right-clicks on story lecterns, signs, barrels
  * </pre>
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
@@ -44,7 +45,12 @@ public final class PlaceLoreCommands {
                         .then(Commands.argument("note", StringArgumentType.word()).executes(c -> give(c, StringArgumentType.getString(c, "note"))))))
                 .then(Commands.literal("read").then(place().executes(c -> read(c, ""))
                         .then(Commands.argument("note", StringArgumentType.word()).executes(c -> read(c, StringArgumentType.getString(c, "note"))))))
-                .then(Commands.literal("lectern").then(place().executes(PlaceLoreCommands::lectern))));
+                .then(Commands.literal("lectern").then(place().executes(PlaceLoreCommands::lectern)))
+                .then(Commands.literal("selftest").then(Commands.literal("lecterns").executes(c -> {
+                    String line = StoryLecternSelfTest.run(c.getSource().getServer());
+                    c.getSource().sendSuccess(() -> Component.literal("Story lectern selftest: " + line), false);
+                    return line.endsWith(" 0 problems") ? 1 : 0;
+                }))));
     }
 
     /**

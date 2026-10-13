@@ -80,6 +80,12 @@
   "tooltip.skycraft.lore.read": "Read",
   "screen.skycraft.lore.by": "by %s",
   "screen.skycraft.lore.faded": "The ink has faded beyond reading.",
+  "screen.skycraft.lore.story.lectern": "Left on a lectern",
+  "screen.skycraft.lore.story.sign": "Written on a signpost",
+  "screen.skycraft.lore.story.note": "A note left behind",
+  "screen.skycraft.lore.story.untitled": "Unsigned",
+  "message.skycraft.lore.story_read": "You read: %s",
+  "hud.skycraft.lore.read": "[F] Read  %s",
 
   "book.skycraft.category.history": "History",
   "book.skycraft.category.daedra": "The Daedra",

@@ -298,6 +298,7 @@ public final class Exteriors {
         for (Component page : pages) list.add(StringTag.valueOf(Component.Serializer.toJson(page)));
         tag.put("pages", list);
         tag.putBoolean("resolved", true);
+        tag.putBoolean(com.skycraft.lore.place.StoryReader.STORY_TAG, true);
         return stack;
     }
 

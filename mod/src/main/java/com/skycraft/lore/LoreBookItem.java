@@ -35,6 +35,8 @@ import java.util.List;
 public class LoreBookItem extends Item {
     public static final String TAG = "book";
     public static final String READ_KEY = "read";
+    /** Test seam: when set, the open-book request goes here instead of the network (self-tests, headless). */
+    public static volatile java.util.function.BiConsumer<ServerPlayer, String> openHook;
 
     public LoreBookItem(Properties props) {
         super(props);
@@ -83,7 +85,9 @@ public class LoreBookItem extends Item {
             data.addStat("lore_books_read", 1);
             data.markDirty();
         }
-        SkyNetwork.sendToPlayer(player, new LorePackets.OpenBook(book.id()));
+        java.util.function.BiConsumer<ServerPlayer, String> hook = openHook;
+        if (hook != null) hook.accept(player, book.id());
+        else SkyNetwork.sendToPlayer(player, new LorePackets.OpenBook(book.id()));
         // place readables reveal what they point at and start their place's mini-quest
         com.skycraft.lore.place.PlaceLoreEvents.onRead(player, book);
     }

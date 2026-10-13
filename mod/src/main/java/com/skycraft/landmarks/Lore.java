@@ -194,6 +194,7 @@ public final class Lore {
         for (String p : pages) list.add(StringTag.valueOf(Component.Serializer.toJson(Component.literal(p))));
         tag.put("pages", list);
         tag.putBoolean("resolved", true);
+        tag.putBoolean(com.skycraft.lore.place.StoryReader.STORY_TAG, true);
         return stack;
     }
 

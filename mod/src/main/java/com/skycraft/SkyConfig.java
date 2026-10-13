@@ -32,6 +32,7 @@ public final class SkyConfig {
     public static final ForgeConfigSpec.IntValue RESPAWN_INVULN_SECONDS;
     public static final ForgeConfigSpec.IntValue RESPAWN_SAFE_RADIUS;
     public static final ForgeConfigSpec.BooleanValue HAND_SPELL_GLOW;
+    public static final ForgeConfigSpec.BooleanValue STORY_LECTERN_TAKEABLE;
 
     /** Where you wake after dying with no bed: the nearest settlement you have visited, or the world spawn. */
     public enum RespawnMode { VISITED_SETTLEMENT, WORLD_SPAWN }
@@ -99,6 +100,12 @@ public final class SkyConfig {
         SNEAK_ATTACKS = b.define("sneakAttacks", true);
         HAND_SPELL_GLOW = b.comment("Equipped spells show a small glow in their hand (no item is drawn over the arm).")
                 .define("handSpellGlow", true);
+        b.pop();
+
+        b.push("lore");
+        STORY_LECTERN_TAKEABLE = b.comment("A lectern with a story keeps its book: a right-click opens the story in the reading screen.",
+                        "On, a sneaking right-click opens the vanilla lectern instead, where the book can be taken.")
+                .define("storyLecternTakeable", false);
         b.pop();
 
         SPEC = b.build();

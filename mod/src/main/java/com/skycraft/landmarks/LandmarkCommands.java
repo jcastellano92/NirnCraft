@@ -36,6 +36,9 @@ import java.util.TreeMap;
  *     <li>{@code near [radius]}: the sites around you;</li>
  *     <li>{@code stats [radius]} / {@code statsat <x> <z> <half>}: counts, density per km2, distinct kinds and variants;</li>
  *     <li>{@code pinned}: the pinned XL sites and where they stand;</li>
+ *     <li>{@code groundcheck <x> <z> <half>}: the floating census of the area (landmarks, minor sites, scene props, control);
+
+ *     {@code grounding on|off} switches the foundation and support pass for before/after runs;</li>
  *     <li>{@code build <kind> [x z]}: builds a kind where you stand (or at x z);</li>
  *     <li>{@code showcase <tier> <family|auto> <x> <z>}: builds every kind of a tier in a grid;</li>
  *     <li>{@code sample <x> <z> <half> <count> <name>}: generates real sites of an area and writes a list for the renderer.</li>
@@ -74,6 +77,32 @@ public final class LandmarkCommands {
                                                 IntegerArgumentType.getInteger(c, "x"), IntegerArgumentType.getInteger(c, "z"),
                                                 IntegerArgumentType.getInteger(c, "half")))))))
                 .then(Commands.literal("pinned").executes(LandmarkCommands::pinned))
+                .then(Commands.literal("grounding")
+                        .then(Commands.argument("on", com.mojang.brigadier.arguments.BoolArgumentType.bool()).executes(c -> {
+                            Grounding.enabled = com.mojang.brigadier.arguments.BoolArgumentType.getBool(c, "on");
+                            say(c, "landmark grounding " + (Grounding.enabled ? "ON" : "OFF (legacy five-point settle, no foundations)"));
+                            return 1;
+                        })))
+                .then(Commands.literal("showcheck")
+                        .then(Commands.argument("tier", StringArgumentType.word())
+                                .then(Commands.argument("x", IntegerArgumentType.integer(-60000, 60000))
+                                        .then(Commands.argument("z", IntegerArgumentType.integer(-60000, 60000))
+                                                .executes(c -> {
+                                                    Tier t = Tier.byId(StringArgumentType.getString(c, "tier"));
+                                                    if (t == null) {
+                                                        c.getSource().sendFailure(Component.literal("Unknown tier"));
+                                                        return 0;
+                                                    }
+                                                    return GroundCheck.showcase(c.getSource().getLevel(), t, IntegerArgumentType.getInteger(c, "x"),
+                                                            IntegerArgumentType.getInteger(c, "z"), line -> say(c, line));
+                                                })))))
+                .then(Commands.literal("groundcheck")
+                        .then(Commands.argument("x", IntegerArgumentType.integer(-60000, 60000))
+                                .then(Commands.argument("z", IntegerArgumentType.integer(-60000, 60000))
+                                        .then(Commands.argument("half", IntegerArgumentType.integer(64, 4000))
+                                                .executes(c -> GroundCheck.run(c.getSource().getLevel(), IntegerArgumentType.getInteger(c, "x"),
+                                                        IntegerArgumentType.getInteger(c, "z"), IntegerArgumentType.getInteger(c, "half"),
+                                                        line -> say(c, line)))))))
                 .then(Commands.literal("build")
                         .then(Commands.argument("kind", StringArgumentType.word())
                                 .suggests((c, b) -> SharedSuggestionProvider.suggest(Kinds.all().stream().map(Kind::id), b))

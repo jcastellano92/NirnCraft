@@ -38,6 +38,7 @@ public final class LoreClientSetup {
     @SubscribeEvent
     public static void overlays(RegisterGuiOverlaysEvent event) {
         event.registerAboveAll("lore_stone", StoneHud::render);
+        event.registerAboveAll("lore_read_prompt", ReadPrompt::render);
     }
 
     @SubscribeEvent
