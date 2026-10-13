@@ -18,7 +18,7 @@ hash = "75dd3be31e417473bb4dba13bd81c6222792c31b41fc6199494c67b5bc432266"
 
 [[files]]
 file = "config/fml.toml"
-hash = "eb6e8b8eda9682889a83d55262ef96cf37153d58fe7f0fa5d5cb1da5d9f7dd9b"
+hash = "6264c3d439371f4d4983417553038c979f938b2ad76f9d64bf03107399420158"
 
 [[files]]
 file = "config/lootr-common.toml"
