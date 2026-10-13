@@ -85,6 +85,22 @@ def main():
     except Exception as ex:  # a broken generator must show up as a check failure, not a crash
         err(f"landmarks: {ex}")
 
+
+    # Forge's EventBus generates handler classes named __<SimpleClass>_<method>_<Event> in the class's package:
+    # two nested classes with the same simple name and handler method in one package collide at runtime.
+    seen_h = defaultdict(set)
+    hre = re.compile(r'@SubscribeEvent\s*(?:\([^)]*\))?\s*public\s+(?:static\s+)?void\s+(\w+)\s*\(\s*([\w.]+)')
+    for f in glob.glob(os.path.join(JAVA, "**", "*.java"), recursive=True):
+        src = open(f, encoding="utf-8", errors="replace").read()
+        pm = re.search(r'^package ([\w.]+);', src, re.M)
+        pkg = pm.group(1) if pm else ""
+        for m in hre.finditer(src):
+            cls = re.findall(r'class\s+(\w+)', src[:m.start()])
+            if cls:
+                seen_h[(pkg, cls[-1], m.group(1), m.group(2).split('.')[-1])].add(os.path.relpath(f, JAVA))
+    for k, files in seen_h.items():
+        if len(files) > 1:
+            err(f"event handler class name collision {k[1]}.{k[2]}({k[3]}) in package {k[0]}: {', '.join(sorted(files))}")
     print(f"{n} json files, {places} places, {sum(len(v) for v in kinds.values())} registry ids checked, {len(errs)} errors")
 
 

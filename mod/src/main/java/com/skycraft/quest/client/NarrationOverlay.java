@@ -43,8 +43,8 @@ public final class NarrationOverlay {
     }
 
     @Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static final class Setup {
-        private Setup() {}
+    public static final class NarrationSetup {  // not 'Setup': Forge's ASM handler names collide per package
+        private NarrationSetup() {}
 
         @SubscribeEvent
         public static void overlays(RegisterGuiOverlaysEvent event) {
