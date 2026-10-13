@@ -144,6 +144,9 @@ public final class Accessibility {
         if (!roofed) return;
         boolean bottom = !sameRun(level, box, p.relative(f.getOpposite()).below(), f);
         boolean top = !sameRun(level, box, p.relative(f).above(), f);
+        // a lone stair (a chair, an awning or bracket under a balcony) is not a run: what stands over it stays (the
+        // balcony deck slab two above an awning is not a table)
+        if (bottom && top) return;
         // the cells above this step
         for (int dy = 1; dy <= 2; dy++) {
             BlockPos u = p.above(dy);

@@ -22,6 +22,7 @@ public final class Builders {
 
     public static void build(Canvas c, SettlementPiece piece) {
         Spec s = piece.spec;
+        if (s.has(Spec.OMIT)) return; // left out by the street plan (a prop on a doorstep path, street or road)
         if (s.has(Spec.RESERVED)) {
             // a player home plot (HousePlots): only its bounds and front door, the economy module builds the home
             c.anchor(AnchorType.HOUSE_MIN, -1, 0, -1);

@@ -64,6 +64,8 @@ public final class PlanGround {
         public boolean mouth;
         /** Pad shaping at the column: weight and pad height. */
         public float padWeight, padHeight;
+        /** P5: the street plan's plot / street pad at the column: weight and the height the terrain is pulled to. */
+        public float plotWeight, plotHeight;
         // candidates (nearest edge per stretch of road)
         private int n;
         private final int[] cEdge = new int[K];
@@ -181,10 +183,15 @@ public final class PlanGround {
                 bucketOf.size(), bucketEdges.length, siteGrid.size(), (System.nanoTime() - t0) / 1_000_000);
     }
 
+    /** Built once per plan: the loader thread, the server thread and every worldgen worker may ask at the same time. */
     private static PlanGround of(RoadPlan p) {
         PlanGround g = cached;
-        if (g == null || g.plan != p) cached = g = new PlanGround(p);
-        return g;
+        if (g != null && g.plan == p) return g;
+        synchronized (PlanGround.class) {
+            g = cached;
+            if (g == null || g.plan != p) cached = g = new PlanGround(p);
+            return g;
+        }
     }
 
     /** Dev harness modes (per thread): plan shaping (production), old terrain, and natural terrain with the detail
@@ -237,7 +244,17 @@ public final class PlanGround {
         float w = 0f;
         if (g.bed(x, z, b)) w = b.weight;
         if (g.pad(x, z, b)) w = Math.max(w, b.padWeight);
+        if (g.plot(x, z, b)) w = Math.max(w, b.plotWeight);
         return w;
+    }
+
+    /**
+     * P5: the street plan's plot and street pads at column (x, z) ({@code b.plotWeight}, {@code b.plotHeight}, see
+     * {@link com.skycraft.worldplan.street.StreetPlan#pad}); false where none reaches. Applied after the site pad and
+     * before the road bed, never on water columns.
+     */
+    public boolean plot(int x, int z, Bed b) {
+        return com.skycraft.worldplan.street.StreetPlan.get().pad(x, z, b);
     }
 
     private static float smooth(float t) {

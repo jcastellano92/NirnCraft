@@ -64,15 +64,40 @@ public final class Bake {
             "com.skycraft.worldplan.scene.ScenePlanBuilder$Run", "com.skycraft.worldplan.scene.ScenePlanBuilder$Layout",
             "com.skycraft.worldplan.scene.ScenePlanBuilder$SceneB", "com.skycraft.worldplan.scene.ScenePlanBuilder$Table",
             "com.skycraft.worldplan.scene.ScenePlanBuilder$KindInfo", "com.skycraft.worldplan.scene.ScenePlanBuilder$LmKind",
-            "com.skycraft.worldplan.scene.SceneKinds"};
-    /** Other data files the baked data reads. */
-    private static final String[] DATA_FILES = {"/skycraft/roads/named_roads.json", "/skycraft/roads/corridors.json",
-            "/skycraft/scatter/kinds.json", "/skycraft/scatter/rules.json", "/skycraft/scatter/loreweb_clues.json",
-            "/skycraft/landmarks/kinds.json"};
-    /** Everything baked, in order (the scene plan reads the road plan, so it comes after it). */
+            "com.skycraft.worldplan.scene.SceneKinds",
+            // the street plan (P5): the settlement planner and the builders whose doors it records
+            "com.skycraft.worldplan.street.StreetPlan", "com.skycraft.worldplan.street.StreetPlanBuilder",
+            "com.skycraft.worldplan.street.StreetPlanBuilder$Resolver", "com.skycraft.worldplan.street.StreetPlanBuilder$Line",
+            "com.skycraft.worldplan.street.StreetPlanBuilder$Result", "com.skycraft.worldplan.street.StreetTerrain",
+            "com.skycraft.worldplan.PlanGround", "com.skycraft.tamriel.settlement.plan.Plan", "com.skycraft.tamriel.settlement.plan.Spec",
+            "com.skycraft.tamriel.settlement.plan.Terrain", "com.skycraft.tamriel.settlement.plan.Layouts",
+            "com.skycraft.tamriel.settlement.plan.CityPlan", "com.skycraft.tamriel.settlement.plan.CityPlans",
+            "com.skycraft.tamriel.settlement.plan.Nets", "com.skycraft.tamriel.settlement.plan.Halls",
+            "com.skycraft.tamriel.settlement.plan.HousePlots", "com.skycraft.tamriel.settlement.plan.Archetype",
+            "com.skycraft.tamriel.settlement.grammar.Fabric", "com.skycraft.tamriel.settlement.grammar.Features",
+            "com.skycraft.tamriel.settlement.grammar.Overlays", "com.skycraft.tamriel.settlement.grammar.Grammar",
+            "com.skycraft.tamriel.settlement.grammar.Blueprint", "com.skycraft.tamriel.settlement.grammar.Programs",
+            "com.skycraft.tamriel.settlement.grammar.Outdoors", "com.skycraft.tamriel.settlement.grammar.Civic",
+            "com.skycraft.tamriel.settlement.grammar.Style", "com.skycraft.tamriel.settlement.grammar.Styles",
+            "com.skycraft.tamriel.settlement.grammar.Tensor", "com.skycraft.tamriel.settlement.grammar.Metrics",
+            "com.skycraft.tamriel.settlement.build.Builders", "com.skycraft.tamriel.settlement.build.Shells",
+            "com.skycraft.tamriel.settlement.build.Works", "com.skycraft.tamriel.settlement.build.Landmarks",
+            "com.skycraft.tamriel.settlement.build.GuildHalls", "com.skycraft.tamriel.settlement.build.Jails",
+            "com.skycraft.tamriel.settlement.build.Canvas", "com.skycraft.tamriel.settlement.kit.Kits",
+            "com.skycraft.tamriel.settlement.SettlementPiece"};
+        /** Other data files the baked data reads. */
+    private static final String[] DATA_FILES = {"/skycraft/roads/named_roads.json", "/skycraft/roads/corridors.json", "/skycraft/scatter/kinds.json",
+            "/skycraft/scatter/rules.json", "/skycraft/scatter/loreweb_clues.json", "/skycraft/landmarks/kinds.json",
+            "/skycraft/tamriel/styles/akaviri.json", "/skycraft/tamriel/styles/altmer.json", "/skycraft/tamriel/styles/argonian.json",
+            "/skycraft/tamriel/styles/atmoran.json", "/skycraft/tamriel/styles/bosmer.json", "/skycraft/tamriel/styles/breton.json",
+            "/skycraft/tamriel/styles/dunmer.json", "/skycraft/tamriel/styles/imperial.json", "/skycraft/tamriel/styles/khajiit.json",
+            "/skycraft/tamriel/styles/maormer.json", "/skycraft/tamriel/styles/nord.json", "/skycraft/tamriel/styles/orc.json",
+            "/skycraft/tamriel/styles/redguard.json", "/skycraft/tamriel/styles/yokudan.json"};
+    /** Everything baked, in order (the street and scene plans read the road plan). */
     private static final List<Bakeable> BAKES = List.of(
             new Bakeable("landmass", com.skycraft.roads.Landmass::computeLive),
             new Bakeable(com.skycraft.worldplan.RoadPlanBuilder.BAKE_NAME, com.skycraft.worldplan.RoadPlanBuilder::computeLive),
+            new Bakeable(com.skycraft.worldplan.street.StreetPlanBuilder.BAKE_NAME, com.skycraft.worldplan.street.StreetPlanBuilder::computeLive),
             new Bakeable(com.skycraft.worldplan.scene.ScenePlanBuilder.BAKE_NAME, com.skycraft.worldplan.scene.ScenePlanBuilder::computeLive));
 
     private static volatile String inputs;
@@ -94,6 +119,13 @@ public final class Bake {
                 for (JsonElement e : names) feed(md, TAMRIEL + "places/" + e.getAsString());
             }
             for (String f : DATA_FILES) feed(md, f);
+            // the authored city plans (the street plan's input)
+            byte[] plans = bytes(TAMRIEL + "cityplans/index.json");
+            if (plans != null) {
+                md.update(plans);
+                JsonElement list = JsonParser.parseString(new String(plans, StandardCharsets.UTF_8)).getAsJsonObject().get("plans");
+                if (list != null) for (JsonElement e : list.getAsJsonArray()) feed(md, TAMRIEL + "cityplans/" + e.getAsString() + ".json");
+            }
             for (String c : CLASSES) feed(md, "/" + c.replace('.', '/') + ".class");
             StringBuilder sb = new StringBuilder();
             for (byte b : md.digest()) sb.append(String.format("%02x", b));

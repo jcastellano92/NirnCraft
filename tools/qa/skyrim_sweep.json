@@ -1,0 +1,218 @@
+[
+ {
+  "id": "whiterun",
+  "type": "capital",
+  "culture": "nord",
+  "x": 62,
+  "z": -68,
+  "radius": 115,
+  "half": 155
+ },
+ {
+  "id": "riverwood",
+  "type": "town",
+  "culture": "nord",
+  "x": 33,
+  "z": 593,
+  "radius": 60,
+  "half": 100
+ },
+ {
+  "id": "rorikstead",
+  "type": "town",
+  "culture": "nord",
+  "x": -1652,
+  "z": -228,
+  "radius": 55,
+  "half": 95
+ },
+ {
+  "id": "solitude",
+  "type": "capital",
+  "culture": "nord",
+  "x": -1216,
+  "z": -1740,
+  "radius": 135,
+  "half": 175
+ },
+ {
+  "id": "dragon_bridge",
+  "type": "town",
+  "culture": "nord",
+  "x": -1934,
+  "z": -1432,
+  "radius": 55,
+  "half": 95
+ },
+ {
+  "id": "windhelm",
+  "type": "capital",
+  "culture": "nord",
+  "x": 1825,
+  "z": -717,
+  "radius": 100,
+  "half": 140
+ },
+ {
+  "id": "kynesgrove",
+  "type": "town",
+  "culture": "nord",
+  "x": 1825,
+  "z": -298,
+  "radius": 50,
+  "half": 90
+ },
+ {
+  "id": "darkwater_crossing",
+  "type": "village",
+  "culture": "nord",
+  "x": 1595,
+  "z": 421,
+  "radius": 40,
+  "half": 80
+ },
+ {
+  "id": "riften",
+  "type": "capital",
+  "culture": "nord",
+  "x": 2435,
+  "z": 1418,
+  "radius": 80,
+  "half": 120
+ },
+ {
+  "id": "ivarstead",
+  "type": "town",
+  "culture": "nord",
+  "x": 896,
+  "z": 901,
+  "radius": 55,
+  "half": 95
+ },
+ {
+  "id": "shors_stone",
+  "type": "town",
+  "culture": "nord",
+  "x": 2269,
+  "z": 842,
+  "radius": 45,
+  "half": 85
+ },
+ {
+  "id": "heartwood_mill",
+  "type": "village",
+  "culture": "nord",
+  "x": 1796,
+  "z": 1401,
+  "radius": 32,
+  "half": 72
+ },
+ {
+  "id": "largashbur",
+  "type": "village",
+  "culture": "orc",
+  "x": 1831,
+  "z": 1636,
+  "radius": 38,
+  "half": 78
+ },
+ {
+  "id": "markarth",
+  "type": "capital",
+  "culture": "nord",
+  "x": -3102,
+  "z": -191,
+  "radius": 85,
+  "half": 125
+ },
+ {
+  "id": "karthwasten",
+  "type": "town",
+  "culture": "nord",
+  "x": -2420,
+  "z": -729,
+  "radius": 50,
+  "half": 90
+ },
+ {
+  "id": "old_hroldan",
+  "type": "village",
+  "culture": "nord",
+  "x": -2131,
+  "z": -10,
+  "radius": 26,
+  "half": 66
+ },
+ {
+  "id": "dushnikh_yal",
+  "type": "village",
+  "culture": "orc",
+  "x": -2623,
+  "z": 243,
+  "radius": 38,
+  "half": 78
+ },
+ {
+  "id": "falkreath",
+  "type": "capital",
+  "culture": "nord",
+  "x": -795,
+  "z": 1250,
+  "radius": 85,
+  "half": 125
+ },
+ {
+  "id": "helgen",
+  "type": "town",
+  "culture": "nord",
+  "x": -24,
+  "z": 1143,
+  "radius": 60,
+  "half": 100
+ },
+ {
+  "id": "morthal",
+  "type": "capital",
+  "culture": "nord",
+  "x": -928,
+  "z": -1176,
+  "radius": 75,
+  "half": 115
+ },
+ {
+  "id": "stonehills",
+  "type": "village",
+  "culture": "nord",
+  "x": -430,
+  "z": -1137,
+  "radius": 40,
+  "half": 80
+ },
+ {
+  "id": "dawnstar",
+  "type": "capital",
+  "culture": "nord",
+  "x": 174,
+  "z": -1801,
+  "radius": 85,
+  "half": 125
+ },
+ {
+  "id": "winterhold",
+  "type": "capital",
+  "culture": "nord",
+  "x": 1417,
+  "z": -1749,
+  "radius": 70,
+  "half": 110
+ },
+ {
+  "id": "college_of_winterhold",
+  "type": "town",
+  "culture": "nord",
+  "x": 1529,
+  "z": -1886,
+  "radius": 60,
+  "half": 100
+ }
+]

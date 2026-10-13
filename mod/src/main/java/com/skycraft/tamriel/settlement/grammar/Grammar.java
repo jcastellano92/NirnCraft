@@ -190,7 +190,7 @@ public final class Grammar {
         c.entrance(b.doorX, 1, main.z0(), p.door, Direction.SOUTH);
         if (b.wallH >= 4) c.set(b.doorX, 3, main.z0(), b.timber ? B.axis(p.beam, Direction.Axis.X) : B.stair(p.trim, Direction.NORTH, true));
         if (b.porchD == 0) steps(c, b, p, b.doorX, main.z0() - 1);
-        if (b.wealth.atLeast(Wealth.COMMON) && b.use.home() && main.z1() == b.bz1 && b.parts.size() == 1) {
+        if (b.wealth.atLeast(Wealth.COMMON) && b.use.home() && main.z1() == b.bz1 && b.parts.size() == 1 && !b.spec.has(Spec.NO_BACK_DOOR)) {
             int bx = b.doorX + (b.doorX + 2 <= main.x1() - 1 ? 1 : 0);
             c.entrance(bx, 1, main.z1(), p.door, Direction.NORTH);
         }

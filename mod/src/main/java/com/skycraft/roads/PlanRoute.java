@@ -70,12 +70,13 @@ final class PlanRoute {
         if (gate >= 0) link = ix.links.get(placeA + "|@gate" + gate);
         else if (trail) link = ix.links.get(placeA + "|@road");
         else if (placeB != null && !placeB.isEmpty()) link = ix.links.get(placeA + "|" + placeB);
-        if (link == null || ix.segs[link] == null) {
+        boolean named = link != null && ix.segs[link] != null;
+        if (!named) {
             // the plan's rules and the network's can differ in a corner case: take the plan link that starts at this end
             link = byEnd(ix, ea, eb, trail || gate >= 0);
             if (link == null) return null;
         }
-        return build(ix, link, generation, a, b, ea, eb);
+        return build(ix, link, generation, a, b, ea, eb, named);
     }
 
     /** A link of the plan with a vertex at {@code ea} (and, for a graph link, one at {@code eb}). */
@@ -96,7 +97,7 @@ final class PlanRoute {
         return null;
     }
 
-    private static RoadPlanner.Result build(Index ix, int link, int generation, int a, int b, int[] ea, int[] eb) {
+    private static RoadPlanner.Result build(Index ix, int link, int generation, int a, int b, int[] ea, int[] eb, boolean named) {
         RoadPlan plan = ix.plan;
         IntArrayList segs = ix.segs[link];
         // chain the pieces from the end at ea
@@ -143,7 +144,23 @@ final class PlanRoute {
         double dStart = Math.hypot(px.getFloat(0) - ea[0] - 0.5, pz.getFloat(0) - ea[1] - 0.5);
         double dEnd = Math.hypot(px.getFloat(last) - ea[0] - 0.5, pz.getFloat(last) - ea[1] - 0.5);
         boolean flip = dEnd < dStart;
-        if (Math.min(dStart, dEnd) > END_TOLERANCE * 4) return null;
+        double off = Math.min(dStart, dEnd);
+        // a link found by its places is the plan's own even where the network chose another gate (its neighbours are
+        // the towns it has found so far, not the whole graph): the road starts at the plan's gate
+        if (off > END_TOLERANCE * 8 && !named) return null;
+        if (off > END_TOLERANCE && off <= END_TOLERANCE * 8) {
+            // the plan merged this link's first stretch into another road leaving the same gate (P5: roads leave a
+            // settlement radially, so two roads from one gate share their start): a chord from the gate along that road
+            if (flip) {
+                px.add(ea[0] + 0.5f);
+                pz.add(ea[1] + 0.5f);
+                pv.add(-1);
+            } else {
+                px.add(0, ea[0] + 0.5f);
+                pz.add(0, ea[1] + 0.5f);
+                pv.add(0, -1);
+            }
+        }
 
         // densify: one point every STEP blocks (chords between pieces included), integer columns
         IntArrayList xs = new IntArrayList(), zs = new IntArrayList();
@@ -192,7 +209,7 @@ final class PlanRoute {
 
     /** A vertex the road crosses water at on a bridge deck. */
     private static boolean water(RoadPlan plan, int v) {
-        return plan.vspan[v] == RoadPlan.BRIDGE && !Float.isNaN(plan.vw[v]);
+        return v >= 0 && plan.vspan[v] == RoadPlan.BRIDGE && !Float.isNaN(plan.vw[v]);
     }
 
     /** The class (0 highway .. 3 trail) of the plan road nearest to the column within {@code margin} of its band, or -1. */

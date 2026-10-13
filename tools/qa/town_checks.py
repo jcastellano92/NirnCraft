@@ -596,7 +596,8 @@ _PASS_END = ('_carpet', '_pressure_plate', '_door', '_fence_gate', '_trapdoor', 
 def access_report(area):
     """Unreachable doors and blocked stairs, from the blocks alone (block names carry no state).
 
-    Doors: every lower door half with exactly one side open to the sky (within 4 blocks) is an exterior door; its
+    Doors: every lower door half with exactly one side open to the sky (within 4 blocks) is an exterior door (a door
+    onto a railed balcony deck is counted apart: reached from inside); its
     doorstep (the cell in front and the one behind it) must have 2 passable cells and a floor. Stairs: every run end
     (a stair cell with exactly one stair neighbour one level up or down, under a roof) needs a free 2-high standing cell
     beside it (same level for a bottom end, one up for a top end). Returns counts and the first few positions."""
@@ -622,7 +623,7 @@ def access_report(area):
     solid_top = ~(area.air[A] | area.soft[A] | area.water[A])
     def sky(x, z, y):  # column open to the sky above y (cells y+2 .. top)
         return area.top[z, x] <= y + 1
-    doors = bad_doors = 0
+    doors = bad_doors = balconies = 0
     bad_door_pos = []
     ys, zs, xs = np.nonzero(DR)
     for y, z, x in zip(ys, zs, xs):
@@ -641,6 +642,13 @@ def access_report(area):
         if cnt[0] == cnt[1] or max(cnt) == 0:
             continue
         dx, dz = sides[0] if cnt[0] > cnt[1] else sides[1]
+        # an upper-storey door onto a railed balcony (railing at the doorstep, a slab or plank deck under it, air under
+        # the deck) is not an entrance: it is reached from inside (Grammar.balcony)
+        fx, fz = x + dx, z + dz
+        if 2 <= y < H and ('fence' in names[A[y, fz, fx]] or names[A[y, fz, fx]].endswith('_wall')) \
+                and any(k in names[A[y - 1, fz, fx]] for k in ('_slab', '_planks')) and area.air[A[y - 2, fz, fx]]:
+            balconies += 1
+            continue
         # the opposite side must be roofed (it is, by the single open direction)
         doors += 1
         def stand(cx, cz, lv):  # a 2-high free cell on a floor at level lv
@@ -692,7 +700,7 @@ def access_report(area):
             if len(bad_end_pos) < 8:
                 bad_end_pos.append((int(x) + area.x1, wy, int(z) + area.z1, 'bottom' if ndy == 1 else 'top'))
     return dict(exterior_doors=doors, doors_unreachable=bad_doors, doors_unreachable_detail=bad_door_pos,
-                stair_runs=runs, stairs_blocked=bad_ends, stairs_blocked_detail=bad_end_pos)
+                balcony_doors=balconies, stair_runs=runs, stairs_blocked=bad_ends, stairs_blocked_detail=bad_end_pos)
 
 
 # ------------------------------------------------------------------ sealed-building check
@@ -803,8 +811,10 @@ def main():
                      res.get('props_floating', 0), verdict(res)))
     ok = [r for r in allres if not r.get('note')]
     tot = lambda k: sum(r.get(k, 0) or 0 for r in ok)  # noqa: E731
-    print('ACCESS exterior_doors=%d unreachable=%d stair_runs=%d blocked_ends=%d' % (
-        sum(r.get('exterior_doors', 0) for r in allres), sum(r.get('doors_unreachable', 0) for r in allres),
+    ext = sum(r.get('exterior_doors', 0) for r in allres)
+    bad = sum(r.get('doors_unreachable', 0) for r in allres)
+    print('ACCESS exterior_doors=%d unreachable=%d (%.2f%%) balcony_doors=%d stair_runs=%d blocked_ends=%d' % (
+        ext, bad, 100.0 * bad / max(1, ext), sum(r.get('balcony_doors', 0) for r in allres),
         sum(r.get('stair_runs', 0) for r in allres), sum(r.get('stairs_blocked', 0) for r in allres)))
     print('TOTAL towns=%d gate_points=%d gates_without_road_24=%d stubs=%d props_on_road=%d props_on_street=%d '
           'props_in_buildings=%d' % (len(ok), tot('gate_points'), tot('gates_without_road_24'), tot('road_end_stubs'),

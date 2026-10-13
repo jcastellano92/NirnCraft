@@ -79,7 +79,7 @@ whiterun-rorikstead, whiterun-dragon_bridge and one river crossing; plus `reach_
   `skycraft:placement_mask` filter). The road corridors are weak until P1: the map channel does not follow the
   planner's roads, so `roads/worldplan` must `PlacementMask.register(Source)` its baked polylines (class half width + 2).
   Paver/Canvas clearing and `OrphanSweep` stay as the safety net and as the upgrade path for old saves.
-* **P5 Streets to every door (S5).** Settlement plans emit a street graph that reaches every door (and gate lanes that
+* **P5 Streets to every door (S5). DONE** (section 7c). Settlement plans emit a street graph that reaches every door (and gate lanes that
   meet S4 road ends); plot pads go into S7. Gate: unreachable doors <= 1% on the Skyrim sweep sample.
 * **P6 Planned scenes (S6+S11). DONE** (section 9). Replace per-chunk human-prop rolls with the planned scene list (scene = anchor,
   reason, props, optional clue/note from the lore web). Keep only natural micro-scatter random. Gate: placement lint
@@ -327,6 +327,121 @@ chunk grid; chunk generation 24 ms per chunk with and without the painter in `/s
 Screens: `docs/screens/worldplan/p3_bridge.jpg`, `p3_culvert.jpg`, `p3_switchback.jpg` (`render_town.py <world> --box x z half out`).
 Known limits: farm plots and walls (structure pieces) keep their ground where a plan road crosses them (P5); a bridge
 over a rise the macro plan did not know becomes a short covered passage; a steep tunnel is stairs.
+
+## 7c. P5 result: streets to every door (S5)
+
+Code: package `com.skycraft.worldplan.street`: `StreetPlan` (the baked data, bake name `streetplan`, format version 1,
+queries), `StreetPlanBuilder` (the bake), `StreetTerrain` (the seed-free plan terrain), `StreetPaint` (the world
+generation feature `skycraft:street_paint`, biome modifier `zz_street_paint`, after the road painter), `StreetMask` (the
+`PlacementMask` source), `StreetPlanModule` (registration, loader thread, `/skycraft-streetplan stats|at|lint [id]|debug
+<id> <x> <z>|trace|repaint|verify`, autorun task `streetplan`). Changed: `SettlementStructure` (named places are built
+from the baked layout; `planPlace` plans on the plan terrain), `plan/Plan` (`keepOut`, terrace seating in `resolve`, wall
+towers face the town), `plan/Terrain` (height-model constructor), `plan/Spec` (`OMIT`, `NO_BACK_DOOR`), `plan/Nets` and
+`grammar/Zoning` (wall towers face the town), `grammar/Grammar` (no back door when flagged), `build/Builders` (skips
+`OMIT`), `build/Canvas` + `SettlementPiece.recordDoors` (declared entrances are recorded on a replay), `build/Accessibility`
+(a lone stair no longer clears what stands over it: it deleted balcony decks), `worldplan/PlanGround` (the edge index is
+built once, under a lock: it was built by every worldgen thread at start; plot pads), `terrain/TamrielHeight` (plot pads),
+`worldplan/RoadPlanBuilder` (a road keeps outside the gate ring of the settlement it ends at and off the buildings and
+landmarks its city plan pins), `worldplan/RoadPlan` (`atSegment`, `Hit.set`), `roads/RoadPaint` (at a junction the road a
+branch joins keeps its own surface; a settlement's open works yield to a road), `roads/PlanRoute` (a link found by its
+places keeps the plan's gate; a stretch merged into another road is joined by a chord), `grammar/Fabric` (a static field
+shared by every planner thread made layouts depend on thread timing: the bake was not reproducible),
+`creatures/world/BanditCampFeature` (keeps off the placement mask: a camp stood on the Rorikstead highway), `bake/Bake`
+(the third bakeable, and the settlement planner, builders, city plans and style sheets in the input hash). Tools:
+`tools/qa/town_checks.py` (a door onto a railed balcony deck is counted apart, `balcony_doors`), `tools/qa/road_measure.py`
+(a point under a gatehouse arch or deck is judged on the surface walked under it), `tools/qa/skyrim_sweep.json` (the
+24-settlement sample of `docs/SKYRIM-SWEEP.md`).
+
+**How it is made** (`StreetPlanBuilder`, 5-15 s for the 884 named settlements, 8 threads):
+* **Layout on the plan terrain.** Every named settlement (capital, city, town, village, farm) is planned by the settlement
+  grammar exactly as before (its city plan is the authored input), but on `StreetTerrain`: `TamrielHeight` without the
+  seeded detail (macro elevation, the seed-free hydrology, the site pads and the road beds of P1/P2). Inside a site pad
+  that is exactly the generated terrain; outside it the plot pads below pull the terrain to it. The planned roads' beds
+  plus 2.5 blocks are kept free (`Plan.keepOut`): fields, yards, fences and houses never cut a road. A piece standing on
+  a terrace tile is seated on it (`Plan.resolve`; the town fill used to sink houses into Whiterun's terraces). Wall
+  towers face the town (their door opened onto the field outside).
+* **Doors.** Every building's builder is replayed on a recording canvas; every declared entrance (`Canvas.entrance`) and
+  every player-home front door is a door. On a 1-block walk grid of the settlement (buildings, walls, towers, mines
+  blocked; a gatehouse only through its 3-wide passage; eaves, props, yards and fields dearer; water dearest, it gets a
+  plank walk; a step of more than two blocks impossible, of two dear) the cheapest 4-connected walk runs from the
+  doorstep (through the building's own porch and its steps, which its builder lays) to a street, a plaza, a road's gate
+  or a planned road's bed. Heights: from the door's floor along the ground, at most one block per cell, then back from
+  the end so the walk meets what it reached. A square building whose front door has no walk is turned to the first side
+  that has one (324 in Tamriel, mostly wall towers); a back door with no walk is not built (`NO_BACK_DOOR`, 92); a prop
+  without anchors on a walk, a street or a planned road is left out (`OMIT`: it keeps its index, so no other piece
+  changes).
+* **Graph.** Street and bridge lines give the street nodes (ends merged within 2 blocks, T-junctions split); a plaza is a
+  node joined to its nearest street node; the last vertex of every planned road that ends at the settlement (a segment
+  end with `JOIN_SITE` on its pad) is a GATE node (ROAD when no predicted gate is within 16 blocks), joined to the
+  nearest street node by the gate lane; each walk is a chain of PATH edges (a node at every corner or change of grade)
+  from the door node to a node split into the street it reaches. Edges: MAIN (major street, gate lane), LANE (3+ wide),
+  ALLEY, PATH, STAIRS (2+ blocks at more than 0.35 per block, and the builder's own steps), BRIDGE; surfaces PAVED,
+  BEATEN, PLANKS (on water), STONE (the building's own porch and steps: left as built).
+* **Plots.** Building footprints (axis-aligned rectangles) with their floor as the pad (not on water, stilts or tents),
+  plazas with theirs, walls, gatehouses and towers, and every other work (no pad). The layout itself (every spec, 20
+  ints and a name) is stored too: `SettlementStructure` builds named places from it, so the generated blocks are what
+  the graph describes.
+
+**Consumers.** (a) The settlement grammar: city plans are the input, the bake their resolved output; named places are
+no longer planned at runtime (`SettlementStructure.plan` reads `StreetPlan.layout`). (b) Terrain: `TamrielHeight` applies
+`StreetPlan.pad` after the site pad and before the road bed (never on water): weight 1 on a plot and one block round it,
+or on a street band (half width + 1), a smoothstep over 4 blocks beyond, height pad + 0.5 (the top solid block is the
+pad); `PlanGround.influence` includes it (caves and overhangs calm under plots). (c) `PlacementMask`: `StreetMask`, every
+plot plus one block and every street, lane and walk plus one block. (d) `StreetPaint`, per column of the chunk being
+decorated, after the settlement's pieces (same step, structures first) and the road painter: each walk cell at its
+planned height: a hole filled (dirt under a path block), grass and dirt worn to a path, a plank walk on water, the two
+cells above cleared of clutter, plants, low walls, slabs and stairs of yard props, tree trunks and natural ground (a
+cut; a full block of a building stays), a yard or pen fence turned into a gate; gate lanes (up to 28 blocks) the same
+over their width; inside a building, wall or gatehouse footprint and on the building's own porch and steps only plants
+and snow go. Streets, their steps on slopes and the stairs off terraces stay the settlement pieces' own (built on the
+real ground). Painting is deterministic and idempotent, reads and writes only its chunk.
+
+**Joins with the road plan.** A road ending at a settlement is penalised inside the ring of its gates plus 16 blocks
+(`OWN_MARGIN`) and on the buildings and landmarks its city plan pins, so it reaches the gate radially, never along or
+through a wall, a field or the Dragon Bridge mill; its last vertex is the gate (P1) and the street plan's GATE node is that
+vertex exactly (lint: 0 GATE/ROAD nodes off a road plan vertex); the gate lane joins it to the main street; fields,
+yards and houses keep 2.5 blocks off every planned road bed.
+
+**Numbers** (bake of this phase; the 24-town Skyrim sweep sample and the 4 corridors regenerated in the Nirn dev world
+with the final code, `/skycraft-dev regen`):
+* Bake: 884 settlements, 64,564 specs (5,387 props left out, 324 buildings turned to a free side, 292 back doors not
+  built), 60,263 nodes, 57,820 edges (37,707 doorstep path edges, ~150 km), 12,962 doors, 58 with no walk in the plan
+  (0.45%: buildings walled in by another piece, a ruin inside a wall tower, a door two blocks under its street), 1,295
+  GATE nodes + 1,281 ROAD joins, 56,926 plots. `streetplan.bin` 1.7 MB deflated (9.1 MB raw); 5 s warm / 15 s cold
+  (8 threads) to compute live, 0.3 s to load. Reproducible (`qa.ps1 -Bake`: a live recomputation equals the bake).
+* `town_checks.py`, 24 settlements: **1,324 exterior doors, 5 unreachable (0.38%)** (before: 69 of 1,401, 4.9%; 39 of
+  them, 2.8%, without the 30 balcony doors the checker now counts apart), 0 blocked stair ends, props on a street 64 > 1,
+  props in buildings 0, gates without a road within 24 blocks 0. Left: two Windhelm harbour doors (a drop past the
+  doorstep, a missing floor), a Markarth back door onto a slab, a Karthwasten door two blocks under its street, a Helgen
+  ruin built into a wall tower.
+* `road_measure.py`, the 4 corridors (1,993 points): **gaps 0, drops 0, tree-blocked 0, obstacles 0, unbridged 0**
+  (P3: 11 / 8 / 0 / 0 / 1, every one at a settlement join: Whiterun's and Helgen's walls, Rorikstead's fields, a farm
+  fence). `p3_corridors.py` (plan centre lines, 1,941 points): gaps 2, drops 1, unbridged 0: one dry-gap bridge between
+  Whiterun and Riverwood where the Nirn detail terrain rises to the deck (the P3 limit, not a join).
+* `StreetPaint`: 24 us per painted chunk (1,302 chunks). The road plan's terrain index is built once (it was built by
+  the loader, the server thread and every worldgen worker at once, 16+ times at start).
+* `qa.ps1 -Server -Bake`: PASS (build, data, layout, reach, world boots, selftests, population lint 0 errors, bake up to date).
+
+**Known limits.** Generic (unnamed) settlements and sites are still planned at runtime on the noise terrain (no street
+plan). Doors of landmarks, jails and towers built with `Canvas.door` (not `entrance`) are not in the plan. A path is one
+block wide and is not stepped with stair blocks (a one-block rise is a step). Street lines are still painted by the
+settlement's STREET pieces on the real ground.
+
+**API** (`com.skycraft.worldplan.street.StreetPlan`, immutable, thread-safe):
+```java
+StreetPlan plan = StreetPlan.get();               // baked (or planned live once)
+StreetPlan.Hit hit = new StreetPlan.Hit();        // reuse one per thread
+if (plan.at(x, z, hit)) {                         // nearest street edge within StreetPlan.REACH (16) blocks
+    hit.cls;      // MAIN LANE ALLEY PATH STAIRS BRIDGE     hit.surface; hit.width; hit.distance; hit.height (walk top y)
+    hit.settlement; hit.edge; hit.t;
+}
+List<StreetPlan.Door> doors = plan.doorsOf("whiterun");   // {spec, x, y, z, facing (outward), node, reachable}
+List<Spec> layout = plan.layout("whiterun");              // the resolved layout (OMIT / NO_BACK_DOOR flags set)
+plan.pad(x, z, bed);                                      // plot / street pad: bed.plotWeight, bed.plotHeight
+```
+Raw arrays: settlements `sId sX sZ sReach` with ranges `sNodeOff/sEdgeOff/sDoorOff/sPlotOff/sSpecOff`; nodes `nx nz nh
+nClass nJoinSeg nJoinVert` (a GATE / ROAD node's road plan segment and global vertex); edges `ea eb ew eClass eSurf`; doors
+`dSpec dx dy dz dFacing dNode dReach`; plots `pSpec pMinX pMinZ pMaxX pMaxZ pPad pKind` (`NO_PAD`; building, wall, work).
 
 ## 8. Contracts for P5 and P6 (so they can run in parallel with P3)
 

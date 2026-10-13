@@ -21,6 +21,8 @@ public final class Terrain {
     private final ChunkGenerator gen;
     private final LevelHeightAccessor heights;
     private final RandomState random;
+    /** A seed-independent height model (y of the topmost solid block of a column) used instead of the generator, or null. */
+    private final java.util.function.IntBinaryOperator model;
     private final Long2LongOpenHashMap cache = new Long2LongOpenHashMap();
     public final int sea;
 
@@ -34,6 +36,21 @@ public final class Terrain {
         this.heights = ctx.heightAccessor();
         this.random = ctx.randomState();
         this.sea = gen.getSeaLevel();
+        this.model = null;
+    }
+
+    /**
+     * A terrain read from a seed-independent height model ({@code land(x, z)} = y of the topmost solid block) instead of
+     * the noise generator: the plan terrain named settlements are laid out on for the street plan
+     * (docs/WORLDGEN-PIPELINE.md P5), the same for every world seed. Water comes from the map, as for the generator.
+     */
+    public Terrain(int grid, int sea, java.util.function.IntBinaryOperator land) {
+        this.grid = grid;
+        this.gen = null;
+        this.heights = null;
+        this.random = null;
+        this.sea = sea;
+        this.model = land;
     }
 
     /** Packed (land, water) of a lattice node. */
@@ -41,7 +58,7 @@ public final class Terrain {
         long key = (((long) gx) << 32) ^ (gz & 0xFFFFFFFFL);
         if (cache.containsKey(key)) return cache.get(key);
         int x = gx * grid, z = gz * grid;
-        int land = gen.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, heights, random) - 1;
+        int land = model != null ? model.applyAsInt(x, z) : gen.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, heights, random) - 1;
         // water: the sea below sea level, and the map's lakes and rivers above it (no second noise column needed)
         int water = NO_WATER;
         if (land < sea) {

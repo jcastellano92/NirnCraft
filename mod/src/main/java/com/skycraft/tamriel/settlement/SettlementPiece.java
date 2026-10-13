@@ -191,6 +191,27 @@ public class SettlementPiece extends StructurePiece {
         return new Canvas(level, clip, o[0], spec.floor, o[1], spec.facing, seed);
     }
 
+    /**
+     * Replays the builder without painting: adds the anchors it declares to {@code anchors} and its declared entrances
+     * ({world x, y, z of the lower door half, outward 2D value}) to {@code doors} (the street plan bake, P5).
+     */
+    public void recordDoors(List<Anchor> anchors, List<int[]> doors) {
+        Canvas c;
+        if (spec.isLine()) {
+            c = new Canvas(anchors, 0, spec.floor, 0, Direction.NORTH, seed);
+        } else {
+            int[] o = origin(spec);
+            c = new Canvas(anchors, o[0], spec.floor, o[1], spec.facing, seed);
+        }
+        c.doors(doors);
+        c.owner = owner();
+        try {
+            Builders.build(c, this);
+        } catch (RuntimeException e) {
+            Skycraft.LOGGER.warn("Could not record the doors of {} in {}", spec.kind, settlement, e);
+        }
+    }
+
     /** Replays the builder without painting and adds the anchors it declares to {@code out}. */
     public void record(List<Anchor> out) {
         Canvas c;

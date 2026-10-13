@@ -104,6 +104,24 @@ public final class RoadPlan {
             vertex = -1;
             distance = Float.MAX_VALUE;
         }
+
+        /** Copies another answer into this one. */
+        public void set(Hit o) {
+            segment = o.segment;
+            link = o.link;
+            vertex = o.vertex;
+            kind = o.kind;
+            span = o.span;
+            halfWidth = o.halfWidth;
+            distance = o.distance;
+            height = o.height;
+            ground = o.ground;
+            water = o.water;
+            t = o.t;
+            along = o.along;
+            dirX = o.dirX;
+            dirZ = o.dirZ;
+        }
     }
 
     RoadPlan(Builder b) {
@@ -232,6 +250,56 @@ public final class RoadPlan {
         float bestT = 0;
         for (int j = bucketOff[k], end = bucketOff[k + 1]; j < end; j++) {
             int i = bucketEdges[j];
+            float ax = vx[i], az = vz[i];
+            float dx = vx[i + 1] - ax, dz = vz[i + 1] - az;
+            float t = ((px - ax) * dx + (pz - az) * dz) * edgeInvLen2[i];
+            if (t < 0f) t = 0f;
+            else if (t > 1f) t = 1f;
+            float qx = ax + dx * t - px, qz = az + dz * t - pz;
+            float d2 = qx * qx + qz * qz;
+            if (d2 < best) {
+                best = d2;
+                bestEdge = i;
+                bestT = t;
+            }
+        }
+        if (bestEdge < 0) return false;
+        int i = bestEdge, s = vseg[i];
+        out.segment = s;
+        out.link = segLink[s];
+        out.kind = segKind[s];
+        out.halfWidth = segHalfWidth[s];
+        out.vertex = i;
+        out.t = bestT;
+        out.distance = (float) Math.sqrt(best);
+        out.height = vh[i] + (vh[i + 1] - vh[i]) * bestT;
+        out.ground = vg[i] + (vg[i + 1] - vg[i]) * bestT;
+        float w0 = vw[i], w1 = vw[i + 1];
+        out.water = Float.isNaN(w0) ? w1 : Float.isNaN(w1) ? w0 : w0 + (w1 - w0) * bestT;
+        out.span = vspan[bestT < 0.5f ? i : i + 1];
+        out.along = varc[i] + (varc[i + 1] - varc[i]) * bestT;
+        float dx = vx[i + 1] - vx[i], dz = vz[i + 1] - vz[i];
+        float len = (float) Math.sqrt(dx * dx + dz * dz);
+        out.dirX = len < 1e-6f ? 1f : dx / len;
+        out.dirZ = len < 1e-6f ? 0f : dz / len;
+        return true;
+    }
+
+    /**
+     * Like {@link #at}, restricted to one segment (P5: at a junction the road a branch joins keeps its own height over
+     * the branch's overlapping bed). Allocation-free; thread-safe.
+     */
+    public boolean atSegment(double x, double z, int segment, Hit out) {
+        out.clear();
+        int k = bucketOf.get(key((int) Math.floor(x) >> BUCKET_SHIFT, (int) Math.floor(z) >> BUCKET_SHIFT));
+        if (k < 0 || segment < 0) return false;
+        float px = (float) x, pz = (float) z;
+        float best = REACH * REACH;
+        int bestEdge = -1;
+        float bestT = 0;
+        for (int j = bucketOff[k], end = bucketOff[k + 1]; j < end; j++) {
+            int i = bucketEdges[j];
+            if (vseg[i] != segment) continue;
             float ax = vx[i], az = vz[i];
             float dx = vx[i + 1] - ax, dz = vz[i + 1] - az;
             float t = ((px - ax) * dx + (pz - az) * dz) * edgeInvLen2[i];

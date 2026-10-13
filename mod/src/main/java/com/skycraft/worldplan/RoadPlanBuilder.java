@@ -40,6 +40,8 @@ public final class RoadPlanBuilder {
     private static final int IDX_SHIFT = 5;
     /** Trails closer than this to their road get none (the junction sign will do). */
     private static final int TRAIL_MIN = 20;
+    /** A road keeps this far outside the ring of gates of a settlement it ends at (blocks), see {@code avoid}. */
+    private static final int OWN_MARGIN = 16;
     /** Height differences (blocks) that make a cut or fill span, a gap bridge, a tunnel. */
     static final float CUT_FILL = 2f, GAP = 3f, TUNNEL = 12f;
     static final float GAP_BRIDGE_MAX = 80f, TUNNEL_MIN = 16f;
@@ -135,6 +137,8 @@ public final class RoadPlanBuilder {
         final IntArrayList linkBridge = new IntArrayList();
         List<Place> nodes;
         int[] nodeCore;
+        /** Authored buildings and landmarks of each node's city plan as (x, z, r) triples (roads keep off them), or null. */
+        int[][] nodePins;
         int failed, merged, pinMiss, switchbacks, dropped;
         ExecutorService pool;
 
@@ -148,6 +152,8 @@ public final class RoadPlanBuilder {
             for (int i = 0; i < terrain.siteId.length; i++) siteOf.putIfAbsent(terrain.siteId[i], i);
             nodeCore = new int[nodes.size()];
             for (int i = 0; i < nodes.size(); i++) nodeCore[i] = PlanLinks.coreRadius(nodes.get(i));
+            nodePins = new int[nodes.size()][];
+            for (int i = 0; i < nodes.size(); i++) nodePins[i] = pins(nodes.get(i));
             long tSites = System.nanoTime();
             int threads = Math.max(1, Math.min(8, Runtime.getRuntime().availableProcessors() - 1));
             String env = System.getenv("SKYCRAFT_BAKE_THREADS");
@@ -251,6 +257,31 @@ public final class RoadPlanBuilder {
             return false;
         }
 
+        /**
+         * P5: the buildings and landmarks a city plan pins (a mill, a tavern by the gate...) are placed whatever the
+         * ground, so a road must keep off them; (x, z, r) triples in world blocks, or null without a city plan.
+         */
+        static int[] pins(Place p) {
+            com.skycraft.tamriel.settlement.plan.CityPlan cp = com.skycraft.tamriel.settlement.plan.CityPlans.of(p);
+            if (cp == null) return null;
+            IntArrayList out = new IntArrayList();
+            for (com.skycraft.tamriel.settlement.plan.CityPlan.Building b : cp.buildings) {
+                for (int k = 0; k < Math.max(1, b.count()); k++) {
+                    int[] w = com.skycraft.tamriel.settlement.plan.Cities.world(p, b.x() + k * b.stepX(), b.z() + k * b.stepZ());
+                    out.add(w[0]);
+                    out.add(w[1]);
+                    out.add(Math.max(b.w(), b.d()) / 2 + Math.max(0, b.margin()) + 3);
+                }
+            }
+            for (com.skycraft.tamriel.settlement.plan.CityPlan.Landmark l : cp.landmarks) {
+                int[] w = com.skycraft.tamriel.settlement.plan.Cities.world(p, l.x(), l.z());
+                out.add(w[0]);
+                out.add(w[1]);
+                out.add(Math.max(l.w(), l.d()) / 2 + Math.max(0, l.margin()) + 3);
+            }
+            return out.isEmpty() ? null : out.toIntArray();
+        }
+
         /** Walled settlement interiors near a link: (x, z, r) triples, as the live planner avoids them. */
         int[] avoid(double ax, double az, double bx, double bz) {
             double mx = (ax + bx) / 2, mz = (az + bz) / 2;
@@ -263,7 +294,10 @@ public final class RoadPlanBuilder {
                 int core = nodeCore[i];
                 boolean own = Math.hypot(ax - p.x(), az - p.z()) <= Math.max(p.radius(), core) + 60
                         || Math.hypot(bx - p.x(), bz - p.z()) <= Math.max(p.radius(), core) + 60;
-                int r = own ? core - 8 : city ? p.radius() : core;
+                // P5: a road ending at this settlement keeps out of its walls, fields and outskirts until it turns in at
+                // the gate (the ring of gates plus a margin; the gate itself is inside, so the last stretch runs in radially)
+                int r = own ? (core > 0 ? core + 14 + OWN_MARGIN : 0) : city ? p.radius() : core;
+                if (own && nodePins[i] != null) out.addElements(out.size(), nodePins[i]);
                 if (r < 16) continue;
                 out.add(p.x());
                 out.add(p.z());

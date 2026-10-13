@@ -452,7 +452,8 @@ public final class Nets {
                 boolean nearGate = false;
                 for (int[] g : gates) if (Math.hypot(p[0] - g[0], p[1] - g[1]) < gateHalf + 8) nearGate = true;
                 if (nearGate) continue;
-                Spec t = plan.at(Archetype.TOWER, p[0], p[1], plan.dir(outwardLocal(p[0], p[1]))).size(7, 7);
+                // the tower's door opens into the town (P5: a door onto the field outside the wall has no way in)
+                Spec t = plan.at(Archetype.TOWER, p[0], p[1], plan.dir(outwardLocal(p[0], p[1])).getOpposite()).size(7, 7);
                 t.h = h + 14;
                 t.margin = 2;
                 plan.add(t);

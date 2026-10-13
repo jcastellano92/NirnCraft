@@ -129,7 +129,7 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
         final WorldGenLevel level;
         final RoadPlan plan;
         final int x0, z0, minY, maxY;
-        final RoadPlan.Hit hit = new RoadPlan.Hit(), other = new RoadPlan.Hit();
+        final RoadPlan.Hit hit = new RoadPlan.Hit(), other = new RoadPlan.Hit(), joined = new RoadPlan.Hit();
         final MapSample sample = new MapSample();
         final PlanGround.Bed bed = PlanGround.scratch();
         final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
@@ -152,6 +152,12 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
                 for (int dx = 0; dx < 16; dx++) {
                     int x = x0 + dx, z = z0 + dz;
                     if (!plan.at(x + 0.5, z + 0.5, hit)) continue;
+                    // P5: near a junction the branch's bed overlaps the road it joins: that road keeps its own surface
+                    // (a branch whose profile has not yet come down to it would leave a step in the main road)
+                    int join = junctionOf(hit);
+                    if (join >= 0 && plan.atSegment(x + 0.5, z + 0.5, join, joined) && joined.distance <= joined.halfWidth + 0.5f) {
+                        hit.set(joined);
+                    }
                     float d = hit.distance, hw = hit.halfWidth;
                     float reach = hw + (hit.span == RoadPlan.TUNNEL ? 2.0f : hit.span == RoadPlan.BRIDGE ? 1.0f : VERGE);
                     if (d > reach) continue;
@@ -161,16 +167,29 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
                     columns++;
                     // the terrain was pulled to the profile at the integer corner (PlanGround.bed): use that height so
                     // the painted surface and the top solid block agree to the block
-                    height = plan.at(x, z, other) && other.segment == hit.segment ? other.height : hit.height;
+                    height = plan.atSegment(x, z, hit.segment, other) ? other.height : hit.height;
                     // on a steep stretch (stairs, a mountain track) the corner and the centre differ by a block: use the centre
                     int ev = hit.vertex;
                     float el = plan.varc[ev + 1] - plan.varc[ev];
                     if (el > 1e-3f && Math.abs(plan.vh[ev + 1] - plan.vh[ev]) / el > 0.2f) height = hit.height;
                     height += 0.002f;
                     boolean reserved = structures[dz << 4 | dx] == 0;
+                    // P5: a settlement's open works (fields, yards, camps, pens) yield to a planned road; buildings,
+                    // walls and gatehouses do not (the street plan knows which piece is which)
+                    if (reserved && com.skycraft.worldplan.street.StreetPaint.workOnly(x, z)) reserved = false;
                     paint(x, z, d, hw, reserved);
                 }
             }
+        }
+
+        /** The segment the hit's segment joins at its near end (within 40 blocks of it), or -1. */
+        int junctionOf(RoadPlan.Hit h) {
+            int s = h.segment;
+            if (s < 0) return -1;
+            float len = plan.varc[plan.segEnd[s] - 1];
+            if (h.along <= 40f && plan.segJoinA[s] >= 0) return plan.segJoinA[s];
+            if (len - h.along <= 40f && plan.segJoinB[s] >= 0) return plan.segJoinB[s];
+            return -1;
         }
 
         // ---------------------------------------------------------------- one column

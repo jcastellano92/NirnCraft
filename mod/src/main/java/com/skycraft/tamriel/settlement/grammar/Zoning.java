@@ -1316,7 +1316,9 @@ public final class Zoning {
             }
             // a tower at some corners of stone walls
             if (stone && b[2] == 0 && x.r.nextInt(3) > 0) {
-                Spec t = plan.at(Archetype.TOWER, (int) Math.round(Math.sin(b[0]) * b[1]), (int) Math.round(Math.cos(b[0]) * b[1]), Plan.outward(b[0])).size(7, 7);
+                // its door opens into the town, not onto the field outside the wall
+                Spec t = plan.at(Archetype.TOWER, (int) Math.round(Math.sin(b[0]) * b[1]), (int) Math.round(Math.cos(b[0]) * b[1]),
+                        Plan.outward(b[0]).getOpposite()).size(7, 7);
                 t.h = h + 12;
                 t.margin = 1;
                 plan.add(t);

@@ -61,6 +61,9 @@ public final class Canvas {
     private java.util.Set<Long> deadBeds = new java.util.HashSet<>();
     /** Beds placed so far by this building (shared by its frames; counted identically in every chunk's replay). */
     private int[] beds = new int[1];
+    /** Recording only: declared entrances as {world x, y, z of the lower half, outward 2D value} (the street plan). */
+    @Nullable
+    private List<int[]> doorSink;
     private static final int MAX_CONTAINERS = 6, MAX_LOOT = 3;
     private final BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
 
@@ -110,7 +113,14 @@ public final class Canvas {
         c.reserved = reserved;
         c.deadBeds = deadBeds;
         c.beds = beds;
+        c.doorSink = doorSink;
         return c;
+    }
+
+    /** Recording canvas: also collect the declared entrances into {@code sink} (see {@link #entrance}). */
+    public Canvas doors(List<int[]> sink) {
+        this.doorSink = sink;
+        return this;
     }
 
     /** A sub-frame whose local origin is this frame's (lx, ly, lz), facing local {@code localFacing}. */
@@ -430,6 +440,7 @@ public final class Canvas {
     public void entrance(int lx, int ly, int lz, BlockState door, Direction face) {
         door(lx, ly, lz, door, face);
         int x = wx(lx, lz), y = oy + ly, z = wz(lx, lz);
+        if (doorSink != null) doorSink.add(new int[]{x, y, z, dir(face.getOpposite()).get2DDataValue()});
         if (level == null || !okWorld(x, y, z)) return;
         if (ENTRANCES.size() > 100_000) ENTRANCES.clear();
         ENTRANCES.put(BlockPos.asLong(x, y, z), dir(face.getOpposite()));

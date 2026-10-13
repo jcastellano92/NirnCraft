@@ -150,6 +150,7 @@ public class SettlementStructure extends Structure {
         int n = 0;
         for (int i = 0; i < specs.size(); i++) {
             Spec s = specs.get(i);
+            if (s.has(Spec.OMIT)) continue; // left out by the street plan; the index (and every piece's seed) is kept
             if (split) {
                 if (Plan.district(s, p.x(), p.z()) != want) continue;
             } else if (!anchor) {
@@ -161,9 +162,15 @@ public class SettlementStructure extends Structure {
         if (anchor && n == 0) Skycraft.LOGGER.warn("Settlement {} produced no pieces", p.id());
     }
 
-    /** The plan of a named place (cached per place and world seed: every start of the place sees the same one). */
+    /**
+     * The layout of a named place: the street plan's (docs/WORLDGEN-PIPELINE.md P5: resolved at build time from the city
+     * plan on the seed-independent plan terrain, with its doorstep paths, gate joins and plots), else planned here on
+     * the same plan terrain (cached per place: every start of the place sees the same one).
+     */
     private List<Spec> plan(GenerationContext ctx, Place p) {
-        String key = p.id() + "@" + ctx.seed() + "@" + System.identityHashCode(ctx.chunkGenerator());
+        List<Spec> baked = com.skycraft.worldplan.street.StreetPlan.get().layout(p.id());
+        if (baked != null) return baked;
+        String key = p.id() + "@" + culture;
         List<Spec> cached = PLANS.get(key);
         if (cached != null) return cached;
         long t0 = System.nanoTime();
@@ -176,16 +183,16 @@ public class SettlementStructure extends Structure {
         return specs;
     }
 
-    /** Plans a named place on the terrain of a generation context (the structure path and the dev tools share it). */
+    /**
+     * Plans a named place (the structure path and the dev tools share it). Since P5 the terrain is the seed-independent
+     * plan terrain of the street plan ({@code worldplan.street.StreetTerrain}: the generated terrain inside the place's
+     * pad, which the plot pads pull it to outside), so the plan is the same in every world and matches the bake;
+     * {@code ctx} is no longer read.
+     */
     public static Plan planPlace(GenerationContext ctx, Place p, String cultureOverride) {
-        Culture c = Culture.of(cultureOverride.equals("auto") ? p.culture() : cultureOverride);
-        int style = Cities.style(p, c);
-        Plan plan = new Plan(p.id(), p.x(), p.z(), Cities.layoutRadius(p), c, style, Cities.seed(p),
-                new Terrain(ctx, Cities.layoutRadius(p) > 60 ? 16 : 8), Cities.back(p));
         // the zoning planner also gives the hold's jail, the faction halls (plan/Halls) and the provincial player-home
         // plots (plan/HousePlots) their lots, before it packs the streets with houses
-        com.skycraft.tamriel.settlement.grammar.Zoning.place(plan, p);
-        plan.resolve();
+        Plan plan = com.skycraft.worldplan.street.StreetPlanBuilder.plan(p, cultureOverride);
         com.skycraft.tamriel.settlement.plan.Halls.report(plan, p);
         return plan;
     }

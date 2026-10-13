@@ -13,6 +13,8 @@ Per road (planned polyline points, 2 blocks apart, outside settlement zones, in 
   tree      points with leaves/logs in the 4 blocks of headroom, or a trunk in the surface (tree-blocked)
   obstacle  points with a solid non-road block 1-2 blocks over the surface (shrine, statue, barrel, well...)
   unbridged points whose top block is water (road dives into a river/lake)
+  (a point under a cover (gatehouse arch, deck, roof) is judged on the surface walked under it when that surface
+  continues the previous point's within a block)
   unloaded  points in chunks that are not saved (not judged)
   Reproduce: (1) boot a headless server on a fresh world with JAVA_TOOL_OPTIONS=-Dskycraft.autorun=<cmds separated by |,
   spaces as +> -Dskycraft.autorun.wait=<ticks>, cmds = 'forceload add x1 z1 x2 z2' (10x10-chunk tiles along the
@@ -180,6 +182,31 @@ def analyse_point(cols, x, z):
                 road=is_road(sname), above=names[col[yy + 1]] if yy + 1 < n else 'minecraft:air')
 
 
+def covered_point(cols, x, z, near):
+    """The walking surface of a column under a cover (gatehouse arch, deck, roof): the solid block within 2 of the
+    previous point's surface height {@code near} with two passable cells over it, as analyse_point's dict; else None."""
+    cc = cols.column(x, z)
+    if cc is None:
+        return None
+    y0, col = cc
+    names = cols.w.names
+    best = None
+    for sy in range(int(near) - 3, int(near) + 2):
+        yy = sy - y0
+        if yy < 0 or yy + 2 >= len(col):
+            continue
+        nm = names[col[yy]]
+        if is_air(nm) or is_soft(nm) or is_leaf(nm) or is_log(nm) or is_water(nm):
+            continue
+        a1, a2 = names[col[yy + 1]], names[col[yy + 2]]
+        if not ((is_air(a1) or is_soft(a1)) and (is_air(a2) or is_soft(a2))):
+            continue
+        h = sy + (0.5 if short(nm).endswith('_slab') else 1.0)
+        if best is None or abs(h - near) < abs(best['h'] - near):
+            best = dict(sy=sy, name=nm, h=h, tree=False, obstacle=False, water=False, top=nm, road=is_road(nm), above=a1)
+    return best if best is not None and abs(best['h'] - near) <= 1 else None
+
+
 def load_places(path):
     try:
         data = json.load(open(path, encoding='utf8'))
@@ -288,6 +315,11 @@ def main():
                 prev = None
                 continue
             row['judged'] += 1
+            if prev is not None and not prev['water'] and abs(p['h'] - prev['h']) > 1:
+                # a covered passage (a gatehouse arch, a deck or a roof over the road): judge the surface walked under it
+                q = covered_point(cols, int(xs[i]), int(zs[i]), prev['h'])
+                if q is not None:
+                    p = q
             gap = (not p['road']) and not p['water']
             if p['water']:
                 row['unbridged'] += 1

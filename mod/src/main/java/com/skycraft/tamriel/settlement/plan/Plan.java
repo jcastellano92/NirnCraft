@@ -41,6 +41,17 @@ public final class Plan {
     public final List<Chain> chains = new ArrayList<>();
     /** Summary of the fabric pass (built-area ratio...), or empty. */
     public String fabricReport = "";
+    /**
+     * Ground no footprint may cover (the street plan sets it to the planned roads' beds and verges, so farm fields,
+     * yards and houses never cut a road), or null. Lines (streets, walls, bridges) and ground works are exempt.
+     */
+    public KeepOut keepOut;
+
+    /** See {@link #keepOut}. */
+    @FunctionalInterface
+    public interface KeepOut {
+        boolean blocked(int x, int z);
+    }
 
     /** A smooth street (or bridge link) of a city plan: its polyline, width, rank (0 main, 1 secondary, 2 alley) and tag. */
     public record Chain(List<double[]> pts, int width, int rank, String tag) {
@@ -166,9 +177,21 @@ public final class Plan {
                 if (terrain.anyWet(s.x, s.z, hx, hz)) return false;
                 if (!relaxed && terrain.spread(s.x, s.z, hx, hz) > maxSlope(s.kind)) return false;
             }
+            if (keepOut != null && !s.has(Spec.GROUND) && keptOut(s)) return false;
         }
         for (Spec o : specs) if (collides(s, o, gap)) return false;
         return true;
+    }
+
+    /** True if the footprint (with its margin) touches {@link #keepOut} ground (sampled every 2 blocks and on its edges). */
+    private boolean keptOut(Spec s) {
+        int hx = s.halfX(), hz = s.halfZ();
+        for (int dx = -hx; dx <= hx; dx += (dx + 2 > hx && dx < hx ? hx - dx : 2)) {
+            for (int dz = -hz; dz <= hz; dz += (dz + 2 > hz && dz < hz ? hz - dz : 2)) {
+                if (keepOut.blocked(s.x + dx, s.z + dz)) return true;
+            }
+        }
+        return false;
     }
 
     static int maxSlope(Archetype k) {
@@ -248,7 +271,8 @@ public final class Plan {
                 }
             }
             if (towers && !s(flags, Spec.PALISADE)) {
-                Spec t = at(Archetype.TOWER, (int) Math.round(lx1), (int) Math.round(lz1), outward(a1)).size(7, 7);
+                // the tower's door opens into the town, not onto the field outside the wall
+                Spec t = at(Archetype.TOWER, (int) Math.round(lx1), (int) Math.round(lz1), outward(a1).getOpposite()).size(7, 7);
                 t.h = h + 14;
                 t.margin = 2;
                 boolean nearGate = false;
@@ -289,6 +313,22 @@ public final class Plan {
     public void resolve() {
         Palette pal = palette();
         List<Spec> drop = new ArrayList<>();
+        // a piece standing on a terrace tile is seated on it: the terrain model does not know the tiles, so a house the
+        // town fill put there would otherwise be sunk into the fill with its door facing a wall (the fabric pass seats
+        // its own pieces the same way)
+        List<Spec> tiles = new ArrayList<>();
+        for (Spec s : specs) if (s.has(Spec.GROUND) && s.minFloor != Spec.UNSET && s.kind != Archetype.CAMP && !s.isLine()) tiles.add(s);
+        if (!tiles.isEmpty()) {
+            for (Spec s : specs) {
+                if (s.isLine() || s.has(Spec.GROUND) || s.has(Spec.FIXED) || s.has(Spec.WATER) || s.minFloor != Spec.UNSET
+                        || s.kind == Archetype.DOCK) continue;
+                int best = Spec.UNSET;
+                for (Spec t : tiles) {
+                    if (Math.abs(s.x - t.x) <= t.halfX() + 1 && Math.abs(s.z - t.z) <= t.halfZ() + 1) best = Math.max(best, t.minFloor);
+                }
+                if (best != Spec.UNSET) s.minFloor = best;
+            }
+        }
         for (Spec s : specs) {
             if (s.has(Spec.FIXED) && s.floor != Spec.UNSET) continue;
             if (s.isLine()) {

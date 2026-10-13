@@ -37,6 +37,13 @@ public final class Spec {
     public static final int GROUND = 2048;
     /** A plot kept clear and level for a building another module puts up (player homes, {@link HousePlots}). */
     public static final int RESERVED = 4096;
+    /**
+     * Left out by the street plan (docs/WORLDGEN-PIPELINE.md P5): a prop with no anchors standing on a doorstep path,
+     * a street or a planned road. It keeps its place (and index) in the plan but is never built.
+     */
+    public static final int OMIT = 8192;
+    /** Built without its back door: the street plan found no way from it (it would open onto a wall or a terrace face). */
+    public static final int NO_BACK_DOOR = 16384;
 
     public Archetype kind;
     /** Culture ordinal, or -1 for the plan's culture. */

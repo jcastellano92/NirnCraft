@@ -63,7 +63,7 @@ public record TamrielHeight(DensityFunction.NoiseHolder hills, DensityFunction.N
         }
 
         // P2: the road plan and the site pads (docs/WORLDGEN-PIPELINE.md section 7): bed and pad weights, applied last
-        float wBed = 0f, wPad = 0f;
+        float wBed = 0f, wPad = 0f, wPlot = 0f;
         PlanGround.Bed pb = null;
         if (PlanGround.enabled()) {
             PlanGround g = PlanGround.get();
@@ -74,12 +74,14 @@ public record TamrielHeight(DensityFunction.NoiseHolder hills, DensityFunction.N
             if (g.bed(x, z, pb) && (!inWater || pb.span == RoadPlan.FORD)) wBed = pb.weight;
             boolean tidal = s.elevation < TamrielMap.SEA_LEVEL - 0.5f && cd < 24;
             if (!inWater && !tidal && g.pad(x, z, pb)) wPad = pb.padWeight;
+            // P5: the street plan's plots and streets (named settlements) are pads too
+            if (!inWater && g.plot(x, z, pb)) wPlot = pb.plotWeight;
         }
 
         // detail amplitude: calm at the shoreline, along roads and in towns, next to water, on ledges and paths; and
         // fading out over the planned road beds and pads, so the profile never sits far from the natural ground
         double amp = MapNoise.smoothstep(0, 56, cd) * (1 - 0.75 * s.road) * (1 - s.calm)
-                * (1 - PlanGround.CALM * Math.max(wBed, wPad));
+                * (1 - PlanGround.CALM * Math.max(wBed, Math.max(wPad, wPlot)));
         boolean water = !Float.isNaN(s.waterLevel);
         if (water) {
             // brooks calm the ground over a shorter reach than rivers (every authored river has a half width of 4+)
@@ -178,6 +180,7 @@ public record TamrielHeight(DensityFunction.NoiseHolder hills, DensityFunction.N
         // site pads, then the road bed (profile + shoulders); the bed wins where they meet (roads end on the pad height)
         if (PlanGround.blending()) {
             if (wPad > 0f) h += (pb.padHeight - h) * wPad;
+            if (wPlot > 0f) h += (pb.plotHeight - h) * wPlot;
             if (wBed > 0f) h += (pb.height - h) * wBed;
         }
         return Math.min(h, MAX_SURFACE);

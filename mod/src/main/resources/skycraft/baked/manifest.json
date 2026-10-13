@@ -1,5 +1,5 @@
 {
   "format": 1,
-  "inputs": "0eca869ef66160778ef122d086257917efbf42c2854f77dbe4b6d01731c0caa4",
-  "files": ["landmass.bin", "roadplan.bin", "sceneplan.bin"]
+  "inputs": "f7e61bf3e478b1663516da928803260d0b31821b5657d9b42be841e623a014de",
+  "files": ["landmass.bin", "roadplan.bin", "streetplan.bin", "sceneplan.bin"]
 }

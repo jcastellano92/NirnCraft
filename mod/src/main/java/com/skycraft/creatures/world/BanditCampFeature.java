@@ -94,6 +94,8 @@ public class BanditCampFeature extends Feature<NoneFeatureConfiguration> {
     private static boolean suitable(WorldGenLevel level, BlockPos center) {
         if (!level.getFluidState(center).isEmpty() || !level.getFluidState(center.below()).isEmpty()) return false;
         if (!level.getBlockState(center.below()).isFaceSturdy(level, center.below(), Direction.UP)) return false;
+        // never on a planned road, a street, a settlement plot or another structure (the plan-first placement mask)
+        if (!com.skycraft.world.PlacementMask.clear(level, center.getX(), center.getZ(), RADIUS + 2)) return false;
         int min = Integer.MAX_VALUE;
         int max = Integer.MIN_VALUE;
         for (int dx = -RADIUS; dx <= RADIUS; dx += 3) {

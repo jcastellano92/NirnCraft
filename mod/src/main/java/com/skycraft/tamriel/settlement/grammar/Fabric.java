@@ -311,20 +311,22 @@ public final class Fabric {
             }
             int sx = (int) Math.round(p0[0]), sz = (int) Math.round(p0[1]);
             Street tmp = new Street(sx, sz, (int) Math.round(p0[0] + dx / l * 40), (int) Math.round(p0[1] + dz / l * 40), ch.width(), ch.rank());
-            if (!lot(x, zoner, tmp, side, t, gapMin, gapMax, p0)) {
+            double advance = lot(x, zoner, tmp, side, t, gapMin, gapMax, p0);
+            if (advance < 0) {
                 if (misses++ % 3 == 0) Zoning.gapFiller(x, tmp, side, 0);
                 t += 2;
             } else {
                 misses = 0;
-                t += lastAdvance;
+                t += advance;
             }
         }
     }
 
-    private static double lastAdvance;
-
-    /** Tries a lot at the street position; sets {@link #lastAdvance} to the distance to skip on success. */
-    private static boolean lot(Zoning.Ctx x, Zoner zoner, Street tmp, int side, double t, int gapMin, int gapMax, double[] at) {
+    /**
+     * Tries a lot at the street position; returns the distance to skip on success, -1 otherwise. (It used to hand the
+     * distance back through a static field, which planners running on several threads overwrote for each other.)
+     */
+    private static double lot(Zoning.Ctx x, Zoner zoner, Street tmp, int side, double t, int gapMin, int gapMax, double[] at) {
         Zone z = zoner.at(at[0], at[1]);
         if (z == Zone.CENTRE && x.tier >= 2 && x.r.nextInt(4) == 0) z = Zone.COMMON;
         Wealth wl = Zoning.wealthOf(x, z);
@@ -335,12 +337,9 @@ public final class Fabric {
             int w = Math.max(5, sz[0] - shrink * 2), d = Math.max(5, sz[1] - shrink * 2);
             Use u = shrink == 2 && use != Use.HOVEL ? Use.COTTAGE : use;
             Spec s = Zoning.lotOn(x, tmp, side, 0, u, wl, w, d, Zoning.setback(x, tmp));
-            if (Zoning.tryPlace(x, s)) {
-                lastAdvance = Zoning.alongStreet(tmp, side, w, d) + gapMin + x.r.nextInt(gapMax - gapMin + 1);
-                return true;
-            }
+            if (Zoning.tryPlace(x, s)) return Zoning.alongStreet(tmp, side, w, d) + gapMin + x.r.nextInt(gapMax - gapMin + 1);
         }
-        return false;
+        return -1;
     }
 
     private static void frontageStreet(Zoning.Ctx x, Zoner zoner, Street st, int side) {
@@ -352,8 +351,8 @@ public final class Fabric {
         while (t < len - 3) {
             double px = st.x1() + ux * t, pz = st.z1() + uz * t;
             Street tmp = new Street((int) Math.round(px), (int) Math.round(pz), (int) Math.round(px + ux * 40), (int) Math.round(pz + uz * 40), st.width(), st.rank());
-            if (lot(x, zoner, tmp, side, t, gapMin, gapMax, new double[]{px, pz})) t += lastAdvance;
-            else t += 2;
+            double advance = lot(x, zoner, tmp, side, t, gapMin, gapMax, new double[]{px, pz});
+            t += advance >= 0 ? advance : 2;
         }
     }
 
