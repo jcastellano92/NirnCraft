@@ -22,9 +22,9 @@ import org.lwjgl.glfw.GLFW;
 public final class SailingClient {
     /** Set more sail (furled -> half -> full) and take sail in. */
     public static final KeyMapping SAIL_UP = new KeyMapping("key.skycraft.sail_up", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, SkyKeys.CATEGORY);
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_EQUAL, SkyKeys.CATEGORY);
     public static final KeyMapping SAIL_DOWN = new KeyMapping("key.skycraft.sail_down", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, SkyKeys.CATEGORY);
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_MINUS, SkyKeys.CATEGORY);
 
     private SailingClient() {}
 

@@ -152,6 +152,25 @@ public final class PlayerDataEvents {
         return null;
     }
 
+    /**
+     * A death never wakes you in the intro cottage: when the respawn point is only the provisional place to wake (not a
+     * home), vanilla's is cleared so the respawn goes to the world spawn and {@link #placeRespawn} then moves you to
+     * the nearest town you have discovered.
+     */
+    @SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.LOWEST)
+    public static void onPlayerDeath(net.minecraftforge.event.entity.living.LivingDeathEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player) || event.isCanceled()) return;
+        BlockPos home = com.skycraft.combat.RespawnPoints.home(player);
+        if (home != null) {
+            // vanilla moves its respawn to any bed you slept in, somebody else's included: the home is the record
+            if (!home.equals(player.getRespawnPosition()) || player.getRespawnDimension() != Level.OVERWORLD) {
+                player.setRespawnPosition(Level.OVERWORLD, home, player.getYRot(), true, false);
+            }
+        } else if (player.getRespawnPosition() != null) {
+            player.setRespawnPosition(player.getRespawnDimension(), null, 0f, false, false);
+        }
+    }
+
     @SubscribeEvent
     public static void respawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
@@ -180,39 +199,56 @@ public final class PlayerDataEvents {
      * as 30% closer. The target is the market square (meeting anchor), else a gate, else the place's centre.
      */
     @javax.annotation.Nullable
-    private static BlockPos nearestVisitedSettlement(ServerPlayer player, ServerLevel level, BlockPos from) {
+    public static BlockPos nearestVisitedSettlement(ServerPlayer player, ServerLevel level, BlockPos from) {
+        // the places the map says were discovered, and the towns this player has walked into (their own record)
+        java.util.Map<String, com.skycraft.tamriel.Place> candidates = new java.util.LinkedHashMap<>();
         net.minecraft.nbt.ListTag list = com.skycraft.world.WorldData.discovered(SkyData.get(player));
-        BlockPos best = null;
-        double bestScore = Double.MAX_VALUE;
         for (int i = 0; i < list.size(); i++) {
             net.minecraft.nbt.CompoundTag loc = list.getCompound(i);
             if (loc.getBoolean("known") || !level.dimension().location().toString().equals(
                     loc.getString("dim").isEmpty() ? "minecraft:overworld" : loc.getString("dim"))) continue;
             java.util.Optional<com.skycraft.tamriel.Place> place = com.skycraft.world.WorldData.place(loc);
-            if (place.isEmpty() || !place.get().type().isSettlement()) continue;
-            com.skycraft.tamriel.Place p = place.get();
-            java.util.Optional<com.skycraft.tamriel.settlement.SettlementAnchors.Entry> e =
-                    com.skycraft.tamriel.settlement.SettlementAnchors.find(level, p.id());
-            double score = Math.sqrt(p.distSqr(from.getX(), from.getZ()));
-            BlockPos at = new BlockPos(p.x(), level.getSharedSpawnPos().getY(), p.z());
-            if (e.isPresent()) {
-                if (e.get().first(com.skycraft.tamriel.settlement.AnchorType.INN) != null) score *= 0.7;
-                com.skycraft.tamriel.settlement.Anchor m = e.get().first(com.skycraft.tamriel.settlement.AnchorType.MEETING);
-                if (m != null) at = m.pos();
-            }
-            if (score < bestScore) {
-                bestScore = score;
-                best = at;
-            }
+            if (place.isPresent() && place.get().type().isSettlement()) candidates.put(place.get().id(), place.get());
+        }
+        for (String id : com.skycraft.combat.RespawnPoints.visitedTowns(player)) {
+            com.skycraft.tamriel.Places.byId(id).filter(p -> p.type().isSettlement()).ifPresent(p -> candidates.put(p.id(), p));
+        }
+        BlockPos best = null;
+        double bestScore = Double.MAX_VALUE;
+        for (com.skycraft.tamriel.Place p : candidates.values()) {
+            if ("homestead".equals(p.variant())) continue;
+            double score = p.distSqr(from.getX(), from.getZ()); // the nearest to where you fell, nothing else
+            if (score >= bestScore) continue;
+            bestScore = score;
+            best = restSpot(level, p);
         }
         return best;
+    }
+
+    /** Where in a settlement a respawning player appears: the market square, else a gate, else the inn, else its centre. */
+    public static BlockPos restSpot(ServerLevel level, com.skycraft.tamriel.Place p) {
+        BlockPos at = new BlockPos(p.x(), level.getSharedSpawnPos().getY(), p.z());
+        var e = com.skycraft.tamriel.settlement.SettlementAnchors.find(level, p.id());
+        if (e.isPresent()) {
+            com.skycraft.tamriel.settlement.Anchor a = e.get().first(com.skycraft.tamriel.settlement.AnchorType.MEETING);
+            if (a == null) a = e.get().first(com.skycraft.tamriel.settlement.AnchorType.GATE);
+            if (a == null) a = e.get().first(com.skycraft.tamriel.settlement.AnchorType.INN);
+            if (a != null) at = a.pos();
+        } else {
+            java.util.List<int[]> gates = com.skycraft.tamriel.settlement.SettlementAnchors.gates(p);
+            if (!gates.isEmpty()) at = new BlockPos(gates.get(0)[0], at.getY(), gates.get(0)[1]);
+        }
+        return at;
     }
 
     private static void placeRespawn(ServerPlayer player, @javax.annotation.Nullable BlockPos died) {
         ServerLevel level = player.serverLevel();
         if (level.dimension() != Level.OVERWORLD) return;
         BlockPos here = player.blockPosition();
-        boolean hasBed = player.getRespawnPosition() != null && player.getRespawnDimension() == Level.OVERWORLD;
+        // a bed counts only when it is a home (slept in and usable, a bought house): the intro cottage's bed never is
+        BlockPos home = com.skycraft.combat.RespawnPoints.home(player);
+        boolean hasBed = home != null && player.getRespawnPosition() != null && player.getRespawnDimension() == Level.OVERWORLD
+                && here.distSqr(home) <= 24 * 24; // vanilla could not use the bed (gone, blocked): treat as having none
         BlockPos target = here;
         if (!hasBed) {
             target = level.getSharedSpawnPos();

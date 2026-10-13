@@ -74,7 +74,19 @@ public final class Settlers {
         if (!data.populated.contains(s.key)) populate(level, s, data);
     }
 
+    /**
+     * A settlement of Skycraft's own (a named place with a layout, or a generated one) is populated from its recorded
+     * anchors by the housing model, never by this older roster: running both used to put a second crowd in the square.
+     */
+    private static boolean ownSettlement(Settlement s) {
+        for (com.skycraft.tamriel.Place p : com.skycraft.tamriel.Places.overlapping(s.x - 8, s.z - 8, s.x + 8, s.z + 8)) {
+            if (p.type().isSettlement() && p.distSqr(s.x, s.z) <= (long) (p.radius() + 24) * (p.radius() + 24)) return true;
+        }
+        return false;
+    }
+
     private static void populate(ServerLevel level, Settlement s, Data data) {
+        if (ownSettlement(s)) return;
         data.populated.add(s.key);
         data.setDirty();
         RandomSource r = level.getRandom();

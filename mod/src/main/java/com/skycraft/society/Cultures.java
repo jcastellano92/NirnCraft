@@ -117,7 +117,73 @@ public final class Cultures {
                 }
             }
         }
+        Race local = localRace(level, pos, role, r);
+        if (local != null) return local;
         return raceFor(region, role, r);
+    }
+
+    /**
+     * The race of a person who lives in a settlement, by the settlement's own culture (owner, playtest 4: no orcs and
+     * Altmer in a Nord village). A hamlet or village is 94% its own people, a town 82%, a city or capital 62%; the
+     * rest follow the region's mix, but a village or town takes no far-off peoples (orc, Altmer, Bosmer, Khajiit,
+     * Argonian) unless they are the region's own. Travellers, soldiers and the like keep the role rules above; null here.
+     */
+    @Nullable
+    private static Race localRace(Level level, BlockPos pos, @Nullable NpcRole role, RandomSource r) {
+        if (role == null || !role.townsfolk() || !(level instanceof net.minecraft.server.level.ServerLevel sl)
+                || sl.dimension() != Level.OVERWORLD) {
+            return null;
+        }
+        var entry = com.skycraft.tamriel.settlement.SettlementAnchors.near(sl, pos, 16);
+        if (entry.isEmpty() || entry.get().homestead()) return null;
+        Race home = entry.get().place().map(p -> raceOfCulture(p.culture())).orElse(null);
+        if (home == null) return null;
+        if (role == NpcRole.JARL || role == NpcRole.HOUSECARL || role == NpcRole.STEWARD) return home; // rulers: the land's own
+        int tier = com.skycraft.tamriel.settlement.SettlementPopulation.tier(entry.get());
+        return pickSettled(home, tier, regionAt(level, pos), r);
+    }
+
+    /** The mix of a settlement's people: {@code tier} 0 capital/city, 1 town, 2 village (and smaller). */
+    static Race pickSettled(Race home, int tier, @Nullable Region region, RandomSource r) {
+        int own = tier >= 2 ? 94 : tier == 1 ? 82 : 62;
+        if (r.nextInt(100) < own) return home;
+        for (int i = 0; i < 6; i++) {
+            Race x = roll(weights(region), r);
+            if (tier == 0 || !outsider(x, home, region)) return x;
+        }
+        return home;
+    }
+
+    /** A far-off people that a village or town of another culture would not have living in it. */
+    private static boolean outsider(Race x, Race home, @Nullable Region region) {
+        if (x == home || x == majority(region)) return false;
+        return switch (x) {
+            case ORC, ALTMER, BOSMER, KHAJIIT, ARGONIAN, DUNMER -> true;
+            default -> false;
+        };
+    }
+
+    /** The people of a place's culture string, or null for the cultures that are not a living people's (ruins, Daedra). */
+    @Nullable
+    private static Race raceOfCulture(String culture) {
+        if (culture == null) return null;
+        return switch (culture.toLowerCase(java.util.Locale.ROOT)) {
+            case "nord" -> Race.NORD;
+            case "imperial" -> Race.IMPERIAL;
+            case "breton" -> Race.BRETON;
+            case "redguard", "yokudan" -> Race.REDGUARD;
+            case "altmer" -> Race.ALTMER;
+            case "bosmer" -> Race.BOSMER;
+            case "dunmer", "ashlander" -> Race.DUNMER;
+            case "khajiit" -> Race.KHAJIIT;
+            case "argonian" -> Race.ARGONIAN;
+            case "orc" -> Race.ORC;
+            case "forsworn", "reachman" -> Race.REACHMAN;
+            case "atmoran", "skaal" -> Race.ATMORAN;
+            case "akaviri" -> Race.TSAESCI;
+            case "maormer" -> Race.MAORMER;
+            default -> null;
+        };
     }
 
     /** A race for someone with {@code role} living in {@code region}. */

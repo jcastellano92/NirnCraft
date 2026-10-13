@@ -461,7 +461,8 @@ def bow_texture(tier, pull):
     img = cv.img
     outline(img, color_of=lambda n: with_alpha(shade(n, 0.3), 255),
             skip=lambda x, y: cv.roles.get((x, y)) in ("string", "arrow"))
-    return img
+    # vanilla orientation: the belly faces the top-left (the display transforms of item/bow assume it)
+    return img.transpose(0)
 
 
 # ============================================================================ materials, ores, ingots

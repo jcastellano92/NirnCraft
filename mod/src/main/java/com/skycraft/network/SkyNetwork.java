@@ -62,6 +62,7 @@ public final class SkyNetwork {
         com.skycraft.curse.CurseModule.registerPackets();
         com.skycraft.sailing.SailingModule.registerPackets();
         com.skycraft.fire.FireModule.registerPackets();
+        com.skycraft.protect.ProtectModule.registerPackets();
     }
 
     public static void sendToPlayer(ServerPlayer player, Object msg) {

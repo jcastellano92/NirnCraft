@@ -56,6 +56,10 @@ public class GuardEntity extends PathfinderMob {
 
     @Nullable
     private BlockPos home;
+    /** A fixed post (a settlement gate's flank): the guard stands here facing {@link #postYaw} and returns after a fight. */
+    @Nullable
+    private BlockPos post;
+    private float postYaw;
     private long nextLine;
     private boolean initialized;
 
@@ -87,8 +91,14 @@ public class GuardEntity extends PathfinderMob {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.15D, true));
         this.goalSelector.addGoal(4, new OpenDoorGoal(this, true));
+        this.goalSelector.addGoal(3, new HoldPostGoal());
         this.goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 0.8D));
-        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.6D));
+        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.6D) {
+            @Override
+            public boolean canUse() {
+                return GuardEntity.this.post == null && super.canUse();
+            }
+        });
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this, GuardEntity.class).setAlertOthers());
@@ -129,6 +139,42 @@ public class GuardEntity extends PathfinderMob {
         this.restrictTo(this.home, 40);
     }
 
+    /** Pins this guard to a post: it stands there facing {@code yaw}, never strolls, and walks back after a fight. */
+    public void setPost(BlockPos pos, float yaw) {
+        this.post = pos.immutable();
+        this.postYaw = yaw;
+        this.home = this.post;
+        this.restrictTo(this.post, 8);
+    }
+
+    @Nullable
+    public BlockPos getPost() {
+        return post;
+    }
+
+    /** Walks back to the post whenever nothing is being fought. */
+    private final class HoldPostGoal extends net.minecraft.world.entity.ai.goal.Goal {
+        HoldPostGoal() {
+            this.setFlags(java.util.EnumSet.of(Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse() {
+            return post != null && getTarget() == null
+                    && distanceToSqr(post.getX() + 0.5, post.getY(), post.getZ() + 0.5) > 1.5 * 1.5;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return canUse() && !getNavigation().isDone();
+        }
+
+        @Override
+        public void start() {
+            getNavigation().moveTo(post.getX() + 0.5, post.getY(), post.getZ() + 0.5, 0.75D);
+        }
+    }
+
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason,
@@ -162,6 +208,13 @@ public class GuardEntity extends PathfinderMob {
         if (target != null && (!target.isAlive() || target instanceof Player p && (p.isCreative() || p.isSpectator()))) {
             this.setTarget(null);
             target = null;
+        }
+        if (target == null && post != null && this.tickCount % 10 == 0
+                && this.distanceToSqr(post.getX() + 0.5, post.getY(), post.getZ() + 0.5) <= 2.25) {
+            // on the post: square up facing outward (the head is left to look at passers-by)
+            this.setYRot(postYaw);
+            this.yBodyRot = postYaw;
+            this.getNavigation().stop();
         }
         if (target == null) {
             if (this.tickCount % 40 == 0 && this.getHealth() < this.getMaxHealth()) this.heal(1.0f);
@@ -219,6 +272,10 @@ public class GuardEntity extends PathfinderMob {
         tag.putInt("Hold", getHold());
         tag.putBoolean("SkycraftInit", initialized);
         if (home != null) tag.put("Home", NbtUtils.writeBlockPos(home));
+        if (post != null) {
+            tag.put("Post", NbtUtils.writeBlockPos(post));
+            tag.putFloat("PostYaw", postYaw);
+        }
     }
 
     @Override
@@ -227,5 +284,6 @@ public class GuardEntity extends PathfinderMob {
         setHold(tag.getInt("Hold"));
         initialized = tag.getBoolean("SkycraftInit");
         if (tag.contains("Home")) setHome(NbtUtils.readBlockPos(tag.getCompound("Home")));
+        if (tag.contains("Post")) setPost(NbtUtils.readBlockPos(tag.getCompound("Post")), tag.getFloat("PostYaw"));
     }
 }

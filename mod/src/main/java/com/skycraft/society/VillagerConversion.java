@@ -113,6 +113,8 @@ public final class VillagerConversion {
         if (!level.isLoaded(pos)) return;
         int nearby = level.getEntitiesOfClass(NpcEntity.class, new net.minecraft.world.phys.AABB(pos).inflate(48), e -> true).size();
         if (nearby >= MAX_NEARBY) return;
+        // a settlement that already holds as many people as its housing plan has slots takes no strangers
+        if (!p.trader() && p.persistent().isEmpty() && p.tags().isEmpty() && SettlementCrowd.settlementFull(level, pos)) return;
         NpcEntity npc = NpcEntities.typeFor(p.role()).create(level);
         if (npc == null) return;
         npc.moveTo(p.pos().x, p.pos().y, p.pos().z, p.yaw(), 0f);

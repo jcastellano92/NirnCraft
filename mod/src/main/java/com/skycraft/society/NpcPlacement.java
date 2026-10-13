@@ -98,6 +98,16 @@ public final class NpcPlacement {
         return true;
     }
 
+    /**
+     * Puts the person in their bed now (a closed door, a stair they cannot take: the night must not find them awake
+     * on the wrong side of a wall). True once they lie there; false if the bed is gone, taken or not loaded.
+     */
+    public static boolean putToBed(NpcEntity npc, BlockPos bed) {
+        if (!npc.level().isLoaded(bed)) return false;
+        lieDown(npc, bed);
+        return npc.isSleeping();
+    }
+
     private static void lieDown(NpcEntity npc, BlockPos bed) {
         Level level = npc.level();
         BlockState s = level.getBlockState(bed);

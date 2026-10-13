@@ -242,7 +242,12 @@ public final class RestManager {
         player.resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
         if (bed != null && player.level().getBlockState(bed).getBlock() instanceof BedBlock) {
             boolean same = bed.equals(player.getRespawnPosition()) && player.level().dimension() == player.getRespawnDimension();
-            player.setRespawnPosition(player.level().dimension(), bed, player.getYRot(), false, !same);
+            // a home is a bed slept in and usable: not the intro cottage's provisional bed, not somebody else's (combat.RespawnPoints)
+            if (!com.skycraft.combat.RespawnPoints.isProvisional(player, bed)
+                    && !com.skycraft.crime.Ownership.isOwnedByOther(player, player.level(), bed)) {
+                com.skycraft.combat.RespawnPoints.setOwned(player, player.level().dimension(), bed);
+                if (!same) player.displayClientMessage(Component.translatable("block.minecraft.set_spawn"), true);
+            }
         }
         int ticks = WorldConfig.WELL_RESTED_TICKS.get();
         if (hours >= 1 && ticks > 0) {

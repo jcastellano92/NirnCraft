@@ -318,7 +318,7 @@ public final class CreatureSpawns {
     /** Town guards: at most 2 + one per four villagers (at most {@value #MAX_TOWN_GUARDS}) within 64 blocks. */
     private static boolean guardWanted(ServerLevel level, BlockPos pos) {
         AABB area = new AABB(pos).inflate(64);
-        int guards = level.getEntitiesOfClass(GuardEntity.class, area).size();
+        int guards = level.getEntitiesOfClass(GuardEntity.class, area, g -> g.getPost() == null).size(); // gate posts are not patrols
         int villagers = level.getEntitiesOfClass(LivingEntity.class, area,
                 e -> e instanceof AbstractVillager || e instanceof com.skycraft.society.entity.NpcEntity).size();
         return guards < Math.min(MAX_TOWN_GUARDS, 2 + villagers / 4);
@@ -386,7 +386,7 @@ public final class CreatureSpawns {
             spread = Math.max(10, Math.min(30, best.radius() / 2));
         }
         if (!level.isLoaded(center)) return;
-        int guards = level.getEntitiesOfClass(GuardEntity.class, new AABB(center).inflate(64)).size();
+        int guards = level.getEntitiesOfClass(GuardEntity.class, new AABB(center).inflate(64), g -> g.getPost() == null).size(); // gate posts are not patrols
         if (guards >= MIN_GUARDS) return;
         RandomSource random = level.getRandom();
         int wanted = Math.min(MAX_GUARDS, MIN_GUARDS + random.nextInt(2)) - guards;

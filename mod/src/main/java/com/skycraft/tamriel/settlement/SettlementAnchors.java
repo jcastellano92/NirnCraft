@@ -54,6 +54,11 @@ public final class SettlementAnchors extends SavedData {
             return java.util.Collections.unmodifiableList(anchors);
         }
 
+        /** Dev: forgets which anchors already got their person, so the next visit fills them again. */
+        public void forgetSpawned() {
+            spawned.clear();
+        }
+
         public List<Anchor> anchors(AnchorType type) {
             List<Anchor> out = new ArrayList<>();
             for (Anchor a : anchors) if (a.type() == type) out.add(a);

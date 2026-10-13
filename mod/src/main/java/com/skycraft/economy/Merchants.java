@@ -57,6 +57,16 @@ public final class Merchants {
         return npc instanceof WanderingTrader || "caravan_trader".equals(npc.getPersistentData().getString("skycraft_role"));
     }
 
+    /**
+     * Travelling merchants (caravans, tinkers and peddlers on the road) keep no shop hours: they sell while they are
+     * here, day or night (owner, playtest 4). Shopkeepers of a settlement keep the shop hours of {@link Shop#isOpen}.
+     */
+    public static boolean alwaysOpen(LivingEntity npc) {
+        if (isCaravan(npc)) return true;
+        CompoundTag pd = npc.getPersistentData();
+        return pd.contains("skycraft_traveler") || pd.getBoolean("skycraft_always_open");
+    }
+
     /** Merchant level 1..5 (villager level; wandering traders are journeymen). */
     public static int level(LivingEntity npc) {
         if (npc instanceof Villager v) return Math.max(1, Math.min(5, v.getVillagerData().getLevel()));

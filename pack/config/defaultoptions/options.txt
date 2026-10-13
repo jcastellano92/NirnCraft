@@ -3,3 +3,11 @@ onboardAccessibility:false
 toggleCrouch:false
 renderDistance:10
 simulationDistance:8
+key_keybind.name.CHAT_PEEK:key.keyboard.unknown
+key_keybind.name.EMOTE_WHEEL:key.keyboard.unknown
+key_keybind.name.ZOOM:key.keyboard.unknown
+key_keybind.name.ESSENTIAL_FRIENDS:key.keyboard.unknown
+key_key.skycraft.favorites:key.keyboard.r
+key_key.skycraft.journal:key.keyboard.q
+key_key.skycraft.sail_up:key.keyboard.equal
+key_key.skycraft.sail_down:key.keyboard.minus

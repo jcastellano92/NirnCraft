@@ -7,12 +7,12 @@ import net.minecraftforge.client.settings.KeyConflictContext;
 import org.lwjgl.glfw.GLFW;
 
 /**
- * Key bindings owned by the inventory module. FAVORITES defaults to Q (Skyrim's favorites key); vanilla's drop key is
- * unbound on first launch by the core's KeyConflictResolver.
+ * Key bindings owned by the inventory module. FAVORITES defaults to R (the owner's layout; the quest journal took Q);
+ * vanilla's drop key is unbound on first launch by the core's KeyConflictResolver.
  */
 public final class InventoryKeys {
     public static final KeyMapping FAVORITES = new KeyMapping("key.skycraft.favorites", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Q, SkyKeys.CATEGORY);
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, SkyKeys.CATEGORY);
 
     private InventoryKeys() {}
 }

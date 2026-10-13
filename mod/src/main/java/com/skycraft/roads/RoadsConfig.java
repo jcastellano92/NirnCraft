@@ -30,6 +30,7 @@ public final class RoadsConfig {
     public static final ForgeConfigSpec.BooleanValue TRAVELERS;
     public static final ForgeConfigSpec.IntValue TRAVELER_INTERVAL;
     public static final ForgeConfigSpec.IntValue TRAVELER_CAP;
+    public static final ForgeConfigSpec.IntValue TRAVELER_MERCHANT_PERCENT;
     public static final ForgeConfigSpec.IntValue TRAVELER_DESPAWN_DISTANCE;
     public static final ForgeConfigSpec.BooleanValue BANDIT_AMBUSHES;
 
@@ -90,10 +91,13 @@ public final class RoadsConfig {
         b.push("travelers");
         TRAVELERS = b.comment("Spawn ambient traffic on roads near players: Khajiit caravans, travelers, guard patrols and bandit ambushes.")
                 .define("enabled", true);
-        TRAVELER_INTERVAL = b.comment("Seconds between traveler spawn attempts per player.")
-                .defineInRange("intervalSeconds", 40, 5, 3600);
+        TRAVELER_INTERVAL = b.comment("Seconds between traveler spawn attempts per player (owner, playtest 4: spaced, not a stream).")
+                .defineInRange("spawnIntervalSeconds", 100, 5, 3600);
         TRAVELER_CAP = b.comment("Maximum traveler groups within 128 blocks of a player.")
-                .defineInRange("groupsPerPlayer", 4, 0, 32);
+                .defineInRange("groupsNearPlayer", 3, 0, 32);
+        TRAVELER_MERCHANT_PERCENT = b.comment("Share of road traffic that are travelling merchants (Khajiit caravans, tinkers); the rest are",
+                "couriers, pilgrims, hunters, bards, farmers, refugees, adventurers, tax collectors, soldiers and patrols.")
+                .defineInRange("merchantPercent", 15, 0, 60);
         TRAVELER_DESPAWN_DISTANCE = b.comment("Travelers farther than this from every player are removed.")
                 .defineInRange("despawnDistance", 160, 64, 512);
         BANDIT_AMBUSHES = b.comment("Allow rare bandit ambushes beside roads (needs skycraft:bandit, never on Peaceful).")

@@ -49,6 +49,8 @@ public final class Housing {
 
     /** Persistent-data keys on a spawned resident: job id, workplace anchor position (packed). */
     public static final String JOB_KEY = "skycraft_job", WORK_KEY = "skycraft_work";
+    /** Persistent-data key: {@code "<settlement>#<anchor index>"}, the housing-plan slot this person fills (one each). */
+    public static final String SLOT_KEY = "skycraft_slot";
 
     private Housing() {}
 

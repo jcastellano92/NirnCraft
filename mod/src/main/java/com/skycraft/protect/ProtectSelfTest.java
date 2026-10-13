@@ -196,14 +196,26 @@ public final class ProtectSelfTest {
         cleanup.add(() -> PlacedBlocks.mark(level, C, false));
         stranger.setPos(C.getX() + 0.5, C.getY(), C.getZ() + 0.5);
         player.setPos(C.getX() + 0.5, C.getY(), C.getZ() + 0.5);
-        c.check("break stone in your homestead -> allowed", !breakCancelled(level, player, C, Blocks.STONE.defaultBlockState()),
+        // owner decision (playtest 4): digging at home still needs the Mining perks (homesteadFreeDiggingWithoutPerks=false)
+        boolean freeDig = ProtectConfig.HOMESTEAD_FREE_DIGGING.get();
+        c.check("break stone in your homestead without the Mining perk follows homesteadFreeDiggingWithoutPerks=" + freeDig,
+                breakCancelled(level, player, C, Blocks.STONE.defaultBlockState()) != freeDig,
                 "stone at " + fmt(C) + ", claim inside a town");
         c.check("break glass in your homestead -> allowed", !breakCancelled(level, player, C, Blocks.GLASS.defaultBlockState()), "glass");
         c.check("break stone in someone else's homestead -> cancelled", breakCancelled(level, stranger, C, Blocks.STONE.defaultBlockState()),
                 "stranger");
+        // wild plants are everyone's, on anyone's land; a crop somebody planted at home is not
+        c.check("pick a wild flower in someone else's homestead (decision) -> allowed",
+                Protect.checkBreak(stranger, level, C, Blocks.POPPY.defaultBlockState()).allowed(), "poppy");
+        PlacedBlocks.mark(level, C, true);
+        c.check("pick a planted crop in someone else's homestead (decision) -> denied",
+                !Protect.checkBreak(stranger, level, C, Blocks.POPPY.defaultBlockState()).allowed(), "planted poppy");
+        PlacedBlocks.mark(level, C, false);
         c.check("place planks in your homestead -> allowed", !placeCancelled(level, player, C, Blocks.OAK_PLANKS.defaultBlockState()), "planks");
         c.check("place planks in someone else's homestead -> cancelled", placeCancelled(level, stranger, C, Blocks.OAK_PLANKS.defaultBlockState()),
                 "stranger");
+        c.check("a player's own TNT in their homestead leaves every block (damage only)", explosionKeepsBlocks(level, C, player),
+                "synthetic detonation lit by the owner");
         homes.removeClaim(player.getUUID());
 
         // ---- 6. the op bypass
@@ -304,8 +316,13 @@ public final class ProtectSelfTest {
 
     /** A detonation whose list names three blocks of the town: the handler must empty it. */
     private static boolean explosionKeepsBlocks(ServerLevel level, BlockPos at) {
+        return explosionKeepsBlocks(level, at, null);
+    }
+
+    /** The same, lit by {@code igniter} (a player's own TNT): it must leave every block as well, at home too. */
+    private static boolean explosionKeepsBlocks(ServerLevel level, BlockPos at, net.minecraft.world.entity.Entity igniter) {
         List<BlockPos> blocks = new ArrayList<>(List.of(at.below(), at.east(), at.north()));
-        Explosion explosion = new Explosion(level, null, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 3.0f, blocks);
+        Explosion explosion = new Explosion(level, igniter, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 3.0f, blocks);
         ExplosionEvent.Detonate event = new ExplosionEvent.Detonate(level, explosion, new ArrayList<>());
         MinecraftForge.EVENT_BUS.post(event);
         return explosion.getToBlow().isEmpty();

@@ -13,7 +13,7 @@ key_key.hotbar.8:key.keyboard.8:NONE
 key_key.hotbar.9:key.keyboard.unknown:NONE
 key_key.skycraft.hub:key.keyboard.tab:NONE
 key_key.skycraft.skills:key.keyboard.k:NONE
-key_key.skycraft.journal:key.keyboard.j:NONE
+key_key.skycraft.journal:key.keyboard.q:NONE
 key_key.skycraft.magic_menu:key.keyboard.p:NONE
 key_key.skycraft.shout:key.keyboard.z:NONE
 key_key.skycraft.wait:key.keyboard.i:NONE
@@ -21,10 +21,16 @@ key_key.skycraft.map:key.keyboard.m:NONE
 key_key.skycraft.interact:key.keyboard.f:NONE
 key_key.skycraft.dodge:key.keyboard.left.alt:NONE
 key_key.skycraft.call_horse:key.keyboard.h:NONE
-key_key.skycraft.favorites:key.keyboard.q:NONE
+key_key.skycraft.favorites:key.keyboard.r:NONE
 key_key.skycraft.sheathe:key.keyboard.unknown:NONE
 key_key.skycraft.reputation:key.keyboard.y:NONE
 key_key.skycraft.stone_power:key.keyboard.unknown:NONE
 key_iris.keybind.reload:key.keyboard.unknown:NONE
 key_iris.keybind.toggleShaders:key.keyboard.unknown:NONE
 key_iris.keybind.shaderPackSelection:key.keyboard.unknown:NONE
+key_key.skycraft.sail_up:key.keyboard.equal:NONE
+key_key.skycraft.sail_down:key.keyboard.minus:NONE
+key_keybind.name.CHAT_PEEK:key.keyboard.unknown:NONE
+key_keybind.name.EMOTE_WHEEL:key.keyboard.unknown:NONE
+key_keybind.name.ZOOM:key.keyboard.unknown:NONE
+key_keybind.name.ESSENTIAL_FRIENDS:key.keyboard.unknown:NONE

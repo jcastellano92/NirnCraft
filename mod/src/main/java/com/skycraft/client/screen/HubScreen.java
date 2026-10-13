@@ -161,7 +161,7 @@ public class HubScreen extends Screen {
             selectSection(3);
             return true;
         }
-        if (key == GLFW.GLFW_KEY_J) {
+        if (com.skycraft.client.SkyKeys.JOURNAL.matches(key, scan) || key == GLFW.GLFW_KEY_J) {
             JournalClient.open();
             return true;
         }

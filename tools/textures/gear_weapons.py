@@ -553,7 +553,8 @@ def bow(mat, pull):
                 if b == 1 and 3 <= a - tail and a < 26:
                     continue
                 cv.put(a, b, col, role="arrow")
-    return cv.image(skip_roles=("string", "arrow", "nooutline"))
+    # vanilla orientation: the belly faces the top-left (the display transforms of item/bow assume it)
+    return cv.image(skip_roles=("string", "arrow", "nooutline")).transpose(0)
 
 
 def weapon(mat, wtype, seed=0):

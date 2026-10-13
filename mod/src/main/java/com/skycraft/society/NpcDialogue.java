@@ -114,6 +114,10 @@ public final class NpcDialogue {
         }
         NpcRole role = npc.role();
         if (npc.isPrisoner()) return line("prisoner");
+        String travelKind = travelerKind(npc);
+        if (travelKind != null && npc.getRandom().nextInt(4) != 0) {
+            return Component.translatable("society.skycraft.greet.traveler." + travelKind + "." + npc.getRandom().nextInt(3), player.getName());
+        }
         if (Marriage.isSpouseOf(npc, player)) {
             return Component.translatable("society.skycraft.greet.spouse." + npc.getRandom().nextInt(4), player.getName());
         }
@@ -146,6 +150,17 @@ public final class NpcDialogue {
             }
         }
         return Component.translatable("society.skycraft.greet." + role.id + "." + npc.getRandom().nextInt(2), player.getName());
+    }
+
+    /** The kinds of road traveller that have their own lines (see roads.Travelers), or null for everyone else. */
+    private static final java.util.Set<String> TRAVELER_KINDS = java.util.Set.of("caravan", "courier", "pilgrim", "hunter", "bard",
+            "soldiers", "tinker", "farmer", "refugees", "adventurer", "tax");
+
+    @org.jetbrains.annotations.Nullable
+    static String travelerKind(NpcEntity npc) {
+        CompoundTag t = npc.getPersistentData().getCompound("skycraft_traveler");
+        String kind = t.getString("kind");
+        return TRAVELER_KINDS.contains(kind) ? kind : null;
     }
 
     private static Component line(String key) {
@@ -258,6 +273,12 @@ public final class NpcDialogue {
                 || !com.skycraft.quest.story.QuestNpcs.idOf(npc).isEmpty();
         if (!obviousJob) out.add(new DialogueOption("society.job", opt("job"), 600,
                 (p, n) -> Dialogue.open(p, n, jobLine(n, role))));
+        // people on the road talk about the road (pilgrims of their shrine, soldiers of their orders, tinkers of their wares)
+        String travelKind = travelerKind(npc);
+        if (travelKind != null) {
+            out.add(new DialogueOption("society.traveler", opt("traveler_news"), 15, (p, n) -> Dialogue.open(p, n,
+                    Component.translatable("society.skycraft.say.traveler." + travelKind + "." + p.getRandom().nextInt(3)))));
+        }
         Relationships.addOptions(player, npc, out);
         Marriage.addOptions(player, npc, out);
         if (role.civilian && !npc.isChild()) {

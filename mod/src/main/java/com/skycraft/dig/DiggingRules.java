@@ -57,6 +57,10 @@ public final class DiggingRules {
     /** Returns the translation key of the reason the player can't break this block, or null if allowed. */
     public static String denyReason(Player player, BlockState state, BlockPos pos) {
         if (player.isCreative() || player.isSpectator()) return null;
+        // wild plants are everyone's to pick, on anyone's land (owner decision, playtest 4); a crop somebody planted
+        // in a homestead keeps that homestead's rules below
+        boolean wildPlant = com.skycraft.protect.Protect.isAmbientPlant(state) || com.skycraft.survival.Harvesting.isHarvestable(state);
+        if (wildPlant && !PlacedBlocks.isPlayerPlaced(player.level(), pos)) return null;
         boolean ownGround = false;
         if (player instanceof ServerPlayer sp && sp.getServer() != null) {
             com.skycraft.homestead.HomesteadClaim claim = com.skycraft.homestead.HomesteadData.get(sp.getServer()).getClaimHorizontal(sp.level(), pos);

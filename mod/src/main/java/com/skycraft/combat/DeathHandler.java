@@ -303,7 +303,10 @@ public final class DeathHandler {
             BlockPos bed = player.getSleepingPos().orElse(player.blockPosition());
             // bedrolls and tents are for one night: they never become a respawn point
             if (com.skycraft.survival.camping.CampingEvents.isCampBed(player.level(), bed)) return;
-            RespawnPoints.set(player, player.level().dimension(), bed);
+            // the intro cottage's bed is only where you wake; somebody else's bed is no home of yours
+            if (RespawnPoints.isProvisional(player, bed)) return;
+            if (com.skycraft.crime.Ownership.isOwnedByOther(player, player.level(), bed)) return;
+            RespawnPoints.setOwned(player, player.level().dimension(), bed);
         }
     }
 

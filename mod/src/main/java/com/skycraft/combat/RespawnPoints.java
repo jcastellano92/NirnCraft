@@ -15,21 +15,146 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 
 /**
- * Contract 9 (docs/PLAYTEST-1.md): the player's rest point (last bed, inn or owned house). Respawn goes there,
- * otherwise to the world spawn.
+ * Contract 9 (docs/PLAYTEST-1.md): the player's rest point. Death sends you to a bed you actually slept in and may
+ * use (an owned house, a rented inn room, a bed of your own); otherwise to the nearest settlement you have
+ * discovered ({@code core.PlayerDataEvents}); the world spawn only when you have found nothing yet.
+ *
+ * <p>{@link #set} is the provisional kind (the intro cottage's bed is where you wake, not a home): it moves where the
+ * vanilla respawn would go, but a death does not honour it. {@link #setOwned} is a home: a bed the player slept in and
+ * is allowed to use, or a house they bought.</p>
  */
+@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = com.skycraft.Skycraft.MODID)
 public final class RespawnPoints {
     private RespawnPoints() {}
 
+    /** Walking into a town (or to its gate) puts it on the player's list of places to come back to. */
+    @net.minecraftforge.eventbus.api.SubscribeEvent
+    public static void onPlayerTick(net.minecraftforge.event.TickEvent.PlayerTickEvent event) {
+        if (event.phase != net.minecraftforge.event.TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+        if (player.isSpectator() || (player.tickCount + player.getId()) % 40 != 5) return;
+        try {
+            noteVisit(player);
+        } catch (RuntimeException e) {
+            com.skycraft.Skycraft.LOGGER.debug("Skycraft: visited-town check failed", e);
+        }
+    }
+
+    /** A place to wake (the start cottage): never the death respawn, never a home, and sleeping in it makes it none. */
     public static void set(ServerPlayer player, ResourceKey<Level> dim, BlockPos pos) {
-        player.setRespawnPosition(dim, pos, player.getYRot(), true, false);
+        write(player, dim, pos, false);
+    }
+
+    /** A home: the death respawn until the player sleeps somewhere else they may use. */
+    public static void setOwned(ServerPlayer player, ResourceKey<Level> dim, BlockPos pos) {
+        write(player, dim, pos, true);
+    }
+
+    private static void write(ServerPlayer player, ResourceKey<Level> dim, BlockPos pos, boolean owned) {
         PlayerData data = SkyData.get(player);
         CompoundTag tag = data.module("respawn");
+        if (!owned && home(player) != null && !pos.equals(home(player))) {
+            // a provisional place to wake never replaces a home the player has: it is only remembered as one
+            long[] old = tag.getLongArray("provisional");
+            long[] arr = java.util.Arrays.copyOf(old, old.length + 1);
+            arr[old.length] = pos.asLong();
+            tag.putLongArray("provisional", arr);
+            data.markDirty();
+            return;
+        }
+        player.setRespawnPosition(dim, pos, player.getYRot(), true, false);
         tag.putString("dim", dim.location().toString());
         tag.putInt("x", pos.getX());
         tag.putInt("y", pos.getY());
         tag.putInt("z", pos.getZ());
+        tag.putBoolean("earned", owned);
+        // the beds that are only ever places to wake: sleeping in them later does not make them a home either
+        long key = pos.asLong();
+        long[] old = tag.getLongArray("provisional");
+        java.util.List<Long> list = new java.util.ArrayList<>();
+        for (long l : old) if (l != key) list.add(l);
+        if (!owned) list.add(key);
+        long[] arr = new long[list.size()];
+        for (int i = 0; i < arr.length; i++) arr[i] = list.get(i);
+        tag.putLongArray("provisional", arr);
         data.markDirty();
+    }
+
+    /** True if {@code pos} was only ever set as a provisional place to wake (the start cottage's bed). */
+    public static boolean isProvisional(ServerPlayer player, BlockPos pos) {
+        long key = pos.asLong();
+        for (long l : SkyData.get(player).module("respawn").getLongArray("provisional")) if (l == key) return true;
+        return false;
+    }
+
+    /** True when the player has a home (a bed slept in and usable, a bought house), not just a provisional place to wake. */
+    public static boolean isEarned(ServerPlayer player) {
+        return home(player) != null;
+    }
+
+    /** The player's home bed (overworld), or null. Vanilla sets its own respawn on any bed slept in; this is the record. */
+    @javax.annotation.Nullable
+    public static BlockPos home(ServerPlayer player) {
+        CompoundTag tag = SkyData.get(player).module("respawn");
+        if (!tag.getBoolean("earned") || !tag.contains("x")) return null;
+        String dim = tag.getString("dim");
+        if (!dim.isEmpty() && !dim.equals(Level.OVERWORLD.location().toString())) return null;
+        BlockPos pos = new BlockPos(tag.getInt("x"), tag.getInt("y"), tag.getInt("z"));
+        return isProvisional(player, pos) ? null : pos;
+    }
+
+    // ------------------------------------------------------------------ the towns a player has been to
+
+    /** Place ids of the settlements this player has walked into (their own record, independent of the map). */
+    public static java.util.Set<String> visitedTowns(ServerPlayer player) {
+        net.minecraft.nbt.ListTag list = SkyData.get(player).module("respawn").getList("towns", net.minecraft.nbt.Tag.TAG_STRING);
+        java.util.Set<String> out = new java.util.LinkedHashSet<>();
+        for (int i = 0; i < list.size(); i++) out.add(list.getString(i));
+        return out;
+    }
+
+    /**
+     * Records the settlements the player is standing in or at the gate of (its layout reach plus a margin, or within
+     * thirty blocks of one of its gates). Cheap: one place-list lookup. Returns true when a new town was added.
+     */
+    public static boolean noteVisit(ServerPlayer player) {
+        ServerLevel level = player.serverLevel();
+        if (level.dimension() != Level.OVERWORLD) return false;
+        int px = player.getBlockX(), pz = player.getBlockZ();
+        boolean added = false;
+        CompoundTag tag = SkyData.get(player).module("respawn");
+        net.minecraft.nbt.ListTag list = tag.getList("towns", net.minecraft.nbt.Tag.TAG_STRING);
+        for (com.skycraft.tamriel.Place p : com.skycraft.tamriel.Places.overlapping(px - 160, pz - 160, px + 160, pz + 160)) {
+            if (!p.type().isSettlement() || "homestead".equals(p.variant())) continue;
+            boolean known = false;
+            for (int i = 0; i < list.size() && !known; i++) known = list.getString(i).equals(p.id());
+            if (known) continue;
+            int reach;
+            try {
+                reach = Math.max(p.radius(), com.skycraft.tamriel.settlement.plan.Cities.layoutRadius(p));
+            } catch (RuntimeException e) {
+                reach = p.radius();
+            }
+            long r = reach + 24L;
+            boolean in = p.distSqr(px, pz) <= r * r;
+            if (!in) {
+                // any gate of the settlement within thirty blocks: standing at the town's entrance
+                for (int[] g : com.skycraft.tamriel.settlement.SettlementAnchors.gates(p)) {
+                    long dx = px - g[0], dz = pz - g[1];
+                    if (dx * dx + dz * dz <= 30L * 30L) {
+                        in = true;
+                        break;
+                    }
+                }
+            }
+            if (!in) continue;
+            list.add(net.minecraft.nbt.StringTag.valueOf(p.id()));
+            added = true;
+        }
+        if (added) {
+            tag.put("towns", list);
+            SkyData.get(player).markDirty();
+        }
+        return added;
     }
 
     public static boolean teleportToRestPoint(ServerPlayer player) {

@@ -38,8 +38,9 @@ public final class ProtectConfig {
                 "  homestead = never outside a homestead (strict Skyrim: the Mining perks only matter at home);",
                 "  free      = no terrain rule of its own (the perk rules of the dig module still apply).")
                 .defineInList("terrainDigging", "perks", List.of("perks", "homestead", "free"));
-        HOMESTEAD_FREE_DIGGING = b.comment("Inside a homestead you may build in, terrain can be dug without the Mining perks.")
-                .define("homesteadFreeDigging", true);
+        HOMESTEAD_FREE_DIGGING = b.comment("Inside a homestead you may build in, terrain can be dug without the Mining perks.",
+                "Off (owner decision, playtest 4): digging at home still needs Excavator / Stonebreaker / Deep Delver.")
+                .define("homesteadFreeDiggingWithoutPerks", false);
         ORE_MINING = b.comment("Ore and mineral veins may be mined with a pickaxe anywhere outside settlements and roads.")
                 .define("oreMining", true);
         TREE_CHOPPING = b.comment("Trees (logs, leaves) may be chopped away from settlements, roads, structures and landmarks.")
@@ -48,9 +49,10 @@ public final class ProtectConfig {
 
         b.push("griefing");
         GRIEFING_OFF = b.comment("Explosions (creepers, TNT, ghasts, the dragon), endermen, withers, door-breaking mobs and the like never",
-                "destroy blocks. Only a player's own TNT inside a homestead they may build in does.")
+                "destroy blocks. TNT included, in a homestead too: it hurts and throws, it never breaks a block.")
                 .define("mobGriefingOff", true);
-        FIRE_SPREAD_OFF = b.comment("Fire that appears outside a homestead (spread, lightning, lava, flint) is put out at once.")
+        FIRE_SPREAD_OFF = b.comment("Fire that appears anywhere, a homestead included (spread, lightning, lava, flint), is put out at once:",
+                "fire never spreads and never destroys a block. Blocks tagged skycraft:persistent_fire (scripted scenes) stay.")
                 .define("fireSpreadOff", true);
         FLUIDS_OFF = b.comment("No buckets of water or lava outside a homestead; lava and water do not turn into stone there.")
                 .define("fluidsOff", true);

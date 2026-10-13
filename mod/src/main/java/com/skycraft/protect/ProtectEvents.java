@@ -39,7 +39,17 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.event.TickEvent;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * The world protection handlers (see {@link Protect}): player breaking and placing, and the "griefing off" rules for
@@ -48,6 +58,10 @@ import java.util.Iterator;
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ProtectEvents {
+    /** Fire blocks scripted scenes keep burning ({@code skycraft:persistent_fire}, added by the Helgen scene). */
+    public static final net.minecraft.tags.TagKey<net.minecraft.world.level.block.Block> PERSISTENT_FIRE = net.minecraft.tags.TagKey.create(
+            net.minecraft.core.registries.Registries.BLOCK, new net.minecraft.resources.ResourceLocation(Skycraft.MODID, "persistent_fire"));
+
     private ProtectEvents() {}
 
     // ------------------------------------------------------------------ players: breaking and placing
@@ -59,6 +73,45 @@ public final class ProtectEvents {
         if (d.allowed()) return;
         event.setCanceled(true);
         Protect.hint(player, d);
+        denied(player, event.getPos(), event.getState());
+    }
+
+    /** Tells the client a block will not break, so it stops predicting it (no crack, no ghost removal). */
+    private static void denied(ServerPlayer player, BlockPos pos, BlockState state) {
+        if (player instanceof FakePlayer || player.connection == null) return;
+        ProtectPackets.sendDenied(player, pos, String.valueOf(BuiltInRegistries.BLOCK.getKey(state.getBlock())));
+    }
+
+    // ------------------------------------------------------------------ the client's picture of the rules
+
+    private static final Map<UUID, Integer> LAST_POLICY = new HashMap<>();
+    private static final int POLICY_RANGE = 320;
+
+    /** Keeps each client's picture of the claims around it (and of whether the rules apply to it) current. */
+    @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player) || player.tickCount % 40 != 7) return;
+        if (player instanceof FakePlayer || player.connection == null) return;
+        boolean enabled = Protect.enabled();
+        boolean bypass = Protect.bypassed(player);
+        ServerLevel level = player.serverLevel();
+        List<ProtectPackets.ClaimView> views = new ArrayList<>();
+        if (enabled && !bypass) {
+            String dim = level.dimension().location().toString();
+            for (HomesteadClaim c : HomesteadData.get(level.getServer()).allClaims()) {
+                if (!dim.equals(c.getDimension())) continue;
+                BlockPos at = c.getCenter();
+                long dx = at.getX() - player.getBlockX(), dz = at.getZ() - player.getBlockZ();
+                long reach = POLICY_RANGE + c.getRadius();
+                if (dx * dx + dz * dz > reach * reach) continue;
+                views.add(new ProtectPackets.ClaimView(at.getX(), at.getY(), at.getZ(), c.getRadius(), c.getMinDepth(),
+                        c.getMaxHeight(), c.canBuild(player)));
+            }
+        }
+        int hash = Objects.hash(enabled, bypass, views);
+        Integer last = LAST_POLICY.put(player.getUUID(), hash);
+        if (last != null && last == hash) return;
+        ProtectPackets.sendPolicy(player, new ProtectPackets.Policy(enabled, bypass, views));
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -81,6 +134,7 @@ public final class ProtectEvents {
         if (d.allowed()) return;
         event.setCanceled(true);
         Protect.hint(player, d);
+        denied(player, event.getPos(), state);
     }
 
     /** Hoes, axes and shovels do not till, strip or flatten the world outside a homestead. */
@@ -164,17 +218,9 @@ public final class ProtectEvents {
         if (!ProtectConfig.GRIEFING_OFF.get() || !Protect.enabled() || !(event.getLevel() instanceof ServerLevel level)) return;
         Explosion explosion = event.getExplosion();
         ServerPlayer owner = explosion.getIndirectSourceEntity() instanceof ServerPlayer sp ? sp : null;
-        HomesteadData data = HomesteadData.get(level.getServer());
-        if (owner == null || Protect.bypassed(owner)) {
-            // nobody who may build here lit it: nothing is destroyed (a bypassing op's blast is theirs to make)
-            if (owner == null) event.getAffectedBlocks().clear();
-        } else {
-            Iterator<BlockPos> it = event.getAffectedBlocks().iterator();
-            while (it.hasNext()) {
-                HomesteadClaim claim = data.getClaimHorizontal(level, it.next());
-                if (claim == null || !claim.canBuild(owner)) it.remove();
-            }
-        }
+        // owner decision (playtest 4): an explosion hurts and throws, it never destroys a block, a player's own TNT in
+        // their own homestead included. (A bypassing op's blast is theirs to make.)
+        if (owner == null || !Protect.bypassed(owner)) event.getAffectedBlocks().clear();
         if (ProtectConfig.PROTECT_ENTITIES.get()) {
             event.getAffectedEntities().removeIf(e -> isDecor(e)
                     && (owner == null || !Protect.bypassed(owner) && !Protect.mayBuildAt(owner, level, e.blockPosition())));
@@ -218,10 +264,14 @@ public final class ProtectEvents {
         if (!(event.getLevel() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) return;
         MinecraftServer server = level.getServer();
         if (!server.isSameThread()) return;
+        // scripted fires (the burning of Helgen...) are tagged and stay; every other fire goes out at once, in a
+        // homestead too (owner decision, playtest 4: fire never spreads and never destroys a block)
+        if (event.getState().is(PERSISTENT_FIRE)) return;
         BlockPos pos = event.getPos().immutable();
-        if (Protect.claimAt(level, pos) != null) return;
         server.execute(() -> {
-            if (level.isLoaded(pos) && level.getBlockState(pos).getBlock() instanceof BaseFireBlock) level.removeBlock(pos, false);
+            if (!level.isLoaded(pos)) return;
+            BlockState now = level.getBlockState(pos);
+            if (now.getBlock() instanceof BaseFireBlock && !now.is(PERSISTENT_FIRE)) level.removeBlock(pos, false);
         });
     }
 
@@ -263,6 +313,7 @@ public final class ProtectEvents {
     @SubscribeEvent
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         Protect.forget(event.getEntity().getUUID());
+        LAST_POLICY.remove(event.getEntity().getUUID());
     }
 
     @SubscribeEvent

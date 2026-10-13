@@ -95,6 +95,27 @@ public final class Footprints {
         return best;
     }
 
+    /**
+     * True if the column lies in a named settlement's footprint. Pure data (the place list and layout reach), so the
+     * client can use it to predict a denial without asking the server.
+     */
+    public static boolean inNamedSettlement(int x, int z) {
+        int margin;
+        try {
+            margin = ProtectConfig.SETTLEMENT_MARGIN.get();
+        } catch (RuntimeException e) {
+            margin = 6;
+        }
+        int[] ps = places(x >> 4, z >> 4);
+        for (int i = 0; i < ps.length; i += 4) {
+            if (ps[i + 3] != 1) continue;
+            long dx = x - ps[i], dz = z - ps[i + 1];
+            long r = ps[i + 2] + margin;
+            if (dx * dx + dz * dz <= r * r) return true;
+        }
+        return false;
+    }
+
     /** True if a piece of a structure start the chunk references contains the position (grown by {@code pad}). */
     public static boolean inStructure(ServerLevel level, BlockPos pos, int pad) {
         ChunkAccess chunk = level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.STRUCTURE_REFERENCES, false);
@@ -123,7 +144,7 @@ public final class Footprints {
                 && z >= b.minZ() - pad && z <= b.maxZ() + pad;
     }
 
-    private static int[] places(int cx, int cz) {
+    private static synchronized int[] places(int cx, int cz) {
         long key = ChunkPos.asLong(cx, cz);
         int[] cached = PLACES.get(key);
         if (cached != null) return cached;

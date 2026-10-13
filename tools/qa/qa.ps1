@@ -132,7 +132,10 @@ if ($Server) {
     }
     Remove-Item -Recurse -Force (Join-Path $Run "world") -ErrorAction SilentlyContinue
     Remove-Item -Recurse -Force (Join-Path $Run "crash-reports") -ErrorAction SilentlyContinue
-    $cmds = @("forceload add -96 -96 96 96", "skycraft-quest selftest flow", "skycraft magic selftest", "skycraft-protect selftest", "skycraft-quest intro selftest")
+    # society selftest is async (about 40 s of server time: crowd cap, gate guards, night sleepers, respawn); the housing
+    # dumps that follow give it the time, one command every 300 ticks
+    $cmds = @("forceload add -96 -96 96 96", "skycraft-quest selftest flow", "skycraft magic selftest", "skycraft-protect selftest",
+        "skycraft-quest intro selftest", "skycraft-society selftest")
     # housing model dump for the population lint (tools/qa/population_lint.py): no building, no chunk loads
     $popSample = @("whiterun", "riverwood", "helgen", "rorikstead", "dragon_bridge", "falkreath", "old_hroldan")
     $popSample | ForEach-Object { $cmds += "skypop $_" }
@@ -165,6 +168,15 @@ if ($Server) {
         Result "protect" ($ptl -match "^\d+/\d+ checks passed, 0 problems") $ptl
     } else {
         Result "protect" $false "no 'Protect selftest' line in the server log"
+    }
+    # society self-test (com.skycraft.society.SocietySelfTest): crowd cap, gate guards, night sleepers, races, respawn
+    $st = Select-String -Path $out -Pattern "Society selftest: \d+/" | Select-Object -Last 1
+    if ($st) {
+        $stl = ($st.Line -replace "^.*?Society selftest: ", "")
+        Result "society" ($stl -match "^\d+/\d+ checks passed, 0 problems") $stl
+        Select-String -Path $out -Pattern "\[society\] FAIL" | Select-Object -First 8 | ForEach-Object { Add("       " + ($_.Line -replace "^.*?\[society\] ", "")) }
+    } else {
+        Result "society" $false "no 'Society selftest' line in the server log"
     }
     $popDir =Join-Path $Run "skycraft-previews"
     $pl = @(& $py -3 -I (Join-Path $PSScriptRoot "population_lint.py") $popDir --require ($popSample -join ",") 2>&1)

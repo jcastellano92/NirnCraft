@@ -283,7 +283,7 @@ public final class Houses {
             Optional<HouseSite> site = site(level, house.id());
             if (site.isPresent()) {
                 claim(level, site.get(), player.getUUID());
-                if (site.get().bed() != null) RespawnPoints.set(player, Level.OVERWORLD, site.get().bed());
+                if (site.get().bed() != null) RespawnPoints.setOwned(player, Level.OVERWORLD, site.get().bed());
                 else data.pendingRespawn.add(player.getUUID());
             } else {
                 // not generated yet: the claim is applied when the house is built (see onSiteBuilt)
@@ -324,7 +324,7 @@ public final class Houses {
             claim(level, site, owner);
             ServerPlayer player = level.getServer().getPlayerList().getPlayer(owner);
             if (player != null && site.bed() != null && data.pendingRespawn.remove(owner)) {
-                RespawnPoints.set(player, Level.OVERWORLD, site.bed());
+                RespawnPoints.setOwned(player, Level.OVERWORLD, site.bed());
                 data.setDirty();
             }
         });

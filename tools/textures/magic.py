@@ -296,7 +296,8 @@ def bound_bow(pull):
             if 0 <= x < 16 and 0 <= y < 16:
                 px[x, y] = VIOLET_HI if i >= 5 + pull else rgba("#A070F0", 220)
     glow_outline(img)
-    return img
+    # vanilla orientation: the belly faces the top-left (the display transforms of item/bow assume it)
+    return img.transpose(0)
 
 
 # --------------------------------------------------------------------------- word wall

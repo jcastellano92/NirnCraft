@@ -62,7 +62,9 @@ public final class SettlementEvents {
             while (budget-- > 0 && (start = FOUND.poll()) != null) record(level, start);
             if (tick % 40 == 11) {
                 for (ServerPlayer player : level.players()) {
-                    if (!player.isSpectator()) SettlementPopulation.tick(level, player);
+                    if (player.isSpectator()) continue;
+                    SettlementPopulation.tick(level, player);
+                    com.skycraft.society.GatePosts.tick(level, player);
                 }
             }
         } catch (RuntimeException e) {

@@ -19,6 +19,11 @@ import net.minecraftforge.fml.config.ModConfig;
 public final class ProtectModule {
     private ProtectModule() {}
 
+    /** Registers the client-prediction packets via {@link com.skycraft.network.SkyNetwork#register}. Called once at startup. */
+    public static void registerPackets() {
+        ProtectPackets.register();
+    }
+
     /** Registers this module's config and autorun task. Called from the mod constructor. */
     public static void init(IEventBus modBus) {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ProtectConfig.SPEC, "skycraft-protect.toml");

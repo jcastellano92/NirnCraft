@@ -19,10 +19,11 @@ import org.lwjgl.glfw.GLFW;
 public final class SkyKeys {
     public static final String CATEGORY = "key.categories.skycraft";
 
-    // Documented defaults (keep in sync with defaultoptions/keybindings.txt). Favorites (Q) is in InventoryKeys.
+    // Documented defaults (keep in sync with defaultoptions/keybindings.txt). Favorites (R) is in InventoryKeys, the sail
+    // trim keys (= and -) in SailingClient. Owner's layout (playtest 4): R favorites, Q journal, Z shout (no chat peek).
     public static final KeyMapping SKILLS = key("skills", GLFW.GLFW_KEY_K);
     public static final KeyMapping HUB = key("hub", GLFW.GLFW_KEY_TAB);
-    public static final KeyMapping JOURNAL = key("journal", GLFW.GLFW_KEY_J);
+    public static final KeyMapping JOURNAL = key("journal", GLFW.GLFW_KEY_Q);
     public static final KeyMapping MAGIC_MENU = key("magic_menu", GLFW.GLFW_KEY_P);
     public static final KeyMapping SHOUT = key("shout", GLFW.GLFW_KEY_Z);
     public static final KeyMapping WAIT = key("wait", GLFW.GLFW_KEY_I);

@@ -164,11 +164,15 @@ public final class Protect {
         if (!enabled()) return Decision.ok("disabled");
         if (bypassed(player)) return Decision.ok("bypass");
         HomesteadClaim claim = claimAt(level, pos);
+        // wild plants are everyone's to pick, on anyone's land (owner decision, playtest 4); what somebody planted in
+        // a homestead they own stays theirs
+        boolean plant = Harvesting.isHarvestable(state) || isAmbientPlant(state);
+        if (plant && (claim == null || !PlacedBlocks.isPlayerPlaced(level, pos))) return Decision.ok("plant");
         if (claim != null) {
             boolean may = player instanceof ServerPlayer sp && claim.canBuild(sp);
             return may ? Decision.ok("homestead") : Decision.no("foreign_homestead");
         }
-        if (Harvesting.isHarvestable(state) || isAmbientPlant(state)) return Decision.ok("plant");
+        if (plant) return Decision.ok("plant");
         // a worked-out vein is unbreakable by itself; leave its own "the vein is depleted" hint to speak
         if (state.getBlock() instanceof com.skycraft.survival.block.DepletedOreBlock) return Decision.ok("depleted_vein");
         if (PlacedBlocks.isPlayerPlaced(level, pos)) return Decision.ok("own_block");

@@ -39,7 +39,7 @@ public final class Barter {
     /** Opens the barter menu with a merchant. */
     public static void open(ServerPlayer player, LivingEntity npc) {
         if (!Merchants.isMerchant(npc)) return;
-        if (!Shop.isOpen(player.level())) {
+        if (!Merchants.alwaysOpen(npc) && !Shop.isOpen(player.level())) {
             Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.economy.closed"));
             return;
         }

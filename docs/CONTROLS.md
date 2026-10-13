@@ -9,13 +9,13 @@ never overrides keys you've changed. Rebind anything in **Options → Controls �
 | Key | Action | Notes |
 | --- | --- | --- |
 | **E** | Skyrim inventory | Replaces the vanilla inventory. To turn it off, set `replaceInventoryScreen` in `skycraft-inventory-client.toml`. |
-| **Tab** | Menu hub | W/↑ Skills, A/← Items, D/→ Magic, S/↓ Map; J opens the Journal; Tab closes it. |
+| **Tab** | Menu hub | W/↑ Skills, A/← Items, D/→ Magic, S/↓ Map; Q opens the Journal; Tab closes it. |
 | **K** | Skills | Look to the heavens: perks, and the level-up choice. Opens the character creator if you haven't chosen a race. |
-| **J** | Journal | Main, Side, Misc, Factions, Reputation, Stats and Party tabs. |
+| **Q** | Journal | Main, Side, Misc, Factions, Reputation, Stats and Party tabs. |
 | **P** | Magic menu | Equip spells to either hand; shouts and powers. |
 | **M** | Map | Fast travel. WASD/arrows pan, Q/E or scroll zoom, Space centres on you, L shows the legend. |
 | **Z** | Shout / power | Tap for one word, hold about 0.35 s for two and 0.7 s for three. Racial powers use the same key. |
-| **Q** | Favorites | Quick menu. Keys **1–8** equip favorites 1–8 (when that slot has a favorite; otherwise the hotbar as usual). |
+| **R** | Favorites | Quick menu. Keys **1–8** equip favorites 1–8 (when that slot has a favorite; otherwise the hotbar as usual). |
 | **F** | Interact | Picks up the item you look at, talks to or loots the creature you look at, then uses or harvests the block. |
 | **Left mouse** | Attack / cast right hand | Hold for a power attack (sprint-attacking is a power attack too). |
 | **Right mouse** | Block / cast left hand | Hold to block with a weapon or shield. |
@@ -23,6 +23,7 @@ never overrides keys you've changed. Rebind anything in **Options → Controls �
 | **H** | Call your horse | |
 | **I** | Wait | Right-click a bed to sleep (any time of day). Sneak + empty hand on a bed for vanilla sleeping. |
 | **Y** | Reputation | Your standing with twelve factions. |
+| **=** / **-** | Set more sail / take in sail | On a ship at the helm. |
 | **`** | Player list | Moved from Tab. |
 | *(unbound)* | Ready / sheathe weapon | |
 | *(unbound)* | Standing Stone power | The once-a-day powers of the Ritual, Serpent, Shadow and Tower stones. Bind it yourself (the code default is O). |
@@ -31,9 +32,14 @@ Also unbound by default: vanilla drop, swap hands, advancements, hotbar slot 9, 
 select-shader keys (shaders are in **Video Settings → Shader Packs**).
 
 **Clashes:** on the first launch Skycraft unbinds vanilla keys that clash with its own defaults, plus Oculus's keys.
-On every launch, any Skycraft key still on its default that clashes with another mod's key moves to the first free
-key in this list: G J K N O P U I Y Z X B V R C , . ; ' [ ] \ - = CapsLock KP0–KP3. Keys you rebound yourself are
-never touched. To rerun the first-launch pass, delete `config/skycraft-client-keys.done`.
+**Skycraft's keys win** (playtest 4: Essential's chat peek sat on Z, its emote wheel on R, friends on H, zoom on C).
+On every launch, any other mod's key that shares a key with a Skycraft key is unbound, saved and logged; vanilla's own
+keys are only unbound when the Skycraft key is on its documented default. The first launch of layout v2 moves
+Favorites Q→R, Journal J→Q, sail trim R/V→=/− (only keys still on the old defaults) and unbinds Essential's Chat Peek,
+Emote Wheel, Zoom and Friends keys (`config/skycraft-client-keys.v2.done`). Fresh instances get the same from
+`pack/config/defaultoptions`. A Skycraft key on its default that still clashes with a key of the player's own moves to
+the first free key in this list: G J K N O P U I Y Z X B V R C , . ; ' [ ] \ - = CapsLock KP0–KP3. To rerun the
+first-launch pass, delete `config/skycraft-client-keys.done` (v2: `skycraft-client-keys.v2.done`).
 
 ### Sneaking actions
 

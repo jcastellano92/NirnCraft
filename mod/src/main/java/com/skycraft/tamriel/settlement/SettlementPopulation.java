@@ -52,15 +52,17 @@ import java.util.Optional;
 public final class SettlementPopulation {
     private SettlementPopulation() {}
 
-    static void tick(ServerLevel level, ServerPlayer player) {
+    public static void tick(ServerLevel level, ServerPlayer player) {
         SettlementAnchors data = SettlementAnchors.get(level);
         for (SettlementAnchors.Entry e : data.entries()) {
             if (!e.contains(player.getBlockX(), player.getBlockZ(), 48)) continue;
             populate(level, data, e);
+            // the hard cap: one person per plan slot, a handful of visitors (docs: playtest 4, "why so many people")
+            com.skycraft.society.SettlementCrowd.audit(level, e);
         }
     }
 
-    static int tier(SettlementAnchors.Entry e) {
+    public static int tier(SettlementAnchors.Entry e) {
         Optional<Place> p = e.place();
         if (p.isPresent() && (p.get().type() == PlaceType.CAPITAL || p.get().type() == PlaceType.CITY)) return 0;
         if (p.isPresent() && p.get().type() == PlaceType.TOWN || e.radius >= 45) return 1;
@@ -128,7 +130,7 @@ public final class SettlementPopulation {
                     // the dragon has been: only survivors and shaken soldiers, no shopkeepers, innkeeper, bard or court
                     done = ruinedHelgen(level, at, t, i);
                     if (done) {
-                        adopt(level, at, res, list, bed);
+                        adopt(level, at, res, list, bed, e.key + "#" + i);
                         e.spawned.add(i);
                         changed = true;
                     }
@@ -177,7 +179,7 @@ public final class SettlementPopulation {
                 done = true;
             }
             if (done) {
-                adopt(level, at, res, list, bed);
+                adopt(level, at, res, list, bed, e.key + "#" + i);
                 e.spawned.add(i);
                 changed = true;
             }
@@ -232,13 +234,14 @@ public final class SettlementPopulation {
      * Ties the person just spawned at {@code at} to the housing plan: records the job, the workplace anchor (for
      * villager shopkeepers' hours and the NPC routine) and the exact bed they sleep in (their home from then on).
      */
-    private static void adopt(ServerLevel level, BlockPos at, Housing.Resident res, List<Anchor> list, @Nullable BlockPos bed) {
+    private static void adopt(ServerLevel level, BlockPos at, Housing.Resident res, List<Anchor> list, @Nullable BlockPos bed, String slot) {
         BlockPos post = res.work() >= 0 && res.work() < list.size() ? standing(level, list.get(res.work()).pos()) : null;
         for (LivingEntity l : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(at).inflate(5),
                 x -> x.isAlive() && x.tickCount <= 2 && !x.getPersistentData().contains(Housing.JOB_KEY)
                         && (x instanceof NpcEntity || x instanceof AbstractVillager || x instanceof GuardEntity))) {
             CompoundTag pd = l.getPersistentData();
             pd.putString(Housing.JOB_KEY, res.job());
+            pd.putString(Housing.SLOT_KEY, slot);
             if (post != null) pd.putLong(Housing.WORK_KEY, post.asLong());
             if (res.household()) { // free hours at the plaza the plan picked for them, or indoors when it is full
                 pd.putLong(com.skycraft.society.Workplaces.PLAZA_KEY,
@@ -348,26 +351,32 @@ public final class SettlementPopulation {
         return level.addFreshEntity(g);
     }
 
-    /** A villager merchant with a Skycraft shop of the given pool. */
-    static Villager merchant(ServerLevel level, BlockPos at, VillagerProfession prof, String pool, String nameKey, String... morePools) {
+    /**
+     * A townsperson merchant with a Skycraft shop of the given pool. Made directly as a society NPC: vanilla villagers
+     * are cancelled and replaced by {@link com.skycraft.society.VillagerConversion}, which made a failed
+     * {@code addFreshEntity} look like "not spawned yet" and turned every retry of an anchor into one more resident.
+     */
+    static NpcEntity merchant(ServerLevel level, BlockPos at, VillagerProfession prof, String pool, String nameKey, String... morePools) {
         at = freeSpot(level, at);
         if (at == null) return null;
-        Villager v = EntityType.VILLAGER.create(level);
-        if (v == null) return null;
-        v.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0f);
-        v.setVillagerData(v.getVillagerData().setType(VillagerType.byBiome(level.getBiome(at))).setProfession(prof).setLevel(3));
-        v.setVillagerXp(100);
-        v.setPersistenceRequired();
-        v.setCustomName(Component.translatable(nameKey, firstName(level.getRandom().nextBoolean(), level.getRandom())));
+        NpcRole role = com.skycraft.society.VillagerConversion.roleFor(prof);
+        NpcEntity npc = Npcs.create(level, at, role);
+        if (npc == null) return null;
+        npc.setPersistenceRequired();
+        npc.setCustomName(Component.translatable(nameKey, firstName(npc.race(), npc.isFemale(), level.getRandom())));
+        CompoundTag pd = npc.getPersistentData();
+        var key = net.minecraftforge.registries.ForgeRegistries.VILLAGER_PROFESSIONS.getKey(prof);
+        if (key != null) pd.putString(Npcs.PROFESSION_KEY, key.toString());
         CompoundTag shop = new CompoundTag();
         ListTag pools = new ListTag();
         pools.add(StringTag.valueOf(pool));
         for (String extra : morePools) pools.add(StringTag.valueOf(extra));
         shop.put("pools", pools);
         shop.putInt("level", 3);
-        v.getPersistentData().put(Shop.KEY, shop);
-        v.getPersistentData().putBoolean("skycraft_settler", true);
-        return level.addFreshEntity(v) ? v : null;
+        pd.put(Shop.KEY, shop);
+        npc.setHome(at, 28);
+        pd.putBoolean("skycraft_settler", true);
+        return level.addFreshEntity(npc) ? npc : null;
     }
 
     /**
@@ -380,12 +389,10 @@ public final class SettlementPopulation {
         // one innkeeper per inn: if the survival module already sent one, it stays
         if (!level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, new net.minecraft.world.phys.AABB(at).inflate(24, 12, 24),
                 l -> l.isAlive() && Innkeepers.isInnkeeper(l)).isEmpty()) return true;
-        Villager v = EntityType.VILLAGER.create(level);
+        BlockPos spot = freeSpot(level, at);
+        if (spot == null) return false;
+        NpcEntity v = Npcs.create(level, spot, NpcRole.INNKEEPER);
         if (v == null) return false;
-        v.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0f);
-        v.setVillagerData(v.getVillagerData().setType(VillagerType.byBiome(level.getBiome(at)))
-                .setProfession(VillagerProfession.BUTCHER).setLevel(3));
-        v.setVillagerXp(100);
         String name = innkeeperName(e.key, level.getRandom());
         v.setCustomName(Component.translatable("entity.skycraft.innkeeper", name));
         v.setPersistenceRequired();
@@ -404,12 +411,18 @@ public final class SettlementPopulation {
         shop.put("pools", pools);
         shop.putInt("level", 3);
         pd.put(Shop.KEY, shop);
+        v.setHome(spot, 12);
         pd.putBoolean("skycraft_settler", true);
         return level.addFreshEntity(v);
     }
 
     static String firstName(boolean female, RandomSource r) {
         return com.skycraft.society.NpcNames.generate(com.skycraft.society.NpcNames.raceFor(NpcRole.COURIER, r), female, r);
+    }
+
+    /** A first name in the style of the person's own people. */
+    static String firstName(com.skycraft.society.NpcNames.Race race, boolean female, RandomSource r) {
+        return com.skycraft.society.NpcNames.generate(race, female, r);
     }
 
     static String innkeeperName(String key, RandomSource r) {

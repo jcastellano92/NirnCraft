@@ -991,6 +991,8 @@ final class NpcGoals {
         public boolean canUse() {
             if (npc.isBusy() || npc.getTarget() != null || !npc.role().civilian) return false;
             if (npc.social().hasUUID("engaged")) return false; // waiting at the temple for the wedding
+            // people on the road (roads.Travelers) are walking, not keeping a townsperson's day: no beds, no plaza
+            if (npc.getPersistentData().contains("skycraft_traveler")) return false;
             if (routines()) return true;
             return Npcs.isNight(npc.level());
         }
@@ -1024,6 +1026,7 @@ final class NpcGoals {
                 activity = Schedule.Activity.HOME;
             }
             if (activity != Schedule.Activity.SLEEP && npc.isSleeping()) npc.stopSleeping();
+            if (activity != Schedule.Activity.SLEEP || npc.isSleeping()) sleepSince = -1;
             watchdog(activity);
             if (activity == Schedule.Activity.SLEEP || activity == Schedule.Activity.HOME) {
                 if (npc.tickCount % 10 == 0 && guardHome()) return;
@@ -1071,17 +1074,19 @@ final class NpcGoals {
                     }
                 }
                 case WANDER -> {
-                    // free hours: the plaza (their own slot around a meeting point) from midday, indoors chores before
+                    // free hours: the plaza (their own slot around a meeting point) only in their own market hour of the
+                    // day and while it is not full; chores at home otherwise
                     BlockPos spot = leisureSpot();
-                    if (spot == null || com.skycraft.society.Schedule.hour(level) < 12) chores(home);
+                    if (spot == null || !com.skycraft.society.PlazaHours.mayGo(npc, spot, com.skycraft.society.Schedule.hour(level))) chores(home);
                     else if (!arrived(spot, 4)) go(spot, 0.55D, 3);
                     else stroll(spot, 2, 0.4D, 8);
                     com.skycraft.society.Chatter.tryStart(npc);
                 }
                 case PLAY -> {
                     BlockPos spot = leisureSpot();
-                    if (spot == null) stroll(npc.getBed() != null ? npc.getBed() : home, 5, 0.85D, 2);
-                    else if (!arrived(spot, 6)) go(spot, 0.8D, 4);
+                    if (spot == null || com.skycraft.society.PlazaHours.crowded(npc, spot)) {
+                        stroll(npc.getBed() != null ? npc.getBed() : home, 5, 0.85D, 2);
+                    } else if (!arrived(spot, 6)) go(spot, 0.8D, 4);
                     else stroll(spot, 5, 0.85D, 2);
                     com.skycraft.society.Chatter.tryStart(npc);
                 }
@@ -1097,6 +1102,8 @@ final class NpcGoals {
         private int stuck;
         private int stuckRounds;
         private int outdoorNight;
+        /** Game tick (npc.tickCount) at which this night's walk to bed began, or -1 when not on the way to bed. */
+        private int sleepSince = -1;
 
         /**
          * No progress towards a destination for 40 ticks sends the person to it (or the nearest free spot beside
@@ -1270,7 +1277,11 @@ final class NpcGoals {
             }
             if (bedPos != null) {
                 double distSq = npc.distanceToSqr(bedPos.getX() + 0.5, bedPos.getY(), bedPos.getZ() + 0.5);
+                if (sleepSince < 0) sleepSince = npc.tickCount;
                 if (distSq > 2.5 * 2.5) {
+                    // half a minute and still not there (a door that will not open, a stair that is not a path): the bed
+                    // is where they are; nobody spends the night awake in the wrong room
+                    if (npc.tickCount - sleepSince > 600 && distSq < 90.0 * 90.0 && NpcPlacement.putToBed(npc, bedPos)) return;
                     go(bedPos, 0.65D, 1.5);
                 } else {
                     npc.getNavigation().stop();

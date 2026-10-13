@@ -1,6 +1,10 @@
 package com.skycraft.roads;
 
 import com.skycraft.Skycraft;
+import com.skycraft.society.NpcNames;
+import com.skycraft.society.NpcRole;
+import com.skycraft.society.Npcs;
+import com.skycraft.society.entity.NpcEntity;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -51,9 +55,13 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Ambient road traffic: Khajiit caravans (wandering trader + trader llamas), lone travelers and couriers (villagers),
- * guard patrols ({@code skycraft:guard}) and rare bandit ambushes ({@code skycraft:bandit}). Travelers are ordinary
- * mobs tagged with {@link #TAG} in their persistent data; only tagged mobs are ever despawned by this class.
+ * Ambient road traffic. Every traveller is a society NPC (or a guard / bandit / pack animal) tagged with {@link #TAG};
+ * only tagged mobs are ever despawned by this class. The mix (owner, playtest 4: "too many merchants, mix it up"):
+ * merchants (Khajiit caravans, tinkers) about {@link RoadsConfig#TRAVELER_MERCHANT_PERCENT} per cent, the rest
+ * couriers, pilgrims, hunters, wandering bards, farmers with a donkey, refugees, adventurers, tax collectors with an
+ * escort, soldiers and guard patrols, and rare bandit ambushes. Travelling merchants keep no shop hours
+ * ({@code skycraft_always_open}). A traveller's stay at a settlement is limited ({@link #LINGER}); nobody lives on the
+ * road for more than {@link #LIFETIME}.
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Travelers {
@@ -62,30 +70,28 @@ public final class Travelers {
     public static final String COURIER = "courier";
     public static final String PATROL = "patrol";
     public static final String AMBUSH = "ambush";
+    public static final String PILGRIM = "pilgrim";
+    public static final String HUNTER = "hunter";
+    public static final String BARD = "bard";
+    public static final String SOLDIERS = "soldiers";
+    public static final String TINKER = "tinker";
+    public static final String FARMER = "farmer";
+    public static final String REFUGEES = "refugees";
+    public static final String ADVENTURER = "adventurer";
+    public static final String TAX = "tax";
     static final String LLAMA = "llama";
-    public static final String[] KINDS = {CARAVAN, COURIER, PATROL, AMBUSH};
+    static final String BEAST = "beast";
+    public static final String[] KINDS = {CARAVAN, COURIER, PATROL, AMBUSH, PILGRIM, HUNTER, BARD, SOLDIERS, TINKER, FARMER,
+            REFUGEES, ADVENTURER, TAX};
 
     private static final ResourceLocation GUARD = new ResourceLocation(Skycraft.MODID, "guard");
     private static final ResourceLocation BANDIT = new ResourceLocation(Skycraft.MODID, "bandit");
     private static final int MIN_SPAWN = 40, MAX_SPAWN = 100;
     private static final double CAP_RADIUS = 128;
-
-    private static final String[] FIRST_NAMES = {
-            "Lucan", "Faendal", "Sven", "Hilde", "Alvor", "Gerdur", "Hod", "Embry", "Bjorn", "Erik", "Hulda", "Ysolda",
-            "Brenuin", "Jon", "Olfina", "Idolaf", "Lod", "Temba", "Wilhelm", "Narri", "Gemma", "Fastred", "Klimmek",
-            "Mjoll", "Uthgerd", "Brina", "Sigrid", "Dorthe", "Torolf", "Frida", "Lars", "Camilla", "Adrianne", "Ralis",
-            "Annekke", "Gunding", "Hroki", "Leifnarr", "Svana", "Grelka"
-    };
-    private static final String[] TITLES = {"traveler", "pilgrim", "peddler", "bard", "hunter", "farmhand", "courier"};
-    private static final String[] PATRONS = {
-            "Hrongar", "Balgruuf", "Siddgeir", "Idgrod", "Skald", "Laila", "Elisif", "Igmund", "Ulfric", "Korir", "Dengeir"
-    };
-    private static final VillagerProfession[] PROFESSIONS = {
-            VillagerProfession.FARMER, VillagerProfession.FISHERMAN, VillagerProfession.SHEPHERD,
-            VillagerProfession.FLETCHER, VillagerProfession.LEATHERWORKER, VillagerProfession.CARTOGRAPHER,
-            VillagerProfession.MASON, VillagerProfession.TOOLSMITH, VillagerProfession.BUTCHER,
-            VillagerProfession.LIBRARIAN, VillagerProfession.CLERIC, VillagerProfession.ARMORER
-    };
+    /** A group is gone for good this many ticks after it appeared (when nobody is looking). */
+    private static final long LIFETIME = 20 * 60 * 8L;
+    /** How long travellers stay once they have reached their destination before they move on. */
+    private static final long LINGER = 20 * 75L;
 
     /** Loaded travelers by UUID (maintained by join/leave events). */
     private static final Map<UUID, Mob> TRAVELERS = new HashMap<>();
@@ -189,8 +195,24 @@ public final class Travelers {
                 gone.add(m);
                 continue;
             }
-            boolean done = t.getBoolean("arrived") || t.getInt("stuck") > 60;
-            if (done && !t.hasUUID("leader") && level.getNearestPlayer(m, 32) == null) gone.add(m);
+            if (t.hasUUID("leader")) continue; // group members leave with their leader (below)
+            long now = level.getGameTime();
+            if (!t.contains("born")) t.putLong("born", now);
+            long born = t.getLong("born");
+            boolean arrived = t.getBoolean("arrived") || t.getInt("stuck") > 60;
+            if (arrived && !t.contains("arrivedAt")) t.putLong("arrivedAt", now);
+            boolean watched = level.getNearestPlayer(m, 24) != null;
+            if (arrived && now - t.getLong("arrivedAt") > LINGER) {
+                // the visit is over: out of sight they vanish, in sight they turn round and walk away
+                if (!watched) gone.add(m);
+                else if (!t.getBoolean("leaving")) leave(t);
+            } else if (t.getBoolean("leaving") && level.getNearestPlayer(m, 40) == null) {
+                gone.add(m);
+            } else if (now - born > LIFETIME && level.getNearestPlayer(m, 40) == null) {
+                gone.add(m);
+            } else if (now - born > LIFETIME * 2 && !t.getBoolean("leaving")) {
+                leave(t); // a lifetime is a lifetime: they start for the horizon even with someone watching
+            }
         }
         if (gone.isEmpty()) return;
         // group members (llamas, second guard, ambushers) leave with their leader
@@ -213,12 +235,38 @@ public final class Travelers {
         for (Mob m : gone) m.discard();
     }
 
+    /** Sends a traveller back down the road it came along (no further legs); it vanishes once nobody is near. */
+    private static void leave(CompoundTag t) {
+        t.putInt("dir", t.getInt("dir") >= 0 ? -1 : 1);
+        t.putBoolean("arrived", false);
+        t.putBoolean("leaving", true);
+        t.putInt("legs", 99);
+        t.putInt("stuck", 0);
+        t.remove("arrivedAt");
+    }
+
     // ------------------------------------------------------------------ steering
 
     private static double speed(Mob mob) {
-        if (mob instanceof Villager) return 0.5;
-        if (mob instanceof WanderingTrader) return 0.5;
-        return 0.7;
+        CompoundTag t = tag(mob);
+        String kind = t == null ? "" : t.getString("kind");
+        return switch (kind) {
+            case PILGRIM, REFUGEES -> 0.42;
+            case FARMER, CARAVAN -> 0.5;
+            case TINKER, BARD, TAX -> 0.55;
+            case HUNTER -> 0.6;
+            case ADVENTURER, SOLDIERS, PATROL -> 0.65;
+            case COURIER -> 0.8;
+            default -> mob instanceof Villager || mob instanceof WanderingTrader ? 0.5 : 0.7;
+        };
+    }
+
+    /** Kinds that stop for a rest at the roadside now and then (the bard plays, the pilgrim prays). */
+    private static boolean rests(String kind) {
+        return switch (kind) {
+            case PILGRIM, BARD, HUNTER, FARMER, TINKER, REFUGEES, CARAVAN -> true;
+            default -> false;
+        };
     }
 
     private static void moveTo(Mob mob, double x, double y, double z, double speed) {
@@ -242,7 +290,7 @@ public final class Travelers {
                 CompoundTag lt = tag(lm);
                 if (lt != null) {
                     t.putInt("idx", lt.getInt("idx"));
-                    if (lt.getBoolean("arrived")) t.putBoolean("arrived", true);
+                    t.putBoolean("arrived", lt.getBoolean("arrived"));
                 }
                 if (mob.distanceToSqr(lm) > 9) moveTo(mob, lm.getX(), lm.getY(), lm.getZ(), speed(mob) * 1.15);
                 return;
@@ -253,6 +301,21 @@ public final class Travelers {
             t.remove("leader"); // the leader is gone: lead the rest of the way
         }
         if (!RoadNetwork.isRoadLevel(level)) return;
+        // a rest at the roadside: the bard plays a tune, the pilgrim stands in prayer, the rest sit about
+        int rest = t.getInt("rest");
+        if (rest > 0) {
+            t.putInt("rest", rest - 1);
+            mob.getNavigation().stop();
+            if (rest == 1 && mob instanceof NpcEntity n) n.setPlaying(false);
+            return;
+        }
+        String kind = t.getString("kind");
+        if (rests(kind) && !t.getBoolean("leaving") && level.getRandom().nextInt(110) == 0) {
+            t.putInt("rest", 12 + level.getRandom().nextInt(26));
+            mob.getNavigation().stop();
+            if (mob instanceof NpcEntity n && kind.equals(BARD)) n.setPlaying(true);
+            return;
+        }
         Road road = RoadsData.get(level).road(t.getInt("road"));
         if (road == null) {
             t.putBoolean("arrived", true);
@@ -336,23 +399,70 @@ public final class Travelers {
 
     static boolean kindAvailable(ServerLevel level, String kind) {
         return switch (kind) {
-            case CARAVAN, COURIER -> true;
             case PATROL -> ForgeRegistries.ENTITY_TYPES.containsKey(GUARD);
             case AMBUSH -> RoadsConfig.BANDIT_AMBUSHES.get() && level.getDifficulty() != Difficulty.PEACEFUL
                     && ForgeRegistries.ENTITY_TYPES.containsKey(BANDIT);
+            case CARAVAN, COURIER, PILGRIM, HUNTER, BARD, SOLDIERS, TINKER, FARMER, REFUGEES, ADVENTURER, TAX -> true;
             default -> false;
         };
     }
 
-    private static String pickKind(ServerLevel level, RandomSource random) {
-        int caravan = 3, courier = 4;
-        int patrol = kindAvailable(level, PATROL) ? 3 : 0;
-        int ambush = kindAvailable(level, AMBUSH) ? 1 : 0;
-        int roll = random.nextInt(caravan + courier + patrol + ambush);
-        if ((roll -= caravan) < 0) return CARAVAN;
-        if ((roll -= courier) < 0) return COURIER;
-        if ((roll -= patrol) < 0) return PATROL;
-        return AMBUSH;
+    /** Whether a kind sells things (they keep no shop hours and share the merchant quota). */
+    static boolean merchantKind(String kind) {
+        return CARAVAN.equals(kind) || TINKER.equals(kind);
+    }
+
+    /**
+     * The next kind of traveller: the other kinds at fixed weights, merchants (caravans and tinkers) added so that they
+     * are {@link RoadsConfig#TRAVELER_MERCHANT_PERCENT} per cent of all. After dark only the watch (patrols, soldiers)
+     * and bandits are about: everybody else is in camp.
+     */
+    static String pickKind(ServerLevel level, RandomSource random) {
+        return pickKind(level, random, com.skycraft.society.Npcs.isNight(level));
+    }
+
+    /** The mix over {@code n} picks (the self-test and the dev census read it). */
+    public static java.util.Map<String, Integer> sampleMix(ServerLevel level, int n, boolean night) {
+        java.util.Map<String, Integer> out = new java.util.TreeMap<>();
+        RandomSource random = RandomSource.create(8128);
+        for (int i = 0; i < n; i++) out.merge(pickKind(level, random, night), 1, Integer::sum);
+        return out;
+    }
+
+    private static String pickKind(ServerLevel level, RandomSource random, boolean night) {
+        java.util.LinkedHashMap<String, Integer> w = new java.util.LinkedHashMap<>();
+        if (!night) {
+            w.put(COURIER, 11);
+            w.put(PILGRIM, 11);
+            w.put(HUNTER, 9);
+            w.put(BARD, 8);
+            w.put(FARMER, 7);
+            w.put(REFUGEES, 6);
+            w.put(ADVENTURER, 7);
+            w.put(TAX, 3);
+        }
+        w.put(SOLDIERS, 8);
+        if (kindAvailable(level, PATROL)) w.put(PATROL, 9);
+        if (kindAvailable(level, AMBUSH)) w.put(AMBUSH, 3);
+        int others = 0;
+        for (int v : w.values()) others += v;
+        int pct = Math.max(0, Math.min(60, RoadsConfig.TRAVELER_MERCHANT_PERCENT.get()));
+        if (!night && pct > 0) {
+            int merchants = Math.max(2, Math.round(others * pct / (float) (100 - pct)));
+            w.put(CARAVAN, Math.max(1, merchants * 3 / 5));
+            w.put(TINKER, Math.max(1, merchants - merchants * 3 / 5));
+            others += merchants;
+        }
+        int roll = random.nextInt(Math.max(1, others));
+        for (var e : w.entrySet()) {
+            if ((roll -= e.getValue()) < 0) return e.getKey();
+        }
+        return COURIER;
+    }
+
+    /** Dev: forces one group of {@code kind} near the player (the census harness). Returns the kind spawned, or null. */
+    public static String devSpawn(ServerLevel level, ServerPlayer player, String kind) {
+        return trySpawn(level, RoadsData.get(level), player, kind);
     }
 
     /**
@@ -427,11 +537,25 @@ public final class Travelers {
         return hit.getType() == HitResult.Type.MISS;
     }
 
+    /** A group member after the first: {@code role} walking behind the leader. */
+    private static boolean follower(ServerLevel level, NpcRole role, String kind, Road road, int idx, int dir, int dest, Mob leader,
+                                    int back, int side) {
+        return spawnNpc(level, role, kind, road, road.clamp(idx - dir * back), dir, side, newTag(kind, road, idx, dir, dest, leader.getUUID())) != null;
+    }
+
+    private static NpcRole soldierRole(ServerLevel level, BlockPos at) {
+        // the holds that stand with Ulfric send Stormcloak patrols, everywhere else the Legion walks the roads
+        String region = com.skycraft.society.Cultures.regionAt(level, at).id();
+        return region.equals("skyrim/eastmarch") || region.equals("skyrim/the_pale") || region.equals("skyrim/winterhold")
+                ? NpcRole.STORMCLOAK_SOLDIER : NpcRole.IMPERIAL_SOLDIER;
+    }
+
     private static boolean spawnGroup(ServerLevel level, String kind, Road road, int idx, int dir, RandomSource random) {
         int dest = dir > 0 ? road.b : road.a;
+        BlockPos here = new BlockPos(road.xs[idx], level.getSeaLevel(), road.zs[idx]);
         return switch (kind) {
             case CARAVAN -> {
-                Mob trader = spawn(level, EntityType.WANDERING_TRADER, road, idx, dir, 0, newTag(kind, road, idx, dir, dest, null));
+                Mob trader = spawnNpc(level, NpcRole.CARAVAN_TRADER, kind, road, idx, dir, 0, newTag(kind, road, idx, dir, dest, null));
                 if (trader == null) yield false;
                 int llamas = 1 + random.nextInt(2);
                 for (int i = 1; i <= llamas; i++) {
@@ -441,9 +565,60 @@ public final class Travelers {
                 }
                 yield true;
             }
-            case COURIER -> {
-                Mob mob = spawn(level, EntityType.VILLAGER, road, idx, dir, 0, newTag(kind, road, idx, dir, dest, null));
-                yield mob != null;
+            case TINKER -> {
+                Mob tinker = spawnNpc(level, NpcRole.MERCHANT, kind, road, idx, dir, 0, newTag(kind, road, idx, dir, dest, null));
+                if (tinker == null) yield false;
+                Mob beast = spawn(level, EntityType.DONKEY, road, road.clamp(idx - dir * 2), dir, 0,
+                        newTag(BEAST, road, idx, dir, dest, tinker.getUUID()));
+                if (beast != null) beast.setLeashedTo(tinker, true);
+                yield true;
+            }
+            case FARMER -> {
+                Mob farmer = spawnNpc(level, NpcRole.FARMER, kind, road, idx, dir, 0, newTag(kind, road, idx, dir, dest, null));
+                if (farmer == null) yield false;
+                Mob cart = spawn(level, EntityType.DONKEY, road, road.clamp(idx - dir * 2), dir, 0,
+                        newTag(BEAST, road, idx, dir, dest, farmer.getUUID()));
+                if (cart != null) cart.setLeashedTo(farmer, true);
+                yield true;
+            }
+            case COURIER -> spawnNpc(level, NpcRole.COURIER, kind, road, idx, dir, 0, newTag(kind, road, idx, dir, dest, null)) != null;
+            case HUNTER -> spawnNpc(level, NpcRole.HUNTER, kind, road, idx, dir, 0, newTag(kind, road, idx, dir, dest, null)) != null;
+            case BARD -> spawnNpc(level, NpcRole.BARD, kind, road, idx, dir, 0, newTag(kind, road, idx, dir, dest, null)) != null;
+            case PILGRIM -> {
+                Mob first = spawnNpc(level, NpcRole.PRIEST, kind, road, idx, dir, 0, newTag(kind, road, idx, dir, dest, null));
+                if (first == null) yield false;
+                if (random.nextInt(3) == 0) follower(level, NpcRole.CITIZEN, kind, road, idx, dir, dest, first, 2, 1);
+                yield true;
+            }
+            case ADVENTURER -> {
+                Mob first = spawnNpc(level, NpcRole.ADVENTURER, kind, road, idx, dir, 0, newTag(kind, road, idx, dir, dest, null));
+                if (first == null) yield false;
+                if (random.nextInt(5) < 2) follower(level, NpcRole.ADVENTURER, kind, road, idx, dir, dest, first, 2, 1);
+                yield true;
+            }
+            case REFUGEES -> {
+                Mob first = spawnNpc(level, NpcRole.CITIZEN, kind, road, idx, dir, 0, newTag(kind, road, idx, dir, dest, null));
+                if (first == null) yield false;
+                follower(level, random.nextBoolean() ? NpcRole.CHILD : NpcRole.BEGGAR, kind, road, idx, dir, dest, first, 2, 1);
+                if (random.nextBoolean()) follower(level, NpcRole.CITIZEN, kind, road, idx, dir, dest, first, 3, -1);
+                yield true;
+            }
+            case SOLDIERS -> {
+                NpcRole soldier = soldierRole(level, here);
+                Mob first = spawnNpc(level, soldier, kind, road, idx, dir, 0, newTag(kind, road, idx, dir, dest, null));
+                if (first == null) yield false;
+                follower(level, soldier, kind, road, idx, dir, dest, first, 1, 1);
+                if (random.nextInt(3) == 0) follower(level, soldier, kind, road, idx, dir, dest, first, 2, -1);
+                yield true;
+            }
+            case TAX -> {
+                // a collector of the Jarl's with two soldiers of the same colours behind him
+                Mob first = spawnNpc(level, NpcRole.COURIER, kind, road, idx, dir, 0, newTag(kind, road, idx, dir, dest, null));
+                if (first == null) yield false;
+                NpcRole soldier = soldierRole(level, here);
+                follower(level, soldier, kind, road, idx, dir, dest, first, 2, 1);
+                follower(level, soldier, kind, road, idx, dir, dest, first, 2, -1);
+                yield true;
             }
             case PATROL -> {
                 EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(GUARD);
@@ -501,25 +676,44 @@ public final class Travelers {
         mob.setYHeadRot(yaw);
         if (!level.noCollision(mob)) return null;
         mob.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
-        if (mob instanceof Villager villager) dressVillager(level, villager, pos, level.getRandom());
+        tag.putLong("born", level.getGameTime());
         mob.getPersistentData().put(TAG, tag);
         if (!level.addFreshEntity(mob)) return null;
         return mob;
     }
 
-    private static void dressVillager(ServerLevel level, Villager villager, BlockPos pos, RandomSource random) {
-        VillagerProfession profession = random.nextInt(3) == 0 ? VillagerProfession.NITWIT : PROFESSIONS[random.nextInt(PROFESSIONS.length)];
-        villager.setVillagerData(villager.getVillagerData()
-                .setType(VillagerType.byBiome(level.getBiome(pos)))
-                .setProfession(profession));
-        if (profession != VillagerProfession.NITWIT) villager.setVillagerXp(1); // keeps the profession without a job site
-        Component name;
-        if (random.nextInt(4) == 0) {
-            name = Component.translatable("roads.skycraft.title.courier_of", PATRONS[random.nextInt(PATRONS.length)]);
-        } else {
-            name = Component.translatable("roads.skycraft.title." + TITLES[random.nextInt(TITLES.length)],
-                    FIRST_NAMES[random.nextInt(FIRST_NAMES.length)]);
+    /**
+     * Creates, positions and adds one traveller of a society role at road point {@code idx}. Made directly as a society
+     * NPC (never as a vanilla villager, which the villager conversion would cancel and redo): looks and race follow the
+     * region, the title names the kind, merchants keep no shop hours.
+     */
+    @Nullable
+    private static NpcEntity spawnNpc(ServerLevel level, NpcRole role, String kind, Road road, int idx, int dir, int sideOffset,
+                                      CompoundTag tag) {
+        int x = road.xs[idx], z = road.zs[idx];
+        if (sideOffset != 0) {
+            double[] right = RoadLayout.right(road, idx);
+            x = (int) Math.round(x + right[0] * sideOffset);
+            z = (int) Math.round(z + right[1] * sideOffset);
         }
-        villager.setCustomName(name);
+        BlockPos pos = groundAt(level, x, z);
+        if (pos == null) return null;
+        NpcEntity npc = Npcs.create(level, pos, role);
+        if (npc == null) return null;
+        int ahead = road.clamp(idx + dir * 3);
+        float yaw = (float) (Mth.atan2(road.zs[ahead] - road.zs[idx], road.xs[ahead] - road.xs[idx]) * (180.0 / Math.PI)) - 90.0f;
+        npc.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0.0f);
+        npc.setYHeadRot(yaw);
+        if (!level.noCollision(npc)) return null;
+        tag.putLong("born", level.getGameTime());
+        npc.getPersistentData().put(TAG, tag);
+        // the title names the kind of traveller ("Orla the Pilgrim"); soldiers keep their own
+        if (role.civilian && role != NpcRole.CARAVAN_TRADER) {
+            String first = NpcNames.generate(npc.race(), npc.isFemale(), level.getRandom());
+            npc.setCustomName(Component.translatable("roads.skycraft.title." + kind, first));
+        }
+        if (merchantKind(kind)) npc.getPersistentData().putBoolean("skycraft_always_open", true);
+        if (!level.addFreshEntity(npc)) return null;
+        return npc;
     }
 }

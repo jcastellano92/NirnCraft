@@ -47,6 +47,20 @@ public final class KeyConflictResolver {
     /** Hold-to-show overlays that may share a key with a Skycraft key (player list on Tab with the Hub). */
     private static final Set<String> SHARED_OK = Set.of("key.playerlist");
 
+    /**
+     * Layout v2 (owner, playtest 4): R favorites, Q quest journal, Z shout with no chat peek. Skycraft keys still on
+     * their previous default move to the new one: {name, previous key, new key}.
+     */
+    private static final Object[][] LAYOUT_V2 = {
+            {"key.skycraft.favorites", GLFW.GLFW_KEY_Q, GLFW.GLFW_KEY_R},
+            {"key.skycraft.journal", GLFW.GLFW_KEY_J, GLFW.GLFW_KEY_Q},
+            {"key.skycraft.sail_up", GLFW.GLFW_KEY_R, GLFW.GLFW_KEY_EQUAL},
+            {"key.skycraft.sail_down", GLFW.GLFW_KEY_V, GLFW.GLFW_KEY_MINUS},
+    };
+    /** Essential's keys that sit on Skycraft's (chat peek on Z, emote wheel on R, friends on H, zoom on C): unbound once. */
+    private static final Set<String> ESSENTIAL_KEYS = Set.of("keybind.name.chat_peek", "keybind.name.emote_wheel",
+            "keybind.name.zoom", "keybind.name.essential_friends");
+
     private static boolean done;
 
     private KeyConflictResolver() {}
@@ -103,7 +117,38 @@ public final class KeyConflictResolver {
             }
         }
 
-        // Every launch: move a Skycraft key still at its default off a clash (never touch anyone else's keys).
+        // Layout v2, once: previous defaults move to the owner's layout and Essential's colliding keys are unbound
+        Path markerV2 = FMLPaths.CONFIGDIR.get().resolve("skycraft-client-keys.v2.done");
+        boolean layoutV2 = !Files.exists(markerV2);
+        if (layoutV2) {
+            changed |= migrateLayoutV2(all);
+            try {
+                Files.writeString(markerV2, "Skycraft key layout v2 (R favorites, Q journal, Z shout) applied once. Delete to apply again.\n");
+            } catch (Exception e) {
+                Skycraft.LOGGER.warn("Could not write {}", markerV2, e);
+            }
+        }
+
+        // Every launch: Skycraft keys win. Another mod's key that shares a key with a Skycraft key is unbound (and
+        // logged once, since it is then unbound). Vanilla's own keys are only touched when the Skycraft key is at its
+        // documented default, never because a player rebound a Skycraft key onto them.
+        Set<KeyMapping> vanilla = vanillaKeys(mc);
+        for (KeyMapping ours : all) {
+            if (!isOurs(ours) || ours.isUnbound()) continue;
+            for (KeyMapping other : all) {
+                if (other == ours || isOurs(other) || other.isUnbound() || !other.getKey().equals(ours.getKey())) continue;
+                if (SHARED_OK.contains(other.getName().toLowerCase(Locale.ROOT))) continue;
+                if (!ours.getKeyConflictContext().conflicts(other.getKeyConflictContext())) continue;
+                if (vanilla.contains(other) && !ours.isDefault()) continue;
+                Skycraft.LOGGER.info("Key conflict: unbinding {} ({}); {} keeps the key", other.getName(), other.getKey().getName(),
+                        ours.getName());
+                other.setKey(InputConstants.UNKNOWN);
+                changed = true;
+            }
+        }
+
+        // A Skycraft key still at its default that clashes with another key (e.g. one of the player's own, or another
+        // Skycraft key) moves to a free key. Never touches anyone else's keys.
         for (KeyMapping ours : all) {
             if (!isOurs(ours) || ours.isUnbound()) continue;
             if (!ours.isDefault() && !sharesWithChat(ours, all)) continue;
@@ -131,6 +176,46 @@ public final class KeyConflictResolver {
                 Skycraft.LOGGER.warn("Could not write {}", marker, e);
             }
         }
+    }
+
+    /** Moves Skycraft keys off their previous defaults and unbinds Essential's colliding keys. True if anything changed. */
+    private static boolean migrateLayoutV2(KeyMapping[] all) {
+        boolean changed = false;
+        java.util.Map<KeyMapping, Integer> moves = new java.util.HashMap<>();
+        for (Object[] row : LAYOUT_V2) {
+            for (KeyMapping k : all) {
+                if (!k.getName().equals(row[0]) || k.isUnbound()) continue;
+                if (k.getKey().getType() == InputConstants.Type.KEYSYM && k.getKey().getValue() == (Integer) row[1]) {
+                    moves.put(k, (Integer) row[2]);
+                }
+            }
+        }
+        for (var e : moves.entrySet()) {
+            InputConstants.Key to = InputConstants.Type.KEYSYM.getOrCreate(e.getValue());
+            Skycraft.LOGGER.info("Key layout v2: {} moves from {} to {}", e.getKey().getName(), e.getKey().getKey().getName(), to.getName());
+            e.getKey().setKey(to);
+            changed = true;
+        }
+        for (KeyMapping k : all) {
+            if (ESSENTIAL_KEYS.contains(k.getName().toLowerCase(Locale.ROOT)) && !k.isUnbound()) {
+                Skycraft.LOGGER.info("Key layout v2: unbinding {} ({})", k.getName(), k.getKey().getName());
+                k.setKey(InputConstants.UNKNOWN);
+                changed = true;
+            }
+        }
+        return changed;
+    }
+
+    /** Vanilla's own key mappings (movement, attack, inventory, chat, hotbar...). */
+    private static Set<KeyMapping> vanillaKeys(Minecraft mc) {
+        var o = mc.options;
+        Set<KeyMapping> set = new HashSet<>(java.util.List.of(o.keyUp, o.keyLeft, o.keyDown, o.keyRight, o.keyJump, o.keyShift,
+                o.keySprint, o.keyInventory, o.keySwapOffhand, o.keyDrop, o.keyUse, o.keyAttack, o.keyPickItem, o.keyChat,
+                o.keyPlayerList, o.keyCommand, o.keySocialInteractions, o.keyScreenshot, o.keyTogglePerspective,
+                o.keySmoothCamera, o.keyFullscreen, o.keySpectatorOutlines, o.keyAdvancements, o.keySaveHotbarActivator,
+                o.keyLoadHotbarActivator));
+        set.addAll(java.util.Arrays.asList(o.keyHotbarSlots));
+        return set;
     }
 
     private static boolean sharesWithChat(KeyMapping ours, KeyMapping[] all) {

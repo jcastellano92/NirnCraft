@@ -47,6 +47,60 @@ final class SocietyCommands {
                         .then(Commands.argument("role", StringArgumentType.word())
                                 .suggests((c, b) -> SharedSuggestionProvider.suggest(roles, b))
                                 .executes(SocietyCommands::npc)))
+                // dev: how many people of which spawn path stand around a place (and a fake player visit to drive population)
+                .then(Commands.literal("census")
+                        .then(Commands.argument("place", StringArgumentType.word())
+                                .executes(c -> census(c, 80))
+                                .then(Commands.argument("radius", IntegerArgumentType.integer(8, 400))
+                                        .executes(c -> census(c, IntegerArgumentType.getInteger(c, "radius"))))))
+                .then(Commands.literal("visit")
+                        .then(Commands.argument("place", StringArgumentType.word()).executes(SocietyCommands::visit)))
+                // dev: a fake player at x z asks the road traffic for one group of a kind, then lists what road people are near
+                .then(Commands.literal("traveller")
+                        .then(Commands.argument("kind", StringArgumentType.word())
+                                .suggests((c, b) -> SharedSuggestionProvider.suggest(Arrays.asList(com.skycraft.roads.Travelers.KINDS), b))
+                                .then(Commands.argument("x", IntegerArgumentType.integer())
+                                        .then(Commands.argument("z", IntegerArgumentType.integer()).executes(c -> {
+                                            var level = c.getSource().getLevel();
+                                            var fake = net.minecraftforge.common.util.FakePlayerFactory.get(level,
+                                                    new com.mojang.authlib.GameProfile(java.util.UUID.nameUUIDFromBytes("skycraft-society-census".getBytes()), "[Census]"));
+                                            int x = IntegerArgumentType.getInteger(c, "x"), z = IntegerArgumentType.getInteger(c, "z");
+                                            fake.setPos(x + 0.5, level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z + 0.5);
+                                            String made = com.skycraft.roads.Travelers.devSpawn(level, fake, StringArgumentType.getString(c, "kind"));
+                                            int n = 0;
+                                            for (var e : level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
+                                                    fake.getBoundingBox().inflate(150, 200, 150), m -> m.getPersistentData().contains(com.skycraft.roads.Travelers.TAG))) {
+                                                String kind = e.getPersistentData().getCompound(com.skycraft.roads.Travelers.TAG).getString("kind");
+                                                String line = "  " + kind + ": " + e.getType().builtInRegistryHolder().key().location().getPath()
+                                                        + (e instanceof com.skycraft.society.entity.NpcEntity npc ? "/" + npc.role().id + "/" + npc.race().name().toLowerCase() : "")
+                                                        + " '" + e.getDisplayName().getString() + "' at " + e.blockPosition().toShortString();
+                                                c.getSource().sendSuccess(() -> Component.literal(line), false);
+                                                n++;
+                                            }
+                                            final int count = n;
+                                            c.getSource().sendSuccess(() -> Component.literal("spawned " + made + "; " + count + " road people near"), false);
+                                            return made == null ? 0 : 1;
+                                        })))))
+                .then(Commands.literal("reset")
+                        .then(Commands.argument("place", StringArgumentType.word()).executes(c -> {
+                            var place = com.skycraft.tamriel.Places.byId(StringArgumentType.getString(c, "place"));
+                            if (place.isEmpty()) return 0;
+                            int n = SocietyCensus.repopulate(c.getSource().getLevel(), place.get(), 140);
+                            c.getSource().sendSuccess(() -> Component.literal("Removed " + n + " people; " + place.get().id()
+                                    + " fills again on the next visit"), false);
+                            return n;
+                        })))
+                // runs for about a minute of server time (the night needs the people to walk home); the report follows
+                .then(Commands.literal("selftest").executes(c -> {
+                    CommandSourceStack src = c.getSource();
+                    boolean started = SocietySelfTest.start(src.getServer(), r -> {
+                        for (String l : r.lines()) src.sendSuccess(() -> Component.literal(l), false);
+                        src.sendSuccess(() -> Component.literal(r.summary()), false);
+                        com.skycraft.Skycraft.LOGGER.info("{}", r.summary());
+                    });
+                    src.sendSuccess(() -> Component.literal(started ? "Society selftest started (about a minute)" : "Society selftest already running"), false);
+                    return started ? 1 : 0;
+                }))
                 .then(Commands.literal("populate")
                         .then(Commands.argument("size", StringArgumentType.word())
                                 .suggests((c, b) -> SharedSuggestionProvider.suggest(List.of("farm", "village", "town", "city"), b))
@@ -68,6 +122,31 @@ final class SocietyCommands {
                                         .suggests((c, b) -> SharedSuggestionProvider.suggest(factions, b))
                                         .then(Commands.argument("value", IntegerArgumentType.integer(Reputation.MIN, Reputation.MAX))
                                                 .executes(SocietyCommands::setRep))))));
+    }
+
+    private static int census(CommandContext<CommandSourceStack> c, int radius) {
+        String id = StringArgumentType.getString(c, "place");
+        var place = com.skycraft.tamriel.Places.byId(id);
+        if (place.isEmpty()) {
+            c.getSource().sendFailure(Component.literal("No place " + id));
+            return 0;
+        }
+        List<String> lines = SocietyCensus.report(c.getSource().getLevel(), place.get(), radius);
+        for (String l : lines) c.getSource().sendSuccess(() -> Component.literal(l), false);
+        com.skycraft.Skycraft.LOGGER.info("{}", String.join(" | ", lines));
+        return lines.size();
+    }
+
+    private static int visit(CommandContext<CommandSourceStack> c) {
+        String id = StringArgumentType.getString(c, "place");
+        var place = com.skycraft.tamriel.Places.byId(id);
+        if (place.isEmpty()) {
+            c.getSource().sendFailure(Component.literal("No place " + id));
+            return 0;
+        }
+        String s = SocietyCensus.visit(c.getSource().getLevel(), place.get());
+        c.getSource().sendSuccess(() -> Component.literal(s), false);
+        return 1;
     }
 
     private static int npc(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {

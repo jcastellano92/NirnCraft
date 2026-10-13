@@ -10,11 +10,11 @@ hash = "b1b3fa305c12f58e93653acabf8f906d2ffaf71be51a4956a1384ecd49a9170e"
 
 [[files]]
 file = "config/defaultoptions/keybindings.txt"
-hash = "01fe471882e099ba751b79ea0c8237e740f5d47e0a0edc18c997b5750ec27daf"
+hash = "a532a959ad13eec500143e6ed9d6d21db748df87107cec9b7b8a16e9da7b85d7"
 
 [[files]]
 file = "config/defaultoptions/options.txt"
-hash = "809ac132f886b5fe357d15f09e86c736e0ae8b9cb070b75affb7c812ce1fd3af"
+hash = "75dd3be31e417473bb4dba13bd81c6222792c31b41fc6199494c67b5bc432266"
 
 [[files]]
 file = "config/fml.toml"
