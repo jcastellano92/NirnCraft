@@ -21,6 +21,9 @@ than the running server (new code; -NoRestart to skip); a dead server is reporte
 World: mod\run\devworld\world (seed 2428247, Nirn), port: -Port, else $env:SKYCRAFT_DEV_PORT, else derived from the
 worktree path (25700-25989). Full job output: mod\run\devworld\outbox\<id>.out (the console shows command feedback,
 tagged log lines like [bake]/[dev]/[roadplan] and errors; -All shows every captured log line).
+Memory: the server JVM gets -Xmx (default 4G; -Xmx 6G or $env:SKYCRAFT_SERVER_XMX). ONE dev server per machine: start
+refuses while another worktree's dev server runs or boots (registry in %LOCALAPPDATA%\skycraft-dev; stop that one, or
+-Force when you know there is RAM for two).
 #>
 param(
     [Parameter(Position = 0)][ValidateSet("start", "stop", "status", "run", "wait", "restart", "reset")][string]$Action = "status",
@@ -30,7 +33,9 @@ param(
     [switch]$NoRestart,
     [int]$Port = 0,
     [int]$Timeout = 1800,
-    [int]$BootTimeout = 1200
+    [int]$BootTimeout = 1200,
+    [string]$Xmx = "",
+    [switch]$Force
 )
 $ErrorActionPreference = "Stop"
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
@@ -40,6 +45,21 @@ $Inbox = Join-Path $Dev "inbox"
 $Outbox = Join-Path $Dev "outbox"
 $Log = Join-Path $Dev "server.log"
 New-Item -ItemType Directory -Force $Dev, $Inbox, $Outbox | Out-Null
+
+if (-not $Xmx) { $Xmx = $(if ($env:SKYCRAFT_SERVER_XMX) { $env:SKYCRAFT_SERVER_XMX } else { "4G" }) }
+$Registry = Join-Path $env:LOCALAPPDATA "skycraft-dev"
+New-Item -ItemType Directory -Force $Registry | Out-Null
+$Key = Join-Path $Registry (("$Root".ToLower() -replace '[^a-z0-9]+', '_').Trim('_') + ".txt")
+
+# other dev servers of this machine (any worktree) that are alive: "<pid> <root>" per registry file
+function OtherServers {
+    foreach ($f in Get-ChildItem $Registry -Filter *.txt -ErrorAction SilentlyContinue) {
+        if ($f.FullName -eq $Key) { continue }
+        $l = (Get-Content $f.FullName -TotalCount 1) -split ' ', 2
+        if ($l.Count -eq 2 -and (Get-Process -Id ([int]$l[0]) -ErrorAction SilentlyContinue)) { $l[1] }
+        else { Remove-Item $f.FullName -ErrorAction SilentlyContinue }
+    }
+}
 
 if ($Port -le 0) {
     if ($env:SKYCRAFT_DEV_PORT) { $Port = [int]$env:SKYCRAFT_DEV_PORT }
@@ -87,6 +107,16 @@ function DeathReport {
 function Start-Dev {
     $r = ReadyInfo
     if ($r) { Write-Host "dev server already running (pid $($r.Pid), port $Port, since $($r.Since))"; return $true }
+    if (Test-Path $Key) {
+        $l = (Get-Content $Key -TotalCount 1) -split ' ', 2
+        if (Get-Process -Id ([int]$l[0]) -ErrorAction SilentlyContinue) { Write-Host "this worktree's dev server is still booting (pid $($l[0])); wait for it"; return $false }
+    }
+    $others = @(OtherServers)
+    if ($others.Count -gt 0 -and -not $Force) {
+        Write-Host "REFUSED: another dev server runs on this machine (out-of-memory risk): $($others -join '; ')"
+        Write-Host "  stop it (tools\dev\devserver.ps1 stop in that worktree) or pass -Force"
+        return $false
+    }
     Set-Content (Join-Path $Dev "eula.txt") "eula=true" -Encoding ascii
     $props = Join-Path $Dev "server.properties"
     $lines = @()
@@ -103,16 +133,21 @@ function Start-Dev {
     Get-ChildItem $Inbox -File -ErrorAction SilentlyContinue | Remove-Item -Force
     $t0 = Get-Date
     Write-Host "starting dev server (port $Port, log $Log) ..."
-    $env:JAVA_TOOL_OPTIONS = "-Dskycraft.dev=."
+    $env:JAVA_TOOL_OPTIONS = "-Dskycraft.dev=. -Xmx$Xmx"
     try {
         $p = Start-Process -FilePath "cmd.exe" -ArgumentList "/c .\gradlew.bat runServer --console=plain -PskycraftRunDir=run/devworld `"-Dorg.gradle.jvmargs=-Xmx2G`"" `
             -WorkingDirectory $Mod -RedirectStandardOutput $Log -RedirectStandardError "$Log.err" -PassThru -WindowStyle Hidden
     } finally { Remove-Item Env:JAVA_TOOL_OPTIONS -ErrorAction SilentlyContinue }
+    Set-Content $Key "$($p.Id) $Root (booting)" -Encoding ascii
     while ($true) {
         Start-Sleep -Milliseconds 500
         $r = ReadyInfo
-        if ($r) { Write-Host ("dev server ready in {0:N0} s (pid {1})" -f ((Get-Date) - $t0).TotalSeconds, $r.Pid); return $true }
+        if ($r) {
+            Set-Content $Key "$($r.Pid) $Root" -Encoding ascii
+            Write-Host ("dev server ready in {0:N0} s (pid {1}, -Xmx{2})" -f ((Get-Date) - $t0).TotalSeconds, $r.Pid, $Xmx); return $true
+        }
         if ($p.HasExited) {
+            Remove-Item $Key -ErrorAction SilentlyContinue
             Get-Content "$Log.err" -ErrorAction SilentlyContinue | Add-Content $Log
             DeathReport; return $false
         }
@@ -126,7 +161,7 @@ function Stop-Dev {
     $id = Submit "stop"
     $proc = Get-Process -Id $r.Pid -ErrorAction SilentlyContinue
     if ($proc -and -not $proc.WaitForExit(90000)) { Stop-Process -Id $r.Pid -Force -ErrorAction SilentlyContinue; Write-Host "killed pid $($r.Pid)" }
-    Remove-Item (Join-Path $Outbox "ready") -ErrorAction SilentlyContinue
+    Remove-Item (Join-Path $Outbox "ready"), $Key -ErrorAction SilentlyContinue
     Write-Host "dev server stopped"
 }
 

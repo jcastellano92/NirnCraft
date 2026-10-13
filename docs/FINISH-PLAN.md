@@ -26,7 +26,8 @@ session can pick it up cold. Read it top to bottom once, then work the task list
     `py -3 -I tools/worldgen/noise_settings.py`. Quest text: `node tools/quest_lang.js`.
   * `ClientAutotest.java` conflicts: keep ours (the tour code), add the other side's hook lines if any.
   * Index files (`places/index.json`, tag lists): union both sides.
-  * Then `tools\qa\qa.ps1 -Server`, then commit.
+  * Then `tools\qa\qa.ps1 -Server -Rebake` (one boot: re-bakes inside the same server run when the bake is stale,
+    section 2; `merge_worktree.sh` prints this), then commit.
 * **Known merge traps (all hit before):** duplicate registry ids across modules (the QA `data` check and the
   server boot catch these); generators that clean whole folders (biomes.py was fixed to only clean its own files);
   `.gitignore` hiding source folders named `build/`; two modules registering the same `DimensionSpecialEffects`.
@@ -75,6 +76,12 @@ git stash pop` (resolve conflicts keeping both sides).
   `/skycraft-quest selftest flow` and `/skycraft magic selftest`, stops itself (via `-Dskycraft.autorun`), and
   summarises the log (`tools/qa/log_summary.py`: crashes, Skycraft stack traces, registry errors, missing assets,
   selftest results). ~2 min. Add server commands with `-ServerCmds "cmd a|cmd b"`.
+* `qa.ps1 -Server -Bake` — strict: also fails when the baked data (`skycraft/baked`) is stale. Release builds
+  (`build_release.ps1`, which bakes explicitly first) use this.
+* `qa.ps1 -Server -Rebake` — one boot instead of QA + a second `bake.ps1` boot: when the bake is stale the same
+  server run re-bakes (`/skycraft-bake refresh`), verifies the written files against a second live computation, the
+  script copies them into `resources/skycraft/baked` and rebuilds the jar; report line `PASS bake rebaked (...)`.
+  When the bake is current it runs the same full comparison as `-Bake`. **The command after every merge.**
 * `qa.ps1 -Server -Client -Tour "Name:x:z;Name:x:z"` — client autotest + one contact sheet
   (`mod\run\qa-contact-sheet.jpg`). **Final verification only.**
 
@@ -85,12 +92,19 @@ git stash pop` (resolve conflicts keeping both sides).
   `devserver.ps1 run "cmd a|cmd b" -Wait` runs lines through its inbox in about a second and prints their output
   (server commands, `task:roadplan|roadterrain|bake|verify`, `@wait <ticks>`, `@until <regex>`, `@idle`). `run`
   auto-starts the server and restarts it (~40 s) when anything under `mod\src\main` changed since it booted.
+  Memory: every server JVM started by `devserver.ps1`/`qa.ps1`/`bake.ps1` gets `-Xmx4G` (`-Xmx 6G` or
+  `$env:SKYCRAFT_SERVER_XMX`), and `devserver.ps1` refuses to start while another worktree's dev server runs
+  (several servers at once ran the PC out of native memory; `-Force` overrides).
 * `/skycraft-dev regen x1 z1 x2 z2 [skycraft:scratch]` (dev server only) regenerates that area in place with the
   current code: deletes the chunks, generates them fresh, repaves the roads, saves (~7-10 s for 12x12 chunks).
   `skycraft:scratch` = same generator, no roads (terrain-only checks such as `p2_corridors.py measure`).
 * `tools\qa\quick_corridor.ps1 whiterun:riverwood [-Index n] [-Replan]` = regen of one 160-block tile of the
   corridor + `road_measure.py --box` on it: ~15 s with the server up. After changing road PLANNING code use `-Replan`
   (the dev world keeps its planned network) or `devserver.ps1 reset`.
+* `tools\qa\full_corridors.ps1` = the 4-corridor gate (whiterun:riverwood, riverwood:helgen, whiterun:rorikstead,
+  dragon_bridge:karthwasten): fresh dev world, waits for the planner, one `/skycraft-dev regenchunks` of every chunk
+  within 2 of the road points, `road_measure.py` over all four. `-Reuse` keeps the world (replans). Run it once at the
+  end of a phase; iterate with `quick_corridor.ps1`.
 
 ## 3. Verification strategy (token-efficient, layered)
 

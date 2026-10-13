@@ -3,7 +3,11 @@ Skycraft QA harness: one command, a short report. Built so automated sessions re
 
   tools\qa\qa.ps1                 # build + static checks (fast, ~3-5 min)
   tools\qa\qa.ps1 -Server         # + headless dedicated server: worldgen, all selftests, clean stop
-  tools\qa\qa.ps1 -Server -Bake   # server run + check that the baked data (skycraft/baked) is up to date
+  tools\qa\qa.ps1 -Server -Bake   # server run + STRICT check that the baked data (skycraft/baked) is up to date
+                                  # (fails when stale; build_release.ps1 uses this after baking explicitly)
+  tools\qa\qa.ps1 -Server -Rebake # ONE boot: when the bake is stale the same server run re-bakes (and verifies against a
+                                  # second live computation), the files are copied into resources/skycraft/baked and the
+                                  # jar is rebuilt; reports PASS "rebaked". The recommended command after a merge.
   tools\qa\qa.ps1 -Server -Client # + client autotest tour and a single contact-sheet image of all screenshots
   tools\qa\qa.ps1 -NoBuild ...    # skip the Gradle build (reuse the last one)
   tools\qa\qa.ps1 -Layout        # no build: static checks only, incl. the layout lint (places vs map rasters, ~2 s;
@@ -24,10 +28,12 @@ param(
     [switch]$Parity,
     [switch]$Novelty,
     [switch]$Bake,
+    [switch]$Rebake,
     [string]$ServerCmds = "",
     [string]$Tour = "",
     [int]$ServerTimeout = 900,
-    [int]$ClientTimeout = 1500
+    [int]$ClientTimeout = 1500,
+    [string]$Xmx = ""   # server/client JVM heap (default 4G or $env:SKYCRAFT_SERVER_XMX): several JVMs at once ran the PC out of memory
 )
 $ErrorActionPreference = "Continue"
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
@@ -42,6 +48,7 @@ function Result([string]$name, [bool]$ok, [string]$detail) {
     Add(("{0,-6} {1,-18} {2}" -f ($(if ($ok) { "PASS" } else { "FAIL" })), $name, $detail))
 }
 $py = "py"
+if (-not $Xmx) { $Xmx = $(if ($env:SKYCRAFT_SERVER_XMX) { $env:SKYCRAFT_SERVER_XMX } else { "4G" }) }
 
 # ------------------------------------------------------------------ build
 if (-not $NoBuild) {
@@ -109,11 +116,20 @@ if ($Novelty) {
 Pop-Location
 
 # ------------------------------------------------------------------ headless server
+if ($Rebake) { $Bake = [System.Management.Automation.SwitchParameter]::new($true) }
 if ($Bake) { $Server = [System.Management.Automation.SwitchParameter]::new($true) }
 if ($Server) {
     Set-Content (Join-Path $Run "eula.txt") "eula=true" -Encoding ascii
     $props = Join-Path $Run "server.properties"
     if (-not (Test-Path $props)) { Set-Content $props "online-mode=false`nserver-port=25601`n" -Encoding ascii }
+    $baked = Join-Path $Mod "src\main\resources\skycraft\baked"
+    $stage = Join-Path $Run "skycraft-bake"
+    if ($Rebake) {
+        Remove-Item -Recurse -Force $stage -ErrorAction SilentlyContinue
+        # the rebake runs on the server thread for a while: no watchdog
+        $pl = @(Get-Content $props | Where-Object { $_ -notmatch '^max-tick-time=' }) + "max-tick-time=-1"
+        Set-Content $props $pl -Encoding ascii
+    }
     Remove-Item -Recurse -Force (Join-Path $Run "world") -ErrorAction SilentlyContinue
     Remove-Item -Recurse -Force (Join-Path $Run "crash-reports") -ErrorAction SilentlyContinue
     $cmds = @("forceload add -96 -96 96 96", "skycraft-quest selftest flow", "skycraft magic selftest")
@@ -121,11 +137,11 @@ if ($Server) {
     $popSample = @("whiterun", "riverwood", "helgen", "rorikstead", "dragon_bridge", "falkreath", "old_hroldan")
     $popSample | ForEach-Object { $cmds += "skypop $_" }
     Remove-Item (Join-Path $Run "skycraft-previews\population_*.json") -ErrorAction SilentlyContinue
-    if ($Bake) { $cmds += "skycraft-bake check" }
+    if ($Rebake) { $cmds += "skycraft-bake refresh" } elseif ($Bake) { $cmds += "skycraft-bake check" }
     if ($ServerCmds) { $cmds += ($ServerCmds -split "\|") }
     $cmds += "stop"
     $auto = (($cmds | ForEach-Object { $_.Trim().Replace(' ', '+') }) -join "|")
-    $env:JAVA_TOOL_OPTIONS = "-Dskycraft.autorun=$auto -Dskycraft.autorun.wait=300"
+    $env:JAVA_TOOL_OPTIONS = "-Xmx$Xmx -Dskycraft.autorun=$auto -Dskycraft.autorun.wait=300"
     $out = Join-Path $Run "qa-server.log"
     $start = Get-Date
     $p = Start-Process -FilePath (Join-Path $Mod "gradlew.bat") -ArgumentList "runServer", "--console=plain" -WorkingDirectory $Mod `
@@ -148,8 +164,32 @@ if ($Server) {
     Result "population" ($plerr.Count -eq 0) ("{0}" -f ($pl | Select-Object -Last 1))
     $pl | Where-Object { $_ -match "^(ERR|WARN)" } | Select-Object -First 12 | ForEach-Object { Add("       $_") }
     if ($Bake) {
-        $b = Select-String -Path $out -Pattern "Bake is up to date|Bake problems" | Select-Object -Last 1
-        Result "bake" ($b -and $b.Line -match "up to date") $(if ($b) { ($b.Line -replace "^.*?\]: ", "") } else { "no bake check output" })
+        $b = Select-String -Path $out -Pattern "Bake is up to date|Bake problems|Bake was stale: rebaked" | Select-Object -Last 1
+        if ($b -and $b.Line -match "rebaked and verified") {
+            # the server re-baked and verified inside this run: ship the files, rebuild the jar only now
+            $n = @(Get-ChildItem $stage -File -ErrorAction SilentlyContinue).Count
+            if ($n -lt 2 -or -not (Test-Path (Join-Path $stage "manifest.json"))) {
+                Result "bake" $false "server rebaked but $stage has no manifest"
+            } else {
+                New-Item -ItemType Directory -Force $baked | Out-Null
+                Get-ChildItem $baked -File | Remove-Item -Force
+                Copy-Item (Join-Path $stage "*") $baked
+                $detail = "rebaked ($n files into resources/skycraft/baked, verified against a second live computation)"
+                if (-not $NoBuild) {
+                    $t0 = Get-Date
+                    Push-Location $Mod
+                    & .\gradlew.bat build -x test --console=plain "-Dorg.gradle.jvmargs=-Xmx2G" *> (Join-Path $Run "qa-rebuild.log")
+                    $okb = ($LASTEXITCODE -eq 0)
+                    Pop-Location
+                    $detail += ("; jar rebuilt in {0:N0}s" -f ((Get-Date) - $t0).TotalSeconds)
+                    Result "bake" $okb $detail
+                } else {
+                    Result "bake" $true ($detail + "; -NoBuild: the jar still has the old bake, build before packaging")
+                }
+            }
+        } else {
+            Result "bake" ($b -and $b.Line -match "up to date") $(if ($b) { ($b.Line -replace "^.*?\]: ", "") } else { "no bake check output" })
+        }
     }
 }
 
@@ -157,7 +197,7 @@ if ($Server) {
 if ($Client) {
     $shots = Join-Path $Run "build\autotest-screenshots"
     Remove-Item -Recurse -Force $shots -ErrorAction SilentlyContinue
-    $flags = "-Dskycraft.autotest=true -Dskycraft.autotest.world=qa_world"
+    $flags = "-Xmx$Xmx -Dskycraft.autotest=true -Dskycraft.autotest.world=qa_world"
     if ($Tour) { $flags += " -Dskycraft.autotest.tour=" + $Tour.Replace(' ', '+') }
     $env:JAVA_TOOL_OPTIONS = $flags
     $out = Join-Path $Run "qa-client.log"

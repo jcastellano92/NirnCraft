@@ -61,6 +61,7 @@ final class DevRegen {
 
     final ServerLevel level;
     final int cx1, cz1, cx2, cz2;
+    final LongOpenHashSet set = new LongOpenHashSet();
     final CommandSourceStack src;
     Phase phase = Phase.PROBE;
     long phaseStart = System.currentTimeMillis(), started = phaseStart;
@@ -73,20 +74,55 @@ final class DevRegen {
     String result;
     boolean failed;
 
-    DevRegen(ServerLevel level, int x1, int z1, int x2, int z2, CommandSourceStack src) {
+    DevRegen(ServerLevel level, LongArrayList chunks, CommandSourceStack src) {
         this.level = level;
-        cx1 = Math.min(x1, x2) >> 4;
-        cz1 = Math.min(z1, z2) >> 4;
-        cx2 = Math.max(x1, x2) >> 4;
-        cz2 = Math.max(z1, z2) >> 4;
         this.src = src;
-        for (int cx = cx1; cx <= cx2; cx++) for (int cz = cz1; cz <= cz2; cz++) all.add(ChunkPos.asLong(cx, cz));
+        int a = Integer.MAX_VALUE, b = Integer.MAX_VALUE, c = Integer.MIN_VALUE, d = Integer.MIN_VALUE;
+        for (long ch : chunks) {
+            if (!set.add(ch)) continue;
+            all.add(ch);
+            a = Math.min(a, ChunkPos.getX(ch));
+            b = Math.min(b, ChunkPos.getZ(ch));
+            c = Math.max(c, ChunkPos.getX(ch));
+            d = Math.max(d, ChunkPos.getZ(ch));
+        }
+        cx1 = a;
+        cz1 = b;
+        cx2 = c;
+        cz2 = d;
     }
 
-    static String start(ServerLevel level, int x1, int z1, int x2, int z2, CommandSourceStack src) {
+    /** The chunks of a block rectangle. */
+    static LongArrayList rect(int x1, int z1, int x2, int z2) {
+        LongArrayList l = new LongArrayList();
+        for (int cx = Math.min(x1, x2) >> 4; cx <= Math.max(x1, x2) >> 4; cx++) {
+            for (int cz = Math.min(z1, z2) >> 4; cz <= Math.max(z1, z2) >> 4; cz++) l.add(ChunkPos.asLong(cx, cz));
+        }
+        return l;
+    }
+
+    /** Chunk runs {@code cz:cx1-cx2,cx1-cx2;cz:...} (tools/qa/corridor_tile.py --region). */
+    static LongArrayList runs(String spec) {
+        LongArrayList l = new LongArrayList();
+        for (String row : spec.trim().split(";")) {
+            if (row.isBlank()) continue;
+            int colon = row.indexOf(':');
+            int cz = Integer.parseInt(row.substring(0, colon));
+            for (String run : row.substring(colon + 1).split(",")) {
+                int dash = run.indexOf('-', 1);
+                int a = Integer.parseInt(dash < 0 ? run : run.substring(0, dash));
+                int b = dash < 0 ? a : Integer.parseInt(run.substring(dash + 1));
+                for (int cx = a; cx <= b; cx++) l.add(ChunkPos.asLong(cx, cz));
+            }
+        }
+        return l;
+    }
+
+    static String start(ServerLevel level, LongArrayList chunks, CommandSourceStack src) {
         if (active != null) return "A regen is already running: " + active.describe();
-        DevRegen r = new DevRegen(level, x1, z1, x2, z2, src);
-        if (r.all.size() > 64 * 64) return "Area too large: " + r.all.size() + " chunks (max 4096)";
+        DevRegen r = new DevRegen(level, chunks, src);
+        if (r.all.isEmpty()) return "No chunks given";
+        if (r.all.size() > 4096) return "Area too large: " + r.all.size() + " chunks (max 4096)";
         release();
         active = r;
         Skycraft.LOGGER.info("[dev] regen {} started", r.describe());
@@ -104,6 +140,13 @@ final class DevRegen {
     String describe() {
         return String.format("%s chunks %d,%d..%d,%d (%d chunks, blocks %d %d %d %d) phase %s", level.dimension().location(),
                 cx1, cz1, cx2, cz2, all.size(), cx1 * 16, cz1 * 16, cx2 * 16 + 15, cz2 * 16 + 15, phase);
+    }
+
+    /** All 8 neighbours are regenerated too, so the paver can pave the chunk. */
+    private boolean interior(long c) {
+        int x = ChunkPos.getX(c), z = ChunkPos.getZ(c);
+        for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) if (!set.contains(ChunkPos.asLong(x + dx, z + dz))) return false;
+        return true;
     }
 
     private void ticket(LongArrayList chunks) {
@@ -166,6 +209,9 @@ final class DevRegen {
         switch (phase) {
             case PROBE -> {
                 if (reads.isEmpty()) {
+                    // /setworldspawn re-adds the spawn-chunk ticket (radius 11) around the new spawn: drop it again
+                    level.getChunkSource().removeRegionTicket(TicketType.START, new ChunkPos(level.getSharedSpawnPos()), 11,
+                            net.minecraft.util.Unit.INSTANCE);
                     for (long c : level.getForcedChunks()) if (inside(c)) forced.add(c);
                     for (long c : forced) level.setChunkForced(ChunkPos.getX(c), ChunkPos.getZ(c), false);
                     for (long c : all) reads.add(map.read(new ChunkPos(c)));
@@ -253,10 +299,7 @@ final class DevRegen {
                     fail("paving did not finish (paver queue " + Roads.queued() + ")");
                     return;
                 }
-                for (long c : all) {
-                    int x = ChunkPos.getX(c), z = ChunkPos.getZ(c);
-                    if (x > cx1 && x < cx2 && z > cz1 && z < cz2 && Roads.needsPaving(level, c)) return;
-                }
+                for (long c : all) if (interior(c) && Roads.needsPaving(level, c)) return;
                 paveMs = spent;
                 finish();
             }
@@ -266,8 +309,7 @@ final class DevRegen {
     }
 
     private boolean inside(long c) {
-        int x = ChunkPos.getX(c), z = ChunkPos.getZ(c);
-        return x >= cx1 && x <= cx2 && z >= cz1 && z <= cz2;
+        return set.contains(c);
     }
 
     private void finish() {

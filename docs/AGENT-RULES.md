@@ -102,3 +102,19 @@ Read these first:
 * World creation can be slow. Delete `mod/run/world` before each test.
 * `tools/autotest.ps1` can launch the client and capture screenshots. Read it before using it.
 * Only one Gradle run per worktree at a time.
+
+## Fast loop (every workstream; docs/FINISH-PLAN.md section 2)
+
+* **Iterate with quick checks; run the full gate once at the end of a phase.** While developing, use the
+  persistent dev server, never a fresh boot per check: `tools\dev\devserver.ps1 run "cmd|cmd" -Wait`,
+  `tools\qa\quick_corridor.ps1 <a>:<b>` (one tile, ~15 s) and `/skycraft-dev regen` for a bounded area. Compile
+  (`compileJava`) after a chunk of work, as above.
+* **Full gates only at a checkpoint:** `tools\qa\full_corridors.ps1` (the 4-corridor road gate) when the road work of
+  the phase is done, and `tools\qa\qa.ps1 -Server -Rebake` before merging (one boot, re-bakes in the same run). Do not
+  repeat a full gate after each small edit and do not weaken one: a gate that only the slow path can run is run once,
+  not skipped.
+* The dev server restarts itself when `mod\src\main` changed (about 40 s); it uses its own world (`mod\run\devworld`),
+  port and working directory, so it never collides with `qa.ps1`/`bake.ps1`. Only ONE dev server per machine
+  (`devserver.ps1` refuses a second; servers get `-Xmx4G`): stop it (`devserver.ps1 stop`) when you finish and before
+  another agent needs one; do not leave it running between sessions.
+* Release builds stay strict: `tools\build_release.ps1` bakes explicitly and runs `qa.ps1 -Server -Bake`.

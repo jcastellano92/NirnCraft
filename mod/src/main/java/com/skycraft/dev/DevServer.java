@@ -194,7 +194,8 @@ public final class DevServer {
             Files.writeString(tmp, text);
             Files.move(tmp, dir("outbox").resolve(name), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
         } catch (IOException e) {
-            Skycraft.LOGGER.warn("[dev] can't write {}", name, e);
+            // the script reading the heartbeat holds it open for a moment on Windows: the next second's write wins
+            if (!name.equals("heartbeat")) Skycraft.LOGGER.warn("[dev] can't write {}", name, e);
         }
     }
 
@@ -325,6 +326,10 @@ public final class DevServer {
                                                                 .executes(c -> regen(c.getSource(), DimensionArgument.getDimension(c, "dimension"),
                                                                         IntegerArgumentType.getInteger(c, "x1"), IntegerArgumentType.getInteger(c, "z1"),
                                                                         IntegerArgumentType.getInteger(c, "x2"), IntegerArgumentType.getInteger(c, "z2")))))))))
+                .then(Commands.literal("regenchunks")
+                        .then(Commands.argument("runs", com.mojang.brigadier.arguments.StringArgumentType.greedyString())
+                                .executes(c -> regenChunks(c.getSource(), c.getSource().getServer().overworld(),
+                                        com.mojang.brigadier.arguments.StringArgumentType.getString(c, "runs")))))
                 .then(Commands.literal("release").executes(c -> {
                     DevRegen.release();
                     c.getSource().sendSuccess(() -> Component.literal("Released the last regen area."), false);
@@ -339,8 +344,22 @@ public final class DevServer {
                 })));
     }
 
+    private static int regenChunks(CommandSourceStack src, ServerLevel level, String runs) {
+        String msg;
+        try {
+            msg = DevRegen.start(level, DevRegen.runs(runs), src);
+        } catch (RuntimeException e) {
+            msg = "Bad chunk runs (cz:cx1-cx2,cx1-cx2;cz:...): " + e;
+        }
+        boolean ok = DevRegen.active != null;
+        String m = msg;
+        if (ok) src.sendSuccess(() -> Component.literal(m), false);
+        else src.sendFailure(Component.literal(m));
+        return ok ? 1 : 0;
+    }
+
     private static int regen(CommandSourceStack src, ServerLevel level, int x1, int z1, int x2, int z2) {
-        String msg = DevRegen.start(level, x1, z1, x2, z2, src);
+        String msg = DevRegen.start(level, DevRegen.rect(x1, z1, x2, z2), src);
         boolean ok = DevRegen.active != null;
         if (ok) src.sendSuccess(() -> Component.literal(msg), false);
         else src.sendFailure(Component.literal(msg));

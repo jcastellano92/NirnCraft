@@ -110,7 +110,10 @@ public final class Bake {
 
     /** The payload of a baked file when it exists and matches the live inputs, else null (caller computes live). */
     public static byte[] load(String name) {
-        byte[] raw = bytes(DIR + name + ".bin");
+        return decode(bytes(DIR + name + ".bin"), name);
+    }
+
+    private static byte[] decode(byte[] raw, String name) {
         if (raw == null) return null;
         try (DataInputStream in = new DataInputStream(new ByteArrayInputStream(raw))) {
             String h = in.readUTF();
@@ -197,10 +200,44 @@ public final class Bake {
         return bad;
     }
 
+    /**
+     * One-boot QA (qa.ps1 -Rebake): when {@link #check()} finds the shipped bake stale or missing, bakes into
+     * {@code dir} and verifies the written files against a second live computation (what bake.ps1's
+     * {@code bake,verify} did across a separate boot). Returns null when the shipped bake is up to date, else the
+     * problems of the rebake (empty list = rebaked and verified; the caller copies {@code dir} into the resources).
+     */
+    public static List<String> refresh(Path dir) {
+        if (check().isEmpty()) return null;
+        List<String> bad = new java.util.ArrayList<>();
+        try {
+            Skycraft.LOGGER.info("[bake] {}", bakeAll(dir));
+            for (Bakeable b : BAKES) {
+                byte[] written = decode(Files.readAllBytes(dir.resolve(b.name() + ".bin")), b.name());
+                if (written == null) {
+                    bad.add(b.name() + ".bin unreadable after the rebake");
+                } else if (!java.util.Arrays.equals(written, b.compute().run())) {
+                    bad.add(b.name() + ".bin differs from a second live computation (non-deterministic bake)");
+                }
+            }
+        } catch (IOException | RuntimeException e) {
+            bad.add("rebake failed: " + e);
+        }
+        return bad;
+    }
+
     @SubscribeEvent
     public static void onCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
         d.register(Commands.literal("skycraft-bake").requires(s -> s.hasPermission(4))
+                .then(Commands.literal("refresh").executes(c -> {
+                    List<String> bad = refresh(Path.of("skycraft-bake"));
+                    String msg = bad == null ? "Bake is up to date." : bad.isEmpty()
+                            ? "Bake was stale: rebaked and verified into " + Path.of("skycraft-bake").toAbsolutePath()
+                            : "Bake problems: " + bad;
+                    Skycraft.LOGGER.info("[bake] {}", msg);
+                    c.getSource().sendSuccess(() -> Component.literal(msg), false);
+                    return bad == null || bad.isEmpty() ? 1 : 0;
+                }))
                 .then(Commands.literal("check").executes(c -> {
                     List<String> bad = check();
                     c.getSource().sendSuccess(() -> Component.literal(bad.isEmpty() ? "Bake is up to date." : "Bake problems: " + bad), false);

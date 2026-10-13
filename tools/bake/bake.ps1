@@ -12,7 +12,8 @@
 # otherwise they compute live (log lines "[bake] ...").
 param(
     [int]$Port = 25748,
-    [int]$Threads = 0
+    [int]$Threads = 0,
+    [string]$Xmx = ""   # server heap (default 4G or $env:SKYCRAFT_SERVER_XMX)
 )
 $ErrorActionPreference = "Stop"
 $root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
@@ -37,6 +38,7 @@ $lines += "max-tick-time=-1"
 Set-Content -Path $props -Value $lines -Encoding ascii
 
 $env:SKYCRAFT_AUTORUN = "bake:skycraft-bake,verify"
+$env:JAVA_TOOL_OPTIONS = "-Xmx" + $(if ($Xmx) { $Xmx } elseif ($env:SKYCRAFT_SERVER_XMX) { $env:SKYCRAFT_SERVER_XMX } else { "4G" })
 if ($Threads -gt 0) { $env:SKYCRAFT_BAKE_THREADS = "$Threads" }
 $log = Join-Path $out "bake.full.log"
 Write-Host "Baking (log: $log) ..."
@@ -48,6 +50,7 @@ try {
 } finally {
     Remove-Item Env:SKYCRAFT_AUTORUN -ErrorAction SilentlyContinue
     Remove-Item Env:SKYCRAFT_BAKE_THREADS -ErrorAction SilentlyContinue
+    Remove-Item Env:JAVA_TOOL_OPTIONS -ErrorAction SilentlyContinue
 }
 Select-String -Path $log -Pattern '\[bake\]|\[autorun\]|Exception|FATAL' | ForEach-Object { $_.Line } | Set-Content (Join-Path $out "bake.log")
 Get-Content (Join-Path $out "bake.log")
