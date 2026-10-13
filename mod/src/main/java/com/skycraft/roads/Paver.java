@@ -244,7 +244,9 @@ final class Paver {
             int[] road = new int[256];
             int[] idx = new int[256];
             java.util.Arrays.fill(best, Float.MAX_VALUE);
-            LongArrayList entries = data.chunkIndex.get(chunk);
+            // plan-first worlds: the road blocks were painted at generation (RoadPaint); only the roadside features
+            // (signposts, lanterns, milestones, shrines, dressing) are placed here, so no columns are collected
+            LongArrayList entries = data.legacyPaving() ? data.chunkIndex.get(chunk) : null;
             if (entries != null) {
                 List<Settlement> zones = data.zonesNearChunk(cx, cz);
                 int radius = data.zoneRadius();

@@ -11,7 +11,9 @@ import net.minecraft.world.level.Level;
  * class plus the edge stones of a highway or the rails of a bridge. Ground inside a planned town's gates is not paved,
  * so a road polyline that ends at a gate never reports the town's own streets.
  *
- * <p>Server thread only (it reads the live road index), overworld only; every other level answers "no road".</p>
+ * <p>Backed by the baked road plan ({@code com.skycraft.worldplan.RoadPlan}): the band is the plan's class half width
+ * plus the margin, answered from any thread. Roads of a save that predates the plan (the legacy network, server thread
+ * only) are consulted when the plan has none there. Overworld only; every other level answers "no road".</p>
  */
 public final class RoadCells {
     /** Outer half width (blocks) of the paved band per road class (highway, road, lane, trail); bridges are wider. */
@@ -34,9 +36,17 @@ public final class RoadCells {
 
     /** The class of the nearest road within {@code margin} blocks of the paved band ({@link Road#HIGHWAY}..), or -1. */
     public static int kind(Level level, int x, int z, int margin) {
-        if (!RoadNetwork.isRoadLevel(level) || !(level instanceof ServerLevel sl)) return -1;
-        return near(RoadsData.get(sl), x, z, margin, true);
+        if (level.dimension() != Level.OVERWORLD) return -1;
+        // the baked road plan answers (immutable, any thread): the roads that worldgen painted
+        int k = PlanRoute.kindAt(x + 0.5, z + 0.5, margin, HIT.get());
+        if (k >= 0) return k;
+        // roads of a pre-plan save (planned by the legacy planner) live in the level's data: server thread only
+        if (level instanceof ServerLevel sl && sl.getServer().isSameThread()) return near(RoadsData.get(sl), x, z, margin, true);
+        return -1;
     }
+
+    private static final ThreadLocal<com.skycraft.worldplan.RoadPlan.Hit> HIT =
+            ThreadLocal.withInitial(com.skycraft.worldplan.RoadPlan.Hit::new);
 
     /** Road class of the nearest road whose band is within {@code margin} of (x, z), or -1 (any polyline point counts). */
     static int near(RoadsData data, int x, int z, int margin) {

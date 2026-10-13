@@ -37,7 +37,7 @@ ROAD_SUB = ('dirt_path', 'cobblestone', 'gravel', 'stone_bricks', 'polished_ande
             'rooted_dirt', 'packed_mud', 'mud_bricks', 'sandstone', 'calcite', 'polished_diorite', 'quartz_bricks',
             'smooth_quartz', 'deepslate_tiles', 'deepslate_bricks', 'tuff', 'smooth_basalt', 'ash_block',
             'volcanic_rock', 'planks', '_slab', 'blackstone_bricks', 'terracotta', 'basalt', 'path', 'dirt', 'stone',
-            'bricks', 'deepslate')
+            'bricks', 'deepslate', '_stairs')
 NATURAL_NOT_ROAD = ('grass_block', 'podzol', 'mycelium', 'sand', 'red_sand', 'snow', 'moss_block', 'water', 'clay',
                     'mud', 'ice', 'lava')
 SOFT_SUB = ('grass', 'fern', 'flower', 'bush', 'sapling', 'mushroom', 'vine', 'lichen', 'kelp', 'seagrass', 'roots',

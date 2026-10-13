@@ -338,12 +338,16 @@ public final class SiteBuilder {
         if (level == null || stack.isEmpty() || !writable(p)) return;
         BlockEntity be = level.getBlockEntity(p);
         if (be instanceof Container c) {
-            for (int i = 0; i < c.getContainerSize(); i++) {
-                int slot = (i * 7 + 4) % c.getContainerSize();
-                if (c.getItem(slot).isEmpty()) {
-                    c.setItem(slot, stack);
-                    return;
+            try {
+                for (int i = 0; i < c.getContainerSize(); i++) {
+                    int slot = (i * 7 + 4) % c.getContainerSize();
+                    if (c.getItem(slot).isEmpty()) {
+                        c.setItem(slot, stack);
+                        return;
+                    }
                 }
+            } catch (NullPointerException e) {
+                // a worldgen container with a loot table has no level yet: reading it would unpack the table; leave it
             }
         }
     }

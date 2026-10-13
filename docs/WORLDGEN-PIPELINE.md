@@ -68,7 +68,7 @@ whiterun-rorikstead, whiterun-dragon_bridge and one river crossing; plus `reach_
   the profile height; shoulders blend with smoothstep; cut slopes get stone, fills get earth; settlement/landmark pads
   likewise. Gate: in the saved corridors, terrain under every road cell is within 0.5 of the profile (met to
   within the cell interpolation: 95.5% of bed columns exact, 99.9% within 2; see section 7 for the exceptions).
-* **P3 Paint and crossings (S8+S9).** Road surface in the surface rule (half steps as slabs from the fractional
+* **P3 Paint and crossings (S8+S9). DONE** (section 7b). Road surface in the surface rule (half steps as slabs from the fractional
   height); bridges, culverts, fords, stairs as per-chunk features cut from the span list. Retire `Paver` for new
   chunks (keep it only to upgrade old saves). Gate: 0 missing road cells, 0 unbridged crossings, 0 drops without a
   step on the corridors.
@@ -269,6 +269,64 @@ a pit or a lip; do not depend on the terrain alone. (2) A culvert's opening is t
 of a CULVERT span (`PlanGround.opening`): embankment at the bed height on both sides, water column below, arch over it.
 (3) Settlement interiors are untouched by roads: the plan roads end on the pad at the gate (P5 streets). (4) Aquifer
 barrier and water changes up to ~40 blocks away in marsh are expected after any terrain change.
+
+## 7b. P3 result: roads, crossings and the network paint from the plan (S8 + S9)
+
+Code (package `com.skycraft.roads`): `RoadPaint` (the world generation feature `skycraft:road_paint`, added to every
+overworld biome at `top_layer_modification` by the biome modifier `z_road_paint`, so it runs after the vegetation and
+the landmarks), `RoadMask` (the plan as a `PlacementMask.Source`), `PlanRoute` (the network's polylines come from the plan);
+changed: `RoadCells`, `Paver`, `RoadNetwork`, `RoadsData`, `Road`, `RoadsConfig`, `RoadsModule`, `RoadLayout`,
+`PlacementMask` (+`structureGrid`, `useMapRoadChannel`), `scatter/RoadProbe`. Nothing the bake hashes changed.
+
+**Painting.** Per column of the chunk being decorated, no neighbour read, no order dependence, idempotent, written only
+inside the chunk (so Distant Horizons, which runs the same generator, shows the roads): `RoadPlan.at(x+.5, z+.5)` gives
+distance, class half width, span; the surface height is `floor(profile at the column corner + 0.002)` (the height the
+terrain was shaped to in P2, centre height on steep stretches). Inside the half width: refill below (dirt then stone, until it
+rests on something solid: carver pits, caves, water), clear 4 blocks above (leaves, logs, plants, snow, props), the culture's
+`RoadStyle` surface mix (highways get edge stones on the outer column), a slab on top where the fraction is >= .5 on
+highways and roads, half-block curbs where a town pad is near; 1.5 blocks of worn verge beyond (coarse dirt, vegetation
+cleared). Columns inside a structure piece (`PlacementMask.structureGrid`, pad 0) are only blended: a plain ground top with
+air above becomes road, so a road runs through a gate; nothing is cleared there.
+**Crossings, all from span data:** bridge (also over dry gaps): deck at the profile height; highways and roads a stone arch
+(bays between the planned piers, rise from the clearance, full-width piers down to the bed, solid abutments in the first
+and last 3.5 blocks), lanes and trails a plank deck on beams and log piers; parapet wall or fence connected from the plan,
+a taller post with a lantern every 8 blocks. Culvert: the channel columns (map water) stay open under the deck, lintel and
+stone-brick lining on the columns beside the channel. Ford: gravel and cobble flush with the water. Stairs (and any
+steep stretch, grade > 1:4): stair blocks facing uphill where a row starts a step, full blocks on the landings, a lantern
+post beside every 8th row. Tunnel: a bore of 4 (3) blocks between the mouths, stone-brick lined, a hanging lantern every 8
+blocks, a taller portal frame in the first and last 2.5 blocks.
+
+**Masks, cells, network.** `RoadMask` registers with `PlacementMask` (distance to the centre line minus half width minus
+2) and switches the map's road-channel stand-in off, so trees keep off the real roads only. `RoadCells.isRoad/kind` read
+`RoadPlan.at` (any thread; the legacy network is consulted only for roads of old saves, server thread), and `scatter/RoadProbe`
+now uses it on worldgen threads too. `RoadNetwork` takes each link's polyline from the plan (`PlanRoute`: graph links by
+place pair, gate lanes by `placeId|@gateN`, trails by `placeId|@road`; resampled to 2 blocks, chords across junction
+cuts, bridge vertices flagged WATER): 4,688 roads (1,443 km) in ~0.0 s of planner time instead of A* on noise heights,
+12 links applied per planning call. Travelers, carriages, gates, signposts, inns, wayshrines and dressing therefore stand on
+the roads that are painted (posts stand one block further out on plan roads). A link the plan does not have (a generic
+structure-found settlement) is dropped unless the legacy paver is on.
+**Config** `roads.legacyPaver` = `auto` (default) | `true` | `false`: `false` never paves at runtime (the `Paver` only places
+signposts, lanterns, milestones, shrines, dressing); `auto` = only in saves whose `RoadsData` predates the plan
+(`planEra` flag, set for every new world); `true` = always and plans its own roads where the plan has none.
+`roads.paintAtGeneration` switches the painter off (A/B timing). Settlement join: the plan's last vertex is the gate cell
+(`GateEnds`, the settlement grammar's `SettlementAnchors.gates`), the painter blends onto the gate's ground and the grammar's
+street starts there.
+
+**Numbers** (fresh world seed 7777, roads module on, 45 tiles around the 4 corridors, the plan-based check
+`tools/qa/p3_corridors.py measure`, 1,820 centre-line points every 2 blocks outside 8 blocks of any site): gaps 0, drops > 1
+0, tree-blocked 0, unbridged 0, obstacles 0; 5 bridges and 2 culverts, all clean. On span examples regenerated with
+`/skycraft-dev regen` (7 bridges incl. 2 over dry gaps, 5 culverts, 8 stairs runs, 3 fords, 2 tunnels, 205 switchback
+points; 1,406 points): gaps 1 (a farm fence on a plan road), drops > 1 5 (2 farm/plan seams, 1 ford where two plan segments
+disagree by 2-3 blocks, 2 covered-bridge seams), big drops 2, unbridged 0; 176 points are covered by ground (the 173 tunnel
+points and 3 bridge points under a natural rise the macro ground did not predict). The legacy `road_measure.py` on the
+same 4 corridors (1,898 points): gaps 11, drops > 1 8, tree 0, obstacle 0, unbridged 1: every one is inside a settlement
+structure the road ends at (Whiterun's walls and gate, Helgen, Rorikstead's farm fields, a farm fence, a stray plant) —
+inside its settlement zone, where the grammar owns the ground (P5). `roadplan_lint` 0 errors and `reach_lint` unchanged.
+Cost: `RoadPaint` 0.19-0.22 ms per painted chunk (1,289 of ~4,500 corridor chunks); `PlacementMask` plan source ~70 us per
+chunk grid; chunk generation 24 ms per chunk with and without the painter in `/skycraft-dev regen` (difference inside noise).
+Screens: `docs/screens/worldplan/p3_bridge.jpg`, `p3_culvert.jpg`, `p3_switchback.jpg` (`render_town.py <world> --box x z half out`).
+Known limits: farm plots and walls (structure pieces) keep their ground where a plan road crosses them (P5); a bridge
+over a rise the macro plan did not know becomes a short covered passage; a steep tunnel is stairs.
 
 ## 8. Contracts for P5 and P6 (so they can run in parallel with P3)
 

@@ -73,6 +73,12 @@ public final class RoadsData extends SavedData {
     final Int2ObjectOpenHashMap<it.unimi.dsi.fastutil.ints.IntArrayList> roadsAt = new Int2ObjectOpenHashMap<>();
     /** Version of the world plan applied to this save (0 = roads only from explored settlements). */
     int planVersion;
+    /**
+     * True for a world created with the plan-first pipeline (roads painted at generation from the baked road plan,
+     * docs/WORLDGEN-PIPELINE.md P3); false for a save that predates it, whose roads the legacy {@link Paver} still
+     * paves when {@code roads.legacyPaver} is {@code auto}.
+     */
+    boolean planEra = true;
     /** Regions ({@link WorldPlan#SCAN_SHIFT}) whose generic settlements and dungeons were predicted and registered. */
     final LongOpenHashSet scanned = new LongOpenHashSet();
     /** Trail destinations already checked for a nearby road (whether or not they got a trail). */
@@ -431,7 +437,13 @@ public final class RoadsData extends SavedData {
     // ------------------------------------------------------------------ roads
 
     Road addRoad(int a, int b, int[] xs, int[] zs, byte[] flags, byte kind, String name) {
+        return addRoad(a, b, xs, zs, flags, kind, name, false);
+    }
+
+    /** {@code plan}: the polyline was taken from the baked road plan (painted at generation, not by the paver). */
+    Road addRoad(int a, int b, int[] xs, int[] zs, byte[] flags, byte kind, String name, boolean plan) {
         Road road = new Road(nextRoadId++, a, b, xs, zs, flags, kind, name);
+        road.plan = plan;
         roads.put(road.id, road);
         indexEnds(road);
         pairs.add(pairKey(a, b));
@@ -497,6 +509,15 @@ public final class RoadsData extends SavedData {
         return best;
     }
 
+    /**
+     * True if the legacy paver still lays road blocks in this world ({@code roads.legacyPaver}: {@code true} always,
+     * {@code false} never, {@code auto} only in saves that predate the plan-first generation).
+     */
+    boolean legacyPaving() {
+        String mode = RoadsConfig.LEGACY_PAVER.get();
+        return "true".equals(mode) || ("auto".equals(mode) && !planEra);
+    }
+
     /** True if this chunk has road points or features that are not paved yet. */
     boolean needsPaving(long chunk) {
         return !paved.contains(chunk) && (chunkIndex.containsKey(chunk) || featuresByChunk.containsKey(chunk));
@@ -555,6 +576,7 @@ public final class RoadsData extends SavedData {
         for (Long2ObjectMap.Entry<Link> e : links.long2ObjectEntrySet()) l.add(e.getValue().save(e.getLongKey()));
         tag.put("links", l);
         tag.putInt("planVersion", planVersion);
+        tag.putBoolean("planEra", planEra);
         tag.putLongArray("scanned", scanned.toLongArray());
         tag.putIntArray("trailChecked", trailChecked.toIntArray());
         tag.putInt("nextSettlement", nextSettlementId);
@@ -592,6 +614,7 @@ public final class RoadsData extends SavedData {
         ListTag l = tag.getList("links", Tag.TAG_COMPOUND);
         for (int i = 0; i < l.size(); i++) data.links.put(l.getCompound(i).getLong("p"), Link.load(l.getCompound(i)));
         data.planVersion = tag.getInt("planVersion");
+        data.planEra = tag.contains("planEra") && tag.getBoolean("planEra");
         for (long k : tag.getLongArray("scanned")) data.scanned.add(k);
         for (int k : tag.getIntArray("trailChecked")) data.trailChecked.add(k);
         data.setDirty(false);

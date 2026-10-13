@@ -86,6 +86,8 @@ public final class PlacementMask {
     }
 
     private static final List<Source> SOURCES = new CopyOnWriteArrayList<>();
+    /** The authored map's road channel is a stand-in until the baked road plan is registered as a source. */
+    private static volatile boolean mapRoadChannel = true;
 
     private static final class Cache {
         ServerLevel owner;
@@ -118,6 +120,14 @@ public final class PlacementMask {
     /** Registers another module's footprints (the baked road plan). Chunk grids built earlier are not revised. */
     public static void register(Source source) {
         SOURCES.add(source);
+    }
+
+    /**
+     * Switches the approximate road corridors of the map's road channel off (the baked road plan registered an exact
+     * {@link Source}, so trees no longer keep clear of corridors where no road was planned).
+     */
+    public static void useMapRoadChannel(boolean on) {
+        mapRoadChannel = on;
     }
 
     /** For {@link Source}s: lowers the clearance at a column index to {@code distance} (clamped to 0..{@link #CAP}). */
@@ -213,7 +223,7 @@ public final class PlacementMask {
         boolean overworld = owner.dimension() == Level.OVERWORLD;
         try {
             if (overworld) {
-                roads(p, x0, z0);
+                if (mapRoadChannel) roads(p, x0, z0);
                 places(p, x0, z0);
             }
             structures(level, p, cx, cz);
@@ -316,6 +326,26 @@ public final class PlacementMask {
      * (starts whose box reaches it, up to 8 chunks away) plus the start chunks within {@link #START_RING}.
      */
     private static void structures(WorldGenLevel level, byte[] m, int cx, int cz) {
+        structures(level, m, cx, cz, STRUCT_PAD);
+    }
+
+    /**
+     * For the road painter: the clearance of every column of chunk (cx, cz) to the pieces of the structure starts the
+     * region holds, 0 inside a piece's box grown by {@code pad}, {@link #CAP} when none is near. No road, pad or site
+     * contribution (the painter must not be refused by its own road). Allocates; call once per chunk.
+     */
+    public static byte[] structureGrid(WorldGenLevel level, int cx, int cz, int pad) {
+        byte[] m = new byte[256];
+        Arrays.fill(m, (byte) CAP);
+        try {
+            structures(level, m, cx, cz, pad);
+        } catch (RuntimeException e) {
+            Skycraft.LOGGER.warn("PlacementMask: could not read the structure pieces of chunk {} {}", cx, cz, e);
+        }
+        return m;
+    }
+
+    private static void structures(WorldGenLevel level, byte[] m, int cx, int cz, int pad) {
         if (!(level instanceof WorldGenRegion region)) return;
         int x0 = cx << 4, z0 = cz << 4;
         // pieces that can matter: horizontally within the cap of the chunk
@@ -350,8 +380,8 @@ public final class PlacementMask {
                     if (b.maxY() < ground - 4) continue; // buried (dungeon halls, cellars)
                     int ex = Math.max(Math.max(b.minX() - x, x - b.maxX()), 0);
                     int ez = Math.max(Math.max(b.minZ() - z, z - b.maxZ()), 0);
-                    if (ex > best + STRUCT_PAD || ez > best + STRUCT_PAD) continue;
-                    double d = Math.sqrt((double) ex * ex + (double) ez * ez) - STRUCT_PAD;
+                    if (ex > best + pad || ez > best + pad) continue;
+                    double d = Math.sqrt((double) ex * ex + (double) ez * ez) - pad;
                     if (d < best) best = d <= 0 ? 0 : (int) d;
                     if (best == 0) break;
                 }

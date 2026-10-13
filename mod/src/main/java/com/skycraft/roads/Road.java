@@ -29,6 +29,8 @@ public final class Road {
     public final byte kind;
     /** Named historic road id ({@code gold_road}; lang key {@code road.skycraft.<id>}), or empty. */
     public final String name;
+    /** The polyline was taken from the baked road plan (painted at generation; see {@code PlanRoute}). */
+    public boolean plan;
     /** Cumulative arc length (blocks) from point 0, computed on load. */
     final float[] cum;
 
@@ -106,6 +108,7 @@ public final class Road {
         t.putByteArray("f", flags);
         t.putByte("k", kind);
         if (!name.isEmpty()) t.putString("n", name);
+        if (plan) t.putBoolean("pl", true);
         return t;
     }
 
@@ -114,6 +117,8 @@ public final class Road {
         int[] zs = t.getIntArray("z");
         if (xs.length < 2 || xs.length != zs.length) return null;
         byte kind = t.contains("k") ? t.getByte("k") : ROAD;
-        return new Road(t.getInt("id"), t.getInt("a"), t.getInt("b"), xs, zs, t.getByteArray("f"), kind, t.getString("n"));
+        Road road = new Road(t.getInt("id"), t.getInt("a"), t.getInt("b"), xs, zs, t.getByteArray("f"), kind, t.getString("n"));
+        road.plan = t.getBoolean("pl");
+        return road;
     }
 }

@@ -17,6 +17,8 @@ public final class RoadsConfig {
     public static final ForgeConfigSpec.BooleanValue SIGNPOSTS;
     public static final ForgeConfigSpec.BooleanValue LANTERNS;
     public static final ForgeConfigSpec.BooleanValue ROADSIDE;
+    public static final ForgeConfigSpec.ConfigValue<String> LEGACY_PAVER;
+    public static final ForgeConfigSpec.BooleanValue PAINT;
 
     // ------------------------------------------------------------------ performance
     public static final ForgeConfigSpec.IntValue PAVE_BLOCKS_PER_TICK;
@@ -62,6 +64,15 @@ public final class RoadsConfig {
         LANTERNS = b.comment("Place lantern posts along roads.").define("lanterns", true);
         ROADSIDE = b.comment("Dress the verges of new roads: carts, barrels, hay, fences, cairns, camps, woodpiles (denser near towns).")
                 .define("roadsideDressing", true);
+        LEGACY_PAVER = b.comment("The runtime paver that pastes roads onto generated chunks (the pre-plan pipeline).",
+                        "false = never: roads are painted at chunk generation from the baked road plan, the network",
+                        "follows the plan, and the paver only places signposts, lanterns, shrines and dressing.",
+                        "auto = only in saves that predate the plan-first generation (to upgrade old worlds).",
+                        "true = always (and it plans its own roads on noise heights where the plan has none).")
+                .defineInList("legacyPaver", "auto", java.util.List.of("auto", "true", "false"));
+        PAINT = b.comment("Paint the planned roads, bridges, culverts, fords, stairs and tunnels while chunks generate",
+                        "(read by worldgen threads; switch off only for A/B timing).")
+                .define("paintAtGeneration", true);
         b.pop();
 
         b.push("performance");

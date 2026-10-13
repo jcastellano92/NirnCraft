@@ -4,6 +4,8 @@ Reads a saved world folder (see town_checks.py); no Minecraft client.
 usage:
   py -3 -I tools/qa/render_town.py <world_dir> <place_id> <out_dir> [--half N]
   py -3 -I tools/qa/render_town.py <world_dir> corridor <placeA> <placeB> <out_dir>
+  py -3 -I tools/qa/render_town.py <world_dir> --box <x> <z> <half> <out_png> [--view 0..3]
+        isometric close-up of the (2 half + 1)-block square around (x, z): a bridge, a culvert, a switchback...
 
 Outputs per town: 00_sheet.jpg (<=1600 px wide), 01_plan.png (2 px/block, schematic over faded terrain),
 02_iso_market.png, 03_iso_poor.png, 04_iso_gate.png, 05_density.png, report.json.
@@ -313,7 +315,29 @@ def corridor(world, roads, A, B, outdir, pad=110):
     print('wrote', fn, st['roads'], 'roads', st['bridge_points'], 'bridge pts', st['features'], 'features')
 
 
+def box(world_dir, x, z, half, out, view=0):
+    """Isometric close-up of a square of the saved world (no town needed): road crossings and switchbacks."""
+    world = World(world_dir)
+    im = iso_view(world, x, z, half=half, view=view, maxw=1400)
+    if im is None:
+        sys.exit('no loaded chunks around %d %d' % (x, z))
+    os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
+    if out.lower().endswith(('.jpg', '.jpeg')):
+        im.convert('RGB').save(out, quality=86)
+    else:
+        im.save(out)
+    print('wrote', out, im.size)
+
+
 def main():
+    if '--box' in sys.argv:
+        i = sys.argv.index('--box')
+        vals = sys.argv[i + 1:i + 5]
+        view = 0
+        if '--view' in sys.argv:
+            view = int(sys.argv[sys.argv.index('--view') + 1])
+        box(sys.argv[1], int(vals[0]), int(vals[1]), int(vals[2]), vals[3], view)
+        return
     ap = argparse.ArgumentParser()
     ap.add_argument('world')
     ap.add_argument('target', help='place id, or "corridor"')

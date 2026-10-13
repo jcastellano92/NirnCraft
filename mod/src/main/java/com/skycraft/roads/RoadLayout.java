@@ -31,6 +31,11 @@ final class RoadLayout {
 
     private RoadLayout() {}
 
+    /** Roads taken from the plan have a wider painted bed (highways 5 + edge stones): posts stand one block further out. */
+    private static int off(Road road, int base) {
+        return road.plan ? base + 1 : base;
+    }
+
     /**
      * Must be called BEFORE the new road is indexed (so junction detection only sees the other roads).
      * Adds the features to {@code data} and returns the chunks whose paving must be (re)done.
@@ -77,8 +82,8 @@ final class RoadLayout {
                 // lit only on the approaches to towns, like the lamp posts outside Skyrim's cities
                 if (road.cum[i] > LANTERN_REACH && road.length() - road.cum[i] > LANTERN_REACH) continue;
                 double[] r = right(road, i);
-                int x = (int) Math.round(road.xs[i] + r[0] * LANTERN_OFFSET * side);
-                int z = (int) Math.round(road.zs[i] + r[1] * LANTERN_OFFSET * side);
+                int x = (int) Math.round(road.xs[i] + r[0] * off(road, LANTERN_OFFSET) * side);
+                int z = (int) Math.round(road.zs[i] + r[1] * off(road, LANTERN_OFFSET) * side);
                 side = -side;
                 if (data.noRoadZoneAt(x, z) != null) continue;
                 if (data.signpostNear(x, z, 8) == null && !near(created, x, z, 8)) {
@@ -95,8 +100,8 @@ final class RoadLayout {
                                  LongOpenHashSet touched) {
         double[] r = right(road, i);
         // stand on the traveller's right when leaving the settlement
-        int x = (int) Math.round(road.xs[i] + r[0] * SIGN_OFFSET * dir);
-        int z = (int) Math.round(road.zs[i] + r[1] * SIGN_OFFSET * dir);
+        int x = (int) Math.round(road.xs[i] + r[0] * off(road, SIGN_OFFSET) * dir);
+        int z = (int) Math.round(road.zs[i] + r[1] * off(road, SIGN_OFFSET) * dir);
         RoadFeature.Dest d = dest(road, i, dir, dest);
         RoadFeature existing = data.signpostNear(x, z, MERGE_RADIUS);
         if (existing != null) {
@@ -139,8 +144,8 @@ final class RoadLayout {
             if (at >= nextMile && len - at > MILESTONE_SPACING / 3f) {
                 nextMile += MILESTONE_SPACING;
                 double[] r = right(road, i);
-                int x = (int) Math.round(road.xs[i] + r[0] * SIGN_OFFSET * side);
-                int z = (int) Math.round(road.zs[i] + r[1] * SIGN_OFFSET * side);
+                int x = (int) Math.round(road.xs[i] + r[0] * off(road, SIGN_OFFSET) * side);
+                int z = (int) Math.round(road.zs[i] + r[1] * off(road, SIGN_OFFSET) * side);
                 side = -side;
                 if (data.noRoadZoneAt(x, z) != null || data.signpostNear(x, z, 24) != null || near(created, x, z, 24)) continue;
                 RoadFeature f = new RoadFeature(RoadFeature.MILESTONE, x, z, road.id);
@@ -230,8 +235,8 @@ final class RoadLayout {
             // put the post on the side away from the other road
             double ox = other.xs[oi] - road.xs[at], oz = other.zs[oi] - road.zs[at];
             int side = ox * r[0] + oz * r[1] > 0 ? -1 : 1;
-            int x = (int) Math.round(road.xs[at] + r[0] * JUNCTION_OFFSET * side);
-            int z = (int) Math.round(road.zs[at] + r[1] * JUNCTION_OFFSET * side);
+            int x = (int) Math.round(road.xs[at] + r[0] * off(road, JUNCTION_OFFSET) * side);
+            int z = (int) Math.round(road.zs[at] + r[1] * off(road, JUNCTION_OFFSET) * side);
             if (data.signpostNear(x, z, JUNCTION_SPACING) != null || near(created, x, z, JUNCTION_SPACING)) continue;
 
             RoadFeature f = new RoadFeature(RoadFeature.SIGNPOST, x, z, road.id);
@@ -246,8 +251,8 @@ final class RoadLayout {
             // a lantern post a few blocks further along, on the same verge, lights the junction
             int li = Math.max(first, Math.min(last, at + 3));
             double[] lr = right(road, li);
-            int lx = (int) Math.round(road.xs[li] + lr[0] * JUNCTION_OFFSET * side);
-            int lz = (int) Math.round(road.zs[li] + lr[1] * JUNCTION_OFFSET * side);
+            int lx = (int) Math.round(road.xs[li] + lr[0] * off(road, JUNCTION_OFFSET) * side);
+            int lz = (int) Math.round(road.zs[li] + lr[1] * off(road, JUNCTION_OFFSET) * side);
             if (RoadsConfig.LANTERNS.get() && data.noRoadZoneAt(lx, lz) == null && !near(created, lx, lz, 3)
                     && !inZone[li] && road.flags[li] == 0) {
                 created.add(new RoadFeature(RoadFeature.LANTERN, lx, lz, road.id));

@@ -416,9 +416,13 @@ public final class RoadNetwork {
         return false;
     }
 
+    /** Links taken from the road plan per planning call (applying one indexes it and lays out its signs). */
+    private static final int PLAN_ROUTES_PER_CALL = 12;
+
     private static void startPlanning(ServerLevel level, RoadsData data) {
         RUNNING.removeIf(Future::isDone);
         int threads = RoadsConfig.PLANNER_THREADS.get();
+        int fromPlanNow = 0;
         while (RUNNING.size() < threads && !data.pending.isEmpty()) {
             long pair = nextPair(level, data);
             if (pair == -1) break; // everything waiting overlaps a road being planned
@@ -446,6 +450,23 @@ public final class RoadNetwork {
             }
             if (ea == null) ea = end(data, a, link.trail() ? Integer.MIN_VALUE : b.id, link.trail() ? link.tx() : b.x, link.trail() ? link.tz() : b.z);
             int[] eb = link.trail() ? new int[]{link.tx(), link.tz()} : end(data, b, a.id, a.x, a.z);
+            // the baked road plan has the polyline of every named link: the network takes it instead of searching
+            RoadPlanner.Result fromPlan = PlanRoute.route(data.generation, a.id, virtual < 0 ? virtual : b.id, a.placeId, b.placeId,
+                    virtual < 0 ? -virtual - 1 : -1, link.trail(), ea, eb);
+            if (fromPlan != null) {
+                data.inFlight.add(pair);
+                RESULTS.add(fromPlan);
+                if (++fromPlanNow >= PLAN_ROUTES_PER_CALL) break;
+                continue;
+            }
+            if (!data.legacyPaving()) {
+                // no plan link (a generic settlement, a trail the plan did not make) and no runtime road planner here
+                data.pairs.remove(pair);
+                data.failed.add(pair);
+                data.rebuildLinks();
+                data.setDirty();
+                continue;
+            }
             data.inFlight.add(pair);
             IN_FLIGHT_BOXES.put(pair, box(data, pair, a, b, ea, eb));
             ChunkGenerator generator = level.getChunkSource().getGenerator();
@@ -570,7 +591,8 @@ public final class RoadNetwork {
                 continue;
             }
             RoadsData.Link link = data.link(pair);
-            Road road = data.addRoad(r.a(), r.b(), r.xs(), r.zs(), r.flags(), link.kind(), link.name());
+            Road road = data.addRoad(r.a(), r.b(), r.xs(), r.zs(), r.flags(), link.kind(), link.name(),
+                    r.expansions() == PlanRoute.FROM_PLAN);
             LongOpenHashSet touched = RoadLayout.layout(data, road); // before indexing: junctions see only other roads
             touched.addAll(data.indexRoad(road));
             cellsSnapshot = null;
