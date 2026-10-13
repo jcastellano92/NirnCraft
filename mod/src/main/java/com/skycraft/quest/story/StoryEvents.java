@@ -31,7 +31,10 @@ public final class StoryEvents {
 
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && event.getServer() != null) Scenes.tick(event.getServer());
+        if (event.phase == TickEvent.Phase.END && event.getServer() != null) {
+            Scenes.tick(event.getServer());
+            IntroFlow.serverTick(event.getServer());
+        }
     }
 
     @SubscribeEvent
@@ -43,6 +46,7 @@ public final class StoryEvents {
     @SubscribeEvent
     public static void onStopped(ServerStoppedEvent event) {
         Scenes.reset();
+        IntroFlow.reset();
         Discoveries.reset();
     }
 

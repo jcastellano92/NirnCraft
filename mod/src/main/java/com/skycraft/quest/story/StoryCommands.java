@@ -114,6 +114,62 @@ public final class StoryCommands {
                                             "none".equals(side) ? "" : side);
                                     return 1;
                                 }))))
+                .then(Commands.literal("intro")
+                        .then(Commands.literal("status").executes(StoryCommands::introStatus))
+                        .then(Commands.literal("selftest").executes(c -> introSelftest(c, false))
+                                .then(Commands.literal("rebuild").executes(c -> introSelftest(c, true))))
+                        .then(Commands.literal("restart").executes(c -> {
+                            ServerPlayer p = c.getSource().getPlayerOrException();
+                            boolean ok = IntroFlow.restart(p);
+                            c.getSource().sendSuccess(() -> Component.literal(ok ? "The opening starts again in the cottage." : "No cottage in this world."), true);
+                            return ok ? 1 : 0;
+                        }).then(Commands.argument("player", EntityArgument.player()).executes(c -> {
+                            ServerPlayer p = EntityArgument.getPlayer(c, "player");
+                            boolean ok = IntroFlow.restart(p);
+                            c.getSource().sendSuccess(() -> Component.literal(ok ? "The opening starts again for " + p.getName().getString() : "No cottage in this world."), true);
+                            return ok ? 1 : 0;
+                        })))
+                        .then(Commands.literal("skip").executes(c -> {
+                            IntroFlow.skip(c.getSource().getPlayerOrException());
+                            return 1;
+                        }))
+                        .then(Commands.literal("map").then(Commands.argument("x1", IntegerArgumentType.integer())
+                                .then(Commands.argument("z1", IntegerArgumentType.integer())
+                                        .then(Commands.argument("x2", IntegerArgumentType.integer())
+                                                .then(Commands.argument("z2", IntegerArgumentType.integer()).executes(c -> {
+                                                    net.minecraft.server.level.ServerLevel level = c.getSource().getServer().overworld();
+                                                    int ax = IntegerArgumentType.getInteger(c, "x1"), az = IntegerArgumentType.getInteger(c, "z1");
+                                                    int bx = IntegerArgumentType.getInteger(c, "x2"), bz = IntegerArgumentType.getInteger(c, "z2");
+                                                    for (String line : IntroSelftest.map(level, Math.min(ax, bx), Math.min(az, bz),
+                                                            Math.min(Math.max(ax, bx), Math.min(ax, bx) + 140), Math.min(Math.max(az, bz), Math.min(az, bz) + 120))) {
+                                                        c.getSource().sendSuccess(() -> Component.literal(line), false);
+                                                    }
+                                                    return 1;
+                                                }))))))
+                        .then(Commands.literal("column").then(Commands.argument("x", IntegerArgumentType.integer())
+                                .then(Commands.argument("z", IntegerArgumentType.integer()).executes(c -> {
+                                    net.minecraft.server.level.ServerLevel level = c.getSource().getServer().overworld();
+                                    StartCottage.Site site = StartCottage.site(level);
+                                    if (site == null) return 0;
+                                    int hg = CottageTerrain.groundTop(level, site.helgenX(), site.helgenZ());
+                                    String m = CottageTerrain.debugColumn(level, site, new CottageTerrain.Town(site.helgenX(), site.helgenZ(), 60,
+                                            hg == CottageTerrain.NO_GROUND ? site.helgenY() : hg), IntegerArgumentType.getInteger(c, "x"),
+                                            IntegerArgumentType.getInteger(c, "z"));
+                                    c.getSource().sendSuccess(() -> Component.literal(m), false);
+                                    return 1;
+                                }))))
+                        .then(Commands.literal("dump").executes(c -> {
+                            net.minecraft.server.level.ServerLevel level = c.getSource().getServer().overworld();
+                            StartCottage.Site site = StartCottage.site(level);
+                            if (site == null) return 0;
+                            for (String line : IntroSelftest.dump(level, site)) c.getSource().sendSuccess(() -> Component.literal(line), false);
+                            return 1;
+                        }))
+                        .then(Commands.literal("rebuild").executes(c -> {
+                            StartCottage.rebuild(c.getSource().getServer().overworld());
+                            c.getSource().sendSuccess(() -> Component.literal("The cottage is rebuilt; its path and sight cone follow as the chunks load."), true);
+                            return 1;
+                        })))
                 .then(Commands.literal("check").executes(StoryCommands::check))
                 .then(Commands.literal("selftest").executes(StoryCommands::selftest)
                         .then(Commands.literal("flow").executes(StoryCommands::selftestFlow))));
@@ -159,7 +215,28 @@ public final class StoryCommands {
         return problems.isEmpty() ? 1 : 0;
     }
 
-    private static final java.util.Set<String> ACTIONS = java.util.Set.of("give", "relic", "take", "scene", "flag", "unflag", "start",
+    private static int introStatus(CommandContext<CommandSourceStack> c) {
+        net.minecraft.server.level.ServerLevel level = c.getSource().getServer().overworld();
+        StartCottage.Site site = StartCottage.site(level);
+        String who = "";
+        if (c.getSource().getEntity() instanceof ServerPlayer p) who = "you: " + IntroFlow.state(p) + "; ";
+        String msg = site == null ? "no cottage site" : who + "cottage " + site.origin() + " floor " + site.floorY() + " facing (" + site.fx() + ","
+                + site.fz() + "); prepared " + StartCottage.prepared(level) + "; " + StartCottage.report(level) + "; hidden players " + IntroFlow.hidden().size();
+        c.getSource().sendSuccess(() -> Component.literal(msg), false);
+        return 1;
+    }
+
+    /** Headless checks of the cottage and the whole opening for a stand-in player. */
+    private static int introSelftest(CommandContext<CommandSourceStack> c, boolean rebuild) {
+        List<String> info = new ArrayList<>();
+        List<String> problems = IntroSelftest.run(c.getSource().getServer(), info, rebuild);
+        for (String s : info) c.getSource().sendSuccess(() -> Component.literal(" " + s), false);
+        c.getSource().sendSuccess(() -> Component.literal("Intro selftest: " + problems.size() + " problems"), false);
+        for (String p : problems) c.getSource().sendSuccess(() -> Component.literal(" - " + p).withStyle(ChatFormatting.RED), false);
+        return problems.isEmpty() ? 1 : 0;
+    }
+
+    private static final java.util.Set<String> ACTIONS =java.util.Set.of("give", "relic", "take", "scene", "flag", "unflag", "start",
             "word", "souls", "teleport_dim", "flight", "effect", "control", "relocate", "summon", "flyover", "helgen", "thunder",
             "absorb_soul", "beast_blood", "cure_beast_blood", "vampire_lord", "cure", "retire", "victory",
             "join", "points", "expel", "imprison", "loot", "unique", "boss");

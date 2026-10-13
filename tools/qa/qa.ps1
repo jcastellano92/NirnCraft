@@ -132,7 +132,7 @@ if ($Server) {
     }
     Remove-Item -Recurse -Force (Join-Path $Run "world") -ErrorAction SilentlyContinue
     Remove-Item -Recurse -Force (Join-Path $Run "crash-reports") -ErrorAction SilentlyContinue
-    $cmds = @("forceload add -96 -96 96 96", "skycraft-quest selftest flow", "skycraft magic selftest", "skycraft-protect selftest")
+    $cmds = @("forceload add -96 -96 96 96", "skycraft-quest selftest flow", "skycraft magic selftest", "skycraft-protect selftest", "skycraft-quest intro selftest")
     # housing model dump for the population lint (tools/qa/population_lint.py): no building, no chunk loads
     $popSample = @("whiterun", "riverwood", "helgen", "rorikstead", "dragon_bridge", "falkreath", "old_hroldan")
     $popSample | ForEach-Object { $cmds += "skypop $_" }

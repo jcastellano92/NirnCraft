@@ -90,6 +90,29 @@ TEXTURES = {
             ".......RR.......",
         ],
     ),
+    "cottage_key": (
+        {
+            "K": 0x2A2118, "G": 0xB8AA8A, "g": 0x7E7360, "H": 0xE6DCC0,
+        },
+        [
+            "................",
+            "................",
+            "...KKKK.........",
+            "..KHHHHK........",
+            ".KHKKKKGK.......",
+            ".KGK..KGKKKKKKK.",
+            ".KGK..KGGGGGGGGK",
+            ".KGKKKKGGggggggK",
+            "..KGGGGKKKKKGKKK",
+            "...KKKK...KGKKGK",
+            "..........KGKKGK",
+            "..........KKK.KK",
+            "................",
+            "................",
+            "................",
+            "................",
+        ],
+    ),
     "courier_letter": (
         {
             "K": 0x5A4A32, "E": 0xE8DCC0, "e": 0xC0B090, "R": 0xB02020, "r": 0x701010, "S": 0x8A6A3A,

@@ -31,6 +31,7 @@ public final class QuestPackets {
         SkyNetwork.register(PartyTravelPrompt.class, NetworkDirection.PLAY_TO_CLIENT, PartyTravelPrompt::encode, PartyTravelPrompt::decode, PartyTravelPrompt::handle);
         SkyNetwork.register(PartyTravel.class, NetworkDirection.PLAY_TO_SERVER, PartyTravel::encode, PartyTravel::decode, PartyTravel::handle);
         SkyNetwork.register(NarrationCard.class, NetworkDirection.PLAY_TO_CLIENT, NarrationCard::encode, NarrationCard::decode, NarrationCard::handle);
+        com.skycraft.quest.story.IntroPackets.register();
     }
 
     // ------------------------------------------------------------------ S2C

@@ -35,8 +35,19 @@ public final class QuestItems {
     public static final RegistryObject<Item> QUEST_RELIC = ITEMS.register("quest_relic",
             () -> new RelicItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));
     public static final String RELIC_TAG = "relic";
+    /** The one-use key to the start cottage's door (bound to the player it was made for; see quest.story.IntroFlow). */
+    public static final RegistryObject<Item> COTTAGE_KEY = ITEMS.register("cottage_key",
+            () -> new QuestItem(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON), "cottage_key"));
 
     private QuestItems() {}
+
+    /** The cottage key made for {@code owner}: a soulbound quest item that only opens that player's way out. */
+    public static ItemStack cottageKey(java.util.UUID owner) {
+        ItemStack stack = new ItemStack(COTTAGE_KEY.get());
+        stack.getOrCreateTag().putUUID("owner", owner);
+        stack.getOrCreateTag().putBoolean("skycraft_quest", true);
+        return stack;
+    }
 
     public static void init(IEventBus modBus) {
         ITEMS.register(modBus);

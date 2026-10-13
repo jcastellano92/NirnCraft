@@ -17,6 +17,14 @@ public final class QuestConfig {
     public static final ForgeConfigSpec.BooleanValue INTRO;
     public static final ForgeConfigSpec.BooleanValue RUINED_HELGEN;
     public static final ForgeConfigSpec.IntValue SKIP_DAYS;
+    public static final ForgeConfigSpec.BooleanValue INTRO_LOCK_EXIT;
+    public static final ForgeConfigSpec.BooleanValue INTRO_HIDE_PLAYERS;
+    public static final ForgeConfigSpec.IntValue INTRO_LOADING_SECONDS;
+    public static final ForgeConfigSpec.IntValue INTRO_CUTSCENE_SECONDS;
+    public static final ForgeConfigSpec.EnumValue<IntroMigration> INTRO_EXISTING_SAVES;
+
+    /** What an existing save (a character made before the cottage opening) does at its next login. */
+    public enum IntroMigration { SKIP, REPLAY_IF_UNFINISHED }
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -37,6 +45,19 @@ public final class QuestConfig {
                 .define("helgenStart", false);
         INTRO = b.comment("Play the short opening (a wake-up scene and one distant dragon sighting). False skips it: the first objective is still set.")
                 .define("intro", true);
+        INTRO_LOCK_EXIT = b.comment("While in the opening (before the cottage key is used) the door is locked, teleports are blocked and a player",
+                        "that ends up away from the cottage is put back. False leaves the door and teleports alone.")
+                .define("introLockExit", true);
+        INTRO_HIDE_PLAYERS = b.comment("Players still in the opening are not drawn for each other (they appear when they leave the cottage).")
+                .define("introHidePlayers", true);
+        INTRO_LOADING_SECONDS = b.comment("Longest the 'world loading' screen after character creation waits for the chunks, in seconds.")
+                .defineInRange("introLoadingSeconds", 45, 10, 300);
+        INTRO_CUTSCENE_SECONDS = b.comment("Length of the dragon-attack cutscene at the cottage window, in seconds.")
+                .defineInRange("introCutsceneSeconds", 48, 30, 120);
+        INTRO_EXISTING_SAVES = b.comment("A character that existed before the cottage opening: SKIP = never play it;",
+                        "REPLAY_IF_UNFINISHED = play it once if the first quest 'Unbound' is not done yet (it starts at the cottage).",
+                        "An operator can always run '/skycraft-quest intro restart [player]'.")
+                .defineEnum("introExistingSaves", IntroMigration.REPLAY_IF_UNFINISHED);
         RUINED_HELGEN = b.comment("Helgen is a ruin after the dragon: only survivors and soldiers live there (no shopkeepers, no innkeeper).")
                 .define("ruinedHelgen", true);
         SKIP_DAYS = b.comment("In-game days a quest step must stay unfinished before the journal offers to skip it (0 = never).",

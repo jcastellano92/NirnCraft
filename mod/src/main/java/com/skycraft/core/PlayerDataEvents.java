@@ -98,8 +98,11 @@ public final class PlayerDataEvents {
                 data.module("core").putBoolean("spawn_placed", true);
                 com.skycraft.combat.Sheathe.setSheathed(player, true);
                 data.markDirty();
-                placeAtStart(player);
+                // the cottage is the first spawn (set before the character screen, so there is no gate spawn and move);
+                // the world spawn is the fallback when there is no cottage (other worlds, intro off)
+                if (!com.skycraft.quest.story.IntroFlow.onFirstJoin(player)) placeAtStart(player);
             }
+            com.skycraft.quest.story.IntroFlow.onLogin(player);
         }
     }
 
