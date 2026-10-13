@@ -132,7 +132,7 @@ if ($Server) {
     }
     Remove-Item -Recurse -Force (Join-Path $Run "world") -ErrorAction SilentlyContinue
     Remove-Item -Recurse -Force (Join-Path $Run "crash-reports") -ErrorAction SilentlyContinue
-    $cmds = @("forceload add -96 -96 96 96", "skycraft-quest selftest flow", "skycraft magic selftest")
+    $cmds = @("forceload add -96 -96 96 96", "skycraft-quest selftest flow", "skycraft magic selftest", "skycraft-protect selftest")
     # housing model dump for the population lint (tools/qa/population_lint.py): no building, no chunk loads
     $popSample = @("whiterun", "riverwood", "helgen", "rorikstead", "dragon_bridge", "falkreath", "old_hroldan")
     $popSample | ForEach-Object { $cmds += "skypop $_" }
@@ -158,7 +158,15 @@ if ($Server) {
     $sfail = @($summary | Where-Object { $_ -match "^FAIL" })
     Result "server" ($sfail.Count -eq 0) "ran ${secs}s"
     $summary | ForEach-Object { Add("       $_") }
-    $popDir = Join-Path $Run "skycraft-previews"
+    # world protection self-test (com.skycraft.protect.ProtectSelfTest): glass/bed in town cancelled, homestead/vein/tree allowed...
+    $pt = Select-String -Path $out -Pattern "Protect selftest:" | Select-Object -Last 1
+    if ($pt) {
+        $ptl = ($pt.Line -replace "^.*?Protect selftest: ", "")
+        Result "protect" ($ptl -match "^\d+/\d+ checks passed, 0 problems") $ptl
+    } else {
+        Result "protect" $false "no 'Protect selftest' line in the server log"
+    }
+    $popDir =Join-Path $Run "skycraft-previews"
     $pl = @(& $py -3 -I (Join-Path $PSScriptRoot "population_lint.py") $popDir --require ($popSample -join ",") 2>&1)
     $plerr = @($pl | Where-Object { $_ -match "^ERR" })
     Result "population" ($plerr.Count -eq 0) ("{0}" -f ($pl | Select-Object -Last 1))

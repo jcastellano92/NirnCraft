@@ -1,0 +1,27 @@
+package com.skycraft.protect;
+
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.config.ModConfig;
+
+/**
+ * Skyrim-style world protection ("you can't pick up the world"): outside a homestead nobody breaks or places blocks,
+ * except the designated harvests; griefing (explosions, fire, mob block-breaking, fluids, pistons) is off.
+ *
+ * <ul>
+ *     <li>{@link Protect}: the decision (break / place) for a player and a block;</li>
+ *     <li>{@link Footprints}: where settlements, roads, structures and sites are (cached per chunk);</li>
+ *     <li>{@link ProtectEvents}: the Forge event handlers;</li>
+ *     <li>{@link ProtectCommands}: {@code /skycraft-protect status|bypass|check|selftest};</li>
+ *     <li>{@link ProtectSelfTest}: the headless self-test (autorun task {@code protect}).</li>
+ * </ul>
+ */
+public final class ProtectModule {
+    private ProtectModule() {}
+
+    /** Registers this module's config and autorun task. Called from the mod constructor. */
+    public static void init(IEventBus modBus) {
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ProtectConfig.SPEC, "skycraft-protect.toml");
+        ProtectSelfTest.registerAutorun();
+    }
+}

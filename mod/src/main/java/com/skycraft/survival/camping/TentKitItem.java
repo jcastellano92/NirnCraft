@@ -49,8 +49,10 @@ public class TentKitItem extends Item {
         if (level.isClientSide) return InteractionResult.SUCCESS;
 
         for (TentBlock.Part part : TentBlock.Part.values()) {
-            level.setBlock(TentBlock.partPos(origin, facing, part), SurvivalRegistry.TENT.get().defaultBlockState()
+            BlockPos partPos = TentBlock.partPos(origin, facing, part);
+            level.setBlock(partPos, SurvivalRegistry.TENT.get().defaultBlockState()
                     .setValue(TentBlock.FACING, facing).setValue(TentBlock.PART, part), 3);
+            com.skycraft.dig.PlacedBlocks.mark(level, partPos, true); // yours: you can break camp anywhere (world protection)
         }
         // lay out a carried bedroll, head toward the back
         int slot = findBedroll(player);
@@ -59,6 +61,8 @@ public class TentKitItem extends Item {
             BlockState foot = SurvivalRegistry.BEDROLL.get().defaultBlockState().setValue(BedBlock.FACING, in).setValue(BedBlock.PART, BedPart.FOOT);
             level.setBlock(origin, foot, 3);
             level.setBlock(origin.relative(in), foot.setValue(BedBlock.PART, BedPart.HEAD), 3);
+            com.skycraft.dig.PlacedBlocks.mark(level, origin, true);
+            com.skycraft.dig.PlacedBlocks.mark(level, origin.relative(in), true);
             if (slot >= 0 && !player.isCreative()) player.getInventory().getItem(slot).shrink(1);
         }
         level.playSound(null, origin, SoundEvents.WOOL_PLACE, SoundSource.BLOCKS, 1.0f, 0.8f);

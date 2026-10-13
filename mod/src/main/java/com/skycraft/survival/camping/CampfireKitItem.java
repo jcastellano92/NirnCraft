@@ -48,6 +48,7 @@ public class CampfireKitItem extends Item {
         Direction facing = player == null ? Direction.NORTH : player.getDirection().getOpposite();
         BlockState fire = Blocks.CAMPFIRE.defaultBlockState().setValue(CampfireBlock.FACING, facing).setValue(CampfireBlock.LIT, true);
         level.setBlock(pos, fire, 11);
+        com.skycraft.dig.PlacedBlocks.mark(level, pos, true); // yours: you can break camp anywhere (world protection)
         level.gameEvent(player, GameEvent.BLOCK_PLACE, pos);
         level.playSound(null, pos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0f, 0.9f);
         level.playSound(null, pos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 0.8f, 1.0f);

@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:drafting_table",
+    "skycraft:bedroll",
+    "skycraft:tent",
+    "skycraft:cooking_pot"
+  ]
+}
