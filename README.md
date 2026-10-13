@@ -108,6 +108,11 @@ advancements, hotbar slot 9, and Oculus's shader keys. The full list is in [docs
 * [docs/DEVELOPING.md](docs/DEVELOPING.md): architecture, generators, test harnesses and CI.
 * [docs/TAMRIEL.md](docs/TAMRIEL.md): the world plan and the worldgen contracts.
 
+Contributing or continuing development (including a new Claude Code session): start at
+[docs/START-HERE.md](docs/START-HERE.md). It links the master plan and roadmap
+([docs/world/WORLD-PLAN.md](docs/world/WORLD-PLAN.md)) and the ready-to-run phase prompts
+([docs/prompts/](docs/prompts/README.md)).
+
 ## Credits and legal
 
 Skycraft is a fan project. It is not affiliated with or endorsed by Bethesda Softworks, ZeniMax Media or Mojang.

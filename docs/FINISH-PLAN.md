@@ -1,7 +1,16 @@
 # Skycraft finish plan
 
-This is the execution plan for wrapping up Skycraft on a tight token budget. It is written so a Sonnet (or Opus)
-session can pick it up cold. Read it top to bottom once, then work the task list in order.
+> **Superseded as the plan (2026-10-13).** New sessions start at [`docs/START-HERE.md`](START-HERE.md). The roadmap,
+> the order of work and the progress table now live in [`docs/world/WORLD-PLAN.md`](world/WORLD-PLAN.md) (sections 5
+> and 7), and every phase has a ready-to-run prompt in [`docs/prompts/`](prompts/README.md).
+>
+> **Still current here:** section 0 (ground rules and merge traps; `docs/prompts/_COMMON.md` summarises them),
+> section 2 (the QA harness and the fast loop) and section 3 (the layered verification strategy).
+> **Historical:** section 1 (state as of 2026-10-11), section 4 (the T1-T9 task list; status per task below),
+> section 5 (old prompts; replaced by `docs/prompts/`) and section 6 (definition of done; replaced by the R15 gates).
+
+This was the execution plan for wrapping up Skycraft on a tight token budget, written so a Sonnet (or Opus) session
+could pick it up cold.
 
 ## 0. Ground rules for whoever executes this
 
@@ -32,7 +41,12 @@ session can pick it up cold. Read it top to bottom once, then work the task list
   server boot catch these); generators that clean whole folders (biomes.py was fixed to only clean its own files);
   `.gitignore` hiding source folders named `build/`; two modules registering the same `DimensionSpecialEffects`.
 
-## 1. Current state (as of this plan)
+## 1. Current state (historical: as of 2026-10-11; the live state is WORLD-PLAN section 7)
+
+Since then: LORE WRITERS, QUESTS2, VISUALS2, EXPLORE, DUNGEON-QA and PERF+BAKE were merged (commits 0aa075c, f62d69a,
+81cdedb, 4dd6e15, 133d9a6, fd5c0c9). ILIAC BAY became roadmap phase R5 (`docs/world/ILIAC-BAY.md`,
+`docs/prompts/R5-iliac-bay.md`) and ITEMS AFFIX became R14 (`docs/prompts/R14-items-affix.md`); their old worktrees
+hold nothing usable.
 
 Merged and verified on `tamriel-overhaul` (`git log --oneline | head -60` for detail): Phase 1 fixes; the Tamriel
 map + terrain (height 704, eroded, peaks); 113 biomes + flora generator; 4,914 places across every province (with
@@ -134,7 +148,14 @@ Cheapest first; stop at the first layer that answers the question.
 5. **Full client (rare):** `qa.ps1 -Server -Client` in the dev client, and once at the very end the real Prism pack
    (section 6). Distant Horizons/shader checks only there.
 
-## 4. Task list (do in this order)
+## 4. Task list (historical; superseded by the WORLD-PLAN roadmap)
+
+Status of each task as of 2026-10-13: **T1** done (all five worktrees merged). **T2** done (`tools/qa/layout_lint.py`,
+`qa.ps1 -Layout`; commit a1215f7). **T3** headless census not built (WORLD-PLAN open item O3). **T4** partly done
+(`render_town.py`, `render_dungeon.py`, `region_render.py`, `contact_sheet.py` exist; snapshot goldens not built: open
+item O4). **T5** ILIAC BAY is now R5. **T6** ITEMS AFFIX is now R14. **T7** PERF+BAKE done (fd5c0c9). **T8** authored
+content is now the province phases R4-R12. **T9** final release pass is now R15. Do not work from this list; use
+`docs/START-HERE.md`.
 
 **T1. Land the unfinished worktrees** (one at a time; each: finish → merge → `qa.ps1 -Server` → commit):
 1. LORE WRITERS (`agent-af776652…`): nearly done. Finish smoke test; merge.
@@ -199,7 +220,7 @@ plan format), more side quests.
 `docs/PLAYTEST-FULLPACK.md`: DH + Oculus/Complementary) with a short tour and one contact sheet; fix blockers; tag a
 release commit.
 
-## 5. Prompts for the remaining workstreams
+## 5. Prompts for the remaining workstreams (historical; replaced by `docs/prompts/`)
 
 Each prompt below is self-contained; prepend "Read docs/AGENT-RULES.md and docs/FINISH-PLAN.md section 0 first."
 and give the agent `isolation: worktree` (or point it at the existing worktree to finish).
@@ -232,7 +253,7 @@ and give the agent `isolation: worktree` (or point it at the existing worktree t
   weather tuning (visuals2); density audit + culture-specific minor sites + hidden unique items (explore);
   dungeon analyzer + bot + cyclic/set-piece redesign + telemetry (dungeon-qa).
 
-## 6. Definition of done
+## 6. Definition of done (historical; the current one is the R15 gates in `docs/prompts/R15-final-polish.md` and DESIGN-PRINCIPLES 5.5 per region)
 
 * `qa.ps1 -Server -Layout -Census` all PASS; layout lint has no errors (warnings documented).
 * Haiku visual review of the T4 sheet set returns no blocking issues.

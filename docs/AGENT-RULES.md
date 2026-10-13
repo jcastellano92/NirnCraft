@@ -1,6 +1,8 @@
 # Skycraft agent rules
 
 Rules every agent/workstream follows. Reference data from the owner's game installs lives in `.reference/` (gitignored, facts only).
+New sessions start at `docs/START-HERE.md`; the roadmap and its state table are in `docs/world/WORLD-PLAN.md`, the
+phase prompts in `docs/prompts/`. The world-building rules at the end of this file apply to every workstream.
 
 ## Phase 1 rules (still apply)
 
@@ -118,3 +120,40 @@ Read these first:
   (`devserver.ps1` refuses a second; servers get `-Xmx4G`): stop it (`devserver.ps1 stop`) when you finish and before
   another agent needs one; do not leave it running between sessions.
 * Release builds stay strict: `tools\build_release.ps1` bakes explicitly and runs `qa.ps1 -Server -Bake`.
+
+## World-building rules (every workstream; docs/world/DESIGN-PRINCIPLES.md)
+
+* **World building first.** Everything (terrain, architecture, palette, a prop in a scene, an NPC's job and line, a
+  quest, a book, a dungeon's enemies, music, weather) exists to build the world. Each element must express its
+  place's history, culture, conflict, economy, faith and ecology, and agree with every other element there. When two
+  rules conflict, the one that makes the place more believable wins. A desert town with a pine-log mill, a bandit camp
+  with no road to rob or a mine with no ore in the rock is a bug.
+* **Cite the world-model sheet.** Every region and province has an 11-layer causal sheet (L1 geology, L2 climate, L3
+  water, L4 ecology and micro-biomes, L5 economy, L6 settlement pattern, L7 society, L8 culture and belief, L9 politics,
+  L10 the hidden and underground, L11 history), as data in `mod/src/main/resources/skycraft/tamriel/world/<province>.json`
+  (designed in `docs/world/provinces/<province>.md` section 1). Every sheet field in L2-L11 cites a field above it.
+  Every new content record (place, NPC, quest, scene kind, dungeon identity, book, creature table, palette or
+  micro-biome rule, music cue, weather rule) carries `why: [sheet field ids]`, e.g.
+  `"why": ["the_reach.L5.silver_mining", "the_reach.L7.prison_labour"]`. Ids must resolve
+  (`tools/qa/worldsheet_lint.py`); content with no cause is rejected. Until a province's JSON sheet exists, cite the
+  ids of its province document's section 1. Content reports quote the region's world truth paragraph and answer the
+  four questions (why does this place exist here, what do its people do, what were the ruins, why are the dangers on
+  this road) with sheet ids.
+* **Skyrim-measured floors.** The quality bar is Skyrim, measured from the real game (DESIGN-PRINCIPLES 4.1-4.9).
+  A region's count of each kind is `max(absolute floor, round(Skyrim's median per km² x the region's km²))`; each
+  settlement meets its tier's measured medians (capital: 73 named NPCs, 27 interiors, 23 named buildings, 15 merchants,
+  5 trainers, a court; city 20 NPCs; town 9; village 3; hamlet 2), with the tier minimum as the absolute floor. ESO
+  ideas are an optional layer on top of a met floor (4.12), never the bar and never a replacement.
+* **Modernise legacy sources: keep / amplify / replace** (DESIGN-PRINCIPLES 1). Keep the facts that define a place in
+  lore (name, rough position, culture, role, the famous thing). Amplify what the source had in seed form until it
+  drives a quest, a scene, a mechanic or a view. Replace the source's limits (bland terrain, repeated town blocks,
+  generic mazes, nameless NPCs, random encounters, consequence-free generator quests, empty space) so no trace remains.
+  Never import legacy quantity: curate to the Skyrim floor. Province phases report a "source did vs we do" table.
+* **Source precedence.** Positions from Skyrim, Oblivion (Cyrodiil) and Morrowind (Vvardenfell, Solstheim) are
+  canonical and are never overridden by Daggerfall or Arena data. Daggerfall and Arena may move or add places only
+  where those three games have no say (High Rock, Hammerfell, the Iliac Bay towns, the Arena-only provinces). Between
+  provinces the lore map wins. Fan projects (Tamriel Rebuilt, Beyond Skyrim, Project Tamriel) are never traced and
+  their invented names never reused.
+* **Gates and the plan.** Every phase prompt lists measurable gates; never weaken one to pass it. The orchestrating
+  session (not a worktree agent) merges, commits and updates the state table in `docs/world/WORLD-PLAN.md` section 7
+  on every merge.
