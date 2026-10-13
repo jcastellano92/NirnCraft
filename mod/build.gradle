@@ -22,7 +22,8 @@ minecraft {
 
     runs {
         configureEach {
-            workingDirectory project.file('run')
+            // tools/dev/devserver.ps1 runs its persistent dev server in run/devworld (-PskycraftRunDir=run/devworld)
+            workingDirectory project.file(project.findProperty('skycraftRunDir') ?: 'run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             mods {

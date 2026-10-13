@@ -65,6 +65,23 @@ public final class PerfAutorun {
         TASKS.put(name, task);
     }
 
+    /**
+     * Runs one task {@code name[:arg]} now (dev command inbox, {@code com.skycraft.dev}); {@code done} runs when it
+     * finishes. False if no such task.
+     */
+    public static boolean runOne(MinecraftServer server, String item, Runnable done) {
+        int colon = item.indexOf(':');
+        BiConsumer<Task, Runnable> task = TASKS.get((colon < 0 ? item : item.substring(0, colon)).toLowerCase(Locale.ROOT));
+        if (task == null) return false;
+        try {
+            task.accept(new Task(server, colon < 0 ? "" : item.substring(colon + 1), server.createCommandSourceStack()), done);
+        } catch (RuntimeException e) {
+            Skycraft.LOGGER.error("[autorun] task {} failed", item, e);
+            done.run();
+        }
+        return true;
+    }
+
     /** The task list from the environment, or null. */
     static String spec() {
         String s = System.getProperty("skycraft.perfrun");

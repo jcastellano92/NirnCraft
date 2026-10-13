@@ -1,7 +1,10 @@
 """Acceptance test for roads: measure the roads of a SAVED world (blocks, not the plan): the numbers a player feels.
 
 usage: py -3 -I tools/qa/road_measure.py <world_dir> <placeA>:<placeB> [<placeA>:<placeB> ...] [--json out.json]
+                                         [--box x1 z1 x2 z2]
        (every road of the pair, or ':placeA' / 'placeA' = every road touching that place)
+       --box: judge only road points inside that block box (the rest is not counted at all) and only the doors of
+       settlements centred in it; used by tools/qa/quick_corridor.ps1 after a dev-server regen of one tile.
 
 Per road (planned polyline points, 2 blocks apart, outside settlement zones, in loaded chunks):
   gaps      points whose walking surface is not road material (and not water): the road is missing there
@@ -211,6 +214,13 @@ def main():
     if '--json' in sys.argv:
         out_json = sys.argv[sys.argv.index('--json') + 1]
         args = [a for a in args if a != out_json]
+    box = None
+    if '--box' in sys.argv:
+        i = sys.argv.index('--box')
+        b = [int(v) for v in sys.argv[i + 1:i + 5]]
+        for v in sys.argv[i + 1:i + 5]:
+            args.remove(v)
+        box = (min(b[0], b[2]), min(b[1], b[3]), max(b[0], b[2]), max(b[1], b[3]))
     world_dir = args[0]
     pairs = args[1:]
     world = World(world_dir)
@@ -251,6 +261,9 @@ def main():
         info = [None] * n
         for i in range(n):
             x, z = int(xs[i]), int(zs[i])
+            if box and not (box[0] <= x <= box[2] and box[1] <= z <= box[3]):
+                info[i] = 'zone'
+                continue
             if inzone(x, z):
                 info[i] = 'zone'
                 continue
@@ -320,6 +333,8 @@ def main():
     for sid in sorted(sett_ids):
         s = roads.settlements.get(sid)
         if not s:
+            continue
+        if box and not (box[0] <= s['x'] <= box[2] and box[1] <= s['z'] <= box[3]):
             continue
         rad = 70
         x1, z1, x2, z2 = s['x'] - rad - 40, s['z'] - rad - 40, s['x'] + rad + 40, s['z'] + rad + 40

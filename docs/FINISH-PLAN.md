@@ -78,6 +78,20 @@ git stash pop` (resolve conflicts keeping both sides).
 * `qa.ps1 -Server -Client -Tour "Name:x:z;Name:x:z"` — client autotest + one contact sheet
   (`mod\run\qa-contact-sheet.jpg`). **Final verification only.**
 
+**Fast loop (dev server; iterate with this, run the full gates once at the end of a phase):**
+
+* `tools\dev\devserver.ps1 start|stop|status|restart|reset` keeps ONE headless dev server running (world
+  `mod\run\devworld\world`, Nirn seed, own port and working dir, so it never collides with `qa.ps1`/`bake.ps1`).
+  `devserver.ps1 run "cmd a|cmd b" -Wait` runs lines through its inbox in about a second and prints their output
+  (server commands, `task:roadplan|roadterrain|bake|verify`, `@wait <ticks>`, `@until <regex>`, `@idle`). `run`
+  auto-starts the server and restarts it (~40 s) when anything under `mod\src\main` changed since it booted.
+* `/skycraft-dev regen x1 z1 x2 z2 [skycraft:scratch]` (dev server only) regenerates that area in place with the
+  current code: deletes the chunks, generates them fresh, repaves the roads, saves (~7-10 s for 12x12 chunks).
+  `skycraft:scratch` = same generator, no roads (terrain-only checks such as `p2_corridors.py measure`).
+* `tools\qa\quick_corridor.ps1 whiterun:riverwood [-Index n] [-Replan]` = regen of one 160-block tile of the
+  corridor + `road_measure.py --box` on it: ~15 s with the server up. After changing road PLANNING code use `-Replan`
+  (the dev world keeps its planned network) or `devserver.ps1 reset`.
+
 ## 3. Verification strategy (token-efficient, layered)
 
 Cheapest first; stop at the first layer that answers the question.
