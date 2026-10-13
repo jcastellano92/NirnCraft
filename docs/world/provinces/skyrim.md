@@ -714,7 +714,7 @@ reverse it, a rumour at the inn. The reversal is a building swap or an NPC-state
 * **Trainers.** Five in distinct skills in each capital, two in each city (R3d trainer role; today training goes by
   profession). The College is the second training hub (magic skills).
 * **Services.** Inn with rooms, smith, apothecary, general store, temple, priest of the dead, bard, jail, stables,
-  carriage. Dawnstar and Winterhold have their priests since content pass 2 (WORLD-PLAN O6 is stale; close it).
+  carriage. Dawnstar and Winterhold have their priests since content pass 2 (the old open item O6 is closed).
 * **Jobs.** No unstaffed workplaces (16 before pass 2, 0 after).
 * **Reactivity.** 12 deed-keyed lines per hold (guards, innkeepers, the court), every finished side chain changes at
   least one (F-REACT).

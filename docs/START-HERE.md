@@ -38,20 +38,26 @@ people ("world building is king").
 * Branch `tamriel-overhaul`, local only. The whole continent exists: 71 land regions, 4,914 places, 113+ biomes,
   settlements with a building grammar, dungeons with identity in Skyrim, 1,072 quests, NPCs with homes, jobs and
   schedules, creatures, magic, sailing, realms, music. `qa.ps1 -Server` passes.
-* The plan-first generation pipeline is in: P1 road plan, P2 terrain obeys it, P3 roads and crossings painted from it,
-  P4 vegetation masks, P6 planned scenes. **P5 (streets to every door) is being finished in another worktree.**
+* The plan-first generation pipeline is complete: P1 road plan, P2 terrain obeys it, P3 roads and crossings painted
+  from it, P4 vegetation masks, **P5 streets to every door (`e9a5ebe`, 0.38% unreachable doors)**, P6 planned scenes.
+  Since then: fire system and the destroyed-Helgen aftermath (`4ba41bb`), playtest rounds 4 and 5 (`15e46d7`,
+  `b738492`), landmark grounding and story lecterns (`7af4469`). Release builds exist in `dist/`.
 * Design is done: the rulebook, the scale model, the Iliac Bay plan, this roadmap and the prompt library. The ten
-  province documents (`docs/world/provinces/*.md`) are being written.
-* The gap: Skyrim scores 95 on the parity scorecard but only 53 on Settlements; every other province sits at 40-53.
+  province documents (`docs/world/provinces/*.md`) are being written; **`skyrim.md` is finished (sections 1-10,
+  phases SK1-SK8, `7df74b4`)**, the template the other provinces copy.
+* The gap: Skyrim scores 95 on the parity scorecard but only 53-54 on Settlements (named NPCs 187 against the real
+  845, named buildings 112 against 210); every other province sits at 40-53.
   The map is full; **depth per place** is what is missing (named people, stories, identity, quests).
 
 ## Next
 
-**Next: R0 (post-P5 release build and playtest), `docs/prompts/R0-release-playtest.md`, as soon as P5 is merged.**
-Then R1 and R2 in parallel, then R3a-R3e, then R4 (Skyrim), then the provinces from R5 (Iliac Bay). The full order and
+**Next: R0 (release build and playtest) is in progress; finish it per `docs/prompts/R0-release-playtest.md`.** P5 is
+merged, so nothing blocks it. Then R1 and R2 in parallel, then R3a-R3e (R3a's pilot input, `skyrim.md`, exists), then
+R4 (Skyrim, designed in `skyrim.md` section 10.4), then the provinces from R5 (Iliac Bay). The full order and
 dependencies are in WORLD-PLAN section 5; what is running or done is in section 7.
 
-To run it, say: "Read `docs/START-HERE.md` and `docs/prompts/_COMMON.md`, then run `docs/prompts/R0-release-playtest.md`."
+To run the next unstarted phase, say: "Read `docs/START-HERE.md` and `docs/prompts/_COMMON.md`, then run
+`docs/prompts/R1-loose-ends.md`" (or the prompt of whichever phase WORLD-PLAN section 7 shows as `next`).
 
 ## The rules (non-negotiable)
 

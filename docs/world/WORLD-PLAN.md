@@ -462,21 +462,26 @@ Status values: `done`, `in progress`, `next`, `blocked (why)`, `not started`. "G
 | P2 terrain obeys plan | done | 7b0816c | 95.5% bed columns exact | 2026-10-13 |
 | P3 paint and crossings | done | 5d0ffe7 | p3_corridors all zeros; legacy measure 11 gaps in settlement zones (P5/R1b) | 2026-10-13 |
 | P4 vegetation masks | done | 233629b | | 2026-10-13 |
-| P5 streets to every door | in progress | another agent's worktree | gate: unreachable doors <= 1% | 2026-10-13 |
+| P5 streets to every door | done | e9a5ebe | unreachable doors 0.38% (gate <= 1%) | 2026-10-13 |
 | P6 planned scenes | done | f8e3a68 | 3,962 scenes; placement_lint 0 | 2026-10-13 |
+| Fire system and destroyed-Helgen aftermath | done | 4ba41bb | big-fire blocks, far fire renderer, `FireSites` API, aftermath scene, mournful music | 2026-10-13 |
+| Playtest round 4 fixes | done | 15e46d7 | settlement crowd cap, night sleepers, gate posts, respawn at nearest town, key remap, longbow pose | 2026-10-13 |
+| Playtest round 5 fixes | done | b738492 | block-model rotations, strict asset audit, intro cover, Helgen polish; rebake | 2026-10-13 |
+| Landmark grounding and story lecterns | done | 7af4469 | whole-footprint sampling, foundations, support validator, lectern reader UI; rebake | 2026-10-13 |
 | Design docs (principles, scale, Iliac Bay) | done | cf288dd | | 2026-10-13 |
-| Province documents `docs/world/provinces/*.md` | in progress | four agents | | 2026-10-13 |
+| Province documents `docs/world/provinces/*.md` | in progress | one agent per province | Skyrim done (next row); others as they land | 2026-10-13 |
+| Province document: Skyrim (`skyrim.md`, all ten sections) | done | 7df74b4 | Phases SK1-SK8 (section 10.4) feed R4 S1-S5. Baseline: SET 54, named NPCs 187 (target 862), named buildings 112 (209), quests 334 (371), 0 hold chains (9), 0 unmarked (16), 0 lore-web arcs (9), 29 wilderness nodes missing | 2026-10-13 |
 | World plan, prompt library, START-HERE | done | this commit | | 2026-10-13 |
 | IB0 Iliac extraction | done | `.reference/daggerfall_ref/v2` | | 2026-10-12 |
-| **R0** release build and playtest | **next** (after P5 merges) | | | |
+| **R0** release build and playtest | **in progress** (P5 merged; release builds exist) | | | 2026-10-13 |
 | R1 loose ends (R1a, R1b) | not started | | | |
 | R2 testing tiers 0/1 | not started | | | |
-| R3a world sheets | not started (needs `provinces/skyrim.md`) | | | |
+| R3a world sheets | not started (`provinces/skyrim.md` is written, 7df74b4; waits on R0) | | | |
 | R3b micro-biomes | not started | | | |
 | R3c measurement | not started | | | |
 | R3d town services | not started | | | |
 | R3e world systems | not started | | | |
-| R4 Skyrim uplift (S1-S5) | not started | | Skyrim SET 53 | |
+| R4 Skyrim uplift (S1-S5) | not started (design done: `skyrim.md` SK1-SK8; waits on R3a-R3e) | | Skyrim SET 54 | |
 | R5 Iliac Bay (IB-S, IB1-IB9, IB-G) | not started | | High Rock 42, Hammerfell 43 | |
 | R6 Cyrodiil | not started | | 48 | |
 | R7 Morrowind | not started | | 53 | |
@@ -498,6 +503,8 @@ Status values: `done`, `in progress`, `next`, `blocked (why)`, `not started`. "G
 | O3 | Headless world census (`/skycraft-qa census`, FINISH-PLAN T3) not built | R3c if budget, else R15 |
 | O4 | Snapshot golden-image renders (`tools/qa/snapshots.json`, FINISH-PLAN T4) not built; `render_town.py` and `render_dungeon.py` exist | R2 follow-on or R15 |
 | O5 | `parity.py` counts uniques from `uniques.json` only and `n_say` from `society.json` only (PARITY wave 0 notes) | R3c |
-| O6 | Dawnstar and Winterhold have no priest (temple lot does not fit; SKYRIM-SWEEP 5) | R4 S2 |
 | O7 | Minor sites and hidden stashes are on seeded cell grids, not in the plan (WORLDGEN-PIPELINE 9) | R4 S3 or R13 |
 | O8 | PARITY PA3-PA22 backlog: fold each batch into the province step that owns its files (PA3 into V7/V8, PA4-PA9 into V6/V8, PA11-PA13 into V7, PA14-PA15 into V3/V7, PA16-PA17 into V6, PA18 into V7, PA19 into V3, PA20 into V3, PA21 into V8, PA22 into R3c/V8) | per province |
+| O9 | Skyrim hold labels: 11 places carry a `region` that disagrees with the game's hold and the nearest seat; decide data relabel (recommended) or raster repaint (`skyrim.md` 3.2) | R4 SK2 |
+| O10 | `parity.py` counts named NPCs only from quest-file `npcs[]`; named residents of plans, sanctuaries and camps need a reader before R4 S2 can measure (extends O5) | R3c |
+| O11 | The Reach's level band (8-30) is 22 wide, over the F-LEVEL limit of 20 (`skyrim.md` 10.3) | R3e / R4 SK7 |
