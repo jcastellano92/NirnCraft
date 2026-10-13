@@ -173,7 +173,8 @@ public final class IntroFlow {
     @SubscribeEvent
     public static void onLoadPlayer(PlayerEvent.LoadFromFile event) {
         if (!(event.getEntity() instanceof ServerPlayer p) || p.connection != null) return; // not a login in progress
-        if (event.getPlayerFile("dat").exists()) return; // an existing character: resumed in onLogin
+        // an existing character has its data file (getPlayerFile("dat") throws: the suffix is reserved)
+        if (new java.io.File(event.getPlayerDirectory(), event.getPlayerUUID() + ".dat").exists()) return; // resumed in onLogin
         try {
             placeFirstJoin(p);
         } catch (RuntimeException e) {
