@@ -375,5 +375,11 @@
   "subtitles.skycraft.ui.lockpick_turn": "Lockpick turns",
   "subtitles.skycraft.ui.lockpick_strain": "Lockpick strains",
   "subtitles.skycraft.ui.lockpick_break": "Lockpick breaks",
-  "subtitles.skycraft.ui.lockpick_unlock": "Lock opens"
+  "subtitles.skycraft.ui.lockpick_unlock": "Lock opens",
+  "subtitles.skycraft.ambient.fire_crackle": "Fire crackles",
+  "subtitles.skycraft.ambient.fire_roar": "Fire roars",
+  "subtitles.skycraft.ambient.timber_creak": "Timber creaks",
+  "subtitles.skycraft.ambient.timber_collapse": "Timber collapses",
+  "subtitles.skycraft.ambient.sobbing": "Someone sobs",
+  "subtitles.skycraft.ambient.mourning": "Someone keens"
 }

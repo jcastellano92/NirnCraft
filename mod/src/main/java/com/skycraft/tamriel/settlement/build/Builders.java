@@ -23,6 +23,17 @@ public final class Builders {
     public static void build(Canvas c, SettlementPiece piece) {
         Spec s = piece.spec;
         if (s.has(Spec.OMIT)) return; // left out by the street plan (a prop on a doorstep path, street or road)
+        if (s.has(Spec.BURNT) && c.burn == 0) {
+            // a burnt piece: everything it writes goes through the charring filter, then fires, rubble and soot are added
+            c.burn = s.has(Spec.RUINED) ? 3 : 1;
+            try {
+                build(c, piece);
+            } finally {
+                c.burn = 0;
+            }
+            com.skycraft.fire.aftermath.Charring.finish(c, s);
+            return;
+        }
         if (s.has(Spec.RESERVED)) {
             // a player home plot (HousePlots): only its bounds and front door, the economy module builds the home
             c.anchor(AnchorType.HOUSE_MIN, -1, 0, -1);

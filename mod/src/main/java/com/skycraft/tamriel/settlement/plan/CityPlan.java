@@ -219,6 +219,7 @@ public final class CityPlan {
             case "major" -> Spec.MAJOR;
             case "palisade" -> Spec.PALISADE;
             case "ruined" -> Spec.RUINED;
+            case "burnt" -> Spec.BURNT;
             case "sign" -> Spec.SIGN;
             case "seat" -> Spec.SEAT;
             case "ground" -> Spec.GROUND;

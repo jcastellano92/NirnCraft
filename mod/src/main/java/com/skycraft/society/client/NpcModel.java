@@ -38,6 +38,9 @@ public class NpcModel extends PlayerModel<NpcEntity> {
             this.leftArmPose = main;
             this.rightArmPose = off;
         }
+        // aftermath poses: sitting on the ground uses the seated leg pose, kneeling and tending the crouch
+        if (entity.isHuddled()) this.riding = true;
+        if (entity.isKneeling() || entity.isTending()) this.crouching = true;
         super.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTick);
     }
 
@@ -49,7 +52,9 @@ public class NpcModel extends PlayerModel<NpcEntity> {
         this.head.xScale = this.head.yScale = this.head.zScale = headScale;
         this.hat.xScale = this.hat.yScale = this.hat.zScale = headScale;
         boolean changed = true;
-        if (entity.isPrisoner()) {
+        if (entity.isHuddled() || entity.isKneeling() || entity.isTending() || entity.isCarrying() || entity.isWeeping()) {
+            aftermathPose(entity, ageInTicks);
+        } else if (entity.isPrisoner()) {
             // hands bound behind the back, head hung low
             this.rightArm.xRot = 0.55F;
             this.rightArm.yRot = 0.0F;
@@ -82,5 +87,67 @@ public class NpcModel extends PlayerModel<NpcEntity> {
             this.leftSleeve.copyFrom(this.leftArm);
             this.rightSleeve.copyFrom(this.rightArm);
         }
+    }
+
+    /** Huddled, kneeling, tending, working, weeping: the people of a burnt town (see fire.aftermath.Tableau). */
+    private void aftermathPose(NpcEntity entity, float age) {
+        float breath = Mth.sin(age * 0.09F + entity.getId()) * 0.02F;
+        if (entity.isHuddled()) {
+            // knees up, arms round them, head down
+            this.rightLeg.xRot = -1.5F;
+            this.leftLeg.xRot = -1.5F;
+            this.rightLeg.yRot = 0.38F;
+            this.leftLeg.yRot = -0.38F;
+            this.body.xRot = 0.34F + breath;
+            this.head.xRot = 0.62F;
+            this.rightArm.xRot = -1.2F;
+            this.leftArm.xRot = -1.2F;
+            this.rightArm.yRot = -0.55F;
+            this.leftArm.yRot = 0.55F;
+            this.rightArm.zRot = 0.0F;
+            this.leftArm.zRot = 0.0F;
+        } else if (entity.isKneeling()) {
+            this.rightLeg.xRot = 0.1F;
+            this.leftLeg.xRot = -0.25F;
+            this.body.xRot = 0.28F + breath;
+            this.head.xRot = 0.5F;
+            this.rightArm.xRot = -0.55F;
+            this.leftArm.xRot = -0.55F;
+            this.rightArm.yRot = -0.15F;
+            this.leftArm.yRot = 0.15F;
+        } else if (entity.isTending()) {
+            this.body.xRot = 0.85F + breath;
+            this.head.xRot = 0.15F;
+            this.rightArm.xRot = -1.45F + Mth.sin(age * 0.07F) * 0.08F;
+            this.leftArm.xRot = -1.3F;
+            this.rightArm.yRot = -0.25F;
+            this.leftArm.yRot = 0.25F;
+            this.rightLeg.xRot = -0.35F;
+            this.leftLeg.xRot = 0.3F;
+        } else if (entity.isCarrying()) {
+            // arms out in front, holding the load (the walk cycle still moves the legs)
+            this.rightArm.xRot = -1.1F;
+            this.leftArm.xRot = -1.1F;
+            this.rightArm.yRot = -0.28F;
+            this.leftArm.yRot = 0.28F;
+            this.rightArm.zRot = 0.0F;
+            this.leftArm.zRot = 0.0F;
+        }
+        if (entity.isWeeping()) {
+            // hands to the face, shoulders shaking
+            float shake = Mth.sin(age * 0.75F + entity.getId()) * 0.03F;
+            this.rightArm.xRot = -2.25F + shake;
+            this.leftArm.xRot = -2.25F - shake;
+            this.rightArm.yRot = -0.45F;
+            this.leftArm.yRot = 0.45F;
+            this.rightArm.zRot = 0.1F;
+            this.leftArm.zRot = -0.1F;
+            this.head.xRot = Math.max(this.head.xRot, 0.5F);
+            this.body.xRot += shake;
+        }
+        this.hat.copyFrom(this.head);
+        this.jacket.copyFrom(this.body);
+        this.leftPants.copyFrom(this.leftLeg);
+        this.rightPants.copyFrom(this.rightLeg);
     }
 }

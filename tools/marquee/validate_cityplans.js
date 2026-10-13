@@ -39,7 +39,7 @@ const arche = fs.readFileSync(path.join(root, "mod", "src", "main", "java", "com
 const archetypes = new Set([...arche.matchAll(/^\s+([A-Z_]+)\((?:true|false),/gm)].map((m) => m[1].toLowerCase()));
 const useSrc = fs.readFileSync(path.join(root, "mod", "src", "main", "java", "com", "skycraft", "tamriel", "settlement", "grammar", "Use.java"), "utf8");
 const uses = new Set([...useSrc.matchAll(/^\s+([A-Z_]+)\(\d+, \d+, \d+, \d+,/gm)].map((m) => m[1].toLowerCase()));
-const FLAGS = new Set(["for_sale", "upper", "rich", "water", "no_beard", "fixed", "major", "palisade", "ruined", "sign", "seat", "ground"]);
+const FLAGS = new Set(["for_sale", "upper", "rich", "water", "no_beard", "fixed", "major", "palisade", "ruined", "burnt", "sign", "seat", "ground"]);
 const LINE_KINDS = new Set(["street", "wall", "bridge", "canal"]);
 
 function overlayIndex(id) {

@@ -2341,6 +2341,29 @@ def level_up():
     return master(out, -18.0, max_len=3.4)
 
 
+def helgen_aftermath():
+    """Helgen after the dragon: a town that is still burning and already burying its dead. Phrygian, slow, unresolved:
+    low strings that never settle, a double reed keening above a choir, a toll of bells, a muffled drum like a
+    heartbeat under the wind and ash. Dark, mournful, tense; no melody ever arrives home."""
+    s = Song("helgen_aftermath", 71301, 50, "phrygian", 46, 4, room=0.96, damp=0.55, wet=0.54, target=-22.5, tone=6000)
+    s.section("smoke", 1, 16, {"drone": 0.9, "wind": 0.4}, opts={"drone": dict(choir=True, bright=0.18)})
+    s.section("toll", 3, 12, {"drone": 0.55, "strings": 0.45, "bells": 0.3, "boom": 0.3, "wind": 0.25},
+              opts={"strings": dict(lo=43, hi=62, bright=0.22, attack=3.5), "bells": dict(rate=0.07, lo=57, hi=76),
+                    "boom": dict(every=4)})
+    s.section("grief", 3, 12, {"drone": 0.5, "choir": 0.5, "strings": 0.4, "lead": 0.6, "boom": 0.35},
+              opts={"choir": dict(vowel="o", lo=50, hi=65, low=True), "strings": dict(lo=45, hi=64, bright=0.25, attack=3.0),
+                    "lead": dict(instr="reed", lo=-3, hi=5, density=0.45, ornament=False), "boom": dict(every=4)})
+    s.section("ash", 3, 12, {"drone": 0.6, "pad": 0.4, "bells": 0.25, "lead": 0.5, "wind": 0.3},
+              opts={"pad": dict(lo=43, hi=58, cutoff=550), "bells": dict(rate=0.06, lo=57, hi=74),
+                    "lead": dict(instr="whistle", lo=-2, hi=4, density=0.35)})
+    s.section("pyre", 2, 12, {"drone": 0.7, "choir": 0.45, "strings": 0.35, "lead": 0.5, "boom": 0.3},
+              opts={"choir": dict(vowel="u", lo=48, hi=62, low=True), "strings": dict(lo=43, hi=60, bright=0.2, attack=3.5),
+                    "lead": dict(instr="reed", lo=-5, hi=2, density=0.4), "boom": dict(every=4)})
+    s.section("embers", 2, 12, {"drone": 0.8, "wind": 0.35, "bells": 0.18}, end=0,
+              opts={"drone": dict(choir=True, bright=0.15), "bells": dict(rate=0.05, lo=60, hi=76)})
+    return s
+
+
 TRACKS = {
     # Skyrim (the historical events music.explore / music.explore_night / music.town / music.dungeon)
     "explore_day_1": explore_day_1, "explore_day_2": explore_day_2, "explore_day_3": explore_day_3,
@@ -2366,6 +2389,8 @@ TRACKS = {
     "combat_1": combat_1, "combat_2": combat_2, "boss_dragon": boss_dragon, "boss_battle": boss_battle,
     "oblivion_1": oblivion_1, "sovngarde_1": sovngarde_1,
     "discovery": discovery, "level_up": level_up,
+    # places that were just attacked (fire/client/MusicZones)
+    "helgen_aftermath": helgen_aftermath,
 }
 
 # Encoding per track: (sample rate, Vorbis quality). Long pieces 24 kHz q1 (about 40 kb/s stereo) keep the whole

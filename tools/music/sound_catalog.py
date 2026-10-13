@@ -343,6 +343,22 @@ UI = [("menu_open", None), ("menu_close", None), ("menu_click", None), ("menu_ba
 for name, sub in UI:
     ev(f"ui.{name}", [f"ui/{name}"], "ui", sub)
 
+# =====================================================================================================  fire and aftermath
+# Registered by com.skycraft.fire.FireSounds. The aftermath piece plays inside the footprint of a place that was just
+# attacked (Helgen: fire/client/MusicZones); the ambience one-shots are positional, quiet, and played with cooldowns by
+# the fire module (fire sites, mourners), never by the random ambience engine.
+ev("music.helgen_aftermath", ["music/helgen_aftermath"], "music", stream=True)
+FIRE_ONESHOTS = [
+    ("fire_crackle", "fire_crackle", 3, "Fire crackles", 24),
+    ("fire_roar", "fire_roar", 2, "Fire roars", 40),
+    ("timber_creak", "timber_creak", 3, "Timber creaks", 28),
+    ("timber_collapse", "timber_collapse", 2, "Timber collapses", 48),
+    ("sobbing", "sobbing", 4, "Someone sobs", 14),
+    ("mourning", "mourning", 2, "Someone keens", 32),
+]
+for name, stem, count, sub, dist in FIRE_ONESHOTS:
+    ev(f"ambient.{name}", n(f"ambient/{stem}", count), "ambient", sub, distance=dist)
+
 
 # =====================================================================================================  tools
 

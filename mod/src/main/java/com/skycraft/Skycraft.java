@@ -65,6 +65,7 @@ public class Skycraft {
         com.skycraft.landmarks.LandmarksModule.init(modBus);
         com.skycraft.worldplan.street.StreetPlanModule.init(modBus);
         com.skycraft.protect.ProtectModule.init(modBus);
+        com.skycraft.fire.FireModule.init(modBus);
 
         modBus.addListener(this::registerCapabilities);
         modBus.addListener(this::commonSetup);

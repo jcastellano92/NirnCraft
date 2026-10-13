@@ -53,6 +53,11 @@ public final class Canvas {
     private final List<Anchor> anchors;
     /** Owner label of the building being painted (anchor owner). */
     public String owner = "";
+    /**
+     * Burn severity of the piece being painted (0 = none, 1 = scorched, 2 = burnt, 3 = gutted): every block written is
+     * passed through {@code fire.aftermath.Charring} (wood charred, cloth and glass gone). Copied to sub-frames.
+     */
+    public int burn;
     /** Containers declared so far by this building (shared by its frames); capped, see {@link #container}. */
     private int[] containers = new int[1];
     /** Cells (world positions) kept clear of furniture: stair landings and exits. Shared by the building's frames. */
@@ -109,6 +114,7 @@ public final class Canvas {
                 ? new Canvas(anchors, nox, noy, noz, nf, seed)
                 : new Canvas(level, new BoundingBox(x0, y0, z0, x1, y1, z1), nox, noy, noz, nf, seed);
         c.owner = owner;
+        c.burn = burn;
         c.containers = containers;
         c.reserved = reserved;
         c.deadBeds = deadBeds;
@@ -218,6 +224,7 @@ public final class Canvas {
         m.set(x, y, z);
         BlockState old = level.getBlockState(m);
         if (old.is(BlockTags.FEATURES_CANNOT_REPLACE)) return;
+        if (burn > 0 && !s.isAir()) s = com.skycraft.fire.aftermath.Charring.apply(s, x, y, z, y - oy, seed, burn);
         level.setBlock(m, s, 2);
     }
 

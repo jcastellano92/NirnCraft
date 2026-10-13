@@ -3874,5 +3874,107 @@
       "skycraft:ui/lockpick_unlock"
     ],
     "subtitle": "subtitles.skycraft.ui.lockpick_unlock"
+  },
+  "music.helgen_aftermath": {
+    "sounds": [
+      {
+        "name": "skycraft:music/helgen_aftermath",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.fire_crackle": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/fire_crackle1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "skycraft:ambient/fire_crackle2",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "skycraft:ambient/fire_crackle3",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.fire_crackle"
+  },
+  "ambient.fire_roar": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/fire_roar1",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "skycraft:ambient/fire_roar2",
+        "attenuation_distance": 40
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.fire_roar"
+  },
+  "ambient.timber_creak": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/timber_creak1",
+        "attenuation_distance": 28
+      },
+      {
+        "name": "skycraft:ambient/timber_creak2",
+        "attenuation_distance": 28
+      },
+      {
+        "name": "skycraft:ambient/timber_creak3",
+        "attenuation_distance": 28
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.timber_creak"
+  },
+  "ambient.timber_collapse": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/timber_collapse1",
+        "attenuation_distance": 48
+      },
+      {
+        "name": "skycraft:ambient/timber_collapse2",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.timber_collapse"
+  },
+  "ambient.sobbing": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/sobbing1",
+        "attenuation_distance": 14
+      },
+      {
+        "name": "skycraft:ambient/sobbing2",
+        "attenuation_distance": 14
+      },
+      {
+        "name": "skycraft:ambient/sobbing3",
+        "attenuation_distance": 14
+      },
+      {
+        "name": "skycraft:ambient/sobbing4",
+        "attenuation_distance": 14
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.sobbing"
+  },
+  "ambient.mourning": {
+    "sounds": [
+      {
+        "name": "skycraft:ambient/mourning1",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "skycraft:ambient/mourning2",
+        "attenuation_distance": 32
+      }
+    ],
+    "subtitle": "subtitles.skycraft.ambient.mourning"
   }
 }

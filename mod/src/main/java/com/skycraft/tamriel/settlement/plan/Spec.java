@@ -44,6 +44,12 @@ public final class Spec {
     public static final int OMIT = 8192;
     /** Built without its back door: the street plan found no way from it (it would open onto a wall or a terrace face). */
     public static final int NO_BACK_DOOR = 16384;
+    /**
+     * Burnt: the building's wooden blocks are charred, its windows and cloth gone, soot and ash on its floors
+     * (com.skycraft.fire.aftermath.Charring). With {@link #RUINED} it is gutted: holes in the roof and walls, rubble
+     * and fires inside (variant bit 0 = still burning, bit 1 = a collapsed quarter); without it only scorched.
+     */
+    public static final int BURNT = 32768;
 
     public Archetype kind;
     /** Culture ordinal, or -1 for the plan's culture. */

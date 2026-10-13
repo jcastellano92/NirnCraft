@@ -61,7 +61,9 @@ import java.util.Random;
  * music is muted while this is active (see {@link WorldClientEvents#onPlaySound}).
  */
 public final class MusicController {
-    public enum Kind { EXPLORE, TOWN, DUNGEON, BLACKREACH, COMBAT, BOSS, OBLIVION, SOVNGARDE }
+    public enum Kind { EXPLORE, TOWN, DUNGEON, BLACKREACH, COMBAT, BOSS, OBLIVION, SOVNGARDE,
+        /** A place with a piece of its own (Helgen's aftermath): see {@code fire.client.MusicZones}. */
+        ZONE }
 
     /** A mood: what kind of music, which event, and its family (moods of one family don't interrupt each other). */
     public record Mood(Kind kind, String event) {
@@ -219,6 +221,7 @@ public final class MusicController {
         return switch (mood.kind()) {
             case COMBAT, BOSS -> 0;
             case TOWN, OBLIVION, SOVNGARDE -> 10 + RANDOM.nextInt(20);
+            case ZONE -> 8 + RANDOM.nextInt(14);
             case DUNGEON, BLACKREACH -> 15 + RANDOM.nextInt(30);
             case EXPLORE -> {
                 int lo = AudioConfig.MIN_SILENCE.get();
@@ -242,7 +245,7 @@ public final class MusicController {
 
     private static net.minecraft.sounds.SoundEvent fallback(Mood mood) {
         return switch (mood.kind()) {
-            case TOWN -> WorldSounds.MUSIC_TOWN.get();
+            case TOWN, ZONE -> WorldSounds.MUSIC_TOWN.get();
             case DUNGEON, BLACKREACH -> WorldSounds.MUSIC_DUNGEON.get();
             case COMBAT, BOSS -> WorldSounds.MUSIC_COMBAT.get();
             case OBLIVION -> WorldSounds.MUSIC_OBLIVION.get();
@@ -300,6 +303,9 @@ public final class MusicController {
         if (fight) return new Mood(Kind.COMBAT, "music.combat");
         BlockPos pos = player.blockPosition();
         Region region = region(level, pos);
+        // a place that has a piece of its own (the ruined town of Helgen) plays it instead of the town or road music
+        String zone = com.skycraft.fire.client.MusicZones.eventAt(level, pos);
+        if (zone != null) return new Mood(Kind.ZONE, zone);
         if (AmbienceEngine.inGlowCave() && pos.getY() < level.getSeaLevel() - 20) return new Mood(Kind.BLACKREACH, "music.blackreach");
         String dungeon = dungeon(mc, pos, region);
         if (dungeon != null) return new Mood(Kind.DUNGEON, dungeon);

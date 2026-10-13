@@ -2,67 +2,853 @@
   "id": "helgen",
   "base": "none",
   "sil": "burnt-keep-rebuilt-wall",
-  "names": {"inn": "helgen_charred_tankard", "store": "helgen_salvage_goods", "smithy": "helgen_masons_forge"},
+  "names": {
+    "inn": "helgen_charred_tankard",
+    "store": "helgen_salvage_goods",
+    "smithy": "helgen_masons_forge"
+  },
   "innKey": "helgen_charred_tankard",
-  "gates": [[0, 56], [0, -56]],
+  "gates": [
+    [
+      0,
+      56
+    ],
+    [
+      0,
+      -56
+    ]
+  ],
   "walls": [
-    {"r": 56, "sides": 12, "h": 8, "gates": [0, 3.14159], "flags": ["major"], "towers": true}
+    {
+      "r": 56,
+      "sides": 12,
+      "h": 8,
+      "gates": [
+        0,
+        3.14159
+      ],
+      "flags": [
+        "major"
+      ],
+      "towers": true
+    }
   ],
   "buildings": [
-    {"kind": "palace", "at": [22, -22], "size": [21, 25], "face": "W", "h": 26, "culture": "imperial", "flags": ["ruined", "seat"], "name": "helgen_burnt_keep"},
-    {"kind": "tower", "at": [-26, -26], "size": [7, 7], "face": "E", "h": 22, "culture": "imperial", "flags": ["ruined"]},
-    {"kind": "barracks", "at": [30, 30], "size": [9, 15], "face": "W", "culture": "imperial", "name": "helgen_legion_barracks"},
-    {"kind": "shrine", "at": [-10, -36], "size": [5, 5], "face": "S", "variant": 1},
-    {"kind": "house", "at": [-14, -10], "size": [7, 9], "face": "S", "flags": ["ruined"]},
-    {"kind": "house", "at": [-30, -8], "size": [7, 9], "face": "E", "flags": ["ruined"]},
-    {"kind": "house", "at": [-44, -12], "size": [7, 9], "face": "E", "flags": ["ruined"]},
-    {"kind": "house", "at": [-42, -30], "size": [7, 9], "face": "S", "flags": ["ruined"]},
-    {"kind": "house", "at": [-12, -30], "size": [7, 9], "face": "W", "flags": ["ruined"]},
-    {"kind": "house", "at": [-26, -44], "size": [7, 9], "face": "S", "flags": ["ruined"]},
-    {"kind": "house", "at": [4, -44], "size": [7, 9], "face": "S", "flags": ["ruined"]},
-    {"kind": "house", "at": [40, -42], "size": [7, 9], "face": "W", "flags": ["ruined"]},
-    {"kind": "house", "at": [44, -8], "size": [7, 9], "face": "W", "flags": ["ruined"]},
-    {"kind": "house", "at": [8, -10], "size": [7, 9], "face": "S", "flags": ["ruined"]},
-    {"kind": "tent", "at": [-38, 30], "size": [5, 7], "face": "E"},
-    {"kind": "tent", "at": [-38, 40], "size": [5, 7], "face": "E"},
-    {"kind": "tent", "at": [-24, 30], "size": [5, 7], "face": "W"},
-    {"kind": "tent", "at": [-24, 40], "size": [5, 7], "face": "W"},
-    {"kind": "camp", "at": [-31, 35], "size": [13, 13], "variant": 9},
-    {"kind": "tent", "at": [40, 2], "size": [5, 7], "face": "W"},
-    {"kind": "tent", "at": [40, 12], "size": [5, 7], "face": "W"},
-    {"kind": "camp", "at": [48, 7], "size": [13, 13], "variant": 9},
-    {"kind": "yard", "at": [-9, 62], "size": [5, 5], "variant": 0, "face": "S"},
-    {"kind": "yard", "at": [9, 66], "size": [5, 5], "variant": 0, "face": "S"},
-    {"kind": "yard", "at": [-12, 72], "size": [5, 5], "variant": 2, "face": "S"},
-    {"kind": "yard", "at": [11, 74], "size": [5, 5], "variant": 3, "face": "S"}
+    {
+      "kind": "palace",
+      "at": [
+        22,
+        -22
+      ],
+      "size": [
+        21,
+        25
+      ],
+      "face": "W",
+      "h": 26,
+      "culture": "imperial",
+      "flags": [
+        "ruined",
+        "burnt",
+        "seat"
+      ],
+      "variant": 3,
+      "name": "helgen_burnt_keep"
+    },
+    {
+      "kind": "tower",
+      "at": [
+        -26,
+        -26
+      ],
+      "size": [
+        7,
+        7
+      ],
+      "face": "E",
+      "h": 22,
+      "culture": "imperial",
+      "flags": [
+        "ruined",
+        "burnt"
+      ],
+      "variant": 0
+    },
+    {
+      "kind": "barracks",
+      "at": [
+        30,
+        30
+      ],
+      "size": [
+        9,
+        15
+      ],
+      "face": "W",
+      "culture": "imperial",
+      "flags": [
+        "burnt"
+      ],
+      "name": "helgen_legion_barracks"
+    },
+    {
+      "kind": "shrine",
+      "at": [
+        -10,
+        -36
+      ],
+      "size": [
+        5,
+        5
+      ],
+      "face": "S",
+      "variant": 1
+    },
+    {
+      "kind": "house",
+      "at": [
+        -14,
+        -10
+      ],
+      "size": [
+        7,
+        9
+      ],
+      "face": "S",
+      "flags": [
+        "ruined",
+        "burnt"
+      ],
+      "variant": 0
+    },
+    {
+      "kind": "house",
+      "at": [
+        -30,
+        -8
+      ],
+      "size": [
+        7,
+        9
+      ],
+      "face": "E",
+      "flags": [
+        "ruined",
+        "burnt"
+      ],
+      "variant": 2
+    },
+    {
+      "kind": "house",
+      "at": [
+        -44,
+        -12
+      ],
+      "size": [
+        7,
+        9
+      ],
+      "face": "E",
+      "flags": [
+        "ruined",
+        "burnt"
+      ],
+      "variant": 3
+    },
+    {
+      "kind": "house",
+      "at": [
+        -42,
+        -30
+      ],
+      "size": [
+        7,
+        9
+      ],
+      "face": "S",
+      "flags": [
+        "ruined",
+        "burnt"
+      ],
+      "variant": 2
+    },
+    {
+      "kind": "house",
+      "at": [
+        -12,
+        -30
+      ],
+      "size": [
+        7,
+        9
+      ],
+      "face": "W",
+      "flags": [
+        "ruined",
+        "burnt"
+      ],
+      "variant": 1
+    },
+    {
+      "kind": "house",
+      "at": [
+        -26,
+        -44
+      ],
+      "size": [
+        7,
+        9
+      ],
+      "face": "S",
+      "flags": [
+        "ruined",
+        "burnt"
+      ],
+      "variant": 2
+    },
+    {
+      "kind": "house",
+      "at": [
+        4,
+        -44
+      ],
+      "size": [
+        7,
+        9
+      ],
+      "face": "S",
+      "flags": [
+        "ruined",
+        "burnt"
+      ],
+      "variant": 3
+    },
+    {
+      "kind": "house",
+      "at": [
+        40,
+        -42
+      ],
+      "size": [
+        7,
+        9
+      ],
+      "face": "W",
+      "flags": [
+        "ruined",
+        "burnt"
+      ],
+      "variant": 0
+    },
+    {
+      "kind": "house",
+      "at": [
+        44,
+        -8
+      ],
+      "size": [
+        7,
+        9
+      ],
+      "face": "W",
+      "flags": [
+        "ruined",
+        "burnt"
+      ],
+      "variant": 1
+    },
+    {
+      "kind": "house",
+      "at": [
+        8,
+        -10
+      ],
+      "size": [
+        7,
+        9
+      ],
+      "face": "S",
+      "flags": [
+        "ruined",
+        "burnt"
+      ],
+      "variant": 1
+    },
+    {
+      "kind": "tent",
+      "at": [
+        -38,
+        30
+      ],
+      "size": [
+        5,
+        7
+      ],
+      "face": "E"
+    },
+    {
+      "kind": "tent",
+      "at": [
+        -38,
+        40
+      ],
+      "size": [
+        5,
+        7
+      ],
+      "face": "E"
+    },
+    {
+      "kind": "tent",
+      "at": [
+        -24,
+        30
+      ],
+      "size": [
+        5,
+        7
+      ],
+      "face": "W"
+    },
+    {
+      "kind": "tent",
+      "at": [
+        -24,
+        40
+      ],
+      "size": [
+        5,
+        7
+      ],
+      "face": "W"
+    },
+    {
+      "kind": "camp",
+      "at": [
+        -31,
+        35
+      ],
+      "size": [
+        13,
+        13
+      ],
+      "face": "S",
+      "variant": 9
+    },
+    {
+      "kind": "tent",
+      "at": [
+        40,
+        2
+      ],
+      "size": [
+        5,
+        7
+      ],
+      "face": "W"
+    },
+    {
+      "kind": "tent",
+      "at": [
+        40,
+        12
+      ],
+      "size": [
+        5,
+        7
+      ],
+      "face": "W"
+    },
+    {
+      "kind": "camp",
+      "at": [
+        48,
+        7
+      ],
+      "size": [
+        13,
+        13
+      ],
+      "face": "S",
+      "variant": 9
+    },
+    {
+      "kind": "yard",
+      "at": [
+        -9,
+        62
+      ],
+      "size": [
+        5,
+        5
+      ],
+      "face": "S",
+      "variant": 0,
+      "flags": [
+        "burnt"
+      ]
+    },
+    {
+      "kind": "yard",
+      "at": [
+        9,
+        66
+      ],
+      "size": [
+        5,
+        5
+      ],
+      "face": "S",
+      "variant": 0
+    },
+    {
+      "kind": "yard",
+      "at": [
+        -12,
+        72
+      ],
+      "size": [
+        5,
+        5
+      ],
+      "face": "S",
+      "variant": 2
+    },
+    {
+      "kind": "yard",
+      "at": [
+        11,
+        74
+      ],
+      "size": [
+        5,
+        5
+      ],
+      "face": "S",
+      "variant": 3,
+      "flags": [
+        "burnt"
+      ]
+    },
+    {
+      "kind": "reserved",
+      "at": [
+        -26,
+        6
+      ],
+      "size": [
+        15,
+        11
+      ],
+      "face": "S",
+      "name": "helgen_triage",
+      "variant": 0
+    },
+    {
+      "kind": "reserved",
+      "at": [
+        18,
+        4
+      ],
+      "size": [
+        9,
+        15
+      ],
+      "face": "S",
+      "name": "helgen_funeral_row",
+      "variant": 0
+    },
+    {
+      "kind": "reserved",
+      "at": [
+        30,
+        4
+      ],
+      "size": [
+        9,
+        9
+      ],
+      "face": "S",
+      "name": "helgen_pyre",
+      "variant": 0
+    },
+    {
+      "kind": "reserved",
+      "at": [
+        5,
+        4
+      ],
+      "size": [
+        3,
+        15
+      ],
+      "face": "S",
+      "name": "helgen_bucket_line",
+      "variant": 0
+    },
+    {
+      "kind": "reserved",
+      "at": [
+        12,
+        47
+      ],
+      "size": [
+        17,
+        7
+      ],
+      "face": "S",
+      "name": "helgen_gate_post",
+      "variant": 0
+    },
+    {
+      "kind": "reserved",
+      "at": [
+        14,
+        38
+      ],
+      "size": [
+        9,
+        7
+      ],
+      "face": "S",
+      "name": "helgen_cart_stall",
+      "variant": 0
+    },
+    {
+      "kind": "reserved",
+      "at": [
+        -8,
+        -20
+      ],
+      "size": [
+        11,
+        9
+      ],
+      "face": "S",
+      "name": "helgen_wreckage",
+      "variant": 0
+    },
+    {
+      "kind": "reserved",
+      "at": [
+        -35,
+        -19
+      ],
+      "size": [
+        7,
+        9
+      ],
+      "face": "S",
+      "name": "helgen_wreckage",
+      "variant": 1
+    },
+    {
+      "kind": "reserved",
+      "at": [
+        22,
+        -46
+      ],
+      "size": [
+        11,
+        9
+      ],
+      "face": "S",
+      "name": "helgen_wreckage",
+      "variant": 2
+    },
+    {
+      "kind": "reserved",
+      "at": [
+        -14,
+        -46
+      ],
+      "size": [
+        9,
+        9
+      ],
+      "face": "S",
+      "name": "helgen_crater",
+      "variant": 0
+    },
+    {
+      "kind": "reserved",
+      "at": [
+        46,
+        -24
+      ],
+      "size": [
+        9,
+        9
+      ],
+      "face": "S",
+      "name": "helgen_crater",
+      "variant": 0
+    },
+    {
+      "kind": "reserved",
+      "at": [
+        -45,
+        3
+      ],
+      "size": [
+        9,
+        9
+      ],
+      "face": "S",
+      "name": "helgen_crater",
+      "variant": 0
+    },
+    {
+      "kind": "reserved",
+      "at": [
+        -10,
+        49
+      ],
+      "size": [
+        7,
+        7
+      ],
+      "face": "S",
+      "name": "helgen_belongings",
+      "variant": 0
+    },
+    {
+      "kind": "reserved",
+      "at": [
+        10,
+        24
+      ],
+      "size": [
+        7,
+        7
+      ],
+      "face": "S",
+      "name": "helgen_belongings",
+      "variant": 0
+    },
+    {
+      "kind": "reserved",
+      "at": [
+        -12,
+        24
+      ],
+      "size": [
+        7,
+        7
+      ],
+      "face": "S",
+      "name": "helgen_huddle",
+      "variant": 1
+    },
+    {
+      "kind": "reserved",
+      "at": [
+        42,
+        24
+      ],
+      "size": [
+        7,
+        7
+      ],
+      "face": "S",
+      "name": "helgen_huddle",
+      "variant": 0
+    }
   ],
   "plazas": [
-    {"at": [-12, 0], "size": 9, "variant": 3, "name": "helgen_headsmans_square"}
+    {
+      "at": [
+        -12,
+        0
+      ],
+      "size": 9,
+      "variant": 3,
+      "name": "helgen_headsmans_square"
+    }
   ],
   "nets": [
-    {"type": "path", "via": [[0, 56], [0, 40], [0, 20], [0, 6]], "width": 3, "major": true, "tag": "main"},
-    {"type": "path", "via": [[-44, 16], [-20, 18], [0, 16], [22, 16], [44, 14]], "width": 3, "rank": 1, "tag": "row"},
-    {"type": "path", "via": [[0, 6], [0, -20], [0, -40], [0, -56]], "width": 3, "major": true, "tag": "bare_north"}
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          56
+        ],
+        [
+          0,
+          40
+        ],
+        [
+          0,
+          20
+        ],
+        [
+          0,
+          6
+        ]
+      ],
+      "width": 3,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -44,
+          16
+        ],
+        [
+          -20,
+          18
+        ],
+        [
+          0,
+          16
+        ],
+        [
+          22,
+          16
+        ],
+        [
+          44,
+          14
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "row"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          -20
+        ],
+        [
+          0,
+          -40
+        ],
+        [
+          0,
+          -56
+        ]
+      ],
+      "width": 3,
+      "major": true,
+      "tag": "bare_north"
+    }
   ],
   "zones": [
-    {"at": [0, 30], "r": 22, "zone": "centre"},
-    {"at": [-24, 40], "r": 24, "zone": "poor"},
-    {"at": [30, 34], "r": 20, "zone": "common"}
+    {
+      "at": [
+        0,
+        30
+      ],
+      "r": 22,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        -24,
+        40
+      ],
+      "r": 24,
+      "zone": "poor"
+    },
+    {
+      "at": [
+        30,
+        34
+      ],
+      "r": 20,
+      "zone": "common"
+    }
   ],
-  "fabric": {"radius": 52, "target": 0.16, "fill_cap": 0, "yard_cap": 4},
+  "fabric": {
+    "radius": 52,
+    "target": 0.16,
+    "fill_cap": 0,
+    "yard_cap": 4
+  },
   "queue": [
-    {"kind": "inn", "size": [11, 13], "name": "helgen_charred_tankard", "on": "main"},
-    {"kind": "store", "size": [7, 9], "name": "helgen_salvage_goods", "on": "main"},
-    {"kind": "smithy", "size": [9, 9], "name": "helgen_masons_forge", "on": "row"},
-    {"kind": "house", "name": "helgen_widow_sigruns_house", "on": "main"}
+    {
+      "kind": "inn",
+      "size": [
+        11,
+        13
+      ],
+      "name": "helgen_charred_tankard",
+      "on": "main",
+      "flags": [
+        "burnt"
+      ]
+    },
+    {
+      "kind": "store",
+      "size": [
+        7,
+        9
+      ],
+      "name": "helgen_salvage_goods",
+      "on": "main",
+      "flags": [
+        "burnt"
+      ]
+    },
+    {
+      "kind": "smithy",
+      "size": [
+        9,
+        9
+      ],
+      "name": "helgen_masons_forge",
+      "on": "row"
+    },
+    {
+      "kind": "house",
+      "name": "helgen_widow_sigruns_house",
+      "on": "main",
+      "flags": [
+        "burnt"
+      ]
+    }
   ],
   "features": [
-    {"type": "memorial", "at": [-4, -4]},
-    {"type": "memorial", "where": "free"},
-    {"type": "well", "where": "free"},
-    {"type": "lamps", "count": 2, "where": "street", "tag": "main"},
-    {"type": "bench", "where": "square"},
-    {"type": "gatehouse", "where": "gate"}
+    {
+      "type": "memorial",
+      "at": [
+        -4,
+        -4
+      ]
+    },
+    {
+      "type": "memorial",
+      "where": "free"
+    },
+    {
+      "type": "well",
+      "where": "free"
+    },
+    {
+      "type": "lamps",
+      "count": 2,
+      "where": "street",
+      "tag": "main"
+    },
+    {
+      "type": "bench",
+      "where": "square"
+    },
+    {
+      "type": "gatehouse",
+      "where": "gate"
+    }
   ],
   "titles": {
     "helgen_burnt_keep": "Helgen Keep",
@@ -71,6 +857,16 @@
     "helgen_charred_tankard": "The Charred Tankard",
     "helgen_salvage_goods": "Salvage Goods",
     "helgen_masons_forge": "Mason's Forge",
-    "helgen_widow_sigruns_house": "Widow Sigrun's House"
+    "helgen_widow_sigruns_house": "Widow Sigrun's House",
+    "helgen_triage": "Survivors' Aid Camp",
+    "helgen_funeral_row": "The Covered Dead",
+    "helgen_pyre": "Funeral Pyre",
+    "helgen_bucket_line": "Bucket Line",
+    "helgen_gate_post": "Legion Gate Post",
+    "helgen_cart_stall": "Salvage Cart",
+    "helgen_wreckage": "Wreckage",
+    "helgen_crater": "Crater",
+    "helgen_belongings": "Scattered Belongings",
+    "helgen_huddle": "Huddled Survivors"
   }
 }

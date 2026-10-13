@@ -65,6 +65,10 @@ public class NpcRenderer extends HumanoidMobRenderer<NpcEntity, NpcModel> {
         // race height (core.Race.scale), sub-people and sex
         if (look >= 0 && !entity.isChild()) s *= NpcLook.bodyScale(look);
         if (s != 1.0f) poseStack.scale(s, s, s);
+        // aftermath poses sit lower: on the ground, on the knees, bent over a patient
+        if (entity.isHuddled()) poseStack.translate(0.0f, 0.62f, 0.0f);
+        else if (entity.isKneeling()) poseStack.translate(0.0f, 0.34f, 0.0f);
+        else if (entity.isTending()) poseStack.translate(0.0f, 0.12f, 0.0f);
         this.shadowRadius = 0.5f * entity.getScale();
     }
 }

@@ -81,6 +81,9 @@ public class CorpseEntity extends Entity {
     private int wornMask;
     /** Somebody has opened the body. */
     private boolean looted;
+    /** Scene bodies (a battlefield, a burnt town): never despawn, stay where they lie, and may be unlootable. */
+    private boolean persistent;
+    private boolean locked;
     private int age;
     private int emptyTicks;
     private float bodyWidth = 0.6f;
@@ -134,6 +137,24 @@ public class CorpseEntity extends Entity {
         this.entityData.set(BODY_HEIGHT, dead.getBbHeight());
         this.bodyWidth = dead.getBbWidth();
         this.setCustomName(dead.getName().copy());
+    }
+
+    /** A scene body: it never despawns, cannot be dragged or knocked about, and is not part of any loot rule. */
+    public void setPersistent(boolean persistent) {
+        this.persistent = persistent;
+    }
+
+    public boolean isPersistent() {
+        return persistent;
+    }
+
+    /** Nothing to take: opening the body only says so (cloth, ash and nothing else). */
+    public void setLocked(boolean locked) {
+        this.locked = locked;
+    }
+
+    public boolean isLocked() {
+        return locked;
     }
 
     /** Ticks during which the body stays invisible (the vanilla death animation is still playing). */
@@ -406,7 +427,7 @@ public class CorpseEntity extends Entity {
         return this.entityData.get(ROLL);
     }
 
-    private void setRoll(float roll) {
+    public void setRoll(float roll) {
         this.entityData.set(ROLL, Mth.clamp(roll, -45.0f, 45.0f));
     }
 
@@ -437,7 +458,7 @@ public class CorpseEntity extends Entity {
         age++;
         if (looted && loot.isEmpty()) emptyTicks++;
         else emptyTicks = 0;
-        if (inUse()) return;
+        if (inUse() || persistent) return;
         if (emptyTicks > CreaturesConfig.EMPTY_CORPSE_DESPAWN_SECONDS.get() * 20
                 || age > CreaturesConfig.CORPSE_DESPAWN_SECONDS.get() * 20) {
             this.discard();
@@ -512,6 +533,7 @@ public class CorpseEntity extends Entity {
     }
 
     private void startDragging(Player player) {
+        if (persistent) return;
         for (CorpseEntity other : this.level().getEntitiesOfClass(CorpseEntity.class, player.getBoundingBox().inflate(16),
                 c -> c != this && c.entityData.get(DRAGGER) == player.getId())) {
             other.stopDragging();
@@ -559,6 +581,12 @@ public class CorpseEntity extends Entity {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
         if (player.isShiftKeyDown() && this.entityData.get(DRAGGER) == player.getId()) {
             if (!this.level().isClientSide) stopDragging();
+            return InteractionResult.sidedSuccess(this.level().isClientSide);
+        }
+        if (locked) {
+            if (!this.level().isClientSide) {
+                player.displayClientMessage(Component.translatable("fire.skycraft.body.nothing"), true);
+            }
             return InteractionResult.sidedSuccess(this.level().isClientSide);
         }
         if (!this.level().isClientSide) {
@@ -634,6 +662,7 @@ public class CorpseEntity extends Entity {
     }
 
     private void knock(Vec3 from, double strength) {
+        if (persistent) return;
         Vec3 dir = new Vec3(this.getX() - from.x, 0, this.getZ() - from.z);
         dir = dir.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0, this.random.nextFloat() * 360f) : dir.normalize();
         double weight = Math.max(0.5, Math.sqrt(bodyWidth * bodyWidth * getBodyHeight()));
@@ -748,6 +777,8 @@ public class CorpseEntity extends Entity {
         tag.putFloat("Roll", getRoll());
         tag.putInt("Age", age);
         tag.putInt("EmptyTicks", emptyTicks);
+        if (persistent) tag.putBoolean("Persistent", true);
+        if (locked) tag.putBoolean("Locked", true);
     }
 
     @Override
@@ -766,6 +797,8 @@ public class CorpseEntity extends Entity {
         setRoll(tag.getFloat("Roll"));
         age = tag.getInt("Age");
         emptyTicks = tag.getInt("EmptyTicks");
+        persistent = tag.getBoolean("Persistent");
+        locked = tag.getBoolean("Locked");
     }
 
     @Override

@@ -103,7 +103,12 @@ public enum AnchorType {
     /** An inn room's door (lower half): locked unless the player has rented a room there. */
     INN_DOOR,
     /** A public bed (an inn's dormitory): anyone may sleep in it. */
-    GUEST_BED;
+    GUEST_BED,
+    // ---- aftermath scenes (com.skycraft.fire.aftermath; appended: ordinals are saved)
+    /** A person or body of an aftermath scene; the owner label is {@code pose|role|option} (see fire.aftermath.Tableau). */
+    TABLEAU,
+    /** A fire seen from afar; the owner label is {@code intensity|height|smoke[|flags]} (see fire.FireAnchors). */
+    FIRE_SITE;
 
     public static final AnchorType[] VALUES = values();
 

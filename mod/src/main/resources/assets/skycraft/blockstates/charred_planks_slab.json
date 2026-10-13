@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "skycraft:block/charred_planks_slab"
+    },
+    "type=double": {
+      "model": "skycraft:block/charred_planks"
+    },
+    "type=top": {
+      "model": "skycraft:block/charred_planks_slab_top"
+    }
+  }
+}

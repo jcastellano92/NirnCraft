@@ -260,3 +260,12 @@ mage_tower, fishery...) and `"wealth"`; `fabric.fill_cap` / `fabric.yard_cap` bo
 authored streets (0 = none); a net tagged `bare*` is a road with no frontage (ruins, tracks); the dev command
 `/skysettle terrain <id>` writes the planner's terrain model (height and wet flag every 3 blocks, local frame) to
 `skycraft-previews/terrain_<id>.json` so a plan can be authored against real ground.
+
+## Helgen aftermath (fire module)
+
+Helgen is no longer a quiet ruin with camps: `cityplans/helgen.json` is the town an hour after the dragon (see
+`docs/FEATURES.md`, "Fire and aftermath"). The ten houses, the keep and the tower are `ruined` + `burnt` (variant bit 0
+= still burning, bit 1 = a quarter fallen in), the barracks, inn, store and widow's house are scorched only (the town
+still functions: smith at the forge, a merchant at a salvage cart, soldiers at the gate), and sixteen painter pieces
+(`AftermathPainters`) add the aid camp, covered dead, pyre, rubble fields, bucket chain, gate post, cart stall,
+craters, belongings and huddled families. The survivors' camps keep their bedrolls and residents (housing model).

@@ -52,6 +52,13 @@ The `MusicController` checks the situation once a second and plays a `skycraft:m
 * **Bosses:** dragons that are attacking, or close by, play the dragon battle theme (`music.boss`). Other bosses
   shown by the boss bar, such as dragon priests, deathlords and giants, play `music.boss.battle`.
 * **Oblivion** (the Nether) and **Sovngarde** (the End) have their own music.
+* **Place zones:** the footprint of a place that was just attacked has a piece of its own, chosen before the town and
+  exploration music and crossfaded like any change of mood (`fire/client/MusicZones`, data
+  `assets/skycraft/fire/music_zones.json`: place id, margin, event). Helgen plays `music.helgen_aftermath`
+  (`helgen_aftermath` in `compose.py`: Phrygian, 46 bpm, low strings that never resolve, a double reed over a low
+  choir, a toll of bells, a muffled heartbeat; config `skycraft-fire-client.toml` `ambience.aftermathMusic`). Its
+  ambience (`ambient.fire_crackle`, `fire_roar`, `timber_creak`, `timber_collapse`, `sobbing`, `mourning`) is played
+  by the fire module, positional and quiet, with per-site and per-person cooldowns.
 * **Stings:**
   * The discovery sting plays on "DISCOVERED".
   * The level-up fanfare is played by the atmosphere module.

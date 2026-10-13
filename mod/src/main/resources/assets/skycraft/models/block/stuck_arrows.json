@@ -1,0 +1,266 @@
+{
+  "textures": {
+    "particle": "skycraft:block/stuck_arrows",
+    "a": "skycraft:block/stuck_arrows"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        5
+      ],
+      "to": [
+        5,
+        11,
+        5
+      ],
+      "shade": false,
+      "rotation": {
+        "origin": [
+          4,
+          0,
+          5
+        ],
+        "axis": "x",
+        "angle": 18,
+        "rescale": false
+      },
+      "faces": {
+        "north": {
+          "uv": [
+            3,
+            0,
+            5,
+            16
+          ],
+          "texture": "#a"
+        },
+        "south": {
+          "uv": [
+            3,
+            0,
+            5,
+            16
+          ],
+          "texture": "#a"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        0,
+        4
+      ],
+      "to": [
+        4,
+        11,
+        6
+      ],
+      "shade": false,
+      "rotation": {
+        "origin": [
+          4,
+          0,
+          5
+        ],
+        "axis": "x",
+        "angle": 18,
+        "rescale": false
+      },
+      "faces": {
+        "east": {
+          "uv": [
+            3,
+            0,
+            5,
+            16
+          ],
+          "texture": "#a"
+        },
+        "west": {
+          "uv": [
+            3,
+            0,
+            5,
+            16
+          ],
+          "texture": "#a"
+        }
+      }
+    },
+    {
+      "from": [
+        9,
+        0,
+        9
+      ],
+      "to": [
+        11,
+        11,
+        9
+      ],
+      "shade": false,
+      "rotation": {
+        "origin": [
+          10,
+          0,
+          9
+        ],
+        "axis": "z",
+        "angle": -22,
+        "rescale": false
+      },
+      "faces": {
+        "north": {
+          "uv": [
+            9,
+            0,
+            11,
+            16
+          ],
+          "texture": "#a"
+        },
+        "south": {
+          "uv": [
+            9,
+            0,
+            11,
+            16
+          ],
+          "texture": "#a"
+        }
+      }
+    },
+    {
+      "from": [
+        10,
+        0,
+        8
+      ],
+      "to": [
+        10,
+        11,
+        10
+      ],
+      "shade": false,
+      "rotation": {
+        "origin": [
+          10,
+          0,
+          9
+        ],
+        "axis": "z",
+        "angle": -22,
+        "rescale": false
+      },
+      "faces": {
+        "east": {
+          "uv": [
+            9,
+            0,
+            11,
+            16
+          ],
+          "texture": "#a"
+        },
+        "west": {
+          "uv": [
+            9,
+            0,
+            11,
+            16
+          ],
+          "texture": "#a"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        0,
+        12
+      ],
+      "to": [
+        8,
+        11,
+        12
+      ],
+      "shade": false,
+      "rotation": {
+        "origin": [
+          7,
+          0,
+          12
+        ],
+        "axis": "x",
+        "angle": -12,
+        "rescale": false
+      },
+      "faces": {
+        "north": {
+          "uv": [
+            6,
+            0,
+            8,
+            16
+          ],
+          "texture": "#a"
+        },
+        "south": {
+          "uv": [
+            6,
+            0,
+            8,
+            16
+          ],
+          "texture": "#a"
+        }
+      }
+    },
+    {
+      "from": [
+        7,
+        0,
+        11
+      ],
+      "to": [
+        7,
+        11,
+        13
+      ],
+      "shade": false,
+      "rotation": {
+        "origin": [
+          7,
+          0,
+          12
+        ],
+        "axis": "x",
+        "angle": -12,
+        "rescale": false
+      },
+      "faces": {
+        "east": {
+          "uv": [
+            6,
+            0,
+            8,
+            16
+          ],
+          "texture": "#a"
+        },
+        "west": {
+          "uv": [
+            6,
+            0,
+            8,
+            16
+          ],
+          "texture": "#a"
+        }
+      }
+    }
+  ]
+}

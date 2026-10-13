@@ -67,6 +67,19 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     public static final int FLAG_PRISONER = 1;
     public static final int FLAG_CASTING = 2;
     public static final int FLAG_PLAYING = 4;
+    // aftermath poses (com.skycraft.fire.aftermath): synced so the client model can pose the body; saved with the NPC
+    /** Kneeling (hips low, legs folded back). */
+    public static final int FLAG_KNEEL = 8;
+    /** Sitting huddled on the ground, knees up, head down. */
+    public static final int FLAG_HUDDLE = 16;
+    /** Bent over somebody (a healer at a bedside, a mourner). */
+    public static final int FLAG_TEND = 32;
+    /** Arms out in front, carrying or working (a shovel, a bucket, a plank). */
+    public static final int FLAG_CARRY = 64;
+    /** Crying: hands at the face, tears. */
+    public static final int FLAG_WEEP = 128;
+    /** The flags that are saved with the NPC. */
+    private static final int SAVED_FLAGS = FLAG_PRISONER | FLAG_KNEEL | FLAG_HUDDLE | FLAG_TEND | FLAG_CARRY | FLAG_WEEP;
 
     public enum Style { NONE, MELEE, BOW, CASTER }
 
@@ -156,12 +169,57 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         if (ROLE.equals(key)) {
             roleCache = null;
             this.refreshDimensions();
+        } else if (FLAGS.equals(key)) {
+            this.refreshDimensions();
         }
+    }
+
+    /** Kneeling and huddled people are shorter: their hitbox follows the pose. */
+    @Override
+    public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
+        net.minecraft.world.entity.EntityDimensions d = super.getDimensions(pose);
+        if (this.entityData == null) return d;
+        int f = this.entityData.get(FLAGS);
+        if ((f & FLAG_HUDDLE) != 0) return net.minecraft.world.entity.EntityDimensions.scalable(d.width, d.height * 0.52f);
+        if ((f & FLAG_KNEEL) != 0) return net.minecraft.world.entity.EntityDimensions.scalable(d.width, d.height * 0.68f);
+        return d;
+    }
+
+    public boolean isKneeling() {
+        return flag(FLAG_KNEEL);
+    }
+
+    public boolean isHuddled() {
+        return flag(FLAG_HUDDLE);
+    }
+
+    public boolean isTending() {
+        return flag(FLAG_TEND);
+    }
+
+    public boolean isCarrying() {
+        return flag(FLAG_CARRY);
+    }
+
+    public boolean isWeeping() {
+        return flag(FLAG_WEEP);
+    }
+
+    /** Sets or clears one of the aftermath pose flags ({@link #FLAG_KNEEL} ... {@link #FLAG_WEEP}). */
+    public void setPoseFlag(int poseFlag, boolean on) {
+        setFlag(poseFlag, on);
+    }
+
+    /** Replaces all aftermath pose flags at once (the prisoner / playing flags are kept). */
+    public void setPoseFlags(int flags) {
+        int keep = this.entityData.get(FLAGS) & ~(FLAG_KNEEL | FLAG_HUDDLE | FLAG_TEND | FLAG_CARRY | FLAG_WEEP);
+        this.entityData.set(FLAGS, (byte) (keep | (flags & (FLAG_KNEEL | FLAG_HUDDLE | FLAG_TEND | FLAG_CARRY | FLAG_WEEP))));
     }
 
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
+        this.goalSelector.addGoal(3, new com.skycraft.fire.aftermath.TableauGoal(this));
         this.goalSelector.addGoal(1, new NpcGoals.Follower(this));
         this.goalSelector.addGoal(1, new NpcGoals.Panic(this));
         this.goalSelector.addGoal(2, new NpcGoals.Avoid(this));
@@ -738,7 +796,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         super.addAdditionalSaveData(tag);
         tag.putString("Role", role().id);
         tag.putInt("Skin", getSkin());
-        tag.putByte("NpcFlags", (byte) (this.entityData.get(FLAGS) & FLAG_PRISONER));
+        tag.putByte("NpcFlags", (byte) (this.entityData.get(FLAGS) & SAVED_FLAGS));
         tag.putBoolean("SkycraftInit", initialized);
         if (huntTarget != null) tag.putUUID("Hunt", huntTarget);
         if (seekTarget != null) tag.putUUID("Seek", seekTarget);
@@ -763,7 +821,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         NpcRole r = NpcRole.byId(tag.getString("Role"));
         if (r != null) setRole(r);
         setSkin(tag.getInt("Skin"));
-        this.entityData.set(FLAGS, (byte) (tag.getByte("NpcFlags") & FLAG_PRISONER));
+        this.entityData.set(FLAGS, (byte) (tag.getByte("NpcFlags") & SAVED_FLAGS));
         initialized = tag.getBoolean("SkycraftInit");
         huntTarget = tag.hasUUID("Hunt") ? tag.getUUID("Hunt") : null;
         seekTarget = tag.hasUUID("Seek") ? tag.getUUID("Seek") : null;

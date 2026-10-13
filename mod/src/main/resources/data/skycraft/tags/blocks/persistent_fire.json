@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:big_fire",
+    "skycraft:flame_column",
+    "skycraft:flame_tip",
+    "skycraft:rubble_fire",
+    "skycraft:smouldering_embers"
+  ]
+}

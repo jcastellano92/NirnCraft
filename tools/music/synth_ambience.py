@@ -1961,7 +1961,126 @@ def sh_cicada(rng, v, sr):
     return x * am * e
 
 
+# ---------------------------------------------------------------------------- fire and aftermath (com.skycraft.fire)
+
+def sh_fire_crackle(rng, v, sr):
+    """A burning house heard from a few blocks: a soft low rush with sparse wood pops."""
+    D = [1.6, 2.0, 1.4][v - 1]
+    n = int(sr * D)
+    u = np.arange(n) / n
+    rush = bandnoise(rng, n, sr, 90, 700, 2) * 0.35
+    rush = rush * (0.6 + 0.4 * smooth(rng, n, sr, 6.0))
+    hiss = bandnoise(rng, n, sr, 1800, 5200, 2) * 0.05 * (0.5 + 0.5 * smooth(rng, n, sr, 12.0))
+    y = rush + hiss
+    pops = [6, 9, 5][v - 1]
+    for _ in range(pops):
+        t0 = rng.uniform(0.05, D - 0.1)
+        m = int(rng.uniform(0.004, 0.012) * sr)
+        burst = rng.standard_normal(m) * np.exp(-np.arange(m) / (m * 0.3))
+        burst = filt(burst, sr, "bandpass", [rng.uniform(900, 2200), rng.uniform(3500, 6500)], 2)
+        place(y, burst * rng.uniform(0.5, 1.4), int(t0 * sr))
+        if rng.random() < 0.35:
+            place(y, modal(rng, sr, 0.12, [(rng.uniform(300, 700), 0.4, 0.02)], att=0.0005) * 0.4, int(t0 * sr))
+    y = y * curve(u, [(0, 0), (0.12, 1), (0.8, 0.9), (1, 0)])
+    return verb(y, sr, rng, 0.5, 0.12)
+
+
+def sh_fire_roar(rng, v, sr):
+    """The low, breathing roar of a big fire: filtered noise that swells and falls."""
+    D = 3.2 if v == 1 else 2.6
+    n = int(sr * D)
+    u = np.arange(n) / n
+    low = bandnoise(rng, n, sr, 45, 380, 3) * 1.0
+    mid = bandnoise(rng, n, sr, 350, 1700, 2) * 0.28
+    swell = curve(u, [(0, 0.1), (0.3, 1.0), (0.55, 0.65), (0.8, 0.95), (1, 0.05)])
+    y = (low + mid * (0.5 + 0.5 * smooth(rng, n, sr, 4.0))) * swell
+    return verb(filt(y, sr, "lowpass", 2400, 2), sr, rng, 0.9, 0.2)
+
+
+def sh_timber_creak(rng, v, sr):
+    """Burnt beams settling: a slow low groan, two short strained creaks, or a groan ending in a snap."""
+    wood = [(150, 30, 1.0), (310, 45, 0.9), (540, 70, 0.55), (900, 100, 0.3)]
+    if v == 1:
+        y = pulse_voice(rng, sr, 2.1, [(0, 18), (0.4, 52), (0.8, 40), (1, 22)], wood,
+                        env=[(0, 0), (0.2, 0.8), (0.55, 1.0), (0.9, 0.5), (1, 0)], jitter=0.15, amp_jit=0.45)
+    elif v == 2:
+        hi = [(f * 1.6, bw * 1.3, g) for f, bw, g in wood]
+        y = np.zeros(int(sr * 1.8))
+        place(y, pulse_voice(rng, sr, 0.6, [(0, 70), (1, 120)], hi, jitter=0.12, amp_jit=0.4), int(0.05 * sr))
+        place(y, pulse_voice(rng, sr, 0.8, [(0, 100), (1, 45)], hi, jitter=0.15, amp_jit=0.4) * 0.85, int(0.85 * sr))
+    else:
+        y = np.zeros(int(sr * 2.2))
+        place(y, pulse_voice(rng, sr, 1.3, [(0, 20), (1, 60)], wood, env=[(0, 0), (0.3, 0.8), (1, 1.0)], jitter=0.2, amp_jit=0.5), 0)
+        m = int(0.07 * sr)
+        place(y, filt(rng.standard_normal(m) * np.exp(-np.arange(m) / (0.008 * sr)), sr, "highpass", 600, 2) * 1.6, int(1.3 * sr))
+        place(y, modal(rng, sr, 0.5, [(rng.uniform(900, 1700), 0.5, 0.06), (rng.uniform(350, 600), 0.5, 0.1)], att=0.0008), int(1.3 * sr))
+    return verb(y, sr, rng, 1.0, 0.2, damp=0.6, bright=5000)
+
+
+def sh_timber_collapse(rng, v, sr):
+    """A burnt roof or wall giving way: a crack, a low tumble of beams, a rain of small debris, dust settling."""
+    D = 3.6
+    n = int(sr * D)
+    y = np.zeros(n)
+    m = int(0.09 * sr)
+    place(y, filt(rng.standard_normal(m) * np.exp(-np.arange(m) / (0.012 * sr)), sr, "highpass", 500, 2) * 1.8, int(0.05 * sr))
+    for k in range(5 if v == 1 else 7):
+        t0 = 0.12 + 0.12 * k + rng.uniform(0, 0.15)
+        f = rng.uniform(70, 190)
+        place(y, modal(rng, sr, 0.5, [(f, 0.7, 0.09), (f * 2.3, 0.35, 0.05), (f * 4.1, 0.15, 0.03)], att=0.001) * rng.uniform(0.5, 1.0),
+              int(t0 * sr))
+    for _ in range(60):
+        t0 = rng.uniform(0.4, 2.4)
+        mm = int(rng.uniform(0.003, 0.01) * sr)
+        tick = filt(rng.standard_normal(mm) * np.exp(-np.arange(mm) / (mm * 0.25)), sr, "bandpass",
+                    [rng.uniform(700, 2000), rng.uniform(3000, 6000)], 2)
+        place(y, tick * rng.uniform(0.05, 0.35), int(t0 * sr))
+    dust = bandnoise(rng, n, sr, 200, 2500, 2) * 0.2 * curve(np.arange(n) / n, [(0, 0), (0.1, 0.8), (0.5, 0.3), (1, 0)])
+    return verb(y + dust, sr, rng, 1.6, 0.35, damp=0.5, bright=4500)
+
+
+def sob(rng, sr, f0, dur, soft):
+    """One sob: a short voiced burst with a falling pitch, breath noise and a vowel colour."""
+    bank = [(560, 90, 1.0), (1050, 110, 0.55), (2600, 160, 0.18)]
+    s = voice(rng, sr, dur, [(0, f0 * 1.06), (0.5, f0), (1, f0 * 0.82)], [(0, 0), (0.18, 1), (0.55, 0.7), (1, 0)], nh=14, tilt=1.4,
+              jitter=0.02, breath=0.55, breath_band=(900, 3800), formants=bank, vib=(0.012, 7.0))
+    return s * soft
+
+
+def sh_sobbing(rng, v, sr):
+    """Quiet crying: a few catching sobs with breaths between, a little shaky."""
+    f0 = [250, 215, 290, 180][v - 1]
+    D = [2.8, 3.2, 2.4, 3.4][v - 1]
+    n = int(sr * D)
+    y = np.zeros(n)
+    t = 0.1
+    k = 0
+    while t < D - 0.5:
+        dur = rng.uniform(0.2, 0.34)
+        place(y, sob(rng, sr, f0 * rng.uniform(0.92, 1.08), dur, max(0.3, 0.8 - 0.05 * k)), int(t * sr))
+        t += dur + 0.02
+        m = int(rng.uniform(0.12, 0.22) * sr)
+        breath = bandnoise(rng, m, sr, 1100, 3600, 2) * win_grain(m, 0.5) * 0.18
+        place(y, breath, int(t * sr))
+        t += m / sr + rng.uniform(0.05, 0.25)
+        k += 1
+    return verb(y, sr, rng, 0.8, 0.18, damp=0.7, bright=3500)
+
+
+def sh_mourning(rng, v, sr):
+    """A long keening cry, far off: one voice rising and falling, breathy, with a slow vibrato."""
+    D = 3.6 if v == 1 else 4.2
+    base = 330.0 if v == 1 else 270.0
+    bank = [(620, 100, 1.0), (1150, 130, 0.45), (2500, 200, 0.12)]
+    s = voice(rng, sr, D, [(0, base * 0.9), (0.25, base * 1.1), (0.6, base * 1.18), (0.85, base * 0.98), (1, base * 0.8)],
+              [(0, 0), (0.18, 0.9), (0.55, 1.0), (0.85, 0.5), (1, 0)], nh=12, tilt=1.6, jitter=0.012, breath=0.25,
+              breath_band=(700, 3000), formants=bank, vib=(0.02, 5.0))
+    return verb(s, sr, rng, 2.4, 0.5, damp=0.9, bright=3000, predelay=0.04)
+
+
 SHOTS = {
+    "fire_crackle": (sh_fire_crackle, 3), "fire_roar": (sh_fire_roar, 2), "timber_creak": (sh_timber_creak, 3),
+    "timber_collapse": (sh_timber_collapse, 2), "sobbing": (sh_sobbing, 4), "mourning": (sh_mourning, 2),
     "bird_song": (sh_bird_song, 4), "crow": (sh_crow, 2), "hawk": (sh_hawk, 2), "gull": (sh_gull, 2),
     "jungle_bird": (sh_jungle_bird, 3), "owl": (sh_owl, 2), "loon": (sh_loon, 2), "frog": (sh_frog, 3),
     "cricket": (sh_cricket, 2), "insect": (sh_insect, 2), "cave_drip": (sh_cave_drip, 4),
