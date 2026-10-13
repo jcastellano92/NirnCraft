@@ -70,16 +70,6 @@
           ],
           "texture": "#t"
         }
-      },
-      "rotation": {
-        "origin": [
-          8.0,
-          0,
-          6.5
-        ],
-        "axis": "y",
-        "angle": 8,
-        "rescale": false
       }
     },
     {
@@ -156,7 +146,7 @@
           10.5
         ],
         "axis": "y",
-        "angle": -25,
+        "angle": -22.5,
         "rescale": false
       }
     },
@@ -234,7 +224,7 @@
           2.5
         ],
         "axis": "y",
-        "angle": 12,
+        "angle": 22.5,
         "rescale": false
       }
     },

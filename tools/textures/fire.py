@@ -95,9 +95,10 @@ def flame(w, hgt, frame, frames, seed, shape, pal, floor_glow=0.0):
         width = 0.78 * (1.0 - yy ** 1.5) + 0.04
         fall = 0.10 * yy
     elif shape == "rubble":
-        low = np.clip(yy / 0.62, 0, 1)
-        width = (0.95 - 0.7 * low ** 1.2) * (yy < 0.62)
-        fall = 0.18 * low
+        # separate small tongues with dark gaps between them: clearly flames licking out of rubble, never a solid
+        # orange slab (which read as lava in the first playtest)
+        width = None
+        fall = 0.0 * yy
     elif shape == "far":
         width = None
         fall = 0.08 * yy
@@ -106,16 +107,20 @@ def flame(w, hgt, frame, frames, seed, shape, pal, floor_glow=0.0):
     if width is None:
         # three tongues: a tall one in the middle and two shorter ones that lean away from it
         base = np.full((hgt, w), -1.0)
-        for c, wk, hk, ps in ((0.0, 0.52, 1.0, 0.0), (-0.52, 0.36, 0.66, 2.1), (0.5, 0.38, 0.74, 4.2)):
+        if shape == "rubble":
+            tongues = ((-0.68, 0.27, 0.50, 0.4), (-0.22, 0.31, 0.76, 2.0), (0.22, 0.26, 0.58, 3.3), (0.66, 0.26, 0.66, 5.1))
+        else:
+            tongues = ((0.0, 0.52, 1.0, 0.0), (-0.52, 0.36, 0.66, 2.1), (0.5, 0.38, 0.74, 4.2))
+        for c, wk, hk, ps in tongues:
             wl = wk * np.clip(1.0 - (yy / hk) ** 1.25, 0, 1) + 0.03
             sw = 0.12 * np.sin(ph + yy * 3.5 + ps) * (0.3 + yy)
             tongue = (1.0 - np.abs(xx - c - sw) / wl) * (yy < hk)
             base = np.maximum(base, tongue)
     else:
         base = 1.0 - np.abs(xx - sway) / np.maximum(width, 0.05)
-    v = base * (0.58 + 0.80 * n) - fall + 0.22 * (1 - yy) ** 2 * (1 - np.abs(xx) * 0.8)
+    v = base * (0.58 + 0.80 * n) - fall + (0.0 if shape == "rubble" else 0.22) * (1 - yy) ** 2 * (1 - np.abs(xx) * 0.8)
     if shape == "rubble":
-        v = v * (yy < 0.62)
+        v = v * (yy < 0.80)
     mask = v > 0.14
     t = np.clip((v - 0.14) / 0.72, 0, 0.999)
     idx = (t * len(pal)).astype(int)
@@ -164,23 +169,26 @@ def floor_strip(name, seed, kind):
     n2 = tile_noise(16, 16, 2, 2, seed + 3)
     rng = random.Random(seed)
     dark = [hexc(h) for h in ("#0c0907", "#171210", "#221a15", "#2d231c")]
-    hot = [hexc(h) for h in ("#5c1608", "#a32a0c", "#e0541a", "#ff8a2c", "#ffc860")]
+    ash = [hexc(h) for h in ("#26231f", "#34302b", "#433d36", "#2a1d16")]
+    # embers are dull red to ember orange: never the yellow-orange of lava
+    hot = [hexc(h) for h in ("#3c0f07", "#661509", "#8e1e0b", "#b82f10", "#d8501a")]
     for f in range(FRAMES):
         pulse = 0.5 + 0.5 * math.sin(2 * math.pi * f / FRAMES + 0.0)
         for y in range(16):
             for x in range(16):
                 v = 0.6 * n[y, x] + 0.4 * n2[y, x]
                 if kind == "coals":
-                    glow = max(0.0, v - 0.30 + 0.25 * pulse * (n2[(y + 5) % 16, (x + 3) % 16] - 0.4))
-                    if glow > 0.12:
-                        c = hot[min(len(hot) - 1, int(glow * 7.0))]
+                    # a charred floor with small glowing cracks (about a fifth of it), pulsing
+                    glow = max(0.0, v - 0.50 + 0.18 * pulse * (n2[(y + 5) % 16, (x + 3) % 16] - 0.4))
+                    if glow > 0.06:
+                        c = hot[min(len(hot) - 1, int(glow * 8.0))]
                     else:
                         c = dark[int(v * 3.99)]
-                else:  # rubble: dark charred pieces with a few live embers
-                    ember = n2[y, x] > 0.80 and (x * 3 + y * 5 + f) % 4 != 0
-                    c = hot[1 + int(pulse * 2.5)] if ember else dark[int(v * 3.99)]
-                    if rng.random() < 0.04:
-                        c = hexc("#3a2c20")
+                else:  # rubble: ash grey and charred pieces with a few dim live embers
+                    ember = n2[y, x] > 0.88 and (x * 3 + y * 5 + f) % 4 != 0
+                    c = hot[1 + int(pulse * 2.0)] if ember else ash[int(v * 3.99)]
+                    if rng.random() < 0.05:
+                        c = hexc("#1a1512")
                 col[f * 16 + y, x] = c
                 hot_px = c[0] > 90 and c[1] < 120 and c[2] < 60
                 spec[f * 16 + y, x, 3] = 140 if hot_px else 0
@@ -510,6 +518,21 @@ LANG_ENTRIES = {
     "fire.skycraft.line.looter.1": "What? I'm... helping. Looking for family.",
     "fire.skycraft.line.looter.2": "Nothing here anyway. Burnt through.",
     "fire.skycraft.line.looter.3": "Mind your own business.",
+    "fire.skycraft.line.pray.1": "Mara, hold them close. Stendarr, hold us.",
+    "fire.skycraft.line.pray.2": "Shh. Not now. I am asking for them.",
+    "fire.skycraft.line.pray.3": "Talos stands with Helgen. He has to.",
+    "fire.skycraft.line.pray.4": "Arkay, take them gently. Take them all gently.",
+    "fire.skycraft.line.priest.1": "Light a candle. They should not go in the dark.",
+    "fire.skycraft.line.priest.2": "The Eight keep a place for each of them. I have to believe that.",
+    "fire.skycraft.line.priest.3": "Kneel if you wish. Or simply stand with us.",
+    "fire.skycraft.line.priest.4": "Say the names you know. Someone must carry them.",
+    "fire.skycraft.line.night.1": "Don't walk the streets after dark. The walls still fall.",
+    "fire.skycraft.line.night.2": "I can't sleep. Every shadow looks like wings.",
+    "fire.skycraft.line.night.3": "Keep your voice down. The little ones are finally asleep.",
+    "fire.skycraft.line.wary.1": "Put that away. We have seen enough blades this week.",
+    "fire.skycraft.line.wary.2": "Are you here to help, or to take? Sheathe it.",
+    "fire.skycraft.line.wary.3": "The Legion is watching you. So am I.",
+    "dialogue.skycraft.continue": "Continue",
     "fire.skycraft.body.nothing": "Nothing here but ash and cloth.",
 }
 
@@ -618,21 +641,23 @@ def main():
             {"model": f"{SK}:block/{name}{sfx}", "y": y} for sfx in ("", "_b") for y in (0, 90, 180, 270)]}})
 
     # timber debris: loose planks and a beam lying on the ground, two arrangements
-    a = [(1, 2, 15, 5, 0, 2, 0), (3, 7, 14, 10, 0, 2, 20), (2, 11, 9, 14, 0, 2, -15), (5, 4, 11, 7, 2, 2, 35)]
-    b = [(0, 5, 16, 8, 0, 3, 8), (6, 9, 15, 12, 0, 2, -25), (2, 1, 8, 4, 0, 2, 12), (7, 13, 13, 15, 0, 2, 0)]
+    # element rotations must be -45, -22.5, 0, 22.5 or 45: any other angle makes the loader reject the whole model
+    # (it then renders as the magenta/black missing-model cube; the asset audit's model syntax check catches this)
+    a = [(1, 2, 15, 5, 0, 2, 0), (3, 7, 14, 10, 0, 2, 22.5), (2, 11, 9, 14, 0, 2, -22.5), (5, 4, 11, 7, 2, 2, 45)]
+    b = [(0, 5, 16, 8, 0, 3, 0), (6, 9, 15, 12, 0, 2, -22.5), (2, 1, 8, 4, 0, 2, 22.5), (7, 13, 13, 15, 0, 2, 0)]
     write_json(os.path.join(models, "timber_debris_a.json"), debris_model("charred_planks", a))
     write_json(os.path.join(models, "timber_debris_b.json"), debris_model("charred_planks", b))
     write_json(os.path.join(states, "timber_debris.json"), {"variants": {"": [
         {"model": f"{SK}:block/timber_debris_{s}", "y": y} for s in ("a", "b") for y in (0, 90, 180, 270)]}})
     # splintered wreckage: a taller heap
-    c = [(1, 1, 15, 6, 0, 3, 5), (2, 8, 15, 13, 0, 3, -8), (4, 3, 12, 8, 3, 3, 25), (3, 9, 13, 12, 3, 2, -20), (6, 5, 10, 11, 5, 2, 40)]
+    c = [(1, 1, 15, 6, 0, 3, 0), (2, 8, 15, 13, 0, 3, 0), (4, 3, 12, 8, 3, 3, 22.5), (3, 9, 13, 12, 3, 2, -22.5), (6, 5, 10, 11, 5, 2, 45)]
     write_json(os.path.join(models, "splintered_wreckage.json"), debris_model("charred_planks", c))
     write_json(os.path.join(states, "splintered_wreckage.json"), {"variants": {"": [
         {"model": f"{SK}:block/splintered_wreckage", "y": y} for y in (0, 90, 180, 270)]}})
 
     # stuck arrows: three shafts leaning out of the ground at different angles (crossed planes)
     arrows = []
-    for (x, z, ax, ang) in ((4, 5, "x", 18), (10, 9, "z", -22), (7, 12, "x", -12)):
+    for (x, z, ax, ang) in ((4, 5, "x", 22.5), (10, 9, "z", -22.5), (7, 12, "x", -22.5)):
         arrows.append({"from": [x - 1, 0, z], "to": [x + 1, 11, z], "shade": False,
                        "rotation": {"origin": [x, 0, z], "axis": ax, "angle": ang, "rescale": False},
                        "faces": {"north": {"uv": [x - 1, 0, x + 1, 16], "texture": "#a"}, "south": {"uv": [x - 1, 0, x + 1, 16], "texture": "#a"}}})
@@ -656,6 +681,9 @@ def main():
             write_json(os.path.join(loot, name + ".json"), slab)
         else:
             write_json(os.path.join(loot, name + ".json"), loot_self(name))
+
+    # timber debris has no single block model (two arrangements): its item uses the first
+    write_json(os.path.join(items, "timber_debris.json"), {"parent": f"{SK}:block/timber_debris_a"})
 
     # item model of the decals must not use a flat 3D plane at y 0.04: show the texture as a flat icon
     for name in ("soot_stain", "blood_stain"):

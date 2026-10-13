@@ -146,7 +146,7 @@
           8.5
         ],
         "axis": "y",
-        "angle": 20,
+        "angle": 22.5,
         "rescale": false
       }
     },
@@ -224,7 +224,7 @@
           12.5
         ],
         "axis": "y",
-        "angle": -15,
+        "angle": -22.5,
         "rescale": false
       }
     },
@@ -302,7 +302,7 @@
           5.5
         ],
         "axis": "y",
-        "angle": 35,
+        "angle": 45,
         "rescale": false
       }
     }

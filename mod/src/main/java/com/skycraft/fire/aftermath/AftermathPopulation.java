@@ -140,6 +140,20 @@ public final class AftermathPopulation {
         if (role == null) return true;
         BlockPos pos = settle(level, a.pos());
         float yaw = (Math.floorMod(a.pos().asLong() * 0x9E3779B97F4A7C15L >>> 40, 8)) * 45f;
+        // "@x,z": look at that world column (a mourner at a body, a worshipper at an altar, a healer at a patient)
+        int look = opt.indexOf('@');
+        if (look >= 0) {
+            String[] t = opt.substring(look + 1).split(",");
+            opt = opt.substring(0, look);
+            if (t.length == 2) {
+                try {
+                    double dx = Integer.parseInt(t[0].trim()) - a.pos().getX(), dz = Integer.parseInt(t[1].trim()) - a.pos().getZ();
+                    if (dx != 0 || dz != 0) yaw = (float) (Math.atan2(-dx, dz) * 180.0 / Math.PI);
+                } catch (NumberFormatException ignored) {
+                    // keep the hashed yaw
+                }
+            }
+        }
         if (poseId.equals("body")) {
             boolean lootable = opt.contains("l");
             float roll = opt.contains("f") ? 40f : (opt.contains("s") ? -30f : 0f);
@@ -153,6 +167,7 @@ public final class AftermathPopulation {
         npc.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0f);
         npc.setYHeadRot(yaw);
         npc.getPersistentData().putString(Tableau.KEY, pose.id);
+        npc.getPersistentData().putBoolean(HelgenFolk.BARKS, true);
         npc.getPersistentData().putLong(Tableau.AT_KEY, a.pos().asLong());
         npc.setPoseFlags(pose.flags);
         if (!pose.item.isEmpty()) {
@@ -193,7 +208,8 @@ public final class AftermathPopulation {
 
     @Nullable
     private static BlockPos findBed(ServerLevel level, BlockPos near) {
-        for (int dy = -1; dy <= 1; dy++)
+        // anchors are recorded without a level, so their height is the plan's: look a few blocks up and down
+        for (int dy = -5; dy <= 5; dy++)
             for (int dx = -1; dx <= 1; dx++)
                 for (int dz = -1; dz <= 1; dz++) {
                     BlockPos p = near.offset(dx, dy, dz);

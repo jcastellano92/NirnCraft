@@ -68,7 +68,16 @@ if (-not $NoBuild) {
 Push-Location $Root
 $a = & $py -3 -I tools/check_assets.py 2>&1 | Select-Object -Last 1
 Result "assets" ($a -match " 0 problems") "$a"
-$audit = & $py -3 -I tools/audit_items.py 2>&1
+# the whole asset chain (tools/qa/asset_audit.py): blockstates (every state has a variant), model syntax (a bad element
+# rotation makes the loader drop the model: magenta cube), parents, texture variables, PNGs, item models, texture
+# literals, unregistered skycraft: ids. With -Server it runs after the boot against that boot's registry dump instead.
+if (-not ($Server -or $Bake -or $Rebake)) {
+    $aa = @(& $py -3 -I tools/qa/asset_audit.py --list 25 2>&1)
+    $aaerr = @($aa | Where-Object { $_ -match "^ERR" })
+    Result "asset-audit" ($LASTEXITCODE -eq 0) ("{0}" -f ($aa | Select-Object -Last 1))
+    $aaerr | Select-Object -First 15 | ForEach-Object { Add("       $_") }
+}
+$audit =& $py -3 -I tools/audit_items.py 2>&1
 # lang-only display keys and the optional runtime dump are known non-gaps
 $gaps = @($audit | Where-Object { $_ -match "^GAP " -and $_ -notmatch "^GAP \(all\)" -and $_ -notmatch "^GAP (potion_of|poison_of|legendary_fish):" })
 Result "items" ($gaps.Count -eq 0) ("{0} gaps; {1}" -f $gaps.Count, ($audit | Select-Object -Last 1))
@@ -132,10 +141,12 @@ if ($Server) {
     }
     Remove-Item -Recurse -Force (Join-Path $Run "world") -ErrorAction SilentlyContinue
     Remove-Item -Recurse -Force (Join-Path $Run "crash-reports") -ErrorAction SilentlyContinue
+    # the registry dump of this boot (com.skycraft.dev.AssetDump) feeds the asset audit below
+    Remove-Item (Join-Path $Run "skycraft-asset-audit.json") -ErrorAction SilentlyContinue
     # society selftest is async (about 40 s of server time: crowd cap, gate guards, night sleepers, respawn); the housing
     # dumps that follow give it the time, one command every 300 ticks
     $cmds = @("forceload add -96 -96 96 96", "skycraft-quest selftest flow", "skycraft magic selftest", "skycraft-protect selftest",
-        "skycraft-quest intro selftest", "skycraft-society selftest")
+        "skycraft-quest intro selftest", "skycraft-fire selftest", "skycraft-fire census helgen generate", "skycraft-society selftest")
     # housing model dump for the population lint (tools/qa/population_lint.py): no building, no chunk loads
     $popSample = @("whiterun", "riverwood", "helgen", "rorikstead", "dragon_bridge", "falkreath", "old_hroldan")
     $popSample | ForEach-Object { $cmds += "skypop $_" }
@@ -169,6 +180,16 @@ if ($Server) {
     } else {
         Result "protect" $false "no 'Protect selftest' line in the server log"
     }
+    # Helgen aftermath census (com.skycraft.fire.FireCommands): the scene exists and nothing in it floats
+    $fc = Select-String -Path $out -Pattern "\[fire\] +fire sites \d+.*burnt blocks \(charred\+scorched\) (\d+)" | Select-Object -Last 1
+    $ff = Select-String -Path $out -Pattern "floating fire/decal/bed blocks (\d+)" | Select-Object -Last 1
+    if ($fc -and $ff) {
+        $burnt = [int]$fc.Matches[0].Groups[1].Value
+        $float = [int]$ff.Matches[0].Groups[1].Value
+        Result "fire-census" ($burnt -gt 0 -and $float -eq 0) ("helgen: {0} burnt blocks, {1} floating fire/decal/bed blocks" -f $burnt, $float)
+    } else {
+        Result "fire-census" $false "no 'skycraft-fire census helgen' output in the server log"
+    }
     # society self-test (com.skycraft.society.SocietySelfTest): crowd cap, gate guards, night sleepers, races, respawn
     $st = Select-String -Path $out -Pattern "Society selftest: \d+/" | Select-Object -Last 1
     if ($st) {
@@ -183,6 +204,19 @@ if ($Server) {
     $plerr = @($pl | Where-Object { $_ -match "^ERR" })
     Result "population" ($plerr.Count -eq 0) ("{0}" -f ($pl | Select-Object -Last 1))
     $pl | Where-Object { $_ -match "^(ERR|WARN)" } | Select-Object -First 12 | ForEach-Object { Add("       $_") }
+    # asset audit against the registry this boot dumped: every registered block/item has a working blockstate/model/texture
+    $dumpFile = Join-Path $Run "skycraft-asset-audit.json"
+    if (Test-Path $dumpFile) {
+        Push-Location $Root
+        $aa = @(& $py -3 -I tools/qa/asset_audit.py --dump $dumpFile --list 25 2>&1)
+        $aarc = $LASTEXITCODE
+        Pop-Location
+        $aaerr = @($aa | Where-Object { $_ -match "^ERR" })
+        Result "asset-audit" ($aarc -eq 0) ("{0}" -f ($aa | Select-Object -Last 1))
+        $aaerr | Select-Object -First 15 | ForEach-Object { Add("       $_") }
+    } else {
+        Result "asset-audit" $false "the server wrote no skycraft-asset-audit.json (com.skycraft.dev.AssetDump)"
+    }
     if ($Bake) {
         $b = Select-String -Path $out -Pattern "Bake is up to date|Bake problems|Bake was stale: rebaked" | Select-Object -Last 1
         if ($b -and $b.Line -match "rebaked and verified") {

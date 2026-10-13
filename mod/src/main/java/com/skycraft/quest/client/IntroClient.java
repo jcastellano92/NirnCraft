@@ -6,6 +6,9 @@ import com.skycraft.quest.story.IntroState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.client.gui.screens.ReceivingLevelScreen;
+import com.skycraft.client.screen.RaceScreen;
+import com.skycraft.core.SkyData;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.Vec3;
@@ -19,10 +22,12 @@ import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.RenderNameTagEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -42,6 +47,12 @@ public final class IntroClient {
     private static Set<UUID> hidden = new HashSet<>();
     private static IntroCutscene cutscene;
     private static long loadingSince;
+    /** True from joining until the server has said whether this player is in the opening: the world is not shown meanwhile. */
+    private static boolean awaiting;
+    private static int awaitTicks;
+    /** The character was confirmed (the server has not moved on yet): do not open the character screen again. */
+    private static boolean characterDone;
+    private static int characterTicks;
 
     private IntroClient() {}
 
@@ -51,6 +62,8 @@ public final class IntroClient {
         IntroState was = state;
         state = IntroState.byId(s.state());
         last = s;
+        awaiting = false;
+        if (state != IntroState.JOINED && state != IntroState.CHARACTER) characterDone = false;
         if (state == IntroState.LOADING && was != IntroState.LOADING) loadingSince = System.currentTimeMillis();
         if (state != IntroState.CUTSCENE && cutscene != null && state != null) {
             // the server moved on (relog, admin): drop the scene
@@ -77,7 +90,30 @@ public final class IntroClient {
     }
 
     static boolean controlsLocked() {
-        return cutscene != null || state == IntroState.LOADING;
+        return cutscene != null || coverWanted();
+    }
+
+    /**
+     * The world must not be seen: from the moment the player exists until the server has said where they are in the
+     * opening, and while the character is made and the valley loads. (The cottage is the first thing they ever see
+     * once this lifts, and by then the chunks are in.)
+     */
+    static boolean coverWanted() {
+        if (awaiting) return true;
+        return state == IntroState.JOINED || state == IntroState.CHARACTER || state == IntroState.LOADING;
+    }
+
+    /** True while the character screen is what the player must be looking at. */
+    private static boolean needsCharacter(Minecraft mc) {
+        if (characterDone || mc.player == null) return false;
+        if (state != IntroState.JOINED && state != IntroState.CHARACTER) return false;
+        return SkyData.get(mc.player).getRace() == null;
+    }
+
+    /** Called by the character screen when it is confirmed: the loading cover takes over at once. */
+    public static void characterConfirmed() {
+        characterDone = true;
+        characterTicks = 0;
     }
 
     static void reset() {
@@ -85,6 +121,8 @@ public final class IntroClient {
         last = null;
         hidden = new HashSet<>();
         cutscene = null;
+        awaiting = false;
+        characterDone = false;
     }
 
     // ------------------------------------------------------------------ events
@@ -98,8 +136,21 @@ public final class IntroClient {
             if (event.phase != TickEvent.Phase.END) return;
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null || mc.level == null) return;
-            if (state == IntroState.LOADING && !(mc.screen instanceof IntroLoadingScreen)) {
-                mc.setScreen(new IntroLoadingScreen(loadingSince));
+            if (awaiting && ++awaitTicks > 200) awaiting = false; // the server never answered: do not hold the world back
+            if (characterDone && (state == IntroState.JOINED || state == IntroState.CHARACTER)) {
+                // the server did not take the character: let them choose again
+                if (++characterTicks > 200) {
+                    characterDone = false;
+                    characterTicks = 0;
+                }
+            }
+            if (coverWanted()) {
+                var s = mc.screen;
+                if (needsCharacter(mc)) {
+                    if (!(s instanceof RaceScreen)) mc.setScreen(new RaceScreen());
+                } else if (!(s instanceof IntroLoadingScreen) && !(s instanceof RaceScreen) && !(s instanceof ReceivingLevelScreen)) {
+                    mc.setScreen(new IntroLoadingScreen());
+                }
             }
             if (cutscene != null) {
                 if (mc.screen != null && !(mc.screen instanceof PauseScreen) && !(mc.screen instanceof IntroLoadingScreen)
@@ -204,6 +255,26 @@ public final class IntroClient {
         @SubscribeEvent
         public static void introLogout(ClientPlayerNetworkEvent.LoggingOut event) {
             reset();
+        }
+
+        /** Joining: hold the world back until the server says whether this player is in the opening. */
+        @SubscribeEvent
+        public static void introLogin(ClientPlayerNetworkEvent.LoggingIn event) {
+            reset();
+            awaiting = true;
+            awaitTicks = 0;
+        }
+
+        /**
+         * A screen is closing and would show the world (the vanilla "loading terrain" screen, the character screen):
+         * while the opening needs the world hidden, the cover or the character screen takes its place in the same frame.
+         */
+        @SubscribeEvent(priority = EventPriority.HIGH)
+        public static void introScreenOpening(ScreenEvent.Opening event) {
+            if (event.getNewScreen() != null || !coverWanted()) return;
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player == null) return;
+            event.setNewScreen(needsCharacter(mc) ? new RaceScreen() : new IntroLoadingScreen());
         }
     }
 

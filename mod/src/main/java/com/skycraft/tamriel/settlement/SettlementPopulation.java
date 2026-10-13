@@ -128,7 +128,7 @@ public final class SettlementPopulation {
                 AnchorType t = res.slotType();
                 if ("helgen".equals(e.key) && com.skycraft.quest.QuestConfig.RUINED_HELGEN.get()) {
                     // the dragon has been: only survivors and shaken soldiers, no shopkeepers, innkeeper, bard or court
-                    done = ruinedHelgen(level, at, t, i);
+                    done = ruinedHelgen(level, at, t, i, a.owner());
                     if (done) {
                         adopt(level, at, res, list, bed, e.key + "#" + i);
                         e.spawned.add(i);
@@ -192,12 +192,23 @@ public final class SettlementPopulation {
      * kept a shop, an inn or a court is a dazed survivor sitting among the rubble, and only some of the households are
      * still there. Returns true when the anchor is dealt with.
      */
-    private static boolean ruinedHelgen(ServerLevel level, BlockPos at, AnchorType t, int i) {
+    private static boolean ruinedHelgen(ServerLevel level, BlockPos at, AnchorType t, int i, String owner) {
         switch (t) {
             case GUARD -> {
                 return guard(level, at);
             }
-            case JARL, HOUSECARL, STEWARD, WIZARD, BARD, PRIEST, INN, SMITH, MERCHANT, ALCHEMIST, FARMER, MILLER, LUMBERJACK, MINER, JEWELER,
+            case MERCHANT -> {
+                if ("helgen_cart".equals(owner)) {
+                    // the salvage cart's merchant still sells (barter only: the dialogue offers nothing else)
+                    NpcEntity m = merchant(level, at, VillagerProfession.CARTOGRAPHER, "general", "entity.skycraft.merchant");
+                    if (m == null) return false;
+                    m.getPersistentData().putBoolean(com.skycraft.fire.aftermath.HelgenFolk.CART, true);
+                    return true;
+                }
+                if (i % 2 == 0) return true;
+                return npc(level, at, NpcRole.CITIZEN, Component.translatable("entity.skycraft.helgen_survivor"), 6) != null;
+            }
+            case JARL, HOUSECARL, STEWARD, WIZARD, BARD, PRIEST, INN, SMITH, ALCHEMIST, FARMER, MILLER, LUMBERJACK, MINER, JEWELER,
                     BOOKSELLER, TAILOR, BUTCHER, FLETCHER, FENCE, FISHER, HUNTER, WORKER -> {
                 // roughly one in two of the old jobs left a survivor behind
                 if (i % 2 == 0) return true;

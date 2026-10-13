@@ -87,11 +87,19 @@ public final class Dialogue {
     /** Every option the providers offer, de-duplicated (same id, same topic or same label), sorted, Goodbye last. */
     public static List<DialogueOption> collect(ServerPlayer player, LivingEntity npc) {
         List<DialogueOption> raw = new ArrayList<>();
-        for (DialogueProvider p : PROVIDERS) {
-            try {
-                p.addOptions(player, npc, raw);
-            } catch (Exception e) {
-                Skycraft.LOGGER.error("Dialogue provider failed", e);
+        if (com.skycraft.fire.aftermath.HelgenFolk.barkOnly(npc)) {
+            // the people of the ruined town: one line, Continue and Goodbye; no topics, trades or work
+            raw.add(com.skycraft.fire.aftermath.HelgenFolk.continueOption());
+        } else {
+            for (DialogueProvider p : PROVIDERS) {
+                try {
+                    p.addOptions(player, npc, raw);
+                } catch (Exception e) {
+                    Skycraft.LOGGER.error("Dialogue provider failed", e);
+                }
+            }
+            if (com.skycraft.fire.aftermath.HelgenFolk.limited(npc)) {
+                raw.removeIf(o -> !com.skycraft.fire.aftermath.HelgenFolk.allowed(npc, o.id()));
             }
         }
         raw.sort(Comparator.comparingInt(DialogueOption::order)); // stable: ties keep provider order
@@ -316,7 +324,8 @@ public final class Dialogue {
                     return;
                 }
             }
-            open(player, npc, Component.empty());
+            open(player, npc, com.skycraft.fire.aftermath.HelgenFolk.barkOnly(npc)
+                    ? com.skycraft.fire.aftermath.HelgenFolk.line(player, npc) : Component.empty());
         }
         event.setCancellationResult(InteractionResult.SUCCESS);
         event.setCanceled(true);

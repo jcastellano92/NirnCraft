@@ -28,7 +28,11 @@ import net.minecraft.world.phys.Vec3;
  * <p>Timeline (scaled by the configured length; 48 s by default): bars and zoom in; a low rumble; the dragon rises
  * over the ridge and begins circling Helgen; it breathes fire on the town six times, each blast sweeping from one
  * point to the next and leaving it burning; roars with a pitch shift as it passes, bells, screams, collapsing
- * timber; the camera shakes throughout and harder on every impact; the dragon climbs away and the town smokes.</p>
+ * timber; the dragon climbs away and the town smokes.</p>
+ *
+ * <p>Shake and explosions are tied to what the player sees: the camera shakes only while a fire-breath burst visibly
+ * lands (a short, light tremor scaled by its distance), and one explosion (flash, sound, a harder jolt) happens at most
+ * every {@link #EXPLOSION_GAP} ticks, again only when the breath is in view. Ambient fire does not shake the camera.</p>
  */
 final class IntroCutscene {
     private final IntroPackets.Cutscene p;
@@ -45,6 +49,8 @@ final class IntroCutscene {
     private final int[] breathStart;
     private static final int BREATHS = 6;
     private static final int BREATH_LEN = 62;
+    /** At most one explosion this often (ticks): 12 seconds. */
+    private static final int EXPLOSION_GAP = 240;
 
     private int t;
     private DragonEntity dragon;
@@ -56,6 +62,7 @@ final class IntroCutscene {
     private double lastDist = -1;
     private Vec3 mouth = Vec3.ZERO;
     private int lastRoar = -999;
+    private int lastExplosion = -EXPLOSION_GAP;
 
     IntroCutscene(IntroPackets.Cutscene p) {
         this.p = p;
@@ -129,7 +136,7 @@ final class IntroCutscene {
     /** Camera shake: roll and pitch jitter in degrees for this frame. */
     float[] shakeNow(float partial) {
         double tt = (t + partial);
-        double a = shake * 1.0;
+        double a = shake * 0.5;
         double roll = a * (Math.sin(tt * 1.7) * 0.9 + Math.sin(tt * 3.9 + 1.3) * 0.5 + Math.sin(tt * 7.1) * 0.25);
         double pit = a * 0.6 * (Math.sin(tt * 2.3 + 0.7) + 0.5 * Math.sin(tt * 5.3));
         double yw = a * 0.5 * Math.sin(tt * 2.9 + 2.1);
@@ -197,21 +204,15 @@ final class IntroCutscene {
 
         // the first rumble, as if the hill itself spoke
         if (t == (int) (30 * scale)) {
-            play(level, SoundEvents.LIGHTNING_BOLT_THUNDER, eye.add(away.scale(60)), 0.9f, 0.5f);
-            play(level, SoundEvents.GENERIC_EXPLODE, town, 0.55f, 0.45f);
-            addShake(0.9);
+            play(level, SoundEvents.LIGHTNING_BOLT_THUNDER, eye.add(away.scale(60)), 0.5f, 0.5f);
         }
-        shake *= 0.945;
-        // a low, sustained tremble all the while the town burns
-        double base = t < 30 ? 0.0 : (t < total - 100 ? 0.22 : 0.08);
-        shake = Math.max(shake, base * (0.8 + 0.2 * Math.sin(t * 0.13)));
+        // a tremor is short: it dies away in about half a second (no sustained trembling under the fire)
+        shake *= 0.88;
 
         dragonSounds(level, dist, vr);
         breaths(level);
         town(level);
         camera();
-        // each time the dragon sweeps close, the ground trembles
-        if (dist < 95 && t % 12 == 0) addShake(0.5 * (1 - dist / 95));
     }
 
     private void camera() {
@@ -232,7 +233,23 @@ final class IntroCutscene {
     }
 
     private void addShake(double e) {
-        shake = Math.min(2.4, shake + e);
+        shake = Math.min(1.2, shake + e);
+    }
+
+    /** True when {@code p} is inside the view cone of the camera (about the screen), as the scene's own camera aims. */
+    private boolean inView(Vec3 p) {
+        Vec3 d = p.subtract(eye);
+        double len = d.length();
+        if (len < 1) return true;
+        double yawR = Math.toRadians(camYaw), pitR = Math.toRadians(camPitch);
+        double fx = -Math.sin(yawR) * Math.cos(pitR), fy = -Math.sin(pitR), fz = Math.cos(yawR) * Math.cos(pitR);
+        double cos = (d.x * fx + d.y * fy + d.z * fz) / len;
+        return cos > 0.6; // within about 53 degrees of the centre of the view
+    }
+
+    /** 1 for a hit at the window, falling with distance (a far impact is felt, not thrown at). */
+    private double nearness(Vec3 p) {
+        return Mth.clamp(1.0 - p.distanceTo(eye) / 320.0, 0.15, 1.0);
     }
 
     // ------------------------------------------------------------------ the dragon entity
@@ -310,8 +327,7 @@ final class IntroCutscene {
         if (t == (int) (95 * scale) || (t > 150 * scale && t - lastRoar > 190 * scale && t < total - 120 * scale)) {
             lastRoar = t;
             play(level, AudioSounds.dragon("alduin", "roar"), pos, 1.0f, 0.88f + doppler);
-            play(level, SoundEvents.ENDER_DRAGON_GROWL, pos, 0.45f, 0.55f + doppler);
-            addShake(0.7);
+            play(level, SoundEvents.ENDER_DRAGON_GROWL, pos, 0.35f, 0.55f + doppler);
         }
         if (t % 26 == 0 && t > 60) {
             play(level, AudioSounds.dragon("alduin", "wings"), pos, 0.55f, 0.85f + doppler * 0.5f);
@@ -343,7 +359,6 @@ final class IntroCutscene {
                 if (dragon != null) {
                     dragon.anims().state(AnimSlot.SHOUT).start(dragon.tickCount);
                 }
-                addShake(0.8);
             }
             // the blast: a dense stream of flame from the mouth to the target, widening with the distance
             Vec3 dir = target.subtract(mouth);
@@ -357,7 +372,7 @@ final class IntroCutscene {
                 ParticleOptions kind = n % 9 == 0 ? ParticleTypes.LAVA : n % 4 == 0 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.FLAME;
                 particle(level, kind, at.x, at.y, at.z, d.x * 0.5, d.y * 0.5 - 0.02, d.z * 0.5);
             }
-            // impact: fire, smoke, flying timber and stone
+            // where it lands: fire, smoke, flying timber and stone
             for (int n = 0; n < 7; n++) {
                 particle(level, ParticleTypes.FLAME, target.x + rng.nextGaussian() * 2.5, target.y + rng.nextDouble() * 2, target.z + rng.nextGaussian() * 2.5,
                         rng.nextGaussian() * 0.12, 0.25 + rng.nextDouble() * 0.3, rng.nextGaussian() * 0.12);
@@ -372,21 +387,19 @@ final class IntroCutscene {
                 particle(level, deb, target.x + rng.nextGaussian(), target.y + 1, target.z + rng.nextGaussian(),
                         rng.nextGaussian() * 0.5, 0.5 + rng.nextDouble() * 0.8, rng.nextGaussian() * 0.5);
             }
-            if (k % 6 == 0) particle(level, ParticleTypes.EXPLOSION, target.x + rng.nextGaussian() * 3, target.y + 1, target.z + rng.nextGaussian() * 3, 1.0, 0, 0);
-            if (k % 4 == 0) {
-                play(level, SoundEvents.GENERIC_EXPLODE, target, 0.9f, 0.55f + rng.nextFloat() * 0.2f);
-                addShake(0.35);
+            boolean seen = inView(target);
+            // the fire landing is felt, lightly, only while it is in sight: a short tremor every few ticks, by distance
+            if (seen && k >= 8 && k < BREATH_LEN - 8 && k % 6 == 0) addShake(0.10 * nearness(target));
+            // one explosion at most every twelve seconds, and only when the breath is in view
+            if (k == BREATH_LEN / 2 && seen && t - lastExplosion >= EXPLOSION_GAP) {
+                lastExplosion = t;
+                particle(level, ParticleTypes.EXPLOSION_EMITTER, target.x, target.y + 2, target.z, 0, 0, 0);
+                play(level, SoundEvents.GENERIC_EXPLODE, target, 0.6f, 0.55f + rng.nextFloat() * 0.15f);
+                addShake(0.45 * nearness(target));
             }
             if (k == BREATH_LEN / 2 || k == BREATH_LEN - 1) {
                 int which = order[(i * 2 + (k == BREATH_LEN - 1 ? 1 : 0)) % burn.length];
-                Vec3 at = burn[which];
                 if (litAt[which] < 0) litAt[which] = t;
-                particle(level, ParticleTypes.EXPLOSION_EMITTER, at.x, at.y + 3, at.z, 0, 0, 0);
-                // the roar of the blast: a thunderclap and a sub-bass thud
-                play(level, SoundEvents.LIGHTNING_BOLT_THUNDER, at, 0.9f, 0.6f);
-                play(level, SoundEvents.GENERIC_EXPLODE, at, 1.0f, 0.4f);
-                play(level, SoundEvents.ENDER_DRAGON_GROWL, at, 0.5f, 0.5f);
-                addShake(1.1);
             }
         }
     }
@@ -417,10 +430,9 @@ final class IntroCutscene {
                         0.02, 0.01, 0.02);
             }
             // the noise of it: crackle, a roof coming down, a scream or a shout, distance-attenuated
-            if ((t + i * 7) % 30 == 0) play(level, SoundEvents.FIRE_AMBIENT, b, 0.5f, 0.7f + rng.nextFloat() * 0.3f);
+            if ((t + i * 7) % 30 == 0) play(level, SoundEvents.FIRE_AMBIENT, b, 0.35f, 0.7f + rng.nextFloat() * 0.3f);
             if ((t + i * 13) % 97 == 0 && age > 10) {
-                play(level, rng.nextBoolean() ? SoundEvents.WOOD_BREAK : SoundEvents.STONE_BREAK, b, 0.75f, 0.45f + rng.nextFloat() * 0.25f);
-                addShake(0.18);
+                play(level, rng.nextBoolean() ? SoundEvents.WOOD_BREAK : SoundEvents.STONE_BREAK, b, 0.5f, 0.45f + rng.nextFloat() * 0.25f);
                 for (int n = 0; n < 8; n++) {
                     ParticleOptions deb = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SPRUCE_PLANKS.defaultBlockState());
                     particle(level, deb, b.x + rng.nextGaussian() * 2, b.y + 4, b.z + rng.nextGaussian() * 2, rng.nextGaussian() * 0.15, -0.05, rng.nextGaussian() * 0.15);
@@ -439,8 +451,7 @@ final class IntroCutscene {
         // fire is also the faint low rumble under everything: a deep cave rumble every few seconds once something burns
         boolean any = false;
         for (int v : litAt) any |= v >= 0;
-        if (any && t % 70 == 0) play(level, SoundEvents.AMBIENT_BASALT_DELTAS_MOOD.value(), town, 0.45f, 0.6f);
-        if (any && t % 55 == 0) play(level, SoundEvents.GENERIC_EXPLODE, town.add(rng.nextGaussian() * 30, 0, rng.nextGaussian() * 30), 0.55f, 0.35f);
+        if (any && t % 90 == 0) play(level, SoundEvents.AMBIENT_BASALT_DELTAS_MOOD.value(), town, 0.25f, 0.6f);
     }
 
     /** Position of the dragon for the tests of the cutscene geometry. */

@@ -16,9 +16,14 @@ Verified headless only (`/skycraft-quest intro selftest`: site, support, windows
 with a stand-in player). **Nothing below has been seen in the game.** Use a new world (or `/skycraft-quest intro restart`
 on an old character; config `quest/introExistingSaves`).
 
-1. **First join**: you appear inside the cottage (no gate spawn, no second teleport). The character screen opens there.
-2. **After the character**: a dark "The valley wakes" screen with a progress bar until the chunks around you and the
-   town are in (45 s at most, `introLoadingSeconds`), then it fades; no terrain popping in behind it.
+1. **First join**: the world is never seen before the cottage is ready. The server puts a new character on the cottage
+   floor while their data loads (`PlayerEvent.LoadFromFile`, before the first chunk packet), the cottage is built at
+   server start, and the client holds an opaque screen from the moment the player exists (the vanilla loading screen
+   hands over to the character screen, which is opaque). The character screen is up at once.
+2. **After the character**: a dark "The valley wakes" screen with a progress bar until the chunks within 8 of you and the
+   whole town are in AND at least 6 s have passed (45 s at most, `introLoadingSeconds`), then it fades; no terrain
+   popping in behind it. No floating stone, dirt or ore in view (a rock sweep runs over the cone and the road/town
+   grading passes).
 3. **The cottage from outside** (go out with `/tp` as an op, or after the key): sits on real ground (no platform on air,
    retaining wall where the hill falls away), timber walls, stepped gable roof, chimney with a smoking campfire, porch
    with posts and a lantern, woodpile, well, fenced garden with crops, shutters, lanterns. Check the roof and chimney join.

@@ -193,6 +193,8 @@ public final class FireCommands {
         }
         // blocks, by registry path, in the loaded chunks of the footprint
         Map<String, Integer> blocks = new TreeMap<>();
+        int floating = 0;
+        List<String> floatSample = new java.util.ArrayList<>();
         int minCx = (pl.x() - r) >> 4, maxCx = (pl.x() + r) >> 4, minCz = (pl.z() - r) >> 4, maxCz = (pl.z() + r) >> 4;
         int chunks = 0;
         for (int cx = minCx; cx <= maxCx; cx++) {
@@ -202,7 +204,8 @@ public final class FireCommands {
                 chunks++;
                 ChunkPos cp = chunk.getPos();
                 LevelChunkSection[] sections = chunk.getSections();
-                for (LevelChunkSection sec : sections) {
+                for (int si = 0; si < sections.length; si++) {
+                    LevelChunkSection sec = sections[si];
                     if (sec == null || sec.hasOnlyAir()) continue;
                     if (!sec.maybeHas(st -> st.getBlock().builtInRegistryHolder().key().location().getNamespace().equals(Skycraft.MODID))) continue;
                     for (int x = 0; x < 16; x++) {
@@ -216,6 +219,14 @@ public final class FireCommands {
                                 long dx = wx - pl.x(), dz = wz - pl.z();
                                 if (dx * dx + dz * dz > (long) r * r) continue;
                                 blocks.merge(key.getPath(), 1, Integer::sum);
+                                if (com.skycraft.fire.aftermath.Supports.needsFloor(st)) {
+                                    int wy = chunk.getMinBuildHeight() + si * 16 + y;
+                                    BlockPos at = new BlockPos(wx, wy, wz);
+                                    if (!com.skycraft.fire.aftermath.Supports.holds(chunk.getBlockState(at.below()))) {
+                                        floating++;
+                                        if (floatSample.size() < 4) floatSample.add(key.getPath() + "@" + at.toShortString());
+                                    }
+                                }
                             }
                         }
                     }
@@ -279,7 +290,8 @@ public final class FireCommands {
         out.add(String.format(Locale.ROOT, "  tableau anchors %d %s", anchorsTableau, anchorPoses));
         out.add(String.format(Locale.ROOT, "  spawned: bodies %d (%d lootable), huddled %d, kneeling %d, weeping %d, workers %d, aid people %d, guards %d, others %d",
                 bodies, lootable, huddled, kneeling, weeping, workers, aid, guards, other));
-        out.add(String.format(Locale.ROOT, "  aid camp props: bedrolls %d, cooking pots %d", bedrolls, pots));
+        out.add(String.format(Locale.ROOT, "  aid camp props: bedrolls %d, cooking pots %d; floating fire/decal/bed blocks %d %s",
+                bedrolls, pots, floating, floatSample));
         for (String line : out) {
             src.sendSuccess(() -> Component.literal(line), false);
             Skycraft.LOGGER.info("[fire] {}", line);

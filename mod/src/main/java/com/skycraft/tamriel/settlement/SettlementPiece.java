@@ -173,6 +173,9 @@ public class SettlementPiece extends StructurePiece {
             // crowns and trunk stubs the clearing left hanging, here and in the neighbouring chunks of the region
             com.skycraft.world.OrphanSweep.sweep(level, clip.minX(), clip.minZ(), clip.maxX(), clip.maxZ(), 10,
                     chunkBox.minX() - 14, chunkBox.minZ() - 14, chunkBox.maxX() + 14, chunkBox.maxZ() + 14, null);
+            // boulders and loose stone whose ground the grading removed (they would hang in the air over the town)
+            com.skycraft.world.RockSweep.sweep(level, clip.minX(), clip.minZ(), clip.maxX(), clip.maxZ(), 6,
+                    chunkBox.minX() - 14, chunkBox.minZ() - 14, chunkBox.maxX() + 14, chunkBox.maxZ() + 14, 24, null, null);
             {
                 // a yard, garden, fence line or stall painted after a building can fence its door in: sweep the neighbourhood too
                 BoundingBox wide = new BoundingBox(

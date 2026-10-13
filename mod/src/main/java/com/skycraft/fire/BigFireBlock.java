@@ -35,8 +35,8 @@ public class BigFireBlock extends Block {
         BASE(15, 2.0f, 6, Block.box(2, 0, 2, 14, 16, 14)),
         COLUMN(15, 2.0f, 6, Block.box(3, 0, 3, 13, 16, 13)),
         TIP(13, 1.0f, 4, Block.box(4, 0, 4, 12, 12, 12)),
-        RUBBLE(12, 1.0f, 3, Block.box(1, 0, 1, 15, 8, 15)),
-        EMBERS(7, 0.0f, 0, Block.box(0, 0, 0, 16, 2, 16));
+        RUBBLE(12, 1.5f, 4, Block.box(1, 0, 1, 15, 8, 15)),
+        EMBERS(7, 1.0f, 0, Block.box(0, 0, 0, 16, 2, 16));
 
         public final int light;
         public final float damage;
@@ -77,6 +77,13 @@ public class BigFireBlock extends Block {
     public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
         if (level.isClientSide || kind.damage <= 0.0f || !FireConfig.BIG_FIRE_HURTS.get() || entity instanceof ItemEntity) return;
         if (entity.fireImmune()) return;
+        if (kind == Kind.EMBERS) {
+            // hot coals: like a magma block (a careful step is safe), they hurt but do not set you alight
+            if (!entity.isSteppingCarefully() && entity instanceof net.minecraft.world.entity.LivingEntity) {
+                entity.hurt(level.damageSources().hotFloor(), kind.damage);
+            }
+            return;
+        }
         entity.setSecondsOnFire(kind.burnSeconds);
         entity.hurt(level.damageSources().inFire(), kind.damage);
     }

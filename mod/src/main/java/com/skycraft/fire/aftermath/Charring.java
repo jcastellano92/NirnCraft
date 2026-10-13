@@ -178,6 +178,8 @@ public final class Charring {
                 else if (r < 38 && gutted) c.setIfOpen(x, gy + 1, z, FireBlocks.SMOULDERING_EMBERS.get().defaultBlockState());
             }
         }
+        // a fire, a bedroll or a stain whose floor fell in or burnt through must not hang in the air
+        Supports.sweep(c, -3, -3, w + 2, d + 2, -2, hh + 6);
     }
 
     private static int ground(Canvas c, int x, int z) {

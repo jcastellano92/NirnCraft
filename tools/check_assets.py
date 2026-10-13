@@ -3,6 +3,12 @@
 
 Items are discovered from assets/skycraft/lang/en_us.json ("item.skycraft.<id>").
 Run from the repo root: python tools/check_assets.py
+
+NARROW BY DESIGN: this only covers the ITEM models of ids that have a lang key. It never opens a blockstate, a block
+model, a model's element rotations or a variant key, so it reported "0 problems" while four fire/debris block models
+were being rejected by the game's loader (magenta cubes in Helgen). The whole chain (registered blocks and items,
+blockstates, model syntax, parents, texture variables, PNGs, texture literals in Java, unregistered skycraft: ids)
+is tools/qa/asset_audit.py; qa.ps1 runs both.
 """
 import json
 import sys

@@ -70,16 +70,6 @@
           ],
           "texture": "#t"
         }
-      },
-      "rotation": {
-        "origin": [
-          8.0,
-          0,
-          3.5
-        ],
-        "axis": "y",
-        "angle": 5,
-        "rescale": false
       }
     },
     {
@@ -148,16 +138,6 @@
           ],
           "texture": "#t"
         }
-      },
-      "rotation": {
-        "origin": [
-          8.5,
-          0,
-          10.5
-        ],
-        "axis": "y",
-        "angle": -8,
-        "rescale": false
       }
     },
     {
@@ -234,7 +214,7 @@
           5.5
         ],
         "axis": "y",
-        "angle": 25,
+        "angle": 22.5,
         "rescale": false
       }
     },
@@ -312,7 +292,7 @@
           10.5
         ],
         "axis": "y",
-        "angle": -20,
+        "angle": -22.5,
         "rescale": false
       }
     },
@@ -390,7 +370,7 @@
           8.0
         ],
         "axis": "y",
-        "angle": 40,
+        "angle": 45,
         "rescale": false
       }
     }

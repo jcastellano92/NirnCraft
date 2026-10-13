@@ -23,9 +23,12 @@ final class IntroLoadingScreen extends Screen {
     private float shown;
     private float clientFrac;
 
-    IntroLoadingScreen(long since) {
+    /** The valley takes at least this long to "wake", whatever is already loaded (so it is read, and the far chunks arrive). */
+    private static final long MIN_MILLIS = 6000L;
+
+    IntroLoadingScreen() {
         super(Component.translatable("quest.skycraft.intro2.loading.title"));
-        this.since = since;
+        this.since = System.currentTimeMillis();
     }
 
     @Override
@@ -70,18 +73,20 @@ final class IntroLoadingScreen extends Screen {
         IntroPackets.State info = IntroClient.loadingInfo();
         IntroState st = IntroClient.state();
         long now = System.currentTimeMillis();
-        if (st != IntroState.LOADING) {
+        if (!IntroClient.coverWanted()) {
+            // the server moved the player on (or there is no opening): the world fades in
             if (fadeStart < 0) fadeStart = now;
             if (now - fadeStart > 900) onClose();
             return;
         }
-        if (info == null) return;
+        // while the character is being made, or before the server has said LOADING, the cover just waits
+        if (st != IntroState.LOADING || info == null) return;
         clientFrac = chunkFraction(mc, info);
         float server = Mth.clamp(info.progress(), 0f, 1f);
         float target = 0.5f * clientFrac + 0.5f * server;
         shown += (target - shown) * 0.2f;
         boolean timedOut = now - since > info.timeoutSeconds() * 1000L;
-        boolean ready = clientFrac >= 0.98f && server >= 0.999f;
+        boolean ready = clientFrac >= 0.98f && server >= 0.999f && now - since >= MIN_MILLIS;
         if ((ready || timedOut) && (!sent || now - sentAt > 2000)) {
             sent = true;
             sentAt = now;

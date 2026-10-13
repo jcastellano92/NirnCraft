@@ -215,7 +215,7 @@ public class RaceScreen extends Screen {
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         // Dark vignette background
-        g.fillGradient(0, 0, width, height, 0xF0050505, 0xF0181410);
+        g.fillGradient(0, 0, width, height, 0xFF050505, 0xFF181410); // opaque: the world is never seen behind it
         SkyUi.smoke(g, width, height, (net.minecraft.Util.getMillis() % 1_000_000L) / 1000f, 0.7f);
         // a soft pool of light where the character stands
         for (int i = 6; i > 0; i--) {
@@ -653,6 +653,7 @@ public class RaceScreen extends Screen {
 
     private void confirmSelection() {
         SkyNetwork.sendToServer(new CorePackets.ChooseRace(selected.id(), look()));
+        com.skycraft.quest.client.IntroClient.characterConfirmed();
         onClose();
     }
 }

@@ -838,7 +838,8 @@ and the fire entries of `tools/music/sound_catalog.py` / `synth_ambience.py` / `
 * **Big fire blocks** (`big_fire`, `flame_column`, `flame_tip`, `rubble_fire`, `smouldering_embers`): animated,
   emissive (light 15; each flame texture ships a labPBR `_s` emission map for shader packs), persistent and
   non-spreading: they are not vanilla fire (no random or scheduled ticks, never ignite a neighbour, never burn a block)
-  and only hurt what stands in them (`fire.bigFireHurts`). Stack base, column and tip for a tall flame
+  and only hurt what stands in them (`fire.bigFireHurts`: flames and rubble fire set you alight, embers burn like a
+  magma block unless you sneak). Stack base, column and tip for a tall flame
   (`BigFireBlock.column`). All are in the block tag `skycraft:persistent_fire`, which the world protection skips.
 * **Burnt block set:** `charred_planks` (+ stairs, slab), `charred_log`, `charred_beam`, `scorched_stone`,
   `scorched_stone_bricks`; decals `soot_stain`, `blood_stain`; debris `timber_debris`, `splintered_wreckage`,
@@ -863,12 +864,24 @@ and the fire entries of `tools/music/sound_catalog.py` / `synth_ambience.py` / `
   (wood charred or gone, cloth and glass gone, stone scorched); with `ruined` the building is gutted, a quarter may
   have fallen in (`variant` bit 1), and bit 0 sets it burning: fire columns inside and a `FIRE_SITE` anchor.
 * **Helgen** (`cityplans/helgen.json`, painters in `AftermathPainters`): the burnt keep and tower, ten gutted homes
-  (five still burning), an aid camp with wounded on bedrolls and two healers, a row of covered dead and a pyre with
-  kneeling mourners, rubble fields with diggers, haulers and a looter, a bucket chain to a burning home, soldiers at
-  a barricaded gate with their fallen, huddled families with children clinging, craters, a salvage cart whose merchant
-  still sells, scattered belongings. Aftermath people are ordinary `NpcEntity`s with pose flags (kneel, huddle, tend,
-  carry, weep), frozen in place, with short lines when you come close and soft sobbing; bodies are persistent
-  `CorpseEntity`s, most unlootable.
+  (five still burning), and scenes that each have a reason: an aid camp of real field tents (cloth over a ridge, the
+  wounded lying on bedrolls inside, a healer tending between them, a cook's fire in front); rows of covered dead, each
+  under a sheet laid on the ground with a candle at its head and mourners kneeling beside it; graves (mound,
+  headstone, flowers, mourners kneeling at the side); a small shrine (stone platform, altar with candles, stele, braziers)
+  where people kneel in prayer and a priest stands; a vigil of three covered dead; a funeral pyre with kneeling
+  mourners; rubble fields with diggers, haulers and a looter; soldiers at a barricaded gate with their fallen; craters
+  (the fire sits on the floor of the bowl); a salvage cart whose merchant still sells; scattered belongings. There is no
+  bucket chain and no huddled groups any more. Aftermath people are ordinary `NpcEntity`s with pose flags (kneel,
+  tend, carry, weep), frozen in place and turned towards what they attend (`@x,z` in the anchor option), with soft
+  sobbing. **Nothing floats:** painters read the ground once before painting, and a final `Supports` pass removes any
+  fire, decal, carpet, bed or candle left without a floor (burnt buildings run the same pass); the census prints the
+  number of floating blocks (0).
+* **Bodies:** every body is a persistent `CorpseEntity` that can be searched with the same prompt: a few coins, what
+  they wore (a soldier's weapon and armour) and one personal thing (`AftermathBodies`).
+* **One-liners only:** survivors, the wounded, healers, mourners, soldiers and every other person of the ruined town
+  (`HelgenFolk`) show one short line (by what they do, the hour, a drawn weapon) with only Continue and Goodbye: no
+  topics, no trade, no work. The exceptions: the named story people (Hadvar, Ralof...: only their story choices) and the
+  salvage cart's merchant (Barter only).
 * **Audio:** `music.helgen_aftermath` plays inside Helgen's footprint (`assets/skycraft/fire/music_zones.json`, any
   place can get one) with the soundtrack's normal crossfade; `ambient.fire_crackle`, `fire_roar`, `timber_creak`,
   `timber_collapse`, `sobbing`, `mourning` are quiet, positional, one per site every few seconds at most

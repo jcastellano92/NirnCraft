@@ -483,7 +483,7 @@
         15
       ],
       "face": "S",
-      "name": "helgen_bucket_line",
+      "name": "helgen_graves",
       "variant": 0
     },
     {
@@ -637,8 +637,8 @@
         7
       ],
       "face": "S",
-      "name": "helgen_huddle",
-      "variant": 1
+      "name": "helgen_shrine",
+      "variant": 0
     },
     {
       "kind": "reserved",
@@ -651,7 +651,7 @@
         7
       ],
       "face": "S",
-      "name": "helgen_huddle",
+      "name": "helgen_vigil",
       "variant": 0
     }
   ],
@@ -861,12 +861,13 @@
     "helgen_triage": "Survivors' Aid Camp",
     "helgen_funeral_row": "The Covered Dead",
     "helgen_pyre": "Funeral Pyre",
-    "helgen_bucket_line": "Bucket Line",
     "helgen_gate_post": "Legion Gate Post",
     "helgen_cart_stall": "Salvage Cart",
     "helgen_wreckage": "Wreckage",
     "helgen_crater": "Crater",
     "helgen_belongings": "Scattered Belongings",
-    "helgen_huddle": "Huddled Survivors"
+    "helgen_graves": "The Graves",
+    "helgen_shrine": "Shrine of the Divines",
+    "helgen_vigil": "The Vigil"
   }
 }

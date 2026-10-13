@@ -621,6 +621,27 @@ final class CottageTerrain {
         return removed;
     }
 
+    /**
+     * Removes stone, dirt and ore that hangs in the air over the chunks of the preparation (boulders, spires and loose
+     * ore whose ground was cut away by the terrain pass, roads or the town's grading): what the window would see as
+     * "floating rocks". Only loaded chunks are touched. Returns the number of blocks removed.
+     */
+    static int sweepRocks(ServerLevel level, java.util.Collection<Long> chunks) {
+        if (chunks.isEmpty()) return 0;
+        int minCx = Integer.MAX_VALUE, maxCx = Integer.MIN_VALUE, minCz = Integer.MAX_VALUE, maxCz = Integer.MIN_VALUE;
+        for (long k : chunks) {
+            minCx = Math.min(minCx, net.minecraft.world.level.ChunkPos.getX(k));
+            maxCx = Math.max(maxCx, net.minecraft.world.level.ChunkPos.getX(k));
+            minCz = Math.min(minCz, net.minecraft.world.level.ChunkPos.getZ(k));
+            maxCz = Math.max(maxCz, net.minecraft.world.level.ChunkPos.getZ(k));
+        }
+        java.util.Set<Long> set = new java.util.HashSet<>(chunks);
+        return com.skycraft.world.RockSweep.sweep(level, minCx * 16, minCz * 16, maxCx * 16 + 15, maxCz * 16 + 15, 0,
+                minCx * 16, minCz * 16, maxCx * 16 + 15, maxCz * 16 + 15, 48,
+                (cx, cz) -> set.contains(net.minecraft.world.level.ChunkPos.asLong(cx, cz)) && level.getChunkSource().getChunkNow(cx, cz) != null,
+                p -> com.skycraft.dig.PlacedBlocks.isPlayerPlaced(level, p));
+    }
+
     /** One column of the cone as the clearing sees it, for the QA command. */
     static String debugColumn(ServerLevel level, StartCottage.Site site, Town town, int x, int z) {
         Vec3 eye = site.windowEye();

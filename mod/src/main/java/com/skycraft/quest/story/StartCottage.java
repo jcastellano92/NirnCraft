@@ -192,6 +192,11 @@ public final class StartCottage {
         return p != null ? new int[]{p.x(), p.z()} : new int[]{HELGEN_X, HELGEN_Z};
     }
 
+    /** The town's radius in blocks (clamped), for the loading screen's chunk list. */
+    public static int townRadius() {
+        return helgenRadius();
+    }
+
     private static int helgenRadius() {
         Place p = Places.byId("helgen").orElse(null);
         return p != null ? Mth.clamp(p.radius(), 40, 90) : 60;
@@ -456,6 +461,18 @@ public final class StartCottage {
         return site;
     }
 
+    /**
+     * Builds the cottage and starts its preparation at server start, when this world has one and it is not done yet, so
+     * that the first player finds it ready (the build and the chunk generation happen behind the world-loading screen).
+     */
+    public static void prebuild(ServerLevel level) {
+        Site tmp = site(level);
+        if (tmp == null) return;
+        Data d = data(level);
+        if (d.built && d.prepared) return;
+        ensure(level);
+    }
+
     /** Admin: throws away what was built and prepared and builds again at the stored site. */
     public static void rebuild(ServerLevel level) {
         Site tmp = site(level);
@@ -671,6 +688,7 @@ public final class StartCottage {
         CottageTerrain.PathReport path;
         CottageTerrain.View view;
         int cleared;
+        int rocks;
         int loaded;
     }
 
@@ -809,6 +827,8 @@ public final class StartCottage {
             town = new CottageTerrain.Town(s.helgenX(), s.helgenZ(), helgenRadius(), hg == CottageTerrain.NO_GROUND ? s.helgenY() - 1 : hg);
             p.path = CottageTerrain.buildPath(level, s);
             p.cleared = CottageTerrain.clearCone(level, s, town);
+            // stone and dirt left hanging by the terrain pass or by roads and grading: the "floating rocks" the window saw
+            p.rocks = CottageTerrain.sweepRocks(level, p.chunks);
             p.view = CottageTerrain.viewshed(level, s, town);
             int[] sup = CottageTerrain.support(level, s, 3);
             d.visibility = (float) p.view.percent();
@@ -821,7 +841,8 @@ public final class StartCottage {
             d.cleared = p.cleared;
             d.report = "view " + Math.round(p.view.percent()) + "% (" + p.view.visible() + "/" + p.view.total() + ", trees " + p.view.blockedByTrees()
                     + ", terrain " + p.view.blockedByTerrain() + ", ground level " + Math.round(p.view.groundPercent()) + "%"
-                    + (p.view.sample().isEmpty() ? "" : ", blockers " + p.view.sample()) + "), cleared " + p.cleared + " canopy blocks, supports " + sup[0] + "/" + sup[1]
+                    + (p.view.sample().isEmpty() ? "" : ", blockers " + p.view.sample()) + "), cleared " + p.cleared + " canopy blocks, "
+                    + p.rocks + " floating rock blocks, supports " + sup[0] + "/" + sup[1]
                     + ", path " + (p.path.built() ? p.path.cells() + " cells, " + p.path.steps() + " steps, gaps " + p.path.airGaps() + ", breaks "
                     + p.path.discontinuities() + ", " + p.path.note() : "none: " + p.path.note());
             com.skycraft.Skycraft.LOGGER.info("Start cottage ready: {}", d.report);

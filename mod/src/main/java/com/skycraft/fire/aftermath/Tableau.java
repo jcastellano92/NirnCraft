@@ -49,7 +49,11 @@ public final class Tableau {
         CAPTAIN(0, true, "", 0, "captain", false),
         PATIENT(0, true, "", 0, "patient", false),
         LOOKER(0, true, "", 0, "survivor", false),
-        LOOTER(NpcEntity.FLAG_TEND, true, "minecraft:gold_nugget", 0, "looter", false);
+        LOOTER(NpcEntity.FLAG_TEND, true, "minecraft:gold_nugget", 0, "looter", false),
+        /** Kneeling in prayer before a shrine (head bowed, no tears). */
+        PRAY(NpcEntity.FLAG_KNEEL, true, "", 0, "pray", false),
+        /** The priest at a shrine or a vigil, standing, hands folded. */
+        PRIEST(0, true, "", 0, "priest", false);
 
         public final int flags;
         public final boolean frozen;
@@ -90,6 +94,10 @@ public final class Tableau {
             case "captain" -> 5;
             case "patient" -> 4;
             case "looter" -> 3;
+            case "pray" -> 4;
+            case "priest" -> 4;
+            case "night" -> 3;
+            case "wary" -> 3;
             default -> 0;
         };
     }

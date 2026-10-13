@@ -757,7 +757,7 @@
     },
     "mq_mw_ald_rilu": {
       "name": "Rilu the Shell-Poisoner",
-      "type": "skycraft:assassin",
+      "type": "npc:assassin",
       "hp": 3,
       "dmg": 1.4,
       "level": 20,

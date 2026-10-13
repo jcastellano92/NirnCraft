@@ -23,7 +23,7 @@
           5
         ],
         "axis": "x",
-        "angle": 18,
+        "angle": 22.5,
         "rescale": false
       },
       "faces": {
@@ -66,7 +66,7 @@
           5
         ],
         "axis": "x",
-        "angle": 18,
+        "angle": 22.5,
         "rescale": false
       },
       "faces": {
@@ -109,7 +109,7 @@
           9
         ],
         "axis": "z",
-        "angle": -22,
+        "angle": -22.5,
         "rescale": false
       },
       "faces": {
@@ -152,7 +152,7 @@
           9
         ],
         "axis": "z",
-        "angle": -22,
+        "angle": -22.5,
         "rescale": false
       },
       "faces": {
@@ -195,7 +195,7 @@
           12
         ],
         "axis": "x",
-        "angle": -12,
+        "angle": -22.5,
         "rescale": false
       },
       "faces": {
@@ -238,7 +238,7 @@
           12
         ],
         "axis": "x",
-        "angle": -12,
+        "angle": -22.5,
         "rescale": false
       },
       "faces": {

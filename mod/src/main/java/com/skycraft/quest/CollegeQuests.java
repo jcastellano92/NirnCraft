@@ -54,7 +54,7 @@ public final class CollegeQuests {
         Objective o2 = new Objective(Objective.Type.KILL_TARGET, tr("quest.skycraft.obj.college_dest_2"))
                 .at(ruin, dim, 0).guessY().placement("surface").label("Pyromancer Archmage")
                 .spawn(Spawn.of("skycraft:bandit_chief", 1).name(lit("Pyromancer Archmage")).target().boss().health(2.2f).build())
-                .spawn(Spawn.of("skycraft:skeleton", 3).name(lit("Flame Thrall")).build());
+                .spawn(Spawn.of("minecraft:skeleton", 3).name(lit("Flame Thrall")).build());
         Objective o3 = new Objective(Objective.Type.TALK_TO, tr("quest.skycraft.obj.college_dest_3"))
                 .npc(giver.getUUID()).at(giver.blockPosition(), dim, 0)
                 .topic(tr("dialogue.skycraft.quest.college_dest_return"), tr("quest.skycraft.reply.college_dest_done"))
@@ -88,8 +88,8 @@ public final class CollegeQuests {
                 .at(crypt, dim, 24).guessY().label("Desecrated Catacombs");
         Objective o2 = new Objective(Objective.Type.KILL_TARGET, tr("quest.skycraft.obj.college_rest_2"))
                 .at(crypt, dim, 0).guessY().placement("structure").label("Tormented Lich")
-                .spawn(Spawn.of("skycraft:draugr_wight", 1).name(lit("Tormented Lich")).target().boss().health(2.0f).build())
-                .spawn(Spawn.of("skycraft:skeleton", 4).name(lit("Restless Shade")).build());
+                .spawn(Spawn.of("skycraft:draugr_deathlord", 1).name(lit("Tormented Lich")).target().boss().health(2.0f).build())
+                .spawn(Spawn.of("minecraft:skeleton", 4).name(lit("Restless Shade")).build());
         Objective o3 = new Objective(Objective.Type.TALK_TO, tr("quest.skycraft.obj.college_rest_3"))
                 .npc(giver.getUUID()).at(giver.blockPosition(), dim, 0)
                 .topic(tr("dialogue.skycraft.quest.college_rest_return"), tr("quest.skycraft.reply.college_rest_done"))
@@ -123,7 +123,7 @@ public final class CollegeQuests {
         Objective o2 = new Objective(Objective.Type.KILL_TARGET, tr("quest.skycraft.obj.college_alt_2"))
                 .at(fracture, dim, 0).guessY().placement("surface").label("Anomalous Construct")
                 .spawn(Spawn.of("skycraft:bandit_chief", 1).name(lit("Anomalous Construct")).target().boss().health(2.4f).build())
-                .spawn(Spawn.of("skycraft:spider", 3).build());
+                .spawn(Spawn.of("minecraft:spider", 3).build());
         Objective o3 = new Objective(Objective.Type.TALK_TO, tr("quest.skycraft.obj.college_alt_3"))
                 .npc(giver.getUUID()).at(giver.blockPosition(), dim, 0)
                 .topic(tr("dialogue.skycraft.quest.college_alt_return"), tr("quest.skycraft.reply.college_alt_done"))
@@ -157,7 +157,7 @@ public final class CollegeQuests {
         Objective o2 = new Objective(Objective.Type.KILL_TARGET, tr("quest.skycraft.obj.college_conj_2"))
                 .at(circle, dim, 0).guessY().placement("surface").label("Renegade Conjurer")
                 .spawn(Spawn.of("skycraft:necromancer", 1).name(lit("Renegade Conjurer")).target().boss().health(2.2f).build())
-                .spawn(Spawn.of("skycraft:zombie", 4).name(lit("Bound Undead")).build());
+                .spawn(Spawn.of("minecraft:zombie", 4).name(lit("Bound Undead")).build());
         Objective o3 = new Objective(Objective.Type.TALK_TO, tr("quest.skycraft.obj.college_conj_3"))
                 .npc(giver.getUUID()).at(giver.blockPosition(), dim, 0)
                 .topic(tr("dialogue.skycraft.quest.college_conj_return"), tr("quest.skycraft.reply.college_conj_done"))
@@ -191,7 +191,7 @@ public final class CollegeQuests {
         Objective o2 = new Objective(Objective.Type.KILL_TARGET, tr("quest.skycraft.obj.college_ill_2"))
                 .at(lair, dim, 0).guessY().placement("surface").label("Master of Mirages")
                 .spawn(Spawn.of("skycraft:bandit_chief", 1).name(lit("Master of Mirages")).target().boss().health(2.0f).build())
-                .spawn(Spawn.of("skycraft:spider", 3).name(lit("Phantasm")).build());
+                .spawn(Spawn.of("minecraft:spider", 3).name(lit("Phantasm")).build());
         Objective o3 = new Objective(Objective.Type.TALK_TO, tr("quest.skycraft.obj.college_ill_3"))
                 .npc(giver.getUUID()).at(giver.blockPosition(), dim, 0)
                 .topic(tr("dialogue.skycraft.quest.college_ill_return"), tr("quest.skycraft.reply.college_ill_done"))

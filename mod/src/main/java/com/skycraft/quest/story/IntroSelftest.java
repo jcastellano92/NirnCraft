@@ -197,6 +197,10 @@ final class IntroSelftest {
         SkyData.get(fake).setRace(null);
         fake.setPos(site.origin().getX() + 40, site.floorY() + 5, site.origin().getZ() + 40);
         try {
+            // the pre-join placement (PlayerEvent.LoadFromFile): a new character starts on the cottage floor, before any chunk is sent
+            if (!IntroFlow.testPlaceFirstJoin(fake)) pr.add("the pre-join placement found no cottage");
+            if (fake.position().distanceToSqr(site.wake()) > 2 * 2) pr.add("the pre-join placement is not at the cottage floor: " + fake.position());
+            fake.setPos(site.origin().getX() + 40, site.floorY() + 5, site.origin().getZ() + 40);
             if (!IntroFlow.onFirstJoin(fake)) {
                 pr.add("onFirstJoin did not take the cottage");
                 return pr;
@@ -210,6 +214,10 @@ final class IntroSelftest {
             IntroFlow.testTick(fake);
             if (IntroFlow.state(fake) != IntroState.LOADING) pr.add("after the character the state is " + IntroFlow.state(fake) + ", not LOADING");
             IntroFlow.onClientLoaded(fake);
+            IntroFlow.testTick(fake);
+            // the world-loading screen lasts at least 6 s even when everything is already in
+            if (IntroFlow.state(fake) != IntroState.LOADING) pr.add("loading ended before its minimum time (state " + IntroFlow.state(fake) + ")");
+            IntroFlow.testFastForwardLoading(fake);
             IntroFlow.testTick(fake);
             if (IntroFlow.state(fake) != IntroState.IN_COTTAGE) pr.add("after loading the state is " + IntroFlow.state(fake) + ", not IN_COTTAGE");
             // a door that stays locked

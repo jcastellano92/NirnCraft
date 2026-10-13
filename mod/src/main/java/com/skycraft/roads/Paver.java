@@ -342,6 +342,10 @@ final class Paver {
                 int n = com.skycraft.world.OrphanSweep.sweep(level, cx * 16, cz * 16, cx * 16 + 15, cz * 16 + 15, 6,
                         cx * 16 - 14, cz * 16 - 14, cx * 16 + 29, cz * 16 + 29,
                         p -> PlacedBlocks.isPlayerPlaced(level, p) || reserved(level, p.getX(), p.getY(), p.getZ()));
+                // stone and dirt the cutting left hanging (a boulder whose ground was lowered under it)
+                n += com.skycraft.world.RockSweep.sweep(level, cx * 16, cz * 16, cx * 16 + 15, cz * 16 + 15, 4,
+                        cx * 16 - 14, cz * 16 - 14, cx * 16 + 29, cz * 16 + 29, 24, null,
+                        p -> PlacedBlocks.isPlayerPlaced(level, p) || reserved(level, p.getX(), p.getY(), p.getZ()));
                 if (n + ramps > 0) return n + ramps;
             }
             return -1;

@@ -32,6 +32,7 @@ import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -128,11 +129,20 @@ public final class IntroFlow {
         if (changed) syncHidden();
     }
 
+    /** The world-loading screen never lasts less than this (ticks): long enough to read, and the far chunks arrive meanwhile. */
+    static final int MIN_LOADING_TICKS = 6 * 20;
+
     private static void sendState(ServerPlayer p, IntroState st) {
         int[] h = StartCottage.helgen();
         float progress = StartCottage.prepProgress(p.serverLevel());
-        send(p, new IntroPackets.State(st.ordinal(), progress, h[0] >> 4, h[1] >> 4, 40, 8,
+        // the chunks the client must have before the screen lifts: 8 around the cottage and the whole town (its radius + 16)
+        send(p, new IntroPackets.State(st.ordinal(), progress, h[0] >> 4, h[1] >> 4, StartCottage.townRadius() + 16, 8,
                 QuestConfig.INTRO_LOADING_SECONDS.get()));
+    }
+
+    /** Tells a client that is not in the opening so (it holds the world back until it knows): state -1. */
+    private static void sendNone(ServerPlayer p) {
+        send(p, new IntroPackets.State(-1, 1f, 0, 0, 0, 0, 0));
     }
 
     private static void syncHidden() {
@@ -153,6 +163,46 @@ public final class IntroFlow {
     }
 
     // ------------------------------------------------------------------ first join, login
+
+    /**
+     * A brand-new character is put in the cottage BEFORE the connection exists: this fires while the server loads the
+     * player's data (no data file yet), before the dimension, the login packet and the first chunk packets are sent, so
+     * the client's very first position is the cottage floor and the first chunks it receives are the cottage's. (The
+     * later {@link #onFirstJoin} only finishes the state; its teleport is then a no-op.)
+     */
+    @SubscribeEvent
+    public static void onLoadPlayer(PlayerEvent.LoadFromFile event) {
+        if (!(event.getEntity() instanceof ServerPlayer p) || p.connection != null) return; // not a login in progress
+        if (event.getPlayerFile("dat").exists()) return; // an existing character: resumed in onLogin
+        try {
+            placeFirstJoin(p);
+        } catch (RuntimeException e) {
+            Skycraft.LOGGER.error("Could not place the new character in the start cottage", e);
+        }
+    }
+
+    /** Moves a new player to the cottage floor (facing the window). Returns false when there is no cottage here. */
+    static boolean placeFirstJoin(ServerPlayer p) {
+        if (!QuestConfig.INTRO.get() || p.level().dimension() != Level.OVERWORLD || !(p.level() instanceof ServerLevel level)) return false;
+        StartCottage.Site site = StartCottage.ensure(level);
+        if (site == null) return false;
+        Vec3 w = site.wake();
+        p.moveTo(w.x, w.y + 0.05, w.z, site.yaw(), 8f);
+        p.fallDistance = 0f;
+        p.setDeltaMovement(Vec3.ZERO);
+        return true;
+    }
+
+    /** Builds the cottage while the world loads (behind the loading screen), so no player ever waits for it on joining. */
+    @SubscribeEvent
+    public static void onServerStarted(ServerStartedEvent event) {
+        if (!QuestConfig.INTRO.get()) return;
+        try {
+            StartCottage.prebuild(event.getServer().overworld());
+        } catch (RuntimeException e) {
+            Skycraft.LOGGER.error("Start cottage prebuild failed (it is built on the first join instead)", e);
+        }
+    }
 
     /**
      * First login of a new character: the cottage is the first spawn (the world is not entered at the gate and moved).
@@ -212,6 +262,7 @@ public final class IntroFlow {
             st = stored(d);
         }
         if (st == null || !st.inIntro()) {
+            sendNone(p);
             syncHidden(p);
             return;
         }
@@ -283,7 +334,7 @@ public final class IntroFlow {
             }
             case LOADING -> {
                 int timeout = QuestConfig.INTRO_LOADING_SECONDS.get() * 20;
-                boolean ready = StartCottage.prepared(level) && r.clientLoaded;
+                boolean ready = StartCottage.prepared(level) && r.clientLoaded && now - r.since >= MIN_LOADING_TICKS;
                 if (now - r.lastProgress >= 10) {
                     r.lastProgress = now;
                     sendState(p, IntroState.LOADING);
@@ -578,6 +629,15 @@ public final class IntroFlow {
     static void testTick(ServerPlayer p) {
         Run r = RUNS.get(p.getUUID());
         if (r != null) tick(p, r);
+    }
+
+    static void testFastForwardLoading(ServerPlayer p) {
+        Run r = RUNS.get(p.getUUID());
+        if (r != null) r.since -= MIN_LOADING_TICKS + 5;
+    }
+
+    static boolean testPlaceFirstJoin(ServerPlayer p) {
+        return placeFirstJoin(p);
     }
 
     static void testFastForwardCutscene(ServerPlayer p) {
