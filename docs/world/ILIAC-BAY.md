@@ -600,3 +600,14 @@ Order: IB1, then IB2 and IB3 in parallel, then IB4, IB5 and IB6 in parallel, the
   capitals, 6 cities, 11 towns, 23 fief keeps, 6 villages, 10 farms, 6 inns) and 111 are dungeons and unique sites.
 * Reconciliation: 274 existing places sit inside the window; 37 Daggerfall namesakes move; marquee and lore-web
   places stay.
+
+## Owner decisions (2026-10-12)
+
+1. **Keep-village density: accepted conditionally.** Build it; judge in the playtest. If it looks or feels crowded,
+   thin the keeps (the curation rules in this doc make that a data change).
+2. **Binding anchors may move, with a precedence rule:** positions from the three main modern games win. Skyrim,
+   Oblivion (Cyrodiil) and Morrowind (Vvardenfell/Solstheim) placements are never overridden by Daggerfall/Arena data;
+   Daggerfall/Arena may move places only where those games have no say (High Rock, Hammerfell, and the Iliac Bay
+   towns). Sentinel's x, Elinhir and Gilane may move as proposed.
+3. **Orsinium:** use Daggerfall's Orsinium area for the existing `old_orsinium` dungeon if it fits the geography
+   and lore there; otherwise keep it where it is and note why.
