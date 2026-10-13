@@ -25,6 +25,9 @@ cannot hide a hole. The category score is the mean of its sub-metrics. Three kin
   prov     the number is shared by every region of a province (music, gear tags, legendary uniques); Skyrim ref =
            Skyrim's own number. Flagged "P" in the raw tables.
 
+For s_npcs, s_bldgs, q_total and q_per_town the reference is the larger of our Skyrim's value and the value measured
+from the real game (SKYRIM_MEASURED below), so Skycraft's own Skyrim can score under 100 too.
+
 Anything that is the same everywhere (spells, perks, recipes, NPC role list, rare creature variants) is global: it is
 listed under GLOBAL and not scored per region.
 """
@@ -110,6 +113,17 @@ METRICS = [
     ("i_unique", "ITM", "legendary uniques", "prov", None),
 ]
 M_BY_ID = {m[0]: m for m in METRICS}
+
+# Measured from the real game (the owner's Skyrim SE install, nine holds, counts only; see
+# docs/world/DESIGN-PRINCIPLES.md 4.1). Where Skycraft's own Skyrim is thinner than the real thing, the real number is
+# the reference, so the bar is Skyrim itself and not our copy of it. Areas are Skycraft km2 of the same holds (26.49).
+#   s_npcs      845 unique named NPCs placed in the nine holds / 18 named towns          = 46.9 (our Skyrim: 10.4)
+#   s_bldgs     210 named building locations (houses, shops, inns, temples, halls) / 18 = 11.7 (our Skyrim: 5.3)
+#   q_total     371 journal quests (main, faction, Daedric, side, misc, radiant) / 26.49 km2 = 14.0 (ours: 12.6)
+#   q_per_town  371 / 18 named towns                                                     = 20.6 (ours: 18.6)
+# Metrics not listed (dialogue lines, scenes, variety counts, dungeon density...) keep our Skyrim as the reference:
+# either the real game cannot be counted the same way, or our Skyrim already meets or beats it.
+SKYRIM_MEASURED = {"s_npcs": 46.9, "s_bldgs": 11.7, "q_total": 14.0, "q_per_town": 20.6}
 
 
 def jload(path, default=None):
@@ -962,6 +976,8 @@ def build_scores(data):
         v = value_of(sky, R, sets, mid)
         if not v and m[4] is not None:
             v = m[4]
+        if mid in SKYRIM_MEASURED:
+            v = max(v or 0.0, SKYRIM_MEASURED[mid])
         refs[mid] = v
     rows = {}
 
