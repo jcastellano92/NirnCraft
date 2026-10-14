@@ -6,10 +6,32 @@ import com.skycraft.society.entity.NpcEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.block.AbstractFurnaceBlock;
+import net.minecraft.world.level.block.BambooSaplingBlock;
+import net.minecraft.world.level.block.BambooStalkBlock;
+import net.minecraft.world.level.block.BonemealableBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CactusBlock;
+import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.SpreadingSnowyDirtBlock;
+import net.minecraft.world.level.block.SugarCaneBlock;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
+import net.minecraft.world.level.block.entity.CampfireBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -111,5 +133,109 @@ final class RestSim {
             }
         }
         return moved;
+    }
+
+    // ------------------------------------------------------------------ the rest of the world catches up
+
+    /** Chunks around a resting player that are brought forward (their loaded, ticking neighbourhood). */
+    private static final int CATCHUP_RADIUS = 3;
+    private static final int GROWTH_CAP = 384;
+    private static final int MACHINE_CAP = 400;
+
+    /** Plants and farmland: random-ticking, growing blocks (not the spreading grass and dirt, not leaves). */
+    private static boolean growing(BlockState s) {
+        if (!s.isRandomlyTicking()) return false;
+        Block b = s.getBlock();
+        if (b instanceof SpreadingSnowyDirtBlock) return false;
+        return b instanceof BonemealableBlock || b instanceof FarmBlock || b instanceof CactusBlock || b instanceof SugarCaneBlock
+                || b instanceof BambooStalkBlock || b instanceof BambooSaplingBlock;
+    }
+
+    /**
+     * One skip tick that moved the clock {@code step} ticks: bounded extra random ticks for the plants around the
+     * players (as many as the skipped ticks would have given, capped), and furnaces, brewing stands and campfires
+     * advanced by the same ticks. Only already loaded chunks, never forcing loads.
+     */
+    static void catchUp(ServerLevel level, List<ServerPlayer> players, long step, int skipTick) {
+        if (players.isEmpty() || step <= 1) return;
+        Set<Long> chunks = new HashSet<>();
+        for (ServerPlayer p : players) {
+            ChunkPos c = p.chunkPosition();
+            for (int dx = -CATCHUP_RADIUS; dx <= CATCHUP_RADIUS; dx++) {
+                for (int dz = -CATCHUP_RADIUS; dz <= CATCHUP_RADIUS; dz++) chunks.add(ChunkPos.asLong(c.x + dx, c.z + dz));
+            }
+        }
+        int samples = RestLogic.growthSamples(step, level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING), GROWTH_CAP);
+        int machineTicks = (int) Math.min(MACHINE_CAP, step * 2);
+        for (long key : chunks) {
+            LevelChunk chunk = level.getChunkSource().getChunkNow(ChunkPos.getX(key), ChunkPos.getZ(key));
+            if (chunk == null) continue;
+            if (samples > 0) growth(level, chunk, samples);
+            if (skipTick % 2 == 0) machines(level, chunk, machineTicks);
+        }
+    }
+
+    private static void growth(ServerLevel level, LevelChunk chunk, int samples) {
+        LevelChunkSection[] sections = chunk.getSections();
+        ChunkPos cp = chunk.getPos();
+        for (int i = 0; i < sections.length; i++) {
+            LevelChunkSection sec = sections[i];
+            if (sec == null || sec.hasOnlyAir() || !sec.isRandomlyTickingBlocks() || !sec.getStates().maybeHas(RestSim::growing)) continue;
+            int y0 = (chunk.getMinSection() + i) << 4;
+            for (int n = 0; n < samples; n++) {
+                int x = level.random.nextInt(16), y = level.random.nextInt(16), z = level.random.nextInt(16);
+                BlockState bs = sec.getBlockState(x, y, z);
+                if (growing(bs)) bs.randomTick(level, new BlockPos(cp.getMinBlockX() + x, y0 + y, cp.getMinBlockZ() + z), level.random);
+            }
+        }
+    }
+
+    /** Smelting, brewing and cooking go on for the skipped ticks (fuel burns, items finish). */
+    private static void machines(ServerLevel level, LevelChunk chunk, int ticks) {
+        for (BlockEntity be : new ArrayList<>(chunk.getBlockEntities().values())) {
+            if (be.isRemoved()) continue;
+            if (be instanceof AbstractFurnaceBlockEntity f) {
+                if (f.getItem(0).isEmpty() && !f.getBlockState().getOptionalValue(AbstractFurnaceBlock.LIT).orElse(false)) continue;
+                for (int i = 0; i < ticks && !f.isRemoved(); i++) {
+                    AbstractFurnaceBlockEntity.serverTick(level, f.getBlockPos(), f.getBlockState(), f);
+                }
+            } else if (be instanceof BrewingStandBlockEntity b) {
+                if (b.getItem(3).isEmpty()) continue;
+                for (int i = 0; i < ticks && !b.isRemoved(); i++) {
+                    BrewingStandBlockEntity.serverTick(level, b.getBlockPos(), b.getBlockState(), b);
+                }
+            } else if (be instanceof CampfireBlockEntity c && c.getBlockState().getOptionalValue(CampfireBlock.LIT).orElse(false)) {
+                for (int i = 0; i < ticks && !c.isRemoved(); i++) {
+                    CampfireBlockEntity.cookTick(level, c.getBlockPos(), c.getBlockState(), c);
+                }
+            }
+        }
+    }
+
+    /** Baby animals grow and breeding cooldowns run down by the ticks skipped (every few skip ticks, accumulated). */
+    static void animals(ServerLevel level, List<ServerPlayer> players, long ticks) {
+        if (ticks <= 0) return;
+        for (ServerPlayer p : players) {
+            AABB box = p.getBoundingBox().inflate(CATCHUP_RADIUS * 16, 48, CATCHUP_RADIUS * 16);
+            for (AgeableMob m : level.getEntitiesOfClass(AgeableMob.class, box, e -> e.isAlive() && e.getAge() != 0)) {
+                m.setAge(RestLogic.ageAfter(m.getAge(), ticks));
+            }
+        }
+    }
+
+    /**
+     * Status effects run down by the skipped ticks: the ones that are spent expire (no retroactive damage or
+     * healing), the rest keep their remaining time. Effects the player gets after this call (Well Rested) are fresh.
+     */
+    static void shortenEffects(ServerPlayer player, long ticks) {
+        if (ticks <= 0) return;
+        for (MobEffectInstance e : new ArrayList<>(player.getActiveEffects())) {
+            if (e.isInfiniteDuration()) continue;
+            int left = RestLogic.effectLeft(e.getDuration(), ticks);
+            player.removeEffect(e.getEffect());
+            if (left > 0) {
+                player.addEffect(new MobEffectInstance(e.getEffect(), left, e.getAmplifier(), e.isAmbient(), e.isVisible(), e.showIcon()));
+            }
+        }
     }
 }

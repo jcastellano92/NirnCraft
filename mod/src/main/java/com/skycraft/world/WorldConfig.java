@@ -21,7 +21,6 @@ public final class WorldConfig {
     public static final ForgeConfigSpec.IntValue REST_AFK_SECONDS;
     public static final ForgeConfigSpec.IntValue REST_FULL_RECHARGE_SECONDS;
     public static final ForgeConfigSpec.IntValue REST_BEDROLL_PERCENT;
-    public static final ForgeConfigSpec.IntValue REST_WAIT_PERCENT;
     public static final ForgeConfigSpec.IntValue REST_MAX_SKIP_SECONDS;
     public static final ForgeConfigSpec.IntValue WELL_RESTED_TICKS;
 
@@ -58,8 +57,6 @@ public final class WorldConfig {
                 .defineInRange("fullRechargeSeconds", 120, 10, 3600);
         REST_BEDROLL_PERCENT = b.comment("Recovery speed on a bedroll or in a tent, in percent of a bed's.")
                 .defineInRange("bedrollPercent", 75, 5, 100);
-        REST_WAIT_PERCENT = b.comment("Recovery speed while sitting to wait, in percent of a bed's.")
-                .defineInRange("waitPercent", 25, 0, 100);
         REST_MAX_SKIP_SECONDS = b.comment("Real seconds the longest fast-forward (24 hours) takes.")
                 .defineInRange("maxSkipSeconds", 12, 3, 60);
         b.pop();

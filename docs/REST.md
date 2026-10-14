@@ -1,58 +1,90 @@
 # Rest: Wait, Sleep and time passing
 
 One system for sleeping, waiting, the rest need, multiplayer time skips and the jail sentence. Code:
-`world/RestManager` (server sessions and skips), `world/RestLogic` (the pure rules, self-tested), `world/RestSim` (townsfolk),
-`world/client/RestClient` + `RestScreen` (camera, pose, HUD, input). Selftest: `/skycraft-crime selftest` ("rest:" lines).
+`world/RestManager` (server sessions, skips, spawn gate), `world/RestLogic` (the pure rules, self-tested),
+`world/RestSim` (townsfolk and world catch-up), `world/client/RestClient` (camera, HUD, input). Selftest:
+`/skycraft-crime selftest` ("rest:" lines).
 
 ## What the player does
 
-* **The wait key** (`key.skycraft.wait`, "Wait / Sleep", default I; every message shows the player's real binding) opens a
-  small non-pausing prompt: **Sleep** (enabled only with a bed or bedroll block within 3.5 blocks; the server picks the
-  nearest free one) or **Wait** (sit on the ground). Right-clicking a bed lies down in it directly (sneak = vanilla).
-  Pressing the key again while resting opens the same prompt to switch or stand up.
-* Sleeping lies the player along the bed (a client-side sleeping pose from a `RestPose` packet, centred on the mattress);
-  waiting seats them as a rider on an invisible `Marker` (sneak = vanilla dismount = stand up). The camera goes to third
-  person; the view the player had is remembered and restored on every exit (stand up, cancel, logout, death).
+* **Sleep** = use a bed you may use (a rented room, your bedroll, an unowned bed): **right-click or [F]** (the interact key;
+  its crosshair prompt reads "[F] Sleep Bed"). Sneak-use is still vanilla sleeping. Sleeping is the **real vanilla sleeping
+  state**: every client draws the lying pose, the hitbox is low, damage wakes. The vanilla "Leave Bed" screen and black-out
+  are replaced by our panel while a rest session runs.
+* **Wait** = the wait key (`key.skycraft.wait`, default I; every message shows the real binding) sits the player on the
+  ground (a rider on an invisible `Marker`; sneak = stand up). Pressing the key again stands up and cancels a running skip.
+* Camera goes third person; the view the player had is remembered and restored on every exit (stand up, cancel, logout,
+  death, ESC).
 * A non-blocking panel above the hotbar (`HudStack.BC_REST`): hours (left/right or mouse wheel, 1-24; up = until morning,
-  down = until evening), Enter starts. Movement keys, sneak, Escape or damage stand the player up. Escape does not open
-  the pause menu while resting (it cancels).
-* Time passing is a **fast-forward**, never a jump: the world clock is advanced a little every tick over 3-12 real
-  seconds (`RestLogic.worldTicksAt`, smoothstep), the sky visibly races, weather ticks as normal, the FOV slowly zooms and a
-  vignette closes in with a progress bar; meters are fed hour by hour (`SurvivalMode.restStep`), the townsfolk near the
-  resting players hop along their real paths towards the anchor their schedule gives (`RestSim.hop`, throttled to 48 per
-  10 ticks), and at the end (or on a cancel) every loaded scheduled NPC near the group not at its scheduled place is put
-  there (`NpcPlacement.snapToSchedule`: standable cell by the anchor, in bed for sleepers). The normal wake-up then plays
-  (fade "N hours later", Well Rested, spawn at an owned bed, Rested in a bedroll, Lover's Comfort).
-* **Rest need**: lying or sitting slowly refills the survival fatigue ("rest") bar and stops it growing, with no skip:
-  a drained bar is full in `fullRechargeSeconds` (120) in a bed, `bedrollPercent` (75) of that speed on a bedroll,
-  `waitPercent` (25) sitting. Combat, damage, fire, water or a hostile hunting the player within 16 blocks end it.
+  down = until evening), Enter starts. Movement keys, sneak, Escape or damage stand the player up; Escape does not open
+  the pause menu while resting.
+* **Rest bar**: only a bed rests you. Lying in a bed slowly refills the survival fatigue bar (a drained bar full in
+  `fullRechargeSeconds`, 120; a bedroll at `bedrollPercent`, 75%) and stops it growing. Waiting gives no recovery and does
+  not stop the bar growing (a skipped hour of waiting tires like any awake hour).
+
+## The fast-forward
+
+Time passing is never a jump: the world clock (and game time, see below) advances a little every tick over 3-12 real
+seconds (`RestLogic.worldTicksAt`, smoothstep), the sky visibly races, weather ticks as normal, the FOV zooms slowly and a
+vignette and progress bar show it. During it, per tick and bounded:
+
+* **Meters** hour by hour (`SurvivalMode.restStep`); at the end Well Rested, spawn at an owned bed, Rested/Lover's Comfort.
+* **Townsfolk** near the resting players hop along their real paths towards the anchor their schedule gives
+  (`RestSim.hop`, 48 per 10 ticks); at the end (or on a cancel) every loaded scheduled NPC near the group is put at its
+  scheduled place (`NpcPlacement.snapToSchedule`: standable cell by the anchor, in bed for sleepers).
+* **Plants**: extra random ticks for crops, saplings, stems, cane, cactus, bamboo and farmland in the loaded chunks within
+  3 chunks of every player (`RestSim.catchUp`): as many samples per section per tick as the skipped ticks would have given
+  (`randomTickSpeed`, capped at 384), only growing blocks (no grass spread). Growth honours the light at that moment.
+* **Machines**: furnaces, smokers, blast furnaces, brewing stands and lit campfires near the players are ticked for the
+  skipped ticks (fuel burns, items finish). Baby animals grow up and breeding cooldowns run down.
+* **Game time**: `advanceTime` moves the overworld game time as well as the day time, so every deadline stored as
+  "game time + n" (spell/shout/power/mount cooldowns, rented rooms, hostile pacing, scheduled block ticks and commands)
+  runs out exactly as if the time had been waited.
+* **Status effects** of every player in the dimension are shortened by the skipped ticks at the end; spent ones expire
+  (no retroactive poison/regeneration; Well Rested is applied after, fresh).
+* **Jail sentences**: every prisoner's remaining seconds count down by the skipped time (`Jail.passTime`).
+* **No hostile spawning**: while a skip runs, no hostile appears in that dimension; while anyone rests, none within 96
+  blocks of them. Gated at `MobSpawnEvent` (position check, finalize), at `EntityJoinLevelEvent` (every Skycraft spawner,
+  patrol, encounter, ambush and dragon) and in `SpawnPacing.hostileReady`.
+
+## Waking: disturbances
+
+Any damage, a hostile mob targeting the resting player within 16 blocks, combat, fire, water or being pushed more than
+1.5 blocks wakes the player at once, stands them up (they can fight immediately) and, during a skip, stops it for
+**everybody** and stands everybody up, naming who was disturbed (`RestLogic.disturb`). Without a skip only that player
+gets up and other resting players are told.
 
 ## Multiplayer
 
-* Per dimension, time may pass only when **every** player there rests (SLEEP or WAIT). Excluded from the requirement:
-  spectators, dead players, prisoners and players idle (no movement or look change) for `afkSeconds` (300).
-* Players who are not resting see one HUD line (`HudStack`, no chat, no screen): "<Name> is resting. Press [key] to rest
-  and join (n/m)". Pressing the key gives the same Sleep/Wait prompt (join sleeping if a bed is near, else waiting).
-* The **initiator** is the longest-resting player; only they start the skip. If they stand up before it starts (or log
-  out, die or change dimension at any time) it passes to the next longest-resting player.
+* Per dimension, time may pass only when **every** player there rests (sleeping or waiting). Excluded: spectators, dead
+  players, prisoners and players idle for `afkSeconds` (300).
+* Players who are not resting see one HUD line: "<Name> is resting. Press [key] to rest and join (n/m)"; the key waits.
+* The **initiator** is the longest-resting player; only they start the skip. If they stand up before it starts (or log out,
+  die or change dimension at any time) it passes to the next longest-resting player.
 * **Cancel**: not skipping = only that player stands up. Initiator cancels a running skip = it stops for all and everybody
-  stands up (the time that passed stays, with its effects). Another player cancels = they leave and the skip stops (not
-  everyone rests), the others keep resting and may start again. Logout/death/dimension change do not stop the skip: the
-  member is dropped and the handover applies.
-* Works the same on an Essential-hosted integrated server and a dedicated one (all logic is server side; client packets
-  are `ENTER mode` / `START hours` / `CANCEL` and are validated: combat, enemies, water, fire, air, mounted, open menu,
-  prisoner, bed range/ownership/occupancy).
+  stands up. Another player cancels = they leave and the skip stops (not everyone rests), the others keep resting.
+  Logout/death/dimension change do not stop the skip: the member is dropped and the handover applies.
+* Works on an Essential-hosted integrated server and a dedicated one (all logic is server side; the client packet is
+  `ENTER mode` / `START hours` / `CANCEL`, validated: combat, enemies, water, fire, air, mounted, open menu, prisoner, bed
+  range/ownership/occupancy).
+
+## Vanilla sleeping and the sleep percentage
+
+Vanilla wakes everybody and skips to morning once all players have slept 100 ticks. Our system owns time, so while anybody
+lies in a bed the world's `playersSleepingPercentage` is raised to 1000 and put back afterwards (`RestManager.guardSleepRule`;
+the original value is kept in `skycraft_rest_rule` world data and restored at server start after a crash). The "you can only
+sleep at night" stop is lifted for resting players (`SleepingTimeCheckEvent`).
 
 ## Config (`config/skycraft-world-common.toml`, `[rest]`)
 
 | key | default | effect |
 | --- | --- | --- |
-| `syncMultiplayer` | true | false: with more than one player online the world clock never skips; resting restores needs and a "Start" is a personal fast-forward (needs and effects only, no world time, no NPC simulation) |
+| `syncMultiplayer` | true | false: with more than one player online the world clock never skips; resting restores needs and "Start" is a personal fast-forward (needs and effects only, no world time, no NPC simulation) |
 | `allowWait` | true | false disables sitting to wait |
 | `allowSleepSkip` | true | false: beds only restore the rest need, no time skip |
 | `afkSeconds` | 300 | idle time after which a non-resting player no longer blocks the group (0 = never) |
 | `fullRechargeSeconds` | 120 | seconds in a bed to refill a drained rest bar |
-| `bedrollPercent` / `waitPercent` | 75 / 25 | recovery speed relative to a bed |
+| `bedrollPercent` | 75 | bedroll recovery speed relative to a bed (waiting has none) |
 | `maxSkipSeconds` | 12 | real seconds of the longest (24 h) fast-forward; 1 h takes 3.5 s |
 
 ## Jail
@@ -60,12 +92,11 @@ One system for sleeping, waiting, the rest need, multiplayer time skips and the 
 Sleeping in the cell bed after the first minute (`crime/Jail`) is a **personal** fast-forward of the same cinematic
 (`RestManager.beginJail`): no hours, no other player needed, the world clock is not touched by the cinematic, and the
 release (items back, wake outside the door, `passDays` only when alone) runs when it completes. Cancelling leaves the
-prisoner in the cell. Prisoners are excluded from the group requirement and never block anybody.
+prisoner in the cell. Prisoners are excluded from the group requirement; the cell bed never becomes a respawn point.
 
 ## Notes and limits
 
-* Crops, effect durations and jail sentence timers run on real ticks (as before); the survival meters, hunger/fatigue/cold,
-  rest effects and townsfolk follow the skipped hours. `doDaylightCycle` off: the clock still moves for a skip (as before).
-* The lying pose is a client override (the server keeps the player standing): other players need the mod to see it; the
-  hitbox stays standing height.
-* Vanilla sneak-use on a bed still starts vanilla sleeping (night only, vanilla skip).
+* Sitting keeps the full standing hitbox (a rider cannot be made smaller without mixins). Sleeping has the vanilla low one.
+* Not accelerated: dropped items (they do not despawn), Skycraft's own crafting stations that tick on their own counters,
+  entity fire, mob AI. Regional difficulty (chunk inhabited time) rises with the game-time jump, as for any elapsed time.
+* `doDaylightCycle` off: a skip still moves the clock (as before).

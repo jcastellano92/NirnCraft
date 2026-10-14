@@ -324,6 +324,8 @@ public final class DeathHandler {
     public static void onWakeUp(PlayerWakeUpEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             BlockPos bed = player.getSleepingPos().orElse(player.blockPosition());
+            // a prisoner sleeping off the sentence in the cell bed does not make the cell their home
+            if (com.skycraft.crime.Jail.isJailArea(player.level(), bed)) return;
             // bedrolls and tents are for one night: they never become a respawn point
             if (com.skycraft.survival.camping.CampingEvents.isCampBed(player.level(), bed)) return;
             // the intro cottage's bed is only where you wake; somebody else's bed is no home of yours

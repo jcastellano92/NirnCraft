@@ -17,7 +17,9 @@ import net.minecraft.util.Mth;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraft.client.gui.screens.InBedChatScreen;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
@@ -60,11 +62,6 @@ public final class RestClient {
 
     private static float zoom, prevZoom, eased;
 
-    /** Entity id -> head direction of players lying in a bed (the sleeping pose's rotation). */
-    private static final Map<Integer, Float> LYING = new HashMap<>();
-    private static final float[] SAVED = new float[4];
-    private static net.minecraft.world.entity.Pose savedPose;
-
     private RestClient() {}
 
     // ------------------------------------------------------------------ server state
@@ -87,6 +84,7 @@ public final class RestClient {
         }
         hint = null;
         if (mc.player == null) return;
+        if (mc.screen instanceof InBedChatScreen) mc.setScreen(null);
         if (!cameraTaken) {
             savedCamera = mc.options.getCameraType();
             mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
@@ -104,11 +102,6 @@ public final class RestClient {
         hint = m.required() <= 0 ? null : m;
     }
 
-    public static void onPose(WorldPackets.RestPose m) {
-        if (m.lying()) LYING.put(m.entityId(), m.yaw());
-        else LYING.remove(m.entityId());
-    }
-
     private static void restoreCamera() {
         if (!cameraTaken) return;
         cameraTaken = false;
@@ -122,7 +115,6 @@ public final class RestClient {
         hint = null;
         zoom = prevZoom = eased = 0f;
         cancelSent = false;
-        LYING.clear();
         restoreCamera();
     }
 
@@ -243,39 +235,21 @@ public final class RestClient {
         event.setFOV(event.getFOV() * (1.0 - 0.28 * ease * (0.4 + 0.6 * Mth.clamp(eased, 0f, 1f))));
     }
 
-    // ------------------------------------------------------------------ lying pose
+    // ------------------------------------------------------------------ vanilla sleeping chrome
 
     /**
-     * Players in a bed are drawn lying along it: the renderer's sleeping pose with the bed's direction (the server
-     * keeps them standing so nothing else about their body changes), shifted so the body lies centred on the mattress.
+     * Sleeping uses the vanilla sleeping state, which opens the "Leave Bed" chat screen and blacks the screen out.
+     * While the rest system runs, neither is wanted: the time panel and the cinematic replace them (ESC, movement or
+     * a hit stands the player up). A vanilla sneak-use sleep (no rest session) keeps the vanilla screen.
      */
     @SubscribeEvent
-    public static void onRenderPlayerPre(RenderPlayerEvent.Pre event) {
-        Float yaw = LYING.get(event.getEntity().getId());
-        if (yaw == null) return;
-        var p = event.getEntity();
-        savedPose = p.getPose();
-        SAVED[0] = p.yBodyRot;
-        SAVED[1] = p.yBodyRotO;
-        SAVED[2] = p.yHeadRot;
-        SAVED[3] = p.yHeadRotO;
-        p.setPose(net.minecraft.world.entity.Pose.SLEEPING);
-        p.yBodyRot = p.yBodyRotO = p.yHeadRot = p.yHeadRotO = yaw;
-        double rad = Math.toRadians(yaw);
-        // head direction (-cos, sin); the body extends 1.8 from the feet, so move it back by half
-        event.getPoseStack().translate(0.9 * Math.cos(rad), 0.2, -0.9 * Math.sin(rad));
+    public static void onInBedScreen(ScreenEvent.Opening event) {
+        if (phase != 0 && event.getNewScreen() instanceof InBedChatScreen) event.setCanceled(true);
     }
 
     @SubscribeEvent
-    public static void onRenderPlayerPost(RenderPlayerEvent.Post event) {
-        if (savedPose == null || !LYING.containsKey(event.getEntity().getId())) return;
-        var p = event.getEntity();
-        p.setPose(savedPose);
-        p.yBodyRot = SAVED[0];
-        p.yBodyRotO = SAVED[1];
-        p.yHeadRot = SAVED[2];
-        p.yHeadRotO = SAVED[3];
-        savedPose = null;
+    public static void onOverlay(RenderGuiOverlayEvent.Pre event) {
+        if (phase != 0 && event.getOverlay().id().equals(VanillaGuiOverlay.SLEEP_FADE.id())) event.setCanceled(true);
     }
 
     // ------------------------------------------------------------------ HUD

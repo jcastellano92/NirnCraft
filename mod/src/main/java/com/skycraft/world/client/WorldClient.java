@@ -29,8 +29,4 @@ public final class WorldClient {
     public static void restHint(WorldPackets.RestHint m) {
         RestClient.onHint(m);
     }
-
-    public static void restPose(WorldPackets.RestPose m) {
-        RestClient.onPose(m);
-    }
 }

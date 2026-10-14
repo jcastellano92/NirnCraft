@@ -109,6 +109,8 @@ public final class SpawnPacing {
 
     /** True when a hostile event near this player may happen now (not in the grace period, cooldown over). */
     public static boolean hostileReady(ServerPlayer player) {
+        // nobody is hunted while they or the world around them rest (world/RestManager)
+        if (com.skycraft.world.RestManager.spawnsBlocked(player.serverLevel(), player.getX(), player.getY(), player.getZ())) return false;
         long now = player.level().getGameTime();
         if (now < QUIET_UNTIL.getOrDefault(player.getUUID(), 0L)) return false;
         Long last = LAST_HOSTILE.get(player.getUUID());

@@ -65,6 +65,14 @@ public final class RestLogic {
         return isInitiator ? Cancel.STOP_ALL_AND_WAKE : Cancel.LEAVER_ONLY_STOP_SKIP;
     }
 
+    /**
+     * A player was disturbed (damage, a hostile hunting them, pushed away): they get up to defend themselves and a
+     * running skip stops for everybody, whoever was hit, and everybody gets up.
+     */
+    public static Cancel disturb(boolean skipRunning) {
+        return skipRunning ? Cancel.STOP_ALL_AND_WAKE : Cancel.LEAVE_ONLY;
+    }
+
     public enum Block {
         NONE, JAIL, MODE_DISABLED, MULTIPLAYER_OFF, NOT_ALL_RESTING, NOT_INITIATOR
     }
@@ -99,16 +107,53 @@ public final class RestLogic {
 
     /**
      * Rest-need points (of {@code max}) recovered per second: a bed refills a drained bar in {@code fullSeconds}, a
-     * bedroll in {@code bedrollPercent} of that speed, sitting to wait in {@code waitPercent}.
+     * bedroll in {@code bedrollPercent} of that speed. Waiting (sitting) recovers nothing: only a bed rests you.
      */
-    public static float recoveryPerSecond(int mode, boolean bedroll, float max, int fullSeconds, int bedrollPercent, int waitPercent) {
+    public static float recoveryPerSecond(int mode, boolean bedroll, float max, int fullSeconds, int bedrollPercent) {
         float base = max / Math.max(1, fullSeconds);
         return switch (mode) {
             case SLEEP -> bedroll ? base * bedrollPercent / 100f : base;
-            case WAIT -> base * waitPercent / 100f;
             case JAIL -> base;
             default -> 0f;
         };
+    }
+
+    // ------------------------------------------------------------------ catching the world up
+
+    /** A status effect's duration after {@code skipped} ticks passed (infinite stays infinite; 0 means it ran out). */
+    public static int effectLeft(int duration, long skipped) {
+        if (duration < 0) return duration;
+        return (int) Math.max(0L, duration - Math.max(0L, skipped));
+    }
+
+    /** A jail sentence's remaining seconds after {@code skippedTicks} of world time passed. */
+    public static int jailLeft(int remainingSeconds, long skippedTicks) {
+        return (int) Math.max(0L, remainingSeconds - Math.max(0L, skippedTicks) / 20L);
+    }
+
+    /**
+     * Extra random-tick samples per section for one skip tick that moved the clock {@code step} ticks: the vanilla
+     * {@code randomTickSpeed} per skipped tick (one tick already happened naturally), capped for performance.
+     */
+    public static int growthSamples(long step, int randomTickSpeed, int cap) {
+        long n = Math.max(0L, step - 1) * Math.max(0, randomTickSpeed);
+        return (int) Math.min(cap, n);
+    }
+
+    /** An animal's age counter after {@code step} ticks: babies grow towards 0, breeding cooldowns count down. */
+    public static int ageAfter(int age, long step) {
+        if (age < 0) return (int) Math.min(0L, age + step);
+        if (age > 0) return (int) Math.max(0L, age - step);
+        return 0;
+    }
+
+    /**
+     * Whether a hostile spawn is refused: dimension-wide while a time skip runs, and near (within {@code radius}
+     * blocks of) a resting player otherwise ({@code nearestRestSq}: squared distance, or a negative number for none).
+     */
+    public static boolean spawnBlocked(boolean skipRunningInDimension, double nearestRestSq, double radius) {
+        if (skipRunningInDimension) return true;
+        return nearestRestSq >= 0 && nearestRestSq <= radius * radius;
     }
 
     /** Seconds to refill a bar from {@code value} (0 = rested) with the given speed per second. */
@@ -214,12 +259,22 @@ public final class RestLogic {
         c.eq(startBlock(JAIL, true, all, 1, true, true, true) == Block.JAIL, "jail sleep is not a world skip");
 
         // need recovery: bed refills 240 in 120 s, bedroll and waiting slower
-        float bed = recoveryPerSecond(SLEEP, false, 240f, 120, 75, 25);
+        float bed = recoveryPerSecond(SLEEP, false, 240f, 120, 75);
         c.eq(Math.abs(bed - 2f) < 1e-4, "bed 2 points/s");
         c.eq(Math.abs(secondsToRecover(240f, bed) - 120f) < 0.01f, "drained bar full in 120 s");
-        c.eq(recoveryPerSecond(SLEEP, true, 240f, 120, 75, 25) < bed, "bedroll slower than bed");
-        c.eq(recoveryPerSecond(WAIT, false, 240f, 120, 75, 25) < recoveryPerSecond(SLEEP, true, 240f, 120, 75, 25), "waiting slowest");
+        c.eq(recoveryPerSecond(SLEEP, true, 240f, 120, 75) < bed, "bedroll slower than bed");
+        c.eq(recoveryPerSecond(WAIT, false, 240f, 120, 75) == 0f, "waiting does not rest you: only a bed does");
         c.eq(secondsToRecover(120f, bed) < 61f, "half drained takes half the time");
+
+        // the world catches up with the skipped time
+        c.eq(effectLeft(1000, 400) == 600 && effectLeft(300, 8000) == 0 && effectLeft(-1, 8000) == -1, "effect durations shrink, expire, infinite stays");
+        c.eq(jailLeft(300, 4000) == 100 && jailLeft(60, 8000) == 0, "jail sentence counts down by skipped time");
+        c.eq(growthSamples(1, 3, 384) == 0 && growthSamples(57, 3, 384) == 168 && growthSamples(500, 3, 384) == 384, "growth samples scale and cap");
+        c.eq(ageAfter(-6000, 1000) == -5000 && ageAfter(-500, 1000) == 0 && ageAfter(300, 1000) == 0 && ageAfter(5000, 1000) == 4000, "animal ages");
+        c.eq(spawnBlocked(true, -1, 96) && spawnBlocked(false, 50 * 50, 96) && !spawnBlocked(false, 200 * 200, 96) && !spawnBlocked(false, -1, 96),
+                "no hostile spawns during a skip or near a resting player");
+        c.eq(cancel(true, false) == Cancel.LEAVER_ONLY_STOP_SKIP && disturb(true) == Cancel.STOP_ALL_AND_WAKE && disturb(false) == Cancel.LEAVE_ONLY,
+                "a disturbance (damage, hunter) cancels the skip for all whoever it hits");
 
         // time maths
         c.eq(hourOfDay(0) == 6 && hourOfDay(12000) == 18 && hourOfDay(18000) == 0, "clock hours");

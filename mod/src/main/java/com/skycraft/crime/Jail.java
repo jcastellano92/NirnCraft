@@ -655,6 +655,24 @@ public final class Jail {
         return before == 1;
     }
 
+    /**
+     * World time passed while the prisoner was not serving it second by second (a time skip of the rest system): the
+     * sentence counts down by those seconds, and a sentence that runs out is announced like any served one.
+     */
+    public static void passTime(ServerPlayer player, int seconds) {
+        if (seconds <= 0 || !isJailed(player)) return;
+        CompoundTag j = Bounty.state(player).getCompound("jail");
+        int before = j.getInt("remaining");
+        j.putInt("served", j.getInt("served") + seconds);
+        if (before > 0) {
+            j.putInt("remaining", Math.max(0, before - seconds));
+            if (before - seconds <= 0) {
+                Notifier.title(player, Component.translatable("crime.skycraft.jail.served"), Component.translatable("crime.skycraft.jail.served_sleep"));
+            }
+        }
+        SkyData.get(player).markDirty();
+    }
+
     /** Whether the prisoner may sleep to be released: the first minute is over, or the sentence is served. */
     static boolean maySleep(CompoundTag j) {
         return j.getInt("served") >= 60 || j.getInt("remaining") <= 0;

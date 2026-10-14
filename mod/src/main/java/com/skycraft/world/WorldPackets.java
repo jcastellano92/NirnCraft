@@ -21,7 +21,6 @@ public final class WorldPackets {
         SkyNetwork.register(RestFade.class, NetworkDirection.PLAY_TO_CLIENT, RestFade::encode, RestFade::decode, RestFade::handle);
         SkyNetwork.register(RestState.class, NetworkDirection.PLAY_TO_CLIENT, RestState::encode, RestState::decode, RestState::handle);
         SkyNetwork.register(RestHint.class, NetworkDirection.PLAY_TO_CLIENT, RestHint::encode, RestHint::decode, RestHint::handle);
-        SkyNetwork.register(RestPose.class, NetworkDirection.PLAY_TO_CLIENT, RestPose::encode, RestPose::decode, RestPose::handle);
         SkyNetwork.register(Rest.class, NetworkDirection.PLAY_TO_SERVER, Rest::encode, Rest::decode, Rest::handle);
         SkyNetwork.register(FastTravel.class, NetworkDirection.PLAY_TO_SERVER, FastTravel::encode, FastTravel::decode, FastTravel::handle);
     }
@@ -117,24 +116,6 @@ public final class WorldPackets {
 
         static void handle(RestHint m, Supplier<NetworkEvent.Context> ctx) {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> WorldClient.restHint(m));
-            ctx.get().setPacketHandled(true);
-        }
-    }
-
-    /** A player lies down (head pointing along {@code yaw}, as the sleeping pose's rotation) or gets up. */
-    public record RestPose(int entityId, boolean lying, float yaw) {
-        static void encode(RestPose m, FriendlyByteBuf buf) {
-            buf.writeVarInt(m.entityId);
-            buf.writeBoolean(m.lying);
-            buf.writeFloat(m.yaw);
-        }
-
-        static RestPose decode(FriendlyByteBuf buf) {
-            return new RestPose(buf.readVarInt(), buf.readBoolean(), buf.readFloat());
-        }
-
-        static void handle(RestPose m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> WorldClient.restPose(m));
             ctx.get().setPacketHandled(true);
         }
     }
