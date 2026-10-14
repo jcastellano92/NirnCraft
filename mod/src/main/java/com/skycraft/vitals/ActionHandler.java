@@ -329,7 +329,8 @@ public final class ActionHandler {
 
         boolean takenAny = false;
         if (all) {
-            for (int i = 0; i < containerSlotCount; i++) {
+            // a mount's gear slots (saddle, barding) are taken one at a time, never by "take all"
+            for (int i = menu instanceof com.skycraft.mounts.SaddlebagMenu ? com.skycraft.mounts.Saddlebags.GEAR : 0; i < containerSlotCount; i++) {
                 takenAny |= takeSlot(player, menu.getSlot(i));
             }
         } else if (slotIndex >= 0 && slotIndex < containerSlotCount) {
@@ -371,10 +372,17 @@ public final class ActionHandler {
                 Slot pSlot = menu.getSlot(i);
                 // Don't store actively held mainhand or offhand item when storing all
                 if (pSlot.getItem() == player.getMainHandItem() || pSlot.getItem() == player.getOffhandItem()) continue;
+                // a mount's saddle and barding are equipped one at a time, never swapped in by "store all"
+                if (menu instanceof com.skycraft.mounts.SaddlebagMenu bm && bm.isGear(pSlot.getItem())) continue;
                 storedAny |= storeSlot(player, menu, containerSlotCount, pSlot);
             }
         } else if (slotIndex >= containerSlotCount && slotIndex < menu.slots.size()) {
-            storedAny = storeSlot(player, menu, containerSlotCount, menu.getSlot(slotIndex));
+            Slot pSlot = menu.getSlot(slotIndex);
+            if (menu instanceof com.skycraft.mounts.SaddlebagMenu bm && bm.isGear(pSlot.getItem())) {
+                storedAny = bm.equipFrom(player, pSlot); // "store" is "equip" for the mount's tack
+            } else {
+                storedAny = storeSlot(player, menu, containerSlotCount, pSlot);
+            }
         }
 
         if (storedAny) {

@@ -8,6 +8,8 @@ import com.skycraft.mounts.MountEntities;
 import com.skycraft.mounts.MountItems;
 import com.skycraft.mounts.MountKind;
 import com.skycraft.mounts.Mounts;
+import com.skycraft.mounts.MountGear;
+import com.skycraft.mounts.SaddleType;
 import com.skycraft.mounts.Saddlebags;
 import com.skycraft.tamriel.Region;
 import com.skycraft.tamriel.Regions;
@@ -65,7 +67,7 @@ public final class Stables {
             if (owned.contains(kind)) continue;
             out.add(new DialogueOption("fauna.buy_mount." + kind.id,
                     Component.translatable("dialogue.skycraft.stables.buy_mount", kind.displayName(), Currency.formatCompact(kind.cost),
-                            speed(kind), kind.stamina, kind.bagSlots()),
+                            speed(kind), kind.stamina, Math.round(MountGear.bagKg(kind, SaddleType.PLAIN))),
                     order++, (pl, n) -> buyMount(pl, n, kind)));
         }
         // any mount you own can be brought out here
@@ -76,8 +78,15 @@ public final class Stables {
             out.add(new DialogueOption("fauna.take_out." + kind.id, Component.translatable("dialogue.skycraft.stables.take_out", kind.displayName()),
                     order++, (pl, n) -> takeOut(pl, n, kind)));
         }
-        out.add(new DialogueOption("fauna.buy_saddle", Component.translatable("dialogue.skycraft.stables.buy_saddle", SADDLE_COST), order++,
-                (pl, n) -> sell(pl, n, new ItemStack(Items.SADDLE), SADDLE_COST)));
+        // saddles: the plain one everywhere, travel and war saddles for any breed that takes them, court saddles only
+        // where there is a court (the Imperial and Altmer provinces, High Rock, Haafingar)
+        for (SaddleType type : SaddleType.VALUES) {
+            if (type == SaddleType.NOBLE && !courtSaddles(region)) continue;
+            if (type != SaddleType.PLAIN && active != null && !MountGear.accepts(active, type)) continue;
+            int cost = type == SaddleType.PLAIN ? SADDLE_COST : type.cost;
+            out.add(new DialogueOption("fauna.buy_saddle." + type.id, Component.translatable("dialogue.skycraft.stables.buy_saddle_type",
+                    type.displayName(), cost), order++, (pl, n) -> sell(pl, n, type.stack(), cost)));
+        }
         if (active != null && active.bardable()) {
             boolean beast = active.backing == MountKind.Backing.BEAST;
             Item barding = beast ? MountItems.BEAST_BARDING.get() : MountItems.bardingFor(region.province());
@@ -89,6 +98,14 @@ public final class Stables {
             out.add(new DialogueOption("fauna.buy_marsh_shoes", Component.translatable("dialogue.skycraft.stables.buy_marsh_shoes", MARSH_SHOES_COST),
                     order, (pl, n) -> sell(pl, n, new ItemStack(MountItems.MARSH_SHOES.get()), MARSH_SHOES_COST)));
         }
+    }
+
+    static boolean courtSaddles(Region region) {
+        return switch (region.province()) {
+            case "cyrodiil", "summerset", "high_rock" -> true;
+            case "skyrim" -> "haafingar".equals(com.skycraft.core.Holds.base(region.id()));
+            default -> false;
+        };
     }
 
     /** Riding speed in blocks a second (roughly), for the price list. */
@@ -112,7 +129,7 @@ public final class Stables {
         }
         BlockPos spawnPos = npc.blockPosition().relative(npc.getDirection(), 2);
         Mounts.grant(player, kind, spawnPos);
-        Saddlebags.fit(player, kind.bagSlots());
+        Saddlebags.fit(player, MountGear.bagKg(kind, MountGear.remembered(player, kind)));
         player.level().playSound(null, spawnPos, SoundEvents.HORSE_SADDLE, SoundSource.NEUTRAL, 1.0f, 1.0f);
         Notifier.message(player, Component.translatable("fauna.skycraft.horse.bought", kind.displayName()));
         Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.stables.bought", kind.displayName()));
@@ -120,7 +137,7 @@ public final class Stables {
 
     private static void takeOut(ServerPlayer player, LivingEntity npc, MountKind kind) {
         Mounts.switchTo(player, kind, npc.blockPosition().relative(npc.getDirection(), 2));
-        Saddlebags.fit(player, kind.bagSlots());
+        Saddlebags.fit(player, MountGear.bagKg(kind, MountGear.remembered(player, kind)));
         Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.stables.brought", kind.displayName()));
     }
 

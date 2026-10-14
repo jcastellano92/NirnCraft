@@ -49,6 +49,9 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
     private static final int PANEL_PADDING = 8;
 
     private final boolean isOwned;
+    /** The menu of a mount's saddlebags (com.skycraft.mounts): slots 0 and 1 are its saddle and barding, cargo is weight-limited. */
+    private final boolean isBag;
+    private final float bagScale;
     private final int containerSlotCount;
     private final boolean wasCrouching;
 
@@ -66,6 +69,18 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
         super(menu, playerInventory, title);
         this.containerSlotCount = menu.getRowCount() * 9;
         this.isOwned = checkIsOwned();
+        boolean bag = false;
+        float scale = 1f;
+        if (title.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents tc
+                && "mounts.skycraft.bags.title".equals(tc.getKey())) {
+            bag = true;
+            try {
+                if (tc.getArgs().length > 1) scale = Float.parseFloat(String.valueOf(tc.getArgs()[1]));
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        this.isBag = bag;
+        this.bagScale = scale;
         LocalPlayer p = net.minecraft.client.Minecraft.getInstance().player;
         this.wasCrouching = p != null && p.isCrouching();
         this.imageWidth = 380;
@@ -164,6 +179,15 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
             int warnColor = detected ? SkyUi.STOLEN : 0xFF55FF55;
             g.drawString(font, warn, stealX, headerY, warnColor, false);
         }
+        if (viewMode == 0 && isBag) {
+            // saddlebag load against what the saddle in slot 0 allows (the mount's bag scale rides in the title)
+            float load = 0f;
+            for (int i = com.skycraft.mounts.Saddlebags.GEAR; i < containerSlotCount; i++) load += ItemWeights.getStack(menu.getSlot(i).getItem());
+            com.skycraft.mounts.SaddleType worn = com.skycraft.mounts.SaddleType.of(menu.getSlot(0).getItem());
+            float cap = worn == null ? 0f : worn.bagKg * bagScale;
+            String loadText = ItemWeights.format(load) + " / " + ItemWeights.format(cap) + " kg";
+            g.drawString(font, loadText, px + 16 + font.width(displayTitle), headerY, load > cap + 0.05f ? SkyUi.STOLEN : SkyUi.GOLD, false);
+        }
 
         // View toggle tabs (Container vs My Items)
         String tabContainer = "[1] Container";
@@ -219,6 +243,9 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
                 String name = entry.stack().getHoverName().getString();
                 if (entry.totalCount() > 1) {
                     name += " (" + entry.totalCount() + ")";
+                }
+                if (isBag && viewMode == 0 && entry.primarySlot().index < com.skycraft.mounts.Saddlebags.GEAR) {
+                    name = Component.translatable("mounts.skycraft.gear.worn", name).getString();
                 }
                 String ellipsized = SkyUi.ellipsize(font, name, listW - 75);
                 int nameColor = (viewMode == 0 && isOwned) ? SkyUi.STOLEN : (isSelected ? SkyUi.BRIGHT : (isHovered ? SkyUi.TEXT : SkyUi.DIM));
@@ -281,6 +308,19 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
             g.drawString(font, ItemWeights.format(sel.totalWeight()), detX + 50, infoY, SkyUi.BRIGHT, false);
             infoY += 11;
 
+            com.skycraft.mounts.SaddleType saddle = com.skycraft.mounts.SaddleType.of(selStack);
+            if (saddle != null) {
+                g.drawString(font, "CARRY", detX, infoY, SkyUi.HEADER, false);
+                g.drawString(font, "+" + ItemWeights.format(saddle.carryKg), detX + 50, infoY, SkyUi.BRIGHT, false);
+                infoY += 11;
+                g.drawString(font, "BAGS", detX, infoY, SkyUi.HEADER, false);
+                g.drawString(font, ItemWeights.format(saddle.bagKg * bagScale) + " kg", detX + 50, infoY, SkyUi.BRIGHT, false);
+                infoY += 11;
+                g.drawString(font, "STAMINA", detX, infoY, SkyUi.HEADER, false);
+                g.drawString(font, "x" + saddle.staminaMult, detX + 50, infoY, SkyUi.BRIGHT, false);
+                infoY += 11;
+            }
+
             g.drawString(font, "VALUE", detX, infoY, SkyUi.HEADER, false);
             g.drawString(font, String.valueOf(sel.value()), detX + 50, infoY, SkyUi.GOLD, false);
         }
@@ -290,6 +330,14 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
         SkyUi.hline(g, px + 8, px + pw - 8, bottomY - 4, 0x80);
 
         String actionHint = viewMode == 0 ? (isOwned ? "[F] Steal" : "[F] Take") : "[F] Store";
+        if (isBag && selectedIndex >= 0 && selectedIndex < entries.size()) {
+            // on a mount's menu "take" removes its gear and "store" fits your saddle or barding
+            ContainerEntry cur = entries.get(selectedIndex);
+            if (viewMode == 0 && cur.primarySlot().index < com.skycraft.mounts.Saddlebags.GEAR) actionHint = "[F] Unequip";
+            else if (viewMode == 1 && (com.skycraft.mounts.SaddleType.of(cur.stack()) != null
+                    || cur.stack().getItem() instanceof net.minecraft.world.item.HorseArmorItem
+                    || cur.stack().is(com.skycraft.mounts.MountItems.BEAST_BARDING.get()))) actionHint = "[F] Equip";
+        }
         int actionColor = (viewMode == 0 && isOwned) ? SkyUi.STOLEN : SkyUi.GOLD;
         g.drawString(font, actionHint, px + 12, bottomY, actionColor, false);
 
@@ -335,6 +383,7 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
     }
 
     private static double armor(ItemStack stack) {
+        if (stack.getItem() instanceof net.minecraft.world.item.HorseArmorItem horse) return horse.getProtection();
         if (!(stack.getItem() instanceof ArmorItem armor)) return 0;
         return armor.getDefense();
     }

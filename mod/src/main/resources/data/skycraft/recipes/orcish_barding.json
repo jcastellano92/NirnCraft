@@ -1,0 +1,17 @@
+{
+    "type":  "minecraft:crafting_shaped",
+    "category":  "equipment",
+    "key":  {
+                "M":  {
+                          "item":  "skycraft:orichalcum_ingot"
+                      }
+            },
+    "pattern":  [
+                    "M M",
+                    "MMM",
+                    "M M"
+                ],
+    "result":  {
+                   "item":  "skycraft:orcish_barding"
+               }
+}

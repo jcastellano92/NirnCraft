@@ -134,7 +134,9 @@ public final class InventoryActions {
                 || it instanceof net.minecraft.world.item.ShearsItem) {
             return true;
         }
-        return it == net.minecraft.world.item.Items.TORCH || it == net.minecraft.world.item.Items.SOUL_TORCH;
+        // a saddle is held in the hand: sneak up to a wild mount and use it (com.skycraft.mounts)
+        return it == net.minecraft.world.item.Items.TORCH || it == net.minecraft.world.item.Items.SOUL_TORCH
+                || com.skycraft.mounts.MountItems.isSaddle(stack);
     }
 
     private static void equip(ServerPlayer player, Inventory inv, int slot, ItemStack stack) {

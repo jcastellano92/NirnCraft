@@ -24,6 +24,12 @@ public final class MountCommands {
     static void register(CommandDispatcher<CommandSourceStack> d) {
         d.register(Commands.literal("skycraft-mounts")
                 .then(Commands.literal("list").executes(MountCommands::list))
+                .then(Commands.literal("selftest").requires(s -> s.hasPermission(2)).executes(c -> {
+                    MountsSelfTest.Report r = MountsSelfTest.run(c.getSource().getServer());
+                    for (String line : r.lines()) c.getSource().sendSuccess(() -> Component.literal(line), false);
+                    c.getSource().sendSuccess(() -> Component.literal(r.summary()), false);
+                    return r.problems() == 0 ? 1 : 0;
+                }))
                 .then(Commands.literal("call").executes(c -> {
                     Mounts.call(c.getSource().getPlayerOrException());
                     return 1;

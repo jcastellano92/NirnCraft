@@ -6,15 +6,22 @@ import com.skycraft.mounts.MountPackets;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.HorseInventoryScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.world.entity.HasCustomInventoryScreen;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGuiEvent;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 /**
- * The rider's side of the mount system: sends the gallop (sprint key) state while riding, and draws the mount's
- * stamina bar (green, amber while galloping, red when exhausted) and health bar over the hotbar.
+ * The rider's side of the mount system: sends the gallop (sprint key) state while riding, keeps the vanilla horse
+ * screen from ever opening (the inventory key while mounted opens the Skyrim inventory like anywhere else; your mount's
+ * gear and saddlebags are the container screen of sneak-using it), and draws a thin health bar for the mount when it is
+ * hurt. There is no mount stamina bar: while you steer a mount the stamina bar of the HUD is its stamina
+ * ({@code MountStamina}).
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class MountHudOverlay {
@@ -31,9 +38,16 @@ public final class MountHudOverlay {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
+        if (event.phase == TickEvent.Phase.START) {
+            // before the key handling of this tick: the inventory key opens the normal inventory, not the horse's
+            if (mc.screen == null && mc.player.getVehicle() instanceof HasCustomInventoryScreen
+                    && !mc.player.isCreative() && !mc.player.isSpectator()) {
+                while (mc.options.keyInventory.consumeClick()) mc.setScreen(new InventoryScreen(mc.player));
+            }
+            return;
+        }
         boolean want = mc.player.isPassenger() && mc.options.keySprint.isDown() && mc.screen == null;
         if (want != sentGallop) {
             sentGallop = want;
@@ -41,24 +55,24 @@ public final class MountHudOverlay {
         }
     }
 
+    /** The server opens the horse screen on some paths (mod interactions): there is none, the server closes it too. */
+    @SubscribeEvent
+    public static void onScreen(ScreenEvent.Opening event) {
+        if (event.getNewScreen() instanceof HorseInventoryScreen) event.setCanceled(true);
+    }
+
     @SubscribeEvent
     public static void render(RenderGuiEvent.Post event) {
-        // drawn after the whole HUD (Skycraft hides the vanilla hotbar overlay, so not attached to it)
         Minecraft mc = Minecraft.getInstance();
         MountPackets.MountHud hud = last;
-        if (mc.player == null || hud == null || !mc.player.isPassenger() || System.currentTimeMillis() - lastAt > 1500 || mc.options.hideGui) return;
+        if (mc.player == null || hud == null || !mc.player.isPassenger() || System.currentTimeMillis() - lastAt > 60000 || mc.options.hideGui
+                || mc.screen != null || hud.maxHealth() <= 0 || hud.health() >= hud.maxHealth()) return;
         GuiGraphics g = event.getGuiGraphics();
         int w = mc.getWindow().getGuiScaledWidth(), h = mc.getWindow().getGuiScaledHeight();
         // bottom-centre stack above the health bar, below the survival meters (they used to share this row)
-        int barW = 120, x = w / 2 - barW / 2, y = HudStack.reserve(HudStack.Zone.BOTTOM_CENTER, HudStack.BC_MOUNT, 10, h) + 1;
-        float st = hud.max() <= 0 ? 0 : Math.max(0, Math.min(1, hud.stamina() / hud.max()));
-        float hp = hud.maxHealth() <= 0 ? 0 : Math.max(0, Math.min(1, hud.health() / hud.maxHealth()));
-        int stColor = hud.exhausted() ? 0xFFC03A2B : hud.gallop() ? 0xFFE0A030 : 0xFF5FB04A;
-        // stamina
+        int barW = 60, x = w / 2 - barW / 2, y = HudStack.reserve(HudStack.Zone.BOTTOM_CENTER, HudStack.BC_MOUNT, 10, h) + 1;
+        float hp = Math.max(0, Math.min(1, hud.health() / hud.maxHealth()));
         g.fill(x - 1, y - 1, x + barW + 1, y + 3, 0xA0000000);
-        g.fill(x, y, x + (int) (barW * st), y + 2, stColor);
-        // health
-        g.fill(x - 1, y + 4, x + barW + 1, y + 8, 0xA0000000);
-        g.fill(x, y + 5, x + (int) (barW * hp), y + 7, 0xFFB02828);
+        g.fill(x, y, x + (int) (barW * hp), y + 2, 0xFFB02828);
     }
 }

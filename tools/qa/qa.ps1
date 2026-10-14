@@ -146,7 +146,7 @@ if ($Server) {
     # society selftest is async (about 40 s of server time: crowd cap, gate guards, night sleepers, respawn); the housing
     # dumps that follow give it the time, one command every 300 ticks
     $cmds = @("forceload add -96 -96 96 96", "skycraft-quest selftest flow", "skycraft magic selftest", "skycraft-protect selftest",
-        "skycraft-quest intro selftest", "skycraft-fire selftest", "skycraft-fire census helgen generate", "skycraft-society selftest", "skylore selftest lecterns")
+        "skycraft-quest intro selftest", "skycraft-mounts selftest", "skycraft-fire selftest", "skycraft-fire census helgen generate", "skycraft-society selftest", "skylore selftest lecterns")
     # housing model dump for the population lint (tools/qa/population_lint.py): no building, no chunk loads
     $popSample = @("whiterun", "riverwood", "helgen", "rorikstead", "dragon_bridge", "falkreath", "old_hroldan")
     $popSample | ForEach-Object { $cmds += "skypop $_" }
@@ -179,6 +179,15 @@ if ($Server) {
         Result "protect" ($ptl -match "^\d+/\d+ checks passed, 0 problems") $ptl
     } else {
         Result "protect" $false "no 'Protect selftest' line in the server log"
+    }
+    # mount system self-test (com.skycraft.mounts.MountsSelfTest): saddles, barding, weight-limited bags, stamina bar swap, taming rules
+    $mt = Select-String -Path $out -Pattern "Mounts selftest:" | Select-Object -Last 1
+    if ($mt) {
+        $mtl = ($mt.Line -replace "^.*?Mounts selftest: ", "")
+        Result "mounts" ($mtl -match "^\d+/\d+ checks passed, 0 problems") $mtl
+        Select-String -Path $out -Pattern "\[mounts\] FAIL" | Select-Object -First 8 | ForEach-Object { Add("       " + ($_.Line -replace "^.*?\[mounts\] ", "")) }
+    } else {
+        Result "mounts" $false "no 'Mounts selftest' line in the server log"
     }
     # Helgen aftermath census (com.skycraft.fire.FireCommands): the scene exists and nothing in it floats
     $fc = Select-String -Path $out -Pattern "\[fire\] +fire sites \d+.*burnt blocks \(charred\+scorched\) (\d+)" | Select-Object -Last 1

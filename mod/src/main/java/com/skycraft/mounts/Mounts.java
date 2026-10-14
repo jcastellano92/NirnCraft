@@ -63,8 +63,6 @@ public final class Mounts {
     public static final String OWNER = "skycraft_owner";
     public static final long DEATH_COOLDOWN_TICKS = 1200;
 
-    private static final UUID BARDING_ARMOR = UUID.fromString("6b1f3c1e-5a3d-4d61-9d0f-2f4c1d7e8a10");
-
     private Mounts() {}
 
     // ------------------------------------------------------------------ the record
@@ -231,6 +229,8 @@ public final class Mounts {
             else h.setTamed(true);
             h.equipSaddle(SoundSource.NEUTRAL);
         }
+        // the tack the player left this kind of mount in (a bought one comes in a plain saddle); the legends wear their own
+        MountGear.setSaddle(mob, owner != null && !MountGear.fixedTack(kind) ? MountGear.remembered(owner, kind) : SaddleType.PLAIN);
         if (owner != null) setOwner(mob, owner);
         if (kind == MountKind.SHADOWMERE || kind == MountKind.ARVAK) mob.setCustomName(kind.displayName());
         if (kind == MountKind.ARVAK) mob.setInvulnerable(false);
@@ -251,6 +251,8 @@ public final class Mounts {
         Mob mob = create(level, kind, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, player.getYRot(), player);
         if (mob == null) return null;
         applyBarding(mob, data(player).getString("barding"));
+        // a mount brought back from the stable or from afar is as winded as it was left
+        if (data(player).contains(MountStamina.SAVED)) mob.getPersistentData().putFloat(MountStamina.TAG, data(player).getFloat(MountStamina.SAVED));
         level.addFreshEntity(mob);
         CompoundTag tag = data(player);
         tag.putString("active", kind.id);
@@ -290,7 +292,7 @@ public final class Mounts {
         if (kind == MountKind.BRETON_DESTRIER && mob instanceof Horse h) {
             // destriers come barded
             ItemStack barding = new ItemStack(MountItems.BRETON_BARDING.get());
-            h.getSlot(401).set(barding);
+            MountGear.setBarding(h, barding);
             tag.putString("barding", key(barding));
         }
         SkyData.get(player).addStat("mounts_owned", 1);
@@ -305,11 +307,9 @@ public final class Mounts {
         ItemStack refund = ItemStack.EMPTY;
         if (e != null) {
             e.ejectPassengers();
-            if (e instanceof AbstractHorse h && h.isWearingArmor()) {
-                refund = h.getSlot(401).get().copy();
-                h.getSlot(401).set(ItemStack.EMPTY);
-            } else if (e instanceof MountBeast b && b.getVariant() == 2) {
-                refund = new ItemStack(MountItems.BEAST_BARDING.get());
+            if (e instanceof Mob m) {
+                refund = MountGear.barding(m);
+                if (!refund.isEmpty()) MountGear.setBarding(m, ItemStack.EMPTY);
             }
             e.discard();
         } else if (!tag.getString("barding").isEmpty()) {
@@ -320,6 +320,7 @@ public final class Mounts {
         if (!refund.isEmpty() && !player.getInventory().add(refund)) player.drop(refund, false);
         tag.remove("uuid");
         tag.remove("barding");
+        tag.remove(MountStamina.SAVED);
     }
 
     /** Keeps the record of what the active horse wears (barding put on through the horse's own screen). */
@@ -353,6 +354,11 @@ public final class Mounts {
         tag.putUUID("uuid", mob.getUUID());
         tag.remove("barding");
         tag.remove("cooldown");
+        tag.remove(MountStamina.SAVED);
+        // the saddle it was broken in with (or the one a vanilla taming left it in) is its saddle from now on
+        SaddleType saddle = MountGear.saddle(mob);
+        MountGear.setSaddle(mob, saddle);
+        MountGear.remember(player, kind, saddle);
         SkyData.get(player).addStat("mounts_owned", 1);
         SkyData.get(player).markDirty();
     }
@@ -431,13 +437,21 @@ public final class Mounts {
     public static boolean interact(ServerPlayer player, Mob mount, ItemStack held) {
         UUID owner = ownerOf(mount);
         MountKind kind = kindOf(mount);
+        SaddleType saddle = SaddleType.of(held);
         if (owner == null) {
-            // wild: a saddle starts the taming
+            // wild: a saddle in the hand, from a sneak, starts the taming (only a wild mount is saddled this way)
             MountKind wild = MountTaming.wildKind(mount);
-            if (wild != null && held.is(Items.SADDLE)) return WildHorseTaming.tryStart(player, mount, held, wild);
+            if (wild != null && saddle != null) {
+                if (!MountGear.accepts(wild, saddle)) {
+                    MountGear.say(player, MountGear.Result.WRONG_BREED);
+                    return true;
+                }
+                return WildHorseTaming.tryStart(player, mount, held, wild, saddle);
+            }
             if (mount instanceof MountBeast b) {
                 // an unowned beast (spawned by an admin): the first rider with a saddle claims it
-                if (held.is(Items.SADDLE)) {
+                if (saddle != null) {
+                    if (MountGear.accepts(b.kind(), saddle)) MountGear.setSaddle(b, saddle);
                     adopt(player, b, b.kind());
                     if (!player.getAbilities().instabuild) held.shrink(1);
                     return true;
@@ -460,21 +474,18 @@ public final class Mounts {
             if (kind != null) Saddlebags.open(player, mount, kind);
             return kind != null;
         }
+        // tack from the hand: only a mount that wears no saddle takes one this way (a saddled one is changed in its menu),
+        // and barding goes straight on
+        if (kind != null && saddle != null) {
+            if (MountGear.saddle(mount) == null) MountGear.say(player, MountGear.equipSaddle(player, mount, kind, held));
+            else Notifier.message(player, Component.translatable("mounts.skycraft.saddle.use_menu"));
+            return true;
+        }
+        if (kind != null && MountGear.wearsBarding(mount, kind, held)) {
+            MountGear.say(player, MountGear.equipBarding(player, mount, kind, held));
+            return true;
+        }
         if (mount instanceof MountBeast b) {
-            if (held.is(MountItems.BEAST_BARDING.get()) && b.getVariant() < 2) {
-                b.setVariant(2);
-                applyBarding(b, key(held));
-                if (isActive(player, b)) data(player).putString("barding", key(held));
-                if (!player.getAbilities().instabuild) held.shrink(1);
-                b.playSound(SoundEvents.HORSE_ARMOR, 1.0f, 0.9f);
-                return true;
-            }
-            if (held.is(Items.SADDLE) && b.getVariant() == 0) {
-                b.setVariant(1);
-                if (!player.getAbilities().instabuild) held.shrink(1);
-                b.playSound(SoundEvents.HORSE_SADDLE, 1.0f, 0.9f);
-                return true;
-            }
             if (b.getVariant() == 0) {
                 Notifier.message(player, Component.translatable("mounts.skycraft.needs_saddle"));
                 return true;
@@ -505,14 +516,8 @@ public final class Mounts {
         if (itemId == null || itemId.isEmpty()) return;
         var item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemId));
         if (item == null || item == Items.AIR) return;
-        if (mob instanceof Horse h && item instanceof HorseArmorItem) {
-            h.getSlot(401).set(new ItemStack(item));
-        } else if (mob instanceof MountBeast b && item == MountItems.BEAST_BARDING.get()) {
-            b.setVariant(2);
-            var armor = b.getAttribute(Attributes.ARMOR);
-            if (armor != null && armor.getModifier(BARDING_ARMOR) == null) {
-                armor.addPermanentModifier(new AttributeModifier(BARDING_ARMOR, "Barding", 8, AttributeModifier.Operation.ADDITION));
-            }
-        }
+        MountKind kind = kindOf(mob);
+        ItemStack one = new ItemStack(item);
+        if (kind != null && MountGear.wearsBarding(mob, kind, one)) MountGear.setBarding(mob, one);
     }
 }

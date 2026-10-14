@@ -115,7 +115,8 @@ public final class Vitals {
 
         // Sprinting drains stamina. Out of stamina (with hysteresis, see isExhausted) you can't run: this is the one
         // server-side sprint block; the client mirrors it from the EXHAUSTED vitals flag (ClientEvents).
-        if (player.isSprinting() && !player.isCreative() && !player.isSpectator()) {
+        // (while you steer a mount the bar is the mount's: com.skycraft.mounts.MountStamina drains and restores it)
+        if (player.isSprinting() && !player.isCreative() && !player.isSpectator() && !com.skycraft.mounts.MountStamina.swapped(player)) {
             float drain = (float) (SkyConfig.SPRINT_STAMINA_PER_SECOND.get() / 20.0);
             if (Perks.has(data, "light_armor.unhindered") && ArmorClass.countLight(player) >= 4) drain *= 0.85f;
             if (Perks.has(data, "athletics.sprinter")) drain *= 0.8f;
@@ -155,6 +156,7 @@ public final class Vitals {
 
     /** Hysteresis: once out of stamina, sprinting is blocked until 15 stamina has regenerated. */
     public static boolean isExhausted(Player player) {
+        if (com.skycraft.mounts.MountStamina.exhausted(player)) return true; // an exhausted mount can't gallop either
         PlayerData data = SkyData.get(player);
         if (data.getStamina() < 1f) EXHAUSTED.add(player.getUUID());
         else if (data.getStamina() >= 15f) EXHAUSTED.remove(player.getUUID());
@@ -195,7 +197,7 @@ public final class Vitals {
             stPct *= 1.15f; // Cloth bonus
         }
 
-        if (now - data.getLastStaminaUseTick() > 20 && !player.isSprinting()) {
+        if (now - data.getLastStaminaUseTick() > 20 && !player.isSprinting() && !com.skycraft.mounts.MountStamina.swapped(player)) {
             data.setStamina(data.getStamina() + data.maxStamina() * stPct * seconds);
         }
         // Health

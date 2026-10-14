@@ -40,8 +40,19 @@ public final class MountItems {
     public static final RegistryObject<Item> BRETON_BARDING = barding("breton_barding", 11);
     public static final RegistryObject<Item> REDGUARD_BARDING = barding("redguard_barding", 8);
     public static final RegistryObject<Item> ELVEN_BARDING = barding("elven_barding", 10);
+    // armour tiers that follow the smithing ladder (protection in the horse-armour scale: leather 3, iron 5, gold 7, diamond 11)
+    public static final RegistryObject<Item> LEATHER_BARDING = barding("leather_barding", 3);
+    public static final RegistryObject<Item> IRON_BARDING = barding("iron_barding", 5);
+    public static final RegistryObject<Item> STEEL_BARDING = barding("steel_barding", 6);
+    public static final RegistryObject<Item> DWARVEN_BARDING = barding("dwarven_barding", 12);
+    public static final RegistryObject<Item> ORCISH_BARDING = barding("orcish_barding", 13);
+    public static final RegistryObject<Item> EBONY_BARDING = barding("ebony_barding", 15);
     public static final RegistryObject<Item> BEAST_BARDING = ITEMS.register("beast_barding",
             () -> new Item(new Item.Properties().stacksTo(1)));
+    // saddles: PLAIN is the vanilla saddle (SaddleType)
+    public static final RegistryObject<Item> PACK_SADDLE = saddle("pack_saddle", SaddleType.PACK);
+    public static final RegistryObject<Item> WAR_SADDLE = saddle("war_saddle", SaddleType.WAR);
+    public static final RegistryObject<Item> NOBLE_SADDLE = saddle("noble_saddle", SaddleType.NOBLE);
     public static final RegistryObject<Item> MARSH_SHOES = ITEMS.register("marsh_shoes",
             () -> new MarshShoes(new Item.Properties()));
     public static final RegistryObject<Item> SHADOWMERE_BRIDLE = ITEMS.register("shadowmere_bridle",
@@ -59,6 +70,35 @@ public final class MountItems {
         return ITEMS.register(id, () -> new HorseArmorItem(protection,
                 new ResourceLocation(Skycraft.MODID, "textures/entity/mounts/horse_armor_" + id + ".png"),
                 new Item.Properties().stacksTo(1)));
+    }
+
+    private static RegistryObject<Item> saddle(String id, SaddleType type) {
+        return ITEMS.register(id, () -> new SaddleItem(type, new Item.Properties().stacksTo(1)));
+    }
+
+    /** True for any saddle item (the vanilla one included). */
+    public static boolean isSaddle(ItemStack stack) {
+        return SaddleType.of(stack) != null;
+    }
+
+    /**
+     * A saddle of the mount system. Not the vanilla {@code SaddleItem}: it does not saddle pigs or striders, only the
+     * mounts ({@link Mounts#interact}).
+     */
+    public static final class SaddleItem extends Item {
+        public final SaddleType type;
+
+        public SaddleItem(SaddleType type, Properties props) {
+            super(props);
+            this.type = type;
+        }
+
+        @Override
+        public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+            tooltip.add(Component.translatable("item.skycraft." + type.id + "_saddle.tooltip"));
+            tooltip.add(Component.translatable("mounts.skycraft.saddle.stats", Math.round(type.carryKg), Math.round(type.bagKg),
+                    Math.round(type.staminaMult * 100f)));
+        }
     }
 
     /** The horse barding a province's stablemasters sell. */

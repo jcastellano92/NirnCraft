@@ -58,7 +58,9 @@ public final class CarryWeight {
         PlayerData data = SkyData.get(player);
         double base = safe(InventoryConfig.BASE_CAPACITY, 300.0);
         double perStamina = safe(InventoryConfig.CAPACITY_PER_STAMINA, 5.0);
-        return (float) (base + perStamina * data.getStaminaPoints() + data.module("bonus").getFloat("carry"));
+        // the mount you steer carries part of the load (kind and saddle: com.skycraft.mounts.MountGear)
+        return (float) (base + perStamina * data.getStaminaPoints() + data.module("bonus").getFloat("carry")
+                + com.skycraft.mounts.MountGear.carryBonus(player));
     }
 
     /** Total weight of the main inventory, worn armor and offhand. */

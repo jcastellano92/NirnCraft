@@ -19,7 +19,8 @@ import net.minecraftforge.fml.common.Mod;
  * Fighting from the saddle. Works with any swing that ends in a vanilla attack (Better Combat's directional combos
  * included, its own "don't hit your mount" rule kept): your blows never land on your own mount, a strike at speed
  * carries the charge (up to +50% damage, Skyrim's mounted power attacks), and a fighting beast (senche-tiger, giant
- * wolf, mammoth, Akaviri tiger, grazer) lashes out at whatever its rider hits. An unridden mount defends its owner.
+ * wolf, mammoth, Akaviri tiger, grazer) lashes out at whatever its rider hits. A war saddle adds to the blow
+ * ({@link SaddleType#WAR}). An unridden mount defends its owner.
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class MountedCombat {
@@ -45,6 +46,8 @@ public final class MountedCombat {
                 && rider.getVehicle() instanceof LivingEntity mount && Mounts.kindOf(mount) != null) {
             // the charge: the mount's speed behind the blow
             float bonus = (float) Math.min(0.5, MountStamina.speed(rider) * 1.1);
+            // a war saddle braces the blow (the charge still counts)
+            bonus += MountGear.damageBonus(mount);
             if (bonus > 0.05f) event.setAmount(event.getAmount() * (1f + bonus));
             // a fighting beast strikes too
             if (mount instanceof MountBeast beast && beast.distanceTo(victim) < beast.getBbWidth() + 2.5f && beast.readyToAssist()) {

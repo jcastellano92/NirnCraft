@@ -24,6 +24,7 @@ public final class MountsModule {
     public static void init(IEventBus modBus) {
         MountEntities.init(modBus);
         MountItems.init(modBus);
+        MountsSelfTest.registerAutorun();
     }
 
     public static void registerPackets() {

@@ -104,12 +104,14 @@ public final class InvEntry {
         if (it == net.minecraft.world.item.Items.TORCH || it == net.minecraft.world.item.Items.SOUL_TORCH) {
             return true;
         }
-        return false;
+        // saddles are held in the right hand, to be used on a wild mount
+        return com.skycraft.mounts.MountItems.isSaddle(stack);
     }
 
     /** Can be held in the left hand (shields, torches, one-handed weapons, offhand tools). */
     public boolean leftHandable() {
-        return !isArmor() && !consumable() && isUsableEquipment() && !com.skycraft.combat.WeaponClass.of(stack).twoHanded();
+        return !isArmor() && !consumable() && isUsableEquipment() && !com.skycraft.mounts.MountItems.isSaddle(stack)
+                && !com.skycraft.combat.WeaponClass.of(stack).twoHanded();
     }
 
     // ------------------------------------------------------------------ building

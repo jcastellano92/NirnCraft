@@ -11,7 +11,7 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-/** Packets of the mount system: the rider's gallop key, and the mount HUD (stamina, health). */
+/** Packets of the mount system: the rider's gallop key, and the ridden mount's health for the HUD. */
 public final class MountPackets {
     private MountPackets() {}
 
@@ -39,20 +39,18 @@ public final class MountPackets {
         }
     }
 
-    /** S2C: the ridden mount's stamina and health for the HUD. */
-    public record MountHud(float stamina, int max, boolean gallop, boolean exhausted, float health, float maxHealth, String kind) {
+    /**
+     * S2C: the ridden mount's health (its stamina is the player's own bar while riding, {@link MountStamina}, and needs
+     * no packet of its own).
+     */
+    public record MountHud(float health, float maxHealth) {
         static void encode(MountHud m, FriendlyByteBuf buf) {
-            buf.writeFloat(m.stamina);
-            buf.writeVarInt(m.max);
-            buf.writeBoolean(m.gallop);
-            buf.writeBoolean(m.exhausted);
             buf.writeFloat(m.health);
             buf.writeFloat(m.maxHealth);
-            buf.writeUtf(m.kind, 64);
         }
 
         static MountHud decode(FriendlyByteBuf buf) {
-            return new MountHud(buf.readFloat(), buf.readVarInt(), buf.readBoolean(), buf.readBoolean(), buf.readFloat(), buf.readFloat(), buf.readUtf(64));
+            return new MountHud(buf.readFloat(), buf.readFloat());
         }
 
         static void handle(MountHud m, Supplier<NetworkEvent.Context> ctx) {

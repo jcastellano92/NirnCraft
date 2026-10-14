@@ -332,6 +332,13 @@ HORSE_STYLES = {
     "breton_barding": (hexc("#b8bcc4"), hexc("#2a4a9a"), hexc("#e8d8a8"), "caparison"),
     "redguard_barding": (hexc("#b08848"), hexc("#a82a1c"), hexc("#e8c868"), "scale"),
     "elven_barding": (hexc("#c8b048"), hexc("#e8e4d4"), hexc("#7aa848"), "plate"),
+    # the smithing ladder (leather to ebony), plain cloth under the plate
+    "leather_barding": (hexc("#7a5230"), hexc("#4a3420"), hexc("#c8a060"), "plate"),
+    "iron_barding": (hexc("#8e9298"), hexc("#3a3c40"), hexc("#6a6e74"), "plate"),
+    "steel_barding": (hexc("#b4bac4"), hexc("#2c3440"), hexc("#d8dce4"), "plate"),
+    "dwarven_barding": (hexc("#b89850"), hexc("#4a3a20"), hexc("#e8c868"), "scale"),
+    "orcish_barding": (hexc("#5a7a48"), hexc("#2a3a22"), hexc("#a8b890"), "plate"),
+    "ebony_barding": (hexc("#2a2c34"), hexc("#16161c"), hexc("#7a6aa8"), "plate"),
 }
 
 
@@ -482,7 +489,40 @@ SKULL_ICON = [
 ]
 
 
+SADDLE_ICON = [
+    "................",
+    "................",
+    "......ssss......",
+    ".....sSSSSs.....",
+    "....sSSSSSSs....",
+    "..bbsSSSSSSsbb..",
+    ".bBBsSSttSSsBBb.",
+    ".bBBssSSSSssBBb.",
+    ".bBBb.ssss.bBBb.",
+    ".bBBb.t..t.bBBb.",
+    "..bb..t..t..bb..",
+    "......t..t......",
+    ".....tt..tt.....",
+    "................",
+    "................",
+    "................",
+]
+
+
+def saddles():
+    # pack: brown with big panniers; war: dark leather, steel studs; noble: crimson with gold
+    pal = {
+        "pack_saddle": {"s": hexc("#5a3a1e"), "S": hexc("#8a5e34"), "b": hexc("#3a2a14"), "B": hexc("#a07a48"), "t": hexc("#2a1c0e")},
+        "war_saddle": {"s": hexc("#22201e"), "S": hexc("#46423c"), "b": hexc("#8a8e96"), "B": hexc("#4a4e56"), "t": hexc("#b0b4bc")},
+        "noble_saddle": {"s": hexc("#5a1018"), "S": hexc("#9a1c2a"), "b": hexc("#b8962e"), "B": hexc("#8a1824"), "t": hexc("#e8c860")},
+    }
+    for name, p in pal.items():
+        icon(name, SADDLE_ICON, p)
+    print("painted saddles")
+
+
 def items():
+    saddles()
     for name, (metal, cloth_c, trim, kind) in HORSE_STYLES.items():
         icon(name, BARDING_ICON, {"m": shade(metal, 0.7), "M": metal, "c": shade(cloth_c, 0.7), "C": cloth_c, "t": trim})
     icon("beast_barding", BARDING_ICON, {"m": hexc("#5a4a3a"), "M": hexc("#9a8060"), "c": hexc("#4a2a18"),

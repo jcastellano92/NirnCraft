@@ -65,7 +65,7 @@ public final class MountTaming {
      * still carrying the rider). Returns the mount.
      */
     @Nullable
-    public static Mob complete(ServerPlayer player, Mob wild, MountKind kind) {
+    public static Mob complete(ServerPlayer player, Mob wild, MountKind kind, SaddleType saddle) {
         Mob mount = wild;
         if (wild instanceof AbstractHorse h) {
             h.tameWithName(player);
@@ -85,6 +85,8 @@ public final class MountTaming {
             player.startRiding(beast, true);
             mount = beast;
         }
+        // it wears the saddle it was broken in with (adopt records it as this kind's saddle)
+        MountGear.setSaddle(mount, saddle);
         Mounts.adopt(player, mount, kind);
         if (player.level() instanceof ServerLevel sl) {
             sl.sendParticles(ParticleTypes.HEART, mount.getX(), mount.getY() + 1.0, mount.getZ(), 8, 0.3, 0.3, 0.3, 0.05);
