@@ -56,6 +56,7 @@ final class CrimeSelfTest {
         restock(r);
         jail(r, server);
         rest(r);
+        evidence(r, server, level);
         return new Report(r.checks, r.problems, r.lines);
     }
 
@@ -155,6 +156,75 @@ final class CrimeSelfTest {
         // a prisoner is never part of the group the others wait for
         r.check(com.skycraft.world.RestLogic.tally(List.of(new com.skycraft.world.RestLogic.Participant(
                 new java.util.UUID(1, 1), false, true))).required() == 0, "a jailed player is not required to rest");
+    }
+
+    /**
+     * The jail's two stores: arrest routes stolen goods to the shared one and the rest to the prisoner's own, the
+     * evidence chest gives back only that prisoner's things, two prisoners never see each other's, everything
+     * survives the saved-data NBT, and the confiscated goods need a lockpick every time.
+     */
+    private static void evidence(Result r, MinecraftServer server, ServerLevel level) {
+        Jail.JailData jd = new Jail.JailData();
+        JailEvidence.Stores st = jd.stores("selftest_jail");
+        java.util.UUID alice = java.util.UUID.nameUUIDFromBytes("alice".getBytes());
+        java.util.UUID bob = java.util.UUID.nameUUIDFromBytes("bob".getBytes());
+        ItemStack stolen = new ItemStack(Items.DIAMOND, 3);
+        Bounty.markStolen(stolen);
+        JailEvidence.route(st, alice, new ItemStack(Items.IRON_SWORD));
+        JailEvidence.route(st, alice, new ItemStack(Items.BREAD, 1500)); // more than any stack
+        JailEvidence.route(st, alice, stolen.copy());
+        JailEvidence.route(st, bob, new ItemStack(Items.GOLDEN_APPLE, 2));
+        JailEvidence.route(st, bob, stolen.copy());
+        r.check(st.confiscated.count(Items.DIAMOND) == 6, "stolen goods of every prisoner go to the shared store (" + st.confiscated.count(Items.DIAMOND) + " diamonds)");
+        r.check(st.personal(alice).count(Items.DIAMOND) == 0 && st.personal(bob).count(Items.DIAMOND) == 0, "stolen goods are not in anyone's own evidence");
+        r.check(st.personal(alice).count(Items.IRON_SWORD) == 1 && st.personal(alice).count(Items.BREAD) == 1500, "own things go to the prisoner's evidence, unbounded");
+
+        // persistence through the saved-data NBT
+        CompoundTag saved = jd.save(new CompoundTag());
+        Jail.JailData back = Jail.JailData.load(saved);
+        JailEvidence.Stores st2 = back.stores("selftest_jail");
+        r.check(st2.confiscated.sameAs(st.confiscated) && st2.personal(alice).sameAs(st.personal(alice)) && st2.personal(bob).sameAs(st.personal(bob)),
+                "both stores survive the saved-data NBT");
+
+        // the evidence chest: only mine, and nothing of Bob's moves
+        List<ItemStack> mine = JailEvidence.takePersonal(st2, alice);
+        int sword = 0, bread = 0, other = 0;
+        for (ItemStack s : mine) {
+            if (s.is(Items.IRON_SWORD)) sword += s.getCount();
+            else if (s.is(Items.BREAD)) bread += s.getCount();
+            else other += s.getCount();
+        }
+        r.check(sword == 1 && bread == 1500 && other == 0, "the evidence chest returns exactly what was taken from that player");
+        r.check(st2.personal(bob).count(Items.GOLDEN_APPLE) == 2 && st2.confiscated.count(Items.DIAMOND) == 6,
+                "...and leaves the other prisoner's things and the shared stolen goods alone");
+        r.check(JailEvidence.takePersonal(st2, alice).isEmpty(), "a second use finds nothing more of mine");
+        r.check(JailEvidence.takePersonal(st2, java.util.UUID.nameUUIDFromBytes("carol".getBytes())).isEmpty(), "a stranger gets nothing");
+
+        // the confiscated goods are locked every time
+        net.minecraft.core.BlockPos pos = level.getSharedSpawnPos().atY(level.getMaxBuildHeight() - 12).east(9);
+        level.getChunk(pos);
+        BlockState old = level.getBlockState(pos);
+        Locks.LockData data = Locks.LockData.get(server);
+        String key = Locks.key(level, pos);
+        Integer hadLock = data.locks.get(key);
+        java.util.Set<java.util.UUID> hadUnlocked = data.unlocked.get(key);
+        try {
+            level.setBlock(pos, Blocks.BARREL.defaultBlockState(), 2);
+            Locks.setLock(level, pos, Locks.ADEPT);
+            net.minecraft.server.level.ServerPlayer picker = net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(level);
+            r.check(Locks.blocks(picker, level, pos), "the confiscated goods are locked");
+            data.unlocked.computeIfAbsent(key, k -> new java.util.HashSet<>()).add(picker.getUUID());
+            r.check(!Locks.blocks(picker, level, pos), "a picked lock lets the prisoner in");
+            JailEvidence.relock(level, pos);
+            r.check(Locks.blocks(picker, level, pos), "...and it is locked again after being opened: picked every time");
+        } finally {
+            data.unlocked.remove(key);
+            if (hadUnlocked != null) data.unlocked.put(key, hadUnlocked);
+            data.locks.remove(key);
+            if (hadLock != null) data.locks.put(key, hadLock);
+            data.setDirty();
+            level.setBlock(pos, old, 2);
+        }
     }
 
     private static void jail(Result r, MinecraftServer server) {

@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.properties.Half;
 
 /**
  * A hold's jail (Castle Dour's dungeon, the Dragonsreach dungeon, Mistveil Keep's jail...) as a stone gaol beside
- * the keep. Front: the guard room with the guards' tables and one evidence chest per cell. Through a locked iron
+ * the keep. Front: the guard room with the guards' tables, the evidence chest and the confiscated goods. Through a locked iron
  * gate: the cell block, a corridor between two rows of three barred cells with iron doors, beds and buckets; the two
  * back cells hold NPC prisoners. At the corridor's end a rusted drain grate drops into an old culvert that comes out
  * behind the jail - the way out for those who would rather not serve their time (the other is picking the cell door
@@ -101,22 +101,21 @@ public final class Jails {
         return s;
     }
 
-    /** Guard room (z 1..6): tables, the guards' posts and the evidence chests along both side walls. */
+    /** Guard room (z 1..6): tables, the guards' posts, the evidence chest and the confiscated goods by the side walls. */
     static void guardRoom(Canvas c, Palette p, int w, boolean mine) {
         int y = 1;
-        // evidence chests: three double chests on each side wall, in cell order (left, right, left, right...)
-        for (int k = 0; k < 6; k++) {
-            boolean left = k % 2 == 0;
-            int x = left ? 1 : w - 2;
-            int z = 1 + (k / 2) * 2;
-            Direction face = left ? Direction.EAST : Direction.WEST;
-            // a double chest: LEFT half connects clockwise of its facing
-            BlockState base = B.face(B.s(Blocks.CHEST), face);
-            int lz = left ? z : z + 1, rz = left ? z + 1 : z;
-            c.set(x, y, rz, base.setValue(ChestBlock.TYPE, ChestType.RIGHT));
-            c.set(x, y, lz, base.setValue(ChestBlock.TYPE, ChestType.LEFT));
-            c.anchor(AnchorType.JAIL_EVIDENCE, x, y, rz);
-            c.anchor(AnchorType.JAIL_EVIDENCE, x, y, lz);
+        // the jail's two containers, in the guard room and in no cell (docs/JAIL.md): the evidence chest by the west
+        // wall (unlocked, a prisoner's own things come back when it is used) and the confiscated goods, a barrel by
+        // the east wall (locked, the shared stolen goods); each with a sign above it
+        c.set(1, y, 1, B.face(B.s(Blocks.CHEST), Direction.EAST).setValue(ChestBlock.TYPE, ChestType.SINGLE));
+        c.anchor(AnchorType.JAIL_PERSONAL, 1, y, 1);
+        c.set(w - 2, y, 1, B.s(Blocks.BARREL));
+        c.anchor(AnchorType.JAIL_CONFISCATED, w - 2, y, 1);
+        if (!c.recording()) {
+            c.sign(1, y + 1, 1, p.sign, Direction.EAST, Component.empty(),
+                    Component.translatable("crime.skycraft.jail.sign.evidence"), Component.translatable("crime.skycraft.jail.sign.evidence_2"));
+            c.sign(w - 2, y + 1, 1, p.sign, Direction.WEST, Component.empty(),
+                    Component.translatable("crime.skycraft.jail.sign.confiscated"), Component.translatable("crime.skycraft.jail.sign.confiscated_2"));
         }
         // the guards' tables, a weapon rack and lamps
         Props.table(c, p, 3, y, 5);

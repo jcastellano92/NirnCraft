@@ -190,6 +190,11 @@ Skyrim's chest holds anything; the engineering cap is 2000 kinds x 1,000,000 eac
 * **Loot restock** (`loot/Restock`). A restock empties the slots and the overflow, and only when nothing but what the
   table rolled is inside: `holdsForeignItems` counts the overflow rows against the recorded roll (an unreadable row
   counts as the player's), so a player's stash in a restocking container is never wiped.
+  change: the corpses and the ships' cargo holds (`sailing/ShipEntity`, spilled when the ship sinks or is dismantled)
+  do. A mount's saddlebags are weight-limited, not slot-limited: their owner decides whether (and with what rule) to
+  expose an overflow. Followers' trade inventories keep their own accounting. The jail's two stores (a prisoner's
+  evidence and the shared confiscated goods) are `BulkStore`s in `Jail.JailData`, unbounded and independent of any block;
+  the confiscated goods open through an `OverflowHost` container (`crime/JailEvidence.StoreContainer`): see docs/JAIL.md.
 
 ## Corpses and death
 
@@ -205,7 +210,7 @@ Skyrim's chest holds anything; the engineering cap is 2000 kinds x 1,000,000 eac
   body away (`/kill`, creative punch) spills its content; if another mod vetoes the body, the items stay as drops.
 * **Edge cases.** `keepInventory`: nothing is stashed, the pack stays, vanilla restores the slots. Another mod cancels
   the drops (a grave): the stash goes back to the player's pack and comes back with the respawn copy. A prisoner dying in
-  jail: the pack part goes to the evidence chest with the rest (`PlayerCorpses.takePackCargo`). Corpses switched off in
+  jail: the pack part goes to the jail's stores with the rest (`PlayerCorpses.takePackCargo`). Corpses switched off in
   the config: the pack part falls as item entities, as it always did. Other players loot a body by the existing rule
   (`player_corpses.lootAccess`).
 * **Creature and NPC bodies** (`creatures/entity/CorpseEntity`) have the same overflow behind their 27 slots (`Bulk` in

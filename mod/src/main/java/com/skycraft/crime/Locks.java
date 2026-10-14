@@ -520,7 +520,7 @@ public final class Locks {
         level.playSound(null, s.pos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.7f, 1.6f);
 
         // Contract 5: Roll lock bonus loot for containers
-        if (level.getBlockEntity(s.pos) != null) {
+        if (level.getBlockEntity(s.pos) != null && JailEvidence.kindAt(level, s.pos) == JailEvidence.Kind.NONE) {
             rollLockBonus(player, level, s.pos, s.difficulty);
         }
 
@@ -546,6 +546,11 @@ public final class Locks {
         reply(player, RESULT_UNLOCKED, 1);
         // open the container or door right away, like Skyrim
         BlockState state = level.getBlockState(s.pos);
+        if (JailEvidence.kindAt(level, s.pos) == JailEvidence.Kind.CONFISCATED) {
+            // the jail's shared confiscated goods: the Skyrim screen over the jail's store, locked again behind us
+            JailEvidence.openConfiscated(player, level, s.pos);
+            return;
+        }
         Theft.noteClick(player, s.pos);
         if (state.getBlock() instanceof DoorBlock door) {
             door.setOpen(player, level, state, s.pos, true);

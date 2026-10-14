@@ -84,11 +84,13 @@ import java.util.UUID;
  * minute serves the rest at once, and a served sentence does not end by itself: the prisoner sleeps in the bed (or
  * breaks out) and wakes outside the jail's front door, never back at the crime. Release clears the hold's bounty,
  * hands back what isn't stolen, lets the days of the sentence pass (single player) and costs some skill progress.
- * A prisoner seen outside their cell by a guard is walked back to it ({@link #guardReaction}); the evidence chest is
- * locked, as hard as the bounty says (a guard's key opens it, so does picking it). Possessions go to the cell's evidence chest
- * (overflow is held in {@link JailData}; nothing is ever deleted). A prisoner may escape instead: pick the cell door
- * and the cell block gate (or slip down the drain at the end of the corridor) and walk out - escaping adds an escape
- * bounty. In Cidhna Mine the prisoners work the silver veins: every load mined shortens the sentence.</p>
+ * A prisoner seen outside their cell by a guard is walked back to it ({@link #guardReaction}). Possessions go to the
+ * jail's two stores ({@link JailEvidence}, docs/JAIL.md): personal belongings to the prisoner's own evidence (the
+ * unlocked evidence chest gives them back, as does release), stolen goods to the shared confiscated goods (a locked
+ * barrel, picked every time); both are unbounded, saved in {@link JailData} and never deleted. A prisoner may escape
+ * instead: pick the cell door and the cell block gate (or slip down the drain at the end of the corridor) and walk
+ * out - escaping adds an escape bounty. In Cidhna Mine the prisoners work the silver veins: every load mined shortens
+ * the sentence.</p>
  *
  * <p>State while jailed: {@code crime.jail = {hold, bounty, remaining (seconds), served, site ("hold" | "dim"),
  * place, cell, rdim, rx, ry, rz, ryaw, rpitch}}.</p>
@@ -142,12 +144,13 @@ public final class Jail {
 
     /**
      * Where a prisoner serves: a cell of a hold jail in the overworld ({@code hold}) or a cell block of the jail
-     * dimension. {@code evidence} are the two halves of the cell's evidence chest; {@code min}/{@code max} the jail's
-     * bounds (the whole cell block in the dimension).
+     * dimension. {@code personal} is the evidence chest and {@code confiscated} the shared confiscated goods (see
+     * {@link JailEvidence}); {@code evidence} are the older per-cell double chest halves, only read to be migrated;
+     * {@code min}/{@code max} the jail's bounds (the whole cell block in the dimension).
      */
     record Site(boolean hold, String place, int cell, ServerLevel level, BlockPos stand, @Nullable BlockPos door,
                 @Nullable BlockPos gate, List<BlockPos> evidence, @Nullable BlockPos exit, BlockPos min, BlockPos max,
-                boolean mine, @Nullable BlockPos drain) {
+                boolean mine, @Nullable BlockPos drain, @Nullable BlockPos personal, @Nullable BlockPos confiscated) {
 
         boolean contains(Level l, double x, double y, double z) {
             return l == level && x >= min.getX() - 0.5 && x <= max.getX() + 1.5 && y >= min.getY() - 1 && y <= max.getY() + 2
@@ -167,14 +170,6 @@ public final class Jail {
         String key() {
             return place + "#" + cell;
         }
-
-        List<Container> chests() {
-            List<Container> out = new ArrayList<>(2);
-            for (BlockPos p : evidence) {
-                if (level.getBlockEntity(p) instanceof ChestBlockEntity chest) out.add(chest);
-            }
-            return out;
-        }
     }
 
     /** The cell block of the jail dimension that belongs to the player. */
@@ -182,7 +177,7 @@ public final class Jail {
         int slot = JailData.get(server).slotFor(player);
         BlockPos o = cellOrigin(slot);
         return new Site(false, "", slot, jail, o.offset(7, 1, 4), o.offset(5, 1, 4), o.offset(2, 1, 3), List.of(o.offset(2, 1, 1), o.offset(3, 1, 1)), null,
-                o, o.offset(11, 4, 25), false, o.offset(2, 1, 23));
+                o, o.offset(11, 4, 25), false, o.offset(2, 1, 23), o.offset(1, 1, 1), o.offset(4, 1, 1));
     }
 
     /** Cell {@code cell} of the hold jail recorded for a place, or null if the jail isn't (fully) known. */
@@ -195,16 +190,23 @@ public final class Jail {
         List<Anchor> doors = e.anchors(AnchorType.JAIL_DOOR);
         List<Anchor> chests = e.anchors(AnchorType.JAIL_EVIDENCE);
         Anchor min = e.first(AnchorType.JAIL_MIN), max = e.first(AnchorType.JAIL_MAX);
-        if (cell < 0 || cell >= cells.size() || min == null || max == null || chests.size() < 2 * (cell + 1)) return null;
+        if (cell < 0 || cell >= cells.size() || min == null || max == null) return null;
         Anchor gate = e.first(AnchorType.JAIL_GATE), exit = e.first(AnchorType.JAIL_EXIT);
         BlockPos lo = new BlockPos(Math.min(min.pos().getX(), max.pos().getX()), Math.min(min.pos().getY(), max.pos().getY()),
                 Math.min(min.pos().getZ(), max.pos().getZ()));
         BlockPos hi = new BlockPos(Math.max(min.pos().getX(), max.pos().getX()), Math.max(min.pos().getY(), max.pos().getY()),
                 Math.max(min.pos().getZ(), max.pos().getZ()));
         boolean mine = cells.get(cell).owner().startsWith("cidhna_mine");
+        // the evidence chest and the confiscated goods: the jail's own anchors, or (jails generated before them)
+        // the first two cells' double chests of the guard room, converted on first use
+        Anchor personal = e.first(AnchorType.JAIL_PERSONAL), confiscated = e.first(AnchorType.JAIL_CONFISCATED);
+        BlockPos personalPos = personal != null ? personal.pos() : chests.size() > 0 ? chests.get(0).pos() : null;
+        BlockPos confiscatedPos = confiscated != null ? confiscated.pos() : personal == null && chests.size() > 2 ? chests.get(2).pos() : null;
+        List<BlockPos> oldChests = new ArrayList<>();
+        for (Anchor c : chests) oldChests.add(c.pos());
         return new Site(true, place, cell, overworld, cells.get(cell).pos(), cell < doors.size() ? doors.get(cell).pos() : null,
-                gate == null ? null : gate.pos(), List.of(chests.get(2 * cell).pos(), chests.get(2 * cell + 1).pos()),
-                exit == null ? null : exit.pos(), lo, hi, mine, null);
+                gate == null ? null : gate.pos(), oldChests, exit == null ? null : exit.pos(), lo, hi, mine, null,
+                personalPos, confiscatedPos);
     }
 
     /** The place whose jail serves a hold: its capital's, else the nearest city jail of the region, else the nearest. */
@@ -235,7 +237,7 @@ public final class Jail {
         return best != null ? best : bestAny;
     }
 
-    /** A free cell of the place's jail for the player (not another prisoner's, its evidence chest not holding another's things). */
+    /** A free cell of the place's jail for the player (not another prisoner's). */
     @Nullable
     static Site claimCell(ServerLevel overworld, String place, ServerPlayer player) {
         Optional<SettlementAnchors.Entry> entry = SettlementAnchors.find(overworld, place);
@@ -249,26 +251,9 @@ public final class Jail {
             if (s == null || npcCells.contains(s.stand())) continue;
             UUID inside = jd.occupied.get(s.key());
             if (inside != null && !inside.equals(player.getUUID())) continue;
-            UUID owner = jd.chestOwner.get(s.key());
-            if (owner != null && !owner.equals(player.getUUID())) {
-                overworld.getChunk(s.evidence().get(0));
-                if (!empty(s.chests())) continue;
-                jd.chestOwner.remove(s.key());
-            }
             return s;
         }
         return null;
-    }
-
-    private static boolean empty(List<Container> chests) {
-        for (Container c : chests) {
-            if (!c.isEmpty()) return false;
-            // the overflow behind the 54 slots (inventory.ContainerOverflow) is part of the chest's content
-            com.skycraft.inventory.BulkStore ov = c instanceof net.minecraft.world.level.block.entity.BlockEntity be
-                    ? com.skycraft.inventory.ContainerOverflow.store(be) : null;
-            if (ov != null && !ov.isEmpty()) return false;
-        }
-        return true;
     }
 
     /** The player's current site from their jail state (null if their hold jail is gone). */
@@ -345,23 +330,23 @@ public final class Jail {
         if (site.hold()) {
             JailData jd = JailData.get(server);
             jd.occupied.put(site.key(), player.getUUID());
-            jd.chestOwner.put(site.key(), player.getUUID());
             jd.setDirty();
         }
 
         Guards.pacify(player);
         player.closeContainer();
         player.stopRiding();
-        Bounty.confiscate(player);
         Component where = site.hold() ? jailName(site) : Component.translatable("crime.skycraft.jail.dimension");
         Notifier.title(player, Component.translatable("crime.skycraft.jail.title"),
                 Component.translatable("crime.skycraft.jail.sentence", formatTime(sentenceSeconds(bounty))));
         if (site.hold()) Notifier.message(player, Component.translatable("crime.skycraft.jail.taken_to", where));
+        JailEvidence.noteBounty(player.server, JailEvidence.jailKey(site), bounty); // the goods' lock before the cell is made ready
         teleportToCell(player, site);
 
-        // Move possessions to the Evidence Chest (overflow is held in JailData; nothing is ever deleted), keeping
-        // quest items and up to 2 lockpicks if skilled
-        List<Container> chests = site.chests();
+        // Move possessions to the jail's stores (nothing is ever deleted): stolen goods to the shared confiscated goods,
+        // the rest to the prisoner's own evidence. Quest items and up to 2 lockpicks (if skilled) stay.
+        String jail = JailEvidence.jailKey(site);
+        JailEvidence.noteBounty(player.server, jail, bounty);
         var inv = player.getInventory();
         int lockpickCount = 0;
         for (int i = 0; i < inv.getContainerSize(); i++) {
@@ -379,11 +364,11 @@ public final class Jail {
             if (s.is(CrimeItems.LOCKPICK.get()) && kept < keep) {
                 int take = Math.min(s.getCount(), keep - kept);
                 kept += take;
-                if (s.getCount() > take) stash(player, chests, s.split(s.getCount() - take));
+                if (s.getCount() > take) JailEvidence.confiscate(player, jail, s.split(s.getCount() - take));
                 continue;
             }
             inv.setItem(i, ItemStack.EMPTY);
-            stash(player, chests, s);
+            JailEvidence.confiscate(player, jail, s);
         }
         // the overflow pack (inventory.Pack) is confiscated like the slots: quest items and the kept picks stay
         for (ItemStack e : com.skycraft.inventory.Pack.entries(player)) {
@@ -396,7 +381,7 @@ public final class Jail {
             }
             if (take <= 0) continue;
             ItemStack all = com.skycraft.inventory.Pack.take(player, com.skycraft.inventory.Pack.indexOf(player, e), take);
-            while (!all.isEmpty()) stash(player, chests, all.split(all.getMaxStackSize()));
+            JailEvidence.confiscate(player, jail, all);
         }
         if (site.mine()) {
             ItemStack pick = new ItemStack(Items.IRON_PICKAXE);
@@ -423,47 +408,23 @@ public final class Jail {
 
     // ------------------------------------------------------------------ evidence chest
 
-    /** Both halves of the cell block's evidence double chest (an empty list if it is missing). */
-    private static List<Container> evidenceChests(ServerLevel jail, BlockPos origin) {
-        List<Container> out = new ArrayList<>(2);
-        for (BlockPos p : new BlockPos[]{origin.offset(2, 1, 1), origin.offset(3, 1, 1)}) {
-            if (jail.getBlockEntity(p) instanceof ChestBlockEntity chest) out.add(chest);
-        }
-        return out;
-    }
-
-    /** Places the evidence double chest (54 slots, more than a whole inventory); never touches its contents. */
-    private static void ensureEvidenceChest(ServerLevel level, BlockPos o, int tier) {
-        BlockPos right = o.offset(2, 1, 1);
-        BlockPos left = o.offset(3, 1, 1);
-        BlockState base = Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH);
-        // same block -> the block entity (and its items) is kept, only the half type changes
-        level.setBlock(right, base.setValue(ChestBlock.TYPE, ChestType.RIGHT), 3);
-        level.setBlock(left, base.setValue(ChestBlock.TYPE, ChestType.LEFT), 3);
-        Locks.setLock(level, right, tier);
-        Locks.setLock(level, left, tier);
-    }
-
-    /** A hold jail's cell made ready for a new prisoner: chests present and locked, the doors shut and locked. */
+    /**
+     * A hold jail's cell made ready for a new prisoner: the older per-cell chests migrated into the stores, the
+     * evidence chest and the confiscated goods in place (locked as hard as the biggest bounty taken in), the doors
+     * shut and locked.
+     */
     private static void prepareHoldCell(ServerPlayer player, Site s) {
         ServerLevel level = s.level();
         level.getChunk(s.stand());
-        int tier = evidenceTier(Bounty.state(player).getCompound("jail").getInt("bounty"));
-        for (BlockPos p : s.evidence()) {
-            if (!(level.getBlockEntity(p) instanceof ChestBlockEntity)) {
-                // a broken evidence chest is replaced (single chests: still 54 slots in all)
-                level.setBlock(p, Blocks.CHEST.defaultBlockState(), 3);
-            }
-            Locks.setLock(level, p, tier);
-            relock(level, p);
-        }
+        SettlementAnchors.find(level, s.place()).ifPresent(e -> JailEvidence.migrateHold(level, e));
+        JailEvidence.ensureHold(level, s, JailEvidence.stores(player.server, s.place()).tier);
         lockDoor(level, s.door(), Locks.APPRENTICE);
         lockDoor(level, s.gate(), Locks.ADEPT);
     }
 
     /**
-     * How hard the lock on the evidence chest (and the room around it) is: the bigger the bounty, the harder the
-     * lock a prisoner has to pick to get their things back. A guard's jail key opens any of them.
+     * How hard the lock on the confiscated goods (and, in the jail dimension, the evidence room's door) is: the bigger
+     * the bounty, the harder the lock to pick. A guard's jail key opens any of them.
      */
     static int evidenceTier(int bounty) {
         if (bounty < 100) return Locks.NOVICE;
@@ -510,84 +471,7 @@ public final class Jail {
 
     /** Forgets who picked this lock, so the next prisoner has to pick it again. */
     private static void relock(ServerLevel level, BlockPos pos) {
-        Locks.LockData data = Locks.LockData.get(level.getServer());
-        if (data.unlocked.remove(Locks.key(level, Locks.normalizePos(level, pos))) != null) data.setDirty();
-    }
-
-    /** Merges {@code stack} into the containers; returns whatever did not fit (possibly empty). */
-    private static ItemStack insert(List<Container> containers, ItemStack stack) {
-        for (Container c : containers) {
-            for (int i = 0; i < c.getContainerSize() && !stack.isEmpty(); i++) {
-                ItemStack in = c.getItem(i);
-                if (in.isEmpty() || !ItemStack.isSameItemSameTags(in, stack)) continue;
-                int move = Math.min(stack.getCount(), Math.min(in.getMaxStackSize(), c.getMaxStackSize()) - in.getCount());
-                if (move > 0) {
-                    in.grow(move);
-                    stack.shrink(move);
-                    c.setChanged();
-                }
-            }
-        }
-        for (Container c : containers) {
-            for (int i = 0; i < c.getContainerSize() && !stack.isEmpty(); i++) {
-                if (!c.getItem(i).isEmpty()) continue;
-                c.setItem(i, stack.copy());
-                stack.setCount(0);
-                c.setChanged();
-            }
-        }
-        return stack.isEmpty() ? ItemStack.EMPTY : stack;
-    }
-
-    /**
-     * Confiscates {@code stack} into the evidence chest: its 54 slots, then the chest's own overflow
-     * ({@code inventory.ContainerOverflow}, shown by its Skyrim screen and handed back on release); only when the chest
-     * is missing does the rest wait in {@link JailData}.
-     */
-    private static void stash(ServerPlayer player, List<Container> chests, ItemStack stack) {
-        if (stack.isEmpty()) return;
-        ItemStack rest = insert(chests, stack);
-        if (!rest.isEmpty()) {
-            for (Container c : chests) {
-                if (rest.isEmpty()) break;
-                if (c instanceof net.minecraft.world.level.block.entity.BlockEntity be) {
-                    com.skycraft.inventory.BulkStore ov = com.skycraft.inventory.ContainerOverflow.store(be);
-                    if (ov != null) ov.add(rest);
-                }
-            }
-        }
-        if (!rest.isEmpty()) {
-            JailData data = JailData.get(player.server);
-            data.held.computeIfAbsent(player.getUUID(), k -> new ArrayList<>()).add(rest.copy());
-            data.setDirty();
-        }
-    }
-
-    /** Moves held overflow into the evidence chest as room frees up, so escapees can still find everything there. */
-    private static void refillChest(ServerPlayer player, Site site) {
-        JailData data = JailData.get(player.server);
-        List<ItemStack> held = data.held.get(player.getUUID());
-        if (held == null || held.isEmpty()) return;
-        List<Container> chests = site.chests();
-        if (chests.isEmpty()) return;
-        for (var it = held.iterator(); it.hasNext(); ) {
-            ItemStack rest = insert(chests, it.next());
-            if (!rest.isEmpty()) break;
-            it.remove();
-        }
-        if (held.isEmpty()) data.held.remove(player.getUUID());
-        data.setDirty();
-    }
-
-    /** Hands a confiscated item back: armor to its empty slot, then the bags, then at the player's feet. */
-    private static void giveBack(ServerPlayer player, ItemStack stack) {
-        if (stack.isEmpty()) return;
-        EquipmentSlot slot = LivingEntity.getEquipmentSlotForItem(stack);
-        if (slot.getType() == EquipmentSlot.Type.ARMOR && player.getItemBySlot(slot).isEmpty()) {
-            player.setItemSlot(slot, stack);
-            return;
-        }
-        if (!ActionHandler.addToBags(player, stack) && !stack.isEmpty()) player.drop(stack, false);
+        JailEvidence.relock(level, pos);
     }
 
     private static void teleportToCell(ServerPlayer player, Site site) {
@@ -603,22 +487,18 @@ public final class Jail {
         BlockPos origin = cellOrigin(slot);
         JailData data = JailData.get(player.server);
         boolean fresh = !data.built.contains(slot);
-        int tier = evidenceTier(Bounty.state(player).getCompound("jail").getInt("bounty"));
-        // the partition wall beside the evidence chest is always stone; air there means the cell block is gone
+        int tier = JailEvidence.stores(player.server, JailEvidence.DIM).tier;
+        // an older cell block's per-cell chest goes into the stores before anything is rebuilt around it
+        JailEvidence.migrateDim(jail, slot);
+        // the partition wall beside the evidence room is always stone; air there means the cell block is gone
         if (fresh || jail.getBlockState(origin.offset(5, 1, 1)).isAir()) {
             buildCell(jail, origin, fresh, tier);
             data.built.add(slot);
             data.setDirty();
-        } else if (!(jail.getBlockEntity(origin.offset(3, 1, 1)) instanceof ChestBlockEntity)) {
-            ensureEvidenceChest(jail, origin, tier); // cells built before the evidence chest became a double chest
         }
-        // every sentence starts with the chest, its room and the cell door locked again, as hard as the bounty says
-        for (BlockPos p : new BlockPos[]{origin.offset(2, 1, 1), origin.offset(3, 1, 1)}) {
-            if (jail.getBlockEntity(p) instanceof ChestBlockEntity) {
-                Locks.setLock(jail, p, tier);
-                relock(jail, p);
-            }
-        }
+        // the evidence chest and the confiscated goods stand in the evidence room (their contents are in the stores)
+        JailEvidence.ensureDim(jail, origin, tier);
+        // every sentence starts with the room's door and the cell door locked again
         if (jail.getBlockState(origin.offset(2, 1, 3)).getBlock() instanceof DoorBlock) lockDoor(jail, origin.offset(2, 1, 3), tier);
         if (jail.getBlockState(origin.offset(5, 1, 4)).getBlock() instanceof DoorBlock) lockDoor(jail, origin.offset(5, 1, 4), Locks.MASTER);
         player.teleportTo(jail, origin.getX() + 7.5, CELL_Y + 1, origin.getZ() + 4.5, 90f, 0f);
@@ -629,10 +509,11 @@ public final class Jail {
     }
 
     /**
-     * A hold jail with central corridor, evidence chest, guard patrol, and multiple cells with NPCs. Rebuilding never
-     * touches the evidence chest's contents; the prisoners and the guard are only spawned the first time
-     * ({@code spawnNpcs}). The cell block is two rooms: the corridor with the three cells and the escape drain at its
-     * far end, and, behind a locked iron door at the near end, the evidence room with the prisoner's chest.
+     * A cell block with a central corridor, guard patrol, and multiple cells with NPCs. Rebuilding never touches
+     * what the jail holds (it is in {@link JailData}, not in the blocks); the prisoners and the guard are only spawned
+     * the first time ({@code spawnNpcs}). The cell block is two rooms: the corridor with the three cells and the
+     * escape drain at its far end, and, behind a locked iron door at the near end, the evidence room with the
+     * evidence chest and the confiscated goods (never in a cell).
      */
     private static void buildCell(ServerLevel level, BlockPos o, boolean spawnNpcs, int tier) {
         BlockState wall = Blocks.STONE_BRICKS.defaultBlockState();
@@ -640,7 +521,6 @@ public final class Jail {
         for (int x = 0; x <= 11; x++) {
             for (int y = 0; y <= 4; y++) {
                 for (int z = 0; z <= 25; z++) {
-                    if (y == 1 && z == 1 && (x == 2 || x == 3)) continue; // evidence chest
                     boolean shell = x == 0 || x == 11 || y == 0 || y == 4 || z == 0 || z == 25;
                     BlockState s = shell ? (y == 0 && (x + z) % 3 == 0 ? Blocks.CRACKED_STONE_BRICKS.defaultBlockState()
                             : y > 0 && y < 4 && (x * 7 + z * 3 + y) % 5 == 0 ? Blocks.MOSSY_STONE_BRICKS.defaultBlockState() : wall) : air;
@@ -677,7 +557,7 @@ public final class Jail {
         level.setBlock(o.offset(2, 2, 3), evidenceDoor.setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER), 2);
         Locks.setLock(level, o.offset(2, 1, 3), tier);
         level.setBlock(o.offset(2, 3, 2), Blocks.LANTERN.defaultBlockState().setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true), 2);
-        ensureEvidenceChest(level, o, tier);
+        JailEvidence.ensureDim(level, o, tier);
 
         // South end: Old sewer grate / Escape hatch
         BlockPos escapePos = o.offset(2, 1, 23);
@@ -790,7 +670,6 @@ public final class Jail {
             teleportToCell(player, site);
             return;
         }
-        refillChest(player, site);
         guardReaction(player, site);
         if (!isJailed(player)) return;
         boolean over = serveSecond(j);
@@ -921,37 +800,9 @@ public final class Jail {
         int bounty = Math.max(j.getInt("bounty"), 1);
         Bounty.clear(player, hold);
 
-        // Restore non-stolen possessions from the Evidence Chest and the overflow held in JailData
-        JailData jd = JailData.get(player.server);
-        if (site != null) {
-            freeCell(player, site);
-            boolean mine = !site.hold() || player.getUUID().equals(jd.chestOwner.get(site.key()));
-            if (mine) {
-                for (Container chest : site.chests()) {
-                    for (int i = 0; i < chest.getContainerSize(); i++) {
-                        ItemStack s = chest.getItem(i);
-                        if (s.isEmpty()) continue;
-                        chest.setItem(i, ItemStack.EMPTY);
-                        if (!Bounty.isStolen(s)) giveBack(player, s);
-                    }
-                    chest.setChanged();
-                    // what the slots could not hold (the chest's overflow, whole int-count rows, split to stacks)
-                    com.skycraft.inventory.BulkStore ov = chest instanceof net.minecraft.world.level.block.entity.BlockEntity be
-                            ? com.skycraft.inventory.ContainerOverflow.store(be) : null;
-                    if (ov != null) {
-                        for (int i = ov.size() - 1; i >= 0; i--) {
-                            ItemStack all = ov.take(i, Integer.MAX_VALUE);
-                            if (all.isEmpty() || Bounty.isStolen(all)) continue;
-                            for (ItemStack part : com.skycraft.inventory.BulkStore.splitToStacks(all)) giveBack(player, part);
-                        }
-                    }
-                }
-                if (site.hold()) jd.chestOwner.remove(site.key());
-            }
-        }
-        List<ItemStack> held = jd.held.remove(player.getUUID());
-        if (held != null) for (ItemStack s : held) if (!Bounty.isStolen(s)) giveBack(player, s);
-        jd.setDirty();
+        // Their own things come back from the evidence (the stolen goods stay in the jail's confiscated goods)
+        if (site != null) freeCell(player, site);
+        JailEvidence.returnPersonal(player, site != null ? JailEvidence.jailKey(site) : JailEvidence.LEGACY);
         player.inventoryMenu.broadcastChanges();
 
         List<Skill> lost = deteriorate(player, Math.max(1, bounty / 100));
@@ -1010,8 +861,8 @@ public final class Jail {
         } else {
             Notifier.title(player, Component.translatable("crime.skycraft.jail.escaped"), Component.translatable("crime.skycraft.jail.escaped_unseen"));
         }
-        // whatever was left behind stays in the evidence chest (and JailData): picking that chest's lock later, or
-        // serving or paying the next time, gets it back
+        // whatever was left behind stays in the jail's evidence: right-clicking the evidence chest later (sneak back
+        // in) gives it back; stolen goods are in the locked confiscated barrel and have to be picked out
         LOOSE.remove(player.getUUID());
         if (site != null && site.hold()) return;
 
@@ -1088,6 +939,7 @@ public final class Jail {
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         Level level = event.getLevel();
         if (event.getEntity().isCreative()) return;
+        if (level instanceof ServerLevel sl && event.getEntity() instanceof ServerPlayer actor && onStoreClick(event, sl, actor)) return;
         boolean dimension = isJailDimension(level);
         if (!dimension && !(event.getEntity() instanceof ServerPlayer sp && isJailed(sp))) return;
         BlockState state = level.getBlockState(event.getPos());
@@ -1128,6 +980,45 @@ public final class Jail {
 
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.FAIL);
+    }
+
+    /**
+     * The evidence chest and the confiscated goods (for everybody, jailed or not). The chest is never a screen: it
+     * hands the player's own things back. The goods are locked: a click that passes the lock check (a guard's key)
+     * opens them, one that does not is left to {@link Locks}' minigame, which opens them through
+     * {@link JailEvidence#openConfiscated} when the pick turns. Returns true when the click was dealt with.
+     */
+    private static boolean onStoreClick(PlayerInteractEvent.RightClickBlock event, ServerLevel level, ServerPlayer player) {
+        BlockPos pos = event.getPos();
+        JailEvidence.Kind kind = JailEvidence.kindAt(level, pos);
+        if (kind == JailEvidence.Kind.NONE) return false;
+        if (event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND) {
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.FAIL);
+            return true;
+        }
+        switch (kind) {
+            case PERSONAL -> {
+                event.setCanceled(true);
+                event.setCancellationResult(InteractionResult.SUCCESS);
+                JailEvidence.interactPersonal(player, level, pos);
+            }
+            case LEGACY_CHEST -> {
+                event.setCanceled(true);
+                event.setCancellationResult(InteractionResult.SUCCESS);
+                JailEvidence.migrateAt(level, pos);
+            }
+            case CONFISCATED -> {
+                if (Locks.blocks(player, level, pos)) return false; // the lockpick minigame
+                event.setCanceled(true);
+                event.setCancellationResult(InteractionResult.SUCCESS);
+                JailEvidence.openConfiscated(player, level, pos);
+            }
+            default -> {
+                return false;
+            }
+        }
+        return true;
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -1178,22 +1069,22 @@ public final class Jail {
         return level instanceof Level l && isJailDimension(l);
     }
 
-    /** A prisoner who dies in jail doesn't lose what they carried: it goes into the evidence chest. */
+    /** A prisoner who dies in jail doesn't lose what they carried: it goes into the jail's stores like an arrest's. */
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onDrops(LivingDropsEvent event) {
         if (event.isCanceled() || !(event.getEntity() instanceof ServerPlayer player) || !isJailed(player)) return;
         Site site = siteOf(player);
         if (site == null || player.level() != site.level()) return;
         if (site.hold() && !site.contains(player.level(), player.getX(), player.getY(), player.getZ())) return;
-        List<Container> chests = site.chests();
+        String jail = JailEvidence.jailKey(site);
         for (ItemEntity drop : event.getDrops()) {
             ItemStack s = drop.getItem().copy();
             if (s.getTag() != null && s.getTag().getBoolean(TOOL_TAG)) continue;
-            stash(player, chests, s);
+            JailEvidence.confiscate(player, jail, s);
         }
         // the pack part of the death's drops (whole entries with int counts, see survival/corpse/PlayerCorpses)
         for (ItemStack all : com.skycraft.survival.corpse.PlayerCorpses.takePackCargo(player)) {
-            for (ItemStack part : com.skycraft.inventory.BulkStore.splitToStacks(all)) stash(player, chests, part);
+            JailEvidence.confiscate(player, jail, all);
         }
         event.getDrops().clear();
         event.setCanceled(true);
@@ -1211,9 +1102,10 @@ public final class Jail {
     // ------------------------------------------------------------------ saved data
 
     /**
-     * Which jail-dimension cell belongs to which player, which cells are built, confiscated items that didn't fit
-     * the evidence chest (handed back on release), and the hold jails' cells: who is locked in which, and whose
-     * things are in its evidence chest. Stored with the overworld.
+     * Which jail-dimension cell belongs to which player, which cells are built, the hold jails' cells (who is locked
+     * in which) and each jail's two stores (the prisoners' evidence and the shared confiscated goods,
+     * {@link JailEvidence}). Stored with the overworld. {@code held} and {@code chestOwner} are only read from
+     * older saves, to be migrated into the stores.
      */
     public static class JailData extends SavedData {
         private static final String NAME = "skycraft_jail";
@@ -1222,9 +1114,15 @@ public final class Jail {
         final Map<UUID, List<ItemStack>> held = new HashMap<>();
         /** Hold jail cell ({@code place#cell}) -> the prisoner in it. */
         final Map<String, UUID> occupied = new HashMap<>();
-        /** Hold jail cell -> whose confiscated things its evidence chest holds. */
+        /** Hold jail cell -> whose confiscated things its (older, per-cell) evidence chest holds. */
         final Map<String, UUID> chestOwner = new HashMap<>();
+        /** Jail key (hold place id, {@link JailEvidence#DIM} or {@link JailEvidence#LEGACY}) -> its stores. */
+        final Map<String, JailEvidence.Stores> stores = new HashMap<>();
         int next = 0;
+
+        JailEvidence.Stores stores(String jailKey) {
+            return stores.computeIfAbsent(jailKey, k -> new JailEvidence.Stores(this::setDirty));
+        }
 
         static JailData get(MinecraftServer server) {
             return server.overworld().getDataStorage().computeIfAbsent(JailData::load, JailData::new, NAME);
@@ -1267,6 +1165,8 @@ public final class Jail {
             }
             readCells(tag.getCompound("occupied"), data.occupied);
             readCells(tag.getCompound("chest_owner"), data.chestOwner);
+            CompoundTag st = tag.getCompound("stores");
+            for (String k : st.getAllKeys()) data.stores.put(k, JailEvidence.Stores.load(st.getCompound(k), data::setDirty));
             return data;
         }
 
@@ -1298,6 +1198,9 @@ public final class Jail {
             tag.put("held", h);
             tag.put("occupied", writeCells(occupied));
             tag.put("chest_owner", writeCells(chestOwner));
+            CompoundTag st = new CompoundTag();
+            stores.forEach((k, v) -> st.put(k, v.save()));
+            tag.put("stores", st);
             return tag;
         }
     }

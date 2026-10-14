@@ -159,6 +159,13 @@ public final class Theft {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         SESSIONS.remove(player.getUUID());
         Click click = LAST_CLICK.remove(player.getUUID());
+        // the jail's confiscated goods are the jail's: taking from them is stealing like from any owned container
+        if (event.getContainer() instanceof net.minecraft.world.inventory.ChestMenu jailMenu
+                && jailMenu.getContainer() instanceof JailEvidence.StoreContainer store && Crimes.canCommitCrime(player)) {
+            SESSIONS.put(player.getUUID(), new Session(jailMenu.containerId, store.pos(), countMenu(jailMenu, player),
+                    countInventory(player), Currency.balance(player)));
+            return;
+        }
         if (click == null || player.level().getGameTime() - click.tick() > 2 || !Crimes.canCommitCrime(player)) return;
         AbstractContainerMenu menu = event.getContainer();
         if (menu == player.inventoryMenu) return;

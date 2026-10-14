@@ -65,7 +65,7 @@ public enum AnchorType {
     JAIL_CELL,
     /** Lower half of a cell's door (one per cell). */
     JAIL_DOOR,
-    /** The two halves of a cell's evidence chest (two per cell, right then left). */
+    /** Older jails: the two halves of a cell's evidence chest (two per cell, right then left); migrated into the stores. */
     JAIL_EVIDENCE,
     /** The locked door between the cell block and the guard room. */
     JAIL_GATE,
@@ -108,7 +108,12 @@ public enum AnchorType {
     /** A person or body of an aftermath scene; the owner label is {@code pose|role|option} (see fire.aftermath.Tableau). */
     TABLEAU,
     /** A fire seen from afar; the owner label is {@code intensity|height|smoke[|flags]} (see fire.FireAnchors). */
-    FIRE_SITE;
+    FIRE_SITE,
+    // ---- jail evidence (crime.JailEvidence; appended: ordinals are saved)
+    /** The evidence chest: gives a prisoner back what the jail took from them (never in a cell). */
+    JAIL_PERSONAL,
+    /** The confiscated goods: the shared, locked store of stolen goods taken from prisoners (never in a cell). */
+    JAIL_CONFISCATED;
 
     public static final AnchorType[] VALUES = values();
 
