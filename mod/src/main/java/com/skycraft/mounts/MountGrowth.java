@@ -29,17 +29,20 @@ import java.util.concurrent.ConcurrentHashMap;
  * How an individual mount lives its stats: where they are kept, how they change the animal, and what grows, steadies
  * or damages them.
  *
- * <p><b>Where.</b> The player's mount record holds the stats of every mount they own ({@code mstats.<kind>}, the source
- * of truth: a mount is rebuilt from it when it is called, brought out or loaded); the entity carries a copy
- * ({@link MountStats#TAG}) so a mount in the world needs no lookup. Anything that changes the stats goes through
- * {@link #commit}, which writes both and re-applies the attributes.</p>
+ * <p><b>Where.</b> The stats belong to the ANIMAL: while it is an entity, its persistent data ({@link MountStats#TAG})
+ * is the truth; whenever it is not (called back from afar, in the stable, sold) it is a {@link MountToken}. The
+ * player's record holds only the token of the active mount and of the legends ({@code tokens.<kind>}), refreshed by
+ * {@link #commit} on every change and by {@link #captureToken} on unload and logout; selling moves the token into the
+ * stable's stock ({@link MountStable}). Nothing about an individual is derived from, or keyed by, the player.</p>
  *
  * <p><b>Growth</b> is accumulated on the server a tick at a time and paid out once a second ({@link #ride}): distance
  * (a gallop is worth three times a walk), jumps, hauling a load, blows struck and taken. Everything is a handful of
  * float additions a tick.</p>
  */
 public final class MountGrowth {
-    public static final String RECORDS = "mstats";
+    public static final String RECORDS = "tokens";
+    /** The first version kept bare stats per kind here; they are turned into tokens when first read. */
+    private static final String LEGACY = "mstats";
     private static final UUID SPEED_ID = UUID.fromString("7a0e5f10-3b1c-4a77-8c0d-61a7d2b9e101");
     private static final UUID HEALTH_ID = UUID.fromString("7a0e5f10-3b1c-4a77-8c0d-61a7d2b9e102");
     private static final UUID JUMP_ID = UUID.fromString("7a0e5f10-3b1c-4a77-8c0d-61a7d2b9e103");
@@ -60,41 +63,93 @@ public final class MountGrowth {
         long lastBlow, lastHit;
     }
 
-    // ------------------------------------------------------------------ the record
+    // ------------------------------------------------------------------ tokens: where an animal's stats live
 
-    /** The recorded stats of a kind the player owns, or null. */
+    /**
+     * The token of an owned animal in the player's record: the ACTIVE mount's and the legends' only (a regular mount
+     * that is retired takes its token with it, to the stable or back to the wild). While the animal is an entity its
+     * persistent data is the truth and this is a copy ({@link #captureToken}); while it is not, this is the animal.
+     */
     @Nullable
-    public static MountStats recorded(Player p, MountKind kind) {
-        CompoundTag all = Mounts.data(p).getCompound(RECORDS);
-        return all.contains(kind.id, 10) ? MountStats.fromTag(kind, all.getCompound(kind.id)) : null;
+    public static CompoundTag tokenOf(Player p, MountKind kind) {
+        CompoundTag rec = Mounts.data(p);
+        CompoundTag all = rec.getCompound(RECORDS);
+        if (all.contains(kind.id, 10)) return all.getCompound(kind.id).copy();
+        CompoundTag old = rec.getCompound(LEGACY);
+        if (old.contains(kind.id, 10)) {
+            // a record of the first version: the stats become the token of the animal that is active
+            CompoundTag token = MountToken.create(kind, MountStats.fromTag(kind, old.getCompound(kind.id)), null,
+                    rec.hasUUID("uuid") && kind == Mounts.active(p) ? rec.getUUID("uuid") : UUID.randomUUID());
+            old.remove(kind.id);
+            rec.put(LEGACY, old);
+            all.put(kind.id, token);
+            rec.put(RECORDS, all);
+            return token.copy();
+        }
+        return null;
     }
 
-    public static void record(Player p, MountKind kind, MountStats s) {
+    public static void putToken(Player p, MountKind kind, CompoundTag token) {
         CompoundTag tag = Mounts.data(p);
         CompoundTag all = tag.getCompound(RECORDS);
-        all.put(kind.id, s.toTag());
+        all.put(kind.id, token.copy());
         tag.put(RECORDS, all);
         SkyData.get(p).markDirty();
     }
 
-    public static void forget(Player p, MountKind kind) {
-        CompoundTag tag = Mounts.data(p);
-        if (tag.getCompound(RECORDS).contains(kind.id)) {
+    /** Removes and returns the token of a kind from the record (the animal leaves the player), or null. */
+    @Nullable
+    public static CompoundTag takeToken(Player p, MountKind kind) {
+        CompoundTag token = tokenOf(p, kind);
+        if (token != null) {
+            CompoundTag tag = Mounts.data(p);
             CompoundTag all = tag.getCompound(RECORDS);
             all.remove(kind.id);
             tag.put(RECORDS, all);
+            SkyData.get(p).markDirty();
         }
+        return token;
+    }
+
+    /** The stats in the player's token of a kind, or null. */
+    @Nullable
+    public static MountStats recorded(Player p, MountKind kind) {
+        CompoundTag t = tokenOf(p, kind);
+        return t == null ? null : MountToken.stats(t);
+    }
+
+    /** Writes new stats into the player's token of a kind (a token is created if there is none). */
+    public static void record(Player p, MountKind kind, MountStats s) {
+        CompoundTag t = tokenOf(p, kind);
+        if (t == null) t = MountToken.create(kind, s, null, UUID.randomUUID());
+        else MountToken.putStats(t, s);
+        putToken(p, kind, t);
+    }
+
+    public static void forget(Player p, MountKind kind) {
+        takeToken(p, kind);
+    }
+
+    /** Refreshes the player's token of the active mount from its entity (the entity is the truth while it exists). */
+    public static void captureToken(ServerPlayer owner, Mob mob) {
+        MountKind kind = Mounts.kindOf(mob);
+        if (kind == null || !Mounts.isActive(owner, mob)) return;
+        CompoundTag token = MountToken.capture(mob, kind);
+        CompoundTag old = tokenOf(owner, kind);
+        // keep what the token knows that the entity does not carry
+        if (old != null && MountToken.origin(token).isEmpty() && !MountToken.origin(old).isEmpty()) MountToken.setOrigin(token, MountToken.origin(old));
+        putToken(owner, kind, token);
     }
 
     /**
-     * The stats of the player's active mount: its record (the entity may be far away or unloaded). A mount from a save
-     * that predates individuals has none yet: its stats are what its UUID rolls (the same ones the entity computes), and
-     * they are recorded from here on.
+     * The stats of the player's active mount: the entity's when it is loaded (the truth), else its token. A mount from a
+     * save that predates individuals has neither: its stats are what its UUID rolls, the same ones its entity computes.
      */
     @Nullable
     public static MountStats active(Player p) {
         MountKind k = Mounts.active(p);
         if (k == null) return null;
+        if (p instanceof ServerPlayer sp && Mounts.activeEntity(sp) instanceof Mob m && Mounts.kindOf(m) == k) return MountStats.of(m, k);
         MountStats s = recorded(p, k);
         CompoundTag tag = Mounts.data(p);
         if (s == null && tag.hasUUID("uuid")) {
@@ -104,40 +159,59 @@ public final class MountGrowth {
         return s;
     }
 
-    /** Stats of a mount kind the player owns (the active one may be derived, see {@link #active}). */
+    /** Stats of a mount kind the player holds a token of (the active one comes from its entity when loaded). */
     @Nullable
     public static MountStats known(Player p, MountKind kind) {
         return kind == Mounts.active(p) ? active(p) : recorded(p, kind);
     }
 
-    /** Binds a mount that is about to join the world to its owner's record, rolling (and recording) a new animal. */
+    /**
+     * Binds a mount that is about to join the world to the token the player holds for its kind: the individual (stats,
+     * name, coat, health) is restored onto the new entity. With no token a new animal is rolled, and its token is made.
+     */
     static MountStats bind(ServerPlayer owner, Mob mob, MountKind kind) {
-        MountStats s = recorded(owner, kind);
-        if (s == null) {
+        CompoundTag token = tokenOf(owner, kind);
+        MountStats s;
+        if (token != null) {
+            MountToken.apply(mob, token);
+            s = MountToken.stats(token);
+        } else {
             s = MountStats.roll(kind, MountStats.seedOf(mob.getUUID(), kind), 0f, false);
-            record(owner, kind, s);
+            MountStats.store(mob, s);
+            MountToken.idOf(mob);
         }
-        MountStats.store(mob, s);
         applyAttributes(mob, kind);
+        if (token != null) mob.setHealth(Math.max(1f, mob.getMaxHealth() * MountToken.health(token)));
+        // the token follows what the entity now is (name, coat, id), so what is held is always the entity's
+        putToken(owner, kind, MountToken.capture(mob, kind));
         return s;
     }
 
-    /** A mount of the record loading from disk takes the record's numbers (training may have happened while it slept). */
+    /**
+     * A mount loading from disk: the entity is the truth, unless its token was changed while it slept (trained by a
+     * stable hand while it stood in an unloaded chunk): the newer revision wins.
+     */
     static void syncFromRecord(Mob mob) {
         MountKind kind = Mounts.kindOf(mob);
         UUID owner = Mounts.ownerOf(mob);
         if (kind == null || owner == null || mob.level().getServer() == null) return;
         ServerPlayer p = mob.level().getServer().getPlayerList().getPlayer(owner);
         if (p == null || !Mounts.isActive(p, mob)) return;
-        MountStats rec = recorded(p, kind);
-        if (rec != null) MountStats.store(mob, rec);
+        CompoundTag token = tokenOf(p, kind);
+        if (token == null) {
+            captureToken(p, mob);
+            return;
+        }
+        MountStats held = MountToken.stats(token);
+        if (!MountStats.stored(mob) || held.rev > MountStats.of(mob, kind).rev) MountStats.store(mob, held);
+        MountToken.idOf(mob);
     }
 
-    /** Writes changed stats to the entity and the owner's record, and re-applies what they do to the animal. */
+    /** Writes changed stats to the entity (the truth) and refreshes the owner's token, and re-applies what they do. */
     static void commit(Mob mob, MountKind kind, MountStats s, @Nullable ServerPlayer owner, boolean attributes) {
         MountStats.store(mob, s);
-        if (owner != null && Mounts.isActive(owner, mob)) record(owner, kind, s);
         if (attributes) applyAttributes(mob, kind);
+        if (owner != null && Mounts.isActive(owner, mob)) captureToken(owner, mob);
     }
 
     // ------------------------------------------------------------------ what the stats do
@@ -387,9 +461,14 @@ public final class MountGrowth {
         long week = MountStock.weekOf(p.level().getGameTime());
         if (MountStock.canTrain(s, stat, week) != MountStock.Train.OK) return false;
         MountStock.applyTraining(s, stat, week);
-        record(p, kind, s);
         Entity e = Mounts.activeEntity(p);
-        if (e instanceof Mob m) commit(m, kind, s, p, true);
+        if (e instanceof Mob m && Mounts.kindOf(m) == kind) {
+            commit(m, kind, s, p, true); // the entity is the truth, and the token follows
+        } else {
+            // the animal stands in an unloaded chunk: its token is changed, and the newer revision wins when it loads
+            s.rev++;
+            record(p, kind, s);
+        }
         return true;
     }
 }

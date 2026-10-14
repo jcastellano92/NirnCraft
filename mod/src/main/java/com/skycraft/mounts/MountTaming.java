@@ -78,7 +78,9 @@ public final class MountTaming {
             MountStats born = MountStats.of(wild, kind); // the animal the rider has been breaking in, not a new roll
             Mob beast = Mounts.create(level, kind, wild.getX(), wild.getY(), wild.getZ(), wild.getYRot(), player);
             if (beast == null) return null;
-            MountStats.store(beast, born);
+            MountStats.store(beast, born); // the same animal in its mount body: its stats, its id and its name go with it
+            beast.getPersistentData().putUUID(MountToken.ID_TAG, MountToken.idOf(wild));
+            if (wild.hasCustomName()) beast.setCustomName(wild.getCustomName());
             MountGear.refresh(beast);
             float health = wild.getHealth() / Math.max(1f, wild.getMaxHealth());
             player.stopRiding();

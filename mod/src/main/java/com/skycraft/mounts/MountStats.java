@@ -47,6 +47,8 @@ public final class MountStats {
     /** The in-game week of the last training session and how many were paid that week. */
     public int trainWeek = -1;
     public int trainCount;
+    /** Bumped when the stats are changed away from the animal (trained while it was not loaded): the newer copy wins. */
+    public int rev;
 
     public MountStats(MountKind kind) {
         this.kind = kind;
@@ -246,6 +248,7 @@ public final class MountStats {
         t.putFloat("trust", trust);
         if (fedAt > Long.MIN_VALUE / 4) t.putLong("fed", fedAt);
         if (stabledAt >= 0) t.putLong("stabled", stabledAt);
+        if (rev != 0) t.putInt("rev", rev);
         if (trainWeek >= 0) {
             t.putInt("tw", trainWeek);
             t.putInt("tn", trainCount);
@@ -265,6 +268,7 @@ public final class MountStats {
         s.trust = clampTrust(t.getFloat("trust"));
         if (t.contains("fed")) s.fedAt = t.getLong("fed");
         if (t.contains("stabled")) s.stabledAt = t.getLong("stabled");
+        s.rev = t.getInt("rev");
         if (t.contains("tw")) {
             s.trainWeek = t.getInt("tw");
             s.trainCount = t.getInt("tn");

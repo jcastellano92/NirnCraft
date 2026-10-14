@@ -138,12 +138,12 @@ public final class MountInspect {
     }
 
     /** A stable's animal for the comparison screen. */
-    public static MountView offerView(ServerPlayer viewer, MountKind kind, MountStats s) {
+    public static MountView offerView(ServerPlayer viewer, MountKind kind, MountStats s, String name) {
         SaddleType plain = SaddleType.PLAIN;
         float carry = (MountGear.baseCarry(kind) + plain.carryKg) * s.mult(MountProfile.CARRY) * MountGrowth.packMult(viewer);
         float bags = MountGear.bagKg(kind, plain) * s.mult(MountProfile.CARRY) * MountGrowth.packMult(viewer);
         float hp = (float) (MountProfile.baseHealth(kind) * s.mult(MountProfile.HEALTH));
-        return build(viewer, kind, s, 3, "", "", plain, ItemStack.EMPTY, carry, bags, hp, hp, 0L);
+        return build(viewer, kind, s, 3, "", name, plain, ItemStack.EMPTY, carry, bags, hp, hp, 0L);
     }
 
     public static MountView build(ServerPlayer viewer, MountKind kind, MountStats s, int owner, String ownerName, String name,

@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
@@ -111,6 +112,7 @@ public final class MountsSelfTest {
             rec.remove("stable");
             rec.remove("origin");
             rec.remove("mstats");
+            rec.remove("tokens");
             rec.remove("stock_sold");
             rec.remove("cooldown");
             for (String perk : new String[]{"horse_sense", "wild_eye", "steady_seat", "pack_master", "endurance", "trick_rider"}) {
@@ -825,11 +827,17 @@ public final class MountsSelfTest {
                 won && Mounts.active(fp) == MountKind.RIFTEN_CHESTNUT && m3.isRemoved() && Mounts.stable(fp).size() == 1 && !wild.isNoAi()
                         && Mounts.activeEntity(fp) == wild && MountStats.stored(wild), "");
         // and a tamed one is let go when the next one comes: it wanders free, still alive
+        MountStats wildStats = MountStats.of(wild, MountKind.RIFTEN_CHESTNUT);
+        java.util.UUID wildId = MountToken.idOf(wild);
         Horse wild2 = wildHorse(level, HorseBreed.WHITERUN_BAY, at.east(14), spawned);
         boolean won2 = breakIn(fp, wild2, SaddleType.PLAIN);
         fp.stopRiding();
         c.check("the tamed one it replaced is released: alive, ownerless, untamed",
                 won2 && !wild.isRemoved() && Mounts.ownerOf(wild) == null && !wild.isTamed() && Mounts.active(fp) == MountKind.WHITERUN_BAY, "");
+        c.check("a released animal keeps its token on it: same stats, same animal id, and anyone can break it in again",
+                sameStats(MountStats.of(wild, MountKind.RIFTEN_CHESTNUT), wildStats) && MountToken.idOf(wild).equals(wildId)
+                        && MountStats.stored(wild) && MountTaming.wildKind(wild) == MountKind.RIFTEN_CHESTNUT
+                        && MountGrowth.tokenOf(fp, MountKind.RIFTEN_CHESTNUT) == null, "");
 
         // ---- training and selling the active mount
         MountStats act = MountGrowth.active(fp);
@@ -846,14 +854,177 @@ public final class MountsSelfTest {
         rec.put("bags", bags.copy());
         Saddlebags.overflowOf(fp).add(new ItemStack(Items.IRON_INGOT, 100));
         Saddlebags.overflowOf(fp).add(bagItem(951, 0.01f, 12));
-        int sold = Mounts.sell(fp);
+        int sold = Mounts.sell(fp, "skyrim/selftest:0:0");
         c.check("selling returns the bags and tack first, then pays by grade and level; the stable is empty",
                 sold == worth && worth > 0 && pd.getGold() == goldBefore + worth && Mounts.active(fp) == null && Mounts.stable(fp).isEmpty()
                         && count(fp.getInventory().items, Items.COBBLESTONE) == 10 && count(fp.getInventory().items, Items.SADDLE) >= 1, "paid " + sold);
         c.check("selling returns the overflow rows to the player as well, the record's overflow is empty",
                 com.skycraft.inventory.Inv.count(fp, Items.IRON_INGOT) == 100 && bagKind(fp, 951) == 12 && Saddlebags.overflowOf(fp).isEmpty(),
                 com.skycraft.inventory.Inv.count(fp, Items.IRON_INGOT) + " ingots, " + bagKind(fp, 951) + " sticks");
+        tokenChecks(level, fp, c, spawned, at);
         pd.setGold(gold0);
+    }
+
+    /**
+     * The animal and its stats travel together: a mount sold to a stable is offered there as that very individual and
+     * bought by another player with its stats, level, trust, name and coat; the seller's record no longer holds it; the
+     * token survives NBT and cannot be had twice.
+     */
+    private static void tokenChecks(ServerLevel level, FakePlayer fp, Checks c, List<Mob> spawned, BlockPos at) {
+        var rec = Mounts.data(fp);
+        MountKind pk = MountKind.NIBENESE_GREY;
+        String stableKey = "skyrim/selftest:7:7";
+        MountStable store = MountStable.get(level.getServer());
+        fp.getInventory().clearContent();
+
+        // an animal with a life behind it: levels, trust, a name, a coat, a wound
+        Mob animal = Mounts.grant(fp, pk, at.north(6), null, true);
+        spawned.add(animal);
+        MountStats lived = MountStats.of(animal, pk);
+        lived.addXp(900f);
+        lived.addTrust(25f);
+        lived.trainWeek = 3;
+        lived.trainCount = 1;
+        MountGrowth.commit(animal, pk, lived, fp, true);
+        animal.setCustomName(net.minecraft.network.chat.Component.literal("Biscuit"));
+        animal.setHealth(animal.getMaxHealth() * 0.75f);
+        net.minecraft.nbt.CompoundTag live = MountToken.capture(animal, pk);
+        java.util.UUID animalId = MountToken.id(live);
+        MountStats expected = MountToken.stats(live);
+        float hp = live.getFloat("hp");
+        c.check("the animal carries its own id and stats; the record's token is a copy of what the entity is",
+                MountStats.stored(animal) && MountToken.idOf(animal).equals(animalId) && expected.level() >= 5
+                        && sameStats(MountToken.stats(MountGrowth.tokenOf(fp, pk)), MountStats.of(animal, pk)), "level " + expected.level());
+
+        // the token survives NBT (as it would in the record or the stable's SavedData)
+        net.minecraft.nbt.CompoundTag wrapped = new net.minecraft.nbt.CompoundTag();
+        wrapped.put("t", live.copy());
+        net.minecraft.nbt.CompoundTag back;
+        try {
+            java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+            net.minecraft.nbt.NbtIo.writeCompressed(wrapped, out);
+            back = net.minecraft.nbt.NbtIo.readCompressed(new java.io.ByteArrayInputStream(out.toByteArray()));
+        } catch (java.io.IOException e) {
+            back = new net.minecraft.nbt.CompoundTag();
+        }
+        net.minecraft.nbt.CompoundTag revived = back.getCompound("t");
+        c.check("a token survives an NBT round trip: id, kind, stats, level, trust, name, coat, health",
+                MountToken.id(revived).equals(animalId) && MountToken.kind(revived) == pk && sameStats(MountToken.stats(revived), expected)
+                        && MountToken.name(revived).equals("Biscuit") && revived.getInt("coat") == live.getInt("coat")
+                        && Math.abs(revived.getFloat("hp") - hp) < 1e-4f, "");
+
+        // sold to a stable: the token leaves the seller and the entity, and is in that stable's stock
+        int worth = Mounts.tradeInValue(fp);
+        fp.getInventory().add(SaddleType.PLAIN.stack());
+        long gold = SkyData.get(fp).getGold();
+        int paid = Mounts.sell(fp, stableKey);
+        java.util.List<net.minecraft.nbt.CompoundTag> held = store.stockOf(stableKey);
+        net.minecraft.nbt.CompoundTag sold = held.size() == 1 ? held.get(0) : null;
+        c.check("selling removes the token from the seller's record and the entity, and the stable holds that individual",
+                paid == worth && worth > 0 && animal.isRemoved() && MountGrowth.tokenOf(fp, pk) == null && Mounts.active(fp) == null
+                        && !rec.hasUUID("uuid") && !rec.getCompound(MountGrowth.RECORDS).contains(pk.id)
+                        && sold != null && MountToken.id(sold).equals(animalId) && sameStats(MountToken.stats(sold), expected)
+                        && MountToken.name(sold).equals("Biscuit") && SkyData.get(fp).getGold() == gold + worth, "paid " + paid);
+        c.check("the sold animal's tack is not sold with it: the saddle it wore is back with the seller",
+                count(fp.getInventory().items, Items.SADDLE) >= 1 && sold != null && !sold.contains("saddle"), "");
+
+        // another player buys it from that stable's master
+        GameProfile otherProfile = new GameProfile(UUID.nameUUIDFromBytes("skycraft-mounts-selftest-2".getBytes()), "[MountsTest2]");
+        FakePlayer buyer = FakePlayerFactory.get(level, otherProfile);
+        buyer.moveTo(at.getX() + 0.5, at.getY(), at.getZ() - 14.5);
+        net.minecraft.world.entity.npc.Villager npc = EntityType.VILLAGER.create(level);
+        npc.moveTo(buyer.getX() + 1, buyer.getY(), buyer.getZ());
+        npc.getPersistentData().putBoolean("skycraft_stable_master", true);
+        npc.getPersistentData().putString(StableUi.KEY, stableKey);
+        level.addFreshEntity(npc);
+        SkyData.get(buyer).setGold(100000L);
+        var buyerRec = Mounts.data(buyer);
+        buyerRec.remove("stable");
+        buyerRec.remove("active");
+        buyerRec.remove("uuid");
+        int price = MountStock.value(pk, expected);
+        String offerId = "t:" + animalId;
+        boolean offered = false;
+        for (MountStock.Offer o : StableUi.offers(buyer, npc)) offered |= o.id().equals(offerId) && o.price() == price && o.token() != null;
+        c.check("the stable offers that individual in its stock list, priced by its grades and level", offered && price > MountStock.value(pk, MountStats.roll(pk, 1L, 0f, false)) / 2, "price " + price);
+        StablePackets.Action buy = new StablePackets.Action(npc.getId(), StablePackets.BUY, offerId, price);
+        StableUi.handle(buyer, buy);
+        Entity bought = Mounts.activeEntity(buyer);
+        if (bought != null) spawned.add((Mob) bought);
+        MountStats got = bought instanceof Mob bm ? MountStats.of(bm, pk) : null;
+        c.check("the buyer gets that very animal: id, stats, level, trust, name, coat, health",
+                bought instanceof Mob bm2 && Mounts.active(buyer) == pk && got != null && sameStats(got, expected) && MountToken.idOf(bought).equals(animalId)
+                        && bought.hasCustomName() && "Biscuit".equals(bought.getCustomName().getString())
+                        && MountToken.capture(bm2, pk).getInt("coat") == live.getInt("coat")
+                        && Math.abs(bm2.getHealth() / bm2.getMaxHealth() - Math.max(0.5f, hp)) < 0.06f, got == null ? "no mount" : "level " + got.level());
+        c.check("it is gone from the stable, and the buyer paid its price", store.stockOf(stableKey).isEmpty() && !store.holds(animalId)
+                && SkyData.get(buyer).getGold() == 100000L - price, "gold " + SkyData.get(buyer).getGold());
+        // a second click (or a second buyer) finds nothing: no duplicate
+        UUID firstEntity = bought == null ? null : bought.getUUID();
+        StableUi.handle(buyer, buy);
+        FakePlayer third = FakePlayerFactory.get(level, new GameProfile(UUID.nameUUIDFromBytes("skycraft-mounts-selftest-3".getBytes()), "[MountsTest3]"));
+        third.moveTo(buyer.getX(), buyer.getY(), buyer.getZ() + 1);
+        SkyData.get(third).setGold(100000L);
+        StableUi.handle(third, buy);
+        c.check("a second click or a second buyer cannot get it again: one animal, one holder",
+                Mounts.activeEntity(buyer) != null && Mounts.activeEntity(buyer).getUUID().equals(firstEntity) && Mounts.active(third) == null
+                        && SkyData.get(buyer).getGold() == 100000L - price && SkyData.get(third).getGold() == 100000L, "");
+
+        // the buyer's record holds the token of the active mount only
+        c.check("the buyer's record holds the token of the active mount and nothing else",
+                MountGrowth.tokenOf(buyer, pk) != null && MountToken.id(MountGrowth.tokenOf(buyer, pk)).equals(animalId)
+                        && buyerRec.getCompound(MountGrowth.RECORDS).getAllKeys().size() == 1, "");
+
+        // a stable keeps twelve; the oldest overflow quietly leaves for the pool, and every token is in one place
+        java.util.List<UUID> ids = new ArrayList<>();
+        for (int i = 0; i < MountStable.PER_STABLE + 2; i++) {
+            UUID id = UUID.randomUUID();
+            ids.add(id);
+            store.consign("skyrim/selftest:overflow", MountToken.create(MountKind.WHITERUN_BAY, MountStats.roll(MountKind.WHITERUN_BAY, i, 0f, false), null, id));
+        }
+        boolean bounded = store.stockOf("skyrim/selftest:overflow").size() == MountStable.PER_STABLE;
+        boolean oldestInPool = store.pool().stream().anyMatch(t -> MountToken.id(t).equals(ids.get(0)))
+                && store.pool().stream().anyMatch(t -> MountToken.id(t).equals(ids.get(1)));
+        boolean newest = store.stockOf("skyrim/selftest:overflow").stream().anyMatch(t -> MountToken.id(t).equals(ids.get(ids.size() - 1)));
+        c.check("a stable keeps 12 sold animals; the oldest overflow goes to the sold-on pool", bounded && oldestInPool && newest && store.holds(ids.get(0)), "");
+        for (UUID id : ids) {
+            if (store.take("skyrim/selftest:overflow", id) == null) store.takeFromPool(id);
+        }
+        // an animal out of reach gets its fate once, when it loads
+        UUID far = UUID.randomUUID();
+        store.fate(far, MountStable.Fate.DELETE);
+        c.check("an unloaded animal's fate is remembered and consumed once", store.takeFate(far) == MountStable.Fate.DELETE && store.takeFate(far) == null, "");
+
+        // legends: their token stays in the record when they step aside, and comes back with the same animal
+        Mob legend = Mounts.grant(fp, MountKind.SHADOWMERE, at.north(9), null, true);
+        spawned.add(legend);
+        UUID legendId = legend == null ? null : MountToken.idOf(legend);
+        MountStats lore = legend == null ? null : MountStats.of(legend, MountKind.SHADOWMERE);
+        if (legend != null) {
+            lore.addXp(300f);
+            MountGrowth.commit(legend, MountKind.SHADOWMERE, lore, fp, true);
+        }
+        Mounts.dismissActive(fp);
+        c.check("a legend's token stays in the record when it is not an entity", legend != null && MountGrowth.tokenOf(fp, MountKind.SHADOWMERE) != null
+                && MountToken.id(MountGrowth.tokenOf(fp, MountKind.SHADOWMERE)).equals(legendId), "");
+        Mounts.switchTo(fp, MountKind.SHADOWMERE, at.north(9));
+        Entity back2 = Mounts.activeEntity(fp);
+        if (back2 instanceof Mob bm) spawned.add(bm);
+        c.check("brought out again it is the same animal with the stats it had", back2 instanceof Mob && MountToken.idOf(back2).equals(legendId)
+                && lore != null && sameStats(MountStats.of(back2, MountKind.SHADOWMERE), lore), "");
+
+        // clean up the second and third players
+        for (FakePlayer fpx : new FakePlayer[]{buyer, third}) {
+            Entity e = Mounts.activeEntity(fpx);
+            if (e != null) e.discard();
+            var r = Mounts.data(fpx);
+            for (String key : new String[]{"stable", "active", "uuid", "tokens", "bags", "saddles", "barding", "stock_sold", "cooldown", "mstats"}) r.remove(key);
+            fpx.getInventory().clearContent();
+        }
+        npc.discard();
+        Mounts.dismissActive(fp);
+        rec.remove("tokens");
+        rec.remove("stable");
     }
 
     /** A distinct, light stick: the bag tests' unit of cargo ({@code mbt} = which kind, {@code kg} = weight of one). */

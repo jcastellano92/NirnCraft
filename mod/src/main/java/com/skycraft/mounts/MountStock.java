@@ -1,5 +1,8 @@
 package com.skycraft.mounts;
 
+import net.minecraft.nbt.CompoundTag;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -28,8 +31,13 @@ public final class MountStock {
 
     private MountStock() {}
 
-    /** One animal for sale. {@code id} is {@code <kind>#<slot>}, stable within the week. */
-    public record Offer(String id, MountKind kind, MountStats stats, int price) {}
+    /** One animal for sale. {@code id}: {@code <kind>#<slot>} for generated stock (stable within the week), {@code t:<animal id>} for one a player sold here, {@code p:<animal id>} from the pool. */
+    public record Offer(String id, MountKind kind, MountStats stats, int price, @Nullable CompoundTag token) {
+        /** The animal as a token: a player's animal brings its own, a generated one is born (a new animal id) when it is bought. */
+        public CompoundTag tokenOrNew() {
+            return token != null ? token.copy() : MountToken.create(kind, stats, null, java.util.UUID.randomUUID());
+        }
+    }
 
     public static long weekOf(long gameTime) {
         return Math.max(0, gameTime) / WEEK;
@@ -55,7 +63,7 @@ public final class MountStock {
                 if (sold.contains(id)) continue;
                 long seed = (stableKey + "|" + week + "|" + id).hashCode() * 0x9E3779B97F4A7C15L + slot * 7919L;
                 MountStats s = MountStats.rollStock(kind, seed, shift, quality);
-                out.add(new Offer(id, kind, s, value(kind, s)));
+                out.add(new Offer(id, kind, s, value(kind, s), null));
             }
         }
         return out;

@@ -1,7 +1,8 @@
 # Mounts: saddles, tack, saddlebags and stamina
 
 Code: `mod/src/main/java/com/skycraft/mounts/` (`SaddleType`, `MountGear`, `Saddlebags`, `SaddlebagMenu`, `MountStamina`,
-`Mounts`, `MountKind`; individuals: `MountProfile`, `MountStats`, `MountGrowth`, `MountInspect`, `MountView`, `MountStock`,
+`Mounts`, `MountKind`; individuals: `MountProfile`, `MountStats`, `MountToken`, `MountGrowth`, `MountInspect`, `MountView`,
+`MountStock`, `MountStable`,
 `StableUi`, `StablePackets`; client `mounts/client`), breaking in `fauna/WildHorseTaming` + `fauna/TameBalance`, the stable
 dialogue `fauna/Stables`, selftest `MountsSelfTest` (`/skycraft-mounts selftest`, run by `qa.ps1 -Server`).
 
@@ -154,8 +155,14 @@ health, carry +-20%, jump +-10%. **Trust** (0..100) is earned and moves speed (-
 - **Trust** rises with feeding (apple, carrot, sugar +4, hay +3, wheat +2, golden +8; one feeding per 30 s; use the item on
   it, a wild one takes +50% and will let you walk up at 50), a day left in a stable (+6), riding (a point in 6 min); it falls
   with a swing at your own mount (-3), and while it is left hurt (under 35%) and far from you (-0.5 per 10 s).
-- Applied through attribute modifiers (speed, health, jump) and the stamina, carry and bag multipliers. The player's record
-  (`module("mounts").mstats.<kind>`) is the truth; the entity carries a copy (`skycraft_mstats`).
+- Applied through attribute modifiers (speed, health, jump) and the stamina, carry and bag multipliers.
+- **The stats belong to the animal, not the player** (`MountToken`, `MountStable`): while it is an entity its persistent data
+  (`skycraft_mstats`, `skycraft_mid` its animal id, custom name, coat, health) is the single truth; whenever it is not an
+  entity it is a **token**, a self-contained CompoundTag (`id`, `kind`, `stats` incl. rolls, growth, level, XP, trust and
+  training counters, `name`, `coat`, `hp`, `origin`; never tack or bag items). The player's record (`mounts.tokens.<kind>`)
+  holds only the token of the ACTIVE mount and of the legends, refreshed on every change, on unload (`EntityLeaveLevelEvent`),
+  on logout and before a body is discarded. Training an animal that stands in an unloaded chunk changes its token and bumps
+  `rev`; the newer revision wins when it loads. Old `mstats.<kind>` records become tokens when first read.
 
 ## Inspecting (`MountInspect`, `MountView`; the server decides what the viewer may know)
 - **Target card**: look at any horse, camel, guar or beast within 6 blocks (16 with Wild Eye): top-right HUD card with name or
@@ -171,18 +178,31 @@ health, carry +-20%, jump +-10%. **Trust** (0..100) is earned and moves speed (-
 ## The stable (`StableUi`, `MountStock`, `StableScreen`)
 The stablemaster's "Show me your horses" opens one screen: **Horses** lists this week's stock (a stable's own quality and the
 week's luck move the bell; each stable keeps its own, per region flavour from `MountKind.forSale`) beside **your own mount**,
-read from its record wherever it is parked: grades, numbers (Horse Sense), arrows up and down, level, trust, whether your
-saddle and barding fit, price, and what yours is worth. Price = list price x (0.75 + 0.45 x quality + 5% a level), clamped
-0.5..2.6; trade-in is 60% of the same formula for yours. Buying and selling ask for a second click and are recomputed on the
-server. **Train** pays a stable hand one growth point in a stat (fee 50 + 40/point + 20/level + grade; Trust +10), at most
-twice an in-game week and never past the stat's soft cap.
+from its entity or token wherever it is parked: grades, numbers (Horse Sense), arrows up and down, level, trust, whether
+your saddle and barding fit, price, and what yours is worth. Price = list price x (0.75 + 0.45 x quality + 5% a level),
+clamped 0.5..2.6; trade-in is 60% of the same formula for yours. Buying and selling ask for a second click and are
+recomputed on the server. **Train** pays a stable hand one growth point in a stat (fee 50 + 40/point + 20/level + grade;
+Trust +10), at most twice an in-game week and never past the stat's soft cap.
+- **Selling puts the animal in that stable's stock.** Its token (same stats, level, trust, training, name, coat; id kept) moves
+  into the stable's SavedData (`skycraft_mount_stock`, keyed by the stable's key, at most 12, the oldest overflow to a
+  bounded "sold on" pool of 64, of which one animal that suits the region is shown per week). It is listed first in the
+  stock, priced by its grades and level, indistinguishable from generated animals except that it has a history. Buying it
+  restores the token onto a fresh entity: that very animal. Generated stock keeps filling the rest, deterministic per week.
+- **No duplicates**: selling removes the token from the seller's record and discards the entity in the same server call; a
+  purchase takes the token out of the stable's storage before anything is granted (a second click or a second buyer finds
+  nothing, and a failed grant puts it back). An animal standing in an unloaded chunk when it is sold gets a fate
+  (`MountStable.fate`: delete, or release) that is applied when it loads, by its animal id and its entity UUID.
+- Tack and saddlebag items are not sold with the animal: they are returned to the seller first (the saddle and barding to
+  your bags, bag contents to your inventory). A released tamed mount keeps its stats, name and id on the entity, and anyone
+  can break it in again to get that individual.
 
 ## One active mount
 Buying or breaking in a mount retires the previous regular mount: its saddlebag items (slots and overflow rows, with their
 whole counts) go to your inventory through `Inv.giveOrDrop` (slots, then your pack), its saddle and
 barding move to the new mount if the breed takes them (else to your bags), and the animal is released if you tamed it
-(it wanders free) or returned to the stable if bought (a bought one pays its trade-in when you tame instead). Selling does
-the same and pays by grade and level. Never deleted. Legends (Shadowmere, Arvak) are quest rewards: they stay yours and are
+(it wanders free, token on it) or its token goes to the stable (a bought one pays its trade-in when you tame instead:
+to the sold-on pool; at a stable master: into that stable's stock). Selling does the same and pays by grade and level.
+Never deleted. Legends (Shadowmere, Arvak) are quest rewards: they stay yours and are
 brought out at any stablemaster instead; getting one does not retire your horse, it steps aside to the stable.
 
 ## Breaking in (`WildHorseTaming`, `TameBalance`)

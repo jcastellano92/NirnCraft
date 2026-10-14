@@ -67,10 +67,53 @@ public final class StableUi {
         return MountKind.forSale(r.id(), r.province());
     }
 
-    /** The offers this player may still buy this week. */
+    /**
+     * The offers this player may buy now: the animals players sold to this stable (the very individuals, with their
+     * stats, level, trust and name), one animal from the sold-on pool that suits the region, then the stable's
+     * generated stock for the week that this player has not already taken.
+     */
     public static List<MountStock.Offer> offers(ServerPlayer player, LivingEntity npc) {
         long week = MountStock.weekOf(player.level().getGameTime());
-        return MountStock.offers(key(player, npc), week, sale(player, npc), sold(player, week));
+        String key = key(player, npc);
+        List<MountKind> kinds = sale(player, npc);
+        List<MountStock.Offer> out = new ArrayList<>();
+        MountStable stock = MountStable.get(player.server);
+        for (CompoundTag token : stock.stockOf(key)) {
+            MountStock.Offer o = fromToken("t:", token);
+            if (o != null) out.add(o);
+        }
+        List<CompoundTag> pool = new ArrayList<>();
+        for (CompoundTag token : stock.pool()) {
+            MountKind k = MountToken.kind(token);
+            if (k != null && !k.unique() && kinds.contains(k)) pool.add(token);
+        }
+        if (!pool.isEmpty()) {
+            CompoundTag pick = pool.get(Math.floorMod((key + "|" + week).hashCode(), pool.size()));
+            MountStock.Offer o = fromToken("p:", pick);
+            if (o != null) out.add(o);
+        }
+        out.addAll(MountStock.offers(key, week, kinds, sold(player, week)));
+        return out;
+    }
+
+    @Nullable
+    private static MountStock.Offer fromToken(String prefix, CompoundTag token) {
+        MountKind kind = MountToken.kind(token);
+        if (kind == null || kind.unique()) return null;
+        MountStats s = MountToken.stats(token);
+        return new MountStock.Offer(prefix + MountToken.id(token), kind, s, MountStock.value(kind, s), token);
+    }
+
+    /** Takes the animal of a player-sold or pooled offer out of storage: true only for the first caller. */
+    @Nullable
+    private static CompoundTag takeToken(ServerPlayer player, LivingEntity npc, String offerId) {
+        MountStable stock = MountStable.get(player.server);
+        try {
+            if (offerId.startsWith("t:")) return stock.take(key(player, npc), java.util.UUID.fromString(offerId.substring(2)));
+            if (offerId.startsWith("p:")) return stock.takeFromPool(java.util.UUID.fromString(offerId.substring(2)));
+        } catch (IllegalArgumentException ignored) {
+        }
+        return null;
     }
 
     private static Set<String> sold(ServerPlayer player, long week) {
@@ -112,7 +155,7 @@ public final class StableUi {
             boolean saddleFits = saddle == null || MountGear.accepts(o.kind(), saddle);
             boolean bardFits = barding.isEmpty() || (o.kind().backing == MountKind.Backing.HORSE && barding.getItem() instanceof HorseArmorItem)
                     || (o.kind().backing == MountKind.Backing.BEAST && barding.is(MountItems.BEAST_BARDING.get()));
-            rows.add(new StablePackets.Offer(o.id(), MountInspect.offerView(player, o.kind(), o.stats()), o.price(), saddleFits, bardFits));
+            rows.add(new StablePackets.Offer(o.id(), MountInspect.offerView(player, o.kind(), o.stats(), o.token() == null ? "" : MountToken.name(o.token())), o.price(), saddleFits, bardFits));
         }
         List<StablePackets.TrainRow> train = new ArrayList<>();
         int left = 0;
@@ -161,15 +204,24 @@ public final class StableUi {
             send(player, npc, Component.translatable("dialogue.skycraft.stables.no_gold", net), false);
             return;
         }
+        // the animal changes hands in one step: a sold-here animal leaves the stable's storage now (a second click, or
+        // another buyer, finds nothing), and its token goes to the buyer's record in the grant below
+        CompoundTag token = offer.token() != null ? takeToken(player, npc, offer.id()) : offer.tokenOrNew();
+        if (token == null) {
+            if (net > 0) Currency.give(player, net);
+            send(player, npc, Component.translatable("mounts.skycraft.stable.gone"), false);
+            return;
+        }
         BlockPos spawnPos = npc.blockPosition().relative(npc.getDirection(), 2);
-        Mob mob = Mounts.grant(player, offer.kind(), spawnPos, offer.stats(), false);
+        Mob mob = Mounts.grant(player, offer.kind(), spawnPos, token, key(player, npc));
         if (mob == null) {
+            if (offer.token() != null) MountStable.get(player.server).consign(key(player, npc), token); // back where it was
             if (net > 0) Currency.give(player, net);
             send(player, npc, Component.translatable("mounts.skycraft.stable.nospace"), false);
             return;
         }
         if (net < 0) Currency.give(player, -net); // the old one was worth more than the new one costs
-        markSold(player, week, offer.id());
+        if (offer.token() == null) markSold(player, week, offer.id());
         Saddlebags.fit(player, MountGear.bagCapacity(mob, offer.kind()));
         player.level().playSound(null, spawnPos, SoundEvents.HORSE_SADDLE, SoundSource.NEUTRAL, 1.0f, 1.0f);
         Notifier.message(player, Component.translatable("fauna.skycraft.horse.bought", offer.kind().displayName()));
@@ -187,7 +239,7 @@ public final class StableUi {
             send(player, npc, Component.translatable("mounts.skycraft.stable.stale"), false);
             return;
         }
-        Mounts.sell(player);
+        Mounts.sell(player, key(player, npc)); // the animal itself goes into this stable's stock
         send(player, npc, Component.translatable("mounts.skycraft.stable.sold", kind.displayName(), value), false);
     }
 

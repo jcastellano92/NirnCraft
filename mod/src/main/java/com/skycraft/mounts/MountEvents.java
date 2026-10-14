@@ -14,6 +14,7 @@ import net.minecraft.world.inventory.HorseInventoryMenu;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.living.AnimalTameEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
@@ -64,12 +65,38 @@ public final class MountEvents {
             event.setCanceled(true);
             return;
         }
+        // an animal that was sold, traded in or let go while its chunk was unloaded: its token has moved on (or it is
+        // wild now), so this body must not come back as the player's
+        if (e instanceof Mob loaded && Mounts.kindOf(loaded) != null && event.getLevel().getServer() != null) {
+            java.util.UUID mid = loaded.getPersistentData().hasUUID(MountToken.ID_TAG) ? loaded.getPersistentData().getUUID(MountToken.ID_TAG) : e.getUUID();
+            MountStable.Fate fate = MountStable.get(event.getLevel().getServer()).takeFate(mid, e.getUUID());
+            if (fate == MountStable.Fate.DELETE) {
+                event.setCanceled(true);
+                return;
+            }
+            if (fate == MountStable.Fate.RELEASE) Mounts.release(loaded);
+        }
         // a breaking that was cut short (a crash, a chunk unloading) must not leave the animal without its mind
         if (e instanceof Mob m && m.getPersistentData().getBoolean(WildHorseTaming.NOAI_TAG)) WildHorseTaming.release(m);
         if (e instanceof Mob mob && Mounts.kindOf(mob) != null) {
             MountGrowth.syncFromRecord(mob); // the record is the truth (training happens while it is away)
             MountGear.refresh(mob);
         }
+    }
+
+    /**
+     * The active mount leaves the world (its chunk unloads, the server stops): the token in its owner's record is
+     * refreshed from the entity, which is the truth while it exists. A mount that dies or is discarded is not captured
+     * (its removal reason is not a save).
+     */
+    @SubscribeEvent
+    public static void onLeave(EntityLeaveLevelEvent event) {
+        if (event.getLevel().isClientSide() || !(event.getEntity() instanceof Mob mob) || mob.getPersistentData().getString(Mounts.OWNER).isEmpty()) return;
+        var reason = mob.getRemovalReason();
+        if (reason == null || !reason.shouldSave() || Mounts.kindOf(mob) == null || event.getLevel().getServer() == null) return;
+        java.util.UUID owner = Mounts.ownerOf(mob);
+        ServerPlayer p = owner == null ? null : event.getLevel().getServer().getPlayerList().getPlayer(owner);
+        if (p != null) MountGrowth.captureToken(p, mob);
     }
 
     @SubscribeEvent
@@ -105,6 +132,7 @@ public final class MountEvents {
     @SubscribeEvent
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
+            if (Mounts.activeEntity(player) instanceof Mob active) MountGrowth.captureToken(player, active); // the token follows the animal out
             MountStamina.leave(player);
             MountStamina.forget(player);
             MountInspect.forget(player);
