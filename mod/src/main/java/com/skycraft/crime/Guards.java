@@ -72,7 +72,7 @@ public final class Guards {
     // ------------------------------------------------------------------ behaviour (every second per player)
 
     static void tick(ServerPlayer player) {
-        if (player.isSpectator() || Jail.isJailed(player) || Jail.isJailDimension(player.level())) return;
+        if (player.isSpectator() || Jail.isJailed(player) || Jail.isLoadingJail(player) || Jail.isJailDimension(player.level())) return;
         var level = player.serverLevel();
         String hold = Holds.holdAt(level, player.blockPosition());
         int bounty = player.isCreative() ? 0 : Bounty.get(player, hold);

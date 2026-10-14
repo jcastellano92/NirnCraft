@@ -201,6 +201,8 @@ public final class Crimes {
         // Attacking a guard: assault and resisting arrest. The only leeway is one stray punch (weapon sheathed) per
         // guard per minute, and never while already fighting the guards.
         if (isGuard(victim)) {
+            // a guard cut down where nobody else can see is no report: no bounty, no alarm (until his body is found)
+            if (event.getAmount() >= victim.getHealth() && !witnessed(player, victim)) return;
             if (victim instanceof Mob mob) {
                 if (event.getSource().getEntity() == player && com.skycraft.combat.Sheathe.isSheathed(player) && !Bounty.isHostile(player)
                         && !Guards.hitRecently(victim, player, 1200) && Guards.allowAccident(victim, player)) {

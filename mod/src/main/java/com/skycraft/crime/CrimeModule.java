@@ -23,6 +23,7 @@ public final class CrimeModule {
     public static void init(IEventBus modBus) {
         CrimeItems.init(modBus);
         Dialogue.registerProvider(Guards::addOptions);
+        Dialogue.registerProvider(JailVisitors::addOptions);
     }
 
     /** Registers this module's packets via {@link com.skycraft.network.SkyNetwork#register}. Called once at startup. */

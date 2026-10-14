@@ -275,6 +275,57 @@ final class CrimeSelfTest {
         r.check(Math.abs(exit.pos().getX() - 123456) > 8 || Math.abs(exit.pos().getZ() - 654321) > 8, "...and not where the crime was");
 
         patrol(r);
+        loading(r, server);
+        visitors(r);
+    }
+
+    /** An arrest with an ungenerated jail: held hidden and safe, ends in the cell once ready, falls back on timeout. */
+    private static void loading(Result r, MinecraftServer server) {
+        long start = 1000, deadline = start + JailLoading.TIMEOUT_TICKS;
+        r.check(JailLoading.step(false, start + 10, start, deadline) == JailLoading.Step.WAIT, "a jail that is not ready is waited for");
+        r.check(JailLoading.step(true, start + 10, start, deadline) == JailLoading.Step.WAIT, "...a ready jail still waits out the cover's minimum time");
+        r.check(JailLoading.step(true, start + JailLoading.MIN_TICKS, start, deadline) == JailLoading.Step.ENTER, "...then the prisoner is put in the cell");
+        r.check(JailLoading.step(false, deadline, start, deadline) == JailLoading.Step.FALLBACK, "no jail by the deadline: the jail dimension serves");
+        r.check(JailLoading.step(true, deadline + 5, start, deadline) == JailLoading.Step.ENTER, "a jail that came just late is still used");
+
+        // every major settlement has a jail, every minor town a guardhouse (the rule the plan builds from)
+        List<String> without = new ArrayList<>();
+        for (com.skycraft.tamriel.Place p : com.skycraft.tamriel.Places.all()) {
+            com.skycraft.society.GuardWatch.Watch w = com.skycraft.society.GuardWatch.of(p);
+            if (w == com.skycraft.society.GuardWatch.Watch.MAJOR && !com.skycraft.tamriel.settlement.plan.Halls.hasJail(p)) without.add(p.id());
+            if (w == com.skycraft.society.GuardWatch.Watch.MINOR && !com.skycraft.tamriel.settlement.plan.Halls.guardhouse(p)) without.add(p.id());
+        }
+        r.check(without.isEmpty(), "every major settlement keeps a jail and every minor town a guardhouse (missing: " + without + ")");
+        r.check(JailLoading.placeFor("whiterun", net.minecraft.core.BlockPos.ZERO) != null, "a crime in a hold is served by some jail place");
+
+        // held safe and hidden, and put back
+        try {
+            net.minecraft.server.level.ServerPlayer p = net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(server.overworld());
+            CompoundTag pending = new CompoundTag();
+            pending.putInt("mode", net.minecraft.world.level.GameType.SURVIVAL.getId());
+            Bounty.state(p).put(JailLoading.PENDING, pending);
+            JailLoading.hide(p);
+            r.check(Jail.isLoadingJail(p), "a prisoner whose jail loads is in the loading state");
+            r.check(p.isSpectator() && p.isInvulnerable(), "...hidden and safe: spectator mode (unseen, untouchable, not targeted)");
+            JailLoading.release(p);
+            r.check(!Jail.isLoadingJail(p) && !p.isSpectator(), "...and back to normal when the cell is ready");
+        } catch (RuntimeException e) {
+            r.check(false, "the loading state could not be exercised on a fake player: " + e);
+        }
+    }
+
+    /** Visitors, trespass in the guard room, the jailbreak's bounty. */
+    private static void visitors(Result r) {
+        r.check(JailVisitors.zoneFor(true, 1.0) == JailVisitors.Zone.HALL, "the front hall is public");
+        r.check(JailVisitors.zoneFor(true, 6.0) == JailVisitors.Zone.RESTRICTED, "past the hall (the guard room, the gate, the cells) is for guards");
+        r.check(JailVisitors.zoneFor(false, 6.0) == JailVisitors.Zone.OUTSIDE, "outside the jail is nothing");
+        r.check(JailVisitors.visitorStep(JailVisitors.Zone.HALL, true, -1, 100) == JailVisitors.Offence.NONE, "a visitor in the hall is no crime, seen or not");
+        r.check(JailVisitors.visitorStep(JailVisitors.Zone.RESTRICTED, false, -1, 100) == JailVisitors.Offence.NONE, "unseen in the guard room is no crime");
+        r.check(JailVisitors.visitorStep(JailVisitors.Zone.RESTRICTED, true, -1, 100) == JailVisitors.Offence.WARN, "seen in the guard room: told to leave first");
+        r.check(JailVisitors.visitorStep(JailVisitors.Zone.RESTRICTED, true, 100, 100 + JailVisitors.GRACE_TICKS - 1) == JailVisitors.Offence.NONE, "...grace to leave");
+        r.check(JailVisitors.visitorStep(JailVisitors.Zone.RESTRICTED, true, 100, 100 + JailVisitors.GRACE_TICKS) == JailVisitors.Offence.TRESPASS, "...then it is trespass");
+        r.check(JailVisitors.rescueBounty(true) == JailVisitors.AIDING_ESCAPE && JailVisitors.AIDING_ESCAPE > 0, "a jailbreak a guard saw earns an aiding-escape bounty");
+        r.check(JailVisitors.rescueBounty(false) == 0, "...and none when nobody saw");
     }
 
     /** The guards' rounds: gaps in the watch of the corridor and of the guard room, ten to twenty seconds long. */

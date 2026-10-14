@@ -18,6 +18,7 @@ public final class CrimeEvents {
         if (player.tickCount % 20 != 0) return;
         Jail.tick(player);
         JailPatrol.tick(player);
+        JailVisitors.tick(player);
         Guards.tick(player);
         Theft.tick(player);
     }
@@ -30,6 +31,7 @@ public final class CrimeEvents {
         Guards.forget(id);
         Crimes.forget(id);
         Jail.forget(id);
+        JailVisitors.forget(id);
         CrimePackets.forget(id);
     }
 }

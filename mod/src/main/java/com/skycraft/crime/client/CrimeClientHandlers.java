@@ -18,6 +18,17 @@ public final class CrimeClientHandlers {
         else mc.setScreen(new PickpocketScreen(m));
     }
 
+    /** The opening's loading cover, for an arrest whose jail is being built (title, subtitle, chunks ready of needed). */
+    public static void jailCover(CrimePackets.JailCover m) {
+        if (!m.show()) {
+            com.skycraft.quest.client.LoadingCover.hide();
+            return;
+        }
+        float progress = m.total() <= 0 ? 0f : Math.min(1f, m.ready() / (float) m.total());
+        com.skycraft.quest.client.LoadingCover.show(m.title(), m.sub(),
+                net.minecraft.network.chat.Component.translatable("crime.skycraft.jail.loading_tip"), progress);
+    }
+
     public static void closePickpocket() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen instanceof PickpocketScreen) mc.setScreen(null);

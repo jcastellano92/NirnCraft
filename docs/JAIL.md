@@ -103,3 +103,54 @@ is 10 s, the round 8 slots (80 s); guard 2 walks the same round two slots later.
 * **Jail dimension** (one corridor guard per cell block): near the player's cell window (z 6) for 30 s, the middle for 10 s, then
   the far end (z 21) for 30 s. From the cell door (z 4) the far end is 17 m: a sneaking prisoner (visibility x0.8,
   range 16 m) is not seen, a walking one is; the evidence room's door (z 3) is 18 m.
+
+## Which jail, and loading it
+
+* **Which settlement.** A crime in a hold is served by (`JailLoading.placeFor`): the guardhouse of a minor town of that
+  hold within 300 blocks, else the hold's capital, else the nearest major jail of the region, else the nearest jail within
+  1500 blocks. Every capital, city and **major** town (`GuardWatch.of(p) == MAJOR`: towns of radius 90 or more) keeps a full
+  jail; every **minor** town (`MINOR`) keeps a **guardhouse** (`Jails.guardhouse`, 13 x 13, one low building above ground:
+  guard room with the evidence chest and the confiscated goods, an iron gate, a one block corridor and one to three barred
+  cells in a row, anchors as a hold jail's). `Halls.hasJail` / `Halls.guardhouse` are the rule; the plan needs a re-bake
+  (`qa.ps1 -Server -Rebake`) to carry the guardhouses of towns that had no jail before.
+* **Not generated yet.** The prisoner is **not** sent to the jail dimension. `JailLoading.begin`: they stay where they are,
+  in spectator mode (unseen, nothing collides with or targets them, nothing hurts them), held in place every tick, rides
+  and screens dropped; the opening's opaque loading cover ("Taken to the gaol" + the city, `quest.client.LoadingCover`,
+  the same painter as "The valley wakes") shows the chunks ready of needed, at least 6 s like the opening's. The server
+  prewarms the settlement's start chunk (it records the anchors of the pieces it holds), the start chunk of the district
+  that holds the jail piece and the jail's own chunks (`Prewarm.start(player, points, ...)`, from the baked street plan,
+  the place's middle without it); when the anchors exist and the cell's chunks are built, the prisoner is put in the cell
+  and the sentence runs as ever. After 60 s without it (`JailLoading.TIMEOUT_TICKS`) the jail dimension serves.
+* **State and rest.** `crime.jail_pending` is saved with the player: a relog or a restart resumes the load.
+  `Jail.isLoadingJail(player)` is the predicate other systems (rest/wait) call: no time skips while it is true.
+  A generated jail whose cells are all taken is not loaded again: the dimension serves the overflow as before.
+
+## Visitors
+
+A player who is not under arrest may walk into a jail's front hall (the first 3 blocks behind the front door, with the
+evidence chest and the confiscated goods) without penalty, guards do not react. The rest of the guard room, the gate and
+the cell block are for guards: a guard who sees a visitor there tells them to leave (`crime.skycraft.jail.visitor_warn`),
+and a visitor who is still there 5 s later is trespassing (`Bounty.TRESPASS` through `Crimes.report`: a bounty only if
+someone sees it). `JailVisitors.visitorStep` is the rule. A night challenge is not implemented.
+
+## Talking through the bars
+
+Every cell wall has a pane-free one-block grate window by its door, so a line runs both ways; the server lets a player
+interact with an entity he has no line of sight to within 3 blocks, so talking and pickpocketing through the bars work
+from the corridor. NPC prisoners talk like any NPC and have two extra options (`JailVisitors.addOptions`): a rumour (what
+the guards do, where the key hangs) and what they are in for. A player prisoner is talked to in normal chat; items can be
+passed through the grate window by tossing them (a dedicated give-through-the-bars interaction is not built).
+
+## Jailbreak
+
+* Opening a cell door as a free player, by lockpick (the door's tier), by a guard's key, or because it is unlocked, frees
+  what is in the cell (`JailVisitors.freed`, from `Jail.onRightClickBlock` and `Locks.unlock`). An NPC prisoner slips away.
+  A player prisoner is simply out of the cell: guards that see them re-arrest them (`Jail.guardReaction`), and leaving the
+  jail's bounds is an escape with its bounty (`Jail.escape`).
+* A rescuer a guard saw gets an **aiding-escape bounty** (`JailVisitors.AIDING_ESCAPE`, 150) and the freed prisoner +60 s
+  on the sentence; unseen, nothing is reported.
+* **Guards can be dealt with silently.** A guard cut down by a blow that kills, with no other guard or civilian seeing, is no
+  assault and no murder report (`Crimes.onHurt` / `onDeath` already judge murder by witnesses). Nothing happens until a
+  patrolling guard comes within 10 blocks of the body with a clear line: then the jail goes on **alert** for 3 minutes
+  (`JailPatrol.findBody`): the patrols converge on the body, the front door is shut and locked (EXPERT), the players in the
+  jail are told. A killed guard is replaced after 3 minutes, not at once.

@@ -293,22 +293,43 @@ public final class Jail {
         send(player, hold, MAX_SECONDS * 100 / SECONDS_PER_100, placeId);
     }
 
+    /** Whether the player is held (hidden, safe) while the jail that serves them is generated: see {@link JailLoading}. */
+    public static boolean isLoadingJail(Player player) {
+        return JailLoading.isLoading(player);
+    }
+
     private static void send(ServerPlayer player, String hold, int bounty, @Nullable String forcedPlace) {
-        if (isJailed(player)) return;
+        if (isJailed(player) || JailLoading.isLoading(player)) return;
         MinecraftServer server = player.getServer();
         if (server == null) return;
         ServerLevel overworld = server.overworld();
+        // a jail that exists serves the arrest; one that is not generated yet is generated first, with the prisoner
+        // held hidden behind the loading cover (JailLoading); the dimension is only what is left when that fails
         String place = forcedPlace != null && SettlementAnchors.find(overworld, forcedPlace).map(e -> e.first(AnchorType.JAIL_CELL) != null).orElse(false)
                 ? forcedPlace : forcedPlace == null ? jailPlaceFor(overworld, hold, player.blockPosition()) : null;
         Site site = place == null ? null : claimCell(overworld, place, player);
+        if (site == null && JailLoading.begin(player, hold, bounty, forcedPlace)) return;
         if (site == null) {
-            ServerLevel jail = server.getLevel(JAIL);
-            if (jail == null) {
-                Skycraft.LOGGER.error("Jail dimension {} is missing and no hold jail is known; the arrest is dropped", JAIL.location());
-                return;
-            }
-            site = dimensionSite(server, jail, player.getUUID());
+            sendToDimension(player, hold, bounty, forcedPlace);
+            return;
         }
+        startSentence(player, hold, bounty, forcedPlace, site);
+    }
+
+    /** The fallback: the prisoner's own cell block in the jail dimension. */
+    static void sendToDimension(ServerPlayer player, String hold, int bounty, @Nullable String forcedPlace) {
+        MinecraftServer server = player.server;
+        ServerLevel jail = server.getLevel(JAIL);
+        if (jail == null) {
+            Skycraft.LOGGER.error("Jail dimension {} is missing and no hold jail is known; the arrest is dropped", JAIL.location());
+            return;
+        }
+        startSentence(player, hold, bounty, forcedPlace, dimensionSite(server, jail, player.getUUID()));
+    }
+
+    /** Puts the player in the cell of {@code site}: the sentence, the confiscation, the cell. */
+    static void startSentence(ServerPlayer player, String hold, int bounty, @Nullable String forcedPlace, Site site) {
+        MinecraftServer server = player.server;
         PlayerData data = SkyData.get(player);
         CompoundTag j = new CompoundTag();
         j.putString("hold", hold);
@@ -928,6 +949,14 @@ public final class Jail {
         Level level = event.getLevel();
         if (event.getEntity().isCreative()) return;
         if (level instanceof ServerLevel sl && event.getEntity() instanceof ServerPlayer actor && onStoreClick(event, sl, actor)) return;
+        // a free player opening a closed cell door (a guard's key, or it was already unlocked for them): a jailbreak
+        if (level instanceof ServerLevel cl && event.getEntity() instanceof ServerPlayer free && !isJailed(free)
+                && event.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND
+                && JailVisitors.cellOfDoor(cl, Locks.normalizePos(cl, event.getPos())) >= 0
+                && !cl.getBlockState(Locks.normalizePos(cl, event.getPos())).getValue(DoorBlock.OPEN)
+                && !Locks.blocks(free, cl, event.getPos())) {
+            JailVisitors.freed(free, cl, event.getPos());
+        }
         boolean dimension = isJailDimension(level);
         if (!dimension && !(event.getEntity() instanceof ServerPlayer sp && isJailed(sp))) return;
         BlockState state = level.getBlockState(event.getPos());
@@ -1081,6 +1110,10 @@ public final class Jail {
 
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer loading && JailLoading.isLoading(loading)) {
+            JailLoading.resume(loading); // the arrest was waiting for its jail
+            return;
+        }
         if (!(event.getEntity() instanceof ServerPlayer player) || !isJailed(player) || player.isCreative()) return;
         Site site = siteOf(player);
         if (site == null) return;

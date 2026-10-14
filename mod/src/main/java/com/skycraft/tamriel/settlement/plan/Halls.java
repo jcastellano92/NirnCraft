@@ -101,9 +101,18 @@ public final class Halls {
 
     // ------------------------------------------------------------------ jails
 
-    /** Every hold capital and city keeps a jail (Skyrim's hold capitals are all capitals). */
+    /**
+     * Every hold capital and city keeps a jail (Skyrim's hold capitals are all capitals), and so does every major town
+     * (the watch rule of {@code society.GuardWatch}); a minor town keeps a guardhouse, see {@link #guardhouse}.
+     */
     public static boolean hasJail(Place p) {
-        return p.type() == PlaceType.CAPITAL || p.type() == PlaceType.CITY;
+        if (p.type() == PlaceType.CAPITAL || p.type() == PlaceType.CITY) return true;
+        return p.type() == PlaceType.TOWN && com.skycraft.society.GuardWatch.of(p) != com.skycraft.society.GuardWatch.Watch.NONE;
+    }
+
+    /** A minor town's jail is a guardhouse: one low building with one to three cells above ground (build.Jails). */
+    public static boolean guardhouse(Place p) {
+        return hasJail(p) && p.type() == PlaceType.TOWN && com.skycraft.society.GuardWatch.of(p) == com.skycraft.society.GuardWatch.Watch.MINOR;
     }
 
     /** The jail's name (its lang key {@code settlement.skycraft.name.<name>}); generic towns get {@code jail}. */
@@ -138,6 +147,11 @@ public final class Halls {
             jail.name = jailName(p.id());
             jail.variant = p.id().equals("markarth") ? 1 : 0;
             jail.margin = 3;
+            if (guardhouse(p)) {
+                jail.variant = com.skycraft.tamriel.settlement.build.Jails.GUARDHOUSE;
+                jail.size(com.skycraft.tamriel.settlement.build.Jails.GW, com.skycraft.tamriel.settlement.build.Jails.GD, 6);
+                jail.margin = 2;
+            }
             jail.flags |= Spec.SIGN;
             Spec ref = keep(plan, p.id());
             boolean ok = ref != null && around(plan, jail, ref);

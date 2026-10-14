@@ -41,6 +41,8 @@ public final class Prewarm {
         long start;
         long releaseAt = -1;
         int lastSent = -1;
+        /** Ticks before the continuation runs anyway (the area is not ready). */
+        int timeout = TIMEOUT;
     }
 
     private static final List<Job> JOBS = new ArrayList<>();
@@ -76,6 +78,38 @@ public final class Prewarm {
         j.then = then;
         JOBS.add(j);
         return true;
+    }
+
+    /**
+     * Prewarms several areas at once ({@code points}: {x, z, radiusInChunks} each, x and z in blocks) and runs {@code then}
+     * when all are ready or after {@code timeoutTicks}. For a jail: the settlement's start chunk (which records its
+     * anchors) and the building's own chunks. Returns false when this player already has a prewarm running.
+     */
+    public static boolean start(ServerPlayer player, java.util.List<int[]> points, Component label, int timeoutTicks, Runnable then) {
+        if (busy(player.getUUID()) || points.isEmpty()) return false;
+        ServerLevel level = player.serverLevel();
+        Job j = new Job();
+        j.level = level;
+        j.start = level.getServer().getTickCount();
+        j.chunks = new ArrayList<>();
+        j.timeout = timeoutTicks;
+        for (int[] pt : points) addArea(j, level, pt[0] >> 4, pt[1] >> 4, pt[2]);
+        j.player = player.getUUID();
+        j.label = label;
+        j.then = then;
+        JOBS.add(j);
+        return true;
+    }
+
+    private static void addArea(Job j, ServerLevel level, int cx, int cz, int radius) {
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                ChunkPos p = new ChunkPos(cx + dx, cz + dz);
+                if (j.chunks.contains(p)) continue;
+                j.chunks.add(p);
+                level.getChunkSource().addRegionTicket(TICKET, p, 0, p);
+            }
+        }
     }
 
     /** Silent prewarm (no player, no continuation): keeps the area loaded for {@code ticks} (a ride or voyage). */
@@ -119,7 +153,7 @@ public final class Prewarm {
             for (ChunkPos p : j.chunks) if (j.level.getChunkSource().getChunkNow(p.x, p.z) != null) ready++;
             ServerPlayer player = event.getServer().getPlayerList().getPlayer(j.player);
             if (j.releaseAt < 0) {
-                boolean done = ready == j.chunks.size() || now - j.start > TIMEOUT;
+                boolean done = ready == j.chunks.size() || now - j.start > j.timeout;
                 if (player == null || !player.isAlive()) {
                     release(j);
                     it.remove();

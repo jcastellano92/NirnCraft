@@ -36,6 +36,7 @@ public final class CrimePackets {
         SkyNetwork.register(LockClose.class, NetworkDirection.PLAY_TO_SERVER, LockClose::encode, LockClose::decode, LockClose::handle);
         SkyNetwork.register(QueryContainer.class, NetworkDirection.PLAY_TO_SERVER, QueryContainer::encode, QueryContainer::decode, QueryContainer::handle);
         SkyNetwork.register(ContainerInfo.class, NetworkDirection.PLAY_TO_CLIENT, ContainerInfo::encode, ContainerInfo::decode, ContainerInfo::handle);
+        SkyNetwork.register(JailCover.class, NetworkDirection.PLAY_TO_CLIENT, JailCover::encode, JailCover::decode, JailCover::handle);
     }
 
     static void forget(UUID player) {
@@ -238,6 +239,29 @@ public final class CrimePackets {
 
         static void handle(ContainerInfo m, Supplier<NetworkEvent.Context> ctx) {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> CrimeClientHandlers.containerInfo(m));
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
+    /**
+     * The loading cover of an arrest whose jail is being generated (the opening's "valley wakes" screen with another
+     * title and subtitle): {@code show} raises or updates it with the chunks ready of needed, else it fades away.
+     */
+    public record JailCover(boolean show, Component title, Component sub, int ready, int total) {
+        static void encode(JailCover m, FriendlyByteBuf buf) {
+            buf.writeBoolean(m.show);
+            buf.writeComponent(m.title);
+            buf.writeComponent(m.sub);
+            buf.writeVarInt(m.ready);
+            buf.writeVarInt(m.total);
+        }
+
+        static JailCover decode(FriendlyByteBuf buf) {
+            return new JailCover(buf.readBoolean(), buf.readComponent(), buf.readComponent(), buf.readVarInt(), buf.readVarInt());
+        }
+
+        static void handle(JailCover m, Supplier<NetworkEvent.Context> ctx) {
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> CrimeClientHandlers.jailCover(m));
             ctx.get().setPacketHandled(true);
         }
     }

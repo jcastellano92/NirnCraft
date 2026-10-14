@@ -546,6 +546,8 @@ public final class Locks {
         }
 
         reply(player, RESULT_UNLOCKED, 1);
+        // a cell door picked by someone who is not under arrest: a jailbreak (docs/JAIL.md)
+        JailVisitors.freed(player, level, s.pos);
         // open the container or door right away, like Skyrim
         BlockState state = level.getBlockState(s.pos);
         if (JailEvidence.kindAt(level, s.pos) == JailEvidence.Kind.CONFISCATED) {

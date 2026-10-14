@@ -99,19 +99,8 @@ final class IntroLoadingScreen extends Screen {
         long now = System.currentTimeMillis();
         float fadeIn = Mth.clamp((now - since) / 400f, 0f, 1f);
         float fadeOut = fadeStart < 0 ? 0f : Mth.clamp((now - fadeStart) / 900f, 0f, 1f);
-        float a = fadeIn * (1f - fadeOut);
-        int alpha = (int) (a * 255);
-        g.fill(0, 0, width, height, (alpha << 24) | 0x0A0806);
-        if (alpha < 8) return;
-        int ta = Math.max(8, alpha);
-        int cx = width / 2, cy = height / 2;
-        g.drawCenteredString(font, Component.translatable("quest.skycraft.intro2.loading.title"), cx, cy - 34, (ta << 24) | 0xE8D9A8);
-        g.drawCenteredString(font, Component.translatable("quest.skycraft.intro2.loading.sub"), cx, cy - 18, (ta << 24) | 0xA89C80);
-        int bw = Math.min(220, width - 40), bx = cx - bw / 2, by = cy + 4;
-        g.fill(bx - 1, by - 1, bx + bw + 1, by + 7, (ta << 24) | 0x4A3E26);
-        g.fill(bx, by, bx + bw, by + 6, (ta << 24) | 0x16120C);
-        int fill = (int) (bw * Mth.clamp(shown, 0f, 1f));
-        g.fill(bx, by, bx + fill, by + 6, (ta << 24) | 0xC9A650);
-        g.drawCenteredString(font, Component.translatable("quest.skycraft.intro2.loading.tip"), cx, by + 18, (ta << 24) | 0x7C735E);
+        LoadingCover.draw(g, font, width, height, fadeIn * (1f - fadeOut),
+                Component.translatable("quest.skycraft.intro2.loading.title"), Component.translatable("quest.skycraft.intro2.loading.sub"),
+                Component.translatable("quest.skycraft.intro2.loading.tip"), shown);
     }
 }

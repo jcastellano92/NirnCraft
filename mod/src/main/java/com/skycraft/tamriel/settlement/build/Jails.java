@@ -30,11 +30,18 @@ public final class Jails {
     private Jails() {}
 
     public static final int W = 15, D = 21;
+    /** {@link Spec#variant} of a minor town's guardhouse (see {@link #guardhouse}), footprint {@link #GW} x {@link #GD}. */
+    public static final int GUARDHOUSE = 2;
+    public static final int GW = 13, GD = 13;
     /** Cell rows: first and last z of each cell (left cells x 1..4, right cells x 10..13). */
     static final int[][] ROWS = {{8, 10}, {12, 14}, {16, 19}};
     static final int GATE_Z = 7, CORRIDOR_X = 7, ROOF = 6;
 
     public static void build(Canvas c, Palette p, Spec s, Culture culture, String settlement) {
+        if (s.variant == GUARDHOUSE) {
+            guardhouse(c, p, settlement);
+            return;
+        }
         boolean mine = s.variant == 1;
         int w = W, d = D;
         BlockState wall = mine ? B.s(Blocks.STONE) : p.cityWall;
@@ -226,5 +233,101 @@ public final class Jails {
         }
         c.set(x, 0, z1 + 1, wall);
         c.set(x, 0, z1, B.s(Blocks.SPRUCE_TRAPDOOR).setValue(TrapDoorBlock.HALF, Half.TOP));
+    }
+
+    /**
+     * A minor town's guardhouse: one low building above ground, 13 x 13. Front: the guard room with the guards' table,
+     * the evidence chest and the confiscated goods (as in a hold's jail). Through a locked iron gate: a one block
+     * corridor and one to three barred cells in a row (the count is the town's own), each with its iron door against a
+     * stone post, a grate window beside it, a bed and a bucket. No drain: the way out is the front door past the guard.
+     * Anchors as a hold jail's, so {@code crime.Jail} serves it the same way (cells claimed in order).
+     */
+    static void guardhouse(Canvas c, Palette p, String settlement) {
+        int w = GW, d = GD, roof = 5, gateZ = 6, frontZ = 8, doorX = (w - 1) / 2;
+        int cells = 1 + Math.floorMod(settlement.hashCode(), 3);
+        BlockState wall = p.cityWall, wall2 = p.cityWall2, floor = B.s(Blocks.STONE_BRICKS);
+        if (!c.recording()) {
+            c.clear(1, 1, 1, w - 2, roof - 1, d - 2);
+            c.clearPlants(-2, 1, -2, w + 1, roof + 3, d + 1);
+        }
+        for (int x = 0; x < w; x++) {
+            for (int z = 0; z < d; z++) {
+                boolean edge = x == 0 || z == 0 || x == w - 1 || z == d - 1;
+                c.set(x, 0, z, edge ? wall : (c.chance(x, 0, z, 41, 6) ? B.s(Blocks.CRACKED_STONE_BRICKS) : floor));
+                c.foundation(x, -1, z, p.foundation, Shells.SettlementPieceDepth.DEPTH);
+                if (edge) {
+                    for (int y = 1; y < roof; y++) c.set(x, y, z, c.chance(x, y, z, 43, 5) ? wall2 : wall);
+                }
+                c.set(x, roof, z, wall);
+                if (edge && (x + z) % 2 == 0) c.set(x, roof + 1, z, p.cityWallWall);
+            }
+        }
+        c.door(doorX, 1, 0, p.door, Direction.SOUTH);
+        c.set(doorX - 1, 3, -1, p.light);
+        c.set(doorX + 1, 3, -1, p.light);
+        if (!c.recording()) {
+            c.sign(doorX, 4, -1, p.sign, Direction.NORTH, Component.empty(), jailTitle("jail", settlement));
+        }
+        c.anchor(AnchorType.JAIL_EXIT, doorX, 1, -2);
+        c.anchor(AnchorType.JAIL_MIN, 0, -4, 0);
+        c.anchor(AnchorType.JAIL_MAX, w - 1, roof + 1, d - 1);
+
+        // the guard room (z 1..5): the evidence chest and the confiscated goods by the side walls, a table, two posts
+        int y = 1;
+        c.set(1, y, 1, B.face(B.s(Blocks.CHEST), Direction.EAST).setValue(ChestBlock.TYPE, ChestType.SINGLE));
+        c.anchor(AnchorType.JAIL_PERSONAL, 1, y, 1);
+        c.set(w - 2, y, 1, B.s(Blocks.BARREL));
+        c.anchor(AnchorType.JAIL_CONFISCATED, w - 2, y, 1);
+        if (!c.recording()) {
+            Component key = Component.keybind("key.skycraft.interact");
+            c.sign(1, y + 1, 1, p.sign, Direction.EAST, Component.translatable("crime.skycraft.jail.sign.evidence"),
+                    Component.translatable("crime.skycraft.jail.sign.evidence_2"), Component.translatable("crime.skycraft.jail.sign.use_evidence", key));
+            c.sign(w - 2, y + 1, 1, p.sign, Direction.WEST, Component.translatable("crime.skycraft.jail.sign.confiscated"),
+                    Component.translatable("crime.skycraft.jail.sign.confiscated_2"), Component.translatable("crime.skycraft.jail.sign.use_confiscated", key));
+        }
+        Props.table(c, p, 5, y, 4);
+        Props.table(c, p, 7, y, 4);
+        Props.chair(c, p, 6, y, 3, Direction.SOUTH);
+        c.anchor(AnchorType.GUARD, 3, y, 3);
+        c.anchor(AnchorType.GUARD, w - 4, y, 3);
+        Props.lantern(c, p, 3, roof - 1, 3, true);
+        Props.lantern(c, p, w - 4, roof - 1, 3, true);
+
+        // the wall to the cells with its locked iron gate and barred peep holes
+        for (int x = 1; x < w - 1; x++) {
+            for (int yy = 1; yy < roof; yy++) c.set(x, yy, gateZ, p.cityWall);
+        }
+        c.door(doorX, 1, gateZ, B.s(Blocks.IRON_DOOR), Direction.SOUTH);
+        c.set(doorX - 1, 2, gateZ, bars(Direction.EAST, Direction.WEST));
+        c.set(doorX + 1, 2, gateZ, bars(Direction.EAST, Direction.WEST));
+        c.anchor(AnchorType.JAIL_GATE, doorX, 1, gateZ);
+
+        // the corridor (z 7) and the cells' barred front (z 8): door against a post, then bars with a grate window
+        Props.lantern(c, p, doorX, roof - 1, 7, true);
+        for (int x = 1; x < w - 1; x++) {
+            for (int yy = 1; yy <= 3; yy++) c.set(x, yy, frontZ, bars(Direction.EAST, Direction.WEST));
+            c.set(x, 4, frontZ, wall);
+        }
+        for (int k = 0; k < cells; k++) {
+            int xa = 1 + 4 * k;
+            c.door(xa, 1, frontZ, B.s(Blocks.IRON_DOOR), Direction.NORTH);
+            c.anchor(AnchorType.JAIL_DOOR, xa, 1, frontZ);
+            for (int yy = 1; yy <= 3; yy++) c.set(xa + 1, yy, frontZ, wall);
+            c.set(xa + 2, 2, frontZ, B.s(Blocks.AIR));
+            c.anchor(AnchorType.JAIL_CELL, xa + 1, y, 10);
+            c.bed(xa + 2, y, 10, B.s(Blocks.BROWN_BED), Direction.SOUTH);
+            c.set(xa, y, 11, B.s(Blocks.CAULDRON));
+            if (k < cells - 1) {
+                for (int z = frontZ; z <= d - 2; z++) {
+                    for (int yy = 1; yy < roof; yy++) c.set(xa + 3, yy, z, wall);
+                }
+            }
+        }
+        // what is not a cell is a stone store room
+        for (int x = 1 + 4 * cells; x < w - 1; x++) {
+            for (int z = frontZ; z <= d - 2; z++) {
+                for (int yy = 1; yy < roof; yy++) c.set(x, yy, z, wall);
+            }
+        }
     }
 }
