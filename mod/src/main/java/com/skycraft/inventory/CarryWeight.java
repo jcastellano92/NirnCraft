@@ -182,6 +182,24 @@ public final class CarryWeight {
         return speedFactor(current(player), capacity(player));
     }
 
+    /**
+     * How far over capacity the player is, as a fraction of capacity (0 when at or under it, 1.0 at double). Uses the
+     * server's cached state, so it is cheap to call every tick (mounts read it).
+     */
+    public static float overweightRatio(Player player) {
+        if (player == null || player.isCreative() || player.isSpectator() || !enabled()) return 0f;
+        float cur, cap;
+        State s = player.level().isClientSide ? null : STATES.get(player.getUUID());
+        if (s != null && s.current >= 0) {
+            cur = s.current;
+            cap = s.capacity;
+        } else {
+            cur = current(player);
+            cap = capacity(player);
+        }
+        return cap <= 0f || cur <= cap ? 0f : (cur - cap) / cap;
+    }
+
     /** Server-side switch (common config). */
     public static boolean enabled() {
         return safe(InventoryConfig.CARRY_WEIGHT, true);

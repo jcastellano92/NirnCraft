@@ -172,8 +172,9 @@ public final class MountStamina {
         // an over-encumbered rider slows the mount too: a milder version of their own slowdown, so the mount still
         // outpaces them on foot but never runs at full speed with a loaded-down rider
         if (move != null) {
-            float rider = com.skycraft.inventory.CarryWeight.speedFactor(player);
-            double penalty = rider >= 1f ? 0 : -Math.min(0.85, Math.round((1f - rider) * 0.75f * 50f) / 50.0);
+            float over = com.skycraft.inventory.CarryWeight.overweightRatio(player);
+            // the mount slows with the rider's load more gently than a person does, and stops outright at +150%
+            double penalty = over <= 0f ? 0 : -Math.min(1.0, Math.round(over / 1.5f * 50f) / 50.0);
             AttributeModifier cur = move.getModifier(LOAD);
             if (penalty < 0 && (cur == null || cur.getAmount() != penalty)) {
                 if (cur != null) move.removeModifier(LOAD);
