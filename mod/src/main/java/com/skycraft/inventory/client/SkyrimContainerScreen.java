@@ -355,6 +355,7 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
         List<ContainerEntry> entries = getCurrentEntries();
         if (selectedIndex >= 0 && selectedIndex < entries.size()) {
             ContainerEntry entry = entries.get(selectedIndex);
+            // a list row aggregates every slot holding this item: take/store all of them, not just the first
             for (Slot slot : entry.slots()) {
                 if (slot.hasItem()) {
                     if (viewMode == 0) {
@@ -362,7 +363,6 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
                     } else {
                         SkyNetwork.sendToServer(new CorePackets.ContainerStore(menu.containerId, slot.index, false));
                     }
-                    break;
                 }
             }
         }
