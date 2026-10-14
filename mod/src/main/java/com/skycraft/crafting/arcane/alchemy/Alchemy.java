@@ -149,7 +149,7 @@ public final class Alchemy {
     public static MobEffectInstance tasteInstance(Player player, AlchemyEffect effect) {
         float s = strength(player, effect);
         int amp = effect.amplifier(1f + (s - 1f) * TASTE_POTENCY);
-        int ticks = effect.instant() ? 1 : Math.max(20, Math.round(effect.durationTicks(s) * TASTE_POTENCY));
+        int ticks = effect.instant() ? 1 : Math.max(200, Math.round(effect.durationTicks(s) * TASTE_POTENCY));
         return new MobEffectInstance(effect.mobEffect(), ticks, amp);
     }
 
