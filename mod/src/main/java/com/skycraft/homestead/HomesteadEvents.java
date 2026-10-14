@@ -4,12 +4,13 @@ import com.skycraft.Skycraft;
 import com.skycraft.core.Notifier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -17,6 +18,11 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+/**
+ * The homestead's own rules: founding (placing the drafting table), building, build mode (picking up stations and
+ * containers) and who may use doors, containers, crafting stations and beds. Breaking and placing by strangers is
+ * refused first by {@code com.skycraft.protect} and the dig module; this handler adds the homestead-specific limits.
+ */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class HomesteadEvents {
     private HomesteadEvents() {}
@@ -32,16 +38,17 @@ public final class HomesteadEvents {
 
         // 1. Placing the Drafting Table establishing a claim
         if (placedState.getBlock() instanceof DraftingTableBlock) {
-            String denyReason = data.checkCanClaim(player, pos);
-            if (denyReason != null) {
+            HomesteadData.Denial deny = data.checkCanClaim(player, pos);
+            if (deny != null) {
                 event.setCanceled(true);
-                Notifier.message(player, Component.translatable(denyReason));
+                Notifier.message(player, deny.message());
                 return;
             }
             // Establish the claim
             data.addClaim(player, pos);
             Notifier.message(player, Component.translatable("message.skycraft.homestead.claimed"));
             level.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.8f, 1.0f);
+            HomesteadDiscovery.sync(player);
             return;
         }
 
@@ -69,11 +76,10 @@ public final class HomesteadEvents {
                 return;
             }
 
-            // Whitelist check
+            // Griefing blocks (TNT, spawners, portals...) are never placed
             if (!HomesteadBlocks.isAllowedBuildingBlock(placedState) && !player.isCreative()) {
                 event.setCanceled(true);
                 Notifier.message(player, Component.translatable("message.skycraft.homestead.block_not_allowed"));
-                return;
             }
         }
     }
@@ -104,6 +110,7 @@ public final class HomesteadEvents {
             }
             if (claim != null) {
                 data.removeClaimAt(level, pos);
+                HomesteadDiscovery.forget(sp.server, claim);
                 Notifier.message(sp, Component.translatable("message.skycraft.homestead.dismantled"));
             }
             return;
@@ -124,6 +131,16 @@ public final class HomesteadEvents {
                 Notifier.message(sp, Component.translatable("message.skycraft.homestead.depth_limit", claim.getMinDepth()));
                 return;
             }
+
+            // 3. Build mode: stations and containers are carried, never broken (their contents travel with them)
+            if (!sp.isCreative() && level instanceof ServerLevel sl && HomesteadBuildMode.isMovable(level, pos, state)) {
+                event.setCanceled(true);
+                if (HomesteadBuildMode.isOn(sp) && claim.getOwnerId().equals(sp.getUUID())) {
+                    HomesteadBuildMode.pickUp(sp, sl, pos, state);
+                } else {
+                    Notifier.message(sp, Component.translatable("message.skycraft.homestead.needs_build_mode"));
+                }
+            }
         }
     }
 
@@ -133,33 +150,43 @@ public final class HomesteadEvents {
         if (level.isClientSide()) return;
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
 
-        BlockPos pos = event.getPos();
+        BlockPos clicked = event.getPos();
         HomesteadData data = HomesteadData.get(sp.server);
-        HomesteadClaim claim = data.getClaimAt(level, pos);
+        HomesteadClaim claim = data.getClaimHorizontal(level, clicked);
         if (claim == null) return;
 
-        BlockState state = level.getBlockState(pos);
-        Block block = state.getBlock();
+        BlockState state = level.getBlockState(clicked);
 
-        // Doors & Trapdoors & Gates
-        if (block instanceof DoorBlock || block instanceof TrapDoorBlock || block instanceof FenceGateBlock) {
-            if (!claim.canAccessDoor(sp) && !sp.isCreative()) {
+        // the drafting table: sneak and use with empty hands toggles build mode (the owner's)
+        if (state.getBlock() instanceof DraftingTableBlock) {
+            if (sp.isShiftKeyDown() && sp.getMainHandItem().isEmpty() && claim.getOwnerId().equals(sp.getUUID())) {
                 event.setCanceled(true);
-                level.playSound(null, pos, SoundEvents.CHEST_LOCKED, SoundSource.BLOCKS, 0.8f, 1.0f);
-                Notifier.message(sp, Component.translatable("message.skycraft.homestead.door_locked", claim.getOwnerName()));
-                return;
+                if (event.getHand() == InteractionHand.MAIN_HAND) HomesteadBuildMode.toggle(sp, claim);
             }
+            return;
         }
 
-        // Containers (chests, barrels, etc. - not counting bodies)
-        if (block instanceof ChestBlock || block instanceof BarrelBlock || block instanceof ShulkerBoxBlock
-                || block instanceof HopperBlock || block instanceof DispenserBlock) {
-            if (!claim.canAccessContainer(sp) && !sp.isCreative()) {
-                event.setCanceled(true);
-                level.playSound(null, pos, SoundEvents.CHEST_LOCKED, SoundSource.BLOCKS, 0.8f, 1.0f);
-                Notifier.message(sp, Component.translatable("message.skycraft.homestead.container_locked", claim.getOwnerName()));
-                return;
+        HomesteadClaim.Access kind = HomesteadAccess.classify(level, clicked, state);
+        if (kind == null) return;
+        BlockPos pos = HomesteadAccess.canonical(clicked, state);
+
+        // build mode: sneak and use with empty hands sets this door, container, station or bed's own level
+        if (HomesteadBuildMode.isOn(sp) && claim.getOwnerId().equals(sp.getUUID()) && sp.isShiftKeyDown() && sp.getMainHandItem().isEmpty()) {
+            event.setCanceled(true);
+            if (event.getHand() == InteractionHand.MAIN_HAND) {
+                int now = claim.cycleOverride(pos);
+                HomesteadData.get(sp.server).setDirty();
+                String who = now < 0 ? "default" : now == HomesteadClaim.PERM_OWNER ? "owner" : now == HomesteadClaim.PERM_PARTY ? "party" : "public";
+                Notifier.message(sp, Component.translatable("message.skycraft.homestead.access_set",
+                        Component.translatable("homestead.skycraft.access." + kind.name().toLowerCase(java.util.Locale.ROOT)),
+                        Component.translatable("homestead.skycraft.perm." + who)));
             }
+            return;
         }
+
+        if (sp.isCreative() || claim.mayUse(sp, kind, pos)) return;
+        event.setCanceled(true);
+        level.playSound(null, clicked, SoundEvents.CHEST_LOCKED, SoundSource.BLOCKS, 0.8f, 1.0f);
+        Notifier.message(sp, Component.translatable(HomesteadAccess.lockedKey(kind), claim.getOwnerName()));
     }
 }

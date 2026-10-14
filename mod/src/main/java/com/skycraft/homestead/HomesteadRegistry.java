@@ -43,5 +43,6 @@ public final class HomesteadRegistry {
     public static void init(IEventBus modBus) {
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
+        HomesteadSelfTest.registerAutorun();
     }
 }

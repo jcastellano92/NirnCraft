@@ -4,8 +4,12 @@ import com.skycraft.crime.Theft;
 import com.skycraft.quest.Locate;
 import com.skycraft.roads.RoadsData;
 import com.skycraft.roads.Settlement;
+import com.skycraft.survival.SurvivalConfig;
+import com.skycraft.tamriel.Place;
+import com.skycraft.tamriel.Places;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
@@ -61,15 +65,15 @@ public class HomesteadData extends SavedData {
      * Returns error message translation key or reason, or null if allowed.
      */
     @Nullable
-    public String checkCanClaim(ServerPlayer player, BlockPos pos) {
+    public Denial checkCanClaim(ServerPlayer player, BlockPos pos) {
         if (player.level().dimension() != Level.OVERWORLD) {
-            return "message.skycraft.homestead.overworld_only";
+            return new Denial("message.skycraft.homestead.overworld_only");
         }
 
         // 1. One homestead per player
         HomesteadClaim existing = claimsByOwner.get(player.getUUID());
         if (existing != null) {
-            return "message.skycraft.homestead.already_claimed";
+            return new Denial("message.skycraft.homestead.already_claimed");
         }
 
         ServerLevel level = player.serverLevel();
@@ -78,22 +82,23 @@ public class HomesteadData extends SavedData {
         Homesteads.Plot plot = Homesteads.plotAt(pos);
         if (plot != null) {
             for (HomesteadClaim claim : claimsByOwner.values()) {
-                if (plot.id().equals(claim.getPlot())) return "message.skycraft.homestead.plot_taken";
+                if (plot.id().equals(claim.getPlot())) return new Denial("message.skycraft.homestead.plot_taken");
             }
             return null;
         }
 
         // 2. Check settlements and villages
+        int settlementDistance = SurvivalConfig.CLAIM_SETTLEMENT_DISTANCE.get();
         if (Theft.inVillage(level, pos)) {
-            return "message.skycraft.homestead.near_settlement";
+            return new Denial("message.skycraft.homestead.near_settlement");
         }
 
         // POI check (village bells / beds)
         var closestPoi = level.getPoiManager().findClosest(
                 holder -> holder.is(PoiTypes.MEETING) || holder.is(PoiTypes.HOME),
-                pos, MIN_DIST_FROM_SETTLEMENT, PoiManager.Occupancy.ANY);
+                pos, settlementDistance, PoiManager.Occupancy.ANY);
         if (closestPoi.isPresent()) {
-            return "message.skycraft.homestead.near_settlement";
+            return new Denial("message.skycraft.homestead.near_settlement");
         }
 
         // Roads / Settlements data check
@@ -101,8 +106,8 @@ public class HomesteadData extends SavedData {
         for (Settlement s : roads.settlements()) {
             int dx = Math.max(0, Math.max(s.minX - pos.getX(), pos.getX() - s.maxX));
             int dz = Math.max(0, Math.max(s.minZ - pos.getZ(), pos.getZ() - s.maxZ));
-            if (Math.sqrt(dx * dx + dz * dz) < MIN_DIST_FROM_SETTLEMENT) {
-                return "message.skycraft.homestead.near_settlement";
+            if (Math.sqrt(dx * dx + dz * dz) < settlementDistance) {
+                return new Denial("message.skycraft.homestead.near_settlement");
             }
         }
 
@@ -110,22 +115,88 @@ public class HomesteadData extends SavedData {
         BlockPos dungeon = Locate.structure(level, Locate.DUNGEONS, pos, 4);
         if (dungeon != null) {
             double dist = Math.sqrt(pos.distSqr(dungeon));
-            if (dist < MIN_DIST_FROM_DUNGEON) {
-                return "message.skycraft.homestead.near_dungeon";
+            if (dist < SurvivalConfig.CLAIM_DUNGEON_DISTANCE.get()) {
+                return new Denial("message.skycraft.homestead.near_dungeon");
             }
         }
 
         // 4. Check distance to existing claims
+        int spacing = Math.max(SurvivalConfig.CLAIM_SPACING.get(), 0);
         for (HomesteadClaim claim : claimsByOwner.values()) {
             if (claim.getDimension().equals(level.dimension().location().toString())) {
                 double dist = Math.sqrt(claim.getCenter().distSqr(pos));
-                if (dist < MIN_DIST_FROM_CLAIM) {
-                    return "message.skycraft.homestead.near_claim";
+                // an expanded homestead keeps its whole grounds clear of a neighbour's
+                if (dist < Math.max(spacing, claim.getRadius() + HomesteadClaim.DEFAULT_RADIUS + 8)) {
+                    return new Denial("message.skycraft.homestead.near_claim");
                 }
             }
         }
 
+        // 5. Named places of the map and the man-made footprints (the open homestead plots are exempt)
+        return checkLand(level, pos, HomesteadClaim.DEFAULT_RADIUS, 0);
+    }
+
+    /**
+     * The land rules of a homestead of {@code radius} around {@code pos}: no named place of the map (standing stones,
+     * forts, shrines, ruins, farms...) within its radius plus {@code claimPlaceClearance} (plus {@code extra}), no
+     * settlement, structure or site footprint under it, and not on the open sea. A designated open homestead plot
+     * (a place with variant {@code homestead}) is exempt from the footprint test. Null if fine.
+     */
+    @Nullable
+    public static Denial checkLand(ServerLevel level, BlockPos pos, int radius, int extra) {
+        int x = pos.getX(), z = pos.getZ();
+        int clearance = SurvivalConfig.CLAIM_PLACE_CLEARANCE.get() + extra;
+        boolean openPlot = false;
+        for (Place p : Places.overlapping(x - clearance, z - clearance, x + clearance, z + clearance)) {
+            long d2 = p.distSqr(x, z);
+            if ("homestead".equals(p.variant())) {
+                if (d2 <= (long) p.radius() * p.radius()) openPlot = true;
+                continue;
+            }
+            long reach = (long) p.radius() + clearance;
+            if (d2 <= reach * reach) return new Denial("message.skycraft.homestead.near_place", p.name());
+        }
+        try {
+            com.skycraft.tamriel.Region region = com.skycraft.tamriel.Regions.at(level, pos);
+            if (region != null && ("sea".equals(region.kind()) || "dimension".equals(region.kind()))) {
+                return new Denial("message.skycraft.homestead.bad_ground");
+            }
+        } catch (RuntimeException ignored) {
+            // no map data here: nothing to test
+        }
+        if (openPlot) return null;
+        int ring = Math.max(1, radius * 3 / 4);
+        int[][] samples = {{0, 0}, {ring, 0}, {-ring, 0}, {0, ring}, {0, -ring}, {ring * 7 / 10, ring * 7 / 10},
+                {-ring * 7 / 10, ring * 7 / 10}, {ring * 7 / 10, -ring * 7 / 10}, {-ring * 7 / 10, -ring * 7 / 10}};
+        for (int[] s : samples) {
+            BlockPos sp = new BlockPos(x + s[0], pos.getY(), z + s[1]);
+            if (!level.isLoaded(sp)) continue;
+            com.skycraft.protect.Footprints.Kind kind = com.skycraft.protect.Footprints.at(level, sp);
+            // a road may run by the plot (the lanes of the open plots); the table itself never stands on one
+            boolean blocked = kind == com.skycraft.protect.Footprints.Kind.SETTLEMENT || kind == com.skycraft.protect.Footprints.Kind.STRUCTURE
+                    || kind == com.skycraft.protect.Footprints.Kind.SITE || (s[0] == 0 && s[1] == 0 && kind.built());
+            if (blocked) return new Denial("message.skycraft.homestead.near_place", Component.translatable("homestead.skycraft.something_built"));
+        }
         return null;
+    }
+
+    /** Whether {@code claim}'s grounds may widen to {@code newRadius}: clear of every other homestead and (off the Hearthfire plots) of the world's places. */
+    @Nullable
+    public Denial checkExpansion(ServerLevel level, HomesteadClaim claim, int newRadius) {
+        for (HomesteadClaim other : claimsByOwner.values()) {
+            if (other == claim || !other.getDimension().equals(claim.getDimension())) continue;
+            double dist = Math.sqrt(other.getCenter().distSqr(claim.getCenter()));
+            if (dist < newRadius + other.getRadius() + 8) return new Denial("message.skycraft.homestead.near_claim");
+        }
+        if (claim.getPlot() != null) return null; // a Hearthfire plot is the land of its manor
+        return checkLand(level, claim.getCenter(), newRadius, newRadius - HomesteadClaim.DEFAULT_RADIUS);
+    }
+
+    /** Why a homestead cannot be founded or expanded here: a translation key and its arguments. */
+    public record Denial(String key, Object... args) {
+        public Component message() {
+            return Component.translatable(key, args);
+        }
     }
 
     public HomesteadClaim addClaim(ServerPlayer player, BlockPos pos) {

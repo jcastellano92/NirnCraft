@@ -290,7 +290,8 @@ public final class ProtectEvents {
     public static void onPiston(PistonEvent.Pre event) {
         if (!ProtectConfig.GRIEFING_OFF.get() || !Protect.enabled() || !(event.getLevel() instanceof ServerLevel level)) return;
         HomesteadClaim home = Protect.claimAt(level, event.getPos());
-        if (home == null) return;
+        // a piston outside any homestead may not push into one or pull from one either (docs/HOMESTEAD.md, f)
+        if (home == null && HomesteadData.get(level.getServer()).allClaims().isEmpty()) return;
         PistonStructureResolver helper = event.getStructureHelper();
         if (helper == null || !helper.resolve()) return;
         Direction push = event.getPistonMoveType() == PistonEvent.PistonMoveType.EXTEND ? event.getDirection() : event.getDirection().getOpposite();

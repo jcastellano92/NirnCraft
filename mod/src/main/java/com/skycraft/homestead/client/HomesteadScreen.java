@@ -10,6 +10,7 @@ import com.skycraft.inventory.client.SkyUi;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.nbt.CompoundTag;
@@ -43,7 +44,7 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
     private static final int INSET = 0x60000000;
     private static final int ROW = 18;
     private static final int TAB_ROW = 14;
-    private static final String[] TABS = {"build", "materials", "land", "permissions"};
+    private static final String[] TABS = {"build", "materials", "land", "permissions", "home"};
     private static int lastTab;
 
     private record Hot(int x, int y, int w, int h, Runnable action) {}
@@ -55,6 +56,7 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
     private int scroll;
     private ItemStack hoveredStack = ItemStack.EMPTY;
     private int tabX, tabW, listX, listY, listW, listH, detX, detW;
+    private EditBox nameBox;
 
     public HomesteadScreen(HomesteadMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -81,6 +83,13 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
         listW = Math.min(150, (imageWidth - tabW) / 2 - 6);
         detX = listX + listW + 6;
         detW = leftPos + imageWidth - 6 - detX;
+        // the homestead's name (the Homestead tab)
+        nameBox = new EditBox(font, listX + 4, listY + 18, Math.min(260, listW + detW - 8), 16, Component.translatable("homestead.skycraft.home.name"));
+        nameBox.setMaxLength(32);
+        nameBox.setValue(state().getString("home_name"));
+        nameBox.setHint(Component.translatable("homestead.skycraft.home.name_hint"));
+        nameBox.visible = false;
+        addRenderableWidget(nameBox);
     }
 
     private CompoundTag state() {
@@ -137,6 +146,19 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
 
     @Override
     public boolean keyPressed(int key, int scan, int mods) {
+        // typing a name: the inventory key and the arrows belong to the text box
+        if (nameBox != null && nameBox.visible && nameBox.isFocused()) {
+            if (key == GLFW.GLFW_KEY_ESCAPE) {
+                onClose();
+                return true;
+            }
+            if (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_KP_ENTER) {
+                send("rename", nameBox.getValue());
+                nameBox.setFocused(false);
+                return true;
+            }
+            return nameBox.keyPressed(key, scan, mods) || nameBox.canConsumeInput();
+        }
         if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_DOWN) {
             int n = rows();
             if (n > 0) {
@@ -159,6 +181,7 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
         lastTab = t;
         selected = 0;
         scroll = 0;
+        if (nameBox != null && "home".equals(TABS[t])) nameBox.setValue(state().getString("home_name"));
     }
 
     // ------------------------------------------------------------------ rendering
@@ -192,11 +215,15 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
         SkyUi.carryLine(g, font, (x0 + x1) / 2 + font.width(SkyUi.caps(name == null ? title : name)) / 2 + 10, y0 + 7, x1 - 10);
         g.fill(x0 + 6, y0 + 29, x1 - 6, y0 + 30, 0x808A7F66);
         renderTabs(g, mx, my);
-        g.fill(listX, listY, listX + listW, listY + listH, INSET);
+        boolean home = "home".equals(TABS[tab]);
+        nameBox.visible = home;
+        nameBox.active = home;
+        g.fill(listX, listY, home ? detX + detW : listX + listW, home ? listY + listH : listY + listH, INSET);
         switch (TABS[tab]) {
             case "build" -> renderBuild(g, mx, my);
             case "materials" -> renderMaterials(g, mx, my);
             case "land" -> renderLand(g, mx, my);
+            case "home" -> renderHome(g, mx, my);
             default -> renderPermissions(g, mx, my);
         }
     }
@@ -397,10 +424,17 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
     private void renderPermissions(GuiGraphics g, int mx, int my) {
         int y = listY + 6;
         CompoundTag s = state();
-        y = permRow(g, mx, my, y, "doors", s.getInt("door"), 3, v -> perms(v, s.getInt("container"), s.getInt("build")));
-        y = permRow(g, mx, my, y, "containers", s.getInt("container"), 2, v -> perms(s.getInt("door"), v, s.getInt("build")));
-        y = permRow(g, mx, my, y, "building", s.getInt("build"), 2, v -> perms(s.getInt("door"), s.getInt("container"), v));
-        y += 8;
+        y = permRow(g, mx, my, y, "doors", s.getInt("door"), 3, v -> perms("door", v));
+        y = permRow(g, mx, my, y, "containers", s.getInt("container"), 3, v -> perms("container", v));
+        y = permRow(g, mx, my, y, "stations", s.getInt("station"), 3, v -> perms("station", v));
+        y = permRow(g, mx, my, y, "beds", s.getInt("bed"), 3, v -> perms("bed", v));
+        y = permRow(g, mx, my, y, "building", s.getInt("build"), 2, v -> perms("build", v));
+        y += 4;
+        for (FormattedCharSequence line : font.split(Component.translatable("homestead.skycraft.perm.hint"), listW + detW - 8)) {
+            g.drawString(font, line, listX + 4, y, GREY, false);
+            y += 10;
+        }
+        y += 4;
         String info = Component.translatable("homestead.skycraft.screen.bounds", s.getInt("radius"), s.getInt("depth"), s.getInt("height")).getString();
         for (FormattedCharSequence line : font.split(Component.literal(info), listW + detW - 8)) {
             g.drawString(font, line, listX + 4, y, GREY, false);
@@ -424,12 +458,80 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
         return y + 24;
     }
 
-    private void perms(int door, int container, int build) {
+    private void perms(String what, int value) {
         CompoundTag s = state();
-        s.putInt("door", door);
-        s.putInt("container", container);
-        s.putInt("build", build);
-        SkyNetwork.sendToServer(new HomesteadPackets.UpdatePerms(menu.pos, door, container, build));
+        s.putInt(what, value);
+        SkyNetwork.sendToServer(new HomesteadPackets.UpdatePerms(menu.pos, s.getInt("door"), s.getInt("container"),
+                s.getInt("station"), s.getInt("bed"), s.getInt("build")));
+    }
+
+    /** The Homestead tab: name, build mode, the grounds' expansion and how the homestead shows on other people's maps. */
+    private void renderHome(GuiGraphics g, int mx, int my) {
+        CompoundTag s = state();
+        int x = listX + 4;
+        int w = listW + detW - 8;
+        int y = listY + 4;
+        g.drawString(font, Component.translatable("homestead.skycraft.home.name"), x, y, GOLD, false);
+        y = listY + 38;
+        button(g, mx, my, Component.translatable("homestead.skycraft.home.rename"), x, y, 110, 18, true, () -> send("rename", nameBox.getValue()));
+        for (FormattedCharSequence line : font.split(Component.translatable("homestead.skycraft.home.name_info"), w - 120)) {
+            g.drawString(font, line, x + 118, y + 1, GREY, false);
+            y += 9;
+        }
+        y = Math.max(y, listY + 38 + 18) + 10;
+
+        // build mode
+        boolean on = s.getBoolean("build_mode");
+        g.drawString(font, Component.translatable("homestead.skycraft.home.build_mode"), x, y, GOLD, false);
+        y += 11;
+        button(g, mx, my, Component.translatable(on ? "homestead.skycraft.home.build_mode.turn_off" : "homestead.skycraft.home.build_mode.turn_on"),
+                x, y, 130, 18, true, () -> send("build_mode", ""));
+        for (FormattedCharSequence line : font.split(Component.translatable("homestead.skycraft.home.build_mode.info"), w - 140)) {
+            g.drawString(font, line, x + 138, y + 1, on ? GOOD : GREY, false);
+            y += 9;
+        }
+        y = Math.max(y, y) + 14;
+
+        // the grounds
+        g.drawString(font, Component.translatable("homestead.skycraft.home.grounds", s.getInt("radius")), x, y, GOLD, false);
+        y += 11;
+        int next = s.getInt("next_radius");
+        if (next <= 0) {
+            g.drawString(font, Component.translatable("homestead.skycraft.expand.max"), x, y, GREY, false);
+            y += 12;
+        } else {
+            long gold = s.getLong("expand_gold");
+            ListTag mats = s.getList("expand_mats", Tag.TAG_STRING);
+            boolean ok = s.getLong("gold") >= gold;
+            Inventory inv = minecraft.player.getInventory();
+            StringBuilder need = new StringBuilder();
+            for (int i = 0; i < mats.size(); i++) {
+                String[] parts = mats.getString(i).split(":");
+                int count = Integer.parseInt(parts[1]);
+                ItemStack icon = switch (parts[0]) {
+                    case "sawn_log" -> new ItemStack(com.skycraft.homestead.HomesteadRegistry.SAWN_LOG.get());
+                    case "quarried_stone" -> new ItemStack(com.skycraft.homestead.HomesteadRegistry.QUARRIED_STONE.get());
+                    default -> new ItemStack(com.skycraft.homestead.HomesteadRegistry.NAILS.get());
+                };
+                int have = com.skycraft.inventory.Inv.count(minecraft.player, icon.getItem());
+                if (have < count) ok = false;
+                if (need.length() > 0) need.append(", ");
+                need.append(count).append(' ').append(icon.getHoverName().getString());
+            }
+            g.drawString(font, fit(Component.translatable("homestead.skycraft.home.expand_cost", next, gold).getString(), w), x, y, ok ? TEXT : BAD, false);
+            y += 11;
+            g.drawString(font, fit(need.toString(), w), x, y, ok ? DIM : BAD, false);
+            y += 13;
+            final boolean enabled = ok || minecraft.player.isCreative();
+            button(g, mx, my, Component.translatable("homestead.skycraft.home.expand"), x, y, 130, 18, enabled, () -> send("expand", ""));
+            y += 22;
+        }
+        y += 4;
+        for (FormattedCharSequence line : font.split(Component.translatable("homestead.skycraft.home.map_info"), w)) {
+            if (y + 9 > topPos + imageHeight - 6) break;
+            g.drawString(font, line, x, y, GREY, false);
+            y += 9;
+        }
     }
 
     private void button(GuiGraphics g, int mx, int my, Component label, int x, int y, int w, int h, boolean active, Runnable action) {

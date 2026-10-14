@@ -96,7 +96,109 @@ public final class Hearthfire {
         t.putBoolean("carpenter", carpenter(player));
         t.putLong("gold", Currency.balance(player));
         t.putBoolean("owner_view", claim.isOwner(player));
+        t.putInt("station", claim.getStationPerm());
+        t.putInt("bed", claim.getBedPerm());
+        t.putString("home_name", claim.getName());
+        t.putBoolean("build_mode", HomesteadBuildMode.isOn(player));
+        int next = nextRadius(claim);
+        t.putInt("next_radius", next);
+        if (next > 0) {
+            t.putLong("expand_gold", expandGold(claim));
+            ListTag mats = new ListTag();
+            int step = expandStep(claim);
+            mats.add(StringTag.valueOf("sawn_log:" + 16 * step));
+            mats.add(StringTag.valueOf("quarried_stone:" + 16 * step));
+            mats.add(StringTag.valueOf("nails:" + 32 * step));
+            t.put("expand_mats", mats);
+        }
         return t;
+    }
+
+    // ------------------------------------------------------------------ expanding the grounds
+
+    /** How many 8-block steps beyond the founding radius the grounds already are, plus one: the next step's number. */
+    static int expandStep(HomesteadClaim claim) {
+        return (claim.getRadius() - HomesteadClaim.DEFAULT_RADIUS) / EXPAND_STEP + 1;
+    }
+
+    /** The radius of the next expansion, or 0 if the grounds are as large as they get. */
+    public static int nextRadius(HomesteadClaim claim) {
+        int next = claim.getRadius() + EXPAND_STEP;
+        return next > SurvivalConfig.CLAIM_MAX_RADIUS.get() ? 0 : next;
+    }
+
+    /** Gold for the next expansion: the base price, doubling with every step. */
+    public static long expandGold(HomesteadClaim claim) {
+        return (long) SurvivalConfig.CLAIM_EXPAND_GOLD.get() << Math.min(10, expandStep(claim) - 1);
+    }
+
+    /** Materials of the next expansion (sawn logs, quarried stone, nails), growing with every step. */
+    static List<ItemStack> expandMaterials(HomesteadClaim claim) {
+        int step = expandStep(claim);
+        return List.of(new ItemStack(HomesteadRegistry.SAWN_LOG.get(), 16 * step),
+                new ItemStack(HomesteadRegistry.QUARRIED_STONE.get(), 16 * step),
+                new ItemStack(HomesteadRegistry.NAILS.get(), 32 * step));
+    }
+
+    public static final int EXPAND_STEP = 8;
+
+    /** Widens the grounds by one step: gold and materials, and the new ground must be free of neighbours and of the world's places. */
+    public static void expand(ServerPlayer player, HomesteadClaim claim) {
+        int next = nextRadius(claim);
+        if (next <= 0) {
+            Notifier.message(player, Component.translatable("homestead.skycraft.expand.max"));
+            return;
+        }
+        if (!claim.isPurchased()) {
+            Notifier.message(player, Component.translatable("homestead.skycraft.plot.buy_first"));
+            return;
+        }
+        HomesteadData data = HomesteadData.get(player.server);
+        HomesteadData.Denial denial = data.checkExpansion(player.serverLevel(), claim, next);
+        if (denial != null) {
+            Notifier.message(player, denial.message());
+            return;
+        }
+        List<ItemStack> mats = expandMaterials(claim);
+        long gold = expandGold(claim);
+        if (!player.isCreative()) {
+            if (Currency.balance(player) < gold) {
+                Notifier.message(player, Component.translatable("homestead.skycraft.plot.no_gold", gold));
+                return;
+            }
+            for (ItemStack m : mats) {
+                if (com.skycraft.inventory.Inv.count(player, m.getItem()) < m.getCount()) {
+                    Notifier.message(player, Component.translatable("message.skycraft.homestead.missing_mats", m.getHoverName()));
+                    return;
+                }
+            }
+            Currency.take(player, gold);
+            for (ItemStack m : mats) com.skycraft.inventory.Inv.take(player, m.getItem(), m.getCount());
+        }
+        claim.setRadius(next);
+        data.setDirty();
+        player.level().playSound(null, claim.getCenter(), SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.8f, 0.9f);
+        Notifier.send(player, NotifyKind.BIG_TITLE, Component.translatable("homestead.skycraft.expand.done"),
+                Component.translatable("homestead.skycraft.expand.radius", next));
+        HomesteadDiscovery.sync(player);
+        sync(player, claim);
+    }
+
+    // ------------------------------------------------------------------ name and build mode
+
+    /** The owner names the homestead: what the map, the compass and the discovery banner of other players show. */
+    public static void rename(ServerPlayer player, HomesteadClaim claim, String raw) {
+        String name = HomesteadClaim.sanitizeName(raw);
+        claim.setName(name);
+        HomesteadData.get(player.server).setDirty();
+        Notifier.message(player, Component.translatable(name.isEmpty() ? "homestead.skycraft.rename.reset" : "homestead.skycraft.rename.done", claim.plainName()));
+        HomesteadDiscovery.sync(player);
+        sync(player, claim);
+    }
+
+    public static void toggleBuildMode(ServerPlayer player, HomesteadClaim claim) {
+        HomesteadBuildMode.toggle(player, claim);
+        sync(player, claim);
     }
 
     public static void sync(ServerPlayer player, HomesteadClaim claim) {

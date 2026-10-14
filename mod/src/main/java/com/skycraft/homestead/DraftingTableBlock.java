@@ -55,12 +55,13 @@ public class DraftingTableBlock extends HorizontalDirectionalBlock {
                 }
             } else {
                 // If claim was missing, attempt re-establishment if allowed
-                String reason = data.checkCanClaim(sp, pos);
+                HomesteadData.Denial reason = data.checkCanClaim(sp, pos);
                 if (reason == null) {
                     claim = data.addClaim(sp, pos);
+                    HomesteadDiscovery.sync(sp);
                     HomesteadMenu.open(sp, claim, pos);
                 } else {
-                    Notifier.message(sp, Component.translatable(reason));
+                    Notifier.message(sp, reason.message());
                 }
             }
         }

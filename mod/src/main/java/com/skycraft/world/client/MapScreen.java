@@ -668,6 +668,7 @@ public class MapScreen extends Screen {
         for (int i = 0; i < list.size(); i++) {
             CompoundTag loc = list.getCompound(i);
             if (!loc.getString("dim").equals(dim)) continue;
+            if (loc.getBoolean("hidden")) continue; // a stranger's homestead not yet discovered: a point on the compass only
             LocationKind kind = LocationKind.byId(loc.getString("type"));
             Place place = WorldData.place(loc).orElse(null);
             if (place != null) listed.add(place.id());

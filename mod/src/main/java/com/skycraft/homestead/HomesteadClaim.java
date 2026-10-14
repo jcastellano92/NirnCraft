@@ -14,8 +14,10 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -42,13 +44,23 @@ public class HomesteadClaim {
     private String ownerName;
     private final BlockPos center;
     private final String dimension;
-    private final int radius;
+    private int radius;
     private final int minDepth;
     private final int maxHeight;
 
     private int doorPerm;
     private int containerPerm;
     private int buildPerm;
+    /** Crafting stations (forge, anvil, alchemy lab...) and beds: {@link #PERM_OWNER}, {@link #PERM_PARTY}, {@link #PERM_PUBLIC}. */
+    private int stationPerm = PERM_PARTY;
+    private int bedPerm = PERM_PARTY;
+    /** Per-block access overrides set in build mode (sneak-use): block position (long) to level 0..2; absent = the claim's default. */
+    private final Map<Long, Integer> overrides = new HashMap<>();
+    /** The name the owner gave the homestead; empty = the default name. Shown on the map, compass and discovery banner. */
+    private String name = "";
+
+    /** What a block is used for, for access control. */
+    public enum Access { DOOR, CONTAINER, STATION, BED }
 
     // Hearthfire: which plot (if any), what was built, the steward, the beds of the house
     @Nullable
@@ -106,6 +118,11 @@ public class HomesteadClaim {
 
     public int getRadius() {
         return radius;
+    }
+
+    /** Expands the grounds (the caller has checked the new area is free). */
+    public void setRadius(int radius) {
+        this.radius = Math.max(this.radius, radius);
     }
 
     public int getMinDepth() {
@@ -172,16 +189,120 @@ public class HomesteadClaim {
     }
 
     public boolean canAccessDoor(ServerPlayer player) {
-        if (doorPerm == PERM_PUBLIC) return true;
-        if (isOwner(player)) return true;
-        if (doorPerm == PERM_PARTY && isPartyMember(player)) return true;
-        return false;
+        return allows(doorPerm, player);
     }
 
     public boolean canAccessContainer(ServerPlayer player) {
+        return allows(containerPerm, player);
+    }
+
+    public boolean canAccessStation(ServerPlayer player) {
+        return allows(stationPerm, player);
+    }
+
+    public boolean canAccessBed(ServerPlayer player) {
+        return allows(bedPerm, player);
+    }
+
+    /** Owner only (0), the owner's party (1) or everyone (2). */
+    private boolean allows(int perm, ServerPlayer player) {
+        if (perm >= PERM_PUBLIC) return true;
         if (isOwner(player)) return true;
-        if (containerPerm == PERM_PARTY && isPartyMember(player)) return true;
-        return false;
+        return perm == PERM_PARTY && isPartyMember(player);
+    }
+
+    /** The claim-wide level of an access kind. */
+    public int permOf(Access kind) {
+        return switch (kind) {
+            case DOOR -> doorPerm;
+            case CONTAINER -> containerPerm;
+            case STATION -> stationPerm;
+            case BED -> bedPerm;
+        };
+    }
+
+    /** May {@code player} use the block at {@code pos} (its own override, else the claim's level for this kind)? */
+    public boolean mayUse(ServerPlayer player, Access kind, BlockPos pos) {
+        Integer o = overrides.get(pos.asLong());
+        return allows(o != null ? o : permOf(kind), player);
+    }
+
+    /** The level set for this one block, or -1 when it follows the claim. */
+    public int overrideAt(BlockPos pos) {
+        Integer o = overrides.get(pos.asLong());
+        return o == null ? -1 : o;
+    }
+
+    /** Cycles a block's own level: follows the claim, owner only, party, everyone, follows the claim. Returns the new level (-1 = claim). */
+    public int cycleOverride(BlockPos pos) {
+        int next = overrideAt(pos) + 1;
+        if (next > PERM_PUBLIC) {
+            overrides.remove(pos.asLong());
+            return -1;
+        }
+        overrides.put(pos.asLong(), next);
+        return next;
+    }
+
+    /** Forgets overrides of blocks that are gone (the caller passes a test). */
+    public void pruneOverrides(java.util.function.Predicate<BlockPos> stillThere) {
+        overrides.keySet().removeIf(l -> !stillThere.test(BlockPos.of(l)));
+    }
+
+    public int getStationPerm() {
+        return stationPerm;
+    }
+
+    public void setStationPerm(int v) {
+        stationPerm = Math.floorMod(v, 3);
+    }
+
+    public int getBedPerm() {
+        return bedPerm;
+    }
+
+    public void setBedPerm(int v) {
+        bedPerm = Math.floorMod(v, 3);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    /** What a client may name a homestead: letters, digits and a little punctuation, one space at a time, 32 characters at most. */
+    public static String sanitizeName(String raw) {
+        if (raw == null) return "";
+        StringBuilder sb = new StringBuilder();
+        for (char c : raw.toCharArray()) {
+            if (Character.isLetterOrDigit(c) || " '-.,:!&".indexOf(c) >= 0) sb.append(c);
+        }
+        String name = sb.toString().trim().replaceAll("\\s{2,}", " ");
+        if (name.length() > 32) name = name.substring(0, 32).trim();
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name == null ? "" : name;
+    }
+
+    /** The name as plain text (server side: no language files): the owner's choice, the plot's name or "&lt;owner&gt;'s Homestead". */
+    public String plainName() {
+        if (!name.isEmpty()) return name;
+        if (plot != null) {
+            StringBuilder sb = new StringBuilder();
+            boolean up = true;
+            for (char c : plot.toCharArray()) {
+                if (c == '_') {
+                    sb.append(' ');
+                    up = true;
+                } else {
+                    sb.append(up ? Character.toUpperCase(c) : c);
+                    up = false;
+                }
+            }
+            return sb.toString();
+        }
+        return ownerName + "'s Homestead";
     }
 
     // ------------------------------------------------------------------ Hearthfire
@@ -251,6 +372,7 @@ public class HomesteadClaim {
 
     /** The homestead's display name: the plot's name, or "<owner>'s Homestead". */
     public Component displayName() {
+        if (!name.isEmpty()) return Component.literal(name);
         if (plot != null) return Component.translatable("place.skycraft." + plot);
         return Component.translatable("homestead.skycraft.name", ownerName);
     }
@@ -279,6 +401,19 @@ public class HomesteadClaim {
         for (BlockPos b : beds) bedList.add(NbtUtils.writeBlockPos(b));
         tag.put("beds", bedList);
         tag.putInt("childBeds", childBeds);
+        tag.putInt("stationPerm", stationPerm);
+        tag.putInt("bedPerm", bedPerm);
+        if (!name.isEmpty()) tag.putString("homeName", name);
+        if (!overrides.isEmpty()) {
+            ListTag list = new ListTag();
+            for (Map.Entry<Long, Integer> e : overrides.entrySet()) {
+                CompoundTag o = new CompoundTag();
+                o.putLong("p", e.getKey());
+                o.putInt("l", e.getValue());
+                list.add(o);
+            }
+            tag.put("overrides", list);
+        }
         return tag;
     }
 
@@ -304,6 +439,14 @@ public class HomesteadClaim {
         ListTag bedList = tag.getList("beds", Tag.TAG_COMPOUND);
         for (int i = 0; i < bedList.size(); i++) claim.beds.add(NbtUtils.readBlockPos(bedList.getCompound(i)));
         claim.childBeds = Math.min(claim.beds.size(), tag.getInt("childBeds"));
+        if (tag.contains("stationPerm")) claim.setStationPerm(tag.getInt("stationPerm"));
+        if (tag.contains("bedPerm")) claim.setBedPerm(tag.getInt("bedPerm"));
+        claim.name = tag.getString("homeName");
+        ListTag ov = tag.getList("overrides", Tag.TAG_COMPOUND);
+        for (int i = 0; i < ov.size(); i++) {
+            CompoundTag o = ov.getCompound(i);
+            claim.overrides.put(o.getLong("p"), Math.max(0, Math.min(PERM_PUBLIC, o.getInt("l"))));
+        }
         return claim;
     }
 }

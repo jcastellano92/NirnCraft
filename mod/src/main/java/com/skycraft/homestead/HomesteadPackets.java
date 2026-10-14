@@ -27,6 +27,7 @@ public final class HomesteadPackets {
         SkyNetwork.register(CraftBlueprint.class, NetworkDirection.PLAY_TO_SERVER, CraftBlueprint::encode, CraftBlueprint::decode, CraftBlueprint::handle);
         SkyNetwork.register(Action.class, NetworkDirection.PLAY_TO_SERVER, Action::encode, Action::decode, Action::handle);
         SkyNetwork.register(State.class, NetworkDirection.PLAY_TO_CLIENT, State::encode, State::decode, State::handle);
+        HomesteadDialogue.register(); // the builder's conversation options
     }
 
     /** The claim of the open drafting table if {@code player} owns it, else null. */
@@ -42,16 +43,20 @@ public final class HomesteadPackets {
         return claim;
     }
 
-    public record UpdatePerms(BlockPos pos, int doorPerm, int containerPerm, int buildPerm) {
+    /** C2S: the claim-wide levels: 0 only me, 1 my party, 2 everyone (building: 0 or 1). */
+    public record UpdatePerms(BlockPos pos, int doorPerm, int containerPerm, int stationPerm, int bedPerm, int buildPerm) {
         static void encode(UpdatePerms m, FriendlyByteBuf buf) {
             buf.writeBlockPos(m.pos);
             buf.writeVarInt(m.doorPerm);
             buf.writeVarInt(m.containerPerm);
+            buf.writeVarInt(m.stationPerm);
+            buf.writeVarInt(m.bedPerm);
             buf.writeVarInt(m.buildPerm);
         }
 
         static UpdatePerms decode(FriendlyByteBuf buf) {
-            return new UpdatePerms(buf.readBlockPos(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt());
+            return new UpdatePerms(buf.readBlockPos(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(),
+                    buf.readVarInt());
         }
 
         static void handle(UpdatePerms m, Supplier<NetworkEvent.Context> ctx) {
@@ -59,7 +64,9 @@ public final class HomesteadPackets {
             HomesteadClaim claim = ownedClaim(player);
             if (claim != null && claim.getCenter().equals(m.pos)) {
                 claim.setDoorPerm(Math.floorMod(m.doorPerm, 3));
-                claim.setContainerPerm(Math.floorMod(m.containerPerm, 2));
+                claim.setContainerPerm(Math.floorMod(m.containerPerm, 3));
+                claim.setStationPerm(m.stationPerm);
+                claim.setBedPerm(m.bedPerm);
                 claim.setBuildPerm(Math.floorMod(m.buildPerm, 2));
                 HomesteadData.get(player.server).setDirty();
                 Notifier.message(player, Component.translatable("message.skycraft.homestead.perms_updated"));
@@ -90,7 +97,7 @@ public final class HomesteadPackets {
 
     /**
      * C2S: a drafting table action: {@code build} (arg: plan id), {@code buy_plot}, {@code hire_steward},
-     * {@code steward_buy} (arg: offer index).
+     * {@code steward_buy} (arg: offer index), {@code rename} (arg: the new name), {@code build_mode}, {@code expand}.
      */
     public record Action(String action, String arg) {
         static void encode(Action m, FriendlyByteBuf buf) {
@@ -110,6 +117,9 @@ public final class HomesteadPackets {
                     case "build" -> Hearthfire.build(player, claim, m.arg);
                     case "buy_plot" -> Hearthfire.buyPlot(player, claim);
                     case "hire_steward" -> Hearthfire.hireSteward(player, claim);
+                    case "rename" -> Hearthfire.rename(player, claim, m.arg);
+                    case "build_mode" -> Hearthfire.toggleBuildMode(player, claim);
+                    case "expand" -> Hearthfire.expand(player, claim);
                     case "steward_buy" -> {
                         try {
                             Hearthfire.stewardBuy(player, claim, Integer.parseInt(m.arg));

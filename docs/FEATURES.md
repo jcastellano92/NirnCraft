@@ -741,6 +741,10 @@ Spell sounds all go through `SpellSounds` (slots the audio module can override),
 * **Hearthfire homesteads** [Core]: buy Lakeview Manor, Windstad Manor or Heljarchen Hall (or claim your own land)
   with a drafting table, then build a small house, a main hall, three wings, a cellar, a garden, an animal pen and a
   workshop from sawn logs, quarried stone, clay, nails, hinges, locks and iron fittings. Hire a steward.
+  Builders in cities buy you a drafting table and show open land; name the homestead, widen its grounds, set who may use
+  doors, chests, workstations and beds (owner, party, everyone, per block in build mode), and carry stations and chests in
+  build mode. Strangers see a compass point, then discover it by name and can fast travel to it. Details and the
+  audit: `docs/HOMESTEAD.md`.
 * **Controllers & Steam Deck.** Full gamepad and Steam Deck support out-of-the-box via Controllable, preconfigured
   with Steam button icons and the virtual cursor.
 

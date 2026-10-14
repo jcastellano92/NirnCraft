@@ -38,6 +38,16 @@ public final class SurvivalConfig {
 
     public static final ForgeConfigSpec.IntValue PLOT_PRICE;
     public static final ForgeConfigSpec.IntValue STEWARD_PRICE;
+    /** Where a homestead may be founded (docs/HOMESTEAD.md): distances in blocks from the table. */
+    public static final ForgeConfigSpec.IntValue CLAIM_SETTLEMENT_DISTANCE;
+    public static final ForgeConfigSpec.IntValue CLAIM_DUNGEON_DISTANCE;
+    public static final ForgeConfigSpec.IntValue CLAIM_PLACE_CLEARANCE;
+    public static final ForgeConfigSpec.IntValue CLAIM_SPACING;
+    public static final ForgeConfigSpec.IntValue CLAIM_PRICE_DRAFTING_TABLE;
+    public static final ForgeConfigSpec.IntValue CLAIM_EXPAND_GOLD;
+    public static final ForgeConfigSpec.IntValue CLAIM_MAX_RADIUS;
+    public static final ForgeConfigSpec.IntValue HOMESTEAD_HINT_RANGE;
+    public static final ForgeConfigSpec.IntValue HOMESTEAD_DISCOVER_MARGIN;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -109,6 +119,25 @@ public final class SurvivalConfig {
         PLOT_PRICE = b.comment("Gold for the deed to a Hearthfire plot (Lakeview Manor, Windstad Manor, Heljarchen Hall).")
                 .defineInRange("plotPrice", 5000, 0, 1_000_000);
         STEWARD_PRICE = b.comment("Gold to hire a steward for your homestead.").defineInRange("stewardPrice", 1000, 0, 1_000_000);
+        CLAIM_SETTLEMENT_DISTANCE = b.comment("A homestead may not be founded closer than this to a town, village or city.")
+                .defineInRange("claimSettlementDistance", 96, 0, 1000);
+        CLAIM_DUNGEON_DISTANCE = b.comment("A homestead may not be founded closer than this to a dungeon.")
+                .defineInRange("claimDungeonDistance", 64, 0, 1000);
+        CLAIM_PLACE_CLEARANCE = b.comment("A homestead may not be founded within this many blocks beyond the radius of any named place",
+                        "on the map (standing stones, forts, shrines, ruins, farms...); the open homestead plots are exempt.")
+                .defineInRange("claimPlaceClearance", 48, 0, 500);
+        CLAIM_SPACING = b.comment("Minimum distance between the drafting tables of two players' homesteads.")
+                .defineInRange("claimSpacing", 64, 0, 2000);
+        CLAIM_PRICE_DRAFTING_TABLE = b.comment("Gold a builder or steward in a city asks for a drafting table (the item that founds a homestead).")
+                .defineInRange("draftingTablePrice", 250, 0, 1_000_000);
+        CLAIM_EXPAND_GOLD = b.comment("Gold for the first expansion of the grounds (+8 blocks of radius); each next costs twice as much.")
+                .defineInRange("expandGold", 1500, 0, 1_000_000);
+        CLAIM_MAX_RADIUS = b.comment("The largest radius a homestead's grounds can be expanded to.")
+                .defineInRange("claimMaxRadius", 44, 28, 64);
+        HOMESTEAD_HINT_RANGE = b.comment("Blocks from a homestead at which a stranger sees its undiscovered point on the compass.")
+                .defineInRange("homesteadHintRange", 220, 0, 1000);
+        HOMESTEAD_DISCOVER_MARGIN = b.comment("Blocks beyond a homestead's boundary at which a stranger discovers it.")
+                .defineInRange("homesteadDiscoverMargin", 6, 0, 100);
         b.pop();
         SPEC = b.build();
     }
