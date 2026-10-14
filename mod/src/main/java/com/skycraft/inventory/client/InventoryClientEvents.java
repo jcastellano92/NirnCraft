@@ -188,20 +188,11 @@ public final class InventoryClientEvents {
         double delta = event.getScrollDelta();
         if (delta == 0) return;
 
-        // Without favorites the wheel scrolls the hotbar as usual (and never toggles sheathing or sends packets).
-        List<FavoritesScreen.Row> favs = getFavorites(player);
-        if (favs.isEmpty()) return;
+        // The wheel only draws and sheathes (Skyrim): up draws the weapon, down puts it away. It never cycles the
+        // favorites (their number keys and the quick menu do that) and no longer scrolls the hotbar.
         event.setCanceled(true);
-
-        int total = favs.size() + 1;
-        if (scrollFavIndex < 0) scrollFavIndex = 0;
-        if (delta > 0) {
-            scrollFavIndex = Math.floorMod(scrollFavIndex - 1, total);
-        } else {
-            scrollFavIndex = Math.floorMod(scrollFavIndex + 1, total);
-        }
-
-        if (scrollFavIndex == favs.size()) {
+        boolean sheathed = com.skycraft.combat.Sheathe.isSheathed(player);
+        if (delta < 0 && !sheathed) {
             if (!player.getMainHandItem().isEmpty()) lastDrawnMainSlot = player.getInventory().selected;
             com.skycraft.combat.Sheathe.setSheathed(player, true);
             com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.SHEATHE_TOGGLE, 0));
@@ -212,15 +203,15 @@ public final class InventoryClientEvents {
                 }
             }
             ClientPacketHandlers.notify(new CorePackets.Notify(NotifyKind.MESSAGE, Component.literal("Hands Sheathed"), Component.empty(), 0, 0f));
-        } else {
-            FavoritesScreen.Row chosen = favs.get(scrollFavIndex);
-            if (com.skycraft.combat.Sheathe.isSheathed(player)) {
-                com.skycraft.combat.Sheathe.setSheathed(player, false);
-                com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.SHEATHE_TOGGLE, 0));
+        } else if (delta > 0 && sheathed) {
+            com.skycraft.combat.Sheathe.setSheathed(player, false);
+            com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.SHEATHE_TOGGLE, 0));
+            if (lastDrawnMainSlot >= 0 && lastDrawnMainSlot < 9 && !player.getInventory().getItem(lastDrawnMainSlot).isEmpty()) {
+                player.getInventory().selected = lastDrawnMainSlot;
             }
-            FavoritesScreen.activate(chosen, false);
         }
     }
+
 
     // ------------------------------------------------------------------ misc
 
