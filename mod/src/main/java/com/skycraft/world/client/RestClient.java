@@ -128,14 +128,17 @@ public final class RestClient {
 
     // ------------------------------------------------------------------ keys
 
-    /** The wait key: a prompt for sleeping or waiting (also changes the mode while resting). */
+    /**
+     * The wait key waits (sits down); it never sleeps. Pressing it again stands up (and cancels a running skip).
+     * Sleeping is using a bed you may use (a rented room, your bedroll, an unowned bed): right-click it.
+     */
     public static void onWaitKey(Minecraft mc) {
         if (mc.player == null || mc.screen != null) return;
-        if (phase == 2) {
+        if (phase != 0) {
             sendCancel();
             return;
         }
-        mc.setScreen(new RestScreen(phase == 1 ? mode : RestLogic.NONE));
+        sendEnter(RestLogic.WAIT);
     }
 
     static void sendEnter(int rest) {

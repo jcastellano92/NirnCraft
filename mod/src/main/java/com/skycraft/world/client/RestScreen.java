@@ -10,7 +10,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 /**
- * The small prompt the wait key opens: sleep in the bed within reach, or wait sitting on the ground. The choice puts
+ * Legacy prompt (no longer opened by the wait key, which just waits; kept for a future options screen). The choice puts
  * the player in the pose; the hours are then picked in the non-blocking panel of {@link RestClient} (so the camera
  * stays free), and, with other players online, joining a rest that somebody started uses the same two buttons.
  */
