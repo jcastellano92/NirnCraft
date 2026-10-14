@@ -8,6 +8,8 @@ Prints 'ERR ...' lines and a final summary line.
   - Java: no item/block/entity id registered twice in the same kind of registry (ITEMS / BLOCKS / ENTITIES)
   - guards: skycraft/creatures/guard_profiles.json (every profile has its skin, name and item models, every row names
     a profile, no Skyrim hold livery outside Skyrim; see docs/world/GUARDS.md)
+  - menus: every menu type of the game and the mod has a Skyrim screen or an explicit `vanilla-allowed` row in
+    docs/UI-COVERAGE.md (tools/qa/menu_coverage.py)
 """
 import glob
 import json
@@ -249,6 +251,16 @@ def main():
         if len(files) > 1:
             err(f"event handler class name collision {k[1]}.{k[2]}({k[3]}) in package {k[0]}: {', '.join(sorted(files))}")
     inventory_lint()
+
+    # menus: every menu type (game and mod) has a Skyrim screen or an explicit `vanilla-allowed` row in
+    # docs/UI-COVERAGE.md (tools/qa/menu_coverage.py)
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import menu_coverage
+        for e in menu_coverage.check(verbose=True):
+            err(e)
+    except Exception as ex:  # a broken table must show up as a check failure, not a crash
+        err(f"menus: {ex}")
     print(f"{n} json files, {places} places, {sum(len(v) for v in kinds.values())} registry ids checked, {len(errs)} errors")
 
 

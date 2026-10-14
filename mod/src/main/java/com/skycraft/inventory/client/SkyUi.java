@@ -239,6 +239,27 @@ public final class SkyUi {
         g.pose().popPose();
     }
 
+    /**
+     * "Weight 120/300" right-aligned to {@code rightX}, red when over capacity: the carry state every container and
+     * workstation menu shows (the client's live sum of slots and pack against the server's capacity).
+     */
+    public static void carryLine(GuiGraphics g, Font font, int leftX, int y, int rightX) {
+        net.minecraft.client.player.LocalPlayer player = net.minecraft.client.Minecraft.getInstance().player;
+        if (player == null) return;
+        float cur = ClientInventoryHandlers.liveCurrent();
+        float cap = ClientInventoryHandlers.liveCapacity();
+        boolean carryOn = ClientInventoryHandlers.enabled;
+        boolean over = carryOn && !player.isCreative() && cur > cap;
+        String label = caps(Component.translatable("inventory.skycraft.stat.weight"));
+        String value = carryOn ? com.skycraft.inventory.ItemWeights.format(cur) + "/" + com.skycraft.inventory.ItemWeights.format(cap)
+                : com.skycraft.inventory.ItemWeights.format(cur);
+        int vx = rightX - font.width(value);
+        int lx = vx - 4 - font.width(label);
+        if (lx < leftX) return;
+        g.drawString(font, label, lx, y, HEADER, false);
+        g.drawString(font, value, vx, y, over ? BAD : BRIGHT, false);
+    }
+
     public static String ellipsize(Font font, String s, int width) {
         if (font.width(s) <= width) return s;
         if (width <= font.width("...")) return "";

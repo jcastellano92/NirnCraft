@@ -286,6 +286,9 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
         // Smithing skill badge on the top right
         String skillText = "Smithing " + data().getSkill(Skill.SMITHING);
         g.drawString(font, skillText, x1 - 10 - font.width(skillText), y0 + 6, GOLD, false);
+        // what you carry (crafted gear and bought materials weigh something)
+        com.skycraft.inventory.client.SkyUi.carryLine(g, font, (x0 + x1) / 2 + font.width(title) / 2 + 10, y0 + 6,
+                x1 - 10 - font.width(skillText) - 14);
 
         // Station-specific accent trim divider
         g.fill(x0 + 6, y0 + 17, x1 - 6, y0 + 18, accentColor);

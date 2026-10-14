@@ -187,6 +187,7 @@ public class CookingScreen extends AbstractContainerScreen<CookingMenu> {
         frame(g, x0, y0, x1, y1, BORDER);
         frame(g, x0 + 2, y0 + 2, x1 - 2, y1 - 2, 0x408A7F66);
         g.drawCenteredString(font, title, (x0 + x1) / 2, y0 + 7, TEXT);
+        com.skycraft.inventory.client.SkyUi.carryLine(g, font, (x0 + x1) / 2 + font.width(title) / 2 + 10, y0 + 7, x1 - 10);
         g.fill(x0 + 6, y0 + 18, x1 - 6, y0 + 19, 0x808A7F66);
         g.fill(listX, listY, listX + listW, listY + listH, INSET);
         renderCategories(g, mouseX, mouseY);

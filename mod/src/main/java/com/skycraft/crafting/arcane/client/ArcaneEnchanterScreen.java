@@ -237,6 +237,7 @@ public class ArcaneEnchanterScreen extends Screen {
         renderBackground(g);
         ArcaneUi.panel(g, left, top, pw, ph, ArcaneUi.MAGIC);
         g.drawCenteredString(font, title, left + pw / 2, top + 7, ArcaneUi.GOLD);
+        com.skycraft.inventory.client.SkyUi.carryLine(g, font, left + pw / 2 + font.width(title) / 2 + 10, top + 7, left + pw - 12);
         ArcaneUi.divider(g, left + 12, top + 40, pw - 24);
 
         Player p = player();

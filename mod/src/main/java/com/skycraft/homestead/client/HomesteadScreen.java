@@ -189,6 +189,7 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
                 ? state().getBoolean("purchased") ? "homestead.skycraft.screen.plot_owned" : "homestead.skycraft.screen.plot_for_sale"
                 : "homestead.skycraft.screen.claim", state().getString("owner"), state().getInt("radius")).getString();
         g.drawCenteredString(font, sub, (x0 + x1) / 2, y0 + 19, DIM);
+        SkyUi.carryLine(g, font, (x0 + x1) / 2 + font.width(SkyUi.caps(name == null ? title : name)) / 2 + 10, y0 + 7, x1 - 10);
         g.fill(x0 + 6, y0 + 29, x1 - 6, y0 + 30, 0x808A7F66);
         renderTabs(g, mx, my);
         g.fill(listX, listY, listX + listW, listY + listH, INSET);

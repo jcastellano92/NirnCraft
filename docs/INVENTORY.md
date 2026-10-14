@@ -92,6 +92,14 @@ Known gaps (they still only look at slots; the drain above makes them rare): arb
 through `Inv.take` and hands the gold over with `Inv.giveOrDrop`, so pack iron works. Arrows and bolts: see "The
 facade" (`Ammo`).
 
+**Vanilla menus.** Every vanilla menu screen is replaced by a Skyrim one that lists the pack next to the slots and shows
+the carry weight: chests, barrels, ender chests, shulker boxes, hoppers, dispensers/droppers and Skycraft's bodies and
+holds by `SkyrimContainerScreen` (`inventory/client/MenuSkins`); furnaces, brewing stand, anvil, grindstone, smithing
+table, loom, stonecutter, cartography table, enchanting table, beacon, crafting table and the trader by
+`SkyrimMachineScreen`, whose moves go through `MachineActions` (a pack entry is pulled into a real slot with
+`Pack.resolveSlot`, then the move is a real vanilla menu click; taken results go to the bags, never stay behind for lack
+of slots). The full table and the lint that keeps it complete: `docs/UI-COVERAGE.md`, `tools/qa/menu_coverage.py`.
+
 ## The facade (`inventory.Inv`)
 
 The one door gameplay code uses. "Carried" is the 36 storage slots, the offhand and the pack; armor is worn gear and is

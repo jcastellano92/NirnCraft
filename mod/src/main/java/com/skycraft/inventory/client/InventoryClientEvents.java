@@ -25,8 +25,9 @@ import net.minecraftforge.fml.common.Mod;
 import java.util.List;
 
 /**
- * Forge-bus client events of the inventory module: swapping the vanilla survival inventory for the Skyrim one, the
- * favorites key and number keys, and item weights in tooltips (over-encumbered sprint blocking: core ClientEvents).
+ * Forge-bus client events of the inventory module: swapping the vanilla survival inventory and every vanilla menu screen
+ * for the Skyrim ones ({@link MenuSkins}), the favorites key and number keys, and item weights in tooltips
+ * (over-encumbered sprint blocking: core ClientEvents).
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class InventoryClientEvents {
@@ -66,10 +67,13 @@ public final class InventoryClientEvents {
             return;
         }
 
-        if (next instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?> acs
-                && acs.getMenu() instanceof net.minecraft.world.inventory.ChestMenu cm) {
-            if (!player.isCreative() && !player.isSpectator()) {
-                event.setNewScreen(new SkyrimContainerScreen(cm, player.getInventory(), acs.getTitle()));
+        // chests, barrels, ender chests, shulker boxes, hoppers, dispensers/droppers, corpses, holds, saddlebags -> the
+        // container list; furnaces, brewing stand, anvil, grindstone, smithing table, loom, stonecutter, cartography
+        // table, enchanting table, beacon, crafting table, trader -> the machine screen; lectern -> the parchment
+        if (next instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?>) {
+            Screen skinned = MenuSkins.replace(next, player);
+            if (skinned != next) {
+                event.setNewScreen(skinned);
                 return;
             }
         }

@@ -30,6 +30,8 @@ public final class InventoryPackets {
         SkyNetwork.register(PackSync.class, NetworkDirection.PLAY_TO_CLIENT, PackSync::encode, PackSync::decode, PackSync::handle);
         SkyNetwork.register(ContainerOverflowSync.class, NetworkDirection.PLAY_TO_CLIENT, ContainerOverflowSync::encode,
                 ContainerOverflowSync::decode, ContainerOverflowSync::handle);
+        SkyNetwork.register(MachineAction.class, NetworkDirection.PLAY_TO_SERVER, MachineAction::encode, MachineAction::decode,
+                MachineAction::handle);
     }
 
     // ------------------------------------------------------------------ S2C
@@ -215,6 +217,39 @@ public final class InventoryPackets {
         static void handle(InvAction m, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayer player = ctx.get().getSender();
             if (player != null) InventoryActions.handle(player, m.action, m.slot, m.item);
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
+    /**
+     * A move on an open workstation menu (furnace, brewing stand, anvil, crafting grid...) from the Skyrim machine
+     * screen ({@code inventory.client.SkyrimMachineScreen}); see {@link MachineActions}. {@code a} is a menu slot id
+     * (or {@link Pack#VIRTUAL_BASE} + n for pack entry n), {@code b} a target menu slot or -1.
+     */
+    public record MachineAction(int containerId, int kind, int a, int b) {
+        /** Take machine slot {@code a} (a result or an input going back) into the bags, through the slot's own rules. */
+        public static final int TAKE = 0;
+        /** Shift-click the player stack {@code a} into the machine (the menu picks the slot). */
+        public static final int FEED = 1;
+        /** Put the whole player stack {@code a} into machine slot {@code b}. */
+        public static final int PLACE_ALL = 2;
+        /** Put one item of player stack {@code a} into machine slot {@code b}. */
+        public static final int PLACE_ONE = 3;
+
+        static void encode(MachineAction m, FriendlyByteBuf buf) {
+            buf.writeVarInt(m.containerId);
+            buf.writeByte(m.kind);
+            buf.writeVarInt(m.a);
+            buf.writeVarInt(m.b + 1);
+        }
+
+        static MachineAction decode(FriendlyByteBuf buf) {
+            return new MachineAction(buf.readVarInt(), buf.readByte(), buf.readVarInt(), buf.readVarInt() - 1);
+        }
+
+        static void handle(MachineAction m, Supplier<NetworkEvent.Context> ctx) {
+            ServerPlayer player = ctx.get().getSender();
+            if (player != null) MachineActions.handle(player, m.containerId, m.kind, m.a, m.b);
             ctx.get().setPacketHandled(true);
         }
     }

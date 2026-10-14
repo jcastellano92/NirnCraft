@@ -23,6 +23,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
@@ -41,11 +42,12 @@ import java.util.Locale;
 
 /**
  * Skyrim-style container looting / transfer menu.
- * Replaces ChestScreen for chests, barrels, Lootr containers, and corpses.
+ * Replaces the vanilla screens of chests, barrels, ender chests, shulker boxes, hoppers, dispensers and droppers,
+ * Lootr containers, corpses, ship holds and saddlebags (see {@link MenuSkins}).
  * Shows container items on the left, 3D rotating preview and item details on the right,
  * with Take / Steal indication based on Ownership contract, and Take All (R key).
  */
-public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
+public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractContainerMenu> {
     private static final int ROW_HEIGHT = 18;
     private static final int PANEL_PADDING = 8;
 
@@ -77,11 +79,18 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
         public boolean isGearSlot() { return !slots.isEmpty() && slots.get(0).index < com.skycraft.mounts.Saddlebags.GEAR; }
     }
 
-    public SkyrimContainerScreen(ChestMenu menu, Inventory playerInventory, Component title) {
+    public SkyrimContainerScreen(AbstractContainerMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         // the server sends this container's overflow right after the open packet: drop any copy of an earlier menu
         ContainerOverflowClient.clear();
-        this.containerSlotCount = menu.getRowCount() * 9;
+        // chests, barrels, ender chests, corpses: ChestMenu rows; shulker boxes, hoppers, dispensers/droppers: the slots
+        // in front of the player's own (the server counts them the same way, ActionHandler.storageSlots)
+        int own = 0;
+        for (Slot s : menu.slots) {
+            if (s.container == playerInventory) break;
+            own++;
+        }
+        this.containerSlotCount = menu instanceof ChestMenu cm ? cm.getRowCount() * 9 : own;
         this.isOwned = checkIsOwned();
         boolean bag = false;
         float scale = 1f;
@@ -378,6 +387,9 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
             g.drawString(font, String.valueOf(sel.value()), detX + 50, infoY, SkyUi.GOLD, false);
         }
 
+        // what you carry against what you can carry (the container tab is the one you take from)
+        SkyUi.carryLine(g, font, detX, py + ph - 35, px + pw - 10);
+
         // Bottom Hints bar
         int bottomY = py + ph - 22;
         SkyUi.hline(g, px + 8, px + pw - 8, bottomY - 4, 0x80);
@@ -423,7 +435,7 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
         return statsHintX;
     }
 
-    private static void renderPreview(GuiGraphics g, ItemStack stack, int cx, int cy, float scale) {
+    static void renderPreview(GuiGraphics g, ItemStack stack, int cx, int cy, float scale) {
         float t = (Util.getMillis() % 1_000_000L) / 1000f;
         float angle = (float) Math.sin(t * 0.8) * 30f;
         g.pose().pushPose();
@@ -435,7 +447,7 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
         g.pose().popPose();
     }
 
-    private static double damage(ItemStack stack) {
+    static double damage(ItemStack stack) {
         try {
             var mods = stack.getAttributeModifiers(EquipmentSlot.MAINHAND);
             double sum = 0;
@@ -452,13 +464,13 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
         }
     }
 
-    private static double armor(ItemStack stack) {
+    static double armor(ItemStack stack) {
         if (stack.getItem() instanceof net.minecraft.world.item.HorseArmorItem horse) return horse.getProtection();
         if (!(stack.getItem() instanceof ArmorItem armor)) return 0;
         return armor.getDefense();
     }
 
-    private static Component kindLine(ItemStack stack) {
+    static Component kindLine(ItemStack stack) {
         if (stack.getItem() instanceof ArmorItem) {
             return Component.translatable(ArmorClass.isHeavy(stack) ? "inventory.skycraft.heavy_armor" : "inventory.skycraft.light_armor");
         }
@@ -515,7 +527,7 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
                 return true;
             }
         }
-        if (button == 0 && sheetUp()) return super.mouseClicked(mouseX, mouseY, button);
+        if (button == 0 && sheetUp()) return true; // never vanilla slot clicking: the slots are not drawn but still sit under the panel
         if (button == 0) {
             if (hoveredIndex >= 0) {
                 selectedIndex = hoveredIndex;
@@ -542,7 +554,7 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
                 return true;
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return true; // same: a click on an empty part of the list must not pick up a hidden vanilla slot
     }
 
     @Override

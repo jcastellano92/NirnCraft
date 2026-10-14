@@ -200,6 +200,8 @@ public class BarterScreen extends Screen {
             int alpha = age < 4000 ? 0xFF : (int) (0xFF * (5000 - age) / 1000f);
             g.drawCenteredString(font, message, width / 2, height - 26, (Math.max(8, alpha) << 24) | 0xF0E6C8);
         }
+        // what you carry: buying adds weight (the sell list and the buy list both change it)
+        com.skycraft.inventory.client.SkyUi.carryLine(g, font, 12, height - 26, 12 + 130);
         Component pGold = Component.literal("Your Gold: " + com.skycraft.core.Currency.formatGold(state.playerGold()));
         Component mGold = Component.literal("Merchant Gold: " + com.skycraft.core.Currency.formatGold(state.merchantGold()));
         Component hint = Component.translatable("barter.skycraft.hint");
