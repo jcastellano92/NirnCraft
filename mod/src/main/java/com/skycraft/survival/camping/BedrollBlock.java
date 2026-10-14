@@ -32,7 +32,7 @@ public class BedrollBlock extends BedBlock {
     @Override
     @Nullable
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return null;
+        return super.newBlockEntity(pos, state);
     }
 
     @Override

@@ -11,7 +11,10 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -30,10 +33,10 @@ public final class SkyNetwork {
      * for it lazily (at the handshake, after {@link #init()}); the same build on both sides always produces the same
      * string.
      */
+    private static final List<Consumer<SimpleChannel>> REGISTRARS = new ArrayList<>();
     private static final StringBuilder PACKET_LIST = new StringBuilder();
     private static String protocol;
-    public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(Skycraft.MODID, "main"), SkyNetwork::protocol, v -> protocol().equals(v), v -> protocol().equals(v));
+    public static SimpleChannel CHANNEL;
     private static int nextId = 0;
 
     private SkyNetwork() {}
@@ -43,22 +46,26 @@ public final class SkyNetwork {
         String version = net.minecraftforge.fml.ModList.get() == null ? "?"
                 : net.minecraftforge.fml.ModList.get().getModContainerById(Skycraft.MODID)
                         .map(c -> c.getModInfo().getVersion().toString()).orElse("?");
-        String value = version + "-" + Integer.toHexString(PACKET_LIST.toString().hashCode()) + "-" + nextId;
-        if (nextId > 0) protocol = value; // cache only once the packets are registered
-        return value;
+        protocol = version + "-" + Integer.toHexString(PACKET_LIST.toString().hashCode()) + "-" + nextId;
+        return protocol;
     }
 
     public static <T> void register(Class<T> type, NetworkDirection direction, BiConsumer<T, FriendlyByteBuf> encoder,
                                     Function<FriendlyByteBuf, T> decoder, BiConsumer<T, Supplier<NetworkEvent.Context>> handler) {
-        PACKET_LIST.append(nextId).append(':').append(type.getName()).append(':').append(direction).append(';');
-        CHANNEL.messageBuilder(type, nextId++, direction)
+        if (CHANNEL != null) {
+            throw new IllegalStateException("Cannot register packet after SkyNetwork.init()");
+        }
+        int id = nextId++;
+        PACKET_LIST.append(id).append(':').append(type.getName()).append(':').append(direction).append(';');
+        REGISTRARS.add(channel -> channel.messageBuilder(type, id, direction)
                 .encoder(encoder)
                 .decoder(decoder)
                 .consumerMainThread(handler)
-                .add();
+                .add());
     }
 
-    public static void init() {
+    public static synchronized void init() {
+        if (CHANNEL != null) return;
         CorePackets.register();
         com.skycraft.dialogue.DialoguePackets.register();
         com.skycraft.magic.MagicModule.registerPackets();
@@ -82,6 +89,14 @@ public final class SkyNetwork {
         com.skycraft.fire.FireModule.registerPackets();
         com.skycraft.protect.ProtectModule.registerPackets();
         com.skycraft.combat.Threats.registerPackets();
+
+        String proto = protocol();
+        CHANNEL = NetworkRegistry.newSimpleChannel(
+                new ResourceLocation(Skycraft.MODID, "main"), () -> proto, proto::equals, proto::equals);
+        for (Consumer<SimpleChannel> registrar : REGISTRARS) {
+            registrar.accept(CHANNEL);
+        }
+        REGISTRARS.clear();
     }
 
     public static void sendToPlayer(ServerPlayer player, Object msg) {
