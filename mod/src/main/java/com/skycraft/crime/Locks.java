@@ -454,6 +454,8 @@ public final class Locks {
         float half = sweetSpot(player, tier) / 2f;
         float center = -90f + half + player.getRandom().nextFloat() * (180f - 2 * half);
         SESSIONS.put(player.getUUID(), new Session(level.dimension(), pos.immutable(), tier, center, half));
+        // picking a lock in a jail is heard: the guards nearby come to look
+        if (Jail.isJailArea(level, pos)) JailPatrol.noise(player, 8);
         com.skycraft.network.SkyNetwork.sendToPlayer(player, new CrimePackets.OpenLockpick(pos, tier, picks));
     }
 

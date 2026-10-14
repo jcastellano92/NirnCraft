@@ -17,6 +17,7 @@ public final class CrimeEvents {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
         if (player.tickCount % 20 != 0) return;
         Jail.tick(player);
+        JailPatrol.tick(player);
         Guards.tick(player);
         Theft.tick(player);
     }

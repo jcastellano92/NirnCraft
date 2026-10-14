@@ -263,5 +263,32 @@ final class CrimeSelfTest {
         Jail.Exit exit = Jail.outside(server, crime, null);
         r.check(exit.level() == server.overworld(), "a prisoner of the jail dimension wakes in the overworld");
         r.check(Math.abs(exit.pos().getX() - 123456) > 8 || Math.abs(exit.pos().getZ() - 654321) > 8, "...and not where the crime was");
+
+        patrol(r);
+    }
+
+    /** The guards' rounds: gaps in the watch of the corridor and of the guard room, ten to twenty seconds long. */
+    private static void patrol(Result r) {
+        JailPatrol.Stop[] round = JailPatrol.HOLD_ROUND;
+        int slots = round.length;
+        int corridorGap = 0, roomGap = 0, corridorRun = 0, roomRun = 0, bothAtOnce = 0;
+        for (int pass = 0; pass < 2; pass++) { // two laps, so runs across the wrap are counted
+            for (int slot = 0; slot < slots; slot++) {
+                JailPatrol.Stop a = JailPatrol.stopOf(round, 0, slot * (long) JailPatrol.SLOT_SECONDS);
+                JailPatrol.Stop b = JailPatrol.stopOf(round, 1, slot * (long) JailPatrol.SLOT_SECONDS);
+                boolean corridorWatched = a == JailPatrol.Stop.FAR || a == JailPatrol.Stop.NEAR || b == JailPatrol.Stop.FAR || b == JailPatrol.Stop.NEAR;
+                boolean roomWatched = a == JailPatrol.Stop.ROOM || b == JailPatrol.Stop.ROOM;
+                corridorRun = corridorWatched ? 0 : corridorRun + 1;
+                roomRun = roomWatched ? 0 : roomRun + 1;
+                corridorGap = Math.max(corridorGap, corridorRun);
+                roomGap = Math.max(roomGap, roomRun);
+                if (a == b) bothAtOnce++;
+            }
+        }
+        int seconds = JailPatrol.SLOT_SECONDS;
+        r.check(corridorGap * seconds >= 10 && corridorGap * seconds <= 20, "the cell block corridor is unwatched for 10-20 s a round (" + corridorGap * seconds + " s)");
+        r.check(roomGap * seconds >= 10 && roomGap * seconds <= 20, "the guard room is unwatched for 10-20 s a round (" + roomGap * seconds + " s)");
+        r.check(bothAtOnce < slots, "the two guards are not always at the same stop (phases differ)");
+        r.check(JailPatrol.stopOf(round, 0, 0) == JailPatrol.stopOf(round, 0, (long) slots * seconds), "the round repeats");
     }
 }

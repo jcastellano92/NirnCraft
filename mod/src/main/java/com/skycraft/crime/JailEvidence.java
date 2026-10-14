@@ -51,7 +51,7 @@ import java.util.UUID;
  * <p>Two containers stand in the jail, in no cell, in the evidence room (the guard room of a hold jail, the evidence
  * room behind the locked iron door of a jail-dimension cell block):</p>
  * <ul>
- *     <li>the <b>evidence chest</b> (a chest with an "Evidence" sign), never locked, no screen: right-click it and
+ *     <li>the <b>evidence chest</b> (a chest with an "Evidence" sign), never locked, no screen: interact with it (the Interact key) and
  *     everything the jail took from <i>you</i> comes back to your inventory (armour to its slot when empty);</li>
  *     <li>the <b>confiscated goods</b> (a barrel with a "Confiscated" sign), shared by every prisoner of that jail:
  *     the stolen goods taken from arrested players. It is locked every time (lockpicking at a level that grows
@@ -268,7 +268,7 @@ final class JailEvidence {
         return SettlementAnchors.near(level, pos, 0).map(e -> e.key).orElse(LEGACY);
     }
 
-    /** Right-click on the evidence chest: your things come back, no screen. */
+    /** Interacting with the evidence chest: your things come back, no screen. */
     static void interactPersonal(ServerPlayer player, ServerLevel level, BlockPos pos) {
         migrateAt(level, pos);
         int n = returnPersonal(player, keyAt(level, pos));
@@ -348,13 +348,13 @@ final class JailEvidence {
                 level.setBlock(chest, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, facing), 3);
             }
             Locks.setLock(level, chest, Locks.NOT_LOCKED);
-            sign(level, chest.above(), wallSide(s, chest), "crime.skycraft.jail.sign.evidence", "crime.skycraft.jail.sign.evidence_2");
+            sign(level, chest.above(), wallSide(s, chest), "crime.skycraft.jail.sign.evidence", "crime.skycraft.jail.sign.evidence_2", "crime.skycraft.jail.sign.use_evidence");
         }
         if (barrel != null) {
             level.getChunk(barrel);
             if (!level.getBlockState(barrel).is(Blocks.BARREL)) level.setBlock(barrel, Blocks.BARREL.defaultBlockState(), 3);
             Locks.setLock(level, barrel, tier);
-            sign(level, barrel.above(), wallSide(s, barrel), "crime.skycraft.jail.sign.confiscated", "crime.skycraft.jail.sign.confiscated_2");
+            sign(level, barrel.above(), wallSide(s, barrel), "crime.skycraft.jail.sign.confiscated", "crime.skycraft.jail.sign.confiscated_2", "crime.skycraft.jail.sign.use_confiscated");
         }
     }
 
@@ -372,16 +372,20 @@ final class JailEvidence {
         if (!level.getBlockState(barrel).is(Blocks.BARREL)) level.setBlock(barrel, Blocks.BARREL.defaultBlockState(), 3);
         Locks.setLock(level, chest, Locks.NOT_LOCKED);
         Locks.setLock(level, barrel, tier);
-        sign(level, chest.above(), Direction.EAST, "crime.skycraft.jail.sign.evidence", "crime.skycraft.jail.sign.evidence_2");
-        sign(level, barrel.above(), Direction.WEST, "crime.skycraft.jail.sign.confiscated", "crime.skycraft.jail.sign.confiscated_2");
+        sign(level, chest.above(), Direction.EAST, "crime.skycraft.jail.sign.evidence", "crime.skycraft.jail.sign.evidence_2", "crime.skycraft.jail.sign.use_evidence");
+        sign(level, barrel.above(), Direction.WEST, "crime.skycraft.jail.sign.confiscated", "crime.skycraft.jail.sign.confiscated_2", "crime.skycraft.jail.sign.use_confiscated");
     }
 
-    /** A wall sign with two lines where the block is free; an existing one is left alone. */
-    private static void sign(ServerLevel level, BlockPos pos, Direction face, String line1, String line2) {
+    /**
+     * A wall sign where the block is free (an existing one is left alone): its name, what it is, and a third line
+     * that names the Interact key (a keybind component: the player's own key, F by default).
+     */
+    private static void sign(ServerLevel level, BlockPos pos, Direction face, String line1, String line2, String use) {
         if (!level.getBlockState(pos).isAir()) return;
         level.setBlock(pos, Blocks.OAK_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, face), 3);
         if (level.getBlockEntity(pos) instanceof SignBlockEntity sbe) {
-            SignText text = new SignText().setMessage(1, Component.translatable(line1)).setMessage(2, Component.translatable(line2));
+            SignText text = new SignText().setMessage(0, Component.translatable(line1)).setMessage(1, Component.translatable(line2))
+                    .setMessage(2, Component.translatable(use, Component.keybind("key.skycraft.interact")));
             sbe.setText(text, true);
             sbe.setChanged();
         }

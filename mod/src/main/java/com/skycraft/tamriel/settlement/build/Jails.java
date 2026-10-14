@@ -112,10 +112,11 @@ public final class Jails {
         c.set(w - 2, y, 1, B.s(Blocks.BARREL));
         c.anchor(AnchorType.JAIL_CONFISCATED, w - 2, y, 1);
         if (!c.recording()) {
-            c.sign(1, y + 1, 1, p.sign, Direction.EAST, Component.empty(),
-                    Component.translatable("crime.skycraft.jail.sign.evidence"), Component.translatable("crime.skycraft.jail.sign.evidence_2"));
-            c.sign(w - 2, y + 1, 1, p.sign, Direction.WEST, Component.empty(),
-                    Component.translatable("crime.skycraft.jail.sign.confiscated"), Component.translatable("crime.skycraft.jail.sign.confiscated_2"));
+            Component key = Component.keybind("key.skycraft.interact");
+            c.sign(1, y + 1, 1, p.sign, Direction.EAST, Component.translatable("crime.skycraft.jail.sign.evidence"),
+                    Component.translatable("crime.skycraft.jail.sign.evidence_2"), Component.translatable("crime.skycraft.jail.sign.use_evidence", key));
+            c.sign(w - 2, y + 1, 1, p.sign, Direction.WEST, Component.translatable("crime.skycraft.jail.sign.confiscated"),
+                    Component.translatable("crime.skycraft.jail.sign.confiscated_2"), Component.translatable("crime.skycraft.jail.sign.use_confiscated", key));
         }
         // the guards' tables, a weapon rack and lamps
         Props.table(c, p, 3, y, 5);

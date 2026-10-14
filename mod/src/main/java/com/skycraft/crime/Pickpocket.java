@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Pickpocketing: sneak + right-click a villager, wandering trader or other townsperson to see what's in their
+ * Pickpocketing: sneak + interact (the Interact key) with a villager, wandering trader or other townsperson to see what's in their
  * pockets (generated from {@code skycraft:pickpocket/<villager|guard>} and kept on the entity for several in-game days).
  * Each item shows a success chance; the server rolls when the player tries to take it.
  */
@@ -121,7 +121,9 @@ public final class Pickpocket {
         ObjectArrayList<ItemStack> items = table.getRandomItems(params);
         List<ItemStack> result = new ArrayList<>(items);
         if ((level.dimension() == Jail.JAIL || Jail.isJailArea(level, npc.blockPosition())) && Crimes.isGuard(npc)) {
-            result.add(0, new ItemStack(CrimeItems.JAIL_KEY.get()));
+            ItemStack key = new ItemStack(CrimeItems.JAIL_KEY.get());
+            key.getOrCreateTag().putBoolean(CrimeItems.JAIL_PROPERTY, true);
+            result.add(0, key);
         }
         return result;
     }
@@ -206,7 +208,8 @@ public final class Pickpocket {
                 Currency.give(player, Currency.valueOf(stack));
             } else {
                 ItemStack loot = stack.copy();
-                if (!player.isCreative() && !Jail.isJailDimension(player.level())) Bounty.markStolen(loot);
+                // the jail's key is the jail's property, not stolen goods (it stays with the thief until they leave)
+                if (!player.isCreative() && !Jail.isJailDimension(player.level()) && !loot.is(CrimeItems.JAIL_KEY.get())) Bounty.markStolen(loot);
                 Notifier.message(player, Component.translatable("crime.skycraft.pickpocket.stole", loot.getCount(), loot.getHoverName()));
                 com.skycraft.inventory.Pack.giveOrDrop(player, loot);
             }

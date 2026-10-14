@@ -346,6 +346,7 @@ public final class Jail {
         // Move possessions to the jail's stores (nothing is ever deleted): stolen goods to the shared confiscated goods,
         // the rest to the prisoner's own evidence. Quest items and up to 2 lockpicks (if skilled) stay.
         String jail = JailEvidence.jailKey(site);
+        recoverKeys(player); // a key from an earlier escape is the jail's property, not an item to confiscate
         JailEvidence.noteBounty(player.server, jail, bounty);
         var inv = player.getInventory();
         int lockpickCount = 0;
@@ -434,33 +435,6 @@ public final class Jail {
         return Locks.MASTER;
     }
 
-    /**
-     * A guard walks the cell block of a hold jail (spawned here, by the jail, not by the settlement's population):
-     * at the barred window of the cell's wall, where a prisoner can reach through to the guard's pockets.
-     */
-    private static void ensureCorridorGuard(Site s) {
-        BlockPos door = s.door();
-        if (door == null || s.mine()) return;
-        ServerLevel level = s.level();
-        int sx = Integer.signum(door.getX() - s.stand().getX());
-        BlockPos post = new BlockPos(door.getX() + sx, door.getY(), door.getZ() + 2);
-        level.getChunk(post);
-        if (!level.getEntitiesOfClass(Mob.class, new AABB(post).inflate(6), m -> m.isAlive() && Crimes.isGuard(m)).isEmpty()) return;
-        try {
-            var guard = com.skycraft.creatures.ModEntities.GUARD.get().create(level);
-            if (guard == null) return;
-            guard.setCustomName(Component.translatable("crime.skycraft.jail.npc.guard"));
-            guard.setCustomNameVisible(true);
-            guard.setPos(post.getX() + 0.5, post.getY(), post.getZ() + 0.5);
-            guard.restrictTo(post, 3);
-            guard.addTag(NPC_TAG);
-            guard.setPersistenceRequired();
-            level.addFreshEntity(guard);
-        } catch (Exception ignored) {
-            // no guard entity registered: the jail is just quieter
-        }
-    }
-
     private static void lockDoor(ServerLevel level, @Nullable BlockPos door, int tier) {
         if (door == null) return;
         BlockState st = level.getBlockState(door);
@@ -477,7 +451,6 @@ public final class Jail {
     private static void teleportToCell(ServerPlayer player, Site site) {
         if (site.hold()) {
             prepareHoldCell(player, site);
-            ensureCorridorGuard(site);
             BlockPos s = site.stand();
             player.teleportTo(site.level(), s.getX() + 0.5, s.getY(), s.getZ() + 0.5, player.getYRot(), 0f);
             return;
@@ -591,18 +564,7 @@ public final class Jail {
                 prisoner2.setPersistenceRequired();
                 level.addFreshEntity(prisoner2);
             }
-            // Spawn patrolling Guard in corridor
-            var guard = com.skycraft.creatures.ModEntities.GUARD.get().create(level);
-            if (guard != null) {
-                guard.setCustomName(Component.translatable("crime.skycraft.jail.npc.guard"));
-                guard.setCustomNameVisible(true);
-                // walks the corridor by the player's cell: the window at z 6 is at his reach
-                guard.setPos(o.getX() + 4.5, CELL_Y + 1, o.getZ() + 6.5);
-                guard.restrictTo(o.offset(3, 1, 7), 5);
-                guard.addTag(NPC_TAG);
-                guard.setPersistenceRequired();
-                level.addFreshEntity(guard);
-            }
+            // the corridor's guard walks his round (JailPatrol spawns him when he is missing, and walks him)
         } catch (Exception ignored) {}
     }
 
@@ -715,8 +677,9 @@ public final class Jail {
     }
 
     /**
-     * A guard who sees a prisoner outside their cell (door opened with a stolen key or a pick) comes over, takes the
-     * key, and drags them back: the sentence grows a little. Sneaking and darkness shorten how far the guard sees.
+     * A guard who sees a prisoner outside their cell (door opened with a key or a pick) comes over and drags them
+     * back: the sentence grows a little. The key is the jail's, and stays with them until they leave the jail for
+     * good ({@link #recoverKeys}). Sneaking and darkness shorten how far the guard sees.
      */
     private static void guardReaction(ServerPlayer player, Site site) {
         if (site.door() == null || !player.isAlive() || player.isCreative() || player.isSpectator()) return;
@@ -724,6 +687,8 @@ public final class Jail {
             LOOSE.remove(player.getUUID());
             return;
         }
+        // a prisoner running about outside the cell is heard by the guards nearby, seen or not (they come to look)
+        if (player.isSprinting()) JailPatrol.noise(player, 10);
         LivingEntity guard = Crimes.findGuardWitness(player);
         if (guard == null) {
             LOOSE.computeIfPresent(player.getUUID(), (k, v) -> v > 1 ? v - 1 : null);
@@ -731,6 +696,7 @@ public final class Jail {
         }
         int seen = LOOSE.merge(player.getUUID(), 1, Integer::sum);
         if (guard instanceof Mob mob) {
+            JailPatrol.busy(mob, 100);
             mob.getNavigation().moveTo(player, 1.25);
             mob.getLookControl().setLookAt(player, 30f, 30f);
         }
@@ -741,7 +707,6 @@ public final class Jail {
     private static void draggedBack(ServerPlayer player, Site site, LivingEntity guard) {
         LOOSE.remove(player.getUUID());
         if (guard instanceof Mob mob) mob.getNavigation().stop();
-        int keys = takeKeys(player);
         ServerLevel level = site.level();
         BlockPos s = site.stand();
         player.teleportTo(level, s.getX() + 0.5, s.getY(), s.getZ() + 0.5, player.getYRot(), 0f);
@@ -752,12 +717,15 @@ public final class Jail {
         j.putInt("remaining", Math.min(MAX_SECONDS, j.getInt("remaining") + DRAGGED_BACK_SECONDS));
         SkyData.get(player).markDirty();
         Notifier.message(player, Component.translatable("crime.skycraft.jail.dragged_back", guard.getDisplayName(), DRAGGED_BACK_SECONDS));
-        if (keys > 0) Notifier.message(player, Component.translatable("crime.skycraft.jail.key_taken"));
         level.playSound(null, s, SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 1f, 1f);
     }
 
-    /** The guards take their keys back. Returns how many were taken. */
-    private static int takeKeys(ServerPlayer player) {
+    /**
+     * The jail's keys go back to the guards: when the prisoner leaves the jail for good (released, escaped out of
+     * the exit) or is arrested again. Until then a key stays in the inventory and keeps opening the jail's doors and
+     * the confiscated goods (and nothing outside the jail). Returns how many were recovered.
+     */
+    private static int recoverKeys(ServerPlayer player) {
         int n = 0;
         var inv = player.getInventory();
         for (int i = 0; i < inv.getContainerSize(); i++) {
@@ -817,6 +785,7 @@ public final class Jail {
         passDays(player, Math.max(1, Math.min(7, bounty / 100)));
 
         // wakes outside the jail's front door in the city, never back at the scene of the crime
+        recoverKeys(player);
         teleportOutside(player, j, site);
         SkyData.get(player).markDirty();
     }
@@ -855,13 +824,14 @@ public final class Jail {
         if (!place.isEmpty()) com.skycraft.quest.story.Story.setFlag(SkyData.get(player), "escaped_" + place, true);
 
         Bounty.add(player, hold, Bounty.ESCAPE);
+        recoverKeys(player); // out of the jail for good: the key goes back
         if (detected) {
             Guards.attack(player, 24);
             Notifier.title(player, Component.translatable("crime.skycraft.jail.escaped"), Component.translatable("crime.skycraft.jail.escaped_seen"));
         } else {
             Notifier.title(player, Component.translatable("crime.skycraft.jail.escaped"), Component.translatable("crime.skycraft.jail.escaped_unseen"));
         }
-        // whatever was left behind stays in the jail's evidence: right-clicking the evidence chest later (sneak back
+        // whatever was left behind stays in the jail's evidence: interacting with the evidence chest later (sneak back
         // in) gives it back; stolen goods are in the locked confiscated barrel and have to be picked out
         LOOSE.remove(player.getUUID());
         if (site != null && site.hold()) return;
@@ -1080,6 +1050,7 @@ public final class Jail {
         for (ItemEntity drop : event.getDrops()) {
             ItemStack s = drop.getItem().copy();
             if (s.getTag() != null && s.getTag().getBoolean(TOOL_TAG)) continue;
+            if (s.is(CrimeItems.JAIL_KEY.get())) continue; // the jail's own
             JailEvidence.confiscate(player, jail, s);
         }
         // the pack part of the death's drops (whole entries with int counts, see survival/corpse/PlayerCorpses)
