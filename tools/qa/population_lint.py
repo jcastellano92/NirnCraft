@@ -8,7 +8,8 @@ Fails (exit 1, `ERR` lines) when
   * more residents sleep in beds than the settlement has resident beds, or two residents share a bed;
   * a resident's bed is not a bed anchor, or a resident has no bed/job (guards on post and prisoners excepted);
   * a job is tied to an anchor that is not a workplace (ghost job);
-  * a required sample file is missing.
+  * a required sample file is missing;
+  * the guard watch breaks the rule (major: 2 posted, minor: 1 patrol, none: 0; no guard residents but Helgen's).
 Warns (`WARN`) about idle clusters: more household residents assigned to one meeting point than it can hold, and
 settlements with household residents but no meeting point (they stay indoors).
 
@@ -55,6 +56,20 @@ def lint(path):
         w = p['work']
         if w >= 0 and (w >= len(anchors) or anchors[w][0] not in WORKPLACE):
             errs.append('%s: workplace anchor %d is %s (ghost job)' % (label, w, anchors[w][0] if w < len(anchors) else '?'))
+    # the watch (owner, playtest 5): 2 posted guards at the main gate of a major settlement, 1 wandering guard in a
+    # minor one, none in anything smaller; none of them is a housing resident (Helgen's scripted garrison excepted)
+    watch = d.get('watch')
+    if watch is not None:
+        want = {'major': (2, 0), 'minor': (0, 1), 'none': (0, 0)}.get(watch)
+        if want is None:
+            errs.append('%s: unknown watch %r' % (sid, watch))
+        elif (d.get('watch_posted'), d.get('watch_patrols')) != want:
+            errs.append('%s: %s settlement has %s posted + %s patrol guards (want %d + %d)'
+                        % (sid, watch, d.get('watch_posted'), d.get('watch_patrols'), want[0], want[1]))
+        if sid != 'helgen' and d.get('guard_residents', 0) != 0:
+            errs.append('%s: %d guard residents in the housing plan (the watch is not a household)' % (sid, d['guard_residents']))
+        if not d.get('guard_profile'):
+            errs.append('%s: no guard profile resolved' % sid)
     for m, n in d['idle_at'].items():
         if n > MAX_IDLE_PER_MEETING:
             warns.append('%s: %d idlers assigned to meeting point #%s (max %d)' % (sid, n, m, MAX_IDLE_PER_MEETING))
@@ -93,10 +108,10 @@ def main(argv):
         bad += len(errs)
         rows.append(d)
     if table or not bad:
-        print('%-16s %5s %5s %6s %6s %5s %5s %6s' % ('settlement', 'tier', 'beds', 'resid', 'post', 'inmat', 'old', 'unstf'))
+        print('%-16s %5s %5s %6s %6s %5s %5s %6s %-6s %-18s' % ('settlement', 'tier', 'beds', 'resid', 'post', 'inmat', 'old', 'unstf', 'watch', 'guard'))
         for d in rows:
-            print('%-16s %5d %5d %6d %6d %5d %5d %6d' % (d['id'], d['tier'], d['capacity'], d['residents'], d['post_sleepers'],
-                                                       d['inmates'], d['legacy'], len(d['unstaffed'])))
+            print('%-16s %5d %5d %6d %6d %5d %5d %6d %-6s %-18s' % (d['id'], d['tier'], d['capacity'], d['residents'], d['post_sleepers'],
+                                                       d['inmates'], d['legacy'], len(d['unstaffed']), d.get('watch', '?'), d.get('guard_profile', '?')))
     print('population lint: %d settlements, %d errors' % (len(rows), bad))
     return 1 if bad else 0
 

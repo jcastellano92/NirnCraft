@@ -57,7 +57,7 @@ import java.util.Optional;
 /**
  * Skyrim-like world population: draugr replace zombies in the cold north and frostbite spiders the spiders of caves,
  * vanilla night monsters make way for skeevers and (a few, transient) wolves, phantoms are disabled, dragons attack
- * travelers, and every village keeps a few hold guards (capped) instead of iron golems.
+ * travelers, and iron golems make way for nothing (the guards are the settlement's own: society.GuardWatch).
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class CreatureSpawns {
@@ -79,7 +79,6 @@ public final class CreatureSpawns {
     /** Wolves spawned instead of vanilla night monsters: capped per area, and they leave when no player is near. */
     public static final String WILD_WOLF_TAG = "skycraft.wild_wolf";
     private static final int MAX_WILD_WOLVES = 4;
-    private static final int MAX_TOWN_GUARDS = 6;
 
     /** Settlement lookups by chunk section and dimension: {@code expiry << 4 | flags}, see {@link #poiFlags}. */
     private static final Map<ResourceKey<Level>, Long2LongOpenHashMap> POI_CACHE = new HashMap<>();
@@ -177,17 +176,9 @@ public final class CreatureSpawns {
             return;
         }
 
-        // Replace Iron Golems in towns with proper Hold Guards, a few per village
+        // No Iron Golems in towns, and no guards in their place: the watch is the settlement's own (society.GuardWatch)
         if (entityType == EntityType.IRON_GOLEM && isSettlementOrHouse(serverLevel, pos)) {
             event.setSpawnCancelled(true);
-            if (!guardWanted(serverLevel, pos)) return; // villagers keep "summoning": the cap stops the flood
-            GuardEntity guard = ModEntities.GUARD.get().create(serverLevel);
-            if (guard != null) {
-                guard.moveTo(event.getX(), event.getY(), event.getZ(), mob.getYRot(), 0);
-                guard.finalizeSpawn(serverLevel, event.getDifficulty(), MobSpawnType.CONVERSION, null, null);
-                guard.setPersistenceRequired();
-                serverLevel.addFreshEntity(guard);
-            }
             return;
         }
 
@@ -315,15 +306,6 @@ public final class CreatureSpawns {
         return level.getEntities(type, new AABB(pos).inflate(radius), e -> true).size() < max;
     }
 
-    /** Town guards: at most 2 + one per four villagers (at most {@value #MAX_TOWN_GUARDS}) within 64 blocks. */
-    private static boolean guardWanted(ServerLevel level, BlockPos pos) {
-        AABB area = new AABB(pos).inflate(64);
-        int guards = level.getEntitiesOfClass(GuardEntity.class, area, g -> g.getPost() == null).size(); // gate posts are not patrols
-        int villagers = level.getEntitiesOfClass(LivingEntity.class, area,
-                e -> e instanceof AbstractVillager || e instanceof com.skycraft.society.entity.NpcEntity).size();
-        return guards < Math.min(MAX_TOWN_GUARDS, 2 + villagers / 4);
-    }
-
     private static boolean fewWildWolves(ServerLevel level, BlockPos pos) {
         return level.getEntities(Bestiary.WOLF.get(), new AABB(pos).inflate(64), w -> true).size() < MAX_WILD_WOLVES;
     }
@@ -355,7 +337,8 @@ public final class CreatureSpawns {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
         ServerLevel level = player.serverLevel();
         long time = level.getGameTime() + player.getId() * 37L;
-        if (CreaturesConfig.GUARD_SPAWNING.get() && time % GUARD_CHECK_INTERVAL == 0) maintainGuards(level, player);
+        // guards are no longer topped up around any bell or settlement: the watch is society.GuardWatch's (none in the
+        // wilderness, one patrol in a minor settlement, two posted at a major one's gate); maintainGuards is retired
         if (time % CreaturesConfig.DRAGON_ATTACK_INTERVAL.get() == 0) maybeDragonAttack(level, player);
     }
 

@@ -76,6 +76,16 @@ public final class PopulationCommand {
         o.addProperty("post_sleepers", h.postSleepers());
         o.addProperty("inmates", h.inmates());
         o.addProperty("people", h.bySlot.size());
+        // the watch (society.GuardWatch): exactly 2 posted guards at a major settlement's main gate, 1 patrol in a
+        // minor one, none elsewhere; none of them is a housing resident (Helgen's scripted garrison excepted)
+        com.skycraft.society.GuardWatch.Watch watch = com.skycraft.society.GuardWatch.of(p);
+        o.addProperty("watch", watch.name().toLowerCase(java.util.Locale.ROOT));
+        o.addProperty("watch_posted", watch == com.skycraft.society.GuardWatch.Watch.MAJOR ? com.skycraft.society.GuardWatch.POSTED : 0);
+        o.addProperty("watch_patrols", watch == com.skycraft.society.GuardWatch.Watch.MINOR ? com.skycraft.society.GuardWatch.PATROLS : 0);
+        int guardResidents = 0;
+        for (Housing.Resident r : h.bySlot.values()) if (r.slotType() == AnchorType.GUARD) guardResidents++;
+        o.addProperty("guard_residents", guardResidents);
+        o.addProperty("guard_profile", com.skycraft.creatures.GuardProfiles.of(p).profile().id());
         o.addProperty("legacy", legacy);
         o.addProperty("household_idle", h.householdIdle);
         JsonObject wp = new JsonObject();

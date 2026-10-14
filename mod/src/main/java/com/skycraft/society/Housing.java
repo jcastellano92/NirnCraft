@@ -38,7 +38,10 @@ import java.util.TreeMap;
 public final class Housing {
     public enum BedKind { HOME, COURT, BARRACKS, INN_STAFF, TEMPLE, GUILD, NONE }
 
-    /** Upper bounds per settlement tier (0 capital/city, 1 town, 2 village): guards, merchants, ambient crowd. */
+    /**
+     * Upper bounds per settlement tier (0 capital/city, 1 town, 2 village): guards (only Helgen's scripted garrison
+     * uses them now, see {@link #guardSlots}), merchants, ambient crowd.
+     */
     public static final int[] GUARDS = {12, 4, 2}, MERCHANTS = {8, 3, 2}, AMBIENT = {26, 15, 8};
     /** Guards with no barracks bed who keep the night watch at their post. */
     public static final int POST_SLEEPERS = 2;
@@ -173,7 +176,7 @@ public final class Housing {
         // ---- jobs, most important first
         Map<AnchorType, Integer> count = new EnumMap<>(AnchorType.class);
         for (AnchorType type : JOB_ORDER) {
-            int cap = cap(type, tier, capital);
+            int cap = type == AnchorType.GUARD ? guardSlots(key, tier) : cap(type, tier, capital);
             if (cap <= 0) continue;
             for (int i = 0; i < n && count.getOrDefault(type, 0) < cap; i++) {
                 Anchor a = anchors.get(i);
@@ -316,6 +319,15 @@ public final class Housing {
             AnchorType.HUNTER, AnchorType.MINER, AnchorType.LUMBERJACK, AnchorType.WORKER, AnchorType.BARD,
             AnchorType.JAIL_PRISONER};
     private static final Set<AnchorType> JOB_SET = Set.of(JOB_ORDER);
+
+    /**
+     * Residents a settlement's guard posts hold. None: the watch is not a household ({@link GuardWatch}: two posted
+     * guards at a major settlement's gate, one patrol in a minor one, kept by the watch, not by barracks and anchors).
+     * The scripted garrison of Helgen is the one exception.
+     */
+    static int guardSlots(String key, int tier) {
+        return "helgen".equals(key) ? GUARDS[Math.max(0, Math.min(2, tier))] : 0;
+    }
 
     static int cap(AnchorType t, int tier, boolean capital) {
         return switch (t) {

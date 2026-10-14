@@ -399,7 +399,7 @@ public final class Travelers {
 
     static boolean kindAvailable(ServerLevel level, String kind) {
         return switch (kind) {
-            case PATROL -> ForgeRegistries.ENTITY_TYPES.containsKey(GUARD);
+            case PATROL -> false; // no hold guards on the roads (owner, playtest 5): the watch stays in its settlement
             case AMBUSH -> RoadsConfig.BANDIT_AMBUSHES.get() && level.getDifficulty() != Difficulty.PEACEFUL
                     && ForgeRegistries.ENTITY_TYPES.containsKey(BANDIT);
             case CARAVAN, COURIER, PILGRIM, HUNTER, BARD, SOLDIERS, TINKER, FARMER, REFUGEES, ADVENTURER, TAX -> true;

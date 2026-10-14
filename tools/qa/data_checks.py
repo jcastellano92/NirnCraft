@@ -6,6 +6,8 @@ Prints 'ERR ...' lines and a final summary line.
   - places: no duplicate ids across files listed in places/index.json; every file in the index exists
   - quests: index.json lists existing files
   - Java: no item/block/entity id registered twice in the same kind of registry (ITEMS / BLOCKS / ENTITIES)
+  - guards: skycraft/creatures/guard_profiles.json (every profile has its skin, name and item models, every row names
+    a profile, no Skyrim hold livery outside Skyrim; see docs/world/GUARDS.md)
 """
 import glob
 import json
@@ -91,6 +93,78 @@ def inventory_lint():
                 err(f"inventory: {rel}:{i} reads the player's slots directly; use com.skycraft.inventory.Inv "
                     f"(count/has/take/give/find/forEach) so pack items count (docs/INVENTORY.md)")
     return bad
+def check_guards(place_ids):
+    """The guard table (skycraft/creatures/guard_profiles.json, docs/world/GUARDS.md) against what it points at.
+
+    Every profile has its skin and its name; every item it carries has a model; every settlement/region/culture/
+    province row names a profile; every place of a major or minor settlement resolves to a guard whose skin exists, and
+    nobody outside Skyrim (and not Nord) wears a Skyrim hold's colours. Mirrors com.skycraft.society.GuardWatch (the
+    rule: capital/city and towns of radius 90+ are major, other towns minor, nothing else keeps a watch) and
+    com.skycraft.creatures.GuardProfiles (place > region > culture > province > default).
+    """
+    path = os.path.join(RES, "skycraft", "creatures", "guard_profiles.json")
+    table = json.load(open(path, encoding="utf-8"))
+    profiles = table["profiles"]
+    tex = os.path.join(RES, "assets", "skycraft", "textures", "entity", "guard")
+    models = os.path.join(RES, "assets", "skycraft", "models", "item")
+    lang = json.load(open(os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft", "creatures.json"), encoding="utf-8"))
+    if table.get("default") not in profiles:
+        err(f"guards: default profile {table.get('default')} is not a profile")
+    for pid, prof in profiles.items():
+        if not os.path.exists(os.path.join(tex, f"guard_{pid}.png")):
+            err(f"guards: profile {pid} has no skin guard_{pid}.png")
+        if f"entity.skycraft.guard.{pid}" not in lang:
+            err(f"guards: profile {pid} has no name (entity.skycraft.guard.{pid} in creatures.json)")
+        for item in (prof.get("weapon"), prof.get("shield")):
+            if item and item.startswith("skycraft:") and not os.path.exists(os.path.join(models, item.split(":")[1] + ".json")):
+                err(f"guards: profile {pid} carries {item}, which has no item model")
+        if "art" not in prof or "tunic" not in prof["art"]:
+            err(f"guards: profile {pid} has no art.tunic (the skin generator needs it)")
+    regions = {r["id"] for r in json.load(open(os.path.join(RES, "skycraft", "tamriel", "regions.json"), encoding="utf-8"))}
+    provinces = {r.split("/")[0] for r in regions}
+    for key, rows, valid in (("settlements", table["settlements"], place_ids), ("regions", table["regions"], regions),
+                             ("provinces", table["provinces"], provinces)):
+        for k, v in rows.items():
+            if k not in valid:
+                err(f"guards: {key} row {k} is not a known {key[:-1] if key != 'settlements' else 'place'}")
+            if v not in profiles:
+                err(f"guards: {key} row {k} names unknown profile {v}")
+    for k, v in table["cultures"].items():
+        if v not in profiles:
+            err(f"guards: cultures row {k} names unknown profile {v}")
+
+    holds = {"whiterun", "the_rift", "eastmarch", "the_pale", "winterhold", "haafingar", "hjaalmarch", "the_reach", "falkreath"}
+
+    def resolve(p):
+        if p["id"] in table["settlements"]:
+            return table["settlements"][p["id"]]
+        if p.get("region") in table["regions"]:
+            return table["regions"][p["region"]]
+        if p.get("culture") in table["cultures"]:
+            return table["cultures"][p["culture"]]
+        prov = p.get("region", "").split("/")[0]
+        return table["provinces"].get(prov, table["default"])
+
+    pdir = os.path.join(RES, "skycraft", "tamriel", "places")
+    major = minor = 0
+    for f in json.load(open(os.path.join(pdir, "index.json"), encoding="utf-8")):
+        for p in json.load(open(os.path.join(pdir, f), encoding="utf-8")):
+            t, rad, var = p.get("type"), p.get("radius", 32), p.get("variant", "")
+            if var == "homestead" or p["id"] in ("helgen", "college_of_winterhold", "skaal_village"):
+                continue
+            if t in ("capital", "city") or (t == "town" and rad >= 90):
+                major += 1
+            elif t == "town":
+                minor += 1
+            else:
+                continue
+            pid = resolve(p)
+            skyrim = p.get("region", "").startswith("skyrim/")
+            if pid in holds and not skyrim and p.get("culture") not in ("nord", "atmoran"):
+                err(f"guards: {p['id']} ({p.get('region')}) would have the {pid} hold's guard outside Skyrim")
+            if skyrim and pid not in holds:
+                err(f"guards: Skyrim settlement {p['id']} has {pid}, not its hold's livery")
+    print(f"guards: {len(profiles)} profiles, {major} major and {minor} minor settlements resolved")
 
 
 def main():
@@ -153,6 +227,11 @@ def main():
     except Exception as ex:  # a broken generator must show up as a check failure, not a crash
         err(f"landmarks: {ex}")
 
+
+    try:
+        check_guards(seen)
+    except Exception as ex:  # a broken table must show up as a check failure, not a crash
+        err(f"guards: {ex}")
 
     # Forge's EventBus generates handler classes named __<SimpleClass>_<method>_<Event> in the class's package:
     # two nested classes with the same simple name and handler method in one package collide at runtime.

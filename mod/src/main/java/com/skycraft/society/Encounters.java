@@ -367,7 +367,9 @@ public final class Encounters {
         Map<Kind, Integer> w = new EnumMap<>(Kind.class);
         w.put(Kind.HUNTER, forest ? 10 : 5);
         w.put(Kind.BARD, night ? 2 : 6);
-        w.put(Kind.THIEF, night ? 2 : 4);
+        // two hold guards chasing a thief across open country would be guards in the wilderness (owner, playtest 5):
+        // the scene stays available when forced (the intro, /skycraft-dev), it is not rolled on the road
+        w.put(Kind.THIEF, 0);
         w.put(Kind.IMPERIAL_ESCORT, 5);
         w.put(Kind.STORMCLOAK_ESCORT, snowy ? 6 : 3);
         w.put(Kind.THALMOR_ESCORT, 3);

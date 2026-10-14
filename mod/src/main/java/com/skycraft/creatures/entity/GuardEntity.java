@@ -1,9 +1,10 @@
 package com.skycraft.creatures.entity;
 
-import com.skycraft.core.Holds;
 import com.skycraft.core.Notifier;
+import com.skycraft.creatures.GuardProfiles;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.LongArrayTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -40,19 +41,26 @@ import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * {@code skycraft:guard}: hold guards. Patrol around their village, fight monsters, and say the famous lines.
- * Neutral to players: the crime module decides when a player becomes their target ({@link #setTarget}); the
- * melee goal pursues whatever target is set and the monster-target goal never replaces a player target.
+ * {@code skycraft:guard}: the watch of a settlement. A posted guard stands at a gate ({@link #setPost}), a patrolling one
+ * walks a route through its settlement ({@link #setPatrol}); both fight monsters, say the famous lines and answer a
+ * shout for the guard ({@link #summon}). Their look (skin, name, weapon) is the {@link GuardProfiles.Profile} of the
+ * settlement they serve. Neutral to players: the crime module decides when a player becomes their target
+ * ({@link #setTarget}); the melee goal pursues whatever target is set and the monster-target goal never replaces a
+ * player target.
  */
 public class GuardEntity extends PathfinderMob {
-    private static final EntityDataAccessor<Integer> HOLD = SynchedEntityData.defineId(GuardEntity.class, EntityDataSerializers.INT);
+    /** Index into {@link GuardProfiles#all()}: which guard this is (skin on the client, name and gear on the server). */
+    private static final EntityDataAccessor<Integer> PROFILE = SynchedEntityData.defineId(GuardEntity.class, EntityDataSerializers.INT);
     public static final int LINES = 20;
+    /** The lines that are not about Skyrim's dragons, draugr and mead: what a guard outside Skyrim says. */
+    private static final int[] GENERIC_LINES = {1, 3, 4, 5, 9, 10, 11, 13, 14, 16, 17, 18, 19};
+    /** Ticks a guard keeps answering a shout (it is renewed while the player stays wanted nearby). */
+    public static final int SUMMON_TICKS = 400;
 
     @Nullable
     private BlockPos home;
@@ -60,8 +68,17 @@ public class GuardEntity extends PathfinderMob {
     @Nullable
     private BlockPos post;
     private float postYaw;
+    /** The waypoints of a patrolling guard (market, inn, forge, gate...): it walks them in turn, stopping at each. */
+    private long[] route = new long[0];
+    private long patrolIdleUntil;
+    private int routeIndex = -1;
+    /** Where a shout for the guard sent it, and until when it keeps going there instead of walking back to its post. */
+    @Nullable
+    private BlockPos summonPos;
+    private long summonUntil;
     private long nextLine;
     private boolean initialized;
+    private boolean profileSet;
 
     public GuardEntity(EntityType<? extends GuardEntity> type, Level level) {
         super(type, level);
@@ -83,20 +100,22 @@ public class GuardEntity extends PathfinderMob {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(HOLD, 0);
+        this.entityData.define(PROFILE, 0);
     }
 
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new SummonedGoal());
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.15D, true));
         this.goalSelector.addGoal(4, new OpenDoorGoal(this, true));
         this.goalSelector.addGoal(3, new HoldPostGoal());
         this.goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 0.8D));
+        this.goalSelector.addGoal(5, new PatrolGoal());
         this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.6D) {
             @Override
             public boolean canUse() {
-                return GuardEntity.this.post == null && super.canUse();
+                return GuardEntity.this.post == null && GuardEntity.this.route.length == 0 && super.canUse();
             }
         });
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
@@ -112,20 +131,22 @@ public class GuardEntity extends PathfinderMob {
         });
     }
 
-    // ------------------------------------------------------------------ hold & home
+    // ------------------------------------------------------------------ profile & home
 
-    /** Index into {@link Holds#NAMES}: the tunic color of the hold this guard serves. */
-    public int getHold() {
-        return Math.floorMod(this.entityData.get(HOLD), Holds.NAMES.length);
+    /** Which guard this is: skin, name, gear and lines come from it. */
+    public GuardProfiles.Profile getProfile() {
+        return GuardProfiles.byIndex(this.entityData.get(PROFILE));
     }
 
-    public void setHold(int hold) {
-        this.entityData.set(HOLD, Math.floorMod(hold, Holds.NAMES.length));
+    /** Index into {@link GuardProfiles#all()} (what the client renderer picks the skin by). */
+    public int getProfileIndex() {
+        return this.entityData.get(PROFILE);
     }
 
-    public static int holdIndex(String holdId) {
-        // guards outside Skyrim's holds wear Whiterun's colours until their province gets its own guards
-        return Math.max(0, Holds.index(holdId));
+    /** Makes this guard that profile (before {@link #finalizeSpawn}: the name and gear follow it). */
+    public void setProfile(GuardProfiles.Profile profile) {
+        this.entityData.set(PROFILE, profile.index());
+        this.profileSet = true;
     }
 
     @Nullable
@@ -152,6 +173,93 @@ public class GuardEntity extends PathfinderMob {
         return post;
     }
 
+    /**
+     * Makes this guard patrol: it walks the route's points in turn (stopping a while at each) and never strays more
+     * than {@code radius} blocks from {@code center}.
+     */
+    public void setPatrol(BlockPos center, int radius, java.util.List<BlockPos> waypoints) {
+        this.post = null;
+        this.home = center.immutable();
+        this.restrictTo(this.home, Math.max(16, radius));
+        this.route = new long[waypoints.size()];
+        for (int i = 0; i < route.length; i++) route[i] = waypoints.get(i).asLong();
+        this.routeIndex = -1;
+    }
+
+    /** Whether this guard walks a patrol route (as opposed to standing at a post). */
+    public boolean isPatrolling() {
+        return route.length > 0;
+    }
+
+    /**
+     * A shout for the guard: this one goes to {@code at} and stays about there for {@code ticks} (renewed while the
+     * trouble goes on), instead of standing at its post or walking its route. A fight in hand wins over it.
+     */
+    public void summon(BlockPos at, int ticks) {
+        this.summonPos = at.immutable();
+        this.summonUntil = this.level().getGameTime() + ticks;
+    }
+
+    /** Whether a shout is still being answered. */
+    public boolean isSummoned() {
+        return summonPos != null && this.level().getGameTime() < summonUntil;
+    }
+
+    /** Walks to the place a shout came from. */
+    private final class SummonedGoal extends net.minecraft.world.entity.ai.goal.Goal {
+        SummonedGoal() {
+            this.setFlags(java.util.EnumSet.of(Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse() {
+            return isSummoned() && getTarget() == null && summonPos.distSqr(blockPosition()) > 9;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return canUse() && !getNavigation().isDone();
+        }
+
+        @Override
+        public void start() {
+            getNavigation().moveTo(summonPos.getX() + 0.5, summonPos.getY(), summonPos.getZ() + 0.5, 1.05D);
+        }
+    }
+
+    /** Walks the patrol route: next waypoint, a stop of a few seconds there, the next one. */
+    private final class PatrolGoal extends net.minecraft.world.entity.ai.goal.Goal {
+        PatrolGoal() {
+            this.setFlags(java.util.EnumSet.of(Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse() {
+            return route.length > 0 && post == null && getTarget() == null && !isSummoned()
+                    && level().getGameTime() >= patrolIdleUntil;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return route.length > 0 && getTarget() == null && !isSummoned() && !getNavigation().isDone();
+        }
+
+        @Override
+        public void start() {
+            int next = route.length == 1 ? 0 : (routeIndex + 1 + getRandom().nextInt(2)) % route.length;
+            routeIndex = next;
+            BlockPos at = BlockPos.of(route[next]);
+            if (!getNavigation().moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0.7D)) {
+                patrolIdleUntil = level().getGameTime() + 60;
+            }
+        }
+
+        @Override
+        public void stop() {
+            patrolIdleUntil = level().getGameTime() + 100 + getRandom().nextInt(260);
+        }
+    }
+
     /** Walks back to the post whenever nothing is being fought. */
     private final class HoldPostGoal extends net.minecraft.world.entity.ai.goal.Goal {
         HoldPostGoal() {
@@ -160,7 +268,7 @@ public class GuardEntity extends PathfinderMob {
 
         @Override
         public boolean canUse() {
-            return post != null && getTarget() == null
+            return post != null && getTarget() == null && !isSummoned()
                     && distanceToSqr(post.getX() + 0.5, post.getY(), post.getZ() + 0.5) > 1.5 * 1.5;
         }
 
@@ -187,14 +295,16 @@ public class GuardEntity extends PathfinderMob {
     private void initialize(Level level) {
         if (initialized) return;
         initialized = true;
-        setHold(holdIndex(Holds.holdAt(level, this.blockPosition())));
+        // the watch of the settlement they stand in (or the region): its livery, name and gear
+        if (!profileSet) setProfile(GuardProfiles.at(level, this.blockPosition()));
+        GuardProfiles.Profile profile = getProfile();
         if (!this.hasCustomName()) {
-            // "Whiterun Guard", "Riften Guard"... named after the hold they serve
-            this.setCustomName(Component.translatable("entity.skycraft.guard." + Holds.NAMES[getHold()]));
+            // "Whiterun Guard", "Redoran Guard", "Temple Ordinator"... named after the watch they belong to
+            this.setCustomName(Component.translatable(profile.nameKey()));
         }
         if (home == null) setHome(this.blockPosition());
-        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
-        this.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
+        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(profile.weaponItem()));
+        this.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(profile.shieldItem()));
         for (EquipmentSlot slot : EquipmentSlot.values()) this.setDropChance(slot, 0.0f);
     }
 
@@ -230,7 +340,8 @@ public class GuardEntity extends PathfinderMob {
         if (!(player instanceof ServerPlayer sp) || !this.hasLineOfSight(player)) return;
         nextLine = now + 1200 + this.getRandom().nextInt(1800);
         this.getLookControl().setLookAt(player, 30f, 30f);
-        int line = this.getRandom().nextInt(LINES);
+        int line = getProfile().skyrimLines() ? this.getRandom().nextInt(LINES)
+                : GENERIC_LINES[this.getRandom().nextInt(GENERIC_LINES.length)];
         Notifier.message(sp, Component.translatable("creatures.skycraft.guard.says", this.getDisplayName(),
                 Component.translatable("creatures.skycraft.guard.line." + line)));
     }
@@ -269,9 +380,10 @@ public class GuardEntity extends PathfinderMob {
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
-        tag.putInt("Hold", getHold());
+        tag.putString("Profile", getProfile().id());
         tag.putBoolean("SkycraftInit", initialized);
         if (home != null) tag.put("Home", NbtUtils.writeBlockPos(home));
+        if (route.length > 0) tag.put("Route", new LongArrayTag(route));
         if (post != null) {
             tag.put("Post", NbtUtils.writeBlockPos(post));
             tag.putFloat("PostYaw", postYaw);
@@ -281,9 +393,15 @@ public class GuardEntity extends PathfinderMob {
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        setHold(tag.getInt("Hold"));
+        if (tag.contains("Profile")) {
+            GuardProfiles.Profile p = GuardProfiles.byId(tag.getString("Profile"));
+            if (p != null) setProfile(p);
+        } else if (tag.contains("Hold")) {
+            setProfile(GuardProfiles.ofHoldIndex(tag.getInt("Hold"))); // a guard saved before the profiles
+        }
         initialized = tag.getBoolean("SkycraftInit");
         if (tag.contains("Home")) setHome(NbtUtils.readBlockPos(tag.getCompound("Home")));
+        if (tag.contains("Route")) route = tag.getLongArray("Route");
         if (tag.contains("Post")) setPost(NbtUtils.readBlockPos(tag.getCompound("Post")), tag.getFloat("PostYaw"));
     }
 }

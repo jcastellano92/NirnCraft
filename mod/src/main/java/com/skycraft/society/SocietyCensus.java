@@ -164,6 +164,7 @@ public final class SocietyCensus {
         if (pd.contains(com.skycraft.quest.faction.FactionStaff.TAG)) return "faction-staff";
         if (pd.getBoolean("skycraft_steward")) return "steward";
         if (pd.contains(GatePosts.KEY)) return "gate-post";
+        if (pd.contains(GuardWatch.PATROL_KEY)) return "patrol";
         if (pd.contains(Housing.JOB_KEY)) return "housing";
         if (pd.getBoolean("skycraft_settler")) return "settler-unadopted";
         if (e instanceof GuardEntity g) return g.getHome() != null ? "guard-spawner" : "guard";

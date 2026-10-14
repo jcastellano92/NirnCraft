@@ -41,7 +41,9 @@ import java.util.function.Consumer;
  * (Whiterun) with a fake player standing in it:
  * <ul>
  *     <li>the population is capped: one person per housing-plan slot, no unadopted settlers, a handful of visitors;</li>
- *     <li>the gates are guarded: two guards per gate, one on each side, replaced when killed;</li>
+ *     <li>the watch follows the settlement's size: two posted guards (one on each side of the main gate, replaced
+ *     when killed) in a major settlement, one wandering guard in a minor one, none in a hamlet, none outside; the
+ *     right guard for the region (the table of {@link com.skycraft.creatures.GuardProfiles});</li>
  *     <li>at night every resident is still there and sleeps in a bed;</li>
  *     <li>villages and towns are their own people, the road mix has 15% merchants;</li>
  *     <li>death respawns at the nearest discovered town, never in the intro cottage.</li>
@@ -170,6 +172,8 @@ public final class SocietySelfTest {
         r.steps.add(new Step(0, () -> peopleMixChecks(r)));
         r.steps.add(new Step(0, () -> travellerMixChecks(r, level)));
         r.steps.add(new Step(0, () -> respawnChecks(r, level)));
+        r.steps.add(new Step(0, () -> watchRuleChecks(r)));
+        r.steps.add(new Step(0, () -> guardTypeChecks(r)));
 
         // the town: three visits (a populate pass each), then count
         r.steps.add(new Step(0, () -> {
@@ -189,6 +193,171 @@ public final class SocietySelfTest {
         // the settlement tick runs every two seconds with a player about: the visits stand in for it
         for (int k = 0; k < 6; k++) r.steps.add(new Step(200, () -> SocietyCensus.visit(level, r.town)));
         r.steps.add(new Step(100, () -> nightChecks(r, level)));
+        // a minor settlement (one wanderer) and a hamlet (none), each visited three times like the town
+        for (String id : new String[]{MINOR_SAMPLE, HAMLET_SAMPLE}) {
+            Optional<Place> sample = Places.byId(id);
+            if (sample.isEmpty()) continue;
+            r.steps.add(new Step(0, () -> {
+                level.setDayTime((level.getDayTime() / 24000L) * 24000L + 6000L);
+                level.getChunk(sample.get().x() >> 4, sample.get().z() >> 4);
+                SocietyCensus.visit(level, sample.get());
+            }));
+            r.steps.add(new Step(40, () -> SocietyCensus.visit(level, sample.get())));
+            r.steps.add(new Step(40, () -> SocietyCensus.visit(level, sample.get())));
+            r.steps.add(new Step(60, () -> {
+                if (id.equals(MINOR_SAMPLE)) minorWatchChecks(r, level, sample.get());
+                else noWatchChecks(r, level, sample.get());
+            }));
+        }
+    }
+
+    /** A Riverwood-class town for the one-wanderer check, and a village for the none check. */
+    private static final String MINOR_SAMPLE = "riverwood", HAMLET_SAMPLE = "old_hroldan";
+
+    /** The rule, on the places file itself (no world needed): who gets how many guards. */
+    private static void watchRuleChecks(Run r) {
+        int major = 0, minor = 0, none = 0, wrong = 0;
+        List<String> samples = new ArrayList<>();
+        for (Place p : Places.all()) {
+            GuardWatch.Watch w = GuardWatch.of(p);
+            boolean ok = switch (p.type()) {
+                case CAPITAL, CITY -> w == GuardWatch.Watch.MAJOR || "homestead".equals(p.variant());
+                case TOWN -> w == (p.radius() >= GuardWatch.SEAT_RADIUS ? GuardWatch.Watch.MAJOR : GuardWatch.Watch.MINOR)
+                        || w == GuardWatch.Watch.NONE; // the exempt ones: Helgen, the College, a homestead
+                default -> w == GuardWatch.Watch.NONE; // villages, farms, forts, dungeons, landmarks: nothing
+            };
+            if (!ok && samples.size() < 4) samples.add(p.id());
+            if (!ok) wrong++;
+            switch (w) {
+                case MAJOR -> major++;
+                case MINOR -> minor++;
+                default -> none++;
+            }
+        }
+        r.check("a capital or city has the major watch, a town the minor one, a village, farm, fort or dungeon none", wrong == 0,
+                major + " major, " + minor + " minor, " + none + " none; wrong " + samples);
+        r.check("a major settlement has two posted guards, a minor one wanderer, the rest none",
+                GuardWatch.count(GuardWatch.Watch.MAJOR) == 2 && GuardWatch.count(GuardWatch.Watch.MINOR) == 1
+                        && GuardWatch.count(GuardWatch.Watch.NONE) == 0, "2 / 1 / 0");
+        int[][] posts = GuardWatch.posts(GuardWatch.Watch.MAJOR);
+        r.check("the two posts are the two sides of the main gate", posts.length == 2 && posts[0][0] == 0 && posts[1][0] == 0
+                && posts[0][1] != posts[1][1], posts.length + " posts");
+        r.check("a minor settlement has no gate post and a village has none", GuardWatch.posts(GuardWatch.Watch.MINOR).length == 0
+                && GuardWatch.posts(GuardWatch.Watch.NONE).length == 0, "no posts");
+    }
+
+    /** Which guard stands where, on real settlements of every province (the table, no world needed). */
+    private static void guardTypeChecks(Run r) {
+        String[][] expect = {
+                {"whiterun", "whiterun"}, {"windhelm", "eastmarch"}, {"riften", "the_rift"}, {"solitude", "haafingar"},
+                {"markarth", "the_reach"}, {"imperial_city", "imperial_watch"}, {"vivec", "dunmer_ordinator"},
+                {"balmora", "dunmer_hlaalu"}, {"aldruhn", "dunmer_redoran"}, {"sadrith_mora", "dunmer_telvanni"},
+                {"caldera", "imperial_legion"}, {"raven_rock", "imperial_legion"}, {"wayrest", "breton_guard"},
+                {"orsinium", "orc_stronghold"}, {"jehanna", "breton_guard"}, {"sentinel", "redguard_crown"},
+                {"abahs_landing", "redguard_forebear"}, {"dune", "khajiit_dune"}, {"torval", "khajiit_moon"},
+                {"alinor", "altmer_aldmeri"}, {"elden_root", "bosmer_wood"}, {"lilmoth", "argonian_hist"}};
+        int tested = 0;
+        List<String> bad = new ArrayList<>();
+        for (String[] row : expect) {
+            Optional<Place> p = Places.byId(row[0]);
+            if (p.isEmpty()) continue;
+            tested++;
+            String got = com.skycraft.creatures.GuardProfiles.of(p.get()).profile().id();
+            if (!got.equals(row[1])) bad.add(row[0] + " is " + got + ", wanted " + row[1]);
+        }
+        r.check("the guard of each region is that region's own (" + tested + " settlements over the provinces)", tested >= 6 && bad.isEmpty(),
+                bad.isEmpty() ? tested + " settlements as the table says" : bad.toString());
+
+        // nobody outside Skyrim wears a Skyrim hold's colours, unless they are Nord (or Atmoran) themselves
+        java.util.Set<String> holds = new java.util.HashSet<>(java.util.Arrays.asList(com.skycraft.core.Holds.NAMES));
+        int outsiders = 0;
+        List<String> wrong = new ArrayList<>();
+        for (Place p : Places.all()) {
+            if (GuardWatch.of(p) == GuardWatch.Watch.NONE) continue;
+            outsiders++;
+            String id = com.skycraft.creatures.GuardProfiles.of(p).profile().id();
+            boolean skyrimPlace = p.regionId().startsWith("skyrim/");
+            boolean nordPlace = "nord".equals(p.culture()) || "atmoran".equals(p.culture());
+            if (holds.contains(id) && !skyrimPlace && !nordPlace) wrong.add(p.id());
+            if (skyrimPlace && !holds.contains(id)) wrong.add(p.id());
+        }
+        r.check("no Skyrim hold livery outside Skyrim (and every hold of Skyrim has its own)", wrong.isEmpty(),
+                outsiders + " guarded settlements, wrong: " + (wrong.size() > 6 ? wrong.subList(0, 6) + "..." : wrong));
+
+        // every profile has its skin, and the guarded settlements all resolve through the table
+        List<String> noSkin = new ArrayList<>();
+        for (var profile : com.skycraft.creatures.GuardProfiles.all()) {
+            if (SocietySelfTest.class.getResource("/assets/skycraft/textures/entity/guard/guard_" + profile.id() + ".png") == null) {
+                noSkin.add(profile.id());
+            }
+        }
+        r.check("every guard profile has its skin texture", noSkin.isEmpty(),
+                com.skycraft.creatures.GuardProfiles.count() + " profiles, missing " + noSkin);
+    }
+
+    private static List<GuardEntity> guardsAround(ServerLevel level, SettlementAnchors.Entry e) {
+        return level.getEntitiesOfClass(GuardEntity.class, boxOf(e, level), GuardEntity::isAlive);
+    }
+
+    /** A minor settlement: exactly one guard, walking a route, belonging to no gate; and still one after more visits. */
+    private static void minorWatchChecks(Run r, ServerLevel level, Place town) {
+        Optional<SettlementAnchors.Entry> entry = SettlementAnchors.find(level, town.id());
+        if (entry.isEmpty()) {
+            r.check("the minor settlement's anchors are recorded", false, "no entry for " + town.id());
+            return;
+        }
+        List<GuardEntity> guards = guardsAround(level, entry.get());
+        String key = town.id() + "|patrol";
+        int patrol = 0, posted = 0, foreign = 0;
+        boolean walking = false, ownProfile = true;
+        String want = com.skycraft.creatures.GuardProfiles.of(town).profile().id();
+        for (GuardEntity g : guards) {
+            var pd = g.getPersistentData();
+            if (key.equals(pd.getString(GuardWatch.PATROL_KEY))) {
+                patrol++;
+                walking |= g.isPatrolling() && g.getPost() == null;
+                ownProfile &= g.getProfile().id().equals(want);
+            } else if (pd.contains(GatePosts.KEY)) {
+                posted++;
+            } else if (!pd.getBoolean(GuardWatch.SCRIPTED)) {
+                foreign++;
+            }
+        }
+        r.check(town.id() + " (a town) has exactly one guard", patrol == 1 && guards.size() == 1,
+                patrol + " patrol guards, " + guards.size() + " in all, " + foreign + " unmarked");
+        r.check("the one guard of a minor settlement walks a route and is posted at no gate", walking && posted == 0,
+                walking ? "patrolling, " + posted + " gate posts" : "not patrolling");
+        r.check("the town's guard is its own region's (" + want + ")", ownProfile, want);
+        // a second look changes nothing (no duplicate patrols)
+        GatePosts.tick(level, r.fake);
+        GatePosts.tick(level, r.fake);
+        int again = 0;
+        for (GuardEntity g : guardsAround(level, entry.get())) if (key.equals(g.getPersistentData().getString(GuardWatch.PATROL_KEY))) again++;
+        r.check("visiting a minor settlement again never makes a second guard", again == 1, again + " patrol guards");
+    }
+
+    /** A village: nobody keeps the watch. */
+    private static void noWatchChecks(Run r, ServerLevel level, Place village) {
+        Optional<SettlementAnchors.Entry> entry = SettlementAnchors.find(level, village.id());
+        if (entry.isEmpty()) {
+            r.check("the village's anchors are recorded", false, "no entry for " + village.id());
+            return;
+        }
+        int n = guardsAround(level, entry.get()).size();
+        r.check(village.id() + " (a village) has no guard at all", n == 0, n + " guards");
+        // the open country: no guard stands anywhere that is not a settlement's, a patrol's or somebody's scripted one
+        int stray = 0;
+        for (GuardEntity g : level.getEntitiesOfClass(GuardEntity.class,
+                new AABB(village.x() - 300, level.getMinBuildHeight(), village.z() - 300, village.x() + 300, level.getMaxBuildHeight(),
+                        village.z() + 300), GuardEntity::isAlive)) {
+            var pd = g.getPersistentData();
+            if (!pd.contains(GatePosts.KEY) && !pd.contains(GuardWatch.PATROL_KEY) && !pd.getBoolean(GuardWatch.SCRIPTED)
+                    && !pd.contains(com.skycraft.quest.QuestSpawner.TAG_QUEST) && !pd.contains(com.skycraft.quest.story.QuestNpcs.TAG)
+                    && !Encounters.isTagged(g) && !g.getTags().contains(com.skycraft.crime.Jail.NPC_TAG)) {
+                stray++;
+            }
+        }
+        r.check("no hold guard roams the country round a village (300 blocks)", stray == 0, stray + " unmarked guards");
     }
 
     private static void peopleMixChecks(Run r) {
@@ -288,26 +457,33 @@ public final class SocietySelfTest {
         for (int n : perSlot.values()) if (n > 1) dup++;
         r.check("no housing-plan slot is filled twice", dup == 0, dup + " slots with two people");
 
-        // the gates
-        List<BlockPos> gates = GatePosts.gatePositions(level, entry.get());
+        // the gate watch: two posted guards, one on each side of the main gate, and nobody else keeping a watch
+        List<BlockPos> postGates = GatePosts.postGates(level, entry.get());
         List<String> keys = GatePosts.keysOf(level, entry.get());
-        int tested = 0, bad = 0;
-        for (int i = 0; i < gates.size(); i++) {
-            BlockPos g = gates.get(i);
-            if (!level.isLoaded(g) || !level.isPositionEntityTicking(g)) continue;
-            long dx = g.getX() - r.town.x(), dz = g.getZ() - r.town.z();
-            if (dx * dx + dz * dz > 108L * 108L) continue; // the fake visitor stands in the centre: gates beyond its range wait
-            tested++;
-            int sideA = 0, sideB = 0;
-            for (GuardEntity guard : level.getEntitiesOfClass(GuardEntity.class, new AABB(g).inflate(9, 6, 9), GuardEntity::isAlive)) {
-                String k = guard.getPersistentData().getString(GatePosts.KEY);
-                if (k.equals(keys.get(2 * i))) sideA++;
-                if (k.equals(keys.get(2 * i + 1))) sideB++;
+        GuardWatch.Watch watch = GuardWatch.of(entry.get());
+        r.check(r.town.id() + " has the major watch", watch == GuardWatch.Watch.MAJOR, watch.name());
+        int posted = 0, others = 0, wrongSide = 0, moving = 0;
+        List<String> found = new ArrayList<>();
+        for (GuardEntity guard : guardsAround(level, entry.get())) {
+            String k = guard.getPersistentData().getString(GatePosts.KEY);
+            if (k.isEmpty()) {
+                if (!guard.getPersistentData().getBoolean(GuardWatch.SCRIPTED)) others++;
+                continue;
             }
-            if (sideA != 1 || sideB != 1) bad++;
+            posted++;
+            found.add(k);
+            if (!keys.contains(k)) wrongSide++;
+            if (guard.getPost() == null) moving++;
+            if (!postGates.isEmpty() && guard.distanceToSqr(postGates.get(0).getX() + 0.5, postGates.get(0).getY(), postGates.get(0).getZ() + 0.5) > 36) {
+                wrongSide++;
+            }
         }
-        r.check("every gate has two guards, one on each side", bad == 0,
-                tested + " of " + gates.size() + " gates in the visitor's range, " + bad + " not exactly staffed");
+        boolean twoSides = keys.size() == 2 && found.contains(keys.get(0)) && found.contains(keys.get(1));
+        r.check("a major settlement has exactly two posted guards, one on each side of the main gate",
+                posted == 2 && twoSides && wrongSide == 0,
+                posted + " posted, keys " + found + " of " + keys + ", " + wrongSide + " off the gate");
+        r.check("the posted guards stand still on their posts", posted > 0 && moving == 0, moving + " without a post");
+        r.check("a major settlement keeps no other guard (no barracks guards, no patrol, nobody wandering)", others == 0, others + " others");
     }
 
     private static AABB boxOf(SettlementAnchors.Entry e, ServerLevel level) {
@@ -318,14 +494,14 @@ public final class SocietySelfTest {
     private static void gateReplaceChecks(Run r, ServerLevel level) {
         Optional<SettlementAnchors.Entry> entry = SettlementAnchors.find(level, r.town.id());
         if (entry.isEmpty()) return;
-        List<BlockPos> gates = GatePosts.gatePositions(level, entry.get());
+        List<BlockPos> gates = GatePosts.postGates(level, entry.get());
         List<String> keys = GatePosts.keysOf(level, entry.get());
         for (int i = 0; i < gates.size(); i++) {
             BlockPos g = gates.get(i);
             if (!level.isLoaded(g) || !level.isPositionEntityTicking(g)) continue;
             GuardEntity victim = null;
-            for (GuardEntity guard : level.getEntitiesOfClass(GuardEntity.class, new AABB(g).inflate(9, 6, 9), GuardEntity::isAlive)) {
-                if (keys.get(2 * i).equals(guard.getPersistentData().getString(GatePosts.KEY))) victim = guard;
+            for (GuardEntity guard : level.getEntitiesOfClass(GuardEntity.class, boxOf(entry.get(), level), GuardEntity::isAlive)) {
+                if (keys.get(i).equals(guard.getPersistentData().getString(GatePosts.KEY))) victim = guard;
             }
             if (victim == null) continue;
             victim.discard(); // killed
@@ -333,13 +509,15 @@ public final class SocietySelfTest {
             r.fake.setPos(r.town.x() + 0.5, g.getY(), r.town.z() + 0.5);
             GatePosts.tick(level, r.fake);
             boolean back = false;
-            for (GuardEntity guard : level.getEntitiesOfClass(GuardEntity.class, new AABB(g).inflate(9, 6, 9), GuardEntity::isAlive)) {
-                if (keys.get(2 * i).equals(guard.getPersistentData().getString(GatePosts.KEY))) back = true;
+            int total = 0;
+            for (GuardEntity guard : level.getEntitiesOfClass(GuardEntity.class, boxOf(entry.get(), level), GuardEntity::isAlive)) {
+                if (guard.getPersistentData().contains(GatePosts.KEY)) total++;
+                if (keys.get(i).equals(guard.getPersistentData().getString(GatePosts.KEY))) back = true;
             }
-            int near = level.getEntitiesOfClass(GuardEntity.class, new AABB(g).inflate(9, 6, 9), GuardEntity::isAlive).size();
-            r.check("a gate guard that is killed is replaced", back, "gate " + i + " of " + entry.get().key + ", the visitor stands "
-                    + (int) Math.sqrt(r.fake.distanceToSqr(g.getX() + 0.5, g.getY(), g.getZ() + 0.5)) + " blocks off, " + near
-                    + " guards at the gate");
+            r.check("a gate guard that is killed is replaced (and the gate still has exactly two)", back && total == 2,
+                    "post " + i + " of " + entry.get().key + ", the visitor stands "
+                    + (int) Math.sqrt(r.fake.distanceToSqr(g.getX() + 0.5, g.getY(), g.getZ() + 0.5)) + " blocks off, " + total
+                    + " posted guards");
             return;
         }
         r.check("a gate guard that is killed is replaced", gates.isEmpty(), gates.isEmpty() ? "the town has no gates" : "no gate in range");

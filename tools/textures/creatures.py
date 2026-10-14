@@ -3,7 +3,7 @@
 Writes PNGs into mod/src/main/resources/assets/skycraft/textures/entity/:
   bandit/bandit_0..3.png, bandit/bandit_chief.png       64x64 player-layout skins
   draugr/draugr_0..1.png, draugr/draugr_deathlord.png   64x64 (+ draugr_eyes.png glow layer)
-  guard/guard_<hold>.png                               64x64, one tunic color per hold
+  guard/guard_<profile>.png                            64x64, one per guard profile (guard_profiles.json)
   (giants, skeevers, trolls and dragons are rig models now: bestiary.py and bestiary_fauna.py paint them)
 
 Every model box is painted face by face from the same UV layout as the Java models, so details (eyes, belly
@@ -408,33 +408,190 @@ def draugr_eyes():
 
 
 # ---- guards
+#
+# One skin per guard profile of mod/src/main/resources/skycraft/creatures/guard_profiles.json (the table that maps a
+# settlement's place / region / culture / province to a guard, see docs/world/GUARDS.md). The "art" object of a profile
+# is read here: tunic / trim / metal / mail / leather colours (hex), helm style, skin tone, eye colour, chest emblem.
+# Skyrim's nine holds keep the closed helm and the cross emblem: their skins are the ones the game always had.
 
-HOLD_COLORS = {
-    "whiterun": "c8a23a", "the_rift": "6b3a7a", "eastmarch": "2e4c8a", "the_pale": "5c7a99", "winterhold": "8fa6b8",
-    "haafingar": "9a2222", "hjaalmarch": "4e5f3c", "the_reach": "6e2a20", "falkreath": "2f5a2e",
+import json
+
+GUARD_PROFILES = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft", "creatures", "guard_profiles.json")
+
+GUARD_SKIN_TONES = {
+    "nord": SKIN["nord"], "imperial": hexc("d6a882"), "breton": hexc("ecd2bc"), "redguard": hexc("a46e4a"),
+    "altmer": hexc("ead489"), "bosmer": hexc("c8a070"), "dunmer": hexc("8e979c"), "khajiit": hexc("c9a46c"),
+    "khajiit_pale": hexc("ddd0b4"), "argonian": hexc("5f7f4c"), "orc": hexc("84a05e"),
+}
+# hair under an open helm (None: the colour of the fur / scales, a little darker)
+GUARD_HAIR = {
+    "nord": HAIR["brown"], "imperial": HAIR["brown"], "breton": HAIR["brown"], "redguard": HAIR["black"],
+    "altmer": HAIR["blond"], "bosmer": HAIR["brown"], "dunmer": HAIR["black"], "orc": HAIR["black"],
+    "khajiit": None, "khajiit_pale": None, "argonian": None,
 }
 
 
-def guard_skin(hold, rnd):
+def guard_emblem(style, p):
+    """Is this chest-front pixel part of the emblem (x 0..7, y 0..11)?"""
+    if style == "cross":
+        return (p.y in (2, 7) and p.x in (3, 4)) or (3 <= p.y <= 6 and 2 <= p.x <= 5 and not (p.y in (3, 6) and p.x in (2, 5)))
+    if style == "bar":
+        return p.y in (3, 4) and 1 <= p.x <= 6
+    if style == "chevron":
+        return (p.y == 3 and p.x in (3, 4)) or (p.y == 4 and p.x in (2, 5)) or (p.y == 5 and p.x in (1, 6))
+    if style == "disc":
+        return (p.y in (3, 5) and p.x in (3, 4)) or (p.y == 4 and 2 <= p.x <= 5)
+    return False
+
+
+def guard_helm(style, p, c):
+    """The head overlay pixel of a helm style (None: nothing there, the head shows). c: metal, mail, accent, trim, dark."""
+    metal, mail, accent, trim, dark = c["metal"], c["mail"], c["accent"], c["trim"], c["dark"]
+    face = p.face
+    if style in ("closed", "crest"):
+        # closed helmet: the face is hidden, only a dark T-shaped visor
+        if face == "front":
+            if p.y == 3 and 1 <= p.x <= 6:
+                return dark
+            if p.y in (4, 5) and p.x in (3, 4):
+                return dark
+            if p.y == 0 or p.x in (0, 7):
+                return shade(metal, 0.8)
+            return metal
+        if face == "top":
+            if style == "crest" and p.x in (3, 4):
+                return accent
+            return metal if (p.x not in (3, 4)) else shade(metal, 1.15)  # crest ridge
+        if face == "bottom":
+            return shade(metal, 0.7)
+        if style == "crest" and face == "back" and p.x in (3, 4) and p.y <= 4:
+            return accent
+        return metal if p.y != 7 else shade(metal, 0.75)
+    if style == "ordinator":
+        # a full helm with a slit and broad cheek plates, a ridge down the middle
+        if face == "front":
+            if p.y == 4 and 1 <= p.x <= 6:
+                return dark
+            if p.x in (3, 4) and p.y <= 7:
+                return shade(metal, 1.2)
+            if p.y >= 5 or p.x in (0, 7):
+                return shade(metal, 0.8)
+            return metal
+        if face == "bottom":
+            return shade(metal, 0.7)
+        if face == "top":
+            return shade(metal, 1.2) if p.x in (3, 4) else metal
+        return metal if p.y < 7 else shade(metal, 0.75)
+    if style == "open":
+        # a nasal helm: the face shows between the brow band and the nose bar
+        if face == "top":
+            return metal
+        if face == "bottom":
+            return None
+        if p.side:
+            return metal if p.y <= 3 else None
+        if face == "back":
+            return metal if p.y <= 5 else shade(metal, 0.8)
+        if p.y <= 1:
+            return metal
+        if p.x in (3, 4) and p.y <= 5:
+            return shade(metal, 0.9)
+        if p.y == 2 and p.x in (0, 7):
+            return shade(metal, 0.8)
+        return None
+    if style == "coif":
+        # a mail coif framing the face under a steel cap
+        if face == "bottom":
+            return None
+        if face == "top":
+            return metal
+        if p.side or face == "back":
+            return mail if p.y <= 6 else None
+        if p.y <= 1:
+            return metal
+        if p.x in (0, 1, 6, 7) and p.y <= 6:
+            return mail
+        if p.y == 7:
+            return mail
+        return None
+    if style == "hood":
+        if face == "bottom":
+            return None
+        if face == "top" or face == "back":
+            return accent
+        if p.side:
+            return accent if p.y <= 6 else None
+        if p.y <= 1 or (p.x in (0, 7) and p.y <= 6):
+            return accent
+        if p.y == 2 and p.x in (1, 6):
+            return trim
+        return None
+    if style == "turban":
+        # wound cloth in two colours, the face open below it
+        if face == "bottom":
+            return None
+        rows = 2 if face == "front" else 3 if p.side else 4 if face == "back" else 9
+        if p.y <= rows or face == "top":
+            return accent if (p.x + p.y) % 3 else trim
+        return None
+    if style == "horned":
+        # an orcish helm: heavy brow, bone horns at the temples, tusks below
+        if face == "bottom":
+            return None
+        if face == "top":
+            return metal
+        if p.side:
+            if p.y <= 1 and p.x in (3, 4):
+                return hexc("d8d0b0")
+            return metal if p.y <= 3 else None
+        if face == "back":
+            return metal if p.y <= 5 else None
+        if p.y <= 2:
+            return metal if p.y < 2 else shade(metal, 0.8)
+        if p.y == 6 and p.x in (2, 5):
+            return hexc("e8e0c0")  # tusks
+        return None
+    if style == "wrap":
+        # a headband across the brow, ears and mane left free
+        if face in ("top", "bottom"):
+            return None
+        if p.y in (1, 2):
+            if face == "front" and p.x in (3, 4) and p.y == 1:
+                return metal
+            return trim if p.y == 1 else accent
+        return None
+    return None
+
+
+def guard_skin(spec, rnd):
+    """One guard skin from a profile's art object (see guard_profiles.json)."""
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    tunic = hexc(HOLD_COLORS[hold])
-    trim = shade(tunic, 0.6)
-    emblem = mix(tunic, hexc("f0e6c8"), 0.6)
-    mail = hexc("8a8e92")
-    steel = hexc("9aa0a6")
-    leather = hexc("5a3e26")
-    skin = SKIN["nord"]
+    tunic = hexc(spec["tunic"])
+    trim = hexc(spec["trim"]) if "trim" in spec else shade(tunic, 0.6)
+    emblem = hexc(spec["emblem_color"]) if "emblem_color" in spec else (
+        trim if "trim" in spec else mix(tunic, hexc("f0e6c8"), 0.6))
+    mail = hexc(spec["mail"]) if "mail" in spec else hexc("8a8e92")
+    steel = hexc(spec["metal"]) if "metal" in spec else hexc("9aa0a6")
+    leather = hexc(spec["leather"]) if "leather" in spec else hexc("5a3e26")
+    tone = spec.get("skin", "nord")
+    skin = GUARD_SKIN_TONES[tone]
+    hair = GUARD_HAIR.get(tone) or shade(skin, 0.7)
+    beard = hair if tone == "nord" else None  # the nord guard's beard is hidden under the closed helm
+    eyes = hexc(spec["eyes"]) if "eyes" in spec else hexc("3a5a7a")
+    helm = spec.get("helm", "closed")
+    style = spec.get("emblem", "cross")
+    colors = {"metal": steel, "mail": mail, "accent": tunic, "trim": trim, "dark": hexc("16181a")}
 
     def base(p):
         if p.kind == "head":
-            return face_features(p, skin, HAIR["brown"], HAIR["brown"])
+            return face_features(p, skin, hair, beard, eye=eyes)
         if p.kind == "body":
             if 11.0 <= p.h <= 12.5:
                 return leather if not (p.face == "front" and p.x in (3, 4)) else hexc("b0a070")
             if p.face in ("front", "back"):
-                # hold emblem on the chest
-                if p.face == "front" and 2 <= p.y <= 7 and 2 <= p.x <= 5:
-                    if (p.y in (2, 7) and p.x in (3, 4)) or (3 <= p.y <= 6 and 2 <= p.x <= 5 and not (p.y in (3, 6) and p.x in (2, 5))):
+                # the settlement's emblem on the chest
+                if p.face == "front" and 2 <= p.y <= 7 and style != "none":
+                    if guard_emblem(style, p):
                         return emblem
                 if p.x in (0, 7):
                     return trim
@@ -454,20 +611,7 @@ def guard_skin(hold, rnd):
 
     def over(p):
         if p.kind == "head":
-            # closed helmet: the face is hidden, only a dark T-shaped visor
-            if p.face == "front":
-                if p.y == 3 and 1 <= p.x <= 6:
-                    return hexc("16181a")
-                if p.y in (4, 5) and p.x in (3, 4):
-                    return hexc("16181a")
-                if p.y == 0 or p.x in (0, 7):
-                    return shade(steel, 0.8)
-                return steel
-            if p.face == "top":
-                return steel if (p.x not in (3, 4)) else shade(steel, 1.15)  # crest ridge
-            if p.face == "bottom":
-                return shade(steel, 0.7)
-            return steel if p.y != 7 else shade(steel, 0.75)
+            return guard_helm(helm, p, colors)
         if p.kind == "body":
             if p.h > 22 and p.face != "bottom":
                 return hexc("6a5a46")  # leather collar
@@ -487,6 +631,11 @@ def guard_skin(hold, rnd):
     return img
 
 
+def guard_profiles():
+    with open(GUARD_PROFILES, encoding="utf-8") as fh:
+        return json.load(fh)["profiles"]
+
+
 # ---- giant
 
 def main():
@@ -501,8 +650,9 @@ def main():
     save(draugr_skin(0, random.Random(250), deathlord=True), "draugr", "draugr_deathlord.png")
     save(draugr_eyes(), "draugr", "draugr_eyes.png")
 
-    for i, hold in enumerate(HOLD_COLORS):
-        save(guard_skin(hold, random.Random(300 + i)), "guard", "guard_%s.png" % hold)
+    for i, (pid, prof) in enumerate(guard_profiles().items()):
+        # the nine hold skins keep their seeds (300..308); newer profiles follow
+        save(guard_skin(prof["art"], random.Random(300 + i)), "guard", "guard_%s.png" % pid)
 
 
 

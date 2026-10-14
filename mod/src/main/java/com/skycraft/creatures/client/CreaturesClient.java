@@ -1,7 +1,7 @@
 package com.skycraft.creatures.client;
 
 import com.skycraft.Skycraft;
-import com.skycraft.core.Holds;
+import com.skycraft.creatures.GuardProfiles;
 import com.skycraft.creatures.ModEntities;
 import com.skycraft.creatures.client.kit.RigRenderer;
 import com.skycraft.creatures.entity.BanditChiefEntity;
@@ -30,7 +30,7 @@ public final class CreaturesClient {
     private static final ResourceLocation[] DRAUGR = textures("draugr/draugr_", DraugrEntity.SKINS);
     private static final ResourceLocation DEATHLORD = tex("draugr/draugr_deathlord");
     private static final ResourceLocation DRAUGR_EYES = tex("draugr/draugr_eyes");
-    private static final ResourceLocation[] GUARD = new ResourceLocation[Holds.NAMES.length];
+    private static final ResourceLocation[] GUARD = new ResourceLocation[GuardProfiles.count()];
     private static final ResourceLocation[] FORSWORN = textures("society/forsworn_", ForswornEntity.SKINS);
     private static final ResourceLocation[] NECROMANCER = textures("society/necromancer_", NecromancerEntity.SKINS);
     private static final ResourceLocation[] VAMPIRE = textures("society/vampire_", VampireEntity.SKINS);
@@ -54,7 +54,7 @@ public final class CreaturesClient {
     }
 
     static {
-        for (int i = 0; i < GUARD.length; i++) GUARD[i] = tex("guard/guard_" + Holds.NAMES[i]);
+        for (int i = 0; i < GUARD.length; i++) GUARD[i] = tex("guard/guard_" + GuardProfiles.byIndex(i).id());
     }
 
     private CreaturesClient() {}
@@ -92,7 +92,7 @@ public final class CreaturesClient {
                 ctx -> new SkyHumanoidRenderer<DraugrDeathlordEntity>(ctx, HUMANOID, d -> DEATHLORD, 0.6f, 1.08f, true)
                         .withEyes(DRAUGR_EYES).withCostume("costume_deathlord"));
         event.registerEntityRenderer(ModEntities.GUARD.get(),
-                ctx -> new SkyHumanoidRenderer<GuardEntity>(ctx, HUMANOID, g -> GUARD[g.getHold()], 0.5f, 1.0f, true));
+                ctx -> new SkyHumanoidRenderer<GuardEntity>(ctx, HUMANOID, g -> GUARD[Math.floorMod(g.getProfileIndex(), GUARD.length)], 0.5f, 1.0f, true));
         BestiaryClient.rig(event, ModEntities.GIANT, "giant", 1.4f, 2.0f, null, null, r -> {});
         BestiaryClient.rig(event, ModEntities.SKEEVER, "skeever", 0.35f, 1.0f, null, null, r -> {});
         BestiaryClient.rig(event, ModEntities.TROLL, "troll", 0.9f, 1.15f, new String[]{"troll", "troll_frost"}, null, r -> {});

@@ -91,7 +91,15 @@ public final class GuardProtection {
         double r = CreaturesConfig.GUARD_ALERT_RADIUS.get();
         AABB box = player.getBoundingBox().inflate(r * 1.5, 20, r * 1.5);
         List<GuardEntity> guards = level.getEntitiesOfClass(GuardEntity.class, box, Mob::isAlive);
-        if (guards.isEmpty()) return;
+        if (guards.isEmpty()) {
+            // few settlements keep a watch now (society.GuardWatch): the people still run from what hunts them
+            List<Mob> hostile = new ArrayList<>();
+            for (Mob t : level.getEntitiesOfClass(Mob.class, box, GuardProtection::isThreat)) {
+                if (t.distanceToSqr(player) <= r * r) hostile.add(t);
+            }
+            if (CreaturesConfig.CIVILIANS_FLEE.get() && !hostile.isEmpty()) civiliansFlee(level, player, r, hostile, false);
+            return;
+        }
         long now = level.getGameTime();
 
         double cx = 0, cz = 0;
@@ -172,24 +180,27 @@ public final class GuardProtection {
         }
 
         // civilians run from hostiles nearby
-        if (CreaturesConfig.CIVILIANS_FLEE.get() && !near.isEmpty()) {
-            double fear = alarmed ? 24 : 14;
-            AABB civBox = player.getBoundingBox().inflate(r, 12, r);
-            for (Mob civ : level.getEntitiesOfClass(Mob.class, civBox, m -> m.isAlive() && m instanceof PathfinderMob
-                    && (m instanceof AbstractVillager || m instanceof NpcEntity) && m.getTarget() == null)) {
-                Mob threat = null;
-                double bd = fear * fear;
-                for (Mob t : near) {
-                    double d = civ.distanceToSqr(t);
-                    if (d < bd) {
-                        bd = d;
-                        threat = t;
-                    }
+        if (CreaturesConfig.CIVILIANS_FLEE.get() && !near.isEmpty()) civiliansFlee(level, player, r, near, alarmed);
+    }
+
+    /** Townsfolk within {@code r} of the player run from the hostiles in {@code near} (further when the town is alarmed). */
+    private static void civiliansFlee(ServerLevel level, ServerPlayer player, double r, List<Mob> near, boolean alarmed) {
+        double fear = alarmed ? 24 : 14;
+        AABB civBox = player.getBoundingBox().inflate(r, 12, r);
+        for (Mob civ : level.getEntitiesOfClass(Mob.class, civBox, m -> m.isAlive() && m instanceof PathfinderMob
+                && (m instanceof AbstractVillager || m instanceof NpcEntity) && m.getTarget() == null)) {
+            Mob threat = null;
+            double bd = fear * fear;
+            for (Mob t : near) {
+                double d = civ.distanceToSqr(t);
+                if (d < bd) {
+                    bd = d;
+                    threat = t;
                 }
-                if (threat == null) continue;
-                Vec3 to = DefaultRandomPos.getPosAway((PathfinderMob) civ, 16, 7, threat.position());
-                if (to != null) civ.getNavigation().moveTo(to.x, to.y, to.z, 1.3);
             }
+            if (threat == null) continue;
+            Vec3 to = DefaultRandomPos.getPosAway((PathfinderMob) civ, 16, 7, threat.position());
+            if (to != null) civ.getNavigation().moveTo(to.x, to.y, to.z, 1.3);
         }
     }
 }

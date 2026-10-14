@@ -1,12 +1,12 @@
 package com.skycraft.society;
 
+import com.skycraft.creatures.GuardProfiles;
 import com.skycraft.creatures.ModEntities;
 import com.skycraft.creatures.entity.GuardEntity;
 import com.skycraft.tamriel.Place;
 import com.skycraft.tamriel.settlement.Anchor;
 import com.skycraft.tamriel.settlement.AnchorType;
 import com.skycraft.tamriel.settlement.SettlementAnchors;
-import com.skycraft.tamriel.settlement.SettlementPopulation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,15 +22,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The permanent gate watch (owner, playtest 4): every settlement gate has two guards at all times, one on each side of
- * the passage, standing and facing outward, whatever the hour. They are not residents (no bed, no schedule, no
- * housing slot): a post is a (settlement, gate, side) key stored on the guard, kept filled while the gate's chunk is
- * entity-ticking and a player is within {@link #RANGE}; a guard that dies is replaced after {@link #REPLACE_DELAY}
- * ticks, and a second guard claiming the same post is discarded. Patrols and barracks guards are separate.
+ * The permanent gate watch of a major settlement (owner, playtest 4, narrowed in playtest 5: see {@link GuardWatch}):
+ * two guards at all times, one on each side of the main gate's passage, standing and facing outward, whatever the
+ * hour. They are not residents (no bed, no schedule, no housing slot): a post is a (settlement, gate, side) key stored
+ * on the guard, kept filled while the gate's chunk is entity-ticking and a player is within {@link #RANGE}; a guard
+ * that dies is replaced after {@link #REPLACE_DELAY} ticks, and a second guard claiming the same post is discarded.
+ * Minor settlements have one patrolling guard instead and everything smaller has none ({@link GuardWatch}).
  *
  * <p>The gates are the settlement's real ones: its recorded {@link AnchorType#GATE} anchors (gatehouses, road-end
  * signposts) and the places where the road plan joins it ({@link SettlementAnchors#gates(Place)}), main gate first;
- * a capital keeps up to eight, a town four, a village three.</p>
+ * the posts are at the main gate.</p>
  */
 public final class GatePosts {
     /** Persistent-data key on a gate guard: {@code "<settlement>|<gate id>|<side>"}. */
@@ -38,10 +39,9 @@ public final class GatePosts {
     /** A player this close (blocks) keeps the gates they can see staffed. */
     private static final double RANGE = 110;
     /** Ticks a vacated post stays empty before its replacement walks in (a killed guard is not back the same second). */
-    private static final long REPLACE_DELAY = 600;
+    static final long REPLACE_DELAY = 600;
     /** Blocks beside the passage centre a guard stands. */
     private static final int FLANK = 2;
-    private static final int[] MAX_GATES = {8, 4, 3};
 
     /** Game time of the last time each post was seen filled (so a death starts the replacement clock). */
     private static final Map<String, Long> LAST_FILLED = new HashMap<>();
@@ -53,23 +53,33 @@ public final class GatePosts {
     /** One gate: a stable id (its map coordinates) and the block a guard's flank is measured from. */
     private record Gate(String id, BlockPos pos) {}
 
-    /** The two guards each gate of every settlement near {@code player} must have. Called about every two seconds. */
+    /**
+     * The watch of every settlement near {@code player}, about every two seconds: two posted guards at a major
+     * settlement's main gate, one patrol in a minor one, none elsewhere (and the guards an older save left in a
+     * settlement that has no place for them are removed). Also answers a shout for the guard ({@link GuardWatch#shout}).
+     */
     public static void tick(ServerLevel level, ServerPlayer player) {
         if (level.dimension() != Level.OVERWORLD || !com.skycraft.creatures.CreaturesConfig.GUARD_SPAWNING.get()) return;
         SettlementAnchors data = SettlementAnchors.get(level);
         double r2 = RANGE * RANGE;
+        GuardWatch.shout(level, player);
+        GuardWatch.cullRoadPatrols(level, player);
         for (SettlementAnchors.Entry e : data.entries()) {
             if (e.homestead() || e.anchors().isEmpty()) continue;
             if (!e.contains(player.getBlockX(), player.getBlockZ(), (int) RANGE)) continue;
             // the dragon has been: Helgen's gates are a ruin, its soldiers are the intro's to place
             if ("helgen".equals(e.key) && com.skycraft.quest.QuestConfig.RUINED_HELGEN.get()) continue;
-            int max = MAX_GATES[Math.max(0, Math.min(2, SettlementPopulation.tier(e)))];
+            GuardWatch.Watch watch = GuardWatch.of(e);
+            GuardWatch.keep(level, e, watch);
+            if (watch != GuardWatch.Watch.MAJOR) continue;
             List<Gate> gates = gatesOf(level, e);
-            for (int i = 0; i < gates.size() && i < max; i++) {
-                BlockPos g = gates.get(i).pos();
+            for (int[] post : GuardWatch.posts(watch)) {
+                if (post[0] >= gates.size()) continue;
+                Gate gate = gates.get(post[0]);
+                BlockPos g = gate.pos();
                 if (player.distanceToSqr(g.getX() + 0.5, g.getY(), g.getZ() + 0.5) > r2) continue;
                 if (!level.isLoaded(g) || !level.isPositionEntityTicking(g)) continue;
-                keep(level, e, gates.get(i));
+                keep(level, e, gate, post[1]);
             }
         }
     }
@@ -127,16 +137,19 @@ public final class GatePosts {
         return new int[]{0, Integer.signum(dz) == 0 ? 1 : Integer.signum(dz)};
     }
 
-    private static void keep(ServerLevel level, SettlementAnchors.Entry e, Gate gate) {
+    /** Keeps one post ({@code side} 0 or 1 of the gate) filled. */
+    private static void keep(ServerLevel level, SettlementAnchors.Entry e, Gate gate, int side) {
         BlockPos at = gate.pos();
         int[] out = outward(e, at);
         // the passage runs along the outward axis, so the flanks are to either side of it
         int px = -out[1], pz = out[0];
-        AABB box = new AABB(at).inflate(FLANK + 5, 6, FLANK + 5);
+        // the whole settlement: a guard answering a shout is away from its post, and must not be replaced meanwhile
+        int reach = e.radius + 24;
+        AABB box = new AABB(e.x - reach, level.getMinBuildHeight(), e.z - reach, e.x + reach, level.getMaxBuildHeight(), e.z + reach);
         List<GuardEntity> near = level.getEntitiesOfClass(GuardEntity.class, box, g -> g.isAlive());
         long now = level.getGameTime();
         float yaw = (float) (Math.atan2(-out[0], out[1]) * (180.0 / Math.PI));
-        for (int side = 0; side < 2; side++) {
+        {
             String key = e.key + "|" + gate.id() + "|" + side;
             GuardEntity holder = null;
             for (GuardEntity g : near) {
@@ -146,20 +159,21 @@ public final class GatePosts {
             }
             if (holder != null) {
                 LAST_FILLED.put(key, now);
-                continue;
+                return;
             }
             Long last = LAST_FILLED.get(key);
-            if (last != null && now - last < REPLACE_DELAY) continue;
+            if (last != null && now - last < REPLACE_DELAY) return;
             int sign = side == 0 ? 1 : -1;
             BlockPos want = new BlockPos(at.getX() + px * FLANK * sign, at.getY(), at.getZ() + pz * FLANK * sign);
             BlockPos spot = standable(level, want, at);
-            if (spot == null) continue;
+            if (spot == null) return;
             GuardEntity guard = ModEntities.GUARD.get().create(level);
-            if (guard == null) continue;
+            if (guard == null) return;
             guard.moveTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, yaw, 0f);
             guard.setYHeadRot(yaw);
             guard.yBodyRot = yaw;
             guard.getPersistentData().putString(KEY, key);
+            guard.setProfile(GuardProfiles.of(e).profile());
             guard.finalizeSpawn(level, level.getCurrentDifficultyAt(spot), MobSpawnType.EVENT, null, null);
             guard.setPost(spot, yaw);
             guard.setPersistenceRequired();
@@ -168,7 +182,7 @@ public final class GatePosts {
     }
 
     /** The cell nearest {@code want} (within two blocks, never the passage itself) a person can stand in. */
-    private static BlockPos standable(ServerLevel level, BlockPos want, BlockPos gate) {
+    static BlockPos standable(ServerLevel level, BlockPos want, BlockPos gate) {
         for (int r = 0; r <= 2; r++) {
             for (int dx = -r; dx <= r; dx++) {
                 for (int dz = -r; dz <= r; dz++) {
@@ -191,24 +205,26 @@ public final class GatePosts {
     /** Forgets cached timers (server stop; the self-test uses it to let a killed guard be replaced at once). */
     public static void clear() {
         LAST_FILLED.clear();
+        GuardWatch.clear();
     }
 
-    /** Test hook: the posts' keys of a settlement as the census and the self-test read them. */
+    /** Test hook: the posts' keys of a settlement as the census and the self-test read them (empty unless it is major). */
     static List<String> keysOf(ServerLevel level, SettlementAnchors.Entry e) {
         List<String> keys = new ArrayList<>();
-        for (Gate g : gatesOf(level, e)) {
-            keys.add(e.key + "|" + g.id() + "|0");
-            keys.add(e.key + "|" + g.id() + "|1");
+        List<Gate> gates = gatesOf(level, e);
+        for (int[] post : GuardWatch.posts(GuardWatch.of(e))) {
+            if (post[0] < gates.size()) keys.add(e.key + "|" + gates.get(post[0]).id() + "|" + post[1]);
         }
         return keys;
     }
 
-    /** Test hook: the gates of a settlement, in the order they are staffed. */
-    static List<BlockPos> gatePositions(ServerLevel level, SettlementAnchors.Entry e) {
+    /** Test hook: the position of the gate of each post, in the order of {@link #keysOf}. */
+    static List<BlockPos> postGates(ServerLevel level, SettlementAnchors.Entry e) {
         List<BlockPos> out = new ArrayList<>();
-        int max = MAX_GATES[Math.max(0, Math.min(2, SettlementPopulation.tier(e)))];
         List<Gate> gates = gatesOf(level, e);
-        for (int i = 0; i < gates.size() && i < max; i++) out.add(gates.get(i).pos());
+        for (int[] post : GuardWatch.posts(GuardWatch.of(e))) {
+            if (post[0] < gates.size()) out.add(gates.get(post[0]).pos());
+        }
         return out;
     }
 }

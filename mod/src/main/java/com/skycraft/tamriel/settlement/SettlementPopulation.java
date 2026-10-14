@@ -41,7 +41,7 @@ import java.util.Optional;
  * Puts people where a settlement's anchors say they belong, through the existing society/economy/creature APIs:
  * the Jarl on the throne with housecarl, steward and court wizard; innkeepers behind their bars (the survival
  * module's innkeeper contract) and bards by the fire; smiths at the forge, merchants and apothecaries behind their
- * counters (economy merchants); priests at the altar; hold guards at barracks, gates and palace; farmers, millers,
+ * counters (economy merchants); priests at the altar; the watch is not placed here ({@link com.skycraft.society.GuardWatch}); farmers, millers,
  * miners and townsfolk at their fields, mills, mines and beds. Each anchor is filled once (recorded in
  * {@link SettlementAnchors}), only while its chunk is entity-ticking.
  *
@@ -356,6 +356,8 @@ public final class SettlementPopulation {
         GuardEntity g = ModEntities.GUARD.get().create(level);
         if (g == null) return false;
         g.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
+        // only a scripted garrison (Helgen's soldiers) is placed from guard anchors now: the watch is society.GuardWatch's
+        g.getPersistentData().putBoolean(com.skycraft.society.GuardWatch.SCRIPTED, true);
         g.setHome(at);
         g.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.EVENT, null, null);
         g.setPersistenceRequired();
