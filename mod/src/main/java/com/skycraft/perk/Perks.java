@@ -348,9 +348,11 @@ public final class Perks {
         p(s, "sprinter", -0.5f, 0.35f, lv(25), "runner");
         p(s, "climber", 0.5f, 0.35f, lv(35), "runner");
         p(s, "dodge_roll", -0.35f, 0.7f, lv(50), "sprinter");
-        p(s, "strong_back", -0.75f, 0.2f, lv(15, 30, 45), "runner");
-        p(s, "pack_mule", 0.75f, 0.2f, lv(50, 75), "strong_back");
         p(s, "wind_walker", 0f, 1f, lv(100), "dodge_roll", "climber");
+        // the carry line (inventory.CarryWeight): +25 per rank, +50 per rank, +100
+        p(s, "strong_back", -1.0f, 0.15f, lv(20, 45, 70), "runner");
+        p(s, "pack_mule", -1.0f, 0.5f, lv(55, 85), "strong_back");
+        p(s, "beast_of_burden", -0.8f, 0.85f, lv(100), "pack_mule");
     }
 
     static {

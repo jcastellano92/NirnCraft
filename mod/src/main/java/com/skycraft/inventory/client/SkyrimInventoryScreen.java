@@ -8,6 +8,7 @@ import com.skycraft.combat.WeaponClass;
 import com.skycraft.core.Currency;
 import com.skycraft.core.PlayerData;
 import com.skycraft.core.SkyData;
+import com.skycraft.inventory.CarryWeight;
 import com.skycraft.inventory.InvCategory;
 import com.skycraft.inventory.InventoryActions;
 import com.skycraft.inventory.InventoryPackets;
@@ -93,6 +94,8 @@ public class SkyrimInventoryScreen extends Screen {
     private int detScroll, detMaxScroll;
     private InvEntry detScrollFor;
     private Component hoverText;
+    /** Multi-line tooltip (the carry capacity sources) or null. */
+    private List<Component> hoverLines;
     private final List<ActionButton> actions = new ArrayList<>();
     private long lastClick;
     private int lastClickRow = -1;
@@ -281,6 +284,7 @@ public class SkyrimInventoryScreen extends Screen {
 
         g.fillGradient(0, 0, width, height, 0xA8050505, 0xD8050505);
         hoverText = null;
+        hoverLines = null;
         drawCategories(g, mouseX, mouseY);
         drawList(g, mouseX, mouseY);
         drawDetails(g, mouseX, mouseY);
@@ -289,9 +293,38 @@ public class SkyrimInventoryScreen extends Screen {
 
         if (hoverPreview && selectedEntry != null) {
             g.renderTooltip(font, selectedEntry.icon, mouseX, mouseY);
+        } else if (hoverLines != null) {
+            g.renderComponentTooltip(font, hoverLines, mouseX, mouseY);
         } else if (hoverText != null) {
             g.renderTooltip(font, hoverText, mouseX, mouseY);
         }
+    }
+
+    /** The capacity tooltip: where the carry capacity comes from, and how fast you move at this load. */
+    private static List<Component> capacityLines(LocalPlayer player, float cur, float cap) {
+        List<Component> lines = new ArrayList<>();
+        CarryWeight.CapacityParts p = CarryWeight.parts(player);
+        lines.add(Component.translatable("inventory.skycraft.capacity.header", ItemWeights.format(cur), ItemWeights.format(cap)));
+        lines.add(Component.translatable("inventory.skycraft.capacity.base", ItemWeights.format(p.base())));
+        if (p.stamina() != 0f) lines.add(Component.translatable("inventory.skycraft.capacity.stamina", signed(p.stamina())));
+        if (p.race() != 0f) {
+            com.skycraft.core.Race race = SkyData.get(player).getRace();
+            lines.add(Component.translatable("inventory.skycraft.capacity.race", race == null ? "" : race.displayName(), signed(p.race())));
+        }
+        if (p.perks() != 0f) lines.add(Component.translatable("inventory.skycraft.capacity.perks", signed(p.perks())));
+        if (p.bonus() != 0f) lines.add(Component.translatable("inventory.skycraft.capacity.bonus", signed(p.bonus())));
+        // the mount's share is known to the server only: whatever the server's capacity has beyond the parts
+        float other = cap - p.total();
+        if (Math.abs(other) >= 0.5f) lines.add(Component.translatable("inventory.skycraft.capacity.mount", signed(other)));
+        if (cur > cap) {
+            lines.add(Component.translatable("inventory.skycraft.capacity.slow",
+                    Math.round((1f - CarryWeight.speedFactor(cur, cap)) * 100f)));
+        }
+        return lines;
+    }
+
+    private static String signed(float v) {
+        return (v >= 0 ? "+" : "") + ItemWeights.format(v);
     }
 
     private void renderInspectOverlay(GuiGraphics g, int mx, int my) {
@@ -694,6 +727,7 @@ public class SkyrimInventoryScreen extends Screen {
             g.drawString(font, values[i], sx, ry, colors[i], false);
             if (i == 1 && SkyUi.inside(mx, my, sx - font.width(labels[i]) - 4, ry - 2, sx + font.width(values[i]), ry + 10)) {
                 hoverText = Component.translatable(over ? "inventory.skycraft.overencumbered" : "inventory.skycraft.carry_tooltip");
+                if (carryOn) hoverLines = capacityLines(player, cur, cap);
             }
             sx += font.width(values[i]);
             if (i < 2) {

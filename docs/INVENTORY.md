@@ -15,9 +15,17 @@ belt" and adds an overflow **pack** behind them. Code: `com.skycraft.inventory.P
   stacks, then free slots (never the held slot, never above the max stack size), then the pack. The old
   `inv.add(..)` / `placeItemBackInInventory` fall-backs that dropped things on the floor now call `Pack.giveOrDrop`.
 * **Weight.** `CarryWeight.current` = slots + armor + offhand + `Pack.weight`. Pick-ups are never refused for weight.
-  Encumbrance is graded: `CarryWeight.speedFactor` is 1.0 at or under capacity, then `max(0.30, 1 - 0.70 r)` with
-  `r = (current - capacity) / capacity` (the floor is +100%); it is the movement-speed modifier. Beyond +10% you also
-  cannot run (`RUN_LIMIT`). The HUD shows "Carry 412/300 (slow 31%)".
+  Encumbrance is graded and has no floor: `CarryWeight.speedFactor` is 1.0 at or under capacity, then `max(0, 1 - r)`
+  with `r = (current - capacity) / capacity`; it is the movement-speed modifier (never below 2% of normal in the
+  attribute itself, `speedModifier`, so swimming/riding maths stay sane). At double capacity you cannot move and must
+  drop things; the inventory screen and its drop actions do not depend on movement, so they stay usable. Beyond +10%
+  you also cannot run (`RUN_LIMIT`), and below 50% speed jumps shrink to nothing (`CarryWeight.onJump`). The HUD shows
+  "Carry 412/300 (slow 37%)".
+* **Capacity** (`CarryWeight.parts`, listed in the inventory screen's weight tooltip) = base 300 + 5 per Stamina
+  level-up + perks (Athletics: Strong Back +25/rank x3, Pack Mule +50/rank x2, Beast of Burden +100) + race
+  (`CarryWeight.raceBonus`: Orsimer +60, Nord/Ka Po' Tun +50, Redguard/Imga/Atmoran +40, Tsaesci +30, Imperial/
+  Argonian +10, Dunmer +5, Altmer -20, Bosmer/Lilmothiit/Tang Mo -15, Khajiit/Ohmes-raht -10, the rest 0) + the
+  `bonus.carry` of enchantments and potions + the mount you steer.
 * **Grouping.** A take or store request names one slot but moves every stack of that exact item (item + NBT) in the
   container (and, storing, the pack part), in one operation with one message; world pick-ups sweep the same split pile.
 * **Caps (engineering, not gameplay).** 2000 distinct item+NBT entries and 1,000,000 items per entry

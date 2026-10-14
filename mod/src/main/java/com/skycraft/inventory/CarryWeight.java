@@ -53,36 +53,55 @@ public final class CarryWeight {
 
     // ------------------------------------------------------------------ public API
 
-    /** Carry bonus of a race (weight units): the strong folk of Skyrim and Orsinium carry more, the slight Elves less. */
-    public static float raceBonus(Player player) {
-        com.skycraft.core.Race race = SkyData.get(player).getRace();
-        if (race == null) return 0f;
-        return switch (race) {
-            case ORSIMER -> 50f;
-            case NORD -> 40f;
-            case REDGUARD -> 30f;
-            case ARGONIAN, IMPERIAL -> 10f;
-            case ALTMER, BOSMER -> -30f;
-            case KHAJIIT -> -20f;
-            default -> 0f;
-        };
+    /** Where a character's carry capacity comes from (the inventory screen lists these). */
+    public record CapacityParts(float base, float stamina, float race, float perks, float bonus, float mount) {
+        public float total() {
+            return base + stamina + race + perks + bonus + mount;
+        }
     }
 
-    /** Capacity from the Athletics perks Strong Back (+25 per rank) and Pack Mule (+50 per rank). */
-    public static float perkBonus(Player player) {
-        return 25f * com.skycraft.perk.Perks.rank(player, "athletics.strong_back")
-                + 50f * com.skycraft.perk.Perks.rank(player, "athletics.pack_mule");
-    }
-
-    /** How much the player can carry before becoming over-encumbered. */
-    public static float capacity(Player player) {
+    /**
+     * Base + 5 per Stamina level-up + the people's build ({@link #raceBonus}) + carry perks (Athletics: Strong Back,
+     * Pack Mule, Beast of Burden) + enchantment/potion bonuses + the mount you steer (server side only).
+     */
+    public static CapacityParts parts(Player player) {
         PlayerData data = SkyData.get(player);
         double base = safe(InventoryConfig.BASE_CAPACITY, 300.0);
         double perStamina = safe(InventoryConfig.CAPACITY_PER_STAMINA, 5.0);
+        float perks = PERK_STRONG_BACK * data.getPerkRank("athletics.strong_back") + PERK_PACK_MULE * data.getPerkRank("athletics.pack_mule")
+                + PERK_BEAST * data.getPerkRank("athletics.beast_of_burden");
         // the mount you steer carries part of the load (kind and saddle: com.skycraft.mounts.MountGear)
-        return (float) (base + perStamina * data.getStaminaPoints() + data.module("bonus").getFloat("carry")
-                + raceBonus(player) + perkBonus(player)
-                + com.skycraft.mounts.MountGear.carryBonus(player));
+        return new CapacityParts((float) base, (float) (perStamina * data.getStaminaPoints()), raceBonus(data.getRace()), perks,
+                data.module("bonus").getFloat("carry"), com.skycraft.mounts.MountGear.carryBonus(player));
+    }
+
+    /** Carry weight per rank of the Athletics carry perks. */
+    public static final float PERK_STRONG_BACK = 25f, PERK_PACK_MULE = 50f, PERK_BEAST = 100f;
+
+    /** How much the player can carry before becoming over-encumbered. */
+    public static float capacity(Player player) {
+        return parts(player).total();
+    }
+
+    /**
+     * Carry-weight bonus of a people (Skyrim: the strong carry more). Orsimer, Nord and Redguard are higher (and the
+     * big folk of Akavir and Atmora); Altmer, Bosmer, Khajiit and the lithe ones lower; Imperial, Breton, Dunmer and
+     * Argonian are about average.
+     */
+    public static float raceBonus(com.skycraft.core.Race race) {
+        if (race == null) return 0f;
+        return switch (race) {
+            case ORSIMER -> 60f;
+            case NORD, KA_PO_TUN -> 50f;
+            case REDGUARD, IMGA, ATMORAN -> 40f;
+            case TSAESCI -> 30f;
+            case IMPERIAL, ARGONIAN -> 10f;
+            case DUNMER -> 5f;
+            case ALTMER -> -20f;
+            case BOSMER, LILMOTHIIT, TANG_MO -> -15f;
+            case KHAJIIT, OHMES_RAHT -> -10f;
+            default -> 0f;
+        };
     }
 
     /** Total weight of the main inventory, worn armor, offhand and the pack. */
@@ -129,6 +148,28 @@ public final class CarryWeight {
         if (capacity <= 0f || current <= capacity) return 1f;
         float r = (current - capacity) / capacity;
         return Math.max(MIN_SPEED, 1f - r);
+    }
+
+    /**
+     * The attribute modifier (MULTIPLY_TOTAL amount) of a speed factor: never -1, so the movement attribute is never
+     * exactly zero (swimming and riding maths stay sane) yet far too small to walk; the inventory stays usable to drop.
+     */
+    static double speedModifier(float factor) {
+        return Math.round((Math.max(factor, ATTRIBUTE_EPSILON) - 1.0) * 100.0) / 100.0;
+    }
+
+    private static final float ATTRIBUTE_EPSILON = 0.02f;
+    /** Below this speed factor jumping shrinks in proportion (and is gone at 0): a loaded-down body cannot leap. */
+    private static final float JUMP_LIMIT = 0.5f;
+
+    /** Lowers the jump of a player too loaded down to leap (both sides: the client moves itself). */
+    @SubscribeEvent
+    public static void onJump(net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        float factor = speedFactor(player);
+        if (factor >= JUMP_LIMIT) return;
+        var dm = player.getDeltaMovement();
+        player.setDeltaMovement(dm.x, dm.y * (factor / JUMP_LIMIT), dm.z);
     }
 
     /** {@link #speedFactor(float, float)} of a player (1.0 for creative/spectator or with carry weight off). */
@@ -216,7 +257,7 @@ public final class CarryWeight {
     private static void applySpeed(ServerPlayer player, float factor) {
         AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speed == null) return;
-        double penalty = Math.round((factor - 1.0) * 100.0) / 100.0;
+        double penalty = speedModifier(factor);
         AttributeModifier existing = speed.getModifier(SPEED_MOD);
         if (penalty < 0) {
             if (existing != null && existing.getAmount() == penalty) return;

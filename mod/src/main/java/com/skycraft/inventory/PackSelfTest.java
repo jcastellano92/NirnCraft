@@ -334,11 +334,34 @@ public final class PackSelfTest {
         Pack.clear(a);
 
         c.check("encumbrance: no slowdown at or under capacity", CarryWeight.speedFactor(300f, 300f) == 1f && CarryWeight.speedFactor(10f, 300f) == 1f, "1.0");
-        c.check("encumbrance: graded, +50% over is 65% speed", Math.abs(CarryWeight.speedFactor(450f, 300f) - 0.65f) < 0.001f,
+        c.check("encumbrance: graded, +50% over is half speed", Math.abs(CarryWeight.speedFactor(450f, 300f) - 0.5f) < 0.001f,
                 String.valueOf(CarryWeight.speedFactor(450f, 300f)));
-        c.check("encumbrance: floor of 30% at +100% and beyond", CarryWeight.speedFactor(600f, 300f) == 0.30f
-                && CarryWeight.speedFactor(5000f, 300f) == 0.30f, String.valueOf(CarryWeight.speedFactor(5000f, 300f)));
-        c.check("encumbrance: a little over is only a little slower", CarryWeight.speedFactor(315f, 300f) > 0.9f, String.valueOf(CarryWeight.speedFactor(315f, 300f)));
+        c.check("encumbrance: no floor, at double capacity you cannot move", CarryWeight.speedFactor(600f, 300f) == 0f
+                && CarryWeight.speedFactor(5000f, 300f) == 0f, String.valueOf(CarryWeight.speedFactor(600f, 300f)));
+        c.check("encumbrance: a little over is only a little slower", Math.abs(CarryWeight.speedFactor(315f, 300f) - 0.95f) < 0.001f,
+                String.valueOf(CarryWeight.speedFactor(315f, 300f)));
+        c.check("encumbrance: the movement attribute never reaches zero (the inventory stays usable to drop things)",
+                CarryWeight.speedModifier(0f) > -1.0 && CarryWeight.speedModifier(0f) < -0.9 && CarryWeight.speedModifier(1f) == 0.0,
+                "modifier at factor 0: " + CarryWeight.speedModifier(0f));
+        c.check("capacity: strong peoples carry more than average, slight ones less",
+                CarryWeight.raceBonus(com.skycraft.core.Race.ORSIMER) > CarryWeight.raceBonus(com.skycraft.core.Race.NORD)
+                        && CarryWeight.raceBonus(com.skycraft.core.Race.NORD) > CarryWeight.raceBonus(com.skycraft.core.Race.IMPERIAL)
+                        && CarryWeight.raceBonus(com.skycraft.core.Race.IMPERIAL) > CarryWeight.raceBonus(com.skycraft.core.Race.BOSMER),
+                "orsimer " + CarryWeight.raceBonus(com.skycraft.core.Race.ORSIMER) + ", bosmer " + CarryWeight.raceBonus(com.skycraft.core.Race.BOSMER));
+        // capacity is the sum of its sources, with a race and carry perks really read from the player's data
+        com.skycraft.core.PlayerData data = com.skycraft.core.SkyData.get(a);
+        com.skycraft.core.Race saved = data.getRace();
+        float plain = CarryWeight.capacity(a);
+        data.setRace(com.skycraft.core.Race.ORSIMER);
+        CarryWeight.CapacityParts parts = CarryWeight.parts(a);
+        c.check("capacity: the race bonus is part of the capacity", Math.abs(parts.race() - 60f) < 0.01f
+                && Math.abs(CarryWeight.capacity(a) - parts.total()) < 0.01f, "race " + parts.race() + ", capacity " + CarryWeight.capacity(a));
+        data.setRace(saved);
+        c.check("capacity: the carry perks exist in the perk tree (reachable in the Athletics screen)",
+                com.skycraft.perk.Perks.get("athletics.strong_back") != null && com.skycraft.perk.Perks.get("athletics.pack_mule") != null
+                        && com.skycraft.perk.Perks.get("athletics.beast_of_burden") != null
+                        && com.skycraft.perk.Perks.of(com.skycraft.core.Skill.ATHLETICS).contains(com.skycraft.perk.Perks.get("athletics.pack_mule")),
+                "plain capacity " + plain);
     }
 
     /** ChestMenu slot index (27 container slots, then inventory 9-35, then the hotbar) of the first stack of {@code item}. */
