@@ -144,6 +144,13 @@ public final class Protect {
                 || state.is(BlockTags.CROPS) || state.is(BlockTags.FLOWERS);
     }
 
+    /** Natural amethyst: clusters, buds, budding amethyst and the plain block. */
+    public static boolean isGeode(BlockState state) {
+        Block b = state.getBlock();
+        return b instanceof net.minecraft.world.level.block.AmethystClusterBlock || b == Blocks.AMETHYST_BLOCK
+                || b == Blocks.BUDDING_AMETHYST;
+    }
+
     /** Wood and foliage of a tree (also the fungus trees of the Nether). */
     public static boolean isTree(BlockState state) {
         Block b = state.getBlock();
