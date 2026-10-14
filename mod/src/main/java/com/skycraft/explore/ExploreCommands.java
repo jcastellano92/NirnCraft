@@ -187,7 +187,7 @@ public final class ExploreCommands {
             c.getSource().sendFailure(Component.literal("No treasure cache nearby"));
             return 0;
         }
-        player.getInventory().add(TreasureMapItem.create(s, RandomSource.create()));
+        com.skycraft.inventory.Pack.giveOrDrop(player, TreasureMapItem.create(s, RandomSource.create()));
         return 1;
     }
 
@@ -203,7 +203,7 @@ public final class ExploreCommands {
         ServerPlayer player = c.getSource().getPlayerOrException();
         ItemStack stack = Uniques.stack(StringArgumentType.getString(c, "id"));
         if (stack.isEmpty()) return 0;
-        player.getInventory().add(stack);
+        com.skycraft.inventory.Pack.giveOrDrop(player, stack);
         return 1;
     }
 }

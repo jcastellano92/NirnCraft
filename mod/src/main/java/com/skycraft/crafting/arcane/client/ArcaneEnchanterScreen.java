@@ -104,10 +104,12 @@ public class ArcaneEnchanterScreen extends Screen {
         Player p = player();
         if (p == null) return;
         Inventory inv = p.getInventory();
+        int packSize = com.skycraft.inventory.Pack.size(p); // overflow-pack entries follow the slots as virtual slot ids
         if (tab == 0) {
             List<ArcaneList.Entry<Integer>> list = new ArrayList<>();
-            for (int i = 0; i < inv.getContainerSize(); i++) {
-                ItemStack s = inv.getItem(i);
+            for (int n = 0; n < inv.getContainerSize() + packSize; n++) {
+                int i = n < inv.getContainerSize() ? n : com.skycraft.inventory.Pack.VIRTUAL_BASE + (n - inv.getContainerSize());
+                ItemStack s = com.skycraft.inventory.Pack.stackAt(p, i);
                 List<Enchantment> unknown = Enchanting.unknownEnchantments(p, s);
                 if (unknown.isEmpty()) continue;
                 Component sub = Component.translatable("screen.skycraft.enchanter.unknown_count", unknown.size());
@@ -116,8 +118,9 @@ public class ArcaneEnchanterScreen extends Screen {
             disList.setEntries(list);
         } else {
             List<ArcaneList.Entry<Integer>> items = new ArrayList<>();
-            for (int i = 0; i < inv.getContainerSize(); i++) {
-                ItemStack s = inv.getItem(i);
+            for (int n = 0; n < inv.getContainerSize() + packSize; n++) {
+                int i = n < inv.getContainerSize() ? n : com.skycraft.inventory.Pack.VIRTUAL_BASE + (n - inv.getContainerSize());
+                ItemStack s = com.skycraft.inventory.Pack.stackAt(p, i);
                 if (s.getItem() instanceof SoulGemItem || Enchanting.applicable(p, s).isEmpty()) continue;
                 Component sub = s.isEnchanted() ? Component.translatable("screen.skycraft.enchanter.extra_effect") : Component.empty();
                 items.add(new ArcaneList.Entry<>(String.valueOf(i), s, s.getHoverName(), sub, i));
@@ -125,8 +128,9 @@ public class ArcaneEnchanterScreen extends Screen {
             itemList.setEntries(items);
 
             List<ArcaneList.Entry<Integer>> gems = new ArrayList<>();
-            for (int i = 0; i < inv.getContainerSize(); i++) {
-                ItemStack s = inv.getItem(i);
+            for (int n = 0; n < inv.getContainerSize() + packSize; n++) {
+                int i = n < inv.getContainerSize() ? n : com.skycraft.inventory.Pack.VIRTUAL_BASE + (n - inv.getContainerSize());
+                ItemStack s = com.skycraft.inventory.Pack.stackAt(p, i);
                 if (!(s.getItem() instanceof SoulGemItem) || SoulGemItem.getSoul(s) <= 0) continue;
                 gems.add(new ArcaneList.Entry<>(String.valueOf(i), s, s.getItem().getDescription(), SoulGemItem.soulName(SoulGemItem.getSoul(s)), i));
             }
@@ -156,7 +160,7 @@ public class ArcaneEnchanterScreen extends Screen {
     private int selectedSoul() {
         Integer gemSlot = gemList.selectedValue();
         if (gemSlot == null) return 0;
-        return SoulGemItem.getSoul(player().getInventory().getItem(gemSlot));
+        return SoulGemItem.getSoul(com.skycraft.inventory.Pack.stackAt(player(), gemSlot));
     }
 
     private void updateAction() {
@@ -262,7 +266,7 @@ public class ArcaneEnchanterScreen extends Screen {
             drawWrapped(g, Component.translatable("screen.skycraft.enchanter.disenchant_help"), x, y + 4, w, ArcaneUi.MUTED);
             return;
         }
-        ItemStack s = p.getInventory().getItem(slot);
+        ItemStack s = com.skycraft.inventory.Pack.stackAt(p, slot);
         g.renderItem(s, x, y);
         g.drawString(font, s.getHoverName(), x + 20, y + 4, ArcaneUi.TEXT, false);
         int ly = y + 24;
@@ -294,7 +298,7 @@ public class ArcaneEnchanterScreen extends Screen {
         int soul = selectedSoul();
         Component result;
         if (item != null && ench != null && soul > 0) {
-            ItemStack s = p.getInventory().getItem(item);
+            ItemStack s = com.skycraft.inventory.Pack.stackAt(p, item);
             result = Component.translatable("screen.skycraft.enchanter.result", s.getHoverName(),
                     ench.getFullname(Enchanting.resultLevel(p, ench, soul)));
         } else {

@@ -182,6 +182,7 @@ public final class DeathHandler {
     public static void onPlayerDrops(LivingDropsEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         dropGold(player, event);
+        dropPack(player, event);
         CompoundTag keptTag = SkyData.get(player).module("death_kept");
         if (!keptTag.contains("items", Tag.TAG_LIST)) return;
 
@@ -236,6 +237,25 @@ public final class DeathHandler {
         }
         keptTag.put("items", confirmed);
         keptTag.putBoolean("confirmed", true);
+    }
+
+    /**
+     * The overflow pack (inventory.Pack) falls to the corpse like the backpack does: the same keep rule as the slots
+     * (quest items always, and in VALUABLES mode everything that is not a valuable); the rest leaves the pack as drops.
+     * What stays is part of the player data and comes back with the clone.
+     */
+    private static void dropPack(ServerPlayer player, LivingDropsEvent event) {
+        if (player.isSpectator() || player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) return;
+        SkyConfig.DeathDrops mode = SkyConfig.DEATH_DROPS.get();
+        for (ItemStack entry : com.skycraft.inventory.Pack.entries(player)) {
+            if (entry.isEmpty()) continue;
+            if (QuestItems.isQuestItem(entry) || (mode == SkyConfig.DeathDrops.VALUABLES && !isValuable(entry))) continue;
+            ItemStack all = com.skycraft.inventory.Pack.takeAll(player, entry);
+            while (!all.isEmpty()) {
+                ItemStack part = all.split(all.getMaxStackSize());
+                event.getDrops().add(new ItemEntity(player.level(), player.getX(), player.getY() + 0.5, player.getZ(), part));
+            }
+        }
     }
 
     /** A share of the gold wallet falls to the corpse as coins (configurable, 0 disables). */

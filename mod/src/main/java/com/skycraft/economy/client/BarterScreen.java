@@ -29,14 +29,21 @@ public class BarterScreen extends Screen {
     private static final int DIM = 0xFF77736A;
     private static final int STOLEN = 0xFFD06050;
     private static final int LINE = 0xFFC8BC9A;
+    private static final int LEFT_HAND = 0xFF9FC4E8;
 
     private EconomyPackets.BarterState state;
     private boolean sellMode = false;
     private ItemCategory tab = ItemCategory.ALL;
     private List<EconomyPackets.Entry> left = List.of();
     private List<EconomyPackets.Entry> right = List.of();
+    private List<EconomyPackets.Entry> back = List.of();
+    private boolean buybackMode = false;
+    /** The equipped sell row that was clicked once; a second click within 4 s confirms the sale (server re-checks). */
+    private int armedIndex = -1;
+    private long armedAt;
     private int scrollLeft;
     private int scrollRight;
+    private int scrollBack;
     private Component message = Component.empty();
     private long messageAt;
 
@@ -67,8 +74,10 @@ public class BarterScreen extends Screen {
     private void refilter() {
         left = filter(state.merchant());
         right = filter(state.player());
+        back = filter(state.buyback());
         scrollLeft = clampScroll(scrollLeft, left.size());
         scrollRight = clampScroll(scrollRight, right.size());
+        scrollBack = clampScroll(scrollBack, back.size());
     }
 
     private List<EconomyPackets.Entry> filter(List<EconomyPackets.Entry> entries) {
@@ -76,7 +85,9 @@ public class BarterScreen extends Screen {
         for (EconomyPackets.Entry e : entries) {
             if (tab == ItemCategory.ALL || e.category() == tab.ordinal()) out.add(e);
         }
-        out.sort(Comparator.<EconomyPackets.Entry>comparingInt(e -> e.category())
+        // equipped rows sink to the bottom, so what you can sell freely is together at the top
+        out.sort(Comparator.<EconomyPackets.Entry>comparingInt(e -> e.equip() != 0 ? 1 : 0)
+                .thenComparingInt(e -> e.category())
                 .thenComparing(e -> e.stack().getHoverName().getString())
                 .thenComparingInt(EconomyPackets.Entry::index));
         return out;
@@ -133,30 +144,24 @@ public class BarterScreen extends Screen {
                 .append(Component.translatable("barter.skycraft.merchant_gold", com.skycraft.core.Currency.formatGold(state.merchantGold())));
         g.drawCenteredString(font, gold, width / 2, 22, GOLD);
 
-        // BUY / SELL Mode Buttons
+        // BUY / SELL / BUY BACK mode buttons
         hoveredMode = -1;
         int modeW = 70;
         int modeH = 14;
         int modeY = 36;
-        int buyX = width / 2 - modeW - 6;
-        int sellX = width / 2 + 6;
-
-        boolean hovBuy = mouseX >= buyX && mouseX < buyX + modeW && mouseY >= modeY && mouseY < modeY + modeH;
-        boolean hovSell = mouseX >= sellX && mouseX < sellX + modeW && mouseY >= modeY && mouseY < modeY + modeH;
-        if (hovBuy) hoveredMode = 0;
-        else if (hovSell) hoveredMode = 1;
-
-        // BUY button
-        g.fill(buyX, modeY, buyX + modeW, modeY + modeH, !sellMode ? 0x50FFFFFF : hovBuy ? 0x28FFFFFF : 0x18000000);
-        if (!sellMode) g.fill(buyX, modeY + modeH - 1, buyX + modeW, modeY + modeH, LINE);
-        g.drawCenteredString(font, Component.translatable("barter.skycraft.mode.buy"), buyX + modeW / 2, modeY + 3,
-                !sellMode ? 0xFFFFFFFF : hovBuy ? TEXT : 0xFFA8A090);
-
-        // SELL button
-        g.fill(sellX, modeY, sellX + modeW, modeY + modeH, sellMode ? 0x50FFFFFF : hovSell ? 0x28FFFFFF : 0x18000000);
-        if (sellMode) g.fill(sellX, modeY + modeH - 1, sellX + modeW, modeY + modeH, LINE);
-        g.drawCenteredString(font, Component.translatable("barter.skycraft.mode.sell"), sellX + modeW / 2, modeY + 3,
-                sellMode ? 0xFFFFFFFF : hovSell ? TEXT : 0xFFA8A090);
+        int modeX0 = width / 2 - (3 * modeW + 12) / 2;
+        String[] modeKeys = {"barter.skycraft.mode.buy", "barter.skycraft.mode.sell", "barter.skycraft.mode.buyback"};
+        int active = buybackMode ? 2 : sellMode ? 1 : 0;
+        for (int m = 0; m < 3; m++) {
+            int bx = modeX0 + m * (modeW + 6);
+            boolean hov = mouseX >= bx && mouseX < bx + modeW && mouseY >= modeY && mouseY < modeY + modeH;
+            if (hov) hoveredMode = m;
+            boolean on = m == active;
+            g.fill(bx, modeY, bx + modeW, modeY + modeH, on ? 0x50FFFFFF : hov ? 0x28FFFFFF : 0x18000000);
+            if (on) g.fill(bx, modeY + modeH - 1, bx + modeW, modeY + modeH, LINE);
+            g.drawCenteredString(font, Component.translatable(modeKeys[m]), bx + modeW / 2, modeY + 3,
+                    on ? 0xFFFFFFFF : hov ? TEXT : 0xFFA8A090);
+        }
 
         g.fill(width / 2 - 160, 52, width / 2 + 160, 53, 0x60C8BC9A);
 
@@ -181,7 +186,9 @@ public class BarterScreen extends Screen {
         // Active table (BUY: merchant goods, SELL: player inventory)
         hoveredEntry = null;
         int txPos = tableX(), tw = tableWidth();
-        if (!sellMode) {
+        if (buybackMode) {
+            drawCatalog(g, txPos, tw, Component.translatable("barter.skycraft.mode.buyback"), back, scrollBack, true, mouseX, mouseY);
+        } else if (!sellMode) {
             drawCatalog(g, txPos, tw, state.merchantName(), left, scrollLeft, true, mouseX, mouseY);
         } else {
             drawCatalog(g, txPos, tw, Component.translatable("barter.skycraft.inventory"), right, scrollRight, false, mouseX, mouseY);
@@ -214,8 +221,13 @@ public class BarterScreen extends Screen {
 
         if (hoveredEntry != null) {
             List<Component> lines = new ArrayList<>(Screen.getTooltipFromItem(minecraft, hoveredEntry.stack()));
-            lines.add(Component.translatable(hoveredBuy ? "barter.skycraft.tooltip.buy" : "barter.skycraft.tooltip.sell",
+            lines.add(Component.translatable(buybackMode ? "barter.skycraft.buyback.tooltip"
+                            : hoveredBuy ? "barter.skycraft.tooltip.buy" : "barter.skycraft.tooltip.sell",
                     com.skycraft.core.Currency.formatCompact(hoveredEntry.price())).withStyle(ChatFormatting.GOLD));
+            if (hoveredEntry.equip() != 0) {
+                String key = hoveredEntry.equip() == 1 ? "right" : hoveredEntry.equip() == 2 ? "left" : "worn";
+                lines.add(Component.translatable("inventory.skycraft.equipped." + key).withStyle(ChatFormatting.YELLOW));
+            }
             if (hoveredBuy) {
                 int carrying = countCarrying(hoveredEntry.stack());
                 lines.add(Component.literal("Carrying: " + carrying).withStyle(ChatFormatting.GRAY));
@@ -236,7 +248,7 @@ public class BarterScreen extends Screen {
         for (ItemStack s : minecraft.player.getInventory().items) {
             if (!s.isEmpty() && s.getItem() == target.getItem()) count += s.getCount();
         }
-        return count;
+        return count + com.skycraft.inventory.Pack.count(minecraft.player, target.getItem()); // overflow pack too
     }
 
     private void drawCatalog(GuiGraphics g, int x, int w, Component title, List<EconomyPackets.Entry> entries, int scroll,
@@ -249,7 +261,7 @@ public class BarterScreen extends Screen {
         g.fill(x, TOP - 1, x + w, TOP, 0x80C8BC9A);
 
         if (entries.isEmpty()) {
-            g.drawCenteredString(font, Component.translatable("barter.skycraft.empty"), x + w / 2, TOP + 12, DIM);
+            g.drawCenteredString(font, Component.translatable(buybackMode ? "barter.skycraft.buyback.empty" : "barter.skycraft.empty"), x + w / 2, TOP + 12, DIM);
             return;
         }
         int rows = visibleRows();
@@ -272,8 +284,22 @@ public class BarterScreen extends Screen {
             boolean affordable = !buy || state.playerGold() >= e.price();
             int nameColor = e.status() == Barter.STATUS_STOLEN ? STOLEN : ok ? (hov ? 0xFFFFFFFF : TEXT) : DIM;
 
+            // equipped rows (worn, held, left hand): "E" badge and the inventory screen's equipped colours
+            int badgeW = 0;
+            if (e.equip() != 0 && !buy) {
+                int tint = e.equip() == 2 ? LEFT_HAND : GOLD;
+                String badge = Component.translatable("barter.skycraft.equipped.badge").getString();
+                badgeW = font.width(badge) + 8;
+                int bx = x + w - 8 - priceW - badgeW - 4;
+                g.fill(x, y, x + w, y + ROW, 0x20000000 | (tint & 0xFFFFFF));
+                g.fill(bx, y + 4, bx + badgeW, y + ROW - 4, 0xC0000000 | (tint & 0xFFFFFF));
+                g.drawString(font, badge, bx + 4, y + 6, 0xFF1A1710, false);
+                nameColor = tint;
+                badgeW += 4;
+            }
+
             String count = stack.getCount() > 1 ? " (" + stack.getCount() + ")" : "";
-            int nameSpace = w - 30 - priceW - 12 - font.width(count);
+            int nameSpace = w - 30 - priceW - 12 - font.width(count) - badgeW;
             String name = font.plainSubstrByWidth(stack.getHoverName().getString(), Math.max(10, nameSpace));
             g.drawString(font, name, x + 26, y + 6, nameColor, false);
             if (!count.isEmpty()) g.drawString(font, count, x + 26 + font.width(name), y + 6, DIM, false);
@@ -294,11 +320,8 @@ public class BarterScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
-        if (hoveredMode == 0) {
-            sellMode = false;
-            return true;
-        } else if (hoveredMode == 1) {
-            sellMode = true;
+        if (hoveredMode >= 0) {
+            setMode(hoveredMode);
             return true;
         }
         if (hoveredTab >= 0) {
@@ -307,8 +330,17 @@ public class BarterScreen extends Screen {
         }
         if (hoveredEntry != null && (button == GLFW.GLFW_MOUSE_BUTTON_LEFT || button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)) {
             ItemStack stack = hoveredEntry.stack();
-            SkyNetwork.sendToServer(new EconomyPackets.BarterAction(state.entityId(), hoveredBuy, hoveredEntry.index(),
-                    hasShiftDown(), BuiltInRegistries.ITEM.getKey(stack.getItem())));
+            int op = buybackMode ? Barter.OP_BUYBACK : sellMode ? Barter.OP_SELL : Barter.OP_BUY;
+            // an equipped row needs a second click on the same row within 4 seconds (the server asks for it too)
+            boolean confirm = false;
+            if (op == Barter.OP_SELL && hoveredEntry.equip() != 0) {
+                long now = Util.getMillis();
+                confirm = armedIndex == hoveredEntry.index() && now - armedAt < 4000;
+                armedIndex = confirm ? -1 : hoveredEntry.index();
+                armedAt = now;
+            }
+            SkyNetwork.sendToServer(new EconomyPackets.BarterAction(state.entityId(), op, hoveredEntry.index(),
+                    hasShiftDown(), BuiltInRegistries.ITEM.getKey(stack.getItem()), confirm));
             return true;
         }
         return super.mouseClicked(mx, my, button);
@@ -317,7 +349,9 @@ public class BarterScreen extends Screen {
     @Override
     public boolean mouseScrolled(double mx, double my, double delta) {
         int step = delta > 0 ? -1 : delta < 0 ? 1 : 0;
-        if (!sellMode) {
+        if (buybackMode) {
+            scrollBack = clampScroll(scrollBack + step, back.size());
+        } else if (!sellMode) {
             scrollLeft = clampScroll(scrollLeft + step, left.size());
         } else {
             scrollRight = clampScroll(scrollRight + step, right.size());
@@ -325,10 +359,16 @@ public class BarterScreen extends Screen {
         return true;
     }
 
+    private void setMode(int mode) {
+        buybackMode = mode == 2;
+        sellMode = mode == 1;
+        armedIndex = -1;
+    }
+
     @Override
     public boolean keyPressed(int key, int scan, int mods) {
         if (key == GLFW.GLFW_KEY_TAB) {
-            sellMode = !sellMode;
+            setMode(((buybackMode ? 2 : sellMode ? 1 : 0) + 1) % 3);
             return true;
         }
         int n = ItemCategory.VALUES.length;
@@ -352,6 +392,7 @@ public class BarterScreen extends Screen {
         tab = c;
         scrollLeft = 0;
         scrollRight = 0;
+        scrollBack = 0;
         refilter();
     }
 }

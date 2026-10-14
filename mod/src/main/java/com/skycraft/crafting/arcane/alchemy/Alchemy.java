@@ -310,6 +310,8 @@ public final class Alchemy {
     public static void combine(ServerPlayer player, BlockPos pos, int[] slots) {
         if (!ArcaneModule.atStation(player, pos, ArcaneRegistry.ALCHEMY_LAB.get())) return;
         if (slots.length < 2 || slots.length > 3) return;
+        slots = com.skycraft.inventory.Pack.resolveAll(player, slots); // overflow-pack ingredients come into slots first
+        if (slots == null) return;
         Inventory inv = player.getInventory();
         List<Ingredients.Ingredient> ings = new ArrayList<>();
         Set<Integer> used = new HashSet<>();
@@ -343,7 +345,7 @@ public final class Alchemy {
         }
 
         ItemStack result = createItem(brew);
-        if (!inv.add(result)) player.drop(result, false);
+        com.skycraft.inventory.Pack.giveOrDrop(player, result);
         player.level().playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1f, 1f);
         Progression.addSkillXp(player, Skill.ALCHEMY, brew.value());
         SkyData.get(player).addStat(brew.poison() ? "poisons_mixed" : "potions_mixed", 1);
@@ -354,6 +356,7 @@ public final class Alchemy {
     public static void taste(ServerPlayer player, BlockPos pos, int slot) {
         if (!ArcaneModule.atStation(player, pos, ArcaneRegistry.ALCHEMY_LAB.get())) return;
         Inventory inv = player.getInventory();
+        slot = com.skycraft.inventory.Pack.resolveSlot(player, slot, null);
         if (slot < 0 || slot >= inv.getContainerSize()) return;
         ItemStack stack = inv.getItem(slot);
         Ingredients.Ingredient ing = Ingredients.get(stack);

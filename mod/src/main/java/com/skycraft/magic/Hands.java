@@ -94,6 +94,10 @@ public final class Hands {
                 return;
             }
         }
+        // every slot is taken: the overflow pack holds it (inventory.Pack)
+        ItemStack held = inv.items.get(inv.selected);
+        inv.items.set(inv.selected, ItemStack.EMPTY);
+        com.skycraft.inventory.Pack.giveOrDrop(p, held);
     }
 
     private static void freeOffHand(ServerPlayer p) {
@@ -107,6 +111,8 @@ public final class Hands {
                 return;
             }
         }
+        inv.offhand.set(0, ItemStack.EMPTY);
+        com.skycraft.inventory.Pack.giveOrDrop(p, off.copy());
     }
 
     private static void selectSlot(ServerPlayer p, int slot) {

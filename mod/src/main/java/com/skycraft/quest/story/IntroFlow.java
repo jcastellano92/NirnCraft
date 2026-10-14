@@ -472,18 +472,20 @@ public final class IntroFlow {
     private static boolean hasKey(ServerPlayer p) {
         for (ItemStack s : p.getInventory().items) if (isKey(s, p.getUUID())) return true;
         for (ItemStack s : p.getInventory().offhand) if (isKey(s, p.getUUID())) return true;
+        if (com.skycraft.inventory.Pack.has(p, s -> isKey(s, p.getUUID()))) return true;
         return false;
     }
 
     private static void ensureKey(ServerPlayer p) {
         if (hasKey(p)) return;
         ItemStack key = QuestItems.cottageKey(p.getUUID());
-        if (!p.getInventory().add(key)) p.drop(key, false);
+        com.skycraft.inventory.Pack.giveOrDrop(p, key);
     }
 
     private static void removeKeys(ServerPlayer p) {
         for (ItemStack s : p.getInventory().items) if (isKey(s, p.getUUID())) s.setCount(0);
         for (ItemStack s : p.getInventory().offhand) if (isKey(s, p.getUUID())) s.setCount(0);
+        com.skycraft.inventory.Pack.remove(p, s -> isKey(s, p.getUUID()), Integer.MAX_VALUE);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -660,6 +662,7 @@ public final class IntroFlow {
         RUNS.remove(p.getUUID());
         if (HIDDEN.remove(p.getUUID())) syncHidden();
         p.getInventory().clearContent();
+        com.skycraft.inventory.Pack.clear(p);
         SkyData.get(p).module(MODULE).remove(STATE);
     }
 

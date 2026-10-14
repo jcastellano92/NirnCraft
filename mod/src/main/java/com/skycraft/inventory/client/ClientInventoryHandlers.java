@@ -2,6 +2,7 @@ package com.skycraft.inventory.client;
 
 import com.skycraft.inventory.CarryWeight;
 import com.skycraft.inventory.InventoryPackets;
+import com.skycraft.inventory.Pack;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -28,6 +29,12 @@ public final class ClientInventoryHandlers {
         enabled = en;
         over = ov;
         received = true;
+    }
+
+    /** The server's copy of the pack (overflow inventory), applied to the local player's data. */
+    public static void packSync(InventoryPackets.PackSync m) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player != null) Pack.applyClientSync(player, m.start(), m.total(), m.rows());
     }
 
     public static void reset() {

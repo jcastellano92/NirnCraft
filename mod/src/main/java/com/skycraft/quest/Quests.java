@@ -384,33 +384,15 @@ public final class Quests {
 
     public static void give(Player player, ItemStack stack) {
         if (stack.isEmpty()) return;
-        // Never auto-equip quest rewards into armor or active hand slots! Place directly into inventory storage (9-35)
-        net.minecraft.world.entity.player.Inventory inv = player.getInventory();
-        for (int i = 9; i < 36; i++) {
-            ItemStack inSlot = inv.getItem(i);
-            if (ItemStack.isSameItemSameTags(inSlot, stack)) {
-                int space = inSlot.getMaxStackSize() - inSlot.getCount();
-                if (space > 0) {
-                    int move = Math.min(space, stack.getCount());
-                    inSlot.grow(move);
-                    stack.shrink(move);
-                    if (stack.isEmpty()) return;
-                }
-            }
-        }
-        for (int i = 9; i < 36; i++) {
-            if (inv.getItem(i).isEmpty()) {
-                inv.setItem(i, stack.copy());
-                return;
-            }
-        }
-        if (!inv.add(stack) && !stack.isEmpty()) player.drop(stack, false);
+        // Never auto-equip quest rewards into armor or active hand slots: storage slots, then hotbar, then the
+        // overflow pack (inventory.Pack), so a reward is never refused or dropped for lack of slots
+        com.skycraft.inventory.Pack.giveOrDrop(player, stack);
     }
 
     public static int count(Player player, Item item) {
         int n = 0;
         for (ItemStack s : player.getInventory().items) if (s.is(item)) n += s.getCount();
-        return n;
+        return n + com.skycraft.inventory.Pack.count(player, item);
     }
 
     public static void remove(Player player, Item item, int amount) {
@@ -422,6 +404,7 @@ public final class Quests {
                 amount -= take;
             }
         }
+        if (amount > 0) com.skycraft.inventory.Pack.remove(player, s -> s.is(item), amount);
     }
 
     // ------------------------------------------------------------------ killers

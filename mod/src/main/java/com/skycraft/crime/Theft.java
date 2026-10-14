@@ -415,7 +415,16 @@ public final class Theft {
                 left = 0;
             }
         }
-        for (ItemStack part : split) inv.placeItemBackInInventory(part);
+        for (ItemStack part : split) com.skycraft.inventory.Pack.giveOrDrop(player, part);
+        if (left > 0) { // what overflowed into the pack counts too
+            int idx = com.skycraft.inventory.Pack.indexOf(player, proto);
+            ItemStack part = idx < 0 ? ItemStack.EMPTY : com.skycraft.inventory.Pack.take(player, idx, left);
+            if (!part.isEmpty()) {
+                left -= part.getCount();
+                Bounty.markStolen(part);
+                com.skycraft.inventory.Pack.add(player, part);
+            }
+        }
         return amount - left;
     }
 
@@ -434,6 +443,7 @@ public final class Theft {
         List<Entry> out = new ArrayList<>();
         Inventory inv = player.getInventory();
         for (int i = 0; i < inv.getContainerSize(); i++) add(out, inv.getItem(i));
+        for (ItemStack s : com.skycraft.inventory.Pack.entries(player)) add(out, s);
         return out;
     }
 

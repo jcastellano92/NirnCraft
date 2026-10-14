@@ -317,7 +317,7 @@ public final class Mounts {
             var item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(tag.getString("barding")));
             if (item != null && item != Items.AIR) refund = new ItemStack(item);
         }
-        if (!refund.isEmpty() && !player.getInventory().add(refund)) player.drop(refund, false);
+        if (!refund.isEmpty()) com.skycraft.inventory.Pack.giveOrDrop(player, refund);
         tag.remove("uuid");
         tag.remove("barding");
         tag.remove(MountStamina.SAVED);

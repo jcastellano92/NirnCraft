@@ -65,7 +65,7 @@ public final class Shipwright {
             ItemStack s = inv.getItem(i);
             if (m.matches(s)) n += s.getCount();
         }
-        return n;
+        return n + com.skycraft.inventory.Pack.count(inv.player, m::matches);
     }
 
     public static boolean canBuild(Player player, ShipType type) {
@@ -93,10 +93,11 @@ public final class Shipwright {
                     s.shrink(take);
                     left -= take;
                 }
+                if (left > 0) com.skycraft.inventory.Pack.remove(player, m::matches, left);
             }
         }
         ItemStack ship = new ItemStack(SailingRegistry.SHIP_ITEMS.get(type).get());
-        if (!player.getInventory().add(ship)) player.drop(ship, false);
+        com.skycraft.inventory.Pack.giveOrDrop(player, ship);
         player.level().playSound(null, bench, SoundEvents.VILLAGER_WORK_FLETCHER, SoundSource.BLOCKS, 1f, 0.8f);
         player.level().playSound(null, bench, Blocks.SPRUCE_PLANKS.defaultBlockState().getSoundType().getPlaceSound(), SoundSource.BLOCKS, 1f, 0.7f);
         Notifier.message(player, Component.translatable("sailing.skycraft.shipwright.built", ship.getHoverName()));

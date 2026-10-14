@@ -45,7 +45,9 @@ public final class StaffEnchanting {
             ItemStack s = inv.getItem(i);
             if (s.is(ArsenalItems.UNENCHANTED_STAFF.get())) return i;
         }
-        return -1;
+        // the overflow pack: a virtual slot id (com.skycraft.inventory.Pack)
+        int packed = com.skycraft.inventory.Pack.find(player, s -> s.is(ArsenalItems.UNENCHANTED_STAFF.get()));
+        return packed >= 0 ? com.skycraft.inventory.Pack.VIRTUAL_BASE + packed : -1;
     }
 
     /** Index of the filled soul gem with the biggest soul (Azura's and the Black Star are emptied, not consumed), or -1. */
@@ -61,12 +63,22 @@ public final class StaffEnchanting {
                 best = i;
             }
         }
+        java.util.List<ItemStack> packed = com.skycraft.inventory.Pack.entries(player);
+        for (int i = 0; i < packed.size(); i++) {
+            ItemStack s = packed.get(i);
+            if (s.isEmpty() || !s.is(ArsenalTags.SOUL_GEMS) || s.getTag() == null) continue;
+            int soul = s.getTag().getInt("soul");
+            if (soul > bestSoul) {
+                bestSoul = soul;
+                best = com.skycraft.inventory.Pack.VIRTUAL_BASE + i;
+            }
+        }
         return best;
     }
 
     public static int soulAt(Player player, int slot) {
         if (slot < 0) return 0;
-        ItemStack s = player.getInventory().getItem(slot);
+        ItemStack s = com.skycraft.inventory.Pack.stackAt(player, slot);
         return s.getTag() == null ? 0 : s.getTag().getInt("soul");
     }
 
@@ -103,6 +115,10 @@ public final class StaffEnchanting {
         Inventory inv = player.getInventory();
         int staffSlot = findStaff(player);
         int gemSlot = findGem(player);
+        int[] resolved = com.skycraft.inventory.Pack.resolveAll(player, new int[]{staffSlot, gemSlot});
+        if (resolved == null) return;
+        staffSlot = resolved[0];
+        gemSlot = resolved[1];
         int soul = soulAt(player, gemSlot);
         ItemStack gem = inv.getItem(gemSlot);
         String gemId = String.valueOf(net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(gem.getItem()));
@@ -117,7 +133,7 @@ public final class StaffEnchanting {
         inv.getItem(staffSlot).shrink(1);
         ItemStack staff = new ItemStack(ArsenalItems.ENCHANTED_STAFF.get());
         EnchantedStaffItem.bind(staff, spell, chargesFor(player, soul));
-        if (!inv.add(staff)) player.drop(staff, false);
+        com.skycraft.inventory.Pack.giveOrDrop(player, staff);
         inv.setChanged();
         Progression.addSkillXp(player, Skill.ENCHANTING, 0.6f + 0.15f * soul);
         SkyData.get(player).addStat("staves_enchanted", 1);

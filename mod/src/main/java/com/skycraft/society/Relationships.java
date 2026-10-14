@@ -284,7 +284,7 @@ public final class Relationships {
             ItemStack s = inv.getItem(i);
             if (s.is(item)) n += s.getCount();
         }
-        return n;
+        return n + com.skycraft.inventory.Pack.count(player, item);
     }
 
     private static void take(Player player, Item item, int count) {
@@ -296,6 +296,7 @@ public final class Relationships {
             s.shrink(t);
             count -= t;
         }
+        if (count > 0) com.skycraft.inventory.Pack.remove(player, st -> st.is(item), count);
     }
 
     /** Gives a stack to the player's bags (or drops it at their feet). */

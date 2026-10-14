@@ -4,6 +4,7 @@ import com.skycraft.economy.ItemValues;
 import com.skycraft.inventory.InvCategory;
 import com.skycraft.inventory.InventoryActions;
 import com.skycraft.inventory.ItemWeights;
+import com.skycraft.inventory.Pack;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -148,6 +149,29 @@ public final class InvEntry {
                 }
             }
             out.add(new InvEntry(s, i, equip));
+        }
+        // The overflow pack (inventory.Pack): the same rows as slot items; a pack entry is "slot" VIRTUAL_BASE + index
+        List<ItemStack> pack = Pack.entries(player);
+        for (int p = 0; p < pack.size(); p++) {
+            ItemStack s = pack.get(p);
+            if (s.isEmpty()) continue;
+            int virtual = Pack.VIRTUAL_BASE + p;
+            int equip = InventoryActions.isWornJewelry(player, s) ? WORN : NONE;
+            InvEntry merged = null;
+            if (equip == NONE) {
+                for (InvEntry e : out) {
+                    if (e.equip == NONE && ItemStack.isSameItemSameTags(e.stack, s)) {
+                        merged = e;
+                        break;
+                    }
+                }
+            }
+            if (merged != null) {
+                merged.stack.grow(s.getCount());
+                merged.slots.add(virtual);
+            } else {
+                out.add(new InvEntry(s, virtual, equip));
+            }
         }
         return out;
     }

@@ -19,6 +19,7 @@ public final class InventoryModule {
     public static void init(IEventBus modBus) {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, InventoryConfig.COMMON_SPEC, "skycraft-inventory-common.toml");
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, InventoryConfig.CLIENT_SPEC, "skycraft-inventory-client.toml");
+        PackSelfTest.registerAutorun();
     }
 
     /** Registers this module's packets via {@link com.skycraft.network.SkyNetwork#register}. Called once at startup. */

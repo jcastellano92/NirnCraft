@@ -147,7 +147,7 @@ public final class Stables {
             return;
         }
         Component name = stack.getHoverName();
-        if (!player.getInventory().add(stack)) player.drop(stack, false);
+        com.skycraft.inventory.Pack.giveOrDrop(player, stack);
         Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.stables.sold", name));
     }
 }

@@ -49,7 +49,8 @@ public record Cost(Predicate<ItemStack> test, Supplier<ItemStack> display, int c
             ItemStack stack = inv.getItem(slot);
             if (matches(stack)) n += stack.getCount();
         }
-        return n;
+        // the overflow pack (inventory.Pack) counts like slots do
+        return n + com.skycraft.inventory.Pack.count(inv.player, this::matches);
     }
 
     /** Removes {@code amount} matching items; call only after {@link #countIn} confirmed they are there. */
@@ -64,6 +65,7 @@ public record Cost(Predicate<ItemStack> test, Supplier<ItemStack> display, int c
             if (stack.isEmpty()) inv.setItem(slot, ItemStack.EMPTY);
             left -= take;
         }
+        if (left > 0 && !inv.player.level().isClientSide) left -= com.skycraft.inventory.Pack.remove(inv.player, this::matches, left);
         inv.setChanged();
     }
 

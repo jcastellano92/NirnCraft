@@ -6,6 +6,7 @@ import com.skycraft.combat.WeaponClass;
 import com.skycraft.crime.Ownership;
 import com.skycraft.economy.ItemValues;
 import com.skycraft.inventory.ItemWeights;
+import com.skycraft.inventory.Pack;
 import com.skycraft.network.CorePackets;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.Util;
@@ -61,7 +62,8 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
     private int scrollOffset = 0;
     private int hoveredIndex = -1;
 
-    public record ContainerEntry(List<Slot> slots, ItemStack stack, int totalCount, float totalWeight, int value) {
+    /** {@code packIndex}: the overflow-pack entry of this row (My Items tab), or -1. */
+    public record ContainerEntry(List<Slot> slots, ItemStack stack, int totalCount, float totalWeight, int value, int packIndex) {
         public Slot primarySlot() { return slots.get(0); }
     }
 
@@ -130,17 +132,35 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
             }
         }
 
+        // My Items tab: the overflow pack (inventory.Pack) joins the same rows as the slots
+        java.util.Map<String, Integer> packIndex = new java.util.HashMap<>();
+        java.util.Map<String, Integer> packCount = new java.util.HashMap<>();
+        if (viewMode == 1 && net.minecraft.client.Minecraft.getInstance().player != null) {
+            List<ItemStack> packed = Pack.entries(net.minecraft.client.Minecraft.getInstance().player);
+            for (int i = 0; i < packed.size(); i++) {
+                ItemStack stack = packed.get(i);
+                if (stack.isEmpty()) continue;
+                String key = stack.getItem().getDescriptionId() + ":" + (stack.getTag() != null ? stack.getTag().toString() : "");
+                if (!groups.containsKey(key)) {
+                    groups.put(key, new ArrayList<>());
+                    repStacks.put(key, stack.copy());
+                }
+                packIndex.put(key, i);
+                packCount.put(key, stack.getCount());
+            }
+        }
+
         List<ContainerEntry> list = new ArrayList<>();
         for (java.util.Map.Entry<String, List<Slot>> e : groups.entrySet()) {
             ItemStack rep = repStacks.get(e.getKey());
-            int totalCount = 0;
-            float totalWeight = 0f;
+            int totalCount = packCount.getOrDefault(e.getKey(), 0);
+            float totalWeight = ItemWeights.getStack(rep) / Math.max(1, rep.getCount()) * totalCount;
             for (Slot s : e.getValue()) {
                 totalCount += s.getItem().getCount();
-                totalWeight += ItemWeights.get(s.getItem());
+                totalWeight += ItemWeights.getStack(s.getItem());
             }
             int value = ItemValues.get(rep) * totalCount;
-            list.add(new ContainerEntry(e.getValue(), rep, totalCount, totalWeight, value));
+            list.add(new ContainerEntry(e.getValue(), rep, totalCount, totalWeight, value, packIndex.getOrDefault(e.getKey(), -1)));
         }
         return list;
     }
@@ -413,6 +433,10 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
                         SkyNetwork.sendToServer(new CorePackets.ContainerStore(menu.containerId, slot.index, false));
                     }
                 }
+            }
+            // the row's part in the overflow pack (a virtual slot id, see inventory.Pack)
+            if (viewMode == 1 && entry.packIndex() >= 0) {
+                SkyNetwork.sendToServer(new CorePackets.ContainerStore(menu.containerId, Pack.VIRTUAL_BASE + entry.packIndex(), false));
             }
         }
     }

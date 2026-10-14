@@ -118,6 +118,7 @@ public final class Enchanting {
     public static void disenchant(ServerPlayer player, BlockPos pos, int slot) {
         if (!ArcaneModule.atStation(player, pos, ArcaneRegistry.ARCANE_ENCHANTER.get())) return;
         Inventory inv = player.getInventory();
+        slot = com.skycraft.inventory.Pack.resolveSlot(player, slot, null);
         if (slot < 0 || slot >= inv.getContainerSize()) return;
         ItemStack stack = inv.getItem(slot);
         List<Enchantment> learnable = unknownEnchantments(player, stack);
@@ -277,6 +278,10 @@ public final class Enchanting {
     public static void enchant(ServerPlayer player, BlockPos pos, int itemSlot, String enchantId, int gemSlot) {
         if (!ArcaneModule.atStation(player, pos, ArcaneRegistry.ARCANE_ENCHANTER.get())) return;
         Inventory inv = player.getInventory();
+        int[] resolved = com.skycraft.inventory.Pack.resolveAll(player, new int[]{itemSlot, gemSlot});
+        if (resolved == null) return;
+        itemSlot = resolved[0];
+        gemSlot = resolved[1];
         if (itemSlot < 0 || itemSlot >= inv.getContainerSize() || gemSlot < 0 || gemSlot >= inv.getContainerSize() || itemSlot == gemSlot) return;
         ResourceLocation rl = ResourceLocation.tryParse(enchantId);
         Enchantment ench = rl == null ? null : ForgeRegistries.ENCHANTMENTS.getValue(rl);
@@ -302,7 +307,7 @@ public final class Enchanting {
         EnchantmentHelper.setEnchantments(map, target);
         CompoundTag tag = target.getOrCreateTag();
         tag.putInt(MARK, tag.getInt(MARK) + 1);
-        if (split && !inv.add(target)) player.drop(target, false);
+        if (split) com.skycraft.inventory.Pack.giveOrDrop(player, target);
 
         SoulGemItem.consume(gem);
         inv.setChanged();

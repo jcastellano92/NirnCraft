@@ -199,7 +199,7 @@ public final class OblivionGates extends SavedData {
         deadlands.sendParticles(ParticleTypes.FLAME, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 120, 2, 2, 2, 0.15);
         deadlands.sendParticles(ParticleTypes.EXPLOSION, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 6, 1.5, 1.5, 1.5, 0);
         ItemStack stone = SigilStoneItem.roll(RealmItems.SIGIL_STONE.get(), p.getRandom());
-        if (!p.getInventory().add(stone)) p.drop(stone, false);
+        com.skycraft.inventory.Pack.giveOrDrop(p, stone);
         data.taken.add(key);
         String placeFlag = null;
         if (gate != null && !data.closed.contains(gate.asLong())) {

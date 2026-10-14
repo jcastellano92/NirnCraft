@@ -183,6 +183,7 @@ public final class Tempering {
     /** Server: improves the item in inventory slot {@code slot} once. */
     public static void improve(ServerPlayer player, StationType station, int slot) {
         Inventory inv = player.getInventory();
+        slot = com.skycraft.inventory.Pack.resolveSlot(player, slot, null); // an overflow-pack item comes into a slot first
         if (slot < 0 || slot >= inv.getContainerSize()) return;
         ItemStack stack = inv.getItem(slot);
         Check check = check(player, station, stack, slot);

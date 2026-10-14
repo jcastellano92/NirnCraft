@@ -34,11 +34,15 @@ public final class CarryHud {
         if (!show) return;
         float cur = ClientInventoryHandlers.current;
         float cap = ClientInventoryHandlers.capacity;
-        boolean over = ClientInventoryHandlers.over;
-        if (!over && cur < cap * threshold) return;
+        boolean over = ClientInventoryHandlers.over; // too heavy to run
+        boolean heavy = cur > cap;                   // slower (graded), see CarryWeight.speedFactor
+        if (!heavy && cur < cap * threshold) return;
 
         Font font = mc.font;
-        Component text = Component.translatable("inventory.skycraft.hud.carry", ItemWeights.format(cur), ItemWeights.format(cap));
+        Component text = heavy
+                ? Component.translatable("inventory.skycraft.hud.carry_slow", ItemWeights.format(cur), ItemWeights.format(cap),
+                        Math.round((1f - com.skycraft.inventory.CarryWeight.speedFactor(cur, cap)) * 100f))
+                : Component.translatable("inventory.skycraft.hud.carry", ItemWeights.format(cur), ItemWeights.format(cap));
         // one slot in the bottom-right stack, above the voice words and the right-hand spell (whatever is drawn there)
         int y = HudStack.reserve(HudStack.Zone.BOTTOM_RIGHT, HudStack.BR_CARRY, 10, height);
         int x = width - 12 - font.width(text);
@@ -47,6 +51,8 @@ public final class CarryHud {
             float pulse = 0.75f + 0.25f * (float) Math.sin(System.currentTimeMillis() / 300.0);
             int r = (int) (0xE0 * pulse), gg = (int) (0x50 * pulse), b = (int) (0x50 * pulse);
             color = 0xFF000000 | r << 16 | gg << 8 | b;
+        } else if (heavy) {
+            color = 0xFFE8A050; // slower, but still able to run
         } else {
             color = 0xFFE8D9A0;
         }

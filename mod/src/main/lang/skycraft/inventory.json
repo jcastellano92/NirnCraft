@@ -82,6 +82,8 @@
   "inventory.skycraft.favorites.hint": "Click/E equip  Right-click left hand",
 
   "inventory.skycraft.hud.carry": "Carry %s/%s",
+  "inventory.skycraft.hud.carry_slow": "Carry %s/%s (slow %s%%)",
+  "inventory.skycraft.msg.took": "Took %s %s",
   "inventory.skycraft.tooltip.weight": "Weight: %s",
 
   "inventory.skycraft.overencumbered": "You are carrying too much to be able to run.",
@@ -89,5 +91,6 @@
   "inventory.skycraft.msg.bound": "That item is bound to you and can't be removed.",
   "inventory.skycraft.msg.full": "You have no room for that.",
   "inventory.skycraft.msg.not_hungry": "You can't eat that right now.",
-  "inventory.skycraft.msg.quest_item": "Quest items cannot be dropped."
+  "inventory.skycraft.msg.quest_item": "Quest items cannot be dropped.",
+  "inventory.skycraft.pack.cap": "You cannot carry any more kinds of items."
 }

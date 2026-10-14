@@ -104,6 +104,15 @@ public class AlchemyScreen extends Screen {
             counts.merge(ing.id(), s.getCount(), Integer::sum);
             icons.putIfAbsent(ing.id(), s);
         }
+        List<ItemStack> packed = com.skycraft.inventory.Pack.entries(p); // the overflow pack: virtual slot ids
+        for (int i = 0; i < packed.size(); i++) {
+            ItemStack s = packed.get(i);
+            Ingredients.Ingredient ing = Ingredients.get(s);
+            if (ing == null) continue;
+            slotOf.putIfAbsent(ing.id(), com.skycraft.inventory.Pack.VIRTUAL_BASE + i);
+            counts.merge(ing.id(), s.getCount(), Integer::sum);
+            icons.putIfAbsent(ing.id(), s);
+        }
         chosen.removeIf(id -> !slotOf.containsKey(id));
         if (focus != null && !slotOf.containsKey(focus)) focus = null;
 
@@ -221,7 +230,7 @@ public class AlchemyScreen extends Screen {
         for (Ingredients.Ingredient ing : ings) {
             Integer slot = slotOf.get(ing.id());
             if (slot == null) continue;
-            ItemStack s = p.getInventory().getItem(slot);
+            ItemStack s = com.skycraft.inventory.Pack.stackAt(p, slot);
             g.renderItem(s, x, y);
             g.drawString(font, s.getHoverName(), x + 18, y + 4, ArcaneUi.TEXT, false);
             y += 17;

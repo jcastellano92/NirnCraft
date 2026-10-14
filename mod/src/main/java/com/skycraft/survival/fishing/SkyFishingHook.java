@@ -307,6 +307,18 @@ public class SkyFishingHook extends FishingHook {
             }
             if (found.isEmpty() && s.is(FishingRegistry.BAIT.get())) found = s;
         }
+        if (found.isEmpty()) {
+            // bait that overflowed into the pack (inventory.Pack)
+            net.minecraft.world.item.Item pick = com.skycraft.inventory.Pack.count(player, FishingRegistry.GLOW_BAIT.get()) > 0
+                    ? FishingRegistry.GLOW_BAIT.get()
+                    : com.skycraft.inventory.Pack.count(player, FishingRegistry.BAIT.get()) > 0 ? FishingRegistry.BAIT.get() : null;
+            if (pick != null) {
+                bait = true;
+                glowBait = pick == FishingRegistry.GLOW_BAIT.get();
+                if (consume && !player.isCreative()) com.skycraft.inventory.Pack.remove(player, s -> s.is(pick), 1);
+                return;
+            }
+        }
         bait = !found.isEmpty();
         if (consume && bait && !player.isCreative()) found.shrink(1);
     }

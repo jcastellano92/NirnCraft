@@ -51,6 +51,9 @@ public final class CollectionTracker {
             ItemStack s = inv.getItem(i);
             if (!s.isEmpty()) note(player, s);
         }
+        for (ItemStack s : com.skycraft.inventory.Pack.entries(player)) { // the overflow pack
+            if (!s.isEmpty()) note(player, s);
+        }
     }
 
     /** Records one collectible stack (if it is one the character hasn't found yet). */
@@ -109,7 +112,7 @@ public final class CollectionTracker {
         if (r.gold() > 0) Currency.give(player, r.gold());
         if (r.item() != null) {
             ItemStack item = r.item().get();
-            if (!item.isEmpty() && !player.getInventory().add(item)) player.drop(item, false);
+            if (!item.isEmpty()) com.skycraft.inventory.Pack.giveOrDrop(player, item);
         }
         data.addStat("collections_completed", 1);
         data.markDirty();

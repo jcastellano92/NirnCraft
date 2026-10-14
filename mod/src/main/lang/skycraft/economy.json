@@ -134,5 +134,14 @@
   "settlement.skycraft.name.elden_root_treehouse": "Elden Root Treehouse",
   "settlement.skycraft.name.alinor_villa": "Alinor Villa",
   "settlement.skycraft.name.lilmoth_stilt_house": "Lilmoth Stilt House",
-  "settlement.skycraft.name.torval_moon_house": "Moon House of Torval"
+  "settlement.skycraft.name.torval_moon_house": "Moon House of Torval",
+  "barter.skycraft.mode.buyback": "BUY BACK",
+  "barter.skycraft.buyback.empty": "You have sold nothing to this merchant lately",
+  "barter.skycraft.buyback.tooltip": "Buy back for %s gold each",
+  "barter.skycraft.equipped.badge": "E",
+  "message.skycraft.economy.confirm_equipped": "%s is equipped. Click it again to sell it.",
+  "message.skycraft.economy.bound": "%s is bound to you and can't be sold.",
+  "message.skycraft.economy.quest_item": "%s is a quest item and can't be sold.",
+  "message.skycraft.economy.buyback_gone": "That is no longer here to buy back.",
+  "message.skycraft.economy.bought_back": "Bought back %s %s for %s gold"
 }

@@ -145,7 +145,7 @@ if ($Server) {
     Remove-Item (Join-Path $Run "skycraft-asset-audit.json") -ErrorAction SilentlyContinue
     # society selftest is async (about 40 s of server time: crowd cap, gate guards, night sleepers, respawn); the housing
     # dumps that follow give it the time, one command every 300 ticks
-    $cmds = @("forceload add -96 -96 96 96", "skycraft-quest selftest flow", "skycraft magic selftest", "skycraft-protect selftest",
+    $cmds = @("forceload add -96 -96 96 96", "skycraft-quest selftest flow", "skycraft magic selftest", "skycraft-protect selftest", "skycraft-inventory selftest",
         "skycraft-quest intro selftest", "skycraft-mounts selftest", "skycraft-fire selftest", "skycraft-fire census helgen generate", "skycraft-society selftest", "skylore selftest lecterns")
     # housing model dump for the population lint (tools/qa/population_lint.py): no building, no chunk loads
     $popSample = @("whiterun", "riverwood", "helgen", "rorikstead", "dragon_bridge", "falkreath", "old_hroldan")
@@ -188,6 +188,16 @@ if ($Server) {
         Select-String -Path $out -Pattern "\[mounts\] FAIL" | Select-Object -First 8 | ForEach-Object { Add("       " + ($_.Line -replace "^.*?\[mounts\] ", "")) }
     } else {
         Result "mounts" $false "no 'Mounts selftest' line in the server log"
+    }
+    # inventory self-test (com.skycraft.inventory.PackSelfTest): overflow pack save/load/sync, full container take,
+    # quest-item sale refusal, equipped confirmation, buy-back
+    $it = Select-String -Path $out -Pattern "Inventory selftest:" | Select-Object -Last 1
+    if ($it) {
+        $itl = ($it.Line -replace "^.*?Inventory selftest: ", "")
+        Result "inventory" ($itl -match "^\d+/\d+ checks passed, 0 problems") $itl
+        Select-String -Path $out -Pattern "\[inventory\] FAIL" | Select-Object -First 8 | ForEach-Object { Add("       " + ($_.Line -replace "^.*?\[inventory\] ", "")) }
+    } else {
+        Result "inventory" $false "no 'Inventory selftest' line in the server log"
     }
     # Helgen aftermath census (com.skycraft.fire.FireCommands): the scene exists and nothing in it floats
     $fc = Select-String -Path $out -Pattern "\[fire\] +fire sites \d+.*burnt blocks \(charred\+scorched\) (\d+)" | Select-Object -Last 1

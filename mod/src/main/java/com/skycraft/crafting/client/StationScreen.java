@@ -109,9 +109,14 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
             for (int slot = 0; slot < inv.getContainerSize(); slot++) {
                 if (Tempering.accepts(type, inv.getItem(slot))) temperSlots.add(slot);
             }
+            // the overflow pack (inventory.Pack): virtual slot ids after the real ones
+            List<ItemStack> packed = com.skycraft.inventory.Pack.entries(minecraft.player);
+            for (int i = 0; i < packed.size(); i++) {
+                if (!packed.get(i).isEmpty() && Tempering.accepts(type, packed.get(i))) temperSlots.add(com.skycraft.inventory.Pack.VIRTUAL_BASE + i);
+            }
             if (!temperSlots.contains(selectedSlot)) selectedSlot = temperSlots.isEmpty() ? -1 : temperSlots.get(0);
             scroll = Mth.clamp(scroll, 0, Math.max(0, temperSlots.size() - visibleRows()));
-            action.active = selectedSlot >= 0 && Tempering.check(minecraft.player, type, inv.getItem(selectedSlot), selectedSlot).ok();
+            action.active = selectedSlot >= 0 && Tempering.check(minecraft.player, type, com.skycraft.inventory.Pack.stackAt(minecraft.player, selectedSlot), selectedSlot).ok();
         } else {
             recipes = categories.isEmpty() ? List.of() : SmithingRecipes.forStation(type).getOrDefault(categories.get(category), List.of());
             selected = Mth.clamp(selected, 0, Math.max(0, recipes.size() - 1));
@@ -406,7 +411,7 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
         int rows = visibleRows() + 1;
         for (int i = scroll; i < Math.min(temperSlots.size(), scroll + rows); i++) {
             int slot = temperSlots.get(i);
-            ItemStack stack = inv.getItem(slot);
+            ItemStack stack = com.skycraft.inventory.Pack.stackAt(minecraft.player, slot);
             int y = listY + (i - scroll) * ROW;
             boolean hover = inside(mx, my, listX, y, listW, ROW) && my < listY + listH;
             if (slot == selectedSlot) g.fill(listX, y, listX + listW, y + ROW, 0x50C8A050);
@@ -415,7 +420,7 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
             int quality = Tempering.quality(stack);
             String q = quality > 0 ? Tempering.qualityName(quality).getString() : "";
             int qW = font.width(q);
-            if (slot >= 36) g.fill(listX + 1, y + 1, listX + 3, y + 3, GOLD); // equipped marker
+            if (slot >= 36 && slot < com.skycraft.inventory.Pack.VIRTUAL_BASE) g.fill(listX + 1, y + 1, listX + 3, y + 3, GOLD); // equipped marker
             g.drawString(font, fit(stack.getHoverName().getString(), listW - 28 - qW), listX + 22, y + 5, TEXT, false);
             if (quality > 0) g.drawString(font, q, listX + listW - 4 - qW, y + 5, GOLD, false);
             if (hover && mx < listX + 19) hoveredStack = stack;
@@ -427,7 +432,7 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
     private void renderTemperDetails(GuiGraphics g, int mx, int my) {
         if (selectedSlot < 0) return;
         Inventory inv = minecraft.player.getInventory();
-        ItemStack stack = inv.getItem(selectedSlot);
+        ItemStack stack = com.skycraft.inventory.Pack.stackAt(minecraft.player, selectedSlot);
         if (stack.isEmpty()) return;
         int y = listY + 2;
         bigItem(g, stack, detX + 2, y, mx, my);

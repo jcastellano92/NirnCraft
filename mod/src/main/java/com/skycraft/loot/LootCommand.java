@@ -176,7 +176,7 @@ public final class LootCommand {
             c.getSource().sendFailure(Component.literal("Unknown collectible"));
             return 0;
         }
-        if (!player.getInventory().add(stack)) player.drop(stack, false);
+        com.skycraft.inventory.Pack.giveOrDrop(player, stack);
         return 1;
     }
 

@@ -33,8 +33,8 @@ public final class InventoryConfig {
                 .defineInRange("baseCapacity", 300.0, 1.0, 100000.0);
         CAPACITY_PER_STAMINA = b.comment("Extra carry capacity for every level-up spent on Stamina (Skyrim: 5).")
                 .defineInRange("capacityPerStaminaLevel", 5.0, 0.0, 1000.0);
-        ENCUMBERED_SPEED_PENALTY = b.comment("Extra movement speed lost while over-encumbered (0.2 = 20% slower), on top of not being able",
-                        "to run and the client limiting forward input to a slow walk.")
+        ENCUMBERED_SPEED_PENALTY = b.comment("UNUSED since encumbrance became graded: speed falls smoothly from 100% at capacity to 30% at double",
+                        "capacity (CarryWeight.speedFactor) and you cannot run beyond 10% over capacity. Kept so old configs load.")
                 .defineInRange("encumberedSpeedPenalty", 0.2, 0.0, 0.95);
         b.pop();
 

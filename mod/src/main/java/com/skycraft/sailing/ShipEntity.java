@@ -714,7 +714,8 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
             if (!s.isEmpty()) spawnAtLocation(s, 1f);
         }
         if (!player.getAbilities().instabuild || !player.getInventory().contains(item)) {
-            if (!player.getInventory().add(item)) spawnAtLocation(item, 1f);
+            ItemStack rest = com.skycraft.inventory.Pack.give(player, item);
+            if (!rest.isEmpty()) spawnAtLocation(rest, 1f);
         }
         level().playSound(null, getX(), getY(), getZ(), SoundEvents.WOOD_BREAK, SoundSource.NEUTRAL, 1f, 0.8f);
         discard();

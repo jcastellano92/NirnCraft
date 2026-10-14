@@ -46,6 +46,7 @@ public final class MountStamina {
     /** In the mount record: the active mount's stamina points when it was last left (it may be unloaded). */
     static final String SAVED = "stamina_pts";
     private static final UUID GALLOP = UUID.fromString("0f6b9c2a-71de-4f0b-8a73-2c9b0b5c4e11");
+    private static final UUID LOAD = UUID.fromString("5d1b7e34-9a2c-4c6f-b3f1-6e0a8d2c7b19");
     /** A jump costs this fraction of the mount's stamina. */
     private static final float JUMP_COST = 0.06f;
 
@@ -168,6 +169,19 @@ public final class MountStamina {
                 move.removeModifier(GALLOP);
             }
         }
+        // an over-encumbered rider slows the mount too: a milder version of their own slowdown, so the mount still
+        // outpaces them on foot but never runs at full speed with a loaded-down rider
+        if (move != null) {
+            float rider = com.skycraft.inventory.CarryWeight.speedFactor(player);
+            double penalty = rider >= 1f ? 0 : -Math.min(0.85, Math.round((1f - rider) * 0.75f * 50f) / 50.0);
+            AttributeModifier cur = move.getModifier(LOAD);
+            if (penalty < 0 && (cur == null || cur.getAmount() != penalty)) {
+                if (cur != null) move.removeModifier(LOAD);
+                move.addTransientModifier(new AttributeModifier(LOAD, "Rider load", penalty, AttributeModifier.Operation.MULTIPLY_TOTAL));
+            } else if (penalty == 0 && cur != null) {
+                move.removeModifier(LOAD);
+            }
+        }
         if (gallop && player.tickCount % 3 == 0 && mount.level() instanceof ServerLevel sl && mount.onGround()) {
             BlockState below = sl.getBlockState(mount.blockPosition().below());
             if (!below.isAir()) {
@@ -234,7 +248,10 @@ public final class MountStamina {
     static void dismounted(Entity mount) {
         if (mount instanceof LivingEntity l) {
             AttributeInstance move = l.getAttribute(Attributes.MOVEMENT_SPEED);
-            if (move != null) move.removeModifier(GALLOP);
+            if (move != null) {
+                move.removeModifier(GALLOP);
+                move.removeModifier(LOAD);
+            }
         }
     }
 }

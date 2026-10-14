@@ -106,7 +106,7 @@ public final class SkyCommands {
                 return 0;
             }
             var stack = Currency.coins(amount);
-            if (!p.getInventory().add(stack)) p.drop(stack, false);
+            com.skycraft.inventory.Pack.giveOrDrop(p, stack);
             return 1;
         })));
     }

@@ -52,7 +52,9 @@ public final class NpcDialogue {
             ItemStack s = inv.getItem(i);
             if (!s.isEmpty() && s.getTag() != null && s.getTag().getBoolean(STOLEN_BLADE_TAG)) return i;
         }
-        return -1;
+        // the overflow pack: a virtual slot id (resolved with Pack.resolveSlot before use)
+        int packed = com.skycraft.inventory.Pack.find(player, s -> s.getTag() != null && s.getTag().getBoolean(STOLEN_BLADE_TAG));
+        return packed >= 0 ? com.skycraft.inventory.Pack.VIRTUAL_BASE + packed : -1;
     }
 
     static void register() {
@@ -229,7 +231,7 @@ public final class NpcDialogue {
             if (!npc.getPersistentData().getBoolean("skycraft_blade_returned") && stolenBladeSlot(player) >= 0) {
                 out.add(new DialogueOption("society.hunter_return", Component.literal("He gave me this stolen blade. Take it."), 30, (p, n) -> {
                     // re-check on choose: the blade must still be in the bags, and each hunter pays only once
-                    int slot = stolenBladeSlot(p);
+                    int slot = com.skycraft.inventory.Pack.resolveSlot(p, stolenBladeSlot(p), null);
                     if (slot < 0 || n.getPersistentData().getBoolean("skycraft_blade_returned")) return;
                     p.getInventory().getItem(slot).shrink(1);
                     n.getPersistentData().putBoolean("skycraft_blade_returned", true);

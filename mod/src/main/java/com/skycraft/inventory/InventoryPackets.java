@@ -2,6 +2,7 @@ package com.skycraft.inventory;
 
 import com.skycraft.inventory.client.ClientInventoryHandlers;
 import com.skycraft.network.SkyNetwork;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -10,8 +11,10 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -24,6 +27,7 @@ public final class InventoryPackets {
         SkyNetwork.register(CarryState.class, NetworkDirection.PLAY_TO_CLIENT, CarryState::encode, CarryState::decode, CarryState::handle);
         SkyNetwork.register(InvAction.class, NetworkDirection.PLAY_TO_SERVER, InvAction::encode, InvAction::decode, InvAction::handle);
         SkyNetwork.register(UseHeld.class, NetworkDirection.PLAY_TO_CLIENT, UseHeld::encode, UseHeld::decode, UseHeld::handle);
+        SkyNetwork.register(PackSync.class, NetworkDirection.PLAY_TO_CLIENT, PackSync::encode, PackSync::decode, PackSync::handle);
     }
 
     // ------------------------------------------------------------------ S2C
@@ -104,11 +108,47 @@ public final class InventoryPackets {
         }
     }
 
+    /**
+     * The owner's pack ({@link Pack}), in packets of at most 100 entries: {@code start} is the index of the first row,
+     * {@code total} the number of entries; a packet with start 0 begins a new copy. Counts are VarInts (never bytes).
+     */
+    public record PackSync(int start, int total, List<Row> rows) {
+        public record Row(CompoundTag key, int count) {}
+
+        static void encode(PackSync m, FriendlyByteBuf buf) {
+            buf.writeVarInt(m.start);
+            buf.writeVarInt(m.total);
+            buf.writeVarInt(m.rows.size());
+            for (Row r : m.rows) {
+                buf.writeNbt(r.key);
+                buf.writeVarInt(r.count);
+            }
+        }
+
+        static PackSync decode(FriendlyByteBuf buf) {
+            int start = buf.readVarInt();
+            int total = buf.readVarInt();
+            int n = Math.min(buf.readVarInt(), Pack.MAX_ENTRIES);
+            List<Row> rows = new ArrayList<>(n);
+            for (int i = 0; i < n; i++) {
+                CompoundTag key = buf.readNbt();
+                rows.add(new Row(key == null ? new CompoundTag() : key, buf.readVarInt()));
+            }
+            return new PackSync(start, total, rows);
+        }
+
+        static void handle(PackSync m, Supplier<NetworkEvent.Context> ctx) {
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientInventoryHandlers.packSync(m));
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
     // ------------------------------------------------------------------ C2S
 
     /**
      * An inventory screen action on one slot ({@link net.minecraft.world.entity.player.Inventory#getItem(int)} index:
-     * 0-35 main, 36-39 armor, 40 offhand). {@code item} must match the slot's current item or the request is ignored.
+     * 0-35 main, 36-39 armor, 40 offhand; {@link Pack#VIRTUAL_BASE} + n names pack entry n). {@code item} must match
+     * the slot's current item or the request is ignored.
      */
     public record InvAction(int action, int slot, ResourceLocation item) {
         /** Toggle: equip to the right hand / armor slot, or unequip if already equipped. */

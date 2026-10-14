@@ -220,6 +220,7 @@ public final class Bounty {
                 inv.setItem(i, net.minecraft.world.item.ItemStack.EMPTY);
             }
         }
+        taken += com.skycraft.inventory.Pack.remove(player, Bounty::isStolen, Integer.MAX_VALUE); // the overflow pack too
         if (taken > 0 && player instanceof ServerPlayer sp) {
             Notifier.send(sp, NotifyKind.CRIME, Component.translatable("crime.skycraft.confiscated", taken), Component.empty());
         }

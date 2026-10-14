@@ -299,7 +299,7 @@ public final class Houses {
 
     private static void give(ServerPlayer player, ItemStack stack) {
         if (stack.isEmpty()) return;
-        if (!player.getInventory().add(stack)) player.drop(stack, false);
+        com.skycraft.inventory.Pack.giveOrDrop(player, stack);
     }
 
     /** Every built block of the house becomes the player's (contract 1). */
@@ -466,7 +466,8 @@ public final class Houses {
         for (ItemStack s : player.getInventory().items) {
             if (s.getItem() instanceof HouseKeyItem && houseId.equals(HouseKeyItem.houseOf(s))) return true;
         }
-        return houseId.equals(HouseKeyItem.houseOf(player.getOffhandItem()));
+        if (houseId.equals(HouseKeyItem.houseOf(player.getOffhandItem()))) return true;
+        return com.skycraft.inventory.Pack.has(player, s -> s.getItem() instanceof HouseKeyItem && houseId.equals(HouseKeyItem.houseOf(s)));
     }
 
     private static void updateHouseSign(ServerLevel level, BlockPos pos, Component houseName, String ownerName) {

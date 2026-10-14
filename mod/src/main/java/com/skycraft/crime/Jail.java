@@ -351,6 +351,7 @@ public final class Jail {
             ItemStack s = inv.getItem(i);
             if (s.is(CrimeItems.LOCKPICK.get())) lockpickCount += s.getCount();
         }
+        lockpickCount += com.skycraft.inventory.Pack.count(player, CrimeItems.LOCKPICK.get());
         int keep = (data.getSkill(Skill.LOCKPICKING) >= 20 || data.getSkill(Skill.SNEAK) >= 20
                 || data.hasPerk(Skill.LOCKPICKING.id() + ".novice_locks"))
                 ? Math.min(2, lockpickCount) : (lockpickCount > 0 ? 1 : 0);
@@ -367,11 +368,24 @@ public final class Jail {
             inv.setItem(i, ItemStack.EMPTY);
             stash(player, chests, s);
         }
+        // the overflow pack (inventory.Pack) is confiscated like the slots: quest items and the kept picks stay
+        for (ItemStack e : com.skycraft.inventory.Pack.entries(player)) {
+            if (e.isEmpty() || QuestItems.isQuestItem(e)) continue;
+            int take = e.getCount();
+            if (e.is(CrimeItems.LOCKPICK.get()) && kept < keep) {
+                int k = Math.min(take, keep - kept);
+                kept += k;
+                take -= k;
+            }
+            if (take <= 0) continue;
+            ItemStack all = com.skycraft.inventory.Pack.take(player, com.skycraft.inventory.Pack.indexOf(player, e), take);
+            while (!all.isEmpty()) stash(player, chests, all.split(all.getMaxStackSize()));
+        }
         if (site.mine()) {
             ItemStack pick = new ItemStack(Items.IRON_PICKAXE);
             pick.setHoverName(Component.translatable("item.skycraft.reward.cidhna_pickaxe"));
             pick.getOrCreateTag().putBoolean(TOOL_TAG, true);
-            player.getInventory().add(pick);
+            com.skycraft.inventory.Pack.giveOrDrop(player, pick);
             Notifier.message(player, Component.translatable("crime.skycraft.jail.mine_labour", LABOUR_SECONDS));
         }
         player.inventoryMenu.broadcastChanges();
@@ -711,6 +725,7 @@ public final class Jail {
             ItemStack s = inv.getItem(i);
             if (!s.isEmpty() && s.getTag() != null && s.getTag().getBoolean(TOOL_TAG)) inv.setItem(i, ItemStack.EMPTY);
         }
+        com.skycraft.inventory.Pack.remove(player, s -> s.getTag() != null && s.getTag().getBoolean(TOOL_TAG), Integer.MAX_VALUE);
     }
 
     static void release(ServerPlayer player, boolean slept) {

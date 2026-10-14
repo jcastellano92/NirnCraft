@@ -64,6 +64,9 @@ public final class ItemWeights {
     public static final String WEIGHT_NBT = "skycraft_weight";
 
     private static volatile Table table = new Table(Collections.emptyMap(), Collections.emptyMap());
+    /** Bumped whenever the table is replaced; lets {@link Pack} cache its weight (the session part keeps saved values honest). */
+    private static final long SESSION = System.nanoTime() << 12;
+    private static volatile long generation;
 
     private ItemWeights() {}
 
@@ -151,12 +154,19 @@ public final class ItemWeights {
     /** Replaces the table (server reload, or client receiving the sync packet). */
     static void setTable(Map<ResourceLocation, Float> items, Map<ResourceLocation, Float> tags) {
         table = new Table(items, tags);
+        generation++;
+    }
+
+    /** Changes whenever weights may have changed (reload, tag update, client sync). */
+    static long version() {
+        return SESSION + generation;
     }
 
     /** Tags changed: forget the cached resolutions but keep the data. */
     static void clearCache() {
         Table t = table;
         table = new Table(t.items, t.tags);
+        generation++;
     }
 
     // ------------------------------------------------------------------ heuristic

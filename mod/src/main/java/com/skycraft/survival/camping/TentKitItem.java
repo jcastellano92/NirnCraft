@@ -56,7 +56,8 @@ public class TentKitItem extends Item {
         }
         // lay out a carried bedroll, head toward the back
         int slot = findBedroll(player);
-        if (slot >= 0 || player.isCreative()) {
+        boolean packed = slot < 0 && com.skycraft.inventory.Pack.count(player, SurvivalRegistry.BEDROLL_ITEM.get()) > 0;
+        if (slot >= 0 || packed || player.isCreative()) {
             Direction in = facing.getOpposite();
             BlockState foot = SurvivalRegistry.BEDROLL.get().defaultBlockState().setValue(BedBlock.FACING, in).setValue(BedBlock.PART, BedPart.FOOT);
             level.setBlock(origin, foot, 3);
@@ -64,6 +65,9 @@ public class TentKitItem extends Item {
             com.skycraft.dig.PlacedBlocks.mark(level, origin, true);
             com.skycraft.dig.PlacedBlocks.mark(level, origin.relative(in), true);
             if (slot >= 0 && !player.isCreative()) player.getInventory().getItem(slot).shrink(1);
+            else if (packed && !player.isCreative()) {
+                com.skycraft.inventory.Pack.remove(player, s -> s.is(SurvivalRegistry.BEDROLL_ITEM.get()), 1);
+            }
         }
         level.playSound(null, origin, SoundEvents.WOOL_PLACE, SoundSource.BLOCKS, 1.0f, 0.8f);
         level.playSound(null, origin, SoundEvents.ARMOR_EQUIP_LEATHER, SoundSource.BLOCKS, 1.0f, 0.9f);

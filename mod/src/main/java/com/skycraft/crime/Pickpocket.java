@@ -202,7 +202,7 @@ public final class Pickpocket {
                 ItemStack loot = stack.copy();
                 if (!player.isCreative() && !Jail.isJailDimension(player.level())) Bounty.markStolen(loot);
                 Notifier.message(player, Component.translatable("crime.skycraft.pickpocket.stole", loot.getCount(), loot.getHoverName()));
-                player.getInventory().placeItemBackInInventory(loot);
+                com.skycraft.inventory.Pack.giveOrDrop(player, loot);
             }
             if (!player.isCreative()) {
                 Bounty.increment(player, "pickpockets", 1);

@@ -341,6 +341,14 @@ public final class RealmTravel {
                 return true;
             }
         }
+        // a filled gem that overflowed into the pack (inventory.Pack)
+        if (com.skycraft.inventory.Pack.remove(p, s -> s.getItem() instanceof SoulGemItem && SoulGemItem.getSoul(s) > 0, 1) > 0) {
+            d.putBoolean("soul_toll", true);
+            SkyData.get(p).markDirty();
+            Notifier.message(p, Component.translatable("realm.skycraft.soul_cairn.toll_paid"));
+            p.level().playSound(null, p.blockPosition(), SoundEvents.SOUL_ESCAPE, SoundSource.PLAYERS, 1f, 0.6f);
+            return true;
+        }
         Notifier.message(p, Component.translatable("realm.skycraft.soul_cairn.toll"));
         return false;
     }

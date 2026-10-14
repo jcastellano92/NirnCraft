@@ -82,9 +82,11 @@ public final class BoundWeapons {
             if (free >= 0) {
                 inv.setItem(free, held.copy());
                 p.setItemInHand(InteractionHand.MAIN_HAND, stack);
-            } else if (!inv.add(stack)) {
-                Notifier.message(p, Component.translatable("message.skycraft.inventory_full"));
-                return Spell.Result.FAILED;
+            } else {
+                // every slot is taken: the held item goes into the overflow pack and the conjured weapon takes its place
+                ItemStack displaced = held.copy();
+                p.setItemInHand(InteractionHand.MAIN_HAND, stack);
+                com.skycraft.inventory.Pack.giveOrDrop(p, displaced);
             }
         }
         MagicFx.send(p, MagicFx.SUMMON, spell.element, p.position(), p.position(), p.getId(), 18);

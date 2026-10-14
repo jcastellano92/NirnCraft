@@ -34,6 +34,6 @@ public final class GuideEvents {
                 return;
             }
         }
-        if (!inv.add(book)) player.drop(book, false);
+        com.skycraft.inventory.Pack.giveOrDrop(player, book);
     }
 }

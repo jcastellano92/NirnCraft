@@ -89,6 +89,19 @@ public final class ActionHandler {
         if (!(entity instanceof net.minecraft.world.entity.item.ItemEntity itemEntity) || !itemEntity.isAlive()) return;
         if (player.distanceToSqr(itemEntity) > 25.0) return; // within 5 blocks
 
+        // grouped: the same item lying split in a pile (five apples as three + two) is one take
+        ItemStack template = itemEntity.getItem().copy();
+        takeOneWorldItem(player, itemEntity);
+        if (template.isEmpty()) return;
+        for (net.minecraft.world.entity.item.ItemEntity other : player.serverLevel().getEntitiesOfClass(
+                net.minecraft.world.entity.item.ItemEntity.class, itemEntity.getBoundingBox().inflate(1.5),
+                e -> e != itemEntity && e.isAlive() && player.distanceToSqr(e) <= 25.0
+                        && ItemStack.isSameItemSameTags(e.getItem(), template))) {
+            takeOneWorldItem(player, other);
+        }
+    }
+
+    private static void takeOneWorldItem(ServerPlayer player, net.minecraft.world.entity.item.ItemEntity itemEntity) {
         ItemStack stack = itemEntity.getItem();
         if (stack.isEmpty()) return;
 
@@ -185,34 +198,21 @@ public final class ActionHandler {
             }
         }
 
-        // 3. Try empty storage slots (9..35)
-        if (!stack.isEmpty()) {
-            for (int i = 9; i < 36; i++) {
-                if (inv.getItem(i).isEmpty()) {
-                    inv.setItem(i, stack.copy());
-                    stack.setCount(0);
-                    return true;
-                }
-            }
+        // 3. Try empty storage slots (9..35), then 4. empty hotbar slots (except active slot): one max-size stack each
+        // (a larger stack would be a corrupt, byte-truncated slot on disk)
+        for (int i = 9; i < 36 && !stack.isEmpty(); i++) {
+            if (inv.getItem(i).isEmpty()) inv.setItem(i, stack.split(stack.getMaxStackSize()));
+        }
+        for (int i = 0; i < 9 && !stack.isEmpty(); i++) {
+            if (i != activeSlot && inv.getItem(i).isEmpty()) inv.setItem(i, stack.split(stack.getMaxStackSize()));
         }
 
-        // 4. Try empty hotbar slots (except active slot)
+        // 5. Everything the 36 slots cannot take goes to the pack: weight is the only carrying limit (inventory.Pack).
+        // Only the pack's engineering cap leaves a remainder (callers drop it at the player's feet).
         if (!stack.isEmpty()) {
-            for (int i = 0; i < 9; i++) {
-                if (i == activeSlot) continue;
-                if (inv.getItem(i).isEmpty()) {
-                    inv.setItem(i, stack.copy());
-                    stack.setCount(0);
-                    return true;
-                }
-            }
+            com.skycraft.inventory.Pack.add(player, stack);
         }
-
-        // 5. Fallback only if all other 35 slots are completely full
-        if (!stack.isEmpty()) {
-            return inv.add(stack);
-        }
-        return true;
+        return stack.isEmpty();
     }
 
     private static void handleDodgeRoll(ServerPlayer player) {
@@ -334,7 +334,20 @@ public final class ActionHandler {
                 takenAny |= takeSlot(player, menu.getSlot(i));
             }
         } else if (slotIndex >= 0 && slotIndex < containerSlotCount) {
-            takenAny = takeSlot(player, menu.getSlot(slotIndex));
+            // grouped: one request takes EVERY stack of that exact item (item + tags) in the container, however many
+            // slots they sit in ("five apples in three slots": you take the apples, all five)
+            Slot first = menu.getSlot(slotIndex);
+            if (first.hasItem()) {
+                ItemStack template = first.getItem().copy();
+                Component name = template.getHoverName();
+                int before = containerCount(menu, containerSlotCount, template);
+                for (int i = 0; i < containerSlotCount; i++) {
+                    Slot s = menu.getSlot(i);
+                    if (s.hasItem() && ItemStack.isSameItemSameTags(s.getItem(), template)) takenAny |= takeSlot(player, s);
+                }
+                int took = before - containerCount(menu, containerSlotCount, template);
+                if (took > 0) Notifier.message(player, Component.translatable("inventory.skycraft.msg.took", took, name));
+            }
         }
 
         if (takenAny) {
@@ -343,6 +356,15 @@ public final class ActionHandler {
             player.inventoryMenu.broadcastChanges();
             player.getInventory().setChanged();
         }
+    }
+
+    private static int containerCount(AbstractContainerMenu menu, int containerSlotCount, ItemStack template) {
+        int n = 0;
+        for (int i = 0; i < containerSlotCount; i++) {
+            ItemStack s = menu.getSlot(i).getItem();
+            if (!s.isEmpty() && ItemStack.isSameItemSameTags(s, template)) n += s.getCount();
+        }
+        return n;
     }
 
     /** Takes a container slot into the bags through the slot's own rules (mayPickup / onTake); leftovers go back. */
@@ -355,7 +377,7 @@ public final class ActionHandler {
         boolean moved = taken.getCount() < before;
         if (!taken.isEmpty()) {
             ItemStack rest = slot.safeInsert(taken);
-            if (!rest.isEmpty()) player.getInventory().placeItemBackInInventory(rest);
+            if (!rest.isEmpty()) com.skycraft.inventory.Pack.giveOrDrop(player, rest);
         }
         return moved;
     }
@@ -376,12 +398,34 @@ public final class ActionHandler {
                 if (menu instanceof com.skycraft.mounts.SaddlebagMenu bm && bm.isGear(pSlot.getItem())) continue;
                 storedAny |= storeSlot(player, menu, containerSlotCount, pSlot);
             }
-        } else if (slotIndex >= containerSlotCount && slotIndex < menu.slots.size()) {
-            Slot pSlot = menu.getSlot(slotIndex);
-            if (menu instanceof com.skycraft.mounts.SaddlebagMenu bm && bm.isGear(pSlot.getItem())) {
-                storedAny = bm.equipFrom(player, pSlot); // "store" is "equip" for the mount's tack
-            } else {
-                storedAny = storeSlot(player, menu, containerSlotCount, pSlot);
+            // the overflow pack goes too (last entry first: indexes below stay valid)
+            for (int i = com.skycraft.inventory.Pack.size(player) - 1; i >= 0; i--) {
+                if (menu instanceof com.skycraft.mounts.SaddlebagMenu bm && bm.isGear(com.skycraft.inventory.Pack.get(player, i))) continue;
+                storedAny |= storePackEntry(player, menu, containerSlotCount, i);
+            }
+        } else if (com.skycraft.inventory.Pack.isVirtual(slotIndex)
+                || (slotIndex >= containerSlotCount && slotIndex < menu.slots.size())) {
+            // grouped like Take: every stack of that exact item (item + tags) goes, slots and pack together
+            ItemStack template = com.skycraft.inventory.Pack.isVirtual(slotIndex)
+                    ? com.skycraft.inventory.Pack.get(player, slotIndex - com.skycraft.inventory.Pack.VIRTUAL_BASE)
+                    : menu.getSlot(slotIndex).getItem().copy();
+            // a mount's saddle and barding: "store" is "equip" for the tack (one piece, never grouped)
+            if (menu instanceof com.skycraft.mounts.SaddlebagMenu bm && !com.skycraft.inventory.Pack.isVirtual(slotIndex)
+                    && slotIndex >= containerSlotCount && slotIndex < menu.slots.size() && bm.isGear(menu.getSlot(slotIndex).getItem())) {
+                storedAny = bm.equipFrom(player, menu.getSlot(slotIndex));
+                template = ItemStack.EMPTY;
+            }
+            if (!template.isEmpty()) {
+                for (int i = containerSlotCount; i < menu.slots.size(); i++) {
+                    Slot pSlot = menu.getSlot(i);
+                    if (!pSlot.hasItem() || !ItemStack.isSameItemSameTags(pSlot.getItem(), template)) continue;
+                    // the held / off hand stack only when it is the very slot that was clicked
+                    boolean hand = pSlot.getItem() == player.getMainHandItem() || pSlot.getItem() == player.getOffhandItem();
+                    if (hand && i != slotIndex) continue;
+                    storedAny |= storeSlot(player, menu, containerSlotCount, pSlot);
+                }
+                int pi = com.skycraft.inventory.Pack.indexOf(player, template);
+                if (pi >= 0) storedAny |= storePackEntry(player, menu, containerSlotCount, pi);
             }
         }
 
@@ -403,8 +447,19 @@ public final class ActionHandler {
         boolean stored = moving.getCount() < before;
         if (!moving.isEmpty()) {
             ItemStack rest = pSlot.safeInsert(moving);
-            if (!rest.isEmpty()) player.getInventory().placeItemBackInInventory(rest);
+            if (!rest.isEmpty()) com.skycraft.inventory.Pack.giveOrDrop(player, rest);
         }
+        return stored;
+    }
+
+    /** Moves a whole pack entry into the container slots; what does not fit goes back into the pack. */
+    private static boolean storePackEntry(ServerPlayer player, AbstractContainerMenu menu, int containerSlotCount, int index) {
+        ItemStack moving = com.skycraft.inventory.Pack.take(player, index, Integer.MAX_VALUE);
+        if (moving.isEmpty()) return false;
+        int before = moving.getCount();
+        storeIntoContainerSlots(menu, containerSlotCount, moving);
+        boolean stored = moving.getCount() < before;
+        if (!moving.isEmpty()) com.skycraft.inventory.Pack.add(player, moving);
         return stored;
     }
 

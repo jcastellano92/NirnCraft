@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 
 /** Network messages of the economy module. Registration order is fixed (see {@link #register()}). */
 public final class EconomyPackets {
-    private static final int MAX_ENTRIES = 256;
+    private static final int MAX_ENTRIES = 512;
 
     private EconomyPackets() {}
 
@@ -72,28 +72,39 @@ public final class EconomyPackets {
     /**
      * One row of the barter menu.
      *
-     * @param index    stock index (merchant side) or inventory slot (player side)
+     * @param index    stock index (merchant side), inventory slot or {@code Pack.VIRTUAL_BASE + n} (player side), or
+     *                 buy-back list index
      * @param price    price per item in gold, computed by the server
      * @param category {@link ItemCategory} ordinal
      * @param status   {@link Barter#STATUS_OK}, {@link Barter#STATUS_NOT_DEALT} or {@link Barter#STATUS_STOLEN}
+     * @param equip    0 not equipped, 1 right hand, 2 left hand, 3 worn (see InventoryActions.EQ_*)
      */
-    public record Entry(int index, ItemStack stack, int price, byte category, byte status) {
+    public record Entry(int index, ItemStack stack, int price, byte category, byte status, byte equip) {
         void write(FriendlyByteBuf buf) {
             buf.writeVarInt(index);
-            buf.writeItem(stack);
+            // the count is a VarInt of its own: writeItem's count is one byte and rows can carry hundreds (the pack)
+            ItemStack one = stack.copy();
+            one.setCount(1);
+            buf.writeItem(one);
+            buf.writeVarInt(stack.getCount());
             buf.writeVarInt(price);
             buf.writeByte(category);
             buf.writeByte(status);
+            buf.writeByte(equip);
         }
 
         static Entry read(FriendlyByteBuf buf) {
-            return new Entry(buf.readVarInt(), buf.readItem(), buf.readVarInt(), buf.readByte(), buf.readByte());
+            int index = buf.readVarInt();
+            ItemStack stack = buf.readItem();
+            int count = buf.readVarInt();
+            if (!stack.isEmpty()) stack.setCount(Math.max(1, count));
+            return new Entry(index, stack, buf.readVarInt(), buf.readByte(), buf.readByte(), buf.readByte());
         }
     }
 
     /** Full barter state: opens the barter screen ({@code open}) or refreshes it after a trade. */
     public record BarterState(int entityId, Component merchantName, boolean open, long playerGold, int merchantGold,
-                              Component message, List<Entry> merchant, List<Entry> player) {
+                              Component message, List<Entry> merchant, List<Entry> player, List<Entry> buyback) {
         static void encode(BarterState m, FriendlyByteBuf buf) {
             buf.writeVarInt(m.entityId);
             buf.writeComponent(m.merchantName);
@@ -103,6 +114,7 @@ public final class EconomyPackets {
             buf.writeComponent(m.message);
             writeEntries(buf, m.merchant);
             writeEntries(buf, m.player);
+            writeEntries(buf, m.buyback);
         }
 
         private static void writeEntries(FriendlyByteBuf buf, List<Entry> entries) {
@@ -127,7 +139,8 @@ public final class EconomyPackets {
             Component msg = buf.readComponent();
             List<Entry> merchant = readEntries(buf);
             List<Entry> player = readEntries(buf);
-            return new BarterState(id, name, open, gold, merchantGold, msg, merchant, player);
+            List<Entry> buyback = readEntries(buf);
+            return new BarterState(id, name, open, gold, merchantGold, msg, merchant, player, buyback);
         }
 
         static void handle(BarterState m, Supplier<NetworkEvent.Context> ctx) {
@@ -139,25 +152,29 @@ public final class EconomyPackets {
     // ------------------------------------------------------------------ C2S
 
     /**
-     * Buy ({@code buy}) one item / the whole stack ({@code all}) of stock entry {@code index}, or sell from inventory
-     * slot {@code index}. {@code item} is the id the client saw there, so a stale click never trades the wrong thing.
+     * Buy ({@link Barter#OP_BUY}) one item / the whole stack ({@code all}) of stock entry {@code index}, sell
+     * ({@link Barter#OP_SELL}) from inventory slot / pack entry {@code index}, or buy back
+     * ({@link Barter#OP_BUYBACK}) list entry {@code index}. {@code item} is the id the client saw there, so a stale
+     * click never trades the wrong thing. {@code confirm} is the second click that sells an equipped item.
      */
-    public record BarterAction(int entityId, boolean buy, int index, boolean all, ResourceLocation item) {
+    public record BarterAction(int entityId, int op, int index, boolean all, ResourceLocation item, boolean confirm) {
         static void encode(BarterAction m, FriendlyByteBuf buf) {
             buf.writeVarInt(m.entityId);
-            buf.writeBoolean(m.buy);
+            buf.writeVarInt(m.op);
             buf.writeVarInt(m.index);
             buf.writeBoolean(m.all);
             buf.writeResourceLocation(m.item);
+            buf.writeBoolean(m.confirm);
         }
 
         static BarterAction decode(FriendlyByteBuf buf) {
-            return new BarterAction(buf.readVarInt(), buf.readBoolean(), buf.readVarInt(), buf.readBoolean(), buf.readResourceLocation());
+            return new BarterAction(buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readBoolean(), buf.readResourceLocation(),
+                    buf.readBoolean());
         }
 
         static void handle(BarterAction m, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayer player = ctx.get().getSender();
-            if (player != null) Barter.handleAction(player, m.entityId, m.buy, m.index, m.all, m.item);
+            if (player != null) Barter.handleAction(player, m.entityId, m.op, m.index, m.all, m.item, m.confirm);
             ctx.get().setPacketHandled(true);
         }
     }

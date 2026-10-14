@@ -64,14 +64,22 @@ public final class CorePackets {
          */
         public static SyncData of(PlayerData data) {
             CompoundTag tag = data.save();
-            int size = sizeOf(tag);
-            if (size <= MAX_BYTES) return new SyncData(tag);
             CompoundTag modules = tag.getCompound("modules");
+            ListTag omitted = new ListTag();
+            // the overflow pack (inventory.Pack) is mirrored by its own chunked packets, never by this one
+            if (modules.contains("pack")) {
+                modules.remove("pack");
+                omitted.add(StringTag.valueOf("pack"));
+            }
+            int size = sizeOf(tag);
+            if (size <= MAX_BYTES) {
+                if (!omitted.isEmpty()) tag.put("omitted", omitted);
+                return new SyncData(tag);
+            }
             List<String> bySize = new ArrayList<>(modules.getAllKeys());
             Map<String, Integer> sizes = new HashMap<>();
             for (String k : bySize) sizes.put(k, sizeOf(modules.getCompound(k)));
             bySize.sort((a, b) -> Integer.compare(sizes.get(b), sizes.get(a)));
-            ListTag omitted = new ListTag();
             for (String k : bySize) {
                 if (size <= MAX_BYTES) break;
                 modules.remove(k);

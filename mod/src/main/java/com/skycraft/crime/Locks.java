@@ -250,7 +250,7 @@ public final class Locks {
         for (ItemStack s : player.getInventory().items) {
             if (s.is(CrimeItems.JAIL_KEY.get())) return true;
         }
-        return false;
+        return com.skycraft.inventory.Pack.count(player, CrimeItems.JAIL_KEY.get()) > 0;
     }
 
     /** Whether the player must pick this lock before using the block. */
@@ -368,7 +368,7 @@ public final class Locks {
             ItemStack s = inv.getItem(i);
             if (s.is(CrimeItems.LOCKPICK.get())) n += s.getCount();
         }
-        return n;
+        return n + com.skycraft.inventory.Pack.count(player, CrimeItems.LOCKPICK.get());
     }
 
     private static boolean consumePick(Player player) {
@@ -380,7 +380,7 @@ public final class Locks {
                 return true;
             }
         }
-        return false;
+        return com.skycraft.inventory.Pack.remove(player, s -> s.is(CrimeItems.LOCKPICK.get()), 1) > 0;
     }
 
     /** Full sweet spot width in degrees for this player and difficulty. */
@@ -478,7 +478,7 @@ public final class Locks {
                 case 2 -> new ItemStack(s.difficulty >= EXPERT ? Items.DIAMOND : Items.GOLD_INGOT);
                 default -> Currency.coins(25L + 25L * s.difficulty);
             };
-            player.getInventory().placeItemBackInInventory(bonus);
+            com.skycraft.inventory.Pack.giveOrDrop(player, bonus);
             Notifier.message(player, Component.translatable("crime.skycraft.lock.treasure", bonus.getHoverName()));
         }
 

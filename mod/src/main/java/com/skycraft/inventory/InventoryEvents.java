@@ -63,6 +63,7 @@ public final class InventoryEvents {
                 inv.setItem(i, net.minecraft.world.item.ItemStack.EMPTY);
             }
         }
+        totalFound += Pack.extractCoins(player); // coins that overflowed into the pack
         if (totalFound > 0) {
             // Imperial luck: Imperials find more gold
             com.skycraft.core.Race race = com.skycraft.core.SkyData.get(player).getRace();

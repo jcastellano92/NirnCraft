@@ -503,7 +503,7 @@ public final class SpellEffects {
                 if (stack.is(pair[0])) {
                     stack.shrink(1);
                     ItemStack gold = new ItemStack(pair[1]);
-                    if (!inv.add(gold)) p.drop(gold, false);
+                    com.skycraft.inventory.Pack.giveOrDrop(p, gold);
                     MagicFx.send(p, MagicFx.AURA, Element.ARCANE, p.position(), p.position(), p.getId(), 2);
                     MagicFx.sound(p, SoundEvents.AMETHYST_BLOCK_CHIME, 1f, 1.5f);
                     MagicFx.sound(p, SoundEvents.ANVIL_USE, 0.3f, 1.8f);

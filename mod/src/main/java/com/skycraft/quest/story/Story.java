@@ -653,6 +653,7 @@ public final class Story {
         int n = 0;
         for (ItemStack s : p.getInventory().items) if (isRelic(s, id)) n += s.getCount();
         for (ItemStack s : p.getInventory().offhand) if (isRelic(s, id)) n += s.getCount();
+        n += com.skycraft.inventory.Pack.count(p, s -> isRelic(s, id));
         return n;
     }
 
@@ -671,6 +672,7 @@ public final class Story {
                 }
             }
         }
+        if (amount > 0) com.skycraft.inventory.Pack.remove(p, s -> isRelic(s, id), amount);
     }
 
     // ------------------------------------------------------------------ journal

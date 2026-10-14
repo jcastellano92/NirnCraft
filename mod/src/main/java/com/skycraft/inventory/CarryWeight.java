@@ -63,13 +63,14 @@ public final class CarryWeight {
                 + com.skycraft.mounts.MountGear.carryBonus(player));
     }
 
-    /** Total weight of the main inventory, worn armor and offhand. */
+    /** Total weight of the main inventory, worn armor, offhand and the pack. */
     public static float current(Player player) {
         Inventory inv = player.getInventory();
         float sum = 0f;
         sum += sum(inv.items);
         sum += sum(inv.armor);
         sum += sum(inv.offhand);
+        sum += Pack.weight(player); // the overflow pack weighs exactly like slots do: weight is the only limit
         return sum;
     }
 
@@ -86,10 +87,36 @@ public final class CarryWeight {
         if (player == null || player.isCreative() || player.isSpectator()) return false;
         if (!player.level().isClientSide) {
             State s = STATES.get(player.getUUID());
-            if (s != null && s.current >= 0) return s.over;
+            if (s != null && s.current >= 0) return enabled() && s.current > s.capacity;
             return enabled() && current(player) > capacity(player);
         }
         return enabled() && current(player) > capacity(player);
+    }
+
+    /** Overweight beyond this ratio (of capacity) and you can no longer run (below it you are only slower). */
+    public static final float RUN_LIMIT = 0.10f;
+    /** The slowest an over-encumbered character moves: none, reached at +100% of capacity (drop things). */
+    public static final float MIN_SPEED = 0f;
+
+    /**
+     * Movement speed as a fraction of normal: 1.0 at or under capacity, then falling smoothly with the overweight
+     * ratio r = (current - capacity) / capacity: {@code max(0, 1 - r)}. Nothing is ever refused for weight;
+     * you just get slower and slower.
+     */
+    public static float speedFactor(float current, float capacity) {
+        if (capacity <= 0f || current <= capacity) return 1f;
+        float r = (current - capacity) / capacity;
+        return Math.max(MIN_SPEED, 1f - r);
+    }
+
+    /** {@link #speedFactor(float, float)} of a player (1.0 for creative/spectator or with carry weight off). */
+    public static float speedFactor(Player player) {
+        if (player == null || player.isCreative() || player.isSpectator() || !enabled()) return 1f;
+        if (!player.level().isClientSide) {
+            State s = STATES.get(player.getUUID());
+            if (s != null && s.current >= 0) return speedFactor(s.current, s.capacity);
+        }
+        return speedFactor(current(player), capacity(player));
     }
 
     /** Server-side switch (common config). */
@@ -139,9 +166,11 @@ public final class CarryWeight {
         boolean enabled = enabled();
         float cur = current(player);
         float cap = capacity(player);
-        boolean over = enabled && !player.isCreative() && !player.isSpectator() && cur > cap;
+        boolean heavy = enabled && !player.isCreative() && !player.isSpectator() && cur > cap;
+        // "over" = too heavy to run (more than RUN_LIMIT above capacity); between capacity and that you are only slower
+        boolean over = heavy && cap > 0f && (cur - cap) / cap > RUN_LIMIT;
 
-        applySpeed(player, over);
+        applySpeed(player, heavy ? speedFactor(cur, cap) : 1f);
         if (over && !state.over && now - state.lastMessage > MESSAGE_COOLDOWN) {
             state.lastMessage = now;
             Notifier.message(player, Component.translatable("inventory.skycraft.overencumbered"));
@@ -161,12 +190,13 @@ public final class CarryWeight {
         }
     }
 
-    private static void applySpeed(ServerPlayer player, boolean over) {
+    /** Graded encumbrance: the movement-speed modifier is {@code factor - 1} (0 = no modifier at all). */
+    private static void applySpeed(ServerPlayer player, float factor) {
         AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speed == null) return;
-        double penalty = -safe(InventoryConfig.ENCUMBERED_SPEED_PENALTY, 0.2);
+        double penalty = Math.round((factor - 1.0) * 100.0) / 100.0;
         AttributeModifier existing = speed.getModifier(SPEED_MOD);
-        if (over && penalty != 0) {
+        if (penalty < 0) {
             if (existing != null && existing.getAmount() == penalty) return;
             if (existing != null) speed.removeModifier(SPEED_MOD);
             speed.addTransientModifier(new AttributeModifier(SPEED_MOD, "Skycraft over-encumbered", penalty, AttributeModifier.Operation.MULTIPLY_TOTAL));
@@ -176,7 +206,7 @@ public final class CarryWeight {
     }
 
     /** Forces a re-check and a fresh sync on the player's next tick. */
-    static void invalidate(Player player) {
+    public static void invalidate(Player player) {
         State s = STATES.get(player.getUUID());
         if (s != null) s.sent = false;
     }

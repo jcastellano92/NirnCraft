@@ -96,6 +96,12 @@ public final class SoulGems {
                 bestSlot = i;
             }
         }
+        if (bestSlot < 0) {
+            // an empty gem that overflowed into the pack (inventory.Pack): pull it into a slot and fill it there
+            int packed = com.skycraft.inventory.Pack.find(player,
+                    s -> s.getItem() instanceof SoulGemItem g && SoulGemItem.getSoul(s) <= 0 && g.canHold(soul));
+            if (packed >= 0) bestSlot = com.skycraft.inventory.Pack.resolveSlot(player, com.skycraft.inventory.Pack.VIRTUAL_BASE + packed, null);
+        }
         if (bestSlot < 0) return false;
 
         ItemStack stack = inv.getItem(bestSlot);
@@ -106,7 +112,7 @@ public final class SoulGems {
             filled.setCount(1);
             stack.shrink(1);
             SoulGemItem.setSoul(filled, soul);
-            if (!inv.add(filled)) player.drop(filled, false);
+            com.skycraft.inventory.Pack.giveOrDrop(player, filled);
         }
         inv.setChanged();
 

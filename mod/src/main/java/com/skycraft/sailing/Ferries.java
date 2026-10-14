@@ -149,7 +149,7 @@ public final class Ferries {
             return;
         }
         ItemStack ship = new ItemStack(SailingRegistry.SHIP_ITEMS.get(type).get());
-        if (!player.getInventory().add(ship)) player.drop(ship, false);
+        com.skycraft.inventory.Pack.giveOrDrop(player, ship);
         Dialogue.open(player, npc, Component.translatable("sailing.skycraft.dialogue.sold", ship.getHoverName()));
     }
 

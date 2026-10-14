@@ -40,6 +40,32 @@ public final class InventoryActions {
         if (player.containerMenu != player.inventoryMenu) return;
         if (!player.inventoryMenu.getCarried().isEmpty()) return;
         Inventory inv = player.getInventory();
+        if (Pack.isVirtual(slot)) {
+            // a row that lives only in the overflow pack: favorite and drop act on the pack directly, everything else
+            // pulls one stack into a real slot first and then runs the normal slot rules
+            int index = slot - Pack.VIRTUAL_BASE;
+            ItemStack entry = Pack.get(player, index);
+            if (entry.isEmpty() || !BuiltInRegistries.ITEM.getKey(entry.getItem()).equals(itemId)) return;
+            if (action == InventoryPackets.InvAction.FAVORITE) {
+                Pack.setFavorite(player, entry, !InvCategory.isFavorite(entry));
+                CarryWeight.invalidate(player);
+                return;
+            }
+            if (action == InventoryPackets.InvAction.DROP_ONE || action == InventoryPackets.InvAction.DROP_ALL) {
+                if (com.skycraft.quest.QuestItems.isQuestItem(entry)) {
+                    message(player, "quest_item");
+                    return;
+                }
+                tossAll(player, inv, Pack.take(player, index, action == InventoryPackets.InvAction.DROP_ALL ? Integer.MAX_VALUE : 1));
+                CarryWeight.invalidate(player);
+                return;
+            }
+            slot = Pack.materialize(player, index, itemId);
+            if (slot < 0) {
+                message(player, "full");
+                return;
+            }
+        }
         if (slot < 0 || slot >= SLOT_COUNT || slot >= inv.getContainerSize()) return;
         ItemStack stack = inv.getItem(slot);
         if (stack.isEmpty() || !BuiltInRegistries.ITEM.getKey(stack.getItem()).equals(itemId)) return;
@@ -50,7 +76,7 @@ public final class InventoryActions {
             case InventoryPackets.InvAction.USE -> use(player, inv, slot, stack);
             case InventoryPackets.InvAction.DROP_ONE -> drop(player, inv, slot, stack, false);
             case InventoryPackets.InvAction.DROP_ALL -> drop(player, inv, slot, stack, true);
-            case InventoryPackets.InvAction.FAVORITE -> favorite(inv, stack);
+            case InventoryPackets.InvAction.FAVORITE -> favorite(player, inv, stack);
             case InventoryPackets.InvAction.READ -> read(player, inv, slot, stack, itemId);
             default -> {
                 return;
@@ -63,6 +89,29 @@ public final class InventoryActions {
 
     public static boolean isArmorSlot(int slot) {
         return slot >= ARMOR_START && slot < ARMOR_START + 4;
+    }
+
+    /** Equip states of a row (the same numbers as the client's InvEntry). */
+    public static final int EQ_NONE = 0, EQ_RIGHT = 1, EQ_LEFT = 2, EQ_WORN = 3;
+
+    /**
+     * What a stack in {@code slot} is doing: worn armor / worn jewellery (the apparel module), the left hand, the held
+     * right hand, or nothing. Same rules the Skyrim inventory screen draws its equipped marks with.
+     */
+    public static int equipState(net.minecraft.world.entity.player.Player player, Inventory inv, int slot, ItemStack stack) {
+        if (isArmorSlot(slot)) return EQ_WORN;
+        if (slot == OFFHAND) return EQ_LEFT;
+        if (slot == inv.selected) return EQ_RIGHT;
+        return isWornJewelry(player, stack) ? EQ_WORN : EQ_NONE;
+    }
+
+    /** Jewellery counts as worn when its item id is the one in the apparel module (any stack of it, slot or pack). */
+    public static boolean isWornJewelry(net.minecraft.world.entity.player.Player player, ItemStack stack) {
+        if (stack.isEmpty() || !com.skycraft.economy.ItemCategory.isJewelry(stack)) return false;
+        ResourceLocation key = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        String id = key != null ? key.toString() : "";
+        CompoundTag apparel = com.skycraft.core.SkyData.get(player).module("apparel");
+        return id.equals(apparel.getString("necklace")) || id.equals(apparel.getString("ring")) || id.equals(apparel.getString("circlet"));
     }
 
     /** Armor slot / offhand / the selected hotbar slot. */
@@ -185,7 +234,7 @@ public final class InventoryActions {
         if (stack.getCount() > 1) {
             ItemStack one = stack.split(1);
             player.setItemSlot(target, one);
-            if (!worn.isEmpty() && !inv.add(worn)) player.drop(worn, false);
+            if (!worn.isEmpty()) Pack.giveOrDrop(player, worn);
         } else {
             inv.setItem(slot, ItemStack.EMPTY);
             player.setItemSlot(target, stack);
@@ -220,10 +269,9 @@ public final class InventoryActions {
             ItemStack off = inv.getItem(OFFHAND);
             if (!off.isEmpty()) {
                 int free = freeSlot(inv);
-                if (free >= 0) {
-                    inv.setItem(OFFHAND, ItemStack.EMPTY);
-                    inv.setItem(free, off);
-                }
+                inv.setItem(OFFHAND, ItemStack.EMPTY);
+                if (free >= 0) inv.setItem(free, off);
+                else Pack.giveOrDrop(player, off); // all 36 slots taken: the pack holds it
             }
         }
     }
@@ -257,17 +305,19 @@ public final class InventoryActions {
                 }
             }
             int empty = freeHotbarSlot(inv);
-            if (empty >= 0) select(player, empty);
-            else message(player, "full");
+            if (empty >= 0) {
+                select(player, empty);
+            } else {
+                // every slot is taken: the weapon goes into the pack (weight is the only carrying limit)
+                inv.setItem(slot, ItemStack.EMPTY);
+                Pack.giveOrDrop(player, stack);
+            }
             return;
         }
         int free = freeSlot(inv);
-        if (free < 0) {
-            message(player, "full");
-            return;
-        }
         inv.setItem(slot, ItemStack.EMPTY);
-        inv.setItem(free, stack);
+        if (free >= 0) inv.setItem(free, stack);
+        else Pack.giveOrDrop(player, stack);
     }
 
     // ------------------------------------------------------------------ use / read
@@ -303,8 +353,8 @@ public final class InventoryActions {
         if (result != stack) {
             if (stack.isEmpty()) {
                 inv.setItem(slot, result);
-            } else if (!result.isEmpty() && !inv.add(result)) {
-                player.drop(result, false);
+            } else if (!result.isEmpty()) {
+                Pack.giveOrDrop(player, result); // an empty bottle...
             }
         } else if (stack.isEmpty()) {
             inv.setItem(slot, ItemStack.EMPTY);
@@ -361,6 +411,8 @@ public final class InventoryActions {
                 toss(player, inv, inv.removeItem(i, s.getCount()));
             }
         }
+        // ... and the part of the row that sits in the overflow pack
+        tossAll(player, inv, Pack.takeAll(player, template));
     }
 
     private static void toss(ServerPlayer player, Inventory inv, ItemStack stack) {
@@ -368,12 +420,19 @@ public final class InventoryActions {
         ItemEntity entity = player.drop(stack, true);
         if (entity == null) {
             // a mod cancelled the toss: don't let the item vanish
-            if (!inv.add(stack)) player.drop(stack, false, false);
+            Pack.giveOrDrop(player, stack);
         }
     }
 
-    /** Toggles the favorite mark on every stack of this exact item (the whole list row). */
-    private static void favorite(Inventory inv, ItemStack stack) {
+    /** Tosses a stack of any size as max-size stacks (at most 64 entities per action; the rest stays in the pack). */
+    private static void tossAll(ServerPlayer player, Inventory inv, ItemStack stack) {
+        int entities = 0;
+        while (!stack.isEmpty() && entities++ < 64) toss(player, inv, stack.split(stack.getMaxStackSize()));
+        if (!stack.isEmpty()) Pack.add(player, stack);
+    }
+
+    /** Toggles the favorite mark on every stack of this exact item (the whole list row), pack entry included. */
+    private static void favorite(ServerPlayer player, Inventory inv, ItemStack stack) {
         boolean fav = !InvCategory.isFavorite(stack);
         ItemStack template = stack.copy();
         for (int i = 0; i < inv.getContainerSize(); i++) {
@@ -382,6 +441,7 @@ public final class InventoryActions {
             setFavorite(s, fav);
             inv.setChanged();
         }
+        Pack.setFavorite(player, template, fav);
     }
 
     static void setFavorite(ItemStack stack, boolean fav) {
