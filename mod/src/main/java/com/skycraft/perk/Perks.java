@@ -348,6 +348,8 @@ public final class Perks {
         p(s, "sprinter", -0.5f, 0.35f, lv(25), "runner");
         p(s, "climber", 0.5f, 0.35f, lv(35), "runner");
         p(s, "dodge_roll", -0.35f, 0.7f, lv(50), "sprinter");
+        p(s, "strong_back", -0.75f, 0.2f, lv(15, 30, 45), "runner");
+        p(s, "pack_mule", 0.75f, 0.2f, lv(50, 75), "strong_back");
         p(s, "wind_walker", 0f, 1f, lv(100), "dodge_roll", "climber");
     }
 

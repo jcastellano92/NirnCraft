@@ -53,6 +53,27 @@ public final class CarryWeight {
 
     // ------------------------------------------------------------------ public API
 
+    /** Carry bonus of a race (weight units): the strong folk of Skyrim and Orsinium carry more, the slight Elves less. */
+    public static float raceBonus(Player player) {
+        com.skycraft.core.Race race = SkyData.get(player).getRace();
+        if (race == null) return 0f;
+        return switch (race) {
+            case ORSIMER -> 50f;
+            case NORD -> 40f;
+            case REDGUARD -> 30f;
+            case ARGONIAN, IMPERIAL -> 10f;
+            case ALTMER, BOSMER -> -30f;
+            case KHAJIIT -> -20f;
+            default -> 0f;
+        };
+    }
+
+    /** Capacity from the Athletics perks Strong Back (+25 per rank) and Pack Mule (+50 per rank). */
+    public static float perkBonus(Player player) {
+        return 25f * com.skycraft.perk.Perks.rank(player, "athletics.strong_back")
+                + 50f * com.skycraft.perk.Perks.rank(player, "athletics.pack_mule");
+    }
+
     /** How much the player can carry before becoming over-encumbered. */
     public static float capacity(Player player) {
         PlayerData data = SkyData.get(player);
@@ -60,6 +81,7 @@ public final class CarryWeight {
         double perStamina = safe(InventoryConfig.CAPACITY_PER_STAMINA, 5.0);
         // the mount you steer carries part of the load (kind and saddle: com.skycraft.mounts.MountGear)
         return (float) (base + perStamina * data.getStaminaPoints() + data.module("bonus").getFloat("carry")
+                + raceBonus(player) + perkBonus(player)
                 + com.skycraft.mounts.MountGear.carryBonus(player));
     }
 
