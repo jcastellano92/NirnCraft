@@ -16,7 +16,7 @@ import net.minecraftforge.fml.common.Mod;
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class BossBarOffset {
-    private static final float OFFSET = 26.0F;
+    private static final float OFFSET = 30.0F;
     private static boolean pushed;
 
     private BossBarOffset() {}

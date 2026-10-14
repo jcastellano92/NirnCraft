@@ -1,6 +1,7 @@
 package com.skycraft.client;
 
 import com.skycraft.Skycraft;
+import com.skycraft.client.hud.TargetHud;
 import com.skycraft.client.screen.RaceScreen;
 import com.skycraft.client.screen.SkillsScreen;
 import com.skycraft.combat.WeaponClass;
@@ -422,7 +423,7 @@ public final class ClientEvents {
         boolean replaced = name.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t
                 && (t.getKey().startsWith("entity.skycraft.") || t.getKey().equals("entity.minecraft.ender_dragon")
                 || t.getKey().equals("entity.minecraft.wither"));
-        if (replaced || SkyBossHud.isShowing(name)) {
+        if (replaced || SkyBossHud.isShowing(name) || TargetHud.isVisible()) {
             event.setIncrement(0);
             event.setCanceled(true);
         }

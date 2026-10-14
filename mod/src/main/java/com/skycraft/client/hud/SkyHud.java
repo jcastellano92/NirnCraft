@@ -233,7 +233,7 @@ public final class SkyHud {
         // stay clear of the boss and enemy bars under the compass
         boolean boss = com.skycraft.client.SkyBossHud.isShowing(null);
         boolean target = TargetHud.isVisible();
-        int off = msg.kind() == NotifyKind.BIG_TITLE ? 0 : (boss ? 28 : 0) + (target ? 24 : 0);
+        int off = msg.kind() == NotifyKind.BIG_TITLE ? 0 : ((boss || target) ? 28 : 0);
         g.pose().pushPose();
         g.pose().translate(0, off, 0);
         renderBannerBody(g, font, mc, msg, width, height, alpha, cx, settle);

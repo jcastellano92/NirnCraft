@@ -21,7 +21,7 @@ public final class Compass {
         Font font = mc.font;
         int half = 110;
         int cx = width / 2;
-        int y = 8;
+        int y = 12;
         float yaw = Mth.wrapDegrees(mc.player.getViewYRot(partialTick));
 
         // frame: smoky band with fading gold edges and end ornaments (textures/gui/hud/compass.png)
@@ -59,6 +59,10 @@ public final class Compass {
 
         // markers
         Vec3 eye = mc.player.position();
+        CompassMarkers.Marker bestCentred = null;
+        float bestRel = 999f;
+        double bestDist = 0;
+
         for (CompassMarkers.Marker m : CompassMarkers.deduplicated()) {
             double dx = m.pos().x - eye.x;
             double dz = m.pos().z - eye.z;
@@ -72,22 +76,32 @@ public final class Compass {
             }
             int x = cx + (int) (rel / 90f * half);
             drawMarker(g, x, y + 6, m);
-            boolean centred = Math.abs(rel) < 4 && !m.label().isEmpty();
-            if (centred) {
-                // Undiscovered locations (LOCATION) show only their icon without a name
-                if (m.shape() != CompassMarkers.Shape.LOCATION) {
-                    String label = m.label() + "  " + (int) dist + "m";
-                    g.drawCenteredString(font, label, cx, y + 16, 0xFFE8E2D0);
+
+            float absRel = Math.abs(rel);
+            if (absRel < 6 && !m.label().isEmpty() && m.shape() != CompassMarkers.Shape.LOCATION) {
+                if (absRel < bestRel) {
+                    bestCentred = m;
+                    bestRel = absRel;
+                    bestDist = dist;
                 }
             } else if (m.priority() >= CompassMarkers.TRACKED_PRIORITY) {
-                // the tracked quest always carries its distance, wherever it sits on the bar
-                String d = (int) dist + "m";
-                g.pose().pushPose();
-                g.pose().translate(x, y + 15, 0);
-                g.pose().scale(0.75f, 0.75f, 1f);
-                g.drawString(font, d, -font.width(d) / 2, 0, 0xFFE8C060, true);
-                g.pose().popPose();
+                // the tracked quest carries its distance; avoid drawing if directly under target bar
+                boolean inTargetArea = TargetHud.isVisible() && Math.abs(x - cx) < 85;
+                if (!inTargetArea) {
+                    String d = (int) dist + "m";
+                    g.pose().pushPose();
+                    g.pose().translate(x, y + 15, 0);
+                    g.pose().scale(0.75f, 0.75f, 1f);
+                    g.drawString(font, d, -font.width(d) / 2, 0, 0xFFE8C060, true);
+                    g.pose().popPose();
+                }
             }
+        }
+
+        // Location text above compass: selected closest to looking direction
+        if (bestCentred != null) {
+            String label = bestCentred.label() + "  " + (int) bestDist + "m";
+            g.drawCenteredString(font, label, cx, y - 10, 0xFFE8E2D0);
         }
     }
 

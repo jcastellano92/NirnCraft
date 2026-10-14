@@ -9,11 +9,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
@@ -30,19 +29,26 @@ import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.Locale;
+
 /**
- * Skyrim's enemy health bar at the top centre: the creature you are fighting or aiming at (up to 32 blocks, not
- * through walls), its name in small capitals and a red bar that drains toward the centre with a pale trail showing
- * the last hit. Name and trim are coloured by how dangerous it is next to you (weak, even, strong, deadly). Fades
- * out a few seconds after you look away; bosses use {@link SkyBossHud} instead.
+ * Skyrim's authentic enemy & boss health bar, positioned directly beneath the compass.
+ * <p>
+ * Displays the single entity the player is actively fighting or aiming at within their forward combat cone.
+ * Both standard hostiles and bosses use this identical, unified bar. Features a carved Nordic trapezoidal
+ * frame, symmetrical health depletion from both outer ends towards the center, fading damage trails on both sides,
+ * Title-Cased names, and dynamic Celtic knot ornamental brackets that adapt to name lengths.
+ * </p>
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class TargetHud {
-    private static final double RANGE = 32.0;
-    private static final long LINGER_MS = 3500;
+    private static final double RANGE = 36.0;
+    private static final long LINGER_MS = 3200;
 
     private static LivingEntity target;
     private static long lastSeen;
+    private static LivingEntity lastAttacked;
+    private static long lastAttackedTime;
     private static float shownHealth = 1f;
     private static float trailHealth = 1f;
     private static float alpha;
@@ -50,16 +56,34 @@ public final class TargetHud {
 
     private TargetHud() {}
 
-    /** The enemy bar is on screen (other HUD elements make room for it). */
+    /** Whether the target bar is visible on screen. */
     public static boolean isVisible() {
-        return target != null && alpha > 0.1f;
+        return target != null && alpha > 0.05f;
     }
 
-    /** The local player hit something: show it even if it isn't under the crosshair any more. */
+    /** The currently focused combat target. */
+    public static LivingEntity getTarget() {
+        return isVisible() ? target : null;
+    }
+
+    /** Returns the active target if it is a boss, or null. Used by soundtrack/boss events. */
+    public static LivingEntity getActiveBoss() {
+        LivingEntity t = getTarget();
+        return (t != null && isBoss(t)) ? t : null;
+    }
+
+    /** Whether an entity counts as a boss. */
+    public static boolean isBoss(LivingEntity e) {
+        return SkyBossHud.isBossEntity(e);
+    }
+
+    /** When the local player attacks an entity, immediately engage it. */
     @SubscribeEvent
     public static void onAttack(AttackEntityEvent event) {
         if (event.getEntity().level().isClientSide && event.getEntity() == Minecraft.getInstance().player
                 && event.getTarget() instanceof LivingEntity le && worthShowing(le)) {
+            lastAttacked = le;
+            lastAttackedTime = Util.getMillis();
             select(le);
         }
     }
@@ -73,12 +97,69 @@ public final class TargetHud {
             target = null;
             return;
         }
-        if (target != null && (!target.isAlive() && target.deathTime > 15 || target.level() != mc.level || target.distanceTo(player) > RANGE * 1.5)) {
+
+        long now = Util.getMillis();
+
+        // Target death / invalidation check
+        if (target != null) {
+            if (!target.isAlive() || target.isDeadOrDying()) {
+                shownHealth = 0f;
+                if (now - lastSeen > 1200) {
+                    target = null;
+                }
+            } else if (target.level() != mc.level || target.distanceTo(player) > (isBoss(target) ? 52.0 : RANGE * 1.5)) {
+                target = null;
+            }
+        }
+
+        if (mc.isPaused() || player.tickCount % 2 != 0) return;
+
+        // Scan for candidates in the player's forward combat area
+        Vec3 eye = player.getEyePosition();
+        Vec3 look = player.getViewVector(1f);
+        LivingEntity aimed = mc.crosshairPickEntity instanceof LivingEntity le ? le : farPick(mc, player);
+
+        LivingEntity bestCandidate = null;
+        double bestScore = -999.0;
+
+        AABB searchBox = player.getBoundingBox().inflate(RANGE);
+        for (LivingEntity e : mc.level.getEntitiesOfClass(LivingEntity.class, searchBox, LivingEntity::isAlive)) {
+            if (e == player || e instanceof ArmorStand || e.isSpectator() || e.isInvisible()) continue;
+            if (!worthShowing(e)) continue;
+
+            Vec3 toTarget = e.getEyePosition().subtract(eye);
+            double dist = toTarget.length();
+            if (dist < 0.2 || dist > (isBoss(e) ? 48.0 : RANGE)) continue;
+
+            Vec3 dir = toTarget.normalize();
+            double dot = look.dot(dir);
+
+            // Forward combat cone (~140° area in front of player); recently attacked foes get wider leeway
+            boolean recentAttack = (e == lastAttacked && (now - lastAttackedTime < 3500));
+            if (dot < 0.35 && !recentAttack) continue;
+
+            // Line of sight check (blocks obscure targets)
+            if (!player.hasLineOfSight(e)) continue;
+
+            // Alignment score: closest to look direction has highest dot; aim & combat engagement add priority
+            double score = dot * 4.0 - (dist / 24.0);
+            if (e == aimed) score += 5.0;
+            if (recentAttack) score += 4.0;
+            if (e instanceof Mob mob && mob.getTarget() == player) score += 2.0;
+            if (isBoss(e)) score += 1.5;
+            if (e == target) score += 1.5; // Hysteresis bonus prevents jitter between nearby foes
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestCandidate = e;
+            }
+        }
+
+        if (bestCandidate != null) {
+            select(bestCandidate);
+        } else if (target != null && now - lastSeen > LINGER_MS) {
             target = null;
         }
-        if (mc.isPaused() || player.tickCount % 2 != 0) return;
-        LivingEntity aimed = mc.crosshairPickEntity instanceof LivingEntity le ? le : farPick(mc, player);
-        if (aimed != null && worthShowing(aimed)) select(aimed);
     }
 
     private static void select(LivingEntity e) {
@@ -89,7 +170,7 @@ public final class TargetHud {
         lastSeen = Util.getMillis();
     }
 
-    /** A cheap long-range pick along the view (every other tick), stopped by blocks. */
+    /** Cheaper visual-line pick along the view vector. */
     private static LivingEntity farPick(Minecraft mc, LocalPlayer player) {
         Vec3 eye = player.getEyePosition();
         Vec3 look = player.getViewVector(1f);
@@ -104,84 +185,203 @@ public final class TargetHud {
     }
 
     private static boolean worthShowing(LivingEntity e) {
-        if (e instanceof ArmorStand || e instanceof Player && !e.isAlive()) return false;
+        if (e instanceof ArmorStand || (e instanceof Player && !e.isAlive())) return false;
         if (e.isInvisible()) return false;
-        // creatures that matter in a fight: monsters, anything angry at us, anything we've hurt
-        if (e instanceof Enemy || e instanceof Player) return true;
+        if (e instanceof Enemy || isBoss(e)) return true;
         if (e instanceof Mob mob && mob.getTarget() == Minecraft.getInstance().player) return true;
-        return e.getHealth() < e.getMaxHealth() || e == target;
+        if (e == lastAttacked && (Util.getMillis() - lastAttackedTime < 4000)) return true;
+        return e == target;
     }
 
     private static float health(LivingEntity e) {
         return e.getMaxHealth() <= 0 ? 0f : Mth.clamp(e.getHealth() / e.getMaxHealth(), 0f, 1f);
     }
 
-    /** 0 weak, 1 even, 2 strong, 3 deadly: the target's toughness next to the player's. */
-    private static int danger(LivingEntity e, Player player) {
-        double armor = e.getAttributes().hasAttribute(Attributes.ARMOR) ? e.getAttributeValue(Attributes.ARMOR) : 0;
-        double ratio = e.getMaxHealth() * (1.0 + armor / 25.0) / Math.max(1.0, player.getMaxHealth());
-        if (ratio < 0.45) return 0;
-        if (ratio < 1.6) return 1;
-        if (ratio < 3.5) return 2;
-        return 3;
+    /**
+     * Formats an entity's name into Skyrim's Title Case (e.g. "Bandit", "Bandit Chief", "Draugr Deathlord").
+     */
+    public static String formatTitleCase(Component component) {
+        String raw = component.getString().trim();
+        if (raw.isEmpty()) return "";
+        String[] words = raw.split("\\s+");
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < words.length; i++) {
+            String word = words[i];
+            if (word.isEmpty()) continue;
+            if (i > 0) sb.append(' ');
+            String lower = word.toLowerCase(Locale.ROOT);
+            if (i > 0 && (lower.equals("of") || lower.equals("the") || lower.equals("and") || lower.equals("in") || lower.equals("a"))) {
+                sb.append(lower);
+            } else {
+                sb.append(Character.toUpperCase(lower.charAt(0)));
+                if (lower.length() > 1) {
+                    sb.append(lower.substring(1));
+                }
+            }
+        }
+        return sb.toString();
     }
 
+    /** 10x6 Celtic knot pixel pattern framing enemy names. */
+    private static final int[][] KNOT_PIXELS = {
+            {0, 0, 1, 1, 0, 0, 1, 1, 0, 0},
+            {0, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+            {1, 1, 0, 0, 1, 1, 0, 0, 1, 1},
+            {1, 1, 0, 0, 1, 1, 0, 0, 1, 1},
+            {0, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+            {0, 0, 1, 1, 0, 0, 1, 1, 0, 0}
+    };
+
+    /**
+     * Renders the authentic Skyrim target health bar under the compass.
+     */
     public static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
         Minecraft mc = Minecraft.getInstance();
         long now = Util.getMillis();
         float dt = Mth.clamp((now - lastFrame) / 1000f, 0f, 0.25f);
         lastFrame = now;
+
         if (!VisualConfig.TARGET_BAR.get() || mc.options.hideGui || mc.player == null) return;
         LivingEntity e = target;
-        boolean visible = e != null && now - lastSeen < LINGER_MS && !(e.isAlive() && SkyBossHud.isShowing(e.getDisplayName()));
+        boolean visible = e != null && (now - lastSeen < LINGER_MS);
         alpha += ((visible ? 1f : 0f) - alpha) * (1f - (float) Math.exp((visible ? -10.0 : -4.0) * dt));
         if (e == null || alpha < 0.02f) return;
 
         float hp = e.isAlive() ? health(e) : 0f;
         shownHealth += (hp - shownHealth) * (1f - (float) Math.exp(-12.0 * dt));
-        // the pale "damage taken" trail waits a moment, then catches up
-        if (trailHealth < shownHealth) trailHealth = shownHealth;
-        else trailHealth += (shownHealth - trailHealth) * (1f - (float) Math.exp(-2.2 * dt));
+        if (trailHealth < shownHealth) {
+            trailHealth = shownHealth;
+        } else {
+            trailHealth += (shownHealth - trailHealth) * (1f - (float) Math.exp(-2.5 * dt));
+        }
 
         Font font = mc.font;
-        int danger = danger(e, mc.player);
-        int nameColor = switch (danger) {
-            case 0 -> 0xFFB8B4AC;
-            case 2 -> 0xFFF0C878;
-            case 3 -> 0xFFFF7A6A;
-            default -> 0xFFF0EAD6;
-        };
-        int barColor = switch (danger) {
-            case 0 -> 0x9A3A32;
-            case 2 -> 0xC0281E;
-            case 3 -> 0xA0102A;
-            default -> 0xB0262A;
-        };
-        int w = Math.min(150, width / 3);
-        int x = (width - w) / 2;
-        int y = SkyBossHud.isShowing(null) ? 76 : 46;
+        int cx = width / 2;
+        int barW = Math.min(160, width - 80);
+        int barH = 6;
+        int barY = 26; // Placed directly under the compass frame (compass frame y=11..25)
+        int tSlope = 5; // Inset slope in pixels across bar height
 
-        String name = SkyUi.ellipsize(font, SkyUi.caps(e.getDisplayName()), w + 40);
-        SkyUi.scaledCentered(g, font, name, width / 2f, y - 10, 0.75f, SkyUi.fade(nameColor, alpha), true);
+        // 1. Trapezoidal Health Bar & Symmetrical Depletion / Trails
+        for (int dy = 0; dy < barH; dy++) {
+            int yLine = barY + dy;
+            int slopeInset = (dy * tSlope) / barH;
+            int rLeft = (cx - barW / 2) + slopeInset;
+            int rRight = (cx + barW / 2) - slopeInset;
 
-        SkyUi.ornateBar(g, x, y, w, 4, 0f, barColor, alpha, true, false);
-        int trailW = Math.round(w * Mth.clamp(trailHealth, 0f, 1f));
-        int a = (int) (alpha * 255) << 24;
-        if (trailW > 0) g.fill(x + (w - trailW) / 2, y, x + (w + trailW) / 2, y + 4, (int) (alpha * 0xB0) << 24 | 0xE8D8C0);
-        int fillW = Math.round(w * Mth.clamp(shownHealth, 0f, 1f));
-        if (fillW > 0) {
-            int left = x + (w - fillW) / 2;
-            g.fill(left, y, left + fillW, y + 4, a | barColor);
-            g.fill(left, y, left + fillW, y + 1, a | SkyUi.brighten(barColor, 70));
+            // Dark trough background
+            g.fill(rLeft, yLine, rRight, yLine + 1, SkyUi.fade(0xE0121010, alpha));
+            g.fill(rLeft, yLine, rRight, yLine + 1, SkyUi.fade(0x403A1212, alpha));
+
+            // Symmetrical health depletion on both sides
+            int trailWidth = Math.round(barW * Mth.clamp(trailHealth, 0f, 1f));
+            int fillWidth = Math.round(barW * Mth.clamp(shownHealth, 0f, 1f));
+
+            int tLeft = Math.max(rLeft, cx - trailWidth / 2);
+            int tRight = Math.min(rRight, cx + trailWidth / 2);
+            int fLeft = Math.max(rLeft, cx - fillWidth / 2);
+            int fRight = Math.min(rRight, cx + fillWidth / 2);
+
+            // Fading damage trail on both sides
+            if (fLeft > tLeft) {
+                g.fill(tLeft, yLine, fLeft, yLine + 1, SkyUi.fade(0x999E342A, alpha));
+            }
+            if (tRight > fRight) {
+                g.fill(fRight, yLine, tRight, yLine + 1, SkyUi.fade(0x999E342A, alpha));
+            }
+
+            // Symmetrical red health fill (centered, draining from both sides)
+            if (fRight > fLeft) {
+                int red = switch (dy) {
+                    case 0 -> 0xFFE64646; // Specular top highlight
+                    case 1 -> 0xFFD22828; // Upper bright crimson
+                    case 2, 3 -> 0xFFB21818; // Rich Skyrim crimson
+                    default -> 0xFF650A0A; // Shaded bottom
+                };
+                g.fill(fLeft, yLine, fRight, yLine + 1, SkyUi.fade(red, alpha));
+            }
         }
-        if (danger == 3) {
-            // deadly: a small skull-like mark beside the name
-            int sx = width / 2 + font.width(name) * 3 / 8 + 6;
-            int sy = y - 10;
-            g.fill(sx, sy, sx + 5, sy + 4, SkyUi.fade(0xFFFF7A6A, alpha));
-            g.fill(sx + 1, sy + 4, sx + 4, sy + 6, SkyUi.fade(0xFFFF7A6A, alpha));
-            g.fill(sx + 1, sy + 1, sx + 2, sy + 2, SkyUi.fade(0xFF200808, alpha));
-            g.fill(sx + 3, sy + 1, sx + 4, sy + 2, SkyUi.fade(0xFF200808, alpha));
+
+        // 2. Trapezoid Frame Outlines
+        int borderColor = SkyUi.fade(0xFF383232, alpha);
+        // Top line
+        g.fill(cx - barW / 2 - 1, barY - 1, cx + barW / 2 + 1, barY, borderColor);
+        // Bottom line
+        g.fill(cx - barW / 2 + tSlope, barY + barH, cx + barW / 2 - tSlope, barY + barH + 1, borderColor);
+        // Sloped ends
+        for (int dy = 0; dy < barH; dy++) {
+            int slope = (dy * tSlope) / barH;
+            int xL = (cx - barW / 2) + slope;
+            int xR = (cx + barW / 2) - slope;
+            g.fill(xL - 1, barY + dy, xL, barY + dy + 1, borderColor);
+            g.fill(xR, barY + dy, xR + 1, barY + dy + 1, borderColor);
+        }
+
+        // 3. Enemy Name & Dynamic Nordic Ornamental Brackets
+        int nameY = barY + barH + 3;
+        String name = formatTitleCase(e.getDisplayName());
+        int rawW = font.width(name);
+
+        // Dynamically scale/condense font for long names
+        float scale = 0.82f;
+        if (rawW * scale > 85f) {
+            scale = Math.max(0.65f, 85f / rawW);
+        }
+        float scaledW = rawW * scale;
+
+        // Celtic knot positions & wing spans
+        int knotW = 10;
+        int knotH = 6;
+        int knotY = nameY + (int) (9 * scale) / 2 - 3;
+        int leftKnotX = (int) (cx - (scaledW / 2f) - 4 - knotW);
+        int rightKnotX = (int) (cx + (scaledW / 2f) + 4);
+
+        int maxWing = (int) ((barW - scaledW) / 2 - 16);
+        int wingLen = Math.max(12, Math.min(42, maxWing));
+        int wingColor = SkyUi.fade(0xFF8A847C, alpha);
+
+        // Left wing (double horizontal lines with angled tip)
+        g.fill(leftKnotX - wingLen + 3, knotY + 1, leftKnotX, knotY + 2, wingColor);
+        g.fill(leftKnotX - wingLen, knotY + 4, leftKnotX, knotY + 5, wingColor);
+        drawAngledCap(g, leftKnotX - wingLen, knotY + 1, true, wingColor);
+
+        // Right wing (double horizontal lines with angled tip)
+        g.fill(rightKnotX + knotW, knotY + 1, rightKnotX + knotW + wingLen, knotY + 2, wingColor);
+        g.fill(rightKnotX + knotW, knotY + 4, rightKnotX + knotW + wingLen - 3, knotY + 5, wingColor);
+        drawAngledCap(g, rightKnotX + knotW + wingLen - 3, knotY + 1, false, wingColor);
+
+        // Celtic knots
+        drawKnot(g, leftKnotX, knotY, alpha);
+        drawKnot(g, rightKnotX, knotY, alpha);
+
+        // Centered Title-Cased Name with drop shadow
+        SkyUi.scaledCentered(g, font, name, cx, nameY, scale, SkyUi.fade(0xFFECE6D8, alpha), true);
+    }
+
+    private static void drawKnot(GuiGraphics g, int kx, int ky, float alpha) {
+        int ribbonColor = SkyUi.fade(0xFFC4BEB0, alpha);
+        int shadowColor = SkyUi.fade(0xFF282420, alpha);
+        for (int y = 0; y < 6; y++) {
+            for (int x = 0; x < 10; x++) {
+                if (KNOT_PIXELS[y][x] == 1) {
+                    g.fill(kx + x, ky + y + 1, kx + x + 1, ky + y + 2, shadowColor);
+                    g.fill(kx + x, ky + y, kx + x + 1, ky + y + 1, ribbonColor);
+                }
+            }
+        }
+    }
+
+    private static void drawAngledCap(GuiGraphics g, int x, int y, boolean left, int color) {
+        if (left) {
+            g.fill(x + 2, y, x + 3, y + 1, color);
+            g.fill(x + 1, y + 1, x + 2, y + 2, color);
+            g.fill(x + 1, y + 2, x + 2, y + 3, color);
+            g.fill(x, y + 3, x + 1, y + 4, color);
+        } else {
+            g.fill(x + 2, y, x + 3, y + 1, color);
+            g.fill(x + 1, y + 1, x + 2, y + 2, color);
+            g.fill(x + 1, y + 2, x + 2, y + 3, color);
+            g.fill(x, y + 3, x + 1, y + 4, color);
         }
     }
 }

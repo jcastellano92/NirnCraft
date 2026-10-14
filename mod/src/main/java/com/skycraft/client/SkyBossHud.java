@@ -43,11 +43,20 @@ public final class SkyBossHud {
     /** The boss whose bar is shown (or fading), if any. Used by the soundtrack for boss music. */
     @org.jetbrains.annotations.Nullable
     public static LivingEntity currentBoss() {
+        LivingEntity target = com.skycraft.client.hud.TargetHud.getActiveBoss();
+        if (target != null) return target;
         return activeBoss;
     }
 
-    /** True if the bar for this boss name is the one this HUD is drawing (its vanilla boss bar is then hidden). */
+    /** True if the bar for this boss name is being drawn by the HUD (its vanilla boss bar is then hidden). */
     public static boolean isShowing(Component name) {
+        if (com.skycraft.client.hud.TargetHud.isVisible()) {
+            LivingEntity target = com.skycraft.client.hud.TargetHud.getTarget();
+            if (target != null && isBossEntity(target)) {
+                if (name == null) return true;
+                return target.getDisplayName().getString().equals(name.getString());
+            }
+        }
         if (name == null) return activeBoss != null && currentAlpha > 0.05f;
         return activeBoss != null && currentAlpha > 0.01f && activeBoss.getDisplayName().getString().equals(name.getString());
     }
@@ -112,7 +121,7 @@ public final class SkyBossHud {
         return closest;
     }
 
-    private static boolean isBossEntity(LivingEntity e) {
+    public static boolean isBossEntity(LivingEntity e) {
         if (e instanceof EnderDragon || e instanceof WitherBoss) return true;
         if (e.getType().is(com.skycraft.combat.CombatHandler.BOSSES)) return true;
         if (e.getMaxHealth() < 80.0f) return false;
@@ -124,83 +133,7 @@ public final class SkyBossHud {
 
     /** HUD overlay "sky_boss_bar" (registered by {@code visual.client.VisualClientSetup}). */
     public static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
-        if (currentAlpha <= 0.01f || activeBoss == null) return;
-
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.options.hideGui) return;
-        Font font = mc.font;
-
-        if (com.skycraft.visual.VisualConfig.STYLED_BOSS_BAR.get()) {
-            renderStyled(g, font, width);
-            return;
-        }
-
-        int barW = 220;
-        int barH = 5;
-        int barX = (width - barW) / 2;
-        int barY = 34;
-
-        int alphaInt = (int) (currentAlpha * 255.0f);
-        int borderCol = (alphaInt << 24) | 0x2A241C;
-        int bgCol = (alphaInt << 24) | 0x0A0908;
-        int healthCol = (alphaInt << 24) | (COLOR_HEALTH & 0x00FFFFFF);
-        int textCol = (alphaInt << 24) | 0xE0E0E0;
-        int goldCol = (alphaInt << 24) | (COLOR_GOLD & 0x00FFFFFF);
-
-        // Nordic carved dragon wing ends
-        g.drawString(font, "◄══", barX - 22, barY - 2, goldCol, false);
-        g.drawString(font, "══►", barX + barW + 4, barY - 2, goldCol, false);
-
-        // Frame and Background
-        g.fill(barX - 1, barY - 1, barX + barW + 1, barY + barH + 1, borderCol);
-        g.fill(barX, barY, barX + barW, barY + barH, bgCol);
-
-        // Health Fill
-        int fillW = (int) (barW * Mth.clamp(currentDisplayHealth, 0.0f, 1.0f));
-        if (fillW > 0) {
-            g.fill(barX, barY, barX + fillW, barY + barH, healthCol);
-            // Highlight specular line
-            g.fill(barX, barY, barX + fillW, barY + 1, (alphaInt << 24) | 0xFFE08080);
-        }
-
-        // Center diamond marker
-        g.fill(barX + barW / 2 - 1, barY - 1, barX + barW / 2 + 1, barY + barH + 1, goldCol);
-
-        // Boss Name label
-        Component bossName = activeBoss.getDisplayName();
-        int nameW = font.width(bossName);
-        g.drawString(font, bossName, (width - nameW) / 2, barY - 10, textCol, true);
+        // Boss health bars are handled uniformly by TargetHud under the compass, matching Skyrim.
+        // Doing nothing here guarantees only ONE bar is ever rendered.
     }
-
-    /**
-     * The Skyrim boss bar: the name in spaced small capitals over an ornament, then a long crimson bar between
-     * winged end caps that drains toward the centre, with a pale trail of the last hit.
-     */
-    private static void renderStyled(GuiGraphics g, Font font, int width) {
-        float a = currentAlpha;
-        int barW = Math.min(220, width - 90);
-        int barX = (width - barW) / 2;
-        int barY = 52;
-        String name = com.skycraft.inventory.client.SkyUi.caps(activeBoss.getDisplayName());
-        com.skycraft.inventory.client.SkyUi.scaledCentered(g, font, name, width / 2f, barY - 15, 0.85f,
-                com.skycraft.inventory.client.SkyUi.fade(0xFFF0EAD6, a), true);
-        com.skycraft.inventory.client.SkyUi.ornament(g, width / 2, barY - 4, Math.min(80, barW / 2 - 10),
-                com.skycraft.inventory.client.SkyUi.fade(0xFFC8BC9A, a * 0.8f));
-        com.skycraft.inventory.client.SkyUi.ornateBar(g, barX, barY, barW, 5, 0f, COLOR_HEALTH & 0xFFFFFF, a, true, true);
-        float hp = activeBoss.isAlive() ? Mth.clamp(activeBoss.getHealth() / activeBoss.getMaxHealth(), 0f, 1f) : 0f;
-        if (trailHealth < currentDisplayHealth) trailHealth = currentDisplayHealth;
-        else trailHealth += (currentDisplayHealth - trailHealth) * 0.02f;
-        int alphaInt = (int) (a * 255) << 24;
-        int trailW = Math.round(barW * trailHealth);
-        if (trailW > 0) g.fill(barX + (barW - trailW) / 2, barY, barX + (barW + trailW) / 2, barY + 5, (int) (a * 0xA0) << 24 | 0xE8D8C0);
-        int fillW = Math.round(barW * Mth.clamp(Math.min(currentDisplayHealth, hp + 0.02f), 0f, 1f));
-        if (fillW > 0) {
-            int left = barX + (barW - fillW) / 2;
-            g.fill(left, barY, left + fillW, barY + 5, alphaInt | (COLOR_HEALTH & 0xFFFFFF));
-            g.fill(left, barY, left + fillW, barY + 1, alphaInt | 0xE07060);
-            g.fill(left, barY + 4, left + fillW, barY + 5, alphaInt | 0x5A0E10);
-        }
-    }
-
-    private static float trailHealth = 1.0f;
 }
