@@ -1,6 +1,7 @@
 package com.skycraft.world;
 
 import com.skycraft.Skycraft;
+import com.skycraft.combat.Stealth;
 import com.skycraft.core.Notifier;
 import com.skycraft.core.PlayerData;
 import com.skycraft.core.SkyData;
@@ -284,8 +285,10 @@ public final class RestManager {
         if (enemiesNear(player, 16)) return Component.translatable("world.skycraft.rest.enemies." + act);
         if (player.isInWater() || player.isInLava()) return Component.translatable("world.skycraft.rest.water." + act);
         if (player.isOnFire()) return Component.translatable("world.skycraft.rest.fire." + act);
+        boolean supported = player.onGround()
+                || !player.level().noCollision(player, player.getBoundingBox().expandTowards(0, -0.35, 0));
         if (!alreadyResting && (player.fallDistance > 1f || player.isFallFlying()
-                || (!player.onGround() && !player.isPassenger() && !player.getAbilities().flying))) {
+                || (!supported && !player.isPassenger() && !player.getAbilities().flying))) {
             return Component.translatable("world.skycraft.rest.air." + act);
         }
         if (sleep) {
@@ -314,17 +317,35 @@ public final class RestManager {
     }
 
     /**
-     * Hostiles close enough to stop a rest from starting: awake enemies within {@code radius}, and anything of any
-     * kind (bandit NPCs included) within 24 blocks that is hunting this player now. Guards and prisoners'
-     * company do not count: they do not hunt a prisoner in the cell.
+     * Hostiles close enough to stop a rest from starting: enemies within {@code radius} that have line of sight
+     * to the player or are targeting them, and anything within 24 blocks that is actively hunting or searching
+     * for this player. Mobs sealed in underground caverns or behind walls with no awareness do not block rest.
      */
     public static boolean enemiesNear(Player player, double radius) {
-        if (!player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(radius),
-                m -> m instanceof Enemy && m.isAlive() && !m.isNoAi()).isEmpty()) {
+        Level level = player.level();
+        // 1. Actively hunting or searching mobs within 24 blocks (including bandits, wolves, etc.)
+        double huntRadius = Math.max(radius, 24);
+        List<Mob> hunters = level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(huntRadius),
+                m -> m.isAlive() && (m.getTarget() == player || Stealth.isSearchingFor(m, player)));
+        if (!hunters.isEmpty()) {
             return true;
         }
-        return !player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(Math.max(radius, 24)),
-                m -> m.isAlive() && m.getTarget() == player).isEmpty();
+
+        // 2. Enemies within radius (and vertical +/- 8 blocks) that are targeting the player or have line of sight
+        List<Mob> nearby = level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(radius, 8.0, radius),
+                m -> m instanceof Enemy && m.isAlive() && !m.isNoAi());
+        for (Mob m : nearby) {
+            if (m.getTarget() == player || Stealth.isSearchingFor(m, player)) {
+                return true;
+            }
+            if (m.hasLineOfSight(player)) {
+                if (player.isCrouching() && Stealth.hiddenFrom(m, player)) {
+                    continue;
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     private static BlockPos bedHead(Level level, BlockPos pos) {

@@ -78,8 +78,10 @@ public final class FastTravelHandler {
             fail(player, "riding");
             return;
         }
+        boolean supported = player.onGround()
+                || !player.level().noCollision(player, player.getBoundingBox().expandTowards(0, -0.35, 0));
         if (player.fallDistance > 1f || player.isFallFlying()
-                || (!player.onGround() && !player.getAbilities().flying && !player.isInWater())) {
+                || (!supported && !player.getAbilities().flying && !player.isInWater())) {
             fail(player, "falling");
             return;
         }

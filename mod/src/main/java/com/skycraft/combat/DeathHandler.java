@@ -282,6 +282,7 @@ public final class DeathHandler {
         // Reset negative status effects and cure diseases on respawn
         newPlayer.removeAllEffects();
         com.skycraft.survival.Diseases.cureAll(newPlayer);
+        data.setLastCombatTick(-100000L);
 
         CompoundTag keptTag = data.module("death_kept");
         if (!keptTag.contains("items", Tag.TAG_LIST)) return;
