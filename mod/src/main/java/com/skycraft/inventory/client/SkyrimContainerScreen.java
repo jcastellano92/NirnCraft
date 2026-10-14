@@ -6,6 +6,7 @@ import com.skycraft.combat.WeaponClass;
 import com.skycraft.crime.Ownership;
 import com.skycraft.economy.ItemValues;
 import com.skycraft.inventory.ItemWeights;
+import com.skycraft.inventory.ValueDensity;
 import com.skycraft.inventory.Pack;
 import com.skycraft.network.CorePackets;
 import com.skycraft.network.SkyNetwork;
@@ -65,6 +66,8 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
     private int selectedIndex = 0;
     private int scrollOffset = 0;
     private int hoveredIndex = -1;
+    /** Mouse position while the V/W (gold per weight) text is hovered, else null: its tooltip is drawn last. */
+    private int[] vwTooltipAt;
 
     /**
      * {@code packIndex}: the overflow-pack entry of this row (My Items tab), or -1. {@code overflowIndex}: the entry
@@ -277,6 +280,22 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
         }
 
         hoveredIndex = -1;
+        // right-aligned columns, measured from what they show: weight | value | V/W (gold per weight, the last to go
+        // when the name would be left with too little room)
+        int wtW = 0, valW = 0, vwW = font.width("9.9k");
+        for (int i = 0, n = Math.min(entries.size(), 400); i < n; i++) {
+            ContainerEntry en = entries.get(i);
+            wtW = Math.max(wtW, font.width(ItemWeights.format(en.totalWeight())));
+            valW = Math.max(valW, font.width(en.value() + "g"));
+            vwW = Math.max(vwW, font.width(ValueDensity.format(ValueDensity.of(en.stack()))));
+        }
+        int colRight = listX + listW - 6;
+        boolean showVw = colRight - vwW - 8 - valW - 8 - wtW - 8 - (listX + 22) >= 60;
+        int vwRight = colRight;
+        int valRight = showVw ? vwRight - vwW - 8 : colRight;
+        int wtRight = valRight - valW - 8;
+        int nameRoom = wtRight - wtW - 8 - (listX + 22);
+        boolean vwHover = false;
         if (entries.isEmpty()) {
             Component emptyText = Component.translatable("inventory.skycraft.empty_container");
             g.drawString(font, emptyText, listX + 8, listY + 12, SkyUi.DIM, false);
@@ -309,18 +328,25 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
                 if (isBag && viewMode == 0 && entry.isGearSlot()) {
                     name = Component.translatable("mounts.skycraft.gear.worn", name).getString();
                 }
-                String ellipsized = SkyUi.ellipsize(font, name, listW - 75);
+                String ellipsized = SkyUi.ellipsize(font, name, Math.max(20, nameRoom));
                 int nameColor = (viewMode == 0 && isOwned) ? SkyUi.STOLEN : (isSelected ? SkyUi.BRIGHT : (isHovered ? SkyUi.TEXT : SkyUi.DIM));
                 g.drawString(font, ellipsized, listX + 22, rowY + 5, nameColor, false);
 
-                // Weight and Value
+                // Weight, Value and gold per weight
                 String wtStr = ItemWeights.format(entry.totalWeight());
                 String valStr = entry.value() + "g";
-                int infoX = listX + listW - font.width(valStr) - 6;
-                g.drawString(font, valStr, infoX, rowY + 5, SkyUi.GOLD, false);
-                g.drawString(font, wtStr, infoX - font.width(wtStr) - 6, rowY + 5, SkyUi.DIM, false);
+                g.drawString(font, valStr, valRight - font.width(valStr), rowY + 5, SkyUi.GOLD, false);
+                g.drawString(font, wtStr, wtRight - font.width(wtStr), rowY + 5, SkyUi.DIM, false);
+                if (showVw) {
+                    float ratio = ValueDensity.of(entry.stack());
+                    String vwStr = ValueDensity.format(ratio);
+                    g.drawString(font, vwStr, vwRight - font.width(vwStr), rowY + 5, ratio < 0f ? SkyUi.DIM : 0xFF98B888, false);
+                    if (isHovered && mouseX >= vwRight - vwW - 4) vwHover = true;
+                }
             }
         }
+        if (vwHover) vwTooltipAt = new int[]{mouseX, mouseY};
+        else vwTooltipAt = null;
 
         // Vertical separator
         int sepX = px + listW + 15;
@@ -385,6 +411,16 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
 
             g.drawString(font, "VALUE", detX, infoY, SkyUi.HEADER, false);
             g.drawString(font, String.valueOf(sel.value()), detX + 50, infoY, SkyUi.GOLD, false);
+            infoY += 11;
+
+            // gold per weight: higher is worth carrying (hover for the explanation)
+            float ratio = ValueDensity.of(selStack);
+            String vwLabel = SkyUi.caps(Component.translatable("inventory.skycraft.column.vw"));
+            g.drawString(font, vwLabel, detX, infoY, SkyUi.HEADER, false);
+            g.drawString(font, ValueDensity.format(ratio), detX + 50, infoY, ratio < 0f ? SkyUi.DIM : 0xFFB8E0A0, false);
+            if (SkyUi.inside(mouseX, mouseY, detX, infoY - 1, detX + 50 + font.width(ValueDensity.format(ratio)), infoY + 9)) {
+                vwTooltipAt = new int[]{mouseX, mouseY};
+            }
         }
 
         // what you carry against what you can carry (the container tab is the one you take from)
@@ -422,6 +458,9 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
             statsHintX = spaceX + font.width(spaceHint) + 12;
             g.drawString(font, "[3] Stats", statsHintX, bottomY, sheetUp() ? SkyUi.GOLD : SkyUi.DIM, false);
             if (sheetUp()) com.skycraft.mounts.client.MountSheetPanel.draw(g, font, px + 4, py + 24, pw - 8, ph - 52);
+        }
+        if (vwTooltipAt != null && !sheetUp()) {
+            g.renderTooltip(font, Component.translatable("inventory.skycraft.column.vw.tooltip"), vwTooltipAt[0], vwTooltipAt[1]);
         }
     }
 

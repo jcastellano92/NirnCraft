@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "_doc": [
+    "What each kind of shop is (read by com.skycraft.economy.ShopTrades, linted by tools/qa/data_checks.py and BarterSelfTest).",
+    "anchors: the settlement anchor type (lowercase AnchorType id) that stands behind a counter -> the shop types of that building.",
+    "  A building's shop is the union of its anchors' types; every merchant working in it shares ONE stock and ONE gold pool.",
+    "jobs: an NPC's job id (housing job or society role id) -> which shop types it works and which item categories it may",
+    "  sell from the shared stock ('sells'; absent = the whole stock). A filter over the shared stock, never a second stock.",
+    "trades: per shop type: min_rows (a level 1 shop carries at least this many kinds), allow (item categories it may stock;",
+    "  absent = anything), qty_scale (multiplier on the bulk quantity brackets below).",
+    "quantity: bulk goods by gold value; a stack of cheap goods is bigger than a stack of expensive ones.",
+    "goods_by_province: goods a shop only stocks in these provinces (gear keys): mead is a northern drink, alto wine a",
+    "  southern one. An item not listed is sold everywhere. Applies to every shop's tagged goods and to an inn's table."
+  ],
+  "anchors": {
+    "inn": ["food"],
+    "smith": ["blacksmith"],
+    "merchant": ["general"],
+    "alchemist": ["apothecary"],
+    "jeweler": ["jeweler"],
+    "bookseller": ["library"],
+    "tailor": ["tailor"],
+    "butcher": ["food", "hunter"],
+    "fletcher": ["fletcher"],
+    "fence": ["fence"],
+    "fisher": ["fisher", "food"],
+    "hunter": ["hunter"],
+    "farmer": ["food"],
+    "wizard": ["arcane"]
+  },
+  "jobs": {
+    "innkeeper": {"pools": ["food"]},
+    "cook": {"pools": ["food"], "sells": ["food"]},
+    "server": {"pools": ["food"], "sells": ["food", "potions"]}
+  },
+  "quantity": [
+    {"max_value": 5, "min": 4, "max": 16},
+    {"max_value": 25, "min": 2, "max": 6},
+    {"max_value": 100, "min": 1, "max": 3},
+    {"max_value": 2147483647, "min": 1, "max": 1}
+  ],
+  "trades": {
+    "blacksmith": {"min_rows": 8, "allow": ["weapons", "apparel", "misc", "ingredients"], "qty_scale": 0.5},
+    "apothecary": {"min_rows": 6, "allow": ["potions", "ingredients", "misc", "food"], "qty_scale": 1.0},
+    "general": {"min_rows": 6, "qty_scale": 1.0},
+    "arcane": {"min_rows": 6, "allow": ["books", "potions", "ingredients", "misc", "weapons"], "qty_scale": 0.75},
+    "food": {"min_rows": 6, "allow": ["food", "ingredients", "misc"], "qty_scale": 1.5},
+    "fence": {"min_rows": 3, "qty_scale": 0.5},
+    "hunter": {"min_rows": 5, "allow": ["ingredients", "misc", "food", "weapons"], "qty_scale": 1.0},
+    "fisher": {"min_rows": 5, "allow": ["food", "ingredients", "misc"], "qty_scale": 1.25},
+    "mason": {"min_rows": 5, "allow": ["misc", "ingredients"], "qty_scale": 1.5},
+    "library": {"min_rows": 4, "allow": ["books", "misc"], "qty_scale": 1.0},
+    "fletcher": {"min_rows": 5, "allow": ["weapons", "misc", "ingredients"], "qty_scale": 1.5},
+    "exotic": {"min_rows": 5, "qty_scale": 0.75},
+    "jeweler": {"min_rows": 5, "allow": ["apparel", "misc", "ingredients"], "qty_scale": 0.5},
+    "tailor": {"min_rows": 5, "allow": ["apparel", "misc", "ingredients"], "qty_scale": 1.0}
+  },
+  "goods_by_province": {
+    "skycraft:nord_mead": ["skyrim", "solstheim", "atmora", "high_rock", "orsinium"],
+    "skycraft:honningbrew_mead": ["skyrim", "solstheim", "atmora"],
+    "skycraft:black_briar_mead": ["skyrim", "solstheim"],
+    "skycraft:horker_loaf": ["skyrim", "solstheim", "atmora"],
+    "skycraft:horker_stew": ["skyrim", "solstheim", "atmora"],
+    "skycraft:goat_cheese_wedge": ["skyrim", "solstheim", "atmora", "high_rock"],
+    "skycraft:eidar_cheese_wedge": ["skyrim"],
+    "skycraft:alto_wine": ["summerset", "valenwood", "cyrodiil", "high_rock"],
+    "skycraft:spiced_wine": ["cyrodiil", "summerset", "hammerfell", "high_rock", "elsweyr"],
+    "skycraft:elsweyr_fondue": ["elsweyr", "hammerfell"],
+    "skycraft:salmon_steak": ["skyrim", "solstheim", "cyrodiil", "high_rock", "atmora"]
+  }
+}

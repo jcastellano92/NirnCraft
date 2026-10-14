@@ -1,11 +1,11 @@
 package com.skycraft.economy;
 
+import net.minecraft.core.BlockPos;
 import com.skycraft.perk.Perks;
-import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -18,25 +18,31 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
- * A merchant's shop, stored in the entity's persistent data under {@code skycraft_shop}:
- * {@code stock} (list of item stacks), {@code gold} (int), {@code invested} (bool), {@code restock_day} (long) and
- * {@code mt_used} (per-player use of the Master Trader bonus gold since the last restock).
+ * A merchant's view of the shop it works in. The goods and the gold are a property of the establishment, not of the
+ * person ({@link ShopKeys}, {@link ShopBook}): the innkeeper and the cook of one inn are two views of one shop, so a
+ * purchase at one counter is gone at the other, and what a player sells is on sale to everybody afterwards.
  *
- * <p>Stock and gold are regenerated every two in-game days. Always obtain through {@link #of(LivingEntity)} on the
- * server and call {@link #save()} after changing the stock.</p>
+ * <p>The goods of a restock period are a pure function of the shop's key, its trades, its level and the period
+ * ({@link ShopStock}); every player and every client sees the same list. Always obtain through {@link #of} on the
+ * server thread and call {@link #save()} after changing anything.</p>
  */
 public final class Shop {
     public static final String KEY = "skycraft_shop";
     public static final int RESTOCK_DAYS = 2;
-    public static final int MAX_ENTRIES = 64;
+    /** Distinct kinds on the shelves (the barter packet carries at most 512 rows). */
+    public static final int MAX_ENTRIES = ShopBook.MAX_ROWS;
     public static final int INVEST_COST = 500;
     public static final int INVEST_BONUS = 500;
     public static final int MASTER_TRADER_BONUS = 1000;
+    /** How long a sale stays on the seller's buy-back list. */
+    public static final long BUYBACK_TICKS = Buyback.TTL_TICKS;
 
     private static final Potion[] SHOP_POTIONS = {
             Potions.HEALING, Potions.HEALING, Potions.STRONG_HEALING, Potions.REGENERATION, Potions.LONG_REGENERATION,
@@ -46,17 +52,14 @@ public final class Shop {
     };
 
     private final LivingEntity npc;
-    private final CompoundTag tag;
-    private final List<ItemStack> stock = new ArrayList<>();
+    private final ShopBook.Record rec;
+    /** True for a preview that is not registered in the book (audits). */
+    private final boolean ephemeral;
 
-    private Shop(LivingEntity npc, CompoundTag tag) {
+    private Shop(LivingEntity npc, ShopBook.Record rec, boolean ephemeral) {
         this.npc = npc;
-        this.tag = tag;
-        ListTag list = tag.getList("stock", Tag.TAG_COMPOUND);
-        for (int i = 0; i < list.size(); i++) {
-            ItemStack s = ItemStack.of(list.getCompound(i));
-            if (!s.isEmpty()) stock.add(s);
-        }
+        this.rec = rec;
+        this.ephemeral = ephemeral;
     }
 
     /**
@@ -74,122 +77,349 @@ public final class Shop {
     }
 
     /**
-     * Loads (and restocks if due) the shop of a merchant for a customer. Like Skyrim's vendors, a restock follows the
-     * customer: blacksmiths' gear their character level, court wizards' tomes their skill in each school.
+     * Loads (and restocks if due) the shop a merchant works in. The customer no longer shapes the goods: a shop's list
+     * is the same for every player (it used to follow the first customer's level, so two players could be offered
+     * different lists by the same counter).
      */
-    public static Shop of(LivingEntity npc, @org.jetbrains.annotations.Nullable Player customer) {
-        CompoundTag root = npc.getPersistentData();
-        if (!root.contains(KEY, Tag.TAG_COMPOUND)) root.put(KEY, new CompoundTag());
-        Shop shop = new Shop(npc, root.getCompound(KEY));
-        shop.restockIfDue(customer);
+    public static Shop of(LivingEntity npc, @Nullable Player customer) {
+        if (!(npc.level() instanceof ServerLevel level)) throw new IllegalStateException("Shop.of is server side only");
+        ShopBook book = ShopBook.get(level.getServer());
+        ShopKeys.Info info = ShopKeys.resolve(npc);
+        String key = info != null ? info.key() : "npc:" + npc.getUUID();
+        long today = today(level);
+        ShopBook.Record rec = book.find(key);
+        boolean created = rec == null;
+        if (created) {
+            rec = book.create(key, today);
+            rec.pos = npc.blockPosition();
+            rec.inn = (info != null && info.inn()) || com.skycraft.survival.inn.Innkeepers.isInnkeeper(npc);
+        }
+        Shop shop = new Shop(npc, rec, false);
+        shop.join(info, created);
+        shop.restockIfDue();
+        rec.lastDay = today;
         return shop;
     }
+
+    /** A shop that is not registered in the book (audit samples): stocked like a real one, discarded afterwards. */
+    public static Shop preview(LivingEntity npc) {
+        if (!(npc.level() instanceof ServerLevel level)) throw new IllegalStateException("Shop.preview is server side only");
+        ShopBook.Record rec = new ShopBook.Record("npc:" + npc.getUUID(), new ShopBook());
+        rec.pos = npc.blockPosition();
+        Shop shop = new Shop(npc, rec, true);
+        shop.join(null, true);
+        shop.restockIfDue();
+        return shop;
+    }
+
+    static long today(net.minecraft.world.level.Level level) {
+        // day time advances when sleeping; game time keeps going even with the daylight cycle off
+        return Math.max(level.getDayTime(), level.getGameTime()) / 24000L;
+    }
+
+    /**
+     * Brings this NPC into the record: the trades it adds (a pool the shop did not sell yet is stocked at once, from
+     * its own seed), a higher level, and the old per-NPC stock of saves from before shops were shared.
+     */
+    private void join(@Nullable ShopKeys.Info info, boolean created) {
+        List<ShopType> mine = info != null && !info.pools().isEmpty() ? info.pools() : Merchants.ownPools(npc);
+        int level = Merchants.level(npc);
+        if (created) {
+            rec.level = level;
+            for (ShopType t : mine) rec.addPool(t);
+            if (rec.pools.isEmpty()) rec.addPool(ShopType.GENERAL);
+            rec.share = Math.max(3, (6 + 3 * rec.level) / Math.max(1, rec.pools.size()));
+        } else {
+            if (level > rec.level) rec.level = Math.min(5, level);
+            // a trade the shop did not sell yet (another counter of the same building): its goods come at once, from
+            // their own seed, so the result does not depend on which counter was opened first
+            for (ShopType t : mine) {
+                if (rec.hasPool(t)) continue;
+                rec.addPool(t);
+                if (rec.period != Long.MIN_VALUE) {
+                    for (ItemStack s : ShopStock.generate(this, t, ShopStock.seed(npc.level(), rec.key, rec.period, t))) rec.stock.add(s);
+                    rec.dirty();
+                }
+            }
+        }
+        migrateLegacy(created);
+    }
+
+    /** Takes over (once) what an NPC of an older save carried in its own persistent data. */
+    private void migrateLegacy(boolean created) {
+        CompoundTag root = npc.getPersistentData();
+        if (!root.contains(KEY, Tag.TAG_COMPOUND)) return;
+        CompoundTag old = root.getCompound(KEY);
+        boolean legacy = old.contains("stock", Tag.TAG_LIST) || old.contains("restock_day") || old.contains("gold") || old.contains("invested");
+        if (!legacy) return;
+        if (old.getBoolean("invested") && !rec.invested) rec.invested = true;
+        if (created && old.contains("restock_day")) {
+            long day = old.getLong("restock_day");
+            rec.period = Math.floorDiv(day, (long) RESTOCK_DAYS);
+            rec.gold = old.getInt("gold");
+            ListTag list = old.getList("stock", Tag.TAG_COMPOUND);
+            for (int i = 0; i < list.size(); i++) {
+                ItemStack s = ItemStack.of(list.getCompound(i));
+                if (!s.isEmpty()) rec.stock.add(s);
+            }
+            if (old.contains("mt_used", Tag.TAG_COMPOUND)) rec.mtUsed = old.getCompound("mt_used").copy();
+            rec.dirty();
+        }
+        old.remove("stock");
+        old.remove("gold");
+        old.remove("restock_day");
+        old.remove("mt_used");
+        old.remove("invested");
+    }
+
+    // ------------------------------------------------------------------ identity
 
     public LivingEntity npc() {
         return npc;
     }
 
-    public List<ItemStack> stock() {
-        return stock;
+    /** The establishment's key: the same for every merchant of the building. */
+    public String key() {
+        return rec.key;
     }
 
+    public int level() {
+        return rec.level;
+    }
+
+    /** The shop types this establishment sells. */
+    public List<ShopType> pools() {
+        return List.copyOf(rec.pools);
+    }
+
+    public boolean inn() {
+        return rec.inn;
+    }
+
+    BlockPos pos() {
+        return rec.pos;
+    }
+
+    ShopBook.Record record() {
+        return rec;
+    }
+
+    /** Makes the change durable (the record is saved with the world). */
     public void save() {
-        ListTag list = new ListTag();
-        for (ItemStack s : stock) {
-            if (!s.isEmpty()) list.add(s.save(new CompoundTag()));
-        }
-        tag.put("stock", list);
+        if (!ephemeral) rec.dirty();
     }
 
     // ------------------------------------------------------------------ gold
 
     public boolean invested() {
-        return tag.getBoolean("invested");
+        return rec.invested;
     }
 
     public void invest() {
-        tag.putBoolean("invested", true);
-        tag.putInt("gold", tag.getInt("gold") + INVEST_BONUS);
+        rec.invested = true;
+        rec.gold += INVEST_BONUS;
     }
 
     public int baseGold() {
-        return 500 + 150 * Merchants.level(npc) + (invested() ? INVEST_BONUS : 0);
+        return 500 + 150 * rec.level + (rec.invested ? INVEST_BONUS : 0);
     }
 
-    /** Gold the merchant can pay out to this player (including the Master Trader bonus pool). */
+    /** Gold the shop can pay out to this player (including the Master Trader bonus pool). */
     public int available(Player player) {
-        return Math.max(0, tag.getInt("gold")) + masterTraderLeft(player);
+        return Math.max(0, rec.gold) + masterTraderLeft(player);
     }
 
     private int masterTraderLeft(Player player) {
         if (!Perks.has(player, "speech.master_trader")) return 0;
-        return Math.max(0, MASTER_TRADER_BONUS - tag.getCompound("mt_used").getInt(player.getStringUUID()));
+        return Math.max(0, MASTER_TRADER_BONUS - rec.mtUsed.getInt(player.getStringUUID()));
     }
 
-    /** The merchant pays {@code amount} to the player (Master Trader bonus first). Caller checked {@link #available}. */
+    /** The shop pays {@code amount} to the player (Master Trader bonus first). Caller checked {@link #available}. */
     public void pay(Player player, int amount) {
         int bonus = Math.min(amount, masterTraderLeft(player));
-        if (bonus > 0) {
-            CompoundTag used = tag.getCompound("mt_used");
-            used.putInt(player.getStringUUID(), used.getInt(player.getStringUUID()) + bonus);
-            tag.put("mt_used", used);
-        }
-        tag.putInt("gold", Math.max(0, tag.getInt("gold") - (amount - bonus)));
+        if (bonus > 0) rec.mtUsed.putInt(player.getStringUUID(), rec.mtUsed.getInt(player.getStringUUID()) + bonus);
+        rec.gold = Math.max(0, rec.gold - (amount - bonus));
     }
 
-    /** The merchant receives gold from a sale. */
+    /** The shop receives gold from a sale. */
     public void receive(int amount) {
-        long g = (long) tag.getInt("gold") + amount;
-        tag.putInt("gold", (int) Math.min(Integer.MAX_VALUE / 2, g));
+        long g = (long) rec.gold + amount;
+        rec.gold = (int) Math.min(Integer.MAX_VALUE / 2, g);
     }
 
     // ------------------------------------------------------------------ stock
 
-    /** Adds an item the merchant bought (merging with existing stacks). Excess beyond the shop's capacity is lost. */
-    public void addToStock(ItemStack incoming) {
-        ItemStack s = incoming.copy();
-        for (ItemStack existing : stock) {
-            if (s.isEmpty()) break;
-            if (ItemStack.isSameItemSameTags(existing, s) && existing.getCount() < existing.getMaxStackSize()) {
-                int move = Math.min(s.getCount(), existing.getMaxStackSize() - existing.getCount());
-                existing.grow(move);
-                s.shrink(move);
-            }
-        }
-        while (!s.isEmpty() && stock.size() < MAX_ENTRIES) {
-            ItemStack part = s.split(Math.max(1, s.getMaxStackSize()));
-            stock.add(part);
-        }
+    /** Number of rows on the shelves (indexes {@code 0..rows()-1}). */
+    public int rows() {
+        return rec.stock.size();
     }
 
-    public void restockIfDue() {
-        restockIfDue(null);
+    /** Row {@code index} with its full count (a copy), EMPTY when out of range. */
+    public ItemStack row(int index) {
+        return rec.stock.get(index);
     }
 
-    public void restockIfDue(@org.jetbrains.annotations.Nullable Player customer) {
-        // day time advances when sleeping; game time keeps going even with the daylight cycle off
-        long day = Math.max(npc.level().getDayTime(), npc.level().getGameTime()) / 24000L;
-        boolean fresh = !tag.contains("restock_day");
-        long last = tag.getLong("restock_day");
-        if (fresh || day - last >= RESTOCK_DAYS || day < last) {
-            restock(day, customer);
-        }
+    /** Every row, index-aligned (copies). Unreadable rows are EMPTY. */
+    public List<ItemStack> stock() {
+        return rec.stock.entries();
     }
 
-    private void restock(long day, @org.jetbrains.annotations.Nullable Player customer) {
-        tag.putLong("restock_day", day);
-        tag.putInt("gold", baseGold());
-        tag.remove("mt_used");
-        stock.clear();
-        ShopStock.generate(this, customer, npc.getRandom());
-        save();
+    /** How many of exactly {@code key} (item and NBT) are on the shelves. */
+    public int count(ItemStack key) {
+        int idx = rec.stock.indexOf(key);
+        return idx < 0 ? 0 : rec.stock.countAt(idx);
     }
 
     /**
-     * One stock entry of {@code item}: enchanted books get an enchantment, potions become Skyrim potions (poison for a
-     * splash potion), higher-level shops enchant some gear, and stack sizes shrink as the value grows.
+     * Removes up to {@code n} of row {@code index} (a purchase). Sold goods are drawn first, so the ledger of what
+     * players sold turns over. Returns what was taken.
      */
-    static ItemStack makeStock(Item item, RandomSource rnd, int level) {
+    public ItemStack take(int index, int n) {
+        ItemStack key = rec.stock.get(index);
+        if (key.isEmpty() || n <= 0) return ItemStack.EMPTY;
+        ItemStack taken = rec.stock.take(index, n);
+        if (!taken.isEmpty()) unsell(taken, taken.getCount());
+        return taken;
+    }
+
+    /** Removes up to {@code n} items equal to {@code key} (a buy-back); returns how many were removed. */
+    public int takeEqual(ItemStack key, int n) {
+        ItemStack taken = rec.stock.take(key, n);
+        if (taken.isEmpty()) return 0;
+        unsell(taken, taken.getCount());
+        return taken.getCount();
+    }
+
+    private void unsell(ItemStack key, int n) {
+        int idx = rec.sold.indexOf(key);
+        if (idx >= 0) rec.sold.take(idx, n);
+    }
+
+    /** Adds goods the shop made or bought from an NPC (not a player's sale). Excess beyond the caps is lost. */
+    public void addToStock(ItemStack incoming) {
+        if (incoming.isEmpty()) return;
+        ItemStack s = incoming.copy();
+        rec.stock.add(s);
+    }
+
+    /**
+     * Stocks what a player sold: on sale to everybody from now on and kept across restocks. When the ledger is full
+     * the oldest sold kind is dumped to make room. Returns how many of {@code sold} are on the shelves afterwards
+     * (the caps may refuse some; nothing is duplicated either way).
+     */
+    public int addSold(ItemStack sold) {
+        if (sold.isEmpty()) return 0;
+        ItemStack s = sold.copy();
+        int want = s.getCount();
+        if (rec.sold.indexOf(s) < 0 && rec.sold.size() >= ShopBook.MAX_SOLD_ROWS) {
+            // oldest sold kind out: from the ledger and from the shelves
+            ItemStack oldest = rec.sold.get(0);
+            if (!oldest.isEmpty()) rec.stock.take(oldest, oldest.getCount());
+            rec.sold.take(0, Integer.MAX_VALUE);
+        }
+        int taken = rec.stock.add(s);
+        if (taken > 0) {
+            ItemStack ledger = sold.copy();
+            ledger.setCount(taken);
+            rec.sold.add(ledger);
+        }
+        return want - s.getCount();
+    }
+
+    /** Count of {@code key} among the player-sold goods (what a buy-back can still reach). */
+    public int soldCount(ItemStack key) {
+        int idx = rec.sold.indexOf(key);
+        return idx < 0 ? 0 : rec.sold.countAt(idx);
+    }
+
+    // ------------------------------------------------------------------ restock
+
+    public void restockIfDue() {
+        long period = Math.floorDiv(today(npc.level()), (long) RESTOCK_DAYS);
+        if (rec.period == Long.MIN_VALUE || rec.period != period) restock(period);
+    }
+
+    /**
+     * Rebuilds the generated goods of the period (pure function of key, pools, level, period) and puts the sold
+     * ledger back on the shelves. A clock that went backwards (a restored save) restocks as well.
+     */
+    private void restock(long period) {
+        rec.period = period;
+        rec.gold = baseGold();
+        rec.mtUsed = new CompoundTag();
+        rec.stock.clear();
+        for (ShopType t : rec.pools) {
+            for (ItemStack s : ShopStock.generate(this, t, ShopStock.seed(npc.level(), rec.key, period, t))) rec.stock.add(s);
+        }
+        // what players sold stays for everybody (the ledger is a subset of the shelves)
+        for (ItemStack s : rec.sold.entries()) {
+            if (!s.isEmpty()) rec.stock.add(s);
+        }
+        rec.dirty();
+    }
+
+    // ------------------------------------------------------------------ kept (buy-back only)
+
+    /** Specialty goods the shop bought from {@code player} but never resells: they wait on that player's buy-back list. */
+    public void keep(UUID player, ItemStack one, int count, int unit, long gameTime) {
+        for (ShopBook.Kept k : rec.kept) {
+            if (k.player.equals(player) && k.unit == unit && ItemStack.isSameItemSameTags(k.one, one)) {
+                k.count += count;
+                rec.dirty();
+                return;
+            }
+        }
+        ItemStack copy = one.copy();
+        copy.setCount(1);
+        rec.kept.add(new ShopBook.Kept(player, copy, count, unit, gameTime));
+        // oldest first out, per player and in total
+        int mine = 0;
+        for (ShopBook.Kept k : rec.kept) if (k.player.equals(player)) mine++;
+        for (int i = 0; i < rec.kept.size() && mine > ShopBook.KEPT_PER_PLAYER; ) {
+            if (rec.kept.get(i).player.equals(player)) {
+                rec.kept.remove(i);
+                mine--;
+            } else {
+                i++;
+            }
+        }
+        while (rec.kept.size() > ShopBook.KEPT_TOTAL) rec.kept.remove(0);
+        rec.dirty();
+    }
+
+    /** The player's still-valid kept goods (older ones are dropped here). */
+    public List<ShopBook.Kept> keptFor(UUID player, long gameTime) {
+        List<ShopBook.Kept> out = new ArrayList<>();
+        boolean changed = false;
+        for (int i = 0; i < rec.kept.size(); ) {
+            ShopBook.Kept k = rec.kept.get(i);
+            if (gameTime - k.at > BUYBACK_TICKS || k.count <= 0) {
+                rec.kept.remove(i);
+                changed = true;
+                continue;
+            }
+            if (k.player.equals(player)) out.add(k);
+            i++;
+        }
+        if (changed) rec.dirty();
+        return out;
+    }
+
+    /** Removes a kept row (it was bought back). */
+    public void unkeep(ShopBook.Kept kept, int n) {
+        kept.count -= n;
+        if (kept.count <= 0) rec.kept.remove(kept);
+        rec.dirty();
+    }
+
+    // ------------------------------------------------------------------ stock pieces
+
+    /**
+     * One stock entry of {@code item}: enchanted books get an enchantment, potions become Skyrim potions (poison for a
+     * splash potion), higher-level shops enchant some gear, and stack sizes shrink as the value grows (the brackets and
+     * the trade's scale are data: {@link ShopTrades#quantity}).
+     */
+    static ItemStack makeStock(Item item, RandomSource rnd, int level, ShopType trade) {
         if (item == Items.AIR) return ItemStack.EMPTY;
         if (item == Items.ENCHANTED_BOOK) {
             ItemStack book = EnchantmentHelper.enchantItem(rnd, new ItemStack(Items.BOOK), 5 + 5 * level, false);
@@ -207,12 +437,8 @@ public final class Shop {
         }
         int max = stack.getMaxStackSize();
         if (max > 1) {
-            int value = ItemValues.get(stack);
-            int count;
-            if (value <= 5) count = 4 + rnd.nextInt(13);
-            else if (value <= 25) count = 2 + rnd.nextInt(5);
-            else if (value <= 100) count = 1 + rnd.nextInt(3);
-            else count = 1;
+            int[] range = ShopTrades.quantity(ItemValues.get(stack), trade);
+            int count = range[0] + (range[1] > range[0] ? rnd.nextInt(range[1] - range[0] + 1) : 0);
             stack.setCount(Math.min(max, count));
         }
         return stack;

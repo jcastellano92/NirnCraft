@@ -13,6 +13,7 @@ import com.skycraft.inventory.InvCategory;
 import com.skycraft.inventory.InventoryActions;
 import com.skycraft.inventory.InventoryPackets;
 import com.skycraft.inventory.ItemWeights;
+import com.skycraft.inventory.ValueDensity;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
@@ -58,7 +59,7 @@ public class SkyrimInventoryScreen extends Screen {
     private static final int BOTTOM_BAR = 30;
     private static final int MARGIN = 8;
 
-    static final int SORT_NAME = 0, SORT_WEIGHT = 1, SORT_VALUE = 2;
+    static final int SORT_NAME = 0, SORT_WEIGHT = 1, SORT_VALUE = 2, SORT_VW = 3;
 
     // remembered between openings, like Skyrim keeps your last tab
     private static InvCategory lastCategory = InvCategory.ALL;
@@ -87,6 +88,8 @@ public class SkyrimInventoryScreen extends Screen {
     private int hoverCat = -1;
     private int hoverRow = -1;
     private int hoverSort = -1;
+    /** Whether the V/W column fit in the list at the last draw (otherwise sorting cycles name, weight, value). */
+    private boolean vwVisible = true;
     private int hoverAction = -1;
     private boolean hoverCrafting;
     private boolean hoverPreview;
@@ -193,6 +196,7 @@ public class SkyrimInventoryScreen extends Screen {
         Comparator<InvEntry> c = switch (sortMode) {
             case SORT_WEIGHT -> Comparator.comparingDouble(e -> e.weight);
             case SORT_VALUE -> Comparator.comparingInt(e -> e.value);
+            case SORT_VW -> Comparator.comparingDouble(e -> ValueDensity.sortKey(e.valuePerWeight));
             default -> Comparator.comparing(e -> e.name, String.CASE_INSENSITIVE_ORDER);
         };
         if (sortDescending) c = c.reversed();
@@ -408,31 +412,52 @@ public class SkyrimInventoryScreen extends Screen {
 
     private void drawList(GuiGraphics g, int mx, int my) {
         SkyUi.panel(g, listX, top, listX + listW, bottom);
-        int valRight = listX + listW - 8;
-        int wgtRight = valRight - 36;
+        // Columns are measured from their header and from the widest value they can show (4 digits), so nothing
+        // overflows at any GUI scale. V/W (gold per weight) is the right-most; it gives way to the name when the list
+        // is too narrow for it (then Tab/R only cycles name, weight, value).
+        String vwHead = SkyUi.caps(Component.translatable("inventory.skycraft.column.vw"));
+        int vwColW = Math.max(font.width(vwHead), font.width("9.9k"));
+        int valColW = font.width(SkyUi.caps(Component.translatable("inventory.skycraft.column.value")));
+        int wgtColW = font.width(SkyUi.caps(Component.translatable("inventory.skycraft.column.weight")));
+        for (InvEntry e : shown) {
+            valColW = Math.max(valColW, font.width(String.valueOf(e.value)));
+            wgtColW = Math.max(wgtColW, font.width(ItemWeights.format(e.weight)));
+            vwColW = Math.max(vwColW, font.width(ValueDensity.format(e.valuePerWeight)));
+        }
         int nameX = listX + 30;
-        int nameEnd = wgtRight - 30;
+        boolean showVw = listW - 38 - (vwColW + valColW + wgtColW + 30) >= 70;
+        vwVisible = showVw;
+        int vwRight = listX + listW - 8;
+        int valRight = showVw ? vwRight - vwColW - 14 : listX + listW - 8;
+        int wgtRight = valRight - valColW - 14;
+        int nameEnd = wgtRight - wgtColW - 8;
 
         // column headers (click to sort)
         hoverSort = -1;
         int hy = top + 5;
+        int cols = showVw ? 4 : 3;
         Component[] headers = {Component.translatable("inventory.skycraft.column.name"),
-                Component.translatable("inventory.skycraft.column.weight"), Component.translatable("inventory.skycraft.column.value")};
-        int[] hx = new int[3];
-        String[] hs = new String[3];
-        for (int i = 0; i < 3; i++) hs[i] = SkyUi.caps(headers[i]);
+                Component.translatable("inventory.skycraft.column.weight"), Component.translatable("inventory.skycraft.column.value"),
+                Component.translatable("inventory.skycraft.column.vw")};
+        int[] hx = new int[4];
+        String[] hs = new String[4];
+        for (int i = 0; i < 4; i++) hs[i] = SkyUi.caps(headers[i]);
         hx[0] = nameX;
         hx[1] = wgtRight - font.width(hs[1]);
         hx[2] = valRight - font.width(hs[2]);
-        for (int i = 0; i < 3; i++) {
+        hx[3] = vwRight - font.width(hs[3]);
+        Component vwTip = null;
+        for (int i = 0; i < cols; i++) {
             int x1 = i == 0 ? listX + 2 : hx[i] - 8;
             int x2 = i == 0 ? nameEnd : hx[i] + font.width(hs[i]) + 2;
             boolean hov = SkyUi.inside(mx, my, x1, hy - 3, x2, hy + 10);
             if (hov) hoverSort = i;
+            if (hov && i == SORT_VW) vwTip = Component.translatable("inventory.skycraft.column.vw.tooltip");
             boolean active = sortMode == i;
             g.drawString(font, hs[i], hx[i], hy, active ? SkyUi.LINE : hov ? SkyUi.TEXT : SkyUi.HEADER, false);
             if (active) SkyUi.triangle(g, hx[i] - 5, hy + 2, !sortDescending, SkyUi.LINE);
         }
+        if (vwTip != null) hoverText = vwTip;
         SkyUi.hline(g, listX + 2, listX + listW - 2, listTop - 2, 0x90);
 
         hoverRow = -1;
@@ -481,6 +506,11 @@ public class SkyrimInventoryScreen extends Screen {
             g.drawString(font, w, wgtRight - font.width(w), y + 5, sel ? SkyUi.TEXT : 0xFFB0A898, false);
             String v = String.valueOf(e.value);
             g.drawString(font, v, valRight - font.width(v), y + 5, sel ? SkyUi.GOLD : 0xFFC0A050, false);
+            if (showVw) {
+                String r = ValueDensity.format(e.valuePerWeight);
+                int c = e.valuePerWeight < 0f ? SkyUi.DIM : sel ? 0xFFB8E0A0 : 0xFF98B888;
+                g.drawString(font, r, vwRight - font.width(r), y + 5, c, false);
+            }
         }
 
         // scrollbar
@@ -570,6 +600,12 @@ public class SkyrimInventoryScreen extends Screen {
         labels.add(Component.translatable("inventory.skycraft.stat.value"));
         values.add(String.valueOf(e.value));
         colorsList.add(SkyUi.GOLD);
+        // gold per weight: only when the cell stays wide enough for its label and value (narrow panels skip it)
+        if ((detW - 8) / (labels.size() + 1) >= 44) {
+            labels.add(Component.translatable("inventory.skycraft.column.vw"));
+            values.add(ValueDensity.format(e.valuePerWeight));
+            colorsList.add(e.valuePerWeight < 0f ? SkyUi.DIM : 0xFFB8E0A0);
+        }
 
         int cellW = (detW - 8) / labels.size();
         for (int i = 0; i < labels.size(); i++) {
@@ -1005,7 +1041,7 @@ public class SkyrimInventoryScreen extends Screen {
                 return true;
             }
             case GLFW.GLFW_KEY_R -> {
-                setSort((sortMode + 1) % 3);
+                setSort((sortMode + 1) % (vwVisible ? 4 : 3));
                 return true;
             }
             case GLFW.GLFW_KEY_TAB -> {

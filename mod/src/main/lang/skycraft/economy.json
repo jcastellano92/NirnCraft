@@ -143,5 +143,11 @@
   "message.skycraft.economy.bound": "%s is bound to you and can't be sold.",
   "message.skycraft.economy.quest_item": "%s is a quest item and can't be sold.",
   "message.skycraft.economy.buyback_gone": "That is no longer here to buy back.",
-  "message.skycraft.economy.bought_back": "Bought back %s %s for %s gold"
+  "message.skycraft.economy.bought_back": "Bought back %s %s for %s gold",
+  "message.skycraft.economy.confirm_keepsake": "%s is too special to be sold on. The shop would keep it for you for half an hour, then it is gone. Click again to sell.",
+  "barter.skycraft.status.keepsake": "The shop will not put this on its shelves: only you can buy it back, for 30 minutes",
+  "barter.skycraft.vw": "V/W",
+  "barter.skycraft.vw.tooltip": "Gold per weight: higher is worth carrying",
+  "barter.skycraft.vw.sort": "Click to sort by gold per weight",
+  "barter.skycraft.vw.line": "Gold per weight: %s"
 }

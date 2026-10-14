@@ -32,6 +32,8 @@ public final class Barter {
     public static final byte STATUS_OK = 0;
     public static final byte STATUS_NOT_DEALT = 1;
     public static final byte STATUS_STOLEN = 2;
+    /** A sell row the shop will not put on its shelves: kept for you alone (buy-back), explicit second click. */
+    public static final byte STATUS_KEEPSAKE = 3;
     /** {@link EconomyPackets.BarterAction} operations. */
     public static final int OP_BUY = 0, OP_SELL = 1, OP_BUYBACK = 2;
     /** Items flagged with this boolean NBT (quest items) can never be sold. */
@@ -81,10 +83,17 @@ public final class Barter {
         };
         sendState(player, npc, shop, msg, false);
 
-        // Sync stock & gold to all players viewing this merchant
+        // The stock and the gold belong to the shop: everybody at any counter of it sees the change (a client without
+        // that merchant's screen open ignores the state)
         for (ServerPlayer other : player.serverLevel().players()) {
-            if (other != player && canReach(other, npc)) {
+            if (other == player || other.isSpectator()) continue;
+            if (canReach(other, npc)) {
                 sendState(other, npc, shop, Component.empty(), false);
+            }
+            for (LivingEntity near : other.level().getEntitiesOfClass(LivingEntity.class, other.getBoundingBox().inflate(10),
+                    e -> e != npc && Merchants.isMerchant(e) && canReach(other, e))) {
+                Shop theirs = Shop.of(near, other);
+                if (theirs.key().equals(shop.key())) sendState(other, near, theirs, Component.empty(), false);
             }
         }
     }
@@ -93,11 +102,12 @@ public final class Barter {
         return !stack.isEmpty() && BuiltInRegistries.ITEM.getKey(stack.getItem()).equals(itemId);
     }
 
-    private static Component buy(ServerPlayer player, Shop shop, int index, boolean all, ResourceLocation itemId) {
-        List<ItemStack> stock = shop.stock();
-        if (index < 0 || index >= stock.size()) return Component.empty();
-        ItemStack stack = stock.get(index);
+    static Component buy(ServerPlayer player, Shop shop, int index, boolean all, ResourceLocation itemId) {
+        if (index < 0 || index >= shop.rows()) return Component.empty();
+        ItemStack stack = shop.row(index);
         if (!matches(stack, itemId)) return Component.empty();
+        // the same filter the list was built with: a cook sells the food only, a keepsake is never for sale
+        if (!shelfVisible(shop.npc(), stack)) return Component.empty();
         Component name = stack.getHoverName();
         int unit = Pricing.buyPrice(player, stack, shop.npc());
         int want = all ? stack.getCount() : 1;
@@ -111,8 +121,8 @@ public final class Barter {
         if (bought <= 0) return Component.translatable("message.skycraft.economy.inventory_full");
         int total = unit * bought;
         Currency.take(player, total);
-        stack.shrink(bought);
-        if (stack.isEmpty()) stock.remove(index);
+        // the shelf row, read and reduced in this one server-thread step: two customers can never both get the last one
+        shop.take(index, bought);
         shop.receive(total);
         shop.save();
         Progression.addSkillXp(player, Skill.SPEECH, total);
@@ -158,6 +168,10 @@ public final class Barter {
         // an equipped item is sold only on an explicit second click, and only one at a time
         boolean equipped = eq != InventoryActions.EQ_NONE;
         if (equipped && !confirm) return Component.translatable("message.skycraft.economy.confirm_equipped", name);
+        // an artifact or a unique thing is not put on the shelf: the shop keeps it for the seller alone (buy-back), so it
+        // takes an explicit second click, and it is gone for good once the buy-back time runs out
+        boolean keepsake = Resale.isKeepsake(stack);
+        if (keepsake && !confirm) return Component.translatable("message.skycraft.economy.confirm_keepsake", name);
 
         // where the items come from: the clicked slot, the other unequipped stacks of the row, the pack part
         List<Integer> slots = new ArrayList<>();
@@ -213,12 +227,18 @@ public final class Barter {
         ItemStack original = sold.copy();
         if (stolen) Merchants.clearStolen(sold);
         ItemStack inStock = sold.copy();
-        shop.addToStock(sold);
         shop.pay(player, total);
+        if (keepsake) {
+            // never on the shared shelf: only this player can buy it back (persisted with the shop)
+            Buyback.recordHeld(player, shop, original, n, unit);
+        } else {
+            // on sale to every player from now on, at the shop's markup; the seller's buy-back takes it off again
+            shop.addSold(sold);
+            Buyback.record(player, shop, original, inStock, n, unit);
+        }
         shop.save();
-        Buyback.record(player, npc, original, inStock, n, unit);
         Currency.give(player, total);
-        if (!Buyback.noXp(player, npc)) Progression.addSkillXp(player, Skill.SPEECH, total);
+        if (!Buyback.noXp(player, shop)) Progression.addSkillXp(player, Skill.SPEECH, total);
         if (equipped && eq == InventoryActions.EQ_WORN) unwearJewelry(player, original);
         CarryWeight.invalidate(player);
         player.level().playSound(null, player.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.5f, 0.8f);
@@ -249,14 +269,15 @@ public final class Barter {
 
     /** Buys back what this player sold to this merchant: at the price it was paid, from the shop's stock. */
     static Component buyback(ServerPlayer player, Shop shop, int index, boolean all, ResourceLocation itemId) {
-        LivingEntity npc = shop.npc();
-        List<Buyback.Entry> list = Buyback.list(player, npc);
+        List<Buyback.Entry> list = Buyback.list(player, shop);
         if (index < 0 || index >= list.size()) return Component.empty();
         Buyback.Entry e = list.get(index);
         if (!matches(e.original, itemId)) return Component.empty();
         Component name = e.original.getHoverName();
-        int inStock = stockCount(shop, e.inStock);
-        int want = Math.min(all ? e.count : 1, Math.min(e.count, inStock));
+        // shelf goods must still be on the shelf (a customer may have bought them meanwhile: then they are gone);
+        // kept goods are the seller's alone and are always there
+        int available = e.held() ? e.count : shop.count(e.inStock);
+        int want = Math.min(all ? e.count : 1, Math.min(e.count, available));
         if (want <= 0) return Component.translatable("message.skycraft.economy.buyback_gone");
         int affordable = (int) Math.min(want, Currency.balance(player) / Math.max(1, e.unit));
         if (affordable <= 0) return Component.translatable("message.skycraft.not_enough_gold");
@@ -268,34 +289,22 @@ public final class Barter {
         if (bought <= 0) return Component.translatable("message.skycraft.economy.inventory_full");
         int total = e.unit * bought;
         Currency.take(player, total);
-        stockRemove(shop, e.inStock, bought);
+        if (!e.held()) shop.takeEqual(e.inStock, bought);
         shop.receive(total);
         shop.save();
-        Buyback.consume(player, npc, e, bought);
+        Buyback.consume(player, shop, e, bought);
         player.level().playSound(null, player.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.5f, 1.2f);
         return Component.translatable("message.skycraft.economy.bought_back", bought, name, total);
     }
 
-    private static int stockCount(Shop shop, ItemStack key) {
-        int n = 0;
-        for (ItemStack s : shop.stock()) if (!s.isEmpty() && ItemStack.isSameItemSameTags(s, key)) n += s.getCount();
-        return n;
-    }
-
-    private static void stockRemove(Shop shop, ItemStack key, int n) {
-        List<ItemStack> stock = shop.stock();
-        for (int i = 0; i < stock.size() && n > 0; ) {
-            ItemStack s = stock.get(i);
-            if (s.isEmpty() || !ItemStack.isSameItemSameTags(s, key)) {
-                i++;
-                continue;
-            }
-            int take = Math.min(n, s.getCount());
-            s.shrink(take);
-            n -= take;
-            if (s.isEmpty()) stock.remove(i);
-            else i++;
-        }
+    /**
+     * Whether this merchant offers this shelf row: never a keepsake (an old per-NPC stock may still hold one), and a
+     * person whose job sells part of the shop's stock (the cook) only sells that part.
+     */
+    static boolean shelfVisible(LivingEntity npc, ItemStack row) {
+        if (row.isEmpty() || Resale.isKeepsake(row)) return false;
+        java.util.Set<ItemCategory> sells = Merchants.sells(npc);
+        return sells.isEmpty() || sells.contains(ItemCategory.of(row));
     }
 
     /** True for quest items: the quest flag, and the item kinds that are quest items by nature (letters, relics, keys). */
@@ -324,19 +333,20 @@ public final class Barter {
 
     static void sendState(ServerPlayer player, LivingEntity npc, Shop shop, Component message, boolean open) {
         List<EconomyPackets.Entry> merchant = new ArrayList<>();
-        List<ItemStack> stock = shop.stock();
-        for (int i = 0; i < stock.size(); i++) {
-            ItemStack s = stock.get(i);
-            if (s.isEmpty()) continue;
-            merchant.add(new EconomyPackets.Entry(i, s.copy(), Pricing.buyPrice(player, s, npc), (byte) ItemCategory.of(s).ordinal(), STATUS_OK, (byte) 0));
+        // the shop's shelves, as this person sells them (the same rows for every customer and every counter)
+        int rows = shop.rows();
+        for (int i = 0; i < rows; i++) {
+            ItemStack s = shop.row(i);
+            if (!shelfVisible(npc, s)) continue;
+            merchant.add(new EconomyPackets.Entry(i, s, Pricing.buyPrice(player, s, npc), (byte) ItemCategory.of(s).ordinal(), STATUS_OK, (byte) 0));
         }
         List<EconomyPackets.Entry> mine = sellEntries(player, npc, shop);
-        // the buy-back list: what this player sold here lately (only what is still on the merchant's shelves)
+        // the buy-back list: what this player sold here lately (shelf goods only while still on the shelf)
         List<EconomyPackets.Entry> back = new ArrayList<>();
-        List<Buyback.Entry> sold = Buyback.list(player, npc);
+        List<Buyback.Entry> sold = Buyback.list(player, shop);
         for (int i = 0; i < sold.size(); i++) {
             Buyback.Entry e = sold.get(i);
-            int count = Math.min(e.count, stockCount(shop, e.inStock));
+            int count = e.held() ? e.count : Math.min(e.count, shop.count(e.inStock));
             if (count <= 0) continue;
             ItemStack shown = e.original.copy();
             shown.setCount(count);
@@ -377,6 +387,7 @@ public final class Barter {
             if (!Merchants.buysFrom(player, npc, s)) {
                 if (!com.skycraft.perk.Perks.has(player, "speech.merchant")) continue;
             }
+            if (Resale.isKeepsake(s)) status = STATUS_KEEPSAKE;
             if (Merchants.isStolen(s) && !fence) status = STATUS_STOLEN;
             if (!smuggler && Merchants.isContraband(npc, s)) status = STATUS_STOLEN;
             mine.add(new EconomyPackets.Entry(row.index, s.copy(), price, (byte) ItemCategory.of(s).ordinal(), status, (byte) row.equip));
@@ -436,7 +447,7 @@ public final class Barter {
             int slot = k;
             int packIndex = packSize - 1 - (k - MAIN_INVENTORY);
             ItemStack s = fromPack ? Pack.get(player, packIndex) : inv.getItem(slot);
-            if (s.isEmpty() || !s.is(filter) || !sellable(s) || Merchants.isStolen(s)) continue;
+            if (s.isEmpty() || !s.is(filter) || !sellable(s) || Merchants.isStolen(s) || Resale.isKeepsake(s)) continue;
             if (!fromPack && InventoryActions.equipState(player, inv, slot, s) != InventoryActions.EQ_NONE) continue;
             if (fromPack && InventoryActions.isWornJewelry(player, s)) continue;
             int unit = Pricing.sellPrice(player, s, npc);
@@ -448,9 +459,9 @@ public final class Barter {
             if (sold.isEmpty()) continue;
             int got = sold.getCount() * unit;
             ItemStack original = sold.copy();
-            shop.addToStock(sold);
+            shop.addSold(sold);
             shop.pay(player, got);
-            Buyback.record(player, npc, original, original, original.getCount(), unit);
+            Buyback.record(player, shop, original, original, original.getCount(), unit);
             total += got;
             count += original.getCount();
         }

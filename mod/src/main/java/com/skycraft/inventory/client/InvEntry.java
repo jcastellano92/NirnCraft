@@ -32,6 +32,8 @@ public final class InvEntry {
     public final InvCategory category;
     public final float weight;
     public final int value;
+    /** Gold per weight unit of one item ({@link com.skycraft.inventory.ValueDensity}), or -1 for a weightless item. */
+    public final float valuePerWeight;
     public final boolean favorite;
     public final boolean stolen;
     public final String name;
@@ -46,6 +48,7 @@ public final class InvEntry {
         this.category = InvCategory.of(first);
         this.weight = ItemWeights.get(first);
         this.value = ItemValues.get(first);
+        this.valuePerWeight = com.skycraft.inventory.ValueDensity.of(this.value, this.weight);
         this.favorite = InvCategory.isFavorite(first);
         this.stolen = InvCategory.isStolen(first);
         this.name = first.getHoverName().getString();

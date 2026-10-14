@@ -2,7 +2,7 @@ package com.skycraft.economy;
 
 import com.skycraft.arsenal.LeveledGear;
 import com.skycraft.arsenal.item.ArtifactItem;
-import com.skycraft.core.SkyData;
+import com.skycraft.inventory.BulkStore;
 import com.skycraft.crafting.RegionalGear;
 import com.skycraft.crafting.SoulGems;
 import com.skycraft.crafting.arcane.item.SoulGemItem;
@@ -16,12 +16,10 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -51,77 +49,130 @@ public final class ShopStock {
 
     private ShopStock() {}
 
-    public static void generate(Shop shop, @Nullable Player customer, RandomSource rnd) {
-        LivingEntity npc = shop.npc();
-        int level = Merchants.level(npc);
-        Region region = EconomyLoot.regionAt(npc.level(), npc.blockPosition());
+    private static long mix(long z) {
+        z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9L;
+        z = (z ^ (z >>> 27)) * 0x94D049BB133111EBL;
+        return z ^ (z >>> 31);
+    }
+
+    /**
+     * The seed of one trade's goods in one shop for one restock period: a pure function of the world, the shop's key,
+     * the period and the trade, so a list never depends on who opens the shop first or when.
+     */
+    public static long seed(net.minecraft.world.level.Level world, String shopKey, long period, ShopType trade) {
+        long h = world instanceof net.minecraft.server.level.ServerLevel sl ? sl.getSeed() : 0L;
+        long k = 0xCBF29CE484222325L; // FNV-1a over the key: String.hashCode is 32 bits and collides on similar keys
+        for (int i = 0; i < shopKey.length(); i++) k = (k ^ shopKey.charAt(i)) * 0x100000001B3L;
+        h = mix(h ^ k);
+        h = mix(h + period * 0x9E3779B97F4A7C15L);
+        return mix(h + (trade.ordinal() + 1) * 0xD6E8FEB86659FD93L);
+    }
+
+    /** The goods of one trade of a shop for one period (merged rows, deterministic for {@code seed}). */
+    public static List<ItemStack> generate(Shop shop, ShopType trade, long seed) {
+        BulkStore out = new BulkStore(ShopBook.MAX_ROWS, ShopBook.MAX_PER_ROW, null);
+        generate(out, shop.npc().level(), shop.pos(), shop.level(), shop.record().share, shop.inn(), trade, RandomSource.create(seed));
+        return out.entries();
+    }
+
+    /**
+     * Stocks {@code out} with the goods of {@code trade} for a shop of this level at this place. The shop's size
+     * stands in for the customer's level (a shop's list is the same for every player); the place sets the province.
+     */
+    static void generate(BulkStore out, net.minecraft.world.level.Level world, net.minecraft.core.BlockPos pos, int level, int share,
+                         boolean inn, ShopType t, RandomSource rnd) {
+        Region region = EconomyLoot.regionAt(world, pos);
         String key = RegionalGear.gearKey(region);
         String province = region == null ? "skyrim" : region.province();
-        // like Skyrim, gear follows the customer's level; without one, the shop's size stands in
-        int gearLevel = customer != null ? Math.max(1, SkyData.get(customer).getLevel()) : 1 + 6 * (level - 1);
-        List<ShopType> pools = Merchants.pools(npc);
-        int share = Math.max(3, (6 + 3 * level) / Math.max(1, pools.size()));
+        int gearLevel = 1 + 6 * (level - 1);
+        Player customer = null;
 
-        for (ShopType t : pools) {
-            tagged(shop, t, key, share, level, rnd);
+        {
+            tagged(out, t, key, share, level, rnd);
             switch (t) {
                 case BLACKSMITH -> {
                     int n = 3 + level;
                     for (int i = 0; i < n; i++) {
                         float f = rnd.nextFloat();
                         LeveledGear.Kind kind = f < 0.45f ? LeveledGear.Kind.WEAPON : f < 0.85f ? LeveledGear.Kind.ARMOR : LeveledGear.Kind.SHIELD;
-                        gear(shop, LeveledGear.regional(key, kind, gearLevel, rnd), gearLevel, level, rnd);
+                        gear(out, LeveledGear.regional(key, kind, gearLevel, rnd), gearLevel, level, rnd);
                     }
                 }
                 case FLETCHER -> {
-                    for (int i = 0; i < 1 + level / 2; i++) gear(shop, LeveledGear.regional(key, LeveledGear.Kind.BOW, gearLevel, rnd), gearLevel, level, rnd);
+                    for (int i = 0; i < 1 + level / 2; i++) gear(out, LeveledGear.regional(key, LeveledGear.Kind.BOW, gearLevel, rnd), gearLevel, level, rnd);
                     for (int i = 0; i < 2 + level; i++) {
                         ItemStack arrows = LeveledGear.arrows(gearLevel, rnd);
-                        arrows.setCount(Math.min(arrows.getMaxStackSize(), 10 + rnd.nextInt(15)));
-                        shop.addToStock(arrows);
+                        int[] lot = ShopTrades.quantity(ItemValues.get(arrows), ShopType.FLETCHER);
+                        arrows.setCount(Math.min(arrows.getMaxStackSize(), lot[0] + rnd.nextInt(lot[1] - lot[0] + 1)));
+                        add(out, arrows);
                     }
                 }
                 case ARCANE -> {
                     Set<School> any = EnumSet.noneOf(School.class);
-                    for (int i = 0; i < 2 + level; i++) add(shop, EconomyLoot.tome(gearLevel, customer, true, level, any, rnd));
-                    soulGems(shop, level, rnd);
-                    if (level >= 2) staves(shop, gearLevel, level, rnd);
-                    for (int i = 0; i < 1 + level / 2; i++) add(shop, potion(false, rnd, level, true));
+                    for (int i = 0; i < 2 + level; i++) add(out, EconomyLoot.tome(gearLevel, customer, true, level, any, rnd));
+                    soulGems(out, level, rnd);
+                    if (level >= 2) staves(out, gearLevel, level, rnd);
+                    for (int i = 0; i < 1 + level / 2; i++) add(out, potion(false, rnd, level, true));
                 }
                 case LIBRARY -> {
                     for (int i = 0; i < 2 + level; i++) {
                         LoreBooks.Book b = LoreBooks.randomFor(rnd, province, book -> true);
-                        if (b != null) add(shop, LoreBookItem.create(b));
+                        if (b != null) add(out, LoreBookItem.create(b));
                     }
                     List<Item> skillBooks = items(ItemCategory.SKILL_BOOKS);
                     int n = 1 + (level >= 3 ? 1 : 0) + (level >= 5 ? 1 : 0);
-                    for (int i = 0; i < n && !skillBooks.isEmpty(); i++) add(shop, new ItemStack(skillBooks.get(rnd.nextInt(skillBooks.size()))));
-                    add(shop, EconomyLoot.tome(1, null, false, level, EnumSet.noneOf(School.class), rnd));
+                    for (int i = 0; i < n && !skillBooks.isEmpty(); i++) add(out, new ItemStack(skillBooks.get(rnd.nextInt(skillBooks.size()))));
+                    add(out, EconomyLoot.tome(1, null, false, level, EnumSet.noneOf(School.class), rnd));
                 }
                 case APOTHECARY -> {
-                    for (int i = 0; i < 2 + level; i++) add(shop, potion(false, rnd, level, false));
-                    if (rnd.nextFloat() < 0.6f) add(shop, potion(true, rnd, level, false));
+                    for (int i = 0; i < 2 + level; i++) add(out, potion(false, rnd, level, false));
+                    if (rnd.nextFloat() < 0.6f) add(out, potion(true, rnd, level, false));
                 }
                 case GENERAL -> {
-                    for (int i = 0; i < 1 + level / 2; i++) add(shop, potion(false, rnd, level, true));
-                    if (rnd.nextFloat() < 0.5f) gear(shop, LeveledGear.regional(key, LeveledGear.Kind.WEAPON, Math.min(gearLevel, 12), rnd), gearLevel, 1, rnd);
+                    for (int i = 0; i < 1 + level / 2; i++) add(out, potion(false, rnd, level, true));
+                    if (rnd.nextFloat() < 0.5f) gear(out, LeveledGear.regional(key, LeveledGear.Kind.WEAPON, Math.min(gearLevel, 12), rnd), gearLevel, 1, rnd);
                 }
                 case FENCE -> {
-                    for (int i = 0; i < 1 + level / 2; i++) add(shop, potion(true, rnd, level, false));
-                    jewelry(shop, level, rnd, 2);
+                    for (int i = 0; i < 1 + level / 2; i++) add(out, potion(true, rnd, level, false));
+                    jewelry(out, level, rnd, 2);
                 }
-                case JEWELER -> jewelry(shop, level, rnd, 3 + level);
+                case JEWELER -> jewelry(out, level, rnd, 3 + level);
+                case FOOD -> {
+                    // an inn's own table (mead, ale, stews, sweetrolls...): the province's, from #skycraft:inn_goods
+                    if (inn) innGoods(out, key, rnd);
+                }
                 default -> {
                 }
             }
         }
     }
 
+    /** The inn's own goods: 5 to 8 kinds of #skycraft:inn_goods this province serves, 1 to 4 each. */
+    private static void innGoods(BulkStore out, String gearKey, RandomSource rnd) {
+        List<Item> goods = new ArrayList<>();
+        for (Item item : items(com.skycraft.survival.inn.Innkeepers.INN_GOODS)) {
+            ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+            if (id != null && ShopTrades.servedIn(id.toString(), gearKey)) goods.add(item);
+        }
+        if (goods.isEmpty()) return;
+        int entries = 5 + rnd.nextInt(4);
+        for (int i = 0; i < entries; i++) {
+            ItemStack stack = new ItemStack(goods.get(rnd.nextInt(goods.size())));
+            stack.setCount(Math.min(stack.getMaxStackSize(), 1 + rnd.nextInt(4)));
+            add(out, stack);
+        }
+    }
+
     // ------------------------------------------------------------------ pieces
 
     /** Random goods of the type's tag and of its province tag (province goods three times as likely). */
-    private static void tagged(Shop shop, ShopType t, String key, int entries, int level, RandomSource rnd) {
+    private static void tagged(BulkStore out, ShopType t, String key, int entries, int level, RandomSource rnd) {
         List<Item> base = t.stockItems();
+        // goods the data ties to other provinces are not on this province's shelves (no mead in a Dunmer food shop)
+        base.removeIf(i -> {
+            ResourceLocation id = BuiltInRegistries.ITEM.getKey(i);
+            return id != null && !ShopTrades.servedIn(id.toString(), key);
+        });
         List<Item> local = t.provinceItems(key);
         if (base.isEmpty() && local.isEmpty()) return;
         for (int i = 0; i < entries; i++) {
@@ -132,22 +183,22 @@ public final class ShopStock {
             for (int attempt = 0; attempt < 6 && stack.isEmpty(); attempt++) {
                 Item item = pool.get(rnd.nextInt(pool.size()));
                 if (item instanceof ArtifactItem) continue;
-                ItemStack candidate = Shop.makeStock(item, rnd, level);
+                ItemStack candidate = Shop.makeStock(item, rnd, level, t);
                 if (candidate.isEmpty()) continue;
                 int value = ItemValues.get(candidate);
                 float accept = value <= 0 ? 1f : Math.min(1f, 120f * level / value);
                 if (rnd.nextFloat() < accept) stack = candidate;
             }
-            add(shop, stack);
+            add(out, stack);
         }
     }
 
     /** A piece of gear: worn a little, sometimes enchanted (bigger shops more often), sometimes tempered. */
-    private static void gear(Shop shop, ItemStack stack, int gearLevel, int shopLevel, RandomSource rnd) {
+    private static void gear(BulkStore out, ItemStack stack, int gearLevel, int shopLevel, RandomSource rnd) {
         if (stack.isEmpty()) return;
         float enchant = shopLevel >= 2 ? 0.06f * shopLevel : 0f;
         LeveledGear.decorate(stack, gearLevel, rnd, enchant, 0.1f);
-        add(shop, stack);
+        add(out, stack);
     }
 
     private static ItemStack potion(boolean poison, RandomSource rnd, int shopLevel, boolean restoreOnly) {
@@ -163,7 +214,7 @@ public final class ShopStock {
     }
 
     /** Empty soul gems by shop size, and a few filled ones (Skyrim's court wizards sell both). */
-    private static void soulGems(Shop shop, int level, RandomSource rnd) {
+    private static void soulGems(BulkStore out, int level, RandomSource rnd) {
         List<Item> gems = items(TagKey.create(Registries.ITEM, new ResourceLocation("skycraft", "soul_gems")));
         gems.removeIf(g -> !(g instanceof SoulGemItem s) || s.reusable || s.black && level < 4);
         if (gems.isEmpty()) return;
@@ -175,24 +226,24 @@ public final class ShopStock {
                 stack.setCount(1);
                 SoulGemItem.setSoul(stack, Math.max(SoulGems.PETTY, gem.capacity - rnd.nextInt(2)));
             }
-            add(shop, stack);
+            add(out, stack);
         }
     }
 
     /** Plain (non-artifact) staves whose spell level suits the customer. */
-    private static void staves(Shop shop, int gearLevel, int level, RandomSource rnd) {
+    private static void staves(BulkStore out, int gearLevel, int level, RandomSource rnd) {
         List<Item> staves = items(TagKey.create(Registries.ITEM, new ResourceLocation("skycraft", "staves")));
         staves.removeIf(s -> s instanceof ArtifactItem);
         if (staves.isEmpty()) return;
         for (int i = 0; i < level / 2; i++) {
             ItemStack staff = new ItemStack(staves.get(rnd.nextInt(staves.size())));
             int value = ItemValues.get(staff);
-            if (value <= 120 + 25 * gearLevel) add(shop, staff);
+            if (value <= 120 + 25 * gearLevel) add(out, staff);
         }
     }
 
     /** Rings, necklaces and circlets (bigger shops enchant some), gems and precious metals. */
-    private static void jewelry(Shop shop, int level, RandomSource rnd, int n) {
+    private static void jewelry(BulkStore out, int level, RandomSource rnd, int n) {
         List<Item> jewels = items(ShopType.JEWELRY);
         jewels.removeIf(i -> i instanceof ArtifactItem || ForgeRegistries.ITEMS.getKey(i).getPath().startsWith("mask_"));
         List<Item> gems = items(TagKey.create(Registries.ITEM, new ResourceLocation("skycraft", "merchant/gems")));
@@ -207,7 +258,7 @@ public final class ShopStock {
                 stack = net.minecraft.world.item.enchantment.EnchantmentHelper.enchantItem(rnd, stack, 5 + 4 * level, false);
                 if (!stack.isEnchanted()) stack = enchantJewelry(stack, rnd, level);
             }
-            add(shop, stack);
+            add(out, stack);
         }
     }
 
@@ -267,8 +318,8 @@ public final class ShopStock {
         return out;
     }
 
-    private static void add(Shop shop, ItemStack stack) {
-        if (!stack.isEmpty()) shop.addToStock(stack);
+    private static void add(BulkStore out, ItemStack stack) {
+        if (!stack.isEmpty()) out.add(stack.copy());
     }
 
     private static List<Item> items(TagKey<Item> tag) {

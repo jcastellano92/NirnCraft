@@ -240,9 +240,41 @@ filled containers are not listed and are refused by the server (`Barter.sell`, `
 The sell list marks equipped rows with an "E" badge and the inventory screen's colours and sorts them last;
 unequipped stacks of one item (slots and pack) are one row. Selling an equipped item needs the explicit second click
 (`confirm` in `BarterAction`, validated on the server), sells one item, and never a bound (cursed) worn item.
-**Buy back** (`economy.Buyback`): per player and merchant, the last 30 minutes of sales, at the price paid, taken from
-the merchant's stock (if somebody else bought it meanwhile it is gone, so nothing can be duplicated); a buy-back
-suppresses Speech XP from that merchant for two minutes (no sell/buy-back farming).
+**Buy back** (`economy.Buyback`): per player and *shop*, the last 30 minutes of sales, at the price paid, taken from
+the shop's stock (if somebody else bought it meanwhile it is gone, so nothing can be duplicated); a buy-back
+suppresses Speech XP from that shop for two minutes (no sell/buy-back farming).
+
+### Shops are buildings, and what you sell is for sale (`economy/Shop`, `ShopBook`, `ShopKeys`, `Resale`)
+
+* **The stock is the establishment's, not the person's.** `ShopKeys` maps a merchant to its shop: `<settlement>/<owner
+  label>` (the label of the NPC's anchor, `inn#1`, `smithy#4`: building plus index), else `npc:<uuid>` for a traveller.
+  The innkeeper and the cook of one inn, the merchants of one market hall, are views of one record: one stock, one gold
+  pool, one buy-back list. The building also says the trade (`economy/shop_trades.json`: counter anchor -> shop types, so
+  a tailor's counter is a tailor's whatever pool the NPC was spawned with). A job may sell only part of the shared stock
+  (`jobs.<id>.sells`, e.g. the cook sells food): a filter over the one stock, enforced on the server at buy time.
+* **Saved with the world** (`ShopBook`, SavedData `skycraft_shops`, one `BulkStore` for the shelves and one for the sold
+  ledger, caps 256 / 128 kinds and 1,000,000 per row). Old per-NPC stock in `skycraft_shop` is taken over once and removed.
+* **Deterministic restocks.** The generated goods of a period (`Shop.RESTOCK_DAYS` = 2) are a pure function of
+  (world seed, shop key, period, trade) (`ShopStock.seed`); the customer no longer shapes them, so every player and
+  client sees one list. Quantity brackets, per-trade floors and allowed categories, and province-bound goods (mead is
+  northern) are data in `shop_trades.json`.
+* **What a player sells goes on the shared shelf** (`Shop.addSold`), at the shop's markup for every later customer, and
+  stays across restocks (the ledger); purchases take sold goods first so it turns over. A buy-back takes the goods off the
+  shelf again; when the 30 minutes pass they simply stay.
+* **Keepsakes** (`Resale.isKeepsake`: artifacts and `#skycraft:no_resale`, legendary items, curses, written books) are
+  never put on a shelf: the sale needs a second click, the goods are held in the shop's record for the seller alone
+  (persisted, 30 minutes of game time), then they are gone. Quest items, coins, bound weapons and filled containers are
+  still refused outright.
+* **Atomic.** Every barter packet runs on the server thread (`consumerMainThread`); a purchase, sale and buy-back are
+  each one uninterrupted read-modify-write of the record, so a row cannot be bought twice or sold into two places.
+
+## Gold per weight (V/W)
+
+`inventory/ValueDensity`: coins per weight unit of one item (`-` when weightless). It is a column of the Skyrim
+inventory list (sortable like name, weight and value; `R` cycles it), of the container list (hover for the explanation),
+of the barter lists (click the header to sort best first / worst first) and a cell of the inventory's details panel.
+Columns are measured from the widest value they show (never a fixed width); V/W gives way to the name when the list is too
+narrow. Format: one decimal below 10, whole numbers, then `1.2k` / `12k` / `1.2m`, at most four characters.
 
 ## Tests
 

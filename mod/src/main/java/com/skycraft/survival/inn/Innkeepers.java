@@ -15,8 +15,6 @@ import com.skycraft.survival.SurvivalConfig;
 import com.skycraft.survival.SurvivalEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -36,8 +34,6 @@ import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerType;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -180,26 +176,14 @@ public final class Innkeepers {
 
     // ------------------------------------------------------------------ shop
 
-    /** Adds the inn's own goods (mead, ale, stews, sweetrolls...) once per economy restock. */
+    /**
+     * The inn's own goods (mead, ale, stews, sweetrolls...) are part of the inn's shared stock: the economy's
+     * {@code ShopStock} adds the province's {@link #INN_GOODS} to the food of an inn (a building with an INN anchor,
+     * or an innkeeper), once per restock period, the same for the innkeeper and the cook. This only makes sure the
+     * shop is loaded and restocked; it used to roll a second, per-NPC list.
+     */
     public static void topUpStock(LivingEntity npc) {
-        Shop shop = Shop.of(npc);
-        CompoundTag root = npc.getPersistentData();
-        long day = root.getCompound(Shop.KEY).getLong("restock_day");
-        if (root.contains("skycraft_inn_stock_day") && root.getLong("skycraft_inn_stock_day") == day) return;
-        root.putLong("skycraft_inn_stock_day", day);
-        List<Item> goods = new ArrayList<>();
-        for (Holder<Item> h : BuiltInRegistries.ITEM.getTagOrEmpty(INN_GOODS)) {
-            if (h.value() != Items.AIR) goods.add(h.value());
-        }
-        if (goods.isEmpty()) return;
-        RandomSource rnd = npc.getRandom();
-        int entries = 5 + rnd.nextInt(4);
-        for (int i = 0; i < entries; i++) {
-            ItemStack stack = new ItemStack(goods.get(rnd.nextInt(goods.size())));
-            stack.setCount(Math.min(stack.getMaxStackSize(), 1 + rnd.nextInt(4)));
-            shop.addToStock(stack);
-        }
-        shop.save();
+        Shop.of(npc);
     }
 
     // ------------------------------------------------------------------ rooms

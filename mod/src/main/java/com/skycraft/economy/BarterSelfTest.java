@@ -4,8 +4,10 @@ import com.skycraft.core.Currency;
 import com.skycraft.core.SkyData;
 import com.skycraft.inventory.Pack;
 import com.skycraft.inventory.PackSelfTest;
+import com.skycraft.inventory.ValueDensity;
 import com.skycraft.quest.QuestItems;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
@@ -126,7 +128,7 @@ public final class BarterSelfTest {
         long goldAfterSale = Currency.balance(p);
 
         // ---- buy back: everything just sold, at the price it was paid
-        List<Buyback.Entry> back = Buyback.list(p, npc);
+        List<Buyback.Entry> back = Buyback.list(p, shop);
         c.check("barter: the sale is on the buy-back list", back.size() == 1 && back.get(0).count == unequipped,
                 back.size() + " entries" + (back.isEmpty() ? "" : ", count " + back.get(0).count));
         String bb = key(Barter.buyback(p, shop, 0, true, sellId));
@@ -143,5 +145,333 @@ public final class BarterSelfTest {
         inv.clearContent();
         Pack.clear(p);
         Buyback.forget(p.getUUID());
+        ShopBook.get(server).forget(shop.key());
+        sharedShops(server, level, p, c);
+        tradeLint(level, p, c);
+        valueDensity(c);
+    }
+
+    // ------------------------------------------------------------------ shared shops, resale, kept goods
+
+    /** A villager working at a counter of the shop {@code key}, selling the {@code general} trade (it buys anything). */
+    private static Villager counter(ServerLevel level, ServerPlayer p, String key, String job) {
+        Villager v = EntityType.VILLAGER.create(level);
+        if (v == null) return null;
+        v.setVillagerData(v.getVillagerData().setProfession(VillagerProfession.CARTOGRAPHER).setLevel(3));
+        v.setPos(p.getX(), p.getY(), p.getZ());
+        CompoundTag shop = new CompoundTag();
+        net.minecraft.nbt.ListTag pools = new net.minecraft.nbt.ListTag();
+        pools.add(net.minecraft.nbt.StringTag.valueOf("general"));
+        shop.put("pools", pools);
+        shop.putInt("level", 3);
+        shop.putString(ShopKeys.KEY, key);
+        v.getPersistentData().put(Shop.KEY, shop);
+        if (job != null) v.getPersistentData().putString(com.skycraft.society.Housing.JOB_KEY, job);
+        return v;
+    }
+
+    private static boolean sameStock(List<ItemStack> a, List<ItemStack> b) {
+        if (a.size() != b.size()) return false;
+        for (int i = 0; i < a.size(); i++) {
+            if (a.get(i).getCount() != b.get(i).getCount() || !ItemStack.isSameItemSameTags(a.get(i), b.get(i))) return false;
+        }
+        return true;
+    }
+
+    private static int rowOf(Shop shop, Item item) {
+        for (int i = 0; i < shop.rows(); i++) if (shop.row(i).is(item)) return i;
+        return -1;
+    }
+
+    /**
+     * Docs/INVENTORY.md "Selling": a shop is a building, not a person. Two counters of one inn share stock, gold and
+     * buy-back; a restock is a pure function of key and period; what one player sells another can buy; artifacts are
+     * kept for the seller alone; the cook sells a filter over the same stock; the whole book survives NBT.
+     */
+    private static void sharedShops(MinecraftServer server, ServerLevel level, ServerPlayer p, PackSelfTest.Checks c) {
+        ShopBook book = ShopBook.get(server);
+        String key = "selftest/inn#1";
+        book.forget(key);
+        p.getInventory().clearContent();
+        Pack.clear(p);
+        Buyback.forget(p.getUUID());
+        SkyData.get(p).setGold(1_000_000);
+        Villager innkeeper = counter(level, p, key, null);
+        Villager cook = counter(level, p, key, "cook");
+        if (innkeeper == null || cook == null) {
+            c.check("shops: test counters", false, "could not create villagers");
+            return;
+        }
+        Shop a = Shop.of(innkeeper, p);
+        Shop b = Shop.of(cook, p);
+        c.check("shops: two counters of one building are one shop (same key, same record)", a.key().equals(key) && b.key().equals(key)
+                && a.record() == b.record(), a.key() + " / " + b.key());
+        c.check("shops: a shop is stocked for its trade", a.rows() >= ShopTrades.trade(ShopType.GENERAL).minRows(), a.rows() + " rows");
+
+        // determinism: the same key and period give the same list, whoever opens it and whenever
+        List<ItemStack> first = a.stock();
+        book.forget(key);
+        Shop again = Shop.of(innkeeper, p);
+        c.check("shops: a restock is a pure function of (shop key, period): rebuilt list is identical", sameStock(first, again.stock()),
+                first.size() + " vs " + again.stock().size() + " rows");
+        a = again;
+        b = Shop.of(cook, p);
+        a.record().gold = 900_000; // the shop can pay for anything below
+
+        // a purchase at one counter is gone at the other
+        int total = 0;
+        for (ItemStack s : a.stock()) total += s.getCount();
+        ItemStack row0 = a.row(0);
+        ResourceLocation row0Id = BuiltInRegistries.ITEM.getKey(row0.getItem());
+        int before = a.count(row0);
+        int carried = count(p, row0.getItem());
+        Component bought = Barter.buy(p, a, 0, false, row0Id);
+        c.check("shops: buying at one counter takes it off the shelf of the other", key(bought).endsWith("bought")
+                && b.count(row0) == before - 1 && count(p, row0.getItem()) == carried + 1,
+                key(bought) + ", shelf " + before + " -> " + b.count(row0));
+        c.check("shops: the gold of the shop is one pool", a.available(p) == b.available(p), a.available(p) + " vs " + b.available(p));
+
+        // the cook only sells a part of the one stock (declared in shop_trades.json), never a stock of her own
+        a.addToStock(new ItemStack(Items.BREAD, 5));
+        int foodRows = 0, visibleToCook = 0, nonFoodVisible = 0;
+        for (int i = 0; i < a.rows(); i++) {
+            ItemStack s = a.row(i);
+            if (s.isEmpty()) continue;
+            if (ItemCategory.of(s) == ItemCategory.FOOD) foodRows++;
+            if (Barter.shelfVisible(cook, s)) {
+                visibleToCook++;
+                if (ItemCategory.of(s) != ItemCategory.FOOD) nonFoodVisible++;
+            }
+        }
+        c.check("shops: the cook sells the food of the shared stock and nothing else", foodRows > 0 && visibleToCook == foodRows && nonFoodVisible == 0,
+                foodRows + " food rows, cook sees " + visibleToCook);
+        int nonFoodRow = -1;
+        for (int i = 0; i < a.rows(); i++) {
+            if (!a.row(i).isEmpty() && ItemCategory.of(a.row(i)) != ItemCategory.FOOD) {
+                nonFoodRow = i;
+                break;
+            }
+        }
+        if (nonFoodRow >= 0) {
+            ItemStack nf = a.row(nonFoodRow);
+            int had = a.count(nf);
+            Component refused = Barter.buy(p, b, nonFoodRow, false, BuiltInRegistries.ITEM.getKey(nf.getItem()));
+            c.check("shops: the server refuses the cook's customer a row that is not hers to sell", refused.getString().isEmpty() && a.count(nf) == had,
+                    "count " + had + " -> " + a.count(nf));
+        }
+
+        // what a player sells goes on the shared shelf: the other counter sells it, after the buy-back time too
+        Item sold = null;
+        for (Item it : new Item[]{Items.EMERALD, Items.DIAMOND, Items.GOLD_INGOT, Items.AMETHYST_SHARD, Items.IRON_SWORD, Items.CLOCK}) {
+            ItemStack probe = new ItemStack(it);
+            if (a.count(probe) == 0 && Pricing.sellPrice(p, probe, innkeeper) > 0) {
+                sold = it;
+                break;
+            }
+        }
+        if (sold == null) {
+            c.check("shops: a sale candidate", false, "none of the candidates is worth gold");
+        } else {
+            ResourceLocation soldId = BuiltInRegistries.ITEM.getKey(sold);
+            p.getInventory().setItem(10, new ItemStack(sold, 3));
+            String sale = key(Barter.sell(p, a, 10, true, soldId, false));
+            c.check("shops: a sale is paid", sale.endsWith("sold") && p.getInventory().getItem(10).isEmpty(), sale);
+            c.check("shops: the sold goods are on the shelf of every counter of the shop", a.count(new ItemStack(sold)) == 3
+                    && b.count(new ItemStack(sold)) == 3 && a.soldCount(new ItemStack(sold)) == 3,
+                    "a " + a.count(new ItemStack(sold)) + ", b " + b.count(new ItemStack(sold)));
+            List<Buyback.Entry> list = Buyback.list(p, b);
+            c.check("shops: the seller's buy-back list belongs to the shop (the other counter lists it)", list.size() == 1 && list.get(0).count == 3
+                    && !list.get(0).held(), list.size() + " entries");
+            // the buy-back time runs out: the goods stay for everyone and a customer buys them
+            Buyback.forget(p.getUUID());
+            c.check("shops: after the buy-back time the goods stay on the shelf", Buyback.list(p, b).isEmpty()
+                    && b.count(new ItemStack(sold)) == 3, "shelf " + b.count(new ItemStack(sold)));
+            int idx = rowOf(b, sold);
+            int have = count(p, sold);
+            String buy = idx < 0 ? "no row" : key(Barter.buy(p, b, idx, true, soldId));
+            c.check("shops: another customer buys what was sold, at the shop's markup", buy.endsWith("bought") && count(p, sold) == have + 3
+                    && b.count(new ItemStack(sold)) == 0 && a.soldCount(new ItemStack(sold)) == 0, buy + ", carried " + count(p, sold));
+            String twice = idx < 0 ? "no row" : key(Barter.buy(p, b, idx, true, soldId));
+            c.check("shops: the last of a row cannot be bought twice (no duplication)", count(p, sold) == have + 3,
+                    "carried " + count(p, sold) + " (" + twice + ")");
+        }
+
+        // artifacts are kept for the seller only: never on a shelf, back from the buy-back list, persisted
+        Item artifact = BuiltInRegistries.ITEM.get(new ResourceLocation("skycraft", "dawnbreaker"));
+        if (artifact == Items.AIR) {
+            c.check("shops: an artifact is a keepsake", false, "skycraft:dawnbreaker is not registered");
+        } else {
+            ResourceLocation artId = BuiltInRegistries.ITEM.getKey(artifact);
+            p.getInventory().setItem(11, new ItemStack(artifact));
+            c.check("shops: an artifact is a keepsake (never resold)", Resale.isKeepsake(new ItemStack(artifact)), "isKeepsake");
+            String ask = key(Barter.sell(p, a, 11, false, artId, false));
+            c.check("shops: selling an artifact asks for a second click", ask.endsWith("confirm_keepsake") && !p.getInventory().getItem(11).isEmpty(), ask);
+            String done = key(Barter.sell(p, a, 11, false, artId, true));
+            boolean onShelf = a.count(new ItemStack(artifact)) > 0 || b.count(new ItemStack(artifact)) > 0;
+            for (int i = 0; i < b.rows(); i++) if (b.row(i).is(artifact)) onShelf = true;
+            boolean listed = false;
+            for (EconomyPackets.Entry e : shelfRows(p, innkeeper, a)) if (e.stack().is(artifact)) listed = true;
+            c.check("shops: a sold artifact is not on any shelf and not in any customer's list", done.endsWith("sold") && !onShelf && !listed,
+                    done + ", shelf " + onShelf + ", listed " + listed);
+            List<Buyback.Entry> kept = Buyback.list(p, b);
+            c.check("shops: the seller can see it on the buy-back list", kept.size() == 1 && kept.get(0).held() && kept.get(0).original.is(artifact),
+                    kept.size() + " entries");
+
+            // the whole book through NBT: stock, ledger, gold, trades and the kept goods
+            CompoundTag saved = book.save(new CompoundTag());
+            ShopBook copy = ShopBook.load(saved);
+            ShopBook.Record r1 = a.record();
+            ShopBook.Record r2 = copy.find(key);
+            c.check("shops: the shop book survives a save and load (stock, ledger, gold, trades, kept goods)", r2 != null
+                    && r2.stock().sameAs(r1.stock()) && r2.sold().sameAs(r1.sold()) && r2.gold == r1.gold && r2.pools().equals(r1.pools())
+                    && r2.kept().size() == r1.kept().size() && r2.period == r1.period && r2.level == r1.level,
+                    r2 == null ? "record missing" : r2.stock().size() + " rows, " + r2.kept().size() + " kept");
+
+            int idx = kept.isEmpty() ? -1 : 0;
+            String back = idx < 0 ? "none" : key(Barter.buyback(p, b, idx, false, artId));
+            c.check("shops: the keepsake comes back at the price paid and leaves the record", back.endsWith("bought_back")
+                    && count(p, artifact) == 1 && a.record().kept().isEmpty(), back);
+        }
+
+        // caps: a flood of sold kinds is bounded, nothing throws, the ledger stays a subset of the shelves
+        for (int i = 0; i < ShopBook.MAX_SOLD_ROWS + 20; i++) {
+            ItemStack junk = new ItemStack(Items.STICK);
+            junk.getOrCreateTag().putInt("selftest_kind", i);
+            a.addSold(junk);
+        }
+        boolean subset = true;
+        for (ItemStack s : a.record().sold().entries()) if (a.count(s) < s.getCount()) subset = false;
+        c.check("shops: sold goods are bounded by the ledger cap and stay a subset of the shelves", a.record().sold().size() <= ShopBook.MAX_SOLD_ROWS
+                && a.rows() <= ShopBook.MAX_ROWS && subset, a.record().sold().size() + " ledger rows, " + a.rows() + " shelf rows");
+
+        // a restock keeps what players sold (and rebuilds the rest): move the clock one period on
+        ItemStack mark = new ItemStack(Items.STICK);
+        mark.getOrCreateTag().putInt("selftest_kind", ShopBook.MAX_SOLD_ROWS + 19);
+        int markCount = a.count(mark);
+        a.record().period -= 1;
+        Shop restocked = Shop.of(innkeeper, p);
+        c.check("shops: a restock keeps the goods players sold", restocked.count(mark) == markCount && markCount > 0,
+                "marker " + markCount + " -> " + restocked.count(mark));
+
+        book.forget(key);
+        p.getInventory().clearContent();
+        Pack.clear(p);
+        Buyback.forget(p.getUUID());
+    }
+
+    /** The rows a customer is offered at this counter (what {@code Barter.sendState} puts in the packet). */
+    private static List<EconomyPackets.Entry> shelfRows(ServerPlayer p, net.minecraft.world.entity.LivingEntity npc, Shop shop) {
+        List<EconomyPackets.Entry> out = new java.util.ArrayList<>();
+        for (int i = 0; i < shop.rows(); i++) {
+            ItemStack s = shop.row(i);
+            if (!Barter.shelfVisible(npc, s)) continue;
+            out.add(new EconomyPackets.Entry(i, s, Pricing.buyPrice(p, s, npc), (byte) ItemCategory.of(s).ordinal(), Barter.STATUS_OK, (byte) 0));
+        }
+        return out;
+    }
+
+    // ------------------------------------------------------------------ stock sanity
+
+    /** Where a shop's stock is rolled: a town of several provinces (tags and gear differ by region). */
+    private static final int[][] PLACES = {{0, 0}, {6300, 500}, {-8200, 4900}, {-4000, 11300}, {-11200, 13000}, {7700, 10000}};
+
+    /**
+     * Every trade carries enough kinds, only its own kind of goods, and its province's flavour: no blacksmith sells
+     * potions, no apothecary sells swords, no empty shelf (the trade's floor and allowed categories are data).
+     */
+    private static void tradeLint(ServerLevel level, ServerPlayer p, PackSelfTest.Checks c) {
+        List<String> thin = new java.util.ArrayList<>();
+        List<String> foreign = new java.util.ArrayList<>();
+        List<String> keepsakes = new java.util.ArrayList<>();
+        int runs = 0;
+        for (ShopType t : ShopType.values()) {
+            ShopTrades.Trade trade = ShopTrades.trade(t);
+            for (int[] at : PLACES) {
+                for (int lvl : new int[]{1, 3, 5}) {
+                    for (int seed = 0; seed < 4; seed++) {
+                        com.skycraft.inventory.BulkStore out = new com.skycraft.inventory.BulkStore(ShopBook.MAX_ROWS, ShopBook.MAX_PER_ROW, null);
+                        int share = Math.max(3, (6 + 3 * lvl) / 1);
+                        ShopStock.generate(out, level, new net.minecraft.core.BlockPos(at[0], 80, at[1]), lvl, share, false, t,
+                                net.minecraft.util.RandomSource.create(1000L * t.ordinal() + 10L * lvl + seed));
+                        runs++;
+                        if (out.size() < trade.minRows() && thin.size() < 6) thin.add(t.id() + "@" + at[0] + "," + at[1] + " L" + lvl + ": " + out.size() + " < " + trade.minRows());
+                        for (ItemStack s : out.entries()) {
+                            if (s.isEmpty()) continue;
+                            ItemCategory cat = ItemCategory.of(s);
+                            if (!trade.allows(cat) && foreign.size() < 8) {
+                                foreign.add(t.id() + " sells " + BuiltInRegistries.ITEM.getKey(s.getItem()) + " (" + cat + ")");
+                            }
+                            if (Resale.isKeepsake(s) && keepsakes.size() < 4) keepsakes.add(t.id() + " stocks " + BuiltInRegistries.ITEM.getKey(s.getItem()));
+                        }
+                    }
+                }
+            }
+        }
+        c.check("shops: every trade carries at least its declared number of kinds", thin.isEmpty(), runs + " stocks rolled" + (thin.isEmpty() ? "" : "; thin: " + thin));
+        c.check("shops: no trade sells another trade's kind of goods", foreign.isEmpty(), foreign.isEmpty() ? "all within the declared categories" : String.join("; ", foreign));
+        c.check("shops: no shop stocks a keepsake (artifact, key, curse) of its own accord", keepsakes.isEmpty(), keepsakes.isEmpty() ? "none" : String.join("; ", keepsakes));
+
+        // region flavour: a Dunmer food shop sells Dunmer goods, a Nord one does not
+        List<Item> dunmer = ShopType.FOOD.provinceItems("morrowind");
+        boolean dunmerHas = false, nordHas = false;
+        for (int seed = 0; seed < 12; seed++) {
+            for (int[] at : new int[][]{PLACES[1], PLACES[0]}) {
+                com.skycraft.inventory.BulkStore out = new com.skycraft.inventory.BulkStore(ShopBook.MAX_ROWS, ShopBook.MAX_PER_ROW, null);
+                ShopStock.generate(out, level, new net.minecraft.core.BlockPos(at[0], 80, at[1]), 3, 15, false, ShopType.FOOD,
+                        net.minecraft.util.RandomSource.create(77L + seed));
+                for (ItemStack s : out.entries()) if (dunmer.contains(s.getItem())) {
+                    if (at == PLACES[1]) dunmerHas = true;
+                    else nordHas = true;
+                }
+            }
+        }
+        c.check("shops: a Dunmer food shop sells kwama eggs and saltrice, a Nord one does not", dunmer.isEmpty() || dunmerHas && !nordHas,
+                dunmer.size() + " Dunmer goods, Balmora " + dunmerHas + ", Whiterun " + nordHas);
+        c.check("shops: mead is a northern drink", ShopTrades.servedIn("skycraft:nord_mead", "skyrim") && !ShopTrades.servedIn("skycraft:nord_mead", "morrowind"),
+                "nord_mead");
+
+        // every counter of the settlements the world already knows belongs to a building (owner label), so every
+        // merchant working in it resolves to the building's one shop; a counter with no owner would be a shop of its own
+        int buildings = 0, counters = 0, unkeyed = 0;
+        java.util.List<String> unkeyedAt = new java.util.ArrayList<>();
+        for (var entry : com.skycraft.tamriel.settlement.SettlementAnchors.get(level).entries()) {
+            java.util.Set<String> owners = new java.util.HashSet<>();
+            for (var anchor : entry.anchors()) {
+                if (ShopTrades.poolsForAnchor(anchor.type().id()).isEmpty()) continue;
+                counters++;
+                if (anchor.owner().isEmpty()) {
+                    unkeyed++;
+                    if (unkeyedAt.size() < 5) unkeyedAt.add(entry.key + ":" + anchor.type().id() + "@" + anchor.pos().toShortString());
+                } else {
+                    owners.add(anchor.owner());
+                }
+            }
+            buildings += owners.size();
+        }
+        c.check("shops: every counter of the known settlements belongs to a building (no counter is a shop of its own)", unkeyed == 0,
+                counters + " counters in " + buildings + " buildings" + (unkeyed == 0 ? "" : "; unowned: " + unkeyedAt));
+        for (String anchorId : ShopTrades.anchorIds()) {
+            if (com.skycraft.tamriel.settlement.AnchorType.byId(anchorId) == null) {
+                c.check("shops: shop_trades.json names real anchor types", false, anchorId);
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------ gold per weight
+
+    private static void valueDensity(PackSelfTest.Checks c) {
+        c.check("V/W: weightless items show a dash and sort first", ValueDensity.format(ValueDensity.of(500, 0f)).equals("-")
+                && ValueDensity.sortKey(ValueDensity.NONE) > ValueDensity.sortKey(ValueDensity.of(1000, 1f)), ValueDensity.format(ValueDensity.of(500, 0f)));
+        c.check("V/W: compact formatting (one decimal below 10, whole numbers, k and m suffixes)",
+                ValueDensity.format(3.54f).equals("3.5") && ValueDensity.format(0f).equals("0") && ValueDensity.format(12.4f).equals("12")
+                        && ValueDensity.format(999.4f).equals("999") && ValueDensity.format(1500f).equals("1.5k") && ValueDensity.format(12500f).equals("13k")
+                        && ValueDensity.format(2_500_000f).equals("2.5m") && ValueDensity.format(999.6f).equals("1k"),
+                ValueDensity.format(3.54f) + " " + ValueDensity.format(1500f) + " " + ValueDensity.format(12500f) + " " + ValueDensity.format(999.6f));
+        c.check("V/W: a ring is worth more per weight than a sword", ValueDensity.of(500, 0.1f) > ValueDensity.of(500, 12f), "ratio");
+        boolean short4 = true;
+        for (float r : new float[]{0.04f, 0.5f, 9.94f, 99.5f, 999f, 9_999f, 99_999f, 999_999f, 9_999_999f, 2e9f}) {
+            if (ValueDensity.format(r).length() > 4) short4 = false;
+        }
+        c.check("V/W: never wider than four characters", short4, "checked 10 magnitudes");
     }
 }

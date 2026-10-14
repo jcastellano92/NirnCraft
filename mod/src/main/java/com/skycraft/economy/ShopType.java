@@ -34,7 +34,9 @@ public enum ShopType {
     FLETCHER(EnumSet.noneOf(ItemCategory.class), false),
     EXOTIC(EnumSet.noneOf(ItemCategory.class), true),
     /** Jewellers buy and sell rings, necklaces, circlets, gems and precious metals. */
-    JEWELER(EnumSet.noneOf(ItemCategory.class), false, "jewelry", "merchant/gems");
+    JEWELER(EnumSet.noneOf(ItemCategory.class), false, "jewelry", "merchant/gems"),
+    /** Tailors and clothiers: wool, leather and hide, and the light clothing made of them (#skycraft:merchant/tailor). */
+    TAILOR(EnumSet.noneOf(ItemCategory.class), false);
 
     public static final TagKey<Item> CROPS = tag("merchant/crops");
     public static final TagKey<Item> PELTS = tag("merchant/pelts");

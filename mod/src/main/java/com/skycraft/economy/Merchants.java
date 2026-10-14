@@ -46,7 +46,27 @@ public final class Merchants {
         if (npc.isBaby()) return false;
         // Skycraft townsfolk with a shop (society module: trades, caravan traders, innkeepers)
         if (npc.getPersistentData().getCompound(Shop.KEY).contains("pools", Tag.TAG_LIST)) return true;
+        // the inn's cook and server work the inn's counter: a job the shop data declares (economy/shop_trades.json)
+        ShopTrades.Job job = ShopTrades.job(jobId(npc));
+        if (job != null && !job.pools().isEmpty()) return true;
         return npc.getType().is(MERCHANTS);
+    }
+
+    /** The job an NPC holds: its housing job ("cook", "smith"...), else its society role id, else "". */
+    public static String jobId(LivingEntity npc) {
+        String job = npc.getPersistentData().getString(com.skycraft.society.Housing.JOB_KEY);
+        if (!job.isEmpty()) return job;
+        if (npc instanceof com.skycraft.society.entity.NpcEntity n && n.role() != null) return n.role().id;
+        return "";
+    }
+
+    /**
+     * The item categories this person sells from the shop's shared stock; empty means everything the shop has. A cook
+     * sells the inn's food and no more: a filter over the one stock, never a stock of its own.
+     */
+    public static java.util.Set<ItemCategory> sells(LivingEntity npc) {
+        ShopTrades.Job job = ShopTrades.job(jobId(npc));
+        return job == null ? java.util.Set.of() : job.sells();
     }
 
     /** Persistent-data key under which Skycraft townsfolk store the vanilla profession their trade matches. */
@@ -85,8 +105,18 @@ public final class Merchants {
         return rl == null ? null : net.minecraftforge.registries.ForgeRegistries.VILLAGER_PROFESSIONS.getValue(rl);
     }
 
-    /** The shop types (stock pools) of a merchant. Never empty for a merchant. */
+    /**
+     * The shop types (stock pools) of a merchant. Never empty for a merchant. The building the merchant works in says
+     * first which trades it is ({@link ShopKeys#buildingPools}: a tailor's counter is a tailor's whatever pool the
+     * NPC was spawned with); an NPC with no known building uses {@link #ownPools}.
+     */
     public static List<ShopType> pools(LivingEntity npc) {
+        List<ShopType> building = ShopKeys.buildingPools(npc);
+        return building.isEmpty() ? ownPools(npc) : new ArrayList<>(building);
+    }
+
+    /** The pools the NPC itself declares (its shop tag, its job, its profession), whatever building it stands in. */
+    public static List<ShopType> ownPools(LivingEntity npc) {
         List<ShopType> out = new ArrayList<>();
         CompoundTag shop = npc.getPersistentData().getCompound(Shop.KEY);
         if (shop.contains("pools", Tag.TAG_LIST)) {
@@ -97,6 +127,8 @@ public final class Merchants {
             }
             if (!out.isEmpty()) return out;
         }
+        ShopTrades.Job job = ShopTrades.job(jobId(npc));
+        if (job != null && !job.pools().isEmpty()) return new ArrayList<>(job.pools());
         if (isCaravan(npc)) {
             out.add(ShopType.GENERAL);
             out.add(ShopType.FENCE);

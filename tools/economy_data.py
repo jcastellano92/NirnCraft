@@ -214,10 +214,22 @@ MERCHANT = {
                    "minecraft:feather", "minecraft:candle", "minecraft:lantern", "minecraft:bookshelf",
                    "minecraft:glow_ink_sac", "minecraft:map"),
     "jeweler": GEMS + JEWELRY + ids("silver_ingot", "minecraft:gold_ingot", "minecraft:gold_nugget", "raw_silver"),
+    # a tailor's counter (settlement TAILOR anchor, economy/shop_trades.json): cloth, leather, hide and light clothing
+    "tailor": ids("minecraft:white_wool", "minecraft:black_wool", "minecraft:brown_wool", "minecraft:gray_wool",
+                  "minecraft:red_wool", "minecraft:blue_wool", "minecraft:string", "minecraft:shears", "minecraft:leather",
+                  "minecraft:white_carpet", "minecraft:red_carpet", "minecraft:leather_helmet",
+                  "minecraft:leather_chestplate", "minecraft:leather_leggings", "minecraft:leather_boots",
+                  "leather_strips", "hide", "leather_helmet", "leather_chestplate", "leather_leggings", "leather_boots",
+                  "hide_helmet", "hide_chestplate", "hide_leggings", "hide_boots", "fur_helmet", "fur_chestplate",
+                  "fur_leggings", "fur_boots"),
 }
 
 # province goods: #skycraft:merchant/<type>/<gear key>
 PROVINCE_GOODS = {
+    "tailor": {
+        "morrowind": ids("netch_leather", "guar_hide", "kagouti_hide", "alit_hide"),
+        "skyrim": ids("wolf_pelt", "fur_helmet", "fur_chestplate", "fur_leggings", "fur_boots"),
+    },
     "general": {
         "morrowind": ids("kwama_egg", "saltrice", "ash_yam", "comberry", "marshmerrow", "netch_leather", "chitin_plate",
                          "guar_hide", "scrib_jelly", "netch_jelly"),

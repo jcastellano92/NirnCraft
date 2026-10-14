@@ -156,5 +156,8 @@
   "inventory.skycraft.machine.hint.all": "Take All",
   "inventory.skycraft.machine.hint.rename": "Rename",
   "inventory.skycraft.machine.hint.close": "Close",
-  "inventory.skycraft.machine.hint.take_book": "Take Book"
+  "inventory.skycraft.machine.hint.take_book": "Take Book",
+  "inventory.skycraft.column.vw": "V/W",
+  "inventory.skycraft.column.vw.tooltip": "Gold per weight: higher is worth carrying. Weightless items show a dash.",
+  "inventory.skycraft.tooltip.vw": "Gold per weight: %s"
 }

@@ -130,7 +130,7 @@ public final class ItemAudit {
                 shop.put("pools", pools);
                 v.getPersistentData().put(Shop.KEY, shop);
                 JsonArray stock = new JsonArray();
-                for (ItemStack s : Shop.of(v).stock()) {
+                for (ItemStack s : Shop.preview(v).stock()) {
                     stock.add(BuiltInRegistries.ITEM.getKey(s.getItem()).getPath() + (s.getCount() > 1 ? " x" + s.getCount() : "")
                             + (s.isEnchanted() ? " (enchanted)" : ""));
                 }

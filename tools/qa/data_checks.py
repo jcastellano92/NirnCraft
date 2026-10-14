@@ -169,6 +169,94 @@ def check_guards(place_ids):
     print(f"guards: {len(profiles)} profiles, {major} major and {minor} minor settlements resolved")
 
 
+def check_shops():
+    """Shops are data (skycraft/economy/shop_trades.json, com.skycraft.economy.ShopTrades): a shop is a building, its
+    stock belongs to the building, and every trade has goods that are its own.
+
+    Checks the table against the enums it names (AnchorType, ShopType, ItemCategory), that every trade has a stock tag
+    with enough distinct goods for its declared floor, that every tag include resolves, and that province tags are
+    known gear keys. The runtime half (a rolled stock has at least min_rows kinds, only allowed categories, the cook
+    sells a filter over the shared stock) is economy/BarterSelfTest.
+    """
+    path = os.path.join(RES, "skycraft", "economy", "shop_trades.json")
+    table = json.load(open(path, encoding="utf-8"))
+    eco = os.path.join(JAVA, "com", "skycraft", "economy")
+
+    shop_types = set(re.findall(r"^    ([A-Z_]+)\(", open(os.path.join(eco, "ShopType.java"), encoding="utf-8").read(), re.M))
+    anchor_src = open(os.path.join(JAVA, "com", "skycraft", "tamriel", "settlement", "AnchorType.java"), encoding="utf-8").read()
+    anchors = set(re.findall(r"^    ([A-Z_]+)[,;]", anchor_src, re.M))
+    cats_src = open(os.path.join(eco, "ItemCategory.java"), encoding="utf-8").read()
+    cats = set(re.search(r"public enum ItemCategory \{\s*([A-Z_, ]+);", cats_src).group(1).replace(" ", "").split(","))
+    gear_keys = set(re.findall(r'"([a-z_]+)"', re.search(r"GEAR_KEYS = List\.of\(([^)]*)\)",
+                                                          open(os.path.join(eco, "ShopStock.java"), encoding="utf-8").read(), re.S).group(1)))
+    tags = os.path.join(RES, "data", "skycraft", "tags", "items")
+
+    def values(rel):
+        f = os.path.join(tags, rel + ".json")
+        if not os.path.exists(f):
+            return None
+        out = []
+        for v in json.load(open(f, encoding="utf-8")).get("values", []):
+            out.append(v["id"] if isinstance(v, dict) else v)
+        return out
+
+    for a, pools in table["anchors"].items():
+        if a.upper() not in anchors:
+            err(f"shops: anchors.{a} is not an AnchorType")
+        for p in pools:
+            if p.upper() not in shop_types:
+                err(f"shops: anchors.{a} names unknown shop type {p}")
+    for j, spec in table["jobs"].items():
+        for p in spec.get("pools", []):
+            if p.upper() not in shop_types:
+                err(f"shops: jobs.{j} names unknown shop type {p}")
+        for c in spec.get("sells", []):
+            if c.upper() not in cats or c.upper() == "ALL":
+                err(f"shops: jobs.{j}.sells names unknown category {c}")
+    last = 0
+    for b in table["quantity"]:
+        if b["max_value"] <= last or b["min"] < 1 or b["max"] < b["min"]:
+            err(f"shops: quantity bracket {b} is out of order or empty")
+        last = b["max_value"]
+    for t in shop_types:
+        spec = table["trades"].get(t.lower())
+        if spec is None:
+            err(f"shops: trade {t.lower()} has no entry in trades")
+            continue
+        for c in spec.get("allow", []):
+            if c.upper() not in cats or c.upper() == "ALL":
+                err(f"shops: trades.{t.lower()}.allow names unknown category {c}")
+        if spec.get("min_rows", 0) < 1:
+            err(f"shops: trades.{t.lower()} has no min_rows floor")
+        vals = values("merchant/" + t.lower())
+        if vals is None:
+            err(f"shops: trade {t.lower()} has no stock tag merchant/{t.lower()}.json")
+        elif len(set(vals)) < spec.get("min_rows", 0) + 2:
+            err(f"shops: trade {t.lower()} stock tag has {len(set(vals))} goods for a floor of {spec.get('min_rows')} kinds")
+        for ref in vals or []:
+            if ref.startswith("#skycraft:") and values(ref[len("#skycraft:"):]) is None:
+                err(f"shops: merchant/{t.lower()}.json includes {ref}, which does not exist")
+    for t in table["trades"]:
+        if t.upper() not in shop_types:
+            err(f"shops: trades.{t} is not a ShopType")
+    mroot = os.path.join(tags, "merchant")
+    for d in glob.glob(os.path.join(mroot, "*", "")):
+        trade = os.path.basename(os.path.dirname(d))
+        if trade.upper() not in shop_types:
+            err(f"shops: tag directory merchant/{trade} is not a shop type")
+        for f in glob.glob(os.path.join(d, "*.json")):
+            key = os.path.splitext(os.path.basename(f))[0]
+            if key not in gear_keys:
+                err(f"shops: merchant/{trade}/{key}.json is not a known province gear key")
+            if not json.load(open(f, encoding="utf-8")).get("values"):
+                err(f"shops: merchant/{trade}/{key}.json is an empty province list")
+    for item, provinces in table.get("goods_by_province", {}).items():
+        for p in provinces:
+            if p not in gear_keys:
+                err(f"shops: goods_by_province.{item} names unknown province {p}")
+    print(f"shops: {len(shop_types)} trades, {len(table['anchors'])} counter anchors, {len(table['jobs'])} jobs checked")
+
+
 def main():
     n = 0
     for pattern in ("mod/src/main/resources/**/*.json", "mod/src/main/lang/**/*.json"):
@@ -234,6 +322,11 @@ def main():
         check_guards(seen)
     except Exception as ex:  # a broken table must show up as a check failure, not a crash
         err(f"guards: {ex}")
+
+    try:
+        check_shops()
+    except Exception as ex:  # a broken table must show up as a check failure, not a crash
+        err(f"shops: {ex}")
 
     # Forge's EventBus generates handler classes named __<SimpleClass>_<method>_<Event> in the class's package:
     # two nested classes with the same simple name and handler method in one package collide at runtime.

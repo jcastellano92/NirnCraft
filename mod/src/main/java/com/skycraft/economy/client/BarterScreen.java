@@ -3,6 +3,7 @@ package com.skycraft.economy.client;
 import com.skycraft.economy.Barter;
 import com.skycraft.economy.EconomyPackets;
 import com.skycraft.economy.ItemCategory;
+import com.skycraft.inventory.ValueDensity;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -30,6 +31,8 @@ public class BarterScreen extends Screen {
     private static final int STOLEN = 0xFFD06050;
     private static final int LINE = 0xFFC8BC9A;
     private static final int LEFT_HAND = 0xFF9FC4E8;
+    private static final int KEEPSAKE = 0xFFC8A8E8;
+    private static final int VW = 0xFFA8C890;
 
     private EconomyPackets.BarterState state;
     private boolean sellMode = false;
@@ -38,6 +41,10 @@ public class BarterScreen extends Screen {
     private List<EconomyPackets.Entry> right = List.of();
     private List<EconomyPackets.Entry> back = List.of();
     private boolean buybackMode = false;
+    /** V/W (gold per weight) column sort: 0 = the usual order, 1 = best first, 2 = worst first. Click the header. */
+    private int vwSort = 0;
+    private boolean hoveredVwHeader;
+    private Component vwTooltip;
     /** The equipped sell row that was clicked once; a second click within 4 s confirms the sale (server re-checks). */
     private int armedIndex = -1;
     private long armedAt;
@@ -86,10 +93,16 @@ public class BarterScreen extends Screen {
             if (tab == ItemCategory.ALL || e.category() == tab.ordinal()) out.add(e);
         }
         // equipped rows sink to the bottom, so what you can sell freely is together at the top
-        out.sort(Comparator.<EconomyPackets.Entry>comparingInt(e -> e.equip() != 0 ? 1 : 0)
+        Comparator<EconomyPackets.Entry> order = Comparator.<EconomyPackets.Entry>comparingInt(e -> e.equip() != 0 ? 1 : 0)
                 .thenComparingInt(e -> e.category())
                 .thenComparing(e -> e.stack().getHoverName().getString())
-                .thenComparingInt(EconomyPackets.Entry::index));
+                .thenComparingInt(EconomyPackets.Entry::index);
+        if (vwSort != 0) {
+            // sorted by gold per weight: weightless goods count as the best (they cost no capacity at all)
+            Comparator<EconomyPackets.Entry> byVw = Comparator.comparingDouble(e -> ValueDensity.sortKey(ValueDensity.of(e.stack())));
+            order = (vwSort == 1 ? byVw.reversed() : byVw).thenComparing(order);
+        }
+        out.sort(order);
         return out;
     }
 
@@ -185,6 +198,8 @@ public class BarterScreen extends Screen {
 
         // Active table (BUY: merchant goods, SELL: player inventory)
         hoveredEntry = null;
+        hoveredVwHeader = false;
+        vwTooltip = null;
         int txPos = tableX(), tw = tableWidth();
         if (buybackMode) {
             drawCatalog(g, txPos, tw, Component.translatable("barter.skycraft.mode.buyback"), back, scrollBack, true, mouseX, mouseY);
@@ -239,7 +254,16 @@ public class BarterScreen extends Screen {
                 lines.add(Component.translatable("barter.skycraft.status.not_dealt").withStyle(ChatFormatting.RED));
             } else if (hoveredEntry.status() == Barter.STATUS_STOLEN) {
                 lines.add(Component.translatable("barter.skycraft.status.stolen").withStyle(ChatFormatting.RED));
+            } else if (hoveredEntry.status() == Barter.STATUS_KEEPSAKE) {
+                lines.add(Component.translatable("barter.skycraft.status.keepsake").withStyle(ChatFormatting.LIGHT_PURPLE));
             }
+            float vw = ValueDensity.of(hoveredEntry.stack());
+            lines.add(Component.translatable("barter.skycraft.vw.line", ValueDensity.format(vw)).withStyle(ChatFormatting.GRAY));
+            g.renderComponentTooltip(font, lines, mouseX, mouseY);
+        } else if (vwTooltip != null) {
+            List<Component> lines = new ArrayList<>();
+            lines.add(vwTooltip);
+            lines.add(Component.translatable("barter.skycraft.vw.sort").withStyle(ChatFormatting.DARK_GRAY));
             g.renderComponentTooltip(font, lines, mouseX, mouseY);
         }
     }
@@ -257,9 +281,33 @@ public class BarterScreen extends Screen {
                              boolean buy, int mouseX, int mouseY) {
         int bottom = listBottom();
         g.fill(x, TOP - 10, x + w, bottom + 2, 0x70000000);
-        g.drawString(font, font.plainSubstrByWidth(title.getString(), w - 70), x + 6, TOP - 8, LINE, false);
+
+        // columns are measured, not guessed: the price and V/W columns are as wide as their widest text (or header), so
+        // nothing overflows at any GUI scale; V/W gives way when the name would be left with too little room
         Component priceHeader = Component.translatable("barter.skycraft.price");
-        g.drawString(font, priceHeader, x + w - 8 - font.width(priceHeader), TOP - 8, LINE, false);
+        int priceColW = font.width(priceHeader);
+        String vwHead = Component.translatable("barter.skycraft.vw").getString();
+        int vwColW = font.width(vwHead);
+        for (EconomyPackets.Entry e : entries) {
+            priceColW = Math.max(priceColW, font.width(com.skycraft.core.Currency.formatCompact(e.price()) + "g"));
+            vwColW = Math.max(vwColW, font.width(ValueDensity.format(ValueDensity.of(e.stack()))));
+        }
+        int priceRight = x + w - 8;
+        int vwRight = priceRight - priceColW - 10;
+        boolean showVw = (vwRight - vwColW) - (x + 26) >= 76;
+        int colLeft = showVw ? vwRight - vwColW : priceRight - priceColW;
+
+        g.drawString(font, font.plainSubstrByWidth(title.getString(), Math.max(20, colLeft - 12 - (x + 6))), x + 6, TOP - 8, LINE, false);
+        g.drawString(font, priceHeader, priceRight - font.width(priceHeader), TOP - 8, LINE, false);
+        if (showVw) {
+            boolean hov = mouseX >= vwRight - vwColW - 8 && mouseX < vwRight + 3 && mouseY >= TOP - 10 && mouseY < TOP;
+            if (hov) {
+                hoveredVwHeader = true;
+                vwTooltip = Component.translatable("barter.skycraft.vw.tooltip");
+            }
+            g.drawString(font, vwHead, vwRight - font.width(vwHead), TOP - 8, vwSort != 0 ? 0xFFFFFFFF : hov ? TEXT : LINE, false);
+            if (vwSort != 0) com.skycraft.inventory.client.SkyUi.triangle(g, vwRight - font.width(vwHead) - 5, TOP - 6, vwSort == 2, 0xFFFFFFFF);
+        }
         g.fill(x, TOP - 1, x + w, TOP, 0x80C8BC9A);
 
         if (entries.isEmpty()) {
@@ -282,9 +330,10 @@ public class BarterScreen extends Screen {
 
             String price = com.skycraft.core.Currency.formatCompact(e.price()) + "g";
             int priceW = font.width(price);
-            boolean ok = e.status() == Barter.STATUS_OK;
+            boolean ok = e.status() == Barter.STATUS_OK || e.status() == Barter.STATUS_KEEPSAKE;
             boolean affordable = !buy || state.playerGold() >= e.price();
-            int nameColor = e.status() == Barter.STATUS_STOLEN ? STOLEN : ok ? (hov ? 0xFFFFFFFF : TEXT) : DIM;
+            int nameColor = e.status() == Barter.STATUS_STOLEN ? STOLEN : e.status() == Barter.STATUS_KEEPSAKE ? KEEPSAKE
+                    : ok ? (hov ? 0xFFFFFFFF : TEXT) : DIM;
 
             // equipped rows (worn, held, left hand): "E" badge and the inventory screen's equipped colours
             int badgeW = 0;
@@ -292,20 +341,25 @@ public class BarterScreen extends Screen {
                 int tint = e.equip() == 2 ? LEFT_HAND : GOLD;
                 String badge = Component.translatable("barter.skycraft.equipped.badge").getString();
                 badgeW = font.width(badge) + 8;
-                int bx = x + w - 8 - priceW - badgeW - 4;
+                int bx = colLeft - badgeW - 8;
                 g.fill(x, y, x + w, y + ROW, 0x20000000 | (tint & 0xFFFFFF));
                 g.fill(bx, y + 4, bx + badgeW, y + ROW - 4, 0xC0000000 | (tint & 0xFFFFFF));
                 g.drawString(font, badge, bx + 4, y + 6, 0xFF1A1710, false);
                 nameColor = tint;
-                badgeW += 4;
+                badgeW += 8;
             }
 
             String count = stack.getCount() > 1 ? " (" + stack.getCount() + ")" : "";
-            int nameSpace = w - 30 - priceW - 12 - font.width(count) - badgeW;
+            int nameSpace = colLeft - 8 - (x + 26) - font.width(count) - badgeW;
             String name = font.plainSubstrByWidth(stack.getHoverName().getString(), Math.max(10, nameSpace));
             g.drawString(font, name, x + 26, y + 6, nameColor, false);
             if (!count.isEmpty()) g.drawString(font, count, x + 26 + font.width(name), y + 6, DIM, false);
-            g.drawString(font, price, x + w - 8 - priceW, y + 6, !ok ? DIM : affordable ? GOLD : 0xFFC04040, false);
+            if (showVw) {
+                float vw = ValueDensity.of(stack);
+                String vws = ValueDensity.format(vw);
+                g.drawString(font, vws, vwRight - font.width(vws), y + 6, vw < 0f ? DIM : VW, false);
+            }
+            g.drawString(font, price, priceRight - priceW, y + 6, !ok ? DIM : affordable ? GOLD : 0xFFC04040, false);
         }
 
         // scrollbar
@@ -330,12 +384,21 @@ public class BarterScreen extends Screen {
             setTab(ItemCategory.byOrdinal(hoveredTab));
             return true;
         }
+        if (hoveredVwHeader && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+            vwSort = (vwSort + 1) % 3;
+            scrollLeft = 0;
+            scrollRight = 0;
+            scrollBack = 0;
+            refilter();
+            return true;
+        }
         if (hoveredEntry != null && (button == GLFW.GLFW_MOUSE_BUTTON_LEFT || button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)) {
             ItemStack stack = hoveredEntry.stack();
             int op = buybackMode ? Barter.OP_BUYBACK : sellMode ? Barter.OP_SELL : Barter.OP_BUY;
-            // an equipped row needs a second click on the same row within 4 seconds (the server asks for it too)
+            // an equipped row, or a keepsake the shop will not put on its shelves, needs a second click on the same
+            // row within 4 seconds (the server asks for it too)
             boolean confirm = false;
-            if (op == Barter.OP_SELL && hoveredEntry.equip() != 0) {
+            if (op == Barter.OP_SELL && (hoveredEntry.equip() != 0 || hoveredEntry.status() == Barter.STATUS_KEEPSAKE)) {
                 long now = Util.getMillis();
                 confirm = armedIndex == hoveredEntry.index() && now - armedAt < 4000;
                 armedIndex = confirm ? -1 : hoveredEntry.index();
