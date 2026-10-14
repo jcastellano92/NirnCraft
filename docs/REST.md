@@ -43,9 +43,35 @@ vignette and progress bar show it. During it, per tick and bounded:
 * **Status effects** of every player in the dimension are shortened by the skipped ticks at the end; spent ones expire
   (no retroactive poison/regeneration; Well Rested is applied after, fresh).
 * **Jail sentences**: every prisoner's remaining seconds count down by the skipped time (`Jail.passTime`).
-* **No hostile spawning**: while a skip runs, no hostile appears in that dimension; while anyone rests, none within 96
-  blocks of them. Gated at `MobSpawnEvent` (position check, finalize), at `EntityJoinLevelEvent` (every Skycraft spawner,
-  patrol, encounter, ambush and dragon) and in `SpawnPacing.hostileReady`.
+* **No hostile spawning**: while a skip runs, no new hostile appears in that dimension; while anyone rests, none within 96
+  blocks of them. Gated where new spawns are decided: `MobSpawnEvent` (position check and finalize, for natural, patrol,
+  event, reinforcement, triggered and jockey spawns only), `SpawnPacing.hostileReady` (region spawner, wild scenes,
+  encounters, ambushes, vanilla replacements) and the dragon attack roll in `CreatureSpawns`.
+
+## Nothing that exists is removed
+
+* There is **no** `EntityJoinLevelEvent` filter: a join event cannot tell a fresh spawn from a world-generation
+  entity, a dungeon population or a quest actor (world-generation entities arrive with `loadedFromDisk=false`), so
+  cancelling there could lose a mob for good. Dungeon spawners (`SPAWNER`), `CHUNK_GENERATION` and `STRUCTURE` spawns
+  are never gated. Chunk loading during a rest cannot lose a mob.
+* The rest system never discards, despawns or teleports hostiles, bosses, dormant dungeon mobs, summons or pets
+  (`RestSim` only moves scheduled townsfolk: not busy, not hunting, not prisoners, not followers).
+* **Live time**: skipped ticks are added to the game time, so every cooldown, room and pacing deadline runs out, but
+  anything that **removes a creature on a timer** counts the real clock `RestManager.liveTime(level)` (game time minus
+  the ticks rest added, persisted in `skycraft_rest_rule`): encounters and their summons, wild scenes, region-spawned
+  creatures, ambushes, wild dragons, conjured summons. Read and write such deadlines with `liveTime`, never the raw
+  game time. Vanilla `checkDespawn` uses tick counters and distance, not game time.
+* **Hunters**: hostiles already hunting a resting player when a skip starts have their target cleared and the skip does
+  not let them re-acquire it (`LivingChangeTargetEvent`); when it ends they get the same target back. A rest cannot
+  START with anything awake and hostile within 16 blocks or anything at all hunting the player within 24 (bandit NPCs
+  included); guards and fellow prisoners do not hunt a prisoner in the cell, so a jail cell can always be slept in.
+
+## When resting is not allowed (`RestGate`)
+
+`RestGate.blocked(player)`: dead, in the opening (`IntroFlow.inIntro`), a loading cover (`Prewarm.busy`: fast travel,
+carriage, jail transfer), in a conversation (`Dialogue.isTalking`), a scripted scene (`Scenes.playing`), or any state a
+system registers with `RestGate.register`. Such a player cannot start or join a rest, a running session of theirs ends,
+and no world skip starts (or a running one stops, everybody keeps resting) while anyone in the dimension is in one.
 
 ## Waking: disturbances
 

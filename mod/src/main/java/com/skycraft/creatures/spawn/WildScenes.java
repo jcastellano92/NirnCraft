@@ -232,7 +232,7 @@ public final class WildScenes {
     @SubscribeEvent
     public static void onLevelTick(TickEvent.LevelTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !(event.level instanceof ServerLevel level) || LIVE.isEmpty()) return;
-        long now = level.getGameTime();
+        long now = com.skycraft.world.RestManager.liveTime(level);
         if (now % 40 != 11) return;
         for (Iterator<Live> it = LIVE.iterator(); it.hasNext(); ) {
             Live s = it.next();
@@ -368,7 +368,7 @@ public final class WildScenes {
 
     private static boolean spawn(ServerLevel level, ServerPlayer player, BlockPos center, SceneDef def, RandomSource random) {
         long id = level.getGameTime() * 31L + random.nextInt(1 << 20) + 1;
-        long now = level.getGameTime();
+        long now = com.skycraft.world.RestManager.liveTime(level);
         Live live = new Live(id, level, now + 20L * lifetime, def.calmAfter() > 0 ? now + 20L * def.calmAfter() : 0);
         Map<String, List<Mob>> byRole = new HashMap<>();
         // away from the player on the line spot -> player, so travelers walk past them

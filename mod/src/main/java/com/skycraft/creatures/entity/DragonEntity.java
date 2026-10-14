@@ -898,7 +898,7 @@ public class DragonEntity extends Monster implements AnimatedCreature {
      * an unloaded chunk is gone as soon as it loads again.
      */
     private boolean tickDespawn() {
-        long now = this.level().getGameTime();
+        long now = com.skycraft.world.RestManager.liveTime(this.level());
         if (this.isPersistenceRequired() || getRole() != ROLE_WILD || lastSeenTime < 0) {
             lastSeenTime = now;
             checkAbsence = false;

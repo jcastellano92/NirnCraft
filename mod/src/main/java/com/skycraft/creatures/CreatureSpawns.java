@@ -407,6 +407,8 @@ public final class CreatureSpawns {
     /** Skyrim: out of nowhere, a roar. A dragon appears ~100 blocks away and hunts the player. */
     private static void maybeDragonAttack(ServerLevel level, ServerPlayer player) {
         if (level.dimension() != Level.OVERWORLD || player.isCreative() || player.isSpectator() || !player.isAlive()) return;
+        // no new dragon while the player (or the world around them) rests or waits
+        if (com.skycraft.world.RestManager.spawnsBlocked(level, player.getX(), player.getY(), player.getZ())) return;
         com.skycraft.core.PlayerData data = SkyData.get(player);
         int pLevel = data.getLevel();
         if (pLevel < CreaturesConfig.DRAGON_MIN_LEVEL.get()) return;

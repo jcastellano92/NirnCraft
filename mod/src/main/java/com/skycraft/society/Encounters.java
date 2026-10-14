@@ -210,7 +210,7 @@ public final class Encounters {
     }
 
     private static void despawnPass(ServerLevel level) {
-        long now = level.getGameTime();
+        long now = com.skycraft.world.RestManager.liveTime(level);
         List<Mob> gone = new ArrayList<>();
         for (Mob mob : TRACKED.values()) {
             if (mob.isRemoved() || mob.level() != level) continue;
@@ -472,7 +472,7 @@ public final class Encounters {
             this.center = center;
             this.random = level.getRandom();
             this.id = random.nextInt(Integer.MAX_VALUE - 1) + 1;
-            this.until = level.getGameTime() + LIFETIME;
+            this.until = com.skycraft.world.RestManager.liveTime(level) + LIFETIME;
         }
 
         /** A point beyond the player on the line from the spawn, so travelers walk past them. */
@@ -675,7 +675,7 @@ public final class Encounters {
                 Mob dragon = g.mob(DRAGON, sky);
                 if (dragon == null) return false;
                 CompoundTag t = tag(dragon);
-                if (t != null) t.putLong("until", g.level.getGameTime() + 3 * 60 * 20);
+                if (t != null) t.putLong("until", com.skycraft.world.RestManager.liveTime(g.level) + 3 * 60 * 20);
                 // anyone nearby raises the alarm
                 for (Mob m : g.level.getEntitiesOfClass(Mob.class, g.player.getBoundingBox().inflate(32),
                         x -> x instanceof NpcEntity || x instanceof AbstractVillager)) {
@@ -707,7 +707,7 @@ public final class Encounters {
                 }
                 for (int i = 0; i < Math.min(legion.size(), cloaks.size()); i++) fight(legion.get(i), cloaks.get(i));
                 // a skirmish is a moment, not a war: it breaks off after half a minute (despawnPass)
-                long skirmishEnd = g.level.getGameTime() + 20 * 30;
+                long skirmishEnd = com.skycraft.world.RestManager.liveTime(g.level) + 20 * 30;
                 for (NpcEntity n : legion) { CompoundTag st = tag(n); if (st != null) st.putLong("skirmish_until", skirmishEnd); }
                 for (NpcEntity n : cloaks) { CompoundTag st = tag(n); if (st != null) st.putLong("skirmish_until", skirmishEnd); }
                 return !legion.isEmpty() || !cloaks.isEmpty();

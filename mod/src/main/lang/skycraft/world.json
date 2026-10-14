@@ -102,6 +102,8 @@
   "world.skycraft.rest.jailed": "You cannot rest freely while imprisoned: sleep in your cell bed to serve out the sentence.",
   "world.skycraft.rest.mounted": "Dismount first.",
   "world.skycraft.rest.busy": "You cannot rest right now.",
+  "world.skycraft.rest.gated": "You cannot rest while the screen is busy (loading, conversation or cutscene).",
+  "world.skycraft.rest.gated_group": "Time cannot pass while someone is loading, talking or in a cutscene.",
   "world.skycraft.rest.wait_off": "Waiting is disabled on this server.",
   "world.skycraft.rest.fire.wait": "You cannot wait while on fire",
   "world.skycraft.rest.fire.sleep": "You cannot sleep while on fire",

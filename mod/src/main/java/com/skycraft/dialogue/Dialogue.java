@@ -58,6 +58,11 @@ public final class Dialogue {
         PROVIDERS.add(provider);
     }
 
+    /** Whether this player is in a conversation now (the dialogue camera is on them). */
+    public static boolean isTalking(UUID player) {
+        return TALKING.containsValue(player);
+    }
+
     public static boolean canTalk(LivingEntity entity) {
         if (entity.getType().is(NO_DIALOGUE) || !entity.isAlive()) return false;
         return entity instanceof AbstractVillager || entity.getType().is(TALKERS);

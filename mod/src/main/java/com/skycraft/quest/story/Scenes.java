@@ -40,6 +40,13 @@ public final class Scenes {
 
     private static final List<Flyby> FLYBYS = new ArrayList<>();
 
+    /** Whether a scripted opening (narration, flyby beats) or story scene is still playing for this player. */
+    public static boolean playing(UUID player) {
+        for (Beat b : INTRO) if (player.equals(b.player())) return true;
+        for (Pending p : LINES) if (p.audience().contains(player)) return true;
+        return false;
+    }
+
     /**
      * A dragon crosses low over {@code p}: the path passes ~18 blocks to the side and ~22 up, 150 blocks in 7 s, so it
      * is inside entity tracking range and plainly visible. Roar, camera shake and fleeing NPCs are timed by

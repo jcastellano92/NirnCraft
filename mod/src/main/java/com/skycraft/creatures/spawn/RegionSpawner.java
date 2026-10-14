@@ -348,7 +348,7 @@ public final class RegionSpawner {
             if (!level.getFluidState(at).isEmpty()) return false;
         }
         mob.addTag(SkyCreature.REGION_SPAWN_TAG);
-        mob.getPersistentData().putLong(SEEN_KEY, level.getGameTime());
+        mob.getPersistentData().putLong(SEEN_KEY, com.skycraft.world.RestManager.liveTime(level));
         mob.getPersistentData().putLong(GROUP_KEY, groupId);
         mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.NATURAL, null, null);
         level.addFreshEntityWithPassengers(mob);
@@ -367,7 +367,7 @@ public final class RegionSpawner {
             mob.removeTag(SkyCreature.REGION_SPAWN_TAG);
             return;
         }
-        long now = mob.level().getGameTime();
+        long now = com.skycraft.world.RestManager.liveTime(mob.level());
         if (mob.level().getNearestPlayer(mob, BUDGET_RADIUS) != null) {
             mob.getPersistentData().putLong(SEEN_KEY, now);
         } else if (now - mob.getPersistentData().getLong(SEEN_KEY) > 1200) {

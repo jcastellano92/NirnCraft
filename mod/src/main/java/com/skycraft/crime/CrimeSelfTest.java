@@ -56,6 +56,7 @@ final class CrimeSelfTest {
         restock(r);
         jail(r, server);
         rest(r);
+        restWorld(r, server);
         evidence(r, server, level);
         return new Report(r.checks, r.problems, r.lines);
     }
@@ -225,6 +226,15 @@ final class CrimeSelfTest {
             data.setDirty();
             level.setBlock(pos, old, 2);
         }
+    }
+
+    /** A hostile mob that already exists survives a simulated time skip with its target restored (nothing is removed). */
+    private static void restWorld(Result r, MinecraftServer server) {
+        int[] checks = new int[1];
+        List<String> fails = com.skycraft.world.RestManager.selfTestWorld(server, checks);
+        r.checks += checks[0];
+        r.problems += fails.size();
+        r.lines.addAll(fails);
     }
 
     private static void jail(Result r, MinecraftServer server) {

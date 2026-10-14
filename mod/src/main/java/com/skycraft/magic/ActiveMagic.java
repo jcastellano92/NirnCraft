@@ -119,7 +119,7 @@ public final class ActiveMagic {
             List<Summon> found = new ArrayList<>();
             for (Mob m : Summons.summonsOf(p)) {
                 CompoundTag pd = m.getPersistentData();
-                if (pd.contains(Summons.UNTIL)) found.add(new Summon(m.getDisplayName(), pd.getLong(Summons.UNTIL)));
+                if (pd.contains(Summons.UNTIL)) found.add(new Summon(m.getDisplayName(), pd.getLong(Summons.UNTIL) + com.skycraft.world.RestManager.skippedTicks())); // live time -> game time
             }
             if (found.isEmpty()) SUMMONS.remove(p.getUUID());
             else SUMMONS.put(p.getUUID(), found);

@@ -120,7 +120,7 @@ public final class Ambush {
         if (leader == null) return false;
         long bal = Currency.balance(player);
         st.demand = (int) Math.max(15, Math.min(250, bal / 4));
-        st.start = level.getGameTime();
+        st.start = com.skycraft.world.RestManager.liveTime(level);
         st.attackAt = st.start + TIMER_TICKS;
         ACTIVE.put(player.getUUID(), st);
         Barks.say(leader, Component.translatable("society.skycraft.ambush.demand", st.demand));
@@ -175,7 +175,7 @@ public final class Ambush {
                 }
             }
             case "flee" -> {
-                st.attackAt = Math.min(st.attackAt, level.getGameTime() + HEAD_START_TICKS);
+                st.attackAt = Math.min(st.attackAt, com.skycraft.world.RestManager.liveTime(level) + HEAD_START_TICKS);
                 player.sendSystemMessage(Component.translatable("society.skycraft.ambush.fled"));
             }
             case "fight" -> attack(level, player, st);
@@ -223,7 +223,7 @@ public final class Ambush {
     /** The bandits take what they were given (or lose their nerve) and walk away. */
     private static void release(ServerLevel level, State st) {
         ACTIVE.remove(st.player);
-        long gone = level.getGameTime() + 100;
+        long gone = com.skycraft.world.RestManager.liveTime(level) + 100;
         ServerPlayer player = level.getServer().getPlayerList().getPlayer(st.player);
         for (Mob m : mobs(level, st)) {
             m.setNoAi(false);
@@ -250,7 +250,7 @@ public final class Ambush {
     @SubscribeEvent
     public static void onLevelTick(TickEvent.LevelTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !(event.level instanceof ServerLevel level)) return;
-        long now = level.getGameTime();
+        long now = com.skycraft.world.RestManager.liveTime(level);
         if (now % 10 != 0) return;
         if (!LEAVING.isEmpty()) {
             Iterator<Map.Entry<UUID, Long>> it = LEAVING.entrySet().iterator();

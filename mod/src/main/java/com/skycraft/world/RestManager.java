@@ -40,7 +40,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.SleepingTimeCheckEvent;
@@ -125,6 +125,8 @@ public final class RestManager {
         long done;
         /** Skipped ticks not yet given to the animals' age counters. */
         long animalTicks;
+        /** Hostile mob -> the member it was hunting when the skip began (targets are put back when it ends). */
+        final Map<UUID, UUID> paused = new HashMap<>();
 
         Skip(UUID initiator, @Nullable ResourceKey<Level> dim, List<UUID> members, int hours, long total, int duration,
              boolean world, boolean meters, @Nullable Runnable onDone) {
@@ -272,6 +274,7 @@ public final class RestManager {
         boolean sleep = mode == RestLogic.SLEEP;
         String act = sleep ? "sleep" : "wait";
         if (!player.isAlive() || player.isSpectator()) return Component.translatable("world.skycraft.rest.busy");
+        if (RestGate.blocked(player)) return Component.translatable("world.skycraft.rest.gated"); // opening, loading, dialogue, scene
         if (com.skycraft.crime.Jail.isJailed(player)) return Component.translatable("world.skycraft.rest.jailed");
         if (!sleep && !WorldConfig.REST_ALLOW_WAIT.get()) return Component.translatable("world.skycraft.rest.wait_off");
         if (player.isSleeping()) return Component.translatable("world.skycraft.rest.busy");
@@ -310,9 +313,18 @@ public final class RestManager {
         return null;
     }
 
+    /**
+     * Hostiles close enough to stop a rest from starting: awake enemies within {@code radius}, and anything of any
+     * kind (bandit NPCs included) within 24 blocks that is hunting this player now. Guards and prisoners'
+     * company do not count: they do not hunt a prisoner in the cell.
+     */
     public static boolean enemiesNear(Player player, double radius) {
-        return !player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(radius),
-                m -> m instanceof Enemy && m.isAlive() && !m.isNoAi()).isEmpty();
+        if (!player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(radius),
+                m -> m instanceof Enemy && m.isAlive() && !m.isNoAi()).isEmpty()) {
+            return true;
+        }
+        return !player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(Math.max(radius, 24)),
+                m -> m.isAlive() && m.getTarget() == player).isEmpty();
     }
 
     private static BlockPos bedHead(Level level, BlockPos pos) {
@@ -477,6 +489,11 @@ public final class RestManager {
         Session s = SESSIONS.get(id);
         MinecraftServer server = player.server;
         if (s == null || s.jail || skipOf(id) != null) return;
+        // nobody's timers jump under a cutscene, a loading cover or a conversation
+        if (RestGate.blocked(player) || anyBlocked(server, s.dim)) {
+            Notifier.message(player, Component.translatable("world.skycraft.rest.gated_group"));
+            return;
+        }
         List<RestLogic.Participant> order = participants(server, s.dim);
         RestLogic.Tally tally = RestLogic.tally(order);
         UUID ini = RestLogic.initiator(INITIATOR.get(s.dim), order);
@@ -507,6 +524,7 @@ public final class RestManager {
         Skip k = new Skip(id, s.dim, members, hours, hours * (long) TICKS_PER_HOUR,
                 RestLogic.durationTicks(hours, WorldConfig.REST_MAX_SKIP_SECONDS.get()), !personal, true, null);
         SKIPS.add(k);
+        pauseHunters(server, k);
         for (UUID m : members) SurvivalMode.setRestState(m, 2);
         for (UUID m : members) {
             ServerPlayer p = server.getPlayerList().getPlayer(m);
@@ -526,6 +544,10 @@ public final class RestManager {
     public static boolean beginJail(ServerPlayer player, BlockPos clicked, Runnable done) {
         UUID id = player.getUUID();
         if (SESSIONS.containsKey(id)) return true; // already sleeping it off
+        if (RestGate.blocked(player)) { // a loading cover or a scene owns the player: not now (and not an instant release)
+            Notifier.message(player, Component.translatable("world.skycraft.rest.gated"));
+            return true;
+        }
         ServerLevel level = player.serverLevel();
         if (!level.isLoaded(clicked) || !(level.getBlockState(clicked).getBlock() instanceof BedBlock)
                 || player.isPassenger() || player.isSleeping()
@@ -541,11 +563,28 @@ public final class RestManager {
         return true;
     }
 
+    /** Somebody in the dimension is in the opening, a loading cover, a conversation or a scene. */
+    private static boolean anyBlocked(MinecraftServer server, ResourceKey<Level> dim) {
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            if (p.level().dimension() == dim && !p.isSpectator() && RestGate.blocked(p)) return true;
+        }
+        return false;
+    }
+
     private static void tickSkips(MinecraftServer server) {
         for (Skip k : new ArrayList<>(SKIPS)) {
             k.members.removeIf(m -> !SESSIONS.containsKey(m));
             if (k.members.isEmpty()) {
                 SKIPS.remove(k);
+                continue;
+            }
+            // a cutscene or loading cover appeared somewhere in the dimension: the skip stops (everybody keeps resting)
+            if (k.world && k.dim != null && k.elapsed % 10 == 0 && anyBlocked(server, k.dim)) {
+                for (UUID m : k.members) {
+                    ServerPlayer p = server.getPlayerList().getPlayer(m);
+                    if (p != null) Notifier.message(p, Component.translatable("world.skycraft.rest.gated_group"));
+                }
+                finish(server, k, false, false);
                 continue;
             }
             k.elapsed++;
@@ -644,6 +683,7 @@ public final class RestManager {
             }
         }
         if (wakeAll) for (UUID m : new ArrayList<>(k.members)) endSession(server, m);
+        resumeHunters(server, k); // whoever was mid-attack goes back to hunting (nothing was removed)
         if (completed && k.onDone != null) {
             ServerPlayer p = server.getPlayerList().getPlayer(k.initiator);
             if (p != null && p.isAlive()) k.onDone.run();
@@ -728,6 +768,11 @@ public final class RestManager {
         // commands) then runs out exactly as if the skipped time had been waited
         var data = server.getWorldData().overworldData();
         data.setGameTime(data.getGameTime() + ticks);
+        skippedTicks += ticks; // timers that remove creatures count without it (liveTime)
+        if (ruleData != null) {
+            ruleData.skipped = skippedTicks;
+            ruleData.setDirty();
+        }
         for (ServerLevel level : server.getAllLevels()) {
             server.getPlayerList().broadcastAll(new ClientboundSetTimePacket(level.getGameTime(), level.getDayTime(),
                     level.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)), level.dimension());
@@ -791,6 +836,10 @@ public final class RestManager {
             ServerPlayer p = server.getPlayerList().getPlayer(id);
             if (p == null || !p.isAlive() || p.isSpectator() || p.level().dimension() != s.dim) {
                 depart(server, id);
+                continue;
+            }
+            if (RestGate.blocked(p)) { // an opening, a loading cover, a conversation or a scene took the player
+                cancel(server, id, null);
                 continue;
             }
             boolean settled = tick - s.startTick > 5;
@@ -986,6 +1035,8 @@ public final class RestManager {
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
         RuleData data = RuleData.get(event.getServer());
+        ruleData = data;
+        skippedTicks = data.skipped;
         if (data.original >= 0) { // the server died while somebody lay in a bed
             event.getServer().getGameRules().getRule(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE).set(data.original, event.getServer());
             data.original = -1;
@@ -1006,6 +1057,8 @@ public final class RestManager {
     /** The sleeping percentage the world had before a rest raised it (-1: not raised). */
     private static final class RuleData extends SavedData {
         int original = -1;
+        /** Total ticks rest has added to the game time (see {@link #liveTime}). */
+        long skipped;
 
         static RuleData get(MinecraftServer server) {
             return server.overworld().getDataStorage().computeIfAbsent(RuleData::load, RuleData::new, "skycraft_rest_rule");
@@ -1014,12 +1067,14 @@ public final class RestManager {
         static RuleData load(CompoundTag tag) {
             RuleData d = new RuleData();
             d.original = tag.contains("original") ? tag.getInt("original") : -1;
+            d.skipped = tag.getLong("skipped");
             return d;
         }
 
         @Override
         public CompoundTag save(CompoundTag tag) {
             tag.putInt("original", original);
+            tag.putLong("skipped", skipped);
             return tag;
         }
     }
@@ -1045,7 +1100,8 @@ public final class RestManager {
 
     private static boolean blockedType(MobSpawnType t) {
         return switch (t) {
-            case NATURAL, PATROL, EVENT, REINFORCEMENT, SPAWNER, TRIGGERED, JOCKEY -> true;
+            // never SPAWNER, CHUNK_GENERATION or STRUCTURE: dungeon spawners and world generation are world content
+            case NATURAL, PATROL, EVENT, REINFORCEMENT, TRIGGERED, JOCKEY -> true;
             default -> false;
         };
     }
@@ -1062,13 +1118,128 @@ public final class RestManager {
         if (spawnsBlocked(event.getLevel().getLevel(), event.getX(), event.getY(), event.getZ())) event.setSpawnCancelled(true);
     }
 
-    /** The net under every Skycraft spawner, patrol, encounter and dragon: a fresh hostile does not enter the level. */
+    // Deliberately NO EntityJoinLevelEvent net: a join event cannot tell a fresh spawn from a worldgen chunk entity,
+    // a dungeon population or a quest actor (world-gen entities arrive with loadedFromDisk=false), and cancelling one
+    // of those loses it for good. Skycraft's spawners are gated at their entry points instead
+    // (SpawnPacing.hostileReady, the dragon attack roll) and vanilla spawns at the spawn events above; nothing that
+    // already exists is ever cancelled or removed by the rest system.
+
+    // ------------------------------------------------------------------ a skip never costs a hostile its target
+
+    /** Hostiles that were hunting a resting player when a skip started: their target is put back when it ends. */
+    private static void pauseHunters(MinecraftServer server, Skip k) {
+        for (UUID m : k.members) {
+            ServerPlayer p = server.getPlayerList().getPlayer(m);
+            if (p == null) continue;
+            for (Mob mob : p.serverLevel().getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(64), x -> x.isAlive() && x.getTarget() == p)) {
+                k.paused.put(mob.getUUID(), m);
+                mob.setTarget(null);
+                mob.getNavigation().stop();
+            }
+        }
+    }
+
+    /** The skip is over: whoever was mid-attack goes back to hunting the same player (the mob is never removed). */
+    private static void resumeHunters(MinecraftServer server, Skip k) {
+        if (k.paused.isEmpty()) return;
+        for (Map.Entry<UUID, UUID> e : k.paused.entrySet()) {
+            ServerPlayer p = server.getPlayerList().getPlayer(e.getValue());
+            if (p == null || !p.isAlive() || p.isSpectator() || p.isCreative()) continue;
+            Entity ent = p.serverLevel().getEntity(e.getKey());
+            if (ent instanceof Mob mob && mob.isAlive() && mob.getTarget() == null && mob.distanceToSqr(p) < 96 * 96) mob.setTarget(p);
+        }
+        k.paused.clear();
+    }
+
+    /** While a skip runs, the hunters it paused do not pick the resting player up again. */
     @SubscribeEvent
-    public static void onEntityJoin(EntityJoinLevelEvent event) {
-        if (SESSIONS.isEmpty() || event.loadedFromDisk() || event.getLevel().isClientSide) return;
-        if (!(event.getEntity() instanceof Enemy) || event.getEntity() instanceof Player) return;
-        if (!(event.getLevel() instanceof ServerLevel level)) return;
-        Entity e = event.getEntity();
-        if (spawnsBlocked(level, e.getX(), e.getY(), e.getZ())) event.setCanceled(true);
+    public static void onChangeTarget(LivingChangeTargetEvent event) {
+        if (SKIPS.isEmpty() || event.getNewTarget() == null) return;
+        UUID mob = event.getEntity().getUUID();
+        for (Skip k : SKIPS) {
+            UUID who = k.paused.get(mob);
+            if (who != null && event.getNewTarget().getUUID().equals(who)) {
+                event.setCanceled(true);
+                return;
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------ the world's real clock
+
+    /**
+     * The game time without the time rest skips added: the clock for anything that despawns, expires or ends a
+     * creature on a timer (encounters, scenes, summons, wild dragons, ambushes). Skipped hours must never be what
+     * removes a mob, so those systems count real ticks only. Read and write deadlines with the same clock.
+     */
+    public static long liveTime(Level level) {
+        return level.getGameTime() - skippedTicks;
+    }
+
+    /** Ticks rest has added to the game time so far (live time + this = game time). */
+    public static long skippedTicks() {
+        return skippedTicks;
+    }
+
+    private static long skippedTicks;
+    private static RuleData ruleData;
+
+    // ------------------------------------------------------------------ headless check
+
+    /**
+     * Selftest of the "nothing existing is lost" rule: a hostile mob that already exists in a loaded chunk, hunting a
+     * stand-in player, goes through a simulated skip (hunters paused, clock and game time jumped, plants/machines
+     * caught up, effects shortened, hunters resumed) and must still exist, once, with its target back. The clocks
+     * are put back afterwards. Returns one line per failed check.
+     */
+    public static List<String> selfTestWorld(MinecraftServer server, int[] checks) {
+        List<String> fails = new ArrayList<>();
+        ServerLevel level = server.overworld();
+        BlockPos at = level.getSharedSpawnPos();
+        if (!level.isLoaded(at)) return fails; // nothing loaded to test with
+        net.minecraft.world.entity.monster.Zombie z = EntityType.ZOMBIE.create(level);
+        ServerPlayer fake = net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(level);
+        if (z == null || fake == null) return fails;
+        z.moveTo(at.getX() + 0.5, at.getY() + 2, at.getZ() + 0.5, 0f, 0f);
+        z.setNoAi(true); // stays where it is during the check
+        level.addFreshEntity(z);
+        z.setTarget(fake);
+        long game0 = level.getGameTime(), day0 = level.getDayTime(), skipped0 = skippedTicks;
+        try {
+            checks[0] += 6;
+            long zombies = level.getEntities(EntityType.ZOMBIE, e -> true).size();
+            List<UUID> members = new ArrayList<>();
+            members.add(fake.getUUID());
+            Skip k = new Skip(fake.getUUID(), level.dimension(), members, 8, 8000L, 140, true, true, null);
+            for (Mob mob : level.getEntitiesOfClass(Mob.class, z.getBoundingBox().inflate(8), x -> x.getTarget() == fake)) {
+                k.paused.put(mob.getUUID(), fake.getUUID());
+                mob.setTarget(null);
+            }
+            if (z.getTarget() != null) fails.add("rest: a hunter's target is paused during the skip");
+            advanceTime(server, 8000);
+            RestSim.catchUp(level, List.of(fake), 120, 0);
+            RestSim.shortenEffects(fake, 8000);
+            z.checkDespawn(); // what the time jump might have triggered
+            if (z.isRemoved() || level.getEntity(z.getUUID()) == null) fails.add("rest: an existing hostile survives a simulated skip");
+            long after = level.getEntities(EntityType.ZOMBIE, e -> true).size();
+            if (after != zombies) fails.add("rest: hostile count unchanged by a skip (" + zombies + " -> " + after + ")");
+            if (liveTime(level) != game0 - skipped0) fails.add("rest: live time does not include skipped ticks");
+            for (Map.Entry<UUID, UUID> e : k.paused.entrySet()) {
+                Entity ent = level.getEntity(e.getKey());
+                if (ent instanceof Mob mob && mob.isAlive() && mob.getTarget() == null) mob.setTarget(fake);
+            }
+            if (z.getTarget() != fake) fails.add("rest: the hunter's target is restored after the skip");
+        } finally {
+            z.discard();
+            var data = server.getWorldData().overworldData();
+            data.setGameTime(game0);
+            level.setDayTime(day0);
+            skippedTicks = skipped0;
+            if (ruleData != null) {
+                ruleData.skipped = skipped0;
+                ruleData.setDirty();
+            }
+        }
+        return fails;
     }
 }

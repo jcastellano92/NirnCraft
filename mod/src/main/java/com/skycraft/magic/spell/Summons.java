@@ -389,7 +389,7 @@ public final class Summons {
         mob.addTag(TAG);
         CompoundTag pd = mob.getPersistentData();
         pd.putUUID(OWNER, caster.getUUID());
-        pd.putLong(UNTIL, level.getGameTime() + spell.duration);
+        pd.putLong(UNTIL, com.skycraft.world.RestManager.liveTime(level) + spell.duration);
         pd.putString(KIND, kind.isEmpty() ? "commanded" : kind);
         mob.setTarget(null);
         mob.setPersistenceRequired();
@@ -488,7 +488,7 @@ public final class Summons {
         mob.addTag(TAG);
         CompoundTag pd = mob.getPersistentData();
         pd.putUUID(OWNER, p.getUUID());
-        pd.putLong(UNTIL, level.getGameTime() + duration);
+        pd.putLong(UNTIL, com.skycraft.world.RestManager.liveTime(level) + duration);
         pd.putString(KIND, kind);
         if (free) pd.putBoolean(FREE, true);
         mob.setPersistenceRequired();
@@ -578,7 +578,7 @@ public final class Summons {
         UUID ownerId = ownerOf(mob);
         boolean summon = isSummon(mob);
         ServerPlayer owner = ownerId == null ? null : level.getServer().getPlayerList().getPlayer(ownerId);
-        long now = level.getGameTime();
+        long now = com.skycraft.world.RestManager.liveTime(level);
         long until = mob.getPersistentData().getLong(UNTIL);
         boolean ownerOk = owner != null && owner.isAlive() && owner.level() == level;
         if (summon) {
