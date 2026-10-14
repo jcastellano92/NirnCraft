@@ -650,11 +650,7 @@ public final class Story {
     }
 
     public static int countRelic(Player p, String id) {
-        int n = 0;
-        for (ItemStack s : p.getInventory().items) if (isRelic(s, id)) n += s.getCount();
-        for (ItemStack s : p.getInventory().offhand) if (isRelic(s, id)) n += s.getCount();
-        n += com.skycraft.inventory.Pack.count(p, s -> isRelic(s, id));
-        return n;
+        return com.skycraft.inventory.Inv.count(p, s -> isRelic(s, id));
     }
 
     public static boolean isRelic(ItemStack s, String id) {
@@ -662,17 +658,7 @@ public final class Story {
     }
 
     public static void removeRelic(Player p, String id, int amount) {
-        for (List<ItemStack> list : List.of(p.getInventory().items, p.getInventory().offhand)) {
-            for (ItemStack s : list) {
-                if (amount <= 0) return;
-                if (isRelic(s, id)) {
-                    int take = Math.min(amount, s.getCount());
-                    s.shrink(take);
-                    amount -= take;
-                }
-            }
-        }
-        if (amount > 0) com.skycraft.inventory.Pack.remove(p, s -> isRelic(s, id), amount);
+        com.skycraft.inventory.Inv.take(p, s -> isRelic(s, id), amount);
     }
 
     // ------------------------------------------------------------------ journal

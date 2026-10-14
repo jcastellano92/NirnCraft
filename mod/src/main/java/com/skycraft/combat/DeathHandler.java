@@ -248,15 +248,16 @@ public final class DeathHandler {
     private static void dropPack(ServerPlayer player, LivingDropsEvent event) {
         if (player.isSpectator() || player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) return;
         SkyConfig.DeathDrops mode = SkyConfig.DEATH_DROPS.get();
+        // whole entries (int counts) go to the player corpse next to the slots' drops, never as thousands of max-size
+        // item entities (survival/corpse/PlayerCorpses; with corpses off they fall as entities like before)
+        List<ItemStack> cargo = new ArrayList<>();
         for (ItemStack entry : com.skycraft.inventory.Pack.entries(player)) {
             if (entry.isEmpty()) continue;
             if (QuestItems.isQuestItem(entry) || (mode == SkyConfig.DeathDrops.VALUABLES && !isValuable(entry))) continue;
             ItemStack all = com.skycraft.inventory.Pack.takeAll(player, entry);
-            while (!all.isEmpty()) {
-                ItemStack part = all.split(all.getMaxStackSize());
-                event.getDrops().add(new ItemEntity(player.level(), player.getX(), player.getY() + 0.5, player.getZ(), part));
-            }
+            if (!all.isEmpty()) cargo.add(all);
         }
+        com.skycraft.survival.corpse.PlayerCorpses.stashPackDrops(player, cargo, event);
     }
 
     /** A share of the gold wallet falls to the corpse as coins (configurable, 0 disables). */

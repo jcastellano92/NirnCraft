@@ -102,6 +102,7 @@ public final class PackSelfTest {
             virtualSlots(level, a, c);
             containerTake(a, c);
             grouping(a, c);
+            OverflowSelfTest.run(server, level, a, c); // bulk store, container overflow, block entities, corpse, file, facade
             try {
                 com.skycraft.economy.BarterSelfTest.run(server, level, a, c);
             } catch (RuntimeException e) {

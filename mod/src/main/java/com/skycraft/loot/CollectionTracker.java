@@ -15,7 +15,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -44,14 +43,10 @@ public final class CollectionTracker {
         if (event.getEntity() instanceof ServerPlayer player) note(player, event.getStack());
     }
 
-    /** Records every collectible in the inventory (main, armour, off hand). */
+    /** Records every collectible carried (slots, off hand, overflow pack) and worn. */
     public static void scan(ServerPlayer player) {
-        Inventory inv = player.getInventory();
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            ItemStack s = inv.getItem(i);
-            if (!s.isEmpty()) note(player, s);
-        }
-        for (ItemStack s : com.skycraft.inventory.Pack.entries(player)) { // the overflow pack
+        com.skycraft.inventory.Inv.forEach(player, s -> note(player, s));
+        for (ItemStack s : player.getArmorSlots()) {
             if (!s.isEmpty()) note(player, s);
         }
     }

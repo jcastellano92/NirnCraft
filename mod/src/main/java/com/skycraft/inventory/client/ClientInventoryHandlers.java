@@ -37,7 +37,13 @@ public final class ClientInventoryHandlers {
         if (player != null) Pack.applyClientSync(player, m.start(), m.total(), m.rows());
     }
 
+    /** The server's copy of the open container's overflow (see {@link ContainerOverflowClient}). */
+    public static void containerOverflow(InventoryPackets.ContainerOverflowSync m) {
+        ContainerOverflowClient.apply(m);
+    }
+
     public static void reset() {
+        ContainerOverflowClient.clear();
         current = 0f;
         capacity = 300f;
         enabled = true;

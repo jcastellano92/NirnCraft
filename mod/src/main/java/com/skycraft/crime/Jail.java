@@ -1161,6 +1161,10 @@ public final class Jail {
             if (s.getTag() != null && s.getTag().getBoolean(TOOL_TAG)) continue;
             stash(player, chests, s);
         }
+        // the pack part of the death's drops (whole entries with int counts, see survival/corpse/PlayerCorpses)
+        for (ItemStack all : com.skycraft.survival.corpse.PlayerCorpses.takePackCargo(player)) {
+            for (ItemStack part : com.skycraft.inventory.BulkStore.splitToStacks(all)) stash(player, chests, part);
+        }
         event.getDrops().clear();
         event.setCanceled(true);
     }

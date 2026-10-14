@@ -1,5 +1,6 @@
 package com.skycraft.crafting.recipe;
 
+import com.skycraft.inventory.Inv;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Inventory;
@@ -43,30 +44,22 @@ public record Cost(Predicate<ItemStack> test, Supplier<ItemStack> display, int c
 
     /** How many matching items the inventory holds, ignoring {@code exceptSlot} (-1 for none). */
     public int countIn(Inventory inv, int exceptSlot) {
-        int n = 0;
-        for (int slot = 0; slot < inv.getContainerSize(); slot++) {
-            if (slot == exceptSlot || !searched(slot)) continue;
-            ItemStack stack = inv.getItem(slot);
-            if (matches(stack)) n += stack.getCount();
-        }
-        // the overflow pack (inventory.Pack) counts like slots do
-        return n + com.skycraft.inventory.Pack.count(inv.player, this::matches);
+        int n = Inv.count(inv.player, this::matches);
+        ItemStack except = exceptStack(inv, exceptSlot);
+        return matches(except) ? n - except.getCount() : n;
     }
 
     /** Removes {@code amount} matching items; call only after {@link #countIn} confirmed they are there. */
     public void removeFrom(Inventory inv, int amount, int exceptSlot) {
-        int left = amount;
-        for (int slot = 0; slot < inv.getContainerSize() && left > 0; slot++) {
-            if (slot == exceptSlot || !searched(slot)) continue;
-            ItemStack stack = inv.getItem(slot);
-            if (!matches(stack)) continue;
-            int take = Math.min(left, stack.getCount());
-            stack.shrink(take);
-            if (stack.isEmpty()) inv.setItem(slot, ItemStack.EMPTY);
-            left -= take;
-        }
-        if (left > 0 && !inv.player.level().isClientSide) left -= com.skycraft.inventory.Pack.remove(inv.player, this::matches, left);
+        ItemStack except = exceptStack(inv, exceptSlot);
+        Inv.take(inv.player, s -> s != except && matches(s), amount);
         inv.setChanged();
+    }
+
+    /** The live stack in {@code slot} when it is a searched slot (so it can be left out), else EMPTY. */
+    private static ItemStack exceptStack(Inventory inv, int slot) {
+        if (slot < 0 || slot >= inv.getContainerSize() || !searched(slot)) return ItemStack.EMPTY;
+        return inv.getItem(slot);
     }
 
     private static boolean searched(int slot) {

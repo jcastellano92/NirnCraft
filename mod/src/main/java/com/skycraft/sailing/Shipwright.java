@@ -60,12 +60,7 @@ public final class Shipwright {
     private Shipwright() {}
 
     public static int count(Inventory inv, Material m) {
-        int n = 0;
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            ItemStack s = inv.getItem(i);
-            if (m.matches(s)) n += s.getCount();
-        }
-        return n + com.skycraft.inventory.Pack.count(inv.player, m::matches);
+        return com.skycraft.inventory.Inv.count(inv.player, m::matches);
     }
 
     public static boolean canBuild(Player player, ShipType type) {
@@ -83,18 +78,7 @@ public final class Shipwright {
             return;
         }
         if (!player.getAbilities().instabuild) {
-            Inventory inv = player.getInventory();
-            for (Material m : PLANS.get(type)) {
-                int left = m.count();
-                for (int i = 0; i < inv.getContainerSize() && left > 0; i++) {
-                    ItemStack s = inv.getItem(i);
-                    if (!m.matches(s)) continue;
-                    int take = Math.min(left, s.getCount());
-                    s.shrink(take);
-                    left -= take;
-                }
-                if (left > 0) com.skycraft.inventory.Pack.remove(player, m::matches, left);
-            }
+            for (Material m : PLANS.get(type)) com.skycraft.inventory.Inv.take(player, m::matches, m.count());
         }
         ItemStack ship = new ItemStack(SailingRegistry.SHIP_ITEMS.get(type).get());
         com.skycraft.inventory.Pack.giveOrDrop(player, ship);

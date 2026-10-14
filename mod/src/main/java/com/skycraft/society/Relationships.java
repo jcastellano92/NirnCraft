@@ -278,25 +278,11 @@ public final class Relationships {
     }
 
     private static int count(Player player, Item item) {
-        int n = 0;
-        var inv = player.getInventory();
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            ItemStack s = inv.getItem(i);
-            if (s.is(item)) n += s.getCount();
-        }
-        return n + com.skycraft.inventory.Pack.count(player, item);
+        return com.skycraft.inventory.Inv.count(player, item);
     }
 
     private static void take(Player player, Item item, int count) {
-        var inv = player.getInventory();
-        for (int i = 0; i < inv.getContainerSize() && count > 0; i++) {
-            ItemStack s = inv.getItem(i);
-            if (!s.is(item)) continue;
-            int t = Math.min(count, s.getCount());
-            s.shrink(t);
-            count -= t;
-        }
-        if (count > 0) com.skycraft.inventory.Pack.remove(player, st -> st.is(item), count);
+        com.skycraft.inventory.Inv.take(player, item, count);
     }
 
     /** Gives a stack to the player's bags (or drops it at their feet). */

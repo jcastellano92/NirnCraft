@@ -330,6 +330,9 @@ public final class ActionHandler {
         int containerSlotCount = storageSlots(player, containerId);
         if (containerSlotCount <= 0) return;
         AbstractContainerMenu menu = player.containerMenu;
+        // the overflow behind the container's slots (inventory.ContainerOverflow), if it has one: slots first, then it
+        com.skycraft.inventory.ContainerOverflow.Bound ov = com.skycraft.inventory.ContainerOverflow.of(player, menu);
+        com.skycraft.inventory.BulkStore store = ov == null ? null : ov.store();
 
         boolean takenAny = false;
         if (all) {
@@ -337,29 +340,44 @@ public final class ActionHandler {
             for (int i = menu instanceof com.skycraft.mounts.SaddlebagMenu ? com.skycraft.mounts.Saddlebags.GEAR : 0; i < containerSlotCount; i++) {
                 takenAny |= takeSlot(player, menu.getSlot(i));
             }
+            if (store != null) takenAny |= takeOverflow(player, store, null);
+        } else if (store != null && com.skycraft.inventory.ContainerOverflow.isOverflowSlot(slotIndex)) {
+            // a row that only exists in the overflow
+            ItemStack template = store.get(slotIndex - com.skycraft.inventory.ContainerOverflow.SLOT_BASE);
+            if (!template.isEmpty()) takenAny |= takeGrouped(player, menu, containerSlotCount, store, template);
         } else if (slotIndex >= 0 && slotIndex < containerSlotCount) {
             // grouped: one request takes EVERY stack of that exact item (item + tags) in the container, however many
-            // slots they sit in ("five apples in three slots": you take the apples, all five)
+            // slots (and overflow rows) they sit in ("five apples in three slots": you take the apples, all five)
             Slot first = menu.getSlot(slotIndex);
-            if (first.hasItem()) {
-                ItemStack template = first.getItem().copy();
-                Component name = template.getHoverName();
-                int before = containerCount(menu, containerSlotCount, template);
-                for (int i = 0; i < containerSlotCount; i++) {
-                    Slot s = menu.getSlot(i);
-                    if (s.hasItem() && ItemStack.isSameItemSameTags(s.getItem(), template)) takenAny |= takeSlot(player, s);
-                }
-                int took = before - containerCount(menu, containerSlotCount, template);
-                if (took > 0) Notifier.message(player, Component.translatable("inventory.skycraft.msg.took", took, name));
-            }
+            if (first.hasItem()) takenAny |= takeGrouped(player, menu, containerSlotCount, store, first.getItem().copy());
         }
 
         if (takenAny) {
+            if (ov != null) {
+                com.skycraft.inventory.ContainerOverflow.drain(ov.container(), ov.store());
+                com.skycraft.inventory.ContainerSync.markDirty(player);
+            }
             player.level().playSound(null, player.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.5f, 1.2f);
             menu.broadcastChanges();
             player.inventoryMenu.broadcastChanges();
             player.getInventory().setChanged();
         }
+    }
+
+    /** Takes every stack of {@code template} (slots, then the overflow) and says how many items that was. */
+    private static boolean takeGrouped(ServerPlayer player, AbstractContainerMenu menu, int containerSlotCount,
+                                       @org.jetbrains.annotations.Nullable com.skycraft.inventory.BulkStore store, ItemStack template) {
+        Component name = template.getHoverName();
+        long before = containerCount(menu, containerSlotCount, template) + overflowCount(store, template);
+        boolean any = false;
+        for (int i = 0; i < containerSlotCount; i++) {
+            Slot s = menu.getSlot(i);
+            if (s.hasItem() && ItemStack.isSameItemSameTags(s.getItem(), template)) any |= takeSlot(player, s);
+        }
+        if (store != null) any |= takeOverflow(player, store, template);
+        long took = before - containerCount(menu, containerSlotCount, template) - overflowCount(store, template);
+        if (took > 0) Notifier.message(player, Component.translatable("inventory.skycraft.msg.took", (int) Math.min(Integer.MAX_VALUE, took), name));
+        return any;
     }
 
     private static int containerCount(AbstractContainerMenu menu, int containerSlotCount, ItemStack template) {
@@ -369,6 +387,37 @@ public final class ActionHandler {
             if (!s.isEmpty() && ItemStack.isSameItemSameTags(s, template)) n += s.getCount();
         }
         return n;
+    }
+
+    private static long overflowCount(@org.jetbrains.annotations.Nullable com.skycraft.inventory.BulkStore store, ItemStack template) {
+        if (store == null) return 0;
+        int idx = store.indexOf(template);
+        return idx < 0 ? 0 : store.countAt(idx);
+    }
+
+    /**
+     * Takes the overflow rows equal to {@code template} (every row when null) into the bags; what the bags' caps refuse
+     * goes back into the overflow, never to the ground.
+     */
+    private static boolean takeOverflow(ServerPlayer player, com.skycraft.inventory.BulkStore store, @org.jetbrains.annotations.Nullable ItemStack template) {
+        boolean moved = false;
+        if (template != null) {
+            moved = moveOverflowRow(player, store, store.indexOf(template));
+        } else {
+            for (int i = store.size() - 1; i >= 0; i--) moved |= moveOverflowRow(player, store, i);
+        }
+        return moved;
+    }
+
+    private static boolean moveOverflowRow(ServerPlayer player, com.skycraft.inventory.BulkStore store, int index) {
+        if (index < 0) return false;
+        ItemStack all = store.take(index, Integer.MAX_VALUE);
+        if (all.isEmpty()) return false;
+        int before = all.getCount();
+        addToBags(player, all, false);
+        boolean moved = all.getCount() < before;
+        if (!all.isEmpty()) store.add(all); // the bags' engineering cap: it stays in the container
+        return moved;
     }
 
     /** Takes a container slot into the bags through the slot's own rules (mayPickup / onTake); leftovers go back. */
@@ -391,6 +440,9 @@ public final class ActionHandler {
         int containerSlotCount = storageSlots(player, containerId);
         if (containerSlotCount <= 0) return;
         AbstractContainerMenu menu = player.containerMenu;
+        // slots first, then the container's overflow: a store never fails because the slots are full
+        com.skycraft.inventory.ContainerOverflow.Bound ov = com.skycraft.inventory.ContainerOverflow.of(player, menu);
+        com.skycraft.inventory.BulkStore store = ov == null ? null : ov.store();
 
         boolean storedAny = false;
         if (all) {
@@ -400,12 +452,12 @@ public final class ActionHandler {
                 if (pSlot.getItem() == player.getMainHandItem() || pSlot.getItem() == player.getOffhandItem()) continue;
                 // a mount's saddle and barding are equipped one at a time, never swapped in by "store all"
                 if (menu instanceof com.skycraft.mounts.SaddlebagMenu bm && bm.isGear(pSlot.getItem())) continue;
-                storedAny |= storeSlot(player, menu, containerSlotCount, pSlot);
+                storedAny |= storeSlot(player, menu, containerSlotCount, ov, pSlot);
             }
             // the overflow pack goes too (last entry first: indexes below stay valid)
             for (int i = com.skycraft.inventory.Pack.size(player) - 1; i >= 0; i--) {
                 if (menu instanceof com.skycraft.mounts.SaddlebagMenu bm && bm.isGear(com.skycraft.inventory.Pack.get(player, i))) continue;
-                storedAny |= storePackEntry(player, menu, containerSlotCount, i);
+                storedAny |= storePackEntry(player, menu, containerSlotCount, ov, i);
             }
         } else if (com.skycraft.inventory.Pack.isVirtual(slotIndex)
                 || (slotIndex >= containerSlotCount && slotIndex < menu.slots.size())) {
@@ -426,14 +478,15 @@ public final class ActionHandler {
                     // the held / off hand stack only when it is the very slot that was clicked
                     boolean hand = pSlot.getItem() == player.getMainHandItem() || pSlot.getItem() == player.getOffhandItem();
                     if (hand && i != slotIndex) continue;
-                    storedAny |= storeSlot(player, menu, containerSlotCount, pSlot);
+                    storedAny |= storeSlot(player, menu, containerSlotCount, ov, pSlot);
                 }
                 int pi = com.skycraft.inventory.Pack.indexOf(player, template);
-                if (pi >= 0) storedAny |= storePackEntry(player, menu, containerSlotCount, pi);
+                if (pi >= 0) storedAny |= storePackEntry(player, menu, containerSlotCount, ov, pi);
             }
         }
 
         if (storedAny) {
+            if (ov != null) com.skycraft.inventory.ContainerSync.markDirty(player);
             player.level().playSound(null, player.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.4f, 0.9f);
             menu.broadcastChanges();
             player.inventoryMenu.broadcastChanges();
@@ -441,13 +494,14 @@ public final class ActionHandler {
         }
     }
 
-    /** Moves a player-inventory slot of the menu into the container slots; whatever doesn't fit stays put. */
-    private static boolean storeSlot(ServerPlayer player, AbstractContainerMenu menu, int containerSlotCount, Slot pSlot) {
+    /** Moves a player-inventory slot of the menu into the container (slots, then overflow); whatever doesn't fit stays put. */
+    private static boolean storeSlot(ServerPlayer player, AbstractContainerMenu menu, int containerSlotCount,
+                                     @org.jetbrains.annotations.Nullable com.skycraft.inventory.ContainerOverflow.Bound overflow, Slot pSlot) {
         if (pSlot == null || !pSlot.hasItem() || !pSlot.mayPickup(player)) return false;
         ItemStack moving = pSlot.safeTake(pSlot.getItem().getCount(), Integer.MAX_VALUE, player);
         if (moving.isEmpty()) return false;
         int before = moving.getCount();
-        storeIntoContainerSlots(menu, containerSlotCount, moving);
+        storeIntoContainerSlots(menu, containerSlotCount, overflow, moving);
         boolean stored = moving.getCount() < before;
         if (!moving.isEmpty()) {
             ItemStack rest = pSlot.safeInsert(moving);
@@ -456,19 +510,24 @@ public final class ActionHandler {
         return stored;
     }
 
-    /** Moves a whole pack entry into the container slots; what does not fit goes back into the pack. */
-    private static boolean storePackEntry(ServerPlayer player, AbstractContainerMenu menu, int containerSlotCount, int index) {
+    /** Moves a whole pack entry into the container (slots, then overflow); what does not fit goes back into the pack. */
+    private static boolean storePackEntry(ServerPlayer player, AbstractContainerMenu menu, int containerSlotCount,
+                                          @org.jetbrains.annotations.Nullable com.skycraft.inventory.ContainerOverflow.Bound overflow, int index) {
         ItemStack moving = com.skycraft.inventory.Pack.take(player, index, Integer.MAX_VALUE);
         if (moving.isEmpty()) return false;
         int before = moving.getCount();
-        storeIntoContainerSlots(menu, containerSlotCount, moving);
+        storeIntoContainerSlots(menu, containerSlotCount, overflow, moving);
         boolean stored = moving.getCount() < before;
         if (!moving.isEmpty()) com.skycraft.inventory.Pack.add(player, moving);
         return stored;
     }
 
-    /** Inserts through each slot's own rules (mayPlace, max stack size), merging first. Shrinks {@code stack}. */
-    private static void storeIntoContainerSlots(AbstractContainerMenu menu, int containerSlotCount, ItemStack stack) {
+    /**
+     * Inserts through each slot's own rules (mayPlace, max stack size), merging first, then into the container's
+     * overflow when it has one. Shrinks {@code stack}.
+     */
+    private static void storeIntoContainerSlots(AbstractContainerMenu menu, int containerSlotCount,
+                                                @org.jetbrains.annotations.Nullable com.skycraft.inventory.ContainerOverflow.Bound overflow, ItemStack stack) {
         // 1. Merge into matching existing stacks in container
         for (int i = 0; i < containerSlotCount && !stack.isEmpty(); i++) {
             Slot s = menu.getSlot(i);
@@ -479,5 +538,7 @@ public final class ActionHandler {
             Slot s = menu.getSlot(i);
             if (!s.hasItem()) s.safeInsert(stack);
         }
+        // 3. Everything the slots cannot hold goes to the container's overflow (never refused for lack of slots)
+        if (!stack.isEmpty() && overflow != null) overflow.add(stack);   // the host's own room rule applies (Bound#add)
     }
 }

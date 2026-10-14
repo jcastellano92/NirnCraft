@@ -64,13 +64,23 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
     private int scrollOffset = 0;
     private int hoveredIndex = -1;
 
-    /** {@code packIndex}: the overflow-pack entry of this row (My Items tab), or -1. */
-    public record ContainerEntry(List<Slot> slots, ItemStack stack, int totalCount, float totalWeight, int value, int packIndex) {
-        public Slot primarySlot() { return slots.get(0); }
+    /**
+     * {@code packIndex}: the overflow-pack entry of this row (My Items tab), or -1. {@code overflowIndex}: the entry
+     * of the container's own overflow (Container tab, {@code inventory.ContainerOverflow}), or -1. A row may hold only
+     * an overflow entry: then {@code slots} is empty.
+     */
+    public record ContainerEntry(List<Slot> slots, ItemStack stack, int totalCount, float totalWeight, int value, int packIndex,
+                                 int overflowIndex) {
+        public Slot primarySlot() { return slots.isEmpty() ? null : slots.get(0); }
+
+        /** True when this row is one of a mount's gear slots (saddle, barding). */
+        public boolean isGearSlot() { return !slots.isEmpty() && slots.get(0).index < com.skycraft.mounts.Saddlebags.GEAR; }
     }
 
     public SkyrimContainerScreen(ChestMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
+        // the server sends this container's overflow right after the open packet: drop any copy of an earlier menu
+        ContainerOverflowClient.clear();
         this.containerSlotCount = menu.getRowCount() * 9;
         this.isOwned = checkIsOwned();
         boolean bag = false;
@@ -153,6 +163,23 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
             }
         }
 
+        // Container tab: the container's own overflow (inventory.ContainerOverflow) joins the same rows as the slots
+        java.util.Map<String, Integer> overflowIndex = new java.util.HashMap<>();
+        if (viewMode == 0) {
+            List<ItemStack> over = ContainerOverflowClient.entries(menu.containerId);
+            for (int i = 0; i < over.size(); i++) {
+                ItemStack stack = over.get(i);
+                if (stack.isEmpty()) continue;
+                String key = stack.getItem().getDescriptionId() + ":" + (stack.getTag() != null ? stack.getTag().toString() : "");
+                if (!groups.containsKey(key)) {
+                    groups.put(key, new ArrayList<>());
+                    repStacks.put(key, stack.copy());
+                }
+                overflowIndex.put(key, i);
+                packCount.put(key, stack.getCount());
+            }
+        }
+
         List<ContainerEntry> list = new ArrayList<>();
         for (java.util.Map.Entry<String, List<Slot>> e : groups.entrySet()) {
             ItemStack rep = repStacks.get(e.getKey());
@@ -163,7 +190,8 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
                 totalWeight += ItemWeights.getStack(s.getItem());
             }
             int value = ItemValues.get(rep) * totalCount;
-            list.add(new ContainerEntry(e.getValue(), rep, totalCount, totalWeight, value, packIndex.getOrDefault(e.getKey(), -1)));
+            list.add(new ContainerEntry(e.getValue(), rep, totalCount, totalWeight, value, packIndex.getOrDefault(e.getKey(), -1),
+                    overflowIndex.getOrDefault(e.getKey(), -1)));
         }
         return list;
     }
@@ -267,7 +295,7 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
                 if (entry.totalCount() > 1) {
                     name += " (" + entry.totalCount() + ")";
                 }
-                if (isBag && viewMode == 0 && entry.primarySlot().index < com.skycraft.mounts.Saddlebags.GEAR) {
+                if (isBag && viewMode == 0 && entry.isGearSlot()) {
                     name = Component.translatable("mounts.skycraft.gear.worn", name).getString();
                 }
                 String ellipsized = SkyUi.ellipsize(font, name, listW - 75);
@@ -356,7 +384,7 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
         if (isBag && selectedIndex >= 0 && selectedIndex < entries.size()) {
             // on a mount's menu "take" removes its gear and "store" fits your saddle or barding
             ContainerEntry cur = entries.get(selectedIndex);
-            if (viewMode == 0 && cur.primarySlot().index < com.skycraft.mounts.Saddlebags.GEAR) actionHint = "[F] Unequip";
+            if (viewMode == 0 && cur.isGearSlot()) actionHint = "[F] Unequip";
             else if (viewMode == 1 && (com.skycraft.mounts.SaddleType.of(cur.stack()) != null
                     || cur.stack().getItem() instanceof net.minecraft.world.item.HorseArmorItem
                     || cur.stack().is(com.skycraft.mounts.MountItems.BEAST_BARDING.get()))) actionHint = "[F] Equip";
@@ -457,6 +485,12 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
             // the row's part in the overflow pack (a virtual slot id, see inventory.Pack)
             if (viewMode == 1 && entry.packIndex() >= 0) {
                 SkyNetwork.sendToServer(new CorePackets.ContainerStore(menu.containerId, Pack.VIRTUAL_BASE + entry.packIndex(), false));
+            }
+            // a row that only exists in the container's overflow (the server's Take of a slot row takes the overflow
+            // part too, see vitals.ActionHandler.takeGrouped)
+            if (viewMode == 0 && entry.slots().isEmpty() && entry.overflowIndex() >= 0) {
+                SkyNetwork.sendToServer(new CorePackets.ContainerTake(menu.containerId,
+                        com.skycraft.inventory.ContainerOverflow.SLOT_BASE + entry.overflowIndex(), false));
             }
         }
     }
@@ -600,4 +634,9 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
+    @Override
+    public void onClose() {
+        super.onClose();
+        ContainerOverflowClient.clear();
+    }
 }

@@ -1,6 +1,7 @@
 package com.skycraft.survival.fishing;
 
 import com.skycraft.core.Skill;
+import com.skycraft.inventory.Inv;
 import com.skycraft.network.SkyNetwork;
 import com.skycraft.skills.Progression;
 import com.skycraft.survival.SurvivalConfig;
@@ -295,32 +296,13 @@ public class SkyFishingHook extends FishingHook {
     private void findBait(ServerPlayer player, boolean consume) {
         bait = false;
         glowBait = false;
-        ItemStack found = ItemStack.EMPTY;
-        List<ItemStack> stacks = new ArrayList<>();
-        stacks.add(player.getOffhandItem());
-        stacks.addAll(player.getInventory().items);
-        for (ItemStack s : stacks) {
-            if (s.is(FishingRegistry.GLOW_BAIT.get())) {
-                found = s;
-                glowBait = true;
-                break;
-            }
-            if (found.isEmpty() && s.is(FishingRegistry.BAIT.get())) found = s;
-        }
-        if (found.isEmpty()) {
-            // bait that overflowed into the pack (inventory.Pack)
-            net.minecraft.world.item.Item pick = com.skycraft.inventory.Pack.count(player, FishingRegistry.GLOW_BAIT.get()) > 0
-                    ? FishingRegistry.GLOW_BAIT.get()
-                    : com.skycraft.inventory.Pack.count(player, FishingRegistry.BAIT.get()) > 0 ? FishingRegistry.BAIT.get() : null;
-            if (pick != null) {
-                bait = true;
-                glowBait = pick == FishingRegistry.GLOW_BAIT.get();
-                if (consume && !player.isCreative()) com.skycraft.inventory.Pack.remove(player, s -> s.is(pick), 1);
-                return;
-            }
-        }
-        bait = !found.isEmpty();
-        if (consume && bait && !player.isCreative()) found.shrink(1);
+        net.minecraft.world.item.Item pick = Inv.has(player, FishingRegistry.GLOW_BAIT.get())
+                ? FishingRegistry.GLOW_BAIT.get()
+                : Inv.has(player, FishingRegistry.BAIT.get()) ? FishingRegistry.BAIT.get() : null;
+        if (pick == null) return;
+        bait = true;
+        glowBait = pick == FishingRegistry.GLOW_BAIT.get();
+        if (consume && !player.isCreative()) Inv.take(player, pick, 1);
     }
 
     // ------------------------------------------------------------------ reeling in

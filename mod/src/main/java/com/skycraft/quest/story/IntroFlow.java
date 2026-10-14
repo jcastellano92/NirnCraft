@@ -470,10 +470,7 @@ public final class IntroFlow {
     }
 
     private static boolean hasKey(ServerPlayer p) {
-        for (ItemStack s : p.getInventory().items) if (isKey(s, p.getUUID())) return true;
-        for (ItemStack s : p.getInventory().offhand) if (isKey(s, p.getUUID())) return true;
-        if (com.skycraft.inventory.Pack.has(p, s -> isKey(s, p.getUUID()))) return true;
-        return false;
+        return com.skycraft.inventory.Inv.has(p, s -> isKey(s, p.getUUID()));
     }
 
     private static void ensureKey(ServerPlayer p) {
@@ -483,9 +480,7 @@ public final class IntroFlow {
     }
 
     private static void removeKeys(ServerPlayer p) {
-        for (ItemStack s : p.getInventory().items) if (isKey(s, p.getUUID())) s.setCount(0);
-        for (ItemStack s : p.getInventory().offhand) if (isKey(s, p.getUUID())) s.setCount(0);
-        com.skycraft.inventory.Pack.remove(p, s -> isKey(s, p.getUUID()), Integer.MAX_VALUE);
+        com.skycraft.inventory.Inv.take(p, s -> isKey(s, p.getUUID()), Integer.MAX_VALUE);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)

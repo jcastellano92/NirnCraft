@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Puts a dead player's drops into a {@link PlayerCorpseEntity} where they fell (after {@code combat/DeathHandler}
@@ -50,33 +51,113 @@ public final class PlayerCorpses {
         LAST_SAFE.keySet().removeIf(k -> k.id().equals(id));
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
+    /**
+     * What the dying player's pack drops, handed over by {@code combat/DeathHandler} (full int counts, any size), until
+     * {@link #onDrops} of the same death puts it into the body. Never visible to other mods as item entities, which
+     * would have to save a count above 127 as a byte.
+     */
+    private static final Map<UUID, List<net.minecraft.world.item.ItemStack>> PACK_CARGO = new ConcurrentHashMap<>();
+
+    /**
+     * {@code combat/DeathHandler}: the pack part of a death's drops. With corpses on it goes into the body next to the
+     * slots' drops (one body, nothing on the ground for lack of room); with corpses off it falls as item entities the
+     * way it always did.
+     */
+    public static void stashPackDrops(ServerPlayer player, List<net.minecraft.world.item.ItemStack> cargo, LivingDropsEvent event) {
+        if (cargo.isEmpty()) return;
+        if (SurvivalConfig.PLAYER_CORPSES.get()) {
+            PACK_CARGO.put(player.getUUID(), cargo);
+        } else {
+            spillAsEntities(player, cargo, event.getDrops());
+        }
+    }
+
+    /**
+     * For handlers that take a death's drops for themselves (the jail's evidence chest): the pack part handed over by
+     * {@link #stashPackDrops}, removed from the stash. Empty when there is none.
+     */
+    public static List<net.minecraft.world.item.ItemStack> takePackCargo(ServerPlayer player) {
+        List<net.minecraft.world.item.ItemStack> cargo = PACK_CARGO.remove(player.getUUID());
+        return cargo == null ? List.of() : cargo;
+    }
+
+    private static void spillAsEntities(ServerPlayer player, List<net.minecraft.world.item.ItemStack> cargo, java.util.Collection<ItemEntity> out) {
+        for (net.minecraft.world.item.ItemStack all : cargo) {
+            for (net.minecraft.world.item.ItemStack part : com.skycraft.inventory.BulkStore.splitToStacks(all.copy())) {
+                out.add(new ItemEntity(player.level(), player.getX(), player.getY() + 0.5, player.getZ(), part));
+            }
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
     public static void onDrops(LivingDropsEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player) || event.isCanceled()) return;
-        if (!SurvivalConfig.PLAYER_CORPSES.get() || event.getDrops().isEmpty()) return;
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        List<net.minecraft.world.item.ItemStack> cargo = PACK_CARGO.remove(player.getUUID());
+        if (event.isCanceled()) {
+            // another mod took the drops (a grave): the pack part we took out stays with the player and comes back with
+            // the respawn copy of their data, so nothing is lost or duplicated
+            if (cargo != null) for (net.minecraft.world.item.ItemStack s : cargo) com.skycraft.inventory.Pack.add(player, s);
+            return;
+        }
+        boolean hasCargo = cargo != null && !cargo.isEmpty();
+        if (!SurvivalConfig.PLAYER_CORPSES.get() || (event.getDrops().isEmpty() && !hasCargo)) {
+            if (hasCargo) spillAsEntities(player, cargo, event.getDrops());
+            return;
+        }
         ServerLevel level = player.serverLevel();
-        if (level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) return;
+        if (level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
+            if (hasCargo) for (net.minecraft.world.item.ItemStack s : cargo) com.skycraft.inventory.Pack.add(player, s);
+            return;
+        }
         PlayerCorpseEntity corpse = SurvivalRegistry.PLAYER_CORPSE.get().create(level);
-        if (corpse == null) return;
+        if (corpse == null) {
+            if (hasCargo) spillAsEntities(player, cargo, event.getDrops());
+            return;
+        }
 
         BlockPos lastSafe = LAST_SAFE.getOrDefault(new SafeKey(level.dimension(), player.getUUID()), level.getSharedSpawnPos());
         BlockPos at = safeSpot(level, player.blockPosition(), lastSafe);
         corpse.setOwner(player, at.equals(player.blockPosition()) ? lastSafe : at);
 
         List<ItemEntity> stored = new ArrayList<>();
+        List<ItemEntity> partial = new ArrayList<>();
+        List<net.minecraft.world.item.ItemStack> partialRest = new ArrayList<>();
         for (ItemEntity drop : event.getDrops()) {
             net.minecraft.world.item.ItemStack rest = corpse.add(drop.getItem().copy());
-            if (rest.isEmpty()) stored.add(drop);
-            else drop.setItem(rest);
+            if (rest.isEmpty()) {
+                stored.add(drop);
+            } else {
+                partial.add(drop);
+                partialRest.add(rest);
+            }
         }
-        if (stored.isEmpty()) return;
-        event.getDrops().removeAll(stored);
+        List<net.minecraft.world.item.ItemStack> refused = new ArrayList<>();
+        if (hasCargo) {
+            for (net.minecraft.world.item.ItemStack all : cargo) {
+                net.minecraft.world.item.ItemStack rest = corpse.addBulk(all.copy());
+                if (!rest.isEmpty()) refused.add(rest);
+            }
+        }
+        if (stored.isEmpty() && !corpse.hasItems()) return;
         float yaw = player.yBodyRot;
         corpse.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0);
         if (!level.noCollision(corpse)) corpse.setCentered(false);
         if (lava(level, at.below())) corpse.setNoGravity(true); // hovers over the lava it was pulled out of
-        level.addFreshEntity(corpse);
+        if (!level.addFreshEntity(corpse)) {
+            // another mod vetoed the body: leave every item where it was (nothing was removed from the drops yet)
+            if (hasCargo) spillAsEntities(player, cargo, event.getDrops());
+            return;
+        }
+        event.getDrops().removeAll(stored);
+        for (int i = 0; i < partial.size(); i++) partial.get(i).setItem(partialRest.get(i)); // what the overflow's caps refused
+        // only the overflow's engineering caps can refuse something: it falls at the body, it is never deleted
+        if (!refused.isEmpty()) spillAsEntities(player, refused, event.getDrops());
         com.skycraft.combat.DeathHandler.moveCorpseMarker(player, at);
+    }
+
+    @SubscribeEvent
+    public static void onClone(PlayerEvent.Clone event) {
+        PACK_CARGO.remove(event.getEntity().getUUID());
     }
 
     /**

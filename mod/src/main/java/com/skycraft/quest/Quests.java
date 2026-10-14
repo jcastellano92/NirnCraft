@@ -390,21 +390,11 @@ public final class Quests {
     }
 
     public static int count(Player player, Item item) {
-        int n = 0;
-        for (ItemStack s : player.getInventory().items) if (s.is(item)) n += s.getCount();
-        return n + com.skycraft.inventory.Pack.count(player, item);
+        return com.skycraft.inventory.Inv.count(player, item);
     }
 
     public static void remove(Player player, Item item, int amount) {
-        for (ItemStack s : player.getInventory().items) {
-            if (amount <= 0) break;
-            if (s.is(item)) {
-                int take = Math.min(amount, s.getCount());
-                s.shrink(take);
-                amount -= take;
-            }
-        }
-        if (amount > 0) com.skycraft.inventory.Pack.remove(player, s -> s.is(item), amount);
+        com.skycraft.inventory.Inv.take(player, item, amount);
     }
 
     // ------------------------------------------------------------------ killers

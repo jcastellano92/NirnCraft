@@ -28,6 +28,8 @@ public final class InventoryPackets {
         SkyNetwork.register(InvAction.class, NetworkDirection.PLAY_TO_SERVER, InvAction::encode, InvAction::decode, InvAction::handle);
         SkyNetwork.register(UseHeld.class, NetworkDirection.PLAY_TO_CLIENT, UseHeld::encode, UseHeld::decode, UseHeld::handle);
         SkyNetwork.register(PackSync.class, NetworkDirection.PLAY_TO_CLIENT, PackSync::encode, PackSync::decode, PackSync::handle);
+        SkyNetwork.register(ContainerOverflowSync.class, NetworkDirection.PLAY_TO_CLIENT, ContainerOverflowSync::encode,
+                ContainerOverflowSync::decode, ContainerOverflowSync::handle);
     }
 
     // ------------------------------------------------------------------ S2C
@@ -139,6 +141,43 @@ public final class InventoryPackets {
 
         static void handle(PackSync m, Supplier<NetworkEvent.Context> ctx) {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientInventoryHandlers.packSync(m));
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
+    /**
+     * The overflow of the container behind the menu {@code containerId} ({@link ContainerOverflow}), in packets of at
+     * most 100 rows like {@link PackSync}; a packet with start 0 begins a new copy, total 0 clears it. Rows reuse
+     * {@link PackSync.Row}. The client lists them after the container's slot rows; a row's menu slot id for take
+     * requests is {@link ContainerOverflow#SLOT_BASE} + its index.
+     */
+    public record ContainerOverflowSync(int containerId, int start, int total, List<PackSync.Row> rows) {
+        static void encode(ContainerOverflowSync m, FriendlyByteBuf buf) {
+            buf.writeVarInt(m.containerId);
+            buf.writeVarInt(m.start);
+            buf.writeVarInt(m.total);
+            buf.writeVarInt(m.rows.size());
+            for (PackSync.Row r : m.rows) {
+                buf.writeNbt(r.key());
+                buf.writeVarInt(r.count());
+            }
+        }
+
+        static ContainerOverflowSync decode(FriendlyByteBuf buf) {
+            int id = buf.readVarInt();
+            int start = buf.readVarInt();
+            int total = buf.readVarInt();
+            int n = Math.min(buf.readVarInt(), ContainerSync.ROWS);
+            List<PackSync.Row> rows = new ArrayList<>(n);
+            for (int i = 0; i < n; i++) {
+                CompoundTag key = buf.readNbt();
+                rows.add(new PackSync.Row(key == null ? new CompoundTag() : key, buf.readVarInt()));
+            }
+            return new ContainerOverflowSync(id, start, total, rows);
+        }
+
+        static void handle(ContainerOverflowSync m, Supplier<NetworkEvent.Context> ctx) {
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientInventoryHandlers.containerOverflow(m));
             ctx.get().setPacketHandled(true);
         }
     }

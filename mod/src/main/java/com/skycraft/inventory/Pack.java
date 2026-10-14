@@ -38,6 +38,11 @@ import java.util.function.Predicate;
  * InventoryPackets.PackSync} (the Skyrim inventory, container and barter screens list pack entries in the same rows as
  * slot items) and drained back into free slots on the server tick.</p>
  *
+ * <p>The entry list itself (merge by item+NBT, int counts, caps, add/take/iterate, NBT rows) is {@link BulkStore}, the
+ * same class that backs the overflow of containers ({@link ContainerOverflow}) and corpses; the pack is a view of it
+ * over the list in the player's SkyData, plus what only a player has: weight, sync, refill, virtual slots. Gameplay
+ * code reads and spends what a player carries through {@link Inv}, never through slots alone.</p>
+ *
  * <p>Entries are identified by their index (a "virtual slot", {@link #VIRTUAL_BASE} + index, in client requests). To
  * act on one (equip, use, read, craft with it) the server <em>materialises</em> it: pulls one stack into a free slot,
  * pushing the least useful stack back into the pack when all slots are full ({@link #materialize}). That keeps every
@@ -87,18 +92,12 @@ public final class Pack {
         return m.getList(LIST, Tag.TAG_COMPOUND);
     }
 
-    /** The identity of an item in the pack: the saved stack with count 1 (id, tag, capability data). */
-    private static CompoundTag key(ItemStack stack) {
-        ItemStack one = stack.copy();
-        one.setCount(1);
-        return one.save(new CompoundTag());
-    }
-
-    private static int indexOf(ListTag list, CompoundTag key) {
-        for (int i = 0; i < list.size(); i++) {
-            if (list.getCompound(i).getCompound(STACK).equals(key)) return i;
-        }
-        return -1;
+    /**
+     * The pack's entry list as a {@link BulkStore} view (the NBT in the player's SkyData module is the storage; the
+     * view is cheap and only valid for the call). Mutations go through {@link #changed}.
+     */
+    private static BulkStore store(Player player) {
+        return new BulkStore(list(player), MAX_ENTRIES, MAX_PER_ENTRY, () -> changed(player));
     }
 
     private static ItemStack stackOf(CompoundTag entry) {
@@ -124,9 +123,7 @@ public final class Pack {
 
     /** Copy of entry {@code index} with its full (int) count; EMPTY when out of range or the item no longer exists. */
     public static ItemStack get(Player player, int index) {
-        ListTag l = list(player);
-        if (index < 0 || index >= l.size()) return ItemStack.EMPTY;
-        return stackOf(l.getCompound(index));
+        return store(player).get(index);
     }
 
     /** The stack at a real inventory slot or, for a virtual slot id, a copy of the pack entry. */
@@ -136,18 +133,12 @@ public final class Pack {
 
     /** All entries as copies, index-aligned with the virtual slots (unreadable entries are EMPTY). */
     public static List<ItemStack> entries(Player player) {
-        ListTag l = list(player);
-        List<ItemStack> out = new ArrayList<>(l.size());
-        for (int i = 0; i < l.size(); i++) out.add(stackOf(l.getCompound(i)));
-        return out;
+        return store(player).entries();
     }
 
     /** Total number of items in the pack. */
     public static long totalItems(Player player) {
-        ListTag l = list(player);
-        long n = 0;
-        for (int i = 0; i < l.size(); i++) n += l.getCompound(i).getInt(COUNT);
-        return n;
+        return store(player).totalItems();
     }
 
     /** Weight of the whole pack (cached until the pack or the weight table changes). */
@@ -157,11 +148,7 @@ public final class Pack {
         CompoundTag m = module(player);
         long version = ItemWeights.version();
         if (m.contains("w", Tag.TAG_FLOAT) && m.getLong("wv") == version) return m.getFloat("w");
-        float sum = 0f;
-        for (int i = 0; i < l.size(); i++) {
-            ItemStack s = stackOf(l.getCompound(i));
-            if (!s.isEmpty()) sum += ItemWeights.getStack(s);
-        }
+        float sum = store(player).weight();
         m.putFloat("w", sum);
         m.putLong("wv", version);
         return sum;
@@ -169,46 +156,21 @@ public final class Pack {
 
     /** Items in the pack matching {@code filter}. */
     public static int count(Player player, Predicate<ItemStack> filter) {
-        ListTag l = list(player);
-        long n = 0;
-        for (int i = 0; i < l.size(); i++) {
-            ItemStack s = stackOf(l.getCompound(i));
-            if (!s.isEmpty() && filter.test(s)) n += s.getCount();
-        }
-        return (int) Math.min(Integer.MAX_VALUE, n);
+        return store(player).count(filter);
     }
 
     /** Items of one type in the pack (cheap: compares the item id only). */
     public static int count(Player player, Item item) {
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
-        if (id == null) return 0;
-        String want = id.toString();
-        ListTag l = list(player);
-        long n = 0;
-        for (int i = 0; i < l.size(); i++) {
-            CompoundTag e = l.getCompound(i);
-            if (want.equals(e.getCompound(STACK).getString("id"))) n += e.getInt(COUNT);
-        }
-        return (int) Math.min(Integer.MAX_VALUE, n);
+        return store(player).count(item);
     }
 
     public static boolean has(Player player, Predicate<ItemStack> filter) {
-        ListTag l = list(player);
-        for (int i = 0; i < l.size(); i++) {
-            ItemStack s = stackOf(l.getCompound(i));
-            if (!s.isEmpty() && filter.test(s)) return true;
-        }
-        return false;
+        return store(player).has(filter);
     }
 
     /** Index of the first entry matching, or -1. */
     public static int find(Player player, Predicate<ItemStack> filter) {
-        ListTag l = list(player);
-        for (int i = 0; i < l.size(); i++) {
-            ItemStack s = stackOf(l.getCompound(i));
-            if (!s.isEmpty() && filter.test(s)) return i;
-        }
-        return -1;
+        return store(player).find(filter);
     }
 
     // ------------------------------------------------------------------ writing (server)
@@ -221,72 +183,27 @@ public final class Pack {
         if (stack.isEmpty()) return 0;
         // conjured weapons only exist where they tick (slots): they never rest in the pack
         if (com.skycraft.magic.bound.BoundWeapons.isBound(stack)) return 0;
-        int want = stack.getCount();
-        CompoundTag key = key(stack);
-        ListTag l = list(player);
-        int idx = indexOf(l, key);
-        int taken;
-        if (idx >= 0) {
-            CompoundTag e = l.getCompound(idx);
-            taken = Math.min(MAX_PER_ENTRY - e.getInt(COUNT), want);
-            if (taken <= 0) return 0;
-            e.putInt(COUNT, e.getInt(COUNT) + taken);
-        } else {
-            if (l.size() >= MAX_ENTRIES) return 0;
-            taken = Math.min(MAX_PER_ENTRY, want);
-            CompoundTag e = new CompoundTag();
-            e.put(STACK, key);
-            e.putInt(COUNT, taken);
-            l.add(e);
-        }
-        stack.shrink(taken);
-        changed(player);
-        return taken;
+        return store(player).add(stack);
     }
 
     /** Removes up to {@code max} items of entry {@code index} and returns them as one stack (may exceed the max stack size). */
     public static ItemStack take(Player player, int index, int max) {
-        ListTag l = list(player);
-        if (index < 0 || index >= l.size() || max <= 0) return ItemStack.EMPTY;
-        CompoundTag e = l.getCompound(index);
-        ItemStack s = stackOf(e);
-        if (s.isEmpty()) return ItemStack.EMPTY;
-        int n = e.getInt(COUNT);
-        int t = Math.min(n, max);
-        s.setCount(t);
-        if (t >= n) l.remove(index);
-        else e.putInt(COUNT, n - t);
-        changed(player);
-        return s;
+        return store(player).take(index, max);
     }
 
     /** Removes up to {@code max} items matching {@code filter} (first entries first); returns how many were removed. */
     public static int remove(Player player, Predicate<ItemStack> filter, int max) {
-        ListTag l = list(player);
-        int left = max;
-        for (int i = 0; i < l.size() && left > 0; ) {
-            ItemStack s = stackOf(l.getCompound(i));
-            if (s.isEmpty() || !filter.test(s)) {
-                i++;
-                continue;
-            }
-            int before = l.size();
-            left -= take(player, i, left).getCount();
-            if (l.size() == before) i++; // entry kept (partly taken): done with it
-        }
-        return max - left;
+        return store(player).remove(filter, max);
     }
 
     /** Removes every item equal to {@code template} (item and NBT) and returns the stack (count = all of them). */
     public static ItemStack takeAll(Player player, ItemStack template) {
-        ListTag l = list(player);
-        int idx = indexOf(l, key(template));
-        return idx < 0 ? ItemStack.EMPTY : take(player, idx, Integer.MAX_VALUE);
+        return store(player).takeAll(template);
     }
 
     /** Index of the entry equal to {@code template} (item and NBT), or -1. */
     public static int indexOf(Player player, ItemStack template) {
-        return template.isEmpty() ? -1 : indexOf(list(player), key(template));
+        return store(player).indexOf(template);
     }
 
     /** Sets or clears the favorite mark on the entry equal to {@code template} (merging with an equal entry). */

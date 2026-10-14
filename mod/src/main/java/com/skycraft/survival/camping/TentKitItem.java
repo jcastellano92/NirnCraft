@@ -1,6 +1,7 @@
 package com.skycraft.survival.camping;
 
 import com.skycraft.core.Notifier;
+import com.skycraft.inventory.Inv;
 import com.skycraft.survival.SurvivalRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -55,31 +56,19 @@ public class TentKitItem extends Item {
             com.skycraft.dig.PlacedBlocks.mark(level, partPos, true); // yours: you can break camp anywhere (world protection)
         }
         // lay out a carried bedroll, head toward the back
-        int slot = findBedroll(player);
-        boolean packed = slot < 0 && com.skycraft.inventory.Pack.count(player, SurvivalRegistry.BEDROLL_ITEM.get()) > 0;
-        if (slot >= 0 || packed || player.isCreative()) {
+        if (Inv.has(player, SurvivalRegistry.BEDROLL_ITEM.get()) || player.isCreative()) {
             Direction in = facing.getOpposite();
             BlockState foot = SurvivalRegistry.BEDROLL.get().defaultBlockState().setValue(BedBlock.FACING, in).setValue(BedBlock.PART, BedPart.FOOT);
             level.setBlock(origin, foot, 3);
             level.setBlock(origin.relative(in), foot.setValue(BedBlock.PART, BedPart.HEAD), 3);
             com.skycraft.dig.PlacedBlocks.mark(level, origin, true);
             com.skycraft.dig.PlacedBlocks.mark(level, origin.relative(in), true);
-            if (slot >= 0 && !player.isCreative()) player.getInventory().getItem(slot).shrink(1);
-            else if (packed && !player.isCreative()) {
-                com.skycraft.inventory.Pack.remove(player, s -> s.is(SurvivalRegistry.BEDROLL_ITEM.get()), 1);
-            }
+            if (!player.isCreative()) Inv.take(player, SurvivalRegistry.BEDROLL_ITEM.get(), 1);
         }
         level.playSound(null, origin, SoundEvents.WOOL_PLACE, SoundSource.BLOCKS, 1.0f, 0.8f);
         level.playSound(null, origin, SoundEvents.ARMOR_EQUIP_LEATHER, SoundSource.BLOCKS, 1.0f, 0.9f);
         if (!player.isCreative()) ctx.getItemInHand().shrink(1);
         return InteractionResult.CONSUME;
-    }
-
-    private static int findBedroll(Player player) {
-        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-            if (player.getInventory().getItem(i).is(SurvivalRegistry.BEDROLL_ITEM.get())) return i;
-        }
-        return -1;
     }
 
     /** Every tent block and the bedroll spots are free, with something solid to stand on. */

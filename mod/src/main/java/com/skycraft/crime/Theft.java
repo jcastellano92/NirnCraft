@@ -457,6 +457,10 @@ public final class Theft {
             if (slot.container == player.getInventory()) continue;
             add(out, slot.getItem());
         }
+        // the container's overflow (inventory.ContainerOverflow) is part of what it holds
+        if (player instanceof ServerPlayer sp) {
+            for (ItemStack s : com.skycraft.inventory.ContainerOverflow.entriesOf(sp, menu)) add(out, s);
+        }
         return out;
     }
 

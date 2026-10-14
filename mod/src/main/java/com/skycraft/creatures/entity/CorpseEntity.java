@@ -77,6 +77,12 @@ public class CorpseEntity extends Entity {
 
     /** The body's loot, shared by every looter. */
     private final Loot loot = new Loot();
+    /**
+     * What the 27 slots could not hold (inventory.OverflowHost): a body never loses or drops loot for lack of slots.
+     * Persisted next to the slots, listed by the Skyrim container screen after them.
+     */
+    private final com.skycraft.inventory.BulkStore bulk = new com.skycraft.inventory.BulkStore(
+            com.skycraft.inventory.ContainerOverflow.CORPSE_ENTRIES, com.skycraft.inventory.ContainerOverflow.CORPSE_PER_ENTRY, null);
     /** Bit i set: loot slot i (0-5) holds the item the body is shown wearing in that slot. */
     private int wornMask;
     /** Somebody has opened the body. */
@@ -358,7 +364,9 @@ public class CorpseEntity extends Entity {
                 }
             }
         }
-        return loot.addItem(stack);
+        ItemStack rest = loot.addItem(stack);
+        if (!rest.isEmpty()) bulk.add(rest); // slots full: the overflow takes it (only its caps can refuse)
+        return rest;
     }
 
     /**
@@ -392,7 +400,7 @@ public class CorpseEntity extends Entity {
 
     /** True when the body holds no loot. */
     public boolean isEmptyOfLoot() {
-        return loot.isEmpty();
+        return loot.isEmpty() && bulk.isEmpty();
     }
 
     /** Ticks since the body appeared. */
@@ -456,7 +464,7 @@ public class CorpseEntity extends Entity {
         if (!isDragged()) tickPhysics();
 
         age++;
-        if (looted && loot.isEmpty()) emptyTicks++;
+        if (looted && isEmptyOfLoot()) emptyTicks++;
         else emptyTicks = 0;
         if (inUse() || persistent) return;
         if (emptyTicks > CreaturesConfig.EMPTY_CORPSE_DESPAWN_SECONDS.get() * 20
@@ -767,6 +775,7 @@ public class CorpseEntity extends Entity {
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
         tag.put("Loot", saveItems(loot));
+        if (!bulk.isEmpty()) tag.put("Bulk", bulk.save());
         tag.putByte("Worn", (byte) wornMask);
         tag.putBoolean("Looted", looted);
         tag.putString("BodyType", this.entityData.get(BODY_TYPE));
@@ -787,6 +796,7 @@ public class CorpseEntity extends Entity {
         loot.quiet = true;
         loadItems(loot, tag.getList("Loot", Tag.TAG_COMPOUND));
         loot.quiet = false;
+        bulk.load(tag.getCompound("Bulk"));
         wornMask = tag.getByte("Worn") & ((1 << WORN_SLOTS) - 1);
         looted = tag.getBoolean("Looted") || tag.contains("Copies", Tag.TAG_LIST) && !tag.getList("Copies", Tag.TAG_COMPOUND).isEmpty();
         this.entityData.set(BODY_TYPE, tag.getString("BodyType"));
@@ -807,8 +817,13 @@ public class CorpseEntity extends Entity {
     }
 
     /** The body's inventory, shared by all looters; valid while the corpse exists and the looter is close. */
-    private class Loot extends SimpleContainer {
+    private class Loot extends SimpleContainer implements com.skycraft.inventory.OverflowHost {
         int openers;
+
+        @Override
+        public com.skycraft.inventory.BulkStore overflow() {
+            return bulk;
+        }
         /** Set while filling or loading: no appearance updates. */
         boolean quiet;
 

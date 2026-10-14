@@ -81,7 +81,22 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
 
     public final ShipType shipType;
     private final ShipPart[] parts;
-    private final SimpleContainer cargo;
+    private final Cargo cargo;
+
+    /** The cargo hold: its slots and, behind them, an overflow (inventory.OverflowHost) so a hold is never "full". */
+    private static final class Cargo extends SimpleContainer implements com.skycraft.inventory.OverflowHost {
+        final com.skycraft.inventory.BulkStore bulk = new com.skycraft.inventory.BulkStore(
+                com.skycraft.inventory.ContainerOverflow.MAX_ENTRIES, com.skycraft.inventory.ContainerOverflow.MAX_PER_ENTRY, null);
+
+        Cargo(int size) {
+            super(size);
+        }
+
+        @Override
+        public com.skycraft.inventory.BulkStore overflow() {
+            return bulk;
+        }
+    }
 
     // controller-side state
     private int input;
@@ -129,7 +144,7 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
         super(type, level);
         this.shipType = shipType;
         this.blocksBuilding = true;
-        this.cargo = new SimpleContainer(Math.max(9, shipType.cargoSlots));
+        this.cargo = new Cargo(Math.max(9, shipType.cargoSlots));
         this.parts = new ShipPart[shipType.parts.length];
         for (int i = 0; i < parts.length; i++) {
             parts[i] = new ShipPart(this, shipType.parts[i], shipType.hitWidth(), shipType.height);
@@ -686,6 +701,7 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
             ItemStack s = cargo.removeItemNoUpdate(i);
             if (!s.isEmpty()) spawnAtLocation(s, 1.5f);
         }
+        com.skycraft.inventory.ContainerOverflow.spill(level(), blockPosition(), cargo.bulk);
         spawnAtLocation(new ItemStack(Items.OAK_PLANKS, 2 + random.nextInt(4)), 1.2f);
         level().playSound(null, getX(), getY(), getZ(), SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.NEUTRAL, 1.0f, 0.6f);
         level().playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_SPLASH, SoundSource.NEUTRAL, 1.2f, 0.5f);
@@ -713,7 +729,8 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
             ItemStack s = cargo.removeItemNoUpdate(i);
             if (!s.isEmpty()) spawnAtLocation(s, 1f);
         }
-        if (!player.getAbilities().instabuild || !player.getInventory().contains(item)) {
+        com.skycraft.inventory.ContainerOverflow.spill(level(), blockPosition(), cargo.bulk);
+        if (!player.getAbilities().instabuild || !com.skycraft.inventory.Inv.has(player, item.getItem())) {
             ItemStack rest = com.skycraft.inventory.Pack.give(player, item);
             if (!rest.isEmpty()) spawnAtLocation(rest, 1f);
         }
@@ -978,6 +995,7 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
             items.add(t);
         }
         tag.put("Cargo", items);
+        if (!cargo.bulk.isEmpty()) tag.put("CargoBulk", cargo.bulk.save());
     }
 
     @Override
@@ -990,7 +1008,12 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
         for (int i = 0; i < items.size(); i++) {
             CompoundTag t = items.getCompound(i);
             int slot = t.getByte("Slot") & 255;
-            if (slot < cargo.getContainerSize()) cargo.setItem(slot, ItemStack.of(t));
+            ItemStack stack = ItemStack.of(t);
+            if (stack.isEmpty()) continue;
+            // a slot that no longer exists (a smaller hold) keeps its stack in the overflow: loading drops nothing
+            if (slot < cargo.getContainerSize() && cargo.getItem(slot).isEmpty()) cargo.setItem(slot, stack);
+            else cargo.bulk.add(stack);
         }
+        cargo.bulk.load(tag.getCompound("CargoBulk"));
     }
 }

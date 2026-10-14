@@ -30,7 +30,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -330,19 +329,7 @@ public final class RealmTravel {
     static boolean payToll(ServerPlayer p) {
         CompoundTag d = data(p);
         if (d.getBoolean("soul_toll") || p.getAbilities().instabuild) return true;
-        for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
-            ItemStack s = p.getInventory().getItem(i);
-            if (s.getItem() instanceof SoulGemItem && SoulGemItem.getSoul(s) > 0) {
-                s.shrink(1);
-                d.putBoolean("soul_toll", true);
-                SkyData.get(p).markDirty();
-                Notifier.message(p, Component.translatable("realm.skycraft.soul_cairn.toll_paid"));
-                p.level().playSound(null, p.blockPosition(), SoundEvents.SOUL_ESCAPE, SoundSource.PLAYERS, 1f, 0.6f);
-                return true;
-            }
-        }
-        // a filled gem that overflowed into the pack (inventory.Pack)
-        if (com.skycraft.inventory.Pack.remove(p, s -> s.getItem() instanceof SoulGemItem && SoulGemItem.getSoul(s) > 0, 1) > 0) {
+        if (com.skycraft.inventory.Inv.take(p, s -> s.getItem() instanceof SoulGemItem && SoulGemItem.getSoul(s) > 0, 1) > 0) {
             d.putBoolean("soul_toll", true);
             SkyData.get(p).markDirty();
             Notifier.message(p, Component.translatable("realm.skycraft.soul_cairn.toll_paid"));

@@ -2,6 +2,9 @@ package com.skycraft.survival.corpse;
 
 import com.skycraft.core.Notifier;
 import com.skycraft.creatures.entity.CorpseEntity;
+import com.skycraft.inventory.BulkStore;
+import com.skycraft.inventory.ContainerOverflow;
+import com.skycraft.inventory.OverflowHost;
 import com.skycraft.quest.party.Parties;
 import com.skycraft.quest.party.Party;
 import com.skycraft.survival.SurvivalConfig;
@@ -52,6 +55,12 @@ public class PlayerCorpseEntity extends CorpseEntity {
     private static final EntityDataAccessor<String> OWNER_NAME = SynchedEntityData.defineId(PlayerCorpseEntity.class, EntityDataSerializers.STRING);
 
     private final Items items = new Items();
+    /**
+     * Everything the 54 slots cannot hold: a dying player's whole inventory and pack always fit in one body
+     * (inventory.OverflowHost; docs/INVENTORY.md "Corpses"). Persisted with the body, listed after the slots by the
+     * Skyrim container screen.
+     */
+    private final BulkStore bulk = new BulkStore(ContainerOverflow.CORPSE_ENTRIES, ContainerOverflow.CORPSE_PER_ENTRY, null);
     private BlockPos safe;
     private int emptyTicks;
     // client
@@ -87,13 +96,63 @@ public class PlayerCorpseEntity extends CorpseEntity {
         return this.entityData.get(OWNER_NAME);
     }
 
-    /** Adds a dropped stack; returns what didn't fit. */
+    /** Adds a dropped stack (slots, then the overflow); returns what didn't fit (only the overflow's caps refuse). */
     public ItemStack add(ItemStack stack) {
-        return items.addItem(stack);
+        ItemStack rest = items.addItem(stack);
+        if (!rest.isEmpty()) bulk.add(rest);
+        return rest;
+    }
+
+    /** Adds a whole entry with an int count (a pack entry): straight into the overflow when the slots are full. */
+    public ItemStack addBulk(ItemStack all) {
+        if (all.isEmpty()) return ItemStack.EMPTY;
+        // slots first while they have room, in max-size parts; the rest merges into the overflow as one row
+        while (!all.isEmpty()) {
+            ItemStack part = all.split(Math.min(all.getCount(), all.getMaxStackSize()));
+            ItemStack rest = items.addItem(part);
+            if (!rest.isEmpty()) {
+                all.grow(rest.getCount());
+                bulk.add(all);
+                return all;
+            }
+        }
+        return ItemStack.EMPTY;
     }
 
     public boolean hasItems() {
-        return !items.isEmpty();
+        return !items.isEmpty() || !bulk.isEmpty();
+    }
+
+    /** The overflow behind the slots (the selftest and the lead's tools read it). */
+    public BulkStore overflow() {
+        return bulk;
+    }
+
+    /** Everything the body holds, slots and overflow, merged by item (for tests and for spilling). */
+    public java.util.List<ItemStack> contents() {
+        BulkStore all = new BulkStore(Integer.MAX_VALUE, Integer.MAX_VALUE, null);
+        for (int i = 0; i < items.getContainerSize(); i++) {
+            ItemStack s = items.getItem(i).copy();
+            if (!s.isEmpty()) all.add(s);
+        }
+        for (ItemStack s : bulk.entries()) {
+            if (!s.isEmpty()) all.add(s);
+        }
+        return all.entries();
+    }
+
+    /** Taking the body away (command, creative punch) never deletes what it holds: it spills where it lies. */
+    @Override
+    public void remove(RemovalReason reason) {
+        if (!this.level().isClientSide && reason.shouldDestroy() && hasItems() && this.level() instanceof net.minecraft.server.level.ServerLevel level) {
+            BlockPos at = this.getY() < level.getMinBuildHeight() + 1 ? (safe != null ? safe : level.getSharedSpawnPos()) : this.blockPosition();
+            for (int i = 0; i < items.getContainerSize(); i++) {
+                ItemStack s = items.removeItemNoUpdate(i);
+                if (!s.isEmpty()) bulk.add(s);
+            }
+            ContainerOverflow.spill(level, at, bulk);
+        }
+        super.remove(reason);
     }
 
     // ------------------------------------------------------------------ ticking
@@ -191,6 +250,7 @@ public class PlayerCorpseEntity extends CorpseEntity {
             list.add(t);
         }
         tag.put("PlayerItems", list);
+        if (!bulk.isEmpty()) tag.put("PlayerBulk", bulk.save());
         this.entityData.get(OWNER).ifPresent(u -> tag.putUUID("Owner", u));
         tag.putString("OwnerName", ownerName());
         if (safe != null) tag.put("Safe", NbtUtils.writeBlockPos(safe));
@@ -200,11 +260,17 @@ public class PlayerCorpseEntity extends CorpseEntity {
     @Override
     protected void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        bulk.load(tag.getCompound("PlayerBulk"));
         ListTag list = tag.getList("PlayerItems", Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             CompoundTag t = list.getCompound(i);
             int slot = t.getByte("Slot") & 255;
-            if (slot < SLOTS) items.setItem(slot, ItemStack.of(t));
+            ItemStack stack = ItemStack.of(t);
+            if (stack.isEmpty()) continue;
+            // a slot that no longer exists (the body used to be bigger) or is taken keeps its stack in the overflow:
+            // nothing a body saved is ever dropped on load
+            if (slot < SLOTS && items.getItem(slot).isEmpty()) items.setItem(slot, stack);
+            else bulk.add(stack);
         }
         if (tag.hasUUID("Owner")) this.entityData.set(OWNER, Optional.of(tag.getUUID("Owner")));
         this.entityData.set(OWNER_NAME, tag.getString("OwnerName"));
@@ -213,8 +279,13 @@ public class PlayerCorpseEntity extends CorpseEntity {
     }
 
     /** The body's inventory; valid while the body exists and the looter is close. */
-    private class Items extends SimpleContainer {
+    private class Items extends SimpleContainer implements OverflowHost {
         int openers;
+
+        @Override
+        public BulkStore overflow() {
+            return bulk;
+        }
 
         Items() {
             super(SLOTS);

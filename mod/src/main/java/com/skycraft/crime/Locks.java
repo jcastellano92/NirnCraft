@@ -25,7 +25,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -321,10 +320,7 @@ public final class Locks {
     }
 
     public static boolean hasJailKey(Player player) {
-        for (ItemStack s : player.getInventory().items) {
-            if (s.is(CrimeItems.JAIL_KEY.get())) return true;
-        }
-        return com.skycraft.inventory.Pack.count(player, CrimeItems.JAIL_KEY.get()) > 0;
+        return com.skycraft.inventory.Inv.has(player, CrimeItems.JAIL_KEY.get());
     }
 
     /** Whether the player must pick this lock before using the block. */
@@ -436,25 +432,11 @@ public final class Locks {
     // ------------------------------------------------------------------ minigame
 
     static int countPicks(Player player) {
-        Inventory inv = player.getInventory();
-        int n = 0;
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            ItemStack s = inv.getItem(i);
-            if (s.is(CrimeItems.LOCKPICK.get())) n += s.getCount();
-        }
-        return n + com.skycraft.inventory.Pack.count(player, CrimeItems.LOCKPICK.get());
+        return com.skycraft.inventory.Inv.count(player, CrimeItems.LOCKPICK.get());
     }
 
     private static boolean consumePick(Player player) {
-        Inventory inv = player.getInventory();
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            ItemStack s = inv.getItem(i);
-            if (s.is(CrimeItems.LOCKPICK.get())) {
-                s.shrink(1);
-                return true;
-            }
-        }
-        return com.skycraft.inventory.Pack.remove(player, s -> s.is(CrimeItems.LOCKPICK.get()), 1) > 0;
+        return com.skycraft.inventory.Inv.take(player, CrimeItems.LOCKPICK.get(), 1) > 0;
     }
 
     /** Full sweet spot width in degrees for this player and difficulty. */

@@ -463,11 +463,7 @@ public final class Houses {
     private static final Map<UUID, String[]> DOOR_OFFERS = new java.util.concurrent.ConcurrentHashMap<>();
 
     public static boolean hasKey(Player player, String houseId) {
-        for (ItemStack s : player.getInventory().items) {
-            if (s.getItem() instanceof HouseKeyItem && houseId.equals(HouseKeyItem.houseOf(s))) return true;
-        }
-        if (houseId.equals(HouseKeyItem.houseOf(player.getOffhandItem()))) return true;
-        return com.skycraft.inventory.Pack.has(player, s -> s.getItem() instanceof HouseKeyItem && houseId.equals(HouseKeyItem.houseOf(s)));
+        return com.skycraft.inventory.Inv.has(player, s -> s.getItem() instanceof HouseKeyItem && houseId.equals(HouseKeyItem.houseOf(s)));
     }
 
     private static void updateHouseSign(ServerLevel level, BlockPos pos, Component houseName, String ownerName) {

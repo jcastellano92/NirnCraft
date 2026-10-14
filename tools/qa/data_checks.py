@@ -25,6 +25,74 @@ def err(msg):
     print("ERR", msg)
 
 
+# --- inventory discipline (docs/INVENTORY.md "The facade") ---------------------------------------------------------
+# Gameplay code reads and spends what a player carries through com.skycraft.inventory.Inv (slots + offhand + the
+# overflow pack). A rule that reads only the 36 slots misses pack items. This lint fails when a Java file outside the
+# whitelist reads the player's inventory slots directly. Every whitelist entry says why it is allowed; a new entry
+# needs the same: slot-addressed screens (a slot id names the item, virtual pack ids go through Pack.resolveSlot),
+# code that transfers or mutates whole inventories (death, jail, theft), and containers that are not the player's.
+INV_WHITELIST = {
+    "inventory/": "the inventory module itself (Pack, Inv, screens, actions, selftests)",
+    "economy/": "barter, shops and house keys are slot-addressed (virtual slot ids) and keep their own pack accounting",
+    "vitals/ActionHandler.java": "pick-up (addToBags) and container take/store",
+    "combat/DeathHandler.java": "death keep rules work per slot and per pack entry",
+    "crime/Theft.java": "tags stolen items in place (slots and pack)",
+    "crime/Jail.java": "confiscation moves whole inventories into the evidence chest",
+    "crime/Bounty.java": "confiscates stolen items from slots and pack",
+    "crafting/recipe/Cost.java": "material costs with an exceptSlot rule; already counts slots + offhand + pack",
+    "crafting/arcane/alchemy/Alchemy.java": "slot-addressed: the screen names slots (Pack.resolveAll for pack rows)",
+    "crafting/arcane/enchant/Enchanting.java": "slot-addressed: the screen names slots (Pack.resolveAll for pack rows)",
+    "crafting/Tempering.java": "slot-addressed: the screen names a slot (Pack.resolveSlot for a pack row)",
+    "crafting/SoulGems.java": "slot-addressed best-gem choice (Pack.resolveSlot for a pack row)",
+    "arsenal/StaffEnchanting.java": "slot-addressed: the screen names slots (Pack.resolveAll for pack rows)",
+    "society/NpcDialogue.java": "slot-addressed stolen-blade handover (Pack.resolveSlot)",
+    "crafting/menu/StationMenu.java": "lays the player's slots out in a station menu (slot widgets, not a gameplay read)",
+    "homestead/HomesteadMenu.java": "lays the player's slots out in a menu (slot widgets, not a gameplay read)",
+    "survival/cooking/CookingMenu.java": "lays the player's slots out in a menu (slot widgets, not a gameplay read)",
+    "society/Followers.java": "a follower's own inventory, not the player's",
+    "survival/corpse/": "the player corpse's own containers",
+    "creatures/entity/CorpseEntity.java": "the creature corpse's own container",
+    "magic/": "conjured weapons live only in slots; hands and hotbar management (owned by the magic stream)",
+    "mounts/": "saddlebags are the mount's own container (owned by the mounts stream)",
+}
+# direct reads of the player's slots (after stripping // comments)
+INV_PATTERNS = [
+    re.compile(r"getInventory\(\)\s*\.\s*(items|armor|offhand|compartments)\b"),
+    re.compile(r"\.inventory\s*\.\s*(items|armor|offhand)\b"),
+    re.compile(r"\.countItem\("),
+    re.compile(r"getInventory\(\)\s*\.\s*(contains|getItem|getContainerSize|removeItem|add|clearOrCountMatchingItems|"
+               r"findSlotMatchingItem|hasAnyMatching|hasAnyOf|getFreeSlot)\("),
+]
+# a local named inv/inventory (type Inventory or var) that is then read slot by slot
+INV_LOCAL = re.compile(r"\b(inv|inventory)\s*\.\s*(items|armor|offhand|getContainerSize\(\)|getItem\(|removeItem\(|contains\(|"
+                       r"clearOrCountMatchingItems\(|findSlotMatchingItem\(|add\(|getFreeSlot\()")
+INV_DECL = re.compile(r"getInventory\(\)|\bInventory\s+(inv|inventory)\b")
+
+
+def inventory_lint():
+    bad = 0
+    for f in glob.glob(os.path.join(JAVA, "com", "skycraft", "**", "*.java"), recursive=True):
+        rel = os.path.relpath(f, os.path.join(JAVA, "com", "skycraft")).replace(os.sep, "/")
+        if "/client/" in "/" + rel or rel.startswith("client/"):
+            continue  # screens read the client's own mirror
+        if any(rel == k or (k.endswith("/") and rel.startswith(k)) for k in INV_WHITELIST):
+            continue
+        if re.search(r"(SelfTest|Selftest|Autotest|AutoTest)\.java$", rel) or "/qa/" in "/" + rel:
+            continue  # tests build and inspect inventories on purpose
+        src = open(f, encoding="utf-8", errors="replace").read()
+        has_decl = bool(INV_DECL.search(src))
+        for i, line in enumerate(src.splitlines(), 1):
+            code = line.split("//")[0]
+            if not code.strip() or code.lstrip().startswith(("*", "/*")):
+                continue
+            hit = any(p.search(code) for p in INV_PATTERNS) or (has_decl and INV_LOCAL.search(code))
+            if hit and "inventory-lint: ok" not in line:
+                bad += 1
+                err(f"inventory: {rel}:{i} reads the player's slots directly; use com.skycraft.inventory.Inv "
+                    f"(count/has/take/give/find/forEach) so pack items count (docs/INVENTORY.md)")
+    return bad
+
+
 def main():
     n = 0
     for pattern in ("mod/src/main/resources/**/*.json", "mod/src/main/lang/**/*.json"):
@@ -101,6 +169,7 @@ def main():
     for k, files in seen_h.items():
         if len(files) > 1:
             err(f"event handler class name collision {k[1]}.{k[2]}({k[3]}) in package {k[0]}: {', '.join(sorted(files))}")
+    inventory_lint()
     print(f"{n} json files, {places} places, {sum(len(v) for v in kinds.values())} registry ids checked, {len(errs)} errors")
 
 

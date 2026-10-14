@@ -26,14 +26,7 @@ public final class GuideEvents {
         tag.putBoolean("handbook_given", true);
         data.markDirty();
         ItemStack book = new ItemStack(GuideModule.HANDBOOK.get());
-        // into the backpack, never the hand the player is holding (an empty main hand would otherwise take it)
-        var inv = player.getInventory();
-        for (int i = 9; i < inv.items.size(); i++) {
-            if (inv.items.get(i).isEmpty()) {
-                inv.setItem(i, book);
-                return;
-            }
-        }
-        com.skycraft.inventory.Pack.giveOrDrop(player, book);
+        // into the backpack (storage slots first), never the hand the player is holding: Inv.give is the pick-up path
+        com.skycraft.inventory.Inv.giveOrDrop(player, book);
     }
 }
