@@ -102,7 +102,37 @@ public final class SurvivalMode {
     /** Game time each player last woke from vanilla sleep, and where. */
     private static final Map<UUID, long[]> WOKE = new HashMap<>();
 
+    /** Players in the rest system ({@code world/RestManager}): 1 lying or sitting, 2 inside a fast-forward. */
+    private static final Map<UUID, Integer> RESTING = new HashMap<>();
+
     private SurvivalMode() {}
+
+    /** The rest system's state of a player: 0 none, 1 lying or sitting (no fatigue), 2 fast-forward (fed by {@link #restStep}). */
+    public static void setRestState(UUID player, int state) {
+        if (state == 0) RESTING.remove(player);
+        else RESTING.put(player, state);
+    }
+
+    /** Lowers the fatigue by {@code points} (the rest bar slowly refills while lying in a bed). Returns the new value. */
+    public static float restRecover(ServerPlayer player, float points) {
+        if (!active(player)) return 0f;
+        CompoundTag t = tag(player);
+        float v = Math.max(0f, t.getFloat("fatigue") - points);
+        t.putFloat("fatigue", v);
+        return v;
+    }
+
+    /** One hour (or {@code hours}) of the fast-forward passed: the meters only, no Rested effects (see {@link #restDone}). */
+    public static void restStep(ServerPlayer player, int hours, boolean sleep) {
+        if (!active(player) || hours < 1) return;
+        advanceMeters(player, tag(player), hours, sleep);
+    }
+
+    /** The rest ended after at least an hour of sleep: Rested in a bedroll, Lover's Comfort at home with a spouse. */
+    public static void restDone(ServerPlayer player, @Nullable BlockPos bed) {
+        restEffects(player, bed);
+        if (active(player)) update(player, 0, false);
+    }
 
     /** Forces class loading (registers the game rule early). */
     public static void init() {
@@ -203,7 +233,9 @@ public final class SurvivalMode {
         boolean on = active(player);
         long clock = clock(player);
         if (!t.contains("t")) t.putLong("t", clock);
-        if (on && advance) {
+        // 2 = a fast-forward of the rest system is running: RestManager feeds the meters hour by hour (restStep)
+        int restState = RESTING.getOrDefault(player.getUUID(), 0);
+        if (on && advance && restState != 2) {
             long delta = clock - t.getLong("t");
             if (delta < 0 || delta > 24000L * 3) delta = ticks;
             long[] woke = WOKE.remove(player.getUUID());
@@ -213,7 +245,7 @@ public final class SurvivalMode {
             } else {
                 float hours = delta / 1000f;
                 t.putFloat("hunger", Math.min(MAX_HUNGER, t.getFloat("hunger") + hours * (float) (double) SurvivalConfig.HUNGER_PER_HOUR.get()));
-                if (!player.isSleeping()) {
+                if (!player.isSleeping() && restState == 0) { // lying or sitting in the rest system does not tire you
                     t.putFloat("fatigue", Math.min(MAX_FATIGUE, t.getFloat("fatigue") + hours * (float) (double) SurvivalConfig.FATIGUE_PER_HOUR.get()));
                 }
             }
@@ -221,7 +253,7 @@ public final class SurvivalMode {
         } else if (!on) {
             t.putBoolean("heat", false);
         }
-        t.putLong("t", clock);
+        if (restState != 2) t.putLong("t", clock);
         applyPenalties(player, data, t, on);
         if (on) notifyStages(player, t);
         sync(player, t, on);
@@ -407,22 +439,30 @@ public final class SurvivalMode {
     private static void rested(ServerPlayer player, int hours, boolean sleep, @Nullable BlockPos bed, boolean fromMenu) {
         CompoundTag t = tag(player);
         boolean on = active(player);
-        if (on) {
-            float hungerRate = (float) (double) SurvivalConfig.HUNGER_PER_HOUR.get();
-            float fatigueRate = (float) (double) SurvivalConfig.FATIGUE_PER_HOUR.get();
-            t.putFloat("hunger", Math.min(MAX_HUNGER, t.getFloat("hunger") + hours * hungerRate * (sleep ? 0.6f : 1f)));
-            if (sleep) {
-                t.putFloat("fatigue", Math.max(0f, t.getFloat("fatigue") - hours * 30f));
-            } else {
-                t.putFloat("fatigue", Math.min(MAX_FATIGUE, t.getFloat("fatigue") + hours * fatigueRate));
-            }
-            stepCold(player, t, 20, hours * 1000);
-            t.putLong("t", clock(player));
-        }
+        if (on) advanceMeters(player, t, hours, sleep);
         if (!sleep || hours < 1) {
             if (on) update(player, 0, false);
             return;
         }
+        restEffects(player, bed);
+        if (on) update(player, 0, false);
+    }
+
+    /** Hunger, fatigue and cold after {@code hours} of resting. */
+    private static void advanceMeters(ServerPlayer player, CompoundTag t, int hours, boolean sleep) {
+        float hungerRate = (float) (double) SurvivalConfig.HUNGER_PER_HOUR.get();
+        float fatigueRate = (float) (double) SurvivalConfig.FATIGUE_PER_HOUR.get();
+        t.putFloat("hunger", Math.min(MAX_HUNGER, t.getFloat("hunger") + hours * hungerRate * (sleep ? 0.6f : 1f)));
+        if (sleep) {
+            t.putFloat("fatigue", Math.max(0f, t.getFloat("fatigue") - hours * 30f));
+        } else {
+            t.putFloat("fatigue", Math.min(MAX_FATIGUE, t.getFloat("fatigue") + hours * fatigueRate));
+        }
+        stepCold(player, t, 20, hours * 1000);
+        t.putLong("t", clock(player));
+    }
+
+    private static void restEffects(ServerPlayer player, @Nullable BlockPos bed) {
         boolean bedroll = bed != null && player.level().getBlockState(bed).getBlock() instanceof BedrollBlock;
         Entity spouse = bed == null || bedroll ? null : com.skycraft.homestead.Homesteads.spouseNear(player, bed, 48);
         int ticks = com.skycraft.world.WorldConfig.WELL_RESTED_TICKS.get();
@@ -436,7 +476,6 @@ public final class SurvivalMode {
             player.addEffect(new MobEffectInstance(SurvivalEffects.RESTED.get(), Math.max(ticks, 6000), 0, false, false, true));
             Notifier.message(player, Component.translatable("survival.skycraft.rest.rested"));
         }
-        if (on) update(player, 0, false);
     }
 
     @SubscribeEvent

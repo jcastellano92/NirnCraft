@@ -55,6 +55,7 @@ final class CrimeSelfTest {
         stolenGoods(r);
         restock(r);
         jail(r, server);
+        rest(r);
         return new Report(r.checks, r.problems, r.lines);
     }
 
@@ -142,6 +143,18 @@ final class CrimeSelfTest {
         chest.setItem(1, ItemStack.EMPTY);
         chest.setItem(2, new ItemStack(Items.IRON_SWORD, 2));
         r.check(com.skycraft.loot.Restock.holdsForeignItems(entry, chest), "more of an item than the table rolled counts as the player's");
+    }
+
+    /** The rest system's pure state machine (group requirement, handover, cancel, switches, AFK, jail, recovery): docs/REST.md. */
+    private static void rest(Result r) {
+        int[] checks = new int[1];
+        List<String> fails = com.skycraft.world.RestLogic.selfTest(checks);
+        r.checks += checks[0];
+        r.problems += fails.size();
+        r.lines.addAll(fails);
+        // a prisoner is never part of the group the others wait for
+        r.check(com.skycraft.world.RestLogic.tally(List.of(new com.skycraft.world.RestLogic.Participant(
+                new java.util.UUID(1, 1), false, true))).required() == 0, "a jailed player is not required to rest");
     }
 
     private static void jail(Result r, MinecraftServer server) {

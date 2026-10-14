@@ -43,7 +43,7 @@ public final class WorldClientEvents {
         if (mc.player == null || mc.level == null) return;
 
         while (SkyKeys.WAIT.consumeClick()) {
-            if (mc.screen == null) mc.setScreen(new RestScreen(false, null));
+            RestClient.onWaitKey(mc);
         }
         while (SkyKeys.MAP.consumeClick()) {
             if (mc.screen == null) mc.setScreen(new MapScreen());

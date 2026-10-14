@@ -1,8 +1,6 @@
 package com.skycraft.world.client;
 
 import com.skycraft.world.WorldPackets;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 
 /** Client-side entry points for world packets and common-side events (only class-loaded on the client). */
@@ -24,9 +22,15 @@ public final class WorldClient {
         ScreenFade.start(text, kind == WorldPackets.RestFade.TRAVEL ? 1200 : 1800);
     }
 
-    public static void openRest(boolean sleep, BlockPos bed) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
-        if (mc.screen == null || mc.screen instanceof RestScreen) mc.setScreen(new RestScreen(sleep, bed));
+    public static void restState(WorldPackets.RestState m) {
+        RestClient.onState(m);
+    }
+
+    public static void restHint(WorldPackets.RestHint m) {
+        RestClient.onHint(m);
+    }
+
+    public static void restPose(WorldPackets.RestPose m) {
+        RestClient.onPose(m);
     }
 }

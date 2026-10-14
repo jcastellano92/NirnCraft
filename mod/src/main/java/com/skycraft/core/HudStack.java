@@ -56,6 +56,7 @@ public final class HudStack {
     public static final int BC_TAME = 5;         // the horse-breaking balance bar
     public static final int BC_MOUNT = 10;
     public static final int BC_SURVIVAL = 20;
+    public static final int BC_REST = 30;        // the rest panel / "X is resting, press the key to join" line (world module)
     public static final int TR_PERKS = 0;
     public static final int TR_CURSE_PERKS = 10;
     public static final int TR_TARGET = 20;      // the target card of a mount you look at

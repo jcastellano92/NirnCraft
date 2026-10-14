@@ -1103,7 +1103,8 @@ public final class Jail {
                 int served = j.getInt("served");
                 if (!maySleep(j)) {
                     Notifier.message(player, Component.translatable("crime.skycraft.jail.too_soon", 60 - served));
-                } else {
+                } else if (!com.skycraft.world.RestManager.beginJail(player, pos, () -> release(player, true))) {
+                    // the sentence is slept off as a personal fast-forward (world/RestManager); no cinematic: release at once
                     release(player, true);
                 }
                 return;

@@ -15,5 +15,6 @@ public final class WorldClientSetup {
     public static void overlays(RegisterGuiOverlaysEvent event) {
         event.registerAboveAll("region_banner", RegionBanner::render);
         event.registerAboveAll("world_fade", ScreenFade::render);
+        event.registerAboveAll("rest_hud", RestClient::render);
     }
 }
