@@ -30,6 +30,20 @@ public final class MountCommands {
                     c.getSource().sendSuccess(() -> Component.literal(r.summary()), false);
                     return r.problems() == 0 ? 1 : 0;
                 }))
+                .then(Commands.literal("stance")
+                        .executes(c -> {
+                            ServerPlayer p = c.getSource().getPlayerOrException();
+                            MountCompanion.setStance(p, !MountCompanion.stays(p));
+                            return 1;
+                        })
+                        .then(Commands.literal("follow").executes(c -> {
+                            MountCompanion.setStance(c.getSource().getPlayerOrException(), false);
+                            return 1;
+                        }))
+                        .then(Commands.literal("stay").executes(c -> {
+                            MountCompanion.setStance(c.getSource().getPlayerOrException(), true);
+                            return 1;
+                        })))
                 .then(Commands.literal("call").executes(c -> {
                     Mounts.call(c.getSource().getPlayerOrException());
                     return 1;

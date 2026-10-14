@@ -373,6 +373,8 @@ public final class Mounts {
             return;
         }
         if (player.isPassenger()) return;
+        // sneak + the call key: the mount close by fights at your side or holds (MountCompanion)
+        if (player.isShiftKeyDown() && MountCompanion.toggleStance(player)) return;
         long now = player.level().getGameTime();
         if (tag.contains("cooldown") && now < tag.getLong("cooldown") && kind != MountKind.ARVAK) {
             int secs = (int) Math.ceil((tag.getLong("cooldown") - now) / 20.0);
@@ -382,6 +384,8 @@ public final class Mounts {
         ServerLevel level = player.serverLevel();
         BlockPos target = safeSpot(level, player.blockPosition().relative(player.getDirection().getOpposite(), 3));
         Entity existing = activeEntity(player);
+        // lying down after a fight: it gets up first when the area is calm, otherwise it stays down
+        if (existing != null && MountCompanion.onCall(player, existing)) return;
         if (existing != null && existing.level() == level && existing.distanceToSqr(player) < 16 * 16) {
             // close by: it trots over
             if (existing instanceof Mob m) m.getNavigation().moveTo(player, 1.4);

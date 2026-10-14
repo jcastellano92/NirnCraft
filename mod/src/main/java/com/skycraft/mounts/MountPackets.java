@@ -18,6 +18,7 @@ public final class MountPackets {
     public static void register() {
         SkyNetwork.register(Gallop.class, NetworkDirection.PLAY_TO_SERVER, Gallop::encode, Gallop::decode, Gallop::handle);
         SkyNetwork.register(MountHud.class, NetworkDirection.PLAY_TO_CLIENT, MountHud::encode, MountHud::decode, MountHud::handle);
+        CompanionPackets.register();
     }
 
     /** C2S: the rider pressed or released sprint (gallop). */

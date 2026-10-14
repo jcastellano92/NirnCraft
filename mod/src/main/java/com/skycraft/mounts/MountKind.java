@@ -114,6 +114,11 @@ public enum MountKind {
         return backing == Backing.HORSE || backing == Backing.BEAST;
     }
 
+    /** How this kind helps its owner in a fight and what it does when it would die ({@link MountCompanion}). */
+    public MountCompanion.Profile combat() {
+        return MountCompanion.profile(this);
+    }
+
     public int bagSlots() {
         return bagRows * 9;
     }

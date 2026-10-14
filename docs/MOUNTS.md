@@ -65,3 +65,66 @@ the mount dying), and the mount keeps what the bar held (`skycraft_mount_stamina
 for a mount brought back from afar). Gallop (sprint key) drains 1 point per tick, a jump 6% of the max, resting regains
 slowly; an exhausted mount cannot gallop until a quarter is back and you cannot sprint either. The vitals module neither
 drains nor restores the bar while swapped. The only mount HUD left is a thin health bar when the mount is hurt.
+
+## Downed and companion combat (`MountCompanion`, `MountCompanionEvents`, `CompanionPackets`, `client/MountDownedClient`)
+
+Applies to every OWNED mount of a `MountKind` (a Skycraft mount entity carrying `skycraft_mount` and a player owner). NPC
+and guard horses, wild mounts and stable-master stock have no owner tag and are untouched.
+
+### Downed instead of dead
+* A blow past the mount's health (`LivingDamageEvent`, HIGHEST) or any death event (`LivingDeathEvent`) is cancelled and
+  the mount is laid down with 1 health. `Mounts.onDeath` (cooldown, "has fallen") now only runs for an explicit kill
+  (`/kill`, the `GENERIC_KILL` source); damage never removes a mount.
+* **While down**: invulnerable, silent (it whimpers every 4 s), no AI, rider ejected, cannot be mounted
+  (`EntityMountEvent`), no blows land (`LivingAttackEvent`/`LivingHurtEvent` cancelled, aimed or area), cannot be a target
+  (`LivingChangeTargetEvent` cancelled, mobs already after it are cleared every 0.5 s within 24 blocks). Client: the model
+  is rolled onto its side by `RenderLivingEvent` (works on vanilla horses, camels, the guar and every rig), owner gets a
+  message, a low note and a compass marker ("Fallen mount").
+* **Rises** (`MountCompanion.tryRise`, from the owner's player tick) when it has lain 3 s and the area is calm: owner not
+  in combat for 8 s (`Vitals.inCombat`, 160 ticks), no hostile within 24 blocks of the mount or the owner that targets
+  either, OR the owner is gone (offline, dead, other dimension, more than 64 blocks away). It stands at 35% health and
+  cannot be ridden for 5 s (`skycraft_mount_rest`; the owner is told).
+* **Call (H)** while down: if calm it gets up and comes; otherwise "is down and cannot come until the fight is over".
+* **Edge cases**: state is entity persistent data (`skycraft_downed`), so it survives saves and restarts. A downed mount
+  loading with its owner offline/elsewhere, or not the recorded mount, rises quietly; the owner logging out raises it
+  quietly; a downed mount that falls below the world is put beside its owner (or the surface) and stays down until
+  calm. Dimension change: it stays downed in the old dimension; calling spawns a fresh mount as before, and the old
+  copy is dropped as stale.
+* Stable cooldowns: `DEATH_COOLDOWN_TICKS` and Arvak's 10 s respawn remain only for the explicit-kill branch.
+
+### Companion combat
+A mount that is not ridden and whose profile `fights` helps while its owner is in combat: it takes up the mob that hit
+the owner, the mob the owner hit, or a hostile targeting the owner (monsters, or mobs targeting the owner; never
+players, the owner's pets or other owned mounts), stays within 12 blocks of the owner and lets go of a foe more than 20
+blocks from the owner. Beasts attack with their own spec attacks (so their attack attribute and animations); horses and
+Arvak kick (`attribute or base x factor x power`, cooldown, knockback). `power` reads the persistent floats
+`skycraft_mount_power` (multiplier) and `skycraft_mount_level` (+4% per level) that the mount-stat system may write.
+Non-fighters keep 8 blocks from hostiles near the owner (moving away, drifting back to the owner when far), and never get
+a target. A downed fighter leaves the fight like any downed mount.
+
+**Stance**: sneak + the call key (H) while your mount is within 48 blocks, or `/skycraft-mounts stance [follow|stay]`.
+Stay: it does not follow into a fight and only takes foes within 6 blocks. (Sneak-use stays the saddlebag menu.)
+
+| Kind | Role | Kick/attack | Notes |
+|---|---|---|---|
+| Whiterun bay, Riften chestnut, Cyrodilic bay, Colovian paint | fighter (light) | x0.5, base 4, 1.5 s | cavalry stock |
+| Breton destrier | fighter | x0.8, base 5 | warhorse |
+| Alik'r steed | fighter (light) | x0.6, base 4 | |
+| Shadowmere | fighter | x1.0, base 6 | legend |
+| Arvak | fighter (strong) | x1.4, base 8 | legend |
+| Senche-tiger | fighter | spec attacks | claws, 1.2 s |
+| Akaviri tiger | fighter | spec attacks | stronger |
+| Giant wolf | fighter | spec attacks | |
+| Woolly mammoth | fighter (stomp) | spec attacks | slow, heavy knockback |
+| Realm grazer | fighter (light) | spec attacks | |
+| Windhelm pinto, Markarth black, Solitude grey, Nibenese grey, Auridon white | peaceful | none | keep 8 blocks away |
+| Camel, pack guar, indrik | peaceful | none | camel's brain may override the keep-away |
+
+### Future work
+* A real stance/command key and a radial entry; "attack my target" order; per-mount aggression setting.
+* A proper lying/sitting animation per rig (the roll is a render transform) and a lying hitbox.
+* Mount stat/level system (the other mounts workstream): write `skycraft_mount_power` / `skycraft_mount_level`; bardings could
+  add a kick bonus; the kick for the beasts should scale with it too (set the attack attribute modifier).
+* Revive by item (a healing potion or food speeds the rise), and a rise timer shown on the mount's health bar.
+* Keep-away does not avoid doors; camels use a brain, so their flight is only partly effective.
+* A downed mount in a dimension the owner left rises only when loaded again (a fresh mount is spawned on call).
