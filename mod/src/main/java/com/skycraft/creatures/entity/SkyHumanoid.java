@@ -134,7 +134,7 @@ public abstract class SkyHumanoid extends Monster implements AnimatedCreature, R
                 // last seen, look around, then return to the post (Stealth.beginSearch).
                 BlockPos where = this.lastKnownTargetPos != null ? this.lastKnownTargetPos : player.blockPosition();
                 this.lastKnownTargetPos = null;
-                com.skycraft.combat.Stealth.beginSearch(this, Vec3.atBottomCenterOf(where));
+                com.skycraft.combat.Stealth.beginSearch(this, Vec3.atBottomCenterOf(where), player.getUUID());
             }
         }
     }

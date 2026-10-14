@@ -72,18 +72,35 @@ public final class Compass {
             }
             int x = cx + (int) (rel / 90f * half);
             drawMarker(g, x, y + 6, m);
-            if (Math.abs(rel) < 4 && !m.label().isEmpty()) {
+            boolean centred = Math.abs(rel) < 4 && !m.label().isEmpty();
+            if (centred) {
                 // Undiscovered locations (LOCATION) show only their icon without a name
                 if (m.shape() != CompassMarkers.Shape.LOCATION) {
                     String label = m.label() + "  " + (int) dist + "m";
                     g.drawCenteredString(font, label, cx, y + 16, 0xFFE8E2D0);
                 }
+            } else if (m.priority() >= CompassMarkers.TRACKED_PRIORITY) {
+                // the tracked quest always carries its distance, wherever it sits on the bar
+                String d = (int) dist + "m";
+                g.pose().pushPose();
+                g.pose().translate(x, y + 15, 0);
+                g.pose().scale(0.75f, 0.75f, 1f);
+                g.drawString(font, d, -font.width(d) / 2, 0, 0xFFE8C060, true);
+                g.pose().popPose();
             }
         }
     }
 
     private static final net.minecraft.resources.ResourceLocation ICONS =
             new net.minecraft.resources.ResourceLocation(com.skycraft.Skycraft.MODID, "textures/gui/map_icons.png");
+
+    /** A filled diamond of the given radius centred on (x, y). */
+    private static void diamond(GuiGraphics g, int x, int y, int r, int color) {
+        for (int dy = -r; dy <= r; dy++) {
+            int w = r - Math.abs(dy);
+            g.fill(x - w, y + dy, x + w + 1, y + dy + 1, color);
+        }
+    }
 
     private static void drawMarker(GuiGraphics g, int x, int y, CompassMarkers.Marker m) {
         int c = 0xFF000000 | m.color();
@@ -109,7 +126,18 @@ public final class Compass {
                 for (int i = 0; i < 5; i++) g.fill(x - 4 + i, y - 5 + i, x + 5 - i, y - 4 + i, c);
                 g.fill(x - 1, y - 8, x + 2, y - 5, c);
             }
-            case ENEMY -> g.fill(x - 1, y - 1, x + 2, y + 2, 0xFFD03030);
+            case ENEMY -> {
+                // in combat with you: a solid red diamond with a dark rim
+                diamond(g, x, y, 4, 0xFF000000);
+                diamond(g, x, y, 3, 0xFFD03030);
+                diamond(g, x, y, 1, 0xFFFF7060);
+            }
+            case SEARCHING -> {
+                // looking for you: a hollow yellow-orange diamond
+                diamond(g, x, y, 4, 0xFF000000);
+                diamond(g, x, y, 3, c);
+                diamond(g, x, y, 2, 0xFF000000);
+            }
             case DISCOVERED -> {
                 g.fill(x - 3, y - 3, x + 4, y + 4, c);
                 g.fill(x - 2, y - 2, x + 3, y + 3, 0xFF000000);

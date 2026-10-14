@@ -38,9 +38,12 @@ public class NpcModel extends PlayerModel<NpcEntity> {
             this.leftArmPose = main;
             this.rightArmPose = off;
         }
-        // aftermath poses: sitting on the ground uses the seated leg pose, kneeling and tending the crouch
-        if (entity.isHuddled()) this.riding = true;
-        if (entity.isKneeling() || entity.isTending()) this.crouching = true;
+        // aftermath poses: sitting on the ground uses the seated leg pose, kneeling and tending the crouch.
+        // This model instance is shared by every NPC the renderer draws and nothing in vanilla resets `crouching`
+        // for a non-player (LivingEntityRenderer only resets `riding`), so it is assigned for EVERY entity here:
+        // set only when true it leaked from the first kneeling Helgen survivor to every NPC drawn after it.
+        if (entity.isHuddled()) this.riding = true; // LivingEntityRenderer resets `riding` before every render
+        this.crouching = entity.showsCrouchPose();
         super.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTick);
     }
 

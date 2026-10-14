@@ -205,6 +205,20 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         return flag(FLAG_WEEP);
     }
 
+    /**
+     * Whether the client model bends this NPC into the crouch body pose: the aftermath kneeling and tending poses,
+     * or a real sneak. Used by {@code NpcModel} every frame (it assigns, never just sets) and checked headless by
+     * the intro self-test: no ordinary townsperson may ever answer true.
+     */
+    public boolean showsCrouchPose() {
+        return isKneeling() || isTending() || this.isCrouching();
+    }
+
+    /** The aftermath pose bits (kneel, huddle, tend, carry, weep) that are set; 0 for an ordinary townsperson. */
+    public int aftermathPoseFlags() {
+        return this.entityData.get(FLAGS) & (FLAG_KNEEL | FLAG_HUDDLE | FLAG_TEND | FLAG_CARRY | FLAG_WEEP);
+    }
+
     /** Sets or clears one of the aftermath pose flags ({@link #FLAG_KNEEL} ... {@link #FLAG_WEEP}). */
     public void setPoseFlag(int poseFlag, boolean on) {
         setFlag(poseFlag, on);

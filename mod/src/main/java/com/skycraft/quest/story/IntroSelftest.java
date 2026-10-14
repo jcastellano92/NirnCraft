@@ -188,6 +188,56 @@ final class IntroSelftest {
         return out;
     }
 
+    /**
+     * Checks that ride along with the intro (they need no cottage): after the opening nobody in the world may be
+     * bent into the crouch pose except the frozen aftermath survivors of a burnt town (playtest: every NPC in Skyrim
+     * crouched after the Helgen opening). The cause was client-side, a shared model flag
+     * ({@code NpcModel.prepareMobModel}), which a headless server cannot see; what it does check is that the
+     * server never marks an ordinary NPC with a pose (flag or sneak) and that aftermath poses are exactly the
+     * actor's tableau pose. Also the hostile-awareness compass feed ({@link com.skycraft.combat.Threats}).
+     */
+    static List<String> extra(MinecraftServer server, List<String> info) {
+        List<String> problems = new ArrayList<>();
+        ServerLevel level = server.overworld();
+        int npcs = 0, actors = 0;
+        for (net.minecraft.world.entity.Entity e : level.getAllEntities()) {
+            if (!(e instanceof com.skycraft.society.entity.NpcEntity npc)) continue;
+            npcs++;
+            com.skycraft.fire.aftermath.Tableau.Pose pose = com.skycraft.fire.aftermath.Tableau.poseOf(npc);
+            String who = npc.role().id + " at " + npc.blockPosition().toShortString();
+            if (npc.isCrouching()) problems.add("NPC " + who + " is sneaking");
+            if (pose == null) {
+                if (npc.showsCrouchPose()) problems.add("NPC " + who + " shows the crouch pose without being an aftermath actor");
+                if (npc.aftermathPoseFlags() != 0) problems.add("NPC " + who + " has aftermath pose flags " + npc.aftermathPoseFlags() + " but no tableau pose");
+            } else {
+                actors++;
+                // a hauler toggles its carry flag; every other actor holds exactly its pose
+                int allowed = pose.flags | (pose == com.skycraft.fire.aftermath.Tableau.Pose.HAUL ? com.skycraft.society.entity.NpcEntity.FLAG_CARRY : 0);
+                int extra = npc.aftermathPoseFlags() & ~allowed;
+                if (extra != 0) problems.add("aftermath actor " + pose.id + " at " + npc.blockPosition().toShortString() + " carries stray pose flags " + extra);
+            }
+        }
+        info.add("npc poses: " + npcs + " NPCs loaded, " + actors + " aftermath actors, no stray crouch");
+
+        // the pose bits do clear: a survivor released from its tableau stands up (renders upright)
+        BlockPos at = level.getSharedSpawnPos();
+        level.getChunk(at.getX() >> 4, at.getZ() >> 4);
+        com.skycraft.society.entity.NpcEntity npc = com.skycraft.society.Npcs.create(level, at, com.skycraft.society.NpcRole.CITIZEN);
+        if (npc != null) {
+            try {
+                npc.setPoseFlags(com.skycraft.fire.aftermath.Tableau.Pose.KNEEL_WEEP.flags);
+                if (!npc.showsCrouchPose()) problems.add("a kneeling survivor does not show the crouch pose (the aftermath scene would lose it)");
+                npc.setPoseFlags(0);
+                if (npc.showsCrouchPose() || npc.aftermathPoseFlags() != 0) problems.add("clearing the pose flags of a survivor does not stand it up");
+            } finally {
+                npc.discard();
+            }
+        }
+
+        com.skycraft.combat.Threats.selfTest(level, info, problems);
+        return problems;
+    }
+
     /** The state machine for a stand-in player: first join to left. */
     private static List<String> machine(MinecraftServer server, ServerLevel level, StartCottage.Site site, List<String> info) {
         List<String> pr = new ArrayList<>();

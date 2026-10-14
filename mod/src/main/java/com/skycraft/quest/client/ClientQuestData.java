@@ -112,8 +112,14 @@ public final class ClientQuestData {
     /** The tracked quest, or the main quest if nothing is tracked. */
     public static boolean isTracked(Quest q) {
         String t = tracked();
-        if (!t.isEmpty()) return q.id.equals(t);
+        // a tracked id that is finished, abandoned or unknown here no longer counts: fall back to the main quest
+        if (!t.isEmpty() && isActiveQuest(t)) return q.id.equals(t);
         return q.isMain();
+    }
+
+    private static boolean isActiveQuest(String id) {
+        for (Quest q : quests) if (q.isActive() && q.id.equals(id)) return true;
+        return false;
     }
 
     /** Current-objective markers of every active quest in this dimension; the tracked one highlighted. */
@@ -128,8 +134,9 @@ public final class ClientQuestData {
             Objective o = q.current();
             if (o == null || !o.hasPos || !o.dim.equals(dim)) continue;
             boolean t = isTracked(q);
+            // the tracked quest outranks every other marker near the same spot, so it is never merged away
             CompassMarkers.Marker m = new CompassMarkers.Marker(Vec3.atBottomCenterOf(o.pos), CompassMarkers.Shape.QUEST,
-                    t ? TRACKED_COLOR : OTHER_COLOR, q.title.getString(), 0);
+                    t ? TRACKED_COLOR : OTHER_COLOR, q.title.getString(), 0, -1, t ? CompassMarkers.TRACKED_PRIORITY : 0);
             (t ? tracked : others).add(m);
         }
         others.addAll(tracked); // tracked last so it's drawn on top

@@ -120,7 +120,7 @@ public final class Stealth {
             if (mob.getTarget() == player) {
                 if (crouching && !keepsTrack(mob, player, data)) {
                     // lost them: go to where they were last seen, look around, return to the post
-                    beginSearch(mob, SEEN.getOrDefault(mob.getUUID(), player.position()));
+                    beginSearch(mob, SEEN.getOrDefault(mob.getUUID(), player.position()), player.getUUID());
                 } else {
                     if (SEEN.size() > 512) SEEN.clear();
                     if (mob.hasLineOfSight(player)) SEEN.put(mob.getUUID(), player.position());
@@ -145,6 +145,9 @@ public final class Stealth {
     private static final class Search {
         final Mob mob;
         final net.minecraft.world.phys.Vec3 spot;
+        /** The player it lost, or null when unknown (the search then counts for everyone nearby). */
+        @org.jetbrains.annotations.Nullable
+        java.util.UUID player;
         int phase; // 0 go to the last known spot, 1 look around, 2 return to the post
         long until;
         long started;
@@ -166,11 +169,28 @@ public final class Stealth {
      * it saw them, looks around for a few seconds, then returns to its post. A new target interrupts the search.
      */
     public static void beginSearch(Mob mob, net.minecraft.world.phys.Vec3 spot) {
+        beginSearch(mob, spot, null);
+    }
+
+    /** As {@link #beginSearch(Mob, net.minecraft.world.phys.Vec3)}, remembering the player it lost (for the compass). */
+    public static void beginSearch(Mob mob, net.minecraft.world.phys.Vec3 spot, @org.jetbrains.annotations.Nullable java.util.UUID player) {
         if (mob.level().isClientSide) return;
         mob.setTarget(null);
         mob.getNavigation().stop();
-        SEARCHES.put(mob.getUUID(), new Search(mob, spot, mob.level().getGameTime()));
+        Search search = new Search(mob, spot, mob.level().getGameTime());
+        search.player = player;
+        SEARCHES.put(mob.getUUID(), search);
         SEEN.remove(mob.getUUID());
+    }
+
+    /**
+     * Whether this mob lost the player and is looking for them: walking to the last place it saw them or looking
+     * around there (not once it heads back to its post, and never while it has a target again).
+     */
+    public static boolean isSearchingFor(Mob mob, Player player) {
+        Search s = SEARCHES.get(mob.getUUID());
+        if (s == null || s.phase >= 2 || mob.getTarget() != null || !mob.isAlive()) return false;
+        return s.player == null || s.player.equals(player.getUUID());
     }
 
     private static net.minecraft.world.phys.Vec3 postOf(Mob mob) {

@@ -230,6 +230,7 @@ public final class StoryCommands {
     private static int introSelftest(CommandContext<CommandSourceStack> c, boolean rebuild) {
         List<String> info = new ArrayList<>();
         List<String> problems = IntroSelftest.run(c.getSource().getServer(), info, rebuild);
+        problems.addAll(IntroSelftest.extra(c.getSource().getServer(), info));
         for (String s : info) c.getSource().sendSuccess(() -> Component.literal(" " + s), false);
         c.getSource().sendSuccess(() -> Component.literal("Intro selftest: " + problems.size() + " problems"), false);
         for (String p : problems) c.getSource().sendSuccess(() -> Component.literal(" - " + p).withStyle(ChatFormatting.RED), false);
