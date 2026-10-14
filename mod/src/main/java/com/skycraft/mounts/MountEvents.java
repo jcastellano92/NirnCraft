@@ -40,6 +40,8 @@ public final class MountEvents {
         MountStamina.tick(player); // takes and gives back the stamina bar (cheap when not riding)
         if (player.tickCount % 40 == 7) legends(player);
         if (player.tickCount % 100 == 13) StableMasters.tick(player);
+        if (player.tickCount % 200 == 31) MountGrowth.care(player);
+        if (player.tickCount % 60 == 41) MountInspect.spot(player); // Wild Eye: wild mounts on the compass
     }
 
     private static void legends(ServerPlayer player) {
@@ -62,7 +64,12 @@ public final class MountEvents {
             event.setCanceled(true);
             return;
         }
-        if (e instanceof Mob mob && Mounts.kindOf(mob) != null) MountGear.refresh(mob);
+        // a breaking that was cut short (a crash, a chunk unloading) must not leave the animal without its mind
+        if (e instanceof Mob m && m.getPersistentData().getBoolean(WildHorseTaming.NOAI_TAG)) WildHorseTaming.release(m);
+        if (e instanceof Mob mob && Mounts.kindOf(mob) != null) {
+            MountGrowth.syncFromRecord(mob); // the record is the truth (training happens while it is away)
+            MountGear.refresh(mob);
+        }
     }
 
     @SubscribeEvent
@@ -100,6 +107,7 @@ public final class MountEvents {
         if (event.getEntity() instanceof ServerPlayer player) {
             MountStamina.leave(player);
             MountStamina.forget(player);
+            MountInspect.forget(player);
             WildHorseTaming.onLogout(player);
         }
     }

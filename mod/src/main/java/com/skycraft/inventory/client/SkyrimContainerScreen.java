@@ -53,6 +53,9 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
     /** The menu of a mount's saddlebags (com.skycraft.mounts): slots 0 and 1 are its saddle and barding, cargo is weight-limited. */
     private final boolean isBag;
     private final float bagScale;
+    /** A mount's menu shows its stat sheet over the list (key 3). */
+    private boolean showSheet;
+    private int statsHintX = -100;
     private final int containerSlotCount;
 
     // View mode: 0 = Container loot, 1 = Player inventory (Store)
@@ -83,6 +86,8 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
         this.isBag = bag;
         this.bagScale = scale;
         // Sneaking through a screen is com.skycraft.client.SneakKeeper's job (it works for every screen).
+        // an empty-handed sneak-use opens a mount's menu on its stat sheet
+        this.showSheet = bag && com.skycraft.mounts.client.MountClientState.takeOpenOnSheet();
         this.imageWidth = 380;
         this.imageHeight = 220;
     }
@@ -360,15 +365,32 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
         g.drawString(font, actionHint, px + 12, bottomY, actionColor, false);
 
         int allX = px + 12 + font.width(actionHint) + 16;
-        String allHint = viewMode == 0 ? "[R] Take All" : "[R] Store All";
+        String allHint = isBag ? (viewMode == 0 ? "[R] All" : "[R] Store All") : viewMode == 0 ? "[R] Take All" : "[R] Store All";
         g.drawString(font, allHint, allX, bottomY, SkyUi.GOLD, false);
 
         int spaceX = allX + font.width(allHint) + 16;
-        String spaceHint = "[Space] Switch Tab";
+        String spaceHint = isBag ? "[Space] Tab" : "[Space] Switch Tab";
         g.drawString(font, spaceHint, spaceX, bottomY, SkyUi.DIM, false);
 
         int closeX = px + pw - font.width("[Tab/Esc] Close") - 12;
         g.drawString(font, "[Tab/Esc] Close", closeX, bottomY, SkyUi.DIM, false);
+
+        if (isBag) {
+            // a mount's stat sheet (com.skycraft.mounts.client.MountSheetPanel) covers the body of the screen
+            statsHintX = spaceX + font.width(spaceHint) + 12;
+            g.drawString(font, "[3] Stats", statsHintX, bottomY, sheetUp() ? SkyUi.GOLD : SkyUi.DIM, false);
+            if (sheetUp()) com.skycraft.mounts.client.MountSheetPanel.draw(g, font, px + 4, py + 24, pw - 8, ph - 52);
+        }
+    }
+
+    /** The stat sheet of a mount's menu is showing. */
+    private boolean sheetUp() {
+        return isBag && showSheet && viewMode == 0;
+    }
+
+    /** X of the "[3] Stats" hint of a mount's menu (set while rendering). */
+    private int px3Tab() {
+        return statsHintX;
     }
 
     private static void renderPreview(GuiGraphics g, ItemStack stack, int cx, int cy, float scale) {
@@ -449,6 +471,15 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 0 && isBag) {
+            int tx = px3Tab();
+            if (SkyUi.inside((int) mouseX, (int) mouseY, tx, topPos + imageHeight - 24,tx + font.width("[3] Stats"), topPos + imageHeight - 10)) {
+                viewMode = 0;
+                showSheet = true;
+                return true;
+            }
+        }
+        if (button == 0 && sheetUp()) return super.mouseClicked(mouseX, mouseY, button);
         if (button == 0) {
             if (hoveredIndex >= 0) {
                 selectedIndex = hoveredIndex;
@@ -494,6 +525,27 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (isBag && keyCode == GLFW.GLFW_KEY_3) {
+            // a mount's menu: key 3 is its stat sheet (com.skycraft.mounts.client)
+            viewMode = 0;
+            showSheet = true;
+            return true;
+        }
+        if (sheetUp()) {
+            // the sheet covers the list: it takes the keys that would act on the hidden rows
+            switch (keyCode) {
+                case GLFW.GLFW_KEY_F, GLFW.GLFW_KEY_E, GLFW.GLFW_KEY_R, GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_W, GLFW.GLFW_KEY_DOWN, GLFW.GLFW_KEY_S -> {
+                    return true;
+                }
+                case GLFW.GLFW_KEY_SPACE, GLFW.GLFW_KEY_1 -> {
+                    showSheet = false;
+                    return true;
+                }
+                case GLFW.GLFW_KEY_2 -> showSheet = false;
+                default -> {
+                }
+            }
+        }
         switch (keyCode) {
             case GLFW.GLFW_KEY_F, GLFW.GLFW_KEY_E -> {
                 takeOrStoreSelected();

@@ -1,5 +1,6 @@
 package com.skycraft.mounts;
 
+import com.skycraft.core.Currency;
 import com.skycraft.core.Notifier;
 import com.skycraft.core.PlayerData;
 import com.skycraft.core.SkyData;
@@ -45,10 +46,13 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Owned mounts. Every player has one active mount (called with H, {@link #call}) and a stable of others they own
- * (switched at any stablemaster). The record lives in {@code module("mounts")}: {@code active} kind id, {@code uuid}
- * of the entity in the world, {@code stable} (owned kind ids), {@code bags} (saddlebag items, {@link Saddlebags}),
- * {@code barding} (item id worn by the active mount), {@code cooldown} (game time a fallen mount may return).
+ * Owned mounts. Every player has one active mount (called with H, {@link #call}); getting a new regular mount (buying,
+ * breaking in) retires the old one ({@link #retire}), and only the legends (Shadowmere, Arvak: quest rewards) stay in
+ * the stable beside it, to be brought out at any stablemaster. The record lives in {@code module("mounts")}:
+ * {@code active} kind id, {@code uuid} of the entity in the world, {@code stable} (owned kind ids), {@code bags}
+ * (saddlebag items, {@link Saddlebags}), {@code barding} (item id worn by the active mount), {@code cooldown} (game
+ * time a fallen mount may return), {@code mstats} (the individual stats of each owned kind, {@link MountGrowth}),
+ * {@code origin} (bought, wild or legend).
  *
  * <p>Mount entities carry {@link #KIND} and {@link #OWNER} ({@code "player:<uuid>"}, the crime module's entity-owner
  * contract). A stale copy of an owner's mount (the old one, left in an unloaded chunk before it was called or
@@ -232,6 +236,7 @@ public final class Mounts {
         // the tack the player left this kind of mount in (a bought one comes in a plain saddle); the legends wear their own
         MountGear.setSaddle(mob, owner != null && !MountGear.fixedTack(kind) ? MountGear.remembered(owner, kind) : SaddleType.PLAIN);
         if (owner != null) setOwner(mob, owner);
+        if (owner != null) MountGrowth.bind(owner, mob, kind); // its individual stats: the record's, else newly rolled
         if (kind == MountKind.SHADOWMERE || kind == MountKind.ARVAK) mob.setCustomName(kind.displayName());
         if (kind == MountKind.ARVAK) mob.setInvulnerable(false);
         return mob;
@@ -285,8 +290,28 @@ public final class Mounts {
      */
     @Nullable
     public static Mob grant(ServerPlayer player, MountKind kind, @Nullable BlockPos at) {
+        return grant(player, kind, at, null, true);
+    }
+
+    /**
+     * {@link #grant(ServerPlayer, MountKind, BlockPos)} with the individual that was bought ({@code stats}, null
+     * rolls a new one). One active mount: the regular mount it replaces is retired ({@link #retire}); {@code pay}
+     * false when the caller has already netted the old one's trade-in value against the price.
+     */
+    @Nullable
+    public static Mob grant(ServerPlayer player, MountKind kind, @Nullable BlockPos at, @Nullable MountStats stats, boolean pay) {
         CompoundTag tag = data(player);
+        Carried carried = kind.unique() ? Carried.NONE : retire(player, pay, !pay);
         addToStable(tag, kind);
+        setOrigin(tag, kind, kind.unique() ? "legend" : "bought");
+        if (stats != null) MountGrowth.record(player, kind, stats);
+        // the saddle of the old mount goes on the new one when the breed takes it (else it came back to the bags)
+        if (carried.saddle != null && !MountGear.fixedTack(kind)) {
+            if (MountGear.accepts(kind, carried.saddle)) MountGear.remember(player, kind, carried.saddle);
+            else MountGear.give(player, carried.saddle.stack());
+        } else if (carried.saddle != null) {
+            MountGear.give(player, carried.saddle.stack());
+        }
         dismissActive(player);
         Mob mob = spawnActive(player, kind, at != null ? at : player.blockPosition().relative(player.getDirection().getOpposite(), 2));
         if (kind == MountKind.BRETON_DESTRIER && mob instanceof Horse h) {
@@ -294,15 +319,144 @@ public final class Mounts {
             ItemStack barding = new ItemStack(MountItems.BRETON_BARDING.get());
             MountGear.setBarding(h, barding);
             tag.putString("barding", key(barding));
+            if (!carried.barding.isEmpty()) MountGear.give(player, carried.barding);
+        } else if (!carried.barding.isEmpty()) {
+            if (mob != null && MountGear.wearsBarding(mob, kind, carried.barding)) {
+                MountGear.setBarding(mob, carried.barding);
+                tag.putString("barding", key(carried.barding));
+            } else {
+                MountGear.give(player, carried.barding);
+            }
         }
         SkyData.get(player).addStat("mounts_owned", 1);
         SkyData.get(player).markDirty();
         return mob;
     }
 
+    // ------------------------------------------------------------------ one active mount: retiring and selling
+
+    /** Gear a replaced mount wore (it moves to the new one when that takes it, else to the player's bags). */
+    public record Carried(@Nullable SaddleType saddle, ItemStack barding) {
+        static final Carried NONE = new Carried(null, ItemStack.EMPTY);
+    }
+
+    /** How the player came by a kind: {@code bought}, {@code wild} (tamed) or {@code legend}. */
+    private static void setOrigin(CompoundTag tag, MountKind kind, String origin) {
+        CompoundTag all = tag.getCompound("origin");
+        all.putString(kind.id, origin);
+        tag.put("origin", all);
+    }
+
+    /**
+     * Retires every regular (non-legend) mount the player owns because a new one is taking its place, and returns the
+     * tack it wore. Nothing is deleted: saddlebag items go to the player's inventory, saddle and barding come back
+     * through {@link Carried}, a mount bought from a stable goes back to the stable (its value is paid out when
+     * {@code pay}), a mount tamed from the wild is let go where it stands.
+     */
+    public static Carried retire(ServerPlayer player, boolean pay, boolean traded) {
+        CompoundTag tag = data(player);
+        Saddlebags.emptyToPlayer(player);
+        MountKind active = MountKind.byId(tag.getString("active"));
+        SaddleType saddle = null;
+        ItemStack barding = ItemStack.EMPTY;
+        long payout = 0;
+        for (MountKind kind : stable(player)) {
+            if (kind.unique()) continue;
+            boolean isActive = kind == active;
+            Entity e = isActive ? activeEntity(player) : null;
+            SaddleType worn = e instanceof Mob m ? MountGear.saddle(m) : MountGear.remembered(player, kind);
+            if (isActive) {
+                saddle = worn;
+                if (e instanceof Mob m) {
+                    barding = MountGear.barding(m);
+                    if (!barding.isEmpty()) MountGear.setBarding(m, ItemStack.EMPTY);
+                } else if (!tag.getString("barding").isEmpty()) {
+                    var item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(tag.getString("barding")));
+                    if (item != null && item != Items.AIR) barding = new ItemStack(item);
+                }
+            } else if (worn != null) {
+                MountGear.give(player, worn.stack()); // an old stabled mount's saddle: yours
+            }
+            MountStats stats = MountGrowth.known(player, kind);
+            String origin = tag.getCompound("origin").getString(kind.id);
+            if (stats != null && (traded || !"wild".equals(origin))) payout += MountStock.tradeIn(kind, stats);
+            if (e instanceof Mob m) {
+                e.ejectPassengers();
+                if ("wild".equals(origin) && !traded) release(m); else e.discard();
+            }
+        }
+        // forget the retired kinds
+        ListTag keep = new ListTag();
+        CompoundTag saddles = tag.getCompound("saddles");
+        for (Tag t : tag.getList("stable", Tag.TAG_STRING)) {
+            MountKind k = MountKind.byId(t.getAsString());
+            if (k == null) continue;
+            if (k.unique()) {
+                keep.add(t);
+            } else {
+                MountGrowth.forget(player, k);
+                saddles.remove(k.id);
+                tag.getCompound("origin").remove(k.id);
+            }
+        }
+        tag.put("stable", keep);
+        tag.put("saddles", saddles);
+        if (active != null && !active.unique()) {
+            tag.remove("active");
+            tag.remove("uuid");
+            tag.remove("barding");
+            tag.remove(MountStamina.SAVED);
+        }
+        if (pay && payout > 0) {
+            Currency.give(player, payout);
+        }
+        SkyData.get(player).markDirty();
+        return new Carried(saddle, barding);
+    }
+
+    /** What a stable would pay for the player's active regular mount (0 when none, or a legend). */
+    public static int tradeInValue(Player player) {
+        MountKind kind = active(player);
+        MountStats s = kind == null ? null : MountGrowth.known(player, kind);
+        return kind == null || s == null ? 0 : MountStock.tradeIn(kind, s);
+    }
+
+    /**
+     * Sells the active regular mount back to a stable: its items and tack go to the player first, then the animal
+     * and the gold changes hands. Returns the gold paid, or -1 when there is nothing to sell (no mount, or a legend).
+     */
+    public static int sell(ServerPlayer player) {
+        MountKind kind = active(player);
+        if (kind == null || kind.unique()) return -1;
+        int value = tradeInValue(player);
+        Carried carried = retire(player, false, true);
+        if (carried.saddle != null) MountGear.give(player, carried.saddle.stack());
+        if (!carried.barding.isEmpty()) MountGear.give(player, carried.barding);
+        if (value > 0) Currency.give(player, value);
+        return value;
+    }
+
+    /** Lets a tamed mount go wild again: no owner, no tack, free to wander. */
+    static void release(Mob mob) {
+        mob.ejectPassengers();
+        MountGear.clearSaddle(mob);
+        CompoundTag t = mob.getPersistentData();
+        t.remove(OWNER);
+        t.remove(KIND);
+        t.remove(Livestock.PLAYER_OWNED);
+        if (mob instanceof AbstractHorse h) {
+            h.setOwnerUUID(null);
+            h.setTamed(false);
+        }
+        mob.setCustomName(null);
+        mob.getNavigation().stop();
+    }
+
     /** Removes the player's active mount from the world (it goes back to the stable); its barding comes back to you. */
     public static void dismissActive(ServerPlayer player) {
         CompoundTag tag = data(player);
+        MountKind leaving = MountKind.byId(tag.getString("active"));
+        if (leaving != null) MountGrowth.leftAtStable(player, leaving);
         Entity e = activeEntity(player);
         ItemStack refund = ItemStack.EMPTY;
         if (e != null) {
@@ -345,8 +499,14 @@ public final class Mounts {
     /** A tamed wild mount joins the stable as the active one (the entity is already in the world). */
     public static void adopt(ServerPlayer player, Mob mob, MountKind kind) {
         CompoundTag tag = data(player);
-        if (activeEntity(player) != mob) dismissActive(player);
+        boolean already = activeEntity(player) == mob;
+        // its individual stats: the ones it was born with (stored when it was fed, else rolled from its UUID)
+        MountStats stats = MountStats.of(mob, kind);
+        if (!already) stats.addTrust(10f); // it let itself be broken in: a start
+        Carried carried = already || kind.unique() ? Carried.NONE : retire(player, true, false);
+        if (!already) dismissActive(player);
         addToStable(tag, kind);
+        setOrigin(tag, kind, already ? tag.getCompound("origin").getString(kind.id) : "wild");
         mob.getPersistentData().putString(KIND, kind.id);
         mob.setPersistenceRequired();
         setOwner(mob, player);
@@ -355,10 +515,28 @@ public final class Mounts {
         tag.remove("barding");
         tag.remove("cooldown");
         tag.remove(MountStamina.SAVED);
-        // the saddle it was broken in with (or the one a vanilla taming left it in) is its saddle from now on
+        if (!already) MountGrowth.record(player, kind, stats);
+        MountGrowth.bind(player, mob, kind);
+        // the saddle it was broken in with (or the one a vanilla taming left it in) is its saddle from now on, unless the
+        // old mount's saddle fits it: that one moves over and the taming saddle goes back to the bags
         SaddleType saddle = MountGear.saddle(mob);
+        if (carried.saddle != null && carried.saddle != saddle && !MountGear.fixedTack(kind) && MountGear.accepts(kind, carried.saddle)) {
+            if (saddle != null) MountGear.give(player, saddle.stack());
+            saddle = carried.saddle;
+        } else if (carried.saddle != null) {
+            MountGear.give(player, carried.saddle.stack());
+        }
         MountGear.setSaddle(mob, saddle);
         MountGear.remember(player, kind, saddle);
+        if (!carried.barding.isEmpty()) {
+            if (MountGear.wearsBarding(mob, kind, carried.barding)) {
+                MountGear.setBarding(mob, carried.barding);
+                tag.putString("barding", key(carried.barding));
+            } else {
+                MountGear.give(player, carried.barding);
+            }
+        }
+        Saddlebags.fit(player, MountGear.bagCapacity(mob, kind));
         SkyData.get(player).addStat("mounts_owned", 1);
         SkyData.get(player).markDirty();
     }
@@ -445,6 +623,8 @@ public final class Mounts {
         if (owner == null) {
             // wild: a saddle in the hand, from a sneak, starts the taming (only a wild mount is saddled this way)
             MountKind wild = MountTaming.wildKind(mount);
+            // feed from the hand (not sneaking): a wild one gets used to a hand, and is easier to break in
+            if (wild != null && saddle == null && !player.isSecondaryUseActive() && MountGrowth.feed(player, mount, wild, held, false)) return true;
             if (wild != null && saddle != null) {
                 if (!MountGear.accepts(wild, saddle)) {
                     MountGear.say(player, MountGear.Result.WRONG_BREED);
@@ -475,9 +655,11 @@ public final class Mounts {
             return true;
         }
         if (player.isSecondaryUseActive()) {
-            if (kind != null) Saddlebags.open(player, mount, kind);
+            // sneak-use: the mount menu; with an empty hand it opens on the stat sheet
+            if (kind != null) Saddlebags.open(player, mount, kind, held.isEmpty());
             return kind != null;
         }
+        if (kind != null && saddle == null && MountGrowth.feed(player, (Mob) mount, kind, held, true)) return true;
         // tack from the hand: only a mount that wears no saddle takes one this way (a saddled one is changed in its menu),
         // and barding goes straight on
         if (kind != null && saddle != null) {

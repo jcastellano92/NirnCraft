@@ -1,19 +1,20 @@
 # Mounts: saddles, tack, saddlebags and stamina
 
 Code: `mod/src/main/java/com/skycraft/mounts/` (`SaddleType`, `MountGear`, `Saddlebags`, `SaddlebagMenu`, `MountStamina`,
-`Mounts`, `MountKind`), taming in `fauna/WildHorseTaming`, selftest `MountsSelfTest` (`/skycraft-mounts selftest`, run by
-`qa.ps1 -Server`). Kinds, breeds and their base data (`MountKind`) are unchanged; this layer sits on top.
+`Mounts`, `MountKind`; individuals: `MountProfile`, `MountStats`, `MountGrowth`, `MountInspect`, `MountView`, `MountStock`,
+`StableUi`, `StablePackets`; client `mounts/client`), breaking in `fauna/WildHorseTaming` + `fauna/TameBalance`, the stable
+dialogue `fauna/Stables`, selftest `MountsSelfTest` (`/skycraft-mounts selftest`, run by `qa.ps1 -Server`).
 
 ## The loop
 1. **Get a saddle** (an item): stablemasters sell them, or craft them (a pack saddle is a saddle, leather and a chest; a war
    saddle steel and leather; an Imperial saddle gold, red wool and leather).
 2. **Hold it**: Skyrim inventory, Equip (right hand), like a weapon.
-3. **Sneak up to a wild mount and use it.** Not sneaking, sprinting, or having hurt it in the last 5 s spooks it. Only wild
-   mounts are saddled this way; one saddle is consumed. The breed must take that saddle type (matrix below). Then the
-   existing bucking minigame; a failed or interrupted breaking returns the saddle. Success: it wears that saddle.
+3. **Sneak up to a wild mount and use it.** Not sneaking (unless you have fed it), sprinting, or having hurt it in the last
+   5 s spooks it. Only wild mounts are saddled this way; one saddle is consumed. The breed must take that saddle type
+   (matrix below). Then the balance minigame (below); thrown or interrupted returns the saddle. Success: it wears that saddle.
 4. **Your own mount**: use = ride; **sneak-use = the mount menu**, the Skyrim container screen of chests and corpses (no
    vanilla horse screen exists: it is closed on the server and cancelled on the client; the inventory key while mounted opens
-   the normal Skyrim inventory).
+   the normal Skyrim inventory). Empty-handed it opens on the **stat sheet** (key 3 shows it from the bags too).
    - Slot entries "Worn: saddle" and "Worn: barding": Take = Unequip. From My Items, Store = Equip, and it swaps with what is
      worn (the old piece goes back to your bags). Take All and Store All never touch gear.
    - Everything else is cargo, limited by **weight** (kg, the `ItemWeights` unit), not by slots. A smaller or removed saddle
@@ -128,3 +129,86 @@ Stay: it does not follow into a fight and only takes foes within 6 blocks. (Snea
 * Revive by item (a healing potion or food speeds the rise), and a rise timer shown on the mount's health bar.
 * Keep-away does not avoid doors; camels use a brain, so their flight is only partly effective.
 * A downed mount in a dimension the owner left rises only when loaded again (a fresh mount is spawned on call).
+for a mount brought back from afar). Gallop (sprint key) drains 1 point per tick (a runner has about 14 s on a 100 bar, every
+mount 30 s or more, see the table), a jump 6% of the max, resting regains the bar in 12 s standing or 24 s moving (a trusting
+mount sooner); an exhausted mount cannot gallop until a quarter is back and you cannot sprint either. The vitals module
+neither drains nor restores the bar while swapped. The only mount HUD left is a thin health bar when the mount is hurt.
+
+## Individuals: stats, grades, growth, trust (`MountStats`, `MountGrowth`)
+Every mount of every kind is an individual: **Speed, Stamina, Health, Jump, Carry** and **Temperament** are rolled once
+(bell-shaped, from the wild animal's UUID, or the stable's key, week and slot; the legends are fixed Fine to Superb), shown as
+a grade (Poor, Fair, Good, Fine, Superb; a Superb is about 1 in 22 per stat). Variance at the extremes: speed +-6%, stamina,
+health, carry +-20%, jump +-10%. **Trust** (0..100) is earned and moves speed (-3%..+3%) and wind recovery (-15%..+15%).
+- **Growth** (cap level 20): mount XP per second of riding is distance (walk 1 per 48 blocks, gallop 1 per 16), jumps (1.5),
+  hauling a load of 20%+ of its bags (0.1/s), blows struck and hits taken. Each level is one growth point in the stat that
+  use trained most (gallop: Speed and Stamina, jumps: Jump, hauling: Carry, taking hits: Health), up to a soft cap of
+  3 + grade + what the kind trains well (table). Point worth: speed +0.4%, jump +1%, the others +1.5%. A level-up shows a
+  message, a sound and particles.
+- **Trust** rises with feeding (apple, carrot, sugar +4, hay +3, wheat +2, golden +8; one feeding per 30 s; use the item on
+  it, a wild one takes +50% and will let you walk up at 50), a day left in a stable (+6), riding (a point in 6 min); it falls
+  with a swing at your own mount (-3), and while it is left hurt (under 35%) and far from you (-0.5 per 10 s).
+- Applied through attribute modifiers (speed, health, jump) and the stamina, carry and bag multipliers. The player's record
+  (`module("mounts").mstats.<kind>`) is the truth; the entity carries a copy (`skycraft_mstats`).
+
+## Inspecting (`MountInspect`, `MountView`; the server decides what the viewer may know)
+- **Target card**: look at any horse, camel, guar or beast within 6 blocks (16 with Wild Eye): top-right HUD card with name or
+  breed, wild or owner, level, the six grades, saddle and armour, health. The client asks when the target changes and every
+  2 s (the server rate-limits to one per 5 ticks and validates distance and kind).
+- **Sheet**: sneak-use your own mount empty-handed, or key 3 in the mount menu: level and XP bar, trust, grades and numbers
+  with growth pips against their cap, carry and bags, saddle, barding, health.
+- **Perks** (Riding): *Horse Sense* grades and numbers (without it only words: swift, sturdy, placid; no numbers);
+  *Wild Eye* tells what a wild mount is, sizes it up at range and marks wild mounts within 48 blocks on the compass (without it:
+  "a wild animal"); a stranger's grades are a
+  two-grade estimate below Riding 40.
+
+## The stable (`StableUi`, `MountStock`, `StableScreen`)
+The stablemaster's "Show me your horses" opens one screen: **Horses** lists this week's stock (a stable's own quality and the
+week's luck move the bell; each stable keeps its own, per region flavour from `MountKind.forSale`) beside **your own mount**,
+read from its record wherever it is parked: grades, numbers (Horse Sense), arrows up and down, level, trust, whether your
+saddle and barding fit, price, and what yours is worth. Price = list price x (0.75 + 0.45 x quality + 5% a level), clamped
+0.5..2.6; trade-in is 60% of the same formula for yours. Buying and selling ask for a second click and are recomputed on the
+server. **Train** pays a stable hand one growth point in a stat (fee 50 + 40/point + 20/level + grade; Trust +10), at most
+twice an in-game week and never past the stat's soft cap.
+
+## One active mount
+Buying or breaking in a mount retires the previous regular mount: its saddlebag items go to your inventory, its saddle and
+barding move to the new mount if the breed takes them (else to your bags), and the animal is released if you tamed it
+(it wanders free) or returned to the stable if bought (a bought one pays its trade-in when you tame instead). Selling does
+the same and pays by grade and level. Never deleted. Legends (Shadowmere, Arvak) are quest rewards: they stay yours and are
+brought out at any stablemaster instead; getting one does not retire your horse, it steps aside to the stable.
+
+## Breaking in (`WildHorseTaming`, `TameBalance`)
+A bar at the bottom centre with a safe zone and a marker. The bucking pushes the marker with growing strength and speed;
+hold A / D to push back (the camera rolls with it); progress fills in the zone and drains outside; touching an edge too long
+throws you. 20 to 35 s by the kind's difficulty (shorter for a trusting, placid animal); the AI is off meanwhile and the
+vanilla saddle goes on only at the end. The server simulates it and the client sends only steer. *Steady Seat*: slower
+growth, wider zone, longer grace. Other perks: *Pack Master* +10% carry and bags a rank, *Endurance* -12% gallop burn a
+rank, *Trick Rider* +6% mounted blows and -15% jump cost a rank.
+
+## Per kind (average animal; individuals vary by the grades above)
+| Kind | Gallop | Speed (m/s) | Health | Jump (blocks) | Carry | Bags (plain) | Trains well (cap +) |
+|---|---|---|---|---|---|---|---|
+| Whiterun bay | 35 s | 12.0 | 26 | 3.1 | 80 kg | 10 kg | speed 1, jump 1 |
+| Solitude grey | 36 s | 12.9 | 28 | 4.0 | 80 | 10 | speed 2, jump 1 |
+| Windhelm pinto | 40 s | 11.2 | 32 | 2.7 | 60 | 20 | health 2, stamina 1, carry 1 |
+| Riften chestnut | 34 s | 14.2 | 24 | 4.4 | 80 | 10 | speed 2, jump 1 |
+| Markarth black | 42 s | 11.6 | 36 | 5.4 | 60 | 20 | health 2, stamina/jump/carry 1 |
+| Shadowmere | 50 s | 15.5 | 50 | 5.9 | 120 | 20 | all 2 (fixed Fine+) |
+| Cyrodilic bay | 36 s | 12.9 | 30 | 3.5 | 80 | 20 | all 1 |
+| Colovian paint | 38 s | 13.3 | 28 | 4.0 | 140 | 10 | carry 2, stamina/health 1 |
+| Nibenese grey | 32 s | 14.2 | 26 | 4.0 | 80 | 10 | speed 2, jump 2 |
+| Breton destrier | 30 s | 11.2 | 44 | 3.1 | 110 | 20 | health 2, carry 1 |
+| Alik'r steed | 50 s | 15.0 | 24 | 4.9 | 70 | 10 | stamina 2, speed/jump 1 |
+| Auridon white | 35 s | 14.6 | 30 | 5.4 | 80 | 10 | speed 2, jump 2 |
+| Arvak | 70 s | 15.0 | 40 | 5.4 | 120 | 10 | all 2 (fixed Fine+) |
+| Camel | 65 s | 11.2 | 40 | 1.7 | 200 | 30 | stamina 2, carry 2, health 1 |
+| Pack guar | 50 s | 9.9 | 45 | 1.4 | 260 | 30 | health 2, carry 2, stamina 1 |
+| Senche-tiger | 32 s | 13.3 | 60 | 5.4 | 120 | 20 | speed 2, health/jump 1, carry -1 |
+| Giant wolf | 45 s | 14.2 | 50 | 4.9 | 80 | 10 | stamina 2, speed/jump 1 |
+| Indrik | 40 s | 14.6 | 55 | 6.5 | 90 | 10 | speed 2, jump 2 |
+| Woolly mammoth | 50 s | 9.5 | 180 | 1.7 | 320 | 30 | health 3, carry 3, stamina 1, speed -1 |
+| Akaviri tiger | 35 s | 13.8 | 70 | 5.4 | 110 | 20 | speed 2, health/jump 1, carry -1 |
+| Tamed grazer | 45 s | 12.5 | 45 | 3.5 | 150 | 20 | stamina/health/carry 1 |
+
+Stat names follow the kind on cards (camel: Pace, Endurance, Burden; guar: Trot, Hide; cats: Sprint, Pounce, Haul; indrik:
+Grace, Bound; mammoth: Stride, Heave; see `mounts.skycraft.stat.*`). Overweight slowdown is not implemented here.

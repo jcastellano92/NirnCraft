@@ -39,15 +39,24 @@ public final class Saddlebags {
     private Saddlebags() {}
 
     public static void open(ServerPlayer player, Entity mount, MountKind kind) {
+        open(player, mount, kind, false);
+    }
+
+    /** Opens the mount menu; {@code sheet} makes the screen start on the stat sheet (an empty-handed sneak-use). */
+    public static void open(ServerPlayer player, Entity mount, MountKind kind, boolean sheet) {
         if (!(mount instanceof Mob mob) || !mob.isAlive()) return;
         if (!Mounts.isActive(player, mount)) {
             Notifier.message(player, Component.translatable("mounts.skycraft.bags.not_active"));
             return;
         }
         Bag bag = new Bag(player, mob, kind);
-        // the title carries the beast's bag scale: the screen sums the cargo it lists against the saddle in slot 0
+        // the stat sheet reaches the screen ahead of the menu (the same connection, so in order)
+        MountInspect.sendSheet(player, mob, kind, sheet);
+        // the title carries the beast's bag scale (rows, its build and its owner's Pack Master): the screen sums the
+        // cargo it lists against the saddle in slot 0
+        float scale = kind.bagRows / 2f * MountGear.capacityMult(mob, kind);
         player.openMenu(new SimpleMenuProvider((id, inv, p) -> new SaddlebagMenu(id, inv, bag),
-                Component.translatable("mounts.skycraft.bags.title", kind.displayName(), String.valueOf(kind.bagRows / 2f))));
+                Component.translatable("mounts.skycraft.bags.title", kind.displayName(), String.valueOf(scale))));
         mount.playSound(net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_LEATHER, 0.8f, 1.0f);
     }
 
@@ -97,6 +106,19 @@ public final class Saddlebags {
         if (spilled) Notifier.message(player, Component.translatable("mounts.skycraft.bags.spilled"));
     }
 
+    /**
+     * Hands everything in the bags back to the player's own bags (the floor when they are full): a mount that is
+     * replaced, sold or released takes nothing with it. Never loses an item.
+     */
+    public static void emptyToPlayer(ServerPlayer player) {
+        CompoundTag tag = Mounts.data(player);
+        ListTag list = tag.getList(BAGS, Tag.TAG_COMPOUND);
+        if (list.isEmpty()) return;
+        tag.remove(BAGS);
+        for (int i = 0; i < list.size(); i++) MountGear.give(player, ItemStack.of(list.getCompound(i)));
+        SkyData.get(player).markDirty();
+    }
+
     /** Weight (kg) of everything in the bags of the player's record. */
     public static float load(Player player) {
         float sum = 0f;
@@ -123,7 +145,7 @@ public final class Saddlebags {
         }
 
         float capacity() {
-            return MountGear.bagKg(kind, MountGear.saddle(mount));
+            return MountGear.bagCapacity(mount, kind);
         }
 
         /** Weight of the cargo stacks. */

@@ -53,10 +53,12 @@ public final class HudStack {
     public static final int BL_LEFT_SPELL = 10;  // left spell, "unarmed" hint, vampire lord's ability
     public static final int BL_STONE = 20;       // active standing stone banner
     public static final int BC_FORM_BAR = 0;     // beast form countdown over the health bar
+    public static final int BC_TAME = 5;         // the horse-breaking balance bar
     public static final int BC_MOUNT = 10;
     public static final int BC_SURVIVAL = 20;
     public static final int TR_PERKS = 0;
     public static final int TR_CURSE_PERKS = 10;
+    public static final int TR_TARGET = 20;      // the target card of a mount you look at
 
     /** Pixels between two stacked slots. */
     public static final int GAP = 2;

@@ -3,9 +3,11 @@ package com.skycraft.fauna;
 import com.skycraft.core.Notifier;
 import com.skycraft.core.Skill;
 import com.skycraft.mounts.MountGear;
+import com.skycraft.mounts.MountGrowth;
 import com.skycraft.mounts.MountKind;
-import com.skycraft.mounts.SaddleType;
+import com.skycraft.mounts.MountStats;
 import com.skycraft.mounts.MountTaming;
+import com.skycraft.mounts.SaddleType;
 import com.skycraft.network.SkyNetwork;
 import com.skycraft.skills.Progression;
 import net.minecraft.core.particles.ParticleTypes;
@@ -16,29 +18,41 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Wild mount taming minigame (horses, camels, guar, senche-tigers, indriks, mammoths, realm grazers; see
- * {@link MountTaming#wildKind}):
- * 1. Player sneaks up with a saddle in hand (any {@link SaddleType} the breed accepts); the beast spooks and bolts if
- *    they are not sneaking, are sprinting, or have hurt it in the last five seconds. Only wild mounts: an owned mount
- *    is managed in its menu.
- * 2. Player uses the saddle on it -> saddle thrown on and the player mounts.
- * 3. It begins bucking: balance minigame starts. Player must counter-steer (press A/D or steer keys)
- *    sent via packet. Higher difficulty makes balance windows shorter and penalties harsher.
- * 4. Success tames it into the player's mount ({@link MountTaming#complete}, wearing that saddle) and awards HUNTING and
- *    ATHLETICS XP. Failure throws the rider (a predator turns on them) and the saddle comes back to the rider's bags;
- *    so does a saddle whose taming is interrupted (logout, the beast dying, getting off).
+ * Breaking in a wild mount (horses, camels, guar, senche-tigers, indriks, mammoths, realm grazers; see
+ * {@link MountTaming#wildKind}) is a balance minigame:
+ * <ol>
+ *     <li>Sneak up with a saddle in hand (any {@link SaddleType} the breed accepts). A mount that is not calm spooks and
+ *     bolts if you are not sneaking (one that has been fed and trusts you tolerates a walk), are sprinting, or have
+ *     hurt it in the last five seconds. Only wild mounts: an owned mount is managed in its menu.</li>
+ *     <li>Use the saddle: it is thrown on, you mount, and the animal bucks. A marker on the bar at the bottom of the
+ *     screen is pushed left and right by the bucking, which grows in strength and speed the longer you hold on; you
+ *     counter-steer with A and D to keep it in the safe zone while the camera sways with the animal.
+ *     {@link TameBalance} is the physics; this class runs it on the server a tick at a time (the client sends only its
+ *     steer input and draws the state it is sent).</li>
+ *     <li>Keep the marker in the zone long enough (20 to 35 seconds by the kind's difficulty, shorter for a trusting
+ *     animal) and it is yours ({@link MountTaming#complete}, wearing that saddle; HUNTING and ATHLETICS XP). Touch the
+ *     edge for too long and you are thrown: the saddle comes back to your bags, as it does when the breaking is
+ *     interrupted (logout, death, the beast dying, getting off).</li>
+ * </ol>
+ * While it is being broken the animal's AI is off ({@link #NOAI_TAG} guards against it staying off) so vanilla's own
+ * rearing and rider-throwing, its temper and its steering cannot interfere, and the vanilla saddle is only put on at
+ * the end (a saddled horse would be steered by its rider's own keys).
  */
 public final class WildHorseTaming {
+    /** Persistent-data flag: the animal's AI was switched off for a breaking (cleared when it ends, or when it loads). */
+    public static final String NOAI_TAG = "skycraft_breaking";
+
     private static final Map<UUID, TamingSession> ACTIVE_SESSIONS = new ConcurrentHashMap<>();
+    /** Steer packets a player may send in a second. */
+    private static final int MAX_INPUTS = 30;
 
     public static class TamingSession {
         public final UUID playerId;
@@ -47,34 +61,39 @@ public final class WildHorseTaming {
         public final int difficulty;
         /** The saddle thrown on (its item was used up; it is returned when the taming fails). */
         public final SaddleType saddle;
+        public final TameBalance balance;
         public boolean refunded;
-        public int progress = 0; // 0 to 100
-        public int required = 100;
-        public int balanceDirection = 0; // -1 (left), 1 (right)
-        public int ticksRemainingInPrompt = 0;
-        public int sessionTicks = 0;
+        public int steer;
+        long windowStart;
+        int inputs;
+        final float yaw;
+        int sessionTicks;
 
-        public TamingSession(UUID playerId, int horseId, MountKind kind, SaddleType saddle) {
+        public TamingSession(UUID playerId, int horseId, MountKind kind, SaddleType saddle, TameBalance balance, float yaw) {
             this.playerId = playerId;
             this.horseId = horseId;
             this.kind = kind;
             this.saddle = saddle;
             this.difficulty = Math.max(1, Math.min(5, kind.tameDifficulty));
+            this.balance = balance;
+            this.yaw = yaw;
         }
     }
 
     private WildHorseTaming() {}
 
-    /** Starts taming a wild creature (true when the saddle use was handled). */
+    /** Starts breaking in a wild creature (true when the saddle use was handled). */
     public static boolean tryStart(ServerPlayer player, Mob mob, ItemStack stack, MountKind kind, SaddleType saddle) {
         if (!mob.isAlive() || SaddleType.of(stack) != saddle || kind.tameDifficulty <= 0) return false;
         if (!MountGear.accepts(kind, saddle)) return false;
         if (ACTIVE_SESSIONS.containsKey(player.getUUID())) return true;
 
-        // Check if undetected / sneaking: a mount that is not calm spooks and runs
+        MountStats stats = MountStats.of(mob, kind);
+        // a mount that is not calm spooks and runs; one that has been fed and trusts you lets you walk up
         boolean hurt = mob.hurtTime > 0 || mob.getLastHurtByMob() != null && mob.tickCount - mob.getLastHurtByMobTimestamp() < 100;
-        if (!player.isCrouching() || player.isSprinting() || hurt) {
-            Notifier.message(player, Component.translatable(player.isCrouching() ? "fauna.skycraft.tame.spooked" : "fauna.skycraft.tame.must_sneak"));
+        boolean trusting = stats.trust >= 50f;
+        if (player.isSprinting() || hurt || !player.isCrouching() && !trusting) {
+            Notifier.message(player, Component.translatable(player.isCrouching() || trusting ? "fauna.skycraft.tame.spooked" : "fauna.skycraft.tame.must_sneak"));
             mob.setDeltaMovement(mob.getDeltaMovement().add(
                     (mob.getX() - player.getX()) * 0.4,
                     0.2,
@@ -89,63 +108,47 @@ public final class WildHorseTaming {
             stack.shrink(1);
         }
 
-        MountGear.setSaddle(mob, saddle);
+        // the bucking: harder for a hard kind and a wary animal, gentler for a rider with a Steady Seat
+        float calm = Math.max(0f, Math.min(1f, stats.trust / 100f * 0.7f + (stats.q[5] + 100) / 200f * 0.3f));
+        int seat = MountGrowth.rank(player, "steady_seat");
+        TameBalance balance = new TameBalance(kind.tameDifficulty, calm, seat, mob.getUUID().getLeastSignificantBits() ^ player.getUUID().getMostSignificantBits());
 
-        // Mount player
         mob.setTarget(null);
+        mob.getNavigation().stop();
+        mob.setNoAi(true);
+        mob.getPersistentData().putBoolean(NOAI_TAG, true);
         player.startRiding(mob, true);
 
-        TamingSession session = new TamingSession(player.getUUID(), mob.getId(), kind, saddle);
+        TamingSession session = new TamingSession(player.getUUID(), mob.getId(), kind, saddle, balance, mob.getYRot());
         ACTIVE_SESSIONS.put(player.getUUID(), session);
 
         Notifier.message(player, Component.translatable("fauna.skycraft.tame.started", kind.displayName()));
-        promptNextBalance(player, session);
+        sendState(player, session, true);
         return true;
     }
 
-    public static void promptNextBalance(ServerPlayer player, TamingSession session) {
-        session.balanceDirection = player.getRandom().nextBoolean() ? -1 : 1;
-        int promptTicks = Math.max(15, 40 - session.difficulty * 5);
-        session.ticksRemainingInPrompt = promptTicks;
-
-        // Send packet or notification to client
-        SkyNetwork.sendToPlayer(player, new FaunaPackets.TamePrompt(
-                session.balanceDirection,
-                promptTicks,
-                session.progress
-        ));
-
-        // bucking effect
-        if (player.level() instanceof ServerLevel sl) {
-            sl.sendParticles(ParticleTypes.SMOKE, player.getX(), player.getY() + 0.5, player.getZ(), 4, 0.2, 0.2, 0.2, 0.02);
-            sl.playSound(null, player.blockPosition(), session.kind.horseLike() ? SoundEvents.HORSE_ANGRY : SoundEvents.RAVAGER_STUNNED,
-                    SoundSource.NEUTRAL, 1.0f, 1.0f);
+    /** C2S: the rider's held steer, -1 (A), 0 or +1 (D). Rate-limited; anything else is ignored. */
+    public static void onClientSteer(ServerPlayer player, int direction) {
+        TamingSession s = ACTIVE_SESSIONS.get(player.getUUID());
+        if (s == null || direction < -1 || direction > 1) return;
+        long now = player.level().getGameTime();
+        if (now - s.windowStart >= 20 || now < s.windowStart) {
+            s.windowStart = now;
+            s.inputs = 0;
         }
-        if (player.getVehicle() instanceof Mob m) {
-            m.setDeltaMovement(m.getDeltaMovement().add(0, m.onGround() ? 0.25 : 0, 0));
-            m.setYRot(m.getYRot() + session.balanceDirection * 25f);
-        }
+        if (++s.inputs > MAX_INPUTS) return;
+        s.steer = direction;
     }
 
-    public static void onClientSteer(ServerPlayer player, int direction) {
-        TamingSession session = ACTIVE_SESSIONS.get(player.getUUID());
-        if (session == null || (direction != -1 && direction != 1)) return;
-
-        if (direction == session.balanceDirection) {
-            // Correct counter-steer!
-            session.progress += 25 - session.difficulty * 2;
-            player.level().playSound(null, player.blockPosition(), SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.5f, 1.2f);
-            if (session.progress >= session.required) {
-                completeTaming(player, session, true);
-                return;
-            }
-        } else {
-            // Failed balance steer
-            session.progress = Math.max(0, session.progress - 20);
-            player.level().playSound(null, player.blockPosition(), SoundEvents.HORSE_HURT, SoundSource.NEUTRAL, 0.6f, 1.0f);
-        }
-
-        promptNextBalance(player, session);
+    private static void sendState(ServerPlayer player, TamingSession s, boolean active) {
+        TameBalance b = s.balance;
+        SkyNetwork.sendToPlayer(player, new FaunaPackets.TameState(active,
+                Math.round(Math.max(-1f, Math.min(1f, b.marker)) * 100f),
+                Math.round(b.zone * 100f),
+                Math.round(Math.max(0f, Math.min(1f, b.progress)) * 100f),
+                Math.round(Math.max(0f, Math.min(1.2f, b.amplitude())) * 100f),
+                Math.round(Math.max(-1f, Math.min(1f, b.vel / 0.2f)) * 100f),
+                Math.round(Math.min(1f, b.edgeTicks / (float) b.grace) * 100f)));
     }
 
     public static void tickServer(ServerPlayer player) {
@@ -154,26 +157,55 @@ public final class WildHorseTaming {
 
         if (!(player.getVehicle() instanceof Mob mob) || mob.getId() != session.horseId || !mob.isAlive()) {
             ACTIVE_SESSIONS.remove(player.getUUID());
+            if (player.serverLevel().getEntity(session.horseId) instanceof Mob m) release(m);
             refund(player, session);
-            SkyNetwork.sendToPlayer(player, new FaunaPackets.TamePrompt(0, 0, 0));
+            SkyNetwork.sendToPlayer(player, new FaunaPackets.TameState(false, 0, 0, 0, 0, 0, 0));
             return;
         }
         // the beast bucks in place rather than wandering off (or biting its rider)
         mob.setTarget(null);
         mob.getNavigation().stop();
-
+        if (mob instanceof AbstractHorse h) h.setTemper(0);
         session.sessionTicks++;
-        session.ticksRemainingInPrompt--;
 
-        if (session.ticksRemainingInPrompt <= 0) {
-            // Player timed out answering bucking prompt: bucked off!
-            completeTaming(player, session, false);
+        TameBalance.Result r = session.balance.step(session.steer);
+        buck(player, mob, session);
+        if (session.sessionTicks % 2 == 0) sendState(player, session, true);
+        if (r == TameBalance.Result.WON) completeTaming(player, session, true);
+        else if (r == TameBalance.Result.THROWN) completeTaming(player, session, false);
+    }
+
+    /** The animal's side of it: it rocks, hops and snorts with the force that is pushing the marker. */
+    private static void buck(ServerPlayer player, Mob mob, TamingSession s) {
+        TameBalance b = s.balance;
+        float force = b.buck() * b.amplitude();
+        float yaw = s.yaw + b.marker * 24f;
+        mob.setYRot(yaw);
+        mob.yBodyRot = yaw;
+        mob.yHeadRot = yaw;
+        mob.setXRot(Math.max(-12f, Math.min(12f, force * 14f)));
+        if (!(player.level() instanceof ServerLevel sl)) return;
+        int t = s.sessionTicks;
+        if (t % 9 == 0 && mob.onGround() && Math.abs(force) > 0.18f) {
+            Vec3 dm = mob.getDeltaMovement();
+            mob.setDeltaMovement(dm.x * 0.3, 0.20 + 0.16 * Math.min(1.2f, b.amplitude()), dm.z * 0.3);
+            sl.sendParticles(ParticleTypes.POOF, mob.getX(), mob.getY() + 0.1, mob.getZ(), 3, 0.35, 0.05, 0.35, 0.02);
+        }
+        if (t % 24 == 0) {
+            sl.playSound(null, mob.blockPosition(), s.kind.horseLike() ? SoundEvents.HORSE_ANGRY : SoundEvents.RAVAGER_STUNNED,
+                    SoundSource.NEUTRAL, 0.6f + 0.5f * Math.min(1f, b.amplitude()), 0.9f + 0.2f * b.fraction());
+        }
+        if (b.edgeTicks > 0 && t % 6 == 0) {
+            sl.playSound(null, player.blockPosition(), SoundEvents.HORSE_HURT, SoundSource.NEUTRAL, 0.5f, 1.3f);
         }
     }
 
     public static void onLogout(ServerPlayer player) {
         TamingSession session = ACTIVE_SESSIONS.remove(player.getUUID());
-        if (session != null) refund(player, session);
+        if (session != null) {
+            if (player.serverLevel().getEntity(session.horseId) instanceof Mob m) release(m);
+            refund(player, session);
+        }
     }
 
     /** True while the player is in the middle of breaking a mount in. */
@@ -181,9 +213,23 @@ public final class WildHorseTaming {
         return ACTIVE_SESSIONS.containsKey(player.getUUID());
     }
 
+    /** The running session of a player (selftests). */
+    public static TamingSession session(ServerPlayer player) {
+        return ACTIVE_SESSIONS.get(player.getUUID());
+    }
+
     /** Ends the player's session as if they had fallen off (selftests and interruptions); the saddle comes back. */
     public static void abort(ServerPlayer player) {
         onLogout(player);
+    }
+
+    /** Gives the animal its own mind back after a breaking. */
+    public static void release(Mob mob) {
+        if (mob.getPersistentData().getBoolean(NOAI_TAG)) {
+            mob.getPersistentData().remove(NOAI_TAG);
+            mob.setNoAi(false);
+        }
+        mob.setXRot(0f);
     }
 
     /** The saddle of a taming that did not succeed goes back to the player's bags; the beast is bare again. */
@@ -200,8 +246,10 @@ public final class WildHorseTaming {
         ACTIVE_SESSIONS.remove(player.getUUID());
         if (!(player.getVehicle() instanceof Mob mob)) {
             refund(player, session);
+            SkyNetwork.sendToPlayer(player, new FaunaPackets.TameState(false, 0, 0, 0, 0, 0, 0));
             return;
         }
+        release(mob);
 
         if (success) {
             session.refunded = true; // the saddle stays on the mount
@@ -216,7 +264,6 @@ public final class WildHorseTaming {
             Progression.addSkillXp(player, Skill.ATHLETICS, 20.0f * session.difficulty);
 
             Notifier.message(player, Component.translatable("fauna.skycraft.tame.success", session.kind.displayName()));
-            SkyNetwork.sendToPlayer(player, new FaunaPackets.TamePrompt(0, 0, 100));
         } else {
             // Bucked off! (the saddle comes back)
             player.stopRiding();
@@ -228,7 +275,7 @@ public final class WildHorseTaming {
             ));
             if (!(mob instanceof AbstractHorse) && session.kind.tameDifficulty >= 4) mob.setTarget(player);
             Notifier.message(player, Component.translatable("fauna.skycraft.tame.bucked_off"));
-            SkyNetwork.sendToPlayer(player, new FaunaPackets.TamePrompt(0, 0, 0));
         }
+        SkyNetwork.sendToPlayer(player, new FaunaPackets.TameState(false, 0, 0, success ? 100 : 0, 0, 0, 0));
     }
 }

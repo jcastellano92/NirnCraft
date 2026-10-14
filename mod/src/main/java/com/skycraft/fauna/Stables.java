@@ -1,34 +1,32 @@
 package com.skycraft.fauna;
 
 import com.skycraft.core.Currency;
-import com.skycraft.core.Notifier;
 import com.skycraft.dialogue.Dialogue;
 import com.skycraft.dialogue.DialogueOption;
-import com.skycraft.mounts.MountEntities;
+import com.skycraft.mounts.MountGear;
+import com.skycraft.mounts.MountGrowth;
 import com.skycraft.mounts.MountItems;
 import com.skycraft.mounts.MountKind;
 import com.skycraft.mounts.Mounts;
-import com.skycraft.mounts.MountGear;
 import com.skycraft.mounts.SaddleType;
 import com.skycraft.mounts.Saddlebags;
+import com.skycraft.mounts.StableUi;
 import com.skycraft.tamriel.Region;
 import com.skycraft.tamriel.Regions;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 import java.util.List;
 
 /**
- * Stables: stablemasters sell their province's mounts ({@link MountKind#forSale}: hold breeds in Skyrim, Imperial
- * horses in Cyrodiil, guar in Morrowind, senche-tigers in Elsweyr, camels in Hammerfell...), bring out any mount you
- * already own, and sell saddles, the local barding and, in Black Marsh where no beast will carry you, marsh-shoes.
+ * Stables: stablemasters show their stock in one screen ({@link StableUi}: your own mount beside every animal for sale
+ * this week, grades, prices and trade-in, and a Train tab), bring out any legend you own, and sell saddles, the local
+ * barding and, in Black Marsh where no beast will carry you, marsh-shoes. What a region sells is
+ * {@link MountKind#forSale}: hold breeds in Skyrim, Imperial horses in Cyrodiil, guar in Morrowind, senche-tigers in
+ * Elsweyr, camels in Hammerfell...
  */
 public final class Stables {
     static final int SADDLE_COST = 60;
@@ -63,14 +61,11 @@ public final class Stables {
         List<MountKind> owned = Mounts.stable(player);
         MountKind active = Mounts.active(player);
         int order = 180;
-        for (MountKind kind : sale) {
-            if (owned.contains(kind)) continue;
-            out.add(new DialogueOption("fauna.buy_mount." + kind.id,
-                    Component.translatable("dialogue.skycraft.stables.buy_mount", kind.displayName(), Currency.formatCompact(kind.cost),
-                            speed(kind), kind.stamina, Math.round(MountGear.bagKg(kind, SaddleType.PLAIN))),
-                    order++, (pl, n) -> buyMount(pl, n, kind)));
+        // the stock, your own mount next to it, trading and training: one screen
+        if (!sale.isEmpty() || active != null) {
+            out.add(new DialogueOption("fauna.horses", Component.translatable("dialogue.skycraft.stables.browse"), order++, StableUi::open));
         }
-        // any mount you own can be brought out here
+        // a legend you own (Shadowmere, Arvak) can be brought out here whichever mount is out
         int shown = 0;
         for (MountKind kind : owned) {
             if (kind == active || shown >= 4) continue;
@@ -108,43 +103,10 @@ public final class Stables {
         };
     }
 
-    /** Riding speed in blocks a second (roughly), for the price list. */
-    static int speed(MountKind kind) {
-        double attr = switch (kind.backing) {
-            case HORSE, SKELETON -> kind.breed.movementSpeed;
-            case CAMEL -> 0.26;
-            case GUAR -> 0.23;
-            case BEAST -> {
-                var t = MountEntities.type(kind);
-                yield t == null ? 0.3 : MountEntities.spec(t).speed;
-            }
-        };
-        return (int) Math.round(attr * 43.0);
-    }
-
-    private static void buyMount(ServerPlayer player, LivingEntity npc, MountKind kind) {
-        // the dialogue option may be stale (a second click, another buyer, walked away): re-check on the server
-        Region region = Regions.at(player.level(), npc.blockPosition());
-        if (!isStableMaster(npc) || npc.level() != player.level() || player.distanceToSqr(npc) > 64
-                || !MountKind.forSale(region.id(), region.province()).contains(kind) || Mounts.owns(player, kind)) {
-            Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.stables.unavailable", kind.displayName()));
-            return;
-        }
-        if (!Currency.take(player, kind.cost)) {
-            Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.stables.no_gold", kind.cost));
-            return;
-        }
-        BlockPos spawnPos = npc.blockPosition().relative(npc.getDirection(), 2);
-        Mounts.grant(player, kind, spawnPos);
-        Saddlebags.fit(player, MountGear.bagKg(kind, MountGear.remembered(player, kind)));
-        player.level().playSound(null, spawnPos, SoundEvents.HORSE_SADDLE, SoundSource.NEUTRAL, 1.0f, 1.0f);
-        Notifier.message(player, Component.translatable("fauna.skycraft.horse.bought", kind.displayName()));
-        Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.stables.bought", kind.displayName()));
-    }
-
     private static void takeOut(ServerPlayer player, LivingEntity npc, MountKind kind) {
+        MountGrowth.stableRest(player, kind); // a day in the stable and it trusts you the more
         Mounts.switchTo(player, kind, npc.blockPosition().relative(npc.getDirection(), 2));
-        Saddlebags.fit(player, MountGear.bagKg(kind, MountGear.remembered(player, kind)));
+        if (Mounts.activeEntity(player) instanceof net.minecraft.world.entity.Mob m) Saddlebags.fit(player, MountGear.bagCapacity(m, kind));
         Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.stables.brought", kind.displayName()));
     }
 

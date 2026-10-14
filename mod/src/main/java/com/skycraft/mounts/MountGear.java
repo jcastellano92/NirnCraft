@@ -108,7 +108,15 @@ public final class MountGear {
     /** Carry weight (kg) the mount adds to its rider's capacity while ridden. */
     public static float carryKg(Entity mount, MountKind kind) {
         SaddleType s = saddle(mount);
-        return baseCarry(kind) + (s == null ? 0f : s.carryKg);
+        return (baseCarry(kind) + (s == null ? 0f : s.carryKg)) * capacityMult(mount, kind);
+    }
+
+    /**
+     * What this individual's build and its owner's Pack Master add to the carry weight and to the bags: the Carry
+     * roll and its growth, then +10% a rank of the perk (the owner only, while they are online).
+     */
+    public static float capacityMult(Entity mount, MountKind kind) {
+        return MountStats.of(mount, kind).mult(MountProfile.CARRY) * MountGrowth.packMult(MountGrowth.ownerPlayer(mount));
     }
 
     /** Saddlebag capacity (kg): the saddle's, scaled by the beast's bag rows (a pony's bags are half a guar's). */
@@ -116,9 +124,15 @@ public final class MountGear {
         return saddle == null ? 0f : saddle.bagKg * kind.bagRows / 2f;
     }
 
+    /** Saddlebag capacity (kg) of this animal in its saddle ({@link #bagKg} times its build and its owner's perk). */
+    public static float bagCapacity(Entity mount, MountKind kind) {
+        return bagKg(kind, saddle(mount)) * capacityMult(mount, kind);
+    }
+
     public static int maxStamina(Entity mount, MountKind kind) {
         SaddleType s = saddle(mount);
-        return Math.max(1, Math.round(kind.stamina * (s == null ? 1f : s.staminaMult)));
+        float mult = MountStats.of(mount, kind).mult(MountProfile.STAMINA);
+        return Math.max(1, Math.round(kind.stamina * (s == null ? 1f : s.staminaMult) * mult));
     }
 
     /** Extra damage fraction of a strike from the saddle of the mount the attacker rides. */
@@ -223,10 +237,12 @@ public final class MountGear {
             AttributeInstance armor = mob.getAttribute(Attributes.ARMOR);
             if (armor != null) setModifier(armor, BARDING_ARMOR, "Barding", bard.isEmpty() ? 0 : BEAST_BARDING_ARMOR, AttributeModifier.Operation.ADDITION);
         }
+        MountKind kind = Mounts.kindOf(mob);
+        if (kind != null) MountGrowth.applyAttributes(mob, kind); // the individual: speed, health and jump of its stats
     }
 
     /** Sets (or clears, at 0) a permanent modifier; true when its value changed. */
-    private static boolean setModifier(AttributeInstance attr, UUID id, String name, double amount, AttributeModifier.Operation op) {
+    static boolean setModifier(AttributeInstance attr, UUID id, String name, double amount, AttributeModifier.Operation op) {
         AttributeModifier cur = attr.getModifier(id);
         if (cur == null ? amount == 0 : cur.getAmount() == amount) return false;
         if (cur != null) attr.removeModifier(id);
@@ -272,7 +288,7 @@ public final class MountGear {
         setSaddle(mount, t);
         remember(player, kind, t);
         if (old != null) give(player, old.stack());
-        Saddlebags.fit(player, bagKg(kind, t));
+        Saddlebags.fit(player, bagCapacity(mount, kind));
         mount.playSound(SoundEvents.HORSE_SADDLE, 0.8f, 1.0f);
         return Result.OK;
     }

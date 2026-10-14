@@ -34,6 +34,8 @@ public final class MountedCombat {
         if (!(src instanceof Player p) || victim.level().isClientSide) return;
         if (p.getVehicle() == victim || Mounts.kindOf(victim) != null && Mounts.isOwner(p, victim) && !p.isCreative()) {
             event.setCanceled(true);
+            // a swing at your own animal that you are not sitting on: it does not land, and it is not forgotten
+            if (p.getVehicle() != victim && p instanceof ServerPlayer sp) MountGrowth.abuse(sp, victim);
         }
     }
 
@@ -48,12 +50,18 @@ public final class MountedCombat {
             float bonus = (float) Math.min(0.5, MountStamina.speed(rider) * 1.1);
             // a war saddle braces the blow (the charge still counts)
             bonus += MountGear.damageBonus(mount);
+            bonus += MountGrowth.trickBlow(rider); // Trick Rider
+            MountGrowth.struck(rider, mount, false, 0f); // a blow from the saddle is training
             if (bonus > 0.05f) event.setAmount(event.getAmount() * (1f + bonus));
             // a fighting beast strikes too
             if (mount instanceof MountBeast beast && beast.distanceTo(victim) < beast.getBbWidth() + 2.5f && beast.readyToAssist()) {
                 CreatureAnims.play(beast, AnimSlot.ATTACK);
                 Attacks.strike(beast, victim, 0.8f);
             }
+        }
+        // a blow the ridden mount takes trains its Health
+        if (victim.getControllingPassenger() instanceof ServerPlayer rider && Mounts.kindOf(victim) != null && src != rider) {
+            MountGrowth.struck(rider, victim, true, event.getAmount());
         }
         if (victim instanceof ServerPlayer owner && src instanceof LivingEntity attacker && attacker != owner) {
             // an unridden mount comes to its owner's aid

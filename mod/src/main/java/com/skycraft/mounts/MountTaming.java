@@ -75,8 +75,11 @@ public final class MountTaming {
         } else if (wild instanceof GuarEntity g) {
             g.setVariant(1);
         } else if (kind.backing == MountKind.Backing.BEAST && wild.level() instanceof ServerLevel level) {
+            MountStats born = MountStats.of(wild, kind); // the animal the rider has been breaking in, not a new roll
             Mob beast = Mounts.create(level, kind, wild.getX(), wild.getY(), wild.getZ(), wild.getYRot(), player);
             if (beast == null) return null;
+            MountStats.store(beast, born);
+            MountGear.refresh(beast);
             float health = wild.getHealth() / Math.max(1f, wild.getMaxHealth());
             player.stopRiding();
             wild.discard();

@@ -106,6 +106,14 @@ public final class MountsSelfTest {
             rec.remove("barding");
             rec.remove("uuid");
             rec.remove("active");
+            rec.remove("stable");
+            rec.remove("origin");
+            rec.remove("mstats");
+            rec.remove("stock_sold");
+            rec.remove("cooldown");
+            for (String perk : new String[]{"horse_sense", "wild_eye", "steady_seat", "pack_master", "endurance", "trick_rider"}) {
+                SkyData.get(fp).setPerkRank("riding." + perk, 0);
+            }
         }
         return new Report(c.passed, c.total, c.lines, c.failed);
     }
@@ -154,11 +162,12 @@ public final class MountsSelfTest {
         c.check("a pack saddle replaces the plain one", r == MountGear.Result.OK && MountGear.saddle(bay) == SaddleType.PACK && bay.isSaddled(), r.name());
         c.check("the old saddle came back to the bags and the new one was used up",
                 count(fp.getInventory().items, Items.SADDLE) == 1 && count(fp.getInventory().items, SaddleType.PACK.item()) == 0, "");
-        c.check("the pack saddle sets speed, bags, carry and stamina",
-                Math.abs(bay.getAttributeValue(Attributes.MOVEMENT_SPEED) - baseSpeed * (1 + SaddleType.PACK.speedMod)) < 1e-6
+        MountStats born = MountStats.of(bay, kind);
+        c.check("the pack saddle sets speed, bags, carry and stamina (on top of the individual's own)",
+                Math.abs(bay.getAttributeValue(Attributes.MOVEMENT_SPEED) - baseSpeed * (1 + SaddleType.PACK.speedMod) * born.speedMult()) < 1e-5
                         && MountGear.bagKg(kind, SaddleType.PACK) > MountGear.bagKg(kind, SaddleType.PLAIN)
-                        && MountGear.carryKg(bay, kind) == MountGear.baseCarry(kind) + SaddleType.PACK.carryKg
-                        && MountGear.maxStamina(bay, kind) < kind.stamina,
+                        && Math.abs(MountGear.carryKg(bay, kind) - (MountGear.baseCarry(kind) + SaddleType.PACK.carryKg) * born.mult(MountProfile.CARRY)) < 0.01f
+                        && MountGear.maxStamina(bay, kind) == Math.round(kind.stamina * SaddleType.PACK.staminaMult * born.mult(MountProfile.STAMINA)),
                 "speed " + bay.getAttributeValue(Attributes.MOVEMENT_SPEED) + " bags " + MountGear.bagKg(kind, SaddleType.PACK) + " kg");
         ItemStack war = SaddleType.WAR.stack();
         Horse pony = horse(level, fp, MountKind.WINDHELM_PINTO, at.east(4), spawned);
@@ -274,17 +283,20 @@ public final class MountsSelfTest {
         spawned.add(wild);
         fp.getInventory().add(SaddleType.WAR.stack());
         ItemStack held = fp.getInventory().getItem(0);
+        MountStats wary = MountStats.of(wild, MountKind.WHITERUN_BAY);
+        wary.trust = 20f; // a wild animal that has never been fed: it does not let you walk up
+        MountStats.store(wild, wary);
         boolean handled = Mounts.interact(fp, wild, held);
         c.check("standing up, the saddle spooks a wild mount: no session, saddle kept", handled && !WildHorseTaming.isTaming(fp) && !wild.isSaddled() && held.getCount() == 1, "");
         fp.setPose(Pose.CROUCHING);
         fp.setShiftKeyDown(true);
         handled = Mounts.interact(fp, wild, held);
-        c.check("sneaking, a war saddle is thrown on and the breaking begins", handled && WildHorseTaming.isTaming(fp) && wild.isSaddled()
-                && MountGear.saddle(wild) == SaddleType.WAR && held.isEmpty() && fp.getVehicle() == wild, "");
+        c.check("sneaking, a war saddle is used up and the breaking begins (AI off, no saddle yet, rider aboard)",
+                handled && WildHorseTaming.isTaming(fp) && !wild.isSaddled() && wild.isNoAi() && held.isEmpty() && fp.getVehicle() == wild, "");
         WildHorseTaming.abort(fp);
         fp.stopRiding();
-        c.check("an interrupted breaking returns the saddle and leaves the beast bare",
-                count(fp.getInventory().items, SaddleType.WAR.item()) == 1 && !wild.isSaddled() && MountGear.saddle(wild) == null, "");
+        c.check("an interrupted breaking returns the saddle, leaves the beast bare and gives it its mind back",
+                count(fp.getInventory().items, SaddleType.WAR.item()) == 1 && !wild.isSaddled() && MountGear.saddle(wild) == null && !wild.isNoAi(), "");
         Horse wildPony = EntityType.HORSE.create(level);
         HorseBreed.WINDHELM_PINTO.apply(wildPony);
         wildPony.moveTo(at.getX() + 8.5, at.getY(), at.getZ() + 0.5);
@@ -303,6 +315,7 @@ public final class MountsSelfTest {
         c.check("the vanilla horse screen is closed the moment it opens", fp.containerMenu == fp.inventoryMenu, "");
 
         companionChecks(level, fp, c, spawned, at);
+        statChecks(level, fp, c, spawned, at);
     }
 
     private static Mob zombie(ServerLevel level, BlockPos at, List<Mob> spawned) {
@@ -503,6 +516,332 @@ public final class MountsSelfTest {
         float scaled = MountCompanion.kickDamage(mob, kind.combat());
         mob.getPersistentData().remove(MountCompanion.POWER);
         return Math.abs(scaled - base * factor) < 1e-4;
+    }
+
+    // ------------------------------------------------------------------ individuals, growth, inspection, stable, one active mount
+
+    private static boolean sameStats(MountStats a, MountStats b) {
+        return java.util.Arrays.equals(a.q, b.q) && java.util.Arrays.equals(a.grow, b.grow) && a.xp == b.xp && Math.abs(a.trust - b.trust) < 1e-4f
+                && a.trainWeek == b.trainWeek && a.trainCount == b.trainCount;
+    }
+
+    private static Horse wildHorse(ServerLevel level, HorseBreed breed, BlockPos at, List<Mob> spawned) {
+        Horse h = EntityType.HORSE.create(level);
+        breed.apply(h);
+        h.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+        level.addFreshEntity(h);
+        spawned.add(h);
+        return h;
+    }
+
+    /** Breaks a wild horse in with a bot that counter-steers (the minigame played perfectly). */
+    private static boolean breakIn(FakePlayer fp, Horse wild, SaddleType saddle) {
+        fp.getInventory().add(saddle.stack());
+        ItemStack held = find(fp, saddle.item());
+        fp.setPose(Pose.CROUCHING);
+        fp.setShiftKeyDown(true);
+        Mounts.interact(fp, wild, held);
+        WildHorseTaming.TamingSession s = WildHorseTaming.session(fp);
+        for (int i = 0; s != null && i < 20 * 130 && WildHorseTaming.isTaming(fp); i++) {
+            double want = -(s.balance.marker + s.balance.vel / 0.1);
+            s.steer = want > 0.12 ? 1 : want < -0.12 ? -1 : 0;
+            WildHorseTaming.tickServer(fp);
+        }
+        fp.setPose(Pose.STANDING);
+        fp.setShiftKeyDown(false);
+        return Mounts.isOwner(fp, wild);
+    }
+
+    private static void statChecks(ServerLevel level, FakePlayer fp, Checks c, List<Mob> spawned, BlockPos at) {
+        MountKind k = MountKind.CYRODILIC_BAY;
+        PlayerData pd = SkyData.get(fp);
+
+        // ---- individual rolls: deterministic, graded, bounded; legends fixed high
+        MountStats a = MountStats.roll(k, 12345L, 0f, false), b = MountStats.roll(k, 12345L, 0f, false), d = MountStats.roll(k, 54321L, 0f, false);
+        c.check("a roll is deterministic from its seed and differs between seeds", sameStats(a, b) && !java.util.Arrays.equals(a.q, d.q), "");
+        c.check("grades map from the roll: Poor, Fair, Good, Fine, Superb",
+                MountStats.gradeOf(-100) == 0 && MountStats.gradeOf(-56) == 0 && MountStats.gradeOf(-55) == 1 && MountStats.gradeOf(-21) == 1
+                        && MountStats.gradeOf(-20) == 2 && MountStats.gradeOf(30) == 2 && MountStats.gradeOf(31) == 3 && MountStats.gradeOf(70) == 3
+                        && MountStats.gradeOf(71) == 4 && MountStats.gradeOf(100) == 4, "");
+        int[] hist = new int[5];
+        boolean bounded = true;
+        for (int i = 0; i < 4000; i++) {
+            MountStats s = MountStats.roll(k, i * 7919L + 1, 0f, false);
+            hist[s.grade(MountProfile.SPEED)]++;
+            for (int st = 0; st < MountProfile.N; st++) {
+                float m = s.rollMult(st);
+                bounded &= m >= 1f - MountProfile.VARIANCE[st] - 1e-4f && m <= 1f + MountProfile.VARIANCE[st] + 1e-4f;
+            }
+        }
+        c.check("grades are spread like a bell: Superb is rare, Good is common", hist[4] > 40 && hist[4] < 360 && hist[0] > 200 && hist[2] > 1400,
+                java.util.Arrays.toString(hist));
+        c.check("every roll stays within the kind's variance", bounded, "");
+        MountStats shadow = MountStats.roll(MountKind.SHADOWMERE, 1L, 0f, false), shadow2 = MountStats.roll(MountKind.SHADOWMERE, 2L, 0f, false);
+        c.check("the legends are fixed and fine", java.util.Arrays.equals(shadow.q, shadow2.q) && shadow.grade(MountProfile.SPEED) >= 4
+                && shadow.grade(MountProfile.TEMPER) >= 3, "");
+        boolean allKinds = true;
+        for (MountKind kk : MountKind.VALUES) {
+            MountProfile p = MountProfile.of(kk);
+            allKinds &= p != null && p.bonus.length == MountProfile.N && kk.stamina >= 600 && MountProfile.baseHealth(kk) > 0 && MountProfile.baseJump(kk) > 0
+                    && MountProfile.speedAttr(kk) > 0;
+        }
+        c.check("every kind has a profile, and out-endures a runner (600+ gallop ticks against about 280)", allKinds, "");
+        Horse seen = wildHorse(level, HorseBreed.CYRODILIC_BAY, at.south(14), spawned);
+        c.check("a wild animal is the same animal on every look", sameStats(MountStats.of(seen, k), MountStats.of(seen, k)), "");
+
+        // ---- levels and growth from simulated riding
+        c.check("levels: thresholds rise and cap at 20", MountStats.levelFor(0) == 1 && MountStats.levelFor(MountStats.xpFor(2) - 0.01f) == 1
+                && MountStats.levelFor(MountStats.xpFor(2)) == 2 && MountStats.levelFor(1e9f) == 20 && MountStats.xpFor(20) == 5890f, "");
+        Horse mount = horse(level, fp, k, at.south(4), spawned);
+        var rec = Mounts.data(fp);
+        rec.putString("active", k.id);
+        rec.putUUID("uuid", mount.getUUID());
+        MountStats before = MountStats.of(mount, k);
+        for (int i = 0; i < 40; i++) MountGrowth.ride(fp, mount, k, 0.0, false, true);
+        for (int i = 0; i < 3000; i++) MountGrowth.ride(fp, mount, k, 0.5, true, false);
+        MountStats grown = MountStats.of(mount, k);
+        c.check("a long gallop and some jumps earn experience, levels and growth in the stats they trained",
+                grown.xp > before.xp + 100 && grown.level() >= 3 && grown.growthPoints() >= 2 && grown.grow[MountProfile.JUMP] >= 1
+                        && grown.grow[MountProfile.SPEED] + grown.grow[MountProfile.STAMINA] >= 1,
+                "xp " + grown.xp + " level " + grown.level() + " grow " + java.util.Arrays.toString(grown.grow));
+        MountStats recorded = MountGrowth.recorded(fp, k);
+        c.check("the player's record mirrors the active mount", recorded != null && sameStats(recorded, grown), "");
+        c.check("growth raises what it should: jump attribute, stamina and speed follow the stats",
+                Math.abs(mount.getAttributeValue(Attributes.JUMP_STRENGTH) - HorseBreed.CYRODILIC_BAY.jumpStrength * grown.mult(MountProfile.JUMP)) < 1e-4
+                        && MountGear.maxStamina(mount, k) == Math.round(k.stamina * grown.mult(MountProfile.STAMINA)), "");
+        boolean capped = true;
+        MountStats maxed = MountStats.roll(k, 99L, 0f, false);
+        maxed.addXp(1e9f);
+        for (int s = 0; s < MountProfile.N; s++) capped &= maxed.grow[s] <= maxed.cap(s);
+        c.check("level 20 is the cap and no stat grows past its soft cap", maxed.level() == 20 && capped && maxed.growthPoints() <= 19, "points " + maxed.growthPoints());
+        MountStats trustTest = MountStats.roll(k, 5L, 0f, false);
+        trustTest.addTrust(500f);
+        float hi = trustTest.trust;
+        trustTest.addTrust(-500f);
+        c.check("trust stays within 0 and 100 and moves speed and wind a little",
+                hi == 100f && trustTest.trust == 0f && MountStats.trustSpeed(100f) > MountStats.trustSpeed(0f) && MountStats.restMult(100f) > MountStats.restMult(0f), "");
+
+        // ---- care: feeding raises trust (and not twice in a row), abuse lowers it
+        ItemStack apples = new ItemStack(Items.APPLE, 3);
+        float t0 = MountStats.of(mount, k).trust;
+        MountGrowth.feed(fp, mount, k, apples, true);
+        float t1 = MountStats.of(mount, k).trust;
+        MountGrowth.feed(fp, mount, k, apples, true);
+        c.check("an apple from the hand raises trust once; a second one straight after is refused", t1 > t0 && apples.getCount() == 2
+                && MountStats.of(mount, k).trust == t1, t0 + " -> " + t1);
+        MountGrowth.abuse(fp, mount);
+        c.check("a swing at your own mount costs trust", MountStats.of(mount, k).trust < t1, "");
+        Horse stray = wildHorse(level, HorseBreed.WHITERUN_BAY, at.south(16), spawned);
+        float w0 = MountStats.of(stray, MountKind.WHITERUN_BAY).trust;
+        ItemStack carrots = new ItemStack(Items.CARROT, 2);
+        MountGrowth.feed(fp, stray, MountKind.WHITERUN_BAY, carrots, false);
+        c.check("feeding a wild one calms it, and the calm is stored on it", MountStats.of(stray, MountKind.WHITERUN_BAY).trust > w0 && MountStats.stored(stray)
+                && carrots.getCount() == 1, "");
+
+        // ---- persistence: entity NBT and the record
+        net.minecraft.nbt.CompoundTag saved = new net.minecraft.nbt.CompoundTag();
+        mount.saveWithoutId(saved);
+        Horse copy = EntityType.HORSE.create(level);
+        copy.load(saved);
+        c.check("the stats survive the entity's save and load", Mounts.kindOf(copy) == k && sameStats(MountStats.of(copy, k), MountStats.of(mount, k)), "");
+        MountStats via = MountStats.fromTag(k, MountStats.of(mount, k).toTag());
+        c.check("the stats survive their own tag round trip", sameStats(via, MountStats.of(mount, k)), "");
+
+        // ---- inspection: what a viewer may know, and who may ask
+        pd.setPerkRank("riding.horse_sense", 0);
+        pd.setPerkRank("riding.wild_eye", 0);
+        fp.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 4.5);
+        MountView own = MountInspect.viewOf(fp, mount, k);
+        boolean hidden = true;
+        for (float v : own.value()) hidden &= v == MountView.HIDDEN;
+        c.check("your own mount without Horse Sense: words and no numbers", own.owner() == 1 && own.detail() == 0 && hidden && own.known()
+                && own.trust() == MountView.HIDDEN && own.level() == MountStats.of(mount, k).level(), "");
+        pd.setPerkRank("riding.horse_sense", 1);
+        own = MountInspect.viewOf(fp, mount, k);
+        MountStats ms = MountStats.of(mount, k);
+        boolean exact = true;
+        for (int i = 0; i < MountView.STATS; i++) exact &= own.gradeLo()[i] == ms.grade(i) && own.gradeHi()[i] == ms.grade(i);
+        c.check("with Horse Sense your own mount reads exactly: grades, numbers, growth, trust",
+                own.detail() == 2 && exact && own.value()[MountProfile.SPEED] > 0 && own.value()[MountProfile.STAMINA] > 30
+                        && own.growth()[MountProfile.JUMP] == ms.grow[MountProfile.JUMP] && own.trust() >= 0, "");
+        MountView stranger = MountInspect.viewOf(fp, stray, MountKind.WHITERUN_BAY);
+        MountStats ss = MountStats.of(stray, MountKind.WHITERUN_BAY);
+        boolean estimate = stranger.owner() == 0 && stranger.detail() == 1;
+        for (int i = 0; i < MountView.STATS; i++) {
+            estimate &= stranger.gradeLo()[i] <= ss.grade(i) && ss.grade(i) <= stranger.gradeHi()[i] && stranger.gradeHi()[i] - stranger.gradeLo()[i] == 1;
+        }
+        boolean noNumbers = true;
+        for (float v : stranger.value()) noNumbers &= v == MountView.HIDDEN;
+        c.check("a wild animal's grades are an estimate of two neighbouring grades, with no numbers", estimate && noNumbers, "");
+        io.netty.buffer.ByteBuf raw = io.netty.buffer.Unpooled.buffer();
+        net.minecraft.network.FriendlyByteBuf fb = new net.minecraft.network.FriendlyByteBuf(raw);
+        own.write(fb);
+        MountView back = MountView.read(fb);
+        c.check("the card payload survives the wire", back.kindId().equals(own.kindId()) && back.level() == own.level()
+                && java.util.Arrays.equals(back.gradeLo(), own.gradeLo()) && java.util.Arrays.equals(back.value(), own.value())
+                && java.util.Arrays.equals(back.caps(), own.caps()) && back.trust() == own.trust() && back.saddle().equals(own.saddle()), "");
+        // who may ask
+        fp.moveTo(mount.getX() + 3, mount.getY(), mount.getZ());
+        boolean near = MountInspect.allowed(fp, mount);
+        fp.moveTo(mount.getX() + 12, mount.getY(), mount.getZ());
+        boolean mid = MountInspect.allowed(fp, mount);
+        pd.setPerkRank("riding.wild_eye", 1);
+        boolean midEye = MountInspect.allowed(fp, mount);
+        fp.moveTo(mount.getX() + 40, mount.getY(), mount.getZ());
+        boolean far = MountInspect.allowed(fp, mount);
+        pd.setPerkRank("riding.wild_eye", 0);
+        c.check("the server answers a look only in range (6 blocks, 16 with Wild Eye)", near && !mid && midEye && !far, near + " " + mid + " " + midEye + " " + far);
+        fp.moveTo(at.getX() + 3.5, at.getY(), at.getZ() + 0.5);
+
+        // ---- the stable: price by grade and level, stock by week, trade-in, training
+        MountStats poor = MountStats.roll(k, 1L, 0f, false), fine = MountStats.roll(k, 1L, 0f, false);
+        for (int i = 0; i < poor.q.length; i++) {
+            poor.q[i] = -80;
+            fine.q[i] = 80;
+        }
+        MountStats trained = fine.copy();
+        trained.addXp(MountStats.xpFor(10));
+        int pPoor = MountStock.value(k, poor), pFine = MountStock.value(k, fine), pTrained = MountStock.value(k, trained);
+        c.check("price rises with grade and with level; the stable pays less than it asks",
+                pPoor < pFine && pFine < pTrained && MountStock.tradeIn(k, fine) < pFine && MountStock.tradeIn(MountKind.SHADOWMERE, shadow) == 0,
+                pPoor + " < " + pFine + " < " + pTrained);
+        java.util.List<MountKind> sale = java.util.List.of(MountKind.WHITERUN_BAY, MountKind.CYRODILIC_BAY);
+        var w5 = MountStock.offers("skyrim/whiterun:1:2", 5, sale, java.util.Set.of());
+        var w5b = MountStock.offers("skyrim/whiterun:1:2", 5, sale, java.util.Set.of());
+        var w6 = MountStock.offers("skyrim/whiterun:1:2", 6, sale, java.util.Set.of());
+        var other = MountStock.offers("skyrim/riften:9:9", 5, sale, java.util.Set.of());
+        boolean same = w5.size() == w5b.size();
+        for (int i = 0; same && i < w5.size(); i++) same = w5.get(i).id().equals(w5b.get(i).id()) && sameStats(w5.get(i).stats(), w5b.get(i).stats());
+        boolean weekDiffers = false, stableDiffers = false;
+        for (int i = 0; i < Math.min(w5.size(), w6.size()); i++) weekDiffers |= !java.util.Arrays.equals(w5.get(i).stats().q, w6.get(i).stats().q);
+        for (int i = 0; i < Math.min(w5.size(), other.size()); i++) stableDiffers |= !java.util.Arrays.equals(w5.get(i).stats().q, other.get(i).stats().q);
+        var w5sold = MountStock.offers("skyrim/whiterun:1:2", 5, sale, java.util.Set.of(w5.get(0).id()));
+        c.check("a stable's stock is the same all week, changes with the week and between stables, and a sold animal is gone",
+                same && w5.size() == 3 && weekDiffers && stableDiffers && w5sold.size() == w5.size() - 1, "");
+        MountStats tr = MountStats.roll(k, 3L, 0f, false);
+        long wk = 7;
+        int fee0 = MountStock.trainFee(tr, MountProfile.SPEED);
+        MountStock.applyTraining(tr, MountProfile.SPEED, wk);
+        int fee1 = MountStock.trainFee(tr, MountProfile.SPEED);
+        MountStock.applyTraining(tr, MountProfile.STAMINA, wk);
+        c.check("training: the fee climbs with the stat's growth, two sessions a week, then the stable hand is booked",
+                fee1 > fee0 && tr.grow[MountProfile.SPEED] == 1 && MountStock.canTrain(tr, MountProfile.HEALTH, wk) == MountStock.Train.WEEK_LIMIT
+                        && MountStock.canTrain(tr, MountProfile.HEALTH, wk + 1) == MountStock.Train.OK, fee0 + " -> " + fee1);
+        MountStats capTest = MountStats.roll(k, 4L, 0f, false);
+        capTest.grow[MountProfile.JUMP] = (byte) capTest.cap(MountProfile.JUMP);
+        c.check("training stops at the soft cap of a stat", MountStock.canTrain(capTest, MountProfile.JUMP, 1) == MountStock.Train.CAP, "");
+
+        // ---- Riding perks exist and do something
+        pd.setPerkRank("riding.pack_master", 2);
+        pd.setPerkRank("riding.endurance", 2);
+        pd.setPerkRank("riding.trick_rider", 1);
+        c.check("the Riding perks are defined and scale carry, burn and jumps",
+                com.skycraft.perk.Perks.get("riding.horse_sense") != null && com.skycraft.perk.Perks.get("riding.wild_eye") != null
+                        && com.skycraft.perk.Perks.get("riding.steady_seat") != null && com.skycraft.perk.Perks.get("riding.pack_master") != null
+                        && com.skycraft.perk.Perks.get("riding.endurance") != null && com.skycraft.perk.Perks.get("riding.trick_rider") != null
+                        && Math.abs(MountGrowth.packMult(fp) - 1.2f) < 1e-4 && MountGrowth.drainMult(fp) < 0.8f && MountGrowth.trickJumpCost(fp) < 1f, "");
+        pd.setPerkRank("riding.pack_master", 0);
+        pd.setPerkRank("riding.endurance", 0);
+        pd.setPerkRank("riding.trick_rider", 0);
+        pd.setPerkRank("riding.horse_sense", 0);
+
+        // ---- the breaking minigame's physics: nobody wins by standing still, a steady hand does
+        boolean idleNeverWins = true, botWins = true;
+        for (int dif = 1; dif <= 5; dif++) {
+            for (int seed = 0; seed < 12; seed++) {
+                com.skycraft.fauna.TameBalance idle = new com.skycraft.fauna.TameBalance(dif, 0.4f, 0, seed * 31L + dif);
+                com.skycraft.fauna.TameBalance.Result r = com.skycraft.fauna.TameBalance.Result.RUNNING;
+                for (int i = 0; i < 20 * 130 && r == com.skycraft.fauna.TameBalance.Result.RUNNING; i++) r = idle.step(0);
+                idleNeverWins &= r != com.skycraft.fauna.TameBalance.Result.WON;
+                if (dif <= 3) {
+                    com.skycraft.fauna.TameBalance bot = new com.skycraft.fauna.TameBalance(dif, 0.4f, 0, seed * 17L + dif);
+                    r = com.skycraft.fauna.TameBalance.Result.RUNNING;
+                    for (int i = 0; i < 20 * 130 && r == com.skycraft.fauna.TameBalance.Result.RUNNING; i++) {
+                        double want = -(bot.marker + bot.vel / 0.1);
+                        r = bot.step(want > 0.12 ? 1 : want < -0.12 ? -1 : 0);
+                    }
+                    botWins &= r == com.skycraft.fauna.TameBalance.Result.WON;
+                }
+            }
+        }
+        com.skycraft.fauna.TameBalance easy = new com.skycraft.fauna.TameBalance(1, 0.5f, 0, 1L), hard = new com.skycraft.fauna.TameBalance(5, 0.5f, 0, 1L);
+        com.skycraft.fauna.TameBalance seated = new com.skycraft.fauna.TameBalance(5, 0.5f, 2, 1L);
+        c.check("breaking in: idling never wins, a steady counter-steer wins, 20-40 s by difficulty, Steady Seat widens the zone",
+                idleNeverWins && botWins && easy.duration >= 17 * 20 && hard.duration <= 40 * 20 && hard.duration > easy.duration
+                        && seated.zone > hard.zone && seated.grace > hard.grace && hard.amplitude() > easy.amplitude(), "");
+
+        // ---- one active mount: a new one retires the old one, and nothing is lost
+        fp.getInventory().clearContent();
+        rec.remove("uuid");
+        rec.remove("active");
+        long gold0 = pd.getGold();
+        MountKind first = MountKind.WHITERUN_BAY;
+        Mob m1 = Mounts.grant(fp, first, at.west(6), null, true);
+        spawned.add(m1);
+        fp.getInventory().add(SaddleType.PACK.stack());
+        MountGear.equipSaddle(fp, m1, first, find(fp, SaddleType.PACK.item()));
+        fp.getInventory().add(new ItemStack(MountItems.LEATHER_BARDING.get()));
+        MountGear.equipBarding(fp, m1, first, find(fp, MountItems.LEATHER_BARDING.get()));
+        net.minecraft.nbt.ListTag bags = new net.minecraft.nbt.ListTag();
+        net.minecraft.nbt.CompoundTag slot = new net.minecraft.nbt.CompoundTag();
+        slot.putByte("Slot", (byte) 0);
+        new ItemStack(Items.COBBLESTONE, 10).save(slot);
+        bags.add(slot);
+        rec.put("bags", bags);
+        c.check("a bought mount is the active one, with its own stats in the record", Mounts.active(fp) == first && MountGrowth.recorded(fp, first) != null
+                && MountStats.stored(m1) && Mounts.stable(fp).size() == 1, "");
+        int cobble0 = count(fp.getInventory().items, Items.COBBLESTONE);
+        Mob m2 = Mounts.grant(fp, MountKind.CYRODILIC_BAY, at.west(9), null, true);
+        spawned.add(m2);
+        c.check("buying another retires the first: it is gone, the stable holds one regular mount",
+                m1.isRemoved() && Mounts.active(fp) == MountKind.CYRODILIC_BAY && Mounts.stable(fp).size() == 1 && Mounts.stable(fp).get(0) == MountKind.CYRODILIC_BAY
+                        && MountGrowth.recorded(fp, first) == null, "");
+        c.check("its saddlebag items went to the player's inventory, and the record's bags are empty",
+                count(fp.getInventory().items, Items.COBBLESTONE) == cobble0 + 10 && rec.getList("bags", 10).isEmpty(), "");
+        c.check("the pack saddle and the barding moved to the new mount (its breed takes them)",
+                MountGear.saddle(m2) == SaddleType.PACK && MountGear.barding((Mob) m2).is(MountItems.LEATHER_BARDING.get()), "");
+        MountGear.equipSaddle(fp, m2, MountKind.CYRODILIC_BAY, withItem(fp, SaddleType.WAR));
+        Mob m3 = Mounts.grant(fp, MountKind.WINDHELM_PINTO, at.west(12), null, true);
+        spawned.add(m3);
+        c.check("a breed that will not take the war saddle gets a plain one, and the war saddle comes back to the bags",
+                MountGear.saddle(m3) == SaddleType.PLAIN && count(fp.getInventory().items, SaddleType.WAR.item()) == 1, "");
+
+        // ---- taming a wild one retires the bought one the same way
+        Horse wild = wildHorse(level, HorseBreed.RIFTEN_CHESTNUT, at.east(10), spawned);
+        boolean won = breakIn(fp, wild, SaddleType.PLAIN);
+        fp.stopRiding();
+        c.check("breaking a wild horse in makes it the mount and retires the old one",
+                won && Mounts.active(fp) == MountKind.RIFTEN_CHESTNUT && m3.isRemoved() && Mounts.stable(fp).size() == 1 && !wild.isNoAi()
+                        && Mounts.activeEntity(fp) == wild && MountStats.stored(wild), "");
+        // and a tamed one is let go when the next one comes: it wanders free, still alive
+        Horse wild2 = wildHorse(level, HorseBreed.WHITERUN_BAY, at.east(14), spawned);
+        boolean won2 = breakIn(fp, wild2, SaddleType.PLAIN);
+        fp.stopRiding();
+        c.check("the tamed one it replaced is released: alive, ownerless, untamed",
+                won2 && !wild.isRemoved() && Mounts.ownerOf(wild) == null && !wild.isTamed() && Mounts.active(fp) == MountKind.WHITERUN_BAY, "");
+
+        // ---- training and selling the active mount
+        MountStats act = MountGrowth.active(fp);
+        pd.setGold(pd.getGold() + 5000);
+        int p0 = act == null ? 0 : act.grow[MountProfile.SPEED];
+        boolean t1ok = MountGrowth.train(fp, MountProfile.SPEED), t2ok = MountGrowth.train(fp, MountProfile.STAMINA), t3ok = MountGrowth.train(fp, MountProfile.HEALTH);
+        MountStats after = MountGrowth.active(fp);
+        c.check("two paid sessions a week train the active mount's record; a third is refused",
+                act != null && t1ok && t2ok && !t3ok && after.grow[MountProfile.SPEED] == p0 + 1 && after.trainCount == 2, "");
+        int worth = Mounts.tradeInValue(fp);
+        long goldBefore = pd.getGold();
+        fp.getInventory().clearContent();
+        rec.put("bags", bags.copy());
+        int sold = Mounts.sell(fp);
+        c.check("selling returns the bags and tack first, then pays by grade and level; the stable is empty",
+                sold == worth && worth > 0 && pd.getGold() == goldBefore + worth && Mounts.active(fp) == null && Mounts.stable(fp).isEmpty()
+                        && count(fp.getInventory().items, Items.COBBLESTONE) == 10 && count(fp.getInventory().items, Items.SADDLE) >= 1, "paid " + sold);
+        pd.setGold(gold0);
+    }
+
+    private static ItemStack withItem(FakePlayer fp, SaddleType t) {
+        fp.getInventory().add(t.stack());
+        return find(fp, t.item());
     }
 
     private static ItemStack find(FakePlayer fp, net.minecraft.world.item.Item item) {

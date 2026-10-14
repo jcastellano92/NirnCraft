@@ -25,30 +25,31 @@ import java.util.Locale;
  */
 public enum MountKind {
     // ---------------------------------------------------------------- horses (vanilla horse entity)
-    WHITERUN_BAY(Backing.HORSE, HorseBreed.WHITERUN_BAY, 100, 0.45f, 1),
-    SOLITUDE_GREY(Backing.HORSE, HorseBreed.SOLITUDE_GREY, 110, 0.45f, 1),
-    WINDHELM_PINTO(Backing.HORSE, HorseBreed.WINDHELM_PINTO, 130, 0.40f, 2),
-    RIFTEN_CHESTNUT(Backing.HORSE, HorseBreed.RIFTEN_CHESTNUT, 100, 0.50f, 1),
-    MARKARTH_BLACK(Backing.HORSE, HorseBreed.MARKARTH_BLACK, 140, 0.40f, 2),
-    SHADOWMERE(Backing.HORSE, HorseBreed.SHADOWMERE, 220, 0.55f, 2),
-    CYRODILIC_BAY(Backing.HORSE, HorseBreed.CYRODILIC_BAY, 120, 0.45f, 2),
-    COLOVIAN_PAINT(Backing.HORSE, HorseBreed.COLOVIAN_PAINT, 120, 0.48f, 1),
-    NIBENESE_GREY(Backing.HORSE, HorseBreed.NIBENESE_GREY, 110, 0.52f, 1),
-    BRETON_DESTRIER(Backing.HORSE, HorseBreed.BRETON_DESTRIER, 150, 0.38f, 2),
-    ALIKR_STEED(Backing.HORSE, HorseBreed.ALIKR_STEED, 180, 0.50f, 1),
-    AURIDON_WHITE(Backing.HORSE, HorseBreed.AURIDON_WHITE, 140, 0.50f, 1),
-    ARVAK(Backing.SKELETON, HorseBreed.ARVAK, 300, 0.55f, 1),
+    // (stamina is in gallop ticks, see MountProfile: 700 is 35 s of gallop where a runner manages about 14 s)
+    WHITERUN_BAY(Backing.HORSE, HorseBreed.WHITERUN_BAY, 700, 0.45f, 1),
+    SOLITUDE_GREY(Backing.HORSE, HorseBreed.SOLITUDE_GREY, 720, 0.45f, 1),
+    WINDHELM_PINTO(Backing.HORSE, HorseBreed.WINDHELM_PINTO, 800, 0.40f, 2),
+    RIFTEN_CHESTNUT(Backing.HORSE, HorseBreed.RIFTEN_CHESTNUT, 680, 0.50f, 1),
+    MARKARTH_BLACK(Backing.HORSE, HorseBreed.MARKARTH_BLACK, 840, 0.40f, 2),
+    SHADOWMERE(Backing.HORSE, HorseBreed.SHADOWMERE, 1000, 0.55f, 2),
+    CYRODILIC_BAY(Backing.HORSE, HorseBreed.CYRODILIC_BAY, 720, 0.45f, 2),
+    COLOVIAN_PAINT(Backing.HORSE, HorseBreed.COLOVIAN_PAINT, 760, 0.48f, 1),
+    NIBENESE_GREY(Backing.HORSE, HorseBreed.NIBENESE_GREY, 640, 0.52f, 1),
+    BRETON_DESTRIER(Backing.HORSE, HorseBreed.BRETON_DESTRIER, 600, 0.38f, 2),
+    ALIKR_STEED(Backing.HORSE, HorseBreed.ALIKR_STEED, 1000, 0.50f, 1),
+    AURIDON_WHITE(Backing.HORSE, HorseBreed.AURIDON_WHITE, 700, 0.50f, 1),
+    ARVAK(Backing.SKELETON, HorseBreed.ARVAK, 1400, 0.55f, 1),
     // ---------------------------------------------------------------- other beasts
     /** Hammerfell's dromedary (vanilla camel): two seats, slow but tireless, its own dash. */
-    CAMEL(Backing.CAMEL, null, 1500, 260, 0.25f, 3, 2, 0),
+    CAMEL(Backing.CAMEL, null, 1500, 1300, 0.25f, 3, 2, 0),
     /** Morrowind's pack guar (the bestiary's guar): the biggest saddlebags. */
-    GUAR(Backing.GUAR, null, 900, 160, 0.30f, 3, 1, 1),
-    SENCHE(Backing.BEAST, null, 3500, 150, 0.50f, 2, 1, 4),
-    GIANT_WOLF(Backing.BEAST, null, 2400, 130, 0.50f, 1, 1, 0),
-    INDRIK(Backing.BEAST, null, 9000, 200, 0.55f, 1, 1, 3),
-    MAMMOTH(Backing.BEAST, null, 7000, 300, 0.20f, 3, 2, 5),
-    AKAVIRI_TIGER(Backing.BEAST, null, 5000, 170, 0.50f, 2, 1, 0),
-    REALM_GRAZER(Backing.BEAST, null, 1200, 180, 0.35f, 2, 1, 2);
+    GUAR(Backing.GUAR, null, 900, 1000, 0.30f, 3, 1, 1),
+    SENCHE(Backing.BEAST, null, 3500, 650, 0.50f, 2, 1, 4),
+    GIANT_WOLF(Backing.BEAST, null, 2400, 900, 0.50f, 1, 1, 0),
+    INDRIK(Backing.BEAST, null, 9000, 800, 0.55f, 1, 1, 3),
+    MAMMOTH(Backing.BEAST, null, 7000, 1000, 0.20f, 3, 2, 5),
+    AKAVIRI_TIGER(Backing.BEAST, null, 5000, 700, 0.50f, 2, 1, 0),
+    REALM_GRAZER(Backing.BEAST, null, 1200, 900, 0.35f, 2, 1, 2);
 
     public enum Backing {
         /** A vanilla horse with a {@link HorseBreed}. */
@@ -70,7 +71,7 @@ public enum MountKind {
     @Nullable
     public final HorseBreed breed;
     public final int cost;
-    /** Stamina points (a gallop drains 1 per tick, rest regains 0.6). */
+    /** Stamina points: a gallop drains 1 per tick, resting regains max/240 a tick (half that while moving). */
     public final int stamina;
     /** Movement speed bonus while galloping (multiplied). */
     public final float gallop;

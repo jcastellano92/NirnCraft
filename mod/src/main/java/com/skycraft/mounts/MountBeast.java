@@ -36,6 +36,8 @@ import java.util.UUID;
  * ({@link MountedCombat}).
  */
 public class MountBeast extends SkyBeast implements PlayerRideableJumping {
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Float> JUMP_MULT =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(MountBeast.class, net.minecraft.network.syncher.EntityDataSerializers.FLOAT);
     private float jumpPending;
     private int assistCooldown;
 
@@ -122,13 +124,19 @@ public class MountBeast extends SkyBeast implements PlayerRideableJumping {
 
     /** Upward speed of a full jump (horse-like for the light beasts, a hop for the mammoth). */
     double jump() {
-        return switch (kind()) {
-            case INDRIK -> 1.05;
-            case SENCHE, AKAVIRI_TIGER -> 0.95;
-            case GIANT_WOLF -> 0.9;
-            case MAMMOTH -> 0.5;
-            default -> 0.75;
-        };
+        // the kind's average, times this animal's Jump roll and growth (synced: the rider's client does the jumping)
+        return MountProfile.baseJump(kind()) * this.entityData.get(JUMP_MULT);
+    }
+
+    /** Server side: the individual's jump multiplier ({@link MountGrowth#applyAttributes}). */
+    void setJumpMult(float mult) {
+        if (this.entityData.get(JUMP_MULT) != mult) this.entityData.set(JUMP_MULT, mult);
+    }
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(JUMP_MULT, 1f);
     }
 
     @Override

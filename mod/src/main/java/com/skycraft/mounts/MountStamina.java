@@ -70,6 +70,7 @@ public final class MountStamina {
         LAST.remove(player.getUUID());
         SPEED.remove(player.getUUID());
         LAST_HEALTH.remove(player.getUUID());
+        MountGrowth.forgetRider(player);
     }
 
     public static double speed(ServerPlayer player) {
@@ -148,11 +149,14 @@ public final class MountStamina {
         boolean exhausted = mount.getPersistentData().getBoolean(EXHAUSTED);
         boolean gallop = moving && !exhausted && st > 0 && WANTS.containsKey(player.getUUID());
         if (gallop) {
-            st = Math.max(0, st - 1f);
+            // Endurance (perk) slows the burn
+            st = Math.max(0, st - MountGrowth.drainMult(player));
         } else {
-            st = Math.min(max, st + (moving ? 0.6f : 1.2f));
+            // a full bar comes back in 12 s standing (24 s moving); a bonded, calm mount gets its wind back sooner
+            float rest = max / 240f * MountStats.restMult(MountStats.of(mount, kind).trust);
+            st = Math.min(max, st + (moving ? rest * 0.5f : rest));
         }
-        if (jumped) st = Math.max(0f, st - max * JUMP_COST);
+        if (jumped) st = Math.max(0f, st - max * JUMP_COST * MountGrowth.trickJumpCost(player));
         if (st <= 0) exhausted = true;
         else if (exhausted && st >= max * 0.25f) exhausted = false;
         mount.getPersistentData().putFloat(TAG, st);
@@ -160,6 +164,7 @@ public final class MountStamina {
         data.setStamina(st / max * pm);
         if (rec.hasUUID("uuid") && rec.getUUID("uuid").equals(mount.getUUID())) rec.putFloat(SAVED, st);
 
+        MountGrowth.ride(player, mount, kind, speed, gallop, jumped); // distance, jumps and loads grow the mount
         AttributeInstance move = mount.getAttribute(Attributes.MOVEMENT_SPEED);
         if (move != null) {
             boolean has = move.getModifier(GALLOP) != null;

@@ -20,7 +20,7 @@ public final class FaunaPackets {
     public static void register() {
         SkyNetwork.register(CallHorse.class, NetworkDirection.PLAY_TO_SERVER, CallHorse::encode, CallHorse::decode, CallHorse::handle);
         SkyNetwork.register(SteerBalance.class, NetworkDirection.PLAY_TO_SERVER, SteerBalance::encode, SteerBalance::decode, SteerBalance::handle);
-        SkyNetwork.register(TamePrompt.class, NetworkDirection.PLAY_TO_CLIENT, TamePrompt::encode, TamePrompt::decode, TamePrompt::handle);
+        SkyNetwork.register(TameState.class, NetworkDirection.PLAY_TO_CLIENT, TameState::encode, TameState::decode, TameState::handle);
     }
 
     // ------------------------------------------------------------------ C2S Call Horse (H)
@@ -49,18 +49,27 @@ public final class FaunaPackets {
         }
     }
 
-    // ------------------------------------------------------------------ S2C Tame Prompt
-    public record TamePrompt(int direction, int ticks, int progress) {
-        static void encode(TamePrompt m, FriendlyByteBuf buf) {
-            buf.writeInt(m.direction);
-            buf.writeInt(m.ticks);
-            buf.writeInt(m.progress);
+    // ------------------------------------------------------------------ S2C Tame State
+    /**
+     * The breaking's balance state, a few times a second ({@link TameBalance}): the marker (-100..100), the safe
+     * zone's half-width, progress, the bucking's strength and the marker's velocity (all percent), and how much of the
+     * grace at the edge is used up. {@code active} false ends the minigame on the client.
+     */
+    public record TameState(boolean active, int marker, int zone, int progress, int amp, int vel, int edge) {
+        static void encode(TameState m, FriendlyByteBuf buf) {
+            buf.writeBoolean(m.active);
+            buf.writeByte(m.marker);
+            buf.writeByte(m.zone);
+            buf.writeByte(m.progress);
+            buf.writeByte(m.amp);
+            buf.writeByte(m.vel);
+            buf.writeByte(m.edge);
         }
-        static TamePrompt decode(FriendlyByteBuf buf) {
-            return new TamePrompt(buf.readInt(), buf.readInt(), buf.readInt());
+        static TameState decode(FriendlyByteBuf buf) {
+            return new TameState(buf.readBoolean(), buf.readByte(), buf.readByte(), buf.readByte(), buf.readByte(), buf.readByte(), buf.readByte());
         }
-        static void handle(TamePrompt m, Supplier<NetworkEvent.Context> ctx) {
-            ctx.get().enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> FaunaClientEvents.handleTamePrompt(m)));
+        static void handle(TameState m, Supplier<NetworkEvent.Context> ctx) {
+            ctx.get().enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> FaunaClientEvents.handleTameState(m)));
             ctx.get().setPacketHandled(true);
         }
     }

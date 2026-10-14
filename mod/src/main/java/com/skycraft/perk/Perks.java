@@ -400,6 +400,13 @@ public final class Perks {
         p(s, "trample", 0.2f, 0.6f, lv(60), "mounted_combat");
         p(s, "bond", -0.45f, 0.8f, lv(70), "endurance_rider");
         p(s, "cavalry_charge", 0.1f, 1f, lv(100), "trample", "bond");
+        // the horseman's eye and the stable's trade (com.skycraft.mounts: stat cards and sheets, wild mounts, taming, tack)
+        p(s, "horse_sense", 0f, 0.14f, lv(10), "horseman");
+        p(s, "wild_eye", -0.28f, 0.4f, lv(25), "horse_sense");
+        p(s, "steady_seat", 0.05f, 0.4f, lv(20, 45), "horse_sense");
+        p(s, "pack_master", -0.9f, 0.1f, lv(15, 40, 65), "horseman");
+        p(s, "endurance", -0.95f, 0.62f, lv(30, 60), "stable_hand");
+        p(s, "trick_rider", 0.85f, 0.8f, lv(45, 75), "horse_archer");
 
         // ---------------------------------------------------------------- Cooking (custom)
         s = Skill.COOKING;
