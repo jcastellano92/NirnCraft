@@ -82,11 +82,29 @@ public final class KeyConflictResolver {
         return FMLPaths.CONFIGDIR.get().resolve("skycraft-client-keys.done");
     }
 
+    /**
+     * The first-launch marker is written in a finally: whatever happens below, the one-time defaults (toggle crouch
+     * off included) are never applied a second time, so a player who turns toggle crouch on keeps it on.
+     */
     private static void resolve(Minecraft mc) {
-        KeyMapping[] all = mc.options.keyMappings;
-        boolean changed = false;
         Path marker = marker();
         boolean firstLaunch = !Files.exists(marker);
+        try {
+            resolve(mc, firstLaunch);
+        } finally {
+            if (firstLaunch) {
+                try {
+                    Files.writeString(marker, "Skycraft applied its default controls once. Delete this file to apply them again.\n");
+                } catch (Exception e) {
+                    Skycraft.LOGGER.warn("Could not write {}", marker, e);
+                }
+            }
+        }
+    }
+
+    private static void resolve(Minecraft mc, boolean firstLaunch) {
+        KeyMapping[] all = mc.options.keyMappings;
+        boolean changed = false;
 
         if (firstLaunch) {
             for (KeyMapping k : all) {
@@ -111,6 +129,7 @@ public final class KeyConflictResolver {
                     changed = true;
                 }
             }
+            // Default off, set once: this block only runs while the marker is missing, so the player can turn it on later.
             if (mc.options.toggleCrouch().get()) {
                 mc.options.toggleCrouch().set(false);
                 changed = true;
@@ -168,13 +187,6 @@ public final class KeyConflictResolver {
         if (changed) {
             KeyMapping.resetMapping();
             mc.options.save();
-        }
-        if (firstLaunch) {
-            try {
-                Files.writeString(marker, "Skycraft applied its default controls once. Delete this file to apply them again.\n");
-            } catch (Exception e) {
-                Skycraft.LOGGER.warn("Could not write {}", marker, e);
-            }
         }
     }
 

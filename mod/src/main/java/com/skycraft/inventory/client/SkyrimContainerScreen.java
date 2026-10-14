@@ -54,7 +54,6 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
     private final boolean isBag;
     private final float bagScale;
     private final int containerSlotCount;
-    private final boolean wasCrouching;
 
     // View mode: 0 = Container loot, 1 = Player inventory (Store)
     private int viewMode = 0;
@@ -83,8 +82,7 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
         }
         this.isBag = bag;
         this.bagScale = scale;
-        LocalPlayer p = net.minecraft.client.Minecraft.getInstance().player;
-        this.wasCrouching = p != null && p.isCrouching();
+        // Sneaking through a screen is com.skycraft.client.SneakKeeper's job (it works for every screen).
         this.imageWidth = 380;
         this.imageHeight = 220;
     }
@@ -550,11 +548,4 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    @Override
-    public void onClose() {
-        super.onClose();
-        if (wasCrouching && minecraft != null && minecraft.player != null) {
-            minecraft.player.setShiftKeyDown(true);
-        }
-    }
 }

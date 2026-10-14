@@ -49,6 +49,19 @@ first-launch pass, delete `config/skycraft-client-keys.done` (v2: `skycraft-clie
 | Sneak + right-click a body | Drag it |
 | Attack an unaware target while sneaking | Sneak attack |
 
+### Staying sneaked
+
+Opening a chest, a body, a pickpocket window, the lockpicking, barter, dialogue, a book, a station or any other screen
+does not make you stand up, and you are still sneaking when it closes (code: `client/SneakKeeper`).
+
+* **Hold mode (the default).** Hold Sneak (Left Shift) when the screen opens and the sneak carries through it. Let go
+  of the key and you stand, as usual. Pressing Sneak with a screen already open does not start a sneak.
+* **Toggle mode** (Options, Controls, Sneak: Toggle). The toggled sneak is kept through every screen, and the
+  screens never flip it. Toggle crouch is switched off once on the very first launch (the marker above) and stays
+  whatever you set afterwards.
+* Sneak is not carried through a screen while riding (it would dismount you), flying or swimming (it would descend or
+  sink you). Opening doors, gates, trapdoors, levers and buttons works while sneaking, with or without an item in hand.
+
 ### Inside menus
 
 | Menu | Keys |

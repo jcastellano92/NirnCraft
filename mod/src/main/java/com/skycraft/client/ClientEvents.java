@@ -92,7 +92,8 @@ public final class ClientEvents {
 
         // BotW / AC-style wall climbing & sticking:
         // Transition ON: intentionally crouch (Shift) and jump towards a wall so you don't stick automatically
-        boolean crouching = mc.options.keyShift.isDown();
+        // The effective sneak state (toggle crouch, and SneakKeeper while a screen is open), not the raw key.
+        boolean crouching = mc.player.isShiftKeyDown();
         boolean jumping = mc.options.keyJump.isDown();
         boolean jumpTriggered = jumping && !jumpWasDown;
         jumpWasDown = jumping;
