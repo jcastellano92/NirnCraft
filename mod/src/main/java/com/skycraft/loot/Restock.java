@@ -81,8 +81,11 @@ public final class Restock {
         if (days <= 0 || now - entry.getLong("at") < days * 24000L) return;
         // the player keeps their own things: wait until only what the table generated is left inside
         if (holdsForeignItems(entry, container)) return;
-        // the time has come: empty it and roll the table again when this open unpacks it
+        // the time has come: empty it (the overflow behind the slots too: only table items are inside) and roll the
+        // table again when this open unpacks it
         container.clearContent();
+        com.skycraft.inventory.BulkStore overflow = com.skycraft.inventory.ContainerOverflow.store(container);
+        if (overflow != null) overflow.clear();
         container.setLootTable(new ResourceLocation(table), level.getRandom().nextLong());
         entry.putLong("at", now);
         entry.remove("gen");
@@ -124,7 +127,9 @@ public final class Restock {
 
     /**
      * Whether the container holds anything the table did not generate (an item kind it did not roll, or more of one
-     * than it rolled). Without a record of the generated contents (entries from before it was kept) any item counts.
+     * than it rolled). The overflow behind the slots ({@code inventory.ContainerOverflow}) counts as inside the
+     * container: an item a player stored there is the player's. Without a record of the generated contents (entries
+     * from before it was kept) any item counts.
      */
     public static boolean holdsForeignItems(CompoundTag entry, RandomizableContainerBlockEntity container) {
         Map<String, Integer> allowed = new HashMap<>();
@@ -139,6 +144,18 @@ public final class Restock {
             int left = allowed.getOrDefault(id, 0) - s.getCount();
             if (left < 0) return true;
             allowed.put(id, left);
+        }
+        com.skycraft.inventory.BulkStore overflow = com.skycraft.inventory.ContainerOverflow.store(container);
+        if (overflow != null) {
+            for (int i = 0; i < overflow.size(); i++) {
+                // a row whose item no longer resolves cannot be told from the table's: it is the player's, keep it
+                ItemStack row = overflow.get(i);
+                if (row.isEmpty()) return true;
+                String id = itemId(row);
+                long left = (long) allowed.getOrDefault(id, 0) - row.getCount();
+                if (left < 0) return true;
+                allowed.put(id, (int) left);
+            }
         }
         return false;
     }

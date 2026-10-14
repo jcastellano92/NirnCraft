@@ -68,7 +68,9 @@ public final class CorePackets {
             ListTag omitted = new ListTag();
             // the overflow pack (inventory.Pack) is mirrored by its own chunked packets, never by this one
             // (so is the ender chest's overflow, inventory.ContainerOverflow: server data the client never reads)
-            for (String bulk : new String[]{"pack", com.skycraft.inventory.ContainerOverflow.ENDER_MODULE}) {
+            // (and the mount saddlebags' overflow, mounts.Saddlebags: also server data)
+            for (String bulk : new String[]{"pack", com.skycraft.inventory.ContainerOverflow.ENDER_MODULE,
+                    com.skycraft.mounts.Saddlebags.OVERFLOW_MODULE}) {
                 if (modules.contains(bulk)) {
                     modules.remove(bulk);
                     omitted.add(StringTag.valueOf(bulk));

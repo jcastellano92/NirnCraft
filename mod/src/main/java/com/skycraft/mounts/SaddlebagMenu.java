@@ -19,7 +19,8 @@ import net.minecraft.world.item.ItemStack;
  *     saddle or barding from your bags is "Equip" and swaps with what is worn ({@link #equipFrom}). Nothing else can be
  *     put in them.</li>
  *     <li>A cargo stack goes in only while the load stays within the saddle's capacity: a partial stack is accepted up
- *     to the last kilogram that fits.</li>
+ *     to the last kilogram that fits. What the 52 slots cannot hold goes to the overflow behind them (the Skyrim
+ *     screen lists it as rows; {@link Saddlebags.Bag} is an {@code OverflowHost}); the weight limit counts both.</li>
  * </ul>
  */
 public final class SaddlebagMenu extends ChestMenu {
@@ -28,6 +29,11 @@ public final class SaddlebagMenu extends ChestMenu {
     SaddlebagMenu(int id, Inventory inv, Saddlebags.Bag bag) {
         super(MenuType.GENERIC_9x6, id, inv, bag, 6);
         this.bag = bag;
+    }
+
+    /** The bag (its slots and the overflow behind them) this menu shows. */
+    Saddlebags.Bag bag() {
+        return bag;
     }
 
     /** Shift-click never moves worn gear (vanilla would bypass {@link GearSlot#onTake} and duplicate the saddle). */
@@ -122,7 +128,7 @@ public final class SaddlebagMenu extends ChestMenu {
 
         @Override
         public boolean mayPlace(ItemStack stack) {
-            return bag.canPlaceItem(getContainerSlot(), stack);
+            return bag.fits(getContainerSlot(), stack);
         }
 
         @Override

@@ -17,8 +17,15 @@ dialogue `fauna/Stables`, selftest `MountsSelfTest` (`/skycraft-mounts selftest`
    the normal Skyrim inventory). Empty-handed it opens on the **stat sheet** (key 3 shows it from the bags too).
    - Slot entries "Worn: saddle" and "Worn: barding": Take = Unequip. From My Items, Store = Equip, and it swaps with what is
      worn (the old piece goes back to your bags). Take All and Store All never touch gear.
-   - Everything else is cargo, limited by **weight** (kg, the `ItemWeights` unit), not by slots. A smaller or removed saddle
-     spills the surplus, last stacks first, split to fit, into your bags (floor if full). Nothing is ever deleted.
+   - Everything else is cargo, limited by **weight** (kg, the `ItemWeights` unit), not by slots. The 52 cargo slots of the
+     screen are only the first rows: what they cannot hold goes to the bags' **overflow** (`BulkStore`, behind the slots like
+     a chest's, `inventory.OverflowHost`), listed in the same screen grouped by exact item (Take / Store / Take All / Store
+     All work on the rows), so 80 different items fit as long as they weigh less than the saddle carries. The limit counts
+     slots and overflow together (the header shows the sum). A smaller or removed saddle spills the surplus, the overflow's
+     last rows first, then the last slots, split to fit, into your bags (floor if full). Nothing is ever deleted.
+   - Persistence: the slot stacks are `bags` in the mount record, the overflow is the player's server-only module
+     `mount_bags` (list `e`, the `BulkStore` row format; never in the data sync). Both stay with the player through
+     calling, falling, switching and relogging; see "One active mount".
    - An unsaddled own mount takes a saddle straight from the hand; a saddled one only through the menu. Barding in hand on
      an own mount puts it on.
 
@@ -171,7 +178,8 @@ server. **Train** pays a stable hand one growth point in a stat (fee 50 + 40/poi
 twice an in-game week and never past the stat's soft cap.
 
 ## One active mount
-Buying or breaking in a mount retires the previous regular mount: its saddlebag items go to your inventory, its saddle and
+Buying or breaking in a mount retires the previous regular mount: its saddlebag items (slots and overflow rows, with their
+whole counts) go to your inventory through `Inv.giveOrDrop` (slots, then your pack), its saddle and
 barding move to the new mount if the breed takes them (else to your bags), and the animal is released if you tamed it
 (it wanders free) or returned to the stable if bought (a bought one pays its trade-in when you tame instead). Selling does
 the same and pays by grade and level. Never deleted. Legends (Shadowmere, Arvak) are quest rewards: they stay yours and are

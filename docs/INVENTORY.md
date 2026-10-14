@@ -14,7 +14,7 @@ that holds items is ever allowed to lose them for lack of room (it spills, it ne
 | Bulk store | `inventory/BulkStore` | `(item+NBT, int count)` entries: merge, add/take, caps, deterministic order, versioned NBT |
 | Player pack | `inventory/Pack` | a `BulkStore` view over the player's SkyData `pack`, plus weight, sync, refill, virtual slots |
 | Container overflow | `inventory/ContainerOverflow` | block-entity capability + resolution of the overflow behind an open menu, drain, spill |
-| Overflow of non-BE containers | `inventory/OverflowHost` | interface implemented by corpses (and, for the mounts/followers owners, by their containers) |
+| Overflow of non-BE containers | `inventory/OverflowHost` | interface implemented by corpses, ship holds, the mount's saddlebags and a follower's bags |
 | Container sync | `inventory/ContainerSync`, `ContainerOverflowSync` packet | opening client's copy of the overflow while a menu is open |
 | Facade | `inventory/Inv` | `count/has/take/give/find/forEach/slotOf` over slots + offhand + pack |
 | Ammo | `inventory/Ammo` | brings pack arrows/bolts into a slot where vanilla's `getProjectile` can see them |
@@ -88,8 +88,9 @@ shipwright, gifts, lockpicks and jail keys, house keys, theft detection and "sto
 backpack), coins (`InventoryEvents.convertCoins`).
 
 Known gaps (they still only look at slots; the drain above makes them rare): arbitrary third-party mods reading
-`Inventory.items`; vanilla crafting-grid shortcuts; the spell `Transmute` (`magic/spell/SpellEffects`, slots only: the
-magic owner routes it through `Inv.take` when they next touch it). Arrows: see "The facade" (`Ammo`).
+`Inventory.items`; vanilla crafting-grid shortcuts. The spell `Transmute` (`SpellEffects.transmuteOne`) takes its iron
+through `Inv.take` and hands the gold over with `Inv.giveOrDrop`, so pack iron works. Arrows and bolts: see "The
+facade" (`Ammo`).
 
 ## The facade (`inventory.Inv`)
 
@@ -118,14 +119,20 @@ bedroll (`TentKitItem`), fishing bait (`SkyFishingHook`), shipwright materials (
 
 **Ammo.** Vanilla's `Player#getProjectile` reads only the slots and cannot be redirected (no mixins), so `Ammo` brings
 one stack of a ranged weapon's ammo from the pack into a slot at `RightClickItem` (before the bow counts arrows) and
-every 5 ticks while a bow/crossbow is in hand. Arrows in the pack are usable at once; the rest stays in the pack.
+every 5 ticks while a ranged weapon is in hand. It works for every `ProjectileWeaponItem` (bows, vanilla and Dawnguard
+crossbows, whose `getAllSupportedProjectiles` includes bolts). Arrows in the pack are usable at once; the rest stays in
+the pack.
 
 **Consumers left on purpose (and why).** Slot-addressed screens and actions: alchemy, enchanting, staff enchanting,
 tempering, soul gem filling, barter sell, the stolen-blade handover (all call `Pack.resolveSlot/resolveAll` and so work
 on pack rows). Code that mutates stacks in place or transfers whole inventories: theft tagging (`crime/Theft`), jail
 confiscation (`crime/Jail`, `crime/Bounty`), death (`combat/DeathHandler`), pick-up (`vitals/ActionHandler.addToBags`).
-Conjured weapons (`magic/bound`) live only in slots by design. Vanilla and third-party readers (hoppers, brewing
-stands, furnaces, other mods) see only vanilla slots.
+Conjured weapons (`magic/bound/BoundWeapons`) and the hand management of `magic/Hands` live only in slots by design:
+a conjured weapon only exists where it ticks, is never stored (not in the pack, not in a chest) and the hand/hotbar
+logic names real slots, so neither goes through `Inv`. The crafting counts agree with `Inv`: `crafting/recipe/Cost`
+(stations, cooking, homestead plans, tempering cost) is `Inv.count/take` itself; alchemy, enchanting, staff enchanting,
+soul gems and tempering name a slot and resolve pack rows with `Pack.resolveSlot/resolveAll`, so a pack row counts at
+once. Vanilla and third-party readers (hoppers, brewing stands, furnaces, other mods) see only vanilla slots.
 
 ## Containers: a chest has no slot limit
 
@@ -160,10 +167,29 @@ Skyrim's chest holds anything; the engineering cap is 2000 kinds x 1,000,000 eac
   block from breaking (the protect module in towns) stops the spill with it.
 * **Other containers.** Anything that is a `Container` and implements `OverflowHost` (give the store an `onChange` that
   marks the owner dirty, save `BulkStore.save()` next to the slots) gets the same screen behaviour with no other
-  change: the corpses and the ships' cargo holds (`sailing/ShipEntity`, spilled when the ship sinks or is dismantled)
-  do. A mount's saddlebags are weight-limited, not slot-limited: their owner decides whether (and with what rule) to
-  expose an overflow. Followers' trade inventories and the jail's evidence chests keep their own accounting (the jail
-  holds what does not fit its chests in `JailData`, nothing is deleted).
+  change: the corpses, the ships' cargo holds (`sailing/ShipEntity`, spilled when the ship sinks or is dismantled), the
+  mount's saddlebags and a follower's bags do. A host with a limit of its own answers `overflowRoom(stack)`: a weight
+  rule never lets the overflow bypass it (`Bound.add` hands back what the room refuses).
+* **Saddlebags** (`mounts/Saddlebags.Bag`, details in docs/MOUNTS.md). 52 cargo slots plus an overflow in the player's
+  server-only module `mount_bags`; the limit is the saddle's weight over both (`overflowRoom`, slot `mayPlace`).
+  `Bag.canPlaceItem` is structural only (moving a row from the overflow into a free slot, which the screen does after
+  every take, changes no weight). Every change of the slots is written to the record at once (`setChanged`), like the
+  overflow, so a crash with the menu open loses nothing. `Saddlebags.fit` (saddle shrinks or goes: overflow rows first,
+  last first, then the last slots) and `emptyToPlayer` (`Mounts.retire`, so buying, taming and selling) hand items to
+  the player through `Inv.giveOrDrop`, with the open menu's slots written first and reloaded after.
+* **Followers' trade bags** (`society/Followers`). 27 slots plus an overflow (`skycraft_follower_ov` in the NPC's
+  persistent data), weight-limited at `Followers.CARRY_KG` (300, the player's base) over both; the Skyrim container
+  screen lists it like a chest. Gear the follower takes off and the stow of swapped gear ignore the weight (never
+  refused, never dropped while the overflow takes it); when the menu closes over the limit (a shift-click can overfill)
+  the surplus goes back to the player. Dismissal gives slots and overflow to the owner (`Inv.giveOrDrop`); death drops
+  the slots and spills the overflow (`ContainerOverflow.spill`, bounded, never deleted).
+* **Jail evidence chests** (`crime/Jail`). The evidence chest is an ordinary chest block entity, so it has the
+  `ContainerOverflow` capability: what its 54 slots cannot hold goes into its overflow (`Jail.stash`), the Skyrim
+  screen shows it, a cell counts as occupied while the overflow holds anything, and `Jail.release` hands every
+  non-stolen row back. `JailData.held` remains only for a missing chest and for saves from before this.
+* **Loot restock** (`loot/Restock`). A restock empties the slots and the overflow, and only when nothing but what the
+  table rolled is inside: `holdsForeignItems` counts the overflow rows against the recorded roll (an unreadable row
+  counts as the player's), so a player's stash in a restocking container is never wiped.
 
 ## Corpses and death
 
@@ -220,4 +246,13 @@ with `saveWithFullMetadata` and loaded with `BlockEntity.loadStatic`, double-che
 spills nothing and a destruction that spills everything; a full death (drops event through `DeathHandler` and
 `PlayerCorpses`, body NBT round trip, respawn `Clone` event, loot by the owner, counts identical); a player written to a
 real temp file with `NbtIo.writeCompressed` and loaded (counts, quest item, favorite, ender overflow); the facade and
-the ammo hook. Static lint: `tools/qa/data_checks.py` (direct slot reads outside the whitelist).
+the ammo hook (bow and crossbow); the stragglers: Transmute from the pack, a follower's bags (overflow, weight rule,
+NBT round trip, death) and restock with an overflow. Static lint: `tools/qa/data_checks.py` (direct slot reads
+outside the whitelist).
+
+`/skycraft-mounts selftest` (`mounts/MountsSelfTest`, `bagOverflow`): 80 distinct kinds through the real
+`handleContainerStore` into 52 slots plus overflow, the weight rule over both (a too heavy item refused, 1000 light
+items stored only up to the last kilogram, the rest stays with the player), the record's list through compressed NBT
+and a reopened bag, the module absent from the data sync, a saddle that carries a quarter and then nothing (spills,
+counts equal), a grouped take over slot and overflow, an overflow-only row by its slot id, `emptyToPlayer`, and the
+retire and sell paths of the one-active-mount rules with overflow rows.

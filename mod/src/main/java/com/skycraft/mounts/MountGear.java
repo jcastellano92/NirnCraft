@@ -272,8 +272,7 @@ public final class MountGear {
     /** Hands an item back to the player's bags (never the held hand), dropping it at their feet when they are full. */
     public static void give(ServerPlayer player, ItemStack stack) {
         if (stack.isEmpty()) return;
-        ActionHandler.addToBags(player, stack, false);
-        if (!stack.isEmpty()) player.drop(stack, false);
+        com.skycraft.inventory.Inv.giveOrDrop(player, stack); // slots, then the pack; only the pack's engineering cap drops
     }
 
     /** Fits the saddle {@code source} (one item of it is used up) onto the mount; the old saddle goes to the player. */

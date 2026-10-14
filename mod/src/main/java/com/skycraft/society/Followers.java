@@ -30,6 +30,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BowItem;
@@ -53,6 +54,13 @@ public final class Followers {
     public static final String FOLLOWER_KEY = "skycraft_follower";
     public static final String INVENTORY_KEY = "skycraft_follower_inv";
     public static final int INVENTORY_SIZE = 27;
+    /** Rows of a follower's overflow behind the 27 slots (BulkStore NBT; absent while it is empty). */
+    public static final String OVERFLOW_KEY = "skycraft_follower_ov";
+    /**
+     * What a follower's bags carry (kg, the unit of inventory.ItemWeights): the same base as a player's. Slots and
+     * overflow count together; a menu that ends over it hands the surplus back to the player (never deletes).
+     */
+    public static final float CARRY_KG = 300f;
     public static final int HIRELING_COST = 500;
     /** Key in the player's {@code society} data: UUID of their one follower (survives restarts). */
     private static final String PLAYER_KEY = "follower";
@@ -111,7 +119,15 @@ public final class Followers {
             ItemStack s = inv.getItem(i);
             if (!s.isEmpty()) com.skycraft.inventory.Pack.giveOrDrop(owner, s);
         }
+        if (inv instanceof Bags b) {
+            // the overflow rows (whole int counts, unreadable rows stay): to the owner like the slots
+            for (int i = b.overflow.size() - 1; i >= 0; i--) {
+                ItemStack all = b.overflow.take(i, Integer.MAX_VALUE);
+                if (!all.isEmpty()) com.skycraft.inventory.Inv.giveOrDrop(owner, all);
+            }
+        }
         npc.getPersistentData().remove(INVENTORY_KEY);
+        npc.getPersistentData().remove(OVERFLOW_KEY);
         if (!(npc instanceof NpcEntity n)) return;
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             ItemStack worn = n.getItemBySlot(slot);
@@ -283,7 +299,10 @@ public final class Followers {
             ItemStack s = inv.getItem(i);
             if (!s.isEmpty()) npc.spawnAtLocation(s);
         }
+        // the overflow falls where it stood as persistent item entities (a huge pile is bounded, never deleted)
+        if (inv instanceof Bags b) com.skycraft.inventory.ContainerOverflow.spill(npc.level(), npc.blockPosition(), b.overflow);
         npc.getPersistentData().remove(INVENTORY_KEY);
+        npc.getPersistentData().remove(OVERFLOW_KEY);
         UUID owner = getOwnerId(npc);
         if (owner != null && npc.level() instanceof ServerLevel sl) {
             Player p = sl.getServer().getPlayerList().getPlayer(owner);
@@ -291,9 +310,71 @@ public final class Followers {
         }
     }
 
+    /**
+     * A follower's bags: the 27 slots of the trade screen and an overflow behind them (inventory.OverflowHost), so
+     * what a player hands over is never refused for lack of slots, only for weight ({@link #CARRY_KG}).
+     */
+    private static final class Bags extends SimpleContainer implements com.skycraft.inventory.OverflowHost {
+        final com.skycraft.inventory.BulkStore overflow;
+
+        Bags() {
+            super(INVENTORY_SIZE);
+            this.overflow = new com.skycraft.inventory.BulkStore(com.skycraft.inventory.ContainerOverflow.MAX_ENTRIES,
+                    com.skycraft.inventory.ContainerOverflow.MAX_PER_ENTRY, this::setChanged);
+        }
+
+        @Override
+        public com.skycraft.inventory.BulkStore overflow() {
+            return overflow;
+        }
+
+        float weight() {
+            float sum = overflow.weight();
+            for (int i = 0; i < getContainerSize(); i++) sum += com.skycraft.inventory.ItemWeights.getStack(getItem(i));
+            return sum;
+        }
+
+        @Override
+        public int overflowRoom(ItemStack stack) {
+            float unit = com.skycraft.inventory.ItemWeights.get(stack);
+            if (unit <= 0f) return Integer.MAX_VALUE;
+            float room = CARRY_KG - weight() + 0.001f;
+            return room <= 0f ? 0 : (int) Math.min(Integer.MAX_VALUE, Math.floor(room / unit));
+        }
+
+        /** True when one more of {@code stack} may go in {@code slot} within the carry weight. */
+        boolean fits(int slot, ItemStack stack) {
+            if (stack.isEmpty()) return false;
+            float unit = com.skycraft.inventory.ItemWeights.get(stack);
+            return unit <= 0f || weight() - com.skycraft.inventory.ItemWeights.getStack(getItem(slot)) + unit <= CARRY_KG + 0.001f;
+        }
+
+        /** Hands the surplus over {@link #CARRY_KG} to {@code to} (overflow rows first, last first; then the last slots). */
+        void spillSurplus(Player to) {
+            float over = weight() - CARRY_KG;
+            for (int i = overflow.size() - 1; i >= 0 && over > 0.001f; i--) {
+                ItemStack row = overflow.get(i);
+                float unit = com.skycraft.inventory.ItemWeights.get(row);
+                if (row.isEmpty() || unit <= 0f) continue;
+                ItemStack out = overflow.take(i, Math.min(row.getCount(), (int) Math.ceil(over / unit - 1e-4)));
+                over -= unit * out.getCount();
+                com.skycraft.inventory.Inv.giveOrDrop(to, out);
+            }
+            for (int i = getContainerSize() - 1; i >= 0 && over > 0.001f; i--) {
+                ItemStack s = getItem(i);
+                float unit = com.skycraft.inventory.ItemWeights.get(s);
+                if (s.isEmpty() || unit <= 0f) continue;
+                ItemStack out = removeItem(i, Math.min(s.getCount(), (int) Math.ceil(over / unit - 1e-4)));
+                over -= unit * out.getCount();
+                com.skycraft.inventory.Inv.giveOrDrop(to, out);
+            }
+        }
+    }
+
     public static SimpleContainer getFollowerInventory(LivingEntity npc) {
-        SimpleContainer container = new SimpleContainer(INVENTORY_SIZE);
+        Bags container = new Bags();
         CompoundTag pd = npc.getPersistentData();
+        if (pd.contains(OVERFLOW_KEY, Tag.TAG_COMPOUND)) container.overflow.load(pd.getCompound(OVERFLOW_KEY));
         if (pd.contains(INVENTORY_KEY, Tag.TAG_LIST)) {
             ListTag list = pd.getList(INVENTORY_KEY, Tag.TAG_COMPOUND);
             for (int i = 0; i < list.size(); i++) {
@@ -319,6 +400,10 @@ public final class Followers {
             }
         }
         npc.getPersistentData().put(INVENTORY_KEY, list);
+        if (container instanceof Bags b) {
+            if (b.overflow.isEmpty()) npc.getPersistentData().remove(OVERFLOW_KEY);
+            else npc.getPersistentData().put(OVERFLOW_KEY, b.overflow.save());
+        }
     }
 
     // ------------------------------------------------------------------ gear
@@ -347,13 +432,25 @@ public final class Followers {
     /** Puts {@code stack} into the follower's bags, or drops it at their feet if they are full. */
     private static void stow(LivingEntity npc, Container container, ItemStack stack) {
         if (stack.isEmpty()) return;
+        if (!put(container, stack)) npc.spawnAtLocation(stack);
+    }
+
+    /**
+     * Puts a stack into a free slot, else into the overflow behind the slots (the carry weight is not checked here:
+     * gear coming off the follower's own body is never refused). True when all of it was stored.
+     */
+    private static boolean put(Container container, ItemStack stack) {
         for (int i = 0; i < container.getContainerSize(); i++) {
             if (container.getItem(i).isEmpty()) {
                 container.setItem(i, stack);
-                return;
+                return true;
             }
         }
-        npc.spawnAtLocation(stack);
+        if (container instanceof Bags b) {
+            b.overflow.add(stack);
+            return stack.isEmpty();
+        }
+        return false;
     }
 
     /** Swaps {@code best} (moved out of the bags) into {@code slot}; given gear goes back into the bags, native gear aside. */
@@ -421,10 +518,8 @@ public final class Followers {
         if (!(entity instanceof NpcEntity npc)) return;
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             if (!npc.isGivenGear(slot) || npc.getItemBySlot(slot).isEmpty()) continue;
-            int free = -1;
-            for (int i = 0; i < container.getContainerSize() && free < 0; i++) if (container.getItem(i).isEmpty()) free = i;
-            if (free < 0) break;
-            container.setItem(free, npc.getItemBySlot(slot));
+            ItemStack worn = npc.getItemBySlot(slot).copy();
+            if (!put(container, worn)) break;
             npc.setItemSlot(slot, ItemStack.EMPTY);
             npc.setDropChance(slot, 0.085f);
         }
@@ -442,29 +537,74 @@ public final class Followers {
         saveFollowerInventory(npc, container);
         container.addListener(c -> saveFollowerInventory(npc, c));
         player.openMenu(new SimpleMenuProvider(
-                (containerId, playerInv, p) -> new ChestMenu(MenuType.GENERIC_9x3, containerId, playerInv, container, 3) {
-                    @Override
-                    public boolean stillValid(Player pl) {
-                        return canTrade(npc, pl);
-                    }
-
-                    @Override
-                    public void clicked(int slot, int button, ClickType type, Player pl) {
-                        // the NPC may have died this tick (its bags already dropped): no more taking
-                        if (!canTrade(npc, pl)) return;
-                        super.clicked(slot, button, type, pl);
-                    }
-
-                    @Override
-                    public void removed(Player pl) {
-                        super.removed(pl);
-                        if (!npc.isAlive() || npc.isRemoved()) return;
-                        autoEquipBestGear(npc, container);
-                        saveFollowerInventory(npc, container);
-                    }
-                },
+                (containerId, playerInv, p) -> new FollowerMenu(containerId, playerInv, container, npc),
                 Component.translatable("society.skycraft.follower.trade_title", npc.getDisplayName())
         ));
+    }
+
+    /** The trade screen: a 27-slot chest menu (the Skyrim container screen) over {@link Bags}, weight-limited. */
+    private static final class FollowerMenu extends ChestMenu {
+        private final LivingEntity npc;
+        private final SimpleContainer bags;
+
+        FollowerMenu(int id, net.minecraft.world.entity.player.Inventory inv, SimpleContainer bags, LivingEntity npc) {
+            super(MenuType.GENERIC_9x3, id, inv, bags, 3);
+            this.npc = npc;
+            this.bags = bags;
+        }
+
+        @Override
+        protected Slot addSlot(Slot slot) {
+            // the chest menu lays out plain slots over the container: the follower's accept only what the weight allows
+            if (slot.container instanceof Bags b) slot = new LimitedSlot(b, slot.getContainerSlot(), slot.x, slot.y);
+            return super.addSlot(slot);
+        }
+
+        @Override
+        public boolean stillValid(Player pl) {
+            return canTrade(npc, pl);
+        }
+
+        @Override
+        public void clicked(int slot, int button, ClickType type, Player pl) {
+            // the NPC may have died this tick (its bags already dropped): no more taking
+            if (!canTrade(npc, pl)) return;
+            super.clicked(slot, button, type, pl);
+        }
+
+        @Override
+        public void removed(Player pl) {
+            super.removed(pl);
+            if (!npc.isAlive() || npc.isRemoved()) return;
+            autoEquipBestGear(npc, bags);
+            if (bags instanceof Bags b) b.spillSurplus(pl); // a shift-click can overfill: the surplus goes back to you
+            saveFollowerInventory(npc, bags);
+        }
+    }
+
+    /** A slot of a follower's bags: takes items only while the carry weight has room. */
+    private static final class LimitedSlot extends Slot {
+        private final Bags bags;
+
+        LimitedSlot(Bags bags, int index, int x, int y) {
+            super(bags, index, x, y);
+            this.bags = bags;
+        }
+
+        @Override
+        public boolean mayPlace(ItemStack stack) {
+            return bags.fits(getContainerSlot(), stack);
+        }
+
+        @Override
+        public int getMaxStackSize(ItemStack stack) {
+            float unit = com.skycraft.inventory.ItemWeights.get(stack);
+            int cap = Math.min(super.getMaxStackSize(stack), stack.getMaxStackSize());
+            if (unit <= 0f) return cap;
+            float others = bags.weight() - com.skycraft.inventory.ItemWeights.getStack(getItem());
+            int fits = (int) Math.floor((CARRY_KG - others + 0.001f) / unit);
+            return Math.max(0, Math.min(cap, fits));
+        }
     }
 
     // ------------------------------------------------------------------ Dialogue

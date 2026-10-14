@@ -261,7 +261,13 @@ public final class Jail {
     }
 
     private static boolean empty(List<Container> chests) {
-        for (Container c : chests) if (!c.isEmpty()) return false;
+        for (Container c : chests) {
+            if (!c.isEmpty()) return false;
+            // the overflow behind the 54 slots (inventory.ContainerOverflow) is part of the chest's content
+            com.skycraft.inventory.BulkStore ov = c instanceof net.minecraft.world.level.block.entity.BlockEntity be
+                    ? com.skycraft.inventory.ContainerOverflow.store(be) : null;
+            if (ov != null && !ov.isEmpty()) return false;
+        }
         return true;
     }
 
@@ -533,10 +539,23 @@ public final class Jail {
         return stack.isEmpty() ? ItemStack.EMPTY : stack;
     }
 
-    /** Confiscates {@code stack} into the evidence chest; overflow is held safely in {@link JailData}. */
+    /**
+     * Confiscates {@code stack} into the evidence chest: its 54 slots, then the chest's own overflow
+     * ({@code inventory.ContainerOverflow}, shown by its Skyrim screen and handed back on release); only when the chest
+     * is missing does the rest wait in {@link JailData}.
+     */
     private static void stash(ServerPlayer player, List<Container> chests, ItemStack stack) {
         if (stack.isEmpty()) return;
         ItemStack rest = insert(chests, stack);
+        if (!rest.isEmpty()) {
+            for (Container c : chests) {
+                if (rest.isEmpty()) break;
+                if (c instanceof net.minecraft.world.level.block.entity.BlockEntity be) {
+                    com.skycraft.inventory.BulkStore ov = com.skycraft.inventory.ContainerOverflow.store(be);
+                    if (ov != null) ov.add(rest);
+                }
+            }
+        }
         if (!rest.isEmpty()) {
             JailData data = JailData.get(player.server);
             data.held.computeIfAbsent(player.getUUID(), k -> new ArrayList<>()).add(rest.copy());
@@ -916,6 +935,16 @@ public final class Jail {
                         if (!Bounty.isStolen(s)) giveBack(player, s);
                     }
                     chest.setChanged();
+                    // what the slots could not hold (the chest's overflow, whole int-count rows, split to stacks)
+                    com.skycraft.inventory.BulkStore ov = chest instanceof net.minecraft.world.level.block.entity.BlockEntity be
+                            ? com.skycraft.inventory.ContainerOverflow.store(be) : null;
+                    if (ov != null) {
+                        for (int i = ov.size() - 1; i >= 0; i--) {
+                            ItemStack all = ov.take(i, Integer.MAX_VALUE);
+                            if (all.isEmpty() || Bounty.isStolen(all)) continue;
+                            for (ItemStack part : com.skycraft.inventory.BulkStore.splitToStacks(all)) giveBack(player, part);
+                        }
+                    }
                 }
                 if (site.hold()) jd.chestOwner.remove(site.key());
             }

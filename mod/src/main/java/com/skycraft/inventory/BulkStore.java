@@ -37,7 +37,7 @@ import java.util.function.Predicate;
 public final class BulkStore {
     public static final int VERSION = 1;
     static final String VERSION_KEY = "v";
-    static final String LIST = "e";
+    public static final String LIST = "e";
     static final String STACK = "s";
     static final String COUNT = "n";
 

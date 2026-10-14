@@ -69,6 +69,7 @@ final class OverflowSelfTest {
         guarded("death and corpse", c, () -> death(server, level, c));
         guarded("player file", c, () -> playerFile(server, level, c));
         guarded("facade", c, () -> facade(server, level, a, c));
+        guarded("stragglers", c, () -> stragglers(level, a, c));
         sweep(level);
     }
 
@@ -560,6 +561,125 @@ final class OverflowSelfTest {
         c.check("ammo: nothing was lost bringing the arrows over", Inv.count(a, Items.ARROW) == 1000, Inv.count(a, Items.ARROW) + " arrows");
         a.getInventory().clearContent();
         Pack.clear(a);
+    }
+
+    // ------------------------------------------------------------------ 7. the stragglers routed through the facade
+
+    private static ItemStack light(int i, int count) {
+        ItemStack s = new ItemStack(Items.STICK, count);
+        s.getOrCreateTag().putInt(TAG, i);
+        s.getTag().putFloat(ItemWeights.WEIGHT_NBT, 0.01f);
+        return s;
+    }
+
+    private static void stragglers(ServerLevel level, FakePlayer a, PackSelfTest.Checks c) {
+        a.getInventory().clearContent();
+        Pack.clear(a);
+        Inventory inv = a.getInventory();
+
+        // magic: Transmute reads the pack through Inv, like every other rule
+        for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) inv.setItem(i, distinct(i));
+        Pack.give(a, new ItemStack(Items.IRON_INGOT, 5));
+        Pack.give(a, new ItemStack(Items.RAW_IRON, 2));
+        boolean slotsBlind = countSlots(inv, Items.IRON_INGOT) == 0;
+        boolean did = com.skycraft.magic.spell.SpellEffects.transmuteOne(a);
+        c.check("transmute: iron that exists only in the pack is transmuted (ingots first), one piece per cast",
+                slotsBlind && did && Inv.count(a, Items.IRON_INGOT) == 4 && Inv.count(a, Items.GOLD_INGOT) == 1 && Inv.count(a, Items.RAW_IRON) == 2,
+                Inv.count(a, Items.IRON_INGOT) + " iron, " + Inv.count(a, Items.GOLD_INGOT) + " gold");
+        for (int i = 0; i < 4; i++) com.skycraft.magic.spell.SpellEffects.transmuteOne(a);
+        boolean raw = com.skycraft.magic.spell.SpellEffects.transmuteOne(a);
+        c.check("transmute: ingots are used up, then raw iron; nothing else is touched, none left means false",
+                raw && Inv.count(a, Items.IRON_INGOT) == 0 && Inv.count(a, Items.RAW_IRON) == 1 && Inv.count(a, Items.RAW_GOLD) == 1
+                        && Inv.count(a, Items.GOLD_INGOT) == 5, Inv.count(a, Items.RAW_IRON) + " raw iron left");
+        Inv.take(a, Items.RAW_IRON, 10);
+        c.check("transmute: nothing to transmute returns false", !com.skycraft.magic.spell.SpellEffects.transmuteOne(a), "");
+        a.getInventory().clearContent();
+        Pack.clear(a);
+
+        // arrows for a crossbow come from the pack too (ProjectileWeaponItem, not only bows)
+        for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) inv.setItem(i, distinct(i));
+        inv.setItem(inv.selected, new ItemStack(Items.CROSSBOW));
+        Pack.give(a, new ItemStack(Items.ARROW, 300));
+        boolean blind = a.getProjectile(a.getMainHandItem()).isEmpty();
+        boolean brought = Ammo.ensure(a, a.getMainHandItem());
+        c.check("ammo: a crossbow finds arrows that only exist in the pack, none lost",
+                blind && brought && !a.getProjectile(a.getMainHandItem()).isEmpty() && Inv.count(a, Items.ARROW) == 300,
+                "blind " + blind + ", brought " + brought + ", " + Inv.count(a, Items.ARROW) + " arrows");
+        a.getInventory().clearContent();
+        Pack.clear(a);
+
+        // followers: 27 slots and an overflow behind them, weight-limited, persisted with the NPC, never lost
+        BlockPos at = level.getSharedSpawnPos().above(2);
+        net.minecraft.world.entity.LivingEntity npc = net.minecraft.world.entity.EntityType.ZOMBIE.create(level);
+        if (npc == null) {
+            c.check("follower bags: a test entity", false, "zombie not created");
+            return;
+        }
+        npc.setPos(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+        SimpleContainer bags = com.skycraft.society.Followers.getFollowerInventory(npc);
+        c.check("follower bags: the trade container has an overflow behind its 27 slots", bags instanceof OverflowHost, bags.getClass().getSimpleName());
+        if (!(bags instanceof OverflowHost host)) return;
+        for (int i = 0; i < 27; i++) bags.setItem(i, light(i, 1));
+        ContainerOverflow.Bound bound = new ContainerOverflow.Bound(host.overflow(), bags);
+        int added = 0;
+        for (int i = 0; i < 40; i++) added += bound.add(light(100 + i, 3));
+        c.check("follower bags: what the 27 slots cannot hold goes to the overflow (40 more kinds)",
+                added == 120 && host.overflow().size() == 40, added + " items, " + host.overflow().size() + " rows");
+        ItemStack heavy = light(999, 1);
+        heavy.getTag().putFloat(ItemWeights.WEIGHT_NBT, com.skycraft.society.Followers.CARRY_KG * 2);
+        c.check("follower bags: an item heavier than the follower can carry is refused, not stored",
+                host.overflowRoom(heavy) == 0 && bound.add(heavy) == 0 && heavy.getCount() == 1, "room " + host.overflowRoom(heavy));
+        com.skycraft.society.Followers.saveFollowerInventory(npc, bags);
+        CompoundTag pd = npc.getPersistentData().copy();
+        SimpleContainer back = null;
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            NbtIo.writeCompressed(pd, bos);
+            net.minecraft.world.entity.LivingEntity npc2 = net.minecraft.world.entity.EntityType.ZOMBIE.create(level);
+            npc2.getPersistentData().merge(NbtIo.readCompressed(new ByteArrayInputStream(bos.toByteArray())));
+            back = com.skycraft.society.Followers.getFollowerInventory(npc2);
+        } catch (IOException e) {
+            c.check("follower bags: NBT round trip", false, e.toString());
+        }
+        boolean same = back instanceof OverflowHost bh && bh.overflow().sameAs(host.overflow());
+        for (int i = 0; back != null && i < 27; i++) same &= ItemStack.matches(back.getItem(i), bags.getItem(i));
+        c.check("follower bags: slots and overflow survive saving the NPC and loading it (a restart)", same, back == null ? "no read" : "compared");
+
+        // death: everything falls where it stood (slots as drops, the overflow as persistent items)
+        com.skycraft.society.Followers.onDeath(npc);
+        int dropped = 0;
+        for (ItemEntity e : level.getEntitiesOfClass(ItemEntity.class, new AABB(at).inflate(8))) {
+            ItemStack s = e.getItem();
+            if (s.is(Items.STICK) && s.hasTag() && s.getTag().contains(TAG)) dropped += s.getCount();
+        }
+        c.check("follower bags: when the follower dies slots and overflow all drop (27 + 120 items), the record is cleared",
+                dropped == 27 + 120 && !npc.getPersistentData().contains(com.skycraft.society.Followers.INVENTORY_KEY)
+                        && !npc.getPersistentData().contains(com.skycraft.society.Followers.OVERFLOW_KEY), dropped + " dropped");
+
+        // restock: the overflow counts as inside the container (a player's things are never wiped)
+        BlockPos cp = level.getSharedSpawnPos().above(5);
+        ChestBlockEntity chest = new ChestBlockEntity(cp, Blocks.CHEST.defaultBlockState());
+        chest.setLevel(level);
+        CompoundTag entry = new CompoundTag();
+        ListTag gen = new ListTag();
+        CompoundTag row = new CompoundTag();
+        row.putString("id", "minecraft:apple");
+        row.putInt("n", 3);
+        gen.add(row);
+        entry.put("gen", gen);
+        chest.setItem(0, new ItemStack(Items.APPLE, 3));
+        BulkStore ov = ContainerOverflow.store(chest);
+        c.check("restock: a chest holding only what the table rolled restocks", ov != null && !com.skycraft.loot.Restock.holdsForeignItems(entry, chest), "");
+        if (ov != null) {
+            ov.add(new ItemStack(Items.DIAMOND, 2));
+            c.check("restock: an item the player stored in the overflow keeps the container from restocking",
+                    com.skycraft.loot.Restock.holdsForeignItems(entry, chest), "");
+            ov.clear();
+            ov.add(new ItemStack(Items.APPLE, 1));
+            c.check("restock: more of a rolled item than the table rolled (slot + overflow) is the player's",
+                    com.skycraft.loot.Restock.holdsForeignItems(entry, chest), "");
+        }
+        sweep(level);
     }
 
     private static int countSlots(Inventory inv, Item item) {

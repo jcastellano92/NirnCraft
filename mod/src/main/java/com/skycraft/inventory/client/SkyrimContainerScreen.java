@@ -234,6 +234,8 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<ChestMenu> {
             // saddlebag load against what the saddle in slot 0 allows (the mount's bag scale rides in the title)
             float load = 0f;
             for (int i = com.skycraft.mounts.Saddlebags.GEAR; i < containerSlotCount; i++) load += ItemWeights.getStack(menu.getSlot(i).getItem());
+            // the bags' overflow rows weigh too (the saddle's limit covers slots and overflow together)
+            for (ItemStack row : ContainerOverflowClient.entries(menu.containerId)) load += ItemWeights.getStack(row);
             com.skycraft.mounts.SaddleType worn = com.skycraft.mounts.SaddleType.of(menu.getSlot(0).getItem());
             float cap = worn == null ? 0f : worn.bagKg * bagScale;
             String loadText = ItemWeights.format(load) + " / " + ItemWeights.format(cap) + " kg";

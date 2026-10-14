@@ -328,6 +328,8 @@ public final class Mounts {
                 MountGear.give(player, carried.barding);
             }
         }
+        // a legend keeps the bags of the mount it replaced (retire skips it): fit them to its own tack, spilling to you
+        if (mob != null && kind.unique()) Saddlebags.fit(player, MountGear.bagCapacity(mob, kind));
         SkyData.get(player).addStat("mounts_owned", 1);
         SkyData.get(player).markDirty();
         return mob;

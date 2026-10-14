@@ -102,6 +102,8 @@ public final class MountsSelfTest {
             MountStamina.forget(fp);
             var rec = Mounts.data(fp);
             rec.remove("bags");
+            SkyData.get(fp).module(Saddlebags.OVERFLOW_MODULE).remove(com.skycraft.inventory.BulkStore.LIST);
+            com.skycraft.inventory.Pack.clear(fp);
             rec.remove("saddles");
             rec.remove("barding");
             rec.remove("uuid");
@@ -229,6 +231,9 @@ public final class MountsSelfTest {
         }
         menu.removed(fp);
         MountGear.equipSaddle(fp, bay, kind, SaddleType.PLAIN.stack());
+
+        // ---- the bags' overflow: weight is the only limit, and it is persistent, grouped and never lost
+        bagOverflow(fp, c, bay, kind);
 
         // ---- the stamina bar swap
         fp.getInventory().clearContent();
@@ -791,6 +796,9 @@ public final class MountsSelfTest {
         c.check("a bought mount is the active one, with its own stats in the record", Mounts.active(fp) == first && MountGrowth.recorded(fp, first) != null
                 && MountStats.stored(m1) && Mounts.stable(fp).size() == 1, "");
         int cobble0 = count(fp.getInventory().items, Items.COBBLESTONE);
+        com.skycraft.inventory.BulkStore ovRec = Saddlebags.overflowOf(fp);
+        ovRec.add(new ItemStack(Items.IRON_INGOT, 100));
+        ovRec.add(bagItem(950, 0.01f, 40));
         Mob m2 = Mounts.grant(fp, MountKind.CYRODILIC_BAY, at.west(9), null, true);
         spawned.add(m2);
         c.check("buying another retires the first: it is gone, the stable holds one regular mount",
@@ -798,6 +806,9 @@ public final class MountsSelfTest {
                         && MountGrowth.recorded(fp, first) == null, "");
         c.check("its saddlebag items went to the player's inventory, and the record's bags are empty",
                 count(fp.getInventory().items, Items.COBBLESTONE) == cobble0 + 10 && rec.getList("bags", 10).isEmpty(), "");
+        c.check("its saddlebag overflow (rows beyond the slots) went to the player too, nothing lost, the record's overflow is empty",
+                com.skycraft.inventory.Inv.count(fp, Items.IRON_INGOT) == 100 && bagKind(fp, 950) == 40 && Saddlebags.overflowOf(fp).isEmpty(),
+                com.skycraft.inventory.Inv.count(fp, Items.IRON_INGOT) + " ingots, " + bagKind(fp, 950) + " sticks");
         c.check("the pack saddle and the barding moved to the new mount (its breed takes them)",
                 MountGear.saddle(m2) == SaddleType.PACK && MountGear.barding((Mob) m2).is(MountItems.LEATHER_BARDING.get()), "");
         MountGear.equipSaddle(fp, m2, MountKind.CYRODILIC_BAY, withItem(fp, SaddleType.WAR));
@@ -831,12 +842,174 @@ public final class MountsSelfTest {
         int worth = Mounts.tradeInValue(fp);
         long goldBefore = pd.getGold();
         fp.getInventory().clearContent();
+        com.skycraft.inventory.Pack.clear(fp);
         rec.put("bags", bags.copy());
+        Saddlebags.overflowOf(fp).add(new ItemStack(Items.IRON_INGOT, 100));
+        Saddlebags.overflowOf(fp).add(bagItem(951, 0.01f, 12));
         int sold = Mounts.sell(fp);
         c.check("selling returns the bags and tack first, then pays by grade and level; the stable is empty",
                 sold == worth && worth > 0 && pd.getGold() == goldBefore + worth && Mounts.active(fp) == null && Mounts.stable(fp).isEmpty()
                         && count(fp.getInventory().items, Items.COBBLESTONE) == 10 && count(fp.getInventory().items, Items.SADDLE) >= 1, "paid " + sold);
+        c.check("selling returns the overflow rows to the player as well, the record's overflow is empty",
+                com.skycraft.inventory.Inv.count(fp, Items.IRON_INGOT) == 100 && bagKind(fp, 951) == 12 && Saddlebags.overflowOf(fp).isEmpty(),
+                com.skycraft.inventory.Inv.count(fp, Items.IRON_INGOT) + " ingots, " + bagKind(fp, 951) + " sticks");
         pd.setGold(gold0);
+    }
+
+    /** A distinct, light stick: the bag tests' unit of cargo ({@code mbt} = which kind, {@code kg} = weight of one). */
+    private static ItemStack bagItem(int kindId, float kg, int count) {
+        ItemStack s = new ItemStack(Items.STICK, count);
+        s.getOrCreateTag().putInt("mbt", kindId);
+        s.getTag().putFloat(ItemWeights.WEIGHT_NBT, kg);
+        return s;
+    }
+
+    private static boolean isBagKind(ItemStack s, int kindId) {
+        return s.is(Items.STICK) && s.hasTag() && s.getTag().contains("mbt") && s.getTag().getInt("mbt") == kindId;
+    }
+
+    /** How many of a bag-test kind the player carries (slots, offhand, pack). */
+    private static int bagKind(FakePlayer fp, int kindId) {
+        return com.skycraft.inventory.Inv.count(fp, s -> isBagKind(s, kindId));
+    }
+
+    /** Every bag-test stick: carried, in the bag's slots and in its overflow. */
+    private static long allSticks(FakePlayer fp, Saddlebags.Bag bag) {
+        long n = com.skycraft.inventory.Inv.count(fp, s -> s.is(Items.STICK) && s.hasTag() && s.getTag().contains("mbt"));
+        for (int i = Saddlebags.GEAR; i < 54; i++) {
+            ItemStack s = bag.getItem(i);
+            if (s.is(Items.STICK) && s.hasTag() && s.getTag().contains("mbt")) n += s.getCount();
+        }
+        for (ItemStack s : bag.overflow().entries()) if (s.is(Items.STICK) && s.hasTag() && s.getTag().contains("mbt")) n += s.getCount();
+        return n;
+    }
+
+    /**
+     * The saddlebags' overflow, driven through the real Skyrim take/store handlers: 80 distinct kinds into 52 cargo
+     * slots (weight, not slots, limits), the weight rule over slots and overflow together, NBT round trip and reopen,
+     * a take that is grouped over slot and overflow, a shrinking saddle that spills (rows first, nothing deleted) and
+     * handing everything to the player.
+     */
+    private static void bagOverflow(FakePlayer fp, Checks c, Horse bay, MountKind kind) {
+        fp.getInventory().clearContent();
+        com.skycraft.inventory.Pack.clear(fp);
+        Saddlebags.emptyToPlayer(fp);
+        fp.getInventory().clearContent();
+        com.skycraft.inventory.Pack.clear(fp);
+        MountGear.equipSaddle(fp, bay, kind, withItem(fp, SaddleType.PACK));
+        fp.getInventory().clearContent();
+        Saddlebags.Bag bag = new Saddlebags.Bag(fp, bay, kind);
+        SaddlebagMenu menu = new SaddlebagMenu(78, fp.getInventory(), bag);
+        fp.containerMenu = menu;
+        float cap = bag.capacity();
+        float w = cap / 500f;
+        int kinds = 80, each = 4;
+        for (int i = 0; i < kinds; i++) com.skycraft.inventory.Inv.give(fp, bagItem(i, w, each));
+        c.check("bag overflow: the saddle has room to test with", cap > 0f && w > 0f, cap + " kg");
+        com.skycraft.vitals.ActionHandler.handleContainerStore(fp, 78, -1, true);
+        int slotsUsed = 0;
+        for (int i = Saddlebags.GEAR; i < 54; i++) if (!bag.getItem(i).isEmpty()) slotsUsed++;
+        c.check("bag overflow: 80 distinct kinds go into 52 cargo slots, the rest into the overflow, nothing stays behind",
+                slotsUsed == 52 && bag.overflow().size() == kinds - 52 && allSticks(fp, bag) == (long) kinds * each
+                        && com.skycraft.inventory.Inv.count(fp, s -> s.is(Items.STICK)) == 0,
+                slotsUsed + " slots, " + bag.overflow().size() + " overflow rows, " + allSticks(fp, bag) + " items");
+        c.check("bag overflow: the load counts slots and overflow (320 of 500 units)", Math.abs(bag.cargoWeight() - w * kinds * each) < 0.05f,
+                bag.cargoWeight() + " of " + cap + " kg");
+
+        // the weight rule over both: a too heavy item is refused outright, light things only up to the last kilogram
+        ItemStack heavy = bagItem(900, cap, 3);
+        int heavyTaken = new com.skycraft.inventory.ContainerOverflow.Bound(bag.overflow(), bag).add(heavy);
+        c.check("bag overflow: an item heavier than the room left is refused (room 0), the stack is untouched",
+                heavyTaken == 0 && heavy.getCount() == 3 && bag.overflowRoom(heavy) == 0, heavyTaken + " taken");
+        com.skycraft.inventory.Inv.give(fp, bagItem(901, w, 1000));
+        com.skycraft.vitals.ActionHandler.handleContainerStore(fp, 78, -1, true);
+        int stored = 0;
+        for (int i = Saddlebags.GEAR; i < 54; i++) if (isBagKind(bag.getItem(i), 901)) stored += bag.getItem(i).getCount();
+        for (ItemStack e : bag.overflow().entries()) if (isBagKind(e, 901)) stored += e.getCount();
+        int left = bagKind(fp, 901);
+        c.check("bag overflow: Store All of 1000 light items takes only what the saddle carries, the rest stays with the player",
+                bag.cargoWeight() <= cap + 0.02f && cap - bag.cargoWeight() < w + 0.02f && stored > 0 && left > 0 && stored + left == 1000,
+                "stored " + stored + ", kept " + left + ", load " + bag.cargoWeight() + "/" + cap);
+
+        // persistence: the record's list survives NBT (compressed bytes) and a reopened bag sees the same rows
+        com.skycraft.inventory.BulkStore snap = com.skycraft.inventory.BulkStore.loaded(bag.overflow().save(),
+                com.skycraft.inventory.ContainerOverflow.MAX_ENTRIES, com.skycraft.inventory.ContainerOverflow.MAX_PER_ENTRY, null);
+        net.minecraft.nbt.CompoundTag saved = SkyData.get(fp).module(Saddlebags.OVERFLOW_MODULE).copy();
+        com.skycraft.inventory.BulkStore back = null;
+        try {
+            java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+            net.minecraft.nbt.CompoundTag wrap = new net.minecraft.nbt.CompoundTag();
+            wrap.put("m", saved);
+            net.minecraft.nbt.NbtIo.writeCompressed(wrap, bos);
+            back = com.skycraft.inventory.BulkStore.loaded(net.minecraft.nbt.NbtIo.readCompressed(
+                    new java.io.ByteArrayInputStream(bos.toByteArray())).getCompound("m"),
+                    com.skycraft.inventory.ContainerOverflow.MAX_ENTRIES, com.skycraft.inventory.ContainerOverflow.MAX_PER_ENTRY, null);
+        } catch (java.io.IOException e) {
+            c.check("bag overflow: NBT round trip", false, e.toString());
+        }
+        c.check("bag overflow: the record's overflow survives saving to compressed NBT and loading",
+                back != null && back.sameAs(snap) && back.size() == snap.size() && snap.size() > 0, back == null ? "no read" : back.size() + " rows");
+        net.minecraft.nbt.CompoundTag syncTag = com.skycraft.network.CorePackets.SyncData.of(SkyData.get(fp)).tag();
+        c.check("bag overflow: the overflow is server data, not in the player data sync",
+                !syncTag.getCompound("modules").contains(Saddlebags.OVERFLOW_MODULE), "");
+        menu.removed(fp);
+        fp.containerMenu = fp.inventoryMenu; // closed for real: the new bag reads the record, not the old menu
+        Saddlebags.Bag again = new Saddlebags.Bag(fp, bay, kind);
+        c.check("bag overflow: reopening the bags (or relogging) shows the same rows and slots",
+                again.overflow().sameAs(snap) && allSticks(fp, again) == (long) kinds * each + 1000,
+                again.overflow().size() + " rows, " + allSticks(fp, again) + " items");
+
+        // a shrinking saddle spills the overflow rows first and deletes nothing
+        long beforeSpill = allSticks(fp, again);
+        SaddlebagMenu menu2 = new SaddlebagMenu(79, fp.getInventory(), again);
+        fp.containerMenu = menu2;
+        Saddlebags.fit(fp, cap * 0.25f);
+        c.check("bag overflow: a saddle that carries a quarter spills the surplus into the bags, never deletes",
+                again.cargoWeight() <= cap * 0.25f + 0.02f && allSticks(fp, again) == beforeSpill
+                        && com.skycraft.inventory.Inv.count(fp, s -> s.is(Items.STICK)) > 0,
+                again.cargoWeight() + " kg left, " + allSticks(fp, again) + " of " + beforeSpill + " items");
+        Saddlebags.fit(fp, 0f);
+        c.check("bag overflow: no saddle means empty bags and an empty overflow, everything carried",
+                again.cargoWeight() < 0.001f && again.overflow().isEmpty() && allSticks(fp, again) == beforeSpill,
+                again.cargoWeight() + " kg, " + allSticks(fp, again) + " items");
+
+        // grouped take: a kind that is in a slot AND in the overflow comes out in one request
+        fp.getInventory().clearContent();
+        com.skycraft.inventory.Pack.clear(fp);
+        again.setItem(Saddlebags.GEAR, bagItem(700, w, 5));
+        again.overflow().add(bagItem(700, w, 7));
+        com.skycraft.vitals.ActionHandler.handleContainerTake(fp, 79, Saddlebags.GEAR, false);
+        c.check("bag overflow: one take of a slot row also takes that item's overflow row (5 + 7)",
+                bagKind(fp, 700) == 12 && again.getItem(Saddlebags.GEAR).isEmpty() && again.overflow().isEmpty(),
+                bagKind(fp, 700) + " taken, overflow rows " + again.overflow().size());
+        // an overflow-only row is taken by its overflow slot id; the freed slot is not refilled by anything else
+        again.overflow().add(bagItem(701, w, 9));
+        for (int i = Saddlebags.GEAR; i < 54; i++) again.setItem(i, bagItem(1000 + i, w, 1));
+        again.overflow().add(bagItem(702, w, 30));
+        int idx = again.overflow().indexOf(bagItem(702, w, 1));
+        com.skycraft.vitals.ActionHandler.handleContainerTake(fp, 79, com.skycraft.inventory.ContainerOverflow.SLOT_BASE + idx, false);
+        c.check("bag overflow: an overflow-only row is taken by its overflow slot id",
+                bagKind(fp, 702) == 30 && again.overflow().indexOf(bagItem(702, w, 1)) < 0 && bagKind(fp, 701) == 0, bagKind(fp, 702) + " taken");
+        menu2.removed(fp);
+
+        // everything back to the player (what retiring, selling or replacing a mount does)
+        Saddlebags.overflowOf(fp).add(bagItem(703, w, 2500));
+        long carriedBefore = com.skycraft.inventory.Inv.count(fp, s -> s.is(Items.STICK));
+        long inBags = 0;
+        for (ItemStack s : Saddlebags.overflowOf(fp).entries()) inBags += s.getCount();
+        for (int i = 0; i < 54 - Saddlebags.GEAR; i++) {
+            net.minecraft.nbt.ListTag l = Mounts.data(fp).getList("bags", 10);
+            if (i < l.size()) inBags += ItemStack.of(l.getCompound(i)).getCount();
+        }
+        Saddlebags.emptyToPlayer(fp);
+        long carriedAfter = com.skycraft.inventory.Inv.count(fp, s -> s.is(Items.STICK));
+        c.check("bag overflow: emptying the bags hands over slots and overflow rows (with their int counts) to the player",
+                carriedAfter == carriedBefore + inBags && Saddlebags.overflowOf(fp).isEmpty() && Mounts.data(fp).getList("bags", 10).isEmpty(),
+                carriedBefore + " + " + inBags + " = " + carriedAfter);
+        fp.containerMenu = fp.inventoryMenu;
+        fp.getInventory().clearContent();
+        com.skycraft.inventory.Pack.clear(fp);
+        MountGear.equipSaddle(fp, bay, kind, SaddleType.PLAIN.stack());
     }
 
     private static ItemStack withItem(FakePlayer fp, SaddleType t) {

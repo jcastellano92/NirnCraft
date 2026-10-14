@@ -491,29 +491,33 @@ public final class SpellEffects {
 
     /** Transmute: one piece of iron (ingot, raw iron or ore) becomes gold. */
     public static Spell.Result transmute(ServerPlayer p, Spell spell, int tick) {
+        if (transmuteOne(p)) {
+            MagicFx.send(p, MagicFx.AURA, Element.ARCANE, p.position(), p.position(), p.getId(), 2);
+            MagicFx.sound(p, SoundEvents.AMETHYST_BLOCK_CHIME, 1f, 1.5f);
+            MagicFx.sound(p, SoundEvents.ANVIL_USE, 0.3f, 1.8f);
+            return Spell.Result.EFFECT;
+        }
+        Notifier.message(p, Component.translatable("message.skycraft.nothing_to_transmute"));
+        return Spell.Result.FAILED;
+    }
+
+    /**
+     * The inventory half of {@link #transmute}: turns one piece of iron the player carries (slots, offhand or the
+     * overflow pack, through {@code inventory.Inv}) into its gold, ingots first. False when there is none.
+     */
+    public static boolean transmuteOne(ServerPlayer p) {
         Item[][] pairs = {
                 {Items.IRON_INGOT, Items.GOLD_INGOT},
                 {Items.RAW_IRON, Items.RAW_GOLD},
                 {Items.IRON_ORE, Items.GOLD_ORE},
                 {Items.DEEPSLATE_IRON_ORE, Items.DEEPSLATE_GOLD_ORE},
         };
-        Inventory inv = p.getInventory();
         for (Item[] pair : pairs) {
-            for (int i = 0; i < inv.getContainerSize(); i++) {
-                ItemStack stack = inv.getItem(i);
-                if (stack.is(pair[0])) {
-                    stack.shrink(1);
-                    ItemStack gold = new ItemStack(pair[1]);
-                    com.skycraft.inventory.Pack.giveOrDrop(p, gold);
-                    MagicFx.send(p, MagicFx.AURA, Element.ARCANE, p.position(), p.position(), p.getId(), 2);
-                    MagicFx.sound(p, SoundEvents.AMETHYST_BLOCK_CHIME, 1f, 1.5f);
-                    MagicFx.sound(p, SoundEvents.ANVIL_USE, 0.3f, 1.8f);
-                    return Spell.Result.EFFECT;
-                }
-            }
+            if (com.skycraft.inventory.Inv.take(p, pair[0], 1) < 1) continue;
+            com.skycraft.inventory.Inv.giveOrDrop(p, new ItemStack(pair[1]));
+            return true;
         }
-        Notifier.message(p, Component.translatable("message.skycraft.nothing_to_transmute"));
-        return Spell.Result.FAILED;
+        return false;
     }
 
     public static void paralyzeHit(SpellProjectile proj, ServerPlayer caster, Spell spell, @Nullable LivingEntity target, Vec3 pos) {
