@@ -361,7 +361,7 @@ public final class CreatureSpawns {
 
     /** Keeps 2-4 guards around the village meeting point (bell) nearest to the player. */
     private static void maintainGuards(ServerLevel level, ServerPlayer player) {
-        if (player.isSpectator()) return;
+        if (player.isSpectator() || level.dimension() != Level.OVERWORLD) return; // Places are dimension-blind
         Optional<BlockPos> bell = level.getPoiManager().findClosest(holder -> holder.is(PoiTypes.MEETING), player.blockPosition(), 64,
                 PoiManager.Occupancy.ANY);
         BlockPos center;

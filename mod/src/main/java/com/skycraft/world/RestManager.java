@@ -129,8 +129,10 @@ public final class RestManager {
             return Component.translatable("world.skycraft.rest.air." + act);
         }
         if (sleep) {
-            if (bed == null || !(player.level().getBlockState(bed).getBlock() instanceof BedBlock)
-                    || player.distanceToSqr(bed.getX() + 0.5, bed.getY() + 0.5, bed.getZ() + 0.5) > 6 * 6) {
+            // client-supplied position: range and loaded checks come before any getBlockState (no forced chunk loads)
+            if (bed == null || player.distanceToSqr(bed.getX() + 0.5, bed.getY() + 0.5, bed.getZ() + 0.5) > 6 * 6
+                    || !player.level().isLoaded(bed)
+                    || !(player.level().getBlockState(bed).getBlock() instanceof BedBlock)) {
                 return Component.translatable("world.skycraft.rest.no_bed");
             }
             if (!BedBlock.canSetSpawn(player.level())) return Component.translatable("world.skycraft.rest.no_bed");

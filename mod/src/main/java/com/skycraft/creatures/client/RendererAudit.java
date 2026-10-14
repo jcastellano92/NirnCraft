@@ -29,7 +29,7 @@ public final class RendererAudit {
 
     @SubscribeEvent
     public static void onJoin(ClientPlayerNetworkEvent.LoggingIn event) {
-        if (done) return;
+        if (done || !Boolean.getBoolean("skycraft.rendererAudit")) return; // dev only: -Dskycraft.rendererAudit=true
         done = true;
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return;

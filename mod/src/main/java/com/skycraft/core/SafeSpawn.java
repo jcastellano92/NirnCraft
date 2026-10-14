@@ -22,6 +22,12 @@ public final class SafeSpawn {
     @Nullable
     public static BlockPos find(ServerLevel level, BlockPos target, int maxRadius) {
         level.getChunk(target.getX() >> 4, target.getZ() >> 4);
+        return findLoaded(level, target, maxRadius);
+    }
+
+    /** Like {@link #find} but never loads or generates a chunk: only already-loaded chunks are read. */
+    @Nullable
+    public static BlockPos findLoaded(ServerLevel level, BlockPos target, int maxRadius) {
         for (int r = 0; r <= maxRadius; r += 2) {
             for (int dx = -r; dx <= r; dx += 2) {
                 for (int dz = -r; dz <= r; dz += 2) {

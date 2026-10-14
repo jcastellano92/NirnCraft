@@ -231,6 +231,7 @@
   "party.skycraft.list_header": "Party (%s/%s):",
   "party.skycraft.map.member": "Party member",
   "party.skycraft.member_online": "%s, your party member, is back.",
+  "party.skycraft.no_party": "You are not in a party.",
   "party.skycraft.no_invite": "You have no pending party invitations.",
   "party.skycraft.not_in_party": "You are not in a party.",
   "party.skycraft.not_leader": "Only the party leader can do that.",

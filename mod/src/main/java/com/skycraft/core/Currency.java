@@ -30,13 +30,34 @@ public final class Currency {
     }
 
     public static void give(Player player, long amount) {
+        give(player, amount, true);
+    }
+
+    /**
+     * Adds gold. {@code found} says whether it counts towards the "gold found" stat: false for transfers between
+     * players (/pay). Coins that left the wallet as items ({@link #markNotFound}) are not counted when picked back up.
+     */
+    public static void give(Player player, long amount, boolean found) {
         if (amount <= 0) return;
         PlayerData data = SkyData.get(player);
         data.setGold(data.getGold() + amount);
-        data.addStat("gold_found", (int) Math.min(Integer.MAX_VALUE, amount));
+        if (found) {
+            net.minecraft.nbt.CompoundTag tag = data.module("currency");
+            long unfound = tag.getLong("unfound");
+            long used = Math.min(unfound, amount);
+            if (used > 0) tag.putLong("unfound", unfound - used);
+            if (amount - used > 0) data.addStat("gold_found", (int) Math.min(Integer.MAX_VALUE, amount - used));
+        }
         if (player instanceof ServerPlayer sp) {
             Notifier.message(sp, Component.translatable("message.skycraft.gold_added", amount));
         }
+    }
+
+    /** Records gold that left the wallet as coin items (withdrawn, dropped on death): picking it up again is no find. */
+    public static void markNotFound(Player player, long amount) {
+        if (amount <= 0) return;
+        net.minecraft.nbt.CompoundTag tag = SkyData.get(player).module("currency");
+        tag.putLong("unfound", Math.min(tag.getLong("unfound") + amount, 1_000_000_000L));
     }
 
     /** Creates physical gold: loose Septims for small amounts, a coin purse holding the amount otherwise. */

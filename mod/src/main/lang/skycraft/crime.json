@@ -5,6 +5,7 @@
   "tooltip.skycraft.stolen": "Stolen",
   "hold.skycraft.jail": "Jail",
 
+  "crime.skycraft.owner.household": "Household",
   "crime.skycraft.bounty_added": "Bounty added: %s gold (%s)",
   "crime.skycraft.bounty_paid": "Bounty paid: %s gold (%s)",
   "crime.skycraft.confiscated": "Your stolen items have been confiscated (%s)",

@@ -275,6 +275,10 @@ public final class ActionHandler {
             Notifier.message(player, Component.translatable("message.skycraft.unstuck_combat"));
             return;
         }
+        if (com.skycraft.crime.Jail.isJailed(player) || com.skycraft.quest.story.IntroFlow.inIntro(player)) {
+            Notifier.message(player, Component.translatable("message.skycraft.unstuck_blocked")); // no escaping a cell
+            return;
+        }
         PlayerData data = SkyData.get(player);
         long now = player.level().getGameTime();
         long next = data.module("unstuck").getLong("cooldown");

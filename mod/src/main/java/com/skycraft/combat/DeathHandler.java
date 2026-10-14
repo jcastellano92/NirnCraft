@@ -267,6 +267,7 @@ public final class DeathHandler {
         long lose = (long) (data.getGold() * pct / 100.0);
         if (lose <= 0) return;
         data.setGold(data.getGold() - lose);
+        com.skycraft.core.Currency.markNotFound(player, lose);
         ItemEntity coins = new ItemEntity(player.level(), player.getX(), player.getY() + 0.5, player.getZ(), com.skycraft.core.Currency.coins(lose));
         event.getDrops().add(coins);
         Notifier.message(player, Component.translatable("message.skycraft.death_gold_lost", lose));

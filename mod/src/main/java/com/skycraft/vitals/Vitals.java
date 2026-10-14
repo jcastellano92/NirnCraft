@@ -208,8 +208,17 @@ public final class Vitals {
             hpPct *= com.skycraft.curse.Curses.regenMultiplier(player, 'h');
             if (hpPct > 0) player.heal(player.getMaxHealth() * hpPct * seconds);
         }
-        if (SkyConfig.SKYRIM_REGEN.get() && player.server.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION)) {
-            player.server.getGameRules().getRule(GameRules.RULE_NATURAL_REGENERATION).set(false, player.server);
+    }
+
+    /**
+     * Skyrim regen replaces vanilla regen, so the rule is switched off once when the server starts (it is saved in
+     * level.dat, so an operator who turns it back on afterwards is respected instead of overridden every tick).
+     */
+    @SubscribeEvent
+    public static void onServerStarted(net.minecraftforge.event.server.ServerStartedEvent event) {
+        var rules = event.getServer().getGameRules();
+        if (SkyConfig.SKYRIM_REGEN.get() && rules.getBoolean(GameRules.RULE_NATURAL_REGENERATION)) {
+            rules.getRule(GameRules.RULE_NATURAL_REGENERATION).set(false, event.getServer());
         }
     }
 

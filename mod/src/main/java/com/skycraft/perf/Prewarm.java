@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -143,6 +144,19 @@ public final class Prewarm {
                 it.remove();
             }
         }
+    }
+
+    /** Drops every job on server stop: the closures would otherwise keep the old server's players and levels alive. */
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event) {
+        for (Job j : JOBS) {
+            try {
+                release(j);
+            } catch (RuntimeException ignored) {
+                // the level is already shutting down
+            }
+        }
+        JOBS.clear();
     }
 
     private static void release(Job j) {

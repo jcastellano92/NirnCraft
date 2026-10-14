@@ -200,6 +200,11 @@ public final class Stealth {
     }
 
     @SubscribeEvent
+    public static void onServerStopped(net.minecraftforge.event.server.ServerStoppedEvent event) {
+        SEARCHES.clear();
+    }
+
+    @SubscribeEvent
     public static void onLevelTick(TickEvent.LevelTickEvent event) {
         if (event.phase != TickEvent.Phase.END || event.level.isClientSide || SEARCHES.isEmpty()) return;
         long now = event.level.getGameTime();
@@ -208,8 +213,12 @@ public final class Stealth {
         while (it.hasNext()) {
             Search s = it.next();
             Mob mob = s.mob;
+            if (mob.isRemoved() || !mob.isAlive()) { // before the level check: a removed mob in another level would leak
+                it.remove();
+                continue;
+            }
             if (mob.level() != event.level) continue;
-            if (mob.isRemoved() || !mob.isAlive() || mob.getTarget() != null) {
+            if (mob.getTarget() != null) {
                 it.remove();
                 continue;
             }

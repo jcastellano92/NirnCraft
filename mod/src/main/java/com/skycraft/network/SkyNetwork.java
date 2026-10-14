@@ -24,15 +24,33 @@ import java.util.function.Supplier;
  * S2C handlers must delegate client-only code through {@code DistExecutor}.</p>
  */
 public final class SkyNetwork {
-    private static final String PROTOCOL = "1";
+    /**
+     * Derived from the mod version and the registered packet list (class, id and direction, in order), so a client and
+     * a server from different builds are refused at the handshake instead of mis-decoding packets. The channel asks
+     * for it lazily (at the handshake, after {@link #init()}); the same build on both sides always produces the same
+     * string.
+     */
+    private static final StringBuilder PACKET_LIST = new StringBuilder();
+    private static String protocol;
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(Skycraft.MODID, "main"), () -> PROTOCOL, PROTOCOL::equals, PROTOCOL::equals);
+            new ResourceLocation(Skycraft.MODID, "main"), SkyNetwork::protocol, v -> protocol().equals(v), v -> protocol().equals(v));
     private static int nextId = 0;
 
     private SkyNetwork() {}
 
+    private static synchronized String protocol() {
+        if (protocol != null) return protocol;
+        String version = net.minecraftforge.fml.ModList.get() == null ? "?"
+                : net.minecraftforge.fml.ModList.get().getModContainerById(Skycraft.MODID)
+                        .map(c -> c.getModInfo().getVersion().toString()).orElse("?");
+        String value = version + "-" + Integer.toHexString(PACKET_LIST.toString().hashCode()) + "-" + nextId;
+        if (nextId > 0) protocol = value; // cache only once the packets are registered
+        return value;
+    }
+
     public static <T> void register(Class<T> type, NetworkDirection direction, BiConsumer<T, FriendlyByteBuf> encoder,
                                     Function<FriendlyByteBuf, T> decoder, BiConsumer<T, Supplier<NetworkEvent.Context>> handler) {
+        PACKET_LIST.append(nextId).append(':').append(type.getName()).append(':').append(direction).append(';');
         CHANNEL.messageBuilder(type, nextId++, direction)
                 .encoder(encoder)
                 .decoder(decoder)

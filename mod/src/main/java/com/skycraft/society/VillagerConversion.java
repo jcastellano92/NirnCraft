@@ -54,8 +54,14 @@ public final class VillagerConversion {
         if (event.getLevel().isClientSide || !(e instanceof AbstractVillager v) || !(event.getLevel() instanceof ServerLevel level)) return;
         if (!(v instanceof Villager) && !(v instanceof WanderingTrader)) return; // other mods' villager subclasses keep their own logic
         if (!SocietyConfig.CONVERT_VILLAGERS.get()) return;
-        event.setCanceled(true);
+        // decide the caps here: only cancel when conversion is certain, otherwise the villager joins unchanged
+        // (convert() re-checks, so a bail there can only happen on a chunk unloading within the tick)
         if (PENDING.size() > 256) return;
+        BlockPos at = v.blockPosition();
+        if (level.getEntitiesOfClass(NpcEntity.class, new net.minecraft.world.phys.AABB(at).inflate(48), n -> true).size() >= MAX_NEARBY) return;
+        if (!(v instanceof WanderingTrader) && v.getPersistentData().isEmpty() && v.getTags().isEmpty()
+                && SettlementCrowd.settlementFull(level, at)) return;
+        event.setCanceled(true);
         NpcRole role;
         String profession = null;
         int lvl = 2;

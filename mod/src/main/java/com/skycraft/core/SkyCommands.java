@@ -94,7 +94,7 @@ public final class SkyCommands {
                         c.getSource().sendFailure(Component.translatable("message.skycraft.not_enough_gold"));
                         return 0;
                     }
-                    Currency.give(to, amount);
+                    Currency.give(to, amount, false); // a transfer is no find
                     c.getSource().sendSuccess(() -> Component.translatable("command.skycraft.paid", amount, to.getDisplayName()), false);
                     return 1;
                 }))));
@@ -106,6 +106,7 @@ public final class SkyCommands {
                 return 0;
             }
             var stack = Currency.coins(amount);
+            Currency.markNotFound(p, amount);
             com.skycraft.inventory.Pack.giveOrDrop(p, stack);
             return 1;
         })));

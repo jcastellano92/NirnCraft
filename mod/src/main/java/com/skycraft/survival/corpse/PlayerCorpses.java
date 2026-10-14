@@ -30,8 +30,10 @@ import java.util.UUID;
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class PlayerCorpses {
-    /** Where each player last stood on solid, lava-free ground (refreshed every second). */
-    private static final Map<UUID, BlockPos> LAST_SAFE = new HashMap<>();
+    private record SafeKey(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dim, UUID id) {}
+
+    /** Where each player last stood on solid, lava-free ground, per dimension (refreshed every second). */
+    private static final Map<SafeKey, BlockPos> LAST_SAFE = new HashMap<>();
 
     private PlayerCorpses() {}
 
@@ -39,12 +41,13 @@ public final class PlayerCorpses {
     public static void onTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
         if (player.tickCount % 20 != 0 || !player.onGround() || player.isInLava() || player.isSpectator()) return;
-        LAST_SAFE.put(player.getUUID(), player.blockPosition());
+        LAST_SAFE.put(new SafeKey(player.level().dimension(), player.getUUID()), player.blockPosition());
     }
 
     @SubscribeEvent
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        LAST_SAFE.remove(event.getEntity().getUUID());
+        UUID id = event.getEntity().getUUID();
+        LAST_SAFE.keySet().removeIf(k -> k.id().equals(id));
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -56,7 +59,7 @@ public final class PlayerCorpses {
         PlayerCorpseEntity corpse = SurvivalRegistry.PLAYER_CORPSE.get().create(level);
         if (corpse == null) return;
 
-        BlockPos lastSafe = LAST_SAFE.getOrDefault(player.getUUID(), level.getSharedSpawnPos());
+        BlockPos lastSafe = LAST_SAFE.getOrDefault(new SafeKey(level.dimension(), player.getUUID()), level.getSharedSpawnPos());
         BlockPos at = safeSpot(level, player.blockPosition(), lastSafe);
         corpse.setOwner(player, at.equals(player.blockPosition()) ? lastSafe : at);
 

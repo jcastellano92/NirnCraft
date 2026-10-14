@@ -266,12 +266,15 @@ public final class PlayerDataEvents {
             // a bandit camp or wanderer at the spot: try the settlement/spawn ring further out for a hostile-free place
             BlockPos fallback = null;
             BlockPos[] centres = {target, level.getSharedSpawnPos(), here};
+            int loads = 6; // forced chunk loads allowed for the whole search; the rest only reads loaded chunks
             outer:
             for (BlockPos c : centres) {
                 for (int r = 24; r <= 160; r += 24) {
                     for (int k = 0; k < 8; k++) {
                         double a = k * Math.PI / 4 + r * 0.37;
-                        BlockPos s = SafeSpawn.find(level, c.offset((int) (Math.cos(a) * r), 0, (int) (Math.sin(a) * r)), 8);
+                        BlockPos cand = c.offset((int) (Math.cos(a) * r), 0, (int) (Math.sin(a) * r));
+                        boolean present = level.getChunkSource().getChunkNow(cand.getX() >> 4, cand.getZ() >> 4) != null;
+                        BlockPos s = present || loads-- > 0 ? SafeSpawn.find(level, cand, 8) : SafeSpawn.findLoaded(level, cand, 8);
                         if (s != null && !hostileNear(level, s, quiet)) {
                             fallback = s;
                             break outer;

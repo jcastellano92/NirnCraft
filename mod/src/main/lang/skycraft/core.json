@@ -65,6 +65,7 @@
   "message.skycraft.sheathed": "Weapons sheathed",
   "message.skycraft.sneak_attack": "Sneak attack for %sx damage!",
   "message.skycraft.unstuck_combat": "Cannot unstuck while in combat!",
+  "message.skycraft.unstuck_blocked": "You cannot unstuck right now.",
   "message.skycraft.unstuck_cooldown": "Unstuck is on cooldown (%s seconds left)",
   "message.skycraft.unstuck_success": "Teleported to rest point",
   "notify.skycraft.big_title": "",
@@ -587,6 +588,7 @@
   "skillgroup.skycraft.warrior": "The Warrior",
   "stat.skycraft.health": "Health",
   "stat.skycraft.magicka": "Magicka",
+  "stat.skycraft.race": "Race",
   "stat.skycraft.stamina": "Stamina",
   "tooltip.skycraft.gold_value": "Worth %s gold"
 }

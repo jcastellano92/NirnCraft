@@ -55,10 +55,12 @@ public final class RespawnPoints {
         if (!owned && home(player) != null && !pos.equals(home(player))) {
             // a provisional place to wake never replaces a home the player has: it is only remembered as one
             long[] old = tag.getLongArray("provisional");
-            long[] arr = java.util.Arrays.copyOf(old, old.length + 1);
-            arr[old.length] = pos.asLong();
-            tag.putLongArray("provisional", arr);
-            data.markDirty();
+            if (java.util.Arrays.stream(old).noneMatch(l -> l == pos.asLong())) { // each place only once
+                long[] arr = java.util.Arrays.copyOf(old, old.length + 1);
+                arr[old.length] = pos.asLong();
+                tag.putLongArray("provisional", arr);
+                data.markDirty();
+            }
             return;
         }
         player.setRespawnPosition(dim, pos, player.getYRot(), true, false);
