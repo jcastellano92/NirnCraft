@@ -60,5 +60,6 @@
   "dialogue.skycraft.stables.buy_horse": "I'd like to buy a horse: %s (%s gold)",
   "dialogue.skycraft.stables.no_gold": "You don't have enough gold for that horse (%s required).",
   "dialogue.skycraft.stables.bought": "The %s is yours. Take good care of it.",
+  "dialogue.skycraft.stables.unavailable": "I can't sell you the %s just now.",
   "entity.skycraft.mudcrab.giant": "Giant Mudcrab"
 }

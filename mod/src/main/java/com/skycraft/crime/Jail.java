@@ -51,6 +51,8 @@ import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
@@ -79,8 +81,11 @@ import java.util.UUID;
  * dimension {@code skycraft:jail} instead, where each prisoner has a cell block of their own.
  *
  * <p>The sentence is 30 seconds per 100 gold of bounty (30 s .. 10 min); sleeping in the cell bed after the first
- * minute serves the rest at once. Release clears the hold's bounty, hands back what isn't stolen, lets the days of
- * the sentence pass (single player) and costs some skill progress. Possessions go to the cell's evidence chest
+ * minute serves the rest at once, and a served sentence does not end by itself: the prisoner sleeps in the bed (or
+ * breaks out) and wakes outside the jail's front door, never back at the crime. Release clears the hold's bounty,
+ * hands back what isn't stolen, lets the days of the sentence pass (single player) and costs some skill progress.
+ * A prisoner seen outside their cell by a guard is walked back to it ({@link #guardReaction}); the evidence chest is
+ * locked, as hard as the bounty says (a guard's key opens it, so does picking it). Possessions go to the cell's evidence chest
  * (overflow is held in {@link JailData}; nothing is ever deleted). A prisoner may escape instead: pick the cell door
  * and the cell block gate (or slip down the drain at the end of the corridor) and walk out - escaping adds an escape
  * bounty. In Cidhna Mine the prisoners work the silver veins: every load mined shortens the sentence.</p>
@@ -104,6 +109,12 @@ public final class Jail {
     public static final int LABOUR_SECONDS = 45;
     /** How far from a hold jail a prisoner may be before leaving counts as being taken away (not an escape). */
     private static final int ESCAPE_RANGE = 48;
+    /** Seconds a prisoner seen outside the cell has before a guard who saw them lays hands on them. */
+    private static final int LOOSE_SECONDS = 5;
+    /** Seconds added to the sentence when a guard drags a prisoner back to the cell. */
+    private static final int DRAGGED_BACK_SECONDS = 30;
+    /** Seconds a prisoner has been seen outside their cell by a guard. */
+    private static final Map<UUID, Integer> LOOSE = new HashMap<>();
 
     /** Ore veins worked recently (dim|x|y|z -> game time free again). */
     private static final Map<String, Long> WORKED = new HashMap<>();
@@ -170,7 +181,7 @@ public final class Jail {
     static Site dimensionSite(MinecraftServer server, ServerLevel jail, UUID player) {
         int slot = JailData.get(server).slotFor(player);
         BlockPos o = cellOrigin(slot);
-        return new Site(false, "", slot, jail, o.offset(7, 1, 4), null, null, List.of(o.offset(2, 1, 1), o.offset(3, 1, 1)), null,
+        return new Site(false, "", slot, jail, o.offset(7, 1, 4), o.offset(5, 1, 4), o.offset(2, 1, 3), List.of(o.offset(2, 1, 1), o.offset(3, 1, 1)), null,
                 o, o.offset(11, 4, 25), false, o.offset(2, 1, 23));
     }
 
@@ -416,31 +427,71 @@ public final class Jail {
     }
 
     /** Places the evidence double chest (54 slots, more than a whole inventory); never touches its contents. */
-    private static void ensureEvidenceChest(ServerLevel level, BlockPos o) {
+    private static void ensureEvidenceChest(ServerLevel level, BlockPos o, int tier) {
         BlockPos right = o.offset(2, 1, 1);
         BlockPos left = o.offset(3, 1, 1);
         BlockState base = Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH);
         // same block -> the block entity (and its items) is kept, only the half type changes
         level.setBlock(right, base.setValue(ChestBlock.TYPE, ChestType.RIGHT), 3);
         level.setBlock(left, base.setValue(ChestBlock.TYPE, ChestType.LEFT), 3);
-        Locks.setLock(level, right, Locks.MASTER);
-        Locks.setLock(level, left, Locks.MASTER);
+        Locks.setLock(level, right, tier);
+        Locks.setLock(level, left, tier);
     }
 
     /** A hold jail's cell made ready for a new prisoner: chests present and locked, the doors shut and locked. */
     private static void prepareHoldCell(ServerPlayer player, Site s) {
         ServerLevel level = s.level();
         level.getChunk(s.stand());
+        int tier = evidenceTier(Bounty.state(player).getCompound("jail").getInt("bounty"));
         for (BlockPos p : s.evidence()) {
             if (!(level.getBlockEntity(p) instanceof ChestBlockEntity)) {
                 // a broken evidence chest is replaced (single chests: still 54 slots in all)
                 level.setBlock(p, Blocks.CHEST.defaultBlockState(), 3);
             }
-            Locks.setLock(level, p, Locks.ADEPT);
+            Locks.setLock(level, p, tier);
             relock(level, p);
         }
         lockDoor(level, s.door(), Locks.APPRENTICE);
         lockDoor(level, s.gate(), Locks.ADEPT);
+    }
+
+    /**
+     * How hard the lock on the evidence chest (and the room around it) is: the bigger the bounty, the harder the
+     * lock a prisoner has to pick to get their things back. A guard's jail key opens any of them.
+     */
+    static int evidenceTier(int bounty) {
+        if (bounty < 100) return Locks.NOVICE;
+        if (bounty < 400) return Locks.APPRENTICE;
+        if (bounty < 1000) return Locks.ADEPT;
+        if (bounty < 3000) return Locks.EXPERT;
+        return Locks.MASTER;
+    }
+
+    /**
+     * A guard walks the cell block of a hold jail (spawned here, by the jail, not by the settlement's population):
+     * at the barred window of the cell's wall, where a prisoner can reach through to the guard's pockets.
+     */
+    private static void ensureCorridorGuard(Site s) {
+        BlockPos door = s.door();
+        if (door == null || s.mine()) return;
+        ServerLevel level = s.level();
+        int sx = Integer.signum(door.getX() - s.stand().getX());
+        BlockPos post = new BlockPos(door.getX() + sx, door.getY(), door.getZ() + 2);
+        level.getChunk(post);
+        if (!level.getEntitiesOfClass(Mob.class, new AABB(post).inflate(6), m -> m.isAlive() && Crimes.isGuard(m)).isEmpty()) return;
+        try {
+            var guard = com.skycraft.creatures.ModEntities.GUARD.get().create(level);
+            if (guard == null) return;
+            guard.setCustomName(Component.translatable("crime.skycraft.jail.npc.guard"));
+            guard.setCustomNameVisible(true);
+            guard.setPos(post.getX() + 0.5, post.getY(), post.getZ() + 0.5);
+            guard.restrictTo(post, 3);
+            guard.addTag(NPC_TAG);
+            guard.setPersistenceRequired();
+            level.addFreshEntity(guard);
+        } catch (Exception ignored) {
+            // no guard entity registered: the jail is just quieter
+        }
     }
 
     private static void lockDoor(ServerLevel level, @Nullable BlockPos door, int tier) {
@@ -523,6 +574,7 @@ public final class Jail {
     private static void teleportToCell(ServerPlayer player, Site site) {
         if (site.hold()) {
             prepareHoldCell(player, site);
+            ensureCorridorGuard(site);
             BlockPos s = site.stand();
             player.teleportTo(site.level(), s.getX() + 0.5, s.getY(), s.getZ() + 0.5, player.getYRot(), 0f);
             return;
@@ -532,14 +584,24 @@ public final class Jail {
         BlockPos origin = cellOrigin(slot);
         JailData data = JailData.get(player.server);
         boolean fresh = !data.built.contains(slot);
+        int tier = evidenceTier(Bounty.state(player).getCompound("jail").getInt("bounty"));
         // the partition wall beside the evidence chest is always stone; air there means the cell block is gone
         if (fresh || jail.getBlockState(origin.offset(5, 1, 1)).isAir()) {
-            buildCell(jail, origin, fresh);
+            buildCell(jail, origin, fresh, tier);
             data.built.add(slot);
             data.setDirty();
         } else if (!(jail.getBlockEntity(origin.offset(3, 1, 1)) instanceof ChestBlockEntity)) {
-            ensureEvidenceChest(jail, origin); // cells built before the evidence chest became a double chest
+            ensureEvidenceChest(jail, origin, tier); // cells built before the evidence chest became a double chest
         }
+        // every sentence starts with the chest, its room and the cell door locked again, as hard as the bounty says
+        for (BlockPos p : new BlockPos[]{origin.offset(2, 1, 1), origin.offset(3, 1, 1)}) {
+            if (jail.getBlockEntity(p) instanceof ChestBlockEntity) {
+                Locks.setLock(jail, p, tier);
+                relock(jail, p);
+            }
+        }
+        if (jail.getBlockState(origin.offset(2, 1, 3)).getBlock() instanceof DoorBlock) lockDoor(jail, origin.offset(2, 1, 3), tier);
+        if (jail.getBlockState(origin.offset(5, 1, 4)).getBlock() instanceof DoorBlock) lockDoor(jail, origin.offset(5, 1, 4), Locks.MASTER);
         player.teleportTo(jail, origin.getX() + 7.5, CELL_Y + 1, origin.getZ() + 4.5, 90f, 0f);
     }
 
@@ -550,9 +612,10 @@ public final class Jail {
     /**
      * A hold jail with central corridor, evidence chest, guard patrol, and multiple cells with NPCs. Rebuilding never
      * touches the evidence chest's contents; the prisoners and the guard are only spawned the first time
-     * ({@code spawnNpcs}).
+     * ({@code spawnNpcs}). The cell block is two rooms: the corridor with the three cells and the escape drain at its
+     * far end, and, behind a locked iron door at the near end, the evidence room with the prisoner's chest.
      */
-    private static void buildCell(ServerLevel level, BlockPos o, boolean spawnNpcs) {
+    private static void buildCell(ServerLevel level, BlockPos o, boolean spawnNpcs, int tier) {
         BlockState wall = Blocks.STONE_BRICKS.defaultBlockState();
         BlockState air = Blocks.AIR.defaultBlockState();
         for (int x = 0; x <= 11; x++) {
@@ -586,8 +649,16 @@ public final class Jail {
         level.setBlock(o.offset(2, 3, 12), Blocks.LANTERN.defaultBlockState().setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true), 2);
         level.setBlock(o.offset(2, 3, 20), Blocks.LANTERN.defaultBlockState().setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true), 2);
 
-        // North end: Evidence Chest
-        ensureEvidenceChest(level, o);
+        // North end: the evidence room (z 1..2) with its own locked iron door off the corridor
+        for (int x = 1; x <= 4; x++) {
+            for (int y = 1; y <= 3; y++) level.setBlock(o.offset(x, y, 3), wall, 2);
+        }
+        BlockState evidenceDoor = Blocks.IRON_DOOR.defaultBlockState().setValue(DoorBlock.FACING, Direction.SOUTH);
+        level.setBlock(o.offset(2, 1, 3), evidenceDoor.setValue(DoorBlock.HALF, DoubleBlockHalf.LOWER), 2);
+        level.setBlock(o.offset(2, 2, 3), evidenceDoor.setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER), 2);
+        Locks.setLock(level, o.offset(2, 1, 3), tier);
+        level.setBlock(o.offset(2, 3, 2), Blocks.LANTERN.defaultBlockState().setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true), 2);
+        ensureEvidenceChest(level, o, tier);
 
         // South end: Old sewer grate / Escape hatch
         BlockPos escapePos = o.offset(2, 1, 23);
@@ -626,8 +697,9 @@ public final class Jail {
             if (guard != null) {
                 guard.setCustomName(Component.translatable("crime.skycraft.jail.npc.guard"));
                 guard.setCustomNameVisible(true);
-                guard.setPos(o.getX() + 2.5, CELL_Y + 1, o.getZ() + 12.5);
-                guard.restrictTo(o.offset(2, 1, 12), 10);
+                // walks the corridor by the player's cell: the window at z 6 is at his reach
+                guard.setPos(o.getX() + 4.5, CELL_Y + 1, o.getZ() + 6.5);
+                guard.restrictTo(o.offset(3, 1, 7), 5);
                 guard.addTag(NPC_TAG);
                 guard.setPersistenceRequired();
                 level.addFreshEntity(guard);
@@ -643,12 +715,14 @@ public final class Jail {
         level.setBlock(doorTop, Blocks.IRON_DOOR.defaultBlockState().setValue(net.minecraft.world.level.block.DoorBlock.HALF, net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER).setValue(net.minecraft.world.level.block.DoorBlock.FACING, Direction.WEST), 2);
         Locks.setLock(level, doorBottom, Locks.MASTER);
 
-        // Iron bars beside door
+        // The door sits in a stone frame (the partition's own blocks at dz +-1: iron bars never meet a door's panel),
+        // with bars on either side of it and a one-block grate window, pane-free, at head height beside the door:
+        // a prisoner can reach through it (pickpocket the guard, talk) and cannot fit through.
         BlockState bars = Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.NORTH, true).setValue(IronBarsBlock.SOUTH, true);
-        for (int dz = -2; dz <= 2; dz++) {
-            if (dz == 0) continue;
+        for (int dz = -3; dz <= 3; dz++) {
+            if (Math.abs(dz) <= 1) continue;
             level.setBlock(o.offset(5, 1, doorZ + dz), bars, 2);
-            level.setBlock(o.offset(5, 2, doorZ + dz), bars, 2);
+            level.setBlock(o.offset(5, 2, doorZ + dz), dz == 2 ? Blocks.AIR.defaultBlockState() : bars, 2);
         }
 
         // Bed inside cell
@@ -698,14 +772,104 @@ public final class Jail {
             return;
         }
         refillChest(player, site);
-        j.putInt("served", j.getInt("served") + 1);
-        int left = j.getInt("remaining") - 1;
-        if (left <= 0) {
-            release(player, false);
-        } else {
-            j.putInt("remaining", left);
-            SkyData.get(player).markDirty();
+        guardReaction(player, site);
+        if (!isJailed(player)) return;
+        boolean over = serveSecond(j);
+        SkyData.get(player).markDirty();
+        if (over) {
+            // the time is served: nobody carries the prisoner out. They sleep in the cell bed to wake outside the
+            // jail's door with their things, or break out instead.
+            Notifier.title(player, Component.translatable("crime.skycraft.jail.served"), Component.translatable("crime.skycraft.jail.served_sleep"));
         }
+    }
+
+    /**
+     * One second of the sentence goes by. Returns true on the second it runs out. A served sentence stays served
+     * ({@code remaining} 0): the prisoner is not released by the clock, only by sleeping in the bed (or escaping).
+     */
+    static boolean serveSecond(CompoundTag j) {
+        j.putInt("served", j.getInt("served") + 1);
+        int before = j.getInt("remaining");
+        if (before <= 0) return false;
+        j.putInt("remaining", before - 1);
+        return before == 1;
+    }
+
+    /** Whether the prisoner may sleep to be released: the first minute is over, or the sentence is served. */
+    static boolean maySleep(CompoundTag j) {
+        return j.getInt("served") >= 60 || j.getInt("remaining") <= 0;
+    }
+
+    /** Forgets a player's jail bookkeeping (logout). */
+    static void forget(UUID player) {
+        LOOSE.remove(player);
+    }
+
+    /**
+     * Whether a prisoner stands outside their cell: on the corridor side of the cell door's plane or in its doorway.
+     * The cell lies on the side of the door where its stand point is; works for doors in x- or z-planes.
+     */
+    static boolean outOfCell(@Nullable BlockPos door, BlockPos stand, double x, double z) {
+        if (door == null) return false;
+        double dx = stand.getX() - door.getX(), dz = stand.getZ() - door.getZ();
+        if (Math.abs(dx) >= Math.abs(dz)) return (x - (door.getX() + 0.5)) * Math.signum(dx) < 0.5;
+        return (z - (door.getZ() + 0.5)) * Math.signum(dz) < 0.5;
+    }
+
+    /**
+     * A guard who sees a prisoner outside their cell (door opened with a stolen key or a pick) comes over, takes the
+     * key, and drags them back: the sentence grows a little. Sneaking and darkness shorten how far the guard sees.
+     */
+    private static void guardReaction(ServerPlayer player, Site site) {
+        if (site.door() == null || !player.isAlive() || player.isCreative() || player.isSpectator()) return;
+        if (!outOfCell(site.door(), site.stand(), player.getX(), player.getZ())) {
+            LOOSE.remove(player.getUUID());
+            return;
+        }
+        LivingEntity guard = Crimes.findGuardWitness(player);
+        if (guard == null) {
+            LOOSE.computeIfPresent(player.getUUID(), (k, v) -> v > 1 ? v - 1 : null);
+            return;
+        }
+        int seen = LOOSE.merge(player.getUUID(), 1, Integer::sum);
+        if (guard instanceof Mob mob) {
+            mob.getNavigation().moveTo(player, 1.25);
+            mob.getLookControl().setLookAt(player, 30f, 30f);
+        }
+        if (seen == 1) Notifier.message(player, Component.translatable("crime.skycraft.jail.out_of_cell", guard.getDisplayName()));
+        if (seen >= LOOSE_SECONDS || guard.distanceToSqr(player) <= 9) draggedBack(player, site, guard);
+    }
+
+    private static void draggedBack(ServerPlayer player, Site site, LivingEntity guard) {
+        LOOSE.remove(player.getUUID());
+        if (guard instanceof Mob mob) mob.getNavigation().stop();
+        int keys = takeKeys(player);
+        ServerLevel level = site.level();
+        BlockPos s = site.stand();
+        player.teleportTo(level, s.getX() + 0.5, s.getY(), s.getZ() + 0.5, player.getYRot(), 0f);
+        BlockPos door = site.door();
+        int tier = Locks.lockLevel(level, door);
+        lockDoor(level, door, tier == Locks.NOT_LOCKED ? Locks.APPRENTICE : tier);
+        CompoundTag j = Bounty.state(player).getCompound("jail");
+        j.putInt("remaining", Math.min(MAX_SECONDS, j.getInt("remaining") + DRAGGED_BACK_SECONDS));
+        SkyData.get(player).markDirty();
+        Notifier.message(player, Component.translatable("crime.skycraft.jail.dragged_back", guard.getDisplayName(), DRAGGED_BACK_SECONDS));
+        if (keys > 0) Notifier.message(player, Component.translatable("crime.skycraft.jail.key_taken"));
+        level.playSound(null, s, SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 1f, 1f);
+    }
+
+    /** The guards take their keys back. Returns how many were taken. */
+    private static int takeKeys(ServerPlayer player) {
+        int n = 0;
+        var inv = player.getInventory();
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack s = inv.getItem(i);
+            if (!s.isEmpty() && s.is(CrimeItems.JAIL_KEY.get())) {
+                n += s.getCount();
+                inv.setItem(i, ItemStack.EMPTY);
+            }
+        }
+        return n + com.skycraft.inventory.Pack.remove(player, s -> s.is(CrimeItems.JAIL_KEY.get()), Integer.MAX_VALUE);
     }
 
     private static void freeCell(ServerPlayer player, Site site) {
@@ -772,22 +936,8 @@ public final class Jail {
         if (!lost.isEmpty()) Notifier.message(player, Component.translatable("crime.skycraft.jail.lost", skills));
         passDays(player, Math.max(1, Math.min(7, bounty / 100)));
 
-        if (site != null && site.hold()) {
-            // released at the jail's door
-            BlockPos out = site.exit() != null ? site.exit() : site.stand();
-            player.teleportTo(site.level(), out.getX() + 0.5, out.getY(), out.getZ() + 0.5, player.getYRot(), 0f);
-        } else {
-            ServerLevel target = null;
-            ResourceLocation dimId = ResourceLocation.tryParse(j.getString("rdim"));
-            if (dimId != null) target = player.server.getLevel(ResourceKey.create(Registries.DIMENSION, dimId));
-            if (target == null || target.dimension() == JAIL) {
-                target = player.server.overworld();
-                BlockPos spawn = target.getSharedSpawnPos();
-                player.teleportTo(target, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, 0f, 0f);
-            } else {
-                player.teleportTo(target, j.getDouble("rx"), j.getDouble("ry"), j.getDouble("rz"), j.getFloat("ryaw"), j.getFloat("rpitch"));
-            }
-        }
+        // wakes outside the jail's front door in the city, never back at the scene of the crime
+        teleportOutside(player, j, site);
         SkyData.get(player).markDirty();
     }
 
@@ -831,15 +981,48 @@ public final class Jail {
         } else {
             Notifier.title(player, Component.translatable("crime.skycraft.jail.escaped"), Component.translatable("crime.skycraft.jail.escaped_unseen"));
         }
-        // whatever was left behind stays in the evidence chest (and JailData) and is handed back on the next release
+        // whatever was left behind stays in the evidence chest (and JailData): picking that chest's lock later, or
+        // serving or paying the next time, gets it back
+        LOOSE.remove(player.getUUID());
         if (site != null && site.hold()) return;
 
-        ServerLevel target = null;
-        ResourceLocation dimId = ResourceLocation.tryParse(j.getString("rdim"));
-        if (dimId != null) target = player.server.getLevel(ResourceKey.create(Registries.DIMENSION, dimId));
-        if (target == null || target.dimension() == JAIL) target = player.server.overworld();
+        // out of the drain of the jail dimension's cell block: behind the nearest city jail, not where the crime was
+        teleportOutside(player, j, site);
+    }
 
-        player.teleportTo(target, j.getDouble("rx"), j.getDouble("ry"), j.getDouble("rz"), j.getFloat("ryaw"), j.getFloat("rpitch"));
+    /** Where a freed or escaped prisoner stands: a place outside a city jail. */
+    record Exit(ServerLevel level, BlockPos pos) {}
+
+    /**
+     * The spot outside the jail: a hold jail's own exit (in front of its door); for the jail dimension the exit of the
+     * jail that serves the hold the crime was in (else the nearest city jail), else the middle of that settlement,
+     * else the world spawn. Never the place of the crime.
+     */
+    static Exit outside(MinecraftServer server, CompoundTag j, @Nullable Site site) {
+        ServerLevel overworld = server.overworld();
+        if (site != null && site.hold()) {
+            BlockPos out = site.exit() != null ? site.exit() : site.stand();
+            return new Exit(site.level(), out);
+        }
+        BlockPos from = BlockPos.containing(j.getDouble("rx"), j.getDouble("ry"), j.getDouble("rz"));
+        String place = j.getString("place");
+        if (place.isEmpty()) place = jailPlaceFor(overworld, j.getString("hold"), from);
+        if (place != null) {
+            Optional<SettlementAnchors.Entry> entry = SettlementAnchors.find(overworld, place);
+            if (entry.isPresent()) {
+                Anchor exit = entry.get().first(AnchorType.JAIL_EXIT);
+                if (exit != null) return new Exit(overworld, exit.pos());
+                SettlementAnchors.Entry e = entry.get();
+                return new Exit(overworld, new BlockPos(e.x, overworld.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, e.x, e.z), e.z));
+            }
+        }
+        return new Exit(overworld, overworld.getSharedSpawnPos());
+    }
+
+    private static void teleportOutside(ServerPlayer player, CompoundTag j, @Nullable Site site) {
+        Exit out = outside(player.server, j, site);
+        BlockPos p = out.pos();
+        player.teleportTo(out.level(), p.getX() + 0.5, p.getY(), p.getZ() + 0.5, player.getYRot(), 0f);
     }
 
     /** Skyrim: time in jail erodes skill progress. Picks {@code times} skills weighted by level and resets their progress. */
@@ -889,7 +1072,7 @@ public final class Jail {
                 event.setCancellationResult(InteractionResult.FAIL);
                 CompoundTag j = Bounty.state(player).getCompound("jail");
                 int served = j.getInt("served");
-                if (served < 60) {
+                if (!maySleep(j)) {
                     Notifier.message(player, Component.translatable("crime.skycraft.jail.too_soon", 60 - served));
                 } else {
                     release(player, true);

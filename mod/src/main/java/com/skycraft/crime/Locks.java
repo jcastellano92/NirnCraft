@@ -135,7 +135,12 @@ public final class Locks {
                 com.skycraft.tamriel.settlement.AnchorType.INN_DOOR, false);
     }
 
-    /** The lock difficulty of the container or door at {@code pos}, or {@link #NOT_LOCKED}. Decides (and remembers) on first use. */
+    /**
+     * The lock difficulty of the container or door at {@code pos}, or {@link #NOT_LOCKED}. Containers are decided (and
+     * remembered) on first use; the decision is a pure function of seed and position, so a HUD look and a click agree.
+     * Doors are never rolled: they are locked only by an explicit {@link #setLock} (jail cells, the intro cottage,
+     * inn rooms) or, inside a settlement, at night when they are a private home's (see {@link #nightLocked}).
+     */
     public static int lockLevel(ServerLevel level, BlockPos rawPos) {
         BlockPos pos = normalizePos(level, rawPos);
         if (isInnRoomDoor(level, pos)) return ADEPT;
@@ -143,6 +148,7 @@ public final class Locks {
         String key = key(level, pos);
         Integer stored = data.locks.get(key);
         if (stored != null) return stored;
+        if (data.never.contains(key)) return NOT_LOCKED;
         if (PlacedBlocks.isPlayerPlaced(level, pos) || Jail.isJailDimension(level)) return NOT_LOCKED;
 
         BlockEntity be = level.getBlockEntity(pos);
@@ -155,24 +161,91 @@ public final class Locks {
 
         BlockState state = level.getBlockState(pos);
         if (state.getBlock() instanceof DoorBlock || state.getBlock() instanceof TrapDoorBlock) {
-            long dayTime = level.getDayTime() % 24000L;
-            boolean isNight = dayTime >= 13000L && dayTime <= 23000L;
-            if (Theft.inVillage(level, pos)) {
-                if (isNight) {
-                    int decided = decide(level, pos);
-                    if (decided == NOT_LOCKED) decided = APPRENTICE;
-                    return decided;
-                }
-                return NOT_LOCKED;
-            } else {
-                int decided = decide(level, pos);
-                data.locks.put(key, decided);
-                data.setDirty();
-                return decided;
-            }
+            // outside a settlement (dungeon path doors, camps, quest buildings) a door only locks when set explicitly;
+            // inside one a private home locks at night: a derived answer that is never stored, so asking decides nothing
+            if (!nightLocked(level, pos)) return NOT_LOCKED;
+            int decided = decide(level, pos);
+            return decided == NOT_LOCKED ? APPRENTICE : decided;
         }
 
         return NOT_LOCKED;
+    }
+
+    /** The one definition of night for locks, shop hours and ownership: the hours a shop is closed (20:00-08:00). */
+    public static boolean isNight(Level level) {
+        return !com.skycraft.economy.Shop.isOpen(level);
+    }
+
+    /**
+     * Whether the door at {@code pos} is a settlement home's door that is shut for the night. Public buildings (inns,
+     * shops, temples, the palace, guard posts, workplaces) and doors flagged {@link #markNeverLock} stay open. The
+     * owner (or household) of a home is let in by the ownership check ({@link Ownership#isOwnedByOther}), not here.
+     */
+    public static boolean nightLocked(ServerLevel level, BlockPos rawPos) {
+        if (!isNight(level)) return false;
+        BlockPos pos = normalizePos(level, rawPos);
+        if (Jail.isJailDimension(level) || PlacedBlocks.isPlayerPlaced(level, pos)) return false;
+        if (LockData.get(level.getServer()).never.contains(key(level, pos))) return false;
+        if (!Theft.inVillage(level, pos)) return false;
+        return isPrivateHome(level, pos);
+    }
+
+    /** Anchor types a household's building carries (a house, a farmhouse, a house for sale). */
+    private static boolean isHomeAnchor(com.skycraft.tamriel.settlement.AnchorType t) {
+        return switch (t) {
+            case BED, HOUSE_BED, HOUSE_DOOR, HOUSE_MIN, HOUSE_MAX, CONTAINER, FARMER, HOMESTEAD -> true;
+            default -> false;
+        };
+    }
+
+    /** Anchor types that belong to the street, not to a building. */
+    private static boolean isStreetAnchor(com.skycraft.tamriel.settlement.AnchorType t) {
+        return switch (t) {
+            case MEETING, CARRIAGE, GATE, TABLEAU, FIRE_SITE -> true;
+            default -> false;
+        };
+    }
+
+    /**
+     * Whether the building around the door is somebody's home (beds, chests, a farmhouse) rather than a public
+     * building (inn, shop, smithy, temple, palace, barracks, guild hall, workplace). The building is the one of the
+     * nearest recorded anchor; it is public if any anchor with the same owner label is not a household anchor.
+     * A door with no recorded building near it counts as a home (the old night rule).
+     */
+    public static boolean isPrivateHome(ServerLevel level, BlockPos pos) {
+        var near = com.skycraft.tamriel.settlement.SettlementAnchors.near(level, pos, 8);
+        if (near.isEmpty()) return true;
+        com.skycraft.tamriel.settlement.Anchor best = null;
+        long bestD = 20L * 20L;
+        for (com.skycraft.tamriel.settlement.Anchor a : near.get().anchors()) {
+            if (isStreetAnchor(a.type()) || Math.abs(a.pos().getY() - pos.getY()) > 12) continue;
+            long dx = a.pos().getX() - pos.getX(), dz = a.pos().getZ() - pos.getZ();
+            long d = dx * dx + dz * dz;
+            if (d < bestD) {
+                bestD = d;
+                best = a;
+            }
+        }
+        if (best == null) return true;
+        for (com.skycraft.tamriel.settlement.Anchor a : near.get().anchors()) {
+            if (!a.owner().equals(best.owner()) || isStreetAnchor(a.type())) continue;
+            if (!isHomeAnchor(a.type())) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Server only: flags a door as a generated path door (dungeon path, marquee or quest door) that is never locked,
+     * whatever the hour or the settlement around it. World-generated doors outside settlements are never rolled
+     * for a lock anyway; the marker is for doors inside a settlement's area that belong to something else.
+     */
+    public static void markNeverLock(ServerLevel level, BlockPos rawPos) {
+        BlockPos pos = normalizePos(level, rawPos);
+        LockData data = LockData.get(level.getServer());
+        String key = key(level, pos);
+        boolean changed = data.locks.remove(key) != null;
+        changed |= data.never.add(key);
+        if (changed) data.setDirty();
     }
 
     private static int decide(ServerLevel level, BlockPos pos) {
@@ -243,6 +316,7 @@ public final class Locks {
         BlockPos pos = normalizePos(level, rawPos);
         LockData data = LockData.get(level.getServer());
         data.locks.put(key(level, pos), tier);
+        data.never.remove(key(level, pos));
         data.setDirty();
     }
 
@@ -534,6 +608,8 @@ public final class Locks {
         final Map<String, Integer> locks = new HashMap<>();
         /** Lock key -> players who have picked it (it stays open for them). */
         final Map<String, Set<UUID>> unlocked = new HashMap<>();
+        /** Keys of generated path doors that are never locked (see {@link Locks#markNeverLock}). */
+        final Set<String> never = new HashSet<>();
 
         static LockData get(MinecraftServer server) {
             return server.overworld().getDataStorage().computeIfAbsent(LockData::load, LockData::new, NAME);
@@ -555,11 +631,15 @@ public final class Locks {
                 }
                 if (!who.isEmpty()) data.unlocked.put(k, who);
             }
+            for (Tag t : tag.getList("never", Tag.TAG_STRING)) data.never.add(t.getAsString());
             return data;
         }
 
         @Override
         public CompoundTag save(CompoundTag tag) {
+            ListTag never = new ListTag();
+            for (String k : this.never) never.add(net.minecraft.nbt.StringTag.valueOf(k));
+            tag.put("never", never);
             CompoundTag locks = new CompoundTag();
             this.locks.forEach(locks::putInt);
             tag.put("locks", locks);

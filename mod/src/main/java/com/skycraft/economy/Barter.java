@@ -63,6 +63,15 @@ public final class Barter {
      */
     static void handleAction(ServerPlayer player, int entityId, int op, int index, boolean all, ResourceLocation itemId, boolean confirm) {
         if (!(player.level().getEntity(entityId) instanceof LivingEntity npc) || !Merchants.isMerchant(npc) || !canReach(player, npc)) return;
+        // a screen opened at 19:59 (or before a fight) is not good for ever: the shop hours and the mood are re-checked
+        if (!Merchants.alwaysOpen(npc) && !Shop.isOpen(player.level())) {
+            Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.economy.closed"));
+            return;
+        }
+        if (com.skycraft.crime.Bounty.isHostile(player)) {
+            Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.economy.closed"));
+            return;
+        }
         Shop shop = Shop.of(npc, player);
         Component msg = switch (op) {
             case OP_BUY -> buy(player, shop, index, all, itemId);

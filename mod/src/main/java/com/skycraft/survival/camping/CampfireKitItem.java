@@ -47,6 +47,14 @@ public class CampfireKitItem extends Item {
         if (level.isClientSide) return InteractionResult.SUCCESS;
         Direction facing = player == null ? Direction.NORTH : player.getDirection().getOpposite();
         BlockState fire = Blocks.CAMPFIRE.defaultBlockState().setValue(CampfireBlock.FACING, facing).setValue(CampfireBlock.LIT, true);
+        // setBlock bypasses the placement events, so ask the protection module (someone else's homestead, a town) here
+        if (player instanceof ServerPlayer sp && level instanceof net.minecraft.server.level.ServerLevel sl) {
+            com.skycraft.protect.Protect.Decision d = com.skycraft.protect.Protect.checkPlace(sp, sl, pos, fire);
+            if (!d.allowed()) {
+                com.skycraft.protect.Protect.hint(sp, d);
+                return InteractionResult.FAIL;
+            }
+        }
         level.setBlock(pos, fire, 11);
         com.skycraft.dig.PlacedBlocks.mark(level, pos, true); // yours: you can break camp anywhere (world protection)
         level.gameEvent(player, GameEvent.BLOCK_PLACE, pos);

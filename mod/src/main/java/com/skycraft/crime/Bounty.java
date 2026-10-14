@@ -201,12 +201,14 @@ public final class Bounty {
 
     // ------------------------------------------------------------------ stolen goods
 
+    /** Whether the stack is stolen goods. A quest item never is, even one that carries the tag: it is never confiscated. */
     public static boolean isStolen(net.minecraft.world.item.ItemStack stack) {
-        return !stack.isEmpty() && stack.getTag() != null && stack.getTag().getBoolean(STOLEN_TAG);
+        return !stack.isEmpty() && stack.getTag() != null && stack.getTag().getBoolean(STOLEN_TAG)
+                && !com.skycraft.quest.QuestItems.isQuestItem(stack);
     }
 
     public static void markStolen(net.minecraft.world.item.ItemStack stack) {
-        if (!stack.isEmpty()) stack.getOrCreateTag().putBoolean(STOLEN_TAG, true);
+        if (!stack.isEmpty() && !com.skycraft.quest.QuestItems.isQuestItem(stack)) stack.getOrCreateTag().putBoolean(STOLEN_TAG, true);
     }
 
     /** Removes every stolen item from the player's inventory. Returns how many items were taken. */

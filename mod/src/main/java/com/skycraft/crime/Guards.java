@@ -33,6 +33,8 @@ public final class Guards {
     public static final int RESIST_TICKS = 6000;
     private static final long CONFRONT_COOLDOWN = 400;
     private static final int RUMORS = 8;
+    /** A failed persuasion cannot be retried in the same hold for one in-game day. */
+    private static final long PERSUADE_COOLDOWN = 24000L;
 
     /** A guard hit by the player doesn't stand down (yield, paid bounty) for this many ticks (30 s). */
     private static final long CALM_AFTER_HIT = 600;
@@ -194,7 +196,7 @@ public final class Guards {
         }
         int speech = SkyData.get(player).getSkill(Skill.SPEECH);
         boolean violent = Bounty.violent(player, hold);
-        boolean triedPersuasion = Bounty.state(player).getInt("persuade_" + hold) == bounty;
+        boolean triedPersuasion = triedRecently(player, hold);
 
         out.add(new DialogueOption("crime.pay", Component.translatable("dialogue.skycraft.crime.pay", Currency.formatCompact(bounty)), 1,
                 (p, n) -> pay(p, n, hold)));
@@ -217,6 +219,16 @@ public final class Guards {
         }
         out.add(new DialogueOption("crime.resist", Component.translatable("dialogue.skycraft.crime.resist"), 6,
                 (p, n) -> resist(p)));
+    }
+
+    /**
+     * A failed persuasion or intimidation closes the option for a whole in-game day in that hold, whatever the bounty
+     * does meanwhile (a new petty crime must not re-open it).
+     */
+    private static boolean triedRecently(ServerPlayer player, String hold) {
+        long at = Bounty.state(player).getLong("persuade_at_" + hold);
+        long now = player.level().getGameTime();
+        return at > 0 && now + 1 >= at && now + 1 - at < PERSUADE_COOLDOWN;
     }
 
     private static void pay(ServerPlayer player, LivingEntity guard, String hold) {
@@ -271,7 +283,7 @@ public final class Guards {
             Notifier.message(player, Component.translatable(intimidate ? "crime.skycraft.guard.intimidated_line" : "crime.skycraft.guard.persuaded_line",
                     guard.getDisplayName()));
         } else {
-            Bounty.state(player).putInt("persuade_" + hold, bounty);
+            Bounty.state(player).putLong("persuade_at_" + hold, player.level().getGameTime() + 1);
             SkyData.get(player).markDirty();
             Dialogue.open(player, guard, Component.translatable(intimidate ? "crime.skycraft.guard.intimidate_failed" : "crime.skycraft.guard.persuade_failed"));
         }

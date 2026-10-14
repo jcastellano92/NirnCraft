@@ -99,8 +99,26 @@ public final class Theft {
         return inVillage(level, pos);
     }
 
+    /** How long (ticks) the entity and POI part of {@link #inVillage} is remembered for a spot. */
+    private static final long VILLAGE_CACHE_TICKS = 100;
+    /** "dimension|cell" -> {game time until valid, 1 if a village is there}: the entity scans are costly per click. */
+    private static final Map<String, long[]> VILLAGE_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
+
     public static boolean inVillage(ServerLevel level, BlockPos pos) {
+        // recorded settlements are a cheap lookup and always answered fresh
         if (com.skycraft.tamriel.settlement.SettlementAnchors.inSettlement(level, pos)) return true;
+        // villagers, townsfolk and meeting points: scanned once per 4x4x4 cell and a few seconds, not per door click
+        long now = level.getGameTime();
+        String key = level.dimension().location() + "|" + (pos.getX() >> 2) + "|" + (pos.getY() >> 2) + "|" + (pos.getZ() >> 2);
+        long[] hit = VILLAGE_CACHE.get(key);
+        if (hit != null && hit[0] > now && hit[0] - VILLAGE_CACHE_TICKS <= now) return hit[1] != 0;
+        if (VILLAGE_CACHE.size() > 2048) VILLAGE_CACHE.clear();
+        boolean found = nearTownsfolk(level, pos);
+        VILLAGE_CACHE.put(key, new long[]{now + VILLAGE_CACHE_TICKS, found ? 1 : 0});
+        return found;
+    }
+
+    private static boolean nearTownsfolk(ServerLevel level, BlockPos pos) {
         if (!level.getEntitiesOfClass(Villager.class, new AABB(pos).inflate(32), Villager::isAlive).isEmpty()) return true;
         // Skycraft townsfolk living here
         if (!level.getEntitiesOfClass(com.skycraft.society.entity.NpcEntity.class, new AABB(pos).inflate(32),
@@ -214,6 +232,8 @@ public final class Theft {
         for (Entry before : s.container) {
             int removed = before.count - countOf(containerAfter, before.proto);
             if (removed <= 0) continue;
+            // quest items are never stolen goods: nobody confiscates or recovers them
+            if (com.skycraft.quest.QuestItems.isQuestItem(before.proto)) continue;
             if (Currency.valueOf(before.proto) > 0) {
                 // coins are paid into the wallet (now or on close), so they are counted by value below
                 coinsRemoved += removed;
@@ -399,6 +419,7 @@ public final class Theft {
     private static int tagStolen(ServerPlayer player, ItemStack proto, int amount) {
         // items that were already stolen (taken from an owned container again) still count
         if (Bounty.isStolen(proto)) return amount;
+        if (com.skycraft.quest.QuestItems.isQuestItem(proto)) return 0;
         Inventory inv = player.getInventory();
         int left = amount;
         List<ItemStack> split = new ArrayList<>();

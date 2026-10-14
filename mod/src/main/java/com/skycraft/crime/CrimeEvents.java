@@ -28,6 +28,7 @@ public final class CrimeEvents {
         Locks.forget(id);
         Guards.forget(id);
         Crimes.forget(id);
+        Jail.forget(id);
         CrimePackets.forget(id);
     }
 }

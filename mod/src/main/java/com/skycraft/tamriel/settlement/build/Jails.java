@@ -23,7 +23,8 @@ import net.minecraft.world.level.block.state.properties.Half;
  * back cells hold NPC prisoners. At the corridor's end a rusted drain grate drops into an old culvert that comes out
  * behind the jail - the way out for those who would rather not serve their time (the other is picking the cell door
  * and the gate). Variant 1 is Cidhna Mine: rough-hewn rock with silver veins in the cell walls for the prisoners'
- * labour. Footprint 15 x 21; anchors in cell order (see {@link AnchorType#JAIL_CELL}).
+ * labour. Footprint 15 x 21; anchors in cell order (see {@link AnchorType#JAIL_CELL}). A guard of the jail
+ * walks the cell block (spawned by {@code crime.Jail}); the cell walls have a grate window by each door.
  */
 public final class Jails {
     private Jails() {}
@@ -171,8 +172,13 @@ public final class Jails {
                 boolean left = side == 0;
                 int bars = left ? 5 : 9;
                 Direction out = left ? Direction.EAST : Direction.WEST;
-                c.door(bars, 1, zc, B.s(Blocks.IRON_DOOR), out);
-                c.anchor(AnchorType.JAIL_DOOR, bars, 1, zc);
+                // the door stands against the divider (or the gate wall) with a stone post beside it, so the bars
+                // never end at a door's thin panel; one bar of the wall is left out at head height: a pane-free
+                // grate a prisoner can reach through (pickpocket, talk) and cannot fit through
+                c.door(bars, 1, za, B.s(Blocks.IRON_DOOR), out);
+                c.anchor(AnchorType.JAIL_DOOR, bars, 1, za);
+                for (int yy = 1; yy <= 3; yy++) c.set(bars, yy, za + 1, wall);
+                c.set(bars, 2, za + 2, B.s(Blocks.AIR));
                 int stand = left ? 3 : 11;
                 c.anchor(AnchorType.JAIL_CELL, stand, y, zc);
                 // a straw bed in the back corner and a slop bucket

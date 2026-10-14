@@ -95,8 +95,32 @@ public final class Followers {
             return true;
         }
         if (recorded.equals(npc.getUUID())) return true;
+        returnGear(npc, owner);
         release(npc);
         return false;
+    }
+
+    /**
+     * Gives back what the player lent a follower who leaves them: the bags and the gear the player handed over (the
+     * follower gets its own gear back). What does not fit the owner's bags drops at the owner; nothing is deleted.
+     */
+    private static void returnGear(LivingEntity npc, Player owner) {
+        if (npc.level().isClientSide) return;
+        SimpleContainer inv = getFollowerInventory(npc);
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack s = inv.getItem(i);
+            if (!s.isEmpty()) com.skycraft.inventory.Pack.giveOrDrop(owner, s);
+        }
+        npc.getPersistentData().remove(INVENTORY_KEY);
+        if (!(npc instanceof NpcEntity n)) return;
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            ItemStack worn = n.getItemBySlot(slot);
+            if (worn.isEmpty() || !n.isGivenGear(slot)) continue;
+            n.setItemSlot(slot, ItemStack.EMPTY);
+            n.setDropChance(slot, 0.085f);
+            com.skycraft.inventory.Pack.giveOrDrop(owner, worn);
+        }
+        restoreNative(n);
     }
 
     private static void release(LivingEntity npc) {
@@ -193,6 +217,7 @@ public final class Followers {
     }
 
     public static void dismiss(ServerPlayer player, LivingEntity npc) {
+        returnGear(npc, player);
         release(npc);
         if (npc.getUUID().equals(followerOf(player))) setFollowerOf(player, null);
         Notifier.message(player, Component.translatable("society.skycraft.follower.dismissed", npc.getDisplayName()));

@@ -42,7 +42,7 @@ import java.util.List;
 
 /**
  * Pickpocketing: sneak + right-click a villager, wandering trader or other townsperson to see what's in their
- * pockets (generated from {@code skycraft:pickpocket/<villager|guard>} once per in-game day and kept on the entity).
+ * pockets (generated from {@code skycraft:pickpocket/<villager|guard>} and kept on the entity for several in-game days).
  * Each item shows a success chance; the server rolls when the player tries to take it.
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
@@ -54,6 +54,8 @@ public final class Pickpocket {
     private static final String STOLEN_TODAY = "skycraft_pockets_stolen";
     private static final String WARY_UNTIL = "skycraft_pockets_wary";
     private static final double REACH_SQR = 16;
+    /** In-game days before a person's emptied pockets hold something again. */
+    private static final long REFILL_DAYS = 5;
 
     private Pickpocket() {}
 
@@ -80,7 +82,11 @@ public final class Pickpocket {
     private static List<ItemStack> pockets(ServerPlayer player, LivingEntity npc) {
         CompoundTag data = npc.getPersistentData();
         long day = npc.level().getDayTime() / 24000L;
-        if (!data.contains(POCKETS, Tag.TAG_LIST) || data.getLong(POCKETS_DAY) != day) {
+        long since = day - data.getLong(POCKETS_DAY);
+        // pockets refill on a long cooldown per person, not every dawn: sleeping through days must not farm them
+        // a jail guard's key is what the prison break needs: his ring is refilled every day
+        boolean jailGuard = Crimes.isGuard(npc) && (npc.getTags().contains(Jail.NPC_TAG) || Jail.isJailArea(npc.level(), npc.blockPosition()));
+        if (!data.contains(POCKETS, Tag.TAG_LIST) || since < 0 || since >= (jailGuard ? 1 : REFILL_DAYS)) {
             ListTag list = new ListTag();
             for (ItemStack s : generate(player, npc)) {
                 if (!s.isEmpty()) list.add(s.save(new CompoundTag()));

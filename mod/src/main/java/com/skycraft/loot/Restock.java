@@ -4,10 +4,15 @@ import com.skycraft.Skycraft;
 import com.skycraft.dig.PlacedBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.event.entity.player.PlayerContainerEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
@@ -18,6 +23,10 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 /**
  * Skyrim's respawn rules for loot containers: a looted dungeon or wilderness container refills after 30 days, a
  * household or shop container after 10, a boss chest (or a placed unique) never ({@link Containers#restockDays}).
@@ -26,11 +35,15 @@ import net.minecraftforge.fml.common.Mod;
  * the pack's {@code config/lootr-common.toml} to the same 30 days for the same tables, does the work. Without Lootr
  * (a dev server, a trimmed pack) Skycraft does it: the first time a player opens a container that still has its loot
  * table, the table and the time are remembered; opening it again after the restock time empties it and rolls the
- * table afresh, at the opener's level. Containers players placed are never touched.</p>
+ * table afresh, at the opener's level. Containers players placed are never touched, and neither is one the player
+ * stored their own things in: what the table generated is remembered when the container is first opened, and a
+ * restock waits until nothing else is inside.</p>
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Restock {
     private static Boolean lootr;
+    /** Opener -> the container whose freshly generated contents are recorded when its menu opens. */
+    private static final Map<UUID, BlockPos> PENDING = new HashMap<>();
 
     private Restock() {}
 
@@ -57,6 +70,7 @@ public final class Restock {
                 entry.putLong("at", now);
                 data.entries.put(key, entry);
                 data.setDirty();
+                if (event.getEntity() instanceof ServerPlayer) PENDING.put(event.getEntity().getUUID(), pos.immutable());
             }
             return;
         }
@@ -65,11 +79,68 @@ public final class Restock {
         String table = entry.getString("table");
         int days = Containers.restockDays(table);
         if (days <= 0 || now - entry.getLong("at") < days * 24000L) return;
+        // the player keeps their own things: wait until only what the table generated is left inside
+        if (holdsForeignItems(entry, container)) return;
         // the time has come: empty it and roll the table again when this open unpacks it
         container.clearContent();
         container.setLootTable(new ResourceLocation(table), level.getRandom().nextLong());
         entry.putLong("at", now);
+        entry.remove("gen");
         data.setDirty();
+        if (event.getEntity() instanceof ServerPlayer) PENDING.put(event.getEntity().getUUID(), pos.immutable());
+    }
+
+    /** The menu is open, so the table has been unpacked: remember what it generated. */
+    @SubscribeEvent
+    public static void onOpen(PlayerContainerEvent.Open event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        BlockPos pos = PENDING.remove(player.getUUID());
+        if (pos == null || !(player.level() instanceof ServerLevel level)) return;
+        if (!(level.getBlockEntity(pos) instanceof RandomizableContainerBlockEntity container)) return;
+        Data data = Data.get(level.getServer());
+        CompoundTag entry = data.entries.getCompound(key(level, pos));
+        if (entry.isEmpty() || entry.contains("gen", Tag.TAG_LIST)) return;
+        Map<String, Integer> counts = new HashMap<>();
+        for (int i = 0; i < container.getContainerSize(); i++) {
+            ItemStack s = container.getItem(i);
+            if (!s.isEmpty()) counts.merge(itemId(s), s.getCount(), Integer::sum);
+        }
+        ListTag gen = new ListTag();
+        counts.forEach((id, n) -> {
+            CompoundTag t = new CompoundTag();
+            t.putString("id", id);
+            t.putInt("n", n);
+            gen.add(t);
+        });
+        entry.put("gen", gen);
+        data.entries.put(key(level, pos), entry);
+        data.setDirty();
+    }
+
+    private static String itemId(ItemStack s) {
+        ResourceLocation id = ForgeRegistries.ITEMS.getKey(s.getItem());
+        return id == null ? "" : id.toString();
+    }
+
+    /**
+     * Whether the container holds anything the table did not generate (an item kind it did not roll, or more of one
+     * than it rolled). Without a record of the generated contents (entries from before it was kept) any item counts.
+     */
+    public static boolean holdsForeignItems(CompoundTag entry, RandomizableContainerBlockEntity container) {
+        Map<String, Integer> allowed = new HashMap<>();
+        for (Tag t : entry.getList("gen", Tag.TAG_COMPOUND)) {
+            CompoundTag c = (CompoundTag) t;
+            allowed.merge(c.getString("id"), c.getInt("n"), Integer::sum);
+        }
+        for (int i = 0; i < container.getContainerSize(); i++) {
+            ItemStack s = container.getItem(i);
+            if (s.isEmpty()) continue;
+            String id = itemId(s);
+            int left = allowed.getOrDefault(id, 0) - s.getCount();
+            if (left < 0) return true;
+            allowed.put(id, left);
+        }
+        return false;
     }
 
     private static String key(Level level, BlockPos pos) {

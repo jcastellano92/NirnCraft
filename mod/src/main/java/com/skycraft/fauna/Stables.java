@@ -123,6 +123,13 @@ public final class Stables {
     }
 
     private static void buyMount(ServerPlayer player, LivingEntity npc, MountKind kind) {
+        // the dialogue option may be stale (a second click, another buyer, walked away): re-check on the server
+        Region region = Regions.at(player.level(), npc.blockPosition());
+        if (!isStableMaster(npc) || npc.level() != player.level() || player.distanceToSqr(npc) > 64
+                || !MountKind.forSale(region.id(), region.province()).contains(kind) || Mounts.owns(player, kind)) {
+            Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.stables.unavailable", kind.displayName()));
+            return;
+        }
         if (!Currency.take(player, kind.cost)) {
             Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.stables.no_gold", kind.cost));
             return;

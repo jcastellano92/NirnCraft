@@ -1,5 +1,6 @@
 package com.skycraft.crime;
 
+import com.skycraft.Skycraft;
 import com.skycraft.dig.PlacedBlocks;
 import com.skycraft.roads.RoadsData;
 import com.skycraft.roads.Settlement;
@@ -23,6 +24,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.AABB;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -38,6 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>Containers, beds, doors, and placed clutter in settlements are owned by the household or shop.
  * Blocks in enemy camps and dungeons are never "owned": looting them is not a crime.</p>
  */
+@Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Ownership {
     public static final String ENTITY_OWNER_KEY = "skycraft_owner";
 
@@ -147,9 +153,10 @@ public final class Ownership {
                     if (com.skycraft.tamriel.settlement.SettlementAnchors.hasBeds(sl, pos)) return true;
                     return !rented;
                 }
-                // Doors during daytime (8:00 - 20:00) are public to allow visiting shops & homes
+                // Doors are public by day (8:00 - 20:00); at night only private homes are shut (inns, shops, temples,
+                // the palace and guard posts stay open), by the same night as Locks and Shop.isOpen
                 if (state.getBlock() instanceof DoorBlock || state.getBlock() instanceof TrapDoorBlock) {
-                    return !com.skycraft.economy.Shop.isOpen(sl);
+                    return Locks.nightLocked(sl, pos);
                 }
                 // Containers: only village loot or locked containers belong to the household
                 if (be instanceof net.minecraft.world.Container) {
@@ -196,6 +203,35 @@ public final class Ownership {
 
     public static void setPlayerOwner(ServerLevel level, BlockPos pos, UUID player) {
         setOwner(level, pos, "player:" + player.toString(), Component.literal(player.toString()));
+    }
+
+    /** Forgets the explicit owner of a block (and of its other half, for beds and doors). */
+    private static void forget(ServerLevel level, BlockPos pos) {
+        OwnershipData data = OwnershipData.get(level.getServer());
+        boolean changed = data.entries.remove(key(level, pos)) != null;
+        BlockState state = level.getBlockState(pos);
+        if (state.getBlock() instanceof BedBlock && state.hasProperty(BedBlock.FACING) && state.hasProperty(BedBlock.PART)) {
+            BlockPos other = pos.relative(BedBlock.getConnectedDirection(state));
+            changed |= data.entries.remove(key(level, other)) != null;
+        } else if (state.getBlock() instanceof DoorBlock && state.hasProperty(DoorBlock.HALF)) {
+            BlockPos other = state.getValue(DoorBlock.HALF) == net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER ? pos.above() : pos.below();
+            changed |= data.entries.remove(key(level, other)) != null;
+        }
+        if (changed) data.setDirty();
+    }
+
+    /**
+     * A block a player placed belongs to the builder: a stale town owner entry at that spot (a bed or chest of the
+     * town they broke) must not win over it. Breaking alone changes nothing: break events are also posted as probes.
+     */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onPlaced(BlockEvent.EntityPlaceEvent event) {
+        if (event.isCanceled() || !(event.getEntity() instanceof Player) || !(event.getLevel() instanceof ServerLevel level)) return;
+        if (event instanceof BlockEvent.EntityMultiPlaceEvent multi) {
+            for (var snapshot : multi.getReplacedBlockSnapshots()) forget(level, snapshot.getPos());
+        } else {
+            forget(level, event.getPos());
+        }
     }
 
     @Nullable

@@ -74,10 +74,21 @@ public final class Crimes {
 
     @Nullable
     public static LivingEntity findWitness(ServerPlayer player, @Nullable LivingEntity exclude) {
+        return find(player, exclude, false);
+    }
+
+    /** A guard that sees the player right now (sneaking and darkness shorten how far), or null. */
+    @Nullable
+    public static LivingEntity findGuardWitness(ServerPlayer player) {
+        return find(player, null, true);
+    }
+
+    @Nullable
+    private static LivingEntity find(ServerPlayer player, @Nullable LivingEntity exclude, boolean guardsOnly) {
         var level = player.level();
         boolean dark = level.getMaxLocalRawBrightness(player.blockPosition()) < 5;
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(WITNESS_RANGE),
-                e -> e != exclude && e != player && e.isAlive() && isCivilian(e))) {
+                e -> e != exclude && e != player && e.isAlive() && (guardsOnly ? isGuard(e) : isCivilian(e)))) {
             if (e.isSleeping()) continue;
             double range = WITNESS_RANGE * Math.max(0.1, player.getVisibilityPercent(e));
             if (dark && player.isCrouching()) range *= 0.5;
@@ -119,10 +130,27 @@ public final class Crimes {
 
     // ------------------------------------------------------------------ violent crimes
 
+    /**
+     * The player answerable for a blow: the attacker itself, or the owner of the conjured summon, ally, follower or
+     * tamed pet that struck (resolved even when the owner is far away, so a summon cannot be used as a weapon).
+     */
     @Nullable
     private static ServerPlayer attacker(net.minecraft.world.damagesource.DamageSource source) {
         Entity e = source.getEntity();
-        return e instanceof ServerPlayer sp ? sp : null;
+        if (e == null) return null;
+        if (e instanceof ServerPlayer sp) return sp;
+        if (!(e.level() instanceof net.minecraft.server.level.ServerLevel level)) return null;
+        var server = level.getServer();
+        ServerPlayer owner = com.skycraft.quest.Quests.asPlayer(server, e);
+        if (owner != null) return owner;
+        java.util.UUID id = com.skycraft.magic.spell.Summons.ownerOf(e);
+        if (id == null) id = com.skycraft.society.Followers.getOwnerId(e);
+        return id == null ? null : server.getPlayerList().getPlayer(id);
+    }
+
+    /** Whether the victim was already fighting the one who struck it (a summon or pet's target), not the player. */
+    private static boolean provokedBy(LivingEntity victim, Entity striker) {
+        return striker != null && victim instanceof Mob mob && mob.getTarget() == striker && !isGuard(victim);
     }
 
     /** Remembers a civilian (or any NPC) hurting a player, for self-defense. */
@@ -174,7 +202,7 @@ public final class Crimes {
         // guard per minute, and never while already fighting the guards.
         if (isGuard(victim)) {
             if (victim instanceof Mob mob) {
-                if (com.skycraft.combat.Sheathe.isSheathed(player) && !Bounty.isHostile(player)
+                if (event.getSource().getEntity() == player && com.skycraft.combat.Sheathe.isSheathed(player) && !Bounty.isHostile(player)
                         && !Guards.hitRecently(victim, player, 1200) && Guards.allowAccident(victim, player)) {
                     Guards.handleAccidentalHit(player, mob);
                     return;
@@ -194,8 +222,8 @@ public final class Crimes {
             return;
         }
 
-        // fighting back against someone who's already attacking you isn't a new crime
-        if (selfDefense(victim, player)) return;
+        // fighting back against someone who's already attacking you (or your summon, follower or pet) isn't a new crime
+        if (selfDefense(victim, player) || provokedBy(victim, event.getSource().getEntity())) return;
 
         long now = victim.level().getGameTime();
         String key = victim.getUUID() + "|" + player.getUUID();
@@ -247,7 +275,7 @@ public final class Crimes {
 
         if (!isCivilian(victim)) return;
         // killing someone who attacked you (or who accepted your duel) isn't murder
-        if (selfDefense(victim, player)) return;
+        if (selfDefense(victim, player) || provokedBy(victim, event.getSource().getEntity())) return;
 
         // the Dark Brotherhood always knows
         Bounty.increment(player, "murders", 1);

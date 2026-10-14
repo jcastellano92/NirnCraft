@@ -44,7 +44,8 @@ public final class CrimeHud {
         Component status = null;
         int color = RED;
         if (Jail.isJailed(mc.player)) {
-            status = Component.translatable("hud.skycraft.crime.sentence", Jail.formatTime(Jail.remaining(mc.player)));
+            status = Jail.remaining(mc.player) <= 0 ? Component.translatable("hud.skycraft.crime.served")
+                    : Component.translatable("hud.skycraft.crime.sentence", Jail.formatTime(Jail.remaining(mc.player)));
             color = 0xE0C080;
         } else {
             String hold = Holds.holdAt(mc.level, mc.player.blockPosition());
