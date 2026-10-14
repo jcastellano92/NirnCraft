@@ -239,7 +239,19 @@ public final class WildHorseTaming {
         if (player.serverLevel().getEntity(session.horseId) instanceof Mob mob && mob.isAlive() && !MountGear.isOwned(mob)) {
             MountGear.clearSaddle(mob);
         }
-        if (!player.isCreative()) MountGear.give(player, session.saddle.stack());
+        if (!player.isCreative()) {
+            ItemStack saddleStack = session.saddle.stack();
+            ItemStack held = player.getMainHandItem();
+            if (held.isEmpty()) {
+                player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, saddleStack);
+                player.containerMenu.broadcastChanges();
+            } else if (ItemStack.isSameItemSameTags(held, saddleStack) && held.getCount() < held.getMaxStackSize()) {
+                held.grow(1);
+                player.containerMenu.broadcastChanges();
+            } else {
+                MountGear.give(player, saddleStack);
+            }
+        }
     }
 
     private static void completeTaming(ServerPlayer player, TamingSession session, boolean success) {

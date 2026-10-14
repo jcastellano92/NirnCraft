@@ -97,6 +97,15 @@ public final class FaunaClientEvents {
     }
 
     @SubscribeEvent
+    public static void onMount(net.minecraftforge.event.entity.EntityMountEvent event) {
+        if (event.isDismounting() && active && event.getEntityMounting() == Minecraft.getInstance().player) {
+            if (event.isCancelable()) {
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void onCameraAngles(ViewportEvent.ComputeCameraAngles event) {
         if (!active && Math.abs(sway) < 0.005f) return;
         // the animal's bucking rolls the view and swings it a little: more as the bucking builds

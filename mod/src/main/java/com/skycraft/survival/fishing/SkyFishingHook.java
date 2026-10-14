@@ -72,6 +72,8 @@ public class SkyFishingHook extends FishingHook {
     // the current bite (server)
     private long biteStart;
     private int zoneStart, zoneEnd, period, window;
+    private int outOfWaterTicks;
+    private int biteMisses;
     private FishSpecies species;
 
     public SkyFishingHook(EntityType<? extends SkyFishingHook> type, Level level) {
@@ -140,6 +142,9 @@ public class SkyFishingHook extends FishingHook {
         FluidState fluid = this.level().getFluidState(pos);
         float height = fluid.is(FluidTags.WATER) ? fluid.getHeight(this.level(), pos) : 0f;
         boolean inWater = height > 0f;
+        boolean touchingWater = inWater
+                || this.level().getFluidState(pos.below()).is(FluidTags.WATER)
+                || this.level().getFluidState(pos.above()).is(FluidTags.WATER);
 
         if (state == State.FLYING) {
             if (this.getHookedIn() != null) {
@@ -147,7 +152,7 @@ public class SkyFishingHook extends FishingHook {
                 state = State.HOOKED;
                 return;
             }
-            if (inWater) {
+            if (inWater || touchingWater) {
                 this.setDeltaMovement(this.getDeltaMovement().multiply(0.3, 0.2, 0.3));
                 state = State.BOBBING;
                 return;
@@ -167,13 +172,16 @@ public class SkyFishingHook extends FishingHook {
             double off = this.getY() + v.y - pos.getY() - height;
             if (Math.abs(off) < 0.01) off += Math.signum(off) * 0.1;
             this.setDeltaMovement(v.x * 0.9, v.y - off * this.random.nextFloat() * 0.2, v.z * 0.9);
-            if (inWater) {
+            if (inWater || touchingWater) {
+                outOfWaterTicks = 0;
                 if (this.entityData.get(BITING)) {
                     this.setDeltaMovement(this.getDeltaMovement().add(0, -0.1 * this.random.nextFloat() * this.random.nextFloat(), 0));
                 }
                 if (!this.level().isClientSide) fish(pos);
             } else if (!this.level().isClientSide && phase != Phase.WAIT) {
-                escape(player, (byte) 0);
+                if (++outOfWaterTicks > 30) {
+                    escape(player, (byte) 0);
+                }
             }
         }
         if (!fluid.is(FluidTags.WATER)) this.setDeltaMovement(this.getDeltaMovement().add(0, -0.03, 0));
@@ -268,9 +276,10 @@ public class SkyFishingHook extends FishingHook {
         zoneStart = 80 + this.random.nextInt(Math.max(1, 840 - width));
         zoneEnd = zoneStart + width;
         period = Mth.clamp(46 - species.rarity() * 8 - (species.maxCm() >= 120 ? 4 : 0), 26, 50);
-        window = period * 2 + 6;
+        window = period * 3 + 30;
         timer = window;
         biteStart = level.getGameTime();
+        biteMisses = 0;
         this.entityData.set(BITING, true);
         this.playSound(SoundEvents.FISHING_BOBBER_SPLASH, 0.3f, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.4f);
         double y = this.getY() + 0.5;
@@ -288,6 +297,8 @@ public class SkyFishingHook extends FishingHook {
         }
         species = null;
         timer = -1;
+        biteMisses = 0;
+        outOfWaterTicks = 0;
         phase = Phase.WAIT;
         this.entityData.set(BITING, false);
     }
@@ -321,8 +332,21 @@ public class SkyFishingHook extends FishingHook {
         } else if (phase == Phase.BITE && species != null && player instanceof ServerPlayer sp) {
             if (inZone(sp)) {
                 damage = land(sp, rod);
+                if (this.onGround()) damage = Math.max(damage, 2);
+                this.discard();
+                return damage;
             } else {
-                escape(sp, (byte) 2);
+                if (++biteMisses < 2 && timer > 25) {
+                    // Missed click: penalty to remaining time, but allow another attempt
+                    timer = Math.max(15, timer - 20);
+                    this.playSound(SoundEvents.FISHING_BOBBER_SPLASH, 0.25f, 1.4f);
+                    return 0;
+                } else {
+                    escape(sp, (byte) 2);
+                    if (this.onGround()) damage = 2;
+                    this.discard();
+                    return damage;
+                }
             }
         } else if (phase == Phase.NIBBLE) {
             escape(player, (byte) 2);

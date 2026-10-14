@@ -51,7 +51,7 @@ public final class TameBalance {
         this.periodStart = 64f;
         this.periodEnd = 34f - 1.5f * d;
         this.zone = 0.40f - 0.02f * d + 0.05f * seat;
-        this.grace = 12 + 5 * seat;
+        this.grace = 30 + 10 * seat;
         // each animal starts its bucking at its own point of the wave
         java.util.SplittableRandom r = new java.util.SplittableRandom(seed);
         this.phase1 = (float) (r.nextDouble() * Math.PI * 2);
@@ -92,7 +92,7 @@ public final class TameBalance {
         }
         tick++;
         edgeTicks = Math.abs(marker) >= 0.995f ? edgeTicks + 1 : Math.max(0, edgeTicks - 2);
-        if (edgeTicks > grace) return Result.THROWN;
+        if (tick > 30 && edgeTicks > grace) return Result.THROWN;
         if (Math.abs(marker) <= zone) progress += 1f / duration;
         else progress = Math.max(0f, progress - 2.0f / duration);
         // a rider who never settles, or sits still, is shaken off

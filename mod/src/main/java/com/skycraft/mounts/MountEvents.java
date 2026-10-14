@@ -102,6 +102,12 @@ public final class MountEvents {
     @SubscribeEvent
     public static void onMount(EntityMountEvent event) {
         if (!event.isDismounting() || event.getEntityBeingMounted() == null || event.getLevel().isClientSide()) return;
+        if (event.getEntityMounting() instanceof ServerPlayer player && WildHorseTaming.isTaming(player)) {
+            if (event.isCancelable()) {
+                event.setCanceled(true);
+                return;
+            }
+        }
         MountStamina.dismounted(event.getEntityBeingMounted());
         // the bar goes back to the rider's own the moment they leave the saddle
         if (event.getEntityMounting() instanceof ServerPlayer player) MountStamina.leave(player);

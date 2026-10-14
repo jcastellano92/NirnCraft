@@ -425,7 +425,12 @@ public final class Pack {
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
-        if (player.tickCount % REFILL_INTERVAL == 0 && player.isAlive()) refill(player);
+        if (player.tickCount % REFILL_INTERVAL == 0 && player.isAlive()) {
+            if (refill(player)) {
+                player.containerMenu.broadcastChanges();
+                sync(player);
+            }
+        }
         if (DIRTY.contains(player.getUUID())) {
             Integer last = LAST_SYNC.get(player.getUUID());
             if (last == null || player.tickCount - last >= SYNC_INTERVAL || player.tickCount < last) sync(player);

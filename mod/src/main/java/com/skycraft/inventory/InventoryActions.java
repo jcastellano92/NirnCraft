@@ -45,30 +45,85 @@ public final class InventoryActions {
             // pulls one stack into a real slot first and then runs the normal slot rules
             int index = slot - Pack.VIRTUAL_BASE;
             ItemStack entry = Pack.get(player, index);
-            if (entry.isEmpty() || !BuiltInRegistries.ITEM.getKey(entry.getItem()).equals(itemId)) return;
-            if (action == InventoryPackets.InvAction.FAVORITE) {
-                Pack.setFavorite(player, entry, !InvCategory.isFavorite(entry));
-                CarryWeight.invalidate(player);
-                return;
+            if (entry.isEmpty() || !BuiltInRegistries.ITEM.getKey(entry.getItem()).equals(itemId)) {
+                // Stale virtual index: search pack first
+                int foundIdx = Pack.find(player, s -> BuiltInRegistries.ITEM.getKey(s.getItem()).equals(itemId));
+                if (foundIdx >= 0) {
+                    index = foundIdx;
+                    entry = Pack.get(player, index);
+                } else {
+                    // Check if it already drained/refilled into real slots
+                    int real = -1;
+                    for (int i = 0; i < SLOT_COUNT; i++) {
+                        ItemStack s = inv.getItem(i);
+                        if (!s.isEmpty() && BuiltInRegistries.ITEM.getKey(s.getItem()).equals(itemId)) {
+                            real = i;
+                            break;
+                        }
+                    }
+                    if (real >= 0) {
+                        slot = real;
+                    } else {
+                        return;
+                    }
+                }
             }
-            if (action == InventoryPackets.InvAction.DROP_ONE || action == InventoryPackets.InvAction.DROP_ALL) {
-                if (com.skycraft.quest.QuestItems.isQuestItem(entry)) {
-                    message(player, "quest_item");
+            if (Pack.isVirtual(slot)) {
+                if (action == InventoryPackets.InvAction.FAVORITE) {
+                    Pack.setFavorite(player, entry, !InvCategory.isFavorite(entry));
+                    CarryWeight.invalidate(player);
+                    player.containerMenu.broadcastChanges();
+                    Pack.sync(player);
                     return;
                 }
-                tossAll(player, inv, Pack.take(player, index, action == InventoryPackets.InvAction.DROP_ALL ? Integer.MAX_VALUE : 1));
-                CarryWeight.invalidate(player);
-                return;
-            }
-            slot = Pack.materialize(player, index, itemId);
-            if (slot < 0) {
-                message(player, "full");
-                return;
+                if (action == InventoryPackets.InvAction.DROP_ONE || action == InventoryPackets.InvAction.DROP_ALL) {
+                    if (com.skycraft.quest.QuestItems.isQuestItem(entry)) {
+                        message(player, "quest_item");
+                        return;
+                    }
+                    tossAll(player, inv, Pack.take(player, index, action == InventoryPackets.InvAction.DROP_ALL ? Integer.MAX_VALUE : 1));
+                    CarryWeight.invalidate(player);
+                    player.containerMenu.broadcastChanges();
+                    Pack.sync(player);
+                    return;
+                }
+                slot = Pack.materialize(player, index, itemId);
+                if (slot < 0) {
+                    message(player, "full");
+                    return;
+                }
             }
         }
         if (slot < 0 || slot >= SLOT_COUNT || slot >= inv.getContainerSize()) return;
         ItemStack stack = inv.getItem(slot);
-        if (stack.isEmpty() || !BuiltInRegistries.ITEM.getKey(stack.getItem()).equals(itemId)) return;
+        if (stack.isEmpty() || !BuiltInRegistries.ITEM.getKey(stack.getItem()).equals(itemId)) {
+            // Real slot mismatch: search other real slots
+            int found = -1;
+            for (int i = 0; i < SLOT_COUNT; i++) {
+                ItemStack s = inv.getItem(i);
+                if (!s.isEmpty() && BuiltInRegistries.ITEM.getKey(s.getItem()).equals(itemId)) {
+                    found = i;
+                    break;
+                }
+            }
+            if (found >= 0) {
+                slot = found;
+                stack = inv.getItem(slot);
+            } else {
+                // Check if it moved into the pack
+                int pIdx = Pack.find(player, s -> BuiltInRegistries.ITEM.getKey(s.getItem()).equals(itemId));
+                if (pIdx >= 0) {
+                    slot = Pack.materialize(player, pIdx, itemId);
+                    if (slot < 0) {
+                        message(player, "full");
+                        return;
+                    }
+                    stack = inv.getItem(slot);
+                } else {
+                    return;
+                }
+            }
+        }
 
         switch (action) {
             case InventoryPackets.InvAction.EQUIP -> equip(player, inv, slot, stack);
@@ -84,6 +139,8 @@ public final class InventoryActions {
         }
         com.skycraft.magic.Hands.settle(player); // one hand system: a new item in a hand replaces its spell / bound weapon
         CarryWeight.invalidate(player);
+        player.containerMenu.broadcastChanges();
+        Pack.sync(player);
     }
 
     // ------------------------------------------------------------------ slot helpers
@@ -175,6 +232,7 @@ public final class InventoryActions {
     // ------------------------------------------------------------------ equip
 
     private static boolean isUsableEquipment(ItemStack stack) {
+        if (com.skycraft.economy.ItemCategory.isJewelry(stack)) return true;
         EquipmentSlot slot = equipSlotFor(stack);
         if (slot != null && slot.getType() == EquipmentSlot.Type.ARMOR) return true;
         net.minecraft.world.item.Item it = stack.getItem();
@@ -316,7 +374,12 @@ public final class InventoryActions {
             return;
         }
         int free = freeSlot(inv);
-        inv.setItem(slot, ItemStack.EMPTY);
+        if (isArmorSlot(slot)) {
+            EquipmentSlot eqSlot = EquipmentSlot.byTypeAndIndex(EquipmentSlot.Type.ARMOR, slot - ARMOR_START);
+            player.setItemSlot(eqSlot, ItemStack.EMPTY);
+        } else {
+            inv.setItem(slot, ItemStack.EMPTY);
+        }
         if (free >= 0) inv.setItem(free, stack);
         else Pack.giveOrDrop(player, stack);
     }
