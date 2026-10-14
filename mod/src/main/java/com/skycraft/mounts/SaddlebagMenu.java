@@ -30,6 +30,13 @@ public final class SaddlebagMenu extends ChestMenu {
         this.bag = bag;
     }
 
+    /** Shift-click never moves worn gear (vanilla would bypass {@link GearSlot#onTake} and duplicate the saddle). */
+    @Override
+    public ItemStack quickMoveStack(Player player, int index) {
+        if (index < Saddlebags.GEAR) return ItemStack.EMPTY;
+        return super.quickMoveStack(player, index);
+    }
+
     /** True for an item that is gear: it goes on the mount through {@link #equipFrom}, never into the cargo. */
     public boolean isGear(ItemStack stack) {
         return SaddleType.of(stack) != null || MountGear.wearsBarding(bag.mount, bag.kind, stack)
