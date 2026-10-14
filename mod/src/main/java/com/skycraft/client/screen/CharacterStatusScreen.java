@@ -124,6 +124,44 @@ public class CharacterStatusScreen extends Screen {
         super.render(g, mouseX, mouseY, partialTick);
     }
 
+    /** What a status effect is and does: name and level, time left, its description, and the stat changes it makes. */
+    private static java.util.List<Component> tooltip(MobEffectInstance inst) {
+        net.minecraft.world.effect.MobEffect effect = inst.getEffect();
+        java.util.List<Component> out = new java.util.ArrayList<>();
+        net.minecraft.ChatFormatting colour = effect.isBeneficial() ? net.minecraft.ChatFormatting.GREEN
+                : effect.getCategory() == net.minecraft.world.effect.MobEffectCategory.HARMFUL ? net.minecraft.ChatFormatting.RED
+                : net.minecraft.ChatFormatting.WHITE;
+        net.minecraft.network.chat.MutableComponent title = effect.getDisplayName().copy();
+        if (inst.getAmplifier() > 0) title.append(" ").append(Component.translatable("potion.potency." + inst.getAmplifier()));
+        out.add(title.withStyle(colour));
+        if (inst.isInfiniteDuration()) {
+            out.add(Component.translatable("screen.skycraft.effect.permanent").withStyle(net.minecraft.ChatFormatting.GRAY));
+        } else if (!effect.isInstantenous()) {
+            int secs = inst.getDuration() / 20;
+            out.add(Component.translatable("screen.skycraft.effect.time_left", String.format(java.util.Locale.ROOT, "%d:%02d", secs / 60, secs % 60))
+                    .withStyle(net.minecraft.ChatFormatting.GRAY));
+        }
+        net.minecraft.resources.ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.MOB_EFFECTS.getKey(effect);
+        if (id != null) {
+            String key = "effect." + id.getNamespace() + "." + id.getPath() + ".desc";
+            if (net.minecraft.client.resources.language.I18n.exists(key)) {
+                out.add(Component.translatable(key).withStyle(net.minecraft.ChatFormatting.WHITE));
+            }
+        }
+        for (java.util.Map.Entry<net.minecraft.world.entity.ai.attributes.Attribute, net.minecraft.world.entity.ai.attributes.AttributeModifier> e
+                : effect.getAttributeModifiers().entrySet()) {
+            net.minecraft.world.entity.ai.attributes.AttributeModifier m = e.getValue();
+            double v = effect.getAttributeModifierValue(inst.getAmplifier(), m);
+            boolean pct = m.getOperation() != net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADDITION;
+            double shown = pct ? v * 100.0 : v;
+            String num = String.format(java.util.Locale.ROOT, Math.abs(shown) == Math.rint(Math.abs(shown)) ? "%.0f" : "%.1f", Math.abs(shown));
+            out.add(Component.literal((shown >= 0 ? "+" : "-") + num + (pct ? "% " : " "))
+                    .append(Component.translatable(e.getKey().getDescriptionId()))
+                    .withStyle(shown >= 0 == effect.isBeneficial() ? net.minecraft.ChatFormatting.BLUE : net.minecraft.ChatFormatting.RED));
+        }
+        return out;
+    }
+
     private void drawHLine(GuiGraphics g, int x1, int x2, int y, int color) {
         g.fill(x1, y, x2, y + 1, color);
     }
