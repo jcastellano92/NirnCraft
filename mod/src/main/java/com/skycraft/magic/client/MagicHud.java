@@ -37,8 +37,9 @@ public final class MagicHud {
 
         // ---------------------------------------------------------- hand spells
         // Left hand above the magicka bar (bottom left), right hand above the voice meter (bottom right).
-        Spell left = Spells.byId(MagicData.leftSpell(player));
-        Spell right = Spells.byId(MagicData.selectedSpell(player));
+        // one hand system: a spell only shows in a hand that holds nothing else (the item wins, see magic.Hands)
+        Spell left = com.skycraft.magic.Hands.spellIn(player, true);
+        Spell right = com.skycraft.magic.Hands.spellIn(player, false);
         Spell leftCast = MagicClientEvents.spellIn(player, SpellCasting.LEFT);
         boolean dual = MagicClientEvents.isCasting(SpellCasting.LEFT) && MagicClientEvents.isCasting(SpellCasting.RIGHT)
                 && leftCast != null && leftCast == right && right.dualCastable;
@@ -58,6 +59,9 @@ public final class MagicHud {
             g.drawString(font, Component.translatable("magic.skycraft.hud_unarmed", MagicClientEvents.HANDS_CYCLE.getTranslatedKeyMessage()),
                     12, uy, 0xFFB8B2A0, true);
         }
+
+        // ---------------------------------------------------------- active spell effects with countdowns (bottom right)
+        ActiveEffectsHud.render(g, font, player, width, height);
 
         // ---------------------------------------------------------- equipped voice / shout / power (bottom right)
         String voice = MagicData.selectedVoice(player);
@@ -179,7 +183,7 @@ public final class MagicHud {
         float cost = SpellMath.cost(player, spell) * (dual ? Spell.DUAL_COST : 1f);
         boolean affordable = player.isCreative() || data.getMagicka() >= (spell.isConcentration() ? cost / 5f : cost);
         Component name = spell.displayName();
-        String costText = (spell.isConcentration() ? Math.round(cost) + "/s" : String.valueOf(Math.round(cost))) + (dual ? " x2" : "");
+        String costText = "-" + (spell.isConcentration() ? Math.round(cost) + "/s" : String.valueOf(Math.round(cost))) + (dual ? " x2" : "");
         int width = 9 + font.width(name) + 4 + font.width(costText);
         int x = alignRight ? anchor - width : anchor;
         gem(g, x + 3, y + 3, spell.school.color, casting);

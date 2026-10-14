@@ -72,7 +72,8 @@ public final class DeathHandler {
         // 1. Equipped gear: head, chest, legs, feet, mainhand, offhand (armour, weapons, ammo in hand...)
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             ItemStack stack = player.getItemBySlot(slot);
-            if (!stack.isEmpty() && (mode != SkyConfig.DeathDrops.EVERYTHING || QuestItems.isQuestItem(stack))) {
+            if (!stack.isEmpty() && !com.skycraft.magic.bound.BoundWeapons.isBound(stack)
+                    && (mode != SkyConfig.DeathDrops.EVERYTHING || QuestItems.isQuestItem(stack))) {
                 CompoundTag entry = new CompoundTag();
                 entry.putString("slot", slot.getName());
                 entry.put("item", stack.save(new CompoundTag()));
@@ -86,7 +87,7 @@ public final class DeathHandler {
         for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
             if (i == inv.selected) continue; // main hand already saved above
             ItemStack stack = inv.getItem(i);
-            if (stack.isEmpty()) continue;
+            if (stack.isEmpty() || com.skycraft.magic.bound.BoundWeapons.isBound(stack)) continue; // conjured: never kept
             boolean keep = QuestItems.isQuestItem(stack)
                     || (mode == SkyConfig.DeathDrops.VALUABLES && !isValuable(stack));
             if (keep) {
@@ -295,7 +296,7 @@ public final class DeathHandler {
         for (int i = 0; i < list.size(); i++) {
             CompoundTag entry = list.getCompound(i);
             ItemStack stack = ItemStack.of(entry.getCompound("item"));
-            if (stack.isEmpty()) continue;
+            if (stack.isEmpty() || com.skycraft.magic.bound.BoundWeapons.isBound(stack)) continue;
             if (entry.contains("slot")) {
                 EquipmentSlot slot = EquipmentSlot.byName(entry.getString("slot"));
                 newPlayer.setItemSlot(slot, stack);

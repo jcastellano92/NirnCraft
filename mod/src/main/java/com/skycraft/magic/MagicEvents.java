@@ -85,6 +85,9 @@ public final class MagicEvents {
         // Bound weapons can't be stored in containers or bundles (the open container reports changes, see onOpen).
         if (BOUND_IN_CONTAINER.remove(p.getUUID())) BoundWeapons.purge(p.containerMenu);
         if (p.tickCount % 20 == 0) BoundWeapons.purgeInventoryBundles(p);
+        // one hand system: spells, bound weapons and held items never coexist in a hand; the HUD countdowns
+        Hands.tick(p);
+        ActiveMagic.tick(p);
     }
 
     /** Players whose open container just received a bound weapon (or a bundle with one): purged at the end of their tick. */
@@ -433,12 +436,38 @@ public final class MagicEvents {
             Candlelight.remove(p);
             com.skycraft.magic.spell.AlterationSpells.removeMagelight(p);
             com.skycraft.magic.spell.Mysticism.onLogin(p);
+            // a bound weapon saved by a crash or an autosave never comes back
+            BoundWeapons.purgeAll(p);
+            Hands.forget(p.getUUID());
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPickup(PlayerEvent.ItemPickupEvent event) {
+        if (event.getEntity() instanceof ServerPlayer p) Hands.onPickup(p);
+    }
+
+    /** Death: bound weapons are never kept (keepInventory copies the inventory over, see also DeathHandler). */
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void onPlayerDeath(LivingDeathEvent event) {
+        if (event.getEntity() instanceof ServerPlayer p) BoundWeapons.purgeAll(p);
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onClone(PlayerEvent.Clone event) {
+        if (event.getEntity() instanceof ServerPlayer p) {
+            BoundWeapons.purgeAll(p);
+            Hands.forget(p.getUUID());
         }
     }
 
     @SubscribeEvent
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer p)) return;
+        // fired before the player's data is written, so the bound weapon never reaches the save file
+        BoundWeapons.purgeAll(p);
+        Hands.forget(p.getUUID());
+        ActiveMagic.forget(p.getUUID());
         Candlelight.remove(p);
         com.skycraft.magic.spell.AlterationSpells.removeMagelight(p);
         com.skycraft.magic.spell.Mysticism.forget(p);
@@ -455,6 +484,8 @@ public final class MagicEvents {
         if (event.getEntity() instanceof ServerPlayer p) {
             Candlelight.remove(p);
             SpellCasting.stop(p);
+            // a conjured weapon does not follow its caster through a portal
+            BoundWeapons.purgeAll(p);
         }
     }
 
@@ -463,7 +494,10 @@ public final class MagicEvents {
         for (ServerPlayer p : event.getServer().getPlayerList().getPlayers()) {
             Candlelight.remove(p);
             com.skycraft.magic.spell.AlterationSpells.removeMagelight(p);
+            BoundWeapons.purgeAll(p); // the players are saved after this event
         }
+        Hands.clear();
+        ActiveMagic.clear();
         com.skycraft.magic.spell.Mysticism.clear();
         com.skycraft.magic.shout.SlowTime.clear();
         MagicScheduler.clear();

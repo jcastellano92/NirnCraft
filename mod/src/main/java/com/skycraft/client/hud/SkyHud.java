@@ -23,6 +23,9 @@ import net.minecraftforge.client.gui.overlay.ForgeGui;
  */
 public final class SkyHud {
     private static float healthAlpha, magickaAlpha, staminaAlpha;
+    /** Casting without enough magicka: the magicka bar flashes red with the cost marked on it until this time. */
+    private static long magickaFlashUntil;
+    private static float magickaFlashCost;
     private static long lastFadeMs = Util.getMillis();
 
     private SkyHud() {}
@@ -43,13 +46,27 @@ public final class SkyHud {
         float step = fadeStep(nowMs - lastFadeMs);
         lastFadeMs = nowMs;
         healthAlpha = approach(healthAlpha, combat || health < 0.999f ? 1f : 0f, step);
-        magickaAlpha = approach(magickaAlpha, combat || magicka < 0.999f ? 1f : 0f, step);
+        boolean magickaFlash = nowMs < magickaFlashUntil;
+        magickaAlpha = approach(magickaAlpha, combat || magicka < 0.999f || magickaFlash ? 1f : 0f, step);
         staminaAlpha = approach(staminaAlpha, combat || stamina < 0.999f || mc.player.isSprinting() ? 1f : 0f, step);
 
         int barW = 110;
         int y = height - 14;
         drawBar(g, width / 2 - 70, height - 31, 140, health, 0xB0262A, 0x5A0E10, healthAlpha, false);
         drawBar(g, 12, y, barW, magicka, 0x2D63C8, 0x0F1F45, magickaAlpha, false);
+        if (magickaFlash) {
+            // cost preview: the magicka the spell needs, as a bracket around the middle of the bar, blinking red
+            float remaining = Mth.clamp((magickaFlashUntil - nowMs) / 900f, 0f, 1f);
+            int need = Mth.clamp((int) (barW * magickaFlashCost / Math.max(1, data.maxMagicka())), 3, barW);
+            int cx = 12 + barW / 2;
+            int col = ((nowMs / 120) % 2 == 0 ? 0xFFFF4040 : 0xFFFFA0A0);
+            int a = (int) (Mth.clamp(remaining * 2f, 0f, 1f) * 255) << 24;
+            col = a | (col & 0xFFFFFF);
+            g.fill(cx - need / 2 - 1, y, cx + need / 2 + 1, y + 1, col);
+            g.fill(cx - need / 2 - 1, y + 5, cx + need / 2 + 1, y + 6, col);
+            g.fill(cx - need / 2 - 1, y, cx - need / 2, y + 6, col);
+            g.fill(cx + need / 2, y, cx + need / 2 + 1, y + 6, col);
+        }
         drawBar(g, width - 12 - barW, y, barW, stamina, 0x3F9A3A, 0x13340F, staminaAlpha, ClientState.has(CorePackets.SyncVitals.EXHAUSTED));
 
         if (data.getPendingLevelUps() > 0 || data.getPerkPoints() > 0) {
@@ -77,6 +94,12 @@ public final class SkyHud {
             }
             g.drawString(mc.font, text, 12, HudStack.reserve(HudStack.Zone.BOTTOM_LEFT, HudStack.BL_POWER, 10, height), col, true);
         }
+    }
+
+    /** Casting something you cannot afford: flash the magicka bar and mark {@code cost} on it (magic HUD). */
+    public static void flashMagicka(float cost) {
+        magickaFlashUntil = Util.getMillis() + 900;
+        magickaFlashCost = cost;
     }
 
     /** Fraction of the remaining distance to cover after {@code elapsedMs}: ~8% per frame at 60 fps, at any frame rate. */

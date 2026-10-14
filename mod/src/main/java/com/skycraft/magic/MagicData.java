@@ -55,22 +55,22 @@ public final class MagicData {
         return false;
     }
 
-    /** Adds a spell; returns false if it was already known. */
+    /**
+     * Adds a spell to the spell list; returns false if it was already known. Learning never equips: the spell does
+     * not go into a hand (equip it from the magic menu or the favorites, see {@link Hands}).
+     */
     public static boolean learn(Player player, String spellId) {
         if (knows(player, spellId)) return false;
         CompoundTag tag = tag(player);
         ListTag list = tag.getList("spells", Tag.TAG_STRING);
         list.add(StringTag.valueOf(spellId));
         tag.put("spells", list);
-        // New spells fill an empty hand: right first, then left.
-        if (selectedSpell(player).isEmpty()) {
-            tag.putString("right_spell", spellId);
-            tag.putString("selected_spell", spellId);
-        } else if (tag.getString("left_spell").isEmpty()) {
-            tag.putString("left_spell", spellId);
-        }
         dirty(player);
         return true;
+    }
+
+    public static boolean isFavorite(Player player, String id) {
+        return favorites(player).contains(id);
     }
 
     /** Removes a spell (made spells can be forgotten); it leaves the hands and favorites too. */

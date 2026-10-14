@@ -31,6 +31,38 @@ public final class MagicPackets {
         SkyNetwork.register(com.skycraft.skills.Acrobatics.DoubleJump.class, NetworkDirection.PLAY_TO_SERVER,
                 com.skycraft.skills.Acrobatics.DoubleJump::encode, com.skycraft.skills.Acrobatics.DoubleJump::decode,
                 com.skycraft.skills.Acrobatics.DoubleJump::handle);
+        SkyNetwork.register(Timers.class, NetworkDirection.PLAY_TO_CLIENT, Timers::encode, Timers::decode, Timers::handle);
+    }
+
+    /**
+     * The player's active spell effects that are not vanilla mob effects (bound weapons, detect spells, lights, summons,
+     * lingering areas), with the ticks left, for the HUD countdown strip. Sent when the set changes and once a second.
+     */
+    public record Timers(java.util.List<Entry> list) {
+        /** {@code ticks} left of {@code total} (0 if unknown), shown in {@code rgb}. */
+        public record Entry(net.minecraft.network.chat.Component name, int ticks, int total, int rgb) {}
+
+        static void encode(Timers m, FriendlyByteBuf buf) {
+            buf.writeVarInt(m.list.size());
+            for (Entry e : m.list) {
+                buf.writeComponent(e.name);
+                buf.writeVarInt(e.ticks);
+                buf.writeVarInt(e.total);
+                buf.writeInt(e.rgb);
+            }
+        }
+
+        static Timers decode(FriendlyByteBuf buf) {
+            int n = Math.min(32, buf.readVarInt());
+            java.util.List<Entry> out = new java.util.ArrayList<>(n);
+            for (int i = 0; i < n; i++) out.add(new Entry(buf.readComponent(), buf.readVarInt(), buf.readVarInt(), buf.readInt()));
+            return new Timers(out);
+        }
+
+        static void handle(Timers m, Supplier<NetworkEvent.Context> ctx) {
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.magic.client.ActiveEffectsHud.set(m.list));
+            ctx.get().setPacketHandled(true);
+        }
     }
 
     /** Spellmaking Altar: make the spell encoded in {@code id} (see {@link com.skycraft.magic.spell.spellmaking.CustomSpells}). */
@@ -146,15 +178,9 @@ public final class MagicPackets {
             if (player != null) {
                 switch (m.action) {
                     case SELECT_SPELL, SELECT_LEFT -> {
-                        if (Spells.byId(m.id) != null && (MagicData.knows(player, m.id) || player.isCreative())) {
-                            if (m.action == SELECT_LEFT) {
-                                SpellCasting.stop(player, SpellCasting.LEFT);
-                                MagicData.setLeftSpell(player, m.id);
-                            } else {
-                                SpellCasting.stop(player, SpellCasting.RIGHT);
-                                MagicData.setSelectedSpell(player, m.id);
-                            }
-                        }
+                        // one hand system: the spell replaces what the hand held (item stowed, bound weapon dismissed)
+                        if (m.action == SELECT_LEFT) Hands.equipLeftSpell(player, m.id);
+                        else Hands.equipRightSpell(player, m.id);
                     }
                     case SELECT_SHOUT -> {
                         Shout shout = Shout.byId(m.id);

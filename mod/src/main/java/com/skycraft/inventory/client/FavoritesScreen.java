@@ -8,6 +8,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
+import com.skycraft.magic.client.MagicFavorites;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -15,7 +17,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Skyrim's favorites quick menu: a small list of the items marked as favorites in the inventory (plus the equipped
+ * Skyrim favorites quick menu: a small list of the items AND spells, shouts and powers marked as favorites (plus the equipped
  * spell and shout, read-only). Click or press E to equip / use, right-click for the left hand; the menu closes after
  * choosing so the game keeps flowing (it doesn't pause, like every Skycraft menu in multiplayer).
  */
@@ -26,11 +28,26 @@ public class FavoritesScreen extends Screen {
     private static final String[] MAGIC_KEYS = {"selected_spell", "left_spell", "selected_shout"};
     private static final String[] MAGIC_LABELS = {"spell_right", "spell_left", "shout"};
 
-    private List<InvEntry> entries = new ArrayList<>();
+    /** One row of the quick menu: an inventory item, or a favorite spell, shout or power of the magic module. */
+    public record Row(@Nullable InvEntry item, @Nullable MagicFavorites.Fav magic) {
+        boolean sameAs(Row o) {
+            if (o == null) return false;
+            if (item != null) return o.item != null && item.sameAs(o.item);
+            return o.magic != null && magic.id().equals(o.magic.id());
+        }
+
+        int equip() {
+            if (item != null) return item.equip;
+            int e = MagicFavorites.equipped(net.minecraft.client.Minecraft.getInstance().player, magic);
+            return (e & 1) != 0 ? InvEntry.RIGHT : (e & 2) != 0 ? InvEntry.LEFT : InvEntry.NONE;
+        }
+    }
+
+    private List<Row> entries = new ArrayList<>();
     private int selected;
     private int scroll;
     private int hoverRow = -1;
-    private InvEntry selectedEntry;
+    private Row selectedEntry;
 
     // layout
     private int px, py, pw, ph, listTop, rows;
@@ -54,7 +71,7 @@ public class FavoritesScreen extends Screen {
         if (minecraft == null || minecraft.player == null) return 0;
         CompoundTag magic = SkyData.get(minecraft.player).module("magic");
         int n = 0;
-        for (String key : MAGIC_KEYS) if (!magic.getString(key).isEmpty()) n++;
+        for (String key : MAGIC_KEYS) if (!magic.getString(key).isEmpty() && !"none".equals(magic.getString(key))) n++;
         return n;
     }
 
@@ -76,13 +93,8 @@ public class FavoritesScreen extends Screen {
 
     private void rebuild() {
         if (minecraft == null || minecraft.player == null) return;
-        InvEntry previous = selectedEntry;
-        List<InvEntry> list = new ArrayList<>();
-        for (InvEntry e : InvEntry.build(minecraft.player)) if (e.favorite) list.add(e);
-        list.sort(Comparator.comparingInt((InvEntry e) -> e.category.ordinal())
-                .thenComparing(e -> e.name, String.CASE_INSENSITIVE_ORDER)
-                .thenComparingInt(e -> e.equip));
-        entries = list;
+        Row previous = selectedEntry;
+        entries = rows(minecraft.player);
         int idx = -1;
         if (previous != null) {
             for (int i = 0; i < entries.size(); i++) if (entries.get(i).sameAs(previous)) idx = i;
@@ -115,9 +127,34 @@ public class FavoritesScreen extends Screen {
 
     private void choose(boolean left) {
         if (selectedEntry == null) return;
-        InvEntry e = selectedEntry;
-        boolean closed = left ? ClientInventoryHandlers.secondary(e) : ClientInventoryHandlers.primary(e);
-        if (!closed) onClose();
+        if (!activate(selectedEntry, left)) onClose();
+    }
+
+    /**
+     * Every favorite, items first (category, name) then spells, shouts and powers (the order they were marked): the list
+     * of this menu, of the number-key hotkeys and of the scroll wheel.
+     */
+    public static List<Row> rows(LocalPlayer player) {
+        List<InvEntry> items = new ArrayList<>();
+        for (InvEntry e : InvEntry.build(player)) if (e.favorite) items.add(e);
+        items.sort(Comparator.comparingInt((InvEntry e) -> e.category.ordinal())
+                .thenComparing(e -> e.name, String.CASE_INSENSITIVE_ORDER)
+                .thenComparingInt(e -> e.equip));
+        List<Row> out = new ArrayList<>(items.size());
+        for (InvEntry e : items) out.add(new Row(e, null));
+        for (MagicFavorites.Fav f : MagicFavorites.list(player)) out.add(new Row(null, f));
+        return out;
+    }
+
+    /**
+     * Equips / uses a row ({@code left}: the left hand). An item goes through the inventory actions, a spell, shout or
+     * power through the magic menu action; both end in the server's one hand system (magic.Hands). Returns true if the
+     * caller must not close a screen (an item action that already closed or kept it open).
+     */
+    public static boolean activate(Row row, boolean left) {
+        if (row.item != null) return left ? ClientInventoryHandlers.secondary(row.item) : ClientInventoryHandlers.primary(row.item);
+        MagicFavorites.activate(row.magic, left);
+        return false;
     }
 
     // ------------------------------------------------------------------ rendering
@@ -136,7 +173,7 @@ public class FavoritesScreen extends Screen {
             CompoundTag magic = SkyData.get(minecraft.player).module("magic");
             for (int i = 0; i < MAGIC_KEYS.length; i++) {
                 String id = magic.getString(MAGIC_KEYS[i]);
-                if (id.isEmpty()) continue;
+                if (id.isEmpty() || "none".equals(id)) continue; // "none": a hand deliberately left empty
                 boolean shout = i == 2;
                 drawMagicLine(g, Component.translatable("inventory.skycraft.favorites." + MAGIC_LABELS[i]),
                         shout ? Component.translatable("shout.skycraft." + id) : spellName(id), shout ? 0xFFD8E4F0 : 0xFF7FB2FF, y);
@@ -146,7 +183,7 @@ public class FavoritesScreen extends Screen {
 
         hoverRow = -1;
         if (entries.isEmpty()) {
-            List<net.minecraft.util.FormattedCharSequence> lines = font.split(Component.translatable("inventory.skycraft.favorites.empty"), pw - 20);
+            List<net.minecraft.util.FormattedCharSequence> lines = font.split(Component.translatable("magic.skycraft.favorites_empty"), pw - 20);
             int ly = listTop + 6;
             for (var line : lines) {
                 g.drawString(font, line, cx - font.width(line) / 2, ly, SkyUi.DIM, false);
@@ -155,7 +192,7 @@ public class FavoritesScreen extends Screen {
         } else {
             for (int i = 0; i < rows && scroll + i < entries.size(); i++) {
                 int idx = scroll + i;
-                InvEntry e = entries.get(idx);
+                Row row = entries.get(idx);
                 int ry = listTop + i * ROW;
                 boolean hov = SkyUi.inside(mouseX, mouseY, px, ry, px + pw, ry + ROW);
                 if (hov) hoverRow = idx;
@@ -168,14 +205,28 @@ public class FavoritesScreen extends Screen {
                     g.fill(px + 1, ry, px + pw - 1, ry + ROW, 0x16FFFFFF);
                 }
                 int mid = ry + ROW / 2;
-                if (e.equip == InvEntry.RIGHT || e.equip == InvEntry.WORN) SkyUi.diamond(g, px + 7, mid, 2, SkyUi.GOLD);
-                else if (e.equip == InvEntry.LEFT) SkyUi.diamondOutline(g, px + 7, mid, 2, SkyUi.LEFT_HAND);
-                g.renderItem(e.icon, px + 12, ry + 1);
-                g.renderItemDecorations(font, e.icon, px + 12, ry + 1);
-                String count = e.count() > 1 ? " (" + e.count() + ")" : "";
-                String name = SkyUi.ellipsize(font, e.name, pw - 40 - font.width(count));
-                g.drawString(font, name, px + 32, ry + 5, e.stolen ? SkyUi.STOLEN : sel ? SkyUi.BRIGHT : SkyUi.TEXT, false);
-                if (!count.isEmpty()) g.drawString(font, count, px + 32 + font.width(name), ry + 5, SkyUi.DIM, false);
+                int equip = row.equip();
+                if (equip == InvEntry.RIGHT || equip == InvEntry.WORN) SkyUi.diamond(g, px + 7, mid, 2, SkyUi.GOLD);
+                else if (equip == InvEntry.LEFT) SkyUi.diamondOutline(g, px + 7, mid, 2, SkyUi.LEFT_HAND);
+                if (row.item != null) {
+                    InvEntry e = row.item;
+                    g.renderItem(e.icon, px + 12, ry + 1);
+                    g.renderItemDecorations(font, e.icon, px + 12, ry + 1);
+                    String count = e.count() > 1 ? " (" + e.count() + ")" : "";
+                    String name = SkyUi.ellipsize(font, e.name, pw - 40 - font.width(count));
+                    g.drawString(font, name, px + 32, ry + 5, e.stolen ? SkyUi.STOLEN : sel ? SkyUi.BRIGHT : SkyUi.TEXT, false);
+                    if (!count.isEmpty()) g.drawString(font, count, px + 32 + font.width(name), ry + 5, SkyUi.DIM, false);
+                } else {
+                    // a favorite spell / shout / power: its school-colored gem, name and (spells) the magicka cost
+                    MagicFavorites.Fav f = row.magic;
+                    SkyUi.diamond(g, px + 20, mid, 4, 0xFF000000 | f.color());
+                    String cost = f.spell() != null && minecraft != null && minecraft.player != null
+                            ? "-" + Math.round(com.skycraft.magic.spell.SpellMath.cost(minecraft.player, f.spell()))
+                            + (f.spell().isConcentration() ? "/s" : "") : "";
+                    String name = SkyUi.ellipsize(font, f.name().getString(), pw - 40 - (cost.isEmpty() ? 0 : font.width(cost) + 8));
+                    g.drawString(font, name, px + 32, ry + 5, sel ? SkyUi.BRIGHT : SkyUi.TEXT, false);
+                    if (!cost.isEmpty()) g.drawString(font, cost, px + pw - 8 - font.width(cost), ry + 5, 0xFF7FB2FF, false);
+                }
             }
             if (entries.size() > rows) {
                 int trackTop = listTop, trackH = rows * ROW;

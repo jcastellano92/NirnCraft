@@ -1,6 +1,7 @@
 package com.skycraft.magic.bound;
 
 import com.skycraft.core.Notifier;
+import com.skycraft.magic.Hands;
 import com.skycraft.magic.MagicFx;
 import com.skycraft.magic.MagicRegistry;
 import com.skycraft.magic.spell.Spell;
@@ -11,7 +12,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -32,6 +32,11 @@ import java.util.UUID;
 public final class BoundWeapons {
     public static final String UNTIL = "skycraft_bound_until";
     public static final String OWNER = "skycraft_bound_owner";
+    /** Length of the conjuration in ticks (for the HUD countdown). */
+    public static final String DURATION = "skycraft_bound_duration";
+    /** The spells this weapon displaced from the right / left hand; they come back when it runs out while held. */
+    public static final String FROM_RIGHT = "skycraft_bound_from_right";
+    public static final String FROM_LEFT = "skycraft_bound_from_left";
     /** Marks arrows fired from a bound bow (persistent data), so bound-weapon perks apply to them. */
     public static final String ARROW_TAG = "skycraft_bound_arrow";
     /** Vanilla bundle contents tag. */
@@ -64,30 +69,15 @@ public final class BoundWeapons {
     }
 
     private static Spell.Result give(ServerPlayer p, Spell spell, Item item) {
-        Inventory inv = p.getInventory();
-        // Re-casting refreshes: remove any copy we already hold.
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            if (inv.getItem(i).is(item)) inv.setItem(i, ItemStack.EMPTY);
-        }
         ItemStack stack = new ItemStack(item);
         CompoundTag tag = stack.getOrCreateTag();
         tag.putLong(UNTIL, p.level().getGameTime() + spell.duration);
         tag.putUUID(OWNER, p.getUUID());
-
-        ItemStack held = p.getMainHandItem();
-        if (held.isEmpty()) {
-            p.setItemInHand(InteractionHand.MAIN_HAND, stack);
-        } else {
-            int free = inv.getFreeSlot();
-            if (free >= 0) {
-                inv.setItem(free, held.copy());
-                p.setItemInHand(InteractionHand.MAIN_HAND, stack);
-            } else {
-                // every slot is taken: the held item goes into the overflow pack and the conjured weapon takes its place
-                ItemStack displaced = held.copy();
-                p.setItemInHand(InteractionHand.MAIN_HAND, stack);
-                com.skycraft.inventory.Pack.giveOrDrop(p, displaced);
-            }
+        tag.putInt(DURATION, spell.duration);
+        // One hand system (magic.Hands): the weapon replaces what the right hand held (a re-cast refreshes the old copy).
+        if (!Hands.equipBound(p, stack)) {
+            Notifier.message(p, Component.translatable("message.skycraft.inventory_full"));
+            return Spell.Result.FAILED;
         }
         MagicFx.send(p, MagicFx.SUMMON, spell.element, p.position(), p.position(), p.getId(), 18);
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 0.8f, 1.4f);
@@ -108,12 +98,50 @@ public final class BoundWeapons {
     public static void inventoryTick(ItemStack stack, Level level, Entity holder) {
         if (level.isClientSide || level.getGameTime() % 10 != 0) return;
         if (expired(stack, level, holder)) {
+            CompoundTag tag = stack.getTag();
+            boolean ranOut = tag != null && tag.hasUUID(OWNER) && tag.getUUID(OWNER).equals(holder.getUUID())
+                    && tag.getLong(UNTIL) <= level.getGameTime();
+            CompoundTag from = tag == null ? new CompoundTag() : tag.copy();
+            boolean held = holder instanceof ServerPlayer hp && hp.getMainHandItem() == stack;
             stack.setCount(0);
             if (holder instanceof ServerPlayer sp) {
                 level.playSound(null, sp.getX(), sp.getY(), sp.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.7f, 1.6f);
                 Notifier.message(sp, Component.translatable("message.skycraft.bound_vanished"));
+                // the hand it was in gets the spell back that it replaced
+                if (ranOut && held && sp.isAlive()) Hands.restoreAfterBound(sp, from);
             }
         }
+    }
+
+    /**
+     * Removes every bound weapon from an inventory (hotbar, bags, armor, off hand) and its bundles. Used on logout (the
+     * logged-out event fires before the player is saved), login, death, respawn and dimension change, so a bound weapon
+     * never reaches a save file. Returns how many were removed.
+     */
+    public static int purgeFrom(Inventory inv) {
+        int n = 0;
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack stack = inv.getItem(i);
+            if (stack.isEmpty()) continue;
+            if (isBound(stack)) {
+                inv.setItem(i, ItemStack.EMPTY);
+                n++;
+            } else if (purgeBundle(stack)) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    /** {@link #purgeFrom} for a player, plus the stack held on the cursor of the inventory screen. */
+    public static int purgeAll(Player player) {
+        int n = purgeFrom(player.getInventory());
+        ItemStack carried = player.containerMenu.getCarried();
+        if (isBound(carried)) {
+            player.containerMenu.setCarried(ItemStack.EMPTY);
+            n++;
+        }
+        return n;
     }
 
     /** Bound items never lie around in the world. */

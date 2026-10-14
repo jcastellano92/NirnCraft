@@ -155,7 +155,7 @@ public final class InventoryClientEvents {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null || mc.screen != null || mc.options == null || player.isCreative() || player.isSpectator()) return;
-        List<InvEntry> favs = null;
+        List<FavoritesScreen.Row> favs = null;
         for (int i = 0; i < Math.min(8, mc.options.keyHotbarSlots.length); i++) {
             while (mc.options.keyHotbarSlots[i].consumeClick()) {
                 if (favs == null) favs = getFavorites(player);
@@ -163,7 +163,7 @@ public final class InventoryClientEvents {
                     if (com.skycraft.combat.Sheathe.isSheathed(player)) {
                         com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.SHEATHE_TOGGLE, 0));
                     }
-                    ClientInventoryHandlers.primary(favs.get(i));
+                    FavoritesScreen.activate(favs.get(i), false);
                 } else {
                     player.getInventory().selected = i; // what vanilla would have done with this press
                 }
@@ -173,15 +173,9 @@ public final class InventoryClientEvents {
 
     private static int scrollFavIndex = -1;
 
-    public static List<InvEntry> getFavorites(LocalPlayer player) {
-        List<InvEntry> list = new java.util.ArrayList<>();
-        for (InvEntry e : InvEntry.build(player)) {
-            if (e.favorite) list.add(e);
-        }
-        list.sort(java.util.Comparator.comparingInt((InvEntry e) -> e.category.ordinal())
-                .thenComparing(e -> e.name, String.CASE_INSENSITIVE_ORDER)
-                .thenComparingInt(e -> e.equip));
-        return list;
+    /** Favorite items, spells, shouts and powers, in the order the quick menu lists them. */
+    public static List<FavoritesScreen.Row> getFavorites(LocalPlayer player) {
+        return FavoritesScreen.rows(player);
     }
 
     private static int lastDrawnMainSlot = 0;
@@ -195,7 +189,7 @@ public final class InventoryClientEvents {
         if (delta == 0) return;
 
         // Without favorites the wheel scrolls the hotbar as usual (and never toggles sheathing or sends packets).
-        List<InvEntry> favs = getFavorites(player);
+        List<FavoritesScreen.Row> favs = getFavorites(player);
         if (favs.isEmpty()) return;
         event.setCanceled(true);
 
@@ -219,12 +213,12 @@ public final class InventoryClientEvents {
             }
             ClientPacketHandlers.notify(new CorePackets.Notify(NotifyKind.MESSAGE, Component.literal("Hands Sheathed"), Component.empty(), 0, 0f));
         } else {
-            InvEntry chosen = favs.get(scrollFavIndex);
+            FavoritesScreen.Row chosen = favs.get(scrollFavIndex);
             if (com.skycraft.combat.Sheathe.isSheathed(player)) {
                 com.skycraft.combat.Sheathe.setSheathed(player, false);
                 com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.SHEATHE_TOGGLE, 0));
             }
-            ClientInventoryHandlers.primary(chosen);
+            FavoritesScreen.activate(chosen, false);
         }
     }
 

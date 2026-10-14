@@ -149,6 +149,7 @@ public final class CustomEffects {
             }
             case DETECT_LIFE -> {
                 int found = 0;
+                com.skycraft.magic.ActiveMagic.note(p, "custom_detect", net.minecraft.network.chat.Component.translatable("spell.skycraft.detect_life"), ticks, 0xB888FF);
                 for (LivingEntity o : Targeting.around(p, p.position(), mag, o -> o != p && !(o instanceof ArmorStand))) {
                     o.addEffect(new MobEffectInstance(MobEffects.GLOWING, ticks, 0, false, false));
                     found++;

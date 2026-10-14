@@ -70,15 +70,19 @@ public final class MagicClientEvents {
 
     /** Main-hand items that keep their attack while the left hand casts: melee weapons and tools. */
     private static boolean castFriendly(ItemStack main) {
-        if (main.isEmpty() || main.getItem() instanceof TieredItem) return true;
+        if (main.isEmpty()) return true;
+        // two-handed items (greatswords, bows, staves, the bound battleaxe and bow) take the left hand too
+        if (com.skycraft.magic.Hands.twoHanded(main)) return false;
+        if (main.getItem() instanceof TieredItem) return true;
         WeaponClass wc = WeaponClass.of(main);
         return wc != WeaponClass.OTHER && wc != WeaponClass.BOW && wc != WeaponClass.UNARMED;
     }
 
+    /** The right hand casts only when it holds no item (one hand system, see {@link com.skycraft.magic.Hands}). */
     private static boolean canStartRightCast(Minecraft mc, LocalPlayer player) {
         if (player.isSpectator() || player.isUsingItem()) return false;
         if (com.skycraft.curse.Curses.transformed(player)) return false;
-        if (!player.getMainHandItem().isEmpty() && !(player.getMainHandItem().getItem() instanceof SpellTomeItem)) return false;
+        if (!player.getMainHandItem().isEmpty()) return false;
         return !MagicData.selectedSpell(player).isEmpty();
     }
 
@@ -117,6 +121,7 @@ public final class MagicClientEvents {
         if (right != rightDown) {
             rightDown = right;
             SkyNetwork.sendToServer(new MagicPackets.Cast(SpellCasting.RIGHT, right));
+            if (right) checkAffordable(player, SpellCasting.RIGHT);
         }
 
         // Left hand: RMB (use key), started on a fresh press while nothing is targeted, held until released.
@@ -126,6 +131,7 @@ public final class MagicClientEvents {
         if (left != leftDown) {
             leftDown = left;
             SkyNetwork.sendToServer(new MagicPackets.Cast(SpellCasting.LEFT, left));
+            if (left) checkAffordable(player, SpellCasting.LEFT);
         }
 
         // A soft glow at the casting hand(s).
@@ -189,8 +195,28 @@ public final class MagicClientEvents {
 
     /** The spell the local player has in a hand (left falls back to right, like the server). */
     public static Spell spellIn(LocalPlayer player, int hand) {
+        // a hand holding an item (or a two-handed item) holds no spell
+        if (hand == SpellCasting.LEFT) {
+            if (!player.getOffhandItem().isEmpty() || com.skycraft.magic.Hands.twoHanded(player.getMainHandItem())) return null;
+        } else if (!player.getMainHandItem().isEmpty()) {
+            return null;
+        }
         String id = hand == SpellCasting.LEFT ? MagicData.leftEffective(player) : MagicData.selectedSpell(player);
         return id.isEmpty() ? null : Spells.byId(id);
+    }
+
+    /** Casting a spell you cannot afford: flash the magicka bar with the cost marked on it (and the label turns red). */
+    private static void checkAffordable(LocalPlayer player, int hand) {
+        Spell spell = spellIn(player, hand);
+        if (spell == null || player.isCreative()) return;
+        float cost = com.skycraft.magic.spell.SpellMath.cost(player, spell);
+        float needed = spell.isConcentration() ? cost / 5f : cost;
+        if (com.skycraft.core.SkyData.get(player).getMagicka() < needed) com.skycraft.client.hud.SkyHud.flashMagicka(needed);
+    }
+
+    @SubscribeEvent
+    public static void onLoggingOut(net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) {
+        ActiveEffectsHud.clear();
     }
 
     private static void handGlow(Minecraft mc, LocalPlayer player, int hand) {

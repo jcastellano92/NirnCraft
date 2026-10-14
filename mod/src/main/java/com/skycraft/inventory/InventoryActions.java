@@ -82,6 +82,7 @@ public final class InventoryActions {
                 return;
             }
         }
+        com.skycraft.magic.Hands.settle(player); // one hand system: a new item in a hand replaces its spell / bound weapon
         CarryWeight.invalidate(player);
     }
 

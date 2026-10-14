@@ -187,6 +187,7 @@ public final class Mysticism {
     public static Spell.Result senseLife(ServerPlayer p, Spell spell, int tick) {
         int found = 0;
         int ticks = duration(p, spell, false);
+        com.skycraft.magic.ActiveMagic.note(p, spell, ticks);
         for (LivingEntity e : Targeting.around(p, p.position(), reach(p, spell), e -> e != p && !(e instanceof ArmorStand))) {
             e.addEffect(new MobEffectInstance(MobEffects.GLOWING, ticks, 0, false, false));
             found++;

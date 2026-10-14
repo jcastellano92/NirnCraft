@@ -47,6 +47,7 @@ public final class HudStack {
     public static final int BR_VOICE = 0;        // shout words / power / form ability + voice meter
     public static final int BR_RIGHT_SPELL = 10;
     public static final int BR_CARRY = 20;
+    public static final int BR_EFFECTS = 25;     // active spell effect countdowns (magic module)
     public static final int BR_SHIP = 30;
     public static final int BL_POWER = 0;        // racial power
     public static final int BL_LEFT_SPELL = 10;  // left spell, "unarmed" hint, vampire lord's ability
@@ -215,6 +216,18 @@ public final class HudStack {
         }
         if (!glided) problems.add("hud: carry did not glide down when its neighbours left");
         if (last != screenH - 17 - 10) problems.add("hud: lone carry slot settled at " + last);
+        // the active-effects strip (several rows tall) sits between carry and ship and overlaps none of them
+        HudStack full = new HudStack();
+        int[] prios = {BR_VOICE, BR_RIGHT_SPELL, BR_CARRY, BR_EFFECTS, BR_SHIP};
+        int[] heights = {14, 10, 10, 50, 22};
+        int[] tops = new int[prios.length];
+        for (int f = 0; f < 3; f++) {
+            full.beginFrame(10000 + f * 16L);
+            for (int i = 0; i < prios.length; i++) tops[i] = full.reserveSlot(Zone.BOTTOM_RIGHT, prios[i], heights[i], 400);
+        }
+        for (int i = 1; i < prios.length; i++) {
+            if (tops[i] + heights[i] + GAP > tops[i - 1]) problems.add("hud: bottom-right slot " + prios[i] + " overlaps " + prios[i - 1]);
+        }
         return problems;
     }
 }

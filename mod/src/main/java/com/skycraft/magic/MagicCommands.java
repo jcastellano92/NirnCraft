@@ -100,6 +100,11 @@ public final class MagicCommands {
 
     /** Consistency checks; returns the number of problems (also printed and logged). */
     public static int runSelftest(java.util.function.Consumer<String> report) {
+        return runSelftest(report, null);
+    }
+
+    /** As above; with a player it also runs the hand, bound weapon, tome and favorite checks on their inventory (restored). */
+    public static int runSelftest(java.util.function.Consumer<String> report, @org.jetbrains.annotations.Nullable ServerPlayer player) {
         List<String> problems = new ArrayList<>();
         int spells = 0;
         for (Spell s : Spells.all()) {
@@ -149,6 +154,8 @@ public final class MagicCommands {
         // eating ingredients (bite choice, four-line effect text, the Use/right-click/eat paths) and the HUD corner layout
         problems.addAll(com.skycraft.crafting.arcane.alchemy.AlchemySelfTest.run());
         problems.addAll(com.skycraft.core.HudStack.selfTest());
+        // one hand system: bound weapon vs spell vs item, tome learning, favorites, nothing bound in a save
+        problems.addAll(HandsSelfTest.run(player, report));
         int perkCount = 0;
         for (Perk ignored : Perks.all()) perkCount++;
         report.accept(String.format(Locale.ROOT, "%d spells, %d shouts, %d skills, %d perks, %d spellmaking effects", spells,
@@ -163,7 +170,7 @@ public final class MagicCommands {
         int problems = runSelftest(line -> {
             out(src, line);
             Skycraft.LOGGER.info("[magic selftest] {}", line);
-        });
+        }, src.getPlayer());
         return problems == 0 ? 1 : 0;
     }
 

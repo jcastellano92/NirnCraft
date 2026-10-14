@@ -106,6 +106,10 @@ public final class SpellCasting {
         if (!p.isAlive() || p.isSpectator() || p.hasEffect(ModEffects.PARALYSIS.get())) return;
         Active[] hands = hands(p);
         if (hands[hand] != null) return;
+        // one hand system (magic.Hands): a hand that holds an item or a bound weapon holds no spell, and a two-handed
+        // item takes both. The right hand needs to be empty, the left one free of an off-hand or two-handed item.
+        if (hand == RIGHT ? !p.getMainHandItem().isEmpty()
+                : !p.getOffhandItem().isEmpty() || com.skycraft.magic.Hands.twoHanded(p.getMainHandItem())) return;
         Spell spell = spellFor(p, hand);
         if (spell == null || !MagicData.knows(p, spell.id) && !p.isCreative()) {
             Notifier.message(p, Component.translatable("message.skycraft.no_spell", Component.keybind("key.skycraft.magic_menu")));

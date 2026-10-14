@@ -121,11 +121,18 @@ public final class AlterationSpells {
         pd.remove(MAGELIGHT_UNTIL);
     }
 
+    /** Game time the caster's Magelight goes out (0 if none), for the HUD countdown. */
+    public static long magelightUntil(ServerPlayer p) {
+        CompoundTag pd = p.getPersistentData();
+        return pd.contains(MAGELIGHT_POS) ? pd.getLong(MAGELIGHT_UNTIL) : 0L;
+    }
+
     // ================================================================== detection
 
     /** Detect Dead: undead nearby can be seen through walls. */
     public static Spell.Result detectDead(ServerPlayer p, Spell spell, int tick) {
         int duration = SpellMath.alterationDuration(p, spell);
+        com.skycraft.magic.ActiveMagic.note(p, spell, duration);
         int found = 0;
         for (LivingEntity e : Targeting.around(p, p.position(), spell.radius, e -> e != p && e.getMobType() == MobType.UNDEAD)) {
             e.addEffect(new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, false));

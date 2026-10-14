@@ -467,6 +467,7 @@ public final class SpellEffects {
 
     public static Spell.Result detectLife(ServerPlayer p, Spell spell, int tick) {
         int duration = SpellMath.alterationDuration(p, spell);
+        com.skycraft.magic.ActiveMagic.note(p, spell, duration);
         int found = 0;
         for (LivingEntity e : Targeting.around(p, p.position(), spell.radius, e -> e != p && !(e instanceof ArmorStand)
                 && e.getMobType() != MobType.UNDEAD && !(e instanceof AbstractGolem))) {

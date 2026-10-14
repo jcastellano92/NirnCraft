@@ -48,6 +48,11 @@ public final class Candlelight {
         return dark && !wasActive;
     }
 
+    /** Game time the light goes out (0 if none), for the HUD countdown. */
+    public static long until(ServerPlayer p) {
+        return p.getPersistentData().getLong(UNTIL);
+    }
+
     public static boolean active(ServerPlayer p) {
         return p.getPersistentData().getLong(UNTIL) > p.level().getGameTime();
     }
