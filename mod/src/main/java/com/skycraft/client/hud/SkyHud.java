@@ -2,6 +2,7 @@ package com.skycraft.client.hud;
 
 import com.skycraft.client.ClientState;
 import com.skycraft.client.SkyKeys;
+import com.skycraft.core.HudStack;
 import com.skycraft.core.PlayerData;
 import com.skycraft.core.SkyData;
 import com.skycraft.core.Skill;
@@ -54,7 +55,8 @@ public final class SkyHud {
         if (data.getPendingLevelUps() > 0 || data.getPerkPoints() > 0) {
             Font font = mc.font;
             Component hint = Component.translatable("hud.skycraft.perks_available", data.getPerkPoints());
-            g.drawString(font, hint, width - font.width(hint) - 6, 6, 0xFFE8D9A0, true);
+            g.drawString(font, hint, width - font.width(hint) - 6, HudStack.reserve(HudStack.Zone.TOP_RIGHT, HudStack.TR_PERKS, 10, height),
+                    0xFFE8D9A0, true);
         }
 
         // Daily racial power recharge indicator (not while transformed: the Voice key is the beast's then, curse module)
@@ -73,7 +75,7 @@ public final class SkyHud {
                 text = race.powerName().getString() + " (" + (sec >= 60 ? (sec / 60) + "m" : sec + "s") + ")";
                 col = 0xFFA09888;
             }
-            g.drawString(mc.font, text, 12, height - 26, col, true);
+            g.drawString(mc.font, text, 12, HudStack.reserve(HudStack.Zone.BOTTOM_LEFT, HudStack.BL_POWER, 10, height), col, true);
         }
     }
 

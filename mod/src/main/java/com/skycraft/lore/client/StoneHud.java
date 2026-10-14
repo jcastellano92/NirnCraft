@@ -1,5 +1,6 @@
 package com.skycraft.lore.client;
 
+import com.skycraft.core.HudStack;
 import com.skycraft.core.SkyData;
 import com.skycraft.lore.StandingStone;
 import com.skycraft.lore.StandingStones;
@@ -66,7 +67,8 @@ public final class StoneHud {
         List<FormattedCharSequence> desc = font.split(shown.description(), w - 44);
         int h = Math.max(52, 26 + desc.size() * 10);
         int x = 8;
-        int y = height - 60 - h;
+        // above the racial power, the left spell and the other bottom-left lines
+        int y = HudStack.reserve(HudStack.Zone.BOTTOM_LEFT, HudStack.BL_STONE, h, height);
 
         g.fill(x, y, x + w, y + h, (int) (alpha * 0.75f) << 24);
         g.fill(x, y, x + w, y + 1, alpha << 24 | 0x8A7F66);

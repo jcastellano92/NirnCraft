@@ -1,5 +1,6 @@
 package com.skycraft.sailing.client;
 
+import com.skycraft.core.HudStack;
 import com.skycraft.sailing.ShipEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -23,7 +24,8 @@ public final class SailingHud {
         if (!(mc.player.getVehicle() instanceof ShipEntity ship)) return;
         Font font = mc.font;
         int w = 168, h = 58;
-        int x = width - w - 6, y = height - h - 44;
+        // the top of the bottom-right column (voice words, spell and carry weight stack below it)
+        int x = width - w - 6, y = HudStack.reserve(HudStack.Zone.BOTTOM_RIGHT, HudStack.BR_SHIP, h, height);
         g.fill(x, y, x + w, y + h, BG);
         g.fill(x, y, x + w, y + 1, EDGE);
         g.fill(x, y + h - 1, x + w, y + h, EDGE);

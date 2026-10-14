@@ -9,12 +9,16 @@ import com.skycraft.crafting.arcane.ArcaneRegistry;
 import com.skycraft.crafting.arcane.effect.ArcaneEffects;
 import com.skycraft.perk.Perks;
 import com.skycraft.skills.Progression;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -70,30 +74,141 @@ public final class Alchemy {
         return now & ~old;
     }
 
-    /** Reveals the first {@code count} unknown effects of the ingredient (eating / tasting). */
-    public static void discoverByTasting(ServerPlayer player, Ingredients.Ingredient ing) {
-        int count = 1 + Perks.rank(player, "alchemy.experimenter");
-        int known = knownMask(player, ing);
-        int add = 0;
-        for (int i = 0; i < 4 && count > 0; i++) {
-            if ((known & (1 << i)) == 0) {
-                add |= 1 << i;
-                count--;
-            }
-        }
-        int learned = learn(player, ing, add);
-        SkyData.get(player).addStat("ingredients_eaten", 1);
-        announce(player, ing, learned);
+    // ------------------------------------------------------------------ eating / tasting
+
+    /**
+     * Eating an ingredient applies its effects at this share of a brewed potion's strength: the duration is halved and
+     * the amplifier comes from half of the strength bonus (instant effects keep their amplifier rules). Raw plants are
+     * weaker than a brewed potion, and the skill/perk multipliers of {@link #strength} still count.
+     */
+    public static final float TASTE_POTENCY = 0.5f;
+
+    /**
+     * What one bite does: {@code index} is the effect (0..3) that is applied, {@code learned} the mask of effects
+     * newly discovered by it (a subset of the player's unknown ones; the applied effect is among them when it was a
+     * discovery).
+     */
+    public record Taste(int index, int learned) {
     }
 
-    private static void announce(ServerPlayer player, Ingredients.Ingredient ing, int learned) {
-        if (learned == 0) return;
+    /**
+     * The decision for one bite, pure so it can be tested. The candidates are the effects the player has already
+     * discovered, plus (while any effect is still unknown) one "discover something new" outcome; one candidate is
+     * picked uniformly. An unknown effect is therefore never applied without being learned, a player who knows nothing
+     * about the ingredient always discovers one (random among the four), and the rest of the ingredient is reachable
+     * by further bites at odds of 1/(known+1). With every effect known a random one of the four is applied. The
+     * Experimenter perk reveals one more unknown effect per rank on a discovery (not applied).
+     */
+    public static Taste chooseTaste(int knownMask, int experimenterRank, RandomSource rng) {
+        int known = knownMask & 0xF;
+        int unknown = ~known & 0xF;
+        int options = Integer.bitCount(known) + (unknown != 0 ? 1 : 0);
+        int pick = rng.nextInt(options);
+        if (pick < Integer.bitCount(known)) {
+            // the pick-th discovered effect
+            for (int i = 0; i < 4; i++) {
+                if ((known & (1 << i)) != 0 && pick-- == 0) return new Taste(i, 0);
+            }
+        }
+        int first = nthBit(unknown, rng.nextInt(Integer.bitCount(unknown)));
+        int learned = 1 << first;
+        unknown &= ~learned;
+        for (int extra = 0; extra < experimenterRank && unknown != 0; extra++) {
+            int bit = 1 << nthBit(unknown, rng.nextInt(Integer.bitCount(unknown)));
+            learned |= bit;
+            unknown &= ~bit;
+        }
+        return new Taste(first, learned);
+    }
+
+    private static int nthBit(int mask, int n) {
+        for (int i = 0; i < 4; i++) {
+            if ((mask & (1 << i)) != 0 && n-- == 0) return i;
+        }
+        throw new IllegalArgumentException("mask " + mask);
+    }
+
+    /** The result of {@link #discoverByTasting}: the bite, the effect instance applied (or null), and messages sent. */
+    public record Tasted(Taste taste, MobEffectInstance applied, int messages) {
+    }
+
+    /**
+     * Eating / tasting an ingredient (the inventory Use action, right-click, eating a food ingredient, the lab's Taste
+     * button): picks one effect ({@link #chooseTaste}), learns what the bite taught (one "You learned" message per
+     * newly learned effect), and applies the picked effect to the player.
+     */
+    public static Tasted discoverByTasting(ServerPlayer player, Ingredients.Ingredient ing) {
+        Taste taste = chooseTaste(knownMask(player, ing), Perks.rank(player, "alchemy.experimenter"), player.getRandom());
+        int learned = learn(player, ing, taste.learned());
+        SkyData.get(player).addStat("ingredients_eaten", 1);
+        MobEffectInstance applied = applyTaste(player, ing.effects()[taste.index()]);
+        return new Tasted(taste, applied, announce(player, ing, learned));
+    }
+
+    /** The effect a bite of this effect gives the player: {@link #strength} at {@link #TASTE_POTENCY}. */
+    public static MobEffectInstance tasteInstance(Player player, AlchemyEffect effect) {
+        float s = strength(player, effect);
+        int amp = effect.amplifier(1f + (s - 1f) * TASTE_POTENCY);
+        int ticks = effect.instant() ? 1 : Math.max(20, Math.round(effect.durationTicks(s) * TASTE_POTENCY));
+        return new MobEffectInstance(effect.mobEffect(), ticks, amp);
+    }
+
+    /**
+     * Applies a bite's effect the way a drunk potion does (instant effects act at once, the rest are added). Tasting
+     * never kills: Damage Health is skipped when it would take the last of the player's health. Returns the applied
+     * instance or null.
+     */
+    public static MobEffectInstance applyTaste(ServerPlayer player, AlchemyEffect effect) {
+        MobEffectInstance inst = tasteInstance(player, effect);
+        MobEffect mob = inst.getEffect();
+        if (mob.isInstantenous()) {
+            if (effect == AlchemyEffect.DAMAGE_HEALTH && player.getHealth() <= 6f * (1 << inst.getAmplifier()) + 1f) return null;
+            mob.applyInstantenousEffect(player, player, player, inst.getAmplifier(), 1.0);
+        } else {
+            player.addEffect(inst);
+        }
+        return inst;
+    }
+
+    /** One line per effect slot of the ingredient: name and power when discovered, "?" otherwise (always four). */
+    public static List<Component> effectLines(Player player, Ingredients.Ingredient ing) {
+        List<Component> out = new ArrayList<>(4);
+        for (int i = 0; i < 4; i++) {
+            AlchemyEffect effect = ing.effects()[i];
+            if (!knows(player, ing, i)) {
+                out.add(Component.literal("?").withStyle(ChatFormatting.DARK_GRAY));
+                continue;
+            }
+            MobEffectInstance inst = tasteInstance(player, effect);
+            MutableComponent line = effect.instant()
+                    ? Component.translatable("tooltip.skycraft.alchemy.effect_instant", effect.displayName(), inst.getAmplifier() + 1)
+                    : Component.translatable("tooltip.skycraft.alchemy.effect_timed", effect.displayName(), inst.getAmplifier() + 1,
+                    inst.getDuration() / 20);
+            out.add(line.withStyle(effect.positive ? ChatFormatting.GREEN : ChatFormatting.RED));
+        }
+        return out;
+    }
+
+    private static int announced;
+
+    /** Total "You learned" messages sent since the game started (the self-test counts them to prove "exactly once"). */
+    public static int announcedTotal() {
+        return announced;
+    }
+
+    /** Sends "You learned: X (from Y)" for every newly learned effect; returns how many messages went out. */
+    private static int announce(ServerPlayer player, Ingredients.Ingredient ing, int learned) {
+        if (learned == 0) return 0;
+        announced += Integer.bitCount(learned & 0xF);
         Component name = ing.item() == null ? Component.literal(ing.id()) : new ItemStack(ing.item()).getHoverName();
+        int sent = 0;
         for (int i = 0; i < 4; i++) {
             if ((learned & (1 << i)) != 0) {
                 Notifier.message(player, Component.translatable("message.skycraft.alchemy.learned_effect", name, ing.effects()[i].coloredName()));
+                sent++;
             }
         }
+        return sent;
     }
 
     // ------------------------------------------------------------------ brewing math

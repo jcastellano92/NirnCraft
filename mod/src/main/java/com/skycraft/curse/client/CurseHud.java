@@ -3,6 +3,7 @@ package com.skycraft.curse.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.skycraft.Skycraft;
 import com.skycraft.client.SkyKeys;
+import com.skycraft.core.HudStack;
 import com.skycraft.core.PlayerData;
 import com.skycraft.core.SkyData;
 import com.skycraft.creatures.entity.CorpseEntity;
@@ -102,7 +103,8 @@ public final class CurseHud {
             float left = Math.max(0, until - now);
             float total = Math.max(Lycanthropy.DURATION, left);
             float frac = Mth.clamp(left / total, 0, 1);
-            int w = 140, y = hy - 7;
+            int w = 140;
+            int y = HudStack.reserve(HudStack.Zone.BOTTOM_CENTER, HudStack.BC_FORM_BAR, 5, height) + 1;
             g.fill(hx - 2, y - 1, hx + w + 2, y + 3, 0xA0101010);
             int filled = (int) (w * frac);
             int col = frac < 0.15f && (now / 5) % 2 == 0 ? 0xFFE0C040 : 0xFFC07A28;
@@ -114,18 +116,20 @@ public final class CurseHud {
             String key = form == Form.BEAST ? "howl" : "lord_power";
             String id = Curses.tag(player).getString(key);
             if (id.isEmpty() || !CursePowers.hasAbility(player, id)) id = form == Form.BEAST ? CursePowers.HOWL_OF_TERROR : CursePowers.BATS;
-            drawAbility(g, font, CursePowers.name(id), CursePowers.readyAt(player, id), CursePowers.cooldown(id), now, width - 12, height - 29, true);
+            int abilityY = HudStack.reserve(HudStack.Zone.BOTTOM_RIGHT, HudStack.BR_VOICE, 14, height);
+            drawAbility(g, font, CursePowers.name(id), CursePowers.readyAt(player, id), CursePowers.cooldown(id), now, width - 12, abilityY, true);
             if (form == Form.LORD) {
                 String spell = Curses.tag(player).getString("lord_spell");
                 if (spell.isEmpty() || !CursePowers.hasAbility(player, spell)) spell = CursePowers.RAISE_DEAD;
                 Component label = player.getAbilities().flying ? CursePowers.name(spell)
                         : Component.translatable("curse.skycraft.hud.levitate");
-                g.drawString(font, label, 12, height - 40, 0xFFD06070, true);
+                g.drawString(font, label, 12, HudStack.reserve(HudStack.Zone.BOTTOM_LEFT, HudStack.BL_LEFT_SPELL, 10, height), 0xFFD06070, true);
             }
             CursePerks.Tree tree = form == Form.BEAST ? CursePerks.Tree.WEREWOLF : CursePerks.Tree.VAMPIRE_LORD;
             if (CursePerks.available(player, tree) > 0) {
                 Component hint = Component.translatable("curse.skycraft.hud.perk", SkyKeys.SKILLS.getTranslatedKeyMessage());
-                g.drawString(font, hint, width - font.width(hint) - 6, 18, 0xFFE8C080, true);
+                g.drawString(font, hint, width - font.width(hint) - 6,
+                        HudStack.reserve(HudStack.Zone.TOP_RIGHT, HudStack.TR_CURSE_PERKS, 10, height), 0xFFE8C080, true);
             }
         }
 

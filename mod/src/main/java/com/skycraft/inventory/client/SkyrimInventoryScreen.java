@@ -89,6 +89,9 @@ public class SkyrimInventoryScreen extends Screen {
     private int hoverAction = -1;
     private boolean hoverCrafting;
     private boolean hoverPreview;
+    /** The detail panel's text scroll (lines): reset on a new selection, bounded by {@code detMaxScroll} while drawing. */
+    private int detScroll, detMaxScroll;
+    private InvEntry detScrollFor;
     private Component hoverText;
     private final List<ActionButton> actions = new ArrayList<>();
     private long lastClick;
@@ -463,6 +466,7 @@ public class SkyrimInventoryScreen extends Screen {
         actions.clear();
         hoverAction = -1;
         hoverPreview = false;
+        detMaxScroll = 0;
         InvEntry e = selectedEntry;
         if (e == null || detW < 60) return;
         int cx = detX + detW / 2;
@@ -471,6 +475,9 @@ public class SkyrimInventoryScreen extends Screen {
         // ---------------------------------------------------------- the item itself, slowly turning
         int previewH = Mth.clamp(detW * 45 / 100, 40, 84);
         previewH = Math.min(previewH, (bottom - top) / 3);
+        // ingredients list four effect lines: a smaller preview leaves them room
+        com.skycraft.crafting.arcane.alchemy.Ingredients.Ingredient ingredient = com.skycraft.crafting.arcane.alchemy.Ingredients.get(stack);
+        if (ingredient != null) previewH = Math.min(previewH, 48);
         int py = top + 6 + previewH / 2;
         glow(g, cx, py, previewH / 2 + 6);
         renderPreview(g, e.icon, cx, py, previewH / 16f * 0.8f);
@@ -553,6 +560,13 @@ public class SkyrimInventoryScreen extends Screen {
         // ---------------------------------------------------------- status & description lines
         List<FormattedCharSequence> lines = new ArrayList<>();
         List<Integer> colors = new ArrayList<>();
+        // an ingredient's four effects come first (all of them: discovered by name and power, the rest "?")
+        if (ingredient != null && minecraft != null && minecraft.player != null) {
+            addLine(lines, colors, Component.translatable("tooltip.skycraft.alchemy.ingredient"), SkyUi.GOLD, textW);
+            for (Component c : com.skycraft.crafting.arcane.alchemy.Alchemy.effectLines(minecraft.player, ingredient)) {
+                addLine(lines, colors, Component.literal(" ").append(c), SkyUi.TEXT, textW);
+            }
+        }
         int quality = quality(stack);
         if (quality > 0) addLine(lines, colors, Component.translatable("quality.skycraft." + quality), 0xFF8FC0FF, textW);
         if (e.equip != InvEntry.NONE) {
@@ -569,13 +583,24 @@ public class SkyrimInventoryScreen extends Screen {
         }
         for (Component c : description(e)) addLine(lines, colors, c, 0xFFCFC7B2, textW);
 
-        for (int i = 0; i < lines.size(); i++) {
-            if (y + 9 > actionsTop) {
-                g.drawString(font, "...", detX + 6, y - 2, SkyUi.DIM, false);
-                break;
-            }
+        // more lines than fit: the mouse wheel over the panel scrolls them instead of cutting them off
+        if (detScrollFor != e) {
+            detScrollFor = e;
+            detScroll = 0;
+        }
+        int visible = Math.max(1, (actionsTop - y) / 10);
+        detMaxScroll = Math.max(0, lines.size() - visible);
+        detScroll = Mth.clamp(detScroll, 0, detMaxScroll);
+        for (int i = detScroll; i < lines.size() && i < detScroll + visible; i++) {
             g.drawString(font, lines.get(i), detX + 6, y, colors.get(i), false);
             y += 10;
+        }
+        if (detMaxScroll > 0) {
+            int trackTop = top + 8, trackBottom = actionsTop;
+            int barH = Math.max(10, (trackBottom - trackTop) * visible / lines.size());
+            int barY = trackTop + (trackBottom - trackTop - barH) * detScroll / detMaxScroll;
+            g.fill(detX + detW - 4, trackTop, detX + detW - 3, trackBottom, 0x30FFFFFF);
+            g.fill(detX + detW - 4, barY, detX + detW - 3, barY + barH, 0xC0C8BC9A);
         }
 
         for (int i = 0; i < actions.size(); i++) {
@@ -847,9 +872,21 @@ public class SkyrimInventoryScreen extends Screen {
         List<Component> tip = Screen.getTooltipFromItem(minecraft, stack);
         String value = Component.translatable("tooltip.skycraft.economy.value", e.value).getString();
         String weight = Component.translatable("inventory.skycraft.tooltip.weight", ItemWeights.format(e.weight)).getString();
+        // ingredients: the tooltip's "Alchemy effects:" block (header + 4 slots) is drawn by drawDetails instead
+        boolean ingredient = com.skycraft.crafting.arcane.alchemy.Ingredients.get(stack) != null;
+        String alchemyHeader = Component.translatable("tooltip.skycraft.alchemy.ingredient").getString();
+        int skip = 0;
         for (int i = 1; i < tip.size(); i++) {
             Component c = tip.get(i);
             String s = c.getString();
+            if (ingredient && s.equals(alchemyHeader)) {
+                skip = 4;
+                continue;
+            }
+            if (skip > 0) {
+                skip--;
+                continue;
+            }
             if (s.isBlank() || s.equals(value) || s.equals(weight)) continue;
             out.add(c);
         }
@@ -1019,6 +1056,10 @@ public class SkyrimInventoryScreen extends Screen {
         }
         int step = delta > 0 ? -1 : delta < 0 ? 1 : 0;
         if (step == 0) return false;
+        if (detMaxScroll > 0 && SkyUi.inside(mx, my, detX, top, detX + detW, bottom)) {
+            detScroll = Mth.clamp(detScroll + step, 0, detMaxScroll);
+            return true;
+        }
         if (SkyUi.inside(mx, my, catX, top, catX + catW, bottom)) {
             cycleCategory(step);
         } else {

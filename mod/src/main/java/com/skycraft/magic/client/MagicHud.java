@@ -1,5 +1,6 @@
 package com.skycraft.magic.client;
 
+import com.skycraft.core.HudStack;
 import com.skycraft.core.PlayerData;
 import com.skycraft.core.SkyData;
 import com.skycraft.magic.MagicData;
@@ -41,12 +42,21 @@ public final class MagicHud {
         Spell leftCast = MagicClientEvents.spellIn(player, SpellCasting.LEFT);
         boolean dual = MagicClientEvents.isCasting(SpellCasting.LEFT) && MagicClientEvents.isCasting(SpellCasting.RIGHT)
                 && leftCast != null && leftCast == right && right.dualCastable;
-        if (left != null) drawSpell(g, font, player, data, left, 12, height - 40, false, MagicClientEvents.isCasting(SpellCasting.LEFT), dual);
-        if (right != null) drawSpell(g, font, player, data, right, width - 12, height - 46, true, MagicClientEvents.isCasting(SpellCasting.RIGHT), dual);
+        // Positions come from the corner layout (HudStack): the right spell sits above the voice words and carry
+        // weight / ship panel stack above it, so nothing here can overprint another bottom-right element.
+        if (left != null) {
+            int ly = HudStack.reserve(HudStack.Zone.BOTTOM_LEFT, HudStack.BL_LEFT_SPELL, 10, height);
+            drawSpell(g, font, player, data, left, 12, ly, false, MagicClientEvents.isCasting(SpellCasting.LEFT), dual);
+        }
+        if (right != null) {
+            int ry = HudStack.reserve(HudStack.Zone.BOTTOM_RIGHT, HudStack.BR_RIGHT_SPELL, 10, height);
+            drawSpell(g, font, player, data, right, width - 12, ry, true, MagicClientEvents.isCasting(SpellCasting.RIGHT), dual);
+        }
         // empty hands are shown too, so "what do I have equipped" is never a guess
         if (left == null && right == null && player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty()) {
+            int uy = HudStack.reserve(HudStack.Zone.BOTTOM_LEFT, HudStack.BL_LEFT_SPELL, 10, height);
             g.drawString(font, Component.translatable("magic.skycraft.hud_unarmed", MagicClientEvents.HANDS_CYCLE.getTranslatedKeyMessage()),
-                    12, height - 40, 0xFFB8B2A0, true);
+                    12, uy, 0xFFB8B2A0, true);
         }
 
         // ---------------------------------------------------------- equipped voice / shout / power (bottom right)
@@ -82,7 +92,7 @@ public final class MagicHud {
             boolean isReady = ready <= now;
             float remaining = !isReady && total > 0 ? Mth.clamp((ready - now) / (float) total, 0, 1) : 0;
             int rightEdge = width - 12;
-            int y = height - 29;
+            int y = HudStack.reserve(HudStack.Zone.BOTTOM_RIGHT, HudStack.BR_VOICE, 14, height);
             int nameW = font.width(powerName);
             int x = rightEdge - nameW;
             g.drawString(font, powerName, x, y, isReady ? powerColor : 0xFF8A9AAA, true);
@@ -104,7 +114,7 @@ public final class MagicHud {
                 float remaining = ready > now && total > 0 ? Mth.clamp((ready - now) / (float) total, 0, 1) : 0;
 
                 int rightEdge = width - 12;
-                int y = height - 29;
+                int y = HudStack.reserve(HudStack.Zone.BOTTOM_RIGHT, HudStack.BR_VOICE, 14, height);
                 int shown = Math.max(1, Math.max(learned, usable));
                 int[] widths = new int[shown];
                 int totalWidth = 0;

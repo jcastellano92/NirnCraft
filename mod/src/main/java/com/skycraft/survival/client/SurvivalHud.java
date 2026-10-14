@@ -2,6 +2,7 @@ package com.skycraft.survival.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.skycraft.Skycraft;
+import com.skycraft.core.HudStack;
 import com.skycraft.inventory.client.SkyUi;
 import com.skycraft.survival.SurvivalPackets;
 import com.skycraft.survival.mode.Climate;
@@ -55,7 +56,8 @@ public final class SurvivalHud {
         Font font = mc.font;
         int total = 3 * (BAR_W + 12) + 2 * 8;
         int x = width / 2 - total / 2;
-        int y = height - 44;
+        // one 18 px slot (stage label above the icons and bars) in the bottom-centre stack above the health bar
+        int y = HudStack.reserve(HudStack.Zone.BOTTOM_CENTER, HudStack.BC_SURVIVAL, 18, height) + 10;
         meter(g, font, x, y, 0, 1f - ClientSurvival.hunger / SurvivalMode.MAX_HUNGER, HUNGER, hs,
                 ClientSurvival.has(SurvivalPackets.Meters.WELL_FED) && hs == 0 ? "survival.skycraft.hunger.well_fed" : "survival.skycraft.hunger.stage." + hs,
                 ClientSurvival.hungerChanged, now);

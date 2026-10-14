@@ -1,6 +1,6 @@
 package com.skycraft.inventory.client;
 
-import com.skycraft.core.SkyData;
+import com.skycraft.core.HudStack;
 import com.skycraft.inventory.InventoryConfig;
 import com.skycraft.inventory.ItemWeights;
 import net.minecraft.client.Minecraft;
@@ -11,8 +11,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 /**
- * "Carry 312/300" above the stamina bar (bottom right), only while close to or over the carry capacity. Sits above
- * the magic module's bottom-right elements (shout words, right-hand spell) when those are shown.
+ * "Carry 312/300" above the stamina bar (bottom right), only while close to or over the carry capacity. Takes its slot
+ * in the {@link HudStack} bottom-right column, above the magic module's elements (shout words, right-hand spell).
  */
 public final class CarryHud {
     private CarryHud() {}
@@ -39,11 +39,8 @@ public final class CarryHud {
 
         Font font = mc.font;
         Component text = Component.translatable("inventory.skycraft.hud.carry", ItemWeights.format(cur), ItemWeights.format(cap));
-        // stack above the magic HUD's bottom-right elements: shout words (-29) and the right-hand spell (-42)
-        var magic = SkyData.get(player).module("magic");
-        int y = height - 27;
-        if (!magic.getString("selected_shout").isEmpty()) y = height - 42;
-        if (!magic.getString("selected_spell").isEmpty()) y = height - 55;
+        // one slot in the bottom-right stack, above the voice words and the right-hand spell (whatever is drawn there)
+        int y = HudStack.reserve(HudStack.Zone.BOTTOM_RIGHT, HudStack.BR_CARRY, 10, height);
         int x = width - 12 - font.width(text);
         int color;
         if (over) {

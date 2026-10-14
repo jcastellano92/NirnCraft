@@ -32,11 +32,8 @@ public final class ArcaneClientEvents {
         Ingredients.Ingredient ing = Ingredients.get(stack);
         if (ing != null && player != null) {
             tooltip.add(Component.translatable("tooltip.skycraft.alchemy.ingredient").withStyle(ChatFormatting.GOLD));
-            for (int i = 0; i < 4; i++) {
-                Component line = Alchemy.knows(player, ing, i) ? ing.effects()[i].coloredName()
-                        : Component.translatable("screen.skycraft.alchemy.unknown").withStyle(ChatFormatting.DARK_GRAY);
-                tooltip.add(Component.literal("  ").append(line));
-            }
+            // all four slots: discovered ones by name and power, the rest as "?" (same lines as the inventory detail panel)
+            for (Component line : Alchemy.effectLines(player, ing)) tooltip.add(Component.literal("  ").append(line));
         }
 
         CompoundTag tag = stack.getTag();

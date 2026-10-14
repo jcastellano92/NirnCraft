@@ -146,6 +146,9 @@ public final class MagicCommands {
         if (Places.nearest(PlaceType.CAPITAL, 0, 0, 1 << 20).isEmpty()) problems.add("no capital for Divine Intervention");
         boolean tribunal = Places.all().stream().anyMatch(p -> p.regionId().startsWith("morrowind/"));
         if (!tribunal) problems.add("no Morrowind place for Almsivi Intervention");
+        // eating ingredients (bite choice, four-line effect text, the Use/right-click/eat paths) and the HUD corner layout
+        problems.addAll(com.skycraft.crafting.arcane.alchemy.AlchemySelfTest.run());
+        problems.addAll(com.skycraft.core.HudStack.selfTest());
         int perkCount = 0;
         for (Perk ignored : Perks.all()) perkCount++;
         report.accept(String.format(Locale.ROOT, "%d spells, %d shouts, %d skills, %d perks, %d spellmaking effects", spells,

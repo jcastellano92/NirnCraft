@@ -1,6 +1,7 @@
 package com.skycraft.mounts.client;
 
 import com.skycraft.Skycraft;
+import com.skycraft.core.HudStack;
 import com.skycraft.mounts.MountPackets;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.client.Minecraft;
@@ -48,7 +49,8 @@ public final class MountHudOverlay {
         if (mc.player == null || hud == null || !mc.player.isPassenger() || System.currentTimeMillis() - lastAt > 1500 || mc.options.hideGui) return;
         GuiGraphics g = event.getGuiGraphics();
         int w = mc.getWindow().getGuiScaledWidth(), h = mc.getWindow().getGuiScaledHeight();
-        int barW = 120, x = w / 2 - barW / 2, y = h - 44;
+        // bottom-centre stack above the health bar, below the survival meters (they used to share this row)
+        int barW = 120, x = w / 2 - barW / 2, y = HudStack.reserve(HudStack.Zone.BOTTOM_CENTER, HudStack.BC_MOUNT, 10, h) + 1;
         float st = hud.max() <= 0 ? 0 : Math.max(0, Math.min(1, hud.stamina() / hud.max()));
         float hp = hud.maxHealth() <= 0 ? 0 : Math.max(0, Math.min(1, hud.health() / hud.maxHealth()));
         int stColor = hud.exhausted() ? 0xFFC03A2B : hud.gallop() ? 0xFFE0A030 : 0xFF5FB04A;
