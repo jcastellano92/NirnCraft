@@ -30,22 +30,22 @@ hash = "f00a2839ae37b222f033df3667fe27dde72be35f704d874e9f4d484130e0b81a"
 
 [[files]]
 file = "mods/balm.pw.toml"
-hash = "68ee64e8e6c5874b10bfb02ec70cb20113de4b96a3f574c64c5707836d4b4cc6"
+hash = "92eef137f9ea740673053ec3604ddf3ed197f22fdf5e5da35c8364f88ad31650"
 metafile = true
 
 [[files]]
 file = "mods/better-combat.pw.toml"
-hash = "55de0e4189b0dff4e449658f14c6cd73499e0dfcb2d7095ae38445aba99faab7"
+hash = "52b4f29eb4a4392ef085617292842dc9fc84d86c318da5ce470b24eab77f6bdc"
 metafile = true
 
 [[files]]
 file = "mods/canary.pw.toml"
-hash = "7f43a2e11019614dbc82e540ea7e649429bb35cf1adc06d69ce31949174762af"
+hash = "14481081a9e233f4ba57df8a77ce028184818143eae1c73b60749ea482c912e9"
 metafile = true
 
 [[files]]
 file = "mods/cloth-config.pw.toml"
-hash = "2cd7fe8b896cd6f102af972c775db3a025f3ad70e755c818addcfdf1e724d9b6"
+hash = "e3dd03e7fec88831974857e2cdded54dd5c5bdcaa3f6d6248c2800e82db4dd41"
 metafile = true
 
 [[files]]
@@ -55,22 +55,22 @@ metafile = true
 
 [[files]]
 file = "mods/controllable.pw.toml"
-hash = "425bd3423fdb6214eca387e027c79101197f8c3c4f5075022d46f60fbdeb8c18"
+hash = "26057db5e04510c3d99742c479d59542a8c8a434d4d26eb872590ebf57d60177"
 metafile = true
 
 [[files]]
 file = "mods/creativecore.pw.toml"
-hash = "3c4b544a9f63603562d2e0a8f62099edcbfb84bd5b9627a257599125ab1b6c0f"
+hash = "83696650659994c6facf18e79b7b53877a0df0622d6beeeb7b27bbe75f6bc0b7"
 metafile = true
 
 [[files]]
 file = "mods/default-options.pw.toml"
-hash = "e3f4f3cfdf82a3867d1096651c46138a94bfc118efb60016a31d9411f7747b51"
+hash = "6311134242af3f639923e825caea40821c7e7ee7caadf4105234f5d7fa44ec8b"
 metafile = true
 
 [[files]]
 file = "mods/distanthorizons.pw.toml"
-hash = "86f762a8b1f828586dbb598de0ef2d9f319c2891575609054da5ba4adbc3a158"
+hash = "084a056c8eca61bdfcb53d7a9ae05693e27ea856256d783cd7757612df125ee5"
 metafile = true
 
 [[files]]
@@ -95,17 +95,17 @@ metafile = true
 
 [[files]]
 file = "mods/essential.pw.toml"
-hash = "5c160c8a84fd13c04ef183941454b3016e42a773ab673507c9afc9428cb351da"
+hash = "ef11cf405ecfcb4403b6387dfa3e5b16e5fa4abf55f885eb096aa0977d8012b1"
 metafile = true
 
 [[files]]
 file = "mods/ferrite-core.pw.toml"
-hash = "3b026ffc2963974cc8252d83e91587b5ac357ab2b59eb1e77e74e82eb3d635d6"
+hash = "902bac905b93271f02bd0951a22bac06a3da24f5c237fcaeb469e14a7679e508"
 metafile = true
 
 [[files]]
 file = "mods/framework.pw.toml"
-hash = "5fca23efa0b16dd5dc4cd58ef7a86deedfb5f7ddee40118cbbcf35e292113de7"
+hash = "86621230dbc7c1b076d579f68e49eb454dededcb0f63f2305cf5d3ca55f9c46f"
 metafile = true
 
 [[files]]
@@ -115,7 +115,7 @@ metafile = true
 
 [[files]]
 file = "mods/itemphysic-lite.pw.toml"
-hash = "b785567abf013a8dab6dd9c06cdf99d8cbff5ec7ba835c494011bc41712eef1f"
+hash = "cf31130ba0da56362298409418b9a6b6e5ab01822d9c04e0aee61c0682662b01"
 metafile = true
 
 [[files]]
@@ -125,12 +125,12 @@ metafile = true
 
 [[files]]
 file = "mods/lootr.pw.toml"
-hash = "1df09df44e212e986f8a83781f36df78f964eacf4bc0bfb401729e49f2d8274a"
+hash = "66bcfe786e6bbdee6f7ea0805ec3d2561b41285a5c77f1e465e80f4c2fd9200c"
 metafile = true
 
 [[files]]
 file = "mods/memoryleakfix.pw.toml"
-hash = "77fa53a8466d39da52d38565818ead2df35fdc358a2af8d83e041b7863d87deb"
+hash = "ade41e4315735aa9116a0222b332e03d3f8df6eea301764d40d0bdc40f5e8689"
 metafile = true
 
 [[files]]
@@ -140,17 +140,17 @@ metafile = true
 
 [[files]]
 file = "mods/mouse-tweaks.pw.toml"
-hash = "919300e0236bdad52e6951ab20a6d2b529af3614d9ccfe491c2b44dfe39f6daf"
+hash = "679fa8f3b49b9ed3fbcb29d6ccdb99bce465faa01f9cec000464ac8d4fbe134f"
 metafile = true
 
 [[files]]
 file = "mods/oculus.pw.toml"
-hash = "ea0949d24e6f1861d818def09246e20302a2ac2fa6038aa2089eea3567588956"
+hash = "f83b253ca6a8e6f2f847952704da0e1fb00e65cbb10b7c9cb15d1a1780618da0"
 metafile = true
 
 [[files]]
 file = "mods/playeranimator.pw.toml"
-hash = "aefb7caf7025ca19c5a701703155197ad62de258b1fccd214aa46c757f83779c"
+hash = "765987a78e5d8c782d0da2de99998b43b5907d6c41347d3804045ad109e4a586"
 metafile = true
 
 [[files]]
@@ -170,7 +170,7 @@ metafile = true
 
 [[files]]
 file = "mods/spark.pw.toml"
-hash = "df58afd70db5e503f4241668e004707cb9a202a354ec035dea17b41528295f24"
+hash = "0be4976227df8e261fd362889bf8e85b93e224d1b1c3cd2a11b73a9de3b64083"
 metafile = true
 
 [[files]]
