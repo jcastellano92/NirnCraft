@@ -106,8 +106,8 @@ public final class Barter {
         if (index < 0 || index >= shop.rows()) return Component.empty();
         ItemStack stack = shop.row(index);
         if (!matches(stack, itemId)) return Component.empty();
-        // the same filter the list was built with: a cook sells the food only, a keepsake is never for sale
-        if (!shelfVisible(shop.npc(), stack)) return Component.empty();
+        // the same filter the list was built with: a cook sells the food only (plus what players sold to the shop), a keepsake is never for sale
+        if (!shelfVisible(shop.npc(), stack) && (Resale.isKeepsake(stack) || shop.soldCount(stack) <= 0)) return Component.empty();
         Component name = stack.getHoverName();
         int unit = Pricing.buyPrice(player, stack, shop.npc());
         int want = all ? stack.getCount() : 1;
@@ -130,7 +130,7 @@ public final class Barter {
         if (bought < want) {
             return bought < affordable
                     ? Component.translatable("message.skycraft.economy.inventory_full")
-                    : Component.translatable("message.skycraft.not_enough_gold");
+                    : Component.translatable("message.skycraft.economy.not_enough_gold");
         }
         return Component.translatable("message.skycraft.economy.bought", bought, name, total);
     }
@@ -150,6 +150,7 @@ public final class Barter {
             eq = InventoryActions.equipState(player, inv, slot, stack);
         }
         if (!matches(stack, itemId)) return Component.empty();
+        ItemStack template = stack.copy();
         LivingEntity npc = shop.npc();
         Component name = stack.getHoverName();
         // quest items are never sold (also rejected here when a modified client asks): they are filtered out of the list
@@ -189,24 +190,24 @@ public final class Barter {
             for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
                 if (i == slot) continue;
                 ItemStack s = inv.getItem(i);
-                if (s.isEmpty() || !ItemStack.isSameItemSameTags(s, stack)) continue;
+                if (s.isEmpty() || !ItemStack.isSameItemSameTags(s, template)) continue;
                 if (InventoryActions.equipState(player, inv, i, s) != InventoryActions.EQ_NONE) continue;
                 slots.add(i);
                 available += s.getCount();
             }
-            int pi = Pack.indexOf(player, stack);
+            int pi = Pack.indexOf(player, template);
             if (pi >= 0) {
                 usePack = true;
                 available += packed ? stack.getCount() : Pack.get(player, pi).getCount();
             }
         }
-        int unit = Pricing.sellPrice(player, stack, npc);
+        int unit = Pricing.sellPrice(player, template, npc);
         int want = equipped || !all ? 1 : available;
         want = Math.min(want, available);
         int n = Math.min(want, shop.available(player) / unit);
         if (n <= 0) return Component.translatable("message.skycraft.economy.no_merchant_gold");
 
-        ItemStack sold = stack.copy();
+        ItemStack sold = template.copy();
         sold.setCount(0);
         int left = n;
         for (int s : slots) {
@@ -216,7 +217,7 @@ public final class Barter {
             left -= part.getCount();
         }
         if (left > 0 && usePack) {
-            int pi = Pack.indexOf(player, stack);
+            int pi = Pack.indexOf(player, template);
             ItemStack part = pi < 0 ? ItemStack.EMPTY : Pack.take(player, pi, left);
             sold.grow(part.getCount());
             left -= part.getCount();
@@ -274,9 +275,9 @@ public final class Barter {
         Buyback.Entry e = list.get(index);
         if (!matches(e.original, itemId)) return Component.empty();
         Component name = e.original.getHoverName();
-        // shelf goods must still be on the shelf (a customer may have bought them meanwhile: then they are gone);
-        // kept goods are the seller's alone and are always there
-        int available = e.held() ? e.count : shop.count(e.inStock);
+        // shelf goods must still be on the shelf or in the seller's shelf-expired buyback pool (if another customer
+        // bought them meanwhile, they are gone); kept goods are the seller's alone and are always there
+        int available = e.availableCount(shop);
         int want = Math.min(all ? e.count : 1, Math.min(e.count, available));
         if (want <= 0) return Component.translatable("message.skycraft.economy.buyback_gone");
         int affordable = (int) Math.min(want, Currency.balance(player) / Math.max(1, e.unit));
@@ -289,7 +290,11 @@ public final class Barter {
         if (bought <= 0) return Component.translatable("message.skycraft.economy.inventory_full");
         int total = e.unit * bought;
         Currency.take(player, total);
-        if (!e.held()) shop.takeEqual(e.inStock, bought);
+        if (!e.held()) {
+            int fromShelf = shop.takeEqual(e.inStock, bought);
+            int fromExpired = bought - fromShelf;
+            if (fromExpired > 0) e.shelfExpiredCount = Math.max(0, e.shelfExpiredCount - fromExpired);
+        }
         shop.receive(total);
         shop.save();
         Buyback.consume(player, shop, e, bought);
@@ -341,12 +346,12 @@ public final class Barter {
             merchant.add(new EconomyPackets.Entry(i, s, Pricing.buyPrice(player, s, npc), (byte) ItemCategory.of(s).ordinal(), STATUS_OK, (byte) 0));
         }
         List<EconomyPackets.Entry> mine = sellEntries(player, npc, shop);
-        // the buy-back list: what this player sold here lately (shelf goods only while still on the shelf)
+        // the buy-back list: what this player sold here lately (shelf goods or shelf-expired buyback pool)
         List<EconomyPackets.Entry> back = new ArrayList<>();
         List<Buyback.Entry> sold = Buyback.list(player, shop);
         for (int i = 0; i < sold.size(); i++) {
             Buyback.Entry e = sold.get(i);
-            int count = e.held() ? e.count : Math.min(e.count, shop.count(e.inStock));
+            int count = e.availableCount(shop);
             if (count <= 0) continue;
             ItemStack shown = e.original.copy();
             shown.setCount(count);

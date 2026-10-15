@@ -241,3 +241,183 @@ barrow's stone, the Skaal want the dead undisturbed, and the dead have views of 
 
 ---
 
+## 2. Micro-biomes
+
+Solstheim's 0.976 km2 island is split along the Moesring massif (`so.L1.moesring_massif`, `so.L2.ash_snow_seam`):
+south of the ridge, ash carried on the south-east wind from Red Mountain governs soil and flora; north of it, polar
+gales off the Sea of Ghosts govern ice and pine. Each of the 9 micro-biomes cites an L1-L3 cause from section 1.
+
+| Area | Micro-biome (key) | Rule (MS21) | Cause | Flora and ground | Weather | Creatures | Work |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `raven_rock`, `isinfier` | `ash_waste` | z >= -3130, elevation < 85, away from springs | `so.L2.ash_fall`, `so.L1.ash_plain` | grey ash turf, charred trunks, scathecraw, ash yam | falling ash, periodic ash storm | ash hopper, netch, ash spawn (night) | ash-farming, salvage |
+| `isinfier` | `spore_garden` | 220-block ring round Tel Mithryn (5007, -2722) | `so.L3.grove_spring`, `isinfier.L3.cistern_at_the_tower` | giant mushroom caps, fungal loam, Emperor parasol moss | dry ash-haze | netch calves, blight moths | Telvanni alchemy and spore trade |
+| `brodir` | `ash_grove` | 4440 <= x < 4660, -3130 <= z < -2930 | `so.L3.grove_spring`, `brodir.L2.sheltered_hollow` | living green broadleaf ash-trees, moss, clear spring | calm, sheltered from ash fall | deer, songbirds, wisps at dusk | colony seed bank and resting cairns |
+| `moesring`, `bloodskal` | `sleet_seam` | -3320 <= z < -3100 along southern foot of Moesring | `so.L2.ash_snow_seam`, `moesring.L3.snow_melt_burns` | wet dark heath, stunted birch, grey sleet-crust | sleet and gusting wind | wolves, draugr patrols near barrows | barrow stone quarrying |
+| `skaal` | `skaal_pine` | x >= 4680, -3600 <= z < -3130, elevation 65-110 | `so.L2.polar_north`, `skaal.L1.forest_uplands` | snow-laden spruce and pine, lichen, deep drift | snow flurries, crisp clear nights | elk, snow bears, wolves | Skaal hunting, bone and hide craft |
+| `skaal`, `felsaad` | `frozen_lake_and_shingle` | shore cells and Lake Fjalding basin | `so.L3.lake_fjalding`, `so.L3.frozen_north_sea` | shore ice, shingle, horker haul-outs | ice fog, coastal gale | horkers, mudcrabs, rieklings | horker oil, shore sledging |
+| `moesring`, `felsaad` | `alpine_crown` | elevation >= 110 on Moesring and north peaks | `so.L1.moesring_massif`, `moesring.L2.crown_blizzard` | bare rock, rime ice, wind-scoured scree | whiteout blizzard, pass gale | frost trolls, ice wraiths, dragons | Dwemer scrap runs, pass watch |
+| `felsaad` | `glacier_and_stalhrim` | x < 4560, z < -3560 (Mortrag Glacier and basins) | `so.L1.glacier_nw`, `so.L1.stalhrim_basins` | blue glacial ice, crevasses, humming stalhrim veins | aurora at night, freezing fog | rieklings on boar-back, frost giants | sacred stalhrim harvest |
+| `raven_rock` | `spoil_and_bulwark` | 180-block arc east of Raven Rock wall | `raven_rock.L1.mine_shaft`, `raven_rock.L2.windward_wall` | black mine spoil, timber palisades, ash cairns | windward ash drift | ash spawn marches | wall watch, ebony sorting |
+
+---
+
+## 3. Map changes and geography
+
+### 3.1 Relief and hydrography (`SCALE-AND-GEOGRAPHY.md` 5.1, 7)
+
+| Measure | Now | Target | How |
+| --- | --- | --- | --- |
+| Height p50 | 24 | 32 | raise the Moesring apron and Bloodskal barrow ridges above the southern ash shelf |
+| Height p90 | 78 | 125 | Moesring crown (`moesring_crown`) to 155, Mortrag Glacier (`mortrag_glacier`) to 130, Hvitkald Peak to 120 |
+| Ruggedness | 2.6 | 4.2 | north-west sea cliffs (`cliff_wall`), Harstrad gorge, barrow ridge scarps |
+| Signature silhouette | low ridge | **central white peak dividing grey ash south from blue-white glacier north** | Moesring massif + Temple of Miraak stair + Tel Mithryn mushroom silhouette on the south-east point |
+
+* **Hydrology:** `harstrad_river` from the Moesring north face to the north-east shore (`so.L3.harstrad_river`); `lake_fjalding` (`4830, -3520`) frozen along its northern reed-bed with a clear meltwater outlet (`skaal_springs`) past Skaal Village; the clean spring at `brodir_grove` (`4504, -3042`).
+
+### 3.2 Missing canonical places to add or verify (`SCALE-AND-GEOGRAPHY.md` 5.1, 8.10)
+
+All 52 Dragonborn markers and key Bloodmoon landmarks are cross-checked against `places/morrowind.json`:
+* Verify/add: `thirsk` (`4885, -3490`, hall settlement), `castle_karstaag` (`4339, -3770`, marquee ice fortress), `lake_fjalding` (`4830, -3520`, landmark), `mortrag_glacier` (`4410, -3710`, landmark), `hrothmunds_bane` (`4610, -3380`, barrow), `thormoors_watch` (`4520, -3590`, tower/camp), `aidanat` (`4890, -2960`, seasonal Ashlander/hunter camp).
+* Standing stones (the six All-Maker Stones, `so.L1.all_maker_stones`): `earth_stone` (`4260, -2860`), `water_stone` (`4195, -3290`), `wind_stone` (`4910, -3360`), `beast_stone` (`4890, -3395`), `sun_stone` (`4820, -2990`), `tree_stone` (`4715, -3275`, inside the Temple precinct).
+
+### 3.3 XL silhouettes
+
+| Area | Target XL | Silhouettes |
+| --- | --- | --- |
+| `raven_rock` | 1 | The Bulwark wall and the Coldcinder headframe over the bay |
+| `moesring` | 2 | Temple of Miraak's rib-spires and black stair; Fahlbtharz/Kagrumez Dwemer observatory |
+| `isinfier` | 2 | Tel Mithryn's giant fungal tower; Nchardak's half-submerged brass domes on the east coast |
+| `felsaad` | 1 | Castle Karstaag's jagged glacial spires above the northern ice |
+
+---
+
+## 4. Roads, travel network, fast travel
+
+### 4.1 Named roads (`named_roads.json`)
+
+| id | Class | Route | Notes |
+| --- | --- | --- | --- |
+| `bulwark_to_mithryn_road` | road | `raven_rock` > `attius_farm` > `fort_frostmoth` > `ashfallow_citadel` > `tel_mithryn` | The southern ash-plain road (`so.L6.island_roads`), marked by Redoran ash-cairns and lantern posts |
+| `moesring_pass_trail` | trail | `raven_rock` > `brodir_grove` > `altar_of_thrond` > `temple_of_miraak` > `thirsk` > `skaal_village` | The only low pass across the massif (`moesring.L6.pass_road`) |
+| `east_shore_sledge_way` | trail | `tel_mithryn` > `nchardak` > `skaal_village` > `northshore_landing` | Shingle and winter-ice track along the east and north coast (`skaal.L3.ice_shingle`) |
+
+### 4.2 Sea routes and travel modes (`MS11`)
+
+| Mode | Nodes | Identity rule | Status |
+| --- | --- | --- | --- |
+| **Ferry (`Northern Maiden`)** | `raven_rock` <-> `windhelm`, `solitude`, `sadrith_mora`, `blacklight` | Paid passage at Raven Rock wharf (`raven_rock.L3.bay_harbour`); non-straight sea corridors around the north capes | EXISTS (fix straight-line fallback in R1b) |
+| **Smuggler / Reaver skiff** | `northshore_landing` <-> `dawnstar`, `dagon_fel` | High-risk charter when winter ice or bounty closes Raven Rock | NEW (`travel/morrowind.json`) |
+| **All-Maker Stones (wilderness nodes)** | The 6 All-Maker Stones (`earth`, `water`, `wind`, `beast`, `sun`, `tree`) | Cleansed stones act as free wilderness fast-travel anchors; corrupted stones do not | NEW (`MS11` rule) |
+
+---
+
+## 5. Settlements
+
+### 5.1 Tier list
+
+| Settlement | Area | Tier | Kit / Look | Named NPCs (now -> target) | Interiors (now -> target) | Role in `so.L6` |
+| --- | --- | --- | --- | ---: | ---: | --- |
+| `raven_rock` | `raven_rock` | City (seat) | `redoran_shell` + `bulwark_ash` | 19 -> 28 | 11 -> 15 | Walled Redoran refugee port and ebony mine |
+| `skaal_village` | `skaal` | Town | `skaal_hide_bone` | 9 -> 14 | 6 -> 9 | Ring of hide-and-bone longhouses around the Greathall |
+| `tel_mithryn` | `isinfier` | Village (wizard seat) | `telvanni_fungal` | 5 -> 8 | 4 -> 5 | Grown mushroom tower, steward's hall, apothecary, spore sheds |
+| `thirsk` | `skaal` | Hamlet (mead hall) | `nord_timber_hall` | 4 -> 7 | 1 -> 2 | Single great hunting hall by Lake Fjalding |
+
+### 5.2 Settlement plan briefs
+
+* **Raven Rock (`raven_rock`):** Walled crescent facing the bay (`raven_rock.L2.windward_wall`). Districts: (1) Wharf and customs pier; (2) Market square and the Retching Netch inn; (3) Morvayn Manor, Redoran guardhouse, and the Temple hall (`raven_rock.L8.temple_hall`); (4) Coldcinder Mine headframe, sorting shed, and the lean-to row where late refugees live (`raven_rock.L7.lean_to_row`).
+* **Skaal Village (`skaal_village`):** Unwalled ring of curved timber-and-horker-hide houses around a central fire and the Greathall (`skaal.L6.skaal_village`). No shops with coin counters—trade is by barter with the smith (`stalhrim_hands`) and healer.
+* **Tel Mithryn (`tel_mithryn`):** One central grown Telvanni tower with a float-shaft, surrounded by three smaller root-pods (steward's kitchen, apprentice laboratory, silt-ash staff quarters) and the spore garden (`isinfier.L4.spore_flat`).
+* **Thirsk Mead Hall (`thirsk`):** One long Nord hall with trophy racks (`skaal.L7.hall_tally`), a mead-brewing annex, and a boar-stave palisade scarred by riekling spears.
+
+---
+
+## 6. Dungeons, underground, landmarks
+
+### 6.1 Underground layers (`so.L10`)
+
+| Class | Count | Signature places | Sheet cause |
+| --- | ---: | --- | --- |
+| Dragon-cult & Thane Barrows | 9 | `temple_of_miraak` (S-marquee), `bloodskal_barrow` (A-marquee), `kolbjorn_barrow`, `gyldenhul_barrow`, `vahloks_tomb`, `hrothmunds_barrow` | `so.L10.temple_cult`, `so.L10.thane_dead` |
+| Frozen & Sunken Dwemer | 4 | `nchardak` (S-marquee), `kagrumez`, `fahlbtharz`, `white_ridge_barrow` (hybrid) | `so.L10.frozen_dwemer` |
+| Colony Mines & Forts | 4 | `raven_rock_mine` (Coldcinder deep gallery), `damphall_mine`, `fort_frostmoth`, `ashfallow_citadel` | `so.L10.deep_gallery_sleepers`, `isinfier.L11.company_fort` |
+| Riekling & Glacial Dens | 7 | `castle_karstaag` (A-marquee), `benkongerike`, `frossel`, `Bristleback Cave`, `Glacier Cave`, `giant_tooth_hollow` | `so.L10.karstaag_hall`, `so.L10.riekling_dens` |
+| Reaver & Werebear Holds | 6 | `wreck_of_the_strident_squall`, `horker_island_camp`, `frostmoon_crag`, `highpoint_tower`, `brodir_hollow` | `so.L10.reavers`, `so.L10.moon_hunt_dens` |
+
+* **Unmarked sites (>= 2):** The prospector's frozen camp under Mortrag (`felsaad.L10.glacier_cave`) and the drowned smuggler cache in the Coldcinder sea-adit (`raven_rock.L10.smuggled_ebony`).
+
+---
+
+## 7. Quests
+
+### 7.1 Island story arc (9 quests): **The First Voice (`mq_solstheim`)**
+
+Sleepers in Raven Rock and the Skaal walk by night to the six All-Maker Stones (`so.L9.first_dragonborn_returns`).
+* **Act I — Ash and Ink (3):** Arrival at Raven Rock wharf; investigating the night-walkers at the Earth Stone; entering the Temple of Miraak's outer sanctum and reading the first Black Book (`so.L10.black_book_altars`).
+* **Act II — The Six Stones and the Sunken City (3):** The Skaal Elder's covenant (`skaal.L8.telling_at_the_fire`); cleansing the Wind, Beast, Water, and Sun Stones; descending into `nchardak` with Tel Mithryn's master to recover the submerged lexicon.
+* **Act III — The Summit of Apocrypha (3):** Returning to the deep sanctum of the Temple; breaking the stone-blight; confronting the First Dragonborn's remnant. **Consequence:** Night-walking ends, the cleansed stones grant their six powers, and Skaal/Redoran envoys open a timber-and-grain compact (`so.L9.colony_and_skaal`).
+
+### 7.2 Area and faction chains
+
+| Chain | Area | Quests | Summary & consequence |
+| --- | --- | ---: | --- |
+| **The Coldcinder Seam** | `raven_rock`, `bloodskal` | 4 | Descend through `raven_rock_mine` into `bloodskal_barrow` (`raven_rock.L10.deep_gallery`), recover the Bloodskal blade and the true charter ledger; re-opens the deep ebony vein or shifts the council to ash-farming (`raven_rock.L9.mine_or_farm`). |
+| **The Hall of Trophies** | `skaal` (`thirsk`) | 3 | Reclaim Thirsk Mead Hall from the riekling chief (`skaal.L9.riekling_raids`) or back the tribe's boar-riders; sets who holds the hall and who trades at Lake Fjalding. |
+| **Ghosts of Frostmoth** | `isinfier` | 3 | Clear the ash-spawn commander in `fort_frostmoth` (`isinfier.L8.unquiet_garrison`) and decide the disposition of the East Empire Company's old stalhrim survey (`so.L9.company_claim`). |
+| **The Spore-Master's Apprentices** | `isinfier` (`tel_mithryn`) | 3 | Heart-stone experiments, a rogue ash-guardian, and the dying root of the mushroom tower (`isinfier.L7.tower_house`). |
+| **The Secret of Stalhrim** | `skaal`, `felsaad` | 2 | Rescue the Skaal smith from reavers/Thalmor prospectors (`felsaad.L9.stalhrim_claim`); unlocks stalhrim smithing (`so.L8.stalhrim_law`). |
+
+---
+
+## 8. Components layout
+
+| Component | File or system | Now | To do (phase) |
+| --- | --- | --- | --- |
+| World sheet | `tamriel/world/solstheim.json` (or `morrowind.json` `so` block) | in `solstheim.md` §1 | SO1 (V1) |
+| Relief & hydrology | `tamriel_vectors.json` (Moesring peak, Mortrag, Harstrad, Lake Fjalding) | p90 78 | SO2 (V2) |
+| Micro-biomes | `palettes.json` (`morrowind/solstheim` 9 micro rules) | 2 biomes | SO2 (V3) |
+| Places | `places/morrowind.json` (50 -> 52 + 2 unmarked) | 50 | SO3 (V4) |
+| Roads & travel | `named_roads.json` (3 island routes), `ports.json`, Stone nodes | 1 ferry | SO3 (V5) |
+| Settlements | `cityplans/raven_rock.json`, `skaal_village.json`, `tel_mithryn.json`, `thirsk.json` | 2 plans | SO4 (V6) |
+| Dungeons | `marquee.json` (Miraak, Bloodskal, Nchardak, Karstaag), `frossel` fix (R1a) | 30 | SO5 (V7) |
+| Quests & voice | `quests/solstheim.json`, `east_empire.json` (4E 201 era alignment), two music cues (ash south / Skaal north) | 63 quests, 1 music cue | SO6 (V8) |
+
+---
+
+## 9. Modernisation: keep, amplify, replace
+
+| Content | Keep | Amplify | Replace |
+| --- | --- | --- | --- |
+| Geography | Exact 52 canonical Dragonborn/Bloodmoon positions | Moesring 155-block divide, Mortrag glacier wall, the sleet seam | Flat ash-to-snow transition without a ridge |
+| Era & lore | Both 3E 427 Bloodmoon history and 4E 201 Redoran/Miraak present | Bloodmoon as L11 history (Frostmoth ruins, Hircine totems, Karstaag's skull); 4E 201 as live L6-L9 state | Mixing active 3E Company colony quests with 4E Redoran Raven Rock |
+| Settlements | Raven Rock, Skaal Village, Tel Mithryn, Thirsk | Distinct kits (`redoran_shell`, `skaal_hide_bone`, `telvanni_fungal`, `nord_timber_hall`) | Generic Dunmer/Nord fallback huts |
+| Dungeons | All 30 dungeons and 7 power sites | Loop shortcuts, Black Book altars, submerged Dwemer water-level rooms in Nchardak | Stuck rooms in `frossel` (fixed in R1a) |
+
+---
+
+## 10. Floors, gates, and implementation phases
+
+### 10.1 Measured floor check (`morrowind/solstheim`, 0.976 km2)
+
+| Metric | Now | Scaled floor (`0.976 km2`) | Real island | Target |
+| --- | ---: | ---: | ---: | ---: |
+| Marked places | 50 | 18 | 52 | **52** (+ 2 unmarked) |
+| Settlements | 4 | 2 | 4 | **4** (all 4 with bespoke plans) |
+| Named NPCs | 37 | 45 | 80 | **64** (Raven Rock 28, Skaal 14, Tel Mithryn 8, Thirsk 7, camps/keeps 7) |
+| Dungeons | 30 | 9 | 35 | **32** (`d_identity` 1.0) |
+| Quests | 63 | 14 | 58 | **65** (era-aligned to 4E 201) |
+| Creature kinds (`c_total`) | 18 | 22 | 24 | **25** (ash spawn, ash hopper, netch, riekling + boar, burnt spriggan, werebear, lurker, seeker) |
+| Micro-biomes (`F-MICRO`) | 2 | 6 | — | **9** |
+| Music cues | 1 | 2 | — | **2** (`solstheim_ash`, `solstheim_skaal`) |
+| Level band | 10-35 (25) | <= 20 | — | **15-35 (20)** |
+
+### 10.2 Implementation phases (SO1–SO7, run inside R7 Morrowind)
+
+| Phase | Step | Scope | Gate |
+| --- | --- | --- | --- |
+| **SO1** | V1 | Compile `solstheim` block into `tamriel/world/morrowind.json`; align `east_empire.json` to 4E 201 | `worldsheet_lint.py` 0 errors |
+| **SO2** | V2, V3 | Raise Moesring & Mortrag relief; wire 9 micro-biomes and 2 music cues (`solstheim_ash`, `solstheim_skaal`) | `F-MICRO` >= 6; p90 >= 120 |
+| **SO3** | V4, V5 | Add missing canonical pins (`thirsk`, `castle_karstaag`, `lake_fjalding`, `mortrag_glacier`, `aidanat`), 3 named roads, Stone travel nodes | `roadplan_lint` 0; `reach_lint` 100% |
+| **SO4** | V6 | Build bespoke plans for `skaal_village`, `tel_mithryn`, `thirsk` and expand `raven_rock` to 28 named NPCs | `SET` >= 95; `y_looks` = 4 |
+| **SO5** | V7 | Marquee upgrades for `temple_of_miraak`, `nchardak`, `bloodskal_barrow`, `castle_karstaag`; 2 unmarked sites | `d_identity` = 1.0; 0 analyzer blockers |
+| **SO6** | V8 | Wire **The First Voice** 9-quest arc, 5 area chains, reactive lines for Stone cleansing, clamp level band to 15-35 | `F-LEVEL` <= 20; `F-REACT` >= 12 |
+| **SO7** | V9 | Full DESIGN-PRINCIPLES 5.5 audit on `morrowind/solstheim` | All parity categories >= 90 |

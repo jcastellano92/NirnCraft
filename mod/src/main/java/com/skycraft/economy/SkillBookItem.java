@@ -87,26 +87,31 @@ public class SkillBookItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (!level.isClientSide && player instanceof ServerPlayer sp) {
-            PlayerData data = SkyData.get(sp);
-            int volume = volume(stack);
-            if (hasRead(data, skill, volume)) {
-                Notifier.message(sp, Component.translatable("message.skycraft.economy.book_already_read"));
-            } else {
-                CompoundTag module = data.module(MODULE);
-                ListTag read = module.getList(READ_KEY, Tag.TAG_STRING);
-                read.add(StringTag.valueOf(readKey(skill, volume)));
-                module.put(READ_KEY, read);
-                data.addStat("skill_books_read", 1);
-                data.markDirty();
-                if (data.getSkill(skill) < Skill.MAX_LEVEL) {
-                    Progression.increaseSkill(sp, skill, 1);
-                } else {
-                    Notifier.message(sp, Component.translatable("message.skycraft.economy.book_mastered", skill.displayName()));
-                }
-            }
-            level.playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1f, 1f);
+            readStack(sp, stack);
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+    }
+
+    /** Reads this skill book directly without moving it into the player's hand. */
+    public void readStack(ServerPlayer sp, ItemStack stack) {
+        PlayerData data = SkyData.get(sp);
+        int volume = volume(stack);
+        if (hasRead(data, skill, volume)) {
+            Notifier.message(sp, Component.translatable("message.skycraft.economy.book_already_read"));
+        } else {
+            CompoundTag module = data.module(MODULE);
+            ListTag read = module.getList(READ_KEY, Tag.TAG_STRING);
+            read.add(StringTag.valueOf(readKey(skill, volume)));
+            module.put(READ_KEY, read);
+            data.addStat("skill_books_read", 1);
+            data.markDirty();
+            if (data.getSkill(skill) < Skill.MAX_LEVEL) {
+                Progression.increaseSkill(sp, skill, 1);
+            } else {
+                Notifier.message(sp, Component.translatable("message.skycraft.economy.book_mastered", skill.displayName()));
+            }
+        }
+        sp.level().playSound(null, sp.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1f, 1f);
     }
 
     @Override

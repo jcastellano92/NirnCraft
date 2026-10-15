@@ -824,9 +824,16 @@ public final class Jail {
         passDays(player, Math.max(1, Math.min(7, bounty / 100)));
 
         // wakes outside the jail's front door in the city, never back at the scene of the crime
+        JailVisitors.forget(player.getUUID());
         recoverKeys(player);
         teleportOutside(player, j, site);
         SkyData.get(player).markDirty();
+    }
+
+    /** True for 1 in-game day (24,000 ticks) after a prisoner breaks out of jail; after a day they may freely visit again. */
+    public static boolean isRecentEscapee(Player player) {
+        long until = Bounty.state(player).getLong("escaped_until");
+        return until > 0 && player.level().getGameTime() < until;
     }
 
     /**
@@ -858,6 +865,7 @@ public final class Jail {
         String hold = j.getString("hold");
         String place = j.getString("place");
         Bounty.state(player).remove("jail");
+        Bounty.state(player).putLong("escaped_until", player.level().getGameTime() + 24000L);
         SkyData.get(player).markDirty();
         if (site != null) freeCell(player, site);
         if (!place.isEmpty()) com.skycraft.quest.story.Story.setFlag(SkyData.get(player), "escaped_" + place, true);
@@ -880,18 +888,29 @@ public final class Jail {
     }
 
     /** Where a freed or escaped prisoner stands: a place outside a city jail. */
-    record Exit(ServerLevel level, BlockPos pos) {}
+    public record Exit(ServerLevel level, BlockPos pos) {}
+
+    /** Public lookup for where a party member traveling to a jailed prisoner should arrive (outside the jail in town). */
+    public static Exit outsideFor(ServerPlayer prisoner) {
+        return outside(prisoner.server, Bounty.state(prisoner).getCompound("jail"), siteOf(prisoner));
+    }
 
     /**
      * The spot outside the jail: a hold jail's own exit (in front of its door); for the jail dimension the exit of the
      * jail that serves the hold the crime was in (else the nearest city jail), else the middle of that settlement,
-     * else the world spawn. Never the place of the crime.
+     * else the world spawn. Never the place of the crime or inside a cell.
      */
     static Exit outside(MinecraftServer server, CompoundTag j, @Nullable Site site) {
         ServerLevel overworld = server.overworld();
         if (site != null && site.hold()) {
-            BlockPos out = site.exit() != null ? site.exit() : site.stand();
-            return new Exit(site.level(), out);
+            if (site.exit() != null) {
+                return new Exit(site.level(), site.exit());
+            }
+            // Fallback for older worlds without a JAIL_EXIT anchor: step outside the jail bounding box (never site.stand() inside the cell!)
+            int cx = (site.min().getX() + site.max().getX()) / 2;
+            int outZ = site.min().getZ() - 2;
+            int topY = site.level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, cx, outZ);
+            return new Exit(site.level(), ensureOutdoor(site.level(), new BlockPos(cx, topY, outZ)));
         }
         BlockPos from = BlockPos.containing(j.getDouble("rx"), j.getDouble("ry"), j.getDouble("rz"));
         String place = j.getString("place");
@@ -901,11 +920,32 @@ public final class Jail {
             if (entry.isPresent()) {
                 Anchor exit = entry.get().first(AnchorType.JAIL_EXIT);
                 if (exit != null) return new Exit(overworld, exit.pos());
+                for (AnchorType pub : new AnchorType[]{AnchorType.MEETING, AnchorType.CARRIAGE, AnchorType.GATE}) {
+                    Anchor a = entry.get().first(pub);
+                    if (a != null) return new Exit(overworld, ensureOutdoor(overworld, a.pos()));
+                }
                 SettlementAnchors.Entry e = entry.get();
-                return new Exit(overworld, new BlockPos(e.x, overworld.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, e.x, e.z), e.z));
+                BlockPos center = new BlockPos(e.x, overworld.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, e.x, e.z), e.z);
+                return new Exit(overworld, ensureOutdoor(overworld, center));
             }
         }
-        return new Exit(overworld, overworld.getSharedSpawnPos());
+        return new Exit(overworld, ensureOutdoor(overworld, overworld.getSharedSpawnPos()));
+    }
+
+    private static BlockPos ensureOutdoor(ServerLevel level, BlockPos base) {
+        if (level.canSeeSky(base) && !isJailArea(level, base)) return base;
+        for (int r = 2; r <= 24; r += 2) {
+            for (int dx = -r; dx <= r; dx += r) {
+                for (int dz = -r; dz <= r; dz += r) {
+                    int x = base.getX() + dx;
+                    int z = base.getZ() + dz;
+                    int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+                    BlockPos p = new BlockPos(x, y, z);
+                    if (level.canSeeSky(p) && !isJailArea(level, p)) return p;
+                }
+            }
+        }
+        return base;
     }
 
     private static void teleportOutside(ServerPlayer player, CompoundTag j, @Nullable Site site) {

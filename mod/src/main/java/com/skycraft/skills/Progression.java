@@ -39,6 +39,22 @@ public final class Progression {
     private Progression() {}
 
     /**
+     * Gentle multi-player XP and reward scaling factor: solo = 100%, 2 players = 90%, 3 players = 85%, 4+ players = 80%.
+     * Never halves rewards or XP.
+     */
+    public static float partyXpFactor(int partySize) {
+        if (partySize <= 1) return 1.0f;
+        if (partySize == 2) return 0.90f;
+        if (partySize == 3) return 0.85f;
+        return 0.80f;
+    }
+
+    /** Alias for {@link #addSkillXp(ServerPlayer, Skill, float)} for callers passing a Skyrim skill use value. */
+    public static void addSkillXpFromUse(ServerPlayer player, Skill skill, float useValue) {
+        addSkillXp(player, skill, useValue);
+    }
+
+    /**
      * Awards skill XP for a skill use.
      *
      * @param useValue Skyrim-style use value; multiplied by the skill's use multiplier and the configured rate.
@@ -91,7 +107,27 @@ public final class Progression {
                 Component.empty(), skill.ordinal(), 0f);
         player.level().playSound(null, player.blockPosition(), com.skycraft.world.WorldSounds.UI_SKILL_UP.get(), SoundSource.PLAYERS, 0.85f, 1.0f);
         data.addStat("skill_increases", 1);
-        addCharacterXp(player, data, newLevel * (float) (double) SkyConfig.LEVEL_XP_RATE.get());
+        float baseCharXp = newLevel * (float) (double) SkyConfig.LEVEL_XP_RATE.get();
+        com.skycraft.quest.party.Party party = player.server == null ? null : com.skycraft.quest.party.Parties.partyOf(player);
+        if (party != null && party.members.size() > 1) {
+            java.util.List<ServerPlayer> online = com.skycraft.quest.party.Parties.onlineMembers(player.server, party);
+            float factor = partyXpFactor(online.size());
+            addCharacterXp(player, data, baseCharXp * factor);
+            float teammateShare = baseCharXp * 0.35f * factor;
+            for (ServerPlayer mate : online) {
+                if (mate == player || mate.isSpectator() || mate.level() != player.level() || mate.distanceToSqr(player) > 96 * 96) continue;
+                addCharacterXp(mate, SkyData.get(mate), teammateShare);
+            }
+        } else {
+            addCharacterXp(player, data, baseCharXp);
+        }
+    }
+
+    /** Awards Character Level XP directly from completing a quest. */
+    public static void awardQuestXp(ServerPlayer player, float xp) {
+        if (xp <= 0) return;
+        PlayerData data = SkyData.get(player);
+        addCharacterXp(player, data, xp * (float) (double) SkyConfig.LEVEL_XP_RATE.get());
     }
 
     private static void addCharacterXp(ServerPlayer player, PlayerData data, float xp) {

@@ -50,12 +50,19 @@ public class HandbookScreen extends Screen {
 
     private final List<List<Line>> pages = new ArrayList<>();
     private final int[] chapterStart = new int[CHAPTERS.size()];
+    @org.jetbrains.annotations.Nullable
+    private final Screen returnScreen;
     private int view;
     private float scale = 1f;
     private int left, top;
 
     public HandbookScreen() {
+        this(null);
+    }
+
+    public HandbookScreen(@org.jetbrains.annotations.Nullable Screen returnScreen) {
         super(Component.translatable("item.skycraft.travelers_handbook"));
+        this.returnScreen = returnScreen;
     }
 
     /** Opens at this chapter next time ({@code /handbook chapter <id>}, autotest); any other value opens the contents. */
@@ -223,6 +230,15 @@ public class HandbookScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    @Override
+    public void onClose() {
+        if (minecraft != null && returnScreen != null) {
+            minecraft.setScreen(returnScreen);
+            return;
+        }
+        super.onClose();
     }
 
     // ------------------------------------------------------------------ geometry

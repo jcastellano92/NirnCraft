@@ -43,8 +43,8 @@ public final class SkyConfig {
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
         b.push("progression");
-        SKILL_XP_RATE = b.comment("Multiplier for all skill XP gains (Skyrim's curve is quite fast for Minecraft's hit rate).")
-                .defineInRange("skillXpRate", 0.5, 0.01, 100.0);
+        SKILL_XP_RATE = b.comment("Multiplier for all skill XP gains.")
+                .defineInRange("skillXpRate", 1.0, 0.01, 100.0);
         LEVEL_XP_RATE = b.comment("Multiplier for character XP gained from skill increases.")
                 .defineInRange("levelXpRate", 1.0, 0.01, 100.0);
         PERK_POINTS_PER_LEVEL = b.defineInRange("perkPointsPerLevel", 1, 0, 10);

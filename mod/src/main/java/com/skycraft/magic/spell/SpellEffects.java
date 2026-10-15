@@ -347,6 +347,17 @@ public final class SpellEffects {
     }
 
     public static Spell.Result healingConcentration(ServerPlayer p, Spell spell, int tick) {
+        Targeting.Ray front = Targeting.companionRayInFront(p, 2.0);
+        LivingEntity ally = front.entity();
+        if (ally != null) {
+            Vec3 hand = Targeting.handPos(p);
+            if (tick % 6 == 0) p.swing(SpellCasting.castingHand(), true);
+            if (tick % 2 == 0) MagicFx.send(p, MagicFx.BEAM, Element.HOLY, hand, front.end(), p.getId(), 1);
+            if (tick % 6 == 0) MagicFx.send(ally, MagicFx.HEAL, Element.HOLY, ally.position(), ally.position(), ally.getId(), 0);
+            if (tick % 20 == 0) MagicFx.sound(p, SoundEvents.AMETHYST_BLOCK_CHIME, 0.6f, 1.4f);
+            float healed = heal(p, ally, spell.magnitude / 20f * SpellMath.healMult(p));
+            return healed > 0 ? Spell.Result.EFFECT : Spell.Result.CAST;
+        }
         if (tick % 4 == 0) MagicFx.send(p, MagicFx.HEAL, Element.HOLY, p.position(), p.position(), p.getId(), 0);
         if (tick % 20 == 0) MagicFx.sound(p, SoundEvents.AMETHYST_BLOCK_CHIME, 0.6f, 1.4f);
         float healed = heal(p, p, spell.magnitude / 20f * SpellMath.healMult(p));
@@ -354,6 +365,18 @@ public final class SpellEffects {
     }
 
     public static Spell.Result healSelf(ServerPlayer p, Spell spell, int tick) {
+        Targeting.Ray front = Targeting.companionRayInFront(p, 2.0);
+        LivingEntity ally = front.entity();
+        if (ally != null) {
+            Vec3 hand = Targeting.handPos(p);
+            p.swing(SpellCasting.castingHand(), true);
+            MagicFx.send(p, MagicFx.BEAM, Element.HOLY, hand, front.end(), p.getId(), 1);
+            MagicFx.send(ally, MagicFx.HEAL, Element.HOLY, ally.position(), ally.position(), ally.getId(), 2);
+            MagicFx.sound(p, SoundEvents.AMETHYST_BLOCK_CHIME, 1f, 1.1f);
+            MagicFx.sound(p, SoundEvents.BEACON_POWER_SELECT, 0.4f, 1.8f);
+            float healed = heal(p, ally, spell.magnitude * SpellMath.healMult(p));
+            return healed > 0 ? Spell.Result.EFFECT : Spell.Result.CAST;
+        }
         MagicFx.send(p, MagicFx.HEAL, Element.HOLY, p.position(), p.position(), p.getId(), 2);
         MagicFx.sound(p, SoundEvents.AMETHYST_BLOCK_CHIME, 1f, 1.1f);
         MagicFx.sound(p, SoundEvents.BEACON_POWER_SELECT, 0.4f, 1.8f);
@@ -364,9 +387,11 @@ public final class SpellEffects {
     public static Spell.Result healOther(ServerPlayer p, Spell spell, int tick) {
         Targeting.Ray ray = Targeting.ray(p, spell.radius, e -> Targeting.isHelpable(p, e));
         Vec3 hand = Targeting.handPos(p);
+        if (tick % 6 == 0) p.swing(SpellCasting.castingHand(), true);
         if (tick % 2 == 0) MagicFx.send(p, MagicFx.BEAM, Element.HOLY, hand, ray.end(), p.getId(), ray.entity() != null ? 1 : 0);
         LivingEntity t = ray.entity();
-        if (t == null || t.getMobType() == MobType.UNDEAD || t instanceof AbstractGolem) return Spell.Result.CAST;
+        if (t == null) return Spell.Result.CAST;
+        if (!Targeting.isCompanionOrParty(p, t) && (t.getMobType() == MobType.UNDEAD || t instanceof AbstractGolem)) return Spell.Result.CAST;
         if (tick % 6 == 0) MagicFx.send(t, MagicFx.HEAL, Element.HOLY, t.position(), t.position(), t.getId(), 0);
         float healed = heal(p, t, spell.magnitude / 20f * SpellMath.healMult(p));
         return healed > 0 ? Spell.Result.EFFECT : Spell.Result.CAST;

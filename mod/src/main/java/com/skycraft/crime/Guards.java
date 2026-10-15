@@ -107,14 +107,21 @@ public final class Guards {
             }
             if (guard.getTarget() == player) calm(guard);
             if (!sees) continue;
-            if (distSqr > 9) {
-                guard.getNavigation().moveTo(player, 1.0);
+            if (distSqr > 16) {
+                if (guard instanceof com.skycraft.creatures.entity.GuardEntity ge) {
+                    ge.summon(player.blockPosition(), 40);
+                }
+                guard.getNavigation().moveTo(player, 1.1);
             } else {
+                if (guard instanceof com.skycraft.creatures.entity.GuardEntity ge) {
+                    ge.summon(player.blockPosition(), 20);
+                }
                 guard.getNavigation().stop();
                 guard.getLookControl().setLookAt(player, 30f, 30f);
                 Long next = NEXT_CONFRONT.get(player.getUUID());
                 if ((next == null || now >= next) && player.isAlive() && player.containerMenu == player.inventoryMenu) {
                     NEXT_CONFRONT.put(player.getUUID(), now + CONFRONT_COOLDOWN);
+                    Dialogue.endConversation(player, guard.getId());
                     Dialogue.open(player, guard, Component.translatable("crime.skycraft.guard.arrest"));
                 }
             }
@@ -125,7 +132,12 @@ public final class Guards {
     static void alert(ServerPlayer player) {
         for (Mob guard : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(AWARE_RANGE),
                 m -> m.isAlive() && Crimes.isGuard(m))) {
-            if (guard.getTarget() == null) guard.getNavigation().moveTo(player, 1.1);
+            if (guard.getTarget() == null) {
+                if (guard instanceof com.skycraft.creatures.entity.GuardEntity ge) {
+                    ge.summon(player.blockPosition(), 60);
+                }
+                guard.getNavigation().moveTo(player, 1.1);
+            }
         }
     }
 
@@ -239,7 +251,7 @@ public final class Guards {
             return;
         }
         Bounty.clear(player, hold);
-        Bounty.confiscate(player);
+        Bounty.confiscate(player, hold);
         Notifier.send(player, NotifyKind.CRIME, Component.translatable("crime.skycraft.bounty_paid", bounty, Holds.displayName(hold)), Component.empty());
         Notifier.message(player, Component.translatable("crime.skycraft.guard.paid_line", guard.getDisplayName()));
     }

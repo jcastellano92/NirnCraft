@@ -214,7 +214,7 @@ public final class Settlers {
     /** How many unclaimed, non-player beds the POI manager knows within 64 blocks of the centre (the housing capacity). */
     private static int freeBeds(ServerLevel level, BlockPos center, Data data) {
         return (int) level.getPoiManager().findAll(h -> h.is(PoiTypes.HOME),
-                p -> !data.beds.containsKey(p.asLong()) && !Ownership.isPlayerOwned(level, p),
+                p -> !data.beds.containsKey(p.asLong()) && !Ownership.isPlayerOwned(level, p) && !Ownership.isInnBed(level, p),
                 center, 64, PoiManager.Occupancy.ANY).count();
     }
 
@@ -222,7 +222,7 @@ public final class Settlers {
     @Nullable
     private static BlockPos freeBed(ServerLevel level, BlockPos center, Set<Long> taken, Data data) {
         return level.getPoiManager().findClosest(h -> h.is(PoiTypes.HOME),
-                p -> !taken.contains(p.asLong()) && !data.beds.containsKey(p.asLong()) && !Ownership.isPlayerOwned(level, p),
+                p -> !taken.contains(p.asLong()) && !data.beds.containsKey(p.asLong()) && !Ownership.isPlayerOwned(level, p) && !Ownership.isInnBed(level, p),
                 center, 64, PoiManager.Occupancy.HAS_SPACE).map(BlockPos::immutable).orElse(null);
     }
 
@@ -267,6 +267,14 @@ public final class Settlers {
         Data data = Data.get(level);
         BlockPos current = npc.getBed();
         if (current != null) {
+            if (Ownership.isInnBed(level, current)) {
+                data.beds.remove(current.asLong());
+                data.setDirty();
+                npc.setBed(null);
+                current = null;
+            }
+        }
+        if (current != null) {
             UUID who = data.beds.get(current.asLong());
             boolean mine = who == null || who.equals(npc.getUUID());
             if (mine && (!level.isLoaded(current) || level.getBlockState(current).is(BlockTags.BEDS))) {
@@ -282,14 +290,14 @@ public final class Settlers {
             }
             npc.setBed(null);
         }
-        // a spouse sleeps in the player's own beds at home
+        // a spouse sleeps in the player's own beds at home; inn beds are reserved for guests
         boolean spouse = Marriage.isSpouse(npc);
         Optional<BlockPos> found = level.getPoiManager().findClosest(h -> h.is(PoiTypes.HOME),
-                p -> !data.beds.containsKey(p.asLong()) && (spouse || !Ownership.isPlayerOwned(level, p)),
+                p -> !data.beds.containsKey(p.asLong()) && !Ownership.isInnBed(level, p) && (spouse || !Ownership.isPlayerOwned(level, p)),
                 home, spouse ? 20 : 32, PoiManager.Occupancy.HAS_SPACE);
         // Skycraft-built settlements: the recorded household beds (no POI needed, no chunk loads)
         BlockPos bed = found.isPresent() ? found.get().immutable() : anchorBed(level, data, home, spouse);
-        if (bed == null) return null;
+        if (bed == null || Ownership.isInnBed(level, bed)) return null;
         data.beds.put(bed.asLong(), npc.getUUID());
         data.setDirty();
         npc.setBed(bed);

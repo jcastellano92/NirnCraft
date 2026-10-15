@@ -452,6 +452,12 @@ public class BarterScreen extends Screen {
         return super.keyPressed(key, scan, mods);
     }
 
+    @Override
+    public void onClose() {
+        SkyNetwork.sendToServer(new com.skycraft.dialogue.DialoguePackets.CloseDialogue(state.entityId()));
+        super.onClose();
+    }
+
     private void setTab(ItemCategory c) {
         if (c == tab) return;
         tab = c;

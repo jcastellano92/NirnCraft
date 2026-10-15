@@ -130,6 +130,7 @@ public final class Chatter {
     public static void tryStart(NpcEntity npc) {
         if (!SocietyConfig.CHATTER.get() || ACTIVE.size() >= MAX_ACTIVE) return;
         if (!(npc.level() instanceof ServerLevel level) || npc.isConversing() || npc.getTarget() != null) return;
+        if (com.skycraft.fire.aftermath.HelgenFolk.inHelgen(npc)) return;
         if ((npc.tickCount + npc.getId() * 7) % 9 != 0 || npc.getRandom().nextInt(4) != 0) return;
         if (level.getNearestPlayer(npc, HEAR) == null) return; // nobody to overhear it
         for (Talk t : ACTIVE) { // one speaker per cluster: no bubbles stacked over a crowd

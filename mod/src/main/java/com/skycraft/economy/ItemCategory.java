@@ -52,7 +52,8 @@ public enum ItemCategory {
         Item item = stack.getItem();
         if (item instanceof BookItem || item instanceof WritableBookItem || item instanceof WrittenBookItem
                 || item instanceof EnchantedBookItem || item instanceof KnowledgeBookItem || item instanceof SkillBookItem
-                || stack.is(SPELL_TOMES) || stack.is(SKILL_BOOKS) || item instanceof com.skycraft.lore.LoreBookItem) return BOOKS;
+                || stack.is(SPELL_TOMES) || stack.is(SKILL_BOOKS) || item instanceof com.skycraft.lore.LoreBookItem
+                || item instanceof com.skycraft.guide.HandbookItem) return BOOKS;
         // Skyrim lists staves with the weapons
         if (stack.is(STAVES) || item instanceof com.skycraft.arsenal.item.StaffItem
                 || item instanceof com.skycraft.arsenal.item.EnchantedStaffItem) return WEAPONS;

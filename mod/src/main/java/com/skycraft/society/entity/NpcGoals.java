@@ -1345,6 +1345,7 @@ final class NpcGoals {
 
             for (Player p : level.getEntitiesOfClass(Player.class, npc.getBoundingBox().inflate(5))) {
                 if (!p.isSpectator() && !p.isCreative() && p.isAlive()) {
+                    if (com.skycraft.crime.Jail.isJailArea(level, p.blockPosition())) continue;
                     // Player must also be indoors under roof
                     if (level.canSeeSky(p.blockPosition())) continue;
                     // Player must be within 4 blocks of the NPC's bed

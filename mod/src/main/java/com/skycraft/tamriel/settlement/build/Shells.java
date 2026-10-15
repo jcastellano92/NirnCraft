@@ -172,7 +172,8 @@ public final class Shells {
                 int sz = d - 2 - f.wallH;
                 for (int i = 0; i < f.wallH; i++) {
                     c.set(x0 + 1, fy - f.wallH + i, sz + i, B.stair(p.stairs, Direction.SOUTH, false));
-                    if (i > 0) c.air(x0 + 1, fy, sz + i - 1);
+                    c.air(x0 + 1, fy, sz + i);
+                    c.air(x0 + 1, fy + 1, sz + i);
                 }
             }
             int rx0 = f.storeys > 1 ? x0 + 2 : x0 + 1;

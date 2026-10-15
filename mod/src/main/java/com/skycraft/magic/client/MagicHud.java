@@ -60,6 +60,9 @@ public final class MagicHud {
                     12, uy, 0xFFB8B2A0, true);
         }
 
+        // ---------------------------------------------------------- active weapon poison with depletion bar (bottom right)
+        drawWeaponPoison(g, font, player, width, height);
+
         // ---------------------------------------------------------- active spell effects with countdowns (bottom right)
         ActiveEffectsHud.render(g, font, player, width, height);
 
@@ -189,6 +192,33 @@ public final class MagicHud {
         gem(g, x + 3, y + 3, spell.school.color, casting);
         g.drawString(font, name, x + 9, y, casting ? 0xFFFFFFFF : 0xFFE8E2D0, true);
         g.drawString(font, costText, x + 13 + font.width(name), y, affordable ? 0xFF7FB2FF : 0xFFD06060, true);
+    }
+
+    /** Coated weapon poison indicator + depletion meter in the bottom-right HUD stack; disappears once depleted. */
+    private static void drawWeaponPoison(GuiGraphics g, Font font, LocalPlayer player, int width, int height) {
+        net.minecraft.world.item.ItemStack weapon = player.getMainHandItem();
+        if (weapon.getTag() == null || !weapon.getTag().contains(com.skycraft.crafting.arcane.ArcaneEvents.WEAPON_POISON, 10)) {
+            weapon = player.getOffhandItem();
+        }
+        if (weapon.getTag() == null || !weapon.getTag().contains(com.skycraft.crafting.arcane.ArcaneEvents.WEAPON_POISON, 10)) return;
+        net.minecraft.nbt.CompoundTag p = weapon.getTag().getCompound(com.skycraft.crafting.arcane.ArcaneEvents.WEAPON_POISON);
+        int hits = p.getInt(com.skycraft.crafting.arcane.ArcaneEvents.POISON_HITS);
+        if (hits <= 0) return;
+        int maxHits = Math.max(hits, p.getInt(com.skycraft.crafting.arcane.ArcaneEvents.POISON_MAX_HITS));
+        String name = com.skycraft.crafting.arcane.ArcaneEvents.poisonDisplayName(p);
+        String label = name + " (" + hits + "/" + maxHits + ")";
+        int rightEdge = width - 12;
+        int y = HudStack.reserve(HudStack.Zone.BOTTOM_RIGHT, HudStack.BR_POISON, 14, height);
+        int labelW = font.width(label);
+        int x = rightEdge - labelW;
+        gem(g, x - 6, y + 3, 0x58C850, false);
+        g.drawString(font, label, x, y, 0xFF88D870, true);
+        int meterW = Math.max(44, labelW + 8);
+        int mx = rightEdge - meterW;
+        int my = y + 10;
+        g.fill(mx - 1, my - 1, rightEdge + 1, my + 3, 0xB0101010);
+        int fill = Math.round(meterW * (hits / (float) Math.max(1, maxHits)));
+        g.fill(mx, my, mx + fill, my + 2, 0xFF68C858);
     }
 
     /** A small diamond "spell gem" in the school color. */

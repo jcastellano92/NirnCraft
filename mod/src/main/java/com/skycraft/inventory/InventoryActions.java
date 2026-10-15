@@ -133,11 +133,18 @@ public final class InventoryActions {
             case InventoryPackets.InvAction.DROP_ALL -> drop(player, inv, slot, stack, true);
             case InventoryPackets.InvAction.FAVORITE -> favorite(player, inv, stack);
             case InventoryPackets.InvAction.READ -> read(player, inv, slot, stack, itemId);
+            case InventoryPackets.InvAction.APPLY_POISON -> {
+                if (com.skycraft.crafting.arcane.ArcaneEvents.applyPoisonFromInventory(player, stack) && stack.isEmpty()) {
+                    inv.setItem(slot, ItemStack.EMPTY);
+                }
+            }
             default -> {
                 return;
             }
         }
-        com.skycraft.magic.Hands.settle(player); // one hand system: a new item in a hand replaces its spell / bound weapon
+        if (action == InventoryPackets.InvAction.EQUIP || action == InventoryPackets.InvAction.EQUIP_LEFT) {
+            com.skycraft.magic.Hands.settle(player); // one hand system: a new item in a hand replaces its spell / bound weapon
+        }
         CarryWeight.invalidate(player);
         player.containerMenu.broadcastChanges();
         Pack.sync(player);
@@ -248,8 +255,23 @@ public final class InventoryActions {
     }
 
     private static void equip(ServerPlayer player, Inventory inv, int slot, ItemStack stack) {
-        if (isArmorSlot(slot) || slot == OFFHAND) {
+        if (isArmorSlot(slot)) {
             unequip(player, inv, slot, stack);
+            return;
+        }
+        if (slot == OFFHAND) {
+            if (equipSlotFor(stack) == EquipmentSlot.OFFHAND) {
+                unequip(player, inv, slot, stack);
+                return;
+            }
+            // A one-handed weapon/tool in the left hand was left-clicked (equip right):
+            // if another identical copy exists in the bag/pack, equip that copy to right hand; otherwise move this one to right hand.
+            int extraSlot = findExtraCopy(player, inv, stack, OFFHAND);
+            if (extraSlot >= 0) {
+                holdRight(player, inv, extraSlot, inv.getItem(extraSlot));
+            } else {
+                holdRightFromOffhand(player, inv, stack);
+            }
             return;
         }
         if (!isUsableEquipment(stack)) return;
@@ -284,9 +306,48 @@ public final class InventoryActions {
         }
     }
 
+    /** Finds another stack matching {@code template} outside {@code excludeSlot} (and outside armor/hands), materializing from Pack if needed. */
+    private static int findExtraCopy(ServerPlayer player, Inventory inv, ItemStack template, int excludeSlot) {
+        for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
+            if (i == excludeSlot || i == inv.selected) continue;
+            ItemStack s = inv.getItem(i);
+            if (!s.isEmpty() && ItemStack.isSameItemSameTags(s, template)) return i;
+        }
+        int pIdx = Pack.find(player, s -> ItemStack.isSameItemSameTags(s, template));
+        if (pIdx >= 0) {
+            ResourceLocation id = BuiltInRegistries.ITEM.getKey(template.getItem());
+            return Pack.materialize(player, pIdx, id);
+        }
+        return -1;
+    }
+
+    private static void holdRightFromOffhand(ServerPlayer player, Inventory inv, ItemStack stack) {
+        com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_RIGHT_ITEM);
+        com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_LEFT_ITEM);
+        inv.setItem(OFFHAND, ItemStack.EMPTY);
+        int sel = inv.selected;
+        ItemStack held = inv.getItem(sel);
+        if (com.skycraft.magic.bound.BoundWeapons.isBound(held)) {
+            inv.setItem(sel, ItemStack.EMPTY);
+            held = ItemStack.EMPTY;
+        }
+        if (held.isEmpty()) {
+            inv.setItem(sel, stack);
+        } else {
+            int free = freeSlot(inv);
+            inv.setItem(sel, stack);
+            if (free >= 0) inv.setItem(free, held);
+            else Pack.giveOrDrop(player, held);
+        }
+    }
+
     private static void wear(ServerPlayer player, Inventory inv, int slot, ItemStack stack, EquipmentSlot target) {
         ItemStack worn = inv.getItem(armorIndex(target));
-        if (!worn.isEmpty() && bound(player, worn)) {
+        if (com.skycraft.magic.bound.BoundWeapons.isBound(worn)) {
+            com.skycraft.magic.MagicData.tag(player).remove("prev_chest_armor");
+            player.setItemSlot(target, ItemStack.EMPTY);
+            worn = ItemStack.EMPTY;
+        } else if (!worn.isEmpty() && bound(player, worn)) {
             message(player, "bound");
             return;
         }
@@ -303,11 +364,25 @@ public final class InventoryActions {
 
     /** Moves an item into the right hand (selected hotbar slot), keeping the hotbar tidy. */
     private static void holdRight(ServerPlayer player, Inventory inv, int slot, ItemStack stack) {
-        if (Inventory.isHotbarSlot(slot)) {
+        com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_RIGHT_ITEM);
+        int sel = inv.selected;
+        ItemStack held = inv.getItem(sel);
+        if (com.skycraft.magic.bound.BoundWeapons.isBound(held)) {
+            inv.setItem(sel, ItemStack.EMPTY);
+            held = ItemStack.EMPTY;
+        }
+        if (stack.getCount() > 1 && stack.getMaxStackSize() > 1) {
+            ItemStack one = stack.split(1);
+            if (!held.isEmpty()) {
+                int free = freeSlot(inv);
+                if (free >= 0) inv.setItem(free, held);
+                else Pack.giveOrDrop(player, held);
+            }
+            inv.setItem(sel, one);
+            stack = one;
+        } else if (Inventory.isHotbarSlot(slot)) {
             select(player, slot);
         } else {
-            int sel = inv.selected;
-            ItemStack held = inv.getItem(sel);
             if (held.isEmpty()) {
                 inv.setItem(slot, ItemStack.EMPTY);
                 inv.setItem(sel, stack);
@@ -324,9 +399,12 @@ public final class InventoryActions {
             }
         }
         // Two-handed weapons need both hands: put away whatever is in the left hand if there's room.
-        if (WeaponClass.of(stack).twoHanded()) {
+        if (com.skycraft.magic.Hands.twoHanded(stack)) {
             ItemStack off = inv.getItem(OFFHAND);
-            if (!off.isEmpty()) {
+            if (com.skycraft.magic.bound.BoundWeapons.isBound(off)) {
+                com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_LEFT_ITEM);
+                inv.setItem(OFFHAND, ItemStack.EMPTY);
+            } else if (!off.isEmpty()) {
                 int free = freeSlot(inv);
                 inv.setItem(OFFHAND, ItemStack.EMPTY);
                 if (free >= 0) inv.setItem(free, off);
@@ -343,16 +421,75 @@ public final class InventoryActions {
         if (isArmorSlot(slot)) return;
         EquipmentSlot target = equipSlotFor(stack);
         if (target != null && target.getType() == EquipmentSlot.Type.ARMOR) return; // armor can't be held
+        if (com.skycraft.magic.Hands.twoHanded(stack) || com.skycraft.mounts.MountItems.isSaddle(stack)) return;
+
+        // If right-clicking the item currently in the right hand, check if we have a second copy to dual-wield
+        if (slot == inv.selected) {
+            int extraSlot = findExtraCopy(player, inv, stack, inv.selected);
+            if (extraSlot >= 0) {
+                slot = extraSlot;
+                stack = inv.getItem(extraSlot);
+            } else {
+                com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_RIGHT_ITEM);
+            }
+        }
+
+        // If the right hand holds a two-handed weapon, stow it (or dismiss it if bound) before equipping the left hand
+        ItemStack main = inv.getItem(inv.selected);
+        if (com.skycraft.magic.Hands.twoHanded(main)) {
+            if (com.skycraft.magic.bound.BoundWeapons.isBound(main)) {
+                com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_RIGHT_ITEM);
+                inv.setItem(inv.selected, ItemStack.EMPTY);
+            } else {
+                unequip(player, inv, inv.selected, main);
+            }
+        }
+
+        com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_LEFT_ITEM);
         ItemStack off = inv.getItem(OFFHAND);
-        inv.setItem(slot, ItemStack.EMPTY);
-        player.setItemSlot(EquipmentSlot.OFFHAND, stack);
-        inv.setItem(slot, off);
+        if (com.skycraft.magic.bound.BoundWeapons.isBound(off)) {
+            inv.setItem(OFFHAND, ItemStack.EMPTY);
+            off = ItemStack.EMPTY;
+        }
+        if (stack.getCount() > 1 && !(stack.getItem() instanceof net.minecraft.world.item.ArrowItem)) {
+            ItemStack one = stack.split(1);
+            player.setItemSlot(EquipmentSlot.OFFHAND, one);
+            if (!off.isEmpty()) {
+                int free = freeSlot(inv);
+                if (free >= 0) inv.setItem(free, off);
+                else Pack.giveOrDrop(player, off);
+            }
+        } else {
+            inv.setItem(slot, ItemStack.EMPTY);
+            player.setItemSlot(EquipmentSlot.OFFHAND, stack);
+            inv.setItem(slot, off);
+        }
     }
 
     private static void unequip(ServerPlayer player, Inventory inv, int slot, ItemStack stack) {
+        if (com.skycraft.magic.bound.BoundWeapons.isBound(stack)) {
+            if (isArmorSlot(slot)) {
+                com.skycraft.magic.MagicData.tag(player).remove("prev_chest_armor");
+                EquipmentSlot eqSlot = EquipmentSlot.byTypeAndIndex(EquipmentSlot.Type.ARMOR, slot - ARMOR_START);
+                player.setItemSlot(eqSlot, ItemStack.EMPTY);
+            } else {
+                if (slot == OFFHAND) com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_LEFT_ITEM);
+                else if (slot == inv.selected) com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_RIGHT_ITEM);
+                inv.setItem(slot, ItemStack.EMPTY);
+            }
+            player.level().playSound(null, player.blockPosition(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.6f, 0.7f);
+            com.skycraft.core.SkyData.get(player).markDirty();
+            com.skycraft.core.PlayerDataEvents.fullSync(player);
+            return;
+        }
         if (isArmorSlot(slot) && bound(player, stack)) {
             message(player, "bound");
             return;
+        }
+        if (slot == OFFHAND) {
+            com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_LEFT_ITEM);
+        } else if (slot == inv.selected) {
+            com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_RIGHT_ITEM);
         }
         if (slot == inv.selected && Inventory.isHotbarSlot(slot)) {
             // put the weapon away into the backpack; with a full backpack, just switch to an empty hand
@@ -401,6 +538,25 @@ public final class InventoryActions {
             }
             return;
         }
+        if (stack.getItem() instanceof net.minecraft.world.item.SplashPotionItem
+                || stack.getItem() instanceof net.minecraft.world.item.LingeringPotionItem) {
+            for (net.minecraft.world.effect.MobEffectInstance effect : net.minecraft.world.item.alchemy.PotionUtils.getMobEffects(stack)) {
+                if (effect.getEffect().isInstantenous()) {
+                    effect.getEffect().applyInstantenousEffect(player, player, player, effect.getAmplifier(), 1.0);
+                } else {
+                    player.addEffect(new net.minecraft.world.effect.MobEffectInstance(effect));
+                }
+            }
+            if (!player.getAbilities().instabuild) {
+                stack.shrink(1);
+            }
+            if (stack.isEmpty()) {
+                inv.setItem(slot, ItemStack.EMPTY);
+            }
+            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_DRINK,
+                    SoundSource.PLAYERS, 0.5f, player.level().random.nextFloat() * 0.1f + 0.9f);
+            return;
+        }
         if (stack.isEdible()) {
             FoodProperties food = stack.getFoodProperties(player);
             if (food != null && !player.canEat(food.canAlwaysEat())) {
@@ -429,9 +585,25 @@ public final class InventoryActions {
         }
     }
 
-    /** Puts a book in the right hand and asks the client to use it the vanilla way (opens it / learns the spell). */
+    /** Reads a book, spell tome, or skill book directly without disturbing the player's equipped weapons. */
     private static void read(ServerPlayer player, Inventory inv, int slot, ItemStack stack, ResourceLocation itemId) {
         if (!InvCategory.isReadable(stack)) return;
+        if (stack.getItem() instanceof com.skycraft.magic.spell.SpellTomeItem tome) {
+            tome.readStack(player, stack);
+            if (stack.isEmpty()) inv.setItem(slot, ItemStack.EMPTY);
+            return;
+        }
+        if (stack.getItem() instanceof com.skycraft.economy.SkillBookItem skillBook) {
+            skillBook.readStack(player, stack);
+            return;
+        }
+        if (stack.getItem() instanceof com.skycraft.lore.LoreBookItem loreBook) {
+            loreBook.readStack(player, stack);
+            return;
+        }
+        if (stack.getItem() instanceof com.skycraft.guide.HandbookItem) {
+            return;
+        }
         if (slot != inv.selected) {
             if (isArmorSlot(slot)) return;
             if (slot == OFFHAND) {

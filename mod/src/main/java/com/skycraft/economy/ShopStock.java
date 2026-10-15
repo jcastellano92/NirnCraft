@@ -144,6 +144,7 @@ public final class ShopStock {
                 default -> {
                 }
             }
+            topUp(out, t, key, level, rnd);
         }
     }
 
@@ -167,13 +168,15 @@ public final class ShopStock {
 
     /** Random goods of the type's tag and of its province tag (province goods three times as likely). */
     private static void tagged(BulkStore out, ShopType t, String key, int entries, int level, RandomSource rnd) {
+        ShopTrades.Trade trade = ShopTrades.trade(t);
         List<Item> base = t.stockItems();
-        // goods the data ties to other provinces are not on this province's shelves (no mead in a Dunmer food shop)
+        // goods the data ties to other provinces or outside the trade's allowed categories are not on this shelf
         base.removeIf(i -> {
             ResourceLocation id = BuiltInRegistries.ITEM.getKey(i);
-            return id != null && !ShopTrades.servedIn(id.toString(), key);
+            return (id != null && !ShopTrades.servedIn(id.toString(), key)) || !trade.allows(ItemCategory.of(new ItemStack(i)));
         });
         List<Item> local = t.provinceItems(key);
+        local.removeIf(i -> !trade.allows(ItemCategory.of(new ItemStack(i))));
         if (base.isEmpty() && local.isEmpty()) return;
         for (int i = 0; i < entries; i++) {
             boolean fromLocal = !local.isEmpty() && (base.isEmpty() || rnd.nextInt(4) > 0);
@@ -184,12 +187,35 @@ public final class ShopStock {
                 Item item = pool.get(rnd.nextInt(pool.size()));
                 if (item instanceof ArtifactItem) continue;
                 ItemStack candidate = Shop.makeStock(item, rnd, level, t);
-                if (candidate.isEmpty()) continue;
+                if (candidate.isEmpty() || !trade.allows(ItemCategory.of(candidate))) continue;
                 int value = ItemValues.get(candidate);
                 float accept = value <= 0 ? 1f : Math.min(1f, 120f * level / value);
                 if (rnd.nextFloat() < accept) stack = candidate;
             }
             add(out, stack);
+        }
+    }
+
+    /** Ensures the shop carries at least its trade's declared minimum number of rows when random draws merged or rejected. */
+    private static void topUp(BulkStore out, ShopType t, String key, int level, RandomSource rnd) {
+        ShopTrades.Trade trade = ShopTrades.trade(t);
+        int min = trade.minRows();
+        if (out.size() >= min) return;
+        List<Item> candidates = new ArrayList<>(t.provinceItems(key));
+        for (Item item : t.stockItems()) {
+            ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+            if (id != null && ShopTrades.servedIn(id.toString(), key) && !candidates.contains(item)) candidates.add(item);
+        }
+        candidates.removeIf(i -> i instanceof ArtifactItem || !trade.allows(ItemCategory.of(new ItemStack(i))));
+        if (candidates.isEmpty()) return;
+        int start = rnd.nextInt(candidates.size());
+        for (int k = 0; k < candidates.size() && out.size() < min; k++) {
+            Item item = candidates.get((start + k) % candidates.size());
+            if (out.count(item) > 0) continue;
+            ItemStack stack = Shop.makeStock(item, rnd, level, t);
+            if (!stack.isEmpty() && trade.allows(ItemCategory.of(stack)) && !Resale.isKeepsake(stack)) {
+                add(out, stack);
+            }
         }
     }
 

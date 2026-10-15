@@ -46,6 +46,7 @@ public final class HudStack {
     // priorities: lowest sits nearest the screen edge. Gaps between values leave room for later elements.
     public static final int BR_VOICE = 0;        // shout words / power / form ability + voice meter
     public static final int BR_RIGHT_SPELL = 10;
+    public static final int BR_POISON = 15;      // active weapon poison charges + depletion bar
     public static final int BR_CARRY = 20;
     public static final int BR_EFFECTS = 25;     // active spell effect countdowns (magic module)
     public static final int BR_SHIP = 30;

@@ -43,6 +43,8 @@ public class BookScreen extends Screen {
     private final BookTexts.Text inline;
     private final Component label;
     private final boolean sheet;
+    @Nullable
+    private final Screen returnScreen;
     private List<List<Line>> pages = new ArrayList<>();
     private String author = "";
     private int view;
@@ -50,11 +52,16 @@ public class BookScreen extends Screen {
     private PageButton prev, next;
 
     public BookScreen(LoreBooks.Book book) {
+        this(book, null);
+    }
+
+    public BookScreen(LoreBooks.Book book, @Nullable Screen returnScreen) {
         super(book.title());
         this.book = book;
         this.inline = null;
         this.label = book.category().displayName();
         this.sheet = book.category().isSheet();
+        this.returnScreen = returnScreen;
     }
 
     /**
@@ -62,11 +69,16 @@ public class BookScreen extends Screen {
      * Same typography as a lore book; {@code sheet} = a single loose sheet, else a bound spread with a title page.
      */
     public BookScreen(Component title, String author, List<String> pages, boolean sheet, Component label) {
+        this(title, author, pages, sheet, label, null);
+    }
+
+    public BookScreen(Component title, String author, List<String> pages, boolean sheet, Component label, @Nullable Screen returnScreen) {
         super(title);
         this.book = null;
         this.inline = new BookTexts.Text(author == null ? "" : author, pages);
         this.label = label;
         this.sheet = sheet;
+        this.returnScreen = returnScreen;
     }
 
     @Override
@@ -188,6 +200,15 @@ public class BookScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    @Override
+    public void onClose() {
+        if (minecraft != null && returnScreen != null) {
+            minecraft.setScreen(returnScreen);
+            return;
+        }
+        super.onClose();
     }
 
     // ------------------------------------------------------------------ rendering

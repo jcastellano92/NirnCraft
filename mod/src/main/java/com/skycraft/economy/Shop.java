@@ -41,8 +41,10 @@ public final class Shop {
     public static final int INVEST_COST = 500;
     public static final int INVEST_BONUS = 500;
     public static final int MASTER_TRADER_BONUS = 1000;
-    /** How long a sale stays on the seller's buy-back list. */
+    /** How long a sale stays on the seller's buy-back list (30 minutes). */
     public static final long BUYBACK_TICKS = Buyback.TTL_TICKS;
+    /** How long player-sold items stay on the public shop shelf before clearing (10 minutes or 2 restock periods). */
+    public static final long SOLD_TTL_TICKS = 10L * 60L * 20L;
 
     private static final Potion[] SHOP_POTIONS = {
             Potions.HEALING, Potions.HEALING, Potions.STRONG_HEALING, Potions.REGENERATION, Potions.LONG_REGENERATION,
@@ -293,6 +295,16 @@ public final class Shop {
     private void unsell(ItemStack key, int n) {
         int idx = rec.sold.indexOf(key);
         if (idx >= 0) rec.sold.take(idx, n);
+        int rem = n;
+        for (var it = rec.soldBatches.iterator(); it.hasNext() && rem > 0; ) {
+            ShopBook.SoldBatch b = it.next();
+            if (ItemStack.isSameItemSameTags(b.one, key)) {
+                int take = Math.min(rem, b.count);
+                b.count -= take;
+                rem -= take;
+                if (b.count <= 0) it.remove();
+            }
+        }
     }
 
     /** Adds goods the shop made or bought from an NPC (not a player's sale). Excess beyond the caps is lost. */
@@ -314,7 +326,10 @@ public final class Shop {
         if (rec.sold.indexOf(s) < 0 && rec.sold.size() >= ShopBook.MAX_SOLD_ROWS) {
             // oldest sold kind out: from the ledger and from the shelves
             ItemStack oldest = rec.sold.get(0);
-            if (!oldest.isEmpty()) rec.stock.take(oldest, oldest.getCount());
+            if (!oldest.isEmpty()) {
+                rec.stock.take(oldest, oldest.getCount());
+                rec.soldBatches.removeIf(b -> ItemStack.isSameItemSameTags(b.one, oldest));
+            }
             rec.sold.take(0, Integer.MAX_VALUE);
         }
         int taken = rec.stock.add(s);
@@ -322,6 +337,9 @@ public final class Shop {
             ItemStack ledger = sold.copy();
             ledger.setCount(taken);
             rec.sold.add(ledger);
+            ItemStack one = sold.copy();
+            one.setCount(1);
+            rec.soldBatches.add(new ShopBook.SoldBatch(one, taken, npc.level().getGameTime(), rec.period));
         }
         return want - s.getCount();
     }
@@ -335,8 +353,55 @@ public final class Shop {
     // ------------------------------------------------------------------ restock
 
     public void restockIfDue() {
+        long dt = npc.level().getDayTime();
         long period = Math.floorDiv(today(npc.level()), (long) RESTOCK_DAYS);
-        if (rec.period == Long.MIN_VALUE || rec.period != period) restock(period);
+        if (rec.lastDayTime != Long.MIN_VALUE && dt - rec.lastDayTime >= 24000L * RESTOCK_DAYS && period == rec.period) {
+            period = rec.period + Math.floorDiv(dt - rec.lastDayTime, 24000L * RESTOCK_DAYS);
+        }
+        if (rec.period == Long.MIN_VALUE || rec.period != period) {
+            rec.lastDayTime = dt;
+            expireSoldIfDue(period);
+            restock(period);
+        } else {
+            if (rec.lastDayTime == Long.MIN_VALUE) rec.lastDayTime = dt;
+            expireSoldIfDue(period);
+        }
+    }
+
+    /**
+     * Expires player-sold items from the public shelf after {@link #SOLD_TTL_TICKS} (10 minutes) or 2 restock periods
+     * so shop shelves do not accumulate player-sold junk forever, while preserving the seller's personal 30-minute
+     * buy-back window via {@link Buyback#markShelfExpired}.
+     */
+    private void expireSoldIfDue(long currentPeriod) {
+        if (rec.soldBatches.isEmpty()) return;
+        long now = npc.level().getGameTime();
+        boolean changed = false;
+        for (var it = rec.soldBatches.iterator(); it.hasNext(); ) {
+            ShopBook.SoldBatch b = it.next();
+            if (b.count <= 0 || b.one.isEmpty()) {
+                it.remove();
+                changed = true;
+                continue;
+            }
+            boolean timeExpired = b.addedAt > 0 && now - b.addedAt >= SOLD_TTL_TICKS;
+            boolean periodExpired = b.period != Long.MIN_VALUE && currentPeriod != Long.MIN_VALUE && currentPeriod - b.period >= 2;
+            if (timeExpired || periodExpired) {
+                int sIdx = rec.sold.indexOf(b.one);
+                int removedSold = 0;
+                if (sIdx >= 0) {
+                    ItemStack taken = rec.sold.take(sIdx, b.count);
+                    removedSold = taken.getCount();
+                }
+                if (removedSold > 0) {
+                    rec.stock.take(b.one, removedSold);
+                    if (!ephemeral) Buyback.markShelfExpired(rec.key, b.one, removedSold);
+                }
+                it.remove();
+                changed = true;
+            }
+        }
+        if (changed && !ephemeral) rec.dirty();
     }
 
     /**

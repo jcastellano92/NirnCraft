@@ -185,6 +185,7 @@
   "message.skycraft.alchemy.learned_effect": "You learned: %2$s (from %1$s)",
   "message.skycraft.alchemy.poison_worn_off": "The poison on your weapon has worn off",
   "message.skycraft.alchemy.weapon_poisoned": "%s coated with poison",
+  "message.skycraft.alchemy.no_weapon_for_poison": "Equip a weapon or bow first to apply poison.",
   "message.skycraft.arcane.cannot_enchant": "That enchantment can't be applied to this item",
   "message.skycraft.arcane.disenchanted": "%s was destroyed",
   "message.skycraft.arcane.enchanted": "%s enchanted: %s",

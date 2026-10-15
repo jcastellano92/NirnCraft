@@ -127,7 +127,7 @@ public class FavoritesScreen extends Screen {
 
     private void choose(boolean left) {
         if (selectedEntry == null) return;
-        if (!activate(selectedEntry, left)) onClose();
+        activate(selectedEntry, left);
     }
 
     /**
@@ -212,19 +212,34 @@ public class FavoritesScreen extends Screen {
                     InvEntry e = row.item;
                     g.renderItem(e.icon, px + 12, ry + 1);
                     g.renderItemDecorations(font, e.icon, px + 12, ry + 1);
+                    String badge = e.equip == InvEntry.RIGHT ? " [R]" : e.equip == InvEntry.LEFT ? " [L]" : e.equip == InvEntry.WORN ? " [W]" : "";
                     String count = e.count() > 1 ? " (" + e.count() + ")" : "";
-                    String name = SkyUi.ellipsize(font, e.name, pw - 40 - font.width(count));
+                    String name = SkyUi.ellipsize(font, e.name, pw - 40 - font.width(count) - font.width(badge));
                     g.drawString(font, name, px + 32, ry + 5, e.stolen ? SkyUi.STOLEN : sel ? SkyUi.BRIGHT : SkyUi.TEXT, false);
-                    if (!count.isEmpty()) g.drawString(font, count, px + 32 + font.width(name), ry + 5, SkyUi.DIM, false);
+                    int nx = px + 32 + font.width(name);
+                    if (!badge.isEmpty()) {
+                        g.drawString(font, badge, nx, ry + 5, e.equip == InvEntry.LEFT ? SkyUi.LEFT_HAND : SkyUi.GOLD, false);
+                        nx += font.width(badge);
+                    }
+                    if (!count.isEmpty()) g.drawString(font, count, nx, ry + 5, SkyUi.DIM, false);
                 } else {
-                    // a favorite spell / shout / power: its school-colored gem, name and (spells) the magicka cost
+                    // a favorite spell / shout / power: its school-colored gem, name, L/R/LR/Z badge, and (spells) the magicka cost
                     MagicFavorites.Fav f = row.magic;
                     SkyUi.diamond(g, px + 20, mid, 4, 0xFF000000 | f.color());
+                    int eq = minecraft != null && minecraft.player != null ? MagicFavorites.equipped(minecraft.player, f) : 0;
+                    String badge = f.kind() == MagicFavorites.Kind.SPELL
+                            ? (eq == 3 ? " [LR]" : eq == 1 ? " [R]" : eq == 2 ? " [L]" : "")
+                            : (eq != 0 ? " [Z]" : "");
                     String cost = f.spell() != null && minecraft != null && minecraft.player != null
                             ? "-" + Math.round(com.skycraft.magic.spell.SpellMath.cost(minecraft.player, f.spell()))
                             + (f.spell().isConcentration() ? "/s" : "") : "";
-                    String name = SkyUi.ellipsize(font, f.name().getString(), pw - 40 - (cost.isEmpty() ? 0 : font.width(cost) + 8));
+                    String name = SkyUi.ellipsize(font, f.name().getString(),
+                            pw - 40 - font.width(badge) - (cost.isEmpty() ? 0 : font.width(cost) + 8));
                     g.drawString(font, name, px + 32, ry + 5, sel ? SkyUi.BRIGHT : SkyUi.TEXT, false);
+                    if (!badge.isEmpty()) {
+                        int bCol = eq == 2 ? SkyUi.LEFT_HAND : SkyUi.GOLD;
+                        g.drawString(font, badge, px + 32 + font.width(name), ry + 5, bCol, false);
+                    }
                     if (!cost.isEmpty()) g.drawString(font, cost, px + pw - 8 - font.width(cost), ry + 5, 0xFF7FB2FF, false);
                 }
             }
@@ -271,6 +286,10 @@ public class FavoritesScreen extends Screen {
         }
         if (key == GLFW.GLFW_KEY_E || key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_KP_ENTER) {
             choose(false);
+            return true;
+        }
+        if (key == GLFW.GLFW_KEY_Q) {
+            choose(true);
             return true;
         }
         if (key >= GLFW.GLFW_KEY_1 && key <= GLFW.GLFW_KEY_8) {

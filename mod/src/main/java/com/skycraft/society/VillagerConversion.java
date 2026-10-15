@@ -53,6 +53,7 @@ public final class VillagerConversion {
         Entity e = event.getEntity();
         if (event.getLevel().isClientSide || !(e instanceof AbstractVillager v) || !(event.getLevel() instanceof ServerLevel level)) return;
         if (!(v instanceof Villager) && !(v instanceof WanderingTrader)) return; // other mods' villager subclasses keep their own logic
+        if (v.getPersistentData().getBoolean("skycraft_stable_master")) return;
         if (!SocietyConfig.CONVERT_VILLAGERS.get()) return;
         // decide the caps here: only cancel when conversion is certain, otherwise the villager joins unchanged
         // (convert() re-checks, so a bail there can only happen on a chunk unloading within the tick)

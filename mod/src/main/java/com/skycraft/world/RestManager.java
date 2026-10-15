@@ -301,7 +301,19 @@ public final class RestManager {
             if (!BedBlock.canSetSpawn(player.level())) return Component.translatable("world.skycraft.rest.no_bed");
             BlockState state = player.level().getBlockState(bed);
             if (state.hasProperty(BedBlock.OCCUPIED) && state.getValue(BedBlock.OCCUPIED)) {
-                return Component.translatable("block.minecraft.bed.occupied");
+                if (com.skycraft.survival.inn.Innkeepers.roomHere(player) != null
+                        && com.skycraft.crime.Ownership.isInnBed(player.serverLevel(), bed)) {
+                    for (net.minecraft.world.entity.LivingEntity sleeper : player.level().getEntitiesOfClass(
+                            net.minecraft.world.entity.LivingEntity.class,
+                            new net.minecraft.world.phys.AABB(bed).inflate(3.0),
+                            e -> !(e instanceof Player) && e.isSleeping())) {
+                        sleeper.stopSleeping();
+                    }
+                    state = player.level().getBlockState(bed);
+                }
+                if (state.hasProperty(BedBlock.OCCUPIED) && state.getValue(BedBlock.OCCUPIED)) {
+                    return Component.translatable("block.minecraft.bed.occupied");
+                }
             }
             if (com.skycraft.crime.Ownership.isOwnedByOther(player, player.level(), bed)) {
                 return Component.translatable("world.skycraft.rest.bed_owned");

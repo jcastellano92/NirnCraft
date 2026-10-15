@@ -340,6 +340,21 @@ Five parts, at most three at once. R3a goes first; the others may start alongsid
   renders) >= 80%.
 * **Size.** XL (about 3 weeks of agent work, 3 agents rolling by step).
 
+### R4a Town overhaul: planned cities, recognisable shops, working people, real interiors
+
+* **Goal.** Execute `docs/prompts/R4a-town-overhaul.md` (steps `TO0`–`TO6`) as the structural settlement foundation of R4
+  and R3d: **TO0** full settlement audit (`docs/world/TOWN-AUDIT.md`); **TO1** district/avenue/stair planner with 100%
+  gate-to-door reachability and stairs between terraces; **TO2** recognisable trade shops and multi-room inns with exterior
+  signs, counters, and working trade stations; **TO3** grand leader/jarl halls and multi-room house interior families by
+  wealth class; **TO4** verified daily work routines anchored to shop counters, forges, thrones, desks, and beds; **TO5**
+  street scatter and ground cleanup; **TO6** rollout across Skyrim and the provinces.
+* **Owns.** `settlements/**`, `worldplan/**` (street/lot planner), `society/**` (work anchors & schedules),
+  `resources/skycraft/tamriel/cityplans/**`, `resources/skycraft/tamriel/styles/**`, `tools/qa/*town*`.
+* **Depends on.** R0; integrates with R3d and R4 S2.
+* **Gate.** 100% key-building reachability from every gate; stairs on all tier transitions; 0 street-blocking scatter or
+  pits; shop/inn/jarl-hall interior size floors met; schedule audit pass across a 24h cycle (`qa.ps1 -Server -Rebake`).
+* **Size.** L-XL (steps `TO0`–`TO6`).
+
 ### R5 High Rock and Hammerfell: the Iliac Bay (IB1-IB8), then the rest (IB9)
 
 * **Goal.** `docs/world/ILIAC-BAY.md` executed, then both provinces brought to the floor outside the window.
@@ -468,28 +483,29 @@ Status values: `done`, `in progress`, `next`, `blocked (why)`, `not started`. "G
 | Playtest round 4 fixes | done | 15e46d7 | settlement crowd cap, night sleepers, gate posts, respawn at nearest town, key remap, longbow pose | 2026-10-13 |
 | Playtest round 5 fixes | done | b738492 | block-model rotations, strict asset audit, intro cover, Helgen polish; rebake | 2026-10-13 |
 | Landmark grounding and story lecterns | done | 7af4469 | whole-footprint sampling, foundations, support validator, lectern reader UI; rebake | 2026-10-13 |
+| Playtest round 6 & multiplayer overhaul (14 items) | done | working tree / latest build | jail/party fast-travel & release grace, Sanies Lupinus & level-gated werewolves, crouch trap disarm & filled dispensers, vanilla spawner strip, NPC busy cleanup, L/R hand dual-wield/spell/bound/favorite equip, Skyrim XP curve & party XP/hud bar, Helgen aftermath & contextual dialogue, weapon poisons & HUD meter, ally/companion healing spells & staves, party inn booking & bed ownership, book-to-inventory state return & readable Journey book, 5-min per-item evidence decay, 48h merchant rotation & buyback decay; `qa.ps1` OVERALL PASS | 2026-10-14 |
 | Design docs (principles, scale, Iliac Bay) | done | cf288dd | | 2026-10-13 |
-| Province documents `docs/world/provinces/*.md` | in progress | one agent per province | Skyrim done (next row); others as they land | 2026-10-13 |
-| Province document: Skyrim (`skyrim.md`, all ten sections) | done | 7df74b4 | Phases SK1-SK8 (section 10.4) feed R4 S1-S5. Baseline: SET 54, named NPCs 187 (target 862), named buildings 112 (209), quests 334 (371), 0 hold chains (9), 0 unmarked (16), 0 lore-web arcs (9), 29 wilderness nodes missing | 2026-10-13 |
-| World plan, prompt library, START-HERE | done | this commit | | 2026-10-13 |
+| Province documents `docs/world/provinces/*.md` (all 11 files, §1-§10) | done | `skyrim.md`, `high_rock.md`, `hammerfell.md`, `cyrodiil.md`, `morrowind.md`, `solstheim.md`, `black_marsh.md`, `elsweyr.md`, `valenwood.md`, `summerset.md`, `foreign_lands.md` | All 11 province/island/expedition design docs complete with §§1-10 | 2026-10-14 |
+| World plan, prompt library, START-HERE | done | updated with R4a & all province docs | | 2026-10-14 |
 | IB0 Iliac extraction | done | `.reference/daggerfall_ref/v2` | | 2026-10-12 |
-| **R0** release build and playtest | **in progress** (P5 merged; release builds exist) | | | 2026-10-13 |
-| R1 loose ends (R1a, R1b) | not started | | | |
-| R2 testing tiers 0/1 | not started | | | |
-| R3a world sheets | not started (`provinces/skyrim.md` is written, 7df74b4; waits on R0) | | | |
+| **R0** release build and playtest | **done** (release build deployed to Prism & `dist/Skycraft-client-instance.zip`; owner playtest items resolved) | | `qa.ps1` OVERALL PASS | 2026-10-14 |
+| **R1** loose ends (R1a, R1b) | **next** | | | 2026-10-14 |
+| R2 testing tiers 0/1 | next (parallel with R1) | | | |
+| R3a world sheets | not started (all 11 `provinces/*.md` §1 sheets written) | | | |
 | R3b micro-biomes | not started | | | |
 | R3c measurement | not started | | | |
 | R3d town services | not started | | | |
 | R3e world systems | not started | | | |
 | R4 Skyrim uplift (S1-S5) | not started (design done: `skyrim.md` SK1-SK8; waits on R3a-R3e) | | Skyrim SET 54 | |
-| R5 Iliac Bay (IB-S, IB1-IB9, IB-G) | not started | | High Rock 42, Hammerfell 43 | |
-| R6 Cyrodiil | not started | | 48 | |
-| R7 Morrowind | not started | | 53 | |
-| R8 Black Marsh | not started | | 40 | |
-| R9 Elsweyr | not started | | 44 | |
-| R10 Valenwood | not started | | 44 | |
-| R11 Summerset | not started | | 45 | |
-| R12 Foreign lands | not started | | 31-32 | |
+| R4a Town overhaul (TO0-TO6) | not started (prompt `R4a-town-overhaul.md` ready) | | | |
+| R5 Iliac Bay (IB-S, IB1-IB9, IB-G) | not started (`high_rock.md`, `hammerfell.md`, `ILIAC-BAY.md` done) | | High Rock 42, Hammerfell 43 | |
+| R6 Cyrodiil | not started (`cyrodiil.md` done) | | 48 | |
+| R7 Morrowind | not started (`morrowind.md`, `solstheim.md` done) | | 53 | |
+| R8 Black Marsh | not started (`black_marsh.md` done) | | 40 | |
+| R9 Elsweyr | not started (`elsweyr.md` done) | | 44 | |
+| R10 Valenwood | not started (`valenwood.md` done) | | 44 | |
+| R11 Summerset | not started (`summerset.md` done) | | 45 | |
+| R12 Foreign lands | not started (`foreign_lands.md` done) | | 31-32 | |
 | R13 P7 endless lands | not started | | | |
 | R14 ITEMS AFFIX | not started | worktree `agent-a2563a6b1f0ded80b` holds nothing usable | | |
 | R15 final polish | not started | | | |

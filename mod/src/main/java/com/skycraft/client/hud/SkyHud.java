@@ -28,6 +28,15 @@ public final class SkyHud {
     private static float magickaFlashCost;
     private static long lastFadeMs = Util.getMillis();
 
+    /** Skyrim Character Level XP bar animation state (shown on quest completion and character XP gains). */
+    private static int trackedLevel = -1;
+    private static float trackedLevelProg = -1f;
+    private static float animStartProg = 0f;
+    private static float animTargetProg = 0f;
+    private static int animDisplayLevel = 1;
+    private static long levelXpAnimStartMs = 0L;
+    private static long levelXpBarUntilMs = 0L;
+
     private SkyHud() {}
 
     // ------------------------------------------------------------------ bars
@@ -156,6 +165,25 @@ public final class SkyHud {
         if (mc.player == null || mc.options.hideGui) return;
         HudNotifications.prune();
         Font font = mc.font;
+        PlayerData pData = SkyData.get(mc.player);
+        long nowMs = Util.getMillis();
+        int curLvl = pData.getLevel();
+        float curProg = pData.levelProgress();
+        if (trackedLevel < 0) {
+            trackedLevel = curLvl;
+            trackedLevelProg = curProg;
+        } else if (curLvl > trackedLevel || (curLvl == trackedLevel && curProg > trackedLevelProg + 0.002f)) {
+            animStartProg = curLvl > trackedLevel ? 0f : trackedLevelProg;
+            animTargetProg = curProg;
+            animDisplayLevel = curLvl;
+            levelXpAnimStartMs = nowMs;
+            levelXpBarUntilMs = nowMs + 3800L;
+            trackedLevel = curLvl;
+            trackedLevelProg = curProg;
+        } else {
+            trackedLevel = curLvl;
+            trackedLevelProg = curProg;
+        }
 
         // Top-left message log (below compass bar)
         int my = 32;
@@ -169,7 +197,12 @@ public final class SkyHud {
         }
 
         HudNotifications.Entry banner = HudNotifications.banner();
-        if (banner == null) return;
+        if (banner == null) {
+            if (nowMs < levelXpBarUntilMs) {
+                renderStandaloneLevelXpBar(g, font, width, nowMs);
+            }
+            return;
+        }
         float age = banner.age();
         float alpha = Mth.clamp(Math.min(age * 6, (1 - age) * 4), 0, 1);
         if (alpha < 0.03f) return;
@@ -217,6 +250,9 @@ public final class SkyHud {
                 g.pose().popPose();
                 if (!msg.subtitle().getString().isEmpty()) g.drawCenteredString(font, msg.subtitle(), width / 2, 84, a | 0xBDB59E);
                 drawDivider(g, width / 2, 95, 100, a);
+                if (msg.kind() == NotifyKind.QUEST_COMPLETED) {
+                    drawAnimatedLevelXpRow(g, font, width / 2, 101, alpha, nowMs, pData);
+                }
             }
         }
     }
@@ -244,12 +280,13 @@ public final class SkyHud {
                                          float alpha, int cx, float settle) {
         switch (msg.kind()) {
             case SKILL_UP -> {
-                band(g, cx, 42, 68, 120, alpha * 0.55f);
+                band(g, cx, 42, 78, 125, alpha * 0.55f);
                 String title = SkyUi.caps(msg.title());
                 SkyUi.scaledCentered(g, font, title, cx, 47, 0.9f, SkyUi.fade(0xFFF0EAD6, alpha), true);
                 Skill skill = msg.value() >= 0 && msg.value() < Skill.VALUES.length ? Skill.VALUES[msg.value()] : null;
                 float prog = skill == null ? msg.progress() : SkyData.get(mc.player).skillProgress(skill);
                 SkyUi.ornateBar(g, cx - 60, 59, 120, 3, prog, 0xD8D0B8, alpha, false, false);
+                drawAnimatedLevelXpRow(g, font, cx, 66, alpha, Util.getMillis(), SkyData.get(mc.player));
             }
             case LEVEL_UP -> {
                 band(g, cx, 50, 100, 150, alpha * 0.6f);
@@ -271,7 +308,8 @@ public final class SkyHud {
                 // quests and locations: "QUEST STARTED" in small capitals over the name, between two ornaments
                 Component header = Component.translatable("notify.skycraft." + msg.kind().name().toLowerCase(java.util.Locale.ROOT));
                 boolean failed = msg.kind() == NotifyKind.QUEST_FAILED;
-                band(g, cx, 46, 98, 130, alpha * 0.55f);
+                boolean completed = msg.kind() == NotifyKind.QUEST_COMPLETED;
+                band(g, cx, 46, completed ? 114 : 98, 130, alpha * 0.55f);
                 SkyUi.ornament(g, cx, 50, 100, SkyUi.fade(0xFFC8BC9A, alpha));
                 SkyUi.scaledCentered(g, font, SkyUi.caps(header), cx, 56, 0.75f, SkyUi.fade(failed ? 0xFFD07060 : 0xFFA89F86, alpha), false);
                 SkyUi.scaledCentered(g, font, msg.title().getString(), cx, 66, 1.5f, SkyUi.fade(0xFFF5EBC8, alpha), true);
@@ -279,8 +317,39 @@ public final class SkyHud {
                     SkyUi.scaledCentered(g, font, msg.subtitle().getString(), cx, 81, 0.9f, SkyUi.fade(0xFFBDB59E, alpha), true);
                 }
                 SkyUi.ornament(g, cx, 94, 100, SkyUi.fade(0xFFC8BC9A, alpha));
+                if (completed) {
+                    drawAnimatedLevelXpRow(g, font, cx, 100, alpha, Util.getMillis(), SkyData.get(mc.player));
+                }
             }
         }
+    }
+
+    /** Renders the Skyrim Character Level XP bar when XP is gained outside an active banner (e.g. shared party XP). */
+    private static void renderStandaloneLevelXpBar(GuiGraphics g, Font font, int width, long nowMs) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+        float rem = (levelXpBarUntilMs - nowMs) / 3800f;
+        float alpha = Mth.clamp(Math.min((1f - rem) * 6f, rem * 4f), 0f, 1f);
+        if (alpha < 0.03f) return;
+        int cx = width / 2;
+        boolean boss = com.skycraft.client.SkyBossHud.isShowing(null);
+        boolean target = TargetHud.isVisible();
+        int y = (boss || target) ? 72 : 44;
+        band(g, cx, y - 4, y + 18, 115, alpha * 0.5f);
+        drawAnimatedLevelXpRow(g, font, cx, y, alpha, nowMs, SkyData.get(mc.player));
+    }
+
+    /** Draws "LEVEL X" and the animated Skyrim Character Level XP bar filling from animStartProg to animTargetProg. */
+    private static void drawAnimatedLevelXpRow(GuiGraphics g, Font font, int cx, int y, float alpha, long nowMs, PlayerData data) {
+        float t = levelXpAnimStartMs > 0 ? Mth.clamp((nowMs - levelXpAnimStartMs) / 1400f, 0f, 1f) : 1f;
+        float ease = 1f - (1f - t) * (1f - t);
+        float startP = nowMs < levelXpBarUntilMs ? animStartProg : data.levelProgress();
+        float endP = nowMs < levelXpBarUntilMs ? animTargetProg : data.levelProgress();
+        float shownProg = Mth.lerp(ease, startP, endP);
+        int lvl = nowMs < levelXpBarUntilMs ? animDisplayLevel : data.getLevel();
+        String label = "LEVEL " + lvl;
+        SkyUi.scaledCentered(g, font, label, cx, y, 0.75f, SkyUi.fade(0xFFE8D9A0, alpha), true);
+        SkyUi.ornateBar(g, cx - 55, y + 8, 110, 3, shownProg, 0xE2C478, alpha, false, false);
     }
 
     /** A horizontal dark band from y1 to y2 that fades out over its last third on each side. */

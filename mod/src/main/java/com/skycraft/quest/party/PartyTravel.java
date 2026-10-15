@@ -30,7 +30,9 @@ public final class PartyTravel {
     }
 
     private static boolean jailed(ServerPlayer p) {
-        return p.level().dimension().location().equals(FastTravelHandler.JAIL);
+        return p.level().dimension().location().equals(FastTravelHandler.JAIL)
+                || com.skycraft.crime.Jail.isJailed(p)
+                || com.skycraft.crime.Jail.isLoadingJail(p);
     }
 
     /** Validates and performs travel of {@code player} to the party member {@code targetId}. */
@@ -54,10 +56,6 @@ public final class PartyTravel {
             fail(player, "jail");
             return false;
         }
-        if (jailed(target)) {
-            fail(player, "target_jail", target.getDisplayName());
-            return false;
-        }
         if (Vitals.inCombat(player)) {
             fail(player, "combat");
             return false;
@@ -68,8 +66,17 @@ public final class PartyTravel {
         }
 
         ServerLevel from = (ServerLevel) player.level();
-        ServerLevel to = (ServerLevel) target.level();
-        BlockPos spot = findSpot(to, target.blockPosition());
+        ServerLevel to;
+        BlockPos anchorPos;
+        if (jailed(target)) {
+            com.skycraft.crime.Jail.Exit exit = com.skycraft.crime.Jail.outsideFor(target);
+            to = exit.level();
+            anchorPos = exit.pos();
+        } else {
+            to = (ServerLevel) target.level();
+            anchorPos = target.blockPosition();
+        }
+        BlockPos spot = findSpot(to, anchorPos);
         List<Mob> followers = from == to
                 ? from.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(16),
                 m -> m.isAlive() && !m.isPassenger() && FastTravelHandler.isFollower(m, player))

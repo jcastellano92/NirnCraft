@@ -65,6 +65,21 @@ public final class ShopBook extends SavedData {
         }
     }
 
+    /** A batch of player-sold items on the public shelf, tracked so sold goods expire over time. */
+    public static final class SoldBatch {
+        public final ItemStack one;
+        public int count;
+        public final long addedAt;
+        public final long period;
+
+        SoldBatch(ItemStack one, int count, long addedAt, long period) {
+            this.one = one;
+            this.count = count;
+            this.addedAt = addedAt;
+            this.period = period;
+        }
+    }
+
     /** One shop. Fields are package-private: {@link Shop} is the only writer. */
     public static final class Record {
         public final String key;
@@ -75,6 +90,7 @@ public final class ShopBook extends SavedData {
         int share = 6;
         boolean inn;
         long period = Long.MIN_VALUE;
+        long lastDayTime = Long.MIN_VALUE;
         int gold;
         boolean invested;
         CompoundTag mtUsed = new CompoundTag();
@@ -82,6 +98,7 @@ public final class ShopBook extends SavedData {
         long lastDay;
         final BulkStore stock;
         final BulkStore sold;
+        final List<SoldBatch> soldBatches = new ArrayList<>();
         final List<Kept> kept = new ArrayList<>();
 
         Record(String key, ShopBook book) {
@@ -197,6 +214,7 @@ public final class ShopBook extends SavedData {
             t.putInt("sh", r.share);
             t.putBoolean("inn", r.inn);
             t.putLong("period", r.period);
+            if (r.lastDayTime != Long.MIN_VALUE) t.putLong("last_dt", r.lastDayTime);
             t.putInt("gold", r.gold);
             t.putBoolean("invested", r.invested);
             t.put("mt", r.mtUsed.copy());
@@ -206,6 +224,17 @@ public final class ShopBook extends SavedData {
             t.putLong("used", r.lastDay);
             t.put("stock", r.stock.save());
             t.put("sold", r.sold.save());
+            ListTag batches = new ListTag();
+            for (SoldBatch sb : r.soldBatches) {
+                if (sb.count <= 0 || sb.one.isEmpty()) continue;
+                CompoundTag bTag = new CompoundTag();
+                bTag.put("s", sb.one.save(new CompoundTag()));
+                bTag.putInt("n", sb.count);
+                bTag.putLong("at", sb.addedAt);
+                bTag.putLong("p", sb.period);
+                batches.add(bTag);
+            }
+            t.put("sold_batches", batches);
             ListTag kept = new ListTag();
             for (Kept k : r.kept) {
                 CompoundTag c = new CompoundTag();
@@ -240,6 +269,7 @@ public final class ShopBook extends SavedData {
             r.share = Math.max(3, t.getInt("sh"));
             r.inn = t.getBoolean("inn");
             r.period = t.contains("period") ? t.getLong("period") : Long.MIN_VALUE;
+            r.lastDayTime = t.contains("last_dt") ? t.getLong("last_dt") : Long.MIN_VALUE;
             r.gold = t.getInt("gold");
             r.invested = t.getBoolean("invested");
             r.mtUsed = t.getCompound("mt");
@@ -247,6 +277,15 @@ public final class ShopBook extends SavedData {
             r.lastDay = t.getLong("used");
             r.stock.load(t.getCompound("stock"));
             r.sold.load(t.getCompound("sold"));
+            ListTag batches = t.getList("sold_batches", Tag.TAG_COMPOUND);
+            for (int b = 0; b < batches.size(); b++) {
+                CompoundTag bTag = batches.getCompound(b);
+                ItemStack one = ItemStack.of(bTag.getCompound("s"));
+                int count = bTag.getInt("n");
+                if (one.isEmpty() || count <= 0) continue;
+                one.setCount(1);
+                r.soldBatches.add(new SoldBatch(one, count, bTag.getLong("at"), bTag.getLong("p")));
+            }
             ListTag kept = t.getList("kept", Tag.TAG_COMPOUND);
             for (int k = 0; k < kept.size() && r.kept.size() < KEPT_TOTAL; k++) {
                 CompoundTag c = kept.getCompound(k);

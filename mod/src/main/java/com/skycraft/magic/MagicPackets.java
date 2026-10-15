@@ -177,20 +177,39 @@ public final class MagicPackets {
             ServerPlayer player = ctx.get().getSender();
             if (player != null) {
                 switch (m.action) {
-                    case SELECT_SPELL, SELECT_LEFT -> {
-                        // one hand system: the spell replaces what the hand held (item stowed, bound weapon dismissed)
-                        if (m.action == SELECT_LEFT) Hands.equipLeftSpell(player, m.id);
-                        else Hands.equipRightSpell(player, m.id);
+                    case SELECT_SPELL -> {
+                        // Clicking the already-equipped right-hand spell unequips the right hand
+                        if (Hands.right(player) == Hands.Held.SPELL && m.id.equals(MagicData.selectedSpell(player))) {
+                            Hands.unequipRight(player);
+                        } else {
+                            Hands.equipRightSpell(player, m.id);
+                        }
+                    }
+                    case SELECT_LEFT -> {
+                        // Clicking the already-equipped left-hand spell unequips the left hand
+                        if (Hands.left(player) == Hands.Held.SPELL && m.id.equals(MagicData.leftSpell(player))) {
+                            Hands.unequipLeft(player);
+                        } else {
+                            Hands.equipLeftSpell(player, m.id);
+                        }
                     }
                     case SELECT_SHOUT -> {
                         Shout shout = Shout.byId(m.id);
                         if (shout != null && (MagicData.wordsLearned(player, shout) > 0 || player.isCreative())) {
-                            MagicData.setSelectedShout(player, m.id);
-                            MagicData.setSelectedVoice(player, "shout:" + m.id);
+                            if (("shout:" + m.id).equals(MagicData.selectedVoice(player)) || m.id.equals(MagicData.selectedShout(player))) {
+                                MagicData.setSelectedShout(player, "");
+                                MagicData.setSelectedVoice(player, "");
+                            } else {
+                                MagicData.setSelectedShout(player, m.id);
+                                MagicData.setSelectedVoice(player, "shout:" + m.id);
+                            }
                         }
                     }
                     case SELECT_POWER -> {
-                        if (MagicData.hasPower(player, m.id)) MagicData.setSelectedVoice(player, m.id);
+                        if (MagicData.hasPower(player, m.id)) {
+                            if (m.id.equals(MagicData.selectedVoice(player))) MagicData.setSelectedVoice(player, "");
+                            else MagicData.setSelectedVoice(player, m.id);
+                        }
                     }
                     case FORGET_CUSTOM -> com.skycraft.magic.spell.spellmaking.SpellmakingAltarBlock.forget(player, m.id);
                     case UNEQUIP_RIGHT -> Hands.unequipRight(player);

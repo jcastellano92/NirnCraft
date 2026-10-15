@@ -190,6 +190,8 @@ public final class Innkeepers {
 
     private static String rentKey(LivingEntity npc) {
         CompoundTag pd = npc.getPersistentData();
+        int sid = settlementOf(npc);
+        if (sid >= 0) return "s" + sid;
         return pd.contains(SETTLEMENT_KEY) ? "s" + pd.getInt(SETTLEMENT_KEY) : "n" + npc.getStringUUID();
     }
 
@@ -203,6 +205,61 @@ public final class Innkeepers {
         return -1;
     }
 
+    /** True if {@code player} personally has an active rented room at {@code npc}'s inn. */
+    public static boolean hasOwnRoom(ServerPlayer player, LivingEntity npc) {
+        CompoundTag rent = SkyData.get(player).module("survival").getCompound("rent");
+        String key = rentKey(npc);
+        long now = OreVeins.clock(player.level());
+        return rent.contains(key) && rent.getCompound(key).getLong("until") > now;
+    }
+
+    /** How many guest/inn beds this inn has available to rent (at least 2). */
+    public static int roomCapacity(LivingEntity npc) {
+        if (!(npc.level() instanceof ServerLevel sl)) return 3;
+        var near = com.skycraft.tamriel.settlement.SettlementAnchors.near(sl, npc.blockPosition(), 64);
+        if (near.isPresent()) {
+            var entry = near.get();
+            java.util.Set<String> innOwners = new java.util.HashSet<>();
+            for (var a : entry.anchors()) {
+                if ((a.type() == com.skycraft.tamriel.settlement.AnchorType.INN
+                        || a.type() == com.skycraft.tamriel.settlement.AnchorType.INN_BED
+                        || a.type() == com.skycraft.tamriel.settlement.AnchorType.GUEST_BED) && !a.owner().isEmpty()) {
+                    innOwners.add(a.owner());
+                }
+            }
+            int beds = 0;
+            for (var a : entry.anchors()) {
+                if (a.type() == com.skycraft.tamriel.settlement.AnchorType.INN_BED
+                        || a.type() == com.skycraft.tamriel.settlement.AnchorType.GUEST_BED
+                        || (a.type() == com.skycraft.tamriel.settlement.AnchorType.BED && innOwners.contains(a.owner()))) {
+                    beds++;
+                }
+            }
+            if (beds > 0) return Math.max(2, beds);
+        }
+        return 3;
+    }
+
+    /** How many players currently have an active room rented at {@code npc}'s inn. */
+    public static int bookedRooms(ServerPlayer viewer, LivingEntity npc) {
+        if (viewer.server == null) return 0;
+        String key = rentKey(npc);
+        long now = OreVeins.clock(viewer.level());
+        int count = 0;
+        for (ServerPlayer p : viewer.server.getPlayerList().getPlayers()) {
+            CompoundTag rent = SkyData.get(p).module("survival").getCompound("rent");
+            if (rent.contains(key) && rent.getCompound(key).getLong("until") > now) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /** True if all rooms at {@code npc}'s inn are currently booked. */
+    public static boolean isFullyBooked(ServerPlayer viewer, LivingEntity npc) {
+        return !hasOwnRoom(viewer, npc) && bookedRooms(viewer, npc) >= roomCapacity(npc);
+    }
+
     /** Dialogue action: "I'd like a room for the night." */
     public static void rent(ServerPlayer player, LivingEntity npc) {
         if (!npc.isAlive() || player.distanceToSqr(npc) > 64) return;
@@ -212,6 +269,10 @@ public final class Innkeepers {
         long now = OreVeins.clock(player.level());
         if (rent.contains(key) && rent.getCompound(key).getLong("until") > now) {
             Dialogue.open(player, npc, Component.translatable("survival.skycraft.inn.already_rented"));
+            return;
+        }
+        if (bookedRooms(player, npc) >= roomCapacity(npc)) {
+            Dialogue.open(player, npc, Component.translatable("survival.skycraft.inn.all_booked"));
             return;
         }
         int price = SurvivalConfig.ROOM_PRICE.get();
@@ -231,17 +292,46 @@ public final class Innkeepers {
         data.module("survival").put("rent", rent);
         data.markDirty();
         data.addStat("rooms_rented", 1);
+        unlockInnDoors(player, npc);
         Notifier.message(player, Component.translatable("message.skycraft.survival.room_rented", innName(npc)));
         Dialogue.open(player, npc, Component.translatable("survival.skycraft.inn.rented"));
     }
 
-    /** The rented room the player is standing in (its tag), or null. Also drops long-expired rentals. */
+    private static void unlockInnDoors(ServerPlayer player, LivingEntity npc) {
+        if (!(npc.level() instanceof ServerLevel sl)) return;
+        var near = com.skycraft.tamriel.settlement.SettlementAnchors.near(sl, npc.blockPosition(), 64);
+        if (near.isEmpty()) return;
+        for (var a : near.get().anchors(com.skycraft.tamriel.settlement.AnchorType.INN_DOOR)) {
+            com.skycraft.crime.Locks.setLock(sl, a.pos(), com.skycraft.crime.Locks.NOT_LOCKED);
+        }
+    }
+
+    /** The rented room the player (or a party member) is standing in (its tag), or null. Also drops long-expired rentals. */
     public static CompoundTag roomHere(ServerPlayer player) {
-        PlayerData data = SkyData.get(player);
+        CompoundTag own = roomHereFor(player, player);
+        if (own != null) return own;
+        if (player.server != null) {
+            var party = com.skycraft.quest.party.Parties.partyOf(player);
+            if (party != null) {
+                for (java.util.UUID memberId : party.memberIds()) {
+                    if (memberId.equals(player.getUUID())) continue;
+                    ServerPlayer member = player.server.getPlayerList().getPlayer(memberId);
+                    if (member != null) {
+                        CompoundTag shared = roomHereFor(member, player);
+                        if (shared != null) return shared;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private static CompoundTag roomHereFor(ServerPlayer renter, ServerPlayer atPlayer) {
+        PlayerData data = SkyData.get(renter);
         CompoundTag rent = data.module("survival").getCompound("rent");
         if (rent.isEmpty()) return null;
-        long now = OreVeins.clock(player.level());
-        String dim = player.level().dimension().location().toString();
+        long now = OreVeins.clock(atPlayer.level());
+        String dim = atPlayer.level().dimension().location().toString();
         Settlement here = null;
         boolean looked = false;
         CompoundTag match = null;
@@ -255,16 +345,16 @@ public final class Innkeepers {
             }
             if (match != null || !dim.equals(room.getString("dim"))) continue;
             int sid = room.getInt("sid");
-            if (sid >= 0 && player.level() instanceof ServerLevel sl && sl.dimension() == Level.OVERWORLD) {
+            if (sid >= 0 && atPlayer.level() instanceof ServerLevel sl && sl.dimension() == Level.OVERWORLD) {
                 if (!looked) {
-                    here = RoadsData.get(sl).zoneAt(player.getBlockX(), player.getBlockZ());
+                    here = RoadsData.get(sl).zoneAt(atPlayer.getBlockX(), atPlayer.getBlockZ());
                     looked = true;
                 }
                 if (here != null && here.id == sid) match = room;
             }
             if (match == null) {
-                long dx = player.getBlockX() - room.getInt("x");
-                long dz = player.getBlockZ() - room.getInt("z");
+                long dx = atPlayer.getBlockX() - room.getInt("x");
+                long dz = atPlayer.getBlockZ() - room.getInt("z");
                 if (dx * dx + dz * dz <= (long) ROOM_RADIUS * ROOM_RADIUS) match = room;
             }
         }

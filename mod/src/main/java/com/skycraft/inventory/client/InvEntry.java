@@ -83,7 +83,7 @@ public final class InvEntry {
     }
 
     public boolean drink() {
-        return stack.getUseAnimation() == UseAnim.DRINK;
+        return stack.getUseAnimation() == UseAnim.DRINK || stack.getItem() instanceof net.minecraft.world.item.PotionItem;
     }
 
     public boolean isArmor() {
@@ -115,7 +115,7 @@ public final class InvEntry {
     /** Can be held in the left hand (shields, torches, one-handed weapons, offhand tools). */
     public boolean leftHandable() {
         return !isArmor() && !consumable() && isUsableEquipment() && !com.skycraft.mounts.MountItems.isSaddle(stack)
-                && !com.skycraft.combat.WeaponClass.of(stack).twoHanded();
+                && !com.skycraft.magic.Hands.twoHanded(stack);
     }
 
     // ------------------------------------------------------------------ building

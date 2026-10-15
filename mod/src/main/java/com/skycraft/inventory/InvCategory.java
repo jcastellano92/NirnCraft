@@ -62,6 +62,7 @@ public enum InvCategory {
     /** Eaten or drunk straight from the inventory. */
     public static boolean isConsumable(ItemStack stack) {
         if (stack.isEdible() || com.skycraft.crafting.arcane.alchemy.Ingredients.isIngredient(stack)) return true;
+        if (stack.getItem() instanceof net.minecraft.world.item.PotionItem) return true;
         UseAnim anim = stack.getUseAnimation();
         return anim == UseAnim.DRINK;
     }

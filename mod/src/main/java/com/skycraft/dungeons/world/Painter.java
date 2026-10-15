@@ -108,7 +108,16 @@ public final class Painter {
         pos.set(x, y, z);
         BlockState old = level.getBlockState(pos);
         if (old.is(BlockTags.FEATURES_CANNOT_REPLACE)) return;
-        level.setBlock(pos, state, 2);
+        if (state.hasBlockEntity()) {
+            BlockPos imm = pos.immutable();
+            level.setBlock(imm, state, 2);
+            if (state.is(Blocks.DISPENSER) && level.getBlockEntity(imm) instanceof DispenserBlockEntity d && d.isEmpty()) {
+                d.setItem(0, Deco.ARROWS.copy());
+                d.getPersistentData().putBoolean("skycraft_stocked", true);
+            }
+        } else {
+            level.setBlock(pos, state, 2);
+        }
     }
 
     public void air(int x, int y, int z) {
@@ -240,7 +249,7 @@ public final class Painter {
     @Nullable
     public BlockEntity blockEntity(int x, int y, int z) {
         if (!ok(x, y, z)) return null;
-        return level.getBlockEntity(pos.set(x, y, z));
+        return level.getBlockEntity(new BlockPos(x, y, z));
     }
 
     // ------------------------------------------------------------------ containers & entities
@@ -249,11 +258,11 @@ public final class Painter {
     public void container(int x, int y, int z, BlockState state, ResourceLocation loot) {
         if (!ok(x, y, z)) return;
         set(x, y, z, state);
-        pos.set(x, y, z);
+        BlockPos imm = new BlockPos(x, y, z);
         // a named place's ordinary chests hold what its story says (half of them; boss and cache chests keep theirs)
         loot = Identity.loot(place, loot, hash(x, y, z, 32));
-        if (level.getBlockEntity(pos) instanceof RandomizableContainerBlockEntity) {
-            RandomizableContainerBlockEntity.setLootTable(level, RandomSource.create(hash(x, y, z, 31)), pos.immutable(), loot);
+        if (level.getBlockEntity(imm) instanceof RandomizableContainerBlockEntity) {
+            RandomizableContainerBlockEntity.setLootTable(level, RandomSource.create(hash(x, y, z, 31)), imm, loot);
         }
     }
 
@@ -261,8 +270,11 @@ public final class Painter {
     public void dispenser(int x, int y, int z, Direction facing, ItemStack ammo) {
         if (!ok(x, y, z)) return;
         set(x, y, z, Blocks.DISPENSER.defaultBlockState().setValue(net.minecraft.world.level.block.DispenserBlock.FACING, facing));
-        BlockEntity be = level.getBlockEntity(pos.set(x, y, z));
-        if (be instanceof DispenserBlockEntity d) d.setItem(0, ammo.copy());
+        BlockEntity be = level.getBlockEntity(new BlockPos(x, y, z));
+        if (be instanceof DispenserBlockEntity d) {
+            d.setItem(0, ammo.copy());
+            d.getPersistentData().putBoolean("skycraft_stocked", true);
+        }
     }
 
     /** Looks a block up by id; {@code fallback} when the owning mod/module isn't present. */

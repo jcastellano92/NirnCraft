@@ -18,7 +18,9 @@ public final class LoreClient {
     public static void openBook(String id) {
         LoreBooks.Book book = LoreBooks.get(id);
         if (book == null) return;
-        Minecraft.getInstance().setScreen(new BookScreen(book));
+        Minecraft mc = Minecraft.getInstance();
+        net.minecraft.client.gui.screens.Screen ret = com.skycraft.inventory.client.ClientInventoryHandlers.consumeReturnScreen(mc.screen);
+        mc.setScreen(new BookScreen(book, ret));
     }
 
     /** A story read off a lectern, a sign or a note barrel: the same reading screen, with the text from the server. */
@@ -27,7 +29,9 @@ public final class LoreClient {
         for (String json : m.pagesJson()) pages.add(pageText(json));
         Component title = m.title().isBlank() ? Component.translatable("screen.skycraft.lore.story.untitled") : Component.literal(m.title());
         Component label = Component.translatable("screen.skycraft.lore.story." + m.kind());
-        Minecraft.getInstance().setScreen(new BookScreen(title, m.author(), pages, m.sheet(), label));
+        Minecraft mc = Minecraft.getInstance();
+        net.minecraft.client.gui.screens.Screen ret = com.skycraft.inventory.client.ClientInventoryHandlers.consumeReturnScreen(mc.screen);
+        mc.setScreen(new BookScreen(title, m.author(), pages, m.sheet(), label, ret));
     }
 
     /** A page's chat-component JSON as the text it shows in the reader's language (plain text passes through). */

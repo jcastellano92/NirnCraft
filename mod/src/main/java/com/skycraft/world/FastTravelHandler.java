@@ -58,7 +58,9 @@ public final class FastTravelHandler {
             return;
         }
         ServerLevel level = (ServerLevel) player.level();
-        if (level.dimension().location().equals(JAIL)) {
+        if (level.dimension().location().equals(JAIL)
+                || com.skycraft.crime.Jail.isJailed(player)
+                || com.skycraft.crime.Jail.isLoadingJail(player)) {
             fail(player, "jail");
             return;
         }

@@ -37,7 +37,7 @@ public final class GatePosts {
     /** Persistent-data key on a gate guard: {@code "<settlement>|<gate id>|<side>"}. */
     public static final String KEY = "skycraft_gate_post";
     /** A player this close (blocks) keeps the gates they can see staffed. */
-    private static final double RANGE = 110;
+    private static final double RANGE = 160;
     /** Ticks a vacated post stays empty before its replacement walks in (a killed guard is not back the same second). */
     static final long REPLACE_DELAY = 600;
     /** Blocks beside the passage centre a guard stands. */
@@ -61,17 +61,18 @@ public final class GatePosts {
     public static void tick(ServerLevel level, ServerPlayer player) {
         if (level.dimension() != Level.OVERWORLD || !com.skycraft.creatures.CreaturesConfig.GUARD_SPAWNING.get()) return;
         SettlementAnchors data = SettlementAnchors.get(level);
-        double r2 = RANGE * RANGE;
         GuardWatch.shout(level, player);
         GuardWatch.cullRoadPatrols(level, player);
         for (SettlementAnchors.Entry e : data.entries()) {
             if (e.homestead() || e.anchors().isEmpty()) continue;
-            if (!e.contains(player.getBlockX(), player.getBlockZ(), (int) RANGE)) continue;
+            int margin = Math.max((int) RANGE, e.radius + 32);
+            if (!e.contains(player.getBlockX(), player.getBlockZ(), margin)) continue;
             // the dragon has been: Helgen's gates are a ruin, its soldiers are the intro's to place
             if ("helgen".equals(e.key) && com.skycraft.quest.QuestConfig.RUINED_HELGEN.get()) continue;
             GuardWatch.Watch watch = GuardWatch.of(e);
             GuardWatch.keep(level, e, watch);
             if (watch != GuardWatch.Watch.MAJOR) continue;
+            double r2 = (double) margin * margin;
             List<Gate> gates = gatesOf(level, e);
             for (int[] post : GuardWatch.posts(watch)) {
                 if (post[0] >= gates.size()) continue;
@@ -183,11 +184,11 @@ public final class GatePosts {
 
     /** The cell nearest {@code want} (within two blocks, never the passage itself) a person can stand in. */
     static BlockPos standable(ServerLevel level, BlockPos want, BlockPos gate) {
-        for (int r = 0; r <= 2; r++) {
+        for (int r = 0; r <= 3; r++) {
             for (int dx = -r; dx <= r; dx++) {
                 for (int dz = -r; dz <= r; dz++) {
                     if (Math.max(Math.abs(dx), Math.abs(dz)) != r) continue;
-                    for (int dy : new int[]{0, 1, -1}) {
+                    for (int dy : new int[]{0, 1, -1, 2, -2}) {
                         BlockPos p = want.offset(dx, dy, dz);
                         if (p.getX() == gate.getX() && p.getZ() == gate.getZ()) continue;
                         if (!level.isLoaded(p)) continue;

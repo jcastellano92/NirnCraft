@@ -40,15 +40,23 @@ public class SpellTomeItem extends Item {
         if (spell == null) return InteractionResultHolder.pass(stack);
         if (level.isClientSide) return InteractionResultHolder.success(stack);
         ServerPlayer sp = (ServerPlayer) player;
+        return readStack(sp, stack) ? InteractionResultHolder.consume(stack) : InteractionResultHolder.fail(stack);
+    }
+
+    /** Reads this spell tome directly from any inventory slot without moving it into the player's hand. */
+    public boolean readStack(ServerPlayer sp, ItemStack stack) {
+        Spell spell = spell();
+        if (spell == null) return false;
+        Level level = sp.level();
         if (MagicData.knows(sp, spell.id)) {
             Notifier.message(sp, Component.translatable("message.skycraft.spell_known", spell.displayName()));
-            return InteractionResultHolder.fail(stack);
+            return false;
         }
         if (spell.tier != Tier.NOVICE && !sp.isCreative()) {
             com.skycraft.core.PlayerData data = com.skycraft.core.SkyData.get(sp);
             if (!com.skycraft.quest.Factions.isMember(data, com.skycraft.quest.Faction.COLLEGE)) {
                 Notifier.message(sp, Component.translatable("message.skycraft.tome_requires_college", spell.school.displayName()));
-                return InteractionResultHolder.fail(stack);
+                return false;
             }
             int collegeRank = com.skycraft.quest.Factions.rank(data, com.skycraft.quest.Faction.COLLEGE);
             String schoolQuestKey = "college_" + spell.school.id();
@@ -64,7 +72,7 @@ public class SpellTomeItem extends Item {
             if (!allowed) {
                 Notifier.message(sp, Component.translatable("message.skycraft.tome_requires_school_progress",
                         spell.school.displayName(), spell.tier.displayName()));
-                return InteractionResultHolder.fail(stack);
+                return false;
             }
         }
         MagicData.learn(sp, spell.id);
@@ -75,7 +83,7 @@ public class SpellTomeItem extends Item {
         level.playSound(null, sp.getX(), sp.getY(), sp.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.4f, 1.6f);
         MagicFx.send(sp, MagicFx.AURA, spell.element, sp.position(), sp.position(), sp.getId(), 4);
         sp.awardStat(net.minecraft.stats.Stats.ITEM_USED.get(this));
-        return InteractionResultHolder.consume(stack);
+        return true;
     }
 
     @Override

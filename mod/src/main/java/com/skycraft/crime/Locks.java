@@ -183,7 +183,7 @@ public final class Locks {
     public static boolean nightLocked(ServerLevel level, BlockPos rawPos) {
         if (!isNight(level)) return false;
         BlockPos pos = normalizePos(level, rawPos);
-        if (Jail.isJailDimension(level) || PlacedBlocks.isPlayerPlaced(level, pos)) return false;
+        if (Jail.isJailDimension(level) || Jail.isJailArea(level, pos) || PlacedBlocks.isPlayerPlaced(level, pos)) return false;
         if (LockData.get(level.getServer()).never.contains(key(level, pos))) return false;
         if (!Theft.inVillage(level, pos)) return false;
         return isPrivateHome(level, pos);
@@ -193,6 +193,14 @@ public final class Locks {
     private static boolean isHomeAnchor(com.skycraft.tamriel.settlement.AnchorType t) {
         return switch (t) {
             case BED, HOUSE_BED, HOUSE_DOOR, HOUSE_MIN, HOUSE_MAX, CONTAINER, FARMER, HOMESTEAD -> true;
+            default -> false;
+        };
+    }
+
+    private static boolean isJailAnchor(com.skycraft.tamriel.settlement.AnchorType t) {
+        return switch (t) {
+            case JAIL_CELL, JAIL_DOOR, JAIL_GATE, JAIL_EVIDENCE, JAIL_PERSONAL, JAIL_CONFISCATED,
+                 JAIL_EXIT, JAIL_MIN, JAIL_MAX, JAIL_PRISONER -> true;
             default -> false;
         };
     }
@@ -212,6 +220,7 @@ public final class Locks {
      * A door with no recorded building near it counts as a home (the old night rule).
      */
     public static boolean isPrivateHome(ServerLevel level, BlockPos pos) {
+        if (Jail.isJailArea(level, pos)) return false;
         var near = com.skycraft.tamriel.settlement.SettlementAnchors.near(level, pos, 8);
         if (near.isEmpty()) return true;
         com.skycraft.tamriel.settlement.Anchor best = null;
@@ -220,6 +229,7 @@ public final class Locks {
             if (isStreetAnchor(a.type()) || Math.abs(a.pos().getY() - pos.getY()) > 12) continue;
             long dx = a.pos().getX() - pos.getX(), dz = a.pos().getZ() - pos.getZ();
             long d = dx * dx + dz * dz;
+            if (isJailAnchor(a.type()) && d <= 16L * 16L) return false;
             if (d < bestD) {
                 bestD = d;
                 best = a;

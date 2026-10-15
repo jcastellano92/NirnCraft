@@ -251,7 +251,10 @@ public final class SettlementPopulation {
                 x -> x.isAlive() && x.tickCount <= 2 && !x.getPersistentData().contains(Housing.JOB_KEY)
                         && (x instanceof NpcEntity || x instanceof AbstractVillager || x instanceof GuardEntity))) {
             CompoundTag pd = l.getPersistentData();
-            pd.putString(Housing.JOB_KEY, res.job());
+            String job = slot.startsWith("helgen#") && com.skycraft.quest.QuestConfig.RUINED_HELGEN.get()
+                    && !pd.getBoolean(com.skycraft.fire.aftermath.HelgenFolk.CART) && !(l instanceof GuardEntity)
+                    ? "survivor" : res.job();
+            pd.putString(Housing.JOB_KEY, job);
             pd.putString(Housing.SLOT_KEY, slot);
             if (post != null) pd.putLong(Housing.WORK_KEY, post.asLong());
             if (res.household()) { // free hours at the plaza the plan picked for them, or indoors when it is full

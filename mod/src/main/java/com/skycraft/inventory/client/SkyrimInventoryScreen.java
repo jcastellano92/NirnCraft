@@ -482,7 +482,7 @@ public class SkyrimInventoryScreen extends Screen {
                 g.fill(listX + 1, y, listX + listW - 1, y + ROW, 0x16FFFFFF);
             }
 
-            // equipped marker: gold diamond = right hand / worn, hollow blue diamond = left hand
+            // equipped marker: gold diamond = right hand / worn, hollow blue diamond = left hand, plus R / L / W badge
             int my0 = y + ROW / 2;
             if (e.equip == InvEntry.RIGHT || e.equip == InvEntry.WORN) SkyUi.diamond(g, listX + 7, my0, 2, SkyUi.GOLD);
             else if (e.equip == InvEntry.LEFT) SkyUi.diamondOutline(g, listX + 7, my0, 2, SkyUi.LEFT_HAND);
@@ -490,12 +490,18 @@ public class SkyrimInventoryScreen extends Screen {
             g.renderItem(e.icon, listX + 12, y + 1);
             g.renderItemDecorations(font, e.icon, listX + 12, y + 1);
 
+            String badge = e.equip == InvEntry.RIGHT ? " [R]" : e.equip == InvEntry.LEFT ? " [L]" : e.equip == InvEntry.WORN ? " [W]" : "";
             String count = e.count() > 1 ? " (" + e.count() + ")" : "";
-            int room = nameEnd - nameX - font.width(count) - (e.favorite ? 9 : 0);
+            int room = nameEnd - nameX - font.width(count) - font.width(badge) - (e.favorite ? 9 : 0);
             String name = SkyUi.ellipsize(font, e.name, Math.max(12, room));
             int nameColor = e.stolen ? SkyUi.STOLEN : sel ? SkyUi.BRIGHT : SkyUi.TEXT;
             g.drawString(font, name, nameX, y + 5, nameColor, false);
             int nx = nameX + font.width(name);
+            if (!badge.isEmpty()) {
+                int bCol = e.equip == InvEntry.LEFT ? SkyUi.LEFT_HAND : SkyUi.GOLD;
+                g.drawString(font, badge, nx, y + 5, bCol, false);
+                nx += font.width(badge);
+            }
             if (!count.isEmpty()) {
                 g.drawString(font, count, nx, y + 5, SkyUi.DIM, false);
                 nx += font.width(count);
@@ -642,6 +648,13 @@ public class SkyrimInventoryScreen extends Screen {
             String key = e.equip == InvEntry.RIGHT ? "right" : e.equip == InvEntry.LEFT ? "left" : "worn";
             addLine(lines, colors, Component.translatable("inventory.skycraft.equipped." + key), SkyUi.GOLD, textW);
         }
+        if (stack.getTag() != null && stack.getTag().contains(com.skycraft.crafting.arcane.ArcaneEvents.WEAPON_POISON, 10)) {
+            CompoundTag pTag = stack.getTag().getCompound(com.skycraft.crafting.arcane.ArcaneEvents.WEAPON_POISON);
+            int hits = pTag.getInt(com.skycraft.crafting.arcane.ArcaneEvents.POISON_HITS);
+            int maxHits = Math.max(hits, pTag.getInt(com.skycraft.crafting.arcane.ArcaneEvents.POISON_MAX_HITS));
+            String pName = com.skycraft.crafting.arcane.ArcaneEvents.poisonDisplayName(pTag);
+            addLine(lines, colors, Component.translatable("inventory.skycraft.poisoned", pName, hits, maxHits), 0xFF88D870, textW);
+        }
         if (e.stolen) addLine(lines, colors, Component.translatable("inventory.skycraft.stolen"), SkyUi.STOLEN, textW);
         if (stack.isDamageableItem() && stack.getMaxDamage() > 0) {
             int pct = Math.round(100f * (stack.getMaxDamage() - stack.getDamageValue()) / stack.getMaxDamage());
@@ -704,9 +717,13 @@ public class SkyrimInventoryScreen extends Screen {
             keys.add("E");
             runs.add(this::primary);
         }
-        if (e.equip == InvEntry.LEFT || (e.leftHandable() && e.equip != InvEntry.WORN)) {
+        if (com.skycraft.crafting.arcane.ArcaneEvents.isApplicablePoison(e.stack)) {
+            labels.add(Component.translatable("inventory.skycraft.action.apply_poison"));
+            keys.add("G");
+            runs.add(() -> ClientInventoryHandlers.applyPoison(selectedEntry));
+        } else if (e.equip == InvEntry.LEFT || (e.leftHandable() && e.equip != InvEntry.WORN)) {
             labels.add(Component.translatable(e.equip == InvEntry.LEFT ? "inventory.skycraft.action.unequip_left" : "inventory.skycraft.action.equip_left"));
-            keys.add("");
+            keys.add("RMB");
             runs.add(this::secondary);
         }
         labels.add(Component.translatable(e.count() > 1 && !hasShiftDown() ? "inventory.skycraft.action.drop_one" : "inventory.skycraft.action.drop"));
@@ -1040,6 +1057,16 @@ public class SkyrimInventoryScreen extends Screen {
                 favorite();
                 return true;
             }
+            case GLFW.GLFW_KEY_G -> {
+                if (selectedEntry != null && com.skycraft.crafting.arcane.ArcaneEvents.isApplicablePoison(selectedEntry.stack)) {
+                    ClientInventoryHandlers.applyPoison(selectedEntry);
+                    return true;
+                }
+            }
+            case GLFW.GLFW_KEY_C -> {
+                openVanilla();
+                return true;
+            }
             case GLFW.GLFW_KEY_R -> {
                 setSort((sortMode + 1) % (vwVisible ? 4 : 3));
                 return true;
@@ -1069,6 +1096,10 @@ public class SkyrimInventoryScreen extends Screen {
         }
 
         if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT || button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+            if (hoverCrafting && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+                openVanilla();
+                return true;
+            }
             if (hoverPreview && selectedEntry != null && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
                 inspectMode = true;
                 inspectRotX = 15f;
@@ -1090,14 +1121,11 @@ public class SkyrimInventoryScreen extends Screen {
             }
             if (hoverRow >= 0 && hoverRow < shown.size()) {
                 long now = Util.getMillis();
-                boolean again = hoverRow == selected && hoverRow == lastClickRow && now - lastClick < 350;
                 select(hoverRow);
                 if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
                     secondary();
-                } else if (again) {
+                } else {
                     primary();
-                    lastClick = 0;
-                    return true;
                 }
                 lastClick = now;
                 lastClickRow = hoverRow;

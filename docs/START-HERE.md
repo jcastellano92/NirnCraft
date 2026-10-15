@@ -33,31 +33,41 @@ people ("world building is king").
 | Reference data from the owner's game installs | `.reference/` (gitignored; facts only; never committed) |
 | Release output | `dist/` (built by `tools/build_release.ps1`; not committed) |
 
-## Current state (2026-10-13)
+## Current state (2026-10-14)
 
 * Branch `tamriel-overhaul`, local only. The whole continent exists: 71 land regions, 4,914 places, 113+ biomes,
   settlements with a building grammar, dungeons with identity in Skyrim, 1,072 quests, NPCs with homes, jobs and
-  schedules, creatures, magic, sailing, realms, music. `qa.ps1 -Server` passes.
+  schedules, creatures, magic, sailing, realms, music. `qa.ps1` passes (`OVERALL PASS`).
 * The plan-first generation pipeline is complete: P1 road plan, P2 terrain obeys it, P3 roads and crossings painted
   from it, P4 vegetation masks, **P5 streets to every door (`e9a5ebe`, 0.38% unreachable doors)**, P6 planned scenes.
   Since then: fire system and the destroyed-Helgen aftermath (`4ba41bb`), playtest rounds 4 and 5 (`15e46d7`,
-  `b738492`), landmark grounding and story lecterns (`7af4469`). Release builds exist in `dist/`.
-* Design is done: the rulebook, the scale model, the Iliac Bay plan, this roadmap and the prompt library. The ten
-  province documents (`docs/world/provinces/*.md`) are being written; **`skyrim.md` is finished (sections 1-10,
-  phases SK1-SK8, `7df74b4`)**, the template the other provinces copy.
+  `b738492`), landmark grounding and story lecterns (`7af4469`), and **playtest round 6 & multiplayer/gameplay
+  overhaul** (jail/party fast-travel & release grace, Sanies Lupinus & level-gated werewolves, crouch trap disarm &
+  filled dispensers, vanilla spawner strip, NPC busy cleanup, L/R hand dual-wield/spell/bound/favorite equip, Skyrim
+  XP curve & party XP/HUD bar, Helgen aftermath & contextual dialogue, weapon poisons & HUD meter, ally/companion
+  healing spells & staves, party inn booking & bed ownership, book-to-inventory state return & readable Journey book,
+  5-min per-item evidence decay, 48h merchant rotation & buyback decay). Release builds are deployed to Prism and
+  `dist/Skycraft-client-instance.zip`.
+* **All design and province planning documents are 100% complete:** the rulebook (`DESIGN-PRINCIPLES.md`), the scale
+  model (`SCALE-AND-GEOGRAPHY.md`), the Iliac Bay plan (`ILIAC-BAY.md`), the master roadmap (`WORLD-PLAN.md`), the
+  prompt library (`docs/prompts/`, including `R4a-town-overhaul.md`), and **all 11 province/island/expedition documents
+  in `docs/world/provinces/*.md` (`skyrim.md`, `high_rock.md`, `hammerfell.md`, `cyrodiil.md`, `morrowind.md`,
+  `solstheim.md`, `black_marsh.md`, `elsweyr.md`, `valenwood.md`, `summerset.md`, `foreign_lands.md`), each with all
+  ten sections (§1–§10) written**.
 * The gap: Skyrim scores 95 on the parity scorecard but only 53-54 on Settlements (named NPCs 187 against the real
   845, named buildings 112 against 210); every other province sits at 40-53.
-  The map is full; **depth per place** is what is missing (named people, stories, identity, quests).
+  The map is full; **depth per place** is what is missing (named people, stories, identity, quests, and the town
+  overhaul of `R4a`).
 
 ## Next
 
-**Next: R0 (release build and playtest) is in progress; finish it per `docs/prompts/R0-release-playtest.md`.** P5 is
-merged, so nothing blocks it. Then R1 and R2 in parallel, then R3a-R3e (R3a's pilot input, `skyrim.md`, exists), then
-R4 (Skyrim, designed in `skyrim.md` section 10.4), then the provinces from R5 (Iliac Bay). The full order and
-dependencies are in WORLD-PLAN section 5; what is running or done is in section 7.
+**Next: R1 (`docs/prompts/R1-loose-ends.md`) and R2 (`docs/prompts/R2-testing-tiers.md`) in parallel, followed by
+R3a–R3e, R4 (`docs/prompts/R4-skyrim-uplift.md`) + R4a (`docs/prompts/R4a-town-overhaul.md`), and the province
+rollout starting with R5 (`docs/prompts/R5-iliac-bay.md`).** All 11 province design documents are finished and ready
+for V1–V9 execution.
 
-To run the next unstarted phase, say: "Read `docs/START-HERE.md` and `docs/prompts/_COMMON.md`, then run
-`docs/prompts/R1-loose-ends.md`" (or the prompt of whichever phase WORLD-PLAN section 7 shows as `next`).
+To run the next phase, say: "Read `docs/START-HERE.md` and `docs/prompts/_COMMON.md`, then run
+`docs/prompts/R1-loose-ends.md`" (or `R4a-town-overhaul.md`, or whichever phase WORLD-PLAN section 7 shows as `next`).
 
 ## The rules (non-negotiable)
 

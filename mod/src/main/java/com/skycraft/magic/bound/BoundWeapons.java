@@ -37,6 +37,11 @@ public final class BoundWeapons {
     /** The spells this weapon displaced from the right / left hand; they come back when it runs out while held. */
     public static final String FROM_RIGHT = "skycraft_bound_from_right";
     public static final String FROM_LEFT = "skycraft_bound_from_left";
+    /** The item keys ({@link com.skycraft.inventory.Pack#keyOf}) displaced from the right / left hand when conjuring. */
+    public static final String FROM_RIGHT_ITEM = "skycraft_bound_from_right_item";
+    public static final String FROM_LEFT_ITEM = "skycraft_bound_from_left_item";
+    /** True when a one-handed bound weapon was conjured into the left (off) hand. */
+    public static final String BOUND_LEFT = "skycraft_bound_left";
     /** Marks arrows fired from a bound bow (persistent data), so bound-weapon perks apply to them. */
     public static final String ARROW_TAG = "skycraft_bound_arrow";
     /** Vanilla bundle contents tag. */
@@ -74,8 +79,9 @@ public final class BoundWeapons {
         tag.putLong(UNTIL, p.level().getGameTime() + spell.duration);
         tag.putUUID(OWNER, p.getUUID());
         tag.putInt(DURATION, spell.duration);
-        // One hand system (magic.Hands): the weapon replaces what the right hand held (a re-cast refreshes the old copy).
-        if (!Hands.equipBound(p, stack)) {
+        boolean leftHand = com.skycraft.magic.spell.SpellCasting.castingSide() < 0 && !Hands.twoHanded(stack);
+        // One hand system (magic.Hands): the weapon replaces what the casting hand held (a re-cast refreshes the old copy).
+        if (!Hands.equipBound(p, stack, leftHand)) {
             Notifier.message(p, Component.translatable("message.skycraft.inventory_full"));
             return Spell.Result.FAILED;
         }
@@ -102,13 +108,15 @@ public final class BoundWeapons {
             boolean ranOut = tag != null && tag.hasUUID(OWNER) && tag.getUUID(OWNER).equals(holder.getUUID())
                     && tag.getLong(UNTIL) <= level.getGameTime();
             CompoundTag from = tag == null ? new CompoundTag() : tag.copy();
-            boolean held = holder instanceof ServerPlayer hp && hp.getMainHandItem() == stack;
+            boolean heldRight = holder instanceof ServerPlayer hp && hp.getMainHandItem() == stack;
+            boolean heldLeft = holder instanceof ServerPlayer hp && hp.getOffhandItem() == stack;
+            if (heldLeft) from.putBoolean(BOUND_LEFT, true);
             stack.setCount(0);
             if (holder instanceof ServerPlayer sp) {
                 level.playSound(null, sp.getX(), sp.getY(), sp.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.7f, 1.6f);
                 Notifier.message(sp, Component.translatable("message.skycraft.bound_vanished"));
-                // the hand it was in gets the spell back that it replaced
-                if (ranOut && held && sp.isAlive()) Hands.restoreAfterBound(sp, from);
+                // the hand it was in gets the previous weapon or spell back that it replaced
+                if (ranOut && (heldRight || heldLeft) && sp.isAlive()) Hands.restoreAfterBound(sp, from);
             }
         }
     }

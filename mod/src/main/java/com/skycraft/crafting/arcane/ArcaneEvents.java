@@ -57,8 +57,22 @@ import java.util.function.Supplier;
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ArcaneEvents {
-    /** Weapon NBT holding an applied poison: {Effects: [MobEffectInstance...], Hits: int, Name: json}. */
+    /** Weapon NBT holding an applied poison: {Effects: [MobEffectInstance...], Hits: int, MaxHits: int, Name: json}. */
     public static final String WEAPON_POISON = "skycraft_weapon_poison";
+    public static final String POISON_HITS = "Hits";
+    public static final String POISON_MAX_HITS = "MaxHits";
+    public static final String POISON_NAME = "Name";
+
+    public static String poisonDisplayName(CompoundTag poisonTag) {
+        String raw = poisonTag.getString(POISON_NAME);
+        if (raw.isEmpty()) return Component.translatable("tooltip.skycraft.alchemy.poison").getString();
+        try {
+            Component parsed = Component.Serializer.fromJson(raw);
+            if (parsed != null) return parsed.getString();
+        } catch (Exception ignored) {
+        }
+        return raw;
+    }
 
     private ArcaneEvents() {}
 
@@ -137,6 +151,7 @@ public final class ArcaneEvents {
                 if (attacker instanceof ServerPlayer player) amount += applyWeaponPoison(player, target);
             } else if (source.getDirectEntity() instanceof AbstractArrow) {
                 amount *= 1f + 0.1f * ArcaneEffects.level(attacker, ArcaneEffects.FORTIFY_ARCHERY);
+                if (attacker instanceof ServerPlayer player) amount += applyWeaponPoison(player, target);
             }
         }
         event.setAmount(Math.max(0f, amount));
@@ -152,11 +167,134 @@ public final class ArcaneEvents {
         return inst == null ? 1f : 1f + 0.25f * (inst.getAmplifier() + 1);
     }
 
-    /** Applies a poison coated on the attacker's main-hand weapon; returns extra instant damage. */
+    public static final int DEFAULT_POISON_HITS = 5;
+    public static final int CONCENTRATED_POISON_HITS = 10;
+
+    /** True if {@code stack} is a potion or poison with at least one harmful effect that can be coated onto a weapon. */
+    public static boolean isApplicablePoison(ItemStack stack) {
+        if (stack.isEmpty() || !(stack.getItem() instanceof net.minecraft.world.item.PotionItem)) return false;
+        CompoundTag tag = stack.getTag();
+        if (tag != null && tag.getBoolean(Alchemy.POISON_TAG)) return true;
+        for (MobEffectInstance inst : PotionUtils.getMobEffects(stack)) {
+            if (!inst.getEffect().isBeneficial()) return true;
+        }
+        return false;
+    }
+
+    /** True if {@code weapon} is a melee weapon or bow that can be coated with poison. */
+    public static boolean canReceivePoison(ItemStack weapon) {
+        if (weapon.isEmpty()) return false;
+        WeaponClass wc = WeaponClass.of(weapon);
+        return wc.skill == Skill.ONE_HANDED || wc.skill == Skill.TWO_HANDED || wc == WeaponClass.BOW;
+    }
+
+    /** Finds the player's equipped weapon to coat with poison (main hand first, then offhand). */
+    public static ItemStack targetWeaponForPoison(Player player) {
+        ItemStack main = player.getMainHandItem();
+        if (canReceivePoison(main)) return main;
+        ItemStack off = player.getOffhandItem();
+        if (canReceivePoison(off)) return off;
+        return ItemStack.EMPTY;
+    }
+
+    /** Coats the player's equipped weapon with the poison in {@code poisonStack} from the inventory screen. */
+    public static boolean applyPoisonFromInventory(ServerPlayer player, ItemStack poisonStack) {
+        if (!isApplicablePoison(poisonStack)) return false;
+        ItemStack weapon = targetWeaponForPoison(player);
+        if (weapon.isEmpty()) {
+            Notifier.message(player, Component.translatable("message.skycraft.alchemy.no_weapon_for_poison"));
+            return false;
+        }
+        if (!coatWeapon(player, poisonStack, weapon)) return false;
+        if (!player.isCreative()) {
+            boolean giveBottle = poisonStack.is(net.minecraft.world.item.Items.POTION);
+            poisonStack.shrink(1);
+            if (giveBottle) {
+                com.skycraft.inventory.Pack.giveOrDrop(player, new ItemStack(net.minecraft.world.item.Items.GLASS_BOTTLE));
+            }
+        }
+        return true;
+    }
+
+    private static boolean coatWeapon(Player player, ItemStack poisonStack, ItemStack weapon) {
+        List<MobEffectInstance> all = PotionUtils.getMobEffects(poisonStack);
+        if (all.isEmpty()) return false;
+        ListTag list = new ListTag();
+        for (MobEffectInstance inst : all) {
+            if (!inst.getEffect().isBeneficial()) list.add(inst.save(new CompoundTag()));
+        }
+        if (list.isEmpty()) {
+            for (MobEffectInstance inst : all) list.add(inst.save(new CompoundTag()));
+        }
+        int maxHits = Perks.has(player, "alchemy.concentrated_poison") ? CONCENTRATED_POISON_HITS : DEFAULT_POISON_HITS;
+        CompoundTag poison = new CompoundTag();
+        poison.put("Effects", list);
+        poison.putInt("Hits", maxHits);
+        poison.putInt("MaxHits", maxHits);
+        poison.putInt("Color", PotionUtils.getColor(all));
+        poison.putString("Name", Component.Serializer.toJson(poisonStack.getHoverName()));
+        weapon.getOrCreateTag().put(WEAPON_POISON, poison);
+        player.level().playSound(null, player.blockPosition(), SoundEvents.BOTTLE_EMPTY, SoundSource.PLAYERS, 0.8f, 1f);
+        if (player instanceof ServerPlayer sp) {
+            Notifier.message(sp, Component.translatable("message.skycraft.alchemy.weapon_poisoned", weapon.getHoverName()));
+        }
+        return true;
+    }
+
+    /** Coats a wilderness chest weapon with a leveled poison (never used on enemy mob equipment). */
+    public static void applyRandomWildernessPoison(ItemStack weapon, int level, RandomSource random) {
+        if (!canReceivePoison(weapon)) return;
+        int amp = level >= 30 ? 2 : level >= 15 ? 1 : 0;
+        MobEffectInstance effect;
+        Component name;
+        int color;
+        switch (random.nextInt(4)) {
+            case 0 -> {
+                effect = new MobEffectInstance(MobEffects.HARM, 1, Math.min(1, amp));
+                name = Component.translatable("item.skycraft.poison_of",
+                        com.skycraft.crafting.arcane.alchemy.AlchemyEffect.DAMAGE_HEALTH.displayName());
+                color = 0x8A1828;
+            }
+            case 1 -> {
+                effect = new MobEffectInstance(MobEffects.POISON, (8 + amp * 4) * 20, amp);
+                name = Component.translatable("item.skycraft.poison_of", Component.translatable("effect.minecraft.poison"));
+                color = 0x4E9331;
+            }
+            case 2 -> {
+                effect = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, (10 + amp * 5) * 20, amp);
+                name = Component.translatable("item.skycraft.poison_of",
+                        com.skycraft.crafting.arcane.alchemy.AlchemyEffect.SLOW.displayName());
+                color = 0x5A6C81;
+            }
+            default -> {
+                effect = new MobEffectInstance(ArcaneEffects.DAMAGE_STAMINA.get(), 1, amp);
+                name = Component.translatable("item.skycraft.poison_of",
+                        com.skycraft.crafting.arcane.alchemy.AlchemyEffect.DAMAGE_STAMINA.displayName());
+                color = 0x589838;
+            }
+        }
+        int maxHits = DEFAULT_POISON_HITS;
+        int hits = 2 + random.nextInt(maxHits - 1);
+        ListTag list = new ListTag();
+        list.add(effect.save(new CompoundTag()));
+        CompoundTag poison = new CompoundTag();
+        poison.put("Effects", list);
+        poison.putInt("Hits", hits);
+        poison.putInt("MaxHits", maxHits);
+        poison.putInt("Color", color);
+        poison.putString("Name", Component.Serializer.toJson(name));
+        weapon.getOrCreateTag().put(WEAPON_POISON, poison);
+    }
+
+    /** Applies a poison coated on the attacker's weapon (main hand, else offhand); returns extra instant damage. */
     private static float applyWeaponPoison(ServerPlayer player, LivingEntity target) {
         ItemStack weapon = player.getMainHandItem();
         CompoundTag tag = weapon.getTag();
-        if (tag == null || !tag.contains(WEAPON_POISON, Tag.TAG_COMPOUND)) return 0f;
+        if (tag == null || !tag.contains(WEAPON_POISON, Tag.TAG_COMPOUND)) {
+            weapon = player.getOffhandItem();
+            tag = weapon.getTag();
+            if (tag == null || !tag.contains(WEAPON_POISON, Tag.TAG_COMPOUND)) return 0f;
+        }
         CompoundTag poison = tag.getCompound(WEAPON_POISON);
         float extra = 0f;
         ListTag effects = poison.getList("Effects", Tag.TAG_COMPOUND);
@@ -185,34 +323,25 @@ public final class ArcaneEvents {
         return extra;
     }
 
-    /** Sneak + use a poison while holding a melee weapon in the other hand to coat the weapon. */
+    /** Sneak + use a poison while holding a weapon in the other hand to coat the weapon. */
     @SubscribeEvent
     public static void onUseItem(PlayerInteractEvent.RightClickItem event) {
         Player player = event.getEntity();
         ItemStack poisonStack = event.getItemStack();
-        CompoundTag ptag = poisonStack.getTag();
-        if (!player.isShiftKeyDown() || ptag == null || !ptag.getBoolean(Alchemy.POISON_TAG)) return;
+        if (!player.isShiftKeyDown() || !isApplicablePoison(poisonStack)) return;
         InteractionHand other = event.getHand() == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
         ItemStack weapon = player.getItemInHand(other);
-        WeaponClass wc = WeaponClass.of(weapon);
-        if (wc.skill != Skill.ONE_HANDED && wc.skill != Skill.TWO_HANDED) return;
+        if (!canReceivePoison(weapon)) return;
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.SUCCESS);
         if (player.level().isClientSide) return;
 
-        List<MobEffectInstance> effects = PotionUtils.getMobEffects(poisonStack);
-        if (effects.isEmpty()) return;
-        ListTag list = new ListTag();
-        for (MobEffectInstance inst : effects) list.add(inst.save(new CompoundTag()));
-        CompoundTag poison = new CompoundTag();
-        poison.put("Effects", list);
-        poison.putInt("Hits", Perks.has(player, "alchemy.concentrated_poison") ? 6 : 3);
-        poison.putString("Name", Component.Serializer.toJson(poisonStack.getHoverName()));
-        weapon.getOrCreateTag().put(WEAPON_POISON, poison);
-        if (!player.isCreative()) poisonStack.shrink(1);
-        player.level().playSound(null, player.blockPosition(), SoundEvents.BOTTLE_EMPTY, SoundSource.PLAYERS, 0.8f, 1f);
-        if (player instanceof ServerPlayer sp) {
-            Notifier.message(sp, Component.translatable("message.skycraft.alchemy.weapon_poisoned", weapon.getHoverName()));
+        if (coatWeapon(player, poisonStack, weapon) && !player.isCreative()) {
+            boolean giveBottle = poisonStack.is(net.minecraft.world.item.Items.POTION);
+            poisonStack.shrink(1);
+            if (giveBottle && player instanceof ServerPlayer sp) {
+                com.skycraft.inventory.Pack.giveOrDrop(sp, new ItemStack(net.minecraft.world.item.Items.GLASS_BOTTLE));
+            }
         }
     }
 

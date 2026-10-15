@@ -82,8 +82,25 @@ public final class ClientInventoryHandlers {
         SkyNetwork.sendToServer(new InventoryPackets.InvAction(action, entry.primarySlot(), entry.itemId));
     }
 
+    private static net.minecraft.client.gui.screens.Screen pendingReturnScreen;
+
+    public static net.minecraft.client.gui.screens.Screen consumeReturnScreen(net.minecraft.client.gui.screens.Screen current) {
+        if (pendingReturnScreen != null) {
+            net.minecraft.client.gui.screens.Screen ret = pendingReturnScreen;
+            pendingReturnScreen = null;
+            return ret;
+        }
+        return current instanceof SkyrimInventoryScreen ? current : null;
+    }
+
+    public static void applyPoison(InvEntry entry) {
+        if (entry != null && com.skycraft.crafting.arcane.ArcaneEvents.isApplicablePoison(entry.stack)) {
+            send(InventoryPackets.InvAction.APPLY_POISON, entry);
+        }
+    }
+
     /**
-     * The row's main action: Eat/Drink, Read, or Equip/Unequip. Returns true if the screen should close
+     * The row's main action: Eat/Drink, Read, or Equip/Unequip. Returns true if the screen was replaced or should close
      * (reading opens the book's own screen).
      */
     public static boolean primary(InvEntry entry) {
@@ -93,7 +110,23 @@ public final class ClientInventoryHandlers {
             return false;
         }
         if (entry.readable() && entry.equip != InvEntry.WORN) {
-            Minecraft.getInstance().setScreen(null);
+            Minecraft mc = Minecraft.getInstance();
+            if (entry.stack.getItem() instanceof com.skycraft.guide.HandbookItem) {
+                net.minecraft.client.gui.screens.Screen ret = mc.screen instanceof SkyrimInventoryScreen ? mc.screen : null;
+                mc.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
+                        net.minecraft.sounds.SoundEvents.BOOK_PAGE_TURN, 1.0f, 1.0f));
+                mc.setScreen(new com.skycraft.guide.client.HandbookScreen(ret));
+                return true;
+            }
+            if (entry.stack.getItem() instanceof com.skycraft.magic.spell.SpellTomeItem
+                    || entry.stack.getItem() instanceof com.skycraft.economy.SkillBookItem) {
+                send(InventoryPackets.InvAction.READ, entry);
+                return false;
+            }
+            pendingReturnScreen = mc.screen instanceof SkyrimInventoryScreen ? mc.screen : null;
+            if (!(entry.stack.getItem() instanceof com.skycraft.lore.LoreBookItem)) {
+                mc.setScreen(null);
+            }
             send(InventoryPackets.InvAction.READ, entry);
             return true;
         }
@@ -103,9 +136,13 @@ public final class ClientInventoryHandlers {
         return false;
     }
 
-    /** Equip to / unequip from the left hand, falling back to the main action when the item can't be held there. */
+    /** Equip to / unequip from the left hand, or apply poison when right-clicking a poison potion. */
     public static boolean secondary(InvEntry entry) {
         if (entry == null) return false;
+        if (com.skycraft.crafting.arcane.ArcaneEvents.isApplicablePoison(entry.stack)) {
+            send(InventoryPackets.InvAction.APPLY_POISON, entry);
+            return false;
+        }
         if (entry.equip == InvEntry.LEFT || entry.leftHandable()) {
             send(InventoryPackets.InvAction.EQUIP_LEFT, entry);
             return false;
@@ -116,6 +153,10 @@ public final class ClientInventoryHandlers {
     public static String primaryLabelKey(InvEntry entry) {
         if (entry.consumable() && entry.equip != InvEntry.WORN) return entry.drink() ? "drink" : "eat";
         if (entry.readable() && entry.equip != InvEntry.WORN) return "read";
+        if (entry.equip == InvEntry.LEFT
+                && com.skycraft.inventory.InventoryActions.equipSlotFor(entry.stack) != net.minecraft.world.entity.EquipmentSlot.OFFHAND) {
+            return "equip";
+        }
         if (entry.equipped()) return "unequip";
         if (entry.isUsableEquipment()) return "equip";
         return null;

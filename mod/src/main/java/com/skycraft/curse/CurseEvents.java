@@ -81,6 +81,7 @@ public final class CurseEvents {
         if ((player.tickCount + player.getId()) % 20 != 0) return;
         long now = player.level().getGameTime();
         Vampirism.tick(player, now);
+        Lycanthropy.tickDisease(player, now);
         Form form = Curses.form(player);
         if (form == Form.BEAST) Lycanthropy.tick(player, now);
         else if (form == Form.LORD) VampireLord.tick(player, now);
@@ -122,9 +123,12 @@ public final class CurseEvents {
             float mult = Vampirism.damageTaken(player, event.getSource());
             if (mult != 1f) event.setAmount(event.getAmount() * mult);
             // Sanguinare Vampiris from the claws and bites of vampires and their hounds
-            if (event.getAmount() > 0 && attacker instanceof LivingEntity carrier && event.getSource().getDirectEntity() == attacker
-                    && carriesSanguinare(carrier) && player.getRandom().nextFloat() < Vampirism.INFECTION_CHANCE) {
-                Vampirism.infect(player);
+            if (event.getAmount() > 0 && attacker instanceof LivingEntity carrier && event.getSource().getDirectEntity() == attacker) {
+                if (carriesSanguinare(carrier) && player.getRandom().nextFloat() < Vampirism.INFECTION_CHANCE) {
+                    Vampirism.infect(player);
+                } else if (carriesSaniesLupinus(carrier) && player.getRandom().nextFloat() < Lycanthropy.INFECTION_CHANCE) {
+                    Lycanthropy.infect(player);
+                }
             }
         }
     }
@@ -132,6 +136,10 @@ public final class CurseEvents {
     public static boolean carriesSanguinare(Entity e) {
         return e instanceof VampireEntity || e instanceof VampireLordEntity || e instanceof DeathHoundEntity
                 || e instanceof NpcEntity npc && npc.role() == NpcRole.VAMPIRE;
+    }
+
+    public static boolean carriesSaniesLupinus(Entity e) {
+        return e instanceof WerewolfEntity || (e instanceof Player p && Curses.form(p) == Form.BEAST);
     }
 
     @SubscribeEvent

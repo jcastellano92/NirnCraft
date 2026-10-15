@@ -70,6 +70,8 @@ public final class Diseases {
         for (RegistryObject<MobEffect> d : ALL) {
             if (d.isPresent() && d.get() == effect) return true;
         }
+        if (com.skycraft.curse.CurseRegistry.SANGUINARE.isPresent() && com.skycraft.curse.CurseRegistry.SANGUINARE.get() == effect) return true;
+        if (com.skycraft.curse.CurseRegistry.SANIES_LUPINUS.isPresent() && com.skycraft.curse.CurseRegistry.SANIES_LUPINUS.get() == effect) return true;
         return false;
     }
 
@@ -79,6 +81,12 @@ public final class Diseases {
         for (RegistryObject<MobEffect> d : ALL) {
             if (entity.hasEffect(d.get())) out.add(d.get());
         }
+        if (com.skycraft.curse.CurseRegistry.SANGUINARE.isPresent() && entity.hasEffect(com.skycraft.curse.CurseRegistry.SANGUINARE.get())) {
+            out.add(com.skycraft.curse.CurseRegistry.SANGUINARE.get());
+        }
+        if (com.skycraft.curse.CurseRegistry.SANIES_LUPINUS.isPresent() && entity.hasEffect(com.skycraft.curse.CurseRegistry.SANIES_LUPINUS.get())) {
+            out.add(com.skycraft.curse.CurseRegistry.SANIES_LUPINUS.get());
+        }
         return out;
     }
 
@@ -86,6 +94,9 @@ public final class Diseases {
         for (RegistryObject<MobEffect> d : ALL) {
             if (entity.hasEffect(d.get())) return true;
         }
+        if (com.skycraft.curse.CurseRegistry.SANGUINARE.isPresent() && entity.hasEffect(com.skycraft.curse.CurseRegistry.SANGUINARE.get())) return true;
+        if (com.skycraft.curse.CurseRegistry.SANIES_LUPINUS.isPresent() && entity.hasEffect(com.skycraft.curse.CurseRegistry.SANIES_LUPINUS.get())) return true;
+        if (entity instanceof Player p && (com.skycraft.curse.Curses.hasSanguinare(p) || com.skycraft.curse.Curses.hasSaniesLupinus(p))) return true;
         return false;
     }
 
@@ -98,8 +109,9 @@ public final class Diseases {
         for (RegistryObject<MobEffect> d : ALL) {
             if (entity.removeEffect(d.get())) cured++;
         }
-        // Sanguinare Vampiris (curse module) is cured like any disease until it has turned its carrier
+        // Sanguinare Vampiris and Sanies Lupinus (curse module) are cured like any disease until they turn their carrier
         if (com.skycraft.curse.Curses.cureSanguinare(entity)) cured++;
+        if (com.skycraft.curse.Curses.cureSaniesLupinus(entity)) cured++;
         if (cured > 0 && entity instanceof Player player) {
             SurvivalEvents.reconcileBonuses(player);
             if (player instanceof ServerPlayer sp) Notifier.message(sp, Component.translatable("message.skycraft.survival.cured"));

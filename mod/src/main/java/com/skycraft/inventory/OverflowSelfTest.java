@@ -408,7 +408,7 @@ final class OverflowSelfTest {
         for (int i = 100; i < 400; i++) Pack.give(dead, distinct(i));
         Pack.give(dead, new ItemStack(Items.ARROW, 1000));
         ItemStack letter = QuestItems.letter("selftest");
-        Pack.give(dead, letter);
+        Pack.give(dead, letter.copy());
         List<ItemStack> carriedBefore = playerStacks(dead);
         Map<String, Long> before = count(carriedBefore);
         long letters = Pack.count(dead, s -> QuestItems.isQuestItem(s));

@@ -43,7 +43,7 @@ public final class Schedule {
             return household(h, social);
         }
         return switch (role) {
-            case INNKEEPER -> h < 6 ? Activity.SLEEP : Activity.WORK;
+            case INNKEEPER -> Activity.WORK;
             case BARD -> h >= 2 && h < 10 ? Activity.SLEEP : h < 12 ? Activity.WANDER : h < 14 ? Activity.WORK
                     : h < 17 ? Activity.WANDER : Activity.WORK;
             case BEGGAR -> h >= 23 || h < 6 ? Activity.SLEEP : h == 12 ? Activity.INN : Activity.WANDER;

@@ -38,6 +38,10 @@ public final class Lycanthropy {
     /** Each feeding adds this much (Skyrim: 30 s). */
     public static final int FEED_EXTENSION = 20 * 30;
     public static final int DAY = 24000;
+    /** Sanies Lupinus turns its carrier into a werewolf after three in-game days unless cured. */
+    public static final int INCUBATION = 3 * DAY;
+    /** Chance per hit that a werewolf's attack passes on Stage 1 Sanies Lupinus. */
+    public static final float INFECTION_CHANCE = 0.25f;
     /** Being seen changing shape is a crime (Skyrim's 1000 gold bounty). */
     public static final int TRANSFORM_BOUNTY = 1000;
 
@@ -48,6 +52,42 @@ public final class Lycanthropy {
     public static final String FED_TAG = "skycraft_fed_on";
 
     private Lycanthropy() {}
+
+    /** Contracts Stage 1 Sanies Lupinus (incubating lycanthropy, curable for 3 days by potion, shrine, or healer). */
+    static boolean infect(ServerPlayer player) {
+        if (player.isCreative() || player.isSpectator()) return false;
+        CompoundTag t = Curses.tag(player);
+        if (t.getBoolean(Curses.WEREWOLF) || t.getBoolean(Curses.VAMPIRE) || t.getLong(Curses.SANIES_LUPINUS) > 0) return false;
+        com.skycraft.core.Race race = SkyData.get(player).getRace();
+        if ((race == com.skycraft.core.Race.ARGONIAN || race == com.skycraft.core.Race.BOSMER) && player.getRandom().nextBoolean()) return false;
+        t.putLong(Curses.SANIES_LUPINUS, Math.max(1, player.level().getGameTime()));
+        t.putInt(Curses.LUPINUS_DAYS, 0);
+        player.addEffect(new MobEffectInstance(CurseRegistry.SANIES_LUPINUS.get(), MobEffectInstance.INFINITE_DURATION, 0, false, false, true));
+        Curses.dirty(player);
+        Notifier.message(player, Component.translatable("message.skycraft.survival.contracted", CurseRegistry.SANIES_LUPINUS.get().getDisplayName()));
+        return true;
+    }
+
+    /** Once a second for all players: advances Sanies Lupinus incubation (3 days until full lycanthropy). */
+    static void tickDisease(ServerPlayer player, long now) {
+        CompoundTag t = Curses.tag(player);
+        long lup = t.getLong(Curses.SANIES_LUPINUS);
+        if (lup <= 0) return;
+        if (!player.hasEffect(CurseRegistry.SANIES_LUPINUS.get())) {
+            t.remove(Curses.SANIES_LUPINUS);
+            t.remove(Curses.LUPINUS_DAYS);
+            Curses.dirty(player);
+        } else if (now - lup >= INCUBATION) {
+            Curses.grantBeastBlood(player);
+        } else {
+            int days = (int) ((now - lup) / DAY);
+            if (days > t.getInt(Curses.LUPINUS_DAYS)) {
+                t.putInt(Curses.LUPINUS_DAYS, days);
+                Curses.dirty(player);
+                Notifier.message(player, Component.translatable("curse.skycraft.sanies_lupinus.day" + Math.min(2, days)));
+            }
+        }
+    }
 
     /** Beast Form, if the power has recharged. Returns whether the player changed. */
     static boolean transform(ServerPlayer player) {

@@ -74,7 +74,12 @@ final class JailEvidence {
     /** Jail key of the jail dimension (every cell block shares one set of stores). */
     static final String DIM = "dim";
 
+    /** How long each confiscated stolen item batch remains in the jail's confiscated barrel before decaying (5 minutes). */
+    static final long CONFISCATED_TTL_TICKS = 5L * 60L * 20L;
+
     enum Kind { NONE, PERSONAL, CONFISCATED, LEGACY_CHEST }
+
+    record ConfiscatedBatch(CompoundTag key, int count, long addedAt) {}
 
     // ------------------------------------------------------------------ the stores
 
@@ -82,6 +87,7 @@ final class JailEvidence {
     static final class Stores {
         final Map<UUID, BulkStore> personal = new HashMap<>();
         final BulkStore confiscated;
+        final List<ConfiscatedBatch> confiscatedBatches = new ArrayList<>();
         /** Lock tier of the confiscated goods: grows with the biggest bounty that was taken in. */
         int tier = Locks.APPRENTICE;
         private final Runnable changed;
@@ -95,10 +101,42 @@ final class JailEvidence {
             return personal.computeIfAbsent(player, k -> new BulkStore(MAX_ENTRIES, MAX_PER_ENTRY, changed));
         }
 
+        void pruneConfiscated(long now) {
+            if (now <= 0 || confiscatedBatches.isEmpty()) return;
+            boolean dirty = false;
+            for (var it = confiscatedBatches.iterator(); it.hasNext(); ) {
+                ConfiscatedBatch b = it.next();
+                if (now >= b.addedAt() && now - b.addedAt() >= CONFISCATED_TTL_TICKS) {
+                    ItemStack template = ItemStack.of(b.key());
+                    if (!template.isEmpty()) {
+                        confiscated.take(template, b.count());
+                    }
+                    it.remove();
+                    dirty = true;
+                }
+            }
+            if (confiscated.isEmpty() && !confiscatedBatches.isEmpty()) {
+                confiscatedBatches.clear();
+                dirty = true;
+            }
+            if (dirty && changed != null) changed.run();
+        }
+
         CompoundTag save() {
             CompoundTag tag = new CompoundTag();
             tag.putInt("tier", tier);
             tag.put("confiscated", confiscated.save());
+            if (!confiscatedBatches.isEmpty()) {
+                net.minecraft.nbt.ListTag batches = new net.minecraft.nbt.ListTag();
+                for (ConfiscatedBatch b : confiscatedBatches) {
+                    CompoundTag bt = new CompoundTag();
+                    bt.put("k", b.key().copy());
+                    bt.putInt("n", b.count());
+                    bt.putLong("t", b.addedAt());
+                    batches.add(bt);
+                }
+                tag.put("confiscated_batches", batches);
+            }
             CompoundTag p = new CompoundTag();
             personal.forEach((id, s) -> {
                 if (!s.isEmpty()) p.put(id.toString(), s.save());
@@ -111,6 +149,16 @@ final class JailEvidence {
             Stores st = new Stores(changed);
             st.tier = Math.max(Locks.NOVICE, Math.min(Locks.MASTER, tag.contains("tier") ? tag.getInt("tier") : Locks.APPRENTICE));
             st.confiscated.load(tag.getCompound("confiscated"));
+            if (tag.contains("confiscated_batches", net.minecraft.nbt.Tag.TAG_LIST)) {
+                net.minecraft.nbt.ListTag batches = tag.getList("confiscated_batches", net.minecraft.nbt.Tag.TAG_COMPOUND);
+                for (int i = 0; i < batches.size(); i++) {
+                    CompoundTag bt = batches.getCompound(i);
+                    int n = bt.getInt("n");
+                    if (n > 0 && bt.contains("k", net.minecraft.nbt.Tag.TAG_COMPOUND)) {
+                        st.confiscatedBatches.add(new ConfiscatedBatch(bt.getCompound("k"), n, bt.getLong("t")));
+                    }
+                }
+            }
             CompoundTag p = tag.getCompound("personal");
             for (String k : p.getAllKeys()) {
                 try {
@@ -126,6 +174,8 @@ final class JailEvidence {
     static Stores stores(MinecraftServer server, String jailKey) {
         Jail.JailData jd = Jail.JailData.get(server);
         Stores st = jd.stores(jailKey);
+        long now = server.overworld() != null ? server.overworld().getGameTime() : 0L;
+        st.pruneConfiscated(now);
         if (!LEGACY.equals(jailKey)) {
             // stolen goods an older version parked under no jail go to the first jail that is looked at
             Stores old = jd.stores.get(LEGACY);
@@ -150,13 +200,25 @@ final class JailEvidence {
      */
     static void confiscate(ServerPlayer player, String jailKey, ItemStack stack) {
         if (stack.isEmpty()) return;
-        route(stores(player.server, jailKey), player.getUUID(), stack);
+        route(stores(player.server, jailKey), player.getUUID(), stack, player.level().getGameTime());
         if (!stack.isEmpty()) Inv.giveOrDrop(player, stack);
     }
 
     /** The one rule: stolen goods into the shared store, anything else into the player's own. Consumes what it took. */
     static void route(Stores st, UUID player, ItemStack stack) {
-        (Bounty.isStolen(stack) ? st.confiscated : st.personal(player)).add(stack);
+        route(st, player, stack, 0L);
+    }
+
+    static void route(Stores st, UUID player, ItemStack stack, long now) {
+        if (Bounty.isStolen(stack)) {
+            CompoundTag key = BulkStore.key(stack);
+            int taken = st.confiscated.add(stack);
+            if (taken > 0 && now > 0) {
+                st.confiscatedBatches.add(new ConfiscatedBatch(key, taken, now));
+            }
+        } else {
+            st.personal(player).add(stack);
+        }
     }
 
     /** Empties one player's evidence in {@code st}: their own things, nobody else's (as stacks of at most max size). */

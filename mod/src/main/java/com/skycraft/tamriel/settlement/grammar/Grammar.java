@@ -264,8 +264,11 @@ public final class Grammar {
             c.keepClear(xs + floorH - 1, fy + 1, fy + 2, zz - 1);
             c.keepClear(xs + floorH - 2, fy + 1, fy + 2, zz - 1);
         } else if (mode == 3) {
+            c.keepClear(x0 + 1, fyPrev + 1, fyPrev + 2, z1 - 1);
             c.keepClear(x0 + 1, fyPrev + 1, fyPrev + 2, z1 - 2);
+            c.keepClear(x0 + 1, fy + 1, fy + 2, z1 - 1);
             c.keepClear(x0 + 1, fy + 1, fy + 2, z1 - 2);
+            c.keepClear(x0 + 2, fy + 1, fy + 2, z1 - 1);
         }
     }
 

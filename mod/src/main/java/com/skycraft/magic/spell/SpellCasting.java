@@ -75,6 +75,11 @@ public final class SpellCasting {
         return castingSide;
     }
 
+    /** The InteractionHand corresponding to the current castingSide (OFF_HAND for left, MAIN_HAND for right/dual). */
+    public static InteractionHand castingHand() {
+        return castingSide < 0 ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
+    }
+
     private static boolean hasMagicka(ServerPlayer p, float amount) {
         return p.isCreative() || SkyData.get(p).getMagicka() >= amount;
     }

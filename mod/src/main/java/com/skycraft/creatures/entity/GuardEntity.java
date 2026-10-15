@@ -110,12 +110,17 @@ public class GuardEntity extends PathfinderMob {
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.15D, true));
         this.goalSelector.addGoal(4, new OpenDoorGoal(this, true));
         this.goalSelector.addGoal(3, new HoldPostGoal());
-        this.goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 0.8D));
+        this.goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 0.8D) {
+            @Override
+            public boolean canUse() {
+                return !GuardEntity.this.isSummoned() && super.canUse();
+            }
+        });
         this.goalSelector.addGoal(5, new PatrolGoal());
         this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.6D) {
             @Override
             public boolean canUse() {
-                return GuardEntity.this.post == null && GuardEntity.this.route.length == 0 && super.canUse();
+                return GuardEntity.this.post == null && GuardEntity.this.route.length == 0 && !GuardEntity.this.isSummoned() && super.canUse();
             }
         });
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
@@ -213,7 +218,7 @@ public class GuardEntity extends PathfinderMob {
 
         @Override
         public boolean canUse() {
-            return isSummoned() && getTarget() == null && summonPos.distSqr(blockPosition()) > 9;
+            return isSummoned() && getTarget() == null && summonPos.distSqr(blockPosition()) > 4;
         }
 
         @Override
@@ -223,7 +228,14 @@ public class GuardEntity extends PathfinderMob {
 
         @Override
         public void start() {
-            getNavigation().moveTo(summonPos.getX() + 0.5, summonPos.getY(), summonPos.getZ() + 0.5, 1.05D);
+            getNavigation().moveTo(summonPos.getX() + 0.5, summonPos.getY(), summonPos.getZ() + 0.5, 1.1D);
+        }
+
+        @Override
+        public void tick() {
+            if (summonPos != null && tickCount % 10 == 0) {
+                getNavigation().moveTo(summonPos.getX() + 0.5, summonPos.getY(), summonPos.getZ() + 0.5, 1.1D);
+            }
         }
     }
 

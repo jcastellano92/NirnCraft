@@ -213,16 +213,40 @@ public final class Bounty {
 
     /** Removes every stolen item from the player's inventory. Returns how many items were taken. */
     public static int confiscate(Player player) {
+        return confiscate(player, Holds.holdAt(player.level(), player.blockPosition()));
+    }
+
+    /** Removes every stolen item from the player's inventory and routes them to the hold's jail confiscated barrel. */
+    public static int confiscate(Player player, String hold) {
         var inv = player.getInventory();
         int taken = 0;
+        String jailKey = JailEvidence.DIM;
+        if (player instanceof ServerPlayer sp) {
+            com.skycraft.tamriel.Place place = JailLoading.placeFor(hold, sp.blockPosition());
+            if (place != null) jailKey = place.id();
+        }
         for (int i = 0; i < inv.getContainerSize(); i++) {
             var stack = inv.getItem(i);
             if (isStolen(stack)) {
                 taken += stack.getCount();
                 inv.setItem(i, net.minecraft.world.item.ItemStack.EMPTY);
+                if (player instanceof ServerPlayer sp) {
+                    JailEvidence.confiscate(sp, jailKey, stack);
+                }
             }
         }
-        taken += com.skycraft.inventory.Pack.remove(player, Bounty::isStolen, Integer.MAX_VALUE); // the overflow pack too
+        for (int i = com.skycraft.inventory.Pack.size(player) - 1; i >= 0; i--) {
+            var stack = com.skycraft.inventory.Pack.get(player, i);
+            if (isStolen(stack)) {
+                var removed = com.skycraft.inventory.Pack.take(player, i, Integer.MAX_VALUE);
+                if (!removed.isEmpty()) {
+                    taken += removed.getCount();
+                    if (player instanceof ServerPlayer sp) {
+                        JailEvidence.confiscate(sp, jailKey, removed);
+                    }
+                }
+            }
+        }
         if (taken > 0 && player instanceof ServerPlayer sp) {
             Notifier.send(sp, NotifyKind.CRIME, Component.translatable("crime.skycraft.confiscated", taken), Component.empty());
         }

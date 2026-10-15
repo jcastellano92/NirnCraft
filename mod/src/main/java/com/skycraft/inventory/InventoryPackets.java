@@ -201,8 +201,10 @@ public final class InventoryPackets {
         public static final int DROP_ONE = 3;
         public static final int DROP_ALL = 4;
         public static final int FAVORITE = 5;
-        /** Books, spell tomes: move to the right hand and use it there. */
+        /** Books, spell tomes: read directly (or open on client). */
         public static final int READ = 6;
+        /** Apply a poison / harming potion to the equipped weapon. */
+        public static final int APPLY_POISON = 7;
 
         static void encode(InvAction m, FriendlyByteBuf buf) {
             buf.writeVarInt(m.action);

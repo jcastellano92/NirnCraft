@@ -114,6 +114,8 @@ public final class NpcDialogue {
         if (npc.getPersistentData().getBoolean("skycraft_reveler")) {
             return Component.literal("Hail, traveler! We are drinking Honningbrew Mead in celebration of life! Care to share a toast?");
         }
+        Component contextual = ContextualDialogue.greetingOverride(player, npc);
+        if (contextual != null) return contextual;
         NpcRole role = npc.role();
         if (npc.isPrisoner()) return line("prisoner");
         String travelKind = travelerKind(npc);
@@ -285,6 +287,7 @@ public final class NpcDialogue {
         Marriage.addOptions(player, npc, out);
         if (role.civilian && !npc.isChild()) {
             out.add(new DialogueOption("society.region", opt("region"), 530, NpcDialogue::aboutRegion));
+            ContextualDialogue.addContextualOptions(player, npc, out);
             if (role != NpcRole.INNKEEPER && Relationships.rank(npc, player).ordinal() >= Relationships.Rank.STRANGER.ordinal()) {
                 out.add(new DialogueOption("society.news", opt("news"), 520, NpcDialogue::news));
             }

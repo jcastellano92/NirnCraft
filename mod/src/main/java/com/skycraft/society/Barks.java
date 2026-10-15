@@ -252,6 +252,14 @@ public final class Barks {
             Long gap = SPEAKER_NEXT.get(m.getUUID());
             if (gap != null && tick < gap) continue;
             if (m.distanceToSqr(player) > range * range || !m.hasLineOfSight(player)) continue;
+            Component override = ContextualDialogue.ambientBarkOverride(player, m, random);
+            if (override != null) {
+                int cooldown = SocietyConfig.between(SocietyConfig.BARK_COOLDOWN_MIN.get(), SocietyConfig.BARK_COOLDOWN_MAX.get(), random);
+                AMBIENT_NEXT.put(m.getUUID(), (long) tick + cooldown * 20L);
+                m.getLookControl().setLookAt(player, 30f, 30f);
+                say(m, override);
+                return true;
+            }
             String category = choose(player, m, random);
             if (category == null) continue;
             int cooldown = SocietyConfig.between(SocietyConfig.BARK_COOLDOWN_MIN.get(), SocietyConfig.BARK_COOLDOWN_MAX.get(), random);

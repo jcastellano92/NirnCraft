@@ -29,30 +29,65 @@ public final class HelgenFolk {
     private HelgenFolk() {}
 
     /** True for somebody within the ruined town (its walls and a little way round). */
-    private static boolean inHelgen(LivingEntity e) {
+    public static boolean inHelgen(LivingEntity e) {
         return QuestConfig.RUINED_HELGEN.get() && e.level().dimension() == Level.OVERWORLD
                 && StartCottage.nearHelgen(e.getBlockX(), e.getBlockZ(), 8);
     }
 
+    /** True if this Helgen NPC is a shopkeeper (either the salvage cart or an actual merchant in Helgen). */
+    public static boolean isHelgenMerchant(LivingEntity npc) {
+        var pd = npc.getPersistentData();
+        if (pd.getBoolean(CART)) return true;
+        if (!inHelgen(npc) || pd.getBoolean(BARKS) || pd.contains(Tableau.KEY)) return false;
+        if (npc instanceof NpcEntity n && (n.role() == NpcRole.CITIZEN || n.role() == NpcRole.BEGGAR)) return false;
+        return com.skycraft.economy.Merchants.isMerchant(npc);
+    }
+
+    /** True if this NPC in Helgen should speak aftermath/fear dialogue (everyone except named quest NPCs and actively arresting guards). */
+    public static boolean isHelgenEventNpc(@org.jetbrains.annotations.Nullable ServerPlayer player, LivingEntity npc) {
+        if (!QuestNpcs.idOf(npc).isEmpty() || hasActiveArrest(player, npc)) return false;
+        var pd = npc.getPersistentData();
+        return pd.getBoolean(BARKS) || pd.contains(Tableau.KEY) || pd.getBoolean(CART) || inHelgen(npc);
+    }
+
+    /** True if this guard in Helgen needs to confront/arrest the player for an active bounty. */
+    public static boolean hasActiveArrest(@org.jetbrains.annotations.Nullable ServerPlayer player, LivingEntity npc) {
+        if (player == null || !com.skycraft.crime.Crimes.isGuard(npc)) return false;
+        String hold = com.skycraft.core.Holds.holdAt(player.level(), player.blockPosition());
+        return com.skycraft.crime.Bounty.get(player, hold) > 0;
+    }
+
     /** One-liners only: no menu of topics, trades or work. */
     public static boolean barkOnly(LivingEntity npc) {
+        return barkOnly(null, npc);
+    }
+
+    /** One-liners only: no menu of topics, trades or work (unless arresting a wanted player or running a shop). */
+    public static boolean barkOnly(@org.jetbrains.annotations.Nullable ServerPlayer player, LivingEntity npc) {
         var pd = npc.getPersistentData();
-        if (pd.getBoolean(CART) || !QuestNpcs.idOf(npc).isEmpty()) return false;
+        if (isHelgenMerchant(npc) || !QuestNpcs.idOf(npc).isEmpty() || hasActiveArrest(player, npc)) return false;
         if (pd.getBoolean(BARKS) || pd.contains(Tableau.KEY)) return true;
         return inHelgen(npc) && (npc instanceof NpcEntity || npc instanceof GuardEntity
                 || npc instanceof net.minecraft.world.entity.npc.AbstractVillager);
     }
 
-    /** Whether the menu of this person is cut down to a few options (the cart merchant, the named story people here). */
+    /** Whether the menu of this person is cut down to a few options (the cart merchant, the named story people here, or an arresting guard). */
     public static boolean limited(LivingEntity npc) {
-        var pd = npc.getPersistentData();
-        return pd.getBoolean(CART) || (!QuestNpcs.idOf(npc).isEmpty() && inHelgen(npc));
+        return limited(null, npc);
     }
 
-    /** What a limited person still offers: the merchant barters, the story people carry the story. */
+    public static boolean limited(@org.jetbrains.annotations.Nullable ServerPlayer player, LivingEntity npc) {
+        return isHelgenMerchant(npc)
+                || (!QuestNpcs.idOf(npc).isEmpty() && inHelgen(npc))
+                || (inHelgen(npc) && hasActiveArrest(player, npc));
+    }
+
+    /** What a limited person still offers: the merchant barters, the guard arrests, the story people carry the story. */
     public static boolean allowed(LivingEntity npc, String optionId) {
-        if (npc.getPersistentData().getBoolean(CART)) return optionId.equals("economy.barter") || optionId.equals("core.goodbye");
-        return optionId.startsWith("story.") || optionId.startsWith("quest.") || optionId.equals("core.goodbye");
+        if (optionId.equals("core.goodbye")) return true;
+        if (com.skycraft.crime.Crimes.isGuard(npc) && optionId.startsWith("crime.")) return true;
+        if (isHelgenMerchant(npc)) return optionId.equals("economy.barter") || optionId.equals("inn.rent");
+        return optionId.startsWith("story.") || optionId.startsWith("quest.");
     }
 
     /** The "Continue" option of a bark-only person: another line. */

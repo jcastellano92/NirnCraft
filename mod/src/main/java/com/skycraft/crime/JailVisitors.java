@@ -53,8 +53,8 @@ final class JailVisitors {
     static final int FREED_SENTENCE_SECONDS = 60;
     /** Ticks a visitor has to leave once a guard told them. */
     static final long GRACE_TICKS = 100;
-    /** Blocks of the front hall (from the front door) that anyone may stand in. */
-    static final int HALL_DEPTH = 3;
+    /** Blocks of the front guard room (before the cell-block gate at z=6..7) that anyone may stand in. */
+    static final int HALL_DEPTH = 6;
 
     /** Game time each player was told to leave. */
     private static final Map<UUID, Long> WARNED = new HashMap<>();
@@ -100,35 +100,27 @@ final class JailVisitors {
         return zoneFor(inside, along);
     }
 
-    /** Every second, for every player: a free player in a jail's restricted part. */
+    /**
+     * Skyrim-style jail visits: free players may freely visit any jail and walk the cell block to speak with prisoners
+     * without warnings or trespass bounties. Only a prisoner who recently broke out (within the last in-game day) and
+     * is spotted inside the jail by a guard is pursued; after a day has passed, they can return to visit normally.
+     */
     static void tick(ServerPlayer player) {
-        if (player.isCreative() || player.isSpectator() || Jail.isJailed(player) || Jail.isLoadingJail(player)) return;
+        WARNED.remove(player.getUUID());
+        if (player.isCreative() || player.isSpectator() || Jail.isJailed(player) || Jail.isLoadingJail(player)) {
+            return;
+        }
+        if (!Jail.isRecentEscapee(player)) {
+            return;
+        }
         ServerLevel level = player.serverLevel();
         Zone zone = zoneAt(level, player.getX(), player.getY(), player.getZ());
-        long now = level.getGameTime();
-        if (zone != Zone.RESTRICTED) {
-            WARNED.remove(player.getUUID());
+        if (zone == Zone.OUTSIDE) {
             return;
         }
         LivingEntity guard = Crimes.findGuardWitness(player);
-        Long warned = WARNED.get(player.getUUID());
-        switch (visitorStep(zone, guard != null, warned == null ? -1 : warned, now)) {
-            case WARN -> {
-                WARNED.put(player.getUUID(), now);
-                if (guard instanceof Mob mob) {
-                    JailPatrol.busy(mob, 200);
-                    mob.getNavigation().moveTo(player, 1.0);
-                    mob.getLookControl().setLookAt(player, 30f, 30f);
-                }
-                Notifier.message(player, Component.translatable("crime.skycraft.jail.visitor_warn", guard.getDisplayName()));
-            }
-            case TRESPASS -> {
-                WARNED.put(player.getUUID(), now);
-                Crimes.report(player, player.blockPosition(), Bounty.TRESPASS, true, null);
-                Notifier.message(player, Component.translatable("crime.skycraft.jail.visitor_trespass"));
-            }
-            default -> {
-            }
+        if (guard != null) {
+            Guards.attack(player, 24);
         }
     }
 

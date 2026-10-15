@@ -38,6 +38,9 @@ public final class Curses {
     /** Game time Sanguinare Vampiris was contracted (0 = not infected). */
     static final String SANGUINARE = "sanguinare";
     static final String SANG_DAYS = "sang_days";
+    /** Game time Sanies Lupinus (Stage 1 lycanthropy disease) was contracted (0 = not infected). */
+    static final String SANIES_LUPINUS = "sanies_lupinus";
+    static final String LUPINUS_DAYS = "lupinus_days";
     static final String WEREWOLF = "werewolf";
     static final String FORM = "form";
     static final String FORM_UNTIL = "form_until";
@@ -84,6 +87,10 @@ public final class Curses {
 
     public static boolean hasSanguinare(Player player) {
         return tag(player).getLong(SANGUINARE) > 0;
+    }
+
+    public static boolean hasSaniesLupinus(Player player) {
+        return tag(player).getLong(SANIES_LUPINUS) > 0;
     }
 
     public static Form form(Player player) {
@@ -143,11 +150,28 @@ public final class Curses {
         return true;
     }
 
+    /** Survival's {@code Diseases.cureAll}: Sanies Lupinus (Stage 1 lycanthropy) is curable until it turns after 3 days. */
+    public static boolean cureSaniesLupinus(LivingEntity entity) {
+        if (!(entity instanceof ServerPlayer player)) return false;
+        boolean had = player.hasEffect(CurseRegistry.SANIES_LUPINUS.get()) || hasSaniesLupinus(player);
+        if (!had) return false;
+        player.removeEffect(CurseRegistry.SANIES_LUPINUS.get());
+        tag(player).remove(SANIES_LUPINUS);
+        tag(player).remove(LUPINUS_DAYS);
+        dirty(player);
+        return true;
+    }
+
     // ------------------------------------------------------------------ granting and curing (server)
 
     /** Sanguinare Vampiris (unless immune). Returns whether the player caught it. */
     public static boolean infect(ServerPlayer player) {
         return Vampirism.infect(player);
+    }
+
+    /** Sanies Lupinus (Stage 1 lycanthropy disease from werewolf hits, unless immune). */
+    public static boolean infectLycanthropy(ServerPlayer player) {
+        return Lycanthropy.infect(player);
     }
 
     /** Makes the player a full vampire at stage 1 (curing beast blood: the two curses don't mix). */
@@ -165,13 +189,14 @@ public final class Curses {
         Notifier.title(player, Component.translatable("curse.skycraft.lord.granted"), Component.translatable("curse.skycraft.lord.granted.sub"));
     }
 
-    /** The Circle's gift (Companions' quest): lycanthropy and the Beast Form power. Cures vampirism. */
+    /** The Circle's gift (Companions' quest) or Sanies Lupinus after 3 days: lycanthropy and Beast Form. Cures vampirism. */
     public static void grantBeastBlood(ServerPlayer player) {
         CompoundTag t = tag(player);
         if (t.getBoolean(VAMPIRE) || hasSanguinare(player)) {
             cureSanguinare(player);
             cure(player, CurseType.VAMPIRISM, false);
         }
+        cureSaniesLupinus(player);
         boolean had = t.getBoolean(WEREWOLF);
         t.putBoolean(WEREWOLF, true);
         t.remove(BEAST_READY);
@@ -206,8 +231,9 @@ public final class Curses {
             t.remove(SIGHT);
             Vampirism.clearEffects(player);
         } else {
-            had = t.getBoolean(WEREWOLF);
+            had = t.getBoolean(WEREWOLF) || hasSaniesLupinus(player);
             if (form(player) == Form.BEAST) Lycanthropy.revert(player, false);
+            cureSaniesLupinus(player);
             t.remove(WEREWOLF);
             t.remove(BEAST_READY);
             data.module("quest").putBoolean("beast_blood", false);

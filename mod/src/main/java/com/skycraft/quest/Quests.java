@@ -241,20 +241,23 @@ public final class Quests {
         QuestStore store = QuestStore.get(server);
         List<UUID> members = eligible(server, key, q);
         boolean shared = isPartyKey(key) && members.size() > 1;
-        // gold is split between the eligible members (unless the quest pays each of them), items go to each
+        int partySize = shared ? members.size() : 1;
+        float factor = com.skycraft.skills.Progression.partyXpFactor(partySize);
+        // Each party member gets full items and nearly full gold/XP (scaled by partyXpFactor, never halved)
         Quest paid = q;
         if (shared && !q.extra.getBoolean(PER_PLAYER)) {
             paid = Quest.load(q.save());
-            paid.rewardGold = Math.round(q.rewardGold / (double) members.size());
+            paid.rewardGold = Math.max(1L, Math.round(q.rewardGold * factor));
         }
         for (UUID id : members) {
             ServerPlayer m = server.getPlayerList().getPlayer(id);
             if (m != null) {
-                grantRewards(m, paid, shared);
+                grantRewards(m, paid, shared, partySize);
             } else {
                 CompoundTag pending = new CompoundTag();
                 pending.put("quest", paid.save());
                 pending.putBoolean("shared", shared);
+                pending.putInt("partySize", partySize);
                 store.addPending(id, pending);
             }
         }
@@ -273,38 +276,10 @@ public final class Quests {
     }
 
     /**
-     * Who gets the rewards: party members who were in the party when the quest was accepted, plus later joiners who
-     * are online and within 64 blocks of one of them (or of the last objective) at completion. Quests without the
-     * record (older saves, solo keys) reward every member.
+     * Who gets the rewards: all current members of the party share quest completion rewards and XP.
      */
     private static List<UUID> eligible(MinecraftServer server, String key, Quest q) {
-        List<UUID> members = members(server, key);
-        if (!isPartyKey(key) || !q.extra.contains(ACCEPTED_BY, Tag.TAG_LIST)) return members;
-        Set<String> accepted = new HashSet<>();
-        for (Tag t : q.extra.getList(ACCEPTED_BY, Tag.TAG_STRING)) accepted.add(t.getAsString());
-        List<ServerPlayer> anchors = new ArrayList<>();
-        for (UUID id : members) {
-            ServerPlayer p = server.getPlayerList().getPlayer(id);
-            if (p != null && accepted.contains(id.toString())) anchors.add(p);
-        }
-        Objective last = q.objectives.isEmpty() ? null : q.objectives.get(q.objectives.size() - 1);
-        List<UUID> out = new ArrayList<>();
-        for (UUID id : members) {
-            if (accepted.contains(id.toString())) {
-                out.add(id);
-                continue;
-            }
-            ServerPlayer p = server.getPlayerList().getPlayer(id);
-            if (p == null) continue;
-            boolean near = false;
-            for (ServerPlayer a : anchors) {
-                if (a.level() == p.level() && a.distanceToSqr(p) <= 64 * 64) near = true;
-            }
-            if (!near && last != null && last.hasPos && p.level().dimension().location().toString().equals(last.dim)
-                    && p.blockPosition().distSqr(last.pos) <= 64 * 64) near = true;
-            if (near) out.add(id);
-        }
-        return out.isEmpty() ? members : out;
+        return members(server, key);
     }
 
     public static void fail(MinecraftServer server, String key, Quest q, Component reason) {
@@ -352,6 +327,10 @@ public final class Quests {
     // ------------------------------------------------------------------ rewards
 
     public static void grantRewards(ServerPlayer player, Quest q, boolean shared) {
+        grantRewards(player, q, shared, shared ? 2 : 1);
+    }
+
+    public static void grantRewards(ServerPlayer player, Quest q, boolean shared, int partySize) {
         PlayerData data = SkyData.get(player);
         double mult = QuestConfig.GOLD_MULTIPLIER.get() * (q.sneakBonus() ? 1.5 : 1.0);
         long gold = Math.round(q.rewardGold * mult);
@@ -360,6 +339,10 @@ public final class Quests {
         if (q.sneakBonus()) Notifier.message(player, Component.translatable("quest.skycraft.sneak_bonus"));
         Currency.give(player, gold);
         for (ItemStack s : q.rewardItems) give(player, s.copy());
+        // Award Skyrim-style character level XP for completing the quest (scaled gently for party size)
+        float baseQuestXp = Math.max(25f, 20f + q.rewardGold * 0.18f + (q.isMain() ? 35f : 0f));
+        float questXp = baseQuestXp * com.skycraft.skills.Progression.partyXpFactor(partySize);
+        com.skycraft.skills.Progression.awardQuestXp(player, questXp);
         if (!q.faction.isEmpty()) Factions.onQuestReward(player, q);
         com.skycraft.quest.story.Story.grantStoryRewards(player, q);
         if (q.kind.startsWith("college_")) {
@@ -376,7 +359,8 @@ public final class Quests {
         if (list == null) return;
         for (Tag t : list) {
             CompoundTag c = (CompoundTag) t;
-            grantRewards(player, Quest.load(c.getCompound("quest")), c.getBoolean("shared"));
+            int partySize = c.contains("partySize") ? c.getInt("partySize") : (c.getBoolean("shared") ? 2 : 1);
+            grantRewards(player, Quest.load(c.getCompound("quest")), c.getBoolean("shared"), partySize);
         }
     }
 
@@ -423,6 +407,31 @@ public final class Quests {
 
     public static void onPartyChanged(MinecraftServer server, UUID player) {
         DIRTY_PLAYERS.add(player);
+        Party party = PartyManager.get(server).partyOf(player);
+        if (party != null) {
+            QuestStore store = QuestStore.get(server);
+            String pKey = personalKey(player);
+            String ptKey = partyKey(party.id);
+            List<Quest> personal = store.quests(pKey);
+            List<Quest> partyQuests = store.quests(ptKey);
+            boolean movedAny = false;
+            for (var it = personal.iterator(); it.hasNext(); ) {
+                Quest q = it.next();
+                if (q.isActive() && !q.isMain()) {
+                    it.remove();
+                    if (store.find(ptKey, q.id) != null) q.id = newId(store, ptKey);
+                    partyQuests.add(q);
+                    movedAny = true;
+                }
+            }
+            for (Quest pq : partyQuests) {
+                if (pq.isActive()) recordAcceptedBy(server, ptKey, pq);
+            }
+            if (movedAny) {
+                changed(server, pKey);
+            }
+            changed(server, ptKey);
+        }
     }
 
     /** The last member leaves: they keep the party's quests. */

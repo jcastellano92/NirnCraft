@@ -19,6 +19,7 @@ measurable gates, the merge procedure and the report format.
 | `R3d-town-services.md` | Trainers, notice boards, signposting, courts, reactive lines, arrival moment | R0 |
 | `R3e-world-systems.md` | Travel networks, encounter library, festival calendar, level policy | R0 |
 | `R4-skyrim-uplift.md` | Skyrim to the measured floors (steps S1-S5) | R3a-R3e |
+| `R4a-town-overhaul.md` | Town overhaul: planned districts, recognisable shops, multi-room inns, jarl halls, daily routines (steps TO0-TO6) | R0 (integrates with R3d and R4 S2) |
 | `R5-iliac-bay.md` | High Rock and Hammerfell: IB-S, IB1-IB8, IB9, IB-G | IB1-IB3 after R1; the rest after R4 |
 | `R6-cyrodiil.md` | Cyrodiil V1-V9 | R5 (V2/V3/V5 slots) |
 | `R7-morrowind.md` | Morrowind V1-V9 | R6 |

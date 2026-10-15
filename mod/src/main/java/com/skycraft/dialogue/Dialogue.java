@@ -76,7 +76,7 @@ public final class Dialogue {
     /** Entity ID -> which page of the conversation menu is showing (absent = main). */
     private static final Map<Integer, Integer> MENU = new ConcurrentHashMap<>();
     /** Ids (or id prefixes ending in '.') of generic small talk: kept under "Ask about..." when anything else is on offer. */
-    private static final List<String> SMALL_TALK = List.of("society.job", "society.region", "society.news", "society.how",
+    private static final List<String> SMALL_TALK = List.of("society.job", "society.region", "society.context", "society.news", "society.how",
             "society.favor", "society.gift", "follower.persuade_friend", "place_lore.", "crime.rumor", "survival.rumors");
     /** Different sources, same question: keep the one with the lowest order. */
     private static final Map<String, String> SAME_TOPIC = Map.of("society.favor", "help", "quest.help", "help",
@@ -92,7 +92,7 @@ public final class Dialogue {
     /** Every option the providers offer, de-duplicated (same id, same topic or same label), sorted, Goodbye last. */
     public static List<DialogueOption> collect(ServerPlayer player, LivingEntity npc) {
         List<DialogueOption> raw = new ArrayList<>();
-        if (com.skycraft.fire.aftermath.HelgenFolk.barkOnly(npc)) {
+        if (com.skycraft.fire.aftermath.HelgenFolk.barkOnly(player, npc)) {
             // the people of the ruined town: one line, Continue and Goodbye; no topics, trades or work
             raw.add(com.skycraft.fire.aftermath.HelgenFolk.continueOption());
         } else {
@@ -103,7 +103,7 @@ public final class Dialogue {
                     Skycraft.LOGGER.error("Dialogue provider failed", e);
                 }
             }
-            if (com.skycraft.fire.aftermath.HelgenFolk.limited(npc)) {
+            if (com.skycraft.fire.aftermath.HelgenFolk.limited(player, npc)) {
                 raw.removeIf(o -> !com.skycraft.fire.aftermath.HelgenFolk.allowed(npc, o.id()));
             }
         }
@@ -221,6 +221,12 @@ public final class Dialogue {
     }
 
     private static void sendMenu(ServerPlayer player, LivingEntity npc, Component greeting, int menu) {
+        TALKING.put(npc.getId(), player.getUUID());
+        if (npc instanceof com.skycraft.society.entity.NpcEntity n) {
+            n.setConversationPartner(player.getId());
+            n.getNavigation().stop();
+            n.getLookControl().setLookAt(player, 30.0F, 30.0F);
+        }
         if (menu == MENU_MAIN) MENU.remove(npc.getId());
         else MENU.put(npc.getId(), menu);
         List<DialoguePackets.Line> lines = new ArrayList<>();
@@ -241,12 +247,8 @@ public final class Dialogue {
                 com.skycraft.core.Notifier.message(player, Component.translatable("society.skycraft.busy"));
                 return;
             }
-        }
-        TALKING.put(npc.getId(), player.getUUID());
-        if (npc instanceof com.skycraft.society.entity.NpcEntity n) {
-            n.setConversationPartner(player.getId());
-            n.getNavigation().stop();
-            n.getLookControl().setLookAt(player, 30.0F, 30.0F);
+            TALKING.remove(npc.getId());
+            MENU.remove(npc.getId());
         }
         sendMenu(player, npc, greeting, MENU_MAIN);
     }
@@ -269,8 +271,13 @@ public final class Dialogue {
             endConversation(player, entityId);
             return;
         }
-        for (DialogueOption option : visible(collect(player, npc), MENU.getOrDefault(entityId, MENU_MAIN), player, npc)) {
+        int currentMenu = MENU.getOrDefault(entityId, MENU_MAIN);
+        for (DialogueOption option : visible(collect(player, npc), currentMenu, player, npc)) {
             if (option.id().equals(optionId)) {
+                // End conversation first; if the option action opens another dialogue page via Dialogue.open/sendMenu,
+                // sendMenu immediately re-marks TALKING and CONVERSATION_PARTNER. If the action closes dialogue (or opens
+                // barter/rent/quest), the NPC won't be stuck busy for party members.
+                endConversation(player, entityId);
                 option.action().accept(player, npc);
                 return;
             }
@@ -329,7 +336,7 @@ public final class Dialogue {
                     return;
                 }
             }
-            open(player, npc, com.skycraft.fire.aftermath.HelgenFolk.barkOnly(npc)
+            open(player, npc, com.skycraft.fire.aftermath.HelgenFolk.isHelgenEventNpc(player, npc)
                     ? com.skycraft.fire.aftermath.HelgenFolk.line(player, npc) : Component.empty());
         }
         event.setCancellationResult(InteractionResult.SUCCESS);

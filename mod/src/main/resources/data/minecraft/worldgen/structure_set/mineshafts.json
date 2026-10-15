@@ -1,0 +1,16 @@
+{
+  "structures": [
+    {
+      "structure": "minecraft:mineshaft",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 4096,
+    "separation": 1024,
+    "salt": 0,
+    "frequency": 0.0
+  }
+}
+

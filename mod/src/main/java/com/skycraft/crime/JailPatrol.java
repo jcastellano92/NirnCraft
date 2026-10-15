@@ -221,7 +221,8 @@ final class JailPatrol {
         }
         setDoor(level, r.gate(), gateOpen);
         // on alert the front door is shut and locked: nobody leaves (or comes in) until the guards have it in hand
-        setDoor(level, r.frontDoor(), alert == null && doorOpen);
+        if (alert != null) setDoor(level, r.frontDoor(), false);
+        else if (doorOpen) setDoor(level, r.frontDoor(), true);
     }
 
     /** A patrolling guard within sight of a fallen guard's body: the jail goes on alert. */

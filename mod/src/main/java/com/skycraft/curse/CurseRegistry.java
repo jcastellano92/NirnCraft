@@ -33,6 +33,11 @@ public final class CurseRegistry {
      * after three days. The effect is only the visible marker; the infection time lives in {@code module("curse")}.
      */
     public static final RegistryObject<MobEffect> SANGUINARE = EFFECTS.register("sanguinare_vampiris", () -> new CurseEffect(0x6A0A14));
+    /**
+     * Sanies Lupinus: Stage 1 incubating lycanthropy contracted from werewolf attacks, curable like any disease
+     * (Cure Disease potion, shrine, priest/healer) for three in-game days before turning the carrier into a werewolf.
+     */
+    public static final RegistryObject<MobEffect> SANIES_LUPINUS = EFFECTS.register("sanies_lupinus", () -> new CurseEffect(0x5C4428));
     /** Marker shown while a vampire is in direct sunlight (the penalties are applied by {@link Vampirism}). */
     public static final RegistryObject<MobEffect> SUN_DAMAGE = EFFECTS.register("sun_damage", () -> new CurseEffect(0xF0C060));
 

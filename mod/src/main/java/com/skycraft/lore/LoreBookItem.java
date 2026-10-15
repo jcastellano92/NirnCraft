@@ -102,16 +102,21 @@ public class LoreBookItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (!level.isClientSide && player instanceof ServerPlayer sp) {
-            LoreBooks.Book book = bookOf(stack);
-            if (book == null) {
-                book = LoreBooks.random(level.random, b -> !b.category().isSheet());
-                if (book == null) return InteractionResultHolder.pass(stack);
-                setBook(stack, book);
-            }
-            read(sp, book);
-            level.playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1f, 1f);
+            readStack(sp, stack);
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+    }
+
+    /** Reads this lore book directly without moving it into the player's hand. */
+    public void readStack(ServerPlayer sp, ItemStack stack) {
+        LoreBooks.Book book = bookOf(stack);
+        if (book == null) {
+            book = LoreBooks.random(sp.level().random, b -> !b.category().isSheet());
+            if (book == null) return;
+            setBook(stack, book);
+        }
+        read(sp, book);
+        sp.level().playSound(null, sp.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1f, 1f);
     }
 
     @Override

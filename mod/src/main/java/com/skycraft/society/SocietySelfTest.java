@@ -144,10 +144,29 @@ public final class SocietySelfTest {
         }
     }
 
+    private static void forceSettlement(ServerLevel level, Place place, boolean forced) {
+        if (place == null) return;
+        int rad = place.radius() + 32;
+        int cx0 = (place.x() - rad) >> 4, cx1 = (place.x() + rad) >> 4;
+        int cz0 = (place.z() - rad) >> 4, cz1 = (place.z() + rad) >> 4;
+        for (int cx = cx0; cx <= cx1; cx++) {
+            for (int cz = cz0; cz <= cz1; cz++) {
+                level.setChunkForced(cx, cz, forced);
+                if (forced) level.getChunk(cx, cz);
+            }
+        }
+    }
+
     private static void finish(Run r) {
         running = null;
         try {
-            if (r.server != null && r.originalTime >= 0 && r.town != null) r.server.overworld().setDayTime(r.originalTime);
+            if (r.server != null) {
+                ServerLevel level = r.server.overworld();
+                if (r.originalTime >= 0 && r.town != null) level.setDayTime(r.originalTime);
+                forceSettlement(level, r.town, false);
+                Places.byId(MINOR_SAMPLE).ifPresent(p -> forceSettlement(level, p, false));
+                Places.byId(HAMLET_SAMPLE).ifPresent(p -> forceSettlement(level, p, false));
+            }
         } catch (RuntimeException ignored) {
             // best effort
         }
@@ -177,7 +196,7 @@ public final class SocietySelfTest {
 
         // the town: three visits (a populate pass each), then count
         r.steps.add(new Step(0, () -> {
-            level.getChunk(r.town.x() >> 4, r.town.z() >> 4);
+            forceSettlement(level, r.town, true);
             SocietyCensus.visit(level, r.town);
         }));
         r.steps.add(new Step(40, () -> SocietyCensus.visit(level, r.town)));
@@ -199,7 +218,7 @@ public final class SocietySelfTest {
             if (sample.isEmpty()) continue;
             r.steps.add(new Step(0, () -> {
                 level.setDayTime((level.getDayTime() / 24000L) * 24000L + 6000L);
-                level.getChunk(sample.get().x() >> 4, sample.get().z() >> 4);
+                forceSettlement(level, sample.get(), true);
                 SocietyCensus.visit(level, sample.get());
             }));
             r.steps.add(new Step(40, () -> SocietyCensus.visit(level, sample.get())));
@@ -207,6 +226,7 @@ public final class SocietySelfTest {
             r.steps.add(new Step(60, () -> {
                 if (id.equals(MINOR_SAMPLE)) minorWatchChecks(r, level, sample.get());
                 else noWatchChecks(r, level, sample.get());
+                forceSettlement(level, sample.get(), false);
             }));
         }
     }

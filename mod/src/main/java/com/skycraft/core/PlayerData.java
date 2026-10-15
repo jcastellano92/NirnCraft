@@ -123,9 +123,9 @@ public class PlayerData {
         markProgressDirty();
     }
 
-    /** Skyrim: XP to go from level L to L+1 is (L + 3) * 25. */
+    /** Skyrim-style linear ramp: easier at early levels (35 XP at level 1) and +25 XP more for each subsequent level. */
     public static float levelXpToNext(int level) {
-        return (level + 3) * 25f;
+        return 35f + (Math.max(1, level) - 1) * 25f;
     }
 
     public float levelProgress() {

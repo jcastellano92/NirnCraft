@@ -99,6 +99,12 @@ public class LeveledGear extends LootItemConditionalFunction {
             return out;
         }
         decorate(out, level, random, enchantChance, qualityChance);
+        if ((kind == Kind.WEAPON || kind == Kind.BOW)
+                && context.getParamOrNull(LootContextParams.DAMAGE_SOURCE) == null
+                && !(context.getParamOrNull(LootContextParams.THIS_ENTITY) instanceof net.minecraft.world.entity.Mob)
+                && random.nextFloat() < 0.12f) {
+            com.skycraft.crafting.arcane.ArcaneEvents.applyRandomWildernessPoison(out, level, random);
+        }
         return out;
     }
 

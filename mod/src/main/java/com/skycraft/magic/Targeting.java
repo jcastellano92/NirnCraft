@@ -83,13 +83,15 @@ public final class Targeting {
     }
 
     /**
-     * The caster itself, its summons and allies, its tamed animals, team mates, members of its party (quest module)
-     * and their summons.
+     * The caster itself, its summons and allies, its hired/recruited followers and companions, its tamed animals,
+     * team mates, members of its party (quest module) and their summons/followers.
      */
     public static boolean isFriendly(Player caster, @Nullable Entity e) {
         if (e == null) return false;
         if (e == caster) return true;
         UUID owner = Summons.ownerOf(e);
+        if (owner == null) owner = com.skycraft.society.Followers.getOwnerId(e);
+        if (owner == null && e instanceof com.skycraft.society.entity.NpcEntity npc) owner = npc.getLeader();
         if (owner != null && owner.equals(caster.getUUID())) return true;
         if (e instanceof TamableAnimal tame && caster.getUUID().equals(tame.getOwnerUUID())) return true;
         if (caster.isAlliedTo(e)) return true;
@@ -99,8 +101,64 @@ public final class Targeting {
                 ServerPlayer ownerPlayer = sp.server.getPlayerList().getPlayer(owner);
                 if (ownerPlayer != null && sameParty(sp, ownerPlayer)) return true;
             }
+            if (e instanceof TamableAnimal tame && tame.getOwnerUUID() != null) {
+                ServerPlayer ownerPlayer = sp.server.getPlayerList().getPlayer(tame.getOwnerUUID());
+                if (ownerPlayer != null && sameParty(sp, ownerPlayer)) return true;
+            }
         }
         return false;
+    }
+
+    /** True if {@code e} is a bound summon, hired/recruited follower, companion, tamed pet, or party member of {@code caster} (excluding {@code caster} itself). */
+    public static boolean isCompanionOrParty(Player caster, @Nullable Entity e) {
+        return e != null && e != caster && isFriendly(caster, e);
+    }
+
+    /**
+     * Finds a companion (bound summon, hired follower, companion, tamed pet, or party member) standing directly in
+     * front of {@code caster} within {@code range} blocks (default 2.0 blocks) that {@code caster} is looking right at.
+     * Used by single-target/self healing spells and healing staves so they heal a looked-at companion in front of the
+     * caster instead of the caster (while AoE/rune/ward spells like Grand Healing, Guardian Circle, and Wards work on all).
+     */
+    public static Ray companionRayInFront(Player caster, double range) {
+        Vec3 eye = caster.getEyePosition();
+        Vec3 look = caster.getViewVector(1f);
+        Vec3 end = eye.add(look.scale(range));
+        BlockHitResult block = caster.level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, caster));
+        boolean hitBlock = block.getType() != HitResult.Type.MISS;
+        Vec3 limit = hitBlock ? block.getLocation() : end;
+
+        LivingEntity best = null;
+        Vec3 bestPos = null;
+        double bestDist = Double.MAX_VALUE;
+        AABB area = caster.getBoundingBox().inflate(range + 0.5);
+        for (LivingEntity e : caster.level().getEntitiesOfClass(LivingEntity.class, area,
+                e -> e != caster && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && isCompanionOrParty(caster, e))) {
+            if (caster.distanceTo(e) > range) continue;
+            Vec3 center = e.position().add(0, e.getBbHeight() * 0.5, 0);
+            Vec3 to = center.subtract(eye);
+            double dist = to.length();
+            if (dist < 1e-4 || dist > range + 0.5) continue;
+            if (to.scale(1.0 / dist).dot(look) < 0.85 || !caster.hasLineOfSight(e)) continue;
+            AABB bb = e.getBoundingBox().inflate(0.1);
+            if (bb.contains(eye)) {
+                best = e;
+                bestPos = center;
+                bestDist = 0;
+                continue;
+            }
+            Optional<Vec3> clip = bb.clip(eye, limit);
+            if (clip.isPresent()) {
+                double d = eye.distanceToSqr(clip.get());
+                if (d < bestDist) {
+                    bestDist = d;
+                    best = e;
+                    bestPos = clip.get();
+                }
+            }
+        }
+        if (best != null) return new Ray(eye, bestPos, best, false);
+        return new Ray(eye, limit, null, hitBlock);
     }
 
     /** Party check through the quest module; never throws (no party data means no party). */

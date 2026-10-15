@@ -11,6 +11,7 @@ import com.skycraft.core.SkyData;
 import com.skycraft.core.Skill;
 import com.skycraft.magic.Targeting;
 import com.skycraft.magic.spell.Illusion;
+import com.skycraft.magic.spell.SpellEffects;
 import com.skycraft.magic.spell.Summons;
 import com.skycraft.registry.ModEffects;
 import com.skycraft.skills.Progression;
@@ -225,9 +226,14 @@ public final class StaffEffects {
     public static void stream(ServerPlayer player, ItemStack stack, StaffKind kind, int used) {
         ServerLevel level = player.serverLevel();
         boolean beam = kind == StaffKind.HEALING || kind == StaffKind.MAGNUS;
-        double range = beam ? 14 : 8;
-        Targeting.Ray ray = Targeting.ray(player, range, e -> true);
+        double range = kind == StaffKind.HEALING ? 2.0 : (beam ? 14 : 8);
+        Targeting.Ray ray = kind == StaffKind.HEALING
+                ? Targeting.companionRayInFront(player, range)
+                : Targeting.ray(player, range, e -> true);
         LivingEntity target = ray.entity();
+        if (kind == StaffKind.HEALING && target != null && used % 6 == 0) {
+            player.swing(player.getUsedItemHand(), true);
+        }
         if (used % 3 == 0) {
             byte fx = switch (kind) {
                 case FLAMES -> ArsenalPackets.Fx.FIRE_STREAM;
@@ -236,7 +242,10 @@ public final class StaffEffects {
                 case HEALING -> ArsenalPackets.Fx.HEAL_BEAM;
                 default -> ArsenalPackets.Fx.MAGNUS_BEAM;
             };
-            ArsenalPackets.Fx.send(level, fx, handPos(player), ray.end());
+            Vec3 endPos = (kind == StaffKind.HEALING && target == null)
+                    ? player.position().add(0, player.getBbHeight() * 0.6, 0)
+                    : ray.end();
+            ArsenalPackets.Fx.send(level, fx, handPos(player), endPos);
         }
         if (used % 20 == 0) {
             SoundEvent s = switch (kind) {
@@ -248,8 +257,19 @@ public final class StaffEffects {
             };
             sound(player, player.position(), s, 0.7f, kind == StaffKind.MAGNUS ? 0.6f : 1.2f);
         }
-        if (used % 10 != 0 || target == null) return;
+        if (used % 10 != 0) return;
         float power = power(player, kind.skill);
+        if (kind == StaffKind.HEALING) {
+            LivingEntity healTarget = target != null ? target : player;
+            if (healTarget.getHealth() < healTarget.getMaxHealth()) {
+                float heal = 1.5f * power;
+                SpellEffects.heal(player, healTarget, heal);
+                level.sendParticles(ParticleTypes.HEART, healTarget.getX(), healTarget.getY() + healTarget.getBbHeight() + 0.2, healTarget.getZ(), 1, 0.2, 0.1, 0.2, 0);
+                xp(player, Skill.RESTORATION, heal * CombatHandler.SKYRIM_SCALE * 0.3f);
+            }
+            return;
+        }
+        if (target == null) return;
         switch (kind) {
             case FLAMES -> {
                 if (friendly(player, target)) return;
@@ -275,14 +295,6 @@ public final class StaffEffects {
                 if (target.hurt(shock(level, null, player), dmg)) {
                     drainMagicka(target, dmg * 3f);
                     xp(player, Skill.DESTRUCTION, dmg * CombatHandler.SKYRIM_SCALE * 0.25f);
-                }
-            }
-            case HEALING -> {
-                if (target.getHealth() < target.getMaxHealth() && !(target instanceof net.minecraft.world.entity.monster.Enemy)) {
-                    float heal = 1.5f * power;
-                    target.heal(heal);
-                    level.sendParticles(ParticleTypes.HEART, target.getX(), target.getY() + target.getBbHeight() + 0.2, target.getZ(), 1, 0.2, 0.1, 0.2, 0);
-                    xp(player, Skill.RESTORATION, heal * CombatHandler.SKYRIM_SCALE * 0.3f);
                 }
             }
             case MAGNUS -> {

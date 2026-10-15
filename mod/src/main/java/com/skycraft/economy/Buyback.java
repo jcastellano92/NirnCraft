@@ -40,6 +40,8 @@ public final class Buyback {
         public final int unit;
         public final long at;
         public int count;
+        /** Count of items that aged off the public shelf but remain available for the seller's 30-min buy-back. */
+        public int shelfExpiredCount;
         /** Non-null for goods the shop never resold: they are held in the shop's record, not on its shelves. */
         public final ShopBook.Kept kept;
 
@@ -56,6 +58,12 @@ public final class Buyback {
         public boolean held() {
             return kept != null;
         }
+
+        /** How many items the seller can currently buy back (either still on shelf or aged off shelf into backroom). */
+        public int availableCount(Shop shop) {
+            if (held()) return count;
+            return Math.min(count, shop.count(inStock) + shelfExpiredCount);
+        }
     }
 
     /** player -> shop key -> entries (shelf entries only). */
@@ -63,6 +71,33 @@ public final class Buyback {
     private static final Map<UUID, Map<String, Long>> BOUGHT_BACK = new ConcurrentHashMap<>();
 
     private Buyback() {}
+
+    /**
+     * Called when a player-sold batch expires off the public shelf after {@link Shop#SOLD_TTL_TICKS}: preserves the
+     * items for the original seller's 30-minute buy-back window without keeping them on the public shelf.
+     */
+    public static void markShelfExpired(String shopKey, ItemStack inStockKey, int expiredCount) {
+        if (expiredCount <= 0 || inStockKey.isEmpty()) return;
+        int rem = expiredCount;
+        for (Map<String, List<Entry>> byShop : SOLD.values()) {
+            List<Entry> list = byShop.get(shopKey);
+            if (list == null) continue;
+            synchronized (list) {
+                for (Entry e : list) {
+                    if (rem <= 0) break;
+                    if (!e.held() && ItemStack.isSameItemSameTags(e.inStock, inStockKey)) {
+                        int room = Math.max(0, e.count - e.shelfExpiredCount);
+                        int add = Math.min(rem, room);
+                        if (add > 0) {
+                            e.shelfExpiredCount += add;
+                            rem -= add;
+                        }
+                    }
+                }
+            }
+            if (rem <= 0) break;
+        }
+    }
 
     private static long now(ServerPlayer player) {
         return player.level().getGameTime();
@@ -121,6 +156,7 @@ public final class Buyback {
     /** Takes {@code n} items off an entry after a buy-back. */
     public static void consume(ServerPlayer player, Shop shop, Entry entry, int n) {
         entry.count -= n;
+        if (entry.shelfExpiredCount > entry.count) entry.shelfExpiredCount = Math.max(0, entry.count);
         if (entry.kept != null) {
             shop.unkeep(entry.kept, n);
             shop.save();

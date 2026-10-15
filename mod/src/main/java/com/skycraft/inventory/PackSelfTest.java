@@ -103,6 +103,7 @@ public final class PackSelfTest {
             containerTake(a, c);
             grouping(a, c);
             OverflowSelfTest.run(server, level, a, c); // bulk store, container overflow, block entities, corpse, file, facade
+            round6Fixes(server, level, a, c);
             try {
                 com.skycraft.economy.BarterSelfTest.run(server, level, a, c);
             } catch (RuntimeException e) {
@@ -400,6 +401,70 @@ public final class PackSelfTest {
         c.check("container: storing a pack entry puts it in the container", stored == 1 && Pack.size(a) == packBefore - 1,
                 stored + " stored, pack " + packBefore + " -> " + Pack.size(a));
         a.containerMenu = a.inventoryMenu;
+        a.getInventory().clearContent();
+        Pack.clear(a);
+    }
+
+    /** Live checks for Round 6 gameplay & multiplayer fixes (dual-wield/spells/bound/consumables/poisons/XP/Sanies Lupinus). */
+    private static void round6Fixes(MinecraftServer server, ServerLevel level, FakePlayer a, Checks c) {
+        a.getInventory().clearContent();
+        Pack.clear(a);
+        Inventory inv = a.getInventory();
+        inv.selected = 0;
+
+        // 1. 1H weapon equip right / equip left / toggle unequip
+        ItemStack ironSword = new ItemStack(Items.IRON_SWORD);
+        ItemStack steelDagger = new ItemStack(Items.STONE_SWORD);
+        inv.setItem(10, ironSword);
+        inv.setItem(11, steelDagger);
+        ResourceLocation ironId = BuiltInRegistries.ITEM.getKey(Items.IRON_SWORD);
+        ResourceLocation daggerId = BuiltInRegistries.ITEM.getKey(Items.STONE_SWORD);
+
+        InventoryActions.handle(a, InventoryPackets.InvAction.EQUIP, 10, ironId);
+        c.check("r6: LMB equips 1H weapon to right hand", a.getMainHandItem().is(Items.IRON_SWORD), a.getMainHandItem().toString());
+        InventoryActions.handle(a, InventoryPackets.InvAction.EQUIP_LEFT, 11, daggerId);
+        c.check("r6: RMB equips second 1H weapon to left hand (dual-wield)", a.getOffhandItem().is(Items.STONE_SWORD) && a.getMainHandItem().is(Items.IRON_SWORD),
+                "main=" + a.getMainHandItem().getItem() + ", off=" + a.getOffhandItem().getItem());
+
+        // 2. Eating food from bag does not unequip right-hand or left-hand weapons
+        inv.setItem(12, new ItemStack(Items.COOKED_BEEF, 2));
+        a.getFoodData().setFoodLevel(10);
+        InventoryActions.handle(a, InventoryPackets.InvAction.USE, 12, BuiltInRegistries.ITEM.getKey(Items.COOKED_BEEF));
+        c.check("r6: eating food from inventory keeps both weapons equipped",
+                a.getMainHandItem().is(Items.IRON_SWORD) && a.getOffhandItem().is(Items.STONE_SWORD) && inv.getItem(12).getCount() == 1,
+                "remaining beef=" + inv.getItem(12).getCount());
+
+        // 3. Applying poison to equipped weapon coats it and shrinks the poison
+        ItemStack harmPotion = net.minecraft.world.item.alchemy.PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), net.minecraft.world.item.alchemy.Potions.HARMING);
+        inv.setItem(13, harmPotion);
+        InventoryActions.handle(a, InventoryPackets.InvAction.APPLY_POISON, 13, BuiltInRegistries.ITEM.getKey(Items.SPLASH_POTION));
+        CompoundTag pTag = a.getMainHandItem().getTag() != null ? a.getMainHandItem().getTag().getCompound(com.skycraft.crafting.arcane.ArcaneEvents.WEAPON_POISON) : null;
+        c.check("r6: applying harming potion coats right-hand weapon with hits and clean display name",
+                pTag != null && pTag.getInt(com.skycraft.crafting.arcane.ArcaneEvents.POISON_HITS) > 0
+                        && !com.skycraft.crafting.arcane.ArcaneEvents.poisonDisplayName(pTag).startsWith("{"),
+                pTag != null ? com.skycraft.crafting.arcane.ArcaneEvents.poisonDisplayName(pTag) + " (" + pTag.getInt(com.skycraft.crafting.arcane.ArcaneEvents.POISON_HITS) + ")" : "null");
+
+        // 4. Bound weapon saves displaced weapon and restores it on expiry
+        ItemStack boundSword = new ItemStack(com.skycraft.magic.MagicRegistry.BOUND_SWORD.get());
+        com.skycraft.magic.Hands.equipBound(a, boundSword, false);
+        c.check("r6: conjuring bound sword places it in right hand and stows iron sword",
+                com.skycraft.magic.bound.BoundWeapons.isBound(a.getMainHandItem()), a.getMainHandItem().toString());
+        CompoundTag bTag = a.getMainHandItem().getTag() != null ? a.getMainHandItem().getTag().copy() : new CompoundTag();
+        inv.setItem(inv.selected, ItemStack.EMPTY);
+        com.skycraft.magic.Hands.restoreAfterBound(a, bTag);
+        c.check("r6: bound weapon expiry restores displaced iron sword to right hand",
+                a.getMainHandItem().is(Items.IRON_SWORD), a.getMainHandItem().toString());
+
+        // 5. Skyrim XP curve & Sanies Lupinus stage 1 + cure
+        c.check("r6: Skyrim leveling curve starts at 35 XP at level 1 and scales by +25 per level",
+                com.skycraft.core.PlayerData.levelXpToNext(1) == 35f && com.skycraft.core.PlayerData.levelXpToNext(10) == 260f,
+                "L1=" + com.skycraft.core.PlayerData.levelXpToNext(1) + ", L10=" + com.skycraft.core.PlayerData.levelXpToNext(10));
+        com.skycraft.curse.Curses.infectLycanthropy(a);
+        boolean infected = com.skycraft.curse.Curses.hasSaniesLupinus(a);
+        com.skycraft.survival.Diseases.cureAll(a);
+        c.check("r6: Sanies Lupinus Stage 1 contracts and is cured by Diseases.cureAll before Beast Blood",
+                infected && !com.skycraft.curse.Curses.hasSaniesLupinus(a), "infected=" + infected + ", afterCure=" + com.skycraft.curse.Curses.hasSaniesLupinus(a));
+
         a.getInventory().clearContent();
         Pack.clear(a);
     }

@@ -35,10 +35,12 @@
   "inventory.skycraft.action.drop_one": "Drop One",
   "inventory.skycraft.action.favorite": "Favorite",
   "inventory.skycraft.action.unfavorite": "Unfavorite",
+  "inventory.skycraft.action.apply_poison": "Apply",
 
   "inventory.skycraft.equipped.right": "Equipped (right hand)",
   "inventory.skycraft.equipped.left": "Equipped (left hand)",
   "inventory.skycraft.equipped.worn": "Worn",
+  "inventory.skycraft.poisoned": "Poisoned: %s (%s/%s)",
   "inventory.skycraft.stolen": "Stolen",
   "inventory.skycraft.condition": "Condition %s%%",
   "inventory.skycraft.total_weight": "Total weight %s",

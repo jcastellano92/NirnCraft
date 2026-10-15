@@ -23,8 +23,11 @@ import java.util.UUID;
  * doubles the odds. They leave again at dawn ({@link WerewolfEntity}).
  */
 public final class WildWerewolves {
-    private static final int INTERVAL = 20 * 90;
-    private static final float CHANCE = 0.06f;
+    private static final int INTERVAL = 20 * 180;
+    private static final long SPAWN_COOLDOWN = 24000L;
+    private static final int MIN_PLAYER_LEVEL = 10;
+    private static final float CHANCE = 0.025f;
+    private static final String LAST_SPAWN_KEY = "last_wild_werewolf";
     private static final Map<UUID, Long> LAST = new HashMap<>();
 
     private WildWerewolves() {}
@@ -37,19 +40,28 @@ public final class WildWerewolves {
         long now = level.getGameTime();
         for (ServerPlayer player : level.players()) {
             if (player.isSpectator() || player.isCreative()) continue;
+            com.skycraft.core.PlayerData data = com.skycraft.core.SkyData.get(player);
+            if (data.getLevel() < MIN_PLAYER_LEVEL) continue;
+            long lastSpawn = Curses.tag(player).getLong(LAST_SPAWN_KEY);
+            if (lastSpawn > 0 && now - lastSpawn < SPAWN_COOLDOWN && now >= lastSpawn) continue;
             Long last = LAST.get(player.getUUID());
             if (last != null && now - last < INTERVAL && now >= last) continue;
             LAST.put(player.getUUID(), now);
+            BlockPos pPos = player.blockPosition();
+            if (com.skycraft.creatures.spawn.SpawnPacing.nearStart(level, pPos.getX(), pPos.getZ())
+                    || com.skycraft.creatures.spawn.SpawnPacing.calm(level, pPos)
+                    || com.skycraft.creatures.spawn.SpawnPacing.onRoad(level, pPos)
+                    || !com.skycraft.creatures.spawn.SpawnPacing.hostileReady(player)) continue;
             RandomSource r = player.getRandom();
             float chance = CHANCE * (level.getMoonBrightness() >= 1f ? 2f : 1f);
             if (r.nextFloat() >= chance) continue;
-            if (!level.canSeeSky(player.blockPosition()) || CreatureSpawns.isSettlementOrHouse(level, player.blockPosition())) continue;
-            if (!level.getEntitiesOfClass(WerewolfEntity.class, player.getBoundingBox().inflate(128)).isEmpty()) continue;
-            spawnNear(level, player, r);
+            if (!level.canSeeSky(pPos) || CreatureSpawns.isSettlementOrHouse(level, pPos)) continue;
+            if (!level.getEntitiesOfClass(WerewolfEntity.class, player.getBoundingBox().inflate(160)).isEmpty()) continue;
+            spawnNear(level, player, r, now);
         }
     }
 
-    private static void spawnNear(ServerLevel level, ServerPlayer player, RandomSource r) {
+    private static void spawnNear(ServerLevel level, ServerPlayer player, RandomSource r, long now) {
         for (int attempt = 0; attempt < 6; attempt++) {
             double a = r.nextDouble() * Math.PI * 2;
             int d = 30 + r.nextInt(20);
@@ -60,7 +72,9 @@ public final class WildWerewolves {
             BlockPos pos = new BlockPos(x, y, z);
             if (!level.getFluidState(pos.below()).isEmpty() || !level.getBlockState(pos.below()).isSolid()) continue;
             if (level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, pos) > 7) continue;
-            if (CreatureSpawns.isSettlementOrHouse(level, pos)) continue;
+            if (CreatureSpawns.isSettlementOrHouse(level, pos)
+                    || com.skycraft.creatures.spawn.SpawnPacing.calm(level, pos)
+                    || com.skycraft.creatures.spawn.SpawnPacing.onRoad(level, pos)) continue;
             WerewolfEntity wolf = CurseRegistry.WEREWOLF.get().create(level);
             if (wolf == null) return;
             wolf.moveTo(x + 0.5, y, z + 0.5, r.nextFloat() * 360, 0);
@@ -68,6 +82,9 @@ public final class WildWerewolves {
             wolf.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
             wolf.setWild(true);
             level.addFreshEntity(wolf);
+            Curses.tag(player).putLong(LAST_SPAWN_KEY, now);
+            Curses.dirty(player);
+            com.skycraft.creatures.spawn.SpawnPacing.noteHostile(player);
             return;
         }
     }

@@ -140,13 +140,16 @@ public final class Ownership {
                         || state.is(Blocks.FLOWER_POT) || state.getBlock() instanceof net.minecraft.world.level.block.FlowerPotBlock) {
                     return false;
                 }
-                // Beds: an inn's dormitory beds are public, an inn room's bed is free to whoever rented a room there,
+                // Beds: an inn's dormitory beds are public, any bed in the inn is free to whoever rented a room there,
                 // every other bed in a recorded settlement belongs to the household that sleeps in it
                 if (state.getBlock() instanceof BedBlock) {
                     if (com.skycraft.tamriel.settlement.SettlementAnchors.hasAnchor(sl, pos, com.skycraft.tamriel.settlement.AnchorType.GUEST_BED, true)) {
                         return false;
                     }
                     boolean rented = player instanceof ServerPlayer sp && com.skycraft.survival.inn.Innkeepers.roomHere(sp) != null;
+                    if (rented && isInnBed(sl, pos)) {
+                        return false;
+                    }
                     if (com.skycraft.tamriel.settlement.SettlementAnchors.hasAnchor(sl, pos, com.skycraft.tamriel.settlement.AnchorType.INN_BED, true)) {
                         return !rented;
                     }
@@ -186,6 +189,41 @@ public final class Ownership {
         }
 
         return false;
+    }
+
+    /** Server: whether a bed at {@code pos} belongs to an inn (guest bed, inn room bed, inn building bed, or near an inn). */
+    public static boolean isInnBed(ServerLevel level, BlockPos pos) {
+        if (com.skycraft.tamriel.settlement.SettlementAnchors.hasAnchor(level, pos, com.skycraft.tamriel.settlement.AnchorType.INN_BED, true)
+                || com.skycraft.tamriel.settlement.SettlementAnchors.hasAnchor(level, pos, com.skycraft.tamriel.settlement.AnchorType.GUEST_BED, true)) {
+            return true;
+        }
+        var near = com.skycraft.tamriel.settlement.SettlementAnchors.near(level, pos, 24);
+        if (near.isPresent()) {
+            var entry = near.get();
+            java.util.Set<String> innOwners = new java.util.HashSet<>();
+            for (var a : entry.anchors()) {
+                if ((a.type() == com.skycraft.tamriel.settlement.AnchorType.INN
+                        || a.type() == com.skycraft.tamriel.settlement.AnchorType.INN_BED
+                        || a.type() == com.skycraft.tamriel.settlement.AnchorType.GUEST_BED) && !a.owner().isEmpty()) {
+                    innOwners.add(a.owner());
+                }
+                if (a.type() == com.skycraft.tamriel.settlement.AnchorType.INN) {
+                    long dx = pos.getX() - a.pos().getX(), dz = pos.getZ() - a.pos().getZ();
+                    if (dx * dx + dz * dz <= 18L * 18L) return true;
+                }
+            }
+            for (var a : entry.anchors()) {
+                if (a.type() == com.skycraft.tamriel.settlement.AnchorType.BED && innOwners.contains(a.owner())) {
+                    BlockPos q = a.pos();
+                    if (q.equals(pos) || (q.getY() == pos.getY() && Math.abs(q.getX() - pos.getX()) + Math.abs(q.getZ() - pos.getZ()) <= 2)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return !level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
+                new net.minecraft.world.phys.AABB(pos).inflate(20, 12, 20),
+                e -> e.isAlive() && com.skycraft.survival.inn.Innkeepers.isInnkeeper(e)).isEmpty();
     }
 
     /** Server: whether a player placed or owns the block (e.g. a bed in their house); NPCs must leave it alone. */

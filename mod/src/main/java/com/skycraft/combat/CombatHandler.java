@@ -104,16 +104,19 @@ public final class CombatHandler {
         DamageSource source = event.getSource();
         if (target.level().isClientSide) return;
 
-        // Party protection: members of the same party cannot damage each other with direct combat or magic
-        if (target instanceof ServerPlayer defender && source.getEntity() instanceof ServerPlayer attacker && attacker != defender) {
-            var pm = com.skycraft.quest.party.PartyManager.get(attacker.getServer());
-            var p1 = pm.partyOf(attacker.getUUID());
-            var p2 = pm.partyOf(defender.getUUID());
-            if (p1 != null && p1 == p2) {
-                if (source.getDirectEntity() == attacker
+        // Party & companion protection: party members and friendly companions/summons cannot be damaged by the player's magic/projectiles
+        if (source.getEntity() instanceof ServerPlayer attacker && attacker != target) {
+            boolean samePartyPlayer = false;
+            if (target instanceof ServerPlayer defender) {
+                var pm = com.skycraft.quest.party.PartyManager.get(attacker.getServer());
+                var p1 = pm.partyOf(attacker.getUUID());
+                var p2 = pm.partyOf(defender.getUUID());
+                samePartyPlayer = p1 != null && p1 == p2;
+            }
+            if (samePartyPlayer || com.skycraft.magic.Targeting.isCompanionOrParty(attacker, target)) {
+                if (samePartyPlayer
                         || source.getDirectEntity() instanceof AbstractArrow
                         || source.is(DamageTypeTags.IS_PROJECTILE)
-                        || source.is(DamageTypes.PLAYER_ATTACK)
                         || source.is(DamageTypes.MAGIC)
                         || source.is(DamageTypes.INDIRECT_MAGIC)) {
                     event.setCanceled(true);

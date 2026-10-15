@@ -236,28 +236,46 @@ public final class CreatureSpawns {
     }
 
     /**
-     * Spawners: vanilla spawner blocks inside Skycraft's own dungeons are removed (Skyrim dungeons are clearable). Any
-     * other spawner (vanilla dungeons, other mods' structures) keeps working; its zombies become draugr in the north and
-     * its spiders frostbite spiders.
+     * Spawners: all vanilla mob spawners are removed (Skyrim mines and dungeons are clearable and have no spinning mob
+     * cages). Also stripped on chunk load in {@link #onChunkLoad}.
      */
     private static void onSpawnerSpawn(MobSpawnEvent.FinalizeSpawn event, ServerLevel level, BlockPos pos, EntityType<?> entityType) {
+        event.setSpawnCancelled(true);
         BaseSpawner spawner = event.getSpawner();
         BlockEntity block = spawner == null ? null : spawner.getSpawnerBlockEntity();
-        if (block instanceof SpawnerBlockEntity && block.getBlockState().is(Blocks.SPAWNER) && inSkycraftStructure(level, block.getBlockPos())) {
-            event.setSpawnCancelled(true);
+        if (block instanceof SpawnerBlockEntity && block.getBlockState().is(Blocks.SPAWNER)) {
             level.removeBlock(block.getBlockPos(), false);
-            return;
+        } else if (level.getBlockState(pos).is(Blocks.SPAWNER)) {
+            level.removeBlock(pos, false);
         }
-        EntityType<? extends Mob> instead = null;
-        if (entityType == EntityType.ZOMBIE && isNorth(level, pos) && level.getRandom().nextFloat() < CreaturesConfig.DRAUGR_REPLACES_ZOMBIES.get()) {
-            instead = ModEntities.DRAUGR.get();
-        } else if ((entityType == EntityType.SPIDER || entityType == EntityType.CAVE_SPIDER) && !level.canSeeSky(pos)) {
-            instead = ModEntities.FROSTBITE_SPIDER.get();
+    }
+
+    /**
+     * Strips any vanilla mob spawner blocks from loaded chunks so spider/zombie spawner cages never appear in mines or
+     * underground, and ensures dungeon trap dispensers generated before the MutableBlockPos fix are stocked with arrows.
+     */
+    @SubscribeEvent
+    public static void onChunkLoad(net.minecraftforge.event.level.ChunkEvent.Load event) {
+        if (!(event.getLevel() instanceof ServerLevel level)) return;
+        net.minecraft.world.level.chunk.ChunkAccess chunk = event.getChunk();
+        java.util.List<BlockPos> positions = new java.util.ArrayList<>(chunk.getBlockEntitiesPos());
+        if (positions.isEmpty()) return;
+        for (BlockPos bePos : positions) {
+            net.minecraft.world.level.block.state.BlockState st = chunk.getBlockState(bePos);
+            if (st.is(Blocks.SPAWNER)) {
+                chunk.removeBlockEntity(bePos);
+                chunk.setBlockState(bePos, Blocks.AIR.defaultBlockState(), false);
+            } else if (st.is(Blocks.DISPENSER)) {
+                BlockEntity be = chunk.getBlockEntity(bePos);
+                if (be instanceof net.minecraft.world.level.block.entity.DispenserBlockEntity disp
+                        && !disp.getPersistentData().getBoolean("skycraft_stocked")) {
+                    disp.getPersistentData().putBoolean("skycraft_stocked", true);
+                    if (disp.isEmpty()) {
+                        disp.setItem(0, com.skycraft.dungeons.world.Deco.ARROWS.copy());
+                    }
+                }
+            }
         }
-        if (instead == null) return;
-        // The spawner only counts its own type against its limit: count the replacements ourselves.
-        if (fewNearby(level, instead, pos, 9, 6)) replace(event, instead.create(level));
-        else event.setSpawnCancelled(true);
     }
 
     /** Inside (a piece of) a structure registered under the {@code skycraft} namespace. */

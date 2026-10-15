@@ -123,12 +123,15 @@ public final class Vitals {
             data.setStamina(data.getStamina() - drain);
             data.setLastStaminaUseTick(now);
             if (isExhausted(player)) player.setSprinting(false);
-            if (now % 20 == 0) Progression.addSkillXp(player, Skill.ATHLETICS, 0.4f);
+            if (now % 20 == 0) Progression.addSkillXpFromUse(player, Skill.ATHLETICS, 2.2f);
+        } else if (now % 20 == 0 && !player.isCreative() && !player.isSpectator() && player.onGround()
+                && !com.skycraft.mounts.MountStamina.swapped(player) && player.getDeltaMovement().horizontalDistanceSqr() > 0.008) {
+            Progression.addSkillXpFromUse(player, Skill.ATHLETICS, 0.35f);
         }
 
         // Swimming trains Athletics
         if ((player.isSwimming() || player.isInWater()) && now % 20 == 0 && player.getDeltaMovement().lengthSqr() > 0.005) {
-            Progression.addSkillXp(player, Skill.ATHLETICS, 0.5f);
+            Progression.addSkillXpFromUse(player, Skill.ATHLETICS, 1.5f);
         }
 
         if (now % 5 == 0) {

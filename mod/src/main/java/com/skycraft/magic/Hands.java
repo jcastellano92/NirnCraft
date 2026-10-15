@@ -36,6 +36,8 @@ import java.util.UUID;
  */
 public final class Hands {
     private static final String SAVED = "hands_saved";
+    public static final String FROM_RIGHT_ITEM = "prev_right_item";
+    public static final String FROM_LEFT_ITEM = "prev_left_item";
 
     /** What a hand holds right now, see {@link #right} and {@link #left}. */
     public enum Held { EMPTY, SPELL, BOUND, ITEM }
@@ -46,6 +48,12 @@ public final class Hands {
     private static final Map<UUID, Long> PICKUP = new HashMap<>();
 
     private Hands() {}
+
+    private static CompoundTag keyOf(ItemStack stack) {
+        ItemStack copy = stack.copy();
+        copy.setCount(1);
+        return copy.save(new CompoundTag());
+    }
 
     // ------------------------------------------------------------------ queries (client and server)
 
@@ -81,11 +89,16 @@ public final class Hands {
     public static boolean equipRightSpell(ServerPlayer p, String spellId) {
         if (!mayEquip(p, spellId)) return false;
         SpellCasting.stop(p, SpellCasting.RIGHT);
+        ItemStack held = p.getMainHandItem();
+        if (!held.isEmpty() && !BoundWeapons.isBound(held)) {
+            MagicData.tag(p).put("prev_right_item", keyOf(held));
+        }
         if (!makeRoomInMainHand(p)) {
             Notifier.message(p, Component.translatable("message.skycraft.inventory_full"));
             return false;
         }
         MagicData.setSelectedSpell(p, spellId);
+        if (MagicData.leftSpell(p).isEmpty()) MagicData.setLeftSpell(p, MagicData.NONE);
         return true;
     }
 
@@ -93,18 +106,26 @@ public final class Hands {
     public static boolean equipLeftSpell(ServerPlayer p, String spellId) {
         if (!mayEquip(p, spellId)) return false;
         SpellCasting.stop(p, SpellCasting.LEFT);
-        if (twoHanded(p.getMainHandItem()) && !makeRoomInMainHand(p)) {
-            Notifier.message(p, Component.translatable("message.skycraft.inventory_full"));
-            return false;
+        if (twoHanded(p.getMainHandItem())) {
+            ItemStack held = p.getMainHandItem();
+            if (!BoundWeapons.isBound(held)) {
+                MagicData.tag(p).put("prev_right_item", keyOf(held));
+            }
+            if (!makeRoomInMainHand(p)) {
+                Notifier.message(p, Component.translatable("message.skycraft.inventory_full"));
+                return false;
+            }
         }
         ItemStack off = p.getOffhandItem();
         if (!off.isEmpty()) {
             if (BoundWeapons.isBound(off)) {
                 p.getInventory().offhand.set(0, ItemStack.EMPTY);
-            } else if (!stow(p, off)) {
-                Notifier.message(p, Component.translatable("message.skycraft.inventory_full"));
-                return false;
             } else {
+                MagicData.tag(p).put("prev_left_item", keyOf(off));
+                if (!stow(p, off)) {
+                    Notifier.message(p, Component.translatable("message.skycraft.inventory_full"));
+                    return false;
+                }
                 p.getInventory().offhand.set(0, ItemStack.EMPTY);
             }
         }
@@ -118,26 +139,69 @@ public final class Hands {
 
     // ------------------------------------------------------------------ bound weapons
 
-    /**
-     * Conjures a bound weapon into the right hand. A real item there is put back (its own hotbar slot is kept; the
-     * bound weapon takes a free hotbar slot, else the item goes to the bags); the right-hand spell is replaced, and a
-     * two-handed bound weapon also clears the left hand. The spells it displaced are remembered on the item and come
-     * back when it times out. Returns false (nothing changed) when there is no room.
-     */
     public static boolean equipBound(ServerPlayer p, ItemStack bound) {
+        return equipBound(p, bound, false);
+    }
+
+    /**
+     * Conjures a bound weapon into the casting hand (right hand, or left hand when {@code leftHand} is true for a
+     * one-handed bound weapon). Remembers both the spell and any previous weapon/shield that hand held so they return
+     * when the bound weapon's timer expires.
+     */
+    public static boolean equipBound(ServerPlayer p, ItemStack bound, boolean leftHand) {
         Inventory inv = p.getInventory();
-        // what the weapon displaces (a re-cast keeps what the previous copy had displaced)
+        CompoundTag mtag = MagicData.tag(p);
+        if (leftHand && !twoHanded(bound)) {
+            String left = MagicData.leftSpell(p);
+            CompoundTag prevLeftItem = mtag.contains("prev_left_item", net.minecraft.nbt.Tag.TAG_COMPOUND)
+                    ? mtag.getCompound("prev_left_item").copy() : null;
+            ItemStack curOff = p.getOffhandItem();
+            if (BoundWeapons.isBound(curOff) && curOff.getTag() != null) {
+                if (left.isEmpty() || MagicData.NONE.equals(left)) left = curOff.getTag().getString(BoundWeapons.FROM_LEFT);
+                if (prevLeftItem == null && curOff.getTag().contains(BoundWeapons.FROM_LEFT_ITEM, net.minecraft.nbt.Tag.TAG_COMPOUND)) {
+                    prevLeftItem = curOff.getTag().getCompound(BoundWeapons.FROM_LEFT_ITEM).copy();
+                }
+                inv.offhand.set(0, ItemStack.EMPTY);
+            } else if (!curOff.isEmpty()) {
+                prevLeftItem = keyOf(curOff);
+                if (!stow(p, curOff)) return false;
+                inv.offhand.set(0, ItemStack.EMPTY);
+            }
+            if (twoHanded(p.getMainHandItem()) && !makeRoomInMainHand(p)) return false;
+            CompoundTag tag = bound.getOrCreateTag();
+            tag.putBoolean(BoundWeapons.BOUND_LEFT, true);
+            if (!left.isEmpty() && !MagicData.NONE.equals(left)) tag.putString(BoundWeapons.FROM_LEFT, left);
+            if (prevLeftItem != null && !prevLeftItem.isEmpty()) tag.put(BoundWeapons.FROM_LEFT_ITEM, prevLeftItem);
+            inv.offhand.set(0, bound);
+            SpellCasting.stop(p, SpellCasting.LEFT);
+            MagicData.setLeftSpell(p, MagicData.NONE);
+            return true;
+        }
+
+        // Right-hand (or two-handed) bound weapon
         String right = MagicData.selectedSpell(p);
         String left = MagicData.leftSpell(p);
+        CompoundTag prevRightItem = mtag.contains("prev_right_item", net.minecraft.nbt.Tag.TAG_COMPOUND)
+                ? mtag.getCompound("prev_right_item").copy() : null;
+        CompoundTag prevLeftItem = mtag.contains("prev_left_item", net.minecraft.nbt.Tag.TAG_COMPOUND)
+                ? mtag.getCompound("prev_left_item").copy() : null;
         for (int i = 0; i < inv.getContainerSize(); i++) {
+            if (i == Inventory.SLOT_OFFHAND && !twoHanded(bound)) continue;
             ItemStack s = inv.getItem(i);
             if (!BoundWeapons.isBound(s) || s.getTag() == null) continue;
             if (right.isEmpty()) right = s.getTag().getString(BoundWeapons.FROM_RIGHT);
             if (left.isEmpty() || MagicData.NONE.equals(left)) left = s.getTag().getString(BoundWeapons.FROM_LEFT);
+            if (prevRightItem == null && s.getTag().contains(BoundWeapons.FROM_RIGHT_ITEM, net.minecraft.nbt.Tag.TAG_COMPOUND)) {
+                prevRightItem = s.getTag().getCompound(BoundWeapons.FROM_RIGHT_ITEM).copy();
+            }
+            if (prevLeftItem == null && s.getTag().contains(BoundWeapons.FROM_LEFT_ITEM, net.minecraft.nbt.Tag.TAG_COMPOUND)) {
+                prevLeftItem = s.getTag().getCompound(BoundWeapons.FROM_LEFT_ITEM).copy();
+            }
         }
         ItemStack[] removed = new ItemStack[inv.getContainerSize()];
         boolean any = false;
         for (int i = 0; i < removed.length; i++) {
+            if (i == Inventory.SLOT_OFFHAND && !twoHanded(bound)) continue;
             ItemStack s = inv.getItem(i);
             if (BoundWeapons.isBound(s)) {
                 removed[i] = s;
@@ -149,6 +213,7 @@ public final class Hands {
         int target = sel;
         ItemStack main = inv.getItem(sel);
         if (!main.isEmpty()) {
+            prevRightItem = keyOf(main);
             int hot = emptyHotbar(inv, sel);
             if (hot >= 0) {
                 target = hot;
@@ -167,6 +232,7 @@ public final class Hands {
         CompoundTag tag = bound.getOrCreateTag();
         if (!right.isEmpty() && !MagicData.NONE.equals(right)) tag.putString(BoundWeapons.FROM_RIGHT, right);
         if (!left.isEmpty() && !MagicData.NONE.equals(left)) tag.putString(BoundWeapons.FROM_LEFT, left);
+        if (prevRightItem != null && !prevRightItem.isEmpty()) tag.put(BoundWeapons.FROM_RIGHT_ITEM, prevRightItem);
         inv.setItem(target, bound);
         if (target != sel) selectSlot(p, target);
         SpellCasting.stop(p, SpellCasting.RIGHT);
@@ -175,24 +241,97 @@ public final class Hands {
             SpellCasting.stop(p, SpellCasting.LEFT);
             MagicData.setLeftSpell(p, MagicData.NONE);
             ItemStack off = p.getOffhandItem();
-            if (!off.isEmpty() && stow(p, off)) inv.offhand.set(0, ItemStack.EMPTY);
+            if (!off.isEmpty()) {
+                if (BoundWeapons.isBound(off)) {
+                    inv.offhand.set(0, ItemStack.EMPTY);
+                } else {
+                    prevLeftItem = keyOf(off);
+                    if (stow(p, off)) inv.offhand.set(0, ItemStack.EMPTY);
+                }
+            }
+            if (prevLeftItem != null && !prevLeftItem.isEmpty()) tag.put(BoundWeapons.FROM_LEFT_ITEM, prevLeftItem);
         }
         LAST_SELECTED.put(p.getUUID(), inv.selected);
         return true;
     }
 
-    /** The bound weapon ran out while held: the spells it replaced return to the hands that are still free. */
+    /** The bound weapon ran out while held: the previous weapon (or the spell) it replaced returns to the hand. */
     public static void restoreAfterBound(ServerPlayer p, CompoundTag boundTag) {
-        String right = boundTag.getString(BoundWeapons.FROM_RIGHT);
-        if (!right.isEmpty() && mayEquip(p, right) && p.getMainHandItem().isEmpty() && MagicData.selectedSpell(p).isEmpty()) {
-            MagicData.setSelectedSpell(p, right);
+        if (boundTag.getBoolean(BoundWeapons.BOUND_LEFT)) {
+            if (p.getOffhandItem().isEmpty() && !twoHanded(p.getMainHandItem())) {
+                if (boundTag.contains(BoundWeapons.FROM_LEFT_ITEM, net.minecraft.nbt.Tag.TAG_COMPOUND)
+                        && restoreItemToHand(p, boundTag.getCompound(BoundWeapons.FROM_LEFT_ITEM), true)) {
+                    MagicData.tag(p).remove("prev_left_item");
+                    return;
+                }
+                String left = boundTag.getString(BoundWeapons.FROM_LEFT);
+                String now = MagicData.leftSpell(p);
+                if (!left.isEmpty() && mayEquip(p, left) && (now.isEmpty() || MagicData.NONE.equals(now))) {
+                    MagicData.setLeftSpell(p, left);
+                }
+            }
+            return;
         }
-        String left = boundTag.getString(BoundWeapons.FROM_LEFT);
-        String now = MagicData.leftSpell(p);
-        if (!left.isEmpty() && mayEquip(p, left) && p.getOffhandItem().isEmpty() && !twoHanded(p.getMainHandItem())
-                && (now.isEmpty() || MagicData.NONE.equals(now))) {
-            MagicData.setLeftSpell(p, left);
+        if (p.getMainHandItem().isEmpty()) {
+            if (boundTag.contains(BoundWeapons.FROM_RIGHT_ITEM, net.minecraft.nbt.Tag.TAG_COMPOUND)
+                    && restoreItemToHand(p, boundTag.getCompound(BoundWeapons.FROM_RIGHT_ITEM), false)) {
+                MagicData.tag(p).remove("prev_right_item");
+            } else {
+                String right = boundTag.getString(BoundWeapons.FROM_RIGHT);
+                if (!right.isEmpty() && mayEquip(p, right) && MagicData.selectedSpell(p).isEmpty()) {
+                    MagicData.setSelectedSpell(p, right);
+                }
+            }
         }
+        if (p.getOffhandItem().isEmpty() && !twoHanded(p.getMainHandItem())) {
+            if (boundTag.contains(BoundWeapons.FROM_LEFT_ITEM, net.minecraft.nbt.Tag.TAG_COMPOUND)
+                    && restoreItemToHand(p, boundTag.getCompound(BoundWeapons.FROM_LEFT_ITEM), true)) {
+                MagicData.tag(p).remove("prev_left_item");
+                return;
+            }
+            String left = boundTag.getString(BoundWeapons.FROM_LEFT);
+            String now = MagicData.leftSpell(p);
+            if (!left.isEmpty() && mayEquip(p, left) && (now.isEmpty() || MagicData.NONE.equals(now))) {
+                MagicData.setLeftSpell(p, left);
+            }
+        }
+    }
+
+    /** Finds a previously displaced item in the player's inventory or pack and puts it back in the hand. */
+    private static boolean restoreItemToHand(ServerPlayer p, CompoundTag itemKey, boolean leftHand) {
+        if (itemKey == null || itemKey.isEmpty()) return false;
+        ItemStack target = ItemStack.of(itemKey);
+        if (target.isEmpty() || BoundWeapons.isBound(target)) return false;
+        Inventory inv = p.getInventory();
+        for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
+            if (!leftHand && i == inv.selected) continue;
+            ItemStack s = inv.getItem(i);
+            if (!s.isEmpty() && ItemStack.isSameItemSameTags(s, target)) {
+                if (leftHand) {
+                    ItemStack one = s.split(1);
+                    if (s.isEmpty()) inv.setItem(i, ItemStack.EMPTY);
+                    inv.offhand.set(0, one);
+                } else if (Inventory.isHotbarSlot(i) && inv.getItem(inv.selected).isEmpty()) {
+                    selectSlot(p, i);
+                } else {
+                    ItemStack one = s.split(1);
+                    if (s.isEmpty()) inv.setItem(i, ItemStack.EMPTY);
+                    inv.setItem(inv.selected, one);
+                }
+                return true;
+            }
+        }
+        int pIdx = com.skycraft.inventory.Pack.find(p, s -> ItemStack.isSameItemSameTags(s, target));
+        if (pIdx >= 0) {
+            ItemStack taken = com.skycraft.inventory.Pack.take(p, pIdx, 1);
+            if (!taken.isEmpty()) {
+                if (leftHand) inv.offhand.set(0, taken);
+                else inv.setItem(inv.selected, taken);
+                com.skycraft.inventory.Pack.sync(p);
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Makes every bound weapon vanish (no refund). Returns how many were removed. */
@@ -247,6 +386,10 @@ public final class Hands {
                 MagicData.clearRightSpell(p);
             }
         }
+        if (twoHanded && BoundWeapons.isBound(off)) {
+            inv.offhand.set(0, ItemStack.EMPTY);
+            off = ItemStack.EMPTY;
+        }
         String left = MagicData.leftSpell(p);
         if (!left.isEmpty() && !MagicData.NONE.equals(left) && (!off.isEmpty() || twoHanded)) {
             SpellCasting.stop(p, SpellCasting.LEFT);
@@ -259,7 +402,8 @@ public final class Hands {
         Inventory inv = p.getInventory();
         boolean stray = false;
         for (int i = 0; i < inv.getContainerSize(); i++) {
-            if (i == inv.selected || i == Inventory.SLOT_OFFHAND) continue;
+            if (i == inv.selected) continue;
+            if (i == Inventory.SLOT_OFFHAND && !twoHanded(inv.getItem(i)) && !twoHanded(inv.getItem(inv.selected))) continue;
             if (BoundWeapons.isBound(inv.getItem(i))) {
                 inv.setItem(i, ItemStack.EMPTY);
                 stray = true;

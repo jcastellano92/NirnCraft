@@ -27,8 +27,15 @@ public final class SurvivalDialogue {
 
     private static void addOptions(ServerPlayer player, LivingEntity npc, List<DialogueOption> out) {
         if (Innkeepers.isInnkeeper(npc)) {
-            out.add(new DialogueOption("survival.rent", Component.translatable("dialogue.skycraft.survival.rent",
-                    SurvivalConfig.ROOM_PRICE.get()), 95, Innkeepers::rent));
+            if (Innkeepers.hasOwnRoom(player, npc)) {
+                out.add(new DialogueOption("survival.rent", Component.translatable("dialogue.skycraft.survival.rent_already"), 95, Innkeepers::rent));
+            } else if (Innkeepers.isFullyBooked(player, npc)) {
+                out.add(new DialogueOption("survival.rent", Component.translatable("dialogue.skycraft.survival.rent_full")
+                        .withStyle(net.minecraft.ChatFormatting.DARK_GRAY), 95, Innkeepers::rent));
+            } else {
+                out.add(new DialogueOption("survival.rent", Component.translatable("dialogue.skycraft.survival.rent",
+                        SurvivalConfig.ROOM_PRICE.get()), 95, Innkeepers::rent));
+            }
             if (Merchants.isMerchant(npc)) {
                 Innkeepers.topUpStock(npc);
                 out.add(new DialogueOption("survival.food", Component.translatable("dialogue.skycraft.survival.food"), 96, Barter::open));
@@ -43,6 +50,10 @@ public final class SurvivalDialogue {
 
     public static boolean isPriest(LivingEntity npc) {
         if (npc instanceof Villager v && !v.isBaby() && v.getVillagerData().getProfession() == VillagerProfession.CLERIC) return true;
+        if (npc instanceof com.skycraft.society.entity.NpcEntity n
+                && (n.role() == com.skycraft.society.NpcRole.PRIEST || n.role() == com.skycraft.society.NpcRole.APOTHECARY)) return true;
+        String job = npc.getPersistentData().getString(com.skycraft.society.Housing.JOB_KEY);
+        if ("priest".equalsIgnoreCase(job) || "healer".equalsIgnoreCase(job) || "apothecary".equalsIgnoreCase(job)) return true;
         return npc.getPersistentData().getBoolean(PRIEST_TAG) || "priest".equals(npc.getPersistentData().getString("skycraft_role"));
     }
 
