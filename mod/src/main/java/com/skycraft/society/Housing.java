@@ -75,6 +75,10 @@ public final class Housing {
         /** Causal world-sheet field IDs explaining why this resident's job exists in {@code regionId} (empty when no sheet). */
         public List<String> why(@Nullable String regionId) {
             if (regionId == null || regionId.isBlank()) return List.of();
+            if (role == NpcRole.TRAINER || (job != null && job.startsWith("trainer_"))) {
+                List<String> tw = SocietyTrainers.whyForTrainerJob(regionId, job);
+                if (!tw.isEmpty()) return tw;
+            }
             List<String> w = com.skycraft.tamriel.world.WorldSheets.whyForJob(regionId, job);
             if (w.isEmpty() && role != null) {
                 w = com.skycraft.tamriel.world.WorldSheets.whyForJob(regionId, role.name());
@@ -272,6 +276,12 @@ public final class Housing {
             }
         }
 
+        // ---- F-COURT (R3d-1.2) & F-TRAINER (R3d-1.1): guarantee full court in capitals/cities and tier trainers
+        if (!anchors.isEmpty()) {
+            ensureCourt(plan, anchors, pool, used, capital);
+            assignTrainers(plan, key, tier, anchors, pool, used);
+        }
+
         // ---- households: what is left of the home beds
         List<Integer> free = new ArrayList<>();
         for (int b : pool.get(BedKind.HOME)) if (!used.contains(b)) free.add(b);
@@ -337,6 +347,134 @@ public final class Housing {
             plan.bySlot.put(b, new Resident(served == 0 ? "cook" : "server", NpcRole.CITIZEN, AnchorType.BED, b, innIdx, b, BedKind.INN_STAFF, -1));
             served++;
         }
+    }
+
+    /** Ensures capitals and cities (tier 0) have a full court (>= 3 distinct court roles) seated at the keep/palace anchor. */
+    private static void ensureCourt(Plan plan, List<Anchor> anchors, Map<BedKind, List<Integer>> pool, Set<Integer> used, boolean capital) {
+        if (!capital) return;
+        Set<String> present = new HashSet<>();
+        int keepIdx = -1;
+        for (Resident r : plan.bySlot.values()) {
+            if (Courts.isCourtJob(r.job())) {
+                present.add(r.job());
+                if (keepIdx < 0 && r.work() >= 0) keepIdx = r.work();
+            }
+        }
+        if (keepIdx < 0) {
+            for (int i = 0; i < anchors.size(); i++) {
+                AnchorType t = anchors.get(i).type();
+                if (t == AnchorType.JARL || t == AnchorType.STEWARD || t == AnchorType.WIZARD || t == AnchorType.HOUSECARL) {
+                    keepIdx = i;
+                    break;
+                }
+            }
+        }
+        if (keepIdx < 0) {
+            for (int i = 0; i < anchors.size(); i++) {
+                if (JOB_SET.contains(anchors.get(i).type())) {
+                    keepIdx = i;
+                    break;
+                }
+            }
+        }
+        if (keepIdx < 0) return;
+        Anchor keepAnchor = anchors.get(keepIdx);
+        for (String courtJob : Courts.REQUIRED_JOBS) {
+            if (present.contains(courtJob)) continue;
+            BedKind[] order = {BedKind.COURT, BedKind.HOME, BedKind.TEMPLE, BedKind.INN_STAFF, BedKind.GUILD, BedKind.BARRACKS};
+            int bed = -1;
+            BedKind chosenKind = BedKind.COURT;
+            for (BedKind bk : order) {
+                bed = takeNearest(pool.get(bk), used, anchors, keepAnchor, null);
+                if (bed >= 0) {
+                    chosenKind = bk;
+                    break;
+                }
+            }
+            if (bed >= 0) {
+                put(plan, new Resident(courtJob, Courts.roleForCourtJob(courtJob), anchors.get(bed).type(),
+                        bed, keepIdx, bed, chosenKind, -1));
+                present.add(courtJob);
+            }
+        }
+    }
+
+    /** Places the settlement's skill trainers (F-TRAINER) with a bed and a workplace anchor. */
+    private static void assignTrainers(Plan plan, String key, int tier, List<Anchor> anchors, Map<BedKind, List<Integer>> pool, Set<Integer> used) {
+        List<SocietyTrainers.Spec> specs = SocietyTrainers.trainersForSettlement(key, tier, null);
+        if (specs.isEmpty()) return;
+        int idx = 0;
+        for (Resident r : new ArrayList<>(plan.bySlot.values())) {
+            if (idx >= specs.size()) break;
+            if (r.slotType() == AnchorType.GUILD_TRAINER || "guild_trainer".equals(r.job())) {
+                SocietyTrainers.Spec spec = specs.get(idx++);
+                int work = r.work() >= 0 ? r.work() : findWorkplaceIndex(anchors, spec.workplace());
+                put(plan, new Resident(spec.jobId(), NpcRole.TRAINER, r.slotType(), r.slot(), work, r.bed(), r.bedKind(), r.leisure()));
+            }
+        }
+        while (idx < specs.size()) {
+            SocietyTrainers.Spec spec = specs.get(idx++);
+            int workIdx = findWorkplaceIndex(anchors, spec.workplace());
+            Anchor ref = workIdx >= 0 ? anchors.get(workIdx) : anchors.get(0);
+            BedKind[] order = {BedKind.GUILD, BedKind.HOME, BedKind.COURT, BedKind.TEMPLE, BedKind.INN_STAFF};
+            int bed = -1;
+            BedKind chosenKind = BedKind.HOME;
+            for (BedKind bk : order) {
+                bed = takeNearest(pool.get(bk), used, anchors, ref, null);
+                if (bed >= 0) {
+                    chosenKind = bk;
+                    break;
+                }
+            }
+            if (bed >= 0) {
+                put(plan, new Resident(spec.jobId(), NpcRole.TRAINER, anchors.get(bed).type(), bed, workIdx, bed, chosenKind, -1));
+                continue;
+            }
+            // Fallback when all beds are claimed by duplicate non-essential jobs (e.g. 6th farmer or inn server)
+            Resident convertible = findConvertibleResident(plan);
+            if (convertible != null) {
+                int w = workIdx >= 0 ? workIdx : convertible.work();
+                put(plan, new Resident(spec.jobId(), NpcRole.TRAINER, convertible.slotType(), convertible.slot(),
+                        w, convertible.bed(), convertible.bedKind(), -1));
+            }
+        }
+    }
+
+    private static int findWorkplaceIndex(List<Anchor> anchors, @Nullable String workplaceId) {
+        if (workplaceId != null && !workplaceId.isEmpty()) {
+            for (int i = 0; i < anchors.size(); i++) {
+                AnchorType t = anchors.get(i).type();
+                if (JOB_SET.contains(t) && (t.id().equalsIgnoreCase(workplaceId) || jobId(t).equalsIgnoreCase(workplaceId))) {
+                    return i;
+                }
+            }
+        }
+        for (int i = 0; i < anchors.size(); i++) {
+            AnchorType t = anchors.get(i).type();
+            if (JOB_SET.contains(t) && t != AnchorType.JAIL_PRISONER && t != AnchorType.GUARD) {
+                return i;
+            }
+        }
+        for (int i = 0; i < anchors.size(); i++) {
+            if (JOB_SET.contains(anchors.get(i).type())) return i;
+        }
+        return -1;
+    }
+
+    @Nullable
+    private static Resident findConvertibleResident(Plan plan) {
+        Map<String, Integer> counts = new HashMap<>();
+        for (Resident r : plan.bySlot.values()) counts.merge(r.job(), 1, Integer::sum);
+        Resident best = null;
+        for (Resident r : plan.bySlot.values()) {
+            if (r.bed() < 0 || r.role() == NpcRole.TRAINER || Courts.isCourtJob(r.job())) continue;
+            if ("server".equals(r.job()) || "cook".equals(r.job())) return r;
+            if (counts.getOrDefault(r.job(), 0) > 1 && ("farmer".equals(r.job()) || "labourer".equals(r.job())
+                    || "lumberjack".equals(r.job()) || "miner".equals(r.job()) || "merchant".equals(r.job()))) {
+                best = r;
+            }
+        }
+        return best;
     }
 
     // ------------------------------------------------------------------ pieces

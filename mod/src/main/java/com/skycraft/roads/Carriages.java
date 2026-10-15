@@ -53,6 +53,7 @@ public final class Carriages {
     }
 
     public static void register() {
+        com.skycraft.travel.TravelSelftest.init();
         Dialogue.registerProvider(Carriages::addOptions);
     }
 
@@ -76,15 +77,35 @@ public final class Carriages {
         String province = Holds.province(Holds.holdAt(player.level(), from));
         int baseFare = RoadsConfig.CARRIAGE_COST.get();
         var data = SkyData.get(player);
+
+        // First consult the data-driven provincial travel network (skycraft/travel/<province>.json)
+        java.util.Set<String> addedIds = new java.util.HashSet<>();
+        com.skycraft.travel.TravelNode originNode = com.skycraft.travel.TravelNetworks
+                .nearestNode(from.getX(), from.getZ(), com.skycraft.travel.TravelMode.CARRIAGE, 320.0)
+                .orElse(null);
+        if (originNode != null) {
+            for (com.skycraft.travel.TravelNetworks.Offer offer : com.skycraft.travel.TravelNetworks.offersFrom(
+                    originNode.id(), com.skycraft.travel.TravelMode.CARRIAGE)) {
+                String placeId = offer.destination().place() != null ? offer.destination().place() : offer.destination().id();
+                Place p = Places.byId(placeId).orElse(null);
+                if (p == null || !addedIds.add(p.id())) continue;
+                double dist = Math.sqrt(p.distSqr(from.getX(), from.getZ()));
+                out.add(new Destination(p, offer.fee() > 0 ? offer.fee() : fare(baseFare, dist, "skyrim".equals(province)), dist));
+            }
+        }
+
         List<Destination> cities = new ArrayList<>();
+        boolean hasDataNetwork = !out.isEmpty();
         for (Place p : Places.all()) {
             if (p.type() != PlaceType.CAPITAL && p.type() != PlaceType.CITY) continue;
+            if (addedIds.contains(p.id())) continue;
             double dist = Math.sqrt(p.distSqr(from.getX(), from.getZ()));
             if (dist < p.radius() + 200) continue; // the town you are at
             // the road network reaches every place on this landmass; islands need a ship
             if (!Landmass.connected(from.getX(), from.getZ(), p.x(), p.z())) continue;
             String destProvince = provinceOf(p);
             boolean sameProvince = destProvince.equals(province);
+            if (hasDataNetwork && sameProvince) continue; // intra-province routes come from travel/<province>.json
             Destination d = new Destination(p, fare(baseFare, dist, sameProvince && "skyrim".equals(province)), dist);
             // every capital the roads reach is offered; other provinces' cities once you have been there
             if (p.type() == PlaceType.CAPITAL) out.add(d);
@@ -196,6 +217,8 @@ public final class Carriages {
         Notifier.message(player, hours > 0
                 ? Component.translatable("dialogue.skycraft.carriage.arrived_hours", dest.name(), hours)
                 : Component.translatable("dialogue.skycraft.carriage.arrived", dest.name()));
+        com.skycraft.travel.TravelNetworks.node(dest.id())
+                .ifPresent(n -> com.skycraft.travel.TravelNetworks.onArrival(player, n, com.skycraft.travel.TravelMode.CARRIAGE));
     }
 
     /**

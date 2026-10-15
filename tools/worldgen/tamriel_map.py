@@ -665,6 +665,47 @@ def build():
     dunes_t = np.clip(dunes, 0, 1) * land
     wet_t = wv
 
+    # --- rainshadow & geothermal heat (MS21 micro-biome drivers) ---------------------------------------------------
+    print("rainshadow & geothermal")
+    crest = h + ridge * 90.0
+    winds_cfg = V.get("winds", {})
+    default_winds = winds_cfg.get("default", [[1.0, 0.0]])
+    yy, xx = np.indices((H, W), dtype=np.float32)
+    rainshadow = np.zeros((H, W), np.float32)
+    wind_groups = {}
+    for i, r in enumerate(regions):
+        wkey = tuple(tuple(w) for w in winds_cfg.get(r["id"], default_winds))
+        wind_groups.setdefault(wkey, []).append(i)
+    for wlist, rindices in wind_groups.items():
+        acc = np.zeros((H, W), np.float32)
+        for wx, wz in wlist:
+            wacc = np.zeros((H, W), np.float32)
+            for k in range(8, 49, 2):
+                ux = np.clip(np.round(xx - k * wx).astype(int), 0, W - 1)
+                uz = np.clip(np.round(yy - k * wz).astype(int), 0, H - 1)
+                dh = np.where(land[uz, ux], np.maximum(crest[uz, ux] - h, 0.0), 0.0)
+                rw = (0.3 + 0.7 * ridge[uz, ux]) * (1.0 - (k - 8) / 48.0)
+                wacc += (dh * rw) / 21.0
+            acc = np.maximum(acc, wacc / 48.0)
+        m = np.isin(reg, rindices)
+        rainshadow[m] = acc[m]
+    rainshadow = np.clip(blur(rainshadow * landf, 2) / (blur(landf, 2) + 1e-6), 0.0, 1.0) * land
+
+    heat = np.zeros((H, W), np.float32)
+    for geo in V.get("geothermal", []):
+        hval = float(geo.get("heat", 0.5))
+        if "poly" in geo:
+            pm = raster_polys([geo["poly"]], CELL, W, H)
+            falloff = float(geo.get("falloff", 200.0))
+            gd = dist_to(pm) * CELL
+            p = 1.0 - smoothstep(0.0, falloff, gd)
+            heat = np.maximum(heat, hval * p)
+        else:
+            gr = np.hypot(GX - float(geo["x"]), GZ - float(geo["z"]))
+            p = 1.0 - smoothstep(0.0, float(geo.get("radius", 220.0)), gr)
+            heat = np.maximum(heat, hval * (p ** 1.15))
+    heat = np.clip(blur(heat, 1), 0.0, 1.0) * land
+
     # --- water raster -----------------------------------------------------------------------------------------------
     use_lake = lake_sd > -64
     use_riv = (riv_d < 220) & ~use_lake
@@ -680,8 +721,9 @@ def build():
     hyd["sites"], hyd["site_counts"] = sites, site_counts
 
     return dict(regions=regions, reg=reg, h=h, D=D, land=land, ridge=ridge, rough=rough_t, crag=crag_t,
-                dunes=dunes_t, wet=wet_t, lake_sd=lake_sd, riv_d=riv_d, riv_hw=riv_hw, road_d=road_d,
-                wl_code=wl_code, wflags=wflags, wlevel=wlevel, h_view=h_view, sharp=sharp, flat=flat, roadw=roadw, hyd=hyd)
+                dunes=dunes_t, wet=wet_t, rainshadow=rainshadow, heat=heat, lake_sd=lake_sd, riv_d=riv_d,
+                riv_hw=riv_hw, road_d=road_d, wl_code=wl_code, wflags=wflags, wlevel=wlevel, h_view=h_view,
+                sharp=sharp, flat=flat, roadw=roadw, hyd=hyd)
 
 
 D8 = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
@@ -879,6 +921,12 @@ def write_assets(o):
                                                                              o["hyd"]["site_counts"]))
     coast = np.clip(np.round(o["D"]) + 32768, 0, 65535).astype(np.uint16)
     Image.fromarray(coast).save(os.path.join(OUT_DIR, "coast.png"))
+
+    rs_u8 = np.clip(np.round(o["rainshadow"] * 255), 0, 255).astype(np.uint8)
+    Image.fromarray(rs_u8, "L").save(os.path.join(OUT_DIR, "rainshadow.png"))
+
+    heat_u8 = np.clip(np.round(o["heat"] * 255), 0, 255).astype(np.uint8)
+    Image.fromarray(heat_u8, "L").save(os.path.join(OUT_DIR, "heat.png"))
 
     # sharp peaks for MapPeaks.java: the profile parameters, shelves with their levelled height, calm path corridors
     peaks = []

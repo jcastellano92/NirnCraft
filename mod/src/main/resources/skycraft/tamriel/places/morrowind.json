@@ -689,7 +689,8 @@
   "x": 6084,
   "z": -1215,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "kogoruhn",
@@ -700,7 +701,8 @@
   "x": 6486,
   "z": -1060,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "marquee"
  },
  {
   "id": "fort_darius",
@@ -711,7 +713,8 @@
   "x": 5374,
   "z": -1020,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "berandas",
@@ -722,7 +725,8 @@
   "x": 5480,
   "z": -807,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "buckmoth_legion_fort",
@@ -733,7 +737,8 @@
   "x": 6136,
   "z": -305,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "andasreth",
@@ -744,7 +749,8 @@
   "x": 5662,
   "z": -260,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "hlormaren",
@@ -755,7 +761,8 @@
   "x": 5790,
   "z": 271,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "moonmoth_legion_fort",
@@ -766,7 +773,8 @@
   "x": 6621,
   "z": 573,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "marandus",
@@ -777,7 +785,8 @@
   "x": 7323,
   "z": 637,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "fort_pelagiad",
@@ -788,7 +797,8 @@
   "x": 6975,
   "z": 958,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "falensarano",
@@ -799,7 +809,8 @@
   "x": 7767,
   "z": -436,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "ghostgate",
@@ -810,7 +821,8 @@
   "x": 6883,
   "z": -102,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "rotheran",
@@ -821,7 +833,8 @@
   "x": 7462,
   "z": -2189,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "valenvaryon",
@@ -832,7 +845,8 @@
   "x": 6656,
   "z": -2199,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "indoranyon",
@@ -843,7 +857,8 @@
   "x": 8473,
   "z": -314,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "telasero",
@@ -854,7 +869,8 @@
   "x": 7896,
   "z": 487,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "heimlyn_keep",
@@ -865,7 +881,8 @@
   "x": 3750,
   "z": 1150,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "fort_virak",
@@ -876,7 +893,8 @@
   "x": 3350,
   "z": 1850,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "fort_arand",
@@ -887,7 +905,8 @@
   "x": 4200,
   "z": 2750,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "castle_ebonheart",
@@ -898,7 +917,8 @@
   "x": 7129,
   "z": 1397,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "taldeic_fortress",
@@ -909,7 +929,8 @@
   "x": 6850,
   "z": 3150,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "foyada_ilibaal",
@@ -1371,7 +1392,8 @@
   "x": 6391,
   "z": -1329,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "pudai_egg_mine",
@@ -1382,7 +1404,8 @@
   "x": 6337,
   "z": -1891,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "bthungthumz",
@@ -1393,7 +1416,8 @@
   "x": 5580,
   "z": -1413,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "ashmelech",
@@ -1404,7 +1428,8 @@
   "x": 6636,
   "z": -1435,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "ashalmawia",
@@ -1415,7 +1440,8 @@
   "x": 5744,
   "z": -1714,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "pulk",
@@ -1426,7 +1452,8 @@
   "x": 5936,
   "z": -1663,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "rissun",
@@ -1437,7 +1464,8 @@
   "x": 6081,
   "z": -1608,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "abernanit",
@@ -1448,7 +1476,8 @@
   "x": 6613,
   "z": -1594,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "arkngthunch_sturdumz",
@@ -1459,7 +1488,8 @@
   "x": 5840,
   "z": -1505,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "matus_akin_egg_mine",
@@ -1470,7 +1500,8 @@
   "x": 5996,
   "z": -1459,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "maelkashishi",
@@ -1481,7 +1512,8 @@
   "x": 5431,
   "z": -1260,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "shal",
@@ -1492,7 +1524,8 @@
   "x": 5649,
   "z": -1378,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "sudanit_mine",
@@ -1503,7 +1536,8 @@
   "x": 6090,
   "z": -1397,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "missamsi",
@@ -1514,7 +1548,8 @@
   "x": 5816,
   "z": -1328,
   "radius": 18,
-  "variant": "sixth_house_base"
+  "variant": "sixth_house_base",
+  "class": "major"
  },
  {
   "id": "koal_cave",
@@ -1525,7 +1560,8 @@
   "x": 5447,
   "z": -1331,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "ilunibi",
@@ -1536,7 +1572,8 @@
   "x": 6450,
   "z": -1288,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "gnisis_eggmine",
@@ -1547,7 +1584,8 @@
   "x": 5548,
   "z": -1268,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "arvs_drelen",
@@ -1558,7 +1596,8 @@
   "x": 5730,
   "z": -1254,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "ashunartes",
@@ -1569,7 +1608,8 @@
   "x": 6003,
   "z": -1254,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "panat",
@@ -1580,7 +1620,8 @@
   "x": 6751,
   "z": -1233,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "ularradallaku",
@@ -1591,7 +1632,8 @@
   "x": 6190,
   "z": -1165,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "yesamsi",
@@ -1602,7 +1644,8 @@
   "x": 5422,
   "z": -1392,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "ramimilk",
@@ -1613,7 +1656,8 @@
   "x": 6067,
   "z": -1105,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "ashimanu_egg_mine",
@@ -1624,7 +1668,8 @@
   "x": 6559,
   "z": -1046,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "nissintu",
@@ -1635,7 +1680,8 @@
   "x": 6255,
   "z": -1017,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "assu",
@@ -1646,7 +1692,8 @@
   "x": 5762,
   "z": -1009,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "kunirai",
@@ -1657,7 +1704,8 @@
   "x": 6684,
   "z": -959,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "shulk_eggmine",
@@ -1668,7 +1716,8 @@
   "x": 6039,
   "z": -973,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "vassir_didanat_cave",
@@ -1679,7 +1728,8 @@
   "x": 6396,
   "z": -784,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "ashinabi",
@@ -1690,7 +1740,8 @@
   "x": 5571,
   "z": -724,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "ahallaraddon_egg_mine",
@@ -1701,7 +1752,8 @@
   "x": 6000,
   "z": -714,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "dushariran",
@@ -1712,7 +1764,8 @@
   "x": 5345,
   "z": -914,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "pinsun",
@@ -1723,7 +1776,8 @@
   "x": 5887,
   "z": -681,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "hassour",
@@ -1734,7 +1788,8 @@
   "x": 6342,
   "z": -640,
   "radius": 18,
-  "variant": "sixth_house_base"
+  "variant": "sixth_house_base",
+  "class": "major"
  },
  {
   "id": "ashirbadon",
@@ -1745,7 +1800,8 @@
   "x": 5874,
   "z": -574,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "dissapla_mine",
@@ -1756,7 +1812,8 @@
   "x": 5722,
   "z": -552,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "kudanat_mine",
@@ -1767,7 +1824,8 @@
   "x": 5567,
   "z": -551,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "hinnabi",
@@ -1778,7 +1836,8 @@
   "x": 5643,
   "z": -467,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "hanud",
@@ -1789,7 +1848,8 @@
   "x": 5881,
   "z": -440,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "beshara",
@@ -1800,7 +1860,8 @@
   "x": 5465,
   "z": -375,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "yasammidan",
@@ -1811,7 +1872,8 @@
   "x": 6290,
   "z": -309,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "unexplored_shipwreck",
@@ -1822,7 +1884,8 @@
   "x": 5644,
   "z": -1759,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "deserted_shipwreck",
@@ -1833,7 +1896,8 @@
   "x": 5346,
   "z": -1255,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "derelict_shipwreck",
@@ -1844,7 +1908,8 @@
   "x": 5250,
   "z": -627,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "llando_ancestral_tomb",
@@ -1855,7 +1920,8 @@
   "x": 6017,
   "z": -1380,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "salvel_ancestral_tomb",
@@ -1866,7 +1932,8 @@
   "x": 5750,
   "z": -1600,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "arethan_ancestral_tomb",
@@ -1877,7 +1944,8 @@
   "x": 5653,
   "z": -1481,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "drethan_ancestral_tomb",
@@ -1888,7 +1956,8 @@
   "x": 5427,
   "z": -1456,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "hlervi_ancestral_tomb",
@@ -1899,7 +1968,8 @@
   "x": 6250,
   "z": -1397,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "randas_ancestral_tomb",
@@ -1910,7 +1980,8 @@
   "x": 5403,
   "z": -767,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "redas_ancestral_tomb",
@@ -1921,7 +1992,8 @@
   "x": 5931,
   "z": -1345,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "heran_ancestral_tomb",
@@ -1932,7 +2004,8 @@
   "x": 5886,
   "z": -1244,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "beran_ancestral_tomb",
@@ -1943,7 +2016,8 @@
   "x": 5595,
   "z": -1172,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "aran_ancestral_tomb",
@@ -1954,7 +2028,8 @@
   "x": 5534,
   "z": -952,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "andalor_ancestral_tomb",
@@ -1965,7 +2040,8 @@
   "x": 5748,
   "z": -885,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "venim_ancestral_tomb",
@@ -1976,7 +2052,8 @@
   "x": 6500,
   "z": -826,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "hlervu_ancestral_tomb",
@@ -1987,7 +2064,8 @@
   "x": 5853,
   "z": -784,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "sethan_ancestral_tomb",
@@ -1998,7 +2076,8 @@
   "x": 6105,
   "z": -761,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "hleran_ancestral_tomb",
@@ -2009,7 +2088,8 @@
   "x": 5725,
   "z": -484,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "aleri_ancestral_tomb",
@@ -2020,7 +2100,8 @@
   "x": 5737,
   "z": -412,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "fadathram_ancestral_tomb",
@@ -2031,7 +2112,8 @@
   "x": 5830,
   "z": -338,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "arenim_ancestral_tomb",
@@ -2042,7 +2124,8 @@
   "x": 5942,
   "z": -289,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "marvani_ancestral_tomb",
@@ -2053,7 +2136,8 @@
   "x": 6044,
   "z": -253,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "salothan_ancestral_tomb",
@@ -2064,7 +2148,8 @@
   "x": 5222,
   "z": -1058,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "caldera_mine",
@@ -2075,7 +2160,8 @@
   "x": 6179,
   "z": 120,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "bthanchend",
@@ -2086,7 +2172,8 @@
   "x": 5796,
   "z": -103,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "yanemus_mine",
@@ -2097,7 +2184,8 @@
   "x": 6474,
   "z": -47,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "halit_mine",
@@ -2108,7 +2196,8 @@
   "x": 6044,
   "z": 105,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "sanit",
@@ -2119,7 +2208,8 @@
   "x": 6237,
   "z": 270,
   "radius": 18,
-  "variant": "sixth_house_base"
+  "variant": "sixth_house_base",
+  "class": "major"
  },
  {
   "id": "arkngthand",
@@ -2130,7 +2220,8 @@
   "x": 6759,
   "z": 560,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "marquee"
  },
  {
   "id": "kora_dur",
@@ -2141,7 +2232,8 @@
   "x": 5966,
   "z": 311,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "palansour",
@@ -2152,7 +2244,8 @@
   "x": 6076,
   "z": 336,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "ashanammu",
@@ -2163,7 +2256,8 @@
   "x": 6084,
   "z": 22,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "shurinbaal",
@@ -2174,7 +2268,8 @@
   "x": 5893,
   "z": 505,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "habinbaes",
@@ -2185,7 +2280,8 @@
   "x": 6714,
   "z": 496,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "madas_grotto",
@@ -2196,7 +2292,8 @@
   "x": 6722,
   "z": 665,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "sinamusa_egg_mine",
@@ -2207,7 +2304,8 @@
   "x": 6480,
   "z": 807,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "sinsibadon",
@@ -2218,7 +2316,8 @@
   "x": 6160,
   "z": 823,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "abinabi",
@@ -2229,7 +2328,8 @@
   "x": 6309,
   "z": 926,
   "radius": 18,
-  "variant": "sixth_house_base"
+  "variant": "sixth_house_base",
+  "class": "major"
  },
  {
   "id": "releth_ancestral_tomb",
@@ -2240,7 +2340,8 @@
   "x": 6318,
   "z": -117,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "norvayn_ancestral_tomb",
@@ -2251,7 +2352,8 @@
   "x": 5910,
   "z": 233,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "serano_ancestral_tomb",
@@ -2262,7 +2364,8 @@
   "x": 6446,
   "z": 56,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "favel_ancestral_tomb",
@@ -2273,7 +2376,8 @@
   "x": 5656,
   "z": 261,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "sadryon_ancestral_tomb",
@@ -2284,7 +2388,8 @@
   "x": 6356,
   "z": 269,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "andas_ancestral_tomb",
@@ -2295,7 +2400,8 @@
   "x": 6819,
   "z": 618,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "thalas_ancestral_tomb",
@@ -2306,7 +2412,8 @@
   "x": 6783,
   "z": 304,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "helas_ancestral_tomb",
@@ -2317,7 +2424,8 @@
   "x": 6523,
   "z": 710,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "othrelas_ancestral_tomb",
@@ -2328,7 +2436,8 @@
   "x": 6020,
   "z": 731,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "nammu",
@@ -2339,7 +2448,8 @@
   "x": 5261,
   "z": -325,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "khartag_point",
@@ -2350,7 +2460,8 @@
   "x": 5314,
   "z": -99,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "dubdil_alar_tower",
@@ -2361,7 +2472,8 @@
   "x": 5439,
   "z": -76,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "ashalmimilkala",
@@ -2372,7 +2484,8 @@
   "x": 5481,
   "z": 302,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "mannammu",
@@ -2383,7 +2496,8 @@
   "x": 5285,
   "z": 198,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "zainsipilu",
@@ -2394,7 +2508,8 @@
   "x": 5669,
   "z": 455,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "anudnabia",
@@ -2405,7 +2520,8 @@
   "x": 5705,
   "z": 620,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "aharunartus",
@@ -2416,7 +2532,8 @@
   "x": 6198,
   "z": 1066,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "ulummusa",
@@ -2427,7 +2544,8 @@
   "x": 5979,
   "z": 953,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "ashurnibibi",
@@ -2438,7 +2556,8 @@
   "x": 5745,
   "z": 555,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "neglected_shipwreck",
@@ -2449,7 +2568,8 @@
   "x": 5221,
   "z": 128,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "abandoned_shipwreck",
@@ -2460,7 +2580,8 @@
   "x": 6027,
   "z": 1051,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "orethi_ancestral_tomb",
@@ -2471,7 +2592,8 @@
   "x": 5364,
   "z": -152,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "thiralas_ancestral_tomb",
@@ -2482,7 +2604,8 @@
   "x": 5379,
   "z": -8,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "sarys_ancestral_tomb",
@@ -2493,7 +2616,8 @@
   "x": 6236,
   "z": 1119,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "dralas_ancestral_tomb",
@@ -2504,7 +2628,8 @@
   "x": 6001,
   "z": 850,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "sarano_ancestral_tomb",
@@ -2515,7 +2640,8 @@
   "x": 6122,
   "z": 921,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "gimothran_ancestral_tomb",
@@ -2526,7 +2652,8 @@
   "x": 5858,
   "z": 979,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "llervu_ancestral_tomb",
@@ -2537,7 +2664,8 @@
   "x": 6265,
   "z": 1050,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "saturan",
@@ -2548,7 +2676,8 @@
   "x": 7807,
   "z": 890,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "subdun",
@@ -2559,7 +2688,8 @@
   "x": 7633,
   "z": 181,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "punabi",
@@ -2570,7 +2700,8 @@
   "x": 7294,
   "z": 506,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "shurdan_raplay_egg_mine",
@@ -2581,7 +2712,8 @@
   "x": 7557,
   "z": 265,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "abebaal_egg_mine",
@@ -2592,7 +2724,8 @@
   "x": 7730,
   "z": 265,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "masseranit",
@@ -2603,7 +2736,8 @@
   "x": 6981,
   "z": 317,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "mudan_grotto",
@@ -2614,7 +2748,8 @@
   "x": 7464,
   "z": 317,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "ihinipalit",
@@ -2625,7 +2760,8 @@
   "x": 7754,
   "z": 376,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "sanabi",
@@ -2636,7 +2772,8 @@
   "x": 7395,
   "z": 318,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "madas_zebba_egg_mine",
@@ -2647,7 +2784,8 @@
   "x": 6934,
   "z": 479,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "bal_ur",
@@ -2658,7 +2796,8 @@
   "x": 7676,
   "z": 812,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "mzahnch",
@@ -2669,7 +2808,8 @@
   "x": 8014,
   "z": 1054,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "inanius_egg_mine",
@@ -2680,7 +2820,8 @@
   "x": 7830,
   "z": 995,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "sha_adnius",
@@ -2691,7 +2832,8 @@
   "x": 7588,
   "z": 649,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "assumanu",
@@ -2702,7 +2844,8 @@
   "x": 7185,
   "z": 680,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "hairat_vassamsi_egg_mine",
@@ -2713,7 +2856,8 @@
   "x": 6929,
   "z": 691,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "nallit",
@@ -2724,7 +2868,8 @@
   "x": 7676,
   "z": 717,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "bensamsi",
@@ -2735,7 +2880,8 @@
   "x": 7109,
   "z": 793,
   "radius": 18,
-  "variant": "sixth_house_base"
+  "variant": "sixth_house_base",
+  "class": "major"
  },
  {
   "id": "yakanalit",
@@ -2746,7 +2892,8 @@
   "x": 7863,
   "z": 854,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "mallapi",
@@ -2757,7 +2904,8 @@
   "x": 6831,
   "z": 869,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "ald_sotha",
@@ -2768,7 +2916,8 @@
   "x": 7709,
   "z": 1078,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "marquee"
  },
  {
   "id": "zaintiraris",
@@ -2779,7 +2928,8 @@
   "x": 7972,
   "z": 886,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "assernerairan",
@@ -2790,7 +2940,8 @@
   "x": 7477,
   "z": 993,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "tusenend",
@@ -2801,7 +2952,8 @@
   "x": 7745,
   "z": 853,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "ibar_dad",
@@ -2812,7 +2964,8 @@
   "x": 7901,
   "z": 996,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "zanabi",
@@ -2823,7 +2976,8 @@
   "x": 7967,
   "z": 981,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "halls_of_fabrication",
@@ -2834,7 +2988,8 @@
   "x": 7586,
   "z": 1021,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "panabanit_nimawia_egg_mine",
@@ -2845,7 +3000,8 @@
   "x": 7418,
   "z": 1063,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "nchardumz",
@@ -2856,7 +3012,8 @@
   "x": 7631,
   "z": 1110,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "addamasartus",
@@ -2867,7 +3024,8 @@
   "x": 6722,
   "z": 1079,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "ilanipu_grotto",
@@ -2878,7 +3036,8 @@
   "x": 7036,
   "z": 1208,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "abaesen_pulu_egg_mine",
@@ -2889,7 +3048,8 @@
   "x": 6909,
   "z": 1154,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "nimawia_grotto",
@@ -2900,7 +3060,8 @@
   "x": 6446,
   "z": 1066,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "unknown_shipwreck",
@@ -2911,7 +3072,8 @@
   "x": 7970,
   "z": 1117,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "lost_shipwreck",
@@ -2922,7 +3084,8 @@
   "x": 7691,
   "z": 1343,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "remote_shipwreck",
@@ -2933,7 +3096,8 @@
   "x": 6734,
   "z": 1242,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "thelas_ancestral_tomb",
@@ -2944,7 +3108,8 @@
   "x": 6400,
   "z": 1111,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "reloth_ancestral_tomb",
@@ -2955,7 +3120,8 @@
   "x": 7531,
   "z": 404,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "andules_ancestral_tomb",
@@ -2966,7 +3132,8 @@
   "x": 7722,
   "z": 610,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "andavel_ancestral_tomb",
@@ -2977,7 +3144,8 @@
   "x": 7828,
   "z": 653,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "sarethi_ancestral_tomb",
@@ -2988,7 +3156,8 @@
   "x": 7281,
   "z": 761,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "sandas_ancestral_tomb",
@@ -2999,7 +3168,8 @@
   "x": 7385,
   "z": 786,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "rethandus_ancestral_tomb",
@@ -3010,7 +3180,8 @@
   "x": 7418,
   "z": 853,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "nerano_ancestral_tomb",
@@ -3021,7 +3192,8 @@
   "x": 7082,
   "z": 922,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "hlaalu_ancestral_tomb",
@@ -3032,7 +3204,8 @@
   "x": 7234,
   "z": 944,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "vandus_ancestral_tomb",
@@ -3043,7 +3216,8 @@
   "x": 7539,
   "z": 697,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "samarys_ancestral_tomb",
@@ -3054,7 +3228,8 @@
   "x": 6378,
   "z": 1003,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "seran_ancestral_tomb",
@@ -3065,7 +3240,8 @@
   "x": 7064,
   "z": 1081,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "andrano_ancestral_tomb",
@@ -3076,7 +3252,8 @@
   "x": 6818,
   "z": 1076,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "lleran_ancestral_tomb",
@@ -3087,7 +3264,8 @@
   "x": 7563,
   "z": 1150,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "andalen_ancestral_tomb",
@@ -3098,7 +3276,8 @@
   "x": 6777,
   "z": 1188,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "nchuleft",
@@ -3109,7 +3288,8 @@
   "x": 7676,
   "z": -636,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "assalkushalit",
@@ -3120,7 +3300,8 @@
   "x": 6860,
   "z": -674,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "mzanchend",
@@ -3131,7 +3312,8 @@
   "x": 7421,
   "z": -882,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "vemynal",
@@ -3142,7 +3324,8 @@
   "x": 6783,
   "z": -645,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "dagoth_ur",
@@ -3153,7 +3336,8 @@
   "x": 6859,
   "z": -438,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "marquee"
  },
  {
   "id": "endusal",
@@ -3164,7 +3348,8 @@
   "x": 6747,
   "z": -382,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "punsabanit",
@@ -3175,7 +3360,8 @@
   "x": 7898,
   "z": -554,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "odrosal",
@@ -3186,7 +3372,8 @@
   "x": 7025,
   "z": -294,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "tureynulal",
@@ -3197,7 +3384,8 @@
   "x": 7222,
   "z": -401,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "mamaea",
@@ -3208,7 +3396,8 @@
   "x": 6521,
   "z": -268,
   "radius": 18,
-  "variant": "sixth_house_base"
+  "variant": "sixth_house_base",
+  "class": "major"
  },
  {
   "id": "forgotten_wastes",
@@ -3219,7 +3408,8 @@
   "x": 7331,
   "z": -261,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "sennananit",
@@ -3230,7 +3420,8 @@
   "x": 7275,
   "z": -128,
   "radius": 18,
-  "variant": "sixth_house_base"
+  "variant": "sixth_house_base",
+  "class": "major"
  },
  {
   "id": "sargon",
@@ -3241,7 +3432,8 @@
   "x": 7122,
   "z": 15,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "assemanu",
@@ -3252,7 +3444,8 @@
   "x": 7490,
   "z": 70,
   "radius": 18,
-  "variant": "sixth_house_base"
+  "variant": "sixth_house_base",
+  "class": "major"
  },
  {
   "id": "verelnim_ancestral_tomb",
@@ -3263,7 +3456,8 @@
   "x": 7185,
   "z": -1059,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "mzuleft",
@@ -3274,7 +3468,8 @@
   "x": 7240,
   "z": -1518,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "nchardahrk",
@@ -3285,7 +3480,8 @@
   "x": 7465,
   "z": -1370,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "ald_daedroth",
@@ -3296,7 +3492,8 @@
   "x": 7942,
   "z": -1332,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "bthuand",
@@ -3307,7 +3504,8 @@
   "x": 7943,
   "z": -2008,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "marquee"
  },
  {
   "id": "sarimisun_assa_egg_mine",
@@ -3318,7 +3516,8 @@
   "x": 7862,
   "z": -1832,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "mudan_mul_egg_mine",
@@ -3329,7 +3528,8 @@
   "x": 7824,
   "z": -785,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "maesa_shammus_egg_mine",
@@ -3340,7 +3540,8 @@
   "x": 7250,
   "z": -1733,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "ainab",
@@ -3351,7 +3552,8 @@
   "x": 6836,
   "z": -1616,
   "radius": 18,
-  "variant": "sixth_house_base"
+  "variant": "sixth_house_base",
+  "class": "major"
  },
  {
   "id": "zergonipal",
@@ -3362,7 +3564,8 @@
   "x": 7651,
   "z": -1591,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "shashpilamat",
@@ -3373,7 +3576,8 @@
   "x": 6945,
   "z": -1524,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "akimaes_grotto",
@@ -3384,7 +3588,8 @@
   "x": 7757,
   "z": -1446,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "maba_ilu",
@@ -3395,7 +3600,8 @@
   "x": 7388,
   "z": -1436,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "yakaridan",
@@ -3406,7 +3612,8 @@
   "x": 7498,
   "z": -1437,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "shashmanu",
@@ -3417,7 +3624,8 @@
   "x": 7791,
   "z": -1338,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "ahanibi_malmus_egg_mine",
@@ -3428,7 +3636,8 @@
   "x": 7536,
   "z": -1322,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "eluba_addon_egg_mine",
@@ -3439,7 +3648,8 @@
   "x": 8048,
   "z": -1225,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "missir_dadalit_egg_mine",
@@ -3450,7 +3660,8 @@
   "x": 7660,
   "z": -1200,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "asha_ahhe_egg_mine",
@@ -3461,7 +3672,8 @@
   "x": 7786,
   "z": -1147,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "punammu",
@@ -3472,7 +3684,8 @@
   "x": 8157,
   "z": -1103,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "sharapli",
@@ -3483,7 +3696,8 @@
   "x": 8037,
   "z": -1099,
   "radius": 18,
-  "variant": "sixth_house_base"
+  "variant": "sixth_house_base",
+  "class": "major"
  },
  {
   "id": "zalkin_sul_egg_mine",
@@ -3494,7 +3708,8 @@
   "x": 7955,
   "z": -932,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "elith_pal_mine",
@@ -3505,7 +3720,8 @@
   "x": 8149,
   "z": -815,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "druscashti",
@@ -3516,7 +3732,8 @@
   "x": 7897,
   "z": -686,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "obscure_shipwreck",
@@ -3527,7 +3744,8 @@
   "x": 8279,
   "z": -1914,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "desolate_shipwreck",
@@ -3538,7 +3756,8 @@
   "x": 8473,
   "z": -1207,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "helan_ancestral_tomb",
@@ -3549,7 +3768,8 @@
   "x": 6793,
   "z": -1776,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "dulo_ancestral_tomb",
@@ -3560,7 +3780,8 @@
   "x": 7534,
   "z": -1732,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "rothan_ancestral_tomb",
@@ -3571,7 +3792,8 @@
   "x": 7081,
   "z": -1651,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "raviro_ancestral_tomb",
@@ -3582,7 +3804,8 @@
   "x": 8096,
   "z": -1570,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "indalen_ancestral_tomb",
@@ -3593,7 +3816,8 @@
   "x": 7178,
   "z": -1440,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "baram_ancestral_tomb",
@@ -3604,7 +3828,8 @@
   "x": 7387,
   "z": -1305,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "sandus_ancestral_tomb",
@@ -3615,7 +3840,8 @@
   "x": 7939,
   "z": -1254,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "dreloth_ancestral_tomb",
@@ -3626,7 +3852,8 @@
   "x": 8270,
   "z": -1102,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "alas_ancestral_tomb",
@@ -3637,7 +3864,8 @@
   "x": 7657,
   "z": -1067,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "telvayn_ancestral_tomb",
@@ -3648,7 +3876,8 @@
   "x": 7900,
   "z": -891,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "vas",
@@ -3659,7 +3888,8 @@
   "x": 6844,
   "z": -2336,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "addadshashanammu",
@@ -3670,7 +3900,8 @@
   "x": 7003,
   "z": -2325,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "marquee"
  },
  {
   "id": "sulipund",
@@ -3681,7 +3912,8 @@
   "x": 7217,
   "z": -2235,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "ald_redaynia",
@@ -3692,7 +3924,8 @@
   "x": 6498,
   "z": -2208,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "shushishi",
@@ -3703,7 +3936,8 @@
   "x": 6572,
   "z": -2123,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "forgotten_shipwreck",
@@ -3714,7 +3948,8 @@
   "x": 7738,
   "z": -2612,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "strange_shipwreck",
@@ -3725,7 +3960,8 @@
   "x": 6631,
   "z": -2365,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "lonely_shipwreck",
@@ -3736,7 +3972,8 @@
   "x": 6180,
   "z": -2240,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "savel_ancestral_tomb",
@@ -3747,7 +3984,8 @@
   "x": 6867,
   "z": -2088,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "galom_daeus",
@@ -3758,7 +3996,8 @@
   "x": 8283,
   "z": -199,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "marquee"
  },
  {
   "id": "mausur_caverns",
@@ -3769,7 +4008,8 @@
   "x": 7975,
   "z": -133,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "yassu_mine",
@@ -3780,7 +4020,8 @@
   "x": 8370,
   "z": -45,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "kaushtarari",
@@ -3791,7 +4032,8 @@
   "x": 8039,
   "z": 5,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "massama_cave",
@@ -3802,7 +4044,8 @@
   "x": 7802,
   "z": -20,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "adanumuran",
@@ -3813,7 +4056,8 @@
   "x": 7776,
   "z": 65,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "abanabi",
@@ -3824,7 +4068,8 @@
   "x": 7901,
   "z": 79,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "esutanamus",
@@ -3835,7 +4080,8 @@
   "x": 8454,
   "z": -482,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "abaelun_mine",
@@ -3846,7 +4092,8 @@
   "x": 8256,
   "z": 121,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "almurbalarammi",
@@ -3857,7 +4104,8 @@
   "x": 7833,
   "z": 165,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "shallit",
@@ -3868,7 +4116,8 @@
   "x": 8351,
   "z": 168,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "bal_fell",
@@ -3879,7 +4128,8 @@
   "x": 8120,
   "z": 219,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "kushtashpi",
@@ -3890,7 +4140,8 @@
   "x": 7990,
   "z": 241,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "dunirai_caverns",
@@ -3901,7 +4152,8 @@
   "x": 7975,
   "z": 364,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "salmantu",
@@ -3912,7 +4164,8 @@
   "x": 7991,
   "z": 477,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "yansirramus",
@@ -3923,7 +4176,8 @@
   "x": 8302,
   "z": 63,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "nchurdamz",
@@ -3934,7 +4188,8 @@
   "x": 8161,
   "z": 483,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "zebabi",
@@ -3945,7 +4200,8 @@
   "x": 8399,
   "z": 529,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "minabi",
@@ -3956,7 +4212,8 @@
   "x": 7948,
   "z": 588,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "onnissiralis",
@@ -3967,7 +4224,8 @@
   "x": 8212,
   "z": 637,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "nchuleftingth",
@@ -3978,7 +4236,8 @@
   "x": 8154,
   "z": 710,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "odirniran",
@@ -3989,7 +4248,8 @@
   "x": 8182,
   "z": 775,
   "radius": 10,
-  "variant": "mage_tower"
+  "variant": "mage_tower",
+  "class": "short"
  },
  {
   "id": "shushan",
@@ -4000,7 +4260,8 @@
   "x": 8036,
   "z": 402,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "shunned_shipwreck",
@@ -4011,7 +4272,8 @@
   "x": 8570,
   "z": -271,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "lonesome_shipwreck",
@@ -4022,7 +4284,8 @@
   "x": 8699,
   "z": 590,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "ancient_shipwreck",
@@ -4033,7 +4296,8 @@
   "x": 8584,
   "z": 664,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "saren_ancestral_tomb",
@@ -4044,7 +4308,8 @@
   "x": 8174,
   "z": -507,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "tharys_ancestral_tomb",
@@ -4055,7 +4320,8 @@
   "x": 8378,
   "z": -276,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "dareleth_ancestral_tomb",
@@ -4066,7 +4332,8 @@
   "x": 7832,
   "z": -209,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "ienith_ancestral_tomb",
@@ -4077,7 +4344,8 @@
   "x": 8078,
   "z": -132,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "velas_ancestral_tomb",
@@ -4088,7 +4356,8 @@
   "x": 8126,
   "z": -70,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "indaren_ancestral_tomb",
@@ -4099,7 +4368,8 @@
   "x": 8238,
   "z": -61,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "omaren_ancestral_tomb",
@@ -4110,7 +4380,8 @@
   "x": 7734,
   "z": -22,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "ginith_ancestral_tomb",
@@ -4121,7 +4392,8 @@
   "x": 8189,
   "z": 21,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "senim_ancestral_tomb",
@@ -4132,7 +4404,8 @@
   "x": 7928,
   "z": 187,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "omalen_ancestral_tomb",
@@ -4143,7 +4416,8 @@
   "x": 7857,
   "z": 402,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "uveran_ancestral_tomb",
@@ -4154,7 +4428,8 @@
   "x": 8112,
   "z": 783,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "drinith_ancestral_tomb",
@@ -4165,7 +4440,8 @@
   "x": 8072,
   "z": 706,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "arano_ancestral_tomb",
@@ -4176,7 +4452,8 @@
   "x": 8156,
   "z": 861,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "tel_dreloth",
@@ -4187,7 +4464,8 @@
   "x": 10300,
   "z": 1500,
   "radius": 10,
-  "variant": "mage_tower"
+  "variant": "mage_tower",
+  "class": "short"
  },
  {
   "id": "softloam_cavern",
@@ -4198,7 +4476,8 @@
   "x": 3900,
   "z": 250,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "hightide_hollow",
@@ -4209,7 +4488,8 @@
   "x": 4100,
   "z": 850,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "emberflint_mine",
@@ -4220,7 +4500,8 @@
   "x": 3750,
   "z": 1500,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "sheogoraths_tongue",
@@ -4231,7 +4512,8 @@
   "x": 3650,
   "z": 1900,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "inner_sea_armature",
@@ -4242,7 +4524,8 @@
   "x": 4250,
   "z": 2150,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "marquee"
  },
  {
   "id": "fungal_grotto",
@@ -4253,7 +4536,8 @@
   "x": 4950,
   "z": 2450,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "mephalas_nest",
@@ -4264,7 +4548,8 @@
   "x": 4400,
   "z": 2500,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "lukiul_uxith",
@@ -4275,7 +4560,8 @@
   "x": 4950,
   "z": 2700,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "steamfont_cavern",
@@ -4286,7 +4572,8 @@
   "x": 4600,
   "z": 3050,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "mzithumz",
@@ -4297,7 +4584,8 @@
   "x": 5950,
   "z": 2500,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "lady_llarels_shelter",
@@ -4308,7 +4596,8 @@
   "x": 5250,
   "z": 2550,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "knife_ear_grotto",
@@ -4319,7 +4608,8 @@
   "x": 7550,
   "z": 2650,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "darkshade_caverns",
@@ -4330,7 +4620,8 @@
   "x": 6200,
   "z": 2700,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "redolent_loam",
@@ -4341,7 +4632,8 @@
   "x": 6900,
   "z": 3550,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "taleons_crag",
@@ -4352,7 +4644,8 @@
   "x": 5800,
   "z": 3700,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "lower_bthanual",
@@ -4363,7 +4656,8 @@
   "x": 7100,
   "z": 3900,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "marquee"
  },
  {
   "id": "forgotten_crypts",
@@ -4374,7 +4668,8 @@
   "x": 5500,
   "z": 3900,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "bthar_zel",
@@ -4385,7 +4680,8 @@
   "x": 9600,
   "z": 2700,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "camonnaruhn",
@@ -4396,7 +4692,8 @@
   "x": 8350,
   "z": 3250,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "bal_sunnar",
@@ -4407,7 +4704,8 @@
   "x": 10100,
   "z": 2200,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "alen_ancestral_tomb",
@@ -4418,7 +4716,8 @@
   "x": 5289,
   "z": -1382,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "andrethi_ancestral_tomb",
@@ -4429,7 +4728,8 @@
   "x": 6008,
   "z": 428,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "aralen_ancestral_tomb",
@@ -4440,7 +4740,8 @@
   "x": 7955,
   "z": -246,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "aryon_ancestral_tomb",
@@ -4451,7 +4752,8 @@
   "x": 7091,
   "z": 147,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "drath_ancestral_tomb",
@@ -4462,7 +4764,8 @@
   "x": 5574,
   "z": -1500,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "maren_ancestral_tomb",
@@ -4473,7 +4776,8 @@
   "x": 8255,
   "z": 428,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "nelas_ancestral_tomb",
@@ -4484,7 +4788,8 @@
   "x": 6276,
   "z": -1964,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "salothran_ancestral_tomb",
@@ -4495,7 +4800,8 @@
   "x": 5378,
   "z": -695,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "ahinipalit",
@@ -4506,7 +4812,8 @@
   "x": 8307,
   "z": 240,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "dun_ahhe",
@@ -4517,7 +4824,8 @@
   "x": 7469,
   "z": -796,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "eluba_addon_grotto",
@@ -4528,7 +4836,8 @@
   "x": 8107,
   "z": -1014,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "kudanat",
@@ -4539,7 +4848,8 @@
   "x": 5974,
   "z": -25,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "malmus_grotto",
@@ -4550,7 +4860,8 @@
   "x": 7143,
   "z": -1819,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "milk",
@@ -4561,7 +4872,8 @@
   "x": 5552,
   "z": -660,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "odaishah",
@@ -4572,7 +4884,8 @@
   "x": 6918,
   "z": 206,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "odibaal",
@@ -4583,7 +4896,8 @@
   "x": 5501,
   "z": -741,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "odirnamat",
@@ -4594,7 +4908,8 @@
   "x": 7478,
   "z": -1290,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "sud",
@@ -4605,7 +4920,8 @@
   "x": 6633,
   "z": -1699,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "surirulk",
@@ -4616,7 +4932,8 @@
   "x": 7309,
   "z": -1317,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "tin_ahhe",
@@ -4627,7 +4944,8 @@
   "x": 7355,
   "z": -676,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "urshilaku",
@@ -4638,7 +4956,8 @@
   "x": 5873,
   "z": -1374,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "vassamsi_grotto",
@@ -4649,7 +4968,8 @@
   "x": 8447,
   "z": -211,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "yasamsi",
@@ -4660,7 +4980,8 @@
   "x": 6067,
   "z": 847,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "zaintirari",
@@ -4671,7 +4992,8 @@
   "x": 8246,
   "z": 364,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "zenarbael",
@@ -4682,7 +5004,8 @@
   "x": 8196,
   "z": 323,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "assarnatamat",
@@ -4693,7 +5016,8 @@
   "x": 6688,
   "z": 281,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "assurdirapal",
@@ -4704,7 +5028,8 @@
   "x": 6246,
   "z": -1684,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "assurnabitashpi",
@@ -4715,7 +5040,8 @@
   "x": 5582,
   "z": -1576,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "dubdilla",
@@ -4726,7 +5052,8 @@
   "x": 8107,
   "z": -542,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "aleft",
@@ -4737,7 +5064,8 @@
   "x": 5492,
   "z": -10,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "marquee"
  },
  {
   "id": "akimaes_ilanipu_egg_mine",
@@ -4748,7 +5076,8 @@
   "x": 6068,
   "z": -1320,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "band_egg_mine",
@@ -4759,7 +5088,8 @@
   "x": 5845,
   "z": -37,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "hawia_egg_mine",
@@ -4770,7 +5100,8 @@
   "x": 7360,
   "z": 1101,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "maelu_egg_mine",
@@ -4781,7 +5112,8 @@
   "x": 7660,
   "z": -88,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "setus_egg_mine",
@@ -4792,7 +5124,8 @@
   "x": 7788,
   "z": -1239,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "shulk_egg_mine",
@@ -4803,7 +5136,8 @@
   "x": 6172,
   "z": 649,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "sinarralit_egg_mine",
@@ -4814,7 +5148,8 @@
   "x": 8103,
   "z": -644,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "sur_egg_mine",
@@ -4825,7 +5160,8 @@
   "x": 7668,
   "z": -240,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "vansunalit_egg_mine",
@@ -4836,7 +5172,8 @@
   "x": 7910,
   "z": 932,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "cavern_of_the_incarnate",
@@ -4847,7 +5184,8 @@
   "x": 7428,
   "z": -732,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "maran_adon",
@@ -4858,7 +5196,8 @@
   "x": 7467,
   "z": -637,
   "radius": 18,
-  "variant": "sixth_house_base"
+  "variant": "sixth_house_base",
+  "class": "major"
  },
  {
   "id": "piran",
@@ -4869,7 +5208,8 @@
   "x": 7795,
   "z": 592,
   "radius": 18,
-  "variant": "sixth_house_base"
+  "variant": "sixth_house_base",
+  "class": "major"
  },
  {
   "id": "yakin",
@@ -4880,7 +5220,8 @@
   "x": 8342,
   "z": -154,
   "radius": 18,
-  "variant": "sixth_house_base"
+  "variant": "sixth_house_base",
+  "class": "major"
  },
  {
   "id": "mababi",
@@ -4891,7 +5232,8 @@
   "x": 7988,
   "z": 643,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "sanni",
@@ -4902,7 +5244,8 @@
   "x": 7713,
   "z": -1286,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "shara",
@@ -4913,7 +5256,8 @@
   "x": 6729,
   "z": -1544,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "shishara",
@@ -4924,7 +5268,8 @@
   "x": 7096,
   "z": 254,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "shishi",
@@ -4935,7 +5280,8 @@
   "x": 5735,
   "z": -1324,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "uleibi",
@@ -4946,7 +5292,8 @@
   "x": 8494,
   "z": 4136,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "moroni_ancestral_tomb",
@@ -4957,7 +5304,8 @@
   "x": 3600,
   "z": 1651,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "methal_plantation",
@@ -4978,7 +5326,8 @@
   "x": 10962,
   "z": -1325,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "ehaikaamus",
@@ -4999,7 +5348,8 @@
   "x": 3689,
   "z": 966,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "uhaiabi",
@@ -5010,7 +5360,8 @@
   "x": 11183,
   "z": 904,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "ald_nasaibi",
@@ -5021,7 +5372,8 @@
   "x": 10318,
   "z": 2279,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "wreck_of_the_bent_mudcrab",
@@ -5032,7 +5384,8 @@
   "x": 10666,
   "z": 2768,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "abasipal_wharf",
@@ -5053,7 +5406,8 @@
   "x": 3282,
   "z": -337,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "adaanabi_eggmine",
@@ -5064,7 +5418,8 @@
   "x": 7993,
   "z": 2953,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "epadaamdun_spire",
@@ -5086,7 +5441,8 @@
   "x": 7527,
   "z": 3641,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "iduipal",
@@ -5107,7 +5463,8 @@
   "x": 4280,
   "z": 182,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "akhairra",
@@ -5118,7 +5475,8 @@
   "x": 6476,
   "z": 2230,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "nerevan_ancestral_tomb",
@@ -5129,7 +5487,8 @@
   "x": 10488,
   "z": -180,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "urutaakku",
@@ -5140,7 +5499,8 @@
   "x": 11629,
   "z": 56,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "ipaanu",
@@ -5151,7 +5511,8 @@
   "x": 9653,
   "z": 1350,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "uhaammu",
@@ -5162,7 +5523,8 @@
   "x": 9849,
   "z": 2349,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "abakaiarnit",
@@ -5173,7 +5535,8 @@
   "x": 5809,
   "z": 2166,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "wreck_of_the_prancing_netch",
@@ -5184,7 +5547,8 @@
   "x": 4246,
   "z": 725,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "areibi",
@@ -5195,7 +5559,8 @@
   "x": 10035,
   "z": 2995,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "bthanduabthar",
@@ -5206,7 +5571,8 @@
   "x": 10359,
   "z": 2867,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "marquee"
  },
  {
   "id": "ikhuraarnit_egg_mine",
@@ -5217,7 +5583,8 @@
   "x": 10281,
   "z": 537,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "hlaren_ancestral_tomb",
@@ -5228,7 +5595,8 @@
   "x": 10505,
   "z": 1902,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "voryn_plantation",
@@ -5249,7 +5617,8 @@
   "x": 9273,
   "z": 3022,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "aryon_plantation",
@@ -5270,7 +5639,8 @@
   "x": 9709,
   "z": -850,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "etudiunar",
@@ -5281,7 +5651,8 @@
   "x": 4038,
   "z": 2258,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "ezlukuibi",
@@ -5292,7 +5663,8 @@
   "x": 7751,
   "z": 4146,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "uvren_ancestral_tomb",
@@ -5303,7 +5675,8 @@
   "x": 3449,
   "z": 1334,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "ishiabi",
@@ -5314,7 +5687,8 @@
   "x": 6549,
   "z": 2956,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "ekhuarnit_altar",
@@ -5336,7 +5710,8 @@
   "x": 7765,
   "z": 2925,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "emaimaamdun",
@@ -5347,7 +5722,8 @@
   "x": 6831,
   "z": -2809,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "paikuappi",
@@ -5358,7 +5734,8 @@
   "x": 3017,
   "z": -944,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "wreck_of_the_lonely_anchor",
@@ -5369,7 +5746,8 @@
   "x": 10968,
   "z": 2648,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "rkuldumz_spire",
@@ -5391,7 +5769,8 @@
   "x": 3274,
   "z": 550,
   "radius": 10,
-  "variant": "mage_tower"
+  "variant": "mage_tower",
+  "class": "short"
  },
  {
   "id": "uraalit",
@@ -5402,7 +5781,8 @@
   "x": 11571,
   "z": 1960,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "aduunar_stronghold",
@@ -5413,7 +5793,8 @@
   "x": 8169,
   "z": 3630,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "esualit",
@@ -5424,7 +5805,8 @@
   "x": 8535,
   "z": -686,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "etearnit",
@@ -5435,7 +5817,8 @@
   "x": 11799,
   "z": -469,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "ekaammu_mine",
@@ -5446,7 +5829,8 @@
   "x": 5399,
   "z": 3335,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "ukasaiabi",
@@ -5457,7 +5841,8 @@
   "x": 3913,
   "z": 870,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "iveran_ancestral_tomb",
@@ -5468,7 +5853,8 @@
   "x": 8840,
   "z": 3926,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "dren_ancestral_tomb",
@@ -5479,7 +5865,8 @@
   "x": 10391,
   "z": 2522,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "ervyn_ancestral_tomb",
@@ -5490,7 +5877,8 @@
   "x": 10612,
   "z": 2536,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "ukaabi_cove",
@@ -5531,7 +5919,8 @@
   "x": 8744,
   "z": 2345,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "umasheakku",
@@ -5542,7 +5931,8 @@
   "x": 3113,
   "z": -403,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "ehakhaamat_egg_mine",
@@ -5553,7 +5943,8 @@
   "x": 8783,
   "z": 3015,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "epaiamdun",
@@ -5564,7 +5955,8 @@
   "x": 11211,
   "z": 559,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "nerethi_ancestral_tomb",
@@ -5575,7 +5967,8 @@
   "x": 6289,
   "z": 3784,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "akhaisaanabi",
@@ -5586,7 +5979,8 @@
   "x": 9969,
   "z": -1232,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "uduanit_crag",
@@ -5641,7 +6035,8 @@
   "x": 10153,
   "z": 1223,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "ileamdun",
@@ -5662,7 +6057,8 @@
   "x": 9528,
   "z": 3023,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "arkzak",
@@ -5673,7 +6069,8 @@
   "x": 10284,
   "z": 1077,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "marquee"
  },
  {
   "id": "zashaiibi",
@@ -5684,7 +6081,8 @@
   "x": 6662,
   "z": 2771,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "beranvanyon",
@@ -5695,7 +6093,8 @@
   "x": 9849,
   "z": -491,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "adupuibi_docks",
@@ -5736,7 +6135,8 @@
   "x": 9654,
   "z": 557,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "llethri_plantation",
@@ -5757,7 +6157,8 @@
   "x": 10000,
   "z": 2552,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "adazleanit_landing",
@@ -5778,7 +6179,8 @@
   "x": 3728,
   "z": 150,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "edariammu",
@@ -5789,7 +6191,8 @@
   "x": 9175,
   "z": 3411,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "zlairra",
@@ -5800,7 +6203,8 @@
   "x": 4120,
   "z": -786,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "khamaiappi_wharf",
@@ -5821,7 +6225,8 @@
   "x": 10297,
   "z": -1904,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "wreck_of_the_bent_hound",
@@ -5832,7 +6237,8 @@
   "x": 11322,
   "z": 1274,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "ibaileibi_ruins",
@@ -5854,7 +6260,8 @@
   "x": 5994,
   "z": 3595,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "ibuluamus",
@@ -5865,7 +6272,8 @@
   "x": 5254,
   "z": 3789,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "nuamat",
@@ -5876,7 +6284,8 @@
   "x": 10963,
   "z": 746,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "tatasipal_spire",
@@ -5887,7 +6296,8 @@
   "x": 11016,
   "z": -436,
   "radius": 10,
-  "variant": "mage_tower"
+  "variant": "mage_tower",
+  "class": "short"
  },
  {
   "id": "rahuabi",
@@ -5929,7 +6339,8 @@
   "x": 8171,
   "z": 3815,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "elamasipal_harbor",
@@ -5961,7 +6372,8 @@
   "x": 9833,
   "z": 553,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "azlazliamus_rock",
@@ -5983,7 +6395,8 @@
   "x": 6376,
   "z": 4055,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "sendas_ancestral_tomb",
@@ -5994,7 +6407,8 @@
   "x": 3411,
   "z": -40,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "ahushuamdun",
@@ -6005,7 +6419,8 @@
   "x": 8692,
   "z": 2838,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "shubuakku_camp",
@@ -6016,7 +6431,8 @@
   "x": 4073,
   "z": 1863,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "ald_izlaassu",
@@ -6027,7 +6443,8 @@
   "x": 10261,
   "z": 183,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "adasiamus",
@@ -6038,7 +6455,8 @@
   "x": 10287,
   "z": 792,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "bthungdahrk",
@@ -6049,7 +6467,8 @@
   "x": 10857,
   "z": 1914,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "ituluabi",
@@ -6060,7 +6479,8 @@
   "x": 9224,
   "z": 3982,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "ezushuamdun",
@@ -6071,7 +6491,8 @@
   "x": 11084,
   "z": 2225,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "arasaurus",
@@ -6082,7 +6503,8 @@
   "x": 7309,
   "z": 2730,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "kazeappi",
@@ -6093,7 +6515,8 @@
   "x": 3225,
   "z": 1673,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "tzinuz",
@@ -6104,7 +6527,8 @@
   "x": 8557,
   "z": 3604,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "emaunar",
@@ -6125,7 +6549,8 @@
   "x": 5330,
   "z": 2262,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "aburuabi",
@@ -6136,7 +6561,8 @@
   "x": 11561,
   "z": -205,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "lleryn_plantation",
@@ -6157,7 +6583,8 @@
   "x": 5465,
   "z": 4087,
   "radius": 22,
-  "variant": "velothi_tomb"
+  "variant": "velothi_tomb",
+  "class": "major"
  },
  {
   "id": "ashatiakku_spire",
@@ -6179,7 +6606,8 @@
   "x": 7383,
   "z": 2222,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "amudiamus_spire",
@@ -6190,7 +6618,8 @@
   "x": 7983,
   "z": 4208,
   "radius": 10,
-  "variant": "mage_tower"
+  "variant": "mage_tower",
+  "class": "short"
  },
  {
   "id": "ubiakku",
@@ -6201,7 +6630,8 @@
   "x": 7727,
   "z": 3161,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "utaidairra",
@@ -6212,7 +6642,8 @@
   "x": 9045,
   "z": 3882,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "iveran_homestead",

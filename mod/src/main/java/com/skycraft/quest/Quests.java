@@ -265,6 +265,7 @@ public final class Quests {
         changed(server, key);
         if (q.extra.contains(com.skycraft.quest.story.Story.DEF)) com.skycraft.quest.story.Story.onQuestCompleted(server, key, q);
         else if (q.isMain()) MainQuest.onStageCompleted(server, key, q);
+        NoticeBoards.onQuestCompleted(server, key, q);
     }
 
     /** Remembers who was in the party when it took on (or was given) the quest. */

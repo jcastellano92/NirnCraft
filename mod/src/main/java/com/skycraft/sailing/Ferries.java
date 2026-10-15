@@ -66,6 +66,7 @@ public final class Ferries {
     private Ferries() {}
 
     static void register() {
+        com.skycraft.travel.TravelSelftest.init();
         Dialogue.registerProvider(Ferries::addOptions);
     }
 
@@ -73,9 +74,11 @@ public final class Ferries {
         return npc != null && npc.isAlive() && !npc.getPersistentData().getString(Harbors.KEEPER_TAG).isEmpty();
     }
 
-    /** The fare of a route: fixed in ports.json, or base + distance (expeditions start higher). */
+    /** The fare of a route: fixed in ports.json / travel network, or base + distance (expeditions start higher). */
     public static int fare(Route route) {
         if (route.fare() >= 0) return route.fare();
+        var offer = com.skycraft.travel.TravelNetworks.findOffer(route.a(), route.b(), com.skycraft.travel.TravelMode.BOAT);
+        if (offer.isPresent() && offer.get().fee() > 0) return offer.get().fee();
         float dist = SeaRoutes.length(route);
         int base = route.expedition() ? SailingConfig.EXPEDITION_BASE_FARE.get() : SailingConfig.FERRY_BASE_FARE.get();
         return base + Math.round(dist / SailingConfig.FERRY_BLOCKS_PER_SEPTIM.get());
@@ -99,15 +102,28 @@ public final class Ferries {
         String prefix = npc.getId() + ":";
         if (menu.equals(prefix + "passage")) {
             int order = 150;
+            java.util.Set<String> offeredIds = new java.util.HashSet<>();
             for (Route r : Ports.routesFrom(portId)) {
                 Port dest = Ports.byId(r.other(portId)).orElse(null);
-                if (dest == null) continue;
+                if (dest == null || !offeredIds.add(dest.id())) continue;
                 int fare = fare(r);
                 Component label = r.ship() != null
                         ? Component.translatable(r.expedition() ? "sailing.skycraft.dialogue.expedition_ship" : "sailing.skycraft.dialogue.passage_ship",
                         dest.name(), r.ship(), fare)
                         : Component.translatable(r.expedition() ? "sailing.skycraft.dialogue.expedition" : "sailing.skycraft.dialogue.passage", dest.name(), fare);
                 out.add(new DialogueOption("sailing.passage." + dest.id(), label, order++, (p, n) -> buyPassage(p, n, port, r)));
+            }
+            for (com.skycraft.travel.TravelNetworks.Offer offer : com.skycraft.travel.TravelNetworks.offersFrom(portId)) {
+                if (!offer.mode().isWater()) continue;
+                String destId = offer.destination().id();
+                if (!offeredIds.add(destId)) continue;
+                Component label = Component.translatable("travel.skycraft.offer." + offer.mode().id(),
+                        offer.destination().displayName(), offer.fee());
+                out.add(new DialogueOption("sailing.passage." + destId, label, order++, (p, n) -> {
+                    MENU.remove(p.getUUID());
+                    Dialogue.endConversation(p, n.getId());
+                    com.skycraft.travel.TravelNetworks.travel(p, portId, destId, offer.mode());
+                }));
             }
             out.add(new DialogueOption("sailing.back", Component.translatable("sailing.skycraft.dialogue.back"), 990, (p, n) -> reopen(p, n, "")));
             return;

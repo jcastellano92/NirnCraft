@@ -1,0 +1,4206 @@
+{
+  "province": "skyrim",
+  "why": [
+    "skyrim.L5.road_hub",
+    "skyrim.L5.sea_trade",
+    "skyrim.L1.spine_ranges"
+  ],
+  "modes": [
+    "carriage",
+    "boat",
+    "river_boat",
+    "lift",
+    "wayshrine"
+  ],
+  "supportedModes": [
+    "carriage",
+    "strider",
+    "boat",
+    "river_boat",
+    "barge",
+    "caravan",
+    "guild_guide",
+    "lift",
+    "propylon",
+    "intervention",
+    "wayshrine"
+  ],
+  "nodes": [
+    {
+      "id": "whiterun",
+      "place": "whiterun",
+      "name": "place.skycraft.whiterun",
+      "region": "skyrim/whiterun",
+      "x": 62,
+      "z": -68,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "river_boat",
+        "wayshrine"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "whiterun.L6.whiterun_seat",
+        "whiterun.L5.crossroads_trade"
+      ]
+    },
+    {
+      "id": "solitude",
+      "place": "solitude",
+      "name": "place.skycraft.solitude",
+      "region": "skyrim/haafingar",
+      "x": -1216,
+      "z": -1740,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "boat",
+        "wayshrine"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "haafingar.L6.solitude_seat",
+        "haafingar.L5.company_docks"
+      ]
+    },
+    {
+      "id": "windhelm",
+      "place": "windhelm",
+      "name": "place.skycraft.windhelm",
+      "region": "skyrim/eastmarch",
+      "x": 1825,
+      "z": -717,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "boat",
+        "river_boat",
+        "wayshrine"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "eastmarch.L6.windhelm_seat",
+        "eastmarch.L5.harbour"
+      ]
+    },
+    {
+      "id": "riften",
+      "place": "riften",
+      "name": "place.skycraft.riften",
+      "region": "skyrim/the_rift",
+      "x": 2435,
+      "z": 1418,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "river_boat",
+        "wayshrine"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "the_rift.L6.riften_seat",
+        "the_rift.L3.honrich_city"
+      ]
+    },
+    {
+      "id": "markarth",
+      "place": "markarth",
+      "name": "place.skycraft.markarth",
+      "region": "skyrim/the_reach",
+      "x": -3102,
+      "z": -191,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "the_reach.L6.markarth_seat",
+        "the_reach.L6.karth_road"
+      ]
+    },
+    {
+      "id": "winterhold",
+      "place": "winterhold",
+      "name": "place.skycraft.winterhold",
+      "region": "skyrim/winterhold",
+      "x": 1417,
+      "z": -1749,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "boat",
+        "wayshrine"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "winterhold.L6.winterhold_remnant",
+        "winterhold.L5.college_coin"
+      ]
+    },
+    {
+      "id": "falkreath",
+      "place": "falkreath",
+      "name": "place.skycraft.falkreath",
+      "region": "skyrim/falkreath",
+      "x": -795,
+      "z": 1250,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "falkreath.L6.falkreath_graves",
+        "falkreath.L5.border_trade"
+      ]
+    },
+    {
+      "id": "morthal",
+      "place": "morthal",
+      "name": "place.skycraft.morthal",
+      "region": "skyrim/hjaalmarch",
+      "x": -928,
+      "z": -1176,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "hjaalmarch.L6.morthal_seat",
+        "hjaalmarch.L6.hjaal_road"
+      ]
+    },
+    {
+      "id": "dawnstar",
+      "place": "dawnstar",
+      "name": "place.skycraft.dawnstar",
+      "region": "skyrim/the_pale",
+      "x": 174,
+      "z": -1801,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "boat",
+        "wayshrine"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "the_pale.L6.dawnstar_seat",
+        "the_pale.L5.ore_ships"
+      ]
+    },
+    {
+      "id": "riverwood",
+      "place": "riverwood",
+      "name": "place.skycraft.riverwood",
+      "region": "skyrim/whiterun",
+      "x": 33,
+      "z": 593,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "river_boat",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "whiterun.L6.riverwood",
+        "whiterun.L5.riverwood_timber"
+      ]
+    },
+    {
+      "id": "rorikstead",
+      "place": "rorikstead",
+      "name": "place.skycraft.rorikstead",
+      "region": "skyrim/whiterun",
+      "x": -1652,
+      "z": -228,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "whiterun.L6.rorikstead",
+        "whiterun.L5.river_farms"
+      ]
+    },
+    {
+      "id": "ivarstead",
+      "place": "ivarstead",
+      "name": "place.skycraft.ivarstead",
+      "region": "skyrim/the_rift",
+      "x": 896,
+      "z": 901,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "river_boat",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "the_rift.L6.ivarstead",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "id": "dragon_bridge",
+      "place": "dragon_bridge",
+      "name": "place.skycraft.dragon_bridge",
+      "region": "skyrim/haafingar",
+      "x": -1934,
+      "z": -1432,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "haafingar.L6.dragon_bridge",
+        "haafingar.L5.toll_bridge"
+      ]
+    },
+    {
+      "id": "karthwasten",
+      "place": "karthwasten",
+      "name": "place.skycraft.karthwasten",
+      "region": "skyrim/the_reach",
+      "x": -2420,
+      "z": -729,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "the_reach.L6.mine_villages",
+        "the_reach.L5.silver_mining"
+      ]
+    },
+    {
+      "id": "shors_stone",
+      "place": "shors_stone",
+      "name": "place.skycraft.shors_stone",
+      "region": "skyrim/the_rift",
+      "x": 2269,
+      "z": 842,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "the_rift.L6.shors_stone",
+        "skyrim.L5.mining_wealth"
+      ]
+    },
+    {
+      "id": "kynesgrove",
+      "place": "kynesgrove",
+      "name": "place.skycraft.kynesgrove",
+      "region": "skyrim/eastmarch",
+      "x": 1825,
+      "z": -298,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "eastmarch.L6.kynesgrove",
+        "eastmarch.L5.mines"
+      ]
+    },
+    {
+      "id": "helgen",
+      "place": "helgen",
+      "name": "place.skycraft.helgen",
+      "region": "skyrim/falkreath",
+      "x": -24,
+      "z": 1143,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "falkreath.L6.helgen_fort",
+        "falkreath.L5.border_trade"
+      ]
+    },
+    {
+      "id": "darkwater_crossing",
+      "place": "darkwater_crossing",
+      "name": "place.skycraft.darkwater_crossing",
+      "region": "skyrim/eastmarch",
+      "x": 1595,
+      "z": 421,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "eastmarch.L6.darkwater_crossing",
+        "eastmarch.L3.darkwater_ford"
+      ]
+    },
+    {
+      "id": "stonehills",
+      "place": "stonehills",
+      "name": "place.skycraft.stonehills",
+      "region": "skyrim/hjaalmarch",
+      "x": -430,
+      "z": -1137,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "hjaalmarch.L6.stonehills",
+        "hjaalmarch.L5.stonehills_iron"
+      ]
+    },
+    {
+      "id": "old_hroldan",
+      "place": "old_hroldan",
+      "name": "place.skycraft.old_hroldan",
+      "region": "skyrim/the_reach",
+      "x": -2131,
+      "z": -10,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L5.border_trade"
+      ]
+    },
+    {
+      "id": "nightgate_inn",
+      "place": "nightgate_inn",
+      "name": "place.skycraft.nightgate_inn",
+      "region": "skyrim/the_pale",
+      "x": 856,
+      "z": -848,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "the_pale.L6.nightgate",
+        "the_pale.L5.roadside_inn"
+      ]
+    },
+    {
+      "id": "heartwood_mill",
+      "place": "heartwood_mill",
+      "name": "place.skycraft.heartwood_mill",
+      "region": "skyrim/the_rift",
+      "x": 1796,
+      "z": 1401,
+      "mode": "river_boat",
+      "modes": [
+        "river_boat",
+        "wayshrine"
+      ],
+      "kind": "landing",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "the_rift.L1.lake_floor",
+        "skyrim.L3.great_lakes"
+      ]
+    },
+    {
+      "id": "college_of_winterhold",
+      "place": "college_of_winterhold",
+      "name": "place.skycraft.college_of_winterhold",
+      "region": "skyrim/winterhold",
+      "x": 1529,
+      "z": -1886,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "julianos",
+      "why": [
+        "winterhold.L6.college",
+        "winterhold.L5.college_coin"
+      ]
+    },
+    {
+      "id": "raven_rock",
+      "place": "raven_rock",
+      "name": "place.skycraft.raven_rock",
+      "region": "morrowind/solstheim",
+      "x": 4300,
+      "z": -2900,
+      "mode": "boat",
+      "modes": [
+        "boat",
+        "strider"
+      ],
+      "kind": "port",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "skyrim.L5.sea_trade",
+        "eastmarch.L5.harbour"
+      ]
+    },
+    {
+      "id": "castle_volkihar",
+      "place": "castle_volkihar",
+      "name": "place.skycraft.castle_volkihar",
+      "region": "skyrim/haafingar",
+      "x": -3125,
+      "z": -2455,
+      "mode": "boat",
+      "modes": [
+        "boat"
+      ],
+      "kind": "port",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "haafingar.L1.island_rock",
+        "haafingar.L10.volkihar_castle"
+      ]
+    },
+    {
+      "id": "alftand",
+      "place": "alftand",
+      "name": "place.skycraft.alftand",
+      "region": "skyrim/winterhold",
+      "x": 927,
+      "z": -1345,
+      "mode": "lift",
+      "modes": [
+        "lift",
+        "wayshrine"
+      ],
+      "kind": "lift",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "skyrim.L1.dwemer_bedrock",
+        "the_pale.L10.great_lifts"
+      ]
+    },
+    {
+      "id": "great_lift_at_alftand",
+      "place": "great_lift_at_alftand",
+      "name": "place.skycraft.great_lift_at_alftand",
+      "region": "skyrim/the_pale",
+      "x": 961,
+      "z": -997,
+      "mode": "lift",
+      "modes": [
+        "lift",
+        "wayshrine"
+      ],
+      "kind": "lift",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "skyrim.L1.dwemer_bedrock",
+        "the_pale.L10.great_lifts"
+      ]
+    },
+    {
+      "id": "mzinchaleft",
+      "place": "mzinchaleft",
+      "name": "place.skycraft.mzinchaleft",
+      "region": "skyrim/the_pale",
+      "x": -204,
+      "z": -1449,
+      "mode": "lift",
+      "modes": [
+        "lift",
+        "wayshrine"
+      ],
+      "kind": "lift",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "skyrim.L1.dwemer_bedrock",
+        "the_pale.L10.great_lifts"
+      ]
+    },
+    {
+      "id": "great_lift_at_mzinchaleft",
+      "place": "great_lift_at_mzinchaleft",
+      "name": "place.skycraft.great_lift_at_mzinchaleft",
+      "region": "skyrim/the_pale",
+      "x": -202,
+      "z": -1357,
+      "mode": "lift",
+      "modes": [
+        "lift",
+        "wayshrine"
+      ],
+      "kind": "lift",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "skyrim.L1.dwemer_bedrock",
+        "the_pale.L10.great_lifts"
+      ]
+    },
+    {
+      "id": "raldbthar",
+      "place": "raldbthar",
+      "name": "place.skycraft.raldbthar",
+      "region": "skyrim/the_pale",
+      "x": 1071,
+      "z": -403,
+      "mode": "lift",
+      "modes": [
+        "lift",
+        "wayshrine"
+      ],
+      "kind": "lift",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "skyrim.L1.dwemer_bedrock",
+        "the_pale.L10.great_lifts"
+      ]
+    },
+    {
+      "id": "great_lift_at_raldbthar",
+      "place": "great_lift_at_raldbthar",
+      "name": "place.skycraft.great_lift_at_raldbthar",
+      "region": "skyrim/the_pale",
+      "x": 1108,
+      "z": -564,
+      "mode": "lift",
+      "modes": [
+        "lift",
+        "wayshrine"
+      ],
+      "kind": "lift",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "skyrim.L1.dwemer_bedrock",
+        "the_pale.L10.great_lifts"
+      ]
+    },
+    {
+      "id": "guardian_stones",
+      "place": "the_guardian_stones",
+      "name": "place.skycraft.the_guardian_stones",
+      "region": "skyrim/falkreath",
+      "x": -274,
+      "z": 824,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "standing_stone",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "warrior",
+      "why": [
+        "falkreath.L3.lake_ilinalta",
+        "skyrim.L8.ancestor_barrows"
+      ]
+    },
+    {
+      "id": "warrior_stone",
+      "place": "the_guardian_stones",
+      "name": "stone.skycraft.warrior",
+      "region": "skyrim/falkreath",
+      "x": -278,
+      "z": 824,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "standing_stone",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "warrior",
+      "why": [
+        "falkreath.L3.lake_ilinalta",
+        "skyrim.L8.ancestor_barrows"
+      ]
+    },
+    {
+      "id": "mage_stone",
+      "place": "the_guardian_stones",
+      "name": "stone.skycraft.mage",
+      "region": "skyrim/falkreath",
+      "x": -274,
+      "z": 828,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "standing_stone",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "mage",
+      "why": [
+        "falkreath.L3.lake_ilinalta",
+        "skyrim.L8.ancestor_barrows"
+      ]
+    },
+    {
+      "id": "thief_stone",
+      "place": "the_guardian_stones",
+      "name": "stone.skycraft.thief",
+      "region": "skyrim/falkreath",
+      "x": -270,
+      "z": 824,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "standing_stone",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "thief",
+      "why": [
+        "falkreath.L3.lake_ilinalta",
+        "skyrim.L8.ancestor_barrows"
+      ]
+    },
+    {
+      "id": "lover_stone",
+      "place": "the_lover_stone",
+      "name": "place.skycraft.the_lover_stone",
+      "region": "skyrim/the_reach",
+      "x": -2697,
+      "z": -439,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "standing_stone",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "lover",
+      "why": [
+        "the_reach.L1.granite_gorges",
+        "the_reach.L8.old_gods"
+      ]
+    },
+    {
+      "id": "lord_stone",
+      "place": "the_lord_stone",
+      "name": "place.skycraft.the_lord_stone",
+      "region": "skyrim/hjaalmarch",
+      "x": -227,
+      "z": -1012,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "standing_stone",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "lord",
+      "why": [
+        "hjaalmarch.L1.stonehills_rise",
+        "hjaalmarch.L8.ruined_shrines"
+      ]
+    },
+    {
+      "id": "apprentice_stone",
+      "place": "the_apprentice_stone",
+      "name": "place.skycraft.the_apprentice_stone",
+      "region": "skyrim/hjaalmarch",
+      "x": -1199,
+      "z": -1383,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "standing_stone",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "apprentice",
+      "why": [
+        "hjaalmarch.L3.hjaal_delta",
+        "hjaalmarch.L8.ruined_shrines"
+      ]
+    },
+    {
+      "id": "atronach_stone",
+      "place": "the_atronach_stone",
+      "name": "place.skycraft.the_atronach_stone",
+      "region": "skyrim/eastmarch",
+      "x": 1766,
+      "z": 337,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "standing_stone",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "atronach",
+      "why": [
+        "eastmarch.L1.steam_basin",
+        "skyrim.L1.geothermal_east"
+      ]
+    },
+    {
+      "id": "lady_stone",
+      "place": "the_lady_stone",
+      "name": "place.skycraft.the_lady_stone",
+      "region": "skyrim/falkreath",
+      "x": -829,
+      "z": 761,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "standing_stone",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "lady",
+      "why": [
+        "falkreath.L3.lake_ilinalta",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "ritual_stone",
+      "place": "the_ritual_stone",
+      "name": "place.skycraft.the_ritual_stone",
+      "region": "skyrim/whiterun",
+      "x": 491,
+      "z": -34,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "standing_stone",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "ritual",
+      "why": [
+        "whiterun.L3.white_river_flats",
+        "skyrim.L8.ancestor_barrows"
+      ]
+    },
+    {
+      "id": "serpent_stone",
+      "place": "the_serpent_stone",
+      "name": "place.skycraft.the_serpent_stone",
+      "region": "skyrim/winterhold",
+      "x": 2090,
+      "z": -1962,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "standing_stone",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "serpent",
+      "why": [
+        "winterhold.L3.frozen_sea",
+        "skyrim.L1.northern_coast"
+      ]
+    },
+    {
+      "id": "shadow_stone",
+      "place": "the_shadow_stone",
+      "name": "place.skycraft.the_shadow_stone",
+      "region": "skyrim/the_rift",
+      "x": 2399,
+      "z": 1630,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "standing_stone",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "shadow",
+      "why": [
+        "the_rift.L1.birch_basin",
+        "the_rift.L8.shadow_patron"
+      ]
+    },
+    {
+      "id": "steed_stone",
+      "place": "the_steed_stone",
+      "name": "place.skycraft.the_steed_stone",
+      "region": "skyrim/haafingar",
+      "x": -1841,
+      "z": -1950,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "standing_stone",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "steed",
+      "why": [
+        "haafingar.L1.sea_cliffs",
+        "skyrim.L1.northern_coast"
+      ]
+    },
+    {
+      "id": "tower_stone",
+      "place": "the_tower_stone",
+      "name": "place.skycraft.the_tower_stone",
+      "region": "skyrim/winterhold",
+      "x": 823,
+      "z": -1801,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "standing_stone",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "tower",
+      "why": [
+        "winterhold.L3.frozen_sea",
+        "skyrim.L1.northern_coast"
+      ]
+    },
+    {
+      "id": "statue_to_meridia",
+      "place": "statue_to_meridia",
+      "name": "place.skycraft.statue_to_meridia",
+      "region": "skyrim/haafingar",
+      "x": -1806,
+      "z": -1689,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "kynareth",
+      "why": [
+        "haafingar.L8.meridia_light",
+        "skyrim.L8.daedric_wilds"
+      ]
+    },
+    {
+      "id": "shrine_of_azura",
+      "place": "shrine_of_azura",
+      "name": "place.skycraft.shrine_of_azura",
+      "region": "skyrim/winterhold",
+      "x": 1451,
+      "z": -1351,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "julianos",
+      "why": [
+        "winterhold.L8.azura_statue",
+        "skyrim.L8.daedric_wilds"
+      ]
+    },
+    {
+      "id": "shrine_of_mehrunes_dagon",
+      "place": "shrine_of_mehrunes_dagon",
+      "name": "place.skycraft.shrine_of_mehrunes_dagon",
+      "region": "skyrim/hjaalmarch",
+      "x": -325,
+      "z": -938,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "arkay",
+      "why": [
+        "hjaalmarch.L8.ruined_shrines",
+        "skyrim.L8.daedric_wilds"
+      ]
+    },
+    {
+      "id": "shrine_to_peryite",
+      "place": "shrine_to_peryite",
+      "name": "place.skycraft.shrine_to_peryite",
+      "region": "skyrim/the_reach",
+      "x": -2619,
+      "z": -748,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "stendarr",
+      "why": [
+        "the_reach.L8.old_gods",
+        "skyrim.L8.daedric_wilds"
+      ]
+    },
+    {
+      "id": "sacellum_of_boethiah",
+      "place": "sacellum_of_boethiah",
+      "name": "place.skycraft.sacellum_of_boethiah",
+      "region": "skyrim/eastmarch",
+      "x": 2252,
+      "z": -541,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "talos",
+      "why": [
+        "eastmarch.L8.boethiah_cult",
+        "skyrim.L8.daedric_wilds"
+      ]
+    },
+    {
+      "id": "high_hrothgar",
+      "place": "high_hrothgar",
+      "name": "place.skycraft.high_hrothgar",
+      "region": "skyrim/whiterun",
+      "x": 511,
+      "z": 457,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "kynareth",
+      "why": [
+        "whiterun.L8.voice_pilgrims",
+        "skyrim.L8.way_of_the_voice"
+      ]
+    },
+    {
+      "id": "sky_haven_temple",
+      "place": "sky_haven_temple",
+      "name": "place.skycraft.sky_haven_temple",
+      "region": "skyrim/the_reach",
+      "x": -2473,
+      "z": -193,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "talos",
+      "why": [
+        "the_reach.L3.karth_upper",
+        "the_reach.L6.karth_road"
+      ]
+    },
+    {
+      "id": "weynon_stones",
+      "place": "weynon_stones",
+      "name": "place.skycraft.weynon_stones",
+      "region": "skyrim/the_pale",
+      "x": 392,
+      "z": -863,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "standing_stone",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "talos",
+      "why": [
+        "the_pale.L1.snow_highland",
+        "skyrim.L8.ancestor_barrows"
+      ]
+    },
+    {
+      "id": "gjukars_monument",
+      "place": "gjukars_monument",
+      "name": "place.skycraft.gjukars_monument",
+      "region": "skyrim/whiterun",
+      "x": -1302,
+      "z": 32,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "blessing": "kynareth",
+      "why": [
+        "whiterun.L1.tundra_plain",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    {
+      "id": "wayshrine_haafingar_1",
+      "name": "travel.skycraft.node.wayshrine_haafingar_1",
+      "region": "skyrim/haafingar",
+      "x": -3408,
+      "z": -1680,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "akatosh",
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_the_reach_1",
+      "name": "travel.skycraft.node.wayshrine_the_reach_1",
+      "region": "skyrim/the_reach",
+      "x": -3408,
+      "z": -1008,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "dibella",
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_the_reach_2",
+      "name": "travel.skycraft.node.wayshrine_the_reach_2",
+      "region": "skyrim/the_reach",
+      "x": -3344,
+      "z": 368,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "dibella",
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_the_reach_3",
+      "name": "travel.skycraft.node.wayshrine_the_reach_3",
+      "region": "skyrim/the_reach",
+      "x": -3408,
+      "z": 1008,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "dibella",
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_the_reach_4",
+      "name": "travel.skycraft.node.wayshrine_the_reach_4",
+      "region": "skyrim/the_reach",
+      "x": -3248,
+      "z": 1584,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "dibella",
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_haafingar_2",
+      "name": "travel.skycraft.node.wayshrine_haafingar_2",
+      "region": "skyrim/haafingar",
+      "x": -2640,
+      "z": -2896,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "akatosh",
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_haafingar_3",
+      "name": "travel.skycraft.node.wayshrine_haafingar_3",
+      "region": "skyrim/haafingar",
+      "x": -2736,
+      "z": -2384,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "akatosh",
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_the_reach_5",
+      "name": "travel.skycraft.node.wayshrine_the_reach_5",
+      "region": "skyrim/the_reach",
+      "x": -2704,
+      "z": -1648,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "dibella",
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_the_reach_6",
+      "name": "travel.skycraft.node.wayshrine_the_reach_6",
+      "region": "skyrim/the_reach",
+      "x": -2832,
+      "z": -1136,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "dibella",
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_the_reach_7",
+      "name": "travel.skycraft.node.wayshrine_the_reach_7",
+      "region": "skyrim/the_reach",
+      "x": -2864,
+      "z": 240,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "dibella",
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_the_reach_8",
+      "name": "travel.skycraft.node.wayshrine_the_reach_8",
+      "region": "skyrim/the_reach",
+      "x": -2704,
+      "z": 816,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "dibella",
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_the_reach_9",
+      "name": "travel.skycraft.node.wayshrine_the_reach_9",
+      "region": "skyrim/the_reach",
+      "x": -2896,
+      "z": 1552,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "dibella",
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_haafingar_4",
+      "name": "travel.skycraft.node.wayshrine_haafingar_4",
+      "region": "skyrim/haafingar",
+      "x": -2256,
+      "z": -2576,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "akatosh",
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_haafingar_5",
+      "name": "travel.skycraft.node.wayshrine_haafingar_5",
+      "region": "skyrim/haafingar",
+      "x": -2160,
+      "z": -2160,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "akatosh",
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_the_reach_10",
+      "name": "travel.skycraft.node.wayshrine_the_reach_10",
+      "region": "skyrim/the_reach",
+      "x": -2288,
+      "z": -1552,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "dibella",
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_whiterun_1",
+      "name": "travel.skycraft.node.wayshrine_whiterun_1",
+      "region": "skyrim/whiterun",
+      "x": -2032,
+      "z": -368,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "whiterun.L5.crossroads_trade",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "wayshrine_the_reach_11",
+      "name": "travel.skycraft.node.wayshrine_the_reach_11",
+      "region": "skyrim/the_reach",
+      "x": -2256,
+      "z": 464,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "dibella",
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_the_reach_12",
+      "name": "travel.skycraft.node.wayshrine_the_reach_12",
+      "region": "skyrim/the_reach",
+      "x": -2384,
+      "z": 784,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "dibella",
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_falkreath_1",
+      "name": "travel.skycraft.node.wayshrine_falkreath_1",
+      "region": "skyrim/falkreath",
+      "x": -2256,
+      "z": 1776,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "arkay",
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "wayshrine_haafingar_6",
+      "name": "travel.skycraft.node.wayshrine_haafingar_6",
+      "region": "skyrim/haafingar",
+      "x": -1584,
+      "z": -2576,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "akatosh",
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_whiterun_2",
+      "name": "travel.skycraft.node.wayshrine_whiterun_2",
+      "region": "skyrim/whiterun",
+      "x": -1744,
+      "z": -784,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "whiterun.L5.crossroads_trade",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "wayshrine_the_reach_13",
+      "name": "travel.skycraft.node.wayshrine_the_reach_13",
+      "region": "skyrim/the_reach",
+      "x": -1648,
+      "z": 336,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "dibella",
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_falkreath_2",
+      "name": "travel.skycraft.node.wayshrine_falkreath_2",
+      "region": "skyrim/falkreath",
+      "x": -1808,
+      "z": 1008,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "arkay",
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "wayshrine_falkreath_3",
+      "name": "travel.skycraft.node.wayshrine_falkreath_3",
+      "region": "skyrim/falkreath",
+      "x": -1808,
+      "z": 1616,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "arkay",
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "wayshrine_falkreath_4",
+      "name": "travel.skycraft.node.wayshrine_falkreath_4",
+      "region": "skyrim/falkreath",
+      "x": -1648,
+      "z": 2000,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "arkay",
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "wayshrine_haafingar_7",
+      "name": "travel.skycraft.node.wayshrine_haafingar_7",
+      "region": "skyrim/haafingar",
+      "x": -1040,
+      "z": -3056,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "akatosh",
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_haafingar_8",
+      "name": "travel.skycraft.node.wayshrine_haafingar_8",
+      "region": "skyrim/haafingar",
+      "x": -1008,
+      "z": -2192,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "akatosh",
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "wayshrine_whiterun_3",
+      "name": "travel.skycraft.node.wayshrine_whiterun_3",
+      "region": "skyrim/whiterun",
+      "x": -1040,
+      "z": -432,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "whiterun.L5.crossroads_trade",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "wayshrine_falkreath_5",
+      "name": "travel.skycraft.node.wayshrine_falkreath_5",
+      "region": "skyrim/falkreath",
+      "x": -1072,
+      "z": 1424,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "arkay",
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "wayshrine_falkreath_6",
+      "name": "travel.skycraft.node.wayshrine_falkreath_6",
+      "region": "skyrim/falkreath",
+      "x": -1200,
+      "z": 2000,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "arkay",
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "wayshrine_the_pale_1",
+      "name": "travel.skycraft.node.wayshrine_the_pale_1",
+      "region": "skyrim/the_pale",
+      "x": -432,
+      "z": -2064,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "the_pale.L5.roadside_inn",
+        "the_pale.L8.mara_priest"
+      ]
+    },
+    {
+      "id": "wayshrine_whiterun_4",
+      "name": "travel.skycraft.node.wayshrine_whiterun_4",
+      "region": "skyrim/whiterun",
+      "x": -336,
+      "z": -240,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "whiterun.L5.crossroads_trade",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "wayshrine_falkreath_7",
+      "name": "travel.skycraft.node.wayshrine_falkreath_7",
+      "region": "skyrim/falkreath",
+      "x": -432,
+      "z": 432,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "arkay",
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "wayshrine_falkreath_8",
+      "name": "travel.skycraft.node.wayshrine_falkreath_8",
+      "region": "skyrim/falkreath",
+      "x": -176,
+      "z": 1648,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "arkay",
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "wayshrine_falkreath_9",
+      "name": "travel.skycraft.node.wayshrine_falkreath_9",
+      "region": "skyrim/falkreath",
+      "x": -272,
+      "z": 2000,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "arkay",
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "wayshrine_winterhold_1",
+      "name": "travel.skycraft.node.wayshrine_winterhold_1",
+      "region": "skyrim/winterhold",
+      "x": 432,
+      "z": -2000,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "julianos",
+      "why": [
+        "winterhold.L6.winterhold_remnant",
+        "winterhold.L8.azura_statue"
+      ]
+    },
+    {
+      "id": "wayshrine_the_pale_2",
+      "name": "travel.skycraft.node.wayshrine_the_pale_2",
+      "region": "skyrim/the_pale",
+      "x": 432,
+      "z": -400,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "the_pale.L5.roadside_inn",
+        "the_pale.L8.mara_priest"
+      ]
+    },
+    {
+      "id": "wayshrine_falkreath_10",
+      "name": "travel.skycraft.node.wayshrine_falkreath_10",
+      "region": "skyrim/falkreath",
+      "x": 368,
+      "z": 1488,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "arkay",
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "wayshrine_the_rift_1",
+      "name": "travel.skycraft.node.wayshrine_the_rift_1",
+      "region": "skyrim/the_rift",
+      "x": 528,
+      "z": 2064,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "id": "wayshrine_winterhold_2",
+      "name": "travel.skycraft.node.wayshrine_winterhold_2",
+      "region": "skyrim/winterhold",
+      "x": 1040,
+      "z": -3056,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "julianos",
+      "why": [
+        "winterhold.L6.winterhold_remnant",
+        "winterhold.L8.azura_statue"
+      ]
+    },
+    {
+      "id": "wayshrine_winterhold_3",
+      "name": "travel.skycraft.node.wayshrine_winterhold_3",
+      "region": "skyrim/winterhold",
+      "x": 1136,
+      "z": -2256,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "julianos",
+      "why": [
+        "winterhold.L6.winterhold_remnant",
+        "winterhold.L8.azura_statue"
+      ]
+    },
+    {
+      "id": "wayshrine_eastmarch_1",
+      "name": "travel.skycraft.node.wayshrine_eastmarch_1",
+      "region": "skyrim/eastmarch",
+      "x": 1136,
+      "z": 368,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "talos",
+      "why": [
+        "eastmarch.L8.talos_open",
+        "eastmarch.L3.darkwater_ford"
+      ]
+    },
+    {
+      "id": "wayshrine_the_rift_2",
+      "name": "travel.skycraft.node.wayshrine_the_rift_2",
+      "region": "skyrim/the_rift",
+      "x": 880,
+      "z": 1712,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "id": "wayshrine_the_rift_3",
+      "name": "travel.skycraft.node.wayshrine_the_rift_3",
+      "region": "skyrim/the_rift",
+      "x": 912,
+      "z": 2224,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "id": "wayshrine_winterhold_4",
+      "name": "travel.skycraft.node.wayshrine_winterhold_4",
+      "region": "skyrim/winterhold",
+      "x": 1808,
+      "z": -2704,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "julianos",
+      "why": [
+        "winterhold.L6.winterhold_remnant",
+        "winterhold.L8.azura_statue"
+      ]
+    },
+    {
+      "id": "wayshrine_the_rift_4",
+      "name": "travel.skycraft.node.wayshrine_the_rift_4",
+      "region": "skyrim/the_rift",
+      "x": 1520,
+      "z": 848,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "id": "wayshrine_the_rift_5",
+      "name": "travel.skycraft.node.wayshrine_the_rift_5",
+      "region": "skyrim/the_rift",
+      "x": 1424,
+      "z": 2224,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "id": "wayshrine_winterhold_5",
+      "name": "travel.skycraft.node.wayshrine_winterhold_5",
+      "region": "skyrim/winterhold",
+      "x": 2320,
+      "z": -2288,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "julianos",
+      "why": [
+        "winterhold.L6.winterhold_remnant",
+        "winterhold.L8.azura_statue"
+      ]
+    },
+    {
+      "id": "wayshrine_winterhold_6",
+      "name": "travel.skycraft.node.wayshrine_winterhold_6",
+      "region": "skyrim/winterhold",
+      "x": 2160,
+      "z": -1552,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "julianos",
+      "why": [
+        "winterhold.L6.winterhold_remnant",
+        "winterhold.L8.azura_statue"
+      ]
+    },
+    {
+      "id": "wayshrine_eastmarch_2",
+      "name": "travel.skycraft.node.wayshrine_eastmarch_2",
+      "region": "skyrim/eastmarch",
+      "x": 2352,
+      "z": 496,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "talos",
+      "why": [
+        "eastmarch.L8.talos_open",
+        "eastmarch.L3.darkwater_ford"
+      ]
+    },
+    {
+      "id": "wayshrine_the_rift_6",
+      "name": "travel.skycraft.node.wayshrine_the_rift_6",
+      "region": "skyrim/the_rift",
+      "x": 2096,
+      "z": 1776,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "id": "wayshrine_the_rift_7",
+      "name": "travel.skycraft.node.wayshrine_the_rift_7",
+      "region": "skyrim/the_rift",
+      "x": 2256,
+      "z": 2288,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "id": "wayshrine_eastmarch_3",
+      "name": "travel.skycraft.node.wayshrine_eastmarch_3",
+      "region": "skyrim/eastmarch",
+      "x": 2704,
+      "z": -1392,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "talos",
+      "why": [
+        "eastmarch.L8.talos_open",
+        "eastmarch.L3.darkwater_ford"
+      ]
+    },
+    {
+      "id": "wayshrine_eastmarch_4",
+      "name": "travel.skycraft.node.wayshrine_eastmarch_4",
+      "region": "skyrim/eastmarch",
+      "x": 2864,
+      "z": -784,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "talos",
+      "why": [
+        "eastmarch.L8.talos_open",
+        "eastmarch.L3.darkwater_ford"
+      ]
+    },
+    {
+      "id": "wayshrine_eastmarch_5",
+      "name": "travel.skycraft.node.wayshrine_eastmarch_5",
+      "region": "skyrim/eastmarch",
+      "x": 2960,
+      "z": 336,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "talos",
+      "why": [
+        "eastmarch.L8.talos_open",
+        "eastmarch.L3.darkwater_ford"
+      ]
+    },
+    {
+      "id": "wayshrine_the_rift_8",
+      "name": "travel.skycraft.node.wayshrine_the_rift_8",
+      "region": "skyrim/the_rift",
+      "x": 3024,
+      "z": 912,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "id": "wayshrine_the_rift_9",
+      "name": "travel.skycraft.node.wayshrine_the_rift_9",
+      "region": "skyrim/the_rift",
+      "x": 2928,
+      "z": 1616,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "id": "wayshrine_the_rift_10",
+      "name": "travel.skycraft.node.wayshrine_the_rift_10",
+      "region": "skyrim/the_rift",
+      "x": 2768,
+      "z": 2128,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "id": "wayshrine_the_pale_3",
+      "name": "travel.skycraft.node.wayshrine_the_pale_3",
+      "region": "skyrim/the_pale",
+      "x": 176,
+      "z": -2544,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "the_pale.L5.roadside_inn",
+        "the_pale.L8.mara_priest"
+      ]
+    },
+    {
+      "id": "wayshrine_eastmarch_6",
+      "name": "travel.skycraft.node.wayshrine_eastmarch_6",
+      "region": "skyrim/eastmarch",
+      "x": 3088,
+      "z": -240,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "talos",
+      "why": [
+        "eastmarch.L8.talos_open",
+        "eastmarch.L3.darkwater_ford"
+      ]
+    },
+    {
+      "id": "wayshrine_eastmarch_7",
+      "name": "travel.skycraft.node.wayshrine_eastmarch_7",
+      "region": "skyrim/eastmarch",
+      "x": 2544,
+      "z": -48,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "talos",
+      "why": [
+        "eastmarch.L8.talos_open",
+        "eastmarch.L3.darkwater_ford"
+      ]
+    },
+    {
+      "id": "wayshrine_the_rift_11",
+      "name": "travel.skycraft.node.wayshrine_the_rift_11",
+      "region": "skyrim/the_rift",
+      "x": 1264,
+      "z": 1328,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "from": "whiterun",
+      "to": "solitude",
+      "mode": "carriage",
+      "fee": 20,
+      "duration": 16,
+      "path": "hjaal_road",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L5.road_hub",
+        "haafingar.L5.toll_bridge"
+      ]
+    },
+    {
+      "from": "whiterun",
+      "to": "windhelm",
+      "mode": "carriage",
+      "fee": 20,
+      "duration": 14,
+      "path": "eastmarch_road",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L5.road_hub",
+        "eastmarch.L6.windhelm_seat"
+      ]
+    },
+    {
+      "from": "whiterun",
+      "to": "riften",
+      "mode": "carriage",
+      "fee": 20,
+      "duration": 16,
+      "path": "treva_road",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L5.road_hub",
+        "the_rift.L6.riften_seat"
+      ]
+    },
+    {
+      "from": "whiterun",
+      "to": "markarth",
+      "mode": "carriage",
+      "fee": 20,
+      "duration": 18,
+      "path": "reach_road",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L5.road_hub",
+        "the_reach.L6.karth_road"
+      ]
+    },
+    {
+      "from": "whiterun",
+      "to": "falkreath",
+      "mode": "carriage",
+      "fee": 50,
+      "duration": 12,
+      "path": "falkreath_road",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L5.road_hub",
+        "falkreath.L5.border_trade"
+      ]
+    },
+    {
+      "from": "whiterun",
+      "to": "morthal",
+      "mode": "carriage",
+      "fee": 50,
+      "duration": 12,
+      "path": "hjaal_road",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L5.road_hub",
+        "hjaalmarch.L6.hjaal_road"
+      ]
+    },
+    {
+      "from": "whiterun",
+      "to": "dawnstar",
+      "mode": "carriage",
+      "fee": 50,
+      "duration": 14,
+      "path": "pale_road",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L5.road_hub",
+        "the_pale.L5.roadside_inn"
+      ]
+    },
+    {
+      "from": "whiterun",
+      "to": "winterhold",
+      "mode": "carriage",
+      "fee": 50,
+      "duration": 16,
+      "path": "winterhold_road",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L5.road_hub",
+        "winterhold.L5.college_coin"
+      ]
+    },
+    {
+      "from": "solitude",
+      "to": "morthal",
+      "mode": "carriage",
+      "fee": 20,
+      "duration": 10,
+      "path": "hjaal_road",
+      "bidirectional": true,
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "hjaalmarch.L6.hjaal_road"
+      ]
+    },
+    {
+      "from": "solitude",
+      "to": "markarth",
+      "mode": "carriage",
+      "fee": 20,
+      "duration": 16,
+      "path": "karth_road",
+      "bidirectional": true,
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "the_reach.L6.karth_road"
+      ]
+    },
+    {
+      "from": "solitude",
+      "to": "dawnstar",
+      "mode": "carriage",
+      "fee": 50,
+      "duration": 14,
+      "path": "northern_coast_road",
+      "bidirectional": true,
+      "why": [
+        "haafingar.L6.solitude_seat",
+        "the_pale.L6.dawnstar_seat"
+      ]
+    },
+    {
+      "from": "morthal",
+      "to": "dawnstar",
+      "mode": "carriage",
+      "fee": 50,
+      "duration": 12,
+      "path": "pale_road",
+      "bidirectional": true,
+      "why": [
+        "hjaalmarch.L6.hjaal_road",
+        "the_pale.L6.dawnstar_seat"
+      ]
+    },
+    {
+      "from": "dawnstar",
+      "to": "winterhold",
+      "mode": "carriage",
+      "fee": 50,
+      "duration": 12,
+      "path": "winterhold_road",
+      "bidirectional": true,
+      "why": [
+        "the_pale.L6.dawnstar_seat",
+        "winterhold.L6.winterhold_remnant"
+      ]
+    },
+    {
+      "from": "dawnstar",
+      "to": "windhelm",
+      "mode": "carriage",
+      "fee": 20,
+      "duration": 14,
+      "path": "pale_road",
+      "bidirectional": true,
+      "why": [
+        "the_pale.L5.roadside_inn",
+        "eastmarch.L6.windhelm_seat"
+      ]
+    },
+    {
+      "from": "winterhold",
+      "to": "windhelm",
+      "mode": "carriage",
+      "fee": 20,
+      "duration": 12,
+      "path": "winterhold_road",
+      "bidirectional": true,
+      "why": [
+        "winterhold.L6.winterhold_remnant",
+        "eastmarch.L6.windhelm_seat"
+      ]
+    },
+    {
+      "from": "windhelm",
+      "to": "riften",
+      "mode": "carriage",
+      "fee": 20,
+      "duration": 14,
+      "path": "rift_road",
+      "bidirectional": true,
+      "why": [
+        "eastmarch.L6.windhelm_seat",
+        "the_rift.L6.riften_seat"
+      ]
+    },
+    {
+      "from": "riften",
+      "to": "falkreath",
+      "mode": "carriage",
+      "fee": 50,
+      "duration": 18,
+      "path": "south_jerall_road",
+      "bidirectional": true,
+      "why": [
+        "the_rift.L6.riften_seat",
+        "falkreath.L5.border_trade"
+      ]
+    },
+    {
+      "from": "falkreath",
+      "to": "markarth",
+      "mode": "carriage",
+      "fee": 50,
+      "duration": 18,
+      "path": "reach_road",
+      "bidirectional": true,
+      "why": [
+        "falkreath.L5.border_trade",
+        "the_reach.L5.border_trade"
+      ]
+    },
+    {
+      "from": "whiterun",
+      "to": "riverwood",
+      "mode": "carriage",
+      "fee": 10,
+      "duration": 8,
+      "path": "white_river_road",
+      "bidirectional": true,
+      "why": [
+        "whiterun.L5.crossroads_trade",
+        "whiterun.L6.riverwood"
+      ]
+    },
+    {
+      "from": "riverwood",
+      "to": "helgen",
+      "mode": "carriage",
+      "fee": 10,
+      "duration": 8,
+      "path": "white_river_road",
+      "bidirectional": true,
+      "why": [
+        "whiterun.L6.riverwood",
+        "falkreath.L6.helgen_fort"
+      ]
+    },
+    {
+      "from": "helgen",
+      "to": "falkreath",
+      "mode": "carriage",
+      "fee": 10,
+      "duration": 8,
+      "path": "falkreath_road",
+      "bidirectional": true,
+      "why": [
+        "falkreath.L6.helgen_fort",
+        "falkreath.L6.falkreath_graves"
+      ]
+    },
+    {
+      "from": "riverwood",
+      "to": "ivarstead",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "treva_road",
+      "bidirectional": true,
+      "why": [
+        "whiterun.L6.riverwood",
+        "the_rift.L6.ivarstead"
+      ]
+    },
+    {
+      "from": "ivarstead",
+      "to": "riften",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 12,
+      "path": "treva_road",
+      "bidirectional": true,
+      "why": [
+        "the_rift.L6.ivarstead",
+        "the_rift.L6.riften_seat"
+      ]
+    },
+    {
+      "from": "whiterun",
+      "to": "rorikstead",
+      "mode": "carriage",
+      "fee": 10,
+      "duration": 10,
+      "path": "reach_road",
+      "bidirectional": true,
+      "why": [
+        "whiterun.L5.crossroads_trade",
+        "whiterun.L6.rorikstead"
+      ]
+    },
+    {
+      "from": "rorikstead",
+      "to": "old_hroldan",
+      "mode": "carriage",
+      "fee": 10,
+      "duration": 8,
+      "path": "reach_road",
+      "bidirectional": true,
+      "why": [
+        "whiterun.L6.rorikstead",
+        "the_reach.L6.karth_road"
+      ]
+    },
+    {
+      "from": "old_hroldan",
+      "to": "markarth",
+      "mode": "carriage",
+      "fee": 10,
+      "duration": 10,
+      "path": "reach_road",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L6.markarth_seat"
+      ]
+    },
+    {
+      "from": "markarth",
+      "to": "karthwasten",
+      "mode": "carriage",
+      "fee": 10,
+      "duration": 8,
+      "path": "karth_road",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L6.markarth_seat",
+        "the_reach.L6.mine_villages"
+      ]
+    },
+    {
+      "from": "karthwasten",
+      "to": "dragon_bridge",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "karth_road",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L6.karth_road",
+        "haafingar.L6.dragon_bridge"
+      ]
+    },
+    {
+      "from": "dragon_bridge",
+      "to": "solitude",
+      "mode": "carriage",
+      "fee": 10,
+      "duration": 8,
+      "path": "karth_road",
+      "bidirectional": true,
+      "why": [
+        "haafingar.L6.dragon_bridge",
+        "haafingar.L6.solitude_seat"
+      ]
+    },
+    {
+      "from": "dragon_bridge",
+      "to": "morthal",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "hjaal_road",
+      "bidirectional": true,
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "hjaalmarch.L6.hjaal_road"
+      ]
+    },
+    {
+      "from": "morthal",
+      "to": "stonehills",
+      "mode": "carriage",
+      "fee": 10,
+      "duration": 8,
+      "path": "hjaal_road",
+      "bidirectional": true,
+      "why": [
+        "hjaalmarch.L6.morthal_seat",
+        "hjaalmarch.L6.stonehills"
+      ]
+    },
+    {
+      "from": "stonehills",
+      "to": "dawnstar",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "pale_road",
+      "bidirectional": true,
+      "why": [
+        "hjaalmarch.L6.stonehills",
+        "the_pale.L6.dawnstar_seat"
+      ]
+    },
+    {
+      "from": "whiterun",
+      "to": "nightgate_inn",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "pale_road",
+      "bidirectional": true,
+      "why": [
+        "whiterun.L5.crossroads_trade",
+        "the_pale.L6.nightgate"
+      ]
+    },
+    {
+      "from": "nightgate_inn",
+      "to": "dawnstar",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "pale_road",
+      "bidirectional": true,
+      "why": [
+        "the_pale.L6.nightgate",
+        "the_pale.L6.dawnstar_seat"
+      ]
+    },
+    {
+      "from": "nightgate_inn",
+      "to": "windhelm",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "pale_road",
+      "bidirectional": true,
+      "why": [
+        "the_pale.L6.nightgate",
+        "eastmarch.L6.windhelm_seat"
+      ]
+    },
+    {
+      "from": "whiterun",
+      "to": "kynesgrove",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 12,
+      "path": "eastmarch_road",
+      "bidirectional": true,
+      "why": [
+        "whiterun.L5.crossroads_trade",
+        "eastmarch.L6.kynesgrove"
+      ]
+    },
+    {
+      "from": "kynesgrove",
+      "to": "windhelm",
+      "mode": "carriage",
+      "fee": 10,
+      "duration": 8,
+      "path": "eastmarch_road",
+      "bidirectional": true,
+      "why": [
+        "eastmarch.L6.kynesgrove",
+        "eastmarch.L6.windhelm_seat"
+      ]
+    },
+    {
+      "from": "windhelm",
+      "to": "darkwater_crossing",
+      "mode": "carriage",
+      "fee": 10,
+      "duration": 10,
+      "path": "rift_road",
+      "bidirectional": true,
+      "why": [
+        "eastmarch.L6.windhelm_seat",
+        "eastmarch.L6.darkwater_crossing"
+      ]
+    },
+    {
+      "from": "darkwater_crossing",
+      "to": "shors_stone",
+      "mode": "carriage",
+      "fee": 10,
+      "duration": 8,
+      "path": "rift_road",
+      "bidirectional": true,
+      "why": [
+        "eastmarch.L6.darkwater_crossing",
+        "the_rift.L6.shors_stone"
+      ]
+    },
+    {
+      "from": "shors_stone",
+      "to": "riften",
+      "mode": "carriage",
+      "fee": 10,
+      "duration": 8,
+      "path": "rift_road",
+      "bidirectional": true,
+      "why": [
+        "the_rift.L6.shors_stone",
+        "the_rift.L6.riften_seat"
+      ]
+    },
+    {
+      "from": "solitude",
+      "to": "dawnstar",
+      "mode": "boat",
+      "fee": 50,
+      "duration": 14,
+      "path": "sea_of_ghosts_west",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L5.sea_trade",
+        "haafingar.L5.company_docks"
+      ]
+    },
+    {
+      "from": "dawnstar",
+      "to": "winterhold",
+      "mode": "boat",
+      "fee": 50,
+      "duration": 12,
+      "path": "sea_of_ghosts_pale",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L5.sea_trade",
+        "the_pale.L5.ore_ships"
+      ]
+    },
+    {
+      "from": "winterhold",
+      "to": "windhelm",
+      "mode": "boat",
+      "fee": 50,
+      "duration": 12,
+      "path": "sea_of_ghosts_east",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L5.sea_trade",
+        "eastmarch.L5.harbour"
+      ]
+    },
+    {
+      "from": "solitude",
+      "to": "windhelm",
+      "mode": "boat",
+      "fee": 75,
+      "duration": 18,
+      "path": "sea_of_ghosts_lane",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L5.sea_trade",
+        "haafingar.L5.company_docks"
+      ]
+    },
+    {
+      "from": "dawnstar",
+      "to": "windhelm",
+      "mode": "boat",
+      "fee": 50,
+      "duration": 14,
+      "path": "sea_of_ghosts_central",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L5.sea_trade",
+        "the_pale.L5.ore_ships"
+      ]
+    },
+    {
+      "from": "windhelm",
+      "to": "raven_rock",
+      "mode": "boat",
+      "fee": 250,
+      "duration": 20,
+      "path": "solstheim_passage",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L5.sea_trade",
+        "eastmarch.L5.harbour"
+      ]
+    },
+    {
+      "from": "solitude",
+      "to": "castle_volkihar",
+      "mode": "boat",
+      "fee": 25,
+      "duration": 10,
+      "path": "haafingar_skiff_channel",
+      "bidirectional": true,
+      "why": [
+        "haafingar.L1.island_rock",
+        "haafingar.L10.volkihar_castle"
+      ]
+    },
+    {
+      "from": "riverwood",
+      "to": "whiterun",
+      "mode": "river_boat",
+      "fee": 15,
+      "duration": 10,
+      "path": "white_river_upper",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L3.white_river",
+        "whiterun.L3.white_river_flats"
+      ]
+    },
+    {
+      "from": "whiterun",
+      "to": "windhelm",
+      "mode": "river_boat",
+      "fee": 25,
+      "duration": 14,
+      "path": "white_river_lower",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L3.white_river",
+        "eastmarch.L1.white_river_mouth"
+      ]
+    },
+    {
+      "from": "riften",
+      "to": "heartwood_mill",
+      "mode": "river_boat",
+      "fee": 10,
+      "duration": 8,
+      "path": "lake_honrich_ferry",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L3.great_lakes",
+        "the_rift.L3.honrich_city"
+      ]
+    },
+    {
+      "from": "heartwood_mill",
+      "to": "ivarstead",
+      "mode": "river_boat",
+      "fee": 10,
+      "duration": 8,
+      "path": "lake_honrich_west",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L3.great_lakes",
+        "the_rift.L1.lake_floor"
+      ]
+    },
+    {
+      "from": "alftand",
+      "to": "great_lift_at_alftand",
+      "mode": "lift",
+      "fee": 0,
+      "duration": 6,
+      "path": "alftand_blackreach_lift",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L1.dwemer_bedrock",
+        "the_pale.L10.great_lifts"
+      ]
+    },
+    {
+      "from": "mzinchaleft",
+      "to": "great_lift_at_mzinchaleft",
+      "mode": "lift",
+      "fee": 0,
+      "duration": 6,
+      "path": "mzinchaleft_blackreach_lift",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L1.dwemer_bedrock",
+        "the_pale.L10.great_lifts"
+      ]
+    },
+    {
+      "from": "raldbthar",
+      "to": "great_lift_at_raldbthar",
+      "mode": "lift",
+      "fee": 0,
+      "duration": 6,
+      "path": "raldbthar_blackreach_lift",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L1.dwemer_bedrock",
+        "the_pale.L10.great_lifts"
+      ]
+    },
+    {
+      "from": "great_lift_at_alftand",
+      "to": "great_lift_at_mzinchaleft",
+      "mode": "lift",
+      "fee": 0,
+      "duration": 10,
+      "path": "blackreach_underway_west",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L1.dwemer_bedrock",
+        "the_pale.L10.great_lifts"
+      ]
+    },
+    {
+      "from": "great_lift_at_alftand",
+      "to": "great_lift_at_raldbthar",
+      "mode": "lift",
+      "fee": 0,
+      "duration": 10,
+      "path": "blackreach_underway_south",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L1.dwemer_bedrock",
+        "the_pale.L10.great_lifts"
+      ]
+    },
+    {
+      "from": "guardian_stones",
+      "to": "riverwood",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "white_river_pilgrim_path",
+      "bidirectional": true,
+      "why": [
+        "falkreath.L3.lake_ilinalta",
+        "whiterun.L6.riverwood"
+      ]
+    },
+    {
+      "from": "guardian_stones",
+      "to": "warrior_stone",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 2,
+      "path": "guardian_circle",
+      "bidirectional": true,
+      "why": [
+        "falkreath.L3.lake_ilinalta",
+        "skyrim.L8.ancestor_barrows"
+      ]
+    },
+    {
+      "from": "guardian_stones",
+      "to": "mage_stone",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 2,
+      "path": "guardian_circle",
+      "bidirectional": true,
+      "why": [
+        "falkreath.L3.lake_ilinalta",
+        "skyrim.L8.ancestor_barrows"
+      ]
+    },
+    {
+      "from": "guardian_stones",
+      "to": "thief_stone",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 2,
+      "path": "guardian_circle",
+      "bidirectional": true,
+      "why": [
+        "falkreath.L3.lake_ilinalta",
+        "skyrim.L8.ancestor_barrows"
+      ]
+    },
+    {
+      "from": "lady_stone",
+      "to": "falkreath",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "ilinalta_shore_path",
+      "bidirectional": true,
+      "why": [
+        "falkreath.L3.lake_ilinalta",
+        "falkreath.L6.falkreath_graves"
+      ]
+    },
+    {
+      "from": "ritual_stone",
+      "to": "whiterun",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "white_river_bluff_path",
+      "bidirectional": true,
+      "why": [
+        "whiterun.L3.white_river_flats",
+        "whiterun.L6.whiterun_seat"
+      ]
+    },
+    {
+      "from": "high_hrothgar",
+      "to": "ivarstead",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 8,
+      "path": "seven_thousand_steps",
+      "bidirectional": true,
+      "why": [
+        "skyrim.L8.way_of_the_voice",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "from": "gjukars_monument",
+      "to": "rorikstead",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "whiterun_tundra_trail",
+      "bidirectional": true,
+      "why": [
+        "whiterun.L1.tundra_plain",
+        "whiterun.L6.rorikstead"
+      ]
+    },
+    {
+      "from": "lover_stone",
+      "to": "markarth",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "druadach_ridge_trail",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L1.granite_gorges",
+        "the_reach.L6.markarth_seat"
+      ]
+    },
+    {
+      "from": "sky_haven_temple",
+      "to": "karthwasten",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "karth_spire_trail",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L3.karth_upper",
+        "the_reach.L6.mine_villages"
+      ]
+    },
+    {
+      "from": "shrine_to_peryite",
+      "to": "karthwasten",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "reach_bluff_trail",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L8.old_gods",
+        "the_reach.L6.mine_villages"
+      ]
+    },
+    {
+      "from": "steed_stone",
+      "to": "solitude",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "haafingar_ridge_trail",
+      "bidirectional": true,
+      "why": [
+        "haafingar.L1.sea_cliffs",
+        "haafingar.L6.solitude_seat"
+      ]
+    },
+    {
+      "from": "statue_to_meridia",
+      "to": "dragon_bridge",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "kilkreath_steps",
+      "bidirectional": true,
+      "why": [
+        "haafingar.L8.meridia_light",
+        "haafingar.L6.dragon_bridge"
+      ]
+    },
+    {
+      "from": "apprentice_stone",
+      "to": "morthal",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "hjaal_marsh_causeway",
+      "bidirectional": true,
+      "why": [
+        "hjaalmarch.L3.hjaal_delta",
+        "hjaalmarch.L6.morthal_seat"
+      ]
+    },
+    {
+      "from": "lord_stone",
+      "to": "stonehills",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "mount_morthal_climb",
+      "bidirectional": true,
+      "why": [
+        "hjaalmarch.L1.stonehills_rise",
+        "hjaalmarch.L6.stonehills"
+      ]
+    },
+    {
+      "from": "shrine_of_mehrunes_dagon",
+      "to": "stonehills",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "pale_ridge_steps",
+      "bidirectional": true,
+      "why": [
+        "hjaalmarch.L8.ruined_shrines",
+        "hjaalmarch.L6.stonehills"
+      ]
+    },
+    {
+      "from": "weynon_stones",
+      "to": "nightgate_inn",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "pale_standing_circle",
+      "bidirectional": true,
+      "why": [
+        "the_pale.L1.snow_highland",
+        "the_pale.L6.nightgate"
+      ]
+    },
+    {
+      "from": "tower_stone",
+      "to": "dawnstar",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "ice_cape_trail",
+      "bidirectional": true,
+      "why": [
+        "winterhold.L3.frozen_sea",
+        "the_pale.L6.dawnstar_seat"
+      ]
+    },
+    {
+      "from": "serpent_stone",
+      "to": "winterhold",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "sea_of_ghosts_ice_floe",
+      "bidirectional": true,
+      "why": [
+        "winterhold.L3.frozen_sea",
+        "winterhold.L6.winterhold_remnant"
+      ]
+    },
+    {
+      "from": "shrine_of_azura",
+      "to": "winterhold",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "azura_mountain_steps",
+      "bidirectional": true,
+      "why": [
+        "winterhold.L8.azura_statue",
+        "winterhold.L6.winterhold_remnant"
+      ]
+    },
+    {
+      "from": "college_of_winterhold",
+      "to": "winterhold",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 4,
+      "path": "college_bridge",
+      "bidirectional": true,
+      "why": [
+        "winterhold.L6.college",
+        "winterhold.L6.winterhold_remnant"
+      ]
+    },
+    {
+      "from": "atronach_stone",
+      "to": "darkwater_crossing",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "fumarole_basin_path",
+      "bidirectional": true,
+      "why": [
+        "eastmarch.L1.steam_basin",
+        "eastmarch.L6.darkwater_crossing"
+      ]
+    },
+    {
+      "from": "sacellum_of_boethiah",
+      "to": "windhelm",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "velothi_foothill_climb",
+      "bidirectional": true,
+      "why": [
+        "eastmarch.L8.boethiah_cult",
+        "eastmarch.L6.windhelm_seat"
+      ]
+    },
+    {
+      "from": "shadow_stone",
+      "to": "riften",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "south_rift_birch_trail",
+      "bidirectional": true,
+      "why": [
+        "the_rift.L8.shadow_patron",
+        "the_rift.L6.riften_seat"
+      ]
+    },
+    {
+      "from": "wayshrine_haafingar_1",
+      "to": "wayshrine_the_reach_1",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "haafingar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_the_reach_1",
+      "to": "wayshrine_the_reach_6",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_reach_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_the_reach_2",
+      "to": "wayshrine_the_reach_7",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_reach_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_the_reach_3",
+      "to": "wayshrine_the_reach_4",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_reach_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_the_reach_4",
+      "to": "wayshrine_the_reach_9",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_reach_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_haafingar_2",
+      "to": "wayshrine_haafingar_4",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "haafingar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_haafingar_3",
+      "to": "castle_volkihar",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "haafingar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_the_reach_5",
+      "to": "wayshrine_the_reach_10",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_reach_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_the_reach_6",
+      "to": "shrine_to_peryite",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_reach_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_the_reach_7",
+      "to": "markarth",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_reach_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_the_reach_8",
+      "to": "wayshrine_the_reach_12",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_reach_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_the_reach_9",
+      "to": "wayshrine_the_reach_4",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_reach_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_haafingar_4",
+      "to": "wayshrine_haafingar_5",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "haafingar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_haafingar_5",
+      "to": "steed_stone",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "haafingar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_the_reach_10",
+      "to": "dragon_bridge",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_reach_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_whiterun_1",
+      "to": "old_hroldan",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "whiterun_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "whiterun.L5.crossroads_trade",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "from": "wayshrine_the_reach_11",
+      "to": "wayshrine_the_reach_12",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_reach_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_the_reach_12",
+      "to": "wayshrine_the_reach_8",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_reach_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_falkreath_1",
+      "to": "wayshrine_falkreath_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "falkreath_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "from": "wayshrine_haafingar_6",
+      "to": "wayshrine_haafingar_4",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "haafingar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_whiterun_2",
+      "to": "wayshrine_whiterun_1",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "whiterun_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "whiterun.L5.crossroads_trade",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "from": "wayshrine_the_reach_13",
+      "to": "gjukars_monument",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_reach_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_reach.L6.karth_road",
+        "the_reach.L8.dibella_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_falkreath_2",
+      "to": "wayshrine_falkreath_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "falkreath_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "from": "wayshrine_falkreath_3",
+      "to": "wayshrine_falkreath_4",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "falkreath_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "from": "wayshrine_falkreath_4",
+      "to": "wayshrine_falkreath_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "falkreath_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "from": "wayshrine_haafingar_7",
+      "to": "wayshrine_haafingar_6",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "haafingar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_haafingar_8",
+      "to": "solitude",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "haafingar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "haafingar.L5.toll_bridge",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "from": "wayshrine_whiterun_3",
+      "to": "gjukars_monument",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "whiterun_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "whiterun.L5.crossroads_trade",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "from": "wayshrine_falkreath_5",
+      "to": "falkreath",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "falkreath_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "from": "wayshrine_falkreath_6",
+      "to": "wayshrine_falkreath_4",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "falkreath_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "from": "wayshrine_the_pale_1",
+      "to": "wayshrine_haafingar_8",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_pale_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_pale.L5.roadside_inn",
+        "the_pale.L8.mara_priest"
+      ]
+    },
+    {
+      "from": "wayshrine_whiterun_4",
+      "to": "whiterun",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "whiterun_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "whiterun.L5.crossroads_trade",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "from": "wayshrine_falkreath_7",
+      "to": "warrior_stone",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "falkreath_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "from": "wayshrine_falkreath_8",
+      "to": "wayshrine_falkreath_9",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "falkreath_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "from": "wayshrine_falkreath_9",
+      "to": "wayshrine_falkreath_8",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "falkreath_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "from": "wayshrine_winterhold_1",
+      "to": "dawnstar",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "winterhold_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "winterhold.L6.winterhold_remnant",
+        "winterhold.L8.azura_statue"
+      ]
+    },
+    {
+      "from": "wayshrine_the_pale_2",
+      "to": "ritual_stone",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_pale_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_pale.L5.roadside_inn",
+        "the_pale.L8.mara_priest"
+      ]
+    },
+    {
+      "from": "wayshrine_falkreath_10",
+      "to": "helgen",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "falkreath_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "falkreath.L5.border_trade",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "from": "wayshrine_the_rift_1",
+      "to": "wayshrine_the_rift_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_rift_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "from": "wayshrine_winterhold_2",
+      "to": "wayshrine_winterhold_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "winterhold_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "winterhold.L6.winterhold_remnant",
+        "winterhold.L8.azura_statue"
+      ]
+    },
+    {
+      "from": "wayshrine_winterhold_3",
+      "to": "college_of_winterhold",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "winterhold_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "winterhold.L6.winterhold_remnant",
+        "winterhold.L8.azura_statue"
+      ]
+    },
+    {
+      "from": "wayshrine_eastmarch_1",
+      "to": "darkwater_crossing",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "eastmarch_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "eastmarch.L8.talos_open",
+        "eastmarch.L3.darkwater_ford"
+      ]
+    },
+    {
+      "from": "wayshrine_the_rift_2",
+      "to": "wayshrine_the_rift_1",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_rift_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "from": "wayshrine_the_rift_3",
+      "to": "wayshrine_the_rift_1",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_rift_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "from": "wayshrine_winterhold_4",
+      "to": "wayshrine_winterhold_5",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "winterhold_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "winterhold.L6.winterhold_remnant",
+        "winterhold.L8.azura_statue"
+      ]
+    },
+    {
+      "from": "wayshrine_the_rift_4",
+      "to": "darkwater_crossing",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_rift_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "from": "wayshrine_the_rift_5",
+      "to": "wayshrine_the_rift_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_rift_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "from": "wayshrine_winterhold_5",
+      "to": "serpent_stone",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "winterhold_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "winterhold.L6.winterhold_remnant",
+        "winterhold.L8.azura_statue"
+      ]
+    },
+    {
+      "from": "wayshrine_winterhold_6",
+      "to": "serpent_stone",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "winterhold_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "winterhold.L6.winterhold_remnant",
+        "winterhold.L8.azura_statue"
+      ]
+    },
+    {
+      "from": "wayshrine_eastmarch_2",
+      "to": "shors_stone",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "eastmarch_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "eastmarch.L8.talos_open",
+        "eastmarch.L3.darkwater_ford"
+      ]
+    },
+    {
+      "from": "wayshrine_the_rift_6",
+      "to": "shadow_stone",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_rift_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "from": "wayshrine_the_rift_7",
+      "to": "wayshrine_the_rift_6",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_rift_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "from": "wayshrine_eastmarch_3",
+      "to": "wayshrine_winterhold_6",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "eastmarch_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "eastmarch.L8.talos_open",
+        "eastmarch.L3.darkwater_ford"
+      ]
+    },
+    {
+      "from": "wayshrine_eastmarch_4",
+      "to": "wayshrine_eastmarch_6",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "eastmarch_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "eastmarch.L8.talos_open",
+        "eastmarch.L3.darkwater_ford"
+      ]
+    },
+    {
+      "from": "wayshrine_eastmarch_5",
+      "to": "wayshrine_eastmarch_7",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "eastmarch_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "eastmarch.L8.talos_open",
+        "eastmarch.L3.darkwater_ford"
+      ]
+    },
+    {
+      "from": "wayshrine_the_rift_8",
+      "to": "wayshrine_eastmarch_5",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_rift_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "from": "wayshrine_the_rift_9",
+      "to": "shadow_stone",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_rift_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "from": "wayshrine_the_rift_10",
+      "to": "wayshrine_the_rift_7",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_rift_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "from": "wayshrine_the_pale_3",
+      "to": "wayshrine_winterhold_1",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_pale_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_pale.L5.roadside_inn",
+        "the_pale.L8.mara_priest"
+      ]
+    },
+    {
+      "from": "wayshrine_eastmarch_6",
+      "to": "wayshrine_eastmarch_7",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "eastmarch_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "eastmarch.L8.talos_open",
+        "eastmarch.L3.darkwater_ford"
+      ]
+    },
+    {
+      "from": "wayshrine_eastmarch_7",
+      "to": "wayshrine_eastmarch_5",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "eastmarch_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "eastmarch.L8.talos_open",
+        "eastmarch.L3.darkwater_ford"
+      ]
+    },
+    {
+      "from": "wayshrine_the_rift_11",
+      "to": "heartwood_mill",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "the_rift_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "the_rift.L8.mara_temple",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    }
+  ]
+}

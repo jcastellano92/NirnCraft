@@ -18,7 +18,7 @@ public final class QuestClientEvents {
 
     private QuestClientEvents() {}
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.LOWEST)
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getInstance();
@@ -28,6 +28,8 @@ public final class QuestClientEvents {
         if (++ticks % 10 == 0) {
             ClientQuestData.refreshCompass();
             ClientQuestData.refreshPartyCompass();
+            ClientQuestData.refreshLocationSilhouettes();
+            ClientQuestData.refreshSettlementQuestGivers();
         }
         ClientQuestData.showPendingPrompt();
     }

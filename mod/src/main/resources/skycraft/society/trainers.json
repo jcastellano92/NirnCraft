@@ -1,0 +1,560 @@
+{
+  "sessions_per_level": 5,
+  "tiers": {
+    "capital": {
+      "min_trainers": 5,
+      "caps": [90, 75, 75, 50, 50]
+    },
+    "city": {
+      "min_trainers": 2,
+      "caps": [75, 75, 50]
+    },
+    "town": {
+      "min_trainers": 1,
+      "caps": [50]
+    }
+  },
+  "fees": {
+    "journeyman": {
+      "cap": 50,
+      "base": 50,
+      "per_level": 15
+    },
+    "expert": {
+      "cap": 75,
+      "base": 150,
+      "per_level": 30
+    },
+    "master": {
+      "cap": 90,
+      "base": 400,
+      "per_level": 50
+    }
+  },
+  "settlements": {
+    "whiterun": [
+      {
+        "name": "Halvar Forge-Hand",
+        "skill": "smithing",
+        "tier": "master",
+        "cap": 90,
+        "workplace": "smith",
+        "why": ["whiterun.L5.skyforge_steel", "whiterun.L7.warrior_hall"]
+      },
+      {
+        "name": "Vignar Shield-Brother",
+        "skill": "two_handed",
+        "tier": "master",
+        "cap": 90,
+        "workplace": "housecarl",
+        "why": ["whiterun.L7.warrior_hall", "whiterun.L8.honour_and_sovngarde"]
+      },
+      {
+        "name": "Torvar Iron-Clad",
+        "skill": "heavy_armor",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "smith",
+        "why": ["whiterun.L7.warrior_hall", "whiterun.L5.skyforge_steel"]
+      },
+      {
+        "name": "Aela Swift-Bow",
+        "skill": "archery",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "merchant",
+        "why": ["whiterun.L7.warrior_hall", "whiterun.L5.river_farms"]
+      },
+      {
+        "name": "Danica Grove-Tender",
+        "skill": "restoration",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "priest",
+        "why": ["whiterun.L8.kynareth_tree", "whiterun.L8.voice_pilgrims"]
+      }
+    ],
+    "solitude": [
+      {
+        "name": "Giraud Song-Master",
+        "skill": "speech",
+        "tier": "master",
+        "cap": 90,
+        "workplace": "bard",
+        "why": ["haafingar.L7.bards_college", "haafingar.L5.east_empire_docks"]
+      },
+      {
+        "name": "Tullia Shield-Wall",
+        "skill": "heavy_armor",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "housecarl",
+        "why": ["haafingar.L7.imperial_seat", "haafingar.L5.east_empire_docks"]
+      },
+      {
+        "name": "Aldis Legion-Blade",
+        "skill": "one_handed",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "steward",
+        "why": ["haafingar.L7.imperial_seat", "haafingar.L8.eight_divines_cathedral"]
+      },
+      {
+        "name": "Sybille Court-Seer",
+        "skill": "illusion",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "wizard",
+        "why": ["haafingar.L7.imperial_seat", "haafingar.L8.eight_divines_cathedral"]
+      },
+      {
+        "name": "Beirand Anvil-Ward",
+        "skill": "block",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "smith",
+        "why": ["haafingar.L5.east_empire_docks", "haafingar.L7.imperial_seat"]
+      }
+    ],
+    "windhelm": [
+      {
+        "name": "Grelka Scale-Binder",
+        "skill": "light_armor",
+        "tier": "master",
+        "cap": 90,
+        "workplace": "merchant",
+        "why": ["eastmarch.L7.old_nord_capital", "eastmarch.L5.harbour_and_quarries"]
+      },
+      {
+        "name": "Torsten Ice-Breaker",
+        "skill": "two_handed",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "housecarl",
+        "why": ["eastmarch.L7.old_nord_capital", "eastmarch.L8.talos_open"]
+      },
+      {
+        "name": "Wuunferth Frost-Weave",
+        "skill": "destruction",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "wizard",
+        "why": ["eastmarch.L7.gray_quarter", "eastmarch.L8.talos_open"]
+      },
+      {
+        "name": "Silda Cold-Finger",
+        "skill": "pickpocket",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "inn",
+        "why": ["eastmarch.L7.gray_quarter", "eastmarch.L5.harbour_and_quarries"]
+      },
+      {
+        "name": "Oengul Soul-Binder",
+        "skill": "smithing",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "smith",
+        "why": ["eastmarch.L5.harbour_and_quarries", "eastmarch.L7.old_nord_capital"]
+      }
+    ],
+    "riften": [
+      {
+        "name": "Delvin Shadow-Step",
+        "skill": "sneak",
+        "tier": "master",
+        "cap": 90,
+        "workplace": "inn",
+        "why": ["the_rift.L7.guild_under_the_canal", "the_rift.L5.lake_and_canal_trade"]
+      },
+      {
+        "name": "Vex Lock-Breaker",
+        "skill": "lockpicking",
+        "tier": "master",
+        "cap": 90,
+        "workplace": "inn",
+        "why": ["the_rift.L7.guild_under_the_canal", "the_rift.L5.lake_and_canal_trade"]
+      },
+      {
+        "name": "Vipir Quick-Palm",
+        "skill": "pickpocket",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "merchant",
+        "why": ["the_rift.L7.guild_under_the_canal", "the_rift.L5.mead_and_honey"]
+      },
+      {
+        "name": "Balimund Fire-Salt",
+        "skill": "smithing",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "smith",
+        "why": ["the_rift.L5.lake_and_canal_trade", "the_rift.L5.mead_and_honey"]
+      },
+      {
+        "name": "Dinya Heart-Healer",
+        "skill": "restoration",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "priest",
+        "why": ["the_rift.L8.mara_weddings", "the_rift.L7.black_briar_grip"]
+      }
+    ],
+    "markarth": [
+      {
+        "name": "Hamal Rune-Voice",
+        "skill": "enchanting",
+        "tier": "master",
+        "cap": 90,
+        "workplace": "priest",
+        "why": ["the_reach.L8.dibella_sanctum", "the_reach.L5.silver_and_smelting"]
+      },
+      {
+        "name": "Moth Gro-Forge",
+        "skill": "smithing",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "smith",
+        "why": ["the_reach.L5.silver_and_smelting", "the_reach.L7.silver_blood_rule"]
+      },
+      {
+        "name": "Ghorza Iron-Plate",
+        "skill": "heavy_armor",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "housecarl",
+        "why": ["the_reach.L7.silver_blood_rule", "the_reach.L5.silver_and_smelting"]
+      },
+      {
+        "name": "Bothela Crag-Brew",
+        "skill": "alchemy",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "alchemist",
+        "why": ["the_reach.L5.silver_and_smelting", "the_reach.L8.old_gods_of_the_crags"]
+      },
+      {
+        "name": "Agmar Stone-Shield",
+        "skill": "block",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "steward",
+        "why": ["the_reach.L7.silver_blood_rule", "the_reach.L5.stone_quarries"]
+      }
+    ],
+    "falkreath": [
+      {
+        "name": "Angi Pine-Sight",
+        "skill": "archery",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "lumberjack",
+        "why": ["falkreath.L5.hunting_and_pelts", "falkreath.L7.border_woodsmen"]
+      },
+      {
+        "name": "Nazir Shadow-Hide",
+        "skill": "light_armor",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "housecarl",
+        "why": ["falkreath.L5.hunting_and_pelts", "falkreath.L7.border_woodsmen"]
+      },
+      {
+        "name": "Runil Grave-Speaker",
+        "skill": "conjuration",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "priest",
+        "why": ["falkreath.L8.great_graveyard", "falkreath.L8.arkay_rites"]
+      },
+      {
+        "name": "Zaria Moss-Vial",
+        "skill": "alchemy",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "alchemist",
+        "why": ["falkreath.L5.forest_timber", "falkreath.L8.great_graveyard"]
+      },
+      {
+        "name": "Lod Anvil-Striker",
+        "skill": "smithing",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "smith",
+        "why": ["falkreath.L5.forest_timber", "falkreath.L7.border_woodsmen"]
+      }
+    ],
+    "morthal": [
+      {
+        "name": "Falion Bog-Binder",
+        "skill": "conjuration",
+        "tier": "master",
+        "cap": 90,
+        "workplace": "wizard",
+        "why": ["hjaalmarch.L8.seer_jarl", "hjaalmarch.L7.marsh_isolation"]
+      },
+      {
+        "name": "Lami Mire-Root",
+        "skill": "alchemy",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "alchemist",
+        "why": ["hjaalmarch.L5.swamp_reagents", "hjaalmarch.L7.marsh_isolation"]
+      },
+      {
+        "name": "Gorm Marsh-Guard",
+        "skill": "light_armor",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "housecarl",
+        "why": ["hjaalmarch.L7.marsh_isolation", "hjaalmarch.L5.swamp_timber"]
+      },
+      {
+        "name": "Virkfur Reed-Stalker",
+        "skill": "sneak",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "lumberjack",
+        "why": ["hjaalmarch.L5.swamp_reagents", "hjaalmarch.L7.marsh_isolation"]
+      },
+      {
+        "name": "Joric Vision-Walker",
+        "skill": "alteration",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "steward",
+        "why": ["hjaalmarch.L8.seer_jarl", "hjaalmarch.L5.swamp_reagents"]
+      }
+    ],
+    "dawnstar": [
+      {
+        "name": "Brina Dual-Blade",
+        "skill": "one_handed",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "housecarl",
+        "why": ["the_pale.L5.quicksilver_and_iron", "the_pale.L7.old_soldier_jarl"]
+      },
+      {
+        "name": "Rustleif Ore-Hammer",
+        "skill": "smithing",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "smith",
+        "why": ["the_pale.L5.quicksilver_and_iron", "the_pale.L5.whaling_harbour"]
+      },
+      {
+        "name": "Frida Mortar-Hand",
+        "skill": "alchemy",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "alchemist",
+        "why": ["the_pale.L5.whaling_harbour", "the_pale.L8.nightmare_shadow"]
+      },
+      {
+        "name": "Horik Iron-Mail",
+        "skill": "heavy_armor",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "steward",
+        "why": ["the_pale.L7.old_soldier_jarl", "the_pale.L5.quicksilver_and_iron"]
+      },
+      {
+        "name": "Thoring Frost-Step",
+        "skill": "sneak",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "inn",
+        "why": ["the_pale.L8.nightmare_shadow", "the_pale.L5.whaling_harbour"]
+      }
+    ],
+    "winterhold": [
+      {
+        "name": "Faralda Flame-Weave",
+        "skill": "destruction",
+        "tier": "master",
+        "cap": 90,
+        "workplace": "wizard",
+        "why": ["winterhold.L5.college_enclave", "winterhold.L7.ruined_capital"]
+      },
+      {
+        "name": "Tolfdir Ward-Shaper",
+        "skill": "alteration",
+        "tier": "master",
+        "cap": 90,
+        "workplace": "wizard",
+        "why": ["winterhold.L5.college_enclave", "winterhold.L8.mage_mistrust"]
+      },
+      {
+        "name": "Phinis Rift-Caller",
+        "skill": "conjuration",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "steward",
+        "why": ["winterhold.L5.college_enclave", "winterhold.L8.mage_mistrust"]
+      },
+      {
+        "name": "Drevis Mind-Veil",
+        "skill": "illusion",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "inn",
+        "why": ["winterhold.L5.college_enclave", "winterhold.L7.ruined_capital"]
+      },
+      {
+        "name": "Sergius Soul-Gem",
+        "skill": "enchanting",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "merchant",
+        "why": ["winterhold.L5.college_enclave", "winterhold.L7.ruined_capital"]
+      }
+    ],
+    "raven_rock": [
+      {
+        "name": "Glover Forge-Master",
+        "skill": "smithing",
+        "tier": "master",
+        "cap": 90,
+        "workplace": "smith",
+        "why": ["solstheim.L5.ebony_and_ash_yam", "solstheim.L7.redoran_outpost"]
+      },
+      {
+        "name": "Neloth Staff-Binder",
+        "skill": "enchanting",
+        "tier": "master",
+        "cap": 90,
+        "workplace": "wizard",
+        "why": ["solstheim.L7.telvanni_tower", "solstheim.L8.reclamations_temple"]
+      },
+      {
+        "name": "Milore Netch-Brew",
+        "skill": "alchemy",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "alchemist",
+        "why": ["solstheim.L5.ebony_and_ash_yam", "solstheim.L7.redoran_outpost"]
+      },
+      {
+        "name": "Adril Bonemold-Guard",
+        "skill": "light_armor",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "housecarl",
+        "why": ["solstheim.L7.redoran_outpost", "solstheim.L8.reclamations_temple"]
+      },
+      {
+        "name": "Talvas Ash-Caller",
+        "skill": "conjuration",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "priest",
+        "why": ["solstheim.L8.reclamations_temple", "solstheim.L7.telvanni_tower"]
+      }
+    ],
+    "college_of_winterhold": [
+      {
+        "name": "Colette Ward-Healer",
+        "skill": "restoration",
+        "tier": "master",
+        "cap": 90,
+        "workplace": "wizard",
+        "why": ["winterhold.L5.college_enclave", "winterhold.L8.mage_mistrust"]
+      }
+    ],
+    "riverwood": [
+      {
+        "name": "Faendal Wood-Bow",
+        "skill": "archery",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "hunter",
+        "why": ["whiterun.L5.riverwood_timber", "whiterun.L7.warrior_hall"]
+      }
+    ],
+    "rorikstead": [
+      {
+        "name": "Jouane Field-Healer",
+        "skill": "alchemy",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "alchemist",
+        "why": ["whiterun.L5.river_farms", "whiterun.L6.rorikstead"]
+      }
+    ],
+    "ivarstead": [
+      {
+        "name": "Klimmek Step-Walker",
+        "skill": "archery",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "hunter",
+        "why": ["the_rift.L5.forest_and_fish", "skyrim.L8.way_of_the_voice"]
+      }
+    ],
+    "helgen": [
+      {
+        "name": "Vilod Mead-Brewer",
+        "skill": "one_handed",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "inn",
+        "why": ["falkreath.L5.forest_timber", "falkreath.L7.border_woodsmen"]
+      }
+    ],
+    "dragon_bridge": [
+      {
+        "name": "Varnius Bridge-Ward",
+        "skill": "block",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "smith",
+        "why": ["haafingar.L5.east_empire_docks", "haafingar.L7.imperial_seat"]
+      }
+    ],
+    "karthwasten": [
+      {
+        "name": "Ainethach Silver-Vein",
+        "skill": "smithing",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "miner",
+        "why": ["the_reach.L5.silver_and_smelting", "the_reach.L7.silver_blood_rule"]
+      }
+    ],
+    "kynesgrove": [
+      {
+        "name": "Dravynea Stone-Weave",
+        "skill": "alteration",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "miner",
+        "why": ["eastmarch.L5.harbour_and_quarries", "eastmarch.L7.old_nord_capital"]
+      }
+    ],
+    "shors_stone": [
+      {
+        "name": "Filnjar Red-Forge",
+        "skill": "smithing",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "smith",
+        "why": ["the_rift.L5.lake_and_canal_trade", "the_rift.L7.black_briar_grip"]
+      }
+    ]
+  },
+  "culture_defaults": {
+    "nord": ["two_handed", "smithing", "heavy_armor", "block", "archery"],
+    "imperial": ["one_handed", "heavy_armor", "block", "speech", "restoration"],
+    "breton": ["conjuration", "alteration", "restoration", "illusion", "alchemy"],
+    "redguard": ["one_handed", "block", "light_armor", "archery", "smithing"],
+    "dunmer": ["destruction", "light_armor", "sneak", "alchemy", "enchanting"],
+    "altmer": ["destruction", "illusion", "alteration", "conjuration", "enchanting"],
+    "bosmer": ["archery", "sneak", "light_armor", "alchemy", "pickpocket"],
+    "khajiit": ["sneak", "pickpocket", "lockpicking", "one_handed", "alchemy"],
+    "argonian": ["lockpicking", "restoration", "alteration", "light_armor", "sneak"],
+    "orc": ["heavy_armor", "two_handed", "smithing", "block", "one_handed"],
+    "reachman": ["conjuration", "light_armor", "alchemy", "sneak", "one_handed"],
+    "atmoran": ["two_handed", "heavy_armor", "smithing", "archery", "block"]
+  }
+}

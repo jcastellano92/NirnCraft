@@ -50,9 +50,13 @@ public class JournalScreen extends Screen {
     private int listScroll, detailScroll, listHeight, detailHeight;
     private boolean abandonArmed;
     private final List<Row> rows = new ArrayList<>();
-    private Button trackButton, shareButton, abandonButton, partyButton, skipButton;
+    private final List<ObjRow> objRows = new ArrayList<>();
+    private Button trackButton, shareButton, abandonButton, partyButton, skipButton, mapButton;
 
     private record Row(@Nullable Quest quest, int y) {
+    }
+
+    private record ObjRow(net.minecraft.core.BlockPos pos, int y0, int y1) {
     }
 
     public JournalScreen() {
@@ -73,10 +77,12 @@ public class JournalScreen extends Screen {
         x1 = x0 + w;
         y1 = y0 + h;
         listX1 = x0 + w * 36 / 100;
-        trackButton = addRenderableWidget(Button.builder(Component.translatable("journal.skycraft.track"), b -> toggleTrack())
-                .bounds(x1 - 180, y1 - 22, 90, 16).build());
+        mapButton = addRenderableWidget(Button.builder(Component.translatable("journal.skycraft.show_on_map"),
+                b -> openMapAt(targetPosOf(selected(), null))).bounds(listX1 + 10, y1 - 22, 76, 16).build());
         shareButton = addRenderableWidget(Button.builder(Component.translatable("journal.skycraft.share"), b -> shareWithParty())
-                .bounds(x1 - 280, y1 - 22, 96, 16).build());
+                .bounds(x1 - 244, y1 - 22, 74, 16).build());
+        trackButton = addRenderableWidget(Button.builder(Component.translatable("journal.skycraft.track"), b -> toggleTrack())
+                .bounds(x1 - 166, y1 - 22, 76, 16).build());
         abandonButton = addRenderableWidget(Button.builder(Component.translatable("journal.skycraft.abandon"), b -> abandon())
                 .bounds(x1 - 86, y1 - 22, 78, 16).build());
         partyButton = addRenderableWidget(Button.builder(Component.translatable("journal.skycraft.open_party"),
@@ -148,6 +154,7 @@ public class JournalScreen extends Screen {
         trackButton.visible = show;
         abandonButton.visible = show && !q.isMain();
         shareButton.visible = show && !q.isMain() && !q.shared && ClientQuestData.inParty();
+        mapButton.visible = isQuestTab && q != null && targetPosOf(q, null) != null;
         if (show) {
             boolean tracked = q.id.equals(ClientQuestData.tracked());
             trackButton.setMessage(Component.translatable(tracked ? "journal.skycraft.untrack" : "journal.skycraft.track"));
@@ -155,6 +162,33 @@ public class JournalScreen extends Screen {
         }
         partyButton.visible = tab == PARTY;
         skipButton.visible = show && canSkip(q);
+    }
+
+    @Nullable
+    private static net.minecraft.core.BlockPos targetPosOf(@Nullable Quest q, @Nullable Objective o) {
+        if (o != null && o.hasPos) return o.pos;
+        if (q == null) return null;
+        Objective cur = q.current();
+        if (cur != null && cur.hasPos) return cur.pos;
+        if (q.extra.contains("target_place")) {
+            com.skycraft.tamriel.Place p = com.skycraft.tamriel.Places.byId(q.extra.getString("target_place")).orElse(null);
+            if (p != null) return new net.minecraft.core.BlockPos(p.x(), 72, p.z());
+        }
+        for (Objective obj : q.objectives) {
+            if (obj.hasPos) return obj.pos;
+        }
+        if (q.giverPos != null && !q.giverPos.equals(net.minecraft.core.BlockPos.ZERO)) return q.giverPos;
+        return null;
+    }
+
+    private void openMapAt(@Nullable net.minecraft.core.BlockPos pos) {
+        if (pos == null || minecraft == null) return;
+        net.minecraft.core.BlockPos prevWp = com.skycraft.world.client.MapScreen.customWaypoint;
+        com.skycraft.world.client.MapScreen map = new com.skycraft.world.client.MapScreen();
+        minecraft.setScreen(map);
+        com.skycraft.world.client.MapScreen.customWaypoint = pos;
+        map.keyPressed(GLFW.GLFW_KEY_F, 0, 0);
+        com.skycraft.world.client.MapScreen.customWaypoint = prevWp != null ? prevWp : pos;
     }
 
     private void toggleTrack() {
@@ -232,6 +266,13 @@ public class JournalScreen extends Screen {
                 if (idx >= 0 && idx < Faction.VALUES.length) {
                     selectedFaction = idx;
                     detailScroll = 0;
+                    return true;
+                }
+            }
+        } else if ((tab == MAIN || tab == SIDE || tab == MISC) && mx >= listX1 + 6 && mx < x1 - 4 && my >= top && my < y1 - 24) {
+            for (ObjRow r : objRows) {
+                if (my >= r.y0() && my < r.y1()) {
+                    openMapAt(r.pos());
                     return true;
                 }
             }
@@ -414,16 +455,22 @@ public class JournalScreen extends Screen {
 
         heading(g, Component.translatable("journal.skycraft.objectives"), x, y);
         y += 12;
+        objRows.clear();
         Objective current = q.current();
         for (Objective o : q.objectives) {
             boolean shown = o.done || o == current;
             if (!shown) continue;
+            int rowStart = y;
             boolean failed = q.status == Quest.Status.FAILED && !o.done;
             Parchment.checkbox(g, x, y, o.done, failed);
             Component text = o.text;
             if (o.required > 1 && !o.done) text = Component.translatable("journal.skycraft.objective_progress", o.text, o.progress, o.required);
             int color = o.done ? Parchment.INK_FADED : Parchment.INK;
             y = drawWrapped(g, text, x + 11, y, w - 12, color) + 3;
+            net.minecraft.core.BlockPos tPos = targetPosOf(q, o);
+            if (tPos != null) {
+                objRows.add(new ObjRow(tPos, rowStart - 1, y));
+            }
         }
         y += 6;
 

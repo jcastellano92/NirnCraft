@@ -258,6 +258,14 @@ public final class QuestSpawner {
         com.skycraft.quest.story.Bosses.apply(e, spec);
         e.getPersistentData().putString(TAG_OWNER, owner);
         e.getPersistentData().putString(TAG_QUEST, quest.id);
+        if (e instanceof Mob mob && !mob.getPersistentData().contains(com.skycraft.creatures.Leveling.LEVEL_KEY)) {
+            int playerLevel = 1;
+            net.minecraft.world.entity.player.Player near = level.getNearestPlayer(mob, 128);
+            if (near != null) playerLevel = com.skycraft.core.SkyData.get(near).getLevel();
+            int foeLevel = com.skycraft.creatures.Leveling.storyQuestLevel(
+                    playerLevel, com.skycraft.tamriel.Regions.at(level, p));
+            com.skycraft.creatures.Leveling.apply(mob, foeLevel);
+        }
         // the boss bar comes back whenever the boss is (re)loaded (see QuestEvents#onEntityJoin)
         if (isTarget && spec.getBoolean("boss")) e.addTag(BOSS_TAG);
         if (!level.addFreshEntity(e)) return null;

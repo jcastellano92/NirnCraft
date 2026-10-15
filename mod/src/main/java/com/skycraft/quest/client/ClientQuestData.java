@@ -96,6 +96,7 @@ public final class ClientQuestData {
         pendingPrompt = null;
         CompassMarkers.clear("quest");
         CompassMarkers.clear("party");
+        CompassMarkers.clear("quest_givers");
     }
 
     // ------------------------------------------------------------------ quests
@@ -141,6 +142,101 @@ public final class ClientQuestData {
         }
         others.addAll(tracked); // tracked last so it's drawn on top
         CompassMarkers.set("quest", others);
+    }
+
+    /** Undiscovered Places within 150 blocks appear as hollow/silhouette icons (MS13, R3d-2.2). */
+    public static final int UNDISCOVERED_PLACE_RANGE = 150;
+    public static final int QUEST_GIVER_COLOR = 0xC8B478;
+
+    /**
+     * Refreshes the {@code "locations"} compass layer so undiscovered {@link com.skycraft.tamriel.Place}s within
+     * {@value #UNDISCOVERED_PLACE_RANGE} blocks appear as silhouette icons ({@link CompassMarkers.Shape#LOCATION})
+     * and discovered places appear as solid icons ({@link CompassMarkers.Shape#DISCOVERED}).
+     */
+    public static void refreshLocationSilhouettes() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.level == null) return;
+        net.minecraft.nbt.ListTag list = SkyData.get(mc.player).module(com.skycraft.world.WorldData.MODULE)
+                .getList("discovered", Tag.TAG_COMPOUND);
+        String dim = mc.level.dimension().location().toString();
+        double range = com.skycraft.world.WorldConfig.COMPASS_RANGE.get();
+        net.minecraft.core.BlockPos p = mc.player.blockPosition();
+        List<CompassMarkers.Marker> markers = new ArrayList<>();
+        java.util.Set<String> listed = new java.util.HashSet<>();
+        for (int i = 0; i < list.size(); i++) {
+            CompoundTag loc = list.getCompound(i);
+            if (!loc.getString("dim").equals(dim)) continue;
+            if (!loc.getString("place").isEmpty()) listed.add(loc.getString("place"));
+            double dx = loc.getInt("x") - p.getX();
+            double dz = loc.getInt("z") - p.getZ();
+            if (dx * dx + dz * dz > range * range) continue;
+            com.skycraft.world.LocationKind kind = com.skycraft.world.LocationKind.byId(loc.getString("type"));
+            boolean knownOnly = loc.getBoolean("known");
+            markers.add(new CompassMarkers.Marker(
+                    new Vec3(loc.getInt("x") + 0.5, loc.getInt("y"), loc.getInt("z") + 0.5),
+                    knownOnly ? CompassMarkers.Shape.LOCATION : CompassMarkers.Shape.DISCOVERED,
+                    kind.color, com.skycraft.world.WorldData.displayName(loc).getString(), range, kind.icon));
+        }
+        if (mc.level.dimension() == net.minecraft.world.level.Level.OVERWORLD) {
+            int reach = UNDISCOVERED_PLACE_RANGE + 192;
+            for (com.skycraft.tamriel.Place place : com.skycraft.tamriel.Places.overlapping(
+                    p.getX() - reach, p.getZ() - reach, p.getX() + reach, p.getZ() + reach)) {
+                if (listed.contains(place.id())) continue;
+                double r = UNDISCOVERED_PLACE_RANGE + Math.min(128, place.radius());
+                if (place.distSqr(p.getX(), p.getZ()) > r * r) continue;
+                com.skycraft.world.LocationKind kind = com.skycraft.world.LocationKind.forPlace(place);
+                markers.add(new CompassMarkers.Marker(
+                        new Vec3(place.x() + 0.5, p.getY(), place.z() + 0.5),
+                        CompassMarkers.Shape.LOCATION, kind.color, place.name().getString(), r, kind.icon));
+            }
+        }
+        CompassMarkers.set("locations", markers);
+    }
+
+    /**
+     * When inside a settlement radius, shows subtle compass markers ({@code "quest_givers"}) for nearby quest-giving
+     * NPCs and the settlement notice board (MS13, R3d-2.2).
+     */
+    public static void refreshSettlementQuestGivers() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.level == null || mc.level.dimension() != net.minecraft.world.level.Level.OVERWORLD) {
+            CompassMarkers.clear("quest_givers");
+            return;
+        }
+        net.minecraft.core.BlockPos p = mc.player.blockPosition();
+        com.skycraft.tamriel.Place inSettlement = null;
+        for (com.skycraft.tamriel.Place place : com.skycraft.tamriel.Places.overlapping(
+                p.getX() - 220, p.getZ() - 220, p.getX() + 220, p.getZ() + 220)) {
+            if (!com.skycraft.quest.NoticeBoards.hasNoticeBoard(place)
+                    && place.type() != com.skycraft.tamriel.PlaceType.VILLAGE) continue;
+            int r = Math.max(48, place.radius() + 16);
+            if (place.distSqr(p.getX(), p.getZ()) <= (long) r * r) {
+                inSettlement = place;
+                break;
+            }
+        }
+        if (inSettlement == null) {
+            CompassMarkers.clear("quest_givers");
+            return;
+        }
+        List<CompassMarkers.Marker> out = new ArrayList<>();
+        // Nearby quest-giving NPCs (innkeepers, guards, townsfolk) within 48 blocks
+        for (net.minecraft.world.entity.LivingEntity npc : mc.level.getEntitiesOfClass(
+                net.minecraft.world.entity.LivingEntity.class, mc.player.getBoundingBox().inflate(48, 16, 48))) {
+            if (!npc.isAlive()) continue;
+            if (com.skycraft.quest.QuestDialogue.isInnkeeper(npc) || com.skycraft.quest.QuestDialogue.isGuard(npc)) {
+                out.add(new CompassMarkers.Marker(npc.position(), CompassMarkers.Shape.LOCATION,
+                        QUEST_GIVER_COLOR, npc.getDisplayName().getString(), 48));
+            }
+        }
+        // Notice board marker in the settlement center if hasNoticeBoard
+        if (com.skycraft.quest.NoticeBoards.hasNoticeBoard(inSettlement)) {
+            String boardLabel = net.minecraft.network.chat.Component.translatable("settlement.skycraft.notice.title").getString();
+            out.add(new CompassMarkers.Marker(
+                    new Vec3(inSettlement.x() + 0.5, p.getY(), inSettlement.z() + 0.5),
+                    CompassMarkers.Shape.LOCATION, QUEST_GIVER_COLOR, boardLabel, 96));
+        }
+        CompassMarkers.set("quest_givers", out);
     }
 
     // ------------------------------------------------------------------ party

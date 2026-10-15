@@ -94,6 +94,14 @@ public final class QuestDialogue {
         return e instanceof com.skycraft.society.entity.NpcEntity n && n.isAlive() && n.role().townsfolk() && !n.isChild();
     }
 
+    /** Innkeepers and tavern keepers in settlements and roadside inns. */
+    public static boolean isInnkeeper(LivingEntity e) {
+        if (e instanceof com.skycraft.society.entity.NpcEntity n && n.isAlive() && !n.isChild()) {
+            return n.role() == com.skycraft.society.NpcRole.INNKEEPER || n.role() == com.skycraft.society.NpcRole.BARD;
+        }
+        return isProfession(e, VillagerProfession.BUTCHER);
+    }
+
     public static boolean matchesNpc(Objective o, LivingEntity npc) {
         if (o.npc != null) return o.npc.equals(npc.getUUID());
         // a named story NPC ("hadvar|ralof"): whichever entity is that NPC right now
@@ -167,6 +175,7 @@ public final class QuestDialogue {
             darkBrotherhoodTopics(player, data, out);
         }
         SideQuests.addSideQuestTopics(player, npc, out);
+        NoticeBoards.addDialogueOptions(player, npc, out);
         com.skycraft.quest.story.StoryDialogue.addOptions(player, npc, out);
         com.skycraft.quest.story.ProvinceRadiant.addOptions(player, npc, out, guard);
     }

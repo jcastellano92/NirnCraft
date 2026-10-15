@@ -63,6 +63,7 @@ public class TamrielBiomeSource extends BiomeSource {
         final MapSample sample = new MapSample();
         Palette palette;
         String regionId;
+        Palettes.MicroRule micro;
         double noise;
         int jitter;
         /**
@@ -130,6 +131,9 @@ public class TamrielBiomeSource extends BiomeSource {
             col.palette = palettes.of(region);
             col.regionId = region.id();
         }
+        col.micro = col.sample.coastDistance >= 0f && !col.sample.inWater()
+                ? col.palette.pickMicro(qx, qz, col.sample)
+                : null;
         col.noise = BiomeNoise.fbm2(x / 320.0, z / 320.0, 303);
         col.jitter = (int) Math.round(BiomeNoise.value2(x / 48.0, z / 48.0, 404) * 10 + ((h >> 8) & 7) - 3.5);
         col.qx = qx;
@@ -168,6 +172,11 @@ public class TamrielBiomeSource extends BiomeSource {
     }
 
     private Holder<Biome> pick(Column col, Palette palette, Context ctx, int qx, int qy, int qz, Climate.TargetPoint tp) {
+        if (ctx == Context.LOWLAND || ctx == Context.UPLAND || ctx == Context.PEAK || ctx == Context.SUMMIT || ctx == Context.MARSH) {
+            Palettes.MicroRule m = palette == col.palette ? col.micro
+                    : (col.sample.coastDistance >= 0f && !col.sample.inWater() ? palette.pickMicro(qx, qz, col.sample) : null);
+            if (m != null && m.biome != null) return m.biome;
+        }
         double v;
         if (ctx == Context.CAVE || ctx == Context.DEEP_CAVE) {
             v = BiomeNoise.cdf(BiomeNoise.value3(qx / 24.0, qy / 12.0, qz / 24.0, 505) / 0.33);
@@ -189,6 +198,9 @@ public class TamrielBiomeSource extends BiomeSource {
     }
 
     private Holder<Biome> surfaceBiome(Column col, Palette p, Climate.TargetPoint tp) {
+        Palettes.MicroRule m = p == col.palette ? col.micro
+                : (col.sample.coastDistance >= 0f && !col.sample.inWater() ? p.pickMicro(col.qx, col.qz, col.sample) : null);
+        if (m != null && m.biome != null) return m.biome;
         float e = col.sample.elevation;
         Context ctx = e >= p.peakY ? Context.PEAK : e >= p.uplandY ? Context.UPLAND : Context.LOWLAND;
         Holder<Biome> b = p.get(ctx).pick(p.bias(climate(col, tp), col.qx << 2, col.qz << 2));
@@ -202,6 +214,23 @@ public class TamrielBiomeSource extends BiomeSource {
     }
 
     // ------------------------------------------------------------------------------------------ debugging
+    /**
+     * The winning micro-biome id at block {@code (x, z)} (e.g. {@code "whiterun/tundra_plain"}), or {@code ""}
+     * when the column is in water or the region's palette defines no micro-biome rules.
+     */
+    public String microAt(int x, int z) {
+        if (grid) return "";
+        Column col = column(x >> 2, z >> 2);
+        return formatMicro(col.regionId, col.micro);
+    }
+
+    private static String formatMicro(String regionId, Palettes.MicroRule micro) {
+        if (micro == null) return "";
+        int slash = regionId.indexOf('/');
+        String hold = slash >= 0 ? regionId.substring(slash + 1) : regionId;
+        return hold + "/" + micro.id;
+    }
+
     /** What the source picks at a block position, for /skybiome and the F3 screen. */
     public String describe(int x, int y, int z, Climate.Sampler sampler) {
         int qx = x >> 2, qy = y >> 2, qz = z >> 2;
@@ -210,9 +239,11 @@ public class TamrielBiomeSource extends BiomeSource {
         Climate.TargetPoint tp = sampler.sample(qx, qy, qz);
         Context ctx = context(col, col.palette, qy << 2, tp);
         MapSample s = col.sample;
+        String microId = formatMicro(col.regionId, col.micro);
         return String.format(java.util.Locale.ROOT,
-                "region %s, palette %s, context %s -> %s | map elev %.0f river %.2f lake %.2f ridge %.2f coast %.0f | depth %.2f cont %.2f",
-                col.regionId, col.palette.key, ctx.key, key(pick(col, col.palette, ctx, qx, qy, qz, tp)), s.elevation, s.river,
+                "region %s, palette %s, micro %s, context %s -> %s | map elev %.0f slope %.2f rs %.2f heat %.2f river %.2f lake %.2f ridge %.2f coast %.0f | depth %.2f cont %.2f",
+                col.regionId, col.palette.key, microId.isEmpty() ? "-" : microId, ctx.key,
+                key(pick(col, col.palette, ctx, qx, qy, qz, tp)), s.elevation, s.slope, s.rainshadow, s.heat, s.river,
                 s.lake, s.ridge, s.coastDistance, Climate.unquantizeCoord(tp.depth()),
                 Climate.unquantizeCoord(tp.continentalness()));
     }
@@ -225,7 +256,10 @@ public class TamrielBiomeSource extends BiomeSource {
     public void addDebugInfo(List<String> info, BlockPos pos, Climate.Sampler sampler) {
         Column col = column(pos.getX() >> 2, pos.getZ() >> 2);
         Climate.TargetPoint tp = sampler.sample(pos.getX() >> 2, pos.getY() >> 2, pos.getZ() >> 2);
-        info.add("Tamriel: " + col.regionId + " [" + col.palette.key + "] " + context(col, col.palette, pos.getY() & ~3, tp).key);
+        String microId = formatMicro(col.regionId, col.micro);
+        info.add("Tamriel: " + col.regionId + " [" + col.palette.key + "]"
+                + (microId.isEmpty() ? "" : " (" + microId + ")")
+                + " " + context(col, col.palette, pos.getY() & ~3, tp).key);
     }
 
     /**

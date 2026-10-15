@@ -139,6 +139,24 @@ public final class QuestCommands {
                             c.getSource().sendSuccess(() -> Component.literal("Reset quests of " + p.getGameProfile().getName()), true);
                             return 1;
                         })))));
+        d.register(Commands.literal("skycraft-board")
+                .executes(c -> boardList(c, null))
+                .then(Commands.literal("list")
+                        .executes(c -> boardList(c, null))
+                        .then(Commands.argument("settlement", StringArgumentType.word())
+                                .suggests(QuestCommands::suggestBoardSettlements)
+                                .executes(c -> boardList(c, StringArgumentType.getString(c, "settlement")))))
+                .then(Commands.literal("accept")
+                        .then(Commands.argument("index", IntegerArgumentType.integer(0, 6))
+                                .executes(c -> boardAccept(c, null, IntegerArgumentType.getInteger(c, "index"))))
+                        .then(Commands.argument("settlement", StringArgumentType.word())
+                                .suggests(QuestCommands::suggestBoardSettlements)
+                                .then(Commands.argument("index", IntegerArgumentType.integer(0, 6))
+                                        .executes(c -> boardAccept(c, StringArgumentType.getString(c, "settlement"),
+                                                IntegerArgumentType.getInteger(c, "index"))))))
+                .then(Commands.literal("selftest").requires(s -> s.hasPermission(2))
+                        .executes(QuestCommands::boardSelftest)));
+
         com.skycraft.quest.story.StoryCommands.register(d);
     }
 
@@ -258,5 +276,50 @@ public final class QuestCommands {
             }
         }
         return best;
+    }
+
+    // ------------------------------------------------------------------ notice boards (/skycraft-board)
+
+    private static CompletableFuture<Suggestions> suggestBoardSettlements(CommandContext<CommandSourceStack> c, SuggestionsBuilder b) {
+        List<String> ids = new ArrayList<>();
+        for (com.skycraft.tamriel.Place p : com.skycraft.tamriel.Places.all()) {
+            if (NoticeBoards.hasNoticeBoard(p)) ids.add(p.id());
+        }
+        return SharedSuggestionProvider.suggest(ids, b);
+    }
+
+    @Nullable
+    private static com.skycraft.tamriel.Place resolveBoardSettlement(ServerPlayer p, @Nullable String id) {
+        if (id != null && !id.isEmpty()) {
+            return com.skycraft.tamriel.Places.byId(id).filter(NoticeBoards::hasNoticeBoard).orElse(null);
+        }
+        return NoticeBoards.nearestBoardSettlement(p.level(), p.blockPosition(), 2500).orElse(null);
+    }
+
+    private static int boardList(CommandContext<CommandSourceStack> c, @Nullable String settlementId) throws CommandSyntaxException {
+        ServerPlayer p = player(c);
+        com.skycraft.tamriel.Place settlement = resolveBoardSettlement(p, settlementId);
+        if (settlement == null) return fail(c, "quest.skycraft.board.none_nearby");
+        return NoticeBoards.showBoard(p, settlement);
+    }
+
+    private static int boardAccept(CommandContext<CommandSourceStack> c, @Nullable String settlementId, int index) throws CommandSyntaxException {
+        ServerPlayer p = player(c);
+        com.skycraft.tamriel.Place settlement = resolveBoardSettlement(p, settlementId);
+        if (settlement == null) return fail(c, "quest.skycraft.board.none_nearby");
+        return ok(NoticeBoards.accept(p, settlement, index));
+    }
+
+    private static int boardSelftest(CommandContext<CommandSourceStack> c) {
+        List<String> problems = new ArrayList<>(NoticeBoards.selftest(c.getSource().getServer()));
+        for (String sp : com.skycraft.roads.Signposts.selftest()) {
+            problems.add("signpost " + sp);
+        }
+        c.getSource().sendSuccess(() -> Component.literal("NoticeBoard & Signpost selftest: " + problems.size() + " problems")
+                .withStyle(problems.isEmpty() ? ChatFormatting.GREEN : ChatFormatting.RED), false);
+        for (String p : problems) {
+            c.getSource().sendSuccess(() -> Component.literal(" - " + p).withStyle(ChatFormatting.RED), false);
+        }
+        return problems.isEmpty() ? 1 : 0;
     }
 }

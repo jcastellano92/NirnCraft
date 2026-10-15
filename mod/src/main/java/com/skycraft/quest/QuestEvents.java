@@ -237,6 +237,7 @@ public final class QuestEvents {
             Factions.tickWhisper(player);
             CivilWar.dressGuards(player);
             com.skycraft.quest.story.ProvinceRadiant.tickPlayer(player);
+            com.skycraft.roads.Signposts.refreshNearbyRoadSigns(player);
         }
     }
 
@@ -506,6 +507,24 @@ public final class QuestEvents {
         Parties.reset();
         Quests.reset();
         QuestDialogue.reset();
+    }
+
+    @SubscribeEvent
+    public static void onRightClickBlock(net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock event) {
+        if (event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND) return;
+        if (!(event.getLevel() instanceof ServerLevel level) || !(event.getEntity() instanceof ServerPlayer player)) return;
+        if (player.isShiftKeyDown()) return;
+        net.minecraft.core.BlockPos pos = event.getPos();
+        if (!(level.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.SignBlockEntity sign)) return;
+        if (NoticeBoards.isNoticeBoardSign(level, pos, sign)) {
+            NoticeBoards.nearestBoardSettlement(level, pos, 2500).ifPresent(settlement -> NoticeBoards.showBoard(player, settlement));
+            event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
+            event.setCanceled(true);
+        } else if (com.skycraft.roads.Signposts.isDirectionalSign(level, pos, sign)) {
+            com.skycraft.roads.Signposts.onUseSign(player, pos, sign);
+            event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
+            event.setCanceled(true);
+        }
     }
 
     @SubscribeEvent

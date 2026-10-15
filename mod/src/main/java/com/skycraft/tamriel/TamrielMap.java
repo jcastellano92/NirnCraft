@@ -38,6 +38,10 @@ public final class TamrielMap {
         out.peak = 0f;
         out.calm = 0f;
         out.slope = 0f;
+        out.rainshadow = 0f;
+        out.heat = 0f;
+        out.aspectX = 0f;
+        out.aspectZ = 0f;
         if (MapRaster.covers(x, z)) {
             MapRaster.get().sample(x, z, out);
             if (Beyond.nearForeign(x, z)) Beyond.mergeForeign(x, z, out);

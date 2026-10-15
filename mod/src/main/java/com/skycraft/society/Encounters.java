@@ -282,6 +282,9 @@ public final class Encounters {
         }
         NEXT.put(id, SocietyConfig.between(SocietyConfig.ENCOUNTER_MIN_SECONDS.get(), SocietyConfig.ENCOUNTER_MAX_SECONDS.get(), random));
         try {
+            if (random.nextInt(3) == 0 && wilderness(player)) {
+                if (com.skycraft.creatures.spawn.WildScenes.rollNearPlayer(player, null) != null) return;
+            }
             trySpawn(player, null);
         } catch (RuntimeException e) {
             Skycraft.LOGGER.warn("Skycraft society: encounter failed", e);
@@ -357,38 +360,42 @@ public final class Encounters {
         ServerLevel level = player.serverLevel();
         BlockPos pos = player.blockPosition();
         Holder<Biome> biome = level.getBiome(pos);
-        boolean forest = biome.is(BiomeTags.IS_FOREST) || biome.is(BiomeTags.IS_TAIGA);
-        boolean mountain = biome.is(BiomeTags.IS_MOUNTAIN) || biome.is(BiomeTags.IS_HILL);
-        boolean snowy = biome.value().coldEnoughToSnow(pos);
+        String hold = com.skycraft.tamriel.Regions.at(level, pos).shortId();
+        boolean forest = biome.is(BiomeTags.IS_FOREST) || biome.is(BiomeTags.IS_TAIGA)
+                || "falkreath".equals(hold) || "the_rift".equals(hold);
+        boolean mountain = biome.is(BiomeTags.IS_MOUNTAIN) || biome.is(BiomeTags.IS_HILL)
+                || "the_reach".equals(hold);
+        boolean snowy = biome.value().coldEnoughToSnow(pos)
+                || "winterhold".equals(hold) || "the_pale".equals(hold) || "eastmarch".equals(hold);
         boolean night = Npcs.isNight(level);
         int lvl = SkyData.get(player).getLevel();
         long lastLetter = Cosmetics.persistedTag(player).getLong("skycraft_letter_time");
 
         Map<Kind, Integer> w = new EnumMap<>(Kind.class);
         w.put(Kind.HUNTER, forest ? 10 : 5);
-        w.put(Kind.BARD, night ? 2 : 6);
+        w.put(Kind.BARD, night ? 2 : ("haafingar".equals(hold) ? 9 : 6));
         // two hold guards chasing a thief across open country would be guards in the wilderness (owner, playtest 5):
         // the scene stays available when forced (the intro, /skycraft-dev), it is not rolled on the road
         w.put(Kind.THIEF, 0);
-        w.put(Kind.IMPERIAL_ESCORT, 5);
-        w.put(Kind.STORMCLOAK_ESCORT, snowy ? 6 : 3);
-        w.put(Kind.THALMOR_ESCORT, 3);
-        w.put(Kind.MAGE_VS_NECROMANCER, lvl >= 3 ? (night ? 5 : 3) : 0);
+        w.put(Kind.IMPERIAL_ESCORT, ("haafingar".equals(hold) || "falkreath".equals(hold) || "the_reach".equals(hold)) ? 8 : 5);
+        w.put(Kind.STORMCLOAK_ESCORT, ("eastmarch".equals(hold) || "the_pale".equals(hold) || "winterhold".equals(hold)) ? 8 : (snowy ? 6 : 3));
+        w.put(Kind.THALMOR_ESCORT, ("haafingar".equals(hold) || "the_reach".equals(hold)) ? 6 : 3);
+        w.put(Kind.MAGE_VS_NECROMANCER, lvl >= 3 ? ("winterhold".equals(hold) || "falkreath".equals(hold) ? 7 : (night ? 5 : 3)) : 0);
         w.put(Kind.ADVENTURERS_VS_BANDITS, 5);
-        w.put(Kind.GIANT_VS_HUNTER, lvl >= 5 ? (mountain ? 4 : 2) : 0);
+        w.put(Kind.GIANT_VS_HUNTER, lvl >= 5 ? (("whiterun".equals(hold) || "eastmarch".equals(hold) || "the_pale".equals(hold)) ? 6 : (mountain ? 4 : 2)) : 0);
         w.put(Kind.WOLF_PACK, forest || snowy ? 6 : 3);
-        w.put(Kind.VAMPIRES, night ? 7 : 0);
+        w.put(Kind.VAMPIRES, night ? (("hjaalmarch".equals(hold) || "haafingar".equals(hold)) ? 10 : 7) : 0);
         w.put(Kind.COURIER, level.getGameTime() - lastLetter > 36000 || lastLetter == 0 ? (night ? 1 : 4) : 0);
         w.put(Kind.BEGGAR, night ? 1 : 3);
         w.put(Kind.STRANDED_MERCHANT, night ? 1 : 4);
         w.put(Kind.DRAGON, lvl >= 10 ? 1 : 0);
-        w.put(Kind.FORSWORN_AMBUSH, mountain ? 6 : 2);
+        w.put(Kind.FORSWORN_AMBUSH, "the_reach".equals(hold) ? 10 : (mountain ? 4 : 1));
         w.put(Kind.ADVENTURER, 4);
-        w.put(Kind.THALMOR_PATROL, 2);
+        w.put(Kind.THALMOR_PATROL, ("haafingar".equals(hold) || "the_reach".equals(hold)) ? 5 : 2);
         w.put(Kind.SKIRMISH, snowy ? 4 : 3);
-        w.put(Kind.OLD_ORC, mountain || snowy ? 5 : 2);
+        w.put(Kind.OLD_ORC, ("the_rift".equals(hold) || "the_reach".equals(hold) || "eastmarch".equals(hold)) ? 7 : (mountain || snowy ? 5 : 2));
         w.put(Kind.FUGITIVE_AND_HUNTER, 4);
-        w.put(Kind.REVELERS, night ? 2 : 5);
+        w.put(Kind.REVELERS, night ? 2 : ("whiterun".equals(hold) || "the_rift".equals(hold) ? 7 : 5));
         w.put(Kind.BANDIT_AMBUSH, lvl >= 2 ? 2 : 0);
 
         int total = 0;

@@ -100,7 +100,14 @@ final class SocietyCommands {
                     });
                     src.sendSuccess(() -> Component.literal(started ? "Society selftest started (about a minute)" : "Society selftest already running"), false);
                     return started ? 1 : 0;
-                }))
+                }).then(Commands.literal("trainer").executes(c -> {
+                    CommandSourceStack src = c.getSource();
+                    SocietySelfTest.Report r = SocietySelfTest.runTrainerSelfTest(src.getServer());
+                    for (String l : r.lines()) src.sendSuccess(() -> Component.literal(l), false);
+                    src.sendSuccess(() -> Component.literal(r.summary()), false);
+                    com.skycraft.Skycraft.LOGGER.info("{}", r.summary());
+                    return r.problems() == 0 ? 1 : 0;
+                })))
                 .then(Commands.literal("populate")
                         .then(Commands.argument("size", StringArgumentType.word())
                                 .suggests((c, b) -> SharedSuggestionProvider.suggest(List.of("farm", "village", "town", "city"), b))

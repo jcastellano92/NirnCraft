@@ -533,7 +533,7 @@ final class NpcGoals {
                 case LUMBERJACK -> (spot = findBlock(false)) != null;
                 case FARMER -> (spot = findCrop()) != null;
                 case BLACKSMITH, BUTCHER, INNKEEPER -> (spot = work != null ? work : npc.blockPosition()) != null;
-                case MERCHANT, APOTHECARY, SCHOLAR, MAGE, STEWARD, JARL -> (spot = work != null ? work : npc.blockPosition()) != null;
+                case MERCHANT, APOTHECARY, SCHOLAR, MAGE, STEWARD, JARL, TRAINER -> (spot = work != null ? work : npc.blockPosition()) != null;
                 case FISHER -> (spot = findWater()) != null;
                 case BARD -> audience() && npc.getRandom().nextInt(3) == 0;
                 case PRIEST -> (patient = findPatient()) != null;
@@ -555,7 +555,7 @@ final class NpcGoals {
         public void start() {
             switch (npc.role()) {
                 case MINER, LUMBERJACK, FARMER, BLACKSMITH, BUTCHER -> ticks = 120 + npc.getRandom().nextInt(80);
-                case MERCHANT, APOTHECARY, SCHOLAR, MAGE, STEWARD, JARL, INNKEEPER -> ticks = 200 + npc.getRandom().nextInt(200);
+                case MERCHANT, APOTHECARY, SCHOLAR, MAGE, STEWARD, JARL, INNKEEPER, TRAINER -> ticks = 200 + npc.getRandom().nextInt(200);
                 case FISHER -> ticks = 300 + npc.getRandom().nextInt(200);
                 case BARD -> {
                     ticks = 200;
@@ -586,7 +586,7 @@ final class NpcGoals {
                 case MINER, LUMBERJACK, FARMER -> labor(level);
                 case BLACKSMITH -> smith(level);
                 case BUTCHER, INNKEEPER -> chores(level);
-                case MERCHANT, APOTHECARY, SCHOLAR, MAGE, STEWARD, JARL -> attend(level);
+                case MERCHANT, APOTHECARY, SCHOLAR, MAGE, STEWARD, JARL, TRAINER -> attend(level);
                 case FISHER -> fish(level);
                 case BARD -> play(level);
                 case PRIEST -> heal(level);
@@ -962,7 +962,7 @@ final class NpcGoals {
 
     static boolean stationRole(NpcRole role) {
         return switch (role) {
-            case MERCHANT, APOTHECARY, INNKEEPER, JARL, STEWARD, MAGE, SCHOLAR, BUTCHER -> true;
+            case MERCHANT, APOTHECARY, INNKEEPER, JARL, STEWARD, MAGE, SCHOLAR, BUTCHER, TRAINER -> true;
             default -> false;
         };
     }

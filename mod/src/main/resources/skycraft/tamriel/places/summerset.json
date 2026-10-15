@@ -441,7 +441,8 @@
   "x": -9450,
   "z": 10650,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "hightide_keep",
@@ -452,7 +453,8 @@
   "x": -9379,
   "z": 12211,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "cey_tarn_keep",
@@ -463,7 +465,8 @@
   "x": -11201,
   "z": 13678,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "keep_of_the_eleven_forces",
@@ -474,7 +477,8 @@
   "x": -11450,
   "z": 14200,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "sea_keep",
@@ -485,7 +489,8 @@
   "x": -13500,
   "z": 12850,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "marnor_keep",
@@ -496,7 +501,8 @@
   "x": -13000,
   "z": 13900,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "the_veiled_keep",
@@ -507,7 +513,8 @@
   "x": -9294,
   "z": 11633,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "nine_prow_landing",
@@ -1013,7 +1020,8 @@
   "x": -9500,
   "z": 10500,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "north_beacon",
@@ -1024,7 +1032,8 @@
   "x": -9200,
   "z": 10750,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "saltspray_cave",
@@ -1035,7 +1044,8 @@
   "x": -9950,
   "z": 10550,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "heritance_proving_ground",
@@ -1046,7 +1056,8 @@
   "x": -9800,
   "z": 10500,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "mehrunes_spite",
@@ -1057,7 +1068,8 @@
   "x": -9750,
   "z": 10950,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "torinaan",
@@ -1068,7 +1080,8 @@
   "x": -9450,
   "z": 11250,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "nestmothers_den",
@@ -1079,7 +1092,8 @@
   "x": -9346,
   "z": 11442,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "quendeluun",
@@ -1090,7 +1104,8 @@
   "x": -9750,
   "z": 11250,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "wansalen",
@@ -1101,7 +1116,8 @@
   "x": -9950,
   "z": 11350,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "bewan",
@@ -1112,7 +1128,8 @@
   "x": -10142,
   "z": 11514,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "dragonguard_tomb",
@@ -1123,7 +1140,8 @@
   "x": -9950,
   "z": 11650,
   "radius": 24,
-  "variant": "akaviri_ruin"
+  "variant": "akaviri_ruin",
+  "class": "major"
  },
  {
   "id": "ezduiin",
@@ -1134,7 +1152,8 @@
   "x": -9700,
   "z": 11550,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "heretics_summons",
@@ -1145,7 +1164,8 @@
   "x": -9412,
   "z": 11615,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "marquee"
  },
  {
   "id": "smugglers_cove",
@@ -1156,7 +1176,8 @@
   "x": -10200,
   "z": 11900,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "wreck_of_the_raptor",
@@ -1167,7 +1188,8 @@
   "x": -10150,
   "z": 12100,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "entilas_folly",
@@ -1178,7 +1200,8 @@
   "x": -9600,
   "z": 12250,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "glister_vale",
@@ -1189,7 +1212,8 @@
   "x": -10050,
   "z": 12350,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "ondil",
@@ -1200,7 +1224,8 @@
   "x": -9700,
   "z": 12450,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "phaer_catacombs",
@@ -1211,7 +1236,8 @@
   "x": -9950,
   "z": 12500,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "toothmaul_gully",
@@ -1222,7 +1248,8 @@
   "x": -10050,
   "z": 12600,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "tanzelwil",
@@ -1233,7 +1260,8 @@
   "x": -10000,
   "z": 12800,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "seaside_scarp_camp",
@@ -1244,7 +1272,8 @@
   "x": -10070,
   "z": 12888,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "dels_claim",
@@ -1255,7 +1284,8 @@
   "x": -9815,
   "z": 12906,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "south_beacon",
@@ -1266,7 +1296,8 @@
   "x": -10000,
   "z": 13100,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "maormer_invasion_camp",
@@ -1277,7 +1308,8 @@
   "x": -9950,
   "z": 13204,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "ceporah_tower",
@@ -1288,7 +1320,8 @@
   "x": -11497,
   "z": 11015,
   "radius": 10,
-  "variant": "mage_tower"
+  "variant": "mage_tower",
+  "class": "short"
  },
  {
   "id": "dreaming_cave",
@@ -1299,7 +1332,8 @@
   "x": -11555,
   "z": 10948,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "traitors_vault",
@@ -1310,7 +1344,8 @@
   "x": -11700,
   "z": 11050,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "psijic_relic_vaults",
@@ -1321,7 +1356,8 @@
   "x": -11486,
   "z": 11243,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "marquee"
  },
  {
   "id": "welenkin_cove",
@@ -1332,7 +1368,8 @@
   "x": -11500,
   "z": 13300,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "karndar_watch",
@@ -1343,7 +1380,8 @@
   "x": -11700,
   "z": 13450,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "eldbur_ruins",
@@ -1354,7 +1392,8 @@
   "x": -11850,
   "z": 13850,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "archons_grove",
@@ -1365,7 +1404,8 @@
   "x": -11500,
   "z": 13950,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "tor_hame_khard",
@@ -1376,7 +1416,8 @@
   "x": -11650,
   "z": 14100,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "dusk_keep",
@@ -1387,7 +1428,8 @@
   "x": -11559,
   "z": 14333,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "red_temple_catacombs",
@@ -1398,7 +1440,8 @@
   "x": -11950,
   "z": 13250,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "rellenthil_sinkhole",
@@ -1409,7 +1452,8 @@
   "x": -12450,
   "z": 13350,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "ald_mora_ruins",
@@ -1420,7 +1464,8 @@
   "x": -12450,
   "z": 12850,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "eton_nir_grotto",
@@ -1431,7 +1476,8 @@
   "x": -12300,
   "z": 12650,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "karnwasten",
@@ -1442,7 +1488,8 @@
   "x": -12067,
   "z": 12077,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "cathedral_of_webs",
@@ -1453,7 +1500,8 @@
   "x": -13350,
   "z": 12250,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "the_queens_hatchery",
@@ -1464,7 +1512,8 @@
   "x": -13500,
   "z": 12400,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "keelsplitters_nest",
@@ -1475,7 +1524,8 @@
   "x": -13250,
   "z": 12850,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "saltbreeze_cave",
@@ -1486,7 +1536,8 @@
   "x": -13600,
   "z": 13050,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "wasten_coraldale",
@@ -1497,7 +1548,8 @@
   "x": -14302,
   "z": 13664,
   "radius": 24,
-  "variant": "coral_pit"
+  "variant": "coral_pit",
+  "class": "major"
  },
  {
   "id": "coral_aerie",
@@ -1508,7 +1560,8 @@
   "x": -12900,
   "z": 10900,
   "radius": 24,
-  "variant": "sea_vault"
+  "variant": "sea_vault",
+  "class": "major"
  },
  {
   "id": "gravelds_hideaway",
@@ -1519,7 +1572,8 @@
   "x": -11400,
   "z": 13950,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "alaxonald",
@@ -1530,7 +1584,8 @@
   "x": -12400,
   "z": 14100,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "marquee"
  },
  {
   "id": "the_vaults_of_heinarwe",
@@ -1541,7 +1596,8 @@
   "x": -13300,
   "z": 13500,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "colossal_aldmeri_grotto",
@@ -1552,7 +1608,8 @@
   "x": -11076,
   "z": 13297,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "queiisen_vineyard",
@@ -1593,7 +1650,8 @@
   "x": -13142,
   "z": 12433,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "berancar_cove",
@@ -1614,7 +1672,8 @@
   "x": -9549,
   "z": 12594,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "valiel_vineyard",
@@ -1635,7 +1694,8 @@
   "x": -13460,
   "z": 12026,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "faaril_spring",
@@ -1657,7 +1717,8 @@
   "x": -12392,
   "z": 10932,
   "radius": 24,
-  "variant": "sea_vault"
+  "variant": "sea_vault",
+  "class": "major"
  },
  {
   "id": "mirimor_landing",
@@ -1678,7 +1739,8 @@
   "x": -13482,
   "z": 14030,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "koraril_cavern",
@@ -1689,7 +1751,8 @@
   "x": -12363,
   "z": 11786,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "lanitar_monument",
@@ -1711,7 +1774,8 @@
   "x": -12140,
   "z": 14351,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "calandil_vineyard",
@@ -1732,7 +1796,8 @@
   "x": -11865,
   "z": 12267,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "the_golden_netch",
@@ -1775,7 +1840,8 @@
   "x": -13850,
   "z": 14478,
   "radius": 10,
-  "variant": "mage_tower"
+  "variant": "mage_tower",
+  "class": "short"
  },
  {
   "id": "renandil",
@@ -1796,7 +1862,8 @@
   "x": -12808,
   "z": 13845,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "tanilmo_lighthouse",
@@ -1807,7 +1874,8 @@
   "x": -14377,
   "z": 13835,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "lilondur_grove",
@@ -1818,7 +1886,8 @@
   "x": -14032,
   "z": 13146,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "matdril_sea_cave",
@@ -1829,7 +1898,8 @@
   "x": -13486,
   "z": 11659,
   "radius": 24,
-  "variant": "sea_vault"
+  "variant": "sea_vault",
+  "class": "major"
  },
  {
   "id": "tandril_grove",
@@ -1840,7 +1910,8 @@
   "x": -12775,
   "z": 15082,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "feninaan_hollow",
@@ -1851,7 +1922,8 @@
   "x": -12586,
   "z": 14663,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "galorne_obelisk",
@@ -1873,7 +1945,8 @@
   "x": -12042,
   "z": 11127,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "alimor_sanctum",
@@ -1884,7 +1957,8 @@
   "x": -13387,
   "z": 14422,
   "radius": 10,
-  "variant": "mage_tower"
+  "variant": "mage_tower",
+  "class": "short"
  },
  {
   "id": "wreck_of_the_bent_stag",
@@ -1895,7 +1969,8 @@
   "x": -13581,
   "z": 11885,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "torethil_grove",
@@ -1906,7 +1981,8 @@
   "x": -12654,
   "z": 13544,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "lanethil",
@@ -1927,7 +2003,8 @@
   "x": -11635,
   "z": 12585,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "the_winking_carafe",
@@ -1949,7 +2026,8 @@
   "x": -10297,
   "z": 12533,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "helduin_sanctum",
@@ -1960,7 +2038,8 @@
   "x": -12217,
   "z": 15002,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "ilinaan_grotto",
@@ -1971,7 +2050,8 @@
   "x": -13134,
   "z": 14286,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "fenethil_watchtower",
@@ -1982,7 +2062,8 @@
   "x": -13032,
   "z": 12041,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "lanwen_villa",
@@ -2026,7 +2107,8 @@
   "x": -14065,
   "z": 13580,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "valilwe_spire",
@@ -2037,7 +2119,8 @@
   "x": -12697,
   "z": 10744,
   "radius": 10,
-  "variant": "mage_tower"
+  "variant": "mage_tower",
+  "class": "short"
  },
  {
   "id": "aeriisen_sanctum",
@@ -2048,7 +2131,8 @@
   "x": -12969,
   "z": 14375,
   "radius": 10,
-  "variant": "mage_tower"
+  "variant": "mage_tower",
+  "class": "short"
  },
  {
   "id": "liliisen_hollow",
@@ -2059,7 +2143,8 @@
   "x": -13398,
   "z": 13069,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "sarwen_caverns",
@@ -2070,7 +2155,8 @@
   "x": -12294,
   "z": 13206,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "silandil_lair",
@@ -2081,7 +2167,8 @@
   "x": -11862,
   "z": 14223,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "calinaan_spring",
@@ -2125,7 +2212,8 @@
   "x": -13704,
   "z": 12076,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "heldril_cove",
@@ -2136,7 +2224,8 @@
   "x": -13257,
   "z": 15343,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "waniel_grotto",
@@ -2147,7 +2236,8 @@
   "x": -12366,
   "z": 14798,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "norimor_lair",
@@ -2158,7 +2248,8 @@
   "x": -13073,
   "z": 12954,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "berimor_sea_cave",
@@ -2169,7 +2260,8 @@
   "x": -12214,
   "z": 15212,
   "radius": 24,
-  "variant": "sea_vault"
+  "variant": "sea_vault",
+  "class": "major"
  },
  {
   "id": "toriisen_archive",
@@ -2180,7 +2272,8 @@
   "x": -12813,
   "z": 13300,
   "radius": 24,
-  "variant": "crystal_vault"
+  "variant": "crystal_vault",
+  "class": "major"
  },
  {
   "id": "galilmo_grotto",
@@ -2191,7 +2284,8 @@
   "x": -12486,
   "z": 14476,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "torondur_cave",
@@ -2202,7 +2296,8 @@
   "x": -13009,
   "z": 12600,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "galiisen",
@@ -2223,7 +2318,8 @@
   "x": -13015,
   "z": 14794,
   "radius": 10,
-  "variant": "mage_tower"
+  "variant": "mage_tower",
+  "class": "short"
  },
  {
   "id": "oraril_monument",

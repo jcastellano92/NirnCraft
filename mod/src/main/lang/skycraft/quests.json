@@ -1,0 +1,59 @@
+{
+  "quest.skycraft.board.sign_prompt": "[Right-Click]",
+  "quest.skycraft.board.header": "=== Notice Board — %s ===",
+  "quest.skycraft.board.empty": "No notices are posted right now.",
+  "quest.skycraft.board.taken": "(Accepted)",
+  "quest.skycraft.board.accept_btn": "Accept",
+  "quest.skycraft.board.innkeeper_intro": "The steward and townsfolk keep the notice board in %s stocked with work. Take whichever posting suits your blade:",
+  "quest.skycraft.board.accepted_reply": "Consider it yours. I've marked %s on your map — return when the job is done for your %s gold.",
+  "quest.skycraft.board.invalid_index": "Pick a notice index between 0 and %s.",
+  "quest.skycraft.board.already_taken": "You have already taken or completed that notice.",
+  "quest.skycraft.board.none_nearby": "No settlement notice board is nearby.",
+  "quest.skycraft.board.giver": "%s Notice Board",
+  "quest.skycraft.board.turnin_reply": "Fine work! The whole town will sleep easier tonight. Here is the %s gold promised on the notice board.",
+
+  "quest.skycraft.board.bandit_bounty.title": "Bounty: %s at %s",
+  "quest.skycraft.board.bandit_bounty.desc": "By order of %3$s: the outlaw leader %1$s has made a camp at %2$s and preys upon travellers along the roads. Slay %1$s to claim the %4$s Septim bounty.",
+  "quest.skycraft.board.bandit_bounty.obj": "Slay %s at %s",
+
+  "quest.skycraft.board.beast_hunt.title": "Hunt: %s near %s",
+  "quest.skycraft.board.beast_hunt.desc": "Hunters from %3$s report that %1$s has been stalking livestock and travellers near %2$s (%4$sm away). Track down and slay the beast, then bring word back to %3$s.",
+  "quest.skycraft.board.beast_hunt.obj": "Hunt down %s at %s",
+  "quest.skycraft.board.beast_hunt.return": "Report the kill in %s",
+
+  "quest.skycraft.board.lost_heirloom.title": "Lost Heirloom: %s",
+  "quest.skycraft.board.lost_heirloom.desc": "%1$s of %4$s offers a reward for the recovery of a family %2$s lost inside %3$s. Retrieve the heirloom and return it to %4$s.",
+  "quest.skycraft.board.lost_heirloom.obj_go": "Recover the %s inside %s",
+  "quest.skycraft.board.lost_heirloom.obj_return": "Return the %s to %s in %s",
+
+  "quest.skycraft.board.missing_person.title": "Missing: %s near %s",
+  "quest.skycraft.board.missing_person.desc": "%1$s set out from %3$s toward %2$s (%4$sm away) and has not returned. Search %2$s for any sign of %1$s and bring word back to %3$s.",
+  "quest.skycraft.board.missing_person.obj_search": "Search for %s at %s",
+  "quest.skycraft.board.missing_person.obj_report": "Report %s's fate in %s",
+
+  "quest.skycraft.board.supply_order.title": "Supply Order: %sx %s",
+  "quest.skycraft.board.supply_order.desc": "Merchant %1$s in %5$s has posted a contract for %2$sx %3$s gathered from the stores around %4$s.",
+  "quest.skycraft.board.supply_order.obj_gather": "Gather %sx %s at %s",
+  "quest.skycraft.board.supply_order.obj_deliver": "Deliver %sx %s to %s in %s",
+
+  "dialogue.skycraft.quest.notice_board": "Any work on the notice board?",
+  "dialogue.skycraft.quest.board_entry": "%s (%sm — %sg)",
+  "dialogue.skycraft.quest.board_turnin": "I slew %s from the notice board.",
+  "dialogue.skycraft.quest.board_heirloom": "I recovered the %s from the notice board.",
+  "dialogue.skycraft.quest.board_missing": "I searched for %s from the notice board.",
+  "dialogue.skycraft.quest.board_supply": "I brought the %sx %s for the notice board order.",
+
+  "signpost.skycraft.to_settlement": "To Settlement",
+  "signpost.skycraft.to_inn": "Roadside Inn",
+  "signpost.skycraft.to_town": "Next Town",
+  "signpost.skycraft.to_landmark": "Nearby Site",
+  "signpost.skycraft.dist_line": "%s %s (%sm)",
+  "signpost.skycraft.time_line": "~%s min walk",
+  "signpost.skycraft.readout.header": "=== Road Signpost ===",
+  "signpost.skycraft.readout.settlement": " %s [%s] Next settlement: %s — %sm (~%s min walk)",
+  "signpost.skycraft.readout.inn": " %s [%s] Roadside inn: %s — %sm (~%s min walk)",
+  "signpost.skycraft.readout.town": " %s [%s] Next town: %s — %sm (~%s min walk)",
+  "signpost.skycraft.readout.landmark": " %s [%s] Nearby landmark: %s — %sm",
+
+  "journal.skycraft.show_on_map": "Show on Map"
+}

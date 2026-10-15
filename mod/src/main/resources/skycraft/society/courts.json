@@ -1,0 +1,214 @@
+{
+  "schema_version": 1,
+  "required_roles": ["jarl", "steward", "court_wizard", "housecarl"],
+  "min_roles_per_capital_or_city": 3,
+  "settlements": {
+    "whiterun": {
+      "seat": "Dragonsreach",
+      "hold": "whiterun",
+      "culture": "nord",
+      "ruler_title": "Jarl",
+      "jarl": "Balgruuf the Greater",
+      "steward": "Proventus Avenicci",
+      "court_wizard": "Farengar Secret-Fire",
+      "housecarl": "Irileth",
+      "why": ["skyrim:whiterun:L7:keep_dragonsreach", "skyrim:whiterun:L8:companions_hall"]
+    },
+    "solitude": {
+      "seat": "Blue Palace",
+      "hold": "haafingar",
+      "culture": "nord",
+      "ruler_title": "Jarl",
+      "jarl": "Elisif the Fair",
+      "steward": "Falk Firebeard",
+      "court_wizard": "Sybille Stentor",
+      "housecarl": "Bolgeir Bearclaw",
+      "why": ["skyrim:haafingar:L7:blue_palace", "skyrim:haafingar:L8:imperial_seat"]
+    },
+    "windhelm": {
+      "seat": "Palace of the Kings",
+      "hold": "eastmarch",
+      "culture": "nord",
+      "ruler_title": "Jarl",
+      "jarl": "Ulfric Stormcloak",
+      "steward": "Jorleif",
+      "court_wizard": "Wuunferth the Unliving",
+      "housecarl": "Galmar Stone-Fist",
+      "why": ["skyrim:eastmarch:L7:palace_of_the_kings", "skyrim:eastmarch:L8:stormcloak_seat"]
+    },
+    "riften": {
+      "seat": "Mistveil Keep",
+      "hold": "the_rift",
+      "culture": "nord",
+      "ruler_title": "Jarl",
+      "jarl": "Laila Law-Giver",
+      "steward": "Anuriel",
+      "court_wizard": "Wylandriah",
+      "housecarl": "Unmid Snow-Shod",
+      "why": ["skyrim:the_rift:L7:mistveil_keep", "skyrim:the_rift:L8:guild_underbelly"]
+    },
+    "markarth": {
+      "seat": "Understone Keep",
+      "hold": "the_reach",
+      "culture": "nord",
+      "ruler_title": "Jarl",
+      "jarl": "Igmund",
+      "steward": "Raerek",
+      "court_wizard": "Calcelmo",
+      "housecarl": "Faleen",
+      "why": ["skyrim:the_reach:L7:understone_keep", "skyrim:the_reach:L8:forsworn_unrest"]
+    },
+    "falkreath": {
+      "seat": "Jarl's Longhouse",
+      "hold": "falkreath",
+      "culture": "nord",
+      "ruler_title": "Jarl",
+      "jarl": "Siddgeir",
+      "steward": "Nenya",
+      "court_wizard": "Helgird Rune-Speaker",
+      "housecarl": "Rayya",
+      "why": ["skyrim:falkreath:L7:jarl_longhouse", "skyrim:falkreath:L8:great_graveyard"]
+    },
+    "morthal": {
+      "seat": "Highmoon Hall",
+      "hold": "hjaalmarch",
+      "culture": "nord",
+      "ruler_title": "Jarl",
+      "jarl": "Idgrod Ravencrone",
+      "steward": "Aslfur",
+      "court_wizard": "Falion",
+      "housecarl": "Gorm",
+      "why": ["skyrim:hjaalmarch:L7:highmoon_hall", "skyrim:hjaalmarch:L8:marsh_visions"]
+    },
+    "dawnstar": {
+      "seat": "The White Hall",
+      "hold": "the_pale",
+      "culture": "nord",
+      "ruler_title": "Jarl",
+      "jarl": "Skald the Elder",
+      "steward": "Bulfrek",
+      "court_wizard": "Madena",
+      "housecarl": "Jod",
+      "why": ["skyrim:the_pale:L7:white_hall", "skyrim:the_pale:L8:northern_port"]
+    },
+    "winterhold": {
+      "seat": "Jarl's Longhouse",
+      "hold": "winterhold",
+      "culture": "nord",
+      "ruler_title": "Jarl",
+      "jarl": "Korir",
+      "steward": "Malur Seloth",
+      "court_wizard": "Nelacar",
+      "housecarl": "Thonjolf",
+      "why": ["skyrim:winterhold:L7:jarl_longhouse", "skyrim:winterhold:L8:great_collapse"]
+    },
+    "raven_rock": {
+      "seat": "Morvayn Manor",
+      "hold": "solstheim",
+      "culture": "dunmer",
+      "ruler_title": "Councilor",
+      "jarl": "Lleril Morvayn",
+      "steward": "Adril Arano",
+      "court_wizard": "Talvas Fathryon",
+      "housecarl": "Veleth",
+      "why": ["skyrim:solstheim:L7:morvayn_manor", "skyrim:solstheim:L8:redoran_outpost"]
+    },
+    "dragon_bridge": {
+      "seat": "Four Shields Hall",
+      "hold": "haafingar",
+      "culture": "nord",
+      "ruler_title": "Thane",
+      "jarl": "Horgeir",
+      "steward": "Lodvar",
+      "court_wizard": "Varnius Junius",
+      "housecarl": "Gormlaith",
+      "why": ["skyrim:haafingar:L7:dragon_bridge"]
+    }
+  },
+  "culture_defaults": {
+    "nord": {
+      "ruler_title": "Jarl",
+      "jarl": "Harald Ice-Brow",
+      "steward": "Halvar Quill-Hand",
+      "court_wizard": "Sigridsdottir the Pale",
+      "housecarl": "Torsten Shield-Wall"
+    },
+    "imperial": {
+      "ruler_title": "Count",
+      "jarl": "Marcellus Caro",
+      "steward": "Tullius Odiil",
+      "court_wizard": "Aurelia Vane",
+      "housecarl": "Cassius Valerius"
+    },
+    "breton": {
+      "ruler_title": "Lord",
+      "jarl": "Edouard Guimard",
+      "steward": "Genevieve Lacroix",
+      "court_wizard": "Moreau the Stargazer",
+      "housecarl": "Roland Montclair"
+    },
+    "redguard": {
+      "ruler_title": "Grandee",
+      "jarl": "Tarik at-Sentinel",
+      "steward": "Yasmin al-Rihad",
+      "court_wizard": "Farid Star-Reader",
+      "housecarl": "Kematu al-Hegathe"
+    },
+    "dunmer": {
+      "ruler_title": "Councilor",
+      "jarl": "Varon Hlaalu",
+      "steward": "Nilera Indoril",
+      "court_wizard": "Gothren Telvanni",
+      "housecarl": "bolvyn Redoran"
+    },
+    "altmer": {
+      "ruler_title": "High Kinlord",
+      "jarl": "Calcelmo of Alinor",
+      "steward": "Elenwen Sapiarch",
+      "court_wizard": "Ancano Star-Weave",
+      "housecarl": "Ondolemar Golden-Glaive"
+    },
+    "bosmer": {
+      "ruler_title": "Treethane",
+      "jarl": "Camoran Green-Bough",
+      "steward": "Fimmion Leaf-Tally",
+      "court_wizard": "galthras Sap-Speaker",
+      "housecarl": "Faendal Thorn-Guard"
+    },
+    "khajiit": {
+      "ruler_title": "Clan-Mother",
+      "jarl": "Ahzirr Two-Moons",
+      "steward": "Ra'zhinda Coin-Counter",
+      "court_wizard": "J'zargo Fire-Whisker",
+      "housecarl": "Kharjo Sand-Shield"
+    },
+    "argonian": {
+      "ruler_title": "Root-Speaker",
+      "jarl": "Speaks-With-Roots",
+      "steward": "Tallies-The-Reeds",
+      "court_wizard": "Dreams-In-Amber",
+      "housecarl": "Stands-Before-Storms"
+    },
+    "orc": {
+      "ruler_title": "War-Chief",
+      "jarl": "Yamarz gro-Orsinium",
+      "steward": "Bolar gra-Dushnikh",
+      "court_wizard": "Atub gra-Largash",
+      "housecarl": "Ghorbash the Iron Hand"
+    },
+    "reachman": {
+      "ruler_title": "Chieftain",
+      "jarl": "Madanach of the Crags",
+      "steward": "Braig Crag-Keeper",
+      "court_wizard": "Hagraven-Voice Morven",
+      "housecarl": "Kaie Briar-Shield"
+    },
+    "atmoran": {
+      "ruler_title": "Elder-Jarl",
+      "jarl": "Yngol Frost-Crown",
+      "steward": "Ahzidal Lore-Tally",
+      "court_wizard": "Vahlok Flame-Binder",
+      "housecarl": "Hakon One-Eye"
+    }
+  }
+}

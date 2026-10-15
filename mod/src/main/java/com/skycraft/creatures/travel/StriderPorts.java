@@ -61,7 +61,7 @@ public final class StriderPorts {
 
     /** Called from module init so the dialogue provider is registered. */
     public static void init() {
-        // the static initialiser registers the dialogue provider
+        com.skycraft.travel.TravelSelftest.init();
     }
 
     /** The strider stand of a port: just outside the settlement, east side. Null when the port doesn't exist. */
@@ -70,6 +70,17 @@ public final class StriderPorts {
         if (place != null) return new int[]{place.x() + place.radius() + 10, place.z()};
         if (port.x() == null) return null;
         return new int[]{port.x() + 70, port.z()};
+    }
+
+    private static int[] standById(String portId) {
+        for (Port p : PORTS) {
+            if (p.id().equals(portId)) return stand(p);
+        }
+        Place place = Places.byId(portId).orElse(null);
+        if (place != null) return new int[]{place.x() + place.radius() + 10, place.z()};
+        return com.skycraft.travel.TravelNetworks.node(portId)
+                .map(n -> new int[]{n.x() + 40, n.z()})
+                .orElse(null);
     }
 
     @SubscribeEvent
@@ -103,6 +114,21 @@ public final class StriderPorts {
     private static void options(ServerPlayer player, LivingEntity npc, List<DialogueOption> out) {
         if (!(npc instanceof SiltStriderEntity strider)) return;
         int order = 150;
+        List<com.skycraft.travel.TravelNetworks.Offer> offers = com.skycraft.travel.TravelNetworks.offersFrom(
+                strider.port(), com.skycraft.travel.TravelMode.STRIDER);
+        if (!offers.isEmpty()) {
+            for (com.skycraft.travel.TravelNetworks.Offer offer : offers) {
+                String destId = offer.destination().id();
+                int[] at = standById(destId);
+                if (at == null) continue;
+                int fare = offer.fee() > 0 ? offer.fee() : FARE;
+                Component name = offer.destination().displayName();
+                out.add(new DialogueOption("creatures.strider." + destId,
+                        Component.translatable("dialogue.skycraft.silt_strider.destination", name, fare), order++,
+                        (p, n) -> travel(p, n, at, name, fare, destId)));
+            }
+            return;
+        }
         for (Port port : PORTS) {
             if (port.id().equals(strider.port())) continue;
             int[] at = stand(port);
@@ -111,20 +137,30 @@ public final class StriderPorts {
                     .orElse(Component.translatable("place.skycraft." + port.id()));
             out.add(new DialogueOption("creatures.strider." + port.id(),
                     Component.translatable("dialogue.skycraft.silt_strider.destination", name, FARE), order++,
-                    (p, n) -> travel(p, n, at, name)));
+                    (p, n) -> travel(p, n, at, name, FARE, port.id())));
         }
     }
 
-    private static void travel(ServerPlayer player, LivingEntity strider, int[] at, Component name) {
+    private static void travel(ServerPlayer player, LivingEntity strider, int[] at, Component name, int fare, String destId) {
         if (Vitals.inCombat(player)) {
             Dialogue.open(player, strider, Component.translatable("world.skycraft.travel.combat"));
             return;
         }
-        if (!Currency.take(player, FARE)) {
-            Dialogue.open(player, strider, Component.translatable("dialogue.skycraft.silt_strider.no_gold", FARE));
+        if (!Currency.take(player, fare)) {
+            Dialogue.open(player, strider, Component.translatable("dialogue.skycraft.silt_strider.no_gold", fare));
             return;
         }
         Dialogue.endConversation(player, strider.getId());
+        if (!com.skycraft.perf.Prewarm.isReady(player.serverLevel(), at[0], at[1])
+                && com.skycraft.perf.Prewarm.start(player, at[0], at[1], name,
+                () -> finishTravel(player, at, name, destId))) {
+            return;
+        }
+        finishTravel(player, at, name, destId);
+    }
+
+    private static void finishTravel(ServerPlayer player, int[] at, Component name, String destId) {
+        if (!player.isAlive()) return;
         ServerLevel level = player.serverLevel();
         int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at[0] - 4, at[1]);
         double tx = at[0] - 4 + 0.5;
@@ -155,5 +191,7 @@ public final class StriderPorts {
         }
         SkyNetwork.sendToPlayer(player, new WorldPackets.RestFade(hours, WorldPackets.RestFade.TRAVEL));
         Notifier.message(player, Component.translatable("dialogue.skycraft.silt_strider.arrived", name));
+        com.skycraft.travel.TravelNetworks.node(destId)
+                .ifPresent(n -> com.skycraft.travel.TravelNetworks.onArrival(player, n, com.skycraft.travel.TravelMode.STRIDER));
     }
 }

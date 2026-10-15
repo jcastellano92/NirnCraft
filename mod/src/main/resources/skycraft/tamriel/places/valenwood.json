@@ -619,7 +619,8 @@
   "x": -3800,
   "z": 9500,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "moon_hunter_keep",
@@ -630,7 +631,8 @@
   "x": -3300,
   "z": 9400,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "fort_sphinxmoth",
@@ -641,7 +643,8 @@
   "x": -1950,
   "z": 10100,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "silvenars_audience_hall",
@@ -1565,7 +1568,8 @@
   "x": -6600,
   "z": 10200,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "dead_mans_drop",
@@ -1576,7 +1580,8 @@
   "x": -6000,
   "z": 9660,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "falinesti_summer_site",
@@ -1587,7 +1592,8 @@
   "x": -6150,
   "z": 10150,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "starwalk_cavern",
@@ -1598,7 +1604,8 @@
   "x": -6600,
   "z": 10650,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "jagged_grotto",
@@ -1609,7 +1616,8 @@
   "x": -5250,
   "z": 9300,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "crimson_cove",
@@ -1620,7 +1628,8 @@
   "x": -5656,
   "z": 9537,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "hoarvor_pit",
@@ -1631,7 +1640,8 @@
   "x": -5550,
   "z": 9850,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "stranglewatch",
@@ -1642,7 +1652,8 @@
   "x": -5950,
   "z": 10000,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "tomb_of_the_apostates",
@@ -1653,7 +1664,8 @@
   "x": -5600,
   "z": 10700,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "bone_grapplers_nest",
@@ -1664,7 +1676,8 @@
   "x": -5150,
   "z": 10800,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "abamath",
@@ -1675,7 +1688,8 @@
   "x": -5000,
   "z": 10500,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "marquee"
  },
  {
   "id": "belarata",
@@ -1686,7 +1700,8 @@
   "x": -4763,
   "z": 10454,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "shael_ruins",
@@ -1697,7 +1712,8 @@
   "x": -4645,
   "z": 10385,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "roots_of_silvenar",
@@ -1708,7 +1724,8 @@
   "x": -4800,
   "z": 9950,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "ouze",
@@ -1719,7 +1736,8 @@
   "x": -4400,
   "z": 9700,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "valeguard",
@@ -1730,7 +1748,8 @@
   "x": -4450,
   "z": 9950,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "ogrims_yawn",
@@ -1741,7 +1760,8 @@
   "x": -4750,
   "z": 9350,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "chancel_of_divine_entreaty",
@@ -1752,7 +1772,8 @@
   "x": -5100,
   "z": 9800,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "black_vine_ruins",
@@ -1763,7 +1784,8 @@
   "x": -4950,
   "z": 9400,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "treehenge",
@@ -1774,7 +1796,8 @@
   "x": -4636,
   "z": 9193,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "wilding_run",
@@ -1785,7 +1808,8 @@
   "x": -5150,
   "z": 9350,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "greenspeakers_grove",
@@ -1796,7 +1820,8 @@
   "x": -3650,
   "z": 9800,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "deathsong_cleft",
@@ -1807,7 +1832,8 @@
   "x": -3850,
   "z": 10300,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "thibauts_cairn",
@@ -1818,7 +1844,8 @@
   "x": -3400,
   "z": 10050,
   "radius": 22,
-  "variant": "imperial_crypt"
+  "variant": "imperial_crypt",
+  "class": "short"
  },
  {
   "id": "the_vile_manse",
@@ -1829,7 +1856,8 @@
   "x": -4100,
   "z": 9350,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "selenes_web",
@@ -1840,7 +1868,8 @@
   "x": -4000,
   "z": 9750,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "senalana",
@@ -1851,7 +1880,8 @@
   "x": -2850,
   "z": 10350,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "old_town_cavern",
@@ -1862,7 +1892,8 @@
   "x": -3150,
   "z": 10250,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "big_ozurs_valley",
@@ -1873,7 +1904,8 @@
   "x": -2350,
   "z": 10850,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "kunas_delve",
@@ -1884,7 +1916,8 @@
   "x": -2250,
   "z": 11000,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "fardirs_folly",
@@ -1895,7 +1928,8 @@
   "x": -2000,
   "z": 9750,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "little_ozurs_camp",
@@ -1906,7 +1940,8 @@
   "x": -2150,
   "z": 10300,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "ushmals_rest",
@@ -1917,7 +1952,8 @@
   "x": -1863,
   "z": 10459,
   "radius": 24,
-  "variant": "moon_temple"
+  "variant": "moon_temple",
+  "class": "major"
  },
  {
   "id": "dawnmead_brigand_camp",
@@ -1928,7 +1964,8 @@
   "x": -2000,
   "z": 11050,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "dawnmead_ruin_camp",
@@ -1939,7 +1976,8 @@
   "x": -1850,
   "z": 11350,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "claws_strike",
@@ -1950,7 +1988,8 @@
   "x": -2750,
   "z": 11300,
   "radius": 24,
-  "variant": "moon_temple"
+  "variant": "moon_temple",
+  "class": "major"
  },
  {
   "id": "thormar",
@@ -1961,7 +2000,8 @@
   "x": -2650,
   "z": 11950,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "broken_arch",
@@ -1972,7 +2012,8 @@
   "x": -2850,
   "z": 12100,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "marquee"
  },
  {
   "id": "willowgrove_cavern",
@@ -1983,7 +2024,8 @@
   "x": -2600,
   "z": 12250,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "weeping_wind_cave",
@@ -1994,7 +2036,8 @@
   "x": -2200,
   "z": 11850,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "moonmont",
@@ -2005,7 +2048,8 @@
   "x": -2000,
   "z": 12150,
   "radius": 24,
-  "variant": "moon_temple"
+  "variant": "moon_temple",
+  "class": "major"
  },
  {
   "id": "jodes_light",
@@ -2016,7 +2060,8 @@
   "x": -1700,
   "z": 11050,
   "radius": 24,
-  "variant": "moon_temple"
+  "variant": "moon_temple",
+  "class": "major"
  },
  {
   "id": "two_moons_path",
@@ -2027,7 +2072,8 @@
   "x": -1600,
   "z": 11250,
   "radius": 24,
-  "variant": "moon_temple"
+  "variant": "moon_temple",
+  "class": "major"
  },
  {
   "id": "maw_of_lorkhaj",
@@ -2038,7 +2084,8 @@
   "x": -1750,
   "z": 10850,
   "radius": 24,
-  "variant": "moon_temple"
+  "variant": "moon_temple",
+  "class": "major"
  },
  {
   "id": "wormroot_depths",
@@ -2049,7 +2096,8 @@
   "x": -4750,
   "z": 10600,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "thugrubs_cave",
@@ -2060,7 +2108,8 @@
   "x": -4550,
   "z": 10700,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "poacher_camp",
@@ -2071,7 +2120,8 @@
   "x": -4200,
   "z": 10950,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "goldfolly",
@@ -2082,7 +2132,8 @@
   "x": -4750,
   "z": 11450,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "faltonias_mine",
@@ -2093,7 +2144,8 @@
   "x": -4550,
   "z": 11600,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "burroot_kwama_mine",
@@ -2104,7 +2156,8 @@
   "x": -4450,
   "z": 11650,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "tarlain_bandit_camp",
@@ -2115,7 +2168,8 @@
   "x": -4800,
   "z": 11650,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "valanirs_rest",
@@ -2126,7 +2180,8 @@
   "x": -4450,
   "z": 11850,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "laeloria",
@@ -2137,7 +2192,8 @@
   "x": -3850,
   "z": 10950,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "marquee"
  },
  {
   "id": "forked_root_camp",
@@ -2148,7 +2204,8 @@
   "x": -4100,
   "z": 11000,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "reliquary_of_stars",
@@ -2159,7 +2216,8 @@
   "x": -4000,
   "z": 10450,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "fishermans_hut",
@@ -2170,7 +2228,8 @@
   "x": -4250,
   "z": 10500,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "boars_run_overlook",
@@ -2181,7 +2240,8 @@
   "x": -3200,
   "z": 11300,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "vinedeath_cave",
@@ -2192,7 +2252,8 @@
   "x": -3500,
   "z": 11450,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "ossuary_of_telacar",
@@ -2203,7 +2264,8 @@
   "x": -3450,
   "z": 11700,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "lair_of_maarselok",
@@ -2214,7 +2276,8 @@
   "x": -3250,
   "z": 11550,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "mobar_mine",
@@ -2225,7 +2288,8 @@
   "x": -4050,
   "z": 12000,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "root_sunder_ruins",
@@ -2236,7 +2300,8 @@
   "x": -3150,
   "z": 12600,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "ne_salas",
@@ -2247,7 +2312,8 @@
   "x": -3500,
   "z": 13200,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "the_scuttle_pit",
@@ -2258,7 +2324,8 @@
   "x": -2250,
   "z": 13400,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "sacred_leap_grotto",
@@ -2269,7 +2336,8 @@
   "x": -2450,
   "z": 13550,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "old_creepy_cave",
@@ -2280,7 +2348,8 @@
   "x": -2600,
   "z": 13350,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "brackenleaf",
@@ -2291,7 +2360,8 @@
   "x": -2400,
   "z": 13150,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "cave_of_broken_sails",
@@ -2302,7 +2372,8 @@
   "x": -3100,
   "z": 13950,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "bone_orchard",
@@ -2313,7 +2384,8 @@
   "x": -4300,
   "z": 13600,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "elden_grove",
@@ -2324,7 +2396,8 @@
   "x": -3300,
   "z": 12200,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "barrow_trench",
@@ -2335,7 +2408,8 @@
   "x": -6500,
   "z": 10950,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "moonhenge",
@@ -2346,7 +2420,8 @@
   "x": -6700,
   "z": 11050,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "maormer_camp",
@@ -2357,7 +2432,8 @@
   "x": -6929,
   "z": 11289,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "the_underroot",
@@ -2368,7 +2444,8 @@
   "x": -6592,
   "z": 11555,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "hectahame",
@@ -2379,7 +2456,8 @@
   "x": -5800,
   "z": 11150,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "city_of_ash",
@@ -2390,7 +2468,8 @@
   "x": -6200,
   "z": 11550,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "marquee"
  },
  {
   "id": "march_of_sacrifices",
@@ -2401,7 +2480,8 @@
   "x": -6400,
   "z": 11700,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "serpents_grotto",
@@ -2412,7 +2492,8 @@
   "x": -6550,
   "z": 12250,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "rootwater_grove",
@@ -2423,7 +2504,8 @@
   "x": -6400,
   "z": 12550,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "reconnaissance_camp",
@@ -2434,7 +2516,8 @@
   "x": -6050,
   "z": 12550,
   "radius": 18,
-  "variant": "imperial_camp"
+  "variant": "imperial_camp",
+  "class": "minor"
  },
  {
   "id": "rulanyils_fall",
@@ -2445,7 +2528,8 @@
   "x": -6000,
   "z": 12000,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "rootwatch_tower",
@@ -2456,7 +2540,8 @@
   "x": -5800,
   "z": 12150,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "naril_nagaia",
@@ -2467,7 +2552,8 @@
   "x": -6300,
   "z": 12850,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "labyrinth",
@@ -2478,7 +2564,8 @@
   "x": -5400,
   "z": 13200,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "carac_dena",
@@ -2489,7 +2576,8 @@
   "x": -5350,
   "z": 13500,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "arananga",
@@ -2500,7 +2588,8 @@
   "x": -5450,
   "z": 12800,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "hollow_den",
@@ -2511,7 +2600,8 @@
   "x": -5850,
   "z": 12650,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "gurzags_mine",
@@ -2522,7 +2612,8 @@
   "x": -5350,
   "z": 12350,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "shrouded_vale",
@@ -2533,7 +2624,8 @@
   "x": -5300,
   "z": 12700,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "wilderking_court",
@@ -2544,7 +2636,8 @@
   "x": -5550,
   "z": 12950,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "pelda_tarn",
@@ -2555,7 +2648,8 @@
   "x": -5300,
   "z": 13350,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "harridans_lair",
@@ -2566,7 +2660,8 @@
   "x": -5550,
   "z": 11850,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "verrant_morass",
@@ -2577,7 +2672,8 @@
   "x": -5750,
   "z": 11850,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "whisper_grove",
@@ -2588,7 +2684,8 @@
   "x": -5300,
   "z": 11200,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "corith_ruins",
@@ -2610,7 +2707,8 @@
   "x": -2010,
   "z": 12661,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "roestia_ossuary",
@@ -2621,7 +2719,8 @@
   "x": -5992,
   "z": 12375,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "laearata_lair",
@@ -2632,7 +2731,8 @@
   "x": -2063,
   "z": 12337,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "malathil_cove",
@@ -2653,7 +2753,8 @@
   "x": -3087,
   "z": 11956,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "vaorin_grove",
@@ -2664,7 +2765,8 @@
   "x": -1735,
   "z": 9064,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "ithara_encampment",
@@ -2675,7 +2777,8 @@
   "x": -2546,
   "z": 13007,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "wiloth_den",
@@ -2686,7 +2789,8 @@
   "x": -3159,
   "z": 9906,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "helaril_ossuary",
@@ -2697,7 +2801,8 @@
   "x": -3144,
   "z": 10739,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "laeath_nest",
@@ -2708,7 +2813,8 @@
   "x": -4528,
   "z": 13003,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "gerestia_burrow",
@@ -2719,7 +2825,8 @@
   "x": -4440,
   "z": 12085,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "ithion",
@@ -2750,7 +2857,8 @@
   "x": -5393,
   "z": 13749,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "maldar_encampment",
@@ -2761,7 +2869,8 @@
   "x": -5328,
   "z": 10446,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "tandavar",
@@ -2772,7 +2881,8 @@
   "x": -3950,
   "z": 12494,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "golion_grove",
@@ -2783,7 +2893,8 @@
   "x": -4922,
   "z": 13876,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "elayas_glade",
@@ -2805,7 +2916,8 @@
   "x": -2731,
   "z": 13769,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "golaril",
@@ -2837,7 +2949,8 @@
   "x": -4278,
   "z": 9990,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "malion_camp",
@@ -2848,7 +2961,8 @@
   "x": -5365,
   "z": 9912,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "athinor_encampment",
@@ -2859,7 +2973,8 @@
   "x": -4912,
   "z": 12632,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "laeoria_root_tomb",
@@ -2870,7 +2985,8 @@
   "x": -3502,
   "z": 12442,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "telenwe_landing",
@@ -2891,7 +3007,8 @@
   "x": -4615,
   "z": 12085,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "balath_keep",
@@ -2902,7 +3019,8 @@
   "x": -3220,
   "z": 13814,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "neathil",
@@ -2923,7 +3041,8 @@
   "x": -2296,
   "z": 12215,
   "radius": 18,
-  "variant": "spriggan_cave"
+  "variant": "spriggan_cave",
+  "class": "short"
  },
  {
   "id": "gilelle_vault",
@@ -2934,7 +3053,8 @@
   "x": -4176,
   "z": 10285,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "falathil_falls",
@@ -2956,7 +3076,8 @@
   "x": -4550,
   "z": 12726,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "maloth_root_tomb",
@@ -2967,7 +3088,8 @@
   "x": -1805,
   "z": 9229,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "goldell_grotto",
@@ -2978,7 +3100,8 @@
   "x": -4845,
   "z": 11954,
   "radius": 18,
-  "variant": "spriggan_cave"
+  "variant": "spriggan_cave",
+  "class": "short"
  },
  {
   "id": "corarata_docks",
@@ -2999,7 +3122,8 @@
   "x": -2739,
   "z": 10999,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "laeion_hollow",
@@ -3010,7 +3134,8 @@
   "x": -2262,
   "z": 9369,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "raara_barrow",
@@ -3021,7 +3146,8 @@
   "x": -4472,
   "z": 13702,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "athorin_hollow",
@@ -3032,7 +3158,8 @@
   "x": -5687,
   "z": 10512,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "athdar_grove",
@@ -3043,7 +3170,8 @@
   "x": -3021,
   "z": 13418,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "athuvar_grove",
@@ -3054,7 +3182,8 @@
   "x": -3721,
   "z": 11801,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "thaayas_root_tomb",
@@ -3065,7 +3194,8 @@
   "x": -3225,
   "z": 9745,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "vauin_burial_tree",
@@ -3076,7 +3206,8 @@
   "x": -2517,
   "z": 9608,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "ceoth_outpost",
@@ -3087,7 +3218,8 @@
   "x": -2732,
   "z": 9608,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "draelle_wharf",
@@ -3108,7 +3240,8 @@
   "x": -6425,
   "z": 13271,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "gilenwe_lair",
@@ -3119,7 +3252,8 @@
   "x": -3698,
   "z": 13322,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "laeoria_ossuary",
@@ -3130,7 +3264,8 @@
   "x": -2798,
   "z": 13329,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "cororin_grove",
@@ -3141,7 +3276,8 @@
   "x": -4664,
   "z": 13528,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "wildell_burrow",
@@ -3152,7 +3288,8 @@
   "x": -5035,
   "z": 13512,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "gerathil",
@@ -3184,7 +3321,8 @@
   "x": -2767,
   "z": 12390,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "ararata_hollow",
@@ -3195,7 +3333,8 @@
   "x": -5910,
   "z": 11431,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "wiloria_sanctum",
@@ -3206,7 +3345,8 @@
   "x": -3921,
   "z": 9241,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "telion_undercroft",
@@ -3217,7 +3357,8 @@
   "x": -5525,
   "z": 13399,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "ardar_grove",
@@ -3228,7 +3369,8 @@
   "x": -2257,
   "z": 12658,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "wreck_of_the_golden_kettle",
@@ -3239,7 +3381,8 @@
   "x": -4279,
   "z": 13978,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "ildar_lair",
@@ -3250,7 +3393,8 @@
   "x": -3053,
   "z": 11125,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "ceelle_falls",
@@ -3272,7 +3416,8 @@
   "x": -2214,
   "z": 9813,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "belarata_camp",
@@ -3283,7 +3428,8 @@
   "x": -4109,
   "z": 13581,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "maath_grove",
@@ -3294,7 +3440,8 @@
   "x": -3992,
   "z": 9544,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "gilaril_glade",
@@ -3337,7 +3484,8 @@
   "x": -4263,
   "z": 13388,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "maenwe_lookout",
@@ -3348,7 +3496,8 @@
   "x": -2706,
   "z": 9127,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "ninarata_hollow",
@@ -3359,7 +3508,8 @@
   "x": -2601,
   "z": 10324,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "xydell_burial_tree",
@@ -3370,7 +3520,8 @@
   "x": -4879,
   "z": 12399,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "telelle_cave",
@@ -3381,7 +3532,8 @@
   "x": -6257,
   "z": 9999,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "telara_hollow",
@@ -3392,7 +3544,8 @@
   "x": -1849,
   "z": 12270,
   "radius": 18,
-  "variant": "spriggan_cave"
+  "variant": "spriggan_cave",
+  "class": "short"
  },
  {
   "id": "serannque",
@@ -3403,7 +3556,8 @@
   "x": -3974,
   "z": 12823,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "malwasten",
@@ -3424,7 +3578,8 @@
   "x": -2033,
   "z": 12934,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "ossinor_encampment",
@@ -3435,7 +3590,8 @@
   "x": -4743,
   "z": 12697,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "silara_hole",
@@ -3446,7 +3602,8 @@
   "x": -5050,
   "z": 13749,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "ninaril_grove",
@@ -3457,7 +3614,8 @@
   "x": -3150,
   "z": 13205,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "ithayas_glade",
@@ -3479,7 +3637,8 @@
   "x": -2458,
   "z": 10709,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "rooth_camp",
@@ -3490,7 +3649,8 @@
   "x": -4687,
   "z": 10869,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "balarata_grove",
@@ -3501,7 +3661,8 @@
   "x": -2287,
   "z": 13716,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "ithdar_grove",
@@ -3512,7 +3673,8 @@
   "x": -3223,
   "z": 13420,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "sildar_grove",
@@ -3523,7 +3685,8 @@
   "x": -3350,
   "z": 12688,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "beldell",
@@ -3544,7 +3707,8 @@
   "x": -4971,
   "z": 10009,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "xyath_grotto",
@@ -3555,7 +3719,8 @@
   "x": -5263,
   "z": 10968,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "havarata_glade",
@@ -3598,7 +3763,8 @@
   "x": -4116,
   "z": 12695,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "neorin_glade",
@@ -3620,7 +3786,8 @@
   "x": -3720,
   "z": 12847,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "laearata_cove",
@@ -3652,7 +3819,8 @@
   "x": -4757,
   "z": 12906,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "ilaril_vault",
@@ -3663,7 +3831,8 @@
   "x": -5033,
   "z": 11733,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "malith_web",
@@ -3674,7 +3843,8 @@
   "x": -6422,
   "z": 10218,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "vuloth_den",
@@ -3685,7 +3855,8 @@
   "x": -6675,
   "z": 10857,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "teloria_watchtower",
@@ -3696,7 +3867,8 @@
   "x": -4168,
   "z": 13818,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "laeoth_hideout",
@@ -3707,7 +3879,8 @@
   "x": -2582,
   "z": 13936,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "raayas_outpost",
@@ -3718,7 +3891,8 @@
   "x": -2489,
   "z": 12755,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "belestia_glade",
@@ -3740,7 +3914,8 @@
   "x": -4983,
   "z": 11080,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "falith_grotto",
@@ -3751,7 +3926,8 @@
   "x": -3636,
   "z": 13082,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "golelle_glade",
@@ -3783,7 +3959,8 @@
   "x": -6223,
   "z": 11735,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "xyion_caverns",
@@ -3794,7 +3971,8 @@
   "x": -3690,
   "z": 12153,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "xydell_cave",
@@ -3805,7 +3983,8 @@
   "x": -5610,
   "z": 13621,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "havion_glade",
@@ -3827,7 +4006,8 @@
   "x": -3117,
   "z": 13594,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "havorin_hollow",
@@ -3838,7 +4018,8 @@
   "x": -4794,
   "z": 12166,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "goloria_hollow",
@@ -3849,7 +4030,8 @@
   "x": -3031,
   "z": 10026,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "wilinor_spring",
@@ -3871,7 +4053,8 @@
   "x": -3401,
   "z": 11919,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "gilestia_outpost",
@@ -3882,7 +4065,8 @@
   "x": -3827,
   "z": 13674,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "belarata_lair",
@@ -3893,7 +4077,8 @@
   "x": -5459,
   "z": 11668,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "notarsel",
@@ -3904,7 +4089,8 @@
   "x": -3510,
   "z": 13394,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "ceinor_barrow",
@@ -3915,7 +4101,8 @@
   "x": -3887,
   "z": 13000,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "falaril_glade",
@@ -3937,7 +4124,8 @@
   "x": -1905,
   "z": 12438,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "wreck_of_the_blue_wheel",
@@ -3948,7 +4136,8 @@
   "x": -6959,
   "z": 12373,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "arara_grove",
@@ -3959,7 +4148,8 @@
   "x": -2104,
   "z": 10664,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "gerara_falls",
@@ -3981,7 +4171,8 @@
   "x": -3406,
   "z": 9222,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "itharil_undercroft",
@@ -3992,7 +4183,8 @@
   "x": -3150,
   "z": 12793,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "drainor_grove",
@@ -4003,7 +4195,8 @@
   "x": -2989,
   "z": 9807,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "draenwe_cave",
@@ -4014,7 +4207,8 @@
   "x": -6902,
   "z": 11030,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "cearata_vault",
@@ -4025,7 +4219,8 @@
   "x": -4935,
   "z": 13322,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "elorin_hollow",
@@ -4036,7 +4231,8 @@
   "x": -3322,
   "z": 12498,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "wreck_of_the_gilded_wheel",
@@ -4047,7 +4243,8 @@
   "x": -6120,
   "z": 9872,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "athenwe_cove",
@@ -4079,7 +4276,8 @@
   "x": -5030,
   "z": 11990,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "faldell",
@@ -4100,7 +4298,8 @@
   "x": -5497,
   "z": 10869,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "ninathil_den",
@@ -4111,7 +4310,8 @@
   "x": -6808,
   "z": 10088,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "falarata_cove",
@@ -4132,7 +4332,8 @@
   "x": -6414,
   "z": 11509,
   "radius": 22,
-  "variant": "tree_tomb"
+  "variant": "tree_tomb",
+  "class": "major"
  },
  {
   "id": "falayas_cove",
@@ -4143,7 +4344,8 @@
   "x": -5036,
   "z": 14228,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "telamath_grove",
@@ -4154,6 +4356,7 @@
   "x": -3113,
   "z": 10955,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  }
 ]

@@ -136,52 +136,69 @@ public final class SettlementPopulation {
                     }
                     continue;
                 }
-                done = switch (t) {
-                    case JARL -> {
-                        jarl = npc(level, at, NpcRole.JARL, jarlName(e.key), 10);
-                        yield jarl != null;
-                    }
-                    case HOUSECARL -> {
-                        NpcEntity hc = npc(level, at, NpcRole.HOUSECARL, null, 16);
-                        if (hc != null) {
-                            NpcEntity leader = jarl;
-                            if (leader == null) {
-                                var found = level.getEntitiesOfClass(NpcEntity.class, new net.minecraft.world.phys.AABB(at).inflate(32),
-                                        x -> x.isAlive() && x.role() == NpcRole.JARL);
-                                if (!found.isEmpty()) leader = found.get(0);
-                            }
-                            if (leader != null) hc.setLeader(leader.getUUID());
+                if (res.role() == NpcRole.TRAINER && t != AnchorType.GUILD_TRAINER) {
+                    done = trainer(level, at, e, regionId, res.job(), i) != null;
+                } else {
+                    done = switch (t) {
+                        case JARL -> {
+                            jarl = npc(level, at, NpcRole.JARL, jarlName(e.key), 10);
+                            yield jarl != null;
                         }
-                        yield hc != null;
-                    }
-                    case STEWARD -> steward(level, at, e) != null;
-                    case WIZARD -> npc(level, at, NpcRole.MAGE, Component.translatable("entity.skycraft.court_wizard"), 10) != null;
-                    case INN -> innkeeper(level, at, e);
-                    case BARD -> npc(level, at, NpcRole.BARD, null, 12) != null;
-                    case PRIEST -> npc(level, at, NpcRole.PRIEST, null, 10) != null;
-                    case SMITH -> merchant(level, at, VillagerProfession.WEAPONSMITH, "blacksmith", "entity.skycraft.blacksmith") != null;
-                    case MERCHANT -> merchant(level, at, VillagerProfession.CARTOGRAPHER, "general", "entity.skycraft.merchant") != null;
-                    case ALCHEMIST -> merchant(level, at, VillagerProfession.CLERIC, "apothecary", "entity.skycraft.apothecary") != null;
-                    case FARMER -> merchant(level, at, VillagerProfession.FARMER, "food", "entity.skycraft.farmer") != null;
-                    case MILLER, LUMBERJACK -> npc(level, at, NpcRole.LUMBERJACK, null, 24) != null;
-                    case MINER -> npc(level, at, NpcRole.MINER, null, 24) != null;
-                    case JEWELER -> merchant(level, at, VillagerProfession.TOOLSMITH, "jeweler", "entity.skycraft.jeweller") != null;
-                    case BOOKSELLER -> merchant(level, at, VillagerProfession.LIBRARIAN, "library", "entity.skycraft.bookseller") != null;
-                    case TAILOR -> merchant(level, at, VillagerProfession.SHEPHERD, "general", "entity.skycraft.tailor") != null;
-                    case BUTCHER -> merchant(level, at, VillagerProfession.BUTCHER, "food", "entity.skycraft.butcher", "hunter") != null;
-                    case FLETCHER -> merchant(level, at, VillagerProfession.FLETCHER, "fletcher", "entity.skycraft.fletcher") != null;
-                    case FENCE -> merchant(level, at, VillagerProfession.CARTOGRAPHER, "fence", "entity.skycraft.fence") != null;
-                    case FISHER -> merchant(level, at, VillagerProfession.FISHERMAN, "fisher", "entity.skycraft.fishmonger", "food") != null;
-                    case HUNTER -> merchant(level, at, VillagerProfession.LEATHERWORKER, "hunter", "entity.skycraft.hunter") != null;
-                    case WORKER -> npc(level, at, i % 2 == 0 ? NpcRole.LUMBERJACK : NpcRole.MINER, null, 24) != null;
-                    case GUARD -> guard(level, at);
-                    case GUILD_LEADER, GUILD_TRAINER, GUILD_VENDOR ->
-                            com.skycraft.quest.faction.FactionStaff.populate(level, a, at, e.key);
-                    case JAIL_PRISONER -> npc(level, at, NpcRole.BEGGAR, Component.translatable("entity.skycraft.prisoner"), 2) != null;
-                    // a bed's household: child, elder, a pair of hands at the nearest field or camp, inn cook/server
-                    case BED -> res.role() != null && npc(level, at, res.role(), null, 40) != null;
-                    default -> true;
-                };
+                        case HOUSECARL -> {
+                            NpcEntity hc = npc(level, at, NpcRole.HOUSECARL, com.skycraft.society.Courts.housecarlDisplayName(e.key), 16);
+                            if (hc != null) {
+                                NpcEntity leader = jarl;
+                                if (leader == null) {
+                                    var found = level.getEntitiesOfClass(NpcEntity.class, new net.minecraft.world.phys.AABB(at).inflate(32),
+                                            x -> x.isAlive() && x.role() == NpcRole.JARL);
+                                    if (!found.isEmpty()) leader = found.get(0);
+                                }
+                                if (leader != null) hc.setLeader(leader.getUUID());
+                            }
+                            yield hc != null;
+                        }
+                        case STEWARD -> steward(level, at, e) != null;
+                        case WIZARD -> npc(level, at, NpcRole.MAGE, com.skycraft.society.Courts.wizardDisplayName(e.key), 10) != null;
+                        case INN -> innkeeper(level, at, e);
+                        case BARD -> npc(level, at, NpcRole.BARD, null, 12) != null;
+                        case PRIEST -> npc(level, at, NpcRole.PRIEST, null, 10) != null;
+                        case SMITH -> merchant(level, at, VillagerProfession.WEAPONSMITH, "blacksmith", "entity.skycraft.blacksmith") != null;
+                        case MERCHANT -> merchant(level, at, VillagerProfession.CARTOGRAPHER, "general", "entity.skycraft.merchant") != null;
+                        case ALCHEMIST -> merchant(level, at, VillagerProfession.CLERIC, "apothecary", "entity.skycraft.apothecary") != null;
+                        case FARMER -> merchant(level, at, VillagerProfession.FARMER, "food", "entity.skycraft.farmer") != null;
+                        case MILLER, LUMBERJACK -> npc(level, at, NpcRole.LUMBERJACK, null, 24) != null;
+                        case MINER -> npc(level, at, NpcRole.MINER, null, 24) != null;
+                        case JEWELER -> merchant(level, at, VillagerProfession.TOOLSMITH, "jeweler", "entity.skycraft.jeweller") != null;
+                        case BOOKSELLER -> merchant(level, at, VillagerProfession.LIBRARIAN, "library", "entity.skycraft.bookseller") != null;
+                        case TAILOR -> merchant(level, at, VillagerProfession.SHEPHERD, "general", "entity.skycraft.tailor") != null;
+                        case BUTCHER -> merchant(level, at, VillagerProfession.BUTCHER, "food", "entity.skycraft.butcher", "hunter") != null;
+                        case FLETCHER -> merchant(level, at, VillagerProfession.FLETCHER, "fletcher", "entity.skycraft.fletcher") != null;
+                        case FENCE -> merchant(level, at, VillagerProfession.CARTOGRAPHER, "fence", "entity.skycraft.fence") != null;
+                        case FISHER -> merchant(level, at, VillagerProfession.FISHERMAN, "fisher", "entity.skycraft.fishmonger", "food") != null;
+                        case HUNTER -> merchant(level, at, VillagerProfession.LEATHERWORKER, "hunter", "entity.skycraft.hunter") != null;
+                        case WORKER -> npc(level, at, i % 2 == 0 ? NpcRole.LUMBERJACK : NpcRole.MINER, null, 24) != null;
+                        case GUARD -> guard(level, at);
+                        case GUILD_LEADER, GUILD_VENDOR ->
+                                com.skycraft.quest.faction.FactionStaff.populate(level, a, at, e.key);
+                        case GUILD_TRAINER -> {
+                            boolean ok = com.skycraft.quest.faction.FactionStaff.populate(level, a, at, e.key);
+                            if (!ok && res.role() == NpcRole.TRAINER) {
+                                yield trainer(level, at, e, regionId, res.job(), i) != null;
+                            }
+                            yield ok;
+                        }
+                        case JAIL_PRISONER -> npc(level, at, NpcRole.BEGGAR, Component.translatable("entity.skycraft.prisoner"), 2) != null;
+                        // a bed's household (or a court member / trainer seated from a bed slot)
+                        case BED, GUILD_BED, GUEST_BED -> {
+                            if ("steward".equals(res.job())) yield steward(level, at, e) != null;
+                            if ("jarl".equals(res.job())) yield npc(level, at, NpcRole.JARL, jarlName(e.key), 10) != null;
+                            if ("court_wizard".equals(res.job())) yield npc(level, at, NpcRole.MAGE, com.skycraft.society.Courts.wizardDisplayName(e.key), 10) != null;
+                            if ("housecarl".equals(res.job())) yield npc(level, at, NpcRole.HOUSECARL, com.skycraft.society.Courts.housecarlDisplayName(e.key), 16) != null;
+                            yield res.role() != null && npc(level, at, res.role(), null, 40) != null;
+                        }
+                        default -> true;
+                    };
+                }
             } catch (RuntimeException ex) {
                 Skycraft.LOGGER.warn("Could not populate {} anchor of {}", a.type(), e.key, ex);
                 done = true;
@@ -268,10 +285,7 @@ public final class SettlementPopulation {
             pd.putString(Housing.JOB_KEY, job);
             pd.putString(Housing.SLOT_KEY, slot);
             if (regionId != null && !regionId.isEmpty()) {
-                List<String> why = com.skycraft.tamriel.world.WorldSheets.whyForJob(regionId, job);
-                if (why.isEmpty() && res.role() != null) {
-                    why = com.skycraft.tamriel.world.WorldSheets.whyForJob(regionId, res.role().name());
-                }
+                List<String> why = res.why(regionId);
                 if (!why.isEmpty()) {
                     pd.putString(Housing.WHY_KEY, String.join(",", why));
                 }
@@ -366,12 +380,20 @@ public final class SettlementPopulation {
         NpcEntity npc = Npcs.create(level, at, NpcRole.STEWARD);
         if (npc == null) return null;
         npc.setPersistenceRequired();
-        npc.setCustomName(Component.translatable("entity.skycraft.steward", firstName(npc.isFemale(), level.getRandom())));
+        npc.setCustomName(com.skycraft.society.Courts.stewardDisplayName(e.key));
         npc.getPersistentData().putBoolean("skycraft_steward", true);
         npc.getPersistentData().putString("skycraft_steward_of", e.key);
         npc.getPersistentData().putBoolean("skycraft_settler", true);
         npc.setHome(at, 12);
         return level.addFreshEntity(npc) ? npc : null;
+    }
+
+    @Nullable
+    static NpcEntity trainer(ServerLevel level, BlockPos at, SettlementAnchors.Entry e,
+                             @Nullable String regionId, String jobId, int slotIdx) {
+        at = freeSpot(level, at);
+        if (at == null) return null;
+        return com.skycraft.society.SocietyTrainers.spawnSettledTrainer(level, at, e.key, tier(e), regionId, jobId, slotIdx);
     }
 
     static boolean guard(ServerLevel level, BlockPos at) {
@@ -489,18 +511,6 @@ public final class SettlementPopulation {
     }
 
     static Component jarlName(String key) {
-        String name = switch (key) {
-            case "whiterun" -> "Balgruuf the Greater";
-            case "solitude" -> "Elisif the Fair";
-            case "windhelm" -> "Ulfric Stormcloak";
-            case "riften" -> "Laila Law-Giver";
-            case "markarth" -> "Igmund";
-            case "winterhold" -> "Korir";
-            case "falkreath" -> "Siddgeir";
-            case "morthal" -> "Idgrod Ravencrone";
-            case "dawnstar" -> "Skald the Elder";
-            default -> null;
-        };
-        return name == null ? null : Component.translatable("entity.skycraft.jarl", name);
+        return com.skycraft.society.Courts.jarlDisplayName(key);
     }
 }

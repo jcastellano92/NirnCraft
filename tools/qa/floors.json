@@ -1,0 +1,303 @@
+{
+  "_comment": "Machine-readable copy of docs/world/DESIGN-PRINCIPLES.md Sections 4.3, 4.4, 4.5, 4.8, and 5.4.",
+  "region_per_km2": {
+    "map_markers": { "median": 14.6, "abs": 11.0 },
+    "dungeons": { "median": 8.9, "abs": 6.7 },
+    "caves": { "median": 2.6, "abs": 2.0 },
+    "ancient_tombs_ruins": { "median": 1.44, "abs": 0.34 },
+    "forts": { "median": 1.14, "abs": 0.65 },
+    "elder_race_ruins": { "median": 0.24, "abs": 0.0 },
+    "mines": { "median": 0.43, "abs": 0.0 },
+    "dungeon_themes": { "fixed": 8, "target": 10 },
+    "signature_theme": { "fixed": 1 },
+    "unmarked_dungeons": { "median": 0.57, "abs": 0.22 },
+    "military_camps": { "median": 1.03, "abs": 0.43 },
+    "watchtowers": { "median": 0.69, "abs": 0.0 },
+    "shacks_dwellings": { "median": 1.29, "abs": 0.60 },
+    "marked_landmarks": { "median": 0.86, "abs": 0.22 },
+    "great_beast_lairs": { "median": 0.72, "abs": 0.0 },
+    "shrines_stones": { "median": 0.57, "abs": 0.24 },
+    "power_sites": { "median": 1.5, "abs": 0.34 },
+    "settlements": { "fixed": 1, "median": 2.0, "abs": 0.43 },
+    "named_npcs": { "median": 33.6, "abs": 16.6 },
+    "merchants": { "median": 5.0, "abs": 0.86 },
+    "trainers": { "median": 3.55, "abs": 1.08 },
+    "quests": { "median": 14.0, "abs": 2.6 },
+    "skill_books": { "median": 16.2, "abs": 10.8 },
+    "readables": { "median": 195.0, "abs": 104.0 },
+    "distinct_readable_titles": { "fixed": 143 },
+    "spell_tomes": { "median": 1.1, "abs": 0.0 },
+    "placed_uniques": { "median": 2.9, "abs": 0.68 },
+    "loot_containers": { "median": 131.0, "abs": 83.0 },
+    "key_relics": { "median": 0.43, "abs": 0.0 },
+    "treasure_maps": { "fixed": 4, "median": 1.0 },
+    "lore_web_arcs": { "fixed": 1 },
+    "hidden_find_quests": { "fixed": 1, "median": 0.5 },
+    "regional_products": { "fixed": 3 },
+    "wilderness_travel_nodes": { "median": 0.7 },
+    "scripted_encounters": { "fixed": 8, "province_specific": 3 },
+    "wonder_moments": { "fixed": 3 },
+    "micro_biomes": { "fixed": 6, "median": 2.0 },
+    "region_voice_lines": { "fixed": 4, "max": 6 },
+    "reactive_lines": { "fixed": 12 },
+    "rumours_legends_songs": { "fixed": 12 },
+    "planned_scenes": { "min": 5.0, "max": 15.0 },
+    "waysides_per_km": {
+      "highway": [0.33, 0.67],
+      "lane": [0.25, 0.71],
+      "trail": [0.17, 0.29]
+    }
+  },
+  "settlement_tiers": {
+    "capital": {
+      "named_npcs": { "target": 73, "abs": 63, "max": 91 },
+      "interiors": { "target": 27, "abs": 24, "max": 33 },
+      "named_buildings": { "target": 23, "abs": 18, "max": 31 },
+      "merchants": { "target": 15, "abs": 14, "max": 22 },
+      "trainers": { "target": 5, "abs": 4, "max": 9 },
+      "inns": { "target": 1, "abs": 1, "max": 2 },
+      "roles": { "target": 45, "abs": 41, "max": 54 },
+      "quests": { "target": 19, "abs": 12, "max": 48 },
+      "scenes": { "target": 8, "abs": 8, "max": 12 }
+    },
+    "city": {
+      "named_npcs": { "target": 20, "abs": 13, "max": 35 },
+      "interiors": { "target": 10, "abs": 7, "max": 14 },
+      "named_buildings": { "target": 11, "abs": 5, "max": 12 },
+      "merchants": { "target": 4, "abs": 3, "max": 5 },
+      "trainers": { "target": 2, "abs": 0, "max": 5 },
+      "inns": { "target": 1, "abs": 1, "max": 1 },
+      "roles": { "target": 22, "abs": 15, "max": 23 },
+      "quests": { "target": 3, "abs": 3, "max": 5 },
+      "scenes": { "target": 6, "abs": 6, "max": 6 }
+    },
+    "town": {
+      "named_npcs": { "target": 9, "abs": 4, "max": 15 },
+      "interiors": { "target": 4, "abs": 2, "max": 8 },
+      "named_buildings": { "target": 4, "abs": 2, "max": 8 },
+      "merchants": { "target": 1, "abs": 0, "max": 4 },
+      "trainers": { "target": 0, "abs": 0, "max": 5 },
+      "inns": { "target": 0.5, "abs": 0, "max": 1 },
+      "roles": { "target": 8, "abs": 3, "max": 17 },
+      "quests": { "target": 2, "abs": 0, "max": 10 },
+      "scenes": { "target": 3, "abs": 3, "max": 3 }
+    },
+    "village": {
+      "named_npcs": { "target": 3, "abs": 1, "max": 12 },
+      "interiors": { "target": 2, "abs": 1, "max": 4 },
+      "named_buildings": { "target": 1, "abs": 0, "max": 4 },
+      "merchants": { "target": 0, "abs": 0, "max": 3 },
+      "trainers": { "target": 0.5, "abs": 0, "max": 4 },
+      "inns": { "target": 0, "abs": 0, "max": 1 },
+      "roles": { "target": 2, "abs": 0, "max": 13 },
+      "quests": { "target": 1, "abs": 0, "max": 13 },
+      "scenes": { "target": 2, "abs": 2, "max": 2 }
+    },
+    "hamlet": {
+      "named_npcs": { "target": 2, "abs": 1, "max": 5 },
+      "interiors": { "target": 1, "abs": 1, "max": 4 },
+      "named_buildings": { "target": 0, "abs": 0, "max": 1 },
+      "merchants": { "target": 0, "abs": 0, "max": 1 },
+      "trainers": { "target": 0, "abs": 0, "max": 0 },
+      "inns": { "target": 0, "abs": 0, "max": 0 },
+      "roles": { "target": 1, "abs": 1, "max": 3 },
+      "quests": { "target": 1, "abs": 0, "max": 2 },
+      "scenes": { "target": 1, "abs": 1, "max": 1 }
+    }
+  },
+  "dungeon_classes": {
+    "marquee": {
+      "per_region": 1,
+      "per_km2": null,
+      "abs_per_km2": null,
+      "minutes": [40, 90],
+      "rooms": [15, 30],
+      "loop_share": 1.0
+    },
+    "major": {
+      "per_region": null,
+      "per_km2": 2.4,
+      "abs_per_km2": 1.9,
+      "minutes": [15, 40],
+      "rooms": [8, 14],
+      "loop_share": 0.9
+    },
+    "short": {
+      "per_region": null,
+      "per_km2": 3.0,
+      "abs_per_km2": 2.0,
+      "minutes": [5, 12],
+      "rooms": [4, 6],
+      "loop_share": 0.0
+    },
+    "minor": {
+      "per_region": null,
+      "per_km2": 3.9,
+      "abs_per_km2": 2.6,
+      "minutes": [2, 8],
+      "rooms": [1, 3],
+      "loop_share": 0.0
+    },
+    "unmarked": {
+      "per_region": null,
+      "per_km2": 0.57,
+      "abs_per_km2": 0.22,
+      "minutes": [1, 5],
+      "rooms": [1, 1],
+      "loop_share": 0.0
+    }
+  },
+  "quests": {
+    "all_per_km2": { "median": 14.0, "abs": 2.6, "abs_min": 8 },
+    "hold_conflict_chains": { "min": 1, "min_quests": 3 },
+    "side_quests": { "median": 3, "abs": 0, "per_seat": 1 },
+    "daedric_or_power": { "median": 2, "abs": 0, "per_3_regions": 1 },
+    "favours": { "median": 3, "abs": 2 },
+    "faction_quests": { "median": 6, "abs": 1 },
+    "radiant_offers": { "median": 4, "abs": 1 },
+    "main_story_chapters": { "min": 0, "max": 2 },
+    "hidden_find": { "fixed": 1, "per_km2": 0.5 },
+    "lore_web_arcs": { "min": 1 },
+    "radiant_templates": { "total": 40, "culture_specific": 6 },
+    "jarl_bounties": { "min": 2 },
+    "notice_board_offers": { "min": 3, "max": 6 }
+  },
+  "flw": {
+    "F-HOOK": {
+      "measure": "Distance from each region border-crossing road entry to the first MS1 story hook",
+      "max_blocks": 800
+    },
+    "F-STORY": {
+      "measure": "Every region has an MS1 story chain with >= 3 quests, a world-state finale, and why citing L7-L10",
+      "min_quests": 3,
+      "require_finale": true,
+      "require_why": true
+    },
+    "F-VISTA": {
+      "measure": "Every settlement and marquee dungeon has >= 1 MS4 approach vista with unobstructed line of sight",
+      "min_vistas_per_target": 1
+    },
+    "F-WEENIE": {
+      "measure": "Share of 500 m highway samples from which >= 2 distinct landmark silhouettes are visible",
+      "sample_spacing_m": 500,
+      "min_landmarks": 2,
+      "min_share": 0.70
+    },
+    "F-DETOUR": {
+      "measure": "Maximum gap along any highway/lane without a visible side trail, shrine, ruin, camp, inn, or scene within 200 blocks; waysides per km by tier",
+      "max_gap_blocks": 450,
+      "radius_blocks": 200,
+      "waysides_per_km": {
+        "highway": [0.33, 0.67],
+        "lane": [0.25, 0.71],
+        "trail": [0.17, 0.29]
+      }
+    },
+    "F-SIGN": {
+      "measure": "Every highway/lane junction has a readable signpost pointing to the next settlement or landmark",
+      "required_share": 1.0
+    },
+    "F-TRAVEL": {
+      "measure": "Every region seat has >= 2 MS3 transit links; wilderness travel nodes / km2",
+      "min_links_per_seat": 2,
+      "wilderness_per_km2": 0.7
+    },
+    "F-ENC": {
+      "measure": "Distinct MS5 road encounter templates eligible per region; province-specific templates",
+      "min_templates": 8,
+      "min_province_specific": 3
+    },
+    "F-WONDER": {
+      "measure": "MS10 wonder moments per region",
+      "min_per_region": 3
+    },
+    "F-QUIET": {
+      "measure": "Share of road distance that is open scenic breathing room (no hostile spawn or structure within 80 blocks)",
+      "radius_blocks": 80,
+      "min_share": 0.30,
+      "max_share": 0.60
+    },
+    "F-LOOP": {
+      "measure": "Share of marquee and major dungeons with a verified loop-back shortcut exit",
+      "marquee_min_share": 1.0,
+      "major_min_share": 0.90
+    },
+    "F-QUEST-RADIUS": {
+      "measure": "Share of region side/favour quest objectives within 1.5 km of the quest giver",
+      "radius_blocks": 1500,
+      "min_share": 0.80
+    },
+    "F-STARTS": {
+      "measure": "Distinct quest start modes present in each region",
+      "min_modes": 4
+    },
+    "F-REWARD-RATE": {
+      "measure": "Placed uniques / km2, skill books / km2, spell tomes / km2, treasure maps / km2, word walls / power sites / km2",
+      "placed_uniques_per_km2": { "median": 2.9, "abs": 0.68 },
+      "skill_books_per_km2": { "median": 16.2, "abs": 10.8 },
+      "spell_tomes_per_km2": { "median": 1.1, "abs": 0.0 },
+      "treasure_maps_per_km2": { "fixed": 4, "median": 1.0 },
+      "power_sites_per_km2": { "median": 1.5, "abs": 0.34 }
+    },
+    "F-COLLECT": {
+      "measure": "Every province has >= 1 multi-part collectible arc with a capstone reward; each region contributes >= 1 piece",
+      "min_arcs_per_province": 1,
+      "min_pieces_per_region": 1
+    },
+    "F-GROUP": {
+      "measure": "Share of hostile spawns with >= 2 behaviour roles",
+      "min_roles": 2,
+      "min_share": 0.50
+    },
+    "F-EVENT": {
+      "measure": "Every region has >= 1 world-event site that visibly changes state after clearing",
+      "min_per_region": 1
+    },
+    "F-GUIDE": {
+      "measure": "Every region has >= 1 ecological guide-clue species pair",
+      "min_per_region": 1
+    },
+    "F-LEVEL": {
+      "measure": "Every region declares road/interior/deep-wilds/apex danger bands; road encounters stay within road band",
+      "required_bands": 4
+    },
+    "F-HUBS": {
+      "measure": "Every capital and city has all 5 MS6 social hubs within 90 blocks of the main gate and a 3-tier wealth gradient",
+      "required_hubs": 5,
+      "max_gate_distance_blocks": 90,
+      "required_wealth_tiers": 3
+    },
+    "F-COURT": {
+      "measure": "Every region seat has ruler, steward, court wizard/priest, housecarl, >= 2 bounties, thaneship/honour title, and purchasable/earnable home or room",
+      "min_court_roles": 4,
+      "min_bounties": 2
+    },
+    "F-BOARD": {
+      "measure": "Every inn and seat has a notice board or steward/innkeeper offering 3-6 local bounties/errands",
+      "min_offers": 3,
+      "max_offers": 6
+    },
+    "F-ORPHAN": {
+      "measure": "Share of named dungeons referenced by >= 1 quest, rumour, bounty, treasure map, lore note, or NPC dialogue",
+      "min_share": 0.80
+    },
+    "F-POI": {
+      "measure": "95th-percentile nearest-neighbour distance between discoverable POIs on land",
+      "p95_max_blocks": 350,
+      "median_range_blocks": [140, 220]
+    },
+    "F-REACT": {
+      "measure": "Reactive guard/innkeeper dialogue lines per region keyed to completed quests, cleared dungeons, faction rank, or gear",
+      "min_per_region": 12
+    },
+    "F-MICRO": {
+      "measure": "Named micro-biomes / scenic sub-zones per region",
+      "min_fixed": 6,
+      "min_per_km2": 2.0
+    },
+    "F-WHY": {
+      "measure": "Share of settlements, dungeons, quests, uniques, and encounters with valid why citations to the region's World Sheet",
+      "required_share": 1.0
+    }
+  }
+}

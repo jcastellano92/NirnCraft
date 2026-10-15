@@ -4,441 +4,704 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.skycraft.Skycraft;
-import com.skycraft.creatures.CreaturesConfig;
+import com.skycraft.core.Holds;
 import com.skycraft.creatures.Leveling;
-import com.skycraft.society.Encounters;
-import com.skycraft.society.Npcs;
+import com.skycraft.network.NotifyKind;
+import com.skycraft.network.SkyNetwork;
+import com.skycraft.quest.Objective;
+import com.skycraft.quest.Quest;
+import com.skycraft.quest.Quests;
+import com.skycraft.quest.SideQuests;
+import com.skycraft.core.Notifier;
+import com.skycraft.quest.story.Story;
+import com.skycraft.quest.story.StoryData;
+import com.skycraft.roads.RoadCells;
 import com.skycraft.society.NpcRole;
-import com.skycraft.society.entity.NpcEntity;
+import com.skycraft.society.Npcs;
+import com.skycraft.tamriel.Places;
 import com.skycraft.tamriel.Region;
 import com.skycraft.tamriel.Regions;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.Difficulty;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.HayBlock;
+import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.AABB;
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.EnumSet;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * A small table of scripted-ish wandering scenes, driven by {@code skycraft/creatures/scenes.json}: a caravan beset
- * by wolves, hunters tracking an elk, a lone pilgrim, two thugs arguing over loot, a hunters' camp. Complements the
- * society module's {@link Encounters} (which owns couriers, escorts, vampires...) with an ecology-minded layer:
- * low frequency (one roll per player per {@code cooldownSeconds}), a daylight bias, the shared hostile pacing rules
- * ({@link SpawnPacing}), and entirely made from existing NPC roles and creatures. Opposed groups then also fight
- * through {@link com.skycraft.creatures.FactionWars}. A scene is a moment: its mobs are tagged, and removed once the
- * player has moved on (never kept across a restart).
+ * Data-driven wilderness & road encounters ({@code /skycraft/creatures/scenes.json}):
+ * multi-actor scenes, wonder moments ({@code "wonder": true}), world-sheet citations ({@code "why"}),
+ * and optional one-shot quest hooks ({@code "questHook"}).
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class WildScenes {
-    private static final String TAG = "skycraft_scene";
+    public static final String RESOURCE = "/skycraft/creatures/scenes.json";
+    public static final String TAG_SCENE = "skycraft_scene";
+    public static final String TAG_SCENE_ID = "skycraft_scene_id";
+    public static final String TAG_QUEST_HOOK = "skycraft_scene_quest_hook";
+    public static final String TAG_HOOK_CLAIMED = "skycraft_scene_hook_claimed";
 
-    private record MemberDef(String npcRole, EntityType<?> type, int min, int max, String as, String target, String leader,
-                             boolean past, boolean hold, int dx, int dz, String nameKey) {}
+    public static final List<String> SKYRIM_HOLDS = List.of(
+            "whiterun", "haafingar", "eastmarch", "the_rift", "the_reach",
+            "falkreath", "hjaalmarch", "the_pale", "winterhold"
+    );
 
-    private record SceneDef(String id, int weight, SpawnTables.Time time, SpawnTables.Weather weather, int minLevel, int maxLevel,
-                            Set<BiomeFamily> families, Set<String> regions, Set<String> provinces, SpawnTables.RoadRule road,
-                            int townMin, int townMax, boolean hostile, boolean campfire, int calmAfter, List<MemberDef> members) {}
+    public record Actor(
+            @Nullable NpcRole npc,
+            @Nullable EntityType<?> entity,
+            int min,
+            int max,
+            int radius,
+            boolean hostile,
+            String group,
+            String pose,
+            int leash
+    ) {}
 
-    /** A live scene: its mobs, when it ends, when mutual fights break off, and a campfire to put out. */
-    private static final class Live {
-        final long id;
-        final ServerLevel level;
-        final List<Mob> mobs = new ArrayList<>();
-        final long end;
-        final long calmAt;
-        final List<Mob> fighters = new ArrayList<>();
-        BlockPos campfire;
-
-        Live(long id, ServerLevel level, long end, long calmAt) {
-            this.id = id;
-            this.level = level;
-            this.end = end;
-            this.calmAt = calmAt;
+    public record Scene(
+            String id,
+            int weight,
+            boolean wonder,
+            String road,
+            String time,
+            double minWildness,
+            Set<String> provinces,
+            Set<String> regions,
+            Set<String> cultures,
+            Set<BiomeFamily> families,
+            String purpose,
+            List<String> needs,
+            List<String> why,
+            String questHook,
+            List<String> props,
+            List<Actor> actors
+    ) {
+        public boolean matchesHold(String holdShortOrFull) {
+            String shortId = holdShortOrFull.contains("/")
+                    ? holdShortOrFull.substring(holdShortOrFull.indexOf('/') + 1)
+                    : holdShortOrFull;
+            String fullId = "skyrim/" + shortId;
+            return regions.contains(shortId) || regions.contains(fullId);
         }
     }
 
-    private static boolean loaded;
-    private static List<SceneDef> scenes = List.of();
-    private static int cooldownMin = 900;
-    private static int cooldownMax = 1500;
-    private static int firstMin = 240;
-    private static int firstMax = 480;
-    private static double nightFactor = 0.3;
-    private static int minDist = 45;
-    private static int maxDist = 85;
-    private static int lifetime = 900;
-
-    private static final Map<UUID, Long> NEXT = new HashMap<>();
-    private static final List<Live> LIVE = new ArrayList<>();
-    private static final Set<Long> ACTIVE = new HashSet<>();
+    private static volatile List<Scene> scenes;
+    private static final Map<UUID, Long> COOLDOWN = new ConcurrentHashMap<>();
+    private static final long MIN_INTERVAL_TICKS = 20L * 75L;
 
     private WildScenes() {}
 
-    // ------------------------------------------------------------------ data
-
-    private static synchronized void load() {
-        if (loaded) return;
-        loaded = true;
-        try (InputStream in = WildScenes.class.getResourceAsStream("/skycraft/creatures/scenes.json")) {
-            if (in == null) return;
-            JsonObject root = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
-            int[] cd = range(root, "cooldownSeconds", 900, 1500);
-            cooldownMin = cd[0];
-            cooldownMax = Math.max(cd[0], cd[1]);
-            int[] first = range(root, "firstSeconds", 240, 480);
-            firstMin = first[0];
-            firstMax = Math.max(first[0], first[1]);
-            int[] dist = range(root, "distance", 45, 85);
-            minDist = dist[0];
-            maxDist = Math.max(dist[0], dist[1]);
-            if (root.has("nightFactor")) nightFactor = root.get("nightFactor").getAsDouble();
-            if (root.has("lifetimeSeconds")) lifetime = root.get("lifetimeSeconds").getAsInt();
-            List<SceneDef> out = new ArrayList<>();
-            for (JsonElement e : root.getAsJsonArray("scenes")) {
-                try {
-                    out.add(parseScene(e.getAsJsonObject()));
-                } catch (RuntimeException ex) {
-                    Skycraft.LOGGER.warn("Bad wild scene: {}", ex.toString());
-                }
-            }
-            scenes = List.copyOf(out);
-            Skycraft.LOGGER.info("Loaded {} wild scenes", scenes.size());
-        } catch (Exception ex) {
-            Skycraft.LOGGER.warn("Wild scenes failed to load: {}", ex.toString());
+    public static List<Scene> all() {
+        List<Scene> s = scenes;
+        if (s != null) return s;
+        synchronized (WildScenes.class) {
+            if (scenes == null) scenes = load();
+            return scenes;
         }
     }
 
-    private static int[] range(JsonObject o, String key, int defMin, int defMax) {
-        if (!o.has(key)) return new int[]{defMin, defMax};
-        JsonElement e = o.get(key);
-        if (e.isJsonPrimitive()) return new int[]{e.getAsInt(), e.getAsInt()};
-        JsonArray a = e.getAsJsonArray();
-        return new int[]{a.get(0).getAsInt(), a.get(a.size() - 1).getAsInt()};
-    }
-
-    private static Set<String> strings(JsonObject o, String key) {
-        Set<String> s = new HashSet<>();
-        if (o.has(key)) for (JsonElement e : o.getAsJsonArray(key)) s.add(e.getAsString());
-        return s;
-    }
-
-    private static String str(JsonObject o, String key, String def) {
-        return o.has(key) ? o.get(key).getAsString() : def;
-    }
-
-    private static SceneDef parseScene(JsonObject o) {
-        EnumSet<BiomeFamily> fams = EnumSet.noneOf(BiomeFamily.class);
-        for (String f : strings(o, "families")) fams.add(BiomeFamily.byId(f));
-        int[] lv = range(o, "levels", 1, 999);
-        List<MemberDef> members = new ArrayList<>();
-        for (JsonElement me : o.getAsJsonArray("members")) {
-            JsonObject m = me.getAsJsonObject();
-            String npc = m.has("npc") ? m.get("npc").getAsString() : null;
-            EntityType<?> type = null;
-            if (npc != null) {
-                if (NpcRole.byId(npc) == null) throw new IllegalArgumentException("unknown npc role " + npc);
-            } else {
-                net.minecraft.resources.ResourceLocation id = new net.minecraft.resources.ResourceLocation(m.get("entity").getAsString());
-                if (!ForgeRegistries.ENTITY_TYPES.containsKey(id)) throw new IllegalArgumentException("unknown entity " + id);
-                type = ForgeRegistries.ENTITY_TYPES.getValue(id);
-            }
-            int[] c = range(m, "count", 1, 1);
-            members.add(new MemberDef(npc, type, c[0], Math.max(c[0], c[1]), str(m, "as", ""), str(m, "target", ""), str(m, "leader", ""),
-                    m.has("dest") && "past".equals(m.get("dest").getAsString()), m.has("hold") && m.get("hold").getAsBoolean(),
-                    m.has("dx") ? m.get("dx").getAsInt() : 0, m.has("dz") ? m.get("dz").getAsInt() : 0, str(m, "name", "")));
+    public static Optional<Scene> byId(String id) {
+        if (id == null || id.isEmpty()) return Optional.empty();
+        for (Scene s : all()) {
+            if (s.id.equalsIgnoreCase(id)) return Optional.of(s);
         }
-        return new SceneDef(o.get("id").getAsString(), Math.max(1, o.has("weight") ? o.get("weight").getAsInt() : 5),
-                SpawnTables.Time.valueOf(str(o, "time", "day").toUpperCase(Locale.ROOT)),
-                SpawnTables.Weather.valueOf(str(o, "weather", "any").toUpperCase(Locale.ROOT)), lv[0], lv[1], fams,
-                strings(o, "regions"), strings(o, "provinces"),
-                SpawnTables.RoadRule.valueOf(str(o, "road", "any").toUpperCase(Locale.ROOT)),
-                o.has("townMin") ? o.get("townMin").getAsInt() : 0, o.has("townMax") ? o.get("townMax").getAsInt() : 0,
-                o.has("hostile") && o.get("hostile").getAsBoolean(), o.has("campfire") && o.get("campfire").getAsBoolean(),
-                o.has("calmAfter") ? o.get("calmAfter").getAsInt() : 0, List.copyOf(members));
+        return Optional.empty();
     }
 
-    // ------------------------------------------------------------------ events
-
-    @SubscribeEvent
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        NEXT.remove(event.getEntity().getUUID());
+    public static List<Scene> forRegion(Region region) {
+        if (region == null) return List.of();
+        List<Scene> out = new ArrayList<>();
+        for (Scene s : all()) {
+            if (matchesRegion(s, region)) out.add(s);
+        }
+        return out;
     }
 
-    /** A scene's mobs that come back from a save (no live scene) are gone: scenes never survive a restart. */
-    @SubscribeEvent
-    public static void onJoin(EntityJoinLevelEvent event) {
-        Entity e = event.getEntity();
-        if (event.getLevel().isClientSide || !e.getPersistentData().contains(TAG)) return;
-        if (!ACTIVE.contains(e.getPersistentData().getLong(TAG))) event.setCanceled(true);
+    public static List<Scene> forHold(String holdId) {
+        String shortId = holdId.contains("/") ? holdId.substring(holdId.indexOf('/') + 1) : holdId;
+        String fullId = "skyrim/" + shortId;
+        List<Scene> out = new ArrayList<>();
+        for (Scene s : all()) {
+            if (s.regions.contains(shortId) || s.regions.contains(fullId)) {
+                out.add(s);
+            }
+        }
+        return out;
     }
 
-    @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
-        ServerLevel level = player.serverLevel();
-        if ((level.getGameTime() + player.getId() * 13L) % 100 != 0) return;
-        if (level.dimension() != Level.OVERWORLD || player.isSpectator() || !player.isAlive()) return;
-        if (!CreaturesConfig.REGION_SPAWNING.get() || !level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) return;
-        if (!loaded) load();
-        if (scenes.isEmpty()) return;
-        RandomSource random = level.getRandom();
+    /**
+     * Called by {@link RegionSpawner} when a spawn cycle has a free roll: has a small chance to place a multi-actor
+     * scene instead of a plain pack. Returns the number of mobs spawned (0 when no scene rolled).
+     */
+    public static int tryRoll(ServerLevel level, ServerPlayer player, BlockPos pos, Region region, BiomeFamily family,
+                              double wildness, RandomSource random) {
+        if (random.nextInt(5) != 0) return 0;
         long now = level.getGameTime();
-        Long next = NEXT.get(player.getUUID());
-        if (next == null) {
-            NEXT.put(player.getUUID(), now + 20L * (firstMin + random.nextInt(Math.max(1, firstMax - firstMin + 1))));
-            return;
-        }
-        if (now < next) return;
-        long wait = 20L * (cooldownMin + random.nextInt(Math.max(1, cooldownMax - cooldownMin + 1)));
-        NEXT.put(player.getUUID(), now + wait);
-        try {
-            if (!roll(level, player, random)) NEXT.put(player.getUUID(), now + 20L * 60); // nothing fit: look again in a minute
-        } catch (RuntimeException ex) {
-            Skycraft.LOGGER.warn("Wild scene failed", ex);
-        }
-    }
+        Long prev = COOLDOWN.get(player.getUUID());
+        if (prev != null && now - prev < MIN_INTERVAL_TICKS) return 0;
 
-    @SubscribeEvent
-    public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.level instanceof ServerLevel level) || LIVE.isEmpty()) return;
-        long now = com.skycraft.world.RestManager.liveTime(level);
-        if (now % 40 != 11) return;
-        for (Iterator<Live> it = LIVE.iterator(); it.hasNext(); ) {
-            Live s = it.next();
-            if (s.level != level) continue;
-            if (s.calmAt > 0 && now >= s.calmAt && !s.fighters.isEmpty()) {
-                // an argument, not a war: they stop fighting each other
-                for (Mob m : s.fighters) {
-                    if (m.isAlive() && m.getTarget() != null && !(m.getTarget() instanceof net.minecraft.world.entity.player.Player)) m.setTarget(null);
-                }
-                s.fighters.clear();
-            }
-            boolean allGone = true;
-            boolean watched = false;
-            boolean near = false;
-            for (Mob m : s.mobs) {
-                if (m.isRemoved() || !m.isAlive()) continue;
-                allGone = false;
-                // adopted: named by a name tag, leashed or made persistent by the player
-                if (m.isLeashed() || m.getPersistentData().contains("skycraft_keep")) {
-                    m.getPersistentData().remove(TAG);
-                    continue;
-                }
-                if (level.getNearestPlayer(m, 128) != null) watched = true;
-                if (level.getNearestPlayer(m, 48) != null) near = true;
-            }
-            boolean over = allGone || !watched || now > s.end && !near;
-            if (!over) continue;
-            for (Mob m : s.mobs) {
-                if (!m.isRemoved() && m.getPersistentData().contains(TAG)) m.discard();
-            }
-            if (s.campfire != null && level.getBlockState(s.campfire).is(Blocks.CAMPFIRE)) level.removeBlock(s.campfire, false);
-            ACTIVE.remove(s.id);
-            it.remove();
-        }
-    }
+        if (!level.getEntitiesOfClass(Mob.class, new AABB(pos).inflate(64),
+                m -> m.getPersistentData().getBoolean(TAG_SCENE)).isEmpty()) return 0;
+        if (SpawnPacing.settlementWithin(level, pos, 80)) return 0;
 
-    // ------------------------------------------------------------------ one roll
-
-    private static boolean roll(ServerLevel level, ServerPlayer player, RandomSource random) {
-        boolean night = level.isNight();
-        if (night && random.nextDouble() > nightFactor) return true; // a quiet night
-        // wilderness only: the surface, outside settlements
-        int surface = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.getBlockX(), player.getBlockZ());
-        if (surface - player.getBlockY() > 8 || RegionSpawner.inSettlement(level, player.blockPosition())) return false;
-        // one scene, and no society encounter, near the player at a time
-        for (Live s : LIVE) {
-            if (s.level == level && s.mobs.stream().anyMatch(m -> !m.isRemoved() && m.distanceToSqr(player) < 160 * 160)) return true;
-        }
-        if (!level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(128, 64, 128), Encounters::isTagged).isEmpty()) return true;
-        boolean peaceful = level.getDifficulty() == Difficulty.PEACEFUL;
-
-        BlockPos spot = pickSpot(level, player, random);
-        if (spot == null) return false;
-        Region region = Regions.at(level, spot);
-        BiomeFamily family = BiomeFamily.of(level.getBiome(spot), spot);
-        int regionLevel = Leveling.regionLevel(level, spot);
-        double fromStart = SpawnPacing.distFromStart(level, spot.getX(), spot.getZ());
-        if (fromStart < 900) regionLevel = Math.min(regionLevel, 2 + (int) (fromStart / 90));
-        boolean nearStart = SpawnPacing.nearStart(level, spot.getX(), spot.getZ());
-        boolean onRoad = SpawnPacing.onRoad(level, spot);
-        long dayTime = level.getDayTime() % 24000L;
-        SpawnTables.Weather weather = level.isThundering() ? SpawnTables.Weather.STORM
-                : level.isRaining() ? SpawnTables.Weather.RAIN : SpawnTables.Weather.CLEAR;
-
-        List<SceneDef> ok = new ArrayList<>();
+        List<Scene> matching = new ArrayList<>();
         int total = 0;
-        for (SceneDef s : scenes) {
-            if (s.hostile() && (peaceful || nearStart || !SpawnPacing.hostileReady(player) || SpawnPacing.calm(level, spot))) continue;
-            if (regionLevel < s.minLevel() || regionLevel > s.maxLevel()) continue;
-            if (!s.regions().isEmpty() && !s.regions().contains(region.id())) continue;
-            if (!s.provinces().isEmpty() && !s.provinces().contains(region.province())) continue;
-            if (!s.families().isEmpty() && !s.families().contains(family)) continue;
-            switch (s.time()) {
-                case DAY -> { if (night) continue; }
-                case NIGHT -> { if (!night) continue; }
-                case DAWN -> { if (night || !(dayTime < 3500 || dayTime > 22800)) continue; }
-                case DUSK -> { if (night || !(dayTime > 10000 && dayTime < 13000)) continue; }
-                default -> { }
-            }
-            if (s.weather() != SpawnTables.Weather.ANY && s.weather() != weather
-                    && !(s.weather() == SpawnTables.Weather.RAIN && weather == SpawnTables.Weather.STORM)) continue;
-            if (s.road() == SpawnTables.RoadRule.ON && !onRoad || s.road() == SpawnTables.RoadRule.OFF && onRoad) continue;
-            if (s.townMin() > 0 && SpawnPacing.settlementWithin(level, spot, s.townMin())) continue;
-            if (s.townMax() > 0 && !SpawnPacing.settlementWithin(level, spot, s.townMax())) continue;
-            ok.add(s);
-            total += s.weight();
+        for (Scene s : all()) {
+            if (!matches(s, level, pos, region, family, wildness)) continue;
+            matching.add(s);
+            total += s.weight;
         }
-        if (total <= 0) return false;
+        if (total <= 0) return 0;
         int r = random.nextInt(total);
-        SceneDef chosen = ok.get(0);
-        for (SceneDef s : ok) {
-            r -= s.weight();
+        Scene chosen = matching.get(0);
+        for (Scene s : matching) {
+            r -= s.weight;
             if (r < 0) {
                 chosen = s;
                 break;
             }
         }
-        boolean spawned = spawn(level, player, spot, chosen, random);
-        if (spawned && chosen.hostile()) SpawnPacing.noteHostile(player);
-        return spawned;
+        int made = spawn(level, pos, chosen, random, player);
+        if (made > 0) COOLDOWN.put(player.getUUID(), now);
+        return made;
     }
 
-    /** A loaded, ticking surface spot {@code minDist..maxDist} from the player, out of their view, away from towns. */
-    private static BlockPos pickSpot(ServerLevel level, ServerPlayer player, RandomSource random) {
-        Vec3 look = player.getViewVector(1f).multiply(1, 0, 1);
-        look = look.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : look.normalize();
+    /**
+     * Rolls or forces a scene near {@code player} (used by {@link com.skycraft.society.Encounters} and
+     * {@code /skycraft-scenes roll}). Returns the spawned {@link Scene}, or {@code null}.
+     */
+    @Nullable
+    public static Scene rollNearPlayer(ServerPlayer player, @Nullable String forcedId) {
+        ServerLevel level = player.serverLevel();
+        RandomSource random = player.getRandom();
+        BlockPos center = findSurfaceNear(level, player.blockPosition(), 24, 56, random);
+        if (center == null) center = player.blockPosition();
+        Region region = Regions.at(level, center);
+        BiomeFamily family = BiomeFamily.of(level.getBiome(center), center);
+        double wild = SpawnPacing.settlementWithin(level, center, 160) ? 0.1
+                : (SpawnPacing.onRoad(level, center) ? 0.35 : 0.85);
+
+        Scene chosen = null;
+        if (forcedId != null && !forcedId.isEmpty()) {
+            chosen = byId(forcedId).orElse(null);
+            if (chosen == null) return null;
+        } else {
+            List<Scene> matching = new ArrayList<>();
+            int total = 0;
+            for (Scene s : all()) {
+                if (!matches(s, level, center, region, family, wild)) continue;
+                matching.add(s);
+                total += s.weight;
+            }
+            if (total <= 0) return null;
+            int r = random.nextInt(total);
+            chosen = matching.get(0);
+            for (Scene s : matching) {
+                r -= s.weight;
+                if (r < 0) {
+                    chosen = s;
+                    break;
+                }
+            }
+        }
+        int made = spawn(level, center, chosen, random, player);
+        if (made <= 0) return null;
+        COOLDOWN.put(player.getUUID(), level.getGameTime());
+        return chosen;
+    }
+
+    @Nullable
+    private static BlockPos findSurfaceNear(ServerLevel level, BlockPos origin, int minR, int maxR, RandomSource r) {
         for (int i = 0; i < 16; i++) {
-            double ang = random.nextDouble() * Math.PI * 2;
-            Vec3 dir = new Vec3(Math.cos(ang), 0, Math.sin(ang));
-            if (dir.dot(look) > 0.3) continue;
-            double dist = minDist + random.nextDouble() * (maxDist - minDist);
-            int x = Mth.floor(player.getX() + dir.x * dist);
-            int z = Mth.floor(player.getZ() + dir.z * dist);
-            BlockPos ground = Encounters.groundAt(level, x, z);
-            if (ground == null || !level.isPositionEntityTicking(ground)) continue;
-            if (Math.abs(ground.getY() - player.getBlockY()) > 25) continue;
-            if (RegionSpawner.inSettlement(level, ground)) continue;
-            return ground;
+            double ang = r.nextDouble() * Math.PI * 2.0;
+            double dist = minR + r.nextDouble() * (maxR - minR);
+            int x = Mth.floor(origin.getX() + Math.cos(ang) * dist);
+            int z = Mth.floor(origin.getZ() + Math.sin(ang) * dist);
+            BlockPos ground = surface(level, x, z, origin.getY());
+            if (ground != null) return ground;
         }
-        return null;
+        return surface(level, origin.getX(), origin.getZ(), origin.getY());
     }
 
-    private static BlockPos around(ServerLevel level, BlockPos center, int radius, RandomSource random) {
-        for (int i = 0; i < 6; i++) {
-            BlockPos p = Encounters.groundAt(level, center.getX() + random.nextInt(radius * 2 + 1) - radius,
-                    center.getZ() + random.nextInt(radius * 2 + 1) - radius);
-            if (p != null && Math.abs(p.getY() - center.getY()) <= 3) return p;
+    private static boolean matchesRegion(Scene s, Region region) {
+        if (!s.regions.isEmpty()) {
+            return s.regions.contains(region.shortId()) || s.regions.contains(region.id());
         }
-        return center;
-    }
-
-    // ------------------------------------------------------------------ spawning a scene
-
-    private static boolean spawn(ServerLevel level, ServerPlayer player, BlockPos center, SceneDef def, RandomSource random) {
-        long id = level.getGameTime() * 31L + random.nextInt(1 << 20) + 1;
-        long now = com.skycraft.world.RestManager.liveTime(level);
-        Live live = new Live(id, level, now + 20L * lifetime, def.calmAfter() > 0 ? now + 20L * def.calmAfter() : 0);
-        Map<String, List<Mob>> byRole = new HashMap<>();
-        // away from the player on the line spot -> player, so travelers walk past them
-        double dx = player.getX() - center.getX();
-        double dz = player.getZ() - center.getZ();
-        double len = Math.max(1, Math.sqrt(dx * dx + dz * dz));
-        BlockPos past = new BlockPos(Mth.floor(player.getX() + dx / len * 60 - dz / len * (random.nextDouble() - 0.5) * 16),
-                player.getBlockY(), Mth.floor(player.getZ() + dz / len * 60 + dx / len * (random.nextDouble() - 0.5) * 16));
-        if (def.campfire()) {
-            BlockPos fire = center;
-            if (level.getBlockState(fire).isAir() && level.getBlockState(fire.below()).isFaceSturdy(level, fire.below(), net.minecraft.core.Direction.UP)) {
-                level.setBlock(fire, Blocks.CAMPFIRE.defaultBlockState(), 3);
-                live.campfire = fire;
-            }
+        if (!s.provinces.isEmpty()) {
+            return s.provinces.contains(region.province());
         }
-        ACTIVE.add(id);
-        for (MemberDef m : def.members()) {
-            int n = m.min() + (m.max() > m.min() ? random.nextInt(m.max() - m.min() + 1) : 0);
-            for (int i = 0; i < n; i++) {
-                BlockPos at = around(level, center.offset(m.dx(), 0, m.dz()), 3, random);
-                Mob mob = create(level, m, at);
-                if (mob == null) continue;
-                mob.getPersistentData().putLong(TAG, id);
-                if (m.hold() && mob instanceof PathfinderMob pm) pm.restrictTo(center, 5);
-                if (m.past() && mob instanceof NpcEntity npc) npc.setDestination(past);
-                if (!m.nameKey().isEmpty()) mob.setCustomName(Component.translatable(m.nameKey()));
-                if (!m.leader().isEmpty() && mob instanceof NpcEntity npc) {
-                    List<Mob> lead = byRole.get(m.leader());
-                    if (lead != null && !lead.isEmpty()) npc.setLeader(lead.get(0).getUUID());
-                }
-                if (!m.target().isEmpty()) {
-                    List<Mob> victims = byRole.get(m.target());
-                    if (victims != null && !victims.isEmpty()) {
-                        Mob victim = victims.get(random.nextInt(victims.size()));
-                        mob.setTarget(victim);
-                        live.fighters.add(mob);
-                        // the victim defends itself too
-                        if (victim.getTarget() == null) {
-                            victim.setTarget(mob);
-                            live.fighters.add(victim);
-                        }
-                    }
-                }
-                live.mobs.add(mob);
-                if (!m.as().isEmpty()) byRole.computeIfAbsent(m.as(), k -> new ArrayList<>()).add(mob);
-            }
+        if (!s.cultures.isEmpty()) {
+            return s.cultures.contains(region.culture());
         }
-        if (live.mobs.isEmpty()) {
-            ACTIVE.remove(id);
-            if (live.campfire != null) level.removeBlock(live.campfire, false);
-            return false;
-        }
-        LIVE.add(live);
         return true;
     }
 
-    private static Mob create(ServerLevel level, MemberDef m, BlockPos at) {
-        if (m.npcRole() != null) {
-            NpcEntity npc = Npcs.create(level, at, NpcRole.byId(m.npcRole()));
-            if (npc == null) return null;
-            return level.addFreshEntity(npc) ? npc : null;
+    private static boolean matches(Scene s, ServerLevel level, BlockPos pos, Region region, BiomeFamily family, double wild) {
+        if (wild < s.minWildness) return false;
+        if (!matchesRegion(s, region)) return false;
+        if (!s.families.isEmpty() && !s.families.contains(family)) return false;
+        if ("day".equals(s.time) && !level.isDay()) return false;
+        if ("night".equals(s.time) && !level.isNight()) return false;
+        if ("dawn_dusk".equals(s.time)) {
+            long tod = level.getDayTime() % 24000L;
+            boolean dawnOrDusk = tod <= 3000L || (tod >= 11000L && tod <= 14500L) || tod >= 22000L;
+            if (!dawnOrDusk && !level.isDay()) return false;
         }
-        Entity e = m.type().create(level);
-        if (!(e instanceof Mob mob)) {
-            if (e != null) e.discard();
-            return null;
+        if (!s.road.isEmpty()) {
+            boolean on = RoadCells.isRoad(level, pos.getX(), pos.getZ(), 10);
+            boolean near = on || RoadCells.isRoad(level, pos.getX(), pos.getZ(), 32);
+            if ("on".equals(s.road) && !on) return false;
+            if ("near".equals(s.road) && !near) return false;
+            if ("off".equals(s.road) && near) return false;
         }
-        mob.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
-        if (!level.noCollision(mob)) return null;
-        mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.EVENT, null, null);
-        return level.addFreshEntity(mob) ? mob : null;
+        boolean peaceful = level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL;
+        if (peaceful) {
+            for (Actor a : s.actors) if (a.hostile) return false;
+        }
+        return true;
+    }
+
+    public static int spawn(ServerLevel level, BlockPos origin, Scene s, RandomSource r, @Nullable ServerPlayer nearPlayer) {
+        BlockPos center = surface(level, origin.getX(), origin.getZ(), origin.getY());
+        if (center == null) return 0;
+        placeProps(level, center, s.props, r);
+
+        Map<String, List<Mob>> groups = new HashMap<>();
+        List<Mob> spawnedAll = new ArrayList<>();
+        int count = 0;
+        for (Actor a : s.actors) {
+            int n = a.min + (a.max > a.min ? r.nextInt(a.max - a.min + 1) : 0);
+            for (int i = 0; i < n; i++) {
+                int dx = a.radius <= 0 ? 0 : r.nextInt(a.radius * 2 + 1) - a.radius;
+                int dz = a.radius <= 0 ? 0 : r.nextInt(a.radius * 2 + 1) - a.radius;
+                BlockPos at = surface(level, center.getX() + dx, center.getZ() + dz, center.getY());
+                if (at == null) continue;
+                Mob m = spawnActor(level, at, a, s, r);
+                if (m == null) continue;
+                count++;
+                spawnedAll.add(m);
+                if (!a.group.isEmpty()) groups.computeIfAbsent(a.group, k -> new ArrayList<>()).add(m);
+            }
+        }
+        wireScene(groups);
+
+        if (count > 0 && nearPlayer != null) {
+            if (s.wonder) {
+                nearPlayer.displayClientMessage(Component.translatable("scene.skycraft.wonder." + s.id), false);
+                level.playSound(null, nearPlayer.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME,
+                        SoundSource.AMBIENT, 0.8f, 1.0f);
+            }
+            // If all actors are hostile or non-NPC creatures and the scene carries a quest hook, offer on spawn
+            boolean hasFriendlyNpc = false;
+            for (Actor a : s.actors) {
+                if (a.npc != null && !a.hostile) {
+                    hasFriendlyNpc = true;
+                    break;
+                }
+            }
+            if (!s.questHook.isEmpty() && !hasFriendlyNpc && !spawnedAll.isEmpty()) {
+                triggerQuestHook(nearPlayer, spawnedAll.get(0), s.questHook, s.id);
+            }
+        }
+        return count;
+    }
+
+    @Nullable
+    private static Mob spawnActor(ServerLevel level, BlockPos pos, Actor a, Scene scene, RandomSource r) {
+        Mob mob = null;
+        if (a.npc != null) {
+            var npc = Npcs.create(level, pos, a.npc);
+            if (npc != null && level.addFreshEntity(npc)) {
+                mob = npc;
+            }
+        } else if (a.entity != null) {
+            Entity e = a.entity.create(level);
+            if (!(e instanceof Mob m)) return null;
+            m.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, r.nextFloat() * 360f, 0f);
+            m.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.NATURAL, null, null);
+            Leveling.apply(m, Leveling.regionLevel(level, pos));
+            if (!level.addFreshEntity(m)) return null;
+            mob = m;
+        }
+        if (mob == null) return null;
+        mob.getPersistentData().putBoolean(TAG_SCENE, true);
+        mob.getPersistentData().putString(TAG_SCENE_ID, scene.id);
+        if (!scene.questHook.isEmpty()) {
+            mob.getPersistentData().putString(TAG_QUEST_HOOK, scene.questHook);
+        }
+        if ("crouch".equals(a.pose)) mob.setPose(Pose.CROUCHING);
+        if (a.leash > 0 && mob instanceof PathfinderMob pm) pm.restrictTo(pos, a.leash);
+        return mob;
+    }
+
+    private static void wireScene(Map<String, List<Mob>> groups) {
+        pairFight(groups.get("attackers"), groups.get("victims"));
+        pairFight(groups.get("hunters"), groups.get("prey"));
+        pairFight(groups.get("companions"), groups.get("beasts"));
+        pairFight(groups.get("orcs"), groups.get("beast"));
+        pairFight(groups.get("imperials"), groups.get("stormcloaks"));
+        pairFight(groups.get("stormcloaks"), groups.get("imperials"));
+    }
+
+    private static void pairFight(@Nullable List<Mob> a, @Nullable List<Mob> b) {
+        if (a == null || b == null || a.isEmpty() || b.isEmpty()) return;
+        for (int i = 0; i < a.size(); i++) {
+            Mob attacker = a.get(i);
+            Mob target = b.get(i % b.size());
+            attacker.setTarget(target);
+        }
+    }
+
+    // ---------------------------------------------------------------- quest hook interaction
+
+    @SubscribeEvent
+    public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
+        if (event.getLevel().isClientSide() || !(event.getEntity() instanceof ServerPlayer player)) return;
+        if (!(event.getTarget() instanceof LivingEntity target)) return;
+        if (!target.getPersistentData().contains(TAG_QUEST_HOOK)) return;
+        if (target.getPersistentData().getBoolean(TAG_HOOK_CLAIMED)) return;
+        String hook = target.getPersistentData().getString(TAG_QUEST_HOOK);
+        String sceneId = target.getPersistentData().getString(TAG_SCENE_ID);
+        if (hook.isEmpty()) return;
+        if (triggerQuestHook(player, target, hook, sceneId)) {
+            target.getPersistentData().putBoolean(TAG_HOOK_CLAIMED, true);
+            event.setCancellationResult(InteractionResult.SUCCESS);
+        }
+    }
+
+    public static boolean triggerQuestHook(ServerPlayer player, LivingEntity giver, String hook, String sceneId) {
+        if (hook == null || hook.isEmpty() || !Quests.canTakeMore(player)) return false;
+        // 1. Dedicated SideQuests
+        switch (hook) {
+            case "side_golden_claw" -> {
+                return SideQuests.startGoldenClaw(player, giver);
+            }
+            case "side_time_of_need" -> {
+                return SideQuests.startTimeOfNeed(player, giver);
+            }
+            case "side_waking_nightmare" -> {
+                return SideQuests.startWakingNightmare(player, giver);
+            }
+            case "side_forsworn_conspiracy" -> {
+                return SideQuests.startForswornConspiracy(player, giver);
+            }
+            default -> {}
+        }
+        // 2. Story quest definitions in StoryData
+        StoryData.QuestDef def = StoryData.quest(hook);
+        if (def != null) {
+            return Story.start(player, def);
+        }
+        // 3. One-shot radiant encounter quest hooks (radiant_bounty, radiant_hunt, radiant_favor)
+        ServerLevel level = player.serverLevel();
+        String dim = level.dimension().location().toString();
+        String hold = Holds.holdAt(level, giver.blockPosition());
+        String qId = "scene_" + (sceneId == null || sceneId.isEmpty() ? hook : sceneId);
+        if (Quests.find(player.server, player.getUUID(), qId) != null) return false;
+
+        Quest q = new Quest(qId, Quest.Category.MISC,
+                Component.translatable("scene.skycraft.quest." + hook + ".title"),
+                Component.translatable("scene.skycraft.quest." + hook + ".desc"));
+        q.giver = giver.getUUID();
+        q.giverName = giver.getDisplayName();
+        q.giverPos = giver.blockPosition();
+        q.giverDim = dim;
+        q.hold = hold;
+
+        if ("radiant_hunt".equals(hook)) {
+            Objective obj = new Objective(Objective.Type.KILL_TYPE_COUNT,
+                    Component.translatable("scene.skycraft.quest.radiant_hunt.obj"))
+                    .target("skycraft:elk,skycraft:deer,skycraft:bear,skycraft:sabre_cat,skycraft:wolf")
+                    .count(2);
+            q.add(obj).reward(120);
+        } else if ("radiant_bounty".equals(hook)) {
+            Objective obj = new Objective(Objective.Type.KILL_TYPE_COUNT,
+                    Component.translatable("scene.skycraft.quest.radiant_bounty.obj"))
+                    .target("skycraft:bandit,skycraft:draugr,skycraft:forsworn,skycraft:vampire,skycraft:necromancer")
+                    .count(3);
+            q.add(obj).reward(180);
+        } else {
+            Objective obj = new Objective(Objective.Type.GO_TO,
+                    Component.translatable("scene.skycraft.quest.radiant_favor.obj"))
+                    .at(giver.blockPosition().offset(48, 0, 48), dim, 24)
+                    .guessY()
+                    .label("Roadside Landmark");
+            q.add(obj).reward(100);
+        }
+        boolean started = Quests.start(player, q);
+        if (started) {
+            Notifier.send(player, NotifyKind.QUEST_STARTED, q.title, q.description);
+        }
+        return started;
+    }
+
+    // ---------------------------------------------------------------- props
+
+    private static void placeProps(ServerLevel level, BlockPos center, List<String> props, RandomSource r) {
+        if (props.isEmpty()) return;
+        for (String p : props) {
+            switch (p) {
+                case "fire" -> setProp(level, center, Blocks.CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true));
+                case "log" -> {
+                    Direction.Axis axis = r.nextBoolean() ? Direction.Axis.X : Direction.Axis.Z;
+                    BlockPos pos = surface(level, center.getX() + (axis == Direction.Axis.X ? 0 : 2),
+                            center.getZ() + (axis == Direction.Axis.Z ? 0 : 2), center.getY());
+                    if (pos != null) setProp(level, pos, Blocks.SPRUCE_LOG.defaultBlockState().setValue(RotatedPillarBlock.AXIS, axis));
+                }
+                case "meat" -> {
+                    BlockPos pos = surface(level, center.getX() - 1, center.getZ() + 1, center.getY());
+                    if (pos != null) setProp(level, pos, Blocks.COARSE_DIRT.defaultBlockState());
+                }
+                case "cart" -> {
+                    BlockPos pos = surface(level, center.getX() + 2, center.getZ() - 1, center.getY());
+                    if (pos != null) {
+                        setProp(level, pos, Blocks.SPRUCE_SLAB.defaultBlockState());
+                        setProp(level, pos.above(), Blocks.BARREL.defaultBlockState());
+                    }
+                }
+                case "sack" -> {
+                    BlockPos pos = surface(level, center.getX() + 1, center.getZ() + 1, center.getY());
+                    if (pos != null) setProp(level, pos, Blocks.HAY_BLOCK.defaultBlockState().setValue(HayBlock.AXIS, Direction.Axis.Y));
+                }
+                case "lantern" -> {
+                    BlockPos pos = surface(level, center.getX() - 1, center.getZ() - 1, center.getY());
+                    if (pos != null) setProp(level, pos, Blocks.LANTERN.defaultBlockState());
+                }
+                default -> {}
+            }
+        }
+    }
+
+    private static void setProp(ServerLevel level, BlockPos pos, BlockState state) {
+        BlockState cur = level.getBlockState(pos);
+        if (!cur.isAir() && !cur.canBeReplaced()) return;
+        if (!level.getFluidState(pos).isEmpty()) return;
+        if (!level.getBlockState(pos.below()).isSolidRender(level, pos.below())) return;
+        level.setBlock(pos, state, 2);
+    }
+
+    @Nullable
+    private static BlockPos surface(ServerLevel level, int x, int z, int nearY) {
+        if (!level.hasChunk(x >> 4, z >> 4)) return null;
+        int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+        if (y <= level.getMinBuildHeight() + 1 || Math.abs(y - nearY) > 16) return null;
+        BlockPos pos = new BlockPos(x, y, z);
+        if (!level.getFluidState(pos).isEmpty() || level.getFluidState(pos.below()).is(FluidTags.WATER)) return null;
+        return pos;
+    }
+
+    // ---------------------------------------------------------------- commands (/skycraft-scenes)
+
+    @SubscribeEvent
+    public static void onRegisterCommands(RegisterCommandsEvent event) {
+        registerCommand(event.getDispatcher());
+    }
+
+    private static void registerCommand(CommandDispatcher<CommandSourceStack> d) {
+        d.register(Commands.literal("skycraft-scenes").requires(s -> s.hasPermission(2))
+                .then(Commands.literal("list")
+                        .executes(c -> {
+                            List<Scene> list = all();
+                            long wonders = list.stream().filter(Scene::wonder).count();
+                            c.getSource().sendSuccess(() -> Component.literal(
+                                    "Encounter scenes: " + list.size() + " total (" + wonders + " wonder moments)"), false);
+                            return list.size();
+                        })
+                        .then(Commands.argument("hold", StringArgumentType.word())
+                                .suggests((c, b) -> SharedSuggestionProvider.suggest(SKYRIM_HOLDS, b))
+                                .executes(c -> {
+                                    String hold = StringArgumentType.getString(c, "hold");
+                                    List<Scene> list = forHold(hold);
+                                    long wonders = list.stream().filter(Scene::wonder).count();
+                                    c.getSource().sendSuccess(() -> Component.literal(
+                                            "Hold " + hold + ": " + list.size() + " scenes (" + wonders + " wonder): "
+                                                    + list.stream().map(Scene::id).reduce((a, b) -> a + ", " + b).orElse("none")), false);
+                                    return list.size();
+                                })))
+                .then(Commands.literal("roll")
+                        .executes(c -> {
+                            ServerPlayer sp = c.getSource().getPlayerOrException();
+                            Scene s = rollNearPlayer(sp, null);
+                            if (s == null) {
+                                c.getSource().sendFailure(Component.literal("No scene matched current location/time."));
+                                return 0;
+                            }
+                            c.getSource().sendSuccess(() -> Component.literal("Rolled scene: " + s.id + (s.wonder ? " [WONDER]" : "")), true);
+                            return 1;
+                        })
+                        .then(Commands.argument("id", StringArgumentType.word())
+                                .suggests((c, b) -> SharedSuggestionProvider.suggest(all().stream().map(Scene::id).toList(), b))
+                                .executes(c -> {
+                                    ServerPlayer sp = c.getSource().getPlayerOrException();
+                                    String id = StringArgumentType.getString(c, "id");
+                                    Scene s = rollNearPlayer(sp, id);
+                                    if (s == null) {
+                                        c.getSource().sendFailure(Component.literal("Could not spawn scene: " + id));
+                                        return 0;
+                                    }
+                                    c.getSource().sendSuccess(() -> Component.literal("Spawned scene: " + s.id + (s.wonder ? " [WONDER]" : "")), true);
+                                    return 1;
+                                })))
+                .then(Commands.literal("selftest")
+                        .executes(c -> {
+                            List<Scene> list = all();
+                            int problems = 0;
+                            if (list.size() < 45) problems++;
+                            for (String hold : SKYRIM_HOLDS) {
+                                List<Scene> h = forHold(hold);
+                                long w = h.stream().filter(Scene::wonder).count();
+                                if (h.size() < 8 || w < 3) problems++;
+                            }
+                            for (Scene s : list) {
+                                if (s.purpose.isEmpty() || s.needs.isEmpty() || s.why.isEmpty()) problems++;
+                            }
+                            int p = problems;
+                            c.getSource().sendSuccess(() -> Component.literal(
+                                    "Scenes selftest: " + list.size() + " scenes, " + p + " problems"), false);
+                            return p == 0 ? 1 : 0;
+                        })));
+    }
+
+    // ---------------------------------------------------------------- JSON loader
+
+    private static List<Scene> load() {
+        List<Scene> out = new ArrayList<>();
+        try (InputStream in = WildScenes.class.getResourceAsStream(RESOURCE)) {
+            if (in == null) {
+                Skycraft.LOGGER.error("Missing {}", RESOURCE);
+                return List.of();
+            }
+            JsonArray arr = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonArray();
+            for (JsonElement el : arr) {
+                Scene s = parseScene(el.getAsJsonObject());
+                if (s != null) out.add(s);
+            }
+        } catch (Exception e) {
+            Skycraft.LOGGER.error("Failed to load {}", RESOURCE, e);
+        }
+        Skycraft.LOGGER.info("Loaded {} wild scenes from {}", out.size(), RESOURCE);
+        return Collections.unmodifiableList(out);
+    }
+
+    @Nullable
+    private static Scene parseScene(JsonObject o) {
+        String id = str(o, "id", "");
+        int weight = o.has("weight") ? o.get("weight").getAsInt() : 10;
+        boolean wonder = o.has("wonder") && o.get("wonder").getAsBoolean();
+        String road = str(o, "road", "");
+        String time = str(o, "time", "any");
+        double minWild = o.has("minWildness") ? o.get("minWildness").getAsDouble() : 0.0;
+        Set<String> provinces = strSet(o, "provinces");
+        Set<String> regions = strSet(o, "regions");
+        Set<String> cultures = strSet(o, "cultures");
+        Set<BiomeFamily> families = new HashSet<>();
+        if (o.has("families")) {
+            for (JsonElement el : o.getAsJsonArray("families")) {
+                try {
+                    families.add(BiomeFamily.valueOf(el.getAsString().toUpperCase(Locale.ROOT)));
+                } catch (IllegalArgumentException e) {
+                    Skycraft.LOGGER.warn("Unknown biome family '{}' in scene {}", el.getAsString(), id);
+                }
+            }
+        }
+        String purpose = str(o, "purpose", "");
+        List<String> needs = strList(o, "needs");
+        List<String> why = strList(o, "why");
+        String questHook = str(o, "questHook", "");
+        List<String> props = strList(o, "props");
+        List<Actor> actors = new ArrayList<>();
+        if (o.has("actors")) {
+            for (JsonElement el : o.getAsJsonArray("actors")) {
+                JsonObject a = el.getAsJsonObject();
+                NpcRole npc = a.has("npc") ? NpcRole.byId(a.get("npc").getAsString()) : null;
+                EntityType<?> entity = null;
+                if (a.has("entity")) {
+                    ResourceLocation eid = new ResourceLocation(a.get("entity").getAsString());
+                    if (ForgeRegistries.ENTITY_TYPES.containsKey(eid)) entity = ForgeRegistries.ENTITY_TYPES.getValue(eid);
+                }
+                if (npc == null && entity == null) continue;
+                int min = 1, max = 1;
+                if (a.has("count")) {
+                    JsonArray c = a.getAsJsonArray("count");
+                    min = Math.max(1, c.get(0).getAsInt());
+                    max = c.size() > 1 ? Math.max(min, c.get(1).getAsInt()) : min;
+                }
+                int radius = a.has("radius") ? a.get("radius").getAsInt() : 3;
+                boolean hostile = a.has("hostile") && a.get("hostile").getAsBoolean();
+                String group = str(a, "group", "");
+                String pose = str(a, "pose", "");
+                int leash = a.has("leash") ? a.get("leash").getAsInt() : 0;
+                actors.add(new Actor(npc, entity, min, max, radius, hostile, group, pose, leash));
+            }
+        }
+        return actors.isEmpty() ? null : new Scene(
+                id, weight, wonder, road, time, minWild,
+                provinces, regions, cultures, families,
+                purpose, needs, why, questHook, props, actors);
+    }
+
+    private static String str(JsonObject o, String k, String def) {
+        return o.has(k) ? o.get(k).getAsString() : def;
+    }
+
+    private static Set<String> strSet(JsonObject o, String k) {
+        if (!o.has(k)) return Set.of();
+        Set<String> s = new HashSet<>();
+        for (JsonElement el : o.getAsJsonArray(k)) s.add(el.getAsString());
+        return Collections.unmodifiableSet(s);
+    }
+
+    private static List<String> strList(JsonObject o, String k) {
+        if (!o.has(k)) return List.of();
+        List<String> s = new ArrayList<>();
+        for (JsonElement el : o.getAsJsonArray(k)) s.add(el.getAsString());
+        return Collections.unmodifiableList(s);
     }
 }

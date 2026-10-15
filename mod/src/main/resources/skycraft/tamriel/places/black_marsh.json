@@ -701,7 +701,8 @@
   "x": 5600,
   "z": 4800,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "white_rose_prison",
@@ -712,7 +713,8 @@
   "x": 5772,
   "z": 6907,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "arx_corinium",
@@ -723,7 +725,8 @@
   "x": 5380,
   "z": 7052,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "castle_giovesse",
@@ -734,7 +737,8 @@
   "x": 5867,
   "z": 7943,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "stonewastes_keep",
@@ -745,7 +749,8 @@
   "x": 6209,
   "z": 9347,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "blackrose_prison",
@@ -756,7 +761,8 @@
   "x": 5822,
   "z": 10757,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "telvanni_acquisition_camp",
@@ -1207,7 +1213,8 @@
   "x": 8029,
   "z": 5142,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "marquee"
  },
  {
   "id": "cold_blood_cavern",
@@ -1218,7 +1225,8 @@
   "x": 5230,
   "z": 5340,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "bitterroot_cave",
@@ -1229,7 +1237,8 @@
   "x": 6544,
   "z": 5369,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "hei_halai",
@@ -1240,7 +1249,8 @@
   "x": 5819,
   "z": 6008,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "shrine_of_the_black_maw",
@@ -1251,7 +1261,8 @@
   "x": 5292,
   "z": 5788,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "the_vile_pavilion",
@@ -1262,7 +1273,8 @@
   "x": 5777,
   "z": 5760,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "haynekhtnamets_lair",
@@ -1273,7 +1285,8 @@
   "x": 5021,
   "z": 6586,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "bogmother",
@@ -1284,7 +1297,8 @@
   "x": 6804,
   "z": 6352,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "nen_ria",
@@ -1295,7 +1309,8 @@
   "x": 6000,
   "z": 6850,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "camp_silken_snare",
@@ -1306,7 +1321,8 @@
   "x": 6901,
   "z": 6668,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "mudshallow_cave",
@@ -1317,7 +1333,8 @@
   "x": 7065,
   "z": 6827,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "ruins_of_ten_maur_wolk",
@@ -1328,7 +1345,8 @@
   "x": 7275,
   "z": 6108,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "gandranen_ruins",
@@ -1339,7 +1357,8 @@
   "x": 6502,
   "z": 7099,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "marquee"
  },
  {
   "id": "camp_merciful_reduction",
@@ -1350,7 +1369,8 @@
   "x": 7541,
   "z": 5977,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "broken_tusk",
@@ -1361,7 +1381,8 @@
   "x": 7916,
   "z": 5946,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "atanaz_ruins",
@@ -1372,7 +1393,8 @@
   "x": 8150,
   "z": 6750,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "the_graceful_dominator",
@@ -1383,7 +1405,8 @@
   "x": 8355,
   "z": 6452,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "captain_bones_ship",
@@ -1394,7 +1417,8 @@
   "x": 8443,
   "z": 5931,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "xal_thak",
@@ -1405,7 +1429,8 @@
   "x": 7586,
   "z": 7108,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "deep_graves",
@@ -1416,7 +1441,8 @@
   "x": 7272,
   "z": 7266,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "tsonashap_mine",
@@ -1427,7 +1453,8 @@
   "x": 7622,
   "z": 7173,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "onkobra_kwama_mine",
@@ -1438,7 +1465,8 @@
   "x": 7858,
   "z": 7269,
   "radius": 20,
-  "variant": "egg_mine"
+  "variant": "egg_mine",
+  "class": "short"
  },
  {
   "id": "mushroom_cave",
@@ -1449,7 +1477,8 @@
   "x": 8350,
   "z": 7450,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "sunscale_strand",
@@ -1460,7 +1489,8 @@
   "x": 8031,
   "z": 7759,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "camp_crystal_abattoir",
@@ -1471,7 +1501,8 @@
   "x": 7979,
   "z": 7801,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "chid_moska_ruins",
@@ -1482,7 +1513,8 @@
   "x": 6828,
   "z": 7939,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "temple_of_sul",
@@ -1493,7 +1525,8 @@
   "x": 6129,
   "z": 7225,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "loriasel",
@@ -1504,7 +1537,8 @@
   "x": 5450,
   "z": 7400,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "marquee"
  },
  {
   "id": "xal_ithix",
@@ -1515,7 +1549,8 @@
   "x": 4892,
   "z": 7677,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "lair_of_the_skin_stealer",
@@ -1526,7 +1561,8 @@
   "x": 5448,
   "z": 7012,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "valrendils_cave",
@@ -1537,7 +1573,8 @@
   "x": 4823,
   "z": 6746,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "odious_chapel",
@@ -1548,7 +1585,8 @@
   "x": 7655,
   "z": 5734,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "vision_of_the_hist",
@@ -1559,7 +1597,8 @@
   "x": 6541,
   "z": 6526,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "tsanjis_hideout",
@@ -1570,7 +1609,8 @@
   "x": 7173,
   "z": 7276,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "rellesel_retreat",
@@ -1581,7 +1621,8 @@
   "x": 5643,
   "z": 7722,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "xal_irasotl",
@@ -1592,7 +1633,8 @@
   "x": 6044,
   "z": 8038,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "old_deathwarts_pond",
@@ -1603,7 +1645,8 @@
   "x": 6695,
   "z": 8082,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "doomvault_porcixid",
@@ -1614,7 +1657,8 @@
   "x": 6585,
   "z": 8457,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "glenbridge_xanmeer",
@@ -1625,7 +1669,8 @@
   "x": 6550,
   "z": 8750,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "the_silent_halls",
@@ -1636,7 +1681,8 @@
   "x": 5791,
   "z": 8876,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "xi_tsei",
@@ -1647,7 +1693,8 @@
   "x": 5500,
   "z": 8950,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "xeemhoks_lagoon",
@@ -1658,7 +1705,8 @@
   "x": 6461,
   "z": 9228,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "doomvault_capraxus",
@@ -1669,7 +1717,8 @@
   "x": 6150,
   "z": 9600,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "the_shattered_xanmeer",
@@ -1680,7 +1729,8 @@
   "x": 5575,
   "z": 9174,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "vunalk",
@@ -1691,7 +1741,8 @@
   "x": 7216,
   "z": 9254,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "ixtaxh_xanmeer",
@@ -1702,7 +1753,8 @@
   "x": 7214,
   "z": 10152,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "vakka_bok_xanmeer",
@@ -1713,7 +1765,8 @@
   "x": 6747,
   "z": 9749,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "deep_root",
@@ -1724,7 +1777,8 @@
   "x": 6509,
   "z": 9674,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "tsofeer_cavern",
@@ -1735,7 +1789,8 @@
   "x": 4933,
   "z": 10985,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "singing_grotto",
@@ -1746,7 +1801,8 @@
   "x": 5411,
   "z": 10780,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "echoing_hollow",
@@ -1757,7 +1813,8 @@
   "x": 5292,
   "z": 10105,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "tomb_of_many_spears",
@@ -1768,7 +1825,8 @@
   "x": 5099,
   "z": 9938,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "xul_thuxis",
@@ -1779,7 +1837,8 @@
   "x": 6104,
   "z": 10315,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "teeth_of_sithis",
@@ -1790,7 +1849,8 @@
   "x": 5650,
   "z": 10400,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "bok_xul",
@@ -1801,7 +1861,8 @@
   "x": 6268,
   "z": 10998,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "blackguard_caravan",
@@ -1812,7 +1873,8 @@
   "x": 6301,
   "z": 10666,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "swallowed_grove",
@@ -1823,7 +1885,8 @@
   "x": 6418,
   "z": 10202,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "glade_of_chimes",
@@ -1834,7 +1897,8 @@
   "x": 6113,
   "z": 9891,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "wither_vault",
@@ -1845,7 +1909,8 @@
   "x": 6716,
   "z": 11446,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "lakemire_xanmeer_manor",
@@ -1856,7 +1921,8 @@
   "x": 6336,
   "z": 11379,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "old_growth",
@@ -1867,7 +1933,8 @@
   "x": 5752,
   "z": 10052,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "murkwood",
@@ -1878,7 +1945,8 @@
   "x": 8395,
   "z": 8616,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "seekhat_xol",
@@ -1889,7 +1957,8 @@
   "x": 8828,
   "z": 7635,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "vaults_of_gemin",
@@ -1900,7 +1969,8 @@
   "x": 9700,
   "z": 6350,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "dark_root_village",
@@ -1941,7 +2011,8 @@
   "x": 7766,
   "z": 9292,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "xaluna_xanmeer",
@@ -1952,7 +2023,8 @@
   "x": 4724,
   "z": 4214,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "soft_marsh_camp",
@@ -1963,7 +2035,8 @@
   "x": 9448,
   "z": 6196,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "leekotsa_ruins",
@@ -1974,7 +2047,8 @@
   "x": 5394,
   "z": 6504,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "warm_egg_spring",
@@ -2006,7 +2080,8 @@
   "x": 6986,
   "z": 9332,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "kotna_fort",
@@ -2017,7 +2092,8 @@
   "x": 9717,
   "z": 7053,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "warm_throat_hist_grove",
@@ -2028,7 +2104,8 @@
   "x": 8267,
   "z": 9608,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "gray_mist_kwama_mine",
@@ -2039,7 +2116,8 @@
   "x": 9546,
   "z": 6585,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "drift_heart_hollow",
@@ -2050,7 +2128,8 @@
   "x": 10249,
   "z": 7982,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "navuteeb",
@@ -2061,7 +2140,8 @@
   "x": 8787,
   "z": 7431,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "naka_jeesei",
@@ -2072,7 +2152,8 @@
   "x": 4821,
   "z": 8631,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "soft_scale_grotto",
@@ -2083,7 +2164,8 @@
   "x": 5742,
   "z": 7379,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "bright_moon_ruins",
@@ -2105,7 +2187,8 @@
   "x": 4916,
   "z": 6200,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "glow_tooth_hideout",
@@ -2116,7 +2199,8 @@
   "x": 7380,
   "z": 10416,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "warm_moon_village",
@@ -2137,7 +2221,8 @@
   "x": 8663,
   "z": 8975,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "zukeke",
@@ -2148,7 +2233,8 @@
   "x": 7437,
   "z": 4280,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "silt_whisper_village",
@@ -2180,7 +2266,8 @@
   "x": 5434,
   "z": 4371,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "dead_leaf_village",
@@ -2201,7 +2288,8 @@
   "x": 5705,
   "z": 11690,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "tsozu_xanmeer",
@@ -2212,7 +2300,8 @@
   "x": 8631,
   "z": 8624,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "mud_whisper_ruins",
@@ -2234,7 +2323,8 @@
   "x": 10101,
   "z": 6831,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "satel",
@@ -2245,7 +2335,8 @@
   "x": 8531,
   "z": 9493,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "marquee"
  },
  {
   "id": "reed_claw_cave",
@@ -2256,7 +2347,8 @@
   "x": 8473,
   "z": 5134,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "tall_leaf_clearing",
@@ -2288,7 +2380,8 @@
   "x": 5228,
   "z": 4915,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "bright_whisper_grotto",
@@ -2299,7 +2392,8 @@
   "x": 4981,
   "z": 11245,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "sun_tree_burrow",
@@ -2310,7 +2404,8 @@
   "x": 4560,
   "z": 9690,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "sweet_egg_burrow",
@@ -2321,7 +2416,8 @@
   "x": 9579,
   "z": 5718,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "jeesei_xanmeer",
@@ -2332,7 +2428,8 @@
   "x": 8473,
   "z": 8398,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "tall_tooth_grotto",
@@ -2343,7 +2440,8 @@
   "x": 6830,
   "z": 10571,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "root_throat_cave",
@@ -2354,7 +2452,8 @@
   "x": 6668,
   "z": 4882,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "deep_throat_cave",
@@ -2365,7 +2464,8 @@
   "x": 7686,
   "z": 8328,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "reed_heart_hollow",
@@ -2376,7 +2476,8 @@
   "x": 9136,
   "z": 4490,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "cold_mist_pit",
@@ -2387,7 +2488,8 @@
   "x": 8654,
   "z": 6708,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "moss_tree_kwama_mine",
@@ -2398,7 +2500,8 @@
   "x": 9491,
   "z": 4757,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "gray_tree_burrow",
@@ -2409,7 +2512,8 @@
   "x": 9304,
   "z": 7918,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "warm_fang_clearing",
@@ -2442,7 +2546,8 @@
   "x": 4504,
   "z": 10536,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "glow_vine_crypt",
@@ -2453,7 +2558,8 @@
   "x": 9050,
   "z": 7219,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "ushushsa",
@@ -2464,7 +2570,8 @@
   "x": 4950,
   "z": 5402,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "mud_egg_hist_grove",
@@ -2475,7 +2582,8 @@
   "x": 4656,
   "z": 7366,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "deep_mist_pit",
@@ -2486,7 +2594,8 @@
   "x": 10666,
   "z": 6453,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "tsonush_ushxan",
@@ -2497,7 +2606,8 @@
   "x": 4889,
   "z": 7320,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "satso_tsexu",
@@ -2508,7 +2618,8 @@
   "x": 7283,
   "z": 6954,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "red_song_kwama_mine",
@@ -2519,7 +2630,8 @@
   "x": 8271,
   "z": 5773,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "silt_vine_ruins",
@@ -2541,7 +2653,8 @@
   "x": 6064,
   "z": 11153,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "jeevu_rice_paddy",
@@ -2572,7 +2685,8 @@
   "x": 9609,
   "z": 6026,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "mud_wallow_camp",
@@ -2583,7 +2697,8 @@
   "x": 10169,
   "z": 6643,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "deep_throat_village",
@@ -2604,7 +2719,8 @@
   "x": 6253,
   "z": 6571,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "tsatse_rice_paddy",
@@ -2625,7 +2741,8 @@
   "x": 6415,
   "z": 6746,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "seitee",
@@ -2636,7 +2753,8 @@
   "x": 5456,
   "z": 9580,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "dead_whisper_village",
@@ -2657,7 +2775,8 @@
   "x": 8752,
   "z": 4536,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "sun_egg_ruins",
@@ -2679,7 +2798,8 @@
   "x": 6520,
   "z": 11481,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "teebseixan_xanmeer",
@@ -2690,7 +2810,8 @@
   "x": 9806,
   "z": 8653,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "tsolutsa_xanmeer",
@@ -2701,7 +2822,8 @@
   "x": 7081,
   "z": 9802,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "silt_water_ruins",
@@ -2723,7 +2845,8 @@
   "x": 5101,
   "z": 3949,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "sateeb_xanmeer",
@@ -2734,7 +2857,8 @@
   "x": 5932,
   "z": 6199,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "deep_moon_cave",
@@ -2745,7 +2869,8 @@
   "x": 4563,
   "z": 3913,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "black_shell_cave",
@@ -2756,7 +2881,8 @@
   "x": 5388,
   "z": 4632,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "meike_salee",
@@ -2767,7 +2893,8 @@
   "x": 9034,
   "z": 7449,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "slow_scale_kwama_mine",
@@ -2778,7 +2905,8 @@
   "x": 9548,
   "z": 4969,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "green_pool_crypt",
@@ -2789,7 +2917,8 @@
   "x": 10355,
   "z": 6634,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "slow_eye_village",
@@ -2810,7 +2939,8 @@
   "x": 6567,
   "z": 5607,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "dark_root_cave",
@@ -2821,7 +2951,8 @@
   "x": 6777,
   "z": 5902,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "mire_mist_ruins",
@@ -2843,7 +2974,8 @@
   "x": 7416,
   "z": 7507,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "bog_mist_hollow",
@@ -2854,7 +2986,8 @@
   "x": 5299,
   "z": 11945,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "cold_tree_grotto",
@@ -2865,7 +2998,8 @@
   "x": 8281,
   "z": 7858,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "cold_root_cave",
@@ -2876,7 +3010,8 @@
   "x": 7248,
   "z": 7706,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "mud_whisper_hollow",
@@ -2887,7 +3022,8 @@
   "x": 6387,
   "z": 4472,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "sun_marsh_hollow",
@@ -2898,7 +3034,8 @@
   "x": 4947,
   "z": 4295,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "dark_song_undercroft",
@@ -2909,7 +3046,8 @@
   "x": 4621,
   "z": 10189,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "hist_branch_ruins",
@@ -2931,7 +3069,8 @@
   "x": 5999,
   "z": 5259,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "slow_water_cave",
@@ -2942,7 +3081,8 @@
   "x": 7350,
   "z": 10708,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "dead_pool_hist_grove",
@@ -2953,7 +3093,8 @@
   "x": 9131,
   "z": 5619,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "xuxa",
@@ -2964,7 +3105,8 @@
   "x": 6663,
   "z": 4395,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "tasahi",
@@ -2975,7 +3117,8 @@
   "x": 7082,
   "z": 5516,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "sweet_vine_village",
@@ -3006,7 +3149,8 @@
   "x": 4628,
   "z": 10935,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "deep_eye_hist_grove",
@@ -3017,7 +3161,8 @@
   "x": 8947,
   "z": 5895,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "moss_shell_burrow",
@@ -3028,7 +3173,8 @@
   "x": 6123,
   "z": 6440,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "warm_fen_spring",
@@ -3050,7 +3196,8 @@
   "x": 6580,
   "z": 4691,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "long_marsh_ruins",
@@ -3072,7 +3219,8 @@
   "x": 9422,
   "z": 6792,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "zunushka_xanmeer",
@@ -3083,7 +3231,8 @@
   "x": 7473,
   "z": 11182,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "still_pool_spring",
@@ -3105,7 +3254,8 @@
   "x": 8073,
   "z": 10010,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "still_marsh_hist_grove",
@@ -3116,7 +3266,8 @@
   "x": 8877,
   "z": 7097,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "liven",
@@ -3127,7 +3278,8 @@
   "x": 8433,
   "z": 6615,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "marquee"
  },
  {
   "id": "gray_egg_ruins",
@@ -3149,7 +3301,8 @@
   "x": 6839,
   "z": 5103,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "old_eye_grotto",
@@ -3160,7 +3313,8 @@
   "x": 6833,
   "z": 5418,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "reed_marsh_camp",
@@ -3171,7 +3325,8 @@
   "x": 4855,
   "z": 5843,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "sun_wallow_sanctum",
@@ -3182,7 +3337,8 @@
   "x": 10486,
   "z": 6377,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "bright_vine_cave",
@@ -3193,7 +3349,8 @@
   "x": 4591,
   "z": 10764,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "cold_song_pit",
@@ -3204,7 +3361,8 @@
   "x": 4910,
   "z": 11409,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "glow_mist_grotto",
@@ -3215,7 +3373,8 @@
   "x": 7863,
   "z": 8072,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "bog_wallow_kwama_mine",
@@ -3226,7 +3385,8 @@
   "x": 6387,
   "z": 7500,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "sap_mist_burrow",
@@ -3237,7 +3397,8 @@
   "x": 6227,
   "z": 4295,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "sweet_fen_undercroft",
@@ -3248,7 +3409,8 @@
   "x": 7951,
   "z": 9133,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "silt_stride_cave",
@@ -3259,7 +3421,8 @@
   "x": 5589,
   "z": 8698,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "hist_branch_hist_grove",
@@ -3270,7 +3433,8 @@
   "x": 6259,
   "z": 11724,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "still_fang_hist_grove",
@@ -3281,7 +3445,8 @@
   "x": 10007,
   "z": 8023,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "waxu",
@@ -3292,7 +3457,8 @@
   "x": 4915,
   "z": 4519,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "bright_heart_encampment",
@@ -3303,7 +3469,8 @@
   "x": 6990,
   "z": 8338,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "silt_mist_ruins",
@@ -3325,7 +3492,8 @@
   "x": 6793,
   "z": 7764,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "red_song_village",
@@ -3346,7 +3514,8 @@
   "x": 8554,
   "z": 4495,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "tall_claw_hist_grove",
@@ -3357,7 +3526,8 @@
   "x": 7481,
   "z": 4660,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "jeexiush_xanmeer",
@@ -3368,7 +3538,8 @@
   "x": 9946,
   "z": 6384,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "drift_heart_hist_grove",
@@ -3379,7 +3550,8 @@
   "x": 5895,
   "z": 4614,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "gray_stride_grotto",
@@ -3390,7 +3562,8 @@
   "x": 4366,
   "z": 9850,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "black_egg_hollow",
@@ -3401,7 +3574,8 @@
   "x": 5395,
   "z": 4820,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "dead_pool_village",
@@ -3422,7 +3596,8 @@
   "x": 6168,
   "z": 4817,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "tall_moon_grotto",
@@ -3433,7 +3608,8 @@
   "x": 8331,
   "z": 9770,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "long_leaf_burrow",
@@ -3444,7 +3620,8 @@
   "x": 5971,
   "z": 5677,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "bog_tail_encampment",
@@ -3455,7 +3632,8 @@
   "x": 5773,
   "z": 4874,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "drift_scale_grotto",
@@ -3466,7 +3644,8 @@
   "x": 5256,
   "z": 8569,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "sweet_wallow_hist_grove",
@@ -3477,7 +3656,8 @@
   "x": 7021,
   "z": 10828,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "warm_scale_grotto",
@@ -3488,7 +3668,8 @@
   "x": 5592,
   "z": 10630,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "keku_zuta",
@@ -3499,7 +3680,8 @@
   "x": 5103,
   "z": 11375,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "dark_marsh_encampment",
@@ -3510,7 +3692,8 @@
   "x": 8121,
   "z": 5614,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "soft_scale_clearing",
@@ -3532,7 +3715,8 @@
   "x": 5809,
   "z": 11543,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "tsewa_hinush",
@@ -3543,7 +3727,8 @@
   "x": 5161,
   "z": 10741,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "swift_fang_kwama_mine",
@@ -3554,7 +3739,8 @@
   "x": 6936,
   "z": 4570,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "green_eye_ruins",
@@ -3576,7 +3762,8 @@
   "x": 6150,
   "z": 5529,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "silt_pool_pit",
@@ -3587,7 +3774,8 @@
   "x": 5262,
   "z": 8979,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "slow_root_hollow",
@@ -3598,7 +3786,8 @@
   "x": 6248,
   "z": 5928,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "moss_shell_crag",
@@ -3652,7 +3841,8 @@
   "x": 6733,
   "z": 6152,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "still_stride_hollow",
@@ -3663,7 +3853,8 @@
   "x": 4727,
   "z": 6422,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "meilee",
@@ -3674,7 +3865,8 @@
   "x": 7209,
   "z": 4175,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "warm_root_hist_grove",
@@ -3685,7 +3877,8 @@
   "x": 5590,
   "z": 5815,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "meiul_xanmeer",
@@ -3696,7 +3889,8 @@
   "x": 5319,
   "z": 10609,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "root_heart_grotto",
@@ -3707,7 +3901,8 @@
   "x": 10735,
   "z": 7274,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "still_throat_grotto",
@@ -3718,7 +3913,8 @@
   "x": 9901,
   "z": 5839,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "root_branch_cave",
@@ -3729,7 +3925,8 @@
   "x": 6700,
   "z": 9274,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "deep_shell_grotto",
@@ -3740,7 +3937,8 @@
   "x": 6127,
   "z": 10671,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "jeeul_nushvu",
@@ -3751,7 +3949,8 @@
   "x": 8166,
   "z": 8586,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "bright_throat_ruins",
@@ -3773,7 +3972,8 @@
   "x": 4655,
   "z": 4598,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "red_shell_hollow",
@@ -3784,7 +3984,8 @@
   "x": 5331,
   "z": 9266,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "kusa_ruins",
@@ -3795,7 +3996,8 @@
   "x": 5145,
   "z": 6155,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "zuhixwa_xanmeer",
@@ -3806,7 +4008,8 @@
   "x": 6630,
   "z": 5193,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "glow_tail_burrow",
@@ -3817,7 +4020,8 @@
   "x": 4785,
   "z": 4922,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "bright_water_grotto",
@@ -3828,7 +4032,8 @@
   "x": 7142,
   "z": 4631,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "mire_heart_village",
@@ -3849,7 +4054,8 @@
   "x": 6712,
   "z": 7386,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "hist_scale_burrow",
@@ -3860,7 +4066,8 @@
   "x": 5104,
   "z": 11032,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "moss_claw_hist_grove",
@@ -3871,7 +4078,8 @@
   "x": 7322,
   "z": 9959,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "soft_fen_pit",
@@ -3882,7 +4090,8 @@
   "x": 5545,
   "z": 7916,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "mud_fang_hist_grove",
@@ -3893,7 +4102,8 @@
   "x": 9169,
   "z": 5095,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "moss_claw_kwama_mine",
@@ -3904,7 +4114,8 @@
   "x": 7889,
   "z": 4501,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "saxulee_ruins",
@@ -3915,7 +4126,8 @@
   "x": 5710,
   "z": 6393,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "black_tooth_ruins",
@@ -3937,7 +4149,8 @@
   "x": 5752,
   "z": 10970,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "vakakot_fort",
@@ -3948,7 +4161,8 @@
   "x": 4753,
   "z": 9914,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "warm_pool_camp",
@@ -3959,7 +4173,8 @@
   "x": 4616,
   "z": 11127,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "green_shell_ruins",
@@ -3981,7 +4196,8 @@
   "x": 9158,
   "z": 5836,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "black_shell_ruins",
@@ -4003,7 +4219,8 @@
   "x": 5556,
   "z": 11992,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "green_moon_ruins",
@@ -4025,7 +4242,8 @@
   "x": 5034,
   "z": 8455,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "hist_tree_undercroft",
@@ -4036,7 +4254,8 @@
   "x": 4908,
   "z": 6407,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "mud_scale_burrow",
@@ -4047,7 +4266,8 @@
   "x": 6130,
   "z": 11541,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "reed_mist_ruins",
@@ -4069,7 +4289,8 @@
   "x": 4748,
   "z": 4438,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "mud_fang_burrow",
@@ -4080,7 +4301,8 @@
   "x": 6354,
   "z": 10386,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "deep_heart_hist_grove",
@@ -4091,7 +4313,8 @@
   "x": 5742,
   "z": 9297,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "leeushjee",
@@ -4102,7 +4325,8 @@
   "x": 5745,
   "z": 11992,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "root_tooth_spring",
@@ -4124,7 +4348,8 @@
   "x": 7206,
   "z": 10379,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "hixxa_ruins",
@@ -4135,7 +4360,8 @@
   "x": 5810,
   "z": 4202,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "sun_egg_hist_grove",
@@ -4146,7 +4372,8 @@
   "x": 7854,
   "z": 5433,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "deep_tooth_hollow",
@@ -4157,7 +4384,8 @@
   "x": 10514,
   "z": 7498,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "sap_fen_cave",
@@ -4168,7 +4396,8 @@
   "x": 8346,
   "z": 5520,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "soft_leaf_hist_grove",
@@ -4179,7 +4408,8 @@
   "x": 6129,
   "z": 7594,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "old_water_undercroft",
@@ -4190,7 +4420,8 @@
   "x": 5394,
   "z": 11352,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "mud_eye_hist_grove",
@@ -4201,7 +4432,8 @@
   "x": 6554,
   "z": 6864,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "silt_egg_cave",
@@ -4212,7 +4444,8 @@
   "x": 4362,
   "z": 10234,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "teebxa_vulu",
@@ -4223,7 +4456,8 @@
   "x": 7064,
   "z": 9520,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "mud_eye_grotto",
@@ -4234,7 +4468,8 @@
   "x": 8016,
   "z": 5768,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "teeseixi_ruins",
@@ -4245,7 +4480,8 @@
   "x": 6832,
   "z": 11863,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "moss_claw_hollow",
@@ -4256,7 +4492,8 @@
   "x": 7784,
   "z": 9611,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "warm_tail_village",
@@ -4277,7 +4514,8 @@
   "x": 6475,
   "z": 4873,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "sun_fen_spring",
@@ -4299,7 +4537,8 @@
   "x": 4776,
   "z": 11242,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "old_stride_cave",
@@ -4310,7 +4549,8 @@
   "x": 10291,
   "z": 6456,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "nahix",
@@ -4321,7 +4561,8 @@
   "x": 5099,
   "z": 5209,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "tsexu_ruins",
@@ -4332,7 +4573,8 @@
   "x": 7496,
   "z": 4985,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "sap_fen_spring",
@@ -4354,7 +4596,8 @@
   "x": 9942,
   "z": 7055,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "tsavaka_vusa",
@@ -4365,7 +4608,8 @@
   "x": 8492,
   "z": 6832,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "bright_egg_hist_grove",
@@ -4376,7 +4620,8 @@
   "x": 5364,
   "z": 12115,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "cold_tree_hist_grove",
@@ -4387,7 +4632,8 @@
   "x": 5038,
   "z": 5583,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "tall_wallow_spring",
@@ -4409,7 +4655,8 @@
   "x": 6822,
   "z": 8204,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "jeesulkot",
@@ -4420,7 +4667,8 @@
   "x": 9523,
   "z": 7286,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "mud_whisper_pillar",
@@ -4453,7 +4701,8 @@
   "x": 9000,
   "z": 6089,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "green_leaf_undercroft",
@@ -4464,7 +4713,8 @@
   "x": 6329,
   "z": 9515,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "long_song_ruins",
@@ -4486,7 +4736,8 @@
   "x": 8017,
   "z": 9842,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "long_scale_pit",
@@ -4497,7 +4748,8 @@
   "x": 9833,
   "z": 6026,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "meike_ruins",
@@ -4508,7 +4760,8 @@
   "x": 5961,
   "z": 7029,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "drift_claw_burrow",
@@ -4519,7 +4772,8 @@
   "x": 8494,
   "z": 7991,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "cold_heart_vault",
@@ -4530,7 +4784,8 @@
   "x": 6744,
   "z": 4589,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "soft_egg_outpost",
@@ -4541,7 +4796,8 @@
   "x": 9318,
   "z": 4469,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "reed_branch_kwama_mine",
@@ -4552,7 +4808,8 @@
   "x": 8390,
   "z": 9363,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "black_root_spring",
@@ -4574,7 +4831,8 @@
   "x": 4913,
   "z": 10790,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "cold_vine_hollow",
@@ -4585,7 +4843,8 @@
   "x": 9914,
   "z": 8301,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "slow_fen_grotto",
@@ -4596,7 +4855,8 @@
   "x": 9460,
   "z": 8375,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "tsezuku",
@@ -4607,7 +4867,8 @@
   "x": 6452,
   "z": 10772,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "xatse_zutee",
@@ -4618,7 +4879,8 @@
   "x": 6954,
   "z": 4369,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "ushwa",
@@ -4629,7 +4891,8 @@
   "x": 5606,
   "z": 7529,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "glow_root_camp",
@@ -4640,7 +4903,8 @@
   "x": 5710,
   "z": 9043,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "red_tail_burrow",
@@ -4651,7 +4915,8 @@
   "x": 5102,
   "z": 8659,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "soft_branch_burrow",
@@ -4662,7 +4927,8 @@
   "x": 8107,
   "z": 5937,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "bright_heart_kwama_mine",
@@ -4673,7 +4939,8 @@
   "x": 5521,
   "z": 5354,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "red_shell_village",
@@ -4694,7 +4961,8 @@
   "x": 9997,
   "z": 8658,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "mire_wallow_burrow",
@@ -4705,7 +4973,8 @@
   "x": 7399,
   "z": 7119,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "zuul_xanmeer",
@@ -4716,7 +4985,8 @@
   "x": 7816,
   "z": 7884,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "wreck_of_the_lucky_griffon",
@@ -4727,7 +4997,8 @@
   "x": 9716,
   "z": 5268,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "green_tree_hist_grove",
@@ -4738,7 +5009,8 @@
   "x": 5710,
   "z": 10228,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "dark_claw_hist_grove",
@@ -4749,7 +5021,8 @@
   "x": 7087,
   "z": 4140,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "reed_root_outpost",
@@ -4760,7 +5033,8 @@
   "x": 4661,
   "z": 5522,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "red_tail_spring",
@@ -4782,7 +5056,8 @@
   "x": 4914,
   "z": 10090,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "mire_tooth_hist_grove",
@@ -4793,7 +5068,8 @@
   "x": 5839,
   "z": 9588,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "glow_tooth_hist_grove",
@@ -4804,7 +5080,8 @@
   "x": 6648,
   "z": 6438,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "soft_eye_cave",
@@ -4815,7 +5092,8 @@
   "x": 9200,
   "z": 6514,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "long_heart_cave",
@@ -4826,7 +5104,8 @@
   "x": 7378,
   "z": 8875,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "black_scale_camp",
@@ -4837,7 +5116,8 @@
   "x": 9207,
   "z": 7277,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "nivaka",
@@ -4848,7 +5128,8 @@
   "x": 5194,
   "z": 4788,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "mud_tree_hist_grove",
@@ -4859,7 +5140,8 @@
   "x": 6790,
   "z": 4145,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "glow_throat_ruins",
@@ -4881,7 +5163,8 @@
   "x": 7498,
   "z": 7221,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "mire_vine_outpost",
@@ -4892,7 +5175,8 @@
   "x": 4813,
   "z": 4601,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "bright_pool_village",
@@ -4913,7 +5197,8 @@
   "x": 9810,
   "z": 6458,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "slow_marsh_hist_grove",
@@ -4924,7 +5209,8 @@
   "x": 7031,
   "z": 7462,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "still_heart_kwama_mine",
@@ -4935,7 +5221,8 @@
   "x": 7501,
   "z": 10256,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "black_tail_camp",
@@ -4946,7 +5233,8 @@
   "x": 8467,
   "z": 6062,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "deep_mist_hist_grove",
@@ -4957,7 +5245,8 @@
   "x": 5523,
   "z": 5097,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "tsavakazu",
@@ -4968,7 +5257,8 @@
   "x": 9585,
   "z": 5581,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "cold_scale_grotto",
@@ -4979,7 +5269,8 @@
   "x": 9495,
   "z": 7471,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "deep_water_cave",
@@ -4990,7 +5281,8 @@
   "x": 5844,
   "z": 10249,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "sun_stride_spring",
@@ -5012,7 +5304,8 @@
   "x": 6515,
   "z": 4372,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "xixa_seisei",
@@ -5023,7 +5316,8 @@
   "x": 10264,
   "z": 6187,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "black_wallow_camp",
@@ -5034,7 +5328,8 @@
   "x": 7558,
   "z": 4309,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "black_claw_hist_grove",
@@ -5045,7 +5340,8 @@
   "x": 9417,
   "z": 6639,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "green_whisper_camp",
@@ -5056,7 +5352,8 @@
   "x": 8846,
   "z": 6644,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "glow_water_crypt",
@@ -5067,7 +5364,8 @@
   "x": 4595,
   "z": 10328,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "black_whisper_camp",
@@ -5078,7 +5376,8 @@
   "x": 4693,
   "z": 6635,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "glow_root_cave",
@@ -5089,7 +5388,8 @@
   "x": 4762,
   "z": 6151,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "reed_heart_camp",
@@ -5100,7 +5400,8 @@
   "x": 8625,
   "z": 4332,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "still_heart_cave",
@@ -5111,7 +5412,8 @@
   "x": 7342,
   "z": 10095,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "tsetsa_jeewa",
@@ -5122,7 +5424,8 @@
   "x": 8299,
   "z": 9254,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "warm_fen_ruins",
@@ -5144,7 +5447,8 @@
   "x": 6026,
   "z": 9681,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "vakakot_xanmeer",
@@ -5155,7 +5459,8 @@
   "x": 9657,
   "z": 6516,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "hixna",
@@ -5166,7 +5471,8 @@
   "x": 8887,
   "z": 4425,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "dark_eye_hist_grove",
@@ -5177,7 +5483,8 @@
   "x": 9338,
   "z": 6122,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "warm_water_hist_grove",
@@ -5188,7 +5495,8 @@
   "x": 5718,
   "z": 6120,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "gray_shell_ruins",
@@ -5230,7 +5538,8 @@
   "x": 7853,
   "z": 4231,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "hist_stride_camp",
@@ -5241,7 +5550,8 @@
   "x": 6070,
   "z": 8344,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "hist_branch_hollow",
@@ -5252,7 +5562,8 @@
   "x": 7175,
   "z": 5066,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "swift_marsh_undercroft",
@@ -5263,7 +5574,8 @@
   "x": 5489,
   "z": 10890,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "warm_tree_ruins",
@@ -5285,7 +5597,8 @@
   "x": 7983,
   "z": 8904,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "reed_wallow_hollow",
@@ -5296,7 +5609,8 @@
   "x": 4848,
   "z": 3768,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "black_stride_grotto",
@@ -5307,7 +5621,8 @@
   "x": 8537,
   "z": 8719,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "long_mist_camp",
@@ -5318,7 +5633,8 @@
   "x": 6545,
   "z": 4249,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "long_fang_undercroft",
@@ -5329,7 +5645,8 @@
   "x": 6873,
   "z": 6007,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "mire_song_burrow",
@@ -5340,7 +5657,8 @@
   "x": 5670,
   "z": 8083,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "warm_tail_spring",
@@ -5362,7 +5680,8 @@
   "x": 7307,
   "z": 4331,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "slow_fen_crypt",
@@ -5373,7 +5692,8 @@
   "x": 5939,
   "z": 11544,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "hist_vine_burrow",
@@ -5384,7 +5704,8 @@
   "x": 6226,
   "z": 11127,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "swift_wallow_ruins",
@@ -5406,7 +5727,8 @@
   "x": 4903,
   "z": 8493,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "hist_branch_grotto",
@@ -5417,7 +5739,8 @@
   "x": 5286,
   "z": 4248,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "tsatso_rice_paddy",
@@ -5438,7 +5761,8 @@
   "x": 6474,
   "z": 11302,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "glow_scale_encampment",
@@ -5449,7 +5773,8 @@
   "x": 6311,
   "z": 6057,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "mud_fen_hollow",
@@ -5460,7 +5785,8 @@
   "x": 8560,
   "z": 6540,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "warm_pool_spring",
@@ -5482,7 +5808,8 @@
   "x": 4877,
   "z": 4119,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "warm_throat_ruins",
@@ -5515,7 +5842,8 @@
   "x": 5421,
   "z": 9074,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "bog_scale_cave",
@@ -5526,7 +5854,8 @@
   "x": 5560,
   "z": 8390,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "mire_claw_grotto",
@@ -5537,7 +5866,8 @@
   "x": 4906,
   "z": 3944,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "bog_moon_ruins",
@@ -5559,7 +5889,8 @@
   "x": 6552,
   "z": 9366,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "sun_heart_hollow",
@@ -5570,7 +5901,8 @@
   "x": 4569,
   "z": 6958,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "green_root_ruins",
@@ -5592,7 +5924,8 @@
   "x": 8405,
   "z": 7814,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "gray_tree_grotto",
@@ -5603,7 +5936,8 @@
   "x": 7922,
   "z": 9606,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "gray_moon_hist_grove",
@@ -5614,7 +5948,8 @@
   "x": 7591,
   "z": 7833,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "moss_water_cave",
@@ -5625,7 +5960,8 @@
   "x": 5242,
   "z": 5206,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "nushmei",
@@ -5636,7 +5972,8 @@
   "x": 7982,
   "z": 4364,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "swift_stride_grotto",
@@ -5647,7 +5984,8 @@
   "x": 5104,
   "z": 9010,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "glow_pool_cave",
@@ -5658,7 +5996,8 @@
   "x": 4755,
   "z": 11366,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "still_leaf_burrow",
@@ -5669,7 +6008,8 @@
   "x": 5804,
   "z": 4438,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "drift_tooth_grotto",
@@ -5680,7 +6020,8 @@
   "x": 5927,
   "z": 8632,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "xaxuvaka",
@@ -5691,7 +6032,8 @@
   "x": 5868,
   "z": 6774,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "root_tail_grotto",
@@ -5702,7 +6044,8 @@
   "x": 4552,
   "z": 8071,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "tazu_kaxa",
@@ -5713,7 +6056,8 @@
   "x": 4934,
   "z": 11543,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "dead_mist_pillar",
@@ -5735,7 +6079,8 @@
   "x": 8371,
   "z": 6966,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "hist_scale_cave",
@@ -5746,7 +6091,8 @@
   "x": 5174,
   "z": 8407,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "reed_mist_village",
@@ -5767,7 +6113,8 @@
   "x": 7050,
   "z": 4461,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "tsokot_hiku",
@@ -5778,7 +6125,8 @@
   "x": 8678,
   "z": 9419,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "deep_egg_burrow",
@@ -5789,7 +6137,8 @@
   "x": 9679,
   "z": 6646,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "dark_fen_grotto",
@@ -5800,7 +6149,8 @@
   "x": 6131,
   "z": 6870,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "cold_root_village",
@@ -5821,7 +6171,8 @@
   "x": 4716,
   "z": 10827,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "bright_scale_grotto",
@@ -5832,7 +6183,8 @@
   "x": 8020,
   "z": 5516,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "xatse",
@@ -5843,7 +6195,8 @@
   "x": 4712,
   "z": 5805,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "bright_tooth_ruins",
@@ -5887,7 +6240,8 @@
   "x": 9621,
   "z": 4844,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "meikemei",
@@ -5898,7 +6252,8 @@
   "x": 5386,
   "z": 8275,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "gray_eye_village",
@@ -5930,7 +6285,8 @@
   "x": 8332,
   "z": 4274,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "bright_fen_cave",
@@ -5941,7 +6297,8 @@
   "x": 5837,
   "z": 6289,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "sweet_claw_grotto",
@@ -5952,7 +6309,8 @@
   "x": 5040,
   "z": 10874,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "moss_marsh_hist_grove",
@@ -5963,7 +6321,8 @@
   "x": 9006,
   "z": 6647,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "sun_scale_hollow",
@@ -5974,7 +6333,8 @@
   "x": 4614,
   "z": 3786,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "soft_fang_spring",
@@ -5996,7 +6356,8 @@
   "x": 4855,
   "z": 5527,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "swift_heart_burrow",
@@ -6007,7 +6368,8 @@
   "x": 5107,
   "z": 3798,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "slow_egg_rock",
@@ -6029,7 +6391,8 @@
   "x": 7126,
   "z": 5966,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "wahix_seiteeb",
@@ -6040,7 +6403,8 @@
   "x": 5832,
   "z": 5273,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "long_throat_hist_grove",
@@ -6051,7 +6415,8 @@
   "x": 9300,
   "z": 5623,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "reed_marsh_hist_grove",
@@ -6062,7 +6427,8 @@
   "x": 4621,
   "z": 4104,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "mire_tail_hist_grove",
@@ -6073,7 +6439,8 @@
   "x": 4693,
   "z": 8208,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "dark_tail_cave",
@@ -6084,7 +6451,8 @@
   "x": 6034,
   "z": 10802,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "sap_water_hist_grove",
@@ -6095,7 +6463,8 @@
   "x": 9990,
   "z": 5929,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "root_leaf_grotto",
@@ -6106,7 +6475,8 @@
   "x": 7307,
   "z": 11605,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "old_tree_grotto",
@@ -6117,7 +6487,8 @@
   "x": 8408,
   "z": 4533,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "hixka_xanmeer",
@@ -6128,7 +6499,8 @@
   "x": 6126,
   "z": 11345,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "nahix_nushvu",
@@ -6139,7 +6511,8 @@
   "x": 5754,
   "z": 7513,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "hist_wallow_grotto",
@@ -6150,7 +6523,8 @@
   "x": 7915,
   "z": 9743,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "dead_wallow_kwama_mine",
@@ -6161,7 +6535,8 @@
   "x": 9295,
   "z": 7186,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "silt_water_cave",
@@ -6172,7 +6547,8 @@
   "x": 7085,
   "z": 7718,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "root_whisper_hollow",
@@ -6183,7 +6559,8 @@
   "x": 9366,
   "z": 8087,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "tall_marsh_kwama_mine",
@@ -6194,7 +6571,8 @@
   "x": 5200,
   "z": 9128,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "red_whisper_hist_grove",
@@ -6205,7 +6583,8 @@
   "x": 8655,
   "z": 8848,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "silt_mist_grotto",
@@ -6216,7 +6595,8 @@
   "x": 5909,
   "z": 10857,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "zusul",
@@ -6227,7 +6607,8 @@
   "x": 4651,
   "z": 6068,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "black_fang_clearing",
@@ -6249,7 +6630,8 @@
   "x": 6704,
   "z": 7661,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "mud_water_hollow",
@@ -6260,7 +6642,8 @@
   "x": 7913,
   "z": 8230,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "sap_shell_ruins",
@@ -6282,7 +6665,8 @@
   "x": 4761,
   "z": 9414,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "xanxusa_ruins",
@@ -6293,7 +6677,8 @@
   "x": 5946,
   "z": 5834,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "black_eye_camp",
@@ -6304,7 +6689,8 @@
   "x": 4662,
   "z": 4789,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "soft_whisper_hollow",
@@ -6315,7 +6701,8 @@
   "x": 4904,
   "z": 6539,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "sap_claw_kwama_mine",
@@ -6326,7 +6713,8 @@
   "x": 5972,
   "z": 7287,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "old_eye_cave",
@@ -6337,7 +6725,8 @@
   "x": 6088,
   "z": 6601,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "xisei_nushka",
@@ -6348,7 +6737,8 @@
   "x": 4753,
   "z": 6287,
   "radius": 26,
-  "variant": "xanmeer"
+  "variant": "xanmeer",
+  "class": "major"
  },
  {
   "id": "long_tooth_cave",
@@ -6359,7 +6749,8 @@
   "x": 7530,
   "z": 4174,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "sweet_fen_arch",
@@ -6381,7 +6772,8 @@
   "x": 9351,
   "z": 7796,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "drift_wallow_hist_grove",
@@ -6392,7 +6784,8 @@
   "x": 7696,
   "z": 4277,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "old_stride_pit",
@@ -6403,7 +6796,8 @@
   "x": 4936,
   "z": 11817,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "bright_vine_camp",
@@ -6414,7 +6808,8 @@
   "x": 7494,
   "z": 9049,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "bog_whisper_hollow",
@@ -6425,7 +6820,8 @@
   "x": 7828,
   "z": 4782,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "sun_fang_sanctum",
@@ -6436,7 +6832,8 @@
   "x": 4938,
   "z": 9352,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "deep_heart_outpost",
@@ -6447,7 +6844,8 @@
   "x": 5520,
   "z": 10409,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "sweet_leaf_hollow",
@@ -6458,7 +6856,8 @@
   "x": 8343,
   "z": 7317,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "slow_claw_kwama_mine",
@@ -6469,7 +6868,8 @@
   "x": 5672,
   "z": 8538,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "vevarmbek",
@@ -6480,7 +6880,8 @@
   "x": 5530,
   "z": 11310,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "marquee"
  },
  {
   "id": "slow_egg_kwama_mine",
@@ -6491,7 +6892,8 @@
   "x": 4851,
   "z": 5973,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "sun_eye_burrow",
@@ -6502,7 +6904,8 @@
   "x": 5044,
   "z": 4435,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "dead_whisper_ruins",
@@ -6524,7 +6927,8 @@
   "x": 7054,
   "z": 5836,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "deep_whisper_camp",
@@ -6535,6 +6939,7 @@
   "x": 9130,
   "z": 6296,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  }
 ]

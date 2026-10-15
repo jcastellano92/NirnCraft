@@ -27,7 +27,7 @@ public class NpcRenderer extends HumanoidMobRenderer<NpcEntity, NpcModel> {
                 case FARMER, FISHER, CITIZEN, CHILD -> "hunter";
                 case BLACKSMITH -> "miner";
                 case MERCHANT, APOTHECARY, BUTCHER, CARAVAN_TRADER -> "innkeeper";
-                case SCHOLAR -> "mage";
+                case SCHOLAR, TRAINER -> "mage";
                 case STEWARD -> "jarl";
                 default -> role.id;
             };

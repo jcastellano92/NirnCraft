@@ -179,12 +179,26 @@ public final class NpcDialogue {
         return Component.translatable("dialogue.skycraft.society." + key, args);
     }
 
+    public static String resolveReactiveKey(@org.jetbrains.annotations.Nullable String regionOrHold, @org.jetbrains.annotations.Nullable String deed) {
+        return ContextualDialogue.resolveReactiveKey(regionOrHold, deed);
+    }
+
     // ------------------------------------------------------------------ topics
 
     static void addOptions(ServerPlayer player, LivingEntity entity, List<DialogueOption> out) {
-        if (!(entity instanceof NpcEntity npc) || npc.isHostileTo(player)) return;
         String hold = com.skycraft.core.Holds.holdAt(player.level(), player.blockPosition());
-        if (com.skycraft.crime.Crimes.isGuard(npc) && com.skycraft.crime.Bounty.get(player, hold) > 0) return;
+        if (com.skycraft.crime.Crimes.isGuard(entity) && com.skycraft.crime.Bounty.get(player, hold) > 0) return;
+        if (!(entity instanceof NpcEntity npc)) {
+            if (com.skycraft.crime.Crimes.isGuard(entity) && !ContextualDialogue.activeDeeds(player, hold).isEmpty()) {
+                out.add(new DialogueOption("society.react", opt("react"), 515, (p, n) -> {
+                    Component react = ContextualDialogue.reactiveLine(p, n);
+                    if (react != null) Dialogue.open(p, n, react);
+                }));
+            }
+            SocietyTrainers.addDialogueOptions(player, entity, out);
+            return;
+        }
+        if (npc.isHostileTo(player)) return;
         NpcRole role = npc.role();
         if (npc.isPrisoner()) {
             out.add(new DialogueOption("society.free", opt("free"), 10, NpcDialogue::freePrisoner));
@@ -271,6 +285,9 @@ public final class NpcDialogue {
             return;
         }
 
+        // Server-validated skill training (F-TRAINER / R3d-1.1)
+        SocietyTrainers.addDialogueOptions(player, npc, out);
+
         // "what do you do around here?" is a silly thing to ask a jarl, a steward, a mage or a court wizard
         boolean obviousJob = role == NpcRole.JARL || role == NpcRole.STEWARD || role == NpcRole.HOUSECARL || role == NpcRole.MAGE
                 || npc.getPersistentData().getString(com.skycraft.economy.Merchants.PROFESSION_KEY).equals("skycraft:court_wizard")
@@ -330,6 +347,8 @@ public final class NpcDialogue {
                     (p, n) -> Dialogue.open(p, n, say("fishing." + p.getRandom().nextInt(2)))));
             case SCHOLAR -> out.add(new DialogueOption("society.studies", opt("studies"), 10,
                     (p, n) -> Dialogue.open(p, n, say("studies." + p.getRandom().nextInt(3)))));
+            case TRAINER -> out.add(new DialogueOption("society.training_lore", opt("training_lore"), 25,
+                    (p, n) -> Dialogue.open(p, n, say("training_lore." + p.getRandom().nextInt(3)))));
             case CHILD -> out.add(new DialogueOption("society.play", opt("play"), 10,
                     (p, n) -> Dialogue.open(p, n, say("play." + p.getRandom().nextInt(4)))));
             case HUNTER -> out.add(new DialogueOption("society.game", opt("game"), 10,

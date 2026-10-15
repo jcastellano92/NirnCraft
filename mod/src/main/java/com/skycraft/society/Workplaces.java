@@ -145,7 +145,7 @@ public final class Workplaces {
             case BLACKSMITH -> Kind.FORGE;
             case MERCHANT -> Kind.COUNTER;
             case APOTHECARY -> Kind.ALCHEMY;
-            case SCHOLAR, MAGE -> Kind.LIBRARY;
+            case SCHOLAR, MAGE, TRAINER -> Kind.LIBRARY;
             case FISHER -> Kind.DOCK;
             case BUTCHER -> Kind.BUTCHER;
             case MINER -> Kind.MINE;

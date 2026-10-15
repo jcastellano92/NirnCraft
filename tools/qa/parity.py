@@ -612,8 +612,12 @@ def collect():
             for rg in prov_regions[k]:
                 R[rg]["flavor"] += n / float(len(prov_regions[k]))
 
-    # ---- society (region-keyed say/chat lines)
-    soc = jload(os.path.join(LANG, "society.json"), {})
+    # ---- society (region-keyed say/chat lines across society.json + society_*.json)
+    soc = {}
+    for sf in sorted(glob.glob(os.path.join(LANG, "society*.json"))):
+        sd = jload(sf, {})
+        if isinstance(sd, dict):
+            soc.update(sd)
     for k in soc:
         parts = k.split(".")
         if len(parts) < 4 or parts[2] not in ("say", "chat", "bark"):
@@ -674,9 +678,37 @@ def collect():
                 return sum(leaves(v) for v in o) if o else 1
             return 1
         style_rich[os.path.basename(f)[:-5]] = leaves(j)
-    # ---- explore uniques
+    # ---- explore uniques (uniques.json + uniques_index.json + uniques_*.json)
+    exp_dir = os.path.join(SKY, "explore")
+    u_files = []
+    p_u0 = os.path.join(exp_dir, "uniques.json")
+    if os.path.exists(p_u0):
+        u_files.append(p_u0)
+    u_idx = jload(os.path.join(exp_dir, "uniques_index.json"), [])
+    if isinstance(u_idx, dict):
+        u_idx = u_idx.get("files", [])
+    for fn in (u_idx if isinstance(u_idx, list) else []):
+        fp = os.path.join(exp_dir, fn)
+        if os.path.exists(fp) and fp not in u_files:
+            u_files.append(fp)
+    for fp in sorted(glob.glob(os.path.join(exp_dir, "uniques_*.json"))):
+        if os.path.basename(fp) != "uniques_index.json" and fp not in u_files:
+            u_files.append(fp)
+    all_uniques = []
+    seen_u = set()
+    for fp in u_files:
+        ud = jload(fp, [])
+        if isinstance(ud, dict):
+            ud = ud.get("uniques", [])
+        for u in (ud if isinstance(ud, list) else []):
+            if not isinstance(u, dict):
+                continue
+            uk = (u.get("id") or u.get("item"), u.get("x"), u.get("z"), u.get("place"))
+            if uk not in seen_u:
+                seen_u.add(uk)
+                all_uniques.append(u)
     ex_unique = Counter()
-    for u in jload(os.path.join(SKY, "explore", "uniques.json"), []):
+    for u in all_uniques:
         rg = rid_at(u.get("x", 0), u.get("z", 0))
         if rg:
             ex_unique[rg] += 1
@@ -739,7 +771,7 @@ def collect():
     uniq_by_prov = Counter(re.findall(r'def\("[a-z_]+",\s*"[a-z_:]+",\s*"([a-z_]+)"', legend))
     identity_ids = set(lore_places) | quest_places
     identity_ids |= set(re.findall(r'def\("[a-z_]+",\s*"[a-z_:]+",\s*"[a-z_]+",\s*"([a-z_]+)"', legend))
-    for u in jload(os.path.join(SKY, "explore", "uniques.json"), []):
+    for u in all_uniques:
         if isinstance(u, dict) and u.get("place"):
             identity_ids.add(u["place"])
 
@@ -900,7 +932,8 @@ def collect():
         "bespoke_settlements": sorted(bespoke),
         "quests_total": len(quest_rows),
     }
-    return dict(regions=land, R=R, sets=sets, area=area, glob=glob_stats, prov_of=prov_of)
+    return dict(regions=land, R=R, sets=sets, area=area, glob=glob_stats, prov_of=prov_of,
+                places=places, bespoke=bespoke, quest_rows=quest_rows, qfiles=qfiles, qplaces_global=qplaces_global)
 
 
 # ------------------------------------------------------------------------------------------------ scoring
@@ -1127,6 +1160,265 @@ def raw_tables(rows, prov_order):
     return out
 
 
+MINOR_HOLD_SEATS = {"winterhold", "falkreath", "morthal", "dawnstar", "raven_rock"}
+
+
+def settlement_tier(p):
+    t = p.get("type", "")
+    pid = p.get("id", "")
+    if pid in MINOR_HOLD_SEATS or t == "city":
+        return "city"
+    if t == "capital":
+        return "capital"
+    if t == "town":
+        return "town"
+    if t == "village":
+        return "village"
+    if t == "farm":
+        return "hamlet"
+    return None
+
+
+def load_streetplan_stats():
+    """Return dict: settlement_id -> dict(interiors, inns, merchants, named_bldgs, trainers)."""
+    sp_path = os.path.join(SKY, "baked", "streetplan.bin")
+    if not os.path.exists(sp_path):
+        return {}
+    try:
+        import struct
+        with open(sp_path, "rb") as f:
+            raw = f.read()
+        hlen = struct.unpack_from(">H", raw, 0)[0]
+        raw = zlib.decompress(raw[2 + hlen:])
+        pos = 0
+
+        def ri():
+            nonlocal pos
+            v = struct.unpack_from(">i", raw, pos)[0]
+            pos += 4
+            return v
+
+        def rutf():
+            nonlocal pos
+            ln = struct.unpack_from(">H", raw, pos)[0]
+            pos += 2
+            s = raw[pos:pos + ln].decode("utf-8")
+            pos += ln
+            return s
+
+        def rints():
+            nonlocal pos
+            n = ri()
+            a = struct.unpack_from(f">{n}i", raw, pos)
+            pos += 4 * n
+            return a
+
+        def rfloats():
+            nonlocal pos
+            n = ri()
+            pos += 4 * n
+
+        def rbytes():
+            nonlocal pos
+            n = ri()
+            pos += n
+
+        _magic, _ver, ns = ri(), ri(), ri()
+        s_ids = []
+        for _ in range(ns):
+            s_ids.append(rutf())
+            ri()
+            ri()
+            ri()
+        _s_node, _s_edge, s_door, _s_plot, s_spec = rints(), rints(), rints(), rints(), rints()
+        rfloats()
+        rfloats()
+        rfloats()
+        rbytes()
+        rints()
+        rints()
+        rints()
+        rints()
+        rfloats()
+        rbytes()
+        rbytes()
+        rints()
+        rints()
+        rints()
+        rints()
+        rints()
+        rbytes()
+        nr = ri()
+        pos += nr
+        rints()
+        rints()
+        rints()
+        rints()
+        rints()
+        rints()
+        rbytes()
+        spec_ints = rints()
+        nn = ri()
+        spec_names = [rutf() for _ in range(nn)]
+
+        BLDG_ARCH = set(range(16)) | {32, 33, 34}
+        TRADE_USES = {6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 22, 24}
+        TRADE_ARCH = {3, 4, 5, 6, 10, 12, 19}
+        out = {}
+        for idx, sid in enumerate(s_ids):
+            i0, i1 = s_spec[idx], s_spec[idx + 1]
+            specs = [spec_ints[i * 20:(i + 1) * 20] for i in range(i0, i1)]
+            names = spec_names[i0:i1]
+            bldgs = [s for s in specs if s[0] in BLDG_ARCH]
+            inns = [s for s in bldgs if s[0] == 3 or (s[0] == 34 and s[16] == 6)]
+            merch = [s for s in specs if s[0] in TRADE_ARCH or (s[0] == 34 and s[16] in TRADE_USES)]
+            named = sum(1 for n in names if n and "," not in n)
+            out[sid] = dict(interiors=len(bldgs), inns=len(inns), merchants=len(merch), named_bldgs=named)
+        return out
+    except Exception:
+        return {}
+
+
+def print_tiers(data, f_prov=None, f_reg=None):
+    floors_path = os.path.join(HERE, "floors.json")
+    tier_floors = jload(floors_path, {}).get("settlement_tiers", {})
+    places = data["places"]
+    bespoke = data["bespoke"]
+    prov_of = data["prov_of"]
+    sp_stats = load_streetplan_stats()
+
+    settlements = [p for p in places if settlement_tier(p) is not None]
+    by_id = {p["id"]: p for p in settlements}
+
+    # Gather per-settlement NPCs, roles, merchants, trainers, quests
+    npcs_by_s = defaultdict(list)
+    roles_by_s = defaultdict(set)
+    merch_by_s = Counter()
+    train_by_s = Counter()
+    quests_by_s = Counter()
+
+    MERCH_ROLES = {"merchant", "blacksmith", "alchemist", "innkeeper", "general_trader", "jeweller",
+                   "tailor", "bookseller", "butcher", "fletcher", "fence", "apothecary", "trader",
+                   "court_wizard", "carriage_driver", "ferryman", "stablemaster"}
+
+    qplaces_global = data["qplaces_global"]
+
+    def resolve_settlement(pl_key, fp):
+        if pl_key in by_id:
+            return pl_key
+        coords = None
+        for src in (fp, qplaces_global):
+            if pl_key in src and isinstance(src[pl_key], dict) and "x" in src[pl_key]:
+                coords = (src[pl_key]["x"], src[pl_key]["z"])
+                break
+        if coords:
+            px, pz = coords
+            best_s, best_d2 = None, 220 * 220
+            for s in settlements:
+                d2 = (s["x"] - px) ** 2 + (s["z"] - pz) ** 2
+                if d2 < best_d2:
+                    best_s, best_d2 = s["id"], d2
+            return best_s
+        return None
+
+    npc_settlement = {}
+    for f in data["qfiles"]:
+        j = jload(f, {})
+        fp = j.get("places", {}) if isinstance(j.get("places"), dict) else {}
+        for n in j.get("npcs", []):
+            sid = resolve_settlement(n.get("place"), fp) if n.get("place") else None
+            if sid:
+                npc_settlement[n.get("id", "")] = sid
+                npcs_by_s[sid].append(n)
+                role = (n.get("role") or "citizen").lower()
+                roles_by_s[sid].add(role)
+                if role in MERCH_ROLES or n.get("shop") or n.get("merchant"):
+                    merch_by_s[sid] += 1
+                if n.get("trainer") or n.get("skill") or "trainer" in role:
+                    train_by_s[sid] += 1
+        for q in j.get("quests", []):
+            touched = set()
+            st = str(q.get("start", ""))
+            if st.startswith("npc:"):
+                ns = npc_settlement.get(st.split(":", 1)[1])
+                if ns:
+                    touched.add(ns)
+            if q.get("place") in by_id:
+                touched.add(q["place"])
+            for o in q.get("objectives", []):
+                osid = resolve_settlement(o.get("place"), fp) if o.get("place") else None
+                if osid:
+                    touched.add(osid)
+            for sid in touched:
+                quests_by_s[sid] += 1
+
+    # Also check society/trainers.json and society/courts.json if present
+    for tf in glob.glob(os.path.join(SKY, "society", "*.json")):
+        tj = jload(tf, {})
+        if isinstance(tj, dict):
+            smap = tj.get("settlements") if isinstance(tj.get("settlements"), dict) else tj
+            for k, v in smap.items():
+                if k not in by_id:
+                    continue
+                if isinstance(v, list):
+                    train_by_s[k] = max(train_by_s[k], len(v))
+                    for item in v:
+                        if isinstance(item, dict) and item.get("name"):
+                            npcs_by_s[k].append({"id": "trainer:" + item["name"]})
+                            roles_by_s[k].add("trainer")
+                elif isinstance(v, dict):
+                    if "trainers" in v and isinstance(v["trainers"], list):
+                        train_by_s[k] = max(train_by_s[k], len(v["trainers"]))
+                    for rk in ("jarl", "ruler", "steward", "court_wizard", "priest", "housecarl"):
+                        if v.get(rk):
+                            npcs_by_s[k].append({"id": f"court:{rk}:{v[rk]}"})
+                            roles_by_s[k].add(rk)
+
+    def match_s(s):
+        rid = s.get("region", "")
+        prov = prov_of.get(rid, rid.split("/")[0] if "/" in rid else "")
+        if f_prov and prov != f_prov:
+            return False
+        if f_reg and rid != f_reg and rid.split("/")[-1] != f_reg:
+            return False
+        return True
+
+    sel = [s for s in settlements if match_s(s)]
+    tier_order = {"capital": 0, "city": 1, "town": 2, "village": 3, "hamlet": 4}
+    sel.sort(key=lambda s: (tier_order.get(settlement_tier(s), 9), s.get("region", ""), s["id"]))
+
+    print("=== Settlement Tier Audit (DESIGN-PRINCIPLES Section 4.4) ===")
+    hdr = f"{'Settlement':<24} {'Region':<24} {'Tier':<8} | {'NPCs':>9} {'Int':>9} {'NamedB':>9} {'Merch':>9} {'Train':>9} {'Inns':>8} {'Roles':>9} {'Quests':>9}"
+    print(hdr)
+    print("-" * len(hdr))
+    for s in sel:
+        sid = s["id"]
+        rid = s.get("region", "")
+        tier = settlement_tier(s)
+        tf = tier_floors.get(tier, {})
+        sp = sp_stats.get(sid, {})
+        n_npcs = len(npcs_by_s[sid])
+        n_int = sp.get("interiors", 1 if tier in ("village", "hamlet") else 0)
+        n_named = max(bespoke.get(sid, 0), sp.get("named_bldgs", 0))
+        n_merch = max(merch_by_s[sid], sp.get("merchants", 0))
+        n_train = train_by_s[sid]
+        n_inns = sp.get("inns", 1 if s.get("variant") == "inn" else 0)
+        n_roles = len(roles_by_s[sid])
+        n_quests = quests_by_s[sid]
+
+        def cell(val, col_key):
+            fl = tf.get(col_key, {}).get("abs", 0)
+            fl_s = f"{fl:g}"
+            return f"{val}/{fl_s}"
+
+        print(f"{sid[:24]:<24} {rid[:24]:<24} {tier:<8} | "
+              f"{cell(n_npcs, 'named_npcs'):>9} {cell(n_int, 'interiors'):>9} {cell(n_named, 'named_buildings'):>9} "
+              f"{cell(n_merch, 'merchants'):>9} {cell(n_train, 'trainers'):>9} {cell(n_inns, 'inns'):>8} "
+              f"{cell(n_roles, 'roles'):>9} {cell(n_quests, 'quests'):>9}")
+    print(f"\nTotal settlements shown: {len(sel)} (format: actual/abs_floor)")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--json", default=None)
@@ -1142,6 +1434,9 @@ def main():
                     help="exit 1 if any region scores under 80 in these categories, e.g. NPC,LOR (batch 'done' check)")
     ap.add_argument("--floors", action="store_true", help="print how many items each province is short of the 80%% floor")
     ap.add_argument("--realms", action="store_true", help="include the beyond-the-map realms (no raster area) in the lowest lists")
+    ap.add_argument("--province", default=None, help="filter output/checks to a single province (e.g. skyrim)")
+    ap.add_argument("--region", default=None, help="filter output/checks to a single region (e.g. whiterun or skyrim/whiterun)")
+    ap.add_argument("--tiers", action="store_true", help="print each settlement against the Section 4.4 tier table")
     args = ap.parse_args()
     global INCLUDE_REALMS
     INCLUDE_REALMS = args.realms
@@ -1151,8 +1446,25 @@ def main():
         except Exception:
             pass
     data = collect()
+    if args.tiers:
+        return print_tiers(data, args.province, args.region)
     rows, refs, prov_ids = build_scores(data)
     order = province_order(prov_ids)
+
+    def match_reg_id(rid):
+        prov = data["prov_of"].get(rid, rid.split("/")[0] if "/" in rid else "")
+        if args.province and prov != args.province:
+            return False
+        if args.region and rid != args.region and rid.split("/")[-1] != args.region:
+            return False
+        return True
+
+    if args.province:
+        order = [p for p in order if p == args.province]
+    elif args.region:
+        matched_provs = {data["prov_of"].get(r) for p in order for r in prov_ids[p] if match_reg_id(r)}
+        order = [p for p in order if p in matched_provs]
+
     reg_label = lambda k: k[2:]
     prov_label = lambda k: k[2:]
     ascii_only = args.ascii or (sys.stdout.encoding or "").lower().replace("-", "") not in ("utf8", "utf8sig")
@@ -1161,7 +1473,7 @@ def main():
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
             json.dump({"refs": refs, "rows": rows, "global": data["glob"]}, f, indent=1, default=float)
-    low = lowest(rows, args.lowest or 10)
+    low = [t for t in lowest(rows, (args.lowest or 10) * 10) if match_reg_id(t[1])][: (args.lowest or 10)]
     if args.assert_metric:
         mids = [c.strip() for c in args.assert_metric.split(",") if c.strip()]
         unknown = [m for m in mids if m not in M_BY_ID]
@@ -1169,8 +1481,11 @@ def main():
             print("unknown metric id(s): %s; known: %s" % (",".join(unknown), ",".join(M_BY_ID)))
             return 2
         bad = []
+        skip_base = not (args.province or args.region)
         for k, row in rows.items():
-            if not k.startswith("R:") or row.get("sliver") or k.startswith("R:" + BASE + "/"):
+            if not k.startswith("R:") or row.get("sliver") or (skip_base and k.startswith("R:" + BASE + "/")):
+                continue
+            if not match_reg_id(k[2:]):
                 continue
             if row["km2"] <= 0 and not INCLUDE_REALMS:
                 continue
@@ -1185,8 +1500,11 @@ def main():
     if args.assert_floor:
         cats = [c.strip().upper() for c in args.assert_floor.split(",") if c.strip()]
         bad = []
+        skip_base = not (args.province or args.region)
         for k, row in rows.items():
-            if not k.startswith("R:") or row.get("sliver") or k.startswith("R:" + BASE + "/"):
+            if not k.startswith("R:") or row.get("sliver") or (skip_base and k.startswith("R:" + BASE + "/")):
+                continue
+            if not match_reg_id(k[2:]):
                 continue
             if row["km2"] <= 0 and not INCLUDE_REALMS:
                 continue
@@ -1201,12 +1519,16 @@ def main():
     if args.floors:
         print("%-12s %-11s %-46s %9s %9s %9s" % ("province", "metric", "label", "now", "floor80", "missing"))
         for prov, mid, kind, a, b, need, miss in floor_rows(data, refs, prov_ids):
+            if args.province and prov != args.province:
+                continue
             if miss > 0:
                 print("%-12s %-11s %-46s %9.2f %9.2f %9.2f" % (prov, mid, M_BY_ID[mid][2][:46],
                       a if b is None else a, need if b is None else need, miss))
         return 0
     if args.deficits:
         for s, p, mid, v, ref in deficits(rows, refs, args.deficits):
+            if args.province and p != args.province:
+                continue
             print("%5.1f  %-12s %-11s %-52s value %-8.3g skyrim %.3g" % (s, p, mid, M_BY_ID[mid][2], v, ref))
         return 0
     if args.lowest and not args.raw:
@@ -1225,7 +1547,7 @@ def main():
         print("SUB-REGIONS")
         keys = []
         for p in order:
-            keys += ["R:" + r for r in sorted(prov_ids[p])]
+            keys += ["R:" + r for r in sorted(prov_ids[p]) if match_reg_id(r)]
         for line in table(rows, keys, reg_label, ascii_only, 30):
             print(line)
         print()

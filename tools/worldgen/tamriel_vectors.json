@@ -1668,5 +1668,81 @@
    "id": "skyrim/whiterun",
    "poly": [[-250,380],[300,380],[330,760],[-250,760]]
   }
+ ],
+ "winds": {
+  "default": [[1.0, 0.0]],
+  "skyrim/whiterun": [[1.0, 0.0], [0.7, 0.7], [-0.5, -0.85]],
+  "skyrim/eastmarch": [[0.85, -0.52], [0.85, 0.52], [1.0, 0.0]],
+  "skyrim/haafingar": [[0.3, 0.95]],
+  "skyrim/falkreath": [[0.2, 0.98]],
+  "skyrim/hjaalmarch": [[0.2, 0.98]],
+  "skyrim/the_pale": [[0.5, 0.86]],
+  "skyrim/winterhold": [[0.4, 0.92]],
+  "skyrim/the_rift": [[0.9, -0.43]],
+  "skyrim/the_reach": [[0.95, 0.3]]
+ },
+ "geothermal": [
+  {
+   "name": "eastmarch_fumarole_basin",
+   "poly": [[1220,-180],[2180,-180],[2360,220],[2250,580],[1420,580],[1160,220]],
+   "heat": 0.42,
+   "falloff": 220
+  },
+  {
+   "name": "eastmarch_steam_basin",
+   "poly": [[1400,150],[1700,80],[2050,150],[2150,400],[1900,560],[1550,500],[1380,320]],
+   "heat": 0.86,
+   "falloff": 240
+  },
+  {"name": "steamcrag_hotsprings", "x": 1760, "z": 310, "radius": 240, "heat": 1.0},
+  {"name": "bonestrewn_fumaroles", "x": 1560, "z": 260, "radius": 220, "heat": 0.92},
+  {"name": "mistwatch_springs", "x": 1920, "z": 420, "radius": 220, "heat": 0.85},
+  {"name": "eldergleam_warm_grotto", "x": 1290, "z": 120, "radius": 190, "heat": 0.54},
+  {"name": "mzulft_dwemer_vents", "x": 2460, "z": 240, "radius": 250, "heat": 0.40},
+  {"name": "kagrenzel_steam_conduit", "x": 2680, "z": 520, "radius": 190, "heat": 0.30},
+  {"name": "raldbthar_dwemer_vents", "x": 920, "z": -480, "radius": 240, "heat": 0.38},
+  {"name": "mzinchaleft_dwemer_vents", "x": -320, "z": -1280, "radius": 260, "heat": 0.42},
+  {"name": "irkngthand_dwemer_vents", "x": 580, "z": -740, "radius": 220, "heat": 0.34},
+  {"name": "tower_of_mzark_vents", "x": 120, "z": -860, "radius": 200, "heat": 0.32},
+  {"name": "nchuand_zel_markarth_vents", "x": -2960, "z": -180, "radius": 280, "heat": 0.42},
+  {"name": "bthardamz_dwemer_vents", "x": -2580, "z": -1080, "radius": 260, "heat": 0.38},
+  {"name": "arkngthamz_dwemer_vents", "x": -2420, "z": 1180, "radius": 240, "heat": 0.34},
+  {"name": "avanchnzel_dwemer_vents", "x": 1280, "z": 1520, "radius": 260, "heat": 0.36},
+  {"name": "alftand_sightless_vents", "x": 680, "z": -1180, "radius": 240, "heat": 0.32},
+  {"name": "whistling_mine_warm_seam", "x": 1580, "z": -1480, "radius": 210, "heat": 0.28},
+  {"name": "sunderstone_warm_cleft", "x": -1280, "z": 920, "radius": 230, "heat": 0.30},
+  {"name": "red_mountain_caldera", "x": 7100, "z": -400, "radius": 1450, "heat": 1.0},
+  {
+   "name": "vvardenfell_ashlands_foyadas",
+   "poly": [[5400,-1800],[6800,-2100],[8100,-1600],[8200,200],[7200,700],[5700,300]],
+   "heat": 0.58,
+   "falloff": 380
+  },
+  {
+   "name": "stonefalls_ash_mountain",
+   "poly": [[3500,600],[4900,600],[5100,2400],[3400,2400]],
+   "heat": 0.65,
+   "falloff": 320
+  },
+  {
+   "name": "molag_amur_lava_verge",
+   "poly": [[7600,1600],[9600,1600],[9600,3400],[7600,3400]],
+   "heat": 0.55,
+   "falloff": 320
+  },
+  {
+   "name": "velothi_foothill_vents_north",
+   "poly": [[2620,-750],[3020,-750],[3050,550],[2620,550]],
+   "heat": 0.28,
+   "falloff": 180
+  },
+  {
+   "name": "velothi_foothill_vents_south",
+   "poly": [[2650,650],[3050,650],[3050,1850],[2650,1850]],
+   "heat": 0.24,
+   "falloff": 180
+  },
+  {"name": "dragontail_vents_west", "x": -5100, "z": 5800, "radius": 650, "heat": 0.32},
+  {"name": "dragontail_vents_east", "x": -4100, "z": 6500, "radius": 600, "heat": 0.28}
  ]
 }

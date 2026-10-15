@@ -40,6 +40,19 @@ import java.util.Locale;
  */
 public final class ContextualDialogue {
 
+    /** All 9 Skyrim holds that have dedicated deed-keyed reactive dialogue lines (G11: >= 12 per hold). */
+    public static final List<String> SKYRIM_HOLDS = List.of(
+            "whiterun", "haafingar", "eastmarch", "the_rift", "the_reach",
+            "falkreath", "hjaalmarch", "the_pale", "winterhold"
+    );
+
+    /** Canonical player deeds recognized by guards, innkeepers, and court NPCs (F-REACT). */
+    public static final List<String> DEEDS = List.of(
+            "dragon_slayer", "companion_member", "college_member", "thieves_member",
+            "brotherhood_member", "civil_war_hero", "high_bounty_cleared", "local_hero",
+            "hold_story", "bounty_hunter", "master_craftsman", "barrow_delver"
+    );
+
     public enum Personality {
         STOIC, WARM, PROUD, CAUTIOUS, CURIOUS;
 
@@ -50,6 +63,113 @@ public final class ContextualDialogue {
     }
 
     private ContextualDialogue() {}
+
+    /**
+     * Resolves a reactive dialogue translation key {@code react.<region>.<deed>} with fallback to
+     * {@code react.generic.<deed>} when the region is outside the 9 Skyrim holds or unspecified (F-REACT / R3d-1.3).
+     */
+    public static String resolveReactiveKey(@Nullable String regionOrHold, @Nullable String deed) {
+        String cleanDeed = (deed != null && DEEDS.contains(deed)) ? deed : "local_hero";
+        String reg = normalizeHold(regionOrHold);
+        if (reg != null && SKYRIM_HOLDS.contains(reg)) {
+            return "react." + reg + "." + cleanDeed;
+        }
+        return "react.generic." + cleanDeed;
+    }
+
+    @Nullable
+    public static String normalizeHold(@Nullable String regionOrHold) {
+        if (regionOrHold == null || regionOrHold.isBlank()) return null;
+        String s = regionOrHold.trim().toLowerCase(Locale.ROOT);
+        int slash = s.lastIndexOf('/');
+        if (slash >= 0) s = s.substring(slash + 1);
+        return s;
+    }
+
+    /** True if {@code speaker} is a guard, innkeeper, or court NPC who reacts to the player's regional/faction deeds. */
+    public static boolean isReactiveSpeaker(@Nullable LivingEntity speaker) {
+        if (speaker == null) return false;
+        if (com.skycraft.crime.Crimes.isGuard(speaker) || Innkeepers.isInnkeeper(speaker)) return true;
+        if (speaker instanceof NpcEntity npc) {
+            NpcRole role = npc.role();
+            if (role == NpcRole.INNKEEPER || role == NpcRole.IMPERIAL_SOLDIER || role == NpcRole.STORMCLOAK_SOLDIER) {
+                return true;
+            }
+            if (Courts.isCourtRole(role) || Courts.isCourtJob(Merchants.jobId(npc))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Returns the list of deeds the player has earned in {@code hold} and across the world. */
+    public static List<String> activeDeeds(ServerPlayer player, @Nullable String hold) {
+        PlayerData data = SkyData.get(player);
+        CompoundTag quests = data.module("quest").getCompound("completed");
+        List<String> out = new java.util.ArrayList<>();
+
+        if (data.getStat("dragon_souls") > 0 || data.module("magic").getInt("dragon_souls") > 0
+                || quests.getBoolean("mq_04_dragon_rising")) {
+            out.add("dragon_slayer");
+        }
+        if (Reputation.get(player, Reputation.COMPANIONS) >= 20 || hasCompletedPrefix(quests, "fc_comp_")) {
+            out.add("companion_member");
+        }
+        if (Reputation.get(player, Reputation.COLLEGE) >= 20 || hasCompletedPrefix(quests, "fc_col_")) {
+            out.add("college_member");
+        }
+        if (Reputation.get(player, Reputation.THIEVES_GUILD) >= 20 || hasCompletedPrefix(quests, "fc_tg_")) {
+            out.add("thieves_member");
+        }
+        if (Reputation.get(player, Reputation.DARK_BROTHERHOOD) >= 20 || hasCompletedPrefix(quests, "fc_db_")) {
+            out.add("brotherhood_member");
+        }
+        if (Reputation.get(player, Reputation.IMPERIAL_LEGION) >= 35
+                || Reputation.get(player, Reputation.STORMCLOAKS) >= 35
+                || hasCompletedPrefix(quests, "cw_")) {
+            out.add("civil_war_hero");
+        }
+        if (data.getStat("bounties_cleared") > 0 || data.getStat("fines_paid") > 0) {
+            out.add("high_bounty_cleared");
+        }
+        String cleanHold = normalizeHold(hold);
+        if (cleanHold != null && hasCompletedPrefix(quests, "hs_" + cleanHold)) {
+            out.add("hold_story");
+        }
+        if (Reputation.get(player, Reputation.TOWNSFOLK) >= 30 || hasCompletedPrefix(quests, "side_")) {
+            out.add("local_hero");
+        }
+        if (data.getStat("bounties_completed") > 0 || hasCompletedPrefix(quests, "rad_")) {
+            out.add("bounty_hunter");
+        }
+        if (data.getSkill(Skill.SMITHING) >= 60 || data.getSkill(Skill.ALCHEMY) >= 60 || data.getSkill(Skill.ENCHANTING) >= 60) {
+            out.add("master_craftsman");
+        }
+        if (data.getStat("dungeons_cleared") > 0 || data.getStat("places_discovered") >= 5) {
+            out.add("barrow_delver");
+        }
+        return out;
+    }
+
+    private static boolean hasCompletedPrefix(CompoundTag completed, String prefix) {
+        for (String k : completed.getAllKeys()) {
+            if (k.startsWith(prefix) && completed.getBoolean(k)) return true;
+        }
+        return false;
+    }
+
+    /** Resolves a reactive line for a guard, innkeeper, or court NPC addressing {@code player}, or null if none applies. */
+    @Nullable
+    public static Component reactiveLine(ServerPlayer player, LivingEntity speaker) {
+        if (!isReactiveSpeaker(speaker)) return null;
+        Region region = Cultures.regionAt(speaker.level(), speaker.blockPosition());
+        String hold = region != null ? region.shortId() : Holds.holdAt(speaker.level(), speaker.blockPosition());
+        List<String> deeds = activeDeeds(player, hold);
+        if (deeds.isEmpty()) return null;
+        String deed = deeds.get(Math.floorMod(speaker.getUUID().hashCode() + (int) (speaker.level().getDayTime() / 1200L), deeds.size()));
+        String key = resolveReactiveKey(hold, deed);
+        return Component.translatable(key, player.getName());
+    }
 
     /**
      * Evaluates contextual overrides for an NPC greeting when a player opens dialogue.
@@ -69,7 +189,15 @@ public final class ContextualDialogue {
 
         RandomSource r = npc.getRandom();
         NpcRole role = npc.role();
-        if (!role.civilian || npc.isPrisoner()) return null;
+        if (npc.isPrisoner()) return null;
+
+        // 2b. F-REACT (R3d-1.3): guards, innkeepers, and court NPCs react to the player's deeds in the hold
+        if (isReactiveSpeaker(npc) && r.nextInt(3) == 0) {
+            Component react = reactiveLine(player, npc);
+            if (react != null) return react;
+        }
+
+        if (!role.civilian) return null;
 
         // 3. Curses & visible afflictions (Sanies Lupinus, Beast Blood, Vampirism, active diseases)
         if (r.nextInt(4) == 0) {
@@ -157,6 +285,11 @@ public final class ContextualDialogue {
         }
         if (speaker instanceof NpcEntity npc && npc.isHostileTo(player)) return null;
 
+        if (isReactiveSpeaker(speaker) && r.nextInt(4) == 0) {
+            Component react = reactiveLine(player, speaker);
+            if (react != null) return react;
+        }
+
         if (r.nextInt(5) == 0) {
             if (Curses.hasSaniesLupinus(player)) {
                 return Component.translatable("society.skycraft.context.greet.sanies." + r.nextInt(2));
@@ -182,6 +315,19 @@ public final class ContextualDialogue {
                         Dialogue.open(p, target, buildContextualReflection(p, target));
                     }
                 }));
+        if (isReactiveSpeaker(npc) && !activeDeeds(player, Holds.holdAt(npc.level(), npc.blockPosition())).isEmpty()) {
+            out.add(new DialogueOption("society.react",
+                    Component.translatable("dialogue.skycraft.society.react"),
+                    515,
+                    (p, n) -> {
+                        Component react = reactiveLine(p, n);
+                        if (react != null) {
+                            Dialogue.open(p, n, react);
+                        } else if (n instanceof NpcEntity target) {
+                            Dialogue.open(p, target, buildContextualReflection(p, target));
+                        }
+                    }));
+        }
     }
 
     /** Builds a multi-faceted response combining location/biome, time/weather, NPC personality/job, and world state. */
@@ -196,6 +342,11 @@ public final class ContextualDialogue {
 
         if (bounty >= 100) {
             return Component.translatable("society.skycraft.context.say.bounty", placeName);
+        }
+
+        if (isReactiveSpeaker(npc) && npc.getRandom().nextBoolean()) {
+            Component react = reactiveLine(player, npc);
+            if (react != null) return react;
         }
 
         PlayerData data = SkyData.get(player);

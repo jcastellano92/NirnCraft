@@ -1,44 +1,1253 @@
-{
-  "_comment": "Wandering ecology scenes (creatures/spawn/WildScenes). One roll per player per cooldownSeconds (random in the range), skipped at night with probability 1-nightFactor; hostile scenes share the hostile pacing rules (cooldown, calm zones, none near the start). Members: 'npc' (NpcRole id) or 'entity'; 'as' names a role others can 'target' or 'leader'; 'dest':'past' walks the NPC past the player; 'hold' keeps it near the scene; dx/dz offset it. calmAfter ends mutual fights after N seconds. Scenes end when nobody is near and never survive a restart.",
-  "cooldownSeconds": [900, 1500],
-  "firstSeconds": [240, 480],
-  "distance": [45, 85],
-  "nightFactor": 0.3,
-  "lifetimeSeconds": 900,
-  "scenes": [
-    {"id": "caravan_under_attack", "weight": 4, "time": "day", "levels": [3, 999], "hostile": true, "road": "on", "townMin": 200,
-     "members": [
-       {"npc": "caravan_trader", "as": "victim", "hold": true, "name": "creatures.skycraft.scene.caravan_trader"},
-       {"entity": "minecraft:mule", "dx": 2, "hold": true},
-       {"entity": "skycraft:wolf", "count": [2, 3], "as": "wolf", "target": "victim", "dx": -9},
-       {"npc": "adventurer", "as": "guard", "target": "wolf", "dx": 3, "name": "creatures.skycraft.scene.caravan_guard"}
-     ]},
-    {"id": "hunters_tracking_elk", "weight": 6, "time": "day", "levels": [1, 999], "road": "off", "townMin": 150,
-     "families": ["forest", "plains", "frozen"],
-     "members": [
-       {"entity": "skycraft:elk", "count": [1, 2], "as": "prey", "dx": 14},
-       {"npc": "hunter", "count": [1, 2], "target": "prey", "name": "creatures.skycraft.scene.tracker"}
-     ]},
-    {"id": "lone_pilgrim", "weight": 6, "time": "day", "levels": [1, 999], "townMin": 120,
-     "members": [
-       {"npc": "priest", "dest": "past", "name": "creatures.skycraft.scene.pilgrim"}
-     ]},
-    {"id": "bandits_arguing", "weight": 3, "time": "day", "levels": [5, 999], "hostile": true, "road": "off", "townMin": 300, "calmAfter": 25,
-     "members": [
-       {"npc": "thug", "as": "thief_a", "name": "creatures.skycraft.scene.squabbler"},
-       {"npc": "thug", "target": "thief_a", "dx": 3, "name": "creatures.skycraft.scene.squabbler"}
-     ]},
-    {"id": "hunters_camp", "weight": 4, "time": "day", "levels": [1, 999], "road": "off", "townMin": 200, "campfire": true,
-     "families": ["forest", "plains", "frozen", "mountain"],
-     "members": [
-       {"npc": "hunter", "count": [1, 2], "hold": true, "name": "creatures.skycraft.scene.camp_hunter"},
-       {"entity": "minecraft:horse", "dx": 5, "hold": true}
-     ]},
-    {"id": "wolves_on_a_kill", "weight": 4, "time": "day", "levels": [2, 999], "hostile": true, "road": "off", "townMin": 150,
-     "families": ["forest", "plains", "frozen", "mountain"],
-     "members": [
-       {"entity": "skycraft:deer", "count": [1, 2], "as": "prey", "dx": 12},
-       {"entity": "skycraft:wolf", "count": [2, 3], "target": "prey"}
-     ]}
-  ]
-}
+[
+  {
+    "id": "caravan_under_attack",
+    "weight": 10,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": ["skyrim", "cyrodiil", "high_rock"],
+    "regions": ["whiterun", "falkreath", "the_rift", "the_reach", "haafingar", "eastmarch"],
+    "cultures": ["nord", "imperial", "breton", "khajiit"],
+    "purpose": "Roadside trade caravan ambushed by highwaymen; players can rescue the merchant and earn trade or bounty work.",
+    "needs": ["road_access", "clear_ground"],
+    "why": ["skyrim.L5.road_hub", "skyrim.L10.bandits_on_roads", "whiterun.L5.crossroads_trade"],
+    "questHook": "radiant_bounty",
+    "props": ["cart", "sack"],
+    "actors": [
+      { "npc": "caravan_trader", "count": [1, 1], "radius": 2, "group": "victims" },
+      { "npc": "citizen", "count": [1, 2], "radius": 3, "group": "victims" },
+      { "entity": "skycraft:bandit", "count": [2, 3], "radius": 6, "hostile": true, "group": "attackers" }
+    ]
+  },
+  {
+    "id": "hunters_tracking_elk",
+    "weight": 12,
+    "wonder": false,
+    "road": "near",
+    "time": "day",
+    "provinces": ["skyrim"],
+    "regions": ["whiterun", "falkreath", "the_rift", "haafingar", "hjaalmarch"],
+    "cultures": ["nord", "bosmer"],
+    "families": ["taiga", "temperate_forest", "tundra", "grassland"],
+    "purpose": "Local hunters stalking wild elk along the timberline, showing active hunting economy.",
+    "needs": ["wildlife_habitat", "open_or_wooded_ground"],
+    "why": ["skyrim.L4.tundra_herds", "falkreath.L5.hunting", "whiterun.L4.throat_meadow"],
+    "questHook": "radiant_hunt",
+    "props": [],
+    "actors": [
+      { "npc": "hunter", "count": [1, 2], "radius": 3, "pose": "crouch", "group": "hunters" },
+      { "entity": "skycraft:elk", "count": [1, 2], "radius": 9, "group": "prey" }
+    ]
+  },
+  {
+    "id": "lone_pilgrim",
+    "weight": 10,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": ["skyrim", "cyrodiil", "high_rock", "morrowind"],
+    "regions": ["whiterun", "the_rift", "eastmarch", "haafingar", "falkreath", "winterhold"],
+    "cultures": ["nord", "imperial", "dunmer", "breton"],
+    "purpose": "Devout pilgrim walking between wayside shrines and hold temples.",
+    "needs": ["road_access"],
+    "why": ["skyrim.L8.hold_temples", "the_rift.L8.voice_pilgrims", "whiterun.L8.kynareth_tree"],
+    "questHook": "radiant_favor",
+    "props": [],
+    "actors": [
+      { "npc": "priest", "count": [1, 1], "radius": 1 }
+    ]
+  },
+  {
+    "id": "bandits_arguing",
+    "weight": 9,
+    "wonder": false,
+    "road": "off",
+    "time": "any",
+    "minWildness": 0.3,
+    "provinces": ["skyrim", "cyrodiil", "hammerfell"],
+    "regions": ["whiterun", "falkreath", "the_rift", "eastmarch", "the_pale", "hjaalmarch"],
+    "cultures": ["nord", "imperial", "redguard"],
+    "purpose": "Outlaws quarreling over stolen loot around a campfire in the wilds.",
+    "needs": ["wilderness_clearing"],
+    "why": ["skyrim.L10.bandits_on_roads", "whiterun.L10.toll_bandits", "falkreath.L10.pass_bandits"],
+    "props": ["fire", "log", "sack"],
+    "actors": [
+      { "entity": "skycraft:bandit", "count": [2, 3], "radius": 3, "hostile": true }
+    ]
+  },
+  {
+    "id": "hunters_camp",
+    "weight": 12,
+    "wonder": false,
+    "road": "off",
+    "time": "any",
+    "provinces": ["skyrim"],
+    "regions": ["falkreath", "whiterun", "the_rift", "haafingar", "hjaalmarch", "the_pale"],
+    "cultures": ["nord"],
+    "families": ["taiga", "temperate_forest", "tundra", "mountain"],
+    "purpose": "Backcountry hunting camp drying venison over a fire, offering pelts and local rumors.",
+    "needs": ["camp_clearing"],
+    "why": ["skyrim.L4.tundra_herds", "falkreath.L6.hunters_camps", "falkreath.L5.hunting"],
+    "props": ["fire", "log", "meat"],
+    "actors": [
+      { "npc": "hunter", "count": [1, 2], "radius": 3, "leash": 8 }
+    ]
+  },
+  {
+    "id": "wolves_on_a_kill",
+    "weight": 11,
+    "wonder": false,
+    "road": "off",
+    "time": "any",
+    "minWildness": 0.2,
+    "provinces": ["skyrim"],
+    "regions": ["whiterun", "falkreath", "the_pale", "winterhold", "eastmarch", "hjaalmarch"],
+    "families": ["taiga", "temperate_forest", "tundra", "snowy", "mountain"],
+    "purpose": "Wolf pack feeding on a fresh kill in the wilds.",
+    "needs": ["prey_ground"],
+    "why": ["skyrim.L4.pine_and_birch", "whiterun.L4.sabre_and_wolf", "falkreath.L4.bear_country"],
+    "props": ["meat"],
+    "actors": [
+      { "entity": "skycraft:wolf", "count": [2, 4], "radius": 4 }
+    ]
+  },
+  {
+    "id": "whiterun_mammoth_dawn_migration",
+    "weight": 8,
+    "wonder": true,
+    "road": "off",
+    "time": "dawn_dusk",
+    "minWildness": 0.25,
+    "provinces": ["skyrim"],
+    "regions": ["whiterun", "the_pale", "eastmarch"],
+    "cultures": ["nord"],
+    "families": ["tundra", "grassland", "snowy"],
+    "purpose": "Wonder moment: a giant herder guiding painted mammoths across the open steppe at dawn.",
+    "needs": ["open_steppe", "clear_horizon"],
+    "why": ["skyrim.L4.tundra_herds", "whiterun.L4.giant_grounds", "eastmarch.L4.fumarole_tundra"],
+    "props": [],
+    "actors": [
+      { "entity": "skycraft:giant", "count": [1, 1], "radius": 4, "group": "herd" },
+      { "entity": "skycraft:mammoth", "count": [2, 3], "radius": 8, "group": "herd" }
+    ]
+  },
+  {
+    "id": "aurora_sky_watchers",
+    "weight": 9,
+    "wonder": true,
+    "road": "near",
+    "time": "night",
+    "provinces": ["skyrim"],
+    "regions": ["winterhold", "the_pale", "whiterun", "eastmarch", "haafingar"],
+    "cultures": ["nord"],
+    "families": ["snowy", "tundra", "mountain", "coast"],
+    "purpose": "Wonder moment: scholars and a bard gathered around lanterns under the northern aurora.",
+    "needs": ["night_sky", "open_horizon"],
+    "why": ["skyrim.L2.aurora", "winterhold.L2.aurora_nights", "the_pale.L2.aurora_coast"],
+    "props": ["fire", "log"],
+    "actors": [
+      { "npc": "scholar", "count": [1, 2], "radius": 3, "leash": 6 },
+      { "npc": "bard", "count": [1, 1], "radius": 3, "leash": 6 }
+    ]
+  },
+  {
+    "id": "distant_dragon_ridge_roost",
+    "weight": 6,
+    "wonder": true,
+    "road": "off",
+    "time": "day",
+    "minWildness": 0.45,
+    "provinces": ["skyrim"],
+    "regions": ["whiterun", "eastmarch", "the_rift", "the_reach", "falkreath"],
+    "cultures": ["nord"],
+    "families": ["mountain", "tundra", "taiga"],
+    "purpose": "Wonder moment: a dragon surveying the valley from a high ridge while survivors watch from cover.",
+    "needs": ["high_ground", "open_sky"],
+    "why": ["skyrim.L4.dragons", "skyrim.L9.dragon_crisis", "whiterun.L4.dragon_perch"],
+    "questHook": "radiant_bounty",
+    "props": [],
+    "actors": [
+      { "entity": "skycraft:dragon", "count": [1, 1], "radius": 10 },
+      { "npc": "adventurer", "count": [1, 2], "radius": 4, "pose": "crouch" }
+    ]
+  },
+  {
+    "id": "kynareth_sapling_pilgrims",
+    "weight": 8,
+    "wonder": true,
+    "road": "on",
+    "time": "day",
+    "provinces": ["skyrim"],
+    "regions": ["whiterun", "eastmarch", "falkreath"],
+    "cultures": ["nord"],
+    "purpose": "Wonder moment: priests and herbalists carrying sacred sapling offerings between Eldergleam and the Gildergreen.",
+    "needs": ["road_access"],
+    "why": ["whiterun.L8.kynareth_tree", "eastmarch.L4.eldergleam", "skyrim.L8.hold_temples"],
+    "questHook": "radiant_favor",
+    "props": ["sack"],
+    "actors": [
+      { "npc": "priest", "count": [1, 2], "radius": 2 },
+      { "npc": "apothecary", "count": [1, 1], "radius": 3 }
+    ]
+  },
+  {
+    "id": "khajiit_road_camp",
+    "weight": 10,
+    "wonder": false,
+    "road": "near",
+    "time": "any",
+    "provinces": ["skyrim", "elsweyr", "cyrodiil"],
+    "regions": ["whiterun", "the_pale", "eastmarch", "the_rift", "haafingar", "the_reach"],
+    "cultures": ["khajiit", "nord"],
+    "purpose": "Khajiit trade caravan pitched beside the road outside hold walls, trading exotic wares.",
+    "needs": ["road_access", "camp_clearing"],
+    "why": ["whiterun.L7.caravans_outside", "whiterun.L6.caravan_ground", "skyrim.L5.road_hub"],
+    "questHook": "radiant_favor",
+    "props": ["fire", "log", "cart", "sack"],
+    "actors": [
+      { "npc": "caravan_trader", "count": [1, 2], "radius": 3, "leash": 8 },
+      { "npc": "adventurer", "count": [1, 2], "radius": 4, "leash": 10 }
+    ]
+  },
+  {
+    "id": "companions_beast_hunt",
+    "weight": 9,
+    "wonder": false,
+    "road": "near",
+    "time": "day",
+    "provinces": ["skyrim"],
+    "regions": ["whiterun", "falkreath", "the_pale"],
+    "cultures": ["nord"],
+    "purpose": "Shield-siblings from Jorrvaskr hunting a rampant sabre cat on the plains.",
+    "needs": ["open_ground"],
+    "why": ["whiterun.L7.warrior_hall", "whiterun.L4.sabre_and_wolf", "whiterun.L8.honour_and_sovngarde"],
+    "questHook": "radiant_bounty",
+    "props": [],
+    "actors": [
+      { "npc": "adventurer", "count": [2, 2], "radius": 3, "group": "companions" },
+      { "entity": "skycraft:sabre_cat", "count": [1, 2], "radius": 7, "hostile": true, "group": "beasts" }
+    ]
+  },
+  {
+    "id": "honningbrew_mead_wagon",
+    "weight": 10,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": ["skyrim"],
+    "regions": ["whiterun", "the_rift", "falkreath", "haafingar"],
+    "cultures": ["nord"],
+    "purpose": "Mead wagon hauling casks between the hold meaderies and roadside inns.",
+    "needs": ["road_access"],
+    "why": ["whiterun.L5.meadery", "the_rift.L5.meadery", "skyrim.L5.farm_and_mead"],
+    "props": ["cart", "sack"],
+    "actors": [
+      { "npc": "merchant", "count": [1, 1], "radius": 2 },
+      { "npc": "farmer", "count": [1, 1], "radius": 3 }
+    ]
+  },
+  {
+    "id": "sea_of_ghosts_horker_choir",
+    "weight": 8,
+    "wonder": true,
+    "road": "off",
+    "time": "dawn_dusk",
+    "provinces": ["skyrim"],
+    "regions": ["haafingar", "winterhold", "the_pale", "hjaalmarch"],
+    "cultures": ["nord"],
+    "families": ["coast", "snowy"],
+    "purpose": "Wonder moment: a massive pod of horkers basking on the sea ice as coastal fishers watch the tide.",
+    "needs": ["coastline", "sea_ice"],
+    "why": ["skyrim.L4.polar_fauna", "haafingar.L4.rocky_shore", "winterhold.L4.floe_shore"],
+    "props": [],
+    "actors": [
+      { "entity": "skycraft:horker", "count": [3, 5], "radius": 6 },
+      { "npc": "fisher", "count": [1, 1], "radius": 4 }
+    ]
+  },
+  {
+    "id": "meridia_beacon_pilgrimage",
+    "weight": 7,
+    "wonder": true,
+    "road": "near",
+    "time": "dawn_dusk",
+    "provinces": ["skyrim"],
+    "regions": ["haafingar", "the_reach", "falkreath"],
+    "cultures": ["nord", "imperial", "breton"],
+    "purpose": "Wonder moment: dawn light catching a hilltop shrine while priests chant against the undead.",
+    "needs": ["high_ground"],
+    "why": ["haafingar.L8.meridia_light", "skyrim.L8.daedric_wilds", "haafingar.L1.pine_ridges"],
+    "questHook": "radiant_bounty",
+    "props": ["fire"],
+    "actors": [
+      { "npc": "priest", "count": [1, 2], "radius": 3 },
+      { "npc": "scholar", "count": [1, 1], "radius": 3 }
+    ]
+  },
+  {
+    "id": "bards_college_troubadours",
+    "weight": 8,
+    "wonder": true,
+    "road": "on",
+    "time": "day",
+    "provinces": ["skyrim"],
+    "regions": ["haafingar", "whiterun", "the_rift"],
+    "cultures": ["nord", "imperial"],
+    "purpose": "Wonder moment: travelling Bards College musicians rehearsing King Olaf's verse along the high road.",
+    "needs": ["road_access"],
+    "why": ["haafingar.L5.bards_college", "haafingar.L8.burning_of_king_olaf", "skyrim.L5.road_hub"],
+    "props": ["log"],
+    "actors": [
+      { "npc": "bard", "count": [2, 3], "radius": 3 },
+      { "npc": "citizen", "count": [1, 2], "radius": 4 }
+    ]
+  },
+  {
+    "id": "thalmor_inquisition_escort",
+    "weight": 9,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": ["skyrim"],
+    "regions": ["haafingar", "the_reach", "whiterun", "falkreath", "hjaalmarch"],
+    "cultures": ["altmer", "nord"],
+    "purpose": "Thalmor Justiciars marching a suspected Talos worshipper toward the mountain embassy.",
+    "needs": ["road_access"],
+    "why": ["skyrim.L9.thalmor_watch", "haafingar.L9.thalmor_embassy", "the_reach.L8.talos_secret"],
+    "questHook": "side_missing_in_action",
+    "props": [],
+    "actors": [
+      { "npc": "thalmor", "count": [2, 2], "radius": 3, "group": "escort" },
+      { "npc": "citizen", "count": [1, 1], "radius": 2, "group": "prisoner" }
+    ]
+  },
+  {
+    "id": "east_empire_supply_convoy",
+    "weight": 10,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": ["skyrim", "cyrodiil"],
+    "regions": ["haafingar", "eastmarch", "the_pale", "whiterun"],
+    "cultures": ["imperial", "nord"],
+    "purpose": "East Empire Company cargo wagons under Imperial Legion guard moving port goods inland.",
+    "needs": ["road_access"],
+    "why": ["haafingar.L5.company_docks", "skyrim.L5.sea_trade", "eastmarch.L5.harbour"],
+    "props": ["cart", "sack"],
+    "actors": [
+      { "npc": "merchant", "count": [1, 1], "radius": 2 },
+      { "npc": "imperial_soldier", "count": [2, 2], "radius": 4 }
+    ]
+  },
+  {
+    "id": "coastal_smugglers_landing",
+    "weight": 8,
+    "wonder": false,
+    "road": "off",
+    "time": "night",
+    "minWildness": 0.25,
+    "provinces": ["skyrim", "hammerfell", "high_rock"],
+    "regions": ["haafingar", "hjaalmarch", "the_pale", "winterhold", "the_rift"],
+    "cultures": ["nord", "breton", "redguard"],
+    "families": ["coast"],
+    "purpose": "Smugglers unloading untaxed crates by lantern light in a rocky cove.",
+    "needs": ["coastline", "night_cover"],
+    "why": ["haafingar.L10.smugglers_coves", "the_rift.L5.smuggling", "winterhold.L5.wreck_salvage"],
+    "props": ["fire", "sack", "cart"],
+    "actors": [
+      { "npc": "thief", "count": [1, 2], "radius": 3 },
+      { "entity": "skycraft:bandit", "count": [1, 2], "radius": 4, "hostile": true }
+    ]
+  },
+  {
+    "id": "falkreath_lantern_funeral",
+    "weight": 8,
+    "wonder": true,
+    "road": "on",
+    "time": "dawn_dusk",
+    "provinces": ["skyrim"],
+    "regions": ["falkreath", "hjaalmarch", "whiterun"],
+    "cultures": ["nord"],
+    "purpose": "Wonder moment: solemn Arkay priests and mourners bearing lanterns along the pine road to the great graveyard.",
+    "needs": ["road_access"],
+    "why": ["falkreath.L5.burial", "falkreath.L8.arkay_priests", "hjaalmarch.L8.arkay_dead"],
+    "questHook": "radiant_favor",
+    "props": ["fire"],
+    "actors": [
+      { "npc": "priest", "count": [1, 2], "radius": 2 },
+      { "npc": "citizen", "count": [2, 3], "radius": 4 }
+    ]
+  },
+  {
+    "id": "spriggan_ancient_grove_bloom",
+    "weight": 8,
+    "wonder": true,
+    "road": "off",
+    "time": "day",
+    "minWildness": 0.3,
+    "provinces": ["skyrim", "valenwood", "high_rock"],
+    "regions": ["falkreath", "the_rift", "haafingar", "eastmarch"],
+    "families": ["temperate_forest", "taiga"],
+    "purpose": "Wonder moment: glowing butterflies and woodland deer gathered peacefully around a guardian spriggan.",
+    "needs": ["forest_canopy"],
+    "why": ["falkreath.L4.spriggan_groves", "the_rift.L4.spriggan_glades", "haafingar.L4.spriggan_glens"],
+    "props": [],
+    "actors": [
+      { "entity": "skycraft:spriggan", "count": [1, 1], "radius": 3 },
+      { "entity": "skycraft:deer", "count": [2, 3], "radius": 6 },
+      { "entity": "skycraft:butterfly", "count": [2, 4], "radius": 5 }
+    ]
+  },
+  {
+    "id": "moonlight_stag_apparition",
+    "weight": 7,
+    "wonder": true,
+    "road": "off",
+    "time": "night",
+    "minWildness": 0.3,
+    "provinces": ["skyrim"],
+    "regions": ["falkreath", "the_rift", "whiterun", "the_reach"],
+    "cultures": ["nord", "reach"],
+    "families": ["taiga", "temperate_forest"],
+    "purpose": "Wonder moment: a great stag standing in a moonlit glade surrounded by torchbugs, watched by a reverent hunter.",
+    "needs": ["forest_clearing", "night_sky"],
+    "why": ["falkreath.L8.huntsman_cult", "falkreath.L4.old_pine", "skyrim.L8.daedric_wilds"],
+    "questHook": "side_ill_met_by_moonlight",
+    "props": [],
+    "actors": [
+      { "entity": "skycraft:elk", "count": [1, 1], "radius": 2 },
+      { "entity": "skycraft:torchbug", "count": [3, 5], "radius": 5 },
+      { "npc": "hunter", "count": [1, 1], "radius": 6, "pose": "crouch" }
+    ]
+  },
+  {
+    "id": "necromancer_grave_ritual",
+    "weight": 8,
+    "wonder": false,
+    "road": "off",
+    "time": "night",
+    "minWildness": 0.35,
+    "provinces": ["skyrim"],
+    "regions": ["falkreath", "hjaalmarch", "winterhold", "the_pale"],
+    "purpose": "Dark conjurer raising draugr at an old roadside cairn under cover of night.",
+    "needs": ["ancient_stones", "night_cover"],
+    "why": ["falkreath.L10.necromancers_and_vampires", "falkreath.L4.grave_ground", "skyrim.L10.draugr_barrows"],
+    "questHook": "radiant_bounty",
+    "props": ["fire"],
+    "actors": [
+      { "entity": "skycraft:necromancer", "count": [1, 1], "radius": 2, "hostile": true },
+      { "entity": "skycraft:draugr", "count": [1, 2], "radius": 4, "hostile": true }
+    ]
+  },
+  {
+    "id": "pale_pass_legion_column",
+    "weight": 10,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": ["skyrim", "cyrodiil"],
+    "regions": ["falkreath", "haafingar", "the_reach", "whiterun"],
+    "cultures": ["imperial", "nord"],
+    "purpose": "Imperial Legion patrol marching along the southern supply road to keep the mountain passes open.",
+    "needs": ["road_access"],
+    "why": ["falkreath.L9.imperial_border", "falkreath.L1.pale_pass", "skyrim.L9.civil_war"],
+    "props": [],
+    "actors": [
+      { "npc": "imperial_soldier", "count": [2, 3], "radius": 3 }
+    ]
+  },
+  {
+    "id": "helgen_refugee_camp",
+    "weight": 9,
+    "wonder": false,
+    "road": "near",
+    "time": "any",
+    "provinces": ["skyrim"],
+    "regions": ["falkreath", "whiterun"],
+    "cultures": ["nord", "imperial"],
+    "purpose": "Displaced survivors from burned Helgen camping beside a salvage cart with a wounded guard.",
+    "needs": ["road_access", "camp_clearing"],
+    "why": ["falkreath.L9.helgen_burned", "falkreath.L6.helgen_fort", "whiterun.L9.first_dragon"],
+    "questHook": "side_golden_claw",
+    "props": ["fire", "log", "cart", "sack"],
+    "actors": [
+      { "npc": "citizen", "count": [2, 3], "radius": 3, "leash": 8 },
+      { "npc": "imperial_soldier", "count": [1, 1], "radius": 3, "leash": 8 }
+    ]
+  },
+  {
+    "id": "drajkmyr_wisp_procession",
+    "weight": 8,
+    "wonder": true,
+    "road": "off",
+    "time": "night",
+    "minWildness": 0.25,
+    "provinces": ["skyrim"],
+    "regions": ["hjaalmarch", "winterhold", "the_pale"],
+    "families": ["swamp", "snowy"],
+    "purpose": "Wonder moment: eerie will-o'-the-wisps and torchbugs drifting across the fog-shrouded fen channels.",
+    "needs": ["wetland_or_snow", "night_fog"],
+    "why": ["hjaalmarch.L2.marsh_fog", "hjaalmarch.L4.marsh_hunters", "hjaalmarch.L1.drajkmyr_flats"],
+    "props": [],
+    "actors": [
+      { "entity": "skycraft:wisp", "count": [2, 4], "radius": 5 },
+      { "entity": "skycraft:torchbug", "count": [2, 4], "radius": 6 }
+    ]
+  },
+  {
+    "id": "labyrinthian_ghost_vigil",
+    "weight": 7,
+    "wonder": true,
+    "road": "near",
+    "time": "night",
+    "minWildness": 0.3,
+    "provinces": ["skyrim"],
+    "regions": ["hjaalmarch", "the_pale", "whiterun"],
+    "cultures": ["nord"],
+    "purpose": "Wonder moment: scholars and priests studying ancient dragon-cult stones where draugr stir in the mist.",
+    "needs": ["ancient_ruins"],
+    "why": ["hjaalmarch.L10.bromjunaar_maze", "hjaalmarch.L8.ruined_shrines", "skyrim.L8.ancestor_barrows"],
+    "questHook": "radiant_bounty",
+    "props": ["fire"],
+    "actors": [
+      { "npc": "scholar", "count": [1, 2], "radius": 3 },
+      { "entity": "skycraft:draugr", "count": [1, 2], "radius": 8, "hostile": true }
+    ]
+  },
+  {
+    "id": "morthal_fen_torch_watch",
+    "weight": 9,
+    "wonder": true,
+    "road": "on",
+    "time": "dawn_dusk",
+    "provinces": ["skyrim"],
+    "regions": ["hjaalmarch", "haafingar"],
+    "cultures": ["nord"],
+    "purpose": "Wonder moment: boardwalk watchmen lighting ward-fires through the salt-marsh fog at dusk.",
+    "needs": ["road_access", "marsh_edge"],
+    "why": ["hjaalmarch.L8.fear_of_the_dark", "hjaalmarch.L3.boardwalks", "hjaalmarch.L9.vampire_fear"],
+    "questHook": "side_laid_to_rest",
+    "props": ["fire", "log"],
+    "actors": [
+      { "npc": "hunter", "count": [1, 2], "radius": 3 },
+      { "npc": "apothecary", "count": [1, 1], "radius": 3 }
+    ]
+  },
+  {
+    "id": "marsh_alchemist_foraging",
+    "weight": 10,
+    "wonder": false,
+    "road": "near",
+    "time": "day",
+    "provinces": ["skyrim", "black_marsh"],
+    "regions": ["hjaalmarch", "the_rift", "falkreath", "eastmarch"],
+    "cultures": ["nord", "argonian"],
+    "families": ["swamp", "temperate_forest"],
+    "purpose": "Herbalist harvesting deathbell and swamp fungal pods while fending off mudcrabs.",
+    "needs": ["flora_ground"],
+    "why": ["hjaalmarch.L5.marsh_herbs", "hjaalmarch.L4.fen", "skyrim.L4.marsh_life"],
+    "questHook": "radiant_favor",
+    "props": ["sack"],
+    "actors": [
+      { "npc": "apothecary", "count": [1, 1], "radius": 2 },
+      { "entity": "skycraft:mudcrab", "count": [2, 3], "radius": 5 }
+    ]
+  },
+  {
+    "id": "vampire_fen_ambush",
+    "weight": 8,
+    "wonder": false,
+    "road": "near",
+    "time": "night",
+    "minWildness": 0.25,
+    "provinces": ["skyrim"],
+    "regions": ["hjaalmarch", "haafingar", "falkreath", "the_rift", "eastmarch"],
+    "purpose": "Fledgling vampires and a death hound stalking the night roads near the fens.",
+    "needs": ["night_cover"],
+    "why": ["hjaalmarch.L10.marsh_vampires", "skyrim.L9.vampire_war", "haafingar.L10.volkihar_castle"],
+    "questHook": "radiant_bounty",
+    "props": [],
+    "actors": [
+      { "entity": "skycraft:vampire", "count": [1, 2], "radius": 4, "hostile": true },
+      { "entity": "skycraft:death_hound", "count": [1, 2], "radius": 5, "hostile": true }
+    ]
+  },
+  {
+    "id": "dwemer_great_lift_expedition",
+    "weight": 8,
+    "wonder": true,
+    "road": "off",
+    "time": "day",
+    "minWildness": 0.3,
+    "provinces": ["skyrim"],
+    "regions": ["the_pale", "winterhold", "eastmarch", "the_reach"],
+    "cultures": ["nord", "imperial", "breton"],
+    "purpose": "Wonder moment: an archaeological camp studying a venting Dwemer ruin while a brass automaton patrols.",
+    "needs": ["dwemer_ruin_proximity"],
+    "why": ["the_pale.L1.dwemer_cluster", "the_pale.L10.great_lifts", "skyrim.L1.dwemer_bedrock"],
+    "questHook": "radiant_bounty",
+    "props": ["fire", "log", "sack"],
+    "actors": [
+      { "npc": "scholar", "count": [1, 1], "radius": 3 },
+      { "npc": "adventurer", "count": [1, 2], "radius": 4 },
+      { "entity": "skycraft:dwarven_ballista", "count": [1, 1], "radius": 9, "hostile": true }
+    ]
+  },
+  {
+    "id": "vaermina_sleepless_walkers",
+    "weight": 8,
+    "wonder": true,
+    "road": "near",
+    "time": "night",
+    "provinces": ["skyrim"],
+    "regions": ["the_pale", "winterhold", "hjaalmarch"],
+    "cultures": ["nord", "dunmer"],
+    "purpose": "Wonder moment: sleepwalking townsfolk and a priest of Mara praying to lift Dawnstar's waking nightmares.",
+    "needs": ["road_access", "night_sky"],
+    "why": ["the_pale.L7.sleepless_town", "the_pale.L8.dream_dread", "the_pale.L10.nightmare_temple"],
+    "questHook": "side_waking_nightmare",
+    "props": ["fire"],
+    "actors": [
+      { "npc": "priest", "count": [1, 1], "radius": 2 },
+      { "npc": "miner", "count": [1, 2], "radius": 4 }
+    ]
+  },
+  {
+    "id": "quicksilver_ore_sledge",
+    "weight": 10,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": ["skyrim"],
+    "regions": ["the_pale", "winterhold", "eastmarch", "hjaalmarch"],
+    "cultures": ["nord"],
+    "purpose": "Miners hauling iron and quicksilver ore carts from the northern shafts toward the harbour.",
+    "needs": ["road_access"],
+    "why": ["the_pale.L5.two_mines", "the_pale.L1.iron_quicksilver", "skyrim.L5.mining_wealth"],
+    "props": ["cart", "sack"],
+    "actors": [
+      { "npc": "miner", "count": [2, 2], "radius": 3 },
+      { "npc": "blacksmith", "count": [1, 1], "radius": 3 }
+    ]
+  },
+  {
+    "id": "frost_troll_pass_ambush",
+    "weight": 9,
+    "wonder": false,
+    "road": "near",
+    "time": "any",
+    "minWildness": 0.35,
+    "provinces": ["skyrim"],
+    "regions": ["the_pale", "winterhold", "eastmarch", "whiterun"],
+    "families": ["snowy", "mountain"],
+    "purpose": "A territorial frost troll blocking a snowy pass beside a downed traveler's pack.",
+    "needs": ["snow_pass"],
+    "why": ["the_pale.L10.troll_caves", "the_pale.L4.snowfield", "winterhold.L4.glacier_waste"],
+    "props": ["sack", "meat"],
+    "actors": [
+      { "entity": "skycraft:troll", "count": [1, 2], "radius": 4, "hostile": true }
+    ]
+  },
+  {
+    "id": "golden_birch_pilgrim_train",
+    "weight": 9,
+    "wonder": true,
+    "road": "on",
+    "time": "day",
+    "provinces": ["skyrim"],
+    "regions": ["the_rift", "whiterun", "falkreath"],
+    "cultures": ["nord", "imperial"],
+    "families": ["temperate_forest", "mountain"],
+    "purpose": "Wonder moment: a peaceful train of Voice pilgrims and a bard climbing toward the Seven Thousand Steps under falling golden leaves.",
+    "needs": ["road_access"],
+    "why": ["the_rift.L2.golden_autumn", "the_rift.L8.voice_pilgrims", "skyrim.L8.way_of_the_voice"],
+    "questHook": "radiant_favor",
+    "props": ["sack"],
+    "actors": [
+      { "npc": "priest", "count": [1, 1], "radius": 2 },
+      { "npc": "citizen", "count": [2, 2], "radius": 3 },
+      { "npc": "bard", "count": [1, 1], "radius": 3 }
+    ]
+  },
+  {
+    "id": "mara_wedding_procession",
+    "weight": 8,
+    "wonder": true,
+    "road": "on",
+    "time": "day",
+    "provinces": ["skyrim"],
+    "regions": ["the_rift", "haafingar", "whiterun"],
+    "cultures": ["nord", "imperial", "breton"],
+    "purpose": "Wonder moment: a joyful betrothed couple, a priest of Mara, and a bard travelling from Riften's wedding temple.",
+    "needs": ["road_access"],
+    "why": ["the_rift.L8.mara_temple", "the_rift.L6.riften_seat", "skyrim.L8.hold_temples"],
+    "questHook": "radiant_favor",
+    "props": ["cart"],
+    "actors": [
+      { "npc": "priest", "count": [1, 1], "radius": 2 },
+      { "npc": "citizen", "count": [2, 2], "radius": 2 },
+      { "npc": "bard", "count": [1, 1], "radius": 3 }
+    ]
+  },
+  {
+    "id": "dawnguard_vampire_hunt",
+    "weight": 9,
+    "wonder": false,
+    "road": "near",
+    "time": "dawn_dusk",
+    "provinces": ["skyrim"],
+    "regions": ["the_rift", "falkreath", "hjaalmarch", "eastmarch"],
+    "cultures": ["nord", "redguard", "breton"],
+    "purpose": "Vampire hunters from the reopened border fort clashing with a night creature.",
+    "needs": ["road_or_wild"],
+    "why": ["the_rift.L9.hunters_fort", "skyrim.L9.vampire_war", "the_rift.L1.border_heights"],
+    "questHook": "radiant_bounty",
+    "props": ["fire"],
+    "actors": [
+      { "npc": "adventurer", "count": [2, 2], "radius": 3, "group": "hunters" },
+      { "entity": "skycraft:vampire", "count": [1, 2], "radius": 6, "hostile": true, "group": "prey" }
+    ]
+  },
+  {
+    "id": "honrich_fishermen_camp",
+    "weight": 10,
+    "wonder": false,
+    "road": "off",
+    "time": "day",
+    "provinces": ["skyrim"],
+    "regions": ["the_rift", "falkreath", "hjaalmarch", "haafingar"],
+    "cultures": ["nord", "argonian"],
+    "purpose": "Lakeside fishers drying their catch over a driftwood fire and trading fresh fish.",
+    "needs": ["water_edge"],
+    "why": ["the_rift.L5.fishery", "the_rift.L3.honrich_city", "falkreath.L3.lake_ilinalta"],
+    "props": ["fire", "log", "meat"],
+    "actors": [
+      { "npc": "fisher", "count": [1, 2], "radius": 3, "leash": 8 }
+    ]
+  },
+  {
+    "id": "largashbur_orc_hunters",
+    "weight": 9,
+    "wonder": false,
+    "road": "off",
+    "time": "day",
+    "minWildness": 0.25,
+    "provinces": ["skyrim", "high_rock"],
+    "regions": ["the_rift", "the_reach", "eastmarch"],
+    "cultures": ["orc"],
+    "purpose": "Stronghold Orc hunters testing their mettle against a cave bear in the border hills.",
+    "needs": ["wilderness_clearing"],
+    "why": ["skyrim.L7.orc_strongholds", "the_rift.L6.largashbur", "the_reach.L6.two_strongholds"],
+    "questHook": "radiant_hunt",
+    "props": ["meat"],
+    "actors": [
+      { "npc": "hunter", "count": [2, 2], "radius": 3, "group": "orcs" },
+      { "entity": "skycraft:bear", "count": [1, 1], "radius": 6, "group": "beast" }
+    ]
+  },
+  {
+    "id": "azura_twilight_chant",
+    "weight": 8,
+    "wonder": true,
+    "road": "near",
+    "time": "dawn_dusk",
+    "provinces": ["skyrim", "morrowind"],
+    "regions": ["winterhold", "eastmarch", "the_pale"],
+    "cultures": ["dunmer", "nord"],
+    "purpose": "Wonder moment: Dunmer pilgrims chanting at twilight beneath the mountain shrine of Dusk and Dawn.",
+    "needs": ["high_ground", "twilight_sky"],
+    "why": ["winterhold.L8.azura_statue", "eastmarch.L8.refugee_faith", "skyrim.L8.daedric_wilds"],
+    "questHook": "radiant_favor",
+    "props": ["fire"],
+    "actors": [
+      { "npc": "priest", "count": [1, 2], "radius": 2 },
+      { "npc": "scholar", "count": [1, 2], "radius": 3 }
+    ]
+  },
+  {
+    "id": "college_atronach_field_test",
+    "weight": 8,
+    "wonder": true,
+    "road": "off",
+    "time": "any",
+    "minWildness": 0.25,
+    "provinces": ["skyrim"],
+    "regions": ["winterhold", "the_pale", "hjaalmarch"],
+    "cultures": ["nord", "altmer", "breton", "dunmer"],
+    "families": ["snowy", "coast"],
+    "purpose": "Wonder moment: College of Winterhold mages conducting an outdoor conjuration trial with a bound Frost Atronach on the ice.",
+    "needs": ["snow_clearing"],
+    "why": ["winterhold.L6.college", "winterhold.L7.scholars_apart", "winterhold.L8.knowledge_seeker"],
+    "questHook": "radiant_favor",
+    "props": ["fire", "sack"],
+    "actors": [
+      { "npc": "mage", "count": [2, 2], "radius": 3, "group": "mages" },
+      { "entity": "skycraft:frost_atronach", "count": [1, 1], "radius": 5, "group": "summon" }
+    ]
+  },
+  {
+    "id": "sea_of_ghosts_wreck_salvagers",
+    "weight": 9,
+    "wonder": false,
+    "road": "off",
+    "time": "day",
+    "provinces": ["skyrim"],
+    "regions": ["winterhold", "the_pale", "haafingar", "hjaalmarch"],
+    "cultures": ["nord"],
+    "families": ["coast", "snowy"],
+    "purpose": "Shore scavengers salvaging timber and cargo crates washed onto the pack ice.",
+    "needs": ["coastline"],
+    "why": ["winterhold.L5.wreck_salvage", "winterhold.L1.ice_floes", "hjaalmarch.L10.wreck_on_the_flats"],
+    "props": ["fire", "cart", "sack"],
+    "actors": [
+      { "npc": "miner", "count": [1, 2], "radius": 3 },
+      { "npc": "merchant", "count": [1, 1], "radius": 3 }
+    ]
+  },
+  {
+    "id": "ice_wraith_blizzard_pack",
+    "weight": 9,
+    "wonder": false,
+    "road": "off",
+    "time": "any",
+    "minWildness": 0.3,
+    "provinces": ["skyrim"],
+    "regions": ["winterhold", "the_pale", "eastmarch"],
+    "families": ["snowy", "mountain"],
+    "purpose": "Translucent ice wraiths darting through the snowdrifts above the glacier.",
+    "needs": ["snow_ground"],
+    "why": ["winterhold.L4.glacier_waste", "winterhold.L2.polar_storm", "the_pale.L4.snowfield"],
+    "props": [],
+    "actors": [
+      { "entity": "skycraft:ice_wraith", "count": [2, 3], "radius": 5, "hostile": true }
+    ]
+  },
+  {
+    "id": "saarthal_excavation_courier",
+    "weight": 8,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": ["skyrim"],
+    "regions": ["winterhold", "the_pale", "eastmarch"],
+    "cultures": ["nord", "breton", "imperial"],
+    "purpose": "A College scholar and courier carrying sealed notes from the Saarthal dig site.",
+    "needs": ["road_access"],
+    "why": ["winterhold.L10.saarthal_eye", "winterhold.L5.college_coin", "winterhold.L1.saarthal_ridge"],
+    "questHook": "radiant_favor",
+    "props": ["sack"],
+    "actors": [
+      { "npc": "scholar", "count": [1, 1], "radius": 2 },
+      { "npc": "courier", "count": [1, 1], "radius": 2 }
+    ]
+  },
+  {
+    "id": "steam_basin_mammoth_bath",
+    "weight": 8,
+    "wonder": true,
+    "road": "off",
+    "time": "day",
+    "minWildness": 0.2,
+    "provinces": ["skyrim"],
+    "regions": ["eastmarch", "whiterun"],
+    "cultures": ["nord"],
+    "purpose": "Wonder moment: mammoths wading in steaming mineral pools while a giant stands watch on the sulphur rim.",
+    "needs": ["geothermal_springs"],
+    "why": ["eastmarch.L1.steam_basin", "eastmarch.L3.hot_pools", "eastmarch.L4.fumarole_tundra"],
+    "props": [],
+    "actors": [
+      { "entity": "skycraft:mammoth", "count": [2, 3], "radius": 6 },
+      { "entity": "skycraft:giant", "count": [1, 1], "radius": 5 }
+    ]
+  },
+  {
+    "id": "stormcloak_veteran_torch_march",
+    "weight": 9,
+    "wonder": true,
+    "road": "on",
+    "time": "dawn_dusk",
+    "provinces": ["skyrim"],
+    "regions": ["eastmarch", "the_pale", "winterhold", "the_rift"],
+    "cultures": ["nord"],
+    "purpose": "Wonder moment: Stormcloak veterans marching with a bard singing of Ysgramor and Talos at dusk.",
+    "needs": ["road_access"],
+    "why": ["eastmarch.L9.rebel_capital", "eastmarch.L8.talos_open", "eastmarch.L11.ysgramor_city"],
+    "props": [],
+    "actors": [
+      { "npc": "stormcloak_soldier", "count": [2, 3], "radius": 3 },
+      { "npc": "bard", "count": [1, 1], "radius": 3 }
+    ]
+  },
+  {
+    "id": "dunmer_ash_pilgrims",
+    "weight": 9,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": ["skyrim", "morrowind"],
+    "regions": ["eastmarch", "the_rift", "winterhold"],
+    "cultures": ["dunmer"],
+    "purpose": "Dunmer travellers from Windhelm's Grey Quarter walking the eastern pass road with ancestor offerings.",
+    "needs": ["road_access"],
+    "why": ["eastmarch.L7.grey_quarter", "eastmarch.L11.red_year_refugees", "eastmarch.L8.refugee_faith"],
+    "questHook": "radiant_favor",
+    "props": ["sack"],
+    "actors": [
+      { "npc": "citizen", "count": [1, 2], "radius": 3 },
+      { "npc": "merchant", "count": [1, 1], "radius": 3 }
+    ]
+  },
+  {
+    "id": "hot_springs_bathers",
+    "weight": 10,
+    "wonder": false,
+    "road": "off",
+    "time": "day",
+    "provinces": ["skyrim"],
+    "regions": ["eastmarch"],
+    "cultures": ["nord"],
+    "purpose": "Hunters resting in Eastmarch's warm mineral pools with their gear stacked by a campfire.",
+    "needs": ["geothermal_springs"],
+    "why": ["eastmarch.L3.hot_pools", "eastmarch.L2.mild_basin", "eastmarch.L4.hot_spring_grass"],
+    "props": ["fire", "log", "sack"],
+    "actors": [
+      { "npc": "hunter", "count": [2, 3], "radius": 3, "leash": 6 }
+    ]
+  },
+  {
+    "id": "karth_gorge_dibella_procession",
+    "weight": 8,
+    "wonder": true,
+    "road": "on",
+    "time": "day",
+    "provinces": ["skyrim"],
+    "regions": ["the_reach", "haafingar"],
+    "cultures": ["nord", "breton", "reach"],
+    "purpose": "Wonder moment: priestesses of Dibella and a bard crossing the misty Karth gorge with floral offerings.",
+    "needs": ["road_access"],
+    "why": ["the_reach.L8.dibella_temple", "the_reach.L2.gorge_mist", "the_reach.L3.karth_upper"],
+    "questHook": "radiant_favor",
+    "props": [],
+    "actors": [
+      { "npc": "priest", "count": [2, 2], "radius": 2 },
+      { "npc": "bard", "count": [1, 1], "radius": 3 }
+    ]
+  },
+  {
+    "id": "sky_haven_cliff_echoes",
+    "weight": 7,
+    "wonder": true,
+    "road": "off",
+    "time": "dawn_dusk",
+    "minWildness": 0.3,
+    "provinces": ["skyrim"],
+    "regions": ["the_reach"],
+    "cultures": ["nord", "imperial"],
+    "purpose": "Wonder moment: scholars and adventurers tracing the ancient dragon carvings below Sky Haven's crag.",
+    "needs": ["crag_overlook"],
+    "why": ["the_reach.L10.blades_temple", "the_reach.L1.crag_temple", "skyrim.L11.dragon_war"],
+    "questHook": "radiant_bounty",
+    "props": ["fire", "log"],
+    "actors": [
+      { "npc": "scholar", "count": [1, 1], "radius": 2 },
+      { "npc": "adventurer", "count": [1, 2], "radius": 3 }
+    ]
+  },
+  {
+    "id": "forsworn_crag_ambush",
+    "weight": 11,
+    "wonder": false,
+    "road": "near",
+    "time": "any",
+    "minWildness": 0.2,
+    "provinces": ["skyrim"],
+    "regions": ["the_reach"],
+    "cultures": ["reach"],
+    "purpose": "Forsworn raiders descending from the granite crags to reclaim the Reach from outsiders.",
+    "needs": ["crag_terrain"],
+    "why": ["the_reach.L9.native_uprising", "the_reach.L10.forsworn_redoubts", "skyrim.L10.forsworn"],
+    "questHook": "side_forsworn_conspiracy",
+    "props": [],
+    "actors": [
+      { "entity": "skycraft:forsworn", "count": [2, 4], "radius": 5, "hostile": true }
+    ]
+  },
+  {
+    "id": "silver_bullion_escort",
+    "weight": 10,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": ["skyrim"],
+    "regions": ["the_reach", "haafingar", "whiterun"],
+    "cultures": ["nord", "reach"],
+    "purpose": "Heavily guarded silver cart carrying ingots from the Reach's mines along the Karth road.",
+    "needs": ["road_access"],
+    "why": ["the_reach.L5.silver_mining", "the_reach.L7.silver_family", "the_reach.L6.karth_road"],
+    "questHook": "side_forsworn_conspiracy",
+    "props": ["cart", "sack"],
+    "actors": [
+      { "npc": "merchant", "count": [1, 1], "radius": 2 },
+      { "npc": "miner", "count": [1, 1], "radius": 3 },
+      { "npc": "imperial_soldier", "count": [2, 2], "radius": 4 }
+    ]
+  },
+  {
+    "id": "hagraven_briarheart_circle",
+    "weight": 8,
+    "wonder": false,
+    "road": "off",
+    "time": "night",
+    "minWildness": 0.4,
+    "provinces": ["skyrim"],
+    "regions": ["the_reach", "falkreath", "haafingar"],
+    "cultures": ["reach"],
+    "purpose": "A hagraven matriarch and Forsworn cultists chanting over a hillside fire.",
+    "needs": ["hilltop_clearing", "night_cover"],
+    "why": ["the_reach.L10.hagraven_covens", "the_reach.L8.old_gods", "haafingar.L4.hill_covens"],
+    "questHook": "radiant_bounty",
+    "props": ["fire", "meat"],
+    "actors": [
+      { "entity": "skycraft:hagraven", "count": [1, 1], "radius": 3, "hostile": true },
+      { "entity": "skycraft:forsworn", "count": [1, 2], "radius": 4, "hostile": true }
+    ]
+  },
+  {
+    "id": "civil_war_skirmish",
+    "weight": 9,
+    "wonder": false,
+    "road": "near",
+    "time": "day",
+    "provinces": ["skyrim"],
+    "regions": ["whiterun", "eastmarch", "haafingar", "the_pale", "the_rift", "falkreath", "hjaalmarch", "winterhold", "the_reach"],
+    "cultures": ["nord", "imperial"],
+    "purpose": "Imperial Legion and Stormcloak patrols clashing at a contested crossroads.",
+    "needs": ["road_or_wild"],
+    "why": ["skyrim.L9.civil_war", "whiterun.L9.siege_point", "eastmarch.L9.rebel_capital"],
+    "props": [],
+    "actors": [
+      { "npc": "imperial_soldier", "count": [2, 3], "radius": 4, "group": "imperials" },
+      { "npc": "stormcloak_soldier", "count": [2, 3], "radius": 6, "hostile": true, "group": "stormcloaks" }
+    ]
+  },
+  {
+    "id": "alikr_search_party",
+    "weight": 8,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": ["skyrim", "hammerfell"],
+    "regions": ["whiterun", "falkreath", "the_reach", "the_rift"],
+    "cultures": ["redguard", "nord"],
+    "purpose": "Redguard warriors questioning travellers on the road in search of a fugitive noblewoman.",
+    "needs": ["road_access"],
+    "why": ["skyrim.L7.outsiders", "whiterun.L5.crossroads_trade", "falkreath.L5.border_trade"],
+    "questHook": "side_time_of_need",
+    "props": [],
+    "actors": [
+      { "npc": "adventurer", "count": [2, 2], "radius": 2 },
+      { "npc": "citizen", "count": [1, 1], "radius": 3 }
+    ]
+  },
+  {
+    "id": "wispmother_frost_glade",
+    "weight": 7,
+    "wonder": true,
+    "road": "off",
+    "time": "night",
+    "minWildness": 0.4,
+    "provinces": ["skyrim"],
+    "regions": ["winterhold", "the_pale", "hjaalmarch", "eastmarch"],
+    "families": ["snowy", "taiga", "swamp"],
+    "purpose": "Wonder moment: a spectral Wispmother and orbiting wisps illuminating a frozen hollow.",
+    "needs": ["night_cover", "cold_glade"],
+    "why": ["winterhold.L2.ice_fog", "hjaalmarch.L4.marsh_hunters", "the_pale.L4.snowfield"],
+    "props": [],
+    "actors": [
+      { "entity": "skycraft:wispmother", "count": [1, 1], "radius": 3, "hostile": true },
+      { "entity": "skycraft:wisp", "count": [2, 3], "radius": 5, "hostile": true }
+    ]
+  },
+  {
+    "id": "falmer_surface_foray",
+    "weight": 7,
+    "wonder": false,
+    "road": "off",
+    "time": "night",
+    "minWildness": 0.45,
+    "provinces": ["skyrim"],
+    "regions": ["the_rift", "winterhold", "the_reach", "the_pale"],
+    "purpose": "Blind Falmer and a chaurus emerging from a sinkhole at night to raid surface camps.",
+    "needs": ["cave_mouth", "night_cover"],
+    "why": ["skyrim.L4.below_fauna", "the_rift.L4.falmer_caves", "winterhold.L10.falmer_pit"],
+    "props": ["sack"],
+    "actors": [
+      { "entity": "skycraft:falmer", "count": [2, 3], "radius": 4, "hostile": true },
+      { "entity": "skycraft:chaurus", "count": [1, 1], "radius": 5, "hostile": true }
+    ]
+  },
+  {
+    "id": "timber_lumberjack_convoy",
+    "weight": 11,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": ["skyrim"],
+    "regions": ["whiterun", "falkreath", "hjaalmarch", "the_rift", "haafingar", "eastmarch"],
+    "cultures": ["nord"],
+    "purpose": "Woodcutters hauling freshly milled pine and birch logs between river mills and towns.",
+    "needs": ["road_access"],
+    "why": ["skyrim.L5.timber", "whiterun.L5.riverwood_timber", "falkreath.L5.timber"],
+    "props": ["cart", "log"],
+    "actors": [
+      { "npc": "lumberjack", "count": [2, 2], "radius": 3 }
+    ]
+  },
+  {
+    "id": "frostbite_spider_web_trap",
+    "weight": 9,
+    "wonder": false,
+    "road": "off",
+    "time": "any",
+    "minWildness": 0.3,
+    "provinces": ["skyrim"],
+    "regions": ["falkreath", "hjaalmarch", "the_rift", "the_reach", "haafingar"],
+    "families": ["taiga", "temperate_forest", "swamp"],
+    "purpose": "Frostbite spiders lurking around a webbed supply cache in the deep woods.",
+    "needs": ["forest_or_marsh"],
+    "why": ["hjaalmarch.L4.marsh_hunters", "the_reach.L4.cave_mouths", "skyrim.L4.pine_and_birch"],
+    "props": ["sack"],
+    "actors": [
+      { "entity": "skycraft:frostbite_spider", "count": [2, 3], "radius": 4, "hostile": true }
+    ]
+  },
+  {
+    "id": "barrow_draugr_awakening",
+    "weight": 8,
+    "wonder": false,
+    "road": "off",
+    "time": "night",
+    "minWildness": 0.35,
+    "provinces": ["skyrim"],
+    "regions": ["whiterun", "the_pale", "hjaalmarch", "winterhold", "eastmarch", "falkreath"],
+    "purpose": "Restless draugr patrolling the standing stones outside an ancient Nordic barrow.",
+    "needs": ["barrow_ridge", "night_cover"],
+    "why": ["skyrim.L10.draugr_barrows", "skyrim.L8.ancestor_barrows", "the_pale.L8.old_crown"],
+    "questHook": "radiant_bounty",
+    "props": [],
+    "actors": [
+      { "entity": "skycraft:draugr", "count": [2, 3], "radius": 4, "hostile": true }
+    ]
+  },
+  {
+    "id": "roadside_bard_campfire",
+    "weight": 11,
+    "wonder": false,
+    "road": "near",
+    "time": "any",
+    "provinces": ["skyrim", "cyrodiil", "high_rock"],
+    "regions": ["whiterun", "haafingar", "the_rift", "eastmarch", "falkreath", "the_reach"],
+    "cultures": ["nord", "imperial", "breton"],
+    "purpose": "Wayfarers and a travelling bard sharing songs and warm food beside the road.",
+    "needs": ["road_access", "camp_clearing"],
+    "why": ["skyrim.L6.work_villages", "haafingar.L5.bards_college", "whiterun.L8.honour_and_sovngarde"],
+    "props": ["fire", "log", "meat"],
+    "actors": [
+      { "npc": "bard", "count": [1, 1], "radius": 2, "leash": 6 },
+      { "npc": "citizen", "count": [1, 2], "radius": 3, "leash": 6 }
+    ]
+  },
+  {
+    "id": "morrowind_silt_strider_caravan",
+    "weight": 7,
+    "wonder": true,
+    "road": "near",
+    "time": "dawn_dusk",
+    "provinces": ["morrowind", "skyrim"],
+    "regions": ["eastmarch", "the_rift", "winterhold"],
+    "cultures": ["dunmer"],
+    "purpose": "Wonder moment: a towering Silt Strider and pack guar resting with Dunmer caravanners near the eastern border passes.",
+    "needs": ["open_ground"],
+    "why": ["eastmarch.L1.velothi_foothills", "the_rift.L1.border_heights", "skyrim.L11.red_year"],
+    "props": ["fire", "sack"],
+    "actors": [
+      { "entity": "skycraft:silt_strider", "count": [1, 1], "radius": 5 },
+      { "entity": "skycraft:guar", "count": [1, 2], "radius": 4 },
+      { "npc": "caravan_trader", "count": [1, 2], "radius": 3 }
+    ]
+  },
+  {
+    "id": "valenwood_indrik_glade",
+    "weight": 6,
+    "wonder": true,
+    "road": "off",
+    "time": "dawn_dusk",
+    "minWildness": 0.35,
+    "provinces": ["valenwood", "summerset", "high_rock", "skyrim"],
+    "regions": ["falkreath", "the_rift", "haafingar"],
+    "cultures": ["bosmer", "altmer", "breton"],
+    "families": ["temperate_forest"],
+    "purpose": "Wonder moment: a luminous Indrik grazing in a misty woodland glade among butterflies.",
+    "needs": ["forest_clearing"],
+    "why": ["falkreath.L4.spriggan_groves", "the_rift.L4.spriggan_glades", "haafingar.L4.spriggan_glens"],
+    "props": [],
+    "actors": [
+      { "entity": "skycraft:indrik", "count": [1, 1], "radius": 3 },
+      { "entity": "skycraft:butterfly", "count": [3, 5], "radius": 5 }
+    ]
+  },
+  {
+    "id": "wrothgar_echatere_herders",
+    "weight": 8,
+    "wonder": false,
+    "road": "near",
+    "time": "day",
+    "provinces": ["high_rock", "skyrim"],
+    "regions": ["the_reach", "eastmarch", "the_rift"],
+    "cultures": ["orc"],
+    "purpose": "Orc herders driving shaggy echatere along the mountain ridges between strongholds.",
+    "needs": ["highland_trail"],
+    "why": ["skyrim.L7.orc_strongholds", "the_reach.L5.orc_mining", "eastmarch.L6.narzulbur"],
+    "props": ["sack"],
+    "actors": [
+      { "npc": "hunter", "count": [1, 2], "radius": 3 },
+      { "entity": "skycraft:echatere", "count": [2, 3], "radius": 5 }
+    ]
+  },
+  {
+    "id": "elsweyr_senche_caravan_guard",
+    "weight": 8,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": ["elsweyr", "cyrodiil", "skyrim"],
+    "regions": ["whiterun", "the_rift", "haafingar", "the_reach"],
+    "cultures": ["khajiit"],
+    "purpose": "Khajiit trader accompanied by a loyal senche tiger mount and an alfiq spellcaster.",
+    "needs": ["road_access"],
+    "why": ["whiterun.L7.caravans_outside", "skyrim.L7.outsiders", "skyrim.L5.road_hub"],
+    "props": ["cart", "sack"],
+    "actors": [
+      { "npc": "caravan_trader", "count": [1, 1], "radius": 2 },
+      { "entity": "skycraft:senche_tiger", "count": [1, 1], "radius": 3 },
+      { "entity": "skycraft:alfiq", "count": [1, 1], "radius": 2 }
+    ]
+  },
+  {
+    "id": "cyrodiil_minotaur_ruin_watch",
+    "weight": 7,
+    "wonder": false,
+    "road": "off",
+    "time": "any",
+    "minWildness": 0.4,
+    "provinces": ["cyrodiil", "skyrim"],
+    "regions": ["falkreath", "the_reach"],
+    "purpose": "A horned minotaur guarding weathered Imperial border stones near the southern passes.",
+    "needs": ["mountain_pass"],
+    "why": ["falkreath.L1.pale_pass", "falkreath.L1.jerall_foothills", "the_reach.L1.granite_gorges"],
+    "props": [],
+    "actors": [
+      { "entity": "skycraft:minotaur", "count": [1, 2], "radius": 4, "hostile": true }
+    ]
+  }
+]

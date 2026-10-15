@@ -323,6 +323,7 @@ public final class StoryCommands {
             if (com.skycraft.society.NpcRole.byId(n.role) == null) problems.add("npc " + n.id + ": unknown role " + n.role);
         }
         for (String t : RadiantTemplates.selftest(fake, fake)) problems.add("radiant template " + t + ": didn't build");
+        for (String nb : com.skycraft.quest.NoticeBoards.selftest(server)) problems.add("notice board " + nb);
         int b = built, o = objectives, s = spawns, f = fallbackSpawns;
         c.getSource().sendSuccess(() -> Component.literal("Story selftest: built " + b + "/" + StoryData.quests().size() + " quests, " + o
                 + " objectives, " + s + " spawn specs (" + f + " use a stand-in entity until their creature exists), "

@@ -172,7 +172,8 @@ public final class Outdoors {
                 c.set(2, 4, 0, B.slab(p.roofSlab, false));
                 c.sign(1, 2, -1, p.sign, Direction.NORTH, net.minecraft.network.chat.Component.empty(),
                         net.minecraft.network.chat.Component.translatable("settlement.skycraft.notice.title"),
-                        net.minecraft.network.chat.Component.translatable("settlement.skycraft.notice.line"));
+                        net.minecraft.network.chat.Component.translatable("settlement.skycraft.notice.line"),
+                        net.minecraft.network.chat.Component.translatable("quest.skycraft.board.sign_prompt"));
                 c.set(1, 3, -1, B.face(B.s(Blocks.WALL_TORCH), Direction.NORTH));
                 c.anchor(AnchorType.MEETING, 1, 1, -2);
             }
@@ -241,21 +242,8 @@ public final class Outdoors {
                 c.set(0, g + 2, 0, B.axis(p.post, Direction.Axis.Y));
                 c.set(0, g + 3, 0, p.fence);
                 if (s.has(Spec.MAJOR)) c.anchor(AnchorType.GATE, 0, 1, 2);
-                // the destinations named on the post (see Zoning#labelPosts): one wall sign per side, kind and compass
-                if (s.name.startsWith("signs:") && !c.recording()) {
-                    String[] entries = s.name.substring(6).split(";");
-                    int[][] side = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-                    Direction[] face = {Direction.EAST, Direction.WEST, Direction.SOUTH, Direction.NORTH};
-                    for (int i = 0; i < entries.length && i < 4; i++) {
-                        String[] kv = entries[i].split("=");
-                        if (kv.length != 2) continue;
-                        net.minecraft.network.chat.Component line = net.minecraft.network.chat.Component.translatable("settlement.skycraft.kind." + kv[0]);
-                        net.minecraft.network.chat.Component dir = net.minecraft.network.chat.Component.translatable("settlement.skycraft.sign.dir." + kv[1].toLowerCase(java.util.Locale.ROOT));
-                        int sx = side[i][0], sz = side[i][1];
-                        if (!Canvas.open(c.get(sx, g + 2, sz))) continue;
-                        c.sign(sx, g + 2, sz, p.sign, face[i], net.minecraft.network.chat.Component.empty(), line, dir);
-                    }
-                }
+                // District directions + regional road/settlement/inn/landmark signposting (see Signposts#populatePost)
+                com.skycraft.roads.Signposts.populatePost(c, p, s, g);
             }
             case KENNEL -> {
                 gset(c, 0, 1, 0, p.planks);

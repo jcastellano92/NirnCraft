@@ -107,6 +107,22 @@ public final class Leveling {
         return entity.getPersistentData().getInt(LEVEL_KEY);
     }
 
+    /**
+     * Story quest foe level policy (MS17 / F-LEVEL): clamps {@code playerLevel} to
+     * {@code [regionMin - 8, regionMax + 8]} within {@code [1, 60]}.
+     */
+    public static int storyQuestLevel(int playerLevel, Region region) {
+        if (region == null) return Math.max(1, Math.min(60, playerLevel));
+        int min = Math.max(1, region.minLevel() - 8);
+        int max = Math.min(60, region.maxLevel() + 8);
+        return Math.max(min, Math.min(Math.max(min, max), playerLevel));
+    }
+
+    /** Story quest foe level at {@code pos} for {@code playerLevel}. */
+    public static int storyQuestLevel(net.minecraft.server.level.ServerLevel level, net.minecraft.core.BlockPos pos, int playerLevel) {
+        return storyQuestLevel(playerLevel, Regions.at(level, pos));
+    }
+
     @SubscribeEvent
     public static void onJoin(EntityJoinLevelEvent event) {
         if (event.getLevel().isClientSide || !(event.getEntity() instanceof Mob mob) || !(mob instanceof Enemy)) return;
@@ -117,10 +133,14 @@ public final class Leveling {
         if (mob.getType().is(CombatHandler.BOSSES) || mob instanceof EnderDragon || mob instanceof WitherBoss) return;
         if (!CreaturesConfig.LEVELED_ENEMIES.get()) return;
 
-        int regLevel = (mob.level() instanceof net.minecraft.server.level.ServerLevel sl)
-                ? regionLevel(sl, mob.blockPosition()) : 1;
         Player nearest = event.getLevel().getNearestPlayer(mob, 128);
         int playerLevel = nearest != null ? SkyData.get(nearest).getLevel() : 1;
+        if (data.contains("skycraft_quest") && mob.level() instanceof net.minecraft.server.level.ServerLevel qLevel) {
+            apply(mob, storyQuestLevel(playerLevel, Regions.at(qLevel, mob.blockPosition())));
+            return;
+        }
+        int regLevel = (mob.level() instanceof net.minecraft.server.level.ServerLevel sl)
+                ? regionLevel(sl, mob.blockPosition()) : 1;
         int base = Math.max(regLevel, (regLevel + playerLevel) / 2);
         int level = Math.max(1, Math.min(60, base + mob.getRandom().nextInt(5) - 2));
         apply(mob, level);

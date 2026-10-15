@@ -149,6 +149,7 @@ def resolve_palettes():
     for key in pj:
         out[key] = {"upland_y": get(key, "upland_y", 115), "peak_y": get(key, "peak_y", 175),
                     "summit_y": get(key, "summit_y", 270), "bias": pj[key].get("bias"),
+                    "micro": pj[key].get("micro", []),
                     "ctx": {c: ctx(key, c) for c in SURF + EXTRA}}
     return out
 
@@ -271,6 +272,9 @@ def analyse():
         for c in EXTRA:
             for x in pal["ctx"][c]:
                 biome_set.add(x["biome"])
+        for mr in pal.get("micro", []):
+            if mr.get("biome"):
+                biome_set.add(mr["biome"])
         biome_set = {b for b in biome_set if b in biomes}
         major = {b: w for b, w in dist.items() if b in biomes}
         trees, plants = set(), set()
@@ -289,6 +293,7 @@ def analyse():
         rows.append({
             "index": i, "id": r["id"], "province": prov, "culture": r["culture"], "cells": n, "km2": round(km2, 1),
             "palette": pk, "biomes": sorted(biome_set), "n_biomes": len(biome_set),
+            "n_micro": len(pal.get("micro", [])),
             "n_major_biomes": sum(1 for w in major.values() if w >= 0.04),
             "trees": sorted(trees), "plants": sorted(plants), "n_trees": len(trees), "n_plants": len(plants),
             "struct_specific": sorted(kinds), "n_struct_specific": len(kinds), "n_struct_generic": generic,
@@ -485,26 +490,350 @@ def analyse_borders(reg, elev, ter, regions, rows, biomes, is_land):
     return out
 
 
+# ---------------------------------------------------------------------------------------------------- MS21 micro-biomes
+ASPECT_BOUNDS = {
+    "any": (0.0, 360.0),
+    "N": (300.0, 60.0),
+    "NE": (345.0, 105.0),
+    "E": (30.0, 150.0),
+    "SE": (75.0, 195.0),
+    "S": (120.0, 240.0),
+    "SW": (165.0, 285.0),
+    "W": (210.0, 330.0),
+    "NW": (255.0, 15.0),
+}
+
+
+def _hash_unit_vec(x, z, salt):
+    x64 = np.asarray(x, dtype=np.int64)
+    z64 = np.asarray(z, dtype=np.int64)
+    h = (x64 * 374761393 + z64 * 668265263 + int(salt) * 1442695041) & 0xFFFFFFFF
+    h = ((h ^ (h >> 13)) * 1274126177) & 0xFFFFFFFF
+    h = (h ^ (h >> 16)) & 0xFFFFFFFF
+    return ((h & 0xFFFF) / 32767.5) - 1.0
+
+
+def _micro_noise(qx, qz, salt, step=6):
+    gx = np.floor_divide(qx, step)
+    gz = np.floor_divide(qz, step)
+    tx = (qx - gx * step) / float(step)
+    tz = (qz - gz * step) / float(step)
+    tx = tx * tx * (3.0 - 2.0 * tx)
+    tz = tz * tz * (3.0 - 2.0 * tz)
+    v00 = _hash_unit_vec(gx, gz, salt)
+    v10 = _hash_unit_vec(gx + 1, gz, salt)
+    v01 = _hash_unit_vec(gx, gz + 1, salt)
+    v11 = _hash_unit_vec(gx + 1, gz + 1, salt)
+    return (1.0 - tz) * ((1.0 - tx) * v00 + tx * v10) + tz * ((1.0 - tx) * v01 + tx * v11)
+
+
+def _eval_hold_rules(rules, qx, qz, e, sl, ax, az, rs, ht, wd, cd, rg):
+    n = len(qx)
+    out = np.full(n, len(rules) - 1, dtype=np.int32)
+    matched = np.zeros(n, dtype=bool)
+    n701 = _micro_noise(qx, qz, 701)
+    n702 = _micro_noise(qx, qz, 702)
+    eff_ax = ax * sl + n701 * 0.14
+    eff_az = az * sl + n702 * 0.14
+    aspect_deg = np.degrees(np.arctan2(eff_ax, -eff_az)) % 360.0
+
+    for k, rule in enumerate(rules):
+        w = rule.get("when") or {}
+        d = _micro_noise(qx, qz, k * 31 + 17)
+        m = ~matched
+        if "elev" in w:
+            lo, hi = w["elev"]
+            ev = e + d * 8.0
+            m &= (ev >= lo) & (ev <= hi)
+        if "slope" in w:
+            lo, hi = w["slope"]
+            sv = np.maximum(0.0, sl + d * 0.035)
+            m &= (sv >= lo) & (sv <= hi)
+        if "rainshadow" in w:
+            lo, hi = w["rainshadow"]
+            rv = rs + d * 0.05
+            m &= (rv >= lo) & (rv <= hi)
+        if "heat" in w:
+            lo, hi = w["heat"]
+            hv = np.where(ht > 0.01, ht + d * 0.03, 0.0)
+            m &= (hv >= lo) & (hv <= hi)
+        if "water_dist" in w:
+            lo, hi = w["water_dist"]
+            wv = np.maximum(0.0, wd + d * 12.0)
+            m &= (wv >= lo) & (wv <= hi)
+        if "coast_dist" in w:
+            lo, hi = w["coast_dist"]
+            cv = np.maximum(0.0, cd + d * 24.0)
+            m &= (cv >= lo) & (cv <= hi)
+        if "ridge" in w:
+            lo, hi = w["ridge"]
+            rgv = rg + d * 0.04
+            m &= (rgv >= lo) & (rgv <= hi)
+        if "aspect" in w:
+            asp = w["aspect"]
+            alo, ahi = ASPECT_BOUNDS.get(asp, (0.0, 360.0)) if isinstance(asp, str) else (float(asp[0]), float(asp[1]))
+            if not (alo <= 0.0 and ahi >= 360.0):
+                ad = (aspect_deg + d * 18.0) % 360.0
+                if alo <= ahi:
+                    m &= (ad >= alo) & (ad <= ahi)
+                else:
+                    m &= (ad >= alo) | (ad <= ahi)
+        out[m] = k
+        matched |= m
+    return out
+
+
+def audit_micro(province=None):
+    if HERE not in sys.path:
+        sys.path.insert(0, HERE)
+    import roadplan_lint
+    import worldsheet_lint
+
+    regions = json.load(open(os.path.join(TAM, "regions.json"), encoding="utf-8"))
+    reg_to_idx = {r["id"]: r["index"] for r in regions}
+    idx_to_id = {r["index"]: r["id"] for r in regions}
+    reg_meta = {r["id"]: r for r in regions}
+    pj = json.load(open(os.path.join(TAM, "palettes.json"), encoding="utf-8"))["palettes"]
+
+    target_holds = {}
+    for r in regions:
+        if r["kind"] == "sea":
+            continue
+        if province and r["province"] != province:
+            continue
+        rid = r["id"]
+        if rid in pj and pj[rid].get("micro"):
+            target_holds[rid] = pj[rid]["micro"]
+
+    if not target_holds:
+        return {"holds": {}, "road_transitions_per_km": 0.0}, []
+
+    elev = np.array(Image.open(os.path.join(TAM, "elevation.png")), dtype=np.float32) / 32.0 - 64.0
+    reg = np.array(Image.open(os.path.join(TAM, "regions.png")))
+    feat = np.array(Image.open(os.path.join(TAM, "features.png")), dtype=np.float32)
+    coast = np.array(Image.open(os.path.join(TAM, "coast.png")), dtype=np.float32) - 32768.0
+    wat = np.array(Image.open(os.path.join(TAM, "water.png")), dtype=np.float32)
+    rs_path = os.path.join(TAM, "rainshadow.png")
+    ht_path = os.path.join(TAM, "heat.png")
+    rs_img = np.array(Image.open(rs_path), dtype=np.float32) / 255.0 if os.path.exists(rs_path) else np.zeros_like(elev)
+    ht_img = np.array(Image.open(ht_path), dtype=np.float32) / 255.0 if os.path.exists(ht_path) else np.zeros_like(elev)
+
+    peaks_path = os.path.join(TAM, "peaks.json")
+    H, W = elev.shape
+    xs_c = MIN_X + (np.arange(W) + 0.5) * CELL
+    zs_c = MIN_Z + (np.arange(H) + 0.5) * CELL
+    GX, GZ = np.meshgrid(xs_c, zs_c)
+    road_ch = feat[:, :, 3] / 255.0
+    if os.path.exists(peaks_path):
+        for pk in json.load(open(peaks_path, encoding="utf-8")).get("peaks", []):
+            dx, dz = GX - pk["x"], GZ - pk["z"]
+            r_dist = np.hypot(dx, dz)
+            th = np.arctan2(dz, dx)
+            reach = pk["reach"] * (1 + 0.06 * (0.5 * np.sin(3 * th + 1.3) + 0.3 * np.sin(7 * th + 0.4) + 0.2 * np.sin(11 * th + 2.1)))
+            for ang, width, gain in pk["spurs"]:
+                da = np.degrees(np.angle(np.exp(1j * (th - np.radians(ang)))))
+                reach = reach * (1 + gain * np.exp(-(da / width) ** 2))
+            u = np.clip(r_dist / reach, 0, 1)
+            prof = ((1 - u ** pk.get("shape", 1.0)) ** pk["power"]) * (1 - 0.85 * road_ch)
+            hh, hr = pk.get("horn", [0, 1])
+            y = elev + np.maximum(pk["height"] - hh - elev, 0) * prof
+            if hr > 0:
+                y = y + hh * (np.clip(1 - r_dist / hr, 0, 1) ** 1.5)
+            elev = np.where(r_dist < reach, y, elev)
+
+    gz_grad, gx_grad = np.gradient(elev, float(CELL))
+    slope_grid = np.hypot(gx_grad, gz_grad)
+    norm_g = np.maximum(slope_grid * CELL, 1e-4)
+    ax_grid = np.where(slope_grid * CELL > 1e-4, -gx_grad * CELL / norm_g, 0.0)
+    az_grid = np.where(slope_grid * CELL > 1e-4, -gz_grad * CELL / norm_g, 0.0)
+
+    riv_d = (255.0 - feat[:, :, 0]) * 0.5
+    riv_d = np.where(riv_d >= 127.5, 400.0, riv_d)
+    riv_hw = wat[:, :, 2]
+    lake_sd = (feat[:, :, 2] - 128.0) * 0.5
+    lake_sd = np.where(lake_sd <= -64.0, -400.0, lake_sd)
+    water_dist_grid = np.clip(np.minimum(np.maximum(0.0, riv_d - riv_hw), np.where(lake_sd >= 0.0, 0.0, -lake_sd)), 0.0, 512.0)
+    coast_dist_grid = np.maximum(0.0, coast)
+    ridge_grid = feat[:, :, 1] / 255.0
+
+    _, world_idx = worldsheet_lint.validate_sheets(province, [])
+    errors = []
+    sub_offsets = [-12.0, -4.0, 4.0, 12.0]
+    cell_km2 = (CELL / 1000.0) ** 2
+    holds_out = {}
+
+    for rid, rules in target_holds.items():
+        ridx = reg_to_idx[rid]
+        total_cells = int((reg == ridx).sum())
+        km2 = total_cells * cell_km2
+        cz_idx, cx_idx = np.nonzero((reg == ridx) & (coast > 0))
+        land_km2 = len(cx_idx) * cell_km2
+        base_x = MIN_X + (cx_idx + 0.5) * CELL
+        base_z = MIN_Z + (cz_idx + 0.5) * CELL
+        all_qx, all_qz = [], []
+        for ox in sub_offsets:
+            for oz in sub_offsets:
+                all_qx.append(np.floor_divide((base_x + ox).astype(np.int32), 4))
+                all_qz.append(np.floor_divide((base_z + oz).astype(np.int32), 4))
+        qx = np.concatenate(all_qx)
+        qz = np.concatenate(all_qz)
+        rep = len(sub_offsets) ** 2
+        res = _eval_hold_rules(
+            rules, qx, qz,
+            np.tile(elev[cz_idx, cx_idx], rep),
+            np.tile(slope_grid[cz_idx, cx_idx], rep),
+            np.tile(ax_grid[cz_idx, cx_idx], rep),
+            np.tile(az_grid[cz_idx, cx_idx], rep),
+            np.tile(rs_img[cz_idx, cx_idx], rep),
+            np.tile(ht_img[cz_idx, cx_idx], rep),
+            np.tile(water_dist_grid[cz_idx, cx_idx], rep),
+            np.tile(coast_dist_grid[cz_idx, cx_idx], rep),
+            np.tile(ridge_grid[cz_idx, cx_idx], rep),
+        )
+        rule_shares = {}
+        distinct_active = 0
+        cites_ok = 0
+        for k, rule in enumerate(rules):
+            pct = float((res == k).mean() * 100.0)
+            rule_shares[rule["id"]] = round(pct, 2)
+            if pct >= 0.5:
+                distinct_active += 1
+            if pct < 0.5 or pct > 60.0:
+                errors.append(f"{rid}:{rule['id']}: coverage {pct:.2f}% outside [0.5%, 60.0%]")
+            why_ids = rule.get("why") or rule.get("cites") or []
+            if not why_ids:
+                errors.append(f"{rid}:{rule['id']}: missing why/cites field citations")
+            else:
+                bad = [fid for fid in why_ids if worldsheet_lint.canon_field_id(fid) not in world_idx]
+                if bad:
+                    errors.append(f"{rid}:{rule['id']}: unresolved worldsheet citations {bad}")
+                else:
+                    cites_ok += 1
+
+        req_distinct = max(6, int(math.ceil(2.0 * km2)))
+        if distinct_active < req_distinct:
+            errors.append(f"{rid}: distinct micro-biomes {distinct_active} < required {req_distinct} (km2={km2:.2f})")
+
+        holds_out[rid] = {
+            "km2": round(km2, 2),
+            "land_km2": round(land_km2, 2),
+            "distinct_micro": distinct_active,
+            "required_micro": req_distinct,
+            "micro_per_km2": round(distinct_active / max(km2, 1e-6), 2),
+            "cites_resolved": f"{cites_ok}/{len(rules)}",
+            "min_share_pct": min(rule_shares.values()) if rule_shares else 0.0,
+            "max_share_pct": max(rule_shares.values()) if rule_shares else 0.0,
+            "rules": rule_shares,
+        }
+
+    # Road transitions per km along roadplan.bin
+    rp = roadplan_lint.load(roadplan_lint.DEFAULT)
+    hold_km = {r: 0.0 for r in target_holds}
+    hold_trans = {r: 0 for r in target_holds}
+    for s in rp["segs"]:
+        xs, zs, arc = s["x"], s["z"], s["arc"]
+        if arc[-1] < 16.0:
+            continue
+        steps = max(2, int(arc[-1] // 4.0) + 1)
+        target_s = np.linspace(0.0, arc[-1], steps)
+        sx = np.interp(target_s, arc, xs)
+        sz = np.interp(target_s, arc, zs)
+        cx = np.clip(((sx - MIN_X) // CELL).astype(np.int32), 0, W - 1)
+        cz = np.clip(((sz - MIN_Z) // CELL).astype(np.int32), 0, H - 1)
+        rids = [idx_to_id.get(int(r), "") for r in reg[cz, cx]]
+        present_holds = set(r for r in rids if r in target_holds)
+        if not present_holds:
+            continue
+        qx = np.floor_divide(sx.astype(np.int32), 4)
+        qz = np.floor_divide(sz.astype(np.int32), 4)
+        m_by_hold = {
+            h: _eval_hold_rules(
+                target_holds[h], qx, qz,
+                elev[cz, cx], slope_grid[cz, cx], ax_grid[cz, cx], az_grid[cz, cx],
+                rs_img[cz, cx], ht_img[cz, cx], water_dist_grid[cz, cx], coast_dist_grid[cz, cx], ridge_grid[cz, cx]
+            )
+            for h in present_holds
+        }
+        prev_m = None
+        prev_r = None
+        for i, r in enumerate(rids):
+            if r not in target_holds:
+                prev_m = None
+                prev_r = None
+                continue
+            if i > 0 and rids[i - 1] == r:
+                hold_km[r] += float(target_s[i] - target_s[i - 1]) / 1000.0
+            m = int(m_by_hold[r][i])
+            if prev_r == r and prev_m is not None and m != prev_m:
+                hold_trans[r] += 1
+            prev_r = r
+            prev_m = m
+
+    tot_km = sum(hold_km.values())
+    tot_tr = sum(hold_trans.values())
+    tot_rate = tot_tr / max(tot_km, 1e-6)
+    for r in target_holds:
+        rate = hold_trans[r] / max(hold_km[r], 1e-6)
+        holds_out[r]["road_km"] = round(hold_km[r], 2)
+        holds_out[r]["road_transitions"] = hold_trans[r]
+        holds_out[r]["road_transitions_per_km"] = round(rate, 2)
+        if hold_km[r] > 0.5 and rate < 3.0:
+            errors.append(f"{r}: road transitions/km {rate:.2f} < 3.0")
+    if tot_km > 0.5 and tot_rate < 3.0:
+        errors.append(f"province road transitions/km {tot_rate:.2f} < 3.0")
+
+    return {
+        "holds": holds_out,
+        "total_rules": sum(len(v) for v in target_holds.values()),
+        "road_km": round(tot_km, 2),
+        "road_transitions": tot_tr,
+        "road_transitions_per_km": round(tot_rate, 2),
+    }, errors
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     path = os.path.join(OUT, "audit.json")
     if "--json" in sys.argv:
         path = sys.argv[sys.argv.index("--json") + 1]
+    province = None
+    if "--province" in sys.argv:
+        province = sys.argv[sys.argv.index("--province") + 1]
     rows, borders = analyse()
-    json.dump({"regions": rows, "borders": borders}, open(path, "w", encoding="utf-8"), indent=1)
+    micro_report, micro_errors = audit_micro(province)
+    json.dump({"regions": rows, "borders": borders, "micro": micro_report}, open(path, "w", encoding="utf-8"), indent=1)
     print("%d land regions, %d borders -> %s" % (len(rows), len(borders), path))
-    print("weakest by variety:")
-    for r in sorted(rows, key=lambda r: r["variety"])[:15]:
-        print("  %-34s %5.1f biomes %2d/%2d trees %2d plants %2d struct %2d places %3d elev %3d" % (
-            r["id"], r["variety"], r["n_major_biomes"], r["n_biomes"], r["n_trees"], r["n_plants"],
-            r["n_struct_specific"], r["n_places"], r["elev_range"]))
-    print("worst borders:")
-    for b in borders[:15]:
-        print("  %-30s | %-30s len %5d straight %.2f ovl %.2f dT %.2f step %3d jump %.1f seam %.1f %s" % (
-            b["a"], b["b"], b["length_blocks"], b["straight_frac"], b["overlap"], b["d_temp"], b["height_step"],
-            b["jump"], b["seam"], b["tags"]))
-    tags = [b for b in borders if b["tags"]]
-    print("tagged:", [(b["a"], b["b"], b["tags"]) for b in tags])
+    if not province:
+        print("weakest by variety:")
+        for r in sorted(rows, key=lambda r: r["variety"])[:15]:
+            print("  %-34s %5.1f biomes %2d/%2d trees %2d plants %2d struct %2d places %3d elev %3d" % (
+                r["id"], r["variety"], r["n_major_biomes"], r["n_biomes"], r["n_trees"], r["n_plants"],
+                r["n_struct_specific"], r["n_places"], r["elev_range"]))
+        print("worst borders:")
+        for b in borders[:15]:
+            print("  %-30s | %-30s len %5d straight %.2f ovl %.2f dT %.2f step %3d jump %.1f seam %.1f %s" % (
+                b["a"], b["b"], b["length_blocks"], b["straight_frac"], b["overlap"], b["d_temp"], b["height_step"],
+                b["jump"], b["seam"], b["tags"]))
+        tags = [b for b in borders if b["tags"]]
+        print("tagged:", [(b["a"], b["b"], b["tags"]) for b in tags])
+    if micro_report.get("holds"):
+        print("\nMS21 Micro-Biome Audit (%d holds, %d rules):" % (
+            len(micro_report["holds"]), micro_report["total_rules"]))
+        print("  %-22s %6s %8s %8s %15s %12s %8s" % (
+            "Hold", "km2", "Distinct", "Micro/km2", "Share [min,max]", "Trans/km", "Cites"))
+        for rid, h in micro_report["holds"].items():
+            print("  %-22s %6.2f %4d/>=%d %8.2f   [%5.2f%%, %5.2f%%] %9.2f/km %8s" % (
+                rid, h["km2"], h["distinct_micro"], h["required_micro"], h["micro_per_km2"],
+                h["min_share_pct"], h["max_share_pct"], h["road_transitions_per_km"], h["cites_resolved"]))
+        print("  TOTAL ROAD TRANSITIONS: %.2f / km (%d transitions over %.2f km)" % (
+            micro_report["road_transitions_per_km"], micro_report["road_transitions"], micro_report["road_km"]))
+        if micro_errors:
+            for e in micro_errors:
+                print("  ERROR:", e)
+            print("region_audit: %d micro-biome gate error(s)" % len(micro_errors))
+            sys.exit(1)
+        else:
+            print("region_audit: 0 errors (all MS21 gates passed)")
 
 
 if __name__ == "__main__":

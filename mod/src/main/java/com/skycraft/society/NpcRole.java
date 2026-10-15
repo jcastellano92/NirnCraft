@@ -45,6 +45,8 @@ public enum NpcRole {
     STEWARD(true, false, false, false, false, Reputation.GUARDS),
     /** Khajiit caravan traders (replace wandering traders). */
     CARAVAN_TRADER(true, true, false, false, false, Reputation.TOWNSFOLK),
+    /** Skill trainers: teach a specific skill up to their tier cap (Journeyman 50, Expert 75, Master 90). */
+    TRAINER(true, true, false, false, false, Reputation.TOWNSFOLK),
     CITIZEN(true, false, false, false, false, Reputation.TOWNSFOLK),
     /** Children: smaller, never harmed (like Skyrim's). */
     CHILD(true, false, false, false, false, Reputation.TOWNSFOLK);

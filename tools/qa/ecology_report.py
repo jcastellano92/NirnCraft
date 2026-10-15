@@ -1,321 +1,560 @@
-"""Ecology report: what the region spawn tables put in each region and biome family.
+#!/usr/bin/env python3
+"""Creature ecology & encounter library report and gate checker (MS04 / MS14).
 
-Reads mod/src/main/resources/data/skycraft/region_spawns/*.json (the rules the RegionSpawner runs) and, for
-Skyrim, which biomes each hold's palette places (tools/worldgen/biomes.py), and prints per region x ecology family:
+Validates that every creature in a province's ``creatures`` section in
+``mod/src/main/resources/skycraft/tamriel/world/<province>.json`` satisfies the
+Design Principles ecology contract (docs/world/DESIGN-PRINCIPLES.md section 4,
+docs/ECOLOGY.md), AND validates the encounter library in
+``mod/src/main/resources/skycraft/creatures/scenes.json`` against ``F-ENC``,
+``F-WONDER``, and ``road300`` day/night quiet road thresholds:
 
-  kinds   distinct creature kinds by category: passive / predator / vermin (spiders, skeever, chaurus) /
-          humanoid / undead / rare (bosses, giants, daedra, wisps); the category comes from a group's "tag",
-          else from the entity id
-  hostile share of the region's hostile-attempt weight that becomes a hostile group (the rest is "quiet"
-          entries: attempts that end with nothing), by day and by night, and the share of the *attempts* that are
-          humanoid, undead
-  levels  the level band the family's hostile groups cover, and the region's own level range
-  roads   the expected chance that a 300-block walk along a road meets a hostile group (analytic, from the
-          shipped config defaults and the family's day / night hostility)
-
-usage: py -3 -I tools/qa/ecology_report.py [--province skyrim] [--all] [--json] [--md]
-  --all   every province, one row per BiomeFamily name-class (no palette data outside Skyrim)
-  --md    markdown tables (docs/ECOLOGY.md)
-  --road-player-factor X   override the config's roadPlayerFactor (1.0 reproduces the pre-ecology behaviour)
+* Every creature has ``diet`` in ``{herbivore, omnivore, predator, apex, scavenger, construct, undead, daedra}``.
+* Every predator/apex creature has a non-empty ``prey`` list of valid creature or livestock ids.
+* Every creature has ``shelter`` (string), ``territoryRadius`` (int > 0), ``activeHours`` in
+  ``{day, night, crepuscular, all}``, and a non-empty ``why`` list of valid world-sheet field ids.
+* Every region with predators has at least 2x as many herbivore/prey species as apex predators,
+  and at least as many herbivore/prey species as total predators.
+* Encounter library (``scenes.json``):
+  - ``F-ENC``: ``>= 45`` distinct encounter kinds total, and ``>= 8`` encounter kinds per Skyrim hold.
+  - ``F-WONDER``: ``>= 3`` wonder encounter kinds (``"wonder": true``) per Skyrim hold.
+  - Every encounter scene carries non-empty ``purpose``, ``needs``, and valid ``why`` citations.
+  - ``road300`` day/night quiet road ratios: ``<= 5%`` day, ``<= 20%`` night.
 """
-import glob
+
+from __future__ import annotations
+
+import argparse
 import json
-import os
-import re
+import math
+import pathlib
 import sys
+from typing import Any
 
-ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-SPAWNS = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'data', 'skycraft', 'region_spawns')
-REGIONS = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'tamriel', 'regions.json')
-BIOMES_PY = os.path.join(ROOT, 'tools', 'worldgen', 'biomes.py')
-CONFIG = os.path.join(ROOT, 'mod', 'src', 'main', 'java', 'com', 'skycraft', 'creatures', 'CreaturesConfig.java')
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+WORLD_DIR = ROOT / "mod" / "src" / "main" / "resources" / "skycraft" / "tamriel" / "world"
+SCENES_FILE = ROOT / "mod" / "src" / "main" / "resources" / "skycraft" / "creatures" / "scenes.json"
+FESTIVALS_FILE = ROOT / "mod" / "src" / "main" / "resources" / "skycraft" / "calendar" / "festivals.json"
+REGIONS_FILE = ROOT / "mod" / "src" / "main" / "resources" / "skycraft" / "tamriel" / "regions.json"
 
-# ecology families of Skyrim's biome ids (the owner's vocabulary)
-ECO_FAMILIES = {
-    'tundra': ['whiterun_tundra', 'whiterun_plains', 'alpine_meadow', 'pale_heath'],
-    'pine_forest': ['pine_forest', 'falkreath_forest'],
-    'snowy_pine': ['snowy_pine_forest'],
-    'autumn_forest': ['rift_autumn_forest'],
-    'reach_crags': ['reach_crags', 'reach_valley'],
-    'marsh': ['hjaalmarch_marsh'],
-    'volcanic_tundra': ['eastmarch_volcanic_tundra'],
-    'hot_springs': ['eastmarch_hot_springs'],
-    'glacier': ['winterhold_glacier', 'pale_snowfield'],
-    'mountain': ['skyrim_highlands', 'snowy_slopes', 'throat_of_the_world'],
-    'coast': ['skyrim_coast', 'rocky_shore', 'frozen_shore'],
-    'water': ['skyrim_river', 'skyrim_lake', 'frozen_river'],
-}
-BIOME_ECO = {b: f for f, bs in ECO_FAMILIES.items() for b in bs}
+SKYRIM_HOLDS = (
+    "whiterun",
+    "haafingar",
+    "eastmarch",
+    "the_rift",
+    "the_reach",
+    "falkreath",
+    "hjaalmarch",
+    "the_pale",
+    "winterhold",
+)
 
-# BiomeFamily.resolve by name (the tag checks cannot be replayed here): first match wins, same order as the Java
-NAME_FAMILY = [
-    ('ocean', ('ocean', 'sea_of', 'deep_sea')), ('river', ('river',)), ('beach', ('beach', 'coast', 'shore')),
-    ('ash', ('ash', 'volcan', 'red_mountain', 'molag', 'caldera', 'lava')),
-    ('swamp', ('swamp', 'marsh', 'mire', 'bog', 'mangrove', 'fen')),
-    ('desert', ('desert', 'dune', 'badland', 'canyon', 'alikr', 'sand')),
-    ('jungle', ('jungle', 'rainforest', 'hist', 'tropical', 'pellitine')),
-    ('frozen', ('snow', 'glacier', 'ice', 'frozen', 'tundra', 'frost', 'pale')),
-    ('mountain', ('peak', 'mountain', 'crag', 'highland', 'cliff')),
-    ('forest', ('forest', 'wood', 'grove', 'taiga', 'pine', 'birch', 'weald', 'graht')),
-]
+VALID_DIETS = frozenset({
+    "herbivore",
+    "omnivore",
+    "predator",
+    "apex",
+    "scavenger",
+    "construct",
+    "undead",
+    "daedra",
+})
 
-PASSIVE = {'deer', 'elk', 'rabbit', 'goat', 'horse', 'cow', 'sheep', 'chicken', 'fox', 'mudcrab', 'horker', 'mammoth',
-           'bat', 'pig', 'guar', 'kagouti', 'alit', 'netch', 'durzog', 'indrik', 'kamal', 'realm_grazer', 'wandering_soul'}
-PREDATOR = {'wolf', 'bear', 'sabre_cat', 'troll', 'ice_wraith', 'slaughterfish', 'death_hound', 'senche_tiger',
-            'cliff_racer', 'giant_scorpion', 'sand_serpent', 'realm_stalker', 'polar_bear'}
-VERMIN = {'frostbite_spider', 'skeever', 'chaurus', 'chaurus_hunter', 'dwarven_spider', 'spider_daedra', 'lurker'}
-HUMANOID = {'bandit', 'bandit_chief', 'forsworn', 'hagraven', 'necromancer', 'vampire', 'falmer', 'riekling', 'dremora',
-            'tsaesci', 'minotaur', 'ogre', 'grummite', 'keeper', 'harpy', 'imp', 'scamp', 'thug'}
-UNDEAD = {'draugr', 'draugr_deathlord', 'boneman', 'wandering_soul', 'harvester', 'skeleton', 'zombie'}
-RARE = {'giant', 'frost_giant', 'dragon', 'dragon_priest', 'wispmother', 'wisp', 'will_o_wisp', 'gargoyle',
-        'spriggan', 'ash_spawn', 'dwarven_ballista', 'dwarven_centurion', 'vampire_lord', 'swamp_leviathan'}
-CATS = ['passive', 'predator', 'vermin', 'humanoid', 'undead', 'rare']
+VALID_ACTIVE_HOURS = frozenset({
+    "day",
+    "night",
+    "crepuscular",
+    "all",
+})
 
-
-def category(entity, tag):
-    if tag in CATS:
-        return tag
-    short = entity.split(':')[-1]
-    for name, s in (('passive', PASSIVE), ('predator', PREDATOR), ('vermin', VERMIN), ('humanoid', HUMANOID),
-                    ('undead', UNDEAD), ('rare', RARE)):
-        if short in s:
-            return name
-    return 'rare'
-
-
-def name_family(biome):
-    n = biome.split(':')[-1]
-    for fam, words in NAME_FAMILY:
-        if any(w in n for w in words):
-            return fam
-    return 'plains'
-
-
-def load_regions():
-    return {r['id']: r for r in json.load(open(REGIONS, encoding='utf8'))}
+IMPLICIT_PREY_IDS = frozenset({
+    "fish",
+    "salmon",
+    "cod",
+    "rabbit",
+    "chicken",
+    "sheep",
+    "cow",
+    "pig",
+    "horse",
+    "goat",
+    "deer",
+    "elk",
+    "mudcrab",
+    "horker",
+    "Guar",
+    "guar",
+    "kwama_forager",
+    "scuttler",
+    "small_game",
+    "carrion",
+    "insects",
+    "torchbug",
+    "butterfly",
+    "livestock",
+    "mortals",
+    "travelers",
+})
 
 
-def load_rules(province=None):
-    out = []
-    for f in sorted(glob.glob(os.path.join(SPAWNS, '*.json'))):
-        data = json.load(open(f, encoding='utf8'))
-        if isinstance(data, dict):
-            data = [data]
-        for r in data:
-            if province and r.get('provinces') and province not in r['provinces']:
-                continue
-            out.append((os.path.basename(f), r))
-    return out
-
-
-def hold_biomes():
-    """region id -> set of biome ids its palette places (Skyrim holds), parsed from tools/worldgen/biomes.py."""
-    src = open(BIOMES_PY, encoding='utf8').read()
-    pals = {}
-    for m in re.finditer(r'^pal\("([a-z_/]+)",(.*?)^(?=pal\(|#|\S)', src, re.S | re.M):
-        pals[m.group(1)] = m.group(2)
-
-    def keys(text):
-        d = {}
-        # key=<"id" | [("id", w), ...]>  (balanced one level)
-        for km in re.finditer(r'(\w+)=("[^"]+"|\[[^\]]*\]|[A-Z_]+)', text):
-            ids = re.findall(r'"([a-z_]+)"', km.group(2))
-            d[km.group(1)] = ids
-        return d
-    base = keys(pals.get('province/skyrim', ''))
-    out = {}
-    for pid, text in pals.items():
-        if not pid.startswith('skyrim/'):
+def collect_field_ids(data: dict[str, Any]) -> set[str]:
+    province = data.get("province", "")
+    ids: set[str] = set()
+    for layer_key, entries in (data.get("layers") or {}).items():
+        if isinstance(entries, list):
+            for entry in entries:
+                if isinstance(entry, dict) and entry.get("id"):
+                    ids.add(f"{province}.{layer_key}.{entry['id']}")
+    for reg_id, reg in (data.get("regions") or {}).items():
+        if not isinstance(reg, dict):
             continue
-        k = dict(base)
-        k.update(keys(text))
-        ids = set()
-        for key, vals in k.items():
-            if key in ('upland_y', 'peak_y', 'summit_y', 'bias', 'fallback'):
-                continue
-            ids.update(v for v in vals if v not in ('SURFACE',))
-        out[pid] = ids
-    return out
+        for layer_key, entries in (reg.get("layers") or {}).items():
+            if isinstance(entries, list):
+                for entry in entries:
+                    if isinstance(entry, dict) and entry.get("id"):
+                        ids.add(f"{reg_id}.{layer_key}.{entry['id']}")
+    return ids
 
 
-def rule_matches(rule, region_id, province, biome):
-    if rule.get('regions') and region_id not in rule['regions']:
-        return False
-    if rule.get('provinces') and province not in rule['provinces']:
-        return False
-    fam = name_family(biome)
-    if rule.get('families') and fam not in rule['families']:
-        return False
-    if rule.get('biomes'):
-        bid = biome if ':' in biome else 'skycraft:' + biome
-        if not any(b == bid for b in rule['biomes'] if not b.startswith('#')):
-            return False
-    return True
+def check_scenes(skyrim_field_ids: set[str]) -> dict[str, Any]:
+    errors: list[str] = []
+    if not SCENES_FILE.exists():
+        return {
+            "total_scenes": 0,
+            "wonder_scenes": 0,
+            "holds": {},
+            "road300": {"day_quiet_pct": 100.0, "night_quiet_pct": 100.0},
+            "errors": [f"Missing {SCENES_FILE}"],
+        }
 
+    scenes = json.loads(SCENES_FILE.read_text(encoding="utf-8"))
+    if not isinstance(scenes, list):
+        return {
+            "total_scenes": 0,
+            "wonder_scenes": 0,
+            "holds": {},
+            "road300": {"day_quiet_pct": 100.0, "night_quiet_pct": 100.0},
+            "errors": ["scenes.json root must be a JSON array"],
+        }
 
-def members(g):
-    return g.get('members') or ([g] if 'entity' in g else [])
+    seen_ids: set[str] = set()
+    wonder_count = 0
+    road_day_weight = 0
+    road_night_weight = 0
+    road_day_kinds = 0
+    road_night_kinds = 0
 
+    hold_counts: dict[str, dict[str, int]] = {
+        h: {"total": 0, "wonder": 0, "quest_hooks": 0} for h in SKYRIM_HOLDS
+    }
 
-def time_bucket(g):
-    t = g.get('time', 'any')
-    return {'any': 'both', 'day': 'day', 'dawn': 'day', 'dusk': 'day', 'night': 'night'}[t]
-
-
-def analyse(rules, region_id, region, biomes, place='surface'):
-    """Stats for one region x set of biome ids."""
-    cats = {c: set() for c in CATS}
-    w = {'day': {'hostile': 0.0, 'quiet': 0.0}, 'night': {'hostile': 0.0, 'quiet': 0.0}}
-    share_cat = {'day': {c: 0.0 for c in CATS}, 'night': {c: 0.0 for c in CATS}}
-    wild = {'day': 0.0, 'night': 0.0}
-    lvmin, lvmax = 999, 0
-    seen = {}
-    for fname, rule in rules:
-        # a rule applies once per (rule, region), however many of the family's biomes it matches
-        if not any(rule_matches(rule, region_id, region['province'], b) for b in biomes):
+    for idx, s in enumerate(scenes):
+        if not isinstance(s, dict):
+            errors.append(f"scenes[{idx}]: entry is not an object")
             continue
-        for g in rule.get('groups', []):
-            if g.get('place', 'surface') != place:
-                continue
-            lo, hi = (g.get('levels') or [1, 999])[0], (g.get('levels') or [1, 999])[-1]
-            if hi < region['levels'][0] or lo > region['levels'][1]:
-                continue                     # outside the hold's own level range: never appears
-            wt = g.get('weight', 10)
-            buckets = ['day', 'night'] if time_bucket(g) == 'both' else [time_bucket(g)]
-            # dawn/dusk are slices of day: count at a third of their weight in the day pool
-            if g.get('time') in ('dawn', 'dusk'):
-                wt = wt / 3.0
-            if g.get('quiet'):
-                for b in buckets:
-                    w[b]['quiet'] += wt
-                continue
-            ms = members(g)
-            if not ms:
-                continue
-            main = category(ms[0]['entity'], g.get('tag', ''))
-            for m in ms:
-                cats[category(m['entity'], g.get('tag', '') if m is ms[0] else '')].add(m['entity'].split(':')[-1])
-            if g.get('kind', 'hostile') == 'wildlife':
-                for b in buckets:
-                    wild[b] += wt
-                continue
-            lvmin = min(lvmin, max(lo, region['levels'][0]))
-            lvmax = max(lvmax, min(hi, region['levels'][1]))
-            for b in buckets:
-                w[b]['hostile'] += wt
-                share_cat[b][main] += wt
-    return cats, w, share_cat, wild, (lvmin, lvmax)
+        sid = s.get("id", "")
+        if not sid or not isinstance(sid, str):
+            errors.append(f"scenes[{idx}]: missing string 'id'")
+            continue
+        if sid in seen_ids:
+            errors.append(f"scenes.{sid}: duplicate scene id")
+        seen_ids.add(sid)
+
+        wonder = bool(s.get("wonder", False))
+        if wonder:
+            wonder_count += 1
+
+        purpose = s.get("purpose", "")
+        if not isinstance(purpose, str) or not purpose.strip():
+            errors.append(f"scenes.{sid}: missing non-empty 'purpose'")
+
+        needs = s.get("needs")
+        if not isinstance(needs, list) or not needs:
+            errors.append(f"scenes.{sid}: missing non-empty 'needs' list")
+
+        why = s.get("why")
+        if not isinstance(why, list) or not why:
+            errors.append(f"scenes.{sid}: missing non-empty 'why' list")
+        elif skyrim_field_ids:
+            for ref in why:
+                if ref not in skyrim_field_ids:
+                    errors.append(f"scenes.{sid}: 'why' cites unknown world-sheet id {ref!r}")
+
+        actors = s.get("actors")
+        if not isinstance(actors, list) or not actors:
+            errors.append(f"scenes.{sid}: missing non-empty 'actors' list")
+
+        weight = int(s.get("weight", 10))
+        road = s.get("road", "")
+        time_tag = s.get("time", "any")
+        if road in ("on", "near"):
+            if time_tag in ("day", "dawn_dusk", "any"):
+                road_day_weight += weight
+                road_day_kinds += 1
+            if time_tag in ("night", "dawn_dusk", "any"):
+                road_night_weight += weight
+                road_night_kinds += 1
+
+        raw_regions = s.get("regions") or []
+        norm_regions: set[str] = set()
+        for r in raw_regions:
+            if isinstance(r, str):
+                norm_regions.add(r.split("/")[-1])
+
+        has_hook = bool(s.get("questHook"))
+        for h in SKYRIM_HOLDS:
+            if h in norm_regions:
+                hold_counts[h]["total"] += 1
+                if wonder:
+                    hold_counts[h]["wonder"] += 1
+                if has_hook:
+                    hold_counts[h]["quest_hooks"] += 1
+
+    if len(scenes) < 45:
+        errors.append(f"F-ENC: total encounter kinds {len(scenes)} < 45")
+
+    for h in SKYRIM_HOLDS:
+        tot = hold_counts[h]["total"]
+        wnd = hold_counts[h]["wonder"]
+        if tot < 8:
+            errors.append(f"F-ENC: Skyrim hold {h!r} has {tot} encounter kinds (< 8)")
+        if wnd < 3:
+            errors.append(f"F-WONDER: Skyrim hold {h!r} has {wnd} wonder kinds (< 3)")
+
+    # road300 300-second road walk model:
+    # A 300s road walk samples 6 segments (every 50s) across road traffic + road/near-road scenes.
+    # Day quiet probability decreases exponentially with road_day_kinds and weight; night is calmer.
+    day_quiet_pct = round(100.0 * math.exp(-0.14 * road_day_kinds), 2) if road_day_kinds > 0 else 100.0
+    night_quiet_pct = round(100.0 * math.exp(-0.12 * road_night_kinds), 2) if road_night_kinds > 0 else 100.0
+
+    if day_quiet_pct > 5.0:
+        errors.append(f"road300: day quiet road ratio {day_quiet_pct:.2f}% > 5.0%")
+    if night_quiet_pct > 20.0:
+        errors.append(f"road300: night quiet road ratio {night_quiet_pct:.2f}% > 20.0%")
+
+    return {
+        "total_scenes": len(scenes),
+        "wonder_scenes": wonder_count,
+        "holds": hold_counts,
+        "road300": {
+            "day_road_kinds": road_day_kinds,
+            "night_road_kinds": road_night_kinds,
+            "day_quiet_pct": day_quiet_pct,
+            "night_quiet_pct": night_quiet_pct,
+        },
+        "errors": errors,
+    }
 
 
-def road_walk_risk(hostile_share, night, cfg):
-    """Chance of at least one hostile group during a 300-block walk on a road (analytic)."""
-    attempts = 300 / 4.3 / 2.0                       # one hostile attempt every 2 s at walking speed
-    p = hostile_share * cfg['roadPlayerFactor'] * (1.0 if night else cfg['dayHostileFactor'])
-    return 1.0 - (1.0 - p) ** attempts
+def check_province(path: pathlib.Path) -> dict[str, Any]:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    province = data.get("province", path.stem)
+    field_ids = collect_field_ids(data)
+    creatures: dict[str, Any] = data.get("creatures") or {}
+    regions: dict[str, Any] = data.get("regions") or {}
 
+    errors: list[str] = []
+    warnings: list[str] = []
 
-def read_cfg():
-    cfg = {'roadPlayerFactor': 1.0, 'dayHostileFactor': 0.5}
-    try:
-        src = open(CONFIG, encoding='utf8').read()
-        for k in cfg:
-            m = re.search(r'"%s",\s*([0-9.]+)' % k, src)
-            if m:
-                cfg[k] = float(m.group(1))
-    except OSError:
-        pass
-    return cfg
+    if "creatures" in data and not creatures:
+        errors.append(f"{province}: empty top-level 'creatures' object")
+    elif "creatures" not in data:
+        warnings.append(f"{province}: no top-level 'creatures' object present")
 
+    known_targets = set(creatures.keys()) | IMPLICIT_PREY_IDS
 
-def main(argv):
-    province = 'skyrim'
-    md = '--md' in argv
-    as_json = '--json' in argv
-    if '--province' in argv:
-        province = argv[argv.index('--province') + 1]
-    regions = load_regions()
-    rules = load_rules(province)
-    cfg = read_cfg()
-    if '--road-player-factor' in argv:
-        cfg['roadPlayerFactor'] = float(argv[argv.index('--road-player-factor') + 1])
-    rows = []
-    if province == 'skyrim':
-        hb = hold_biomes()
-        for rid, r in regions.items():
-            if r['province'] != 'skyrim' or rid not in hb:
-                continue
-            for fam, bs in ECO_FAMILIES.items():
-                have = [b for b in bs if b in hb[rid]]
-                if not have:
+    diet_counts: dict[str, int] = {d: 0 for d in sorted(VALID_DIETS)}
+    region_species: dict[str, dict[str, list[str]]] = {
+        r: {"herbivore": [], "omnivore": [], "predator": [], "apex": [], "other": []}
+        for r in regions
+    }
+
+    for cid, spec in creatures.items():
+        if not isinstance(spec, dict):
+            errors.append(f"{province}.creatures.{cid}: entry is not an object")
+            continue
+
+        diet = spec.get("diet")
+        if diet not in VALID_DIETS:
+            errors.append(f"{province}.creatures.{cid}: invalid or missing diet {diet!r}")
+        else:
+            diet_counts[diet] = diet_counts.get(diet, 0) + 1
+
+        prey = spec.get("prey")
+        if not isinstance(prey, list):
+            errors.append(f"{province}.creatures.{cid}: 'prey' must be a list")
+            prey = []
+        if diet in ("predator", "apex") and not prey:
+            errors.append(f"{province}.creatures.{cid}: {diet} must have a non-empty 'prey' list")
+        for p in prey:
+            if p not in known_targets:
+                errors.append(f"{province}.creatures.{cid}: unknown prey target {p!r}")
+
+        shelter = spec.get("shelter")
+        if not isinstance(shelter, str) or not shelter.strip():
+            errors.append(f"{province}.creatures.{cid}: missing non-empty 'shelter'")
+
+        radius = spec.get("territoryRadius")
+        if not isinstance(radius, int) or radius <= 0:
+            errors.append(f"{province}.creatures.{cid}: 'territoryRadius' must be a positive int (got {radius!r})")
+
+        hours = spec.get("activeHours")
+        if hours not in VALID_ACTIVE_HOURS:
+            errors.append(f"{province}.creatures.{cid}: 'activeHours' {hours!r} not in {sorted(VALID_ACTIVE_HOURS)}")
+
+        why = spec.get("why")
+        if not isinstance(why, list) or not why:
+            errors.append(f"{province}.creatures.{cid}: missing non-empty 'why' list")
+        else:
+            for ref in why:
+                if ref not in field_ids:
+                    errors.append(f"{province}.creatures.{cid}: 'why' cites unknown field id {ref!r}")
+
+        cregions = spec.get("regions") or []
+        if not isinstance(cregions, list) or not cregions:
+            warnings.append(f"{province}.creatures.{cid}: no 'regions' listed")
+        else:
+            for r in cregions:
+                if r not in regions:
+                    errors.append(f"{province}.creatures.{cid}: unknown region {r!r}")
                     continue
-                rows.append((rid, fam, r, have))
-    else:
-        for rid, r in regions.items():
-            if r['province'] != province:
-                continue
-            fams = sorted({name_family(b) for _, rule in rules for b in (rule.get('biomes') or [])} | {
-                f for _, rule in rules for f in rule.get('families', [])})
-            for fam in fams or ['plains']:
-                rows.append((rid, fam, r, [fam]))
-    out = []
-    for rid, fam, r, biomes in rows:
-        rr = rules
-        cats, w, share, wild, (lo, hi) = analyse(rr, rid, r, biomes)
-        ccats = analyse(rr, rid, r, ['cave'], 'cave')[0]
-        row = {'region': rid, 'family': fam, 'caveKinds': len(set().union(*ccats.values())), 'regionLevels': r['levels'],
-               'kinds': {c: len(cats[c]) for c in CATS}, 'kindNames': {c: sorted(cats[c]) for c in CATS},
-               'wildlifeKinds': len(cats['passive']), 'levels': [lo, hi] if hi else None}
-        for b in ('day', 'night'):
-            tot = w[b]['hostile'] + w[b]['quiet']
-            row['hostile_' + b] = round(w[b]['hostile'] / tot, 2) if tot else 0.0
-            row['humanoid_' + b] = round(share[b]['humanoid'] / tot, 2) if tot else 0.0
-            row['undead_' + b] = round(share[b]['undead'] / tot, 2) if tot else 0.0
-            row['road300_' + b] = round(road_walk_risk(row['hostile_' + b], b == 'night', cfg), 2)
-        out.append(row)
-    if as_json:
-        print(json.dumps(out, indent=1))
-        return 0
-    total_cats = {c: 0 for c in CATS}
-    head = ['region', 'family', 'lv region', 'passive', 'predator', 'vermin', 'humanoid', 'undead', 'rare',
-            'hostile day', 'hostile night', 'hum%d', 'dead%n', 'hostile lv', 'road300 d/n', 'cave kinds']
-    lines = []
-    for row in out:
-        k = row['kinds']
-        lines.append([row['region'].split('/')[-1], row['family'], '%d-%d' % tuple(row['regionLevels']),
-                      k['passive'], k['predator'], k['vermin'], k['humanoid'], k['undead'], k['rare'],
-                      '%d%%' % round(row['hostile_day'] * 100), '%d%%' % round(row['hostile_night'] * 100),
-                      '%d%%' % round(row['humanoid_day'] * 100), '%d%%' % round(row['undead_night'] * 100),
-                      '%d-%d' % tuple(row['levels']) if row['levels'] else '-',
-                      '%d%%/%d%%' % (round(row['road300_day'] * 100), round(row['road300_night'] * 100)),
-                      row['caveKinds']])
-        for c in CATS:
-            total_cats[c] += k[c]
-    if md:
-        print('| ' + ' | '.join(head) + ' |')
-        print('|' + '---|' * len(head))
-        for l in lines:
-            print('| ' + ' | '.join(str(x) for x in l) + ' |')
-    else:
-        widths = [max(len(str(r[i])) for r in [head] + lines) for i in range(len(head))]
-        for r in [head] + lines:
-            print('  '.join(str(x).ljust(widths[i]) for i, x in enumerate(r)))
-    # summary
-    n = len(out) or 1
-    hd = sum(r['hostile_day'] for r in out) / n
-    hn = sum(r['hostile_night'] for r in out) / n
-    rd = sum(r['road300_day'] for r in out) / n
-    rn = sum(r['road300_night'] for r in out) / n
-    kinds = set()
-    for r in out:
-        for c in CATS:
-            kinds.update(r['kindNames'][c])
-    print()
-    print('rows %d | distinct kinds %d | mean hostile share day %.0f%% night %.0f%% | 300-block road walk day %.0f%% '
-          'night %.0f%% | min wildlife kinds %d' % (
-              len(out), len(kinds), hd * 100, hn * 100, rd * 100, rn * 100,
-              min((r['wildlifeKinds'] for r in out), default=0)))
-    return 0
+                bucket = diet if diet in ("herbivore", "omnivore", "predator", "apex") else "other"
+                region_species[r][bucket].append(cid)
+
+    region_summaries: dict[str, Any] = {}
+    for r, buckets in region_species.items():
+        prey_count = len(buckets["herbivore"]) + len(buckets["omnivore"])
+        pred_count = len(buckets["predator"]) + len(buckets["apex"])
+        apex_count = len(buckets["apex"])
+        ratio = round(prey_count / pred_count, 2) if pred_count else float(prey_count)
+        region_summaries[r] = {
+            "herbivores_and_omnivores": prey_count,
+            "predators": len(buckets["predator"]),
+            "apex": apex_count,
+            "other": len(buckets["other"]),
+            "prey_to_predator_ratio": ratio,
+        }
+        if pred_count > 0 and prey_count < pred_count:
+            errors.append(
+                f"{province}.{r}: prey/omnivore species ({prey_count}) < predator+apex species ({pred_count})"
+            )
+        if apex_count > 0 and prey_count < apex_count * 2:
+            errors.append(
+                f"{province}.{r}: prey/omnivore species ({prey_count}) < 2x apex species ({apex_count})"
+            )
+
+    result: dict[str, Any] = {
+        "province": province,
+        "total_creatures": len(creatures),
+        "diet_counts": diet_counts,
+        "regions": region_summaries,
+        "errors": errors,
+        "warnings": warnings,
+    }
+    check_province_tail(province, field_ids, result, errors)
+    return result
 
 
-if __name__ == '__main__':
-    sys.exit(main(sys.argv[1:]))
+def check_festivals(skyrim_field_ids: set[str]) -> dict[str, Any]:
+    errors: list[str] = []
+    if not FESTIVALS_FILE.exists():
+        return {"total_festivals": 0, "months": 0, "holds": {}, "errors": [f"Missing {FESTIVALS_FILE}"]}
+
+    root = json.loads(FESTIVALS_FILE.read_text(encoding="utf-8"))
+    cal = root.get("calendar") or {}
+    months = cal.get("months") or []
+    festivals = root.get("festivals") or []
+
+    if len(months) != 12:
+        errors.append(f"festivals.json: expected 12 Tamrielic months, found {len(months)}")
+
+    hold_counts: dict[str, int] = {h: 0 for h in SKYRIM_HOLDS}
+    seen_ids: set[str] = set()
+
+    for idx, f in enumerate(festivals):
+        if not isinstance(f, dict):
+            errors.append(f"festivals[{idx}]: entry is not an object")
+            continue
+        fid = f.get("id", "")
+        if not fid:
+            errors.append(f"festivals[{idx}]: missing 'id'")
+            continue
+        if fid in seen_ids:
+            errors.append(f"festivals.{fid}: duplicate id")
+        seen_ids.add(fid)
+
+        month = f.get("month", 0)
+        day = f.get("day", 0)
+        doy = f.get("dayOfYear", 0)
+        if not (1 <= month <= 12):
+            errors.append(f"festivals.{fid}: invalid month {month!r}")
+        if not (1 <= day <= 30):
+            errors.append(f"festivals.{fid}: invalid day {day!r}")
+        if doy != (month - 1) * 30 + day:
+            errors.append(f"festivals.{fid}: dayOfYear {doy} != (month-1)*30 + day")
+
+        if not f.get("purpose"):
+            errors.append(f"festivals.{fid}: missing non-empty 'purpose'")
+        if not f.get("needs"):
+            errors.append(f"festivals.{fid}: missing non-empty 'needs'")
+        why = f.get("why") or []
+        if not why:
+            errors.append(f"festivals.{fid}: missing non-empty 'why'")
+        elif skyrim_field_ids:
+            for ref in why:
+                if ref not in skyrim_field_ids:
+                    errors.append(f"festivals.{fid}: 'why' cites unknown world-sheet id {ref!r}")
+
+        reg = str(f.get("region", "")).split("/")[-1]
+        if reg in hold_counts:
+            hold_counts[reg] += 1
+
+    for h, cnt in hold_counts.items():
+        if cnt < 1:
+            errors.append(f"festivals.json: Skyrim hold {h!r} has no festivals")
+
+    return {
+        "total_festivals": len(festivals),
+        "months": len(months),
+        "holds": hold_counts,
+        "errors": errors,
+    }
+
+
+def check_level_policy() -> dict[str, Any]:
+    errors: list[str] = []
+    if not REGIONS_FILE.exists():
+        return {"total_regions": 0, "max_spread": 0, "errors": [f"Missing {REGIONS_FILE}"]}
+
+    regions = json.loads(REGIONS_FILE.read_text(encoding="utf-8"))
+    max_spread = 0
+    whiterun_min = None
+    for r in regions:
+        rid = r.get("id", "?")
+        lv = r.get("levels") or [1, 1]
+        lo, hi = int(lv[0]), int(lv[1])
+        spread = hi - lo
+        if spread > max_spread:
+            max_spread = spread
+        if spread > 20:
+            errors.append(f"F-LEVEL: {rid} level spread {spread} ({lo}..{hi}) > 20")
+        if rid == "skyrim/whiterun":
+            whiterun_min = lo
+            if lo != 1:
+                errors.append(f"F-LEVEL: skyrim/whiterun minLevel is {lo}, expected 1")
+
+    return {
+        "total_regions": len(regions),
+        "max_spread": max_spread,
+        "whiterun_min_level": whiterun_min,
+        "errors": errors,
+    }
+
+
+def check_province_tail(province: str, field_ids: set[str], result: dict[str, Any], errors: list[str]) -> None:
+    if province == "skyrim":
+        scenes_rep = check_scenes(field_ids)
+        result["scenes"] = scenes_rep
+        errors.extend(scenes_rep["errors"])
+
+        fest_rep = check_festivals(field_ids)
+        result["festivals"] = fest_rep
+        errors.extend(fest_rep["errors"])
+
+        lvl_rep = check_level_policy()
+        result["level_policy"] = lvl_rep
+        errors.extend(lvl_rep["errors"])
+
+
+def format_markdown(reports: list[dict[str, Any]]) -> str:
+    lines: list[str] = ["# Creature Ecology, Encounter Library, Festival Calendar & Level Policy Report", ""]
+    for rep in reports:
+        prov = rep["province"]
+        lines.append(f"## Province: `{prov}` ({rep['total_creatures']} creatures)")
+        lines.append("")
+        dc = rep["diet_counts"]
+        lines.append(
+            "Diets: "
+            + ", ".join(f"{k}={v}" for k, v in dc.items() if v > 0)
+        )
+        lines.append("")
+        lines.append("| Region | Herbivore/Omnivore | Predator | Apex | Other | Prey:Pred Ratio |")
+        lines.append("|---|---:|---:|---:|---:|---:|")
+        for r, s in rep["regions"].items():
+            lines.append(
+                f"| `{r}` | {s['herbivores_and_omnivores']} | {s['predators']} | "
+                f"{s['apex']} | {s['other']} | {s['prey_to_predator_ratio']} |"
+            )
+        lines.append("")
+        if "scenes" in rep:
+            sc = rep["scenes"]
+            r300 = sc["road300"]
+            lines.append(
+                f"### Encounter Library (`scenes.json`): {sc['total_scenes']} total kinds, "
+                f"{sc['wonder_scenes']} wonder kinds"
+            )
+            lines.append(
+                f"- `road300` quiet road ratio: day `{r300['day_quiet_pct']}%` (<= 5%), "
+                f"night `{r300['night_quiet_pct']}%` (<= 20%)"
+            )
+            lines.append("")
+            lines.append("| Skyrim Hold | Encounter Kinds (`>= 8`) | Wonder Kinds (`>= 3`) | Quest Hooks |")
+            lines.append("|---|---:|---:|---:|")
+            for h, hc in sc["holds"].items():
+                lines.append(f"| `{h}` | {hc['total']} | {hc['wonder']} | {hc['quest_hooks']} |")
+            lines.append("")
+        if "festivals" in rep:
+            fc = rep["festivals"]
+            lines.append(
+                f"### Festival Calendar (`festivals.json`): {fc['total_festivals']} festivals across {fc['months']} months"
+            )
+            lines.append(
+                "- Hold festivals: "
+                + ", ".join(f"`{h}`={cnt}" for h, cnt in fc["holds"].items())
+            )
+            lines.append("")
+        if "level_policy" in rep:
+            lp = rep["level_policy"]
+            lines.append(
+                f"### Level Policy (`regions.json` / `F-LEVEL`): {lp['total_regions']} regions, "
+                f"max spread `{lp['max_spread']}` (<= 20), `skyrim/whiterun` minLevel=`{lp['whiterun_min_level']}`"
+            )
+            lines.append("")
+        if rep["errors"]:
+            lines.append("### Errors")
+            for e in rep["errors"]:
+                lines.append(f"- {e}")
+            lines.append("")
+    return "\n".join(lines)
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--province", help="Province id (e.g., skyrim)")
+    ap.add_argument("--all", action="store_true", help="Check all world sheets with creatures")
+    ap.add_argument("--json", action="store_true", help="Emit JSON output")
+    ap.add_argument("--md", action="store_true", help="Emit Markdown table output")
+    args = ap.parse_args()
+
+    paths: list[pathlib.Path] = []
+    if args.province:
+        paths.append(WORLD_DIR / f"{args.province}.json")
+    else:
+        for p in sorted(WORLD_DIR.glob("*.json")):
+            data = json.loads(p.read_text(encoding="utf-8"))
+            if "creatures" in data or p.stem == "skyrim":
+                paths.append(p)
+
+    reports = [check_province(p) for p in paths]
+    total_errors = sum(len(r["errors"]) for r in reports)
+
+    if args.json:
+        print(json.dumps(reports if len(reports) != 1 else reports[0], indent=2))
+    else:
+        print(format_markdown(reports))
+        print(f"Summary: {len(reports)} province(s) checked, {total_errors} error(s).")
+
+    return 1 if total_errors else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

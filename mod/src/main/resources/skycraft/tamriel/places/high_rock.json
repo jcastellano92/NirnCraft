@@ -407,7 +407,8 @@
   "x": -9750,
   "z": 250,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "dresan_keep",
@@ -418,7 +419,8 @@
   "x": -10550,
   "z": -50,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "merovecs_folly",
@@ -429,7 +431,8 @@
   "x": -10850,
   "z": 250,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "castle_llugwych",
@@ -440,7 +443,8 @@
   "x": -9900,
   "z": -50,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "woodborne_hall",
@@ -451,7 +455,8 @@
   "x": -8800,
   "z": 1350,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "cryptwatch_fort",
@@ -462,7 +467,8 @@
   "x": -8800,
   "z": -1200,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "ravenwatch_castle",
@@ -473,7 +479,8 @@
   "x": -7100,
   "z": -1650,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "tor_draioch",
@@ -484,7 +491,8 @@
   "x": -8250,
   "z": -1750,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "alcaire_castle",
@@ -495,7 +503,8 @@
   "x": -7650,
   "z": 2150,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "firebrand_keep",
@@ -506,7 +515,8 @@
   "x": -7300,
   "z": 1150,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "wind_keep",
@@ -517,7 +527,8 @@
   "x": -7400,
   "z": 400,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "direnni_tower",
@@ -528,7 +539,8 @@
   "x": -7350,
   "z": 3540,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "frostbreak_fortress",
@@ -539,7 +551,8 @@
   "x": -5300,
   "z": -2450,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "watchers_hold",
@@ -550,7 +563,8 @@
   "x": -4500,
   "z": -1250,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "castle_necromoghan",
@@ -561,7 +575,8 @@
   "x": -4900,
   "z": 1900,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "sentinel_of_rkugamz",
@@ -836,7 +851,8 @@
   "x": -9650,
   "z": -950,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "tomb_of_lost_kings",
@@ -847,7 +863,8 @@
   "x": -9300,
   "z": -1350,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "burial_mound",
@@ -858,7 +875,8 @@
   "x": -9050,
   "z": -800,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "bad_mans_hallows",
@@ -869,7 +887,8 @@
   "x": -9850,
   "z": 700,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "lysanduss_tomb",
@@ -880,7 +899,8 @@
   "x": -9600,
   "z": 2350,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "silumm",
@@ -891,7 +911,8 @@
   "x": -10450,
   "z": 1750,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "enduum",
@@ -902,7 +923,8 @@
   "x": -9950,
   "z": -1350,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "ilessan_tower",
@@ -913,7 +935,8 @@
   "x": -8550,
   "z": 1500,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "mines_of_khuras",
@@ -924,7 +947,8 @@
   "x": -10200,
   "z": -450,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "spindleclutch",
@@ -935,7 +959,8 @@
   "x": -10000,
   "z": 2000,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "red_rook_camp",
@@ -946,7 +971,8 @@
   "x": -9200,
   "z": 1300,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "hag_fen",
@@ -957,7 +983,8 @@
   "x": -10450,
   "z": -800,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "wyrd_tree",
@@ -968,7 +995,8 @@
   "x": -10400,
   "z": 1250,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "privateers_hold",
@@ -979,7 +1007,8 @@
   "x": -10250,
   "z": 2300,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "yeorth_burrowland",
@@ -990,7 +1019,8 @@
   "x": -8600,
   "z": 2100,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "tamrith_camp",
@@ -1001,7 +1031,8 @@
   "x": -8150,
   "z": -2000,
   "radius": 18,
-  "variant": "imperial_camp"
+  "variant": "imperial_camp",
+  "class": "minor"
  },
  {
   "id": "staging_grounds",
@@ -1012,7 +1043,8 @@
   "x": -7050,
   "z": -2350,
   "radius": 18,
-  "variant": "imperial_camp"
+  "variant": "imperial_camp",
+  "class": "minor"
  },
  {
   "id": "doomcrag",
@@ -1023,7 +1055,8 @@
   "x": -6800,
   "z": -2200,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "sanguines_demesne",
@@ -1034,7 +1067,8 @@
   "x": -7350,
   "z": -2050,
   "radius": 26,
-  "variant": "daedric_ruin"
+  "variant": "daedric_ruin",
+  "class": "major"
  },
  {
   "id": "crypt_of_hearts",
@@ -1045,7 +1079,8 @@
   "x": -8800,
   "z": -2200,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "flyleaf_catacombs",
@@ -1056,7 +1091,8 @@
   "x": -8500,
   "z": -1550,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "breagha_fin",
@@ -1067,7 +1103,8 @@
   "x": -7950,
   "z": -2500,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "erokii_ruins",
@@ -1078,7 +1115,8 @@
   "x": -6731,
   "z": -1891,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "obsidian_scar",
@@ -1089,7 +1127,8 @@
   "x": -8950,
   "z": -1450,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "hildunes_secret_refuge",
@@ -1100,7 +1139,8 @@
   "x": -7000,
   "z": -1250,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "orcs_finger_ruins",
@@ -1111,7 +1151,8 @@
   "x": -7950,
   "z": -750,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "aesars_web",
@@ -1122,7 +1163,8 @@
   "x": -8859,
   "z": -2294,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "magdelenas_haunt",
@@ -1133,7 +1175,8 @@
   "x": -7250,
   "z": -2650,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "cumberlands_watch",
@@ -1144,7 +1187,8 @@
   "x": -7200,
   "z": 2250,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "portdun_watch",
@@ -1155,7 +1199,8 @@
   "x": -7400,
   "z": 1950,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "koeglin_lighthouse",
@@ -1166,7 +1211,8 @@
   "x": -8100,
   "z": 2900,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "koeglin_mine",
@@ -1177,7 +1223,8 @@
   "x": -7800,
   "z": 2450,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "bearclaw_mine",
@@ -1188,7 +1235,8 @@
   "x": -7350,
   "z": -450,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "norvulk_ruins",
@@ -1199,7 +1247,8 @@
   "x": -8100,
   "z": 750,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "farangels_delve",
@@ -1210,7 +1259,8 @@
   "x": -7050,
   "z": 850,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "bonesnap_ruins",
@@ -1221,7 +1271,8 @@
   "x": -7150,
   "z": -200,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "aphrens_tomb",
@@ -1232,7 +1283,8 @@
   "x": -7900,
   "z": 450,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "pelin_graveyard",
@@ -1243,7 +1295,8 @@
   "x": -7450,
   "z": 100,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "ruins_of_cosh_hall",
@@ -1254,7 +1307,8 @@
   "x": -7240,
   "z": -670,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "old_orsinium",
@@ -1265,7 +1319,8 @@
   "x": -3797,
   "z": -1434,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "marquee"
  },
  {
   "id": "exiles_barrow",
@@ -1276,7 +1331,8 @@
   "x": -4548,
   "z": -1884,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "scourg_barrow",
@@ -1287,7 +1343,8 @@
   "x": -5300,
   "z": 50,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "zthenganaz",
@@ -1298,7 +1355,8 @@
   "x": -5000,
   "z": -2050,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "argent_mine",
@@ -1309,7 +1367,8 @@
   "x": -5050,
   "z": -1650,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "graystone_quarry",
@@ -1320,7 +1379,8 @@
   "x": -5500,
   "z": 750,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "coldperch_cavern",
@@ -1331,7 +1391,8 @@
   "x": -5450,
   "z": -1850,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "coldwinds_den",
@@ -1342,7 +1403,8 @@
   "x": -5500,
   "z": -2250,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "nikolvaras_kennel",
@@ -1353,7 +1415,8 @@
   "x": -5300,
   "z": -1200,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "thukhozods_sanctum",
@@ -1364,7 +1427,8 @@
   "x": -3900,
   "z": 750,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "mad_urkazburs_lair",
@@ -1375,7 +1439,8 @@
   "x": -4450,
   "z": 1250,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "bonerock_cavern",
@@ -1386,7 +1451,8 @@
   "x": -3700,
   "z": -1050,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "bloodroot_forge",
@@ -1397,7 +1463,8 @@
   "x": -4226,
   "z": -1632,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "merciless_end",
@@ -1408,7 +1475,8 @@
   "x": -4250,
   "z": 1900,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "thorncombe_lighthouse",
@@ -1419,7 +1487,8 @@
   "x": -6740,
   "z": 3093,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "wynbrook_stones",
@@ -1441,7 +1510,8 @@
   "x": -10120,
   "z": -275,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "wyngate_outpost",
@@ -1452,7 +1522,8 @@
   "x": -6419,
   "z": 1996,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "hawkgate_hollow",
@@ -1463,7 +1534,8 @@
   "x": -5816,
   "z": -135,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "sorel_farm",
@@ -1484,7 +1556,8 @@
   "x": -6547,
   "z": -437,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "old_yalbag",
@@ -1495,7 +1568,8 @@
   "x": -3910,
   "z": -629,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "frostpoint_mine",
@@ -1506,7 +1580,8 @@
   "x": -8595,
   "z": -2054,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "bordul",
@@ -1528,7 +1603,8 @@
   "x": -9690,
   "z": 1749,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "balbrook_burrow",
@@ -1539,7 +1615,8 @@
   "x": -9479,
   "z": -598,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "jourdain_tomb",
@@ -1550,7 +1627,8 @@
   "x": -7062,
   "z": 1233,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "keep_fontaine",
@@ -1561,7 +1639,8 @@
   "x": -10774,
   "z": -582,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "montclair_catacombs",
@@ -1572,7 +1651,8 @@
   "x": -6584,
   "z": 614,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "oakwold_keep",
@@ -1583,7 +1663,8 @@
   "x": -6862,
   "z": 1900,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "old_ughul",
@@ -1594,7 +1675,8 @@
   "x": -4913,
   "z": -208,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "fairwold_outpost",
@@ -1605,7 +1687,8 @@
   "x": -6488,
   "z": -1034,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "dunwick",
@@ -1626,7 +1709,8 @@
   "x": -5718,
   "z": 2093,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "blackthornminster_hollow",
@@ -1637,7 +1721,8 @@
   "x": -10552,
   "z": 654,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "thorncliff_caverns",
@@ -1648,7 +1733,8 @@
   "x": -9071,
   "z": 1489,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "fhaosh_cave",
@@ -1659,7 +1745,8 @@
   "x": -5224,
   "z": -1398,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "old_dushak",
@@ -1670,7 +1757,8 @@
   "x": -5096,
   "z": 1866,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "borrash_watch",
@@ -1681,7 +1769,8 @@
   "x": -4780,
   "z": -1711,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "wreck_of_the_winking_carafe",
@@ -1692,7 +1781,8 @@
   "x": -10745,
   "z": -1358,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "lincliff_cave",
@@ -1703,7 +1793,8 @@
   "x": -5113,
   "z": 2448,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "dushzog_quarry",
@@ -1714,7 +1805,8 @@
   "x": -3466,
   "z": -1050,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "old_yalmok",
@@ -1725,7 +1817,8 @@
   "x": -3731,
   "z": -84,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "sheepham_keep",
@@ -1736,7 +1829,8 @@
   "x": -10570,
   "z": 1515,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "ulmok_hole",
@@ -1747,7 +1841,8 @@
   "x": -4718,
   "z": -1354,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "briarham_lighthouse",
@@ -1758,7 +1853,8 @@
   "x": -7226,
   "z": 2935,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "delacroix_catacombs",
@@ -1769,7 +1865,8 @@
   "x": -10606,
   "z": 339,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "mzinzel",
@@ -1780,7 +1877,8 @@
   "x": -5898,
   "z": 2606,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "oakcroft_watchtower",
@@ -1791,7 +1889,8 @@
   "x": -7532,
   "z": 1833,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "eagleham_ruins",
@@ -1824,7 +1923,8 @@
   "x": -4425,
   "z": 1425,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "old_dushmok",
@@ -1835,7 +1935,8 @@
   "x": -5101,
   "z": -1171,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "caron_farm",
@@ -1866,7 +1967,8 @@
   "x": -5143,
   "z": 2136,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "old_mogash",
@@ -1877,7 +1979,8 @@
   "x": -4780,
   "z": 1498,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "gashak_cave",
@@ -1888,7 +1991,8 @@
   "x": -4527,
   "z": 1714,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "narum_grotto",
@@ -1899,7 +2003,8 @@
   "x": -6504,
   "z": -2253,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "yalzog_coven",
@@ -1910,7 +2015,8 @@
   "x": -5233,
   "z": -986,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "corbin_homestead",
@@ -1932,7 +2038,8 @@
   "x": -5159,
   "z": -2193,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "shulzog",
@@ -1965,7 +2072,8 @@
   "x": -7953,
   "z": -1838,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "hawkcombe_hollow",
@@ -1976,7 +2084,8 @@
   "x": -7505,
   "z": 950,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "mossmarsh_stones",
@@ -1998,7 +2107,8 @@
   "x": -5946,
   "z": 780,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "greywold_den",
@@ -2009,7 +2119,8 @@
   "x": -6799,
   "z": 1369,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "greyhurst_den",
@@ -2020,7 +2131,8 @@
   "x": -6512,
   "z": 1709,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "roseholt_quarry",
@@ -2031,7 +2143,8 @@
   "x": -9006,
   "z": 2032,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "bramholt_hollow",
@@ -2042,7 +2155,8 @@
   "x": -6417,
   "z": 983,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "travers_farm",
@@ -2063,7 +2177,8 @@
   "x": -8333,
   "z": 1648,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "eaglefield_ruins",
@@ -2085,7 +2200,8 @@
   "x": -8921,
   "z": -971,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "goldthorpe_vault",
@@ -2096,7 +2212,8 @@
   "x": -9402,
   "z": 2215,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "stonewold_pit",
@@ -2107,7 +2224,8 @@
   "x": -10764,
   "z": -202,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "fairgate_lair",
@@ -2118,7 +2236,8 @@
   "x": -10443,
   "z": -1078,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "briarwick",
@@ -2139,7 +2258,8 @@
   "x": -3724,
   "z": 564,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "ogrzog_glacier_cave",
@@ -2150,7 +2270,8 @@
   "x": -3575,
   "z": 1231,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "castle_faucher",
@@ -2161,7 +2282,8 @@
   "x": -10099,
   "z": 1207,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "sorel_crypt",
@@ -2172,7 +2294,8 @@
   "x": -6837,
   "z": -648,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "benoit_catacombs",
@@ -2183,7 +2306,8 @@
   "x": -6168,
   "z": -406,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "mthartzel",
@@ -2194,7 +2318,8 @@
   "x": -9862,
   "z": -979,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "marquee"
  },
  {
   "id": "old_kragur",
@@ -2205,7 +2330,8 @@
   "x": -4760,
   "z": 2246,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "oakbury_watch",
@@ -2216,7 +2342,8 @@
   "x": -9081,
   "z": 791,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "grobul_camp",
@@ -2227,7 +2354,8 @@
   "x": -4242,
   "z": 884,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "crosshelm_wyrd_grove",
@@ -2238,7 +2366,8 @@
   "x": -6745,
   "z": 754,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "gashrash_campsite",
@@ -2260,7 +2389,8 @@
   "x": -5238,
   "z": -1868,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "evermarsh_coven",
@@ -2271,7 +2401,8 @@
   "x": -6643,
   "z": 984,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "ravenford_hollow",
@@ -2282,7 +2413,8 @@
   "x": -8917,
   "z": 660,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "lowpoint",
@@ -2303,7 +2435,8 @@
   "x": -6065,
   "z": 2361,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "bagur_cave",
@@ -2314,7 +2447,8 @@
   "x": -5785,
   "z": -1908,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "dungate_witch_grove",
@@ -2325,7 +2459,8 @@
   "x": -8183,
   "z": 583,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "ogrdul_encampment",
@@ -2336,7 +2471,8 @@
   "x": -4755,
   "z": -1003,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "wreck_of_the_lonely_tortoise",
@@ -2347,7 +2483,8 @@
   "x": -11257,
   "z": 1839,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "goldholt_burrow",
@@ -2358,7 +2495,8 @@
   "x": -8144,
   "z": -469,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "dunwych_hollow",
@@ -2369,7 +2507,8 @@
   "x": -10086,
   "z": 1707,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "highwych",
@@ -2412,7 +2551,8 @@
   "x": -8074,
   "z": 377,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "marminster_lair",
@@ -2423,7 +2563,8 @@
   "x": -7412,
   "z": 2348,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "torcliff_den",
@@ -2434,7 +2575,8 @@
   "x": -11218,
   "z": 244,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "old_lugur",
@@ -2445,7 +2587,8 @@
   "x": -4296,
   "z": 1158,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "thornwick_sanctum",
@@ -2456,7 +2599,8 @@
   "x": -10869,
   "z": 2128,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "yalkhul_den",
@@ -2467,7 +2611,8 @@
   "x": -4940,
   "z": -1069,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "highwold_pit",
@@ -2478,7 +2623,8 @@
   "x": -8433,
   "z": 714,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "bramcliff_crypt",
@@ -2489,7 +2635,8 @@
   "x": -9483,
   "z": -56,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "castle_jourdain",
@@ -2500,7 +2647,8 @@
   "x": -6519,
   "z": -848,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "fairmere_camp",
@@ -2511,7 +2659,8 @@
   "x": -9400,
   "z": -2170,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "torthorpe_hole",
@@ -2522,7 +2671,8 @@
   "x": -7348,
   "z": -50,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "aldwych_cavern",
@@ -2533,7 +2683,8 @@
   "x": -4953,
   "z": 2856,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "stonebrook_hideout",
@@ -2544,7 +2695,8 @@
   "x": -10970,
   "z": 2346,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "balhelm_camp",
@@ -2555,7 +2707,8 @@
   "x": -9584,
   "z": -1271,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "wilford_mine",
@@ -2566,7 +2719,8 @@
   "x": -7823,
   "z": 678,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "karak_den",
@@ -2577,7 +2731,8 @@
   "x": -5720,
   "z": -1738,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "briarcroft_watch",
@@ -2588,7 +2743,8 @@
   "x": -10313,
   "z": -935,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "ruggar_encampment",
@@ -2599,7 +2755,8 @@
   "x": -4073,
   "z": 692,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "ravenpoint_encampment",
@@ -2610,7 +2767,8 @@
   "x": -10968,
   "z": -211,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "wolfmarsh_quarry",
@@ -2621,7 +2779,8 @@
   "x": -10895,
   "z": 1044,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "grobul_hole",
@@ -2632,7 +2791,8 @@
   "x": -5491,
   "z": -1626,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "tumosh_spring",
@@ -2654,7 +2814,8 @@
   "x": -8338,
   "z": 905,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "marquee"
  },
  {
   "id": "evergate_watchtower",
@@ -2665,7 +2826,8 @@
   "x": -7277,
   "z": -1146,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "ashgate_cove",
@@ -2676,7 +2838,8 @@
   "x": -11370,
   "z": 526,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "hartwych_hollow",
@@ -2687,7 +2850,8 @@
   "x": -8909,
   "z": -1933,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "ormond_farm",
@@ -2708,7 +2872,8 @@
   "x": -7607,
   "z": -41,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "bramcroft",
@@ -2729,7 +2894,8 @@
   "x": -4052,
   "z": 1878,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "renaud_farm",
@@ -2761,7 +2927,8 @@
   "x": -10995,
   "z": 455,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "kragdul_coven",
@@ -2772,7 +2939,8 @@
   "x": -3574,
   "z": -1385,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "lugnosh_peak",
@@ -2805,7 +2973,8 @@
   "x": -6488,
   "z": -108,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "rkulzthumz",
@@ -2816,7 +2985,8 @@
   "x": -5360,
   "z": 905,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "bormok_quarry",
@@ -2827,7 +2997,8 @@
   "x": -5524,
   "z": 1330,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "delacroix_farm",
@@ -2859,7 +3030,8 @@
   "x": -7958,
   "z": 2638,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "fairmoor_wyrd_grove",
@@ -2870,7 +3042,8 @@
   "x": -7914,
   "z": -1610,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "yalgar_peak",
@@ -2903,7 +3076,8 @@
   "x": -9645,
   "z": 567,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "camwold_watchtower",
@@ -2914,7 +3088,8 @@
   "x": -10893,
   "z": 1336,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "rousseau_farm",
@@ -2935,7 +3110,8 @@
   "x": -9479,
   "z": 1863,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "crossbury_tower",
@@ -2946,7 +3122,8 @@
   "x": -6157,
   "z": 363,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "celinmbek",
@@ -2957,7 +3134,8 @@
   "x": -10586,
   "z": 1258,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "goldmarsh_lighthouse",
@@ -2968,7 +3146,8 @@
   "x": -7770,
   "z": 2709,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "jourdain_crypt",
@@ -2979,7 +3158,8 @@
   "x": -9190,
   "z": -1063,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "burrash_ice_cave",
@@ -2990,7 +3170,8 @@
   "x": -5305,
   "z": 1355,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "old_rugbul",
@@ -3001,7 +3182,8 @@
   "x": -4345,
   "z": -213,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "benoit_farm",
@@ -3033,7 +3215,8 @@
   "x": -9017,
   "z": -599,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "lenoir_farm",
@@ -3054,7 +3237,8 @@
   "x": -10957,
   "z": -717,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "noel_manor",
@@ -3076,7 +3260,8 @@
   "x": -4043,
   "z": -49,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "westham_mine",
@@ -3087,7 +3272,8 @@
   "x": -7065,
   "z": -1913,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "old_narosh",
@@ -3098,7 +3284,8 @@
   "x": -4983,
   "z": 331,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "khazum_coven",
@@ -3109,7 +3296,8 @@
   "x": -3686,
   "z": 1771,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "sheepthorpe_hole",
@@ -3120,7 +3308,8 @@
   "x": -7949,
   "z": -2132,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "mercier_farm",
@@ -3152,7 +3341,8 @@
   "x": -5562,
   "z": -841,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "nardul_hole",
@@ -3163,7 +3353,8 @@
   "x": -3604,
   "z": 915,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "oakhurst_cave",
@@ -3174,7 +3365,8 @@
   "x": -6421,
   "z": 2958,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "glengate_coven",
@@ -3185,7 +3377,8 @@
   "x": -5786,
   "z": 2440,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "redwych_grotto",
@@ -3196,7 +3389,8 @@
   "x": -7821,
   "z": 1399,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "balpoint_wyrd_grove",
@@ -3207,7 +3401,8 @@
   "x": -9935,
   "z": 1561,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "westford_cave",
@@ -3218,7 +3413,8 @@
   "x": -9743,
   "z": 940,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "sauvage_crypt",
@@ -3229,7 +3425,8 @@
   "x": -6407,
   "z": -1235,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "torbrook_lighthouse",
@@ -3240,7 +3437,8 @@
   "x": -9560,
   "z": -1880,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "mercier_catacombs",
@@ -3251,7 +3449,8 @@
   "x": -8916,
   "z": 248,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "balmarsh",
@@ -3294,7 +3493,8 @@
   "x": -10554,
   "z": -1448,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "hartford_mine",
@@ -3305,7 +3505,8 @@
   "x": -7192,
   "z": -2471,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "ulosh_peak",
@@ -3327,7 +3528,8 @@
   "x": -11431,
   "z": -378,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "gerard_homestead",
@@ -3349,7 +3551,8 @@
   "x": -4756,
   "z": 1133,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "roche_tomb",
@@ -3360,7 +3563,8 @@
   "x": -11087,
   "z": 630,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "gulul_grotto",
@@ -3371,7 +3575,8 @@
   "x": -3404,
   "z": -274,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "crossminster_lair",
@@ -3382,7 +3587,8 @@
   "x": -7849,
   "z": -524,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "linford_ruins",
@@ -3404,7 +3610,8 @@
   "x": -11063,
   "z": 887,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "dushbag_ice_cave",
@@ -3415,7 +3622,8 @@
   "x": -4784,
   "z": -710,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "loroylle",
@@ -3426,7 +3634,8 @@
   "x": -8696,
   "z": 2642,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "beventatar",
@@ -3437,7 +3646,8 @@
   "x": -8403,
   "z": -1362,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "marquee"
  },
  {
   "id": "borum_spring",
@@ -3490,7 +3700,8 @@
   "x": -5873,
   "z": 559,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "marquee"
  },
  {
   "id": "ogrkhul_fire",
@@ -3522,7 +3733,8 @@
   "x": -6888,
   "z": -409,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "everholt_ruins",
@@ -3544,7 +3756,8 @@
   "x": -10835,
   "z": 1682,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "faircroft_stones",
@@ -3566,7 +3779,8 @@
   "x": -7508,
   "z": -2886,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "wolfwold_cavern",
@@ -3577,7 +3791,8 @@
   "x": -9478,
   "z": -1713,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "hallet_farm",
@@ -3598,7 +3813,8 @@
   "x": -11086,
   "z": 1420,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "torwych",
@@ -3641,7 +3857,8 @@
   "x": -5750,
   "z": 1141,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "gerard_family_crypt",
@@ -3652,7 +3869,8 @@
   "x": -9386,
   "z": 500,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "narmok_glacier_cave",
@@ -3663,7 +3881,8 @@
   "x": -3474,
   "z": 595,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "moreau_catacombs",
@@ -3674,7 +3893,8 @@
   "x": -6039,
   "z": -907,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "darnell_crypt",
@@ -3685,7 +3905,8 @@
   "x": -7468,
   "z": -688,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "nargar_ruins",
@@ -3729,7 +3950,8 @@
   "x": -8424,
   "z": -2156,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "khaznosh_ruins",
@@ -3751,7 +3973,8 @@
   "x": -5842,
   "z": -1001,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "luguk_watch",
@@ -3762,7 +3985,8 @@
   "x": -5321,
   "z": -728,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "thukbag_peak",
@@ -3784,7 +4008,8 @@
   "x": -6312,
   "z": 844,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "stonebury_watchtower",
@@ -3795,7 +4020,8 @@
   "x": -6901,
   "z": -982,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "emeric_tomb",
@@ -3806,7 +4032,8 @@
   "x": -6645,
   "z": 2229,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "gorkhul_ruins",
@@ -3828,7 +4055,8 @@
   "x": -3975,
   "z": 1101,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "zgarbag_outpost",
@@ -3839,7 +4067,8 @@
   "x": -4647,
   "z": 1293,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "goldwych_hag_fen",
@@ -3850,7 +4079,8 @@
   "x": -4952,
   "z": 3080,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "karuk_mine",
@@ -3861,7 +4091,8 @@
   "x": -4918,
   "z": 785,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "keep_noel",
@@ -3872,7 +4103,8 @@
   "x": -7504,
   "z": 1453,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "duval_farm",
@@ -3893,7 +4125,8 @@
   "x": -9334,
   "z": -1880,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "ngaruz",
@@ -3904,7 +4137,8 @@
   "x": -4774,
   "z": 243,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "zgarash_quarry",
@@ -3915,7 +4149,8 @@
   "x": -3609,
   "z": -366,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "rugzog_campsite",
@@ -3937,7 +4172,8 @@
   "x": -7976,
   "z": -2871,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "morul_witch_grove",
@@ -3948,7 +4184,8 @@
   "x": -5516,
   "z": -1130,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "old_bagzog",
@@ -3959,7 +4196,8 @@
   "x": -3282,
   "z": 19,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "ulgar_outpost",
@@ -3970,7 +4208,8 @@
   "x": -4779,
   "z": 2070,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "the_lonely_rooster",
@@ -3992,7 +4231,8 @@
   "x": -4024,
   "z": 1351,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "marcliff",
@@ -4013,7 +4253,8 @@
   "x": -9048,
   "z": 974,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "hawkwych_ruins",
@@ -4088,7 +4329,8 @@
   "x": -11158,
   "z": 1105,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "wreck_of_the_gilded_kettle",
@@ -4099,7 +4341,8 @@
   "x": -11224,
   "z": 2126,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "swanwych_ruins",
@@ -4121,7 +4364,8 @@
   "x": -5782,
   "z": -1455,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "gulnosh_campsite",
@@ -4143,7 +4387,8 @@
   "x": -3346,
   "z": -664,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "wilmoor_cove",
@@ -4164,7 +4409,8 @@
   "x": -9460,
   "z": -1457,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "karosh_hollow",
@@ -4175,7 +4421,8 @@
   "x": -4116,
   "z": -1109,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "fairmere_crypt",
@@ -4186,7 +4433,8 @@
   "x": -10475,
   "z": -567,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "grokhul_hole",
@@ -4197,7 +4445,8 @@
   "x": -4026,
   "z": -374,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "vidal_farm",
@@ -4218,7 +4467,8 @@
   "x": -7349,
   "z": 602,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "frostham_keep",
@@ -4229,7 +4479,8 @@
   "x": -9005,
   "z": 1161,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "wilcombe_cave",
@@ -4240,7 +4491,8 @@
   "x": -4938,
   "z": 2424,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "wyngate",
@@ -4261,7 +4513,8 @@
   "x": -8882,
   "z": 2297,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "swanwick_wyrd_grove",
@@ -4272,7 +4525,8 @@
   "x": -9350,
   "z": 1171,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "ulmok_cavern",
@@ -4283,7 +4537,8 @@
   "x": -3756,
   "z": -270,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "ughbul_watchtower",
@@ -4294,7 +4549,8 @@
   "x": -5108,
   "z": 1396,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "karmok_rime_cave",
@@ -4305,7 +4561,8 @@
   "x": -3494,
   "z": 1447,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "castle_leclair",
@@ -4316,7 +4573,8 @@
   "x": -5813,
   "z": -401,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "gauvain_crypt",
@@ -4327,7 +4585,8 @@
   "x": -6257,
   "z": 1420,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "nargar_rime_cave",
@@ -4338,7 +4597,8 @@
   "x": -3796,
   "z": 2022,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "kragbag_burrow",
@@ -4349,7 +4609,8 @@
   "x": -5009,
   "z": -24,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "penham_landing",
@@ -4381,7 +4642,8 @@
   "x": -9935,
   "z": 2260,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "camwick_tower",
@@ -4392,7 +4654,8 @@
   "x": -9690,
   "z": 2583,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "blackthornhaven_burrow",
@@ -4403,7 +4666,8 @@
   "x": -6420,
   "z": 493,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "northhurst_vault",
@@ -4414,7 +4678,8 @@
   "x": -10379,
   "z": 754,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "harthurst_lair",
@@ -4425,7 +4690,8 @@
   "x": -5965,
   "z": 137,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "aldous_farm",
@@ -4446,7 +4712,8 @@
   "x": -4079,
   "z": 1522,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "renaud_tomb",
@@ -4457,7 +4724,8 @@
   "x": -7417,
   "z": 2640,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "frostfield_hollow",
@@ -4468,7 +4736,8 @@
   "x": -11467,
   "z": 204,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "keep_gaston",
@@ -4479,7 +4748,8 @@
   "x": -11052,
   "z": 2062,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "briarstead_wyrd_grove",
@@ -4490,7 +4760,8 @@
   "x": -6092,
   "z": -1400,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "dushuk_burrow",
@@ -4501,7 +4772,8 @@
   "x": -5966,
   "z": -1714,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "ogrmok_delve",
@@ -4512,7 +4784,8 @@
   "x": -4598,
   "z": 528,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "goldmarsh_landing",
@@ -4564,7 +4837,8 @@
   "x": -4399,
   "z": -972,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "sheepmoor_nest",
@@ -4575,7 +4849,8 @@
   "x": -9367,
   "z": -1079,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "linwold_monument",
@@ -4597,7 +4872,8 @@
   "x": -9606,
   "z": 810,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "grour_quarry",
@@ -4608,7 +4884,8 @@
   "x": -5648,
   "z": -537,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "old_karnosh",
@@ -4619,7 +4896,8 @@
   "x": -5166,
   "z": 1578,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "goldminster_landing",
@@ -4640,7 +4918,8 @@
   "x": -8561,
   "z": 1163,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "dushak_rest",
@@ -4662,7 +4941,8 @@
   "x": -8246,
   "z": 1138,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "crosscliff_hollow",
@@ -4673,7 +4953,8 @@
   "x": -8139,
   "z": -240,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "northcliff",
@@ -4694,7 +4975,8 @@
   "x": -8565,
   "z": -328,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "stonehelm_crypt",
@@ -4705,7 +4987,8 @@
   "x": -6358,
   "z": -304,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "telaata",
@@ -4716,7 +4999,8 @@
   "x": -6668,
   "z": 1999,
   "radius": 26,
-  "variant": "ayleid_ruin"
+  "variant": "ayleid_ruin",
+  "class": "major"
  },
  {
   "id": "crossdale_outpost",
@@ -4727,7 +5011,8 @@
   "x": -7257,
   "z": 1559,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "rugbul_diggings",
@@ -4738,7 +5023,8 @@
   "x": -5590,
   "z": -2055,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "yarcroft_cave",
@@ -4749,7 +5035,8 @@
   "x": -9233,
   "z": -627,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "glenthorpe_hag_fen",
@@ -4760,7 +5047,8 @@
   "x": -10026,
   "z": 648,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "vasseur_farm",
@@ -4781,7 +5069,8 @@
   "x": -7770,
   "z": -2330,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "morgar_camp",
@@ -4792,7 +5081,8 @@
   "x": -3787,
   "z": 949,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "swanholt_lookout",
@@ -4803,7 +5093,8 @@
   "x": -10650,
   "z": 1736,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "stonethorpe_ruins",
@@ -4825,7 +5116,8 @@
   "x": -5332,
   "z": -525,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "caron_catacombs",
@@ -4836,7 +5128,8 @@
   "x": -8231,
   "z": 1463,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "gorgar_hole",
@@ -4847,7 +5140,8 @@
   "x": -5361,
   "z": 1862,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "tessier_farm",
@@ -4878,7 +5172,8 @@
   "x": -3533,
   "z": -615,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "lowbrook_undercroft",
@@ -4889,7 +5184,8 @@
   "x": -7159,
   "z": 236,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "everhaven_encampment",
@@ -4900,7 +5196,8 @@
   "x": -6994,
   "z": -121,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "marham_burrow",
@@ -4911,7 +5208,8 @@
   "x": -9847,
   "z": 427,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "hawkgate_hag_fen",
@@ -4922,7 +5220,8 @@
   "x": -5588,
   "z": 2359,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "margate_wyrd_grove",
@@ -4933,7 +5232,8 @@
   "x": -6225,
   "z": 1690,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "gulzog_glacier_cave",
@@ -4944,7 +5244,8 @@
   "x": -5035,
   "z": -487,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "gorum_cavern",
@@ -4955,7 +5256,8 @@
   "x": -3862,
   "z": 74,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "old_burul",
@@ -4966,7 +5268,8 @@
   "x": -5098,
   "z": 1010,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "wreck_of_the_lucky_tortoise",
@@ -4977,7 +5280,8 @@
   "x": -9895,
   "z": 2638,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "ruguk_diggings",
@@ -4988,7 +5292,8 @@
   "x": -5519,
   "z": 486,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "wolfdale_cave",
@@ -4999,7 +5304,8 @@
   "x": -9333,
   "z": -168,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "swanley_cave",
@@ -5010,7 +5316,8 @@
   "x": -7162,
   "z": -2188,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "morbag_camp",
@@ -5021,7 +5328,8 @@
   "x": -4946,
   "z": -1269,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "emeric_farm",
@@ -5042,7 +5350,8 @@
   "x": -7686,
   "z": 182,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "lafont_crypt",
@@ -5053,7 +5362,8 @@
   "x": -5103,
   "z": 2962,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "greythorpe_mill",
@@ -5075,7 +5385,8 @@
   "x": -4262,
   "z": -471,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "everhelm_hollow",
@@ -5086,7 +5397,8 @@
   "x": -8070,
   "z": 1386,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "marchand_tomb",
@@ -5097,7 +5409,8 @@
   "x": -5768,
   "z": 844,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "camwick_grotto",
@@ -5108,7 +5421,8 @@
   "x": -8246,
   "z": 410,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "goldley",
@@ -5129,7 +5443,8 @@
   "x": -10162,
   "z": -78,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "westfield_camp",
@@ -5140,7 +5455,8 @@
   "x": -8729,
   "z": -1625,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "yalkhul_hole",
@@ -5151,7 +5467,8 @@
   "x": -3730,
   "z": -659,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "larbul_watch",
@@ -5162,7 +5479,8 @@
   "x": -3608,
   "z": 406,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "glenwych_mill",
@@ -5184,7 +5502,8 @@
   "x": -4877,
   "z": 3319,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "bordul_quarry",
@@ -5195,7 +5514,8 @@
   "x": -6329,
   "z": -2288,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "mogosh_mine",
@@ -5206,7 +5526,8 @@
   "x": -5388,
   "z": -174,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "millcliff_mill",
@@ -5228,7 +5549,8 @@
   "x": -8656,
   "z": -2475,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "old_gornosh",
@@ -5239,7 +5561,8 @@
   "x": -5195,
   "z": -117,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "moreau_farm",
@@ -5282,7 +5605,8 @@
   "x": -6762,
   "z": 528,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "ashhaven",
@@ -5314,7 +5638,8 @@
   "x": -10384,
   "z": 953,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "wynley_ruins",
@@ -5346,7 +5671,8 @@
   "x": -6054,
   "z": -1158,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "yarpoint_camp",
@@ -5357,7 +5683,8 @@
   "x": -9325,
   "z": 845,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "kragosh_burrow",
@@ -5368,7 +5695,8 @@
   "x": -4053,
   "z": 2231,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "wynpoint_wyrd_grove",
@@ -5379,7 +5707,8 @@
   "x": -5873,
   "z": 1594,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "stonehurst_burrow",
@@ -5390,7 +5719,8 @@
   "x": -10511,
   "z": -295,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "leclair_farm",
@@ -5442,7 +5772,8 @@
   "x": -5620,
   "z": 2857,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "noel_farm",
@@ -5463,7 +5794,8 @@
   "x": -8428,
   "z": 332,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "bramdale_hollow",
@@ -5474,7 +5806,8 @@
   "x": -10216,
   "z": 1487,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "fairwick_outpost",
@@ -5485,7 +5818,8 @@
   "x": -6732,
   "z": 2830,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "mercier_manor",
@@ -5528,7 +5862,8 @@
   "x": -7182,
   "z": -1318,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "ravencombe_burrow",
@@ -5539,7 +5874,8 @@
   "x": -7341,
   "z": -272,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "yarmoor_cavern",
@@ -5550,7 +5886,8 @@
   "x": -6765,
   "z": -811,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "old_yalbul",
@@ -5561,7 +5898,8 @@
   "x": -4718,
   "z": 1774,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "castle_tessier",
@@ -5572,7 +5910,8 @@
   "x": -7255,
   "z": 791,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "gashur_cave",
@@ -5583,7 +5922,8 @@
   "x": -6455,
   "z": -1909,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "mossholt_harbor",
@@ -5615,7 +5955,8 @@
   "x": -5992,
   "z": -214,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "gromok_pass",
@@ -5637,7 +5978,8 @@
   "x": -4498,
   "z": 2258,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "crosspoint_cave",
@@ -5648,7 +5990,8 @@
   "x": -7955,
   "z": -941,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "dranosh_caverns",
@@ -5659,7 +6002,8 @@
   "x": -5004,
   "z": 1648,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "greygate_lair",
@@ -5670,7 +6014,8 @@
   "x": -6280,
   "z": 1863,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "sheephurst_watch",
@@ -5681,7 +6026,8 @@
   "x": -5355,
   "z": 2607,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "wilcliff_keep",
@@ -5692,7 +6038,8 @@
   "x": -10029,
   "z": -520,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "millham_keep",
@@ -5703,7 +6050,8 @@
   "x": -6632,
   "z": -1158,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "ulkhul_ruins",
@@ -5725,7 +6073,8 @@
   "x": -4473,
   "z": -339,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "penmarsh_watch",
@@ -5736,7 +6085,8 @@
   "x": -8118,
   "z": -2220,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "mosshelm_hag_fen",
@@ -5747,7 +6097,8 @@
   "x": -6987,
   "z": -1430,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "glenmere_cove",
@@ -5758,7 +6109,8 @@
   "x": -6478,
   "z": 3185,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "mzanzak",
@@ -5769,7 +6121,8 @@
   "x": -6233,
   "z": -1652,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "pencombe_cavern",
@@ -5780,7 +6133,8 @@
   "x": -7607,
   "z": 395,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "highford_hollow",
@@ -5791,7 +6145,8 @@
   "x": -9959,
   "z": 179,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "wilpoint_wyrd_grove",
@@ -5802,7 +6157,8 @@
   "x": -4791,
   "z": 2644,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "mossmere_sanctum",
@@ -5813,7 +6169,8 @@
   "x": -5546,
   "z": 1935,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "oakstead_camp",
@@ -5824,7 +6181,8 @@
   "x": -8271,
   "z": -1128,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "karum_hollow",
@@ -5835,7 +6193,8 @@
   "x": -4586,
   "z": 1970,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "lugmok_fire",
@@ -5868,7 +6227,8 @@
   "x": -6230,
   "z": 3147,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "ughbag_pass",
@@ -5901,7 +6261,8 @@
   "x": -6197,
   "z": -602,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "briarmoor_watchtower",
@@ -5912,7 +6273,8 @@
   "x": -10091,
   "z": -1010,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "greystead_burrow",
@@ -5923,7 +6285,8 @@
   "x": -8843,
   "z": -815,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "gashuk_ruins",
@@ -5945,7 +6308,8 @@
   "x": -5673,
   "z": 1654,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "old_narash",
@@ -5956,7 +6320,8 @@
   "x": -5427,
   "z": 249,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "lugum_grotto",
@@ -5967,7 +6332,8 @@
   "x": -5817,
   "z": -2124,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "wolfgate_lighthouse",
@@ -5978,7 +6344,8 @@
   "x": -11222,
   "z": -404,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "perrin_homestead",
@@ -6000,7 +6367,8 @@
   "x": -10742,
   "z": 84,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "ogrdul_caverns",
@@ -6011,7 +6379,8 @@
   "x": -3441,
   "z": 826,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "gronosh_fire",
@@ -6033,7 +6402,8 @@
   "x": -3410,
   "z": 179,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "balthorpe",
@@ -6054,7 +6424,8 @@
   "x": -5740,
   "z": -748,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "yarhurst",
@@ -6075,7 +6446,8 @@
   "x": -10025,
   "z": 2510,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "ogrkhul_hollow",
@@ -6086,7 +6458,8 @@
   "x": -4569,
   "z": -1064,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "wreck_of_the_sleepy_goat",
@@ -6097,7 +6470,8 @@
   "x": -8108,
   "z": -2631,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "wilwick_witch_grove",
@@ -6108,7 +6482,8 @@
   "x": -10416,
   "z": 1424,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "millhaven_burrow",
@@ -6119,7 +6494,8 @@
   "x": -7275,
   "z": 1350,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "wreck_of_the_crooked_mare",
@@ -6130,7 +6506,8 @@
   "x": -9196,
   "z": -2255,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "penwick_hollow",
@@ -6141,7 +6518,8 @@
   "x": -4752,
   "z": 3083,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "penbury_outpost",
@@ -6152,7 +6530,8 @@
   "x": -8090,
   "z": 938,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "marchand_farm",
@@ -6173,7 +6552,8 @@
   "x": -9805,
   "z": -749,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "lowmoor_sanctum",
@@ -6184,7 +6564,8 @@
   "x": -6834,
   "z": -6,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "greymoor_lighthouse",
@@ -6195,7 +6576,8 @@
   "x": -11641,
   "z": -57,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "the_jolly_hare",
@@ -6217,7 +6599,8 @@
   "x": -5013,
   "z": -1461,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "wreck_of_the_bent_tortoise",
@@ -6228,7 +6611,8 @@
   "x": -10285,
   "z": -1515,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "oakmarsh_watchtower",
@@ -6239,7 +6623,8 @@
   "x": -7034,
   "z": -757,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "rosegate_hideout",
@@ -6250,7 +6635,8 @@
   "x": -8305,
   "z": -2579,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "fairmarsh_ruins",
@@ -6272,7 +6658,8 @@
   "x": -4823,
   "z": -372,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "nchuthunch",
@@ -6283,7 +6670,8 @@
   "x": -4729,
   "z": -1959,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "castle_lafont",
@@ -6294,7 +6682,8 @@
   "x": -9556,
   "z": -239,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "highfield_hollow",
@@ -6305,7 +6694,8 @@
   "x": -6986,
   "z": -2104,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "dushuk_hole",
@@ -6316,7 +6706,8 @@
   "x": -5327,
   "z": 599,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "zgardul_lair",
@@ -6327,7 +6718,8 @@
   "x": -4140,
   "z": -232,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "lowwick_hollow",
@@ -6338,7 +6730,8 @@
   "x": -8980,
   "z": -2156,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "zgarbag_mine",
@@ -6349,7 +6742,8 @@
   "x": -3910,
   "z": -966,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "westfield_mine",
@@ -6360,7 +6754,8 @@
   "x": -7883,
   "z": -2666,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "ashmoor_diggings",
@@ -6371,7 +6766,8 @@
   "x": -8377,
   "z": 2042,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "gulash_caverns",
@@ -6382,7 +6778,8 @@
   "x": -4646,
   "z": 78,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "greyhurst_cave",
@@ -6393,7 +6790,8 @@
   "x": -10835,
   "z": -368,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "mogul_den",
@@ -6404,7 +6802,8 @@
   "x": -6102,
   "z": -2294,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "greystead_lair",
@@ -6415,7 +6814,8 @@
   "x": -8398,
   "z": -1946,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "penhelm_cave",
@@ -6426,7 +6826,8 @@
   "x": -8442,
   "z": 1301,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "bagum_caverns",
@@ -6437,7 +6838,8 @@
   "x": -5350,
   "z": -2131,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "baldale_grotto",
@@ -6448,7 +6850,8 @@
   "x": -7961,
   "z": 1542,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "northholt_witch_grove",
@@ -6459,7 +6862,8 @@
   "x": -9227,
   "z": 1012,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "camdale_encampment",
@@ -6470,7 +6874,8 @@
   "x": -9970,
   "z": 1351,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "torwold_cove",
@@ -6481,7 +6886,8 @@
   "x": -11692,
   "z": 112,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "old_borum",
@@ -6492,7 +6898,8 @@
   "x": -5139,
   "z": 788,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "castle_travers",
@@ -6503,7 +6910,8 @@
   "x": -9193,
   "z": 629,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "lincombe_encampment",
@@ -6514,7 +6922,8 @@
   "x": -9232,
   "z": -1544,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "glenpoint_cavern",
@@ -6525,7 +6934,8 @@
   "x": -4750,
   "z": 2895,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "marquee"
  },
  {
   "id": "penhaven_cavern",
@@ -6536,7 +6946,8 @@
   "x": -6888,
   "z": 1172,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "everbury_nest",
@@ -6547,7 +6958,8 @@
   "x": -6699,
   "z": 1158,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "dunmarsh_hollow",
@@ -6558,7 +6970,8 @@
   "x": -6193,
   "z": -167,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "gauvain_farm",
@@ -6579,7 +6992,8 @@
   "x": -6165,
   "z": 2598,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "evrard_farm",
@@ -6622,7 +7036,8 @@
   "x": -10872,
   "z": -55,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "wynham_cavern",
@@ -6633,7 +7048,8 @@
   "x": -7403,
   "z": 2161,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "travers_manor",
@@ -6655,7 +7071,8 @@
   "x": -8682,
   "z": -938,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "sauvage_farm",
@@ -6698,7 +7115,8 @@
   "x": -8678,
   "z": 648,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "bramstead_camp",
@@ -6709,7 +7127,8 @@
   "x": -11033,
   "z": 1232,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "balbrook_sanctum",
@@ -6720,7 +7139,8 @@
   "x": -10762,
   "z": 1158,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "gorzog_lair",
@@ -6731,7 +7151,8 @@
   "x": -6615,
   "z": -2091,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "corbin_farm",
@@ -6752,7 +7173,8 @@
   "x": -4975,
   "z": 2635,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "oakcombe_vault",
@@ -6763,7 +7185,8 @@
   "x": -7028,
   "z": 593,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "glenwick_encampment",
@@ -6774,7 +7197,8 @@
   "x": -9672,
   "z": -80,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "balmoor_quarry",
@@ -6785,7 +7209,8 @@
   "x": -10956,
   "z": -533,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "fontaine_homestead",
@@ -6818,7 +7243,8 @@
   "x": -4887,
   "z": 976,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "mornosh_coven",
@@ -6829,7 +7255,8 @@
   "x": -3506,
   "z": -6,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "dunbrook_wyrd_grove",
@@ -6840,7 +7267,8 @@
   "x": -7142,
   "z": -11,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "old_larul",
@@ -6851,7 +7279,8 @@
   "x": -3509,
   "z": -1552,
   "radius": 22,
-  "variant": "orc_ruin"
+  "variant": "orc_ruin",
+  "class": "major"
  },
  {
   "id": "the_blue_mudcrab",
@@ -6884,7 +7313,8 @@
   "x": -4971,
   "z": 2228,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "roseham_quarry",
@@ -6895,7 +7325,8 @@
   "x": -9070,
   "z": 2291,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "noel_catacombs",
@@ -6906,7 +7337,8 @@
   "x": -6099,
   "z": 559,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "aldley_outpost",
@@ -6917,7 +7349,8 @@
   "x": -8410,
   "z": 2575,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "thornham_wyrd_grove",
@@ -6928,7 +7361,8 @@
   "x": -8141,
   "z": -851,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "thornley_pit",
@@ -6939,7 +7373,8 @@
   "x": -8826,
   "z": 840,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "naruk_hollow",
@@ -6950,7 +7385,8 @@
   "x": -5584,
   "z": -358,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "rousseau_catacombs",
@@ -6961,7 +7397,8 @@
   "x": -6482,
   "z": 2406,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "ughmok_pass",
@@ -6983,7 +7420,8 @@
   "x": -9420,
   "z": 1332,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "linhaven_cave",
@@ -6994,7 +7432,8 @@
   "x": -8855,
   "z": 2740,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "karosh_rime_cave",
@@ -7005,7 +7444,8 @@
   "x": -3412,
   "z": -847,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "raventhorpe_sanctum",
@@ -7016,7 +7456,8 @@
   "x": -9640,
   "z": 1558,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "nchuuz",
@@ -7027,7 +7468,8 @@
   "x": -4313,
   "z": -1176,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "balham_stones",
@@ -7049,7 +7491,8 @@
   "x": -5554,
   "z": 3020,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "glenfield_cavern",
@@ -7060,7 +7503,8 @@
   "x": -6934,
   "z": 311,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "faucher_family_crypt",
@@ -7071,7 +7515,8 @@
   "x": -6764,
   "z": -1331,
   "radius": 22,
-  "variant": "breton_crypt"
+  "variant": "breton_crypt",
+  "class": "short"
  },
  {
   "id": "sheepham_caverns",
@@ -7082,7 +7527,8 @@
   "x": -7270,
   "z": 968,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "bramhurst_wyrd_grove",
@@ -7093,7 +7539,8 @@
   "x": -5977,
   "z": 332,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "ogrkhul_cave",
@@ -7104,7 +7551,8 @@
   "x": -3722,
   "z": 757,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "highpoint_lookout",
@@ -7115,7 +7563,8 @@
   "x": -6866,
   "z": 880,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "minor"
  },
  {
   "id": "shulzog_burrow",
@@ -7126,7 +7575,8 @@
   "x": -4593,
   "z": -652,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "thornham_stones",

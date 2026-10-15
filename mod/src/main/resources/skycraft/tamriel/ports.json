@@ -35,6 +35,8 @@
   "routes": [
     {"a": "windhelm", "b": "raven_rock", "ship": "northern_maiden", "fare": 250},
     {"a": "solitude", "b": "dawnstar", "ship": "frostwake"},
+    {"a": "dawnstar", "b": "winterhold", "ship": "frostwake"},
+    {"a": "winterhold", "b": "windhelm", "ship": "frostwake"},
     {"a": "dawnstar", "b": "windhelm", "ship": "frostwake"},
     {"a": "solitude", "b": "windhelm", "ship": "frostwake"},
     {"a": "solitude", "b": "raven_rock", "ship": "grey_gannet"},

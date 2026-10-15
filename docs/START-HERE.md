@@ -57,21 +57,20 @@ people ("world building is king").
 * The gap: Skyrim scores 95 on the parity scorecard but only 53-54 on Settlements (named NPCs 187 against the real
   845, named buildings 112 against 210); every other province sits at 40-53.
   The map is full; **R4a (`docs/prompts/R4a-town-overhaul.md`, TO0-TO6)**, **R1 (`docs/prompts/R1-loose-ends.md`)**,
-  **R2 (`docs/prompts/R2-testing-tiers.md`)**, and **R3a (`docs/prompts/R3a-world-sheets.md`)** are now complete and
-  rebaked (`4144f49a` + latest commit: 60 Tier 0 JUnit 5 tests passing in 17.4s, JDWP hot-swap & `/skycraft-dev reload`,
-  `skyrim.json` 11-layer world sheet with 0 lint errors and 2 consumers, `tower_of_mzark` & `deepwood_redoubt` &
-  dungeon/shipwreck fixes, Solitude sea routes with 0 warnings, and landmass-aware trails). Next up is R3b–R3e and R4
-  Skyrim uplift.
+  **R2 (`docs/prompts/R2-testing-tiers.md`)**, **R3a (`docs/prompts/R3a-world-sheets.md`)**, **R3b
+  (`docs/prompts/R3b-micro-biomes.md`)**, **R3c (`docs/prompts/R3c-measurement.md`)**, **R3d
+  (`docs/prompts/R3d-town-services.md`)**, and **R3e (`docs/prompts/R3e-world-systems.md`)** are now complete,
+  rebaked, and verified (`qa.ps1 -Server -Rebake` + `qa.ps1 -Unit -Flow -NoBuild` OVERALL PASS). Next up is R4 Skyrim
+  uplift (`S1-S5` / `SK2-SK8`).
 
 ## Next
 
-**Next: R3b (`docs/prompts/R3b-micro-biomes.md`), R3c (`docs/prompts/R3c-measurement.md`), R3d
-(`docs/prompts/R3d-town-services.md`), and R3e (`docs/prompts/R3e-world-systems.md`), followed by R4
-(`docs/prompts/R4-skyrim-uplift.md`).**
+**Next: R4 (`docs/prompts/R4-skyrim-uplift.md`, steps S1-S5 / SK2-SK8 in `docs/world/provinces/skyrim.md` §10.4),
+followed by R5 Iliac Bay (`docs/prompts/R5-iliac-bay.md`).**
 All 11 province design documents are finished and ready for V1–V9 execution.
 
 To run the next phase, say: "Read `docs/START-HERE.md` and `docs/prompts/_COMMON.md`, then run
-`docs/prompts/R3d-town-services.md`" (or `R3e-world-systems.md`, `R3b-micro-biomes.md`, `R3c-measurement.md`, or whichever phase WORLD-PLAN section 7 shows as `next`).
+`docs/prompts/R4-skyrim-uplift.md`" (or whichever phase WORLD-PLAN section 7 shows as `next`).
 
 ## The rules (non-negotiable)
 

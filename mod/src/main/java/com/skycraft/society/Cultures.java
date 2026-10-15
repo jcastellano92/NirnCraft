@@ -260,6 +260,7 @@ public final class Cultures {
             case INNKEEPER -> Outfit.INNKEEPER;
             case JARL -> Outfit.JARL;
             case HOUSECARL -> race == Race.ORC ? Outfit.ORC : Outfit.HOUSECARL;
+            case TRAINER -> r.nextBoolean() ? Outfit.SCHOLAR : Outfit.ADVENTURER;
             case THIEF -> Outfit.THIEF;
         };
     }

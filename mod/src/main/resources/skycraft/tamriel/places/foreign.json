@@ -73,7 +73,8 @@
   "x": 300,
   "z": -11300,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "adasooms_gate",
@@ -84,7 +85,8 @@
   "x": 16800,
   "z": -800,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "tosh_rakas_palace",
@@ -95,7 +97,8 @@
   "x": 18200,
   "z": 3600,
   "radius": 26,
-  "variant": "akaviri_fort"
+  "variant": "akaviri_fort",
+  "class": "major"
  },
  {
   "id": "ka_po_tun_steppe_fort",
@@ -106,7 +109,8 @@
   "x": 19600,
   "z": 5800,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "black_lacquer_pagoda",
@@ -117,7 +121,8 @@
   "x": 16400,
   "z": 6200,
   "radius": 26,
-  "variant": "akaviri_fort"
+  "variant": "akaviri_fort",
+  "class": "major"
  },
  {
   "id": "hall_of_the_ansei",
@@ -128,7 +133,8 @@
   "x": -19500,
   "z": 5200,
   "radius": 24,
-  "variant": "keep"
+  "variant": "keep",
+  "class": "major"
  },
  {
   "id": "moot_of_the_five_hundred",
@@ -205,7 +211,8 @@
   "x": 900,
   "z": -11800,
   "radius": 24,
-  "variant": "atmoran_tomb"
+  "variant": "atmoran_tomb",
+  "class": "marquee"
  },
  {
   "id": "hrothgard_barrow",
@@ -216,7 +223,8 @@
   "x": -2600,
   "z": -11200,
   "radius": 26,
-  "variant": "barrow"
+  "variant": "barrow",
+  "class": "marquee"
  },
  {
   "id": "vaermunds_rest",
@@ -227,7 +235,8 @@
   "x": -3600,
   "z": -10500,
   "radius": 24,
-  "variant": "atmoran_tomb"
+  "variant": "atmoran_tomb",
+  "class": "major"
  },
  {
   "id": "the_frozen_dragon_mound",
@@ -238,7 +247,8 @@
   "x": 3600,
   "z": -12400,
   "radius": 16,
-  "variant": "dragon_lair"
+  "variant": "dragon_lair",
+  "class": "minor"
  },
  {
   "id": "skjaldborg",
@@ -249,7 +259,8 @@
   "x": 3930,
   "z": -11199,
   "radius": 12,
-  "variant": "nordic_ruin"
+  "variant": "nordic_ruin",
+  "class": "short"
  },
  {
   "id": "wolf_jarls_howe",
@@ -260,7 +271,8 @@
   "x": -400,
   "z": -12900,
   "radius": 24,
-  "variant": "atmoran_tomb"
+  "variant": "atmoran_tomb",
+  "class": "major"
  },
  {
   "id": "rimefang_cave",
@@ -271,7 +283,8 @@
   "x": -4083,
   "z": -12103,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "atmoran_giants_cairn",
@@ -282,7 +295,8 @@
   "x": 1700,
   "z": -10300,
   "radius": 16,
-  "variant": "giant_camp"
+  "variant": "giant_camp",
+  "class": "minor"
  },
  {
   "id": "saarvik_landing",
@@ -293,7 +307,8 @@
   "x": -800,
   "z": -10000,
   "radius": 12,
-  "variant": "nordic_ruin"
+  "variant": "nordic_ruin",
+  "class": "short"
  },
  {
   "id": "kamal_ice_halls",
@@ -304,7 +319,8 @@
   "x": 18803,
   "z": -1584,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "frost_throne_of_kamal",
@@ -315,7 +331,8 @@
   "x": 15200,
   "z": 300,
   "radius": 24,
-  "variant": "akaviri_ruin"
+  "variant": "akaviri_ruin",
+  "class": "marquee"
  },
  {
   "id": "hall_of_the_dragon_tigers",
@@ -326,7 +343,8 @@
   "x": 17000,
   "z": 2200,
   "radius": 24,
-  "variant": "akaviri_ruin"
+  "variant": "akaviri_ruin",
+  "class": "marquee"
  },
  {
   "id": "temple_of_the_serpent_emperor",
@@ -337,7 +355,8 @@
   "x": 15200,
   "z": 5400,
   "radius": 24,
-  "variant": "akaviri_ruin"
+  "variant": "akaviri_ruin",
+  "class": "marquee"
  },
  {
   "id": "tsaesci_coil_shrine",
@@ -348,7 +367,8 @@
   "x": 16800,
   "z": 7000,
   "radius": 24,
-  "variant": "akaviri_ruin"
+  "variant": "akaviri_ruin",
+  "class": "major"
  },
  {
   "id": "serpent_jungle_camp",
@@ -359,7 +379,8 @@
   "x": 15000,
   "z": 4000,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "dragon_graveyard_of_akavir",
@@ -370,7 +391,8 @@
   "x": 19448,
   "z": 1319,
   "radius": 16,
-  "variant": "dragon_lair"
+  "variant": "dragon_lair",
+  "class": "minor"
  },
  {
   "id": "thousand_monkey_tree",
@@ -381,7 +403,8 @@
   "x": 22207,
   "z": 4668,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "tang_mo_watch",
@@ -392,7 +415,8 @@
   "x": 21198,
   "z": 4444,
   "radius": 12,
-  "variant": "tower"
+  "variant": "tower",
+  "class": "marquee"
  },
  {
   "id": "sunken_temple_of_the_yokudan_kings",
@@ -403,7 +427,8 @@
   "x": -18300,
   "z": 11600,
   "radius": 24,
-  "variant": "yokudan_tomb"
+  "variant": "yokudan_tomb",
+  "class": "major"
  },
  {
   "id": "coral_choked_palace",
@@ -414,7 +439,8 @@
   "x": -17262,
   "z": 12437,
   "radius": 24,
-  "variant": "yokudan_tomb"
+  "variant": "yokudan_tomb",
+  "class": "marquee"
  },
  {
   "id": "temple_of_satakal",
@@ -425,7 +451,8 @@
   "x": -18400,
   "z": 3600,
   "radius": 24,
-  "variant": "yokudan_tomb"
+  "variant": "yokudan_tomb",
+  "class": "major"
  },
  {
   "id": "na_totambu_necropolis",
@@ -436,7 +463,8 @@
   "x": -20800,
   "z": 7200,
   "radius": 24,
-  "variant": "yokudan_tomb"
+  "variant": "yokudan_tomb",
+  "class": "marquee"
  },
  {
   "id": "ra_gada_encampment",
@@ -447,7 +475,8 @@
   "x": -17200,
   "z": 8200,
   "radius": 18,
-  "variant": "imperial_camp"
+  "variant": "imperial_camp",
+  "class": "minor"
  },
  {
   "id": "orgnums_citadel",
@@ -458,7 +487,8 @@
   "x": -19800,
   "z": 19600,
   "radius": 24,
-  "variant": "sea_vault"
+  "variant": "sea_vault",
+  "class": "marquee"
  },
  {
   "id": "serpent_pens",
@@ -469,7 +499,8 @@
   "x": -21200,
   "z": 20000,
   "radius": 24,
-  "variant": "sea_vault"
+  "variant": "sea_vault",
+  "class": "major"
  },
  {
   "id": "storm_callers_spire",
@@ -480,7 +511,8 @@
   "x": -18270,
   "z": 18927,
   "radius": 10,
-  "variant": "mage_tower"
+  "variant": "mage_tower",
+  "class": "short"
  },
  {
   "id": "coral_tower_of_thras",
@@ -491,7 +523,8 @@
   "x": -15410,
   "z": 16730,
   "radius": 24,
-  "variant": "coral_pit"
+  "variant": "coral_pit",
+  "class": "marquee"
  },
  {
   "id": "the_sunken_throne",
@@ -502,7 +535,8 @@
   "x": -16418,
   "z": 17341,
   "radius": 24,
-  "variant": "coral_pit"
+  "variant": "coral_pit",
+  "class": "major"
  },
  {
   "id": "thrassian_plague_pits",
@@ -513,6 +547,7 @@
   "x": -14600,
   "z": 17800,
   "radius": 24,
-  "variant": "coral_pit"
+  "variant": "coral_pit",
+  "class": "major"
  }
 ]

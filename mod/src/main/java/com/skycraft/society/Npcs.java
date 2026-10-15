@@ -235,6 +235,9 @@ public final class Npcs {
             case SCHOLAR -> {
                 if (r.nextBoolean()) hand(npc, new ItemStack(Items.BOOK));
             }
+            case TRAINER -> {
+                hand(npc, r.nextBoolean() ? item("skycraft:steel_sword", Items.IRON_SWORD) : new ItemStack(Items.BOOK));
+            }
             default -> {
             }
         }
@@ -248,7 +251,7 @@ public final class Npcs {
             case HUNTER, MINER -> { health = 24; damage = 3; armor = 0; }
             case LUMBERJACK -> { health = 26; damage = 3; armor = 0; }
             case MAGE -> { health = 24; damage = 2; armor = 0; }
-            case ADVENTURER -> { health = 30; damage = 4; armor = 2; }
+            case ADVENTURER, TRAINER -> { health = 30; damage = 4; armor = 2; }
             case THALMOR -> { health = 34; damage = 5; armor = 6; }
             case IMPERIAL_SOLDIER -> { health = 32; damage = 5; armor = 6; }
             case STORMCLOAK_SOLDIER -> { health = 32; damage = 5; armor = 4; }

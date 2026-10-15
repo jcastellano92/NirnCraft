@@ -42,6 +42,13 @@ public final class MapSample {
     public float calm;
     /** Steepness of the macro elevation, blocks per block (0 where unknown, e.g. beyond Tamriel). */
     public float slope;
+    /** 0..1 rainshadow strength (leeward of ridges along regional prevailing wind). */
+    public float rainshadow;
+    /** 0..1 geothermal heat strength (steam basins, hot springs, Dwemer vents, volcanic ashlands). */
+    public float heat;
+    /** Unit downslope aspect vector (-gradX / |grad|, -gradZ / |grad|); (0, 0) on flat ground. */
+    public float aspectX;
+    public float aspectZ;
 
     public void clear() {
         region = 0;
@@ -65,6 +72,18 @@ public final class MapSample {
         peak = 0f;
         calm = 0f;
         slope = 0f;
+        rainshadow = 0f;
+        heat = 0f;
+        aspectX = 0f;
+        aspectZ = 0f;
+    }
+
+    /** Distance in blocks to the nearest fresh water (river bank or lake shore), clamped to 0..512. */
+    public float waterDistance() {
+        float rd = Math.max(0f, riverDistance - riverHalfWidth);
+        float ld = lakeDistance >= 0f ? 0f : -lakeDistance;
+        float d = Math.min(rd, ld);
+        return d > 512f ? 512f : d;
     }
 
     /** True when the column is inside a lake or a river channel (where the map places water). */

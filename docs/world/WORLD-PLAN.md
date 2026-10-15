@@ -492,11 +492,11 @@ Status values: `done`, `in progress`, `next`, `blocked (why)`, `not started`. "G
 | **R1** loose ends (R1a, R1b) | **done** | `tamriel-overhaul` | `tower_of_mzark` structure & Great Lift/mage bosses, `deepwood_redoubt` Forsworn roster (`dungeon_identity_lint` 293/293, 0 flags), shipwreck/cabin/lair dry sign & motif pads, `skycraft:book` lecterns, `frossel`/`shadowgreen_cavern`/`brucas_leap_redoubt` depth & headroom & bridge fixes, Solitude 2x2 sub-cell sea routing (0 straight-line warnings), landmass-aware site trail snapping, `BedrollBlock.newBlockEntity` null; `qa.ps1 -Server -Rebake` OVERALL PASS | 2026-10-15 |
 | **R2** testing tiers 0/1 | **done** | `tamriel-overhaul` | 60 JUnit 5 Tier 0 tests across 7 test classes (`qa.ps1 -Unit` passes in 17.4s), JDWP hot-swap (`tools/dev/hotswap.py` + `devserver.ps1 hotswap`), `/skycraft-dev reload <scenes\|places\|cityplans\|quests\|palettes\|all>` | 2026-10-15 |
 | **R3a** world sheets | **done** | `tamriel-overhaul` | `tools/world/SCHEMA.md`, `sheet_from_md.py`, `worldsheet_lint.py` (10 blocks x 11 layers, 449 fields, 0 errors, F-WHY 662/1815 = 36.5%, 2 consumers: `SettlementPopulation`/`Housing` 100% + `dungeons/identity/skyrim.json` 100%), `WorldSheets.java` + `/skycraft-world sheet` | 2026-10-15 |
-| **R3b** micro-biomes | **in progress** | | | 2026-10-15 |
-| **R3c** measurement | **in progress** | | | 2026-10-15 |
-| **R3d** town services | **in progress** | | | 2026-10-15 |
-| **R3e** world systems | **in progress** | | | 2026-10-15 |
-| R4 Skyrim uplift (S1-S5) | next (design done: `skyrim.md` SK1-SK8; waits on R3b-R3e) | | Skyrim SET 54 | |
+| **R3b** micro-biomes | **done** | `tamriel-overhaul` | `rainshadow.png` & `heat.png` rasters, `MapSample` aspect/rainshadow/heat drivers, 76 micro-biome rules across 9 Skyrim holds in `palettes.json` (`TamrielBiomeSource.microAt`), `region_spawns/skyrim.json` (100% `why`), `region_audit.py --province skyrim` 0 errors (19.16 transitions/km, 9/9 `F-MICRO` PASS) | 2026-10-15 |
+| **R3c** measurement | **done** | `tamriel-overhaul` | `floors.json`, `flow_audit.py` (all 27 FLW metrics across 71 regions in 6.4s), `story_lint.py` (0 errors on `whiterun.json`), `verbatim_check.py` (0 matches across 101,401 strings), `dungeon_stats.py` (2,947/2,947 class-tagged dungeons), `parity.py --province/--region/--tiers`, `qa.ps1 -Flow` | 2026-10-15 |
+| **R3d** town services | **done** | `tamriel-overhaul` | `NpcRole.TRAINER` + `SocietyTrainers` + `trainers.json` (5/capital, 2+/city, 5-per-level & cap selftests), `Courts` + `courts.json` (9/9 `F-COURT` PASS), 120 reactive dialogue lines (`F-REACT` 9/9 PASS), `population_lint.py` 0 errors, `NoticeBoards` (3-6 live jobs, 48h refresh, `F-BOARD` 9/9 PASS), `Signposts` (`F-SIGN` 9/9 PASS), MS19 region arrival moment | 2026-10-15 |
+| **R3e** world systems | **done** | `tamriel-overhaul` | `TravelNetworks` + `travel/skyrim.json` (116 nodes, 142 routes, 5 active modes, `p50=226.3m`, `p90=357.8m <= 500m`, `max=518.2m <= 800m`, 6/6 selftests, `F-TRAVEL` 9/9 PASS), 66 encounter kinds & 26 wonders in `scenes.json` (`F-ENC` & `F-WONDER` 9/9 PASS, `ecology_report.py` 0 errors), `FestivalCalendar` + 17 festivals in `festivals.json`, `Leveling.storyQuestLevel` + clamped bands (`F-LEVEL` 9/9 PASS); `qa.ps1 -Server -Rebake` OVERALL PASS | 2026-10-15 |
+| **R4** Skyrim uplift (S1-S5) | **in progress** (`skyrim.md` SK1-SK8; SK1 & much of SK7 done in R3a-R3e) | | Skyrim SET 54 -> target >= 95 | 2026-10-15 |
 | **R4a** Town overhaul (TO0-TO6) | **done** | `4144f49a` | TO0 audit, TO1 stepped terrace/tier stairs & 100% leader seats & >=4 house footprints (>=7x9), TO2 recognisable trade shops with unsealed counters/chairs & multi-room inns (4-6 private rooms with desks), TO3 partitioned Jarl/leader halls & 3 house interior layout families, TO4 stationed counter/throne/desk routines, TO5 shrine candle pedestal fix & urban park gardens & 24-block carver foundations; rebaked, `qa.ps1 -Server -Rebake` OVERALL PASS | 2026-10-15 |
 | R5 Iliac Bay (IB-S, IB1-IB9, IB-G) | not started (`high_rock.md`, `hammerfell.md`, `ILIAC-BAY.md` done) | | High Rock 42, Hammerfell 43 | |
 | R6 Cyrodiil | not started (`cyrodiil.md` done) | | 48 | |
@@ -516,11 +516,10 @@ Status values: `done`, `in progress`, `next`, `blocked (why)`, `not started`. "G
 | --- | --- | --- |
 | O1 | Owner decision on `old_orsinium` (move to Daggerfall's Orsinium area if geography and lore fit) | IB3 |
 | O2 | Owner decision 1 of ILIAC-BAY (keep-village density): judge in the first playtest after IB5 | IB-G |
-| O3 | Headless world census (`/skycraft-qa census`, FINISH-PLAN T3) not built | R3c if budget, else R15 |
-| O4 | Snapshot golden-image renders (`tools/qa/snapshots.json`, FINISH-PLAN T4) not built; `render_town.py` and `render_dungeon.py` exist | R2 follow-on or R15 |
-| O5 | `parity.py` counts uniques from `uniques.json` only and `n_say` from `society.json` only (PARITY wave 0 notes) | R3c |
+| O3 | Headless world census (`/skycraft-qa census`, FINISH-PLAN T3) not built | R15 |
+| O4 | Snapshot golden-image renders (`tools/qa/snapshots.json`, FINISH-PLAN T4) not built; `render_town.py` and `render_dungeon.py` exist | R15 |
 | O7 | Minor sites and hidden stashes are on seeded cell grids, not in the plan (WORLDGEN-PIPELINE 9) | R4 S3 or R13 |
 | O8 | PARITY PA3-PA22 backlog: fold each batch into the province step that owns its files (PA3 into V7/V8, PA4-PA9 into V6/V8, PA11-PA13 into V7, PA14-PA15 into V3/V7, PA16-PA17 into V6, PA18 into V7, PA19 into V3, PA20 into V3, PA21 into V8, PA22 into R3c/V8) | per province |
 | O9 | Skyrim hold labels: 11 places carry a `region` that disagrees with the game's hold and the nearest seat; decide data relabel (recommended) or raster repaint (`skyrim.md` 3.2) | R4 SK2 |
-| O10 | `parity.py` counts named NPCs only from quest-file `npcs[]`; named residents of plans, sanctuaries and camps need a reader before R4 S2 can measure (extends O5) | R3c |
-| O11 | The Reach's level band (8-30) is 22 wide, over the F-LEVEL limit of 20 (`skyrim.md` 10.3) | R3e / R4 SK7 |
+| O10 | `parity.py` counts named NPCs only from quest-file `npcs[]`; named residents of plans, sanctuaries and camps need a reader before R4 S2 can measure (extends O5) | R4 S2 |
+

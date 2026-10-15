@@ -2,6 +2,7 @@
   {
     "provinces": ["skyrim"],
     "biomes": ["skycraft:whiterun_tundra", "skycraft:whiterun_plains", "skycraft:alpine_meadow", "skycraft:pale_heath"],
+    "why": ["whiterun.L4.giant_grounds", "the_pale.L4.pale_heath"],
     "groups": [
       {"kind": "wildlife", "weight": 12, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:deer", "count": [1, 3], "tag": "passive"},
       {"kind": "wildlife", "weight": 16, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "skycraft:deer", "count": [1, 3], "tag": "passive"},
@@ -36,6 +37,7 @@
   {
     "provinces": ["skyrim"],
     "biomes": ["skycraft:pine_forest", "skycraft:falkreath_forest"],
+    "why": ["falkreath.L4.old_pine", "haafingar.L4.pine_coast"],
     "groups": [
       {"kind": "wildlife", "weight": 14, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:deer", "count": [1, 3], "tag": "passive"},
       {"kind": "wildlife", "weight": 18, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "skycraft:deer", "count": [1, 3], "tag": "passive"},
@@ -71,6 +73,7 @@
     "provinces": ["skyrim"],
     "regions": ["skyrim/falkreath"],
     "biomes": ["skycraft:pine_forest", "skycraft:falkreath_forest"],
+    "why": ["falkreath.L4.grave_ground", "falkreath.L8.arkay_priests"],
     "groups": [
       {"kind": "hostile", "weight": 5, "levels": [5, 999], "time": "night", "place": "surface", "entity": "skycraft:draugr", "count": [2, 3], "tag": "undead", "nearPlace": ["dungeon_fixed", "landmark", "fort"], "nearDist": 220},
       {"kind": "hostile", "weight": 3, "levels": [6, 999], "time": "night", "place": "surface", "entity": "skycraft:necromancer", "count": [1, 1], "tag": "humanoid", "nearPlace": ["dungeon_fixed", "landmark"], "nearDist": 220},
@@ -81,6 +84,7 @@
     "provinces": ["skyrim"],
     "regions": ["skyrim/haafingar"],
     "biomes": ["skycraft:pine_forest", "skycraft:snowy_pine_forest", "skycraft:skyrim_highlands"],
+    "why": ["haafingar.L4.pine_coast", "haafingar.L6.solitude_seat"],
     "groups": [
       {"kind": "hostile", "weight": 25, "quiet": true, "time": "day", "place": "surface", "tag": "quiet"},
       {"kind": "hostile", "weight": 15, "quiet": true, "time": "dawn", "place": "surface", "tag": "quiet"},
@@ -90,6 +94,7 @@
   {
     "provinces": ["skyrim"],
     "biomes": ["skycraft:snowy_pine_forest"],
+    "why": ["the_pale.L4.snowfield", "winterhold.L4.snow_pine_pockets"],
     "groups": [
       {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:deer", "count": [1, 3], "tag": "passive"},
       {"kind": "wildlife", "weight": 12, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "skycraft:deer", "count": [1, 3], "tag": "passive"},
@@ -123,6 +128,7 @@
   {
     "provinces": ["skyrim"],
     "biomes": ["skycraft:rift_autumn_forest"],
+    "why": ["the_rift.L4.birch_forest", "the_rift.L4.spriggan_glades"],
     "groups": [
       {"kind": "wildlife", "weight": 14, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:deer", "count": [1, 4], "tag": "passive"},
       {"kind": "wildlife", "weight": 18, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "skycraft:deer", "count": [1, 4], "tag": "passive"},
@@ -159,6 +165,7 @@
   {
     "provinces": ["skyrim"],
     "biomes": ["skycraft:reach_crags", "skycraft:reach_valley"],
+    "why": ["the_reach.L4.crag_scrub", "the_reach.L10.forsworn_redoubts"],
     "groups": [
       {"kind": "wildlife", "weight": 10, "levels": [1, 999], "time": "any", "place": "surface", "entity": "minecraft:goat", "count": [2, 4], "tag": "passive", "minY": 95},
       {"kind": "wildlife", "weight": 14, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "minecraft:goat", "count": [2, 4], "tag": "passive", "minY": 95},
@@ -193,6 +200,7 @@
   {
     "provinces": ["skyrim"],
     "biomes": ["skycraft:hjaalmarch_marsh"],
+    "why": ["hjaalmarch.L4.fen", "hjaalmarch.L4.marsh_hunters"],
     "groups": [
       {"kind": "wildlife", "weight": 10, "levels": [1, 999], "time": "day", "place": "surface", "entity": "skycraft:mudcrab", "count": [1, 3], "tag": "passive"},
       {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:deer", "count": [1, 2], "tag": "passive"},
@@ -225,6 +233,7 @@
   {
     "provinces": ["skyrim"],
     "biomes": ["skycraft:eastmarch_volcanic_tundra"],
+    "why": ["eastmarch.L4.fumarole_tundra", "eastmarch.L1.steam_basin"],
     "groups": [
       {"kind": "wildlife", "weight": 5, "levels": [1, 999], "time": "day", "place": "surface", "entity": "minecraft:rabbit", "count": [2, 3], "tag": "passive"},
       {"kind": "wildlife", "weight": 5, "levels": [1, 999], "time": "any", "place": "surface", "entity": "minecraft:goat", "count": [1, 3], "tag": "passive", "minY": 90},
@@ -257,6 +266,7 @@
   {
     "provinces": ["skyrim"],
     "biomes": ["skycraft:eastmarch_hot_springs"],
+    "why": ["eastmarch.L4.hot_spring_grass", "eastmarch.L1.steam_basin"],
     "groups": [
       {"kind": "wildlife", "weight": 12, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:deer", "count": [2, 4], "tag": "passive"},
       {"kind": "wildlife", "weight": 16, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "skycraft:deer", "count": [2, 4], "tag": "passive"},
@@ -287,6 +297,7 @@
   {
     "provinces": ["skyrim"],
     "biomes": ["skycraft:winterhold_glacier", "skycraft:pale_snowfield"],
+    "why": ["winterhold.L4.glacier_waste", "the_pale.L4.snowfield"],
     "groups": [
       {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:horker", "count": [2, 4], "tag": "passive"},
       {"kind": "wildlife", "weight": 4, "levels": [1, 999], "time": "day", "place": "surface", "entity": "skycraft:mudcrab", "count": [1, 2], "tag": "passive"},
@@ -317,6 +328,7 @@
   {
     "provinces": ["skyrim"],
     "biomes": ["skycraft:skyrim_highlands", "skycraft:snowy_slopes", "skycraft:throat_of_the_world"],
+    "why": ["skyrim.L4.polar_fauna", "whiterun.L1.throat_skirt"],
     "groups": [
       {"kind": "wildlife", "weight": 10, "levels": [1, 999], "time": "any", "place": "surface", "entity": "minecraft:goat", "count": [2, 4], "tag": "passive", "minY": 105},
       {"kind": "wildlife", "weight": 14, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "minecraft:goat", "count": [2, 4], "tag": "passive", "minY": 105},
@@ -347,6 +359,7 @@
   {
     "provinces": ["skyrim"],
     "biomes": ["skycraft:skyrim_coast", "skycraft:rocky_shore", "skycraft:frozen_shore"],
+    "why": ["haafingar.L4.rocky_shore", "winterhold.L4.floe_shore"],
     "groups": [
       {"kind": "wildlife", "weight": 10, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:mudcrab", "count": [1, 3], "tag": "passive"},
       {"kind": "wildlife", "weight": 5, "levels": [1, 999], "time": "day", "place": "surface", "entity": "skycraft:horker", "count": [2, 4], "tag": "passive"},
@@ -364,6 +377,7 @@
   {
     "provinces": ["skyrim"],
     "biomes": ["skycraft:skyrim_river", "skycraft:skyrim_lake", "skycraft:frozen_river"],
+    "why": ["skyrim.L3.white_river", "skyrim.L4.tundra_herds"],
     "groups": [
       {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "any", "place": "water", "entity": "skycraft:slaughterfish", "count": [1, 3], "tag": "predator"},
       {"kind": "wildlife", "weight": 5, "levels": [1, 999], "time": "day", "place": "surface", "entity": "skycraft:mudcrab", "count": [1, 2], "tag": "passive"},
@@ -380,6 +394,7 @@
   {
     "provinces": ["skyrim"],
     "regions": ["skyrim/whiterun"],
+    "why": ["whiterun.L4.steppe_grass", "whiterun.L6.whiterun_seat"],
     "groups": [
       {"kind": "hostile", "weight": 30, "quiet": true, "time": "day", "place": "surface", "tag": "quiet"},
       {"kind": "hostile", "weight": 18, "quiet": true, "time": "dawn", "place": "surface", "tag": "quiet"},
@@ -390,6 +405,7 @@
   {
     "provinces": ["skyrim"],
     "regions": ["skyrim/the_pale", "skyrim/winterhold", "skyrim/the_reach"],
+    "why": ["the_pale.L10.troll_caves", "winterhold.L4.glacier_waste", "the_reach.L4.crag_scrub"],
     "groups": [
       {"kind": "hostile", "weight": 3, "levels": [10, 999], "time": "any", "place": "surface", "entity": "skycraft:troll", "count": [1, 1], "tag": "predator", "minY": 95},
       {"kind": "hostile", "weight": 2, "levels": [10, 999], "time": "night", "place": "surface", "entity": "skycraft:ice_wraith", "count": [1, 2], "tag": "predator", "minY": 95},
@@ -398,6 +414,7 @@
   },
   {
     "provinces": ["skyrim"],
+    "why": ["skyrim.L1.dwemer_bedrock", "skyrim.L4.below_fauna"],
     "groups": [
       {"kind": "hostile", "weight": 8, "levels": [1, 30], "time": "any", "place": "cave", "entity": "skycraft:skeever", "count": [2, 4], "tag": "vermin"},
       {"kind": "hostile", "weight": 8, "levels": [1, 999], "time": "any", "place": "cave", "entity": "skycraft:frostbite_spider", "count": [1, 3], "tag": "vermin"},
@@ -417,6 +434,131 @@
       {"kind": "hostile", "weight": 1, "levels": [32, 999], "time": "any", "place": "cave", "members": [{"entity": "skycraft:dragon_priest", "count": [1, 1]}, {"entity": "skycraft:draugr", "count": [2, 3]}], "tag": "rare"},
       {"kind": "wildlife", "weight": 6, "levels": [1, 999], "time": "any", "place": "cave", "entity": "minecraft:bat", "count": [2, 4], "tag": "passive"},
       {"kind": "hostile", "weight": 14, "quiet": true, "time": "any", "place": "cave", "tag": "quiet"}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "regions": ["skyrim/eastmarch"],
+    "micro": ["eastmarch/steam_flats", "eastmarch/mineral_terrace", "eastmarch/sulfur_pool_apron"],
+    "biomes": ["skycraft:eastmarch_hot_springs", "skycraft:eastmarch_volcanic_tundra"],
+    "why": ["eastmarch.L4.hot_spring_grass", "eastmarch.L1.steam_basin"],
+    "groups": [
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "day", "place": "surface", "entity": "skycraft:mudcrab", "count": [1, 3], "tag": "passive", "maxY": 115},
+      {"kind": "wildlife", "weight": 10, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "skycraft:deer", "count": [2, 4], "tag": "passive", "maxY": 115},
+      {"kind": "hostile", "weight": 2, "levels": [14, 999], "time": "night", "place": "surface", "members": [{"entity": "skycraft:wispmother", "count": [1, 1]}, {"entity": "skycraft:wisp", "count": [2, 3]}], "tag": "rare", "maxY": 115},
+      {"kind": "hostile", "weight": 4, "levels": [6, 999], "time": "night", "place": "surface", "entity": "skycraft:draugr", "count": [2, 3], "tag": "undead", "nearPlace": ["dungeon_fixed", "landmark"], "nearDist": 200}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "regions": ["skyrim/hjaalmarch"],
+    "micro": ["hjaalmarch/drajkmyr_fen_heart", "hjaalmarch/floating_sedge_mat"],
+    "biomes": ["skycraft:hjaalmarch_marsh"],
+    "why": ["hjaalmarch.L4.marsh_hunters", "hjaalmarch.L10.marsh_vampires"],
+    "groups": [
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:mudcrab", "count": [2, 4], "tag": "passive", "maxY": 86},
+      {"kind": "hostile", "weight": 4, "levels": [12, 999], "time": "night", "place": "surface", "entity": "skycraft:chaurus", "count": [1, 2], "tag": "vermin", "maxY": 86},
+      {"kind": "hostile", "weight": 6, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:frostbite_spider", "count": [1, 3], "tag": "vermin", "maxY": 88},
+      {"kind": "hostile", "weight": 2, "levels": [14, 999], "time": "night", "place": "surface", "members": [{"entity": "skycraft:wispmother", "count": [1, 1]}, {"entity": "skycraft:wisp", "count": [2, 3]}], "tag": "rare", "maxY": 86},
+      {"kind": "hostile", "weight": 2, "levels": [14, 999], "time": "night", "place": "surface", "entity": "skycraft:hagraven", "count": [1, 1], "tag": "humanoid", "nearPlace": ["dungeon_fixed", "landmark"], "nearDist": 220}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "regions": ["skyrim/the_reach"],
+    "micro": ["the_reach/karth_gorge_floor"],
+    "biomes": ["skycraft:reach_valley"],
+    "why": ["the_reach.L4.gorge_meadow", "the_reach.L3.karth_upper"],
+    "groups": [
+      {"kind": "wildlife", "weight": 10, "levels": [1, 999], "time": "day", "place": "surface", "entity": "skycraft:mudcrab", "count": [1, 3], "tag": "passive", "maxY": 160},
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "any", "place": "water", "entity": "skycraft:slaughterfish", "count": [1, 3], "tag": "predator"},
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "dawn", "place": "surface", "entity": "skycraft:deer", "count": [1, 3], "tag": "passive", "maxY": 165}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "regions": ["skyrim/the_reach"],
+    "micro": ["the_reach/forsworn_redoubt_tor", "the_reach/hagraven_crag_eyrie", "the_reach/briarheart_grove_terrace"],
+    "biomes": ["skycraft:reach_crags"],
+    "why": ["the_reach.L10.forsworn_redoubts", "the_reach.L10.hagraven_covens"],
+    "groups": [
+      {"kind": "hostile", "weight": 6, "levels": [8, 999], "time": "any", "place": "surface", "entity": "skycraft:forsworn", "count": [2, 4], "tag": "humanoid", "minY": 135, "townMin": 160},
+      {"kind": "hostile", "weight": 2, "levels": [14, 999], "time": "any", "place": "surface", "members": [{"entity": "skycraft:hagraven", "count": [1, 1]}, {"entity": "skycraft:forsworn", "count": [2, 3]}], "tag": "humanoid", "minY": 145, "townMin": 200, "nearPlace": ["dungeon_fixed", "landmark", "fort"], "nearDist": 220},
+      {"kind": "hostile", "weight": 3, "levels": [8, 999], "time": "any", "place": "surface", "entity": "skycraft:sabre_cat", "count": [1, 2], "tag": "predator", "minY": 130}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "regions": ["skyrim/haafingar"],
+    "micro": ["haafingar/skerry_isles", "haafingar/rocky_shore", "haafingar/sea_cliff"],
+    "biomes": ["skycraft:frozen_shore", "skycraft:rocky_shore", "skycraft:skyrim_coast"],
+    "why": ["haafingar.L4.rocky_shore", "haafingar.L1.island_rock"],
+    "groups": [
+      {"kind": "wildlife", "weight": 12, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:horker", "count": [2, 4], "tag": "passive", "maxY": 85},
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "day", "place": "surface", "entity": "skycraft:mudcrab", "count": [1, 3], "tag": "passive", "maxY": 85},
+      {"kind": "hostile", "weight": 2, "levels": [8, 999], "time": "any", "place": "surface", "entity": "skycraft:sabre_cat", "count": [1, 1], "tag": "predator", "minY": 75}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "regions": ["skyrim/winterhold"],
+    "micro": ["winterhold/sea_ice_shelf", "winterhold/windswept_headland"],
+    "biomes": ["skycraft:frozen_shore", "skycraft:winterhold_glacier", "skycraft:skyrim_highlands"],
+    "why": ["winterhold.L4.floe_shore", "winterhold.L1.ice_floes"],
+    "groups": [
+      {"kind": "wildlife", "weight": 12, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:horker", "count": [2, 5], "tag": "passive", "maxY": 82},
+      {"kind": "hostile", "weight": 4, "levels": [12, 999], "time": "any", "place": "surface", "entity": "skycraft:ice_wraith", "count": [1, 2], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [8, 999], "time": "any", "place": "surface", "entity": "skycraft:sabre_cat", "count": [1, 1], "tag": "predator", "minY": 85}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "regions": ["skyrim/the_pale"],
+    "micro": ["the_pale/horker_rookery", "the_pale/pale_shore", "the_pale/giant_camp_basin"],
+    "biomes": ["skycraft:frozen_shore", "skycraft:skyrim_coast", "skycraft:pale_heath"],
+    "why": ["the_pale.L4.frozen_shore", "the_pale.L4.pale_heath"],
+    "groups": [
+      {"kind": "wildlife", "weight": 12, "levels": [1, 999], "time": "any", "place": "surface", "entity": "skycraft:horker", "count": [2, 4], "tag": "passive", "maxY": 82},
+      {"kind": "wildlife", "weight": 4, "levels": [6, 999], "time": "any", "place": "surface", "entity": "skycraft:mammoth", "count": [1, 2], "tag": "passive", "minY": 85, "maxY": 140, "townMin": 220},
+      {"kind": "hostile", "weight": 1, "levels": [12, 999], "time": "day", "place": "surface", "members": [{"entity": "skycraft:giant", "count": [1, 1]}, {"entity": "skycraft:mammoth", "count": [1, 2]}], "tag": "rare", "minY": 85, "maxY": 140, "townMin": 280}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "regions": ["skyrim/whiterun"],
+    "micro": ["whiterun/tundra_plain", "whiterun/white_river_flats"],
+    "biomes": ["skycraft:whiterun_tundra", "skycraft:whiterun_plains"],
+    "why": ["whiterun.L4.giant_grounds", "whiterun.L1.tundra_plain"],
+    "groups": [
+      {"kind": "wildlife", "weight": 6, "levels": [4, 999], "time": "any", "place": "surface", "entity": "skycraft:mammoth", "count": [1, 3], "tag": "passive", "maxY": 126, "townMin": 220},
+      {"kind": "hostile", "weight": 2, "levels": [12, 999], "time": "day", "place": "surface", "members": [{"entity": "skycraft:giant", "count": [1, 1]}, {"entity": "skycraft:mammoth", "count": [1, 2]}], "tag": "rare", "maxY": 126, "townMin": 280}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "regions": ["skyrim/falkreath"],
+    "micro": ["falkreath/ilinalta_shore", "falkreath/grave_moss_hollow", "falkreath/pale_pass_snow"],
+    "biomes": ["skycraft:falkreath_forest", "skycraft:pine_forest", "skycraft:snowy_slopes"],
+    "why": ["falkreath.L4.spriggan_groves", "falkreath.L8.arkay_priests"],
+    "groups": [
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "day", "place": "surface", "entity": "skycraft:mudcrab", "count": [1, 3], "tag": "passive", "maxY": 155},
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "any", "place": "water", "entity": "skycraft:slaughterfish", "count": [1, 3], "tag": "predator"},
+      {"kind": "hostile", "weight": 3, "levels": [10, 999], "time": "any", "place": "surface", "entity": "skycraft:spriggan", "count": [1, 2], "tag": "rare", "maxY": 198},
+      {"kind": "hostile", "weight": 2, "levels": [16, 999], "time": "night", "place": "surface", "members": [{"entity": "skycraft:wispmother", "count": [1, 1]}, {"entity": "skycraft:wisp", "count": [2, 3]}], "tag": "rare", "maxY": 198},
+      {"kind": "hostile", "weight": 4, "levels": [12, 999], "time": "any", "place": "surface", "entity": "skycraft:troll", "count": [1, 2], "tag": "predator", "minY": 220}
+    ]
+  },
+  {
+    "provinces": ["skyrim"],
+    "regions": ["skyrim/the_rift"],
+    "micro": ["the_rift/autumn_birch_bench", "the_rift/shadowgreen_glade", "the_rift/black_briar_bog", "the_rift/treva_floodplain"],
+    "biomes": ["skycraft:rift_autumn_forest", "skycraft:falkreath_forest", "skycraft:hjaalmarch_marsh"],
+    "why": ["the_rift.L4.birch_forest", "the_rift.L4.spriggan_glades"],
+    "groups": [
+      {"kind": "hostile", "weight": 6, "levels": [5, 999], "time": "day", "place": "surface", "entity": "skycraft:bear", "count": [1, 2], "tag": "predator", "minY": 100, "maxY": 165},
+      {"kind": "hostile", "weight": 3, "levels": [10, 999], "time": "any", "place": "surface", "entity": "skycraft:spriggan", "count": [1, 2], "tag": "rare", "minY": 95, "maxY": 160},
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "day", "place": "surface", "entity": "skycraft:mudcrab", "count": [1, 3], "tag": "passive", "maxY": 122},
+      {"kind": "wildlife", "weight": 8, "levels": [1, 999], "time": "any", "place": "water", "entity": "skycraft:slaughterfish", "count": [1, 3], "tag": "predator"}
     ]
   }
 ]

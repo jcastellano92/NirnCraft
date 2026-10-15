@@ -119,6 +119,7 @@ public final class Barks {
         lines("role.scholar", 3);
         lines("role.steward", 3);
         lines("role.caravan_trader", 3);
+        lines("role.trainer", 3);
         lines("role.citizen", 4);
         lines("role.child", 4);
         lines("prisoner", 3);

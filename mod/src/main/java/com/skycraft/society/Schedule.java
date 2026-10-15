@@ -51,6 +51,7 @@ public final class Schedule {
                     : h < 13 ? Activity.EAT : h < 19 ? Activity.PLAY : Activity.HOME;
             case PRIEST, JARL, STEWARD, MAGE, HOUSECARL -> h >= 22 || h < 6 ? Activity.SLEEP : h < 8 ? Activity.EAT : h < 20 ? Activity.WORK
                     : Activity.HOME;
+            case TRAINER -> trainer(h, social);
             case MERCHANT, BLACKSMITH, APOTHECARY, SCHOLAR, BUTCHER -> shopkeeper(h, social);
             case FARMER, MINER, LUMBERJACK, HUNTER, FISHER -> labourer(h, social);
             case CITIZEN -> h >= 22 || h < 6 ? Activity.SLEEP : h < 8 ? Activity.EAT : h < 12 ? Activity.WANDER
@@ -58,6 +59,14 @@ public final class Schedule {
                     : h < 22 ? (social ? Activity.INN : Activity.HOME) : Activity.SLEEP;
             default -> h >= 22 || h < 6 ? Activity.SLEEP : h >= 19 ? Activity.INN : Activity.WANDER;
         };
+    }
+
+    /** Trainers instruct during the day, take meals at morning/noon/evening, and sleep at night. */
+    private static Activity trainer(int h, boolean social) {
+        if (h >= 22 || h < 6) return Activity.SLEEP;
+        if (h < 8 || h == 12 || h == 19) return Activity.EAT;
+        if (h < 19) return Activity.WORK;
+        return social ? Activity.INN : Activity.HOME;
     }
 
     /** Shops are open 8:00-20:00 (economy contract 10); lunch is eaten at the counter. */

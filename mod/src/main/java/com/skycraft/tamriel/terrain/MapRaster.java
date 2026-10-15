@@ -21,7 +21,7 @@ public final class MapRaster {
 
     // interleaved float channels per cell
     static final int ELEV = 0, COAST = 1, RIV_D = 2, RIV_HW = 3, LAKE_SD = 4, WATER = 5, RIDGE = 6, ROUGH = 7,
-            CRAG = 8, DUNES = 9, WET = 10, ROAD = 11, BORDER = 12, CH = 13;
+            CRAG = 8, DUNES = 9, WET = 10, ROAD = 11, BORDER = 12, RAINSHADOW = 13, HEAT = 14, CH = 15;
     /** Marks "no water body nearby" in the WATER channel. */
     static final float NO_WATER = -1000f;
     /** Blend partner search radius in cells, and the border blending half width in blocks. */
@@ -63,6 +63,8 @@ public final class MapRaster {
             Raster ter = read("terrain.png", 4);
             Raster wat = read("water.png", 4);
             Raster coast = read("coast.png", 1);
+            Raster rainshadow = readOptional("rainshadow.png", 1);
+            Raster heat = readOptional("heat.png", 1);
             int[] px4 = new int[4];
             for (int z = 0; z < H; z++) {
                 for (int x = 0; x < W; x++) {
@@ -86,6 +88,8 @@ public final class MapRaster {
                     d[o + RIV_HW] = px4[2];
                     if (d[o + RIV_D] >= 127.5f) d[o + RIV_D] = 400f;
                     if (d[o + LAKE_SD] <= -64f) d[o + LAKE_SD] = -400f;
+                    d[o + RAINSHADOW] = rainshadow != null ? rainshadow.getSample(x, z, 0) / 255f : 0f;
+                    d[o + HEAT] = heat != null ? heat.getSample(x, z, 0) / 255f : 0f;
                 }
             }
         } catch (IOException | RuntimeException e) {
@@ -142,6 +146,17 @@ public final class MapRaster {
             Raster ras = img.getRaster();
             if (ras.getNumBands() < bands) throw new IOException(name + " has " + ras.getNumBands() + " bands");
             return ras;
+        }
+    }
+
+    private static Raster readOptional(String name, int bands) throws IOException {
+        try (InputStream in = MapRaster.class.getResourceAsStream(ROOT + name)) {
+            if (in == null) return null;
+            BufferedImage img = ImageIO.read(in);
+            if (img == null) return null;
+            if (img.getWidth() != W || img.getHeight() != H) return null;
+            Raster ras = img.getRaster();
+            return ras.getNumBands() >= bands ? ras : null;
         }
     }
 
@@ -241,6 +256,8 @@ public final class MapRaster {
         out.dunes = lerp(d, DUNES, o00, o10, o01, o11, w00, w10, w01, w11);
         out.wetland = lerp(d, WET, o00, o10, o01, o11, w00, w10, w01, w11);
         out.road = lerp(d, ROAD, o00, o10, o01, o11, w00, w10, w01, w11);
+        out.rainshadow = lerp(d, RAINSHADOW, o00, o10, o01, o11, w00, w10, w01, w11);
+        out.heat = lerp(d, HEAT, o00, o10, o01, o11, w00, w10, w01, w11);
 
         // water level and river width: average only the corners that have a water body
         float ws = 0, wl = 0, hw = 0;
@@ -333,7 +350,15 @@ public final class MapRaster {
             ez += dz * r;
         }
         out.elevation = (float) e;
-        out.slope = (float) (Math.sqrt(ex * ex + ez * ez) / CELL);
+        double gradNorm = Math.sqrt(ex * ex + ez * ez);
+        out.slope = (float) (gradNorm / CELL);
+        if (gradNorm > 1e-4) {
+            out.aspectX = (float) (-ex / gradNorm);
+            out.aspectZ = (float) (-ez / gradNorm);
+        } else {
+            out.aspectX = 0f;
+            out.aspectZ = 0f;
+        }
     }
 
     private static float lerp(float[] d, int ch, int o00, int o10, int o01, int o11,

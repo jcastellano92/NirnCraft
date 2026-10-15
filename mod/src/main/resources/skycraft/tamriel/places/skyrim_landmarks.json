@@ -8,7 +8,8 @@
   "x": 4554,
   "z": -3814,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "castle_karstaag_ruins",
@@ -19,7 +20,8 @@
   "x": 4339,
   "z": -3770,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "frossel",
@@ -30,7 +32,8 @@
   "x": 4972,
   "z": -3685,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "saerings_watch",
@@ -42,7 +45,8 @@
   "z": -3675,
   "radius": 16,
   "variant": "dragon_lair",
-  "shout": "bend_will"
+  "shout": "bend_will",
+  "class": "minor"
  },
  {
   "id": "bristleback_cave",
@@ -53,7 +57,8 @@
   "x": 4103,
   "z": -3664,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "frykte_peak",
@@ -75,7 +80,8 @@
   "x": 4881,
   "z": -3649,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "mortrag_peak",
@@ -98,7 +104,8 @@
   "z": -3617,
   "radius": 26,
   "variant": "barrow",
-  "shout": "cyclone"
+  "shout": "cyclone",
+  "class": "major"
  },
  {
   "id": "broken_tusk_mine",
@@ -109,7 +116,8 @@
   "x": 4169,
   "z": -3613,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "stalhrim_source",
@@ -143,7 +151,8 @@
   "z": -3552,
   "radius": 26,
   "variant": "barrow",
-  "shout": "cyclone"
+  "shout": "cyclone",
+  "class": "major"
  },
  {
   "id": "hrothmunds_barrow",
@@ -154,7 +163,8 @@
   "x": 4500,
   "z": -3538,
   "radius": 26,
-  "variant": "barrow"
+  "variant": "barrow",
+  "class": "major"
  },
  {
   "id": "gyldenhul_barrow",
@@ -165,7 +175,8 @@
   "x": 5008,
   "z": -3408,
   "radius": 26,
-  "variant": "barrow"
+  "variant": "barrow",
+  "class": "major"
  },
  {
   "id": "horker_island",
@@ -187,7 +198,8 @@
   "x": 4615,
   "z": -3452,
   "radius": 12,
-  "variant": "nordic_ruin"
+  "variant": "nordic_ruin",
+  "class": "short"
  },
  {
   "id": "moesring_pass",
@@ -209,7 +221,8 @@
   "x": 4301,
   "z": -3382,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "mount_moesring",
@@ -243,7 +256,8 @@
   "z": -3290,
   "radius": 26,
   "variant": "barrow",
-  "shout": "dragon_aspect"
+  "shout": "dragon_aspect",
+  "class": "marquee"
  },
  {
   "id": "bujolds_retreat",
@@ -254,7 +268,8 @@
   "x": 5040,
   "z": -3280,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "frostmoon_crag",
@@ -265,7 +280,8 @@
   "x": 4469,
   "z": -3250,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "damphall_mine",
@@ -276,7 +292,8 @@
   "x": 4218,
   "z": -3221,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "hvitkald_peak",
@@ -298,7 +315,8 @@
   "x": 4377,
   "z": -3170,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "vahloks_tomb",
@@ -310,7 +328,8 @@
   "z": -3156,
   "radius": 26,
   "variant": "barrow",
-  "shout": "battle_fury"
+  "shout": "battle_fury",
+  "class": "major"
  },
  {
   "id": "kagrumez",
@@ -321,7 +340,8 @@
   "x": 4696,
   "z": -3140,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "bloodskal_barrow",
@@ -333,7 +353,8 @@
   "z": -3089,
   "radius": 26,
   "variant": "barrow",
-  "shout": "dragon_aspect"
+  "shout": "dragon_aspect",
+  "class": "major"
  },
  {
   "id": "brodir_grove",
@@ -344,7 +365,8 @@
   "x": 4504,
   "z": -3042,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "ramshackle_trading_post",
@@ -355,7 +377,8 @@
   "x": 4725,
   "z": -3041,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "ashfallow_citadel",
@@ -366,7 +389,8 @@
   "x": 4867,
   "z": -3005,
   "radius": 22,
-  "variant": "fort_mage"
+  "variant": "fort_mage",
+  "class": "major"
  },
  {
   "id": "nchardak",
@@ -377,7 +401,8 @@
   "x": 5008,
   "z": -3056,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "highpoint_tower",
@@ -388,7 +413,8 @@
   "x": 4593,
   "z": -2947,
   "radius": 10,
-  "variant": "mage_tower"
+  "variant": "mage_tower",
+  "class": "short"
  },
  {
   "id": "kolbjorn_barrow",
@@ -400,7 +426,8 @@
   "z": -2753,
   "radius": 26,
   "variant": "barrow",
-  "shout": "cyclone"
+  "shout": "cyclone",
+  "class": "major"
  },
  {
   "id": "fort_frostmoth",
@@ -411,7 +438,8 @@
   "x": 4642,
   "z": -2724,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "hrodulfs_house",
@@ -422,7 +450,8 @@
   "x": 4508,
   "z": -2653,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "wreck_of_the_strident_squall",
@@ -433,7 +462,8 @@
   "x": 4385,
   "z": -2523,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "castle_volkihar",
@@ -444,7 +474,8 @@
   "x": -3125,
   "z": -2455,
   "radius": 22,
-  "variant": "fort_vampire"
+  "variant": "fort_vampire",
+  "class": "major"
  },
  {
   "id": "broken_oar_grotto",
@@ -455,7 +486,8 @@
   "x": -1377,
   "z": -2366,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "septimus_signuss_outpost",
@@ -466,7 +498,8 @@
   "x": 1552,
   "z": -2256,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "brinewater_grotto",
@@ -477,7 +510,8 @@
   "x": -1172,
   "z": -2208,
   "radius": 18,
-  "variant": "smuggler_cave"
+  "variant": "smuggler_cave",
+  "class": "short"
  },
  {
   "id": "orphans_tear",
@@ -488,7 +522,8 @@
   "x": -2229,
   "z": -2167,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "solitude_lighthouse",
@@ -499,7 +534,8 @@
   "x": -1072,
   "z": -2157,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "ravenscar_hollow",
@@ -510,7 +546,8 @@
   "x": -1767,
   "z": -2123,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "helas_folly",
@@ -521,7 +558,8 @@
   "x": 496,
   "z": -2094,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "shadowgreen_cavern",
@@ -532,7 +570,8 @@
   "x": -1509,
   "z": -2087,
   "radius": 18,
-  "variant": "spriggan_cave"
+  "variant": "spriggan_cave",
+  "class": "short"
  },
  {
   "id": "widows_watch_ruins",
@@ -543,7 +582,8 @@
   "x": -1979,
   "z": -2067,
   "radius": 12,
-  "variant": "watchtower"
+  "variant": "watchtower",
+  "class": "minor"
  },
  {
   "id": "dainty_sload",
@@ -554,7 +594,8 @@
   "x": -1137,
   "z": -2057,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "skytemple_ruins",
@@ -565,7 +606,8 @@
   "x": 1586,
   "z": -2046,
   "radius": 12,
-  "variant": "nordic_ruin"
+  "variant": "nordic_ruin",
+  "class": "short"
  },
  {
   "id": "ysgramors_tomb",
@@ -577,7 +619,8 @@
   "z": -2033,
   "radius": 28,
   "variant": "ysgramors_tomb",
-  "shout": "animal_allegiance"
+  "shout": "animal_allegiance",
+  "class": "marquee"
  },
  {
   "id": "lower_steepfall_burrow",
@@ -588,7 +631,8 @@
   "x": -2390,
   "z": -2025,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "wreck_of_the_brinehammer",
@@ -599,7 +643,8 @@
   "x": -352,
   "z": -2010,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "pilgrims_trench",
@@ -610,7 +655,8 @@
   "x": 1007,
   "z": -1984,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "northwatch_keep",
@@ -621,7 +667,8 @@
   "x": -2605,
   "z": -1980,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "yngvild",
@@ -632,7 +679,8 @@
   "x": 595,
   "z": -1948,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "steepfall_burrow",
@@ -643,7 +691,8 @@
   "x": -2353,
   "z": -1941,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "fort_hraggstad",
@@ -654,7 +703,8 @@
   "x": -2095,
   "z": -1927,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "ironback_hideout",
@@ -665,7 +715,8 @@
   "x": -1774,
   "z": -1904,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "wreck_of_the_icerunner",
@@ -676,7 +727,8 @@
   "x": -841,
   "z": -1847,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "wolfskull_cave",
@@ -687,7 +739,8 @@
   "x": -1861,
   "z": -1820,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "marquee"
  },
  {
   "id": "wreck_of_the_pride_of_tel_vos",
@@ -698,7 +751,8 @@
   "x": 1872,
   "z": -1818,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "the_katariah",
@@ -709,7 +763,8 @@
   "x": -1089,
   "z": -1817,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "high_gate_ruins",
@@ -721,7 +776,8 @@
   "z": -1801,
   "radius": 26,
   "variant": "barrow",
-  "shout": "storm_call"
+  "shout": "storm_call",
+  "class": "major"
  },
  {
   "id": "rimerock_burrow",
@@ -732,7 +788,8 @@
   "x": -2592,
   "z": -1789,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "lost_echo_cave",
@@ -743,7 +800,8 @@
   "x": -2335,
   "z": -1726,
   "radius": 20,
-  "variant": "falmer_cave"
+  "variant": "falmer_cave",
+  "class": "major"
  },
  {
   "id": "nightcaller_temple",
@@ -754,7 +812,8 @@
   "x": 328,
   "z": -1722,
   "radius": 22,
-  "variant": "fort_mage"
+  "variant": "fort_mage",
+  "class": "major"
  },
  {
   "id": "pale_imperial_camp",
@@ -765,7 +824,8 @@
   "x": -349,
   "z": -1722,
   "radius": 18,
-  "variant": "imperial_camp"
+  "variant": "imperial_camp",
+  "class": "minor"
  },
  {
   "id": "pinefrost_tower",
@@ -776,7 +836,8 @@
   "x": -2581,
   "z": -1692,
   "radius": 12,
-  "variant": "watchtower"
+  "variant": "watchtower",
+  "class": "minor"
  },
  {
   "id": "statue_to_meridia",
@@ -809,7 +870,8 @@
   "x": 773,
   "z": -1640,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "winterhold_imperial_camp",
@@ -820,7 +882,8 @@
   "x": 509,
   "z": -1632,
   "radius": 18,
-  "variant": "imperial_camp"
+  "variant": "imperial_camp",
+  "class": "minor"
  },
  {
   "id": "abandoned_shack",
@@ -831,7 +894,8 @@
   "x": -855,
   "z": -1605,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "windward_ruins",
@@ -842,7 +906,8 @@
   "x": -8,
   "z": -1585,
   "radius": 12,
-  "variant": "nordic_ruin"
+  "variant": "nordic_ruin",
+  "class": "short"
  },
  {
   "id": "pinemoon_cave",
@@ -853,7 +918,8 @@
   "x": -2168,
   "z": -1583,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "volskygge",
@@ -865,7 +931,8 @@
   "z": -1581,
   "radius": 26,
   "variant": "barrow",
-  "shout": "whirlwind_sprint"
+  "shout": "whirlwind_sprint",
+  "class": "major"
  },
  {
   "id": "saarthal",
@@ -877,7 +944,8 @@
   "z": -1573,
   "radius": 28,
   "variant": "saarthal",
-  "shout": "ice_form"
+  "shout": "ice_form",
+  "class": "marquee"
  },
  {
   "id": "folgunthur",
@@ -889,7 +957,8 @@
   "z": -1568,
   "radius": 26,
   "variant": "barrow",
-  "shout": "frost_breath"
+  "shout": "frost_breath",
+  "class": "major"
  },
  {
   "id": "bleakcoast_cave",
@@ -900,7 +969,8 @@
   "x": 1998,
   "z": -1560,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "haafingar_stormcloak_camp",
@@ -911,7 +981,8 @@
   "x": -1783,
   "z": -1539,
   "radius": 18,
-  "variant": "stormcloak_camp"
+  "variant": "stormcloak_camp",
+  "class": "minor"
  },
  {
   "id": "frostflow_lighthouse",
@@ -922,7 +993,8 @@
   "x": 705,
   "z": -1528,
   "radius": 10,
-  "variant": "lighthouse"
+  "variant": "lighthouse",
+  "class": "minor"
  },
  {
   "id": "ustengrav",
@@ -934,7 +1006,8 @@
   "z": -1516,
   "radius": 28,
   "variant": "ustengrav",
-  "shout": "become_ethereal"
+  "shout": "become_ethereal",
+  "class": "marquee"
  },
  {
   "id": "hjaalmarch_stormcloak_camp",
@@ -945,7 +1018,8 @@
   "x": -487,
   "z": -1458,
   "radius": 18,
-  "variant": "stormcloak_camp"
+  "variant": "stormcloak_camp",
+  "class": "minor"
  },
  {
   "id": "mzinchaleft",
@@ -956,7 +1030,8 @@
   "x": -204,
   "z": -1449,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "deepwood_redoubt",
@@ -968,7 +1043,8 @@
   "z": -1390,
   "radius": 26,
   "variant": "barrow",
-  "shout": "slow_time"
+  "shout": "slow_time",
+  "class": "major"
  },
  {
   "id": "journeymans_nook",
@@ -979,7 +1055,8 @@
   "x": 1787,
   "z": -1389,
   "radius": 12,
-  "variant": "nordic_ruin"
+  "variant": "nordic_ruin",
+  "class": "short"
  },
  {
   "id": "red_road_pass",
@@ -990,7 +1067,8 @@
   "x": 32,
   "z": -1381,
   "radius": 16,
-  "variant": "giant_camp"
+  "variant": "giant_camp",
+  "class": "minor"
  },
  {
   "id": "driftshade_refuge",
@@ -1001,7 +1079,8 @@
   "x": 569,
   "z": -1379,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "hjaalmarch_imperial_camp",
@@ -1012,7 +1091,8 @@
   "x": -625,
   "z": -1378,
   "radius": 18,
-  "variant": "imperial_camp"
+  "variant": "imperial_camp",
+  "class": "minor"
  },
  {
   "id": "sightless_pit",
@@ -1023,7 +1103,8 @@
   "x": 1270,
   "z": -1365,
   "radius": 20,
-  "variant": "falmer_cave"
+  "variant": "falmer_cave",
+  "class": "major"
  },
  {
   "id": "great_lift_at_mzinchaleft",
@@ -1034,7 +1115,8 @@
   "x": -202,
   "z": -1357,
   "radius": 10,
-  "variant": "great_lift"
+  "variant": "great_lift",
+  "class": "major"
  },
  {
   "id": "shrine_of_azura",
@@ -1056,7 +1138,8 @@
   "x": 927,
   "z": -1345,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "movarths_lair",
@@ -1067,7 +1150,8 @@
   "x": -821,
   "z": -1343,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "whistling_mine",
@@ -1078,7 +1162,8 @@
   "x": 1689,
   "z": -1333,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "meekos_shack",
@@ -1089,7 +1174,8 @@
   "x": -1459,
   "z": -1326,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "darkfall_cave",
@@ -1100,7 +1186,8 @@
   "x": -2765,
   "z": -1267,
   "radius": 20,
-  "variant": "falmer_cave"
+  "variant": "falmer_cave",
+  "class": "major"
  },
  {
   "id": "kjenstag_ruins",
@@ -1111,7 +1198,8 @@
   "x": -605,
   "z": -1263,
   "radius": 12,
-  "variant": "nordic_ruin"
+  "variant": "nordic_ruin",
+  "class": "short"
  },
  {
   "id": "snow_veil_sanctum",
@@ -1123,7 +1211,8 @@
   "z": -1255,
   "radius": 26,
   "variant": "barrow",
-  "shout": "disarm"
+  "shout": "disarm",
+  "class": "major"
  },
  {
   "id": "frostmere_crypt",
@@ -1135,7 +1224,8 @@
   "z": -1246,
   "radius": 26,
   "variant": "barrow",
-  "shout": "ice_form"
+  "shout": "ice_form",
+  "class": "major"
  },
  {
   "id": "fort_fellhammer",
@@ -1146,7 +1236,8 @@
   "x": 366,
   "z": -1242,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "snowpoint_beacon",
@@ -1157,7 +1248,8 @@
   "x": 538,
   "z": -1239,
   "radius": 12,
-  "variant": "watchtower"
+  "variant": "watchtower",
+  "class": "minor"
  },
  {
   "id": "fort_snowhawk",
@@ -1168,7 +1260,8 @@
   "x": -1219,
   "z": -1222,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "dragon_bridge_overlook",
@@ -1179,7 +1272,8 @@
   "x": -1968,
   "z": -1204,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "forebears_holdout",
@@ -1190,7 +1284,8 @@
   "x": -1666,
   "z": -1197,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "mount_anthor",
@@ -1202,7 +1297,8 @@
   "z": -1184,
   "radius": 16,
   "variant": "dragon_lair",
-  "shout": "ice_form"
+  "shout": "ice_form",
+  "class": "minor"
  },
  {
   "id": "hall_of_the_vigilant",
@@ -1213,7 +1309,8 @@
   "x": 3,
   "z": -1184,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "wreck_of_the_winter_war",
@@ -1224,7 +1321,8 @@
   "x": 2403,
   "z": -1156,
   "radius": 14,
-  "variant": "shipwreck"
+  "variant": "shipwreck",
+  "class": "minor"
  },
  {
   "id": "dimhollow_crypt",
@@ -1236,7 +1334,8 @@
   "z": -1146,
   "radius": 26,
   "variant": "barrow",
-  "shout": "drain_vitality"
+  "shout": "drain_vitality",
+  "class": "major"
  },
  {
   "id": "stillborn_cave",
@@ -1247,7 +1346,8 @@
   "x": 1726,
   "z": -1134,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "brucas_leap_redoubt",
@@ -1258,7 +1358,8 @@
   "x": -2296,
   "z": -1126,
   "radius": 18,
-  "variant": "forsworn_cave"
+  "variant": "forsworn_cave",
+  "class": "short"
  },
  {
   "id": "wayward_pass",
@@ -1280,7 +1381,8 @@
   "x": 145,
   "z": -1096,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "deep_folk_crossing",
@@ -1302,7 +1404,8 @@
   "x": 415,
   "z": -1059,
   "radius": 20,
-  "variant": "falmer_cave"
+  "variant": "falmer_cave",
+  "class": "major"
  },
  {
   "id": "druadach_redoubt",
@@ -1313,7 +1416,8 @@
   "x": -2753,
   "z": -1051,
   "radius": 18,
-  "variant": "forsworn_cave"
+  "variant": "forsworn_cave",
+  "class": "short"
  },
  {
   "id": "chillwind_depths",
@@ -1324,7 +1428,8 @@
   "x": -1917,
   "z": -1043,
   "radius": 20,
-  "variant": "falmer_cave"
+  "variant": "falmer_cave",
+  "class": "major"
  },
  {
   "id": "ironbind_barrow",
@@ -1336,7 +1441,8 @@
   "z": -1024,
   "radius": 26,
   "variant": "barrow",
-  "shout": "become_ethereal"
+  "shout": "become_ethereal",
+  "class": "major"
  },
  {
   "id": "cliffside_retreat",
@@ -1347,7 +1453,8 @@
   "x": -2024,
   "z": -1017,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "great_lift_at_alftand",
@@ -1358,7 +1465,8 @@
   "x": 961,
   "z": -997,
   "radius": 10,
-  "variant": "great_lift"
+  "variant": "great_lift",
+  "class": "major"
  },
  {
   "id": "harmugstahl",
@@ -1369,7 +1477,8 @@
   "x": -2489,
   "z": -996,
   "radius": 22,
-  "variant": "fort_mage"
+  "variant": "fort_mage",
+  "class": "major"
  },
  {
   "id": "winterhold_stormcloak_camp",
@@ -1380,7 +1489,8 @@
   "x": 1988,
   "z": -992,
   "radius": 18,
-  "variant": "stormcloak_camp"
+  "variant": "stormcloak_camp",
+  "class": "minor"
  },
  {
   "id": "fort_kastav",
@@ -1391,7 +1501,8 @@
   "x": 1469,
   "z": -970,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "silverdrift_lair",
@@ -1403,7 +1514,8 @@
   "z": -967,
   "radius": 26,
   "variant": "barrow",
-  "shout": "disarm"
+  "shout": "disarm",
+  "class": "major"
  },
  {
   "id": "yorgrim_overlook",
@@ -1414,7 +1526,8 @@
   "x": 1180,
   "z": -959,
   "radius": 12,
-  "variant": "nordic_ruin"
+  "variant": "nordic_ruin",
+  "class": "short"
  },
  {
   "id": "dead_mens_respite",
@@ -1426,7 +1539,8 @@
   "z": -957,
   "radius": 26,
   "variant": "barrow",
-  "shout": "whirlwind_sprint"
+  "shout": "whirlwind_sprint",
+  "class": "major"
  },
  {
   "id": "shrine_of_mehrunes_dagon",
@@ -1448,7 +1562,8 @@
   "x": -2113,
   "z": -923,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "forsaken_cave",
@@ -1460,7 +1575,8 @@
   "z": -916,
   "radius": 26,
   "variant": "barrow",
-  "shout": "marked_for_death"
+  "shout": "marked_for_death",
+  "class": "major"
  },
  {
   "id": "reach_stormcloak_camp",
@@ -1471,7 +1587,8 @@
   "x": -2205,
   "z": -915,
   "radius": 18,
-  "variant": "stormcloak_camp"
+  "variant": "stormcloak_camp",
+  "class": "minor"
  },
  {
   "id": "dragontooth_crater",
@@ -1483,7 +1600,8 @@
   "z": -914,
   "radius": 16,
   "variant": "dragon_lair",
-  "shout": "elemental_fury"
+  "shout": "elemental_fury",
+  "class": "minor"
  },
  {
   "id": "skyborn_altar",
@@ -1495,7 +1613,8 @@
   "z": -883,
   "radius": 16,
   "variant": "dragon_lair",
-  "shout": "frost_breath"
+  "shout": "frost_breath",
+  "class": "minor"
  },
  {
   "id": "robbers_gorge",
@@ -1506,7 +1625,8 @@
   "x": -1596,
   "z": -868,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "yngol_barrow",
@@ -1517,7 +1637,8 @@
   "x": 2187,
   "z": -867,
   "radius": 26,
-  "variant": "barrow"
+  "variant": "barrow",
+  "class": "major"
  },
  {
   "id": "weynon_stones",
@@ -1539,7 +1660,8 @@
   "x": -513,
   "z": -860,
   "radius": 12,
-  "variant": "nordic_ruin"
+  "variant": "nordic_ruin",
+  "class": "short"
  },
  {
   "id": "bthardamz",
@@ -1550,7 +1672,8 @@
   "x": -2915,
   "z": -845,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "marquee"
  },
  {
   "id": "tower_of_mzark",
@@ -1561,7 +1684,8 @@
   "x": 95,
   "z": -842,
   "radius": 12,
-  "variant": "mzark"
+  "variant": "mzark",
+  "class": "marquee"
  },
  {
   "id": "crabbers_shanty",
@@ -1572,7 +1696,8 @@
   "x": -1448,
   "z": -817,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "stonehill_bluff",
@@ -1583,7 +1708,8 @@
   "x": -49,
   "z": -812,
   "radius": 16,
-  "variant": "giant_camp"
+  "variant": "giant_camp",
+  "class": "minor"
  },
  {
   "id": "brood_cavern",
@@ -1594,7 +1720,8 @@
   "x": -1190,
   "z": -807,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "shrouded_grove",
@@ -1605,7 +1732,8 @@
   "x": 620,
   "z": -800,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "bronze_water_cave",
@@ -1616,7 +1744,8 @@
   "x": 1014,
   "z": -796,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "labyrinthian",
@@ -1628,7 +1757,8 @@
   "z": -786,
   "radius": 60,
   "variant": "labyrinthian",
-  "shout": "dismay"
+  "shout": "dismay",
+  "class": "marquee"
  },
  {
   "id": "broken_tower_redoubt",
@@ -1639,7 +1769,8 @@
   "x": -2036,
   "z": -753,
   "radius": 22,
-  "variant": "fort_forsworn"
+  "variant": "fort_forsworn",
+  "class": "major"
  },
  {
   "id": "shrine_to_peryite",
@@ -1661,7 +1792,8 @@
   "x": 306,
   "z": -742,
   "radius": 16,
-  "variant": "giant_camp"
+  "variant": "giant_camp",
+  "class": "minor"
  },
  {
   "id": "north_cold_rock_pass",
@@ -1683,7 +1815,8 @@
   "x": 2265,
   "z": -713,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "refugees_rest",
@@ -1694,7 +1827,8 @@
   "x": 2387,
   "z": -713,
   "radius": 12,
-  "variant": "watchtower"
+  "variant": "watchtower",
+  "class": "minor"
  },
  {
   "id": "orotheim",
@@ -1705,7 +1839,8 @@
   "x": -1388,
   "z": -704,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "eldersblood_peak",
@@ -1717,7 +1852,8 @@
   "z": -688,
   "radius": 16,
   "variant": "dragon_lair",
-  "shout": "disarm"
+  "shout": "disarm",
+  "class": "minor"
  },
  {
   "id": "reach_imperial_camp",
@@ -1728,7 +1864,8 @@
   "x": -2882,
   "z": -680,
   "radius": 18,
-  "variant": "imperial_camp"
+  "variant": "imperial_camp",
+  "class": "minor"
  },
  {
   "id": "pale_stormcloak_camp",
@@ -1739,7 +1876,8 @@
   "x": 1079,
   "z": -676,
   "radius": 18,
-  "variant": "stormcloak_camp"
+  "variant": "stormcloak_camp",
+  "class": "minor"
  },
  {
   "id": "korvanjund",
@@ -1751,7 +1889,8 @@
   "z": -666,
   "radius": 26,
   "variant": "barrow",
-  "shout": "slow_time"
+  "shout": "slow_time",
+  "class": "major"
  },
  {
   "id": "south_cold_rock_pass",
@@ -1774,7 +1913,8 @@
   "z": -610,
   "radius": 26,
   "variant": "barrow",
-  "shout": "aura_whisper"
+  "shout": "aura_whisper",
+  "class": "major"
  },
  {
   "id": "tumble_arch_pass",
@@ -1785,7 +1925,8 @@
   "x": 762,
   "z": -606,
   "radius": 16,
-  "variant": "giant_camp"
+  "variant": "giant_camp",
+  "class": "minor"
  },
  {
   "id": "great_lift_at_raldbthar",
@@ -1796,7 +1937,8 @@
   "x": 1108,
   "z": -564,
   "radius": 10,
-  "variant": "great_lift"
+  "variant": "great_lift",
+  "class": "major"
  },
  {
   "id": "sundered_towers",
@@ -1807,7 +1949,8 @@
   "x": -2186,
   "z": -560,
   "radius": 12,
-  "variant": "forsworn_tower"
+  "variant": "forsworn_tower",
+  "class": "minor"
  },
  {
   "id": "drelas_cottage",
@@ -1818,7 +1961,8 @@
   "x": -801,
   "z": -545,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "sacellum_of_boethiah",
@@ -1841,7 +1985,8 @@
   "z": -540,
   "radius": 26,
   "variant": "barrow",
-  "shout": "kynes_peace"
+  "shout": "kynes_peace",
+  "class": "major"
  },
  {
   "id": "irkngthand",
@@ -1852,7 +1997,8 @@
   "x": 911,
   "z": -538,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "rannveigs_fast",
@@ -1864,7 +2010,8 @@
   "z": -532,
   "radius": 26,
   "variant": "barrow",
-  "shout": "kynes_peace"
+  "shout": "kynes_peace",
+  "class": "major"
  },
  {
   "id": "blind_cliff_cave",
@@ -1875,7 +2022,8 @@
   "x": -2563,
   "z": -491,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "rebels_cairn",
@@ -1886,7 +2034,8 @@
   "x": -2054,
   "z": -486,
   "radius": 26,
-  "variant": "barrow"
+  "variant": "barrow",
+  "class": "major"
  },
  {
   "id": "four_skull_lookout",
@@ -1897,7 +2046,8 @@
   "x": -2419,
   "z": -473,
   "radius": 12,
-  "variant": "nordic_ruin"
+  "variant": "nordic_ruin",
+  "class": "short"
  },
  {
   "id": "talking_stone_camp",
@@ -1908,7 +2058,8 @@
   "x": -1437,
   "z": -458,
   "radius": 16,
-  "variant": "giant_camp"
+  "variant": "giant_camp",
+  "class": "minor"
  },
  {
   "id": "hamvirs_rest",
@@ -1919,7 +2070,8 @@
   "x": -612,
   "z": -452,
   "radius": 12,
-  "variant": "nordic_ruin"
+  "variant": "nordic_ruin",
+  "class": "short"
  },
  {
   "id": "uttering_hills_cave",
@@ -1930,7 +2082,8 @@
   "x": 1329,
   "z": -439,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "shearpoint",
@@ -1942,7 +2095,8 @@
   "z": -427,
   "radius": 16,
   "variant": "dragon_lair",
-  "shout": "throw_voice"
+  "shout": "throw_voice",
+  "class": "minor"
  },
  {
   "id": "morvunskar",
@@ -1953,7 +2107,8 @@
   "x": 1575,
   "z": -425,
   "radius": 22,
-  "variant": "fort_mage"
+  "variant": "fort_mage",
+  "class": "major"
  },
  {
   "id": "halted_stream_camp",
@@ -1964,7 +2119,8 @@
   "x": -53,
   "z": -418,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "dustmans_cairn",
@@ -1976,7 +2132,8 @@
   "z": -407,
   "radius": 26,
   "variant": "barrow",
-  "shout": "fire_breath"
+  "shout": "fire_breath",
+  "class": "marquee"
  },
  {
   "id": "raldbthar",
@@ -1987,7 +2144,8 @@
   "x": 1071,
   "z": -403,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "lunds_hut",
@@ -1998,7 +2156,8 @@
   "x": -1760,
   "z": -396,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "silent_moons_camp",
@@ -2009,7 +2168,8 @@
   "x": -269,
   "z": -369,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "red_eagle_redoubt",
@@ -2020,7 +2180,8 @@
   "x": -2307,
   "z": -364,
   "radius": 18,
-  "variant": "forsworn_cave"
+  "variant": "forsworn_cave",
+  "class": "short"
  },
  {
   "id": "greenspring_hollow",
@@ -2031,7 +2192,8 @@
   "x": -745,
   "z": -358,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "bleakwind_bluff",
@@ -2042,7 +2204,8 @@
   "x": -1987,
   "z": -348,
   "radius": 12,
-  "variant": "forsworn_tower"
+  "variant": "forsworn_tower",
+  "class": "minor"
  },
  {
   "id": "kolskeggr_mine",
@@ -2053,7 +2216,8 @@
   "x": -2671,
   "z": -343,
   "radius": 26,
-  "variant": "kolskeggr_mine"
+  "variant": "kolskeggr_mine",
+  "class": "short"
  },
  {
   "id": "whitewatch_tower",
@@ -2064,7 +2228,8 @@
   "x": 182,
   "z": -323,
   "radius": 12,
-  "variant": "watchtower"
+  "variant": "watchtower",
+  "class": "minor"
  },
  {
   "id": "shimmermist_cave",
@@ -2075,7 +2240,8 @@
   "x": 439,
   "z": -283,
   "radius": 20,
-  "variant": "falmer_cave"
+  "variant": "falmer_cave",
+  "class": "major"
  },
  {
   "id": "karthspire_camp",
@@ -2086,7 +2252,8 @@
   "x": -2361,
   "z": -266,
   "radius": 14,
-  "variant": "forsworn_camp"
+  "variant": "forsworn_camp",
+  "class": "minor"
  },
  {
   "id": "fellglow_keep",
@@ -2097,7 +2264,8 @@
   "x": 697,
   "z": -264,
   "radius": 22,
-  "variant": "fort_mage"
+  "variant": "fort_mage",
+  "class": "major"
  },
  {
   "id": "maras_eye_pond",
@@ -2119,7 +2287,8 @@
   "x": -557,
   "z": -232,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "riverside_shack",
@@ -2130,7 +2299,8 @@
   "x": 1608,
   "z": -226,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "karthspire",
@@ -2141,7 +2311,8 @@
   "x": -2413,
   "z": -223,
   "radius": 14,
-  "variant": "forsworn_camp"
+  "variant": "forsworn_camp",
+  "class": "minor"
  },
  {
   "id": "gallows_rock",
@@ -2152,7 +2323,8 @@
   "x": 1279,
   "z": -211,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "gloombound_mine",
@@ -2163,7 +2335,8 @@
   "x": 2220,
   "z": -200,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "moldering_ruins",
@@ -2174,7 +2347,8 @@
   "x": -1921,
   "z": -199,
   "radius": 12,
-  "variant": "nordic_ruin"
+  "variant": "nordic_ruin",
+  "class": "short"
  },
  {
   "id": "whiterun_imperial_camp",
@@ -2185,7 +2359,8 @@
   "x": -1310,
   "z": -156,
   "radius": 18,
-  "variant": "imperial_camp"
+  "variant": "imperial_camp",
+  "class": "minor"
  },
  {
   "id": "swindlers_den",
@@ -2196,7 +2371,8 @@
   "x": -1045,
   "z": -151,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "bleakwind_basin",
@@ -2207,7 +2383,8 @@
   "x": -290,
   "z": -138,
   "radius": 16,
-  "variant": "giant_camp"
+  "variant": "giant_camp",
+  "class": "minor"
  },
  {
   "id": "left_hand_mine",
@@ -2218,7 +2395,8 @@
   "x": -2939,
   "z": -113,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "valtheim_towers",
@@ -2229,7 +2407,8 @@
   "x": 866,
   "z": -101,
   "radius": 12,
-  "variant": "nordic_tower"
+  "variant": "nordic_tower",
+  "class": "minor"
  },
  {
   "id": "darkshade",
@@ -2240,7 +2419,8 @@
   "x": 982,
   "z": -88,
   "radius": 18,
-  "variant": "spriggan_cave"
+  "variant": "spriggan_cave",
+  "class": "short"
  },
  {
   "id": "cragwallow_slope",
@@ -2251,7 +2431,8 @@
   "x": 2158,
   "z": -82,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "graywinter_watch",
@@ -2262,7 +2443,8 @@
   "x": 475,
   "z": -79,
   "radius": 18,
-  "variant": "troll_cave"
+  "variant": "troll_cave",
+  "class": "short"
  },
  {
   "id": "witchmist_grove",
@@ -2273,7 +2455,8 @@
   "x": 1813,
   "z": -68,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "reachwater_rock",
@@ -2284,7 +2467,8 @@
   "x": -2550,
   "z": -60,
   "radius": 26,
-  "variant": "barrow"
+  "variant": "barrow",
+  "class": "major"
  },
  {
   "id": "cronvangr_cave",
@@ -2295,7 +2479,8 @@
   "x": 1585,
   "z": -34,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "cradlecrush_rock",
@@ -2306,7 +2491,8 @@
   "x": 1150,
   "z": -32,
   "radius": 16,
-  "variant": "giant_camp"
+  "variant": "giant_camp",
+  "class": "minor"
  },
  {
   "id": "serpents_bluff_redoubt",
@@ -2317,7 +2503,8 @@
   "x": -1850,
   "z": -25,
   "radius": 14,
-  "variant": "forsworn_camp"
+  "variant": "forsworn_camp",
+  "class": "minor"
  },
  {
   "id": "fort_greymoor",
@@ -2328,7 +2515,8 @@
   "x": -533,
   "z": 16,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "gjukars_monument",
@@ -2350,7 +2538,8 @@
   "x": 1961,
   "z": 40,
   "radius": 16,
-  "variant": "giant_camp"
+  "variant": "giant_camp",
+  "class": "minor"
  },
  {
   "id": "guldun_rock",
@@ -2361,7 +2550,8 @@
   "x": 840,
   "z": 44,
   "radius": 16,
-  "variant": "giant_camp"
+  "variant": "giant_camp",
+  "class": "minor"
  },
  {
   "id": "reachcliff_cave",
@@ -2372,7 +2562,8 @@
   "x": -2435,
   "z": 68,
   "radius": 26,
-  "variant": "barrow"
+  "variant": "barrow",
+  "class": "major"
  },
  {
   "id": "bonestrewn_crest",
@@ -2384,7 +2575,8 @@
   "z": 73,
   "radius": 16,
   "variant": "dragon_lair",
-  "shout": "frost_breath"
+  "shout": "frost_breath",
+  "class": "minor"
  },
  {
   "id": "reachwind_eyrie",
@@ -2406,7 +2598,8 @@
   "x": 2346,
   "z": 93,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "marquee"
  },
  {
   "id": "broken_limb_camp",
@@ -2417,7 +2610,8 @@
   "x": 1457,
   "z": 109,
   "radius": 16,
-  "variant": "giant_camp"
+  "variant": "giant_camp",
+  "class": "minor"
  },
  {
   "id": "white_river_watch",
@@ -2428,7 +2622,8 @@
   "x": 348,
   "z": 115,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "western_watchtower",
@@ -2439,7 +2634,8 @@
   "x": -289,
   "z": 115,
   "radius": 12,
-  "variant": "watchtower"
+  "variant": "watchtower",
+  "class": "minor"
  },
  {
   "id": "broken_fang_cave",
@@ -2450,7 +2646,8 @@
   "x": -1121,
   "z": 119,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "abandoned_prison",
@@ -2461,7 +2658,8 @@
   "x": 1202,
   "z": 124,
   "radius": 12,
-  "variant": "watchtower"
+  "variant": "watchtower",
+  "class": "minor"
  },
  {
   "id": "whiterun_stormcloak_camp",
@@ -2472,7 +2670,8 @@
   "x": 509,
   "z": 140,
   "radius": 18,
-  "variant": "stormcloak_camp"
+  "variant": "stormcloak_camp",
+  "class": "minor"
  },
  {
   "id": "hag_rock_redoubt",
@@ -2483,7 +2682,8 @@
   "x": -3063,
   "z": 154,
   "radius": 14,
-  "variant": "forsworn_camp"
+  "variant": "forsworn_camp",
+  "class": "minor"
  },
  {
   "id": "hillgrunds_tomb",
@@ -2494,7 +2694,8 @@
   "x": 968,
   "z": 155,
   "radius": 26,
-  "variant": "barrow"
+  "variant": "barrow",
+  "class": "major"
  },
  {
   "id": "sleeping_tree_camp",
@@ -2505,7 +2706,8 @@
   "x": -939,
   "z": 170,
   "radius": 16,
-  "variant": "giant_camp"
+  "variant": "giant_camp",
+  "class": "minor"
  },
  {
   "id": "dead_crone_rock",
@@ -2516,7 +2718,8 @@
   "x": -3176,
   "z": 185,
   "radius": 12,
-  "variant": "forsworn_tower"
+  "variant": "forsworn_tower",
+  "class": "minor"
  },
  {
   "id": "eastmarch_imperial_camp",
@@ -2527,7 +2730,8 @@
   "x": 2456,
   "z": 197,
   "radius": 18,
-  "variant": "imperial_camp"
+  "variant": "imperial_camp",
+  "class": "minor"
  },
  {
   "id": "purewater_run",
@@ -2538,7 +2742,8 @@
   "x": -2825,
   "z": 203,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "eldergleam_sanctuary",
@@ -2549,7 +2754,8 @@
   "x": 1588,
   "z": 239,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "fort_amol",
@@ -2560,7 +2766,8 @@
   "x": 1276,
   "z": 245,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "fort_sungard",
@@ -2571,7 +2778,8 @@
   "x": -1466,
   "z": 270,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "stony_creek_cave",
@@ -2582,7 +2790,8 @@
   "x": 2456,
   "z": 276,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "gloomreach",
@@ -2593,7 +2802,8 @@
   "x": -1904,
   "z": 278,
   "radius": 20,
-  "variant": "falmer_cave"
+  "variant": "falmer_cave",
+  "class": "major"
  },
  {
   "id": "secundas_kiss",
@@ -2604,7 +2814,8 @@
   "x": -363,
   "z": 327,
   "radius": 16,
-  "variant": "giant_camp"
+  "variant": "giant_camp",
+  "class": "minor"
  },
  {
   "id": "lost_knife_hideout",
@@ -2615,7 +2826,8 @@
   "x": 1197,
   "z": 341,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "kagrenzel",
@@ -2626,7 +2838,8 @@
   "x": 2726,
   "z": 349,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "valthume",
@@ -2638,7 +2851,8 @@
   "z": 377,
   "radius": 26,
   "variant": "barrow",
-  "shout": "aura_whisper"
+  "shout": "aura_whisper",
+  "class": "major"
  },
  {
   "id": "arkngthamz",
@@ -2649,7 +2863,8 @@
   "x": -2519,
   "z": 389,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "cradle_stone_tower",
@@ -2660,7 +2875,8 @@
   "x": -1896,
   "z": 419,
   "radius": 12,
-  "variant": "forsworn_tower"
+  "variant": "forsworn_tower",
+  "class": "minor"
  },
  {
   "id": "cragslane_cavern",
@@ -2671,7 +2887,8 @@
   "x": 2334,
   "z": 422,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "mistwatch",
@@ -2682,7 +2899,8 @@
   "x": 1865,
   "z": 425,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "north_brittleshin_pass",
@@ -2693,7 +2911,8 @@
   "x": -683,
   "z": 426,
   "radius": 18,
-  "variant": "skeever_cave"
+  "variant": "skeever_cave",
+  "class": "short"
  },
  {
   "id": "ansilvund",
@@ -2704,7 +2923,8 @@
   "x": 2453,
   "z": 440,
   "radius": 26,
-  "variant": "barrow"
+  "variant": "barrow",
+  "class": "major"
  },
  {
   "id": "bards_leap_summit",
@@ -2737,7 +2957,8 @@
   "x": -1741,
   "z": 464,
   "radius": 14,
-  "variant": "forsworn_camp"
+  "variant": "forsworn_camp",
+  "class": "minor"
  },
  {
   "id": "bloated_mans_grotto",
@@ -2748,7 +2969,8 @@
   "x": -912,
   "z": 468,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "sunderstone_gorge",
@@ -2760,7 +2982,8 @@
   "z": 491,
   "radius": 26,
   "variant": "barrow",
-  "shout": "fire_breath"
+  "shout": "fire_breath",
+  "class": "major"
  },
  {
   "id": "bilegulch_mine",
@@ -2771,7 +2994,8 @@
   "x": -1555,
   "z": 521,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "bleak_falls_barrow",
@@ -2783,7 +3007,8 @@
   "z": 535,
   "radius": 30,
   "variant": "bleak_falls_barrow",
-  "shout": "unrelenting_force"
+  "shout": "unrelenting_force",
+  "class": "marquee"
  },
  {
   "id": "northwind_mine",
@@ -2794,7 +3019,8 @@
   "x": 2083,
   "z": 600,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "darkwater_pass",
@@ -2805,7 +3031,8 @@
   "x": 1482,
   "z": 619,
   "radius": 20,
-  "variant": "falmer_cave"
+  "variant": "falmer_cave",
+  "class": "major"
  },
  {
   "id": "tolvalds_cave",
@@ -2816,7 +3043,8 @@
   "x": 2535,
   "z": 630,
   "radius": 20,
-  "variant": "falmer_cave"
+  "variant": "falmer_cave",
+  "class": "major"
  },
  {
   "id": "throat_of_the_world",
@@ -2839,7 +3067,8 @@
   "x": -795,
   "z": 661,
   "radius": 22,
-  "variant": "fort_mage"
+  "variant": "fort_mage",
+  "class": "major"
  },
  {
   "id": "moss_mother_cavern",
@@ -2850,7 +3079,8 @@
   "x": -1211,
   "z": 673,
   "radius": 18,
-  "variant": "spriggan_cave"
+  "variant": "spriggan_cave",
+  "class": "short"
  },
  {
   "id": "south_brittleshin_pass",
@@ -2861,7 +3091,8 @@
   "x": -628,
   "z": 680,
   "radius": 18,
-  "variant": "skeever_cave"
+  "variant": "skeever_cave",
+  "class": "short"
  },
  {
   "id": "shors_watchtower",
@@ -2872,7 +3103,8 @@
   "x": 2361,
   "z": 693,
   "radius": 12,
-  "variant": "watchtower"
+  "variant": "watchtower",
+  "class": "minor"
  },
  {
   "id": "falkreath_imperial_camp",
@@ -2883,7 +3115,8 @@
   "x": -1394,
   "z": 700,
   "radius": 18,
-  "variant": "imperial_camp"
+  "variant": "imperial_camp",
+  "class": "minor"
  },
  {
   "id": "anises_cabin",
@@ -2894,7 +3127,8 @@
   "x": -304,
   "z": 716,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "northwind_summit",
@@ -2906,7 +3140,8 @@
   "z": 730,
   "radius": 16,
   "variant": "dragon_lair",
-  "shout": "aura_whisper"
+  "shout": "aura_whisper",
+  "class": "minor"
  },
  {
   "id": "pinepeak_cavern",
@@ -2917,7 +3152,8 @@
   "x": 879,
   "z": 744,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "clearspring_tarn",
@@ -2939,7 +3175,8 @@
   "x": -1213,
   "z": 753,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "glenmoril_coven",
@@ -2950,7 +3187,8 @@
   "x": -1563,
   "z": 761,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "snapleg_cave",
@@ -2961,7 +3199,8 @@
   "x": 1531,
   "z": 762,
   "radius": 18,
-  "variant": "hagraven_lair"
+  "variant": "hagraven_lair",
+  "class": "short"
  },
  {
   "id": "embershard_mine",
@@ -2972,7 +3211,8 @@
   "x": -184,
   "z": 792,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "nilheim",
@@ -2983,7 +3223,8 @@
   "x": 1282,
   "z": 812,
   "radius": 12,
-  "variant": "nordic_tower"
+  "variant": "nordic_tower",
+  "class": "minor"
  },
  {
   "id": "ruunvald_excavation",
@@ -2994,7 +3235,8 @@
   "x": 2582,
   "z": 821,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "north_skybound_watch",
@@ -3005,7 +3247,8 @@
   "x": 205,
   "z": 848,
   "radius": 12,
-  "variant": "nordic_ruin"
+  "variant": "nordic_ruin",
+  "class": "short"
  },
  {
   "id": "bannermist_tower",
@@ -3016,7 +3259,8 @@
   "x": -1223,
   "z": 867,
   "radius": 12,
-  "variant": "nordic_tower"
+  "variant": "nordic_tower",
+  "class": "minor"
  },
  {
   "id": "shroud_hearth_barrow",
@@ -3028,7 +3272,8 @@
   "z": 871,
   "radius": 26,
   "variant": "barrow",
-  "shout": "kynes_peace"
+  "shout": "kynes_peace",
+  "class": "major"
  },
  {
   "id": "geirmunds_hall",
@@ -3039,7 +3284,8 @@
   "x": 1104,
   "z": 906,
   "radius": 26,
-  "variant": "barrow"
+  "variant": "barrow",
+  "class": "major"
  },
  {
   "id": "rift_stormcloak_camp",
@@ -3050,7 +3296,8 @@
   "x": 1517,
   "z": 913,
   "radius": 18,
-  "variant": "stormcloak_camp"
+  "variant": "stormcloak_camp",
+  "class": "minor"
  },
  {
   "id": "rift_watchtower",
@@ -3061,7 +3308,8 @@
   "x": 1633,
   "z": 930,
   "radius": 12,
-  "variant": "watchtower"
+  "variant": "watchtower",
+  "class": "minor"
  },
  {
   "id": "knifepoint_ridge",
@@ -3072,7 +3320,8 @@
   "x": -1427,
   "z": 942,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "evergreen_grove",
@@ -3083,7 +3332,8 @@
   "x": -1124,
   "z": 958,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "boulderfall_cave",
@@ -3094,7 +3344,8 @@
   "x": 1999,
   "z": 969,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "south_skybound_watch",
@@ -3105,7 +3356,8 @@
   "x": 19,
   "z": 980,
   "radius": 12,
-  "variant": "nordic_tower"
+  "variant": "nordic_tower",
+  "class": "minor"
  },
  {
   "id": "orphan_rock",
@@ -3128,7 +3380,8 @@
   "z": 1010,
   "radius": 26,
   "variant": "barrow",
-  "shout": "elemental_fury"
+  "shout": "elemental_fury",
+  "class": "major"
  },
  {
   "id": "fort_greenwall",
@@ -3139,7 +3392,8 @@
   "x": 2349,
   "z": 1030,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "falkreath_watchtower",
@@ -3150,7 +3404,8 @@
   "x": -873,
   "z": 1037,
   "radius": 12,
-  "variant": "watchtower"
+  "variant": "watchtower",
+  "class": "minor"
  },
  {
   "id": "last_vigil",
@@ -3161,7 +3416,8 @@
   "x": 2785,
   "z": 1058,
   "radius": 14,
-  "variant": "bandit_camp"
+  "variant": "bandit_camp",
+  "class": "minor"
  },
  {
   "id": "falkreath_stormcloak_camp",
@@ -3172,7 +3428,8 @@
   "x": 312,
   "z": 1071,
   "radius": 18,
-  "variant": "stormcloak_camp"
+  "variant": "stormcloak_camp",
+  "class": "minor"
  },
  {
   "id": "redwater_den",
@@ -3183,7 +3440,8 @@
   "x": 1839,
   "z": 1084,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "honeystrand_cave",
@@ -3194,7 +3452,8 @@
   "x": 945,
   "z": 1088,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "pinewatch",
@@ -3205,7 +3464,8 @@
   "x": -464,
   "z": 1093,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "south_shriekwind_bastion",
@@ -3216,7 +3476,8 @@
   "x": -701,
   "z": 1114,
   "radius": 26,
-  "variant": "barrow"
+  "variant": "barrow",
+  "class": "major"
  },
  {
   "id": "roadside_ruins",
@@ -3227,7 +3488,8 @@
   "x": -1003,
   "z": 1131,
   "radius": 12,
-  "variant": "nordic_ruin"
+  "variant": "nordic_ruin",
+  "class": "short"
  },
  {
   "id": "autumnshade_clearing",
@@ -3249,7 +3511,8 @@
   "x": -1440,
   "z": 1160,
   "radius": 26,
-  "variant": "barrow"
+  "variant": "barrow",
+  "class": "major"
  },
  {
   "id": "haemars_shame",
@@ -3260,7 +3523,8 @@
   "x": 553,
   "z": 1173,
   "radius": 18,
-  "variant": "vampire_lair"
+  "variant": "vampire_lair",
+  "class": "short"
  },
  {
   "id": "trevas_watch",
@@ -3271,7 +3535,8 @@
   "x": 1463,
   "z": 1196,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "fallowstone_cave",
@@ -3282,7 +3547,8 @@
   "x": 2749,
   "z": 1215,
   "radius": 18,
-  "variant": "den"
+  "variant": "den",
+  "class": "minor"
  },
  {
   "id": "alchemists_shack",
@@ -3293,7 +3559,8 @@
   "x": 819,
   "z": 1217,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "ruins_of_bthalft",
@@ -3315,7 +3582,8 @@
   "x": -1188,
   "z": 1273,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "peaks_shade_tower",
@@ -3326,7 +3594,8 @@
   "x": -600,
   "z": 1273,
   "radius": 12,
-  "variant": "nordic_tower"
+  "variant": "nordic_tower",
+  "class": "minor"
  },
  {
   "id": "rift_imperial_camp",
@@ -3337,7 +3606,8 @@
   "x": 967,
   "z": 1277,
   "radius": 18,
-  "variant": "imperial_camp"
+  "variant": "imperial_camp",
+  "class": "minor"
  },
  {
   "id": "lost_prospect_mine",
@@ -3348,7 +3618,8 @@
   "x": 2812,
   "z": 1309,
   "radius": 20,
-  "variant": "mine"
+  "variant": "mine",
+  "class": "short"
  },
  {
   "id": "greywater_grotto",
@@ -3359,7 +3630,8 @@
   "x": -77,
   "z": 1314,
   "radius": 18,
-  "variant": "spider_cave"
+  "variant": "spider_cave",
+  "class": "short"
  },
  {
   "id": "bonechill_passage",
@@ -3370,7 +3642,8 @@
   "x": -275,
   "z": 1325,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "fort_neugrad",
@@ -3381,7 +3654,8 @@
   "x": 213,
   "z": 1339,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "faldars_tooth",
@@ -3392,7 +3666,8 @@
   "x": 1996,
   "z": 1347,
   "radius": 22,
-  "variant": "fort"
+  "variant": "fort",
+  "class": "major"
  },
  {
   "id": "ancestor_glade",
@@ -3403,7 +3678,8 @@
   "x": -525,
   "z": 1404,
   "radius": 16,
-  "variant": "grove"
+  "variant": "grove",
+  "class": "minor"
  },
  {
   "id": "halldirs_cairn",
@@ -3414,7 +3690,8 @@
   "x": -997,
   "z": 1413,
   "radius": 26,
-  "variant": "barrow"
+  "variant": "barrow",
+  "class": "major"
  },
  {
   "id": "angarvunde",
@@ -3426,7 +3703,8 @@
   "z": 1423,
   "radius": 26,
   "variant": "barrow",
-  "shout": "animal_allegiance"
+  "shout": "animal_allegiance",
+  "class": "major"
  },
  {
   "id": "ancients_ascent",
@@ -3438,7 +3716,8 @@
   "z": 1454,
   "radius": 16,
   "variant": "dragon_lair",
-  "shout": "animal_allegiance"
+  "shout": "animal_allegiance",
+  "class": "minor"
  },
  {
   "id": "arcwind_point",
@@ -3450,7 +3729,8 @@
   "z": 1460,
   "radius": 16,
   "variant": "dragon_lair",
-  "shout": "drain_vitality"
+  "shout": "drain_vitality",
+  "class": "minor"
  },
  {
   "id": "autumnwatch_tower",
@@ -3462,7 +3742,8 @@
   "z": 1460,
   "radius": 16,
   "variant": "dragon_lair",
-  "shout": "marked_for_death"
+  "shout": "marked_for_death",
+  "class": "minor"
  },
  {
   "id": "frokis_shack",
@@ -3473,7 +3754,8 @@
   "x": 1205,
   "z": 1494,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "angis_camp",
@@ -3484,7 +3766,8 @@
   "x": -737,
   "z": 1546,
   "radius": 10,
-  "variant": "cabin"
+  "variant": "cabin",
+  "class": "unmarked"
  },
  {
   "id": "southfringe_sanctum",
@@ -3495,7 +3778,8 @@
   "x": 192,
   "z": 1563,
   "radius": 18,
-  "variant": "necromancer_lair"
+  "variant": "necromancer_lair",
+  "class": "short"
  },
  {
   "id": "avanchnzel",
@@ -3506,7 +3790,8 @@
   "x": 1621,
   "z": 1584,
   "radius": 32,
-  "variant": "dwemer_ruin"
+  "variant": "dwemer_ruin",
+  "class": "major"
  },
  {
   "id": "nightingale_hall",
@@ -3517,7 +3802,8 @@
   "x": 2429,
   "z": 1584,
   "radius": 18,
-  "variant": "cave"
+  "variant": "cave",
+  "class": "major"
  },
  {
   "id": "broken_helm_hollow",
@@ -3528,7 +3814,8 @@
   "x": 2723,
   "z": 1617,
   "radius": 18,
-  "variant": "bandit_cave"
+  "variant": "bandit_cave",
+  "class": "short"
  },
  {
   "id": "bloodlet_throne",
@@ -3539,7 +3826,8 @@
   "x": -310,
   "z": 1638,
   "radius": 22,
-  "variant": "fort_vampire"
+  "variant": "fort_vampire",
+  "class": "major"
  },
  {
   "id": "forelhost",
@@ -3551,7 +3839,8 @@
   "z": 1681,
   "radius": 30,
   "variant": "forelhost",
-  "shout": "storm_call"
+  "shout": "storm_call",
+  "class": "marquee"
  },
  {
   "id": "darklight_tower",
@@ -3562,7 +3851,8 @@
   "x": 2052,
   "z": 1722,
   "radius": 12,
-  "variant": "forsworn_tower"
+  "variant": "forsworn_tower",
+  "class": "minor"
  },
  {
   "id": "stendarrs_beacon",
@@ -3573,7 +3863,8 @@
   "x": 2811,
   "z": 1736,
   "radius": 12,
-  "variant": "watchtower"
+  "variant": "watchtower",
+  "class": "minor"
  },
  {
   "id": "crystaldrift_cave",
@@ -3584,7 +3875,8 @@
   "x": 2239,
   "z": 1782,
   "radius": 18,
-  "variant": "ice_cave"
+  "variant": "ice_cave",
+  "class": "major"
  },
  {
   "id": "lost_tongue_overlook",
@@ -3596,7 +3888,8 @@
   "z": 1854,
   "radius": 16,
   "variant": "dragon_lair",
-  "shout": "dismay"
+  "shout": "dismay",
+  "class": "minor"
  },
  {
   "id": "ruins_of_rkund",

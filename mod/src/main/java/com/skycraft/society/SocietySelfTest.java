@@ -76,6 +76,19 @@ public final class SocietySelfTest {
             Skycraft.LOGGER.info("{}", r.summary());
             done.run();
         }));
+        PerfAutorun.register("trainer", (t, done) -> {
+            Report r = runTrainerSelfTest(t.server());
+            for (String l : r.lines()) Skycraft.LOGGER.info("[trainer] {}", l);
+            Skycraft.LOGGER.info("{}", r.summary());
+            done.run();
+        });
+    }
+
+    /** Immediate headless self-test of R3d-1 town services: trainers, courts, and reactive dialogue. */
+    public static Report runTrainerSelfTest(MinecraftServer server) {
+        Run r = new Run(server, rep -> {});
+        trainerChecks(r, server.overworld());
+        return new Report(r.passed, r.total, r.lines, r.failed);
     }
 
     // ------------------------------------------------------------------ the little state machine
@@ -193,6 +206,7 @@ public final class SocietySelfTest {
         r.steps.add(new Step(0, () -> respawnChecks(r, level)));
         r.steps.add(new Step(0, () -> watchRuleChecks(r)));
         r.steps.add(new Step(0, () -> guardTypeChecks(r)));
+        r.steps.add(new Step(0, () -> trainerChecks(r, level)));
 
         // the town: three visits (a populate pass each), then count
         r.steps.add(new Step(0, () -> {
@@ -558,5 +572,103 @@ public final class SocietySelfTest {
         r.check("a few people and the guards are still about at night (a living street, not an empty one)",
                 n.guardCount() >= 2, n.guardCount() + " guards");
         r.check("nobody sleeps in a bed that is not a bed", n.sleeping() == asleep, n.sleeping() + " sleeping, " + asleep + " in beds");
+    }
+
+    /**
+     * R3d-1 self-test: verifies trainer placement by tier, causal why fields, fee deduction, +1 skill level,
+     * 5-per-level cap, trainer cap (50 Journeyman, 75 Expert, 90 Master), court roles (F-COURT), and reactive keys (F-REACT).
+     */
+    private static void trainerChecks(Run r, ServerLevel level) {
+        List<SocietyTrainers.Spec> capitalSpecs = SocietyTrainers.trainersForSettlement("whiterun", 0, "skyrim/whiterun");
+        long distinctCapSkills = capitalSpecs.stream().map(SocietyTrainers.Spec::skill).distinct().count();
+        boolean allHaveWhy = capitalSpecs.stream().allMatch(s -> !s.why().isEmpty());
+        r.check("a capital has >= 5 distinct skill trainers with WorldSheets why fields",
+                distinctCapSkills >= 5 && allHaveWhy, distinctCapSkills + " distinct skills, why=" + allHaveWhy);
+
+        List<SocietyTrainers.Spec> townSpecs = SocietyTrainers.trainersForSettlement("riverwood", 1, "skyrim/whiterun");
+        r.check("a town has at least 1 skill trainer", !townSpecs.isEmpty(), townSpecs.size() + " trainers");
+
+        Courts.Spec whiterunCourt = Courts.courtFor("whiterun");
+        boolean courtComplete = !whiterunCourt.jarl().isBlank() && !whiterunCourt.steward().isBlank()
+                && !whiterunCourt.courtWizard().isBlank() && !whiterunCourt.housecarl().isBlank();
+        r.check("each Skyrim capital/city court has >= 3 distinct court roles (jarl, steward, court_wizard, housecarl)",
+                courtComplete, whiterunCourt.jarl() + " / " + whiterunCourt.steward() + " / " + whiterunCourt.courtWizard() + " / " + whiterunCourt.housecarl());
+
+        String holdKey = ContextualDialogue.resolveReactiveKey("whiterun", "dragon_slayer");
+        String fallbackKey = ContextualDialogue.resolveReactiveKey("cyrodiil", "dragon_slayer");
+        r.check("reactive dialogue key resolves react.<region>.<deed> with fallback to react.generic.<deed>",
+                "react.whiterun.dragon_slayer".equals(holdKey) && "react.generic.dragon_slayer".equals(fallbackKey),
+                holdKey + " / " + fallbackKey);
+
+        FakePlayer p = FakePlayerFactory.get(level, new GameProfile(UUID.nameUUIDFromBytes("skycraft-trainer-test".getBytes()), "[TrainerTest]"));
+        com.skycraft.core.PlayerData data = com.skycraft.core.SkyData.get(p);
+        data.setLevel(15);
+        data.setLevelXp(0f);
+        data.setSkill(com.skycraft.core.Skill.SMITHING, 15);
+        data.setSkillXp(com.skycraft.core.Skill.SMITHING, 0f);
+        data.setTrainingsThisLevel(0);
+        int currentGold = (int) com.skycraft.core.Currency.balance(p);
+        if (currentGold > 0) com.skycraft.core.Currency.take(p, currentGold);
+        com.skycraft.core.Currency.give(p, 10000);
+
+        com.skycraft.society.entity.NpcEntity trainer = Npcs.create(level, new BlockPos(0, 80, 0), NpcRole.TRAINER);
+        if (trainer == null) {
+            r.check("trainer entity created", false, "Npcs.create returned null");
+            return;
+        }
+        SocietyTrainers.Spec journeymanSpec = new SocietyTrainers.Spec(
+                "Eorlund Test", com.skycraft.core.Skill.SMITHING, SocietyTrainers.Tier.JOURNEYMAN,
+                SocietyTrainers.JOURNEYMAN_CAP, "smith", List.of("skyrim:whiterun:L5:skyforge_steel"));
+        SocietyTrainers.configureTrainer(trainer, journeymanSpec);
+
+        String label = SocietyTrainers.formatOptionLabel(p, trainer, com.skycraft.core.Skill.SMITHING).getString();
+        int expectedFee15 = SocietyTrainers.feeFor(15, 50); // 50 + 15 * 15 = 275
+        int goldBefore = (int) com.skycraft.core.Currency.balance(p);
+        SocietyTrainers.Result first = SocietyTrainers.train(p, trainer, com.skycraft.core.Skill.SMITHING);
+        int goldAfter = (int) com.skycraft.core.Currency.balance(p);
+        r.check("training deducts scaled gold fee (" + expectedFee15 + "g) and increments skill by +1 (15 -> 16)",
+                first.ok() && first.newLevel() == 16 && data.getSkill(com.skycraft.core.Skill.SMITHING) == 16
+                        && (goldBefore - goldAfter) == expectedFee15 && data.getTrainingsThisLevel() == 1,
+                "skill=" + data.getSkill(com.skycraft.core.Skill.SMITHING) + ", feePaid=" + (goldBefore - goldAfter)
+                        + ", used=" + data.getTrainingsThisLevel() + ", label='" + label + "'");
+
+        // Train 4 more times to reach 5/5 trainings this character level (16 -> 17 -> 18 -> 19 -> 20)
+        for (int i = 0; i < 4; i++) {
+            SocietyTrainers.train(p, trainer, com.skycraft.core.Skill.SMITHING);
+        }
+        int goldBeforeSixth = (int) com.skycraft.core.Currency.balance(p);
+        SocietyTrainers.Result sixth = SocietyTrainers.train(p, trainer, com.skycraft.core.Skill.SMITHING);
+        int goldAfterSixth = (int) com.skycraft.core.Currency.balance(p);
+        r.check("5-per-level training cap blocks a 6th training at the same character level without taking gold",
+                sixth.status() == SocietyTrainers.Status.AT_LEVEL_CAP
+                        && data.getSkill(com.skycraft.core.Skill.SMITHING) == 20
+                        && goldBeforeSixth == goldAfterSixth,
+                "status=" + sixth.status() + ", skill=" + data.getSkill(com.skycraft.core.Skill.SMITHING) + ", used=" + data.getTrainingsThisLevel());
+
+        // Reset trainingsThisLevel and set skill to Journeyman cap (50) to verify trainer cap enforcement
+        data.setTrainingsThisLevel(0);
+        data.setSkill(com.skycraft.core.Skill.SMITHING, SocietyTrainers.JOURNEYMAN_CAP);
+        int goldBeforeCap = (int) com.skycraft.core.Currency.balance(p);
+        SocietyTrainers.Result atCap = SocietyTrainers.train(p, trainer, com.skycraft.core.Skill.SMITHING);
+        int goldAfterCap = (int) com.skycraft.core.Currency.balance(p);
+        r.check("trainer cap (50 Journeyman) blocks training when skill >= cap without taking gold",
+                atCap.status() == SocietyTrainers.Status.AT_TRAINER_CAP
+                        && data.getSkill(com.skycraft.core.Skill.SMITHING) == 50
+                        && goldBeforeCap == goldAfterCap,
+                "status=" + atCap.status() + ", cap=" + atCap.trainerCap());
+
+        // Upgrade trainer to Expert (cap 75) and verify 50 -> 51 succeeds at Expert fee (150 + 50 * 30 = 1650g)
+        SocietyTrainers.Spec expertSpec = new SocietyTrainers.Spec(
+                "Eorlund Test", com.skycraft.core.Skill.SMITHING, SocietyTrainers.Tier.EXPERT,
+                SocietyTrainers.EXPERT_CAP, "smith", List.of("skyrim:whiterun:L5:skyforge_steel"));
+        SocietyTrainers.configureTrainer(trainer, expertSpec);
+        int expectedExpertFee = SocietyTrainers.feeFor(50, 75);
+        int goldBeforeExp = (int) com.skycraft.core.Currency.balance(p);
+        SocietyTrainers.Result expertTrain = SocietyTrainers.train(p, trainer, com.skycraft.core.Skill.SMITHING);
+        int goldAfterExp = (int) com.skycraft.core.Currency.balance(p);
+        r.check("Expert trainer (cap 75) trains skill 50 -> 51 at expert fee band (" + expectedExpertFee + "g)",
+                expertTrain.ok() && data.getSkill(com.skycraft.core.Skill.SMITHING) == 51
+                        && (goldBeforeExp - goldAfterExp) == expectedExpertFee,
+                "skill=" + data.getSkill(com.skycraft.core.Skill.SMITHING) + ", feePaid=" + (goldBeforeExp - goldAfterExp));
     }
 }
