@@ -42,7 +42,7 @@ public final class Housing {
      * Upper bounds per settlement tier (0 capital/city, 1 town, 2 village): guards (only Helgen's scripted garrison
      * uses them now, see {@link #guardSlots}), merchants, ambient crowd.
      */
-    public static final int[] GUARDS = {12, 4, 2}, MERCHANTS = {8, 3, 2}, AMBIENT = {26, 15, 8};
+    public static final int[] GUARDS = {12, 4, 2}, MERCHANTS = {16, 10, 6}, AMBIENT = {26, 15, 8};
     /** Guards with no barracks bed who keep the night watch at their post. */
     public static final int POST_SLEEPERS = 2;
     /** Most household residents assigned to one meeting point for their free hours. */
@@ -173,71 +173,92 @@ public final class Housing {
         // the dormitory: the innkeeper may take a bed from it, but two stay free for travellers
         int dormSpare = Math.max(0, guest.size() - 2);
 
-        // ---- jobs, most important first
+        // ---- jobs, most important first (indoor building anchors before outdoor market stalls)
         Map<AnchorType, Integer> count = new EnumMap<>(AnchorType.class);
         for (AnchorType type : JOB_ORDER) {
             int cap = type == AnchorType.GUARD ? guardSlots(key, tier) : cap(type, tier, capital);
             if (cap <= 0) continue;
-            for (int i = 0; i < n && count.getOrDefault(type, 0) < cap; i++) {
-                Anchor a = anchors.get(i);
-                if (a.type() != type) continue;
-                String job = jobId(type);
-                NpcRole role = roleOf(type);
-                if (type == AnchorType.JAIL_PRISONER) {
-                    put(plan, new Resident(job, role, type, i, i, -1, BedKind.NONE, -1));
-                    count.merge(type, 1, Integer::sum);
-                    continue;
-                }
-                if (type == AnchorType.GUARD) {
-                    boolean barracks = free(pool.get(BedKind.BARRACKS), used) > 0;
-                    if (!barracks && plan.postSleepers() >= POST_SLEEPERS) continue;
-                    int bed = takeNearest(pool.get(BedKind.BARRACKS), used, anchors, a, null);
-                    put(plan, new Resident(job, role, type, i, i, bed, bed < 0 ? BedKind.NONE : BedKind.BARRACKS, -1));
-                    count.merge(type, 1, Integer::sum);
-                    continue;
-                }
-                int bed = -1;
-                BedKind bk = BedKind.HOME;
-                switch (type) {
-                    case JARL, HOUSECARL, STEWARD, WIZARD -> {
-                        bed = takeNearest(pool.get(BedKind.COURT), used, anchors, a, null);
-                        bk = BedKind.COURT;
+            for (int pass = 0; pass < 2; pass++) {
+                for (int i = 0; i < n && count.getOrDefault(type, 0) < cap; i++) {
+                    Anchor a = anchors.get(i);
+                    if (a.type() != type) continue;
+                    boolean isStall = a.owner().startsWith("stall");
+                    if ((pass == 0) == isStall) continue;
+                    String job = jobId(type);
+                    NpcRole role = roleOf(type);
+                    if (type == AnchorType.JAIL_PRISONER) {
+                        put(plan, new Resident(job, role, type, i, i, -1, BedKind.NONE, -1));
+                        count.merge(type, 1, Integer::sum);
+                        continue;
                     }
-                    case INN -> {
-                        bed = takeNearest(pool.get(BedKind.INN_STAFF), used, anchors, a, a.owner());
-                        bk = BedKind.INN_STAFF;
+                    if (type == AnchorType.GUARD) {
+                        boolean barracks = free(pool.get(BedKind.BARRACKS), used) > 0;
+                        if (!barracks && plan.postSleepers() >= POST_SLEEPERS) continue;
+                        int bed = takeNearest(pool.get(BedKind.BARRACKS), used, anchors, a, null);
+                        put(plan, new Resident(job, role, type, i, i, bed, bed < 0 ? BedKind.NONE : BedKind.BARRACKS, -1));
+                        count.merge(type, 1, Integer::sum);
+                        continue;
+                    }
+                    int bed = -1;
+                    BedKind bk = BedKind.HOME;
+                    switch (type) {
+                        case JARL, HOUSECARL, STEWARD, WIZARD -> {
+                            bed = takeNearest(pool.get(BedKind.COURT), used, anchors, a, null);
+                            bk = BedKind.COURT;
+                        }
+                        case INN -> {
+                            bed = takeNearest(pool.get(BedKind.INN_STAFF), used, anchors, a, a.owner());
+                            bk = BedKind.INN_STAFF;
+                            if (bed < 0 && dormSpare > 0) {
+                                bed = takeNearest(guest, used, anchors, a, null);
+                                if (bed >= 0) {
+                                    dormSpare--;
+                                    plan.beds.merge(BedKind.INN_STAFF, 1, Integer::sum); // the dorm bed now counts as quarters
+                                }
+                            }
+                        }
+                        case PRIEST -> {
+                            bed = takeNearest(pool.get(BedKind.TEMPLE), used, anchors, a, null);
+                            bk = BedKind.TEMPLE;
+                        }
+                        case GUILD_LEADER, GUILD_TRAINER, GUILD_VENDOR -> {
+                            bed = takeNearest(guildBeds.getOrDefault(a.owner(), List.of()), used, anchors, a, null);
+                            bk = BedKind.GUILD;
+                        }
+                        default -> {
+                        }
+                    }
+                    if (bed < 0) { // a bed in the workplace's own building, else the nearest free home
+                        bed = takeNearest(pool.get(BedKind.HOME), used, anchors, a, a.owner());
+                        if (bed < 0) bed = takeNearest(pool.get(BedKind.HOME), used, anchors, a, null);
+                        bk = BedKind.HOME;
+                    }
+                    if (bed < 0) { // fallback to any remaining unclaimed bed in the settlement so essential shops stay staffed
+                        for (BedKind fallback : new BedKind[]{BedKind.INN_STAFF, BedKind.COURT, BedKind.TEMPLE, BedKind.BARRACKS, BedKind.GUILD}) {
+                            bed = takeNearest(pool.get(fallback), used, anchors, a, null);
+                            if (bed >= 0) {
+                                bk = fallback;
+                                break;
+                            }
+                        }
                         if (bed < 0 && dormSpare > 0) {
                             bed = takeNearest(guest, used, anchors, a, null);
                             if (bed >= 0) {
                                 dormSpare--;
-                                plan.beds.merge(BedKind.INN_STAFF, 1, Integer::sum); // the dorm bed now counts as quarters
+                                bk = BedKind.INN_STAFF;
+                                plan.beds.merge(BedKind.INN_STAFF, 1, Integer::sum);
                             }
                         }
                     }
-                    case PRIEST -> {
-                        bed = takeNearest(pool.get(BedKind.TEMPLE), used, anchors, a, null);
-                        bk = BedKind.TEMPLE;
+                    if (bed < 0) {
+                        plan.unstaffed.add(job);
+                        continue;
                     }
-                    case GUILD_LEADER, GUILD_TRAINER, GUILD_VENDOR -> {
-                        bed = takeNearest(guildBeds.getOrDefault(a.owner(), List.of()), used, anchors, a, null);
-                        bk = BedKind.GUILD;
-                    }
-                    default -> {
-                    }
+                    if (anchors.get(bed).type() == AnchorType.GUEST_BED) bk = BedKind.INN_STAFF;
+                    put(plan, new Resident(job, role, type, i, i, bed, bk, -1));
+                    count.merge(type, 1, Integer::sum);
+                    if (type == AnchorType.INN) staffQuarters(plan, anchors, pool, used, i, a);
                 }
-                if (bed < 0) { // a bed in the workplace's own building, else the nearest free home
-                    bed = takeNearest(pool.get(BedKind.HOME), used, anchors, a, a.owner());
-                    if (bed < 0) bed = takeNearest(pool.get(BedKind.HOME), used, anchors, a, null);
-                    bk = BedKind.HOME;
-                }
-                if (bed < 0) {
-                    plan.unstaffed.add(job);
-                    continue;
-                }
-                if (anchors.get(bed).type() == AnchorType.GUEST_BED) bk = BedKind.INN_STAFF;
-                put(plan, new Resident(job, role, type, i, i, bed, bk, -1));
-                count.merge(type, 1, Integer::sum);
-                if (type == AnchorType.INN) staffQuarters(plan, anchors, pool, used, i, a);
             }
         }
 
@@ -331,16 +352,15 @@ public final class Housing {
 
     static int cap(AnchorType t, int tier, boolean capital) {
         return switch (t) {
-            case JARL, HOUSECARL -> capital ? 1 : 0;
-            case STEWARD, WIZARD -> 1;
+            case JARL, HOUSECARL, STEWARD, WIZARD -> 1;
             case GUARD -> GUARDS[tier];
             case MERCHANT -> MERCHANTS[tier];
-            case INN, PRIEST, SMITH, ALCHEMIST, FARMER, MILLER, MINER, LUMBERJACK -> 3;
-            case BARD -> tier <= 1 ? 3 : 1;
+            case INN, PRIEST, SMITH, ALCHEMIST, FARMER, MILLER, MINER, LUMBERJACK -> 6;
+            case BARD -> tier <= 1 ? 4 : 2;
             case GUILD_LEADER, GUILD_VENDOR -> 12;
             case GUILD_TRAINER -> 24;
             case JAIL_PRISONER -> 4;
-            case JEWELER, BOOKSELLER, TAILOR, BUTCHER, FLETCHER, FISHER, HUNTER, WORKER -> 3;
+            case JEWELER, BOOKSELLER, TAILOR, BUTCHER, FLETCHER, FISHER, HUNTER, WORKER -> 6;
             case FENCE -> 1;
             default -> 0;
         };
@@ -373,6 +393,8 @@ public final class Housing {
         return switch (t) {
             case JARL -> NpcRole.JARL;
             case HOUSECARL -> NpcRole.HOUSECARL;
+            case STEWARD -> NpcRole.STEWARD;
+            case WIZARD -> NpcRole.MAGE;
             case BARD -> NpcRole.BARD;
             case PRIEST -> NpcRole.PRIEST;
             case MILLER, LUMBERJACK -> NpcRole.LUMBERJACK;

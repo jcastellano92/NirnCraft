@@ -667,18 +667,31 @@ public final class Grammar {
         if (b.body == Body.TREE) return;
         boolean signed = s.has(Spec.SIGN) || b.use.sign;
         if (signed) {
+            Component kindTitle = Component.translatable("settlement.skycraft.kind."
+                    + (s.kind == com.skycraft.tamriel.settlement.plan.Archetype.RESERVED && !s.name.isEmpty() ? s.name : b.use.id()));
             Component title = s.name.isEmpty() || s.has(Spec.FOR_SALE) || s.kind == com.skycraft.tamriel.settlement.plan.Archetype.RESERVED
-                    ? Component.translatable("settlement.skycraft.kind." + (s.kind == com.skycraft.tamriel.settlement.plan.Archetype.RESERVED && !s.name.isEmpty() ? s.name : b.use.id()))
+                    ? kindTitle
                     : Component.translatable("settlement.skycraft.name." + s.name);
-            // one hanging sign on a bracket beside the door, sticking out from the facade (never flat over the wall)
+            // primary hanging sign on a bracket beside the door, sticking out from the facade
             int sx = res.doorX + 1;
             if (sx > b.bx1 - 1) sx = res.doorX - 1;
             if (!c.recording() && Canvas.open(c.get(sx, 3, dz))) c.sign(sx, 3, dz, hanging(p.sign), Direction.EAST, Component.empty(), title);
+            // for shops and inns, hang a companion trade sign on the opposite side of the door
+            if ((b.use.trade || b.use == Use.INN) && res.doorX - 1 >= b.bx0 + 1 && sx != res.doorX - 1) {
+                int sx2 = res.doorX - 1;
+                if (!c.recording() && Canvas.open(c.get(sx2, 3, dz))) {
+                    c.sign(sx2, 3, dz, hanging(p.sign), Direction.WEST, Component.empty(), kindTitle);
+                }
+            }
         }
         if (b.banner) {
             BlockState banner = B.face(Materials.banner(b.color), Direction.NORTH);
-            int bx = res.doorX - 1;
-            if (!c.recording() && Canvas.open(c.get(bx, 3, dz)) && !Canvas.open(c.get(bx, 3, dz + 1))) c.set(bx, 3, dz, banner);
+            int[] cols = (b.use.trade || b.use == Use.INN || b.use == Use.KEEP) && b.bx1 - b.bx0 >= 6
+                    ? new int[]{b.bx0 + 1, b.bx1 - 1}
+                    : new int[]{res.doorX - 1};
+            for (int bx : cols) {
+                if (!c.recording() && Canvas.open(c.get(bx, 3, dz)) && !Canvas.open(c.get(bx, 3, dz + 1))) c.set(bx, 3, dz, banner);
+            }
             if (b.storeys > 1 && b.body == Body.RECT) {
                 int uy = b.floorH() + 3;
                 for (int x : new int[]{b.bx0 + 1, b.bx1 - 1}) {
@@ -693,11 +706,80 @@ public final class Grammar {
             }
         }
         if (b.awning && b.body == Body.RECT) {
-            BlockState cloth = b.use.trade && b.culture != com.skycraft.tamriel.settlement.Culture.NORD
-                    ? Materials.wool(b.color) : null;
+            BlockState cloth = (b.use.trade || b.use == Use.INN) ? Materials.wool(b.color) : null;
             for (int x = res.doorX - 1; x <= res.doorX + 1; x++) {
                 if (cloth != null) c.setIfOpen(x, 3, dz, cloth);
                 else c.setIfOpen(x, 3, dz, B.stair(p.roof, Direction.SOUTH, false));
+            }
+        }
+        if (!c.recording() && (b.use.trade || b.use == Use.INN) && b.body == Body.RECT && b.foundation != Foundation.STILTS) {
+            tradeExterior(c, b, p, res, dz);
+        }
+    }
+
+    /** Trade-specific outdoor display station beside the shop facade, well clear of the doorway. */
+    static void tradeExterior(Canvas c, Blueprint b, Palette p, Result res, int dz) {
+        int lx = b.bx0 + 1, rx = b.bx1 - 1;
+        boolean leftOk = Math.abs(lx - res.doorX) >= 3 && Canvas.open(c.get(lx, 1, dz));
+        boolean rightOk = Math.abs(rx - res.doorX) >= 3 && Canvas.open(c.get(rx, 1, dz));
+        int px = rightOk ? rx : leftOk ? lx : Integer.MIN_VALUE;
+        if (px == Integer.MIN_VALUE) return;
+        c.setIfOpen(px, 0, dz, p.foundation);
+        c.foundation(px, -1, dz, p.foundation, DEPTH);
+        switch (b.use) {
+            case SMITHY -> {
+                c.setIfOpen(px, 1, dz, B.s(Blocks.ANVIL));
+                if (leftOk && px != lx) {
+                    c.setIfOpen(lx, 0, dz, p.foundation);
+                    c.foundation(lx, -1, dz, p.foundation, DEPTH);
+                    c.setIfOpen(lx, 1, dz, B.s(Blocks.WATER_CAULDRON).setValue(net.minecraft.world.level.block.LayeredCauldronBlock.LEVEL, 3));
+                }
+            }
+            case ALCHEMIST -> {
+                c.setIfOpen(px, 1, dz, B.s(Blocks.CAULDRON));
+                if (leftOk && px != lx) {
+                    c.setIfOpen(lx, 0, dz, p.foundation);
+                    c.foundation(lx, -1, dz, p.foundation, DEPTH);
+                    c.setIfOpen(lx, 1, dz, B.slab(p.slab, true));
+                    c.setIfOpen(lx, 2, dz, B.s(Blocks.BREWING_STAND));
+                }
+            }
+            case FLETCHER -> {
+                c.setIfOpen(px, 1, dz, B.s(Blocks.TARGET));
+                if (leftOk && px != lx) {
+                    c.setIfOpen(lx, 0, dz, p.foundation);
+                    c.foundation(lx, -1, dz, p.foundation, DEPTH);
+                    c.setIfOpen(lx, 1, dz, B.s(Blocks.FLETCHING_TABLE));
+                }
+            }
+            case TAILOR -> {
+                c.setIfOpen(px, 1, dz, B.face(B.s(Blocks.LOOM), Direction.NORTH));
+                if (leftOk && px != lx) {
+                    c.setIfOpen(lx, 0, dz, p.foundation);
+                    c.foundation(lx, -1, dz, p.foundation, DEPTH);
+                    c.setIfOpen(lx, 1, dz, Materials.wool(b.color));
+                }
+            }
+            case JEWELLER -> {
+                c.setIfOpen(px, 1, dz, p.column);
+                c.setIfOpen(px, 2, dz, B.s(Blocks.AMETHYST_CLUSTER));
+            }
+            case BOOKSELLER -> c.setIfOpen(px, 1, dz, B.face(B.s(Blocks.LECTERN), Direction.NORTH));
+            case BUTCHER -> c.setIfOpen(px, 1, dz, B.face(B.s(Blocks.SMOKER), Direction.NORTH));
+            case TANNERY -> c.setIfOpen(px, 1, dz, com.skycraft.tamriel.settlement.build.Props.tanningRack());
+            case GENERAL_STORE -> {
+                c.setIfOpen(px, 1, dz, B.face(B.s(Blocks.BARREL), Direction.UP));
+                c.setIfOpen(px, 2, dz, p.light);
+            }
+            case INN -> {
+                c.setIfOpen(px, 1, dz, B.stair(p.stairs, Direction.SOUTH, false));
+                if (leftOk && px != lx) {
+                    c.setIfOpen(lx, 0, dz, p.foundation);
+                    c.foundation(lx, -1, dz, p.foundation, DEPTH);
+                    c.setIfOpen(lx, 1, dz, B.stair(p.stairs, Direction.SOUTH, false));
+                }
+            }
+            default -> {
             }
         }
     }

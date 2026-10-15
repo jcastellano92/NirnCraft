@@ -73,7 +73,7 @@ public final class Jails {
         }
         // the front door, the jail's name and a lamp either side
         int doorX = (w - 1) / 2;
-        c.door(doorX, 1, 0, mine ? B.s(Blocks.IRON_DOOR) : p.door, Direction.SOUTH);
+        c.entrance(doorX, 1, 0, mine ? B.s(Blocks.IRON_DOOR) : p.door, Direction.SOUTH);
         c.set(doorX - 1, 3, -1, p.light);
         c.set(doorX + 1, 3, -1, p.light);
         if (!c.recording()) {
@@ -262,7 +262,7 @@ public final class Jails {
                 if (edge && (x + z) % 2 == 0) c.set(x, roof + 1, z, p.cityWallWall);
             }
         }
-        c.door(doorX, 1, 0, p.door, Direction.SOUTH);
+        c.entrance(doorX, 1, 0, p.door, Direction.SOUTH);
         c.set(doorX - 1, 3, -1, p.light);
         c.set(doorX + 1, 3, -1, p.light);
         if (!c.recording()) {

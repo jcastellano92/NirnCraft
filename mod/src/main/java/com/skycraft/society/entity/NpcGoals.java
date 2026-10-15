@@ -533,7 +533,7 @@ final class NpcGoals {
                 case LUMBERJACK -> (spot = findBlock(false)) != null;
                 case FARMER -> (spot = findCrop()) != null;
                 case BLACKSMITH, BUTCHER, INNKEEPER -> (spot = work != null ? work : npc.blockPosition()) != null;
-                case MERCHANT, APOTHECARY, SCHOLAR, STEWARD, JARL -> (spot = work != null ? work : npc.blockPosition()) != null;
+                case MERCHANT, APOTHECARY, SCHOLAR, MAGE, STEWARD, JARL -> (spot = work != null ? work : npc.blockPosition()) != null;
                 case FISHER -> (spot = findWater()) != null;
                 case BARD -> audience() && npc.getRandom().nextInt(3) == 0;
                 case PRIEST -> (patient = findPatient()) != null;
@@ -555,7 +555,7 @@ final class NpcGoals {
         public void start() {
             switch (npc.role()) {
                 case MINER, LUMBERJACK, FARMER, BLACKSMITH, BUTCHER -> ticks = 120 + npc.getRandom().nextInt(80);
-                case MERCHANT, APOTHECARY, SCHOLAR, STEWARD, JARL, INNKEEPER -> ticks = 200 + npc.getRandom().nextInt(200);
+                case MERCHANT, APOTHECARY, SCHOLAR, MAGE, STEWARD, JARL, INNKEEPER -> ticks = 200 + npc.getRandom().nextInt(200);
                 case FISHER -> ticks = 300 + npc.getRandom().nextInt(200);
                 case BARD -> {
                     ticks = 200;
@@ -586,7 +586,7 @@ final class NpcGoals {
                 case MINER, LUMBERJACK, FARMER -> labor(level);
                 case BLACKSMITH -> smith(level);
                 case BUTCHER, INNKEEPER -> chores(level);
-                case MERCHANT, APOTHECARY, SCHOLAR, STEWARD, JARL -> attend(level);
+                case MERCHANT, APOTHECARY, SCHOLAR, MAGE, STEWARD, JARL -> attend(level);
                 case FISHER -> fish(level);
                 case BARD -> play(level);
                 case PRIEST -> heal(level);
@@ -715,9 +715,12 @@ final class NpcGoals {
                 ticks = 0;
                 return;
             }
-            if (!near(spot, 3.5)) return;
+            BlockPos seat = findSeat(level, spot);
+            BlockPos post = seat != null ? seat : spot;
+            if (!near(post, 1.75)) return;
             Player p = level.getNearestPlayer(npc, 6);
             if (p != null && npc.getRandom().nextInt(3) > 0) npc.getLookControl().setLookAt(p, 30f, 30f);
+            else if (seat != null) faceSeat(npc, level, seat);
             if (ticks % 40 == 0) {
                 npc.swing(InteractionHand.MAIN_HAND);
                 level.playSound(null, npc.blockPosition(), npc.role() == NpcRole.BUTCHER ? SoundEvents.AXE_STRIP : SoundEvents.BOTTLE_FILL,
@@ -731,10 +734,15 @@ final class NpcGoals {
                 ticks = 0;
                 return;
             }
-            if (!near(spot, 3.0)) return;
+            BlockPos seat = findSeat(level, spot);
+            BlockPos post = seat != null ? seat : spot;
+            if (!near(post, 1.75)) return;
             Player p = level.getNearestPlayer(npc, 7);
             if (p != null && !p.isSpectator()) npc.getLookControl().setLookAt(p, 30f, 30f);
-            else if (ticks % 60 == 0) npc.swing(InteractionHand.OFF_HAND);
+            else {
+                if (seat != null) faceSeat(npc, level, seat);
+                if (ticks % 60 == 0) npc.swing(InteractionHand.OFF_HAND);
+            }
         }
 
         /** Line in the water, the occasional splash. */
@@ -952,6 +960,37 @@ final class NpcGoals {
 
     // ------------------------------------------------------------------ routines
 
+    static boolean stationRole(NpcRole role) {
+        return switch (role) {
+            case MERCHANT, APOTHECARY, INNKEEPER, JARL, STEWARD, MAGE, SCHOLAR, BUTCHER -> true;
+            default -> false;
+        };
+    }
+
+    @Nullable
+    static BlockPos findSeat(net.minecraft.world.level.Level level, BlockPos work) {
+        if (!level.isLoaded(work)) return null;
+        for (int dy : new int[]{0, -1}) {
+            BlockPos b = work.offset(0, dy, 0);
+            if (level.getBlockState(b).getBlock() instanceof net.minecraft.world.level.block.StairBlock) return b;
+        }
+        for (int dy : new int[]{0, -1}) {
+            for (Direction d : Direction.Plane.HORIZONTAL) {
+                BlockPos b = work.offset(d.getStepX(), dy, d.getStepZ());
+                if (level.getBlockState(b).getBlock() instanceof net.minecraft.world.level.block.StairBlock) return b;
+            }
+        }
+        return null;
+    }
+
+    static void faceSeat(NpcEntity npc, net.minecraft.world.level.Level level, BlockPos seat) {
+        BlockState s = level.getBlockState(seat);
+        if (s.hasProperty(net.minecraft.world.level.block.StairBlock.FACING)) {
+            Direction out = s.getValue(net.minecraft.world.level.block.StairBlock.FACING).getOpposite();
+            npc.getLookControl().setLookAt(seat.getX() + 0.5 + out.getStepX() * 3, npc.getEyeY(), seat.getZ() + 0.5 + out.getStepZ() * 3, 25f, 25f);
+        }
+    }
+
     /**
      * The daily routine (Radiant AI-like, see {@link Schedule}): bed at night, breakfast and supper at home, the
      * workplace during working hours, lunch and evenings at the inn, strolling and chatting in between. Thinks about
@@ -1055,12 +1094,26 @@ final class NpcGoals {
                     BlockPos work = Workplaces.workplaceOf(npc);
                     if (work == null) {
                         chores(home); // no workplace: household tasks indoors, never loitering in the street
+                    } else if (stationRole(npc.role())) {
+                        BlockPos seat = findSeat(level, work);
+                        BlockPos post = seat != null ? seat : work;
+                        if (!arrived(post, 1.75)) {
+                            go(post, 0.65D, 1.25);
+                        } else {
+                            npc.getNavigation().stop();
+                            target = null;
+                            if (seat != null && npc.distanceToSqr(seat.getX() + 0.5, npc.getY(), seat.getZ() + 0.5) > 0.25) {
+                                npc.getNavigation().moveTo(seat.getX() + 0.5, seat.getY(), seat.getZ() + 0.5, 0.5D);
+                            }
+                            Player p = level.getNearestPlayer(npc, 6);
+                            if (p != null && !p.isSpectator()) npc.getLookControl().setLookAt(p, 30f, 30f);
+                            else if (seat != null) faceSeat(npc, level, seat);
+                        }
                     } else if (!arrived(work, 5)) {
                         go(work, 0.65D, 3);
                     } else {
                         // the Work goal takes over at the workplace; hang around it until it does
                         stroll(work, 3, 0.4D, 8);
-                        if (npc.role() == NpcRole.MERCHANT || npc.role() == NpcRole.APOTHECARY) lookAtCustomer();
                     }
                 }
                 case LUNCH, INN -> {

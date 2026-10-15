@@ -483,13 +483,13 @@ Status values: `done`, `in progress`, `next`, `blocked (why)`, `not started`. "G
 | Playtest round 4 fixes | done | 15e46d7 | settlement crowd cap, night sleepers, gate posts, respawn at nearest town, key remap, longbow pose | 2026-10-13 |
 | Playtest round 5 fixes | done | b738492 | block-model rotations, strict asset audit, intro cover, Helgen polish; rebake | 2026-10-13 |
 | Landmark grounding and story lecterns | done | 7af4469 | whole-footprint sampling, foundations, support validator, lectern reader UI; rebake | 2026-10-13 |
-| Playtest round 6 & multiplayer overhaul (14 items) | done | working tree / latest build | jail/party fast-travel & release grace, Sanies Lupinus & level-gated werewolves, crouch trap disarm & filled dispensers, vanilla spawner strip, NPC busy cleanup, L/R hand dual-wield/spell/bound/favorite equip, Skyrim XP curve & party XP/hud bar, Helgen aftermath & contextual dialogue, weapon poisons & HUD meter, ally/companion healing spells & staves, party inn booking & bed ownership, book-to-inventory state return & readable Journey book, 5-min per-item evidence decay, 48h merchant rotation & buyback decay; `qa.ps1` OVERALL PASS | 2026-10-14 |
+| Playtest round 6 & multiplayer overhaul (14 items + 2 refinements) | done | 2bcf594b | 2-block direct-aim companion healing, Skyrim-style free jail visits & 1-day escapee tracking, jail/party fast-travel, Sanies Lupinus & level-gated werewolves, crouch trap disarm & filled dispensers, vanilla spawner strip, NPC busy cleanup, L/R hand dual-wield/spell/bound/favorite equip, Skyrim XP curve & party XP/hud bar, Helgen aftermath & contextual dialogue, weapon poisons & HUD meter, party inn booking & bed ownership, book-to-inventory state return & readable Journey book, 5-min per-item evidence decay, 48h merchant rotation & buyback decay; `qa.ps1 -Server` OVERALL PASS | 2026-10-15 |
 | Design docs (principles, scale, Iliac Bay) | done | cf288dd | | 2026-10-13 |
 | Province documents `docs/world/provinces/*.md` (all 11 files, §1-§10) | done | `skyrim.md`, `high_rock.md`, `hammerfell.md`, `cyrodiil.md`, `morrowind.md`, `solstheim.md`, `black_marsh.md`, `elsweyr.md`, `valenwood.md`, `summerset.md`, `foreign_lands.md` | All 11 province/island/expedition design docs complete with §§1-10 | 2026-10-14 |
 | World plan, prompt library, START-HERE | done | updated with R4a & all province docs | | 2026-10-14 |
 | IB0 Iliac extraction | done | `.reference/daggerfall_ref/v2` | | 2026-10-12 |
-| **R0** release build and playtest | **done** (release build deployed to Prism & `dist/Skycraft-client-instance.zip`; owner playtest items resolved) | | `qa.ps1` OVERALL PASS | 2026-10-14 |
-| **R1** loose ends (R1a, R1b) | **next** | | | 2026-10-14 |
+| **R0** release build and playtest | **done** (release build deployed to Prism & `dist/Skycraft-client-instance.zip`; owner playtest items resolved) | 2bcf594b | `qa.ps1` OVERALL PASS | 2026-10-15 |
+| **R1** loose ends (R1a, R1b) | **in progress** | | | 2026-10-15 |
 | R2 testing tiers 0/1 | next (parallel with R1) | | | |
 | R3a world sheets | not started (all 11 `provinces/*.md` §1 sheets written) | | | |
 | R3b micro-biomes | not started | | | |
@@ -497,7 +497,7 @@ Status values: `done`, `in progress`, `next`, `blocked (why)`, `not started`. "G
 | R3d town services | not started | | | |
 | R3e world systems | not started | | | |
 | R4 Skyrim uplift (S1-S5) | not started (design done: `skyrim.md` SK1-SK8; waits on R3a-R3e) | | Skyrim SET 54 | |
-| R4a Town overhaul (TO0-TO6) | not started (prompt `R4a-town-overhaul.md` ready) | | | |
+| **R4a** Town overhaul (TO0-TO6) | **done** | `tamriel-overhaul` | TO0 audit, TO1 stepped terrace/tier stairs & 100% leader seats & >=4 house footprints (>=7x9), TO2 recognisable trade shops with unsealed counters/chairs & multi-room inns (4-6 private rooms with desks), TO3 partitioned Jarl/leader halls & 3 house interior layout families, TO4 stationed counter/throne/desk routines, TO5 shrine candle pedestal fix & urban park gardens & 24-block carver foundations; rebaked, `qa.ps1 -Server -Rebake` OVERALL PASS | 2026-10-15 |
 | R5 Iliac Bay (IB-S, IB1-IB9, IB-G) | not started (`high_rock.md`, `hammerfell.md`, `ILIAC-BAY.md` done) | | High Rock 42, Hammerfell 43 | |
 | R6 Cyrodiil | not started (`cyrodiil.md` done) | | 48 | |
 | R7 Morrowind | not started (`morrowind.md`, `solstheim.md` done) | | 53 | |

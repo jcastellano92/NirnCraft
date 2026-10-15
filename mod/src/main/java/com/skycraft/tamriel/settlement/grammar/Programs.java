@@ -41,28 +41,28 @@ public final class Programs {
         boolean firePit = b.culture == Culture.NORD || b.culture == Culture.ORC || b.culture == Culture.ATMORAN;
         boolean rich = b.wealth.atLeast(Wealth.WEALTHY);
         String homeLoot = sale ? null : rich ? "house_rich" : b.use == Use.FARMHOUSE ? "farm" : "house";
+        int family = Math.floorMod(s.gseed, 3);
         if (res.hasHearth() && inside(r0, res.hearthX, res.hearthZ)) Props.hearth(c, p, res.hearthX, r0.y(), res.hearthZ, res.hearthInto);
         if (s.kind == com.skycraft.tamriel.settlement.plan.Archetype.RESERVED && SettlementPlan.furnish(c, b, res)) return;
         switch (b.use) {
-            case HOVEL, SHACK -> hovel(c, p, r0, doorX, bed, homeLoot);
+            case HOVEL, SHACK -> hovel(c, p, r0, doorX, bed, homeLoot, family);
             case COTTAGE, HOUSE, FARMHOUSE, TOWNHOUSE -> {
                 int beds = b.use == Use.COTTAGE ? 2 : up != null ? 1 : 2 + (rich ? 0 : 1);
-                Interiors.house(c, p, r0, doorX, beds, rich, bed, false, homeLoot == null ? "house" : homeLoot);
+                Interiors.house(c, p, r0, doorX, beds, rich, bed, false, homeLoot == null ? "house" : homeLoot, family);
                 if (sale) clearLoot(c, r0);
                 for (Room w : wings) kitchen(c, p, w, homeLoot);
-                for (Room u : res.upper) bedroom(c, p, u, rich, bed, homeLoot, b.use == Use.TOWNHOUSE ? 1 : 2);
+                for (Room u : res.upper) bedroom(c, p, u, rich, bed, homeLoot, b.use == Use.TOWNHOUSE ? 2 : 2, family);
                 if (b.use == Use.FARMHOUSE) c.anchor(AnchorType.FARMER, doorX, 1, -2);
             }
             case MANOR -> {
-                dining(c, p, r0, rich, homeLoot);
+                manorGround(c, p, r0, doorX, bed, homeLoot, family);
                 for (Room w : wings) kitchen(c, p, w, homeLoot);
-                boolean first = true;
-                for (Room u : res.upper) {
-                    if (first) bedroom(c, p, u, true, bed, homeLoot, 2);
+                for (int i = 0; i < res.upper.size(); i++) {
+                    Room u = res.upper.get(i);
+                    if (i == 0) manorUpper(c, p, u, bed, homeLoot, family);
                     else study(c, p, u, homeLoot);
-                    first = false;
                 }
-                if (res.upper.isEmpty()) bedroom(c, p, wings.isEmpty() ? r0 : wings.get(0), true, bed, homeLoot, 1);
+                if (res.upper.isEmpty()) bedroom(c, p, wings.isEmpty() ? r0 : wings.get(0), true, bed, homeLoot, 2, family);
             }
             case INN -> {
                 Interiors.inn(c, p, r0, up, doorX, firePit);
@@ -71,45 +71,45 @@ public final class Programs {
             }
             case GENERAL_STORE -> {
                 Interiors.shop(c, p, r0, doorX, AnchorType.MERCHANT, "store", false);
-                living(c, p, wings, res.upper, bed, homeLoot);
+                living(c, p, r0, wings, res.upper, bed, homeLoot);
             }
             case SMITHY -> {
                 if (b.annex == Annex.WORKSHOP) Interiors.forgeYard(c, p, b.annexW, b.d);
-                else forgeCorner(c, p, r0);
+                else forgeCorner(c, p, r0, doorX);
                 Interiors.smithyRoom(c, p, r0, doorX);
-                living(c, p, wings, res.upper, bed, homeLoot);
+                living(c, p, r0, wings, res.upper, bed, homeLoot);
             }
             case ALCHEMIST -> {
                 Interiors.shop(c, p, r0, doorX, AnchorType.ALCHEMIST, "alchemist", true);
-                living(c, p, wings, res.upper, bed, homeLoot);
+                living(c, p, r0, wings, res.upper, bed, homeLoot);
             }
             case JEWELLER -> {
                 jeweller(c, p, r0, doorX);
-                living(c, p, wings, res.upper, bed, homeLoot);
+                living(c, p, r0, wings, res.upper, bed, homeLoot);
             }
             case BOOKSELLER -> {
                 books(c, p, r0, doorX, AnchorType.BOOKSELLER);
-                living(c, p, wings, res.upper, bed, homeLoot);
+                living(c, p, r0, wings, res.upper, bed, homeLoot);
             }
             case TAILOR -> {
                 tailor(c, p, r0, doorX);
-                living(c, p, wings, res.upper, bed, homeLoot);
+                living(c, p, r0, wings, res.upper, bed, homeLoot);
             }
             case BUTCHER -> {
                 butcher(c, p, r0, doorX);
-                living(c, p, wings, res.upper, bed, homeLoot);
+                living(c, p, r0, wings, res.upper, bed, homeLoot);
             }
             case FLETCHER -> {
                 fletcher(c, p, r0, doorX);
-                living(c, p, wings, res.upper, bed, homeLoot);
+                living(c, p, r0, wings, res.upper, bed, homeLoot);
             }
             case TANNERY -> {
                 tannery(c, p, r0, doorX);
-                living(c, p, wings, res.upper, bed, homeLoot);
+                living(c, p, r0, wings, res.upper, bed, homeLoot);
             }
             case MAGE_TOWER -> mageTower(c, p, res, doorX);
             case FENCE_DEN -> {
-                hovel(c, p, r0, doorX, AnchorType.BED, "house");
+                hovel(c, p, r0, doorX, AnchorType.BED, "house", family);
                 cellar(c, p, r0);
             }
             case STABLES -> stables(c, b, p, r0);
@@ -118,7 +118,7 @@ public final class Programs {
                 Interiors.mill(c, p, r0, doorX);
                 if (s.variant == 1) waterWheel(c, p, b.bx1, (b.bz0 + b.bz1) / 2);
                 else windmill(c, p, b);
-                living(c, p, List.of(), res.upper, bed, homeLoot);
+                living(c, p, r0, List.of(), res.upper, bed, homeLoot);
             }
             case SAWMILL -> sawmill(c, b, p, r0);
             case SMELTER -> smelter(c, b, p, r0);
@@ -140,9 +140,12 @@ public final class Programs {
             case KEEP -> {
                 Interiors.palace(c, p, r0, up, doorX, true, firePit);
                 for (Room w : wings) quarters(c, p, w, "palace");
-                for (int i = 1; i < res.upper.size(); i++) bedroom(c, p, res.upper.get(i), true, AnchorType.BED, "palace", 2);
+                for (int i = 1; i < res.upper.size(); i++) bedroom(c, p, res.upper.get(i), true, AnchorType.BED, "palace", 2, family);
             }
-            case LONGHOUSE -> Interiors.longhouse(c, p, r0, doorX, s.has(Spec.SEAT));
+            case LONGHOUSE -> {
+                Interiors.longhouse(c, p, r0, doorX, s.has(Spec.SEAT));
+                for (Room u : res.upper) bedroom(c, p, u, true, AnchorType.BED, "palace", 2, family);
+            }
             case GUILD_HALL -> {
                 guildHall(c, p, r0);
                 for (Room u : res.upper) quarters(c, p, u, "house");
@@ -174,20 +177,80 @@ public final class Programs {
     // ------------------------------------------------------------------ homes
 
     static void hovel(Canvas c, Palette p, Room r, int doorX, AnchorType bed, String loot) {
+        hovel(c, p, r, doorX, bed, loot, 0);
+    }
+
+    static void hovel(Canvas c, Palette p, Room r, int doorX, AnchorType bed, String loot, int family) {
         int y = r.y();
         if (r.w() < 2 || r.d() < 2) return;
-        c.bed(r.x0(), y, r.z1() - (r.d() >= 3 ? 1 : 0), p.bed, Direction.SOUTH);
-        c.anchor(bed, r.x0(), y, r.z1() - (r.d() >= 3 ? 1 : 0));
-        Props.chest(c, r.x1(), y, r.z1(), Direction.WEST, loot);
-        if (r.x1() != doorX) Props.barrel(c, r.x1(), y, r.z0(), "food");
-        c.set(r.x1(), y, r.cz() == r.z0() || r.cz() == r.z1() ? r.z1() - 1 : r.cz(), Props.cookingPot());
-        Props.candles(c, r.x1(), y + 1, r.z1(), 1);
-        Props.rug(c, p.carpet2, r.x0() + 1, y, r.z0(), r.x1() - 1, r.z1() - 1);
+        int fam = Math.floorMod(family, 3);
+        int bz = r.z1() - (r.d() >= 3 ? 1 : 0);
+        if (fam == 0) {
+            if (r.d() >= 6 && r.w() >= 5) {
+                int pz = r.z1() - 2;
+                for (int x = r.x0(); x <= r.cx(); x++) c.set(x, y, pz, p.fence);
+            }
+            c.bed(r.x0(), y, bz, p.bed, Direction.SOUTH);
+            c.anchor(bed, r.x0(), y, bz);
+            Props.chest(c, r.x1(), y, r.z1(), Direction.WEST, loot);
+            if (r.x1() != doorX) Props.barrel(c, r.x1(), y, r.z0(), "food");
+            c.set(r.x1(), y, r.cz() == r.z0() || r.cz() == r.z1() ? r.z1() - 1 : r.cz(), Props.cookingPot());
+            if (r.w() >= 4 && r.d() >= 4) {
+                int tx = Math.max(r.x0() + 1, r.cx());
+                int tz = Math.max(r.z0() + 1, r.cz() - 1);
+                Props.table(c, p, tx, y, tz);
+                if (tx + 1 <= r.x1() - 1) Props.chair(c, p, tx + 1, y, tz, Direction.EAST);
+            }
+            Props.candles(c, r.x1(), y + 1, r.z1(), 1);
+        } else if (fam == 1) {
+            if (r.d() >= 6 && r.w() >= 5) {
+                int pz = r.z1() - 2;
+                for (int x = r.cx(); x <= r.x1(); x++) c.set(x, y, pz, p.fence);
+            }
+            c.bed(r.x1(), y, bz, p.bed, Direction.SOUTH);
+            c.anchor(bed, r.x1(), y, bz);
+            Props.chest(c, r.x0(), y, r.z1(), Direction.EAST, loot);
+            if (r.x0() != doorX) Props.barrel(c, r.x0(), y, r.z0(), "food");
+            c.set(r.x0(), y, r.cz() == r.z0() || r.cz() == r.z1() ? r.z1() - 1 : r.cz(), Props.cookingPot());
+            if (r.w() >= 4 && r.d() >= 4) {
+                int tx = Math.min(r.x1() - 1, r.cx());
+                int tz = Math.max(r.z0() + 1, r.cz() - 1);
+                Props.table(c, p, tx, y, tz);
+                if (tx - 1 >= r.x0() + 1) Props.chair(c, p, tx - 1, y, tz, Direction.WEST);
+            }
+            Props.candles(c, r.x0(), y + 1, r.z1(), 1);
+        } else {
+            int bx = r.x0() == doorX ? r.x1() : r.x0();
+            int ox = bx == r.x0() ? r.x1() : r.x0();
+            c.bed(bx, y, bz, p.bed, Direction.SOUTH);
+            c.anchor(bed, bx, y, bz);
+            Props.chest(c, bx, y, Math.max(r.z0() + 1, bz - 2), bx == r.x0() ? Direction.EAST : Direction.WEST, loot);
+            c.set(ox, y, r.z1(), Props.cookingPot());
+            Props.barrel(c, ox, y, Math.max(r.z0() + 1, r.z1() - 1), "food");
+            if (r.w() >= 4 && r.d() >= 4) {
+                Props.table(c, p, r.cx(), y, r.cz());
+                Props.chair(c, p, r.cx(), y, Math.min(r.z1() - 1, r.cz() + 1), Direction.SOUTH);
+                Props.candles(c, r.cx(), y + 1, r.cz(), 1);
+            }
+        }
+        Props.rug(c, p.carpet2, r.x0() + 1, y, r.z0() + 1, r.x1() - 1, r.z1() - 1);
+        Props.lantern(c, p, r.cx(), r.ceil() - 1, r.cz(), true);
     }
 
     static void bedroom(Canvas c, Palette p, Room r, boolean rich, AnchorType bed, String loot, int beds) {
+        bedroom(c, p, r, rich, bed, loot, beds, 0);
+    }
+
+    static void bedroom(Canvas c, Palette p, Room r, boolean rich, AnchorType bed, String loot, int beds, int family) {
         if (r.w() < 3 || r.d() < 3) return;
         int y = r.y();
+        int fam = Math.floorMod(family, 3);
+        if (r.w() >= 8 && r.d() >= 7) {
+            int splitX = fam == 1 ? r.cx() + 1 : r.cx() - 1;
+            if (splitX >= r.x1() - 2) splitX = r.cx() - 1;
+            int doorZ = Math.min(r.z1() - 1, Math.max(r.z0() + 2, r.cz() + 1));
+            Interiors.partitionV(c, p, r, splitX, doorZ);
+        }
         int placed = 0;
         for (int x = r.x0() + (r.w() >= 5 ? 1 : 0); x <= r.x1() && placed < beds; x += 2) {
             int before = c.bedCount();
@@ -202,6 +265,15 @@ public final class Programs {
             Props.pot(c, r.x1(), y + 1, r.z1(), 5);
             c.set(r.x0(), y, r.z0(), B.face(B.s(Blocks.BARREL), Direction.UP));
             Props.candles(c, r.x0(), y + 1, r.z0(), 3);
+            if (r.w() >= 6 && r.d() >= 6) {
+                int dx = r.x0() + 1;
+                int dz = Math.max(r.z0() + 1, r.cz());
+                Props.table(c, p, dx, y, dz);
+                Props.chair(c, p, dx + 1, y, dz, Direction.EAST);
+                Props.candles(c, dx, y + 1, dz, 2);
+                Props.tapestry(c, p, r.cx(), y + 2, r.z1() + 1);
+                Interiors.weaponRack(c, p, r.x0(), y, Math.min(r.z1() - 1, r.z0() + 2), Direction.EAST);
+            }
         } else {
             Props.barrel(c, r.x1(), y, r.z0(), bed == AnchorType.HOUSE_BED ? null : "food");
         }
@@ -224,23 +296,115 @@ public final class Programs {
     }
 
     static void dining(Canvas c, Palette p, Room r, boolean rich, String loot) {
+        manorGround(c, p, r, r.cx(), AnchorType.BED, loot, 0);
+    }
+
+    static void manorGround(Canvas c, Palette p, Room r, int doorX, AnchorType bed, String loot, int family) {
         int y = r.y();
-        int tz0 = r.z0() + 2, tz1 = r.z1() - 2;
+        int fam = Math.floorMod(family, 3);
+        // Partition a side kitchen & servant wing when wide enough
+        int kx0 = r.x0(), kx1 = Math.min(r.x1(), r.x0() + 3);
+        int diningX = r.cx();
+        if (r.w() >= 11 && r.d() >= 11) {
+            if (fam != 1) {
+                int splitX = r.x0() + 3;
+                if (splitX != doorX && splitX + 1 != doorX) {
+                    Interiors.partitionV(c, p, r, splitX, r.cz());
+                    diningX = (splitX + 1 + r.x1()) / 2;
+                }
+            } else {
+                int splitX = r.x1() - 3;
+                if (splitX != doorX && splitX - 1 != doorX) {
+                    Interiors.partitionV(c, p, r, splitX, r.cz());
+                    kx0 = splitX + 1;
+                    kx1 = r.x1();
+                    diningX = (r.x0() + splitX - 1) / 2;
+                }
+            }
+        }
+        // Grand dining table with 6+ chairs
+        int tz0 = r.z0() + 2, tz1 = Math.max(tz0 + 2, r.z1() - 2);
         for (int z = tz0; z <= tz1; z++) {
-            Props.table(c, p, r.cx(), y, z);
-            Props.chair(c, p, r.cx() - 1, y, z, Direction.WEST);
-            Props.chair(c, p, r.cx() + 1, y, z, Direction.EAST);
-            if (z % 2 == 0) Props.candles(c, r.cx(), y + 1, z, 3);
-            else c.set(r.cx(), y + 1, z, Props.cheese());
+            Props.table(c, p, diningX, y, z);
+            Props.chair(c, p, diningX - 1, y, z, Direction.WEST);
+            Props.chair(c, p, diningX + 1, y, z, Direction.EAST);
+            if (z % 2 == 0) Props.candles(c, diningX, y + 1, z, 3);
+            else c.set(diningX, y + 1, z, Props.cheese());
         }
-        for (int z = r.z0() + 1; z <= r.z1() - 1; z += 2) {
-            c.set(r.x0(), y, z, B.s(Blocks.BOOKSHELF));
-            c.set(r.x0(), y + 1, z, B.s(Blocks.BOOKSHELF));
+        // Kitchen & pantry in the side bay
+        c.set(kx0, y, r.z1(), Props.cookingPot());
+        if (kx0 + 1 <= kx1) c.set(kx0 + 1, y, r.z1(), B.face(B.s(Blocks.SMOKER), Direction.NORTH));
+        c.set(kx0, y, Math.max(r.z0() + 1, r.z1() - 2), B.s(Blocks.WATER_CAULDRON).setValue(LayeredCauldronBlock.LEVEL, 3));
+        Props.barrel(c, kx0, y, Math.max(r.z0() + 1, r.z1() - 3), "food");
+        // Servant bed in the ground wing corner
+        int sbx = kx0 == r.x0() ? r.x0() : r.x1();
+        int sbz = r.z0() + 2;
+        if (sbx != doorX && sbz + 1 < r.z1()) {
+            int before = c.bedCount();
+            c.bed(sbx, y, sbz, p.bed, Direction.SOUTH);
+            if (c.bedCount() > before) c.anchor(bed, sbx, y, sbz);
         }
-        Props.chest(c, r.x1(), y, r.z1(), Direction.WEST, loot);
-        Props.pot(c, r.x1(), y, r.z0(), 9);
-        Props.rug(c, p.carpet, r.cx() - 2, y, r.z0(), r.cx() + 2, r.z1());
-        for (int z = r.z0() + 2; z <= r.z1(); z += 4) Props.lantern(c, p, r.cx(), r.ceil() - 1, z, true);
+        // Trophy & display wall on the opposite side
+        int txWall = kx0 == r.x0() ? r.x1() : r.x0();
+        Direction tFace = txWall == r.x1() ? Direction.WEST : Direction.EAST;
+        for (int z = r.z0() + 2; z <= r.z1() - 2; z += 2) {
+            c.set(txWall, y, z, B.s(Blocks.BOOKSHELF));
+            c.set(txWall, y + 1, z, B.s(Blocks.CHISELED_BOOKSHELF));
+        }
+        Interiors.weaponRack(c, p, txWall, y, r.cz(), tFace);
+        Props.tapestry(c, p, diningX, y + 2, r.z1() + 1);
+        Props.chest(c, txWall, y, r.z1(), tFace, loot);
+        Props.pot(c, txWall, y, r.z0() + 1, 9);
+        Props.rug(c, p.carpet, Math.max(r.x0() + 1, diningX - 2), y, r.z0() + 1, Math.min(r.x1() - 1, diningX + 2), r.z1() - 1);
+        for (int z = r.z0() + 2; z <= r.z1(); z += 4) Props.lantern(c, p, diningX, r.ceil() - 1, z, true);
+    }
+
+    static void manorUpper(Canvas c, Palette p, Room r, AnchorType bed, String loot, int family) {
+        if (r.w() < 5 || r.d() < 5) {
+            bedroom(c, p, r, true, bed, loot, 2, family);
+            return;
+        }
+        int y = r.y();
+        int fam = Math.floorMod(family, 3);
+        int splitX = fam == 2 ? r.cx() + 1 : r.cx() - 1;
+        if (splitX >= r.x1() - 2) splitX = r.cx() - 1;
+        Interiors.partitionV(c, p, r, splitX, Math.min(r.z1() - 1, r.cz() + 1));
+        if (r.d() >= 10) {
+            int splitZ = r.cz();
+            for (int x = r.x0(); x < splitX; x++) {
+                boolean doorway = x == (r.x0() + splitX) / 2;
+                for (int yy = y; yy < r.ceil(); yy++) {
+                    if (doorway && yy <= y + 1) continue;
+                    c.set(x, yy, splitZ, p.wall);
+                }
+                if (doorway) c.entrance(x, y, splitZ, p.door, Direction.SOUTH);
+            }
+        }
+        // Master bedroom & guest bedroom beds along back wall
+        int placed = 0;
+        for (int x = r.x0() + 1; x <= r.x1() - 1 && placed < 3; x += 3) {
+            if (x == splitX) continue;
+            int before = c.bedCount();
+            c.bed(x, y, r.z1() - 1, p.bed, Direction.SOUTH);
+            if (c.bedCount() == before) continue;
+            c.anchor(bed, x, y, r.z1() - 1);
+            Props.chest(c, x, y, Math.max(r.z0() + 1, r.z1() - 3), Direction.NORTH, bed == AnchorType.HOUSE_BED ? null : loot);
+            placed++;
+        }
+        // Noble library / study section in front-left
+        for (int x = r.x0(); x < splitX; x++) {
+            c.set(x, y, r.z0(), B.s(Blocks.BOOKSHELF));
+            if (r.ceil() - y > 2) c.set(x, y + 1, r.z0(), B.s(Blocks.CHISELED_BOOKSHELF));
+        }
+        int studyX = Math.max(r.x0() + 1, (r.x0() + splitX) / 2);
+        int studyZ = Math.min(r.z1() - 2, r.z0() + 2);
+        Props.table(c, p, studyX, y, studyZ);
+        c.set(studyX, y + 1, studyZ, B.s(Blocks.LECTERN));
+        if (studyZ + 1 < r.z1() - 1) Props.chair(c, p, studyX, y, studyZ + 1, Direction.SOUTH);
+        Interiors.weaponRack(c, p, r.x0(), y, Math.min(r.z1() - 2, r.z0() + 3), Direction.EAST);
+        Props.tapestry(c, p, r.cx(), y + 2, r.z1() + 1);
+        Props.rug(c, p.carpet, r.x0() + 1, y, r.z0() + 1, Math.max(r.x0() + 1, splitX - 1), r.z1() - 2);
+        Props.lantern(c, p, r.cx(), r.ceil() - 1, r.cz(), true);
     }
 
     static void study(Canvas c, Palette p, Room r, String loot) {
@@ -267,6 +431,23 @@ public final class Programs {
         for (Room u : upper) bedroom(c, p, u, false, bed, loot == null ? "house" : loot, 2);
     }
 
+    static void living(Canvas c, Palette p, Room r0, List<Room> wings, List<Room> upper, AnchorType bed, String loot) {
+        living(c, p, wings, upper, bed, loot);
+        if (upper.isEmpty()) {
+            Room target = wings.isEmpty() ? r0 : wings.get(0);
+            int y = target.y();
+            int bx = target == r0 ? Math.min(target.x1() - 1, target.x0() + 1) : target.x0();
+            int bz = target.z1() - 1;
+            int before = c.bedCount();
+            c.bed(bx, y, bz, p.bed, Direction.SOUTH);
+            if (c.bedCount() > before) {
+                c.anchor(bed, bx, y, bz);
+            } else {
+                c.anchor(bed, bx, y, target.z1());
+            }
+        }
+    }
+
     static void storeRoom(Canvas c, Palette p, Room r) {
         int y = r.y();
         for (int x = r.x0(); x <= r.x1(); x++) {
@@ -287,13 +468,22 @@ public final class Programs {
 
     // ------------------------------------------------------------------ trades
 
-    /** A shop counter across the back third with the keeper behind it; returns the counter row. */
+    /** A shop counter across the back third with an open passage at x1 and a seated keeper chair behind it. */
     static int counter(Canvas c, Palette p, Room r, AnchorType who) {
         int y = r.y();
-        int cz = Math.max(r.z0() + 1, r.z1() - 2);
-        for (int x = r.x0() + 1; x <= r.x1(); x++) c.set(x, y, cz, p.planks);
+        int cz = Math.max(r.z0() + 2, r.z1() - 2);
+        int cx1 = Math.max(r.x0() + 1, r.x1() - 1);
+        for (int x = r.x0() + 1; x <= cx1; x++) c.set(x, y, cz, p.planks);
+        if (r.x1() > cx1) {
+            c.set(r.x1(), y, cz, B.with(B.face(p.trapdoor, Direction.WEST), BlockStateProperties.OPEN, true));
+            for (int kz = Math.max(r.z0(), cz - 1); kz <= Math.min(r.z1(), cz + 1); kz++) {
+                c.keepClear(r.x1(), y, y + 1, kz);
+            }
+        }
         c.set(r.x0() + 1, y + 1, cz, B.s(Blocks.CANDLE).setValue(CandleBlock.LIT, true));
-        c.anchor(who, r.cx(), y, Math.min(r.z1(), cz + 1));
+        int seatZ = Math.min(r.z1(), cz + 1);
+        Props.chair(c, p, r.cx(), y, seatZ, Direction.SOUTH);
+        c.anchor(who, r.cx(), y, seatZ);
         Props.lantern(c, p, r.cx(), r.ceil() - 1, r.cz(), true);
         return cz;
     }
@@ -301,23 +491,29 @@ public final class Programs {
     static void jeweller(Canvas c, Palette p, Room r, int doorX) {
         int y = r.y();
         int cz = counter(c, p, r, AnchorType.JEWELER);
+        int cx1 = Math.max(r.x0() + 1, r.x1() - 1);
         BlockState[] wares = {B.s(Blocks.AMETHYST_CLUSTER), B.s(Blocks.DECORATED_POT), B.s(Blocks.CHAIN), B.s(Blocks.SMALL_AMETHYST_BUD)};
-        for (int x = r.x0() + 1; x <= r.x1(); x += 2) c.set(x, y + 1, cz, wares[c.roll(x, y, cz, 41, wares.length)]);
-        // display cases along the side walls
-        for (int z = r.z0(); z < cz - 1; z += 2) {
+        for (int x = r.x0() + 1; x <= cx1; x += 2) c.set(x, y + 1, cz, wares[c.roll(x, y, cz, 41, wares.length)]);
+        // Locked glass display cases along the side walls
+        for (int z = r.z0() + 1; z < cz - 1; z += 2) {
             c.set(r.x0(), y, z, B.s(Blocks.GLASS));
             c.set(r.x0(), y + 1, z, B.s(Blocks.AMETHYST_CLUSTER));
+            if (r.x1() != doorX) {
+                c.set(r.x1(), y, z, B.s(Blocks.GLASS));
+                c.set(r.x1(), y + 1, z, B.s(Blocks.LARGE_AMETHYST_BUD));
+            }
         }
-        c.set(r.x1(), y, r.z1(), B.face(B.s(Blocks.GRINDSTONE), Direction.WEST));
         c.set(r.x0(), y, r.z1(), B.s(Blocks.SMITHING_TABLE));
-        Props.chest(c, r.cx(), y, r.z1(), Direction.NORTH, "house_rich");
-        Props.rug(c, p.carpet, r.cx() - 1, y, r.z0(), r.cx() + 1, cz - 1);
+        if (r.x0() + 2 < r.cx()) c.set(r.x0() + 2, y, r.z1(), B.s(Blocks.ANVIL));
+        c.set(r.x1(), y, r.z1(), B.face(B.s(Blocks.GRINDSTONE), Direction.WEST));
+        Props.chest(c, Math.min(r.x1() - 1, r.cx() + 2), y, r.z1(), Direction.NORTH, "house_rich");
+        Props.rug(c, p.carpet, r.cx() - 1, y, r.z0() + 1, r.cx() + 1, cz - 1);
     }
 
     static void books(Canvas c, Palette p, Room r, int doorX, AnchorType who) {
         int y = r.y();
         int cz = counter(c, p, r, who);
-        for (int z = r.z0(); z < cz; z++) {
+        for (int z = r.z0(); z < cz - 1; z++) {
             if (r.x0() == doorX && z == r.z0()) continue;
             c.set(r.x0(), y, z, B.s(Blocks.BOOKSHELF));
             c.set(r.x0(), y + 1, z, B.s(Blocks.BOOKSHELF));
@@ -326,9 +522,18 @@ public final class Programs {
                 c.set(r.x1(), y + 1, z, B.s(Blocks.BOOKSHELF));
             }
         }
-        for (int x = r.x0(); x <= r.x1(); x++) c.set(x, y, r.z1(), B.s(Blocks.CHISELED_BOOKSHELF));
+        for (int x = r.x0(); x <= r.x1(); x++) {
+            c.set(x, y, r.z1(), B.s(Blocks.CHISELED_BOOKSHELF));
+            if (r.ceil() - y > 2) c.set(x, y + 1, r.z1(), B.s(Blocks.BOOKSHELF));
+        }
         c.set(r.cx(), y + 1, cz, B.s(Blocks.LECTERN));
-        Props.chest(c, r.x1(), y, r.z1() - 1 > cz ? r.z1() - 1 : r.z1(), Direction.WEST, "store");
+        if (r.w() >= 7 && cz - r.z0() >= 4) {
+            int rz = r.z0() + 2;
+            Props.table(c, p, r.cx(), y, rz);
+            Props.chair(c, p, r.cx() - 1, y, rz, Direction.WEST);
+            Props.candles(c, r.cx(), y + 1, rz, 2);
+        }
+        Props.chest(c, Math.min(r.x1() - 1, r.cx() + 2), y, r.z1(), Direction.NORTH, "store");
         Props.candles(c, r.x0() + 1, y + 1, cz, 3);
     }
 
@@ -343,8 +548,13 @@ public final class Programs {
             c.set(r.x0(), y, z, Materials.wool(cloth[c.roll(r.x0(), y, z, 43, cloth.length)]));
             c.set(r.x0(), y + 1, z, Materials.carpet(cloth[c.roll(r.x0(), y + 1, z, 44, cloth.length)]));
         }
+        // Dress forms & cutting table
+        if (r.x1() != doorX && cz - r.z0() >= 3) {
+            c.set(r.x1(), y, r.z0() + 1, p.fence);
+            c.set(r.x1(), y + 1, r.z0() + 1, Materials.wool("purple"));
+        }
         c.set(r.x1(), y, r.z0(), Props.tanningRack());
-        Props.chest(c, r.cx(), y, r.z1(), Direction.NORTH, "store");
+        Props.chest(c, Math.min(r.x1() - 1, r.cx() + 2), y, r.z1(), Direction.NORTH, "store");
     }
 
     static void butcher(Canvas c, Palette p, Room r, int doorX) {
@@ -352,13 +562,14 @@ public final class Programs {
         int cz = counter(c, p, r, AnchorType.BUTCHER);
         c.set(r.x0(), y, r.z1(), B.face(B.s(Blocks.SMOKER), Direction.NORTH));
         c.set(r.x1(), y, r.z1(), B.s(Blocks.WATER_CAULDRON).setValue(LayeredCauldronBlock.LEVEL, 3));
-        c.set(r.cx(), y, r.z1(), B.axis(B.s(Blocks.STRIPPED_OAK_LOG), Direction.Axis.Y));
-        c.set(r.cx(), y + 1, r.z1(), B.s(Blocks.CHAIN));
+        c.set(Math.max(r.x0() + 1, r.cx() - 1), y, r.z1(), B.axis(B.s(Blocks.STRIPPED_OAK_LOG), Direction.Axis.Y));
+        c.set(Math.max(r.x0() + 1, r.cx() - 1), y + 1, r.z1(), B.s(Blocks.CHAIN));
         for (int z = r.z0(); z < cz - 1; z++) {
             if (r.x1() == doorX && z == r.z0()) continue;
             c.set(r.x1(), y, z, c.chance(r.x1(), y, z, 47, 2) ? B.s(Blocks.PACKED_ICE) : B.face(B.s(Blocks.BARREL), Direction.UP));
         }
         Props.barrel(c, r.x0(), y, r.x0() == doorX ? r.z0() + 1 : r.z0(), "food");
+        Props.chest(c, Math.min(r.x1() - 1, r.cx() + 2), y, r.z1(), Direction.NORTH, "food");
     }
 
     static void fletcher(Canvas c, Palette p, Room r, int doorX) {
@@ -366,12 +577,16 @@ public final class Programs {
         int cz = counter(c, p, r, AnchorType.FLETCHER);
         c.set(r.x0(), y, r.z1(), B.s(Blocks.FLETCHING_TABLE));
         c.set(r.x1(), y, r.z1(), B.s(Blocks.TARGET));
+        if (r.x1() - 1 > r.cx()) c.set(r.x1() - 1, y, r.z1(), B.s(Blocks.HAY_BLOCK));
         for (int z = r.z0(); z < cz - 1; z++) {
             if (r.x0() == doorX && z == r.z0()) continue;
             c.set(r.x0(), y, z, p.fence);
             c.set(r.x0(), y + 1, z, B.face(p.trapdoor, Direction.EAST));
         }
-        Props.barrel(c, r.cx(), y, r.z1(), "store");
+        if (r.x1() != doorX && cz - r.z0() >= 3) {
+            Interiors.weaponRack(c, p, r.x1(), y, r.z0() + 1, Direction.WEST);
+        }
+        Props.barrel(c, Math.min(r.x1() - 1, r.cx() + 2), y, r.z1(), "store");
         c.set(r.x1(), y, r.z0(), B.s(Blocks.WHITE_WOOL));
     }
 
@@ -380,15 +595,24 @@ public final class Programs {
         int cz = counter(c, p, r, AnchorType.HUNTER);
         for (int x = r.x0(); x <= r.x1(); x += 2) c.set(x, y, r.z1(), Props.tanningRack());
         c.set(r.x0(), y, r.z0() + 1, B.s(Blocks.WATER_CAULDRON).setValue(LayeredCauldronBlock.LEVEL, 3));
+        if (r.z0() + 2 < cz - 1) c.set(r.x0(), y, r.z0() + 2, Props.workbench());
         for (int z = r.z0(); z < cz - 1; z += 2) c.set(r.x1(), y, z, Materials.carpet(c.chance(r.x1(), y, z, 5, 2) ? "brown" : "white"));
-        Props.chest(c, r.cx(), y, r.z1() - 1 > cz ? r.z1() - 1 : r.z1(), Direction.NORTH, "store");
+        Props.chest(c, Math.min(r.x1() - 1, r.cx() + 2), y, r.z1(), Direction.NORTH, "store");
     }
 
     static void forgeCorner(Canvas c, Palette p, Room r) {
+        forgeCorner(c, p, r, r.cx());
+    }
+
+    static void forgeCorner(Canvas c, Palette p, Room r, int doorX) {
         int y = r.y();
-        c.set(r.x0(), y, r.z0() + 1, B.face(Props.forge(), Direction.EAST));
-        c.set(r.x0(), y, r.z0() + 2, B.s(Blocks.ANVIL));
-        c.anchor(AnchorType.SMITH, r.x0() + 1, y, r.z0() + 1);
+        int z0 = r.x0() == doorX ? r.z0() + 2 : r.z0() + 1;
+        c.set(r.x0(), y, z0, B.face(Props.forge(), Direction.EAST));
+        if (z0 + 1 <= r.z1() - 2) c.set(r.x0(), y, z0 + 1, B.s(Blocks.ANVIL));
+        if (z0 + 2 <= r.z1() - 2) c.set(r.x0(), y, z0 + 2, B.s(Blocks.WATER_CAULDRON).setValue(LayeredCauldronBlock.LEVEL, 3));
+        if (z0 + 3 <= r.z1() - 2) c.set(r.x0(), y, z0 + 3, B.face(Props.grindstone(), Direction.EAST));
+        if (z0 + 4 <= r.z1() - 2) c.set(r.x0(), y, z0 + 4, B.face(Props.smelter(), Direction.EAST));
+        c.anchor(AnchorType.SMITH, r.x0() + 1, y, z0);
     }
 
     static void mageTower(Canvas c, Palette p, Grammar.Result res, int doorX) {

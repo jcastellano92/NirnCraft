@@ -123,7 +123,8 @@ public final class Blueprint {
 
     private void derive(RandomSource r, Palette kit) {
         faith = style.faith(r);
-        color = style.color(r.nextInt(16));
+        String styleCol = style.color(r.nextInt(16));
+        color = (use.trade || use == Use.INN) ? tradeColor(use, styleCol) : styleCol;
         // ---- body
         String b = use.hall ? style.hallBody : style.pick(style.bodies, wealth, "rect", r);
         body = bodyOf(b, kit);
@@ -177,7 +178,8 @@ public final class Blueprint {
                 case TOWER -> 5;
                 default -> 3;
             };
-            if (w - annexW < 7) {
+            int minBodyW = (use == Use.SMITHY || use == Use.FLETCHER) && w >= 11 ? 6 : 7;
+            if (w - annexW < minBodyW) {
                 annex = Annex.NONE;
                 annexSide = 0;
                 annexW = 0;
@@ -195,8 +197,9 @@ public final class Blueprint {
         bz1 = d - 1;
         // ---- footprint
         String sh = use == Use.TEMPLE ? (r.nextInt(3) == 0 ? "t" : "rect")
-                : use == Use.HOVEL || use == Use.SHACK || use == Use.MAGE_TOWER || use == Use.FENCE_DEN || use == Use.BARN
-                || use == Use.STABLES || use == Use.SAWMILL || use == Use.SMELTER || use == Use.WAREHOUSE || use == Use.SMITHY
+                : use.trade || use == Use.INN || use == Use.KEEP || use == Use.HOVEL || use == Use.SHACK
+                || use == Use.MAGE_TOWER || use == Use.FENCE_DEN || use == Use.BARN || use == Use.STABLES
+                || use == Use.SAWMILL || use == Use.SMELTER || use == Use.WAREHOUSE || use == Use.SMITHY
                 || use == Use.WATCHTOWER || use == Use.LONGHOUSE || use == Use.BARRACKS ? "rect"
                 : style.pick(style.footprints, wealth, "rect", r);
         shape = shapeOf(sh);
@@ -209,10 +212,30 @@ public final class Blueprint {
         balcony = storeys >= 2 && body == Body.RECT && porchD == 0 && wealth.atLeast(Wealth.COMMON) && r.nextDouble() < style.rule("balcony", 0.2);
         shutters = body == Body.RECT && r.nextDouble() < style.rule("shutters", 0.3);
         flowerBoxes = body == Body.RECT && wealth.atLeast(Wealth.COMMON) && r.nextDouble() < style.rule("flowerBoxes", 0.3);
-        banner = (use.sign || wealth.atLeast(Wealth.WEALTHY)) && r.nextDouble() < style.rule("banners", 0.5);
-        lanterns = wealth.atLeast(Wealth.COMMON) && r.nextDouble() < style.rule("lanterns", 0.6);
-        awning = porchD == 0 && (use.trade || wealth.atLeast(Wealth.COMMON)) && r.nextDouble() < style.rule("awning", 0.4);
+        banner = use.trade || use == Use.INN || use == Use.KEEP || (use.sign || wealth.atLeast(Wealth.WEALTHY)) && r.nextDouble() < style.rule("banners", 0.5);
+        lanterns = use.trade || use == Use.INN || use == Use.KEEP || wealth.atLeast(Wealth.COMMON) && r.nextDouble() < style.rule("lanterns", 0.6);
+        awning = porchD == 0 && (use.trade || use == Use.INN || wealth.atLeast(Wealth.COMMON) && r.nextDouble() < style.rule("awning", 0.4));
         dormers = roof == Roof.SLATE || (roof == Roof.GABLE || roof == Roof.HIP) && storeys >= 2 && r.nextDouble() < style.rule("dormers", 0.15);
+    }
+
+    /** Deterministic, recognisable banner/awning colour per trade so each shop type reads immediately from the street. */
+    static String tradeColor(Use use, String fallback) {
+        return switch (use) {
+            case INN -> "orange";
+            case GENERAL_STORE -> "yellow";
+            case SMITHY, SMELTER -> "red";
+            case ALCHEMIST -> "purple";
+            case JEWELLER -> "cyan";
+            case BOOKSELLER, MAGE_TOWER -> "blue";
+            case TAILOR -> "magenta";
+            case BUTCHER -> "red";
+            case FLETCHER -> "green";
+            case TANNERY, STABLES, SAWMILL -> "brown";
+            case FISHERY -> "light_blue";
+            case MILL -> "white";
+            case FENCE_DEN -> "black";
+            default -> fallback;
+        };
     }
 
     private Annex annexFor(RandomSource r) {

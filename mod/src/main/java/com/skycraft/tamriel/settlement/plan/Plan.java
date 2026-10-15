@@ -214,10 +214,10 @@ public final class Plan {
     static boolean lineHits(Spec line, Spec r, int gap) {
         int len = (int) Math.ceil(Math.hypot(line.x2 - line.x, line.z2 - line.z));
         int hw = line.w / 2;
-        for (int i = 0; i <= len; i += 2) {
+        for (int i = 0; i <= len; i++) {
             double t = len == 0 ? 0 : i / (double) len;
             int px = (int) Math.round(line.x + (line.x2 - line.x) * t), pz = (int) Math.round(line.z + (line.z2 - line.z) * t);
-            if (Math.abs(px - r.x) < r.halfX() + hw + gap && Math.abs(pz - r.z) < r.halfZ() + hw + gap) return true;
+            if (Math.abs(px - r.x) <= r.halfX() + hw + gap && Math.abs(pz - r.z) <= r.halfZ() + hw + gap) return true;
         }
         return false;
     }
@@ -339,6 +339,26 @@ public final class Plan {
                     if (s.floor == Spec.UNSET) s.floor = Math.max(terrain.land(s.x, s.z), waterTop(s.x, s.z)) + 1;
                     if (s.floor2 == Spec.UNSET) s.floor2 = Math.max(terrain.land(s.x2, s.z2), waterTop(s.x2, s.z2)) + 1;
                     continue;
+                }
+                if (s.kind == Archetype.STREET && !tiles.isEmpty()) {
+                    int mf1 = Spec.UNSET, mf2 = Spec.UNSET;
+                    for (Spec t : tiles) {
+                        if (Math.abs(s.x - t.x) <= t.halfX() + 2 && Math.abs(s.z - t.z) <= t.halfZ() + 2) mf1 = Math.max(mf1, t.minFloor);
+                        if (Math.abs(s.x2 - t.x) <= t.halfX() + 2 && Math.abs(s.z2 - t.z) <= t.halfZ() + 2) mf2 = Math.max(mf2, t.minFloor);
+                    }
+                    if (mf1 != mf2) {
+                        int f1 = terrain.land(s.x, s.z), f2 = terrain.land(s.x2, s.z2);
+                        if (s.minFloor != Spec.UNSET) {
+                            f1 = Math.max(f1, base + s.minFloor);
+                            f2 = Math.max(f2, base + s.minFloor);
+                        }
+                        if (mf1 != Spec.UNSET) f1 = Math.max(f1, base + mf1);
+                        if (mf2 != Spec.UNSET) f2 = Math.max(f2, base + mf2);
+                        s.floor = f1;
+                        s.floor2 = f2;
+                        continue;
+                    }
+                    if (mf1 != Spec.UNSET) s.minFloor = s.minFloor == Spec.UNSET ? mf1 : Math.max(s.minFloor, mf1);
                 }
                 if (s.kind == Archetype.CANAL) f = s.minFloor != Spec.UNSET ? base + s.minFloor : base;
                 if (s.minFloor != Spec.UNSET) f = Math.max(f, base + s.minFloor);

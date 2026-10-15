@@ -298,12 +298,14 @@ public final class Cities {
 
     /** Fills lots along local streets {@code {x1, z1, x2, z2, width}} with {@code n} houses on terrace {@code level}. */
     static void houses(Plan plan, List<int[]> streets, int n, int flags, int level, Archetype kind) {
+        int[][] sizes = {{7, 9}, {9, 9}, {9, 11}, {11, 9}, {11, 11}, {11, 13}, {13, 15}};
         Deque<Spec> q = new ArrayDeque<>();
         for (int i = 0; i < n; i++) {
             Spec h = new Spec(kind);
             h.flags = flags;
             if ((flags & Spec.UPPER) != 0 && i % 3 == 2) h.flags &= ~Spec.UPPER;
-            if (i % 4 == 1) h.size(9, 9);
+            int[] sz = sizes[i % sizes.length];
+            h.size(sz[0], sz[1]);
             h.minFloor = level == 0 ? Spec.UNSET : level;
             q.add(h);
         }
@@ -314,6 +316,14 @@ public final class Cities {
         Spec s = plan.street(x1, z1, x2, z2, width, major);
         if (level != 0) s.minFloor = level;
         return new int[]{x1, z1, x2, z2, width};
+    }
+
+    static Spec stairStreet(Plan plan, int x1, int z1, int f1, int x2, int z2, int f2, int width, boolean major) {
+        Spec s = plan.street(x1, z1, x2, z2, width, major);
+        s.flags |= Spec.FIXED;
+        s.floor = Math.max(plan.terrain.land(s.x, s.z), plan.base + f1);
+        s.floor2 = Math.max(plan.terrain.land(s.x2, s.z2), plan.base + f2);
+        return s;
     }
 
     static void stalls(Plan plan, int cx, int cz, int n, int level) {
@@ -381,7 +391,7 @@ public final class Cities {
         sf.variant = Landmarks.SKYFORGE;
         sf.h = 18;
         raise(sf, cloud - 3);
-        Spec jv = named(b(plan, Archetype.LONGHOUSE, -40, -30, E, 13, 25), "jorrvaskr");
+        Spec jv = named(b(plan, Archetype.LONGHOUSE, -40, -30, E, 15, 25), "jorrvaskr");
         jv.flags |= Spec.SEAT;
         raise(jv, wind);
         Spec tk = named(b(plan, Archetype.TEMPLE, 40, -30, W, 13, 19), "temple_of_kynareth");
@@ -396,14 +406,24 @@ public final class Cities {
         // streets: main road from the gate, the market square, stairs up through the Wind District
         List<int[]> plains = new ArrayList<>();
         plains.add(st(plan, 0, 104, 0, 44, 5, true, 0));
-        plains.add(st(plan, 0, 26, 0, 0, 5, true, 0));
+        plains.add(st(plan, 0, 26, 0, 4, 5, true, 0));
         plains.add(st(plan, -62, 35, -9, 35, 3, false, 0));
         plains.add(st(plan, 9, 35, 62, 35, 3, false, 0));
         plains.add(st(plan, -45, 70, 45, 70, 3, false, 0));
+        stairStreet(plan, 0, 4, 0, 0, -12, wind, 5, true);
+        st(plan, -62, 35, -62, 4, 3, false, 0);
+        stairStreet(plan, -62, 4, 0, -62, -12, wind, 3, false);
+        st(plan, 62, 35, 62, 4, 3, false, 0);
+        stairStreet(plan, 62, 4, 0, 62, -12, wind, 3, false);
         List<int[]> windSt = new ArrayList<>();
         windSt.add(st(plan, -66, -12, 66, -12, 3, false, wind));
-        st(plan, 0, -14, 0, -22, 3, false, wind);
-        st(plan, 0, -38, 0, -50, 3, false, wind);
+        st(plan, 0, -12, 0, -22, 3, false, wind);
+        st(plan, -10, -22, 10, -22, 3, false, wind);
+        st(plan, -10, -22, -10, -38, 3, false, wind);
+        st(plan, 10, -22, 10, -38, 3, false, wind);
+        st(plan, -10, -38, 10, -38, 3, false, wind);
+        st(plan, 0, -38, 0, -44, 5, true, wind);
+        stairStreet(plan, -52, -12, wind, -52, -54, cloud - 3, 3, false);
         plaza(plan, 0, 35, 15, 0, 0);
         stalls(plan, 0, 35, 4, 0);
         // the Plains District
@@ -419,10 +439,8 @@ public final class Cities {
         named(raise(b(plan, Archetype.MANOR, -62, -34, E, 11, 13), wind), "house_gray_mane").flags |= Spec.UPPER | Spec.RICH;
         named(raise(b(plan, Archetype.MANOR, 62, -36, W, 11, 13), wind), "house_battle_born").flags |= Spec.UPPER | Spec.RICH;
         houses(plan, windSt, 6, Spec.UPPER, wind, Archetype.HOUSE);
-        // the Cloud District's stair
-        Spec cs = plan.line(Archetype.STREET, 0, -52, 0, -56, 5);
-        cs.minFloor = cloud;
-        plan.put(cs);
+        // the Cloud District's stair flight from Wind District up to Dragonsreach
+        stairStreet(plan, 0, -44, wind, 0, -58, cloud, 5, true);
     }
 
     // ------------------------------------------------------------------ Solitude
@@ -471,6 +489,7 @@ public final class Cities {
         // palaces and halls
         Spec bp = b(plan, Archetype.LANDMARK, 0, -95, S, 23, 29);
         bp.variant = Landmarks.BLUE_PALACE;
+        bp.flags |= Spec.SEAT;
         bp.h = 26;
         bp.margin = 8;
         raise(bp, lv);
@@ -541,11 +560,14 @@ public final class Cities {
         Spec cornerclub = named(b(plan, Archetype.INN, 78, 10, W, 11, 13), "new_gnisis_cornerclub");
         cornerclub.culture = Culture.DUNMER.ordinal();
         cornerclub.style = Kits.VELOTHI;
+        int[][] gSizes = {{7, 9}, {9, 9}, {9, 11}, {11, 9}, {11, 11}, {11, 13}};
         Deque<Spec> q = new ArrayDeque<>();
         for (int i = 0; i < 7; i++) {
             Spec h = new Spec(Archetype.HOUSE);
             h.culture = Culture.DUNMER.ordinal();
             h.style = Kits.VELOTHI;
+            int[] sz = gSizes[i % gSizes.length];
+            h.size(sz[0], sz[1]);
             q.add(h);
         }
         Layouts.fillStreets(plan, grey, q, 2);
@@ -610,7 +632,11 @@ public final class Cities {
             cl.variant = Landmarks.CLIFF;
             cl.h = 46;
             cl.margin = 5;
-            if (i == 0) cl.name = "keep";
+            if (i == 0) {
+                cl.name = "keep";
+                cl.flags |= Spec.SEAT;
+                raise(cl, up);
+            }
         }
         terraces(plan, -80, -78, 80, -40, up, 1);
         terraces(plan, -80, -40, 80, -8, mid, 1);
@@ -647,8 +673,19 @@ public final class Cities {
         mine.variant = 2;
         mine.name = "cidhna_mine";
         List<int[]> low = new ArrayList<>();
-        low.add(st(plan, 0, 80, 0, 0, 5, true, 0));
+        low.add(st(plan, 0, 80, 0, -2, 5, true, 0));
         low.add(st(plan, -60, 44, 60, 44, 3, false, 0));
+        stairStreet(plan, 0, -2, 0, 0, -12, mid, 5, true);
+        st(plan, 0, -12, 0, -36, 5, true, mid);
+        stairStreet(plan, 0, -36, mid, 0, -46, up, 5, true);
+        st(plan, 0, -46, 0, -78, 5, true, up);
+        for (int side : new int[]{-48, 48}) {
+            st(plan, side, 44, side, -2, 3, false, 0);
+            stairStreet(plan, side, -2, 0, side, -12, mid, 3, false);
+            st(plan, side, -12, side, -36, 3, false, mid);
+            stairStreet(plan, side, -36, mid, side, -46, up, 3, false);
+            st(plan, side, -46, side, -70, 3, false, up);
+        }
         List<int[]> midSt = new ArrayList<>();
         midSt.add(st(plan, -64, -32, 64, -32, 3, false, mid));
         List<int[]> upSt = new ArrayList<>();
@@ -663,7 +700,7 @@ public final class Cities {
     // ------------------------------------------------------------------ the small capitals
 
     static void winterhold(Plan plan) {
-        named(b(plan, Archetype.LONGHOUSE, 0, -36, S, 13, 21), "jarls_longhouse").flags |= Spec.SEAT;
+        named(b(plan, Archetype.LONGHOUSE, 0, -36, S, 15, 23), "jarls_longhouse").flags |= Spec.SEAT;
         named(b(plan, Archetype.INN, -18, 6, E, 11, 15), "the_frozen_hearth");
         named(b(plan, Archetype.STORE, 18, 6, W, 9, 9), "birnas_oddments");
         List<int[]> streets = new ArrayList<>();
@@ -678,7 +715,7 @@ public final class Cities {
     }
 
     static void falkreath(Plan plan) {
-        named(b(plan, Archetype.LONGHOUSE, 0, -52, S, 13, 21), "dengeirs_hall").flags |= Spec.SEAT;
+        named(b(plan, Archetype.LONGHOUSE, 0, -52, S, 15, 23), "dengeirs_hall").flags |= Spec.SEAT;
         named(b(plan, Archetype.INN, -22, 2, E, 13, 17), "dead_mans_drink").flags |= Spec.UPPER;
         named(b(plan, Archetype.SMITHY, 22, 0, W, 11, 9), "falkreath_smithy");
         named(b(plan, Archetype.STORE, 22, 26, W, 9, 11), "gray_pine_goods");
@@ -696,7 +733,7 @@ public final class Cities {
     }
 
     static void morthal(Plan plan) {
-        named(b(plan, Archetype.PALACE, 0, -46, S, 17, 25), "highmoon_hall").flags |= Spec.SEAT;
+        named(b(plan, Archetype.PALACE, 0, -46, S, 19, 25), "highmoon_hall").flags |= Spec.SEAT;
         named(b(plan, Archetype.INN, -22, 6, E, 13, 15), "moorside_inn");
         named(b(plan, Archetype.ALCHEMIST, 22, 10, W, 9, 11), "thaumaturgists_hut");
         Spec mill = b(plan, Archetype.MILL, 44, 34, S, 9, 11);
@@ -709,7 +746,7 @@ public final class Cities {
     }
 
     static void dawnstar(Plan plan) {
-        named(b(plan, Archetype.PALACE, 0, -48, S, 17, 25), "white_hall").flags |= Spec.SEAT;
+        named(b(plan, Archetype.PALACE, 0, -48, S, 19, 25), "white_hall").flags |= Spec.SEAT;
         named(b(plan, Archetype.INN, -22, 4, E, 13, 17), "windpeak_inn").flags |= Spec.UPPER;
         named(b(plan, Archetype.ALCHEMIST, 22, 4, W, 9, 11), "the_mortar_and_pestle");
         named(b(plan, Archetype.SMITHY, 22, 28, W, 11, 9), "dawnstar_smithy");
@@ -744,7 +781,7 @@ public final class Cities {
         Spec col = b(plan, Archetype.LANDMARK, 0, 0, S, 51, 51);
         col.variant = Landmarks.COLLEGE;
         col.h = 60;
-        col.flags |= Spec.NO_BEARD;
+        col.flags |= Spec.NO_BEARD | Spec.SEAT;
         raise(col, lv);
         // the bridge, in two spans, towards Winterhold (south-west of the College)
         double dx = -0.63, dz = 0.77;
@@ -772,6 +809,7 @@ public final class Cities {
         plan.wallRing(56, 12, 8, new double[]{0, Math.PI}, Spec.MAJOR, true);
         Spec keep = b(plan, Archetype.LANDMARK, 22, -22, W, 23, 23);
         keep.variant = Landmarks.CASTLE;
+        keep.flags |= Spec.SEAT;
         keep.culture = Culture.IMPERIAL.ordinal();
         keep.style = 0;
         keep.h = 26;
@@ -786,10 +824,14 @@ public final class Cities {
         barracks.culture = Culture.IMPERIAL.ordinal();
         barracks.style = 0;
         b(plan, Archetype.SHRINE, -10, -36, S, 5, 5).variant = 1;
+        int[][] hSizes = {{7, 9}, {9, 9}, {9, 11}, {11, 9}, {11, 11}, {11, 13}};
         Deque<Spec> q = new ArrayDeque<>();
         q.add(new Spec(Archetype.STORE));
         q.add(new Spec(Archetype.INN).size(11, 13));
-        for (int i = 0; i < 6; i++) q.add(new Spec(Archetype.HOUSE));
+        for (int i = 0; i < 6; i++) {
+            int[] sz = hSizes[i % hSizes.length];
+            q.add(new Spec(Archetype.HOUSE).size(sz[0], sz[1]));
+        }
         Layouts.fillStreets(plan, streets, q, 2);
     }
 
@@ -809,6 +851,7 @@ public final class Cities {
         int R = plan.radius;
         Spec palace = b(plan, Archetype.LANDMARK, 0, -84, S, 27, 27);
         palace.variant = Landmarks.DOME_PALACE;
+        palace.flags |= Spec.SEAT;
         palace.h = 32;
         palace.margin = 2;
         Spec temple = b(plan, Archetype.LANDMARK, 0, 6, S, 25, 25);
@@ -824,6 +867,7 @@ public final class Cities {
         streets.add(st(plan, -R + 10, 36, R - 10, 36, 5, true, 0));
         streets.add(st(plan, -80, -40, 80, -40, 3, false, 0));
         streets.add(st(plan, -80, 80, 80, 80, 3, false, 0));
+        int[][] mSizes = {{7, 9}, {9, 9}, {9, 11}, {11, 9}, {11, 11}, {11, 13}, {13, 15}};
         Deque<Spec> q = new ArrayDeque<>();
         q.add(new Spec(Archetype.INN).size(13, 17).flag(Spec.UPPER));
         q.add(new Spec(Archetype.SMITHY).size(11, 9));
@@ -835,6 +879,8 @@ public final class Cities {
             Spec h = new Spec(i % 3 == 0 ? Archetype.MANOR : Archetype.HOUSE);
             if (i % 2 == 0) h.flag(Spec.UPPER);
             if (i % 4 == 1) h.style = Kits.HLAALU;
+            int[] sz = mSizes[i % mSizes.length];
+            h.size(sz[0], sz[1]);
             q.add(h);
         }
         Layouts.fillStreets(plan, streets, q, 2);
@@ -847,7 +893,7 @@ public final class Cities {
         Spec palace = b(plan, Archetype.LANDMARK, 0, 0, S, 37, 37);
         palace.variant = Landmarks.CANTON;
         palace.h = 42;
-        palace.flags |= Spec.FIXED | Spec.NO_BEARD;
+        palace.flags |= Spec.FIXED | Spec.NO_BEARD | Spec.SEAT;
         palace.floor = plan.base + lv;
         for (int[] cc : cantons) {
             Spec c = b(plan, Archetype.LANDMARK, cc[0], cc[1], S, 31, 31);
@@ -876,6 +922,7 @@ public final class Cities {
         int R = plan.radius;
         Spec palace = b(plan, Archetype.LANDMARK, 0, -R + 30, S, 27, 27);
         palace.variant = Landmarks.DOME_PALACE;
+        palace.flags |= Spec.SEAT;
         palace.h = 32;
         palace.margin = 2;
         Spec sig = b(plan, Archetype.LANDMARK, -46, 4, E, size, size);
@@ -898,6 +945,7 @@ public final class Cities {
         int R = plan.radius;
         Spec castle = b(plan, Archetype.LANDMARK, 0, -R + 30, S, size, size);
         castle.variant = Landmarks.CASTLE;
+        castle.flags |= Spec.SEAT;
         castle.h = 32;
         castle.margin = 5;
         plaza(plan, 0, 22, 17, 1, 0);
@@ -912,7 +960,7 @@ public final class Cities {
         Spec tree = b(plan, Archetype.LANDMARK, 0, 0, S, 61, 61);
         tree.variant = Landmarks.GIANT_TREE;
         tree.h = 110;
-        tree.flags |= Spec.NO_BEARD;
+        tree.flags |= Spec.NO_BEARD | Spec.SEAT;
         genericCityStreets(plan, 40);
     }
 
@@ -921,6 +969,7 @@ public final class Cities {
         int R = plan.radius;
         Spec x = b(plan, Archetype.LANDMARK, 0, -R + 30, S, 33, 33);
         x.variant = Landmarks.XANMEER;
+        x.flags |= Spec.SEAT;
         x.h = 26;
         plan.put(plan.line(Archetype.CANAL, -R + 15, 20, R - 15, 20, 9));
         genericCityStreets(plan, 30);
@@ -936,13 +985,16 @@ public final class Cities {
         int R = 150;
         Spec tower = b(plan, Archetype.LANDMARK, 0, 0, S, 27, 27);
         tower.variant = Landmarks.WHITE_GOLD_TOWER;
+        tower.flags |= Spec.SEAT;
         tower.h = 210;
         tower.margin = 4;
-        // the Green Emperor Way: a garden ring round the tower
+        // the Green Emperor Way: an ornamental park ring of flower beds and trees round the tower
         for (int i = 0; i < 8; i++) {
             double a = i * Math.PI / 4;
-            Spec g = plan.at(Archetype.GARDEN, (int) Math.round(Math.sin(a) * 24), (int) Math.round(Math.cos(a) * 24), S, 7, 7);
-            g.variant = i;
+            Spec g = plan.at(Archetype.YARD, (int) Math.round(Math.sin(a) * 24), (int) Math.round(Math.cos(a) * 24), S, i % 2 == 0 ? 7 : 5, 5);
+            g.variant = i % 2 == 0 ? com.skycraft.tamriel.settlement.grammar.Outdoors.FLOWER_BED : com.skycraft.tamriel.settlement.grammar.Outdoors.TREE;
+            g.h = i % 2 == 0 ? 3 : 9;
+            g.margin = 0;
             plan.place(g, 1);
         }
         Spec arena = b(plan, Archetype.LANDMARK, -80, 0, E, 37, 37);
@@ -967,6 +1019,7 @@ public final class Cities {
             streets.add(st(plan, -r, -r, -r, r, 3, false, 0));
             streets.add(st(plan, r, -r, r, r, 3, false, 0));
         }
+        int[][] icSizes = {{7, 9}, {9, 9}, {9, 11}, {11, 9}, {11, 11}, {11, 13}, {13, 15}};
         Deque<Spec> q = new ArrayDeque<>();
         q.add(new Spec(Archetype.INN).size(13, 17).flag(Spec.UPPER));
         q.add(new Spec(Archetype.INN).size(13, 17).flag(Spec.UPPER));
@@ -980,6 +1033,8 @@ public final class Cities {
             Spec h = new Spec(i % 4 == 0 ? Archetype.MANOR : Archetype.HOUSE);
             h.flag(Spec.UPPER);
             if (i % 4 == 0) h.flag(Spec.RICH);
+            int[] sz = icSizes[i % icSizes.length];
+            h.size(sz[0], sz[1]);
             q.add(h);
         }
         Layouts.fillStreets(plan, streets, q, 2);
@@ -996,6 +1051,7 @@ public final class Cities {
         streets.add(st(plan, -main + 6, clear / 2 + 10, main - 6, clear / 2 + 10, 5, true, 0));
         streets.add(st(plan, -R / 2, -R + 40, -R / 2, R - 30, 3, false, 0));
         streets.add(st(plan, R / 2, -R + 40, R / 2, R - 30, 3, false, 0));
+        int[][] gSizes = {{7, 9}, {9, 9}, {9, 11}, {11, 9}, {11, 11}, {11, 13}, {13, 15}};
         Deque<Spec> q = new ArrayDeque<>();
         q.add(new Spec(Archetype.INN).size(13, 17).flag(Spec.UPPER));
         q.add(new Spec(Archetype.SMITHY).size(11, 9));
@@ -1007,6 +1063,8 @@ public final class Cities {
         for (int i = 0; i < 24; i++) {
             Spec h = new Spec(i % 5 == 0 ? Archetype.MANOR : Archetype.HOUSE);
             if (i % 2 == 0) h.flag(Spec.UPPER);
+            int[] sz = gSizes[i % gSizes.length];
+            h.size(sz[0], sz[1]);
             q.add(h);
         }
         Layouts.fillStreets(plan, streets, q, 2);

@@ -70,7 +70,10 @@ public final class MarqueeLandmarks {
 
     /** A gigantic upturned crab shell: a ribbed ellipsoid hull with a hollow hall, a ridge and a door in the long side. */
     static void shell(Canvas c, Palette p, Spec s) {
-        if (c.recording()) return;
+        if (c.recording()) {
+            c.entrance((s.w - 1) / 2, 1, 0, p.door, Direction.SOUTH);
+            return;
+        }
         int w = s.w, d = s.d, h = Math.max(12, s.h);
         double cx = (w - 1) / 2.0, cz = (d - 1) / 2.0, ax = w / 2.0, az = d / 2.0;
         double f = Math.max(0.5, 1 - 2.2 / Math.min(ax, az));
@@ -115,8 +118,11 @@ public final class MarqueeLandmarks {
 
     /** A giant fungus tower: tapering stem with floors and windows, and a glowing, spotted cap. {@code name} = cap colour. */
     static void mushroomSpire(Canvas c, Palette p, Spec s) {
-        if (c.recording()) return;
         int cx = (s.w - 1) / 2, cz = (s.d - 1) / 2, h = Math.max(20, s.h);
+        if (c.recording()) {
+            c.entrance(cx, 1, cz - 3, p.door, Direction.SOUTH);
+            return;
+        }
         String col = s.name.isEmpty() ? "purple" : s.name;
         BlockState stem = B.s(Blocks.MUSHROOM_STEM), cap = colour(col, "wool", Blocks.PURPLE_WOOL), spot = B.s(Blocks.WHITE_WOOL);
         BlockState glow = B.s(Blocks.SHROOMLIGHT);
@@ -138,7 +144,7 @@ public final class MarqueeLandmarks {
         c.foundation(cx, -2, cz, stem, 12);
         for (int y = 1; y <= stemH; y++) c.set(cx, y, cz + 1, B.face(B.s(Blocks.LADDER), Direction.NORTH));
         for (int y = 1; y <= 2; y++) c.air(cx, y, cz - 3);
-        c.door(cx, 1, cz - 3, p.door, Direction.SOUTH);
+        c.entrance(cx, 1, cz - 3, p.door, Direction.SOUTH);
         // the cap: an underside of gills, then a dome
         int capH = h - stemH;
         for (int k = 0; k <= capH; k++) {
@@ -306,8 +312,11 @@ public final class MarqueeLandmarks {
 
     /** Two great domes side by side on a low hall: ivory shell with lapis ribs and moon-silver finials. */
     static void twinDomes(Canvas c, Palette p, Spec s) {
-        if (c.recording()) return;
         int w = s.w, d = s.d, h = Math.max(20, s.h), cz = (d - 1) / 2;
+        if (c.recording()) {
+            c.entrance(w / 2, 1, 2, p.door, Direction.SOUTH);
+            return;
+        }
         double r = Math.min(d / 2.0 - 1, (w - 3) / 4.0);
         BlockState shellB = p.cityWall, ribB = B.s(Blocks.LAPIS_BLOCK), hall = p.wall;
         pave(c, p, w, d, h + 4);
@@ -343,7 +352,7 @@ public final class MarqueeLandmarks {
         }
         // the Mane's doors on the south wall
         for (int y = 1; y <= 4; y++) for (int x = w / 2 - 1; x <= w / 2 + 1; x++) c.air(x, y, 2);
-        c.door(w / 2, 1, 2, p.door, Direction.SOUTH);
+        c.entrance(w / 2, 1, 2, p.door, Direction.SOUTH);
         for (int x = 3; x < w - 3; x += 6) Props.lantern(c, p, x, 5, 1, false);
     }
 
@@ -351,8 +360,11 @@ public final class MarqueeLandmarks {
 
     /** A nave with a steep gable roof and a tall tower ending in a snow-capped spire at the back. */
     static void chapelSpire(Canvas c, Palette p, Spec s) {
-        if (c.recording()) return;
         int w = s.w, d = s.d, h = Math.max(30, s.h), cx = (w - 1) / 2;
+        if (c.recording()) {
+            c.entrance(cx, 1, 1, p.door, Direction.SOUTH);
+            return;
+        }
         int naveD = Math.min(d - 9, 17), wallH = 9;
         pave(c, p, w, d, h + 2);
         // nave
@@ -399,7 +411,7 @@ public final class MarqueeLandmarks {
         c.set(cx, h + 1, (tz0 + tz1) / 2, B.s(Blocks.LIGHTNING_ROD));
         // door and steps
         for (int y = 1; y <= 3; y++) for (int x = cx - 1; x <= cx + 1; x++) c.air(x, y, 1);
-        c.door(cx, 1, 1, p.door, Direction.SOUTH);
+        c.entrance(cx, 1, 1, p.door, Direction.SOUTH);
         c.set(cx, 1, 0, B.stair(p.stairs, Direction.NORTH, false));
         for (int i = 0; i < 4; i++) {
             Direction dd = Direction.from2DDataValue(i);

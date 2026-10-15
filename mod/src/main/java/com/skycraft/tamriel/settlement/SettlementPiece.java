@@ -98,15 +98,18 @@ public class SettlementPiece extends StructurePiece {
             int hw = s.w / 2 + 1;
             int f1 = s.floor, f2 = s.floor2 == Spec.UNSET ? s.floor : s.floor2;
             // lines never shape the terrain (NO_BEARD), so their box may span the slope they follow
-            int slack = s.kind == com.skycraft.tamriel.settlement.plan.Archetype.STREET ? 20 : 0;
+            int slack = s.kind == com.skycraft.tamriel.settlement.plan.Archetype.STREET
+                    || s.kind == com.skycraft.tamriel.settlement.plan.Archetype.BRIDGE ? 20 : 0;
             return new BoundingBox(Math.min(s.x, s.x2) - hw, Math.min(f1, f2) + 1 - slack, Math.min(s.z, s.z2) - hw,
                     Math.max(s.x, s.x2) + hw, Math.max(f1, f2) + Math.max(2, s.h) + slack, Math.max(s.z, s.z2) + hw);
         }
         int[] o = origin(s);
-        int ax = cornerX(s, o, -s.margin, -s.margin), az = cornerZ(s, o, -s.margin, -s.margin);
-        int bx = cornerX(s, o, s.w - 1 + s.margin, s.d - 1 + s.margin), bz = cornerZ(s, o, s.w - 1 + s.margin, s.d - 1 + s.margin);
+        int m = s.kind == com.skycraft.tamriel.settlement.plan.Archetype.TERRACE ? Math.max(s.margin, 14) : s.margin;
+        int ax = cornerX(s, o, -m, -m), az = cornerZ(s, o, -m, -m);
+        int bx = cornerX(s, o, s.w - 1 + m, s.d - 1 + m), bz = cornerZ(s, o, s.w - 1 + m, s.d - 1 + m);
         int h = Math.max(2, Builders.height(s));
-        return new BoundingBox(Math.min(ax, bx), s.floor + 1, Math.min(az, bz), Math.max(ax, bx), s.floor + h, Math.max(az, bz));
+        int minY = s.kind == com.skycraft.tamriel.settlement.plan.Archetype.TERRACE ? s.floor - 16 : s.floor + 1;
+        return new BoundingBox(Math.min(ax, bx), minY, Math.min(az, bz), Math.max(ax, bx), s.floor + h, Math.max(az, bz));
     }
 
     /** World position of the building's local origin (front-left corner) so that its footprint is centred on (x, z). */

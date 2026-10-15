@@ -60,6 +60,41 @@ public final class Works {
         boolean major = s.has(Spec.MAJOR);
         int ddx = s.x2 - s.x, ddz = s.z2 - s.z;
         int sx = Math.abs(ddx) >= Math.abs(ddz) ? Integer.signum(ddx) : 0, sz = Math.abs(ddx) >= Math.abs(ddz) ? 0 : Integer.signum(ddz);
+        if (s.floor != Spec.UNSET && s.floor2 != Spec.UNSET && s.floor != s.floor2) {
+            int f1 = s.floor, f2 = s.floor2;
+            double len = Math.max(1.0, Math.hypot(ddx, ddz));
+            Direction upDir = f2 > f1 ? Direction.getNearest(ddx, 0, ddz) : Direction.getNearest(-ddx, 0, -ddz);
+            BlockState stairBlock = B.stair(major ? p.cityWallStairs : p.stairs, upDir, false);
+            line(c, s, half, (x, z, t, side) -> {
+                int g = c.wground(x, z);
+                int y = (int) Math.round(f1 + (f2 - f1) * t);
+                double stepT = 1.0 / len;
+                int yLower = (int) Math.round(f1 + (f2 - f1) * Math.max(0.0, Math.min(1.0, f2 > f1 ? t - stepT : t + stepT)));
+                boolean rail = s.w >= 3 && Math.abs(side) > half - 0.9;
+                int bot = Math.min(g, y) - 4;
+                for (int yy = bot; yy < y; yy++) {
+                    c.wset(x, yy, z, rail ? p.cityWall : p.foundation);
+                }
+                for (int yy = bot - 1, k = 0; k < 20; yy--, k++) {
+                    BlockState b = c.wget(x, yy, z);
+                    if (!b.isAir() && b.getFluidState().isEmpty() && !b.canBeReplaced()) break;
+                    c.wset(x, yy, z, p.foundation);
+                }
+                for (int yy = y + 1; yy <= y + 5; yy++) {
+                    c.wset(x, yy, z, Blocks.AIR.defaultBlockState());
+                }
+                if (rail && y > g + 1) {
+                    c.wset(x, y, z, p.cityWall);
+                    c.wset(x, y + 1, z, p.cityWallWall);
+                } else if (y > yLower) {
+                    c.wset(x, y, z, stairBlock);
+                } else {
+                    long hsh = Math.floorMod(c.hash(x, 0, z, 17), 100);
+                    c.wset(x, y, z, major ? (hsh < 22 ? p.plaza2 : p.plaza) : (hsh < 18 ? p.path2 : p.path));
+                }
+            });
+            return;
+        }
         line(c, s, half, (x, z, t, side) -> {
             int g = c.wground(x, z);
             if (c.wwater(x, z) > g) {
@@ -74,6 +109,11 @@ public final class Works {
             long hsh = Math.floorMod(c.hash(x, 0, z, 17), 100);
             BlockState m = major ? (hsh < 22 ? p.plaza2 : p.plaza) : (hsh < 18 ? p.path2 : p.path);
             c.wset(x, g, z, m);
+            for (int yy = g - 1, k = 0; k < 24; yy--, k++) {
+                BlockState b = c.wget(x, yy, z);
+                if (!b.isAir() && b.getFluidState().isEmpty() && !b.canBeReplaced()) break;
+                c.wset(x, yy, z, p.foundation);
+            }
             for (int y = g + 1; y <= g + 3; y++) {
                 BlockState s2 = c.wget(x, y, z);
                 if (!s2.isAir() && Canvas.open(s2)) c.wset(x, y, z, Blocks.AIR.defaultBlockState());
@@ -464,7 +504,7 @@ public final class Works {
 
     /** A raised terrace: earth and stone up to the floor, paved on top, with a parapet. Open on the front (stairs). */
     public static void terrace(Canvas c, Palette p, Spec s) {
-        int w = s.w, d = s.d;
+        int w = s.w, d = s.d, mx = (w - 1) / 2;
         for (int x = 0; x < w; x++) {
             for (int z = 0; z < d; z++) {
                 boolean edge = x == 0 || z == 0 || x == w - 1 || z == d - 1;
@@ -474,22 +514,26 @@ public final class Works {
                 c.set(x, 0, z, edge && (s.variant & 2) == 0 ? p.cityWall : top);
                 c.foundation(x, -1, z, edge ? p.cityWall : p.foundation, SettlementPieceDepth.DEPTH);
                 if (!c.recording()) c.clearPlants(x, 1, z, x, 4, z);
-                if (edge && (s.variant & 1) == 0 && !(z == 0 && Math.abs(x - (w - 1) / 2) <= 1)) c.set(x, 1, z, p.cityWallWall);
+                if (edge && (s.variant & 1) == 0 && !(z == 0 && Math.abs(x - mx) <= 2)) c.set(x, 1, z, p.cityWallWall);
             }
         }
         // stairs down from the front edge
         if (!c.recording()) {
-            int mx = (w - 1) / 2;
             for (int k = 1; k <= 14; k++) {
                 int y = -k + 1, z = -k;
-                boolean done = true;
-                for (int x = mx - 1; x <= mx + 1; x++) {
-                    if (Canvas.solidGround(c.get(x, y, z))) continue;
-                    done = false;
-                    c.set(x, y, z, B.stair(p.cityWallStairs, Direction.SOUTH, false));
+                int g = c.wground(c.wx(mx, z), c.wz(mx, z)) - s.floor;
+                if (y < g) break;
+                for (int x = mx - 2; x <= mx + 2; x++) {
+                    boolean side = Math.abs(x - mx) == 2;
+                    for (int dy = 1; dy <= 4; dy++) c.air(x, y + dy, z);
+                    if (side) {
+                        c.set(x, y, z, p.cityWall);
+                        c.set(x, y + 1, z, p.cityWallWall);
+                    } else {
+                        c.set(x, y, z, B.stair(p.cityWallStairs, Direction.SOUTH, false));
+                    }
                     c.foundation(x, y - 1, z, p.cityWall, 16);
                 }
-                if (done) break;
             }
         }
     }

@@ -320,14 +320,14 @@ public final class Landmarks {
             hollowCylinder(c, tx, 1, 24, tz, 3, wall, B.s(Blocks.SPRUCE_PLANKS));
             cone(c, tx, 25, tz, 4, 8, roof);
             for (int y = 6; y <= 20; y += 7) c.set(tx, y, tz - 3, B.s(Blocks.BLUE_STAINED_GLASS));
-            c.door(tx, 1, tz - 3, B.s(Blocks.DARK_OAK_DOOR), Direction.SOUTH);
+            c.entrance(tx, 1, tz - 3, B.s(Blocks.DARK_OAK_DOOR), Direction.SOUTH);
             for (int y = 1; y <= 24; y++) c.set(tx, y, tz + 2, B.face(B.s(Blocks.LADDER), Direction.NORTH));
             c.bed(tx - 1, 1, tz, B.s(Blocks.BLUE_BED), Direction.WEST);
             c.anchor(AnchorType.BED, tx - 1, 1, tz);
             Props.chest(c, tx + 1, 1, tz, Direction.WEST, "palace");
         }
         // the hall: the Arch-Mage's seat, enchanting and alchemy stations, the well of magicka
-        c.door(cx, 1, cz - hr, B.s(Blocks.DARK_OAK_DOOR), Direction.SOUTH);
+        c.entrance(cx, 1, cz - hr, B.s(Blocks.DARK_OAK_DOOR), Direction.SOUTH);
         ring(c, cx, 0, cz, 2.5, 1, B.s(Blocks.SEA_LANTERN));
         c.set(cx, 1, cz, B.s(Blocks.AMETHYST_CLUSTER));
         c.set(cx - hr + 2, 1, cz, B.face(Props.enchanter(), Direction.EAST));
@@ -388,7 +388,7 @@ public final class Landmarks {
         }
         c.set(cx, s.h + 1, cz, B.s(Blocks.LIGHTNING_ROD));
         // the Elder Council's hall at the foot
-        c.door(cx, 1, (int) (cz - r0), B.s(Blocks.BIRCH_DOOR), Direction.SOUTH);
+        c.entrance(cx, 1, (int) (cz - r0), B.s(Blocks.BIRCH_DOOR), Direction.SOUTH);
         disc(c, cx, 1, cz, 3, B.slab(B.s(Blocks.QUARTZ_SLAB), true));
         for (int i = 0; i < 8; i++) {
             double ang = i * Math.PI / 4;
@@ -426,6 +426,7 @@ public final class Landmarks {
             c.set(cx + dx, 0, cz + dz, p.floor);
         }
         int doorZ = cz - (int) Math.ceil(trunk * 1.6);
+        c.entrance(cx, 1, doorZ, p.door, Direction.SOUTH);
         for (int z = doorZ; z <= cz - hr; z++) for (int y = 1; y <= 3; y++) for (int x = cx - 1; x <= cx + 1; x++) c.air(x, y, z);
         c.anchor(AnchorType.JARL, cx, 1, cz + hr - 1);
         c.anchor(AnchorType.HOUSECARL, cx + 2, 1, cz + hr - 2);
@@ -514,6 +515,8 @@ public final class Landmarks {
         // shrine on the top tier and a lantern on each corner
         int top = tiers * th;
         int cx = (w - 1) / 2, cz = (d - 1) / 2;
+        c.entrance(cx, 1, 0, p.door, Direction.SOUTH);
+        for (int y = 1; y <= 4; y++) for (int dx = -1; dx <= 1; dx++) c.air(cx + dx, y, 0);
         c.set(cx, top + 1, cz, Props.shrine("akatosh"));
         Props.brazier(c, p, tiers * 4 - 4, top - th, tiers * 4 - 4);
         // inner market hall
@@ -566,7 +569,7 @@ public final class Landmarks {
             c.set(q[0], wallH + 14, q[1], p.column);
         }
         for (int x = cx - 1; x <= cx + 1; x++) for (int y = 1; y <= 4; y++) c.air(x, y, 0);
-        c.door(cx, 1, 0, p.door, Direction.SOUTH);
+        c.entrance(cx, 1, 0, p.door, Direction.SOUTH);
         Room r = new Room(2, 2, w - 3, d - 3, 1, wallH);
         if (palace) Interiors.palace(c, p, r, null, cx, true, false);
         else Interiors.temple(c, p, r, cx, s.name.isEmpty() ? "akatosh" : s.name, false);
@@ -587,6 +590,7 @@ public final class Landmarks {
             }
         }
         int cx = (w - 1) / 2;
+        if (c.recording()) c.entrance(cx, 1, 0, p.door, Direction.SOUTH);
         for (int k = 0; k < tiers * 3; k++) {
             for (int x = cx - 1; x <= cx + 1; x++) c.set(x, k, -1 + (k * 2) / 3, B.stair(B.s(Blocks.MOSSY_STONE_BRICK_STAIRS), Direction.SOUTH, false));
         }
@@ -625,7 +629,7 @@ public final class Landmarks {
             if (sides == 0) break;
         }
         c.set(cx, h + 1, cz, B.s(Blocks.AMETHYST_CLUSTER));
-        c.door(cx, 1, cz - (int) r0 + 1, B.s(Blocks.BIRCH_DOOR), Direction.SOUTH);
+        c.entrance(cx, 1, cz - (int) r0 + 1, B.s(Blocks.BIRCH_DOOR), Direction.SOUTH);
         for (int y = 1; y < Math.min(h, 64); y++) c.set(cx, y, cz + 1, B.face(B.s(Blocks.LADDER), Direction.NORTH));
         c.set(cx, 0, cz + 2, quartz);
         for (int y = 1; y < Math.min(h, 64); y++) c.set(cx, y, cz + 2, quartz);
@@ -669,7 +673,7 @@ public final class Landmarks {
         }
         int cx = (w - 1) / 2;
         for (int x = cx - 1; x <= cx + 1; x++) for (int y = 1; y <= 4; y++) c.air(x, y, 0);
-        c.door(cx, 1, 0, p.door, Direction.SOUTH);
+        c.entrance(cx, 1, 0, p.door, Direction.SOUTH);
         Interiors.palace(c, p, new Room(2, 2, w - 3, d - 3, 1, 8), new Room(2, 2, w - 3, d - 3, 9, h), cx, true, p.name.equals("orc") || p.name.startsWith("nord") || p.name.equals("stone"));
         for (int y = 1; y < 8; y++) c.set(w - 3, y, d - 3, B.face(B.s(Blocks.LADDER), Direction.WEST));
         c.air(w - 3, 8, d - 3);
@@ -716,6 +720,7 @@ public final class Landmarks {
         }
         // Dwemer facade: bronze pillars, a great door and a stepped pediment
         int cx = kx0 + keepW / 2;
+        c.entrance(cx, 1, 0, p.door, Direction.SOUTH);
         for (int x = kx0 - 2; x < kx0 + keepW + 2; x++) {
             for (int y = 0; y <= keepH + 6; y++) {
                 boolean pillar = (x - kx0) % 4 == 0;
@@ -759,6 +764,7 @@ public final class Landmarks {
         int tiers = 8;
         if (!c.recording()) c.clear(0, 1, 0, s.w - 1, tiers + 6, s.d - 1);
         int ri = (int) Math.ceil(R);
+        if (c.recording()) c.entrance(cx, 1, cz - ri, p.door, Direction.SOUTH);
         for (int dx = -ri; dx <= ri; dx++) for (int dz = -ri; dz <= ri; dz++) {
             double dist = Math.sqrt(dx * dx + dz * dz);
             if (dist > R + 0.4) continue;

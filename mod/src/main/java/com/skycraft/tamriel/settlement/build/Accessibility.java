@@ -89,6 +89,11 @@ public final class Accessibility {
                 y--;
             }
             BlockPos feet = new BlockPos(c.getX(), y, c.getZ());
+            BlockState feetState = level.getBlockState(feet);
+            if (feetState.getBlock() instanceof FenceGateBlock && !feetState.getValue(FenceGateBlock.OPEN)) {
+                level.setBlock(feet, feetState.setValue(FenceGateBlock.OPEN, true), 2);
+                changed = true;
+            }
             if (!clear(level, box, feet)) {
                 BlockState fs = level.getBlockState(feet);
                 if (isWall(level, feet, fs)) {
@@ -114,18 +119,29 @@ public final class Accessibility {
             BlockState below = level.getBlockState(feet.below());
             if (roadLike(below)) break; // joined the street
             if (!solidTop(level, box, feet.below())) {
-                // a missing floor: fill down to the ground (at most three deep) and pave the top
+                // a missing floor: fill down to the ground (up to 24 deep) and pave the top
                 int d = 0;
                 BlockPos g = feet.below();
-                while (d < 3 && box.isInside(g) && !solidTop(level, box, g)) {
+                while (d < 24 && box.isInside(g) && !solidTop(level, box, g)) {
                     level.setBlock(g, Blocks.DIRT.defaultBlockState(), 2);
                     g = g.below();
                     d++;
                 }
                 level.setBlock(feet.below(), Blocks.DIRT_PATH.defaultBlockState(), 2);
                 changed = true;
-            } else if (k <= 2 && (below.is(BlockTags.DIRT) || below.is(BlockTags.SAND) || below.is(Blocks.GRASS_BLOCK))) {
-                level.setBlock(feet.below(), Blocks.DIRT_PATH.defaultBlockState(), 2);
+            } else {
+                if (!solidTop(level, box, feet.below(2))) {
+                    int d = 0;
+                    BlockPos g = feet.below(2);
+                    while (d < 24 && box.isInside(g) && !solidTop(level, box, g)) {
+                        level.setBlock(g, Blocks.DIRT.defaultBlockState(), 2);
+                        g = g.below();
+                        d++;
+                    }
+                }
+                if (k <= 2 && (below.is(BlockTags.DIRT) || below.is(BlockTags.SAND) || below.is(Blocks.GRASS_BLOCK))) {
+                    level.setBlock(feet.below(), Blocks.DIRT_PATH.defaultBlockState(), 2);
+                }
             }
         }
         if (changed) DOORS_FIXED.incrementAndGet();

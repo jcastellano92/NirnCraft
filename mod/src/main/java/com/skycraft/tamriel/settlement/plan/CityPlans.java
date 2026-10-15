@@ -181,10 +181,19 @@ public final class CityPlans {
             default -> {
                 s = plan.street(l.x1(), l.z1(), l.x2(), l.z2(), l.width(), l.major());
                 s.flags |= l.flags();
+                if (l.lift() != null) {
+                    s.flags |= Spec.FIXED;
+                    s.floor = plan.base + l.lift();
+                    s.floor2 = plan.base + (l.lift2() != null ? l.lift2() : l.lift());
+                }
             }
         }
         if (l.raise() != 0) s.minFloor = l.raise();
     }
+
+    private static final int[][] HOUSE_SIZES = {
+            {7, 9}, {9, 9}, {9, 11}, {11, 9}, {11, 11}, {11, 13}, {13, 15}
+    };
 
     private static int[][] polygon(CityPlan.Ring r) {
         int[][] v = new int[r.sides()][];
@@ -227,6 +236,13 @@ public final class CityPlans {
         if (l.margin() >= 0) s.margin = l.margin();
         s.flags |= l.flags();
         s.name = l.name();
+        String lid = l.id().toLowerCase(java.util.Locale.ROOT);
+        String lname = l.name().toLowerCase(java.util.Locale.ROOT);
+        if (lid.contains("palace") || lid.contains("castle") || lid.contains("keep") || lid.contains("white_gold")
+                || lid.contains("giant_tree") || lid.contains("xanmeer") || lid.contains("canton") || lid.contains("college")
+                || lname.contains("palace") || lname.contains("castle") || lname.contains("keep") || lname.contains("reach")) {
+            s.flags |= Spec.SEAT;
+        }
         if (l.raise() != 0) s.minFloor = l.raise();
         if (!l.kit().isEmpty() || !l.overlay().isEmpty()) s.style = styleOf(plan, s, "", l.kit(), l.overlay());
     }
@@ -234,6 +250,11 @@ public final class CityPlans {
     private static void building(Plan plan, CityPlan.Building b) {
         for (int i = 0; i < b.count(); i++) {
             int w = b.w() > 0 ? b.w() : b.kind().w, d = b.d() > 0 ? b.d() : b.kind().d;
+            if (b.count() > 1 && b.w() == 0 && (b.kind() == Archetype.HOUSE || b.kind() == Archetype.MANOR || b.kind() == Archetype.FARMHOUSE)) {
+                int[] sz = HOUSE_SIZES[i % HOUSE_SIZES.length];
+                w = sz[0];
+                d = sz[1];
+            }
             Spec s = Cities.b(plan, b.kind(), b.x() + i * b.stepX(), b.z() + i * b.stepZ(), b.face(), w, d);
             s.flags |= b.flags();
             s.variant = b.variant();
@@ -245,6 +266,19 @@ public final class CityPlans {
             }
             if (b.raise() != 0) s.minFloor = b.raise();
             if (!b.use().isEmpty()) grammarUse(plan, s, b.use(), b.wealth());
+            if (s.kind == Archetype.PALACE || s.kind == Archetype.LONGHOUSE
+                    || s.use == com.skycraft.tamriel.settlement.grammar.Use.KEEP.ordinal()
+                    || s.use == com.skycraft.tamriel.settlement.grammar.Use.LONGHOUSE.ordinal()) {
+                s.flags |= Spec.SEAT;
+                if (b.w() == 0) {
+                    boolean cityKeep = s.kind == Archetype.PALACE || s.use == com.skycraft.tamriel.settlement.grammar.Use.KEEP.ordinal();
+                    s.size(Math.max(s.w, cityKeep ? 19 : 15), Math.max(s.d, cityKeep ? 23 : 19));
+                }
+            } else if (s.kind == Archetype.HOUSE || s.kind == Archetype.MANOR || s.kind == Archetype.FARMHOUSE
+                    || (s.grammar() && com.skycraft.tamriel.settlement.grammar.Use.byOrdinal(s.use).home())) {
+                if (s.w < 7) s.w = 7;
+                if (s.d < 9) s.d = 9;
+            }
             if (!b.culture().isEmpty() || !b.kit().isEmpty() || !b.overlay().isEmpty()) {
                 s.style = styleOf(plan, s, b.culture(), b.kit(), b.overlay());
             }
@@ -317,12 +351,22 @@ public final class CityPlans {
             for (int i = 0; i < e.count(); i++) {
                 Spec h = new Spec(e.kind());
                 h.flags = e.flags();
-                if (e.w() > 0) h.size(e.w(), e.d());
+                if (e.w() > 0) {
+                    h.size(e.w(), e.d());
+                } else if (e.kind() == Archetype.HOUSE || e.kind() == Archetype.MANOR || e.kind() == Archetype.FARMHOUSE) {
+                    int[] sz = HOUSE_SIZES[i % HOUSE_SIZES.length];
+                    h.size(sz[0], sz[1]);
+                }
                 if ((h.flags & Spec.UPPER) != 0 && e.plainEvery() > 0 && i % e.plainEvery() == e.plainEvery() - 1) h.flags &= ~Spec.UPPER;
                 if (e.smallEvery() > 0 && e.w() == 0 && i % e.smallEvery() == 1) h.size(9, 9);
                 h.variant = e.variant();
                 h.minFloor = e.raise() == 0 ? Spec.UNSET : e.raise();
                 if (!e.use().isEmpty()) grammarUseQueued(h, e.use(), e.wealth());
+                if (h.kind == Archetype.HOUSE || h.kind == Archetype.MANOR || h.kind == Archetype.FARMHOUSE
+                        || (h.grammar() && com.skycraft.tamriel.settlement.grammar.Use.byOrdinal(h.use).home())) {
+                    if (h.w < 7) h.w = 7;
+                    if (h.d < 9) h.d = 9;
+                }
                 if (!e.name().isEmpty() && i == 0) {
                     h.name = e.name();
                     h.flag(Spec.SIGN);

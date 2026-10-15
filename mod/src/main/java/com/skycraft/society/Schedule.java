@@ -49,7 +49,7 @@ public final class Schedule {
             case BEGGAR -> h >= 23 || h < 6 ? Activity.SLEEP : h == 12 ? Activity.INN : Activity.WANDER;
             case CHILD -> h >= 21 || h < 7 ? Activity.SLEEP : h < 8 ? Activity.EAT : h < 12 ? Activity.PLAY
                     : h < 13 ? Activity.EAT : h < 19 ? Activity.PLAY : Activity.HOME;
-            case PRIEST, JARL, STEWARD -> h >= 22 || h < 6 ? Activity.SLEEP : h < 8 ? Activity.EAT : h < 20 ? Activity.WORK
+            case PRIEST, JARL, STEWARD, MAGE, HOUSECARL -> h >= 22 || h < 6 ? Activity.SLEEP : h < 8 ? Activity.EAT : h < 20 ? Activity.WORK
                     : Activity.HOME;
             case MERCHANT, BLACKSMITH, APOTHECARY, SCHOLAR, BUTCHER -> shopkeeper(h, social);
             case FARMER, MINER, LUMBERJACK, HUNTER, FISHER -> labourer(h, social);

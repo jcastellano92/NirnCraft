@@ -116,9 +116,7 @@ public final class SettlementPopulation {
             if (res.bed() >= 0) {
                 bed = list.get(res.bed()).pos();
                 if (!Settlers.bedFree(level, bed)) bed = nearestFreeBed(level, list, a.pos());
-                if (bed == null) { // every bed is taken or gone: nobody lives here
-                    e.spawned.add(i);
-                    changed = true;
+                if (bed == null) { // bed chunk not loaded or temporarily unavailable: try again on a later tick
                     continue;
                 }
             }
@@ -142,8 +140,16 @@ public final class SettlementPopulation {
                         yield jarl != null;
                     }
                     case HOUSECARL -> {
-                        NpcEntity hc = npc(level, at, NpcRole.HOUSECARL, null, 12);
-                        if (hc != null && jarl != null) hc.setLeader(jarl.getUUID());
+                        NpcEntity hc = npc(level, at, NpcRole.HOUSECARL, null, 16);
+                        if (hc != null) {
+                            NpcEntity leader = jarl;
+                            if (leader == null) {
+                                var found = level.getEntitiesOfClass(NpcEntity.class, new net.minecraft.world.phys.AABB(at).inflate(32),
+                                        x -> x.isAlive() && x.role() == NpcRole.JARL);
+                                if (!found.isEmpty()) leader = found.get(0);
+                            }
+                            if (leader != null) hc.setLeader(leader.getUUID());
+                        }
                         yield hc != null;
                     }
                     case STEWARD -> steward(level, at, e) != null;
@@ -231,7 +237,8 @@ public final class SettlementPopulation {
         BlockPos best = null;
         double bestD = Double.MAX_VALUE;
         for (Anchor b : list) {
-            if (b.type() != AnchorType.BED || !Settlers.bedFree(level, b.pos())) continue;
+            if ((b.type() != AnchorType.BED && b.type() != AnchorType.GUILD_BED && b.type() != AnchorType.GUEST_BED)
+                    || !Settlers.bedFree(level, b.pos())) continue;
             double d = b.pos().distSqr(from);
             if (d < bestD) {
                 bestD = d;
@@ -343,13 +350,14 @@ public final class SettlementPopulation {
     static NpcEntity steward(ServerLevel level, BlockPos at, SettlementAnchors.Entry e) {
         at = freeSpot(level, at);
         if (at == null) return null;
-        NpcEntity npc = Npcs.create(level, at, NpcRole.COURIER);
+        NpcEntity npc = Npcs.create(level, at, NpcRole.STEWARD);
         if (npc == null) return null;
         npc.setPersistenceRequired();
         npc.setCustomName(Component.translatable("entity.skycraft.steward", firstName(npc.isFemale(), level.getRandom())));
         npc.getPersistentData().putBoolean("skycraft_steward", true);
         npc.getPersistentData().putString("skycraft_steward_of", e.key);
-        npc.setHome(at, 8);
+        npc.getPersistentData().putBoolean("skycraft_settler", true);
+        npc.setHome(at, 12);
         return level.addFreshEntity(npc) ? npc : null;
     }
 

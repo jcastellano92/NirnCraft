@@ -477,7 +477,7 @@ public final class Shells {
             }
         }
         c.set(cx, wallH + r + 3, cz, B.axis(p.post, Direction.Axis.Y));
-        c.door(cx, 1, cz - r, p.door, Direction.SOUTH);
+        c.entrance(cx, 1, cz - r, p.door, Direction.SOUTH);
         for (int i = 0; i < 4; i++) {
             Direction dir = Direction.from2DDataValue(i);
             if (dir == Direction.NORTH) continue;
@@ -623,7 +623,7 @@ public final class Shells {
                 if (r >= 3) c.set(cx + o[0] * (r - 1), y, cz + o[1] * (r - 1), p.planks);
             }
         }
-        c.door(cx, 1, cz - r, p.door, Direction.SOUTH);
+        c.entrance(cx, 1, cz - r, p.door, Direction.SOUTH);
         List<Room> rooms = new ArrayList<>();
         int in = Math.max(1, (int) Math.floor((r - 1) / Math.sqrt(2)));
         rooms.add(new Room(cx - in, cz - in + 1, cx + in, cz + in, 1, 5));
@@ -706,7 +706,7 @@ public final class Shells {
                 }
             }
         }
-        c.door(cx, hy + 1, cz - hutR, p.door, Direction.SOUTH);
+        c.entrance(cx, hy + 1, cz - hutR, p.door, Direction.SOUTH);
         c.set(cx, hy, cz - hutR - 1, p.planks);
         List<Room> rooms = new ArrayList<>();
         // a ring room around the trunk: furnish its front half

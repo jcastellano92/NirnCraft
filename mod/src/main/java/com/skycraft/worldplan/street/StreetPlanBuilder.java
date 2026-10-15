@@ -505,7 +505,7 @@ public final class StreetPlanBuilder {
             // ground works raise the walk surface (terraces, rock plateaus)
             for (int i = 0; i < n; i++) {
                 Spec s = specs.get(i);
-                if (!s.has(Spec.GROUND) || s.isLine() || s.floor == Spec.UNSET) continue;
+                if (!s.has(Spec.GROUND) || s.isLine() || s.floor == Spec.UNSET || s.kind == Archetype.CAMP) continue;
                 int f = s.floor;
                 fillRect(rect(s, 0), c -> {
                     if (!wet[c]) surf[c] = Math.max(surf[c], f);
@@ -568,11 +568,18 @@ public final class StreetPlanBuilder {
                 Spec s = specs.get(i);
                 int si = i;
                 if (s.kind == Archetype.STREET || s.kind == Archetype.BRIDGE) {
+                    boolean ramped = s.floor != Spec.UNSET && s.floor2 != Spec.UNSET && (s.kind == Archetype.BRIDGE || s.floor != s.floor2);
+                    double ax = s.x + 0.5, az = s.z + 0.5, dx = s.x2 - s.x, dz = s.z2 - s.z, l2 = dx * dx + dz * dz;
                     band(s, s.w / 2.0, c -> {
                         target[c] = T_STREET;
                         targetLine[c] = si;
                         if (cost[c] == C_WATER) cost[c] = C_FREE;
-                        if (s.kind == Archetype.BRIDGE && s.floor != Spec.UNSET) {
+                        if (ramped) {
+                            double px = gx0 + c % W + 0.5 - ax, pz = gz0 + c / W + 0.5 - az;
+                            double t = l2 < 1e-6 ? 0 : Math.max(0, Math.min(1, (px * dx + pz * dz) / l2));
+                            surf[c] = (int) Math.round(s.floor + (s.floor2 - s.floor) * t);
+                            wet[c] = false;
+                        } else if (s.kind == Archetype.BRIDGE && s.floor != Spec.UNSET) {
                             wet[c] = false;
                         } else if (wet[c]) {
                             wet[c] = false; // the street's own plank walk
@@ -666,9 +673,9 @@ public final class StreetPlanBuilder {
                     surface = s.has(Spec.MAJOR) ? StreetPlan.PAVED : StreetPlan.BEATEN;
                 }
                 Line l = new Line(i, s.x + 0.5, s.z + 0.5, s.x2 + 0.5, s.z2 + 0.5, Math.max(1, s.w), cls, surface);
-                l.a = streetNode(l.ax, l.az, s.kind == Archetype.BRIDGE && s.floor != Spec.UNSET ? s.floor : Integer.MIN_VALUE);
-                l.b = streetNode(l.bx, l.bz, s.kind == Archetype.BRIDGE && s.floor2 != Spec.UNSET ? s.floor2
-                        : s.kind == Archetype.BRIDGE && s.floor != Spec.UNSET ? s.floor : Integer.MIN_VALUE);
+                boolean fixed = (s.kind == Archetype.BRIDGE || s.floor2 != Spec.UNSET) && s.floor != Spec.UNSET;
+                l.a = streetNode(l.ax, l.az, fixed ? s.floor : Integer.MIN_VALUE);
+                l.b = streetNode(l.bx, l.bz, fixed ? (s.floor2 != Spec.UNSET ? s.floor2 : s.floor) : Integer.MIN_VALUE);
                 lines.add(l);
             }
             // T-junctions: a street end lying on another street's side splits it there
@@ -693,13 +700,19 @@ public final class StreetPlanBuilder {
                 if (near >= 0) r.edge(nd, near, 3, StreetPlan.LANE, StreetPlan.PAVED);
             }
             // gates: the last vertex of every planned road that ends here is a node of the graph
-            List<int[]> predicted = SettlementAnchors.gates(place);
+            List<int[]> predicted = new ArrayList<>(SettlementAnchors.gates(place));
+            for (Spec s : specs) {
+                if (s.kind == Archetype.GATE) predicted.add(new int[]{s.x, s.z});
+            }
+            int maxSearch = Math.max(128, r.reach * 2);
+            boolean hasGateNode = false;
             for (int k = 0; k < roadEnds.size(); k++) {
                 long e = roadEnds.getLong(k);
                 int seg = (int) (e >>> 32), v = (int) e;
                 float x = rp.vx[v], z = rp.vz[v];
                 boolean atGate = false;
-                for (int[] g : predicted) if (Math.hypot(g[0] + 0.5 - x, g[1] + 0.5 - z) <= 16) atGate = true;
+                for (int[] g : predicted) if (Math.hypot(g[0] + 0.5 - x, g[1] + 0.5 - z) <= 24) atGate = true;
+                if (atGate) hasGateNode = true;
                 int nd = r.node(x, z, (float) Math.floor(rp.vh[v] + 0.002f), atGate ? StreetPlan.N_GATE : StreetPlan.N_ROAD);
                 r.nSeg.set(nd, seg);
                 r.nVert.set(nd, v);
@@ -717,21 +730,56 @@ public final class StreetPlanBuilder {
                     }
                 }
                 // the gate lane: the road's end to the nearest street node (the main street starts at the gate)
-                int near = nearestNode(x, z, streetNodes, 64);
+                int near = nearestNode(x, z, streetNodes, maxSearch);
                 if (near >= 0) {
                     float w = 3f;
                     for (Line l : lines) if (l.a == near || l.b == near) w = Math.max(w, l.w);
                     r.edge(nd, near, w, StreetPlan.MAIN, StreetPlan.PAVED);
                 }
             }
+            // ensure every planned gate has a GATE node on the street graph even when roads arrive on another side
+            for (int[] g : predicted) {
+                float gx = g[0] + 0.5f, gz = g[1] + 0.5f;
+                boolean covered = false;
+                for (int i = 0; i < gateNodes.size(); i++) {
+                    int gn = gateNodes.getInt(i);
+                    if (r.nCls.getByte(gn) == StreetPlan.N_GATE && Math.hypot(r.nx.getFloat(gn) - gx, r.nz.getFloat(gn) - gz) <= 24) {
+                        covered = true;
+                        break;
+                    }
+                }
+                if (covered) continue;
+                int nd = r.node(gx, gz, surfAt(g[0], g[1]), StreetPlan.N_GATE);
+                gateNodes.add(nd);
+                for (int dz = -1; dz <= 1; dz++) {
+                    for (int dx = -1; dx <= 1; dx++) {
+                        int cc = idx(g[0] + dx, g[1] + dz);
+                        if (cc >= 0 && cost[cc] != 0) {
+                            target[cc] = T_GATE;
+                            targetLine[cc] = nd;
+                        }
+                    }
+                }
+                int near = nearestNode(gx, gz, streetNodes, maxSearch);
+                if (near >= 0) {
+                    float w = 3f;
+                    for (Line l : lines) if (l.a == near || l.b == near) w = Math.max(w, l.w);
+                    r.edge(nd, near, w, StreetPlan.MAIN, StreetPlan.PAVED);
+                }
+                hasGateNode = true;
+            }
+            if (!hasGateNode && !gateNodes.isEmpty()) {
+                r.nCls.set(gateNodes.getInt(0), StreetPlan.N_GATE);
+            }
         }
 
         int streetNode(double x, double z, int fixedH) {
+            int h = fixedH != Integer.MIN_VALUE ? fixedH : surfAt((int) Math.floor(x), (int) Math.floor(z));
             for (int nd = 0; nd < r.nx.size(); nd++) {
                 if (r.nCls.getByte(nd) != StreetPlan.N_STREET) continue;
-                if (Math.abs(r.nx.getFloat(nd) - x) <= 2 && Math.abs(r.nz.getFloat(nd) - z) <= 2) return nd;
+                if (Math.abs(r.nx.getFloat(nd) - x) <= 2 && Math.abs(r.nz.getFloat(nd) - z) <= 2
+                        && Math.abs(r.nh.getFloat(nd) - h) <= 3) return nd;
             }
-            int h = fixedH != Integer.MIN_VALUE ? fixedH : surfAt((int) Math.floor(x), (int) Math.floor(z));
             return r.node((float) x, (float) z, h, StreetPlan.N_STREET);
         }
 
@@ -770,6 +818,7 @@ public final class StreetPlanBuilder {
             Direction out = Direction.from2DDataValue(d[4]);
             int ox = out.getStepX(), oz = out.getStepZ();
             int floor = y - 1;
+            Spec bs = specs.get(spec);
             // the doorstep, then out through the building's own porch and steps (its builder lays those)
             IntArrayList prefix = new IntArrayList();
             int cx = x + ox, cz = z + oz;
@@ -778,7 +827,8 @@ public final class StreetPlanBuilder {
             int steps = 0, startH = floor;
             if (c >= 0) {
                 prefix.add(c);
-                for (int k = 0; k < 4 && owner[c] == spec; k++) {
+                int maxOut = Math.max(4, Math.max(bs.w, bs.d));
+                for (int k = 0; k < maxOut && owner[c] == spec; k++) {
                     cx += ox;
                     cz += oz;
                     c = idx(cx, cz);
@@ -789,7 +839,6 @@ public final class StreetPlanBuilder {
                     // the builder's steps (Grammar.steps) run straight out from the landing at the doorstep while the ground
                     // is below the floor, one stair per block of drop; the walk starts on the ground after the last stair
                     int below = Math.min(8, floor - surf[c]);
-                    Spec bs = specs.get(spec);
                     boolean front = out == bs.facing || !bs.grammar();
                     if (!front && below >= 2) return new Route(prefix, 0, floor, null); // a back door gets no steps
                     for (int k = 0; k < below + 1 && below > 0 && front; k++) {
@@ -801,7 +850,7 @@ public final class StreetPlanBuilder {
                         prefix.add(c);
                         steps++;
                     }
-                    startH = steps > 0 ? surf[c] : floor;
+                    startH = (steps > 0 || Math.abs(floor - surf[c]) > 2) ? surf[c] : floor;
                     if (walk) path = search(c, spec, startH);
                 }
             }

@@ -75,8 +75,13 @@ final class Features {
                     if (r.nextInt(++seen) == 0) pick = c;
                 }
                 if (pick != null) {
-                    double[] p = pick.at(pick.length() * (0.15 + 0.7 * ((i + 0.5) / Math.max(1, n))));
-                    return p;
+                    double s = pick.length() * (0.15 + 0.7 * ((i + 0.5) / Math.max(1, n)));
+                    double[] p = pick.at(s);
+                    double[] p2 = pick.at(Math.min(pick.length(), s + 2.0));
+                    double dx = p2[0] - p[0], dz = p2[1] - p[1], l = Math.hypot(dx, dz);
+                    double side = (r.nextBoolean() ? 1 : -1) * (pick.width() / 2.0 + 3.0);
+                    if (l > 1e-4) return new double[]{p[0] - dz / l * side, p[1] + dx / l * side};
+                    return new double[]{p[0] + side, p[1]};
                 }
             }
             case "gate" -> {
@@ -239,11 +244,11 @@ final class Features {
             }
             case "garden" -> {
                 // a small park: lawn bed, flower beds, two trees and a bench
-                Spec g = spot(x, Archetype.GARDEN, x.r.nextInt(8), "", 11, 9, 4, ax, az, reach, false);
+                Spec g = spot(x, Archetype.YARD, Outdoors.FLOWER_BED, "", 7, 5, 3, ax, az, reach, false);
                 if (g == null) return false;
-                spot(x, Archetype.YARD, Outdoors.TREE, "", 5, 5, 9, g.x - 9, g.z, 4, false);
-                spot(x, Archetype.YARD, Outdoors.FLOWER_BED, "", 7, 5, 3, g.x + 9, g.z, 4, false);
-                spot(x, Archetype.YARD, Outdoors.BENCH, "", 3, 1, 3, g.x, g.z + 7, 3, false);
+                spot(x, Archetype.YARD, Outdoors.TREE, "", 5, 5, 9, g.x - 7, g.z, 4, false);
+                spot(x, Archetype.YARD, Outdoors.FLOWER_BED, "", 7, 5, 3, g.x + 7, g.z, 4, false);
+                spot(x, Archetype.YARD, Outdoors.BENCH, "", 3, 1, 3, g.x, g.z + 5, 3, false);
                 return true;
             }
             case "orchard" -> {

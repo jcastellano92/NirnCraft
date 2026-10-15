@@ -235,9 +235,19 @@ public final class Fabric {
             for (Plan.Chain c : plan.chains) if (!tagged.contains(c) && c.rank() <= 1 && c.length() > 14) order.add(c);
             for (int i = 0; i < q.count(); i++) {
                 int w = q.w() > 0 ? q.w() : q.kind().w, d = q.d() > 0 ? q.d() : q.kind().d;
+                if (q.w() == 0 && (q.kind() == Archetype.HOUSE || q.kind() == Archetype.MANOR || q.kind() == Archetype.FARMHOUSE)) {
+                    int[][] sizes = {{7, 9}, {9, 9}, {9, 11}, {11, 9}, {11, 11}, {11, 13}, {13, 15}};
+                    int[] sz = sizes[i % sizes.length];
+                    w = sz[0];
+                    d = sz[1];
+                }
                 if (q.smallEvery() > 0 && q.w() == 0 && i % q.smallEvery() == 1) {
                     w = 9;
                     d = 9;
+                }
+                if (q.kind() == Archetype.HOUSE || q.kind() == Archetype.MANOR || q.kind() == Archetype.FARMHOUSE) {
+                    w = Math.max(7, w);
+                    d = Math.max(9, d);
                 }
                 boolean placed = false;
                 int first = x.r.nextInt(tagged.size());
@@ -334,7 +344,7 @@ public final class Fabric {
         if (z == Zone.CRAFT && x.r.nextInt(5) == 0) use = x.r.nextBoolean() ? Use.WAREHOUSE : Use.TANNERY;
         int[] sz = use.size(wl, x.r);
         for (int shrink = 0; shrink <= 2; shrink++) {
-            int w = Math.max(5, sz[0] - shrink * 2), d = Math.max(5, sz[1] - shrink * 2);
+            int w = Math.max(7, sz[0] - shrink * 2), d = Math.max(9, sz[1] - shrink * 2);
             Use u = shrink == 2 && use != Use.HOVEL ? Use.COTTAGE : use;
             Spec s = Zoning.lotOn(x, tmp, side, 0, u, wl, w, d, Zoning.setback(x, tmp));
             if (Zoning.tryPlace(x, s)) return Zoning.alongStreet(tmp, side, w, d) + gapMin + x.r.nextInt(gapMax - gapMin + 1);
@@ -455,7 +465,8 @@ public final class Fabric {
                     Direction face = Zoning.cardinal(bx - p[0], bz - p[1]);
                     for (int shrink = 0; shrink <= 2; shrink++) {
                         int[] sz = use.size(wl, x.r);
-                        Spec s = plan.at(use.archetype(), p[0], p[1], face).size(Math.max(5, sz[0] - shrink * 2), Math.max(5, sz[1] - shrink * 2));
+                        int w = Math.max(7, sz[0] - shrink * 2), d = Math.max(9, sz[1] - shrink * 2);
+                        Spec s = plan.at(use.archetype(), p[0], p[1], face).size(w, d);
                         s.use(shrink == 2 ? Use.COTTAGE : use, wl);
                         s.margin = 1;
                         if (Zoning.tryPlace(x, s)) {
@@ -470,7 +481,7 @@ public final class Fabric {
                         }
                     }
                 }
-                if (plan.specs.size() == mark && (pass >= 1 || best > 16)) filler(x, p[0], p[1], wl, pass);
+                if (plan.specs.size() == mark && (pass >= 1 || best > 16)) filler(x, p[0], p[1], wl, z, pass);
                 for (int k = mark; k < plan.specs.size(); k++) grid.spec(plan, plan.specs.get(k));
             }
             double[] m = measure(plan, R);
@@ -480,17 +491,26 @@ public final class Fabric {
     }
 
     /** Something small and lived-in on a bare cell: kitchen garden, pen, orchard patch, well, tree, flowers, yard. */
-    private static void filler(Zoning.Ctx x, int lx, int lz, Wealth wl, int pass) {
+    private static void filler(Zoning.Ctx x, int lx, int lz, Wealth wl, Zone z, int pass) {
         Plan plan = x.plan;
         int roll = x.r.nextInt(12);
         Spec s;
         Direction face = Direction.SOUTH;
-        if (roll < 4) {
+        boolean urbanCore = z == Zone.CENTRE || z == Zone.NOBLE || z == Zone.GATE || (x.tier >= 2 && Math.hypot(lx, lz) < x.R * 0.65);
+        if (roll < 4 && !urbanCore) {
             s = plan.at(Archetype.GARDEN, lx, lz, face).size(5 + 2 * x.r.nextInt(2), 5);
             s.variant = Zoning.cropVariant(x);
-        } else if (roll < 6) {
+        } else if (roll < 6 && !urbanCore) {
             s = plan.at(Archetype.PEN, lx, lz, face).size(7, 5);
             s.variant = x.r.nextInt(8);
+        } else if (roll < 4) {
+            s = plan.at(Archetype.YARD, lx, lz, face).size(7, 5);
+            s.variant = Outdoors.FLOWER_BED;
+            s.h = 3;
+        } else if (roll < 6) {
+            s = plan.at(Archetype.YARD, lx, lz, face).size(3, 1);
+            s.variant = Outdoors.BENCH;
+            s.h = 3;
         } else if (roll == 6 || roll == 7) {
             s = plan.at(Archetype.YARD, lx, lz, face).size(5, 5);
             s.variant = Outdoors.TREE;
@@ -503,7 +523,7 @@ public final class Fabric {
             s = plan.at(Archetype.YARD, lx, lz, face).size(5, 3);
             s.variant = Outdoors.FLOWER_BED;
             s.h = 3;
-        } else if (roll == 10) {
+        } else if (roll == 10 || urbanCore) {
             s = plan.at(Archetype.YARD, lx, lz, face).size(4, 2);
             s.variant = x.r.nextBoolean() ? Outdoors.WOODPILE : Outdoors.HAY;
             s.h = 4;

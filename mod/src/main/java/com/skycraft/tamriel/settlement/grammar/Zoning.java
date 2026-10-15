@@ -153,14 +153,16 @@ public final class Zoning {
                 int r1 = (int) (R * 0.42), r2 = (int) (R * 0.78);
                 ring(sk, r1, 8, rot, lane, 1);
                 if (t >= 1) ring(sk, r2, 10, rot + 0.2, lane, 1);
-                // the main street climbs from the gate to the top in two dog-legs
+                // the main street climbs from the gate to the top in two dog-legs and up to the square and keep
                 int a = (int) (R * 0.18) * (r.nextBoolean() ? 1 : -1);
                 sk.streets.add(new Street(0, R, 0, r2 + 2, main, 0));
                 sk.streets.add(new Street(0, r2 + 2, a, r2 + 2, main, 0));
                 sk.streets.add(new Street(a, r2 + 2, a, r1, main, 0));
+                sk.streets.add(new Street(a, r1, 0, r1 / 2 + 2, main, 0));
                 sk.squares.add(new int[]{0, r1 / 2 + 2, sq});
                 keep = t >= 1;
                 keepZ = -r1 / 2 - 4;
+                if (keep) sk.streets.add(new Street(0, r1 / 2 + 2, 0, keepZ + 10, main, 0));
                 gate(sk, 0, R);
             }
             case RIVERSIDE, HARBOUR, CANAL -> {
@@ -176,7 +178,7 @@ public final class Zoning {
                     sk.squares.add(new int[]{cw / 2 + 4 + sq / 2, 0, sq});
                     gate(sk, -(cw / 2 + 2), R);
                     gate(sk, cw / 2 + 2, R);
-                    keep = false;
+                    if (keep) sk.keep = new int[]{-(cw / 2 + 16), -(int) (R * 0.45)};
                 } else {
                     // canonical frame: the water lies west; rotate onto its real side
                     int q = quarter(sk.water);
@@ -196,7 +198,6 @@ public final class Zoning {
                         sk.keep = new int[]{k[0], k[1]};
                     }
                     if (t >= 2) gate(sk, inland[0], inland[1]);
-                    keep = false;
                 }
             }
             case CLUSTER -> {
@@ -222,7 +223,13 @@ public final class Zoning {
                 sk.streets.add(new Street(0, rg + 6, 0, R, main, 0));
                 sk.squares.add(new int[]{0, 0, rg * 2 - 3});
                 gate(sk, 0, R);
-                keep = false;
+                if (t >= 2) {
+                    keep = true;
+                    keepZ = -(rg + 18);
+                    sk.streets.add(new Street(0, -(rg + 4), 0, keepZ + 10, main, 0));
+                } else {
+                    keep = false;
+                }
             }
         }
         if (keep && sk.keep == null) sk.keep = new int[]{0, keepZ};
@@ -601,13 +608,16 @@ public final class Zoning {
     }
 
     static void seat(Ctx x, Layouts.Names names) {
-        int[] k = x.sk.keep;
+        int[] k = x.sk.keep != null ? x.sk.keep : new int[]{0, -(int) (x.R * 0.6)};
         Plan plan = x.plan;
         boolean hall = plan.culture == Culture.NORD || plan.culture == Culture.ORC || plan.culture == Culture.ATMORAN;
         Use use = x.tier >= 2 ? (hall && x.tier == 2 && x.r.nextBoolean() ? Use.LONGHOUSE : Use.KEEP) : Use.LONGHOUSE;
         int[] sz = use.size(Wealth.NOBLE, x.r);
-        if (use == Use.KEEP && x.tier == 2) sz = new int[]{17, 19};
-        Spec s = plan.at(use.archetype(), k[0], k[1], Direction.SOUTH).size(sz[0], sz[1]);
+        int minW = x.tier >= 3 ? 19 : x.tier == 2 ? 15 : 13;
+        int minD = x.tier >= 3 ? 23 : x.tier == 2 ? 19 : 15;
+        int w = Math.max(minW, sz[0]), d = Math.max(minD, sz[1]);
+        Direction face = cardinal(-k[0], -k[1]);
+        Spec s = plan.at(use.archetype(), k[0], k[1], face).size(w, d);
         s.use(use, Wealth.NOBLE);
         s.flag(Spec.SEAT | Spec.SIGN);
         s.margin = 2;
@@ -615,12 +625,60 @@ public final class Zoning {
         if (plan.place(s, 2) == null) {
             plan.relaxed = true;
             if (plan.place(s, 1) == null) {
-                s.size(13, 15);
-                plan.place(s, 1);
+                s.size(minW, minD);
+                if (plan.place(s, 1) == null) {
+                    // try wider search around the keep quarter, then force-place if still blocked
+                    boolean placed = false;
+                    for (int rad = 12; rad <= Math.max(36, x.R) && !placed; rad += 8) {
+                        for (int dir = 0; dir < 8 && !placed; dir++) {
+                            double a = dir * Math.PI / 4;
+                            int lx = k[0] + (int) Math.round(Math.sin(a) * rad);
+                            int lz = k[1] + (int) Math.round(Math.cos(a) * rad);
+                            if (Math.hypot(lx, lz) > x.R + 16) continue;
+                            Spec cand = plan.at(use.archetype(), lx, lz, cardinal(-lx, -lz)).size(minW, minD);
+                            cand.use(use, Wealth.NOBLE);
+                            cand.flag(Spec.SEAT | Spec.SIGN);
+                            cand.margin = 1;
+                            stamp(x, cand);
+                            if (plan.place(cand, 0) != null) {
+                                s = cand;
+                                placed = true;
+                            }
+                        }
+                    }
+                    if (!placed) {
+                        s.margin = 1;
+                        plan.put(s);
+                    }
+                }
             }
             plan.relaxed = false;
         }
-        if (plan.specs.contains(s)) x.buildings.add(s);
+        if (plan.specs.contains(s)) {
+            x.buildings.add(s);
+            int lx = localX(plan, s.x, s.z), lz = localZ(plan, s.x, s.z);
+            Direction lf = localFacing(x, s);
+            int fx = lf.getStepX(), fz = lf.getStepZ();
+            int half = (lf.getAxis() == Direction.Axis.Z ? s.d : s.w) / 2;
+            int sx = lx + fx * (half + 2), sz2 = lz + fz * (half + 2);
+            double best = Double.MAX_VALUE, bx = 0, bz = 0;
+            for (Street st : x.sk.streets) {
+                double vx = st.x2() - st.x1(), vz = st.z2() - st.z1(), l2 = vx * vx + vz * vz;
+                double t = l2 < 1e-6 ? 0 : Math.max(0, Math.min(1, ((sx - st.x1()) * vx + (sz2 - st.z1()) * vz) / l2));
+                double qx = st.x1() + vx * t, qz = st.z1() + vz * t;
+                double dd = Math.hypot(qx - sx, qz - sz2);
+                if (dd < best) {
+                    best = dd;
+                    bx = qx;
+                    bz = qz;
+                }
+            }
+            if (best > 4 && best < 48) {
+                int ex = (int) Math.round(bx), ez = (int) Math.round(bz);
+                plan.street(sx, sz2, ex, ez, 3, true);
+                x.sk.streets.add(new Street(sx, sz2, ex, ez, 3, 0));
+            }
+        }
     }
 
     static void stamp(Ctx x, Spec s) {
@@ -876,7 +934,7 @@ public final class Zoning {
             int[] sz = use.size(wl, x.r);
             boolean placed = false;
             for (int shrink = 0; shrink <= 2 && !placed; shrink++) {
-                int w = Math.max(5, sz[0] - shrink * 2), d = Math.max(5, sz[1] - shrink * 2);
+                int w = Math.max(7, sz[0] - shrink * 2), d = Math.max(9, sz[1] - shrink * 2);
                 Use u = shrink == 2 && use != Use.HOVEL ? Use.COTTAGE : use;
                 Spec s = lotOn(x, st, side, t, u, wl, w, d, setback(x, st));
                 if (tryPlace(x, s)) {
@@ -929,14 +987,15 @@ public final class Zoning {
             Wealth wl = z == Zone.NOBLE ? Wealth.WEALTHY : z == Zone.CENTRE || z == Zone.COMMON ? Wealth.COMMON : Wealth.POOR;
             Use use = wl == Wealth.POOR ? (x.r.nextBoolean() ? Use.HOVEL : Use.COTTAGE) : wl == Wealth.COMMON ? Use.COTTAGE : Use.HOUSE;
             int[] sz = use.size(wl, x.r);
+            int w = Math.max(7, sz[0]), d = Math.max(9, sz[1]);
             Direction face = cardinal(bx - p[0], bz - p[1]);
-            Spec s = plan.at(use.archetype(), p[0], p[1], face).size(sz[0], sz[1]);
+            Spec s = plan.at(use.archetype(), p[0], p[1], face).size(w, d);
             s.use(use, wl);
             s.margin = 1;
             if (!tryPlace(x, s)) continue;
             // a footpath from the door to the street
             int fx = face.getStepX(), fz = face.getStepZ();
-            int half = (face.getAxis() == Direction.Axis.Z ? sz[1] : sz[0]) / 2;
+            int half = (face.getAxis() == Direction.Axis.Z ? d : w) / 2;
             int sx = p[0] + fx * (half + 2), sz2 = p[1] + fz * (half + 2);
             int ex = (int) Math.round(bx), ez = (int) Math.round(bz);
             Spec path = plan.line(Archetype.STREET, sx, sz2, fx != 0 ? ex : sx, fz != 0 ? ez : sz2, 1);
@@ -1095,11 +1154,11 @@ public final class Zoning {
                 if (yard(x, kind, lx, lz, cardinal(sq[0] - lx, sq[1] - lz), 3, 1, 1) != null) carts--;
             }
         }
-        // signposts or wayside shrines where lanes meet the main streets
+        // signposts where lanes meet the main streets (offset off the street edge)
         for (Street st : x.sk.streets) {
             if (st.rank() != 1 || x.r.nextInt(3) != 0) continue;
-            int kind = x.r.nextBoolean() ? Outdoors.SHRINE : Outdoors.SIGNPOST;
-            yard(x, kind, st.x1() + (st.z1() == st.z2() ? 0 : 2), st.z1() + (st.z1() == st.z2() ? 2 : 0), Direction.SOUTH, 1, 1, 0);
+            int off = st.width() / 2 + 2;
+            yard(x, Outdoors.SIGNPOST, st.x1() + (st.z1() == st.z2() ? 0 : off), st.z1() + (st.z1() == st.z2() ? off : 0), Direction.SOUTH, 1, 1, 0);
         }
         // town dogs and cats, coops between houses
         int pets = 2 + x.tier * 2;
@@ -1127,19 +1186,32 @@ public final class Zoning {
             Direction back = b.facing.getOpposite();
             int depth = (back.getAxis() == Direction.Axis.Z ? b.d : b.w) / 2 + 1;
             Wealth wl = Wealth.byOrdinal(b.wealth);
+            int lx = localX(plan, b.x, b.z), lz = localZ(plan, b.x, b.z);
+            Zone z = zoneAt(x, lx, lz);
+            boolean urbanCore = z == Zone.CENTRE || z == Zone.NOBLE || z == Zone.GATE || (x.tier >= 2 && Math.hypot(lx, lz) < x.R * 0.65);
             int kind;
             int w = 5, d = 5;
             int roll = x.r.nextInt(6);
-            if (wl.atLeast(Wealth.WEALTHY)) kind = roll < 3 ? -1 : roll < 5 ? Outdoors.FLOWER_BED : Outdoors.TREE;
-            else kind = switch (roll) {
-                case 0, 1 -> -1;
-                case 2 -> -2;
-                case 3 -> Outdoors.LAUNDRY;
-                case 4 -> Outdoors.WOODPILE;
-                default -> Outdoors.COOP;
-            };
+            if (wl.atLeast(Wealth.WEALTHY) || urbanCore) {
+                kind = switch (roll) {
+                    case 0, 1, 2 -> Outdoors.FLOWER_BED;
+                    case 3, 4 -> Outdoors.TREE;
+                    default -> Outdoors.BENCH;
+                };
+            } else {
+                kind = switch (roll) {
+                    case 0, 1 -> -1;
+                    case 2 -> -2;
+                    case 3 -> Outdoors.LAUNDRY;
+                    case 4 -> Outdoors.WOODPILE;
+                    default -> Outdoors.COOP;
+                };
+            }
             if (kind == Outdoors.LAUNDRY) {
                 w = 5;
+                d = 1;
+            } else if (kind == Outdoors.BENCH) {
+                w = 3;
                 d = 1;
             } else if (kind == Outdoors.WOODPILE) {
                 w = 4;
@@ -1148,7 +1220,7 @@ public final class Zoning {
                 w = 4;
                 d = 4;
             }
-            int off = depth + 1 + d / 2;
+            int off = depth + 3 + d / 2;
             int bx = b.x + back.getStepX() * off, bz = b.z + back.getStepZ() * off;
             Spec y;
             if (kind == -1) {
@@ -1166,7 +1238,9 @@ public final class Zoning {
                 y.h = 6;
             }
             y.margin = 0;
-            plan.place(y, 0);
+            if (plan.place(y, 0) != null && (kind == -1 || kind == -2 || kind == Outdoors.COOP)) {
+                b.flags |= Spec.NO_BACK_DOOR;
+            }
         }
     }
 
@@ -1653,6 +1727,15 @@ public final class Zoning {
         x.craft = new int[]{(int) (plan.radius * 0.5), (int) (plan.radius * 0.3)};
         x.poor = new int[]{-(int) (plan.radius * 0.5), (int) (plan.radius * 0.6)};
         for (Spec s : new ArrayList<>(plan.specs)) {
+            if (s.kind == Archetype.PALACE || s.kind == Archetype.LONGHOUSE
+                    || s.use == Use.KEEP.ordinal() || s.use == Use.LONGHOUSE.ordinal()) {
+                s.flags |= Spec.SEAT;
+            } else if (s.kind == Archetype.LANDMARK && s.name != null) {
+                String nm = s.name.toLowerCase(Locale.ROOT);
+                if (nm.contains("palace") || nm.contains("castle") || nm.contains("keep") || nm.contains("reach") || nm.contains("tower") || nm.contains("tree")) {
+                    s.flags |= Spec.SEAT;
+                }
+            }
             // a plan piece given a grammar use ("use": "sawmill") needs its seed and slope like a lot the fabric found
             if (s.kind.building && s.grammar() && s.gseed == 0 && !s.has(Spec.RESERVED)) stamp(x, s);
             if (!s.kind.building || s.grammar() || s.has(Spec.RUINED) || s.has(Spec.RESERVED)) continue;
@@ -1667,8 +1750,26 @@ public final class Zoning {
             Use u = Use.of(s.kind, w);
             if (u == null) continue;
             s.use(u, w);
+            if (u == Use.KEEP || u == Use.LONGHOUSE) s.flags |= Spec.SEAT;
+            if (u.home()) {
+                if (s.w < 7) s.w = 7;
+                if (s.d < 9) s.d = 9;
+            }
             stamp(x, s);
             x.buildings.add(s);
+        }
+        if (x.tier >= 2) {
+            boolean hasSeat = false;
+            for (Spec s : plan.specs) {
+                if (s.has(Spec.SEAT)) {
+                    hasSeat = true;
+                    break;
+                }
+            }
+            if (!hasSeat) {
+                x.sk.keep = new int[]{0, -(int) (plan.radius * 0.55)};
+                seat(x, plan.place != null ? com.skycraft.tamriel.settlement.plan.Cities.names(plan.place) : Layouts.Names.NONE);
+            }
         }
         if (x.sk.squares.isEmpty()) {
             for (Spec s : plan.specs) if (s.kind == Archetype.PLAZA) x.sk.squares.add(new int[]{localX(plan, s.x, s.z), localZ(plan, s.x, s.z), s.w});
@@ -1743,7 +1844,7 @@ public final class Zoning {
                 for (int shrink = 0; shrink <= 2 && !placed; shrink++) {
                     Use use = shrink == 2 ? Use.COTTAGE : use0;
                     int[] sz = use.size(wl, r);
-                    int sw = Math.max(5, sz[0] - shrink * 2), sd = Math.max(5, sz[1] - shrink * 2);
+                    int sw = Math.max(7, sz[0] - shrink * 2), sd = Math.max(9, sz[1] - shrink * 2);
                     Spec s = plan.at(use.archetype(), p[0], p[1], face).size(sw, sd);
                     s.use(use, wl);
                     s.margin = 1;
@@ -1797,6 +1898,17 @@ public final class Zoning {
 
     // ------------------------------------------------------------------ variety
 
+    private static final int[][] HOME_FOOTPRINTS = {
+            {7, 9}, {9, 7}, {9, 9}, {9, 11}, {11, 9}, {7, 11},
+            {11, 7}, {11, 11}, {11, 13}, {13, 11}, {13, 13}, {13, 15}
+    };
+
+    private static boolean isHome(Spec s) {
+        if (!s.kind.building || s.has(Spec.SEAT)) return false;
+        if (s.grammar()) return Use.byOrdinal(s.use).home();
+        return s.kind == Archetype.HOUSE || s.kind == Archetype.MANOR || s.kind == Archetype.FARMHOUSE;
+    }
+
     /** No two neighbouring grammar buildings share footprint, roof and materials: reseed the later one until they differ. */
     /**
      * Street signposts name where to find the trades: up to three of the nearest inn, smith, store, apothecary or temple,
@@ -1836,6 +1948,59 @@ public final class Zoning {
 
     public static void variety(Plan plan) {
         labelPosts(plan);
+        List<Spec> homes = new ArrayList<>();
+        for (Spec s : plan.specs) {
+            if (isHome(s)) {
+                if (s.w < 7) s.w = 7;
+                if (s.d < 7) s.d = 9;
+                if (s.w == 7 && s.d < 9) s.d = 9;
+                homes.add(s);
+            }
+        }
+        if (homes.size() >= 4) {
+            int maxPerFootprint = Math.max(1, homes.size() / 4);
+            java.util.Map<String, Integer> counts = new java.util.LinkedHashMap<>();
+            for (int i = 0; i < homes.size(); i++) {
+                Spec h = homes.get(i);
+                String key = h.w + "x" + h.d;
+                int c = counts.getOrDefault(key, 0);
+                if (c >= maxPerFootprint) {
+                    int start = Math.floorMod(h.gseed + i * 5, HOME_FOOTPRINTS.length);
+                    for (int pass = 0; pass < 2; pass++) {
+                        boolean changed = false;
+                        for (int k = 0; k < HOME_FOOTPRINTS.length; k++) {
+                            int[] fp = HOME_FOOTPRINTS[(start + k) % HOME_FOOTPRINTS.length];
+                            if (pass == 0 && (fp[0] > h.w + 2 || fp[1] > h.d + 2)) continue;
+                            String candKey = fp[0] + "x" + fp[1];
+                            if (counts.getOrDefault(candKey, 0) < maxPerFootprint) {
+                                h.size(fp[0], fp[1]);
+                                key = candKey;
+                                changed = true;
+                                break;
+                            }
+                        }
+                        if (changed) break;
+                    }
+                }
+                counts.merge(key, 1, Integer::sum);
+            }
+            if (counts.size() < 4) {
+                for (int i = homes.size() - 1; i >= 0 && counts.size() < 4; i--) {
+                    Spec h = homes.get(i);
+                    String oldKey = h.w + "x" + h.d;
+                    if (counts.getOrDefault(oldKey, 0) <= 1) continue;
+                    for (int[] fp : HOME_FOOTPRINTS) {
+                        String candKey = fp[0] + "x" + fp[1];
+                        if (!counts.containsKey(candKey)) {
+                            counts.put(oldKey, counts.get(oldKey) - 1);
+                            h.size(fp[0], fp[1]);
+                            counts.put(candKey, 1);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
         List<Spec> bs = new ArrayList<>();
         for (Spec s : plan.specs) if (s.grammar() && s.kind.building) bs.add(s);
         int[] sig = new int[bs.size()];

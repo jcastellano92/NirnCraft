@@ -268,7 +268,7 @@ public final class Outdoors {
                 String themed = s.name.startsWith("divine:") ? s.name.substring(7) : null;
                 c.set(0, g + 2, 0, Props.shrine(themed != null ? themed
                         : st.faiths().isEmpty() ? "mara" : st.faiths().get(Math.floorMod(c.roll(0, 0, 0, 3, 64), st.faiths().size()))));
-                Props.candles(c, w > 1 ? 1 : 0, g + 1, 0, 3);
+                if (w > 1) Props.candles(c, 1, g + 1, 0, 3);
             }
             case TROUGH -> {
                 for (int x = 0; x < w; x++) gset(c, x, 1, 0, B.s(Blocks.WATER_CAULDRON).setValue(LayeredCauldronBlock.LEVEL, 3));

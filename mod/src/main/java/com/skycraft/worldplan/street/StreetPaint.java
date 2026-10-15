@@ -229,21 +229,32 @@ public class StreetPaint extends Feature<NoneFeatureConfiguration> {
                 set(x, h, z, Blocks.SPRUCE_PLANKS.defaultBlockState());
             } else if (!solidTop(top)) {
                 set(x, h, z, Blocks.DIRT_PATH.defaultBlockState());
-                for (int y = h - 1, k = 0; k < 4 && y >= minY; y--, k++) {
+                for (int y = h - 1, k = 0; k < 24 && y >= minY; y--, k++) {
                     BlockState s = get(x, y, z);
                     if (solidTop(s) || !s.getFluidState().isEmpty()) break;
                     set(x, y, z, Blocks.DIRT.defaultBlockState());
                 }
-            } else if (natural(top)) {
-                set(x, h, z, Blocks.DIRT_PATH.defaultBlockState());
+            } else {
+                if (natural(top)) set(x, h, z, Blocks.DIRT_PATH.defaultBlockState());
+                if (h - 1 >= minY && !solidTop(get(x, h - 1, z)) && get(x, h - 1, z).getFluidState().isEmpty()) {
+                    for (int y = h - 1, k = 0; k < 24 && y >= minY; y--, k++) {
+                        BlockState s = get(x, y, z);
+                        if (solidTop(s) || !s.getFluidState().isEmpty()) break;
+                        set(x, y, z, Blocks.DIRT.defaultBlockState());
+                    }
+                }
             }
             for (int y = h + 1; y <= h + 2; y++) {
                 BlockState s = get(x, y, z);
                 if (s.isAir()) continue;
                 Block b = s.getBlock();
-                if (b instanceof DoorBlock || b instanceof FenceGateBlock || b instanceof LadderBlock) continue;
+                if (b instanceof FenceGateBlock) {
+                    if (!s.getValue(FenceGateBlock.OPEN)) set(x, y, z, s.setValue(FenceGateBlock.OPEN, true));
+                    continue;
+                }
+                if (b instanceof DoorBlock || b instanceof LadderBlock) continue;
                 if (b instanceof FenceBlock && y == h + 1) {
-                    set(x, y, z, gateFor(s).setValue(FenceGateBlock.FACING, along));
+                    set(x, y, z, gateFor(s).setValue(FenceGateBlock.FACING, along).setValue(FenceGateBlock.OPEN, true));
                     continue;
                 }
                 // a full block of a building stays (the plan routed the path round every building); clutter, plants,
