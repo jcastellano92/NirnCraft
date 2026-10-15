@@ -12,7 +12,7 @@
       "steward": "Proventus Avenicci",
       "court_wizard": "Farengar Secret-Fire",
       "housecarl": "Irileth",
-      "why": ["skyrim:whiterun:L7:keep_dragonsreach", "skyrim:whiterun:L8:companions_hall"]
+      "why": ["whiterun.L6.whiterun_seat", "whiterun.L9.neutral_jarl"]
     },
     "solitude": {
       "seat": "Blue Palace",
@@ -23,7 +23,7 @@
       "steward": "Falk Firebeard",
       "court_wizard": "Sybille Stentor",
       "housecarl": "Bolgeir Bearclaw",
-      "why": ["skyrim:haafingar:L7:blue_palace", "skyrim:haafingar:L8:imperial_seat"]
+      "why": ["haafingar.L6.solitude_seat", "haafingar.L9.imperial_seat"]
     },
     "windhelm": {
       "seat": "Palace of the Kings",
@@ -34,7 +34,7 @@
       "steward": "Jorleif",
       "court_wizard": "Wuunferth the Unliving",
       "housecarl": "Galmar Stone-Fist",
-      "why": ["skyrim:eastmarch:L7:palace_of_the_kings", "skyrim:eastmarch:L8:stormcloak_seat"]
+      "why": ["eastmarch.L6.windhelm_seat", "eastmarch.L9.rebel_capital"]
     },
     "riften": {
       "seat": "Mistveil Keep",
@@ -45,7 +45,7 @@
       "steward": "Anuriel",
       "court_wizard": "Wylandriah",
       "housecarl": "Unmid Snow-Shod",
-      "why": ["skyrim:the_rift:L7:mistveil_keep", "skyrim:the_rift:L8:guild_underbelly"]
+      "why": ["the_rift.L6.riften_seat", "the_rift.L7.meadery_rule"]
     },
     "markarth": {
       "seat": "Understone Keep",
@@ -56,7 +56,7 @@
       "steward": "Raerek",
       "court_wizard": "Calcelmo",
       "housecarl": "Faleen",
-      "why": ["skyrim:the_reach:L7:understone_keep", "skyrim:the_reach:L8:forsworn_unrest"]
+      "why": ["the_reach.L6.markarth_seat", "the_reach.L7.silver_family"]
     },
     "falkreath": {
       "seat": "Jarl's Longhouse",
@@ -67,7 +67,7 @@
       "steward": "Nenya",
       "court_wizard": "Helgird Rune-Speaker",
       "housecarl": "Rayya",
-      "why": ["skyrim:falkreath:L7:jarl_longhouse", "skyrim:falkreath:L8:great_graveyard"]
+      "why": ["falkreath.L6.falkreath_graves", "falkreath.L7.young_jarl"]
     },
     "morthal": {
       "seat": "Highmoon Hall",
@@ -78,7 +78,7 @@
       "steward": "Aslfur",
       "court_wizard": "Falion",
       "housecarl": "Gorm",
-      "why": ["skyrim:hjaalmarch:L7:highmoon_hall", "skyrim:hjaalmarch:L8:marsh_visions"]
+      "why": ["hjaalmarch.L6.morthal_seat", "hjaalmarch.L7.jarl_seer"]
     },
     "dawnstar": {
       "seat": "The White Hall",
@@ -89,7 +89,7 @@
       "steward": "Bulfrek",
       "court_wizard": "Madena",
       "housecarl": "Jod",
-      "why": ["skyrim:the_pale:L7:white_hall", "skyrim:the_pale:L8:northern_port"]
+      "why": ["the_pale.L6.dawnstar_seat", "the_pale.L9.rebel_jarl"]
     },
     "winterhold": {
       "seat": "Jarl's Longhouse",
@@ -100,7 +100,18 @@
       "steward": "Malur Seloth",
       "court_wizard": "Nelacar",
       "housecarl": "Thonjolf",
-      "why": ["skyrim:winterhold:L7:jarl_longhouse", "skyrim:winterhold:L8:great_collapse"]
+      "why": ["winterhold.L6.winterhold_remnant", "winterhold.L9.rebel_jarl"]
+    },
+    "college_of_winterhold": {
+      "seat": "Hall of the Elements",
+      "hold": "winterhold",
+      "culture": "nord",
+      "ruler_title": "Arch-Mage",
+      "jarl": "Savos Aren",
+      "steward": "Mirabelle Ervine",
+      "court_wizard": "Tolfdir",
+      "housecarl": "Faralda",
+      "why": ["winterhold.L6.college", "winterhold.L7.scholars_apart"]
     },
     "raven_rock": {
       "seat": "Morvayn Manor",
@@ -122,7 +133,7 @@
       "steward": "Lodvar",
       "court_wizard": "Varnius Junius",
       "housecarl": "Gormlaith",
-      "why": ["skyrim:haafingar:L7:dragon_bridge"]
+      "why": ["haafingar.L6.dragon_bridge", "haafingar.L5.toll_bridge"]
     }
   },
   "culture_defaults": {

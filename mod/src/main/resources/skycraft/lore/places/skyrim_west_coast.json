@@ -8,7 +8,10 @@
     "The woodcutters at the Solitude Sawmill won't go near the Steepfall burrows after dark. Trolls, they say, big ones, with the frost still on their backs.",
     "My cousin rows out of the Icewater Jetty. He says there's an island in the western fog where the sky goes red at dusk, and no boat that steers for it comes back the same.",
     "Pilgrims climb to the Statue to Meridia with lanterns, even in a blizzard. One told me the light up there burned her nightmares away. She didn't say what it left behind.",
-    "If you're riding to Dragon Bridge, keep to the road. Pinemoon Cave has new tenants, and they've learned the Legion paymaster's schedule better than the paymaster has."
+    "If you're riding to Dragon Bridge, keep to the road. Pinemoon Cave has new tenants, and they've learned the Legion paymaster's schedule better than the paymaster has.",
+    "Harbor-clerks at the Solitude docks say two coasters came in with shredded sails after passing the northern sea-cliffs. [Hearth-Tally]",
+    "Guards at Dragon Bridge have doubled the watch on the stone span since the supply convoys began moving south. [Hearth-Tally]",
+    "Warehouse watchmen down by the East Empire Company pier swear someone has been signaling with shuttered lanterns from the marsh shore. [Hearth-Tally]"
    ],
    "legends": [
     "They say Potema, the Wolf Queen, still walks under Solitude on the night she died, counting the dead she raised in her war. Mothers in the Temple quarter tell their children the wind moaning through the great arch is her laughter, and that a candle in the window keeps her from choosing your house.",
@@ -39,7 +42,10 @@
     "The Stonehills men are digging deeper in the Rockwallow Mine than their fathers ever dared. Some say they've broken into one of the old Dwemer roads out of Mzinchaleft.",
     "There's a light that walks the marsh near Kjenstag at midnight. Follow it and you'll find treasure, or the bottom of a bog. Same thing, if you ask my uncle.",
     "Don't sleep with the shutters open in Morthal. Mother says it's for the damp. Father says it's for the things that live in the damp.",
-    "That Dwemer tower up past Stonehills hums when the stars come out. Even the giants at Stonehill Bluff won't sleep on that side of their fire."
+    "That Dwemer tower up past Stonehills hums when the stars come out. Even the giants at Stonehill Bluff won't sleep on that side of their fire.",
+    "Peat-cutters east of Morthal say the bog-channels have risen a foot since the autumn rains, uncovering carved First Era lintels. [Hearth-Tally]",
+    "Miners up at Stonehills keep a barrel of pitch burning by the pit-head whenever the cold fog rolls down from the Labyrinth. [Hearth-Tally]",
+    "Eel-trappers at Drajkmyr Fishery won't cast their lines near the northern salt-marsh after sundown. [Hearth-Tally]"
    ],
    "legends": [
     "Long before Highmoon Hall was raised, a jarl of Hjaalmarch tried to drain the marsh and plant barley. The marsh let him dig for seven summers, then rose in a single night and took his hall, his fields and his heirs. Morthal's grandmothers say the marsh keeps everything it takes, and gives things back only to those who ask politely.",
@@ -101,6 +107,10 @@
       "Fee, the smuggler from the Broken Oar crew: 20 septims. He spat at the priest and laughed at me. Said his captain would buy the rope back and hang me with it.\nNew hood, black wool: 6 septims. The old one was recognised at the Winking Skeever. A man should be able to drink in peace."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L7.imperial_nobles",
+    "haafingar.L7.dockworkers"
    ]
   },
   "morthal": {
@@ -141,6 +151,10 @@
       "The Jarl's men won't go in. They say the cave is old trouble and they have new trouble enough. Falion told me, kindly, that I should stop hoping. I have not stopped. I've started sharpening Geirlund's old silver knife. If you love me, send coin for a mercenary. If you can't, send prayers to Arkay. I'll take either."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L7.poor_seat",
+    "hjaalmarch.L7.jarl_seer"
    ]
   },
   "dragon_bridge": {
@@ -168,6 +182,10 @@
       "The widow Hulda continues to watch the road each evening. One son with the Stormcloaks in the hills, one gone up to Volskygge after barrow treasure. She is not a threat. Recommend we leave her be. Recommend, privately, that someone go and look for the younger boy."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L7.imperial_nobles",
+    "haafingar.L7.dockworkers"
    ]
   },
   "stonehills": {
@@ -196,6 +214,10 @@
       "Sigrun, I couldn't say it to your face so I'm writing it here. Your brother Knud is still down there. He gave me his token to bring to you. I dropped it running. It's past the first great door, by the brass pillar with the broken arm. I'm sorry. I'm sorry I ran.\nI hear the clicking every time I shut my eyes. Don't send anyone down without fire and a lot of it, and don't send Bulfrek, he can't run."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L7.poor_seat",
+    "hjaalmarch.L7.jarl_seer"
    ]
   },
   "solitude_sawmill": {
@@ -213,6 +235,10 @@
       "Men are refusing the northern stands past Steepfall. Two trolls seen by the burrows, one with a white back. Lost an axe and nearly lost Gunnar. I am told the Legion will deal with it in due course.\nDo not let the boys cut the old pine at Clearpine Pond. The fisherman who camps there says it is bad luck, and I have enough bad luck already."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L7.imperial_nobles",
+    "haafingar.L7.dockworkers"
    ]
   },
   "thalmor_embassy": {
@@ -242,6 +268,10 @@
       "The pay is good. That is the only good thing. There is a door in the cellar that the guards walk past without looking at, and on some nights I hear someone behind it, praying in Nordic. I put an extra heel of bread by the door once. In the morning it was gone and the guard was eating it. I do not do that any more.\nBurn this letter. I mean it, Hildi."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L7.imperial_nobles",
+    "haafingar.L7.dockworkers"
    ]
   },
   "katlas_farm": {
@@ -259,6 +289,10 @@
       "Freydis, Ottar's sister, has not come back. Left on the 2nd of Hearthfire with a basket and a knife and said she was going to gather nightshade. Ottar says she was talking to a crow-woman in the hills toward Ravenscar Hollow before that. I told him crows don't talk. He looked at me like I was the fool.\nOttar's wages: docked nothing. Let the boy grieve."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L7.imperial_nobles",
+    "haafingar.L7.dockworkers"
    ]
   },
   "windstad": {
@@ -287,6 +321,10 @@
       "The Jarl has asked me to add a personal note, which I do not fully understand: 'Whoever builds there will be happy for a while, and then they will be needed.' Make of that what you will. I usually do not try."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L7.poor_seat",
+    "hjaalmarch.L7.jarl_seer"
    ]
   },
   "castle_volkihar": {
@@ -314,6 +352,10 @@
       "~The lord of the castle says that memory is a kindness he allows us.\n~I do not want his kindness. I want my kitchen with the smoke in it.\n~I want the bridge and the river and my mother's bad singing.\n~If anyone finds this, go to Dragon Bridge and tell them Sigga did not drown."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.imperial_seat",
+    "haafingar.L10.smugglers_coves"
    ]
   },
   "broken_oar_grotto": {
@@ -341,6 +383,10 @@
       "Bribes this quarter: dock clerk 60, gate guard 15, the keeper of the Castle Dour keys 100 and a cask.\nWe have more coin than we have ever had, and the men are restless. Rich crews want to go home. I told them: one more season. One more season is what my old captain told me, the year the Company took everything."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "brinewater_grotto": {
@@ -370,6 +416,10 @@
       "IF YOU READ THIS, TELL MY WIFE IN THE SOLITUDE DOCK HOUSES I DID NOT DROWN. TELL HER IT WAS NOT THE SEA. TELL THE COMPANY IT WAS NOT THE SEA.\nTHE OLD LAMP MAN IS IN THE BACK CAVE WITH ME NOW. HE SAYS HIS BRASS GLASS IS IN HROAR'S CHEST. HE SAYS IF ANYONE COMES WE ARE TO SHOUT. WE WILL SHOUT."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "orphans_tear": {
@@ -400,6 +450,10 @@
       "The sea is enormous. There is nothing on it but us and gulls. I am saving my pay to buy a boat of my own, and when I have it I will sail to Riften and take all of you away and we will never have to say Grelod is kind again.\nWe are going north tomorrow. The cook says there is a storm coming. The cook says that every day."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "solitude_lighthouse": {
@@ -431,6 +485,10 @@
       "Refuse and we'll take the choice out of your hands. We know you live alone. We know your boat. We know the stair is steep and an old man can fall.\nAnswer by leaving a white rag on the gallery rail. Do not answer by going to the Company. Their clerks are cheaper than you are, and some of them are already ours.\nBrinewater"
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "ravenscar_hollow": {
@@ -458,6 +516,10 @@
       "There is a price. There is always a price, she says, and I have begun to pay it. My hands do not look like my hands any more. I am not afraid. Mostly I am not afraid.\nIf you come for me, don't. If you come anyway, bring Mother's clasp so I remember who I was before I decide who I will be."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "shadowgreen_cavern": {
@@ -488,6 +550,10 @@
       "^Cut beneath, with a finer blade:\nThe elf with the basket did not read this, or read it and did not care. He cut the heart-root and took the shining sap away in glass. Since then the green ones walk the cave all night, and the honey we leave goes untouched. Kyne forgive us. We did not stop him. We did not even try."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "widows_watch_ruins": {
@@ -518,6 +584,10 @@
       "I went up for a dare when I was twelve and found a ring of bone on the top step, white as new teeth. I put it in my pocket. All the way home I heard a woman singing behind me, and when I looked back the tower was lit green from top to bottom. My father took the ring back up the next morning and wept the whole way, though he never told me why. Leave her be. Or if you must go up, go up to help her, not to rob her."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "dainty_sload": {
@@ -548,6 +618,10 @@
       "When the lighthouse goes dark, the Broken Oar boats will come for the first twenty crates. Count them twice. The last time, Varo's men counted nineteen and swore it was twenty, and I am not paying for the pleasure of being robbed.\nAnyone found talking to the Saltmane boy about anything other than rope will be put ashore at Orphan's Tear. Without a boat."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "lower_steepfall_burrow": {
@@ -579,6 +653,10 @@
       "The Legion cannot spare men to clear the burrows while the Stormcloaks are camped south of us. Hunters who take this work do so at their own risk. The Legion will not retrieve bodies. The Legion will, however, pay for pelts found on bodies, if the finder is honest about it."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "northwatch_keep": {
@@ -619,6 +697,10 @@
       "~Keep the faithful at Ironback safe.\n~Keep the icon under the stone until a braver hand lifts it.\n~And if the elves are right, and you are nothing,\n~then let me be wrong in good company.\n^Hjorvar, Frostfall 4E 201"
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.imperial_seat",
+    "haafingar.L10.smugglers_coves"
    ]
   },
   "steepfall_burrow": {
@@ -647,6 +729,10 @@
       "Continue interrogation regarding the remaining members of the Ironback assembly. Exhaust what he knows; then exhaust him. The Dominion requires no confession. It requires names.\nThe courier carrying this pouch is to take the coastal path past Steepfall. It is quicker, and the Legion does not patrol it. Report any delay to the Third Emissary in person."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "fort_hraggstad": {
@@ -690,6 +776,10 @@
       "Pay particular attention to any Haafingar-born men in that camp. Families in Dragon Bridge and Solitude with sons in rebel blue are to be listed, not harassed. A list is a better weapon than a gallows; it lasts longer and makes less noise."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.imperial_seat",
+    "haafingar.L10.smugglers_coves"
    ]
   },
   "ironback_hideout": {
@@ -719,6 +809,10 @@
       "The icon is still under the hearthstone. They searched twice and did not find it. Do not try to take it yourselves; the elves watch this cabin and leave men here some nights. If a stranger finds this, a stranger who still remembers the Ninth: lift the stone, take the icon somewhere safe, and pray for an old man in Northwatch."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "wreck_of_the_icerunner": {
@@ -746,6 +840,10 @@
       "Strongbox in the captain's cabin: locked. Can't shift it. Rolf of Pinemoon will want a cut if he hears. Don't tell Rolf. Come back with a crowbar and a cousin.\nThere is something in the lower hold that knocks back when you knock. Don't knock."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L8.fear_of_the_dark",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "wolfskull_cave": {
@@ -776,6 +874,10 @@
       "But I must tell you that the dead we raised from the Hall of the Dead in Solitude still have their names sewn into their shrouds. One of them was my uncle. He looked at me. I know you say they do not look, but he looked.\nPlease let me tend the fire instead of fetching. I am good at fires. I will be very good at fires."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "the_katariah": {
@@ -804,6 +906,10 @@
       "#Day 9\nThe bosun has noticed the wine. I am drinking slower and topping up with river water, which is worse for both of us.\n#Day 12\nI meant to stow aboard and sail to Cyrodiil and be someone. But they say the ship does not sail until the Emperor comes, and the Emperor has not come. I have been someone on this ship for twelve days. Pellin the wine-thief. Pellin who talks to cats. It is more than I was in the Solitude gutters."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "rimerock_burrow": {
@@ -836,6 +942,10 @@
       "In it, two soul gems I charged myself and coin enough to cross to High Rock. I will not need either if I am dead. Whoever reads this: spend it on something the Thalmor would hate."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "pinefrost_tower": {
@@ -865,6 +975,10 @@
       "Separately: the Stormcloak camp near Meridia's statue sends a rider north-east every fourth day. I have taken his route down in the margin. I have not shared it with the Legion. The Legion has not asked, and it is unwise to teach them to rely on us."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "statue_to_meridia": {
@@ -895,6 +1009,10 @@
       "^Added in charcoal on the plinth's side:\nSomeone has left the dead at this stone. A bundle of bones and black cord lies by the lowest step, and the star burns dimmer over it every night. I have prayed beside it for three days. The Lady does not answer prayers. She answers deeds. Whoever reads this, do the deed."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "clearpine_pond": {
@@ -913,6 +1031,10 @@
       "Do not cut the old pine on the east bank; it is older than the bridge. Do not swim. The pond is deeper than it looks and the bottom is soft.\nAnd if you are one of the Pinemoon lot, I saw you burying something by the stump on the north shore. I did not touch it. I want that understood, by you and by whatever gods are listening."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "abandoned_shack": {
@@ -940,6 +1062,10 @@
       "If you are a traveller sheltering from the fog, rest, and go in the morning, and forget the way here. If you are curious, be less curious. Curious people in Hjaalmarch have a way of being found in the reeds.\nThere is no signature on this note. There never is.\nDo not move the candles. Do not take the rope. Do not, under any circumstances, lie down on the floor by the hearth and wait to see who comes. Someone always comes."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L8.fear_of_the_dark",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "pinemoon_cave": {
@@ -971,6 +1097,10 @@
       "If I die, the fisherman saw me bury it, so it's his now. Gods know he's earned it, putting up with us shouting by his pond. If he doesn't want it, whoever reads this can have it. Just don't give it to Rolf."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.imperial_seat",
+    "haafingar.L10.smugglers_coves"
    ]
   },
   "volskygge": {
@@ -1009,6 +1139,10 @@
       "I lost your father to the sea and I have lost Ragnvald to the war. Come back with nothing and I will cook you the best supper of your life. Come back with treasure and I'll cook the same supper and scold you through it. But come back."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "folgunthur": {
@@ -1037,6 +1171,10 @@
       "(1) Exactly. Not your impression of it.\n(2) They object.\n(3) The Legion is touchy about grave goods, and so are the graves.\n(4) Also because I would be sorry if you did not come back. I am putting that in a footnote so you do not make a fuss about it."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L8.fear_of_the_dark",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "haafingar_stormcloak_camp": {
@@ -1067,6 +1205,10 @@
       "Recruit quietly among the Haafingar Nords. Pay in coin where you can and in promises where you can't. Send word of Thalmor traffic on the embassy road; the Jarl takes a particular interest in where the elves take our people.\nUnder no circumstances let the men visit family in Dragon Bridge. The Penitus Oculatus are there, and they are patient."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.imperial_seat",
+    "haafingar.L10.smugglers_coves"
    ]
   },
   "ustengrav": {
@@ -1095,6 +1237,10 @@
       "In plain words: we are leaving the tomb of the greatest Voice in Nord history to thieves because we are afraid the other side will accuse us of wanting it. I respectfully suggest that this is a very Nord problem, and that I am glad I am an Imperial."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L8.fear_of_the_dark",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "hjaalmarch_stormcloak_camp": {
@@ -1123,6 +1269,10 @@
       "No one goes into Ustengrav. If the Legion goes in, we go in after them. If the grave robbers come out with anything that looks like it belongs to Jurgen Windcaller, it is taken from them and sent to Windhelm with an escort of six. The Jarl of Eastmarch reveres the Windcaller. So should you."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L9.jarl_apart",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "mzinchaleft": {
@@ -1151,6 +1301,10 @@
       "(1) The Dwemer, like the Imperial bureaucracy, were never happier than when timing something.\n(2) The Lowest Door is presumably the Great Lift, south of here, which descends into the dark beneath Skyrim. I note that nobody ever declared otherwise. The lift is therefore, by its own reckoning, still on shift."
      ]
     }
+   ],
+   "why": [
+    "the_pale.L10.great_lifts",
+    "the_pale.L8.old_crown"
    ]
   },
   "hjaalmarch_imperial_camp": {
@@ -1179,6 +1333,10 @@
       "Also requested: a priest of Stendarr or of Arkay, for the barrow next door is restless and the men say they hear knocking under the tents at night. Also requested: relief. We have been here since Rain's Hand. Also requested: someone to tell Legionary Calvus to stop volunteering for the night watch, because I am beginning to suspect why."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L9.jarl_apart",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "great_lift_at_mzinchaleft": {
@@ -1196,6 +1354,10 @@
       "When the door opens there's a warm wind from below that smells of mushrooms and old metal. My dogs won't go near it. Last night the door opened and something small and blue and glowing floated out, drifted round the sheep, and went back down. The sheep didn't mind. I minded. I'm moving the flock to Stonehills.\nSigrun at the mine says the Dwemer roads under Mzinchaleft run all the way down to this lift. If her brother's still alive down there, maybe he'll come up in it one morning. I'll keep an eye on it for her. From a distance."
      ]
     }
+   ],
+   "why": [
+    "the_pale.L10.great_lifts",
+    "the_pale.L8.old_crown"
    ]
   },
   "movarths_lair": {
@@ -1224,6 +1386,10 @@
       "You told me the Morthal folk would never come. You told me Idgrod sees but does not act. You told me a great many things before you went away. I am beginning to believe you did not go away for my sake.\nWhen you return, I will be stronger. When you do not return, I will be stronger still."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L8.fear_of_the_dark",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "meekos_shack": {
@@ -1241,6 +1407,10 @@
       "I have been coughing since the first snow. The dog sleeps against my chest at night, and it helps, or I tell myself it does. If anything happens, I would like you to come and take him. He eats anything, he hates rabbits personally, and he will sit by the door until someone tells him otherwise. Someone should tell him. I don't think I'll be able to."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L8.fear_of_the_dark",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "kjenstag_ruins": {
@@ -1270,6 +1440,10 @@
       "Also found a grave robbers' camp nearby, recently used, and a bronze horn among their rubbish, too green to sell. I left it where it lay; I am not paid to fetch ghosts their belongings. The robbers themselves are dead in the marsh. The lantern-man did not do it. Something under the stones did."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L10.bromjunaar_maze",
+    "hjaalmarch.L8.ruined_shrines"
    ]
   },
   "fort_snowhawk": {
@@ -1308,6 +1482,10 @@
       "^Beneath, scratched with a knife:\nGarrison withdrawn 4E 176. Last man out, Decanus Hollis, who would like it known that the roof leaks, the cellar floods, and something in the peat under the north wall knocks at night. Good riddance.\n^And beneath that, in a neat new hand:\nThe knocking is the marsh dead, Decanus, and they were only asking to be let in. I have let them in. Vigdis."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L9.jarl_apart",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "forebears_holdout": {
@@ -1335,6 +1513,10 @@
       "Bring him back alive if the Nords make it easy; dead if they make it hard. Do not harm the children. The Crown is not cruel. Do not let the Nords see you work. The Nords are cruel, and they do not love us either."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "chillwind_depths": {
@@ -1363,7 +1545,22 @@
       "FROM THE LADS AT CLIFFSIDE: DON'T GO DOWN.",
       "We used the top of this cave to keep our stores cool. Then the stores started going missing. Then Hrodgar went missing. Then we found Hrodgar, what the chaurus left of him, laid out at the second turning like a gift. We moved our stores back to the Retreat. We'd move further if we could. Down there the dark has ears, and it hunts by them.\nIf you must go down, wrap your boots in fur and don't talk. They can't see a torch, but they can hear you swearing at the cold."
      ]
+    },
+    {
+     "id": "sk4_note_66",
+     "kind": "ledger",
+     "title": "Hold Survey: Chillwind Depths (67)",
+     "author": "Bailiff's Office of The Reach",
+     "at": "chest",
+     "pages": [
+      "Folio #67 (-1917, -1043): Field inspection recorded for Chillwind Depths within The Reach Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #67 for chillwind_depths: All travelers, carters, and hold patrollers passing Chillwind Depths are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_reach.L8.old_gods",
+    "the_reach.L10.hagraven_covens"
    ]
   },
   "skyborn_altar": {
@@ -1391,6 +1588,10 @@
       "Then it spoke. Not to me. To the ruins. One word, and the snow came off every roof in that dead city at once. Then it flew west, toward Eldersblood Peak. I lay in the snow until dark. I have not been elk hunting since. There. Now you can't say I'm lying."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L8.fear_of_the_dark",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "lost_valkygg": {
@@ -1418,6 +1619,10 @@
       "LET THE SNOW COVER THE DOOR.\nLET THE NAME OF THIS PLACE BE FORGOTTEN.\nLET THE ONE WHO WAS WRONGED FIND REST, IF ANY ONE CAN.\nWE WHO SEALED IT WILL NOT SPEAK OF IT AGAIN.\nAND IF THE DOOR IS EVER OPENED, LET THE OPENER KNOW THIS: THE COLD WILL FOLLOW THE BLADE, AND THE GRUDGE WILL FOLLOW THE COLD, UNTIL THE GRUDGE IS ANSWERED."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L10.bromjunaar_maze",
+    "hjaalmarch.L8.ruined_shrines"
    ]
   },
   "tower_of_mzark": {
@@ -1435,6 +1640,10 @@
       "I attempted to turn the main dial and was gently, but firmly, prevented by the dial. I record that a Dwemer mechanism has better manners than most of my colleagues. I record also that I heard a voice from the shaft. I did not record what it said, because I left."
      ]
     }
+   ],
+   "why": [
+    "the_pale.L8.dream_dread",
+    "the_pale.L10.troll_caves"
    ]
   },
   "stonehill_bluff": {
@@ -1452,6 +1661,10 @@
       "I have the rock. It is a good rock. It is not three cows. Please advise. I note also that the giants have moved their fire round to the far side of the bluff from the Dwemer tower, and that the mammoths will not graze to the east. When giants are afraid of something, I want to know what."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L9.jarl_apart",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "brood_cavern": {
@@ -1481,6 +1694,10 @@
       "^Written beneath in another hand:\nYou can have it. We came to take the cave back and found the last lot of you hanging in the webs like washing. Our chief says no road toll in Skyrim is worth that. Keep your venom. Keep your spiders. Keep your faces, while you still have them.\nThere's a Dunmer alchemist's bag in there too, by the big white one. Anyone who wants it can fetch it. We don't."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L8.fear_of_the_dark",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "labyrinthian": {
@@ -1521,6 +1738,10 @@
       "In the margin: 'The priests of Bromjunaar buried their betrayer close, so they could watch him. Svana says it's a blade worth a jarl's ransom. Svana says a lot of things.'\nOn the back, in pencil: 'Take wool, take fire, take two friends. Do not take Svana. She'll talk the whole way and run at the end.'"
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L8.fear_of_the_dark",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "orotheim": {
@@ -1551,6 +1772,10 @@
       "I don't believe him. Nobody here has ever been squared. There's a ledger with all our names, and the numbers next to them only grow. If anyone comes through Rorikstead looking for work, tell them the Orotheim chief keeps the key to the work-pen on his belt, and sleeps heavy after supper."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L9.jarl_apart",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "eldersblood_peak": {
@@ -1580,6 +1805,10 @@
       "THE STORM-WING SLEEPS BENEATH THE MOUND.\nWHEN HE WAKES, HE WILL WANT THE OLD PRICE.\nLET THE MARSH CLANS REMEMBER WHAT THEY PAID, AND PAY IT IN IRON INSTEAD.\nTHE IRON WAS PAID ON THE EIGHTH YEAR, AT THE POINT OF A HUNDRED SPEARS, AND THE STORM-WING FELL. BUT DRAGONS DO NOT DIE AS MEN DIE. THEY WAIT."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L8.fear_of_the_dark",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "talking_stone_camp": {
@@ -1597,6 +1826,10 @@
       "I do not know if they are praying, or singing, or simply keeping the stone company. On the second night the eldest giant turned and looked directly at my hiding place, and then turned back, and hummed again. I think I was being told I was welcome to listen, so long as I stayed where I was. I stayed."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L9.jarl_apart",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "gjukars_monument": {
@@ -1612,7 +1845,22 @@
       "GJUKAR AND HIS SHIELD-BROTHERS STOOD HERE.\nTHEY DID NOT ASK HOW MANY CAME AGAINST THEM.\nTHEY ASKED ONLY WHERE TO STAND.",
       "LET THE GRASS GROW HIGH OVER THEM.\nLET THE WIND SAY THEIR NAMES.\nTRAVELLER, IF YOU STAND HERE, STAND STRAIGHT.\n^Scratched beneath, newer:\nSaw them last Middas from the Legion camp. Lined up. Ready. Shields locked, though there was no one coming at them. One of them, the big one at the front with the braided beard, looked straight at me. He nodded, like one soldier to another, and then they were mist. I've stood straighter since."
      ]
+    },
+    {
+     "id": "sk4_note_3",
+     "kind": "report",
+     "title": "Hold Survey: Gjukars Monument (4)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #4 (-1302, 32): Field inspection recorded for Gjukars Monument within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #4 for gjukars_monument: All travelers, carters, and hold patrollers passing Gjukars Monument are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
    ]
   },
   "the_steed_stone": {
@@ -1629,6 +1877,10 @@
       "^chalked beneath, in another hand:\nThe Thalmor rider who passed here at dawn did not touch the stone. His horse did, with its nose. Even the horse knows better than the elf.\n^And beneath that, in a child's careful letters:\nI touched it too and carried Papa's whole bundle of firewood home from the Ironback road without stopping once. Papa says it was the stone. I say it was me."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "the_apprentice_stone": {
@@ -1646,6 +1898,10 @@
       "Master says the Apprentice favours those who learn quickly and forgives nothing. Master says it as a warning. I am taking it as a compliment.\nFirebolts cast before supper: 31. Mudcrabs hit: 2. Hats lost in the bog: 1.\nNote for tomorrow: practise wards before firebolts. A frost spell from some passing hedge-witch in the fog nearly froze my eyebrows off, and I felt it twice as hard as I should have."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L8.fear_of_the_dark",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "the_lord_stone": {
@@ -1662,6 +1918,10 @@
       "^Folded with it, a second note in a different hand:\nSo am I. Whoever you are. Blue coat or red, I hope you're standing too.\n^And a third, pressed in deeper, the ink smudged by rain:\nI found both your notes. I'm a farmer from Stonehills and I fight for nobody. I pray you both come home, and that you never meet each other on a field. Leave the stone in peace when you're done."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L8.fear_of_the_dark",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "word_wall_statue_to_meridia": {
@@ -1679,6 +1939,10 @@
       "(1) My learned rival at the College of Winterhold renders the second as 'grip.' He is wrong, as usual.\n(2) This is a joke. The Nords who carved this would not have laughed at it either.\nNota bene: the wall is warm to the touch at dusk. I recorded this and then removed it from my fair copy, as it is unscholarly. I record it again here because it is true."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L10.wolf_queen_catacombs",
+    "haafingar.L8.divines_temple"
    ]
   },
   "dragon_mound_rorikstead": {
@@ -1695,7 +1959,22 @@
       "PLOUGH NO NEARER THAN THIS STONE.",
       "My grandfather put this stone here and his grandfather put the one before it. They say the old Nords buried a dragon under the mound and set a ward on it, and that a plough-blade would break the ward like a knife through a seal. I don't know if that's true. I know the mound steams on frosty mornings now, which it never used to, and I know my horse won't pass this stone. I'm trusting the horse."
      ]
+    },
+    {
+     "id": "sk4_note_4",
+     "kind": "ledger",
+     "title": "Hold Survey: Dragon Mound Rorikstead (5)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #5 (-1760, -185): Field inspection recorded for Dragon Mound Rorikstead within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #5 for dragon_mound_rorikstead: All travelers, carters, and hold patrollers passing Dragon Mound Rorikstead are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.honour_and_sovngarde",
+    "skyrim.L10.draugr_barrows"
    ]
   },
   "dragon_mound_meekos_shack": {
@@ -1713,6 +1992,10 @@
       "This morning the big stone on top had moved a hand's width toward the north. Nothing moves that stone. My grandfather said the old Nords put a dragon under it in the war with the dragons, and that the stone is the lid. I always laughed. I'm not laughing. Graze somewhere else.\nI've told the foreman at the sawmill and the Stormcloaks camped in the hills, since they were nearer than the Legion. The sawmill laughed. The Stormcloaks didn't."
      ]
     }
+   ],
+   "why": [
+    "haafingar.L10.wolf_queen_catacombs",
+    "haafingar.L8.divines_temple"
    ]
   },
   "dragon_mound_dead_mens_respite": {
@@ -1730,6 +2013,10 @@
       "He swears he heard breathing. He swears something below said a word that made his ears bleed. He showed me his ears. They had bled. I gave him a fifth mead for free, and I don't do that."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L10.bromjunaar_maze",
+    "hjaalmarch.L8.ruined_shrines"
    ]
   },
   "dragon_mound_eldersblood_peak": {
@@ -1745,6 +2032,63 @@
      "pages": [
       "THE SEVEN CLANS OF THE MARSH LAID THE STORM-WING HERE.\nTHEY PAID HIM THE BLOOD OF THEIR ELDERS FOR SEVEN YEARS, AND IN THE EIGHTH THEY PAID HIM IN IRON.",
       "HIS PERCH IS ON THE PEAK TO THE SOUTH, WHERE THE ELDERS BLED.\nIF THE MOUND IS EVER EMPTY, LOOK THERE.\n^Below, freshly scratched:\nIt's empty. The earth is thrown outward, not inward, in a ring as wide as a longhouse. Grima the herder has lost eleven head this season. Tell the Jarl. Tell the guards. Tell anyone with a bow and more courage than sense."
+     ]
+    },
+    {
+     "id": "sk4_note_5",
+     "kind": "report",
+     "title": "Hold Survey: Dragon Mound Eldersblood Peak (6)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #6 (-891, -924): Field inspection recorded for Dragon Mound Eldersblood Peak within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #6 for dragon_mound_eldersblood_peak: All travelers, carters, and hold patrollers passing Dragon Mound Eldersblood Peak are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ],
+   "why": [
+    "whiterun.L8.honour_and_sovngarde",
+    "skyrim.L10.draugr_barrows"
+   ]
+  },
+  "soul_cairn_portal": {
+   "hook": "A sunken stone rotunda and arcane stair hidden in the sea-cliffs where cold violet light seeps through a fracture between worlds.",
+   "rumour": "Sailors rowing past the northern sea-caves say a purple mist leaks out of the cliffside ruin and turns the surf dead calm.",
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Researcher's Margin Scrawl",
+     "author": "Valerica's Scribe",
+     "at": "chest",
+     "reveals": "castle_volkihar",
+     "pages": [
+      "The geometry of the basin requires exact proportions of ground bone, void salts, and purified soul-shards before the lower steps will align. Even with the seal dormant, a freezing draft pulls inward toward the focal ring, carrying the sound of distant thunder."
+     ]
+    }
+   ]
+  },
+  "drajkmyr_fishery": {
+   "hook": "A stilted plank fishery on the edge of the salt-marshes where mudcrab pots, charrus-shell hooks, and smoked swamp-eels are cured over peat fires.",
+   "rumour": "The fishers at Drajkmyr burn bog-myrtle in their smokehouses just to keep the marsh-wisps from drifting into the nets.",
+   "why": [
+    "hjaalmarch.L7.poor_seat",
+    "hjaalmarch.L7.jarl_seer"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Salt-Marsh Catch Tally",
+     "author": "Jorgen Marsh-Bailiff",
+     "at": "chest",
+     "reveals": "morthal",
+     "pages": [
+      "Twenty baskets of river-betty and nine crates of salted mudcrab claws loaded onto the flat-bottomed punt for Morthal market. Do not set eel-lines past the third reed-channel toward High Gate; the water there smells of old bronze and grave-linen."
      ]
     }
    ]

@@ -1,6 +1,41 @@
 {
   "id": "markarth",
   "base": "java",
+  "sil": "cliff-dwemer-terraces",
+  "names": {
+    "inn": "silver_blood_inn",
+    "store": "arnleif_and_sons",
+    "smithy": "markarth_smithy",
+    "keep": "understone_keep",
+    "player_home": "vlindrel_hall",
+    "temple": "temple_of_dibella",
+    "alchemist": "hags_cure",
+    "mine": "cidhna_mine",
+    "dead_hall": "markarth_hall_of_the_dead",
+    "museum": "markarth_dwemer_museum",
+    "treasury": "markarth_treasury_house",
+    "nepos_house": "markarth_nepos_house",
+    "abandoned": "markarth_abandoned_house",
+    "warrens": "markarth_the_warrens",
+    "guard_tower": "markarth_guard_tower",
+    "smelter": "markarth_smelter_overseer",
+    "sanctum": "dibella_inner_sanctum",
+    "excavation": "nchuand_zel_excavation",
+    "upper_terrace": "markarth_high_terrace",
+    "gate_bridge": "karth_channel_bridge",
+    "barracks": "understone_guard_quarters"
+  },
+  "innKey": "silver_blood_inn",
+  "buildings": [
+    {"kind": "house", "at": [-38, 32], "size": [9, 11], "face": "E", "flags": ["upper"], "name": "markarth_ogmunds_house"},
+    {"kind": "manor", "at": [38, -22], "size": [11, 13], "face": "W", "raise": 4, "flags": ["upper", "rich"], "name": "markarth_endons_house"},
+    {"kind": "house", "at": [-38, -22], "size": [9, 11], "face": "E", "raise": 4, "name": "markarth_dryhten_house"},
+    {"kind": "smithy", "at": [-38, 60], "size": [11, 9], "face": "E", "name": "markarth_silver_smelter"}
+  ],
+  "plazas": [
+    {"at": [0, -24], "size": 11, "variant": 1, "stalls": 2, "raise": 4, "name": "markarth_waterfall_terrace"},
+    {"at": [0, -60], "size": 11, "variant": 1, "stalls": 0, "raise": 9, "name": "markarth_keep_terrace"}
+  ],
   "nets": [
     {"type": "path", "via": [[-74, 40], [-48, 48], [-24, 40], [0, 46]], "width": 3, "tag": "low", "raise": 0},
     {"type": "path", "via": [[74, 40], [48, 48], [24, 40], [0, 46]], "width": 3, "tag": "low", "raise": 0},
@@ -15,6 +50,14 @@
     {"at": [-56, 60], "r": 24, "zone": "poor"}
   ],
   "fabric": {"radius": 78, "target": 0.5},
+  "queue": [
+    {"kind": "house", "name": "markarth_betilds_house", "on": "low"},
+    {"kind": "house", "name": "markarth_mulush_office", "on": "low"},
+    {"kind": "house", "name": "markarth_kerahs_shop", "raise": 4, "on": "mid"},
+    {"kind": "house", "name": "markarth_hognis_stall_house", "on": "low"},
+    {"kind": "house", "name": "markarth_calcelmos_study", "raise": 9, "on": "up"},
+    {"kind": "house", "name": "markarth_thonars_lodging", "raise": 9, "on": "up"}
+  ],
   "features": [
     {"type": "statue", "theme": "divine:dibella", "where": "square"},
     {"type": "memorial", "where": "free"},
@@ -26,5 +69,33 @@
     {"type": "pool", "where": "free"},
     {"type": "bench", "where": "square"},
     {"type": "great_tree", "theme": "spruce", "where": "edge"}
-  ]
+  ],
+  "titles": {
+    "understone_keep": "Understone Keep",
+    "markarth_hall_of_the_dead": "Markarth Hall of the Dead",
+    "markarth_dwemer_museum": "Dwemer Museum",
+    "markarth_treasury_house": "Silver-Blood Treasury House",
+    "markarth_nepos_house": "Cliff-Terrace Manor",
+    "markarth_abandoned_house": "Sealed Stone House",
+    "markarth_the_warrens": "The Warrens",
+    "markarth_guard_tower": "Markarth Crag Watchtower",
+    "markarth_smelter_overseer": "Smelter Overseer's Hall",
+    "dibella_inner_sanctum": "Inner Sanctum of Dibella",
+    "nchuand_zel_excavation": "Nchuand-Zel Excavation Hall",
+    "markarth_high_terrace": "High Rock-Cut Terrace",
+    "karth_channel_bridge": "Dwemer Water-Channel Bridge",
+    "understone_guard_quarters": "Understone Guard Barracks",
+    "markarth_ogmunds_house": "Skald's Stone House",
+    "markarth_endons_house": "Silversmith's Manor",
+    "markarth_dryhten_house": "Waterwheel Terrace House",
+    "markarth_silver_smelter": "Markarth Silver Smeltery",
+    "markarth_waterfall_terrace": "Waterfall Mid-Terrace",
+    "markarth_keep_terrace": "Understone Forecourt",
+    "markarth_betilds_house": "Smelter-Mistress's Quarters",
+    "markarth_mulush_office": "Foundry Tally-Room",
+    "markarth_kerahs_shop": "Silver-Filigree Jeweller",
+    "markarth_hognis_stall_house": "Butcher's Stone Vault",
+    "markarth_calcelmos_study": "Antiquarian's Gallery",
+    "markarth_thonars_lodging": "Silver-Lord's Chamber"
+  }
 }

@@ -1306,9 +1306,7 @@
    "bossNote": "town_petition",
    "story": "",
    "why": [
-    "winterhold.L10.college_midden",
-    "winterhold.L8.mage_blame",
-    "winterhold.L7.town_vs_college"
+    "the_pale.L10.nightmare_temple"
    ]
   },
   "pale_imperial_camp": {
@@ -1478,7 +1476,7 @@
    "bossNote": "eirik_journal",
    "story": "priest_tablet",
    "why": [
-    "the_reach.L10.conspiracy_in_the_mine"
+    "haafingar.L10.wolf_queen_catacombs"
    ]
   },
   "saarthal": {
@@ -2089,8 +2087,9 @@
    "bossNote": "alikr_note",
    "story": "",
    "why": [
-    "hjaalmarch.L4.marsh_hunters",
-    "hjaalmarch.L10.marsh_vampires"
+    "haafingar.L10.wolf_queen_catacombs",
+    "haafingar.L10.smugglers_coves",
+    "haafingar.L10.soul_cairn_gate"
    ]
   },
   "mount_anthor": {
@@ -2331,8 +2330,7 @@
    "bossNote": "ivar_mark",
    "story": "",
    "why": [
-    "the_pale.L8.old_crown",
-    "the_pale.L11.jagged_crown"
+    "winterhold.L10.harbingers_tomb"
    ]
   },
   "cliffside_retreat": {
@@ -2786,8 +2784,8 @@
    "bossNote": "orotheim_warning",
    "story": "",
    "why": [
-    "whiterun.L4.sabre_and_wolf",
-    "whiterun.L10.toll_bandits"
+    "hjaalmarch.L4.marsh_hunters",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "shrouded_grove": {
@@ -2965,8 +2963,7 @@
    "bossNote": "toll_orders",
    "story": "",
    "why": [
-    "whiterun.L10.toll_bandits",
-    "whiterun.L5.crossroads_trade"
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "eldersblood_peak": {
@@ -2987,9 +2984,7 @@
    "bossNote": "ring_inscription",
    "story": "",
    "why": [
-    "whiterun.L10.dragon_mounds",
-    "whiterun.L4.throat_meadow",
-    "whiterun.L4.dragon_perch"
+    "hjaalmarch.L10.bromjunaar_maze"
    ]
   },
   "reach_imperial_camp": {
@@ -3318,9 +3313,7 @@
    "bossNote": "",
    "story": "",
    "why": [
-    "whiterun.L10.giant_camps",
-    "whiterun.L4.steppe_grass",
-    "whiterun.L4.giant_grounds"
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "hamvirs_rest": {
@@ -3363,7 +3356,7 @@
    "bossNote": "captive_scratching",
    "story": "",
    "why": [
-    "the_pale.L5.roadside_inn"
+    "eastmarch.L10.bandit_mine_camps"
    ]
   },
   "shearpoint": {
@@ -3583,7 +3576,9 @@
    "bossNote": "",
    "story": "",
    "why": [
-    "whiterun.L10.beast_blood"
+    "the_reach.L10.conspiracy_in_the_mine",
+    "the_reach.L10.hagraven_covens",
+    "the_reach.L10.forsworn_redoubts"
    ]
   },
   "kolskeggr_mine": {
@@ -6425,6 +6420,1160 @@
    "why": [
     "the_rift.L10.rahgot_barrow",
     "the_rift.L10.dragon_heights"
+   ]
+  },
+  "whiterun_mammoth_butchery": {
+   "family": "giant",
+   "variant": "giant_camp",
+   "boss": "Old Haggarn Cairn-Kicker",
+   "person": "",
+   "sign": [
+    "Whiterun",
+    "Mammoth",
+    "Held by:",
+    "Old Haggarn"
+   ],
+   "motif": "mammoth_bones",
+   "loot": "giant",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "whiterun.L10.giant_camps",
+    "whiterun.L4.steppe_grass",
+    "whiterun.L4.giant_grounds"
+   ]
+  },
+  "sleeping_tree_altar": {
+   "family": "grove",
+   "variant": "grove",
+   "boss": "The Oldwood",
+   "person": "",
+   "sign": [
+    "Sleeping Tree",
+    "Altar",
+    "Held by:",
+    "The Oldwood"
+   ],
+   "motif": "root_throne",
+   "loot": "grove",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "whiterun.L4.throat_meadow",
+    "whiterun.L8.kynareth_tree"
+   ]
+  },
+  "broken_oar_smuggler_cache": {
+   "family": "wreck",
+   "variant": "shipwreck",
+   "boss": "The Barnacle",
+   "person": "",
+   "sign": [
+    "Broken Oar",
+    "Smuggler Cache",
+    "Held by:",
+    "The Barnacle"
+   ],
+   "motif": "crate_stack",
+   "loot": "wreck",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "haafingar.L1.sea_cliffs"
+   ]
+  },
+  "ilinalta_drowned_altar": {
+   "family": "ruin",
+   "variant": "nordic_ruin",
+   "boss": "Warden Morthgar the Watcher",
+   "person": "",
+   "sign": [
+    "Ilinalta",
+    "Drowned Altar",
+    "Guarded by",
+    "Warden"
+   ],
+   "motif": "rune_pillar",
+   "loot": "ruin",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "falkreath.L10.barrow_above_riverwood",
+    "falkreath.L11.sunderstone",
+    "falkreath.L11.bleak_falls"
+   ]
+  },
+  "talos_massacre_shrine": {
+   "family": "cabin",
+   "variant": "cabin",
+   "boss": "Roskva the Trapper",
+   "person": "",
+   "sign": [
+    "Talos Massacre",
+    "Shrine",
+    "Held by:",
+    "Roskva the"
+   ],
+   "motif": "hunter_cache",
+   "loot": "cabin",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "falkreath.L6.half_moon_mill",
+    "falkreath.L6.hunters_camps",
+    "falkreath.L5.timber"
+   ]
+  },
+  "hunters_cliff_blind": {
+   "family": "cabin",
+   "variant": "cabin",
+   "boss": "Hargrim the Hermit",
+   "person": "",
+   "sign": [
+    "Hunters Cliff",
+    "Blind",
+    "Held by:",
+    "Hargrim the"
+   ],
+   "motif": "hearth_corner",
+   "loot": "cabin",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "falkreath.L6.half_moon_mill",
+    "falkreath.L6.hunters_camps",
+    "falkreath.L5.timber"
+   ]
+  },
+  "drajkmyr_marsh_altar": {
+   "family": "ruin",
+   "variant": "nordic_ruin",
+   "boss": "Morthgar of the Broken Wall",
+   "person": "",
+   "sign": [
+    "Drajkmyr Marsh",
+    "Altar",
+    "Guarded by",
+    "Morthgar of"
+   ],
+   "motif": "watch_brazier",
+   "loot": "ruin",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "hjaalmarch.L10.bromjunaar_maze",
+    "hjaalmarch.L10.voice_tomb",
+    "hjaalmarch.L11.bromjunaar"
+   ]
+  },
+  "pale_shore_ivory_camp": {
+   "family": "cabin",
+   "variant": "cabin",
+   "boss": "Folke Tall-Tale",
+   "person": "",
+   "sign": [
+    "Pale Shore",
+    "Ivory Camp",
+    "Held by:",
+    "Folke"
+   ],
+   "motif": "hearth_corner",
+   "loot": "cabin",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_pale.L6.heath_farms",
+    "the_pale.L5.fishing"
+   ]
+  },
+  "autumnwatch_poacher_blind": {
+   "family": "cabin",
+   "variant": "cabin",
+   "boss": "Hargrim Tall-Tale",
+   "person": "",
+   "sign": [
+    "Autumnwatch",
+    "Poacher Blind",
+    "Held by:",
+    "Hargrim"
+   ],
+   "motif": "hearth_corner",
+   "loot": "cabin",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_rift.L6.heartwood_mill",
+    "the_rift.L6.lake_farms",
+    "the_rift.L5.honey_estate"
+   ]
+  },
+  "rift_frost_spider_hollow": {
+   "family": "beast",
+   "variant": "spider_cave",
+   "boss": "Old Bleakhowl",
+   "person": "",
+   "sign": [
+    "Rift Frost",
+    "Spider Hollow",
+    "Held by:",
+    "Old Bleakhowl"
+   ],
+   "motif": "hide_rack",
+   "loot": "den",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_rift.L4.birch_forest",
+    "the_rift.L4.rift_grassland",
+    "the_rift.L4.falmer_caves"
+   ]
+  },
+  "pilgrims_trench_beacon": {
+   "family": "wreck",
+   "variant": "shipwreck",
+   "boss": "Old Barnacle",
+   "person": "",
+   "sign": [
+    "Pilgrims",
+    "Trench Beacon",
+    "Held by:",
+    "Old Barnacle"
+   ],
+   "motif": "driftwood_hoard",
+   "loot": "wreck",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "winterhold.L5.wreck_salvage",
+    "winterhold.L1.ice_floes"
+   ]
+  },
+  "hot_spring_bathers_camp": {
+   "family": "cabin",
+   "variant": "cabin",
+   "boss": "Sunniva the Hermit",
+   "person": "",
+   "sign": [
+    "Hot Spring",
+    "Bathers Camp",
+    "Held by:",
+    "Sunniva the"
+   ],
+   "motif": "hunter_cache",
+   "loot": "cabin",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "eastmarch.L6.darkwater_crossing",
+    "eastmarch.L6.mills_and_farms",
+    "eastmarch.L5.river_mills"
+   ]
+  },
+  "velothi_refugee_cairn": {
+   "family": "ruin",
+   "variant": "nordic_ruin",
+   "boss": "Ysolt the Shrine-Warden",
+   "person": "",
+   "sign": [
+    "Velothi",
+    "Refugee Cairn",
+    "Guarded by",
+    "Ysolt the"
+   ],
+   "motif": "watch_brazier",
+   "loot": "ruin",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L8.boethiah_cult",
+    "eastmarch.L8.refugee_faith"
+   ]
+  },
+  "karth_gorge_sky_burial": {
+   "family": "forsworn",
+   "variant": "forsworn_camp",
+   "boss": "Varka Ash-Walker",
+   "person": "",
+   "sign": [
+    "Karth Gorge",
+    "Sky Burial",
+    "Held by:",
+    "Varka"
+   ],
+   "motif": "bone_fire",
+   "loot": "forsworn",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine",
+    "the_reach.L10.hagraven_covens",
+    "the_reach.L10.forsworn_redoubts"
+   ]
+  },
+  "reachwater_sealed_arch": {
+   "family": "ruin",
+   "variant": "nordic_ruin",
+   "boss": "Orsolf the Fallen Priest",
+   "person": "",
+   "sign": [
+    "Reachwater",
+    "Sealed Arch",
+    "Guarded by",
+    "Orsolf the"
+   ],
+   "motif": "offering_bowl",
+   "loot": "ruin",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_reach.L10.blades_temple"
+   ]
+  },
+  "bthardamz_surface_vent": {
+   "family": "dwemer",
+   "variant": "great_lift",
+   "boss": "Warden-Engine Ol-8",
+   "person": "",
+   "sign": [
+    "Bthardamz",
+    "Surface Vent",
+    "Guarded by",
+    "Warden-Engine"
+   ],
+   "motif": "centurion_bay",
+   "loot": "dwemer",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_reach.L10.dwemer_depths",
+    "the_reach.L1.dwemer_city_rock",
+    "the_reach.L11.dwemer_era"
+   ]
+  },
+  "whiterun_siege_encampment": {
+   "family": "military",
+   "variant": "stormcloak_camp",
+   "boss": "Sergeant Brynjolf Hard-March",
+   "person": "",
+   "sign": [
+    "Whiterun Siege",
+    "Encampment",
+    "Held by:",
+    "Sergeant"
+   ],
+   "motif": "war_table",
+   "loot": "bandit",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "whiterun.L9.siege_point"
+   ]
+  },
+  "solitude_marsh_redoubt": {
+   "family": "military",
+   "variant": "imperial_camp",
+   "boss": "Sergeant Fabius Hard-March",
+   "person": "",
+   "sign": [
+    "Solitude Marsh",
+    "Redoubt",
+    "Held by:",
+    "Sergeant"
+   ],
+   "motif": "bedroll_row",
+   "loot": "bandit",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "haafingar.L9.imperial_seat",
+    "haafingar.L9.naval_power"
+   ]
+  },
+  "helgen_border_outpost": {
+   "family": "military",
+   "variant": "imperial_camp",
+   "boss": "Captain Fabius Hard-March",
+   "person": "",
+   "sign": [
+    "Helgen Border",
+    "Outpost",
+    "Held by:",
+    "Captain Fabius"
+   ],
+   "motif": "bedroll_row",
+   "loot": "bandit",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L9.jarl_uncle"
+   ]
+  },
+  "pale_pass_legion_camp": {
+   "family": "military",
+   "variant": "imperial_camp",
+   "boss": "Sergeant Eirik Hard-March",
+   "person": "",
+   "sign": [
+    "Pale Pass",
+    "Legion Camp",
+    "Held by:",
+    "Sergeant Eirik"
+   ],
+   "motif": "war_table",
+   "loot": "bandit",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L9.jarl_uncle"
+   ]
+  },
+  "ilinalta_rebel_bivouac": {
+   "family": "military",
+   "variant": "stormcloak_camp",
+   "boss": "Sergeant Aurelian the Veteran",
+   "person": "",
+   "sign": [
+    "Ilinalta Rebel",
+    "Bivouac",
+    "Held by:",
+    "Sergeant"
+   ],
+   "motif": "war_table",
+   "loot": "bandit",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L9.jarl_uncle"
+   ]
+  },
+  "shors_stone_watch_camp": {
+   "family": "military",
+   "variant": "stormcloak_camp",
+   "boss": "Commander Halla the Quartermaster",
+   "person": "",
+   "sign": [
+    "Shors Stone",
+    "Watch Camp",
+    "Held by:",
+    "Commander"
+   ],
+   "motif": "war_table",
+   "loot": "bandit",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_rift.L9.rebel_leaning_jarl",
+    "the_rift.L9.hunters_fort"
+   ]
+  },
+  "treva_crossing_camp": {
+   "family": "military",
+   "variant": "imperial_camp",
+   "boss": "Captain Dagny the Veteran",
+   "person": "",
+   "sign": [
+    "Treva Crossing",
+    "Camp",
+    "Held by:",
+    "Captain Dagny"
+   ],
+   "motif": "bedroll_row",
+   "loot": "bandit",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_rift.L9.rebel_leaning_jarl",
+    "the_rift.L9.hunters_fort"
+   ]
+  },
+  "darkwater_ford_camp": {
+   "family": "military",
+   "variant": "stormcloak_camp",
+   "boss": "Sergeant Dagny the Veteran",
+   "person": "",
+   "sign": [
+    "Darkwater Ford",
+    "Camp",
+    "Held by:",
+    "Sergeant Dagny"
+   ],
+   "motif": "armory_rack",
+   "loot": "bandit",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "eastmarch.L9.rebel_capital"
+   ]
+  },
+  "velothi_border_picket": {
+   "family": "military",
+   "variant": "imperial_camp",
+   "boss": "Captain Cassian Iron-Line",
+   "person": "",
+   "sign": [
+    "Velothi Border",
+    "Picket",
+    "Held by:",
+    "Captain"
+   ],
+   "motif": "bedroll_row",
+   "loot": "bandit",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "eastmarch.L9.rebel_capital"
+   ]
+  },
+  "karth_gorge_legion_camp": {
+   "family": "military",
+   "variant": "imperial_camp",
+   "boss": "Sergeant Halla Iron-Line",
+   "person": "",
+   "sign": [
+    "Karth Gorge",
+    "Legion Camp",
+    "Held by:",
+    "Sergeant Halla"
+   ],
+   "motif": "bedroll_row",
+   "loot": "bandit",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_reach.L9.imperial_jarl"
+   ]
+  },
+  "druadach_rebel_camp": {
+   "family": "military",
+   "variant": "stormcloak_camp",
+   "boss": "Captain Brynjolf the Steadfast",
+   "person": "",
+   "sign": [
+    "Druadach Rebel",
+    "Camp",
+    "Held by:",
+    "Captain"
+   ],
+   "motif": "war_table",
+   "loot": "bandit",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_reach.L9.imperial_jarl"
+   ]
+  },
+  "white_river_deep_sink": {
+   "family": "falmer",
+   "variant": "falmer_cave",
+   "boss": "Gloomwarden Thok of the Deep Hive",
+   "person": "",
+   "sign": [
+    "White River",
+    "Deep Sink",
+    "Held by:",
+    "Gloomwarden"
+   ],
+   "motif": "fungus_garden",
+   "loot": "falmer",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "whiterun.L10.beast_blood"
+   ]
+  },
+  "steppe_barrow_pit": {
+   "family": "necromancer",
+   "variant": "necromancer_lair",
+   "boss": "Ritualist Caldus of the Ninth Candle",
+   "person": "",
+   "sign": [
+    "Steppe Barrow",
+    "Pit",
+    "Held by:",
+    "Ritualist"
+   ],
+   "motif": "reagent_shelf",
+   "loot": "necromancer",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "whiterun.L10.beast_blood"
+   ]
+  },
+  "blackreach_whiterun_conduit": {
+   "family": "dwemer",
+   "variant": "dwemer_ruin",
+   "boss": "Foundry-Guard Kt-7",
+   "person": "",
+   "sign": [
+    "Blackreach",
+    "Whiterun",
+    "Guarded by",
+    "Foundry-Guard"
+   ],
+   "motif": "centurion_bay",
+   "loot": "dwemer",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "whiterun.L10.beast_blood"
+   ]
+  },
+  "solitude_deep_conduit": {
+   "family": "dwemer",
+   "variant": "dwemer_ruin",
+   "boss": "Gate-Engine Nx-5",
+   "person": "",
+   "sign": [
+    "Solitude Deep",
+    "Conduit",
+    "Guarded by",
+    "Gate-Engine"
+   ],
+   "motif": "centurion_bay",
+   "loot": "dwemer",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "haafingar.L10.wolf_queen_catacombs"
+   ]
+  },
+  "haafingar_sea_bastion": {
+   "family": "mage",
+   "variant": "fort_mage",
+   "boss": "Conjurer Perrin of the Sealed Door",
+   "person": "",
+   "sign": [
+    "Haafingar Sea",
+    "Bastion",
+    "Held by:",
+    "Conjurer"
+   ],
+   "motif": "reagent_shelf",
+   "loot": "necromancer",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "haafingar.L10.wolf_queen_catacombs"
+   ]
+  },
+  "coast_bluff_giant_camp": {
+   "family": "giant",
+   "variant": "giant_camp",
+   "boss": "Old Skulgar Tree-Splitter",
+   "person": "",
+   "sign": [
+    "Coast Bluff",
+    "Giant Camp",
+    "Held by:",
+    "Old Skulgar"
+   ],
+   "motif": "mammoth_bones",
+   "loot": "giant",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "haafingar.L10.wolf_queen_catacombs"
+   ]
+  },
+  "arch_bluff_grove": {
+   "family": "grove",
+   "variant": "grove",
+   "boss": "Mother Thornmother",
+   "person": "",
+   "sign": [
+    "Arch Bluff",
+    "Grove",
+    "Held by:",
+    "Mother"
+   ],
+   "motif": "root_throne",
+   "loot": "grove",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "haafingar.L4.pine_coast",
+    "haafingar.L4.spriggan_glens"
+   ]
+  },
+  "hjaal_sinkhole_cavern": {
+   "family": "falmer",
+   "variant": "falmer_cave",
+   "boss": "Gloomwarden Grath of the Deep Hive",
+   "person": "",
+   "sign": [
+    "Hjaal Sinkhole",
+    "Cavern",
+    "Held by:",
+    "Gloomwarden"
+   ],
+   "motif": "chaurus_nest",
+   "loot": "falmer",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "hjaalmarch.L10.marsh_vampires"
+   ]
+  },
+  "drajkmyr_hagraven_nest": {
+   "family": "hagraven",
+   "variant": "hagraven_lair",
+   "boss": "Briar-Mother Oldwyth Feather-Mother",
+   "person": "",
+   "sign": [
+    "Drajkmyr",
+    "Hagraven Nest",
+    "Held by:",
+    "Briar-Mother"
+   ],
+   "motif": "feather_totem",
+   "loot": "hagraven",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "hjaalmarch.L10.marsh_vampires"
+   ]
+  },
+  "coldmarsh_ossuary": {
+   "family": "necromancer",
+   "variant": "necromancer_lair",
+   "boss": "Magister Thaddeus the Hollow Hand",
+   "person": "",
+   "sign": [
+    "Coldmarsh",
+    "Ossuary",
+    "Held by:",
+    "Magister"
+   ],
+   "motif": "bone_table",
+   "loot": "necromancer",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "hjaalmarch.L8.arkay_dead"
+   ]
+  },
+  "marshweb_hollow": {
+   "family": "beast",
+   "variant": "spider_cave",
+   "boss": "Old Gnarltooth",
+   "person": "",
+   "sign": [
+    "Marshweb",
+    "Hollow",
+    "Held by:",
+    "Old Gnarltooth"
+   ],
+   "motif": "hide_rack",
+   "loot": "den",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "hjaalmarch.L4.marsh_hunters",
+    "hjaalmarch.L10.marsh_vampires"
+   ]
+  },
+  "pale_glacier_grotto": {
+   "family": "ice",
+   "variant": "ice_cave",
+   "boss": "The Icegrip",
+   "person": "",
+   "sign": [
+    "Pale Glacier",
+    "Grotto",
+    "Held by:",
+    "The Icegrip"
+   ],
+   "motif": "frozen_dead",
+   "loot": "ice",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_pale.L10.troll_caves",
+    "the_pale.L4.snowfield"
+   ]
+  },
+  "white_shore_hollow": {
+   "family": "vampire",
+   "variant": "vampire_lair",
+   "boss": "Mistress Narcissa the Long-Lived",
+   "person": "",
+   "sign": [
+    "White Shore",
+    "Hollow",
+    "Held by:",
+    "Mistress"
+   ],
+   "motif": "thrall_cells",
+   "loot": "vampire",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_pale.L10.nightmare_temple"
+   ]
+  },
+  "yorgrim_iron_seam": {
+   "family": "mine",
+   "variant": "mine",
+   "boss": "The Cinderjaw",
+   "person": "",
+   "sign": [
+    "Yorgrim Iron",
+    "Seam",
+    "Held by:",
+    "The Cinderjaw"
+   ],
+   "motif": "foreman_desk",
+   "loot": "mine",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_pale.L5.two_mines",
+    "the_pale.L5.ore_ships",
+    "the_pale.L1.iron_quicksilver"
+   ]
+  },
+  "pale_border_keep": {
+   "family": "vampire",
+   "variant": "fort_vampire",
+   "boss": "Count Selwyn the Patient",
+   "person": "",
+   "sign": [
+    "Pale Border",
+    "Keep",
+    "Held by:",
+    "Count Selwyn"
+   ],
+   "motif": "blood_altar",
+   "loot": "vampire",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_pale.L10.nightmare_temple"
+   ]
+  },
+  "velothi_troll_den": {
+   "family": "beast",
+   "variant": "troll_cave",
+   "boss": "Black Splitclaw",
+   "person": "",
+   "sign": [
+    "Velothi Troll",
+    "Den",
+    "Held by:",
+    "Black"
+   ],
+   "motif": "bone_heap",
+   "loot": "den",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "eastmarch.L4.eldergleam",
+    "eastmarch.L10.vampire_cave"
+   ]
+  },
+  "eldergleam_root_hollow": {
+   "family": "grove",
+   "variant": "spriggan_cave",
+   "boss": "Elder Thornmother",
+   "person": "",
+   "sign": [
+    "Eldergleam",
+    "Root Hollow",
+    "Held by:",
+    "Elder"
+   ],
+   "motif": "moss_shrine",
+   "loot": "grove",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "eastmarch.L4.snow_pine",
+    "eastmarch.L4.eldergleam"
+   ]
+  },
+  "white_river_smuggler_grotto": {
+   "family": "smuggler",
+   "variant": "smuggler_cave",
+   "boss": "Quartermaster Driftwood",
+   "person": "",
+   "sign": [
+    "White River",
+    "Smuggler",
+    "Held by:",
+    "Quartermaster"
+   ],
+   "motif": "crate_stack",
+   "loot": "smuggler",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "eastmarch.L5.harbour"
+   ]
+  },
+  "karth_spider_cleft": {
+   "family": "beast",
+   "variant": "spider_cave",
+   "boss": "Great Wretchhide",
+   "person": "",
+   "sign": [
+    "Karth Spider",
+    "Cleft",
+    "Held by:",
+    "Great"
+   ],
+   "motif": "bone_heap",
+   "loot": "den",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_reach.L4.cave_mouths"
+   ]
+  },
+  "druadach_troll_hollow": {
+   "family": "beast",
+   "variant": "troll_cave",
+   "boss": "Old Scarflank",
+   "person": "",
+   "sign": [
+    "Druadach Troll",
+    "Hollow",
+    "Held by:",
+    "Old Scarflank"
+   ],
+   "motif": "bone_heap",
+   "loot": "den",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_reach.L4.cave_mouths"
+   ]
+  },
+  "silver_gorge_bandit_camp": {
+   "family": "bandit",
+   "variant": "bandit_camp",
+   "boss": "Boss Kolgrim Split-Lip",
+   "person": "",
+   "sign": [
+    "Silver Gorge",
+    "Bandit Camp",
+    "Held by:",
+    "Boss Kolgrim"
+   ],
+   "motif": "bedroll_row",
+   "loot": "bandit",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_reach.L5.border_trade"
+   ]
+  },
+  "tundra_hagraven_cairn": {
+   "family": "hagraven",
+   "variant": "hagraven_lair",
+   "boss": "Gristle-Mother Oldwyth Old-Bones",
+   "person": "",
+   "sign": [
+    "Tundra",
+    "Hagraven Cairn",
+    "Held by:",
+    "Gristle-Mother"
+   ],
+   "motif": "feather_totem",
+   "loot": "hagraven",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "whiterun.L10.beast_blood"
+   ]
+  },
+  "wolf_queen_ossuary": {
+   "family": "necromancer",
+   "variant": "necromancer_lair",
+   "boss": "Ritualist Velka of the Ninth Candle",
+   "person": "",
+   "sign": [
+    "Wolf Queen",
+    "Ossuary",
+    "Held by:",
+    "Ritualist"
+   ],
+   "motif": "reagent_shelf",
+   "loot": "necromancer",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "haafingar.L10.wolf_queen_catacombs",
+    "haafingar.L8.wolf_queen_fear"
+   ]
+  },
+  "cragwallow_coven_pit": {
+   "family": "hagraven",
+   "variant": "hagraven_lair",
+   "boss": "Crone Skeldra Feather-Mother",
+   "person": "",
+   "sign": [
+    "Cragwallow",
+    "Coven Pit",
+    "Held by:",
+    "Crone Skeldra"
+   ],
+   "motif": "cauldron_fire",
+   "loot": "hagraven",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "eastmarch.L10.old_city_killer"
+   ]
+  },
+  "pale_frostweb_den": {
+   "family": "beast",
+   "variant": "spider_cave",
+   "boss": "Old Splitclaw",
+   "person": "",
+   "sign": [
+    "Pale Frostweb",
+    "Den",
+    "Held by:",
+    "Old Splitclaw"
+   ],
+   "motif": "hide_rack",
+   "loot": "den",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_pale.L4.snowfield",
+    "the_pale.L10.great_lifts",
+    "the_pale.L10.troll_caves"
+   ]
+  },
+  "pale_pine_hollow": {
+   "family": "grove",
+   "variant": "spriggan_cave",
+   "boss": "The Fernhollow",
+   "person": "",
+   "sign": [
+    "Pale Pine",
+    "Hollow",
+    "Held by:",
+    "The Fernhollow"
+   ],
+   "motif": "moss_shrine",
+   "loot": "grove",
+   "entrance": "",
+   "entranceKind": "",
+   "bossNote": "",
+   "story": "",
+   "why": [
+    "the_pale.L4.snowfield"
    ]
   }
  }

@@ -9,7 +9,9 @@
     "Don't go near the stone with the skulls round it, east of the river. Lights there on moonless nights, and the farmers say the ground's been turned over like a field.",
     "A Legion courier rode out from the camp near Rorikstead and never reached Whiterun. They've doubled the patrols, for all the good it does.",
     "Fellglow Keep has smoke in its chimneys again. Nobody honest lives in that place, not since the Legion walked out of it.",
-    "The Battle-Borns and the Gray-Manes nearly came to blows at the Bannered Mare over a bowl of stew. Over the war, really. It's always over the war."
+    "The Battle-Borns and the Gray-Manes nearly came to blows at the Bannered Mare over a bowl of stew. Over the war, really. It's always over the war.",
+    "Caravan-factors outside Whiterun's main gate say the road-tolls near Valtheim have doubled since the watch-patrols were pulled back. [Hearth-Tally]",
+    "Mill-hands at Riverwood have been chaining their pine rafts to the bank at dusk so the river-raiders can't cut them loose. [Hearth-Tally]"
    ],
    "legends": [
     "Before Whiterun had walls, the hill was called the Shield of the Plain, and Ysgramor's people raised Jorrvaskr there because a wounded eagle landed on the summit and would not leave. They took it as a sign that the hill would never fall, and so far it never has.",
@@ -67,7 +69,22 @@
       "You looked at me in the market today and my father saw. He said nothing, which is worse. If your uncle hears what I think of the Empire, and mine hears what you think of Ulfric, there will be blood on the steps of Jorrvaskr and we will be the reason.",
       "So I will not wave. I will not sit at your table in the Bannered Mare. But on Fredas, when the Companions train, I will be at the Gildergreen with a flower for Kynareth, and if a flower should go missing from my hand, I will not tell anyone who took it.\n\nBurn this. I mean it. Burn it."
      ]
+    },
+    {
+     "id": "sk4_note_6",
+     "kind": "ledger",
+     "title": "Hold Survey: Whiterun (7)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #7 (62, -68): Field inspection recorded for Whiterun within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #7 for whiterun: All travelers, carters, and hold patrollers passing Whiterun are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L7.three_districts",
+    "whiterun.L7.caravans_outside"
    ]
   },
   "riverwood": {
@@ -97,7 +114,22 @@
       "#Week of the 10th, Second Seed\nSalmon: 14. Two to the Sleeping Giant, Orgnar paid in coin for once. Six to the Riverwood Trader, Lucan haggled like a Khajiit. Rest smoked.\nSlaughterfish: 3. Bit the net through. Bit my thumb too.",
       "#Week of the 17th\nSalmon: 4. The pool below the bridge has gone mean. Something big has moved in under the rocks, and on Tirdas it tore Father's net-charm right off the line, the iron fish he carved before I was born.\n\nI will get it back. Not alone, though. Not with those teeth in the water."
      ]
+    },
+    {
+     "id": "sk4_note_7",
+     "kind": "report",
+     "title": "Hold Survey: Riverwood (8)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #8 (33, 593): Field inspection recorded for Riverwood within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #8 for riverwood: All travelers, carters, and hold patrollers passing Riverwood are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L7.three_districts",
+    "whiterun.L7.caravans_outside"
    ]
   },
   "rorikstead": {
@@ -125,7 +157,22 @@
       "To the Office of the Imperial Steward at Solitude,\nI have spent nine days testing the soil of Rorikstead, as instructed. I regret to report that it is ordinary soil. Clay, a little sand, the usual stones. I have seen better earth in the Nibenay valley that produced half as much.",
       "The villagers are unhelpful. One told me the founder Rorik made a bargain with the ground itself. Another told me to stop digging holes in his turnips. A third, the most honest, said that if I found the secret I should keep it to myself, because the Thalmor would want it next.\n\nI request leave to return to Cyrodiil. I do not like how well everything grows here."
      ]
+    },
+    {
+     "id": "sk4_note_8",
+     "kind": "ledger",
+     "title": "Hold Survey: Rorikstead (9)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #9 (-1652, -228): Field inspection recorded for Rorikstead within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #9 for rorikstead: All travelers, carters, and hold patrollers passing Rorikstead are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L7.three_districts",
+    "whiterun.L7.caravans_outside"
    ]
   },
   "honningbrew_meadery": {
@@ -153,7 +200,22 @@
       "~Black-Briar's for Riften, where the rain comes down,\n~Honningbrew's for Whiterun, best mead in the town.\n\nUnderneath, in a different hand: 'Whoever wrote this owes me a cask. You know who you are, Mallus.'",
       "A third hand, smaller, beneath that: 'Mallus says he never wrote any verse in his life, and that he certainly owes nobody a cask. Sabjorn says to stop writing on the barrels. Sabjorn wrote that on a barrel.'"
      ]
+    },
+    {
+     "id": "sk4_note_9",
+     "kind": "report",
+     "title": "Hold Survey: Honningbrew Meadery (10)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #10 (176, 163): Field inspection recorded for Honningbrew Meadery within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #10 for honningbrew_meadery: All travelers, carters, and hold patrollers passing Honningbrew Meadery are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L7.three_districts",
+    "whiterun.L7.caravans_outside"
    ]
   },
   "pelagia_farm": {
@@ -170,7 +232,22 @@
       "Dear Cassius,\nYou ask if I regret coming north. Some mornings I do. The wind off the Tundra goes straight through a Colovian coat. The Nords at the market still call me 'the Imperial' after twenty years, as if it were my given name.",
       "But the ground is good, and the city buys everything I grow. Our only real trouble is the giants of Bleakwind Basin. They mean no harm, I think. They just do not understand fences. Last month one stepped over ours, took a cow under each arm and walked home as if they were his.\n\nGunnvor, my farmhand, swears she will get Brindle back. I have told her she is mad. She says that is why I hired her."
      ]
+    },
+    {
+     "id": "sk4_note_10",
+     "kind": "ledger",
+     "title": "Hold Survey: Pelagia Farm (11)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #11 (-9, 151): Field inspection recorded for Pelagia Farm within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #11 for pelagia_farm: All travelers, carters, and hold patrollers passing Pelagia Farm are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L7.three_districts",
+    "whiterun.L7.caravans_outside"
    ]
   },
   "chillfurrow_farm": {
@@ -187,7 +264,22 @@
       "#First Seed\nPlanted cabbage and leek in the north field. Frost late, as ever. Lost a row.\n#Rain's Hand\nWolves at the fence twice. Shot one. The other stood and watched me like it was counting.",
       "#Second Seed\nMen camped past the east hedge. Clean armour, silver on the buckles, polishing their blades by the fire every night. They asked if I'd seen any big dogs. I said only wolves. One of them laughed and said, 'Wolves. Yes.'\n\nI keep the shutters barred now. Whatever they are hunting, I'd rather not be in the way."
      ]
+    },
+    {
+     "id": "sk4_note_11",
+     "kind": "report",
+     "title": "Hold Survey: Chillfurrow Farm (12)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #12 (185, 45): Field inspection recorded for Chillfurrow Farm within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #12 for chillfurrow_farm: All travelers, carters, and hold patrollers passing Chillfurrow Farm are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L7.three_districts",
+    "whiterun.L7.caravans_outside"
    ]
   },
   "battle_born_farm": {
@@ -204,7 +296,22 @@
       "Master Olfrid,\nThe wheat is in, forty sacks, two more than last year. The Legion quartermaster took twelve without paying, as promised. He gave me a paper with a seal on it. I have put the paper in the strongbox. I don't know what else to do with paper.",
       "The Gray-Mane boy was seen at the north fence again, looking at the barn. I don't think he meant harm, but I set the dogs loose that night anyway.\n\nAlso, the hands want to know if they are expected to fight if the Stormcloaks come down from their camp past the river. I told them a Battle-Born never runs. They asked if that went for hired men too. Please advise. Hrongar."
      ]
+    },
+    {
+     "id": "sk4_note_12",
+     "kind": "ledger",
+     "title": "Hold Survey: Battle Born Farm (13)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #13 (219, -40): Field inspection recorded for Battle Born Farm within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #13 for battle_born_farm: All travelers, carters, and hold patrollers passing Battle Born Farm are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L7.three_districts",
+    "whiterun.L7.caravans_outside"
    ]
   },
   "whiterun_stables": {
@@ -231,7 +338,22 @@
       "To the captain of the guard at Whiterun gate,\nOn the 22nd of Last Seed I was riding west with the satchel for Rorikstead and the Imperial camp when four men came out of the rocks near Redoran's Retreat and pulled me off my horse. They took the satchel and my boots.",
       "I am told this is not the guard's concern, since it happened outside the walls. I would remind the captain that one letter in that satchel was sealed by the Jarl's own steward, and that I said so to the robbers, loudly, before I thought better of it.\n\nIf the guard will not go, I will pay someone who will. Kjeld."
      ]
+    },
+    {
+     "id": "sk4_note_13",
+     "kind": "report",
+     "title": "Hold Survey: Whiterun Stables (14)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #14 (-24, 51): Field inspection recorded for Whiterun Stables within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #14 for whiterun_stables: All travelers, carters, and hold patrollers passing Whiterun Stables are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L7.three_districts",
+    "whiterun.L7.caravans_outside"
    ]
   },
   "crabbers_shanty": {
@@ -261,6 +383,10 @@
       "DON'T TAKE THE GORGE ROAD WEST. Robbers in the gorge with a toll-chain across the water and bows on the cliffs. They took my boat, my nets and my good knife.\n\nIf you must go to the Reach, go by the high path past Orotheim and keep your torch low. If you see a man in a red hood waving at you from the rocks, he is not friendly. He is counting you.\n\nSigned with a crab's claw scratched in the wood. Grisvar, probably."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L8.fear_of_the_dark",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "north_cold_rock_pass": {
@@ -277,7 +403,22 @@
       "^TRAVELLER, ADD A STONE\nThis cairn was raised for Arngrim the drover, who was carried off in this pass in the winter of the year his son was born. We found his boots in the webs at the mouth of Brood Cavern, to the north-west, and nothing more.",
       "Below, in fresher cuts: 'The webs are thicker this year. Keep to the middle of the road. Do not stop to look up.'\n\nAnd lower still, in a child's hand: 'I added two stones. One for Arngrim. One for me.'"
      ]
+    },
+    {
+     "id": "sk4_note_14",
+     "kind": "ledger",
+     "title": "Hold Survey: North Cold Rock Pass (15)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #15 (-1068, -715): Field inspection recorded for North Cold Rock Pass within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #15 for north_cold_rock_pass: All travelers, carters, and hold patrollers passing North Cold Rock Pass are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
    ]
   },
   "south_cold_rock_pass": {
@@ -294,7 +435,22 @@
       "^SOUTH: RANNVEIG'S FAST\n^NORTH: THE COLD ROCK\n^EAST: THE SLOW ROAD TO WHITERUN\n\nUnder the old lettering, someone has added with a knife: 'The south road goes to the barrow and nowhere else. If a man tells you there is an inn down there, he wants your boots.'",
       "Lower, worn almost smooth: 'Rannveig kept her fast here. She would not eat until the dead were quiet. They are not quiet yet.'\n\nThe rest has been scraped away by ice and time."
      ]
+    },
+    {
+     "id": "sk4_note_15",
+     "kind": "report",
+     "title": "Hold Survey: South Cold Rock Pass (16)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #16 (-1068, -627): Field inspection recorded for South Cold Rock Pass within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #16 for south_cold_rock_pass: All travelers, carters, and hold patrollers passing South Cold Rock Pass are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
    ]
   },
   "drelas_cottage": {
@@ -324,7 +480,22 @@
       "Third binding. The atronach answered faster tonight. I think it likes the cottage. It certainly likes the smell of Arcadia's alembic heating, which is why I have not returned it. Her glass holds the heat better than anything I own.",
       "The Nords in Whiterun call me a witch. Good. Witches are left alone. The last courier fled when the atronach so much as looked at him, which saves me writing replies.\n\nNote: the summoning circle must be redrawn every third night in salt and fire salts mixed. If the circle fails, so does the leash. Do not let the circle fail."
      ]
+    },
+    {
+     "id": "sk4_note_16",
+     "kind": "ledger",
+     "title": "Hold Survey: Drelas Cottage (17)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #17 (-801, -545): Field inspection recorded for Drelas Cottage within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #17 for drelas_cottage: All travelers, carters, and hold patrollers passing Drelas Cottage are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
    ]
   },
   "rannveigs_fast": {
@@ -353,7 +524,22 @@
       "#12th of Frostfall\nGrandmother always said Rannveig was a Gray-Mane, a hundred generations back, before we had the name. I never believed her. Then I found the ring drawn in the margin of the clan's old saga at the house in Whiterun: a band of iron with a wolf's mouth closing on a stone.",
       "#14th of Frostfall\nI am inside. The dead are stirring and the ring is further in than I can reach alone. They move when I touch the walls.\n\nIf a stranger finds this: the ring belongs with the Gray-Manes in Whiterun. Bring it out of the dark and tell them Sigrid tried."
      ]
+    },
+    {
+     "id": "sk4_note_17",
+     "kind": "report",
+     "title": "Hold Survey: Rannveigs Fast (18)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #18 (-1065, -532): Field inspection recorded for Rannveigs Fast within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #18 for rannveigs_fast: All travelers, carters, and hold patrollers passing Rannveigs Fast are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
    ]
   },
   "hamvirs_rest": {
@@ -382,7 +568,22 @@
       "^HAMVIR THE PATIENT\n^CHIEF OF THE WESTERN HILLS\n\nHe waited forty winters for the raiders from the Reach to tire of raiding. They tired first. Lay his axe across his knees, that he may wait once more, until the end of all waiting.",
       "Beneath, in a rougher hand, scratched with a knife point long after the barrow was sealed: 'We came for the axe. We were told he was only bones. He is not only bones. Skeggi, I am sorry. If anyone reads this, leave the axe where it lies. Whatever it is worth, it is not worth what he does to you for touching it.'"
      ]
+    },
+    {
+     "id": "sk4_note_18",
+     "kind": "ledger",
+     "title": "Hold Survey: Hamvirs Rest (19)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #19 (-612, -452): Field inspection recorded for Hamvirs Rest within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #19 for hamvirs_rest: All travelers, carters, and hold patrollers passing Hamvirs Rest are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.honour_and_sovngarde",
+    "skyrim.L10.draugr_barrows"
    ]
   },
   "halted_stream_camp": {
@@ -411,7 +612,22 @@
       "Ulf of Loreius Farm. Taken 3rd of Sun's Height.\nAsbjorn, also of Loreius. Taken same day.\nWe dig. We dig. The big one with the stone hand counts the sacks every night and beats whoever is short.",
       "If anyone reads this, tell Vantus Loreius that his men did not run away. We were taken on the road to Whitewatch Tower. Tell him to send someone. Tell him we are still alive. Tell him to hurry.\n\nAnd tell my mother in Whiterun that I said my prayers. Ulf."
      ]
+    },
+    {
+     "id": "sk4_note_19",
+     "kind": "report",
+     "title": "Hold Survey: Halted Stream Camp (20)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #20 (-53, -418): Field inspection recorded for Halted Stream Camp within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #20 for halted_stream_camp: All travelers, carters, and hold patrollers passing Halted Stream Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L9.siege_point"
    ]
   },
   "lunds_hut": {
@@ -428,7 +644,22 @@
       "#2nd of Hearthfire\nTraps on the west ridge empty again. Three snapped, not sprung. Something is taking the bait and the trap both. Wolf tracks, too many to count.",
       "#5th of Hearthfire\nFound the pack's den in the rocks above Bleakwind Bluff. Big grey leader with a white blaze, bolder than any wolf I've seen. He watched me reset the traps and didn't run.\n#6th of Hearthfire\nGoing up to the den tomorrow with the long bow. If I'm not back by the 8th, Hjalla, don't come looking. Send someone with a sword. Take the good pelts to Whiterun and get a fair price from Belethor, not what he offers first."
      ]
+    },
+    {
+     "id": "sk4_note_20",
+     "kind": "ledger",
+     "title": "Hold Survey: Lunds Hut (21)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #21 (-1760, -396): Field inspection recorded for Lunds Hut within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #21 for lunds_hut: All travelers, carters, and hold patrollers passing Lunds Hut are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
    ]
   },
   "silent_moons_camp": {
@@ -457,7 +688,22 @@
       "The stone around the forge is carved with old marks, Nordic but older than any Nord now living can read. Someone has scratched a rough translation beside them:\n\n'Two eyes of the night. One red, one pale. What is struck beneath them remembers them.'",
       "Below, a second hand: 'The forge only takes when both moons look on. Under a new moon it is cold iron and nothing more. Don't waste good ore on a dark night.'\n\nA third note, in charcoal: 'Hrodna, the ore's here.'"
      ]
+    },
+    {
+     "id": "sk4_note_21",
+     "kind": "report",
+     "title": "Hold Survey: Silent Moons Camp (22)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #22 (-269, -369): Field inspection recorded for Silent Moons Camp within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #22 for silent_moons_camp: All travelers, carters, and hold patrollers passing Silent Moons Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L9.siege_point"
    ]
   },
   "greenspring_hollow": {
@@ -487,7 +733,22 @@
       "~Keep the hollow green and wild,\n~Keep the keeper reconciled,\n~And if I break the bargain made,\n~Let me lie in your green shade.",
       "Carved smaller, at the foot of the tree, newer and deeper: 'The poachers cut this bark for kindling and laughed at the words. Three of them went into the thicket after a wounded doe that night. Two came back. The keeper does not forgive greed, and neither, I think, does She.'"
      ]
+    },
+    {
+     "id": "sk4_note_22",
+     "kind": "ledger",
+     "title": "Hold Survey: Greenspring Hollow (23)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #23 (-745, -358): Field inspection recorded for Greenspring Hollow within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #23 for greenspring_hollow: All travelers, carters, and hold patrollers passing Greenspring Hollow are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
    ]
   },
   "whitewatch_tower": {
@@ -506,7 +767,22 @@
       "#Hearthfire\nDunmer pilgrim, going to High Hrothgar: 8 septims and a nice cloak.\nFarm cart from Loreius: 30 septims, one cabbage, one driver who talked back. He doesn't talk now.\nKhajiit caravan: tried. They had more swords than us. Let them by. Not writing that down. Wrote it down anyway.",
       "Note to the lads: Brattvar at Halted Stream wants two men a week for his mine. He pays in ore, not coin. I say no. If he wants men he can take them off the road himself, like we do.\n\nAnyone who paints his shield and doesn't stand his watch gets thrown off the top. I'm not joking. Ask Svein. Oh wait. Ingjald."
      ]
+    },
+    {
+     "id": "sk4_note_23",
+     "kind": "report",
+     "title": "Hold Survey: Whitewatch Tower (24)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #24 (182, -323): Field inspection recorded for Whitewatch Tower within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #24 for whitewatch_tower: All travelers, carters, and hold patrollers passing Whitewatch Tower are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
    ]
   },
   "shimmermist_cave": {
@@ -536,7 +812,22 @@
       "The Falmer here mark their tunnels with scratched lines, three short and one long, repeated at every bend. I believe they are not words but distances, counted in steps, so the blind can find their way home.",
       "I also believe I am lost. I have been following the marks the wrong way. They count toward the heart of the cave, not out of it. If I am right, I should be close to their nest. I can hear something breathing that is not me. I shall stop writing now."
      ]
+    },
+    {
+     "id": "sk4_note_24",
+     "kind": "ledger",
+     "title": "Hold Survey: Shimmermist Cave (25)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #25 (439, -283): Field inspection recorded for Shimmermist Cave within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #25 for shimmermist_cave: All travelers, carters, and hold patrollers passing Shimmermist Cave are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
    ]
   },
   "fellglow_keep": {
@@ -564,7 +855,22 @@
       "The thralls in the lower cells are to be fed every second day. More than that is waste. Less than that makes them useless for the work.\n\nThe new acolyte from Whiterun is talented but squeamish. Keep him from the cells. Keep him from the front gate. If he asks about his mother, tell him we are close.",
       "Supplies due: grave dust from the Ritual Stone, where Moriva's circle is working; salt; two more bodies, fresh. The farms east of the river have been watchful lately. Send the collectors further out.\n\nWe do not answer the College's letters. We do not answer anyone's letters."
      ]
+    },
+    {
+     "id": "sk4_note_25",
+     "kind": "report",
+     "title": "Hold Survey: Fellglow Keep (26)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #26 (697, -264): Field inspection recorded for Fellglow Keep within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #26 for fellglow_keep: All travelers, carters, and hold patrollers passing Fellglow Keep are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L9.siege_point"
    ]
   },
   "redorans_retreat": {
@@ -594,7 +900,22 @@
       "Under it, in fresh charcoal: 'Too late, Faryn.'",
       "Further along the wall, a second old carving, smaller and more careful: a list of names, each with a mark beside it. Faryn's guests, perhaps, or Faryn's dead. The last name in the list is his own, carved by someone else, and under it the word for 'honoured' in the Dunmeri script."
      ]
+    },
+    {
+     "id": "sk4_note_26",
+     "kind": "ledger",
+     "title": "Hold Survey: Redorans Retreat (27)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #27 (-557, -232): Field inspection recorded for Redorans Retreat within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #27 for redorans_retreat: All travelers, carters, and hold patrollers passing Redorans Retreat are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L9.siege_point"
    ]
   },
   "moldering_ruins": {
@@ -623,7 +944,22 @@
       "^ODVAR BRONZE-CROWN\n^WHO WATCHED THE WEST\n\nHe watched for the Reachmen from this hill for sixty years, and when he died his people sat him on the stone so that he might keep watching. They closed the door upon him with his eyes open. Do not close his eyes. He has not finished watching.",
       "Scratched beside it in charcoal, recently, by an unsteady hand: 'Agnar, if you ever come back here, his eyes follow you. They do. I saw them move. Don't look at the chair. Get your knife and don't look at the chair.' The rest of the charcoal has been smeared, as if by a sleeve dragged across it in a hurry."
      ]
+    },
+    {
+     "id": "sk4_note_27",
+     "kind": "report",
+     "title": "Hold Survey: Moldering Ruins (28)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #28 (-1921, -199): Field inspection recorded for Moldering Ruins within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #28 for moldering_ruins: All travelers, carters, and hold patrollers passing Moldering Ruins are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.honour_and_sovngarde",
+    "skyrim.L10.draugr_barrows"
    ]
   },
   "whiterun_imperial_camp": {
@@ -651,7 +987,22 @@
       "Dear Mother,\nThe north is cold. They say it isn't cold yet, which is worse. The Nords in Rorikstead sell us cabbages at three times the price and smile while they do it.",
       "We lost a courier last week, Decianus, the one who used to sing. The captain pretends it is about the dispatches, but I saw him sitting alone by the fire afterwards with the man's spare helmet.\n\nI am well. I am fed. I have not had to fight anyone yet, except a mudcrab, and I won. Please send socks. Your loving son, Quintus."
      ]
+    },
+    {
+     "id": "sk4_note_28",
+     "kind": "ledger",
+     "title": "Hold Survey: Whiterun Imperial Camp (29)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #29 (-1310, -156): Field inspection recorded for Whiterun Imperial Camp within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #29 for whiterun_imperial_camp: All travelers, carters, and hold patrollers passing Whiterun Imperial Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L9.siege_point"
    ]
   },
   "swindlers_den": {
@@ -680,7 +1031,22 @@
       "1. No stealing from each other. Steal from the customers.\n2. No fighting inside. Take it outside where the wolves can clean up.\n3. Everything has a price. Everyone has a price. Find it.\n4. If the guards come, you've never heard of Grelka.\n5. If Grelka asks, you've never heard of the guards.",
       "6. The Legion seal is not to be broken. Sealed is worth more.\n7. Whoever keeps eating the cheese, stop.\n\n8. The cave belongs to whoever pays Grelka the most. Right now that is Grelka."
      ]
+    },
+    {
+     "id": "sk4_note_29",
+     "kind": "report",
+     "title": "Hold Survey: Swindlers Den (30)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #30 (-1045, -151): Field inspection recorded for Swindlers Den within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #30 for swindlers_den: All travelers, carters, and hold patrollers passing Swindlers Den are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L9.siege_point"
    ]
   },
   "bleakwind_basin": {
@@ -697,7 +1063,22 @@
       "Watched the basin from the rocks for three days. Two giants, one old, one young. Four mammoths. One cow, ours, Brindle, standing by the fire like she was born there.",
       "The young giant scratches Brindle behind the ears every morning. The old one milks the mammoths and gives the young one the first bowl. They are kinder to each other than half the families in Whiterun.\n\nI still want my cow back. But I don't want to fight for her. There must be another way. Giants like cheese, the old herders say. Maybe a trade."
      ]
+    },
+    {
+     "id": "sk4_note_30",
+     "kind": "ledger",
+     "title": "Hold Survey: Bleakwind Basin (31)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #31 (-290, -138): Field inspection recorded for Bleakwind Basin within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #31 for bleakwind_basin: All travelers, carters, and hold patrollers passing Bleakwind Basin are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L10.giant_camps",
+    "whiterun.L7.three_districts"
    ]
   },
   "valtheim_towers": {
@@ -724,7 +1105,22 @@
       "To any honest guard of Whiterun,\nThis one's caravan paid the Valtheim toll twice in a month, and was robbed anyway at Guldun Rock, where the giants took our salt and the raiders took what the giants left.",
       "Khajiit are patient. Khajiit are not THIS patient. The towers stand on the Jarl's road, and the Jarl's road should not belong to a man who shouts down bridges. If Whiterun will not clear them, perhaps Windhelm will. This one does not care which flag flies over the towers, so long as the toll is less than our whole wagon."
      ]
+    },
+    {
+     "id": "sk4_note_31",
+     "kind": "report",
+     "title": "Hold Survey: Valtheim Towers (32)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #32 (866, -101): Field inspection recorded for Valtheim Towers within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #32 for valtheim_towers: All travelers, carters, and hold patrollers passing Valtheim Towers are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
    ]
   },
   "graywinter_watch": {
@@ -743,7 +1139,22 @@
       "TROLL. Big, grey, three eyes, one of them blinded by my first arrow. It heals faster than I can shoot. I put six arrows in it and it pulled them out and ate the shafts.",
       "It took Gerd's hound and my good bow and it took the bounty notice the Jarl's steward nailed by the Battle-Born Farm road. The bounty still stands: 100 septims for the troll's head at the gate of Whiterun.\n\nBring fire. Bring friends. Bring more fire. Ulfgar."
      ]
+    },
+    {
+     "id": "sk4_note_32",
+     "kind": "ledger",
+     "title": "Hold Survey: Graywinter Watch (33)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #33 (475, -79): Field inspection recorded for Graywinter Watch within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #33 for graywinter_watch: All travelers, carters, and hold patrollers passing Graywinter Watch are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
    ]
   },
   "serpents_bluff_redoubt": {
@@ -773,7 +1184,22 @@
       "Father, I'm alive. They caught me at the goat pen. They don't hurt me, they just stare and talk in that tongue. One of them, the old woman with the thorns in her hair, keeps a heart in a box and sings to it.",
       "She says when the heart is ready, they'll go west and burn the farms. I heard her say 'Rorikstead' plain as day. Please tell the Legion camp. Please tell someone. I hid this in the wall of my cage. If you are not Father, please bring this to him in Rorikstead. Sissel."
      ]
+    },
+    {
+     "id": "sk4_note_67",
+     "kind": "report",
+     "title": "Hold Survey: Serpents Bluff Redoubt (68)",
+     "author": "Bailiff's Office of The Reach",
+     "at": "chest",
+     "pages": [
+      "Folio #68 (-1850, -25): Field inspection recorded for Serpents Bluff Redoubt within The Reach Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #68 for serpents_bluff_redoubt: All travelers, carters, and hold patrollers passing Serpents Bluff Redoubt are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_reach.L9.native_uprising",
+    "the_reach.L10.forsworn_redoubts"
    ]
   },
   "fort_greymoor": {
@@ -804,7 +1230,22 @@
       "Watch rota for the walls. Two on the north rampart, two at the gate, one in the south-west tower. The tower is the worst post. The wolves howl under it every night. Not those wolves. Ordinary wolves. I think.",
       "Anyone who sees a Companion on the road is to report it at once. Anyone who sees a Companion and does nothing will answer to me. The beasts of Jorrvaskr think the plains belong to them. We will teach them otherwise."
      ]
+    },
+    {
+     "id": "sk4_note_33",
+     "kind": "report",
+     "title": "Hold Survey: Fort Greymoor (34)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #34 (-533, 16): Field inspection recorded for Fort Greymoor within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #34 for fort_greymoor: All travelers, carters, and hold patrollers passing Fort Greymoor are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L9.siege_point"
    ]
   },
   "guldun_rock": {
@@ -821,7 +1262,22 @@
       "Note to self: at the bend near Guldun Rock, do not stop. Do not stop to fix a wheel. Do not stop to relieve oneself. The giants consider the bend theirs, and they have opinions about wheels.",
       "Second note to self: the toll at Valtheim Towers, just north, is now higher than the profit of the trip. J'datharr suggests the eastern pass next time, through the Rift. Ahkari says no. Ahkari is the boss. J'datharr will write it down anyway, so that later J'datharr can say he said so."
      ]
+    },
+    {
+     "id": "sk4_note_34",
+     "kind": "ledger",
+     "title": "Hold Survey: Guldun Rock (35)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #35 (840, 44): Field inspection recorded for Guldun Rock within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #35 for guldun_rock: All travelers, carters, and hold patrollers passing Guldun Rock are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L10.giant_camps",
+    "whiterun.L7.three_districts"
    ]
   },
   "white_river_watch": {
@@ -849,7 +1305,22 @@
       "#Turdas\nStood lookout all day. Saw a fox, two Honningbrew carts and the Stormcloak camp's smoke over the hills to the east. Kolskegg says they won't bother us, we're too small to matter. I don't like being too small to matter.",
       "#Fredas\nKolskegg drank a whole cask and fell in the river. We pulled him out. He made us swear not to tell anyone. I am writing it down because I swore not to TELL. I am thinking of leaving. My mother is in Riverwood. She thinks I work at the mill."
      ]
+    },
+    {
+     "id": "sk4_note_35",
+     "kind": "report",
+     "title": "Hold Survey: White River Watch (36)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #36 (348, 115): Field inspection recorded for White River Watch within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #36 for white_river_watch: All travelers, carters, and hold patrollers passing White River Watch are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L9.siege_point"
    ]
   },
   "western_watchtower": {
@@ -866,7 +1337,22 @@
       "Report for the captain at Dragonsreach:\nNight of the 24th. Clear sky. At the third hour Guardsman Brunolf saw a shape cross Secunda from south to north. He says it was too big for a bird and too fast for a cloud. He has been relieved of the watch and given a strong drink.",
       "Night of the 25th. Same shape seen again by myself and by Guardsman Torsk. I have not been given a strong drink. I request one. I also request arrows, as we have nineteen between six men, and a second bell, as the first is cracked.\n\nThe giants at Bleakwind Basin have moved their mammoths to the far side of the basin. They are not afraid of us. They are afraid of something. Hreinn."
      ]
+    },
+    {
+     "id": "sk4_note_36",
+     "kind": "ledger",
+     "title": "Hold Survey: Western Watchtower (37)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #37 (-289, 115): Field inspection recorded for Western Watchtower within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #37 for western_watchtower: All travelers, carters, and hold patrollers passing Western Watchtower are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
    ]
   },
   "broken_fang_cave": {
@@ -883,7 +1369,22 @@
       "#Morndas\nCamped by the road near a cave shaped like a broken tooth. A kind man in a fine coat shared his fire and asked a great many questions about who would be expecting me in Whiterun. Nobody, I told him. He smiled at that.",
       "#Tirdas\nSo tired. Slept until noon and woke with a sore neck. The kind man is still here. He says I should rest another day. His fire never seems to need wood.\n#Middas\nI cannot remember Tirdas night. There are two small marks on my neck. I think I should leave. I think I should leave now."
      ]
+    },
+    {
+     "id": "sk4_note_37",
+     "kind": "report",
+     "title": "Hold Survey: Broken Fang Cave (38)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #38 (-1121, 119): Field inspection recorded for Broken Fang Cave within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #38 for broken_fang_cave: All travelers, carters, and hold patrollers passing Broken Fang Cave are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
    ]
   },
   "whiterun_stormcloak_camp": {
@@ -911,7 +1412,22 @@
       "#Second Seed\nJoined up in Windhelm. They gave me an axe and a blue sash and told me I'm fighting for Skyrim. I've lived in Skyrim my whole life and never knew it needed fighting for.",
       "#Last Seed\nCamped above the White River. You can see High Hrothgar from here, white against the sky. The old sergeant says the Greybeards will never take a side. Lucky them. Some nights I watch the lights of Whiterun and think about how many people live behind those walls who've never done anything to me."
      ]
+    },
+    {
+     "id": "sk4_note_38",
+     "kind": "ledger",
+     "title": "Hold Survey: Whiterun Stormcloak Camp (39)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #39 (509, 140): Field inspection recorded for Whiterun Stormcloak Camp within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #39 for whiterun_stormcloak_camp: All travelers, carters, and hold patrollers passing Whiterun Stormcloak Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L9.siege_point"
    ]
   },
   "sleeping_tree_camp": {
@@ -930,7 +1446,22 @@
       "The sap of the great tree west of Whiterun is unlike any resin I know. A drop on the tongue brings visions and a deep, dreamless sleep. The giants drink it in the evening, and in the morning they are calm as lambs.",
       "I have a buyer in Solitude who will pay three hundred septims for a full flask. I am too old to crawl past a sleeping giant, and too honest to send a child. If an adventurer with quiet feet brings me a flask, I will split the price fairly.\n\nApproach from the south, downwind. The giants sleep hardest just after the sun goes down. Take only what you need. The tree does not like greed."
      ]
+    },
+    {
+     "id": "sk4_note_39",
+     "kind": "report",
+     "title": "Hold Survey: Sleeping Tree Camp (40)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #40 (-939, 170): Field inspection recorded for Sleeping Tree Camp within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #40 for sleeping_tree_camp: All travelers, carters, and hold patrollers passing Sleeping Tree Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L10.giant_camps",
+    "whiterun.L7.three_districts"
    ]
   },
   "high_hrothgar": {
@@ -958,7 +1489,22 @@
       "^FOR THE GREYBEARDS\nSalted fish: 2 crates\nBarley: 1 sack\nCandles: 40\nLamp oil: 1 jug\nWool blankets: 3 (Master Arngeir asked, through Brother Borri's gestures. I think it was blankets. It might have been goats.)",
       "Paid in full, as always, with a nod. Note to self: the steps are icier this year past the fourth shrine. Bring the spiked boots. Do not stop to look down. Do not stop to look at the frost trolls either. Especially do not stop to look at the frost trolls."
      ]
+    },
+    {
+     "id": "sk4_note_40",
+     "kind": "ledger",
+     "title": "Hold Survey: High Hrothgar (41)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #41 (511, 457): Field inspection recorded for High Hrothgar within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #41 for high_hrothgar: All travelers, carters, and hold patrollers passing High Hrothgar are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
    ]
   },
   "throat_of_the_world": {
@@ -975,7 +1521,22 @@
       "Under it, carved deep: 'I climbed for the view. I stayed for the silence. If you are reading this, look east. There is nothing in Tamriel you cannot see from here except yourself.'",
       "Further down the stone, so faint it might be weather and not writing: 'There was a great grey shape on the peak when I came. It watched me carve this. It did not move, and it did not harm me. I think it was very old, and very tired, and glad of the company.'"
      ]
+    },
+    {
+     "id": "sk4_note_41",
+     "kind": "report",
+     "title": "Hold Survey: Throat Of The World (42)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #42 (579, 652): Field inspection recorded for Throat Of The World within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #42 for throat_of_the_world: All travelers, carters, and hold patrollers passing Throat Of The World are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
    ]
   },
   "the_ritual_stone": {
@@ -1005,7 +1566,22 @@
       "Someone has chipped at the carving with a knife, trying to scratch out the word 'no'. They have not quite managed it.",
       "Around the far side of the stone, older marks again, nearly worn away: a ring of small figures lying down, and one figure standing over them with its arms raised. The standing figure has been carved with no face. Shepherds who graze nearby say the old priests did that on purpose, so the dead would never know who woke them."
      ]
+    },
+    {
+     "id": "sk4_note_42",
+     "kind": "ledger",
+     "title": "Hold Survey: The Ritual Stone (43)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #43 (491, -34): Field inspection recorded for The Ritual Stone within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #43 for the_ritual_stone: All travelers, carters, and hold patrollers passing The Ritual Stone are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
    ]
   },
   "dragon_mound_greenspring_hollow": {
@@ -1033,7 +1609,22 @@
       "Copied the claw-script from the fallen stones at the mound's edge. Three marks repeated, the same three I saw at the mound near Shimmermist Cave. If my master is right, they are a name.",
       "If they are a name, then each mound held a single dragon, buried under its own name like a Nord under his barrow-stone. And if each is now empty, then each name is flying somewhere over Skyrim tonight. I will not mention this to the Jarl until my master tells me to. I would rather he heard it from someone with a better title."
      ]
+    },
+    {
+     "id": "sk4_note_43",
+     "kind": "report",
+     "title": "Hold Survey: Dragon Mound Greenspring Hollow (44)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #44 (-870, -222): Field inspection recorded for Dragon Mound Greenspring Hollow within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #44 for dragon_mound_greenspring_hollow: All travelers, carters, and hold patrollers passing Dragon Mound Greenspring Hollow are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.honour_and_sovngarde",
+    "skyrim.L10.draugr_barrows"
    ]
   },
   "dragon_mound_shimmermist_cave": {
@@ -1049,6 +1640,148 @@
      "pages": [
       "Court Wizard,\nYou asked to be told of any old stone mounds that look disturbed. There is one on the hill above Shimmermist Cave. I passed it on the 11th and the capstone was in place. I passed it on the 13th and it lay thirty paces down the slope, broken in two.",
       "Inside, a pit, and scorch marks, and a great rib bone as long as my bow. I took a splinter of it for you, as you asked, wrapped in my spare scarf. You owe me a scarf.\n\nThe Falmer from the cave below were out on the hill in daylight, all of them facing the empty mound. I did not stay to see why. Hedda."
+     ]
+    },
+    {
+     "id": "sk4_note_44",
+     "kind": "ledger",
+     "title": "Hold Survey: Dragon Mound Shimmermist Cave (45)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #45 (416, -375): Field inspection recorded for Dragon Mound Shimmermist Cave within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #45 for dragon_mound_shimmermist_cave: All travelers, carters, and hold patrollers passing Dragon Mound Shimmermist Cave are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ],
+   "why": [
+    "whiterun.L8.honour_and_sovngarde",
+    "skyrim.L10.draugr_barrows"
+   ]
+  },
+  "whiterun_mammoth_butchery": {
+   "hook": "A painted stone circle and timber drying-rack on the open tundra where giants cure mammoth cheese and carved ivory.",
+   "rumour": "Hunters out on the western plains give the Mammoth Butchery a wide berth; the giants there have two bull mammoths guarding the racks.",
+   "why": [
+    "whiterun.L10.giant_camps",
+    "whiterun.L7.three_districts"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Ivory Trader's Sketch",
+     "author": "Ysolda's Factor",
+     "at": "chest",
+     "reveals": "bleakwind_basin",
+     "pages": [
+      "Counted four carved tusks leaning against the painted boulder and three leather vats of fermented mammoth curd hanging from the cross-beams. Do not approach with drawn steel; leave a wheel of salt-brick on the flat stone and wait until the herdsmen move the bulls to water."
+     ]
+    },
+    {
+     "id": "sk4_note_45",
+     "kind": "report",
+     "title": "Hold Survey: Whiterun Mammoth Butchery (46)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #46 (-1500, -80): Field inspection recorded for Whiterun Mammoth Butchery within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #46 for whiterun_mammoth_butchery: All travelers, carters, and hold patrollers passing Whiterun Mammoth Butchery are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "sleeping_tree_altar": {
+   "hook": "A sunken stone basin at the edge of the purple-leaved bog where sap-collectors leave offerings before tapping the ancient trunk.",
+   "rumour": "Alchemists in Whiterun pay good gold for a phial from the Sleeping Tree Altar, provided the giants don't flatten you first.",
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Sap-Tapper's Caution",
+     "author": "Arcadia's Supplier",
+     "at": "chest",
+     "reveals": "sleeping_tree_camp",
+     "pages": [
+      "Drive the brass spigot only into the lower root-buttress beside the stone basin, never into the main trunk where the giant paints his swirl-marks. One flask of violet sap is enough to make a winter's profit if you walk away quietly."
+     ]
+    },
+    {
+     "id": "sk4_note_46",
+     "kind": "ledger",
+     "title": "Hold Survey: Sleeping Tree Altar (47)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #47 (-1420, -320): Field inspection recorded for Sleeping Tree Altar within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #47 for sleeping_tree_altar: All travelers, carters, and hold patrollers passing Sleeping Tree Altar are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "whiterun_siege_encampment": {
+   "hook": "A fortified ring of earthworks, timber mantlets, and catapult frames thrown up across the eastern approach to the plains.",
+   "rumour": "Farmers east of the city say the soldiers at the Siege Encampment bought up every oak beam in the valley to build their mantlets.",
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L9.siege_point"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Siege Engineer's Timber Bill",
+     "author": "Master-Wright Lodvar",
+     "at": "chest",
+     "reveals": "whiterun",
+     "pages": [
+      "Twelve seasoned ash beams for the throwing-arms and forty bundles of rawhide rope stored under the oiled canvas. From the eastern earthwork, Dragonsreach sits clear against the sky at twelve hundred paces."
+     ]
+    }
+   ]
+  },
+  "white_river_deep_sink": {
+   "hook": "A roaring limestone sinkhole beside the White River where surface water vanishes into a dark subterranean chasm.",
+   "rumour": "Log-drivers on the White River steer their rafts hard to the south bank so the current doesn't pull them into the Deep Sink.",
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "River-Pilot's Warning",
+     "author": "Hodir Timber-Wright",
+     "at": "chest",
+     "reveals": "shimmermist_cave",
+     "pages": [
+      "Keep the guide-poles ready once you pass the limestone bluffs below the waterfall. A subterranean cavern swallows half the river channel here, and pale blind creatures have been seen crawling up the wet rocks on moonless nights."
+     ]
+    }
+   ]
+  },
+  "steppe_barrow_pit": {
+   "hook": "A collapsed turf barrow on the wind-swept steppe whose sunken roof exposes a circle of ancient burial lintels.",
+   "rumour": "Shepherds on the central plains pen their ewes away from the Steppe Barrow Pit; cold blue lights dance in the shaft after midnight.",
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Grave-Robber's Abandonment Note",
+     "author": "Krag the Digger",
+     "at": "chest",
+     "reveals": "hamvirs_rest",
+     "pages": [
+      "We broke through the turf roof expecting bronze armbands and burial urns, only to find a black-robed conjurer already using the lower slab as an altar. Left our shovels by the rope-ladder and ran before the dead stood up."
      ]
     }
    ]

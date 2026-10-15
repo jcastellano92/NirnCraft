@@ -2,7 +2,18 @@
   "id": "dawnstar",
   "base": "none",
   "sil": "harbour-shelf-mines",
-  "names": {"inn": "windpeak_inn", "store": "dawnstar_trader", "smithy": "dawnstar_smithy"},
+  "names": {
+    "inn": "windpeak_inn",
+    "store": "dawnstar_trader",
+    "smithy": "dawnstar_smithy",
+    "alchemist": "the_mortar_and_pestle",
+    "stables": "dawnstar_stables",
+    "fishmonger": "dawnstar_fishmonger",
+    "thyra": "dawnstar_thyras_house",
+    "skjold": "dawnstar_skjolds_house",
+    "factor": "dawnstar_factors_house",
+    "hestor": "dawnstar_hestors_house"
+  },
   "innKey": "windpeak_inn",
   "gates": [[0, 78]],
   "buildings": [
@@ -11,8 +22,9 @@
     {"kind": "mine", "at": [56, 44], "size": [7, 14], "face": "S", "variant": 5, "flags": ["no_beard"], "name": "iron_breaker_mine"},
     {"kind": "temple", "at": [26, -14], "size": [11, 17], "face": "W", "variant": 5, "name": "dawnstar_temple_of_mara"},
     {"kind": "barracks", "at": [-34, -36], "size": [9, 15], "face": "E", "name": "dawnstar_barracks"},
-    {"kind": "camp", "at": [-58, -18], "size": [13, 13], "variant": 1},
-    {"kind": "camp", "at": [-58, -2], "size": [13, 13], "variant": 1}
+    {"kind": "camp", "at": [-58, -18], "size": [13, 13], "variant": 1, "name": "dawnstar_north_wharf_camp"},
+    {"kind": "camp", "at": [-58, -2], "size": [13, 13], "variant": 1, "name": "dawnstar_south_wharf_camp"},
+    {"kind": "stables", "at": [24, 68], "size": [11, 13], "face": "W", "name": "dawnstar_stables"}
   ],
   "plazas": [
     {"at": [0, 4], "size": 13, "variant": 0, "stalls": 4, "name": "dawnstar_market_square"}
@@ -64,6 +76,9 @@
     "dawnstar_market_square": "Dawnstar Market Square",
     "dawnstar_temple_of_mara": "Temple of Mara",
     "dawnstar_barracks": "Dawnstar Barracks",
+    "dawnstar_north_wharf_camp": "North Wharf Camp",
+    "dawnstar_south_wharf_camp": "South Wharf Camp",
+    "dawnstar_stables": "Dawnstar Stables",
     "dawnstar_trader": "Dawnstar Trading Post",
     "dawnstar_fishmonger": "Harbour Fishmonger",
     "dawnstar_thyras_house": "Thyra's House",

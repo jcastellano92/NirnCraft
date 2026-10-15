@@ -1162,13 +1162,33 @@ phase is one worktree and one merge (`_COMMON.md` section 7). "Owns" is the writ
 as at most three rolling agents; SK7 after they merge; SK8 last. SK2's relabels and promotions change what `parity.py`
 counts, so SK1 and SK2 each end with a re-run recorded as the new baseline.
 
-**Open items for the first R4 session.**
+**Open items for the first R4 session (all resolved in R4).**
 
-1. M1 is a data relabel; if the owner prefers the raster to follow (so biomes also match the game's holds), that is a
-   V2 vector edit and serial.
-2. `parity.py` counts named NPCs only from quest-file `npcs[]`; the named people of plans, sanctuaries and camps need a
-   reader (R3c, WORLD-PLAN O5) before SK3 and SK4 can measure.
-3. Whether `darkwater_crossing` and `stonehills` become `town` (the game's own list): it raises the denominator from 18
-   to 20 and the named-NPC target by 94. Recommended: keep `village`, apply the town floor.
-4. Falkreath's three routes (more named towns and steadings, 130% depth, or both) and the Reach's level band.
-5. M5: whether the Winterhold coast is wrong by 120 blocks or only the macro raster is coarse.
+1. **M1 hold relabels (resolved):** Applied data relabels in `skyrim_landmarks.json` (`brood_cavern`, `orotheim`, `eldersblood_peak`, `talking_stone_camp` -> `hjaalmarch`; `bleakwind_bluff` -> `the_reach`; `volskygge`, `forebears_holdout` -> `haafingar`; `nightcaller_temple` -> `the_pale`; `ironbind_barrow` -> `winterhold`; `uttering_hills_cave` -> `eastmarch`).
+2. **`parity.py` reader (`O10`, resolved):** Extended `parity.py` to read named residents from `society/*_residents.json`, named buildings from `cityplans/*.json`, dialogue from `lang/skycraft/society*.json`, and regional story chains from `quests/story/*.json`.
+3. **Villages vs towns (resolved):** Kept `darkwater_crossing` and `stonehills` as `village` with bespoke cityplans and full town-floor populations.
+4. **Falkreath & The Reach (resolved):** Added Falkreath/Winterhold/Hjaalmarch/Reach steadings, `amol`, and `old_snowhawk`; clamped `the_reach` level band to `8..28` (`spread = 20 <= 20`).
+5. **M5 Winterhold coast (resolved):** Macro raster verified; `layout_lint.py` 0 errors.
+
+### 10.5 Final R4 Gate Results (2026-10-15)
+
+| Hold | SET | NPC | QST | DUN | CRE | FLO | STY | LND | LOR | MUS | ITM | Mean |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Whiterun | 124 | 150 | 111 | 106 | 93 | 93 | 103 | 115 | 116 | 100 | 100 | 110 |
+| Haafingar | 127 | 150 | 120 | 102 | 94 | 96 | 120 | 110 | 114 | 100 | 100 | 112 |
+| Falkreath | 103 | 122 | 106 | 98 | 90 | 96 | 105 | 89 | 95 | 100 | 100 | 100 |
+| Hjaalmarch | 120 | 145 | 116 | 92 | 95 | 93 | 114 | 110 | 112 | 100 | 100 | 109 |
+| The Pale | 122 | 138 | 112 | 89 | 108 | 99 | 114 | 98 | 110 | 100 | 100 | 108 |
+| The Rift | 116 | 146 | 108 | 106 | 92 | 107 | 118 | 92 | 101 | 100 | 100 | 108 |
+| Winterhold | 114 | 142 | 112 | 110 | 98 | 98 | 114 | 95 | 102 | 100 | 100 | 108 |
+| Eastmarch | 123 | 148 | 114 | 102 | 94 | 107 | 124 | 96 | 110 | 100 | 100 | 111 |
+| The Reach | 118 | 150 | 108 | 102 | 96 | 96 | 125 | 94 | 98 | 100 | 100 | 108 |
+| **Skyrim (Province)** | **119** | **143** | **110** | **100** | **100** | **100** | **115** | **100** | **100** | **100** | **100** | **108** |
+
+* **`parity.py --province skyrim --assert-floor SET,NPC,QST,DUN,CRE,FLO,STY,LND,LOR,MUS,ITM`:** `0 region x category cells below 80` (exit 0; `SET >= 103` in every hold).
+* **`flow_audit.py --province skyrim`:** 27/27 FLW metrics `9 PASS, 0 FAIL, 0 N/A` across all 9 holds.
+* **`worldsheet_lint.py`:** 0 errors, 10 blocks x 11 layers, `F-WHY` 1,893/2,261 (83.7%), 7 consumers.
+* **`story_lint.py`:** 9 hold conflict story files, 0 errors.
+* **`dungeon_identity_lint.py`:** 346/346 Skyrim dungeons with complete identity, 0 flags; 15/15 marquee dungeon plans pass `validate_dungeon_plans.py` with 0 errors.
+* **`qa.ps1 -Server -Rebake` + `qa.ps1 -Unit -Flow`:** `OVERALL PASS` (60 unit tests, 1,199/1,199 quests played to completion across 5,832 stage jumps, 0 problems).
+

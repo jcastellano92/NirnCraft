@@ -1,0 +1,55 @@
+{
+  "id": "stonehills",
+  "base": "none",
+  "sil": "ridge-iron-pit-bunkhouse",
+  "names": {
+    "inn": "stonehills_bunkhouse",
+    "store": "stonehills_assay_store",
+    "smithy": "stonehills_smithy"
+  },
+  "innKey": "stonehills_bunkhouse",
+  "gates": [[0, 30], [26, 0]],
+  "buildings": [
+    {"kind": "mine", "at": [-18, -18], "size": [7, 14], "face": "S", "variant": 5, "flags": ["no_beard"], "name": "rockwallow_mine"},
+    {"kind": "manor", "at": [16, -16], "size": [11, 13], "face": "S", "flags": ["upper", "seat"], "name": "stonehills_sorlis_manor"},
+    {"kind": "house", "at": [-20, 10], "size": [9, 9], "face": "E", "name": "stonehills_overseers_cottage"},
+    {"kind": "stables", "at": [16, 16], "size": [9, 11], "face": "W", "name": "stonehills_stables"}
+  ],
+  "plazas": [
+    {"at": [0, 4], "size": 11, "variant": 0, "stalls": 2, "name": "stonehills_ore_yard"}
+  ],
+  "nets": [
+    {"type": "path", "via": [[0, 30], [0, 16], [0, 4], [-8, -8], [-14, -14]], "width": 4, "major": true, "tag": "main"},
+    {"type": "path", "via": [[-22, 2], [-8, 4], [8, 2], [26, 0]], "width": 3, "rank": 1, "tag": "row"}
+  ],
+  "zones": [
+    {"at": [16, -16], "r": 14, "zone": "noble"},
+    {"at": [0, 4], "r": 16, "zone": "centre"},
+    {"at": [-16, -10], "r": 16, "zone": "craft"}
+  ],
+  "fabric": {"radius": 34, "target": 0.28, "fill_cap": 4, "yard_cap": 4},
+  "queue": [
+    {"kind": "inn", "size": [13, 15], "flags": ["upper"], "name": "stonehills_bunkhouse", "on": "main"},
+    {"kind": "smithy", "size": [11, 9], "name": "stonehills_smithy", "on": "row"},
+    {"kind": "store", "size": [9, 9], "name": "stonehills_assay_store", "on": "main"},
+    {"kind": "house", "name": "stonehills_pacturs_cottage", "on": "row"},
+    {"kind": "house", "name": "stonehills_swanhilds_house", "on": "main"}
+  ],
+  "features": [
+    {"type": "shrine", "theme": "divine:zenithar", "where": "free"},
+    {"type": "well", "where": "free"},
+    {"type": "banners", "where": "gate"}
+  ],
+  "titles": {
+    "rockwallow_mine": "Rockwallow Iron Mine",
+    "stonehills_sorlis_manor": "Overseer's Hall",
+    "stonehills_bunkhouse": "Rockwallow Bunkhouse",
+    "stonehills_smithy": "Stonehills Smelter & Forge",
+    "stonehills_assay_store": "Stonehills Assay Office",
+    "stonehills_overseers_cottage": "Foreman's Cabin",
+    "stonehills_stables": "Stonehills Mule Yard",
+    "stonehills_ore_yard": "Stonehills Ore Yard",
+    "stonehills_pacturs_cottage": "Miner's Row West",
+    "stonehills_swanhilds_house": "Miner's Row East"
+  }
+}

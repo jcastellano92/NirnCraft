@@ -2,7 +2,13 @@
   "id": "darkwater_crossing",
   "base": "none",
   "sil": "ford-causeway-bankside",
-  "names": {"inn": "darkwater_fords_rest", "store": "darkwater_trader", "smithy": "darkwater_smithy"},
+  "names": {
+    "inn": "darkwater_fords_rest",
+    "store": "darkwater_trader",
+    "smithy": "darkwater_smithy",
+    "ferryman": "darkwater_ferrymans_house",
+    "haldis": "darkwater_haldis_house"
+  },
   "innKey": "darkwater_fords_rest",
   "gates": [[0, 24], [-2, -24]],
   "lines": [
@@ -10,8 +16,8 @@
   ],
   "buildings": [
     {"kind": "mine", "at": [-42, -4], "size": [7, 14], "face": "E", "variant": 0, "flags": ["no_beard"], "name": "darkwater_mine"},
-    {"kind": "dock", "at": [1, 4], "size": [5, 11], "face": "E", "flags": ["no_beard"]},
-    {"kind": "dock", "at": [1, -8], "size": [5, 11], "face": "E", "flags": ["no_beard"]}
+    {"kind": "dock", "at": [1, 4], "size": [5, 11], "face": "E", "flags": ["no_beard"], "name": "darkwater_south_ferry_dock"},
+    {"kind": "dock", "at": [1, -8], "size": [5, 11], "face": "E", "flags": ["no_beard"], "name": "darkwater_north_ferry_dock"}
   ],
   "plazas": [
     {"at": [-14, 4], "size": 11, "variant": 0, "stalls": 3, "name": "darkwater_landing"}
@@ -35,7 +41,7 @@
     {"kind": "house", "name": "darkwater_ferrymans_house", "on": "main"},
     {"kind": "house", "name": "darkwater_haldis_house", "on": "mine"},
     {"kind": "house", "name": "darkwater_helas_house", "on": "row"},
-    {"kind": "farmhouse", "size": [9, 11], "on": "east"},
+    {"kind": "farmhouse", "size": [9, 11], "name": "darkwater_hotspring_farmhouse", "on": "east"},
     {"kind": "house", "count": 3, "on": "east"},
     {"kind": "house", "count": 3, "on": "southeast"}
   ],
@@ -49,9 +55,12 @@
     "darkwater_trader": "Darkwater Goods",
     "darkwater_smithy": "Darkwater Smithy",
     "darkwater_mine": "Darkwater Mine",
+    "darkwater_south_ferry_dock": "South Ferry Dock",
+    "darkwater_north_ferry_dock": "North Ferry Dock",
     "darkwater_landing": "Ferry Landing",
     "darkwater_ferrymans_house": "Ferryman's House",
     "darkwater_haldis_house": "Haldis's House",
-    "darkwater_helas_house": "Hela's House"
+    "darkwater_helas_house": "Hela's House",
+    "darkwater_hotspring_farmhouse": "Hotspring Farmhouse"
   }
 }

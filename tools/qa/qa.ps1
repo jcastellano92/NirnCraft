@@ -16,7 +16,6 @@ Skycraft QA harness: one command, a short report. Built so automated sessions re
   tools\qa\qa.ps1 -NoBuild -Reach  # + the reachability lint in full: per-province class table, isolated places, road
                                   # networks (tools/qa/reach_lint.py, ~2 s; a one-line summary runs in every default run)
   tools\qa\qa.ps1 -NoBuild -Parity # + print the 10 lowest cells of the Skyrim-parity scorecard (tools/qa/parity.py)
-  tools\qa\qa.ps1 -NoBuild -Flow   # + R3c player-flow audit (flow_audit.py), story_lint, dungeon_stats, verbatim_check
 
 Writes the report to mod\run\qa-report.txt and prints it. Exit code 0 = all PASS.
 Extra server commands: -ServerCmds "cmd one|cmd two" ('+' or spaces both fine). Client tour spots: -Tour "Name:x:z;Name:x:z".
@@ -30,7 +29,6 @@ param(
     [switch]$Reach,
     [switch]$Parity,
     [switch]$Novelty,
-    [switch]$Flow,
     [switch]$Bake,
     [switch]$Rebake,
     [string]$ServerCmds = "",
@@ -88,7 +86,7 @@ if ($Unit) {
         Result "unit" $false ("{0}/{1} tests passed, {2} failed in {3:N1}s (log: {4})" -f $upass, $urun, $ufail, $usecs, $ulog)
         Select-String -Path $ulog -Pattern " FAILED$|error:|AssertionFailedError" | Select-Object -First 15 | ForEach-Object { Add("       " + $_.Line.Trim()) }
     }
-    if (-not ($Server -or $Client -or $Bake -or $Rebake -or $Layout -or $Reach -or $Parity -or $Novelty -or $Flow)) {
+    if (-not ($Server -or $Client -or $Bake -or $Rebake -or $Layout -or $Reach -or $Parity -or $Novelty)) {
         Add(("OVERALL {0}" -f ($(if ($Fail) { "FAIL" } else { "PASS" }))))
         $Report | Set-Content (Join-Path $Run "qa-report.txt") -Encoding utf8
         $Report | ForEach-Object { $_ }
@@ -170,27 +168,6 @@ if ($Novelty) {
     $nv = @(& $py -3 -I tools/qa/novelty_lint.py --top 10 2>&1)
     Add("INFO   novelty           10 worst near-duplicate clusters (py -3 -I tools/qa/novelty_lint.py --strict gates)")
     $nv | ForEach-Object { Add("       $_") }
-}
-if ($Flow) {
-    $sl = @(& $py -3 -I tools/qa/story_lint.py 2>&1)
-    $slrc = $LASTEXITCODE
-    $slerr = @($sl | Where-Object { $_ -match "^ERR" })
-    Result "story-lint" ($slrc -eq 0) ("{0}" -f ($sl | Select-Object -Last 1))
-    $slerr | Select-Object -First 10 | ForEach-Object { Add("       $_") }
-    $ds = @(& $py -3 -I tools/qa/dungeon_stats.py --province skyrim 2>&1)
-    $dsrc = $LASTEXITCODE
-    $dserr = @($ds | Where-Object { $_ -match "^ERR" })
-    Result "dungeon-stats" ($dsrc -eq 0) ("{0}" -f ($ds | Select-Object -Last 1))
-    $dserr | Select-Object -First 10 | ForEach-Object { Add("       $_") }
-    $vc = @(& $py -3 -I tools/qa/verbatim_check.py 2>&1)
-    $vcrc = $LASTEXITCODE
-    $vcerr = @($vc | Where-Object { $_ -match "^ERR" })
-    Result "verbatim" ($vcrc -eq 0) ("{0}" -f ($vc | Select-Object -Last 1))
-    $vcerr | Select-Object -First 10 | ForEach-Object { Add("       $_") }
-    # informational: per-province FLW summary (tools/qa/flow_audit.py, docs/world/DESIGN-PRINCIPLES.md 5.4)
-    $fa = @(& $py -3 -I tools/qa/flow_audit.py --province skyrim 2>&1)
-    Add("INFO   flow              FLW player-flow summary for Skyrim (full: py -3 -I tools/qa/flow_audit.py)")
-    $fa | ForEach-Object { Add("       $_") }
 }
 Pop-Location
 

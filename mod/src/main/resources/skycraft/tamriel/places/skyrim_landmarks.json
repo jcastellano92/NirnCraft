@@ -475,7 +475,11 @@
   "z": -2455,
   "radius": 22,
   "variant": "fort_vampire",
-  "class": "major"
+  "class": "marquee",
+  "why": [
+   "haafingar.L10.volkihar_castle",
+   "skyrim.L10.volkihar"
+  ]
  },
  {
   "id": "broken_oar_grotto",
@@ -487,7 +491,11 @@
   "z": -2366,
   "radius": 18,
   "variant": "smuggler_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "haafingar.L10.smugglers_coves",
+   "haafingar.L1.sea_caves"
+  ]
  },
  {
   "id": "septimus_signuss_outpost",
@@ -499,7 +507,11 @@
   "z": -2256,
   "radius": 18,
   "variant": "ice_cave",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
  },
  {
   "id": "brinewater_grotto",
@@ -511,7 +523,11 @@
   "z": -2208,
   "radius": 18,
   "variant": "smuggler_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "haafingar.L10.smugglers_coves",
+   "haafingar.L1.sea_caves"
+  ]
  },
  {
   "id": "orphans_tear",
@@ -523,7 +539,11 @@
   "z": -2167,
   "radius": 14,
   "variant": "shipwreck",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "haafingar.L10.smugglers_coves",
+   "haafingar.L5.company_docks"
+  ]
  },
  {
   "id": "solitude_lighthouse",
@@ -535,7 +555,11 @@
   "z": -2157,
   "radius": 10,
   "variant": "lighthouse",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "haafingar.L3.lighthouse_point",
+   "haafingar.L5.company_docks"
+  ]
  },
  {
   "id": "ravenscar_hollow",
@@ -547,7 +571,11 @@
   "z": -2123,
   "radius": 18,
   "variant": "hagraven_lair",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
  },
  {
   "id": "helas_folly",
@@ -559,7 +587,11 @@
   "z": -2094,
   "radius": 14,
   "variant": "shipwreck",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "winterhold.L5.wreck_salvage",
+   "winterhold.L1.ice_floes"
+  ]
  },
  {
   "id": "shadowgreen_cavern",
@@ -571,7 +603,11 @@
   "z": -2087,
   "radius": 18,
   "variant": "spriggan_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
  },
  {
   "id": "widows_watch_ruins",
@@ -583,7 +619,11 @@
   "z": -2067,
   "radius": 12,
   "variant": "watchtower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
  },
  {
   "id": "dainty_sload",
@@ -595,7 +635,11 @@
   "z": -2057,
   "radius": 14,
   "variant": "shipwreck",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "haafingar.L10.smugglers_coves",
+   "haafingar.L5.company_docks"
+  ]
  },
  {
   "id": "skytemple_ruins",
@@ -607,7 +651,11 @@
   "z": -2046,
   "radius": 12,
   "variant": "nordic_ruin",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
  },
  {
   "id": "ysgramors_tomb",
@@ -620,7 +668,11 @@
   "radius": 28,
   "variant": "ysgramors_tomb",
   "shout": "animal_allegiance",
-  "class": "marquee"
+  "class": "marquee",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
  },
  {
   "id": "lower_steepfall_burrow",
@@ -632,7 +684,11 @@
   "z": -2025,
   "radius": 18,
   "variant": "troll_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
  },
  {
   "id": "wreck_of_the_brinehammer",
@@ -644,7 +700,11 @@
   "z": -2010,
   "radius": 14,
   "variant": "shipwreck",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
  },
  {
   "id": "pilgrims_trench",
@@ -656,7 +716,11 @@
   "z": -1984,
   "radius": 14,
   "variant": "shipwreck",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "winterhold.L5.wreck_salvage",
+   "winterhold.L1.ice_floes"
+  ]
  },
  {
   "id": "northwatch_keep",
@@ -668,7 +732,11 @@
   "z": -1980,
   "radius": 22,
   "variant": "fort",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
  },
  {
   "id": "yngvild",
@@ -680,7 +748,11 @@
   "z": -1948,
   "radius": 18,
   "variant": "cave",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
  },
  {
   "id": "steepfall_burrow",
@@ -692,7 +764,11 @@
   "z": -1941,
   "radius": 18,
   "variant": "den",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
  },
  {
   "id": "fort_hraggstad",
@@ -704,7 +780,11 @@
   "z": -1927,
   "radius": 22,
   "variant": "fort",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
  },
  {
   "id": "ironback_hideout",
@@ -716,7 +796,11 @@
   "z": -1904,
   "radius": 10,
   "variant": "cabin",
-  "class": "unmarked"
+  "class": "unmarked",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
  },
  {
   "id": "wreck_of_the_icerunner",
@@ -728,7 +812,11 @@
   "z": -1847,
   "radius": 14,
   "variant": "shipwreck",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "hjaalmarch.L10.wreck_on_the_flats",
+   "hjaalmarch.L1.low_coast"
+  ]
  },
  {
   "id": "wolfskull_cave",
@@ -740,7 +828,11 @@
   "z": -1820,
   "radius": 18,
   "variant": "necromancer_lair",
-  "class": "marquee"
+  "class": "marquee",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
  },
  {
   "id": "wreck_of_the_pride_of_tel_vos",
@@ -752,7 +844,11 @@
   "z": -1818,
   "radius": 14,
   "variant": "shipwreck",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "winterhold.L5.wreck_salvage",
+   "winterhold.L1.ice_floes"
+  ]
  },
  {
   "id": "the_katariah",
@@ -764,7 +860,11 @@
   "z": -1817,
   "radius": 14,
   "variant": "shipwreck",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "haafingar.L10.smugglers_coves",
+   "haafingar.L5.company_docks"
+  ]
  },
  {
   "id": "high_gate_ruins",
@@ -777,7 +877,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "storm_call",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "hjaalmarch.L10.bromjunaar_maze",
+   "hjaalmarch.L10.voice_tomb"
+  ]
  },
  {
   "id": "rimerock_burrow",
@@ -789,7 +893,11 @@
   "z": -1789,
   "radius": 18,
   "variant": "necromancer_lair",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
  },
  {
   "id": "lost_echo_cave",
@@ -801,19 +909,27 @@
   "z": -1726,
   "radius": 20,
   "variant": "falmer_cave",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
  },
  {
   "id": "nightcaller_temple",
   "name": "place.skycraft.nightcaller_temple",
   "type": "fort",
   "culture": "imperial",
-  "region": "skyrim/winterhold",
+  "region": "skyrim/the_pale",
   "x": 328,
   "z": -1722,
   "radius": 22,
   "variant": "fort_mage",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_pale.L10.nightmare_temple",
+   "the_pale.L8.dream_dread"
+  ]
  },
  {
   "id": "pale_imperial_camp",
@@ -825,7 +941,11 @@
   "z": -1722,
   "radius": 18,
   "variant": "imperial_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_pale.L9.rebel_jarl",
+   "skyrim.L9.civil_war"
+  ]
  },
  {
   "id": "pinefrost_tower",
@@ -837,7 +957,11 @@
   "z": -1692,
   "radius": 12,
   "variant": "watchtower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
  },
  {
   "id": "statue_to_meridia",
@@ -848,7 +972,11 @@
   "x": -1806,
   "z": -1689,
   "radius": 26,
-  "variant": "meridia_great"
+  "variant": "meridia_great",
+  "why": [
+   "haafingar.L8.meridia_light",
+   "skyrim.L8.daedric_wilds"
+  ]
  },
  {
   "id": "clearpine_pond",
@@ -859,7 +987,11 @@
   "x": -2036,
   "z": -1640,
   "radius": 12,
-  "variant": "clearing"
+  "variant": "clearing",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
  },
  {
   "id": "hobs_fall_cave",
@@ -871,7 +1003,11 @@
   "z": -1640,
   "radius": 18,
   "variant": "necromancer_lair",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
  },
  {
   "id": "winterhold_imperial_camp",
@@ -883,7 +1019,11 @@
   "z": -1632,
   "radius": 18,
   "variant": "imperial_camp",
-  "class": "minor"
+  "class": "short",
+  "why": [
+   "winterhold.L9.rebel_jarl",
+   "skyrim.L9.civil_war"
+  ]
  },
  {
   "id": "abandoned_shack",
@@ -895,7 +1035,11 @@
   "z": -1605,
   "radius": 10,
   "variant": "cabin",
-  "class": "unmarked"
+  "class": "unmarked",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
  },
  {
   "id": "windward_ruins",
@@ -907,7 +1051,11 @@
   "z": -1585,
   "radius": 12,
   "variant": "nordic_ruin",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
  },
  {
   "id": "pinemoon_cave",
@@ -919,20 +1067,28 @@
   "z": -1583,
   "radius": 18,
   "variant": "bandit_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "haafingar.L10.smugglers_coves",
+   "haafingar.L1.sea_caves"
+  ]
  },
  {
   "id": "volskygge",
   "name": "place.skycraft.volskygge",
   "type": "dungeon_fixed",
   "culture": "nord",
-  "region": "skyrim/the_reach",
+  "region": "skyrim/haafingar",
   "x": -2381,
   "z": -1581,
   "radius": 26,
   "variant": "barrow",
   "shout": "whirlwind_sprint",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "haafingar.L10.wolf_queen_catacombs",
+   "skyrim.L10.draugr_barrows"
+  ]
  },
  {
   "id": "saarthal",
@@ -945,7 +1101,11 @@
   "radius": 28,
   "variant": "saarthal",
   "shout": "ice_form",
-  "class": "marquee"
+  "class": "marquee",
+  "why": [
+   "winterhold.L10.saarthal_eye",
+   "winterhold.L11.saarthal"
+  ]
  },
  {
   "id": "folgunthur",
@@ -958,7 +1118,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "frost_breath",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "hjaalmarch.L10.bromjunaar_maze",
+   "hjaalmarch.L10.voice_tomb"
+  ]
  },
  {
   "id": "bleakcoast_cave",
@@ -970,7 +1134,11 @@
   "z": -1560,
   "radius": 18,
   "variant": "den",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
  },
  {
   "id": "haafingar_stormcloak_camp",
@@ -982,7 +1150,11 @@
   "z": -1539,
   "radius": 18,
   "variant": "stormcloak_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "haafingar.L9.imperial_seat",
+   "skyrim.L9.civil_war"
+  ]
  },
  {
   "id": "frostflow_lighthouse",
@@ -994,7 +1166,11 @@
   "z": -1528,
   "radius": 10,
   "variant": "lighthouse",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "winterhold.L10.falmer_pit",
+   "winterhold.L5.wreck_salvage"
+  ]
  },
  {
   "id": "ustengrav",
@@ -1007,7 +1183,11 @@
   "radius": 28,
   "variant": "ustengrav",
   "shout": "become_ethereal",
-  "class": "marquee"
+  "class": "marquee",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
  },
  {
   "id": "hjaalmarch_stormcloak_camp",
@@ -1019,7 +1199,11 @@
   "z": -1458,
   "radius": 18,
   "variant": "stormcloak_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "hjaalmarch.L9.jarl_apart",
+   "skyrim.L9.civil_war"
+  ]
  },
  {
   "id": "mzinchaleft",
@@ -1031,7 +1215,11 @@
   "z": -1449,
   "radius": 32,
   "variant": "dwemer_ruin",
-  "class": "major"
+  "class": "marquee",
+  "why": [
+   "the_pale.L1.dwemer_cluster",
+   "the_pale.L10.great_lifts"
+  ]
  },
  {
   "id": "deepwood_redoubt",
@@ -1044,7 +1232,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "slow_time",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_reach.L11.reach_kingdom",
+   "skyrim.L10.draugr_barrows"
+  ]
  },
  {
   "id": "journeymans_nook",
@@ -1056,7 +1248,11 @@
   "z": -1389,
   "radius": 12,
   "variant": "nordic_ruin",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
  },
  {
   "id": "red_road_pass",
@@ -1068,7 +1264,11 @@
   "z": -1381,
   "radius": 16,
   "variant": "giant_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_pale.L4.snowfield",
+   "the_pale.L1.snow_highland"
+  ]
  },
  {
   "id": "driftshade_refuge",
@@ -1080,7 +1280,11 @@
   "z": -1379,
   "radius": 22,
   "variant": "fort",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
  },
  {
   "id": "hjaalmarch_imperial_camp",
@@ -1092,7 +1296,11 @@
   "z": -1378,
   "radius": 18,
   "variant": "imperial_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "hjaalmarch.L9.jarl_apart",
+   "skyrim.L9.civil_war"
+  ]
  },
  {
   "id": "sightless_pit",
@@ -1104,7 +1312,11 @@
   "z": -1365,
   "radius": 20,
   "variant": "falmer_cave",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "winterhold.L10.falmer_pit",
+   "winterhold.L4.blind_hunters"
+  ]
  },
  {
   "id": "great_lift_at_mzinchaleft",
@@ -1116,7 +1328,11 @@
   "z": -1357,
   "radius": 10,
   "variant": "great_lift",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_pale.L10.great_lifts",
+   "the_pale.L11.dwemer_lifts"
+  ]
  },
  {
   "id": "shrine_of_azura",
@@ -1127,7 +1343,11 @@
   "x": 1451,
   "z": -1351,
   "radius": 26,
-  "variant": "azura_great"
+  "variant": "azura_great",
+  "why": [
+   "winterhold.L8.azura_statue",
+   "skyrim.L8.daedric_wilds"
+  ]
  },
  {
   "id": "alftand",
@@ -1139,7 +1359,11 @@
   "z": -1345,
   "radius": 32,
   "variant": "dwemer_ruin",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "winterhold.L10.glacier_dwemer",
+   "skyrim.L1.dwemer_bedrock"
+  ]
  },
  {
   "id": "movarths_lair",
@@ -1151,7 +1375,11 @@
   "z": -1343,
   "radius": 18,
   "variant": "vampire_lair",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "hjaalmarch.L10.marsh_vampires",
+   "hjaalmarch.L9.vampire_fear"
+  ]
  },
  {
   "id": "whistling_mine",
@@ -1163,7 +1391,11 @@
   "z": -1333,
   "radius": 20,
   "variant": "mine",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
  },
  {
   "id": "meekos_shack",
@@ -1175,7 +1407,11 @@
   "z": -1326,
   "radius": 10,
   "variant": "cabin",
-  "class": "unmarked"
+  "class": "unmarked",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
  },
  {
   "id": "darkfall_cave",
@@ -1187,7 +1423,11 @@
   "z": -1267,
   "radius": 20,
   "variant": "falmer_cave",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "kjenstag_ruins",
@@ -1199,7 +1439,11 @@
   "z": -1263,
   "radius": 12,
   "variant": "nordic_ruin",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
  },
  {
   "id": "snow_veil_sanctum",
@@ -1212,7 +1456,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "disarm",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "winterhold.L10.saarthal_eye",
+   "winterhold.L10.harbingers_tomb"
+  ]
  },
  {
   "id": "frostmere_crypt",
@@ -1225,7 +1473,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "ice_form",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_pale.L1.crown_barrow",
+   "the_pale.L11.jagged_crown"
+  ]
  },
  {
   "id": "fort_fellhammer",
@@ -1237,7 +1489,11 @@
   "z": -1242,
   "radius": 22,
   "variant": "fort",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
  },
  {
   "id": "snowpoint_beacon",
@@ -1249,7 +1505,11 @@
   "z": -1239,
   "radius": 12,
   "variant": "watchtower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
  },
  {
   "id": "fort_snowhawk",
@@ -1261,7 +1521,11 @@
   "z": -1222,
   "radius": 22,
   "variant": "fort",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "hjaalmarch.L6.hjaal_road",
+   "skyrim.L9.civil_war"
+  ]
  },
  {
   "id": "dragon_bridge_overlook",
@@ -1273,19 +1537,27 @@
   "z": -1204,
   "radius": 14,
   "variant": "bandit_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "forebears_holdout",
   "name": "place.skycraft.forebears_holdout",
   "type": "dungeon_fixed",
   "culture": "nord",
-  "region": "skyrim/hjaalmarch",
+  "region": "skyrim/haafingar",
   "x": -1666,
   "z": -1197,
   "radius": 18,
   "variant": "den",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
  },
  {
   "id": "mount_anthor",
@@ -1298,7 +1570,11 @@
   "radius": 16,
   "variant": "dragon_lair",
   "shout": "ice_form",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
  },
  {
   "id": "hall_of_the_vigilant",
@@ -1310,7 +1586,11 @@
   "z": -1184,
   "radius": 10,
   "variant": "cabin",
-  "class": "unmarked"
+  "class": "unmarked",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
  },
  {
   "id": "wreck_of_the_winter_war",
@@ -1322,7 +1602,11 @@
   "z": -1156,
   "radius": 14,
   "variant": "shipwreck",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "winterhold.L5.wreck_salvage",
+   "winterhold.L1.ice_floes"
+  ]
  },
  {
   "id": "dimhollow_crypt",
@@ -1335,7 +1619,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "drain_vitality",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "hjaalmarch.L10.bromjunaar_maze",
+   "hjaalmarch.L10.voice_tomb"
+  ]
  },
  {
   "id": "stillborn_cave",
@@ -1347,7 +1635,11 @@
   "z": -1134,
   "radius": 18,
   "variant": "ice_cave",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
  },
  {
   "id": "brucas_leap_redoubt",
@@ -1359,7 +1651,11 @@
   "z": -1126,
   "radius": 18,
   "variant": "forsworn_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "the_reach.L10.forsworn_redoubts",
+   "the_reach.L9.native_uprising"
+  ]
  },
  {
   "id": "wayward_pass",
@@ -1370,7 +1666,11 @@
   "x": 891,
   "z": -1113,
   "radius": 12,
-  "variant": "pass"
+  "variant": "pass",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
  },
  {
   "id": "fort_dunstad",
@@ -1382,7 +1682,11 @@
   "z": -1096,
   "radius": 22,
   "variant": "fort",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
  },
  {
   "id": "deep_folk_crossing",
@@ -1393,7 +1697,11 @@
   "x": -2993,
   "z": -1060,
   "radius": 12,
-  "variant": "bridge"
+  "variant": "bridge",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "duskglow_crevice",
@@ -1405,7 +1713,11 @@
   "z": -1059,
   "radius": 20,
   "variant": "falmer_cave",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
  },
  {
   "id": "druadach_redoubt",
@@ -1417,7 +1729,11 @@
   "z": -1051,
   "radius": 18,
   "variant": "forsworn_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "the_reach.L10.forsworn_redoubts",
+   "the_reach.L9.native_uprising"
+  ]
  },
  {
   "id": "chillwind_depths",
@@ -1429,20 +1745,28 @@
   "z": -1043,
   "radius": 20,
   "variant": "falmer_cave",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "ironbind_barrow",
   "name": "place.skycraft.ironbind_barrow",
   "type": "dungeon_fixed",
   "culture": "nord",
-  "region": "skyrim/the_pale",
+  "region": "skyrim/winterhold",
   "x": 805,
   "z": -1024,
   "radius": 26,
   "variant": "barrow",
   "shout": "become_ethereal",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "winterhold.L10.saarthal_eye",
+   "winterhold.L10.harbingers_tomb"
+  ]
  },
  {
   "id": "cliffside_retreat",
@@ -1454,7 +1778,11 @@
   "z": -1017,
   "radius": 10,
   "variant": "cabin",
-  "class": "unmarked"
+  "class": "unmarked",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "great_lift_at_alftand",
@@ -1466,7 +1794,11 @@
   "z": -997,
   "radius": 10,
   "variant": "great_lift",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_pale.L10.great_lifts",
+   "the_pale.L11.dwemer_lifts"
+  ]
  },
  {
   "id": "harmugstahl",
@@ -1478,7 +1810,11 @@
   "z": -996,
   "radius": 22,
   "variant": "fort_mage",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "winterhold_stormcloak_camp",
@@ -1490,7 +1826,11 @@
   "z": -992,
   "radius": 18,
   "variant": "stormcloak_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "winterhold.L9.rebel_jarl",
+   "skyrim.L9.civil_war"
+  ]
  },
  {
   "id": "fort_kastav",
@@ -1502,7 +1842,11 @@
   "z": -970,
   "radius": 22,
   "variant": "fort",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
  },
  {
   "id": "silverdrift_lair",
@@ -1515,7 +1859,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "disarm",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_pale.L1.crown_barrow",
+   "the_pale.L11.jagged_crown"
+  ]
  },
  {
   "id": "yorgrim_overlook",
@@ -1527,7 +1875,11 @@
   "z": -959,
   "radius": 12,
   "variant": "nordic_ruin",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
  },
  {
   "id": "dead_mens_respite",
@@ -1540,7 +1892,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "whirlwind_sprint",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "hjaalmarch.L10.bromjunaar_maze",
+   "hjaalmarch.L10.voice_tomb"
+  ]
  },
  {
   "id": "shrine_of_mehrunes_dagon",
@@ -1551,7 +1907,11 @@
   "x": -325,
   "z": -938,
   "radius": 12,
-  "variant": "mehrunes_dagon"
+  "variant": "mehrunes_dagon",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
  },
  {
   "id": "liars_retreat",
@@ -1563,7 +1923,11 @@
   "z": -923,
   "radius": 18,
   "variant": "bandit_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "forsaken_cave",
@@ -1576,7 +1940,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "marked_for_death",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_pale.L1.crown_barrow",
+   "the_pale.L11.jagged_crown"
+  ]
  },
  {
   "id": "reach_stormcloak_camp",
@@ -1588,7 +1956,11 @@
   "z": -915,
   "radius": 18,
   "variant": "stormcloak_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_reach.L9.imperial_jarl",
+   "skyrim.L9.civil_war"
+  ]
  },
  {
   "id": "dragontooth_crater",
@@ -1601,7 +1973,11 @@
   "radius": 16,
   "variant": "dragon_lair",
   "shout": "elemental_fury",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "skyborn_altar",
@@ -1614,7 +1990,11 @@
   "radius": 16,
   "variant": "dragon_lair",
   "shout": "frost_breath",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
  },
  {
   "id": "robbers_gorge",
@@ -1626,7 +2006,11 @@
   "z": -868,
   "radius": 14,
   "variant": "bandit_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
  },
  {
   "id": "yngol_barrow",
@@ -1638,7 +2022,11 @@
   "z": -867,
   "radius": 26,
   "variant": "barrow",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "eastmarch.L11.ysgramor_city",
+   "skyrim.L10.draugr_barrows"
+  ]
  },
  {
   "id": "weynon_stones",
@@ -1649,7 +2037,11 @@
   "x": 392,
   "z": -863,
   "radius": 12,
-  "variant": "stones"
+  "variant": "stones",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
  },
  {
   "id": "lost_valkygg",
@@ -1661,7 +2053,11 @@
   "z": -860,
   "radius": 12,
   "variant": "nordic_ruin",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
  },
  {
   "id": "bthardamz",
@@ -1673,7 +2069,11 @@
   "z": -845,
   "radius": 32,
   "variant": "dwemer_ruin",
-  "class": "marquee"
+  "class": "marquee",
+  "why": [
+   "the_reach.L10.dwemer_depths",
+   "the_reach.L1.dwemer_city_rock"
+  ]
  },
  {
   "id": "tower_of_mzark",
@@ -1685,7 +2085,11 @@
   "z": -842,
   "radius": 12,
   "variant": "mzark",
-  "class": "marquee"
+  "class": "marquee",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
  },
  {
   "id": "crabbers_shanty",
@@ -1697,7 +2101,11 @@
   "z": -817,
   "radius": 10,
   "variant": "cabin",
-  "class": "unmarked"
+  "class": "unmarked",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
  },
  {
   "id": "stonehill_bluff",
@@ -1709,19 +2117,27 @@
   "z": -812,
   "radius": 16,
   "variant": "giant_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
  },
  {
   "id": "brood_cavern",
   "name": "place.skycraft.brood_cavern",
   "type": "dungeon_fixed",
   "culture": "nord",
-  "region": "skyrim/whiterun",
+  "region": "skyrim/hjaalmarch",
   "x": -1190,
   "z": -807,
   "radius": 18,
   "variant": "spider_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
  },
  {
   "id": "shrouded_grove",
@@ -1733,7 +2149,11 @@
   "z": -800,
   "radius": 16,
   "variant": "grove",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
  },
  {
   "id": "bronze_water_cave",
@@ -1745,7 +2165,11 @@
   "z": -796,
   "radius": 18,
   "variant": "den",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
  },
  {
   "id": "labyrinthian",
@@ -1758,7 +2182,11 @@
   "radius": 60,
   "variant": "labyrinthian",
   "shout": "dismay",
-  "class": "marquee"
+  "class": "marquee",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
  },
  {
   "id": "broken_tower_redoubt",
@@ -1770,7 +2198,11 @@
   "z": -753,
   "radius": 22,
   "variant": "fort_forsworn",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "shrine_to_peryite",
@@ -1781,7 +2213,11 @@
   "x": -2619,
   "z": -748,
   "radius": 12,
-  "variant": "peryite"
+  "variant": "peryite",
+  "why": [
+   "the_reach.L10.dead_eaters",
+   "the_reach.L8.dead_hall_cult"
+  ]
  },
  {
   "id": "blizzard_rest",
@@ -1793,7 +2229,11 @@
   "z": -742,
   "radius": 16,
   "variant": "giant_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_pale.L4.snowfield",
+   "the_pale.L1.snow_highland"
+  ]
  },
  {
   "id": "north_cold_rock_pass",
@@ -1804,7 +2244,11 @@
   "x": -1068,
   "z": -715,
   "radius": 12,
-  "variant": "pass"
+  "variant": "pass",
+  "why": [
+   "whiterun.L1.tundra_plain",
+   "whiterun.L6.whiterun_seat"
+  ]
  },
  {
   "id": "traitors_post",
@@ -1816,7 +2260,11 @@
   "z": -713,
   "radius": 10,
   "variant": "cabin",
-  "class": "unmarked"
+  "class": "unmarked",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
  },
  {
   "id": "refugees_rest",
@@ -1828,32 +2276,44 @@
   "z": -713,
   "radius": 12,
   "variant": "watchtower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
  },
  {
   "id": "orotheim",
   "name": "place.skycraft.orotheim",
   "type": "dungeon_fixed",
   "culture": "nord",
-  "region": "skyrim/whiterun",
+  "region": "skyrim/hjaalmarch",
   "x": -1388,
   "z": -704,
   "radius": 18,
   "variant": "bandit_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
  },
  {
   "id": "eldersblood_peak",
   "name": "place.skycraft.eldersblood_peak",
   "type": "dungeon_fixed",
   "culture": "nord",
-  "region": "skyrim/whiterun",
+  "region": "skyrim/hjaalmarch",
   "x": -971,
   "z": -688,
   "radius": 16,
   "variant": "dragon_lair",
   "shout": "disarm",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
  },
  {
   "id": "reach_imperial_camp",
@@ -1865,7 +2325,11 @@
   "z": -680,
   "radius": 18,
   "variant": "imperial_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_reach.L9.imperial_jarl",
+   "skyrim.L9.civil_war"
+  ]
  },
  {
   "id": "pale_stormcloak_camp",
@@ -1877,7 +2341,11 @@
   "z": -676,
   "radius": 18,
   "variant": "stormcloak_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_pale.L9.rebel_jarl",
+   "skyrim.L9.civil_war"
+  ]
  },
  {
   "id": "korvanjund",
@@ -1890,7 +2358,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "slow_time",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_pale.L1.crown_barrow",
+   "the_pale.L11.jagged_crown"
+  ]
  },
  {
   "id": "south_cold_rock_pass",
@@ -1901,7 +2373,11 @@
   "x": -1068,
   "z": -627,
   "radius": 12,
-  "variant": "pass"
+  "variant": "pass",
+  "why": [
+   "whiterun.L1.tundra_plain",
+   "whiterun.L6.whiterun_seat"
+  ]
  },
  {
   "id": "volunruud",
@@ -1914,7 +2390,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "aura_whisper",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_pale.L1.crown_barrow",
+   "the_pale.L11.jagged_crown"
+  ]
  },
  {
   "id": "tumble_arch_pass",
@@ -1926,7 +2406,11 @@
   "z": -606,
   "radius": 16,
   "variant": "giant_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_pale.L4.snowfield",
+   "the_pale.L1.snow_highland"
+  ]
  },
  {
   "id": "great_lift_at_raldbthar",
@@ -1938,7 +2422,11 @@
   "z": -564,
   "radius": 10,
   "variant": "great_lift",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_pale.L10.great_lifts",
+   "the_pale.L11.dwemer_lifts"
+  ]
  },
  {
   "id": "sundered_towers",
@@ -1950,7 +2438,11 @@
   "z": -560,
   "radius": 12,
   "variant": "forsworn_tower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_reach.L10.forsworn_redoubts",
+   "the_reach.L9.native_uprising"
+  ]
  },
  {
   "id": "drelas_cottage",
@@ -1962,7 +2454,11 @@
   "z": -545,
   "radius": 10,
   "variant": "cabin",
-  "class": "unmarked"
+  "class": "unmarked",
+  "why": [
+   "whiterun.L1.tundra_plain",
+   "whiterun.L6.whiterun_seat"
+  ]
  },
  {
   "id": "sacellum_of_boethiah",
@@ -1973,7 +2469,11 @@
   "x": 2252,
   "z": -541,
   "radius": 12,
-  "variant": "boethiah"
+  "variant": "boethiah",
+  "why": [
+   "eastmarch.L8.boethiah_cult",
+   "skyrim.L8.daedric_wilds"
+  ]
  },
  {
   "id": "ragnvald",
@@ -1986,7 +2486,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "kynes_peace",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_reach.L11.reach_kingdom",
+   "skyrim.L10.draugr_barrows"
+  ]
  },
  {
   "id": "irkngthand",
@@ -1998,7 +2502,11 @@
   "z": -538,
   "radius": 32,
   "variant": "dwemer_ruin",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_pale.L1.dwemer_cluster",
+   "the_pale.L10.great_lifts"
+  ]
  },
  {
   "id": "rannveigs_fast",
@@ -2011,7 +2519,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "kynes_peace",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "whiterun.L1.ridge_barrows",
+   "skyrim.L10.draugr_barrows"
+  ]
  },
  {
   "id": "blind_cliff_cave",
@@ -2023,7 +2535,11 @@
   "z": -491,
   "radius": 18,
   "variant": "hagraven_lair",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "the_reach.L10.hagraven_covens",
+   "the_reach.L8.old_gods"
+  ]
  },
  {
   "id": "rebels_cairn",
@@ -2035,7 +2551,11 @@
   "z": -486,
   "radius": 26,
   "variant": "barrow",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_reach.L11.reach_kingdom",
+   "skyrim.L10.draugr_barrows"
+  ]
  },
  {
   "id": "four_skull_lookout",
@@ -2047,19 +2567,27 @@
   "z": -473,
   "radius": 12,
   "variant": "nordic_ruin",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "talking_stone_camp",
   "name": "place.skycraft.talking_stone_camp",
   "type": "dungeon_fixed",
   "culture": "giant",
-  "region": "skyrim/whiterun",
+  "region": "skyrim/hjaalmarch",
   "x": -1437,
   "z": -458,
   "radius": 16,
   "variant": "giant_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
  },
  {
   "id": "hamvirs_rest",
@@ -2071,19 +2599,27 @@
   "z": -452,
   "radius": 12,
   "variant": "nordic_ruin",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "whiterun.L1.tundra_plain",
+   "whiterun.L6.whiterun_seat"
+  ]
  },
  {
   "id": "uttering_hills_cave",
   "name": "place.skycraft.uttering_hills_cave",
   "type": "dungeon_fixed",
   "culture": "nord",
-  "region": "skyrim/the_pale",
+  "region": "skyrim/eastmarch",
   "x": 1329,
   "z": -439,
   "radius": 18,
   "variant": "bandit_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "eastmarch.L10.bandit_mine_camps",
+   "skyrim.L10.bandits_on_roads"
+  ]
  },
  {
   "id": "shearpoint",
@@ -2096,7 +2632,11 @@
   "radius": 16,
   "variant": "dragon_lair",
   "shout": "throw_voice",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
  },
  {
   "id": "morvunskar",
@@ -2108,7 +2648,11 @@
   "z": -425,
   "radius": 22,
   "variant": "fort_mage",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
  },
  {
   "id": "halted_stream_camp",
@@ -2120,7 +2664,11 @@
   "z": -418,
   "radius": 14,
   "variant": "bandit_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "whiterun.L10.toll_bandits",
+   "skyrim.L10.bandits_on_roads"
+  ]
  },
  {
   "id": "dustmans_cairn",
@@ -2133,7 +2681,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "fire_breath",
-  "class": "marquee"
+  "class": "marquee",
+  "why": [
+   "whiterun.L1.ridge_barrows",
+   "skyrim.L10.draugr_barrows"
+  ]
  },
  {
   "id": "raldbthar",
@@ -2145,7 +2697,11 @@
   "z": -403,
   "radius": 32,
   "variant": "dwemer_ruin",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_pale.L1.dwemer_cluster",
+   "the_pale.L10.great_lifts"
+  ]
  },
  {
   "id": "lunds_hut",
@@ -2157,7 +2713,11 @@
   "z": -396,
   "radius": 10,
   "variant": "cabin",
-  "class": "unmarked"
+  "class": "unmarked",
+  "why": [
+   "whiterun.L1.tundra_plain",
+   "whiterun.L6.whiterun_seat"
+  ]
  },
  {
   "id": "silent_moons_camp",
@@ -2169,7 +2729,11 @@
   "z": -369,
   "radius": 14,
   "variant": "bandit_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "whiterun.L10.toll_bandits",
+   "skyrim.L10.bandits_on_roads"
+  ]
  },
  {
   "id": "red_eagle_redoubt",
@@ -2181,7 +2745,11 @@
   "z": -364,
   "radius": 18,
   "variant": "forsworn_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "the_reach.L10.forsworn_redoubts",
+   "the_reach.L9.native_uprising"
+  ]
  },
  {
   "id": "greenspring_hollow",
@@ -2193,19 +2761,27 @@
   "z": -358,
   "radius": 16,
   "variant": "grove",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "whiterun.L1.tundra_plain",
+   "whiterun.L6.whiterun_seat"
+  ]
  },
  {
   "id": "bleakwind_bluff",
   "name": "place.skycraft.bleakwind_bluff",
   "type": "dungeon_fixed",
   "culture": "forsworn",
-  "region": "skyrim/whiterun",
+  "region": "skyrim/the_reach",
   "x": -1987,
   "z": -348,
   "radius": 12,
   "variant": "forsworn_tower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_reach.L10.forsworn_redoubts",
+   "the_reach.L9.native_uprising"
+  ]
  },
  {
   "id": "kolskeggr_mine",
@@ -2217,7 +2793,11 @@
   "z": -343,
   "radius": 26,
   "variant": "kolskeggr_mine",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "whitewatch_tower",
@@ -2229,7 +2809,11 @@
   "z": -323,
   "radius": 12,
   "variant": "watchtower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "whiterun.L11.watchtower_attack",
+   "whiterun.L11.valtheim_towers"
+  ]
  },
  {
   "id": "shimmermist_cave",
@@ -2241,7 +2825,11 @@
   "z": -283,
   "radius": 20,
   "variant": "falmer_cave",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "skyrim.L10.falmer_below",
+   "skyrim.L1.dwemer_bedrock"
+  ]
  },
  {
   "id": "karthspire_camp",
@@ -2253,7 +2841,11 @@
   "z": -266,
   "radius": 14,
   "variant": "forsworn_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_reach.L10.forsworn_redoubts",
+   "the_reach.L9.native_uprising"
+  ]
  },
  {
   "id": "fellglow_keep",
@@ -2265,7 +2857,11 @@
   "z": -264,
   "radius": 22,
   "variant": "fort_mage",
-  "class": "major"
+  "class": "marquee",
+  "why": [
+   "whiterun.L10.fire_mage_keep",
+   "skyrim.L8.distrust_of_magic"
+  ]
  },
  {
   "id": "maras_eye_pond",
@@ -2276,7 +2872,11 @@
   "x": 1405,
   "z": -256,
   "radius": 12,
-  "variant": "clearing"
+  "variant": "clearing",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
  },
  {
   "id": "redorans_retreat",
@@ -2288,7 +2888,11 @@
   "z": -232,
   "radius": 18,
   "variant": "bandit_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "whiterun.L10.toll_bandits",
+   "skyrim.L10.bandits_on_roads"
+  ]
  },
  {
   "id": "riverside_shack",
@@ -2300,7 +2904,11 @@
   "z": -226,
   "radius": 10,
   "variant": "cabin",
-  "class": "unmarked"
+  "class": "unmarked",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
  },
  {
   "id": "karthspire",
@@ -2312,7 +2920,11 @@
   "z": -223,
   "radius": 14,
   "variant": "forsworn_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_reach.L10.forsworn_redoubts",
+   "the_reach.L9.native_uprising"
+  ]
  },
  {
   "id": "gallows_rock",
@@ -2324,7 +2936,11 @@
   "z": -211,
   "radius": 22,
   "variant": "fort",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
  },
  {
   "id": "gloombound_mine",
@@ -2336,7 +2952,11 @@
   "z": -200,
   "radius": 20,
   "variant": "mine",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
  },
  {
   "id": "moldering_ruins",
@@ -2348,7 +2968,11 @@
   "z": -199,
   "radius": 12,
   "variant": "nordic_ruin",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "whiterun.L1.tundra_plain",
+   "whiterun.L6.whiterun_seat"
+  ]
  },
  {
   "id": "whiterun_imperial_camp",
@@ -2360,7 +2984,11 @@
   "z": -156,
   "radius": 18,
   "variant": "imperial_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "whiterun.L9.siege_point",
+   "skyrim.L9.civil_war"
+  ]
  },
  {
   "id": "swindlers_den",
@@ -2372,7 +3000,11 @@
   "z": -151,
   "radius": 18,
   "variant": "bandit_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "whiterun.L10.toll_bandits",
+   "skyrim.L10.bandits_on_roads"
+  ]
  },
  {
   "id": "bleakwind_basin",
@@ -2384,7 +3016,11 @@
   "z": -138,
   "radius": 16,
   "variant": "giant_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "whiterun.L10.giant_camps",
+   "whiterun.L4.giant_grounds"
+  ]
  },
  {
   "id": "left_hand_mine",
@@ -2396,7 +3032,11 @@
   "z": -113,
   "radius": 20,
   "variant": "mine",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "the_reach.L5.silver_mining",
+   "the_reach.L1.silver_veins"
+  ]
  },
  {
   "id": "valtheim_towers",
@@ -2408,7 +3048,11 @@
   "z": -101,
   "radius": 12,
   "variant": "nordic_tower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "whiterun.L1.tundra_plain",
+   "whiterun.L6.whiterun_seat"
+  ]
  },
  {
   "id": "darkshade",
@@ -2420,7 +3064,11 @@
   "z": -88,
   "radius": 18,
   "variant": "spriggan_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "whiterun.L1.tundra_plain",
+   "whiterun.L6.whiterun_seat"
+  ]
  },
  {
   "id": "cragwallow_slope",
@@ -2432,7 +3080,11 @@
   "z": -82,
   "radius": 18,
   "variant": "necromancer_lair",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
  },
  {
   "id": "graywinter_watch",
@@ -2444,7 +3096,11 @@
   "z": -79,
   "radius": 18,
   "variant": "troll_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "whiterun.L1.tundra_plain",
+   "whiterun.L6.whiterun_seat"
+  ]
  },
  {
   "id": "witchmist_grove",
@@ -2456,7 +3112,11 @@
   "z": -68,
   "radius": 16,
   "variant": "grove",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "eastmarch.L4.eldergleam",
+   "eastmarch.L11.eldergleam"
+  ]
  },
  {
   "id": "reachwater_rock",
@@ -2468,7 +3128,11 @@
   "z": -60,
   "radius": 26,
   "variant": "barrow",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_reach.L11.reach_kingdom",
+   "skyrim.L10.draugr_barrows"
+  ]
  },
  {
   "id": "cronvangr_cave",
@@ -2480,7 +3144,11 @@
   "z": -34,
   "radius": 18,
   "variant": "vampire_lair",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "eastmarch.L10.vampire_cave",
+   "skyrim.L9.vampire_war"
+  ]
  },
  {
   "id": "cradlecrush_rock",
@@ -2492,7 +3160,11 @@
   "z": -32,
   "radius": 16,
   "variant": "giant_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
  },
  {
   "id": "serpents_bluff_redoubt",
@@ -2504,7 +3176,11 @@
   "z": -25,
   "radius": 14,
   "variant": "forsworn_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_reach.L10.forsworn_redoubts",
+   "the_reach.L9.native_uprising"
+  ]
  },
  {
   "id": "fort_greymoor",
@@ -2516,7 +3192,11 @@
   "z": 16,
   "radius": 22,
   "variant": "fort",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "whiterun.L9.siege_point",
+   "skyrim.L9.civil_war"
+  ]
  },
  {
   "id": "gjukars_monument",
@@ -2527,7 +3207,11 @@
   "x": -1302,
   "z": 32,
   "radius": 12,
-  "variant": "monument"
+  "variant": "monument",
+  "why": [
+   "whiterun.L1.tundra_plain",
+   "whiterun.L6.whiterun_seat"
+  ]
  },
  {
   "id": "steamcrag_camp",
@@ -2539,7 +3223,11 @@
   "z": 40,
   "radius": 16,
   "variant": "giant_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
  },
  {
   "id": "guldun_rock",
@@ -2551,7 +3239,11 @@
   "z": 44,
   "radius": 16,
   "variant": "giant_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "whiterun.L10.giant_camps",
+   "whiterun.L4.giant_grounds"
+  ]
  },
  {
   "id": "reachcliff_cave",
@@ -2563,7 +3255,11 @@
   "z": 68,
   "radius": 26,
   "variant": "barrow",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_reach.L11.reach_kingdom",
+   "skyrim.L10.draugr_barrows"
+  ]
  },
  {
   "id": "bonestrewn_crest",
@@ -2576,7 +3272,11 @@
   "radius": 16,
   "variant": "dragon_lair",
   "shout": "frost_breath",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
  },
  {
   "id": "reachwind_eyrie",
@@ -2587,7 +3287,11 @@
   "x": -2530,
   "z": 86,
   "radius": 12,
-  "variant": "eyrie"
+  "variant": "eyrie",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "mzulft",
@@ -2599,7 +3303,11 @@
   "z": 93,
   "radius": 32,
   "variant": "dwemer_ruin",
-  "class": "marquee"
+  "class": "marquee",
+  "why": [
+   "eastmarch.L10.steam_ruin",
+   "eastmarch.L1.dwemer_vents"
+  ]
  },
  {
   "id": "broken_limb_camp",
@@ -2611,7 +3319,11 @@
   "z": 109,
   "radius": 16,
   "variant": "giant_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
  },
  {
   "id": "white_river_watch",
@@ -2623,7 +3335,11 @@
   "z": 115,
   "radius": 18,
   "variant": "bandit_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "whiterun.L10.toll_bandits",
+   "skyrim.L10.bandits_on_roads"
+  ]
  },
  {
   "id": "western_watchtower",
@@ -2635,7 +3351,11 @@
   "z": 115,
   "radius": 12,
   "variant": "watchtower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "whiterun.L11.watchtower_attack",
+   "whiterun.L11.valtheim_towers"
+  ]
  },
  {
   "id": "broken_fang_cave",
@@ -2647,7 +3367,11 @@
   "z": 119,
   "radius": 18,
   "variant": "vampire_lair",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "skyrim.L9.vampire_war",
+   "skyrim.L10.volkihar"
+  ]
  },
  {
   "id": "abandoned_prison",
@@ -2659,7 +3383,11 @@
   "z": 124,
   "radius": 12,
   "variant": "watchtower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
  },
  {
   "id": "whiterun_stormcloak_camp",
@@ -2671,7 +3399,11 @@
   "z": 140,
   "radius": 18,
   "variant": "stormcloak_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "whiterun.L9.siege_point",
+   "skyrim.L9.civil_war"
+  ]
  },
  {
   "id": "hag_rock_redoubt",
@@ -2683,7 +3415,11 @@
   "z": 154,
   "radius": 14,
   "variant": "forsworn_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_reach.L10.forsworn_redoubts",
+   "the_reach.L9.native_uprising"
+  ]
  },
  {
   "id": "hillgrunds_tomb",
@@ -2695,7 +3431,11 @@
   "z": 155,
   "radius": 26,
   "variant": "barrow",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "eastmarch.L11.ysgramor_city",
+   "skyrim.L10.draugr_barrows"
+  ]
  },
  {
   "id": "sleeping_tree_camp",
@@ -2707,7 +3447,11 @@
   "z": 170,
   "radius": 16,
   "variant": "giant_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "whiterun.L10.giant_camps",
+   "whiterun.L4.giant_grounds"
+  ]
  },
  {
   "id": "dead_crone_rock",
@@ -2719,7 +3463,11 @@
   "z": 185,
   "radius": 12,
   "variant": "forsworn_tower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_reach.L10.forsworn_redoubts",
+   "the_reach.L9.native_uprising"
+  ]
  },
  {
   "id": "eastmarch_imperial_camp",
@@ -2731,7 +3479,11 @@
   "z": 197,
   "radius": 18,
   "variant": "imperial_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "eastmarch.L9.rebel_capital",
+   "skyrim.L9.civil_war"
+  ]
  },
  {
   "id": "purewater_run",
@@ -2743,7 +3495,11 @@
   "z": 203,
   "radius": 18,
   "variant": "den",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "eldergleam_sanctuary",
@@ -2755,7 +3511,11 @@
   "z": 239,
   "radius": 16,
   "variant": "grove",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "eastmarch.L4.eldergleam",
+   "eastmarch.L11.eldergleam"
+  ]
  },
  {
   "id": "fort_amol",
@@ -2767,7 +3527,11 @@
   "z": 245,
   "radius": 22,
   "variant": "fort",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
  },
  {
   "id": "fort_sungard",
@@ -2779,7 +3543,11 @@
   "z": 270,
   "radius": 22,
   "variant": "fort",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "stony_creek_cave",
@@ -2791,7 +3559,11 @@
   "z": 276,
   "radius": 18,
   "variant": "bandit_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "eastmarch.L10.bandit_mine_camps",
+   "skyrim.L10.bandits_on_roads"
+  ]
  },
  {
   "id": "gloomreach",
@@ -2803,7 +3575,11 @@
   "z": 278,
   "radius": 20,
   "variant": "falmer_cave",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "secundas_kiss",
@@ -2815,7 +3591,11 @@
   "z": 327,
   "radius": 16,
   "variant": "giant_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "lost_knife_hideout",
@@ -2827,7 +3607,11 @@
   "z": 341,
   "radius": 18,
   "variant": "bandit_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "eastmarch.L10.bandit_mine_camps",
+   "skyrim.L10.bandits_on_roads"
+  ]
  },
  {
   "id": "kagrenzel",
@@ -2839,7 +3623,11 @@
   "z": 349,
   "radius": 32,
   "variant": "dwemer_ruin",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "eastmarch.L10.steam_ruin",
+   "eastmarch.L1.dwemer_vents"
+  ]
  },
  {
   "id": "valthume",
@@ -2852,7 +3640,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "aura_whisper",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_reach.L11.reach_kingdom",
+   "skyrim.L10.draugr_barrows"
+  ]
  },
  {
   "id": "arkngthamz",
@@ -2864,7 +3656,11 @@
   "z": 389,
   "radius": 32,
   "variant": "dwemer_ruin",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_reach.L10.dwemer_depths",
+   "the_reach.L1.dwemer_city_rock"
+  ]
  },
  {
   "id": "cradle_stone_tower",
@@ -2876,7 +3672,11 @@
   "z": 419,
   "radius": 12,
   "variant": "forsworn_tower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_reach.L10.forsworn_redoubts",
+   "the_reach.L9.native_uprising"
+  ]
  },
  {
   "id": "cragslane_cavern",
@@ -2888,7 +3688,11 @@
   "z": 422,
   "radius": 18,
   "variant": "bandit_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "eastmarch.L10.bandit_mine_camps",
+   "skyrim.L10.bandits_on_roads"
+  ]
  },
  {
   "id": "mistwatch",
@@ -2900,7 +3704,11 @@
   "z": 425,
   "radius": 22,
   "variant": "fort",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
  },
  {
   "id": "north_brittleshin_pass",
@@ -2912,7 +3720,11 @@
   "z": 426,
   "radius": 18,
   "variant": "skeever_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "ansilvund",
@@ -2924,7 +3736,11 @@
   "z": 440,
   "radius": 26,
   "variant": "barrow",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "eastmarch.L11.ysgramor_city",
+   "skyrim.L10.draugr_barrows"
+  ]
  },
  {
   "id": "bards_leap_summit",
@@ -2935,7 +3751,11 @@
   "x": -1769,
   "z": 453,
   "radius": 12,
-  "variant": "waterfall"
+  "variant": "waterfall",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "high_hrothgar",
@@ -2946,7 +3766,11 @@
   "x": 511,
   "z": 457,
   "radius": 42,
-  "variant": "high_hrothgar"
+  "variant": "high_hrothgar",
+  "why": [
+   "whiterun.L1.tundra_plain",
+   "whiterun.L6.whiterun_seat"
+  ]
  },
  {
   "id": "lost_valley_redoubt",
@@ -2958,7 +3782,11 @@
   "z": 464,
   "radius": 14,
   "variant": "forsworn_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_reach.L10.forsworn_redoubts",
+   "the_reach.L9.native_uprising"
+  ]
  },
  {
   "id": "bloated_mans_grotto",
@@ -2970,7 +3798,11 @@
   "z": 468,
   "radius": 16,
   "variant": "grove",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "falkreath.L4.spriggan_groves",
+   "falkreath.L4.old_pine"
+  ]
  },
  {
   "id": "sunderstone_gorge",
@@ -2983,7 +3815,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "fire_breath",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "falkreath.L10.barrow_above_riverwood",
+   "falkreath.L11.bleak_falls"
+  ]
  },
  {
   "id": "bilegulch_mine",
@@ -2995,7 +3831,11 @@
   "z": 521,
   "radius": 20,
   "variant": "mine",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "bleak_falls_barrow",
@@ -3008,7 +3848,11 @@
   "radius": 30,
   "variant": "bleak_falls_barrow",
   "shout": "unrelenting_force",
-  "class": "marquee"
+  "class": "marquee",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "northwind_mine",
@@ -3020,7 +3864,11 @@
   "z": 600,
   "radius": 20,
   "variant": "mine",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "darkwater_pass",
@@ -3032,7 +3880,11 @@
   "z": 619,
   "radius": 20,
   "variant": "falmer_cave",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_rift.L10.falmer_pass",
+   "the_rift.L4.falmer_caves"
+  ]
  },
  {
   "id": "tolvalds_cave",
@@ -3044,7 +3896,11 @@
   "z": 630,
   "radius": 20,
   "variant": "falmer_cave",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_rift.L10.falmer_pass",
+   "the_rift.L4.falmer_caves"
+  ]
  },
  {
   "id": "throat_of_the_world",
@@ -3056,7 +3912,11 @@
   "z": 652,
   "radius": 16,
   "variant": "throat_of_the_world",
-  "shout": "fire_breath"
+  "shout": "fire_breath",
+  "why": [
+   "whiterun.L1.tundra_plain",
+   "whiterun.L6.whiterun_seat"
+  ]
  },
  {
   "id": "ilinaltas_deep",
@@ -3068,7 +3928,11 @@
   "z": 661,
   "radius": 22,
   "variant": "fort_mage",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "moss_mother_cavern",
@@ -3080,7 +3944,11 @@
   "z": 673,
   "radius": 18,
   "variant": "spriggan_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "falkreath.L4.spriggan_groves",
+   "falkreath.L4.old_pine"
+  ]
  },
  {
   "id": "south_brittleshin_pass",
@@ -3092,7 +3960,11 @@
   "z": 680,
   "radius": 18,
   "variant": "skeever_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "shors_watchtower",
@@ -3104,7 +3976,11 @@
   "z": 693,
   "radius": 12,
   "variant": "watchtower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "falkreath_imperial_camp",
@@ -3116,7 +3992,11 @@
   "z": 700,
   "radius": 18,
   "variant": "imperial_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "falkreath.L9.imperial_border",
+   "skyrim.L9.civil_war"
+  ]
  },
  {
   "id": "anises_cabin",
@@ -3128,7 +4008,11 @@
   "z": 716,
   "radius": 10,
   "variant": "cabin",
-  "class": "unmarked"
+  "class": "unmarked",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "northwind_summit",
@@ -3141,7 +4025,11 @@
   "radius": 16,
   "variant": "dragon_lair",
   "shout": "aura_whisper",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_rift.L10.dragon_heights",
+   "skyrim.L9.dragon_crisis"
+  ]
  },
  {
   "id": "pinepeak_cavern",
@@ -3153,7 +4041,11 @@
   "z": 744,
   "radius": 18,
   "variant": "den",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "clearspring_tarn",
@@ -3164,7 +4056,11 @@
   "x": 1796,
   "z": 751,
   "radius": 12,
-  "variant": "clearing"
+  "variant": "clearing",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "hunters_rest",
@@ -3176,7 +4072,11 @@
   "z": 753,
   "radius": 10,
   "variant": "cabin",
-  "class": "unmarked"
+  "class": "unmarked",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "glenmoril_coven",
@@ -3188,7 +4088,11 @@
   "z": 761,
   "radius": 18,
   "variant": "hagraven_lair",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "falkreath.L10.coven",
+   "skyrim.L10.hagravens_and_witches"
+  ]
  },
  {
   "id": "snapleg_cave",
@@ -3200,7 +4104,11 @@
   "z": 762,
   "radius": 18,
   "variant": "hagraven_lair",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "embershard_mine",
@@ -3212,7 +4120,11 @@
   "z": 792,
   "radius": 20,
   "variant": "mine",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "nilheim",
@@ -3224,7 +4136,11 @@
   "z": 812,
   "radius": 12,
   "variant": "nordic_tower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "ruunvald_excavation",
@@ -3236,7 +4152,11 @@
   "z": 821,
   "radius": 18,
   "variant": "necromancer_lair",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "north_skybound_watch",
@@ -3248,7 +4168,11 @@
   "z": 848,
   "radius": 12,
   "variant": "nordic_ruin",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "bannermist_tower",
@@ -3260,7 +4184,11 @@
   "z": 867,
   "radius": 12,
   "variant": "nordic_tower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "shroud_hearth_barrow",
@@ -3273,7 +4201,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "kynes_peace",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_rift.L10.rahgot_barrow",
+   "the_rift.L11.forelhost_siege"
+  ]
  },
  {
   "id": "geirmunds_hall",
@@ -3285,7 +4217,11 @@
   "z": 906,
   "radius": 26,
   "variant": "barrow",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_rift.L10.rahgot_barrow",
+   "the_rift.L11.forelhost_siege"
+  ]
  },
  {
   "id": "rift_stormcloak_camp",
@@ -3297,7 +4233,11 @@
   "z": 913,
   "radius": 18,
   "variant": "stormcloak_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_rift.L9.rebel_leaning_jarl",
+   "skyrim.L9.civil_war"
+  ]
  },
  {
   "id": "rift_watchtower",
@@ -3309,7 +4249,11 @@
   "z": 930,
   "radius": 12,
   "variant": "watchtower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "knifepoint_ridge",
@@ -3321,7 +4265,11 @@
   "z": 942,
   "radius": 14,
   "variant": "bandit_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "falkreath.L10.pass_bandits",
+   "skyrim.L10.bandits_on_roads"
+  ]
  },
  {
   "id": "evergreen_grove",
@@ -3333,7 +4281,11 @@
   "z": 958,
   "radius": 16,
   "variant": "grove",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "falkreath.L4.spriggan_groves",
+   "falkreath.L4.old_pine"
+  ]
  },
  {
   "id": "boulderfall_cave",
@@ -3345,7 +4297,11 @@
   "z": 969,
   "radius": 18,
   "variant": "necromancer_lair",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "south_skybound_watch",
@@ -3357,7 +4313,11 @@
   "z": 980,
   "radius": 12,
   "variant": "nordic_tower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "orphan_rock",
@@ -3368,7 +4328,11 @@
   "x": 259,
   "z": 981,
   "radius": 12,
-  "variant": "rock"
+  "variant": "rock",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "north_shriekwind_bastion",
@@ -3381,7 +4345,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "elemental_fury",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "falkreath.L10.barrow_above_riverwood",
+   "falkreath.L11.bleak_falls"
+  ]
  },
  {
   "id": "fort_greenwall",
@@ -3393,7 +4361,11 @@
   "z": 1030,
   "radius": 22,
   "variant": "fort",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_rift.L9.hunters_fort",
+   "the_rift.L11.treva_watch"
+  ]
  },
  {
   "id": "falkreath_watchtower",
@@ -3405,7 +4377,11 @@
   "z": 1037,
   "radius": 12,
   "variant": "watchtower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "last_vigil",
@@ -3417,7 +4393,11 @@
   "z": 1058,
   "radius": 14,
   "variant": "bandit_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "falkreath_stormcloak_camp",
@@ -3429,7 +4409,11 @@
   "z": 1071,
   "radius": 18,
   "variant": "stormcloak_camp",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "falkreath.L9.imperial_border",
+   "skyrim.L9.civil_war"
+  ]
  },
  {
   "id": "redwater_den",
@@ -3441,7 +4425,11 @@
   "z": 1084,
   "radius": 10,
   "variant": "cabin",
-  "class": "unmarked"
+  "class": "unmarked",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "honeystrand_cave",
@@ -3453,7 +4441,11 @@
   "z": 1088,
   "radius": 18,
   "variant": "den",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "pinewatch",
@@ -3465,7 +4457,11 @@
   "z": 1093,
   "radius": 10,
   "variant": "cabin",
-  "class": "unmarked"
+  "class": "unmarked",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "south_shriekwind_bastion",
@@ -3477,7 +4473,11 @@
   "z": 1114,
   "radius": 26,
   "variant": "barrow",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "falkreath.L10.barrow_above_riverwood",
+   "falkreath.L11.bleak_falls"
+  ]
  },
  {
   "id": "roadside_ruins",
@@ -3489,7 +4489,11 @@
   "z": 1131,
   "radius": 12,
   "variant": "nordic_ruin",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "autumnshade_clearing",
@@ -3500,7 +4504,11 @@
   "x": 2114,
   "z": 1143,
   "radius": 12,
-  "variant": "clearing"
+  "variant": "clearing",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "twilight_sepulcher",
@@ -3512,7 +4520,11 @@
   "z": 1160,
   "radius": 26,
   "variant": "barrow",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "falkreath.L10.barrow_above_riverwood",
+   "falkreath.L11.bleak_falls"
+  ]
  },
  {
   "id": "haemars_shame",
@@ -3524,7 +4536,11 @@
   "z": 1173,
   "radius": 18,
   "variant": "vampire_lair",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "falkreath.L10.necromancers_and_vampires",
+   "skyrim.L10.volkihar"
+  ]
  },
  {
   "id": "trevas_watch",
@@ -3536,7 +4552,11 @@
   "z": 1196,
   "radius": 22,
   "variant": "fort",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_rift.L9.hunters_fort",
+   "the_rift.L11.treva_watch"
+  ]
  },
  {
   "id": "fallowstone_cave",
@@ -3548,7 +4568,11 @@
   "z": 1215,
   "radius": 18,
   "variant": "den",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "alchemists_shack",
@@ -3560,7 +4584,11 @@
   "z": 1217,
   "radius": 10,
   "variant": "cabin",
-  "class": "unmarked"
+  "class": "unmarked",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "ruins_of_bthalft",
@@ -3571,7 +4599,11 @@
   "x": 1071,
   "z": 1262,
   "radius": 12,
-  "variant": "dwemer"
+  "variant": "dwemer",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "cracked_tusk_keep",
@@ -3583,7 +4615,11 @@
   "z": 1273,
   "radius": 22,
   "variant": "fort",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "peaks_shade_tower",
@@ -3595,7 +4631,11 @@
   "z": 1273,
   "radius": 12,
   "variant": "nordic_tower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "rift_imperial_camp",
@@ -3607,7 +4647,11 @@
   "z": 1277,
   "radius": 18,
   "variant": "imperial_camp",
-  "class": "minor"
+  "class": "short",
+  "why": [
+   "the_rift.L9.rebel_leaning_jarl",
+   "skyrim.L9.civil_war"
+  ]
  },
  {
   "id": "lost_prospect_mine",
@@ -3619,7 +4663,11 @@
   "z": 1309,
   "radius": 20,
   "variant": "mine",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "greywater_grotto",
@@ -3631,7 +4679,11 @@
   "z": 1314,
   "radius": 18,
   "variant": "spider_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "bonechill_passage",
@@ -3643,7 +4695,11 @@
   "z": 1325,
   "radius": 18,
   "variant": "ice_cave",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "fort_neugrad",
@@ -3655,7 +4711,11 @@
   "z": 1339,
   "radius": 22,
   "variant": "fort",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "faldars_tooth",
@@ -3667,7 +4727,11 @@
   "z": 1347,
   "radius": 22,
   "variant": "fort",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_rift.L9.hunters_fort",
+   "the_rift.L11.treva_watch"
+  ]
  },
  {
   "id": "ancestor_glade",
@@ -3679,7 +4743,11 @@
   "z": 1404,
   "radius": 16,
   "variant": "grove",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "falkreath.L4.spriggan_groves",
+   "falkreath.L4.old_pine"
+  ]
  },
  {
   "id": "halldirs_cairn",
@@ -3691,7 +4759,11 @@
   "z": 1413,
   "radius": 26,
   "variant": "barrow",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "falkreath.L10.barrow_above_riverwood",
+   "falkreath.L11.bleak_falls"
+  ]
  },
  {
   "id": "angarvunde",
@@ -3704,7 +4776,11 @@
   "radius": 26,
   "variant": "barrow",
   "shout": "animal_allegiance",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_rift.L10.rahgot_barrow",
+   "the_rift.L11.forelhost_siege"
+  ]
  },
  {
   "id": "ancients_ascent",
@@ -3717,7 +4793,11 @@
   "radius": 16,
   "variant": "dragon_lair",
   "shout": "animal_allegiance",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "arcwind_point",
@@ -3730,7 +4810,11 @@
   "radius": 16,
   "variant": "dragon_lair",
   "shout": "drain_vitality",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_rift.L10.dragon_heights",
+   "skyrim.L9.dragon_crisis"
+  ]
  },
  {
   "id": "autumnwatch_tower",
@@ -3743,7 +4827,11 @@
   "radius": 16,
   "variant": "dragon_lair",
   "shout": "marked_for_death",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_rift.L10.dragon_heights",
+   "skyrim.L9.dragon_crisis"
+  ]
  },
  {
   "id": "frokis_shack",
@@ -3755,7 +4843,11 @@
   "z": 1494,
   "radius": 10,
   "variant": "cabin",
-  "class": "unmarked"
+  "class": "unmarked",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "angis_camp",
@@ -3767,7 +4859,11 @@
   "z": 1546,
   "radius": 10,
   "variant": "cabin",
-  "class": "unmarked"
+  "class": "unmarked",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "southfringe_sanctum",
@@ -3779,7 +4875,11 @@
   "z": 1563,
   "radius": 18,
   "variant": "necromancer_lair",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "falkreath.L10.necromancers_and_vampires",
+   "falkreath.L11.old_graves"
+  ]
  },
  {
   "id": "avanchnzel",
@@ -3791,7 +4891,11 @@
   "z": 1584,
   "radius": 32,
   "variant": "dwemer_ruin",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_rift.L10.dwemer_valley_ruin",
+   "skyrim.L1.dwemer_bedrock"
+  ]
  },
  {
   "id": "nightingale_hall",
@@ -3803,7 +4907,11 @@
   "z": 1584,
   "radius": 18,
   "variant": "cave",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "broken_helm_hollow",
@@ -3815,7 +4923,11 @@
   "z": 1617,
   "radius": 18,
   "variant": "bandit_cave",
-  "class": "short"
+  "class": "short",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "bloodlet_throne",
@@ -3827,7 +4939,11 @@
   "z": 1638,
   "radius": 22,
   "variant": "fort_vampire",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "forelhost",
@@ -3840,7 +4956,11 @@
   "radius": 30,
   "variant": "forelhost",
   "shout": "storm_call",
-  "class": "marquee"
+  "class": "marquee",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "darklight_tower",
@@ -3852,7 +4972,11 @@
   "z": 1722,
   "radius": 12,
   "variant": "forsworn_tower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "stendarrs_beacon",
@@ -3864,7 +4988,11 @@
   "z": 1736,
   "radius": 12,
   "variant": "watchtower",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "crystaldrift_cave",
@@ -3876,7 +5004,11 @@
   "z": 1782,
   "radius": 18,
   "variant": "ice_cave",
-  "class": "major"
+  "class": "major",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "lost_tongue_overlook",
@@ -3889,7 +5021,11 @@
   "radius": 16,
   "variant": "dragon_lair",
   "shout": "dismay",
-  "class": "minor"
+  "class": "minor",
+  "why": [
+   "the_rift.L10.dragon_heights",
+   "skyrim.L9.dragon_crisis"
+  ]
  },
  {
   "id": "ruins_of_rkund",
@@ -3900,7 +5036,11 @@
   "x": 2137,
   "z": 1871,
   "radius": 12,
-  "variant": "ruin"
+  "variant": "ruin",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "sky_haven_temple",
@@ -3911,7 +5051,11 @@
   "x": -2473,
   "z": -193,
   "radius": 30,
-  "variant": "sky_haven_temple"
+  "variant": "sky_haven_temple",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "allmaker_water_stone",
@@ -3988,7 +5132,11 @@
   "x": -2697,
   "z": -439,
   "radius": 10,
-  "variant": "lover"
+  "variant": "lover",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "the_steed_stone",
@@ -3999,7 +5147,11 @@
   "x": -1841,
   "z": -1950,
   "radius": 10,
-  "variant": "steed"
+  "variant": "steed",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
  },
  {
   "id": "the_apprentice_stone",
@@ -4010,7 +5162,11 @@
   "x": -1199,
   "z": -1383,
   "radius": 10,
-  "variant": "apprentice"
+  "variant": "apprentice",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
  },
  {
   "id": "the_lady_stone",
@@ -4021,7 +5177,11 @@
   "x": -829,
   "z": 761,
   "radius": 10,
-  "variant": "lady"
+  "variant": "lady",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "the_lord_stone",
@@ -4032,7 +5192,11 @@
   "x": -227,
   "z": -1012,
   "radius": 10,
-  "variant": "lord"
+  "variant": "lord",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
  },
  {
   "id": "the_ritual_stone",
@@ -4043,7 +5207,11 @@
   "x": 491,
   "z": -34,
   "radius": 10,
-  "variant": "ritual"
+  "variant": "ritual",
+  "why": [
+   "whiterun.L8.voice_pilgrims",
+   "skyrim.L8.ancestor_barrows"
+  ]
  },
  {
   "id": "the_tower_stone",
@@ -4054,7 +5222,11 @@
   "x": 823,
   "z": -1801,
   "radius": 10,
-  "variant": "tower"
+  "variant": "tower",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
  },
  {
   "id": "the_atronach_stone",
@@ -4065,7 +5237,11 @@
   "x": 1766,
   "z": 337,
   "radius": 10,
-  "variant": "atronach"
+  "variant": "atronach",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
  },
  {
   "id": "the_serpent_stone",
@@ -4076,7 +5252,11 @@
   "x": 2090,
   "z": -1962,
   "radius": 10,
-  "variant": "serpent"
+  "variant": "serpent",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
  },
  {
   "id": "the_shadow_stone",
@@ -4087,7 +5267,11 @@
   "x": 2399,
   "z": 1630,
   "radius": 10,
-  "variant": "shadow"
+  "variant": "shadow",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
  },
  {
   "id": "the_guardian_stones",
@@ -4098,7 +5282,11 @@
   "x": -274,
   "z": 824,
   "radius": 12,
-  "variant": "guardian"
+  "variant": "guardian",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
  },
  {
   "id": "word_wall_dead_crone_rock",
@@ -4109,7 +5297,11 @@
   "x": -3209,
   "z": 188,
   "radius": 10,
-  "variant": "dismay"
+  "variant": "dismay",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "word_wall_statue_to_meridia",
@@ -4120,7 +5312,11 @@
   "x": -1792,
   "z": -1732,
   "radius": 10,
-  "variant": "elemental_fury"
+  "variant": "elemental_fury",
+  "why": [
+   "haafingar.L11.olaf_burning",
+   "skyrim.L8.way_of_the_voice"
+  ]
  },
  {
   "id": "word_wall_lost_valley_redoubt",
@@ -4131,7 +5327,11 @@
   "x": -1778,
   "z": 544,
   "radius": 10,
-  "variant": "become_ethereal"
+  "variant": "become_ethereal",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "dragon_mound_glacial_cave",
@@ -4164,7 +5364,11 @@
   "x": -2827,
   "z": -529,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "dragon_mound_harmugstahl",
@@ -4175,7 +5379,11 @@
   "x": -2485,
   "z": -1195,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "dragon_mound_karthspire",
@@ -4186,7 +5394,11 @@
   "x": -2315,
   "z": -102,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
  },
  {
   "id": "dragon_mound_rorikstead",
@@ -4197,7 +5409,11 @@
   "x": -1760,
   "z": -185,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "whiterun.L10.dragon_mounds",
+   "whiterun.L4.dragon_perch"
+  ]
  },
  {
   "id": "dragon_mound_meekos_shack",
@@ -4208,7 +5424,11 @@
   "x": -1572,
   "z": -1368,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
  },
  {
   "id": "dragon_mound_bilegulch_mine",
@@ -4219,7 +5439,11 @@
   "x": -1517,
   "z": 432,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "falkreath.L1.jerall_foothills",
+   "skyrim.L9.dragon_crisis"
+  ]
  },
  {
   "id": "dragon_mound_dead_mens_respite",
@@ -4230,7 +5454,11 @@
   "x": -1463,
   "z": -989,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
  },
  {
   "id": "dragon_mound_evergreen_grove",
@@ -4241,7 +5469,11 @@
   "x": -1154,
   "z": 998,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "falkreath.L1.jerall_foothills",
+   "skyrim.L9.dragon_crisis"
+  ]
  },
  {
   "id": "dragon_mound_sunderstone_gorge",
@@ -4252,7 +5484,11 @@
   "x": -1108,
   "z": 364,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "falkreath.L1.jerall_foothills",
+   "skyrim.L9.dragon_crisis"
+  ]
  },
  {
   "id": "dragon_mound_eldersblood_peak",
@@ -4263,7 +5499,11 @@
   "x": -891,
   "z": -924,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "whiterun.L10.dragon_mounds",
+   "whiterun.L4.dragon_perch"
+  ]
  },
  {
   "id": "dragon_mound_greenspring_hollow",
@@ -4274,7 +5514,11 @@
   "x": -870,
   "z": -222,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "whiterun.L10.dragon_mounds",
+   "whiterun.L4.dragon_perch"
+  ]
  },
  {
   "id": "dragon_mound_pale_imperial_camp",
@@ -4285,7 +5529,11 @@
   "x": -251,
   "z": -1657,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
  },
  {
   "id": "dragon_mound_greywater_grotto",
@@ -4296,7 +5544,11 @@
   "x": -60,
   "z": 1527,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "falkreath.L1.jerall_foothills",
+   "skyrim.L9.dragon_crisis"
+  ]
  },
  {
   "id": "dragon_mound_shimmermist_cave",
@@ -4307,7 +5559,11 @@
   "x": 416,
   "z": -375,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "whiterun.L10.dragon_mounds",
+   "whiterun.L4.dragon_perch"
+  ]
  },
  {
   "id": "dragon_mound_frokis_shack",
@@ -4318,7 +5574,11 @@
   "x": 1215,
   "z": 1340,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "the_rift.L10.dragon_heights",
+   "skyrim.L9.dragon_crisis"
+  ]
  },
  {
   "id": "dragon_mound_angas_mill",
@@ -4329,7 +5589,11 @@
   "x": 1279,
   "z": -744,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
  },
  {
   "id": "dragon_mound_bonestrewn_crest",
@@ -4340,7 +5604,11 @@
   "x": 1675,
   "z": 108,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "skyrim.L9.dragon_crisis"
+  ]
  },
  {
   "id": "dragon_mound_witchmist_grove",
@@ -4351,7 +5619,11 @@
   "x": 1733,
   "z": -175,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "skyrim.L9.dragon_crisis"
+  ]
  },
  {
   "id": "dragon_mound_autumnshade_clearing",
@@ -4362,7 +5634,11 @@
   "x": 1994,
   "z": 1155,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "the_rift.L10.dragon_heights",
+   "skyrim.L9.dragon_crisis"
+  ]
  },
  {
   "id": "dragon_mound_kynesgrove",
@@ -4373,7 +5649,11 @@
   "x": 2002,
   "z": -334,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "skyrim.L9.dragon_crisis"
+  ]
  },
  {
   "id": "dragon_mound_mzulft",
@@ -4384,7 +5664,11 @@
   "x": 2157,
   "z": 209,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "skyrim.L9.dragon_crisis"
+  ]
  },
  {
   "id": "dragon_mound_lost_tongue_overlook",
@@ -4395,6 +5679,1360 @@
   "x": 2452,
   "z": 1758,
   "radius": 9,
-  "variant": "mound"
+  "variant": "mound",
+  "why": [
+   "the_rift.L10.dragon_heights",
+   "skyrim.L9.dragon_crisis"
+  ]
+ },
+ {
+  "id": "old_snowhawk",
+  "name": "place.skycraft.old_snowhawk",
+  "type": "landmark",
+  "culture": "nord",
+  "region": "skyrim/hjaalmarch",
+  "x": -1260,
+  "z": -980,
+  "radius": 16,
+  "variant": "ruin",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
+ },
+ {
+  "id": "whiterun_mammoth_butchery",
+  "name": "place.skycraft.whiterun_mammoth_butchery",
+  "type": "dungeon_fixed",
+  "culture": "giant",
+  "region": "skyrim/whiterun",
+  "x": -1500,
+  "z": -80,
+  "radius": 14,
+  "variant": "giant_camp",
+  "class": "unmarked",
+  "hidden": true,
+  "why": [
+   "whiterun.L10.giant_camps",
+   "whiterun.L4.giant_grounds"
+  ]
+ },
+ {
+  "id": "sleeping_tree_altar",
+  "name": "place.skycraft.sleeping_tree_altar",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/whiterun",
+  "x": -1420,
+  "z": -320,
+  "radius": 12,
+  "variant": "grove",
+  "class": "unmarked",
+  "hidden": true,
+  "why": [
+   "whiterun.L1.tundra_plain",
+   "whiterun.L6.whiterun_seat"
+  ]
+ },
+ {
+  "id": "broken_oar_smuggler_cache",
+  "name": "place.skycraft.broken_oar_smuggler_cache",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/haafingar",
+  "x": -2800,
+  "z": -1940,
+  "radius": 12,
+  "variant": "shipwreck",
+  "class": "unmarked",
+  "hidden": true,
+  "why": [
+   "haafingar.L10.smugglers_coves",
+   "haafingar.L5.company_docks"
+  ]
+ },
+ {
+  "id": "ilinalta_drowned_altar",
+  "name": "place.skycraft.ilinalta_drowned_altar",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/falkreath",
+  "x": -1600,
+  "z": 920,
+  "radius": 12,
+  "variant": "nordic_ruin",
+  "class": "unmarked",
+  "hidden": true,
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
+ },
+ {
+  "id": "talos_massacre_shrine",
+  "name": "place.skycraft.talos_massacre_shrine",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/falkreath",
+  "x": -1600,
+  "z": 1080,
+  "radius": 12,
+  "variant": "cabin",
+  "class": "unmarked",
+  "hidden": true,
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
+ },
+ {
+  "id": "hunters_cliff_blind",
+  "name": "place.skycraft.hunters_cliff_blind",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/falkreath",
+  "x": -1600,
+  "z": 1240,
+  "radius": 12,
+  "variant": "cabin",
+  "class": "unmarked",
+  "hidden": true,
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
+ },
+ {
+  "id": "drajkmyr_marsh_altar",
+  "name": "place.skycraft.drajkmyr_marsh_altar",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/hjaalmarch",
+  "x": -1500,
+  "z": -1140,
+  "radius": 12,
+  "variant": "nordic_ruin",
+  "class": "unmarked",
+  "hidden": true,
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
+ },
+ {
+  "id": "pale_shore_ivory_camp",
+  "name": "place.skycraft.pale_shore_ivory_camp",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/the_pale",
+  "x": -400,
+  "z": -1900,
+  "radius": 12,
+  "variant": "cabin",
+  "class": "unmarked",
+  "hidden": true,
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
+ },
+ {
+  "id": "autumnwatch_poacher_blind",
+  "name": "place.skycraft.autumnwatch_poacher_blind",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/the_rift",
+  "x": 800,
+  "z": 840,
+  "radius": 12,
+  "variant": "cabin",
+  "class": "unmarked",
+  "hidden": true,
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
+ },
+ {
+  "id": "rift_frost_spider_hollow",
+  "name": "place.skycraft.rift_frost_spider_hollow",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/the_rift",
+  "x": 800,
+  "z": 1560,
+  "radius": 14,
+  "variant": "spider_cave",
+  "class": "unmarked",
+  "hidden": true,
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
+ },
+ {
+  "id": "pilgrims_trench_beacon",
+  "name": "place.skycraft.pilgrims_trench_beacon",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/winterhold",
+  "x": 400,
+  "z": -1900,
+  "radius": 12,
+  "variant": "shipwreck",
+  "class": "unmarked",
+  "hidden": true,
+  "why": [
+   "winterhold.L5.wreck_salvage",
+   "winterhold.L1.ice_floes"
+  ]
+ },
+ {
+  "id": "hot_spring_bathers_camp",
+  "name": "place.skycraft.hot_spring_bathers_camp",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/eastmarch",
+  "x": 900,
+  "z": 300,
+  "radius": 12,
+  "variant": "cabin",
+  "class": "unmarked",
+  "hidden": true,
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
+ },
+ {
+  "id": "velothi_refugee_cairn",
+  "name": "place.skycraft.velothi_refugee_cairn",
+  "type": "dungeon_fixed",
+  "culture": "dunmer",
+  "region": "skyrim/eastmarch",
+  "x": 980,
+  "z": 380,
+  "radius": 12,
+  "variant": "nordic_ruin",
+  "class": "unmarked",
+  "hidden": true,
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
+ },
+ {
+  "id": "karth_gorge_sky_burial",
+  "name": "place.skycraft.karth_gorge_sky_burial",
+  "type": "dungeon_fixed",
+  "culture": "forsworn",
+  "region": "skyrim/the_reach",
+  "x": -3300,
+  "z": -1400,
+  "radius": 12,
+  "variant": "forsworn_camp",
+  "class": "unmarked",
+  "hidden": true,
+  "why": [
+   "the_reach.L10.forsworn_redoubts",
+   "the_reach.L9.native_uprising"
+  ]
+ },
+ {
+  "id": "reachwater_sealed_arch",
+  "name": "place.skycraft.reachwater_sealed_arch",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/the_reach",
+  "x": -3300,
+  "z": -1240,
+  "radius": 12,
+  "variant": "nordic_ruin",
+  "class": "unmarked",
+  "hidden": true,
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
+ },
+ {
+  "id": "bthardamz_surface_vent",
+  "name": "place.skycraft.bthardamz_surface_vent",
+  "type": "dungeon_fixed",
+  "culture": "dwemer",
+  "region": "skyrim/the_reach",
+  "x": -3300,
+  "z": -1080,
+  "radius": 12,
+  "variant": "great_lift",
+  "class": "unmarked",
+  "hidden": true,
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
+ },
+ {
+  "id": "whiterun_siege_encampment",
+  "name": "place.skycraft.whiterun_siege_encampment",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/whiterun",
+  "x": -1420,
+  "z": 0,
+  "radius": 18,
+  "variant": "stormcloak_camp",
+  "class": "minor",
+  "why": [
+   "whiterun.L9.siege_point",
+   "skyrim.L9.civil_war"
+  ]
+ },
+ {
+  "id": "solitude_marsh_redoubt",
+  "name": "place.skycraft.solitude_marsh_redoubt",
+  "type": "dungeon_fixed",
+  "culture": "imperial",
+  "region": "skyrim/haafingar",
+  "x": -2720,
+  "z": -2100,
+  "radius": 18,
+  "variant": "imperial_camp",
+  "class": "minor",
+  "why": [
+   "haafingar.L9.imperial_seat",
+   "skyrim.L9.civil_war"
+  ]
+ },
+ {
+  "id": "helgen_border_outpost",
+  "name": "place.skycraft.helgen_border_outpost",
+  "type": "dungeon_fixed",
+  "culture": "imperial",
+  "region": "skyrim/falkreath",
+  "x": -1600,
+  "z": 1560,
+  "radius": 18,
+  "variant": "imperial_camp",
+  "class": "minor",
+  "why": [
+   "falkreath.L9.imperial_border",
+   "skyrim.L9.civil_war"
+  ]
+ },
+ {
+  "id": "pale_pass_legion_camp",
+  "name": "place.skycraft.pale_pass_legion_camp",
+  "type": "dungeon_fixed",
+  "culture": "imperial",
+  "region": "skyrim/falkreath",
+  "x": -1600,
+  "z": 1720,
+  "radius": 18,
+  "variant": "imperial_camp",
+  "class": "minor",
+  "why": [
+   "falkreath.L9.imperial_border",
+   "skyrim.L9.civil_war"
+  ]
+ },
+ {
+  "id": "ilinalta_rebel_bivouac",
+  "name": "place.skycraft.ilinalta_rebel_bivouac",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/falkreath",
+  "x": -1520,
+  "z": 1000,
+  "radius": 18,
+  "variant": "stormcloak_camp",
+  "class": "minor",
+  "why": [
+   "falkreath.L9.imperial_border",
+   "skyrim.L9.civil_war"
+  ]
+ },
+ {
+  "id": "shors_stone_watch_camp",
+  "name": "place.skycraft.shors_stone_watch_camp",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/the_rift",
+  "x": 800,
+  "z": 1720,
+  "radius": 18,
+  "variant": "stormcloak_camp",
+  "class": "short",
+  "why": [
+   "the_rift.L9.rebel_leaning_jarl",
+   "skyrim.L9.civil_war"
+  ]
+ },
+ {
+  "id": "treva_crossing_camp",
+  "name": "place.skycraft.treva_crossing_camp",
+  "type": "dungeon_fixed",
+  "culture": "imperial",
+  "region": "skyrim/the_rift",
+  "x": 800,
+  "z": 1880,
+  "radius": 18,
+  "variant": "imperial_camp",
+  "class": "short",
+  "why": [
+   "the_rift.L9.rebel_leaning_jarl",
+   "skyrim.L9.civil_war"
+  ]
+ },
+ {
+  "id": "darkwater_ford_camp",
+  "name": "place.skycraft.darkwater_ford_camp",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/eastmarch",
+  "x": 1060,
+  "z": 220,
+  "radius": 18,
+  "variant": "stormcloak_camp",
+  "class": "minor",
+  "why": [
+   "eastmarch.L9.rebel_capital",
+   "skyrim.L9.civil_war"
+  ]
+ },
+ {
+  "id": "velothi_border_picket",
+  "name": "place.skycraft.velothi_border_picket",
+  "type": "dungeon_fixed",
+  "culture": "imperial",
+  "region": "skyrim/eastmarch",
+  "x": 1060,
+  "z": 460,
+  "radius": 18,
+  "variant": "imperial_camp",
+  "class": "minor",
+  "why": [
+   "eastmarch.L9.rebel_capital",
+   "skyrim.L9.civil_war"
+  ]
+ },
+ {
+  "id": "karth_gorge_legion_camp",
+  "name": "place.skycraft.karth_gorge_legion_camp",
+  "type": "dungeon_fixed",
+  "culture": "imperial",
+  "region": "skyrim/the_reach",
+  "x": -3300,
+  "z": -920,
+  "radius": 18,
+  "variant": "imperial_camp",
+  "class": "minor",
+  "why": [
+   "the_reach.L9.imperial_jarl",
+   "skyrim.L9.civil_war"
+  ]
+ },
+ {
+  "id": "druadach_rebel_camp",
+  "name": "place.skycraft.druadach_rebel_camp",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/the_reach",
+  "x": -3300,
+  "z": -760,
+  "radius": 18,
+  "variant": "stormcloak_camp",
+  "class": "minor",
+  "why": [
+   "the_reach.L9.imperial_jarl",
+   "skyrim.L9.civil_war"
+  ]
+ },
+ {
+  "id": "volkihar_word_wall",
+  "name": "place.skycraft.volkihar_word_wall",
+  "type": "word_wall",
+  "culture": "nord",
+  "region": "skyrim/haafingar",
+  "x": -2720,
+  "z": -1860,
+  "radius": 14,
+  "shout": "disarm",
+  "why": [
+   "haafingar.L11.olaf_burning",
+   "skyrim.L8.way_of_the_voice"
+  ]
+ },
+ {
+  "id": "kilkreath_word_wall",
+  "name": "place.skycraft.kilkreath_word_wall",
+  "type": "word_wall",
+  "culture": "nord",
+  "region": "skyrim/haafingar",
+  "x": -2560,
+  "z": -2100,
+  "radius": 14,
+  "shout": "elemental_fury",
+  "why": [
+   "haafingar.L11.olaf_burning",
+   "skyrim.L8.way_of_the_voice"
+  ]
+ },
+ {
+  "id": "sunderstone_word_wall",
+  "name": "place.skycraft.sunderstone_word_wall",
+  "type": "word_wall",
+  "culture": "nord",
+  "region": "skyrim/falkreath",
+  "x": -1520,
+  "z": 1640,
+  "radius": 14,
+  "shout": "fire_breath",
+  "why": [
+   "falkreath.L11.bleak_falls",
+   "skyrim.L8.way_of_the_voice"
+  ]
+ },
+ {
+  "id": "shriekwind_word_wall",
+  "name": "place.skycraft.shriekwind_word_wall",
+  "type": "word_wall",
+  "culture": "nord",
+  "region": "skyrim/falkreath",
+  "x": -1440,
+  "z": 1320,
+  "radius": 14,
+  "shout": "elemental_fury",
+  "why": [
+   "falkreath.L11.bleak_falls",
+   "skyrim.L8.way_of_the_voice"
+  ]
+ },
+ {
+  "id": "ilinalta_word_wall",
+  "name": "place.skycraft.ilinalta_word_wall",
+  "type": "word_wall",
+  "culture": "nord",
+  "region": "skyrim/falkreath",
+  "x": -1440,
+  "z": 1720,
+  "radius": 14,
+  "shout": "kyne_peace",
+  "why": [
+   "falkreath.L11.bleak_falls",
+   "skyrim.L8.way_of_the_voice"
+  ]
+ },
+ {
+  "id": "falkreath_watch_mound",
+  "name": "place.skycraft.falkreath_watch_mound",
+  "type": "dragon_mound",
+  "culture": "nord",
+  "region": "skyrim/falkreath",
+  "x": -1360,
+  "z": 1400,
+  "radius": 16,
+  "why": [
+   "falkreath.L1.jerall_foothills",
+   "skyrim.L9.dragon_crisis"
+  ]
+ },
+ {
+  "id": "jerall_crest_mound",
+  "name": "place.skycraft.jerall_crest_mound",
+  "type": "dragon_mound",
+  "culture": "nord",
+  "region": "skyrim/falkreath",
+  "x": -1360,
+  "z": 1560,
+  "radius": 16,
+  "why": [
+   "falkreath.L1.jerall_foothills",
+   "skyrim.L9.dragon_crisis"
+  ]
+ },
+ {
+  "id": "ilinalta_ridge_mound",
+  "name": "place.skycraft.ilinalta_ridge_mound",
+  "type": "dragon_mound",
+  "culture": "nord",
+  "region": "skyrim/falkreath",
+  "x": -1280,
+  "z": 1000,
+  "radius": 16,
+  "why": [
+   "falkreath.L1.jerall_foothills",
+   "skyrim.L9.dragon_crisis"
+  ]
+ },
+ {
+  "id": "steamcrag_word_wall",
+  "name": "place.skycraft.steamcrag_word_wall",
+  "type": "word_wall",
+  "culture": "nord",
+  "region": "skyrim/eastmarch",
+  "x": 1220,
+  "z": 460,
+  "radius": 14,
+  "shout": "marked_for_death",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "skyrim.L8.way_of_the_voice"
+  ]
+ },
+ {
+  "id": "bonestrewn_word_wall",
+  "name": "place.skycraft.bonestrewn_word_wall",
+  "type": "word_wall",
+  "culture": "nord",
+  "region": "skyrim/eastmarch",
+  "x": 1300,
+  "z": 380,
+  "radius": 14,
+  "shout": "frost_breath",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "skyrim.L8.way_of_the_voice"
+  ]
+ },
+ {
+  "id": "lost_knife_word_wall",
+  "name": "place.skycraft.lost_knife_word_wall",
+  "type": "word_wall",
+  "culture": "nord",
+  "region": "skyrim/eastmarch",
+  "x": 1300,
+  "z": 540,
+  "radius": 14,
+  "shout": "dismay",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "skyrim.L8.way_of_the_voice"
+  ]
+ },
+ {
+  "id": "karth_spire_mound",
+  "name": "place.skycraft.karth_spire_mound",
+  "type": "dragon_mound",
+  "culture": "nord",
+  "region": "skyrim/the_reach",
+  "x": -3300,
+  "z": 280,
+  "radius": 16,
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
+ },
+ {
+  "id": "druadach_crest_mound",
+  "name": "place.skycraft.druadach_crest_mound",
+  "type": "dragon_mound",
+  "culture": "nord",
+  "region": "skyrim/the_reach",
+  "x": -3300,
+  "z": 520,
+  "radius": 16,
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
+ },
+ {
+  "id": "saarthal_ridge_mound",
+  "name": "place.skycraft.saarthal_ridge_mound",
+  "type": "dragon_mound",
+  "culture": "nord",
+  "region": "skyrim/winterhold",
+  "x": 480,
+  "z": -1500,
+  "radius": 16,
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
+ },
+ {
+  "id": "white_river_deep_sink",
+  "name": "place.skycraft.white_river_deep_sink",
+  "type": "dungeon_fixed",
+  "culture": "falmer",
+  "region": "skyrim/whiterun",
+  "x": -1340,
+  "z": -560,
+  "radius": 20,
+  "variant": "falmer_cave",
+  "class": "major",
+  "why": [
+   "skyrim.L10.falmer_below",
+   "skyrim.L1.dwemer_bedrock"
+  ]
+ },
+ {
+  "id": "steppe_barrow_pit",
+  "name": "place.skycraft.steppe_barrow_pit",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/whiterun",
+  "x": -1340,
+  "z": -400,
+  "radius": 18,
+  "variant": "necromancer_lair",
+  "class": "major",
+  "why": [
+   "whiterun.L1.ridge_barrows",
+   "skyrim.L8.ancestor_barrows"
+  ]
+ },
+ {
+  "id": "blackreach_whiterun_conduit",
+  "name": "place.skycraft.blackreach_whiterun_conduit",
+  "type": "dungeon_fixed",
+  "culture": "dwemer",
+  "region": "skyrim/whiterun",
+  "x": -1260,
+  "z": -640,
+  "radius": 24,
+  "variant": "dwemer_ruin",
+  "class": "major",
+  "why": [
+   "skyrim.L1.dwemer_bedrock",
+   "skyrim.L11.dwemer_betrayal"
+  ]
+ },
+ {
+  "id": "solitude_deep_conduit",
+  "name": "place.skycraft.solitude_deep_conduit",
+  "type": "dungeon_fixed",
+  "culture": "dwemer",
+  "region": "skyrim/haafingar",
+  "x": -2480,
+  "z": -1940,
+  "radius": 24,
+  "variant": "dwemer_ruin",
+  "class": "major",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
+ },
+ {
+  "id": "haafingar_sea_bastion",
+  "name": "place.skycraft.haafingar_sea_bastion",
+  "type": "fort",
+  "culture": "imperial",
+  "region": "skyrim/haafingar",
+  "x": -2480,
+  "z": -1780,
+  "radius": 22,
+  "variant": "fort_mage",
+  "class": "major",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
+ },
+ {
+  "id": "coast_bluff_giant_camp",
+  "name": "place.skycraft.coast_bluff_giant_camp",
+  "type": "dungeon_fixed",
+  "culture": "giant",
+  "region": "skyrim/haafingar",
+  "x": -2160,
+  "z": -2100,
+  "radius": 16,
+  "variant": "giant_camp",
+  "class": "minor",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
+ },
+ {
+  "id": "arch_bluff_grove",
+  "name": "place.skycraft.arch_bluff_grove",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/haafingar",
+  "x": -2160,
+  "z": -1700,
+  "radius": 14,
+  "variant": "grove",
+  "class": "minor",
+  "why": [
+   "haafingar.L1.solitude_arch",
+   "haafingar.L4.pine_coast"
+  ]
+ },
+ {
+  "id": "hjaal_sinkhole_cavern",
+  "name": "place.skycraft.hjaal_sinkhole_cavern",
+  "type": "dungeon_fixed",
+  "culture": "falmer",
+  "region": "skyrim/hjaalmarch",
+  "x": -1340,
+  "z": -1380,
+  "radius": 20,
+  "variant": "falmer_cave",
+  "class": "major",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
+ },
+ {
+  "id": "drajkmyr_hagraven_nest",
+  "name": "place.skycraft.drajkmyr_hagraven_nest",
+  "type": "dungeon_fixed",
+  "culture": "forsworn",
+  "region": "skyrim/hjaalmarch",
+  "x": -1340,
+  "z": -1060,
+  "radius": 18,
+  "variant": "hagraven_lair",
+  "class": "short",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
+ },
+ {
+  "id": "coldmarsh_ossuary",
+  "name": "place.skycraft.coldmarsh_ossuary",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/hjaalmarch",
+  "x": -1180,
+  "z": -1620,
+  "radius": 18,
+  "variant": "necromancer_lair",
+  "class": "short",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
+ },
+ {
+  "id": "marshweb_hollow",
+  "name": "place.skycraft.marshweb_hollow",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/hjaalmarch",
+  "x": -1100,
+  "z": -1380,
+  "radius": 18,
+  "variant": "spider_cave",
+  "class": "short",
+  "why": [
+   "hjaalmarch.L1.drajkmyr_flats",
+   "hjaalmarch.L8.ruined_shrines"
+  ]
+ },
+ {
+  "id": "pale_glacier_grotto",
+  "name": "place.skycraft.pale_glacier_grotto",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/the_pale",
+  "x": -320,
+  "z": -1820,
+  "radius": 18,
+  "variant": "ice_cave",
+  "class": "major",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
+ },
+ {
+  "id": "white_shore_hollow",
+  "name": "place.skycraft.white_shore_hollow",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/the_pale",
+  "x": -240,
+  "z": -1900,
+  "radius": 18,
+  "variant": "vampire_lair",
+  "class": "short",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
+ },
+ {
+  "id": "yorgrim_iron_seam",
+  "name": "place.skycraft.yorgrim_iron_seam",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/the_pale",
+  "x": -160,
+  "z": -1820,
+  "radius": 20,
+  "variant": "mine",
+  "class": "short",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
+ },
+ {
+  "id": "pale_border_keep",
+  "name": "place.skycraft.pale_border_keep",
+  "type": "fort",
+  "culture": "imperial",
+  "region": "skyrim/the_pale",
+  "x": -80,
+  "z": -1740,
+  "radius": 22,
+  "variant": "fort_vampire",
+  "class": "major",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
+ },
+ {
+  "id": "yorgrim_standing_stones",
+  "name": "place.skycraft.yorgrim_standing_stones",
+  "type": "landmark",
+  "culture": "nord",
+  "region": "skyrim/the_pale",
+  "x": -80,
+  "z": -700,
+  "radius": 12,
+  "variant": "stones",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
+ },
+ {
+  "id": "pale_ice_falls",
+  "name": "place.skycraft.pale_ice_falls",
+  "type": "landmark",
+  "culture": "nord",
+  "region": "skyrim/the_pale",
+  "x": -80,
+  "z": -540,
+  "radius": 12,
+  "variant": "waterfall",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
+ },
+ {
+  "id": "dawnstar_wind_altar",
+  "name": "place.skycraft.dawnstar_wind_altar",
+  "type": "landmark",
+  "culture": "nord",
+  "region": "skyrim/the_pale",
+  "x": 0,
+  "z": -1900,
+  "radius": 12,
+  "variant": "altar",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
+ },
+ {
+  "id": "ilinalta_falls",
+  "name": "place.skycraft.ilinalta_falls",
+  "type": "landmark",
+  "culture": "nord",
+  "region": "skyrim/falkreath",
+  "x": -1280,
+  "z": 1480,
+  "radius": 12,
+  "variant": "waterfall",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
+ },
+ {
+  "id": "arkay_wayside_altar",
+  "name": "place.skycraft.arkay_wayside_altar",
+  "type": "landmark",
+  "culture": "nord",
+  "region": "skyrim/falkreath",
+  "x": -1280,
+  "z": 1640,
+  "radius": 12,
+  "variant": "altar",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
+ },
+ {
+  "id": "jerall_stone_bridge",
+  "name": "place.skycraft.jerall_stone_bridge",
+  "type": "landmark",
+  "culture": "nord",
+  "region": "skyrim/falkreath",
+  "x": -1200,
+  "z": 1400,
+  "radius": 12,
+  "variant": "bridge",
+  "why": [
+   "falkreath.L4.old_pine",
+   "falkreath.L6.falkreath_graves"
+  ]
+ },
+ {
+  "id": "winterhold_glacier_falls",
+  "name": "place.skycraft.winterhold_glacier_falls",
+  "type": "landmark",
+  "culture": "nord",
+  "region": "skyrim/winterhold",
+  "x": 640,
+  "z": -1260,
+  "radius": 12,
+  "variant": "waterfall",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
+ },
+ {
+  "id": "atmoran_way_stones",
+  "name": "place.skycraft.atmoran_way_stones",
+  "type": "landmark",
+  "culture": "nord",
+  "region": "skyrim/winterhold",
+  "x": 640,
+  "z": -1100,
+  "radius": 12,
+  "variant": "stones",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
+ },
+ {
+  "id": "sky_pillar_altar",
+  "name": "place.skycraft.sky_pillar_altar",
+  "type": "landmark",
+  "culture": "nord",
+  "region": "skyrim/winterhold",
+  "x": 720,
+  "z": -1900,
+  "radius": 12,
+  "variant": "altar",
+  "why": [
+   "winterhold.L1.glacier",
+   "winterhold.L4.glacier_waste"
+  ]
+ },
+ {
+  "id": "velothi_troll_den",
+  "name": "place.skycraft.velothi_troll_den",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/eastmarch",
+  "x": 1380,
+  "z": 300,
+  "radius": 18,
+  "variant": "troll_cave",
+  "class": "short",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
+ },
+ {
+  "id": "eldergleam_root_hollow",
+  "name": "place.skycraft.eldergleam_root_hollow",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/eastmarch",
+  "x": 1380,
+  "z": 460,
+  "radius": 18,
+  "variant": "spriggan_cave",
+  "class": "short",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
+ },
+ {
+  "id": "white_river_smuggler_grotto",
+  "name": "place.skycraft.white_river_smuggler_grotto",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/eastmarch",
+  "x": 1460,
+  "z": 380,
+  "radius": 18,
+  "variant": "smuggler_cave",
+  "class": "short",
+  "why": [
+   "eastmarch.L1.steam_basin",
+   "eastmarch.L4.fumarole_tundra"
+  ]
+ },
+ {
+  "id": "treva_cascade_falls",
+  "name": "place.skycraft.treva_cascade_falls",
+  "type": "landmark",
+  "culture": "nord",
+  "region": "skyrim/the_rift",
+  "x": 880,
+  "z": 1480,
+  "radius": 12,
+  "variant": "waterfall",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
+ },
+ {
+  "id": "honrich_stone_circle",
+  "name": "place.skycraft.honrich_stone_circle",
+  "type": "landmark",
+  "culture": "nord",
+  "region": "skyrim/the_rift",
+  "x": 880,
+  "z": 1640,
+  "radius": 12,
+  "variant": "stones",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
+ },
+ {
+  "id": "birch_basin_bridge",
+  "name": "place.skycraft.birch_basin_bridge",
+  "type": "landmark",
+  "culture": "nord",
+  "region": "skyrim/the_rift",
+  "x": 880,
+  "z": 1800,
+  "radius": 12,
+  "variant": "bridge",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
+ },
+ {
+  "id": "velothi_crag_eyrie",
+  "name": "place.skycraft.velothi_crag_eyrie",
+  "type": "landmark",
+  "culture": "nord",
+  "region": "skyrim/the_rift",
+  "x": 960,
+  "z": 1560,
+  "radius": 12,
+  "variant": "eyrie",
+  "why": [
+   "the_rift.L1.birch_basin",
+   "the_rift.L4.birch_forest"
+  ]
+ },
+ {
+  "id": "karth_spider_cleft",
+  "name": "place.skycraft.karth_spider_cleft",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/the_reach",
+  "x": -3220,
+  "z": -1320,
+  "radius": 18,
+  "variant": "spider_cave",
+  "class": "short",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
+ },
+ {
+  "id": "druadach_troll_hollow",
+  "name": "place.skycraft.druadach_troll_hollow",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/the_reach",
+  "x": -3220,
+  "z": -1160,
+  "radius": 18,
+  "variant": "troll_cave",
+  "class": "short",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
+ },
+ {
+  "id": "silver_gorge_bandit_camp",
+  "name": "place.skycraft.silver_gorge_bandit_camp",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/the_reach",
+  "x": -3220,
+  "z": -1000,
+  "radius": 14,
+  "variant": "bandit_camp",
+  "class": "minor",
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L4.crag_scrub"
+  ]
+ },
+ {
+  "id": "tundra_hagraven_cairn",
+  "name": "place.skycraft.tundra_hagraven_cairn",
+  "type": "dungeon_fixed",
+  "culture": "forsworn",
+  "region": "skyrim/whiterun",
+  "x": -1260,
+  "z": -480,
+  "radius": 18,
+  "variant": "hagraven_lair",
+  "class": "short",
+  "why": [
+   "whiterun.L1.tundra_plain",
+   "skyrim.L10.hagravens_and_witches"
+  ]
+ },
+ {
+  "id": "rorikstead_east_mound",
+  "name": "place.skycraft.rorikstead_east_mound",
+  "type": "dragon_mound",
+  "culture": "nord",
+  "region": "skyrim/whiterun",
+  "x": -1260,
+  "z": -320,
+  "radius": 16,
+  "why": [
+   "whiterun.L10.dragon_mounds",
+   "whiterun.L4.dragon_perch"
+  ]
+ },
+ {
+  "id": "wolf_queen_ossuary",
+  "name": "place.skycraft.wolf_queen_ossuary",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/haafingar",
+  "x": -2080,
+  "z": -1780,
+  "radius": 18,
+  "variant": "necromancer_lair",
+  "class": "short",
+  "why": [
+   "haafingar.L10.wolf_queen_catacombs",
+   "haafingar.L8.wolf_queen_fear"
+  ]
+ },
+ {
+  "id": "cragwallow_coven_pit",
+  "name": "place.skycraft.cragwallow_coven_pit",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/eastmarch",
+  "x": 1220,
+  "z": 300,
+  "radius": 18,
+  "variant": "hagraven_lair",
+  "class": "short",
+  "why": [
+   "eastmarch.L1.velothi_foothills",
+   "skyrim.L10.hagravens_and_witches"
+  ]
+ },
+ {
+  "id": "darkwater_falls_overlook",
+  "name": "place.skycraft.darkwater_falls_overlook",
+  "type": "landmark",
+  "culture": "nord",
+  "region": "skyrim/eastmarch",
+  "x": 1140,
+  "z": 380,
+  "radius": 12,
+  "variant": "waterfall",
+  "why": [
+   "eastmarch.L3.darkwater_ford",
+   "eastmarch.L1.steam_basin"
+  ]
+ },
+ {
+  "id": "velothi_high_eyrie",
+  "name": "place.skycraft.velothi_high_eyrie",
+  "type": "landmark",
+  "culture": "nord",
+  "region": "skyrim/eastmarch",
+  "x": 1140,
+  "z": 540,
+  "radius": 12,
+  "variant": "eyrie",
+  "why": [
+   "eastmarch.L1.velothi_foothills",
+   "eastmarch.L4.snow_pine"
+  ]
+ },
+ {
+  "id": "pale_frostweb_den",
+  "name": "place.skycraft.pale_frostweb_den",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/the_pale",
+  "x": 0,
+  "z": -940,
+  "radius": 18,
+  "variant": "spider_cave",
+  "class": "short",
+  "why": [
+   "the_pale.L1.snow_highland",
+   "the_pale.L4.pale_heath"
+  ]
+ },
+ {
+  "id": "pale_pine_hollow",
+  "name": "place.skycraft.pale_pine_hollow",
+  "type": "dungeon_fixed",
+  "culture": "nord",
+  "region": "skyrim/the_pale",
+  "x": 0,
+  "z": -620,
+  "radius": 18,
+  "variant": "spriggan_cave",
+  "class": "short",
+  "why": [
+   "the_pale.L4.pale_heath",
+   "the_pale.L1.snow_highland"
+  ]
+ },
+ {
+  "id": "pale_pass_dragon_mound",
+  "name": "place.skycraft.pale_pass_dragon_mound",
+  "type": "dragon_mound",
+  "culture": "nord",
+  "region": "skyrim/falkreath",
+  "x": -1520,
+  "z": 1480,
+  "radius": 16,
+  "why": [
+   "falkreath.L1.pale_pass",
+   "skyrim.L9.dragon_crisis"
+  ]
+ },
+ {
+  "id": "sundered_hills_mound",
+  "name": "place.skycraft.sundered_hills_mound",
+  "type": "dragon_mound",
+  "culture": "nord",
+  "region": "skyrim/the_reach",
+  "x": -3220,
+  "z": -840,
+  "radius": 16,
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "skyrim.L9.dragon_crisis"
+  ]
  }
 ]

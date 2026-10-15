@@ -1,0 +1,685 @@
+{
+  "province": "skyrim",
+  "arcs": [
+    {
+      "id": "sk_1",
+      "title": "The Plain That Keeps Count",
+      "hold": "skyrim/whiterun",
+      "tier": "A",
+      "why": ["whiterun.L10.dragon_mounds", "whiterun.L8.honour_and_sovngarde"],
+      "secret": "The ridge barrows across the central plain are laid out as a stone tally of the dragon war's dead, and the final count-stone on Eldersblood Peak is one notch short.",
+      "order": ["valtheim_towers", "hamvirs_rest", "rannveigs_fast", "dustmans_cairn", "eldersblood_peak"],
+      "entry": {
+        "clue": "stone",
+        "offset": [-5, 4],
+        "text": "Chiselled into the bridge-pier at Valtheim is a mason's tally-table: four barrow-names, four numbers of dead, and a fifth line left blank beneath the words 'Count the peak last.'"
+      },
+      "quest": {
+        "title": "The Plain That Keeps Count",
+        "desc": "A mason's tally-table on the Valtheim bridge lists four barrows across the Whiterun plain and leaves the fifth line blank.",
+        "desc2": "The four barrow tallies converge on Eldersblood Peak, where a tally-warden still waits for the final count.",
+        "pitch": "A bridge-mason's mark at Valtheim says the barrows of Whiterun are a single ledger in stone.",
+        "outro": "At the peak I cut the missing notch into the frost-rimed slate. The barrow-fires along the ridge flared once in answer, and the plain's oldest debt was balanced.",
+        "boss": {"name": "The Tally-Warden of the Peak", "type": "skycraft:draugr_deathlord", "hp": 3.4, "dmg": 1.5, "level": 20},
+        "reward": {"gold": 520, "loot": "major"}
+      }
+    },
+    {
+      "id": "sk_2",
+      "title": "The Wreck-Light Ledger",
+      "hold": "skyrim/haafingar",
+      "tier": "A",
+      "why": ["haafingar.L9.naval_power", "haafingar.L10.smugglers_coves"],
+      "secret": "False beacons along the Haafingar headlands are coordinated with an underwriter's clerk in Solitude who insures the doomed hulls twice and splits the salvage in Broken Oar Grotto.",
+      "order": ["solitude_lighthouse", "the_katariah", "orphans_tear", "brinewater_grotto", "broken_oar_grotto"],
+      "entry": {
+        "clue": "lectern",
+        "offset": [4, -6],
+        "text": "Wedged under the oil-cask at Solitude Lighthouse is a brass shutter-gauge stamped with four coastal bearings and an insurance clerk's cipher."
+      },
+      "quest": {
+        "title": "The Wreck-Light Ledger",
+        "desc": "A brass shutter-gauge at Solitude Lighthouse matches the bearings of recent coastal wrecks to an underwriter's cipher.",
+        "desc2": "Tracing the salvaged hulls leads through Brinewater Grotto to the quartermaster's counting-room in Broken Oar Grotto.",
+        "pitch": "Someone has been timing the lighthouse shutters to the arrival of insured merchantmen.",
+        "outro": "Below the grotto's tide-line I took the double-entry salvage ledger from the quartermaster's chest. Every ship on the rocks had been sold before it ever left port.",
+        "boss": {"name": "Quartermaster Vane of the Grotto", "type": "skycraft:bandit_chief", "hp": 3.2, "dmg": 1.4, "level": 22},
+        "reward": {"gold": 540, "loot": "major"}
+      }
+    },
+    {
+      "id": "sk_3",
+      "title": "The Dead Who Are Not Local",
+      "hold": "skyrim/falkreath",
+      "tier": "A",
+      "why": ["falkreath.L7.town_of_mourners", "falkreath.L8.arkay_priests"],
+      "secret": "A syndicate of coffin-carters has been smuggling condemned war-dead from across the southern border into Falkreath's consecrated plots for gold, hiding the unblessed rosters in Halldir's Cairn and Sunderstone Gorge.",
+      "order": ["falkreath", "fort_neugrad", "helgen", "halldirs_cairn", "sunderstone_gorge"],
+      "entry": {
+        "clue": "grave",
+        "offset": [6, 5],
+        "text": "Behind the churchyard wall in Falkreath lies a leaden coffin-plate stamped with an Imperial quartermaster's cipher from south of the Jeralls and the note: 'Plot paid in full—ask the cairn-keeper.'"
+      },
+      "quest": {
+        "title": "The Dead Who Are Not Local",
+        "desc": "A leaden coffin-plate in Falkreath's yard bears a southern border stamp and a receipt for secret burial.",
+        "desc2": "The wagon-waybills run from Fort Neugrad and Helgen to Halldir's Cairn and the pyres of Sunderstone Gorge.",
+        "pitch": "Fresh graves in Falkreath carry names no family in the hold has ever heard.",
+        "outro": "In Sunderstone Gorge I burned the false burial charters and left the true name-rolls on Arkay's altar so the dead would at last be known by their own names.",
+        "boss": {"name": "The Gravedigger-Lord of Sunderstone", "type": "skycraft:necromancer", "hp": 3.4, "dmg": 1.5, "level": 22},
+        "reward": {"gold": 520, "loot": "major"}
+      }
+    },
+    {
+      "id": "sk_4",
+      "title": "The Maze That Lets Out",
+      "hold": "skyrim/hjaalmarch",
+      "tier": "A",
+      "why": ["hjaalmarch.L10.bromjunaar_maze", "hjaalmarch.L8.ruined_shrines"],
+      "secret": "The outer cairns of Hjaalmarch form a wider stone labyrinth around Bromjunaar, built not to keep intruders out of Labyrinthian, but to keep a single exiled priest from walking out.",
+      "order": ["stonehills", "fort_snowhawk", "kjenstag_ruins", "lost_valkygg", "labyrinthian"],
+      "entry": {
+        "clue": "stone",
+        "offset": [-7, 3],
+        "text": "A quarry-stone at Stonehills is incised with a five-ring labyrinth diagram; three outer rings are chipped open from the inside."
+      },
+      "quest": {
+        "title": "The Maze That Lets Out",
+        "desc": "A quarry-stone at Stonehills shows Hjaalmarch's ruins as concentric rings of a single maze whose inner gates have been breached from within.",
+        "desc2": "Following the broken ring-stones through Fort Snowhawk, Kjenstag, and Lost Valkygg leads to the maze-keeper at Labyrinthian.",
+        "pitch": "The ruined shrines of the marsh are all aligned to the walls of Labyrinthian.",
+        "outro": "At the center of the stone maze I turned the keystone back into its socket. The footsteps behind the walls stopped at the fourth ring.",
+        "boss": {"name": "The Maze-Keeper of Bromjunaar", "type": "skycraft:draugr_deathlord", "hp": 3.6, "dmg": 1.5, "level": 24},
+        "reward": {"gold": 560, "loot": "major"}
+      }
+    },
+    {
+      "id": "sk_5",
+      "title": "Seven Lifts, One Missing",
+      "hold": "skyrim/the_pale",
+      "tier": "A",
+      "why": ["the_pale.L10.great_lifts", "winterhold.L10.glacier_dwemer"],
+      "secret": "The Dwemer great lifts of the northern mountains share a mechanical counter that tallies every cage-descent into Blackreach, and the counter shows one lift more than exists on the surface.",
+      "order": ["great_lift_at_raldbthar", "great_lift_at_mzinchaleft", "mzinchaleft", "irkngthand", "great_lift_at_alftand"],
+      "entry": {
+        "clue": "lever",
+        "offset": [3, -4],
+        "text": "Inside the cage-housing at the Great Lift at Raldbthar, a brass odometer drum clicks once whenever a distant counterweight moves—marking seven shafts where the maps show six."
+      },
+      "quest": {
+        "title": "Seven Lifts, One Missing",
+        "desc": "A brass odometer in the Raldbthar lift-cage counts descents across seven coupled shafts, though only six surface cages are known.",
+        "desc2": "Tracing the counterweight cables through Mzinchaleft and Irkngthand reveals the phantom shaft's governor at the Great Lift at Alftand.",
+        "pitch": "Every Dwemer lift in the Pale clicks in answer to a seventh cage that no surface map records.",
+        "outro": "When I locked the phantom governor at Alftand, a sealed sub-shaft sighed shut far below the ice, and the six surface lifts finally kept an honest count.",
+        "boss": {"name": "The Lift-Warden Automaton", "type": "skycraft:dwarven_centurion", "hp": 3.8, "dmg": 1.6, "level": 26},
+        "reward": {"gold": 580, "loot": "major"}
+      }
+    },
+    {
+      "id": "sk_6",
+      "title": "The Honey That Does Not Spoil",
+      "hold": "skyrim/the_rift",
+      "tier": "A",
+      "why": ["the_rift.L7.meadery_rule", "the_rift.L9.meadery_power"],
+      "secret": "The prized reserve casks of the Rift never sour because the oldest apiaries are fed from a subterranean amber-fungus seam running from Honeystrand Cave under the lake to Riften.",
+      "order": ["goldenglow_estate", "black_briar_lodge", "honeystrand_cave", "snow_shod_farm", "riften"],
+      "entry": {
+        "clue": "urn",
+        "offset": [-4, 5],
+        "text": "A wax-sealed tasting jar behind the apiary wall at Goldenglow bears a date forty winters old; the honey inside is still warm and smells faintly of cave-moss."
+      },
+      "quest": {
+        "title": "The Honey That Does Not Spoil",
+        "desc": "A forty-year-old tasting jar at Goldenglow Estate holds honey that is still warm to the touch and scented with subterranean moss.",
+        "desc2": "The apiary ledgers trace the winter feed from Black-Briar Lodge and Honeystrand Cave to a hidden cellar beneath Riften.",
+        "pitch": "The reserve honey of the Rift never crystallises, even in midwinter frost.",
+        "outro": "Beneath the canal vaults I sealed the fungal amber-spring that fed the queen-hives. The next vintage will age like honest mead.",
+        "boss": {"name": "The Amber-Hive Matron", "type": "skycraft:spriggan", "hp": 3.4, "dmg": 1.5, "level": 22},
+        "reward": {"gold": 540, "loot": "major"}
+      }
+    },
+    {
+      "id": "sk_7",
+      "title": "Salvage Rights",
+      "hold": "skyrim/winterhold",
+      "tier": "A",
+      "why": ["winterhold.L7.poverty", "winterhold.L8.knowledge_seeker"],
+      "secret": "Four ships lost along the Winterhold pack-ice were all chartered by the same factor, who moved the beacon-braziers on Snowpoint to claim the sunken cargo under coastal salvage law.",
+      "order": ["wreck_of_the_winter_war", "helas_folly", "pilgrims_trench", "wreck_of_the_pride_of_tel_vos", "snowpoint_beacon"],
+      "entry": {
+        "clue": "skeleton",
+        "offset": [5, -5],
+        "text": "Frozen into the quarterdeck ice of the Winter War is an oilskin pouch containing four identical salvage bonds signed before the ships ever weighed anchor."
+      },
+      "quest": {
+        "title": "Salvage Rights",
+        "desc": "An oilskin pouch on the Wreck of the Winter War holds pre-dated salvage bonds for four different vessels along the ice coast.",
+        "desc2": "Comparing the rudder-chains at Hela's Folly, Pilgrim's Trench, and the Pride of Tel Vos points up the cliff to Snowpoint Beacon.",
+        "pitch": "Four ships went down on the same ice-reef bearing salvage bonds signed by the same hand.",
+        "outro": "At Snowpoint Beacon I took the factor's false chart-glass and restored the true coastal bearing. The Sea of Ghosts takes enough ships without help from the shore.",
+        "boss": {"name": "Captain Varek the Salvager", "type": "skycraft:bandit_chief", "hp": 3.4, "dmg": 1.5, "level": 24},
+        "reward": {"gold": 550, "loot": "major"}
+      }
+    },
+    {
+      "id": "sk_8",
+      "title": "The Steam Under the Stones",
+      "hold": "skyrim/eastmarch",
+      "tier": "A",
+      "why": ["eastmarch.L10.steam_ruin", "eastmarch.L9.mammoth_wars"],
+      "secret": "The hot-spring terraces of Eastmarch are vented exhaust from a single Dwemer geothermal manifold linking Mzulft and Kagrenzel; someone has capped the northern relief valve at Steamcrag Camp, threatening to scald the groves.",
+      "order": ["mzulft", "kagrenzel", "eldergleam_sanctuary", "witchmist_grove", "steamcrag_camp"],
+      "entry": {
+        "clue": "lever",
+        "offset": [-6, 4],
+        "text": "A bronze pressure-plaque outside Mzulft's boiler vestibule lists five surface vents across the caldera basin—and the fifth needle is pinned in the red."
+      },
+      "quest": {
+        "title": "The Steam Under the Stones",
+        "desc": "A bronze pressure-plaque at Mzulft shows five geothermal vents across the Eastmarch basin, with the fifth valve pinned shut.",
+        "desc2": "Following the buried bronze conduits from Kagrenzel through Eldergleam and Witchmist Grove leads to the capped relief engine at Steamcrag Camp.",
+        "pitch": "The geysers of Eastmarch have been boiling higher each week since a bronze valve was jammed in the caldera.",
+        "outro": "When I opened the relief manifold at Steamcrag Camp, a column of white steam roared into the frosty sky and the boiling pools around the Sanctuary settled back to warmth.",
+        "boss": {"name": "The Vent-Engine Overseer", "type": "skycraft:dwarven_centurion", "hp": 3.8, "dmg": 1.6, "level": 26},
+        "reward": {"gold": 580, "loot": "major"}
+      }
+    },
+    {
+      "id": "sk_9",
+      "title": "The Channels' Warden",
+      "hold": "skyrim/the_reach",
+      "tier": "A",
+      "why": ["the_reach.L10.dwemer_depths", "the_reach.L7.silver_family"],
+      "secret": "Markarth's rushing water-channels are governed by an ancient Dwemer sluice-network stretching to Bthardamz and Arkngthamz, used quietly by ore-syndicates to flood or parch rival silver shafts.",
+      "order": ["markarth", "karthwasten", "left_hand_mine", "bthardamz", "arkngthamz"],
+      "entry": {
+        "clue": "lever",
+        "offset": [5, 3],
+        "text": "Set into a culvert wall beneath Markarth's lower waterwheel is a brass sluice-index naming four mine-adits and their water-table depths."
+      },
+      "quest": {
+        "title": "The Channels' Warden",
+        "desc": "A brass sluice-index beneath Markarth's waterwheel links the city's stone canals to the water-tables of four Reach mines.",
+        "desc2": "Tracing the flooded adits through Karthwasten, Left Hand Mine, and Bthardamz leads to the master sluice-warden in Arkngthamz.",
+        "pitch": "Independent silver shafts in the Reach flood overnight while syndicate mines stay bone-dry.",
+        "outro": "In the lower gallery of Arkngthamz I pinned the master sluice-wheel at level gauge. The Karth's water runs equal through every shaft again.",
+        "boss": {"name": "The Sluice-Warden of Arkngthamz", "type": "skycraft:dwarven_centurion", "hp": 3.8, "dmg": 1.6, "level": 26},
+        "reward": {"gold": 580, "loot": "major"}
+      }
+    }
+  ],
+  "thread_joins": {
+    "t_bone": {
+      "place": "shearpoint",
+      "hold": "skyrim/the_pale",
+      "why": ["skyrim.L9.dragon_crisis", "the_pale.L8.old_crown"],
+      "lead": "Climb the windswept ridge of Shearpoint and inspect the numbered Tsaesci saw-cut on the dragon's spine.",
+      "clue": "a dragon-mound rib-arch on Shearpoint with one cervical vertebra sawn cleanly out and tagged 'Number 27 of 41'"
+    },
+    "t_crown": {
+      "place": "korvanjund",
+      "hold": "skyrim/the_pale",
+      "why": ["the_pale.L8.old_crown", "the_pale.L9.crown_race"],
+      "lead": "Examine the inner royal lintel of Korvanjund where a segment of the Hollow King's regalia was chiselled free.",
+      "clue": "a royal frieze in Korvanjund with the crown's brow-plate pried cleanly from the stone"
+    },
+    "t_dial": {
+      "places": ["mzulft", "alftand"],
+      "hold": "skyrim/eastmarch",
+      "why": ["eastmarch.L10.steam_ruin", "winterhold.L10.glacier_dwemer"],
+      "lead": "Compare the twin bronze countdown dials in Mzulft's observatory and Alftand's glacial pump-hall.",
+      "clue": "paired Dwemer bronze dials in Mzulft and Alftand ticking in unison toward the same cross-mark"
+    },
+    "t_falls": {
+      "place": "bards_leap_summit",
+      "hold": "skyrim/the_reach",
+      "why": ["the_reach.L10.forsworn_redoubts", "the_reach.L8.old_gods"],
+      "lead": "Stand on the cantilevered wooden ledge of Bard's Leap Summit and read the waterproofed stanza-cylinder wedged beneath the plank.",
+      "clue": "a waxed stanza-cylinder wedged under the waterfall ledge at Bard's Leap Summit"
+    }
+  },
+  "sit": {
+    "valtheim_towers": {
+      "name": "Valtheim Towers",
+      "g": "Twin stone watchtowers joined by a high span above the White River rapids.",
+      "m": "The bridge-pier carries the first mason's tally of the plain's ridge barrows.",
+      "c": ["a mason's tally-table cut into the bridge-pier", "four barrow-names with dead-counts", "a blank fifth line pointing to the peak"],
+      "x": ["hamvirs_rest"],
+      "p": "A rubbing of the Valtheim barrow-tally.",
+      "lead": "Copy the mason's tally from Valtheim Towers and check the stones at Hamvir's Rest."
+    },
+    "hamvirs_rest": {
+      "name": "Hamvir's Rest",
+      "g": "A sunken burial yard of weathered headstones and an iron-grated crypt at the foot of the northern hills.",
+      "m": "The lintel stone records the second portion of the plain's war-dead.",
+      "c": ["a lintel notched with seventy-two strokes", "an iron grate stamped with a mason's square", "a stone pointer aimed northwest"],
+      "x": ["rannveigs_fast"],
+      "p": "The second tally-stone rubbing.",
+      "lead": "Carry the Hamvir's Rest count west to Rannveig's Fast."
+    },
+    "rannveigs_fast": {
+      "name": "Rannveig's Fast",
+      "g": "An open-air Nordic ruin cut into the western steppes with a sunken word-wall plaza and a trapdoor chute.",
+      "m": "Behind the word wall sits the third tally-plinth, listing the western fallen.",
+      "c": ["a frost-split plinth behind the word wall", "tally notches matching the Valtheim table", "a mason's arrow pointing toward Dustman's Cairn"],
+      "x": ["dustmans_cairn"],
+      "p": "The third tally-stone rubbing.",
+      "lead": "Take the western count from Rannveig's Fast to Dustman's Cairn."
+    },
+    "dustmans_cairn": {
+      "name": "Dustman's Cairn",
+      "g": "A ridge-top barrow of megalithic stone rings overlooking the central moorland.",
+      "m": "The fourth tally-slab stands in the vestibule, naming the final sum owed to Eldersblood Peak.",
+      "c": ["a vestibule slab with a sum of four hundred and nine", "a missing cornerstone chisel", "a bearing line sighted toward the southern mount"],
+      "x": ["eldersblood_peak"],
+      "p": "The mason's cornerstone chisel.",
+      "lead": "Climb Eldersblood Peak with the cornerstone chisel to complete the plain's tally."
+    },
+    "eldersblood_peak": {
+      "name": "Eldersblood Peak",
+      "g": "A high, ice-crowned summit above the clouds with a dragon mound and an ancient word wall.",
+      "m": "The summit slate holds the master tally of the plain, waiting for its last notch.",
+      "c": ["a master tally-slate one notch short", "barrow-braziers aligned down the ridge", "a tally-warden's frost-covered helm"],
+      "x": ["valtheim_towers"],
+      "p": "The completed Master Tally of the Plain.",
+      "lead": "Cut the final notch on Eldersblood Peak and face the Tally-Warden."
+    },
+    "solitude_lighthouse": {
+      "name": "Solitude Lighthouse",
+      "g": "A stone headland beacon guiding vessels out of the Sea of Ghosts into the Karth estuary.",
+      "m": "A shutter-gauge under the oil-casks records timed blackouts used to lure ships onto the rocks.",
+      "c": ["a brass shutter-gauge with four bearings", "blackout hours pencilled on the lamp-housing", "an underwriter's seal"],
+      "x": ["the_katariah"],
+      "p": "The lighthouse shutter-gauge.",
+      "lead": "Match the shutter-gauge bearings to the anchorage of the Katariah."
+    },
+    "the_katariah": {
+      "name": "The Katariah",
+      "g": "A grand vessel anchored in the sheltered shadow of the Solitude arch.",
+      "m": "The harbor-master's log aboard records duplicate insurance policies issued on three wrecked coasters.",
+      "c": ["duplicate insurance manifests in the chart-drawer", "a clerk's initial stamped in red wax", "a bearing line toward Orphan's Tear"],
+      "x": ["orphans_tear"],
+      "p": "The duplicate underwriter's manifest.",
+      "lead": "Follow the insured vessel list northwest to the Wreck of the Orphan's Tear."
+    },
+    "orphans_tear": {
+      "name": "Orphan's Tear",
+      "g": "A broken hull wedged among coastal ice-floes with salvage crates scattered across the shingle.",
+      "m": "The ship's bell was filed clean of its name before the wreckers ever arrived.",
+      "c": ["a ship's bell with its name filed off", "lantern-hooks hung on the wrong side of the reef", "boat-tracks leading to Brinewater Grotto"],
+      "x": ["brinewater_grotto"],
+      "p": "The filed brass clapper from the Orphan's Tear.",
+      "lead": "Trace the salvage skiff tracks into Brinewater Grotto."
+    },
+    "brinewater_grotto": {
+      "name": "Brinewater Grotto",
+      "g": "A tidal sea-cave beneath the Haafingar cliffs where smugglers unload cargo at high water.",
+      "m": "The grotto serves as the sorting depot where insured cargo is re-crated for resale.",
+      "c": ["fresh crates stencilled over old ship-marks", "a tide-table keyed to Broken Oar Grotto", "a quartermaster's tally-key"],
+      "x": ["broken_oar_grotto"],
+      "p": "The quartermaster's tally-key.",
+      "lead": "Carry the tally-key to the main anchorage in Broken Oar Grotto."
+    },
+    "broken_oar_grotto": {
+      "name": "Broken Oar Grotto",
+      "g": "A vast cavern harbor on the northern coast hiding a moored privateer brig inside the rock.",
+      "m": "The quartermaster's chest holds the master Wreck-Light Ledger linking the false beacons to the Solitude counting-house.",
+      "c": ["the master Wreck-Light Ledger", "shutter-lamps matching the lighthouse gauge", "chests of double-insured silver"],
+      "x": ["solitude_lighthouse"],
+      "p": "The Wreck-Light Ledger.",
+      "lead": "Confront Quartermaster Vane in Broken Oar Grotto and seize the ledger."
+    },
+    "falkreath": {
+      "name": "Falkreath",
+      "g": "A timbered pine-valley seat built around the largest graveyard in Skyrim.",
+      "m": "Coffin-plates from southern border skirmishes are buried under false local names in the far corner of the yard.",
+      "c": ["a leaden coffin-plate with a southern cipher", "freshly turned sod unmarked by the priests", "wheel-ruts leading toward Fort Neugrad"],
+      "x": ["fort_neugrad"],
+      "p": "The southern coffin-plate.",
+      "lead": "Follow the coffin-wagon ruts east toward Fort Neugrad."
+    },
+    "fort_neugrad": {
+      "name": "Fort Neugrad",
+      "g": "A mountain border fortress beside a frozen tarn guarding the Pale Pass approach.",
+      "m": "The gatehouse toll-book records night wagons carrying sealed pine boxes north toward Helgen.",
+      "c": ["a gatehouse log listing sealed pine boxes", "paid receipts stamped with a cairn-mark", "sledge tracks toward Helgen"],
+      "x": ["helgen"],
+      "p": "The Pale Pass wagon waybill.",
+      "lead": "Trace the night-wagon route from Fort Neugrad down to Helgen."
+    },
+    "helgen": {
+      "name": "Helgen",
+      "g": "A fire-blackened crossroads fortress-town whose stone cellars survived the dragon's attack.",
+      "m": "Beneath the ruined barracks sits the transfer vault where the coffin-plates were swapped.",
+      "c": ["a crate of blank iron grave-markers", "a chisel-chest in the cellar", "a map marking Halldir's Cairn"],
+      "x": ["halldirs_cairn"],
+      "p": "The box of swapped grave-tags.",
+      "lead": "Take the grave-tags west to Halldir's Cairn."
+    },
+    "halldirs_cairn": {
+      "name": "Halldir's Cairn",
+      "g": "An ancient mossy burial mound deep in the southern pine woods.",
+      "m": "The outer vestibule hides the pay-chest and the true name-rolls of the smuggled dead.",
+      "c": ["parchment rolls of foreign soldiers' names", "a ledger pointing to the Sunderstone pyres", "candle-wax mixed with pine pitch"],
+      "x": ["sunderstone_gorge"],
+      "p": "The true burial roll of the southern dead.",
+      "lead": "Carry the true burial roll to Sunderstone Gorge."
+    },
+    "sunderstone_gorge": {
+      "name": "Sunderstone Gorge",
+      "g": "A fire-scorched canyon cavern where necromancers and warlocks tend oil-fed braziers.",
+      "m": "The gravedigger-lord uses the unrecorded dead to raise an untraceable thrall-company in the gorge.",
+      "c": ["unmarked coffins stacked beside the fire-altar", "a gravedigger's seal-ring", "charred waybills in the brazier"],
+      "x": ["falkreath"],
+      "p": "The Gravedigger-Lord's Seal.",
+      "lead": "Defeat the Gravedigger-Lord in Sunderstone Gorge and restore the true names to Falkreath."
+    },
+    "stonehills": {
+      "name": "Stonehills",
+      "g": "A rocky mining settlement on the edge of the Hjaalmarch salt-fens.",
+      "m": "A dressed stone pulled from the mine adit bears a five-ring labyrinth map of the hold.",
+      "c": ["a five-ring labyrinth diagram cut in granite", "three outer rings chipped open from within", "survey sights pointing to Fort Snowhawk"],
+      "x": ["fort_snowhawk"],
+      "p": "The Stonehills maze-diagram.",
+      "lead": "Follow the first ring-bearing west to Fort Snowhawk."
+    },
+    "fort_snowhawk": {
+      "name": "Fort Snowhawk",
+      "g": "A weathered stone keep rising out of the western marsh reeds.",
+      "m": "The keep's foundation sits on the second ring-post of the Bromjunaar boundary maze.",
+      "c": ["a foundation monolith with its ward-glyph split", "footprints in the marsh mud heading east", "a bronze plumb-bob"],
+      "x": ["kjenstag_ruins"],
+      "p": "The second ring-key.",
+      "lead": "Cross the marsh from Fort Snowhawk to Kjenstag Ruins."
+    },
+    "kjenstag_ruins": {
+      "name": "Kjenstag Ruins",
+      "g": "A ring of half-sunken Nordic stones in the middle of the Hjaalmarch bog.",
+      "m": "The third ring-stone at Kjenstag was turned ninety degrees to open the southern passage.",
+      "c": ["a rotated ring-stone in the peat", "fresh scrape-marks on the socket", "a bearing line toward Lost Valkygg"],
+      "x": ["lost_valkygg"],
+      "p": "The third ring-key.",
+      "lead": "Follow the rotated stone's bearing south to Lost Valkygg."
+    },
+    "lost_valkygg": {
+      "name": "Lost Valkygg",
+      "g": "A deep catacomb cut into the hillside beside the mountain pass.",
+      "m": "The fourth ring-gate inside Lost Valkygg holds the keystone removed from the maze's center.",
+      "c": ["an iron ring-gate wedged open", "a keystone carved with a spiral", "a passage leading into Labyrinthian"],
+      "x": ["labyrinthian"],
+      "p": "The Bromjunaar Maze Keystone.",
+      "lead": "Carry the keystone into the heart of Labyrinthian."
+    },
+    "labyrinthian": {
+      "name": "Labyrinthian",
+      "g": "A vast ruined city of the Dragon Priests crowning the mountain pass between Whiterun and Hjaalmarch.",
+      "m": "The central stone maze was built to keep its own keeper inside; re-seating the keystone locks the five rings.",
+      "c": ["an empty keystone socket at the maze center", "frost-worn walls humming a low chord", "five concentric ward-marks"],
+      "x": ["stonehills"],
+      "p": "The sealed Keystone of Bromjunaar.",
+      "lead": "Set the keystone in Labyrinthian's maze and defeat the Maze-Keeper."
+    },
+    "great_lift_at_raldbthar": {
+      "name": "Great Lift at Raldbthar",
+      "g": "A brass-and-stone Dwemer surface cage descending straight into the deep earth.",
+      "m": "Its mechanical odometer counts seven coupled lift-cages across the northern mountains.",
+      "c": ["a seven-drum brass odometer", "a counterweight cable vibrating in the shaft", "a maintenance plate naming Mzinchaleft"],
+      "x": ["great_lift_at_mzinchaleft"],
+      "p": "The Raldbthar odometer plate.",
+      "lead": "Take the odometer plate west to the Great Lift at Mzinchaleft."
+    },
+    "great_lift_at_mzinchaleft": {
+      "name": "Great Lift at Mzinchaleft",
+      "g": "A domed Dwemer lift-head standing beside the western snow-road of the Pale.",
+      "m": "The cable-sheave here shows an extra tension line running down into Mzinchaleft's pump-rooms.",
+      "c": ["a twin-grooved bronze sheave", "an unmapped seventh tension cable", "a calibration wrench"],
+      "x": ["mzinchaleft"],
+      "p": "The Dwemer calibration wrench.",
+      "lead": "Descend into Mzinchaleft to trace the seventh tension cable."
+    },
+    "mzinchaleft": {
+      "name": "Mzinchaleft",
+      "g": "A sprawling Dwemer ruin in the Pale whose lower workshops open onto the Blackreach lift.",
+      "m": "The workshop blueprints show a sealed seventh shaft between Irkngthand and Alftand.",
+      "c": ["a rolled copper blueprint of seven shafts", "a governor gear with one tooth sheared", "conduit markers toward Irkngthand"],
+      "x": ["irkngthand"],
+      "p": "The copper shaft-blueprint.",
+      "lead": "Carry the copper blueprint east to Irkngthand."
+    },
+    "irkngthand": {
+      "name": "Irkngthand",
+      "g": "A high-walled Dwemer citadel built into the icy cliffs of the southern Pale.",
+      "m": "The relay-room in Irkngthand routes the seventh lift's steam pressure toward Alftand.",
+      "c": ["a steam-relay manifold set to Shaft Seven", "a brass governor key", "a pressure pipe running north"],
+      "x": ["great_lift_at_alftand"],
+      "p": "The Seventh Shaft Governor Key.",
+      "lead": "Take the governor key to the Great Lift at Alftand."
+    },
+    "great_lift_at_alftand": {
+      "name": "Great Lift at Alftand",
+      "g": "A wind-scoured Dwemer lift-tower perched above the glacial gorge of Alftand.",
+      "m": "Locking the seventh governor here shuts down the phantom sub-shaft below the glacier.",
+      "c": ["a seventh governor socket behind the cage lever", "warm steam rising from an unmapped sub-shaft", "the Lift-Warden's brass chassis"],
+      "x": ["great_lift_at_raldbthar"],
+      "p": "The Seventh Governor Core.",
+      "lead": "Lock the seventh governor at the Great Lift at Alftand and defeat the Lift-Warden."
+    },
+    "goldenglow_estate": {
+      "name": "Goldenglow Estate",
+      "g": "A fortified island apiary on Lake Honrich surrounded by golden birch trees and wooden hives.",
+      "m": "A forty-year-old tasting jar behind the apiary wall holds honey that never cools or crystallises.",
+      "c": ["a warm forty-year-old honey jar", "moss spores suspended in the amber", "feed-cart receipts from Black-Briar Lodge"],
+      "x": ["black_briar_lodge"],
+      "p": "The unspoiled Goldenglow tasting jar.",
+      "lead": "Follow the apiary feed-receipts east to Black-Briar Lodge."
+    },
+    "black_briar_lodge": {
+      "name": "Black-Briar Lodge",
+      "g": "A guarded country manor in the eastern hills overlooking the Rift valley.",
+      "m": "The cellar stores winter bee-feed mixed with glowing cave-resin from Honeystrand.",
+      "c": ["casks of resin-laced bee-feed", "a factor's map of Honeystrand Cave", "a brasshive-smoker"],
+      "x": ["honeystrand_cave"],
+      "p": "The cellar feed-ledger.",
+      "lead": "Trace the resin casks south to Honeystrand Cave."
+    },
+    "honeystrand_cave": {
+      "name": "Honeystrand Cave",
+      "g": "A mossy limestone cavern south of Ivarstead where wild bees nest in the warm rock.",
+      "m": "Deep in the cave, an amber-fungus seam warms the rock and preserves everything it touches.",
+      "c": ["combs of warm amber-fungus", "wooden troughs channeling the sap toward the lake", "cart-tracks toward Snow-Shod Farm"],
+      "x": ["snow_shod_farm"],
+      "p": "A cutting of the amber-fungus comb.",
+      "lead": "Follow the sap-trough trail to Snow-Shod Farm."
+    },
+    "snow_shod_farm": {
+      "name": "Snow-Shod Farm",
+      "g": "A prosperous farmstead outside Riften's walls with root cellars near the lake shore.",
+      "m": "A drainage grate in the root cellar connects the amber seam to the lower canal vaults of Riften.",
+      "c": ["a root-cellar grate warm to the touch", "amber droplets on the brickwork", "a key to the lower canal sluice"],
+      "x": ["riften"],
+      "p": "The lower canal sluice-key.",
+      "lead": "Enter Riften's lower canal vault with the sluice-key."
+    },
+    "riften": {
+      "name": "Riften",
+      "g": "A two-tiered timber city spanning the eastern end of Lake Honrich above stone canal vaults.",
+      "m": "In the deepest canal vault sits the queen-hive fed by the amber spring.",
+      "c": ["a subterranean queen-hive glowing gold", "reserve casks stamped forty winters back", "the Amber-Hive Matron's nest"],
+      "x": ["goldenglow_estate"],
+      "p": "The Queen-Hive Amber Seal.",
+      "lead": "Seal the amber spring beneath Riften and defeat the Amber-Hive Matron."
+    },
+    "wreck_of_the_winter_war": {
+      "name": "Wreck of the Winter War",
+      "g": "A merchant hull crushed between pack-ice floes northeast of Windhelm and Winterhold.",
+      "m": "An oilskin pouch on the quarterdeck holds pre-dated salvage bonds for four coastal ships.",
+      "c": ["four pre-dated salvage bonds", "a sawed rudder-chain", "a bearing toward Hela's Folly"],
+      "x": ["helas_folly"],
+      "p": "The Winter War salvage bond.",
+      "lead": "Carry the salvage bond west along the ice to Hela's Folly."
+    },
+    "helas_folly": {
+      "name": "Hela's Folly",
+      "g": "A listing shipwreck pinned against a rocky island off the northern glacier.",
+      "m": "The ship's compass-box was weighted with iron filings to pull her four points south onto the reef.",
+      "c": ["a compass-box packed with iron filings", "a salvage factor's brass tag", "a diver's line toward Pilgrim's Trench"],
+      "x": ["pilgrims_trench"],
+      "p": "The weighted compass-box.",
+      "lead": "Follow the salvage buoys to Pilgrim's Trench."
+    },
+    "pilgrims_trench": {
+      "name": "Pilgrim's Trench",
+      "g": "A deep, freezing abyssal cleft in the coastal shelf littered with sunken hulls.",
+      "m": "A salvage diving-bell on the ice-shelf holds crates lifted from three wrecks before their losses were posted.",
+      "c": ["manifests dated three days before the storm", "a factor's grappling hook", "sled-ruts heading to the Pride of Tel Vos"],
+      "x": ["wreck_of_the_pride_of_tel_vos"],
+      "p": "The pre-storm cargo manifest.",
+      "lead": "Follow the sled-ruts east to the Wreck of the Pride of Tel Vos."
+    },
+    "wreck_of_the_pride_of_tel_vos": {
+      "name": "Wreck of the Pride of Tel Vos",
+      "g": "A Dunmer coaster split across an ice-shelf east of Winterhold.",
+      "m": "The lookout's log records a movable lantern on the cliff below Snowpoint Beacon.",
+      "c": ["a lookout's sketch of a moving cliff-light", "sled-chains leading up the headland", "a signal-mirror"],
+      "x": ["snowpoint_beacon"],
+      "p": "The lookout's signal-mirror.",
+      "lead": "Climb the headland to Snowpoint Beacon."
+    },
+    "snowpoint_beacon": {
+      "name": "Snowpoint Beacon",
+      "g": "A stone watch-tower crowning the wind-blasted headland above the Sea of Ghosts.",
+      "m": "Captain Varek uses a wheeled brazier on the cliff-edge to draw chartered ships onto the shoals.",
+      "c": ["a wheeled false-brazier on iron rails", "the master salvage-claim register", "crates of unclaimed ship-stores"],
+      "x": ["wreck_of_the_winter_war"],
+      "p": "The Master Salvage Register.",
+      "lead": "Defeat Captain Varek at Snowpoint Beacon and restore the true coast light."
+    },
+    "mzulft": {
+      "name": "Mzulft",
+      "g": "A Dwemer steam-observatory built into the eastern mountains above the volcanic tundra.",
+      "m": "A bronze manifold plaque outside the boiler hall shows five basin vents and a pinned fifth gauge.",
+      "c": ["a five-vent pressure plaque with needle five in the red", "a bronze valve-key", "conduit markers toward Kagrenzel"],
+      "x": ["kagrenzel"],
+      "p": "The Mzulft manifold key.",
+      "lead": "Follow the high mountain conduit from Mzulft to Kagrenzel."
+    },
+    "kagrenzel": {
+      "name": "Kagrenzel",
+      "g": "A high Dwemer resonant chamber in the Velothi crags above an underground river plunge.",
+      "m": "The acoustic orb-cage in Kagrenzel regulates the water-feed into the Eastmarch steam pipes.",
+      "c": ["a flooded intake grate", "a pressure-log stamped in Dwemer numerals", "warm water spilling toward Eldergleam"],
+      "x": ["eldergleam_sanctuary"],
+      "p": "The Kagrenzel intake gauge.",
+      "lead": "Follow the warm subterranean stream down to Eldergleam Sanctuary."
+    },
+    "eldergleam_sanctuary": {
+      "name": "Eldergleam Sanctuary",
+      "g": "A sunlit cavern grove where an ancient tree spreads its roots across warm mineral springs.",
+      "m": "The scalding back-pressure from the capped northern valve is blistering the lower roots of the grove.",
+      "c": ["blistered root-bark over a buried bronze pipe", "a pilgrim's warning slate", "steam-vents hissing toward Witchmist Grove"],
+      "x": ["witchmist_grove"],
+      "p": "A relief-valve coupling from beneath the roots.",
+      "lead": "Carry the valve coupling east to Witchmist Grove."
+    },
+    "witchmist_grove": {
+      "name": "Witchmist Grove",
+      "g": "A fog-shrouded copse hovering over bubbling sulfur pools in the center of the caldera.",
+      "m": "An exposed Dwemer junction-box in the bog has been wedged shut with iron spikes.",
+      "c": ["iron spikes driven into a bronze junction-box", "scalding mud-pots", "heavy boot-tracks toward Steamcrag Camp"],
+      "x": ["steamcrag_camp"],
+      "p": "The spiked junction-plate.",
+      "lead": "Follow the tracks across the flats to Steamcrag Camp."
+    },
+    "steamcrag_camp": {
+      "name": "Steamcrag Camp",
+      "g": "A geothermal basin camp ringed by roaring steam-vents and ancient stone piers.",
+      "m": "The fifth relief-engine stands capped under the central crag, guarded by a woken centurion.",
+      "c": ["a capped Dwemer relief-tower", "pressure needles trembling at the limit", "the Vent-Engine Overseer"],
+      "x": ["mzulft"],
+      "p": "The Steamcrag Relief Wheel.",
+      "lead": "Open the relief manifold at Steamcrag Camp and defeat the Vent-Engine Overseer."
+    },
+    "markarth": {
+      "name": "Markarth",
+      "g": "A vertical city of Dwemer stone and rushing waterfalls wedged into the Karth gorge.",
+      "m": "Beneath the lower waterwheel sits a brass sluice-index that rations water-table pressure across four mines.",
+      "c": ["a brass sluice-index naming four mines", "fresh grease on the diversion lever", "a conduit map toward Karthwasten"],
+      "x": ["karthwasten"],
+      "p": "The Markarth sluice-index.",
+      "lead": "Carry the sluice-index up the river road to Karthwasten."
+    },
+    "karthwasten": {
+      "name": "Karthwasten",
+      "g": "An independent silver-mining village perched on the northern crags of the Reach.",
+      "m": "The lower silver drift flooded the same night the syndicate's sluice-lever was turned in Markarth.",
+      "c": ["a flooded lower drift with Dwemer pipe-grates", "a miner's depth-line", "a dry tunnel pointing to Left Hand Mine"],
+      "x": ["left_hand_mine"],
+      "p": "The Karthwasten water-gauge.",
+      "lead": "Compare the water-gauge with the dry shafts at Left Hand Mine."
+    },
+    "left_hand_mine": {
+      "name": "Left Hand Mine",
+      "g": "An iron-and-silver mining hamlet just outside Markarth's main gate.",
+      "m": "A hidden bronze bypass valve in the back gallery drains Left Hand's water into the Bthardamz aqueduct.",
+      "c": ["a bronze bypass valve behind the timber props", "a syndicate foreman's key", "an aqueduct heading north to Bthardamz"],
+      "x": ["bthardamz"],
+      "p": "The aqueduct bypass key.",
+      "lead": "Follow the Dwemer aqueduct north to Bthardamz."
+    },
+    "bthardamz": {
+      "name": "Bthardamz",
+      "g": "A vast, terraced Dwemer city in the northern Reach with deep cisterns and bronze viaducts.",
+      "m": "The cistern regulator in Bthardamz is slaved to the master sluice-hall in Arkngthamz.",
+      "c": ["a cistern regulator locked in diversion mode", "a brass master-spindle", "a high-pressure conduit running south to Arkngthamz"],
+      "x": ["arkngthamz"],
+      "p": "The Bthardamz master-spindle.",
+      "lead": "Carry the master-spindle south to Arkngthamz."
+    },
+    "arkngthamz": {
+      "name": "Arkngthamz",
+      "g": "A cavern-spanning Dwemer ruin in the southern Reach built around tonal chimes and subterranean rivers.",
+      "m": "The master sluice-wheel in the lower river gallery governs the water-table of the entire Reach.",
+      "c": ["the master sluice-wheel of the Karth", "five tonal water-gauges", "the Sluice-Warden's pedestal"],
+      "x": ["markarth"],
+      "p": "The Master Sluice-Pin of the Reach.",
+      "lead": "Pin the master sluice-wheel in Arkngthamz and defeat the Sluice-Warden."
+    },
+    "shearpoint": {
+      "name": "Shearpoint",
+      "g": "An icy mountain crest in the Pale crowned by a dragon burial mound and a three-word wall.",
+      "m": "One cervical vertebra has been sawn cleanly from the dragon mound's rib-arch and tagged for the Bone Census.",
+      "c": ["a clean saw-cut in the dragon mound's spine", "a silk tag reading 'Number 27 of 41'", "monks' boot-prints in the rime"],
+      "x": ["korvanjund"],
+      "p": "Bone Census Tag #27.",
+      "lead": "Inspect the tagged vertebra-gap on Shearpoint."
+    },
+    "korvanjund": {
+      "name": "Korvanjund",
+      "g": "A grand, half-buried Nordic temple in the southern Pale where the Jagged Crown was entombed.",
+      "m": "Behind the inner throne, a section of the older Hollow King's frieze has been chiselled away.",
+      "c": ["a royal frieze with its brow-plate chiselled out", "a pilgrim's wax seal", "chisel-marks matching the Sundered Crown thefts"],
+      "x": ["shearpoint"],
+      "p": "The Korvanjund Crown-Rubbing.",
+      "lead": "Examine the chiselled royal frieze in the inner crypt of Korvanjund."
+    },
+    "alftand": {
+      "name": "Alftand",
+      "g": "A Dwemer ruin sunk into a glacial fissure in Winterhold, descending into Blackreach.",
+      "m": "Deep in the pump-hall sits a bronze countdown dial ticking in unison with the dial in Mzulft.",
+      "c": ["a frost-rimmed bronze dial with one moving hand", "a scholar's cross-mark one tick ahead", "conduit lines to Mzulft"],
+      "x": ["mzulft"],
+      "p": "The Alftand Dial Reading.",
+      "lead": "Read the synchronized bronze dial in Alftand's glacial pump-hall."
+    },
+    "bards_leap_summit": {
+      "name": "Bard's Leap Summit",
+      "g": "A dizzying waterfall precipice in the Reach where a wooden plank juts over a deep canyon pool.",
+      "m": "Wedged beneath the leaping plank is a waxed stanza-cylinder from the continental Falls thread.",
+      "c": ["a waxed brass cylinder under the waterfall plank", "four verses of the Falling Water song", "a minstrel's carved plectrum"],
+      "x": ["markarth"],
+      "p": "The Bard's Leap Stanza-Cylinder.",
+      "lead": "Recover the waxed stanza-cylinder from the ledge at Bard's Leap Summit."
+    }
+  }
+}

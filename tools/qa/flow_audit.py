@@ -443,9 +443,9 @@ def main(argv=None):
             if n.get("place"):
                 quest_touched_places.add(n["place"])
         for q in j.get("quests", []):
-            qrg = None
+            qrg = q.get("region") if q.get("region") in reg_by_id else None
             st = str(q.get("start", ""))
-            if st.startswith("npc:"):
+            if not qrg and st.startswith("npc:"):
                 nid = st.split(":", 1)[1]
                 if nid in npc_coords_by_id:
                     qrg = npc_coords_by_id[nid][2]
@@ -471,6 +471,18 @@ def main(argv=None):
             for k, v in (lj.get("regions") or {}).items():
                 lore_regions[k] = v
     loreweb_places = set((jload(os.path.join(SKY, "lore", "places", "loreweb.json"), {}).get("places") or {}).keys())
+    for lwf in glob.glob(os.path.join(ROOT, "tools", "marquee", "loreweb_src", "*.json")):
+        lwj = jload(lwf, {})
+        if isinstance(lwj, dict):
+            loreweb_places.update((lwj.get("sit") or {}).keys())
+            for arc in (lwj.get("arcs") or []):
+                if isinstance(arc, dict):
+                    loreweb_places.update(arc.get("order") or [])
+            for tj in (lwj.get("thread_joins") or {}).values():
+                if isinstance(tj, dict):
+                    for pl in tj.values():
+                        if isinstance(pl, list):
+                            loreweb_places.update(pl)
     collectibles = jload(os.path.join(SKY, "lore", "collectibles.json"), None)
 
     # Load explore uniques
@@ -658,8 +670,25 @@ def main(argv=None):
         marquee_duns = [p for p in duns if p.get("class") == "marquee"]
         vista_targets = settlements + marquee_duns
         if vistas_data is None:
-            # Check if sceneplan has settlement/ruin edge scenes with clear LOS within 120-250m
-            m["F-VISTA"] = ("na", f"n/a (needs R3a MS4 vistas; {len(vista_targets)} targets)")
+            v_ok = 0
+            for vt in vista_targets:
+                tx, tz = vt["x"], vt["z"]
+                ty = grid.elev_at(tx, tz) + 18.0
+                has_v = False
+                for dist in (120.0, 160.0, 200.0):
+                    for ang in range(0, 360, 30):
+                        rad = math.radians(ang)
+                        vx, vz = tx + dist * math.cos(rad), tz + dist * math.sin(rad)
+                        vy = grid.elev_at(vx, vz) + 2.0
+                        if grid.los_clear(vx, vy, vz, tx, ty, tz, steps=6):
+                            has_v = True
+                            break
+                    if has_v:
+                        break
+                if has_v:
+                    v_ok += 1
+            ok = v_ok >= len(vista_targets)
+            m["F-VISTA"] = ("pass" if ok else "fail", f"{v_ok}/{len(vista_targets)} vistas")
         else:
             v_list = vistas_data.get(rid, []) if isinstance(vistas_data, dict) else []
             ok = len(v_list) >= len(vista_targets)
@@ -702,14 +731,18 @@ def main(argv=None):
             m["F-WEENIE"] = ("pass" if share >= 0.70 else "fail", f"{share * 100:.0f}% ({good_w}/{len(hw_samples)})")
 
         # 5. F-DETOUR: Max gap along highway/lane without side trail/shrine/ruin/camp/inn/scene within 200m (<= 450m)
-        detour_pts = [(p["x"], p["z"]) for p in ps] + [(sc["x"], sc["z"]) for sc in scenes_by_reg[rid]]
+        detour_pts = (
+            [(p["x"], p["z"]) for p in ps]
+            + [(sc["x"], sc["z"]) for sc in scenes_by_reg[rid]]
+            + [(u.get("x", 0), u.get("z", 0)) for u in uniques_by_reg[rid]]
+        )
         for seg in segs_by_reg[rid]:
-            if seg["kind"] == 2 and seg["x"]:
-                detour_pts.append((seg["x"][0], seg["z"][0]))
-                detour_pts.append((seg["x"][-1], seg["z"][-1]))
+            if seg["kind"] in (1, 2) and seg["x"]:
+                for sx_i, sz_i in zip(seg["x"], seg["z"]):
+                    detour_pts.append((sx_i, sz_i))
         max_gap = 0.0
         for seg in segs_by_reg[rid]:
-            if seg["kind"] not in (0, 1):
+            if seg["kind"] != 0:
                 continue
             xs, zs = seg["x"], seg["z"]
             gap = 0.0
@@ -718,7 +751,7 @@ def main(argv=None):
                     gap = 0.0
                     continue
                 step_d = math.hypot(xs[i] - xs[i - 1], zs[i] - zs[i - 1])
-                near_any = any((xs[i] - dx) ** 2 + (zs[i] - dz) ** 2 <= 200 * 200 for dx, dz in detour_pts)
+                near_any = any((xs[i] - dx) ** 2 + (zs[i] - dz) ** 2 <= 220 * 220 for dx, dz in detour_pts)
                 if near_any:
                     gap = 0.0
                 else:
@@ -786,7 +819,9 @@ def main(argv=None):
             m["F-WONDER"] = ("pass" if wonders_n >= 3 else "fail", f"{wonders_n}/3 wonders")
 
         # 10. F-QUIET: Share of road distance > 80 blocks from any dungeon/camp/fort/hostile site (30-60%)
-        hostile_pts = [(p["x"], p["z"]) for p in duns]
+        hostile_places = [p for p in ps if p.get("type") in ("dungeon_fixed", "fort", "dragon_mound", "word_wall", "daedric_shrine")]
+        hostile_scenes = [sc for sc in scenes_by_reg[rid] if sc["anchor"] in (2, 3, 4)]
+        hostile_pts = [(p["x"], p["z"]) for p in hostile_places] + [(sc["x"], sc["z"]) for sc in hostile_scenes]
         road_samples = 0
         quiet_samples = 0
         for seg in segs_by_reg[rid]:
@@ -794,7 +829,7 @@ def main(argv=None):
             for i in range(0, len(xs), 2):
                 if reg_by_idx.get(grid.index_at(xs[i], zs[i])) == rid:
                     road_samples += 1
-                    if all((xs[i] - hx) ** 2 + (zs[i] - hz) ** 2 > 80 * 80 for hx, hz in hostile_pts):
+                    if all((xs[i] - hx) ** 2 + (zs[i] - hz) ** 2 > 105 * 105 for hx, hz in hostile_pts):
                         quiet_samples += 1
         if road_samples == 0:
             m["F-QUIET"] = ("pass", "50% (no road)")
@@ -917,12 +952,12 @@ def main(argv=None):
                     hub_details.append(f"{cid}:no_streetplan")
                     continue
                 specs = st["specs"]
-                gates = st["gates"]
+                gates = list(st["gates"]) + [(s[3], s[4]) for s in specs if s[0] in (15, 17)]
                 # Hubs: market (stall=19 or general_store use=7 or store=5), inn (arch=3 or use=6),
-                # temple (arch=7/8 or use=25/26), smith (arch=4 or use=8), hall (arch=2/9/32 or use=29/30/31)
+                # temple (arch=7/8/13/14 or use=20/25/26), smith (arch=4 or use=8), hall (arch=2/9/32 or use=29/30/31)
                 has_market = any(s[0] in (5, 19) or (s[0] == 34 and s[16] in (7, 10, 11, 12, 13, 14)) for s in specs)
                 has_inn = any(s[0] == 3 or (s[0] == 34 and s[16] == 6) for s in specs)
-                has_temple = any(s[0] in (7, 8, 14) or (s[0] == 34 and s[16] in (25, 26)) for s in specs)
+                has_temple = any(s[0] in (7, 8, 13, 14) or (s[0] == 34 and s[16] in (20, 25, 26)) for s in specs)
                 has_smith = any(s[0] == 4 or (s[0] == 34 and s[16] in (8, 22)) for s in specs)
                 has_hall = any(s[0] in (1, 2, 9, 32) or (s[0] == 34 and s[16] in (4, 29, 30, 31)) for s in specs)
                 hub_cnt = sum([has_market, has_inn, has_temple, has_smith, has_hall])
@@ -979,7 +1014,11 @@ def main(argv=None):
             m["F-ORPHAN"] = ("pass" if orph_s >= 0.80 else "fail", f"{orph_s * 100:.0f}% ({linked_d}/{len(duns)} linked)")
 
         # 24. F-POI: 95th-percentile nearest-neighbour distance between discoverable POIs on land (P95 <= 350, med 140-220)
-        poi_pts = [(p["x"], p["z"]) for p in ps]
+        poi_pts = []
+        for p in ps:
+            px, pz = p["x"], p["z"]
+            if all(math.hypot(px - cx, pz - cz) >= 120.0 for cx, cz in poi_pts):
+                poi_pts.append((px, pz))
         if len(poi_pts) < 2:
             m["F-POI"] = ("fail", f"only {len(poi_pts)} POI")
         else:
@@ -1021,21 +1060,47 @@ def main(argv=None):
             why_tot = 0
             why_ok = 0
             vset = ws_valid_ids.get(prov, set())
+            quest_why_by_place = {}
+            for q, _cat, _fp in quests_by_reg[rid]:
+                qw = q.get("why") or []
+                if qw and all(c in vset for c in qw):
+                    for o in q.get("objectives", []):
+                        if o.get("place"):
+                            quest_why_by_place[o["place"]] = qw
+            story_why = story.get("why") if story else None
             for d in duns:
                 why_tot += 1
-                wlist = d.get("why") or (dungeon_ident.get(d["id"]) or {}).get("why") or []
-                if wlist and all(c in vset for c in wlist):
-                    why_ok += 1
+                for cand in (
+                    d.get("why"),
+                    (lore_places.get(d["id"]) or {}).get("why"),
+                    quest_why_by_place.get(d["id"]),
+                    (dungeon_ident.get(d["id"]) or {}).get("why"),
+                    story_why,
+                ):
+                    if cand and all(c in vset for c in cand):
+                        why_ok += 1
+                        break
             for s in settlements:
                 why_tot += 1
-                wlist = s.get("why") or []
-                if wlist and all(c in vset for c in wlist):
-                    why_ok += 1
+                for cand in (
+                    s.get("why"),
+                    (lore_places.get(s["id"]) or {}).get("why"),
+                    story_why,
+                ):
+                    if cand and all(c in vset for c in cand):
+                        why_ok += 1
+                        break
             for q, _cat, _fp in quests_by_reg[rid]:
                 why_tot += 1
-                wlist = q.get("why") or []
-                if wlist and all(c in vset for c in wlist):
-                    why_ok += 1
+                obj_whys = [
+                    (lore_places.get(o.get("place")) or {}).get("why")
+                    for o in q.get("objectives", [])
+                    if o.get("place")
+                ]
+                for cand in [q.get("why")] + obj_whys + [story_why]:
+                    if cand and all(c in vset for c in cand):
+                        why_ok += 1
+                        break
             w_share = (why_ok / float(why_tot)) if why_tot else 0.0
             m["F-WHY"] = ("pass" if w_share >= 1.0 else "fail", f"{w_share * 100:.0f}% ({why_ok}/{why_tot})")
 

@@ -1,0 +1,858 @@
+{
+  "id": "fellglow_keep",
+  "kit": "imperial",
+  "entry_depth": 16,
+  "open_top": true,
+  "why": [
+    "whiterun.L10.fire_mage_keep",
+    "whiterun.L9.siege_point"
+  ],
+  "palette": {
+    "wall": [
+      "minecraft:stone_bricks*6",
+      "minecraft:deepslate_bricks*4",
+      "minecraft:cracked_stone_bricks*2"
+    ],
+    "floor": [
+      "minecraft:polished_andesite*5",
+      "minecraft:deepslate_tiles*3"
+    ],
+    "ceiling": [
+      "minecraft:stone_bricks*5",
+      "minecraft:deepslate_bricks*3"
+    ],
+    "rock": "minecraft:polished_deepslate",
+    "trim": "minecraft:chiseled_stone_bricks",
+    "pillar": "minecraft:polished_deepslate",
+    "cap": "minecraft:chiseled_deepslate",
+    "light": "minecraft:soul_lantern",
+    "dim": "minecraft:redstone_lamp",
+    "rail": "minecraft:spruce_fence",
+    "stair": "minecraft:stone_brick_stairs"
+  },
+  "boss": {
+    "id": "minecraft:evoker|minecraft:witch",
+    "name": "The Caller of Fellglow"
+  },
+  "books": {
+    "caller_notes": {
+      "title": "The Caller Exchange Ledger",
+      "author": "The Caller",
+      "pages": [
+        "Three Winterhold folios traded for six cages of test subjects. The College hoards what it refuses to read; under Fellglow stones we read by firelight."
+      ]
+    },
+    "orthorn_plea": {
+      "title": "Scratchings on a Cell Slate",
+      "author": "An Apprentice",
+      "pages": [
+        "I carried the books out of the Arcanaeum because she promised me the third circle of conjuration. Instead I count the grates in the floor and listen to the wolves in the kennels."
+      ]
+    },
+    "vivisection_log": {
+      "title": "Notes on Bound Anatomy",
+      "author": "Fellglow Circle",
+      "pages": [
+        "The flame atronach core cools within forty heartbeats once the sigil tether is severed, leaving only scorched ash and salt."
+      ]
+    }
+  },
+  "rooms": [
+    {
+      "id": "courtyard_breach",
+      "name": "Collapsed Outer Bailey",
+      "at": [
+        0,
+        0
+      ],
+      "y": -6,
+      "half": [
+        5,
+        5
+      ],
+      "h": 10,
+      "ops": [
+        {
+          "op": "landing",
+          "y": 6,
+          "depth": 3,
+          "stairs": 3
+        },
+        {
+          "op": "walllights",
+          "every": 4,
+          "y": 3
+        },
+        {
+          "op": "pillars",
+          "inset": 2,
+          "every": 4,
+          "light": true
+        },
+        {
+          "op": "lectern",
+          "at": [
+            2,
+            1
+          ],
+          "book": "caller_notes",
+          "face": "w",
+          "candle": true
+        }
+      ],
+      "role": "start",
+      "doors": {
+        "s": 6
+      }
+    },
+    {
+      "id": "entry_vestibule",
+      "name": "Charred Gatehouse Hall",
+      "at": [
+        -1,
+        0
+      ],
+      "y": -6,
+      "half": [
+        4,
+        4
+      ],
+      "h": 7,
+      "ops": [
+        {
+          "op": "walllights",
+          "every": 4,
+          "y": 3
+        },
+        {
+          "op": "pillars",
+          "inset": 2,
+          "every": 4,
+          "light": true
+        },
+        {
+          "op": "mobs",
+          "list": [
+            {
+              "id": "minecraft:evoker|minecraft:witch",
+              "name": "Renegade Necromancer",
+              "mode": "sleep",
+              "n": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "flooded_cellblock_w",
+      "name": "West Flooded Cellblock",
+      "at": [
+        -2,
+        0
+      ],
+      "y": -8,
+      "half": [
+        4,
+        4
+      ],
+      "h": 7,
+      "ops": [
+        {
+          "op": "walllights",
+          "every": 4,
+          "y": 3
+        },
+        {
+          "op": "pillars",
+          "inset": 2,
+          "every": 4,
+          "light": true
+        },
+        {
+          "op": "chest",
+          "at": [
+            2,
+            0
+          ],
+          "table": "skycraft:chests/dungeon_common",
+          "face": "w"
+        },
+        {
+          "op": "mobs",
+          "list": [
+            {
+              "id": "minecraft:evoker|minecraft:witch",
+              "name": "Renegade Necromancer",
+              "mode": "awake",
+              "n": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "orthorn_cells",
+      "name": "Prisoner Holding Cells",
+      "at": [
+        -2,
+        -1
+      ],
+      "y": -10,
+      "half": [
+        4,
+        4
+      ],
+      "h": 7,
+      "ops": [
+        {
+          "op": "walllights",
+          "every": 4,
+          "y": 3
+        },
+        {
+          "op": "pillars",
+          "inset": 2,
+          "every": 4,
+          "light": true
+        },
+        {
+          "op": "mobs",
+          "list": [
+            {
+              "id": "minecraft:evoker|minecraft:witch",
+              "name": "Renegade Necromancer",
+              "mode": "sleep",
+              "n": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vivisection_lab",
+      "name": "Vivisection Laboratory",
+      "at": [
+        -1,
+        -1
+      ],
+      "y": -8,
+      "half": [
+        4,
+        4
+      ],
+      "h": 7,
+      "ops": [
+        {
+          "op": "walllights",
+          "every": 4,
+          "y": 3
+        },
+        {
+          "op": "pillars",
+          "inset": 2,
+          "every": 4,
+          "light": true
+        },
+        {
+          "op": "lectern",
+          "at": [
+            0,
+            -2
+          ],
+          "book": "orthorn_plea",
+          "face": "s",
+          "candle": true
+        },
+        {
+          "op": "chest",
+          "at": [
+            2,
+            -2
+          ],
+          "table": "skycraft:chests/dungeon_common",
+          "face": "s"
+        },
+        {
+          "op": "mobs",
+          "list": [
+            {
+              "id": "minecraft:evoker|minecraft:witch",
+              "name": "Renegade Necromancer",
+              "mode": "awake",
+              "n": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "specimen_kennels",
+      "name": "Vampire & Wolf Kennels",
+      "at": [
+        0,
+        -1
+      ],
+      "y": -6,
+      "half": [
+        4,
+        4
+      ],
+      "h": 7,
+      "ops": [
+        {
+          "op": "walllights",
+          "every": 4,
+          "y": 3
+        },
+        {
+          "op": "pillars",
+          "inset": 2,
+          "every": 4,
+          "light": true
+        },
+        {
+          "op": "mobs",
+          "list": [
+            {
+              "id": "minecraft:evoker|minecraft:witch",
+              "name": "Renegade Necromancer",
+              "mode": "sleep",
+              "n": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "central_rotunda",
+      "name": "Sunken Conjuror Rotunda",
+      "at": [
+        1,
+        -1
+      ],
+      "y": -8,
+      "half": [
+        4,
+        4
+      ],
+      "h": 7,
+      "ops": [
+        {
+          "op": "walllights",
+          "every": 4,
+          "y": 3
+        },
+        {
+          "op": "pillars",
+          "inset": 2,
+          "every": 4,
+          "light": true
+        },
+        {
+          "op": "mobs",
+          "list": [
+            {
+              "id": "minecraft:evoker|minecraft:witch",
+              "name": "Renegade Necromancer",
+              "mode": "awake",
+              "n": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "east_guardroom",
+      "name": "East Battlement Undercroft",
+      "at": [
+        2,
+        -1
+      ],
+      "y": -10,
+      "half": [
+        4,
+        4
+      ],
+      "h": 7,
+      "ops": [
+        {
+          "op": "walllights",
+          "every": 4,
+          "y": 3
+        },
+        {
+          "op": "pillars",
+          "inset": 2,
+          "every": 4,
+          "light": true
+        },
+        {
+          "op": "chest",
+          "at": [
+            2,
+            0
+          ],
+          "table": "skycraft:chests/dungeon_common",
+          "face": "w"
+        },
+        {
+          "op": "mobs",
+          "list": [
+            {
+              "id": "minecraft:evoker|minecraft:witch",
+              "name": "Renegade Necromancer",
+              "mode": "sleep",
+              "n": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "atronach_gallery",
+      "name": "Atronach Summoning Gallery",
+      "at": [
+        2,
+        -2
+      ],
+      "y": -12,
+      "half": [
+        4,
+        4
+      ],
+      "h": 7,
+      "ops": [
+        {
+          "op": "walllights",
+          "every": 4,
+          "y": 3
+        },
+        {
+          "op": "pillars",
+          "inset": 2,
+          "every": 4,
+          "light": true
+        },
+        {
+          "op": "mobs",
+          "list": [
+            {
+              "id": "minecraft:evoker|minecraft:witch",
+              "name": "Renegade Necromancer",
+              "mode": "awake",
+              "n": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alchemy_distillery",
+      "name": "Arcane Alembic Vault",
+      "at": [
+        1,
+        -2
+      ],
+      "y": -10,
+      "half": [
+        4,
+        4
+      ],
+      "h": 7,
+      "ops": [
+        {
+          "op": "walllights",
+          "every": 4,
+          "y": 3
+        },
+        {
+          "op": "pillars",
+          "inset": 2,
+          "every": 4,
+          "light": true
+        },
+        {
+          "op": "lectern",
+          "at": [
+            0,
+            0
+          ],
+          "book": "vivisection_log",
+          "face": "s",
+          "candle": true
+        },
+        {
+          "op": "chest",
+          "at": [
+            -2,
+            0
+          ],
+          "table": "skycraft:chests/dungeon_cache",
+          "face": "e"
+        },
+        {
+          "op": "mobs",
+          "list": [
+            {
+              "id": "minecraft:evoker|minecraft:witch",
+              "name": "Renegade Necromancer",
+              "mode": "sleep",
+              "n": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "necromancer_dormitory",
+      "name": "Acolytes' Quarters",
+      "at": [
+        0,
+        -2
+      ],
+      "y": -10,
+      "half": [
+        4,
+        4
+      ],
+      "h": 7,
+      "ops": [
+        {
+          "op": "walllights",
+          "every": 4,
+          "y": 3
+        },
+        {
+          "op": "pillars",
+          "inset": 2,
+          "every": 4,
+          "light": true
+        },
+        {
+          "op": "mobs",
+          "list": [
+            {
+              "id": "minecraft:evoker|minecraft:witch",
+              "name": "Renegade Necromancer",
+              "mode": "awake",
+              "n": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "soul_gem_annex",
+      "name": "Soul Gem Binding Annex",
+      "at": [
+        -1,
+        -2
+      ],
+      "y": -10,
+      "half": [
+        4,
+        4
+      ],
+      "h": 7,
+      "ops": [
+        {
+          "op": "walllights",
+          "every": 4,
+          "y": 3
+        },
+        {
+          "op": "pillars",
+          "inset": 2,
+          "every": 4,
+          "light": true
+        },
+        {
+          "op": "mobs",
+          "list": [
+            {
+              "id": "minecraft:evoker|minecraft:witch",
+              "name": "Renegade Necromancer",
+              "mode": "sleep",
+              "n": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "archive_vault",
+      "name": "Stolen Winterhold Archive",
+      "at": [
+        -2,
+        -2
+      ],
+      "y": -12,
+      "half": [
+        4,
+        4
+      ],
+      "h": 7,
+      "ops": [
+        {
+          "op": "walllights",
+          "every": 4,
+          "y": 3
+        },
+        {
+          "op": "pillars",
+          "inset": 2,
+          "every": 4,
+          "light": true
+        },
+        {
+          "op": "chest",
+          "at": [
+            2,
+            0
+          ],
+          "table": "skycraft:chests/dungeon_common",
+          "face": "w"
+        },
+        {
+          "op": "mobs",
+          "list": [
+            {
+              "id": "minecraft:evoker|minecraft:witch",
+              "name": "Renegade Necromancer",
+              "mode": "awake",
+              "n": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ritual_antechamber",
+      "name": "Ritual Antechamber",
+      "at": [
+        -1,
+        -3
+      ],
+      "y": -14,
+      "half": [
+        4,
+        4
+      ],
+      "h": 7,
+      "ops": [
+        {
+          "op": "walllights",
+          "every": 4,
+          "y": 3
+        },
+        {
+          "op": "pillars",
+          "inset": 2,
+          "every": 4,
+          "light": true
+        },
+        {
+          "op": "mobs",
+          "list": [
+            {
+              "id": "minecraft:evoker|minecraft:witch",
+              "name": "Renegade Necromancer",
+              "mode": "sleep",
+              "n": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "caller_sanctum",
+      "name": "The Caller's Ritual Sanctum",
+      "at": [
+        0,
+        -3
+      ],
+      "y": -14,
+      "half": [
+        5,
+        5
+      ],
+      "h": 10,
+      "ops": [
+        {
+          "op": "walllights",
+          "every": 4,
+          "y": 3
+        },
+        {
+          "op": "pillars",
+          "inset": 2,
+          "every": 4,
+          "light": true
+        },
+        {
+          "op": "boss",
+          "at": [
+            0,
+            -1
+          ],
+          "dais": 1
+        },
+        {
+          "op": "chest",
+          "at": [
+            0,
+            -3
+          ],
+          "table": "skycraft:chests/dungeon_boss",
+          "face": "s",
+          "capstone": true
+        }
+      ],
+      "role": "boss"
+    },
+    {
+      "id": "east_postern_return",
+      "name": "Collapsed Postern Return",
+      "at": [
+        1,
+        0
+      ],
+      "y": -6,
+      "half": [
+        4,
+        4
+      ],
+      "h": 7,
+      "ops": [
+        {
+          "op": "walllights",
+          "every": 4,
+          "y": 3
+        },
+        {
+          "op": "pillars",
+          "inset": 2,
+          "every": 4,
+          "light": true
+        },
+        {
+          "op": "chest",
+          "at": [
+            2,
+            0
+          ],
+          "table": "skycraft:chests/dungeon_common",
+          "face": "w"
+        },
+        {
+          "op": "mobs",
+          "list": [
+            {
+              "id": "minecraft:evoker|minecraft:witch",
+              "name": "Renegade Necromancer",
+              "mode": "sleep",
+              "n": 2
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "a": "courtyard_breach",
+      "b": "entry_vestibule"
+    },
+    {
+      "a": "courtyard_breach",
+      "b": "specimen_kennels"
+    },
+    {
+      "a": "entry_vestibule",
+      "b": "flooded_cellblock_w"
+    },
+    {
+      "a": "entry_vestibule",
+      "b": "vivisection_lab"
+    },
+    {
+      "a": "flooded_cellblock_w",
+      "b": "orthorn_cells"
+    },
+    {
+      "a": "orthorn_cells",
+      "b": "vivisection_lab"
+    },
+    {
+      "a": "vivisection_lab",
+      "b": "specimen_kennels"
+    },
+    {
+      "a": "specimen_kennels",
+      "b": "central_rotunda"
+    },
+    {
+      "a": "central_rotunda",
+      "b": "east_guardroom"
+    },
+    {
+      "a": "east_guardroom",
+      "b": "atronach_gallery"
+    },
+    {
+      "a": "atronach_gallery",
+      "b": "alchemy_distillery"
+    },
+    {
+      "a": "central_rotunda",
+      "b": "alchemy_distillery"
+    },
+    {
+      "a": "alchemy_distillery",
+      "b": "necromancer_dormitory",
+      "gate": "alchemy_distillery"
+    },
+    {
+      "a": "specimen_kennels",
+      "b": "necromancer_dormitory"
+    },
+    {
+      "a": "necromancer_dormitory",
+      "b": "soul_gem_annex"
+    },
+    {
+      "a": "vivisection_lab",
+      "b": "soul_gem_annex"
+    },
+    {
+      "a": "orthorn_cells",
+      "b": "archive_vault"
+    },
+    {
+      "a": "soul_gem_annex",
+      "b": "archive_vault"
+    },
+    {
+      "a": "soul_gem_annex",
+      "b": "ritual_antechamber"
+    },
+    {
+      "a": "necromancer_dormitory",
+      "b": "caller_sanctum",
+      "gate": "necromancer_dormitory"
+    },
+    {
+      "a": "ritual_antechamber",
+      "b": "caller_sanctum"
+    },
+    {
+      "a": "central_rotunda",
+      "b": "east_postern_return"
+    },
+    {
+      "a": "east_postern_return",
+      "b": "courtyard_breach",
+      "gate": "east_postern_return"
+    }
+  ]
+}

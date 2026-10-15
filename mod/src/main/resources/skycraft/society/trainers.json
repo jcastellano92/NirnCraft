@@ -81,7 +81,7 @@
         "tier": "master",
         "cap": 90,
         "workplace": "bard",
-        "why": ["haafingar.L7.bards_college", "haafingar.L5.east_empire_docks"]
+        "why": ["haafingar.L5.bards_college", "haafingar.L5.company_docks"]
       },
       {
         "name": "Tullia Shield-Wall",
@@ -89,7 +89,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "housecarl",
-        "why": ["haafingar.L7.imperial_seat", "haafingar.L5.east_empire_docks"]
+        "why": ["haafingar.L9.imperial_seat", "haafingar.L5.company_docks"]
       },
       {
         "name": "Aldis Legion-Blade",
@@ -97,7 +97,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "steward",
-        "why": ["haafingar.L7.imperial_seat", "haafingar.L8.eight_divines_cathedral"]
+        "why": ["haafingar.L9.imperial_seat", "haafingar.L8.divines_temple"]
       },
       {
         "name": "Sybille Court-Seer",
@@ -105,7 +105,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "wizard",
-        "why": ["haafingar.L7.imperial_seat", "haafingar.L8.eight_divines_cathedral"]
+        "why": ["haafingar.L9.imperial_seat", "haafingar.L8.divines_temple"]
       },
       {
         "name": "Beirand Anvil-Ward",
@@ -113,7 +113,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "smith",
-        "why": ["haafingar.L5.east_empire_docks", "haafingar.L7.imperial_seat"]
+        "why": ["haafingar.L5.company_docks", "haafingar.L9.imperial_seat"]
       }
     ],
     "windhelm": [
@@ -123,7 +123,7 @@
         "tier": "master",
         "cap": 90,
         "workplace": "merchant",
-        "why": ["eastmarch.L7.old_nord_capital", "eastmarch.L5.harbour_and_quarries"]
+        "why": ["eastmarch.L8.kings_city", "eastmarch.L5.harbour"]
       },
       {
         "name": "Torsten Ice-Breaker",
@@ -131,7 +131,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "housecarl",
-        "why": ["eastmarch.L7.old_nord_capital", "eastmarch.L8.talos_open"]
+        "why": ["eastmarch.L8.kings_city", "eastmarch.L8.talos_open"]
       },
       {
         "name": "Wuunferth Frost-Weave",
@@ -139,7 +139,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "wizard",
-        "why": ["eastmarch.L7.gray_quarter", "eastmarch.L8.talos_open"]
+        "why": ["eastmarch.L7.grey_quarter", "eastmarch.L8.talos_open"]
       },
       {
         "name": "Silda Cold-Finger",
@@ -147,7 +147,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "inn",
-        "why": ["eastmarch.L7.gray_quarter", "eastmarch.L5.harbour_and_quarries"]
+        "why": ["eastmarch.L7.grey_quarter", "eastmarch.L5.harbour"]
       },
       {
         "name": "Oengul Soul-Binder",
@@ -155,7 +155,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "smith",
-        "why": ["eastmarch.L5.harbour_and_quarries", "eastmarch.L7.old_nord_capital"]
+        "why": ["eastmarch.L5.harbour", "eastmarch.L8.kings_city"]
       }
     ],
     "riften": [
@@ -165,7 +165,7 @@
         "tier": "master",
         "cap": 90,
         "workplace": "inn",
-        "why": ["the_rift.L7.guild_under_the_canal", "the_rift.L5.lake_and_canal_trade"]
+        "why": ["the_rift.L7.guild_decline", "the_rift.L5.smuggling"]
       },
       {
         "name": "Vex Lock-Breaker",
@@ -173,7 +173,7 @@
         "tier": "master",
         "cap": 90,
         "workplace": "inn",
-        "why": ["the_rift.L7.guild_under_the_canal", "the_rift.L5.lake_and_canal_trade"]
+        "why": ["the_rift.L7.guild_decline", "the_rift.L5.smuggling"]
       },
       {
         "name": "Vipir Quick-Palm",
@@ -181,7 +181,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "merchant",
-        "why": ["the_rift.L7.guild_under_the_canal", "the_rift.L5.mead_and_honey"]
+        "why": ["the_rift.L7.guild_decline", "the_rift.L5.meadery"]
       },
       {
         "name": "Balimund Fire-Salt",
@@ -189,7 +189,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "smith",
-        "why": ["the_rift.L5.lake_and_canal_trade", "the_rift.L5.mead_and_honey"]
+        "why": ["the_rift.L5.fishery", "the_rift.L5.meadery"]
       },
       {
         "name": "Dinya Heart-Healer",
@@ -197,7 +197,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "priest",
-        "why": ["the_rift.L8.mara_weddings", "the_rift.L7.black_briar_grip"]
+        "why": ["the_rift.L8.mara_temple", "the_rift.L7.meadery_rule"]
       }
     ],
     "markarth": [
@@ -207,7 +207,7 @@
         "tier": "master",
         "cap": 90,
         "workplace": "priest",
-        "why": ["the_reach.L8.dibella_sanctum", "the_reach.L5.silver_and_smelting"]
+        "why": ["the_reach.L8.dibella_temple", "the_reach.L5.silver_mining"]
       },
       {
         "name": "Moth Gro-Forge",
@@ -215,7 +215,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "smith",
-        "why": ["the_reach.L5.silver_and_smelting", "the_reach.L7.silver_blood_rule"]
+        "why": ["the_reach.L5.silver_mining", "the_reach.L7.silver_family"]
       },
       {
         "name": "Ghorza Iron-Plate",
@@ -223,7 +223,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "housecarl",
-        "why": ["the_reach.L7.silver_blood_rule", "the_reach.L5.silver_and_smelting"]
+        "why": ["the_reach.L7.silver_family", "the_reach.L5.silver_mining"]
       },
       {
         "name": "Bothela Crag-Brew",
@@ -231,7 +231,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "alchemist",
-        "why": ["the_reach.L5.silver_and_smelting", "the_reach.L8.old_gods_of_the_crags"]
+        "why": ["the_reach.L5.silver_mining", "the_reach.L8.old_gods"]
       },
       {
         "name": "Agmar Stone-Shield",
@@ -239,7 +239,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "steward",
-        "why": ["the_reach.L7.silver_blood_rule", "the_reach.L5.stone_quarries"]
+        "why": ["the_reach.L7.silver_family", "the_reach.L5.small_mines"]
       }
     ],
     "falkreath": [
@@ -249,7 +249,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "lumberjack",
-        "why": ["falkreath.L5.hunting_and_pelts", "falkreath.L7.border_woodsmen"]
+        "why": ["falkreath.L5.hunting", "falkreath.L7.hunters_apart"]
       },
       {
         "name": "Nazir Shadow-Hide",
@@ -257,7 +257,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "housecarl",
-        "why": ["falkreath.L5.hunting_and_pelts", "falkreath.L7.border_woodsmen"]
+        "why": ["falkreath.L5.hunting", "falkreath.L7.hunters_apart"]
       },
       {
         "name": "Runil Grave-Speaker",
@@ -265,7 +265,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "priest",
-        "why": ["falkreath.L8.great_graveyard", "falkreath.L8.arkay_rites"]
+        "why": ["falkreath.L6.falkreath_graves", "falkreath.L8.arkay_priests"]
       },
       {
         "name": "Zaria Moss-Vial",
@@ -273,7 +273,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "alchemist",
-        "why": ["falkreath.L5.forest_timber", "falkreath.L8.great_graveyard"]
+        "why": ["falkreath.L5.timber", "falkreath.L6.falkreath_graves"]
       },
       {
         "name": "Lod Anvil-Striker",
@@ -281,7 +281,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "smith",
-        "why": ["falkreath.L5.forest_timber", "falkreath.L7.border_woodsmen"]
+        "why": ["falkreath.L5.timber", "falkreath.L7.hunters_apart"]
       }
     ],
     "morthal": [
@@ -291,7 +291,7 @@
         "tier": "master",
         "cap": 90,
         "workplace": "wizard",
-        "why": ["hjaalmarch.L8.seer_jarl", "hjaalmarch.L7.marsh_isolation"]
+        "why": ["hjaalmarch.L7.jarl_seer", "hjaalmarch.L7.wizard_suspected"]
       },
       {
         "name": "Lami Mire-Root",
@@ -299,7 +299,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "alchemist",
-        "why": ["hjaalmarch.L5.swamp_reagents", "hjaalmarch.L7.marsh_isolation"]
+        "why": ["hjaalmarch.L5.marsh_herbs", "hjaalmarch.L7.poor_seat"]
       },
       {
         "name": "Gorm Marsh-Guard",
@@ -307,7 +307,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "housecarl",
-        "why": ["hjaalmarch.L7.marsh_isolation", "hjaalmarch.L5.swamp_timber"]
+        "why": ["hjaalmarch.L7.poor_seat", "hjaalmarch.L5.timber_mill"]
       },
       {
         "name": "Virkfur Reed-Stalker",
@@ -315,7 +315,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "lumberjack",
-        "why": ["hjaalmarch.L5.swamp_reagents", "hjaalmarch.L7.marsh_isolation"]
+        "why": ["hjaalmarch.L5.marsh_herbs", "hjaalmarch.L7.poor_seat"]
       },
       {
         "name": "Joric Vision-Walker",
@@ -323,7 +323,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "steward",
-        "why": ["hjaalmarch.L8.seer_jarl", "hjaalmarch.L5.swamp_reagents"]
+        "why": ["hjaalmarch.L7.jarl_seer", "hjaalmarch.L5.marsh_herbs"]
       }
     ],
     "dawnstar": [
@@ -333,7 +333,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "housecarl",
-        "why": ["the_pale.L5.quicksilver_and_iron", "the_pale.L7.old_soldier_jarl"]
+        "why": ["the_pale.L5.two_mines", "the_pale.L9.rebel_jarl"]
       },
       {
         "name": "Rustleif Ore-Hammer",
@@ -341,7 +341,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "smith",
-        "why": ["the_pale.L5.quicksilver_and_iron", "the_pale.L5.whaling_harbour"]
+        "why": ["the_pale.L5.two_mines", "the_pale.L5.ore_ships"]
       },
       {
         "name": "Frida Mortar-Hand",
@@ -349,7 +349,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "alchemist",
-        "why": ["the_pale.L5.whaling_harbour", "the_pale.L8.nightmare_shadow"]
+        "why": ["the_pale.L5.ore_ships", "the_pale.L8.dream_dread"]
       },
       {
         "name": "Horik Iron-Mail",
@@ -357,7 +357,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "steward",
-        "why": ["the_pale.L7.old_soldier_jarl", "the_pale.L5.quicksilver_and_iron"]
+        "why": ["the_pale.L9.rebel_jarl", "the_pale.L5.two_mines"]
       },
       {
         "name": "Thoring Frost-Step",
@@ -365,7 +365,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "inn",
-        "why": ["the_pale.L8.nightmare_shadow", "the_pale.L5.whaling_harbour"]
+        "why": ["the_pale.L8.dream_dread", "the_pale.L5.ore_ships"]
       }
     ],
     "winterhold": [
@@ -375,7 +375,7 @@
         "tier": "master",
         "cap": 90,
         "workplace": "wizard",
-        "why": ["winterhold.L5.college_enclave", "winterhold.L7.ruined_capital"]
+        "why": ["winterhold.L5.college_coin", "winterhold.L6.winterhold_remnant"]
       },
       {
         "name": "Tolfdir Ward-Shaper",
@@ -383,7 +383,7 @@
         "tier": "master",
         "cap": 90,
         "workplace": "wizard",
-        "why": ["winterhold.L5.college_enclave", "winterhold.L8.mage_mistrust"]
+        "why": ["winterhold.L5.college_coin", "winterhold.L8.mage_blame"]
       },
       {
         "name": "Phinis Rift-Caller",
@@ -391,7 +391,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "steward",
-        "why": ["winterhold.L5.college_enclave", "winterhold.L8.mage_mistrust"]
+        "why": ["winterhold.L5.college_coin", "winterhold.L8.mage_blame"]
       },
       {
         "name": "Drevis Mind-Veil",
@@ -399,7 +399,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "inn",
-        "why": ["winterhold.L5.college_enclave", "winterhold.L7.ruined_capital"]
+        "why": ["winterhold.L5.college_coin", "winterhold.L6.winterhold_remnant"]
       },
       {
         "name": "Sergius Soul-Gem",
@@ -407,7 +407,7 @@
         "tier": "expert",
         "cap": 75,
         "workplace": "merchant",
-        "why": ["winterhold.L5.college_enclave", "winterhold.L7.ruined_capital"]
+        "why": ["winterhold.L5.college_coin", "winterhold.L6.winterhold_remnant"]
       }
     ],
     "raven_rock": [
@@ -459,7 +459,23 @@
         "tier": "master",
         "cap": 90,
         "workplace": "wizard",
-        "why": ["winterhold.L5.college_enclave", "winterhold.L8.mage_mistrust"]
+        "why": ["winterhold.L6.college", "winterhold.L8.knowledge_seeker"]
+      },
+      {
+        "name": "Urag Lore-Keeper",
+        "skill": "enchanting",
+        "tier": "expert",
+        "cap": 75,
+        "workplace": "wizard",
+        "why": ["winterhold.L6.college", "winterhold.L8.knowledge_seeker"]
+      },
+      {
+        "name": "Enthir Shadow-Broker",
+        "skill": "alchemy",
+        "tier": "journeyman",
+        "cap": 50,
+        "workplace": "alchemist",
+        "why": ["winterhold.L6.college", "winterhold.L5.college_coin"]
       }
     ],
     "riverwood": [
@@ -489,7 +505,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "hunter",
-        "why": ["the_rift.L5.forest_and_fish", "skyrim.L8.way_of_the_voice"]
+        "why": ["the_rift.L6.ivarstead", "the_rift.L8.voice_pilgrims"]
       }
     ],
     "helgen": [
@@ -499,7 +515,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "inn",
-        "why": ["falkreath.L5.forest_timber", "falkreath.L7.border_woodsmen"]
+        "why": ["falkreath.L5.timber", "falkreath.L6.helgen_fort"]
       }
     ],
     "dragon_bridge": [
@@ -509,7 +525,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "smith",
-        "why": ["haafingar.L5.east_empire_docks", "haafingar.L7.imperial_seat"]
+        "why": ["haafingar.L5.toll_bridge", "haafingar.L6.dragon_bridge"]
       }
     ],
     "karthwasten": [
@@ -519,7 +535,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "miner",
-        "why": ["the_reach.L5.silver_and_smelting", "the_reach.L7.silver_blood_rule"]
+        "why": ["the_reach.L5.silver_mining", "the_reach.L7.silver_family"]
       }
     ],
     "kynesgrove": [
@@ -529,7 +545,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "miner",
-        "why": ["eastmarch.L5.harbour_and_quarries", "eastmarch.L7.old_nord_capital"]
+        "why": ["eastmarch.L5.mines", "eastmarch.L6.kynesgrove"]
       }
     ],
     "shors_stone": [
@@ -539,7 +555,7 @@
         "tier": "journeyman",
         "cap": 50,
         "workplace": "smith",
-        "why": ["the_rift.L5.lake_and_canal_trade", "the_rift.L7.black_briar_grip"]
+        "why": ["the_rift.L5.redbelly_iron", "the_rift.L6.shors_stone"]
       }
     ]
   },

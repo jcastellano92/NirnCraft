@@ -1,12 +1,59 @@
 {
   "id": "riften",
   "base": "java",
+  "sil": "canal-lake-walkways",
+  "names": {
+    "inn": "bee_and_barb",
+    "store": "pawned_prawn",
+    "smithy": "scorched_hammer",
+    "keep": "mistveil_keep",
+    "player_home": "honeyside",
+    "temple": "temple_of_mara",
+    "alchemist": "elgrims_elixirs",
+    "meadery": "black_briar_meadery",
+    "dead_hall": "riften_hall_of_the_dead",
+    "barracks": "mistveil_barracks",
+    "jail": "riften_jail",
+    "manor_black_briar": "black_briar_manor",
+    "manor_snow_shod": "snow_shod_manor",
+    "orphanage": "honorhall_orphanage",
+    "bunkhouse": "haelgas_bunkhouse",
+    "flagon": "the_ragged_flagon",
+    "ratway": "the_ratway_warrens",
+    "fishery": "riften_fishery",
+    "warehouse": "riften_lake_warehouse",
+    "canal_walk": "riften_lower_plankway",
+    "wharf": "honrich_lake_wharf"
+  },
+  "innKey": "bee_and_barb",
+  "buildings": [
+    {"kind": "manor", "at": [42, -12], "size": [11, 13], "face": "W", "flags": ["upper", "rich"], "name": "riften_bollis_house"},
+    {"kind": "house", "at": [-44, 18], "size": [9, 11], "face": "E", "flags": ["upper"], "name": "riften_aerins_house"},
+    {"kind": "house", "at": [-44, -8], "size": [9, 11], "face": "E", "name": "riften_romlyns_house"},
+    {"kind": "house", "at": [44, 20], "size": [9, 11], "face": "W", "name": "riften_valindors_house"}
+  ],
+  "plazas": [
+    {"at": [-28, -6], "size": 11, "variant": 0, "stalls": 2, "name": "riften_canal_market"},
+    {"at": [0, -38], "size": 11, "variant": 1, "stalls": 0, "name": "riften_keep_courtyard"}
+  ],
+  "nets": [
+    {"type": "path", "via": [[-52, -16], [-28, -16], [28, -16], [52, -16]], "width": 3, "rank": 1, "tag": "row"},
+    {"type": "path", "via": [[-50, 48], [-26, 48], [26, 48], [50, 48]], "width": 3, "rank": 1, "tag": "south"}
+  ],
   "zones": [
     {"at": [0, -50], "r": 26, "zone": "noble"},
     {"at": [0, 20], "r": 24, "zone": "centre"},
     {"at": [40, 50], "r": 22, "zone": "poor"}
   ],
   "fabric": {"radius": 72, "target": 0.55},
+  "queue": [
+    {"kind": "house", "name": "riften_marises_cottage", "on": "row"},
+    {"kind": "house", "name": "riften_grelods_office", "on": "row"},
+    {"kind": "house", "name": "riften_madesis_stall_house", "on": "row"},
+    {"kind": "house", "name": "riften_brand_sheis_lodging", "on": "south"},
+    {"kind": "house", "name": "riften_wujeetas_bunk", "on": "south"},
+    {"kind": "house", "name": "riften_mauls_watchhouse", "on": "south"}
+  ],
   "features": [
     {"type": "statue", "theme": "divine:mara", "where": "square"},
     {"type": "shrine", "theme": "divine:mara", "where": "free"},
@@ -19,5 +66,32 @@
     {"type": "market", "where": "free"},
     {"type": "bench", "where": "square"},
     {"type": "memorial", "where": "free"}
-  ]
+  ],
+  "titles": {
+    "riften_hall_of_the_dead": "Riften Hall of the Dead",
+    "mistveil_barracks": "Mistveil Keep Barracks",
+    "riften_jail": "Mistveil Keep Dungeons",
+    "black_briar_manor": "Black-Briar Manor",
+    "snow_shod_manor": "House of Clan Snow-Shod",
+    "honorhall_orphanage": "Honorhall Orphanage",
+    "haelgas_bunkhouse": "Canal-Side Workers' Bunkhouse",
+    "the_ragged_flagon": "The Ragged Flagon Cistern",
+    "the_ratway_warrens": "The Ratway Vaults",
+    "riften_fishery": "Lake Honrich Fishery",
+    "riften_lake_warehouse": "Lakeside Smugglers' Warehouse",
+    "riften_lower_plankway": "Lower Canal Plankway",
+    "honrich_lake_wharf": "Honrich Timber Wharf",
+    "riften_bollis_house": "Fishery Master's Manor",
+    "riften_aerins_house": "Birch-Walk Townhouse",
+    "riften_romlyns_house": "Cask-Runner's Cottage",
+    "riften_valindors_house": "Tanner's Canal House",
+    "riften_canal_market": "Riften Canal Bridge Market",
+    "riften_keep_courtyard": "Mistveil Keep Courtyard",
+    "riften_marises_cottage": "Butcher's Row Cottage",
+    "riften_grelods_office": "Matron's Study",
+    "riften_madesis_stall_house": "Jeweller's Canal Room",
+    "riften_brand_sheis_lodging": "Dunmer Trader's Lodging",
+    "riften_wujeetas_bunk": "Dockside Bunk-Room",
+    "riften_mauls_watchhouse": "Gate-Watcher's Post"
+  }
 }

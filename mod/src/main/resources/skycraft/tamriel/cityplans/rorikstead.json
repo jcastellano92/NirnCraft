@@ -1,0 +1,66 @@
+{
+  "id": "rorikstead",
+  "base": "none",
+  "sil": "western-road-harvest-green",
+  "names": {
+    "inn": "frostfruit_inn",
+    "store": "rorikstead_granary",
+    "smithy": "rorikstead_farrier"
+  },
+  "innKey": "frostfruit_inn",
+  "gates": [[-38, 0], [38, 0], [0, 38]],
+  "buildings": [
+    {"kind": "manor", "at": [0, -28], "size": [13, 19], "face": "S", "flags": ["upper", "seat"], "name": "roriks_manor"},
+    {"kind": "farmhouse", "at": [-28, -18], "size": [9, 11], "face": "E", "name": "rorikstead_cowflop_farm"},
+    {"kind": "farmhouse", "at": [28, -18], "size": [9, 11], "face": "W", "name": "rorikstead_hillside_farm"},
+    {"kind": "stables", "at": [-26, 22], "size": [11, 9], "face": "E", "name": "rorikstead_stables"},
+    {"kind": "shrine", "at": [18, -22], "size": [5, 5], "face": "S", "variant": 4, "name": "rorikstead_shrine"},
+    {"kind": "field", "at": [-34, -32], "size": [13, 11], "face": "S"},
+    {"kind": "field", "at": [34, -32], "size": [13, 11], "face": "S"},
+    {"kind": "field", "at": [28, 26], "size": [13, 11], "face": "N"}
+  ],
+  "plazas": [
+    {"at": [0, 4], "size": 13, "variant": 0, "stalls": 3, "name": "rorikstead_green"}
+  ],
+  "nets": [
+    {"type": "path", "via": [[-38, 0], [-18, 2], [0, 4], [18, 2], [38, 0]], "width": 4, "major": true, "tag": "main"},
+    {"type": "path", "via": [[0, 38], [0, 20], [0, 4], [0, -14]], "width": 3, "rank": 1, "tag": "north"},
+    {"type": "path", "via": [[-22, 2], [-24, -12], [-20, -24]], "width": 2, "rank": 2, "tag": "lane"},
+    {"type": "path", "via": [[22, 2], [24, 16], [18, 28]], "width": 2, "rank": 2, "tag": "lane"}
+  ],
+  "zones": [
+    {"at": [0, -24], "r": 18, "zone": "noble"},
+    {"at": [0, 4], "r": 18, "zone": "centre"},
+    {"at": [-24, 16], "r": 18, "zone": "craft"}
+  ],
+  "fabric": {"radius": 48, "target": 0.30, "fill_cap": 6, "yard_cap": 6},
+  "queue": [
+    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "frostfruit_inn", "on": "main"},
+    {"kind": "store", "size": [9, 11], "name": "rorikstead_granary", "on": "main"},
+    {"kind": "smithy", "size": [11, 9], "name": "rorikstead_farrier", "on": "main"},
+    {"kind": "alchemist", "size": [9, 9], "name": "rorikstead_healers_cottage", "on": "north"},
+    {"kind": "house", "name": "rorikstead_reliks_house", "on": "north"},
+    {"kind": "house", "name": "rorikstead_sissel_cottage", "on": "lane"},
+    {"kind": "house", "count": 2, "on": "main"}
+  ],
+  "features": [
+    {"type": "well", "where": "square"},
+    {"type": "shrine", "theme": "divine:kynareth", "where": "free"},
+    {"type": "lamps", "count": 2, "where": "street", "tag": "main"},
+    {"type": "orchard", "count": 2, "where": "edge"},
+    {"type": "garden", "where": "free"}
+  ],
+  "titles": {
+    "roriks_manor": "Rorik's Manor",
+    "rorikstead_granary": "Rorikstead Granary",
+    "rorikstead_farrier": "Rorikstead Farrier",
+    "rorikstead_cowflop_farm": "Westfield Stead",
+    "rorikstead_hillside_farm": "Hillside Stead",
+    "rorikstead_stables": "Rorikstead Stables",
+    "rorikstead_shrine": "Harvest Shrine",
+    "rorikstead_green": "Rorikstead Green",
+    "rorikstead_healers_cottage": "Herbalist's Cottage",
+    "rorikstead_reliks_house": "Steward's Cottage",
+    "rorikstead_sissel_cottage": "Orchard Cottage"
+  }
+}

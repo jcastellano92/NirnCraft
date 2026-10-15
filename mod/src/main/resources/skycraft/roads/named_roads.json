@@ -90,6 +90,11 @@
    "whiterun",
    "riverwood",
    "helgen"
+  ],
+  "why": [
+   "whiterun.L6.riverwood",
+   "falkreath.L6.helgen_fort",
+   "skyrim.L5.road_hub"
   ]
  },
  {
@@ -106,6 +111,11 @@
   "route": [
    "helgen",
    "falkreath"
+  ],
+  "why": [
+   "falkreath.L6.falkreath_graves",
+   "falkreath.L6.helgen_fort",
+   "falkreath.L5.border_trade"
   ]
  },
  {
@@ -163,6 +173,11 @@
    "darkwater_crossing",
    "shors_stone",
    "riften"
+  ],
+  "why": [
+   "the_rift.L6.riften_seat",
+   "the_rift.L6.shors_stone",
+   "eastmarch.L6.kynesgrove"
   ]
  },
  {
@@ -171,6 +186,16 @@
   "route": [
    "whiterun",
    "dawnstar"
+  ],
+  "stops": [
+   "whiterun",
+   "nightgate_inn",
+   "dawnstar"
+  ],
+  "why": [
+   "the_pale.L6.nightgate",
+   "the_pale.L5.roadside_inn",
+   "the_pale.L6.dawnstar_seat"
   ]
  },
  {
@@ -179,6 +204,298 @@
   "route": [
    "windhelm",
    "winterhold"
+  ],
+  "stops": [
+   "windhelm",
+   "amol",
+   "yorgrim_stead",
+   "winterhold"
+  ],
+  "why": [
+   "winterhold.L6.winterhold_remnant",
+   "winterhold.L5.college_coin",
+   "eastmarch.L6.windhelm_seat"
   ]
+ },
+ {
+  "id": "solitude_harbour_lane",
+  "name": "road.skycraft.solitude_harbour_lane",
+  "why": [
+   "haafingar.L5.company_docks",
+   "haafingar.L5.sawmill",
+   "haafingar.L6.dragon_bridge"
+  ],
+  "route": [
+   "solitude",
+   "katlas_farm",
+   "solitude_sawmill",
+   "dragon_bridge"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "hjaal_marsh_lane",
+  "name": "road.skycraft.hjaal_marsh_lane",
+  "why": [
+   "hjaalmarch.L6.hjaal_road",
+   "hjaalmarch.L6.stonehills",
+   "hjaalmarch.L6.windstad"
+  ],
+  "route": [
+   "morthal",
+   "stonehills",
+   "drajkmyr_fishery",
+   "windstad"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "pale_hearth_lane",
+  "name": "road.skycraft.pale_hearth_lane",
+  "why": [
+   "the_pale.L6.heath_farms",
+   "the_pale.L6.nightgate",
+   "whiterun.L5.crossroads_trade"
+  ],
+  "route": [
+   "whiterun",
+   "loreius_farm",
+   "heljarchen",
+   "nightgate_inn"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "whiterun_farms_lane",
+  "name": "road.skycraft.whiterun_farms_lane",
+  "why": [
+   "whiterun.L5.river_farms",
+   "whiterun.L5.meadery",
+   "whiterun.L6.whiterun_seat"
+  ],
+  "route": [
+   "whiterun",
+   "whiterun_stables",
+   "pelagia_farm",
+   "chillfurrow_farm",
+   "battle_born_farm",
+   "honningbrew_meadery"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "windhelm_farms_lane",
+  "name": "road.skycraft.windhelm_farms_lane",
+  "why": [
+   "eastmarch.L6.mills_and_farms",
+   "eastmarch.L5.warm_farms",
+   "eastmarch.L6.windhelm_seat"
+  ],
+  "route": [
+   "windhelm",
+   "windhelm_stables",
+   "brandy_mug_farm",
+   "hlaalu_farm",
+   "hollyfrost_farm",
+   "angas_mill"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "narzulbur_lane",
+  "name": "road.skycraft.narzulbur_lane",
+  "why": [
+   "eastmarch.L6.kynesgrove",
+   "eastmarch.L6.narzulbur",
+   "eastmarch.L5.mines"
+  ],
+  "route": [
+   "kynesgrove",
+   "narzulbur"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "darkwater_lane",
+  "name": "road.skycraft.darkwater_lane",
+  "why": [
+   "eastmarch.L6.darkwater_crossing",
+   "eastmarch.L5.river_mills",
+   "the_rift.L6.ivarstead"
+  ],
+  "route": [
+   "kynesgrove",
+   "mixwater_mill",
+   "darkwater_crossing",
+   "ivarstead"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "honrich_north_lane",
+  "name": "road.skycraft.honrich_north_lane",
+  "why": [
+   "the_rift.L6.lake_farms",
+   "the_rift.L6.heartwood_mill",
+   "the_rift.L6.riften_seat"
+  ],
+  "route": [
+   "ivarstead",
+   "sarethi_farm",
+   "heartwood_mill",
+   "merryfair_farm",
+   "riften_stables",
+   "riften"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "honrich_south_lane",
+  "name": "road.skycraft.honrich_south_lane",
+  "why": [
+   "the_rift.L6.lake_farms",
+   "the_rift.L6.largashbur",
+   "the_rift.L5.honey_estate"
+  ],
+  "route": [
+   "riften",
+   "goldenglow_estate",
+   "snow_shod_farm",
+   "largashbur"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "ilinalta_lane",
+  "name": "road.skycraft.ilinalta_lane",
+  "why": [
+   "falkreath.L6.lakeview_steading",
+   "falkreath.L6.half_moon_mill",
+   "falkreath.L3.lake_ilinalta"
+  ],
+  "route": [
+   "riverwood",
+   "lakeview",
+   "half_moon_mill",
+   "falkreath",
+   "pinewatch_stead",
+   "corpselight_stead",
+   "hunters_rest_stead",
+   "ilinalta_fishery",
+   "knifepoint_stead",
+   "southfringe_stead"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "reach_strongholds_lane",
+  "name": "road.skycraft.reach_strongholds_lane",
+  "why": [
+   "the_reach.L6.two_strongholds",
+   "the_reach.L6.hroldan_inn",
+   "the_reach.L6.mine_villages"
+  ],
+  "route": [
+   "markarth",
+   "markarth_stables",
+   "salvius_farm",
+   "dushnikh_yal",
+   "old_hroldan",
+   "soljunds_sinkhole"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "mor_khazgur_lane",
+  "name": "road.skycraft.mor_khazgur_lane",
+  "why": [
+   "the_reach.L6.two_strongholds",
+   "the_reach.L6.mine_villages",
+   "haafingar.L6.dragon_bridge"
+  ],
+  "route": [
+   "dragon_bridge",
+   "mor_khazgur",
+   "karthwasten",
+   "karth_river_stead",
+   "kolskeggr_stead"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "seven_thousand_steps",
+  "name": "road.skycraft.seven_thousand_steps",
+  "why": [
+   "the_rift.L8.voice_pilgrims",
+   "skyrim.L8.way_of_the_voice",
+   "whiterun.L1.throat_skirt"
+  ],
+  "route": [
+   "ivarstead",
+   "high_hrothgar"
+  ],
+  "class": "trail"
+ },
+ {
+  "id": "frozen_coast_trail",
+  "name": "road.skycraft.frozen_coast_trail",
+  "why": [
+   "winterhold.L6.college",
+   "winterhold.L5.wreck_salvage",
+   "the_pale.L6.dawnstar_seat"
+  ],
+  "route": [
+   "dawnstar",
+   "frostflow_stead",
+   "pilgrims_rest_stead",
+   "winterhold",
+   "college_of_winterhold"
+  ],
+  "class": "trail"
+ },
+ {
+  "id": "druadach_highway",
+  "name": "road.skycraft.druadach_highway",
+  "why": [
+   "the_reach.L5.border_trade",
+   "the_reach.L1.granite_gorges",
+   "skyrim.L5.road_hub"
+  ],
+  "route": [
+   "markarth",
+   "deep_folk_crossing",
+   "jehanna"
+  ],
+  "class": "highway"
+ },
+ {
+  "id": "velothi_pass_road",
+  "name": "road.skycraft.velothi_pass_road",
+  "why": [
+   "eastmarch.L8.refugee_faith",
+   "eastmarch.L11.red_year_refugees",
+   "skyrim.L5.road_hub"
+  ],
+  "route": [
+   "windhelm",
+   "refugees_rest",
+   "blacklight"
+  ],
+  "class": "highway"
+ },
+ {
+  "id": "jerall_south_road",
+  "name": "road.skycraft.jerall_south_road",
+  "why": [
+   "falkreath.L1.pale_pass",
+   "falkreath.L5.border_trade",
+   "skyrim.L5.road_hub"
+  ],
+  "route": [
+   "falkreath",
+   "pale_pass",
+   "bruma"
+  ],
+  "class": "highway"
  }
 ]

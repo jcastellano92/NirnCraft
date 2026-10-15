@@ -3178,9 +3178,8 @@
    "payoff": "A memorial plaque with a seat number: the dead's voting seat.",
    "rumour": "The urns come down the lava channel at Molag Mar every night. No one will say who throws them.",
    "thread_clue": "a lava-cascade that cools and stills at the hush hour",
-   "lore_note": [
-    "place.molag_mar.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_morrowind.json",
    "quests": [
     "lw_mor_4_a",
     "lw_t_falls_b"
@@ -3321,9 +3320,8 @@
    ],
    "payoff": "The Quiet Vote's gavel: a unique relic that can adjourn the dead's council.",
    "rumour": "Under Mournhold's plaza a table is set for forty. Those who've seen it won't say who sat there.",
-   "lore_note": [
-    "place.old_mournhold.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_morrowind.json",
    "quests": [
     "lw_mor_4_b"
    ]
@@ -4001,9 +3999,8 @@
    ],
    "payoff": "A mason's apron with a Wayrest guild-seal sewn in.",
    "rumour": "The beacon at Glenpoint is lit on nights no ship is expected, and a grinding wheel runs in the boat-shed until dawn.",
-   "lore_note": [
-    "place.glenpoint.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_high_rock.json",
    "quests": [
     "lw_hr_1_a"
    ]
@@ -4239,9 +4236,8 @@
    ],
    "payoff": "A silver ward-bell that rings a warning against fog-voices.",
    "rumour": "The lighthouse at Northpoint is dark at the fog hour, by order of the harbour-master, who wears a small silver bell round his neck.",
-   "lore_note": [
-    "place.northpoint.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_high_rock.json",
    "quests": [
     "lw_hr_2_a"
    ]
@@ -4974,9 +4970,8 @@
    ],
    "payoff": "The arena-master's schedule: which panels have been fulfilled.",
    "rumour": "The arena-master of Dragonstar sets his bouts by a schedule he keeps in a locked chest, and the fighters who have read it won't discuss it.",
-   "lore_note": [
-    "place.dragonstar.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_hammerfell.json",
    "quests": [
     "lw_ham_2_a"
    ]
@@ -5124,9 +5119,8 @@
    ],
    "payoff": "A seed-jar manifest naming the lord's agents.",
    "rumour": "The stilt harbour at Abah's Landing ships palm-seeds in sealed jars. Nobody knows which garden they are for, and the harbour-master has stopped asking.",
-   "lore_note": [
-    "place.abahs_landing.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_hammerfell.json",
    "quests": [
     "lw_ham_3_a"
    ]
@@ -5273,10 +5267,8 @@
    "payoff": "The fifth-year manifest.",
    "rumour": "Every fifth year a ship leaves Port Hunding with sealed cargo and the clerks are told to stay home.",
    "thread_clue": "a harbour cabinet containing a page marked with a tide-glyph",
-   "lore_note": [
-    "place.port_hunding.web",
-    "place.port_hunding.thread"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_hammerfell.json",
    "quests": [
     "lw_ham_4_a",
     "lw_t_tide_a"
@@ -5432,9 +5424,8 @@
    ],
    "payoff": "The mage's observation log and a lunar chart.",
    "rumour": "The Star Haven mage says Secunda is late and gets laughed at. He keeps measuring anyway.",
-   "lore_note": [
-    "place.star_haven_adeptorium.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_elsweyr.json",
    "quests": [
     "lw_els_1_a"
    ]
@@ -5462,9 +5453,8 @@
    ],
    "payoff": "A rubbing of the old moon-mark.",
    "rumour": "The great cats at the shrine have started casting shadows that don't match the day.",
-   "lore_note": [
-    "place.shrine_of_the_cats_divine.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_elsweyr.json",
    "quests": [
     "lw_els_1_a"
    ]
@@ -5610,9 +5600,8 @@
    ],
    "payoff": "A burial mask and a receipt naming a caravan stop.",
    "rumour": "A faceless Khajiit walked past the Twin Moons last night and bowed to the lanterns.",
-   "lore_note": [
-    "place.roadside_twin_moons.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_elsweyr.json",
    "quests": [
     "lw_els_2_a"
    ]
@@ -5643,10 +5632,8 @@
    "payoff": "The caravan-mother's account of who sells her the masks.",
    "rumour": "The Baandari tent camp by the Rimmen road will sell you anything, and lately that includes carved faces nobody asks about.",
    "thread_clue": "a tent of caravan-slips all stamped with the same watermark",
-   "lore_note": [
-    "place.baandari_caravan_stop.web",
-    "place.baandari_caravan_stop.thread"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_elsweyr.json",
    "quests": [
     "lw_els_2_a",
     "lw_t_sugar_a"
@@ -5675,9 +5662,8 @@
    ],
    "payoff": "A circle-stone key which lets a bearer into the necropolis' upper tier.",
    "rumour": "The Hakoshae guardians keep faceless dead in the ring at night. Don't walk near after dark.",
-   "lore_note": [
-    "place.hakoshae.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_elsweyr.json",
    "quests": [
     "lw_els_2_a"
    ]
@@ -5736,10 +5722,8 @@
    "payoff": "A gallery key, opening the smugglers' door under the necropolis.",
    "rumour": "The aqueduct's piers are hollow, and on moonless nights lamps burn inside them.",
    "thread_clue": "an aqueduct channel that falls silent, its stones humming a lullaby",
-   "lore_note": [
-    "place.anequina_aqueduct.web",
-    "place.anequina_aqueduct.thread"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_elsweyr.json",
    "quests": [
     "lw_els_2_b",
     "lw_t_falls_a"
@@ -5801,9 +5785,8 @@
    "payoff": "A humming jar: evidence the glow is not natural.",
    "rumour": "The Tathara sugar is brighter than any harvest. It tastes of iron, and the wife sleeps three days.",
    "thread_clue": "a farm ledger with three pages stamped by an unfamiliar seal",
-   "lore_note": [
-    "place.tathara_sugar_farm.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_elsweyr.json",
    "quests": [
     "lw_els_3_a",
     "lw_t_sugar_a"
@@ -5835,10 +5818,8 @@
    "payoff": "A drain-grate key to the colossus hall.",
    "rumour": "The meadow glows brightest along the ditch, and the ditch never freezes.",
    "thread_clue": "an urn holding a debt-slip with a crescent-and-ledger watermark",
-   "lore_note": [
-    "place.moon_sugar_meadow.web",
-    "place.moon_sugar_meadow.thread"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_elsweyr.json",
    "quests": [
     "lw_els_3_a",
     "lw_t_sugar_a"
@@ -5867,9 +5848,8 @@
    ],
    "payoff": "The cellar tank's sample vial.",
    "rumour": "The Prancing Netch's beer glows faintly on Fridays and nobody will say why.",
-   "lore_note": [
-    "place.the_prancing_netch.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_elsweyr.json",
    "quests": [
     "lw_els_3_a"
    ]
@@ -5897,9 +5877,8 @@
    ],
    "payoff": "A herbalist's cure-moss, which cleanses the glow.",
    "rumour": "The cathedral of Corinthe has a ward of sleepers laid out like a field of sheaves, and the herbalists say the cure costs more than the town has.",
-   "lore_note": [
-    "place.corinthe.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_elsweyr.json",
    "quests": [
     "lw_els_3_b"
    ]
@@ -5994,9 +5973,8 @@
    ],
    "payoff": "A blade-shard tied with a red ribbon.",
    "rumour": "Every caravan out of Orcrest carries one broken blade-shard. Nobody knows who sends them.",
-   "lore_note": [
-    "place.orcrest.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_elsweyr.json",
    "quests": [
     "lw_els_4_a"
    ]
@@ -6024,9 +6002,8 @@
    ],
    "payoff": "A caravan-mother's ledger of the blade-shards' carry.",
    "rumour": "The caravan market at Dune has a wagon at its hub that sells nothing and is never left unguarded.",
-   "lore_note": [
-    "place.dune.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_elsweyr.json",
    "quests": [
     "lw_els_4_a"
    ]
@@ -6054,9 +6031,8 @@
    ],
    "payoff": "The oath-hall's broken sword: the first piece of the great blade.",
    "rumour": "At Ne Quin-al the old smiths' oath-hall has a floor that someone has been tallying by hand, and the smith's anvil is warm to the touch.",
-   "lore_note": [
-    "place.ne_quin_al.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_elsweyr.json",
    "quests": [
     "lw_els_4_a"
    ]
@@ -6084,9 +6060,8 @@
    ],
    "payoff": "A hundred-oath shard that fits the quenching trough.",
    "rumour": "The shards on the hill move at night. By morning they are in a ring, and there is always a gap.",
-   "lore_note": [
-    "place.hill_of_shattered_swords.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_elsweyr.json",
    "quests": [
     "lw_els_4_b"
    ]
@@ -6148,9 +6123,8 @@
    ],
    "payoff": "A glass splinter that opens the underground tower's door.",
    "rumour": "The great tree's glow is a shade dimmer than last year. The keepers say it will be fine. The keepers are not looking up.",
-   "lore_note": [
-    "place.elden_tree.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_valenwood.json",
    "quests": [
     "lw_val_1_a"
    ]
@@ -6306,9 +6280,8 @@
    ],
    "payoff": "The route-board's charcoal line and a hermit's address.",
    "rumour": "The walking city has been going in a straight line since spring. The innkeeper drew it on the wall.",
-   "lore_note": [
-    "place.roadside_green_bough.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_valenwood.json",
    "quests": [
     "lw_val_2_a"
    ]
@@ -6336,9 +6309,8 @@
    ],
    "payoff": "A tablet of the apostates' chant, and a map of the guide-trees.",
    "rumour": "The hermit at Supplication House is cutting trees and weeping while she does it. The wardens pretend not to hear.",
-   "lore_note": [
-    "place.supplication_house.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_valenwood.json",
    "quests": [
     "lw_val_2_a"
    ]
@@ -6366,9 +6338,8 @@
    ],
    "payoff": "The chief's tally of felled guide-trees.",
    "rumour": "The Orcs of Drabul have been felling trees that Bosmer would not touch, and no Bosmer has said a word against them.",
-   "lore_note": [
-    "place.drabul.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_valenwood.json",
    "quests": [
     "lw_val_2_a"
    ]
@@ -6396,9 +6367,8 @@
    ],
    "payoff": "The last guide-tree's bearing and a ballista bolt.",
    "rumour": "From Jathsogur's wall you can see the city's route. The Orcs have been shooting at the trees along it.",
-   "lore_note": [
-    "place.jathsogur.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_valenwood.json",
    "quests": [
     "lw_val_2_a"
    ]
@@ -6426,9 +6396,8 @@
    ],
    "payoff": "A court seal, giving access to the walking city's inner stairs.",
    "rumour": "The hidden court at Silvenar knows who is cutting guide-trees, and a councillor passes the cutters coin in secret.",
-   "lore_note": [
-    "place.silvenar.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_valenwood.json",
    "quests": [
     "lw_val_2_b"
    ]
@@ -6519,9 +6488,8 @@
    ],
    "payoff": "A thorn that opens the orchard's inner ring.",
    "rumour": "The thorn wall of Marbruk has names pricked into it. The watchers bow every dusk and nobody asks why.",
-   "lore_note": [
-    "place.marbruk.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_valenwood.json",
    "quests": [
     "lw_val_3_a"
    ]
@@ -6645,10 +6613,8 @@
    "payoff": "A clay thumb-print, an impression that can be matched to a hand.",
    "rumour": "The prayer-stone at Waterdancer has eight notches and only seven bones. Both peoples avoid talking about the eighth.",
    "thread_clue": "a waterfall whose spray rainbow flickers on the hour",
-   "lore_note": [
-    "place.waterdancer_falls.web",
-    "place.waterdancer_falls.thread"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_valenwood.json",
    "quests": [
     "lw_val_4_a",
     "lw_t_falls_a"
@@ -6677,9 +6643,8 @@
    ],
    "payoff": "The first seven verses of the Truce-song.",
    "rumour": "At Sren Ja the drums stop at the eighth beat. The elders say it is for the dead drummer.",
-   "lore_note": [
-    "place.sren_ja.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_valenwood.json",
    "quests": [
     "lw_val_4_a"
    ]
@@ -6707,9 +6672,8 @@
    ],
    "payoff": "The pressed leaf, tracing a Bosmer hand.",
    "rumour": "The monks at Dokrin keep the oldest drum-scores in the March. One page has been replaced with a pressed leaf, and the abbot weeps when anyone asks.",
-   "lore_note": [
-    "place.dokrin_monastery.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_valenwood.json",
    "quests": [
     "lw_val_4_a"
    ]
@@ -6740,9 +6704,8 @@
    "payoff": "The stolen verse with eleven glosses.",
    "rumour": "Rawlkha's lantern-market sells paper from a dozen stalls, and a verse that was stolen from a monastery has passed through eleven hands there.",
    "thread_clue": "a lantern-market stall that sells only paper",
-   "lore_note": [
-    "place.rawlkha.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_valenwood.json",
    "quests": [
     "lw_val_4_a",
     "lw_t_sugar_a"
@@ -6799,9 +6762,8 @@
    ],
    "payoff": "The eighth step: a dance-form that fits the final verse.",
    "rumour": "In the old arena a single footprint stays in the sand. No rain washes it out.",
-   "lore_note": [
-    "place.thizzrini_arena.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_valenwood.json",
    "quests": [
     "lw_val_4_b"
    ]
@@ -6829,9 +6791,8 @@
    ],
    "payoff": "The eighth bone and the Truce renewed: a unique axe of the Wild Hunt.",
    "rumour": "At the henge the altar is bright with bone. One seat has been empty for ten years.",
-   "lore_note": [
-    "place.reapers_henge.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_valenwood.json",
    "quests": [
     "lw_val_4_b"
    ]
@@ -6859,9 +6820,8 @@
    ],
    "payoff": "The hermit's bell-tally, with sixty years of dusk counted.",
    "rumour": "The hermit on the Isle of Contemplation counts twenty-three bells every dusk and swears there should be twenty-four.",
-   "lore_note": [
-    "place.isle_of_contemplation.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_summerset.json",
    "quests": [
     "lw_sum_1_a"
    ]
@@ -6889,9 +6849,8 @@
    ],
    "payoff": "The pried-out tile's edge-pattern, a rubbing to match a missing door.",
    "rumour": "The Old Ways arena's floor has a grey tile where an hour should be. Nobody remembers the fight that was held there.",
-   "lore_note": [
-    "place.colosseum_of_the_old_ways.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_summerset.json",
    "quests": [
     "lw_sum_1_a"
    ]
@@ -6980,10 +6939,8 @@
    "payoff": "A ghost-lens that shows the hour as a room.",
    "rumour": "The Crystal Tower's summit lenses were covered with a cloth at the spring equinox. The wardens won't say what they saw before they did it.",
    "thread_clue": "a lens-room whose lenses face the sky at the wrong angle",
-   "lore_note": [
-    "place.crystal_tower_summerset.web",
-    "place.crystal_tower_summerset.thread"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_summerset.json",
    "quests": [
     "lw_sum_1_b",
     "lw_t_welkynd_b"
@@ -7047,9 +7004,8 @@
    ],
    "payoff": "A glint-ward amulet, a crude shield against the fever.",
    "rumour": "At Dawnbreak a man walked into the sea last winter. His eyes shone like cut glass the week before.",
-   "lore_note": [
-    "place.dawnbreak.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_summerset.json",
    "quests": [
     "lw_sum_2_a"
    ]
@@ -7077,9 +7033,8 @@
    ],
    "payoff": "A sealed cider-sample and a map of the grove.",
    "rumour": "Mara's Kiss serves a cider that sparkles on the tongue. They stopped pouring it after the second drinker went quiet.",
-   "lore_note": [
-    "place.maras_kiss_public_house.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_summerset.json",
    "quests": [
     "lw_sum_2_a"
    ]
@@ -7107,9 +7062,8 @@
    ],
    "payoff": "A grove-shard that responds to the seed's heart.",
    "rumour": "The Shattered Grove bore the largest fruit of its life this year. The folk who ate it have all begun to glitter.",
-   "lore_note": [
-    "place.shattered_grove.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_summerset.json",
    "quests": [
     "lw_sum_2_a"
    ]
@@ -7169,9 +7123,8 @@
    ],
    "payoff": "The conjunction date and the cult's bearing.",
    "rumour": "The great orrery at Skywatch was tilted by a degree one night, and the star-watchers can't say by whom. The conjunction comes sooner now.",
-   "lore_note": [
-    "place.skywatch.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_summerset.json",
    "quests": [
     "lw_sum_2_b"
    ]
@@ -7259,9 +7212,8 @@
    ],
    "payoff": "The reeve's ledger of eggs sent and unaccounted for.",
    "rumour": "The reeve at King's Haven swears the gryphons have stopped laying and then tells you he doesn't believe it.",
-   "lore_note": [
-    "place.kings_haven.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_summerset.json",
    "quests": [
     "lw_sum_3_a"
    ]
@@ -7289,9 +7241,8 @@
    ],
    "payoff": "The dealer's bill of lading, naming the port.",
    "rumour": "A dealer at the Golden Netch pays for his room in coin and his crates in silence. The crates are warm.",
-   "lore_note": [
-    "place.the_golden_netch.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_summerset.json",
    "quests": [
     "lw_sum_3_a"
    ]
@@ -7319,9 +7270,8 @@
    ],
    "payoff": "A stolen clutch recovered from the quiet quay.",
    "rumour": "The quiet quay at Shimmerene has no lantern, and crates marked 'minerals' go aboard a foreign ship after dark. The customs man looks away.",
-   "lore_note": [
-    "place.shimmerene.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_summerset.json",
    "quests": [
     "lw_sum_3_a"
    ]
@@ -7349,9 +7299,8 @@
    ],
    "payoff": "The recovered clutch, and the mother's song.",
    "rumour": "The gryphons at the aerie have started calling at night, and their calls are shorter than they used to be.",
-   "lore_note": [
-    "place.gryphon_aerie.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_summerset.json",
    "quests": [
     "lw_sum_3_b"
    ]
@@ -7379,9 +7328,8 @@
    ],
    "payoff": "The steward's strongbox ledger, proof of the egg sales.",
    "rumour": "Cloudrest hangs its balconies over open air. The steward has been shoring the lower ones with iron where the courtiers will not see.",
-   "lore_note": [
-    "place.cloudrest.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_summerset.json",
    "quests": [
     "lw_sum_3_b"
    ]
@@ -7443,9 +7391,8 @@
    ],
    "payoff": "The spools' first words: a list of lost titles.",
    "rumour": "The Trebbite brothers have found silk in the orchard with words woven in it. They say please don't eat it.",
-   "lore_note": [
-    "place.trebbite_monastery.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_summerset.json",
    "quests": [
     "lw_sum_4_a"
    ]
@@ -7473,9 +7420,8 @@
    ],
    "payoff": "A blank book, proof the words have been taken.",
    "rumour": "Book-barges come into Dusk at night with cargo that's all blank paper. The bookbinders are doing a brisk trade in covers.",
-   "lore_note": [
-    "place.dusk.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_summerset.json",
    "quests": [
     "lw_sum_4_a"
    ]
@@ -7503,9 +7449,8 @@
    ],
    "payoff": "The head librarian's last catalogue entry, a bearing to the acropolis.",
    "rumour": "A third of Lillandril's stacks are blank, and the head librarian has gone missing. The assistants say they can hear reading from beyond the cliff.",
-   "lore_note": [
-    "place.lillandril.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_summerset.json",
    "quests": [
     "lw_sum_4_a"
    ]
@@ -7533,9 +7478,8 @@
    ],
    "payoff": "A silk-page that lets its reader hear the vault's reading.",
    "rumour": "The old acropolis has webs across every column, and some say you can hear a voice reading in them.",
-   "lore_note": [
-    "place.direnni_acropolis.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_summerset.json",
    "quests": [
     "lw_sum_4_b"
    ]
@@ -7992,10 +7936,8 @@
    "payoff": "A reflection-bowl that shows the figure's face.",
    "rumour": "The great pool at Thorn shows a figure at the back of every festival crowd that nobody can name.",
    "thread_clue": "a pool whose surface takes ash and holds a ghost of it",
-   "lore_note": [
-    "place.thorn.web",
-    "place.thorn.thread"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_black_marsh.json",
    "quests": [
     "lw_bm_3_a",
     "lw_t_ash_b"
@@ -8207,10 +8149,8 @@
    "payoff": "A keeper's chart of the dirge's true end, in the mire.",
    "rumour": "No bone-barge has docked at Soulrest in a year, and the island's keepers watch the delta for a dirge that does not come.",
    "thread_clue": "a crypt-door unlocked with a key-shaped scar in its lintel",
-   "lore_note": [
-    "place.soulrest.web",
-    "place.soulrest.thread"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_black_marsh.json",
    "quests": [
     "lw_bm_4_b",
     "lw_t_crown_a"
@@ -8357,9 +8297,8 @@
    ],
    "payoff": "A hold-token that persuades the mound's wardens.",
    "rumour": "Kjolvik's elders sing in the long hall at night, loudly, so the ice cannot be heard. The children ask to be taught the old ship-songs.",
-   "lore_note": [
-    "place.kjolvik.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_foreign.json",
    "quests": [
     "lw_for_1_a"
    ]
@@ -8487,9 +8426,8 @@
    ],
    "payoff": "The harbour's quarter of the seal.",
    "rumour": "The dragon-prow at Tang Mo's quay has a jade tablet set in its throat that glows when the tide is high. The ferrymen have a seal tattooed on their palms.",
-   "lore_note": [
-    "place.tang_mo_harbor_village.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_foreign.json",
    "quests": [
     "lw_for_2_a"
    ]
@@ -8517,9 +8455,8 @@
    ],
    "payoff": "The village's quarter of the seal.",
    "rumour": "A lantern in the headman's house at Tiger Plains has burned without oil since before the village had a name, and he says it is a family heirloom.",
-   "lore_note": [
-    "place.tiger_plains_village.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_foreign.json",
    "quests": [
     "lw_for_2_a"
    ]
@@ -8686,9 +8623,8 @@
    ],
    "payoff": "The admiral's drift-chart: the reef's path.",
    "rumour": "The shell-hulled fleet at anchor keeps pulling south against its lashings. The admiral says it is the current. The deck-hands do not.",
-   "lore_note": [
-    "place.pyandonean_fleet_anchorage.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_foreign.json",
    "quests": [
     "lw_for_3_a"
    ]
@@ -8816,9 +8752,8 @@
    ],
    "payoff": "The second form's token: a polished stone.",
    "rumour": "The sand bowl at Hunding's dojo is raked in a spiral every dawn. The master bows to an empty bench and no one has told him it is empty.",
-   "lore_note": [
-    "place.hundings_dojo.web"
-   ],
+   "lore_note": [],
+   "lore_elsewhere": "marquee_foreign.json",
    "quests": [
     "lw_for_4_a"
    ]

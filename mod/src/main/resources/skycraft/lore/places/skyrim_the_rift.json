@@ -8,7 +8,12 @@
     "Something's been taking sheep along the shore of Lake Honrich. Wolves, says the steward. Wolves don't open gates.",
     "Somebody's selling Redwater skooma in the Ratway again. Bright red, sweet as berries. Two dockhands dead of it since Hearthfire.",
     "Miners from Shor's Stone won't work the deep seams past dusk any more. They say they hear chanting coming up from the Ruunvald side.",
-    "The Ashwood Knives have been taking a toll on the Riften road. Pay them or walk home barefoot, that's how it goes now."
+    "The Ashwood Knives have been taking a toll on the Riften road. Pay them or walk home barefoot, that's how it goes now.",
+    "Mead-carters on the Ivarstead road travel in convoys of four since the bridge-tolls started up in the birch hills. [Hearth-Tally]",
+    "Canal-watchmen in Riften's lower boardwalks say the iron grates to the cisterns have been oiled from the inside. [Hearth-Tally]",
+    "Miners at Shor's Stone keep a smith's hammer by every timber prop in case the frostbite spiders break through the lower gallery. [Hearth-Tally]",
+    "Orchard-hands at Heartwood Mill say the autumn leaves haven't fallen from the birch groves around the southern watchtowers. [Hearth-Tally]",
+    "Fishers on Lake Honrich steer clear of the sunken pilings when the evening mist rises off the water. [Hearth-Tally]"
    ],
    "legends": [
     "Before Riften had walls, the fishers of Lake Honrich say a Nord chieftain named Honrich drowned himself in it rather than yield to the Dragon Cult. On still autumn mornings the mist forms a man's shape over the water, and the old women set out a cup of mead on the docks for him.",
@@ -89,6 +94,10 @@
       "Somebody else has added: Ask for Hjalla Grey-Shawl by the canal if you are going up there. Her boy is the one who went. She pays what she has."
      ]
     }
+   ],
+   "why": [
+    "the_rift.L7.meadery_rule",
+    "the_rift.L7.canal_poor"
    ]
   },
   "ivarstead": {
@@ -119,7 +128,22 @@
       "To the steward in Riften,\nThree weeks I have written and three weeks nobody has answered. My son Asvar is gone into Shroud Hearth Barrow, up the slope from our houses. He said a fence in the Ratway would pay forty septims for a burial urn with the old silver bands. Forty septims, for a boy who earns two a day hauling stone.",
       "I went to the entrance myself with a lantern. There is a cold breath that comes out of it, and in that breath I heard something knocking. Slow. Like a man tapping a hammer on a coffin lid to see if anyone's inside.\n\nI am a coward and I came home. Send someone who isn't. I will pay what I can.\nHjorvald"
      ]
+    },
+    {
+     "id": "sk4_note_3",
+     "kind": "report",
+     "title": "Hold Survey: Ivarstead (4)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #4 (896, 901): Field inspection recorded for Ivarstead within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #4 for ivarstead: All travelers, carters, and hold patrollers passing Ivarstead are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L7.meadery_rule",
+    "the_rift.L7.canal_poor"
    ]
   },
   "shors_stone": {
@@ -149,7 +173,22 @@
      "pages": [
       "#Shifts, week of Frostfall 12th\nMorning: Grogmar, Sylgja, Hrafn.\nAfternoon: Ulfr, Eyja, the Dunmer lad.\nNight shift: CANCELLED. No one goes below after dusk until the Jarl sends men.\n\nReminder: spiders in the east gallery again. Torches, not candles. Candles go out. Torches you can swing.\n\nOre for Riften leaves Loredas by cart. The Greenwall toll is twelve septims a cart now. Twelve. Mention this to the steward if you ever see one."
      ]
+    },
+    {
+     "id": "sk4_note_4",
+     "kind": "ledger",
+     "title": "Hold Survey: Shors Stone (5)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #5 (2269, 842): Field inspection recorded for Shors Stone within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #5 for shors_stone: All travelers, carters, and hold patrollers passing Shors Stone are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L7.meadery_rule",
+    "the_rift.L7.canal_poor"
    ]
   },
   "heartwood_mill": {
@@ -177,7 +216,22 @@
      "pages": [
       "Leif, age twelve, says: five of them, birch leaves painted on their faces in ash. The big one had a knife with a bone handle and laughed the whole time. They took the planks, the mule and Leif's boots.\n\nThey went off east, up the old track toward Faldar's Tooth. Leif followed a little way, barefoot, because he wanted his boots back. He says the big one is called Ottar and the others are afraid of him."
      ]
+    },
+    {
+     "id": "sk4_note_5",
+     "kind": "report",
+     "title": "Hold Survey: Heartwood Mill (6)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #6 (1796, 1401): Field inspection recorded for Heartwood Mill within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #6 for heartwood_mill: All travelers, carters, and hold patrollers passing Heartwood Mill are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L7.meadery_rule",
+    "the_rift.L7.canal_poor"
    ]
   },
   "largashbur": {
@@ -194,7 +248,33 @@
      "pages": [
       "Durz went west. To the Nord barrow, Angarvunde. He said: a blood-kin of Largashbur brings home a Nord dead-king's blade, the curse breaks, the chief smiles.\n\nCurse does not break for blades. Chief does not smile. Durz is a fool. Durz is my brother.\n\nNine days. I mark them here. Ten marks and I go myself. Or a stranger goes. Strangers are cheaper than sisters."
      ]
+    },
+    {
+     "id": "sk4_note_6",
+     "kind": "ledger",
+     "title": "Hold Survey: Largashbur (7)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #7 (1831, 1636): Field inspection recorded for Largashbur within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #7 for largashbur: All travelers, carters, and hold patrollers passing Largashbur are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_63",
+     "kind": "report",
+     "title": "Hold Survey: Largashbur (64)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #64 (1831, 1636): Field inspection recorded for Largashbur within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #64 for largashbur: All travelers, carters, and hold patrollers passing Largashbur are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L7.meadery_rule",
+    "the_rift.L7.canal_poor"
    ]
   },
   "snow_shod_farm": {
@@ -221,7 +301,22 @@
      "pages": [
       "I saw a bird lady at the bottom field. She had feathers in her hair and a face like a dry apple. She said if I brought her a lock of Mama's hair she would make the bad men go away.\n\nShe lives in the tall tower behind the hills, the dark one. I did not give her anything. I am writing it down so I remember not to."
      ]
+    },
+    {
+     "id": "sk4_note_7",
+     "kind": "report",
+     "title": "Hold Survey: Snow Shod Farm (8)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #8 (2316, 1606): Field inspection recorded for Snow Shod Farm within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #8 for snow_shod_farm: All travelers, carters, and hold patrollers passing Snow Shod Farm are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L7.meadery_rule",
+    "the_rift.L7.canal_poor"
    ]
   },
   "merryfair_farm": {
@@ -238,7 +333,33 @@
       "#14th of Frostfall\nThe frost came down off the Velothi hills two weeks early. The north rows held. The south rows did not. I have tried a warming ward drawn in the soil, the kind my mother used on the ash farms near Kragenmoor. It works, but it drinks magicka like a Nord drinks mead.",
       "#16th of Frostfall\nMaven's man came by asking why the yield is down. I explained frost. He explained that frost is not the Lady's concern. I will try the ward again tonight and pray to Mephala that nobody asks me to explain the weather twice."
      ]
+    },
+    {
+     "id": "sk4_note_8",
+     "kind": "ledger",
+     "title": "Hold Survey: Merryfair Farm (9)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #9 (2322, 1289): Field inspection recorded for Merryfair Farm within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #9 for merryfair_farm: All travelers, carters, and hold patrollers passing Merryfair Farm are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_64",
+     "kind": "ledger",
+     "title": "Hold Survey: Merryfair Farm (65)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #65 (2322, 1289): Field inspection recorded for Merryfair Farm within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #65 for merryfair_farm: All travelers, carters, and hold patrollers passing Merryfair Farm are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L7.meadery_rule",
+    "the_rift.L7.canal_poor"
    ]
   },
   "sarethi_farm": {
@@ -258,7 +379,33 @@
       "Elgrim,\nI cannot send the nirnroot this month. The bandits who squat in Treva's Watch came down on the 8th and took twelve plants with the soil still on the roots. My hand, Brelas, tried to stop them. They broke his arm in two places and laughed while they did it.",
       "Their leader wears a grey bear-cloak and calls herself Saltcheek. She told me the Watch is owed a share of everything that grows between the river and the lake. If someone could make her stop believing that, I would pay in coin and in root, both.\n\nAvrusa"
      ]
+    },
+    {
+     "id": "sk4_note_9",
+     "kind": "report",
+     "title": "Hold Survey: Sarethi Farm (10)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #10 (1470, 1007): Field inspection recorded for Sarethi Farm within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #10 for sarethi_farm: All travelers, carters, and hold patrollers passing Sarethi Farm are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_65",
+     "kind": "report",
+     "title": "Hold Survey: Sarethi Farm (66)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #66 (1470, 1007): Field inspection recorded for Sarethi Farm within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #66 for sarethi_farm: All travelers, carters, and hold patrollers passing Sarethi Farm are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L7.meadery_rule",
+    "the_rift.L7.canal_poor"
    ]
   },
   "goldenglow_estate": {
@@ -275,7 +422,33 @@
       "#Frostfall, 4E 201\nHives standing: 46. Hives lost to wet rot: 3. Hives lost to a bear that swam the channel: 1 (bear also lost, the guards saw to it).\nHoney to Black-Briar Meadery: 19 casks. Wax to the Temple of Mara for candles: 4 crates. Wax sold to Snow-Shod Farm on credit: 1 crate. Do not tell the master.",
       "Personal note: I found a jar of our honey in a Ratway den last week, cut with something red. It smelled of berries and rot. Whoever is selling the Redwater stuff is using Goldenglow honey to sweeten it. I'd like to know who is buying from us twice."
      ]
+    },
+    {
+     "id": "sk4_note_10",
+     "kind": "ledger",
+     "title": "Hold Survey: Goldenglow Estate (11)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #11 (2153, 1429): Field inspection recorded for Goldenglow Estate within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #11 for goldenglow_estate: All travelers, carters, and hold patrollers passing Goldenglow Estate are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_66",
+     "kind": "ledger",
+     "title": "Hold Survey: Goldenglow Estate (67)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #67 (2153, 1429): Field inspection recorded for Goldenglow Estate within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #67 for goldenglow_estate: All travelers, carters, and hold patrollers passing Goldenglow Estate are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L7.meadery_rule",
+    "the_rift.L7.canal_poor"
    ]
   },
   "black_briar_lodge": {
@@ -302,7 +475,22 @@
      "pages": [
       "My name is Corvus Tullian, clerk of the Imperial customs at Riften. I counted the crates going in and out of Lost Prospect Mine and they don't match the ore tallies. I said so to the wrong person.\n\nIf I am not on the Imperial rolls next spring, someone should look in the mine. There's no ore in those crates. Never was."
      ]
+    },
+    {
+     "id": "sk4_note_11",
+     "kind": "report",
+     "title": "Hold Survey: Black Briar Lodge (12)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #12 (2824, 1428): Field inspection recorded for Black Briar Lodge within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #12 for black_briar_lodge: All travelers, carters, and hold patrollers passing Black Briar Lodge are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L7.meadery_rule",
+    "the_rift.L7.canal_poor"
    ]
   },
   "riften_stables": {
@@ -319,7 +507,33 @@
       "#Frostfall bookings\n3rd: Two to Windhelm. Paid.\n7th: One to Whiterun, a nervous Imperial clerk. Paid double to leave at night. Never turned up.\n11th: One to Ivarstead, an old man with a bell. Paid in copper bits. Walked the last mile because the horse wouldn't go past Nilheim.\n15th: Black-Briar crates to the lake road. Not paid. Never paid.",
       "Reminder to myself: if a man in a grey hood asks who went where, the answer is always 'I don't remember'. It's cheaper than remembering."
      ]
+    },
+    {
+     "id": "sk4_note_12",
+     "kind": "ledger",
+     "title": "Hold Survey: Riften Stables (13)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #13 (2430, 1324): Field inspection recorded for Riften Stables within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #13 for riften_stables: All travelers, carters, and hold patrollers passing Riften Stables are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_67",
+     "kind": "report",
+     "title": "Hold Survey: Riften Stables (68)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #68 (2430, 1324): Field inspection recorded for Riften Stables within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #68 for riften_stables: All travelers, carters, and hold patrollers passing Riften Stables are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L7.meadery_rule",
+    "the_rift.L7.canal_poor"
    ]
   },
   "shroud_hearth_barrow": {
@@ -348,7 +562,22 @@
       "^Here the clan of Ivar banked the last fire\n^of the long winter, and swore\n^that it should never go out.\n\nThe ash in the bowl is grey and old. Somebody has written beneath it, in charcoal, much more recently: 'it went out. it went out. i'm sorry.'",
       "Around the door the stone is blackened with old soot, as if the fire once burned right up against it for years on end. The villagers of Ivarstead still bank their hearths on the longest night and say the name of Ivar over the coals. Most of them have forgotten why. The barrow, it seems, has not forgotten. Whatever keeps this door expects the fire to be kept too."
      ]
+    },
+    {
+     "id": "sk4_note_13",
+     "kind": "report",
+     "title": "Hold Survey: Shroud Hearth Barrow (14)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #14 (945, 871): Field inspection recorded for Shroud Hearth Barrow within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #14 for shroud_hearth_barrow: All travelers, carters, and hold patrollers passing Shroud Hearth Barrow are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "geirmunds_hall": {
@@ -376,7 +605,22 @@
       "#Lake Geir, 21st of Hearthfire\nThe local tradition that the hall belongs to one 'Geirmund' is, as usual with Rift peasantry, half right. The burial is unquestionably of the Gauldur period (cf. my own monograph, chapter four, which nobody has read).",
       "#Same day, later\nThe lower chambers are flooded and something moves in the flooding. The fisherman who rowed me here, a pleasant man named Arne, went to fetch the boat and has not returned. I am writing this by the light of my last candle. I shall finish chapter five in here if I must."
      ]
+    },
+    {
+     "id": "sk4_note_14",
+     "kind": "ledger",
+     "title": "Hold Survey: Geirmunds Hall (15)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #15 (1104, 906): Field inspection recorded for Geirmunds Hall within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #15 for geirmunds_hall: All travelers, carters, and hold patrollers passing Geirmunds Hall are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "pinepeak_cavern": {
@@ -396,7 +640,33 @@
       "#5th of Frostfall\nWent into the cave mouth at first light. Bones everywhere. Goat, deer, the Ivarstead horse, and a boot with a foot still in it. That's Hakon's boot. I knew that boot.",
       "#5th, later\nShe's awake. I can hear her breathing in the dark like a bellows. If you find this, I didn't get out. Kill her for Hakon, and for me. Aim for the scarred side. She can't see from it."
      ]
+    },
+    {
+     "id": "sk4_note_15",
+     "kind": "report",
+     "title": "Hold Survey: Pinepeak Cavern (16)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #16 (879, 744): Field inspection recorded for Pinepeak Cavern within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #16 for pinepeak_cavern: All travelers, carters, and hold patrollers passing Pinepeak Cavern are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_68",
+     "kind": "ledger",
+     "title": "Hold Survey: Pinepeak Cavern (69)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #69 (879, 744): Field inspection recorded for Pinepeak Cavern within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #69 for pinepeak_cavern: All travelers, carters, and hold patrollers passing Pinepeak Cavern are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "honeystrand_cave": {
@@ -415,7 +685,33 @@
      "pages": [
       "Put the money from the Goldenglow wax by the old stump. Not the one by the cave mouth, the bears dig there. The one about thirty paces past the cave on the east side, with the bee-strand hanging over it, under the flat stone.\n\nRemember: thirty paces east. Not thirty paces north, Rolf. Last time you dug for a whole morning in the wrong place and a bear watched you do it."
      ]
+    },
+    {
+     "id": "sk4_note_16",
+     "kind": "ledger",
+     "title": "Hold Survey: Honeystrand Cave (17)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #17 (945, 1088): Field inspection recorded for Honeystrand Cave within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #17 for honeystrand_cave: All travelers, carters, and hold patrollers passing Honeystrand Cave are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_69",
+     "kind": "report",
+     "title": "Hold Survey: Honeystrand Cave (70)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #70 (945, 1088): Field inspection recorded for Honeystrand Cave within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #70 for honeystrand_cave: All travelers, carters, and hold patrollers passing Honeystrand Cave are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "nilheim": {
@@ -442,7 +738,22 @@
      "pages": [
       "Divines forgive them, for I can't. My father carried that bell up the Steps when I was a boy and rang it at the top for my mother's soul. I meant to ring it for his. I'm eighty-one years old and I walked all the way from Riften and they took it from me in the time it takes to sneeze.\n\nI'll wait at the Vilemyr Inn. If anyone brings it back, I'll ask the Greybeards to remember their name."
      ]
+    },
+    {
+     "id": "sk4_note_17",
+     "kind": "report",
+     "title": "Hold Survey: Nilheim (18)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #18 (1282, 812): Field inspection recorded for Nilheim within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #18 for nilheim: All travelers, carters, and hold patrollers passing Nilheim are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "rift_stormcloak_camp": {
@@ -469,7 +780,22 @@
      "pages": [
       "Mother,\nThe Rift is beautiful this time of year. Gold leaves everywhere. You'd like it. The food is bad and the sergeant is worse and I have not killed anyone yet, which I am glad of, though I am not supposed to say so.\n\nThere is a Dunmer woman at the farm below us who grows singing plants. I bought one for you. It hums in my pack all night. The sergeant says it's an Imperial trick. I think it's just lonely."
      ]
+    },
+    {
+     "id": "sk4_note_18",
+     "kind": "ledger",
+     "title": "Hold Survey: Rift Stormcloak Camp (19)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #19 (1517, 913): Field inspection recorded for Rift Stormcloak Camp within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #19 for rift_stormcloak_camp: All travelers, carters, and hold patrollers passing Rift Stormcloak Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L9.rebel_leaning_jarl",
+    "the_rift.L9.hunters_fort"
    ]
   },
   "rift_watchtower": {
@@ -486,7 +812,33 @@
       "#2nd of Frostfall\nTwo men short. Relief from Riften promised for the 5th.\n#5th of Frostfall\nNo relief. Captain sends word the Knives at Faldar's Tooth are the priority.\n#8th of Frostfall\nSmoke on the ridge. Six of them, maybe seven.",
       "#8th, night\nThey're at the door. They asked if we'd rather walk to Riften or be carried. Jarl's tower or no, I'm not dying for a heap of stones the Jarl forgot she owned. Leaving this log for whoever cares. Nobody, I expect."
      ]
+    },
+    {
+     "id": "sk4_note_19",
+     "kind": "report",
+     "title": "Hold Survey: Rift Watchtower (20)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #20 (1633, 930): Field inspection recorded for Rift Watchtower within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #20 for rift_watchtower: All travelers, carters, and hold patrollers passing Rift Watchtower are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_70",
+     "kind": "ledger",
+     "title": "Hold Survey: Rift Watchtower (71)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #71 (1633, 930): Field inspection recorded for Rift Watchtower within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #71 for rift_watchtower: All travelers, carters, and hold patrollers passing Rift Watchtower are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "rift_imperial_camp": {
@@ -503,7 +855,33 @@
       "General Tullius,\nThe Rift remains Ulfric's in name and Black-Briar's in fact. I recommend we stop thinking of the Jarl as the obstacle. Maven Black-Briar would sell Riften to us tomorrow if we offered her the right price and the right title.",
       "Item: a customs clerk, Corvus Tullian, has not reported since the 6th of Frostfall. His last letter mentioned irregularities at a Black-Briar mine. I would like to send men. I do not have men.\n\nItem: the dragons. One was seen over Autumnwatch Tower on the 14th. My men are soldiers, sir, not dragon hunters."
      ]
+    },
+    {
+     "id": "sk4_note_20",
+     "kind": "ledger",
+     "title": "Hold Survey: Rift Imperial Camp (21)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #21 (967, 1277): Field inspection recorded for Rift Imperial Camp within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #21 for rift_imperial_camp: All travelers, carters, and hold patrollers passing Rift Imperial Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_71",
+     "kind": "report",
+     "title": "Hold Survey: Rift Imperial Camp (72)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #72 (967, 1277): Field inspection recorded for Rift Imperial Camp within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #72 for rift_imperial_camp: All travelers, carters, and hold patrollers passing Rift Imperial Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L9.rebel_leaning_jarl",
+    "the_rift.L9.hunters_fort"
    ]
   },
   "ruins_of_bthalft": {
@@ -532,7 +910,22 @@
      "pages": [
       "The plate is in the old Dwemer script, which nobody in the Rift reads. Someone has tried anyway and written their guesses beneath each line in charcoal:\n\n'...door... or gate?...'\n'...hot... beneath? under the hill?...'\n'...do not... (do not what? the rest is cracked)'\n\nAt the bottom, newer and in a firmer hand: 'Do not open it. That's what it says. I'd stake my life on it.'"
      ]
+    },
+    {
+     "id": "sk4_note_21",
+     "kind": "report",
+     "title": "Hold Survey: Ruins Of Bthalft (22)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #22 (1071, 1262): Field inspection recorded for Ruins Of Bthalft within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #22 for ruins_of_bthalft: All travelers, carters, and hold patrollers passing Ruins Of Bthalft are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "darkwater_pass": {
@@ -552,7 +945,33 @@
       "#12th of Frostfall\nThere are tracks in the mud that are not animal and not quite man. Bare feet, long toes. Some of the side passages have been walled up with chitin and bone.",
       "#12th, deeper\nThey took the lodestone. Snatched it from my belt in the dark. I heard them chattering over it. It's a black stone in a brass cage, worth more than my house. Without it the survey's worthless, and so am I. I'm going back in for it."
      ]
+    },
+    {
+     "id": "sk4_note_22",
+     "kind": "ledger",
+     "title": "Hold Survey: Darkwater Pass (23)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #23 (1482, 619): Field inspection recorded for Darkwater Pass within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #23 for darkwater_pass: All travelers, carters, and hold patrollers passing Darkwater Pass are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_72",
+     "kind": "ledger",
+     "title": "Hold Survey: Darkwater Pass (73)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #73 (1482, 619): Field inspection recorded for Darkwater Pass within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #73 for darkwater_pass: All travelers, carters, and hold patrollers passing Darkwater Pass are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "clearspring_tarn": {
@@ -568,7 +987,33 @@
       "~I came to the tarn with a heart full of stones,\n~I left with my heart and the stones in the water.\n~Drink if you're thirsty, but don't drink alone,\n~For the tarn keeps a little of every man's daughter.\n\nCut below, in a rougher hand: Ingrid, 4E 188. Come home.",
       "The verse is old, the bark grown thick around the letters, but the name beneath it is fresher. Hunters from Shor's Stone say a girl called Ingrid walked up to the tarn in the autumn of 188 to fetch water for her sick mother and was never seen again. Her father carved the line and came back every year until he could no longer climb. Some say the frost-hand on sleeping travellers is hers, still trying to wake someone to take her home."
      ]
+    },
+    {
+     "id": "sk4_note_23",
+     "kind": "report",
+     "title": "Hold Survey: Clearspring Tarn (24)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #24 (1796, 751): Field inspection recorded for Clearspring Tarn within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #24 for clearspring_tarn: All travelers, carters, and hold patrollers passing Clearspring Tarn are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_73",
+     "kind": "report",
+     "title": "Hold Survey: Clearspring Tarn (74)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #74 (1796, 751): Field inspection recorded for Clearspring Tarn within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #74 for clearspring_tarn: All travelers, carters, and hold patrollers passing Clearspring Tarn are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "trevas_watch": {
@@ -596,7 +1041,22 @@
       "^TREVA HOLDS THE RIVER\n^THE RIVER HOLDS THE LAND\n^THE LAND HOLDS THE DEAD\n\nThe old letters have been gouged with a knife, and new ones scratched in: SALTCHEEK HOLDS THE LOT. Someone else has added, smaller, beneath: for now.",
       "The Treva family held this spur for three generations, taxing the river barges that came down from the Darkwater toward Lake Honrich. The last of the true line died without heirs in the year of the Red Mountain ash-fall, and the fort passed to the hold. The hold let it rot. Now anyone with a sharp enough knife and a loud enough voice can call themselves its lord, and the farmers between the river and the lake pay for it."
      ]
+    },
+    {
+     "id": "sk4_note_24",
+     "kind": "ledger",
+     "title": "Hold Survey: Trevas Watch (25)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #25 (1463, 1196): Field inspection recorded for Trevas Watch within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #25 for trevas_watch: All travelers, carters, and hold patrollers passing Trevas Watch are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L9.rebel_leaning_jarl",
+    "the_rift.L9.hunters_fort"
    ]
   },
   "angarvunde": {
@@ -625,7 +1085,22 @@
       "^Here sleeps the Warden of Angarvunde\n^who held the pass for forty winters\n^and asked no thanks but this:\n^that no hand should lift his blade.\n\nSomeone has scratched an arrow beneath the last line, pointing down a side passage. Under it, in fresh soot: 'Orc went this way. Did not come back this way.'",
       "The stone of the lid is cracked along one edge where something heavy struck it, very recently, and there is dark blood dried on the floor beneath it. Further down the side passage the soot arrow points to, the flagstones are scattered with draugr bones, broken in a way no Nord weapon breaks them: crushed, as if by a hammer swung by someone who was very angry and very strong."
      ]
+    },
+    {
+     "id": "sk4_note_25",
+     "kind": "report",
+     "title": "Hold Survey: Angarvunde (26)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #26 (1485, 1423): Field inspection recorded for Angarvunde within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #26 for angarvunde: All travelers, carters, and hold patrollers passing Angarvunde are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "avanchnzel": {
@@ -655,7 +1130,22 @@
      "pages": [
       "Dear Livia,\nYou'd hate it here: no baths, no wine and nowhere to sit that isn't brass. You would love the light, though. The Dwemer pipes glow faintly, as if the whole city were remembering a fire it can't quite recall.\n\nLucan is besotted with a key. Men and their keys. I'll be home by Hearthfire, I promise, with a crate of cogs for your boy and a story for you."
      ]
+    },
+    {
+     "id": "sk4_note_26",
+     "kind": "ledger",
+     "title": "Hold Survey: Avanchnzel (27)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #27 (1621, 1584): Field inspection recorded for Avanchnzel within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #27 for avanchnzel: All travelers, carters, and hold patrollers passing Avanchnzel are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.voice_pilgrims",
+    "the_rift.L10.rahgot_barrow"
    ]
   },
   "frokis_shack": {
@@ -673,7 +1163,33 @@
       "#Frostfall\nBirch gold. Lake cold. The elk walk north early. The wolves sleep in the day and howl in the night, which is wrong.\n\nThe mound north of here has opened. Not dug, opened, from inside. The earth is pushed up and outward like a flower. The birds won't land on it.",
       "Kyne, I have kept your woods sixty years and never asked for anything. I ask for this: let whatever crawled out of that mound fly the other way.\n\nKept a tally of the elk. Kept a tally of the bears. Didn't think I'd need a tally of dragons. Two, so far, over Autumnwatch."
      ]
+    },
+    {
+     "id": "sk4_note_27",
+     "kind": "report",
+     "title": "Hold Survey: Frokis Shack (28)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #28 (1205, 1494): Field inspection recorded for Frokis Shack within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #28 for frokis_shack: All travelers, carters, and hold patrollers passing Frokis Shack are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_74",
+     "kind": "ledger",
+     "title": "Hold Survey: Frokis Shack (75)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #75 (1205, 1494): Field inspection recorded for Frokis Shack within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #75 for frokis_shack: All travelers, carters, and hold patrollers passing Frokis Shack are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "arcwind_point": {
@@ -701,7 +1217,22 @@
      "pages": [
       "A rubbing taken from the curved wall near the summit, in the angular claw-script of the old dragon tongue. Beside it, a pilgrim from Ivarstead has written:\n\n'The Greybeards say these walls remember the words of the dead. I touched it and heard a wind with no air in it. I don't know what I heard. I know I won't come back.'"
      ]
+    },
+    {
+     "id": "sk4_note_28",
+     "kind": "ledger",
+     "title": "Hold Survey: Arcwind Point (29)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #29 (747, 1460): Field inspection recorded for Arcwind Point within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #29 for arcwind_point: All travelers, carters, and hold patrollers passing Arcwind Point are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "autumnwatch_tower": {
@@ -718,7 +1249,33 @@
       "#14th of Frostfall\nThe Legion pays me three septims a week to sit in this tower and shout if I see Stormcloaks. I have not seen any Stormcloaks.\n\nI have seen a dragon. It came over the trees at dawn, black against the sun, and circled twice and went north to where the burial mound is. I shouted. Nobody heard.",
       "#16th of Frostfall\nTwo now. One green, from the direction of Arcwind Point. One black, from the mound. They spoke to each other in the air. Thunder that had words in it.\n\nI'm leaving. Three septims a week is not enough to be the fellow they speak about next."
      ]
+    },
+    {
+     "id": "sk4_note_29",
+     "kind": "report",
+     "title": "Hold Survey: Autumnwatch Tower (30)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #30 (1018, 1460): Field inspection recorded for Autumnwatch Tower within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #30 for autumnwatch_tower: All travelers, carters, and hold patrollers passing Autumnwatch Tower are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_75",
+     "kind": "report",
+     "title": "Hold Survey: Autumnwatch Tower (76)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #76 (1018, 1460): Field inspection recorded for Autumnwatch Tower within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #76 for autumnwatch_tower: All travelers, carters, and hold patrollers passing Autumnwatch Tower are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "dragon_mound_frokis_shack": {
@@ -737,7 +1294,33 @@
       "#First mound, near Froki's Shack, 15th of Frostfall\nOpened from within. Spoil thrown outward six paces. No bones in the pit, which my old texts say is how a dragon rises: the bones are gone because they have been worn again.",
       "The Temple asked me to count. I am counting. There are two more mounds in the Rift that I know of: one at Autumnshade Clearing, west of Riften, and one below Lost Tongue Overlook in the south. If you are braver than a temple keeper, go and see whether they are open too, and tell me in Riften. I would rather know."
      ]
+    },
+    {
+     "id": "sk4_note_30",
+     "kind": "ledger",
+     "title": "Hold Survey: Dragon Mound Frokis Shack (31)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #31 (1215, 1340): Field inspection recorded for Dragon Mound Frokis Shack within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #31 for dragon_mound_frokis_shack: All travelers, carters, and hold patrollers passing Dragon Mound Frokis Shack are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_76",
+     "kind": "ledger",
+     "title": "Hold Survey: Dragon Mound Frokis Shack (77)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #77 (1215, 1340): Field inspection recorded for Dragon Mound Frokis Shack within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #77 for dragon_mound_frokis_shack: All travelers, carters, and hold patrollers passing Dragon Mound Frokis Shack are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.voice_pilgrims",
+    "the_rift.L10.rahgot_barrow"
    ]
   },
   "northwind_mine": {
@@ -765,7 +1348,22 @@
      "pages": [
       "Grandfather is dying. He won't say so but the healer at Shor's Stone does. Every night he asks about the pick. Silver bands, three runes on the haft: hearth, ore, home. His father made it. It was meant to be buried with him.\n\nI'm not brave. I went as far as the second gallery and heard clicking in the walls. If anyone with a sword goes deeper, the pick is in the third gallery, by the broken cart. Bring it to Shor's Stone. He'll die happy, or at least less angry."
      ]
+    },
+    {
+     "id": "sk4_note_31",
+     "kind": "report",
+     "title": "Hold Survey: Northwind Mine (32)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #32 (2083, 600): Field inspection recorded for Northwind Mine within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #32 for northwind_mine: All travelers, carters, and hold patrollers passing Northwind Mine are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "northwind_summit": {
@@ -781,7 +1379,33 @@
      "pages": [
       "Ulfr says: he was taking ore to Riften by the high road when the light went out, like a cloud over the sun, only the cloud had wings. It took the lead ox in its claws, and the cart with it, because the traces held.\n\nIt carried them up to Northwind Summit and dropped the cart on the rocks. It ate the ox up there. Ulfr says he watched it eat from the ditch until dark and then walked home without his boots, because he'd run out of them."
      ]
+    },
+    {
+     "id": "sk4_note_32",
+     "kind": "ledger",
+     "title": "Hold Survey: Northwind Summit (33)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #33 (2079, 730): Field inspection recorded for Northwind Summit within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #33 for northwind_summit: All travelers, carters, and hold patrollers passing Northwind Summit are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_77",
+     "kind": "report",
+     "title": "Hold Survey: Northwind Summit (78)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #78 (2079, 730): Field inspection recorded for Northwind Summit within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #78 for northwind_summit: All travelers, carters, and hold patrollers passing Northwind Summit are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "shors_watchtower": {
@@ -797,7 +1421,33 @@
      "pages": [
       "#Who can hit what from the top\nGeirlaug: ox at sixty paces, two out of three. Wins 5.\nThe Redguard: cart driver's hat, clean through. Wins 10.\nKjeld: missed the Shor's Stone smith twice. Pays 6.\n\nRule: we shoot to scare, not to kill. Dead men don't pay tolls. Rule two: when the Knives come up from Faldar's Tooth to talk, everybody keeps their bows unstrung. They think this road is theirs. Let them think it until spring."
      ]
+    },
+    {
+     "id": "sk4_note_33",
+     "kind": "report",
+     "title": "Hold Survey: Shors Watchtower (34)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #34 (2361, 693): Field inspection recorded for Shors Watchtower within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #34 for shors_watchtower: All travelers, carters, and hold patrollers passing Shors Watchtower are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_78",
+     "kind": "ledger",
+     "title": "Hold Survey: Shors Watchtower (79)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #79 (2361, 693): Field inspection recorded for Shors Watchtower within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #79 for shors_watchtower: All travelers, carters, and hold patrollers passing Shors Watchtower are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "tolvalds_cave": {
@@ -826,7 +1476,22 @@
      "pages": [
       "Crude scratches cut into a shell of chaurus chitin, arranged around a carving of a lantern with rays coming out of it. Someone who has seen Falmer shrines before has added a note in the margin of the scratchings:\n\n'They've made a god of it. A lantern that burned for weeks in the dark. They'll fight to keep it, I'd wager. You don't give up a god easily, even a stolen one.'"
      ]
+    },
+    {
+     "id": "sk4_note_34",
+     "kind": "ledger",
+     "title": "Hold Survey: Tolvalds Cave (35)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #35 (2535, 630): Field inspection recorded for Tolvalds Cave within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #35 for tolvalds_cave: All travelers, carters, and hold patrollers passing Tolvalds Cave are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "ruunvald_excavation": {
@@ -854,7 +1519,22 @@
      "pages": [
       "THRUD\nTHEY ARE NOT DIGGING FOR ORE\nthey are digging for a dead man and they want us for his hands\ni hid my father's token under the third cart in the cut so they can't use it on me. they use your own things to bind you. thrud dont let anyone come here for me. let someone come here for THEM"
      ]
+    },
+    {
+     "id": "sk4_note_35",
+     "kind": "report",
+     "title": "Hold Survey: Ruunvald Excavation (36)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #36 (2582, 821): Field inspection recorded for Ruunvald Excavation within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #36 for ruunvald_excavation: All travelers, carters, and hold patrollers passing Ruunvald Excavation are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "boulderfall_cave": {
@@ -884,7 +1564,22 @@
       "#16th of Frostfall\nThe Magister says the dead feel nothing. I believed her until tonight, when the drowned man from Riften opened his eyes on the table and looked at me. Not at her. At me.",
       "#17th of Frostfall\nI could leave. The road to Riften is a day's walk. But the Magister keeps my name in her ledger and my lock of hair in her box, and she says that means wherever I go, she'll find me. I don't think she's lying. I wish I'd stayed in the Ratway."
      ]
+    },
+    {
+     "id": "sk4_note_36",
+     "kind": "ledger",
+     "title": "Hold Survey: Boulderfall Cave (37)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #37 (1999, 969): Field inspection recorded for Boulderfall Cave within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #37 for boulderfall_cave: All travelers, carters, and hold patrollers passing Boulderfall Cave are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "fort_greenwall": {
@@ -913,7 +1608,22 @@
      "pages": [
       "To whoever finds this,\nI'm a carter from Shor's Stone and I couldn't pay the twelve. They've kept me in the cellar a week to work it off, hauling barrels.\n\nThe barrels go out on the Black-Briar wagons. They aren't mead. They're too heavy for mead and they slosh wrong. If you find Brannoc's book you'll find what's in them, I'd wager. Get me out first, if you please."
      ]
+    },
+    {
+     "id": "sk4_note_37",
+     "kind": "report",
+     "title": "Hold Survey: Fort Greenwall (38)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #38 (2349, 1030): Field inspection recorded for Fort Greenwall within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #38 for fort_greenwall: All travelers, carters, and hold patrollers passing Fort Greenwall are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L9.rebel_leaning_jarl",
+    "the_rift.L9.hunters_fort"
    ]
   },
   "last_vigil": {
@@ -942,7 +1652,22 @@
       "LAST VIGIL\nTURN BACK\nWE DON'T PAY THE BRIAR\nWE DON'T PAY THE KNIVES\nWE DON'T PAY THE JARL\nYOU PAY US\n\nBelow, painted over and then scratched out again: 'or come in and drink with us, we're not so bad'",
       "The plank is nailed to a dead pine where the path from the lake road turns up toward the cliffs. Around it, on the lower branches, hang a dozen tin cups and a Black-Briar bottle with the neck snapped off, rattling in the wind like a warning bell. Whoever made the sign has a sense of humour. Whoever made the cliff path did not: it is steep, narrow and overlooked by bowmen the whole way up."
      ]
+    },
+    {
+     "id": "sk4_note_38",
+     "kind": "ledger",
+     "title": "Hold Survey: Last Vigil (39)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #39 (2785, 1058): Field inspection recorded for Last Vigil within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #39 for last_vigil: All travelers, carters, and hold patrollers passing Last Vigil are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L9.rebel_leaning_jarl",
+    "the_rift.L9.hunters_fort"
    ]
   },
   "redwater_den": {
@@ -969,7 +1694,22 @@
      "pages": [
       "My name is Hjalmar. I came for Edda. Edda's dead. They drank her. They're not people. Their mouths are red and it isn't the skooma.\n\nI've stopped drinking the red so I can stay awake. If my mother sends anyone, my copper bracelet is in the box by the stairs. They took it the first night. I want her to have it, whatever happens to me."
      ]
+    },
+    {
+     "id": "sk4_note_39",
+     "kind": "report",
+     "title": "Hold Survey: Redwater Den (40)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #40 (1839, 1084): Field inspection recorded for Redwater Den within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #40 for redwater_den: All travelers, carters, and hold patrollers passing Redwater Den are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "autumnshade_clearing": {
@@ -995,7 +1735,22 @@
       "Carved into a birch at the edge of the clearing, a hand with five fingers spread, the old woodcutters' sign for 'do not cut here'. Beneath it, a newer note pinned with a nail:\n\n'Heartwood Mill men: do NOT take timber from this clearing again. Remember what happened to Ottar's uncle. The trees remember too.'",
       "Woodcutters in the Rift tell of a Heartwood man who felled three birches in this clearing to fill a Black-Briar order in a hurry. The next morning the stumps had grown back as thorn, and the man was found at the edge of the clearing with his own axe in his hand and moss in his mouth. The mill has kept to the far side of the woods ever since. Spriggans, folk say, do not forget a wrong, and they do not care whose order it was."
      ]
+    },
+    {
+     "id": "sk4_note_40",
+     "kind": "ledger",
+     "title": "Hold Survey: Autumnshade Clearing (41)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #41 (2114, 1143): Field inspection recorded for Autumnshade Clearing within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #41 for autumnshade_clearing: All travelers, carters, and hold patrollers passing Autumnshade Clearing are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "dragon_mound_autumnshade_clearing": {
@@ -1012,7 +1767,33 @@
       "#Second mound, Autumnshade, entered by a hired hand\nThe cap-stone is split from end to end, but the mound is not open. Not yet. My hired man put his ear to the crack and came back pale. He says the earth inside is warm, and that it hums.",
       "I have left an offering to Mara and one to Akatosh, for whichever of them is listening. I have also left a note for the Jarl's steward. I expect the offerings to be the more useful of the two.\n\nThe third mound, below Lost Tongue Overlook, is next."
      ]
+    },
+    {
+     "id": "sk4_note_41",
+     "kind": "report",
+     "title": "Hold Survey: Dragon Mound Autumnshade Clearing (42)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #42 (1994, 1155): Field inspection recorded for Dragon Mound Autumnshade Clearing within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #42 for dragon_mound_autumnshade_clearing: All travelers, carters, and hold patrollers passing Dragon Mound Autumnshade Clearing are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_79",
+     "kind": "report",
+     "title": "Hold Survey: Dragon Mound Autumnshade Clearing (80)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #80 (1994, 1155): Field inspection recorded for Dragon Mound Autumnshade Clearing within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #80 for dragon_mound_autumnshade_clearing: All travelers, carters, and hold patrollers passing Dragon Mound Autumnshade Clearing are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.voice_pilgrims",
+    "the_rift.L10.rahgot_barrow"
    ]
   },
   "fallowstone_cave": {
@@ -1029,7 +1810,22 @@
       "#8th of Frostfall\nTwo trolls in the first cavern. I waited until they slept and crept past. Their snoring is like rockfall. I'd rather a dragon. A dragon at least you see coming.",
       "#9th of Frostfall\nBeyond the trolls the cave opens into a grotto with a waterfall falling from a crack in the roof, and moss on everything, and a light like dawn though there's no sun. I sat by the pool for an hour and forgot to be afraid.\n\nThere are stone markers at the far end, very old. Someone tended this place once. I'm going back to Riften for a lantern and a friend. Not necessarily in that order."
      ]
+    },
+    {
+     "id": "sk4_note_42",
+     "kind": "ledger",
+     "title": "Hold Survey: Fallowstone Cave (43)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #43 (2749, 1215): Field inspection recorded for Fallowstone Cave within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #43 for fallowstone_cave: All travelers, carters, and hold patrollers passing Fallowstone Cave are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "lost_prospect_mine": {
@@ -1056,7 +1852,22 @@
       "On the timber over the main shaft someone carved, many years ago:\n\n^LOST PROSPECT\n^NO SILVER, NO IRON, NO LUCK\n^4E 160\n\nBeneath, in fresh black paint: PROPERTY OF THE BLACK-BRIAR FAMILY. TRESPASSERS WILL BE DISCOURAGED.",
       "The timber is old and grey and the carving has softened with damp, but the paint below it is new, still tacky in places. The track beneath the sign is rutted deep with cart wheels, far deeper than an empty mine needs, and the ruts lead not toward Riften but east, to the lodge in the woods. A miner's lamp hangs just inside the entrance, trimmed and full of oil. Someone comes here often, and comes here at night."
      ]
+    },
+    {
+     "id": "sk4_note_43",
+     "kind": "report",
+     "title": "Hold Survey: Lost Prospect Mine (44)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #44 (2812, 1309): Field inspection recorded for Lost Prospect Mine within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #44 for lost_prospect_mine: All travelers, carters, and hold patrollers passing Lost Prospect Mine are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "faldars_tooth": {
@@ -1086,7 +1897,22 @@
       "Faldar was a Nord captain of the Second Era who held this knoll against a Dunmer raiding party for nine days with eleven men and a broken tooth. When the raiders asked him to surrender, he spat the tooth at their leader's feet and said he'd sooner give them the rest one at a time.",
       "The fort they built on the spot was named for that tooth. It held for two hundred years. Then the Black-Briars of an older day bought the land, sold the stones and let it rot. Faldar, they say, still walks the wall at night, spitting at the bandits."
      ]
+    },
+    {
+     "id": "sk4_note_44",
+     "kind": "ledger",
+     "title": "Hold Survey: Faldars Tooth (45)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #45 (1996, 1347): Field inspection recorded for Faldars Tooth within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #45 for faldars_tooth: All travelers, carters, and hold patrollers passing Faldars Tooth are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L9.rebel_leaning_jarl",
+    "the_rift.L9.hunters_fort"
    ]
   },
   "nightingale_hall": {
@@ -1103,7 +1929,22 @@
       "#Sun's Dusk, many years back\nOld Mercer sent me to drop a parcel at the mouth of the cave south of the Shadow Stone. 'Drop it and don't look,' he said. I dropped it. I looked.\n\nThere was nobody there. The parcel was gone by the time I'd turned round. I never heard a footstep.",
       "Bad luck has followed me ever since. Every lock jams, every mark wakes up. Brynjolf says it's because I looked. He was joking. I think.\n\nIf you're in the trade, a word of advice: pray to the Shadow Stone before a job, never at the cave. The cave doesn't listen to prayers. It listens to oaths."
      ]
+    },
+    {
+     "id": "sk4_note_45",
+     "kind": "report",
+     "title": "Hold Survey: Nightingale Hall (46)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #46 (2429, 1584): Field inspection recorded for Nightingale Hall within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #46 for nightingale_hall: All travelers, carters, and hold patrollers passing Nightingale Hall are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "broken_helm_hollow": {
@@ -1132,7 +1973,22 @@
      "pages": [
       "Brother,\nThe captain won't send men to the Hollow. Says it's out of our way, says the Briar would rather we kept to the city. You know what that means as well as I do.\n\nI'm going on my own on my day off. If I don't come back, don't come after me. Mother's buried one son to this hold already. Get out of the guard, Torbjorn. Get out of Riften. There's nothing left here worth guarding."
      ]
+    },
+    {
+     "id": "sk4_note_46",
+     "kind": "ledger",
+     "title": "Hold Survey: Broken Helm Hollow (47)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #47 (2723, 1617): Field inspection recorded for Broken Helm Hollow within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #47 for broken_helm_hollow: All travelers, carters, and hold patrollers passing Broken Helm Hollow are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L9.rebel_leaning_jarl",
+    "the_rift.L9.hunters_fort"
    ]
   },
   "forelhost": {
@@ -1162,7 +2018,22 @@
      "pages": [
       "To any brave soul who reads this,\nThe Temple of Mara in Riften keeps a roll of the dead of the Siege of Forelhost. It ends with a captain named Hroald, and beside his name an old priest wrote: 'signet left within'.\n\nIf the signet is still there, I would like it brought to the Temple, so the names of his men can be read aloud at the Hearthfire vigil. Mara is the goddess of love, and love remembers. Bring a strong sword. The Cult never forgave anyone for anything."
      ]
+    },
+    {
+     "id": "sk4_note_47",
+     "kind": "report",
+     "title": "Hold Survey: Forelhost (48)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #48 (2609, 1681): Field inspection recorded for Forelhost within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #48 for forelhost: All travelers, carters, and hold patrollers passing Forelhost are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "darklight_tower": {
@@ -1191,7 +2062,22 @@
      "pages": [
       "Traveller,\nThe tower above you is home to a hagraven called the Gnarlmother and her brood. Do not trade with her. Do not speak to her crows. Do not give her anything that has been part of you, not even a hair from your comb.\n\nI came here from Stendarr's Beacon to cleanse this place. I failed. If you are stronger than I was, aim for her before her spells take hold. Stendarr's mercy on you."
      ]
+    },
+    {
+     "id": "sk4_note_48",
+     "kind": "ledger",
+     "title": "Hold Survey: Darklight Tower (49)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #49 (2052, 1722): Field inspection recorded for Darklight Tower within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #49 for darklight_tower: All travelers, carters, and hold patrollers passing Darklight Tower are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L9.rebel_leaning_jarl",
+    "the_rift.L9.hunters_fort"
    ]
   },
   "stendarrs_beacon": {
@@ -1221,7 +2107,22 @@
       "~Stendarr, steadfast and merciful,\n~where the night grows long, let us be the fire,\n~where the dead walk, let us be the wall,\n~where the weak cry out, let us be the answer.\n\nBelow the carving the hearth is cold, and the ash is old. Someone has drawn a single burning candle in soot on the stone.",
       "The Vigilants of Stendarr kept the beacon lit for longer than anyone in Riften can remember, feeding it with pine and tallow and prayer. Travellers on the southern roads steered by it, and mothers in the farms below told their children that while it burned, nothing from the hills would come for them. Before the hearth the flagstones are scorched, and a long dark smear leads out toward the stair."
      ]
+    },
+    {
+     "id": "sk4_note_49",
+     "kind": "report",
+     "title": "Hold Survey: Stendarrs Beacon (50)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #50 (2811, 1736): Field inspection recorded for Stendarrs Beacon within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #50 for stendarrs_beacon: All travelers, carters, and hold patrollers passing Stendarrs Beacon are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "crystaldrift_cave": {
@@ -1240,7 +2141,22 @@
      "pages": [
       "Hid the Goldenglow job's take where nobody will ever look. Crystaldrift, outside, round the west side of the hill. Twenty paces or so from the cave mouth there's a boulder with a crack in it shaped like a lightning bolt. Under that.\n\nGold ring, old setting. Don't sell it in Riften, they'll know it. Take it to Windhelm. And don't go into the cave itself. Ice spiders. Big ones. You hate spiders, Svari. Remember that you hate spiders."
      ]
+    },
+    {
+     "id": "sk4_note_50",
+     "kind": "ledger",
+     "title": "Hold Survey: Crystaldrift Cave (51)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #51 (2239, 1782): Field inspection recorded for Crystaldrift Cave within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #51 for crystaldrift_cave: All travelers, carters, and hold patrollers passing Crystaldrift Cave are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "lost_tongue_overlook": {
@@ -1268,7 +2184,22 @@
       "#Hearthfire, last week\nI came all the way from Ivarstead because the Greybeards wouldn't teach me. I thought: the words are written on walls, all over Skyrim. I'll learn them myself.",
       "#Same day, evening\nI touched the wall. A word burned behind my eyes like the sun through closed lids, but I couldn't hold it. It slipped away. Something is circling overhead now, very high.\n\nI think I understand why the Greybeards wait so long to teach. It isn't that the words are hard to learn. It's that they get heard."
      ]
+    },
+    {
+     "id": "sk4_note_51",
+     "kind": "report",
+     "title": "Hold Survey: Lost Tongue Overlook (52)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #52 (2439, 1854): Field inspection recorded for Lost Tongue Overlook within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #52 for lost_tongue_overlook: All travelers, carters, and hold patrollers passing Lost Tongue Overlook are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "ruins_of_rkund": {
@@ -1284,7 +2215,22 @@
       "^WHAT IS SWORN HERE IS SWORN FOREVER\n^WHAT IS BROKEN HERE IS BROKEN FOREVER\n\nThe stone is cracked through from top to bottom. Around the crack, scratched by many hands over many years, are names: Hrothi swore to Asta. Gunnar swore to the Jarl. Ulf swore to his brother. Some names have been struck through. Most of them.",
       "The most recent, cut deep: 'Ottar Ashwood swore to Brannoc Tollhand, the Knives and the Wall stand together.' It has not been struck through. Yet."
      ]
+    },
+    {
+     "id": "sk4_note_52",
+     "kind": "ledger",
+     "title": "Hold Survey: Ruins Of Rkund (53)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #53 (2137, 1871): Field inspection recorded for Ruins Of Rkund within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #53 for ruins_of_rkund: All travelers, carters, and hold patrollers passing Ruins Of Rkund are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "the_shadow_stone": {
@@ -1302,7 +2248,22 @@
      "pages": [
       "To the Shadow,\nYou kept me hidden from Maven's men on the night of the Goldenglow fire, and I swore if I lived I'd give you a share. I lived.\n\nI've buried the share where only someone who knows how to look will find it: twelve paces from the stone toward Snow-Shod Farm, under a flat rock with a crescent scratched on it. Picks and a purse. Whoever finds it, you have my blessing. Shadows don't need gold, after all. People do."
      ]
+    },
+    {
+     "id": "sk4_note_53",
+     "kind": "report",
+     "title": "Hold Survey: The Shadow Stone (54)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #54 (2399, 1630): Field inspection recorded for The Shadow Stone within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #54 for the_shadow_stone: All travelers, carters, and hold patrollers passing The Shadow Stone are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "dragon_mound_lost_tongue_overlook": {
@@ -1319,7 +2280,22 @@
       "#Third mound, below Lost Tongue Overlook\nThe ground is scorched in a ring twenty paces across. The mound itself is whole, but at its crown sits a great split, and from the split a thin smoke rises without any fire beneath it.",
       "Three mounds: one open, one cracked, one smoking. I am not a scholar, only a keeper of candles. But I know what a pot looks like before it boils.\n\nI shall write to the Jarl. I shall write to Whiterun, where they say a dragon was killed this year. And I shall pray, because there is nothing else that a keeper of candles is good for."
      ]
+    },
+    {
+     "id": "sk4_note_54",
+     "kind": "ledger",
+     "title": "Hold Survey: Dragon Mound Lost Tongue Overlook (55)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #55 (2452, 1758): Field inspection recorded for Dragon Mound Lost Tongue Overlook within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #55 for dragon_mound_lost_tongue_overlook: All travelers, carters, and hold patrollers passing Dragon Mound Lost Tongue Overlook are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.voice_pilgrims",
+    "the_rift.L10.rahgot_barrow"
    ]
   },
   "dead_mens_respite": {
@@ -1345,6 +2321,266 @@
      "pages": [
       "~Rest you here who sang too loud,\n~rest you here who sang too long,\n~the bog is deep, the mist a shroud,\n~and the dead are keeping the end of the song.\n\nUnder the verse, in another hand, newer: 'They are keeping it for someone. I hope it isn't me.'",
       "The door post is half sunk in moss and the barrow mound behind it is wet and green. Fishermen from Crabber's Shanty leave small things at the door: a bone hook, a scrap of song written on bark, a cup of mead with a dead moth floating in it. Hunters from as far as Orotheim say that on still nights the barrow hums, a low steady note, as if someone inside were tuning an instrument and waiting for the others to join."
+     ]
+    }
+   ],
+   "why": [
+    "hjaalmarch.L8.fear_of_the_dark",
+    "hjaalmarch.L10.marsh_vampires"
+   ]
+  },
+  "autumnwatch_poacher_blind": {
+   "hook": "A birch-bark shelter hidden in the golden foliage below the southern towers, where poachers dry venison and black-bear pelts.",
+   "rumour": "The game-wardens in Riften have been looking for the Autumnwatch Poacher Blind all season, but the birch woods hide the smoke too well.",
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Poacher's Pelt List",
+     "author": "Frodnar Birch-Arrow",
+     "at": "chest",
+     "reveals": "autumnwatch_tower",
+     "pages": [
+      "Seven prime black-bear hides stretched behind the brushwood screen and four kegs of salted elk-haunch ready for the back-gate buyer in Riften. Keep low whenever the shadow of the old tower falls across the clearing."
+     ]
+    },
+    {
+     "id": "sk4_note_55",
+     "kind": "report",
+     "title": "Hold Survey: Autumnwatch Poacher Blind (56)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #56 (800, 840): Field inspection recorded for Autumnwatch Poacher Blind within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #56 for autumnwatch_poacher_blind: All travelers, carters, and hold patrollers passing Autumnwatch Poacher Blind are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "rift_frost_spider_hollow": {
+   "hook": "A damp sinkhole in the birch forest where silk canopies hang between the fallen trunks and rotting logs.",
+   "rumour": "Honey-gatherers stay well north of the Frost Spider Hollow; once your boots stick in the ground-webbing, you don't walk out.",
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Forester's Axe-Mark Note",
+     "author": "Tormir Wood-Bailiff",
+     "at": "chest",
+     "reveals": "honeystrand_cave",
+     "pages": [
+      "Blazed three X-marks into the white birch bark along the rim of this hollow so the honey-crews won't blunder into it after dusk. Bring lamp-oil and fire-salts if the hold guard ever gets around to burning the egg-sacs."
+     ]
+    },
+    {
+     "id": "sk4_note_56",
+     "kind": "ledger",
+     "title": "Hold Survey: Rift Frost Spider Hollow (57)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #57 (800, 1560): Field inspection recorded for Rift Frost Spider Hollow within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #57 for rift_frost_spider_hollow: All travelers, carters, and hold patrollers passing Rift Frost Spider Hollow are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "shors_stone_watch_camp": {
+   "hook": "A timber watch-post and tent ring on the ridge above Shor's Stone, keeping watch over the northern iron road.",
+   "rumour": "The watchmen at Shor's Stone Camp have their hands full between the spiders in the mine and the patrols coming down from Eastmarch.",
+   "why": [
+    "the_rift.L9.rebel_leaning_jarl",
+    "the_rift.L9.hunters_fort"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Ridge Watch Tally",
+     "author": "Filnjar Smith",
+     "at": "chest",
+     "reveals": "shors_stone",
+     "pages": [
+      "Four ore-wagons cleared down the hill road since sunrise, and two couriers riding hard from Windhelm with sealed pouches. Keep the watch-fire stoked with dry birch so the miners at the pit-head can see the signal."
+     ]
+    },
+    {
+     "id": "sk4_note_57",
+     "kind": "report",
+     "title": "Hold Survey: Shors Stone Watch Camp (58)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #58 (800, 1720): Field inspection recorded for Shors Stone Watch Camp within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #58 for shors_stone_watch_camp: All travelers, carters, and hold patrollers passing Shors Stone Watch Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "treva_crossing_camp": {
+   "hook": "A riverside camp beside the stone ford of the Treva, where scouts monitor the western approaches to the hold.",
+   "rumour": "Travelers fording near Treva's Watch say the soldiers at the crossing camp check every saddlebag for contraband skooma and stolen silver.",
+   "why": [
+    "the_rift.L9.rebel_leaning_jarl",
+    "the_rift.L9.hunters_fort"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "River Ford Inspection Log",
+     "author": "Optio Severus",
+     "at": "chest",
+     "reveals": "trevas_watch",
+     "pages": [
+      "The water at the Treva ford is knee-deep after the autumn rains, slowing the supply carts from Ivarstead. Keep two bowmen watching the broken battlements of Treva's Watch upstream; mercenary deserters are still holding the inner courtyard."
+     ]
+    },
+    {
+     "id": "sk4_note_58",
+     "kind": "ledger",
+     "title": "Hold Survey: Treva Crossing Camp (59)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #59 (800, 1880): Field inspection recorded for Treva Crossing Camp within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #59 for treva_crossing_camp: All travelers, carters, and hold patrollers passing Treva Crossing Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "treva_cascade_falls": {
+   "hook": "A stepped series of mossy waterfalls where the Treva River drops out of the birch highlands toward Lake Honrich.",
+   "rumour": "Anglers at Ivarstead swear the pools under Treva Cascade Falls hold pearls inside the river-mussels.",
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "River-Miller's Gauge Note",
+     "author": "Klimmek Porter",
+     "at": "chest",
+     "reveals": "ivarstead",
+     "pages": [
+      "When the white water covers the third granite step of the cascade, the lower footbridges toward Lake Honrich will be awash by noon. Left a pair of gaff-hooks and a creel in the dry cleft behind the spray."
+     ]
+    },
+    {
+     "id": "sk4_note_59",
+     "kind": "report",
+     "title": "Hold Survey: Treva Cascade Falls (60)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #60 (880, 1480): Field inspection recorded for Treva Cascade Falls within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #60 for treva_cascade_falls: All travelers, carters, and hold patrollers passing Treva Cascade Falls are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "honrich_stone_circle": {
+   "hook": "A ring of lichen-crusted standing stones on a low bluff overlooking the autumn reflections of Lake Honrich.",
+   "rumour": "Old fishers on Lake Honrich say the stones in the circle cast seven shadows at sunset even though only five pillars are still standing.",
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Antiquarian's Compass Sketch",
+     "author": "Wylandriah's Apprentice",
+     "at": "chest",
+     "reveals": "riften",
+     "pages": [
+      "The five upright monoliths align with the winter solstice sunrise over the Velothi peaks, while the two fallen lintels bear faint star-charts in the style of the early Atmoran sky-watchers."
+     ]
+    },
+    {
+     "id": "sk4_note_60",
+     "kind": "ledger",
+     "title": "Hold Survey: Honrich Stone Circle (61)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #61 (880, 1640): Field inspection recorded for Honrich Stone Circle within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #61 for honrich_stone_circle: All travelers, carters, and hold patrollers passing Honrich Stone Circle are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "birch_basin_bridge": {
+   "hook": "An arched stone pack-bridge spanning a leaf-strewn ravine in the heart of the Rift's golden birch woods.",
+   "rumour": "Keep your hand on your purse when crossing Birch Basin Bridge; highwaymen love to wait under the stone arch.",
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Road-Warden's Chalk Notice",
+     "author": "Bailiff Asgeir",
+     "at": "chest",
+     "reveals": "merryfair_farm",
+     "pages": [
+      "Cleared a brushwood barricade from the northern approach of the bridge at dawn and drove three cutpurses into the bracken. Carters hauling mead from Riften should travel in pairs until the autumn fair is over."
+     ]
+    },
+    {
+     "id": "sk4_note_61",
+     "kind": "report",
+     "title": "Hold Survey: Birch Basin Bridge (62)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #62 (880, 1800): Field inspection recorded for Birch Basin Bridge within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #62 for birch_basin_bridge: All travelers, carters, and hold patrollers passing Birch Basin Bridge are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "velothi_crag_eyrie": {
+   "hook": "A wind-swept crag and ruined watch-beacon high on the eastern border wall overlooking the passes toward Morrowind.",
+   "rumour": "Goatherds on the eastern crags say you can see the ash-plumes of the distant east from the Velothi Crag Eyrie on a clear morning.",
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Border Beacon Inventory",
+     "author": "Scout Hjordis",
+     "at": "chest",
+     "reveals": "lost_prospect_mine",
+     "pages": [
+      "Three tar-barrels and a stack of dry juniper branches stored under the stone overhang beside the beacon brazier. The wind up here tears the shingles off any timber roof, so only dry-laid granite holds against the winter gales."
+     ]
+    },
+    {
+     "id": "sk4_note_62",
+     "kind": "ledger",
+     "title": "Hold Survey: Velothi Crag Eyrie (63)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #63 (960, 1560): Field inspection recorded for Velothi Crag Eyrie within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #63 for velothi_crag_eyrie: All travelers, carters, and hold patrollers passing Velothi Crag Eyrie are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
      ]
     }
    ]

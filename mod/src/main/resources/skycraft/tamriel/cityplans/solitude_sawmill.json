@@ -1,0 +1,52 @@
+{
+  "id": "solitude_sawmill",
+  "base": "none",
+  "sil": "estuary-bank-shipwright-mill",
+  "names": {
+    "inn": "solitude_sawmill_bunkhouse",
+    "store": "solitude_timber_factor",
+    "smithy": "solitude_shipwright_shed"
+  },
+  "innKey": "solitude_sawmill_bunkhouse",
+  "gates": [[0, 26]],
+  "buildings": [
+    {"kind": "mill", "at": [-10, -8], "size": [9, 11], "face": "E", "margin": 3, "name": "solitude_water_mill"},
+    {"kind": "building", "use": "sawmill", "wealth": "common", "at": [12, -8], "size": [13, 11], "face": "W", "name": "solitude_sawmill_shed"},
+    {"kind": "house", "at": [-14, 10], "size": [9, 11], "face": "E", "flags": ["upper"], "name": "solitude_horgeirs_house"},
+    {"kind": "dock", "at": [0, -22], "size": [5, 11], "face": "N", "flags": ["no_beard"]},
+    {"kind": "lumber", "at": [18, 12], "size": [7, 5], "face": "W"}
+  ],
+  "plazas": [
+    {"at": [0, 4], "size": 9, "variant": 0, "stalls": 2, "name": "solitude_mill_landing"}
+  ],
+  "nets": [
+    {"type": "path", "via": [[0, 26], [0, 14], [0, 2], [0, -10]], "width": 3, "major": true, "tag": "main"},
+    {"type": "path", "via": [[-14, 4], [0, 4], [14, 4]], "width": 2, "rank": 2, "tag": "lane"}
+  ],
+  "zones": [
+    {"at": [0, -6], "r": 16, "zone": "craft"},
+    {"at": [0, 10], "r": 14, "zone": "centre"}
+  ],
+  "fabric": {"radius": 26, "target": 0.26, "fill_cap": 3, "yard_cap": 4},
+  "queue": [
+    {"kind": "inn", "size": [11, 15], "flags": ["upper"], "name": "solitude_sawmill_bunkhouse", "on": "main"},
+    {"kind": "store", "size": [9, 9], "name": "solitude_timber_factor", "on": "main"},
+    {"kind": "smithy", "size": [11, 9], "name": "solitude_shipwright_shed", "on": "lane"},
+    {"kind": "house", "name": "solitude_sawyers_cottage", "on": "lane"}
+  ],
+  "features": [
+    {"type": "waterwheel", "where": "free"},
+    {"type": "banners", "where": "gate"},
+    {"type": "well", "where": "free"}
+  ],
+  "titles": {
+    "solitude_sawmill_bunkhouse": "Estuary Loggers' Lodge",
+    "solitude_timber_factor": "Haafingar Timber Factor",
+    "solitude_shipwright_shed": "Ship-Timber Forge",
+    "solitude_water_mill": "Solitude Water Mill",
+    "solitude_sawmill_shed": "Solitude Sawmill",
+    "solitude_horgeirs_house": "Lumbermaster's House",
+    "solitude_mill_landing": "Sawmill Landing",
+    "solitude_sawyers_cottage": "Sawyer's Bank Cottage"
+  }
+}

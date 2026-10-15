@@ -3,19 +3,29 @@
   "base": "java",
   "reach": 112,
   "sil": "sea-stack-college-bridge",
-  "names": {"inn": "college_bridgeward_inn", "store": "college_provisioner", "smithy": "college_forge"},
+  "names": {
+    "inn": "college_bridgeward_inn",
+    "store": "college_provisioner",
+    "smithy": "college_forge",
+    "alchemist": "college_alchemy_workshop",
+    "enchanter": "college_enchanting_room"
+  },
   "innKey": "college_bridgeward_inn",
   "buildings": [
     {"kind": "manor", "at": [-16, 84], "size": [11, 13], "face": "S", "flags": ["upper"], "name": "college_apprentices_dormitory"},
     {"kind": "manor", "at": [24, 84], "size": [11, 13], "face": "S", "flags": ["upper"], "name": "college_journeymens_dormitory"},
     {"kind": "house", "at": [4, 84], "size": [9, 11], "face": "S", "flags": ["upper"], "name": "college_masters_lodge"},
     {"kind": "house", "at": [44, 86], "size": [9, 11], "face": "S", "flags": ["upper"], "name": "college_scholars_house"},
+    {"kind": "house", "at": [-36, 84], "size": [9, 11], "face": "S", "flags": ["upper"], "name": "college_archivists_quarters"},
+    {"kind": "house", "at": [62, 86], "size": [9, 11], "face": "S", "name": "college_augurs_study"},
     {"kind": "inn", "at": [-36, 110], "size": [13, 15], "face": "N", "flags": ["upper"], "name": "college_bridgeward_inn"},
     {"kind": "alchemist", "at": [-14, 110], "size": [9, 11], "face": "N", "name": "college_alchemy_workshop"},
     {"kind": "store", "at": [6, 110], "size": [9, 11], "face": "N", "name": "college_enchanting_room"},
     {"kind": "smithy", "at": [26, 110], "size": [11, 9], "face": "N", "name": "college_forge"},
     {"kind": "store", "at": [-58, 110], "size": [9, 11], "face": "N", "name": "college_provisioner"},
-    {"kind": "house", "at": [-56, 80], "size": [7, 9], "face": "E", "name": "college_gatekeepers_house"}
+    {"kind": "house", "at": [-56, 80], "size": [7, 9], "face": "E", "name": "college_gatekeepers_house"},
+    {"kind": "tower", "at": [-64, 96], "size": [7, 7], "face": "E", "h": 14, "name": "college_bridge_ward_tower"},
+    {"kind": "garden", "at": [46, 110], "size": [9, 9], "variant": 2, "name": "college_frost_herb_garden"}
   ],
   "nets": [
     {"type": "path", "via": [[-53, 92], [-44, 97], [-24, 98], [0, 98], [24, 97], [46, 96]], "width": 4, "major": true, "tag": "landing"}
@@ -32,11 +42,15 @@
     "college_journeymens_dormitory": "Journeymen's Dormitory",
     "college_masters_lodge": "Masters' Lodge",
     "college_scholars_house": "Scholars' House",
+    "college_archivists_quarters": "Archivist's Quarters",
+    "college_augurs_study": "Augur's Study",
     "college_bridgeward_inn": "The Bridgeward Inn",
     "college_alchemy_workshop": "Alchemy Workshop",
     "college_enchanting_room": "Enchanting Workroom",
     "college_forge": "College Forge",
     "college_provisioner": "College Provisioner",
-    "college_gatekeepers_house": "Gatekeeper's House"
+    "college_gatekeepers_house": "Gatekeeper's House",
+    "college_bridge_ward_tower": "Bridge-Ward Tower",
+    "college_frost_herb_garden": "Frost-Herb Garden"
   }
 }

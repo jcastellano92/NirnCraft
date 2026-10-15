@@ -1,0 +1,50 @@
+{
+  "id": "amol",
+  "base": "none",
+  "sil": "crossroads-lantern-bridge-hamlet",
+  "names": {
+    "inn": "amol_lantern_inn",
+    "store": "amol_trappers_post",
+    "smithy": "amol_smiths_shed"
+  },
+  "innKey": "amol_lantern_inn",
+  "gates": [[0, 28], [-24, 0]],
+  "buildings": [
+    {"kind": "mill", "at": [14, -12], "size": [9, 11], "face": "W", "margin": 3, "name": "amol_water_mill"},
+    {"kind": "house", "at": [-14, -12], "size": [9, 9], "face": "E", "name": "amol_charcoal_cottage"},
+    {"kind": "house", "at": [-14, 12], "size": [9, 9], "face": "E", "name": "amol_bridgewatch_house"},
+    {"kind": "stables", "at": [14, 14], "size": [9, 11], "face": "W", "name": "amol_stables"}
+  ],
+  "plazas": [
+    {"at": [0, 4], "size": 9, "variant": 0, "stalls": 2, "name": "amol_green"}
+  ],
+  "nets": [
+    {"type": "path", "via": [[0, 28], [0, 14], [0, 2], [0, -10]], "width": 3, "major": true, "tag": "main"},
+    {"type": "path", "via": [[-24, 0], [-10, 2], [0, 4], [12, 4]], "width": 3, "rank": 1, "tag": "row"}
+  ],
+  "zones": [
+    {"at": [0, 4], "r": 16, "zone": "centre"},
+    {"at": [12, -8], "r": 14, "zone": "craft"}
+  ],
+  "fabric": {"radius": 28, "target": 0.26, "fill_cap": 2, "yard_cap": 4},
+  "queue": [
+    {"kind": "inn", "size": [11, 15], "flags": ["upper"], "name": "amol_lantern_inn", "on": "main"},
+    {"kind": "store", "size": [9, 9], "name": "amol_trappers_post", "on": "main"},
+    {"kind": "smithy", "size": [11, 9], "name": "amol_smiths_shed", "on": "row"}
+  ],
+  "features": [
+    {"type": "shrine", "theme": "divine:mara", "where": "free"},
+    {"type": "well", "where": "free"},
+    {"type": "bench", "where": "square"}
+  ],
+  "titles": {
+    "amol_lantern_inn": "The Frost-Lantern Inn",
+    "amol_trappers_post": "Amol Trapper's Post",
+    "amol_smiths_shed": "Amol Crossing Forge",
+    "amol_water_mill": "Amol Creek Mill",
+    "amol_charcoal_cottage": "Charcoal-Burner's Cottage",
+    "amol_bridgewatch_house": "Bridgewatch Cottage",
+    "amol_stables": "Amol Crossing Stables",
+    "amol_green": "Amol Green"
+  }
+}

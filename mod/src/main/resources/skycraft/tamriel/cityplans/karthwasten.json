@@ -2,15 +2,21 @@
   "id": "karthwasten",
   "base": "none",
   "sil": "valley-mine-terrace",
-  "names": {"inn": "karthwasten_miners_rest", "store": "karthwasten_trader", "smithy": "karthwasten_smithy"},
+  "names": {
+    "inn": "karthwasten_miners_rest",
+    "store": "karthwasten_trader",
+    "smithy": "karthwasten_smithy",
+    "hall": "karthwasten_hall",
+    "bunkhouse": "karthwasten_bunkhouse"
+  },
   "innKey": "karthwasten_miners_rest",
   "gates": [[34, 28], [-34, 28], [0, -23]],
   "buildings": [
     {"kind": "mine", "at": [-24, 14], "size": [7, 14], "face": "E", "variant": 2, "flags": ["no_beard"], "name": "karthwasten_sanuarach_mine"},
-    {"kind": "mine", "at": [-26, -4], "size": [7, 14], "face": "E", "variant": 1, "flags": ["no_beard"]},
-    {"kind": "farmhouse", "at": [30, 6], "size": [9, 11], "face": "W"},
-    {"kind": "field", "at": [32, -10], "size": [13, 11], "face": "W"},
-    {"kind": "field", "at": [32, -24], "size": [13, 11], "face": "W"}
+    {"kind": "mine", "at": [-26, -4], "size": [7, 14], "face": "E", "variant": 1, "flags": ["no_beard"], "name": "karthwasten_north_silver_drift"},
+    {"kind": "farmhouse", "at": [30, 6], "size": [9, 11], "face": "W", "name": "karthwasten_terrace_farmhouse"},
+    {"kind": "field", "at": [32, -10], "size": [13, 11], "face": "W", "name": "karthwasten_upper_field"},
+    {"kind": "field", "at": [32, -24], "size": [13, 11], "face": "W", "name": "karthwasten_lower_field"}
   ],
   "plazas": [
     {"at": [2, 30], "size": 13, "variant": 0, "stalls": 4, "name": "karthwasten_ore_yard"}
@@ -31,7 +37,7 @@
     {"kind": "inn", "size": [13, 15], "flags": ["upper"], "name": "karthwasten_miners_rest", "on": "main"},
     {"kind": "store", "size": [9, 9], "name": "karthwasten_trader", "on": "main"},
     {"kind": "smithy", "size": [11, 9], "name": "karthwasten_smithy", "on": "main"},
-    {"kind": "alchemist", "on": "main"},
+    {"kind": "alchemist", "name": "karthwasten_assay_shop", "on": "main"},
     {"kind": "longhouse", "size": [11, 17], "flags": ["seat"], "name": "karthwasten_hall", "on": "hill"},
     {"kind": "longhouse", "size": [11, 17], "name": "karthwasten_bunkhouse", "on": "main"},
     {"kind": "house", "name": "karthwasten_overseers_house", "on": "hill"},
@@ -49,7 +55,12 @@
     "karthwasten_miners_rest": "Miners' Rest",
     "karthwasten_trader": "Karthwasten Supplies",
     "karthwasten_smithy": "Karthwasten Smithy",
+    "karthwasten_assay_shop": "Silver Assay & Remedies",
     "karthwasten_sanuarach_mine": "Sanuarach Mine",
+    "karthwasten_north_silver_drift": "North Silver Drift",
+    "karthwasten_terrace_farmhouse": "Terrace Farmhouse",
+    "karthwasten_upper_field": "Upper Terrace Field",
+    "karthwasten_lower_field": "Lower Terrace Field",
     "karthwasten_ore_yard": "The Ore Yard",
     "karthwasten_hall": "Karthwasten Hall",
     "karthwasten_bunkhouse": "Miners' Bunkhouse",

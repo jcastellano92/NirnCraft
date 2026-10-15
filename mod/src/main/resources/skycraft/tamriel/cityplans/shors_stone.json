@@ -1,0 +1,60 @@
+{
+  "id": "shors_stone",
+  "base": "none",
+  "sil": "birch-hollow-iron-mine",
+  "names": {
+    "inn": "shors_stone_miners_hall",
+    "store": "shors_stone_provisions",
+    "smithy": "filnjars_smithy"
+  },
+  "innKey": "shors_stone_miners_hall",
+  "gates": [[0, 34], [-28, -12]],
+  "buildings": [
+    {"kind": "mine", "at": [22, -20], "size": [7, 14], "face": "S", "variant": 5, "flags": ["no_beard"], "name": "redbelly_mine"},
+    {"kind": "tower", "at": [-24, -22], "size": [7, 7], "face": "S", "h": 16, "name": "shors_stone_watchtower"},
+    {"kind": "stables", "at": [-18, 22], "size": [11, 9], "face": "E", "name": "shors_stone_stables"},
+    {"kind": "shrine", "at": [16, -4], "size": [5, 5], "face": "W", "variant": 8, "name": "shors_stone_shrine"}
+  ],
+  "plazas": [
+    {"at": [0, 6], "size": 11, "variant": 0, "stalls": 3, "name": "shors_stone_square"}
+  ],
+  "nets": [
+    {"type": "path", "via": [[0, 34], [0, 18], [0, 4], [8, -8], [18, -14]], "width": 4, "major": true, "tag": "main"},
+    {"type": "path", "via": [[-28, -12], [-14, -4], [0, 4], [16, 8], [28, 8]], "width": 3, "rank": 1, "tag": "row"},
+    {"type": "path", "via": [[-14, -4], [-18, 12], [-12, 24]], "width": 2, "rank": 2, "tag": "lane"}
+  ],
+  "zones": [
+    {"at": [0, 6], "r": 18, "zone": "centre"},
+    {"at": [18, -12], "r": 18, "zone": "craft"},
+    {"at": [-18, 10], "r": 16, "zone": "poor"}
+  ],
+  "fabric": {"radius": 40, "target": 0.32, "fill_cap": 5, "yard_cap": 5},
+  "queue": [
+    {"kind": "inn", "size": [13, 15], "flags": ["upper"], "name": "shors_stone_miners_hall", "on": "main"},
+    {"kind": "smithy", "size": [11, 9], "name": "filnjars_smithy", "on": "main"},
+    {"kind": "store", "size": [9, 9], "name": "shors_stone_provisions", "on": "row"},
+    {"kind": "house", "name": "shors_stone_sylgjas_house", "on": "row"},
+    {"kind": "house", "name": "shors_stone_odfels_house", "on": "row"},
+    {"kind": "house", "name": "shors_stone_grogmars_house", "on": "lane"},
+    {"kind": "house", "count": 2, "on": "main"}
+  ],
+  "features": [
+    {"type": "shrine", "theme": "divine:zenithar", "where": "square"},
+    {"type": "well", "where": "free"},
+    {"type": "lamps", "count": 3, "where": "street", "tag": "main"},
+    {"type": "banners", "count": 2, "where": "gate"}
+  ],
+  "titles": {
+    "shors_stone_miners_hall": "Miners' Hearth",
+    "shors_stone_provisions": "Shor's Stone Provisions",
+    "filnjars_smithy": "Filnjar's Forge",
+    "redbelly_mine": "Redbelly Iron Mine",
+    "shors_stone_watchtower": "Shor's Watchtower",
+    "shors_stone_stables": "Shor's Stone Stables",
+    "shors_stone_shrine": "Miner's Wayshrine",
+    "shors_stone_square": "Shor's Stone Square",
+    "shors_stone_sylgjas_house": "Birch-Side Cottage",
+    "shors_stone_odfels_house": "Foreman's Cottage",
+    "shors_stone_grogmars_house": "Smelter's Cabin"
+  }
+}

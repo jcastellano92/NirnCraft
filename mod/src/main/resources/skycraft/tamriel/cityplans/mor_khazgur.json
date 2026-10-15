@@ -1,0 +1,52 @@
+{
+  "id": "mor_khazgur",
+  "base": "none",
+  "sil": "orc-palisade-crag-outpost",
+  "names": {
+    "inn": "",
+    "store": "mor_khazgur_provisions",
+    "smithy": "mor_khazgur_forge"
+  },
+  "gates": [[0, 34]],
+  "walls": [
+    {"r": 32, "sides": 10, "h": 7, "gates": [0], "flags": ["palisade"], "towers": false}
+  ],
+  "buildings": [
+    {"kind": "longhouse", "at": [0, -14], "size": [13, 21], "face": "S", "flags": ["seat"], "name": "mor_khazgur_longhouse"},
+    {"kind": "smithy", "at": [15, 8], "size": [11, 9], "face": "W", "name": "mor_khazgur_forge"},
+    {"kind": "store", "at": [-15, 8], "size": [9, 11], "face": "E", "name": "mor_khazgur_provisions"},
+    {"kind": "longhouse", "at": [17, -10], "size": [9, 15], "face": "W", "name": "mor_khazgur_hunters_hall"},
+    {"kind": "mine", "at": [-20, -22], "size": [7, 14], "face": "S", "variant": 6, "flags": ["no_beard"], "name": "mor_khazgur_mine"},
+    {"kind": "tent", "at": [-22, -4], "size": [5, 7], "face": "E", "name": "mor_khazgur_wise_tent"},
+    {"kind": "pen", "at": [8, 22], "size": [9, 9]}
+  ],
+  "plazas": [
+    {"at": [0, 6], "size": 9, "variant": 3, "name": "mor_khazgur_fire_court"}
+  ],
+  "nets": [
+    {"type": "path", "via": [[0, 34], [0, 22], [0, 10]], "width": 4, "major": true, "tag": "main"},
+    {"type": "path", "via": [[-8, 20], [-16, 14], [-20, 4]], "width": 2, "rank": 2, "tag": "lane"},
+    {"type": "path", "via": [[8, 20], [16, 14], [22, 4]], "width": 2, "rank": 2, "tag": "lane"}
+  ],
+  "zones": [
+    {"at": [0, 18], "r": 20, "zone": "poor"},
+    {"at": [0, -12], "r": 16, "zone": "noble"}
+  ],
+  "fabric": {"radius": 30, "target": 0.22, "fill_cap": 2, "yard_cap": 4},
+  "queue": [
+    {"kind": "house", "size": [9, 11], "count": 2, "on": "main"}
+  ],
+  "features": [
+    {"type": "statue", "theme": "daedric:malacath", "where": "free"},
+    {"type": "banners", "count": 2, "where": "gate"}
+  ],
+  "titles": {
+    "mor_khazgur_longhouse": "Larak's Longhouse",
+    "mor_khazgur_forge": "Mor Khazgur Forge",
+    "mor_khazgur_provisions": "Stronghold Pelt & Ore Store",
+    "mor_khazgur_hunters_hall": "Crag-Hunters' Hall",
+    "mor_khazgur_mine": "Mor Khazgur Orichalcum Mine",
+    "mor_khazgur_wise_tent": "Sharamph's Hearth",
+    "mor_khazgur_fire_court": "The Crag Fire-Ring"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "id": "half_moon_mill",
+  "base": "none",
+  "sil": "ilinalta-shore-waterwheel-mill",
+  "names": {
+    "inn": "half_moon_lodge",
+    "store": "half_moon_timber_store",
+    "smithy": "half_moon_saw_forge"
+  },
+  "innKey": "half_moon_lodge",
+  "gates": [[0, 26]],
+  "buildings": [
+    {"kind": "mill", "at": [-10, -8], "size": [9, 11], "face": "E", "margin": 3, "name": "half_moon_water_mill"},
+    {"kind": "building", "use": "sawmill", "wealth": "common", "at": [12, -8], "size": [13, 11], "face": "W", "name": "half_moon_sawmill"},
+    {"kind": "house", "at": [-14, 10], "size": [9, 11], "face": "E", "flags": ["upper"], "name": "half_moon_herts_cottage"},
+    {"kind": "house", "at": [14, 10], "size": [7, 9], "face": "W", "name": "half_moon_woodshed"},
+    {"kind": "lumber", "at": [18, -20], "size": [7, 5], "face": "W"},
+    {"kind": "dock", "at": [-18, -20], "size": [5, 11], "face": "N", "flags": ["no_beard"]}
+  ],
+  "plazas": [
+    {"at": [0, 4], "size": 9, "variant": 0, "stalls": 2, "name": "half_moon_yard"}
+  ],
+  "nets": [
+    {"type": "path", "via": [[0, 26], [0, 14], [0, 2], [0, -10]], "width": 3, "major": true, "tag": "main"},
+    {"type": "path", "via": [[-14, 4], [0, 4], [14, 4]], "width": 2, "rank": 2, "tag": "lane"}
+  ],
+  "zones": [
+    {"at": [0, -6], "r": 16, "zone": "craft"},
+    {"at": [0, 10], "r": 14, "zone": "centre"}
+  ],
+  "fabric": {"radius": 26, "target": 0.26, "fill_cap": 3, "yard_cap": 4},
+  "queue": [
+    {"kind": "inn", "size": [11, 15], "flags": ["upper"], "name": "half_moon_lodge", "on": "main"},
+    {"kind": "store", "size": [9, 9], "name": "half_moon_timber_store", "on": "main"},
+    {"kind": "smithy", "size": [11, 9], "name": "half_moon_saw_forge", "on": "lane"}
+  ],
+  "features": [
+    {"type": "waterwheel", "where": "edge"},
+    {"type": "great_tree", "theme": "spruce", "where": "free"},
+    {"type": "well", "where": "free"}
+  ],
+  "titles": {
+    "half_moon_lodge": "Half-Moon Travellers' Lodge",
+    "half_moon_timber_store": "Lakeside Timber Store",
+    "half_moon_saw_forge": "Millwright's Forge",
+    "half_moon_water_mill": "Half-Moon Water Mill",
+    "half_moon_sawmill": "Half-Moon Sawmill",
+    "half_moon_herts_cottage": "Mill-Mistress's Cottage",
+    "half_moon_woodshed": "Red-Sap Woodshed",
+    "half_moon_yard": "Half-Moon Timber Yard"
+  }
+}

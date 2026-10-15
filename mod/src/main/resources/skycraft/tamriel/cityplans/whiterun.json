@@ -1,6 +1,45 @@
 {
   "id": "whiterun",
   "base": "java",
+  "sil": "hill-keep-three-tiers",
+  "names": {
+    "inn": "bannered_mare",
+    "store": "belethors_general_goods",
+    "smithy": "warmaidens",
+    "keep": "dragonsreach",
+    "hall": "jorrvaskr",
+    "temple": "temple_of_kynareth",
+    "alchemist": "arcadias_cauldron",
+    "fletcher": "drunken_huntsman",
+    "player_home": "breezehome",
+    "clan_west": "house_gray_mane",
+    "clan_east": "house_battle_born",
+    "skyforge": "whiterun_skyforge",
+    "gildergreen": "whiterun_gildergreen_sanctuary",
+    "dead_hall": "whiterun_hall_of_the_dead",
+    "barracks": "whiterun_guard_barracks",
+    "underforge": "whiterun_underforge",
+    "dungeon": "dragonsreach_dungeon",
+    "gatehouse": "whiterun_main_gatehouse",
+    "drawbridge": "whiterun_drawbridge_watch",
+    "wind_terrace": "whiterun_wind_terrace",
+    "cloud_steps": "whiterun_cloud_steps"
+  },
+  "innKey": "bannered_mare",
+  "buildings": [
+    {"kind": "house", "at": [-44, 52], "size": [9, 11], "face": "E", "flags": ["upper"], "name": "whiterun_carlottas_house"},
+    {"kind": "house", "at": [44, 52], "size": [9, 11], "face": "W", "flags": ["upper"], "name": "whiterun_severios_house"},
+    {"kind": "house", "at": [-46, -18], "size": [9, 11], "face": "S", "raise": 7, "flags": ["upper"], "name": "whiterun_uthgerds_house"},
+    {"kind": "house", "at": [24, -46], "size": [7, 9], "face": "S", "raise": 7, "name": "whiterun_heimskrs_house"}
+  ],
+  "plazas": [
+    {"at": [-32, 35], "size": 11, "variant": 0, "stalls": 2, "name": "whiterun_plains_market"},
+    {"at": [0, -18], "size": 11, "variant": 1, "stalls": 0, "raise": 7, "name": "whiterun_gildergreen_court"}
+  ],
+  "nets": [
+    {"type": "path", "via": [[-56, 54], [-34, 54], [34, 54], [56, 54]], "width": 3, "rank": 1, "tag": "plains"},
+    {"type": "path", "via": [[-54, -22], [-26, -22], [26, -22], [54, -22]], "width": 3, "rank": 1, "tag": "wind", "raise": 7}
+  ],
   "zones": [
     {"at": [0, -76], "r": 34, "zone": "noble"},
     {"at": [0, 40], "r": 24, "zone": "centre"},
@@ -8,6 +47,14 @@
     {"at": [-64, 64], "r": 26, "zone": "common"}
   ],
   "fabric": {"radius": 104, "target": 0.5},
+  "queue": [
+    {"kind": "house", "name": "whiterun_amrens_house", "on": "plains"},
+    {"kind": "house", "name": "whiterun_olavas_house", "on": "plains"},
+    {"kind": "house", "name": "whiterun_ysoldas_house", "on": "plains"},
+    {"kind": "house", "name": "whiterun_lars_house", "raise": 7, "on": "wind"},
+    {"kind": "house", "name": "whiterun_acolyte_quarters", "raise": 7, "on": "wind"},
+    {"kind": "store", "size": [9, 11], "name": "whiterun_caravan_storehouse", "on": "plains"}
+  ],
   "features": [
     {"type": "great_tree", "theme": "oak", "at": [0, -8]},
     {"type": "fountain", "where": "square"},
@@ -20,5 +67,29 @@
     {"type": "bench", "count": 2, "where": "square"},
     {"type": "garden", "count": 2, "where": "free"},
     {"type": "orchard", "where": "edge"}
-  ]
+  ],
+  "titles": {
+    "whiterun_skyforge": "The Skyforge",
+    "whiterun_gildergreen_sanctuary": "Gildergreen Sanctuary",
+    "whiterun_hall_of_the_dead": "Whiterun Hall of the Dead",
+    "whiterun_guard_barracks": "Plains District Barracks",
+    "whiterun_underforge": "The Underforge",
+    "dragonsreach_dungeon": "Dragonsreach Dungeon",
+    "whiterun_main_gatehouse": "Whiterun South Gatehouse",
+    "whiterun_drawbridge_watch": "Drawbridge Watchtower",
+    "whiterun_wind_terrace": "Wind District Terrace",
+    "whiterun_cloud_steps": "Cloud District Great Steps",
+    "whiterun_carlottas_house": "Market-Vendor's House",
+    "whiterun_severios_house": "Orchard-Keeper's House",
+    "whiterun_uthgerds_house": "Shield-Sister's Hall",
+    "whiterun_heimskrs_house": "Preacher's Cottage",
+    "whiterun_plains_market": "Plains District Market",
+    "whiterun_gildergreen_court": "Gildergreen Court",
+    "whiterun_amrens_house": "Sword-Master's Cottage",
+    "whiterun_olavas_house": "Seer's Cottage",
+    "whiterun_ysoldas_house": "Caravan-Factor's House",
+    "whiterun_lars_house": "Wind-Row Manor",
+    "whiterun_acolyte_quarters": "Kynareth Acolytes' Quarters",
+    "whiterun_caravan_storehouse": "Crossroads Trade Warehouse"
+  }
 }

@@ -1,6 +1,41 @@
 {
   "id": "solitude",
   "base": "java",
+  "sil": "stone-arch-palace-port",
+  "names": {
+    "inn": "winking_skeever",
+    "store": "bits_and_pieces",
+    "smithy": "solitude_blacksmith",
+    "palace": "blue_palace",
+    "castle": "castle_dour",
+    "temple": "temple_of_the_divines",
+    "college": "bards_college",
+    "player_home": "proudspire_manor",
+    "tailor": "radiant_raiment",
+    "alchemist": "angelines_aromatics",
+    "dead_hall": "solitude_hall_of_the_dead",
+    "barracks": "castle_dour_barracks",
+    "dungeon": "castle_dour_dungeon",
+    "emperor_tower": "solitude_emperors_tower",
+    "eec_warehouse": "east_empire_warehouse",
+    "fletcher": "solitude_fletcher",
+    "gatehouse": "solitude_great_arch_gate",
+    "windmill": "solitude_windmill",
+    "arch_walk": "solitude_arch_promenade",
+    "customs": "solitude_harbour_customs",
+    "courtyard": "castle_dour_parade_ground"
+  },
+  "innKey": "winking_skeever",
+  "buildings": [
+    {"kind": "manor", "at": [48, 12], "size": [11, 13], "face": "W", "raise": 16, "flags": ["upper", "rich"], "name": "solitude_erikurs_manor"},
+    {"kind": "manor", "at": [-50, -30], "size": [11, 13], "face": "E", "raise": 16, "flags": ["upper", "rich"], "name": "solitude_brylings_manor"},
+    {"kind": "house", "at": [50, 52], "size": [9, 11], "face": "W", "raise": 16, "flags": ["upper"], "name": "solitude_vittorias_house"},
+    {"kind": "stables", "at": [-28, 92], "size": [11, 9], "face": "E", "raise": 16, "name": "solitude_gate_stables"}
+  ],
+  "plazas": [
+    {"at": [-32, 38], "size": 11, "variant": 0, "stalls": 2, "raise": 16, "name": "solitude_wells_square"},
+    {"at": [0, -68], "size": 13, "variant": 1, "stalls": 0, "raise": 16, "name": "solitude_palace_courtyard"}
+  ],
   "nets": [
     {"type": "loop", "at": [0, 8], "rx": 84, "rz": 98, "wobble": 8, "lobes": 4, "phase": 0.5, "width": 3, "rank": 1, "tag": "ring", "raise": 16},
     {"type": "path", "via": [[-52, 104], [-30, 92], [-6, 100]], "width": 3, "tag": "ring", "raise": 16},
@@ -13,6 +48,14 @@
     {"at": [-70, 70], "r": 26, "zone": "poor"}
   ],
   "fabric": {"radius": 120, "target": 0.5},
+  "queue": [
+    {"kind": "house", "name": "solitude_styrrs_house", "raise": 16, "on": "ring"},
+    {"kind": "house", "name": "solitude_evettes_house", "raise": 16, "on": "ring"},
+    {"kind": "house", "name": "solitude_addvars_house", "raise": 16, "on": "ring"},
+    {"kind": "house", "name": "solitude_jalas_house", "raise": 16, "on": "ring"},
+    {"kind": "house", "name": "solitude_melarans_lodging", "raise": 16, "on": "ring"},
+    {"kind": "store", "size": [9, 11], "name": "solitude_spiced_wine_shop", "raise": 16, "on": "ring"}
+  ],
   "features": [
     {"type": "statue", "theme": "emperor", "at": [0, 18]},
     {"type": "fountain", "where": "square"},
@@ -29,5 +72,32 @@
     {"type": "tree_row", "where": "street", "tag": "ring"},
     {"type": "pool", "where": "free"},
     {"type": "well", "where": "free"}
-  ]
+  ],
+  "titles": {
+    "blue_palace": "The Blue Palace",
+    "castle_dour": "Castle Dour",
+    "solitude_hall_of_the_dead": "Solitude Hall of the Dead",
+    "castle_dour_barracks": "Imperial Legion Garrison",
+    "castle_dour_dungeon": "Castle Dour Dungeons",
+    "solitude_emperors_tower": "The Emperor's Tower",
+    "east_empire_warehouse": "East Empire Shipping Warehouse",
+    "solitude_fletcher": "Arch-Side Fletcher",
+    "solitude_great_arch_gate": "Great Arch Gatehouse",
+    "solitude_windmill": "Solitude Stone Windmill",
+    "solitude_arch_promenade": "Arch Promenade",
+    "solitude_harbour_customs": "Karth Estuary Customs House",
+    "castle_dour_parade_ground": "Castle Dour Parade Yard",
+    "solitude_erikurs_manor": "Thane's Arch Manor",
+    "solitude_brylings_manor": "Cliffside Noble Manor",
+    "solitude_vittorias_house": "Shipping Factor's House",
+    "solitude_gate_stables": "Solitude Gate Stables",
+    "solitude_wells_square": "The Wells Square",
+    "solitude_palace_courtyard": "Blue Palace Forecourt",
+    "solitude_styrrs_house": "Priest's Row House",
+    "solitude_evettes_house": "Vintner's Townhouse",
+    "solitude_addvars_house": "Fishmonger's House",
+    "solitude_jalas_house": "Greengrocer's House",
+    "solitude_melarans_lodging": "Court Retainers' Lodging",
+    "solitude_spiced_wine_shop": "Estuary Vintner & Spice Shop"
+  }
 }

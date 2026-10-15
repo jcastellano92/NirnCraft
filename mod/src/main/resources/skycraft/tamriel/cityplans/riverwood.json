@@ -2,7 +2,13 @@
   "id": "riverwood",
   "base": "none",
   "sil": "lakeshore-bridge-sawmill",
-  "names": {"inn": "sleeping_giant_inn", "store": "riverwood_trader", "smithy": "alvors_smithy"},
+  "names": {
+    "inn": "sleeping_giant_inn",
+    "store": "riverwood_trader",
+    "smithy": "alvors_smithy",
+    "sawmill": "riverwood_lumber_mill",
+    "warehouse": "riverwood_timber_store"
+  },
   "innKey": "sleeping_giant_inn",
   "gates": [[0, 34], [-7, -30], [-33, -2]],
   "lines": [
@@ -11,9 +17,9 @@
   ],
   "buildings": [
     {"kind": "building", "use": "sawmill", "wealth": "common", "at": [46, 38], "size": [13, 11], "face": "W", "name": "riverwood_lumber_mill"},
-    {"kind": "camp", "at": [58, 50], "size": [13, 13], "variant": 11},
-    {"kind": "lumber", "at": [60, 34], "size": [7, 5], "face": "W"},
-    {"kind": "camp", "at": [58, 6], "size": [13, 13], "variant": 2},
+    {"kind": "camp", "at": [58, 50], "size": [13, 13], "variant": 11, "name": "riverwood_south_loggers_camp"},
+    {"kind": "lumber", "at": [60, 34], "size": [7, 5], "face": "W", "name": "riverwood_timber_yard"},
+    {"kind": "camp", "at": [58, 6], "size": [13, 13], "variant": 2, "name": "riverwood_north_fellers_camp"},
     {"kind": "mill", "at": [-20, 26], "size": [9, 11], "face": "E", "margin": 3, "name": "riverwood_water_mill"}
   ],
   "plazas": [
@@ -51,6 +57,9 @@
   ],
   "titles": {
     "riverwood_lumber_mill": "Riverwood Lumber Mill",
+    "riverwood_south_loggers_camp": "South Loggers' Camp",
+    "riverwood_timber_yard": "Riverwood Timber Yard",
+    "riverwood_north_fellers_camp": "North Fellers' Camp",
     "riverwood_water_mill": "Riverwood Water Mill",
     "riverwood_green": "Riverwood Green",
     "riverwood_alvors_house": "Alvor's House",

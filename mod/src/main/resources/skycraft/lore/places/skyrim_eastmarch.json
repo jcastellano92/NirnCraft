@@ -8,7 +8,10 @@
     "Darkwater Crossing sends good ore south every week, and half of it never gets past Mistwatch. Somebody up in that tower is eating very well this winter.",
     "Giants came down off Steamcrag to sit in the hot pools again. Leave them be and they'll leave you be. Mostly. Ask the Mixwater carters about mostly.",
     "That Dunmer at Hlaalu Farm pays his Argonian hands the same coin as his Nords. Half the Candlehearth thinks it's a scandal and the other half wants work there.",
-    "Kynesgrove's miners say the stone is warm under the snow this year, warmer than any of them remember. The priest says it's only the springs. He says it too quickly."
+    "Kynesgrove's miners say the stone is warm under the snow this year, warmer than any of them remember. The priest says it's only the springs. He says it too quickly.",
+    "Coal-carters from Kynesgrove say the hot springs have been bubbling black silt since the tremors started under the Dwemer ruins. [Hearth-Tally]",
+    "Quartermasters at the Palace of the Kings have been buying every horseshoe and salt-barrel between Windhelm and Darkwater Crossing. [Hearth-Tally]",
+    "Refugee peddlers on the Velothi road say the border pickets are turning back anyone without a stamped hold pass. [Hearth-Tally]"
    ],
    "legends": [
     "They say Ysgramor's people raised Windhelm's first stones before they had roofs over their own heads, because a king needs a hall before his people need beds. The great bridge over the White River was built in a single winter, and every mason who worked on it was buried in its piers so that it would never forget whom it served.",
@@ -82,6 +85,10 @@
       "I washed the Jarl's linens again this week. You would laugh to see how ordinary they are. A king's sheets have the same stains as ours.\nCome home when the war lets you. Come home even if it doesn't. I will not tell anyone you were afraid. I was afraid too, the whole time you were growing up.\n^Your mother"
      ]
     }
+   ],
+   "why": [
+    "eastmarch.L7.nord_first",
+    "eastmarch.L7.grey_quarter"
    ]
   },
   "kynesgrove": {
@@ -114,7 +121,22 @@
       "A herder saw lanterns moving along Cragwallow Slope on the night of the second digging, south-east past the mound, toward the old cairns. No honest man walks those slopes at night.",
       "I am an old man and a priest, not a warrior. If you cannot spare a templar, send coin and I will hire someone with a strong arm and a short memory. Our dead deserve to lie where we put them."
      ]
+    },
+    {
+     "id": "sk4_note_1",
+     "kind": "report",
+     "title": "Hold Survey: Kynesgrove (2)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #2 (1825, -298): Field inspection recorded for Kynesgrove within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #2 for kynesgrove: All travelers, carters, and hold patrollers passing Kynesgrove are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L7.nord_first",
+    "eastmarch.L7.grey_quarter"
    ]
   },
   "darkwater_crossing": {
@@ -148,7 +170,22 @@
       "The hunter Orgnar Bent-Bow went to Snapleg Cave on the 5th of Frostfall to fetch back his hound and his grandfather's horn. The hound came home. Orgnar did not. The horn was heard blowing from the cave three nights after.",
       "There is a hagraven in that hole and she has taken to calling men in with their own things. If you hear a horn in the hills below Darkwater Pass, do not answer it. If you are fool enough to go in, bring fire and bring the horn back to his widow."
      ]
+    },
+    {
+     "id": "sk4_note_2",
+     "kind": "ledger",
+     "title": "Hold Survey: Darkwater Crossing (3)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #3 (1595, 421): Field inspection recorded for Darkwater Crossing within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #3 for darkwater_crossing: All travelers, carters, and hold patrollers passing Darkwater Crossing are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L7.nord_first",
+    "eastmarch.L7.grey_quarter"
    ]
   },
   "mixwater_mill": {
@@ -182,7 +219,22 @@
       "They have taken him to Gallows Rock, the old fort west of here where your grandfather's grandfather hanged traitors. I have heard screaming from that ridge at night. I am told it is not always a man's voice. I do not care whose voice it is. He is my brother.",
       "I have asked the guards. I have asked the priests. Now I am asking you, and after you I will ask anyone with a blade."
      ]
+    },
+    {
+     "id": "sk4_note_3",
+     "kind": "report",
+     "title": "Hold Survey: Mixwater Mill (4)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #4 (1414, -15): Field inspection recorded for Mixwater Mill within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #4 for mixwater_mill: All travelers, carters, and hold patrollers passing Mixwater Mill are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L7.nord_first",
+    "eastmarch.L7.grey_quarter"
    ]
   },
   "narzulbur": {
@@ -211,7 +263,22 @@
       "~Malacath, who keeps the oaths of the scorned,\n~Keep the oath my husband swore to come home.\n~He went down into Gloombound with a pick and a grudge.\n~Send him up with both, or send me the one who kept him.",
       "~I do not ask you for mercy. You have none and that is why we love you.\n~I ask you for a debt to be paid.\n~Let the dark in the east drift learn the weight of an Orc's anger,\n~And if my arm is not enough, send me a stranger's."
      ]
+    },
+    {
+     "id": "sk4_note_4",
+     "kind": "ledger",
+     "title": "Hold Survey: Narzulbur (5)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #5 (2224, -304): Field inspection recorded for Narzulbur within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #5 for narzulbur: All travelers, carters, and hold patrollers passing Narzulbur are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L7.nord_first",
+    "eastmarch.L7.grey_quarter"
    ]
   },
   "hollyfrost_farm": {
@@ -229,7 +296,22 @@
       "The quartermaster's men came asking after you on the 3rd. They would not say why. They were polite in the way men are polite when they mean to be something else later.",
       "Whatever you have done, you are mine. There is a bed here, and nobody in the world will look for you under your mother's roof but your mother.\n^Ingrid"
      ]
+    },
+    {
+     "id": "sk4_note_5",
+     "kind": "report",
+     "title": "Hold Survey: Hollyfrost Farm (6)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #6 (2060, -685): Field inspection recorded for Hollyfrost Farm within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #6 for hollyfrost_farm: All travelers, carters, and hold patrollers passing Hollyfrost Farm are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L7.nord_first",
+    "eastmarch.L7.grey_quarter"
    ]
   },
   "hlaalu_farm": {
@@ -258,7 +340,22 @@
       "Ten years on the Windhelm docks. Ten years of Shatter-Shield coin counted twice and paid once. Here the Dunmer counts once and pays once. The Nords in the bunkhouse do not like me, but they eat at the same table and nobody spits in the stew. This is what warm feels like, in Skyrim.",
       "If the men from the Candlehearth come with torches, I will be at the gate. The hist did not bring me this far to watch a good roof burn."
      ]
+    },
+    {
+     "id": "sk4_note_6",
+     "kind": "ledger",
+     "title": "Hold Survey: Hlaalu Farm (7)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #7 (2011, -655): Field inspection recorded for Hlaalu Farm within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #7 for hlaalu_farm: All travelers, carters, and hold patrollers passing Hlaalu Farm are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L7.nord_first",
+    "eastmarch.L7.grey_quarter"
    ]
   },
   "brandy_mug_farm": {
@@ -275,7 +372,22 @@
       "To whoever reads complaints in that great cold Palace,\nOn the 6th of Frostfall a patrol of your men came through and requisitioned four casks of our cider, two hams, and a wheel of goat cheese 'in the name of Skyrim'. I asked which part of Skyrim. They said the hungry part.",
       "I am loyal to Ulfric. I am also loyal to my ledger, and my ledger is starving. If the Jarl wishes to fight the Empire on my cider, the Jarl may pay for my cider. 60 septims will do. 80 if he wants me to stop writing these.\n^Bolfrida, who is not leaving this alone"
      ]
+    },
+    {
+     "id": "sk4_note_7",
+     "kind": "report",
+     "title": "Hold Survey: Brandy Mug Farm (8)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #8 (1911, -528): Field inspection recorded for Brandy Mug Farm within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #8 for brandy_mug_farm: All travelers, carters, and hold patrollers passing Brandy Mug Farm are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L7.nord_first",
+    "eastmarch.L7.grey_quarter"
    ]
   },
   "windhelm_stables": {
@@ -292,7 +404,22 @@
       "#Frostfall, 4E 201\n4th: a Breton scholar to Kynesgrove, asking about Mzulft the whole way. Overpaid. Left his gloves.\n7th: two Dunmer to Darkwater Crossing, paying in old Morrowind coin. Accepted it. Told nobody.\n9th: a man in silver-buckled leathers to Mixwater Mill, with chains in his pack. Did not ask. Did not like him.",
       "#Frostfall, 4E 201\n12th: Imperial courier, Riften road, asked me to forget his face. Done, for 30 septims.\n15th: a widow from Darkwater, crying the whole way. Her husband went into Snapleg Cave. Took no fare. Some things a man doesn't charge for."
      ]
+    },
+    {
+     "id": "sk4_note_8",
+     "kind": "ledger",
+     "title": "Hold Survey: Windhelm Stables (9)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #9 (1840, -532): Field inspection recorded for Windhelm Stables within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #9 for windhelm_stables: All travelers, carters, and hold patrollers passing Windhelm Stables are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L7.nord_first",
+    "eastmarch.L7.grey_quarter"
    ]
   },
   "traitors_post": {
@@ -323,7 +450,22 @@
       "Mother,\nHollyfrost is two hours' walk from here. I can see the smoke of the Hlaalu chimney from the ridge on clear days. I could be at your door by supper and I have not gone, because Kolgeir watches the path and he means what he signed.",
       "I did not run because I was afraid. I ran because of what I was told to do to the men at the picket, and because I did it, once, before I ran. Tell no one that. Tell them I died somewhere cold and brave. It is nearly true."
      ]
+    },
+    {
+     "id": "sk4_note_9",
+     "kind": "report",
+     "title": "Hold Survey: Traitors Post (10)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #10 (2265, -713): Field inspection recorded for Traitors Post within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #10 for traitors_post: All travelers, carters, and hold patrollers passing Traitors Post are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L8.talos_open"
    ]
   },
   "refugees_rest": {
@@ -351,7 +493,22 @@
       "Tried to sell the urn at the Grey Quarter. Old Dunmer woman at the market went white as snow and offered me 100 septims for it, so I knew it was worth 500. Told her to come up here and haggle. She hasn't. Yet.",
       "Note to self: tip the dust out before we sell it. Nobody wants a pot full of dead elf."
      ]
+    },
+    {
+     "id": "sk4_note_10",
+     "kind": "ledger",
+     "title": "Hold Survey: Refugees Rest (11)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #11 (2387, -713): Field inspection recorded for Refugees Rest within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #11 for refugees_rest: All travelers, carters, and hold patrollers passing Refugees Rest are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L8.talos_open"
    ]
   },
   "sacellum_of_boethiah": {
@@ -381,7 +538,22 @@
       "^Kneel. And when you rise, rise alone.",
       "Below the chiselled words, someone has scratched a tally of names with a knife-point, each one crossed out by a different hand: Eyvind. Brunhild. Olfrid the Younger. Marcus, a legionary. Two dozen more. Beside the last uncrossed name, Harrald, a fresh line has been started, and left unfinished, as if whoever was cutting it was interrupted, or changed their mind."
      ]
+    },
+    {
+     "id": "sk4_note_11",
+     "kind": "report",
+     "title": "Hold Survey: Sacellum Of Boethiah (12)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #12 (2252, -541): Field inspection recorded for Sacellum Of Boethiah within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #12 for sacellum_of_boethiah: All travelers, carters, and hold patrollers passing Sacellum Of Boethiah are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L8.talos_open"
    ]
   },
   "uttering_hills_cave": {
@@ -413,7 +585,22 @@
       "Bertrand Vanne, of the Imperial Geographical Society, held here eleven days. They took my survey of the Mzulft approaches. I have redrawn it on this wall from memory because I am too stubborn to let it be lost: south-east past Cragwallow Slope, the domes visible from the third ridge.",
       "If I do not leave this place, I ask whoever reads this to tell the Society that the domes are warmer than they ought to be, and that something inside Mzulft is still awake."
      ]
+    },
+    {
+     "id": "sk4_note_12",
+     "kind": "ledger",
+     "title": "Hold Survey: Uttering Hills Cave (13)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #13 (1329, -439): Field inspection recorded for Uttering Hills Cave within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #13 for uttering_hills_cave: All travelers, carters, and hold patrollers passing Uttering Hills Cave are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L9.rebel_capital",
+    "eastmarch.L10.bandit_mine_camps"
    ]
   },
   "morvunskar": {
@@ -457,6 +644,10 @@
       "If the young woman named Elsbet is with you, she is to be returned to Winterhold before the snows close the road. Master Tolfdir has asked me to add that he remembers her fondly, and that he remembers you somewhat less so."
      ]
     }
+   ],
+   "why": [
+    "eastmarch.L9.rebel_capital",
+    "eastmarch.L10.bandit_mine_camps"
    ]
   },
   "maras_eye_pond": {
@@ -473,7 +664,22 @@
       "~If either of us breaks this oath, let the water close over the oath-breaker.\n~If the world breaks it for us, let the water remember.\n^Sworn on the 20th of Frostfall, 4E 201, under a pale moon.",
       "Cut beneath, in a rougher hand: SHE IS IN THE CAVE TO THE SOUTH. CRONVANGR. I COULD NOT FOLLOW."
      ]
+    },
+    {
+     "id": "sk4_note_13",
+     "kind": "report",
+     "title": "Hold Survey: Maras Eye Pond (14)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #14 (1405, -256): Field inspection recorded for Maras Eye Pond within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #14 for maras_eye_pond: All travelers, carters, and hold patrollers passing Maras Eye Pond are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L8.talos_open"
    ]
   },
   "riverside_shack": {
@@ -507,7 +713,22 @@
       "Thirty years of pelts are in an iron box under the flat stone on the west bank of Mara's Eye Pond, the one with the moss shaped like a hand. Dig on the side away from the water. It is not much. It is more than the Jarl ever thought a trapper was worth.",
       "Buy yourself a house in town. Somewhere with a wall. And Mother's gold ring is in there too, wrapped in the fox fur. Wear it. She always said it was wasted on a trapper's sister, and she was wrong about that, as she was about most things."
      ]
+    },
+    {
+     "id": "sk4_note_14",
+     "kind": "ledger",
+     "title": "Hold Survey: Riverside Shack (15)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #15 (1608, -226): Field inspection recorded for Riverside Shack within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #15 for riverside_shack: All travelers, carters, and hold patrollers passing Riverside Shack are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L8.talos_open"
    ]
   },
   "gallows_rock": {
@@ -538,7 +759,22 @@
       "Two winters ago, in the woods by Cradlecrush Rock, something bit me and I lived. Since then there have been nights I do not remember, and mornings I have washed blood off my hands in the river before you woke. I told myself it was deer. It was mostly deer.",
       "Do not come for me. If you do come, do not open the chains on a full moon. Take the ring Father gave me, and remember me as I was in the daylight."
      ]
+    },
+    {
+     "id": "sk4_note_15",
+     "kind": "report",
+     "title": "Hold Survey: Gallows Rock (16)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #16 (1279, -211): Field inspection recorded for Gallows Rock within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #16 for gallows_rock: All travelers, carters, and hold patrollers passing Gallows Rock are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L9.rebel_capital",
+    "eastmarch.L10.bandit_mine_camps"
    ]
   },
   "gloombound_mine": {
@@ -566,7 +802,22 @@
       "#Hearthfire\nEast drift: 3 bars ebony, 1 good vein. West drift: 2 bars. Bad air in the low cut, two men sick.\n#Frostfall, first week\nEast drift: 4 bars and a breakthrough into old rock. Strange smell. Miners grumbling.",
       "#Frostfall, second week\nEast drift: 0 bars. Lantern-oil missing. Dushgar's pick found by the crack, handle chewed.\n#Frostfall, third week\nEast drift closed by order of the chief. Nobody argued, and that is the most frightening line in this book.\nMogdurz came to the drift mouth every night this week and stood there with an axe. Nobody argued with that either."
      ]
+    },
+    {
+     "id": "sk4_note_16",
+     "kind": "ledger",
+     "title": "Hold Survey: Gloombound Mine (17)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #17 (2220, -200): Field inspection recorded for Gloombound Mine within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #17 for gloombound_mine: All travelers, carters, and hold patrollers passing Gloombound Mine are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L8.talos_open"
    ]
   },
   "cragwallow_slope": {
@@ -596,7 +847,22 @@
       "To the cell at Ansilvund,\nMaster Venkar has stopped sending you bodies because he has started keeping them. He talks to them. He calls the widow 'mother'. I came here to learn a craft, not to watch a man build himself a family from the Kynesgrove graveyard.",
       "If you still want what you were promised, come and take it. I will leave the lower gate unbarred on the night of the next new moon. I ask only that you take me with you when you go."
      ]
+    },
+    {
+     "id": "sk4_note_17",
+     "kind": "report",
+     "title": "Hold Survey: Cragwallow Slope (18)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #18 (2158, -82): Field inspection recorded for Cragwallow Slope within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #18 for cragwallow_slope: All travelers, carters, and hold patrollers passing Cragwallow Slope are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L8.talos_open"
    ]
   },
   "witchmist_grove": {
@@ -627,7 +893,22 @@
       "^Cut by the first folk of Kynesgrove, who knew better than to build here.",
       "Someone has left fresh offerings on the stone: a heel of bread, a cup of goat's milk gone to ice, and a child's wooden doll with a scrap of red ribbon tied around its waist. Under the doll, scratched with a hunting knife: 'Take this one instead. Give her back.'"
      ]
+    },
+    {
+     "id": "sk4_note_18",
+     "kind": "ledger",
+     "title": "Hold Survey: Witchmist Grove (19)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #19 (1813, -68): Field inspection recorded for Witchmist Grove within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #19 for witchmist_grove: All travelers, carters, and hold patrollers passing Witchmist Grove are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L8.talos_open"
    ]
   },
   "cronvangr_cave": {
@@ -658,7 +939,22 @@
       "Ottar,\nIf you got away, do not come back for me. She is old and she is patient and she laughs when the others are cruel. She says I am to be kept for a special night.",
       "If you must come back, bring a priest and bring fire and bring someone who is not in love with me, because love makes a man slow and she is very fast.\nI still have the ring. I have kept it in my mouth so they would not take it. I am wearing it now. I am still sworn."
      ]
+    },
+    {
+     "id": "sk4_note_19",
+     "kind": "report",
+     "title": "Hold Survey: Cronvangr Cave (20)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #20 (1585, -34): Field inspection recorded for Cronvangr Cave within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #20 for cronvangr_cave: All travelers, carters, and hold patrollers passing Cronvangr Cave are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L8.talos_open"
    ]
   },
   "cradlecrush_rock": {
@@ -688,7 +984,22 @@
       "A Nord has cut beneath, more recently: 'Counted forty-one pairs. My grandfather counted thirty-nine. They are still adding to it.'",
       "And lower still, in a hasty, frightened hand: 'Wolf-tracks all round the stone last full moon, and one set that started as a wolf's and ended as a man's bare feet, going east toward the river and Mixwater Mill. The giants would not come near them. Neither will I.'"
      ]
+    },
+    {
+     "id": "sk4_note_20",
+     "kind": "ledger",
+     "title": "Hold Survey: Cradlecrush Rock (21)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #21 (1150, -32): Field inspection recorded for Cradlecrush Rock within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #21 for cradlecrush_rock: All travelers, carters, and hold patrollers passing Cradlecrush Rock are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L9.rebel_capital",
+    "eastmarch.L10.bandit_mine_camps"
    ]
   },
   "steamcrag_camp": {
@@ -718,7 +1029,22 @@
       "When a mammoth calf was taken by a sabre cat, the clan carried the calf's body to the hottest pool and left it there. They watched it until the steam hid it. I have seen Nord funerals with less ceremony and more noise.",
       "I conclude that the giants are not savage, merely private. I further conclude that I am never coming back here."
      ]
+    },
+    {
+     "id": "sk4_note_21",
+     "kind": "report",
+     "title": "Hold Survey: Steamcrag Camp (22)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #22 (1961, 40): Field inspection recorded for Steamcrag Camp within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #22 for steamcrag_camp: All travelers, carters, and hold patrollers passing Steamcrag Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L9.rebel_capital",
+    "eastmarch.L10.bandit_mine_camps"
    ]
   },
   "bonestrewn_crest": {
@@ -748,7 +1074,22 @@
       "Deep gouges in the boulder at the crest's peak, too regular to be accident. Someone who knew the dragon tongue has scratched a translation beside them in charcoal:",
       "'I am Sahqovul. The crest is mine. The bones are my count. Come and be counted.'\n\nBeneath, in a different hand: 'Thirty-one tallies. I have stopped adding to them. There is no room.'\n\nAnd at the very bottom, scratched with a broken arrowhead: 'Arvel, the twins, and me. Make it thirty-four. If anyone kills it, cut one more mark, for us.'"
      ]
+    },
+    {
+     "id": "sk4_note_22",
+     "kind": "ledger",
+     "title": "Hold Survey: Bonestrewn Crest (23)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #23 (1791, 73): Field inspection recorded for Bonestrewn Crest within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #23 for bonestrewn_crest: All travelers, carters, and hold patrollers passing Bonestrewn Crest are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L8.talos_open"
    ]
   },
   "mzulft": {
@@ -792,6 +1133,10 @@
       "If you find this, come out by the south door and walk north to Kynesgrove. I will be at the Braidwood Inn every evening until the snows close the road, and then, Mara help me, I will come in after you."
      ]
     }
+   ],
+   "why": [
+    "eastmarch.L8.kings_city",
+    "eastmarch.L10.steam_ruin"
    ]
   },
   "broken_limb_camp": {
@@ -820,7 +1165,22 @@
       "Around the cairn the snow is trodden flat in a perfect circle, as if something enormous has walked around it every night since.",
       "Wedged between two stones, half-hidden, lies a broken spear-shaft with a Mixwater Mill timber-brand burned into the wood, and a twist of rope of the kind the mill's carters use to lash their loads."
      ]
+    },
+    {
+     "id": "sk4_note_23",
+     "kind": "report",
+     "title": "Hold Survey: Broken Limb Camp (24)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #24 (1457, 109): Field inspection recorded for Broken Limb Camp within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #24 for broken_limb_camp: All travelers, carters, and hold patrollers passing Broken Limb Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L9.rebel_capital",
+    "eastmarch.L10.bandit_mine_camps"
    ]
   },
   "abandoned_prison": {
@@ -851,7 +1211,22 @@
       "Kept here because no Stormcloak will set foot in a fever-house, and no Imperial knows it's here. The old lamps make a fine excuse. Folk think it's ghosts. Let them.",
       "Reminder: stop the new boys whispering to the warden's bones. It is bad for discipline."
      ]
+    },
+    {
+     "id": "sk4_note_24",
+     "kind": "ledger",
+     "title": "Hold Survey: Abandoned Prison (25)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #25 (1202, 124): Field inspection recorded for Abandoned Prison within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #25 for abandoned_prison: All travelers, carters, and hold patrollers passing Abandoned Prison are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L8.talos_open"
    ]
   },
   "eastmarch_imperial_camp": {
@@ -883,7 +1258,22 @@
       "We are camped near a Dwemer ruin called Mzulft. Old Decius says there are blind elves in it who eat men. Old Decius says many things, but I have noticed he sleeps with his sword these days.",
       "Do not worry. Tell Father I polish my boots every morning. Tell Julia I have not met anyone. Tell yourself I will be home for Midyear, and I will try to make it true."
      ]
+    },
+    {
+     "id": "sk4_note_25",
+     "kind": "report",
+     "title": "Hold Survey: Eastmarch Imperial Camp (26)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #26 (2456, 197): Field inspection recorded for Eastmarch Imperial Camp within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #26 for eastmarch_imperial_camp: All travelers, carters, and hold patrollers passing Eastmarch Imperial Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L9.rebel_capital",
+    "eastmarch.L10.bandit_mine_camps"
    ]
   },
   "eldergleam_sanctuary": {
@@ -911,7 +1301,22 @@
       "~Walk soft, walk slow, and leave your steel;\n~The roots go deeper than your graves.\n~What the Gleam gives, the Gleam may heal;\n~What the Gleam keeps, the Gleam still saves.",
       "~And if you come with fire or blade\n~To take a bough to warm your hall,\n~The path you walked will fail and fade,\n~And you will find no home at all."
      ]
+    },
+    {
+     "id": "sk4_note_26",
+     "kind": "ledger",
+     "title": "Hold Survey: Eldergleam Sanctuary (27)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #27 (1588, 239): Field inspection recorded for Eldergleam Sanctuary within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #27 for eldergleam_sanctuary: All travelers, carters, and hold patrollers passing Eldergleam Sanctuary are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L8.talos_open"
    ]
   },
   "fort_amol": {
@@ -942,7 +1347,22 @@
       "Send the rest of the boys up from Lost Knife Hideout. With the Stormcloaks off in Windhelm and the Legion stuck behind Darkwater Pass, nobody's coming for Fort Amol before the thaw. We'll be lords by Morning Star.",
       "P.S. The bear banner smells of old men. Bring a new blanket."
      ]
+    },
+    {
+     "id": "sk4_note_27",
+     "kind": "report",
+     "title": "Hold Survey: Fort Amol (28)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #28 (1276, 245): Field inspection recorded for Fort Amol within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #28 for fort_amol: All travelers, carters, and hold patrollers passing Fort Amol are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L9.rebel_capital",
+    "eastmarch.L10.bandit_mine_camps"
    ]
   },
   "stony_creek_cave": {
@@ -972,7 +1392,22 @@
       "Ma, I said I'd tell you when I found steady work. It's steady. I stand at the ford, wave at the wagons, and when the Imperials stop, the others come out of the rocks. Nobody's been hurt. Mostly.",
       "Nazira says I've a good honest face, and that's worth more than a sword in this trade. I don't know if that's a compliment. I've decided to take it as one.\nI'm sending you ten septims with this. Don't ask where it came from. Buy flour, and fix the roof before Sun's Dusk, and don't tell Uncle Bersi I'm south of Mzulft. Burn this."
      ]
+    },
+    {
+     "id": "sk4_note_28",
+     "kind": "ledger",
+     "title": "Hold Survey: Stony Creek Cave (29)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #29 (2456, 276): Field inspection recorded for Stony Creek Cave within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #29 for stony_creek_cave: All travelers, carters, and hold patrollers passing Stony Creek Cave are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L9.rebel_capital",
+    "eastmarch.L10.bandit_mine_camps"
    ]
   },
   "lost_knife_hideout": {
@@ -1003,7 +1438,22 @@
       "And at the bottom, the gang's oath, cut deep: 'A knife lost is a debt owed. Somebody always pays.'",
       "A newer name has been added under the oath, the cuts still pale: 'Ulfgar, at Fort Amol, in a Stormcloak bedroll.' Someone has scored a line through the word 'bedroll' and written 'banner' above it, and someone else has drawn a very rude picture beside it."
      ]
+    },
+    {
+     "id": "sk4_note_29",
+     "kind": "report",
+     "title": "Hold Survey: Lost Knife Hideout (30)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #30 (1197, 341): Field inspection recorded for Lost Knife Hideout within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #30 for lost_knife_hideout: All travelers, carters, and hold patrollers passing Lost Knife Hideout are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L9.rebel_capital",
+    "eastmarch.L10.bandit_mine_camps"
    ]
   },
   "kagrenzel": {
@@ -1035,7 +1485,22 @@
       "'Kagrenzel. Descent to the lower works. The guardians are tuned to the voices of the clan. Those who are not of the clan, descend at the pleasure of the guardians.'",
       "And under that, smaller: 'The clan is gone. The guardians are not. Draw your own conclusions, and then draw your sword.'\n\nA last line, in a cramped Imperial hand, the chalk worn almost away: 'Septimus, if you climb back up this far, we lowered a second rope at dawn. Pull twice.'"
      ]
+    },
+    {
+     "id": "sk4_note_30",
+     "kind": "ledger",
+     "title": "Hold Survey: Kagrenzel (31)",
+     "author": "Bailiff's Office of Eastmarch",
+     "at": "chest",
+     "pages": [
+      "Folio #31 (2726, 349): Field inspection recorded for Kagrenzel within Eastmarch Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #31 for kagrenzel: All travelers, carters, and hold patrollers passing Kagrenzel are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "eastmarch.L8.kings_city",
+    "eastmarch.L10.steam_ruin"
    ]
   },
   "cragslane_cavern": {
@@ -1068,6 +1533,10 @@
       "Do not tell Father. Do send the money. Do not come here yourself, whatever happens."
      ]
     }
+   ],
+   "why": [
+    "eastmarch.L9.rebel_capital",
+    "eastmarch.L10.bandit_mine_camps"
    ]
   },
   "mistwatch": {
@@ -1101,6 +1570,10 @@
       "My soul gems and my coin are buried in a sealed pot, a dozen paces south of the Stone, where the snow never settles because the ground is warm. If I am still their 'guest' by the time anyone reads this, take what you find and spend some of it on getting me out."
      ]
     }
+   ],
+   "why": [
+    "eastmarch.L9.rebel_capital",
+    "eastmarch.L10.bandit_mine_camps"
    ]
   },
   "ansilvund": {
@@ -1142,6 +1615,10 @@
       "If I come home in spring, marry me. If I don't, marry the smith's boy; he has nice teeth and no interest in the dead.\nSister Thyra counts the oath-guard every night and goes pale. I have started counting the steps to the outer door instead. There are two hundred and twelve. I could run them in the dark."
      ]
     }
+   ],
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L8.talos_open"
    ]
   },
   "snapleg_cave": {
@@ -1172,7 +1649,22 @@
       "The witch has my horn. She blows it with something that is not my breath and calls out with something that is not my voice. If you hear me in the hills, it is not me. Stay at the Crossing.",
       "I know you will not stay at the Crossing. So bring someone better with a blade than I was."
      ]
+    },
+    {
+     "id": "sk4_note_1",
+     "kind": "report",
+     "title": "Hold Survey: Snapleg Cave (2)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #2 (1531, 762): Field inspection recorded for Snapleg Cave within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #2 for snapleg_cave: All travelers, carters, and hold patrollers passing Snapleg Cave are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
    ]
   },
   "the_atronach_stone": {
@@ -1192,6 +1684,10 @@
       "Note: the hill is pleasant, the view fine, and the tower to the south full of thieves. Do not meditate with your purse on the ground."
      ]
     }
+   ],
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L8.talos_open"
    ]
   },
   "dragon_mound_angas_mill": {
@@ -1208,8 +1704,24 @@
       "My grandfather's grandfather was told by his grandfather that the Tongues of old buried a dragon here with its name cut into a stone, and the name was the only thing that kept it down.",
       "On the 3rd of Frostfall the stone with the name split clean in two. I heard it from Anga's Mill like a tree coming down. Since then the snow will not lie on the mound, and the ravens that roosted on it have gone to the mill roof instead. Cut your wood somewhere else this winter.\n^Brynjolf the Cutter, of Anga's Mill"
      ]
+    },
+    {
+     "id": "sk4_note_1",
+     "kind": "report",
+     "title": "Hold Survey: Dragon Mound Angas Mill (2)",
+     "author": "Bailiff's Office of The Pale",
+     "at": "chest",
+     "pages": [
+      "Folio #2 (1279, -744): Field inspection recorded for Dragon Mound Angas Mill within The Pale Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #2 for dragon_mound_angas_mill: All travelers, carters, and hold patrollers passing Dragon Mound Angas Mill are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
-   ]
+   ],
+   "why": [
+    "the_pale.L10.great_lifts",
+    "the_pale.L8.old_crown"
+   ],
+   "quest": "main_alduins_bane"
   },
   "dragon_mound_bonestrewn_crest": {
    "hook": "A dragon burial mound on the ridge west of Bonestrewn Crest, its stone lid long since cracked, perhaps the very bed from which the crest's dragon rose.",
@@ -1228,6 +1740,10 @@
       "I have stopped measuring. I recommend that whoever reads this also stop measuring, put away their quill, and walk west at a steady, unremarkable pace."
      ]
     }
+   ],
+   "why": [
+    "eastmarch.L8.kings_city",
+    "eastmarch.L10.steam_ruin"
    ]
   },
   "dragon_mound_witchmist_grove": {
@@ -1246,6 +1762,10 @@
       "I put my ear to it once. It was warm. I did not hear anything. Grandfather says that is because it was holding its breath."
      ]
     }
+   ],
+   "why": [
+    "eastmarch.L8.kings_city",
+    "eastmarch.L10.steam_ruin"
    ]
   },
   "dragon_mound_kynesgrove": {
@@ -1264,6 +1784,10 @@
       "This year, for the first time in my keeping, the water hissed as it touched the stone and rose as steam. I have not told the village. I have only begun to pour twice as much."
      ]
     }
+   ],
+   "why": [
+    "eastmarch.L8.kings_city",
+    "eastmarch.L10.steam_ruin"
    ]
   },
   "dragon_mound_mzulft": {
@@ -1281,6 +1805,94 @@
       "#1st of Hearthfire\nCurious: Dwemer brass fittings and a broken digging-arm embedded in the slope of an ancient Nord burial mound below Mzulft. The arm points into the mound, as if the Dwemer dug toward it.",
       "The digging stopped abruptly. The arm is bent backward, as though it struck something harder than itself. I have found three scorched Dwemer bolts in the turf and a gouge in the brass four fingers wide.",
       "Hypothesis: the Dwemer dug for something here and found a dragon. Recommendation to myself: do not do what the Dwemer did. Go to Mzulft instead. Bertrand will laugh at the irony."
+     ]
+    }
+   ],
+   "why": [
+    "eastmarch.L8.kings_city",
+    "eastmarch.L10.steam_ruin"
+   ]
+  },
+  "hot_spring_bathers_camp": {
+   "hook": "A timber bath-shelter steamed by the mineral pools of the volcanic tundra, where hunters and miners soak frostbitten joints between shifts.",
+   "rumour": "Trappers down at the hot springs say a pair of poachers moved into the bath-shelter and started charging silver just to dip your boots in the warm water.",
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L8.talos_open"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Mineral Pool Tally",
+     "author": "Hallbera the Soaker",
+     "at": "chest",
+     "reveals": "kynesgrove",
+     "pages": [
+      "Steam rises off the sulfur ledges day and night, keeping the frost back twenty paces from the timber planks. Three miners from Kynesgrove paid two silver apiece to soak their shoulders after a week on the malachite face. I told them to leave their pickaxes by the rack and keep out of the deep boiling vent to the east."
+     ]
+    }
+   ]
+  },
+  "velothi_refugee_cairn": {
+   "hook": "A weathered stone cairn and sunken vault along the eastern pass where families fleeing the Red Year buried what heirlooms they could no longer carry.",
+   "rumour": "Refugees coming down the Velothi road still stop at the old cairn to leave ash-yam cakes, though grave-robbers have been prying at the lower stones.",
+   "why": [
+    "eastmarch.L8.kings_city",
+    "eastmarch.L10.steam_ruin"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Cairn Offering Roll",
+     "author": "Serjo Indoril Tols",
+     "at": "chest",
+     "reveals": "windhelm",
+     "pages": [
+      "Here beneath the boundary stones of the western pass we laid the bone-ash urns of three cousins who did not survive the blizzard above Blacklight. Let no Nord bailiff or mountain outlaw disturb these niches; there is no gold within, only clay seals, family signets, and prayers to the Reclamations."
+     ]
+    }
+   ]
+  },
+  "darkwater_ford_camp": {
+   "hook": "A fortified timber ford-post on the Darkwater River where scouts watch the southern crossing and tally ore wagons coming up from the gorge.",
+   "rumour": "The pickets at Darkwater Ford have been stopping every mule-cart since the bridge planks loosened in the thaw.",
+   "why": [
+    "eastmarch.L9.rebel_capital",
+    "eastmarch.L10.bandit_mine_camps"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Ford Watch Orders",
+     "author": "Quartermaster Torstein",
+     "at": "chest",
+     "reveals": "darkwater_crossing",
+     "pages": [
+      "Keep two lanterns burning on the north bank whenever the river mist rises. Every ore wagon out of Darkwater Crossing must show a stamped tally-stick before crossing the shallows, and any rider coming down from the Rift hills without hold colors is to be turned back before nightfall."
+     ]
+    }
+   ]
+  },
+  "velothi_border_picket": {
+   "hook": "A high wind-swept picket station watching the eastern mountain saddle between Skyrim and Morrowind.",
+   "rumour": "Soldiers up at the Velothi Border Picket burn pine pitch just to keep their fingers warm enough to draw a bowstring.",
+   "why": [
+    "eastmarch.L9.rebel_capital",
+    "eastmarch.L10.bandit_mine_camps"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "High Saddle Logbook",
+     "author": "Decurion Maro Vorenus",
+     "at": "chest",
+     "reveals": "windhelm",
+     "pages": [
+      "Snow has drifted six feet against the eastern palisade, burying the mile-markers toward the border arch. Two ash-salt peddlers passed through at noon reporting rockslides along the lower switchbacks. We have rationed the firewood to three logs a watch until the pack-mules get through from the valley."
      ]
     }
    ]

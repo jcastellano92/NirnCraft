@@ -2,7 +2,14 @@
   "id": "dragon_bridge",
   "base": "none",
   "sil": "stone-arch-river-crossing",
-  "names": {"inn": "four_shields_tavern", "store": "dragon_bridge_trader", "smithy": "dragon_bridge_smithy"},
+  "names": {
+    "inn": "four_shields_tavern",
+    "store": "dragon_bridge_trader",
+    "smithy": "dragon_bridge_smithy",
+    "mill": "dragon_bridge_mill",
+    "overlook": "dragon_bridge_overlook",
+    "tollkeeper": "dragon_bridge_tollkeepers_house"
+  },
   "innKey": "four_shields_tavern",
   "gates": [[-34, -8], [34, -8], [0, 23]],
   "lines": [
@@ -10,8 +17,8 @@
   ],
   "buildings": [
     {"kind": "mill", "at": [-33, 40], "size": [9, 11], "face": "E", "margin": 3, "name": "dragon_bridge_mill"},
-    {"kind": "lumber", "at": [-47, 50], "size": [7, 5], "face": "E"},
-    {"kind": "camp", "at": [-39, 56], "size": [13, 13], "variant": 11},
+    {"kind": "lumber", "at": [-47, 50], "size": [7, 5], "face": "E", "name": "dragon_bridge_lumber_pile"},
+    {"kind": "camp", "at": [-39, 56], "size": [13, 13], "variant": 11, "name": "dragon_bridge_loggers_camp"},
     {"kind": "tower", "at": [-46, -44], "size": [7, 7], "face": "S", "h": 16, "name": "dragon_bridge_overlook"}
   ],
   "plazas": [
@@ -33,6 +40,7 @@
     {"kind": "inn", "size": [15, 17], "flags": ["upper"], "name": "four_shields_tavern", "on": "south"},
     {"kind": "store", "size": [9, 11], "name": "dragon_bridge_trader", "on": "row"},
     {"kind": "smithy", "size": [11, 9], "name": "dragon_bridge_smithy", "on": "row"},
+    {"kind": "barracks", "size": [9, 13], "name": "dragon_bridge_imperial_post", "on": "bank"},
     {"kind": "house", "name": "dragon_bridge_arnleif_house", "on": "bank"},
     {"kind": "house", "name": "dragon_bridge_kolfinn_hut", "on": "bank"},
     {"kind": "house", "name": "dragon_bridge_tollkeepers_house", "on": "south"}
@@ -47,10 +55,13 @@
   ],
   "titles": {
     "dragon_bridge_mill": "Dragon Bridge Mill",
+    "dragon_bridge_lumber_pile": "Dragon Bridge Lumber Pile",
+    "dragon_bridge_loggers_camp": "Riverbank Loggers' Camp",
     "dragon_bridge_overlook": "Dragon Bridge Overlook",
     "dragon_bridge_toll_square": "Toll Square",
     "dragon_bridge_trader": "Bridgeside Goods",
     "dragon_bridge_smithy": "Dragon Bridge Smithy",
+    "dragon_bridge_imperial_post": "Imperial Courier Post",
     "dragon_bridge_arnleif_house": "Arnleif House",
     "dragon_bridge_kolfinn_hut": "Kolfinn's Hut",
     "dragon_bridge_tollkeepers_house": "Tollkeeper's House"

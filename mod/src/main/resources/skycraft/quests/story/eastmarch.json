@@ -1,0 +1,204 @@
+{
+  "region": "skyrim/eastmarch",
+  "why": [
+    "eastmarch.L7.grey_quarter",
+    "eastmarch.L7.docks_outside",
+    "eastmarch.L9.rebel_capital",
+    "eastmarch.L9.refugee_tension"
+  ],
+  "hook": {
+    "place": "kynesgrove",
+    "places": [
+      "windhelm",
+      "kynesgrove",
+      "darkwater_crossing",
+      "cronvangr_cave",
+      "refugees_rest",
+      "mixwater_mill"
+    ],
+    "npc": "eastmarch_hook_npc",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "eastmarch_hook_npc",
+      "name": "Banner-Reeve Torbjorn",
+      "role": "guard",
+      "place": "kynesgrove",
+      "greet": "Wagons from the southern steam-flats are backed up at the bridge—Windhelm's war-chest levy has locked the docks and the Gray Quarter merchants are on strike."
+    },
+    {
+      "id": "eastmarch_factor_npc",
+      "name": "Factor Ambarys",
+      "role": "merchant",
+      "place": "windhelm",
+      "greet": "The Palace demands double provisioning while privateers strip our coastal barges and blame the Argonians on the ice-wharf."
+    },
+    {
+      "id": "eastmarch_miner_npc",
+      "name": "Foreman Verner",
+      "role": "citizen",
+      "place": "darkwater_crossing",
+      "greet": "Raiders out of Lost Knife and Mistwatch have been seizing the corundum shipments before they ever reach the river road."
+    }
+  ],
+  "bosses": {
+    "story_eastmarch_privateer_boss": {
+      "name": "Stig the Ice-Reaver",
+      "entity": "minecraft:Vindicator",
+      "place": "stony_creek_cave",
+      "hp": 115
+    },
+    "story_eastmarch_mzulft_archivist": {
+      "name": "Centurion-Keeper Voryn",
+      "entity": "minecraft:Evoker",
+      "place": "mzulft",
+      "hp": 145
+    }
+  },
+  "scenes": {
+    "eastmarch_palace_accord": [
+      "Factor Ambarys: The recovered East Empire cargo manifests and the Mzulft boiler-cores leave the dock-wardens with no excuse to bar the quarters.",
+      "Banner-Reeve Torbjorn: With the southern mines open and the wharf wages settled, Windhelm's supply lines are secure.",
+      "Factor Ambarys: Stamp the new charter in the Palace of the Kings—every quarter of the city stands on the rolls."
+    ]
+  },
+  "quests": [
+    {
+      "id": "story_eastmarch_1",
+      "title": "story.skycraft.eastmarch_1.title",
+      "requires": [],
+      "places": [
+        "kynesgrove",
+        "stony_creek_cave",
+        "windhelm"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "kynesgrove",
+          "objective": "Hear the banner-reeve's briefing at Kynesgrove on the seized supply wagons."
+        },
+        {
+          "id": 20,
+          "place": "stony_creek_cave",
+          "objective": "Recover the impounded shipping tallies from the raiders in Stony Creek Cave."
+        },
+        {
+          "id": 30,
+          "place": "windhelm",
+          "objective": "Deliver the shipping tallies to the quarter factor in Windhelm."
+        }
+      ],
+      "consequence": "guard_banner:eastmarch_road_patrols",
+      "why": [
+        "eastmarch.L9.rebel_capital",
+        "eastmarch.L10.bandit_mine_camps"
+      ]
+    },
+    {
+      "id": "story_eastmarch_2",
+      "title": "story.skycraft.eastmarch_2.title",
+      "requires": [
+        "story_eastmarch_1"
+      ],
+      "places": [
+        "windhelm",
+        "refugees_rest",
+        "yngol_barrow"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "windhelm",
+          "objective": "Inspect the disputed dock-wage rolls with the wharf stevedores and Gray Quarter elders."
+        },
+        {
+          "id": 20,
+          "place": "refugees_rest",
+          "objective": "Trace the smuggled customs chest to the border tower at Refugees' Rest."
+        },
+        {
+          "id": 30,
+          "place": "yngol_barrow",
+          "objective": "Reclaim the stolen guild seal hidden in the sea-cliff vestibule of Yngol Barrow."
+        }
+      ],
+      "consequence": "market_tariff:windhelm_docks_reopened",
+      "why": [
+        "eastmarch.L7.grey_quarter",
+        "eastmarch.L7.docks_outside",
+        "eastmarch.L9.refugee_tension"
+      ]
+    },
+    {
+      "id": "story_eastmarch_3",
+      "title": "story.skycraft.eastmarch_3.title",
+      "requires": [
+        "story_eastmarch_2"
+      ],
+      "places": [
+        "darkwater_crossing",
+        "lost_knife_hideout",
+        "mistwatch"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "darkwater_crossing",
+          "objective": "Take the mine foreman's statement at Darkwater Crossing."
+        },
+        {
+          "id": 20,
+          "place": "lost_knife_hideout",
+          "objective": "Break the highwaymen's toll-camp inside Lost Knife Hideout."
+        },
+        {
+          "id": 30,
+          "place": "mistwatch",
+          "objective": "Free the captive teamsters held in the eastern keep of Mistwatch."
+        }
+      ],
+      "consequence": "patrol_route:eastmarch_hotsprings_open",
+      "why": [
+        "eastmarch.L7.stone_quarter",
+        "eastmarch.L10.bandit_mine_camps"
+      ]
+    },
+    {
+      "id": "story_eastmarch_4",
+      "title": "story.skycraft.eastmarch_4.title",
+      "requires": [
+        "story_eastmarch_3"
+      ],
+      "places": [
+        "windhelm",
+        "mzulft",
+        "bonestrewn_crest"
+      ],
+      "finale": true,
+      "stages": [
+        {
+          "id": 10,
+          "place": "bonestrewn_crest",
+          "objective": "Secure the southern signal-cairn overlooking the flats at Bonestrewn Crest."
+        },
+        {
+          "id": 20,
+          "place": "mzulft",
+          "objective": "Recover the Dwemer steam-regulators from the lower observatory of Mzulft."
+        },
+        {
+          "id": 30,
+          "place": "windhelm",
+          "objective": "Ratify the Three-Quarter Supply Charter in the Palace of the Kings at Windhelm."
+        }
+      ],
+      "consequence": "world_state:eastmarch_resolved",
+      "why": [
+        "eastmarch.L8.kings_city",
+        "eastmarch.L10.steam_ruin"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "id": "honningbrew_meadery",
+  "base": "none",
+  "sil": "mead-hall-boilery-apiary",
+  "names": {
+    "inn": "honningbrew_tasting_hall",
+    "store": "honningbrew_cellar_shop",
+    "smithy": "honningbrew_cooperage"
+  },
+  "innKey": "honningbrew_tasting_hall",
+  "gates": [[0, 24]],
+  "buildings": [
+    {"kind": "manor", "at": [0, -12], "size": [13, 17], "face": "S", "flags": ["upper", "seat"], "name": "honningbrew_boilery"},
+    {"kind": "stables", "at": [-14, 6], "size": [11, 9], "face": "E", "name": "honningbrew_apiary_barn"},
+    {"kind": "house", "at": [14, 8], "size": [9, 9], "face": "W", "name": "honningbrew_brewers_cottage"},
+    {"kind": "garden", "at": [-14, -8], "size": [9, 7], "variant": 2}
+  ],
+  "plazas": [
+    {"at": [0, 6], "size": 9, "variant": 0, "stalls": 2, "name": "honningbrew_yard"}
+  ],
+  "nets": [
+    {"type": "path", "via": [[0, 24], [0, 12], [0, 2]], "width": 4, "major": true, "tag": "main"},
+    {"type": "path", "via": [[-12, 6], [0, 6], [12, 6]], "width": 2, "rank": 2, "tag": "lane"}
+  ],
+  "zones": [
+    {"at": [0, -8], "r": 14, "zone": "craft"},
+    {"at": [0, 8], "r": 14, "zone": "centre"}
+  ],
+  "fabric": {"radius": 24, "target": 0.26, "fill_cap": 2, "yard_cap": 4},
+  "queue": [
+    {"kind": "inn", "size": [13, 15], "flags": ["upper"], "name": "honningbrew_tasting_hall", "on": "main"},
+    {"kind": "store", "size": [9, 9], "name": "honningbrew_cellar_shop", "on": "main"},
+    {"kind": "smithy", "size": [11, 9], "name": "honningbrew_cooperage", "on": "lane"}
+  ],
+  "features": [
+    {"type": "orchard", "where": "edge"},
+    {"type": "garden", "where": "free"},
+    {"type": "well", "where": "free"}
+  ],
+  "titles": {
+    "honningbrew_tasting_hall": "Honningbrew Tasting Hall",
+    "honningbrew_cellar_shop": "Honningbrew Cask Cellar",
+    "honningbrew_cooperage": "Meadery Cooperage",
+    "honningbrew_boilery": "Honningbrew Boilery",
+    "honningbrew_apiary_barn": "Honey & Malt Barn",
+    "honningbrew_brewers_cottage": "Brewmaster's Dwelling",
+    "honningbrew_yard": "Meadery Yard"
+  }
+}

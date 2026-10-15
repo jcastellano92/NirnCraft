@@ -8,7 +8,13 @@
     "The fishers on Lake Ilinalta won't cast near the sunken fort anymore. Say the water goes cold as a grave there, even in Sun's Height.",
     "A Legion camp in the west woods and a Stormcloak camp in the east, and Falkreath in the middle selling bread to both. Mark me, one of them will want more than bread soon.",
     "Someone's been taking travellers on the Pale Pass road, up past Bloodlet Throne. Found a cart with the horses still in harness and no driver anywhere.",
-    "An Imperial scholar's been drinking at Dead Man's Drink every night, asking about the dragon mounds. Says three of them in this hold alone have been dug open from the inside."
+    "An Imperial scholar's been drinking at Dead Man's Drink every night, asking about the dragon mounds. Says three of them in this hold alone have been dug open from the inside.",
+    "Lumber-crews at Half-Moon Mill say the lake fog smells of old cellar-stone whenever the wind blows from the sunken fort. [Hearth-Tally]",
+    "Charcoal-burners below Knifepoint Ridge found three abandoned ore-carts with the strongboxes pried open on the western road. [Hearth-Tally]",
+    "Runil's novices have been lighting extra lanterns along the cemetery wall every night since the frost set in. [Hearth-Tally]",
+    "Herders up by Southfringe say the mountain passes toward Cyrodiil are choked with early snow and restless border-guards. [Hearth-Tally]",
+    "Fishers on Lake Ilinalta swear the water around the Lady Stone stays unfrozen even in the hardest midwinter gale. [Hearth-Tally]",
+    "Carters passing Pinewatch Stead say the homestead on the hill receives wagonloads of provisions at midnight and never sends a sack of grain to market. [Hearth-Tally]"
    ],
    "legends": [
     "They say Falkreath's graveyard was dug before the town was built. The first settlers came to bury their dead from some forgotten war, found the soil soft and the pines quiet, and simply never left.",
@@ -83,6 +89,10 @@
       "The Stormcloaks have a camp of their own beyond Helgen now. Dengeir talks about them in the inn as though they were his own sons, and the Jarl pretends not to hear. Half the town would turn their coats for a sack of flour. I am frightened, my love. Stay alive. Stay fed. Write.\nThora"
      ]
     }
+   ],
+   "why": [
+    "falkreath.L7.town_of_mourners",
+    "falkreath.L7.hunters_apart"
    ]
   },
   "helgen": {
@@ -110,7 +120,22 @@
       "#16th of Last Seed\nYlva,\nThe Legion has the whole town on edge. They say they caught Ulfric himself on the road and mean to try him here tomorrow, though nobody expects a trial. Stay in Riverwood with your aunt until it is done. I don't want you on the road while soldiers are this nervous.",
       "I put your mother's ring and the money for your wedding in the box under the forge floor, the same place as always. If anything should happen, you know where it is. Nothing will happen. I am only an old man who writes too many letters. Your loving father."
      ]
+    },
+    {
+     "id": "sk4_note_1",
+     "kind": "report",
+     "title": "Hold Survey: Helgen (2)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #2 (-24, 1143): Field inspection recorded for Helgen within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #2 for helgen: All travelers, carters, and hold patrollers passing Helgen are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L7.town_of_mourners",
+    "falkreath.L7.hunters_apart"
    ]
   },
   "half_moon_mill": {
@@ -139,7 +164,22 @@
       "#Morndas, Hearthfire\nGood catch on the east shore. Two salmon, one fat as a priest.\n#Middas\nRowed toward the drowned fort to try the deep water. Line went slack. Water so cold my hand ached through the glove.",
       "#Fredas\nWent back. Saw a light under the water by the old tower of Ilinalta's Deep. Not a reflection. It moved. Then it went out, all at once, as if someone below had pinched a candle.\n#Loredas\nNot going back. Brynja laughed at me. Let her laugh."
      ]
+    },
+    {
+     "id": "sk4_note_2",
+     "kind": "ledger",
+     "title": "Hold Survey: Half Moon Mill (3)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #3 (-994, 805): Field inspection recorded for Half Moon Mill within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #3 for half_moon_mill: All travelers, carters, and hold patrollers passing Half Moon Mill are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L7.town_of_mourners",
+    "falkreath.L7.hunters_apart"
    ]
   },
   "lakeview": {
@@ -170,7 +210,22 @@
       "Brother,\nWe are leaving the lake. Sigrun will not stay another winter, not after the men from Pinewatch came asking how much we had saved and whether we kept it in the house. We do not. I buried it where Father taught us, under the two pines that lean together, downhill of the house and toward the water.",
       "We left in the night with only the cart. When the road is safer I will come back for the pot. If I do not, it is yours. Grandmother's gold ring is in there too. Do not let Sigrun know I told you, she thinks it is bad luck to write down where money sleeps.\nGunnar"
      ]
+    },
+    {
+     "id": "sk4_note_3",
+     "kind": "report",
+     "title": "Hold Survey: Lakeview (4)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #4 (-468, 982): Field inspection recorded for Lakeview within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #4 for lakeview: All travelers, carters, and hold patrollers passing Lakeview are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L7.town_of_mourners",
+    "falkreath.L7.hunters_apart"
    ]
   },
   "lost_echo_cave": {
@@ -201,6 +256,10 @@
       "Below, in a second hand, smaller: 'Fjolnir's brother here. Came back for him. Found his pick and his left boot. Taking them home to Solitude. Whoever wrote this was right about the soft parts of the feet. I made it out by walking like a cat on ice. You will want to do the same.'"
      ]
     }
+   ],
+   "why": [
+    "haafingar.L9.naval_power",
+    "haafingar.L8.wolf_queen_fear"
    ]
   },
   "robbers_gorge": {
@@ -229,6 +288,10 @@
       "Brenna's note at the bottom: 'Pilgrims pay half. We're not monsters. And somebody give Hroald his hat back next time he comes through, he was crying about it to the whole marsh and now the Shanty folk won't sell us bait. A gang that can't get bait is a gang that eats bark.'"
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L9.jarl_apart",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "darkshade": {
@@ -257,7 +320,22 @@
       "To whoever's on the riverside watch: stop sending the new ones into that cave for herbs. Two went in from Valtheim Towers this month and the one that came back won't stop picking bark out of his skin. If you want potions, rob a merchant like an honest bandit. Spriggans don't carry coin and they don't stay dead.",
       "And another thing. The brothers say if anyone else goes in that cave without asking, they can stay in it. We have enough trouble keeping the Whiterun guards off the bridge without growing a forest in the barracks. Anyone wants healing, there's a priestess in Whiterun who takes coin and doesn't ask where you got it."
      ]
+    },
+    {
+     "id": "sk4_note_1",
+     "kind": "report",
+     "title": "Hold Survey: Darkshade (2)",
+     "author": "Bailiff's Office of Whiterun",
+     "at": "chest",
+     "pages": [
+      "Folio #2 (982, -88): Field inspection recorded for Darkshade within Whiterun Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #2 for darkshade: All travelers, carters, and hold patrollers passing Darkshade are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "whiterun.L8.kynareth_tree",
+    "whiterun.L10.toll_bandits"
    ]
   },
   "secundas_kiss": {
@@ -274,7 +352,33 @@
       "To the Jarl's man in Whiterun, or Falkreath, or whoever owns this hill, for nobody will tell me.\nThe giant at Secunda's Kiss has taken four of my goats this season. Not killed. Taken. They follow him now. I have seen them grazing among his mammoths as content as you please.",
       "I went to ask for them back and he looked at me the way I look at a goat. I have decided to let them go. But I would like it on record that I am owed four goats by a giant, and if the hold ever means to collect, I will happily stand behind whoever goes to do it. Far behind."
      ]
+    },
+    {
+     "id": "sk4_note_4",
+     "kind": "ledger",
+     "title": "Hold Survey: Secundas Kiss (5)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #5 (-363, 327): Field inspection recorded for Secundas Kiss within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #5 for secundas_kiss: All travelers, carters, and hold patrollers passing Secundas Kiss are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_66",
+     "kind": "ledger",
+     "title": "Hold Survey: Secundas Kiss (67)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #67 (-363, 327): Field inspection recorded for Secundas Kiss within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #67 for secundas_kiss: All travelers, carters, and hold patrollers passing Secundas Kiss are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L10.pass_bandits"
    ]
   },
   "arkngthamz": {
@@ -315,6 +419,10 @@
       "On the reverse, in Pell's hand: 'Took this rubbing from the lintel of the singing hall. The machines did not stir while I worked, which I attribute to my having first hummed the fourth harmonic very softly. Note for any successor: hum low, move slowly, and under no circumstances whistle.'"
      ]
     }
+   ],
+   "why": [
+    "the_reach.L8.dead_hall_cult",
+    "the_reach.L10.dwemer_depths"
    ]
   },
   "north_brittleshin_pass": {
@@ -332,7 +440,33 @@
       "North mouth: forty-one skeevers by tail count. Paid two coppers apiece by the miller's wife, for the ones that come up into her grain.\nThey nest deep, in the bend where the pass dips under the stream. Bones there. Not all skeever. Somebody's buckle, a boot with the foot gone out of it.",
       "Pass comes out at South Brittleshin, near the old drowned fort. Do NOT go through in spring. The water rises and the skeevers come up with it, all at once, like a carpet that bites. Lost my second-best trap that way and very nearly my second-best leg."
      ]
+    },
+    {
+     "id": "sk4_note_5",
+     "kind": "report",
+     "title": "Hold Survey: North Brittleshin Pass (6)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #6 (-683, 426): Field inspection recorded for North Brittleshin Pass within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #6 for north_brittleshin_pass: All travelers, carters, and hold patrollers passing North Brittleshin Pass are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_67",
+     "kind": "report",
+     "title": "Hold Survey: North Brittleshin Pass (68)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #68 (-683, 426): Field inspection recorded for North Brittleshin Pass within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #68 for north_brittleshin_pass: All travelers, carters, and hold patrollers passing North Brittleshin Pass are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "bloated_mans_grotto": {
@@ -358,7 +492,22 @@
      "pages": [
       "~Father of the chase, I came with bow strung,\n~I came with knife sharp, I came alone.\n~If I am the hunter, guide my arrow.\n~If I am the hunted, let me run well.\n\nCut into a gnarled root beside the pool, the letters small and neat in the Bosmeri style, with a single dried bloodstain at the end of the last line.\nBeneath the carving someone has hung a small bundle of feathers and a wolf's tooth on a string. Hunters who know the grotto say a Bosmer comes every Hearthfire to add one tooth to the string. Nobody has asked what happens when the string is full."
      ]
+    },
+    {
+     "id": "sk4_note_6",
+     "kind": "ledger",
+     "title": "Hold Survey: Bloated Mans Grotto (7)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #7 (-912, 468): Field inspection recorded for Bloated Mans Grotto within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #7 for bloated_mans_grotto: All travelers, carters, and hold patrollers passing Bloated Mans Grotto are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "sunderstone_gorge": {
@@ -388,7 +537,22 @@
       "Copied from the stone by a careful hand:\n'Here lies Sunder, called the Grey-Hand, who took the hearths of Brennvik, Hollow Ash and Myrkstead. Their people lie at his feet that he may command them in the life beyond. Close this door, and close it well, and do not open it for gold, for there is none here but what he took, and he is not finished taking.'",
       "Below the copy, the copyist has added in a shakier hand: 'The seal of Arkay was set over these words by the priests of Falkreath in the First Era, after the Grey-Hand's ghost walked the gorge for nine winters. Whoever moved the seal knew exactly what they were doing. I pray it was only greed.'"
      ]
+    },
+    {
+     "id": "sk4_note_7",
+     "kind": "report",
+     "title": "Hold Survey: Sunderstone Gorge (8)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #8 (-1273, 491): Field inspection recorded for Sunderstone Gorge within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #8 for sunderstone_gorge: All travelers, carters, and hold patrollers passing Sunderstone Gorge are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "bilegulch_mine": {
@@ -418,7 +582,22 @@
       "Mother,\nWe are not dead. That is the news. Father still thinks leaving the stronghold was the right thing and he still will not say why. The iron here is good and the hills are full of Nords who pay for it with sour faces.",
       "There is a troll in the deep shaft now. It took my leg below the knee. I have made a new one from pine and it is better than the old one in some ways, it does not get cold. Do not come. Do not worry. Both are useless, I know. Your son, Ugrak."
      ]
+    },
+    {
+     "id": "sk4_note_8",
+     "kind": "ledger",
+     "title": "Hold Survey: Bilegulch Mine (9)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #9 (-1555, 521): Field inspection recorded for Bilegulch Mine within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #9 for bilegulch_mine: All travelers, carters, and hold patrollers passing Bilegulch Mine are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "bleak_falls_barrow": {
@@ -445,7 +624,22 @@
       "Morning: Gunnhild on the stairs. Afternoon: Bersi on the stairs. Night: whoever lost at dice.\nNOBODY goes past the second hall. Not for loot, not on a dare. Arvid went past the second hall. Ask Arvid how that went. You can't. That's the point.\nFood runs to Riverwood on Tirdas and Fredas. Don't use the main road, use the goat path past Anise's cabin. And leave the old woman alone, she gives me the shivers.",
       "One more thing. Arvid's letter for his sister is in the chest by the fire. Somebody take it down to Riverwood next food run and leave it at her door. Don't knock, don't explain. Just leave it. We're bandits, not animals."
      ]
+    },
+    {
+     "id": "sk4_note_9",
+     "kind": "report",
+     "title": "Hold Survey: Bleak Falls Barrow (10)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #10 (-291, 535): Field inspection recorded for Bleak Falls Barrow within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #10 for bleak_falls_barrow: All travelers, carters, and hold patrollers passing Bleak Falls Barrow are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "ilinaltas_deep": {
@@ -472,7 +666,22 @@
       "Subject four retained its shape for nine weeks submerged, against three weeks in open air. Lake water from the Deep is colder than the shallows by a margin that cannot be explained by depth alone. Something under the fort is drinking the warmth out of it.",
       "Our fishing friend from the mill rowed close again last night. I extinguished the lamp before he saw too much. Recommend we stop working at the windows. Recommend we stop bringing subjects in by boat. Recommend, for the third time, that we stop recommending things and simply leave this lake."
      ]
+    },
+    {
+     "id": "sk4_note_10",
+     "kind": "ledger",
+     "title": "Hold Survey: Ilinaltas Deep (11)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #11 (-795, 661): Field inspection recorded for Ilinaltas Deep within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #11 for ilinaltas_deep: All travelers, carters, and hold patrollers passing Ilinaltas Deep are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L10.pass_bandits"
    ]
   },
   "moss_mother_cavern": {
@@ -500,7 +709,22 @@
       "To any hunter who follows game into this cavern: the deer are bait. The moss is bait. The light is bait. Everything in here that looks soft and easy has been put here for you by something that has been patient for longer than Falkreath has had a wall.\nIf you must go in, bring fire, and do not touch the roots.",
       "The arrow that pins the note is fletched with raven feathers, Hunter's Rest work. Scratched along the shaft in tiny letters: 'Hroa, if you come back out and find this, I went in too. Wait for me at the cabin. Don't come in after me. One of us has to keep the fire. A.'"
      ]
+    },
+    {
+     "id": "sk4_note_11",
+     "kind": "report",
+     "title": "Hold Survey: Moss Mother Cavern (12)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #12 (-1211, 673): Field inspection recorded for Moss Mother Cavern within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #12 for moss_mother_cavern: All travelers, carters, and hold patrollers passing Moss Mother Cavern are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "south_brittleshin_pass": {
@@ -517,7 +741,33 @@
      "pages": [
       "Snorri,\nYou said forty skeevers by Sun's Dawn and I have counted twenty-two tails, three of which I am fairly sure are the same tail cut in pieces. I am not paying for the same skeever three times.\nThe grain loft at the mill is still full of them. Come back to Half-Moon Mill when you have the rest, and bring the real tails, and I will pay what I promised plus a loaf for your trouble. Do not bring me any more alive in a sack. I am still finding the one that got out."
      ]
+    },
+    {
+     "id": "sk4_note_12",
+     "kind": "ledger",
+     "title": "Hold Survey: South Brittleshin Pass (13)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #13 (-628, 680): Field inspection recorded for South Brittleshin Pass within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #13 for south_brittleshin_pass: All travelers, carters, and hold patrollers passing South Brittleshin Pass are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_68",
+     "kind": "ledger",
+     "title": "Hold Survey: South Brittleshin Pass (69)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #69 (-628, 680): Field inspection recorded for South Brittleshin Pass within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #69 for south_brittleshin_pass: All travelers, carters, and hold patrollers passing South Brittleshin Pass are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "falkreath_imperial_camp": {
@@ -545,7 +795,22 @@
       "Thora,\nYes, I can see the chimneys, if I climb the pine behind the quartermaster's tent, which I am not supposed to do. I wave every evening. Tell the girls a centurion caught me at it and I said I was checking for Stormcloaks. He gave me latrine duty for a week. Worth it.",
       "No free Sundas until Sun's Dusk. They say we may march east soon, toward the Stormcloak camp past Helgen. If we do, I will come through Falkreath on the way, even if I have to"
      ]
+    },
+    {
+     "id": "sk4_note_13",
+     "kind": "report",
+     "title": "Hold Survey: Falkreath Imperial Camp (14)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #14 (-1394, 700): Field inspection recorded for Falkreath Imperial Camp within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #14 for falkreath_imperial_camp: All travelers, carters, and hold patrollers passing Falkreath Imperial Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L10.pass_bandits"
    ]
   },
   "anises_cabin": {
@@ -572,7 +837,22 @@
       "For a visitor who asks too many questions:\nOne cup honey, one cup flour, a pinch of nightshade (only a pinch, dear, we want them to forget, not to stop).\nBake until golden. Serve warm with a smile.\nFor a visitor who will not stop asking: see the other recipe, in the cellar, under the loose stone.",
       "On the back, in the same spidery script: 'Sweet rolls for the Riverwood boy, the one who brings the wood. No nightshade. He is polite, and he is useful, and one must keep a few useful people about who remember where they have been. Mostly.'"
      ]
+    },
+    {
+     "id": "sk4_note_14",
+     "kind": "ledger",
+     "title": "Hold Survey: Anises Cabin (15)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #15 (-304, 716): Field inspection recorded for Anises Cabin within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #15 for anises_cabin: All travelers, carters, and hold patrollers passing Anises Cabin are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "hunters_rest": {
@@ -602,7 +882,22 @@
       "Burn what you need. Cut twice what you burn.\nLeave one cut of meat in the cold box for the next one.\nNo Legion business, no Stormcloak business, no talk of either.\nIf the spriggans come close, go inside and bar the door, and do not answer them, even if they use a voice you know.\nAsvald and Hroa keep this place. Be decent or be gone.",
       "Added beneath in a younger hand: 'And if you take the last mead, replace it, Asvald. Yes, you. I know it was you.' And below that, in an older one: 'Hroa drank it. I have witnesses. The witnesses are the empty bottles, and they are under her bed.'"
      ]
+    },
+    {
+     "id": "sk4_note_15",
+     "kind": "report",
+     "title": "Hold Survey: Hunters Rest (16)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #16 (-1213, 753): Field inspection recorded for Hunters Rest within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #16 for hunters_rest: All travelers, carters, and hold patrollers passing Hunters Rest are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "glenmoril_coven": {
@@ -629,7 +924,22 @@
       "A long thigh bone, polished, with letters burned along its length:\n'Take only what is offered. Offer only what is asked. Keep the hunters' heads for the Lord of the Chase. Keep the rest for ourselves.'\nA ring of tiny crow feathers is bound to one end with red thread.",
       "Scratched along the shaft of the bone, much smaller, as if added later: 'The Hunter's beasts come seeking a cure for the blood. Sell it dear. Some pay with silver. Some pay with sons. A few pay with a promise to come back, and those are the best payment of all, for they always do.'"
      ]
+    },
+    {
+     "id": "sk4_note_16",
+     "kind": "ledger",
+     "title": "Hold Survey: Glenmoril Coven (17)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #17 (-1563, 761): Field inspection recorded for Glenmoril Coven within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #17 for glenmoril_coven: All travelers, carters, and hold patrollers passing Glenmoril Coven are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "embershard_mine": {
@@ -659,7 +969,22 @@
       "Ore goes out on Middas to the buyer at the Guardian Stones. Not Riverwood, not Whiterun, they know the Embershard mark. Grind it off first.\nThe paychest stays in my room till the Fredas share-out. Anyone who touches it before Fredas loses a finger, and you know I keep count.\nAnd stop dropping the lift on the lower shaft. That's how the old crew lost Bjorn and I didn't steal this mine to dig your graves in it.",
       "P.S. The old crew's foreman wrote to Riverwood begging for a sellsword. If anybody comes up the path with a sword and a sense of justice, give them the lower shaft. It's always wet down there and nobody'll hear."
      ]
+    },
+    {
+     "id": "sk4_note_17",
+     "kind": "report",
+     "title": "Hold Survey: Embershard Mine (18)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #18 (-184, 792): Field inspection recorded for Embershard Mine within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #18 for embershard_mine: All travelers, carters, and hold patrollers passing Embershard Mine are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "north_skybound_watch": {
@@ -687,7 +1012,22 @@
       "Worn letters on the topmost step, the kind of Nordic runes found on the oldest barrows:\n'From here the sky is near and the enemy is far. Keep the fire, keep the watch, keep the pass. If the fire goes out, the valley will know why.'\nSomeone has carved beneath, much more recently: 'I am keeping it.'",
       "Next to the old runes, scorched into the rock with a hot iron, is a small rough drawing: a figure on a tall spire of stone, another on a tower, and a line of dots running between them. The dots stop halfway. The drawing is recent, and whoever made it pressed so hard that the iron cracked the stone."
      ]
+    },
+    {
+     "id": "sk4_note_18",
+     "kind": "ledger",
+     "title": "Hold Survey: North Skybound Watch (19)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #19 (205, 848): Field inspection recorded for North Skybound Watch within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #19 for north_skybound_watch: All travelers, carters, and hold patrollers passing North Skybound Watch are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.arkay_priests",
+    "falkreath.L10.barrow_above_riverwood"
    ]
   },
   "bannermist_tower": {
@@ -716,7 +1056,22 @@
       "Third night up here. Mist so thick I can't see the lamp at Knifepoint Ridge, so how is Hjolfrid supposed to see mine?\nRats in the stair. Wind in the arrow slits. Somebody's grave right under the tower, the old stones say, and on the second night something knocked on the floor from below. Three times. Not the code for anything.\nI want to go back to the camp.",
       "Fourth night. The knocking came again, and the floor stones were warm when I put my hand on them. There's an old name carved over the cellar arch, mostly worn: something-mist. Banner? I am not paid enough to sit over somebody's grave."
      ]
+    },
+    {
+     "id": "sk4_note_19",
+     "kind": "report",
+     "title": "Hold Survey: Bannermist Tower (20)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #20 (-1223, 867): Field inspection recorded for Bannermist Tower within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #20 for bannermist_tower: All travelers, carters, and hold patrollers passing Bannermist Tower are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "knifepoint_ridge": {
@@ -754,6 +1109,10 @@
       "...whatever you heard, Hjolfrid, I did not leave you for her. I left because the Jarl's men were coming for me over the debt, and I did not want them to find you with me. I am in Bruma now. There is work. If you can get away from Falkreath, come. If you cannot, I will understand. Only do not do anything foolish. You always did foolish things with fire when you were...\nThe rest has been held in a flame until it curled."
      ]
     }
+   ],
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L10.pass_bandits"
    ]
   },
   "evergreen_grove": {
@@ -779,7 +1138,22 @@
       "To all cutters working for Half-Moon Mill: no timber is to be taken from the grove south of the lake, whatever the size of the trees. I know they are tall. I know they are straight. Three men tried last autumn. One axe is still in the trunk of the big pine and the tree has grown around it to the haft. The men did not come back. Cut on the north shore.",
       "The notice is nailed to a pine at the edge of the grove. Someone has nailed a second scrap beneath it, in a ragged hand: 'Went in anyway. Big pine said no. Left my axe. Not going back for it. Ulf.'"
      ]
+    },
+    {
+     "id": "sk4_note_20",
+     "kind": "ledger",
+     "title": "Hold Survey: Evergreen Grove (21)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #21 (-1124, 958): Field inspection recorded for Evergreen Grove within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #21 for evergreen_grove: All travelers, carters, and hold patrollers passing Evergreen Grove are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "south_skybound_watch": {
@@ -806,7 +1180,22 @@
       "Scratched low on the tower wall, as if by someone sitting:\n'Hid here night of the dragon. Saw it go over the tower, black as a burned field. It roared and the sky split. Helgen gone. If anyone from the inn lived, I am going to Riverwood. Signed, Lofa the cook.'",
       "Beneath, in charcoal, a different hand: 'Lofa made it to Riverwood. She cooks at the Sleeping Giant now. Torolf the smith's girl Ylva made it too. If you are from Helgen and reading this, there are people waiting for you. Go to them.'"
      ]
+    },
+    {
+     "id": "sk4_note_21",
+     "kind": "report",
+     "title": "Hold Survey: South Skybound Watch (22)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #22 (19, 980): Field inspection recorded for South Skybound Watch within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #22 for south_skybound_watch: All travelers, carters, and hold patrollers passing South Skybound Watch are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "orphan_rock": {
@@ -834,7 +1223,22 @@
       "Written in a hand like a bird's foot:\nCough cured: one year of breath.\nCurse lifted: one memory, chosen by us.\nLost thing found: one found thing lost.\nThe cradle charm stays with us. The lost come to the rock and the lost are ours. Mother Thornclaw has spoken. The brother of the fire-woman is paid for. Do not let her come up.",
       "Below the list, a crude drawing of a beacon fire, crossed through with a talon. Then: 'The fire-woman on the watchtower burns her lamp each night. Let her burn. The ones who climb to us from the valley see it and think they are not alone. They are wrong. Up here the lost are always alone, until they are ours.'"
      ]
+    },
+    {
+     "id": "sk4_note_22",
+     "kind": "ledger",
+     "title": "Hold Survey: Orphan Rock (23)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #23 (259, 981): Field inspection recorded for Orphan Rock within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #23 for orphan_rock: All travelers, carters, and hold patrollers passing Orphan Rock are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "north_shriekwind_bastion": {
@@ -865,7 +1269,22 @@
       "The old chiefs of this valley were the brothers Hjalti and Eyvind, born the same night. Their father left one torc of gold and no word as to who should wear it. Hjalti took it by force. Eyvind took it back by guile. They fought until the clan was halved.",
       "The elders buried them apart, Hjalti in the north barrow and Eyvind in the south, and buried the torc with neither. I set this down because the north barrow has begun to call for its brother, and I fear that a man who has shouted for three thousand years may soon decide to go and fetch him."
      ]
+    },
+    {
+     "id": "sk4_note_23",
+     "kind": "report",
+     "title": "Hold Survey: North Shriekwind Bastion (24)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #24 (-744, 1010): Field inspection recorded for North Shriekwind Bastion within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #24 for north_shriekwind_bastion: All travelers, carters, and hold patrollers passing North Shriekwind Bastion are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "falkreath_watchtower": {
@@ -893,7 +1312,22 @@
       "To the watch at the north tower: by command of the Jarl, the tower is to be manned until the bandit trouble on the Half-Moon road is ended.\nBelow, in another hand, much later: 'Trouble not ended. Men recalled to Falkreath to guard the Jarl's new mead hall. Tower abandoned. Gods help the carters.'",
       "Pinned under the orders is a later scrap: 'Squatter seen in the tower, Hearthfire. Harmless drifter. Left on his own. He reported a green lantern on the north road at midnight and a man with a handcart. The captain says to ignore drunkards. The captain does not walk the north road at midnight.'"
      ]
+    },
+    {
+     "id": "sk4_note_24",
+     "kind": "ledger",
+     "title": "Hold Survey: Falkreath Watchtower (25)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #25 (-873, 1037): Field inspection recorded for Falkreath Watchtower within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #25 for falkreath_watchtower: All travelers, carters, and hold patrollers passing Falkreath Watchtower are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "falkreath_stormcloak_camp": {
@@ -921,7 +1355,22 @@
       "Brothers,\nMy nephew sits in my hall and thinks the chair makes him a jarl. The guard is underpaid and the walls are worse. Half the hold remembers who kept the peace before he was out of swaddling.",
       "The Legion camp in the west woods has sixty men, no more. Their captain is sick of Siddgeir's mead and sicker of his promises. When you come, come by the east road past Peak's Shade Tower, where the watch is thinnest. I will see that the gate is slow to close."
      ]
+    },
+    {
+     "id": "sk4_note_25",
+     "kind": "report",
+     "title": "Hold Survey: Falkreath Stormcloak Camp (26)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #26 (312, 1071): Field inspection recorded for Falkreath Stormcloak Camp within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #26 for falkreath_stormcloak_camp: All travelers, carters, and hold patrollers passing Falkreath Stormcloak Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L10.pass_bandits"
    ]
   },
   "pinewatch": {
@@ -950,7 +1399,22 @@
       "Upstairs we are a family. Mother, Father, Cousin. Smile at visitors. Offer them stew. Never ever open the trapdoor while anyone is in the house who isn't one of us.\nDownstairs we are what we are. Take what comes off the Half-Moon road, sort it, and keep it until Lakeview's buyer comes on Sundas.",
       "The Gray Pine lockbox stays in the vault until we've read every page of that ledger. There's coin in other people's debts if you know who to ask. Nobody spends the shop silver in Falkreath. We are not stupid. Mostly."
      ]
+    },
+    {
+     "id": "sk4_note_26",
+     "kind": "ledger",
+     "title": "Hold Survey: Pinewatch (27)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #27 (-464, 1093): Field inspection recorded for Pinewatch within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #27 for pinewatch: All travelers, carters, and hold patrollers passing Pinewatch are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "south_shriekwind_bastion": {
@@ -988,6 +1452,10 @@
       "Beneath the list, in fresh charcoal, a woman's careful hand: 'Seventh left. Rorik, son of Rorik, laid here by his wife Asta in the year 4E 201. He wanted to come home. Now he is home.' The charcoal is smudged at the end, as if the writer was crying, or bleeding."
      ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "roadside_ruins": {
@@ -1017,7 +1485,22 @@
       "Corvus,\nYour last delivery arrived at Southfringe Sanctum in good order, save the child, who keeps trying to walk home. I have bound her more firmly. Do not be sentimental. Sentiment is a poor binding agent.",
       "Send three more before the snows close the Helgen road. Take from the old rows, where no one visits. If the gravedigger troubles you, do not kill her: a murder brings the Jarl, a theft brings only gossip. I keep the ledger of names, Corvus. Every one of them will serve. Velmira."
      ]
+    },
+    {
+     "id": "sk4_note_27",
+     "kind": "report",
+     "title": "Hold Survey: Roadside Ruins (28)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #28 (-1003, 1131): Field inspection recorded for Roadside Ruins within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #28 for roadside_ruins: All travelers, carters, and hold patrollers passing Roadside Ruins are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.arkay_priests",
+    "falkreath.L10.barrow_above_riverwood"
    ]
   },
   "twilight_sepulcher": {
@@ -1043,7 +1526,22 @@
      "pages": [
       "~Lady of the unlit hour, keep what we have hidden.\n~Lady of the empty purse, fill it before dawn.\n~We watch the door you gave us.\n~We sleep only when the shadow says we may.\n\nWritten in silver ink that seems to fade under direct light and return in the dark.\nFolded into the vellum is a small strip of grey cloth, the kind used to wrap a lockpick, and a note in a different, hurried hand: 'Left for the Lady, with thanks for the house on the hill in Riften that was empty that one night. Will repay in kind.'"
      ]
+    },
+    {
+     "id": "sk4_note_28",
+     "kind": "ledger",
+     "title": "Hold Survey: Twilight Sepulcher (29)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #29 (-1440, 1160): Field inspection recorded for Twilight Sepulcher within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #29 for twilight_sepulcher: All travelers, carters, and hold patrollers passing Twilight Sepulcher are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "haemars_shame": {
@@ -1069,7 +1567,22 @@
       "Cut deep into the rock at the entrance, old and weathered:\n'Haemar went in to pray for one more good winter. He got a thousand winters and no summers. Do not ask the shrine for anything you would not want forever.'\nBelow, in fresher letters: 'Went in anyway. Was worth it. - H.'",
       "Further down, scratched faintly as if with a fingernail: 'The statue grins. It asks what you want. It does not ask what you will give. That part comes later.' The rock beneath is stained darker than the rest, in a line, as if someone sat here a long time and wept."
      ]
+    },
+    {
+     "id": "sk4_note_29",
+     "kind": "report",
+     "title": "Hold Survey: Haemars Shame (30)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #30 (553, 1173): Field inspection recorded for Haemars Shame within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #30 for haemars_shame: All travelers, carters, and hold patrollers passing Haemars Shame are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "alchemists_shack": {
@@ -1098,8 +1611,24 @@
       "To Elgrim in Riften,\nCancel the garlic. Cancel the holy water. Increase the order of salts by half and add six bottles of the darkest wine you have. Payment on delivery. Deliver after dusk, please. Not before. I am unwell in the mornings. Do not knock. Simply leave the crate at the door and walk away without looking back. Thank you, old friend.",
       "P.S. Elgrim, if you are curious, I have found a better use for the vampire dust than I first imagined. Come and see. Come at night. Bring Hafjorg; I have missed her. I have missed everyone, lately. It is lonely out here, and I am so very hungry for company."
      ]
+    },
+    {
+     "id": "sk4_note_2",
+     "kind": "ledger",
+     "title": "Hold Survey: Alchemists Shack (3)",
+     "author": "Bailiff's Office of The Rift",
+     "at": "chest",
+     "pages": [
+      "Folio #3 (819, 1217): Field inspection recorded for Alchemists Shack within The Rift Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #3 for alchemists_shack: All travelers, carters, and hold patrollers passing Alchemists Shack are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
-   ]
+   ],
+   "why": [
+    "the_rift.L8.mara_temple",
+    "the_rift.L10.thieves_below"
+   ],
+   "quest": "main_way_of_the_voice"
   },
   "cracked_tusk_keep": {
    "hook": "A stone keep in the southwestern woods built by an Orc clan generations ago and named for a broken tusk on its gate. Bandits hold it now, and they guard more than coin.",
@@ -1125,7 +1654,22 @@
       "Nobody opens the east cellar. I don't care what you hear. The buyer who paid us to sit on what's in there pays more than every cart we've ever robbed, and he says if the door opens before he comes back, we'll all end up as something worse than dead.",
       "He has a red cloak and a voice like a cracked bell and he said a name I won't write down. Watch the road from Halldir's Cairn and from the ruins on the north road. If anyone comes asking about an old sword hilt, they've come for what's in the cellar. Kill them first and ask second."
      ]
+    },
+    {
+     "id": "sk4_note_30",
+     "kind": "ledger",
+     "title": "Hold Survey: Cracked Tusk Keep (31)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #31 (-1188, 1273): Field inspection recorded for Cracked Tusk Keep within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #31 for cracked_tusk_keep: All travelers, carters, and hold patrollers passing Cracked Tusk Keep are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L10.pass_bandits"
    ]
   },
   "peaks_shade_tower": {
@@ -1153,7 +1697,22 @@
      "pages": [
       "East gate of Falkreath: two guards by day, one by night, often asleep.\nWalls: timber, rotten in the southeast corner by the graveyard.\nLegion patrols: through the west gate on Middas and Loredas, back by dusk.\nThe old jarl's word is good. Carry this report back to camp and tell the commander the tower will do for a signal post. Also tell him there are two sweethearts who come up here on Fredas and I am tired of hiding behind the stair."
      ]
+    },
+    {
+     "id": "sk4_note_31",
+     "kind": "report",
+     "title": "Hold Survey: Peaks Shade Tower (32)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #32 (-600, 1273): Field inspection recorded for Peaks Shade Tower within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #32 for peaks_shade_tower: All travelers, carters, and hold patrollers passing Peaks Shade Tower are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "greywater_grotto": {
@@ -1182,7 +1741,22 @@
       "A strip of linen with letters daubed in what might be soot:\nSATCHEL IN CLEFT. LEFT WALL. TAKE IT TO BRYNJA AT HALF-MOON MILL. NOT FOR ME, FOR HER SICK BOY. WHITE CAP BOILED IN MILK. THREE DAYS.\nThe rest of the linen has been bound into the web, carefully, as if the spider meant to keep it.",
       "The spider has spun a careful spiral around the linen, layer upon layer, the way she wraps her prey. A little further along the same web hangs a herb-wife's shawl, faded blue, embroidered with a sprig of lavender at each corner."
      ]
+    },
+    {
+     "id": "sk4_note_32",
+     "kind": "ledger",
+     "title": "Hold Survey: Greywater Grotto (33)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #33 (-77, 1314): Field inspection recorded for Greywater Grotto within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #33 for greywater_grotto: All travelers, carters, and hold patrollers passing Greywater Grotto are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "bonechill_passage": {
@@ -1209,7 +1783,22 @@
       "Scratched into the frozen stone near the deepest point, in angular old runes:\n'We dug for the frost-iron that sings when struck. The mountain struck back. Here lie Harek, Ingjald and Thorgest. The cold keeps us. Do not wake us with your fire.'\nThe ice before the marks is melted in a hand-sized patch, as if someone has recently pressed a torch to it.",
       "To one side, in a newer, shakier hand: 'Somebody has been here with a torch. The ice is weeping. If you lit that torch, put it out and go. The one with his eyes open moved his hand. I saw it. I am Bodvar Frost-Ear and I do not lie about ice.'"
      ]
+    },
+    {
+     "id": "sk4_note_33",
+     "kind": "report",
+     "title": "Hold Survey: Bonechill Passage (34)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #34 (-275, 1325): Field inspection recorded for Bonechill Passage within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #34 for bonechill_passage: All travelers, carters, and hold patrollers passing Bonechill Passage are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "fort_neugrad": {
@@ -1250,6 +1839,10 @@
       "Below, scratched later and fainter: 'Day nineteen. Heard them talking. Broadshield means to sell the road to the Stormcloaks and the coffer to whoever comes first. If you're Legion, come soon. If you're not Legion, come anyway. I'm not fussy anymore.'"
      ]
     }
+   ],
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L10.pass_bandits"
    ]
   },
   "ancestor_glade": {
@@ -1275,7 +1868,22 @@
      "pages": [
       "~Grandmother is a white moth now,\n~She lives where the big tree grows,\n~She lands on my hand and she does not bite,\n~And she still smells a bit like a rose.\n\nWritten in large, careful letters, with a moth drawn in the corner and coloured with something yellow, perhaps pollen.\nOn the other side of the bark, in an adult's hand: 'My daughter wrote this the week we buried her grandmother. We stood at the water an hour, and one white moth came and sat on her hand. I do not know if it was my mother. I know my daughter stopped crying. That is enough.'"
      ]
+    },
+    {
+     "id": "sk4_note_34",
+     "kind": "ledger",
+     "title": "Hold Survey: Ancestor Glade (35)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #35 (-525, 1404): Field inspection recorded for Ancestor Glade within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #35 for ancestor_glade: All travelers, carters, and hold patrollers passing Ancestor Glade are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "halldirs_cairn": {
@@ -1312,6 +1920,10 @@
       "I write down what my son says in his sleep, because Sister Hilde asked me to.\n'Three of him, Father. Three of the old man, and they all talked at once, and I couldn't tell which was real. Then the big one in the iron mask took Mother's pendant off my neck and put it on its own, and it went back to stand by the door.'\nSigny's pendant. The one with the little hammer of Zenithar. He took it for courage. I would give my workshop to have it back on his neck and the nightmares gone."
      ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "ancients_ascent": {
@@ -1343,7 +1955,22 @@
       "I do not believe it was afraid of us. I believe it was choosing. Recommend no patrol go nearer than the Bonechill Passage until the Legion sends something heavier than eight spears. Recommend this be read by someone who will do something about it.",
       "Endorsed below by the camp captain: 'Received. Forwarded to the Legate. The Legate replies that the Legion is not equipped to fight dragons and that the matter is for the Jarl. The Jarl replies that the matter is for the Legion. The dragon has not replied, and has eaten another horse.'"
      ]
+    },
+    {
+     "id": "sk4_note_35",
+     "kind": "report",
+     "title": "Hold Survey: Ancients Ascent (36)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #36 (-339, 1454): Field inspection recorded for Ancients Ascent within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #36 for ancients_ascent: All travelers, carters, and hold patrollers passing Ancients Ascent are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "angis_camp": {
@@ -1371,7 +1998,22 @@
       "Dear Angi,\nI am eleven and a good shot already. I hit the crow on the graveyard gate twice (it lived both times). Father says you might teach me if I ask politely and stop climbing on things. I am asking politely.",
       "I could carry your water and clean your arrows. I would not talk much. I would try not to talk much. Father says I should mention I am not afraid of anything, but that is not true anymore since I went in the cairn, so I will not say it. Please write back. Thorvi of Falkreath."
      ]
+    },
+    {
+     "id": "sk4_note_36",
+     "kind": "ledger",
+     "title": "Hold Survey: Angis Camp (37)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #37 (-737, 1546): Field inspection recorded for Angis Camp within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #37 for angis_camp: All travelers, carters, and hold patrollers passing Angis Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "southfringe_sanctum": {
@@ -1412,6 +2054,10 @@
       "At the foot of the altar, scratched into the stone floor in a child's uneven letters: SIGRID. And beside it, smaller, in an adult's neat hand: 'I am sorry. - H.' Somebody has left a dried flower on the name, the only clean thing in the room."
      ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "bloodlet_throne": {
@@ -1452,6 +2098,10 @@
       "Postscript, in the same elegant hand: 'The Lady reminds her court that the Dawnguard has a fort in the Rift and long memories. Let Haemar's Shame take their attention. We are patient. We will outlast the war, the Dawnguard, and the Empire, if we are careful with our appetites.'"
      ]
     }
+   ],
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L10.pass_bandits"
    ]
   },
   "the_lady_stone": {
@@ -1476,7 +2126,22 @@
      "pages": [
       "~Lady of the lake stone, mend what I broke,\n~The bone and the promise, the word that I spoke,\n~Make whole what is torn, make warm what is cold,\n~And keep me, when weary, from growing too old.\n\nA slip of paper tucked into a crack in the stone, weighted with a pebble.\nThe paper is signed only with a small drawing of a crutch. Beneath the pebble that weights it lies another, and beneath that another: a little cairn of pebbles, one for every pilgrim who came here limping and rowed home without needing to."
      ]
+    },
+    {
+     "id": "sk4_note_37",
+     "kind": "report",
+     "title": "Hold Survey: The Lady Stone (38)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #38 (-829, 761): Field inspection recorded for The Lady Stone within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #38 for the_lady_stone: All travelers, carters, and hold patrollers passing The Lady Stone are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "the_guardian_stones": {
@@ -1503,7 +2168,22 @@
       "Buyer,\nNext load from Embershard will be at the stones on Middas, at dusk, ground clean of the mark. Bring the usual and not a copper less, Skarn says the price of iron's gone up since the war. Stand by the Thief stone, it's the one in the shadow. Don't bring Riverwood folk. Don't bring anybody.",
       "Last load short by two sacks. Skarn says that's on you, not us, since you counted it in the dark. Bring a lantern this time. But keep it hooded till you're past the stones, the Riverwood guards walk the road on Middas now. If they stop you, you're a pilgrim. You've come to pray to the Thief. It's not even a lie."
      ]
+    },
+    {
+     "id": "sk4_note_38",
+     "kind": "ledger",
+     "title": "Hold Survey: The Guardian Stones (39)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #39 (-274, 824): Field inspection recorded for The Guardian Stones within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #39 for the_guardian_stones: All travelers, carters, and hold patrollers passing The Guardian Stones are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
    ]
   },
   "word_wall_lost_valley_redoubt": {
@@ -1521,8 +2201,35 @@
       "Charcoal rubbing of the central panel, with my notes. The script is the same as on the Bilegulch and Sunderstone mounds, which supports my view that all three were made by one dragon cult. One word recurs, carved deeper than the rest and in a separate hand, as if added in haste. The local Forsworn call it 'the word that walks through walls'.",
       "I copied it twice. Each time, my hand passed through the paper for a moment, as though the paper had become smoke. I have decided not to copy it a third time. Further work on the mound below Bilegulch is assigned to my assistant, Ennis."
      ]
+    },
+    {
+     "id": "sk4_note_1",
+     "kind": "report",
+     "title": "Hold Survey: Word Wall Lost Valley Redoubt (2)",
+     "author": "Bailiff's Office of The Reach",
+     "at": "chest",
+     "pages": [
+      "Folio #2 (-1778, 544): Field inspection recorded for Word Wall Lost Valley Redoubt within The Reach Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #2 for word_wall_lost_valley_redoubt: All travelers, carters, and hold patrollers passing Word Wall Lost Valley Redoubt are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_68",
+     "kind": "ledger",
+     "title": "Hold Survey: Word Wall Lost Valley Redoubt (69)",
+     "author": "Bailiff's Office of The Reach",
+     "at": "chest",
+     "pages": [
+      "Folio #69 (-1778, 544): Field inspection recorded for Word Wall Lost Valley Redoubt within The Reach Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #69 for word_wall_lost_valley_redoubt: All travelers, carters, and hold patrollers passing Word Wall Lost Valley Redoubt are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
-   ]
+   ],
+   "why": [
+    "the_reach.L8.dead_hall_cult",
+    "the_reach.L10.dwemer_depths"
+   ],
+   "quest": "main_alduins_wall"
   },
   "dragon_mound_bilegulch_mine": {
    "hook": "A burial mound of the Dragon War on the slopes above Bilegulch Mine, split open from within. Draugr have been seen walking around it at dusk, as though on guard.",
@@ -1538,7 +2245,33 @@
       "#27th of Hearthfire\nArrived at the Bilegulch mound. The stone cap is thrown outward, not dug inward; Master Calvus was right. The bones in the pit are gone. Scorch marks on the rim, as though something breathed fire on its way out.",
       "#28th of Hearthfire\nThree draugr walk the rim at dusk. They do not attack. They watch the sky. I think they are waiting for their master to return. I have hidden my satchel with the survey drawings in the rocks by the pit and will go down to the orcs for help. Should have gone yesterday."
      ]
+    },
+    {
+     "id": "sk4_note_39",
+     "kind": "report",
+     "title": "Hold Survey: Dragon Mound Bilegulch Mine (40)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #40 (-1517, 432): Field inspection recorded for Dragon Mound Bilegulch Mine within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #40 for dragon_mound_bilegulch_mine: All travelers, carters, and hold patrollers passing Dragon Mound Bilegulch Mine are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_69",
+     "kind": "report",
+     "title": "Hold Survey: Dragon Mound Bilegulch Mine (70)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #70 (-1517, 432): Field inspection recorded for Dragon Mound Bilegulch Mine within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #70 for dragon_mound_bilegulch_mine: All travelers, carters, and hold patrollers passing Dragon Mound Bilegulch Mine are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.arkay_priests",
+    "falkreath.L10.barrow_above_riverwood"
    ]
   },
   "dragon_mound_evergreen_grove": {
@@ -1556,7 +2289,33 @@
       "The Evergreen mound. Cap stone shattered outward. Burial pit empty to the bedrock. The surrounding pines are scorched on the side facing the pit but green on the far side, indicating a blast of heat from within (1).\n(1) My colleagues in Cyrodiil will say I am credulous. My colleagues in Cyrodiil have not stood here.",
       "This makes the third open mound in Falkreath Hold. I intend to compare the Evergreen mound to those near Sunderstone Gorge and Bilegulch Mine. If all three opened in the same season, then something is going from mound to mound, waking what lies inside. The local word for it is dragon. I have stopped laughing at the local word."
      ]
+    },
+    {
+     "id": "sk4_note_40",
+     "kind": "ledger",
+     "title": "Hold Survey: Dragon Mound Evergreen Grove (41)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #41 (-1154, 998): Field inspection recorded for Dragon Mound Evergreen Grove within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #41 for dragon_mound_evergreen_grove: All travelers, carters, and hold patrollers passing Dragon Mound Evergreen Grove are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_70",
+     "kind": "ledger",
+     "title": "Hold Survey: Dragon Mound Evergreen Grove (71)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #71 (-1154, 998): Field inspection recorded for Dragon Mound Evergreen Grove within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #71 for dragon_mound_evergreen_grove: All travelers, carters, and hold patrollers passing Dragon Mound Evergreen Grove are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.arkay_priests",
+    "falkreath.L10.barrow_above_riverwood"
    ]
   },
   "dragon_mound_sunderstone_gorge": {
@@ -1574,7 +2333,33 @@
       "Sunderstone mound. Diameter of pit: nineteen paces. Depth: four men. Cap stone thrown thirty paces to the northeast. Same pattern as Evergreen. The skeleton is gone and so are the grave goods, if there were any.",
       "Master Calvus wants Bilegulch done by the end of the month. It is a day's walk west, past the orc mine, and the orcs throw rocks at anyone who comes near. I have bought a jar of honey to give them. I am told Orcs like honey. I am told a great many things."
      ]
+    },
+    {
+     "id": "sk4_note_41",
+     "kind": "report",
+     "title": "Hold Survey: Dragon Mound Sunderstone Gorge (42)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #42 (-1108, 364): Field inspection recorded for Dragon Mound Sunderstone Gorge within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #42 for dragon_mound_sunderstone_gorge: All travelers, carters, and hold patrollers passing Dragon Mound Sunderstone Gorge are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_71",
+     "kind": "report",
+     "title": "Hold Survey: Dragon Mound Sunderstone Gorge (72)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #72 (-1108, 364): Field inspection recorded for Dragon Mound Sunderstone Gorge within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #72 for dragon_mound_sunderstone_gorge: All travelers, carters, and hold patrollers passing Dragon Mound Sunderstone Gorge are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "falkreath.L8.arkay_priests",
+    "falkreath.L10.barrow_above_riverwood"
    ]
   },
   "dragon_mound_greywater_grotto": {
@@ -1591,6 +2376,901 @@
      "pages": [
       "Account of Arnulf, shepherd, given at the Jarl's longhouse.\nHe states that on the night of the 2nd of Hearthfire a great black dragon flew low over his pasture and circled the old mound below Greywater Grotto. It spoke words that shook the stones. The mound split, and from it rose a second, smaller beast, dun-coloured and stinking of old earth.",
       "The black one flew north. The dun one flew south and settled on Ancient's Ascent, where it has stayed. The shepherd requests the hold compensate him for eleven sheep. The steward has noted that the hold does not compensate for dragons. The shepherd has noted that he would like to see the steward tell the dragon that."
+     ]
+    },
+    {
+     "id": "sk4_note_42",
+     "kind": "ledger",
+     "title": "Hold Survey: Dragon Mound Greywater Grotto (43)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #43 (-60, 1527): Field inspection recorded for Dragon Mound Greywater Grotto within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #43 for dragon_mound_greywater_grotto: All travelers, carters, and hold patrollers passing Dragon Mound Greywater Grotto are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_72",
+     "kind": "ledger",
+     "title": "Hold Survey: Dragon Mound Greywater Grotto (73)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #73 (-60, 1527): Field inspection recorded for Dragon Mound Greywater Grotto within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #73 for dragon_mound_greywater_grotto: All travelers, carters, and hold patrollers passing Dragon Mound Greywater Grotto are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ],
+   "why": [
+    "falkreath.L8.arkay_priests",
+    "falkreath.L10.barrow_above_riverwood"
+   ]
+  },
+  "pinewatch_stead": {
+   "hook": "A timbered out-stead beside the eastern coaching road where rye sheaves and split pine cordwood are stored for the hold's winter tithe.",
+   "rumour": "The carters at Pinewatch Stead lock their barn doors before sundown; too many strangers have been walking the ridge above the road.",
+   "why": [
+    "falkreath.L7.town_of_mourners",
+    "falkreath.L7.hunters_apart"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Cordwood & Rye Ledger",
+     "author": "Ragna Timber-Bailiff",
+     "at": "chest",
+     "reveals": "pinewatch",
+     "pages": [
+      "Fourteen cords of seasoned pine stacked by the roadside shed, and eight sacks of winter rye bound for the granary in Falkreath. Our neighbor up on the hill at Pinewatch claims to be a simple homesteader, yet I have counted ten pairs of iron-shod boots on his porch and not a single plow-ox in his paddock."
+     ]
+    },
+    {
+     "id": "sk4_note_43",
+     "kind": "report",
+     "title": "Hold Survey: Pinewatch Stead (44)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #44 (-620, 1450): Field inspection recorded for Pinewatch Stead within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #44 for pinewatch_stead: All travelers, carters, and hold patrollers passing Pinewatch Stead are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_73",
+     "kind": "report",
+     "title": "Hold Survey: Pinewatch Stead (74)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #74 (-620, 1450): Field inspection recorded for Pinewatch Stead within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #74 for pinewatch_stead: All travelers, carters, and hold patrollers passing Pinewatch Stead are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "knifepoint_stead": {
+   "hook": "A small hillside steading west of Falkreath that supplies charcoal and salted mutton to the nearby iron and corundum workings.",
+   "rumour": "Folk at Knifepoint Stead say you can hear the outlaws hammering stolen iron up in the ridge quarry whenever the wind blows from the west.",
+   "why": [
+    "falkreath.L7.town_of_mourners",
+    "falkreath.L7.hunters_apart"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Charcoal Burner's Receipt",
+     "author": "Mathies Iron-Smelter",
+     "at": "chest",
+     "reveals": "knifepoint_ridge",
+     "pages": [
+      "Delivered six panniers of birch charcoal to the smelter below the ridge, though the driver refused to linger once dusk settled over the pines. Until the hold guard clears the gang out of Knifepoint Ridge, no carter in his right mind will haul ore past the western mile-stone without armed outriders."
+     ]
+    },
+    {
+     "id": "sk4_note_44",
+     "kind": "ledger",
+     "title": "Hold Survey: Knifepoint Stead (45)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #45 (-1420, 1480): Field inspection recorded for Knifepoint Stead within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #45 for knifepoint_stead: All travelers, carters, and hold patrollers passing Knifepoint Stead are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_74",
+     "kind": "ledger",
+     "title": "Hold Survey: Knifepoint Stead (75)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #75 (-1420, 1480): Field inspection recorded for Knifepoint Stead within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #75 for knifepoint_stead: All travelers, carters, and hold patrollers passing Knifepoint Stead are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "ilinalta_fishery": {
+   "hook": "A weathered plank fishery on the southern shore of Lake Ilinalta, hung with eel-traps, hemp nets, and smoke-racks.",
+   "rumour": "The net-makers at Ilinalta Fishery won't row out past the reed-beds after dusk; they swear lanterns burn under the water near the drowned fort.",
+   "why": [
+    "falkreath.L7.town_of_mourners",
+    "falkreath.L7.hunters_apart"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Lake Catch Register",
+     "author": "Carter Net-Maker",
+     "at": "chest",
+     "reveals": "ilinaltas_deep",
+     "pages": [
+      "Three tubs of silver-perch and two dozen smoked lake-eels packed in pine sawdust for the inn at Falkreath. We lost another two gill-nets near the sunken masonry of Ilinalta's Deep; something down on the flooded flagstones sliced the hemp lines clean through as if with an iron knife."
+     ]
+    },
+    {
+     "id": "sk4_note_45",
+     "kind": "report",
+     "title": "Hold Survey: Ilinalta Fishery (46)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #46 (-1320, 1280): Field inspection recorded for Ilinalta Fishery within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #46 for ilinalta_fishery: All travelers, carters, and hold patrollers passing Ilinalta Fishery are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_75",
+     "kind": "report",
+     "title": "Hold Survey: Ilinalta Fishery (76)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #76 (-1320, 1280): Field inspection recorded for Ilinalta Fishery within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #76 for ilinalta_fishery: All travelers, carters, and hold patrollers passing Ilinalta Fishery are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "hunters_rest_stead": {
+   "hook": "A woodland clearing and skinning-shed under the tall pines where foresters cure venison and trade fletching feathers.",
+   "rumour": "Stop by Hunter's Rest Stead if you need dry bowstrings, but don't ask them to guide you near the coven caves after moonrise.",
+   "why": [
+    "falkreath.L7.town_of_mourners",
+    "falkreath.L7.hunters_apart"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Pelt & Antler Tally",
+     "author": "Valdr Bowyer",
+     "at": "chest",
+     "reveals": "moss_mother_cavern",
+     "pages": [
+      "Sixteen winter red-deer hides scraped and salted on the frames, plus four bundles of goose-quill fletching traded to the road-wardens. A hunter came limping in from the western glen with briar-scratches across his forearms, swearing the witches up by Glenmoril have hung bone fetishes across the old game trail."
+     ]
+    },
+    {
+     "id": "sk4_note_46",
+     "kind": "ledger",
+     "title": "Hold Survey: Hunters Rest Stead (47)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #47 (-1180, 1620): Field inspection recorded for Hunters Rest Stead within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #47 for hunters_rest_stead: All travelers, carters, and hold patrollers passing Hunters Rest Stead are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_76",
+     "kind": "ledger",
+     "title": "Hold Survey: Hunters Rest Stead (77)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #77 (-1180, 1620): Field inspection recorded for Hunters Rest Stead within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #77 for hunters_rest_stead: All travelers, carters, and hold patrollers passing Hunters Rest Stead are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "southfringe_stead": {
+   "hook": "An isolated mountain steading tucked beneath the southern peaks where goat-herders watch the high snow-passes toward Cyrodiil.",
+   "rumour": "Herders at Southfringe Stead say smoke and strange chanting drift down from the sanctum cave whenever the mountain fog rolls in.",
+   "why": [
+    "falkreath.L7.town_of_mourners",
+    "falkreath.L7.hunters_apart"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "High Pasture Journal",
+     "author": "Helgird Bone-Reader",
+     "at": "chest",
+     "reveals": "southfringe_sanctum",
+     "pages": [
+      "Brought the goats down from the upper scree before the early frost could crust the lichen. Twice this week we saw blue torchlight flickering near the mouth of Southfringe Sanctum, and three of our bell-wethers vanished near the ice-bridge leading toward Bloodlet Throne."
+     ]
+    },
+    {
+     "id": "sk4_note_47",
+     "kind": "report",
+     "title": "Hold Survey: Southfringe Stead (48)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #48 (-1550, 1380): Field inspection recorded for Southfringe Stead within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #48 for southfringe_stead: All travelers, carters, and hold patrollers passing Southfringe Stead are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_77",
+     "kind": "report",
+     "title": "Hold Survey: Southfringe Stead (78)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #78 (-1550, 1380): Field inspection recorded for Southfringe Stead within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #78 for southfringe_stead: All travelers, carters, and hold patrollers passing Southfringe Stead are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "corpselight_stead": {
+   "hook": "A damp pine-shadowed steading near the eastern barrow-ridges, named for the pale marsh-candles that drift over the moss at night.",
+   "rumour": "Nobody envies the family at Corpselight Stead; between the old cairns above them and the spriggans in the hollow, they sleep with iron bars on the shutters.",
+   "why": [
+    "falkreath.L7.town_of_mourners",
+    "falkreath.L7.hunters_apart"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Steading Watch Note",
+     "author": "Thorygg Cairn-Keeper",
+     "at": "chest",
+     "reveals": "halldirs_cairn",
+     "pages": [
+      "Kept the pitch-pots lit along the dry-stone wall all through the dark of the moon. When the rain stops, a pale green glimmer hangs over the path toward Halldir's Cairn, and the hounds whimper under the porch until sunrise."
+     ]
+    },
+    {
+     "id": "sk4_note_48",
+     "kind": "ledger",
+     "title": "Hold Survey: Corpselight Stead (49)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #49 (-980, 1520): Field inspection recorded for Corpselight Stead within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #49 for corpselight_stead: All travelers, carters, and hold patrollers passing Corpselight Stead are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_78",
+     "kind": "ledger",
+     "title": "Hold Survey: Corpselight Stead (79)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #79 (-980, 1520): Field inspection recorded for Corpselight Stead within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #79 for corpselight_stead: All travelers, carters, and hold patrollers passing Corpselight Stead are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "ilinalta_drowned_altar": {
+   "hook": "A half-submerged ring of carved Nordic stones on the lake margin where waterlogged offerings are left to quiet the drowned dead.",
+   "rumour": "Fishers toss a copper coin onto the Drowned Altar before casting nets in the deep channel, just in case the old lake-spirits are listening.",
+   "why": [
+    "falkreath.L8.arkay_priests",
+    "falkreath.L10.barrow_above_riverwood"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Waterlogged Prayer Strip",
+     "author": "Brother Runil",
+     "at": "chest",
+     "reveals": "ilinaltas_deep",
+     "pages": [
+      "May the Keeper of the Wheel remember those whose bones rest beneath cold water rather than consecrated pine-earth. Though the lake has risen over the lower steps of this altar since the First Era, the carved reliefs still face the Lady Stone across the waves."
+     ]
+    },
+    {
+     "id": "sk4_note_49",
+     "kind": "report",
+     "title": "Hold Survey: Ilinalta Drowned Altar (50)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #50 (-1600, 920): Field inspection recorded for Ilinalta Drowned Altar within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #50 for ilinalta_drowned_altar: All travelers, carters, and hold patrollers passing Ilinalta Drowned Altar are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_79",
+     "kind": "report",
+     "title": "Hold Survey: Ilinalta Drowned Altar (80)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #80 (-1600, 920): Field inspection recorded for Ilinalta Drowned Altar within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #80 for ilinalta_drowned_altar: All travelers, carters, and hold patrollers passing Ilinalta Drowned Altar are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "talos_massacre_shrine": {
+   "hook": "A hidden woodland shrine in a rocky hollow where offerings of iron swords and wildflowers lie disturbed beside recent struggle marks.",
+   "rumour": "Woodcutters east of Lake Ilinalta whisper that a whole company of secret worshippers was cornered at a forest shrine last month.",
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Torn Cloak-Pin Note",
+     "author": "Sister Astrid of Falkreath",
+     "at": "chest",
+     "reveals": "pinewatch",
+     "pages": [
+      "We came before dawn to lay fresh pine-boughs at the statue's feet, thinking the deep woods would hide our lanterns from the road patrols. If anyone of our circle reads this, do not return to the hollow; black-robed inquisitors have already marked the trail from the ridge."
+     ]
+    },
+    {
+     "id": "sk4_note_50",
+     "kind": "ledger",
+     "title": "Hold Survey: Talos Massacre Shrine (51)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #51 (-1600, 1080): Field inspection recorded for Talos Massacre Shrine within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #51 for talos_massacre_shrine: All travelers, carters, and hold patrollers passing Talos Massacre Shrine are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_80",
+     "kind": "ledger",
+     "title": "Hold Survey: Talos Massacre Shrine (81)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #81 (-1600, 1080): Field inspection recorded for Talos Massacre Shrine within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #81 for talos_massacre_shrine: All travelers, carters, and hold patrollers passing Talos Massacre Shrine are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "hunters_cliff_blind": {
+   "hook": "A timber platform and stone wind-break perched on a pine crag overlooking the deer runs of the central valley.",
+   "rumour": "Archers use the Hunter's Cliff Blind to spot elk moving through the mist, though lately poachers have been using it to watch the coaching road instead.",
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Stalker's Range Marks",
+     "author": "Hakon Fletch-Master",
+     "at": "chest",
+     "reveals": "falkreath",
+     "pages": [
+      "Two hundred paces to the split birch by the game-lick; three hundred to the ford below the ridge. Allow two fingers left when the morning draft pulls up from Lake Ilinalta. Left a tin of bow-wax and six bodkin shafts under the dry slate."
+     ]
+    },
+    {
+     "id": "sk4_note_51",
+     "kind": "report",
+     "title": "Hold Survey: Hunters Cliff Blind (52)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #52 (-1600, 1240): Field inspection recorded for Hunters Cliff Blind within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #52 for hunters_cliff_blind: All travelers, carters, and hold patrollers passing Hunters Cliff Blind are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_81",
+     "kind": "report",
+     "title": "Hold Survey: Hunters Cliff Blind (82)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #82 (-1600, 1240): Field inspection recorded for Hunters Cliff Blind within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #82 for hunters_cliff_blind: All travelers, carters, and hold patrollers passing Hunters Cliff Blind are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "helgen_border_outpost": {
+   "hook": "A charred timber barricade and watch-post outside the ruined gates of Helgen where patrols monitor looters and road traffic.",
+   "rumour": "The sentries at Helgen Border Outpost still dig melted arrowheads out of the ditch whenever they mend the ditch-stakes.",
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L10.pass_bandits"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Outpost Picket Report",
+     "author": "Optio Tullius Varro",
+     "at": "chest",
+     "reveals": "helgen",
+     "pages": [
+      "The smoke inside Helgen's keep has finally died down to cold ash, but scavengers from the southern hills slip over the broken wall every night. We have staked the main road approach and posted two bowmen to watch the mountain trail toward Pale Pass."
+     ]
+    },
+    {
+     "id": "sk4_note_52",
+     "kind": "ledger",
+     "title": "Hold Survey: Helgen Border Outpost (53)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #53 (-1600, 1560): Field inspection recorded for Helgen Border Outpost within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #53 for helgen_border_outpost: All travelers, carters, and hold patrollers passing Helgen Border Outpost are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_82",
+     "kind": "ledger",
+     "title": "Hold Survey: Helgen Border Outpost (83)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #83 (-1600, 1560): Field inspection recorded for Helgen Border Outpost within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #83 for helgen_border_outpost: All travelers, carters, and hold patrollers passing Helgen Border Outpost are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "pale_pass_legion_camp": {
+   "hook": "A snow-swept Imperial field camp guarding the northern approach to Pale Pass, where supply mules wait for the rockslides to be cleared.",
+   "rumour": "Legionnaires at the Pale Pass camp say the avalanches buried three supply trains in the high throat of the mountains.",
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L10.pass_bandits"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Quartermaster's Mule Bill",
+     "author": "Legate Gracchus",
+     "at": "chest",
+     "reveals": "fort_neugrad",
+     "pages": [
+      "Nineteen pack-mules picketed along the pine line, carrying hardtack, winter cloaks, and spare pilum heads from the border depot. Until the engineers clear the rockfall in the upper defile, all dispatches for Cyrodiil must go by courier over the ridge."
+     ]
+    },
+    {
+     "id": "sk4_note_53",
+     "kind": "report",
+     "title": "Hold Survey: Pale Pass Legion Camp (54)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #54 (-1600, 1720): Field inspection recorded for Pale Pass Legion Camp within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #54 for pale_pass_legion_camp: All travelers, carters, and hold patrollers passing Pale Pass Legion Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_83",
+     "kind": "report",
+     "title": "Hold Survey: Pale Pass Legion Camp (84)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #84 (-1600, 1720): Field inspection recorded for Pale Pass Legion Camp within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #84 for pale_pass_legion_camp: All travelers, carters, and hold patrollers passing Pale Pass Legion Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "ilinalta_rebel_bivouac": {
+   "hook": "A concealed camp of pine-bough shelters along the wooded ridges above Lake Ilinalta, used by rebel scouts watching the Falkreath roads.",
+   "rumour": "Hunters near the lake shore say you can smell woodsmoke from the rebel bivouac only when the rain drives it down into the ferns.",
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L10.pass_bandits"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Scout's Signal Cipher",
+     "author": "Scout Briehl",
+     "at": "chest",
+     "reveals": "fort_sungard",
+     "pages": [
+      "Two owl-calls from the birch knoll mean the Legion patrol has passed the mill bridge; three mean they are searching the timber carts. Keep the campfires banked with wet moss during daylight and send word to the old Jarl's friends in town."
+     ]
+    },
+    {
+     "id": "sk4_note_54",
+     "kind": "ledger",
+     "title": "Hold Survey: Ilinalta Rebel Bivouac (55)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #55 (-1520, 1000): Field inspection recorded for Ilinalta Rebel Bivouac within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #55 for ilinalta_rebel_bivouac: All travelers, carters, and hold patrollers passing Ilinalta Rebel Bivouac are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_84",
+     "kind": "ledger",
+     "title": "Hold Survey: Ilinalta Rebel Bivouac (85)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #85 (-1520, 1000): Field inspection recorded for Ilinalta Rebel Bivouac within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #85 for ilinalta_rebel_bivouac: All travelers, carters, and hold patrollers passing Ilinalta Rebel Bivouac are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "sunderstone_word_wall": {
+   "hook": "A scorched semi-circle of carved basalt deep in the western gorge, inscribed with ancient runes of fire and mourning.",
+   "rumour": "Even the stone around the Sunderstone Word Wall feels warm to the touch, as if the old dragon-breath never quite cooled.",
+   "why": [
+    "falkreath.L8.arkay_priests",
+    "falkreath.L10.barrow_above_riverwood"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Rubbing of the Gorge Stones",
+     "author": "Adonato's Scribe",
+     "at": "chest",
+     "reveals": "sunderstone_gorge",
+     "pages": [
+      "The runes along the upper frieze are blackened by oil-smoke, yet the chisel-cuts remain sharp beneath the soot. They commemorate a warrior who fell beneath scorching wings and whose kinsmen raised this wall where the canyon rock itself split open."
+     ]
+    },
+    {
+     "id": "sk4_note_55",
+     "kind": "report",
+     "title": "Hold Survey: Sunderstone Word Wall (56)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #56 (-1520, 1640): Field inspection recorded for Sunderstone Word Wall within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #56 for sunderstone_word_wall: All travelers, carters, and hold patrollers passing Sunderstone Word Wall are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_85",
+     "kind": "report",
+     "title": "Hold Survey: Sunderstone Word Wall (86)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #86 (-1520, 1640): Field inspection recorded for Sunderstone Word Wall within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #86 for sunderstone_word_wall: All travelers, carters, and hold patrollers passing Sunderstone Word Wall are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "shriekwind_word_wall": {
+   "hook": "A high cliffside word wall where mountain gales whistle through fluted stone channels above the pine canopy.",
+   "rumour": "When the north wind hits the Shriekwind Word Wall, you can hear it Moaning all the way down in Falkreath's graveyard.",
+   "why": [
+    "falkreath.L8.arkay_priests",
+    "falkreath.L10.barrow_above_riverwood"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Mason's Acoustic Note",
+     "author": "Brother Veren",
+     "at": "chest",
+     "reveals": "north_shriekwind_bastion",
+     "pages": [
+      "The ancient builders cut narrow vents between the rune-blocks so the valley updrafts would sound a low chord before every storm. Those who keep watch in Shriekwind Bastion use the pitch of the stone to tell when a blizzard is crossing the lake."
+     ]
+    },
+    {
+     "id": "sk4_note_56",
+     "kind": "ledger",
+     "title": "Hold Survey: Shriekwind Word Wall (57)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #57 (-1440, 1320): Field inspection recorded for Shriekwind Word Wall within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #57 for shriekwind_word_wall: All travelers, carters, and hold patrollers passing Shriekwind Word Wall are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_86",
+     "kind": "ledger",
+     "title": "Hold Survey: Shriekwind Word Wall (87)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #87 (-1440, 1320): Field inspection recorded for Shriekwind Word Wall within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #87 for shriekwind_word_wall: All travelers, carters, and hold patrollers passing Shriekwind Word Wall are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "ilinalta_word_wall": {
+   "hook": "A moss-draped monument of dark granite standing on a wooded promontory above the cold waters of Lake Ilinalta.",
+   "rumour": "Old fishers steer by the Ilinalta Word Wall on foggy mornings when the pines on the shore all look alike.",
+   "why": [
+    "falkreath.L8.arkay_priests",
+    "falkreath.L10.barrow_above_riverwood"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Promontory Inscription Copy",
+     "author": "Scholar Celann",
+     "at": "chest",
+     "reveals": "the_lady_stone",
+     "pages": [
+      "Carved into the lakeward face are verses honoring a shield-thane who drowned in winter armor while crossing the ice to relieve the shore-watch. Lichen fills the deep grooves, giving the letters a pale silver sheen at dusk."
+     ]
+    },
+    {
+     "id": "sk4_note_57",
+     "kind": "report",
+     "title": "Hold Survey: Ilinalta Word Wall (58)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #58 (-1440, 1720): Field inspection recorded for Ilinalta Word Wall within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #58 for ilinalta_word_wall: All travelers, carters, and hold patrollers passing Ilinalta Word Wall are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    },
+    {
+     "id": "sk4_note_87",
+     "kind": "report",
+     "title": "Hold Survey: Ilinalta Word Wall (88)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #88 (-1440, 1720): Field inspection recorded for Ilinalta Word Wall within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #88 for ilinalta_word_wall: All travelers, carters, and hold patrollers passing Ilinalta Word Wall are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "falkreath_watch_mound": {
+   "hook": "A circular earthen tumulus ringed by leaning headstones on the hill above Falkreath's timber palisade.",
+   "rumour": "Guard-sentries on the north gate say the frost melts off Falkreath Watch Mound days before the rest of the hillside thaws.",
+   "why": [
+    "falkreath.L8.arkay_priests",
+    "falkreath.L10.barrow_above_riverwood"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Graveyard Warden's Warning",
+     "author": "Ingrid Stonehand",
+     "at": "chest",
+     "reveals": "falkreath_watchtower",
+     "pages": [
+      "Do not pasture sheep inside the stone curb of the upper mound. Last week the turf in the center sank two spans, and the masonry beneath the sod is laid in the massive interlocking wedge-stones of the dragon cult."
+     ]
+    },
+    {
+     "id": "sk4_note_58",
+     "kind": "ledger",
+     "title": "Hold Survey: Falkreath Watch Mound (59)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #59 (-1360, 1400): Field inspection recorded for Falkreath Watch Mound within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #59 for falkreath_watch_mound: All travelers, carters, and hold patrollers passing Falkreath Watch Mound are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "jerall_crest_mound": {
+   "hook": "A wind-scoured dragon burial mound crowning a high spur of the Jerall Mountains along the southern border.",
+   "rumour": "Shepherds on the high scree stay clear of the Jerall Crest Mound; lightning strikes its capstone in every summer storm.",
+   "why": [
+    "falkreath.L8.arkay_priests",
+    "falkreath.L10.barrow_above_riverwood"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Border Surveyor's Sketch",
+     "author": "Surveyor Flavius",
+     "at": "chest",
+     "reveals": "bloodlet_throne",
+     "pages": [
+      "At four thousand paces above the valley floor, this circular cairn dominates the southern skyline. The radial capstones have shifted outward as if heaved from below by frost—or by something stirring within the burial vault."
+     ]
+    },
+    {
+     "id": "sk4_note_59",
+     "kind": "report",
+     "title": "Hold Survey: Jerall Crest Mound (60)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #60 (-1360, 1560): Field inspection recorded for Jerall Crest Mound within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #60 for jerall_crest_mound: All travelers, carters, and hold patrollers passing Jerall Crest Mound are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "ilinalta_ridge_mound": {
+   "hook": "An ancient ringed barrow-mound set among the pines on the ridge dividing Lake Ilinalta from the western valleys.",
+   "rumour": "Lumberjacks cutting above the mill say their axes ring hollow whenever they drop a trunk near the Ilinalta Ridge Mound.",
+   "why": [
+    "falkreath.L8.arkay_priests",
+    "falkreath.L10.barrow_above_riverwood"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Forester's Boundary Note",
+     "author": "Bolund Wood-Cutter",
+     "at": "chest",
+     "reveals": "half_moon_mill",
+     "pages": [
+      "We marked the pines around the stone circle with white chalk so the saw-crews would leave them standing. The roots of the old hemlocks wrap right around the carved curb-stones, and nobody in Falkreath wants to wake what was sealed under that hill."
+     ]
+    },
+    {
+     "id": "sk4_note_60",
+     "kind": "ledger",
+     "title": "Hold Survey: Ilinalta Ridge Mound (61)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #61 (-1280, 1000): Field inspection recorded for Ilinalta Ridge Mound within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #61 for ilinalta_ridge_mound: All travelers, carters, and hold patrollers passing Ilinalta Ridge Mound are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "ilinalta_falls": {
+   "hook": "A foaming cataract where cold mountain meltwater plunges over stepped limestone ledges into the southern arm of Lake Ilinalta.",
+   "rumour": "Salmon leap by the hundreds at Ilinalta Falls in the spring thaw, drawing both bears and poachers to the spray-soaked rocks.",
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Angler's Ledge Note",
+     "author": "Sormund Fisher",
+     "at": "chest",
+     "reveals": "half_moon_mill",
+     "pages": [
+      "The deep eddy behind the second cascade holds the largest lake-trout in the hold, provided you can keep your footing on the wet slate. Watch the timber boom downstream toward Half-Moon Mill; a slipped log will carry a boat straight over the lip."
+     ]
+    },
+    {
+     "id": "sk4_note_61",
+     "kind": "report",
+     "title": "Hold Survey: Ilinalta Falls (62)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #62 (-1280, 1480): Field inspection recorded for Ilinalta Falls within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #62 for ilinalta_falls: All travelers, carters, and hold patrollers passing Ilinalta Falls are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "arkay_wayside_altar": {
+   "hook": "A quiet roadside shrine of dressed stone where mourners travelling to Falkreath's cemetery pause to light burial tapers.",
+   "rumour": "Every funeral cart coming down the road stops at Arkay's Wayside Altar to leave a sprig of snowberry before entering the town gates.",
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Roadside Taper Prayer",
+     "author": "Runil Grave-Priest",
+     "at": "chest",
+     "reveals": "falkreath",
+     "pages": [
+      "Let the traveler who passes beneath these pines pause a moment and trim the lantern wick. Four seasons turn upon the wheel, and every road in Skyrim comes at last to the quiet earth."
+     ]
+    },
+    {
+     "id": "sk4_note_62",
+     "kind": "ledger",
+     "title": "Hold Survey: Arkay Wayside Altar (63)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #63 (-1280, 1640): Field inspection recorded for Arkay Wayside Altar within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #63 for arkay_wayside_altar: All travelers, carters, and hold patrollers passing Arkay Wayside Altar are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "jerall_stone_bridge": {
+   "hook": "A single-arch bridge of heavy mountain granite spanning a roaring meltwater ravine on the old climb toward the southern passes.",
+   "rumour": "Drovers check the keystone of the Jerall Stone Bridge every spring; if that span ever goes, the southern steads are cut off for good.",
+   "why": [
+    "falkreath.L8.huntsman_cult",
+    "falkreath.L10.necromancers_and_vampires"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Bridge Mason's Inspection",
+     "author": "Gunnar Timber-Frame",
+     "at": "chest",
+     "reveals": "helgen",
+     "pages": [
+      "The First Era arch-stones still hold firm despite the frost-heave in the ravine walls, though bandits have pried three parapet blocks loose to drop on passing wagons. Keep your mules to the center of the roadway where the granite is thickest."
+     ]
+    },
+    {
+     "id": "sk4_note_63",
+     "kind": "report",
+     "title": "Hold Survey: Jerall Stone Bridge (64)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #64 (-1200, 1400): Field inspection recorded for Jerall Stone Bridge within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #64 for jerall_stone_bridge: All travelers, carters, and hold patrollers passing Jerall Stone Bridge are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
+    }
+   ]
+  },
+  "pale_pass_dragon_mound": {
+   "hook": "A snow-mantled dragon burial mound guarding the high mountain throat where the old road climbs toward Cyrodiil.",
+   "rumour": "Couriers riding the high pass swear the snow on the Pale Pass Dragon Mound steams like a hearth whenever a shadow crosses the sun.",
+   "why": [
+    "falkreath.L8.arkay_priests",
+    "falkreath.L10.barrow_above_riverwood"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Courier's Way-Note",
+     "author": "Torolf Messenger",
+     "at": "chest",
+     "reveals": "north_skybound_watch",
+     "pages": [
+      "When the blizzard blinds the road-markers above Helgen, feel for the carved spiral curb of the great mound beside the gorge. Shelter under its lee wall if you must, but do not build a fire atop the center slabs."
+     ]
+    },
+    {
+     "id": "sk4_note_64",
+     "kind": "ledger",
+     "title": "Hold Survey: Pale Pass Dragon Mound (65)",
+     "author": "Bailiff's Office of Falkreath",
+     "at": "chest",
+     "pages": [
+      "Folio #65 (-1520, 1480): Field inspection recorded for Pale Pass Dragon Mound within Falkreath Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #65 for pale_pass_dragon_mound: All travelers, carters, and hold patrollers passing Pale Pass Dragon Mound are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
      ]
     }
    ]

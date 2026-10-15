@@ -1,0 +1,202 @@
+{
+  "region": "skyrim/the_rift",
+  "why": [
+    "the_rift.L7.meadery_rule",
+    "the_rift.L9.meadery_power",
+    "the_rift.L10.thieves_below",
+    "the_rift.L9.rebel_leaning_jarl"
+  ],
+  "hook": {
+    "place": "ivarstead",
+    "places": [
+      "ivarstead",
+      "riften",
+      "shors_stone",
+      "broken_helm_hollow",
+      "fort_greenwall"
+    ],
+    "npc": "the_rift_hook_npc",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "the_rift_hook_npc",
+      "name": "Toll-ReeveBersi",
+      "role": "guard",
+      "place": "ivarstead",
+      "greet": "Every timber-raft and honey-cart bound for Riften gets taxed at the bridge, and half the coin vanishes down the canal grates before it reaches Mistveil Keep."
+    },
+    {
+      "id": "the_rift_canal_npc",
+      "name": "Wharf-Master Svana",
+      "role": "merchant",
+      "place": "riften",
+      "greet": "The Black-Briar factors lock the upper wharf while their cutpurses strip the lower canal barges by lantern-light."
+    },
+    {
+      "id": "the_rift_miner_npc",
+      "name": "Bailiff Filnjar",
+      "role": "citizen",
+      "place": "shors_stone",
+      "greet": "Our ore-wagons can't pass Fort Greenwall without hired blades demanding meadery scrip instead of the Jarl's coin."
+    }
+  ],
+  "bosses": {
+    "story_the_rift_blackbriar_enforcer": {
+      "name": "Grelod's Wharf-Factor",
+      "entity": "minecraft:Vindicator",
+      "place": "broken_helm_hollow",
+      "hp": 115
+    },
+    "story_the_rift_forelhost_keeper": {
+      "name": "High Mask-Warden Valthor",
+      "entity": "minecraft:Evoker",
+      "place": "forelhost",
+      "hp": 145
+    }
+  },
+  "scenes": {
+    "the_rift_mistveil_reckoning": [
+      "Wharf-Master Svana: The Goldenglow excise books and the Forelhost reliquary seals are both in the Jarl's hands.",
+      "Toll-ReeveBersi: Neither the meadery counting-house nor the canal vaults can hold Mistveil Keep hostage any longer.",
+      "Wharf-Master Svana: Open the lake-gates—the Rift trades under public law again."
+    ]
+  },
+  "quests": [
+    {
+      "id": "story_the_rift_1",
+      "title": "story.skycraft.the_rift_1.title",
+      "requires": [],
+      "places": [
+        "ivarstead",
+        "shroud_hearth_barrow",
+        "riften"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "ivarstead",
+          "objective": "Hear the bridge toll-reeve's account of the seized Pilgrim-Road wagons."
+        },
+        {
+          "id": 20,
+          "place": "shroud_hearth_barrow",
+          "objective": "Recover the hidden excise strongbox from the outer vestibule of Shroud Hearth Barrow."
+        },
+        {
+          "id": 30,
+          "place": "riften",
+          "objective": "Deliver the excise strongbox to the lower wharf-master in Riften."
+        }
+      ],
+      "consequence": "guard_banner:the_rift_canal_watch",
+      "why": [
+        "the_rift.L7.canal_poor",
+        "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "id": "story_the_rift_2",
+      "title": "story.skycraft.the_rift_2.title",
+      "requires": [
+        "story_the_rift_1"
+      ],
+      "places": [
+        "riften",
+        "goldenglow_estate",
+        "black_briar_lodge"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "riften",
+          "objective": "Compare the double-entry wharf tallies with the canal merchants."
+        },
+        {
+          "id": 20,
+          "place": "goldenglow_estate",
+          "objective": "Copy the private tariff ledger held in the counting-room at Goldenglow Estate."
+        },
+        {
+          "id": 30,
+          "place": "black_briar_lodge",
+          "objective": "Seize the factor's seal-ring from the mercenary detail at Black-Briar Lodge."
+        }
+      ],
+      "consequence": "market_tariff:riften_wharf_tolls_repealed",
+      "why": [
+        "the_rift.L7.meadery_rule",
+        "the_rift.L9.meadery_power"
+      ]
+    },
+    {
+      "id": "story_the_rift_3",
+      "title": "story.skycraft.the_rift_3.title",
+      "requires": [
+        "story_the_rift_2"
+      ],
+      "places": [
+        "shors_stone",
+        "fort_greenwall",
+        "avanchnzel"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "shors_stone",
+          "objective": "Meet the mining bailiff in Shor's Stone regarding the blocked northern road."
+        },
+        {
+          "id": 20,
+          "place": "fort_greenwall",
+          "objective": "Clear the hired highwaymen occupying the gatehouse at Fort Greenwall."
+        },
+        {
+          "id": 30,
+          "place": "avanchnzel",
+          "objective": "Retrieve the brass vault-cylinder from the Dwemer boiler gallery of Avanchnzel."
+        }
+      ],
+      "consequence": "patrol_route:the_rift_north_road_open",
+      "why": [
+        "the_rift.L10.thieves_below",
+        "the_rift.L10.dwemer_valley_ruin"
+      ]
+    },
+    {
+      "id": "story_the_rift_4",
+      "title": "story.skycraft.the_rift_4.title",
+      "requires": [
+        "story_the_rift_3"
+      ],
+      "places": [
+        "riften",
+        "broken_helm_hollow",
+        "forelhost"
+      ],
+      "finale": true,
+      "stages": [
+        {
+          "id": 10,
+          "place": "broken_helm_hollow",
+          "objective": "Defeat the syndicate's enforcer captain in Broken Helm Hollow."
+        },
+        {
+          "id": 20,
+          "place": "forelhost",
+          "objective": "Reclaim the ancient hold-charter from the summit crypt of Forelhost."
+        },
+        {
+          "id": 30,
+          "place": "riften",
+          "objective": "Present the restored hold-charter before the council in Mistveil Keep at Riften."
+        }
+      ],
+      "consequence": "world_state:the_rift_resolved",
+      "why": [
+        "the_rift.L9.rebel_leaning_jarl",
+        "the_rift.L10.rahgot_barrow"
+      ]
+    }
+  ]
+}

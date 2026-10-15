@@ -2,17 +2,22 @@
   "id": "kynesgrove",
   "base": "none",
   "sil": "tusk-square-mining-lane",
-  "names": {"inn": "braidwood_inn", "store": "kynesgrove_trader", "smithy": "kynesgrove_smithy"},
+  "names": {
+    "inn": "braidwood_inn",
+    "store": "kynesgrove_trader",
+    "smithy": "kynesgrove_smithy",
+    "alchemist": "kynesgrove_apothecary"
+  },
   "innKey": "braidwood_inn",
   "gates": [[0, 34]],
   "buildings": [
     {"kind": "mine", "at": [-44, -24], "size": [7, 14], "face": "S", "variant": 0, "flags": ["no_beard"], "name": "kynesgrove_malachite_mine"},
-    {"kind": "mine", "at": [-30, -28], "size": [7, 14], "face": "S", "variant": 6, "flags": ["no_beard"]},
+    {"kind": "mine", "at": [-30, -28], "size": [7, 14], "face": "S", "variant": 6, "flags": ["no_beard"], "name": "kynesgrove_upper_malachite_shaft"},
     {"kind": "shrine", "at": [20, -6], "size": [5, 5], "face": "S", "variant": 5, "name": "kynesgrove_shrine"},
-    {"kind": "camp", "at": [44, -26], "size": [13, 13], "variant": 2},
-    {"kind": "farmhouse", "at": [38, 30], "size": [9, 11], "face": "W"},
-    {"kind": "field", "at": [54, 26], "size": [13, 11], "face": "W"},
-    {"kind": "field", "at": [54, 40], "size": [13, 11], "face": "W"}
+    {"kind": "camp", "at": [44, -26], "size": [13, 13], "variant": 2, "name": "kynesgrove_miners_camp"},
+    {"kind": "farmhouse", "at": [38, 30], "size": [9, 11], "face": "W", "name": "kynesgrove_ridge_farmhouse"},
+    {"kind": "field", "at": [54, 26], "size": [13, 11], "face": "W", "name": "kynesgrove_north_field"},
+    {"kind": "field", "at": [54, 40], "size": [13, 11], "face": "W", "name": "kynesgrove_south_field"}
   ],
   "plazas": [
     {"at": [0, 8], "size": 15, "variant": 1, "stalls": 4, "name": "kynesgrove_tusk_square"}
@@ -34,7 +39,7 @@
     {"kind": "inn", "size": [15, 17], "flags": ["upper"], "name": "braidwood_inn", "on": "main"},
     {"kind": "store", "size": [9, 11], "name": "kynesgrove_trader", "on": "main"},
     {"kind": "smithy", "size": [11, 9], "name": "kynesgrove_smithy", "on": "mine"},
-    {"kind": "alchemist", "on": "row"},
+    {"kind": "alchemist", "name": "kynesgrove_apothecary", "on": "row"},
     {"kind": "house", "name": "kynesgrove_dorlags_house", "on": "mine"},
     {"kind": "house", "name": "kynesgrove_bertrands_house", "on": "row"},
     {"kind": "house", "count": 2, "flags": ["upper"], "on": "main"}
@@ -50,8 +55,14 @@
   "titles": {
     "kynesgrove_trader": "Kynesgrove Provisions",
     "kynesgrove_smithy": "Kynesgrove Smithy",
+    "kynesgrove_apothecary": "Braidwood Herbalist",
     "kynesgrove_malachite_mine": "Malachite Mine",
+    "kynesgrove_upper_malachite_shaft": "Upper Malachite Shaft",
     "kynesgrove_shrine": "Kynesgrove Shrine",
+    "kynesgrove_miners_camp": "Miners' Camp",
+    "kynesgrove_ridge_farmhouse": "Ridge Farmhouse",
+    "kynesgrove_north_field": "North Grove Field",
+    "kynesgrove_south_field": "South Grove Field",
     "kynesgrove_tusk_square": "Tusk Square",
     "kynesgrove_dorlags_house": "Dorlag's House",
     "kynesgrove_bertrands_house": "Bertrand's House"

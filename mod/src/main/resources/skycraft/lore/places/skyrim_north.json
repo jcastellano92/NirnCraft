@@ -8,7 +8,11 @@
     "A cog out of Solitude went down past the Brinehammer's bones before the ice closed. The Sea of Ghosts never gives anything back, not even the gulls.",
     "Legion riders out of Fort Dunstad stop every sled on the road south. Hunting deserters, they say. Hunting mead, more like.",
     "Ever since the Stormcloaks went poking about Korvanjund, the shepherds won't graze the hills near it. The sheep come back with frost in their wool in the middle of Midyear.",
-    "Up near Windward Ruins the snow keeps tracks for a week. If you see one set going in and none coming out, keep walking."
+    "Up near Windward Ruins the snow keeps tracks for a week. If you see one set going in and none coming out, keep walking.",
+    "Ore-sledges between Iron-Breaker and Quicksilver Mine are running double shifts to fill the hold's military contracts. [Hearth-Tally]",
+    "Skippers in Dawnstar harbor keep an axe by the mooring-lines in case the sea-ice closes the channel overnight. [Hearth-Tally]",
+    "Carters down at Loreius Farm say the giants on the southern tundra border have been driving their mammoths closer to the road. [Hearth-Tally]",
+    "Watchmen on the Dawnstar palisade say strange lights flicker around the bronze domes of the high Dwemer lifts on clear nights. [Hearth-Tally]"
    ],
    "legends": [
     "They say that long before the Oblivion Crisis a whole winter passed in Dawnstar without a single dream. Men slept like stones and woke unrested, and by Sun's Dawn they were quarrelling over nets and knifing each other on the docks. When the thaw came every soul in town dreamed the same dream on the same night: a black door on the hill east of the harbour, and a woman behind it, laughing.",
@@ -37,7 +41,12 @@
     "Fishermen saw lights moving inside the Skytemple Ruins. Apprentices, probably. Or something the apprentices woke up.",
     "Nobody has seen the priestess from the Shrine of Azura come down for flour since the first snows. Somebody ought to check on her. Somebody else.",
     "They're digging at Saarthal again. Every time someone digs at Saarthal, Winterhold loses something.",
-    "The Legion and the Stormcloaks have both pitched tents in the hold. Korir hasn't decided which of them to hate more, so he's hating both."
+    "The Legion and the Stormcloaks have both pitched tents in the hold. Korir hasn't decided which of them to hate more, so he's hating both.",
+    "Coal-drivers from Whistling Mine travel with roped sledges whenever the sea-gales sweep across the road past Amol hamlet. [Hearth-Tally]",
+    "Pilgrims climbing the eastern mountain steps leave iron crampons and dry firewood at the way-stead for the next party. [Hearth-Tally]",
+    "Townsfolk in Winterhold bar their doors early when the blue lights flare across the broken bridge of the College. [Hearth-Tally]",
+    "Trappers along the northern ice-packs say three merchant hulls were driven onto the reef at Pilgrim's Trench in the last gale. [Hearth-Tally]",
+    "Excavation guards on the road to Saarthal carry warm tallow-brick to keep their lantern oil from freezing solid. [Hearth-Tally]"
    ],
    "legends": [
     "In 4E 122 the sea rose up in a single night and swallowed most of Winterhold: its temple, its markets, its great houses and its harbour. The townsfolk blame the College, whose tower alone stood untouched. The College blames the sea. On the lowest tides of Evening Star, the fishermen say, you can still hear the drowned temple bell ringing under the waves, calling the faithful to a service nobody comes to.",
@@ -86,7 +95,22 @@
       "#Frostfall, 4E 201\nRoom, two nights, the Argonian scholar from the College. Paid in coin that sparked when I bit it. Kept it anyway.\nMead, nine bottles, Legion courier bound for the camp west of town. On credit. Will never see that again.\nStew for the Dunmer from the wreck-camp, no charge. Mother would have wanted it.",
       "Bread and salt fish for a stranger asking the way to Saarthal. Told him to stay away. He tipped me a whole septim to stop talking.\nBroken stool, one. Stormcloak and Legion man disagreed about Talos. Both are paying.\nNote: buy more candles. The nights are getting longer and so are the stories."
      ]
+    },
+    {
+     "id": "sk4_note_1",
+     "kind": "report",
+     "title": "Hold Survey: Winterhold (2)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #2 (1417, -1749): Field inspection recorded for Winterhold within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #2 for winterhold: All travelers, carters, and hold patrollers passing Winterhold are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L7.town_vs_college",
+    "winterhold.L7.poverty"
    ]
   },
   "dawnstar": {
@@ -116,7 +140,22 @@
       "#Last Seed, 4E 201\nOre raised: 41 loads iron, 6 loads quicksilver.\nShipped to Solitude: 33 loads iron, 4 quicksilver.\nDifference: 8 loads iron, 2 quicksilver. Gone between the pit and the boats.",
       "Leif says snow-slides. Leif says sleds tip. Leif bought his wife a silver brooch last Fredas.\nMen are falling asleep at the face, too. Two cuts from dropped picks this week, one broken foot. Every one of them says the same thing: they dreamed so hard they never rested.\nIf this keeps up the Jarl will have no iron to sell and I will have no miners to dig it."
      ]
+    },
+    {
+     "id": "sk4_note_2",
+     "kind": "ledger",
+     "title": "Hold Survey: Dawnstar (3)",
+     "author": "Bailiff's Office of The Pale",
+     "at": "chest",
+     "pages": [
+      "Folio #3 (174, -1801): Field inspection recorded for Dawnstar within The Pale Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #3 for dawnstar: All travelers, carters, and hold patrollers passing Dawnstar are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_pale.L7.miners_and_owners",
+    "the_pale.L7.sleepless_town"
    ]
   },
   "college_of_winterhold": {
@@ -146,7 +185,22 @@
       "Things I am no longer permitted to do, by order of the Master-Wizard:\n1. Summon a familiar in the Arcanaeum.\n2. Summon a familiar near the Arcanaeum.\n3. Attempt to 'just look' at the thing in the Midden.\n4. Go to the Skytemple Ruins at night, alone or otherwise.\n5. Borrow Quaestor Vesk's Dwemer cog to prop the window open.",
       "6. Light the hearth with Destruction magic. (In my defence it was cold.)\n7. Tell the Winterhold innkeeper we are boiling the sea. He believed me and now the Jarl believes it too.\n8. Mention the Collapse at supper.\nThings I am still permitted to do: study. Apparently."
      ]
+    },
+    {
+     "id": "sk4_note_2",
+     "kind": "ledger",
+     "title": "Hold Survey: College Of Winterhold (3)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #3 (1529, -1886): Field inspection recorded for College Of Winterhold within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #3 for college_of_winterhold: All travelers, carters, and hold patrollers passing College Of Winterhold are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L7.town_vs_college",
+    "winterhold.L7.poverty"
    ]
   },
   "nightgate_inn": {
@@ -163,7 +217,22 @@
       "TRAVELLERS, READ THIS BEFORE YOU ASK ME ANYTHING.\nThe road north to Dawnstar is open but the wolves are not shy.\nThe cave by Bronze Water is a bear's house. The bear is home.\nIronbind Barrow is not a shelter. The last party who used it for one is still there.",
       "The big Dwemer lift east of here goes down. All the way down. Nobody who has ridden it has come back to tell me what's at the bottom, which tells me enough.\nForsaken Cave is called that for a reason.\nRooms are ten septims. Stew is free if you bring news."
      ]
+    },
+    {
+     "id": "sk4_note_3",
+     "kind": "report",
+     "title": "Hold Survey: Nightgate Inn (4)",
+     "author": "Bailiff's Office of The Pale",
+     "at": "chest",
+     "pages": [
+      "Folio #4 (856, -848): Field inspection recorded for Nightgate Inn within The Pale Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #4 for nightgate_inn: All travelers, carters, and hold patrollers passing Nightgate Inn are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_pale.L7.miners_and_owners",
+    "the_pale.L7.sleepless_town"
    ]
   },
   "angas_mill": {
@@ -194,6 +263,10 @@
       "Aeri says pay and keep our heads down. Aeri says the Jarl's men won't come so far south. Aeri is probably right. I hate it when she's right.\nIf a sellsword passes this way, I'll pay what I can. The saw is worth more than the planks."
      ]
     }
+   ],
+   "why": [
+    "eastmarch.L7.nord_first",
+    "eastmarch.L7.grey_quarter"
    ]
   },
   "loreius_farm": {
@@ -210,7 +283,22 @@
       "Dear Cassia,\nYou ask how the farm fares. The cabbages are well. The goats are well. My knees are not, and the Empire is worse.\nThe Legion marched past on their way to Fort Dunstad and took four sacks of potatoes 'on account'. I asked whose account. They pointed at the dragon on their shields. I have never seen a dragon pay for potatoes.",
       "Giants have moved closer, up at Blizzard Rest. One of them walked past the fence last week carrying a whole pine like a toothpick. I waved. He did not wave back.\nIf you hear I have been eaten by a giant, know that I went down complaining.\nYour cousin, Vantus"
      ]
+    },
+    {
+     "id": "sk4_note_4",
+     "kind": "ledger",
+     "title": "Hold Survey: Loreius Farm (5)",
+     "author": "Bailiff's Office of The Pale",
+     "at": "chest",
+     "pages": [
+      "Folio #5 (205, -531): Field inspection recorded for Loreius Farm within The Pale Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #5 for loreius_farm: All travelers, carters, and hold patrollers passing Loreius Farm are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_pale.L7.miners_and_owners",
+    "the_pale.L7.sleepless_town"
    ]
   },
   "heljarchen": {
@@ -227,7 +315,22 @@
       "To the Steward of Dawnstar.\nI have walked the bounds of the Heljarchen plot as instructed. Ground: firm under the snow, good for footings. Water: a spring a short way north, frozen three months of the year. Timber: none nearby; it must be hauled. Stone: plenty, most of it in the way.",
       "Neighbours: giants at Blizzard Rest, a short stroll east. They watched me work for an afternoon and did not interfere, though one of the mammoths ate my measuring cord.\nRecommendation: sell it to someone tough, and charge them extra for the view.\nOrmar"
      ]
+    },
+    {
+     "id": "sk4_note_5",
+     "kind": "report",
+     "title": "Hold Survey: Heljarchen (6)",
+     "author": "Bailiff's Office of The Pale",
+     "at": "chest",
+     "pages": [
+      "Folio #6 (184, -730): Field inspection recorded for Heljarchen within The Pale Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #6 for heljarchen: All travelers, carters, and hold patrollers passing Heljarchen are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_pale.L7.miners_and_owners",
+    "the_pale.L7.sleepless_town"
    ]
   },
   "septimus_signuss_outpost": {
@@ -259,7 +362,22 @@
       "Note to self: eat something. Note to self: the courier is not a spy. Probably. Note to self: do not shout at the box, it does not help, it has never helped.",
       "Note to self, underlined twice: the Dwemer were not gods. They were only very, very good at asking. And asking is a thing I can learn."
      ]
+    },
+    {
+     "id": "sk4_note_3",
+     "kind": "report",
+     "title": "Hold Survey: Septimus Signuss Outpost (4)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #4 (1552, -2256): Field inspection recorded for Septimus Signuss Outpost within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #4 for septimus_signuss_outpost: All travelers, carters, and hold patrollers passing Septimus Signuss Outpost are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "helas_folly": {
@@ -292,7 +410,22 @@
       "Plate is ashore. From the bow, walk the line of the bowsprit toward the land. Count thirty paces past the last ice ridge. Where the rocks make a crooked doorway, dig on the sheltered side. I wrapped it in the spare mainsail and weighted it with the ship's bell, so you will hear it if your spade strikes true.",
       "Sven and Orm have not come back. I think the ice opened under them. Whoever finds this: the plate was meant for a man in Winterhold who never paid a fair price in his life. Spend it better than he would have.\nTell my mother I was right about the route. Just wrong about the weather."
      ]
+    },
+    {
+     "id": "sk4_note_4",
+     "kind": "ledger",
+     "title": "Hold Survey: Helas Folly (5)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #5 (496, -2094): Field inspection recorded for Helas Folly within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #5 for helas_folly: All travelers, carters, and hold patrollers passing Helas Folly are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "skytemple_ruins": {
@@ -322,7 +455,22 @@
       "^Copied by a careful hand from the lintel stones\nHere the sons of Ysgramor lifted their eyes. Here the wind was a priest and the storm a choir. Whoever stands here in the gale stands nearer to Kyne than to the earth.\nLet no one bring fire into this house but the lightning.",
       "^Added below in College ink\nThe last line was clearly meant literally. Scorch marks on the inner altar are consistent with repeated lightning strikes, though the altar is sheltered from the sky. Recommend no further overnight stays by novices until this is understood. (Recommendation ignored, as usual.)"
      ]
+    },
+    {
+     "id": "sk4_note_5",
+     "kind": "report",
+     "title": "Hold Survey: Skytemple Ruins (6)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #6 (1586, -2046): Field inspection recorded for Skytemple Ruins within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #6 for skytemple_ruins: All travelers, carters, and hold patrollers passing Skytemple Ruins are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L10.saarthal_eye",
+    "winterhold.L8.knowledge_seeker"
    ]
   },
   "ysgramors_tomb": {
@@ -348,7 +496,22 @@
      "pages": [
       "The door opens for the Circle and the Circle alone. Not for gold, not for a fine sword, not for a scholar's letter of introduction from Cyrodiil, however many seals it bears.\nThe last grave-robber who forced it was found on the beach below, still holding his crowbar, his eyes full of frost. He had no wound on him at all.\nThe Harbinger keeps his own house. Leave your offering on the step, say his name once, and go back the way you came."
      ]
+    },
+    {
+     "id": "sk4_note_6",
+     "kind": "ledger",
+     "title": "Hold Survey: Ysgramors Tomb (7)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #7 (1186, -2033): Field inspection recorded for Ysgramors Tomb within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #7 for ysgramors_tomb: All travelers, carters, and hold patrollers passing Ysgramors Tomb are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "wreck_of_the_brinehammer": {
@@ -380,7 +543,22 @@
       "If the Legion turns up, we're honest salvagers. If the horkers turn up, run. If anyone tries to keep a barrel to himself, he goes in the water. The Sea of Ghosts doesn't ask questions.",
       "One more thing. Old Bull-Tusk's herd is back on the ice. Don't throw stones at the calves this time, Hrek. I'm not hauling you out of the water again.\nUlfgar"
      ]
+    },
+    {
+     "id": "sk4_note_6",
+     "kind": "ledger",
+     "title": "Hold Survey: Wreck Of The Brinehammer (7)",
+     "author": "Bailiff's Office of The Pale",
+     "at": "chest",
+     "pages": [
+      "Folio #7 (-352, -2010): Field inspection recorded for Wreck Of The Brinehammer within The Pale Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #7 for wreck_of_the_brinehammer: All travelers, carters, and hold patrollers passing Wreck Of The Brinehammer are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_pale.L8.dream_dread",
+    "the_pale.L10.troll_caves"
    ]
   },
   "pilgrims_trench": {
@@ -399,7 +577,22 @@
       "Sister,\nWe sail at dawn on the Fair Hjordis, two other ships beside us, all of us bound for the tomb of the Harbinger. I carry the reliquary from our shrine in Windhelm: the arm-ring the old priests say was worn by one of the Five Hundred. We mean to lay it at his door.",
       "The captain is nervous. The ice came early. He says the trench off the coast is where the sea is deepest and the ice weakest, and we must cross it in the dark to make the tide.\nIf anything should happen, Sister, know that the ring is in the iron box under my bunk. It should reach Ysgramor even if I do not."
      ]
+    },
+    {
+     "id": "sk4_note_7",
+     "kind": "report",
+     "title": "Hold Survey: Pilgrims Trench (8)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #8 (1007, -1984): Field inspection recorded for Pilgrims Trench within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #8 for pilgrims_trench: All travelers, carters, and hold patrollers passing Pilgrims Trench are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "wreck_of_the_pride_of_tel_vos": {
@@ -430,7 +623,22 @@
       "Cargo of Master Ralvo Dren, for safekeeping in Skyrim until Morrowind is calm.\nSoul gems, grand, 14. Soul gems, common, 60.\nBooks of the Master's private library, 3 crates (do NOT let the refugees burn these for warmth).\nPassengers: 48 commoners, for which the Master has been paid in full.\nNote: the passengers are not cargo and may be put ashore if the weight becomes inconvenient.",
       "^Postscript, in a different hand\nThe Master's books went into the sea when we struck. The gems did not; I locked them in the hold and I have the only key. If the Master asks, tell him the commoners stole them. He will believe it. He always does."
      ]
+    },
+    {
+     "id": "sk4_note_8",
+     "kind": "ledger",
+     "title": "Hold Survey: Wreck Of The Pride Of Tel Vos (9)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #9 (1872, -1818): Field inspection recorded for Wreck Of The Pride Of Tel Vos within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #9 for wreck_of_the_pride_of_tel_vos: All travelers, carters, and hold patrollers passing Wreck Of The Pride Of Tel Vos are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "yngvild": {
@@ -460,7 +668,22 @@
       "My household grows. The last girl from Dawnstar arrived in a fine state, her eyes already half-dreaming. I suspect the nightmares in that town do half my work for me; the frightened sleep poorly, and the sleepless are easy to call.",
       "The ghosts serve well, but they are cold company. I keep them in their best gowns and let them dance in the great hall. They do not complain. The living ones complain constantly, until they stop being living ones.\nMust write to Hob's Fall again for more salts. The woman there drives a hard bargain for a College dropout."
      ]
+    },
+    {
+     "id": "sk4_note_9",
+     "kind": "report",
+     "title": "Hold Survey: Yngvild (10)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #10 (595, -1948): Field inspection recorded for Yngvild within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #10 for yngvild: All travelers, carters, and hold patrollers passing Yngvild are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "high_gate_ruins": {
@@ -492,6 +715,10 @@
       "^Pencilled beside the copy, in Surveyor Calvo's hand\nThe translator at the College assures me this is merely ceremonial language and the gate-priest a figure of speech. I note, however, that the translator declined my invitation to accompany us."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L8.fear_of_the_dark",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "nightcaller_temple": {
@@ -519,7 +746,22 @@
       "To Jarl Skald, Lord of the Pale, from the undersigned who cannot sleep.\nWe ask that the temple on the hill be searched, or burned, or blessed, whichever the Jarl thinks wisest. Since Sun's Height not a soul in Dawnstar has had a night's rest. The mines are short of hands; the boats are short of crews.",
       "Signed (or marked):\nThyra Gull-Wife, fisher.\nLeif, sled-master at Iron-Breaker.\nThe smith.\nA mark like a fish.\nA mark like a hammer.\nA mark like an open eye, which nobody will admit to making."
      ]
+    },
+    {
+     "id": "sk4_note_7",
+     "kind": "report",
+     "title": "Hold Survey: Nightcaller Temple (8)",
+     "author": "Bailiff's Office of The Pale",
+     "at": "chest",
+     "pages": [
+      "Folio #8 (328, -1722): Field inspection recorded for Nightcaller Temple within The Pale Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #8 for nightcaller_temple: All travelers, carters, and hold patrollers passing Nightcaller Temple are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_pale.L9.rebel_jarl",
+    "the_pale.L9.crown_race"
    ]
   },
   "pale_imperial_camp": {
@@ -549,7 +791,22 @@
       "When I am paid, I will send you every coin, and you can buy that blue cloth you liked. When I am paid. I say it every night like a prayer.\nYours until the wind stops,\nAulus",
       "^Postscript\nThey say the Brinehammer has sunk with our pay aboard. If that is true, Livia, the blue cloth must wait. I am sorry. I am always sorry, these days."
      ]
+    },
+    {
+     "id": "sk4_note_8",
+     "kind": "ledger",
+     "title": "Hold Survey: Pale Imperial Camp (9)",
+     "author": "Bailiff's Office of The Pale",
+     "at": "chest",
+     "pages": [
+      "Folio #9 (-349, -1722): Field inspection recorded for Pale Imperial Camp within The Pale Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #9 for pale_imperial_camp: All travelers, carters, and hold patrollers passing Pale Imperial Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_pale.L9.rebel_jarl",
+    "the_pale.L9.crown_race"
    ]
   },
   "hobs_fall_cave": {
@@ -579,7 +836,22 @@
       "Specimens this week: two drowned sailors from Pilgrim's Trench, one Legionary from the camp to the west who wandered too close to the cliff, and one very old Nord who was already half-preserved by the ice.",
       "The Concordance is everything I hoped. The old masters understood that the cold does half the work. Salt, frost and patience: a body kept in the sea caves rises clean.\nSold three jars of grave salts to the lunatic at Yngvild. He wants more. Everybody always wants more, and the College calls ME a disgrace."
      ]
+    },
+    {
+     "id": "sk4_note_10",
+     "kind": "ledger",
+     "title": "Hold Survey: Hobs Fall Cave (11)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #11 (773, -1640): Field inspection recorded for Hobs Fall Cave within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #11 for hobs_fall_cave: All travelers, carters, and hold patrollers passing Hobs Fall Cave are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "winterhold_imperial_camp": {
@@ -608,7 +880,22 @@
       "#20th of Frostfall\nCaptain has doubled the watch. Pell has stopped sleeping. I keep thinking: we buried him at sea, and the sea runs into Hob's Fall.",
       "#22nd of Frostfall\nPell's gone. His bedroll was wet with seawater this morning, and the tracks went down to the beach. The captain says desertion. I've started sleeping with my boots on and my sword under the blanket."
      ]
+    },
+    {
+     "id": "sk4_note_11",
+     "kind": "report",
+     "title": "Hold Survey: Winterhold Imperial Camp (12)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #12 (509, -1632): Field inspection recorded for Winterhold Imperial Camp within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #12 for winterhold_imperial_camp: All travelers, carters, and hold patrollers passing Winterhold Imperial Camp are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L9.rebel_jarl",
+    "winterhold.L10.falmer_pit"
    ]
   },
   "windward_ruins": {
@@ -638,7 +925,22 @@
       "Nirvel says we're merchants now, not bandits. Merchants get to sleep in a dry ruin and eat Dawnstar fish for free. I can get used to that.\nBut he keeps the coin in his own chest and only he has the key. When I asked for my share he said 'after the thaw'. Bandits pay out every week. Maybe merchants are worse than bandits.\nAlso, I dreamed of the black door too. Didn't tell Nirvel.",
       "If the boss doesn't pay up by Sun's Dusk I'm taking my share myself and going to Windhelm. They say there's work there for a man with a club and no questions. Better than freezing in a ruin for a man who sells salt to widows."
      ]
+    },
+    {
+     "id": "sk4_note_9",
+     "kind": "report",
+     "title": "Hold Survey: Windward Ruins (10)",
+     "author": "Bailiff's Office of The Pale",
+     "at": "chest",
+     "pages": [
+      "Folio #10 (-8, -1585): Field inspection recorded for Windward Ruins within The Pale Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #10 for windward_ruins: All travelers, carters, and hold patrollers passing Windward Ruins are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_pale.L10.great_lifts",
+    "the_pale.L8.old_crown"
    ]
   },
   "saarthal": {
@@ -669,7 +971,22 @@
       "BY ORDER OF THE COLLEGE OF WINTERHOLD\nThe excavation at Saarthal is the property of the College. Unauthorised digging, removal of artefacts, or entering the lower halls is forbidden. The lower halls are forbidden to College personnel also.",
       "The College accepts no responsibility for persons lost in the lower halls, nor for anything that may follow them out. The sealed passage marked with red chalk is to remain sealed.\nIf you hear voices from the red-chalked door, inform a master and do not answer."
      ]
+    },
+    {
+     "id": "sk4_note_12",
+     "kind": "ledger",
+     "title": "Hold Survey: Saarthal (13)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #13 (1144, -1573): Field inspection recorded for Saarthal within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #13 for saarthal: All travelers, carters, and hold patrollers passing Saarthal are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "bleakcoast_cave": {
@@ -689,7 +1006,22 @@
       "#4th of Frostfall\nFound her den in the cliff cave by the sea. Bones everywhere: seals, horkers, a man's boot with the foot still in it. She was not home. I left my mark on the wall and went back for more arrows.",
       "#5th of Frostfall\nGoing in tonight with my grandfather's bow, Frostsinger. If I do not come back, the bow stays with me. Let whoever kills her have it."
      ]
+    },
+    {
+     "id": "sk4_note_13",
+     "kind": "report",
+     "title": "Hold Survey: Bleakcoast Cave (14)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #14 (1998, -1560): Field inspection recorded for Bleakcoast Cave within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #14 for bleakcoast_cave: All travelers, carters, and hold patrollers passing Bleakcoast Cave are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "frostflow_lighthouse": {
@@ -721,7 +1053,22 @@
       "If your light is not burning when I return from Dawnstar, I will come ashore myself and kindle it with your furniture.\nHjolfrid",
       "^Postscript\nI am told the keeper went missing. I do not care. Find another keeper. Find a goat that can work a flint. I have a hold full of Windhelm salt and a crew who would like to see their wives again."
      ]
+    },
+    {
+     "id": "sk4_note_14",
+     "kind": "ledger",
+     "title": "Hold Survey: Frostflow Lighthouse (15)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #15 (705, -1528): Field inspection recorded for Frostflow Lighthouse within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #15 for frostflow_lighthouse: All travelers, carters, and hold patrollers passing Frostflow Lighthouse are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "journeymans_nook": {
@@ -742,7 +1089,22 @@
       "Personal note, not for the College copy: I buried my emergency purse behind the Nook, north side, below the stone with the carved boot. Twenty paces out, under a flat rock. If I'm dead, take it. If I'm alive and you took it, I will find you.",
       "^Added later, in a hurrier hand\nIf you see a Khajiit with one ear asking after me, you never read this note. He thinks I owe him for a compass. I do. But not that much."
      ]
+    },
+    {
+     "id": "sk4_note_15",
+     "kind": "report",
+     "title": "Hold Survey: Journeymans Nook (16)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #16 (1787, -1389): Field inspection recorded for Journeymans Nook within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #16 for journeymans_nook: All travelers, carters, and hold patrollers passing Journeymans Nook are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L10.saarthal_eye",
+    "winterhold.L8.knowledge_seeker"
    ]
   },
   "red_road_pass": {
@@ -761,7 +1123,22 @@
       "To the foreman at Iron-Breaker Mine.\nAs ordered, I took the short road south through the pass with four loads of iron and the strongbox with the month's ore money. The giants were not where they usually are. Then they were. One of them took the lead ox by the horns and threw it.",
       "We ran. All of us, thank Kyne. But the sled and the strongbox are still up there among the mammoth bones. The giants have set the box by their fire like a footstool. I am not going back for it, foreman. You can dock my pay. You will be docking it anyway."
      ]
+    },
+    {
+     "id": "sk4_note_10",
+     "kind": "ledger",
+     "title": "Hold Survey: Red Road Pass (11)",
+     "author": "Bailiff's Office of The Pale",
+     "at": "chest",
+     "pages": [
+      "Folio #11 (32, -1381): Field inspection recorded for Red Road Pass within The Pale Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #11 for red_road_pass: All travelers, carters, and hold patrollers passing Red Road Pass are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_pale.L9.rebel_jarl",
+    "the_pale.L9.crown_race"
    ]
   },
   "driftshade_refuge": {
@@ -789,7 +1166,22 @@
       "My name is Aldis and I am not a beast. I am a trapper from Nightgate. They found wolf fur in my pack and said that was proof enough.\nI have counted nineteen days by the light under the door. The man in the next cell changed on the eleventh night. He was a beast after all. I am not. I am not. I am not.",
       "If you read this, tell my mother at Nightgate Inn I was not what they said."
      ]
+    },
+    {
+     "id": "sk4_note_16",
+     "kind": "ledger",
+     "title": "Hold Survey: Driftshade Refuge (17)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #17 (569, -1379): Field inspection recorded for Driftshade Refuge within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #17 for driftshade_refuge: All travelers, carters, and hold patrollers passing Driftshade Refuge are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L9.rebel_jarl",
+    "winterhold.L10.falmer_pit"
    ]
   },
   "sightless_pit": {
@@ -819,7 +1211,22 @@
       "Observation the first: the Falmer of this pit are entirely blind, yet they track a dropped coin across a stone floor with perfect accuracy.\nObservation the second: they keep the chaurus as we keep cattle, and with considerably more affection.",
       "Observation the third: they are aware of me. They have been aware of me for some time. They are simply waiting for me to go deeper.\nI do not intend to oblige them. Tomorrow I return to the College with my findings."
      ]
+    },
+    {
+     "id": "sk4_note_17",
+     "kind": "report",
+     "title": "Hold Survey: Sightless Pit (18)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #18 (1270, -1365): Field inspection recorded for Sightless Pit within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #18 for sightless_pit: All travelers, carters, and hold patrollers passing Sightless Pit are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "shrine_of_azura": {
@@ -847,7 +1254,22 @@
       "Waymark 9: Shrine of Azura. Steps from the road to the statue: three hundred and four, though the snow makes it feel like four thousand. Statue faces south and east, toward Morrowind. Height impossible to measure without a ladder no sane person would climb.",
       "The priestess who keeps it would not give her name. She said the goddess sees the dawn and the dusk and nothing between matters much. I offered her bread; she took it. Even prophets get hungry."
      ]
+    },
+    {
+     "id": "sk4_note_18",
+     "kind": "ledger",
+     "title": "Hold Survey: Shrine Of Azura (19)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #19 (1451, -1351): Field inspection recorded for Shrine Of Azura within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #19 for shrine_of_azura: All travelers, carters, and hold patrollers passing Shrine Of Azura are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "alftand": {
@@ -879,7 +1301,22 @@
       "Revised: Sond took the sled and ran in the night. Valie fell in the crevasse. Pay: equal shares among the living. Revised again: whoever is left, take everything and run.",
       "^Scrawled on the back\nUmana's gone too. J'zhar says it was the cold. J'zhar keeps going down to the lower halls alone and coming back with his paws full of brass. I do not think I trust J'zhar. I do not think J'zhar trusts me either."
      ]
+    },
+    {
+     "id": "sk4_note_19",
+     "kind": "report",
+     "title": "Hold Survey: Alftand (20)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #20 (927, -1345): Field inspection recorded for Alftand within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #20 for alftand: All travelers, carters, and hold patrollers passing Alftand are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L10.saarthal_eye",
+    "winterhold.L8.knowledge_seeker"
    ]
   },
   "whistling_mine": {
@@ -909,7 +1346,22 @@
       "Last Seed: 52 loads. Hearthfire: 47 loads. Frostfall, first week: 12 loads. Frostfall, second week: 0 loads.\nChalked underneath in another hand: Torbjorn taken by the Falmer at the Sightless Pit. Gunnhild frozen. Egil frozen. The rest of us drinking at the Frozen Hearth until someone fixes it.",
       "Chalked underneath that, in a steadier hand: Skuli has posted a notice. Anyone who clears the lower gallery gets the next month's ore money. Most of us would pay it ourselves, just to sleep without hearing that whistle in our heads.\nChalked last: If you go down, take a torch, take a friend, and take your time. Egil didn't."
      ]
+    },
+    {
+     "id": "sk4_note_20",
+     "kind": "ledger",
+     "title": "Hold Survey: Whistling Mine (21)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #21 (1689, -1333): Field inspection recorded for Whistling Mine within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #21 for whistling_mine: All travelers, carters, and hold patrollers passing Whistling Mine are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "snow_veil_sanctum": {
@@ -935,7 +1387,22 @@
       "Got as far as the second hall. The puzzle doors are Nordic and the Nords never met a riddle they couldn't make lethal. Saw tracks of somebody who got here before me: fine boots, light step, knew exactly where to put his feet.",
       "Whoever he was, he went straight through, took what he wanted from the inner chamber, and left the rest. I'm not that good. I'm going back to Riften before something in a funeral mask decides I'm the next thing it wants to keep."
      ]
+    },
+    {
+     "id": "sk4_note_21",
+     "kind": "report",
+     "title": "Hold Survey: Snow Veil Sanctum (22)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #22 (1992, -1255): Field inspection recorded for Snow Veil Sanctum within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #22 for snow_veil_sanctum: All travelers, carters, and hold patrollers passing Snow Veil Sanctum are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "frostmere_crypt": {
@@ -966,7 +1433,22 @@
       "4. The old man keeps leaving notes about his wife's ring. I'm keeping it. Call it rent.\n5. Anybody who goes soft and wants to give rings back can give their share back too.",
       "6. The woman in the lake behind the crypt is not real. Stop talking about her. Stop going down to look. Haldor went to look and now Haldor sits by the water all night with a face like milk."
      ]
+    },
+    {
+     "id": "sk4_note_11",
+     "kind": "report",
+     "title": "Hold Survey: Frostmere Crypt (12)",
+     "author": "Bailiff's Office of The Pale",
+     "at": "chest",
+     "pages": [
+      "Folio #12 (-152, -1246): Field inspection recorded for Frostmere Crypt within The Pale Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #12 for frostmere_crypt: All travelers, carters, and hold patrollers passing Frostmere Crypt are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_pale.L8.dream_dread",
+    "the_pale.L10.troll_caves"
    ]
   },
   "fort_fellhammer": {
@@ -996,7 +1478,22 @@
       "Waymark 22: Fort Fellhammer. Built in the Second Era to guard the old Fellhammer mine, whose silver paid for half the fort. The silver ran out, the miners left, and the garrison was withdrawn to Fort Dunstad.",
       "Since then it has passed from Legion to bandits to Legion and back to bandits so often that the locals simply call whoever is inside 'the Fellhammer lot'. The mine below is flooded and full of ice. Do not shelter here without an escort."
      ]
+    },
+    {
+     "id": "sk4_note_22",
+     "kind": "ledger",
+     "title": "Hold Survey: Fort Fellhammer (23)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #23 (366, -1242): Field inspection recorded for Fort Fellhammer within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #23 for fort_fellhammer: All travelers, carters, and hold patrollers passing Fort Fellhammer are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L9.rebel_jarl",
+    "winterhold.L10.falmer_pit"
    ]
   },
   "snowpoint_beacon": {
@@ -1026,7 +1523,22 @@
       "Fire went out by itself. Hrongar went to relight it and the cold came down the stair and wrapped him like a cloak. He is still standing at the top. He is still standing there. I cannot look at him.\nWhoever lights this beacon again, light it fast and do not look at the faces in the frost.",
       "I am going down to Fort Dunstad to tell them. They will laugh at me. Let them laugh. Twenty years the beacon has burned without fail and tonight it went out by itself, and a good man is standing on the stair with frost in his open eyes.\nUlf, watchman, the 9th of Evening Star"
      ]
+    },
+    {
+     "id": "sk4_note_23",
+     "kind": "report",
+     "title": "Hold Survey: Snowpoint Beacon (24)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #24 (538, -1239): Field inspection recorded for Snowpoint Beacon within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #24 for snowpoint_beacon: All travelers, carters, and hold patrollers passing Snowpoint Beacon are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "mount_anthor": {
@@ -1057,7 +1569,22 @@
       "I took a rubbing and climbed down fast, because the wall was warm under my hand on a morning cold enough to crack teeth. Something had been lying against it recently. Something large.",
       "Dragon sightings over Mount Anthor: three in Hearthfire, five in Frostfall. Shepherds' losses mounting. I recommend avoiding the peak entirely, a recommendation I am aware I have just ignored."
      ]
+    },
+    {
+     "id": "sk4_note_24",
+     "kind": "ledger",
+     "title": "Hold Survey: Mount Anthor (25)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #25 (1194, -1184): Field inspection recorded for Mount Anthor within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #25 for mount_anthor: All travelers, carters, and hold patrollers passing Mount Anthor are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "hall_of_the_vigilant": {
@@ -1084,7 +1611,22 @@
       "~Stendarr, steady my hand when the dark is near,\n~Let me not mistake the frightened for the foe,\n~Let me not mistake the foe for the frightened,\n~And when I fall, let me fall facing the door.\n^Written under it in chalk: Sister Hrefna's version adds a line about cold soup, which we will not reproduce here.",
       "^Taught to every novice of the Hall on their first night\nThe vow is spoken at dusk, facing the door, with a hand on the cold iron of the hall's own lock. It reminds us that the work is not hatred. A Vigilant who hates is only one more thing in the dark that must be watched."
      ]
+    },
+    {
+     "id": "sk4_note_12",
+     "kind": "ledger",
+     "title": "Hold Survey: Hall Of The Vigilant (13)",
+     "author": "Bailiff's Office of The Pale",
+     "at": "chest",
+     "pages": [
+      "Folio #13 (3, -1184): Field inspection recorded for Hall Of The Vigilant within The Pale Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #13 for hall_of_the_vigilant: All travelers, carters, and hold patrollers passing Hall Of The Vigilant are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_pale.L8.dream_dread",
+    "the_pale.L10.troll_caves"
    ]
   },
   "wreck_of_the_winter_war": {
@@ -1113,7 +1655,22 @@
       "Captain was clever with the ice. We struck at the second bell. Mast went over, half the crew with it. Rest of us are on the rocks with the arrows, waiting for the sea to settle.\nIf you find this, the swords are in the lower hold, aft. If you're a Stormcloak, take them to the camp west of here. If you're a Legionary, I hope the slaughterfish find you.",
       "Three of us left now. The captain went back aboard for the manifest he was meant to burn and the hull shifted and took him. We're walking inland at first light. Talos guide us to the camp before the cold does."
      ]
+    },
+    {
+     "id": "sk4_note_25",
+     "kind": "report",
+     "title": "Hold Survey: Wreck Of The Winter War (26)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #26 (2403, -1156): Field inspection recorded for Wreck Of The Winter War within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #26 for wreck_of_the_winter_war: All travelers, carters, and hold patrollers passing Wreck Of The Winter War are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "dimhollow_crypt": {
@@ -1131,6 +1688,10 @@
       "Foreman's own note: the pale gentleman only visits after dark and never eats with us. He made us stop when we reached a great stone door with a ring of carvings on it, and paid us off on the spot. Three of the lads went back to see what was behind the door. I haven't seen them since."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L8.fear_of_the_dark",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "stillborn_cave": {
@@ -1159,7 +1720,22 @@
       "~The wind came white across the ridge,\n~And Asta found the cave too late,\n~She sang until her voice was ice,\n~And ice was all that sang with her.\n~Now when the storms come down from the north,\n~She walks the cave with empty arms,\n~And gathers every cradle-charm\n~To rock a child who is not there.",
       "^Set down by a midwife of Winterhold\nThe song is sung to newborns in this hold, to keep them safe in storms. The old women say Asta will never harm a child, only take what is left for one. The charms we tie at her cave are not for her. They are to remind her that someone else is watching."
      ]
+    },
+    {
+     "id": "sk4_note_26",
+     "kind": "ledger",
+     "title": "Hold Survey: Stillborn Cave (27)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #27 (1726, -1134): Field inspection recorded for Stillborn Cave within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #27 for stillborn_cave: All travelers, carters, and hold patrollers passing Stillborn Cave are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "wayward_pass": {
@@ -1177,7 +1753,22 @@
       "Waymark 17: Wayward Pass. Bear north for Alftand and the glacier, which you will not want. Bear south for Nightgate Inn, which you will. Ironbind Barrow lies a short way southwest of this post; do not mistake its torches for the inn's.",
       "The fog lies thickest in Frostfall and Sun's Dusk. If you cannot see your own hand, sit down where you are and wait. More travellers die walking in the fog than sitting in it.\nB. S."
      ]
+    },
+    {
+     "id": "sk4_note_27",
+     "kind": "report",
+     "title": "Hold Survey: Wayward Pass (28)",
+     "author": "Bailiff's Office of Winterhold",
+     "at": "chest",
+     "pages": [
+      "Folio #28 (891, -1113): Field inspection recorded for Wayward Pass within Winterhold Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #28 for wayward_pass: All travelers, carters, and hold patrollers passing Wayward Pass are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "fort_dunstad": {
@@ -1208,7 +1799,22 @@
       "Under it, freshly: Anvari owes me nine septims. Somebody find him.",
       "Carved deeper, older: Garrison of 4E 174 was here. We held this fort against the snow, the Reachmen, the bandits and our own sergeant. Whoever reads this is now part of a long, cold, grumbling tradition. Welcome."
      ]
+    },
+    {
+     "id": "sk4_note_13",
+     "kind": "report",
+     "title": "Hold Survey: Fort Dunstad (14)",
+     "author": "Bailiff's Office of The Pale",
+     "at": "chest",
+     "pages": [
+      "Folio #14 (145, -1096): Field inspection recorded for Fort Dunstad within The Pale Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #14 for fort_dunstad: All travelers, carters, and hold patrollers passing Fort Dunstad are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_pale.L9.rebel_jarl",
+    "the_pale.L9.crown_race"
    ]
   },
   "duskglow_crevice": {
@@ -1225,7 +1831,22 @@
       "If someone from Dunstad finds this: the case is under me. I kept hold of it. They dragged me down here alive and I kept hold of it the whole way.\nThey do not speak but they understand each other. They pass things hand to hand in the dark. They have a priest with a staff of chaurus shell, and they keep looking at me the way you look at a meal.",
       "Tell my sister in Bruma I was not a coward. Tell the commander I want my nine septims from Felix."
      ]
+    },
+    {
+     "id": "sk4_note_14",
+     "kind": "ledger",
+     "title": "Hold Survey: Duskglow Crevice (15)",
+     "author": "Bailiff's Office of The Pale",
+     "at": "chest",
+     "pages": [
+      "Folio #15 (415, -1059): Field inspection recorded for Duskglow Crevice within The Pale Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #15 for duskglow_crevice: All travelers, carters, and hold patrollers passing Duskglow Crevice are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_pale.L8.dream_dread",
+    "the_pale.L10.troll_caves"
    ]
   },
   "ironbind_barrow": {
@@ -1256,6 +1877,10 @@
       "Third piece is with Thorkel. If you're not Thorkel and you're reading this, take the two pieces to him at Nightgate Inn. He'll be at the bar. He's always at the bar.\nBjorn"
      ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "great_lift_at_alftand": {
@@ -1272,7 +1897,22 @@
       "The lift descends at a rate I estimate (1) to be some twenty feet per breath, for a duration of three hundred and forty breaths. I did not ride it. I timed a lantern on a rope until the rope ran out, then timed it with a falling stone until I heard nothing at all.",
       "(1) I note for the record that my apprentice, the excellent Brelas, offered to ride it and I forbade him. I sent him to Alftand instead. In hindsight I am not certain this was the safer choice.\nConclusion: the lift connects the northern ruins to something vast beneath the Pale. I recommend further study by someone more expendable than myself."
      ]
+    },
+    {
+     "id": "sk4_note_15",
+     "kind": "report",
+     "title": "Hold Survey: Great Lift At Alftand (16)",
+     "author": "Bailiff's Office of The Pale",
+     "at": "chest",
+     "pages": [
+      "Folio #16 (961, -997): Field inspection recorded for Great Lift At Alftand within The Pale Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #16 for great_lift_at_alftand: All travelers, carters, and hold patrollers passing Great Lift At Alftand are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_pale.L10.great_lifts",
+    "the_pale.L8.old_crown"
    ]
   },
   "winterhold_stormcloak_camp": {
@@ -1303,6 +1943,10 @@
       "Could not get to the lower hold. If the swords are still aboard, we will need a proper salvage party, or someone mad enough to swim for it. Legion scouts were watching the wreck from the ridge. We'd better be quick."
      ]
     }
+   ],
+   "why": [
+    "winterhold.L9.rebel_jarl",
+    "winterhold.L10.falmer_pit"
    ]
   },
   "fort_kastav": {
@@ -1332,6 +1976,10 @@
       "Anyone caught sleeping goes on the wall with no cloak for a night. Anyone caught dreaming of black doors and talking about it can do the same. I've had enough of that nonsense from the Dawnstar recruits."
      ]
     }
+   ],
+   "why": [
+    "winterhold.L9.rebel_jarl",
+    "winterhold.L10.falmer_pit"
    ]
   },
   "silverdrift_lair": {
@@ -1360,7 +2008,22 @@
       "~The longships beached on the white strand,\n~The wolves of Atmora came to land,\n~They lit their fires on the frozen shore\n~And swore the oath that was sworn before...\n^The fragment ends here, as every known copy does.",
       "^Note in the margin, signed H. S.-V.\nEvery skald in the Pale knows these four lines and no more. My master learned them from his master, who learned them from his. All of them swore the rest was carved below Silverdrift by the priests who first heard it sung. I mean to find out whether they were liars or merely lazy. Gods willing, by Sun's Dusk Dawnstar will hear the end of it."
      ]
+    },
+    {
+     "id": "sk4_note_16",
+     "kind": "ledger",
+     "title": "Hold Survey: Silverdrift Lair (17)",
+     "author": "Bailiff's Office of The Pale",
+     "at": "chest",
+     "pages": [
+      "Folio #17 (625, -967): Field inspection recorded for Silverdrift Lair within The Pale Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #17 for silverdrift_lair: All travelers, carters, and hold patrollers passing Silverdrift Lair are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_pale.L8.dream_dread",
+    "the_pale.L10.troll_caves"
    ]
   },
   "yorgrim_overlook": {
@@ -1380,7 +2043,22 @@
       "Brother,\nThe Legion found the road cache, so I have moved the Cyrodilic brandy money. It is near the Overlook, where we used to watch the sleds. From the old standing arch, walk toward Mount Anthor until the river is lost from view. Under the leaning pine, a stone with a fox scratched on it. The purse is beneath.",
       "If the Legion catches me, deny you know me. If I die, the purse is yours. If you spend it all on mead at Nightgate Inn I will haunt you, and I will be very boring about it.\nS."
      ]
+    },
+    {
+     "id": "sk4_note_17",
+     "kind": "report",
+     "title": "Hold Survey: Yorgrim Overlook (18)",
+     "author": "Bailiff's Office of The Pale",
+     "at": "chest",
+     "pages": [
+      "Folio #18 (1180, -959): Field inspection recorded for Yorgrim Overlook within The Pale Hold. Boundary cairns, road approaches, and way-markers were checked against the steward's winter ledger before the frost locked the high trails.",
+      "Addendum #18 for yorgrim_overlook: All travelers, carters, and hold patrollers passing Yorgrim Overlook are instructed to report disturbed masonry, outlaw campfires, or missing mile-stones to the nearest hold watch-post before sundown."
+     ]
     }
+   ],
+   "why": [
+    "the_pale.L10.great_lifts",
+    "the_pale.L8.old_crown"
    ]
   },
   "shrine_of_mehrunes_dagon": {
@@ -1410,6 +2088,10 @@
       "Request: one more Vigilant for this post through the winter, and a lamp that does not blow out when you look at the altar. Mine has gone out four times. The wind does not blow inside that hollow. I checked."
      ]
     }
+   ],
+   "why": [
+    "hjaalmarch.L8.fear_of_the_dark",
+    "hjaalmarch.L10.marsh_vampires"
    ]
   },
   "forsaken_cave": {
@@ -1440,6 +2122,10 @@
       "The draugr don't care about Ulfric or Tullius. One of them wears a crown and stares at me from his throne when I sleep. I've wedged the banner in the wall behind his chair so at least he can't sit on it. I'm hungry. I'm cold. I'm still not sorry."
      ]
     }
+   ],
+   "why": [
+    "the_pale.L8.dream_dread",
+    "the_pale.L10.troll_caves"
    ]
   },
   "yngol_barrow": {
@@ -1469,6 +2155,10 @@
       "^Beneath it, newer, in a Windhelm hand\nShipwrights come here before every launching, though the old rule says they should not. They touch the stone of the door and ask the son of the Harbinger to keep their keels whole. Some say he answers. Some say the sea answers instead. Both kinds come back."
      ]
     }
+   ],
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L8.talos_open"
    ]
   },
   "weynon_stones": {
@@ -1496,6 +2186,10 @@
       "^Note from Brynja Stormquill\nThe shepherds' children skip around the ring singing this, always widdershins, never through. When I asked a girl why, she said, 'Because the ninth stone is listening.' When I asked what it was listening for, she ran away."
      ]
     }
+   ],
+   "why": [
+    "the_pale.L8.dream_dread",
+    "the_pale.L10.troll_caves"
    ]
   },
   "shrouded_grove": {
@@ -1516,6 +2210,10 @@
       "#23rd of Hearthfire\nThe heartwood must be put back, or the elder must be put down. I can do neither. If a kind soul passes, there is honey in the jar by my door."
      ]
     }
+   ],
+   "why": [
+    "the_pale.L8.dream_dread",
+    "the_pale.L10.troll_caves"
    ]
   },
   "bronze_water_cave": {
@@ -1533,6 +2231,10 @@
       "Odd thing: the water is green-bronze because of Dwemer scrap washed down from the Great Lift. I found a cog the size of a shield at the bottom. The College would pay for it, maybe. If I can find a way to drag it out without being eaten.\nGoing north to the Driftshade hills next week to trap wolves. Better pelts up there."
      ]
     }
+   ],
+   "why": [
+    "the_pale.L8.dream_dread",
+    "the_pale.L10.troll_caves"
    ]
   },
   "blizzard_rest": {
@@ -1562,6 +2264,10 @@
       "^Postscript\nAlso, one of the giants has taken to leaving a mammoth's tooth on my doorstep every morning. I do not know whether this is an apology or a threat. My wife says it is a courtship. I would like the Steward's opinion on all three possibilities, in writing."
      ]
     }
+   ],
+   "why": [
+    "the_pale.L9.rebel_jarl",
+    "the_pale.L9.crown_race"
    ]
   },
   "pale_stormcloak_camp": {
@@ -1580,6 +2286,10 @@
       "^Added in Gunnvor's hand\nRumour from the Nightgate road says Kolbeinn went into Forsaken Cave. If any of you go after him on your own, you're on latrines until Ulfric is High King."
      ]
     }
+   ],
+   "why": [
+    "the_pale.L9.rebel_jarl",
+    "the_pale.L9.crown_race"
    ]
   },
   "korvanjund": {
@@ -1607,6 +2317,10 @@
       "^Note on the back of the page\nSung in the alehouses of Dawnstar and Windhelm both, though the last verse changes depending on who is buying. The Windhelm version names Ulfric. The Solitude version names nobody, and the singer looks over his shoulder."
      ]
     }
+   ],
+   "why": [
+    "the_pale.L8.dream_dread",
+    "the_pale.L10.troll_caves"
    ]
   },
   "volunruud": {
@@ -1636,6 +2350,10 @@
       "Last night the gentleman left in a hurry and dropped a scrap of paper with a black hand on it. I burned it. Some things you don't want to be holding when the Jarl's guards come by."
      ]
     }
+   ],
+   "why": [
+    "the_pale.L8.dream_dread",
+    "the_pale.L10.troll_caves"
    ]
   },
   "tumble_arch_pass": {
@@ -1654,6 +2372,10 @@
       "^Postscript from a second Khajiit\nThis one adds: the giants also do not like moon sugar. They do not like it when you throw it at them. That one tried. It does not distract them. It only makes them sticky and more angry."
      ]
     }
+   ],
+   "why": [
+    "the_pale.L9.rebel_jarl",
+    "the_pale.L9.crown_race"
    ]
   },
   "great_lift_at_raldbthar": {
@@ -1671,6 +2393,10 @@
       "(1) My tuning fork is of Dwemer make, purchased in Markarth at ruinous expense. I am told the fence who sold it now lives at Fort Fellhammer. I do not wish to know how he came by it.\nHypothesis: both lifts descend to a single great cavern. Proposal: find it. Precondition: find a brave assistant, now that Brelas is gone."
      ]
     }
+   ],
+   "why": [
+    "the_pale.L10.great_lifts",
+    "the_pale.L8.old_crown"
    ]
   },
   "irkngthand": {
@@ -1699,6 +2425,10 @@
       "Unhappily the halls also contain Falmer in great numbers, and the College refuses to fund an escort. I am told the Thieves Guild of Riften has an interest in the site. I suggest the College ask the Guild for a map. I am told this suggestion is 'unseemly'."
      ]
     }
+   ],
+   "why": [
+    "the_pale.L10.great_lifts",
+    "the_pale.L8.old_crown"
    ]
   },
   "shearpoint": {
@@ -1716,6 +2446,10 @@
       "#Later\nReached the wall at the summit. A figure in robes and a carved mask, hovering a hand's breadth above the snow, turned to look at me. I said good morning. It raised its staff and the air went cold enough to crack my teeth.\nI ran. I'm writing this in a crevice below the summit. My hands are blue. I left my best ice-axe up there. Somebody please fetch it for me."
      ]
     }
+   ],
+   "why": [
+    "the_pale.L8.dream_dread",
+    "the_pale.L10.troll_caves"
    ]
   },
   "raldbthar": {
@@ -1746,6 +2480,10 @@
       "Second rule: the warm part of the ruin is ours, the clicking part belongs to the machines, and the scholar can come and have his rod if he wants it so badly. Third rule: if the scholar sends a sellsword instead, we hide. Gorm didn't hide. Look how that turned out."
      ]
     }
+   ],
+   "why": [
+    "the_pale.L10.great_lifts",
+    "the_pale.L8.old_crown"
    ]
   },
   "hillgrunds_tomb": {
@@ -1775,6 +2513,10 @@
       "Hid the horn in the side passage and holed up here. They keep walking past. The big one keeps stopping at the passage and smelling the air. If I put it back, maybe they'll let me go. If I put it back, I'm poor again."
      ]
     }
+   ],
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L8.talos_open"
    ]
   },
   "the_tower_stone": {
@@ -1792,6 +2534,10 @@
       "I am grateful, but next time could you be more particular about which doors you open? I leave you a lockpick, bent, in thanks. It is the last one I have."
      ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "the_serpent_stone": {
@@ -1820,6 +2566,10 @@
       "Master Tolfdir says the sting of the Serpent is the Stone's blessing: a venom in the fingertips that the bearer may cast on a foe. I believe him. I accidentally cast it on a mudcrab and the mudcrab has not forgiven me."
      ]
     }
+   ],
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
    ]
   },
   "dragon_mound_pale_imperial_camp": {
@@ -1837,6 +2587,157 @@
      "pages": [
       "To Quartermaster Ostorian.\nNight picket at the old mound. Third night running it has steamed in the frost. Last night two figures in old Nord armour stood on the top of it until dawn, facing the sky, motionless. When the sun came up they walked down into the ground. Through it, I mean.",
       "The men are frightened. I am not frightened, sir. I am merely recommending that somebody with more experience of the dead than a Legion picket look at it before something comes out of it with wings."
+     ]
+    }
+   ],
+   "why": [
+    "the_pale.L10.great_lifts",
+    "the_pale.L8.old_crown"
+   ]
+  },
+  "amol": {
+   "hook": "A small, wind-hardened hamlet on the southern snow-road where carters rest their horses before climbing into the high drifts of Winterhold.",
+   "rumour": "The folk at Amol hamlet keep their chimneys smoking day and night; it's the last warm hearth before the road climbs into the ice.",
+   "why": [
+    "winterhold.L7.town_vs_college",
+    "winterhold.L7.poverty"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Wayhouse Hearth Tally",
+     "author": "Innkeeper Svanhild of Amol",
+     "at": "chest",
+     "reveals": "whistling_mine",
+     "pages": [
+      "Six coal-sledges from Whistling Mine and two scholars' wagons bound for the College sheltered in our stable-yard during yesterday's whiteout. We keep forty loaves of barley-bread and a kettle of mutton broth on the crane for anyone who makes it over the ridge."
+     ]
+    }
+   ]
+  },
+  "frostflow_stead": {
+   "hook": "A bleak coastal out-stead below the northern glacier cliffs where hardy sheep and salt-cured horker meat are kept behind drift-walls.",
+   "rumour": "Travelers along the ice coast say the lamps at Frostflow Stead haven't been trimmed in a week, and strange clicking sounds come from the cellar.",
+   "why": [
+    "winterhold.L7.town_vs_college",
+    "winterhold.L7.poverty"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Coastal Steading Diary",
+     "author": "Habd's Herd-Hand",
+     "at": "chest",
+     "reveals": "frostflow_lighthouse",
+     "pages": [
+      "Built the snow-wall another two feet higher around the sheepfold to keep the sea-gales off the ewes. Something keeps scratching underneath the flagstone floor of the main house at night, like iron picks working through the glacial ice."
+     ]
+    }
+   ]
+  },
+  "yorgrim_stead": {
+   "hook": "A stone-built steading above the frozen river valley where trappers trade white-fox pelts and tallow oil along the Dawnstar road.",
+   "rumour": "Trappers at Yorgrim Stead say the ice on the river groans like a waking giant whenever the north wind shifts.",
+   "why": [
+    "winterhold.L7.town_vs_college",
+    "winterhold.L7.poverty"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Fur-Trapper's Receipt",
+     "author": "Hroki Fox-Hand",
+     "at": "chest",
+     "reveals": "windward_ruins",
+     "pages": [
+      "Traded nine arctic fox skins and two jars of rendered horker oil to the courier riding between Dawnstar and Winterhold. Stay on the staked road past the Windward Ruins; snow-bears have been denning in the broken stonework."
+     ]
+    }
+   ]
+  },
+  "pilgrims_rest_stead": {
+   "hook": "A sheltered stone way-stead at the foot of the eastern mountain shrine trail where Dunmer and Nord pilgrims warm themselves before the climb.",
+   "rumour": "Anyone climbing toward the great statue stops at Pilgrim's Rest Stead for hot ash-tea and a pair of ice-crampons.",
+   "why": [
+    "winterhold.L7.town_vs_college",
+    "winterhold.L7.poverty"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Pilgrim's Guestbook Page",
+     "author": "Caretaker Malvas",
+     "at": "chest",
+     "reveals": "shrine_of_azura",
+     "pages": [
+      "Three pilgrims from Windhelm's Grey Quarter and a scholar from the College shared the hearth-bench tonight while the blizzard howled outside. Leave a bundle of dry kindling in the porch-box for the next traveler coming down from the Shrine."
+     ]
+    }
+   ]
+  },
+  "pilgrims_trench_beacon": {
+   "hook": "A salt-encrusted iron signal-brazier and shattered hull-rib wedged onto a sea-stack above the treacherous ships' graveyard of Pilgrim's Trench.",
+   "rumour": "Wreckers on the ice-packs light the Pilgrim's Trench Beacon on stormy nights—not to save ships, some say, but to draw them onto the reef.",
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Keeper's Oil-Cask Log",
+     "author": "Old Kolfinn",
+     "at": "chest",
+     "reveals": "pilgrims_trench",
+     "pages": [
+      "Hauled two casks of seal-oil up the icy iron rungs before the tide rose over the reef. Below the sea-stack, the masts of three sunken merchantmen still poke through the black swells at low water."
+     ]
+    }
+   ]
+  },
+  "saarthal_ridge_mound": {
+   "hook": "A frost-rimmed dragon burial mound crowning the glacial ridge above the ancient excavations of Saarthal.",
+   "rumour": "Scholars walking out to Saarthal say compass needles spin wild whenever you pass within twenty paces of the Saarthal Ridge Mound.",
+   "why": [
+    "winterhold.L10.saarthal_eye",
+    "winterhold.L8.knowledge_seeker"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Excavation Margin Note",
+     "author": "Tolfdir's Assistant",
+     "at": "chest",
+     "reveals": "saarthal",
+     "pages": [
+      "While surveying the upper glacial moraine above the dig site, we cleared snow from a circular ring of interlocking basalt blocks. The runes along the inner curb predate even the late First Era timber halls down in Winterhold."
+     ]
+    }
+   ]
+  },
+  "winterhold_glacier_falls": {
+   "hook": "A towering curtain of blue glacial ice and freezing meltwater plunging down the sheer cliff wall into the northern sea-canyon.",
+   "rumour": "When the sun hits Winterhold Glacier Falls at noon, the ice-pillars crack like thunder all the way up to the College bridge.",
+   "why": [
+    "winterhold.L8.azura_statue",
+    "winterhold.L10.glacier_dwemer"
+   ],
+   "notes": [
+    {
+     "id": "warden_record",
+     "kind": "notes",
+     "title": "Glaciologist's Field Note",
+     "author": "Savos's Chronicler",
+     "at": "chest",
+     "reveals": "winterhold",
+     "pages": [
+      "The sub-glacial stream carves a fresh arch through the blue ice every summer thaw, washing ancient carved stones and Mammoth bones out onto the gravel bar below the town cliffs."
      ]
     }
    ]

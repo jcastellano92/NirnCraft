@@ -1,0 +1,203 @@
+{
+  "region": "skyrim/the_pale",
+  "why": [
+    "the_pale.L7.sleepless_town",
+    "the_pale.L7.miners_and_owners",
+    "the_pale.L9.nightmares",
+    "the_pale.L10.nightmare_temple"
+  ],
+  "hook": {
+    "place": "dawnstar",
+    "places": [
+      "dawnstar",
+      "nightgate_inn",
+      "loreius_farm",
+      "duskglow_crevice",
+      "pale_imperial_camp"
+    ],
+    "npc": "the_pale_hook_npc",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "the_pale_hook_npc",
+      "name": "Watch-Captain Horik",
+      "role": "guard",
+      "place": "dawnstar",
+      "greet": "Three nights running the harbour-watch has woken screaming while the mine shifts stand idle at the adit gates."
+    },
+    {
+      "id": "the_pale_assays_npc",
+      "name": "Assayer Frida",
+      "role": "merchant",
+      "place": "dawnstar",
+      "greet": "Both mines blame the bad dreams for shorting the smelting furnaces, yet someone is hauling refined ingots out through the snow-passes."
+    },
+    {
+      "id": "the_pale_warden_npc",
+      "name": "Beacon-Keeper Sten",
+      "role": "priest",
+      "place": "nightgate_inn",
+      "greet": "The old fane above the harbor leaks a grey miasma whenever the sea-fog rolls inland."
+    }
+  ],
+  "bosses": {
+    "story_the_pale_smuggler_reaver": {
+      "name": "Gorm the Quicksilver-Thief",
+      "entity": "minecraft:Vindicator",
+      "place": "fort_dunstad",
+      "hp": 115
+    },
+    "story_the_pale_dream_curator": {
+      "name": "Prelate Thonir of the Miasma",
+      "entity": "minecraft:Evoker",
+      "place": "nightcaller_temple",
+      "hp": 140
+    }
+  },
+  "scenes": {
+    "the_pale_white_hall_accord": [
+      "Watch-Captain Horik: The miasma censer in the cliff-temple is shattered, and the stolen quicksilver ingots are back on the harbour scales.",
+      "Assayer Frida: Both mine crews have signed the new shift-charter now that the White Hall levies are audited.",
+      "Watch-Captain Horik: Dawnstar sleeps in peace again, and the northern beacons burn out to the sea-ice."
+    ]
+  },
+  "quests": [
+    {
+      "id": "story_the_pale_1",
+      "title": "story.skycraft.the_pale_1.title",
+      "requires": [],
+      "places": [
+        "dawnstar",
+        "red_road_pass",
+        "nightgate_inn"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "dawnstar",
+          "objective": "Hear the harbour watch-captain's report on the sleepless shifts and missing ore carts."
+        },
+        {
+          "id": 20,
+          "place": "red_road_pass",
+          "objective": "Recover the ambushed assay ledger from the snow-drifts at Red Road Pass."
+        },
+        {
+          "id": 30,
+          "place": "nightgate_inn",
+          "objective": "Consult the beacon-keeper at Nightgate Inn regarding the old cliff-temple wards."
+        }
+      ],
+      "consequence": "guard_banner:the_pale_harbour_watch",
+      "why": [
+        "the_pale.L7.sleepless_town",
+        "the_pale.L7.miners_and_owners"
+      ]
+    },
+    {
+      "id": "story_the_pale_2",
+      "title": "story.skycraft.the_pale_2.title",
+      "requires": [
+        "story_the_pale_1"
+      ],
+      "places": [
+        "dawnstar",
+        "fort_dunstad",
+        "wreck_of_the_brinehammer"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "dawnstar",
+          "objective": "Audit the disputed smelter tallies with the harbour assayer."
+        },
+        {
+          "id": 20,
+          "place": "fort_dunstad",
+          "objective": "Reclaim the diverted quicksilver strongboxes from the raiders at Fort Dunstad."
+        },
+        {
+          "id": 30,
+          "place": "wreck_of_the_brinehammer",
+          "objective": "Search the Wreck of the Brinehammer for the smuggler's coastal signal-chart."
+        }
+      ],
+      "consequence": "market_tariff:dawnstar_mines_reopened",
+      "why": [
+        "the_pale.L7.miners_and_owners",
+        "the_pale.L9.rebel_jarl"
+      ]
+    },
+    {
+      "id": "story_the_pale_3",
+      "title": "story.skycraft.the_pale_3.title",
+      "requires": [
+        "story_the_pale_2"
+      ],
+      "places": [
+        "volunruud",
+        "korvanjund",
+        "frostmere_crypt"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "korvanjund",
+          "objective": "Retrieve the ancient seal-rubbing from the outer gallery of Korvanjund."
+        },
+        {
+          "id": 20,
+          "place": "volunruud",
+          "objective": "Recover the ceremonial ward-chisel from the burial chamber of Volunruud."
+        },
+        {
+          "id": 30,
+          "place": "frostmere_crypt",
+          "objective": "Purge the frost-cultists tapping the root-wards in Frostmere Crypt."
+        }
+      ],
+      "consequence": "patrol_route:the_pale_south_pass_open",
+      "why": [
+        "the_pale.L8.old_crown",
+        "the_pale.L9.crown_race"
+      ]
+    },
+    {
+      "id": "story_the_pale_4",
+      "title": "story.skycraft.the_pale_4.title",
+      "requires": [
+        "story_the_pale_3"
+      ],
+      "places": [
+        "dawnstar",
+        "nightcaller_temple",
+        "tower_of_mzark"
+      ],
+      "finale": true,
+      "stages": [
+        {
+          "id": 10,
+          "place": "tower_of_mzark",
+          "objective": "Draw a resonant aetherial condenser from the lift-head at the Tower of Mzark."
+        },
+        {
+          "id": 20,
+          "place": "nightcaller_temple",
+          "objective": "Shatter the nightmare censer inside Nightcaller Temple and defeat its prelate."
+        },
+        {
+          "id": 30,
+          "place": "dawnstar",
+          "objective": "Proclaim the harbour-and-mine settlement before the White Hall in Dawnstar."
+        }
+      ],
+      "consequence": "world_state:the_pale_resolved",
+      "why": [
+        "the_pale.L8.dream_dread",
+        "the_pale.L9.nightmares",
+        "the_pale.L10.nightmare_temple"
+      ]
+    }
+  ]
+}

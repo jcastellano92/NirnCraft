@@ -1,6 +1,41 @@
 {
   "id": "windhelm",
   "base": "java",
+  "sil": "bridge-palace-grey-quarter",
+  "names": {
+    "inn": "candlehearth_hall",
+    "store": "sadris_used_wares",
+    "smithy": "windhelm_blacksmith",
+    "palace": "palace_of_the_kings",
+    "temple": "temple_of_talos",
+    "player_home": "hjerim",
+    "alchemist": "the_white_phial",
+    "cornerclub": "new_gnisis_cornerclub",
+    "dead_hall": "windhelm_hall_of_the_dead",
+    "barracks": "windhelm_barracks",
+    "bloodworks": "windhelm_bloodworks",
+    "clan_cruel_sea": "house_cruel_sea",
+    "clan_shatter_shield": "house_shatter_shield",
+    "curiosities": "calixtos_curiosities",
+    "counting_house": "niranyes_counting_house",
+    "assemblage": "argonian_assemblage",
+    "eec_office": "windhelm_east_empire_office",
+    "shipping_office": "shatter_shield_office",
+    "gate_bridge": "windhelm_great_bridge",
+    "harbour_quay": "windhelm_harbour_quay",
+    "palace_war_room": "palace_of_the_kings_war_room"
+  },
+  "innKey": "candlehearth_hall",
+  "buildings": [
+    {"kind": "manor", "at": [-52, -16], "size": [11, 13], "face": "E", "flags": ["upper", "rich"], "name": "windhelm_violas_house"},
+    {"kind": "house", "at": [-52, 22], "size": [9, 11], "face": "E", "flags": ["upper"], "name": "windhelm_brunwulfs_house"},
+    {"kind": "house", "at": [48, 36], "size": [9, 11], "face": "W", "culture": "dunmer", "name": "windhelm_atherons_house"},
+    {"kind": "house", "at": [48, -14], "size": [9, 11], "face": "W", "culture": "dunmer", "name": "windhelm_suvaris_house"}
+  ],
+  "plazas": [
+    {"at": [-26, 48], "size": 11, "variant": 0, "stalls": 2, "name": "windhelm_stone_quarter_market"},
+    {"at": [62, -22], "size": 9, "variant": 0, "stalls": 1, "name": "windhelm_grey_quarter_court"}
+  ],
   "nets": [
     {"type": "loop", "at": [0, 10], "rx": 70, "rz": 66, "wobble": 6, "lobes": 3, "phase": 1.2, "width": 3, "rank": 1, "tag": "ring"}
   ],
@@ -11,6 +46,14 @@
     {"at": [-50, 50], "r": 22, "zone": "craft"}
   ],
   "fabric": {"radius": 92, "target": 0.55},
+  "queue": [
+    {"kind": "house", "name": "windhelm_belyn_hlaalus_house", "on": "ring"},
+    {"kind": "house", "name": "windhelm_avrusas_house", "on": "ring"},
+    {"kind": "house", "name": "windhelm_torstens_study", "on": "ring"},
+    {"kind": "house", "name": "windhelm_ulundils_lodging", "on": "ring"},
+    {"kind": "house", "name": "windhelm_arivanyas_quarters", "on": "ring"},
+    {"kind": "house", "name": "windhelm_revyn_sadris_house", "on": "ring"}
+  ],
   "features": [
     {"type": "statue", "theme": "divine:talos", "where": "square"},
     {"type": "shrine", "theme": "divine:talos", "count": 2, "where": "free"},
@@ -22,5 +65,33 @@
     {"type": "market", "where": "free"},
     {"type": "bench", "where": "square"},
     {"type": "garden", "where": "free"}
-  ]
+  ],
+  "titles": {
+    "sadris_used_wares": "Grey Quarter Sundries",
+    "windhelm_hall_of_the_dead": "Windhelm Hall of the Dead",
+    "windhelm_barracks": "Stormcloak Garrison Barracks",
+    "windhelm_bloodworks": "The Bloodworks",
+    "house_cruel_sea": "House of Clan Cruel-Sea",
+    "house_shatter_shield": "House of Clan Shatter-Shield",
+    "calixtos_curiosities": "Hall of Northern Curiosities",
+    "niranyes_counting_house": "Stone Quarter Counting House",
+    "argonian_assemblage": "Harbour Dockworkers' Hall",
+    "windhelm_east_empire_office": "East Empire Harbour Office",
+    "shatter_shield_office": "Northern Shipping Ledger House",
+    "windhelm_great_bridge": "Great Bridge of Ysgramor",
+    "windhelm_harbour_quay": "White River Ice-Quay",
+    "palace_of_the_kings_war_room": "Palace of the Kings War Hall",
+    "windhelm_violas_house": "Snow-Stone Manor",
+    "windhelm_brunwulfs_house": "Veteran's Stone House",
+    "windhelm_atherons_house": "Ash-Lane Townhouse",
+    "windhelm_suvaris_house": "Dock-Clerk's House",
+    "windhelm_stone_quarter_market": "Stone Quarter Market",
+    "windhelm_grey_quarter_court": "Grey Quarter Court",
+    "windhelm_belyn_hlaalus_house": "Red-Year Refugee House",
+    "windhelm_avrusas_house": "Apothecary's Lodging",
+    "windhelm_torstens_study": "Sea-Captain's House",
+    "windhelm_ulundils_lodging": "Stablemaster's Townhouse",
+    "windhelm_arivanyas_quarters": "Coachman's Quarters",
+    "windhelm_revyn_sadris_house": "Merchant's Alley House"
+  }
 }

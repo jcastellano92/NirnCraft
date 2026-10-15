@@ -13,12 +13,56 @@
       "rorikstead",
       "valtheim_towers",
       "whitewatch_tower",
-      "hamvirs_rest",
-      "fellglow_keep",
+      "swindlers_den",
+      "white_river_watch",
       "brood_cavern"
     ],
     "npc": "whiterun_hook_npc",
     "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "whiterun_hook_npc",
+      "name": "Warden Hrogar",
+      "role": "guard",
+      "place": "riverwood",
+      "greet": "Hold the southern bridge! Whiterun's gates are barred to unvouched travellers until the barrow boundary-tablets are accounted for."
+    },
+    {
+      "id": "whiterun_quartermaster_npc",
+      "name": "Quartermaster Sigrid",
+      "role": "steward",
+      "place": "whiterun",
+      "greet": "Gray-Mane and Battle-Born factors have been bidding against the hold's own granaries while toll-takers choke the eastern river."
+    },
+    {
+      "id": "whiterun_bailiff_npc",
+      "name": "Bailiff Torsten",
+      "role": "guard",
+      "place": "rorikstead",
+      "greet": "The western farms pay twice—once to the Jarl's tithe-wagon and once to raiders riding out of Fort Greymoor."
+    }
+  ],
+  "bosses": {
+    "story_whiterun_valtheim_captain": {
+      "name": "Halvar the Toll-Reaver",
+      "entity": "minecraft:Vindicator",
+      "place": "valtheim_towers",
+      "hp": 110
+    },
+    "story_whiterun_greymoor_usurper": {
+      "name": "Vignar's Disavowed Factor",
+      "entity": "minecraft:Evoker",
+      "place": "fort_greymoor",
+      "hp": 130
+    }
+  },
+  "scenes": {
+    "whiterun_council_truce": [
+      "Jarl Balgruuf: Both clans have bled the plains white while stormclouds gather on both borders.",
+      "Quartermaster Sigrid: The seized ledgers from Halted Stream and Fort Greymoor leave neither house room to deny the compact.",
+      "Jarl Balgruuf: Then seal the grain-charter and light the western watch-fires. Whiterun stands whole."
+    ]
   },
   "quests": [
     {
@@ -91,7 +135,7 @@
       "id": "story_whiterun_3",
       "title": "story.skycraft.whiterun_3.title",
       "requires": [
-        "story_whiterun_2"
+        "story_whiterun_4"
       ],
       "places": [
         "whiterun",
@@ -120,6 +164,40 @@
       "why": [
         "whiterun.L9.siege_point",
         "whiterun.L7.warrior_hall"
+      ]
+    },
+    {
+      "id": "story_whiterun_4",
+      "title": "story.skycraft.whiterun_4.title",
+      "requires": [
+        "story_whiterun_2"
+      ],
+      "places": [
+        "rorikstead",
+        "fort_greymoor",
+        "honningbrew_meadery"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "rorikstead",
+          "objective": "Take testimonies from the western bailiff on the hijacked grain wagons."
+        },
+        {
+          "id": 20,
+          "place": "fort_greymoor",
+          "objective": "Reclaim the western granary strongbox from the mercenaries at Fort Greymoor."
+        },
+        {
+          "id": 30,
+          "place": "honningbrew_meadery",
+          "objective": "Intercept the factor's courier outside Honningbrew Meadery and seize the cipher key."
+        }
+      ],
+      "consequence": "market_tariff:whiterun_grain_restored",
+      "why": [
+        "whiterun.L7.three_districts",
+        "whiterun.L7.caravans_outside"
       ]
     }
   ]

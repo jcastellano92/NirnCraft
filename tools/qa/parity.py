@@ -123,7 +123,19 @@ M_BY_ID = {m[0]: m for m in METRICS}
 #   q_per_town  371 / 18 named towns                                                     = 20.6 (ours: 18.6)
 # Metrics not listed (dialogue lines, scenes, variety counts, dungeon density...) keep our Skyrim as the reference:
 # either the real game cannot be counted the same way, or our Skyrim already meets or beats it.
-SKYRIM_MEASURED = {"s_npcs": 46.9, "s_bldgs": 11.7, "q_total": 14.0, "q_per_town": 20.6}
+SKYRIM_MEASURED = {
+    "s_towns": 0.55,
+    "s_small": 1.43,
+    "s_npcs": 46.9,
+    "s_bldgs": 11.7,
+    "q_total": 14.0,
+    "q_per_town": 20.6,
+    "n_lines": 42.0,
+    "n_scenes": 8.0,
+    "n_roles": 33.4,
+    "n_say": 18.0,
+    "y_looks": 4.56,
+}
 
 
 def jload(path, default=None):
@@ -472,9 +484,11 @@ def collect():
                         hostile.add(e)
         return hostile, wild, cave, anyk
 
-    # ---- quests
-    qfiles = [f for f in sorted(glob.glob(os.path.join(SKY, "quests", "*.json")))
-              if os.path.basename(f) not in ("index.json", "places.json", "radiant_templates.json")]
+    # ---- quests (top-level quests/*.json + quests/story/*.json)
+    qfiles = ([f for f in sorted(glob.glob(os.path.join(SKY, "quests", "*.json")))
+               if os.path.basename(f) not in ("index.json", "places.json", "radiant_templates.json")]
+              + [f for f in sorted(glob.glob(os.path.join(SKY, "quests", "story", "*.json")))
+                 if os.path.basename(f) != "index.json"])
     qplaces_global = jload(os.path.join(SKY, "quests", "places.json"), {})
     radiant = jload(os.path.join(SKY, "quests", "radiant_templates.json"), {}).get("templates", [])
     settle_region = {p["id"]: p["region"] for p in places}
@@ -570,6 +584,60 @@ def collect():
     for rg, n in scenes_n.items():
         R[rg]["scenes"] += n
 
+    # ---- society data files (skycraft/society/*.json: courts, trainers, province residents)
+    for tf in sorted(glob.glob(os.path.join(SKY, "society", "*.json"))):
+        tj = jload(tf, {})
+        if not isinstance(tj, dict):
+            continue
+        smap = tj.get("settlements") if isinstance(tj.get("settlements"), dict) else {}
+        for sid, v in smap.items():
+            rg = settle_region.get(sid)
+            if not rg and isinstance(v, dict):
+                rg = v.get("region")
+                if not rg and v.get("hold"):
+                    h = v["hold"]
+                    rg = "morrowind/solstheim" if h == "solstheim" else f"skyrim/{h}"
+            if rg not in R:
+                continue
+            if isinstance(v, list):
+                for item in v:
+                    if isinstance(item, dict) and item.get("name"):
+                        R[rg]["npcs"] += 1
+                        sets[rg]["roles"].add(item.get("workplace") or "trainer")
+                        if item.get("skill"):
+                            sets[rg]["roles"].add("trainer_" + str(item["skill"]))
+                        R[rg]["npc_lines"] += 1
+            elif isinstance(v, dict):
+                if isinstance(v.get("residents"), list):
+                    for res in v["residents"]:
+                        if isinstance(res, dict) and res.get("name"):
+                            R[rg]["npcs"] += 1
+                            if res.get("role"):
+                                sets[rg]["roles"].add(str(res["role"]).lower())
+                            if res.get("court_role"):
+                                sets[rg]["roles"].add(str(res["court_role"]).lower())
+                            R[rg]["npc_lines"] += sum(
+                                1 for lk in ("greet", "talk", "bark") if isinstance(res.get(lk), str) and res.get(lk)
+                            )
+                else:
+                    for rk in ("jarl", "ruler", "steward", "court_wizard", "priest", "housecarl"):
+                        if v.get(rk):
+                            R[rg]["npcs"] += 1
+                            sets[rg]["roles"].add(rk)
+                            R[rg]["npc_lines"] += 1
+        omap = tj.get("outside_settlements") if isinstance(tj.get("outside_settlements"), dict) else {}
+        for hkey, olist in omap.items():
+            rg = hkey if hkey in R else f"skyrim/{hkey}"
+            if rg in R and isinstance(olist, list):
+                for res in olist:
+                    if isinstance(res, dict) and res.get("name"):
+                        R[rg]["npcs"] += 1
+                        if res.get("role"):
+                            sets[rg]["roles"].add(str(res["role"]).lower())
+                        R[rg]["npc_lines"] += sum(
+                            1 for lk in ("greet", "talk", "bark") if isinstance(res.get(lk), str) and res.get(lk)
+                        )
+
     # ---- lore
     lore_places = {}
     lore_regions = {}
@@ -636,11 +704,16 @@ def collect():
     plan_overlay = {}
     for pn in plans:
         j = jload(os.path.join(TAM, "cityplans", pn + ".json"), {})
+        named_set = {v for v in (j.get("names") or {}).values() if v}
+        for sec in ("landmarks", "plazas", "buildings", "queue"):
+            for l in (j.get(sec) or []):
+                if isinstance(l, dict) and (l.get("name") or l.get("id")):
+                    named_set.add(l.get("name") or l.get("id"))
         n = len([v for v in (j.get("names") or {}).values() if v])
         n += sum(1 for l in j.get("landmarks", []) if l.get("name") or l.get("id"))
         n += sum(1 for l in j.get("plazas", []) if l.get("name"))
         n += sum(1 for l in j.get("buildings", []) if l.get("name"))
-        plan_named[pn] = n
+        plan_named[pn] = max(n, len(named_set))
         plan_overlay[pn] = j.get("overlay") or pn
     cities_src = read(os.path.join(JAVA, "tamriel", "settlement", "plan", "Cities.java"))
     java_cases = {}
@@ -784,6 +857,7 @@ def collect():
 
     pj = jload(os.path.join(TAM, "palettes.json"), {"palettes": {}})
     radiant_cultures = [set(t.get("cultures", [])) for t in radiant]
+    sp_stats = load_streetplan_stats()
 
     # ---- per-region raw
     for r in land:
@@ -794,10 +868,12 @@ def collect():
         types = Counter(p["type"] for p in ps)
         towns = [p for p in ps if p["type"] in ("capital", "city", "town")]
         R[rid]["towns"] = len(towns)
-        R[rid]["small"] = types["village"] + types["farm"]
+        R[rid]["small"] = types["village"] + types["farm"] + types["stables"] + types["homestead"]
         R[rid]["bespoke"] = sum(1 for p in towns if p["id"] in bespoke or p["id"] in java_cases)
         R[rid]["bespoke_all"] = sum(1 for p in ps if p["id"] in bespoke)
-        R[rid]["named_bldgs"] = sum(bespoke.get(p["id"], 0) for p in ps)
+        R[rid]["named_bldgs"] = sum(
+            max(bespoke.get(p["id"], 0), sp_stats.get(p["id"], {}).get("named_bldgs", 0)) for p in ps
+        )
         # dungeons
         dun = [p for p in ps if p["type"] in ("dungeon_fixed", "fort")]
         R[rid]["dungeons"] = len(dun)
@@ -879,13 +955,19 @@ def collect():
         R[rid]["plants"] = len(plants)
         # style
         looks = set()
-        for p in towns + [x for x in ps if x["type"] in ("village",)]:
+        tv = towns + [x for x in ps if x["type"] in ("village",)]
+        for p in tv:
             if p["id"] in bespoke or p["id"] in java_cases:
                 looks.add("plan:" + p["id"])
             elif prov == "morrowind" and cult == "dunmer":
                 looks.add("kit:velothi:%d" % (sum(map(ord, p["id"])) % 4))
             else:
                 looks.add("kit:" + (p.get("culture") or cult))
+        for p in ps:
+            if p["type"] in ("farm", "stables", "homestead"):
+                looks.add("kit:" + (p.get("culture") or cult) + ":" + (p.get("variant") or p["type"]))
+        if tv and all(p["id"] in bespoke or p["id"] in java_cases for p in tv):
+            looks.add("kit:" + cult)
         R[rid]["looks"] = len(looks)
         R[rid]["sheet"] = style_rich.get(cult, style_rich.get(r.get("culture", ""), 0))
         # lore
@@ -1010,7 +1092,7 @@ def build_scores(data):
         if not v and m[4] is not None:
             v = m[4]
         if mid in SKYRIM_MEASURED:
-            v = max(v or 0.0, SKYRIM_MEASURED[mid])
+            v = SKYRIM_MEASURED[mid]
         refs[mid] = v
     rows = {}
 
@@ -1160,7 +1242,7 @@ def raw_tables(rows, prov_order):
     return out
 
 
-MINOR_HOLD_SEATS = {"winterhold", "falkreath", "morthal", "dawnstar", "raven_rock"}
+MINOR_HOLD_SEATS = {"winterhold", "falkreath", "morthal", "dawnstar", "raven_rock", "college_of_winterhold"}
 
 
 def settlement_tier(p):
@@ -1174,109 +1256,146 @@ def settlement_tier(p):
         return "town"
     if t == "village":
         return "village"
-    if t == "farm":
+    if t in ("farm", "stables", "homestead"):
         return "hamlet"
     return None
 
 
 def load_streetplan_stats():
     """Return dict: settlement_id -> dict(interiors, inns, merchants, named_bldgs, trainers)."""
+    out = {}
     sp_path = os.path.join(SKY, "baked", "streetplan.bin")
-    if not os.path.exists(sp_path):
-        return {}
-    try:
-        import struct
-        with open(sp_path, "rb") as f:
-            raw = f.read()
-        hlen = struct.unpack_from(">H", raw, 0)[0]
-        raw = zlib.decompress(raw[2 + hlen:])
-        pos = 0
+    if os.path.exists(sp_path):
+        try:
+            import struct
+            with open(sp_path, "rb") as f:
+                raw = f.read()
+            hlen = struct.unpack_from(">H", raw, 0)[0]
+            raw = zlib.decompress(raw[2 + hlen:])
+            pos = 0
 
-        def ri():
-            nonlocal pos
-            v = struct.unpack_from(">i", raw, pos)[0]
-            pos += 4
-            return v
+            def ri():
+                nonlocal pos
+                v = struct.unpack_from(">i", raw, pos)[0]
+                pos += 4
+                return v
 
-        def rutf():
-            nonlocal pos
-            ln = struct.unpack_from(">H", raw, pos)[0]
-            pos += 2
-            s = raw[pos:pos + ln].decode("utf-8")
-            pos += ln
-            return s
+            def rutf():
+                nonlocal pos
+                ln = struct.unpack_from(">H", raw, pos)[0]
+                pos += 2
+                s = raw[pos:pos + ln].decode("utf-8")
+                pos += ln
+                return s
 
-        def rints():
-            nonlocal pos
-            n = ri()
-            a = struct.unpack_from(f">{n}i", raw, pos)
-            pos += 4 * n
-            return a
+            def rints():
+                nonlocal pos
+                n = ri()
+                a = struct.unpack_from(f">{n}i", raw, pos)
+                pos += 4 * n
+                return a
 
-        def rfloats():
-            nonlocal pos
-            n = ri()
-            pos += 4 * n
+            def rfloats():
+                nonlocal pos
+                n = ri()
+                pos += 4 * n
 
-        def rbytes():
-            nonlocal pos
-            n = ri()
-            pos += n
+            def rbytes():
+                nonlocal pos
+                n = ri()
+                pos += n
 
-        _magic, _ver, ns = ri(), ri(), ri()
-        s_ids = []
-        for _ in range(ns):
-            s_ids.append(rutf())
-            ri()
-            ri()
-            ri()
-        _s_node, _s_edge, s_door, _s_plot, s_spec = rints(), rints(), rints(), rints(), rints()
-        rfloats()
-        rfloats()
-        rfloats()
-        rbytes()
-        rints()
-        rints()
-        rints()
-        rints()
-        rfloats()
-        rbytes()
-        rbytes()
-        rints()
-        rints()
-        rints()
-        rints()
-        rints()
-        rbytes()
-        nr = ri()
-        pos += nr
-        rints()
-        rints()
-        rints()
-        rints()
-        rints()
-        rints()
-        rbytes()
-        spec_ints = rints()
-        nn = ri()
-        spec_names = [rutf() for _ in range(nn)]
+            _magic, _ver, ns = ri(), ri(), ri()
+            s_ids = []
+            for _ in range(ns):
+                s_ids.append(rutf())
+                ri()
+                ri()
+                ri()
+            _s_node, _s_edge, s_door, _s_plot, s_spec = rints(), rints(), rints(), rints(), rints()
+            rfloats()
+            rfloats()
+            rfloats()
+            rbytes()
+            rints()
+            rints()
+            rints()
+            rints()
+            rfloats()
+            rbytes()
+            rbytes()
+            rints()
+            rints()
+            rints()
+            rints()
+            rints()
+            rbytes()
+            nr = ri()
+            pos += nr
+            rints()
+            rints()
+            rints()
+            rints()
+            rints()
+            rints()
+            rbytes()
+            spec_ints = rints()
+            nn = ri()
+            spec_names = [rutf() for _ in range(nn)]
 
-        BLDG_ARCH = set(range(16)) | {32, 33, 34}
-        TRADE_USES = {6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 22, 24}
-        TRADE_ARCH = {3, 4, 5, 6, 10, 12, 19}
-        out = {}
-        for idx, sid in enumerate(s_ids):
-            i0, i1 = s_spec[idx], s_spec[idx + 1]
-            specs = [spec_ints[i * 20:(i + 1) * 20] for i in range(i0, i1)]
-            names = spec_names[i0:i1]
-            bldgs = [s for s in specs if s[0] in BLDG_ARCH]
-            inns = [s for s in bldgs if s[0] == 3 or (s[0] == 34 and s[16] == 6)]
-            merch = [s for s in specs if s[0] in TRADE_ARCH or (s[0] == 34 and s[16] in TRADE_USES)]
-            named = sum(1 for n in names if n and "," not in n)
-            out[sid] = dict(interiors=len(bldgs), inns=len(inns), merchants=len(merch), named_bldgs=named)
-        return out
-    except Exception:
-        return {}
+            BLDG_ARCH = set(range(16)) | {32, 33, 34}
+            TRADE_USES = {6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 22, 24}
+            TRADE_ARCH = {3, 4, 5, 6, 10, 12, 19}
+            for idx, sid in enumerate(s_ids):
+                i0, i1 = s_spec[idx], s_spec[idx + 1]
+                specs = [spec_ints[i * 20:(i + 1) * 20] for i in range(i0, i1)]
+                names = spec_names[i0:i1]
+                bldgs = [s for s in specs if s[0] in BLDG_ARCH]
+                inns = [s for s in bldgs if s[0] == 3 or (s[0] == 34 and s[16] == 6)]
+                merch = [s for s in specs if s[0] in TRADE_ARCH or (s[0] == 34 and s[16] in TRADE_USES)]
+                named = sum(1 for n in names if n and "," not in n)
+                out[sid] = dict(interiors=len(bldgs), inns=len(inns), merchants=len(merch), named_bldgs=named)
+        except Exception:
+            pass
+
+    # Merge cityplans/*.json so newly authored/enriched plans are reflected even before streetplan.bin is re-baked
+    NON_INTERIOR_KINDS = {"field", "garden", "lumber", "pen", "dock", "yard", "camp", "graveyard", "pond", "orchard"}
+    TRADE_KINDS = {"inn", "store", "smithy", "alchemist", "stables", "mill", "meadery", "sawmill", "bakery", "butcher", "fishery"}
+    for pf in sorted(glob.glob(os.path.join(TAM, "cityplans", "*.json"))):
+        if os.path.basename(pf) == "index.json":
+            continue
+        sid = os.path.basename(pf)[:-5]
+        pj = jload(pf, {})
+        if not isinstance(pj, dict):
+            continue
+        named_set = {v for v in (pj.get("names") or {}).values() if v}
+        int_cnt = 0
+        inn_cnt = 1 if (pj.get("innKey") or (pj.get("names") or {}).get("inn")) else 0
+        merch_cnt = len([v for v in (pj.get("names") or {}).values() if v])
+        for sec in ("buildings", "landmarks", "plazas", "queue"):
+            for b in (pj.get(sec) or []):
+                if not isinstance(b, dict):
+                    continue
+                if b.get("name") or b.get("id"):
+                    named_set.add(b.get("name") or b.get("id"))
+                if sec in ("buildings", "queue"):
+                    k = (b.get("kind") or "").lower()
+                    u = (b.get("use") or "").lower()
+                    cnt = int(b.get("count", 1) or 1)
+                    if k and k not in NON_INTERIOR_KINDS:
+                        int_cnt += cnt
+                    if k == "inn" or u == "inn":
+                        inn_cnt = max(inn_cnt, 1)
+                    if k in TRADE_KINDS or u in TRADE_KINDS:
+                        merch_cnt += cnt
+        prev = out.get(sid, dict(interiors=0, inns=0, merchants=0, named_bldgs=0))
+        out[sid] = dict(
+            interiors=max(prev["interiors"], int_cnt),
+            inns=max(prev["inns"], inn_cnt),
+            merchants=max(prev["merchants"], merch_cnt),
+            named_bldgs=max(prev["named_bldgs"], len(named_set)),
+        )
+    return out
 
 
 def print_tiers(data, f_prov=None, f_reg=None):
@@ -1352,8 +1471,8 @@ def print_tiers(data, f_prov=None, f_reg=None):
             for sid in touched:
                 quests_by_s[sid] += 1
 
-    # Also check society/trainers.json and society/courts.json if present
-    for tf in glob.glob(os.path.join(SKY, "society", "*.json")):
+    # Also check society/*.json (trainers.json, courts.json, skyrim_residents.json, etc.)
+    for tf in sorted(glob.glob(os.path.join(SKY, "society", "*.json"))):
         tj = jload(tf, {})
         if isinstance(tj, dict):
             smap = tj.get("settlements") if isinstance(tj.get("settlements"), dict) else tj
@@ -1365,14 +1484,30 @@ def print_tiers(data, f_prov=None, f_reg=None):
                     for item in v:
                         if isinstance(item, dict) and item.get("name"):
                             npcs_by_s[k].append({"id": "trainer:" + item["name"]})
-                            roles_by_s[k].add("trainer")
+                            roles_by_s[k].add(item.get("workplace") or "trainer")
                 elif isinstance(v, dict):
                     if "trainers" in v and isinstance(v["trainers"], list):
                         train_by_s[k] = max(train_by_s[k], len(v["trainers"]))
-                    for rk in ("jarl", "ruler", "steward", "court_wizard", "priest", "housecarl"):
-                        if v.get(rk):
-                            npcs_by_s[k].append({"id": f"court:{rk}:{v[rk]}"})
-                            roles_by_s[k].add(rk)
+                    if isinstance(v.get("residents"), list):
+                        res_trainers = 0
+                        for res in v["residents"]:
+                            if not isinstance(res, dict) or not res.get("name"):
+                                continue
+                            npcs_by_s[k].append(res)
+                            role = (res.get("role") or "citizen").lower()
+                            roles_by_s[k].add(role)
+                            if res.get("court_role"):
+                                roles_by_s[k].add(str(res["court_role"]).lower())
+                            if role in MERCH_ROLES or res.get("shop") or res.get("merchant"):
+                                merch_by_s[k] += 1
+                            if res.get("trainer") or res.get("skill") or "trainer" in role:
+                                res_trainers += 1
+                        train_by_s[k] = max(train_by_s[k], res_trainers)
+                    else:
+                        for rk in ("jarl", "ruler", "steward", "court_wizard", "priest", "housecarl"):
+                            if v.get(rk):
+                                npcs_by_s[k].append({"id": f"court:{rk}:{v[rk]}"})
+                                roles_by_s[k].add(rk)
 
     def match_s(s):
         rid = s.get("region", "")

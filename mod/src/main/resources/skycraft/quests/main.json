@@ -152,6 +152,8 @@
     {
       "id": "main_unbound",
       "title": "Unbound",
+      "region": "skyrim/falkreath",
+      "why": ["falkreath.L9.helgen_burned", "skyrim.L9.dragon_crisis"],
       "stage": 1,
       "start": "auto",
       "on_start": "intro:helgen_wake;relocate:ralof:riverwood:-10:6",
@@ -210,6 +212,8 @@
     {
       "id": "main_before_the_storm",
       "title": "Before the Storm",
+      "region": "skyrim/whiterun",
+      "why": ["whiterun.L9.neutral_jarl", "whiterun.L9.first_dragon"],
       "stage": 1,
       "start": "auto",
       "requires": ["quest:main_unbound"],
@@ -226,6 +230,8 @@
     {
       "id": "main_bleak_falls_barrow",
       "title": "Bleak Falls Barrow",
+      "region": "skyrim/falkreath",
+      "why": ["falkreath.L10.barrow_above_riverwood", "skyrim.L10.draugr_barrows"],
       "stage": 2,
       "start": "auto",
       "giver": "farengar",
@@ -253,6 +259,8 @@
     {
       "id": "main_dragon_rising",
       "title": "Dragon Rising",
+      "region": "skyrim/whiterun",
+      "why": ["whiterun.L9.first_dragon", "whiterun.L8.voice_pilgrims"],
       "stage": 3,
       "start": "auto",
       "giver": "balgruuf",
@@ -276,6 +284,8 @@
     {
       "id": "main_way_of_the_voice",
       "title": "The Way of the Voice",
+      "region": "skyrim/the_rift",
+      "why": ["the_rift.L8.voice_pilgrims", "skyrim.L8.way_of_the_voice"],
       "stage": 4,
       "start": "auto",
       "giver": "arngeir",
@@ -300,6 +310,8 @@
     {
       "id": "main_horn_of_jurgen",
       "title": "The Horn of Jurgen Windcaller",
+      "region": "skyrim/hjaalmarch",
+      "why": ["hjaalmarch.L10.voice_tomb", "skyrim.L8.way_of_the_voice"],
       "stage": 4,
       "start": "auto",
       "giver": "arngeir",
@@ -325,6 +337,8 @@
     {
       "id": "main_blade_in_the_dark",
       "title": "A Blade in the Dark",
+      "region": "skyrim/eastmarch",
+      "why": ["skyrim.L9.dragon_crisis", "whiterun.L10.dragon_mounds"],
       "stage": 4,
       "start": "auto",
       "giver": "delphine",
@@ -349,6 +363,8 @@
     {
       "id": "main_diplomatic_immunity",
       "title": "Diplomatic Immunity",
+      "region": "skyrim/haafingar",
+      "why": ["haafingar.L9.thalmor_embassy", "haafingar.L10.embassy_dossiers"],
       "stage": 4,
       "start": "auto",
       "giver": "delphine",
@@ -373,6 +389,8 @@
     {
       "id": "main_cornered_rat",
       "title": "A Cornered Rat",
+      "region": "skyrim/the_rift",
+      "why": ["the_rift.L10.thieves_below", "skyrim.L9.thalmor_watch"],
       "stage": 4,
       "start": "auto",
       "giver": "delphine",
@@ -399,6 +417,8 @@
     {
       "id": "main_alduins_wall",
       "title": "Alduin's Wall",
+      "region": "skyrim/the_reach",
+      "why": ["the_reach.L10.blades_temple", "the_reach.L10.forsworn_redoubts"],
       "stage": 4,
       "start": "auto",
       "giver": "esbern",
@@ -424,6 +444,8 @@
     {
       "id": "main_throat_of_the_world",
       "title": "The Throat of the World",
+      "region": "skyrim/whiterun",
+      "why": ["skyrim.L8.way_of_the_voice", "whiterun.L8.voice_pilgrims"],
       "stage": 4,
       "start": "auto",
       "giver": "arngeir",
@@ -446,6 +468,8 @@
     {
       "id": "main_elder_knowledge",
       "title": "Elder Knowledge",
+      "region": "skyrim/winterhold",
+      "why": ["winterhold.L10.glacier_dwemer", "the_pale.L10.great_lifts"],
       "stage": 4,
       "start": "auto",
       "giver": "septimus",
@@ -472,6 +496,8 @@
     {
       "id": "main_alduins_bane",
       "title": "Alduin's Bane",
+      "region": "skyrim/the_pale",
+      "why": ["the_pale.L10.great_lifts", "skyrim.L9.dragon_crisis"],
       "stage": 4,
       "start": "auto",
       "requires": ["quest:main_elder_knowledge"],
@@ -493,6 +519,8 @@
     {
       "id": "main_the_fallen",
       "title": "The Fallen",
+      "region": "skyrim/whiterun",
+      "why": ["whiterun.L9.neutral_jarl", "whiterun.L9.first_dragon"],
       "stage": 4,
       "start": "auto",
       "giver": "balgruuf",
@@ -516,6 +544,8 @@
     {
       "id": "main_worldeaters_eyrie",
       "title": "The World-Eater's Eyrie",
+      "region": "skyrim/whiterun",
+      "why": ["skyrim.L9.dragon_crisis", "skyrim.L10.draugr_barrows"],
       "stage": 5,
       "start": "auto",
       "requires": ["quest:main_the_fallen"],
@@ -535,6 +565,8 @@
     {
       "id": "main_sovngarde",
       "title": "Sovngarde",
+      "region": "skyrim/whiterun",
+      "why": ["whiterun.L8.honour_and_sovngarde", "skyrim.L9.dragon_crisis"],
       "stage": 5,
       "start": "auto",
       "requires": ["quest:main_worldeaters_eyrie"],
@@ -556,6 +588,8 @@
     {
       "id": "main_dragonslayer",
       "title": "Dragonslayer",
+      "region": "skyrim/whiterun",
+      "why": ["whiterun.L8.honour_and_sovngarde", "skyrim.L8.way_of_the_voice"],
       "stage": 5,
       "start": "auto",
       "requires": ["quest:main_sovngarde"],
@@ -568,6 +602,8 @@
     {
       "id": "main_paarthurnax",
       "title": "Paarthurnax",
+      "region": "skyrim/whiterun",
+      "why": ["the_reach.L10.blades_temple", "skyrim.L8.way_of_the_voice"],
       "category": "side",
       "start": "npc:delphine",
       "requires": ["quest:main_alduins_bane", "flag:blades", "!flag:paarthurnax_spared", "!flag:paarthurnax_slain"],
@@ -586,6 +622,8 @@
     {
       "id": "main_paarthurnax_slain",
       "title": "Old Debts",
+      "region": "skyrim/whiterun",
+      "why": ["the_reach.L10.blades_temple", "skyrim.L8.way_of_the_voice"],
       "category": "side",
       "start": "auto",
       "requires": ["flag:paarthurnax_doomed", "!flag:paarthurnax_slain"],
@@ -603,6 +641,8 @@
     {
       "id": "main_season_unending",
       "title": "Season Unending",
+      "region": "skyrim/whiterun",
+      "why": ["skyrim.L9.civil_war", "whiterun.L9.neutral_jarl"],
       "category": "side",
       "start": "npc:arngeir",
       "requires": ["quest:main_alduins_bane", "!quest:cw_legion_capital", "!quest:cw_storm_capital"],

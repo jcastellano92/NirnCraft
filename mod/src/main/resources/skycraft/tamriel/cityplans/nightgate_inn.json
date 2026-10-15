@@ -1,0 +1,42 @@
+{
+  "id": "nightgate_inn",
+  "base": "none",
+  "sil": "snow-pass-lakeside-inn",
+  "names": {
+    "inn": "nightgate_inn",
+    "store": "nightgate_cellar_stores",
+    "smithy": "nightgate_farrier_shed"
+  },
+  "innKey": "nightgate_inn",
+  "gates": [[0, 20], [-18, 4]],
+  "buildings": [
+    {"kind": "inn", "at": [0, -4], "size": [13, 17], "face": "S", "flags": ["upper"], "name": "nightgate_inn"},
+    {"kind": "stables", "at": [14, 4], "size": [9, 11], "face": "W", "name": "nightgate_stables"},
+    {"kind": "store", "at": [-12, -6], "size": [7, 9], "face": "E", "name": "nightgate_cellar_stores"},
+    {"kind": "smithy", "at": [12, -8], "size": [9, 7], "face": "W", "name": "nightgate_farrier_shed"},
+    {"kind": "house", "at": [-12, 8], "size": [7, 9], "face": "E", "name": "nightgate_ice_cabin"}
+  ],
+  "plazas": [
+    {"at": [0, 10], "size": 9, "variant": 0, "stalls": 1, "name": "nightgate_yard"}
+  ],
+  "nets": [
+    {"type": "path", "via": [[0, 20], [0, 10], [0, 4]], "width": 3, "major": true, "tag": "main"},
+    {"type": "path", "via": [[-18, 4], [-8, 6], [0, 6], [10, 4]], "width": 2, "rank": 2, "tag": "lane"}
+  ],
+  "fabric": {"radius": 20, "target": 0.22, "fill_cap": 1, "yard_cap": 2},
+  "queue": [
+    {"kind": "house", "name": "nightgate_roadwardens_hut", "on": "lane"}
+  ],
+  "features": [
+    {"type": "lamps", "count": 2, "where": "free"},
+    {"type": "well", "where": "free"}
+  ],
+  "titles": {
+    "nightgate_stables": "Nightgate Coach Stables",
+    "nightgate_cellar_stores": "Nightgate Cellar Stores",
+    "nightgate_farrier_shed": "Wayfarer's Farrier Shed",
+    "nightgate_ice_cabin": "Ice-Fisher's Cabin",
+    "nightgate_yard": "Nightgate Coach Yard",
+    "nightgate_roadwardens_hut": "Pass-Warden's Cabin"
+  }
+}

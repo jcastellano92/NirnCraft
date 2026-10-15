@@ -1,0 +1,51 @@
+{
+  "id": "angas_mill",
+  "base": "none",
+  "sil": "white-river-rapids-sawmill",
+  "names": {
+    "inn": "angas_loggers_bunkhouse",
+    "store": "angas_timber_office",
+    "smithy": "angas_tool_shed"
+  },
+  "innKey": "angas_loggers_bunkhouse",
+  "gates": [[0, 26]],
+  "buildings": [
+    {"kind": "mill", "at": [-10, -8], "size": [9, 11], "face": "E", "margin": 3, "name": "angas_water_mill"},
+    {"kind": "building", "use": "sawmill", "wealth": "common", "at": [12, -8], "size": [13, 11], "face": "W", "name": "angas_sawmill"},
+    {"kind": "house", "at": [-14, 10], "size": [9, 11], "face": "E", "flags": ["upper"], "name": "angas_aeris_house"},
+    {"kind": "lumber", "at": [18, 12], "size": [7, 5], "face": "W"},
+    {"kind": "lumber", "at": [18, 20], "size": [7, 5], "face": "W"}
+  ],
+  "plazas": [
+    {"at": [0, 4], "size": 9, "variant": 0, "stalls": 2, "name": "angas_mill_yard"}
+  ],
+  "nets": [
+    {"type": "path", "via": [[0, 26], [0, 14], [0, 2], [0, -10]], "width": 3, "major": true, "tag": "main"},
+    {"type": "path", "via": [[-14, 4], [0, 4], [14, 4]], "width": 2, "rank": 2, "tag": "lane"}
+  ],
+  "zones": [
+    {"at": [0, -6], "r": 16, "zone": "craft"},
+    {"at": [0, 10], "r": 14, "zone": "poor"}
+  ],
+  "fabric": {"radius": 26, "target": 0.26, "fill_cap": 3, "yard_cap": 4},
+  "queue": [
+    {"kind": "inn", "size": [11, 15], "flags": ["upper"], "name": "angas_loggers_bunkhouse", "on": "main"},
+    {"kind": "store", "size": [9, 9], "name": "angas_timber_office", "on": "main"},
+    {"kind": "smithy", "size": [11, 9], "name": "angas_tool_shed", "on": "lane"},
+    {"kind": "house", "name": "angas_kodrirs_cottage", "on": "lane"}
+  ],
+  "features": [
+    {"type": "waterwheel", "where": "free"},
+    {"type": "lamps", "count": 2, "where": "street", "tag": "main"}
+  ],
+  "titles": {
+    "angas_loggers_bunkhouse": "Loggers' Common House",
+    "angas_timber_office": "Anga's Timber Office",
+    "angas_tool_shed": "Saw-Filer's Shed",
+    "angas_water_mill": "Anga's Water Mill",
+    "angas_sawmill": "Anga's Sawmill",
+    "angas_aeris_house": "Mill-Keeper's House",
+    "angas_mill_yard": "Anga's Mill Yard",
+    "angas_kodrirs_cottage": "Woodcutter's Cabin"
+  }
+}

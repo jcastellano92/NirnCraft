@@ -54,23 +54,26 @@ people ("world building is king").
   in `docs/world/provinces/*.md` (`skyrim.md`, `high_rock.md`, `hammerfell.md`, `cyrodiil.md`, `morrowind.md`,
   `solstheim.md`, `black_marsh.md`, `elsweyr.md`, `valenwood.md`, `summerset.md`, `foreign_lands.md`), each with all
   ten sections (§1–§10) written**.
-* The gap: Skyrim scores 95 on the parity scorecard but only 53-54 on Settlements (named NPCs 187 against the real
-  845, named buildings 112 against 210); every other province sits at 40-53.
-  The map is full; **R4a (`docs/prompts/R4a-town-overhaul.md`, TO0-TO6)**, **R1 (`docs/prompts/R1-loose-ends.md`)**,
-  **R2 (`docs/prompts/R2-testing-tiers.md`)**, **R3a (`docs/prompts/R3a-world-sheets.md`)**, **R3b
-  (`docs/prompts/R3b-micro-biomes.md`)**, **R3c (`docs/prompts/R3c-measurement.md`)**, **R3d
-  (`docs/prompts/R3d-town-services.md`)**, and **R3e (`docs/prompts/R3e-world-systems.md`)** are now complete,
-  rebaked, and verified (`qa.ps1 -Server -Rebake` + `qa.ps1 -Unit -Flow -NoBuild` OVERALL PASS). Next up is R4 Skyrim
-  uplift (`S1-S5` / `SK2-SK8`).
+* **Skyrim Uplift (`R4`) is complete:** Skyrim now scores `108` mean across all 11 parity categories (`SET = 119`,
+  `NPC = 143`, `QST = 110`, `DUN = 100`, `CRE = 100`, `FLO = 100`, `STY = 115`, `LND = 100`, `LOR = 100`, `MUS = 100`,
+  `ITM = 100`, with 0 hold cells below 80 and `SET >= 103` in every hold) and passes 27/27 FLW metrics across all 9
+  holds (`flow_audit.py --province skyrim`). **R4a (`docs/prompts/R4a-town-overhaul.md`)**, **R1
+  (`docs/prompts/R1-loose-ends.md`)**, **R2 (`docs/prompts/R2-testing-tiers.md`)**, **R3a
+  (`docs/prompts/R3a-world-sheets.md`)**, **R3b (`docs/prompts/R3b-micro-biomes.md`)**, **R3c
+  (`docs/prompts/R3c-measurement.md`)**, **R3d (`docs/prompts/R3d-town-services.md`)**, **R3e
+  (`docs/prompts/R3e-world-systems.md`)**, and **R4 (`docs/prompts/R4-skyrim-uplift.md`)** are all complete, rebaked,
+  and verified (`qa.ps1 -Server -Rebake` + `qa.ps1 -Unit -Flow` OVERALL PASS). Next up is R5 Iliac Bay (`IB-S`,
+  `IB1-IB9`, `IB-G`).
 
 ## Next
 
-**Next: R4 (`docs/prompts/R4-skyrim-uplift.md`, steps S1-S5 / SK2-SK8 in `docs/world/provinces/skyrim.md` §10.4),
-followed by R5 Iliac Bay (`docs/prompts/R5-iliac-bay.md`).**
+**Next: R5 Iliac Bay (`docs/prompts/R5-iliac-bay.md`, steps `IB-S`, `IB1-IB9`, `IB-G` in `docs/world/ILIAC-BAY.md`,
+`docs/world/provinces/high_rock.md`, and `docs/world/provinces/hammerfell.md`), followed by R6 Cyrodiil
+(`docs/prompts/R6-cyrodiil.md`).**
 All 11 province design documents are finished and ready for V1–V9 execution.
 
 To run the next phase, say: "Read `docs/START-HERE.md` and `docs/prompts/_COMMON.md`, then run
-`docs/prompts/R4-skyrim-uplift.md`" (or whichever phase WORLD-PLAN section 7 shows as `next`).
+`docs/prompts/R5-iliac-bay.md`" (or whichever phase WORLD-PLAN section 7 shows as `next`).
 
 ## The rules (non-negotiable)
 
