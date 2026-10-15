@@ -90,7 +90,21 @@ public final class Props {
 
     public static void lantern(Canvas c, Palette p, int x, int y, int z, boolean hanging) {
         BlockState l = p.light;
-        if (hanging && l.hasProperty(BlockStateProperties.HANGING)) l = B.hanging(l);
+        if (hanging && l.hasProperty(BlockStateProperties.HANGING)) {
+            l = B.hanging(l);
+            if (!c.recording() && c.get(x, y + 1, z).isAir()) {
+                int roofY = -1;
+                for (int cy = y + 2; cy <= y + 12; cy++) {
+                    BlockState above = c.get(x, cy, z);
+                    if (!above.isAir() && above.getFluidState().isEmpty() && !above.canBeReplaced()) {
+                        roofY = cy;
+                        break;
+                    }
+                }
+                if (roofY < 0) return;
+                for (int cy = y + 1; cy < roofY; cy++) c.set(x, cy, z, B.s(Blocks.CHAIN));
+            }
+        }
         c.set(x, y, z, l);
     }
 

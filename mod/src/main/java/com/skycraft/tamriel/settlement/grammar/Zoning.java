@@ -746,12 +746,36 @@ public final class Zoning {
         // keep inside the built area (outskirts come later)
         int lx = localX(plan, s.x, s.z), lz = localZ(plan, s.x, s.z);
         if (Math.hypot(lx, lz) > x.R + 4) return false;
+        if (s.kind.building) {
+            int centerT = terraceAt(plan, s.x, s.z);
+            int hx = Math.max(1, s.halfX() - s.margin), hz = Math.max(1, s.halfZ() - s.margin);
+            int front = (s.facing.getAxis() == Direction.Axis.Z ? hz : hx) + 2;
+            int dx = s.x + s.facing.getStepX() * front, dz = s.z + s.facing.getStepZ() * front;
+            if (terraceAt(plan, dx, dz) != centerT
+                    || terraceAt(plan, s.x - hx, s.z - hz) != centerT
+                    || terraceAt(plan, s.x + hx, s.z - hz) != centerT
+                    || terraceAt(plan, s.x - hx, s.z + hz) != centerT
+                    || terraceAt(plan, s.x + hx, s.z + hz) != centerT) {
+                return false;
+            }
+            if (s.minFloor == Spec.UNSET && centerT != Spec.UNSET) s.minFloor = centerT;
+        }
         stamp(x, s);
         if (plan.place(s, 0) != null) {
             x.buildings.add(s);
             return true;
         }
         return false;
+    }
+
+    static int terraceAt(Plan plan, int wx, int wz) {
+        int best = Spec.UNSET;
+        for (Spec t : plan.specs) {
+            if (!t.has(Spec.GROUND) || t.minFloor == Spec.UNSET || t.kind == Archetype.CAMP) continue;
+            int thx = Math.max(1, t.halfX() - t.margin), thz = Math.max(1, t.halfZ() - t.margin);
+            if (Math.abs(wx - t.x) <= thx + 1 && Math.abs(wz - t.z) <= thz + 1) best = Math.max(best, t.minFloor);
+        }
+        return best;
     }
 
     static int localX(Plan p, int wx, int wz) {
@@ -1024,10 +1048,23 @@ public final class Zoning {
 
     /** Places a yard prop (street furniture / clutter) if it fits. */
     static Spec yard(Ctx x, int kind, int lx, int lz, Direction face, int w, int d, int gap) {
+        if (kind == Outdoors.WELL) {
+            w = Math.max(5, w);
+            d = Math.max(5, d);
+        }
         Spec s = x.plan.at(Archetype.YARD, lx, lz, face).size(w, d);
         s.variant = kind;
         s.margin = 0;
         s.h = kind == Outdoors.TREE ? 8 : 5;
+        int centerT = terraceAt(x.plan, s.x, s.z);
+        int hx = s.halfX(), hz = s.halfZ();
+        if (terraceAt(x.plan, s.x - hx, s.z - hz) != centerT
+                || terraceAt(x.plan, s.x + hx, s.z - hz) != centerT
+                || terraceAt(x.plan, s.x - hx, s.z + hz) != centerT
+                || terraceAt(x.plan, s.x + hx, s.z + hz) != centerT) {
+            return null;
+        }
+        if (centerT != Spec.UNSET) s.minFloor = centerT;
         return x.plan.place(s, gap);
     }
 
@@ -1133,11 +1170,11 @@ public final class Zoning {
                 int kind;
                 if (lamps && (st.rank() <= 1)) kind = x.style.culture.equals("nord") && x.r.nextInt(3) == 0 ? Outdoors.BRAZIER : Outdoors.LAMP_POST;
                 else kind = x.r.nextInt(3) == 0 ? Outdoors.BARRELS : x.r.nextBoolean() ? Outdoors.WOODPILE : Outdoors.SIGNPOST;
-                if (yard(x, kind, lx, lz, cardinal(-nx, -nz), 1, 1, 0) == null) {
+                if (yard(x, kind, lx, lz, cardinal(-nx, -nz), 1, 1, 1) == null) {
                     // nudge along the street to the next free spot
                     for (int k = 1; k <= 3; k++) {
                         int ax = (int) Math.round(st.x1() + ux * (t + k) + nx * off), az = (int) Math.round(st.z1() + uz * (t + k) + nz * off);
-                        if (yard(x, kind, ax, az, cardinal(-nx, -nz), 1, 1, 0) != null) break;
+                        if (yard(x, kind, ax, az, cardinal(-nx, -nz), 1, 1, 1) != null) break;
                     }
                 }
             }
@@ -1158,7 +1195,7 @@ public final class Zoning {
         for (Street st : x.sk.streets) {
             if (st.rank() != 1 || x.r.nextInt(3) != 0) continue;
             int off = st.width() / 2 + 2;
-            yard(x, Outdoors.SIGNPOST, st.x1() + (st.z1() == st.z2() ? 0 : off), st.z1() + (st.z1() == st.z2() ? off : 0), Direction.SOUTH, 1, 1, 0);
+            yard(x, Outdoors.SIGNPOST, st.x1() + (st.z1() == st.z2() ? 0 : off), st.z1() + (st.z1() == st.z2() ? off : 0), Direction.SOUTH, 1, 1, 1);
         }
         // town dogs and cats, coops between houses
         int pets = 2 + x.tier * 2;
@@ -1719,6 +1756,7 @@ public final class Zoning {
         x.sk.radius = plan.radius;
         for (Spec s : plan.specs) {
             if (s.isLine() && s.kind == Archetype.STREET) {
+                if (s.floor != Spec.UNSET && s.floor2 != Spec.UNSET && s.floor != s.floor2) continue;
                 int ax = localX(plan, s.x, s.z), az = localZ(plan, s.x, s.z), bx = localX(plan, s.x2, s.z2), bz = localZ(plan, s.x2, s.z2);
                 x.sk.streets.add(new Street(ax, az, bx, bz, s.w, s.has(Spec.MAJOR) ? 0 : 1));
             }
@@ -1946,14 +1984,44 @@ public final class Zoning {
         }
     }
 
+    private static boolean canResize(Plan plan, Spec h, int nw, int nd) {
+        if (nw <= h.w && nd <= h.d) {
+            h.size(nw, nd);
+            return true;
+        }
+        int ow = h.w, od = h.d;
+        h.size(nw, nd);
+        int centerT = terraceAt(plan, h.x, h.z);
+        int hx = Math.max(1, h.halfX() - h.margin), hz = Math.max(1, h.halfZ() - h.margin);
+        int front = (h.facing.getAxis() == Direction.Axis.Z ? hz : hx) + 2;
+        int dx = h.x + h.facing.getStepX() * front, dz = h.z + h.facing.getStepZ() * front;
+        if (terraceAt(plan, dx, dz) != centerT
+                || terraceAt(plan, h.x - hx, h.z - hz) != centerT
+                || terraceAt(plan, h.x + hx, h.z - hz) != centerT
+                || terraceAt(plan, h.x - hx, h.z + hz) != centerT
+                || terraceAt(plan, h.x + hx, h.z + hz) != centerT) {
+            h.size(ow, od);
+            return false;
+        }
+        for (Spec o : plan.specs) {
+            if (o == h || o.has(Spec.GROUND)) continue;
+            if (Plan.collides(h, o, 1)) {
+                h.size(ow, od);
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static void variety(Plan plan) {
         labelPosts(plan);
         List<Spec> homes = new ArrayList<>();
         for (Spec s : plan.specs) {
             if (isHome(s)) {
-                if (s.w < 7) s.w = 7;
-                if (s.d < 7) s.d = 9;
-                if (s.w == 7 && s.d < 9) s.d = 9;
+                int nw = Math.max(7, s.w);
+                int nd = Math.max(7, s.d);
+                if (nw == 7 && nd < 9) nd = 9;
+                if (nw != s.w || nd != s.d) canResize(plan, s, nw, nd);
                 homes.add(s);
             }
         }
@@ -1972,8 +2040,7 @@ public final class Zoning {
                             int[] fp = HOME_FOOTPRINTS[(start + k) % HOME_FOOTPRINTS.length];
                             if (pass == 0 && (fp[0] > h.w + 2 || fp[1] > h.d + 2)) continue;
                             String candKey = fp[0] + "x" + fp[1];
-                            if (counts.getOrDefault(candKey, 0) < maxPerFootprint) {
-                                h.size(fp[0], fp[1]);
+                            if (counts.getOrDefault(candKey, 0) < maxPerFootprint && canResize(plan, h, fp[0], fp[1])) {
                                 key = candKey;
                                 changed = true;
                                 break;
@@ -1991,9 +2058,8 @@ public final class Zoning {
                     if (counts.getOrDefault(oldKey, 0) <= 1) continue;
                     for (int[] fp : HOME_FOOTPRINTS) {
                         String candKey = fp[0] + "x" + fp[1];
-                        if (!counts.containsKey(candKey)) {
+                        if (!counts.containsKey(candKey) && canResize(plan, h, fp[0], fp[1])) {
                             counts.put(oldKey, counts.get(oldKey) - 1);
-                            h.size(fp[0], fp[1]);
                             counts.put(candKey, 1);
                             break;
                         }

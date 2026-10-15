@@ -136,7 +136,7 @@ public final class Blueprint {
         // ---- storeys and walls
         int[] st = style.storeys(wealth);
         storeys = Math.max(use.stMin, Math.min(use.stMax, st[0] + (st[1] > st[0] ? r.nextInt(st[1] - st[0] + 1) : 0)));
-        if (spec.has(Spec.UPPER)) storeys = Math.max(storeys, 2);
+        if (spec.has(Spec.UPPER) || (use.trade && use.stMax >= 2 && w >= 9 && d >= 11 && wealth.atLeast(Wealth.COMMON))) storeys = Math.max(storeys, 2);
         if (use.stMax == 1) storeys = 1;
         wallH = use.wallH + (wealth == Wealth.NOBLE && !use.hall ? 1 : 0);
         if (use == Use.HOVEL || use == Use.SHACK) wallH = 3;
@@ -178,7 +178,7 @@ public final class Blueprint {
                 case TOWER -> 5;
                 default -> 3;
             };
-            int minBodyW = (use == Use.SMITHY || use == Use.FLETCHER) && w >= 11 ? 6 : 7;
+            int minBodyW = (use == Use.SMITHY || use == Use.FLETCHER) && w >= 11 ? 6 : (use.trade || use == Use.INN ? 9 : 7);
             if (w - annexW < minBodyW) {
                 annex = Annex.NONE;
                 annexSide = 0;
@@ -190,7 +190,7 @@ public final class Blueprint {
             if (w - annexW - 2 < 7) stairSide = 0;
         }
         boolean porchy = use.home() || use == Use.INN || use.trade && use != Use.SMITHY;
-        if (porchy && body == Body.RECT && d >= 9 && r.nextDouble() < style.rule("porch", 0.3) * (use == Use.INN ? 1.5 : 1)) porchD = 2;
+        if (porchy && body == Body.RECT && d >= (use.trade || use == Use.INN ? 15 : 11) && r.nextDouble() < style.rule("porch", 0.3) * (use == Use.INN ? 1.5 : 1)) porchD = 2;
         bx0 = (annexSide < 0 ? annexW : 0) + (stairSide < 0 ? 2 : 0);
         bx1 = w - 1 - (annexSide > 0 ? annexW : 0) - (stairSide > 0 ? 2 : 0);
         bz0 = porchD;

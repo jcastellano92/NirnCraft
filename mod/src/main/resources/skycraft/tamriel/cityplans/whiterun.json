@@ -37,8 +37,9 @@
     {"at": [0, -18], "size": 11, "variant": 1, "stalls": 0, "raise": 7, "name": "whiterun_gildergreen_court"}
   ],
   "nets": [
-    {"type": "path", "via": [[-56, 54], [-34, 54], [34, 54], [56, 54]], "width": 3, "rank": 1, "tag": "plains"},
-    {"type": "path", "via": [[-54, -22], [-26, -22], [26, -22], [54, -22]], "width": 3, "rank": 1, "tag": "wind", "raise": 7}
+    {"type": "path", "via": [[-32, 70], [-32, 52], [-32, 35]], "width": 3, "rank": 1, "tag": "plains"},
+    {"type": "path", "via": [[32, 70], [32, 52], [32, 35]], "width": 3, "rank": 1, "tag": "plains"},
+    {"type": "path", "via": [[-34, -38], [-10, -38], [10, -38], [34, -38]], "width": 3, "rank": 1, "tag": "wind", "raise": 7}
   ],
   "zones": [
     {"at": [0, -76], "r": 34, "zone": "noble"},

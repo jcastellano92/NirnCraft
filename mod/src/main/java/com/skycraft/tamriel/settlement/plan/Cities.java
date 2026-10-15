@@ -427,11 +427,11 @@ public final class Cities {
         plaza(plan, 0, 35, 15, 0, 0);
         stalls(plan, 0, 35, 4, 0);
         // the Plains District
-        named(b(plan, Archetype.INN, -20, 16, E, 13, 17), "bannered_mare").flags |= Spec.UPPER;
-        named(b(plan, Archetype.STORE, 18, 52, W, 9, 11), "belethors_general_goods");
-        named(b(plan, Archetype.ALCHEMIST, 18, 16, W, 9, 11), "arcadias_cauldron");
-        named(b(plan, Archetype.SMITHY, 22, 86, W, 11, 9), "warmaidens");
-        named(b(plan, Archetype.STORE, -18, 86, E, 9, 11), "drunken_huntsman");
+        named(b(plan, Archetype.INN, -21, 16, E, 15, 19), "bannered_mare").flags |= Spec.UPPER;
+        named(b(plan, Archetype.STORE, 19, 52, W, 11, 13), "belethors_general_goods").flags |= Spec.UPPER;
+        named(b(plan, Archetype.ALCHEMIST, 19, 16, W, 11, 13), "arcadias_cauldron").flags |= Spec.UPPER;
+        named(b(plan, Archetype.SMITHY, 22, 86, W, 13, 11), "warmaidens");
+        named(b(plan, Archetype.STORE, -19, 86, E, 11, 13), "drunken_huntsman").flags |= Spec.UPPER;
         saleHouse(plan, "breezehome", Archetype.HOUSE);
         b(plan, Archetype.BARRACKS, 44, 84, W, 9, 15);
         houses(plan, plains, 14, 0, 0, Archetype.HOUSE);

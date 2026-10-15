@@ -136,14 +136,10 @@ public final class Interiors {
                         if (!c.isReserved(x, y, pz)) c.door(x, y, pz, p.door, Direction.SOUTH);
                         continue;
                     }
-                    for (int yy = y; yy < r.ceil() - 1; yy++) {
-                        if (!c.isReserved(x, yy, pz)) c.set(x, yy, pz, rich ? p.wall : p.planks);
-                    }
+                    if (!c.isReserved(x, y, pz)) fillWallColumn(c, x, y, r.ceil(), pz, rich ? p.wall : p.planks);
                 }
                 for (int z = pz + 1; z <= r.z1(); z++) {
-                    for (int yy = y; yy < r.ceil() - 1; yy++) {
-                        if (!c.isReserved(r.cx(), yy, z)) c.set(r.cx(), yy, z, rich ? p.wall : p.planks);
-                    }
+                    if (!c.isReserved(r.cx(), y, z)) fillWallColumn(c, r.cx(), y, r.ceil(), z, rich ? p.wall : p.planks);
                 }
                 // Left rear alcove: kitchen & pantry
                 c.setIfOpen(r.x0(), y, r.z1(), Props.cookingPot());
@@ -205,6 +201,13 @@ public final class Interiors {
         c.setIfOpen(tx, y + 1, tz, rich ? Props.cheese() : B.s(Blocks.CANDLE).setValue(net.minecraft.world.level.block.CandleBlock.LIT, true));
     }
 
+    private static void fillWallColumn(Canvas c, int x, int y, int ceil, int z, BlockState wall) {
+        for (int yy = y; yy < ceil; yy++) c.set(x, yy, z, wall);
+        if (!c.recording()) {
+            for (int yy = ceil; yy < ceil + 12 && c.get(x, yy, z).isAir(); yy++) c.set(x, yy, z, wall);
+        }
+    }
+
     /** Horizontal interior partition wall along row {@code z} with a door at {@code doorX}, skipping reserved stair cells. */
     public static void partitionH(Canvas c, Palette p, int x0, int x1, int z, int y, int ceil, int doorX, boolean rich) {
         BlockState wall = rich ? p.wall : p.planks;
@@ -214,7 +217,7 @@ public final class Interiors {
                 c.door(x, y, z, p.door, Direction.SOUTH);
                 continue;
             }
-            for (int yy = y; yy < ceil - 1; yy++) c.set(x, yy, z, wall);
+            fillWallColumn(c, x, y, ceil, z, wall);
         }
     }
 
@@ -231,7 +234,7 @@ public final class Interiors {
                 c.door(x, y, z, p.door, Direction.EAST);
                 continue;
             }
-            for (int yy = y; yy < ceil - 1; yy++) c.set(x, yy, z, wall);
+            fillWallColumn(c, x, y, ceil, z, wall);
         }
     }
 
@@ -349,14 +352,14 @@ public final class Interiors {
                 int kWallX = s == 1 ? kx0 : kx1;
                 int kDoorX = (kx0 + kx1) / 2;
                 for (int z = cz; z <= hall.z1(); z++) {
-                    for (int yy = y; yy < hall.ceil() - 1; yy++) c.set(kWallX, yy, z, p.planks);
+                    fillWallColumn(c, kWallX, y, hall.ceil(), z, p.planks);
                 }
                 for (int x = kx0; x <= kx1; x++) {
                     if (x == kDoorX) {
                         c.door(x, y, cz, p.door, Direction.NORTH);
                         continue;
                     }
-                    for (int yy = y; yy < hall.ceil() - 1; yy++) c.set(x, yy, cz, p.planks);
+                    fillWallColumn(c, x, y, hall.ceil(), cz, p.planks);
                 }
                 int innerK = s == 1 ? kx1 : kx0;
                 c.set(innerK, y, hall.z1(), Props.cookingPot());
@@ -379,8 +382,8 @@ public final class Interiors {
                 int xa2 = Math.min(px, s == 1 ? hall.x1() : hall.x0()), xb2 = Math.max(px, s == 1 ? hall.x1() : hall.x0());
                 int pz = hall.z1() - 3;
                 if (!c.anyReserved(xa2, pz, xb2, hall.z1(), y)) {
-                    for (int z = pz; z <= hall.z1(); z++) for (int yy = y; yy < hall.ceil() - 1; yy++) c.set(px, yy, z, p.wall);
-                    for (int x = xa2; x <= xb2; x++) for (int yy = y; yy < hall.ceil() - 1; yy++) c.set(x, yy, pz, p.wall);
+                    for (int z = pz; z <= hall.z1(); z++) fillWallColumn(c, px, y, hall.ceil(), z, p.wall);
+                    for (int x = xa2; x <= xb2; x++) fillWallColumn(c, x, y, hall.ceil(), pz, p.wall);
                     int dx = s == 1 ? px + 1 : px - 1;
                     c.entrance(dx, y, pz, p.door, Direction.NORTH);
                     c.anchor(AnchorType.INN_DOOR, dx, y, pz);
@@ -462,12 +465,10 @@ public final class Interiors {
             int zOut = back ? zw - 1 : zw + 1;
             if (zOut >= r.z0() && zOut <= r.z1() && c.isReserved(xw + 1, y, zOut)) continue;
             for (int z = za; z <= zb; z++) {
-                for (int yy = y; yy < r.ceil() - 1; yy++) {
-                    if (xw >= r.x0() && xw <= r.x1()) c.set(xw, yy, z, p.planks);
-                    if (xw + 3 <= r.x1()) c.set(xw + 3, yy, z, p.planks);
-                }
+                if (xw >= r.x0() && xw <= r.x1()) fillWallColumn(c, xw, y, r.ceil(), z, p.planks);
+                if (xw + 3 <= r.x1()) fillWallColumn(c, xw + 3, y, r.ceil(), z, p.planks);
             }
-            for (int x = xw + 1; x <= xw + 2; x++) for (int yy = y; yy < r.ceil() - 1; yy++) c.set(x, yy, zw, p.planks);
+            for (int x = xw + 1; x <= xw + 2; x++) fillWallColumn(c, x, y, r.ceil(), zw, p.planks);
             c.entrance(xw + 1, y, zw, p.door, back ? Direction.SOUTH : Direction.NORTH);
             c.anchor(AnchorType.INN_DOOR, xw + 1, y, zw);
             int footZ = back ? r.z1() - 1 : r.z0() + 1;
@@ -609,12 +610,12 @@ public final class Interiors {
                 c.set(r.x1(), y, z, z % 2 == 0 ? B.s(Blocks.BOOKSHELF) : B.slab(p.slab, true));
                 Props.pot(c, r.x1(), y + 1, z, 13 + z);
             }
-            // Overhead hanging drying herbs & glow berries
+            // Overhead hanging drying herbs & glow berries above the counter where ceiling is solid
             for (int x = r.x0() + 1; x <= r.x1() - 1; x += 2) {
-                for (int z = r.z0() + 1; z <= cz; z += 2) {
-                    if (x == r.cx() && z == r.cz()) continue;
-                    BlockState herb = (x + z) % 4 == 0 ? B.s(Blocks.CAVE_VINES) : B.s(Blocks.HANGING_ROOTS);
-                    c.setIfOpen(x, r.ceil() - 1, z, herb);
+                if (x == r.cx()) continue;
+                if (!c.recording() && !c.get(x, r.ceil(), cz).isAir()) {
+                    BlockState herb = (x + cz) % 4 == 0 ? B.s(Blocks.CAVE_VINES) : B.s(Blocks.HANGING_ROOTS);
+                    c.setIfOpen(x, r.ceil() - 1, cz, herb);
                 }
             }
         } else {
@@ -893,7 +894,7 @@ public final class Interiors {
                     c.door(x, y, pz, p.door, Direction.SOUTH);
                     continue;
                 }
-                for (int yy = y; yy < r.ceil() - 1; yy++) c.set(x, yy, pz, p.planks);
+                fillWallColumn(c, x, y, r.ceil(), pz, p.planks);
             }
         }
         if (seat) {

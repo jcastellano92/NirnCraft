@@ -199,9 +199,11 @@ public final class Works {
                 if (mid) {
                     for (int y = -3; y <= 0; y++) c.set(x, y, z, B.s(Blocks.WATER));
                     c.set(x, -4, z, p.foundation);
+                    c.foundation(x, -5, z, p.foundation, 16);
                 } else {
                     c.set(x, 1, z, p.wallLow);
                     for (int y = -3; y <= 0; y++) c.set(x, y, z, p.foundation);
+                    c.foundation(x, -4, z, p.foundation, 16);
                 }
             }
         }

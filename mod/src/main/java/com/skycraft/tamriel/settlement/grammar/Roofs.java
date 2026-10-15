@@ -191,15 +191,18 @@ public final class Roofs {
     /** Crossed "dragon horn" ridge beams over a gable end at (mid, ry, end). */
     public static void horns(Canvas c, Palette p, boolean alongZ, int mid, int ry, int end) {
         BlockState beam = B.axis(p.beam, Direction.Axis.Y);
+        BlockState ridge = B.axis(p.beam, alongZ ? Direction.Axis.Z : Direction.Axis.X);
         if (alongZ) {
+            c.set(mid, ry, end, p.roofFull);
+            c.set(mid, ry + 1, end, ridge);
             c.set(mid - 1, ry + 1, end, beam);
             c.set(mid + 1, ry + 1, end, beam);
             c.set(mid - 1, ry + 2, end, B.s(Blocks.AIR));
-            c.set(mid, ry, end, p.roofFull);
         } else {
+            c.set(end, ry, mid, p.roofFull);
+            c.set(end, ry + 1, mid, ridge);
             c.set(end, ry + 1, mid - 1, beam);
             c.set(end, ry + 1, mid + 1, beam);
-            c.set(end, ry, mid, p.roofFull);
         }
     }
 

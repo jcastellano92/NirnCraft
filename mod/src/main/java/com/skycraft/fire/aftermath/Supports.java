@@ -28,7 +28,9 @@ public final class Supports {
     public static boolean needsFloor(BlockState s) {
         Block b = s.getBlock();
         if (b instanceof BigFireBlock || b instanceof GroundDecalBlock || b instanceof CarpetBlock || b instanceof BedBlock
-                || b instanceof CandleBlock || b instanceof BushBlock || b instanceof BasePressurePlateBlock || b == Blocks.SNOW) {
+                || b instanceof CandleBlock || b instanceof BushBlock || b instanceof BasePressurePlateBlock || b == Blocks.SNOW
+                || b == Blocks.HAY_BLOCK || b instanceof net.minecraft.world.level.block.FenceBlock
+                || b instanceof net.minecraft.world.level.block.WallBlock) {
             return true;
         }
         if (s.isAir()) return false;

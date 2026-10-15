@@ -77,7 +77,8 @@ public final class Charring {
             return copy(s, FireBlocks.CHARRED_PLANKS_SLAB.get().defaultBlockState(), SlabBlock.TYPE, BlockStateProperties.WATERLOGGED);
         }
         if (s.is(BlockTags.WOODEN_FENCES) || s.is(BlockTags.FENCE_GATES)) {
-            return (severity >= 2 && above && h < 55) ? AIR : s;
+            int fh = hash(x, 0, z, seed, 3);
+            return (severity >= 2 && above && fh < 55) ? AIR : s;
         }
         if (s.is(BlockTags.WOODEN_DOORS) || s.is(BlockTags.WOODEN_TRAPDOORS) || s.is(BlockTags.WOODEN_BUTTONS) || s.is(BlockTags.WOODEN_PRESSURE_PLATES)) {
             // both halves of a door roll the same
@@ -240,9 +241,13 @@ public final class Charring {
         for (int i = 0; i < 2; i++) {
             int bx = (k & 1) == 0 ? rw + 1 : w - rw - 2;
             int bz = 1 + c.roll(i, 0, i, 87, Math.max(1, d - 2));
+            int by = Math.min(hh - 3, 5 + c.roll(bz, i, 0, 89, 4));
+            if (bx < 0 || bx >= w || bz < 0 || bz >= d) continue;
+            if (c.get(bx, by, bz).isAir() && c.get(bx, by - 1, bz).isAir()) continue;
             for (int t = 0; t < 3; t++) {
                 int xx = (k & 1) == 0 ? bx - t : bx + t;
-                c.set(xx, Math.min(hh - 3, 5 + c.roll(bz, i, t, 89, 4)), bz, B.axis(beam, Direction.Axis.X));
+                if (xx < 0 || xx >= w) break;
+                c.set(xx, by, bz, B.axis(beam, Direction.Axis.X));
             }
         }
     }

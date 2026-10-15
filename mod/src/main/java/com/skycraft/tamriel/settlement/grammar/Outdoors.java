@@ -178,18 +178,19 @@ public final class Outdoors {
                 c.anchor(AnchorType.MEETING, 1, 1, -2);
             }
             case WELL -> {
-                for (int x = -1; x <= 3; x++) for (int z = -1; z <= 3; z++) {
+                int x0 = Math.max(0, (w - 3) / 2), z0 = Math.max(0, (d - 3) / 2);
+                for (int x = 0; x < w; x++) for (int z = 0; z < d; z++) {
                     c.set(x, 0, z, p.plaza);
-                    c.foundation(x, -1, z, p.foundation, 6);
+                    c.foundation(x, -1, z, p.foundation, 16);
                 }
-                if (!c.recording()) c.clearPlants(-1, 1, -1, 3, 5, 3);
-                Works.well(c, p, 0, 0);
+                if (!c.recording()) c.clearPlants(0, 1, 0, w - 1, 5, d - 1);
+                Works.well(c, p, x0, z0);
             }
             case FOUNTAIN -> fountain(c, p, w, d);
             case STATUE -> {
                 for (int x = 0; x < w; x++) for (int z = 0; z < d; z++) {
                     c.set(x, 0, z, p.plaza2);
-                    c.foundation(x, -1, z, p.foundation, 6);
+                    c.foundation(x, -1, z, p.foundation, 16);
                 }
                 Works.statue(c, p, w / 2, d / 2);
             }
@@ -227,13 +228,22 @@ public final class Outdoors {
                 for (int i = 0; i < 3; i++) animal(c, 1 + i % Math.max(1, w - 2), ground(c, 1, 1) + 1, 1 + i / 2 % Math.max(1, d - 2), EntityType.CHICKEN);
             }
             case TREE -> {
-                int g = ground(c, w / 2, d / 2);
+                int cx = w / 2, cz = d / 2;
+                int g = ground(c, cx, cz);
                 BlockState log = st.culture.equals("bosmer") ? B.id("skycraft:graht_oak_log", Blocks.JUNGLE_LOG) : B.s(Blocks.OAK_LOG);
                 BlockState leaves = B.s(st.culture.equals("altmer") ? Blocks.FLOWERING_AZALEA_LEAVES : Blocks.OAK_LEAVES);
                 if (leaves.hasProperty(LeavesBlock.PERSISTENT)) leaves = leaves.setValue(LeavesBlock.PERSISTENT, true);
-                for (int y = 1; y <= 4; y++) c.set(w / 2, g + y, d / 2, log);
-                for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) for (int dy = 3; dy <= 6; dy++) {
-                    if (dx * dx + dz * dz + (dy - 4) * (dy - 4) <= 5 && c.roll(dx, dy, dz, 23, 6) != 0) c.setIfOpen(w / 2 + dx, g + dy, d / 2 + dz, leaves);
+                for (int y = 1; y <= 4; y++) c.set(cx, g + y, cz, log);
+                for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) {
+                    int x = cx + dx, z = cz + dz;
+                    if (x < 0 || x >= w || z < 0 || z >= d) continue;
+                    int r2 = dx * dx + dz * dz;
+                    if (r2 <= 2) {
+                        for (int dy = 3; dy <= 5; dy++) c.setIfOpen(x, g + dy, z, leaves);
+                        if (r2 <= 1) c.setIfOpen(x, g + 6, z, leaves);
+                    } else if (r2 <= 4) {
+                        c.setIfOpen(x, g + 4, z, leaves);
+                    }
                 }
             }
             case SIGNPOST -> {

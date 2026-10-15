@@ -436,11 +436,13 @@ public final class Programs {
         if (upper.isEmpty()) {
             Room target = wings.isEmpty() ? r0 : wings.get(0);
             int y = target.y();
-            int bx = target == r0 ? Math.min(target.x1() - 1, target.x0() + 1) : target.x0();
+            int bx = target == r0 ? (target.x0() + 1 != target.cx() ? Math.min(target.x1() - 1, target.x0() + 1) : target.x0()) : target.x0();
             int bz = target.z1() - 1;
             int before = c.bedCount();
             c.bed(bx, y, bz, p.bed, Direction.SOUTH);
             if (c.bedCount() > before) {
+                c.air(bx, y + 1, target.z1());
+                c.air(bx, y + 2, target.z1());
                 c.anchor(bed, bx, y, bz);
             } else {
                 c.anchor(bed, bx, y, target.z1());

@@ -169,12 +169,19 @@ public final class Shells {
             if (k > 0) {
                 c.fill(x0 + 1, fy, 1, w - 2, fy, d - 2, p.floor2);
                 // stair well along the left inner wall, climbing towards the back
-                int sz = d - 2 - f.wallH;
-                for (int i = 0; i < f.wallH; i++) {
-                    c.set(x0 + 1, fy - f.wallH + i, sz + i, B.stair(p.stairs, Direction.SOUTH, false));
-                    c.air(x0 + 1, fy, sz + i);
-                    c.air(x0 + 1, fy + 1, sz + i);
+                int sz = Math.max(1, d - 3 - f.wallH);
+                c.keepClear(x0 + 1, fy - f.wallH, fy - f.wallH + 1, Math.max(1, sz - 1));
+                c.keepClear(x0 + 2, fy - f.wallH, fy - f.wallH + 1, Math.max(1, sz - 1));
+                for (int i = 0; i <= f.wallH && sz + i <= d - 2; i++) {
+                    int sy = fy - f.wallH + i, zz = sz + i;
+                    c.set(x0 + 1, sy, zz, B.stair(p.stairs, Direction.SOUTH, false));
+                    if (i < f.wallH) c.air(x0 + 1, fy, zz);
+                    c.air(x0 + 1, sy + 1, zz);
+                    c.air(x0 + 1, sy + 2, zz);
+                    c.keepClear(x0 + 1, sy, sy + 2, zz);
                 }
+                c.keepClear(x0 + 1, fy + 1, fy + 2, d - 2);
+                c.keepClear(x0 + 2, fy + 1, fy + 2, d - 2);
             }
             int rx0 = f.storeys > 1 ? x0 + 2 : x0 + 1;
             rooms.add(new Room(rx0, 1, w - 2, d - 2, fy + 1, fy + f.wallH + 1));
@@ -310,20 +317,25 @@ public final class Shells {
             int ry = y + half * p.pitch;
             int mid = alongZ ? (x0 + x1) / 2 : (z0 + z1) / 2;
             BlockState beam = B.axis(p.beam, Direction.Axis.Y);
+            BlockState ridge = B.axis(p.beam, alongZ ? Direction.Axis.Z : Direction.Axis.X);
             if (alongZ) {
+                c.set(mid, ry, z0, p.roofFull);
+                c.set(mid, ry, z1, p.roofFull);
+                c.set(mid, ry + 1, z0, ridge);
+                c.set(mid, ry + 1, z1, ridge);
                 c.set(mid - 1, ry + 1, z0, beam);
                 c.set(mid + 1, ry + 1, z0, beam);
                 c.set(mid - 1, ry + 1, z1, beam);
                 c.set(mid + 1, ry + 1, z1, beam);
-                c.set(mid, ry, z0, p.roofFull);
-                c.set(mid, ry, z1, p.roofFull);
             } else {
+                c.set(x0, ry, mid, p.roofFull);
+                c.set(x1, ry, mid, p.roofFull);
+                c.set(x0, ry + 1, mid, ridge);
+                c.set(x1, ry + 1, mid, ridge);
                 c.set(x0, ry + 1, mid - 1, beam);
                 c.set(x0, ry + 1, mid + 1, beam);
                 c.set(x1, ry + 1, mid - 1, beam);
                 c.set(x1, ry + 1, mid + 1, beam);
-                c.set(x0, ry, mid, p.roofFull);
-                c.set(x1, ry, mid, p.roofFull);
             }
         }
     }

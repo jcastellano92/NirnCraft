@@ -324,11 +324,17 @@ public final class Canvas {
         int minZ = Math.max(Math.min(wza, wzb), z0), maxZ = Math.min(Math.max(wza, wzb), z1);
         int minY = Math.max(oy + Math.min(ay, by), y0), maxY = Math.min(oy + Math.max(ay, by), y1);
         BlockState air = Blocks.AIR.defaultBlockState();
+        java.util.ArrayList<int[]> cut = new java.util.ArrayList<>();
         for (int x = minX; x <= maxX; x++)
             for (int z = minZ; z <= maxZ; z++)
                 for (int y = minY; y <= maxY; y++) {
-                    if (!level.getBlockState(m.set(x, y, z)).isAir()) wset(x, y, z, air);
+                    BlockState s = level.getBlockState(m.set(x, y, z));
+                    if (!s.isAir()) {
+                        if (s.is(BlockTags.LOGS) && natural(s) && cut.size() < 96) cut.add(new int[]{x, y, z});
+                        wset(x, y, z, air);
+                    }
                 }
+        sweepCrowns(cut);
     }
 
     /** Clears trees, plants and snow (not built blocks or terrain) in a local box. */

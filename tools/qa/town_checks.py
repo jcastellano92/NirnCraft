@@ -255,10 +255,11 @@ def floating_column(area, cx, cz):
     ys = np.nonzero(~area.air[c] & ~area.water[c])[0]
     if len(ys) == 0:
         return None
-    y = int(ys.max())
+    top = int(ys.max())
+    y = top
     while y - 1 >= 0 and not area.air[c[y - 1]]:
         y -= 1
-    if y < 2 or not (area.air[c[y - 1]] and area.air[c[y - 2]]):
+    if top - y > 5 or y < 2 or not (area.air[c[y - 1]] and area.air[c[y - 2]]):
         return None
     if not (~area.air[c[:y - 2]]).any():
         return None  # nothing below at all (unloaded / void): not a prop problem

@@ -253,7 +253,7 @@ public class StreetPaint extends Feature<NoneFeatureConfiguration> {
                     continue;
                 }
                 if (b instanceof DoorBlock || b instanceof LadderBlock) continue;
-                if (b instanceof FenceBlock && y == h + 1) {
+                if (b instanceof FenceBlock && y == h + 1 && !(get(x, h + 2, z).getBlock() instanceof FenceBlock)) {
                     set(x, y, z, gateFor(s).setValue(FenceGateBlock.FACING, along).setValue(FenceGateBlock.OPEN, true));
                     continue;
                 }
@@ -263,7 +263,21 @@ public class StreetPaint extends Feature<NoneFeatureConfiguration> {
                         && !s.is(BlockTags.OVERWORLD_NATURAL_LOGS) && !s.is(BlockTags.LEAVES)) {
                     continue;
                 }
+                boolean wasLog = s.is(BlockTags.OVERWORLD_NATURAL_LOGS);
                 set(x, y, z, Blocks.AIR.defaultBlockState());
+                if (y == h + 2 && h + 3 <= maxY && get(x, h + 3, z).getBlock() instanceof net.minecraft.world.level.block.LanternBlock) {
+                    set(x, h + 3, z, Blocks.AIR.defaultBlockState());
+                }
+                if (wasLog) {
+                    for (int ty = y + 1; ty <= Math.min(maxY, h + 16); ty++) {
+                        BlockState ts = get(x, ty, z);
+                        if (ts.is(BlockTags.OVERWORLD_NATURAL_LOGS) || ts.is(BlockTags.LEAVES)) {
+                            set(x, ty, z, Blocks.AIR.defaultBlockState());
+                        } else {
+                            break;
+                        }
+                    }
+                }
             }
             // a path block needs air above it (or it turns to dirt)
             if (get(x, h, z).is(Blocks.DIRT_PATH) && !get(x, h + 1, z).isAir()) set(x, h, z, Blocks.COARSE_DIRT.defaultBlockState());

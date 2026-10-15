@@ -58,7 +58,7 @@ public final class Fabric {
         if (x.sk.gates.isEmpty()) x.sk.gates.add(new int[]{0, x.R});
         for (Spec s : plan.specs) {
             if (s.kind == Archetype.STREET) {
-                if (onBareChain(plan, s)) continue;
+                if (onBareChain(plan, s) || (s.floor != Spec.UNSET && s.floor2 != Spec.UNSET && s.floor != s.floor2)) continue;
                 int ax = Zoning.localX(plan, s.x, s.z), az = Zoning.localZ(plan, s.x, s.z), bx = Zoning.localX(plan, s.x2, s.z2), bz = Zoning.localZ(plan, s.x2, s.z2);
                 x.sk.streets.add(new Street(ax, az, bx, bz, s.w, s.has(Spec.MAJOR) ? 0 : s.w >= 3 ? 1 : 2));
             } else if (s.kind == Archetype.PLAZA) {
@@ -166,12 +166,34 @@ public final class Fabric {
         for (int i = from; i < plan.specs.size(); i++) {
             Spec s = plan.specs.get(i);
             if (s.isLine() || s.kind == Archetype.TERRACE || s.has(Spec.GROUND) || s.minFloor != Spec.UNSET) continue;
-            int best = Spec.UNSET;
-            for (Spec t : tiles) {
-                if (Math.abs(s.x - t.x) <= t.halfX() + 1 && Math.abs(s.z - t.z) <= t.halfZ() + 1) best = Math.max(best, t.minFloor);
+            int best = terraceAt(tiles, s.x, s.z);
+            int hx = Math.max(1, s.halfX() - s.margin), hz = Math.max(1, s.halfZ() - s.margin);
+            if (terraceAt(tiles, s.x - hx, s.z - hz) != best
+                    || terraceAt(tiles, s.x + hx, s.z - hz) != best
+                    || terraceAt(tiles, s.x - hx, s.z + hz) != best
+                    || terraceAt(tiles, s.x + hx, s.z + hz) != best) {
+                plan.specs.remove(i--);
+                continue;
+            }
+            if (s.kind.building) {
+                int front = (s.facing.getAxis() == Direction.Axis.Z ? hz : hx) + 2;
+                int dx = s.x + s.facing.getStepX() * front, dz = s.z + s.facing.getStepZ() * front;
+                if (terraceAt(tiles, dx, dz) != best) {
+                    plan.specs.remove(i--);
+                    continue;
+                }
             }
             if (best != Spec.UNSET) s.minFloor = best;
         }
+    }
+
+    private static int terraceAt(List<Spec> tiles, int wx, int wz) {
+        int best = Spec.UNSET;
+        for (Spec t : tiles) {
+            int thx = Math.max(1, t.halfX() - t.margin), thz = Math.max(1, t.halfZ() - t.margin);
+            if (Math.abs(wx - t.x) <= thx + 1 && Math.abs(wz - t.z) <= thz + 1) best = Math.max(best, t.minFloor);
+        }
+        return best;
     }
 
     /** Zone lookup that honours the plan's disc zones before the default quarters. */
@@ -273,7 +295,7 @@ public final class Fabric {
                             s.flags = q.flags();
                             if (!q.use().isEmpty()) CityPlans.grammarUse(plan, s, q.use(), q.wealth());
                             s.variant = q.variant();
-                            s.minFloor = q.raise() == 0 ? Spec.UNSET : q.raise();
+                            s.minFloor = (ci < tagged.size() && q.raise() != 0) ? q.raise() : Spec.UNSET;
                             s.margin = Math.max(1, s.margin);
                             if (!q.name().isEmpty() && i == 0) {
                                 s.name = q.name();
@@ -292,7 +314,7 @@ public final class Fabric {
                     s.flags = q.flags();
                     if (!q.use().isEmpty()) CityPlans.grammarUse(plan, s, q.use(), q.wealth());
                     s.variant = q.variant();
-                    s.minFloor = q.raise() == 0 ? Spec.UNSET : q.raise();
+                    s.minFloor = (!tagged.isEmpty() && q.raise() != 0) ? q.raise() : Spec.UNSET;
                     if (!q.name().isEmpty() && i == 0) {
                         s.name = q.name();
                         s.flag(Spec.SIGN);

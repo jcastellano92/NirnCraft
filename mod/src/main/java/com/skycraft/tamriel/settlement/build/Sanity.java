@@ -35,48 +35,60 @@ public final class Sanity {
         BlockState air = Blocks.AIR.defaultBlockState();
         java.util.List<BlockPos> shaped = new java.util.ArrayList<>();
         int minY = Math.max(clip.minY(), level.getMinBuildHeight() + 1), maxY = Math.min(clip.maxY(), level.getMaxBuildHeight() - 2);
-        for (int x = clip.minX(); x <= clip.maxX(); x++) {
-            for (int z = clip.minZ(); z <= clip.maxZ(); z++) {
-                for (int y = minY; y <= maxY; y++) {
-                    p.set(x, y, z);
-                    BlockState s = level.getBlockState(p);
-                    if (s.isAir()) continue;
-                    var b = s.getBlock();
-                    if (b instanceof DoorBlock) {
-                        if (s.getValue(DoorBlock.HALF) != DoubleBlockHalf.LOWER) {
-                            // an upper half without its lower half
-                            if (!level.getBlockState(p.below()).is(b)) level.setBlock(p, air, 2);
-                            continue;
-                        }
-                        if (!doorInWall(level, chunkBox, p, s)) {
+        for (int pass = 0; pass < 2; pass++) {
+            for (int x = clip.minX(); x <= clip.maxX(); x++) {
+                for (int z = clip.minZ(); z <= clip.maxZ(); z++) {
+                    for (int k = 0, span = maxY - minY; k <= span; k++) {
+                        int y = pass == 0 ? minY + k : maxY - k;
+                        p.set(x, y, z);
+                        BlockState s = level.getBlockState(p);
+                        if (s.isAir()) continue;
+                        var b = s.getBlock();
+                        if (b instanceof DoorBlock) {
+                            if (s.getValue(DoorBlock.HALF) != DoubleBlockHalf.LOWER) {
+                                // an upper half without its lower half
+                                if (!level.getBlockState(p.below()).is(b)) level.setBlock(p, air, 2);
+                                continue;
+                            }
+                            if (!doorInWall(level, chunkBox, p, s)) {
+                                level.setBlock(p, air, 2);
+                                level.setBlock(p.above(), air, 2);
+                            }
+                        } else if (b instanceof TrapDoorBlock) {
+                            if (!anyNeighbour(level, chunkBox, p)) level.setBlock(p, air, 2);
+                        } else if (b instanceof StairBlock) {
+                            if (strayStair(level, chunkBox, p) || !anyNeighbour(level, chunkBox, p)) level.setBlock(p, air, 2);
+                        } else if (b instanceof CarpetBlock || b instanceof PressurePlateBlock) {
+                            if (!supported(level, chunkBox, p.below())) level.setBlock(p, air, 2);
+                        } else if (b instanceof LanternBlock) {
+                            boolean hanging = s.getValue(BlockStateProperties.HANGING);
+                            if (!supported(level, chunkBox, hanging ? p.above() : p.below())) level.setBlock(p, air, 2);
+                        } else if (b instanceof LadderBlock) {
+                            Direction back = s.getValue(LadderBlock.FACING).getOpposite();
+                            BlockPos behind = p.relative(back);
+                            boolean climbs = level.getBlockState(p.below()).is(b) || level.getBlockState(p.above()).is(b);
+                            if (!supported(level, chunkBox, behind) && !climbs) level.setBlock(p, air, 2);
+                        } else if (b instanceof ChestBlock || b instanceof BarrelBlock) {
+                            // hard rule: no container over air, liquid or a non-solid block
+                            BlockPos under = p.below();
+                            BlockState us = inside(chunkBox, under) ? level.getBlockState(under) : null;
+                            if (us != null && (us.isAir() || us.canBeReplaced() || !us.getFluidState().isEmpty())) {
+                                level.removeBlock(p, false);
+                            } else if (!reachable(level, chunkBox, p, s)) {
+                                level.removeBlock(p, false);
+                            }
+                        } else if (b instanceof FenceBlock || b instanceof WallBlock || b instanceof IronBarsBlock) {
+                            if ((b instanceof FenceBlock || b instanceof WallBlock)
+                                    && !supported(level, chunkBox, p.below()) && !supported(level, chunkBox, p.above())) {
+                                level.setBlock(p, air, 2);
+                            } else if (!anyNeighbour(level, chunkBox, p)) {
+                                level.setBlock(p, air, 2);
+                            } else if (pass == 0) {
+                                shaped.add(p.immutable());
+                            }
+                        } else if (!anyNeighbour(level, chunkBox, p)) {
                             level.setBlock(p, air, 2);
-                            level.setBlock(p.above(), air, 2);
                         }
-                    } else if (b instanceof TrapDoorBlock) {
-                        if (!anyNeighbour(level, chunkBox, p)) level.setBlock(p, air, 2);
-                    } else if (b instanceof StairBlock) {
-                        if (strayStair(level, chunkBox, p)) level.setBlock(p, air, 2);
-                    } else if (b instanceof CarpetBlock || b instanceof PressurePlateBlock) {
-                        if (!supported(level, chunkBox, p.below())) level.setBlock(p, air, 2);
-                    } else if (b instanceof LanternBlock) {
-                        boolean hanging = s.getValue(BlockStateProperties.HANGING);
-                        if (!supported(level, chunkBox, hanging ? p.above() : p.below())) level.setBlock(p, air, 2);
-                    } else if (b instanceof LadderBlock) {
-                        Direction back = s.getValue(LadderBlock.FACING).getOpposite();
-                        BlockPos behind = p.relative(back);
-                        boolean climbs = level.getBlockState(p.below()).is(b) || level.getBlockState(p.above()).is(b);
-                        if (!supported(level, chunkBox, behind) && !climbs) level.setBlock(p, air, 2);
-                    } else if (b instanceof ChestBlock || b instanceof BarrelBlock) {
-                        // hard rule: no container over air, liquid or a non-solid block
-                        BlockPos under = p.below();
-                        BlockState us = inside(chunkBox, under) ? level.getBlockState(under) : null;
-                        if (us != null && (us.isAir() || us.canBeReplaced() || !us.getFluidState().isEmpty())) {
-                            level.removeBlock(p, false);
-                        } else if (!reachable(level, chunkBox, p, s)) {
-                            level.removeBlock(p, false);
-                        }
-                    } else if (b instanceof FenceBlock || b instanceof WallBlock || b instanceof IronBarsBlock) {
-                        shaped.add(p.immutable());
                     }
                 }
             }
@@ -148,7 +160,7 @@ public final class Sanity {
 
     /** A solid-ish block (anything that is not air, fluid or a replaceable plant); unknown (outside) counts as yes. */
     private static boolean supported(WorldGenLevel level, BoundingBox chunkBox, BlockPos p) {
-        if (!inside(chunkBox, p)) return true;
+        if (!readable(chunkBox, p)) return true;
         BlockState s = level.getBlockState(p);
         return !s.isAir() && s.getFluidState().isEmpty() && !s.canBeReplaced();
     }
@@ -165,11 +177,11 @@ public final class Sanity {
         Direction f = s.getValue(DoorBlock.FACING);
         Direction side = f.getClockWise();
         BlockPos below = p.below();
-        if (inside(chunkBox, below) && level.getBlockState(below).isAir()) return false;
+        if (readable(chunkBox, below) && level.getBlockState(below).isAir()) return false;
         for (Direction d : new Direction[]{side, side.getOpposite()}) {
             for (int dy = 0; dy <= 1; dy++) {
                 BlockPos n = p.relative(d).above(dy);
-                if (!inside(chunkBox, n)) return true;
+                if (!readable(chunkBox, n)) return true;
                 BlockState ns = level.getBlockState(n);
                 if (!ns.isAir() && ns.getFluidState().isEmpty() && !ns.canBeReplaced()) return true;
             }
@@ -190,7 +202,7 @@ public final class Sanity {
         }
         for (Direction d : Direction.Plane.HORIZONTAL) {
             BlockPos n = p.relative(d);
-            if (!inside(chunkBox, n)) return true;
+            if (!readable(chunkBox, n)) return true;
             BlockState ns = level.getBlockState(n);
             if (ns.isAir() || ns.canBeReplaced() || !ns.isSolidRender(level, n)) return true;
         }

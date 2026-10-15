@@ -324,7 +324,8 @@ public final class Plan {
                         || s.kind == Archetype.DOCK) continue;
                 int best = Spec.UNSET;
                 for (Spec t : tiles) {
-                    if (Math.abs(s.x - t.x) <= t.halfX() + 1 && Math.abs(s.z - t.z) <= t.halfZ() + 1) best = Math.max(best, t.minFloor);
+                    int thx = Math.max(1, t.halfX() - t.margin), thz = Math.max(1, t.halfZ() - t.margin);
+                    if (Math.abs(s.x - t.x) <= thx + 1 && Math.abs(s.z - t.z) <= thz + 1) best = Math.max(best, t.minFloor);
                 }
                 if (best != Spec.UNSET) s.minFloor = best;
             }
@@ -343,8 +344,9 @@ public final class Plan {
                 if (s.kind == Archetype.STREET && !tiles.isEmpty()) {
                     int mf1 = Spec.UNSET, mf2 = Spec.UNSET;
                     for (Spec t : tiles) {
-                        if (Math.abs(s.x - t.x) <= t.halfX() + 2 && Math.abs(s.z - t.z) <= t.halfZ() + 2) mf1 = Math.max(mf1, t.minFloor);
-                        if (Math.abs(s.x2 - t.x) <= t.halfX() + 2 && Math.abs(s.z2 - t.z) <= t.halfZ() + 2) mf2 = Math.max(mf2, t.minFloor);
+                        int thx = Math.max(1, t.halfX() - t.margin), thz = Math.max(1, t.halfZ() - t.margin);
+                        if (Math.abs(s.x - t.x) <= thx + 2 && Math.abs(s.z - t.z) <= thz + 2) mf1 = Math.max(mf1, t.minFloor);
+                        if (Math.abs(s.x2 - t.x) <= thx + 2 && Math.abs(s.z2 - t.z) <= thz + 2) mf2 = Math.max(mf2, t.minFloor);
                     }
                     if (mf1 != mf2) {
                         int f1 = terrain.land(s.x, s.z), f2 = terrain.land(s.x2, s.z2);

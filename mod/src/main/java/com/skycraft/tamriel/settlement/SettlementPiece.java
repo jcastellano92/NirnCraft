@@ -185,6 +185,7 @@ public class SettlementPiece extends StructurePiece {
                         Math.max(chunkBox.minX(), clip.minX() - 7), Math.max(chunkBox.minY(), clip.minY() - 2), Math.max(chunkBox.minZ(), clip.minZ() - 7),
                         Math.min(chunkBox.maxX(), clip.maxX() + 7), Math.min(chunkBox.maxY(), clip.maxY() + 4), Math.min(chunkBox.maxZ(), clip.maxZ() + 7));
                 com.skycraft.tamriel.settlement.build.Accessibility.sweep(level, wide, chunkBox);
+                com.skycraft.tamriel.settlement.build.Sanity.sweep(level, wide, chunkBox);
             }
         } catch (RuntimeException e) {
             Skycraft.LOGGER.error("Settlement piece {} of {} failed in chunk {}", spec.kind, settlement, chunkPos, e);
