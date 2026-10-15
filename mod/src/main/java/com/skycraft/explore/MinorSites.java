@@ -169,7 +169,28 @@ public final class MinorSites {
         x = (cx * CELL_CHUNKS + chunkOffset(h, 1)) * 16 + 4 + (int) (unit(h, 3) * 8);
         z = (cz * CELL_CHUNKS + chunkOffset(h, 2)) * 16 + 4 + (int) (unit(h, 4) * 8);
         ctx = Ctx.of(x, z);
-        if (ctx.province.equals("sea")) return null;
+        if (ctx.province.equals("sea") || ctx.s.coastDistance < -96) {
+            int[] isle = com.skycraft.tamriel.terrain.OceanIsles.siteInMinorCell(cx, cz, CELL);
+            if (isle == null || unit(h, 5) >= 0.72 * ExploreConfig.densityScale()) return null;
+            int ix = isle[0], iz = isle[1], itype = isle[2];
+            double r = unit(h, 6);
+            SiteKind mKind = switch (itype) {
+                case com.skycraft.tamriel.terrain.OceanIsles.TYPE_SEA_STACK ->
+                        r < 0.38 ? SiteKind.SEA_SHRINE : r < 0.72 ? SiteKind.BANDIT_LOOKOUT : SiteKind.TREASURE_CACHE;
+                case com.skycraft.tamriel.terrain.OceanIsles.TYPE_ATOLL ->
+                        r < 0.30 ? SiteKind.FISHING_DOCK : r < 0.60 ? SiteKind.HERMIT_HUT : r < 0.82 ? SiteKind.SEA_SHRINE : SiteKind.TREASURE_CACHE;
+                case com.skycraft.tamriel.terrain.OceanIsles.TYPE_CAY ->
+                        r < 0.28 ? SiteKind.ABANDONED_CAMP : r < 0.56 ? SiteKind.HERMIT_HUT : r < 0.80 ? SiteKind.SEA_SHRINE : SiteKind.TREASURE_CACHE;
+                default ->
+                        r < 0.55 ? SiteKind.SHIPWRECK_DEBRIS : r < 0.82 ? SiteKind.TREASURE_CACHE : SiteKind.FISHING_DOCK;
+            };
+            int m = mKind.radius + PLACE_MARGIN;
+            if (!Places.overlapping(ix - m, iz - m, ix + m, iz + m).isEmpty()) return null;
+            Ctx ictx = Ctx.of(ix, iz);
+            int facing = (int) (unit(h, 7) * 4);
+            return new Site(cx, cz, ix, iz, mKind, mix(h ^ (mKind.ordinal() * 0x632BE59BD9B4E019L)), facing, null,
+                    ictx.region.id(), ictx.province);
+        }
         if (unit(h, 5) >= occupancy(ctx) * ExploreConfig.densityScale()) return null;
         if (ctx.s.inWater() || ctx.s.coastDistance < 3) return null;
         SiteKind kind = choose(ctx, unit(h, 6));

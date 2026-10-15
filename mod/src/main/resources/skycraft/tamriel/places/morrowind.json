@@ -20053,5 +20053,161 @@
       "solstheim.L1.ash_plain"
     ],
     "_r7_r12_v4": true
+  },
+  {
+    "id": "tel_ouada_stead",
+    "name": "place.skycraft.tel_ouada_stead",
+    "type": "farm",
+    "culture": "dunmer",
+    "region": "morrowind/telvannis",
+    "x": 9920,
+    "z": -160,
+    "radius": 28,
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L1.fungal_forest_soils"
+    ]
+  },
+  {
+    "id": "zafirbel_mushroom_stead",
+    "name": "place.skycraft.zafirbel_mushroom_stead",
+    "type": "farm",
+    "culture": "dunmer",
+    "region": "morrowind/telvannis",
+    "x": 10760,
+    "z": 60,
+    "radius": 28,
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L1.fungal_forest_soils"
+    ]
+  },
+  {
+    "id": "skaal_sea_isle_cairn",
+    "name": "place.skycraft.skaal_sea_isle_cairn",
+    "type": "landmark",
+    "culture": "nord",
+    "region": "morrowind/solstheim",
+    "x": 4656,
+    "z": -1968,
+    "radius": 18,
+    "variant": "stones",
+    "class": "minor",
+    "why": [
+      "solstheim.L1.moesring_massif",
+      "solstheim.L1.north_cliffs"
+    ]
+  },
+  {
+    "id": "telvanni_spindle_isle_watch",
+    "name": "place.skycraft.telvanni_spindle_isle_watch",
+    "type": "landmark",
+    "culture": "dunmer",
+    "region": "morrowind/telvannis",
+    "x": 10032,
+    "z": -1808,
+    "radius": 20,
+    "variant": "mage_tower",
+    "class": "minor",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L1.fungal_forest_soils"
+    ]
+  },
+  {
+    "id": "telvanni_spindle_dock_cairn",
+    "name": "place.skycraft.telvanni_spindle_dock_cairn",
+    "type": "landmark",
+    "culture": "dunmer",
+    "region": "morrowind/telvannis",
+    "x": 9968,
+    "z": -1808,
+    "radius": 16,
+    "variant": "altar",
+    "class": "minor",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L1.fungal_forest_soils"
+    ]
+  },
+  {
+    "id": "khartag_outer_isle_stack",
+    "name": "place.skycraft.khartag_outer_isle_stack",
+    "type": "landmark",
+    "culture": "dunmer",
+    "region": "morrowind/vvardenfell_ashlands",
+    "x": 4912,
+    "z": -912,
+    "radius": 18,
+    "variant": "monument",
+    "class": "minor",
+    "why": [
+      "vvardenfell_ashlands.L1.ash_plain",
+      "vvardenfell_ashlands.L1.scoria_ridges"
+    ]
+  },
+  {
+    "id": "sadrith_outer_isle_hermitage",
+    "name": "place.skycraft.sadrith_outer_isle_hermitage",
+    "type": "landmark",
+    "culture": "dunmer",
+    "region": "morrowind/vvardenfell_ascadian",
+    "x": 9232,
+    "z": 1008,
+    "radius": 20,
+    "variant": "mage_tower",
+    "class": "minor",
+    "why": [
+      "morrowind.L1.red_mountain",
+      "morrowind.L1.ash_mantle"
+    ]
+  },
+  {
+    "id": "sadrith_outer_isle_shrine",
+    "name": "place.skycraft.sadrith_outer_isle_shrine",
+    "type": "landmark",
+    "culture": "dunmer",
+    "region": "morrowind/vvardenfell_ascadian",
+    "x": 9168,
+    "z": 1040,
+    "radius": 16,
+    "variant": "altar",
+    "class": "minor",
+    "why": [
+      "morrowind.L1.red_mountain",
+      "morrowind.L1.ash_mantle"
+    ]
+  },
+  {
+    "id": "odai_mouth_beacon",
+    "name": "place.skycraft.odai_mouth_beacon",
+    "type": "landmark",
+    "culture": "dunmer",
+    "region": "morrowind/vvardenfell_ascadian",
+    "x": 5840,
+    "z": 1616,
+    "radius": 18,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "morrowind.L1.red_mountain",
+      "morrowind.L1.ash_mantle"
+    ]
+  },
+  {
+    "id": "ebon_strait_isle_watch",
+    "name": "place.skycraft.ebon_strait_isle_watch",
+    "type": "landmark",
+    "culture": "dunmer",
+    "region": "morrowind/vvardenfell_ascadian",
+    "x": 6352,
+    "z": 1872,
+    "radius": 18,
+    "variant": "watchtower",
+    "class": "minor",
+    "why": [
+      "morrowind.L1.red_mountain",
+      "morrowind.L1.ash_mantle"
+    ]
   }
 ]

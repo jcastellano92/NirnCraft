@@ -265,6 +265,8 @@ public final class ScenePlanBuilder {
             for (Place p : all) placeScene(p);
             for (Place p : all) settlementScenes(p);
             waysides();
+            borderAndCorridorFill();
+            wildernessAndIslandFill();
             ScenePlan plan = pack();
             if (stats != null) {
                 int[] perAnchor = new int[ScenePlan.ANCHOR_NAMES.length];
@@ -837,6 +839,141 @@ public final class ScenePlanBuilder {
             String pid = bar >= 0 ? id.substring(0, bar) : id;
             if (pid.isEmpty() || pid.startsWith("@") || out.contains(pid) || Places.byId(pid).isEmpty()) return;
             out.add(pid);
+        }
+
+        /** True if any named place or already-accepted scene lies within {@code r} blocks of (x, z). */
+        boolean hasContentNear(int x, int z, int r) {
+            long r2 = (long) r * r;
+            for (Place p : Places.overlapping(x - r, z - r, x + r, z + r)) {
+                if (p.distSqr(x, z) <= r2) return true;
+            }
+            int c0x = Math.floorDiv(x - r, GRID), c1x = Math.floorDiv(x + r, GRID);
+            int c0z = Math.floorDiv(z - r, GRID), c1z = Math.floorDiv(z + r, GRID);
+            for (int cx = c0x; cx <= c1x; cx++) {
+                for (int cz = c0z; cz <= c1z; cz++) {
+                    IntArrayList l = grid.get(((long) cx << 32) ^ (cz & 0xFFFFFFFFL));
+                    if (l == null) continue;
+                    for (int i = 0; i < l.size(); i++) {
+                        SceneB q = scenes.get(l.getInt(i));
+                        long dx = q.x - x, dz = q.z - z;
+                        if (dx * dx + dz * dz <= r2) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /** Places a roadside scene beside vertex u of segment s with the given anchor, ref, and reason prefix. */
+        boolean placeRoadsideScene(int s, int u, byte anchor, String ref, String what, long h) {
+            int a = rp.segStart[s], b = rp.segEnd[s];
+            String key = ScenePlan.ANCHOR_NAMES[anchor];
+            String kind = pickKind(key, h);
+            Layout l = kind == null ? null : layout(kind, h);
+            if (l == null) return false;
+            float hw = rp.segHalfWidth[s];
+            boolean firstSide = unit(h, 5) < 0.5;
+            for (int shift = 0; shift < 5; shift++) {
+                int u1 = Math.max(a, Math.min(b - 2, u + (shift % 2 == 0 ? shift / 2 : -(shift + 1) / 2) * 2));
+                int n1 = Math.min(b - 1, u1 + 1), n0 = Math.max(a, u1 - 1);
+                double dx = rp.vx[n1] - rp.vx[n0], dz = rp.vz[n1] - rp.vz[n0], len = Math.hypot(dx, dz);
+                if (len < 1e-3) continue;
+                dx /= len;
+                dz /= len;
+                for (int side = 0; side < 2; side++) {
+                    int sgn = (side == 0) == firstSide ? 1 : -1;
+                    double nx = -dz * sgn, nz = dx * sgn;
+                    double d = hw + offset + l.radius;
+                    int x = (int) Math.round(rp.vx[u1] + nx * d), z = (int) Math.round(rp.vz[u1] + nz * d);
+                    if (!ok(x, z, l.radius, false) || !propsOffRoads(l, x, z)) continue;
+                    tried[anchor]++;
+                    SceneB sc = accept(kind, l, x, z, anchor, ref, what + purposeOf(l),
+                            facingTowards(x, z, rp.vx[u1], rp.vz[u1]));
+                    sc.h = rp.vg[u1];
+                    sc.pathX = (int) Math.round(rp.vx[u1] + nx * (hw + 0.5));
+                    sc.pathZ = (int) Math.round(rp.vz[u1] + nz * (hw + 0.5));
+                    if (!sc.clue.isEmpty()) addSign(sc, false);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Blends regional road crossings and fills any long empty road stretches (> 380 blocks from places/scenes)
+         * using non-seg refs so wayside density stays within target bands.
+         */
+        void borderAndCorridorFill() {
+            int maxScenes = (int) (landKm2() * 14.3f);
+            byte[] borderAnchors = {ScenePlan.SHRINE_SITE, ScenePlan.CAMP_SITE, ScenePlan.BATTLE_SITE};
+            byte[] corridorAnchors = {ScenePlan.CAMP_SITE, ScenePlan.SHRINE_SITE, ScenePlan.RUIN_EDGE};
+            // 1. regional border crossings along highway, road, and lane segments
+            for (int s = 0; s < rp.segments() && scenes.size() < maxScenes; s++) {
+                if (rp.segKind[s] > 2) continue;
+                int a = rp.segStart[s], b = rp.segEnd[s];
+                int prevReg = -1;
+                for (int u = a + 2; u < b - 2 && scenes.size() < maxScenes; u += 4) {
+                    int x = Math.round(rp.vx[u]), z = Math.round(rp.vz[u]);
+                    TamrielMap.sample(x, z, ms);
+                    int reg = ms.region;
+                    if (reg > 0 && prevReg > 0 && reg != prevReg && !nearSettlement(rp.vx[u], rp.vz[u]) && !hasContentNear(x, z, 160)) {
+                        long h = hash("border:" + Math.min(reg, prevReg) + ":" + Math.max(reg, prevReg) + ":" + s + ":" + u, 0xB04DE4L);
+                        byte anchor = borderAnchors[(int) (unit(h, 1) * borderAnchors.length)];
+                        int link = rp.segLink[s];
+                        String road = (link >= 0 && link < rp.links()) ? (rp.linkA[link] + "-" + rp.linkB[link]) : ("seg-" + s);
+                        placeRoadsideScene(s, u, anchor, "border:" + prevReg + "-" + reg + ":s" + s,
+                                "regional border crossing on " + road, h);
+                    }
+                    if (reg > 0) prevReg = reg;
+                }
+            }
+            // 2. fill long empty stretches (> 380m from any place or scene) along highways, roads, and lanes
+            for (int s = 0; s < rp.segments() && scenes.size() < maxScenes; s++) {
+                if (rp.segKind[s] > 2) continue;
+                int a = rp.segStart[s], b = rp.segEnd[s];
+                for (int u = a + 4; u < b - 4 && scenes.size() < maxScenes; u += 12) {
+                    int x = Math.round(rp.vx[u]), z = Math.round(rp.vz[u]);
+                    if (nearSettlement(rp.vx[u], rp.vz[u]) || hasContentNear(x, z, 380)) continue;
+                    long h = hash("corridor:" + s + ":" + u, 0xC0441DL);
+                    byte anchor = corridorAnchors[(int) (unit(h, 1) * corridorAnchors.length)];
+                    int link = rp.segLink[s];
+                    String road = (link >= 0 && link < rp.links()) ? (rp.linkA[link] + "-" + rp.linkB[link]) : ("seg-" + s);
+                    placeRoadsideScene(s, u, anchor, "corridor:s" + s + ":v" + (u - a),
+                            "roadside camp along " + road, h);
+                }
+            }
+        }
+
+        /** Fills deep-forest/wilderness gaps and islands so no 400m land zone is empty of scenes. */
+        void wildernessAndIslandFill() {
+            int maxScenes = (int) (landKm2() * 14.4f);
+            byte[] wildAnchors = {ScenePlan.CAMP_SITE, ScenePlan.SHRINE_SITE, ScenePlan.RUIN_EDGE, ScenePlan.BATTLE_SITE};
+            int x0 = Integer.MAX_VALUE, z0 = Integer.MAX_VALUE, x1 = Integer.MIN_VALUE, z1 = Integer.MIN_VALUE;
+            for (Place p : Places.all()) {
+                x0 = Math.min(x0, p.x());
+                z0 = Math.min(z0, p.z());
+                x1 = Math.max(x1, p.x());
+                z1 = Math.max(z1, p.z());
+            }
+            if (x0 > x1) return;
+            for (int gx = x0; gx <= x1 && scenes.size() < maxScenes; gx += 420) {
+                for (int gz = z0; gz <= z1 && scenes.size() < maxScenes; gz += 420) {
+                    long h = hash("wild:" + gx + ":" + gz, 0x711D5CL);
+                    int x = gx + (int) Math.round((unit(h, 1) - 0.5) * 160);
+                    int z = gz + (int) Math.round((unit(h, 2) - 0.5) * 160);
+                    TamrielMap.sample(x, z, ms);
+                    if (ms.region <= 0 || ms.coastDistance < 4f || ms.inWater() || ms.slope > 0.7f) continue;
+                    if (hasContentNear(x, z, 380)) continue;
+                    byte anchor = wildAnchors[(int) (unit(h, 4) * wildAnchors.length)];
+                    String key = ScenePlan.ANCHOR_NAMES[anchor];
+                    String kind = pickKind(key, h);
+                    Layout l = kind == null ? null : layout(kind, h);
+                    if (l == null || !ok(x, z, l.radius, false) || !propsOffRoads(l, x, z)) continue;
+                    tried[anchor]++;
+                    SceneB sc = accept(kind, l, x, z, anchor, "wild:" + gx + ":" + gz,
+                            "wilderness site in region " + ms.region + purposeOf(l), (int) (unit(h, 6) * 4));
+                    if (!sc.clue.isEmpty()) addSign(sc, false);
+                }
+            }
         }
 
         // -------------------------------------------------------------- packing

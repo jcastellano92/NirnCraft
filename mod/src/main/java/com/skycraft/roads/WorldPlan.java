@@ -146,7 +146,7 @@ final class WorldPlan {
         }
         int landmarks = 0;
         for (Place p : Places.all()) {
-            if (!RoadGraph.isTrailDestination(p.type())) continue;
+            if (!RoadGraph.isTrailDestination(p)) continue;
             if (insidePlanned(data, p.x(), p.z()) != null) continue; // part of a town (a temple, a keep...)
             if (Landmass.near(p.x(), p.z(), 96) <= Landmass.SEA) continue; // open-sea island or wreck
             registerPlace(level, data, p, false);
@@ -239,7 +239,7 @@ final class WorldPlan {
             if (spur ? !data.roadsAt(s.id).isEmpty() : data.hasSpur(s.id)) continue;
             int[] bad = failedTargets(data, s.id);
             if (bad.length / 2 >= TRAIL_ATTEMPTS) continue;
-            int range = s.place().filter(RoadGraph::isTourist).isPresent() ? FOOTPATH_RANGE : TRAIL_RANGE;
+            int range = spur || s.place().filter(RoadGraph::isTourist).isPresent() ? FOOTPATH_RANGE : TRAIL_RANGE;
             long hit = nearestRoadPoint(data, s.x, s.z, range, bad, false);
             if (hit == -1) continue;
             Road road = data.road(RoadsData.entryRoad(hit));
@@ -348,7 +348,7 @@ final class WorldPlan {
                     if (road == null || i < 0 || i >= road.size() || (!anyKind && road.isTrail()) || road.water(i)) continue;
                     // not at a bridge's foot either: a trail ending there would stop in the water
                     if (!anyKind && (road.water(road.clamp(i - 3)) || road.water(road.clamp(i + 3)))) continue;
-                    if (!anyKind && !Landmass.connected(x, z, road.xs[i], road.zs[i])) continue;
+                    if (!Landmass.connected(x, z, road.xs[i], road.zs[i])) continue;
                     long ddx = road.xs[i] - x, ddz = road.zs[i] - z;
                     long d = ddx * ddx + ddz * ddz;
                     if (d >= bestD) continue;

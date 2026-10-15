@@ -4,7 +4,7 @@
   "class": "highway",
   "route": [
    "imperial_city",
-   "imperial_bridge_inn"
+   "weye"
   ],
   "bridge": 720,
   "why": [
@@ -16,28 +16,27 @@
   "id": "red_ring_road",
   "class": "highway",
   "route": [
-   "imperial_bridge_inn",
    "weye",
    "aleswell",
-   "pells_gate",
    "roxey_inn",
-   "imperial_bridge_inn"
+   "pells_gate",
+   "weye"
   ],
   "why": [
    "heartlands.L6.imperial_city",
    "cyrodiil.L6.imperial_highways"
-  ]
+  ],
+  "bridge": 240
  },
  {
   "id": "gold_road",
   "class": "highway",
   "route": [
    "weye",
-   "inn_of_ill_omen",
    "skingrad",
-   "brina_cross_inn",
    "kvatch",
    "gottshaw_inn",
+   "brina_cross_inn",
    "anvil"
   ],
   "why": [
@@ -63,7 +62,8 @@
   "class": "highway",
   "route": [
    "aleswell",
-   "bleakers_way"
+   "bleakers_way",
+   "bruma"
   ],
   "why": [
    "jerall_mountains.L6.bruma_seat",
@@ -74,7 +74,7 @@
   "id": "orange_road",
   "class": "highway",
   "route": [
-   "bleakers_way",
+   "chorrol",
    "bruma"
   ],
   "why": [
@@ -86,7 +86,7 @@
   "id": "blue_road",
   "class": "highway",
   "route": [
-   "pells_gate",
+   "roxey_inn",
    "cheydinhal"
   ],
   "why": [
@@ -98,12 +98,15 @@
   "id": "green_road",
   "class": "highway",
   "route": [
-   "roxey_inn",
+   "pells_gate",
+   "inn_of_ill_omen",
    "faregyl_inn",
-   "bravil"
+   "bravil",
+   "leyawiin"
   ],
   "why": [
    "nibenay_valley.L6.bravil_seat",
+   "blackwood.L6.leyawiin_seat",
    "cyrodiil.L6.imperial_highways"
   ]
  },
@@ -111,13 +114,17 @@
   "id": "yellow_road",
   "class": "highway",
   "route": [
-   "bravil",
+   "roxey_inn",
+   "cropsford",
+   "imperial_bridge_inn",
    "drunken_dragon_inn",
+   "waters_edge",
    "leyawiin"
   ],
   "why": [
    "blackwood.L6.leyawiin_seat",
-   "nibenay_valley.L6.bravil_seat"
+   "nibenay_valley.L6.bravil_seat",
+   "cyrodiil.L6.imperial_highways"
   ]
  },
  {
@@ -1593,6 +1600,213 @@
    "summerset_isle.L4.meadow_downs",
    "summerset_isle.L4.salt_waste",
    "summerset_isle.L4.ornamental_ring"
+  ]
+ },
+ {
+  "id": "colovian_weald_road",
+  "class": "road",
+  "route": [
+   "chorrol",
+   "hackdirt",
+   "skingrad"
+  ],
+  "why": [
+   "colovian_highlands.L1.karst_valleys",
+   "colovian_highlands.L1.limestone_caves"
+  ]
+ },
+ {
+  "id": "south_weald_road",
+  "class": "road",
+  "route": [
+   "skingrad",
+   "bravil"
+  ],
+  "why": [
+   "west_weald.L1.warm_limestone_slopes",
+   "west_weald.L1.deep_ayleid_vault"
+  ]
+ },
+ {
+  "id": "west_skyrim_pass_road",
+  "class": "road",
+  "route": [
+   "falkreath",
+   "falkreath_border_lodge",
+   "old_hroldan",
+   "rorikstead"
+  ],
+  "why": [
+   "falkreath.L5.border_trade",
+   "whiterun.L6.rorikstead"
+  ]
+ },
+ {
+  "id": "karth_hjaal_road",
+  "class": "road",
+  "route": [
+   "karthwasten",
+   "rorikstead",
+   "morthal",
+   "dawnstar"
+  ],
+  "why": [
+   "hjaalmarch.L6.hjaal_road",
+   "the_pale.L6.dawnstar_seat"
+  ]
+ },
+ {
+  "id": "reach_jerall_pass_road",
+  "class": "road",
+  "route": [
+   "markarth",
+   "old_hroldan",
+   "falkreath_border_lodge",
+   "chorrol"
+  ],
+  "why": [
+   "the_reach.L1.granite_gorges",
+   "the_reach.L1.silver_veins"
+  ]
+ },
+ {
+  "id": "haafingar_wrothgar_coast_road",
+  "class": "road",
+  "route": [
+   "dragon_bridge",
+   "karthwasten",
+   "markarth",
+   "jehanna"
+  ],
+  "why": [
+   "haafingar.L6.dragon_bridge",
+   "the_reach.L6.markarth_seat"
+  ]
+ },
+ {
+  "id": "colovian_dragontail_pass",
+  "class": "road",
+  "route": [
+   "chorrol",
+   "elinhir",
+   "dragonstar"
+  ],
+  "why": [
+   "colovian_highlands.L1.karst_valleys",
+   "colovian_highlands.L1.limestone_caves"
+  ]
+ },
+ {
+  "id": "gold_coast_malabal_road",
+  "class": "road",
+  "route": [
+   "anvil",
+   "brina_cross_inn",
+   "kvatch",
+   "arenthia"
+  ],
+  "why": [
+   "gold_coast.L1.low_sea_cliffs",
+   "gold_coast.L1.sea_caves"
+  ]
+ },
+ {
+  "id": "silgrad_pass_road",
+  "class": "highway",
+  "route": [
+   "riften",
+   "shors_stone",
+   "blacklight",
+   "narsis"
+  ],
+  "why": [
+   "the_rift.L6.riften_seat",
+   "the_rift.L6.shors_stone"
+  ]
+ },
+ {
+  "id": "cheydinhal_rift_pass",
+  "class": "road",
+  "route": [
+   "cheydinhal",
+   "harluns_watch",
+   "riften"
+  ],
+  "why": [
+   "nibenay_basin.L1.valus_foothills",
+   "nibenay_basin.L1.basin_silt"
+  ]
+ },
+ {
+  "id": "telvannis_peninsula_lane",
+  "class": "lane",
+  "route": [
+   "tel_branora",
+   "tel_ouada_stead",
+   "zafirbel_mushroom_stead",
+   "necrom"
+  ],
+  "why": [
+   "telvannis.L1.peninsula_cliffs",
+   "telvannis.L1.fungal_forest_soils"
+  ]
+ },
+ {
+  "id": "red_mountain_pilgrim_lane",
+  "class": "lane",
+  "route": [
+   "maar_gan",
+   "balmora",
+   "suran"
+  ],
+  "why": [
+   "vvardenfell_ashlands.L1.ash_plain",
+   "vvardenfell_ashlands.L1.scoria_ridges"
+  ]
+ },
+ {
+  "id": "bitter_ascadian_lane",
+  "class": "lane",
+  "route": [
+   "gnisis",
+   "ald_velothi",
+   "khuul",
+   "dagon_fel"
+  ],
+  "bridge": 240,
+  "why": [
+   "vvardenfell_ashlands.L1.ash_plain",
+   "vvardenfell_ashlands.L1.scoria_ridges"
+  ]
+ },
+ {
+  "id": "zafirbel_causeway_lane",
+  "class": "lane",
+  "route": [
+   "sadrith_mora",
+   "tel_mora",
+   "vos",
+   "tel_vos"
+  ],
+  "bridge": 260,
+  "why": [
+   "morrowind.L1.red_mountain",
+   "morrowind.L1.ash_mantle"
+  ]
+ },
+ {
+  "id": "colovian_highlands_west_lane",
+  "class": "lane",
+  "route": [
+   "ulpius_homestead",
+   "vitellius_homestead",
+   "colovian_highlands_homestead_8",
+   "shardrock",
+   "ivy_shade"
+  ],
+  "why": [
+   "colovian_highlands.L1.karst_valleys",
+   "colovian_highlands.L1.limestone_caves"
   ]
  }
 ]

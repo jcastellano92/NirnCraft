@@ -5635,5 +5635,53 @@
       "artaeum.L10.psijic_time_vaults"
     ],
     "_r7_r12_v4": true
+  },
+  {
+    "id": "abecan_coral_beacon",
+    "name": "place.skycraft.abecan_coral_beacon",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -7536,
+    "z": 13104,
+    "radius": 20,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "abecan_coral_isle_reliquary",
+    "name": "place.skycraft.abecan_coral_isle_reliquary",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -7472,
+    "z": 13136,
+    "radius": 18,
+    "variant": "ruin",
+    "class": "minor",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "mathiisen_strait_isle_spire",
+    "name": "place.skycraft.mathiisen_strait_isle_spire",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -7632,
+    "z": 13488,
+    "radius": 18,
+    "variant": "watchtower",
+    "class": "minor",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
   }
 ]

@@ -60,8 +60,10 @@ TOURIST_VARIANTS = {"altar", "monument", "stones", "ruin", "keep", "barrow", "no
                     "den", "troll_cave", "smuggler_cave", "skeever_cave", "spider_cave", "spriggan_cave", "falmer_cave",
                     "bandit_cave", "forsworn_cave", "necromancer_lair", "vampire_lair", "hagraven_lair", "mine",
                     "bandit_camp", "forsworn_camp", "imperial_camp", "stormcloak_camp", "forsworn_tower",
-                    "nordic_tower", "cave", "cabin"}
-MINOR_LANDMARKS = {"clearing", "rock", "source", "island", "district"}
+                    "nordic_tower", "cave", "cabin", "grove", "bleak_falls_barrow", "great_lift",
+                    "kolskeggr_mine", "egg_mine", "ysgramors_tomb", "akaviri_fort", "coral_pit", "fort",
+                    "breton_keep_ruin", "mzark"}
+MINOR_LANDMARKS = {"island", "district"}
 
 AREAS = {  # name -> (x0, z0, x1, z1) block box, Whiterun = 0,0 (north = -Z)
     "whiterun": (-1500, -1100, 1500, 1400),
@@ -261,12 +263,16 @@ def build_graph(mp, places):
 
     named = json.load(open(os.path.join(RES, "roads", "named_roads.json"), encoding="utf-8"))
     for n in named:
-        kind = {"road": "road", "lane": "lane"}.get(n.get("class", "highway"), "highway")
+        kind = {"road": "road", "lane": "lane", "trail": "lane"}.get(n.get("class", "highway"), "highway")
         bridge = n.get("bridge", DEFAULT_BRIDGE)
-        for i in range(len(n["route"]) - 1):
-            a, b = by_id.get(n["route"][i]), by_id.get(n["route"][i + 1])
-            if a is None or b is None:
-                continue
+        raw_route = n.get("stops") if isinstance(n.get("stops"), list) else n.get("route", [])
+        pts = []
+        for pid in raw_route:
+            p = by_id.get(pid)
+            if p is not None and (not pts or pts[-1] is not p):
+                pts.append(p)
+        for i in range(len(pts) - 1):
+            a, b = pts[i], pts[i + 1]
             if bridge <= DEFAULT_BRIDGE and land[a["id"]] != land[b["id"]]:
                 continue
             add_split(a, b, kind, n["id"])
@@ -340,6 +346,45 @@ def build_graph(mp, places):
                     bd, bo = d, o
             if bo is not None:
                 add(f, bo, "lane")
+    # 5. bridge any remaining disconnected farm/settlement components on the same landmass
+    nx = np.array([p["x"] for p in nodes], np.float64)
+    nz = np.array([p["z"] for p in nodes], np.float64)
+    nl = np.array([land[p["id"]] for p in nodes])
+    nd2 = (nx[:, None] - nx[None, :]) ** 2 + (nz[:, None] - nz[None, :]) ** 2
+    while True:
+        comp = components(nodes)
+        nc = np.array([comp[p["id"]] for p in nodes])
+        ok = (nc[:, None] < nc[None, :]) & (nl[:, None] == nl[None, :])
+        if not ok.any():
+            break
+        i, j = np.unravel_index(np.argmin(np.where(ok, nd2, np.inf)), nd2.shape)
+        ba, bb = nodes[int(i)], nodes[int(j)]
+        kind = "lane" if (rank(ba) == 3 or rank(bb) == 3) else ("highway" if rank(ba) == 0 and rank(bb) == 0 else "road")
+        add(ba, bb, kind)
+    # 6. rural micro-lane loops
+    micro = []
+    for i, a in enumerate(nodes):
+        if rank(a) < 2:
+            continue
+        for j in range(i + 1, len(nodes)):
+            b = nodes[j]
+            if rank(b) < 2 or land[a["id"]] != land[b["id"]]:
+                continue
+            if rank(a) == 2 and rank(b) == 2:
+                continue
+            d = length(a, b)
+            if d > 560 or mp.sea_run(a["x"], a["z"], b["x"], b["z"]) > DEFAULT_BRIDGE:
+                continue
+            micro.append((d, i, j))
+    micro.sort()
+    for d, i, j in micro:
+        a, b = nodes[i], nodes[j]
+        if len(adj[a["id"]]) >= 3 or len(adj[b["id"]]) >= 3:
+            continue
+        w = d * tf(a, b)
+        if distance(a, b, w * 2.6) <= w * 2.6:
+            continue
+        add(a, b, "lane")
     return nodes, land, edges, components(nodes)
 
 

@@ -191,4 +191,27 @@ class TamrielPlanTest {
         assertEquals(s1.elevation, s2.elevation, 0.0f);
         assertEquals(s1.peak, s2.peak, 0.0f);
     }
+
+    @Test
+    void oceanIslesGenerateDeterministicMicroIslandsAboveSeaLevelInOpenOcean() {
+        int found = 0;
+        int[] typesSeen = new int[4];
+        for (int cx = -24; cx <= 24; cx++) {
+            for (int cz = -18; cz <= 18; cz++) {
+                com.skycraft.tamriel.terrain.OceanIsles.Isle a = com.skycraft.tamriel.terrain.OceanIsles.cellIsle(cx, cz);
+                com.skycraft.tamriel.terrain.OceanIsles.Isle b = com.skycraft.tamriel.terrain.OceanIsles.cellIsle(cx, cz);
+                assertEquals(a, b, "OceanIsles.cellIsle must be deterministic");
+                if (a == null) continue;
+                found++;
+                typesSeen[a.type()]++;
+                double h = com.skycraft.tamriel.terrain.OceanIsles.surfaceHeight(a.siteX(), a.siteZ(), -300.0, 0.0, 0.0);
+                assertFalse(Double.isNaN(h), "surfaceHeight at island site anchor must not be NaN");
+                assertTrue(h > TamrielMap.SEA_LEVEL, "Micro-island site anchor must rise above sea level: " + h);
+            }
+        }
+        assertTrue(found >= 40, "Expected at least 40 procedural ocean micro-islands across open seas, found " + found);
+        for (int t = 0; t < 4; t++) {
+            assertTrue(typesSeen[t] > 0, "Expected at least one island of type " + t);
+        }
+    }
 }

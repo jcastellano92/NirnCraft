@@ -17852,6 +17852,48 @@
           ]
         }
       ]
+    },
+    "falkreath_border_lodge": {
+      "name": "place.skycraft.falkreath_border_lodge",
+      "region": "skyrim/falkreath",
+      "hold": "falkreath",
+      "tier": "hamlet",
+      "why": [
+        "falkreath.L1.jerall_foothills",
+        "falkreath.L1.ilinalta_valley"
+      ],
+      "residents": [
+        {
+          "id": "falkreath_border_lodge_merchant_1",
+          "name": "Halvar Stag-Stride",
+          "role": "merchant",
+          "title": "Border Outpost Trader",
+          "merchant": true,
+          "trainer": null,
+          "court_role": null,
+          "schedule": "06:00-12:00 work_station, 12:00-13:00 well_commons, 13:00-19:00 work_station, 19:00-22:00 hearth_inn, 22:00-06:00 quarters",
+          "bark": "Mules coming up from Elinhir and Craglorn always stop at Falkreath Border Lodge for pitch and dry salt.",
+          "why": [
+            "falkreath.L1.jerall_foothills",
+            "falkreath.L1.ilinalta_valley"
+          ]
+        },
+        {
+          "id": "falkreath_border_lodge_forester_2",
+          "name": "Asta Pine-Warden",
+          "role": "lumberjack",
+          "title": "Border Trail Forester",
+          "merchant": false,
+          "trainer": null,
+          "court_role": null,
+          "schedule": "05:30-11:30 yard_patrol, 11:30-13:00 well_commons, 13:00-18:30 workshop_bench, 18:30-21:30 longhouse_hall, 21:30-05:30 quarters",
+          "bark": "We blaze the old hunter trails between the border cairns so timber sleds never lose the grade.",
+          "why": [
+            "falkreath.L1.jerall_foothills",
+            "falkreath.L1.ilinalta_valley"
+          ]
+        }
+      ]
     }
   },
   "outside_settlements": {

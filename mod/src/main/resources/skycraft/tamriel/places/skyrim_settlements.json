@@ -1118,5 +1118,19 @@
       "the_reach.L5.river_farms",
       "the_reach.L5.small_mines"
     ]
+  },
+  {
+    "id": "falkreath_border_lodge",
+    "name": "place.skycraft.falkreath_border_lodge",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/falkreath",
+    "x": -1260,
+    "z": 1720,
+    "radius": 28,
+    "why": [
+      "falkreath.L1.jerall_foothills",
+      "falkreath.L1.ilinalta_valley"
+    ]
   }
 ]

@@ -8665,5 +8665,21 @@
       "greenshade.L1.mire_basins"
     ],
     "_r7_r12_v4": true
+  },
+  {
+    "id": "wilderking_tide_isle_shrine",
+    "name": "place.skycraft.wilderking_tide_isle_shrine",
+    "type": "landmark",
+    "culture": "bosmer",
+    "region": "valenwood/grahtwood",
+    "x": -4816,
+    "z": 12880,
+    "radius": 18,
+    "variant": "altar",
+    "class": "minor",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L1.grahtwood_sinks"
+    ]
   }
 ]

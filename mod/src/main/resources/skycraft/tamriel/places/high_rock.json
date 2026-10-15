@@ -11184,5 +11184,53 @@
       "stormhaven.L8.wayside_miracles",
       "stormhaven.L11.old_pilgrim_way"
     ]
+  },
+  {
+    "id": "northpoint_sea_isle_ruin",
+    "name": "place.skycraft.northpoint_sea_isle_ruin",
+    "type": "landmark",
+    "culture": "breton",
+    "region": "high_rock/rivenspire",
+    "x": -8304,
+    "z": -1904,
+    "radius": 20,
+    "variant": "ruin",
+    "class": "minor",
+    "why": [
+      "rivenspire.L1.dark_crags",
+      "rivenspire.L1.shornhelm_gap"
+    ]
+  },
+  {
+    "id": "northpoint_breaker_beacon",
+    "name": "place.skycraft.northpoint_breaker_beacon",
+    "type": "landmark",
+    "culture": "breton",
+    "region": "high_rock/rivenspire",
+    "x": -8240,
+    "z": -1904,
+    "radius": 18,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "rivenspire.L1.dark_crags",
+      "rivenspire.L1.shornhelm_gap"
+    ]
+  },
+  {
+    "id": "frostbreak_skerry_isle_cairn",
+    "name": "place.skycraft.frostbreak_skerry_isle_cairn",
+    "type": "landmark",
+    "culture": "orc",
+    "region": "high_rock/wrothgar",
+    "x": -5200,
+    "z": 1616,
+    "radius": 18,
+    "variant": "stones",
+    "class": "minor",
+    "why": [
+      "wrothgar.L1.granite_peaks",
+      "wrothgar.L1.orsinium_plateau"
+    ]
   }
 ]

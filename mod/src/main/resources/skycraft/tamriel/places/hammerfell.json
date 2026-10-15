@@ -3345,7 +3345,7 @@
     "type": "village",
     "culture": "redguard",
     "region": "hammerfell/alikr_desert",
-    "x": -8786,
+    "x": -8640,
     "z": 5384,
     "radius": 40,
     "why": [
@@ -3533,9 +3533,9 @@
     "name": "place.skycraft.faaleb",
     "type": "village",
     "culture": "redguard",
-    "region": "hammerfell/stros_mkai",
-    "x": -10424,
-    "z": 7400,
+    "region": "hammerfell/sentinel",
+    "x": -8460,
+    "z": 5560,
     "radius": 28,
     "why": [
       "stros_mkai.L9.treaty_ground",

@@ -87,6 +87,10 @@ public final class PlanLinks {
         return RoadGraph.isTrailDestination(t);
     }
 
+    public static boolean isTrailDestination(Place p) {
+        return RoadGraph.isTrailDestination(p);
+    }
+
     public static boolean isTourist(Place p) {
         return RoadGraph.isTourist(p);
     }

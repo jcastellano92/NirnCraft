@@ -58,8 +58,13 @@ public record TamrielHeight(DensityFunction.NoiseHolder hills, DensityFunction.N
         double detailN = detail.getValue(x, 0, z);
 
         if (cd < 0) {
-            // sea floor: a little relief, more in shallow water
-            return Math.min(h + (hillsN * 5 + detailN * 1.5) * (0.4 + 0.6 * MapNoise.smoothstep(-600, 0, cd)), TamrielMap.SEA_LEVEL - 1);
+            // sea floor: a little relief, more in shallow water, plus procedural open-ocean micro-islands
+            double floor = Math.min(h + (hillsN * 5 + detailN * 1.5) * (0.4 + 0.6 * MapNoise.smoothstep(-600, 0, cd)), TamrielMap.SEA_LEVEL - 1);
+            if (cd < -96) {
+                double isle = OceanIsles.surfaceHeight(x, z, cd, hillsN, detailN);
+                if (!Double.isNaN(isle)) return Math.max(floor, isle);
+            }
+            return floor;
         }
 
         // P2: the road plan and the site pads (docs/WORLDGEN-PIPELINE.md section 7): bed and pad weights, applied last

@@ -13686,5 +13686,37 @@
       "murkmire.L10.grand_calendar_xanmeer"
     ],
     "_r7_r12_v4": true
+  },
+  {
+    "id": "padomaic_reed_isle_shrine",
+    "name": "place.skycraft.padomaic_reed_isle_shrine",
+    "type": "landmark",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 9104,
+    "z": 6352,
+    "radius": 20,
+    "variant": "xanmeer",
+    "class": "minor",
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ]
+  },
+  {
+    "id": "padomaic_mud_isle_watch",
+    "name": "place.skycraft.padomaic_mud_isle_watch",
+    "type": "landmark",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 9104,
+    "z": 6448,
+    "radius": 18,
+    "variant": "watchtower",
+    "class": "minor",
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ]
   }
 ]

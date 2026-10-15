@@ -31,7 +31,7 @@
   },
   "scenes": {
     "_doc": "The planned scenes (baked sceneplan, seed independent). wayside.gap: blocks of road between two waysides per class, [min, max] (a hashed draw); offset: extra blocks beyond the road's half width to the scene centre; settlementClear: no wayside within this many blocks of a settlement's edge (its own edge scenes cover it). share: chance that a place of that anchor gets a scene. settlement: edge scenes per settlement size; shore: a fishing scene where the settlement edge is 3-24 blocks from water. anchors: kind weights per anchor type; 'lm:<builder>' is a landmark vignette of that builder family (landmarks/kinds.json, tiers S and M), no longer placed on the landmark grid. signs: kinds that carry a sign (@grave = a name and an epitaph of the province's folk, @warning = a scrawled warning). Lore-web clue scenes take their kind from the clue's words (clueWords, first match; else cairn).",
-    "wayside": {"gap": {"highway": [1500, 3000], "road": [1500, 3000], "lane": [1400, 2800], "trail": [3500, 6000]}, "offset": 7, "settlementClear": 60},
+    "wayside": {"gap": {"highway": [1250, 2350], "road": [1250, 2350], "lane": [1200, 2300], "trail": [3000, 5000]}, "offset": 7, "settlementClear": 60},
     "share": {"SHRINE_SITE": 0.7, "BATTLE_SITE": 0.5, "RUIN_EDGE": 0.5, "CAMP_SITE": 1.0, "DUNGEON_MOUTH": 0.35, "FARM": 1.0},
     "settlement": {"capital": 4, "city": 3, "town": 2, "village": 1, "shore": 0.6},
     "anchors": {

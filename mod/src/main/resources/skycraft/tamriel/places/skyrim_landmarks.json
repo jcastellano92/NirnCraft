@@ -7222,5 +7222,213 @@
       "the_reach.L1.granite_gorges",
       "skyrim.L9.dragon_crisis"
     ]
+  },
+  {
+    "id": "falkreath_border_watch",
+    "name": "place.skycraft.falkreath_border_watch",
+    "type": "landmark",
+    "culture": "nord",
+    "region": "skyrim/falkreath",
+    "x": -1320,
+    "z": 1820,
+    "radius": 20,
+    "variant": "watchtower",
+    "class": "minor",
+    "why": [
+      "falkreath.L1.jerall_foothills",
+      "falkreath.L1.ilinalta_valley"
+    ]
+  },
+  {
+    "id": "crimson_pine_hollow",
+    "name": "place.skycraft.crimson_pine_hollow",
+    "type": "landmark",
+    "culture": "nord",
+    "region": "skyrim/falkreath",
+    "x": -1080,
+    "z": 1840,
+    "radius": 20,
+    "variant": "clearing",
+    "class": "minor",
+    "why": [
+      "falkreath.L1.jerall_foothills",
+      "falkreath.L1.ilinalta_valley"
+    ]
+  },
+  {
+    "id": "stony_creek_cairn",
+    "name": "place.skycraft.stony_creek_cairn",
+    "type": "landmark",
+    "culture": "nord",
+    "region": "skyrim/falkreath",
+    "x": -840,
+    "z": 1860,
+    "radius": 18,
+    "variant": "monument",
+    "class": "minor",
+    "why": [
+      "falkreath.L1.jerall_foothills",
+      "falkreath.L1.ilinalta_valley"
+    ]
+  },
+  {
+    "id": "colovian_gap_post",
+    "name": "place.skycraft.colovian_gap_post",
+    "type": "landmark",
+    "culture": "imperial",
+    "region": "skyrim/falkreath",
+    "x": -1340,
+    "z": 1460,
+    "radius": 20,
+    "variant": "pass",
+    "class": "minor",
+    "why": [
+      "falkreath.L5.border_trade",
+      "falkreath.L6.helgen_fort"
+    ]
+  },
+  {
+    "id": "druadach_high_cairn",
+    "name": "place.skycraft.druadach_high_cairn",
+    "type": "landmark",
+    "culture": "forsworn",
+    "region": "skyrim/the_reach",
+    "x": -2780,
+    "z": 840,
+    "radius": 20,
+    "variant": "stones",
+    "class": "minor",
+    "why": [
+      "the_reach.L1.granite_gorges",
+      "the_reach.L1.silver_veins"
+    ]
+  },
+  {
+    "id": "sundered_crag_overlook",
+    "name": "place.skycraft.sundered_crag_overlook",
+    "type": "landmark",
+    "culture": "forsworn",
+    "region": "skyrim/the_reach",
+    "x": -2380,
+    "z": 880,
+    "radius": 20,
+    "variant": "watchtower",
+    "class": "minor",
+    "why": [
+      "the_reach.L1.granite_gorges",
+      "the_reach.L1.silver_veins"
+    ]
+  },
+  {
+    "id": "reach_border_arch",
+    "name": "place.skycraft.reach_border_arch",
+    "type": "landmark",
+    "culture": "nord",
+    "region": "skyrim/the_reach",
+    "x": -2820,
+    "z": 460,
+    "radius": 20,
+    "variant": "pass",
+    "class": "minor",
+    "why": [
+      "the_reach.L1.granite_gorges",
+      "the_reach.L1.silver_veins"
+    ]
+  },
+  {
+    "id": "winterhold_drift_isle_cairn",
+    "name": "place.skycraft.winterhold_drift_isle_cairn",
+    "type": "landmark",
+    "culture": "nord",
+    "region": "skyrim/winterhold",
+    "x": 1552,
+    "z": -2320,
+    "radius": 18,
+    "variant": "monument",
+    "class": "minor",
+    "why": [
+      "winterhold.L1.collapsed_cliff",
+      "winterhold.L1.college_stack"
+    ]
+  },
+  {
+    "id": "ysgramor_drift_isle_watch",
+    "name": "place.skycraft.ysgramor_drift_isle_watch",
+    "type": "landmark",
+    "culture": "nord",
+    "region": "skyrim/winterhold",
+    "x": 912,
+    "z": -2288,
+    "radius": 18,
+    "variant": "watchtower",
+    "class": "minor",
+    "why": [
+      "winterhold.L1.collapsed_cliff",
+      "winterhold.L1.college_stack"
+    ]
+  },
+  {
+    "id": "ysgramor_drift_isle_shrine",
+    "name": "place.skycraft.ysgramor_drift_isle_shrine",
+    "type": "landmark",
+    "culture": "nord",
+    "region": "skyrim/winterhold",
+    "x": 816,
+    "z": -2256,
+    "radius": 16,
+    "variant": "altar",
+    "class": "minor",
+    "why": [
+      "winterhold.L1.collapsed_cliff",
+      "winterhold.L1.college_stack"
+    ]
+  },
+  {
+    "id": "hsaarik_ice_beacon",
+    "name": "place.skycraft.hsaarik_ice_beacon",
+    "type": "landmark",
+    "culture": "nord",
+    "region": "skyrim/winterhold",
+    "x": 1456,
+    "z": -2224,
+    "radius": 18,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "winterhold.L1.collapsed_cliff",
+      "winterhold.L1.college_stack"
+    ]
+  },
+  {
+    "id": "ghost_sea_fang_isle_shrine",
+    "name": "place.skycraft.ghost_sea_fang_isle_shrine",
+    "type": "landmark",
+    "culture": "nord",
+    "region": "skyrim/winterhold",
+    "x": 2256,
+    "z": -1904,
+    "radius": 18,
+    "variant": "altar",
+    "class": "minor",
+    "why": [
+      "winterhold.L1.collapsed_cliff",
+      "winterhold.L1.college_stack"
+    ]
+  },
+  {
+    "id": "windhelm_skerry_isle_lookout",
+    "name": "place.skycraft.windhelm_skerry_isle_lookout",
+    "type": "landmark",
+    "culture": "nord",
+    "region": "skyrim/eastmarch",
+    "x": 2160,
+    "z": -1840,
+    "radius": 18,
+    "variant": "watchtower",
+    "class": "minor",
+    "why": [
+      "eastmarch.L1.steam_basin",
+      "eastmarch.L1.white_river_mouth"
+    ]
   }
 ]

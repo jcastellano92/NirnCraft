@@ -93,6 +93,15 @@ final class RoadGraph {
                 || t == PlaceType.DRAGON_MOUND;
     }
 
+    private static final Set<String> MARINE_VARIANTS = Set.of("shipwreck", "wreck", "sea_vault", "reef", "sea_cave",
+            "ferry", "boat", "island", "dock", "pier");
+
+    static boolean isTrailDestination(Place p) {
+        if (!isTrailDestination(p.type())) return false;
+        String v = p.variant() == null ? "" : p.variant();
+        return !MARINE_VARIANTS.contains(v);
+    }
+
     /** Dungeon and landmark variants worth a long footpath (keep in step with TOURIST_VARIANTS in tools/qa/reach_lint.py). */
     private static final Set<String> TOURIST_VARIANTS = Set.of("altar", "monument", "stones", "ruin", "keep", "barrow",
             "nordic_ruin", "moon_temple", "dwemer_ruin", "ayleid_ruin", "velothi_tomb", "xanmeer", "daedric_ruin", "tower",
@@ -102,8 +111,10 @@ final class RoadGraph {
             // every story dungeon is meant to be found: lairs, dens and camps get their footpath too
             "den", "troll_cave", "smuggler_cave", "skeever_cave", "spider_cave", "spriggan_cave", "falmer_cave", "bandit_cave",
             "forsworn_cave", "necromancer_lair", "vampire_lair", "hagraven_lair", "mine", "bandit_camp", "forsworn_camp",
-            "imperial_camp", "stormcloak_camp", "forsworn_tower", "nordic_tower", "cave", "cabin");
-    private static final Set<String> MINOR_LANDMARKS = Set.of("clearing", "rock", "source", "island", "district");
+            "imperial_camp", "stormcloak_camp", "forsworn_tower", "nordic_tower", "cave", "cabin",
+            "grove", "bleak_falls_barrow", "great_lift", "kolskeggr_mine", "egg_mine", "ysgramors_tomb",
+            "akaviri_fort", "coral_pit", "fort", "breton_keep_ruin", "mzark");
+    private static final Set<String> MINOR_LANDMARKS = Set.of("island", "district");
 
     /**
      * Tourist-grade destinations (shrines, stones, word walls, dragon mounds, forts, marquee ruins and tombs): they get
@@ -126,7 +137,7 @@ final class RoadGraph {
      * for everything else; never a point in water (the nearest dry one is taken, as for a town on a river).
      */
     static int[] endpoint(Place p) {
-        if (p.type() != PlaceType.CAPITAL && p.type() != PlaceType.CITY) return GateEnds.dryNear(p.x(), p.z(), 96);
+        if (p.type() != PlaceType.CAPITAL && p.type() != PlaceType.CITY) return GateEnds.dryNear(p.x(), p.z(), 192);
         int reach;
         Direction back;
         try {
@@ -144,7 +155,7 @@ final class RoadGraph {
             TamrielMap.sample(x, z, s);
             if (s.region != 0 && s.coastDistance > 12 && !s.inWater() && s.lakeDistance < -12) return new int[]{x, z};
         }
-        return GateEnds.dryNear(p.x(), p.z(), 96);
+        return GateEnds.dryNear(p.x(), p.z(), 192);
     }
 
     // ------------------------------------------------------------------ named roads
@@ -160,10 +171,14 @@ final class RoadGraph {
                 for (JsonElement e : (JsonArray) root) {
                     JsonObject o = e.getAsJsonObject();
                     List<String> route = new ArrayList<>();
-                    for (JsonElement r : o.getAsJsonArray("route")) route.add(r.getAsString());
+                    JsonArray arr = o.has("stops") && o.get("stops").isJsonArray()
+                            ? o.getAsJsonArray("stops") : o.getAsJsonArray("route");
+                    if (arr != null) {
+                        for (JsonElement r : arr) route.add(r.getAsString());
+                    }
                     byte kind = switch (o.has("class") ? o.get("class").getAsString() : "highway") {
                         case "road" -> Road.ROAD;
-                        case "lane" -> Road.LANE;
+                        case "lane", "trail" -> Road.LANE;
                         default -> Road.HIGHWAY;
                     };
                     out.add(new Named(o.get("id").getAsString(), kind, route,
@@ -197,14 +212,15 @@ final class RoadGraph {
         for (Place p : nodes) byId.put(p.id(), p);
 
         Links links = new Links();
-        // 1. named roads, split where they pass other settlements
+        // 1. named roads, split where they pass other settlements (skipping non-settlement landmark waypoints)
         for (Named n : named()) {
-            for (int i = 0; i + 1 < n.route().size(); i++) {
-                Place a = byId.get(n.route().get(i)), b = byId.get(n.route().get(i + 1));
-                if (a == null || b == null) {
-                    Skycraft.LOGGER.warn("Skycraft roads: named road {} names unknown place {} / {}", n.id(), n.route().get(i), n.route().get(i + 1));
-                    continue;
-                }
+            List<Place> pts = new ArrayList<>();
+            for (String id : n.route()) {
+                Place p = byId.get(id);
+                if (p != null && (pts.isEmpty() || pts.get(pts.size() - 1) != p)) pts.add(p);
+            }
+            for (int i = 0; i + 1 < pts.size(); i++) {
+                Place a = pts.get(i), b = pts.get(i + 1);
                 if (n.bridge() <= DEFAULT_BRIDGE && !land.get(a).equals(land.get(b))) continue;
                 links.addSplit(nodes, land, new Edge(a, b, n.kind(), n.id(), n.bridge()));
             }
@@ -271,18 +287,42 @@ final class RoadGraph {
             }
             if (best != null) links.add(new Edge(f, best, Road.LANE, "", DEFAULT_BRIDGE));
         }
+        // 5. bridge any remaining disconnected farm/settlement components on the same landmass
+        joinComponents(links, nodes, land);
+        // 6. rural micro-lane loops: connect nearby rural settlements/farms when the network detour is long
+        List<double[]> micro = new ArrayList<>();
+        for (int i = 0; i < nodes.size(); i++) {
+            Place a = nodes.get(i);
+            if (rank(a) < 2) continue;
+            for (int j = i + 1; j < nodes.size(); j++) {
+                Place b = nodes.get(j);
+                if (rank(b) < 2 || !land.get(a).equals(land.get(b))) continue;
+                if (rank(a) == 2 && rank(b) == 2) continue; // villages already considered by spanner
+                double d = Math.sqrt(a.distSqr(b.x(), b.z()));
+                if (d > 560 || seaRun(a.x(), a.z(), b.x(), b.z()) > DEFAULT_BRIDGE) continue;
+                micro.add(new double[]{d, i, j});
+            }
+        }
+        micro.sort(Comparator.comparingDouble(c -> c[0]));
+        for (double[] c : micro) {
+            Place a = nodes.get((int) c[1]), b = nodes.get((int) c[2]);
+            if (links.degree(a) >= 3 || links.degree(b) >= 3) continue;
+            double w = c[0] * terrainFactor(a.x(), a.z(), b.x(), b.z());
+            if (links.distance(a, b, w * 2.6) <= w * 2.6) continue;
+            links.add(new Edge(a, b, Road.LANE, "", DEFAULT_BRIDGE));
+        }
         Skycraft.LOGGER.info("Skycraft roads: road graph of {} settlements, {} links ({} ms)", nodes.size(), links.edges.size(),
                 (System.nanoTime() - t0) / 1_000_000);
         return new Graph(nodes, List.copyOf(links.edges), land);
     }
 
-    private static void joinComponents(Links links, List<Place> hubs, Map<Place, Integer> land) {
+    private static void joinComponents(Links links, List<Place> list, Map<Place, Integer> land) {
         while (true) {
-            Map<Place, Integer> comp = links.components(hubs);
+            Map<Place, Integer> comp = links.components(list);
             double best = Double.MAX_VALUE;
             Place ba = null, bb = null;
-            for (Place a : hubs) {
-                for (Place b : hubs) {
+            for (Place a : list) {
+                for (Place b : list) {
                     if (comp.get(a) >= comp.get(b) || !land.get(a).equals(land.get(b))) continue;
                     double d = a.distSqr(b.x(), b.z());
                     if (d < best) {
@@ -293,7 +333,9 @@ final class RoadGraph {
                 }
             }
             if (ba == null) return;
-            links.add(new Edge(ba, bb, rank(ba) == 0 && rank(bb) == 0 ? Road.HIGHWAY : Road.ROAD, "", DEFAULT_BRIDGE));
+            byte kind = (rank(ba) == 3 || rank(bb) == 3) ? Road.LANE
+                    : (rank(ba) == 0 && rank(bb) == 0 ? Road.HIGHWAY : Road.ROAD);
+            links.add(new Edge(ba, bb, kind, "", DEFAULT_BRIDGE));
         }
     }
 

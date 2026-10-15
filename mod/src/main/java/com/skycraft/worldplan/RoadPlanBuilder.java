@@ -200,26 +200,114 @@ public final class RoadPlanBuilder {
                                 siteOf.getOrDefault(p.id(), -1), -1, TRAIL_BRIDGE));
                     }
                 }
-                wave(lanes, false);
+                wave(lanes, true);
                 // 5-6. roadside inns and trail destinations: a footpath from the nearest road
                 List<Task> trails = new ArrayList<>();
+                List<Place> unreached = new ArrayList<>();
+                List<Place> connectedDests = new ArrayList<>();
                 for (Place p : places) {
                     boolean spur = p.type().isSettlement() && PlanLinks.isSpur(p);
-                    if (!spur && !PlanLinks.isTrailDestination(p.type())) continue;
+                    if (!spur && !PlanLinks.isTrailDestination(p)) continue;
                     if (!spur && insideTown(p)) continue;
-                    int range = !spur && PlanLinks.isTourist(p) ? PlanLinks.FOOTPATH_RANGE : PlanLinks.TRAIL_RANGE;
+                    int range = spur || PlanLinks.isTourist(p) ? PlanLinks.FOOTPATH_RANGE : PlanLinks.TRAIL_RANGE;
                     int[] e = PlanLinks.endpoint(p);
                     if (!PlanLinks.connected(e[0], e[1], e[0], e[1])) continue;
                     long hit = nearestVertex(e[0] + 0.5, e[1] + 0.5, range, false);
-                    if (hit == -1) continue;
+                    if (hit == -1) {
+                        unreached.add(p);
+                        continue;
+                    }
                     Seg s = segs.get((int) (hit >>> 32));
                     int v = (int) hit;
-                    if (Math.hypot(s.x[v] - p.x(), s.z[v] - p.z()) < TRAIL_MIN) continue;
+                    if (Math.hypot(s.x[v] - p.x(), s.z[v] - p.z()) < TRAIL_MIN) {
+                        connectedDests.add(p);
+                        continue;
+                    }
                     int id = addLink(p.id(), "@road", "", PlanLinks.TRAIL, TRAIL_BRIDGE);
                     trails.add(new Task(id, PlanLinks.TRAIL, true, e[0] + 0.5, e[1] + 0.5, s.x[v], s.z[v],
                             siteOf.getOrDefault(p.id(), -1), -1, TRAIL_BRIDGE));
+                    connectedDests.add(p);
                 }
-                wave(trails, false);
+                wave(trails, true);
+                // 6b. chained off-shoot trails: deep-wilderness destinations branch off newly accepted trails
+                List<Task> offshoots = new ArrayList<>();
+                List<Place> stillUnreached = new ArrayList<>();
+                for (Place p : unreached) {
+                    boolean spur = p.type().isSettlement() && PlanLinks.isSpur(p);
+                    int range = spur || PlanLinks.isTourist(p) ? PlanLinks.FOOTPATH_RANGE : PlanLinks.TRAIL_RANGE;
+                    int[] e = PlanLinks.endpoint(p);
+                    long hit = nearestVertex(e[0] + 0.5, e[1] + 0.5, range, true);
+                    if (hit == -1) {
+                        stillUnreached.add(p);
+                        continue;
+                    }
+                    Seg s = segs.get((int) (hit >>> 32));
+                    int v = (int) hit;
+                    if (Math.hypot(s.x[v] - p.x(), s.z[v] - p.z()) < TRAIL_MIN) {
+                        connectedDests.add(p);
+                        continue;
+                    }
+                    int id = addLink(p.id(), "@road", "", PlanLinks.TRAIL, TRAIL_BRIDGE);
+                    offshoots.add(new Task(id, PlanLinks.TRAIL, true, e[0] + 0.5, e[1] + 0.5, s.x[v], s.z[v],
+                            siteOf.getOrDefault(p.id(), -1), -1, TRAIL_BRIDGE));
+                    connectedDests.add(p);
+                }
+                if (!offshoots.isEmpty()) wave(offshoots, true);
+                // 6c. intra-island micro-trails: connect landmarks/dungeons on roadless islands to each other
+                List<Task> islandTrails = new ArrayList<>();
+                java.util.Set<String> islandPairs = new java.util.HashSet<>();
+                for (int i = 0; i < stillUnreached.size(); i++) {
+                    Place a = stillUnreached.get(i);
+                    int[] ea = PlanLinks.endpoint(a);
+                    Place bestB = null;
+                    int[] bestEb = null;
+                    double bestD = 900.0;
+                    for (int j = 0; j < stillUnreached.size(); j++) {
+                        if (i == j) continue;
+                        Place b = stillUnreached.get(j);
+                        double d = Math.sqrt(a.distSqr(b.x(), b.z()));
+                        if (d >= bestD || d < TRAIL_MIN) continue;
+                        int[] eb = PlanLinks.endpoint(b);
+                        if (!PlanLinks.connected(ea[0], ea[1], eb[0], eb[1])) continue;
+                        bestD = d;
+                        bestB = b;
+                        bestEb = eb;
+                    }
+                    if (bestB != null) {
+                        String pk = a.id().compareTo(bestB.id()) < 0 ? a.id() + "|" + bestB.id() : bestB.id() + "|" + a.id();
+                        if (islandPairs.add(pk)) {
+                            int id = addLink(a.id(), bestB.id(), "", PlanLinks.TRAIL, TRAIL_BRIDGE);
+                            islandTrails.add(new Task(id, PlanLinks.TRAIL, true, ea[0] + 0.5, ea[1] + 0.5, bestEb[0] + 0.5, bestEb[1] + 0.5,
+                                    siteOf.getOrDefault(a.id(), -1), siteOf.getOrDefault(bestB.id(), -1), TRAIL_BRIDGE));
+                        }
+                    }
+                }
+                if (!islandTrails.isEmpty()) wave(islandTrails, true);
+                // 6d. deep-forest & wilderness micro-trail cross-links between neighbouring off-road sites
+                List<Task> forestLoops = new ArrayList<>();
+                java.util.Set<String> loopUsed = new java.util.HashSet<>();
+                for (int i = 0; i < connectedDests.size(); i++) {
+                    Place a = connectedDests.get(i);
+                    if (loopUsed.contains(a.id())) continue;
+                    int[] ea = PlanLinks.endpoint(a);
+                    if (nearestVertex(ea[0] + 0.5, ea[1] + 0.5, 160, false) != -1) continue; // only deep off-road sites
+                    for (int j = i + 1; j < connectedDests.size(); j++) {
+                        Place b = connectedDests.get(j);
+                        if (loopUsed.contains(b.id())) continue;
+                        double d = Math.sqrt(a.distSqr(b.x(), b.z()));
+                        if (d < 110 || d > 280) continue;
+                        int[] eb = PlanLinks.endpoint(b);
+                        if (nearestVertex(eb[0] + 0.5, eb[1] + 0.5, 160, false) != -1) continue;
+                        if (!PlanLinks.connected(ea[0], ea[1], eb[0], eb[1])) continue;
+                        loopUsed.add(a.id());
+                        loopUsed.add(b.id());
+                        int id = addLink(a.id(), b.id(), "", PlanLinks.TRAIL, TRAIL_BRIDGE);
+                        forestLoops.add(new Task(id, PlanLinks.TRAIL, true, ea[0] + 0.5, ea[1] + 0.5, eb[0] + 0.5, eb[1] + 0.5,
+                                siteOf.getOrDefault(a.id(), -1), siteOf.getOrDefault(b.id(), -1), TRAIL_BRIDGE));
+                        break;
+                    }
+                }
+                if (!forestLoops.isEmpty()) wave(forestLoops, true);
             } finally {
                 pool.shutdownNow();
             }
@@ -320,17 +408,20 @@ public final class RoadPlanBuilder {
                 IntArrayList at = new IntArrayList();
                 for (int i = 0; i < tasks.size(); i++) {
                     Task t = tasks.get(i);
-                    if (routes.get(i) == null && t.maxBridge() < RETRY_BRIDGE) {
-                        again.add(new Task(t.link(), t.kind(), t.spur(), t.ax(), t.az(), t.bx(), t.bz(), t.siteA(), t.siteB(), RETRY_BRIDGE));
+                    int wider = t.spur() ? NORMAL_BRIDGE : RETRY_BRIDGE;
+                    if (routes.get(i) == null && t.maxBridge() < wider) {
+                        again.add(new Task(t.link(), t.kind(), t.spur(), t.ax(), t.az(), t.bx(), t.bz(), t.siteA(), t.siteB(), wider));
                         at.add(i);
                     }
                 }
-                List<List<double[]>> more = routeAll(again, cells, false);
-                for (int k = 0; k < again.size(); k++) {
-                    if (more.get(k) == null) continue;
-                    routes.set(at.getInt(k), more.get(k));
-                    tasks.set(at.getInt(k), again.get(k));
-                    linkBridge.set(again.get(k).link(), RETRY_BRIDGE);
+                if (!again.isEmpty()) {
+                    List<List<double[]>> more = routeAll(again, cells, false);
+                    for (int k = 0; k < again.size(); k++) {
+                        if (more.get(k) == null) continue;
+                        routes.set(at.getInt(k), more.get(k));
+                        tasks.set(at.getInt(k), again.get(k));
+                        linkBridge.set(again.get(k).link(), again.get(k).maxBridge());
+                    }
                 }
             }
             for (int i = 0; i < tasks.size(); i++) {
@@ -437,7 +528,7 @@ public final class RoadPlanBuilder {
                         Seg s = segs.get(si);
                         if (!anyKind && s.spur) continue;
                         if (wetNear(s, i)) continue;
-                        if (!anyKind && !PlanLinks.connected((int) Math.round(x), (int) Math.round(z),
+                        if (!PlanLinks.connected((int) Math.round(x), (int) Math.round(z),
                                 (int) Math.round(s.x[i]), (int) Math.round(s.z[i]))) continue;
                         double dx = s.x[i] - x, dz = s.z[i] - z, d = dx * dx + dz * dz;
                         if (d < best) {
