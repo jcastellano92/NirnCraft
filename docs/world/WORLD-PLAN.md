@@ -489,15 +489,15 @@ Status values: `done`, `in progress`, `next`, `blocked (why)`, `not started`. "G
 | World plan, prompt library, START-HERE | done | updated with R4a & all province docs | | 2026-10-14 |
 | IB0 Iliac extraction | done | `.reference/daggerfall_ref/v2` | | 2026-10-12 |
 | **R0** release build and playtest | **done** (release build deployed to Prism & `dist/Skycraft-client-instance.zip`; owner playtest items resolved) | 2bcf594b | `qa.ps1` OVERALL PASS | 2026-10-15 |
-| **R1** loose ends (R1a, R1b) | **in progress** | | | 2026-10-15 |
-| R2 testing tiers 0/1 | next (parallel with R1) | | | |
-| R3a world sheets | not started (all 11 `provinces/*.md` §1 sheets written) | | | |
-| R3b micro-biomes | not started | | | |
-| R3c measurement | not started | | | |
-| R3d town services | not started | | | |
-| R3e world systems | not started | | | |
-| R4 Skyrim uplift (S1-S5) | not started (design done: `skyrim.md` SK1-SK8; waits on R3a-R3e) | | Skyrim SET 54 | |
-| **R4a** Town overhaul (TO0-TO6) | **done** | `tamriel-overhaul` | TO0 audit, TO1 stepped terrace/tier stairs & 100% leader seats & >=4 house footprints (>=7x9), TO2 recognisable trade shops with unsealed counters/chairs & multi-room inns (4-6 private rooms with desks), TO3 partitioned Jarl/leader halls & 3 house interior layout families, TO4 stationed counter/throne/desk routines, TO5 shrine candle pedestal fix & urban park gardens & 24-block carver foundations; rebaked, `qa.ps1 -Server -Rebake` OVERALL PASS | 2026-10-15 |
+| **R1** loose ends (R1a, R1b) | **done** | `tamriel-overhaul` | `tower_of_mzark` structure & Great Lift/mage bosses, `deepwood_redoubt` Forsworn roster (`dungeon_identity_lint` 293/293, 0 flags), shipwreck/cabin/lair dry sign & motif pads, `skycraft:book` lecterns, `frossel`/`shadowgreen_cavern`/`brucas_leap_redoubt` depth & headroom & bridge fixes, Solitude 2x2 sub-cell sea routing (0 straight-line warnings), landmass-aware site trail snapping, `BedrollBlock.newBlockEntity` null; `qa.ps1 -Server -Rebake` OVERALL PASS | 2026-10-15 |
+| **R2** testing tiers 0/1 | **done** | `tamriel-overhaul` | 60 JUnit 5 Tier 0 tests across 7 test classes (`qa.ps1 -Unit` passes in 17.4s), JDWP hot-swap (`tools/dev/hotswap.py` + `devserver.ps1 hotswap`), `/skycraft-dev reload <scenes\|places\|cityplans\|quests\|palettes\|all>` | 2026-10-15 |
+| **R3a** world sheets | **done** | `tamriel-overhaul` | `tools/world/SCHEMA.md`, `sheet_from_md.py`, `worldsheet_lint.py` (10 blocks x 11 layers, 449 fields, 0 errors, F-WHY 662/1815 = 36.5%, 2 consumers: `SettlementPopulation`/`Housing` 100% + `dungeons/identity/skyrim.json` 100%), `WorldSheets.java` + `/skycraft-world sheet` | 2026-10-15 |
+| **R3b** micro-biomes | **in progress** | | | 2026-10-15 |
+| **R3c** measurement | **in progress** | | | 2026-10-15 |
+| **R3d** town services | **in progress** | | | 2026-10-15 |
+| **R3e** world systems | **in progress** | | | 2026-10-15 |
+| R4 Skyrim uplift (S1-S5) | next (design done: `skyrim.md` SK1-SK8; waits on R3b-R3e) | | Skyrim SET 54 | |
+| **R4a** Town overhaul (TO0-TO6) | **done** | `4144f49a` | TO0 audit, TO1 stepped terrace/tier stairs & 100% leader seats & >=4 house footprints (>=7x9), TO2 recognisable trade shops with unsealed counters/chairs & multi-room inns (4-6 private rooms with desks), TO3 partitioned Jarl/leader halls & 3 house interior layout families, TO4 stationed counter/throne/desk routines, TO5 shrine candle pedestal fix & urban park gardens & 24-block carver foundations; rebaked, `qa.ps1 -Server -Rebake` OVERALL PASS | 2026-10-15 |
 | R5 Iliac Bay (IB-S, IB1-IB9, IB-G) | not started (`high_rock.md`, `hammerfell.md`, `ILIAC-BAY.md` done) | | High Rock 42, Hammerfell 43 | |
 | R6 Cyrodiil | not started (`cyrodiil.md` done) | | 48 | |
 | R7 Morrowind | not started (`morrowind.md`, `solstheim.md` done) | | 53 | |

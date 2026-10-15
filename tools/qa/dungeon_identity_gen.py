@@ -460,6 +460,10 @@ def pick_notes(notes):
 
 def build():
     places = load_json(os.path.join(SKY, "tamriel", "places", "skyrim_landmarks.json"))
+    sheet_path = os.path.join(SKY, "tamriel", "world", "skyrim.json")
+    sheet = load_json(sheet_path) if os.path.exists(sheet_path) else {}
+    sheet_regions = sheet.get("regions", {}) if isinstance(sheet, dict) else {}
+    prov_themes = sheet.get("dungeon_themes", {}) if isinstance(sheet, dict) else {}
     names = lang_names()
     lore = lore_places()
     used = set()
@@ -469,7 +473,7 @@ def build():
         if p["type"] not in ("dungeon_fixed", "fort"):
             continue
         pid, variant = p["id"], p.get("variant", "")
-        fam = FAMILY.get(variant)
+        fam = "forsworn" if variant == "barrow" and p.get("culture") == "forsworn" else FAMILY.get(variant)
         if fam is None:
             skipped.append(pid)
             continue
@@ -495,11 +499,22 @@ def build():
             lines += ["Last seen:", short(person)]
         else:
             lines += ["Held by:", short(boss)]
-        out[pid] = {
+        entry = {
             "family": fam, "variant": variant, "boss": boss, "person": person or "", "sign": lines[:4],
             "motif": motif, "loot": FAMILIES[fam][0], "entrance": ent_id,
             "entranceKind": by_id[ent_id]["kind"] if ent_id else "", "bossNote": boss_id, "story": story_id,
         }
+        reg_raw = p.get("region", "")
+        rkey = reg_raw.split("/", 1)[1] if "/" in reg_raw else reg_raw
+        rkey = {"pale": "the_pale", "rift": "the_rift", "reach": "the_reach"}.get(rkey, rkey)
+        why = None
+        if rkey in sheet_regions and fam in sheet_regions[rkey].get("dungeon_themes", {}):
+            why = list(sheet_regions[rkey]["dungeon_themes"][fam])
+        elif fam in prov_themes:
+            why = list(prov_themes[fam])
+        if why:
+            entry["why"] = why
+        out[pid] = entry
     return out, skipped
 
 

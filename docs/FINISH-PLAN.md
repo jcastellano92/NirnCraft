@@ -83,6 +83,8 @@ git stash pop` (resolve conflicts keeping both sides).
 
 `tools\qa\qa.ps1` prints a ~20–40 line report and writes `mod\run\qa-report.txt`:
 
+* `qa.ps1 -Unit` — Tier 0 pure-Java JUnit 5 unit tests (`RoadPlan`, `Profile`, `ScenePlan`, `StreetPlan`,
+  `TamrielMap`/`Places`/`Regions`, `Bake` input hashes; `./gradlew test`, no server boot, < 5 s warm).
 * `qa.ps1` — Gradle build + static checks: assets, item audit, quest graph, sound catalog, data lint (all JSON
   parses, no duplicate place ids, quest index valid, no duplicate registry ids). ~4 min with build, 30 s with
   `-NoBuild`.
@@ -101,11 +103,16 @@ git stash pop` (resolve conflicts keeping both sides).
 
 **Fast loop (dev server; iterate with this, run the full gates once at the end of a phase):**
 
-* `tools\dev\devserver.ps1 start|stop|status|restart|reset` keeps ONE headless dev server running (world
+* **Tier 0 & Tier 1 first:** run `tools\qa\qa.ps1 -Unit` (< 5 s, no server) for pure-Java worldplan/map/bake math;
+  use `tools\dev\devserver.ps1 hotswap` (< 3 s over JDWP `127.0.0.1:5005`, auto-restarts on schema changes) for
+  method-body edits; use `/skycraft-dev reload <scenes|places|cityplans|quests|palettes|all>` (< 1 s) after editing
+  JSONs under `mod/src/main/resources/skycraft/`.
+* `tools\dev\devserver.ps1 start|stop|status|restart|reset|hotswap` keeps ONE headless dev server running (world
   `mod\run\devworld\world`, Nirn seed, own port and working dir, so it never collides with `qa.ps1`/`bake.ps1`).
   `devserver.ps1 run "cmd a|cmd b" -Wait` runs lines through its inbox in about a second and prints their output
   (server commands, `task:roadplan|roadterrain|bake|verify`, `@wait <ticks>`, `@until <regex>`, `@idle`). `run`
-  auto-starts the server and restarts it (~40 s) when anything under `mod\src\main` changed since it booted.
+  auto-starts the server and hot-swaps changed `.java` method bodies (~2 s, falling back to a ~40 s restart only on
+  schema or non-reloadable resource changes).
   Memory: every server JVM started by `devserver.ps1`/`qa.ps1`/`bake.ps1` gets `-Xmx4G` (`-Xmx 6G` or
   `$env:SKYCRAFT_SERVER_XMX`), and `devserver.ps1` refuses to start while another worktree's dev server runs
   (several servers at once ran the PC out of native memory; `-Force` overrides).

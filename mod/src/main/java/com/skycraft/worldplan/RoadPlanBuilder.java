@@ -209,6 +209,7 @@ public final class RoadPlanBuilder {
                     if (!spur && insideTown(p)) continue;
                     int range = !spur && PlanLinks.isTourist(p) ? PlanLinks.FOOTPATH_RANGE : PlanLinks.TRAIL_RANGE;
                     int[] e = PlanLinks.endpoint(p);
+                    if (!PlanLinks.connected(e[0], e[1], e[0], e[1])) continue;
                     long hit = nearestVertex(e[0] + 0.5, e[1] + 0.5, range, false);
                     if (hit == -1) continue;
                     Seg s = segs.get((int) (hit >>> 32));
@@ -436,6 +437,8 @@ public final class RoadPlanBuilder {
                         Seg s = segs.get(si);
                         if (!anyKind && s.spur) continue;
                         if (wetNear(s, i)) continue;
+                        if (!anyKind && !PlanLinks.connected((int) Math.round(x), (int) Math.round(z),
+                                (int) Math.round(s.x[i]), (int) Math.round(s.z[i]))) continue;
                         double dx = s.x[i] - x, dz = s.z[i] - z, d = dx * dx + dz * dz;
                         if (d < best) {
                             best = d;

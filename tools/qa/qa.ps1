@@ -2,6 +2,7 @@
 Skycraft QA harness: one command, a short report. Built so automated sessions read ~40 lines instead of raw logs.
 
   tools\qa\qa.ps1                 # build + static checks (fast, ~3-5 min)
+  tools\qa\qa.ps1 -Unit           # Tier 0 plan-layer unit tests only (gradlew test --console=plain, no MC boot, <90s)
   tools\qa\qa.ps1 -Server         # + headless dedicated server: worldgen, all selftests, clean stop
   tools\qa\qa.ps1 -Server -Bake   # server run + STRICT check that the baked data (skycraft/baked) is up to date
                                   # (fails when stale; build_release.ps1 uses this after baking explicitly)
@@ -20,6 +21,7 @@ Writes the report to mod\run\qa-report.txt and prints it. Exit code 0 = all PASS
 Extra server commands: -ServerCmds "cmd one|cmd two" ('+' or spaces both fine). Client tour spots: -Tour "Name:x:z;Name:x:z".
 #>
 param(
+    [switch]$Unit,
     [switch]$Server,
     [switch]$Client,
     [switch]$NoBuild,
@@ -50,11 +52,53 @@ function Result([string]$name, [bool]$ok, [string]$detail) {
 $py = "py"
 if (-not $Xmx) { $Xmx = $(if ($env:SKYCRAFT_SERVER_XMX) { $env:SKYCRAFT_SERVER_XMX } else { "4G" }) }
 
+# ------------------------------------------------------------------ unit tests (Tier 0)
+if ($Unit) {
+    $ulog = Join-Path $Run "qa-unit.log"
+    $xmlDir = Join-Path $Mod "build\test-results\test"
+    Remove-Item (Join-Path $xmlDir "TEST-*.xml") -Force -ErrorAction SilentlyContinue
+    $ut0 = Get-Date
+    Push-Location $Mod
+    & .\gradlew.bat test --console=plain "-Dorg.gradle.jvmargs=-Xmx2G" *> $ulog
+    $urc = $LASTEXITCODE
+    Pop-Location
+    $usecs = ((Get-Date) - $ut0).TotalSeconds
+    $utests = 0; $uskip = 0; $ufail = 0
+    foreach ($xf in Get-ChildItem $xmlDir -Filter "TEST-*.xml" -ErrorAction SilentlyContinue) {
+        try {
+            [xml]$doc = Get-Content $xf.FullName -Raw
+            $ts = $doc.testsuite
+            $utests += [int]$ts.tests
+            $uskip += [int]$ts.skipped
+            $ufail += ([int]$ts.failures + [int]$ts.errors)
+        } catch {}
+    }
+    $urun = $utests - $uskip
+    if ($utests -eq 0) {
+        $urun = @(Select-String -Path $ulog -Pattern " (PASSED|FAILED)$").Count
+        $ufail = @(Select-String -Path $ulog -Pattern " FAILED$").Count
+    }
+    $upass = $urun - $ufail
+    $uok = ($urc -eq 0) -and ($urun -gt 0) -and ($ufail -eq 0)
+    if ($uok) {
+        Result "unit" $true ("{0} tests passed in {1:N1}s{2}" -f $upass, $usecs, $(if ($uskip -gt 0) { " ($uskip skipped)" } else { "" }))
+    } else {
+        Result "unit" $false ("{0}/{1} tests passed, {2} failed in {3:N1}s (log: {4})" -f $upass, $urun, $ufail, $usecs, $ulog)
+        Select-String -Path $ulog -Pattern " FAILED$|error:|AssertionFailedError" | Select-Object -First 15 | ForEach-Object { Add("       " + $_.Line.Trim()) }
+    }
+    if (-not ($Server -or $Client -or $Bake -or $Rebake -or $Layout -or $Reach -or $Parity -or $Novelty)) {
+        Add(("OVERALL {0}" -f ($(if ($Fail) { "FAIL" } else { "PASS" }))))
+        $Report | Set-Content (Join-Path $Run "qa-report.txt") -Encoding utf8
+        $Report | ForEach-Object { $_ }
+        if ($Fail) { exit 1 } else { exit 0 }
+    }
+}
+
 # ------------------------------------------------------------------ build
 if (-not $NoBuild) {
     $log = Join-Path $Run "qa-build.log"
     Push-Location $Mod
-    & .\gradlew.bat build --console=plain "-Dorg.gradle.jvmargs=-Xmx2G" *> $log
+    & .\gradlew.bat build -x test --console=plain "-Dorg.gradle.jvmargs=-Xmx2G" *> $log
     Pop-Location
     $txt = Get-Content $log -Raw
     $ok = $txt -match "BUILD SUCCESSFUL"
@@ -98,11 +142,14 @@ $ll = & $py -3 -I tools/qa/layout_lint.py 2>&1
 $llerr = @($ll | Where-Object { $_ -match "^ERR" })
 Result "layout" ($LASTEXITCODE -eq 0) ("{0}" -f ($ll | Select-Object -Last 1))
 $llerr | Select-Object -First 10 | ForEach-Object { Add("       $_") }
-# reachability: does a road or trail reach every place (settlements joined per landmass, trails to destinations)
 $rl = @(& $py -3 -I tools/qa/reach_lint.py 2>&1)
 $rlerr = @($rl | Where-Object { $_ -match "^ERR" })
 Result "reach" ($LASTEXITCODE -eq 0) ("{0}" -f ($rl | Select-Object -Last 1))
 $rlerr | Select-Object -First 10 | ForEach-Object { Add("       $_") }
+$ws = @(& $py -3 -I tools/qa/worldsheet_lint.py --province skyrim 2>&1)
+$wserr = @($ws | Where-Object { $_ -match "^ERR" })
+Result "worldsheet" ($LASTEXITCODE -eq 0) ("{0}" -f ($ws | Select-Object -Last 1))
+$wserr | Select-Object -First 10 | ForEach-Object { Add("       $_") }
 if ($Reach) {
     $rtxt = Join-Path $Root "tools\qa\out\reach_lint.txt"
     if (Test-Path $rtxt) {

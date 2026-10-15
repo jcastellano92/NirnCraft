@@ -6,7 +6,8 @@
       "dungeon_fixed"
     ],
     "variants": [
-      "great_lift"
+      "great_lift",
+      "mzark"
     ]
   },
   "biomes": "#skycraft:dungeons/anywhere",

@@ -123,12 +123,16 @@ public final class BarrowRooms {
                 else if (roll == 5) p.container(x, room.floor, z, Deco.barrel(inward), Deco.LOOT_MINOR);
                 else if (roll <= 7 && draugr < 1 + room.tier() / 2) {
                     draugr++;
-                    p.spawnDormant(Mobs.draugr(), x, room.floor, z, Painter.yaw(inward));
+                    p.spawnDormant(foe(room), x, room.floor, z, Painter.yaw(inward));
                 } else if (roll == 8) p.set(x, room.floor, z, Deco.candle(Blocks.CANDLE, 2 + roll % 2, true));
                 else if (roll == 9) p.set(x, room.floor, z, Blocks.BONE_BLOCK.defaultBlockState());
                 else p.set(x, room.floor + 1, z, Blocks.COBWEB.defaultBlockState());
             }
         }
+    }
+
+    static String foe(Room room) {
+        return room.piece.kit == Kit.FORSWORN ? Mobs.forsworn() : Mobs.draugr();
     }
 
     /** Stone coffins against the long walls, their occupants already standing. */
@@ -153,11 +157,11 @@ public final class BarrowRooms {
                 int sx = fx + inward.getStepX(), sz = fz + inward.getStepZ();
                 if (draugr < 1 + room.tier() / 2 && !room.onLane(sx, sz) && p.chance(sx, room.floor, sz, 23, 2)) {
                     draugr++;
-                    p.spawnDormant(Mobs.draugr(), sx, room.floor, sz, Painter.yaw(inward));
+                    p.spawnDormant(foe(room), sx, room.floor, sz, Painter.yaw(inward));
                 }
             }
         }
-        if (draugr == 0) p.spawn(Mobs.draugr(), room.cx + 1, room.floor, room.cz + 1, 0f, null);
+        if (draugr == 0) p.spawn(foe(room), room.cx + 1, room.floor, room.cz + 1, 0f, null);
     }
 
     /** An altar against a doorless wall with pews facing it. */
@@ -186,7 +190,7 @@ public final class BarrowRooms {
             }
         }
         int x = room.localX(side, half - 1, 0) + inward.getStepX(), z = room.localZ(side, half - 1, 0) + inward.getStepZ();
-        if (p.chance(x, room.floor, z, 24, 2)) p.spawn(Mobs.draugr(), x, room.floor, z, Painter.yaw(inward), null);
+        if (p.chance(x, room.floor, z, 24, 2)) p.spawn(foe(room), x, room.floor, z, Painter.yaw(inward), null);
         return true;
     }
 
@@ -209,10 +213,10 @@ public final class BarrowRooms {
             if (room.onLane(x, z) || count >= 2) continue;
             if (p.chance(x, room.floor, z, 26, 2)) {
                 count++;
-                p.spawn(Mobs.draugr(), x, room.floor, z, p.roll(x, 0, z, 27, 360), null);
+                p.spawn(foe(room), x, room.floor, z, p.roll(x, 0, z, 27, 360), null);
             }
         }
-        if (room.puzzle() && count == 0) p.spawn(Mobs.draugr(), room.cx + 1, room.floor, room.cz - 1, 0f, null);
+        if (room.puzzle() && count == 0) p.spawn(foe(room), room.cx + 1, room.floor, room.cz - 1, 0f, null);
     }
 
     /** Fallen masonry, webs and skeevers. */
@@ -232,7 +236,7 @@ public final class BarrowRooms {
         }
         p.spawn(Mobs.skeever(), room.cx - 1, room.floor, room.cz, 90f, null);
         p.spawn(Mobs.skeever(), room.cx + 1, room.floor, room.cz + 1, 270f, null);
-        if (p.chance(room.cx, room.floor, room.cz, 30, 2)) p.spawn(Mobs.draugr(), room.cx, room.floor, room.cz - 1, 180f, null);
+        if (p.chance(room.cx, room.floor, room.cz, 30, 2)) p.spawn(foe(room), room.cx, room.floor, room.cz - 1, 180f, null);
     }
 
     // ------------------------------------------------------------------ special rooms
@@ -309,7 +313,8 @@ public final class BarrowRooms {
         }
         p.set(room.localX(f, halfF - 3, ss + Integer.signum(ss)), room.floor + 1, room.localZ(f, halfF - 3, ss + Integer.signum(ss)),
                 Deco.slab(Blocks.DEEPSLATE_TILE_SLAB, false));
-        p.spawnBoss(Mobs.deathlord(), room.localX(f, halfF - 2, 0), room.floor + 1, room.localZ(f, halfF - 2, 0), Painter.yaw(back), null);
+        p.spawnBoss(room.piece.kit == Kit.FORSWORN ? Mobs.hagraven() : Mobs.deathlord(),
+                room.localX(f, halfF - 2, 0), room.floor + 1, room.localZ(f, halfF - 2, 0), Painter.yaw(back), null);
         // pillars down the hall
         int top = room.height - 1;
         for (int fwd = -(halfF - 2); fwd <= halfF - 5; fwd += 3) {
@@ -320,8 +325,8 @@ public final class BarrowRooms {
             }
         }
         // guards
-        p.spawn(Mobs.draugr(), room.localX(f, 0, 3), room.floor, room.localZ(f, 0, 3), Painter.yaw(back), null);
-        p.spawn(Mobs.draugr(), room.localX(f, 0, -3), room.floor, room.localZ(f, 0, -3), Painter.yaw(back), null);
+        p.spawn(foe(room), room.localX(f, 0, 3), room.floor, room.localZ(f, 0, 3), Painter.yaw(back), null);
+        p.spawn(foe(room), room.localX(f, 0, -3), room.floor, room.localZ(f, 0, -3), Painter.yaw(back), null);
         // hanging lights
         for (int s : new int[]{-2, 2}) {
             int x = room.localX(f, 0, s), z = room.localZ(f, 0, s);

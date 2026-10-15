@@ -263,6 +263,16 @@ renderer) are checks; they generate nothing. `tools/music/import_skyrim_audio.py
 importer (see [MUSIC.md](MUSIC.md)). It refuses to write inside the repository, and nothing it produces may be
 committed.
 
+## Testing tiers
+
+| Tier | Command | Speed | What it covers |
+| --- | --- | --- | --- |
+| **Tier 0 — Unit tests** | `cd mod && ./gradlew test` or `tools\qa\qa.ps1 -Unit` | < 5 s | Pure-Java JUnit 5 suite (`mod/src/test/java/com/skycraft/**`): `RoadPlan` / `Profile` / `PlanGround`, `ScenePlan`, `StreetPlan`, `TamrielMap` / `Places` / `Regions` / `Beyond`, `Bake` input hashes, and `WorldSheets`. No Forge or Minecraft server boot. |
+| **Tier 1a — JDWP HotSwap** | `tools\dev\devserver.ps1 hotswap` | < 3 s | Compiles `mod/src/main/java` (`compileJava --build-cache`) and redefines changed method bodies in the running dev server over JDWP (`127.0.0.1:5005`, `tools/dev/hotswap.py`). If a class changes fields, signatures or hierarchy, falls back automatically to `devserver.ps1 restart`. `devserver.ps1 run` prefers `hotswap` over `restart` when `.java` files change. |
+| **Tier 1b — Data reload** | `tools\dev\devserver.ps1 run "/skycraft-dev reload <target>" -Wait` | < 1 s | Syncs edited files from `mod/src/main/resources/skycraft` into `mod/build/resources/main/skycraft` and re-reads caches in-JVM (`DevReload`): `scenes` (`ScatterRules` + live `ScenePlan`), `places` (`Places` + `QuestPlaces`), `cityplans` (`CityPlans` + `Styles` + `Overlays`), `quests` (`StoryData` + `QuestPlaces`), `palettes` (`Palettes` + live `TamrielBiomeSource`), or `all`. Pair with `/skycraft-dev regen x1 z1 x2 z2` to see worldgen changes in place. Not hot-reloaded (requires restart/rebake): map PNG rasters, `regions.json`, `hydrology.json`, `peaks.json`, baked `RoadPlan`/`StreetPlan`, and Forge/datapack registries. |
+| **Tier 2 — Dev server** | `tools\dev\devserver.ps1 run "cmd" -Wait`, `quick_corridor.ps1` | 1–15 s | In-place chunk regeneration (`/skycraft-dev regen`), corridor grading measurement, command smoke checks. |
+| **Tier 3 — Full gates** | `tools\qa\full_corridors.ps1`, `tools\qa\qa.ps1 -Server -Rebake` | 2–4 min | Full 4-corridor road gate and full headless server boot + selftests + bake verification (run once at phase end / merge). |
+
 ## Test harnesses
 
 Each harness is an `@Mod.EventBusSubscriber` class that does nothing unless triggered. Client harnesses run under

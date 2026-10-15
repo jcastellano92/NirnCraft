@@ -32,7 +32,7 @@ public final class Beats {
     /** The common foe of this dungeon, and the title its elite wears. */
     static String foe(Painter p, Room room) {
         return switch (room.theme()) {
-            case BARROW -> Mobs.draugr();
+            case BARROW -> room.piece.kit == Kit.FORSWORN || p.kit == Kit.FORSWORN ? Mobs.forsworn() : Mobs.draugr();
             case DWEMER -> Mobs.DWARVEN_SPIDER;
             case FORT -> p.kit != Kit.NONE && p.kit != Kit.NORD && p.kit != Kit.IMPERIAL ? p.kit.minion(1).id()
                     : switch (Math.floorMod(room.piece.flavor, 4)) {
@@ -49,7 +49,7 @@ public final class Beats {
     @Nullable
     static String eliteName(Painter p, Room room, String id) {
         if (!id.startsWith("minecraft:") && room.theme() != Theme.RUIN) return switch (room.theme()) {
-            case BARROW -> "Draugr Wight";
+            case BARROW -> room.piece.kit == Kit.FORSWORN || p.kit == Kit.FORSWORN ? "Forsworn Briarheart" : "Draugr Wight";
             case DWEMER -> null;
             default -> null;
         };

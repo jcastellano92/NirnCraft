@@ -56,20 +56,22 @@ people ("world building is king").
   ten sections (§1–§10) written**.
 * The gap: Skyrim scores 95 on the parity scorecard but only 53-54 on Settlements (named NPCs 187 against the real
   845, named buildings 112 against 210); every other province sits at 40-53.
-  The map is full; **R4a (`docs/prompts/R4a-town-overhaul.md`, TO0-TO6) is now complete and rebaked** (planned city
-  terraces/stairs, 100% leader seats, >=4 house footprints >=7x9, recognisable trade shops with unsealed counters and
-  chairs, multi-room inns with 4-6 private rooms and desks, partitioned Jarl/leader halls, 3 house interior layout
-  families, stationed NPC routines, and scatter/foundation cleanup). Next up is closing R1 loose ends, R2 testing
-  tiers, R3a-R3e systems, and R4 per-place depth.
+  The map is full; **R4a (`docs/prompts/R4a-town-overhaul.md`, TO0-TO6)**, **R1 (`docs/prompts/R1-loose-ends.md`)**,
+  **R2 (`docs/prompts/R2-testing-tiers.md`)**, and **R3a (`docs/prompts/R3a-world-sheets.md`)** are now complete and
+  rebaked (`4144f49a` + latest commit: 60 Tier 0 JUnit 5 tests passing in 17.4s, JDWP hot-swap & `/skycraft-dev reload`,
+  `skyrim.json` 11-layer world sheet with 0 lint errors and 2 consumers, `tower_of_mzark` & `deepwood_redoubt` &
+  dungeon/shipwreck fixes, Solitude sea routes with 0 warnings, and landmass-aware trails). Next up is R3b–R3e and R4
+  Skyrim uplift.
 
 ## Next
 
-**Next: R1 (`docs/prompts/R1-loose-ends.md`) and R2 (`docs/prompts/R2-testing-tiers.md`), followed by R3a–R3e, R4
-(`docs/prompts/R4-skyrim-uplift.md`), and the province rollout starting with R5 (`docs/prompts/R5-iliac-bay.md`).**
+**Next: R3b (`docs/prompts/R3b-micro-biomes.md`), R3c (`docs/prompts/R3c-measurement.md`), R3d
+(`docs/prompts/R3d-town-services.md`), and R3e (`docs/prompts/R3e-world-systems.md`), followed by R4
+(`docs/prompts/R4-skyrim-uplift.md`).**
 All 11 province design documents are finished and ready for V1–V9 execution.
 
 To run the next phase, say: "Read `docs/START-HERE.md` and `docs/prompts/_COMMON.md`, then run
-`docs/prompts/R1-loose-ends.md`" (or `R2-testing-tiers.md`, or whichever phase WORLD-PLAN section 7 shows as `next`).
+`docs/prompts/R3d-town-services.md`" (or `R3e-world-systems.md`, `R3b-micro-biomes.md`, `R3c-measurement.md`, or whichever phase WORLD-PLAN section 7 shows as `next`).
 
 ## The rules (non-negotiable)
 

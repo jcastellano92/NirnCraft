@@ -63,11 +63,21 @@ public final class SeaRoutes {
                 for (Port p : Ports.all()) PortSites.of(p);
                 sited = true;
                 boolean[] grid = new boolean[W * H];
+                com.skycraft.tamriel.MapSample s = new com.skycraft.tamriel.MapSample();
                 for (int z = 0; z < H; z++) {
                     for (int x = 0; x < W; x++) {
-                        grid[z * W + x] = TamrielMap.elevation(MIN_X + x * CELL + CELL / 2, MIN_Z + z * CELL + CELL / 2) < 62f;
+                        boolean isSea = false;
+                        int bx = MIN_X + x * CELL, bz = MIN_Z + z * CELL;
+                        for (int dz = 16; dz <= 48 && !isSea; dz += 32) {
+                            for (int dx = 16; dx <= 48 && !isSea; dx += 32) {
+                                TamrielMap.sample(bx + dx, bz + dz, s);
+                                if (s.region == 0 || s.coastDistance <= 8f || s.elevation < 62f) isSea = true;
+                            }
+                        }
+                        grid[z * W + x] = isSea;
                     }
                 }
+                keepMainOcean(grid);
                 sea = grid;
                 for (Route r : Ports.routes()) {
                     Path p = compute(r);
@@ -173,6 +183,40 @@ public final class SeaRoutes {
 
     private static final int[] DX = {1, -1, 0, 0, 1, 1, -1, -1};
     private static final int[] DZ = {0, 0, 1, -1, 1, -1, 1, -1};
+
+    private static void keepMainOcean(boolean[] grid) {
+        int n = W * H;
+        int[] comp = new int[n];
+        int[] queue = new int[n];
+        int nextId = 0, bestId = -1, bestSize = 0;
+        for (int i = 0; i < n; i++) {
+            if (!grid[i] || comp[i] != 0) continue;
+            int id = ++nextId;
+            int head = 0, tail = 0;
+            comp[i] = id;
+            queue[tail++] = i;
+            while (head < tail) {
+                int c = queue[head++];
+                int cx = c % W, cz = c / W;
+                for (int k = 0; k < 8; k++) {
+                    int nx = cx + DX[k], nz = cz + DZ[k];
+                    if (nx < 0 || nz < 0 || nx >= W || nz >= H) continue;
+                    int nb = nz * W + nx;
+                    if (!grid[nb] || comp[nb] != 0) continue;
+                    if (k >= 4 && (!grid[cz * W + nx] || !grid[nz * W + cx])) continue;
+                    comp[nb] = id;
+                    queue[tail++] = nb;
+                }
+            }
+            if (tail > bestSize) {
+                bestSize = tail;
+                bestId = id;
+            }
+        }
+        if (bestId > 0) {
+            for (int i = 0; i < n; i++) if (grid[i] && comp[i] != bestId) grid[i] = false;
+        }
+    }
 
     private static int[] astar(int start, int goal) {
         boolean[] grid = sea;

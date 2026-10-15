@@ -81,6 +81,13 @@ public final class Identity {
         return e == null || e.boss().isEmpty() ? null : e.boss();
     }
 
+    /** The name of the master of this place, or {@code fallback} when the place has no identity boss name. */
+    @Nullable
+    public static String bossName(String place, @Nullable String fallback) {
+        String n = bossName(place);
+        return n != null ? n : fallback;
+    }
+
     /** The chest table a story chest rolls in this place instead of an ordinary dungeon table, or the table itself. */
     public static ResourceLocation loot(String place, ResourceLocation table, long roll) {
         Entry e = of(place);
@@ -102,22 +109,16 @@ public final class Identity {
     @Nullable
     private static ItemStack note(String place, String noteId) {
         if (noteId == null || noteId.isEmpty()) return null;
-        PlaceLore.Note n = PlaceLore.note(PlaceLore.BOOK_PREFIX + place + "." + noteId);
-        if (n == null) return null;
-        // a lectern only shows a written book: the note's words in one, tagged so reading it counts as reading the note
-        // (PlaceLoreEvents turns a right-click on it into the lore book's reading screen)
-        ItemStack s = new ItemStack(net.minecraft.world.item.Items.WRITTEN_BOOK);
-        net.minecraft.nbt.CompoundTag tag = s.getOrCreateTag();
-        tag.putString("title", n.title().text());
-        tag.putString("author", n.author() == null ? "?" : n.author().text());
-        net.minecraft.nbt.ListTag pages = new net.minecraft.nbt.ListTag();
-        for (PlaceLore.Txt t : n.pages()) {
-            String text = t.text().replaceAll("(?m)^[~^#]\\s*", "");
-            pages.add(net.minecraft.nbt.StringTag.valueOf(Component.Serializer.toJson(Component.literal(text))));
+        String bookId = PlaceLore.BOOK_PREFIX + place + "." + noteId;
+        ItemStack s = PlaceLore.createNote(place, noteId);
+        if (s.isEmpty()) {
+            PlaceLore.Note n = PlaceLore.note(bookId);
+            if (n == null) return null;
+            com.skycraft.lore.LoreBooks.Book b = PlaceLore.book(bookId);
+            if (b == null) return null;
+            s = com.skycraft.lore.LoreBookItem.create(b);
         }
-        tag.put("pages", pages);
-        tag.putBoolean("resolved", true);
-        tag.putString(NOTE_TAG, n.bookId());
+        s.getOrCreateTag().putString(NOTE_TAG, bookId);
         return s;
     }
 
@@ -146,7 +147,7 @@ public final class Identity {
         Entry e = of(c.place);
         if (e == null || c.special == Special.MARQUEE) return;
         int t = c.tunnelLength() + 3;
-        marker(p, e, c.frameX(t, 3), c.frameZ(t, 3), c.frameX(t, -3), c.frameZ(t, -3), c.aux, c.facing());
+        marker(p, e, c.frameX(t, 3), c.frameZ(t, 3), c.frameX(t, -3), c.frameZ(t, -3), c.aux, c.facing(), false);
     }
 
     /** The same for surface sites (forts, camps, towers): at the front edge of the footprint. */
@@ -159,33 +160,38 @@ public final class Identity {
         Direction f = c.facing(), r = f.getClockWise();
         int fwd = Math.min(b.getXSpan(), b.getZSpan()) / 2 - 1;
         int fx = cx + f.getStepX() * fwd, fz = cz + f.getStepZ() * fwd;
-        marker(p, e, fx + r.getStepX() * 3, fz + r.getStepZ() * 3, fx - r.getStepX() * 3, fz - r.getStepZ() * 3, c.floor, f);
+        int baseY = c.theme == Theme.SHIPWRECK ? Math.max(c.floor + 2, p.level.getSeaLevel()) : c.floor;
+        BlockState padFloor = c.theme == Theme.SHIPWRECK || c.theme == Theme.CABIN
+                ? Blocks.SPRUCE_PLANKS.defaultBlockState() : Blocks.COBBLESTONE.defaultBlockState();
+        marker(p, e, fx + r.getStepX() * 3, fz + r.getStepZ() * 3, fx - r.getStepX() * 3, fz - r.getStepZ() * 3, baseY, f, true);
         // its stash: a chest of the place's own loot by the way in
-        int sx = fx - r.getStepX() * 6, sz = fz - r.getStepZ() * 6, sy = standY(p, sx, sz, c.floor);
+        int sx = fx - r.getStepX() * 6, sz = fz - r.getStepZ() * 6, sy = standY(p, sx, sz, baseY);
+        if (sy == Integer.MIN_VALUE) sy = ensureStand(p, sx, sz, baseY, padFloor);
         if (sy != Integer.MIN_VALUE) {
             p.container(sx, sy, sz, Deco.chest(f), e.loot());
             p.feature("story:hoard");
         }
         // its motif, laid out on open ground beside the way in
-        int off = Math.max(2, Math.min(8, fwd - 4));
-        if (!Blueprints.placeAt(p, "motif:" + e.motif(), fx + r.getStepX() * off - f.getStepX() * 2, fz + r.getStepZ() * off - f.getStepZ() * 2,
-                c.floor, f.getOpposite())) {
-            Blueprints.placeAt(p, "motif:" + e.motif(), fx - r.getStepX() * off - f.getStepX() * 2, fz - r.getStepZ() * off - f.getStepZ() * 2,
-                    c.floor, f.getOpposite());
-        }
+        int off = Math.max(3, Math.min(6, fwd - 3));
+        int mx = fx + r.getStepX() * off - f.getStepX() * 2, mz = fz + r.getStepZ() * off - f.getStepZ() * 2;
+        ensureMotifPad(p, mx, mz, baseY, f.getOpposite(), padFloor);
+        Blueprints.placeAt(p, "motif:" + e.motif(), mx, mz, baseY, f.getOpposite());
         // and its master, waiting inside (forts keep theirs in the cellars)
-        String boss = c.theme == Theme.FORT ? null : surfaceBoss(e.family());
+        String boss = c.theme == Theme.FORT ? null : surfaceBoss(c.theme, e.family());
         if (boss != null) {
-            int by = standY(p, fx - f.getStepX() * 5, fz - f.getStepZ() * 5, c.floor);
-            if (by != Integer.MIN_VALUE) p.spawnBoss(boss, fx - f.getStepX() * 5, by, fz - f.getStepZ() * 5, Painter.yaw(f), null);
+            int bx = fx - f.getStepX() * 5, bz = fz - f.getStepZ() * 5;
+            int by = standY(p, bx, bz, baseY);
+            if (by == Integer.MIN_VALUE) by = ensureStand(p, bx, bz, baseY, padFloor);
+            if (by != Integer.MIN_VALUE) p.spawnBoss(boss, bx, by, bz, Painter.yaw(f), bossName(c.place));
         }
     }
 
     @Nullable
-    private static String surfaceBoss(String family) {
+    private static String surfaceBoss(Theme theme, String family) {
+        if (theme == Theme.GREAT_LIFT) return Mobs.DWARVEN_SPHERE;
         return switch (family) {
             case "barrow", "ruin" -> Mobs.deathlord();
-            case "bandit" -> Mobs.banditChief();
+            case "bandit", "shipwreck" -> Mobs.banditChief();
             case "military" -> Mobs.soldier();
             case "forsworn", "hagraven" -> Mobs.forsworn();
             case "giant" -> Mobs.orElse(Mobs.GIANT, "minecraft:iron_golem");
@@ -197,7 +203,8 @@ public final class Identity {
         };
     }
 
-    private static void marker(Painter p, Entry e, int sx, int sz, int lx, int lz, int hint, Direction out) {
+    private static void marker(Painter p, Entry e, int sx, int sz, int lx, int lz, int hint, Direction out, boolean forcePad) {
+        BlockState padFloor = Blocks.SPRUCE_PLANKS.defaultBlockState();
         int sy = standY(p, sx, sz, hint);
         // the post is a plain column: where it cannot stand, a spot a block further out of the same chunk takes over
         if (sy == Integer.MIN_VALUE && p.ownsColumn(sx, sz)) {
@@ -209,6 +216,7 @@ public final class Identity {
                     sz = az;
                 }
             }
+            if (sy == Integer.MIN_VALUE && forcePad) sy = ensureStand(p, sx, sz, hint, padFloor);
         }
         if (sy != Integer.MIN_VALUE) {
             int rotation = Math.floorMod(Math.round(out.toYRot() / 22.5f), 16);
@@ -237,6 +245,7 @@ public final class Identity {
                     lz = az;
                 }
             }
+            if (ly == Integer.MIN_VALUE && forcePad) ly = ensureStand(p, lx, lz, hint, padFloor);
         }
         if (book != null && ly != Integer.MIN_VALUE) {
             p.set(lx, ly, lz, Blocks.LECTERN.defaultBlockState().setValue(LecternBlock.FACING, out).setValue(LecternBlock.HAS_BOOK, true));
@@ -246,6 +255,31 @@ public final class Identity {
                 p.feature("story:entrance_lectern");
             } else {
                 p.set(lx, ly, lz, Blocks.AIR.defaultBlockState());
+            }
+        }
+    }
+
+    private static int ensureStand(Painter p, int x, int z, int y, BlockState floor) {
+        if (!p.ownsColumn(x, z) || !p.ok(x, y, z) || !p.ok(x, y + 1, z)) return Integer.MIN_VALUE;
+        BlockState below = p.get(x, y - 1, z);
+        if (below.isAir() || !below.getFluidState().isEmpty() || below.is(BlockTags.LEAVES) || !below.canOcclude()) {
+            p.set(x, y - 1, z, floor);
+        }
+        for (int dy = 0; dy <= 1; dy++) {
+            if (!free(p.get(x, y + dy, z)) && p.blockEntity(x, y + dy, z) == null) {
+                p.set(x, y + dy, z, Blocks.AIR.defaultBlockState());
+            }
+        }
+        return y;
+    }
+
+    private static void ensureMotifPad(Painter p, int cx, int cz, int floor, Direction face, BlockState padFloor) {
+        Direction right = face.getClockWise();
+        for (int v = 0; v < 5; v++) {
+            for (int u = -2; u <= 2; u++) {
+                int x = cx + right.getStepX() * u + face.getStepX() * v;
+                int z = cz + right.getStepZ() * u + face.getStepZ() * v;
+                ensureStand(p, x, z, floor, padFloor);
             }
         }
     }

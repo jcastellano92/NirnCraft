@@ -419,7 +419,7 @@ public final class NaturalRooms {
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dz = -1; dz <= 1; dz++) {
                     int x = s[0] + dx, z = s[1] + dz;
-                    if (room.onLane(x, z) || !inside(p, room, x, z, 0.9)) continue;
+                    if (room.onLane(x, z) || room.nearDoor(x, z, 1) || !inside(p, room, x, z, 0.9)) continue;
                     int roll = p.roll(x, i, z, 121, 4);
                     p.set(x, room.floor, z, roll == 0 ? Deco.pillar(Blocks.HAY_BLOCK, Direction.Axis.Y)
                             : roll == 1 ? Blocks.MANGROVE_ROOTS.defaultBlockState()

@@ -77,10 +77,23 @@ tasks.register('mergeLang') {
 sourceSets.main.resources.srcDir(files(mergedLangDir).builtBy('mergeLang'))
 
 repositories {
+    mavenCentral()
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test', Test).configure {
+    useJUnitPlatform()
+    maxHeapSize = '2G'
+    outputs.upToDateWhen { false }
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "short"
+    }
 }
 
 tasks.named('processResources', ProcessResources).configure {

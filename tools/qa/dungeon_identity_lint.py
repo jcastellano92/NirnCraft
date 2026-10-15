@@ -214,7 +214,8 @@ def main():
                 missing += 1
                 continue
             ex = load_export(path)
-        fam = ident.get(p["id"], {}).get("family") or FAMILY.get(p.get("variant"), "cave")
+        fam = ident.get(p["id"], {}).get("family") or (
+            "forsworn" if p.get("variant") == "barrow" and p.get("culture") == "forsworn" else FAMILY.get(p.get("variant"), "cave"))
         fl = check(p["id"], p.get("variant", ""), fam, lr.get(p["id"]), ex, ident, iso, nm)
         rows.append({"id": p["id"], "name": nm.get(p["id"], p["id"]), "variant": p.get("variant"), "family": fam, "flags": fl,
                      "mobs": len([e for e in (ex or {}).get("entities", []) if "dormant" in e]),

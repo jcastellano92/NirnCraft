@@ -220,7 +220,8 @@ public final class Towers {
         String mage = Mobs.necromancer();
         fr.spawn(mage, 1, 0, 0, fr.f, crystal ? "Aldmeri Sorcerer" : null);
         fr.spawn(crystal ? "minecraft:vex" : "minecraft:skeleton", 1, 9, 1, fr.f, crystal ? "Crystal Sentinel" : null);
-        fr.spawn(mage, 1, 17, -1, fr.f, crystal ? "Aldmeri Archmage" : "Master Necromancer");
+        fr.p.spawnBoss(mage, fr.x(1, -1), fr.base + 17, fr.z(1, -1), Painter.yaw(fr.f),
+                Identity.bossName(fr.p.place, crystal ? "Aldmeri Archmage" : "Master Necromancer"));
         if (!crystal) fr.spawn("minecraft:zombie", 4, 0, 4, fr.f, "Thrall");
     }
 
@@ -277,7 +278,8 @@ public final class Towers {
             fr.set(3, 3, s, Blocks.OCHRE_FROGLIGHT);
         }
         fr.set(4, 1, 3, Deco.wallLever(fr.f.getOpposite()));
-        fr.spawn(Mobs.DWARVEN_SPHERE, 3, 0, -3, fr.f, null);
+        fr.p.spawnBoss(Mobs.DWARVEN_SPHERE, fr.x(3, -3), fr.base, fr.z(3, -3), Painter.yaw(fr.f),
+                Identity.bossName(fr.p.place, "Dwarven Sphere"));
         if (fr.chance(0, 0, 812, 2)) fr.spawn(Mobs.falmer(), 0, bottom, 1, fr.f, null);
     }
 

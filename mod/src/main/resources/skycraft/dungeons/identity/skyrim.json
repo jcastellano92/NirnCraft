@@ -17,7 +17,12 @@
    "entrance": "smuggler_tally",
    "entranceKind": "ledger",
    "bossNote": "apprentice_scratch",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L4.polar_fauna",
+    "skyrim.L2.polar_coast",
+    "skyrim.L2.sheltered_south"
+   ]
   },
   "castle_karstaag_ruins": {
    "family": "ice",
@@ -35,7 +40,12 @@
    "entrance": "hunter_journal",
    "entranceKind": "journal",
    "bossNote": "skaal_warning",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L4.polar_fauna",
+    "skyrim.L2.polar_coast",
+    "skyrim.L2.sheltered_south"
+   ]
   },
   "frossel": {
    "family": "beast",
@@ -53,7 +63,12 @@
    "entrance": "thirsk_hunter",
    "entranceKind": "journal",
    "bossNote": "riekling_scrawl",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L4.polar_fauna",
+    "skyrim.L4.marsh_life",
+    "skyrim.L10.falmer_below"
+   ]
   },
   "saerings_watch": {
    "family": "dragon",
@@ -71,7 +86,12 @@
    "entrance": "dragonhunter_log",
    "entranceKind": "journal",
    "bossNote": "saering_song",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L10.draugr_barrows",
+    "skyrim.L4.dragons",
+    "skyrim.L9.dragon_crisis"
+   ]
   },
   "bristleback_cave": {
    "family": "beast",
@@ -89,7 +109,12 @@
    "entrance": "trapper_log",
    "entranceKind": "journal",
    "bossNote": "boar_warning",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L4.polar_fauna",
+    "skyrim.L4.marsh_life",
+    "skyrim.L10.falmer_below"
+   ]
   },
   "haknirs_shoal": {
    "family": "wreck",
@@ -107,7 +132,10 @@
    "entrance": "salvage_note",
    "entranceKind": "treasure",
    "bossNote": "ships_articles",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L1.northern_coast"
+   ]
   },
   "benkongerike": {
    "family": "barrow",
@@ -125,7 +153,12 @@
    "entrance": "barrow_rubbing",
    "entranceKind": "notes",
    "bossNote": "skald_verses",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L10.draugr_barrows",
+    "skyrim.L8.ancestor_barrows",
+    "skyrim.L11.dragon_war"
+   ]
   },
   "broken_tusk_mine": {
    "family": "mine",
@@ -143,7 +176,12 @@
    "entrance": "foreman_ledger",
    "entranceKind": "ledger",
    "bossNote": "riekling_menu",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L5.mining_wealth",
+    "skyrim.L5.timber",
+    "skyrim.L1.ore_belts"
+   ]
   },
   "white_ridge_barrow": {
    "family": "barrow",
@@ -161,7 +199,12 @@
    "entrance": "smuggler_map",
    "entranceKind": "treasure",
    "bossNote": "barrow_epitaph",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L10.draugr_barrows",
+    "skyrim.L8.ancestor_barrows",
+    "skyrim.L11.dragon_war"
+   ]
   },
   "hrothmunds_barrow": {
    "family": "barrow",
@@ -179,7 +222,12 @@
    "entrance": "skaal_tale",
    "entranceKind": "book",
    "bossNote": "cultist_devotion",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L10.draugr_barrows",
+    "skyrim.L8.ancestor_barrows",
+    "skyrim.L11.dragon_war"
+   ]
   },
   "gyldenhul_barrow": {
    "family": "barrow",
@@ -197,7 +245,12 @@
    "entrance": "brandr_note",
    "entranceKind": "letter",
    "bossNote": "proving_marks",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L10.draugr_barrows",
+    "skyrim.L8.ancestor_barrows",
+    "skyrim.L11.dragon_war"
+   ]
   },
   "snowclad_ruins": {
    "family": "ruin",
@@ -215,7 +268,12 @@
    "entrance": "scholar_letter",
    "entranceKind": "letter",
    "bossNote": "skaal_bones",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L10.draugr_barrows",
+    "skyrim.L11.snow_elf_era",
+    "skyrim.L11.atmoran_landing"
+   ]
   },
   "fahlbtharz": {
    "family": "dwemer",
@@ -233,7 +291,11 @@
    "entrance": "prospector_journal",
    "entranceKind": "journal",
    "bossNote": "dwemer_plate",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L1.dwemer_bedrock",
+    "skyrim.L11.dwemer_betrayal"
+   ]
   },
   "temple_of_miraak": {
    "family": "barrow",
@@ -251,7 +313,12 @@
    "entrance": "searching_husband",
    "entranceKind": "letter",
    "bossNote": "cult_work_list",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L10.draugr_barrows",
+    "skyrim.L8.ancestor_barrows",
+    "skyrim.L11.dragon_war"
+   ]
   },
   "bujolds_retreat": {
    "family": "bandit",
@@ -269,7 +336,11 @@
    "entrance": "bujold_letter",
    "entranceKind": "letter",
    "bossNote": "reaver_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L10.bandits_on_roads",
+    "skyrim.L5.road_hub"
+   ]
   },
   "frostmoon_crag": {
    "family": "beast",
@@ -287,7 +358,12 @@
    "entrance": "hunters_warning",
    "entranceKind": "warning",
    "bossNote": "pack_carving",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L4.polar_fauna",
+    "skyrim.L4.marsh_life",
+    "skyrim.L10.falmer_below"
+   ]
   },
   "damphall_mine": {
    "family": "mine",
@@ -305,7 +381,12 @@
    "entrance": "shift_report",
    "entranceKind": "report",
    "bossNote": "miner_scrawl",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L5.mining_wealth",
+    "skyrim.L5.timber",
+    "skyrim.L1.ore_belts"
+   ]
   },
   "abandoned_lodge": {
    "family": "cabin",
@@ -323,7 +404,12 @@
    "entrance": "helgas_letter",
    "entranceKind": "letter",
    "bossNote": "sigvar_journal",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L6.work_villages",
+    "skyrim.L5.farm_and_mead",
+    "skyrim.L5.timber"
+   ]
   },
   "vahloks_tomb": {
    "family": "barrow",
@@ -341,7 +427,12 @@
    "entrance": "assistant_report",
    "entranceKind": "report",
    "bossNote": "jailors_oath",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L10.draugr_barrows",
+    "skyrim.L8.ancestor_barrows",
+    "skyrim.L11.dragon_war"
+   ]
   },
   "kagrumez": {
    "family": "dwemer",
@@ -359,7 +450,11 @@
    "entrance": "tuning_notes",
    "entranceKind": "notes",
    "bossNote": "scavenger_scrawl",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L1.dwemer_bedrock",
+    "skyrim.L11.dwemer_betrayal"
+   ]
   },
   "bloodskal_barrow": {
    "family": "barrow",
@@ -377,7 +472,12 @@
    "entrance": "redoran_report",
    "entranceKind": "report",
    "bossNote": "robbers_tally",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L10.draugr_barrows",
+    "skyrim.L8.ancestor_barrows",
+    "skyrim.L11.dragon_war"
+   ]
   },
   "brodir_grove": {
    "family": "grove",
@@ -395,7 +495,10 @@
    "entrance": "apprentice_list",
    "entranceKind": "list",
    "bossNote": "skaal_offering",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L4.pine_and_birch"
+   ]
   },
   "ramshackle_trading_post": {
    "family": "cabin",
@@ -413,7 +516,12 @@
    "entrance": "trader_ledger",
    "entranceKind": "ledger",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L6.work_villages",
+    "skyrim.L5.farm_and_mead",
+    "skyrim.L5.timber"
+   ]
   },
   "ashfallow_citadel": {
    "family": "mage",
@@ -431,7 +539,11 @@
    "entrance": "deserter_letter",
    "entranceKind": "letter",
    "bossNote": "seryne_notes",
-   "story": "supply_list"
+   "story": "supply_list",
+   "why": [
+    "skyrim.L8.distrust_of_magic",
+    "skyrim.L7.jarls_and_thanes"
+   ]
   },
   "nchardak": {
    "family": "dwemer",
@@ -449,7 +561,11 @@
    "entrance": "treasure_hunter_journal",
    "entranceKind": "journal",
    "bossNote": "steam_warning",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L1.dwemer_bedrock",
+    "skyrim.L11.dwemer_betrayal"
+   ]
   },
   "highpoint_tower": {
    "family": "mage",
@@ -467,7 +583,11 @@
    "entrance": "arvyn_log",
    "entranceKind": "journal",
    "bossNote": "guard_note",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L8.distrust_of_magic",
+    "skyrim.L7.jarls_and_thanes"
+   ]
   },
   "kolbjorn_barrow": {
    "family": "barrow",
@@ -485,7 +605,12 @@
    "entrance": "neral_diary",
    "entranceKind": "diary",
    "bossNote": "dig_notice",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L10.draugr_barrows",
+    "skyrim.L8.ancestor_barrows",
+    "skyrim.L11.dragon_war"
+   ]
   },
   "fort_frostmoth": {
    "family": "fort",
@@ -503,7 +628,11 @@
    "entrance": "gaius_letter",
    "entranceKind": "letter",
    "bossNote": "last_muster",
-   "story": "redoran_note"
+   "story": "redoran_note",
+   "why": [
+    "skyrim.L9.civil_war",
+    "skyrim.L6.failing_seats"
+   ]
   },
   "hrodulfs_house": {
    "family": "cabin",
@@ -521,7 +650,12 @@
    "entrance": "dream_journal",
    "entranceKind": "journal",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L6.work_villages",
+    "skyrim.L5.farm_and_mead",
+    "skyrim.L5.timber"
+   ]
   },
   "wreck_of_the_strident_squall": {
    "family": "wreck",
@@ -539,7 +673,10 @@
    "entrance": "cooks_letter",
    "entranceKind": "treasure",
    "bossNote": "wreckers_rules",
-   "story": ""
+   "story": "",
+   "why": [
+    "skyrim.L1.northern_coast"
+   ]
   },
   "castle_volkihar": {
    "family": "vampire",
@@ -557,7 +694,11 @@
    "entrance": "ferryman_warning",
    "entranceKind": "warning",
    "bossNote": "thrall_prayer",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L10.volkihar_castle",
+    "haafingar.L10.soul_cairn_gate"
+   ]
   },
   "broken_oar_grotto": {
    "family": "smuggler",
@@ -575,7 +716,11 @@
    "entrance": "smugglers_ledger",
    "entranceKind": "ledger",
    "bossNote": "varo_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L10.smugglers_coves",
+    "haafingar.L5.company_docks"
+   ]
   },
   "septimus_signuss_outpost": {
    "family": "ice",
@@ -593,7 +738,12 @@
    "entrance": "courier_log",
    "entranceKind": "journal",
    "bossNote": "scrawled_theorem",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L10.listener_on_ice",
+    "winterhold.L10.falmer_pit",
+    "winterhold.L10.glacier_dwemer"
+   ]
   },
   "brinewater_grotto": {
    "family": "smuggler",
@@ -611,7 +761,11 @@
    "entrance": "signal_roster",
    "entranceKind": "orders",
    "bossNote": "sailor_scratching",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L10.smugglers_coves",
+    "haafingar.L5.company_docks"
+   ]
   },
   "orphans_tear": {
    "family": "wreck",
@@ -629,7 +783,10 @@
    "entrance": "ship_boy_letter",
    "entranceKind": "letter",
    "bossNote": "last_log",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L1.sea_cliffs"
+   ]
   },
   "solitude_lighthouse": {
    "family": "tower",
@@ -647,7 +804,10 @@
    "entrance": "keeper_log",
    "entranceKind": "journal",
    "bossNote": "wrecker_offer",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L3.lighthouse_point"
+   ]
   },
   "ravenscar_hollow": {
    "family": "hagraven",
@@ -665,7 +825,10 @@
    "entrance": "lesson_bark",
    "entranceKind": "inscription",
    "bossNote": "freydis_letter",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L4.hill_covens"
+   ]
   },
   "helas_folly": {
    "family": "wreck",
@@ -683,7 +846,11 @@
    "entrance": "hela_log",
    "entranceKind": "journal",
    "bossNote": "cache_scrap",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L5.wreck_salvage",
+    "winterhold.L1.ice_floes"
+   ]
   },
   "shadowgreen_cavern": {
    "family": "grove",
@@ -701,7 +868,11 @@
    "entrance": "botanist_notes",
    "entranceKind": "notes",
    "bossNote": "alder_prayer",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L4.pine_coast",
+    "haafingar.L4.spriggan_glens"
+   ]
   },
   "widows_watch_ruins": {
    "family": "tower",
@@ -719,7 +890,10 @@
    "entrance": "fisher_warning",
    "entranceKind": "warning",
    "bossNote": "stair_verse",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L3.lighthouse_point"
+   ]
   },
   "dainty_sload": {
    "family": "wreck",
@@ -737,7 +911,10 @@
    "entrance": "deckhand_confession",
    "entranceKind": "letter",
    "bossNote": "captain_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L1.sea_cliffs"
+   ]
   },
   "skytemple_ruins": {
    "family": "ruin",
@@ -755,7 +932,12 @@
    "entrance": "dare_journal",
    "entranceKind": "journal",
    "bossNote": "sky_inscription",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L10.saarthal_eye",
+    "winterhold.L10.harbingers_tomb",
+    "winterhold.L10.falmer_pit"
+   ]
   },
   "ysgramors_tomb": {
    "family": "barrow",
@@ -773,7 +955,10 @@
    "entrance": "pilgrim_prayer",
    "entranceKind": "prayer",
    "bossNote": "warden_warning",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L10.harbingers_tomb"
+   ]
   },
   "lower_steepfall_burrow": {
    "family": "beast",
@@ -791,7 +976,12 @@
    "entrance": "trapper_journal",
    "entranceKind": "journal",
    "bossNote": "legion_bounty",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L10.wolf_queen_catacombs",
+    "haafingar.L10.smugglers_coves",
+    "haafingar.L10.soul_cairn_gate"
+   ]
   },
   "wreck_of_the_brinehammer": {
    "family": "wreck",
@@ -809,7 +999,10 @@
    "entrance": "brinehammer_manifest",
    "entranceKind": "ledger",
    "bossNote": "salvager_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L5.two_mines"
+   ]
   },
   "pilgrims_trench": {
    "family": "wreck",
@@ -827,7 +1020,11 @@
    "entrance": "pilgrim_letter",
    "entranceKind": "letter",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L5.wreck_salvage",
+    "winterhold.L1.ice_floes"
+   ]
   },
   "northwatch_keep": {
    "family": "fort",
@@ -845,7 +1042,10 @@
    "entrance": "prisoner_register",
    "entranceKind": "ledger",
    "bossNote": "cell_prayer",
-   "story": "interrogator_notes"
+   "story": "interrogator_notes",
+   "why": [
+    "haafingar.L9.imperial_seat"
+   ]
   },
   "yngvild": {
    "family": "cave",
@@ -863,7 +1063,11 @@
    "entrance": "fisher_plea",
    "entranceKind": "letter",
    "bossNote": "host_journal",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L10.falmer_pit",
+    "winterhold.L4.glacier_waste"
+   ]
   },
   "steepfall_burrow": {
    "family": "beast",
@@ -881,7 +1085,12 @@
    "entrance": "scout_report",
    "entranceKind": "report",
    "bossNote": "thalmor_courier_pouch",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L10.wolf_queen_catacombs",
+    "haafingar.L10.smugglers_coves",
+    "haafingar.L10.soul_cairn_gate"
+   ]
   },
   "fort_hraggstad": {
    "family": "fort",
@@ -899,7 +1108,10 @@
    "entrance": "recruit_letter",
    "entranceKind": "letter",
    "bossNote": "castle_dour_orders",
-   "story": "quartermaster_report"
+   "story": "quartermaster_report",
+   "why": [
+    "haafingar.L9.imperial_seat"
+   ]
   },
   "ironback_hideout": {
    "family": "cabin",
@@ -917,7 +1129,11 @@
    "entrance": "warning_faithful",
    "entranceKind": "warning",
    "bossNote": "faithful_psalter",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L6.sawmill_hamlet",
+    "haafingar.L5.sawmill"
+   ]
   },
   "wreck_of_the_icerunner": {
    "family": "wreck",
@@ -935,7 +1151,11 @@
    "entrance": "survivor_note",
    "entranceKind": "journal",
    "bossNote": "scavenger_tally",
-   "story": ""
+   "story": "",
+   "why": [
+    "hjaalmarch.L10.wreck_on_the_flats",
+    "hjaalmarch.L1.low_coast"
+   ]
   },
   "wolfskull_cave": {
    "family": "necromancer",
@@ -953,7 +1173,11 @@
    "entrance": "acolyte_letter",
    "entranceKind": "letter",
    "bossNote": "ritual_notes",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L10.wolf_queen_catacombs",
+    "haafingar.L8.wolf_queen_fear"
+   ]
   },
   "wreck_of_the_pride_of_tel_vos": {
    "family": "wreck",
@@ -971,7 +1195,11 @@
    "entrance": "refugee_diary",
    "entranceKind": "diary",
    "bossNote": "telvanni_manifest",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L5.wreck_salvage",
+    "winterhold.L1.ice_floes"
+   ]
   },
   "the_katariah": {
    "family": "wreck",
@@ -989,7 +1217,10 @@
    "entrance": "stowaway_diary",
    "entranceKind": "diary",
    "bossNote": "watch_roster",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L1.sea_cliffs"
+   ]
   },
   "high_gate_ruins": {
    "family": "barrow",
@@ -1007,7 +1238,12 @@
    "entrance": "survey_journal",
    "entranceKind": "journal",
    "bossNote": "cult_carving",
-   "story": ""
+   "story": "",
+   "why": [
+    "hjaalmarch.L10.bromjunaar_maze",
+    "hjaalmarch.L10.voice_tomb",
+    "hjaalmarch.L11.bromjunaar"
+   ]
   },
   "rimerock_burrow": {
    "family": "necromancer",
@@ -1025,7 +1261,11 @@
    "entrance": "exile_journal",
    "entranceKind": "journal",
    "bossNote": "cache_note",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L10.wolf_queen_catacombs",
+    "haafingar.L8.wolf_queen_fear"
+   ]
   },
   "lost_echo_cave": {
    "family": "falmer",
@@ -1043,7 +1283,10 @@
    "entrance": "bard_journal",
    "entranceKind": "journal",
    "bossNote": "warning_plank",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L10.wolf_queen_catacombs"
+   ]
   },
   "nightcaller_temple": {
    "family": "mage",
@@ -1061,7 +1304,12 @@
    "entrance": "sealed_vigil",
    "entranceKind": "journal",
    "bossNote": "town_petition",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L10.college_midden",
+    "winterhold.L8.mage_blame",
+    "winterhold.L7.town_vs_college"
+   ]
   },
   "pale_imperial_camp": {
    "family": "military",
@@ -1079,7 +1327,10 @@
    "entrance": "soldier_letter",
    "entranceKind": "letter",
    "bossNote": "quartermaster_report",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L9.rebel_jarl"
+   ]
   },
   "pinefrost_tower": {
    "family": "tower",
@@ -1097,7 +1348,10 @@
    "entrance": "watchman_log",
    "entranceKind": "journal",
    "bossNote": "agent_note",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L3.lighthouse_point"
+   ]
   },
   "hobs_fall_cave": {
    "family": "necromancer",
@@ -1115,7 +1369,10 @@
    "entrance": "expulsion_letter",
    "entranceKind": "letter",
    "bossNote": "vinicia_notes",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L10.saarthal_eye"
+   ]
   },
   "winterhold_imperial_camp": {
    "family": "military",
@@ -1133,7 +1390,10 @@
    "entrance": "soldier_diary",
    "entranceKind": "diary",
    "bossNote": "camp_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L9.rebel_jarl"
+   ]
   },
   "abandoned_shack": {
    "family": "cabin",
@@ -1151,7 +1411,11 @@
    "entrance": "witch_receipts",
    "entranceKind": "list",
    "bossNote": "fresh_scrap",
-   "story": ""
+   "story": "",
+   "why": [
+    "hjaalmarch.L5.timber_mill",
+    "hjaalmarch.L5.fishing"
+   ]
   },
   "windward_ruins": {
    "family": "ruin",
@@ -1169,7 +1433,10 @@
    "entrance": "bandit_scrawl",
    "entranceKind": "notes",
    "bossNote": "hawker_ledger",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L11.jagged_crown"
+   ]
   },
   "pinemoon_cave": {
    "family": "bandit",
@@ -1187,7 +1454,11 @@
    "entrance": "hidden_share",
    "entranceKind": "treasure",
    "bossNote": "chief_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L10.smugglers_coves",
+    "haafingar.L5.toll_bridge"
+   ]
   },
   "volskygge": {
    "family": "barrow",
@@ -1205,7 +1476,10 @@
    "entrance": "hulda_letter",
    "entranceKind": "letter",
    "bossNote": "eirik_journal",
-   "story": "priest_tablet"
+   "story": "priest_tablet",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine"
+   ]
   },
   "saarthal": {
    "family": "barrow",
@@ -1223,7 +1497,10 @@
    "entrance": "digger_journal",
    "entranceKind": "journal",
    "bossNote": "dig_notice",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L10.harbingers_tomb"
+   ]
   },
   "folgunthur": {
    "family": "barrow",
@@ -1241,7 +1518,12 @@
    "entrance": "verulus_instructions",
    "entranceKind": "letter",
    "bossNote": "junia_journal",
-   "story": ""
+   "story": "",
+   "why": [
+    "hjaalmarch.L10.bromjunaar_maze",
+    "hjaalmarch.L10.voice_tomb",
+    "hjaalmarch.L11.bromjunaar"
+   ]
   },
   "bleakcoast_cave": {
    "family": "beast",
@@ -1259,7 +1541,12 @@
    "entrance": "hunter_tally",
    "entranceKind": "journal",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L4.glacier_waste",
+    "winterhold.L10.college_midden",
+    "winterhold.L10.falmer_pit"
+   ]
   },
   "haafingar_stormcloak_camp": {
    "family": "military",
@@ -1277,7 +1564,11 @@
    "entrance": "ragnvald_letter",
    "entranceKind": "letter",
    "bossNote": "camp_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "haafingar.L9.imperial_seat",
+    "haafingar.L9.naval_power"
+   ]
   },
   "frostflow_lighthouse": {
    "family": "tower",
@@ -1295,7 +1586,10 @@
    "entrance": "ship_complaint",
    "entranceKind": "letter",
    "bossNote": "keeper_log",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L10.falmer_pit"
+   ]
   },
   "ustengrav": {
    "family": "barrow",
@@ -1313,7 +1607,12 @@
    "entrance": "imperial_scout_note",
    "entranceKind": "report",
    "bossNote": "robber_plan",
-   "story": ""
+   "story": "",
+   "why": [
+    "hjaalmarch.L10.bromjunaar_maze",
+    "hjaalmarch.L10.voice_tomb",
+    "hjaalmarch.L11.bromjunaar"
+   ]
   },
   "hjaalmarch_stormcloak_camp": {
    "family": "military",
@@ -1331,7 +1630,10 @@
    "entrance": "love_letter",
    "entranceKind": "letter",
    "bossNote": "stormcloak_watch",
-   "story": ""
+   "story": "",
+   "why": [
+    "hjaalmarch.L9.jarl_apart"
+   ]
   },
   "mzinchaleft": {
    "family": "dwemer",
@@ -1349,25 +1651,35 @@
    "entrance": "knud_journal",
    "entranceKind": "journal",
    "bossNote": "college_inscription",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L10.great_lifts",
+    "the_pale.L1.dwemer_cluster",
+    "the_pale.L11.dwemer_lifts"
+   ]
   },
   "deepwood_redoubt": {
-   "family": "barrow",
+   "family": "forsworn",
    "variant": "barrow",
-   "boss": "Arnkel Hall-Keeper",
+   "boss": "Gristle-Mother Ungrid",
    "person": "Horgeir",
    "sign": [
     "Deepwood",
     "Redoubt",
-    "Here lies",
-    "Arnkel"
+    "Last seen:",
+    "Horgeir"
    ],
-   "motif": "urn_wall",
-   "loot": "barrow",
+   "motif": "feather_totem",
+   "loot": "forsworn",
    "entrance": "fathers_letter",
    "entranceKind": "letter",
    "bossNote": "briar_rite",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine",
+    "the_reach.L10.hagraven_covens",
+    "the_reach.L10.forsworn_redoubts"
+   ]
   },
   "journeymans_nook": {
    "family": "ruin",
@@ -1385,7 +1697,12 @@
    "entrance": "cartographer_note",
    "entranceKind": "treasure",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L10.saarthal_eye",
+    "winterhold.L10.harbingers_tomb",
+    "winterhold.L10.falmer_pit"
+   ]
   },
   "red_road_pass": {
    "family": "giant",
@@ -1403,7 +1720,11 @@
    "entrance": "sled_report",
    "entranceKind": "report",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L4.snowfield",
+    "the_pale.L4.pale_heath"
+   ]
   },
   "driftshade_refuge": {
    "family": "fort",
@@ -1421,7 +1742,10 @@
    "entrance": "cell_scratching",
    "entranceKind": "warning",
    "bossNote": "silver_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L6.college"
+   ]
   },
   "hjaalmarch_imperial_camp": {
    "family": "military",
@@ -1439,7 +1763,10 @@
    "entrance": "livia_reply",
    "entranceKind": "letter",
    "bossNote": "supply_requisition",
-   "story": ""
+   "story": "",
+   "why": [
+    "hjaalmarch.L9.jarl_apart"
+   ]
   },
   "sightless_pit": {
    "family": "falmer",
@@ -1457,7 +1784,11 @@
    "entrance": "miner_letter",
    "entranceKind": "letter",
    "bossNote": "falmer_study",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L10.falmer_pit",
+    "winterhold.L4.blind_hunters"
+   ]
   },
   "great_lift_at_mzinchaleft": {
    "family": "dwemer",
@@ -1475,7 +1806,12 @@
    "entrance": "shepherd_count",
    "entranceKind": "notes",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L10.great_lifts",
+    "the_pale.L1.dwemer_cluster",
+    "the_pale.L11.dwemer_lifts"
+   ]
   },
   "alftand": {
    "family": "dwemer",
@@ -1493,7 +1829,10 @@
    "entrance": "brelas_notebook",
    "entranceKind": "notes",
    "bossNote": "expedition_list",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L10.glacier_dwemer"
+   ]
   },
   "movarths_lair": {
    "family": "vampire",
@@ -1511,7 +1850,11 @@
    "entrance": "geirlund_note",
    "entranceKind": "journal",
    "bossNote": "vessa_letter",
-   "story": ""
+   "story": "",
+   "why": [
+    "hjaalmarch.L10.marsh_vampires",
+    "hjaalmarch.L9.vampire_fear"
+   ]
   },
   "whistling_mine": {
    "family": "mine",
@@ -1529,7 +1872,11 @@
    "entrance": "foreman_notice",
    "entranceKind": "warning",
    "bossNote": "ore_tally",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L5.wreck_salvage",
+    "winterhold.L5.whistling_mine"
+   ]
   },
   "meekos_shack": {
    "family": "cabin",
@@ -1547,7 +1894,11 @@
    "entrance": "hermit_letter",
    "entranceKind": "letter",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "hjaalmarch.L5.timber_mill",
+    "hjaalmarch.L5.fishing"
+   ]
   },
   "darkfall_cave": {
    "family": "falmer",
@@ -1565,7 +1916,10 @@
    "entrance": "durz_marks",
    "entranceKind": "inscription",
    "bossNote": "falmer_totem",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine"
+   ]
   },
   "kjenstag_ruins": {
    "family": "ruin",
@@ -1583,7 +1937,12 @@
    "entrance": "guard_report",
    "entranceKind": "report",
    "bossNote": "lantern_inscription",
-   "story": ""
+   "story": "",
+   "why": [
+    "hjaalmarch.L10.bromjunaar_maze",
+    "hjaalmarch.L10.voice_tomb",
+    "hjaalmarch.L11.bromjunaar"
+   ]
   },
   "snow_veil_sanctum": {
    "family": "barrow",
@@ -1601,7 +1960,10 @@
    "entrance": "thief_note",
    "entranceKind": "notes",
    "bossNote": "priest_tablet",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L10.harbingers_tomb"
+   ]
   },
   "frostmere_crypt": {
    "family": "barrow",
@@ -1619,7 +1981,11 @@
    "entrance": "widow_letter",
    "entranceKind": "letter",
    "bossNote": "gang_rules",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L8.old_crown",
+    "the_pale.L11.jagged_crown"
+   ]
   },
   "fort_fellhammer": {
    "family": "fort",
@@ -1637,7 +2003,10 @@
    "entrance": "fort_history",
    "entranceKind": "book",
    "bossNote": "fence_ledger",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L6.college"
+   ]
   },
   "snowpoint_beacon": {
    "family": "tower",
@@ -1655,7 +2024,10 @@
    "entrance": "ulf_warning",
    "entranceKind": "warning",
    "bossNote": "beacon_log",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L10.falmer_pit"
+   ]
   },
   "fort_snowhawk": {
    "family": "fort",
@@ -1673,7 +2045,10 @@
    "entrance": "hallgerd_scrap",
    "entranceKind": "letter",
    "bossNote": "vigdis_journal",
-   "story": "legion_plaque"
+   "story": "legion_plaque",
+   "why": [
+    "hjaalmarch.L9.jarl_apart"
+   ]
   },
   "dragon_bridge_overlook": {
    "family": "bandit",
@@ -1691,7 +2066,10 @@
    "entrance": "lookout_note",
    "entranceKind": "orders",
    "bossNote": "toll_ledger",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L5.border_trade"
+   ]
   },
   "forebears_holdout": {
    "family": "beast",
@@ -1709,7 +2087,11 @@
    "entrance": "father_journal",
    "entranceKind": "journal",
    "bossNote": "alikr_note",
-   "story": ""
+   "story": "",
+   "why": [
+    "hjaalmarch.L4.marsh_hunters",
+    "hjaalmarch.L10.marsh_vampires"
+   ]
   },
   "mount_anthor": {
    "family": "dragon",
@@ -1727,7 +2109,10 @@
    "entrance": "wall_rubbing",
    "entranceKind": "notes",
    "bossNote": "shepherd_count",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L10.saarthal_eye"
+   ]
   },
   "hall_of_the_vigilant": {
    "family": "cabin",
@@ -1745,7 +2130,11 @@
    "entrance": "vigilant_rota",
    "entranceKind": "list",
    "bossNote": "vigilant_creed",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L6.heath_farms",
+    "the_pale.L5.fishing"
+   ]
   },
   "wreck_of_the_winter_war": {
    "family": "wreck",
@@ -1763,7 +2152,11 @@
    "entrance": "deckhand_scrawl",
    "entranceKind": "warning",
    "bossNote": "ship_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L5.wreck_salvage",
+    "winterhold.L1.ice_floes"
+   ]
   },
   "dimhollow_crypt": {
    "family": "barrow",
@@ -1781,7 +2174,12 @@
    "entrance": "digger_contract",
    "entranceKind": "contract",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "hjaalmarch.L10.bromjunaar_maze",
+    "hjaalmarch.L10.voice_tomb",
+    "hjaalmarch.L11.bromjunaar"
+   ]
   },
   "stillborn_cave": {
    "family": "ice",
@@ -1799,7 +2197,12 @@
    "entrance": "midwife_prayer",
    "entranceKind": "prayer",
    "bossNote": "asta_legend",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L10.listener_on_ice",
+    "winterhold.L10.falmer_pit",
+    "winterhold.L10.glacier_dwemer"
+   ]
   },
   "brucas_leap_redoubt": {
    "family": "forsworn",
@@ -1817,7 +2220,12 @@
    "entrance": "captive_scratch",
    "entranceKind": "warning",
    "bossNote": "river_watch",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine",
+    "the_reach.L10.hagraven_covens",
+    "the_reach.L10.forsworn_redoubts"
+   ]
   },
   "fort_dunstad": {
    "family": "fort",
@@ -1835,7 +2243,10 @@
    "entrance": "commander_report",
    "entranceKind": "report",
    "bossNote": "fort_graffiti",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L9.rebel_jarl"
+   ]
   },
   "duskglow_crevice": {
    "family": "falmer",
@@ -1853,7 +2264,10 @@
    "entrance": "courier_last_words",
    "entranceKind": "letter",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L10.nightmare_temple"
+   ]
   },
   "druadach_redoubt": {
    "family": "forsworn",
@@ -1871,7 +2285,12 @@
    "entrance": "healer_list",
    "entranceKind": "list",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine",
+    "the_reach.L10.hagraven_covens",
+    "the_reach.L10.forsworn_redoubts"
+   ]
   },
   "chillwind_depths": {
    "family": "falmer",
@@ -1889,7 +2308,10 @@
    "entrance": "orla_journal",
    "entranceKind": "journal",
    "bossNote": "bandit_warning",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine"
+   ]
   },
   "ironbind_barrow": {
    "family": "barrow",
@@ -1907,7 +2329,11 @@
    "entrance": "brothers_pact",
    "entranceKind": "contract",
    "bossNote": "ivar_mark",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L8.old_crown",
+    "the_pale.L11.jagged_crown"
+   ]
   },
   "cliffside_retreat": {
    "family": "cabin",
@@ -1925,7 +2351,10 @@
    "entrance": "hermit_diary",
    "entranceKind": "diary",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L5.river_farms"
+   ]
   },
   "great_lift_at_alftand": {
    "family": "dwemer",
@@ -1943,7 +2372,12 @@
    "entrance": "vesk_lift_notes",
    "entranceKind": "notes",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L10.great_lifts",
+    "the_pale.L1.dwemer_cluster",
+    "the_pale.L11.dwemer_lifts"
+   ]
   },
   "harmugstahl": {
    "family": "mage",
@@ -1961,7 +2395,10 @@
    "entrance": "shepherd_plea",
    "entranceKind": "letter",
    "bossNote": "breeding_notes",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine"
+   ]
   },
   "winterhold_stormcloak_camp": {
    "family": "military",
@@ -1979,7 +2416,10 @@
    "entrance": "camp_letter",
    "entranceKind": "letter",
    "bossNote": "scout_report",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L9.rebel_jarl"
+   ]
   },
   "fort_kastav": {
    "family": "fort",
@@ -1997,7 +2437,10 @@
    "entrance": "lookout_orders",
    "entranceKind": "orders",
    "bossNote": "grelka_tally",
-   "story": ""
+   "story": "",
+   "why": [
+    "winterhold.L6.college"
+   ]
   },
   "silverdrift_lair": {
    "family": "barrow",
@@ -2015,7 +2458,11 @@
    "entrance": "bard_letter",
    "entranceKind": "letter",
    "bossNote": "saga_fragment",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L8.old_crown",
+    "the_pale.L11.jagged_crown"
+   ]
   },
   "yorgrim_overlook": {
    "family": "ruin",
@@ -2033,7 +2480,10 @@
    "entrance": "smuggler_treasure",
    "entranceKind": "treasure",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L11.jagged_crown"
+   ]
   },
   "dead_mens_respite": {
    "family": "barrow",
@@ -2051,7 +2501,12 @@
    "entrance": "fisher_tale",
    "entranceKind": "journal",
    "bossNote": "respite_verse",
-   "story": ""
+   "story": "",
+   "why": [
+    "hjaalmarch.L10.bromjunaar_maze",
+    "hjaalmarch.L10.voice_tomb",
+    "hjaalmarch.L11.bromjunaar"
+   ]
   },
   "liars_retreat": {
    "family": "bandit",
@@ -2069,7 +2524,10 @@
    "entrance": "crew_orders",
    "entranceKind": "orders",
    "bossNote": "ottar_map",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L5.border_trade"
+   ]
   },
   "forsaken_cave": {
    "family": "barrow",
@@ -2087,7 +2545,11 @@
    "entrance": "sergeant_order",
    "entranceKind": "orders",
    "bossNote": "kolbeinn_note",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L8.old_crown",
+    "the_pale.L11.jagged_crown"
+   ]
   },
   "reach_stormcloak_camp": {
    "family": "military",
@@ -2105,7 +2567,10 @@
    "entrance": "soldier_letter",
    "entranceKind": "letter",
    "bossNote": "camp_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L9.imperial_jarl"
+   ]
   },
   "dragontooth_crater": {
    "family": "dragon",
@@ -2123,7 +2588,10 @@
    "entrance": "hunter_journal",
    "entranceKind": "journal",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine"
+   ]
   },
   "skyborn_altar": {
    "family": "dragon",
@@ -2141,7 +2609,10 @@
    "entrance": "hunter_account",
    "entranceKind": "letter",
    "bossNote": "altar_inscription",
-   "story": ""
+   "story": "",
+   "why": [
+    "hjaalmarch.L10.bromjunaar_maze"
+   ]
   },
   "robbers_gorge": {
    "family": "bandit",
@@ -2159,7 +2630,10 @@
    "entrance": "toll_tally",
    "entranceKind": "ledger",
    "bossNote": "toll_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "hjaalmarch.L10.marsh_vampires"
+   ]
   },
   "yngol_barrow": {
    "family": "barrow",
@@ -2177,7 +2651,10 @@
    "entrance": "shipwright_letter",
    "entranceKind": "letter",
    "bossNote": "yngol_epitaph",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L10.old_city_killer"
+   ]
   },
   "lost_valkygg": {
    "family": "ruin",
@@ -2195,7 +2672,12 @@
    "entrance": "adventurer_journal",
    "entranceKind": "journal",
    "bossNote": "sealing_stone",
-   "story": ""
+   "story": "",
+   "why": [
+    "hjaalmarch.L10.bromjunaar_maze",
+    "hjaalmarch.L10.voice_tomb",
+    "hjaalmarch.L11.bromjunaar"
+   ]
   },
   "bthardamz": {
    "family": "dwemer",
@@ -2213,7 +2695,12 @@
    "entrance": "fennick_notes",
    "entranceKind": "journal",
    "bossNote": "afflicted_scrawl",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.dwemer_depths",
+    "the_reach.L1.dwemer_city_rock",
+    "the_reach.L11.dwemer_era"
+   ]
   },
   "tower_of_mzark": {
    "family": "dwemer",
@@ -2231,7 +2718,12 @@
    "entrance": "mage_survey",
    "entranceKind": "notes",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L10.great_lifts",
+    "the_pale.L1.dwemer_cluster",
+    "the_pale.L11.dwemer_lifts"
+   ]
   },
   "crabbers_shanty": {
    "family": "cabin",
@@ -2249,7 +2741,11 @@
    "entrance": "crabber_journal",
    "entranceKind": "journal",
    "bossNote": "gorge_warning",
-   "story": ""
+   "story": "",
+   "why": [
+    "hjaalmarch.L5.timber_mill",
+    "hjaalmarch.L5.fishing"
+   ]
   },
   "stonehill_bluff": {
    "family": "giant",
@@ -2267,7 +2763,10 @@
    "entrance": "farmer_complaint",
    "entranceKind": "letter",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "hjaalmarch.L10.marsh_vampires"
+   ]
   },
   "brood_cavern": {
    "family": "beast",
@@ -2285,7 +2784,11 @@
    "entrance": "alchemist_list",
    "entranceKind": "list",
    "bossNote": "orotheim_warning",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L4.sabre_and_wolf",
+    "whiterun.L10.toll_bandits"
+   ]
   },
   "shrouded_grove": {
    "family": "grove",
@@ -2303,7 +2806,10 @@
    "entrance": "herbalist_journal",
    "entranceKind": "journal",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L4.snowfield"
+   ]
   },
   "bronze_water_cave": {
    "family": "beast",
@@ -2321,7 +2827,12 @@
    "entrance": "trapper_notes",
    "entranceKind": "notes",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L4.snowfield",
+    "the_pale.L10.great_lifts",
+    "the_pale.L10.troll_caves"
+   ]
   },
   "labyrinthian": {
    "family": "barrow",
@@ -2339,7 +2850,12 @@
    "entrance": "student_journal",
    "entranceKind": "journal",
    "bossNote": "bromjunaar_stone",
-   "story": "valkygg_map"
+   "story": "valkygg_map",
+   "why": [
+    "hjaalmarch.L10.bromjunaar_maze",
+    "hjaalmarch.L10.voice_tomb",
+    "hjaalmarch.L11.bromjunaar"
+   ]
   },
   "broken_tower_redoubt": {
    "family": "forsworn",
@@ -2357,7 +2873,12 @@
    "entrance": "hrofi_letter",
    "entranceKind": "letter",
    "bossNote": "briarheart_boast",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine",
+    "the_reach.L10.hagraven_covens",
+    "the_reach.L10.forsworn_redoubts"
+   ]
   },
   "blizzard_rest": {
    "family": "giant",
@@ -2375,7 +2896,11 @@
    "entrance": "loreius_complaint",
    "entranceKind": "letter",
    "bossNote": "poacher_note",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L4.snowfield",
+    "the_pale.L4.pale_heath"
+   ]
   },
   "traitors_post": {
    "family": "cabin",
@@ -2393,7 +2918,12 @@
    "entrance": "deserters_pact",
    "entranceKind": "contract",
    "bossNote": "bjorlam_unsent",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L6.darkwater_crossing",
+    "eastmarch.L6.mills_and_farms",
+    "eastmarch.L5.river_mills"
+   ]
   },
   "refugees_rest": {
    "family": "tower",
@@ -2411,7 +2941,11 @@
    "entrance": "refugee_inscription",
    "entranceKind": "inscription",
    "bossNote": "bandit_squat",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L10.bandit_mine_camps",
+    "eastmarch.L3.windhelm_bridge"
+   ]
   },
   "orotheim": {
    "family": "bandit",
@@ -2429,7 +2963,11 @@
    "entrance": "captive_letter",
    "entranceKind": "letter",
    "bossNote": "toll_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L5.crossroads_trade"
+   ]
   },
   "eldersblood_peak": {
    "family": "dragon",
@@ -2447,7 +2985,12 @@
    "entrance": "herder_journal",
    "entranceKind": "journal",
    "bossNote": "ring_inscription",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.dragon_mounds",
+    "whiterun.L4.throat_meadow",
+    "whiterun.L4.dragon_perch"
+   ]
   },
   "reach_imperial_camp": {
    "family": "military",
@@ -2465,7 +3008,10 @@
    "entrance": "legate_report",
    "entranceKind": "report",
    "bossNote": "quartermaster_list",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L9.imperial_jarl"
+   ]
   },
   "pale_stormcloak_camp": {
    "family": "military",
@@ -2483,7 +3029,10 @@
    "entrance": "camp_roster",
    "entranceKind": "list",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L9.rebel_jarl"
+   ]
   },
   "korvanjund": {
    "family": "barrow",
@@ -2501,7 +3050,11 @@
    "entrance": "scout_dispatch",
    "entranceKind": "report",
    "bossNote": "kings_lament",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L8.old_crown",
+    "the_pale.L11.jagged_crown"
+   ]
   },
   "volunruud": {
    "family": "barrow",
@@ -2519,7 +3072,11 @@
    "entrance": "mercenary_note",
    "entranceKind": "notes",
    "bossNote": "warrior_inscription",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L8.old_crown",
+    "the_pale.L11.jagged_crown"
+   ]
   },
   "tumble_arch_pass": {
    "family": "giant",
@@ -2537,7 +3094,11 @@
    "entrance": "caravan_warning",
    "entranceKind": "warning",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L4.snowfield",
+    "the_pale.L4.pale_heath"
+   ]
   },
   "great_lift_at_raldbthar": {
    "family": "dwemer",
@@ -2555,7 +3116,12 @@
    "entrance": "vesk_lift_two",
    "entranceKind": "notes",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L10.great_lifts",
+    "the_pale.L1.dwemer_cluster",
+    "the_pale.L11.dwemer_lifts"
+   ]
   },
   "sundered_towers": {
    "family": "forsworn",
@@ -2573,7 +3139,12 @@
    "entrance": "forsworn_song",
    "entranceKind": "poem",
    "bossNote": "double_ledger",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine",
+    "the_reach.L10.hagraven_covens",
+    "the_reach.L10.forsworn_redoubts"
+   ]
   },
   "drelas_cottage": {
    "family": "cabin",
@@ -2591,7 +3162,12 @@
    "entrance": "arcadia_letter",
    "entranceKind": "letter",
    "bossNote": "drelas_notes",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L6.riverwood",
+    "whiterun.L6.rorikstead",
+    "whiterun.L6.caravan_ground"
+   ]
   },
   "ragnvald": {
    "family": "barrow",
@@ -2609,7 +3185,10 @@
    "entrance": "eirik_journal",
    "entranceKind": "journal",
    "bossNote": "tithe_inscription",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine"
+   ]
   },
   "irkngthand": {
    "family": "dwemer",
@@ -2627,7 +3206,12 @@
    "entrance": "hunter_journal",
    "entranceKind": "journal",
    "bossNote": "vesk_irkngthand",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L10.great_lifts",
+    "the_pale.L1.dwemer_cluster",
+    "the_pale.L11.dwemer_lifts"
+   ]
   },
   "rannveigs_fast": {
    "family": "barrow",
@@ -2645,7 +3229,11 @@
    "entrance": "gray_mane_journal",
    "entranceKind": "journal",
    "bossNote": "rannveig_inscription",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.beast_blood",
+    "whiterun.L10.dragon_mounds"
+   ]
   },
   "blind_cliff_cave": {
    "family": "hagraven",
@@ -2663,7 +3251,12 @@
    "entrance": "aiwen_plea",
    "entranceKind": "letter",
    "bossNote": "becoming_rite",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.hagraven_covens",
+    "the_reach.L10.dead_eaters",
+    "the_reach.L4.crag_scrub"
+   ]
   },
   "rebels_cairn": {
    "family": "barrow",
@@ -2681,7 +3274,10 @@
    "entrance": "reach_lament",
    "entranceKind": "poem",
    "bossNote": "necro_notes",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine"
+   ]
   },
   "four_skull_lookout": {
    "family": "ruin",
@@ -2699,7 +3295,10 @@
    "entrance": "paymaster_note",
    "entranceKind": "report",
    "bossNote": "seeker_scrawl",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.blades_temple"
+   ]
   },
   "talking_stone_camp": {
    "family": "giant",
@@ -2717,7 +3316,12 @@
    "entrance": "skald_notes",
    "entranceKind": "notes",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.giant_camps",
+    "whiterun.L4.steppe_grass",
+    "whiterun.L4.giant_grounds"
+   ]
   },
   "hamvirs_rest": {
    "family": "ruin",
@@ -2735,7 +3339,11 @@
    "entrance": "robber_notes",
    "entranceKind": "notes",
    "bossNote": "hamvir_epitaph",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.beast_blood",
+    "whiterun.L10.dragon_mounds"
+   ]
   },
   "uttering_hills_cave": {
    "family": "bandit",
@@ -2753,7 +3361,10 @@
    "entrance": "two_coins_orders",
    "entranceKind": "orders",
    "bossNote": "captive_scratching",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L5.roadside_inn"
+   ]
   },
   "shearpoint": {
    "family": "dragon",
@@ -2771,7 +3382,10 @@
    "entrance": "climber_notes",
    "entranceKind": "journal",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L10.nightmare_temple"
+   ]
   },
   "morvunskar": {
    "family": "mage",
@@ -2789,7 +3403,10 @@
    "entrance": "college_letter",
    "entranceKind": "letter",
    "bossNote": "conjurer_notes",
-   "story": "elsbet_journal"
+   "story": "elsbet_journal",
+   "why": [
+    "eastmarch.L10.old_city_killer"
+   ]
   },
   "halted_stream_camp": {
    "family": "bandit",
@@ -2807,7 +3424,11 @@
    "entrance": "brattvar_orders",
    "entranceKind": "orders",
    "bossNote": "miner_scratching",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L5.crossroads_trade"
+   ]
   },
   "dustmans_cairn": {
    "family": "barrow",
@@ -2825,7 +3446,11 @@
    "entrance": "surveyor_notes",
    "entranceKind": "notes",
    "bossNote": "hamvir_scrap",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.beast_blood",
+    "whiterun.L10.dragon_mounds"
+   ]
   },
   "raldbthar": {
    "family": "dwemer",
@@ -2843,7 +3468,12 @@
    "entrance": "vesk_commission",
    "entranceKind": "contract",
    "bossNote": "bandit_complaint",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_pale.L10.great_lifts",
+    "the_pale.L1.dwemer_cluster",
+    "the_pale.L11.dwemer_lifts"
+   ]
   },
   "lunds_hut": {
    "family": "cabin",
@@ -2861,7 +3491,12 @@
    "entrance": "lund_journal",
    "entranceKind": "journal",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L6.riverwood",
+    "whiterun.L6.rorikstead",
+    "whiterun.L6.caravan_ground"
+   ]
   },
   "silent_moons_camp": {
    "family": "bandit",
@@ -2879,7 +3514,11 @@
    "entrance": "lunar_inscription",
    "entranceKind": "inscription",
    "bossNote": "hrodna_notes",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L5.crossroads_trade"
+   ]
   },
   "red_eagle_redoubt": {
    "family": "forsworn",
@@ -2897,7 +3536,12 @@
    "entrance": "nord_spy",
    "entranceKind": "report",
    "bossNote": "keepers_oath",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine",
+    "the_reach.L10.hagraven_covens",
+    "the_reach.L10.forsworn_redoubts"
+   ]
   },
   "greenspring_hollow": {
    "family": "grove",
@@ -2915,7 +3559,11 @@
    "entrance": "hunter_journal",
    "entranceKind": "journal",
    "bossNote": "kynareth_prayer",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L4.throat_meadow",
+    "whiterun.L8.kynareth_tree"
+   ]
   },
   "bleakwind_bluff": {
    "family": "forsworn",
@@ -2933,7 +3581,10 @@
    "entrance": "guest_list",
    "entranceKind": "list",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.beast_blood"
+   ]
   },
   "kolskeggr_mine": {
    "family": "mine",
@@ -2951,7 +3602,12 @@
    "entrance": "gold_prospect",
    "entranceKind": "notes",
    "bossNote": "shift_roster",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L5.silver_mining",
+    "the_reach.L5.small_mines",
+    "the_reach.L5.orc_mining"
+   ]
   },
   "whitewatch_tower": {
    "family": "tower",
@@ -2969,7 +3625,12 @@
    "entrance": "toll_tally",
    "entranceKind": "ledger",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L3.valtheim_crossing",
+    "whiterun.L9.first_dragon"
+   ]
   },
   "shimmermist_cave": {
    "family": "falmer",
@@ -2987,7 +3648,10 @@
    "entrance": "brother_letter",
    "entranceKind": "letter",
    "bossNote": "falmer_scratches",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.beast_blood"
+   ]
   },
   "karthspire_camp": {
    "family": "forsworn",
@@ -3005,7 +3669,12 @@
    "entrance": "sentry_orders",
    "entranceKind": "orders",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine",
+    "the_reach.L10.hagraven_covens",
+    "the_reach.L10.forsworn_redoubts"
+   ]
   },
   "fellglow_keep": {
    "family": "mage",
@@ -3023,7 +3692,10 @@
    "entrance": "acolyte_letter",
    "entranceKind": "letter",
    "bossNote": "keep_rota",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.fire_mage_keep"
+   ]
   },
   "redorans_retreat": {
    "family": "bandit",
@@ -3041,7 +3713,11 @@
    "entrance": "redoran_carving",
    "entranceKind": "inscription",
    "bossNote": "chief_letter",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L5.crossroads_trade"
+   ]
   },
   "riverside_shack": {
    "family": "cabin",
@@ -3059,7 +3735,12 @@
    "entrance": "kjeld_daybook",
    "entranceKind": "diary",
    "bossNote": "kjeld_cache",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L6.darkwater_crossing",
+    "eastmarch.L6.mills_and_farms",
+    "eastmarch.L5.river_mills"
+   ]
   },
   "karthspire": {
    "family": "forsworn",
@@ -3077,7 +3758,12 @@
    "entrance": "blades_fragment",
    "entranceKind": "book",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine",
+    "the_reach.L10.hagraven_covens",
+    "the_reach.L10.forsworn_redoubts"
+   ]
   },
   "gallows_rock": {
    "family": "fort",
@@ -3095,7 +3781,10 @@
    "entrance": "ulmir_confession",
    "entranceKind": "letter",
    "bossNote": "hunt_captain_log",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L9.rebel_capital"
+   ]
   },
   "gloombound_mine": {
    "family": "mine",
@@ -3113,7 +3802,12 @@
    "entrance": "dushgar_last",
    "entranceKind": "notes",
    "bossNote": "ore_ledger",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L5.mines",
+    "eastmarch.L1.small_ores",
+    "eastmarch.L10.bandit_mine_camps"
+   ]
   },
   "moldering_ruins": {
    "family": "ruin",
@@ -3131,7 +3825,11 @@
    "entrance": "shepherd_warning",
    "entranceKind": "warning",
    "bossNote": "draugr_inscription",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.beast_blood",
+    "whiterun.L10.dragon_mounds"
+   ]
   },
   "whiterun_imperial_camp": {
    "family": "military",
@@ -3149,7 +3847,10 @@
    "entrance": "soldier_letter",
    "entranceKind": "letter",
    "bossNote": "legion_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L9.siege_point"
+   ]
   },
   "swindlers_den": {
    "family": "bandit",
@@ -3167,7 +3868,11 @@
    "entrance": "swindle_rules",
    "entranceKind": "list",
    "bossNote": "fence_ledger",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L5.crossroads_trade"
+   ]
   },
   "bleakwind_basin": {
    "family": "giant",
@@ -3185,7 +3890,12 @@
    "entrance": "giant_watch",
    "entranceKind": "notes",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.giant_camps",
+    "whiterun.L4.steppe_grass",
+    "whiterun.L4.giant_grounds"
+   ]
   },
   "left_hand_mine": {
    "family": "mine",
@@ -3203,7 +3913,12 @@
    "entrance": "skaggi_notice",
    "entranceKind": "warning",
    "bossNote": "lucan_carving",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L5.silver_mining",
+    "the_reach.L5.small_mines",
+    "the_reach.L5.orc_mining"
+   ]
   },
   "valtheim_towers": {
    "family": "tower",
@@ -3221,7 +3936,12 @@
    "entrance": "merchant_plea",
    "entranceKind": "letter",
    "bossNote": "toll_schedule",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L3.valtheim_crossing",
+    "whiterun.L9.first_dragon"
+   ]
   },
   "darkshade": {
    "family": "grove",
@@ -3239,7 +3959,11 @@
    "entrance": "alchemist_notes",
    "entranceKind": "notes",
    "bossNote": "valtheim_scrap",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L4.throat_meadow",
+    "whiterun.L8.kynareth_tree"
+   ]
   },
   "cragwallow_slope": {
    "family": "necromancer",
@@ -3257,7 +3981,10 @@
    "entrance": "apprentice_doubt",
    "entranceKind": "letter",
    "bossNote": "necro_workbook",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L10.old_city_killer"
+   ]
   },
   "graywinter_watch": {
    "family": "beast",
@@ -3275,7 +4002,11 @@
    "entrance": "hunter_warning",
    "entranceKind": "warning",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L4.sabre_and_wolf",
+    "whiterun.L10.toll_bandits"
+   ]
   },
   "witchmist_grove": {
    "family": "grove",
@@ -3293,7 +4024,11 @@
    "entrance": "hunter_lodge_diary",
    "entranceKind": "diary",
    "bossNote": "grove_offering",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L4.snow_pine",
+    "eastmarch.L4.eldergleam"
+   ]
   },
   "reachwater_rock": {
    "family": "barrow",
@@ -3311,7 +4046,10 @@
    "entrance": "tomb_warning",
    "entranceKind": "inscription",
    "bossNote": "robber_tally",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine"
+   ]
   },
   "cronvangr_cave": {
    "family": "vampire",
@@ -3329,7 +4067,10 @@
    "entrance": "thrall_note",
    "entranceKind": "letter",
    "bossNote": "vampire_menu",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L10.vampire_cave"
+   ]
   },
   "cradlecrush_rock": {
    "family": "giant",
@@ -3347,7 +4088,10 @@
    "entrance": "hunter_tracks",
    "entranceKind": "report",
    "bossNote": "giant_cradle",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L4.fumarole_tundra"
+   ]
   },
   "serpents_bluff_redoubt": {
    "family": "forsworn",
@@ -3365,7 +4109,12 @@
    "entrance": "captive_note",
    "entranceKind": "letter",
    "bossNote": "forsworn_carving",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine",
+    "the_reach.L10.hagraven_covens",
+    "the_reach.L10.forsworn_redoubts"
+   ]
   },
   "fort_greymoor": {
    "family": "fort",
@@ -3383,7 +4132,11 @@
    "entrance": "paymaster_letter",
    "entranceKind": "letter",
    "bossNote": "silver_scrawl",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L9.siege_point",
+    "whiterun.L10.beast_blood"
+   ]
   },
   "steamcrag_camp": {
    "family": "giant",
@@ -3401,7 +4154,10 @@
    "entrance": "herder_account",
    "entranceKind": "letter",
    "bossNote": "spring_rules",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L4.fumarole_tundra"
+   ]
   },
   "guldun_rock": {
    "family": "giant",
@@ -3419,7 +4175,12 @@
    "entrance": "caravan_note",
    "entranceKind": "notes",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.giant_camps",
+    "whiterun.L4.steppe_grass",
+    "whiterun.L4.giant_grounds"
+   ]
   },
   "reachcliff_cave": {
    "family": "barrow",
@@ -3437,7 +4198,10 @@
    "entrance": "missing_poster",
    "entranceKind": "list",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine"
+   ]
   },
   "bonestrewn_crest": {
    "family": "dragon",
@@ -3455,7 +4219,10 @@
    "entrance": "shout_marks",
    "entranceKind": "inscription",
    "bossNote": "adventurer_journal",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L10.old_city_killer"
+   ]
   },
   "mzulft": {
    "family": "dwemer",
@@ -3473,7 +4240,11 @@
    "entrance": "survey_journal",
    "entranceKind": "journal",
    "bossNote": "society_letter",
-   "story": "falmer_shrine"
+   "story": "falmer_shrine",
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L1.dwemer_vents"
+   ]
   },
   "broken_limb_camp": {
    "family": "giant",
@@ -3491,7 +4262,10 @@
    "entrance": "poachers_boast",
    "entranceKind": "letter",
    "bossNote": "calf_cairn",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L4.fumarole_tundra"
+   ]
   },
   "white_river_watch": {
    "family": "bandit",
@@ -3509,7 +4283,11 @@
    "entrance": "lookout_diary",
    "entranceKind": "diary",
    "bossNote": "bandit_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L5.crossroads_trade"
+   ]
   },
   "western_watchtower": {
    "family": "tower",
@@ -3527,7 +4305,12 @@
    "entrance": "watch_report",
    "entranceKind": "report",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.toll_bandits",
+    "whiterun.L3.valtheim_crossing",
+    "whiterun.L9.first_dragon"
+   ]
   },
   "broken_fang_cave": {
    "family": "vampire",
@@ -3545,7 +4328,10 @@
    "entrance": "traveller_diary",
    "entranceKind": "diary",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.beast_blood"
+   ]
   },
   "abandoned_prison": {
    "family": "tower",
@@ -3563,7 +4349,11 @@
    "entrance": "warden_last",
    "entranceKind": "report",
    "bossNote": "smuggler_tally",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L10.bandit_mine_camps",
+    "eastmarch.L3.windhelm_bridge"
+   ]
   },
   "whiterun_stormcloak_camp": {
    "family": "military",
@@ -3581,7 +4371,10 @@
    "entrance": "recruit_diary",
    "entranceKind": "diary",
    "bossNote": "stormcloak_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L9.siege_point"
+   ]
   },
   "hag_rock_redoubt": {
    "family": "forsworn",
@@ -3599,7 +4392,12 @@
    "entrance": "markarth_bounty",
    "entranceKind": "contract",
    "bossNote": "drumhide_scratches",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine",
+    "the_reach.L10.hagraven_covens",
+    "the_reach.L10.forsworn_redoubts"
+   ]
   },
   "hillgrunds_tomb": {
    "family": "barrow",
@@ -3617,7 +4415,10 @@
    "entrance": "descendant_letter",
    "entranceKind": "letter",
    "bossNote": "robber_note",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L10.old_city_killer"
+   ]
   },
   "sleeping_tree_camp": {
    "family": "giant",
@@ -3635,7 +4436,12 @@
    "entrance": "sap_notes",
    "entranceKind": "notes",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "whiterun.L10.giant_camps",
+    "whiterun.L4.steppe_grass",
+    "whiterun.L4.giant_grounds"
+   ]
   },
   "dead_crone_rock": {
    "family": "forsworn",
@@ -3653,7 +4459,12 @@
    "entrance": "climber_note",
    "entranceKind": "journal",
    "bossNote": "crone_song",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine",
+    "the_reach.L10.hagraven_covens",
+    "the_reach.L10.forsworn_redoubts"
+   ]
   },
   "eastmarch_imperial_camp": {
    "family": "military",
@@ -3671,7 +4482,10 @@
    "entrance": "soldier_letter",
    "entranceKind": "letter",
    "bossNote": "camp_report",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L9.rebel_capital"
+   ]
   },
   "purewater_run": {
    "family": "beast",
@@ -3689,7 +4503,10 @@
    "entrance": "herbalist_notes",
    "entranceKind": "notes",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L4.cave_mouths"
+   ]
   },
   "eldergleam_sanctuary": {
    "family": "grove",
@@ -3707,7 +4524,11 @@
    "entrance": "druid_verse",
    "entranceKind": "poem",
    "bossNote": "pilgrim_book",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L4.snow_pine",
+    "eastmarch.L4.eldergleam"
+   ]
   },
   "fort_amol": {
    "family": "fort",
@@ -3725,7 +4546,10 @@
    "entrance": "withdrawal_order",
    "entranceKind": "orders",
    "bossNote": "bandit_boast",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L9.rebel_capital"
+   ]
   },
   "fort_sungard": {
    "family": "fort",
@@ -3743,7 +4567,12 @@
    "entrance": "merchant_complaint",
    "entranceKind": "letter",
    "bossNote": "deserter_journal",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L9.helgen_burned",
+    "falkreath.L6.helgen_fort"
+   ]
   },
   "stony_creek_cave": {
    "family": "bandit",
@@ -3761,7 +4590,10 @@
    "entrance": "recruit_note",
    "entranceKind": "notes",
    "bossNote": "nazira_accounts",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L10.bandit_mine_camps"
+   ]
   },
   "gloomreach": {
    "family": "falmer",
@@ -3779,7 +4611,10 @@
    "entrance": "gatherer_letter",
    "entranceKind": "letter",
    "bossNote": "falmer_garden",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine"
+   ]
   },
   "secundas_kiss": {
    "family": "giant",
@@ -3797,7 +4632,10 @@
    "entrance": "shepherd_complaint",
    "entranceKind": "letter",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L10.black_door"
+   ]
   },
   "lost_knife_hideout": {
    "family": "bandit",
@@ -3815,7 +4653,10 @@
    "entrance": "initiation",
    "entranceKind": "inscription",
    "bossNote": "ysolde_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L10.bandit_mine_camps"
+   ]
   },
   "kagrenzel": {
    "family": "dwemer",
@@ -3833,7 +4674,11 @@
    "entrance": "rope_log",
    "entranceKind": "report",
    "bossNote": "dwemer_plaque",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L10.steam_ruin",
+    "eastmarch.L1.dwemer_vents"
+   ]
   },
   "valthume": {
    "family": "barrow",
@@ -3851,7 +4696,10 @@
    "entrance": "ketil_letter",
    "entranceKind": "letter",
    "bossNote": "valthume_ward",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine"
+   ]
   },
   "arkngthamz": {
    "family": "dwemer",
@@ -3869,7 +4717,12 @@
    "entrance": "orc_letter",
    "entranceKind": "letter",
    "bossNote": "dwemer_rubbing",
-   "story": "scholar_notes"
+   "story": "scholar_notes",
+   "why": [
+    "the_reach.L10.dwemer_depths",
+    "the_reach.L1.dwemer_city_rock",
+    "the_reach.L11.dwemer_era"
+   ]
   },
   "cradle_stone_tower": {
    "family": "forsworn",
@@ -3887,7 +4740,12 @@
    "entrance": "sentry_complaint",
    "entranceKind": "notes",
    "bossNote": "cradle_blessing",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine",
+    "the_reach.L10.hagraven_covens",
+    "the_reach.L10.forsworn_redoubts"
+   ]
   },
   "cragslane_cavern": {
    "family": "bandit",
@@ -3905,7 +4763,10 @@
    "entrance": "addict_letter",
    "entranceKind": "letter",
    "bossNote": "pit_ledger",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L10.bandit_mine_camps"
+   ]
   },
   "mistwatch": {
    "family": "fort",
@@ -3923,7 +4784,10 @@
    "entrance": "mage_cache_note",
    "entranceKind": "treasure",
    "bossNote": "toll_tally",
-   "story": ""
+   "story": "",
+   "why": [
+    "eastmarch.L9.rebel_capital"
+   ]
   },
   "north_brittleshin_pass": {
    "family": "beast",
@@ -3941,7 +4805,10 @@
    "entrance": "ratcatcher_notes",
    "entranceKind": "notes",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L4.bear_country"
+   ]
   },
   "ansilvund": {
    "family": "barrow",
@@ -3959,7 +4826,10 @@
    "entrance": "lover_letter",
    "entranceKind": "letter",
    "bossNote": "barrow_lintel",
-   "story": "cell_journal"
+   "story": "cell_journal",
+   "why": [
+    "eastmarch.L10.old_city_killer"
+   ]
   },
   "lost_valley_redoubt": {
    "family": "forsworn",
@@ -3977,7 +4847,12 @@
    "entrance": "minstrel_scrawl",
    "entranceKind": "journal",
    "bossNote": "kerath_notes",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_reach.L10.conspiracy_in_the_mine",
+    "the_reach.L10.hagraven_covens",
+    "the_reach.L10.forsworn_redoubts"
+   ]
   },
   "bloated_mans_grotto": {
    "family": "grove",
@@ -3995,7 +4870,11 @@
    "entrance": "hunter_journal",
    "entranceKind": "journal",
    "bossNote": "bosmer_prayer",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L4.old_pine",
+    "falkreath.L4.spriggan_groves"
+   ]
   },
   "sunderstone_gorge": {
    "family": "barrow",
@@ -4013,7 +4892,11 @@
    "entrance": "acolyte_journal",
    "entranceKind": "journal",
    "bossNote": "barrow_epitaph",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L10.barrow_above_riverwood",
+    "falkreath.L11.bleak_falls"
+   ]
   },
   "bilegulch_mine": {
    "family": "mine",
@@ -4031,7 +4914,10 @@
    "entrance": "exile_letter",
    "entranceKind": "letter",
    "bossNote": "ore_ledger",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L1.forest_caves"
+   ]
   },
   "bleak_falls_barrow": {
    "family": "barrow",
@@ -4049,7 +4935,11 @@
    "entrance": "robbers_letter",
    "entranceKind": "letter",
    "bossNote": "bandit_shift",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L10.barrow_above_riverwood",
+    "falkreath.L11.bleak_falls"
+   ]
   },
   "northwind_mine": {
    "family": "mine",
@@ -4067,7 +4957,10 @@
    "entrance": "grandson_note",
    "entranceKind": "letter",
    "bossNote": "foreman_notice",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L5.redbelly_iron"
+   ]
   },
   "darkwater_pass": {
    "family": "falmer",
@@ -4085,7 +4978,12 @@
    "entrance": "surveyor_journal",
    "entranceKind": "journal",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.thieves_below",
+    "the_rift.L10.falmer_pass",
+    "the_rift.L4.falmer_caves"
+   ]
   },
   "tolvalds_cave": {
    "family": "falmer",
@@ -4103,7 +5001,12 @@
    "entrance": "tolvald_last_entry",
    "entranceKind": "journal",
    "bossNote": "falmer_totem",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.thieves_below",
+    "the_rift.L10.falmer_pass",
+    "the_rift.L4.falmer_caves"
+   ]
   },
   "ilinaltas_deep": {
    "family": "mage",
@@ -4121,7 +5024,10 @@
    "entrance": "garrison_log",
    "entranceKind": "report",
    "bossNote": "mage_notes",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L10.necromancers_and_vampires"
+   ]
   },
   "moss_mother_cavern": {
    "family": "grove",
@@ -4139,7 +5045,11 @@
    "entrance": "hroa_marks",
    "entranceKind": "notes",
    "bossNote": "arrow_warning",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L4.old_pine",
+    "falkreath.L4.spriggan_groves"
+   ]
   },
   "south_brittleshin_pass": {
    "family": "beast",
@@ -4157,7 +5067,10 @@
    "entrance": "trapper_debt",
    "entranceKind": "letter",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L4.bear_country"
+   ]
   },
   "shors_watchtower": {
    "family": "tower",
@@ -4175,7 +5088,10 @@
    "entrance": "watchtower_wager",
    "entranceKind": "list",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.thieves_below"
+   ]
   },
   "falkreath_imperial_camp": {
    "family": "military",
@@ -4193,7 +5109,11 @@
    "entrance": "soldier_letter",
    "entranceKind": "letter",
    "bossNote": "legate_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L9.jarl_uncle"
+   ]
   },
   "anises_cabin": {
    "family": "cabin",
@@ -4211,7 +5131,12 @@
    "entrance": "riverwood_complaint",
    "entranceKind": "letter",
    "bossNote": "anise_recipe",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L6.half_moon_mill",
+    "falkreath.L6.hunters_camps",
+    "falkreath.L5.timber"
+   ]
   },
   "northwind_summit": {
    "family": "dragon",
@@ -4229,7 +5154,11 @@
    "entrance": "carter_account",
    "entranceKind": "report",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.rahgot_barrow",
+    "the_rift.L10.dragon_heights"
+   ]
   },
   "pinepeak_cavern": {
    "family": "beast",
@@ -4247,7 +5176,12 @@
    "entrance": "hunter_journal",
    "entranceKind": "journal",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L4.birch_forest",
+    "the_rift.L4.rift_grassland",
+    "the_rift.L4.falmer_caves"
+   ]
   },
   "hunters_rest": {
    "family": "cabin",
@@ -4265,7 +5199,12 @@
    "entrance": "asvald_journal",
    "entranceKind": "journal",
    "bossNote": "guest_rules",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L6.half_moon_mill",
+    "falkreath.L6.hunters_camps",
+    "falkreath.L5.timber"
+   ]
   },
   "glenmoril_coven": {
    "family": "hagraven",
@@ -4283,7 +5222,11 @@
    "entrance": "villager_bargain",
    "entranceKind": "letter",
    "bossNote": "coven_rule",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L10.coven",
+    "falkreath.L8.huntsman_cult"
+   ]
   },
   "snapleg_cave": {
    "family": "hagraven",
@@ -4301,7 +5244,10 @@
    "entrance": "orgnar_last",
    "entranceKind": "letter",
    "bossNote": "hagraven_recipe",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.thieves_below"
+   ]
   },
   "embershard_mine": {
    "family": "mine",
@@ -4319,7 +5265,10 @@
    "entrance": "foreman_letter",
    "entranceKind": "letter",
    "bossNote": "skarn_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L1.forest_caves"
+   ]
   },
   "nilheim": {
    "family": "tower",
@@ -4337,7 +5286,10 @@
    "entrance": "pilgrim_plea",
    "entranceKind": "prayer",
    "bossNote": "nilheim_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.thieves_below"
+   ]
   },
   "ruunvald_excavation": {
    "family": "necromancer",
@@ -4355,7 +5307,10 @@
    "entrance": "kolbjorn_scratch",
    "entranceKind": "warning",
    "bossNote": "necro_tally",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.thieves_below"
+   ]
   },
   "north_skybound_watch": {
    "family": "ruin",
@@ -4373,7 +5328,12 @@
    "entrance": "beacon_keeper",
    "entranceKind": "diary",
    "bossNote": "old_stone",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L10.barrow_above_riverwood",
+    "falkreath.L11.sunderstone",
+    "falkreath.L11.bleak_falls"
+   ]
   },
   "bannermist_tower": {
    "family": "tower",
@@ -4391,7 +5351,10 @@
    "entrance": "lookout_grumble",
    "entranceKind": "journal",
    "bossNote": "signal_codes",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L10.pass_bandits"
+   ]
   },
   "shroud_hearth_barrow": {
    "family": "barrow",
@@ -4409,7 +5372,11 @@
    "entrance": "asvar_scrawl",
    "entranceKind": "journal",
    "bossNote": "hearth_inscription",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.rahgot_barrow",
+    "the_rift.L11.geirmund"
+   ]
   },
   "geirmunds_hall": {
    "family": "barrow",
@@ -4427,7 +5394,11 @@
    "entrance": "scholar_survey",
    "entranceKind": "notes",
    "bossNote": "eydis_prayer",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.rahgot_barrow",
+    "the_rift.L11.geirmund"
+   ]
   },
   "rift_stormcloak_camp": {
    "family": "military",
@@ -4445,7 +5416,11 @@
    "entrance": "soldier_letter",
    "entranceKind": "letter",
    "bossNote": "camp_dispatch",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L9.rebel_leaning_jarl",
+    "the_rift.L9.hunters_fort"
+   ]
   },
   "rift_watchtower": {
    "family": "tower",
@@ -4463,7 +5438,10 @@
    "entrance": "tower_log",
    "entranceKind": "report",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.thieves_below"
+   ]
   },
   "knifepoint_ridge": {
    "family": "bandit",
@@ -4481,7 +5459,11 @@
    "entrance": "burned_letter",
    "entranceKind": "letter",
    "bossNote": "hjolfrid_orders",
-   "story": "share_ledger"
+   "story": "share_ledger",
+   "why": [
+    "falkreath.L10.pass_bandits",
+    "falkreath.L5.border_trade"
+   ]
   },
   "evergreen_grove": {
    "family": "grove",
@@ -4499,7 +5481,11 @@
    "entrance": "lumberjack_warning",
    "entranceKind": "warning",
    "bossNote": "druid_poem",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L4.old_pine",
+    "falkreath.L4.spriggan_groves"
+   ]
   },
   "boulderfall_cave": {
    "family": "necromancer",
@@ -4517,7 +5503,10 @@
    "entrance": "apprentice_doubts",
    "entranceKind": "diary",
    "bossNote": "corpse_ledger",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.thieves_below"
+   ]
   },
   "south_skybound_watch": {
    "family": "tower",
@@ -4535,7 +5524,10 @@
    "entrance": "refugee_scratch",
    "entranceKind": "warning",
    "bossNote": "karl_tally",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L10.pass_bandits"
+   ]
   },
   "north_shriekwind_bastion": {
    "family": "barrow",
@@ -4553,7 +5545,11 @@
    "entrance": "guard_report",
    "entranceKind": "report",
    "bossNote": "brothers_tale",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L10.barrow_above_riverwood",
+    "falkreath.L11.bleak_falls"
+   ]
   },
   "fort_greenwall": {
    "family": "fort",
@@ -4571,7 +5567,10 @@
    "entrance": "prisoner_note",
    "entranceKind": "letter",
    "bossNote": "toll_rules",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L9.hunters_fort"
+   ]
   },
   "falkreath_watchtower": {
    "family": "tower",
@@ -4589,7 +5588,10 @@
    "entrance": "squatter_journal",
    "entranceKind": "journal",
    "bossNote": "old_duty",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L10.pass_bandits"
+   ]
   },
   "last_vigil": {
    "family": "bandit",
@@ -4607,7 +5609,10 @@
    "entrance": "vigil_warning",
    "entranceKind": "warning",
    "bossNote": "vigil_boast",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L5.smuggling"
+   ]
   },
   "falkreath_stormcloak_camp": {
    "family": "military",
@@ -4625,7 +5630,11 @@
    "entrance": "dengeir_letter",
    "entranceKind": "letter",
    "bossNote": "camp_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L9.jarl_uncle"
+   ]
   },
   "redwater_den": {
    "family": "cabin",
@@ -4643,7 +5652,12 @@
    "entrance": "hjalmar_scratch",
    "entranceKind": "warning",
    "bossNote": "den_rules",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L6.heartwood_mill",
+    "the_rift.L6.lake_farms",
+    "the_rift.L5.honey_estate"
+   ]
   },
   "honeystrand_cave": {
    "family": "beast",
@@ -4661,7 +5675,12 @@
    "entrance": "beekeeper_stash",
    "entranceKind": "treasure",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L4.birch_forest",
+    "the_rift.L4.rift_grassland",
+    "the_rift.L4.falmer_caves"
+   ]
   },
   "pinewatch": {
    "family": "cabin",
@@ -4679,7 +5698,12 @@
    "entrance": "merchant_complaint",
    "entranceKind": "letter",
    "bossNote": "cellar_rules",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L6.half_moon_mill",
+    "falkreath.L6.hunters_camps",
+    "falkreath.L5.timber"
+   ]
   },
   "south_shriekwind_bastion": {
    "family": "barrow",
@@ -4697,7 +5721,11 @@
    "entrance": "asta_letter",
    "entranceKind": "letter",
    "bossNote": "eyvind_epitaph",
-   "story": "family_names"
+   "story": "family_names",
+   "why": [
+    "falkreath.L10.barrow_above_riverwood",
+    "falkreath.L11.bleak_falls"
+   ]
   },
   "roadside_ruins": {
    "family": "ruin",
@@ -4715,7 +5743,12 @@
    "entrance": "velmira_letter",
    "entranceKind": "letter",
    "bossNote": "corvus_journal",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L10.barrow_above_riverwood",
+    "falkreath.L11.sunderstone",
+    "falkreath.L11.bleak_falls"
+   ]
   },
   "twilight_sepulcher": {
    "family": "barrow",
@@ -4733,7 +5766,11 @@
    "entrance": "pilgrim_account",
    "entranceKind": "journal",
    "bossNote": "ward_prayer",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L10.barrow_above_riverwood",
+    "falkreath.L11.bleak_falls"
+   ]
   },
   "haemars_shame": {
    "family": "vampire",
@@ -4751,7 +5788,10 @@
    "entrance": "vampire_journal",
    "entranceKind": "journal",
    "bossNote": "haemar_carving",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L10.necromancers_and_vampires"
+   ]
   },
   "trevas_watch": {
    "family": "fort",
@@ -4769,7 +5809,10 @@
    "entrance": "treva_epitaph",
    "entranceKind": "inscription",
    "bossNote": "saltcheek_tally",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L9.hunters_fort"
+   ]
   },
   "fallowstone_cave": {
    "family": "beast",
@@ -4787,7 +5830,12 @@
    "entrance": "explorer_notes",
    "entranceKind": "journal",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L4.birch_forest",
+    "the_rift.L4.rift_grassland",
+    "the_rift.L4.falmer_caves"
+   ]
   },
   "alchemists_shack": {
    "family": "cabin",
@@ -4805,7 +5853,12 @@
    "entrance": "unsent_order",
    "entranceKind": "letter",
    "bossNote": "alchemy_notes",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L6.heartwood_mill",
+    "the_rift.L6.lake_farms",
+    "the_rift.L5.honey_estate"
+   ]
   },
   "cracked_tusk_keep": {
    "family": "fort",
@@ -4823,7 +5876,12 @@
    "entrance": "clan_history",
    "entranceKind": "book",
    "bossNote": "bandit_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L9.helgen_burned",
+    "falkreath.L6.helgen_fort"
+   ]
   },
   "peaks_shade_tower": {
    "family": "tower",
@@ -4841,7 +5899,10 @@
    "entrance": "lovers_letter",
    "entranceKind": "letter",
    "bossNote": "stormcloak_watch",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L10.pass_bandits"
+   ]
   },
   "rift_imperial_camp": {
    "family": "military",
@@ -4859,7 +5920,11 @@
    "entrance": "legate_report",
    "entranceKind": "report",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L9.rebel_leaning_jarl",
+    "the_rift.L9.hunters_fort"
+   ]
   },
   "lost_prospect_mine": {
    "family": "mine",
@@ -4877,7 +5942,10 @@
    "entrance": "crate_manifest",
    "entranceKind": "list",
    "bossNote": "old_miner_mark",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L5.redbelly_iron"
+   ]
   },
   "greywater_grotto": {
    "family": "beast",
@@ -4895,7 +5963,10 @@
    "entrance": "herbalist_notes",
    "entranceKind": "notes",
    "bossNote": "web_scrap",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L4.bear_country"
+   ]
   },
   "bonechill_passage": {
    "family": "ice",
@@ -4913,7 +5984,10 @@
    "entrance": "trapper_journal",
    "entranceKind": "journal",
    "bossNote": "miner_mark",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L10.black_door"
+   ]
   },
   "fort_neugrad": {
    "family": "fort",
@@ -4931,7 +6005,12 @@
    "entrance": "quartermaster_report",
    "entranceKind": "report",
    "bossNote": "ulfgar_orders",
-   "story": "prisoner_scratch"
+   "story": "prisoner_scratch",
+   "why": [
+    "falkreath.L9.imperial_border",
+    "falkreath.L9.helgen_burned",
+    "falkreath.L6.helgen_fort"
+   ]
   },
   "faldars_tooth": {
    "family": "fort",
@@ -4949,7 +6028,10 @@
    "entrance": "faldar_legend",
    "entranceKind": "book",
    "bossNote": "ottar_orders",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L9.hunters_fort"
+   ]
   },
   "ancestor_glade": {
    "family": "grove",
@@ -4967,7 +6049,11 @@
    "entrance": "mourners_custom",
    "entranceKind": "book",
    "bossNote": "child_poem",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L4.old_pine",
+    "falkreath.L4.spriggan_groves"
+   ]
   },
   "halldirs_cairn": {
    "family": "barrow",
@@ -4985,7 +6071,11 @@
    "entrance": "thorvi_words",
    "entranceKind": "notes",
    "bossNote": "halldir_lore",
-   "story": "dare_note"
+   "story": "dare_note",
+   "why": [
+    "falkreath.L10.barrow_above_riverwood",
+    "falkreath.L11.bleak_falls"
+   ]
   },
   "angarvunde": {
    "family": "barrow",
@@ -5003,7 +6093,11 @@
    "entrance": "durz_marks",
    "entranceKind": "journal",
    "bossNote": "angarvunde_epitaph",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.rahgot_barrow",
+    "the_rift.L11.geirmund"
+   ]
   },
   "ancients_ascent": {
    "family": "dragon",
@@ -5021,7 +6115,11 @@
    "entrance": "grimvar_journal",
    "entranceKind": "journal",
    "bossNote": "legion_report",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L10.barrow_above_riverwood",
+    "falkreath.L9.helgen_burned"
+   ]
   },
   "arcwind_point": {
    "family": "dragon",
@@ -5039,7 +6137,11 @@
    "entrance": "scout_report",
    "entranceKind": "report",
    "bossNote": "word_wall_rubbing",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.rahgot_barrow",
+    "the_rift.L10.dragon_heights"
+   ]
   },
   "autumnwatch_tower": {
    "family": "dragon",
@@ -5057,7 +6159,11 @@
    "entrance": "tower_last_watch",
    "entranceKind": "journal",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.rahgot_barrow",
+    "the_rift.L10.dragon_heights"
+   ]
   },
   "frokis_shack": {
    "family": "cabin",
@@ -5075,7 +6181,12 @@
    "entrance": "froki_almanac",
    "entranceKind": "diary",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L6.heartwood_mill",
+    "the_rift.L6.lake_farms",
+    "the_rift.L5.honey_estate"
+   ]
   },
   "angis_camp": {
    "family": "cabin",
@@ -5093,7 +6204,12 @@
    "entrance": "falkreath_letter",
    "entranceKind": "letter",
    "bossNote": "target_tally",
-   "story": ""
+   "story": "",
+   "why": [
+    "falkreath.L6.half_moon_mill",
+    "falkreath.L6.hunters_camps",
+    "falkreath.L5.timber"
+   ]
   },
   "southfringe_sanctum": {
    "family": "necromancer",
@@ -5111,7 +6227,12 @@
    "entrance": "apprentice_journal",
    "entranceKind": "diary",
    "bossNote": "altar_inscription",
-   "story": "ledger_of_names"
+   "story": "ledger_of_names",
+   "why": [
+    "falkreath.L10.necromancers_and_vampires",
+    "falkreath.L10.coven",
+    "falkreath.L10.barrow_above_riverwood"
+   ]
   },
   "avanchnzel": {
    "family": "dwemer",
@@ -5129,7 +6250,10 @@
    "entrance": "petronia_letter",
    "entranceKind": "letter",
    "bossNote": "expedition_journal",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.dwemer_valley_ruin"
+   ]
   },
   "nightingale_hall": {
    "family": "cave",
@@ -5147,7 +6271,12 @@
    "entrance": "thief_musings",
    "entranceKind": "diary",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.falmer_pass",
+    "the_rift.L4.birch_forest",
+    "the_rift.L4.falmer_caves"
+   ]
   },
   "broken_helm_hollow": {
    "family": "bandit",
@@ -5165,7 +6294,10 @@
    "entrance": "guard_letter",
    "entranceKind": "letter",
    "bossNote": "helm_count",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L5.smuggling"
+   ]
   },
   "bloodlet_throne": {
    "family": "vampire",
@@ -5183,7 +6315,10 @@
    "entrance": "captive_letter",
    "entranceKind": "letter",
    "bossNote": "tithe_roll",
-   "story": "court_decree"
+   "story": "court_decree",
+   "why": [
+    "falkreath.L10.necromancers_and_vampires"
+   ]
   },
   "forelhost": {
    "family": "barrow",
@@ -5201,7 +6336,11 @@
    "entrance": "temple_request",
    "entranceKind": "letter",
    "bossNote": "siege_captain_diary",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.rahgot_barrow",
+    "the_rift.L11.geirmund"
+   ]
   },
   "darklight_tower": {
    "family": "forsworn",
@@ -5219,7 +6358,10 @@
    "entrance": "witch_hunter_note",
    "entranceKind": "warning",
    "bossNote": "hagraven_bargain",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.thieves_below"
+   ]
   },
   "stendarrs_beacon": {
    "family": "tower",
@@ -5237,7 +6379,10 @@
    "entrance": "vigilant_log",
    "entranceKind": "journal",
    "bossNote": "vigilant_creed",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.thieves_below"
+   ]
   },
   "crystaldrift_cave": {
    "family": "ice",
@@ -5255,7 +6400,10 @@
    "entrance": "thief_treasure",
    "entranceKind": "treasure",
    "bossNote": "",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.thieves_below"
+   ]
   },
   "lost_tongue_overlook": {
    "family": "dragon",
@@ -5273,7 +6421,11 @@
    "entrance": "pilgrim_journal",
    "entranceKind": "journal",
    "bossNote": "cult_inscription",
-   "story": ""
+   "story": "",
+   "why": [
+    "the_rift.L10.rahgot_barrow",
+    "the_rift.L10.dragon_heights"
+   ]
   }
  }
 }

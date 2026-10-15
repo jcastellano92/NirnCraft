@@ -962,7 +962,7 @@
   "id": "deepwood_redoubt",
   "name": "place.skycraft.deepwood_redoubt",
   "type": "dungeon_fixed",
-  "culture": "nord",
+  "culture": "forsworn",
   "region": "skyrim/the_reach",
   "x": -2423,
   "z": -1390,

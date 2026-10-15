@@ -50,8 +50,8 @@ public final class Housing {
     /** Extra pairs of hands one workplace takes from the households. */
     private static final int HANDS = 2;
 
-    /** Persistent-data keys on a spawned resident: job id, workplace anchor position (packed). */
-    public static final String JOB_KEY = "skycraft_job", WORK_KEY = "skycraft_work";
+    /** Persistent-data keys on a spawned resident: job id, workplace anchor position (packed), and MS22 causal why field IDs. */
+    public static final String JOB_KEY = "skycraft_job", WORK_KEY = "skycraft_work", WHY_KEY = "SkycraftWhy";
     /** Persistent-data key: {@code "<settlement>#<anchor index>"}, the housing-plan slot this person fills (one each). */
     public static final String SLOT_KEY = "skycraft_slot";
 
@@ -70,6 +70,16 @@ public final class Housing {
     public record Resident(String job, @Nullable NpcRole role, AnchorType slotType, int slot, int work, int bed, BedKind bedKind, int leisure) {
         public boolean household() {
             return work < 0;
+        }
+
+        /** Causal world-sheet field IDs explaining why this resident's job exists in {@code regionId} (empty when no sheet). */
+        public List<String> why(@Nullable String regionId) {
+            if (regionId == null || regionId.isBlank()) return List.of();
+            List<String> w = com.skycraft.tamriel.world.WorldSheets.whyForJob(regionId, job);
+            if (w.isEmpty() && role != null) {
+                w = com.skycraft.tamriel.world.WorldSheets.whyForJob(regionId, role.name());
+            }
+            return w;
         }
     }
 

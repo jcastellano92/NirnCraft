@@ -192,6 +192,8 @@ public final class RoadNetwork {
             // only explicit tags decide: towns get people, other destinations only a spur road
             boolean town = holder.get().is(LocationTags.TOWNS);
             if (!town && !holder.get().is(LocationTags.ROAD_DESTINATIONS)) continue;
+            int cx = (box.minX() + box.maxX()) / 2, cz = (box.minZ() + box.maxZ()) / 2;
+            if (!town && Landmass.near(cx, cz, 96) <= Landmass.SEA) continue;
             register(level, data, f, holder.get(), town);
         }
     }
@@ -216,6 +218,7 @@ public final class RoadNetwork {
         String name = SettlementNames.name(level.dimension(), holder, structure, locationId);
         int cx = (box.minX() + box.maxX()) / 2;
         int cz = (box.minZ() + box.maxZ()) / 2;
+        if (!town && Landmass.near(cx, cz, 96) <= Landmass.SEA) return;
         int cy = (box.minY() + box.maxY()) / 2;
         Settlement s = new Settlement(data.nextSettlementId++, f.key(), cx, cy, cz, box.minX(), box.minZ(), box.maxX(),
                 box.maxZ(), name, structure.toString(), locationId, false);

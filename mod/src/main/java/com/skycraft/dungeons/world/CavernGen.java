@@ -110,8 +110,8 @@ final class CavernGen {
         this.meander = mea;
         this.meanderFreq = prm("meanderFreq", 2.6, 4.2, 3);
         this.meanderPhase = prm("meanderPhase", 0, 6.28, 4);
-        this.armX = longX ? armLong : true;
-        this.armZ = longX ? true : armLong;
+        this.armX = (longX ? armLong : true) || room.hasDoor(Direction.EAST) || room.hasDoor(Direction.WEST);
+        this.armZ = (longX ? true : armLong) || room.hasDoor(Direction.NORTH) || room.hasDoor(Direction.SOUTH);
 
         // ---- fluid
         FluidKind fk = prof.fluid.kind();
@@ -380,16 +380,16 @@ final class CavernGen {
         return Math.sqrt(a * a + b * b) + 0.06 * p.noise(x, 0, z, 8.0, 1203);
     }
 
-    /** Within {@code w} of a doorway's lane (from half-way out to the wall). */
+    /** Within {@code w} of a doorway's lane (from the middle arms out to the wall). */
     boolean lane(int x, int z, int w) {
         for (Direction d : Direction.Plane.HORIZONTAL) {
             if (!room.hasDoor(d)) continue;
             if (d.getAxis() == Direction.Axis.X) {
                 int along = d == Direction.EAST ? x - cx : cx - x;
-                if (Math.abs(z - cz) <= w && along >= 0.5 * ex) return true;
+                if (Math.abs(z - cz) <= w && along >= 0.30 * ex) return true;
             } else {
                 int along = d == Direction.SOUTH ? z - cz : cz - z;
-                if (Math.abs(x - cx) <= w && along >= 0.5 * ez) return true;
+                if (Math.abs(x - cx) <= w && along >= 0.30 * ez) return true;
             }
         }
         return false;
@@ -402,8 +402,8 @@ final class CavernGen {
 
     /** The cross of walkways through the middle (bridges over the bowl), 5 wide, and the extra causeways. */
     boolean cross(int x, int z) {
-        if (armZ && Math.abs(x - cx) <= 2 && Math.abs(z - cz) <= 0.66 * ez) return true;
-        if (armX && Math.abs(z - cz) <= 2 && Math.abs(x - cx) <= 0.66 * ex) return true;
+        if (armZ && Math.abs(x - cx) <= 2 && Math.abs(z - cz) <= 0.72 * ez) return true;
+        if (armX && Math.abs(z - cz) <= 2 && Math.abs(x - cx) <= 0.72 * ex) return true;
         return inCauseway(x, z);
     }
 
@@ -412,6 +412,7 @@ final class CavernGen {
         // the doorway lanes run through the wall layer itself, to meet the corridors
         if (lane(x, z, 1)) return true;
         if (x == room.minX || x == room.maxX || z == room.minZ || z == room.maxZ) return false;
+        if (lane(x, z, 2) || cross(x, z) || onPlatform(x, z)) return true;
         return rr(x, z) < 0.88;
     }
 
@@ -542,15 +543,18 @@ final class CavernGen {
 
     /** The ground before stalagmites: terraces, ring, galleries, 1-Lipschitz in a bowl. */
     int terrainAt(int x, int z) {
-        if (chasm || forced(x, z)) return baseFloor(x, z);
+        int base = baseFloor(x, z);
+        if (forced(x, z) || (chasm && base < floor - 3)) return base;
         long k = posKey(x, z);
         Integer c = floorMemo.get(k);
         if (c != null) return c;
-        int best = baseFloor(x, z);
+        int best = base;
         for (int dx = -3; dx <= 3; dx++) {
             for (int dz = -(3 - Math.abs(dx)); dz <= 3 - Math.abs(dx); dz++) {
                 if (dx == 0 && dz == 0) continue;
-                int f = baseFloor(x + dx, z + dz) - Math.abs(dx) - Math.abs(dz);
+                int nb = baseFloor(x + dx, z + dz);
+                if (chasm && nb < floor - 3) continue;
+                int f = nb - Math.abs(dx) - Math.abs(dz);
                 if (f > best) best = f;
             }
         }
@@ -776,7 +780,9 @@ final class CavernGen {
         }
         int ci = floor + (int) Math.round(c);
         ci = Math.max(ci, f + 6);
-        return Math.min(ci, top - 1);
+        int cap = top - 1;
+        if (p.ok(x, floor, z)) cap = Math.min(cap, Math.max(f + 5, p.surfaceAt(x, z) - 2));
+        return Math.min(ci, cap);
     }
 
     boolean onPlatform(int x, int z) {
@@ -787,7 +793,7 @@ final class CavernGen {
     /** The span of a bridge (the cross's arms over the bowl or chasm, and the causeways). */
     boolean bridge(int x, int z) {
         if (inCauseway(x, z)) return true;
-        return cross(x, z) && rrb(x, z) < 0.64;
+        return (cross(x, z) || lane(x, z, 2)) && (rrb(x, z) < 0.72 || terrainAt(x, z) < floor);
     }
 
     boolean pillarAt(int x, int z, int margin) {
@@ -914,8 +920,7 @@ final class CavernGen {
                 }
                 int yEnd = Math.min(c - 1, p.maxY());
                 for (int y = Math.max(f, p.minY()); y <= yEnd; y++) {
-                    if (edge || y <= nb || y == f || y >= c - 2) p.carve(x, y, z, rock(y));
-                    else p.air(x, y, z);
+                    p.carve(x, y, z, rock(y));
                 }
                 if (p.ok(x, f - 1, z)) {
                     // a stalagmite's mound shows the spike's own rock
@@ -925,9 +930,17 @@ final class CavernGen {
                 }
                 if (p.ok(x, f - 2, z) && Painter.open(p.get(x, f - 2, z))) p.set(x, f - 2, z, rock(f - 2));
                 if (p.ok(x, c, z)) {
-                    // the roof: its own rock in patches, sealed where it met open ground
+                    // the roof: its own rock in patches, sealed where it met open ground or water
                     BlockState above = p.get(x, c, z);
-                    if (Painter.open(above) || p.noise(x, c, z, 4.0, 1250) > 0.2) p.set(x, c, z, roofBlock(x, c, z));
+                    if (Painter.open(above) || !above.getFluidState().isEmpty() || p.noise(x, c, z, 4.0, 1250) > 0.2) {
+                        p.set(x, c, z, roofBlock(x, c, z));
+                    }
+                    if (p.ok(x, c + 1, z)) {
+                        BlockState above2 = p.get(x, c + 1, z);
+                        if (Painter.open(above2) || !above2.getFluidState().isEmpty()) {
+                            p.set(x, c + 1, z, roofBlock(x, c + 1, z));
+                        }
+                    }
                 }
             }
         }
@@ -997,8 +1010,8 @@ final class CavernGen {
                 if (!bridge(x, z) || onPlatform(x, z)) continue;
                 int f = floorAt(x, z);
                 if (f >= floor) continue;
-                boolean rect = inCauseway(x, z) && !(armZ && Math.abs(x - cx) <= 2 && Math.abs(z - cz) <= 0.66 * ez)
-                        && !(armX && Math.abs(z - cz) <= 2 && Math.abs(x - cx) <= 0.66 * ex);
+                boolean rect = inCauseway(x, z) && !(armZ && Math.abs(x - cx) <= 2 && Math.abs(z - cz) <= 0.72 * ez)
+                        && !(armX && Math.abs(z - cz) <= 2 && Math.abs(x - cx) <= 0.72 * ex);
                 int thick, lat;
                 if (rect) {
                     int[] c = null;
@@ -1010,7 +1023,7 @@ final class CavernGen {
                     lat = lat == 0 ? 2 : 0;
                 } else {
                     double along = Math.abs(x - cx) <= 2 ? Math.abs(z - cz) : Math.abs(x - cx);
-                    double reach = Math.max(1.0, 0.64 * (Math.abs(x - cx) <= 2 ? ez : ex));
+                    double reach = Math.max(1.0, 0.72 * (Math.abs(x - cx) <= 2 ? ez : ex));
                     thick = 1 + (int) Math.round(2.0 * Math.pow(Mth.clamp(along / reach, 0, 1), 2));
                     lat = Math.abs(x - cx) <= 2 && Math.abs(z - cz) > 2 ? Math.abs(x - cx) : Math.abs(z - cz);
                 }
@@ -1018,7 +1031,17 @@ final class CavernGen {
                     p.set(x, y, z, y == floor - 1 ? floorBlock(x, y, z) : rock(y));
                 }
                 for (int y = floor; y <= floor + 4; y++) p.air(x, y, z);
-                if (lat == 2) p.set(x, floor, z, Blocks.COBBLESTONE_WALL.defaultBlockState());
+                if (lat == 2 && !lane(x, z, 1)) {
+                    boolean dropSide = false;
+                    for (Direction dir : Direction.Plane.HORIZONTAL) {
+                        int nx = x + dir.getStepX(), nz = z + dir.getStepZ();
+                        if (!bridge(nx, nz) && !onPlatform(nx, nz) && !lane(nx, nz, 2) && floorAt(nx, nz) < floor - 1) {
+                            dropSide = true;
+                            break;
+                        }
+                    }
+                    if (dropSide) p.set(x, floor, z, Blocks.COBBLESTONE_WALL.defaultBlockState());
+                }
             }
         }
         // the platform and the islands: piers from the bottom up to the rim level

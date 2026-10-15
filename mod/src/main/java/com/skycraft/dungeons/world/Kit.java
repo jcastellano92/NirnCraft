@@ -59,6 +59,12 @@ public enum Kit implements StringRepresentable {
         return ordinal >= 0 && ordinal < v.length ? v[ordinal] : NONE;
     }
 
+    @Nullable
+    public static Kit forCulture(@Nullable String culture) {
+        if (culture == null || culture.isEmpty()) return null;
+        return "forsworn".equals(culture) ? FORSWORN : null;
+    }
+
     /** Built lazily: the palette refers to block instances, which must exist first. */
     public Palette palette() {
         Palette p = palette;

@@ -788,6 +788,7 @@ final class CavernDress {
     }
 
     private static String foe(CavernGen g) {
+        if (g.p.place != null && !g.p.place.isEmpty()) return Beats.foe(g.p, g.room);
         for (String id : g.prof.foes) {
             if (Painter.entityExists(id)) return id;
         }

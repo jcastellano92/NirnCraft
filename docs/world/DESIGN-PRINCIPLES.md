@@ -963,6 +963,14 @@ meets the Skyrim floor, and never count toward it. MS21 and MS22 are part of the
     * every content record's `why` resolves (100% for new content, a back-fill counter for legacy content);
     * the forbidden pairs listed in the sheet are absent (a crop on a micro-biome whose climate forbids it, an
       industry with no resource, a shrine to a faith the region does not hold).
+  * **Format as built (`tools/world/SCHEMA.md`).** `tools/world/sheet_from_md.py <provinces/x.md> --out <json>` parses
+    section 1 of a province markdown plan into `mod/src/main/resources/skycraft/tamriel/world/<province>.json` with
+    `province`, `truth`, `layers` (`L1`..`L11` of `{id, text, cites}`), `regions` (`<region>` -> `{truth, layers, jobs,
+    dungeon_themes}`), and `forbidden` (`{kind, a, b, reason}`). Field IDs are global as `<scope>.L<n>.<id>` (aliases
+    `sk`/`skyrim`, `reach`/`the_reach`, `rift`/`the_rift`, `pale`/`the_pale` normalized). `com.skycraft.tamriel.world.WorldSheets`
+    loads all sheets asynchronously at server start and exposes `/skycraft-world sheet <scope> [layer]`;
+    `SettlementPopulation` (`SkycraftWhy` NBT tag from `jobs`) and `dungeons/identity/skyrim.json` (`why` from `L10`
+    `dungeon_themes`) are the first two consumers.
 
   The lint runs in `qa.ps1` and in every province phase report.
 

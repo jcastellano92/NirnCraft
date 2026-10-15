@@ -46,13 +46,13 @@ public final class SetPieces {
                 p.air(x, room.floor + 1, z);
                 if (sleepers < max && p.chance(x, room.floor, z, 520, 2)) {
                     sleepers++;
-                    p.spawnDormant(Mobs.draugr(), x, room.floor, z, Painter.yaw(inward));
+                    p.spawnDormant(BarrowRooms.foe(room), x, room.floor, z, Painter.yaw(inward));
                 } else {
                     p.set(x, room.floor, z, Deco.skull(Blocks.SKELETON_SKULL, Deco.skullRotation(inward)));
                 }
             }
         }
-        if (sleepers == 0) p.spawnDormant(Mobs.draugr(), room.cx + (alongX ? 2 : 0), room.floor, room.cz + (alongX ? 0 : 2), 0f);
+        if (sleepers == 0) p.spawnDormant(BarrowRooms.foe(room), room.cx + (alongX ? 2 : 0), room.floor, room.cz + (alongX ? 0 : 2), 0f);
         // the aisle: braziers down the middle, soul light on chains
         for (int a = -half + 3; a <= half - 3; a += 4) {
             for (int s : new int[]{-2, 2}) {

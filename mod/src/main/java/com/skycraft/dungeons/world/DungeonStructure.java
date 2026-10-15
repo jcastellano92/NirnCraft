@@ -208,21 +208,29 @@ public class DungeonStructure extends Structure {
     private static int rise(GenerationContext ctx, int x, int z, Direction d) {
         int a = ground(ctx, x + d.getStepX() * 12, z + d.getStepZ() * 12);
         int b = ground(ctx, x + d.getStepX() * 24, z + d.getStepZ() * 24);
-        return Math.max(a, b);
+        int sea = ctx.chunkGenerator().getSeaLevel();
+        int back = Math.min(ground(ctx, x - d.getStepX() * 28, z - d.getStepZ() * 28),
+                ground(ctx, x - d.getStepX() * 48, z - d.getStepZ() * 48));
+        int seaPenalty = Math.max(0, sea - back) * 4;
+        return Math.max(a, b) + seaPenalty;
     }
 
     /** Deepens the dungeon until the ground over the room grid covers it. */
     private int coverDepth(GenerationContext ctx, int x, int z, Direction out, int surface, int depth) {
-        int back = depth + 4 + 6;
-        int lx = x - out.getStepX() * back;
-        int lz = z - out.getStepZ() * back;
-        int lowest = surface;
-        // the room grid reaches about 50 blocks round the entrance hall: probe its middle, edges and corners
-        int[][] offsets = {{0, 0}, {28, 0}, {-28, 0}, {0, 28}, {0, -28}, {42, 42}, {-42, 42}, {42, -42}, {-42, -42},
-                {45, 0}, {-45, 0}, {0, 45}, {0, -45}};
-        for (int[] o : offsets) lowest = Math.min(lowest, ground(ctx, lx + o[0], lz + o[1]));
-        int cover = theme.maxHeight + 3 + 7;
-        if (surface - depth + cover > lowest) depth = surface - (lowest - cover);
+        int cover = Math.max(theme.maxHeight + 3, GrandCavern.MIN_HEIGHT + 2) + 8;
+        for (int pass = 0; pass < 2; pass++) {
+            int back = depth + 4 + 6;
+            int lx = x - out.getStepX() * back;
+            int lz = z - out.getStepZ() * back;
+            int lowest = surface;
+            // the room grid reaches about 56 blocks round the entrance hall: probe its full footprint
+            for (int dx = -56; dx <= 56; dx += 14) {
+                for (int dz = -56; dz <= 56; dz += 14) {
+                    lowest = Math.min(lowest, ground(ctx, lx + dx, lz + dz));
+                }
+            }
+            if (surface - depth + cover > lowest) depth = surface - (lowest - cover);
+        }
         return depth;
     }
 
@@ -246,7 +254,8 @@ public class DungeonStructure extends Structure {
         int h0 = theme.underground() && theme != Theme.FORT && special != Special.LABYRINTHIAN ? surface(ctx, pl.x(), pl.z()) : WATER;
         Direction out = special == Special.LABYRINTHIAN ? Direction.NORTH : h0 != WATER ? downhill(ctx, pl.x(), pl.z(), h0, rolled) : rolled;
         int fl = flavor >= 0 ? flavor : randomFlavor(random);
-        Kit k = regionalKit ? Cultures.kitFor(TamrielMap.region(pl.x(), pl.z()), pl.x(), pl.z()) : kit;
+        Kit placeKit = Kit.forCulture(pl.culture());
+        Kit k = placeKit != null ? placeKit : regionalKit ? Cultures.kitFor(TamrielMap.region(pl.x(), pl.z()), pl.x(), pl.z()) : kit;
         Site site = new Site(theme, k, special, fl, SiteParams.forPlace(theme, pl), pl.id());
         int sea = ctx.chunkGenerator().getSeaLevel();
         int minY = ctx.heightAccessor().getMinBuildHeight();
@@ -302,7 +311,7 @@ public class DungeonStructure extends Structure {
         int surface = h;
         int depth = theme.minDepth + random.nextInt(theme.maxDepth - theme.minDepth + 1) + (special != Special.NONE ? 4 : 0);
         depth = com.skycraft.dungeons.marquee.MarqueePlans.depth(pl.id(), depth);
-        depth = Math.min(44, coverDepth(ctx, x, z, out, surface, depth));
+        depth = Math.min(56, coverDepth(ctx, x, z, out, surface, depth));
         depth = Math.max(6, Math.min(depth, surface - (minY + 14)));
         int fDepth = depth;
         Direction fOut = out;

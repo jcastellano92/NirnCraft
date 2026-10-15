@@ -130,7 +130,7 @@ public final class NaturalBuilder {
         for (Direction d : Direction.Plane.HORIZONTAL) {
             if (!room.hasDoor(d)) continue;
             int base = room.floor + (d == v ? vistaLift(room, x, z) : 0);
-            if (y < base || y > base + 2) continue;
+            if (y < base || y > base + 3) continue;
             if (d.getAxis() == Direction.Axis.X) {
                 if (Math.abs(z - room.cz) > 1) continue;
                 if (d == Direction.EAST ? x >= room.cx : x <= room.cx) return true;
@@ -199,7 +199,7 @@ public final class NaturalBuilder {
         boolean lane = Math.abs(lat) <= 1;
         boolean open = lane || Math.abs(lat - wobble) <= half;
         if (!open) return;
-        int top = lane ? Math.max(h, 3) : h - (Math.abs(lat - wobble) == half && half == 2 ? 1 : 0);
+        int top = lane ? 4 : h - (Math.abs(lat - wobble) == half && half == 2 ? 1 : 0);
         for (int y = f; y < f + top; y++) p.carve(x, y, z, rock(y));
         if (p.ok(x, f - 1, z)) {
             BlockState below = p.get(x, f - 1, z);

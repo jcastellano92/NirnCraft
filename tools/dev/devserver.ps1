@@ -3,6 +3,7 @@ Persistent headless dev server with a command inbox: boot once, then run command
 fresh server per check.
 
   tools\dev\devserver.ps1 start                 # boot (gradle runServer in mod\run\devworld; returns when ready)
+  tools\dev\devserver.ps1 hotswap               # compileJava + JDWP RedefineClasses (<15s; falls back to restart on schema change)
   tools\dev\devserver.ps1 run "cmd a|cmd b" -Wait   # run lines one after another, print their output, exit 0/1
   tools\dev\devserver.ps1 run "..."             # queue only; prints the job id (then: wait <id>)
   tools\dev\devserver.ps1 wait <id>             # wait for a queued job and print it
@@ -12,26 +13,28 @@ Line forms (com.skycraft.dev.DevServer): a server command ('/' optional; feedbac
 (roadplan, roadterrain[:n], bake[:dir], verify, columns, bench[:r], stages[:n]), @wait <ticks>, @until <regex>,
 @idle (no chunk work pending), @timeout <s>. Dev-only commands: skycraft-dev regen <x1> <z1> <x2> <z2> [dimension]
 (regenerates that area in place with the current code, overworld = paved too; skycraft:scratch = same generator,
-no roads), skycraft-dev release, skycraft-dev status. Other useful lines: skypop <place>, skycraft-roads export,
-skycraft-dungeon-qa export ..., skycraft-roadplan verify + @until verify:.
+no roads), skycraft-dev release, skycraft-dev status, skycraft-dev reload <scenes|places|cityplans|quests|palettes|all>.
+Other useful lines: skypop <place>, skycraft-roads export, skycraft-dungeon-qa export ..., skycraft-roadplan verify + @until verify:.
 
 Robustness: one job at a time (the server takes the oldest inbox file); per-job timeout (server side @timeout, client
-side -Timeout); 'run' auto-starts the server when it is down and RESTARTS it when any file under mod\src\main is newer
-than the running server (new code; -NoRestart to skip); a dead server is reported with its crash report and log tail.
+side -Timeout); 'run' auto-starts the server when it is down and prefers JDWP hotswap over restart when Java files under
+mod\src\main\java are newer than the last sync (-NoRestart to skip); a dead server is reported with its crash report and log tail.
 World: mod\run\devworld\world (seed 2428247, Nirn), port: -Port, else $env:SKYCRAFT_DEV_PORT, else derived from the
-worktree path (25700-25989). Full job output: mod\run\devworld\outbox\<id>.out (the console shows command feedback,
+worktree path (25700-25989); JDWP port: -JdwpPort, else $env:SKYCRAFT_JDWP_PORT, else Port + 1000 (127.0.0.1:<jdwpPort>).
+Full job output: mod\run\devworld\outbox\<id>.out (the console shows command feedback,
 tagged log lines like [bake]/[dev]/[roadplan] and errors; -All shows every captured log line).
 Memory: the server JVM gets -Xmx (default 4G; -Xmx 6G or $env:SKYCRAFT_SERVER_XMX). ONE dev server per machine: start
 refuses while another worktree's dev server runs or boots (registry in %LOCALAPPDATA%\skycraft-dev; stop that one, or
 -Force when you know there is RAM for two).
 #>
 param(
-    [Parameter(Position = 0)][ValidateSet("start", "stop", "status", "run", "wait", "restart", "reset")][string]$Action = "status",
+    [Parameter(Position = 0)][ValidateSet("start", "stop", "status", "run", "wait", "restart", "reset", "hotswap")][string]$Action = "status",
     [Parameter(Position = 1)][string]$Cmd = "",
     [switch]$Wait,
     [switch]$All,
     [switch]$NoRestart,
     [int]$Port = 0,
+    [int]$JdwpPort = 0,
     [int]$Timeout = 1800,
     [int]$BootTimeout = 1200,
     [string]$Xmx = "",
@@ -44,6 +47,8 @@ $Dev = Join-Path $Mod "run\devworld"
 $Inbox = Join-Path $Dev "inbox"
 $Outbox = Join-Path $Dev "outbox"
 $Log = Join-Path $Dev "server.log"
+$BootClasses = Join-Path $Dev "classes-boot"
+$LastClasses = Join-Path $Dev "classes-last"
 New-Item -ItemType Directory -Force $Dev, $Inbox, $Outbox | Out-Null
 
 if (-not $Xmx) { $Xmx = $(if ($env:SKYCRAFT_SERVER_XMX) { $env:SKYCRAFT_SERVER_XMX } else { "4G" }) }
@@ -68,6 +73,18 @@ if ($Port -le 0) {
         $Port = 25700 + ($h % 290)
     }
 }
+if ($JdwpPort -le 0) {
+    if ($env:SKYCRAFT_JDWP_PORT) { $JdwpPort = [int]$env:SKYCRAFT_JDWP_PORT }
+    else { $JdwpPort = $Port + 1000 }
+}
+
+function ActiveJdwpPort {
+    $jf = Join-Path $Outbox "jdwp.port"
+    if (Test-Path $jf) {
+        try { return [int](Get-Content $jf -TotalCount 1).Trim() } catch {}
+    }
+    return $JdwpPort
+}
 
 function ReadyInfo {
     $f = Join-Path $Outbox "ready"
@@ -79,6 +96,18 @@ function ReadyInfo {
     return [pscustomobject]@{ Pid = [int]$l[0]; Since = [DateTimeOffset]::FromUnixTimeMilliseconds([long]$l[1]).LocalDateTime }
 }
 
+function LastSyncTime($r) {
+    if (-not $r) { return [DateTime]::MinValue }
+    $sf = Join-Path $Outbox "code-sync"
+    if (Test-Path $sf) {
+        try {
+            $dt = [DateTimeOffset]::FromUnixTimeMilliseconds([long](Get-Content $sf -TotalCount 1).Trim()).LocalDateTime
+            if ($dt -gt $r.Since) { return $dt }
+        } catch {}
+    }
+    return $r.Since
+}
+
 function HeartbeatAge {
     $f = Join-Path $Outbox "heartbeat"
     if (-not (Test-Path $f)) { return 0 }
@@ -87,9 +116,19 @@ function HeartbeatAge {
 }
 
 function NewestSource {
-    $src = Join-Path $Mod "src\main"
+    $src = Join-Path $Mod "src\main\java"
     $n = Get-ChildItem $src -Recurse -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
     if ($n) { return $n } else { return $null }
+}
+
+function Snapshot-BootClasses {
+    $compiled = Join-Path $Mod "build\classes\java\main"
+    Remove-Item -Recurse -Force $BootClasses, $LastClasses -ErrorAction SilentlyContinue
+    if (Test-Path $compiled) {
+        Copy-Item -Recurse -Force $compiled $BootClasses
+        Copy-Item -Recurse -Force $compiled $LastClasses
+    }
+    Set-Content (Join-Path $Outbox "code-sync") ([DateTimeOffset]::Now.ToUnixTimeMilliseconds().ToString()) -Encoding ascii
 }
 
 function DeathReport {
@@ -106,7 +145,7 @@ function DeathReport {
 
 function Start-Dev {
     $r = ReadyInfo
-    if ($r) { Write-Host "dev server already running (pid $($r.Pid), port $Port, since $($r.Since))"; return $true }
+    if ($r) { Write-Host "dev server already running (pid $($r.Pid), port $Port, jdwp 127.0.0.1:$(ActiveJdwpPort), since $($r.Since))"; return $true }
     if (Test-Path $Key) {
         $l = (Get-Content $Key -TotalCount 1) -split ' ', 2
         if (Get-Process -Id ([int]$l[0]) -ErrorAction SilentlyContinue) { Write-Host "this worktree's dev server is still booting (pid $($l[0])); wait for it"; return $false }
@@ -129,13 +168,25 @@ function Start-Dev {
     New-Item -ItemType Directory -Force (Join-Path $dp "data\skycraft\dimension") | Out-Null
     Set-Content (Join-Path $dp "pack.mcmeta") '{"pack":{"pack_format":15,"description":"Skycraft dev server: scratch dimension"}}' -Encoding ascii
     Set-Content (Join-Path $dp "data\skycraft\dimension\scratch.json") '{"type":"minecraft:overworld","generator":{"type":"minecraft:noise","settings":"skycraft:tamriel","biome_source":{"type":"skycraft:tamriel"}}}' -Encoding ascii
-    Remove-Item (Join-Path $Outbox "ready"), (Join-Path $Outbox "heartbeat") -ErrorAction SilentlyContinue
+    # Gradle init script that attaches the JDWP agent ONLY to the runServer JavaExec JVM (never to the Gradle wrapper or daemon)
+    $jdwpInit = Join-Path $Dev "jdwp.init.gradle"
+    $initLines = @(
+        "allprojects { p ->",
+        "    p.tasks.matching { it.name == 'runServer' }.configureEach {",
+        "        if (p.hasProperty('skycraftJdwpPort')) {",
+        "            jvmArgs(`"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=127.0.0.1:`${p.property('skycraftJdwpPort')}`")",
+        "        }",
+        "    }",
+        "}"
+    )
+    Set-Content $jdwpInit $initLines -Encoding ascii
+    Remove-Item (Join-Path $Outbox "ready"), (Join-Path $Outbox "heartbeat"), (Join-Path $Outbox "jdwp.port"), (Join-Path $Outbox "code-sync") -ErrorAction SilentlyContinue
     Get-ChildItem $Inbox -File -ErrorAction SilentlyContinue | Remove-Item -Force
     $t0 = Get-Date
-    Write-Host "starting dev server (port $Port, log $Log) ..."
+    Write-Host "starting dev server (port $Port, jdwp 127.0.0.1:$JdwpPort, log $Log) ..."
     $env:JAVA_TOOL_OPTIONS = "-Dskycraft.dev=. -Xmx$Xmx"
     try {
-        $p = Start-Process -FilePath "cmd.exe" -ArgumentList "/c .\gradlew.bat runServer --console=plain -PskycraftRunDir=run/devworld `"-Dorg.gradle.jvmargs=-Xmx2G`"" `
+        $p = Start-Process -FilePath "cmd.exe" -ArgumentList "/c .\gradlew.bat runServer --console=plain -I `"$jdwpInit`" -PskycraftRunDir=run/devworld -PskycraftJdwpPort=$JdwpPort `"-Dorg.gradle.jvmargs=-Xmx2G`"" `
             -WorkingDirectory $Mod -RedirectStandardOutput $Log -RedirectStandardError "$Log.err" -PassThru -WindowStyle Hidden
     } finally { Remove-Item Env:JAVA_TOOL_OPTIONS -ErrorAction SilentlyContinue }
     Set-Content $Key "$($p.Id) $Root (booting)" -Encoding ascii
@@ -144,7 +195,14 @@ function Start-Dev {
         $r = ReadyInfo
         if ($r) {
             Set-Content $Key "$($r.Pid) $Root" -Encoding ascii
-            Write-Host ("dev server ready in {0:N0} s (pid {1}, -Xmx{2})" -f ((Get-Date) - $t0).TotalSeconds, $r.Pid, $Xmx); return $true
+            Set-Content (Join-Path $Outbox "jdwp.port") "$JdwpPort" -Encoding ascii
+            Snapshot-BootClasses
+            # Warm the idle compile daemon so subsequent 'devserver.ps1 hotswap' calls finish in ~2-4 s
+            Push-Location $Mod
+            try { & .\gradlew.bat compileJava --console=plain "-Dorg.gradle.jvmargs=-Xmx2G" *> $null } catch {}
+            Pop-Location
+            Snapshot-BootClasses
+            Write-Host ("dev server ready in {0:N0} s (pid {1}, jdwp 127.0.0.1:{2}, -Xmx{3})" -f ((Get-Date) - $t0).TotalSeconds, $r.Pid, $JdwpPort, $Xmx); return $true
         }
         if ($p.HasExited) {
             Remove-Item $Key -ErrorAction SilentlyContinue
@@ -161,8 +219,43 @@ function Stop-Dev {
     $id = Submit "stop"
     $proc = Get-Process -Id $r.Pid -ErrorAction SilentlyContinue
     if ($proc -and -not $proc.WaitForExit(90000)) { Stop-Process -Id $r.Pid -Force -ErrorAction SilentlyContinue; Write-Host "killed pid $($r.Pid)" }
-    Remove-Item (Join-Path $Outbox "ready"), $Key -ErrorAction SilentlyContinue
+    Remove-Item (Join-Path $Outbox "ready"), (Join-Path $Outbox "jdwp.port"), (Join-Path $Outbox "code-sync"), $Key -ErrorAction SilentlyContinue
     Write-Host "dev server stopped"
+}
+
+function Invoke-Hotswap {
+    $r = ReadyInfo
+    if (-not $r) {
+        Write-Host "dev server not running: starting it first ..."
+        return (Start-Dev)
+    }
+    $ht0 = Get-Date
+    $syncMs = [DateTimeOffset]::Now.ToUnixTimeMilliseconds()
+    $clog = Join-Path $Dev "hotswap-compile.log"
+    Push-Location $Mod
+    & .\gradlew.bat compileJava --console=plain "-Dorg.gradle.jvmargs=-Xmx2G" *> $clog
+    $crc = $LASTEXITCODE
+    Pop-Location
+    if ($crc -ne 0) {
+        Write-Host "HOTSWAP FAILED: compileJava failed (server left running; see $clog):"
+        Select-String -Path $clog -Pattern "\.java:\d+: error:" | Select-Object -First 15 | ForEach-Object { Write-Host "  $($_.Line.Trim())" }
+        return $false
+    }
+    $activeJdwp = ActiveJdwpPort
+    $hsOut = @(& py -3 -I (Join-Path $PSScriptRoot "hotswap.py") --host 127.0.0.1 --port $activeJdwp `
+        --classes (Join-Path $Mod "build\classes\java\main") --boot $BootClasses --last $LastClasses 2>&1)
+    $hsrc = $LASTEXITCODE
+    $elapsed = ((Get-Date) - $ht0).TotalSeconds
+    if ($hsrc -eq 0) {
+        Set-Content (Join-Path $Outbox "code-sync") "$syncMs" -Encoding ascii
+        $hsOut | ForEach-Object { Write-Host $_ }
+        Write-Host ("hotswap applied in {0:N1} s (pid {1}, jdwp 127.0.0.1:{2})" -f $elapsed, $r.Pid, $activeJdwp)
+        return $true
+    }
+    $why = ($hsOut -join "; ")
+    Write-Host "hotswap cannot apply in-place ($why) -> falling back to server restart ..."
+    Stop-Dev
+    return (Start-Dev)
 }
 
 function Submit([string]$text) {
@@ -214,6 +307,7 @@ switch ($Action) {
     "start" { if (Start-Dev) { exit 0 } else { exit 2 } }
     "stop" { Stop-Dev; exit 0 }
     "restart" { Stop-Dev; if (Start-Dev) { exit 0 } else { exit 2 } }
+    "hotswap" { if (Invoke-Hotswap) { exit 0 } else { exit 1 } }
     "reset" {
         # fresh dev world (new road network, new chunks); keeps server.properties
         Stop-Dev
@@ -225,9 +319,10 @@ switch ($Action) {
         if (-not $r) { Write-Host "dev server: not running (port $Port)"; exit 1 }
         $hb = Get-Content (Join-Path $Outbox "heartbeat") -ErrorAction SilentlyContinue
         $n = NewestSource
-        $stale = $n -and $n.LastWriteTime -gt $r.Since
-        Write-Host ("dev server: pid {0}, port {1}, up since {2}, heartbeat {3:N0} s ago ({4}){5}" -f $r.Pid, $Port, $r.Since, (HeartbeatAge), $hb,
-                $(if ($stale) { "; STALE: $($n.Name) changed after boot (run restarts it)" } else { "" }))
+        $sync = LastSyncTime $r
+        $stale = $n -and $n.LastWriteTime -gt $sync
+        Write-Host ("dev server: pid {0}, port {1}, jdwp 127.0.0.1:{2}, up since {3}, heartbeat {4:N0} s ago ({5}){6}" -f $r.Pid, $Port, (ActiveJdwpPort), $r.Since, (HeartbeatAge), $hb,
+                $(if ($stale) { "; STALE: $($n.Name) changed since last sync (run will hotswap or restart)" } else { "" }))
         exit 0
     }
     "wait" { exit (Wait-DevJob $Cmd) }
@@ -236,7 +331,11 @@ switch ($Action) {
         $r = ReadyInfo
         if ($r -and -not $NoRestart) {
             $n = NewestSource
-            if ($n -and $n.LastWriteTime -gt $r.Since) { Write-Host "sources changed after boot ($($n.Name)): restarting"; Stop-Dev; $r = $null }
+            if ($n -and $n.LastWriteTime -gt (LastSyncTime $r)) {
+                Write-Host "sources changed ($($n.Name)): attempting JDWP hotswap ..."
+                if (-not (Invoke-Hotswap)) { exit 2 }
+                $r = ReadyInfo
+            }
         }
         if (-not $r) { if (-not (Start-Dev)) { exit 2 } }
         $id = Submit $Cmd

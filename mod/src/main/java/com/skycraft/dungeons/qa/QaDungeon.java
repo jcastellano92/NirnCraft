@@ -143,7 +143,7 @@ public final class QaDungeon {
         for (Map.Entry<BlockPos, BlockEntity> e : lvl.blockEntities().entrySet()) {
             BlockPos pos = e.getKey();
             BlockEntity be = e.getValue();
-            if (be instanceof LecternBlockEntity lec && lec.hasBook()) {
+            if (be instanceof LecternBlockEntity lec && (lec.hasBook() || !lec.getBook().isEmpty())) {
                 lecterns++;
                 RoomInfo r = roomAt(pos.getX(), pos.getY(), pos.getZ());
                 if (r != null) r.notes++;
@@ -418,7 +418,7 @@ public final class QaDungeon {
             String table = lootTable(be);
             RoomInfo r = roomAt(pos.getX(), pos.getY(), pos.getZ());
             for (ItemStack st : items(be)) {
-                if (st.is(Items.WRITTEN_BOOK) || st.is(Items.WRITABLE_BOOK)) {
+                if (st.is(Items.WRITTEN_BOOK) || st.is(Items.WRITABLE_BOOK) || com.skycraft.lore.LoreBookItem.bookOf(st) != null) {
                     notes++;
                     if (r != null) r.notes++;
                 }

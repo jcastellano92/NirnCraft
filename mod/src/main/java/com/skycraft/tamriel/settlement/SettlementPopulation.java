@@ -98,6 +98,8 @@ public final class SettlementPopulation {
         boolean capital = tier(e) == 0;
         boolean changed = false;
         NpcEntity jarl = null;
+        String regionId = e.place().map(Place::regionId)
+                .orElseGet(() -> com.skycraft.tamriel.Regions.at(level, new BlockPos(e.x, 64, e.z)).id());
         for (int i = 0; i < list.size(); i++) {
             if (e.spawned.contains(i)) continue;
             Anchor a = list.get(i);
@@ -128,7 +130,7 @@ public final class SettlementPopulation {
                     // the dragon has been: only survivors and shaken soldiers, no shopkeepers, innkeeper, bard or court
                     done = ruinedHelgen(level, at, t, i, a.owner());
                     if (done) {
-                        adopt(level, at, res, list, bed, e.key + "#" + i);
+                        adopt(level, at, res, list, bed, e.key + "#" + i, regionId);
                         e.spawned.add(i);
                         changed = true;
                     }
@@ -185,7 +187,7 @@ public final class SettlementPopulation {
                 done = true;
             }
             if (done) {
-                adopt(level, at, res, list, bed, e.key + "#" + i);
+                adopt(level, at, res, list, bed, e.key + "#" + i, regionId);
                 e.spawned.add(i);
                 changed = true;
             }
@@ -250,9 +252,11 @@ public final class SettlementPopulation {
 
     /**
      * Ties the person just spawned at {@code at} to the housing plan: records the job, the workplace anchor (for
-     * villager shopkeepers' hours and the NPC routine) and the exact bed they sleep in (their home from then on).
+     * villager shopkeepers' hours and the NPC routine), the causal world-sheet {@code why} field IDs (MS22),
+     * and the exact bed they sleep in (their home from then on).
      */
-    private static void adopt(ServerLevel level, BlockPos at, Housing.Resident res, List<Anchor> list, @Nullable BlockPos bed, String slot) {
+    private static void adopt(ServerLevel level, BlockPos at, Housing.Resident res, List<Anchor> list,
+                              @Nullable BlockPos bed, String slot, @Nullable String regionId) {
         BlockPos post = res.work() >= 0 && res.work() < list.size() ? standing(level, list.get(res.work()).pos()) : null;
         for (LivingEntity l : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(at).inflate(5),
                 x -> x.isAlive() && x.tickCount <= 2 && !x.getPersistentData().contains(Housing.JOB_KEY)
@@ -263,6 +267,15 @@ public final class SettlementPopulation {
                     ? "survivor" : res.job();
             pd.putString(Housing.JOB_KEY, job);
             pd.putString(Housing.SLOT_KEY, slot);
+            if (regionId != null && !regionId.isEmpty()) {
+                List<String> why = com.skycraft.tamriel.world.WorldSheets.whyForJob(regionId, job);
+                if (why.isEmpty() && res.role() != null) {
+                    why = com.skycraft.tamriel.world.WorldSheets.whyForJob(regionId, res.role().name());
+                }
+                if (!why.isEmpty()) {
+                    pd.putString(Housing.WHY_KEY, String.join(",", why));
+                }
+            }
             if (post != null) pd.putLong(Housing.WORK_KEY, post.asLong());
             if (res.household()) { // free hours at the plaza the plan picked for them, or indoors when it is full
                 pd.putLong(com.skycraft.society.Workplaces.PLAZA_KEY,

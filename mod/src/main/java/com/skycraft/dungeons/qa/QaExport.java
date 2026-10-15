@@ -213,10 +213,12 @@ final class QaExport {
             m.addProperty("z", p.getZ());
             m.addProperty("block", BuiltInRegistries.BLOCK.getKey(be.getBlockState().getBlock()).toString());
             if (be instanceof LecternBlockEntity lec) {
-                m.addProperty("book", lec.hasBook());
-                if (lec.hasBook() && lec.getBook().getTag() != null) {
+                ItemStack book = lec.getBook();
+                boolean hasBook = lec.hasBook() || !book.isEmpty();
+                m.addProperty("book", hasBook);
+                if (hasBook && book.getTag() != null) {
                     // a place's lore note (its book id) or a written book's title
-                    CompoundTag bt = lec.getBook().getTag();
+                    CompoundTag bt = book.getTag();
                     for (String k : bt.getAllKeys()) {
                         if (bt.getTagType(k) == 8 && bt.getString(k).startsWith("place.")) m.addProperty("note", bt.getString(k));
                     }

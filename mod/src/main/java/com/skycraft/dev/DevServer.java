@@ -341,7 +341,13 @@ public final class DevServer {
                             + c.getSource().getServer().overworld().getChunkSource().getLoadedChunksCount();
                     c.getSource().sendSuccess(() -> Component.literal(s), false);
                     return 1;
-                })));
+                }))
+                .then(Commands.literal("reload")
+                        .executes(c -> DevReload.execute(c.getSource(), "all"))
+                        .then(Commands.argument("target", com.mojang.brigadier.arguments.StringArgumentType.word())
+                                .suggests((c, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(DevReload.TARGETS, b))
+                                .executes(c -> DevReload.execute(c.getSource(),
+                                        com.mojang.brigadier.arguments.StringArgumentType.getString(c, "target"))))));
     }
 
     private static int regenChunks(CommandSourceStack src, ServerLevel level, String runs) {

@@ -737,36 +737,34 @@ public final class StreetPlanBuilder {
                     r.edge(nd, near, w, StreetPlan.MAIN, StreetPlan.PAVED);
                 }
             }
-            // ensure every planned gate has a GATE node on the street graph even when roads arrive on another side
+            // ensure every planned gate connects to the street graph and promotes its nearest road end to N_GATE
             for (int[] g : predicted) {
                 float gx = g[0] + 0.5f, gz = g[1] + 0.5f;
-                boolean covered = false;
+                int bestGate = -1;
+                double bestGateDist = Double.MAX_VALUE;
                 for (int i = 0; i < gateNodes.size(); i++) {
                     int gn = gateNodes.getInt(i);
-                    if (r.nCls.getByte(gn) == StreetPlan.N_GATE && Math.hypot(r.nx.getFloat(gn) - gx, r.nz.getFloat(gn) - gz) <= 24) {
-                        covered = true;
-                        break;
+                    double d = Math.hypot(r.nx.getFloat(gn) - gx, r.nz.getFloat(gn) - gz);
+                    if (d < bestGateDist) {
+                        bestGateDist = d;
+                        bestGate = gn;
                     }
                 }
-                if (covered) continue;
-                int nd = r.node(gx, gz, surfAt(g[0], g[1]), StreetPlan.N_GATE);
-                gateNodes.add(nd);
-                for (int dz = -1; dz <= 1; dz++) {
-                    for (int dx = -1; dx <= 1; dx++) {
-                        int cc = idx(g[0] + dx, g[1] + dz);
-                        if (cc >= 0 && cost[cc] != 0) {
-                            target[cc] = T_GATE;
-                            targetLine[cc] = nd;
-                        }
-                    }
+                if (bestGate >= 0 && bestGateDist <= maxSearch) {
+                    r.nCls.set(bestGate, StreetPlan.N_GATE);
+                    hasGateNode = true;
                 }
+                if (bestGateDist <= 24) continue;
+                int nd = r.node(gx, gz, surfAt(g[0], g[1]), StreetPlan.N_STREET);
                 int near = nearestNode(gx, gz, streetNodes, maxSearch);
                 if (near >= 0) {
                     float w = 3f;
                     for (Line l : lines) if (l.a == near || l.b == near) w = Math.max(w, l.w);
                     r.edge(nd, near, w, StreetPlan.MAIN, StreetPlan.PAVED);
                 }
-                hasGateNode = true;
+                if (bestGate >= 0 && bestGateDist <= maxSearch) {
+                    r.edge(bestGate, nd, 3f, StreetPlan.MAIN, StreetPlan.PAVED);
+                }
             }
             if (!hasGateNode && !gateNodes.isEmpty()) {
                 r.nCls.set(gateNodes.getInt(0), StreetPlan.N_GATE);
